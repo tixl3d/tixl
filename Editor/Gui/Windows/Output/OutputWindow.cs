@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using ImGuiNET;
 using T3.Core.DataTypes;
 using T3.Core.Operator;
@@ -203,7 +203,7 @@ internal sealed class OutputWindow : Window
                 ScreenshotWriter.StartSavingToFile(texture, filename, ScreenshotWriter.FileFormats.Png);
             }
 
-            CustomComponents.TooltipForLastItem("Save screenshot");
+            CustomComponents.TooltipForLastItem("Save screenshot: Save Location \\Documents\\TiXL\\projectname\\Screenshots");
         }
 
         ImGui.SameLine();
