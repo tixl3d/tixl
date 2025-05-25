@@ -8,7 +8,10 @@
       "Position": {
         "X": -200.0,
         "Y": 180.0
-      }
+      },
+      "Min": 0.01,
+      "Max": 2.1,
+      "Clamp": true
     },
     {
       "InputId": "1139b245-76b4-4f51-a263-ee1a1371073f"/*Bias*/,
@@ -22,7 +25,10 @@
       "Position": {
         "X": -200.0,
         "Y": 135.0
-      }
+      },
+      "Min": 0.0001,
+      "Max": 3.0,
+      "Clamp": true
     },
     {
       "InputId": "44409811-1a0f-4be6-83ea-b2f040ebf08b"/*InputBand*/,
@@ -45,14 +51,18 @@
       "Position": {
         "X": -200.0,
         "Y": 405.0
-      }
+      },
+      "Min": 0.001,
+      "Clamp": true
     },
     {
       "InputId": "b1c43d3b-f425-4d62-9d48-07ccb5d08707"/*Amplitude*/,
       "Position": {
         "X": -200.0,
         "Y": 360.0
-      }
+      },
+      "Min": 0.01,
+      "Clamp": true
     },
     {
       "InputId": "d138c961-b163-428a-9479-2130f1e46314"/*Reset*/,
@@ -73,10 +83,14 @@
     },
     {
       "InputId": "f920a79d-c946-4a78-9e68-f64fc3c4a696"/*WindowEdge*/,
+      "Relevancy": "Required",
       "Position": {
         "X": -200.0,
         "Y": 90.0
-      }
+      },
+      "Min": 0.009,
+      "Max": 5.0,
+      "Clamp": true
     }
   ],
   "SymbolChildUis": [],
