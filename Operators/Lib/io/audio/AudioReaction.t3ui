@@ -8,7 +8,10 @@
       "Position": {
         "X": -200.0,
         "Y": 180.0
-      }
+      },
+      "Min": 0.01,
+      "Max": 3.0,
+      "Clamp": true
     },
     {
       "InputId": "1139b245-76b4-4f51-a263-ee1a1371073f"/*Bias*/,
@@ -48,7 +51,10 @@
       "Position": {
         "X": -200.0,
         "Y": 405.0
-      }
+      },
+      "Min": 0.001,
+      "Max": 100.0,
+      "Clamp": true
     },
     {
       "InputId": "b1c43d3b-f425-4d62-9d48-07ccb5d08707"/*Amplitude*/,
@@ -80,7 +86,7 @@
         "X": -200.0,
         "Y": 90.0
       },
-      "Min": 0.0,
+      "Min": 0.01,
       "Max": 1.0,
       "Clamp": true
     }
