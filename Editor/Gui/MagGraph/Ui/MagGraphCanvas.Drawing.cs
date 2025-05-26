@@ -1,4 +1,4 @@
-﻿using ImGuiNET;
+using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator.Interfaces;
 using T3.Core.Utils;
@@ -329,14 +329,14 @@ internal sealed partial class MagGraphCanvas
         var fineGrid = MathUtils.RemapAndClamp(Scale.X, 0.5f, 2f, 0.0f, maxOpacity);
         if (fineGrid > 0.01f)
         {
-            var color = UiColors.BackgroundFull.Fade(fineGrid);
+            var color = UiColors.CanvasGrid.Fade(fineGrid);
             DrawBackgroundGrid(drawList, gridSize, color);
         }
 
         var roughGrid = MathUtils.RemapAndClamp(Scale.X, 0.1f, 2f, 0.0f, maxOpacity);
         if (roughGrid > 0.01f)
         {
-            var color = UiColors.BackgroundFull.Fade(roughGrid);
+            var color = UiColors.CanvasGrid.Fade(roughGrid);
             DrawBackgroundGrid(drawList, gridSize * 5, color);
         }
     }
