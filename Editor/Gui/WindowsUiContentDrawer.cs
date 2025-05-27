@@ -336,20 +336,20 @@ public sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
                 {
                     _deviceContext.Rasterizer.SetScissorRectangle((int)(cmd.ClipRect.X - pos.X), (int)(cmd.ClipRect.Y - pos.Y),
                                                                   (int)(cmd.ClipRect.Z - pos.X), (int)(cmd.ClipRect.W - pos.Y));
-                    if (!_srvCache.TryGetValue(cmd.TextureId, out var srv))
-                    {
-                        srv = new ShaderResourceView(cmd.TextureId);
-                        _srvCache.Add(cmd.TextureId, srv);
-                    }
 
-                    try
+                    using (ShaderResourceView srv = new ShaderResourceView(cmd.TextureId))
                     {
-                        _deviceContext.PixelShader.SetShaderResource(0, srv);
-                        _deviceContext.DrawIndexed((int)cmd.ElemCount, idxOffset, vtxOffset);
-                    }
-                    catch (SharpDXException e)
-                    {
-                        Log.Error(e.Message);
+                        //does an addref since as soon as it's GC ed it will call release in SharpDX (note : in Silk it is not doing this)
+                        srv.QueryInterface<ShaderResourceView>();
+                        try
+                        {
+                            _deviceContext.PixelShader.SetShaderResource(0, srv);
+                            _deviceContext.DrawIndexed((int)cmd.ElemCount, idxOffset, vtxOffset);
+                        }
+                        catch (SharpDXException e)
+                        {
+                            Log.Error(e.Message);
+                        }
                     }
                 }
 
@@ -687,7 +687,6 @@ public sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
     private BlendState _blendState;
     private DepthStencilState _depthStencilState;
     private int _vertexBufferSize = 5000, _indexBufferSize = 1000;
-    private readonly Dictionary<IntPtr, ShaderResourceView> _srvCache = new();
 
     private int _windowWidth;
     private int _windowHeight;
