@@ -1,4 +1,4 @@
-﻿using ImGuiNET;
+using ImGuiNET;
 
 namespace T3.Editor.Gui.Graph.Interaction;
 
@@ -21,7 +21,7 @@ internal sealed class ShakeDetector
             return false;
 
         // Queue length is optimized for 60 fps adjust length for different frame rates
-        var queueLength = (int)(QueueLength * (60f / ImGui.GetIO().Framerate));
+        var queueLength = (int)(QueueLength * (ImGui.GetIO().Framerate / 60f));
         if (Directions.Count > queueLength)
             Directions.RemoveAt(0);
 
