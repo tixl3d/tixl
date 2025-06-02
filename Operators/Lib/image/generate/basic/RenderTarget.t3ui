@@ -9,7 +9,7 @@
         "X": -100.96112,
         "Y": -102.246216
       },
-      "Description": "Overrides the default resolution or the resolution of the Output-window.\n\nIf the resolution is:\n- [0,0], the current resolution requested by the Output window is used.\n- For image fx operators, negative resolutions will use the incoming resolution.\n\nAll other settings using custom resolutions. \nThe maximum resolution depends on your graphics hardware and is normally 16k.\n",
+      "Description": "Overrides the default resolution or the resolution of the Output window.\n\nIf the resolution is:\n- [0,0], the current resolution requested by the Output window is used.\n- For image fx operators, negative resolutions will use the incoming resolution.\n\nAll other settings use custom resolutions. \nThe maximum resolution depends on your graphics hardware and is normally 16k.\n",
       "Min": -1,
       "Max": 16384,
       "Clamp": true

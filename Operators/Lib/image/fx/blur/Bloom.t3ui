@@ -1,6 +1,6 @@
 {
   "Id": "f634e126-8834-46ea-bd6e-5ebfdc8b0733"/*Bloom*/,
-  "Description": "An more versatile and faster version of [Glow]. \n\nThis uses a down sampling and blurring cascade to create multiple blurred copies of the original image and then combines these layer additively while applying a gradient.\n\nPlease also try the presets and check the documentation of the parameters.",
+  "Description": "A more versatile and faster version of [Glow]. \n\nThis uses a down sampling and blurring cascade to create multiple blurred copies of the original image and then combines these layers additively while applying a gradient.\n\nPlease also try the presets and check the documentation of the parameters.",
   "InputUis": [
     {
       "InputId": "2064aba1-658e-4795-a4fc-5be1026d7064"/*MaxLevels*/,
@@ -8,7 +8,7 @@
         "X": 1598.7069,
         "Y": 1636.1553
       },
-      "Description": "The number of blur levels applied. The maximum is 12 (which should be enough for most resolutions).\n\nIn most scenarious you wouldn't adjust this, but in edges scenarios, it might help to optimize performance of craft special looks.",
+      "Description": "The number of blur levels applied. The maximum is 12 (which should be enough for most resolutions).\n\nIn most scenarios you wouldn't adjust this, but in edge scenarios, it might help to optimize performance or craft special looks.",
       "AddPadding": "True"
     },
     {
@@ -29,7 +29,7 @@
         "X": 1598.7069,
         "Y": 1671.1553
       },
-      "Description": "This can be used to shape the distribution of the blur kernels\n\nLower curves focus on the core, higher curves on the blurred parts.\n\nMany settings cause artifacts, but when used suptely  can be very useful for crafting a look.",
+      "Description": "This can be used to shape the distribution of the blur kernels\n\nLower curves focus on the core, higher curves on the blurred parts.\n\nMany settings cause artifacts, but when used subtly can be very useful for crafting a look.",
       "Min": 0.0,
       "Max": 1.0,
       "Clamp": true,
@@ -42,7 +42,7 @@
         "X": 1598.7069,
         "Y": 1496.1553
       },
-      "Description": "Colors to calculate the initial luminaticy used for the glow. This can be useful for limiting the effect on certain colors.\nThe default values are the NTSC perception of color channels.\n\nReducint the alpha channel blends these colors to gray.",
+      "Description": "Colors to calculate the initial luminance used for the glow. This can be useful for limiting the effect on certain colors.\nThe default values are the NTSC perception of color channels.\n\nReducing the alpha channel blends these colors to gray.",
       "Min": 0.0,
       "Max": 1.0,
       "Clamp": true
@@ -62,7 +62,7 @@
         "Y": 1566.1553
       },
       "GroupTitle": "Settings",
-      "Description": "The overall intensity values below 1 are hardly noticable.",
+      "Description": "The overall intensity values below 1 are hardly noticeable.",
       "Min": 0.0,
       "Max": 100.0,
       "Scale": 0.01,
@@ -75,7 +75,7 @@
         "Y": 1706.1553
       },
       "GroupTitle": "Advanced",
-      "Description": "Can be used the colorize or shape the glow. \nIts multiplied onto each blur kernel with the more blurred levels on the right.\n\nTIP:\n- You can also adjust the brightness above 1 (hold CTRL while dragging the brightness slider) so amplify levels like the core."
+      "Description": "Can be used to colorize or shape the glow. \nIt's multiplied onto each blur kernel with the more blurred levels on the right.\n\nTIP:\n- You can also adjust the brightness above 1 (hold CTRL while dragging the brightness slider) to amplify levels like the core."
     },
     {
       "InputId": "c6a0cadc-9e1c-40ac-97f1-d9271b5376df"/*Blur*/,
@@ -83,7 +83,7 @@
         "X": 1598.7069,
         "Y": 1601.1553
       },
-      "Description": "Offsets the blur amount. This might be useful to craft looks (e.g. to limit the glow spread).\n\nBut it will cause noticable artifacts."
+      "Description": "Offsets the blur amount. This might be useful to craft looks (e.g. to limit the glow spread).\n\nBut it will cause noticeable artifacts."
     },
     {
       "InputId": "e7412f9b-b5e3-4166-8f5e-4b142ccee55a"/*Clamp*/,

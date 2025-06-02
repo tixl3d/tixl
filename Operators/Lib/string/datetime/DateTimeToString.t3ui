@@ -18,7 +18,7 @@
         "X": -182.1091,
         "Y": -14.074188
       },
-      "Description": "Input for a 'DateTime' paramenter\n\nFor example by [NowAsDateTime] operator"
+      "Description": "Input for a 'DateTime' parameter\n\nFor example by [NowAsDateTime] operator"
     }
   ],
   "SymbolChildUis": [],

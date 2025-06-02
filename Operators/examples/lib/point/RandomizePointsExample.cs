@@ -1,4 +1,4 @@
-namespace Examples.lib.point;
+namespace Examples.Lib.point;
 
 [Guid("e555a0ca-8c81-4436-9f77-8c7a327d7379")]
  internal sealed class RandomizePointsExample : Instance<RandomizePointsExample>

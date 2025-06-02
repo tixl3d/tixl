@@ -1,6 +1,6 @@
 {
   "Id": "954af16f-b37b-4e64-a965-4bec02b9179e"/*OrthographicCamera*/,
-  "Description": "Set an orthographic project matrix for the operators following further down (I.e. to the left).\n\nNote that this projection uses a special z-buffer depth that might be incompatible with other operators like [DepthBufferAsGrayScale]",
+  "Description": "Set an orthographic project matrix for the operators following further down (i.e., to the left).\n\nNote that this projection uses a special z-buffer depth that might be incompatible with other operators like [DepthBufferAsGrayScale]",
   "SymbolTags": "8",
   "InputUis": [
     {

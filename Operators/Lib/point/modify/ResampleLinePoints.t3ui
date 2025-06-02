@@ -25,7 +25,7 @@
         "Y": 807.46857
       },
       "GroupTitle": "Smoothing",
-      "Description": "The smoothing distinces for sampling. E.g. 1 rounding over the neighbour points. 2 rounding across two neighours, etc.",
+      "Description": "The smoothing distances for sampling. E.g. 1 rounding over the neighbour points. 2 rounding across two neighbours, etc.",
       "Min": -1.0,
       "Max": 1.0
     },
@@ -36,7 +36,7 @@
         "Y": 1113.043
       },
       "GroupTitle": "Rotation",
-      "Description": "Defines how rotation of the interpolated points is computed. \nThis rotation can be relevant when resulting points are used for instantiating or repeating other points.\n\nIn some situations, the rotation is already inconsistent, e.g. when the position of the points has be randomized without adjusting the rotation. In this case, recomputing the rotation from the line's tangent can be helpful."
+      "Description": "Defines how rotation of the interpolated points is computed. \nThis rotation can be relevant when resulting points are used for instantiating or repeating other points.\n\nIn some situations, the rotation is already inconsistent, e.g. when the position of the points has been randomized without adjusting the rotation. In this case, recomputing the rotation from the line's tangent can be helpful."
     },
     {
       "InputId": "58980e30-204b-40e2-9610-8482ff01a57c"/*RangeMode*/,
@@ -125,7 +125,7 @@
     },
     {
       "ChildId": "9a86664c-4888-4d3d-83f4-cecfedf45dac"/*ClampInt*/,
-      "Comment": "clamp to 10 samples because this gets slow FAST.",
+      "Comment": "Clamp to 10 samples because this gets slow FAST.",
       "Position": {
         "X": -407.2406,
         "Y": 852.46857

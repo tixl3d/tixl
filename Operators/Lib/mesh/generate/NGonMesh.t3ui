@@ -1,6 +1,6 @@
 {
   "Id": "1b9977be-70cf-4dbd-8af1-1459596b6527"/*NGonMesh*/,
-  "Description": "Generates a procedural flat circular mesh with a joined center vertex which can be rendered with [DrawMesh] , [DrawMeshUnlit] and [DrawMeshHatched] among others.\nAlso consider using [CylinderMesh].\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToDrawThings].\n\nIt can also become the source for a particle system with [MeshVerticesToPoints] or [PointsOnMesh].\nTo import static 3D meshes from other programs refer to [LoadObj].\n\n",
+  "Description": "Generates a procedural flat circular mesh with a joined center vertex which can be rendered with [DrawMesh], [DrawMeshUnlit] and [DrawMeshHatched] among others.\nAlso consider using [CylinderMesh].\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToDrawThings].\n\nIt can also become the source for a particle system with [MeshVerticesToPoints] or [PointsOnMesh].\nTo import static 3D meshes from other programs refer to [LoadObj].\n\n",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "Y": 134.66893
       },
       "GroupTitle": "Shape",
-      "Description": "Controls the tesselation.",
+      "Description": "Controls the tessellation.",
       "Min": 0,
       "Max": 100
     },
@@ -46,7 +46,7 @@
         "X": -199.74533,
         "Y": 224.66893
       },
-      "Description": "Select different UV Methods",
+      "Description": "Select different UV methods",
       "AddPadding": "True"
     },
     {

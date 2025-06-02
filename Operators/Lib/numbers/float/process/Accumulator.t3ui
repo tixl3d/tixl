@@ -1,6 +1,6 @@
 {
   "Id": "90b2c6d2-e9a6-4910-b42d-94202f07be27"/*Accumulator*/,
-  "Description": "Accumulates a value with the incoming rate.\n\nNote that the increment is a rate that get multiplied with the current frame duration: With an increment of 1 you have a full value change of 1 unit after one second.\n\nSimilar to [Time].\nFor a variant that does not count up linearly / smooth but in steps, see [Counter]",
+  "Description": "Accumulates a value with the incoming rate.\n\nNote that the increment is a rate that gets multiplied with the current frame duration: With an increment of 1 you have a full value change of 1 unit after one second.\n\nSimilar to [Time].\nFor a variant that does not count up linearly / smooth but in steps, see [Counter]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -20,7 +20,7 @@
         "X": 197.0,
         "Y": 328.0
       },
-      "Description": "Defines the number with which the accumulator starts counting.\n\nNotice: On the fly changes are only applied after the reset trigger has been used",
+      "Description": "Defines the number with which the accumulator starts counting.\n\nNotice: On-the-fly changes are only applied after the reset trigger has been used",
       "AddPadding": "True",
       "Min": -100.0,
       "Max": 100.0,

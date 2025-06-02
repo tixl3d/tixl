@@ -1,4 +1,4 @@
-namespace Examples.lib.image.generate.pattern;
+namespace Examples.Lib.image.generate.pattern;
 
 [Guid("014b8d6f-c7f2-43b5-84a8-033356e440ef")]
  internal sealed class RasterExample : Instance<RasterExample>

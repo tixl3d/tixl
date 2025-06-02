@@ -1,6 +1,6 @@
 {
   "Id": "0b5b14bf-c850-493a-afb1-72643926e214"/*UavFromStructuredBuffer*/,
-  "Description": "This operator is obsolete. please use [GetBufferComponents] instead.",
+  "Description": "This operator is obsolete. Please use [GetBufferComponents] instead.",
   "SymbolTags": "24",
   "InputUis": [
     {

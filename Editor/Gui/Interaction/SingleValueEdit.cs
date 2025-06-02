@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Utils;
+using T3.Editor.Gui.Interaction.Timing;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel.InputsAndTypes;
@@ -132,7 +133,8 @@ public static class SingleValueEdit
 
                     var restarted = (float)(ImGui.GetTime() - _timeOpened) < 0.1f;
                     DrawValueEditMethod(ref _editValue, restarted, _center, min, max, clamp, scale);
-
+                    _dampedValue = _slidingAverage.UpdateAndCompute(_editValue);
+                    
                     break;
 
                 case InputStates.StartedTextInput:
@@ -199,7 +201,16 @@ public static class SingleValueEdit
                     break;
             }
 
-            value = _editValue;
+            //value = _editValue;
+            if (_state == InputStates.Dialing)
+            {
+                value = _dampedValue;
+            }
+            else
+            {
+                value = _editValue;
+            }
+            
             if (_state == InputStates.Inactive)
             {
                 return InputEditStateFlags.Finished;
@@ -307,6 +318,10 @@ public static class SingleValueEdit
     }
 
     private static bool _hoveredComponentModifiedByWheel;
+    
+
+    private static readonly SlidingAverage _slidingAverage = new(UserSettings.Config.ValueEditSmoothing.Clamp(0,100));
+    private static double _dampedValue;
 
     private static void SetState(InputStates newState)
     {
@@ -319,6 +334,8 @@ public static class SingleValueEdit
             }
 
             case InputStates.Dialing:
+                _slidingAverage.Clear(UserSettings.Config.ValueEditSmoothing);
+                 
                 _center = ImGui.GetMousePos();
                 _timeOpened = ImGui.GetTime();
                 break;

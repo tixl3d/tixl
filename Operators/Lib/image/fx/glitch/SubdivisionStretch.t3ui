@@ -1,6 +1,6 @@
 {
   "Id": "e34c88f6-815e-4ce1-a6a8-59e2c8101849"/*SubdivisionStretch*/,
-  "Description": "A powerful image generation effect that splits an image into smaller and smaller fragments. The splits occur horizontal or vertical within the giving split range.\n\nThis effect is especially nice, because it can be animated either with the RandomPhase parameter or with the ScrollOffset. Combining it with an incoming image is also great, because it can produce great glitch effects.\n\nIt's similar to [RyojiPattern] and [RyojiPattern2] but produces more random results. Check out the presets and parameter documentation.\n\n\nFor similar effects or interesting combinations see: [MosaicTiling] [VoronoiCells] [SubdivisionStretch] [HoneyCombTiles] [TriangleGridTransition] [Dither] [AsciiRender]",
+  "Description": "A powerful image generation effect that splits an image into smaller and smaller fragments. The splits occur horizontal or vertical within the given split range.\n\nThis effect is especially nice, because it can be animated either with the RandomPhase parameter or with the ScrollOffset. Combining it with an incoming image is also great, because it can produce great glitch effects.\n\nIt's similar to [RyojiPattern] and [RyojiPattern2] but produces more random results. Check out the presets and parameter documentation.\n\n\nFor similar effects or interesting combinations see: [MosaicTiling] [VoronoiCells] [SubdivisionStretch] [HoneyCombTiles] [TriangleGridTransition] [Dither] [AsciiRender]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -23,7 +23,7 @@
         "Y": 1136.9158
       },
       "GroupTitle": "Divisions",
-      "Description": "The maximum number of splits applied to the image. "
+      "Description": "The maximum number of splits applied to the image."
     },
     {
       "InputId": "3e164af6-1cb3-45b3-a319-e562789d73f7"/*Feather*/,
@@ -62,7 +62,7 @@
         "X": 678.7557,
         "Y": 1066.9158
       },
-      "Description": "If enabled, split direction will select the longer side. This will preven cells for becoming to stretched.",
+      "Description": "If enabled, split direction will select the longer side. This will prevent cells from becoming too stretched.",
       "AddPadding": "True"
     },
     {
@@ -82,7 +82,7 @@
         "X": 818.7557,
         "Y": 716.91583
       },
-      "Description": "The chance that the cell is no longer sub-divided. If 0, every cell will be subdivided until MaxSubdivisions is reached.",
+      "Description": "The chance that the cell is no longer subdivided. If 0, every cell will be subdivided until MaxSubdivisions is reached.",
       "Min": 0.0,
       "Max": 1.0,
       "Clamp": true
@@ -102,7 +102,7 @@
         "X": 818.7557,
         "Y": 1241.9158
       },
-      "Description": "An additiona random seed."
+      "Description": "An additional random seed."
     },
     {
       "InputId": "82a8fbb3-c1be-494e-8a8d-e7ccf5440556"/*GapWidth*/,
@@ -128,7 +128,7 @@
         "X": 678.7557,
         "Y": 471.91577
       },
-      "Description": "Provides an additional color palette. This colors are then multiplied onto the image color.\n\nTry using this with RandomColor mode and hold interpolation of the gradient to create Piet Mondrian like designs."
+      "Description": "Provides an additional color palette. These colors are then multiplied onto the image color.\n\nTry using this with RandomColor mode and hold interpolation of the gradient to create Piet Mondrian-like designs."
     },
     {
       "InputId": "c6f0a794-ba0f-44cf-95cb-9ec6484f9f02"/*ScrollOffset*/,

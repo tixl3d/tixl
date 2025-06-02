@@ -1,6 +1,6 @@
 {
   "Id": "348652c3-abf5-4fe9-873b-89d1acaaf0ff"/*Locator*/,
-  "Description": "Can be used to add a visible transform gizmo and its position in a scene (only visible if 'Toggle Gizmos and Floor Grid' are enabled in the Output window).\n\nThe 'Pos' output can be linked to the 'Translation' input of any operator synchronize (link) their position.\n(e.g. a [PointLight] with any mesh or geometry via [Transform] and the [GodRays] effect).\n\nThe 'Distance to Camera' output allows using the locator as a visible target for [DepthOfField].\n\nHelpful in combination with [TransformPoints], [TransformMesh]",
+  "Description": "Can be used to add a visible transform gizmo and its position in a scene (only visible if 'Toggle Gizmos and Floor Grid' is enabled in the Output window).\n\nThe 'Pos' output can be linked to the 'Translation' input of any operator to synchronize (link) their position.\n(e.g. a [PointLight] with any mesh or geometry via [Transform] and the [GodRays] effect).\n\nThe 'Distance to Camera' output allows using the locator as a visible target for [DepthOfField].\n\nHelpful in combination with [TransformPoints], [TransformMesh]",
   "SymbolTags": "9",
   "InputUis": [
     {

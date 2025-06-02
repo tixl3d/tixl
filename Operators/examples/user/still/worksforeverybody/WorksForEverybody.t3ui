@@ -2916,7 +2916,7 @@
   "Annotations": [
     {
       "Id": "0b411677-57d1-4fda-b59d-aec081f232d1",
-      "Title": "Wobbling checkboard 2",
+      "Title": "Wobbling checkerboard 2",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -3024,7 +3024,7 @@
     },
     {
       "Id": "7a0de6dd-f421-4ba7-bab7-84717aaff0e7",
-      "Title": "sharpness contrast",
+      "Title": "Sharpness contrast",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -3078,7 +3078,7 @@
     },
     {
       "Id": "b01a29df-bfaf-4a86-bb27-c6fef021b7a0",
-      "Title": "Bubble zoon",
+      "Title": "Bubble zoom",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -3132,7 +3132,7 @@
     },
     {
       "Id": "be981353-2afe-4ee8-ab46-375412d96598",
-      "Title": "Yellow scintilian illusion",
+      "Title": "Yellow scintillan illusion",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -3150,7 +3150,7 @@
     },
     {
       "Id": "c38c40f2-a942-4423-ab4a-4375cc2a78f7",
-      "Title": "Schooll TV-Clock",
+      "Title": "School TV-Clock",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -3204,7 +3204,7 @@
     },
     {
       "Id": "df7e28de-e132-4a8c-9a98-3628f05bdbbf",
-      "Title": "Exploration interaction /  Prove of concept",
+      "Title": "Exploration interaction /  Proof of concept",
       "Color": {
         "X": 0.6,
         "Y": 0.6,

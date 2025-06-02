@@ -1,6 +1,6 @@
 {
   "Id": "927a77d5-7bf0-477b-b288-4bb48d4980cd"/*ImageSequenceClip*/,
-  "Description": "Loads an image sequence from a folder and adds it as a time clip bar within the DopeView of the Timeline, similar to how Video editing apps show clips.\nThese Clips can be moved by drag and drop and arranged next to and on top of each other (classic NLE non-liniear editing).\n\nWhen the time marker is running over / playing the time clip it is activated and rendered.\n\nTo load an Operator tree into the DopeView of the Timeline [TimeClip] can be used.\n[MidiClip] can be used to load linear Midi information into the scene.",
+  "Description": "Loads an image sequence from a folder and adds it as a time clip bar within the DopeView of the Timeline, similar to how video editing apps show clips.\nThese clips can be moved by drag and drop and arranged next to and on top of each other (classic NLE non-linear editing).\n\nWhen the time marker is running over / playing the time clip it is activated and rendered.\n\nTo load an Operator tree into the DopeView of the Timeline [TimeClip] can be used.\n[MidiClip] can be used to load linear MIDI information into the scene.",
   "InputUis": [
     {
       "InputId": "25215a7e-1e38-4370-8845-cbf422a7eb92"/*TriggerUpdate*/,

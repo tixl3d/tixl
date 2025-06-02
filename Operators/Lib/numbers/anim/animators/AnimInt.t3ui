@@ -1,0 +1,98 @@
+{
+  "Id": "85b5a198-deb9-4bea-b760-dad211e16ee6"/*AnimInt*/,
+  "Description": "Animates an integer value.",
+  "InputUis": [
+    {
+      "InputId": "1bc7d002-1483-48bd-b419-cccfcb38aa2f"/*Rate*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      },
+      "Min": -5.0,
+      "Max": 5.0,
+      "Clamp": true
+    },
+    {
+      "InputId": "2dbc22a0-f8c7-4545-941f-544250e760d9"/*Bias*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 315.0
+      },
+      "Min": 0.01,
+      "Max": 0.99,
+      "Scale": 0.01,
+      "Clamp": true
+    },
+    {
+      "InputId": "33a4f3f1-2344-4785-a97e-0ff631370484"/*Amplitude*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 135.0
+      },
+      "Min": -5.0,
+      "Max": 5.0
+    },
+    {
+      "InputId": "4c8d2efc-f4e0-4199-90cf-815f77d390ad"/*Ratio*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 270.0
+      },
+      "Min": 0.0,
+      "Max": 2.0,
+      "Clamp": true
+    },
+    {
+      "InputId": "5b3d75c9-aac5-44d7-9e68-828cd87cdc0c"/*Phase*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 180.0
+      }
+    },
+    {
+      "InputId": "72da2976-f1a6-4b3e-a8f0-b43e278e5056"/*AllowSpeedFactor*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 135.0
+      }
+    },
+    {
+      "InputId": "8e6216f0-ca8e-4218-b174-24cc19e781c8"/*Shape*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "a7915472-8744-409b-80aa-eb3c9c7fe9ba"/*Offset*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 180.0
+      }
+    },
+    {
+      "InputId": "e037f3b2-c5eb-4d89-bcbc-ad80aca1cd36"/*OverrideTime*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "3dd09b91-4400-4aff-a4f5-c42af7655e0e"/*Result*/,
+      "Position": {
+        "X": 149.09799,
+        "Y": -6.8220024
+      }
+    },
+    {
+      "OutputId": "e1c176ab-0375-42b2-b222-b971aa6ce889"/*WasHit*/,
+      "Position": {
+        "X": 149.09799,
+        "Y": 93.17799
+      }
+    }
+  ]
+}

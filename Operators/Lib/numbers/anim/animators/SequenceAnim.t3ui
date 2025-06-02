@@ -18,7 +18,7 @@
         "X": -200.0,
         "Y": 315.0
       },
-      "Description": "Bias for the min / max scaling",
+      "Description": "Bias for the min/max scaling",
       "Min": 0.01,
       "Max": 0.99,
       "Scale": 0.01,
@@ -81,7 +81,7 @@
         "X": -200.0,
         "Y": 495.0
       },
-      "Description": "Recording value might be useful for tapping in rythms during a live set.\nIf there is an input (e.g. MidiInput) connected to recordValue, it will detect hits and writes them to the cycle.\n\nThe different modes define how recording should work: Either continues overdubbing or by clearing the complete cycle on recording start.\n"
+      "Description": "Recording value might be useful for tapping in rhythms during a live set.\nIf there is an input (e.g. MidiInput) connected to recordValue, it will detect hits and write them to the cycle.\n\nThe different modes define how recording should work: Either continuous overdubbing or by clearing the complete cycle on recording start.\n"
     },
     {
       "InputId": "f0ae47ae-5849-4d81-bae0-9b6ec44949ef"/*Rate*/,

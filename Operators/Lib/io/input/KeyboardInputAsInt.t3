@@ -2,12 +2,12 @@
   "Id": "e7cdc103-4be4-4465-b77d-a66917cec5f6"/*KeyboardInputAsInt*/,
   "Inputs": [
     {
-      "Id": "22266196-d8c5-4727-af12-9e53d7cb5720"/*Mode*/,
-      "DefaultValue": 3
+      "Id": "2aa9e2e4-1830-4483-88e5-1f2ca50bfe3f"/*Zone*/,
+      "DefaultValue": 0
     },
     {
-      "Id": "75ec0c96-3b8f-4c57-9a82-e47c2cf2e46c"/*Key*/,
-      "DefaultValue": 13
+      "Id": "8846aa50-e4d0-433c-9e5b-013a93f17f79"/*Mode*/,
+      "DefaultValue": 0
     }
   ],
   "Children": [],

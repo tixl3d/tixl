@@ -1,6 +1,6 @@
 {
   "Id": "649d4542-4165-4129-9484-dd8fb8663e15"/*HowToUseImageEffects*/,
-  "Description": "This is playground that gives an overview about Tooll's main image effects operators.",
+  "Description": "This is a playground that gives an overview about Tooll's main image effects operators.",
   "SymbolTags": "3",
   "InputUis": [],
   "SymbolChildUis": [
@@ -34,7 +34,7 @@
     },
     {
       "ChildId": "293cb7d1-08f5-4437-aa94-502ddde4eb60"/*Blend*/,
-      "Comment": "Note:\n\n1. Image B is rendered on top.\n2. We multiply the color from the gradient so adjust its color and opacity.\n3. The effect uses the \"auto resolution\" [0,0] which here uses the resolution Image A.\n4. Image B gets \"stretched\". If you want to avoid that, see the [Layer2d] example below.",
+      "Comment": "Note:\n\n1. Image B is rendered on top.\n2. We multiply the color from the gradient, so adjust its color and opacity.\n3. The effect uses the \"auto resolution\" [0,0], which here uses the resolution of Image A.\n4. Image B gets \"stretched.\" If you want to avoid that, see the [Layer2d] example below.",
       "Position": {
         "X": 755.9698,
         "Y": 1389.9012
@@ -49,7 +49,7 @@
     },
     {
       "ChildId": "34135c50-1c3a-4999-9653-1cb04bb1b567"/*Layer2d*/,
-      "Comment": "Note:\n\n1. The ScaleMode parameter is set to \"FitHeight\". Feel free to experiment with the other modes.",
+      "Comment": "Note:\n\n1. The ScaleMode parameter is set to \"FitHeight.\" Feel free to experiment with the other modes.",
       "Position": {
         "X": 770.1049,
         "Y": 1621.6539
@@ -454,7 +454,7 @@
     },
     {
       "Id": "50b5afd1-0769-411f-b2e0-5bc37a2e664c",
-      "Title": "This is nice example of the kind of effects that \ncan be achieved with compute shaders. ",
+      "Title": "This is a nice example of the kind of effects that \ncan be achieved with compute shaders. ",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -526,7 +526,7 @@
     },
     {
       "Id": "a35b622a-4f5c-4ee1-bf67-0c29c446415a",
-      "Title": "This operator picks one of the incoming effects.\n\nYour can toggle the grid icon in the \nTime Controls to pause this.",
+      "Title": "This operator picks one of the incoming effects.\n\nYou can toggle the grid icon in the \nTime Controls to pause this.",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -580,7 +580,7 @@
     },
     {
       "Id": "cc4c290c-294b-4d1d-bdcd-c58be4ad88d6",
-      "Title": "Here are some basic image effects.\nAlso note, that most operators\nhave presets you can explore.\n\nTIPP: Hold the ALT-Key while\nhovering over presets.",
+      "Title": "Here are some basic image effects.\nAlso note that most operators\nhave presets you can explore.\n\nTIPP: Hold the ALT key while\nhovering over presets.",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -652,7 +652,7 @@
     },
     {
       "Id": "eecc7921-23d8-4aa9-8e16-6d35fb2a816e",
-      "Title": "You don't need an effects layer for [DirectionalBlur] .\nBut it really results in some very interesting visuals.",
+      "Title": "You don't need an effects layer for [DirectionalBlur].\nBut it really results in some very interesting visuals.",
       "Color": {
         "X": 0.6,
         "Y": 0.6,

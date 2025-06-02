@@ -1,6 +1,6 @@
 {
   "Id": "8211249d-7a26-4ad0-8d84-56da72a5c536"/*SampleGradient*/,
-  "Description": "Defines a gradient that can then be sampled into a color or used further by [GradientsToTexture] or other operators.\nLeft clicking the Gradient in the graph- or in the parameters-window adds a color sample.\nDragging a color sample to the lower border removes it.\n\nThe first output returns the sampled color.\nThe second output the gradient structure.\n\nRight click in the parameter window gradient to adjust interpolation mode or save presets.",
+  "Description": "Defines a gradient that can then be sampled into a color or used further by [GradientsToTexture] or other operators.\nLeft-clicking the Gradient in the graph- or in the parameters window adds a color sample.\nDragging a color sample to the lower border removes it.\n\nThe first output returns the sampled color.\nThe second output the gradient structure.\n\nRight-click in the parameter window gradient to adjust interpolation mode or save presets.",
   "SymbolTags": "1",
   "InputUis": [
     {

@@ -1,20 +1,20 @@
 {
   "Id": "e85d98cf-9240-4f5d-8df6-35425d325778"/*TextureToCubeMap*/,
-  "Description": "Converts a 2d texture ([loaded with [LoadImage]) into a cube map that can then be used by [SetEnvironment] for PBR image based lighting.\nCurrently Tooll spports Equirectangular Cubemaps.\n\nIf changing values and settings in this Operator does not cause any changes in the VIewport, it may be necessary to (temporarily) activate 'UpdateLive' in the following [SetEnvironment] op.",
+  "Description": "Converts a 2d texture ([loaded with [LoadImage]) into a cube map that can then be used by [SetEnvironment] for PBR image-based lighting.\nCurrently Tooll supports Equirectangular Cubemaps.\n\nIf changing values and settings in this Operator does not cause any changes in the Viewport, it may be necessary to (temporarily) activate 'UpdateLive' in the following [SetEnvironment] op.",
   "SymbolTags": "1",
   "InputUis": [
     {
       "InputId": "8c57c309-c033-4371-9647-dea3529e5655"/*Orientation*/,
       "Position": {
-        "X": -364.53455,
-        "Y": 1030.2115
+        "X": 63.88965,
+        "Y": 1215.1609
       },
-      "Description": "Rotates the texture along the horizon.\n\nIf changing this value does not cause any changes in the VIewport, it may be necessary to activate 'UpdateLive' in the following [SetEnvironment] op."
+      "Description": "Rotates the texture along the horizon.\n\nIf changing this value does not cause any changes in the Viewport, it may be necessary to activate 'UpdateLive' in the following [SetEnvironment] op."
     },
     {
       "InputId": "8eeb0224-ade3-4808-a60b-9c490e42229a"/*Resolution*/,
       "Position": {
-        "X": -826.8507,
+        "X": -41.109863,
         "Y": 1648.8114
       },
       "Description": "Defines the resolution in pixels"
@@ -23,8 +23,8 @@
       "InputId": "d5aa1045-5471-42c3-bfc2-c5fa9663817f"/*Image*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -826.8507,
-        "Y": 1603.8114
+        "X": 68.85986,
+        "Y": 1120.0338
       }
     }
   ],
@@ -32,113 +32,114 @@
     {
       "ChildId": "04633476-2e37-4961-a87d-f2f9515644da"/*SrvFromTexture2d*/,
       "Position": {
-        "X": -492.5575,
-        "Y": 1174.9718
+        "X": 208.85986,
+        "Y": 1120.0338
       }
     },
     {
       "ChildId": "0d426041-1124-43c7-bb9e-8f50dbbfb2e1"/*PickBlendMode*/,
       "Position": {
-        "X": 106.92154,
-        "Y": 1328.7828
+        "X": 535.9797,
+        "Y": 1440.7311
       }
     },
     {
       "ChildId": "120b3946-9e16-43be-b37d-fe9b3f58651e"/*GeometryShaderStage*/,
       "Position": {
-        "X": 408.3253,
-        "Y": 1036.4761
+        "X": 673.6103,
+        "Y": 1196.1796
       }
     },
     {
       "ChildId": "126bef77-a662-4c32-a58c-c21d126b15f2"/*PixelShader*/,
       "Position": {
-        "X": 108.32529,
-        "Y": 983.82153
+        "X": 532.478,
+        "Y": 1343.7064
       }
     },
     {
       "ChildId": "175e0a20-9ee0-496d-9dc0-3070289ec07d"/*ExecuteTextureUpdate*/,
       "Position": {
-        "X": 1062.2078,
-        "Y": 875.24286
+        "X": 1014.13745,
+        "Y": 1730.4669
       }
     },
     {
       "ChildId": "21f39483-8018-400a-8ab7-01f3c0c31463"/*Rasterizer*/,
       "Position": {
-        "X": 409.57922,
-        "Y": 1087.0419
+        "X": 670.03015,
+        "Y": 1579.227
       }
     },
     {
       "ChildId": "4aa56f72-37b9-41fa-b296-9affe3c15c93"/*VertexShaderStage*/,
       "Position": {
-        "X": 408.3253,
-        "Y": 928.4761
+        "X": 668.2869,
+        "Y": 1051.8026
       }
     },
     {
       "ChildId": "55c09999-699d-4dea-9fa7-12e4b02bace5"/*Texture2d*/,
       "Position": {
-        "X": -73.4938,
-        "Y": 1392.6798
+        "X": 205.53268,
+        "Y": 1529.846
       }
     },
     {
       "ChildId": "6d43404c-4718-47ef-ac66-b720acf78597"/*GenerateMips*/,
+      "Comment": "We have to trigger the generation as command.\nOtherwise the output would stay dirty and thus prevent caching.",
       "Position": {
-        "X": 862.27496,
-        "Y": 1391.2775
+        "X": 711.0387,
+        "Y": 1774.2568
       }
     },
     {
       "ChildId": "79a2c8c1-6cf5-4589-ba97-96947a67a76f"/*GeometryShader*/,
       "Position": {
-        "X": 108.32529,
-        "Y": 1095.8215
+        "X": 533.6103,
+        "Y": 1196.1796
       }
     },
     {
       "ChildId": "7fecaf8f-7029-41d0-8175-47ad30a562d2"/*InputAssemblerStage*/,
       "Position": {
-        "X": 408.3253,
-        "Y": 885.4761
+        "X": 668.2869,
+        "Y": 1008.8026
       }
     },
     {
       "ChildId": "82aef33f-0ef6-4076-bb49-959583407121"/*RasterizerState*/,
       "Position": {
-        "X": 108.32529,
-        "Y": 940.82153
+        "X": 530.03015,
+        "Y": 1579.227
       }
     },
     {
       "ChildId": "8c044af8-61a9-4fbb-9589-d1f246eaf87e"/*SamplerState*/,
       "Position": {
-        "X": 106.92154,
-        "Y": 1229.7828
+        "X": 532.478,
+        "Y": 1273.7064
       }
     },
     {
       "ChildId": "8c3df43e-253a-4511-984a-40154a5f7f63"/*FloatsToBuffer*/,
       "Position": {
-        "X": 108.32529,
-        "Y": 1026.8215
+        "X": 203.88965,
+        "Y": 1180.1609
       }
     },
     {
       "ChildId": "9b8aecbc-a04c-4259-b43d-ff79a83eafde"/*Viewport*/,
       "Position": {
-        "X": -117.02641,
-        "Y": 1529.2023
+        "X": 530.03015,
+        "Y": 1614.227
       }
     },
     {
       "ChildId": "a8228113-3a6f-4061-a84b-710bfead8b8a"/*Draw*/,
       "Position": {
-        "X": 409.08795,
-        "Y": 1443.3628
+        "X": 874.1374,
+        "Y": 1660.467
       }
     },
     {
@@ -149,57 +150,50 @@
         "Y": 422.9334
       },
       "Position": {
-        "X": 709.5792,
-        "Y": 881.26215
+        "X": 1014.13745,
+        "Y": 1485.4669
       }
     },
     {
       "ChildId": "b5b57275-2e38-45cd-b685-433d973ae77f"/*RtvFromTexture2d*/,
       "Position": {
-        "X": 106.92154,
-        "Y": 1272.7828
+        "X": 535.9797,
+        "Y": 1475.7311
       }
     },
     {
       "ChildId": "bcb50d4a-1506-4be2-b72c-c488efc11b15"/*PixelShaderStage*/,
       "Position": {
-        "X": 409.57922,
-        "Y": 1169.0422
+        "X": 672.4781,
+        "Y": 1273.7064
       }
     },
     {
       "ChildId": "d2b564b7-51d0-4584-b013-ae62109da9a3"/*VertexShader*/,
       "Position": {
-        "X": 108.32529,
-        "Y": 897.82153
+        "X": 528.287,
+        "Y": 1051.8026
       }
     },
     {
       "ChildId": "d60d624b-eba6-4f18-852f-653e4e6ca6a9"/*IntToFloat*/,
       "Position": {
-        "X": -313.99176,
-        "Y": 1702.835
+        "X": 390.0301,
+        "Y": 1649.227
       }
     },
     {
       "ChildId": "ec3fd5a9-3a49-478f-8df7-df76f8ac9e8f"/*Int2*/,
       "Position": {
-        "X": -342.14355,
-        "Y": 1460.4492
-      }
-    },
-    {
-      "ChildId": "f4e7ec7f-09e6-42b4-be20-6332104b8586"/*Execute*/,
-      "Position": {
-        "X": 902.5953,
-        "Y": 881.26215
+        "X": 205.53268,
+        "Y": 1459.846
       }
     },
     {
       "ChildId": "f4ffe3b5-7590-41b3-9a59-26225dd1ba23"/*OutputMergerStage*/,
       "Position": {
-        "X": 409.57922,
-        "Y": 1303.0428
+        "X": 675.9797,
+        "Y": 1440.7311
       }
     }
   ],
@@ -207,8 +201,8 @@
     {
       "OutputId": "a3c61268-e57c-4ab0-939c-6fc4da0fc574"/*OutputTexture*/,
       "Position": {
-        "X": 1368.3926,
-        "Y": 875.2732
+        "X": 1014.13745,
+        "Y": 1800.4669
       }
     }
   ]

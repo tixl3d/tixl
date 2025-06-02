@@ -1,6 +1,6 @@
 {
   "Id": "43783ad9-72a0-4928-bb86-c89aae5c5d85"/*GetAttributeFromJsonString*/,
-  "Description": "Loads a Json string from a URL and outputs the defined part as a string.\n\nSimpler alternative [RequestUrl]\n\nAlso see [LoadImageFromUrl] [WriteToFile] [ReadFile] [PickStringPart] [FilesInFolder]",
+  "Description": "Loads a JSON string from a URL and outputs the defined part as a string.\n\nSimpler alternative [RequestUrl]\n\nAlso see [LoadImageFromUrl] [WriteToFile] [ReadFile] [PickStringPart] [FilesInFolder]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,7 +9,7 @@
         "X": 51.512096,
         "Y": 46.995968
       },
-      "Description": "Defines the URL / path to the json string",
+      "Description": "Defines the URL / path to the JSON string",
       "Usage": "Default"
     },
     {

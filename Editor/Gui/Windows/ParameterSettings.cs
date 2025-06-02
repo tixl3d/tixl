@@ -14,7 +14,7 @@ public sealed class ParameterSettings
     public bool DrawToggleIcon(SymbolUi symbolUi, ref bool isEnabled)
     {
         var modified = false;
-        
+
         IsActive = isEnabled;
         ImGui.SameLine();
         var w = ImGui.GetFrameHeight();
@@ -36,26 +36,26 @@ public sealed class ParameterSettings
         ImGui.PopStyleColor();
         return modified;
     }
-    
+
     internal bool DrawContent(SymbolUi symbolUi, NodeSelection nodeSelection)
     {
         var modified = false;
-        
-        using (new ChildWindowScope("wrapper", 
+
+        using (new ChildWindowScope("wrapper",
                                     new Vector2(0, 0),
                                     ImGuiWindowFlags.None,
                                     UiColors.BackgroundInputField))
         {
             FormInputs.AddVerticalSpace(5);
-            
+
             var selectedInputUi = DrawSelectionArea(symbolUi, nodeSelection);
-            ImGui.SameLine(0,0);
+            ImGui.SameLine(0, 0);
             modified = DrawSettingsForParameter(selectedInputUi);
         }
 
         return modified;
     }
-    
+
     private bool _isDraggingParameterOrder;
     private static bool _wasDraggingParameterOrder;
 
@@ -64,11 +64,11 @@ public sealed class ParameterSettings
     private IInputUi DrawSelectionArea(SymbolUi symbolUi, NodeSelection nodeSelection)
     {
         IInputUi selectedInputUi = null;
-        
-        using (new ChildWindowScope("selector", 
+
+        using (new ChildWindowScope("selector",
                                     new Vector2(SelectionWidth * T3Ui.UiScaleFactor, 0),
                                     ImGuiWindowFlags.NoBackground,
-                                    Color.Transparent, 
+                                    Color.Transparent,
                                     0))
         {
             var dl = ImGui.GetWindowDrawList();
@@ -76,9 +76,9 @@ public sealed class ParameterSettings
 
             ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, new Vector2(0, 0.5f));
 
-            var inputUis =  _isDraggingParameterOrder ? _symbolUisWhileDragging : symbolUi.InputUis.Values.ToList();
+            var inputUis = _isDraggingParameterOrder ? _symbolUisWhileDragging : symbolUi.InputUis.Values.ToList();
             var dragCompleted = false;
-            
+
             for (var index = 0; index < inputUis.Count; index++)
             {
                 var inputUi = inputUis[index];
@@ -94,7 +94,7 @@ public sealed class ParameterSettings
                 var clicked = ImGui.InvisibleButton(inputUi.InputDefinition.Name, size);
 
                 var typeColor = TypeUiRegistry.GetPropertiesForType(inputUi.Type).Color;
-                var textColor = isSelected ? ColorVariations.OperatorLabel.Apply( typeColor) : typeColor.Fade(0.9f);
+                var textColor = isSelected ? ColorVariations.OperatorLabel.Apply(typeColor) : typeColor.Fade(0.9f);
                 var backgroundColor = isSelected ? UiColors.WindowBackground : Color.Transparent;
                 if ((ImGui.IsItemHovered() || ImGui.IsItemActive()) && !isSelected)
                 {
@@ -105,14 +105,13 @@ public sealed class ParameterSettings
                 var itemMin = ImGui.GetItemRectMin();
                 var itemMax = ImGui.GetItemRectMax();
 
-                if(!_isDraggingParameterOrder && ImGui.IsItemActive() && ImGui.IsMouseDragging(ImGuiMouseButton.Left))
+                if (!_isDraggingParameterOrder && ImGui.IsItemActive() && ImGui.IsMouseDragging(ImGuiMouseButton.Left))
                 {
                     _isDraggingParameterOrder = true;
                     _symbolUisWhileDragging = symbolUi.InputUis.Values.ToList();
                 }
                 else if (_isDraggingParameterOrder)
                 {
-
                     //if (ImGui.IsItemActive() && !ImGui.IsItemHovered())
                     if (ImGui.IsItemActive())
                     {
@@ -127,12 +126,12 @@ public sealed class ParameterSettings
                         {
                             indexDelta = 1;
                         }
-                        
+
                         if (indexDelta != 0)
                         {
                             (_symbolUisWhileDragging[index + indexDelta], _symbolUisWhileDragging[index])
                                 = (_symbolUisWhileDragging[index], _symbolUisWhileDragging[index + indexDelta]);
-                            
+
                             _wasDraggingParameterOrder = true;
                         }
                     }
@@ -159,22 +158,22 @@ public sealed class ParameterSettings
                            inputUi.InputDefinition.Name);
 
                 // Drag handle
-                if(ImGui.IsItemActive() || (!ImGui.IsAnyItemActive() && ImGui.IsItemHovered()))
+                if (ImGui.IsItemActive() || (!ImGui.IsAnyItemActive() && ImGui.IsItemHovered()))
                 {
                     for (int i = 0; i < 3; i++)
                     {
-                        var pos = new Vector2(itemMin.X + 2, itemMin.Y  + i * 5  + size.Y / 2 - 6);
-                        dl.AddRectFilled(pos, pos+new Vector2(3,2), UiColors.ForegroundFull.Fade(0.2f), 0);
+                        var pos = new Vector2(itemMin.X + 2, itemMin.Y + i * 5 + size.Y / 2 - 6);
+                        dl.AddRectFilled(pos, pos + new Vector2(3, 2), UiColors.ForegroundFull.Fade(0.2f), 0);
                     }
                 }
-                
+
                 // Handle click
                 if (clicked && !_wasDraggingParameterOrder)
-                { 
+                {
                     SelectedInputId = inputUi.InputDefinition.Id;
                     selectedInputUi = inputUi;
                     var selectedInstance = nodeSelection.GetFirstSelectedInstance();
-                    if(selectedInstance == null) 
+                    if (selectedInstance == null)
                         nodeSelection.SetSelection(inputUi);
                 }
 
@@ -182,7 +181,6 @@ public sealed class ParameterSettings
                 {
                     dragCompleted = true;
                 }
-                
             }
 
             ImGui.PopStyleVar();
@@ -191,11 +189,11 @@ public sealed class ParameterSettings
             {
                 SelectedInputId = symbolUi.InputUis.Values.First().InputDefinition.Id;
             }
-            
+
             if (dragCompleted && _wasDraggingParameterOrder)
             {
                 _isDraggingParameterOrder = false;
-                
+
                 // Sort inputDef by order of inputUis...
                 var originalList = symbol.InputDefinitions.ToList();
                 symbol.InputDefinitions.Clear();
@@ -207,7 +205,7 @@ public sealed class ParameterSettings
                         symbol.InputDefinitions.Add(inputDefinition);
                     }
                 }
-                
+
                 _symbolUisWhileDragging.Clear();
                 _wasDraggingParameterOrder = false;
                 symbol.SortInputSlotsByDefinitionOrder();
@@ -222,20 +220,20 @@ public sealed class ParameterSettings
     private static bool DrawSettingsForParameter(IInputUi selectedInputUi)
     {
         var modified = false;
-        using (new ChildWindowScope("settings", 
-                                    new Vector2(0,0), ImGuiWindowFlags.None,
-                                    UiColors.WindowBackground.Rgba, 
-                                    10, 
+        using (new ChildWindowScope("settings",
+                                    new Vector2(0, 0), ImGuiWindowFlags.None,
+                                    UiColors.WindowBackground.Rgba,
+                                    10,
                                     5))
-        {            
+        {
             if (selectedInputUi != null)
             {
                 FormInputs.AddSectionHeader(selectedInputUi.InputDefinition.Name);
                 ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-                ImGui.TextUnformatted( selectedInputUi.Type.Name);
+                ImGui.TextUnformatted(selectedInputUi.Type.Name);
                 ImGui.PopStyleColor();
                 FormInputs.AddVerticalSpace(5);
-                    
+
                 var style = ParameterListStyles.Default;
                 if (selectedInputUi.AddPadding)
                 {
@@ -245,7 +243,7 @@ public sealed class ParameterSettings
                 {
                     style = ParameterListStyles.WithGroup;
                 }
-            
+
                 FormInputs.DrawFieldSetHeader("Show parameter as");
                 if (FormInputs.AddEnumDropdown(ref style, null))
                 {
@@ -264,9 +262,10 @@ public sealed class ParameterSettings
                             selectedInputUi.GroupTitle = "";
                             break;
                     }
+
                     modified = true;
                 }
-            
+
                 if (style == ParameterListStyles.WithGroup)
                 {
                     var groupTitle = selectedInputUi.GroupTitle;
@@ -277,30 +276,51 @@ public sealed class ParameterSettings
                         modified = true;
                     }
                 }
-            
-                FormInputs.DrawFieldSetHeader("Relevancy in Graph");
-                var tmpForRef = selectedInputUi.Relevancy;
-                if (FormInputs.AddEnumDropdown(ref tmpForRef, null, defaultValue: Relevancy.Optional))
+
                 {
-                    selectedInputUi.Relevancy = tmpForRef;
-                    modified = true;
+                    FormInputs.DrawFieldSetHeader("Relevancy in Graph");
+                    var tmpForRef = selectedInputUi.Relevancy;
+                    if (FormInputs.AddEnumDropdown(ref tmpForRef, null, defaultValue: Relevancy.Optional))
+                    {
+                        selectedInputUi.Relevancy = tmpForRef;
+                        modified = true;
+                    }
                 }
-                    
+
+                {
+                    FormInputs.AddVerticalSpace();
+                    FormInputs.SetIndentToLeft();
+                    var tmp = selectedInputUi.ExcludedFromPresets;
+                    if (FormInputs.AddCheckBox("Excluded from presets", 
+                                               ref tmp,
+                                               """
+                                               Saving certain parameters in presets might not be useful or expected. E.g. for Text rendering, the actual string should not be part of the text style.
+                                               This setting does also apply to Snapshots.
+                                               """,
+                                               false))
+                    {
+                        selectedInputUi.ExcludedFromPresets = tmp;
+                        modified = true;
+                    }
+                    FormInputs.SetIndentToParameters();
+                }
+
                 // Draw additional settings for input types like Vector2, Vector3, etc.
-                modified |=selectedInputUi.DrawSettings();
-                    
+                modified |= selectedInputUi.DrawSettings();
+
                 FormInputs.AddVerticalSpace();
 
                 FormInputs.DrawFieldSetHeader("Documentation");
                 var width = ImGui.GetContentRegionAvail().X;
                 var description = string.IsNullOrEmpty(selectedInputUi.Description) ? string.Empty : selectedInputUi.Description;
-                    
-                ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding,5);
+
+                ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 5);
                 if (ImGui.InputTextMultiline("##parameterDescription", ref description, 16000, new Vector2(width, 0)))
                 {
                     selectedInputUi.Description = string.IsNullOrEmpty(description) ? null : description;
                     modified = true;
                 }
+
                 ImGui.PopStyleVar();
             }
             else
@@ -322,7 +342,7 @@ public sealed class ParameterSettings
     }
 
     internal Guid SelectedInputId { get; set; }
-    
+
     public bool IsActive { get; private set; } = false;
 
     public void SelectInput(Guid inputUiId)
@@ -330,4 +350,3 @@ public sealed class ParameterSettings
         SelectedInputId = inputUiId;
     }
 }
-

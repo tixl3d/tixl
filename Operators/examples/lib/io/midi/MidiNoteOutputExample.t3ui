@@ -1,6 +1,6 @@
 {
   "Id": "cb2cdd1d-811a-4a30-a5bc-289f36c31028"/*MidiNoteOutputExample*/,
-  "Description": "An example for the new MidiOutputNodes creating generative Music",
+  "Description": "An example for the new MidiOutputNodes creating generative music",
   "InputUis": [],
   "SymbolChildUis": [
     {
@@ -174,7 +174,7 @@
     },
     {
       "Id": "e2792d1a-9ee4-4063-bc5e-edcffe4da8b4",
-      "Title": "This example will send weird generative Midi notes to a Midi instrument you can select in the three output nodes.\nThe note pitch, speed, velocity and modwheel (CC1) are generated via PerlinNoise.\nThe pitch wheel is \"shaken\" randomly with a spring modifier.",
+      "Title": "This example will send weird generative Midi notes to a Midi instrument you can select in the three output nodes.\nThe note pitch, speed, velocity, and modwheel (CC1) are generated via PerlinNoise.\nThe pitch wheel is \"shaken\" randomly with a spring modifier.",
       "Color": {
         "X": 0.6,
         "Y": 0.6,

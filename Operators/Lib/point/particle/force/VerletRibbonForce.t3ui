@@ -1,6 +1,6 @@
 {
   "Id": "543a97fb-8319-4767-a248-d0662d2e8781"/*VerletRibbonForce*/,
-  "Description": "A experimental ribbon force simulation.",
+  "Description": "An experimental ribbon force simulation.",
   "SymbolTags": "128",
   "InputUis": [
     {

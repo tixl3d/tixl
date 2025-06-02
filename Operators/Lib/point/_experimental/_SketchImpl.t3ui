@@ -1,6 +1,6 @@
 {
   "Id": "b238b288-6e9b-4b91-bac9-3d7566416028"/*_SketchImpl*/,
-  "Description": "Internal implementation for Sketching.",
+  "Description": "Internal implementation for sketching.",
   "InputUis": [
     {
       "InputId": "0fa40e27-c7ca-4bb9-88c6-ced917dfec12"/*OverridePageIndex*/,

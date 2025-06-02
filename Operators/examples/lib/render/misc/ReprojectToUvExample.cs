@@ -1,4 +1,4 @@
-namespace Examples.lib.render.misc;
+namespace Examples.Lib.render.misc;
 
 [Guid("2bd99e05-9a54-4466-a220-0289939406bd")]
  internal sealed class ReprojectToUvExample : Instance<ReprojectToUvExample>

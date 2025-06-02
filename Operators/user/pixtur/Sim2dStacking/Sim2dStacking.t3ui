@@ -124,7 +124,7 @@
     },
     {
       "Id": "f2b30f56-fc20-4445-ae0a-9890f4b2eb6b",
-      "Title": "Setup the compute shader and calculate the number of dispatches ThreadGroups and buffer length.",
+      "Title": "Setup the compute shader and calculate the number of dispatches, ThreadGroups, and buffer length.",
       "Color": {
         "X": 0.6,
         "Y": 0.6,

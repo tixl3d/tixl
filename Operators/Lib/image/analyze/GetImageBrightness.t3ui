@@ -1,6 +1,6 @@
 {
   "Id": "787f44a8-8c51-4cfa-a7d5-7014d11b6a28"/*GetImageBrightness*/,
-  "Description": "Analyzes the brightness of a 2d input and outputs the brightness as a float value.\nIn order to function, this op must be integrated into the active rendering tree.",
+  "Description": "Analyzes the brightness of a 2D input and outputs the brightness as a float value.\nIn order to function, this op must be integrated into the active rendering tree.",
   "SymbolTags": "72",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "X": -67.544556,
         "Y": 659.64
       },
-      "Description": "2d input to be analyzed"
+      "Description": "2D input to be analyzed"
     }
   ],
   "SymbolChildUis": [

@@ -11,7 +11,7 @@ internal sealed class SetEnvironment : Instance<SetEnvironment>
     public readonly InputSlot<Command> SubTree = new();
 
     [Input(Guid = "5c042a08-74b3-4a6b-a420-2fcfa0fc01ee")]
-    public readonly InputSlot<Texture2D> CubeMap = new();
+    public readonly InputSlot<Texture2D> Texture = new();
 
     [Input(Guid = "c3c815fa-8672-4d99-99a7-986844f2fc45")]
     public readonly InputSlot<bool> UpdateLive = new();
@@ -33,5 +33,8 @@ internal sealed class SetEnvironment : Instance<SetEnvironment>
 
     [Input(Guid = "46d76d8a-5fb6-4138-a88b-950a2e5b8529")]
     public readonly InputSlot<float> QualityFactor = new InputSlot<float>();
+
+        [Input(Guid = "486f4f09-2e4e-43b8-bfbc-2722e77d5dbd")]
+        public readonly InputSlot<float> Orientation = new InputSlot<float>();
 
 }

@@ -1,6 +1,6 @@
 {
   "Id": "933aec2c-e7dd-44b4-a094-14d0195f9f7a"/*FractalSDF*/,
-  "Description": "Generates a procedural MandelBox field which can be rendered with [RaymarchField] and visualized with [VisualizeFieldDistance].\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToRaymarchField].\n\nIt can be modified with [BendField] , [TransformField] , [PolarRepeat] and more.\n\nSimilar nodes: [BoxSDF], [CapsuleLineSDF], [FractalSDF].",
+  "Description": "Generates a procedural MandelBox field which can be rendered with [RaymarchField] and visualized with [VisualizeFieldDistance].\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToRaymarchField].\n\nIt can be modified with [BendField], [TransformField], [PolarRepeat] and more.\n\nSimilar nodes: [BoxSDF], [CapsuleLineSDF], [FractalSDF].",
   "InputUis": [
     {
       "InputId": "094637cf-9526-49d5-bb9f-19991cdcc516"/*Iterations*/,
@@ -9,7 +9,7 @@
         "Y": 225.0
       },
       "GroupTitle": "Quality",
-      "Description": "The quality and complexity of the fractal greatly depends on the number of iterations. So does the performance.\n\nIterations above 10 might not be able to raymarch in 1080p."
+      "Description": "The quality and complexity of the fractal greatly depend on the number of iterations. So does the performance.\n\nIterations above 10 might not be able to raymarch in 1080p."
     },
     {
       "InputId": "482ff1b2-2383-45db-8a5a-30ef2a07c8fb"/*Clamping*/,
@@ -17,7 +17,7 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "Description": "An internal parameter that shapes the fractal.\nThe x and y components only have an effect with a z-compent > 0.",
+      "Description": "An internal parameter that shapes the fractal.\nThe x and y components only have an effect with a z-component > 0.",
       "AddPadding": "True"
     },
     {
@@ -55,7 +55,7 @@
         "X": -200.0,
         "Y": 90.0
       },
-      "Description": "And additional parameter to manipulate the fractal."
+      "Description": "An additional parameter to manipulate the fractal."
     }
   ],
   "SymbolChildUis": [],

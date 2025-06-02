@@ -3,28 +3,11 @@
   "Description": "",
   "InputUis": [
     {
-      "InputId": "6bf87714-c2f3-41b6-899b-cb4baab7d9f1"/*ResetTrigger*/,
+      "InputId": "7d1ba868-209f-4419-962b-f13c36a7d19d"/*List*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
       }
-    },
-    {
-      "InputId": "8d131bbb-0740-4a08-955d-d24ebe25223c"/*ListLenght*/,
-      "Position": {
-        "X": 0.0,
-        "Y": 45.0
-      }
-    },
-    {
-      "InputId": "fbc0c7c9-e468-4a21-917d-beb05e3c1962"/*DefaultValue*/,
-      "Relevancy": "Required",
-      "Position": {
-        "X": 0.0,
-        "Y": 0.0
-      },
-      "Min": -100.0,
-      "Max": 100.0
     }
   ],
   "SymbolChildUis": [],

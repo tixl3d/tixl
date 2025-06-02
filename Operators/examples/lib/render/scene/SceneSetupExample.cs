@@ -1,4 +1,4 @@
-namespace Examples.lib.render.scene;
+namespace Examples.Lib.render.scene;
 
 [Guid("fa6d1930-b1f4-4655-8450-c876e8dd2803")]
 public class SceneSetupExample : Instance<SceneSetupExample>

@@ -1,6 +1,6 @@
 {
   "Id": "8fc90e3e-169b-41ba-a76a-51e74f183eb4"/*ProceduralMaterialExample*/,
-  "Description": "A test scene with several procedural Materials.\nBeware: This scene consumes a lof of RAM / VRAM",
+  "Description": "A test scene with several procedural Materials.\nBeware: This scene consumes a lot of RAM / VRAM",
   "InputUis": [],
   "SymbolChildUis": [
     {
@@ -1047,7 +1047,7 @@
     },
     {
       "Id": "72d99dd2-a8e6-437c-b9ce-1b4a2ebd0d56",
-      "Title": "BathRoom Spraycan spill",
+      "Title": "Bathroom Spraycan spill",
       "Color": {
         "X": 0.6,
         "Y": 0.6,

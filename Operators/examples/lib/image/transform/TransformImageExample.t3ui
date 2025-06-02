@@ -26,7 +26,7 @@
     },
     {
       "ChildId": "4e3b0c70-d407-4f3c-a206-1a699b9350d6"/*CutOut*/,
-      "Comment": "Not directly related to this example but notice how the blend mode allows to cut out first layer2D\n",
+      "Comment": "Not directly related to this example but notice how the blend mode allows cutting out the first layer2D\n",
       "Position": {
         "X": -42.758606,
         "Y": -72.26404
@@ -46,7 +46,7 @@
         "X": 110.0,
         "Y": 140.0
       },
-      "Comment": "With a scale value below 1, pay attention how the different wrapping modes are behaving.",
+      "Comment": "With a scale value below 1, pay attention to how the different wrapping modes are behaving.",
       "Position": {
         "X": 593.8805,
         "Y": -48.914032

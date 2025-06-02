@@ -1,6 +1,6 @@
 {
   "Id": "9d6dbf28-9983-4584-abba-6281ce51d583"/*QuadMesh*/,
-  "Description": "Generates a procedural three-dimensional tesselated mesh which can be rendered with [DrawMesh] , [DrawMeshUnlit] and [DrawMeshHatched] among others.\nAlso known as: Plane, Quad\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToDrawThings].\n\nIt can also become the source for a particle system with [MeshVerticesToPoints] or [PointsOnMesh].\nTo import static 3D meshes from other programs refer to [LoadObj].\n\nAlso consider using [CylinderMesh].\n\n",
+  "Description": "Generates a procedural three-dimensional tessellated mesh which can be rendered with [DrawMesh], [DrawMeshUnlit] and [DrawMeshHatched] among others.\nAlso known as: Plane, Quad\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToDrawThings].\n\nIt can also become the source for a particle system with [MeshVerticesToPoints] or [PointsOnMesh].\nTo import static 3D meshes from other programs refer to [LoadObj].\n\nAlso consider using [CylinderMesh].\n\n",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -18,7 +18,7 @@
         "X": -200.0,
         "Y": 90.0
       },
-      "Description": "Defines the tesselation\nX: Left to Right \nY: Top to Bottom"
+      "Description": "Defines the tessellation\nX: Left to Right \nY: Top to Bottom"
     },
     {
       "InputId": "44fc1e7b-b1d1-4199-b373-8b7c4cc060d2"/*Scale*/,
@@ -34,7 +34,7 @@
         "Y": 45.0
       },
       "GroupTitle": "Position and Rotation",
-      "Description": "Offsets the position of the pivotpoint (center).\n\nThis is helpful to change the point around which the Mesh rotates / along which it is scaled."
+      "Description": "Offsets the position of the pivot point (center).\n\nThis is helpful to change the point around which the Mesh rotates / along which it is scaled."
     },
     {
       "InputId": "a89e41bf-5395-41f0-9804-a782ed4c0f30"/*Rotation*/,

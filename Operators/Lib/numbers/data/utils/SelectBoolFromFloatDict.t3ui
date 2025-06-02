@@ -1,6 +1,6 @@
 {
   "Id": "05295c65-7dfd-4570-866e-9b5c4e735569"/*SelectBoolFromFloatDict*/,
-  "Description": "A small helper that converts at float value from a dict to a boolean.",
+  "Description": "A small helper that converts a float value from a dict to a boolean.",
   "InputUis": [
     {
       "InputId": "132db9de-cffe-4379-af85-2aca18b4f6e0"/*Select*/,

@@ -55,7 +55,7 @@
         "X": -199.96725,
         "Y": -203.49324
       },
-      "Description": "An optional background image. If connected allows to apply different BlendingModes."
+      "Description": "An optional background image. If connected, allows applying different BlendingModes."
     },
     {
       "InputId": "49066387-92a6-46b2-a471-be0104e70651"/*Rotate*/,
@@ -83,7 +83,7 @@
         "Y": 576.24677
       },
       "GroupTitle": "Options",
-      "Description": "Blend mode between the generated blob graphic and the backgrund image, if one is provided."
+      "Description": "Blend mode between the generated blob graphic and the background image, if one is provided."
     },
     {
       "InputId": "94d5a7cd-99bb-4146-a556-dd893eb3ebbc"/*Repeat*/,

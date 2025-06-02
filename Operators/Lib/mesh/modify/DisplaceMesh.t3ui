@@ -1,6 +1,6 @@
 {
   "Id": "79c01289-f3a9-4bea-8e95-a6b5f89b752d"/*DisplaceMesh*/,
-  "Description": "Distorts the input mesh by displacing its vertices by an amount controlled by the connected input texture. ",
+  "Description": "Distorts the input mesh by displacing its vertices by an amount controlled by the connected input texture.",
   "SymbolTags": "65",
   "InputUis": [
     {
@@ -11,7 +11,7 @@
         "Y": 1404.9718
       },
       "GroupTitle": "Displacement Map",
-      "Description": "The displacement texture. Depending the color channels will be applied as average or individually.\nThe alpha is always applied as factor."
+      "Description": "The displacement texture. Depending on the color channels, it will be applied as average or individually.\nThe alpha is always applied as a factor."
     },
     {
       "InputId": "7c6fa9b0-1c70-4865-8f01-d22c41ff9b6b"/*UseVertexSelection*/,

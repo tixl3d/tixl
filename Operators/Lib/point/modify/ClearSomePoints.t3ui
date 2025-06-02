@@ -1,6 +1,6 @@
 {
   "Id": "e570b2e6-6e35-4a14-ade6-f377494fe96d"/*ClearSomePoints*/,
-  "Description": "Override a fraction of points with seperators to insert gaps into lines.",
+  "Description": "Override a fraction of points with separators to insert gaps into lines.",
   "SymbolTags": "64",
   "InputUis": [
     {

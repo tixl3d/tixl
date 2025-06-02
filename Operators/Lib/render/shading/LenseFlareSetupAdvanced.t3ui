@@ -1,6 +1,6 @@
 {
   "Id": "8f4ca295-7268-44a2-94b0-4e974fac22a4"/*LenseFlareSetupAdvanced*/,
-  "Description": "Same as [LenseFlareSetup] but all elements can be tweaked seperately.\n\nNote: Some effects can have unpredicatable behaviour if the point light position matches the camera look target.\n",
+  "Description": "Same as [LenseFlareSetup] but all elements can be tweaked separately.\n\nNote: Some effects can have unpredictable behaviour if the point light position matches the camera look target.\n",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -83,7 +83,7 @@
         "X": -564.8251,
         "Y": 444.45773
       },
-      "Description": "Select the Index / ID of the Pointlight to which the Lenseflare is attached.",
+      "Description": "Select the Index / ID of the Pointlight to which the Lensflare is attached.",
       "AddPadding": "True"
     },
     {

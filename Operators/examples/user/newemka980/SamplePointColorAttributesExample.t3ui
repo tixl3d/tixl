@@ -48,7 +48,7 @@
     },
     {
       "ChildId": "538500b9-0b5f-4eea-a4a4-a6a665331861"/*AddNoise*/,
-      "Comment": "We use the W as weight to contol the noise",
+      "Comment": "We use the W as weight to control the noise",
       "Position": {
         "X": 1256.2498,
         "Y": 17.32959
@@ -61,7 +61,7 @@
         "X": 127.659935,
         "Y": 22.193188
       },
-      "Comment": "we need to adjust the scale a little",
+      "Comment": "We need to adjust the scale a little",
       "Position": {
         "X": 762.62244,
         "Y": 108.64047

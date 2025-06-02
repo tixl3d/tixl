@@ -1,6 +1,6 @@
 {
   "Id": "e1cd1cdf-3982-4bb3-b080-9f0a851566d7"/*ConvertFormat*/,
-  "Description": "Converts a Texture into another format. This can be useful to speed up video file rendering or to fix unsupported texture formats for [PlayVideo].\n\nFor fast video exporting use [B8G8R8A8_UNorm].\n\nPlease note: The ScaleImage is only experimental and will crop from the upper left corner.",
+  "Description": "Converts a texture into another format. This can be useful to speed up video file rendering or to fix unsupported texture formats for [PlayVideo].\n\nFor fast video exporting use [B8G8R8A8_UNorm].\n\nPlease note: The ScaleImage is only experimental and will crop from the upper left corner.",
   "SymbolTags": "8",
   "InputUis": [
     {

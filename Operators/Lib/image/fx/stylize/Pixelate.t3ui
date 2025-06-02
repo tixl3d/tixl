@@ -1,6 +1,6 @@
 {
   "Id": "1fa725a1-dab6-4a2a-8a4d-6efdfba5cf05"/*Pixelate*/,
-  "Description": "TilesAmount parameter works only if Divisor = 0, if Divisor is greater than 0 it will divide the resolution of your image and try to keep the tiles close to a square shape.\n\n[MosaicTiling] is similar, I needed a \"pixel perfect\" alternative that allows to define the desired X and Y resolution using integers.\n\nTags:\nlowres / low-res / Pixelart / resolution / Mosaic / tiling / old-school / retro / grid",
+  "Description": "TilesAmount parameter works only if Divisor = 0. If Divisor is greater than 0, it will divide the resolution of your image and try to keep the tiles close to a square shape.\n\n[MosaicTiling] is similar. I needed a \"pixel perfect\" alternative that allows defining the desired X and Y resolution using integers.\n\nTags:\nlowres / low-res / Pixelart / resolution / Mosaic / tiling / old-school / retro / grid",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -35,7 +35,7 @@
         "X": 132.69783,
         "Y": 119.37579
       },
-      "Description": "Set X and Y resolution (ignored if Divisor is greater than 0) "
+      "Description": "Set X and Y resolution (ignored if Divisor is greater than 0)"
     },
     {
       "InputId": "f8a8381b-3a8c-4468-b66b-0a5be6f040bd"/*Shape*/,

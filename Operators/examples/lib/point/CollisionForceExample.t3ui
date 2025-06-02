@@ -1,6 +1,6 @@
 {
   "Id": "54bea221-f2db-4ff8-afeb-200bcfd37871"/*CollisionForceExample*/,
-  "Description": "This examples explores how to combine [ParticleCollisionForce] with a [SurfaceForce].\n\nAlso check the comments on the graph operators.",
+  "Description": "This example explores how to combine [ParticleCollisionForce] with a [SurfaceForce].\n\nAlso check the comments on the graph operators.",
   "InputUis": [],
   "SymbolChildUis": [
     {

@@ -101,7 +101,7 @@
         "X": -200.0,
         "Y": 45.0
       },
-      "Description": "Rotates and animates the effect like a clock-wope transition",
+      "Description": "Rotates and animates the effect like a clock-wipe transition",
       "AddPadding": "True",
       "Scale": 0.5
     },

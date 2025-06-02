@@ -1,6 +1,6 @@
 {
   "Id": "7eefe668-d290-4673-b766-39c98b9ba12e"/*SnapToAnglesForce*/,
-  "Description": "Slowly align particle velocity with repeated angles steps on the xy-plane. \n\nIt works well, when combined with [TurbulenceForce] and [PointTrail].\n\nNote: This will have no effect if the particles have no the default velocity or only along the z-axis.",
+  "Description": "Slowly align particle velocity with repeated angle steps on the xy-plane. \n\nIt works well when combined with [TurbulenceForce] and [PointTrail].\n\nNote: This will have no effect if the particles have no default velocity or only along the z-axis.",
   "SymbolTags": "64",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "Y": 443.39877
       },
       "GroupTitle": "Options",
-      "Description": "A factor that will keep the particle velocity planar to camera.\nThis might be useful to emphasize the angled direction, if camera rotation changes.",
+      "Description": "A factor that will keep the particle velocity planar to the camera.\nThis might be useful to emphasize the angled direction if camera rotation changes.",
       "Min": 0.0,
       "Max": 1.0,
       "Clamp": true
@@ -32,7 +32,7 @@
         "X": -516.99866,
         "Y": 536.7369
       },
-      "Description": "A twist angle, that is apply every frame. Might lead to unpredictable but interesting effects.",
+      "Description": "A twist angle that is applied every frame. Might lead to unpredictable but interesting effects.",
       "Min": -180.0,
       "Max": 180.0,
       "Format": "{0:0.0}°"
@@ -44,7 +44,7 @@
         "Y": 339.70987
       },
       "GroupTitle": "Random turns",
-      "Description": "How frequent random rotation occur: 0 never. 1 always.",
+      "Description": "How frequently random rotations occur: 0 never. 1 always.",
       "Min": 0.0,
       "Max": 1.0,
       "Clamp": true
@@ -55,7 +55,7 @@
         "X": -514.92114,
         "Y": 398.39877
       },
-      "Description": "If a random threshold is exceeded define the amount of random rotation the particle will do.",
+      "Description": "If a random threshold is exceeded, define the amount of random rotation the particle will do.",
       "Min": 0.0,
       "Max": 1.0,
       "Clamp": true

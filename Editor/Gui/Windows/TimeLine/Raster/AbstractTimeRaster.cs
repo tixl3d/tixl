@@ -55,7 +55,7 @@ public abstract class AbstractTimeRaster : IValueSnapAttractor
             double t = -scroll % raster.Spacing;
 
             var lineAlpha = raster.FadeLines ? fadeFactor : 1;
-            var lineColor = UiColors.GridLines.Fade(lineAlpha);
+            var lineColor = UiColors.GridLines.Fade(lineAlpha * 0.4f);
 
             var textAlpha = raster.FadeLabels ? fadeFactor : 1;
             var textColor = UiColors.Text.Fade(textAlpha);
@@ -79,7 +79,7 @@ public abstract class AbstractTimeRaster : IValueSnapAttractor
                     {
                         var output = BuildLabel(raster, timeInUnits);
 
-                        var p = topLeft + new Vector2(xIndex + 1, viewHeight - 17);
+                        var p = topLeft + new Vector2(xIndex + 1, viewHeight - 17 * T3Ui.UiScaleFactor);
                         drawList.AddText(p, textColor, output);
                     }
                 }

@@ -1,4 +1,4 @@
-namespace Examples.lib.io.audio;
+namespace Examples.Lib.io.audio;
 
 [Guid("012119bf-aeec-4134-b7aa-6bc7f9816800")]
  internal sealed class SoundInputExample : Instance<SoundInputExample>

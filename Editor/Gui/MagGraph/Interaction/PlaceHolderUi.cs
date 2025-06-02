@@ -388,7 +388,7 @@ internal static class PlaceHolderUi
 
         var isRelevantNamespace = symbolNamespace.StartsWith("Lib.")
                                   || symbolNamespace.StartsWith("Types.")
-                                  || symbolNamespace.StartsWith("Examples.lib.")
+                                  || symbolNamespace.StartsWith("Examples.Lib.")
                                   || symbolNamespace.StartsWith(projectNamespace)
                                   || symbolNamespace.StartsWith(compositionNameSpace);
         return isRelevantNamespace;

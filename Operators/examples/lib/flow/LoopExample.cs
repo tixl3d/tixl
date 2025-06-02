@@ -1,4 +1,4 @@
-namespace Examples.lib.flow;
+namespace Examples.Lib.flow;
 
 [Guid("a3945dbe-d5be-4f0f-a904-8ee287d14a9f")]
  internal sealed class LoopExample : Instance<LoopExample>

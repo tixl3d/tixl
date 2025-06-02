@@ -1,6 +1,6 @@
 {
   "Id": "0bc39951-6eec-493c-b609-9e07a9a1dcee"/*GenArMarker*/,
-  "Description": "A quick experiment to create unique 8th wall markers.",
+  "Description": "A quick experiment to create unique 8th Wall markers.",
   "InputUis": [
     {
       "InputId": "09d5357f-5717-4a83-b3ad-ef134e5fda28"/*RingCount*/,

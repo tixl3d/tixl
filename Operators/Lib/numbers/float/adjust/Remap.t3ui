@@ -1,6 +1,6 @@
 {
   "Id": "f0acd1a4-7a98-43ab-a807-6d1bd3e92169"/*Remap*/,
-  "Description": "Remaps a value range to a new value range. Optionally applies bias, clamping or modulo.",
+  "Description": "Remaps a value range to a new value range. Optionally applies bias, clamping, or modulo.",
   "SymbolTags": "1",
   "InputUis": [
     {

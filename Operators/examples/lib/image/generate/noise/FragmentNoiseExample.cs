@@ -1,4 +1,4 @@
-namespace Examples.lib.image.generate.noise;
+namespace Examples.Lib.image.generate.noise;
 
 [Guid("3ce7996f-dd8a-4deb-9cd5-d0aed584026f")]
  internal sealed class FragmentNoiseExample : Instance<FragmentNoiseExample>

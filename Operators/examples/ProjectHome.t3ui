@@ -5,7 +5,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "018e0408-fac8-42f0-a17c-b9c0bb5ab5b7"/*SampleGradient*/,
-      "Comment": "Here we sample a gradient with that value.\n\nYou can use the upper area for dragging the operator and the lower area for adjust the gradients.\nAlso try to right-click the lower area to open the context menu with presets and further options.\n\nTip: You can remove a step from the gradient by dragging it down until the remove icon appears.",
+      "Comment": "Here we sample a gradient with that value.\n\nYou can use the upper area for dragging the operator and the lower area to adjust the gradients.\nAlso try to right-click the lower area to open the context menu with presets and further options.\n\nTip: You can remove a step from the gradient by dragging it down until the remove icon appears.",
       "Position": {
         "X": -730.53064,
         "Y": 390.34015
@@ -105,7 +105,7 @@
         "X": 176.34798,
         "Y": 61.01957
       },
-      "Comment": "Double click this operator to open an quick interactive tutorials.",
+      "Comment": "Double-click this operator to open a quick interactive tutorial.",
       "Position": {
         "X": -500.54578,
         "Y": 154.50812
@@ -152,7 +152,7 @@
     },
     {
       "Id": "b4fc7f16-73ac-48ea-93d2-6253527680e3",
-      "Title": "These interactive playgrounds give you a first introduction on how to use different Operators.\nAlso consider watching the intro-tutorial video linked in the description in Parameter Window.",
+      "Title": "These interactive playgrounds give you a first introduction on how to use different Operators.\nAlso consider watching the intro-tutorial video linked in the description in the Parameter Window.",
       "Color": {
         "X": 0.5490099,
         "Y": 0.5490099,

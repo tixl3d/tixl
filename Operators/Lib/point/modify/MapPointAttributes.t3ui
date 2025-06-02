@@ -17,7 +17,7 @@
         "X": -153.77283,
         "Y": 824.7957
       },
-      "Description": "Can rescale the range input range. Smaller value will effectively narrow the range or increase the number of repetitions respectively."
+      "Description": "Can rescale the input range. Smaller value will effectively narrow the range or increase the number of repetitions respectively."
     },
     {
       "InputId": "6d16847c-a560-4835-b120-3fb8c278530a"/*WriteTo*/,
@@ -26,7 +26,7 @@
         "Y": 1049.7959
       },
       "GroupTitle": "Write Attributes",
-      "Description": "Defines to which attribute the result should be written to."
+      "Description": "Defines to which attribute the result should be written."
     },
     {
       "InputId": "7634c477-6891-4fac-8f8a-3e580cb02277"/*InputMode*/,
@@ -34,7 +34,7 @@
         "X": -153.77283,
         "Y": 914.7957
       },
-      "Description": "Defines how to normalized input value is computed for each point.\n\n- The default will use 0 for the first point and 1 for the last. Interpolating between.\n- F1 and F2 will use the point attributes. This can be very powerful, e.g. remap the age of particles to a color or size.\n- Random will assign a random value between 0 and 1 for each point.\n"
+      "Description": "Defines how the normalized input value is computed for each point.\n\n- The default will use 0 for the first point and 1 for the last, interpolating between.\n- F1 and F2 will use the point attributes. This can be very powerful, e.g., remap the age of particles to a color or size.\n- Random will assign a random value between 0 and 1 for each point.\n"
     },
     {
       "InputId": "7be4e933-6183-4e9c-9c10-0468b46f2a45"/*WriteColor*/,
@@ -59,7 +59,7 @@
         "X": -153.77283,
         "Y": 869.7957
       },
-      "Description": "Allows the range to swifted. This be useful to build transitions or cycle through repetitive configurations."
+      "Description": "Allows the range to be shifted. This can be useful to build transitions or cycle through repetitive configurations."
     },
     {
       "InputId": "840aa616-6983-4840-a58b-d5396a91c2f9"/*Mapping*/,
@@ -76,7 +76,7 @@
         "X": -153.77283,
         "Y": 1004.79565
       },
-      "Description": "Allow different configuration of how the new values should be applied."
+      "Description": "Allow different configurations of how the new values should be applied."
     },
     {
       "InputId": "cd91ff45-7f21-40fd-86c8-8dd95204c3b3"/*ValueTexture*/,
@@ -84,7 +84,7 @@
         "X": -86.86752,
         "Y": 1300.8027
       },
-      "Description": "Allows to override the curve with an texture."
+      "Description": "Allows overriding the curve with a texture."
     },
     {
       "InputId": "d504c3f9-290f-4a73-bf9d-f9266ea955f6"/*Points*/,
@@ -100,7 +100,7 @@
         "X": -153.77283,
         "Y": 779.7957
       },
-      "Description": "Defines how the effect is apply,  with 0 effectively bypassing the effect.\n\nNote the values below 0 or above 1 are allowed but might yield unpredicicatable effects.",
+      "Description": "Defines how the effect is applied, with 0 effectively bypassing the effect.\n\nNote the values below 0 or above 1 are allowed but might yield unpredictable effects.",
       "Min": 0.0,
       "Max": 1.0
     }

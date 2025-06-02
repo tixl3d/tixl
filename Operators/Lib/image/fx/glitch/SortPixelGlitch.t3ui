@@ -1,6 +1,6 @@
 {
   "Id": "cbbb011c-f2bc-460e-86d0-48e49ed377fd"/*SortPixelGlitch*/,
-  "Description": "An interesting image glitch effect.\n\nVaguely similar Op: [GlitchDisplace]\n\n\nUseful Ops for a PostFX Pipeline: [MotionBlur] [DepthOfField] [ChromaticAbberation] [Glow] [Grain] [Blur]",
+  "Description": "An interesting image glitch effect.\n\nVaguely similar Op: [GlitchDisplace]\n\n\nUseful Ops for a PostFX Pipeline: [MotionBlur] [DepthOfField] [ChromaticAberration] [Glow] [Grain] [Blur]",
   "SymbolTags": "1",
   "InputUis": [
     {

@@ -217,7 +217,8 @@ internal static class TimeControls
             }
         }
 
-        CustomComponents.TooltipForLastItem($"Current playtime at {settings.Bpm:0.0} BPM.", "Click mode button to toggle between timeline formats.");
+        if(ImGui.IsItemHovered())
+            CustomComponents.TooltipForLastItem($"Current playtime at {settings.Bpm:0.0} BPM.", "Click mode button to toggle between timeline formats.");
 
         ImGui.SameLine();
 

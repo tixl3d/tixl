@@ -1,6 +1,6 @@
 {
   "Id": "613507c8-fe54-40b0-8434-d0c4b4f59b45"/*MakeTileableImageAdvanced*/,
-  "Description": "Makes an incoming image tileable based on linear edge Falloff combined with a tweakable noise pattern that can also be animated.\nUseful to avoid visible repetitive patterns that can happen with the similar and simpler[MakeTileableImage].\n",
+  "Description": "Makes an incoming image tileable based on linear edge falloff combined with a tweakable noise pattern that can also be animated.\nUseful to avoid visible repetitive patterns that can happen with the similar and simpler [MakeTileableImage].\n",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -71,13 +71,13 @@
         "X": -1198.5454,
         "Y": -67.29733
       },
-      "Description": "Defines how the image is tiled:\n\n0 = No Tiling\n1 = horizontal tiling only\n2 = vertical tiling only\n3 = Vertical and horizontal tiling"
+      "Description": "Defines how the image is tiled:\n\n0 = No Tiling\n1 = horizontal tiling only\n2 = vertical tiling only\n3 = vertical and horizontal tiling"
     }
   ],
   "SymbolChildUis": [
     {
       "ChildId": "02112825-0940-4186-9b78-3da865ab418c"/*BlendWithMask*/,
-      "Comment": "Now this texture can be repeated to the infinite",
+      "Comment": "Now this texture can be repeated to infinity",
       "Position": {
         "X": 613.89294,
         "Y": 426.39722
@@ -115,7 +115,7 @@
     },
     {
       "ChildId": "1ae51171-b601-469d-bcee-d63bc183f335"/*BlendWithMask*/,
-      "Comment": "Now this texture can be repeated to the infinite",
+      "Comment": "Now this texture can be repeated to infinity",
       "Position": {
         "X": -1179.0946,
         "Y": 945.06213
@@ -187,7 +187,7 @@
     },
     {
       "ChildId": "8ca17c3d-e0c8-4b80-ad45-0f893161308e"/*BlendWithMask*/,
-      "Comment": "Now this texture can be repeated to the infinite",
+      "Comment": "Now this texture can be repeated to infinity",
       "Position": {
         "X": 173.39227,
         "Y": 1030.9358

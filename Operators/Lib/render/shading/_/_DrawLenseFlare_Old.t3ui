@@ -1,6 +1,6 @@
 {
   "Id": "95558338-81a5-4ecc-9d5c-1c6fb5f6f4fa"/*_DrawLenseFlare_Old*/,
-  "Description": "Draws 2D Sprites defined in a sprite buffer. This can be used to render things like lens flare quads or other effects.\n\nAdditionally to a Point-buffer Sprites also contain attributes like UV and color.",
+  "Description": "Draws 2D Sprites defined in a sprite buffer. This can be used to render things like lens flare quads or other effects.\n\nAdditionally to a Point-buffer, Sprites also contain attributes like UV and color.",
   "SymbolTags": "4112",
   "InputUis": [
     {

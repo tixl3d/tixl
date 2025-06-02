@@ -1,6 +1,6 @@
 {
   "Id": "c0a26813-bc97-4c42-b051-53a9a5913331"/*RequestedResolution*/,
-  "Description": "Has the function of extracting the resolution from an operator that is initialized later (for example a [Rendertarget]) in order to use it at an earlier point in the node tree.\n\nTo do this, you can connect the 'Resolution' input of a render target to the output of the 'RequestResolution'. The requested resolution can now be extracted and used again.\n\nalso see [SetRequestedResolution]",
+  "Description": "Has the function of extracting the resolution from an operator that is initialized later (for example a [Rendertarget]) in order to use it at an earlier point in the node tree.\n\nTo do this, you can connect the 'Resolution' input of a render target to the output of the 'RequestResolution'. The requested resolution can now be extracted and used again.\n\nAlso see [SetRequestedResolution]",
   "SymbolTags": "1",
   "InputUis": [],
   "SymbolChildUis": [],

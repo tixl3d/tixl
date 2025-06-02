@@ -531,7 +531,13 @@
     {
       "Id": "69936fe1-9444-443c-9622-42a473ac2eb9"/*ValueToRate*/,
       "SymbolId": "8171c2f5-96df-41f6-884c-dbd004ae8a17",
-      "InputValues": [],
+      "InputValues": [
+        {
+          "Id": "1ad90698-0d84-488b-b969-4d727e173aff"/*Rates*/,
+          "Type": "System.String",
+          "Value": "0\n0.0625\n0.125\n0.25\n0.5\n1\n1\n4\n8\n16\n32"
+        }
+      ],
       "Outputs": []
     },
     {

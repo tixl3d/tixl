@@ -1,6 +1,6 @@
 {
   "Id": "d8699da1-13aa-42f7-816a-88abb1d0ba06"/*_ProcessLayer2d*/,
-  "Description": "Internal operator that prepares attribute for rendering a quad as a Layer2d.\nWe reimplemented this functionality c# for performance optimization.",
+  "Description": "Internal operator that prepares attribute for rendering a quad as a Layer2d.\nWe reimplemented this functionality in C# for performance optimization.",
   "SymbolTags": "16",
   "InputUis": [
     {

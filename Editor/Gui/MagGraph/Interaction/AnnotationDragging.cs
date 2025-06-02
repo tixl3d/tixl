@@ -54,8 +54,8 @@ internal static class AnnotationDragging
                 else
                 {
                     if (!ImGui.GetIO().KeyCtrl)
-
                         _draggedNodes.AddRange(FindAnnotatedOps(context.ProjectView.InstView.SymbolUi, annotation));
+                    
                     _draggedNodes.Add(annotation);
                 }
 
@@ -195,6 +195,7 @@ internal static class AnnotationDragging
         var matches = new List<ISelectableCanvasObject>();
         var aRect = new ImRect(annotation.PosOnCanvas, annotation.PosOnCanvas + annotation.Size);
 
+        // Find ops
         foreach (var n in parentUi.ChildUis.Values)
         {
             var nRect = new ImRect(n.PosOnCanvas, n.PosOnCanvas + n.Size);
@@ -202,6 +203,22 @@ internal static class AnnotationDragging
                 matches.Add(n);
         }
 
+        foreach (var n in parentUi.InputUis.Values)
+        {
+            var nRect = new ImRect(n.PosOnCanvas, n.PosOnCanvas + n.Size);
+            if (aRect.Contains(nRect))
+                matches.Add(n);
+        }
+
+        foreach (var n in parentUi.OutputUis.Values)
+        {
+            var nRect = new ImRect(n.PosOnCanvas, n.PosOnCanvas + n.Size);
+            if (aRect.Contains(nRect))
+                matches.Add(n);
+        }
+
+
+        // Find nested annotations
         foreach (var a in parentUi.Annotations.Values)
         {
             if (a == annotation)

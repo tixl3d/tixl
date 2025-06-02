@@ -1,6 +1,6 @@
 {
   "Id": "816eda66-79c3-430c-9f03-d51b93b17987"/*DrawImageMosaic*/,
-  "Description": "Initialize and draws an image mosaic",
+  "Description": "Initialize and draw an image mosaic",
   "InputUis": [
     {
       "InputId": "0a8188a1-6a5f-44bf-92dc-ada83c1df1da"/*Size*/,

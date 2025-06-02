@@ -5,7 +5,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "039f598a-27da-460b-94da-eb2caf06479e"/*SphereMesh*/,
-      "Comment": "We reduce poly count. It would work with the defaults, but it doesn't make a visual difference onto the effect.",
+      "Comment": "We reduce poly count. It would work with the defaults, but it doesn't make a visual difference on the effect.",
       "Position": {
         "X": -47.901184,
         "Y": 302.73633
@@ -180,7 +180,7 @@
     },
     {
       "ChildId": "c4655e46-a146-4584-aedd-e5565fc59675"/*RandomizePoints*/,
-      "Comment": "Adding some variations to the leaves orientation and size.\n\nAnimation the RandomPhase will lead to a subtle secondary animation.",
+      "Comment": "Adding some variations to the leaves' orientation and size.\n\nAnimating the RandomPhase will lead to a subtle secondary animation.",
       "Position": {
         "X": 1405.945,
         "Y": 353.49512
@@ -231,7 +231,7 @@
     },
     {
       "ChildId": "eb66c5d4-50d1-48d3-8895-e8cafcd77b19"/*QuadMesh*/,
-      "Comment": "I'm not a leave!",
+      "Comment": "I'm not a leaf!",
       "Position": {
         "X": 1405.945,
         "Y": 422.49512
@@ -290,7 +290,7 @@
     },
     {
       "Id": "89cb9d04-6be9-46e6-b7c4-f74dc81714ea",
-      "Title": "Some Random geometry",
+      "Title": "Some random geometry",
       "Color": {
         "X": 0.6,
         "Y": 0.6,

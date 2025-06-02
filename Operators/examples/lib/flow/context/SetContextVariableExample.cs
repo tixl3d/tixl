@@ -1,4 +1,4 @@
-namespace Examples.lib.flow.context;
+namespace Examples.Lib.flow.context;
 
 [Guid("cce36a29-8f66-492d-bf8f-b924fa1ae384")]
  internal sealed class SetContextVariableExample : Instance<SetContextVariableExample>

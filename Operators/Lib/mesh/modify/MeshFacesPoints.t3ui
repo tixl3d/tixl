@@ -1,6 +1,6 @@
 {
   "Id": "58a490b1-eb8a-4102-906a-f74a79c0ad1c"/*MeshFacesPoints*/,
-  "Description": "Set points at the \"Inscribed Circle Center\" of the mesh's faces, as the W attribute gets the radius the size of wach of the faces defines the size of the points. \n\nUseful combinations [LoadObj] and [DrawPoints] and more.\n\nSimilar Operators:\nTo create a point at each vertice of the connected mesh [MeshVerticesToPoints] can be used.\nTo get evenly distributed points on a mesh [PointsOnMesh] can be used.",
+  "Description": "Set points at the \"Inscribed Circle Center\" of the mesh's faces, as the W attribute gets the radius. The size of each of the faces defines the size of the points. \n\nUseful combinations [LoadObj] and [DrawPoints] and more.\n\nSimilar Operators:\nTo create a point at each vertex of the connected mesh [MeshVerticesToPoints] can be used.\nTo get evenly distributed points on a mesh [PointsOnMesh] can be used.",
   "SymbolTags": "8",
   "InputUis": [
     {

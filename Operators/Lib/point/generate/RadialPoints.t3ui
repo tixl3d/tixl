@@ -82,7 +82,7 @@
         "X": 78.80856,
         "Y": 1435.9105
       },
-      "Description": "When drawing the radial points as a close line, two additional points have to be appended: One at the start position and one as separator.\n\nIt will add an overlapping point and a separator, so the number of corners will be Count - 2."
+      "Description": "When drawing the radial points as a closed line, two additional points have to be appended: One at the start position and one as separator.\n\nIt will add an overlapping point and a separator, so the number of corners will be Count - 2."
     },
     {
       "InputId": "8fd178b9-877a-43ac-9e03-3fc1c98faf21"/*PointScale*/,
@@ -136,7 +136,7 @@
         "X": 78.80856,
         "Y": 840.91064
       },
-      "Description": "Moves the points:\n\nX (-left / +right), \nY (-down / + up), \nZ (-forward/+backwards)",
+      "Description": "Moves the points:\n\nX (-left / +right), \nY (-down / + up), \nZ (-forward / +backwards)",
       "AddPadding": "True"
     },
     {
@@ -167,7 +167,7 @@
         "X": 78.80856,
         "Y": 980.9105
       },
-      "Description": "Moves the position of the last point in relation to the first point:\n\nX (-left / +right), \nY (-down / + up),\nZ (-forward/+backward)\n"
+      "Description": "Moves the position of the last point in relation to the first point:\n\nX (-left / +right), \nY (-down / + up),\nZ (-forward / +backward)\n"
     }
   ],
   "SymbolChildUis": [

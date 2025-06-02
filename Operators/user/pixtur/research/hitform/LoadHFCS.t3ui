@@ -1,6 +1,6 @@
 {
   "Id": "73faed85-f936-4f54-bef5-600a11405af3"/*LoadHFCS*/,
-  "Description": "Attempt to load and parse hitfilm composite animation files to drive camera animations.",
+  "Description": "Attempt to load and parse HitFilm composite animation files to drive camera animations.",
   "InputUis": [
     {
       "InputId": "81e8ad44-56d6-4944-b81c-a36d035a502c"/*TriggerReload*/,

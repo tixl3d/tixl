@@ -1,6 +1,6 @@
 {
   "Id": "d9a71078-8296-4a07-b7de-250d4e2b95ac"/*Tint*/,
-  "Description": "Tints the bright and dark colors of an image. This can be an easy method for subtle color corrections the achive a wide variety of conversion effects, like grayscale or threshold.\n\n\nAlso, see [RemapColor] for a similar operator.",
+  "Description": "Tints the bright and dark colors of an image. This can be an easy method for subtle color corrections to achieve a wide variety of conversion effects, like grayscale or threshold.\n\n\nAlso, see [RemapColor] for a similar operator.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "Y": 547.5263
       },
       "GroupTitle": "Options",
-      "Description": "A factor that is applied before using the brightness. This can be useful to constrain hdr colors with levels above 1 into the mapped range.",
+      "Description": "A factor that is applied before using the brightness. This can be useful to constrain HDR colors with levels above 1 into the mapped range.",
       "Min": 0.0,
       "Max": 5.0,
       "Clamp": true
@@ -51,7 +51,7 @@
         "X": -8.08049,
         "Y": 337.35626
       },
-      "Description": "The strength of the effect. If fully applied the image will loose it's original color information and only the brightness information will be used to blend between the two color parameters.\nNegative colors will reverse the effect.",
+      "Description": "The strength of the effect. If fully applied the image will lose its original color information and only the brightness information will be used to blend between the two color parameters.\nNegative colors will reverse the effect.",
       "Min": -1.0,
       "Max": 1.0
     },
@@ -72,7 +72,7 @@
         "X": -11.143417,
         "Y": 742.5365
       },
-      "Description": "A helper apply different weights to the input image color channels. This can be useful for creating more natural gray scale conversions or to only use the alpha channel."
+      "Description": "A helper to apply different weights to the input image color channels. This can be useful for creating more natural grayscale conversions or to only use the alpha channel."
     }
   ],
   "SymbolChildUis": [

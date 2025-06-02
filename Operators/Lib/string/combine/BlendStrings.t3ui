@@ -1,6 +1,6 @@
 {
   "Id": "98bd1491-6e69-4ae0-9fc1-0be8e6a72d32"/*BlendStrings*/,
-  "Description": "Blends two strings with a scrambling animation similar to a airport flight display board.",
+  "Description": "Blends two strings with a scrambling animation similar to an airport flight display board.",
   "SymbolTags": "9",
   "InputUis": [
     {

@@ -1,4 +1,4 @@
-namespace Examples.lib.render.postfx;
+namespace Examples.Lib.render.postfx;
 
 [Guid("9a7063ee-abde-45b0-b3f0-73a12721488f")]
  internal sealed class MotionBlurExample2 : Instance<MotionBlurExample2>

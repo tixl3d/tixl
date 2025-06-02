@@ -1,4 +1,4 @@
-namespace Examples.lib.image.color;
+namespace Examples.Lib.image.color;
 
 [Guid("737a41db-bf35-4f66-8600-a083f0157cd5")]
  internal sealed class ColorGradeDepthExample : Instance<ColorGradeDepthExample>

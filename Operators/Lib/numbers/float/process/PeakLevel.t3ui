@@ -9,7 +9,7 @@
         "X": 197.0,
         "Y": 373.0
       },
-      "Description": "Threshold value for the height of the peak from which it is recognized as a peak (e.g. to be able to filter out noise)",
+      "Description": "Threshold value for the height of the peak from which it is recognized as a peak (e.g., to be able to filter out noise)",
       "AddPadding": "True"
     },
     {

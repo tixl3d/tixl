@@ -1,6 +1,6 @@
 {
   "Id": "de173d83-66e6-4363-a478-4336100c2dbd"/*DrawLensFlares*/,
-  "Description": "Draws 2D Sprites defined in a sprite buffer. This can be used to render things like lens flare quads or other effects.\n\nAdditionally to a Point-buffer Sprites also contain attributes like UV and color.",
+  "Description": "Draws 2D Sprites defined in a sprite buffer. This can be used to render things like lens flare quads or other effects.\n\nAdditionally to a Point-buffer, Sprites also contain attributes like UV and color.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -39,7 +39,7 @@
         "X": -95.74167,
         "Y": 1378.026
       },
-      "Description": "Texture used for the sprites. Good options for generating them are [RadialGradient], [Blob] and [NGon].\nMake sure to set their Resolution to a fixed square size like 256x256 pixels.."
+      "Description": "Texture used for the sprites. Good options for generating them are [RadialGradient], [Blob] and [NGon].\nMake sure to set their Resolution to a fixed square size like 256x256 pixels."
     },
     {
       "InputId": "b84b107c-5179-48b2-ab2e-eb0b847fbb1e"/*Size*/,

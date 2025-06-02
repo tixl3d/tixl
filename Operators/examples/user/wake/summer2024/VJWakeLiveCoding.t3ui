@@ -603,7 +603,7 @@
     },
     {
       "ChildId": "75ac53e8-4b80-4c49-9eaf-1d6fb4581f60"/*_SwitchSyncTriggers*/,
-      "Comment": "TODO: Connected to sub bass comming in later.",
+      "Comment": "TODO: Connected to sub bass coming in later.",
       "Position": {
         "X": -7022.917,
         "Y": 2885.2466
@@ -738,7 +738,7 @@
     },
     {
       "ChildId": "9d43cc99-45ff-4424-9a63-fe8e9d7a524b"/*klak klak klak*/,
-      "Comment": "TODO: Connected to sub bass comming in later.",
+      "Comment": "TODO: Connected to sub bass coming in later.",
       "Position": {
         "X": -7022.917,
         "Y": 2816.2466
@@ -868,7 +868,7 @@
     },
     {
       "ChildId": "cb5950bd-ed90-4dc7-9d23-904e7cee1bf7"/*Slow bass*/,
-      "Comment": "TODO: Connected to sub bass comming in later.",
+      "Comment": "TODO: Connected to sub bass coming in later.",
       "Position": {
         "X": -7029.019,
         "Y": 2633.9238

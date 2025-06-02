@@ -1,6 +1,6 @@
 {
   "Id": "bc7594df-68f0-4678-aec7-523474b3b36a"/*SumInts*/,
-  "Description": "Adds the connected integervalues",
+  "Description": "Adds the connected integer values",
   "SymbolTags": "8",
   "InputUis": [
     {

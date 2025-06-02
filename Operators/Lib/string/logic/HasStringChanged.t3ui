@@ -1,6 +1,6 @@
 {
   "Id": "de9f1dfd-05ec-466f-9f5f-46e7e8da219a"/*HasStringChanged*/,
-  "Description": "Returns true if the connected a string attribute has changed.",
+  "Description": "Returns true if the connected string attribute has changed.",
   "SymbolTags": "8",
   "InputUis": [
     {

@@ -1,6 +1,6 @@
 {
   "Id": "245de58f-d3d0-4c57-ba27-1b884b7f6b31"/*DrivenByMossExample*/,
-  "Description": "install drivenbymoss extension for reaper or bitwig to use this",
+  "Description": "Install drivenbymoss extension for Reaper or Bitwig to use this",
   "InputUis": [],
   "SymbolChildUis": [
     {
@@ -131,7 +131,7 @@
   "Annotations": [
     {
       "Id": "0418d19d-a844-40f7-a49c-075896e2f5e2",
-      "Title": "Demo running along drivenbymoss osc driver (https://www.mossgrabers.de) default settings.\nThis move the 1st volume fader in the current bank, mind your)",
+      "Title": "Demo running along drivenbymoss OSC driver (https://www.mossgrabers.de) default settings.\nThis moves the 1st volume fader in the current bank, mind your)",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -167,7 +167,7 @@
     },
     {
       "Id": "68d848fc-25e6-4ea2-8287-c43717d28eb3",
-      "Title": "address:port, only dotted IP4 are supported.",
+      "Title": "address:port, only dotted IPv4 are supported.",
       "Color": {
         "X": 0.6,
         "Y": 0.6,

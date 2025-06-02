@@ -41,10 +41,10 @@ internal static class UiContentUpdate
         var fontAtlasPtr = ImGui.GetIO().Fonts;
         fontAtlasPtr.Clear();
         const string fontName = "Roboto";
-        var root = Path.Combine(SharedResources.Directory, "fonts", "editor", fontName + '-');
+        var rootFilePath = Path.Combine(SharedResources.Directory, "fonts", "editor", fontName + '-');
         
         const string fileExtension = ".ttf";
-        var format = $"{root}{{0}}{fileExtension}";
+        var format = $"{rootFilePath}{{0}}{fileExtension}";
         
         var normalFont  = new TtfFont(string.Format(format, "Regular"), 18f * dpiAwareScale);
         var boldFont    = new TtfFont(string.Format(format, "Medium"), 18f * dpiAwareScale);
@@ -55,6 +55,11 @@ internal static class UiContentUpdate
         Fonts.FontBold = fontAtlasPtr.AddFontFromFileTTF(boldFont.Path, boldFont.PixelSize);
         Fonts.FontSmall = fontAtlasPtr.AddFontFromFileTTF(smallFont.Path, smallFont.PixelSize);
         Fonts.FontLarge = fontAtlasPtr.AddFontFromFileTTF(largeFont.Path, largeFont.PixelSize);
+        
+        var codeFontPath = Path.Combine(SharedResources.Directory, "fonts", "editor", "JetBrainsMono-Regular.ttf");
+        var codeFont   = new TtfFont(codeFontPath, 18f * dpiAwareScale);
+        Fonts.Code = fontAtlasPtr.AddFontFromFileTTF(codeFont.Path, codeFont.PixelSize);
+        
         
         ImGuiWindowService.Instance.SetFonts(new FontPack(normalFont, boldFont, smallFont, largeFont));
     }

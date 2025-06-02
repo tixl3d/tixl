@@ -1,6 +1,6 @@
 {
   "Id": "46231897-662d-481c-97d9-1cea1fdb67be"/*WS4_Boids*/,
-  "Description": "A VJ expriments triggering boids",
+  "Description": "A VJ experiments triggering boids",
   "InputUis": [],
   "SymbolChildUis": [
     {

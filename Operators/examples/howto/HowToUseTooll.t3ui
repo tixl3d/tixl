@@ -20,7 +20,7 @@
     },
     {
       "ChildId": "73ef00c1-942d-4464-9390-b9632fef8468"/*DetectEdges*/,
-      "Comment": "You discovered a comment! \nIn many examples we will use these to explain the purpose of certain operators in a graph or point out noteworthy parameter settings.",
+      "Comment": "You discovered a comment! \nIn many examples, we will use these to explain the purpose of certain operators in a graph or point out noteworthy parameter settings.",
       "Position": {
         "X": 272.81885,
         "Y": 265.47058
@@ -81,7 +81,7 @@
   "Annotations": [
     {
       "Id": "1058504f-053c-4b01-833c-4c5d8d5ea64a",
-      "Title": "Creating new operators is easy:\n1. select [DetectEdges] and...\n2. press TAB on your keyboard.\n3. Type \"Color...\" and select \n [ColorGrade] by pressing return.",
+      "Title": "Creating new operators is easy:\n1. Select [DetectEdges] and...\n2. Press TAB on your keyboard.\n3. Type \"Color...\" and select \n [ColorGrade] by pressing return.",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -99,7 +99,7 @@
     },
     {
       "Id": "125f20a8-465e-4758-b8c0-7601c7dc0112",
-      "Title": "This is an Operator.\nIf you select it, you see its output \nin the Output-View.",
+      "Title": "This is an operator.\nIf you select it, you see its output \nin the Output-View.",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -153,7 +153,7 @@
     },
     {
       "Id": "474e3707-8497-44ea-890b-fc3f1f6b4448",
-      "Title": "1. Creating and connecting Operators",
+      "Title": "1. Creating and connecting operators",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -225,7 +225,7 @@
     },
     {
       "Id": "ac1fcac6-637d-474b-8a07-98c92c18ab56",
-      "Title": "Welcome - You made it!\nDouble clicking on an operator will enter it. This is how you got here.\n\nTry to double click on the background to get back to the [HomeCanvas].\n",
+      "Title": "Welcome - You made it!\nDouble-clicking on an operator will enter it. This is how you got here.\n\nTry to double-click on the background to get back to the [HomeCanvas].\n",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -279,7 +279,7 @@
     },
     {
       "Id": "f083606b-1507-4ed9-a5e1-d41787afec99",
-      "Title": "6. Click on a parameter name \"e.g. FillColor\" to reset it to its default.",
+      "Title": "6. Click on a parameter name, \"e.g. FillColor,\" to reset it to its default.",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -297,7 +297,7 @@
     },
     {
       "Id": "f5ee65c5-76e7-4242-bdb2-6e6c8ab1cc2a",
-      "Title": "You can...\n\n1. Drag values horizontally to change them.\n2. Click a value to type, e.g. values like \"2.1\" or formulas like \"1.4/3\"\n3. Hover over a value to use mouse wheel. Try holding Shift (for finer) \n  or ALT (for faster) changes.\n\n",
+      "Title": "You can...\n\n1. Drag values horizontally to change them.\n2. Click a value to type, e.g., values like \"2.1\" or formulas like \"1.4/3\"\n3. Hover over a value to use the mouse wheel. Try holding Shift (for finer) \n  or ALT (for faster) changes.\n\n",
       "Color": {
         "X": 0.6,
         "Y": 0.6,

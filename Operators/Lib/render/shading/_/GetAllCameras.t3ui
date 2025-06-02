@@ -1,6 +1,6 @@
 {
   "Id": "5b538cf5-e3b6-4674-b23e-ab55fc59ada6"/*GetAllCameras*/,
-  "Description": "Provides a list of all camera defined in the current composition symbol. \n\nThis can be useful for rendering camera gizmos.",
+  "Description": "Provides a list of all cameras defined in the current composition symbol. \n\nThis can be useful for rendering camera gizmos.",
   "SymbolTags": "208",
   "InputUis": [
     {

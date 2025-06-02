@@ -1,6 +1,6 @@
 {
   "Id": "ec0675d7-6b72-4b15-b141-80bdd2367cd8"/*RandomizePoints*/,
-  "Description": "Smoothly randomizes various point attributes. It's an extremely versatile operator that provides a various options of applying the random modifications and can be smoothly animated.\n\nNote:  This is an updated version of [_RandomizePoints_Legacy1]. It supports phase seeds, colors, extends and different randomization methods and an improved BiasGain method.",
+  "Description": "Smoothly randomizes various point attributes. It's an extremely versatile operator that provides various options of applying the random modifications and can be smoothly animated.\n\nNote:  This is an updated version of [_RandomizePoints_Legacy1]. It supports phase seeds, colors, extends and different randomization methods and an improved BiasGain method.",
   "SymbolTags": "1",
   "InputUis": [
     {

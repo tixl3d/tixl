@@ -326,7 +326,7 @@
     },
     {
       "ChildId": "eef48261-a1e5-4178-baab-547c36d1e276"/*BlendWithMask*/,
-      "Comment": "Now this texture can be repeated to the infinite",
+      "Comment": "Now this texture can be repeated to infinity",
       "Position": {
         "X": 974.77905,
         "Y": -1407.0104

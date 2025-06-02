@@ -9,7 +9,7 @@
         "X": -200.0,
         "Y": 225.0
       },
-      "Description": "Increases / decreases the values of the curves on the vertical axis up and down"
+      "Description": "Increases/decreases the values of the curves on the vertical axis up and down"
     },
     {
       "InputId": "4c94a39e-88d9-4b7f-bbbf-42e80f9627ef"/*Amplitude*/,
@@ -43,7 +43,7 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "Description": "increases the speed at which the curves are drawn"
+      "Description": "Increases the speed at which the curves are drawn"
     },
     {
       "InputId": "afcf8b5a-11fa-42e6-8da3-09457c950ee7"/*OverrideTime*/,

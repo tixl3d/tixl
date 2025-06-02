@@ -78,7 +78,16 @@ public static class ValueUtils
                                      return new InputValue<int>(r);
                                  }
                 },
+                {
+                    typeof(string), (a, b, t) =>
+                                 {
+                                     if (a is not InputValue<string> aValue2 || b is not InputValue<string> bValue2)
+                                         return null;
 
+                                     return new InputValue<string>(t <= 0.5f ? aValue2.Value : bValue2.Value);
+                                 }
+                },
+                
                 {
                     typeof(Int3), (a, b, t) =>
                                   {
@@ -112,13 +121,7 @@ public static class ValueUtils
                                       if (aValue is not InputValue<bool> aValue2 || bValue is not InputValue<bool> bValue2)
                                           return null;
 
-                                      var a = aValue2.Value;
-                                      var b = bValue2.Value;
-
-                                      var r = a == b ? a :
-                                              t <= 0.5f ? a : b;
-
-                                      return new InputValue<bool>(r);
+                                      return new InputValue<bool>(t <= 0.5f ? aValue2.Value : bValue2.Value);
                                   }
                 },
                 {
@@ -248,7 +251,6 @@ public static class ValueUtils
                                          return new InputValue<Vector4>(sum);
                                      }
                 },
-
                 {
                     typeof(int), (values, weights) =>
                                  {
@@ -265,6 +267,30 @@ public static class ValueUtils
                                      return new InputValue<int>((int)(sum + 0.5f));
                                  }
                 },
+                {
+                    typeof(string), (values, weights) =>
+                                 {
+                                     //var sum = 0f;
+                                     var best = string.Empty;
+                                     var bestWeight = float.NegativeInfinity;
+                                     
+                                     for (var index = 0; index < values.Length; index++)
+                                     {
+                                         var inputV = values[index];
+                                         if (inputV is not InputValue<string> v)
+                                             continue;
+                                         
+                                         var weight =  weights[index];
+                                         if (!(weight > bestWeight)) 
+                                             continue;
+
+                                         bestWeight = weight;
+                                         best = v.Value;
+                                     }
+
+                                     return new InputValue<string>(best);
+                                 }
+                },                
                 {
                     typeof(Int2), (values, weights) =>
                                   {

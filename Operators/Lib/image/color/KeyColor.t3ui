@@ -1,6 +1,6 @@
 {
   "Id": "2ab1bbef-8322-4638-8b1d-7e31aaa6a457"/*KeyColor*/,
-  "Description": "A simple color keyer.\nThis can be used to select a color / range of colors in a 2d image / rendering / video to replace it with something else. For example with a different color of turn it transparent.\nThis can be used for Bluescreen / Greensceen footage.\nUseful combinations: [LoadImage], [PlayVideo], [PlayVideoClip]",
+  "Description": "A simple color keyer.\nThis can be used to select a color / range of colors in a 2D image / rendering / video to replace it with something else. For example, with a different color or turn it transparent.\nThis can be used for Bluescreen / Greenscreen footage.\nUseful combinations: [LoadImage], [PlayVideo], [PlayVideoClip]",
   "SymbolTags": "1",
   "InputUis": [
     {

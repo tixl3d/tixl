@@ -152,8 +152,6 @@ public static class ExportWikiDocumentation
         sb.AppendLine("");
         sb.AppendLine("___");
         sb.AppendLine("");
-        sb.AppendLine("Please help use to improve this documentation. Feel free to improve the description.");
-        sb.AppendLine("");
         sb.AppendLine("⚠ Everything else is automatically generated and will be overwritten regularly.");
             
         File.WriteAllText(filepath, sb.ToString());

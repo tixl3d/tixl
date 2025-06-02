@@ -13,79 +13,89 @@ internal sealed class GetTextureSize : Instance<GetTextureSize>
     public readonly Slot<int> TotalSize = new();
 
     [Output(Guid = "209BF938-E317-4F9C-8906-265C2AFAE1E5")]
-    public readonly Slot<bool> IsTextureValid = new ();
+    public readonly Slot<bool> IsTextureValid = new();
 
-
+    [Output(Guid = "CDEC05B6-9EE8-48F8-811F-3D1DE18A251F")]
+    public readonly Slot<bool> IsCubeMap = new();
+    
     public GetTextureSize()
     {
         Size.UpdateAction += Update;
         SizeFloat.UpdateAction += Update;
         TotalSize.UpdateAction += Update;
         IsTextureValid.UpdateAction += Update;
+        IsCubeMap.UpdateAction += Update;
     }
 
     private void Update(EvaluationContext context)
     {
+        var isCubeMap = false;   
         var texture = Texture.GetValue(context);
-        IsTextureValid.Value = texture != null;
-            
-        var overrideResolution = OverrideSize.GetValue(context);
-            
-        // Log.Debug("is texture valid: " + IsTextureValid, this);
-        var useContextResolution = overrideResolution.Width < 0 || overrideResolution.Height < 0;
-        // Log.Debug(" UseContextResolution:" + useContextResolution);
-            
-        if (!useContextResolution && overrideResolution.Width > 0 && overrideResolution.Height > 0)
+        var isTextureValid = texture != null && !texture.IsDisposed;
+        
+        //if(isTextureValid )
+
+        var customResolution = OverrideSize.GetValue(context);
+        
+        var mode = ResModes.UseContext;
+        if (customResolution.Width > 0 && customResolution.Height > 0)
         {
-            //Log.Debug($" use override size: {overrideResolution}", this);
-            Size.Value = overrideResolution;
+            mode = ResModes.UseOverride;
         }
-        else if (texture != null)
+        else if (isTextureValid && customResolution.Width == 0 && customResolution.Height == 0)
         {
-            // Log.Debug(" texture is none", this);
-            try
-            {
-                Size.Value = new Int2(texture.Description.Width, texture.Description.Height);
-                //Log.Debug($" use texture size: {Size.Value} {useContextResolution}", this);
-            }
-            catch (Exception e)
-            {
-                Log.Warning("Failed to get texture description: " + e.Message, this);
-            }
+            mode = ResModes.UseTexture;
         }
-        else
+        
+        var resolution = mode switch
+                             {
+                                 ResModes.UseContext  => context.RequestedResolution,
+                                 ResModes.UseTexture  => new Int2(texture!.Description.Width, texture.Description.Height),
+                                 ResModes.UseOverride => customResolution,
+                                 _                    => throw new ArgumentOutOfRangeException()
+                             };
+
+
+        if (isTextureValid)
         {
-            useContextResolution = true;
+            isCubeMap = (texture.Description.OptionFlags & ResourceOptionFlags.TextureCube) != 0;
         }
+        
+        var alwaysDirty = mode == ResModes.UseContext;
+        if (alwaysDirty != _alwaysDirty)
+        {
+            var dirtyFlagTrigger = alwaysDirty ? DirtyFlagTrigger.Animated : DirtyFlagTrigger.None;
+            Size.DirtyFlag.Trigger = dirtyFlagTrigger;
+            SizeFloat.DirtyFlag.Trigger = dirtyFlagTrigger;
+            TotalSize.DirtyFlag.Trigger = dirtyFlagTrigger;
+            IsTextureValid.DirtyFlag.Trigger = dirtyFlagTrigger;
+            IsCubeMap.DirtyFlag.Trigger = dirtyFlagTrigger;
             
-        if (useContextResolution)
-        {
-            //Log.Debug($"Set to animated resolution to : {context.RequestedResolution}", this);
-            Size.Value = context.RequestedResolution;
-            Size.DirtyFlag.Trigger =      DirtyFlagTrigger.Animated;
-            SizeFloat.DirtyFlag.Trigger = DirtyFlagTrigger.Animated;
-            TotalSize.DirtyFlag.Trigger = DirtyFlagTrigger.Animated;
-            IsTextureValid.DirtyFlag.Trigger = DirtyFlagTrigger.Animated;
-        }
-        else
-        {
-            //Log.Debug("Set to none", this);
-            Size.DirtyFlag.Trigger =      DirtyFlagTrigger.None;
-            SizeFloat.DirtyFlag.Trigger = DirtyFlagTrigger.None;
-            TotalSize.DirtyFlag.Trigger = DirtyFlagTrigger.None;
-            IsTextureValid.DirtyFlag.Trigger = DirtyFlagTrigger.None;
+            _alwaysDirty = alwaysDirty;
         }
 
-        SizeFloat.Value = new Vector2(Size.Value.Width, Size.Value.Height);
-        TotalSize.Value = Size.Value.Width * Size.Value.Height;
-            
+        
+        IsTextureValid.Value = isTextureValid;
+        Size.Value = resolution;
+        SizeFloat.Value = new Vector2(resolution.Width, resolution.Height);
+        TotalSize.Value = resolution.Width * resolution.Height;
+        IsCubeMap.Value = isCubeMap;
+
         Size.DirtyFlag.Clear();
         TotalSize.DirtyFlag.Clear();
         SizeFloat.DirtyFlag.Clear();
-        Texture.DirtyFlag.Clear();
         IsTextureValid.DirtyFlag.Clear();
+        IsCubeMap.DirtyFlag.Clear();
     }
-        
+
+    private enum ResModes
+    {
+        UseTexture,
+        UseContext,
+        UseOverride,
+    }
+
+    private bool _alwaysDirty = true;
 
     [Input(Guid = "8b15d8e1-10c7-41e1-84db-a85e31e0c909")]
     public readonly InputSlot<Texture2D> Texture = new();

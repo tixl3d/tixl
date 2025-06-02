@@ -201,7 +201,7 @@ internal sealed class CameraSelectionHandling
         if (TransformGizmoHandling.IsDragging)
             PreventCameraInteraction = true;
 
-        if (!PreventCameraInteraction && cameraForManipulation != null)
+        if (cameraForManipulation != null)
         {
             _cameraInteraction.Update(cameraForManipulation, !PreventCameraInteraction);
         }

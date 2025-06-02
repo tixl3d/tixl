@@ -492,7 +492,7 @@
     },
     {
       "Id": "cc77db97-a906-4175-b1ef-1d31239648f3",
-      "Title": "Set Input midi input controls for LFO speed overrides and Beat Tapping",
+      "Title": "Set input MIDI controls for LFO speed overrides and Beat Tapping",
       "Color": {
         "X": 0.6,
         "Y": 0.6,

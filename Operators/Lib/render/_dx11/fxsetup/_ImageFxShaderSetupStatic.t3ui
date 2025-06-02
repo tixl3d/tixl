@@ -6,8 +6,8 @@
     {
       "InputId": "1e4e274b-60b2-4fe8-b275-ebef80d520a7"/*Source*/,
       "Position": {
-        "X": 1035.6152,
-        "Y": 1001.1787
+        "X": 1042.055,
+        "Y": 991.1764
       },
       "Usage": "FilePath"
     },
@@ -28,8 +28,8 @@
     {
       "InputId": "480d6c19-a33c-48b3-b9fa-aaf8bd31e6d9"/*GenerateMips*/,
       "Position": {
-        "X": 1175.6152,
-        "Y": 1526.1787
+        "X": 1177.2594,
+        "Y": 1556.5967
       }
     },
     {
@@ -43,15 +43,15 @@
     {
       "InputId": "6cf68692-43a5-4a93-873c-99aa0d2dde93"/*BufferColor*/,
       "Position": {
-        "X": 1175.6152,
-        "Y": 1456.1787
+        "X": 1177.2594,
+        "Y": 1486.5967
       }
     },
     {
       "InputId": "86fe6e64-5301-4eb7-b91d-581d2f775db2"/*IntParams*/,
       "Position": {
-        "X": 1035.6151,
-        "Y": 1106.1787
+        "X": 1042.0549,
+        "Y": 1096.1764
       }
     },
     {
@@ -72,8 +72,8 @@
     {
       "InputId": "ff7cb999-aa3a-4e11-b9c8-d027bdb55ff6"/*OutputFormat*/,
       "Position": {
-        "X": 1175.6152,
-        "Y": 1491.1786
+        "X": 1177.2594,
+        "Y": 1521.5966
       }
     }
   ],
@@ -81,22 +81,22 @@
     {
       "ChildId": "06eae8bd-212d-4286-8f37-6e0b85591bd2"/*OutputMergerStage*/,
       "Position": {
-        "X": 1175.6152,
-        "Y": 1316.1787
+        "X": 1177.2594,
+        "Y": 1346.5967
       }
     },
     {
       "ChildId": "11c856e6-1d8e-4fca-ad9d-8ac6ccbbb788"/*Rasterizer*/,
       "Position": {
-        "X": 1175.6152,
-        "Y": 1281.1788
+        "X": 1177.2594,
+        "Y": 1311.5968
       }
     },
     {
       "ChildId": "16d35738-fa2d-4080-b14d-a0c1a055818d"/*RenderTargetBlendDescription*/,
       "Position": {
-        "X": 895.61523,
-        "Y": 1316.1787
+        "X": 897.2594,
+        "Y": 1346.5967
       }
     },
     {
@@ -109,15 +109,15 @@
     {
       "ChildId": "2c34da17-653b-4843-9616-da5ec68f8ec6"/*InputAssemblerStage*/,
       "Position": {
-        "X": 1175.6152,
-        "Y": 1246.1787
+        "X": 1177.2594,
+        "Y": 1276.5967
       }
     },
     {
       "ChildId": "2e4990bb-cbcd-4145-ad6b-5b01444b9b9e"/*IntsToBuffer*/,
       "Position": {
-        "X": 1175.6152,
-        "Y": 1106.1787
+        "X": 1182.055,
+        "Y": 1096.1764
       }
     },
     {
@@ -130,8 +130,8 @@
     {
       "ChildId": "423e0ee4-4650-4ace-b8ea-6b9069a62d6a"/*VertexShader*/,
       "Position": {
-        "X": 1175.6152,
-        "Y": 966.1788
+        "X": 1182.055,
+        "Y": 956.1765
       }
     },
     {
@@ -144,29 +144,29 @@
     {
       "ChildId": "60ad40b7-b6ac-4750-837a-73afad8182f5"/*Execute*/,
       "Position": {
-        "X": 1315.6152,
-        "Y": 1211.1788
+        "X": 1317.2594,
+        "Y": 1241.5968
       }
     },
     {
       "ChildId": "66065af5-2777-4378-87f3-62236ef57103"/*BlendState*/,
       "Position": {
-        "X": 1035.6152,
-        "Y": 1316.1787
+        "X": 1037.2594,
+        "Y": 1346.5967
       }
     },
     {
       "ChildId": "7d5a44c8-7cbe-4515-9d7a-1d2ba1ba0b08"/*PixelShader*/,
       "Position": {
-        "X": 1175.6152,
-        "Y": 1001.1787
+        "X": 1182.055,
+        "Y": 991.1764
       }
     },
     {
       "ChildId": "80cfb4be-a8b0-4937-9553-b77cfad64a20"/*RasterizerState*/,
       "Position": {
-        "X": 1035.6152,
-        "Y": 1281.1788
+        "X": 1037.2594,
+        "Y": 1311.5968
       }
     },
     {
@@ -179,22 +179,22 @@
     {
       "ChildId": "92964e5d-4224-46ff-947b-c983128fe296"/*RenderTarget*/,
       "Position": {
-        "X": 1315.6152,
-        "Y": 1386.1787
+        "X": 1317.2594,
+        "Y": 1416.5967
       }
     },
     {
       "ChildId": "953de3dc-d722-4902-866a-5d0eff43df98"/*SetPixelAndVertexShaderStage*/,
       "Position": {
-        "X": 1315.6152,
-        "Y": 966.1788
+        "X": 1322.055,
+        "Y": 956.1765
       }
     },
     {
       "ChildId": "c6b7f935-c140-4081-b189-8cdf21b4311f"/*ResolutionConstBuffer*/,
       "Position": {
-        "X": 1175.6152,
-        "Y": 1071.1787
+        "X": 1182.055,
+        "Y": 1061.1764
       }
     },
     {
@@ -207,8 +207,8 @@
     {
       "ChildId": "e272479f-2e0b-4df1-b20b-a92aef7de123"/*Draw*/,
       "Position": {
-        "X": 1175.6152,
-        "Y": 1351.1787
+        "X": 1177.2594,
+        "Y": 1381.5967
       }
     }
   ],
@@ -216,8 +216,8 @@
     {
       "OutputId": "d49f10dc-6617-4541-96d3-b58b0266b631"/*TextureOutput*/,
       "Position": {
-        "X": 1455.6152,
-        "Y": 1386.1787
+        "X": 1317.2594,
+        "Y": 1591.5967
       }
     }
   ]

@@ -1,6 +1,6 @@
 {
   "Id": "085b7841-9502-4b49-896e-3b1fa023f1bf"/*CombineMaterialChannels*/,
-  "Description": "Combines roughness, metallic, and ambient occlusion texture maps that are loaded with [LoadImage] into a single texture for [SetMaterial] to create PBR Materials.\n\nIf no normalmap is available [NormalMap] can be used to generate one.\n\nOlder version: [CombineMaterialChannels2]",
+  "Description": "Combines roughness, metallic, and ambient occlusion texture maps that are loaded with [LoadImage] into a single texture for [SetMaterial] to create PBR materials.\n\nIf no normal map is available, [NormalMap] can be used to generate one.\n\nOlder version: [CombineMaterialChannels2]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,7 +9,7 @@
         "X": -514.44653,
         "Y": 790.6531
       },
-      "Description": "Hold the \"Alt\" key and left click to create points on the curve to fine tune how the loaded roughness map is used.\nRight click on the points opens more options such as interpolation etc.",
+      "Description": "Hold the \"Alt\" key and left-click to create points on the curve to fine-tune how the loaded roughness map is used.\nRight-click on the points opens more options such as interpolation etc.",
       "AddPadding": "True"
     },
     {
@@ -18,7 +18,7 @@
         "X": -514.44653,
         "Y": 745.6531
       },
-      "Description": "Enables the generation of Mipmaps which ensure that textures also look good from different distances and angles."
+      "Description": "Enables the generation of mipmaps which ensure that textures also look good from different distances and angles."
     },
     {
       "InputId": "34ba88b4-7fe0-4f40-9433-feab3b6e81f0"/*Resolution*/,
@@ -36,7 +36,7 @@
         "X": -515.9635,
         "Y": 463.74335
       },
-      "Description": "Input for a AmbientOcclusionMap via a [LoadImage] Operator."
+      "Description": "Input for an AmbientOcclusionMap via a [LoadImage] operator."
     },
     {
       "InputId": "ae7df1c8-ffd1-4a32-9f25-769fc7630f6f"/*Metallic*/,
@@ -45,7 +45,7 @@
         "X": -515.9635,
         "Y": 418.74335
       },
-      "Description": "Input for a MetallicMap via a [LoadImage] Operator."
+      "Description": "Input for a MetallicMap via a [LoadImage] operator."
     },
     {
       "InputId": "c697d838-f9a3-4ee7-af3d-713494f0ae93"/*Roughness*/,
@@ -54,7 +54,7 @@
         "X": -515.9635,
         "Y": 373.74335
       },
-      "Description": "Input for a RoughnessMap via a [LoadImage] Operator."
+      "Description": "Input for a RoughnessMap via a [LoadImage] operator."
     }
   ],
   "SymbolChildUis": [

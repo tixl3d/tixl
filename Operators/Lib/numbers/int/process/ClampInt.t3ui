@@ -9,7 +9,7 @@
         "X": -200.0,
         "Y": 90.0
       },
-      "Description": "Upper Limit"
+      "Description": "Upper limit"
     },
     {
       "InputId": "75a09454-6cde-458b-9314-05a99b2e5919"/*Value*/,
@@ -17,7 +17,7 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "Description": "Integer Input to be clamped"
+      "Description": "Integer input to be clamped"
     },
     {
       "InputId": "e715919d-f3e3-4708-90a6-b55efb379257"/*Min*/,
@@ -25,7 +25,7 @@
         "X": -200.0,
         "Y": 45.0
       },
-      "Description": "Lower Limit",
+      "Description": "Lower limit",
       "AddPadding": "True"
     }
   ],

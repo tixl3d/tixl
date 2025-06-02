@@ -9,7 +9,7 @@
         "X": -202.95078,
         "Y": 400.32733
       },
-      "Description": "Defines the bias for the Feather",
+      "Description": "Defines the bias for the feather",
       "Min": -10.0,
       "Max": 10.0,
       "Scale": 0.1
@@ -129,7 +129,7 @@
         "X": -197.04916,
         "Y": 790.5728
       },
-      "Description": "Blend mode between the generated blob graphic and the backgrund image, if one is provided."
+      "Description": "Blend mode between the generated blob graphic and the background image, if one is provided."
     }
   ],
   "SymbolChildUis": [

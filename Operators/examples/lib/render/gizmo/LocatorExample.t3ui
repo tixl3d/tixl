@@ -6,7 +6,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "182f6998-76a5-4434-a0c7-ac340f4a75a7"/*Point*/,
-      "Comment": "We can use this position to create a point for some complex constrution...",
+      "Comment": "We can use this position to create a point for some complex construction...",
       "Position": {
         "X": 287.6535,
         "Y": 193.98416
@@ -150,7 +150,7 @@
     },
     {
       "ChildId": "e524d8fa-2032-40d9-b72c-ad8002323fb2"/*Camera*/,
-      "Comment": "Note the that the [Locator] ignores the projection matrix created by cameras.\n\nSo to project a position to screenspace you'll need another another solution. ",
+      "Comment": "Note that the [Locator] ignores the projection matrix created by cameras.\n\nSo to project a position to screenspace you'll need another solution.",
       "Position": {
         "X": 1143.1587,
         "Y": -123.91278

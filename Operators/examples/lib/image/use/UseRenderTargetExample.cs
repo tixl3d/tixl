@@ -1,4 +1,4 @@
-namespace Examples.lib.image.use;
+namespace Examples.Lib.image.use;
 
 [Guid("1fdd634f-4c6a-4615-b75a-0c46732c9826")]
  internal sealed class UseRenderTargetExample : Instance<UseRenderTargetExample>

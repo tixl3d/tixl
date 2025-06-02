@@ -2062,7 +2062,6 @@
     "Syncing": 0,
     "AudioDecayFactor": 0.77,
     "AudioGainFactor": 1.0,
-    "AudioInputDeviceName": "Microphone Builtin (Realtek(R) Audio)",
-    "AudioClips": []
+    "AudioInputDeviceName": "Microphone Builtin (Realtek(R) Audio)"
   }
 }

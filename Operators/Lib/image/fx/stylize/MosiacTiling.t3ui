@@ -1,6 +1,6 @@
 {
   "Id": "c68fbb84-2f56-4aed-97ab-3c2df0ec700b"/*MosiacTiling*/,
-  "Description": "Subdivides the incoming image into recursive tiles. \nThis effect looks like the resolution of the image is reduced also known as 'pixelate' or 'resisizing without sampling'.\n\nCheck out the presets for an overview.\n\nFor similar effects or interesting combinations see: [MosaicTiling] [VoronoiCells] [SubdivisionStretch] [HoneyCombTiles] [TriangleGridTransition] [Dither] [AsciiRender]\n\nTags:\nPixelate / pixilated / Pixel / resolution / lowres / low-res / Pixelart / resolution / Mosiac",
+  "Description": "Subdivides the incoming image into recursive tiles. \nThis effect looks like the resolution of the image is reduced, also known as 'pixelate' or 'resizing without sampling'.\n\nCheck out the presets for an overview.\n\nFor similar effects or interesting combinations see: [MosaicTiling] [VoronoiCells] [SubdivisionStretch] [HoneyCombTiles] [TriangleGridTransition] [Dither] [AsciiRender]\n\nTags:\nPixelate / pixilated / Pixel / resolution / lowres / low-res / Pixelart / resolution / Mosaic",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -82,7 +82,7 @@
         "X": 132.69783,
         "Y": 217.32104
       },
-      "Description": "Defines the maximum amount subdivisions"
+      "Description": "Defines the maximum amount of subdivisions"
     },
     {
       "InputId": "a99725c2-9a88-4d9f-8b38-cb3f392d0be9"/*Padding*/,

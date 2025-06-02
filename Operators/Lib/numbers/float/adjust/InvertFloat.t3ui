@@ -1,6 +1,6 @@
 {
   "Id": "97032147-ba0c-4454-b878-1048d8faea05"/*InvertFloat*/,
-  "Description": "Negates a float value. \n\nThis is the same as multiplying with -1.",
+  "Description": "Negates a float value. \n\nThis is the same as multiplying by -1.",
   "SymbolTags": "8",
   "InputUis": [
     {

@@ -1,6 +1,6 @@
 {
   "Id": "a3f64d34-1fab-4230-86b3-1c3deba3f90b"/*Group*/,
-  "Description": "Groups a sequence of incoming draw commands.\n\nAlthough similar to [Execute] it also allows to [Transform] and override the color multiply for all operators further down (I.e. left) in the graph.\n",
+  "Description": "Groups a sequence of incoming draw commands.\n\nAlthough similar to [Execute], it also allows to [Transform] and override the color multiply for all operators further down (i.e., left) in the graph.\n",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -71,7 +71,7 @@
         "Y": 0.0
       },
       "GroupTitle": "Transformations",
-      "Description": "Moves the incoming subgraph\n\nX (-left / +right), \nY (-down / + up), \nZ (-forward/+backwards)\n"
+      "Description": "Moves the incoming subgraph\n\nX (-left / +right), \nY (-down / +up), \nZ (-forward / +backwards)\n"
     },
     {
       "InputId": "9e961f73-1ee7-4369-9ac7-5c653e570b6f"/*Commands*/,

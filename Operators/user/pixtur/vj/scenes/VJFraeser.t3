@@ -134,18 +134,6 @@
       "Outputs": []
     },
     {
-      "Id": "18d2f587-c606-40e5-9a1a-c3e8d10fe013"/*Counter*/,
-      "SymbolId": "11882635-4757-4cac-a024-70bb4e8b504c",
-      "InputValues": [
-        {
-          "Id": "bca3f7b2-a093-4cb3-89a5-0e2681760607"/*Increment*/,
-          "Type": "System.Single",
-          "Value": 15.0
-        }
-      ],
-      "Outputs": []
-    },
-    {
       "Id": "29a38486-c7c5-4756-aaac-b3eb47f5fb4a"/*shapeSize*/,
       "SymbolId": "59a0458e-2f3a-4856-96cd-32936f783cc5",
       "Name": "shapeSize",
@@ -209,14 +197,6 @@
           "Id": "52243bdc-6dce-46b9-95d9-af90cde3d56f"/*Scale*/,
           "Type": "System.Single",
           "Value": 4.0
-        },
-        {
-          "Id": "75c859fa-9dad-4da3-994c-7232811d5ede"/*Resolution*/,
-          "Type": "T3.Core.DataTypes.Vector.Int2",
-          "Value": {
-            "X": 1024,
-            "Y": 1024
-          }
         },
         {
           "Id": "a4a70b12-ab9b-4c53-a93c-6f2460228e1e"/*GAffects_ShapeSize*/,
@@ -313,18 +293,6 @@
       "Outputs": []
     },
     {
-      "Id": "7500e8e1-f949-4b73-8367-4d460daaf997"/*FraserGrid*/,
-      "SymbolId": "b882a5d0-f5ae-40a4-8c42-5b25e5775def",
-      "InputValues": [
-        {
-          "Id": "1dad9264-32a0-4476-a4af-c7eb9a5a5fec"/*Rotate*/,
-          "Type": "System.Single",
-          "Value": 54.0
-        }
-      ],
-      "Outputs": []
-    },
-    {
       "Id": "7f41d342-c7d3-43ad-978e-523206307b4e"/*Counter*/,
       "SymbolId": "11882635-4757-4cac-a024-70bb4e8b504c",
       "InputValues": [
@@ -348,7 +316,6 @@
     },
     {
       "Id": "b19c3149-cfcd-4a0f-bf7d-45651934cad0"/*MirrorRepeat*/,
-      "IsBypassed": true,
       "SymbolId": "06621b4b-43be-4ef9-80d0-f1b36fa4dbd1",
       "InputValues": [
         {

@@ -1,4 +1,4 @@
-namespace Examples.lib.io.midi;
+namespace Examples.Lib.io.midi;
 
 [Guid("cb2cdd1d-811a-4a30-a5bc-289f36c31028")]
  internal sealed class MidiNoteOutputExample : Instance<MidiNoteOutputExample>

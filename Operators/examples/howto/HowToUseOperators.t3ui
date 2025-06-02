@@ -125,7 +125,7 @@
     },
     {
       "ChildId": "408ef106-ec9b-4661-85be-99f940c2873b"/*Counter*/,
-      "Comment": "We use the second \"was triggered\" output to count up an integer intex.\n\nThat's a workaround because we can't directly connect the output float value to the integer index.\n\nAn alternative solution would be to use [FloatToInt].",
+      "Comment": "We use the second \"was triggered\" output to count up an integer index.\n\nThat's a workaround because we can't directly connect the output float value to the integer index.\n\nAn alternative solution would be to use [FloatToInt].",
       "Position": {
         "X": -1725.4952,
         "Y": 1394.2295
@@ -448,7 +448,7 @@
     },
     {
       "ChildId": "fa34d2db-546e-4e0b-8727-f7940e87c0a1"/*Switch*/,
-      "Comment": "We use the connected index to pick which of the connected sub graphs should be evaluate.\n\nThere are a number interesting things here:\n\n1. If the index is positve wraps around (I.e. uses a modulo with the count of connections)\n2. If parts of the subgraph are no longer evaluated, they fade out.\n\nTip:\n\nYou can use negative indices to show none or all children.",
+      "Comment": "We use the connected index to pick which of the connected subgraphs should be evaluated.\n\nThere are a number of interesting things here:\n\n1. If the index is positive, it wraps around (i.e. uses a modulo with the count of connections)\n2. If parts of the subgraph are no longer evaluated, they fade out.\n\nTip:\n\nYou can use negative indices to show none or all children.",
       "Position": {
         "X": -1370.5378,
         "Y": 1297.1636

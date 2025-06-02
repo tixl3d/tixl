@@ -1,6 +1,6 @@
 {
   "Id": "bf7fcd04-0cf6-4518-86cc-48f74483d98d"/*RoundedRect*/,
-  "Description": "Generates a rounded rectangle.\n\nCan be customised to create a variety of shapes, similarly to [Blob].\n\nAKA: rectangle, square, ellipse, circle, rings, blob, vignette\n\nTips:\n\nSimilar Ops: [NGon] [RoundedRect] [Rings] [RadialGradient] [LinearGradient] [Blob]",
+  "Description": "Generates a rounded rectangle.\n\nCan be customized to create a variety of shapes, similarly to [Blob].\n\nAKA: rectangle, square, ellipse, circle, rings, blob, vignette\n\nTips:\n\nSimilar Ops: [NGon] [RoundedRect] [Rings] [RadialGradient] [LinearGradient] [Blob]",
   "SymbolTags": "1",
   "InputUis": [
     {

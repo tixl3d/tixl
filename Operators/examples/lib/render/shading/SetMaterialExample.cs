@@ -1,4 +1,4 @@
-namespace Examples.lib.render.shading;
+namespace Examples.Lib.render.shading;
 
 [Guid("5b86e841-548d-4dbd-a39b-6361e28e23f5")]
  internal sealed class SetMaterialExample : Instance<SetMaterialExample>

@@ -6,7 +6,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "0242f027-8cc7-4fa4-ae84-63b763387164"/*TriggerAnim*/,
-      "Comment": "Combined with Boolean this operator allows to achieve simple tweening animations.",
+      "Comment": "Combined with Boolean, this operator allows achieving simple tweening animations.",
       "Position": {
         "X": -22.62378,
         "Y": -125.056885
@@ -332,7 +332,7 @@
     },
     {
       "ChildId": "f6c0d3a1-fed6-4425-bd4c-1f4f1fda980b"/*BoolToInt*/,
-      "Comment": "In order to switch between cameras this operator convert the bool value to an integer",
+      "Comment": "In order to switch between cameras, this operator converts the bool value to an integer",
       "Position": {
         "X": 1650.5682,
         "Y": -427.56726

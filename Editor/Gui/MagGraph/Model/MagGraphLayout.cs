@@ -334,6 +334,8 @@ internal sealed class MagGraphLayout
                                            MultiInputIndex = 0,
                                            VisibleIndex = 0,
                                        });
+                    
+                    item.PrimaryType = parentOutput.ValueType;
                     break;
                 }
                 case MagGraphItem.Variants.Placeholder:

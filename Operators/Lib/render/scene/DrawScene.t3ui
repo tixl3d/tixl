@@ -1,6 +1,6 @@
 {
   "Id": "2fcdea21-18f1-4006-a2fe-aab40893fed8"/*DrawScene*/,
-  "Description": "Draw the connected SceneSetup.\n\nYou can use [LoadGltfScene] to load an scene.",
+  "Description": "Draw the connected SceneSetup.\n\nYou can use [LoadGltfScene] to load a scene.",
   "SymbolTags": "72",
   "InputUis": [
     {
@@ -9,7 +9,7 @@
         "X": 1053.3339,
         "Y": 4078.1934
       },
-      "Description": "If Scene material are disabled you can select a context material defined with [DefineMaterials].",
+      "Description": "If Scene materials are disabled you can select a context material defined with [DefineMaterials].",
       "Usage": "CustomDropdown"
     },
     {
@@ -60,7 +60,7 @@
         "X": 1053.3339,
         "Y": 4033.1934
       },
-      "Description": "If enabled Tooll uses the materials from the SceneSetup. \nIf disabled these materials are ignore and the the material define by [SetMaterial] in the context will be used."
+      "Description": "If enabled Tool uses the materials from the SceneSetup. \nIf disabled these materials are ignored and the material defined by [SetMaterial] in the context will be used."
     },
     {
       "InputId": "69151dfb-59cf-4618-8642-c9dc88260786"/*BlendMode*/,

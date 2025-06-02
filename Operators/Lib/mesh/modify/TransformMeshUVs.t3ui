@@ -1,6 +1,6 @@
 {
   "Id": "208a86b5-55cc-460a-86e6-2b17da818494"/*TransformMeshUVs*/,
-  "Description": "Manipulates the existing UV coordinates of a mesh to change the mapping of textures.\n\nBecomes visible with [DrawMesh].\n\nTo overwrite existing UV Coordinates with planar mapping see [MeshProjectUV] \n\n\nAlso see [ReprojectToUV].",
+  "Description": "Manipulates the existing UV coordinates of a mesh to change the mapping of textures.\n\nBecomes visible with [DrawMesh].\n\nTo overwrite existing UV Coordinates with planar mapping see [MeshProjectUV]\n\nAlso see [ReprojectToUV].",
   "SymbolTags": "1",
   "InputUis": [
     {

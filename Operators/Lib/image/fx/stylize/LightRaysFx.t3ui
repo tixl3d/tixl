@@ -73,7 +73,7 @@
         "X": -761.0598,
         "Y": 140.2838
       },
-      "Description": "Allows to bring more variations to the light rays\nThis texture is using Multiply blending mode"
+      "Description": "Allows to bring more variations to the light rays\nThis texture is using multiply blending mode"
     }
   ],
   "SymbolChildUis": [
@@ -374,7 +374,7 @@
   "Annotations": [
     {
       "Id": "fd9fb83d-cfc9-45d3-b450-adb5144909c8",
-      "Title": "An illfated attempt to implement a second refinement pass.\nThe even distance scaling in the first pass sadly caused visual artifacts,\nthere were not obvious how to resolve.",
+      "Title": "An ill-fated attempt to implement a second refinement pass.\nThe even distance scaling in the first pass sadly caused visual artifacts,\nthere were not obvious how to resolve.",
       "Color": {
         "X": 0.6,
         "Y": 0.6,

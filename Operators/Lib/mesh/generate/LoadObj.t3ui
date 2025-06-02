@@ -1,6 +1,6 @@
 {
   "Id": "be52b670-9749-4c0d-89f0-d8b101395227"/*LoadObj*/,
-  "Description": "Loads a a mesh from an obj. file  by generating Vertex and Index buffers which can be rendered with [DrawMesh] , [DrawMeshUnlit] and [DrawMeshHatched] among others.\nAll surfaces must have valid UVs, otherwise they will appear black.\n\nFor a more comfortable import of 3d meshes (which also allows the import of already linked materials) use [LoadGltfScene] in combination with [DrawScene].\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToDrawThings].\n\nIt can also become the source for a particle system with [MeshVerticesToPoints] or [PointsOnMesh].\n\nTo generate meshes procedurally with many adjustment options see [CubeMesh], [CylinderMesh], [QuadMesh], [SphereMesh] or [TorusMesh] etc.\n\n",
+  "Description": "Loads a mesh from an obj. file by generating Vertex and Index buffers which can be rendered with [DrawMesh], [DrawMeshUnlit] and [DrawMeshHatched] among others.\nAll surfaces must have valid UVs, otherwise they will appear black.\n\nFor a more comfortable import of 3d meshes (which also allows the import of already linked materials) use [LoadGltfScene] in combination with [DrawScene].\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToDrawThings].\n\nIt can also become the source for a particle system with [MeshVerticesToPoints] or [PointsOnMesh].\n\nTo generate meshes procedurally with many adjustment options see [CubeMesh], [CylinderMesh], [QuadMesh], [SphereMesh] or [TorusMesh] etc.\n\n",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -20,7 +20,7 @@
         "X": 51.512096,
         "Y": 136.99597
       },
-      "Description": "check to sort vertices"
+      "Description": "Check to sort vertices"
     },
     {
       "InputId": "c39a61b3-fb6b-4611-8f13-273f13c9c491"/*ScaleFactor*/,
@@ -41,7 +41,7 @@
         "X": 51.512096,
         "Y": 181.99597
       },
-      "Description": "enable and disable to clear gpu cache"
+      "Description": "Enable and disable to clear GPU cache"
     },
     {
       "InputId": "ffd22736-a600-4c97-a4a4-ad3526b8b35c"/*UseGPUCaching*/,
@@ -50,7 +50,7 @@
         "Y": 91.99597
       },
       "GroupTitle": "Advanced Options...",
-      "Description": "toggle GPU Caching"
+      "Description": "Toggle GPU Caching"
     }
   ],
   "SymbolChildUis": [],

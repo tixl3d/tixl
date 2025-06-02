@@ -44,15 +44,15 @@
           "Type": "System.Numerics.Vector4",
           "Value": {
             "X": 1.0,
-            "Y": 0.2693429,
-            "Z": 0.4312876,
+            "Y": 0.9994434,
+            "Z": 0.9998608,
             "W": 1.0
           }
         },
         {
           "Id": "ca8724d8-a362-4af4-bdf8-a80a1b0ef72e"/*FolderWithImages*/,
           "Type": "System.String",
-          "Value": "Resources\\user\\pixtur\\VJ\\CatMadness"
+          "Value": "Resources/images/CatMadness/"
         }
       ],
       "Outputs": []
@@ -1027,15 +1027,25 @@
         {
           "Id": "16231de9-2e85-4a9a-a2d1-99dfac18a0f6"/*PreSaturate*/,
           "Type": "System.Single",
-          "Value": 0.61
+          "Value": 0.68
+        },
+        {
+          "Id": "423eb712-f7e3-4402-b841-324a9fc91c54"/*VignetteColor*/,
+          "Type": "System.Numerics.Vector4",
+          "Value": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0,
+            "W": 0.0
+          }
         },
         {
           "Id": "4dc44a7b-fe7c-4807-aaaa-53fb553de017"/*Gain*/,
           "Type": "System.Numerics.Vector4",
           "Value": {
-            "X": 0.37,
-            "Y": 0.37,
-            "Z": 0.37,
+            "X": 0.82,
+            "Y": 0.82,
+            "Z": 0.82,
             "W": 0.506
           }
         },
@@ -1043,9 +1053,9 @@
           "Id": "e8cc8a26-313e-4399-b800-901019bbaa78"/*Lift*/,
           "Type": "System.Numerics.Vector4",
           "Value": {
-            "X": 0.0,
-            "Y": 0.0,
-            "Z": 0.0,
+            "X": 0.19,
+            "Y": 0.19,
+            "Z": 0.19,
             "W": 0.25
           }
         }
@@ -1100,9 +1110,9 @@
                   "Id": "83974e9d-5937-4276-a097-c025faa00a34",
                   "NormalizedPosition": 1.0,
                   "Color": {
-                    "R": 1.0,
-                    "G": 1.0,
-                    "B": 1.0,
+                    "R": 0.76555026,
+                    "G": 0.76555026,
+                    "B": 0.76555026,
                     "A": 0.5
                   }
                 }

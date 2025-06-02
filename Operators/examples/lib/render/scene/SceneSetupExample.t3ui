@@ -190,7 +190,7 @@
     },
     {
       "ChildId": "f05a77a9-0656-4041-9043-f0eb40c9ef2b"/*LinePoints*/,
-      "Comment": "A set of points twisted by 360 degree along the y-axis squeezed to a length of zero into a single point.",
+      "Comment": "A set of points twisted by 360 degrees along the y-axis squeezed to a length of zero into a single point.",
       "Position": {
         "X": 1082.5807,
         "Y": 1447.4456

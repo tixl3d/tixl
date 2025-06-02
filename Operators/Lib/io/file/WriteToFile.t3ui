@@ -1,6 +1,6 @@
 {
   "Id": "0db15e2d-b457-44d7-bb58-ace0a0708073"/*WriteToFile*/,
-  "Description": "Writes the incoming string into a predefined file on the local disk\n\nInfo: This Operator is unable to create files. The file has to exist in order to write something into it. \nDepending on the user and operating system Tooll might need admin privileges.\n\n\n\nAlso see: [ReadFile] [RequestUrl] [FilesInFolder]",
+  "Description": "Writes the incoming string into a predefined file on the local disk\n\nInfo: This operator is unable to create files. The file has to exist in order to write something into it.\nDepending on the user and operating system, Tooll might need admin privileges.\n\n\n\nAlso see: [ReadFile] [RequestUrl] [FilesInFolder]",
   "InputUis": [
     {
       "InputId": "a12d0e5c-a0f9-4d3c-8ab6-827fb618c021"/*Content*/,

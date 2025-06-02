@@ -56,7 +56,7 @@ internal sealed class SpreadLayout : Instance<SpreadLayout>
             {
                 var t1 = commands[spreadIndex];
                     
-                var f =  0.5f - ((float)spreadIndex / (count-1) - 0.5f) - pivot;
+                var f = count <= 1 ? 0:  (0.5f - ((float)spreadIndex / (count-1) - 0.5f)) - pivot;
                 var tSpreaded = t - spread * f;  
 
                 // Build and set transform matrix

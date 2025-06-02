@@ -9,7 +9,7 @@
         "X": -91.13745,
         "Y": 99.28253
       },
-      "Description": "Letters Numbers or combinations to be searched for in the original string",
+      "Description": "Letters, numbers, or combinations to be searched for in the original string",
       "Usage": "Default"
     },
     {

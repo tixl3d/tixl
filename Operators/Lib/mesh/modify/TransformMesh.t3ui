@@ -47,7 +47,7 @@
         "Y": 1092.4706
       },
       "GroupTitle": "Transform Pivot",
-      "Description": "Moves the Pivot (center point) of the incoming subgraph:\n\nX (-left / +right) \nY (-down / + up) \nZ (-forward/+backwards)\n\nThe Pivot Point determines the location of the incoming subgraph Gizmo. Transforming its location can make it easier to perform transformations around the position you want.\n"
+      "Description": "Moves the pivot (center point) of the incoming subgraph:\n\nX (-left / +right) \nY (-down / +up) \nZ (-forward / +backwards)\n\nThe pivot point determines the location of the incoming subgraph gizmo. Transforming its location can make it easier to perform transformations around the position you want.\n"
     },
     {
       "InputId": "da607ebd-6fec-4ae8-bf91-b70dcb794557"/*Translation*/,
@@ -56,7 +56,7 @@
         "Y": 867.47046
       },
       "GroupTitle": "Transform Mesh",
-      "Description": "Moves the incoming mesh\n\nX (-left / +right), \nY (-down / + up), \nZ (-forward/+backwards)\n"
+      "Description": "Moves the incoming mesh\n\nX (-left / +right), \nY (-down / +up), \nZ (-forward / +backwards)\n"
     },
     {
       "InputId": "f37c11a5-b210-4e83-8ebd-64ea49ee9b96"/*Scale*/,

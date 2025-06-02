@@ -1,6 +1,6 @@
 {
   "Id": "05cf9ea7-045d-421f-8ed3-2c2f6b325a46"/*CompareInt*/,
-  "Description": "Compares two integers and gives out the result as a Boolean and / or an Integer",
+  "Description": "Compares two integers and gives out the result as a Boolean and/or an Integer",
   "SymbolTags": "8",
   "InputUis": [
     {

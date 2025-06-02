@@ -1,6 +1,6 @@
 {
   "Id": "c757cde3-511c-44cb-af62-39156557daa6"/*DrawMeshHatched*/,
-  "Description": "Draws incoming geometry and meshnodes in an abstract shading style.\n\nAn interactive tutorial for the complete TiXL render pipeline can be found at [HowToDrawThings].\n\nThe most commonly used render methods are [Drawmesh], [DrawMeshUnlit] and [DrawMeshHatched] and [DrawMeshAtPoints].\n\nThey can then be combined with [SetMaterial], [SetFog], [SetPointLight] and many others to create the look of scenes.",
+  "Description": "Draws incoming geometry and meshnodes in an abstract shading style.\n\nAn interactive tutorial for the complete TiXL render pipeline can be found at [HowToDrawThings].\n\nThe most commonly used render methods are [Drawmesh], [DrawMeshUnlit], [DrawMeshHatched], and [DrawMeshAtPoints].\n\nThey can then be combined with [SetMaterial], [SetFog], [SetPointLight], and many others to create the look of scenes.",
   "SymbolTags": "64",
   "InputUis": [
     {
@@ -103,7 +103,7 @@
         "X": 635.04663,
         "Y": 5083.9478
       },
-      "Description": "Defines the gradient between highlight and shade-colors",
+      "Description": "Defines the gradient between highlight and shade colors",
       "AddPadding": "True"
     },
     {

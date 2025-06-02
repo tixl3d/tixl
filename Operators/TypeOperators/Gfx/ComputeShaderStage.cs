@@ -127,6 +127,7 @@ public sealed class ComputeShaderStage : Instance<ComputeShaderStage>, IRenderSt
                 }
             }
         }
+        VariousResources.DirtyFlag.Clear();
     }
     
 

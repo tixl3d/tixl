@@ -1,0 +1,37 @@
+{
+  "Id": "883e01f5-44ee-4724-9e6e-f885255c17e5"/*PlaneSDF*/,
+  "Description": "",
+  "InputUis": [
+    {
+      "InputId": "76d4c422-399a-4b68-b0ea-5d2d2f54a667"/*Center*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "99fca01a-e0a6-49dc-9535-ebde0f5f8744"/*Axis*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      }
+    },
+    {
+      "InputId": "deb91db5-cefb-4e0d-9244-d44bc6a21985"/*Size*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "82527072-beb2-492f-b737-faf9ed454e3f"/*Result*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

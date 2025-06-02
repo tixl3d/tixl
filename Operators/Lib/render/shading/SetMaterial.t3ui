@@ -1,6 +1,6 @@
 {
   "Id": "0ed2bee3-641f-4b08-8685-df1506e9af3c"/*SetMaterial*/,
-  "Description": "Sets the Physically Based Rendering (PBR) Material for the current RenderTarget which is then used by [DrawMesh] and other PBR rendering operators. Each of the material properties can be controlled by a color and / or by connecting a texture input by using a [LoadImage] operator].\n\nPlease note that color parameter is multiplied to the texture: so for an emissive texture to be visible, you have to first set the Emissive Color to white (or 1,1,1).\n\nThe base (albedo) color can also be adjusted by the Draw operators.\nPlease use [CombineMaterialChannels] to combine Roughness, Metallic and Occlusion textures into a single texture that can be connected to the .RoughnessMetallicOcclusion parameter.\nFor the roughness rendering the draw operators need an IBL texture set by [SetEnvironment] . If [SetEnvironment] is not used there is still a predefined a default IBL .\n\n\nAlso see: [HowToDrawThings]\n\nIf no normalmap is available [NormalMap] can be used to generate one.",
+  "Description": "Sets the Physically Based Rendering (PBR) Material for the current RenderTarget which is then used by [DrawMesh] and other PBR rendering operators. Each of the material properties can be controlled by a color and/or by connecting a texture input by using a [LoadImage] operator.\n\nPlease note that the color parameter is multiplied to the texture: so for an emissive texture to be visible, you have to first set the Emissive Color to white (or 1,1,1).\n\nThe base (albedo) color can also be adjusted by the Draw operators.\nPlease use [CombineMaterialChannels] to combine Roughness, Metallic and Occlusion textures into a single texture that can be connected to the .RoughnessMetallicOcclusion parameter.\nFor the roughness rendering the draw operators need an IBL texture set by [SetEnvironment]. If [SetEnvironment] is not used there is still a predefined default IBL.\n\n\nAlso see: [HowToDrawThings]\n\nIf no normalmap is available [NormalMap] can be used to generate one.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -33,7 +33,7 @@
         "X": -200.0,
         "Y": 135.0
       },
-      "Description": "Defines the color and brightness with which the material emits light*.\n\nPlease Note: If an [EmissiveColorMap] is used this must be set to white!\n\n*Please Note: As of now: Materials in T3 can not be used to *actually* illuminate scenes. Scenes are lit with a combination of [SetEnvironment] and [Pointlight] Operators.",
+      "Description": "Defines the color and brightness with which the material emits light*.\n\nPlease Note: If an [EmissiveColorMap] is used this must be set to white!\n\n*Please Note: As of now: Materials in T3 cannot be used to *actually* illuminate scenes. Scenes are lit with a combination of [SetEnvironment] and [Pointlight] Operators.",
       "AddPadding": "True"
     },
     {
@@ -51,7 +51,7 @@
         "X": -200.0,
         "Y": 405.0
       },
-      "Description": "Input for a Emissive Color Map via a [LoadImage] Operator.\nPlease Note: The \"Emissive Color\" must be set to white, otherwise the image will always be rendered black."
+      "Description": "Input for an Emissive Color Map via a [LoadImage] Operator.\nPlease Note: The \"Emissive Color\" must be set to white, otherwise the image will always be rendered black."
     },
     {
       "InputId": "71e289f0-382b-4d0f-a2e0-701c7019a360"/*MaterialId*/,

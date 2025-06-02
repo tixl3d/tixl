@@ -1,6 +1,6 @@
 {
   "Id": "88aa2a40-5841-48b7-8e95-907ee6b70270"/*FC3_NoLoops*/,
-  "Description": "This is a fast demo. It's central ideas is a the [ReflectionLinePoints] that uses compute shaders to intersect a ray with a simple geometry.",
+  "Description": "This is a fast demo. Its central idea is the [ReflectionLinePoints] that uses compute shaders to intersect a ray with simple geometry.",
   "SymbolTags": "6",
   "InputUis": [],
   "SymbolChildUis": [
@@ -305,7 +305,7 @@
     },
     {
       "ChildId": "a61dd26c-8322-4327-aefa-1fb86e600dca"/*RenderWithMotionBlur*/,
-      "Comment": "Cheating for youtube",
+      "Comment": "Cheating for YouTube",
       "Position": {
         "X": 2220.8403,
         "Y": 73.59485

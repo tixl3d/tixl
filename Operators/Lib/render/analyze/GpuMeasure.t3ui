@@ -1,6 +1,6 @@
 {
   "Id": "000e08d0-669f-48df-9083-7aa0a43bbc05"/*GpuMeasure*/,
-  "Description": "Measures the time in milliseconds that the GPU (graphics card) needs to render the current image.\n\nSimilar to the Performance display top left next to the menu in TiXLs UI.",
+  "Description": "Measures the time in milliseconds that the GPU (graphics card) needs to render the current image.\n\nSimilar to the Performance display top left next to the menu in TiXL's UI.",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,7 +9,7 @@
         "X": 0.0,
         "Y": 45.0
       },
-      "Description": "activates the measuring"
+      "Description": "Activates the measuring"
     },
     {
       "InputId": "76c017f1-5474-44a5-b881-d581f7038ca5"/*Command*/,
@@ -17,7 +17,7 @@
         "X": 0.0,
         "Y": 0.0
       },
-      "Description": "scene input to be measured"
+      "Description": "Scene input to be measured"
     },
     {
       "InputId": "e430cc80-9003-4a56-af5d-f5820434c074"/*LogToConsole*/,

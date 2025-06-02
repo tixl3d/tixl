@@ -1,6 +1,6 @@
 {
   "Id": "51648ecd-05ee-40b3-b562-8518ada70918"/*Not*/,
-  "Description": "Creates and / or inverts a single Boolean value\n\nSimilar to [Boolean] (but inverted)",
+  "Description": "Creates and/or inverts a single Boolean value\n\nSimilar to [Boolean] (but inverted)",
   "SymbolTags": "1",
   "InputUis": [
     {

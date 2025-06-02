@@ -1,6 +1,6 @@
 {
   "Id": "da93f7d1-ef91-4b4a-9708-2d9b1baa4c14"/*RemapColor*/,
-  "Description": "Replaces the colors of an image with a gradient based on its brightness. This can be used to emulate gradient curves or level adjustments or color cycling effects.\n\nTip: This operator can be used to simulate \"adjustment curves\" from image manipulation software when gradient interpolation is set to spline. \n\nNote: The gradient's alpha channel can control the intensity of the effect.\n\nAlso consider using [Tint].",
+  "Description": "Replaces the colors of an image with a gradient based on its brightness. This can be used to emulate gradient curves or level adjustments or color cycling effects.\n\nTip: This operator can be used to simulate \"adjustment curves\" from image manipulation software when gradient interpolation is set to spline.\n\nNote: The gradient's alpha channel can control the intensity of the effect.\n\nAlso consider using [Tint].",
   "SymbolTags": "1",
   "InputUis": [
     {

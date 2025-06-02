@@ -1,6 +1,6 @@
 {
   "Id": "96ccea19-c37f-4ee4-8dd2-5abdb347f5a1"/*WrapString*/,
-  "Description": "Wraps a string a column width",
+  "Description": "Wraps a string at a column width",
   "SymbolTags": "1",
   "InputUis": [
     {

@@ -70,7 +70,7 @@
         "X": -29.352737,
         "Y": 95.74985
       },
-      "Description": "Changes the position of the PointLight:\n\nX (-left / +right), \nY (-down / + up), \nZ (-forward/+backwards)",
+      "Description": "Changes the position of the PointLight:\n\nX (-left / +right), \nY (-down / +up), \nZ (-forward / +backwards)",
       "AddPadding": "True"
     },
     {

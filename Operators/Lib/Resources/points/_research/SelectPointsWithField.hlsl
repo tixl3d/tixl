@@ -32,7 +32,13 @@ cbuffer Params : register(b2)
 
 StructuredBuffer<Point> SourcePoints : t0;
 RWStructuredBuffer<Point> ResultPoints : u0;
-/*{RESOURCES}*/
+
+
+//=== Global functions ==============================================
+/*{GLOBALS}*/
+
+//=== Additional Resources ==========================================
+/*{RESOURCES(t1)}*/
 
 //=== Field functions ===============================================
 /*{FIELD_FUNCTIONS}*/

@@ -1,4 +1,4 @@
-namespace Examples.lib.point;
+namespace Examples.Lib.point;
 
 [Guid("3096f86e-e850-4f76-80de-1996fc811285")]
  internal sealed class LoadObjAsPointsExample : Instance<LoadObjAsPointsExample>

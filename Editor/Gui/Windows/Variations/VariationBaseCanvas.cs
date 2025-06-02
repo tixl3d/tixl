@@ -45,17 +45,18 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
         // Render variations to pinned output
         if (OutputWindow.OutputWindowInstances.FirstOrDefault(window => window.Config.Visible) is OutputWindow outputWindow)
         {
-            var renderInstance = outputWindow.ShownInstance;
+            var instanceForOutput = outputWindow.ShownInstance;
+            var instanceForBlending = InstanceForBlendOperations;
 
-            if (renderInstance is { Outputs.Count: > 0 } && renderInstance.Outputs[0] is Slot<Texture2D> textureSlot)
+            if (instanceForOutput is { Outputs.Count: > 0 } && instanceForOutput.Outputs[0] is Slot<Texture2D> textureSlot)
             {
-                UpdateThumbnailRendering(renderInstance, textureSlot);
+                UpdateThumbnailRendering(instanceForBlending, textureSlot);
             }
 
-            if (renderInstance != _currentRenderInstance)
+            if (instanceForBlending != _currentRenderInstance)
             {
                 pinnedOutputChanged = true;
-                _currentRenderInstance = renderInstance;
+                _currentRenderInstance = instanceForBlending;
             }
         }
             
@@ -115,19 +116,19 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
     /// <summary>
     /// Updates keeps rendering thumbnails until all are processed.
     /// </summary>
-    private void UpdateThumbnailRendering(Instance renderInstance, Slot<Texture2D> textureOutputSlot)
+    private void UpdateThumbnailRendering(Instance instanceForBlending, Slot<Texture2D> textureOutputSlot)
     {
         if (!UserSettings.Config.VariationLiveThumbnails && !_rerenderManuallyRequested)
             return;
 
         _thumbnailCanvasRendering.InitializeCanvasTexture(VariationThumbnail.ThumbnailSize);
 
-        var symbolUi = renderInstance.GetSymbolUi();
-            
-        if (!symbolUi.OutputUis.TryGetValue(textureOutputSlot.Id, out var outputUi))
+        var outputSymbolUi = textureOutputSlot.Parent.Symbol.GetSymbolUi();
+        //var symbolUi = instanceForBlending.GetSymbolUi();
+        if (!outputSymbolUi.OutputUis.TryGetValue(textureOutputSlot.Id, out var textureOutputUi))
             return;
 
-        UpdateNextVariationThumbnail(outputUi, textureOutputSlot, renderInstance);
+        UpdateNextVariationThumbnail(instanceForBlending, textureOutputUi, textureOutputSlot);
     }
 
     private void DrawBlendingOverlay(ImDrawListPtr drawList, Instance instanceForBlending)
@@ -436,7 +437,7 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
         {
             if (!hideHeader)
             {
-                area.Min.Y -= 150;
+                area.Min.Y -= 50;
             }
             FitAreaOnCanvas(area);
         }
@@ -503,7 +504,7 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
     }
 
     #region thumbnail rendering
-    private void UpdateNextVariationThumbnail(IOutputUi outputUi, Slot<Texture2D> textureSlot, Instance instanceForBlending)
+    private void UpdateNextVariationThumbnail(Instance instanceForBlending, IOutputUi textureOutputUi, Slot<Texture2D> textureOutputSlot)
     {
         if (_allThumbnailsRendered || PoolForBlendOperations == null)
             return;
@@ -525,11 +526,12 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
         }
 
         var variation = PoolForBlendOperations.AllVariations[_renderThumbnailIndex];
-        RenderThumbnail(variation, _renderThumbnailIndex, instanceForBlending, outputUi, textureSlot);
+        RenderThumbnail(instanceForBlending, textureOutputUi, textureOutputSlot, variation, _renderThumbnailIndex);
         _renderThumbnailIndex++;
     }
 
-    private void RenderThumbnail(Variation variation, int atlasIndex, Instance instanceForBlending, IOutputUi outputUi, Slot<Texture2D> textureSlot)
+    private void RenderThumbnail(Instance instanceForBlending, IOutputUi textureOutputUi, Slot<Texture2D> textureOutputSlot, Variation variation,
+                                 int atlasIndex)
     {
         if (PoolForBlendOperations == null)
             return;
@@ -545,15 +547,15 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
         // DrawValue will use the current ImageOutputCanvas for rendering
         _imageCanvas.SetAsCurrent();
         ImGui.PushClipRect(new Vector2(0, 0), new Vector2(1, 1), true);
-        outputUi.DrawValue(textureSlot, _thumbnailCanvasRendering.EvaluationContext, "variationsThumbnail");
+        textureOutputUi.DrawValue(textureOutputSlot, _thumbnailCanvasRendering.EvaluationContext, "variationsThumbnail");
         ImGui.PopClipRect();
         ImageOutputCanvas.Deactivate();
 
         var rect = GetPixelRectForIndex(atlasIndex);
 
-        if (textureSlot.Value != null)
+        if (textureOutputSlot.Value != null)
         {
-            _thumbnailCanvasRendering.CopyToCanvasTexture(textureSlot, rect);
+            _thumbnailCanvasRendering.CopyToCanvasTexture(textureOutputSlot, rect);
         }
 
         PoolForBlendOperations.StopHover();

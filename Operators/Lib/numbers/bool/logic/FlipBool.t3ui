@@ -1,6 +1,6 @@
 {
   "Id": "f38311df-d356-4385-8535-96f52a71d53e"/*FlipBool*/,
-  "Description": "Toggles (flips) a boolean between true/false everytime it is triggered.\n\nThis is similar to [FlipFlop].",
+  "Description": "Toggles (flips) a boolean between true/false every time it is triggered.\n\nThis is similar to [FlipFlop].",
   "SymbolTags": "8",
   "InputUis": [
     {

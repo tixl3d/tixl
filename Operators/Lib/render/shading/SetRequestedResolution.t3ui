@@ -1,6 +1,6 @@
 {
   "Id": "5b3a0c1d-87d6-4d88-ae20-ff9f95049ecf"/*SetRequestedResolution*/,
-  "Description": "Set the requested resolution (similar to the Resolution drop down of the output windows).\n\nPlease be sure to understand how Tooll handles resolutions before using this operator. Check the tutorial linked below.\n\nAlso see: [RequestedResolution]",
+  "Description": "Set the requested resolution (similar to the Resolution drop-down of the output windows).\n\nPlease be sure to understand how Tooll handles resolutions before using this operator. Check the tutorial linked below.\n\nAlso see: [RequestedResolution]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -9,7 +9,7 @@
         "X": -200.0,
         "Y": 90.0
       },
-      "Description": "An optional scaling factor that is apply to either the original original or the new requested resolution."
+      "Description": "An optional scaling factor that is applied to either the original or the new requested resolution."
     },
     {
       "InputId": "d6303c59-5ea2-43b3-8e73-218b99d7df5f"/*Resolution*/,
@@ -17,7 +17,7 @@
         "X": -200.0,
         "Y": 45.0
       },
-      "Description": "Enforces a new resolution of both of these are greater than 1."
+      "Description": "Enforces a new resolution if both of these are greater than 1."
     },
     {
       "InputId": "dd52dd4f-84ee-421b-91e9-da0b90adb1a6"/*Texture*/,

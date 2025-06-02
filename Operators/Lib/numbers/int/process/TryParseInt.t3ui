@@ -1,6 +1,6 @@
 {
   "Id": "f833d070-97d7-4c2b-974a-fd116c88ec38"/*TryParseInt*/,
-  "Description": "Tries to parse a string to an integer, if failing, the default value is used instead.",
+  "Description": "Tries to parse a string to an integer; if failing, the default value is used instead.",
   "SymbolTags": "8",
   "InputUis": [
     {

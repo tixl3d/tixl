@@ -1,4 +1,4 @@
-namespace Examples.lib.io.input;
+namespace Examples.Lib.io.input;
 
 [Guid("025285fd-c00f-44c7-8698-363ccc763fa1")]
  internal sealed class GamePadExample : Instance<GamePadExample>

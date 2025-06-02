@@ -1,6 +1,6 @@
 {
   "Id": "e64f95e4-c045-400f-98ca-7c020ad46174"/*Switch*/,
-  "Description": "Switches between connected graphs. Can be used to \"cut\" between scenes.\nThe index starts with 0 for the first input and will wrap on values exceeding the count of connected inputs.\n\nTip: \n- use index -1 to activate non (I.e. disable all)\n- use index -2 to activate all\n\nThe naming of this operator diverges from the Pick... convention like [PickColor], [PickImage] etc because it also allows to execute \"nothing\" or all connected inputs. \nThis is a a consequence of command being the only \"type\" that doesn't return data but only executes connected commands.\n\nFor a more visual approach see [TimeClip].\n",
+  "Description": "Switches between connected graphs. Can be used to \"cut\" between scenes.\nThe index starts with 0 for the first input and will wrap on values exceeding the count of connected inputs.\n\nTip: \n- use index -1 to activate none (i.e. disable all)\n- use index -2 to activate all\n\nThe naming of this operator diverges from the Pick... convention like [PickColor], [PickImage] etc because it also allows executing \"nothing\" or all connected inputs. \nThis is a consequence of command being the only \"type\" that doesn't return data but only executes connected commands.\n\nFor a more visual approach see [TimeClip].\n",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -28,7 +28,7 @@
         "X": 0.0,
         "Y": 90.0
       },
-      "Description": "If enabled Tooll will only invalidate the active connection. This can significantly improve performance for very complex scenes with thousands of Ops.\nThis feature is experimental and might have unexpected side effects.",
+      "Description": "If enabled, Tooll will only invalidate the active connection. This can significantly improve performance for very complex scenes with thousands of Ops.\nThis feature is experimental and might have unexpected side effects.",
       "AddPadding": "True"
     }
   ],

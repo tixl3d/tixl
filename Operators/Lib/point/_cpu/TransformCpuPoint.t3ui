@@ -1,6 +1,6 @@
 {
   "Id": "5f2df291-4667-474e-9e84-3b64d4cc0555"/*TransformCpuPoint*/,
-  "Description": "Transforms a single point of CPU. This can be useful for camera animations or other interactive effects.",
+  "Description": "Transforms a single point on the CPU. This can be useful for camera animations or other interactive effects.",
   "InputUis": [
     {
       "InputId": "3e7ba85d-48d0-413e-99c7-9a8742c2653e"/*Rotation*/,

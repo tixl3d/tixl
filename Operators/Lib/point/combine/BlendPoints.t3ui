@@ -36,7 +36,7 @@
         "X": -551.6894,
         "Y": 616.0946
       },
-      "Description": "Defines the transition between the two point setups\n0 = PointsA is displayed without changes\n1 = PointsB is displayed without changes\nIf the 'BlendMode' ist set to 'Blend', the points overshoot at values lower than 0 and higher than 1.\nIf the 'Blendmode' is set to 'RangeBlendSmooth', the transition loops.",
+      "Description": "Defines the transition between the two point setups\n0 = PointsA is displayed without changes\n1 = PointsB is displayed without changes\nIf the 'BlendMode' is set to 'Blend', the points overshoot at values lower than 0 and higher than 1.\nIf the 'BlendMode' is set to 'RangeBlendSmooth', the transition loops.",
       "AddPadding": "True",
       "Min": 0.0,
       "Max": 1.0
@@ -47,7 +47,7 @@
         "X": -549.20703,
         "Y": 797.9427
       },
-      "Description": "Defines the Range width when the 'BlendMode' is set to 'RangeBlend' or 'RangeBlendSmooth'"
+      "Description": "Defines the range width when the 'BlendMode' is set to 'RangeBlend' or 'RangeBlendSmooth'"
     },
     {
       "InputId": "c5480ce5-a8ba-4a26-8cee-c28e442020b7"/*BlendMode*/,
@@ -64,7 +64,7 @@
         "X": -551.6894,
         "Y": 661.0946
       },
-      "Description": "Adds a random noise to the points position during the transition"
+      "Description": "Adds random noise to the points' position during the transition"
     }
   ],
   "SymbolChildUis": [

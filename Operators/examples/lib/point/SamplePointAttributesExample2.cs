@@ -1,4 +1,4 @@
-namespace Examples.lib.point;
+namespace Examples.Lib.point;
 
 [Guid("01ebb7a3-9caa-4259-aaa1-c79248b39325")]
  internal sealed class SamplePointAttributesExample2 : Instance<SamplePointAttributesExample2>

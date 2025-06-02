@@ -1,4 +1,4 @@
-namespace Examples.lib.image.analyze;
+namespace Examples.Lib.image.analyze;
 
 [Guid("db89bacd-db5a-4d52-a073-ed141f413f8d")]
  internal sealed class OpticalFlowExample : Instance<OpticalFlowExample>

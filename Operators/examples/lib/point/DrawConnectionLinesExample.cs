@@ -1,4 +1,4 @@
-namespace Examples.lib.point;
+namespace Examples.Lib.point;
 
 [Guid("21198ce9-7ef8-4f5e-a26a-f29b6abbcdec")]
  internal sealed class DrawConnectionLinesExample : Instance<DrawConnectionLinesExample>

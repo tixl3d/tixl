@@ -1,4 +1,4 @@
-namespace Examples.lib.render.shading;
+namespace Examples.Lib.render.shading;
 
 [Guid("e20f492c-490f-4297-a9c8-0e5aab14f9c1")]
  internal sealed class ShadowPlaneExample : Instance<ShadowPlaneExample>

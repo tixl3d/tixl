@@ -1,6 +1,6 @@
 {
   "Id": "1f23db4a-871e-42a9-9255-49b956993eb1"/*Viewport*/,
-  "Description": "Defines a DirectX11 viewport that can be passed to an [Rasterizer] stage.",
+  "Description": "Defines a DirectX11 viewport that can be passed to a [Rasterizer] stage.",
   "SymbolTags": "24",
   "InputUis": [
     {

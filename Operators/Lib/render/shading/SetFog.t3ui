@@ -1,6 +1,6 @@
 {
   "Id": "74cbfce0-f8b8-46a1-b5d6-38477d4eec99"/*SetFog*/,
-  "Description": "Adds Fog to the incoming scene.\n\nProTip: If large meshes (for example a \"quadmesh\" as a ground plane) are not properly obscured by the fog, one possible reason could be that the tessellation is not high enough.\n\nUseful combinations [ColorGradeDepth]. An Operator that allows objects far away from the camera to be colored differently than close objects.\n\nAlso see [SetEnvironment] and [DepthBufferAsGrayScale]",
+  "Description": "Adds fog to the incoming scene.\n\nProTip: If large meshes (for example a \"quadmesh\" as a ground plane) are not properly obscured by the fog, one possible reason could be that the tessellation is not high enough.\n\nUseful combinations [ColorGradeDepth]. An operator that allows objects far away from the camera to be colored differently than close objects.\n\nAlso see [SetEnvironment] and [DepthBufferAsGrayScale]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -38,7 +38,7 @@
         "X": -200.0,
         "Y": 135.0
       },
-      "Description": "Defines the color of the fog. \nTip you can use the alpha channel to fade out fog color impact.",
+      "Description": "Defines the color of the fog. \nTip: you can use the alpha channel to fade out fog color impact.",
       "AddPadding": "True"
     }
   ],

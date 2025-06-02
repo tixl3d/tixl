@@ -1,4 +1,4 @@
-namespace Examples.lib.render.postfx;
+namespace Examples.Lib.render.postfx;
 
 [Guid("4b8b7567-a9d2-4956-813d-91e542e1f661")]
  internal sealed class GodRaysExamples : Instance<GodRaysExamples>

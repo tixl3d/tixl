@@ -1,49 +1,56 @@
 {
   "Id": "f3b66187-34b2-4018-8380-279f9f296ded"/*SetEnvironment*/,
-  "Description": "Sets the image based lighting (IBL) for the current RenderTarget. This texture can then be used by drawing operators for physically based rendering (PBR) further left in the graph.\nThe Operators needed are: [LoadImage] -> [TextureToCubeMap] -> [SetEnvironment]\n\n\nSome background information: a standard technology for rendering is to use environment textures that store various degrees of roughness in their mip map levels: fully reflective chrome in the highest resolution and very blurry/diffuse reflections in the lower levels. This is not just done be blurring, though: a single ultra bright pixel (E.g. the sun) can brighten the complete diffuse reflection. This computation is very(!) expensive and should not be done in real-time for high resolution environment maps.\n\nTo compute this IBL map [SetEnvironment] needs a cube map texture. As of now you can load equirectangular HDR maps only in DDS format and convert them with a [TextureToCubemap]. We are working on making this more convenient. You can also use procedural image textures for this.\n\nNOTICE: For the background environment to have the correctly alignment, the camera must be set after the environment:\n\n[DrawMesh]->[SetMaterial]->[SetPointLight]->[SetEnvironment]->[SetCamera].\n\nAlso see: [HowToDrawThings]",
+  "Description": "Sets the image-based lighting (IBL) for the current RenderTarget. This texture can then be used by drawing operators for physically based rendering (PBR) further left in the graph.\nThe operators needed are: [LoadImage] -> [TextureToCubeMap] -> [SetEnvironment]\n\n\nSome background information: a standard technology for rendering is to use environment textures that store various degrees of roughness in their mip map levels: fully reflective chrome in the highest resolution and very blurry/diffuse reflections in the lower levels. This is not just done by blurring, though: a single ultra bright pixel (e.g. the sun) can brighten the complete diffuse reflection. This computation is very(!) expensive and should not be done in real-time for high resolution environment maps.\n\nTo compute this IBL map [SetEnvironment] needs a cube map texture. As of now you can load equirectangular HDR maps only in DDS format and convert them with a [TextureToCubemap]. We are working on making this more convenient. You can also use procedural image textures for this.\n\nNOTICE: For the background environment to have the correct alignment, the camera must be set after the environment:\n\n[DrawMesh]->[SetMaterial]->[SetPointLight]->[SetEnvironment]->[SetCamera].\n\nAlso see: [HowToDrawThings]",
   "SymbolTags": "1",
   "InputUis": [
     {
       "InputId": "0299761d-7397-4a2f-b591-81fadb404a92"/*BackgroundDistance*/,
       "Position": {
-        "X": 114.808914,
-        "Y": 1336.7096
+        "X": 1516.9678,
+        "Y": 479.1858
       },
-      "Description": "Sets the radius for the sphere mesh that surrounds the scene.\n\nProTip: Clipping of the Background can be prevented either by this setting or by the \"NearFarClip\" settings in the used camera."
+      "Description": "Sets the radius for the sphere mesh that surrounds the scene.\n\nProTip: Clipping of the background can be prevented either by this setting or by the \"NearFarClip\" settings in the used camera."
     },
     {
       "InputId": "46d76d8a-5fb6-4138-a88b-950a2e5b8529"/*QualityFactor*/,
       "Position": {
-        "X": 114.808914,
-        "Y": 1381.7096
+        "X": 574.45807,
+        "Y": 1260.3137
       },
-      "Description": "A factor that is apply to the sample count for the different roughness levels.\nWhen enabling Live update this is Significant(!) impact on your rendering performance, so turning this down until it the artifacts are noticable. "
+      "Description": "A factor that is applied to the sample count for the different roughness levels.\nWhen enabling Live update this has significant(!) impact on your rendering performance, so turn this down until the artifacts are noticable."
+    },
+    {
+      "InputId": "486f4f09-2e4e-43b8-bfbc-2722e77d5dbd"/*Orientation*/,
+      "Position": {
+        "X": 574.45807,
+        "Y": 1335.3137
+      }
     },
     {
       "InputId": "4f573afe-8815-4fd3-a655-89ec40bf3c22"/*RenderBackground*/,
       "Position": {
-        "X": 114.808914,
-        "Y": 1201.7096
+        "X": 1376.9678,
+        "Y": 759.1858
       },
       "GroupTitle": "Render Background",
-      "Description": "If turned on the environment will be visible to the camera by being mapped on a sphere-mesh around the scene."
+      "Description": "If turned on the environment will be visible to the camera by being mapped on a sphere mesh around the scene."
     },
     {
-      "InputId": "5c042a08-74b3-4a6b-a420-2fcfa0fc01ee"/*CubeMap*/,
+      "InputId": "5c042a08-74b3-4a6b-a420-2fcfa0fc01ee"/*Texture*/,
       "Relevancy": "Required",
       "Position": {
-        "X": 248.10037,
-        "Y": 598.6846
+        "X": -51.30281,
+        "Y": 925.5227
       },
-      "Description": "Cubemap input to overwrite the default cubemap.\nThis can be used with the [TextureToCubeMap] Operator."
+      "Description": "Cubemap input to overwrite the default cubemap.\nThis can be used with the [TextureToCubeMap] operator."
     },
     {
       "InputId": "650aa9a6-4aa6-4928-be76-3f1f825aa773"/*BackgroundColor*/,
       "Position": {
-        "X": 114.808914,
-        "Y": 1291.7096
+        "X": 1376.9678,
+        "Y": 619.1858
       },
-      "Description": "Tints the Background with the selected color.\n\nDoes not affect the color of the light and / or reflection.",
+      "Description": "Tints the background with the selected color.\n\nDoes not affect the color of the light and/or reflection.",
       "Min": 0.0,
       "Max": 1.0,
       "Clamp": true
@@ -51,16 +58,16 @@
     {
       "InputId": "71c54c8e-a95f-47e8-b126-0cdaa89ae49b"/*Exposure*/,
       "Position": {
-        "X": 114.808914,
-        "Y": 1156.7096
+        "X": 775.7092,
+        "Y": 1066.7955
       },
       "Description": "Defines the intensity with which the scene is illuminated by the image.\n\nIf changing this value has no effect temporarily turn on and off the \"UpdateLive\" setting.\n"
     },
     {
       "InputId": "96094239-9d82-4a32-bbb0-e9da7f6501da"/*BackgroundBlur*/,
       "Position": {
-        "X": 114.808914,
-        "Y": 1246.7096
+        "X": 1376.9678,
+        "Y": 689.1858
       },
       "Description": "Defines how much the image on the sphere in the background is blurred.\n",
       "Min": 0.0,
@@ -70,118 +77,125 @@
     {
       "InputId": "c3c815fa-8672-4d99-99a7-986844f2fc45"/*UpdateLive*/,
       "Position": {
-        "X": 112.468506,
-        "Y": 883.0534
+        "X": 358.13943,
+        "Y": 1135.6758
       },
-      "Description": "Refreshes any changes to the image and exposure settings. This can be kept turned on but will significantly decrease rendering performance.\n\nIf turned on this allows animated \"Exposure\"-Values and live changes in the incoming image.",
+      "Description": "Refreshes any changes to the image and exposure settings. This can be kept turned on but will significantly decrease rendering performance.\n\nIf turned on this allows animated \"Exposure\" values and live changes in the incoming image.",
       "AddPadding": "True"
     },
     {
       "InputId": "e4482cab-f20c-4f9f-9179-c64944164509"/*SubTree*/,
       "Relevancy": "Required",
       "Position": {
-        "X": 264.8882,
-        "Y": 440.3667
+        "X": 1376.9678,
+        "Y": 934.18555
       }
     }
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "0a68afba-7eb9-45c6-8655-6a214876db13"/*GetIntVar*/,
-      "Position": {
-        "X": 112.468506,
-        "Y": 928.0534
-      }
-    },
-    {
       "ChildId": "18221d8e-7d80-4258-9a21-23acf7a77206"/*SamplerState*/,
       "Position": {
-        "X": 517.91925,
-        "Y": 845.0012
+        "X": 775.7092,
+        "Y": 1101.7955
       }
     },
     {
       "ChildId": "20636efb-c637-4879-93fd-0b507509ec4e"/*SetContextTexture*/,
       "Position": {
-        "X": 1084.2887,
-        "Y": 432.318
+        "X": 1516.9678,
+        "Y": 934.18555
       }
     },
     {
       "ChildId": "21e433dd-ce81-43a7-9d6c-27b94c067d69"/*BoolToFloat*/,
       "Position": {
-        "X": 295.86642,
-        "Y": 1038.8162
+        "X": 574.45807,
+        "Y": 1295.3137
       }
     },
     {
       "ChildId": "335c2a99-4955-4e1a-8de0-d4cdab570928"/*VertexShader*/,
       "Position": {
-        "X": 517.91925,
-        "Y": 660.0012
+        "X": 775.7092,
+        "Y": 926.79553
+      }
+    },
+    {
+      "ChildId": "456c9d13-1565-4aaf-8739-6f40d88e7b90"/*TextureToCubeMap*/,
+      "Position": {
+        "X": 418.41245,
+        "Y": 889.7184
       }
     },
     {
       "ChildId": "5254b03f-0846-458e-add4-340c1afb6552"/*PickTexture*/,
       "Position": {
-        "X": 923.77185,
-        "Y": 500.50842
+        "X": 1089.8207,
+        "Y": 585.0
       }
     },
     {
       "ChildId": "57d70a8c-f7e8-4529-b4b4-51a8f06bf6db"/*Multiply*/,
       "Position": {
-        "X": 465.529,
-        "Y": 1373.6943
+        "X": 714.45807,
+        "Y": 1260.3137
+      }
+    },
+    {
+      "ChildId": "5f0299fd-0b37-449a-a0aa-219ae385cfa1"/*PickTexture*/,
+      "Position": {
+        "X": 558.4124,
+        "Y": 889.7184
       }
     },
     {
       "ChildId": "66262d33-299d-4752-beb5-845123b5593e"/*BoolToInt*/,
       "Position": {
-        "X": 742.5415,
-        "Y": 540.6771
+        "X": 949.82074,
+        "Y": 655.0
       }
     },
     {
       "ChildId": "7eb179ca-b424-4a82-9ed6-74999a732dda"/*PixelShader*/,
       "Position": {
-        "X": 517.91925,
-        "Y": 746.0012
+        "X": 775.7092,
+        "Y": 996.79553
+      }
+    },
+    {
+      "ChildId": "9457bffd-906c-406e-824f-87665c3894d2"/*BoolToInt*/,
+      "Position": {
+        "X": 418.4124,
+        "Y": 959.7184
       }
     },
     {
       "ChildId": "9ff1ba3e-587e-4929-82b6-4d40aad07c42"/*SphereMesh*/,
       "Position": {
-        "X": 756.5238,
-        "Y": 1033.8887
+        "X": 1516.9678,
+        "Y": 549.1859
       }
     },
     {
       "ChildId": "aa7acd2f-79ce-4e8b-b7d1-fc32958a5834"/*LoadImage*/,
       "Position": {
-        "X": 742.5415,
-        "Y": 484.67712
-      }
-    },
-    {
-      "ChildId": "b0b223f9-7dda-4108-aaaf-8c2c6c511365"/*CompareInt*/,
-      "Position": {
-        "X": 242.2692,
-        "Y": 934.3681
+        "X": 1089.8207,
+        "Y": 550.0
       }
     },
     {
       "ChildId": "b6fe3bfd-ac8a-4c2f-a893-e10110268c18"/*Execute*/,
       "Position": {
-        "X": 1237.415,
-        "Y": 943.25555
+        "X": 1516.9678,
+        "Y": 724.1858
       }
     },
     {
       "ChildId": "c3cd2794-e1d9-4fc7-a24e-5b32285d990d"/*SrvFromTexture2d*/,
       "Position": {
-        "X": 517.91925,
-        "Y": 789.0012
+        "X": 775.7092,
+        "Y": 1031.7955
       }
     },
     {
@@ -192,50 +206,43 @@
         "Y": 166.0
       },
       "Position": {
-        "X": 712.7189,
-        "Y": 674.8084
+        "X": 915.7092,
+        "Y": 891.79553
       }
     },
     {
       "ChildId": "c939be06-8698-493f-802d-646663b52d3a"/*GeometryShader*/,
       "Position": {
-        "X": 517.91925,
-        "Y": 703.0012
+        "X": 775.7092,
+        "Y": 961.79553
       }
     },
     {
       "ChildId": "ce742e93-72f1-4be4-ac1a-37e6a5a98c4e"/*GetTextureSize*/,
       "Position": {
-        "X": 605.45374,
-        "Y": 535.2658
+        "X": 219.3588,
+        "Y": 783.2045
       }
     },
     {
       "ChildId": "d21fdf03-5b23-4752-bf5e-a01c4b525f55"/*Multiply*/,
       "Position": {
-        "X": 606.5238,
-        "Y": 1033.8887
+        "X": 1516.9678,
+        "Y": 514.1858
       }
     },
     {
       "ChildId": "db7944aa-ade6-450e-af4d-d4af0fd039fc"/*DrawMeshUnlit*/,
       "Position": {
-        "X": 1087.415,
-        "Y": 943.25555
+        "X": 1516.9678,
+        "Y": 584.1858
       }
     },
     {
       "ChildId": "f928533d-0340-4d75-8396-3dd391eeb005"/*Execute*/,
       "Position": {
-        "X": 1387.415,
-        "Y": 614.7438
-      }
-    },
-    {
-      "ChildId": "fe341d21-f672-4148-a92e-8a01945d25d8"/*All*/,
-      "Position": {
-        "X": 381.04324,
-        "Y": 883.05334
+        "X": 1781.9124,
+        "Y": 768.9589
       }
     }
   ],
@@ -243,8 +250,82 @@
     {
       "OutputId": "1f8cbdfd-ffcd-4604-b4b4-5f1184daf138"/*Output*/,
       "Position": {
-        "X": 1716.7408,
-        "Y": 614.7438
+        "X": 1781.9124,
+        "Y": 873.9589
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "30aa609b-5ba7-4528-a09f-3cefb103dd0d",
+      "Label": "Draw Background Sphere",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1330.0,
+        "Y": 420.0
+      },
+      "Size": {
+        "X": 350.0,
+        "Y": 420.0
+      }
+    },
+    {
+      "Id": "49c02188-8b54-4ed7-a5f6-067ae0f121f0",
+      "Label": "Fallback to default",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 889.82074,
+        "Y": 490.0
+      },
+      "Size": {
+        "X": 369.99994,
+        "Y": 250.0
+      }
+    },
+    {
+      "Id": "84075a2f-1303-42ae-b066-789a44dafc95",
+      "Label": "Convert to CubeMap if necessary",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 159.3588,
+        "Y": 723.2045
+      },
+      "Size": {
+        "X": 569.0536,
+        "Y": 321.51385
+      }
+    },
+    {
+      "Id": "f7160267-14dc-4a30-92cf-4eb74eb9edfe",
+      "Label": "Use for Subgraph",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1330.0,
+        "Y": 875.0
+      },
+      "Size": {
+        "X": 350.0,
+        "Y": 140.0
       }
     }
   ]

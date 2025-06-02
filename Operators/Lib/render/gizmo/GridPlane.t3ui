@@ -1,6 +1,6 @@
 {
   "Id": "935e6597-3d9f-4a79-b4a6-600e8f28861e"/*GridPlane*/,
-  "Description": "A helper gizmo that can uses a fragment shader to draw smooth grid lines.\n\nThis is what is visible in the viewport when \"show gizmo and floor grid\" is activated in an output window.\n\nAlso known as: Floor Grid, grid, coordinate system, graticule, \n\nIf you want to apply Fog consider using [DrawLineGrid] which uses line geometry.",
+  "Description": "A helper gizmo that can use a fragment shader to draw smooth grid lines.\n\nThis is what is visible in the viewport when \"show gizmo and floor grid\" is activated in an output window.\n\nAlso known as: Floor Grid, grid, coordinate system, graticule, \n\nIf you want to apply Fog consider using [DrawLineGrid] which uses line geometry.",
   "SymbolTags": "8",
   "InputUis": [
     {

@@ -1,6 +1,6 @@
 {
   "Id": "3dae14a8-3d0b-432f-b951-bdd7afd7e5f8"/*ApplyCamMatrices*/,
-  "Description": "An internal helper that applies camera transformation matrix to the context. \nThis is can be used to draw something distorted with camera clip space.",
+  "Description": "An internal helper that applies the camera transformation matrix to the context. \nThis can be used to draw something distorted with camera clip space.",
   "SymbolTags": "16",
   "InputUis": [
     {

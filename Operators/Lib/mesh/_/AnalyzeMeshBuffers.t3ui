@@ -1,6 +1,6 @@
 {
   "Id": "e43370a7-dafd-48b0-bac6-f30ea1bcf4cb"/*AnalyzeMeshBuffers*/,
-  "Description": "An internal helper that exposes the count and size of mesh buffers. It's used by CombineMeshBuffers to iterate over the to be combined meshes.",
+  "Description": "An internal helper that exposes the count and size of mesh buffers. It's used by CombineMeshBuffers to iterate over the meshes to be combined.",
   "SymbolTags": "16",
   "InputUis": [
     {

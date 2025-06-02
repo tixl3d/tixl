@@ -145,7 +145,7 @@
     },
     {
       "Id": "2b4e0d94-84f9-48d0-93c3-68c178f8ac14",
-      "Title": "Convert input parameters to into a buffer \nfor the shader.",
+      "Title": "Convert input parameters into a buffer \nfor the shader.",
       "Color": {
         "X": 0.6,
         "Y": 0.6,

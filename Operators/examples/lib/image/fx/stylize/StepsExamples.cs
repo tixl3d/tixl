@@ -1,4 +1,4 @@
-namespace Examples.lib.image.fx.stylize;
+namespace Examples.Lib.image.fx.stylize;
 
 [Guid("47ee078b-e24f-4493-a068-864938e2c90b")]
  internal sealed class StepsExamples : Instance<StepsExamples>

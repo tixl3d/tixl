@@ -10,7 +10,7 @@
         "Y": 270.0
       },
       "GroupTitle": "Options",
-      "Description": "If enabled, packages will only be send if any of the parameters or the address changes."
+      "Description": "If enabled, packages will only be sent if any of the parameters or the address changes."
     },
     {
       "InputId": "3cca3654-2428-4526-8ed6-d1fa088c0bf9"/*SendTrigger*/,
@@ -18,7 +18,7 @@
         "X": -200.0,
         "Y": 225.0
       },
-      "Description": "Enables sending messages. If you want a continues value stream, consider disabling the OnlySendChanges options.\n\nTip: Reduce the send rate, you can connect an [AnimValue].WasTrigger."
+      "Description": "Enables sending messages. If you want a continuous value stream, consider disabling the OnlySendChanges option.\n\nTip: Reduce the send rate, you can connect an [AnimValue].WasTrigger."
     },
     {
       "InputId": "6c0e07ba-7ea6-4dab-af0b-61cf9cb74ad7"/*Port*/,
@@ -38,7 +38,7 @@
         "Y": 180.0
       },
       "GroupTitle": "Content",
-      "Description": "One or more values to send. You can connect multiple float values to send.\n\nThis paraemter is ignored (not send) if default. Click on the paraemter name to reset it."
+      "Description": "One or more values to send. You can connect multiple float values to send.\n\nThis parameter is ignored (not sent) if default. Click on the parameter name to reset it."
     },
     {
       "InputId": "9016e418-7761-4916-aafb-c95599f77f38"/*Address*/,
@@ -65,7 +65,7 @@
         "X": -200.0,
         "Y": 225.0
       },
-      "Description": "One or more strings to send. You can connect multiple strings to send.\nThe strings will always be sent after the float values.\n\nThis paraemter is ignored (not send) if default. Click on the paraemter name to reset it.",
+      "Description": "One or more strings to send. You can connect multiple strings to send.\nThe strings will always be sent after the float values.\n\nThis parameter is ignored (not sent) if default. Click on the parameter name to reset it.",
       "Usage": "Default"
     },
     {

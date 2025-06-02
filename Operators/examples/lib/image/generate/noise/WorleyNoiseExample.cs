@@ -1,4 +1,4 @@
-namespace Examples.lib.image.generate.noise;
+namespace Examples.Lib.image.generate.noise;
 
 [Guid("e3c3942b-451e-4e71-b6d8-ca5a6acd7ce1")]
  internal sealed class WorleyNoiseExample : Instance<WorleyNoiseExample>

@@ -1,6 +1,6 @@
 {
   "Id": "c5f1292a-e692-422b-9261-b5ae3451cd7c"/*StringBuilderToString*/,
-  "Description": "Converts the 'Builder' Output of a [StringBuilder] or [BuildRandomString] to a string",
+  "Description": "Converts the 'Builder' output of a [StringBuilder] or [BuildRandomString] to a string",
   "SymbolTags": "8",
   "InputUis": [
     {

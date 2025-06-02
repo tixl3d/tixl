@@ -45,7 +45,7 @@
     },
     {
       "ChildId": "195fc78a-57a1-4e9e-b9ce-515d69f6d67d"/*DrawAsSplitView*/,
-      "Comment": "This is a fancy operator isn't it? If you are curious, you can double click it to look inside and learn how this is made.",
+      "Comment": "This is a fancy operator, isn't it? If you are curious, you can double-click it to look inside and learn how this is made.",
       "Position": {
         "X": -921.0188,
         "Y": -1227.0078
@@ -53,7 +53,7 @@
     },
     {
       "ChildId": "24bb70f4-6ce4-4e1b-8de6-f1f93bd73e8f"/*RenderTarget*/,
-      "Comment": "Notices how we increased the MultiSampling to 8 samples to reduce some of aliasing on the finer details of the gun.\n\nThese samples are ONLY computed at the edges of the geometry, not of the surfaces.",
+      "Comment": "Notice how we increased the MultiSampling to 8 samples to reduce some of the aliasing on the finer details of the gun.\n\nThese samples are ONLY computed at the edges of the geometry, not of the surfaces.",
       "Position": {
         "X": -672.9573,
         "Y": 306.2461
@@ -113,7 +113,7 @@
     },
     {
       "ChildId": "3c854ec7-5b82-41f5-a3be-5e868217a7d6"/*DrawMeshAtPoints*/,
-      "Comment": "...but you can also use a list of Points to draw instances.",
+      "Comment": "...but you can also use a list of points to draw instances.",
       "Position": {
         "X": -1128.3275,
         "Y": -38.503754
@@ -136,7 +136,7 @@
     },
     {
       "ChildId": "4af260fa-2660-48af-824f-fec5b990582f"/*RenderTarget*/,
-      "Comment": "Notices how we increased the MultiSampling to 8 samples to reduce some of aliasing on the finer details of the gun.\n\nThese samples are ONLY computed at the edges of the geometry, not of the surfaces.",
+      "Comment": "Notice how we increased the MultiSampling to 8 samples to reduce some of the aliasing on the finer details of the gun.\n\nThese samples are ONLY computed at the edges of the geometry, not of the surfaces.",
       "Position": {
         "X": -1878.8679,
         "Y": 97.16577
@@ -179,7 +179,7 @@
     },
     {
       "ChildId": "53c914fb-e460-4144-9737-884190a58651"/*SetEnvironment*/,
-      "Comment": "SetEnvironment without a connected connected texture allows us to enable the default background and adjust is brightness.\n\nAlso check the documentation fo this operator.",
+      "Comment": "SetEnvironment without a connected texture allows us to enable the default background and adjust its brightness.\n\nAlso check the documentation for this operator.",
       "Position": {
         "X": -1878.8679,
         "Y": -77.83423
@@ -209,7 +209,7 @@
     },
     {
       "ChildId": "5f06349f-20f9-4c08-9080-73cab767ec56"/*TorusMesh*/,
-      "Comment": "Some \"content\" like buffers or textures...\n\nYou can discover numerous additional Mesh generators in the symbol browser within the lib.3d.mesh.generate namespace.",
+      "Comment": "Some \"content\" like buffers or textures...\n\nYou can discover numerous additional mesh generators in the symbol browser within the lib.3d.mesh.generate namespace.",
       "Position": {
         "X": -2023.8115,
         "Y": -1222.5277
@@ -267,7 +267,7 @@
     },
     {
       "ChildId": "7b3387ab-9153-4d44-99c6-e62c9dff7131"/*SetMaterial*/,
-      "Comment": "We're using CombineMaterialMaps to create the combined texture.\nThat's the reason we change the roughness-offset to 0.",
+      "Comment": "We're using CombineMaterialMaps to create the combined texture.\nThat's the reason we change the roughness offset to 0.",
       "Position": {
         "X": -672.9573,
         "Y": -78.753876
@@ -321,7 +321,7 @@
     },
     {
       "ChildId": "9f1f826c-9b24-40cf-ade1-ed4dfc692dbd"/*SetEnvironment*/,
-      "Comment": "SetEnvironment without a connected connected texture allows us to enable the default background and adjust is brightness.\n\nAlso check the documentation fo this operator.",
+      "Comment": "SetEnvironment without a connected texture allows us to enable the default background and adjust its brightness.\n\nAlso check the documentation for this operator.",
       "Position": {
         "X": -672.9573,
         "Y": 131.24612
@@ -550,7 +550,7 @@
     },
     {
       "Id": "172298dc-5619-4b11-9fd1-759b82cd840a",
-      "Title": "Generate and apply environment texture and\nshow it in the background. The Camera \nhas to follow later so the background \nmatches the camera movement..",
+      "Title": "Generate and apply environment texture and\nshow it in the background. The camera \nhas to follow later so the background \nmatches the camera movement.",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -625,7 +625,7 @@
     },
     {
       "Id": "3a8bdb04-1d08-4008-b185-062af61f0302",
-      "Title": "An example how to load a textured PBR object as gltf",
+      "Title": "An example of how to load a textured PBR object as gltf",
       "Label": "GLTF Scenes",
       "Color": {
         "X": 0.6,
@@ -720,7 +720,7 @@
     },
     {
       "Id": "ad01e43b-9c5d-4b80-944e-34349b66ea9c",
-      "Title": "Here is an example of loading and setting up PBR Assets with complex textures.\nThe awesome \"Cerberus\" gun is made by Andrew Maximov (see link in the description).\n",
+      "Title": "Here is an example of loading and setting up PBR assets with complex textures.\nThe awesome \"Cerberus\" gun is made by Andrew Maximov (see link in the description).\n",
       "Label": "PBR-Materials II",
       "Color": {
         "X": 0.6,
@@ -758,7 +758,7 @@
     },
     {
       "Id": "f54d92fe-a9ba-4a15-847f-235451f65431",
-      "Title": "- Select and pin the final operator on the right to the output window to see the results.\n- Enable Idle-Motion on the timeline toolbar to see some animations.\n- Hover over the comment-icons to learn more.",
+      "Title": "- Select and pin the final operator on the right to the output window to see the results.\n- Enable Idle-Motion on the timeline toolbar to see some animations.\n- Hover over the comment icons to learn more.",
       "Label": "Some Tips.",
       "Color": {
         "X": 0.6205674,

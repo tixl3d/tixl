@@ -1,6 +1,6 @@
 {
   "Id": "1a241222-200b-417d-a8c7-131e3b48cc36"/*SpherePoints*/,
-  "Description": "Generates a sphere with evenly distributed points on its surface.\n\nNeeds a [DrawPoints], [DrawLines] or [DrawMeshAtPoints] or similar in order to become visible.\n\nSimilar: [GridPoints], [RadialPoints], [PointsOnMesh]",
+  "Description": "Generates a sphere with evenly distributed points on its surface.\n\nNeeds a [DrawPoints], [DrawLines], or [DrawMeshAtPoints] or similar in order to become visible.\n\nSimilar: [GridPoints], [RadialPoints], [PointsOnMesh]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -33,7 +33,7 @@
         "X": -173.14885,
         "Y": 936.73737
       },
-      "Description": "Shifts the points on the sphere with varying values\n\nProTip: If the points should leave the surface of the sphere [RandomizePoints] can be of help",
+      "Description": "Shifts the points on the sphere with varying values\n\nProTip: If the points should leave the surface of the sphere, [RandomizePoints] can be of help",
       "AddPadding": "True"
     },
     {

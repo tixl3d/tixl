@@ -1,6 +1,6 @@
 {
   "Id": "de8bc97a-8ef0-4d4a-9ffa-88046a2daf40"/*TimeConstBuffer*/,
-  "Description": "A obsolete helper that creates a constant buffer with different times.\n\nPlease use [Time] -> [FloatsToBuffer]  instead.",
+  "Description": "An obsolete helper that creates a constant buffer with different times.\n\nPlease use [Time] -> [FloatsToBuffer] instead.",
   "SymbolTags": "24",
   "InputUis": [],
   "SymbolChildUis": [],

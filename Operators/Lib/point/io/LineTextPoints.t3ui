@@ -1,6 +1,6 @@
 {
   "Id": "3d862455-6a7b-4bf6-a159-e4f7cdba6062"/*LineTextPoints*/,
-  "Description": "Loads a single line SVG-font generates a point buffer for a text. This can then be rendered as lines, particle effects or mesh.\n\n",
+  "Description": "Loads a single line SVG font and generates a point buffer for a text. This can then be rendered as lines, particle effects, or mesh.\n\n",
   "SymbolTags": "8",
   "InputUis": [
     {

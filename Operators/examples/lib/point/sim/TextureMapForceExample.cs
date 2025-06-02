@@ -1,4 +1,4 @@
-namespace Examples.lib.point.sim;
+namespace Examples.Lib.point.sim;
 
 [Guid("af0a4265-44aa-49d9-b674-5b7c1937c99a")]
  internal sealed class TextureMapForceExample : Instance<TextureMapForceExample>

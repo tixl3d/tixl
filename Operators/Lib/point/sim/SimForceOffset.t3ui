@@ -1,6 +1,6 @@
 {
   "Id": "9c378944-9a57-4ae4-a88e-36c07244bcf7"/*SimForceOffset*/,
-  "Description": "Creates a gizmo with a spherical force that can be used to affect points\n\nNeeds a [DrawPoints], [DrawLines] or [DrawMeshAtPoints] or similar in order to become visible.\n\nNeeds Points as a base for example: [RadialPoints], [SpherePoints], [PointsOnMesh]",
+  "Description": "Creates a gizmo with a spherical force that can be used to affect points\n\nNeeds a [DrawPoints], [DrawLines], or [DrawMeshAtPoints] or similar in order to become visible.\n\nNeeds Points as a base, for example: [RadialPoints], [SpherePoints], [PointsOnMesh]",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -34,7 +34,7 @@
         "X": -167.80368,
         "Y": 691.5903
       },
-      "Description": "Defines the the size of the falloff / smooth are"
+      "Description": "Defines the size of the falloff / smooth area"
     },
     {
       "InputId": "b30b9a6e-1407-48e8-9eaa-955250f289e7"/*RadialForce*/,

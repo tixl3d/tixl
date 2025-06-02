@@ -1,6 +1,6 @@
 {
   "Id": "025285fd-c00f-44c7-8698-363ccc763fa1"/*GamePadExample*/,
-  "Description": "Here you can test your gamepads / controllers / joystick. It has been tested with Xbox One and Xbox 360 controllers, Dualsense PS5...",
+  "Description": "Here you can test your gamepads / controllers / joystick. It has been tested with Xbox One and Xbox 360 controllers, DualSense PS5...",
   "InputUis": [],
   "SymbolChildUis": [
     {

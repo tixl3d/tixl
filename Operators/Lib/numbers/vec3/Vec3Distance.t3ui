@@ -1,6 +1,6 @@
 {
   "Id": "4af1080c-3133-4070-a440-4cf2f4cc10a1"/*Vec3Distance*/,
-  "Description": "Computes the distance between two vectors. (I.e. substract two positions)",
+  "Description": "Computes the distance between two vectors. (I.e., subtract two positions)",
   "InputUis": [
     {
       "InputId": "c4094f11-d93d-4497-b1ce-1faa8bc1d1b0"/*Input2*/,

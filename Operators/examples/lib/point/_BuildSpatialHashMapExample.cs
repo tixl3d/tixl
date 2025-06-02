@@ -1,4 +1,4 @@
-namespace Examples.lib.point;
+namespace Examples.Lib.point;
 
 [Guid("69776b58-e05d-47c8-b19f-2f44f7b9c915")]
  internal sealed class _BuildSpatialHashMapExample : Instance<_BuildSpatialHashMapExample>

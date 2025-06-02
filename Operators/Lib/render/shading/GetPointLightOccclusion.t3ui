@@ -1,6 +1,6 @@
 {
   "Id": "574d636f-64e6-4f07-ac17-49754d2c3599"/*GetPointLightOccclusion*/,
-  "Description": "Returns a float list with the visibility of the current point lights.\n\nThis means: This operator can recognize if a pointlight is being occluded by another object. It can be used to control the intensity of effects like [LenseFlare], glow, godrays etc.\n\nUse the Operator called [UseRenderTarget] to get a reference to the current rendertarget and connect its Depth-output.\nThe output value can then be connected to [LenseFlareSetup] Brightness parameter.\n\n[UseRenderTarget] -> [GetPointLightOcclusion] -> [LenseFlareSetup]\n\n",
+  "Description": "Returns a float list with the visibility of the current point lights.\n\nThis means: This operator can recognize if a point light is being occluded by another object. It can be used to control the intensity of effects like [LenseFlare], glow, godrays etc.\n\nUse the operator called [UseRenderTarget] to get a reference to the current render target and connect its Depth output.\nThe output value can then be connected to [LenseFlareSetup] Brightness parameter.\n\n[UseRenderTarget] -> [GetPointLightOcclusion] -> [LenseFlareSetup]\n\n",
   "SymbolTags": "8",
   "InputUis": [
     {

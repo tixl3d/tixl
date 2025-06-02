@@ -1,6 +1,6 @@
 {
   "Id": "3631c727-36a0-4f26-ae76-ee9c100efc33"/*Loop*/,
-  "Description": "Executes the sub graph multiple times. This can be very useful for iterating a drawing functions.\n\nYou can use [GetFloatVar] and [GetIntVar] to access the iterator variables. \n\nPlease note that this operation creates draw calls for each interaction and thus is not meant for loop counts exceeding 1000 or more.\n\nPlease check the example.\n\n\n",
+  "Description": "Executes the sub graph multiple times. This can be very useful for iterating a drawing function.\n\nYou can use [GetFloatVar] and [GetIntVar] to access the iterator variables. \n\nPlease note that this operation creates draw calls for each iteration and thus is not meant for loop counts exceeding 1000 or more.\n\nPlease check the example.\n\n\n",
   "SymbolTags": "1",
   "InputUis": [
     {

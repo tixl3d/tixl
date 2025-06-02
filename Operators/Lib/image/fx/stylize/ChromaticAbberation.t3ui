@@ -1,6 +1,6 @@
 {
   "Id": "8a203866-148d-4785-ae0e-61328b7646bb"/*ChromaticAbberation*/,
-  "Description": "Simulates an imaging error of optical camera lenses that manifests itself as blurring or discoloration at the outer edges.\n\nAlso see [ChromaticDistortion]\n\nUseful Ops for a PostFX Pipeline: [MotionBlur] [DepthOfField] [ChromaticAbberation] [Glow] [Grain] [Blur]",
+  "Description": "Simulates an imaging error of optical camera lenses that manifests itself as blurring or discoloration at the outer edges.\n\nAlso see [ChromaticDistortion]\n\nUseful Ops for a PostFX Pipeline: [MotionBlur] [DepthOfField] [ChromaticAberration] [Glow] [Grain] [Blur]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -44,7 +44,7 @@
         "X": 120.10747,
         "Y": 190.95874
       },
-      "Description": "Simulates lense distortion.\nNegative values stretch the edges of the image outwards. Positive values pull them inwards.",
+      "Description": "Simulates lens distortion.\nNegative values stretch the edges of the image outwards. Positive values pull them inwards.",
       "Min": -2.0,
       "Max": 1.0,
       "Clamp": true

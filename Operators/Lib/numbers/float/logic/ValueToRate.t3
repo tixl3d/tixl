@@ -3,7 +3,7 @@
   "Inputs": [
     {
       "Id": "1ad90698-0d84-488b-b969-4d727e173aff"/*Rates*/,
-      "DefaultValue": "0\n0.125\n0.25\n0.5\n1\n1\n4\n8\n16\n32"
+      "DefaultValue": "0\n0.0625\n0.125\n0.25\n0.5\n1\n1\n4\n8\n16\n32"
     },
     {
       "Id": "4f2dad75-0f45-498a-9a1a-7571dc9f0b09"/*Value*/,

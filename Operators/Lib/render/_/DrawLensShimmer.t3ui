@@ -1,6 +1,6 @@
 {
   "Id": "c87b140b-1109-4eff-bf77-98bff3fc3e17"/*DrawLensShimmer*/,
-  "Description": "Draw a lense flare shimmer effect at the given points.\nIt requires a single [DefineLenseFlare] sprite with a large size indeally in the center of the light.\n\nThe effect has two different styles sharing the same parameter but resulting in completely different looks. This is a 2d fragment shader rendered on the sprite quad. This means that higher complexity does not affect the performance.",
+  "Description": "Draw a lens flare shimmer effect at the given points.\nIt requires a single [DefineLenseFlare] sprite with a large size ideally in the center of the light.\n\nThe effect has two different styles sharing the same parameter but resulting in completely different looks. This is a 2d fragment shader rendered on the sprite quad. This means that higher complexity does not affect the performance.",
   "SymbolTags": "24",
   "InputUis": [
     {
@@ -9,7 +9,7 @@
         "X": -603.1012,
         "Y": 169.14426
       },
-      "Description": "Define the draw style:\n\nSparkle: a band of lines pointing towards the light.\nShimmer: a batch fo lights rays radiating from the center."
+      "Description": "Define the draw style:\n\nSparkle: a band of lines pointing towards the light.\nShimmer: a batch of light rays radiating from the center."
     },
     {
       "InputId": "1191708c-9cdb-4331-8886-1742193f532e"/*AnimationSpeed*/,
@@ -45,7 +45,7 @@
         "X": -603.1012,
         "Y": 214.14426
       },
-      "Description": "How often the band is divided into segments. It has no affect on rendering performance but can increase aliasing.\n\nAlso check the MultiSampling parameter.",
+      "Description": "How often the band is divided into segments. It has no effect on rendering performance but can increase aliasing.\n\nAlso check the MultiSampling parameter.",
       "Min": 0.0,
       "Max": 1000.0
     },
@@ -96,7 +96,7 @@
         "Y": 1344.698
       },
       "GroupTitle": "Options",
-      "Description": "Computes the affect with 4x multisampling (using RGSS).\n\nThis adds significant performance overhead."
+      "Description": "Computes the effect with 4x multisampling (using RGSS).\n\nThis adds significant performance overhead."
     },
     {
       "InputId": "a2785b57-abcc-442e-90c7-cd120d3255ab"/*SegmentFill*/,
@@ -112,7 +112,7 @@
         "X": -605.4723,
         "Y": 760.01764
       },
-      "Description": "Shrinks the ray length towards to center at the edge of the circle completion. This can be useful to define \"sparkle hoops\".\n"
+      "Description": "Shrinks the ray length towards the center at the edge of the circle completion. This can be useful to define \"sparkle hoops\".\n"
     },
     {
       "InputId": "bab504e1-dce7-4264-b1c8-40ec14202305"/*CoreBrightness*/,

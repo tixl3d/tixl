@@ -1,6 +1,6 @@
 {
   "Id": "f2a0a8d9-e2dc-476b-ac97-de13101a6fdb"/*ZollnerPattern*/,
-  "Description": "Creates an image for a optical illusion.\n\nOriginally programmed for [WorksForEverybody]\n\nOther interesting patterns can be generated with [SinForm] [ZollnerPattern] [FraserGrid] [Raster] [CheckerBoard] [RyojiPattern2] [RyojiPattern1]",
+  "Description": "Creates an image for an optical illusion.\n\nOriginally programmed for [WorksForEverybody]\n\nOther interesting patterns can be generated with [SinForm] [ZollnerPattern] [FraserGrid] [Raster] [CheckerBoard] [RyojiPattern2] [RyojiPattern1]",
   "SymbolTags": "64",
   "InputUis": [
     {
@@ -146,7 +146,7 @@
         "X": -223.4553,
         "Y": 564.05206
       },
-      "Description": "Uniformly scales the Pattern",
+      "Description": "Uniformly scales the pattern",
       "Min": -10.0,
       "Max": 10.0,
       "Scale": 0.1

@@ -1,6 +1,6 @@
 {
   "Id": "43f15919-f6c3-4a10-9092-00973fc8e821"/*GlitchDisplace*/,
-  "Description": "Takes the incoming image and applies an image effect that glitches and displaces parts of the image to mimic lossy signals, broken videofiles, codec glitches etc.\n\nVaguely similar Op: [SortPixelGlitch]\n\n\nUseful Ops for a PostFX Pipeline: [MotionBlur] [DepthOfField] [ChromaticAbberation] [Glow] [Grain] [Blur]",
+  "Description": "Takes the incoming image and applies an image effect that glitches and displaces parts of the image to mimic lossy signals, broken video files, codec glitches etc.\n\nVaguely similar Op: [SortPixelGlitch]\n\n\nUseful Ops for a PostFX Pipeline: [MotionBlur] [DepthOfField] [ChromaticAbberation] [Glow] [Grain] [Blur]",
   "InputUis": [
     {
       "InputId": "1bd2e0bd-6902-44e3-93ce-da352973ca8d"/*Colorize*/,
@@ -56,7 +56,7 @@
         "Y": 5555.4746
       },
       "GroupTitle": "Bars",
-      "Description": "Scales the size of the glitch elements\nHigh value can make this effect take a lot of ressources",
+      "Description": "Scales the size of the glitch elements\nHigh value can make this effect take a lot of resources",
       "Min": 0.0,
       "Max": 5.0,
       "Clamp": true

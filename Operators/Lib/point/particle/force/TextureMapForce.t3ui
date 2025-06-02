@@ -42,7 +42,7 @@
         "X": -53.12256,
         "Y": 1163.3694
       },
-      "Description": "Applies force to push particles towards distanced from the camera that is defined by CenterDepth.",
+      "Description": "Applies force to push particles towards distance from the camera that is defined by CenterDepth.",
       "Min": 0.0,
       "Max": 0.1
     },

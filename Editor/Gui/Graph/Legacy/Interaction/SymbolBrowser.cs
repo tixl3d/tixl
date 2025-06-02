@@ -306,7 +306,7 @@ internal sealed class SymbolBrowser
                     var symbolNamespace = symbolUi.Symbol.Namespace;
                     var isRelevantNamespace = symbolNamespace.StartsWith("Lib.")
                                               || symbolNamespace.StartsWith("Types.")
-                                              || symbolNamespace.StartsWith("Examples.lib.")
+                                              || symbolNamespace.StartsWith("Examples.Lib.")
                                               || symbolNamespace.StartsWith(projectNamespace)
                                               || symbolNamespace.StartsWith(compositionNameSpace);
 

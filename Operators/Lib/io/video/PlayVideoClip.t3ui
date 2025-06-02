@@ -1,6 +1,6 @@
 {
   "Id": "04c1a6dc-3042-48a8-81d2-0a5a162016dc"/*PlayVideoClip*/,
-  "Description": "Implementation to load and play Videofiles with similar options like a [TimeClip]\n\nAlso see [PlayVideo] and [PlayVideoExample] for an operator with more options",
+  "Description": "Implementation to load and play video files with similar options like a [TimeClip]\n\nAlso see [PlayVideo] and [PlayVideoExample] for an operator with more options",
   "SymbolTags": "1024",
   "InputUis": [
     {
@@ -25,7 +25,7 @@
         "X": -200.0,
         "Y": 45.0
       },
-      "Description": "Path to the videofile",
+      "Description": "Path to the video file",
       "AddPadding": "True",
       "Usage": "FilePath"
     },

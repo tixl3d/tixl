@@ -19,7 +19,7 @@
         "Y": 45.0
       },
       "GroupTitle": "Delay",
-      "Description": "defines by how many frames the change of the bool is delayed"
+      "Description": "Defines by how many frames the change of the bool is delayed"
     }
   ],
   "SymbolChildUis": [],

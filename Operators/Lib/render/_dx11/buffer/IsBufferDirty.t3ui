@@ -1,6 +1,6 @@
 {
   "Id": "02b84d90-aa4e-4cf9-94d5-feb5d7ca731e"/*IsBufferDirty*/,
-  "Description": "A helper that can be used to optimize update behaviour of compute shaders. ",
+  "Description": "A helper that can be used to optimize update behavior of compute shaders.",
   "SymbolTags": "24",
   "InputUis": [
     {

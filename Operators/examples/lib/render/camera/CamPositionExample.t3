@@ -100,6 +100,11 @@
           }
         },
         {
+          "Id": "76124db6-4b89-4d7c-bd25-2ebf95b1c141"/*CloseCircleLine*/,
+          "Type": "System.Boolean",
+          "Value": true
+        },
+        {
           "Id": "acce4779-56d6-47c4-9c52-874fca91a3a1"/*Radius*/,
           "Type": "System.Single",
           "Value": 3.4
@@ -460,6 +465,11 @@
           }
         },
         {
+          "Id": "76124db6-4b89-4d7c-bd25-2ebf95b1c141"/*CloseCircleLine*/,
+          "Type": "System.Boolean",
+          "Value": true
+        },
+        {
           "Id": "acce4779-56d6-47c4-9c52-874fca91a3a1"/*Radius*/,
           "Type": "System.Single",
           "Value": 7.0
@@ -630,7 +640,7 @@
         {
           "Id": "76124db6-4b89-4d7c-bd25-2ebf95b1c141"/*CloseCircleLine*/,
           "Type": "System.Boolean",
-          "Value": false
+          "Value": true
         },
         {
           "Id": "acce4779-56d6-47c4-9c52-874fca91a3a1"/*Radius*/,

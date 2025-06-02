@@ -1,6 +1,6 @@
 {
   "Id": "a9e77500-ccb5-45b9-9f17-0d9bf9b58fb5"/*SoundTrackLevels*/,
-  "Description": "This operator has been deprecated.\n\nIt uses a save JSON export of soundtrack levels to scan for beats.\n\nConsider using [AudioReaction]",
+  "Description": "This operator has been deprecated.\n\nIt uses a saved JSON export of soundtrack levels to scan for beats.\n\nConsider using [AudioReaction]",
   "InputUis": [
     {
       "InputId": "4ef9500a-daa4-4979-a03c-306e8e56c2f1"/*Threshold*/,

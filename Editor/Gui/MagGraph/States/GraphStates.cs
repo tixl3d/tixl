@@ -34,6 +34,12 @@ internal static class GraphStates
                           if (context.ItemWithActiveCustomUi != null)
                               return;
 
+                          if (context.ProjectView.GraphImageBackground.HasInteractionFocus)
+                          {
+                              context.StateMachine.SetState(BackgroundContentIsInteractive, context);
+                              return;
+                          }
+                          
                           // Check keyboard commands if focused...
                           if (context.Canvas.IsFocused
                               && context.Canvas.IsHovered
@@ -148,6 +154,23 @@ internal static class GraphStates
               Exit:
               _ => { }
              );
+    
+    /** A special mode to prevent interaction with graph elements */
+    internal static State BackgroundContentIsInteractive
+        = new(
+              Enter: _ => { },
+              Update: context =>
+                      {
+                          // Switch back
+                          if (!context.ProjectView.GraphImageBackground.HasInteractionFocus)
+                          {
+                              context.StateMachine.SetState(Default, context);
+                              return;
+                          }
+                      },
+              Exit: _ => { }
+             );
+    
 
     /// <summary>
     /// Active while long tapping on background for insertion

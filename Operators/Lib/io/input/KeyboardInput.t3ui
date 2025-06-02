@@ -1,6 +1,6 @@
 {
   "Id": "2b00bb7a-92cc-41e5-a5f6-bc3e8b16c5eb"/*KeyboardInput*/,
-  "Description": "Allows the real-time manipulation of any value using a key on the keyboard.\n\nUseful combinations: [BooltoFloat] [BoolToInt] [FlipFlop] [HasBooleanChanged] [TriggerAnim]\n\nAlso see: [MouseInput] [MidiInput]",
+  "Description": "Allows the real-time manipulation of any value using a key on the keyboard.\n\nUseful combinations: [BoolToFloat] [BoolToInt] [FlipFlop] [HasBooleanChanged] [TriggerAnim]\n\nAlso see: [MouseInput] [MidiInput]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -9,7 +9,7 @@
         "X": -200.0,
         "Y": 45.0
       },
-      "Description": "Defines when / how the boolean ist output as 'True'",
+      "Description": "Defines when/how the boolean is output as 'True'",
       "AddPadding": "True"
     },
     {
@@ -18,7 +18,7 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "Description": "Defines which Key of the Keyboard is evaluated"
+      "Description": "Defines which key of the keyboard is evaluated"
     }
   ],
   "SymbolChildUis": [],

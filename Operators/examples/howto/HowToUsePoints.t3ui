@@ -91,7 +91,7 @@
     },
     {
       "ChildId": "11de5802-3cd1-4b92-8ddc-bd99a6476198"/*AddNoise*/,
-      "Comment": "We add some perlin noice driven by the Time.\n\nIf you don't see the animation, please enable IdleMotion.",
+      "Comment": "We add some Perlin noise driven by the Time.\n\nIf you don't see the animation, please enable IdleMotion.",
       "Position": {
         "X": -2498.384,
         "Y": 1520.6158
@@ -272,7 +272,7 @@
     },
     {
       "ChildId": "51f3ae0c-f82f-44af-8bd6-11d7bd79f9ad"/*RadialPoints*/,
-      "Comment": "We generate 400 points...\n\n- in a radial layout\n- with 3 cycles\n- and a radius offset to form a sprial.\n\nWe also apply a gradient (1 ... 1.5) to the point's W attribute.\n\nNote how we disabled CloseCircle line.",
+      "Comment": "We generate 400 points...\n\n- in a radial layout\n- with 3 cycles\n- and a radius offset to form a spiral.\n\nWe also apply a gradient (1 ... 1.5) to the point's W attribute.\n\nNote how we disabled CloseCircle line.",
       "Position": {
         "X": -2498.384,
         "Y": 1380.6158
@@ -580,7 +580,7 @@
     },
     {
       "ChildId": "ccb65dc9-10ca-4a9f-9a22-809e3a4e9ba4"/*TransformPoints*/,
-      "Comment": "We slightly stretch to spiral to adjust it to our view's aspect ratio.",
+      "Comment": "We slightly stretch the spiral to adjust it to our view's aspect ratio.",
       "Position": {
         "X": -2498.384,
         "Y": 1415.6158
@@ -628,7 +628,7 @@
     },
     {
       "ChildId": "e57a5f2d-aa54-4df4-a367-fc53d6d1c97b"/*LinePoints*/,
-      "Comment": "A set of points twisted by 360 degree along the y-axis squeezed to a length of zero into a single point.",
+      "Comment": "A set of points twisted by 360 degrees along the y-axis squeezed to a length of zero into a single point.",
       "Position": {
         "X": -1715.5317,
         "Y": 2097.1514
@@ -818,7 +818,7 @@
     },
     {
       "Id": "3c2452bb-9e0b-4eaa-b8f6-0b76783689c6",
-      "Title": "Points can be drawn in many different styles:\n\n(Hover of the comment icons to learn more...)",
+      "Title": "Points can be drawn in many different styles:\n\n(Hover over the comment icons to learn more...)",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -1016,7 +1016,7 @@
     },
     {
       "Id": "e80e0d59-a953-4658-85f3-9cf519280745",
-      "Title": "Most operators will create NEW buffers with manipulated, combined or filtered points.\nThis allows you to create reproducible  and controllable effects.",
+      "Title": "Most operators will create NEW buffers with manipulated, combined or filtered points.\nThis allows you to create reproducible and controllable effects.",
       "Color": {
         "X": 0.6,
         "Y": 0.6,

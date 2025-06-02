@@ -1,4 +1,4 @@
-namespace Examples.lib.numbers.anim.time;
+namespace Examples.Lib.numbers.anim.time;
 
 [Guid("1cccb283-18f0-4ef2-817f-dd28d40ebb7a")]
  internal sealed class SetCommandTimeExample : Instance<SetCommandTimeExample>

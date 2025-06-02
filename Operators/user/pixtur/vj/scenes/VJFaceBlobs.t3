@@ -747,7 +747,7 @@
         {
           "Id": "ceeae47b-d792-471d-a825-49e22749b7b9"/*InputString*/,
           "Type": "System.String",
-          "Value": "Resources\\user\\pixtur\\VJ\\agingFacesMale2"
+          "Value": "Resources/images/sequences/agingFacesMale"
         }
       ],
       "Outputs": []
@@ -778,7 +778,7 @@
         {
           "Id": "ceeae47b-d792-471d-a825-49e22749b7b9"/*InputString*/,
           "Type": "System.String",
-          "Value": "Resources\\user\\pixtur\\VJ\\agingFacesFemale"
+          "Value": "Resources\\images\\sequences\\agingFacesMale"
         }
       ],
       "Outputs": []

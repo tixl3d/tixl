@@ -1,6 +1,6 @@
 {
   "Id": "0c30ce21-0c02-4676-a636-63d744bfa788"/*_ImageMosaicInitialize*/,
-  "Description": "Builds all images from an folder and sets up a texture atlas and a look up table.",
+  "Description": "Builds all images from a folder and sets up a texture atlas and a lookup table.",
   "InputUis": [
     {
       "InputId": "6d9eb435-595b-421f-9852-6e923a532aed"/*Folder*/,
@@ -358,7 +358,7 @@
     },
     {
       "Id": "5487ba2f-d344-4b5a-afa4-1e76ea5ded6d",
-      "Title": "Render 1x1px scale down versions into a 1000x1px texture.",
+      "Title": "Render 1x1px scale-down versions into a 1000x1px texture.",
       "Color": {
         "X": 0.6,
         "Y": 0.6,

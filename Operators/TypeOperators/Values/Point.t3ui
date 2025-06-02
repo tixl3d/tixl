@@ -43,7 +43,7 @@
         "Y": 315.0
       },
       "GroupTitle": "Additional Option",
-      "Description": "Enabling this option will append a seperator point and thus return a buffer with the length of two.\nThis can be useful for rendering lines and working with [RepeatAtPoints]."
+      "Description": "Enabling this option will append a separator point and thus return a buffer with the length of two.\nThis can be useful for rendering lines and working with [RepeatAtPoints]."
     },
     {
       "InputId": "55a3370f-1768-414f-b38d-4accc5e93914"/*RotationAxis*/,

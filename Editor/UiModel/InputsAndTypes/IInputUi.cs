@@ -35,6 +35,9 @@ public interface IInputUi : ISelectableCanvasObject
         
     /**Insert a vertical padding */
     bool AddPadding { get; set; }
+    
+    bool ExcludedFromPresets { get; set; }
+    
     bool IsAnimatable { get; }
 
     string Description { get; set; }

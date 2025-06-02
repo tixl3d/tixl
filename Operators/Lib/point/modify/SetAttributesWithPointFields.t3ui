@@ -1,6 +1,6 @@
 {
   "Id": "21b0a346-f214-449f-ae27-7bfbe5395d66"/*SetAttributesWithPointFields*/,
-  "Description": "Sets various attributes points from the distance of a 2nd (small) set of points.",
+  "Description": "Sets various attribute points from the distance of a 2nd (small) set of points.",
   "SymbolTags": "64",
   "InputUis": [
     {
@@ -114,7 +114,7 @@
         "X": -460.336,
         "Y": 455.21533
       },
-      "Description": "Controls the modification field. Not that count is clamped to 10."
+      "Description": "Controls the modification field. Note that count is clamped to 10."
     },
     {
       "InputId": "ea732975-c8c7-4210-b2ea-0e73298c54d1"/*AffectW*/,

@@ -69,6 +69,9 @@ internal static class TransformGizmoHandling
     {
         _drawList = drawList;
         _isDrawListValid = true;
+        
+        if (!ImGui.IsMouseDown(ImGuiMouseButton.Left))
+            _draggedGizmoPart = GizmoParts.None;
     }
 
     public static void RestoreDrawList()

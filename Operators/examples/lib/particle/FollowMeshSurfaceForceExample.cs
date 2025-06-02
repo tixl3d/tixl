@@ -1,4 +1,4 @@
-namespace Examples.lib.particle;
+namespace Examples.Lib.particle;
 
 [Guid("16235faf-61b7-474f-bdc7-f7abe3c538eb")]
  internal sealed class FollowMeshSurfaceForceExample : Instance<FollowMeshSurfaceForceExample>

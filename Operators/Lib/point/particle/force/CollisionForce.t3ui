@@ -1,6 +1,6 @@
 {
   "Id": "ed0bc47a-31ef-400b-b4e4-5552a859b309"/*CollisionForce*/,
-  "Description": "A simple similation of sphere collision between points. The radius of the points is the defined on emit by the [ParticleSystem]'s PointRadiusW factor.\n\nSome recommendation:\n1. Try to increase the radius (either by increasing the emit points W attribute or the radius factor) and adjust the [DrawPoints] radius accordingly.\n2. Try to increase [ParticleSystem] damping.\n",
+  "Description": "A simple simulation of sphere collision between points. The radius of the points is defined on emit by the [ParticleSystem]'s PointRadiusW factor.\n\nSome recommendations:\n1. Try to increase the radius (either by increasing the emit points W attribute or the radius factor) and adjust the [DrawPoints] radius accordingly.\n2. Try to increase [ParticleSystem] damping.\n",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -163,7 +163,7 @@
   "Annotations": [
     {
       "Id": "0a71289d-177f-4297-add3-5d5b7f281727",
-      "Title": "Sadly, the _BuildSpatialHashMap helper requires a point buffer, \nso we have to copy particles to point buffer :(\n\nFor optimization we could implement a Particle-version of the spatial hash map and also find some method of sharing this\nbetween Forces.",
+      "Title": "Sadly, the _BuildSpatialHashMap helper requires a point buffer, \nso we have to copy particles to point buffer :(\n\nFor optimization, we could implement a Particle-version of the spatial hash map and also find some method of sharing this\nbetween Forces.",
       "Color": {
         "X": 0.6,
         "Y": 0.6,

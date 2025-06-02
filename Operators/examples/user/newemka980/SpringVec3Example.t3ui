@@ -91,7 +91,7 @@
     },
     {
       "ChildId": "8d3cae5c-33e8-4173-abb7-b4dda31915b2"/*Group*/,
-      "Comment": "Group is like Parent and child hierarchy in other 3D softwares",
+      "Comment": "Group is like parent and child hierarchy in other 3D software",
       "Position": {
         "X": 1445.859,
         "Y": 357.15527
@@ -128,7 +128,7 @@
     },
     {
       "ChildId": "dc07b56f-6acb-43e5-afe5-dfc9bb34e77b"/*SpringVec2*/,
-      "Comment": "Just for the sake of showing [SpringVec2] ",
+      "Comment": "Just for the sake of showing [SpringVec2]",
       "Position": {
         "X": 1651.571,
         "Y": 221.04785
@@ -136,7 +136,7 @@
     },
     {
       "ChildId": "e388fcb8-ab65-4f2d-b9e3-fd36471b2985"/*Vector3Components*/,
-      "Comment": "switching X and Z so the rotation follows the movement",
+      "Comment": "Switching X and Z so the rotation follows the movement",
       "Position": {
         "X": 32.127167,
         "Y": 552.3927

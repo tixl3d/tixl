@@ -7,7 +7,7 @@
     },
     {
       "Id": "23c34f4c-4ba3-4834-8d51-3e3909751f84"/*Device*/,
-      "DefaultValue": "APC MINI"
+      "DefaultValue": "Midi Device"
     },
     {
       "Id": "4636d6cf-8233-4281-8840-5ba079b5f1a6"/*DefaultOutputValue*/,

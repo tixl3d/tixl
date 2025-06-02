@@ -1,6 +1,6 @@
 {
   "Id": "c6d50423-54ea-4c9d-b547-eb78cc2c950c"/*ScaleSize*/,
-  "Description": "Uniformly scales / multiplies an int2 which is used for defining resolutions\n\nFor a similar operator with more settings see [ScaleResolution]\n\nAlso see [MakeResolution], [int2] etc.",
+  "Description": "Uniformly scales/multiplies an int2 which is used for defining resolutions\n\nFor a similar operator with more settings see [ScaleResolution]\n\nAlso see [MakeResolution], [int2] etc.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -9,7 +9,7 @@
         "X": -200.0,
         "Y": 45.0
       },
-      "Description": "Scalefactor that is used to multiply the resolution",
+      "Description": "Scale factor that is used to multiply the resolution",
       "AddPadding": "True"
     },
     {

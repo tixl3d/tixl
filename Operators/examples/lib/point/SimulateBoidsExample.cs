@@ -1,4 +1,4 @@
-namespace Examples.lib.point;
+namespace Examples.Lib.point;
 
 [Guid("abdf2c06-2b93-4938-afac-6d737a1c1be5")]
  internal sealed class SimulateBoidsExample : Instance<SimulateBoidsExample>

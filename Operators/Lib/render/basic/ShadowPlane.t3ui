@@ -10,7 +10,7 @@
         "Y": 138.63855
       },
       "GroupTitle": "ShadowMap",
-      "Description": "This defines the angle at which the light casts a shadow. \nSince this operator treats any PointLight as a directional light this can be helpful if lightsources are very close to the ShadowPlane and have to cast shadows in a wide 'Field of View'."
+      "Description": "This defines the angle at which the light casts a shadow. \nSince this operator treats any PointLight as a directional light, this can be helpful if lightsources are very close to the ShadowPlane and have to cast shadows in a wide 'Field of View'."
     },
     {
       "InputId": "2f90c70b-7979-4426-aad2-7e715e7c1691"/*Resolution*/,

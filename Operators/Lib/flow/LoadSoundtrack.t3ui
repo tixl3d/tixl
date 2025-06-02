@@ -1,6 +1,6 @@
 {
   "Id": "72b6327d-4304-48bb-b9b5-15705352c225"/*LoadSoundtrack*/,
-  "Description": "This operator has no function other than to point out that, unlike meshes, images and other assets, audio files are integrated via the \"Playback Settings\" menu.\n\nThis menu can be opened by clicking on the gear icon in the control Bar of the Timeline. This gives the option to integrate a project soundtrack (for example as an mp3 file) as well as live audio devices.",
+  "Description": "This operator has no function other than to point out that, unlike meshes, images and other assets, audio files are integrated via the \"Playback Settings\" menu.\n\nThis menu can be opened by clicking on the gear icon in the control bar of the timeline. This gives the option to integrate a project soundtrack (for example as an mp3 file) as well as live audio devices.",
   "SymbolTags": "2",
   "InputUis": [
     {

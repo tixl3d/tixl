@@ -1,6 +1,6 @@
 {
   "Id": "7baaa83d-5c09-42a0-b7bc-35dbcfa5156d"/*PickStringPart*/,
-  "Description": "Gets a lines, words, or characters from the input string. Good for typewriter effects, etc.\n\nUseful combinations: [ReadFile] [RequestUrl] [GetAttributeFromJsonString]",
+  "Description": "Gets lines, words, or characters from the input string. Good for typewriter effects, etc.\n\nUseful combinations: [ReadFile] [RequestUrl] [GetAttributeFromJsonString]",
   "SymbolTags": "1",
   "InputUis": [
     {

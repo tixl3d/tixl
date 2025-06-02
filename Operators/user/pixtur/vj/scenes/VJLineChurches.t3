@@ -502,22 +502,14 @@
       "SymbolId": "e34c88f6-815e-4ce1-a6a8-59e2c8101849",
       "InputValues": [
         {
-          "Id": "22afde68-08c5-438f-9425-fe255b2e079f"/*ScrollGainAndBias*/,
-          "Type": "System.Numerics.Vector2",
-          "Value": {
-            "X": 0.16500002,
-            "Y": 0.525
-          }
-        },
-        {
           "Id": "32d082f5-d6e1-4068-bcd9-a01977ed72df"/*MaxSubdivisions*/,
           "Type": "System.Int32",
-          "Value": 9
+          "Value": 15
         },
         {
           "Id": "3e164af6-1cb3-45b3-a319-e562789d73f7"/*Feather*/,
           "Type": "System.Single",
-          "Value": 0.0001
+          "Value": -0.0018
         },
         {
           "Id": "5cae4d6e-d441-42f7-8e17-3aeb58719f08"/*GapColor*/,
@@ -537,12 +529,12 @@
         {
           "Id": "6d3c2c76-df35-411a-8e25-450dc9cd6f4e"/*DirectionBias*/,
           "Type": "System.Single",
-          "Value": -1.19
+          "Value": -0.82
         },
         {
           "Id": "71c99158-cf0e-4ceb-82ee-5ef5685441b3"/*Threshold*/,
           "Type": "System.Single",
-          "Value": 0.12
+          "Value": 0.0
         },
         {
           "Id": "7a8684c9-ee81-49c1-ad13-d91d62799efb"/*RandomPhase*/,
@@ -557,7 +549,7 @@
         {
           "Id": "82a8fbb3-c1be-494e-8a8d-e7ccf5440556"/*GapWidth*/,
           "Type": "System.Single",
-          "Value": -0.011
+          "Value": 0.007
         },
         {
           "Id": "be07242e-39fc-4631-ab6e-3023c9444406"/*Gradient*/,
@@ -567,7 +559,7 @@
               "Interpolation": "Linear",
               "Steps": [
                 {
-                  "Id": "2a97acf8-c3c3-497b-92ff-eb92b9f476ec",
+                  "Id": "73e18abf-8631-4e3b-b606-3877dad6115f",
                   "NormalizedPosition": 0.0,
                   "Color": {
                     "R": 1.0,
@@ -577,7 +569,7 @@
                   }
                 },
                 {
-                  "Id": "7d2f52d8-fd4c-4e83-807d-406c609d2b34",
+                  "Id": "859bc8b9-2983-4881-a18d-29afa120e7ac",
                   "NormalizedPosition": 1.0,
                   "Color": {
                     "R": 0.0,
@@ -599,6 +591,16 @@
           }
         },
         {
+          "Id": "c8550e83-bd37-4db3-a859-4a6bcd64a63c"/*SplitCenterVariation*/,
+          "Type": "System.Single",
+          "Value": 0.75
+        },
+        {
+          "Id": "d30b5542-d564-46e1-9f9e-987351eb425b"/*SplitCenter*/,
+          "Type": "System.Single",
+          "Value": 0.64
+        },
+        {
           "Id": "d90350a0-9fa8-4747-805b-ba7ab8125595"/*Use4xMSAA*/,
           "Type": "System.Boolean",
           "Value": false
@@ -606,7 +608,7 @@
         {
           "Id": "ee2bc31a-a67f-4bec-bce7-0a70db88082c"/*GradientMode*/,
           "Type": "System.Int32",
-          "Value": -1
+          "Value": 2
         }
       ],
       "Outputs": []
@@ -933,7 +935,7 @@
         {
           "Id": "29e289be-e735-4dd4-8826-5e434cc995fa"/*Index*/,
           "Type": "System.Int32",
-          "Value": 0
+          "Value": 1
         }
       ],
       "Outputs": []
@@ -1107,7 +1109,7 @@
         {
           "Id": "ca9778e7-072c-4304-9043-eeb2dc4ca5d7"/*Folder*/,
           "Type": "System.String",
-          "Value": "Resources\\user\\pixtur\\VJ\\churches"
+          "Value": "c:/Users/pixtur/Documents/TiXL/VJCasual/Resources/images/churches"
         },
         {
           "Id": "e14a4aae-e253-4d14-80ef-a90271cd306a"/*TriggerUpdate*/,

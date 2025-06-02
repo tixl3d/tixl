@@ -121,7 +121,7 @@
         "X": 35.242065,
         "Y": 2018.4316
       },
-      "Description": "Replace Points with a selection of 0.0 with line seperators. This can be relevant for instanciation on drawing connection lines between points.\nThis does NOT change the size of the buffer.",
+      "Description": "Replace points with a selection of 0.0 with line separators. This can be relevant for instantiation on drawing connection lines between points.\nThis does NOT change the size of the buffer.",
       "AddPadding": "True"
     },
     {

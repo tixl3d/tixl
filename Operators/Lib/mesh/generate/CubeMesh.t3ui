@@ -1,6 +1,6 @@
 {
   "Id": "c47ab830-aae7-4f8f-b67c-9119bcbaf7df"/*CubeMesh*/,
-  "Description": "Generates a procedural three-dimensional mesh which can be rendered with [DrawMesh] , [DrawMeshUnlit] and [DrawMeshHatched] among others.\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToDrawThings].\n\nIt can also become the source for a particle system with [MeshVerticesToPoints] or [PointsOnMesh].\nTo import static 3D meshes from other programs refer to [LoadObj].",
+  "Description": "Generates a procedural three-dimensional mesh which can be rendered with [DrawMesh], [DrawMeshUnlit] and [DrawMeshHatched] among others.\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToDrawThings].\n\nIt can also become the source for a particle system with [MeshVerticesToPoints] or [PointsOnMesh].\nTo import static 3D meshes from other programs refer to [LoadObj].",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -92,7 +92,7 @@
         "Y": 45.0
       },
       "GroupTitle": "Position and Rotation",
-      "Description": "Offsets the position of the pivotpoint (center).\n\nThis is helpful to change the point around which the cube rotates / along which it is scaled."
+      "Description": "Offsets the position of the pivot point (center).\n\nThis is helpful to change the point around which the cube rotates / along which it is scaled."
     }
   ],
   "SymbolChildUis": [],

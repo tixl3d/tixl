@@ -17,7 +17,7 @@
         "X": 1014.23206,
         "Y": 1162.8093
       },
-      "Description": "Selects the mode in which the Plane should dynamically adapt to the aspect ratio of the viewport."
+      "Description": "Selects the mode in which the plane should dynamically adapt to the aspect ratio of the viewport."
     },
     {
       "InputId": "2a95ac54-5ef7-4d3c-a90b-ecd5b422bddc"/*Texture*/,
@@ -26,7 +26,7 @@
         "X": -13.199188,
         "Y": 1089.728
       },
-      "Description": "Texture Input for any 2D Op.\ne.g. [RenderTarget], [Loadimage] etc."
+      "Description": "Texture input for any 2D op.\ne.g. [RenderTarget], [LoadImage] etc."
     },
     {
       "InputId": "38f34034-b36f-4351-84e1-1a4f96e03fc6"/*Scale*/,
@@ -34,7 +34,7 @@
         "X": 1014.23206,
         "Y": 1092.8093
       },
-      "Description": "Uniformly scales the Plane.",
+      "Description": "Uniformly scales the plane.",
       "Min": 0.01,
       "Max": 10.0,
       "Scale": 0.001,
@@ -47,7 +47,7 @@
         "X": 1014.23206,
         "Y": 1057.8093
       },
-      "Description": "Non-Uniform scaling of the plane.\nX = Width\nY = Height",
+      "Description": "Non-uniform scaling of the plane.\nX = Width\nY = Height",
       "AddPadding": "True",
       "Min": -2.0,
       "Max": 2.0,
@@ -67,7 +67,7 @@
         "X": 1014.23206,
         "Y": 987.8094
       },
-      "Description": "The horizontal and vertical position of the layer in world space. \\nWith the default camera the viewport at that distance is precisely two units high. So setting y to 1 will align the lower layer border to the screen center.",
+      "Description": "The horizontal and vertical position of the layer in world space. \nWith the default camera the viewport at that distance is precisely two units high. So setting y to 1 will align the lower layer border to the screen center.",
       "Min": 0.0,
       "Max": 1.0,
       "Format": "{0:0.000}",
@@ -88,7 +88,7 @@
         "Y": 935.5263
       },
       "GroupTitle": "Additional Options",
-      "Description": "Selects the Blendmode."
+      "Description": "Selects the blend mode."
     },
     {
       "InputId": "da0941c9-c700-4552-9d8a-799bf7a08826"/*Rotate*/,

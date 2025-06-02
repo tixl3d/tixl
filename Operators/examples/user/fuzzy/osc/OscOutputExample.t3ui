@@ -1,6 +1,6 @@
 {
   "Id": "48e284ff-cfcc-4d6c-83d4-256c9380de61"/*OscOutputExample*/,
-  "Description": "shows what the OscOutput operator can do.",
+  "Description": "Shows what the OscOutput operator can do.",
   "InputUis": [],
   "SymbolChildUis": [
     {
@@ -115,7 +115,7 @@
   "Annotations": [
     {
       "Id": "d28956a0-5be2-4264-b73a-dfe0668896da",
-      "Title": "address:port, only dotted IP4 are supported.",
+      "Title": "address:port, only dotted IPv4 are supported.",
       "Color": {
         "X": 0.6,
         "Y": 0.6,

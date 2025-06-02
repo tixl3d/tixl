@@ -19,7 +19,7 @@
     },
     {
       "ChildId": "36cc16e3-95d3-4da2-83f4-93c3e49dbaf5"/*ImageLevels*/,
-      "Comment": "As usual [ImageLevels] is your friend to understand what's going on.\n\nWhat we can see here:\n\n1. Most of the values are \"blue\" - This indicates the Z-axis is high the the normal is pointing towards the camera.\n2. Some values at the edges have Red and Green components (with less Blue). This values are changing betwen NormalMap.Twist is animated.\n3. You see the slight gradient created by the [Glow].",
+      "Comment": "As usual [ImageLevels] is your friend to understand what's going on.\n\nWhat we can see here:\n\n1. Most of the values are \"blue\" - This indicates the Z-axis is high and the normal is pointing towards the camera.\n2. Some values at the edges have Red and Green components (with less Blue). These values are changing between NormalMap.Twist is animated.\n3. You see the slight gradient created by the [Glow].",
       "Position": {
         "X": 916.23846,
         "Y": 309.82355
@@ -34,7 +34,7 @@
     },
     {
       "ChildId": "573990a4-992e-437c-94da-6ce9043fbb5c"/*TextureMapForce*/,
-      "Comment": "We enfore the Gizmo visibility for this example.",
+      "Comment": "We enforce the Gizmo visibility for this example.",
       "Position": {
         "X": 900.0001,
         "Y": 125.0
@@ -108,7 +108,7 @@
     },
     {
       "ChildId": "e0d88f70-0b51-4814-b39b-5a7dca8092d1"/*Glow*/,
-      "Comment": "We add a glow with a large blur radias for a smooth gradient towards to center.",
+      "Comment": "We add a glow with a large blur radius for a smooth gradient towards the center.",
       "Position": {
         "X": 600.0001,
         "Y": 175.0
@@ -131,7 +131,7 @@
     },
     {
       "ChildId": "fce3192d-fdfa-47ab-a49d-3df41f8f4352"/*NormalMap*/,
-      "Comment": "In this essential step, we convert the brightness gradient into a signed normal map.\n\n\"Signed\"  means the texture contains NEGATIVE value. Please check the [ImageLevels] below to see how this looks.\n\nAlso note, that we twist the resulting normals to create accelerations towards to away from the letters.",
+      "Comment": "In this essential step, we convert the brightness gradient into a signed normal map.\n\n\"Signed\" means the texture contains NEGATIVE values. Please check the [ImageLevels] below to see how this looks.\n\nAlso note that we twist the resulting normals to create accelerations towards and away from the letters.",
       "Position": {
         "X": 750.0001,
         "Y": 175.0
@@ -139,7 +139,7 @@
     },
     {
       "ChildId": "fff2f405-2905-4fb1-87dd-4679e9fa0c22"/*RadialPoints*/,
-      "Comment": "We emit a bunch of points for aligned orientation axis so their z-axis can be use for initial velocity in [ParticleSystem].",
+      "Comment": "We emit a bunch of points for aligned orientation axis so their z-axis can be used for initial velocity in [ParticleSystem].",
       "Position": {
         "X": 900.0001,
         "Y": 69.0

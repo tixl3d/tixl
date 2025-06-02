@@ -1,6 +1,6 @@
 {
   "Id": "fd31d208-12fe-46bf-bfa3-101211f8f497"/*Text*/,
-  "Description": "Creates flat 2D Text as an Object in 3D Space from bitmap fonts.\nFor each Character a quad mesh is generated. [TextSprites] can be used to manipulate these generated Objects.\n\nAny String Operator like [AString], [RandomString] etc. can be used as string input.\n\nThe Fonts used consist of a BmFont font definition file and the matching MSDF (multichannel distance field) texture",
+  "Description": "Creates flat 2D Text as an Object in 3D Space from bitmap fonts.\nFor each character a quad mesh is generated. [TextSprites] can be used to manipulate these generated objects.\n\nAny String Operator like [AString], [RandomString], etc. can be used as string input.\n\nThe fonts used consist of a BmFont font definition file and the matching MSDF (multichannel distance field) texture",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -9,7 +9,7 @@
         "X": -266.3731,
         "Y": 279.70062
       },
-      "Description": "defines which color the surfaces of the letters have"
+      "Description": "Defines which color the surfaces of the letters have"
     },
     {
       "InputId": "28be4e86-6761-4d07-80bf-abf6f82897e4"/*CullMode*/,
@@ -73,7 +73,7 @@
         "Y": 994.4491
       },
       "GroupTitle": "Alignment",
-      "Description": "Defines how high the letters are in relation to the pivot.\n\nTop: The pivot point is on the row line\nMiddle: The letters are centered above the pivot\nBottom: The pivot is at the bottom of the letters such as 'y' 'g' etc."
+      "Description": "Defines how high the letters are in relation to the pivot.\n\nTop: The pivot point is on the row line\nMiddle: The letters are centered above the pivot\nBottom: The pivot is at the bottom of the letters such as 'y', 'g', etc."
     },
     {
       "InputId": "d89c518c-a862-4f46-865b-0380350b7417"/*Size*/,
@@ -81,6 +81,7 @@
         "X": 614.013,
         "Y": 854.4491
       },
+      "ExcludedFromPresets": "True",
       "Description": "Uniformly scales the Text",
       "Min": 0.0,
       "Max": 500.0,

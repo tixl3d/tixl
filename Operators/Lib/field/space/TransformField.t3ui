@@ -1,6 +1,6 @@
 {
   "Id": "c44d23c7-bfac-403d-b49e-49d00001a316"/*TransformField*/,
-  "Description": "Transforms, rotates and scales the incoming field in 3D space.\nSimilar node with less options: [Translate]\n\nIt can be rendered with [RaymarchField] and visualized with [VisualizeFieldDistance].\n\nOther nodes: [RepeatWithMirror], [PolarRepeat], [TwistField].\n\nIt needs an incoming field like [BoxSDF], [ChainLinkSDF], [FractalSDF] as an input.\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToRaymarchField].\n",
+  "Description": "Transforms, rotates and scales the incoming field in 3D space.\nSimilar node with fewer options: [Translate]\n\nIt can be rendered with [RaymarchField] and visualized with [VisualizeFieldDistance].\n\nOther nodes: [RepeatWithMirror], [PolarRepeat], [TwistField].\n\nIt needs an incoming field like [BoxSDF], [ChainLinkSDF], [FractalSDF] as an input.\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToRaymarchField].\n",
   "InputUis": [
     {
       "InputId": "279730b7-c427-4924-9fde-77eb65a3076c"/*Pivot*/,
@@ -8,7 +8,7 @@
         "X": -200.0,
         "Y": 225.0
       },
-      "Description": "Moves the Pivot (center point) of the incoming field:\n\nX (-left / +right) \nY (-down / + up) \nZ (-forward/+backwards)\n\nThe Pivot Point determines the location of the incoming subgraph Gizmo. Transforming its location can make it easier to perform transformations around the position you want.\n"
+      "Description": "Moves the Pivot (center point) of the incoming field:\n\nX (-left / +right) \nY (-down / +up) \nZ (-forward / +backwards)\n\nThe Pivot Point determines the location of the incoming subgraph Gizmo. Transforming its location can make it easier to perform transformations around the position you want.\n"
     },
     {
       "InputId": "3b817e6c-f532-4a8c-a2ff-a00dc926eeb2"/*Translation*/,
@@ -17,7 +17,7 @@
         "Y": 0.0
       },
       "GroupTitle": "Transformation",
-      "Description": "Moves the incoming field\n\nX (-left / +right), \nY (-down / + up), \nZ (-forward/+backwards)\n"
+      "Description": "Moves the incoming field\n\nX (-left / +right), \nY (-down / +up), \nZ (-forward / +backwards)\n"
     },
     {
       "InputId": "5339862d-5a18-4d0c-b908-9277f5997563"/*Rotation*/,

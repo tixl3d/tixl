@@ -1,6 +1,6 @@
 {
   "Id": "6b7c541a-ca36-4f21-ac95-89e874820c5a"/*BlendColors*/,
-  "Description": "Blends two colors with the defined blendmode",
+  "Description": "Blends two colors with the defined blend mode",
   "SymbolTags": "1",
   "InputUis": [
     {

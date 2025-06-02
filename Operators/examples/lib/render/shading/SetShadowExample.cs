@@ -1,4 +1,4 @@
-namespace Examples.lib.render.shading;
+namespace Examples.Lib.render.shading;
 
 [Guid("1f73d45d-fdbf-4429-8e17-741285a050f5")]
 public class SetShadowExample : Instance<SetShadowExample>

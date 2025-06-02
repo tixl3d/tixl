@@ -1,6 +1,6 @@
 {
   "Id": "a3700115-a15b-493a-8a07-dab16b4ee0af"/*GetMatrixVar*/,
-  "Description": "Retrieves a matrix as an array for Vector4 from the evaluation context.\nThis is used internally for passing transform matrices between renderpasses for things like rendering shadow maps.",
+  "Description": "Retrieves a matrix as an array for Vector4 from the evaluation context.\nThis is used internally for passing transform matrices between render passes for things like rendering shadow maps.",
   "SymbolTags": "8",
   "InputUis": [
     {

@@ -1,4 +1,4 @@
-namespace Examples.lib.io.file;
+namespace Examples.Lib.io.file;
 
 [Guid("897a5f40-7970-4770-bd51-08a085f8355b")]
  internal sealed class FilesInFolderExample : Instance<FilesInFolderExample>

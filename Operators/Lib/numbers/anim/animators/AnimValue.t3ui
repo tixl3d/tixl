@@ -1,6 +1,6 @@
 {
   "Id": "ea7b8491-2f8e-4add-b0b1-fd068ccfed0d"/*AnimValue*/,
-  "Description": "Generates a repetitive LFO-like signal synced to the current BPM rate. It supports various shapes, modes and forms.\n\nYou can manipulate the rate and shape directly in the graph by dragging with CTRL+ left mouse button.\n\nSome tips:\n- Please checkout the [HowToAnimate] playground to see some applications.\n- You can use [SetSpeedFactors] to override the incoming rate, which is very useful for live VJ setups.\n\n- Also have a look at [AnimVec2], [AnimVec3], [TriggerAnim], [OscillateVec2] and [OscillateVec3]",
+  "Description": "Generates a repetitive LFO-like signal synced to the current BPM rate. It supports various shapes, modes and forms.\n\nYou can manipulate the rate and shape directly in the graph by dragging with CTRL+ left mouse button.\n\nSome tips:\n- Please check out the [HowToAnimate] playground to see some applications.\n- You can use [SetSpeedFactors] to override the incoming rate, which is very useful for live VJ setups.\n\n- Also have a look at [AnimVec2], [AnimVec3], [TriggerAnim], [OscillateVec2] and [OscillateVec3]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -46,7 +46,7 @@
         "X": -200.0,
         "Y": 135.0
       },
-      "Description": "defines the strongest value of the animation curve",
+      "Description": "Defines the strongest value of the animation curve",
       "AddPadding": "True",
       "Min": -5.0,
       "Max": 5.0,

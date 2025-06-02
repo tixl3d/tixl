@@ -1,4 +1,4 @@
-namespace Examples.lib.numbers;
+namespace Examples.Lib.numbers;
 
 [Guid("04b8f508-2101-42dc-8d91-60b585bc561e")]
  internal sealed class SpringExample : Instance<SpringExample>

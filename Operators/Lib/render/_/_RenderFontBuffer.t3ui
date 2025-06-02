@@ -1,6 +1,6 @@
 {
   "Id": "c5707b79-859b-4d53-92e0-cbed53aae648"/*_RenderFontBuffer*/,
-  "Description": "An internal implementation of the Text operator that generates a sprite buffer that is then being rendered.",
+  "Description": "An internal implementation of the Text operator that generates a sprite buffer that is then rendered.",
   "SymbolTags": "16",
   "InputUis": [
     {

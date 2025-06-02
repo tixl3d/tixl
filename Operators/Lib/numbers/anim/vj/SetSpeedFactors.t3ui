@@ -1,6 +1,6 @@
 {
   "Id": "61dc8ba5-8aa6-4003-8d8c-8bce27f56a67"/*SetSpeedFactors*/,
-  "Description": "Speed factors are multiplied to most animation operators like [AnimValue] and [Counter].\n\nThis is an extremely powerful method to adjust the pace of visuals while staying beat synced.\n\nIn NormalizedRates mode...\n- ...0.5 means neutral (factor 1). \n- ...lower means slower: 1/2 1/4 1/8 1/16 frozen\n- ...larger means faster  x2 x4 x8 x16 x32\n\nSpeedFactorA is applied to:\n[Counter]\n\nSpeedFactorB is applied to:\n[AnimValue]\n[AnimVec2]\n[AnimVec3]\n\nTo keep things flexible it supports Image and Commands types (but not crossing between them).",
+  "Description": "Speed factors are multiplied to most animation operators like [AnimValue] and [Counter].\n\nThis is an extremely powerful method to adjust the pace of visuals while staying beat synced.\n\nIn NormalizedRates mode...\n- ...0.5 means neutral (factor 1).\n- ...lower means slower: 1/2 1/4 1/8 1/16 frozen\n- ...larger means faster x2 x4 x8 x16 x32\n\nSpeedFactorA is applied to:\n[Counter]\n\nSpeedFactorB is applied to:\n[AnimValue]\n[AnimVec2]\n[AnimVec3]\n\nTo keep things flexible it supports Image and Commands types (but not crossing between them).",
   "SymbolTags": "8",
   "InputUis": [
     {

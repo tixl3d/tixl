@@ -9,7 +9,7 @@
         "X": -663.8243,
         "Y": 596.9816
       },
-      "Description": "Completely restores the buffer with the input buffer. This is equivilant to setting MixRate to 1.\n"
+      "Description": "Completely restores the buffer with the input buffer. This is equivalent to setting MixRate to 1.\n"
     },
     {
       "InputId": "2f883ce2-421a-45f5-8de2-9e05d984b551"/*MinCapacity*/,

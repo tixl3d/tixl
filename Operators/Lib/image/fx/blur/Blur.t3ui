@@ -29,7 +29,7 @@
         "X": -308.4377,
         "Y": 103.11561
       },
-      "Description": "Defines the strength / radius of the blur",
+      "Description": "Defines the strength/radius of the blur",
       "AddPadding": "True",
       "Min": 0.0,
       "Max": 20.0
@@ -40,7 +40,7 @@
         "X": -308.4377,
         "Y": 328.1156
       },
-      "Description": "Defines what is displayed at the edge of the image or how it is repeated should it be cut off / offset over its borders.",
+      "Description": "Defines what is displayed at the edge of the image or how it is repeated should it be cut off/offset over its borders.",
       "AddPadding": "True"
     },
     {
@@ -58,7 +58,7 @@
         "X": -308.4377,
         "Y": 238.1156
       },
-      "Description": "Changes the opacity / gamma of the image"
+      "Description": "Changes the opacity/gamma of the image"
     },
     {
       "InputId": "e4e5e654-d570-4dea-ad16-f4eb1018ff2f"/*Resolution*/,
@@ -66,7 +66,7 @@
         "X": -308.4377,
         "Y": 283.1156
       },
-      "Description": "Overwrites / redefines the resolution of the incoming image",
+      "Description": "Overwrites/redefines the resolution of the incoming image",
       "AddPadding": "True"
     }
   ],
@@ -90,30 +90,6 @@
       "Position": {
         "X": 526.80054,
         "Y": 535.7032
-      }
-    },
-    {
-      "ChildId": "4c68857a-b51f-4980-a734-e93d082349a5"/*_ImageFxShaderSetup2*/,
-      "Style": "Resizable",
-      "Size": {
-        "X": 110.0,
-        "Y": 166.0
-      },
-      "Position": {
-        "X": 410.55597,
-        "Y": -229.1864
-      }
-    },
-    {
-      "ChildId": "65e8c351-25ad-4205-b589-d154ffa993e7"/*_ImageFxShaderSetup2*/,
-      "Style": "Resizable",
-      "Size": {
-        "X": 116.91156,
-        "Y": 203.54987
-      },
-      "Position": {
-        "X": 769.92786,
-        "Y": -200.39159
       }
     },
     {

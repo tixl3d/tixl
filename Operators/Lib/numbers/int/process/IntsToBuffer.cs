@@ -26,7 +26,10 @@ internal sealed class IntsToBuffer : Instance<IntsToBuffer>
         var array = new int[arraySize];
 
         if (array.Length == 0)
+        {
+            Params.DirtyFlag.Clear();    
             return;
+        }
             
         for (var intIndex = 0; intIndex < intParamCount; intIndex++)
         {

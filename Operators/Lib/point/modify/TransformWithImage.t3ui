@@ -1,6 +1,6 @@
 {
   "Id": "09b2aeea-79fa-4209-860e-85161060b6c8"/*TransformWithImage*/,
-  "Description": "Allows to modify various point attributes from an image.",
+  "Description": "Allows modifying various point attributes from an image.",
   "InputUis": [
     {
       "InputId": "027ef9a9-73ef-4d23-861b-660060541826"/*Rotate*/,

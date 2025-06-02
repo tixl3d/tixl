@@ -1,6 +1,6 @@
 {
   "Id": "b15e4950-5c72-4655-84bc-c00647319030"/*Vector4Components*/,
-  "Description": "Converts a Vector4 (or RGBA Color) into three individual values.\n\nOppositve of [RgbaToColor]",
+  "Description": "Converts a Vector4 (or RGBA Color) into three individual values.\n\nOpposite of [RgbaToColor]",
   "InputUis": [
     {
       "InputId": "980ef785-6ae2-44d1-803e-febfc75791c5"/*Value*/,

@@ -1,4 +1,4 @@
-namespace Examples.lib.image.fx.stylize;
+namespace Examples.Lib.image.fx.stylize;
 
 [Guid("a2612284-7b74-449e-903e-536eaab4833f")]
  internal sealed class HoneyCombTilesExample : Instance<HoneyCombTilesExample>

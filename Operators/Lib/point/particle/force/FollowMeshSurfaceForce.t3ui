@@ -1,6 +1,6 @@
 {
   "Id": "26bb382c-5e3d-49ae-b17e-5bd49b083d9a"/*FollowMeshSurfaceForce*/,
-  "Description": "Contains particles close the a surface of a simple(!) mesh geometry.",
+  "Description": "Contains particles close to a surface of a simple(!) mesh geometry.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -9,7 +9,7 @@
         "X": 582.98804,
         "Y": 673.8364
       },
-      "Description": "A continues random offset onto the spin. This can lead to more natural looking effects."
+      "Description": "A continuous random offset onto the spin. This can lead to more natural looking effects."
     },
     {
       "InputId": "235158be-dc6f-45ad-81fa-8b1b2ef0e1bd"/*RandomPhase*/,
@@ -44,7 +44,7 @@
         "X": 582.98804,
         "Y": 538.83636
       },
-      "Description": "The accelleration towards and on the surface.",
+      "Description": "The acceleration towards and on the surface.",
       "Min": 0.0,
       "Max": 1.0,
       "Scale": 0.001
@@ -64,7 +64,7 @@
         "Y": 628.8364
       },
       "GroupTitle": "Orientation",
-      "Description": "Add a random rotation. This could be useful for wiggling or veine like motions."
+      "Description": "Add a random rotation. This could be useful for wiggling or vein-like motions."
     },
     {
       "InputId": "bbd372b8-5a0d-4dd6-a2dd-13049722e1a1"/*RandomSurfaceDistance*/,

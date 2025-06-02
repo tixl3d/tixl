@@ -258,7 +258,8 @@
       "Position": {
         "X": 1479.0017,
         "Y": -11.53981
-      }
+      },
+      "SnapshotGroupIndex": "1"
     },
     {
       "ChildId": "aa5f45bc-2e3b-4800-abe8-137ec743c8cf"/*PickTexture*/,
@@ -312,7 +313,7 @@
     {
       "ChildId": "d7f2e199-576c-4542-85ee-46ae2d4269f4"/*TriggerAnim*/,
       "Position": {
-        "X": 1221.5193,
+        "X": 1231.5193,
         "Y": 151.10153
       }
     },

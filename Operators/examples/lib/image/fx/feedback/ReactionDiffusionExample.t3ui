@@ -1,6 +1,6 @@
 {
   "Id": "ddf3077b-6273-4023-88e5-2948312e012b"/*ReactionDiffusionExample*/,
-  "Description": "An example for how to use the sharpen effect in a feedback loop to create a reaction diffusion texture",
+  "Description": "An example of how to use the sharpen effect in a feedback loop to create a reaction diffusion texture",
   "InputUis": [],
   "SymbolChildUis": [
     {

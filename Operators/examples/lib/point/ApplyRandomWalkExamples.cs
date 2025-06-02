@@ -1,4 +1,4 @@
-namespace Examples.lib.point;
+namespace Examples.Lib.point;
 
 [Guid("ab5fbecb-abef-4a17-a0bf-2ce8f81ff813")]
  internal sealed class ApplyRandomWalkExamples : Instance<ApplyRandomWalkExamples>

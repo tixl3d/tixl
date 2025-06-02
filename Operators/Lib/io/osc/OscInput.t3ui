@@ -1,6 +1,6 @@
 {
   "Id": "3a1d7ea0-5445-4df0-b08a-6596e53f815a"/*OscInput*/,
-  "Description": "Receives OSC input from a connected server. \n\nIn most scenarios it is useful to record some input messages and then pick the relevant addresses by using a [SelectFloatFromDict] or [SelectVec2FromDict] operator.\n\nYou might want to adjust the default OSC port in the settings window to see a visual indication of incoming messages in the timeline bar.",
+  "Description": "Receives OSC input from a connected server. \n\nIn most scenarios, it is useful to record some input messages and then pick the relevant addresses by using a [SelectFloatFromDict] or [SelectVec2FromDict] operator.\n\nYou might want to adjust the default OSC port in the settings window to see a visual indication of incoming messages in the timeline bar.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "Y": 45.0
       },
       "GroupTitle": "Filter value",
-      "Description": "An optional filter to the collected OSC addresses. The first match to this filter will be used for the float output parameter.\n\nThis can be useful to directly pick a channel without the need to insert an [SelectFloatFromDict] operator.\n\nThis list is automatically filled with all addresses used by incoming OSC message after connecting to that port. This list is shared between all OscInput operators listing to that port. \nNext to the address there is an indicator for the data-type of that address. E.g. <ff> for a vec2 or <ddd> for a double precision Vec3.",
+      "Description": "An optional filter to the collected OSC addresses. The first match to this filter will be used for the float output parameter.\n\nThis can be useful to directly pick a channel without the need to insert a [SelectFloatFromDict] operator.\n\nThis list is automatically filled with all addresses used by incoming OSC messages after connecting to that port. This list is shared between all OscInput operators listening to that port. \nNext to the address, there is an indicator for the data type of that address. E.g. <ff> for a vec2 or <ddd> for a double precision Vec3.",
       "Usage": "CustomDropdown"
     },
     {
@@ -27,7 +27,7 @@
         "Y": 225.0
       },
       "GroupTitle": "Options",
-      "Description": "Logs all received OSC messages to the console window which can be very useful for debugging.\n\nEnabling it can have a performance impact, it can lead to excessive log output.  Tip: You can click on console log message to jump to the Operator that printed the message."
+      "Description": "Logs all received OSC messages to the console window, which can be very useful for debugging.\n\nEnabling it can have a performance impact; it can lead to excessive log output. Tip: You can click on a console log message to jump to the Operator that printed the message."
     },
     {
       "InputId": "8014a7a6-cacb-4206-a5b4-87c14235a20c"/*UseKeyValuePairs*/,
@@ -36,7 +36,7 @@
         "Y": 270.0
       },
       "GroupTitle": "Key Value Pairs",
-      "Description": "Many applications (e.g. Super Collider) send their data bundled as a list of key value pairs. Enabling this option will use the keys as another segment of the address path."
+      "Description": "Many applications (e.g. Super Collider) send their data bundled as a list of key-value pairs. Enabling this option will use the keys as another segment of the address path."
     },
     {
       "InputId": "87efd3c4-f2df-4996-924f-12c631bad8d8"/*Port*/,
@@ -55,7 +55,7 @@
         "X": -200.0,
         "Y": 315.0
       },
-      "Description": "This is an additional method of filtering OSC messages: \n\nIf KeyValue pairs are enabled only messages which have a key with the given pattern will be filtered.",
+      "Description": "This is an additional method of filtering OSC messages: \n\nIf KeyValue pairs are enabled, only messages which have a key with the given pattern will be filtered.",
       "Usage": "Default"
     },
     {

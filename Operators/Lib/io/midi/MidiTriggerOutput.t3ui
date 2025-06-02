@@ -33,7 +33,7 @@
         "X": 197.0,
         "Y": 778.0
       },
-      "Description": "This trigger sends Toolls current BPM value to the receiving device."
+      "Description": "This trigger sends Tool's current BPM value to the receiving device."
     },
     {
       "InputId": "8f5e7919-09ae-4d38-a404-93ad6d9ea6ed"/*TriggerStart*/,

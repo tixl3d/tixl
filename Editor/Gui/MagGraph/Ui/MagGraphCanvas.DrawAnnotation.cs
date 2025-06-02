@@ -37,10 +37,13 @@ internal sealed partial class MagGraphCanvas
 
         var isNodeSelected = context.Selector.IsNodeSelected(magAnnotation.Annotation);
 
+        
         // Outline
+        var borderColor = isNodeSelected ? UiColors.ForegroundFull 
+                                 : ColorVariations.AnnotationOutline.Apply(magAnnotation.Annotation.Color);
         drawList.AddRect(pMin,
                          pMax,
-                         isNodeSelected ? UiColors.ForegroundFull : ColorVariations.AnnotationOutline.Apply(magAnnotation.Annotation.Color),
+                         borderColor.Fade(_context.GraphOpacity),
                          rounding,
                          flags);
 
@@ -91,7 +94,7 @@ internal sealed partial class MagGraphCanvas
             {
                 if (!string.IsNullOrEmpty(magAnnotation.Annotation.Label))
                 {
-                    var fade = MathUtils.SmootherStep(0.1f, 0.2f, canvasScale) * 0.8f;
+                    var fade = MathUtils.SmootherStep(0.1f, 0.2f, canvasScale) * 0.8f * _context.GraphOpacity;
                     var fontSize = canvasScale > 1
                                        ? Fonts.FontLarge.FontSize
                                        : canvasScale > 0.333 / Fonts.FontLarge.Scale

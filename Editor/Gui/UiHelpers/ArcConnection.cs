@@ -15,7 +15,7 @@ internal static class GraphConnectionDrawer
     /// Returns true if hovering...
     /// </summary>
     internal static bool DrawConnection(float canvasScale, ImRect Sn, Vector2 Sp,
-                                        ImRect Tn, Vector2 Tp, uint color, float thickness,
+                                        ImRect Tn, Vector2 Tp, Color color, float thickness,
                                         out Vector2 hoverPosition, out float normalizedHoverPos)
     {
         var currentCanvasScale = canvasScale.Clamp(0.2f, 2f);
@@ -244,7 +244,10 @@ internal static class GraphConnectionDrawer
         // Optionally draw an outline
         if (currentCanvasScale > 0.5f)
         {
-            drawList.AddPolyline(ref drawList._Path[0], drawList._Path.Size, UiColors.WindowBackground.Fade(0.4f), ImDrawFlags.None, thickness + 5f);
+            drawList.AddPolyline(ref drawList._Path[0], drawList._Path.Size, 
+                                 UiColors.WindowBackground.Fade(0.6f * color.A), 
+                                 ImDrawFlags.None, 
+                                 thickness + 5f);
         }
 
         drawList.PathStroke(color, ImDrawFlags.None, thickness);

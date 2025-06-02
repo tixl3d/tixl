@@ -1,0 +1,26 @@
+{
+  "Id": "883e01f5-44ee-4724-9e6e-f885255c17e5"/*PlaneSDF*/,
+  "Inputs": [
+    {
+      "Id": "76d4c422-399a-4b68-b0ea-5d2d2f54a667"/*Center*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "99fca01a-e0a6-49dc-9535-ebde0f5f8744"/*Axis*/,
+      "DefaultValue": 1
+    },
+    {
+      "Id": "deb91db5-cefb-4e0d-9244-d44bc6a21985"/*Size*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

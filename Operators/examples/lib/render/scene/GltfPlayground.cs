@@ -1,4 +1,4 @@
-namespace Examples.lib.render.scene;
+namespace Examples.Lib.render.scene;
 
 [Guid("e012c92e-3278-4e4b-9e60-44ccb70648ce")]
 public class GltfPlayground : Instance<GltfPlayground>

@@ -1,6 +1,6 @@
 {
   "Id": "cda108a1-db4f-4a0a-ae4d-d50e9aade467"/*PlaybackFFT*/,
-  "Description": "Returns the bass audio FFT buffer during soundtrack playback.\n\nCheck [AudioFrequencies] if you're using external audio device  ",
+  "Description": "Returns the bass audio FFT buffer during soundtrack playback.\n\nCheck [AudioFrequencies] if you're using an external audio device  ",
   "InputUis": [
     {
       "InputId": "66cb16d6-1506-4783-925d-3cdf62602812"/*InputBand*/,

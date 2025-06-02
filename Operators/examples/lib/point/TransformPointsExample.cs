@@ -1,4 +1,4 @@
-namespace Examples.lib.point;
+namespace Examples.Lib.point;
 
 [Guid("0d94d3d9-3023-4763-b80c-2c63415500d4")]
  internal sealed class TransformPointsExample : Instance<TransformPointsExample>

@@ -1,6 +1,6 @@
 {
   "Id": "ff6d6856-c287-4f2c-9a9e-7dda8b4c2921"/*SyncedNestBalls*/,
-  "Description": "A weird clustering effect caused by apply non-curl noise.",
+  "Description": "A weird clustering effect caused by applying non-curl noise.",
   "InputUis": [],
   "SymbolChildUis": [
     {

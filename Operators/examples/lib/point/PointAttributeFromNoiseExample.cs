@@ -1,4 +1,4 @@
-namespace Examples.lib.point;
+namespace Examples.Lib.point;
 
 [Guid("78413b72-9c04-41e7-93cc-7fc75aff99b5")]
  internal sealed class PointAttributeFromNoiseExample : Instance<PointAttributeFromNoiseExample>

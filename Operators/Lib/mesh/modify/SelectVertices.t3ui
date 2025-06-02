@@ -1,6 +1,6 @@
 {
   "Id": "6184ac2d-c17d-47de-a314-15e1c670f969"/*SelectVertices*/,
-  "Description": "Sets the selection property of mesh vertices from a volume. This can later be used to selectively apply manipulations like displace.\n\nalso see: [ScatterMeshFaces]",
+  "Description": "Sets the selection property of mesh vertices from a volume. This can later be used to selectively apply manipulations like displace.\n\nAlso see: [ScatterMeshFaces]",
   "SymbolTags": "1",
   "InputUis": [
     {

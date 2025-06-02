@@ -1,4 +1,4 @@
-namespace Examples.lib.image.use;
+namespace Examples.Lib.image.use;
 
 [Guid("6594c457-82ab-4121-8e51-5212fe69262f")]
  internal sealed class BlendWithMaskExample : Instance<BlendWithMaskExample>

@@ -33,7 +33,7 @@
         "X": 0.0,
         "Y": 0.0
       },
-      "Description": "X (-left / +right), Y (-down / + up), Z (-forward/+backwards) coordinates of the current view position. \n\nThe default z-position is 2.41 behind the centered scene origin so that a [Layer2d] with a size of 2 precisely fills the screen height for a Field of view (Fov) of 45°.",
+      "Description": "X (-left / +right), Y (-down / +up), Z (-forward / +backwards) coordinates of the current view position. \n\nThe default z-position is 2.41 behind the centered scene origin so that a [Layer2d] with a size of 2 precisely fills the screen height for a Field of View (FOV) of 45°.",
       "Scale": 0.01
     },
     {
@@ -42,7 +42,7 @@
         "X": 0.0,
         "Y": 0.0
       },
-      "Description": "Rotates the camera right / left",
+      "Description": "Rotates the camera right/left",
       "Min": -90.0,
       "Max": 90.0,
       "Format": "{0:0.0}°"
@@ -88,7 +88,7 @@
         "X": 0.0,
         "Y": 0.0
       },
-      "Description": "Defined a helping vector to control the rotation of the camera. If the the view direction approaches the Up-Vector, camera motion becomes instable because of gimbal lock.\n\nThis needs to be adjusted in cases where the camera needs to point directly up or down."
+      "Description": "Defines a helping vector to control the rotation of the camera. If the view direction approaches the Up-Vector, camera motion becomes unstable because of gimbal lock.\n\nThis needs to be adjusted in cases where the camera needs to point directly up or down."
     },
     {
       "InputId": "f66e91a1-b991-48c3-a8c9-33bcad0c2f6f"/*AspectRatio*/,
@@ -96,7 +96,7 @@
         "X": 0.0,
         "Y": 0.0
       },
-      "Description": "Enforce as fixed aspect ratio for the camera view. \nFor values smaller or equal 0 this settings is ignored and the current view's aspect-ratio is automatically used. When setting this parameter to a positive window the content get's stretched with the aspect of the output window."
+      "Description": "Enforce a fixed aspect ratio for the camera view. \nFor values smaller or equal to 0 this setting is ignored and the current view's aspect ratio is automatically used. When setting this parameter to a positive window, the content gets stretched with the aspect of the output window."
     },
     {
       "InputId": "fee19916-846f-491a-a2ee-1e7b1ac8e533"/*PositionOffset*/,

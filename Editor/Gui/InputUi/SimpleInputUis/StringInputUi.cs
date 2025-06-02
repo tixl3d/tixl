@@ -7,6 +7,7 @@ using T3.Core.Operator;
 using T3.Core.Operator.Interfaces;
 using T3.Core.Resource;
 using T3.Core.SystemUi;
+using T3.Core.Utils;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel.InputsAndTypes;
@@ -121,10 +122,24 @@ public sealed class StringInputUi : InputValueUi<string>
         return ImGui.InputText("##textEdit", ref value, MaxStringLength);
     }
 
+
+    
     private static InputEditStateFlags DrawMultilineTextEdit(ref string value)
     {
+        // Wrap to next line
         ImGui.Dummy(new Vector2(1, 1));
-        var changed = ImGui.InputTextMultiline("##textEdit", ref value, MaxStringLength, new Vector2(-1, 3 * ImGui.GetFrameHeight()));
+        
+        ImGui.PushFont(Fonts.Code);
+        var lineCount = value.LineCount().Clamp(1, 30) + 1;
+        var lineHeight = Fonts.Code.FontSize;
+        ImGui.PushStyleColor(ImGuiCol.FrameBg, UiColors.BackgroundInputField.Rgba);
+        var requestedContentHeight = lineCount * lineHeight;
+        var clampedToWindowHeight = MathF.Min(requestedContentHeight, ImGui.GetWindowSize().Y * 0.5f);
+        
+        var changed = ImGui.InputTextMultiline("##textEdit", ref value, MaxStringLength, new Vector2(-1, clampedToWindowHeight));
+        ImGui.PopStyleColor();
+        ImGui.PopFont();
+        FormInputs.AddVerticalSpace(3);
         return changed ? InputEditStateFlags.Modified : InputEditStateFlags.Nothing;
     }
 

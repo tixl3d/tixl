@@ -643,7 +643,7 @@
   "Annotations": [
     {
       "Id": "d0be7518-a796-4bbb-836b-94285aa9e521",
-      "Title": "This show some interesting SVG \nline animations at the beginning.",
+      "Title": "This shows some interesting SVG \nline animations at the beginning.",
       "Label": "Intro Logos",
       "Color": {
         "X": 0.6,

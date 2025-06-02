@@ -711,7 +711,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\common\\meshes\\cube-bevelled.obj"
+          "Value": "Resources/common/meshes/cube-bevelled.obj"
         }
       ],
       "Outputs": []
@@ -1052,18 +1052,18 @@
           "Id": "1168094f-1eee-4ed7-95e2-9459e6171e08"/*Rotation*/,
           "Type": "System.Numerics.Vector3",
           "Value": {
-            "X": 25.3,
-            "Y": -10.6,
-            "Z": -4.4
+            "X": -0.1,
+            "Y": -74.1,
+            "Z": -45.7
           }
         },
         {
           "Id": "f37c11a5-b210-4e83-8ebd-64ea49ee9b96"/*Scale*/,
           "Type": "System.Numerics.Vector3",
           "Value": {
-            "X": 4.01,
-            "Y": 0.2,
-            "Z": 4.7
+            "X": 35.2,
+            "Y": 0.41,
+            "Z": 0.147
           }
         }
       ],

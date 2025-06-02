@@ -1,6 +1,6 @@
 {
   "Id": "38e88910-6063-41d1-840b-8aeeb0eeccc0"/*ResolutionConstBuffer*/,
-  "Description": "Sadly, it's not possible to get the resolution of the image a FragmentShader is currently writing into.\nThis helper operator provides a Constant Buffer that can be bound to a shader to get this information.\n\nIn most use-cases it is probably more convenient to use [RequestedResolution]  with [FloatsToBuffer] or [IntsToBuffer]. ",
+  "Description": "Sadly, it's not possible to get the resolution of the image a FragmentShader is currently writing into.\nThis helper operator provides a Constant Buffer that can be bound to a shader to get this information.\n\nIn most use-cases it is probably more convenient to use [RequestedResolution] with [FloatsToBuffer] or [IntsToBuffer]. ",
   "SymbolTags": "8",
   "InputUis": [
     {

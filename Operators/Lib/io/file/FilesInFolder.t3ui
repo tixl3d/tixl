@@ -17,7 +17,7 @@
         "X": 0.5290108,
         "Y": -29.32594
       },
-      "Description": "Defines the selected folger / path",
+      "Description": "Defines the selected folder / path",
       "Usage": "DirectoryPath"
     },
     {
@@ -26,7 +26,7 @@
         "X": 0.0,
         "Y": 50.0
       },
-      "Description": "triggers a scan of the selected folder and filter / filetype",
+      "Description": "Triggers a scan of the selected folder and filter / filetype",
       "AddPadding": "True"
     }
   ],

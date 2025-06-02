@@ -1,6 +1,6 @@
 {
   "Id": "95d586a2-ee14-4ff5-a5bb-40c497efde95"/*TriggerAnim*/,
-  "Description": "Generate interactive animation values than can be triggered with a boolean value.\nIt offers a variety of shapes and modes.\n\nTips:\n- Hold CTRL to directly manipulate rate and shape in the graph.\n- Have a look at [HowToAnimate] to get some ideas on how to use this.\n\nAn example setup might be:\n\n[HasValueIIncreased]->[TriggerAnim]->[SampleGradient]->[Blob]",
+  "Description": "Generate interactive animation values that can be triggered with a boolean value.\nIt offers a variety of shapes and modes.\n\nTips:\n- Hold CTRL to directly manipulate rate and shape in the graph.\n- Have a look at [HowToAnimate] to get some ideas on how to use this.\n\nAn example setup might be:\n\n[HasValueIIncreased]->[TriggerAnim]->[SampleGradient]->[Blob]",
   "SymbolTags": "1",
   "InputUis": [
     {

@@ -9,7 +9,7 @@
         "X": -1251.6332,
         "Y": 804.2572
       },
-      "Description": "In certain situation it you an save resources by disabling update.\nE.g. you could use [Once] on only compute a single distribution of Image and Seed do not change."
+      "Description": "In certain situations you can save resources by disabling update.\nE.g. you could use [Once] to only compute a single distribution if Image and Seed do not change."
     },
     {
       "InputId": "19db4357-97ae-4e83-8464-4e4cf9182bdb"/*Seed*/,
@@ -18,7 +18,7 @@
         "Y": 1920.4591
       },
       "GroupTitle": "Options",
-      "Description": "A random seed. Consider connecting [CountInt] to add a animated dithering."
+      "Description": "A random seed. Consider connecting [CountInt] to add animated dithering."
     },
     {
       "InputId": "1d0e573e-f733-4715-afe3-f96950f29aa4"/*ColorWeight*/,
@@ -44,7 +44,7 @@
         "X": -1251.6332,
         "Y": 849.2572
       },
-      "Description": "The counts of emitted points. Note that the resolution of the connected image has larger impact on performance than the number of points. "
+      "Description": "The count of emitted points. Note that the resolution of the connected image has a larger impact on performance than the number of points."
     },
     {
       "InputId": "71d1e34f-bf8c-4e24-87b2-177bb3249b12"/*ScatterWithinPixel*/,
@@ -52,7 +52,7 @@
         "X": -1229.6033,
         "Y": 1508.8694
       },
-      "Description": "On images with very small resolution the pixels can be become noticible. This parameter scatters the points with the pixels.\nValues larger than one add an additional scattering."
+      "Description": "On images with very small resolution the pixels can become noticeable. This parameter scatters the points within the pixels.\nValues larger than one add additional scattering."
     },
     {
       "InputId": "9af8bd73-43cd-4d54-b7a1-d537a880e736"/*Mode*/,
@@ -355,7 +355,7 @@
     },
     {
       "Id": "76501a94-e13d-4361-bed3-2774c5f9bef8",
-      "Title": "Some documentation on how this op works:\nThis shaders creates a cummulive distribution function (CDF) for the rows and columns of the image and then uses binary search to find the the position of of a normalized random number vector 2.",
+      "Title": "Some documentation on how this op works:\nThis shader creates a cumulative distribution function (CDF) for the rows and columns of the image and then uses binary search to find the position of a normalized random number vector 2.",
       "Color": {
         "X": 0.6,
         "Y": 0.6,

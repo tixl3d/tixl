@@ -1,6 +1,6 @@
 {
   "Id": "8fb63c4d-80a8-4023-b55b-7f97bffbee48"/*_GetTidalTrigger*/,
-  "Description": "An internal helper that detects triggers for the selected channel from TidalCycles.\nThese channels are sent as OSC packages but to detect triggers with identical values or nodes we also have to look for changes in the \"cycle\" attribute.",
+  "Description": "An internal helper that detects triggers for the selected channel from TidalCycles.\nThese channels are sent as OSC packages, but to detect triggers with identical values or nodes, we also have to look for changes in the \"cycle\" attribute.",
   "InputUis": [
     {
       "InputId": "183c0a33-a37b-42eb-b160-b370aad2e924"/*LogDebug*/,

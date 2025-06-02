@@ -1,6 +1,6 @@
 {
   "Id": "cc3cc712-9e87-49c6-b04b-49a12cf2ba75"/*_SpecularPrefilter*/,
-  "Description": "GGX prefiltering for input cubemap. Different roughness prefilterings are store in mip levels.",
+  "Description": "GGX prefiltering for input cubemap. Different roughness prefilterings are stored in mip levels.",
   "SymbolTags": "16",
   "InputUis": [
     {

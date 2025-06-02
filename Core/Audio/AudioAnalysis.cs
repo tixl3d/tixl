@@ -53,6 +53,7 @@ public static class AudioAnalysis
                     var decayed = lastPeak * decayFactor;
                     var currentValue = FrequencyBands[bandIndex];
                     var newPeak = MathF.Max(decayed, currentValue);
+                    FrequencyBandPeaks[bandIndex] = newPeak;
                     
                     const float attackAmplification = 4;
                     var newAttack = (newPeak - lastPeak).Clamp(0, 10000) * attackAmplification;

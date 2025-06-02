@@ -1,4 +1,4 @@
-namespace Examples.lib.image.fx.stylize;
+namespace Examples.Lib.image.fx.stylize;
 
 [Guid("ea7536a2-f69b-4964-a04c-4474bfacfa56")]
  internal sealed class PixelateExample : Instance<PixelateExample>

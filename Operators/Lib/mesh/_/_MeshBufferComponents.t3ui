@@ -1,6 +1,6 @@
 {
   "Id": "5b9f1d97-4e10-4f31-ba83-4cbf7be9719b"/*_MeshBufferComponents*/,
-  "Description": "Gives access to Vertex and Index-Buffers of a mesh.\n\nThe buffer can then be combined with [_AssembleMeshBuffers].",
+  "Description": "Gives access to Vertex and Index Buffers of a mesh.\n\nThe buffer can then be combined with [_AssembleMeshBuffers].",
   "SymbolTags": "16",
   "InputUis": [
     {

@@ -1,6 +1,6 @@
 {
   "Id": "9d71d46c-f3d8-4bf4-a104-38c0b37cc88b"/*Equirectangle*/,
-  "Description": "Renders the input scene as an image with depth with equirectangular mapping (for 360/VR/fuldome video)\n\nAlso see [PolarCoordinates], [ConvertEquirectangle]",
+  "Description": "Renders the input scene as an image with depth with equirectangular mapping (for 360/VR/fulldome video)\n\nAlso see [PolarCoordinates], [ConvertEquirectangle]",
   "SymbolTags": "64",
   "InputUis": [
     {
@@ -16,7 +16,7 @@
         "X": -2690.953,
         "Y": -86.78491
       },
-      "Description": "use 256, 512, 1024 or 2048",
+      "Description": "Use 256, 512, 1024 or 2048",
       "AddPadding": "True"
     }
   ],

@@ -16,6 +16,7 @@ internal static class AnnotationRenaming
 {
     public static void Draw(GraphUiContext context)
     {
+        var shouldClose = false;
         var annotationId = context.ActiveAnnotationId;
 
         if (!context.Layout.Annotations.TryGetValue(annotationId, out var magAnnotation))
@@ -45,6 +46,11 @@ internal static class AnnotationRenaming
             ImGui.SetNextItemWidth(200);
             ImGui.InputText("##renameAnnotationLabel", ref annotation.Label, 256, ImGuiInputTextFlags.AutoSelectAll);
 
+            if (ImGui.IsItemDeactivated() && ImGui.IsKeyPressed((ImGuiKey)Key.Return))
+            {
+                shouldClose = true;
+            }
+            
             // Label Placeholder
             if (string.IsNullOrEmpty(annotation.Label))
             {
@@ -54,6 +60,7 @@ internal static class AnnotationRenaming
                                                   UiColors.ForegroundFull.Fade(0.3f),
                                                   "Label...");
             }
+            
         }
 
         ImGui.SetCursorScreenPos(new Vector2(ImGui.GetItemRectMin().X, ImGui.GetItemRectMax().Y));
@@ -85,7 +92,8 @@ internal static class AnnotationRenaming
             return;
 
         var clickedOutside = ImGui.IsMouseClicked(ImGuiMouseButton.Left) && !screenArea.Contains(ImGui.GetMousePos());
-        var shouldClose = ImGui.IsItemDeactivated() || ImGui.IsKeyPressed((ImGuiKey)Key.Esc) || clickedOutside;
+        
+        shouldClose |= ImGui.IsItemDeactivated() || ImGui.IsKeyPressed((ImGuiKey)Key.Esc) || clickedOutside;
         if (!shouldClose)
             return;
 

@@ -8,22 +8,27 @@ internal sealed class GenerateMips : Instance<GenerateMips>
     [Output(Guid = "ac14864f-3288-4cab-87a0-636cee626a2b")]
     public readonly Slot<Texture2D> TextureWithMips = new();
 
+    [Output(Guid = "DBF236AA-1905-442A-B2E0-759E9F33C1C9")]
+    public readonly Slot<Command> Activate = new();
+
+
     public GenerateMips()
     {
         TextureWithMips.UpdateAction += Update;
+        Activate.UpdateAction += Update;
     }
 
     private void Update(EvaluationContext context)
     {
-        Texture2D texture = Texture.GetValue(context);
-        if (texture != null)
+        var texture = Texture.GetValue(context);
+        if (texture != null && !texture.IsDisposed)
         {
             try
             {
 
                 if ((texture.Description.BindFlags & BindFlags.RenderTarget) > 0)
                 {
-                    if (_srv == null || _srv.Resource != (Resource)texture)
+                    if (_srv == null || _srv.IsDisposed || _srv.Resource != (Resource)texture)
                     {
                         _srv?.Dispose();
                         texture.CreateShaderResourceView(ref _srv, null);
@@ -43,9 +48,12 @@ internal sealed class GenerateMips : Instance<GenerateMips>
         }
 
         TextureWithMips.Value = texture;
+        
+        TextureWithMips.DirtyFlag.Clear();
+        Activate.DirtyFlag.Clear();
     }
 
-    private ShaderResourceView _srv = null;
+    private ShaderResourceView _srv;
 
     [Input(Guid = "a4e3001c-0663-48ec-8f56-b11ff0b40850")]
     public readonly InputSlot<Texture2D> Texture = new();

@@ -1,6 +1,6 @@
 {
   "Id": "2f851b5b-b66d-40b0-9445-e733dc4b907d"/*Sum*/,
-  "Description": "Allows to connect any amount of floats whose sum is output\n\nAlso see [Add]",
+  "Description": "Allows connecting any amount of floats whose sum is output\n\nAlso see [Add]",
   "SymbolTags": "1",
   "InputUis": [
     {

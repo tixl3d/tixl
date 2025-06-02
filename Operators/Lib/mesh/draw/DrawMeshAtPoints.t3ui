@@ -1,6 +1,6 @@
 {
   "Id": "42cb88bc-beb8-4d89-ac99-44b77be5f03e"/*DrawMeshAtPoints*/,
-  "Description": "Draws PBR shaded instances of a mesh defined by the connected point buffer. It uses the current settings for material, point lights, fog and environment. It can use the point's W attribute to control the size of the instances.\n\nCheckout the [HowToDrawThings] on how to set these up.\n\nAlso checkout [DrawMesh] and [RepeatMeshAtPoints].",
+  "Description": "Draws PBR shaded instances of a mesh defined by the connected point buffer. It uses the current settings for material, point lights, fog, and environment. It can use the point's W attribute to control the size of the instances.\n\nCheck out the [HowToDrawThings] on how to set these up.\n\nAlso check out [DrawMesh] and [RepeatMeshAtPoints].",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -30,7 +30,7 @@
         "Y": 3814.7598
       },
       "GroupTitle": "Input",
-      "Description": "Input for Incoming Mesh Geometry"
+      "Description": "Input for incoming Mesh Geometry"
     },
     {
       "InputId": "408ae7c7-9aa8-4537-8c55-b5689f8f9b56"/*GPoints*/,
@@ -47,7 +47,7 @@
         "X": 1907.7228,
         "Y": 3529.3093
       },
-      "Description": "Defines whether the meshes are influenced / non-uniformly stretched by their points.",
+      "Description": "Defines whether the meshes are influenced/non-uniformly stretched by their points.",
       "AddPadding": "True"
     },
     {
@@ -97,7 +97,7 @@
         "X": 2000.9934,
         "Y": 4217.8496
       },
-      "Description": "Defines the transparency of the surfaces.\n\nNone: All surfaces are \"bothsided\" or always visible from all sides\n\nFront: The normals are flipped (frontside is transparent / backside visible)\n\nBack: Default (Frontside is visible / backside is invisible)"
+      "Description": "Defines the transparency of the surfaces.\n\nNone: All surfaces are \"bothsided\" or always visible from all sides\n\nFront: The normals are flipped (frontside is transparent / backside visible)\n\nBack: Default (frontside is visible / backside is invisible)"
     },
     {
       "InputId": "dd511aab-0472-4109-9c10-cc1ab5042499"/*EnableZWrite*/,

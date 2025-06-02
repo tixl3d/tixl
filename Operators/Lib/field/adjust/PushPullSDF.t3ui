@@ -1,6 +1,6 @@
 {
   "Id": "0ff18a32-c1e9-406d-b3e3-23700e2453a0"/*PushPullSDF*/,
-  "Description": "Makes the incoming SDF volumens thicker or thinner by pushes or pulls the surface by adding a constant value to the distance.",
+  "Description": "Makes the incoming SDF volumes thicker or thinner by pushing or pulling the surface by adding a constant value to the distance.",
   "InputUis": [
     {
       "InputId": "463149fa-b53b-4d43-b4e7-57dcb045bba0"/*StepScale*/,
@@ -15,7 +15,7 @@
         "X": -200.0,
         "Y": 75.0
       },
-      "Description": "Add additional scale field to simulate some kind of displacement.\nThis will break the Lipschitz continuity of your field and cause artifacs when raymarching.",
+      "Description": "Add additional scale field to simulate some kind of displacement.\nThis will break the Lipschitz continuity of your field and cause artifacts when raymarching.",
       "AddPadding": "True"
     },
     {

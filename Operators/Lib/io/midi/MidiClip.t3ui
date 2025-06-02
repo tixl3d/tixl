@@ -1,6 +1,6 @@
 {
   "Id": "a3ceb788-4055-4556-961b-63b7221f93e7"/*MidiClip*/,
-  "Description": "Creates a time clip bar within the DopeView of the Timeline, similar to how Video editing apps show clips.\nTimeClips can be moved by drag and drop and arranged next to and on top of each other (classic NLE non-liniear editing).\n\nWhen the time marker is running over / playing the time clip it is activated.\n\nTo load an image sequence into the DopeView of the Timeline [ImageSequenceClip] can be used.\n[TimeClip] can be used to activate full node trees.",
+  "Description": "Creates a time clip bar within the DopeView of the Timeline, similar to how video editing apps show clips.\nTimeClips can be moved by drag and drop and arranged next to and on top of each other (classic NLE non-linear editing).\n\nWhen the time marker is running over / playing the time clip it is activated.\n\nTo load an image sequence into the DopeView of the Timeline [ImageSequenceClip] can be used.\n[TimeClip] can be used to activate full node trees.",
   "SymbolTags": "64",
   "InputUis": [
     {

@@ -1,6 +1,6 @@
 {
   "Id": "7a08d73e-1aea-479f-8d36-ecb119d75c3a"/*SimDirectionalOffset*/,
-  "Description": "Linearly offsets the incoming points along the defines axis.\n\nNeeds a [DrawPoints], [DrawLines] or [DrawMeshAtPoints] or similar in order to become visible.\n\nNeeds Points as a base for example: [RadialPoints], [SpherePoints], [PointsOnMesh]",
+  "Description": "Linearly offsets the incoming points along the defined axis.\n\nNeeds a [DrawPoints], [DrawLines] or [DrawMeshAtPoints] or similar in order to become visible.\n\nNeeds Points as a base, for example: [RadialPoints], [SpherePoints], [PointsOnMesh]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -10,7 +10,7 @@
         "Y": 574.45514
       },
       "GroupTitle": "Settings",
-      "Description": "Defines how much the Points are offsets on the given axis",
+      "Description": "Defines how much the Points are offset on the given axis",
       "Scale": 0.001
     },
     {
@@ -28,7 +28,7 @@
         "X": -417.82614,
         "Y": 664.45526
       },
-      "Description": "Randomized the force per point"
+      "Description": "Randomizes the force per point"
     },
     {
       "InputId": "4f9ab443-3885-4a57-9116-6be5824bd95b"/*Amount*/,

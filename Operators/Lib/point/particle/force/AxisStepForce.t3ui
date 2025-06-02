@@ -25,6 +25,7 @@
         "X": -540.1571,
         "Y": 332.20456
       },
+      "GroupTitle": "Axis Settings",
       "Min": 0.0,
       "Max": 1.0,
       "Clamp": true
@@ -50,14 +51,16 @@
       "Position": {
         "X": -540.1571,
         "Y": 242.20462
-      }
+      },
+      "GroupTitle": "Settings"
     },
     {
       "InputId": "ab591dbc-b521-4ef0-b1e2-d03ff27b959e"/*AxisSpace*/,
       "Position": {
         "X": -541.097,
         "Y": 617.51074
-      }
+      },
+      "AddPadding": "True"
     },
     {
       "InputId": "f5e93296-efe1-42e0-add8-f8b6298fe183"/*StrengthDistribution*/,

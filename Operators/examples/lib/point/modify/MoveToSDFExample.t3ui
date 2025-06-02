@@ -1,0 +1,197 @@
+{
+  "Id": "653100dc-0c7d-4ce2-aa23-fdba8d7d4395"/*MoveToSDFExample*/,
+  "Description": "A complex example how to use use [MoveoToSDF] to visualzie distances to SDFs.",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0426d668-50a7-4419-a530-54013cf2fc55"/*LinePoints*/,
+      "Position": {
+        "X": 232.00327,
+        "Y": 42.23271
+      }
+    },
+    {
+      "ChildId": "0f9c6cd2-9911-49be-b882-ce095294b4eb"/*Group*/,
+      "Position": {
+        "X": 1145.9191,
+        "Y": -25.798462
+      }
+    },
+    {
+      "ChildId": "16d2cbd4-dbeb-4658-b578-07254536463c"/*Point*/,
+      "Position": {
+        "X": 232.00327,
+        "Y": 7.232712
+      }
+    },
+    {
+      "ChildId": "2a6ba4a6-1841-4f11-b4aa-496ea88d60be"/*MoveToSDF*/,
+      "Comment": "Create a new set of points with the closed position on the given SDF-Field.",
+      "Position": {
+        "X": 781.34344,
+        "Y": 147.5611
+      }
+    },
+    {
+      "ChildId": "2f38d902-a441-46da-bd84-67761ef983e5"/*AnimVec3*/,
+      "Position": {
+        "X": 234.01248,
+        "Y": 307.1079
+      }
+    },
+    {
+      "ChildId": "41794f9d-3344-4085-8174-8995eff7e0c8"/*DrawLines*/,
+      "Position": {
+        "X": 748.5374,
+        "Y": 626.4053
+      }
+    },
+    {
+      "ChildId": "4306bc71-6bea-41f5-b0a4-a6f452219e6c"/*Vector3Gizmo*/,
+      "Position": {
+        "X": 92.003265,
+        "Y": 7.232712
+      }
+    },
+    {
+      "ChildId": "687550fd-981a-4da5-9262-aa2f37614414"/*DrawPoints*/,
+      "Position": {
+        "X": 781.34344,
+        "Y": 217.5611
+      }
+    },
+    {
+      "ChildId": "68facb18-8946-4ba7-b8a6-08d3b3377470"/*NoiseDisplaceSDF*/,
+      "Position": {
+        "X": 374.01248,
+        "Y": 272.1079
+      }
+    },
+    {
+      "ChildId": "6eda92f1-82d4-4fbd-a5c6-a8d6b160d6d7"/*AnimInt*/,
+      "Position": {
+        "X": 232.00327,
+        "Y": 112.23271
+      }
+    },
+    {
+      "ChildId": "7b88bace-c4d0-41df-afdb-278b334f6142"/*MoveToSDF*/,
+      "Comment": "We clamp the amount of the movement to zero to lock them to their original position.\nWe also write the distance to FX1 so we can use it as a scale factor for...",
+      "Position": {
+        "X": 748.5374,
+        "Y": 486.40527
+      }
+    },
+    {
+      "ChildId": "9d6891ff-2378-4bf3-9e88-ef450d073645"/*BoxSDF*/,
+      "Position": {
+        "X": 94.01248,
+        "Y": 272.1079
+      }
+    },
+    {
+      "ChildId": "afcd0bd5-4865-4e85-923d-3474a9611a43"/*PickPointList*/,
+      "Comment": "Switch between a couple of source points sets.\nFeel free to experiment with our own.",
+      "Position": {
+        "X": 372.00327,
+        "Y": 7.232712
+      }
+    },
+    {
+      "ChildId": "aff996b8-3345-4ccd-a8a2-b5b39a9dca70"/*SetMaterial*/,
+      "Position": {
+        "X": 947.25073,
+        "Y": 353.45374
+      }
+    },
+    {
+      "ChildId": "b984dd71-896a-4645-867e-677177474a59"/*RadialPoints*/,
+      "Position": {
+        "X": 232.00327,
+        "Y": 77.23271
+      }
+    },
+    {
+      "ChildId": "bfedc174-46fd-4518-a355-148507d86ef5"/*CombineSDF*/,
+      "Position": {
+        "X": 234.01248,
+        "Y": 272.1079
+      }
+    },
+    {
+      "ChildId": "c5cdf0d0-bf59-4c30-912e-e2e340ce8295"/*DrawPoints*/,
+      "Comment": "Draw the original points.",
+      "Position": {
+        "X": 948.3339,
+        "Y": -47.416473
+      }
+    },
+    {
+      "ChildId": "d71f9ede-f9c6-4373-87d1-e636e9fe70c1"/*RadialPoints*/,
+      "Position": {
+        "X": 608.5374,
+        "Y": 591.4053
+      }
+    },
+    {
+      "ChildId": "de9a4dc9-3fbc-49bc-8ea6-f56f0f6d6d31"/*RepeatAtGPoints*/,
+      "Comment": "...repeating some circles at those points.",
+      "Position": {
+        "X": 748.5374,
+        "Y": 556.4053
+      }
+    },
+    {
+      "ChildId": "e78dd8f8-bb40-4de9-98d3-60b18a843f75"/*PairPointsForLines*/,
+      "Position": {
+        "X": 949.67163,
+        "Y": 29.521393
+      }
+    },
+    {
+      "ChildId": "f07e261e-8c4f-43f4-8993-0eca8d2624bd"/*DrawLines*/,
+      "Comment": "Draw a line between source and target.",
+      "Position": {
+        "X": 949.67163,
+        "Y": 99.52139
+      }
+    },
+    {
+      "ChildId": "f07e8a07-a9e2-4584-b0bd-35695d62c3d0"/*RaymarchField*/,
+      "Comment": "Show the actual field.",
+      "Position": {
+        "X": 947.25073,
+        "Y": 318.45374
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "2d8dcf73-18f5-42a5-b693-9c788094b5ec"/*Output*/,
+      "Position": {
+        "X": 1145.9191,
+        "Y": 149.20154
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "9fca2e52-023c-4664-8a62-330b0a3dddbf",
+      "Label": "Visualize radius",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 548.5374,
+        "Y": 426.40527
+      },
+      "Size": {
+        "X": 400.0,
+        "Y": 295.0
+      }
+    }
+  ]
+}

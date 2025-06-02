@@ -131,6 +131,9 @@ float4 GetField(float4 p)
     p.xyz = mul(float4(p.xyz, 1), WorldToObject).xyz;
     float4 f = 1;
     /*{FIELD_CALL}*/
+
+    float uniformScale = length(ObjectToWorld[0].xyz);
+    f.w *= uniformScale;
     return f;
 }
 

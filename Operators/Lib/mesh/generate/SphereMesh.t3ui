@@ -1,6 +1,6 @@
 {
   "Id": "5fb3dafe-aed4-4fff-a5b9-c144ea023d35"/*SphereMesh*/,
-  "Description": "Generates a procedural three-dimensional UV sphere mesh which can be rendered with [DrawMesh] , [DrawMeshUnlit] and [DrawMeshHatched] among others.\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToDrawThings].\n\nIt can also become the source for a particle system with [MeshVerticesToPoints] or [PointsOnMesh].\nTo import static 3D meshes from other programs refer to [LoadObj].\n\n",
+  "Description": "Generates a procedural three-dimensional UV sphere mesh which can be rendered with [DrawMesh], [DrawMeshUnlit] and [DrawMeshHatched] among others.\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToDrawThings].\n\nIt can also become the source for a particle system with [MeshVerticesToPoints] or [PointsOnMesh].\nTo import static 3D meshes from other programs refer to [LoadObj].\n\n",
   "SymbolTags": "1",
   "InputUis": [
     {

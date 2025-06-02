@@ -1,4 +1,4 @@
-namespace Examples.lib.numbers.floats;
+namespace Examples.Lib.numbers.floats;
 
 [Guid("805d5196-f253-4fb6-9c5e-d69915b56328")]
  internal sealed class ValuesToTextureExample : Instance<ValuesToTextureExample>

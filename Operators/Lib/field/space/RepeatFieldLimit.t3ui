@@ -23,7 +23,7 @@
         "X": -200.0,
         "Y": 45.0
       },
-      "Description": "Defines the size of the gaps between the repetition"
+      "Description": "Defines the size of the gaps between the repetitions"
     },
     {
       "InputId": "b73fe274-cf9a-4950-a10c-88c9f22b4397"/*Start*/,
@@ -32,7 +32,7 @@
         "Y": 120.0
       },
       "GroupTitle": "Extend",
-      "Description": "defines how often the field is to be repeated in one direction along the axis"
+      "Description": "Defines how often the field is to be repeated in one direction along the axis"
     },
     {
       "InputId": "c72615be-8123-4d3b-bc69-0f912b0fdc39"/*Stop*/,
@@ -40,7 +40,7 @@
         "X": -200.0,
         "Y": 195.0
       },
-      "Description": "defines how often the field is to be repeated in the other direction along the axis"
+      "Description": "Defines how often the field is to be repeated in the other direction along the axis"
     }
   ],
   "SymbolChildUis": [],

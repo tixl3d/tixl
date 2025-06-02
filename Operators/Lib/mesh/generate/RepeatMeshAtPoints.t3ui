@@ -1,6 +1,6 @@
 {
   "Id": "ab496711-8b99-4463-aac9-b41fdf46608d"/*RepeatMeshAtPoints*/,
-  "Description": "Creates a new mesh that repeats the incoming mesh at each point.\nNote: \nWarning: With detailed meshes, or very large scaled meshes and or a very high number of points, this Operator can take up a lot of resources.\n\nAlso see: [DrawMeshAtPoints]",
+  "Description": "Creates a new mesh that repeats the incoming mesh at each point.\nNote: \nWarning: With detailed meshes, or very large scaled meshes and/or a very high number of points, this Operator can take up a lot of resources.\n\nAlso see: [DrawMeshAtPoints]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -205,13 +205,6 @@
       "ChildId": "787b0cf7-00be-4330-bcd4-a3588ebe8fc0"/*newVertexBuffer*/,
       "Position": {
         "X": 583.74963,
-        "Y": 1111.366
-      }
-    },
-    {
-      "ChildId": "89c1e7af-fa5c-4b92-ae75-ea3210fce580"/*VertexSize*/,
-      "Position": {
-        "X": 433.74976,
         "Y": 1111.366
       }
     },

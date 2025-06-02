@@ -1,6 +1,6 @@
 using T3.Core.Utils;
 
-namespace Examples.lib.image.use;
+namespace Examples.Lib.image.use;
 
 [Guid("57c1fe66-d8bc-4ea5-ad25-6986d4c2bba4")]
  internal sealed class KeepPreviousFrame2 : Instance<KeepPreviousFrame2>

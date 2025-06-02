@@ -1,4 +1,4 @@
-namespace Examples.lib.point;
+namespace Examples.Lib.point;
 
 [Guid("93292762-bc39-4b66-ace0-583f461abf76")]
  internal sealed class DrawBillboardsExample : Instance<DrawBillboardsExample>

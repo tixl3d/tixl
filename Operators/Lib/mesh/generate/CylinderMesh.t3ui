@@ -1,6 +1,6 @@
 {
   "Id": "5777a005-bbae-48d6-b633-5e998ca76c91"/*CylinderMesh*/,
-  "Description": "Generates a procedural three-dimensional mesh which can be rendered with [DrawMesh] , [DrawMeshUnlit] and [DrawMeshHatched] among others.\n\nThis mesh can be generated with or without closing caps. You can use the Height, Fill, and RadiusOffset parameters to generate things like pie charts, torus diagrams, cones, and other shapes.\nCheck the presets.\n\nTip:\n- set the cap segments to 0 to skip drawing caps.\nAlso see [NGonMesh]\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToDrawThings].\n\nIt can also become the source for a particle system with [MeshVerticesToPoints] or [PointsOnMesh].\nTo import static 3D meshes from other programs refer to [LoadObj].\n\n",
+  "Description": "Generates a procedural three-dimensional mesh which can be rendered with [DrawMesh], [DrawMeshUnlit], and [DrawMeshHatched] among others.\n\nThis mesh can be generated with or without closing caps. You can use the Height, Fill, and RadiusOffset parameters to generate things like pie charts, torus diagrams, cones, and other shapes.\nCheck the presets.\n\nTip:\n- set the cap segments to 0 to skip drawing caps.\nAlso see [NGonMesh]\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToDrawThings].\n\nIt can also become the source for a particle system with [MeshVerticesToPoints] or [PointsOnMesh].\nTo import static 3D meshes from other programs refer to [LoadObj].\n\n",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -9,7 +9,7 @@
         "X": -200.0,
         "Y": 225.0
       },
-      "Description": "Rotates the the surface on top in relation to the \"Spin\" setting",
+      "Description": "Rotates the surface on top in relation to the \"Spin\" setting",
       "Min": -90.0,
       "Max": 90.0,
       "Scale": 1.0,
@@ -76,7 +76,7 @@
         "Y": 315.0
       },
       "GroupTitle": "Pivot",
-      "Description": "Offsets the position of the pivotpoint (center).\n\nThis is helpful to change the point around which the cube rotates / along which it is scaled.",
+      "Description": "Offsets the position of the pivot point (center).\n\nThis is helpful to change the point around which the cube rotates/along which it is scaled.",
       "Min": 0.0,
       "Max": 1.0
     },
@@ -97,7 +97,7 @@
         "X": -200.0,
         "Y": 270.0
       },
-      "Description": "Cuts and compresses / slides the geometry along the radius",
+      "Description": "Cuts and compresses/slides the geometry along the radius",
       "Min": 0.0,
       "Max": 360.0,
       "Scale": 1.0,

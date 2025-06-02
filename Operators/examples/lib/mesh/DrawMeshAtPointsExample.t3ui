@@ -49,7 +49,7 @@
     },
     {
       "ChildId": "e5315f37-a88a-479a-88c3-f00f1e32affd"/*RadialPoints*/,
-      "Comment": "Notice how we disabled CloseCircleLine. Since we don't draw lines we don't need to repeat the start and end points.\n\nWe also adjust the orientation angle with a random axis and adjust the orientation angle so that the Torus are aligned at the z-axis.",
+      "Comment": "Notice how we disabled CloseCircleLine. Since we don't draw lines, we don't need to repeat the start and end points.\n\nWe also adjust the orientation angle with a random axis and adjust the orientation angle so that the Torus are aligned at the z-axis.",
       "Position": {
         "X": 107.3291,
         "Y": 67.248535

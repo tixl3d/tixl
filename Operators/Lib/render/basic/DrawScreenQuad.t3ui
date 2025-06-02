@@ -1,6 +1,6 @@
 {
   "Id": "5a2752e8-95ae-4d76-b903-1f52ef43bcdc"/*DrawScreenQuad*/,
-  "Description": "Renders a rectangle that is locked to the cameraview and automatically adjusts to the right image aspect ratio.",
+  "Description": "Renders a rectangle that is locked to the camera view and automatically adjusts to the right image aspect ratio.",
   "SymbolTags": "24",
   "InputUis": [
     {
@@ -35,7 +35,7 @@
         "Y": 364.10834
       },
       "GroupTitle": "Options",
-      "Description": "Selects the Blendmode"
+      "Description": "Selects the Blend mode"
     },
     {
       "InputId": "6a91ba46-257d-4c3c-94c5-72cbc06ee816"/*EnableDepthTest*/,

@@ -1,6 +1,6 @@
 {
   "Id": "284d2183-197d-47fd-b130-873cced78b1c"/*Transform*/,
-  "Description": "Moves, Scales and Rotates the sub graph. \nTransform ops can be chained to add local pivots.\n\nAlso see [HowToDraw3d] playground.",
+  "Description": "Moves, scales and rotates the sub graph. \nTransform ops can be chained to add local pivots.\n\nAlso see [HowToDraw3d] playground.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -21,7 +21,7 @@
         "Y": 90.0
       },
       "GroupTitle": "Transform pivot",
-      "Description": "Moves the Pivot (center point) of the incoming subgraph:\n\nX (-left / +right) \nY (-down / + up) \nZ (-forward/+backwards)\n\nThe Pivot Point determines the location of the incoming subgraph Gizmo. Transforming its location can make it easier to perform transformations around the position you want.\n"
+      "Description": "Moves the pivot (center point) of the incoming subgraph:\n\nX (-left / +right) \nY (-down / +up) \nZ (-forward / +backwards)\n\nThe pivot point determines the location of the incoming subgraph gizmo. Transforming its location can make it easier to perform transformations around the position you want.\n"
     },
     {
       "InputId": "a7b1e667-bce3-4e76-a5b1-0955c118d0fc"/*UniformScale*/,
@@ -40,7 +40,7 @@
         "Y": 0.0
       },
       "GroupTitle": "Transform subgraph",
-      "Description": "Moves the incoming subgraph\n\nX (-left / +right), \nY (-down / + up), \nZ (-forward/+backwards)\n"
+      "Description": "Moves the incoming subgraph\n\nX (-left / +right), \nY (-down / +up), \nZ (-forward / +backwards)\n"
     },
     {
       "InputId": "da4cd6c8-2307-45da-9258-49c578025aa8"/*Scale*/,

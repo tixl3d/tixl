@@ -3,19 +3,19 @@
   "Description": "Spout live video input",
   "InputUis": [
     {
-      "InputId": "f7a7a410-fb91-448c-a0fe-ba4278d82107"/*Command*/,
-      "Position": {
-        "X": -200.0,
-        "Y": 45.0
-      }
-    },
-    {
       "InputId": "c5c487d2-3ec0-49e3-9ea5-0b1238e82233"/*ReceiverName*/,
       "Position": {
         "X": -200.0,
         "Y": 90.0
       },
       "Usage": "Default"
+    },
+    {
+      "InputId": "f7a7a410-fb91-448c-a0fe-ba4278d82107"/*Command*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      }
     }
   ],
   "SymbolChildUis": [],

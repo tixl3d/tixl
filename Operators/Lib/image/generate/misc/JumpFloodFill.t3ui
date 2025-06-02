@@ -1,6 +1,6 @@
 {
   "Id": "e9b69525-4df8-40a6-86de-938597bd33a3"/*JumpFloodFill*/,
-  "Description": "Generates a distance field based on an images Alpha channel",
+  "Description": "Generates a distance field based on an image's Alpha channel",
   "InputUis": [
     {
       "InputId": "12651b8c-42af-4de6-b37d-6383f0da22cc"/*Image*/,

@@ -1,4 +1,4 @@
-namespace Examples.lib.point;
+namespace Examples.Lib.point;
 
 [Guid("2fcb6afc-2d82-47a5-a6dd-39c85348b8c4")]
  internal sealed class SelectPointsExample : Instance<SelectPointsExample>

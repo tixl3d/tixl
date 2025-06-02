@@ -12,7 +12,7 @@
     },
     {
       "ChildId": "25eb84c5-3626-4500-ba96-c878d41de2f2"/*LoadObj*/,
-      "Comment": "Pay attention how \"Sort Vertices\" setting defines the way the spawn points will be collected",
+      "Comment": "Pay attention to how the \"Sort Vertices\" setting defines the way the spawn points will be collected",
       "Position": {
         "X": 48.37207,
         "Y": 366.72363

@@ -1,6 +1,6 @@
 {
   "Id": "d40966c3-2369-40f2-8202-e5c8ab6d9cc0"/*BlurWithMask*/,
-  "Description": "Applying a masked blur can be a very powerful effect for simulating tilt-shift cameras (with [LinearRamp] or depth of field (with [Blob]). \nIt can be also useful for fade-in transitions.\n\nTips:\n- Also try to apply it with animated patterns like [FractalNoise].\n- Some additional effects can be achieved by increasing .MaskContrast and animating .MaskOffset.\n- MaskContrast of -1 will invert the mask.\n\n",
+  "Description": "Applying a masked blur can be a very powerful effect for simulating tilt-shift cameras (with [LinearRamp]) or depth of field (with [Blob]). \nIt can also be useful for fade-in transitions.\n\nTips:\n- Also try to apply it with animated patterns like [FractalNoise].\n- Some additional effects can be achieved by increasing .MaskContrast and animating .MaskOffset.\n- MaskContrast of -1 will invert the mask.\n\n",
   "SymbolTags": "1",
   "InputUis": [
     {

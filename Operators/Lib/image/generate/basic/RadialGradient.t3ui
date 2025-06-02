@@ -20,12 +20,14 @@
         "X": 215.29034,
         "Y": 68.98285
       },
-      "GroupTitle": "Gradient",
+      "GroupTitle": "Gradient"
     },
     {
       "InputId": "54bca43c-fc2b-4a40-b991-8b76e35eee01"/*Image*/,
       "Position": {
-      },
+        "X": 0.0,
+        "Y": 0.0
+      }
     },
     {
       "InputId": "5e93ba7d-a33d-4574-a438-a13c03361c29"/*BiasAndGain*/,
@@ -44,14 +46,14 @@
       "Position": {
         "X": -270.7163,
         "Y": 318.82593
-      },
+      }
     },
     {
       "InputId": "7270a7df-744e-4b66-8f85-71fbdf0848d6"/*BlendMode*/,
       "Position": {
         "X": -263.44446,
         "Y": 616.8738
-      },
+      }
     },
     {
       "InputId": "93dd184b-8809-4746-8544-41abde6635a3"/*TextureFormat*/,
@@ -85,7 +87,7 @@
         "X": -265.4931,
         "Y": 711.91315
       },
-      "GroupTitle": "Texture Options",
+      "GroupTitle": "Texture Options"
     },
     {
       "InputId": "dc383dbd-9dab-4bb2-8c6e-7f094e28d8a9"/*PolarOrientation*/,
@@ -93,14 +95,14 @@
         "X": -258.18066,
         "Y": 531.1108
       },
-      "GroupTitle": "Options",
+      "GroupTitle": "Options"
     },
     {
       "InputId": "eab31c38-0e6f-432a-9f15-04bfb0aae28c"/*Repeat*/,
       "Position": {
         "X": -270.7163,
         "Y": 374.82593
-      },
+      }
     }
   ],
   "SymbolChildUis": [

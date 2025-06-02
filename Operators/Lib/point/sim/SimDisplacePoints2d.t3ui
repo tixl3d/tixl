@@ -1,6 +1,6 @@
 {
   "Id": "9d6cc9a3-980f-46ae-bf79-02fc1f49c480"/*SimDisplacePoints2d*/,
-  "Description": "Applies a displacement to the currently point position.\nThis operator modifies the incoming buffer and thus can be used for simulations with [KeepPoints].",
+  "Description": "Applies a displacement to the current point position.\nThis operator modifies the incoming buffer and thus can be used for simulations with [KeepPoints].",
   "SymbolTags": "72",
   "InputUis": [
     {

@@ -1,6 +1,6 @@
 {
   "Id": "a8fd7522-7874-4411-ad8d-b2e7a20bc4ac"/*DeformMesh*/,
-  "Description": "Spherize, Taper and Twist. It works better if your mesh has a high density of vertices.\n(such as a [CubeMesh] with 64 segments on each axis for example)",
+  "Description": "Spherize, Taper and Twist. It works better if your mesh has a high density of vertices.\n(such as a [CubeMesh] with 64 segments on each axis, for example)",
   "SymbolTags": "64",
   "InputUis": [
     {

@@ -1,4 +1,4 @@
-namespace Examples.lib.image.fx.feedback;
+namespace Examples.Lib.image.fx.feedback;
 
 [Guid("ddf3077b-6273-4023-88e5-2948312e012b")]
  internal sealed class ReactionDiffusionExample : Instance<ReactionDiffusionExample>

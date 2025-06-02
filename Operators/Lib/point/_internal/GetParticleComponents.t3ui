@@ -1,6 +1,6 @@
 {
   "Id": "e62c1fa0-6fcd-49f5-9cf8-d3081c8a5917"/*GetParticleComponents*/,
-  "Description": "Get the particle system components from the context.\nThis is an internal component that is only required for developing new particle simulation effects.",
+  "Description": "Gets the particle system components from the context.\nThis is an internal component that is only required for developing new particle simulation effects.",
   "InputUis": [],
   "SymbolChildUis": [],
   "OutputUis": [

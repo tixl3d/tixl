@@ -13,7 +13,7 @@
     },
     {
       "ChildId": "03041eed-99b6-47f2-8b55-5d5471202045"/*AxisStepForce*/,
-      "Comment": "...40% of the particles are accelerated along the x,y, or z-axis.\n\nNotice the y-axis: \n- it's chosen only 5% of the time, but then with 4x the velocity.",
+      "Comment": "...40% of the particles are accelerated along the x, y, or z-axis.\n\nNotice the y-axis: \n- it's chosen only 5% of the time, but then with 4x the velocity.",
       "Position": {
         "X": 752.1406,
         "Y": 1554.8049
@@ -29,7 +29,7 @@
     },
     {
       "ChildId": "0d092b4a-7378-4625-9d6a-f9b857208b13"/*DrawLines*/,
-      "Comment": "We ignore the points with for the lines.",
+      "Comment": "We ignore the points for the lines.",
       "Position": {
         "X": 1201.3545,
         "Y": 1496.6941
@@ -93,7 +93,7 @@
     },
     {
       "ChildId": "3147c1a0-dff7-4068-a5fc-3c0ad1124fa2"/*DrawBillboards*/,
-      "Comment": "Uses draw the W attributes to highlight fast particles.\n\nThe Gradient uses HDR colors, that spread nicely with [Glow].",
+      "Comment": "Uses draw the W attributes to highlight fast particles.\n\nThe Gradient uses HDR colors that spread nicely with [Glow].",
       "Position": {
         "X": 1201.3545,
         "Y": 1440.6941
@@ -108,7 +108,7 @@
     },
     {
       "ChildId": "33c4ad16-4e20-46d8-9065-0c9bf18f17d8"/*PointsOnMesh*/,
-      "Comment": "This operator computes the size of each face to produce a uniform random distribution of points on the mesh surface. Notes how these points are oriented with their normal pointing towards the mesh normal.",
+      "Comment": "This operator computes the size of each face to produce a uniform random distribution of points on the mesh surface. Note how these points are oriented with their normal pointing towards the mesh normal.",
       "Position": {
         "X": 718.1648,
         "Y": -157.54547
@@ -160,7 +160,7 @@
     },
     {
       "ChildId": "481d81f4-d9cb-4171-b742-1b7bb34f9fca"/*RadialPoints*/,
-      "Comment": "We change the orientation of this circle toward the y-axis (pointing up),\nand adjust the orientation so Z-points inwards.\n",
+      "Comment": "We change the orientation of this circle toward the y-axis (pointing up),\nand adjust the orientation so Z points inwards.\n",
       "Position": {
         "X": 602.2476,
         "Y": 969.8798
@@ -212,7 +212,7 @@
     },
     {
       "ChildId": "6228a4bd-c9c1-4844-b980-20a94dedc951"/*ParticleSystem*/,
-      "Comment": "We adjust the aging rate and write the particle age to the result points W attribute so it can be used by [DrawBillboards].",
+      "Comment": "We adjust the aging rate and write the particle age to the result points' W attribute so it can be used by [DrawBillboards].",
       "Position": {
         "X": 902.2478,
         "Y": 969.8798
@@ -220,7 +220,7 @@
     },
     {
       "ChildId": "628ae78f-9eae-4479-89c1-5dcc580d62bd"/*RepeatAtGPoints*/,
-      "Comment": "We can also clone other points at the particles positions.",
+      "Comment": "We can also clone other points at the particles' positions.",
       "Position": {
         "X": 1040.5278,
         "Y": 569.09753
@@ -256,7 +256,7 @@
     },
     {
       "ChildId": "6c70d237-9e63-4bba-9f46-8a7387ed7afa"/*RadialPoints*/,
-      "Comment": "We adjusted its parameters to it creates 4 points in a on the Y-axis.\n\nNotice how we also adjusted the OrientationAxis to X and adjusted the orientation angle to adjust the point's z (forward) direction.\n\nWe also disable the CloseCircleLine to prevent overlapping points at the start and end.",
+      "Comment": "We adjusted its parameters so it creates 4 points on the Y-axis.\n\nNotice how we also adjusted the OrientationAxis to X and adjusted the orientation angle to adjust the point's Z (forward) direction.\n\nWe also disable the CloseCircleLine to prevent overlapping points at the start and end.",
       "Position": {
         "X": -161.66048,
         "Y": -752.87067
@@ -294,7 +294,7 @@
     },
     {
       "ChildId": "72174cd2-fad8-4937-bd31-fef054611b64"/*VisualizePoints*/,
-      "Comment": "Visualize the used emits points with their position and index.",
+      "Comment": "Visualize the used emit points with their position and index.",
       "Position": {
         "X": 1372.5825,
         "Y": -444.10205
@@ -345,7 +345,7 @@
     },
     {
       "ChildId": "88f59435-472d-47d9-90ae-59c74e57374a"/*DrawBillboards*/,
-      "Comment": "We use the W-attribute for sampling a gradient and scale curve for each particle.",
+      "Comment": "We use the W attribute for sampling a gradient and scale curve for each particle.",
       "Position": {
         "X": 1041.0337,
         "Y": 964.99457
@@ -353,7 +353,7 @@
     },
     {
       "ChildId": "8980fc15-5044-474c-9e9c-6ba02c55461a"/*SelectPoints*/,
-      "Comment": "A similar volume with a slow falloff can be used for \"selecting\" points.\nSelection in this case means setting the W-Attribute.\n\nbecause this is then used by [DrawPoints] it looks like the points are fading out.",
+      "Comment": "A similar volume with a slow falloff can be used for \"selecting\" points.\nSelection in this case means setting the W attribute.\n\nBecause this is then used by [DrawPoints], it looks like the points are fading out.",
       "Position": {
         "X": 1040.5278,
         "Y": 694.0976
@@ -561,7 +561,7 @@
     },
     {
       "ChildId": "cfc7c7c0-c7b5-4f68-a87b-0a4bb3a0c8f5"/*DrawPoints*/,
-      "Comment": "Simple white points. Notice that the Point's W attribute is used for scaling the points.",
+      "Comment": "Simple white points. Notice that the point's W attribute is used for scaling the points.",
       "Position": {
         "X": 1046.8801,
         "Y": 393.8699
@@ -708,7 +708,7 @@
     },
     {
       "Id": "35f2d883-63f6-49b9-809d-cd9b9b19e94b",
-      "Title": "This is the most simple example of a particle system...",
+      "Title": "This is the simplest example of a particle system...",
       "Color": {
         "X": 0.6,
         "Y": 0.6,

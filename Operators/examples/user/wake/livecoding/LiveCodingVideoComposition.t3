@@ -8265,8 +8265,7 @@
     "Syncing": 0,
     "AudioDecayFactor": 0.85,
     "AudioGainFactor": 1.0,
-    "AudioInputDeviceName": "Speakers (Realtek(R) Audio)",
-    "AudioClips": []
+    "AudioInputDeviceName": "Speakers (Realtek(R) Audio)"
   },
   "Animator": [
     {

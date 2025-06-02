@@ -4,7 +4,7 @@ using T3.Core.Operator.Attributes;
 using T3.Core.Operator.Slots;
 using System.Runtime.InteropServices;
 
-namespace Examples.lib.render.analyze{
+namespace Examples.Lib.render.analyze{
     [Guid("f0ea45cd-9971-46cd-a761-6e81c036aa87")]
     internal sealed class GetScreenPosExample : Instance<GetScreenPosExample>
     {

@@ -132,7 +132,7 @@
     },
     {
       "ChildId": "4771aebf-6745-4694-87c2-e3727cab0a39"/*ConvertFormat*/,
-      "Comment": "PlayVideo return textures in BGRA format. For Layer2d to render it correctly, we have to first convert to RGBA.",
+      "Comment": "PlayVideo returns textures in BGRA format. For Layer2d to render it correctly, we have to first convert to RGBA.",
       "Position": {
         "X": 1001.76953,
         "Y": 835.17413
@@ -155,7 +155,7 @@
     },
     {
       "ChildId": "566c5a9b-555c-4274-baf6-25d3e55704cd"/*KeepPreviousFrame2*/,
-      "Comment": "The last version of [KeepPreviousFrame] didn't work correctly with non 60fps footage.",
+      "Comment": "The last version of [KeepPreviousFrame] didn't work correctly with non-60fps footage.",
       "Position": {
         "X": 393.7776,
         "Y": 875.17413
@@ -199,7 +199,7 @@
     },
     {
       "ChildId": "a6150640-917b-4805-ac9e-536598b4a37d"/*DrawPointsShaded*/,
-      "Comment": "We use shaded points here, to make overlapping points more readable.",
+      "Comment": "We use shaded points here to make overlapping points more readable.",
       "Position": {
         "X": 1050.0,
         "Y": 166.0

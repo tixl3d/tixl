@@ -1,6 +1,6 @@
 {
   "Id": "1dfc9f6d-effa-407b-8f8d-5adf62504205"/*_WFEGameState*/,
-  "Description": "Checks if users hits key on right time and computes score.",
+  "Description": "Checks if users hit key on right time and computes score.",
   "InputUis": [
     {
       "InputId": "163da70f-3aaa-4321-b575-dff9f5772b30"/*SceneIndex*/,

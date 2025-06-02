@@ -1,6 +1,6 @@
 {
   "Id": "4912ba82-460a-4229-884d-6b647d64b08c"/*SetPointLight*/,
-  "Description": "Adds a point light into the scene which illuminated geometry using a combination of \"Color\", \"Intensity\" and \"Decay\".\n\nBeware that [SetEnvironment] also affects the lighting in your scene, even if you are not using it, because every scene is always lit by a Default CubeMap (that can be deactivated by manually adding a [SetEnvironment]).\n\nCurrently a maximum of 8 Pointlights can be used in your scene. For example by daisychaining them right before your graph goes into the camera.\n",
+  "Description": "Adds a point light into the scene which illuminates geometry using a combination of \"Color\", \"Intensity\" and \"Decay\".\n\nBeware that [SetEnvironment] also affects the lighting in your scene, even if you are not using it, because every scene is always lit by a Default CubeMap (that can be deactivated by manually adding a [SetEnvironment]).\n\nCurrently a maximum of 8 Pointlights can be used in your scene. For example by daisy-chaining them right before your graph goes into the camera.\n",
   "SymbolTags": "16",
   "InputUis": [
     {
@@ -41,7 +41,7 @@
         "X": -199.39244,
         "Y": 193.36653
       },
-      "Description": "This setting is currently ignored. It is recommended to use the \"Decay\" Setting instead.\n",
+      "Description": "This setting is currently ignored. It is recommended to use the \"Decay\" setting instead.\n",
       "AddPadding": "True"
     },
     {
@@ -50,7 +50,7 @@
         "X": -199.39244,
         "Y": 58.36653
       },
-      "Description": "Changes the position of the PointLight:\n\nX (-left / +right), \nY (-down / + up), \nZ (-forward/+backwards)",
+      "Description": "Changes the position of the PointLight:\n\nX (-left / +right), \nY (-down / +up), \nZ (-forward / +backwards)",
       "AddPadding": "True"
     }
   ],

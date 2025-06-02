@@ -1,6 +1,6 @@
 {
   "Id": "c2b2758a-5b3e-465a-87b7-c6a13d3fba48"/*PlayAudioClip*/,
-  "Description": "This a work around to playback audio clips without syncing.",
+  "Description": "This is a workaround to playback audio clips without syncing.",
   "SymbolTags": "64",
   "InputUis": [
     {

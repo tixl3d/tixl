@@ -1,6 +1,6 @@
 {
   "Id": "54f28d0a-d367-4b59-8480-5b762b8f2a9c"/*NoiseDisplaceSDF*/,
-  "Description": "Displaces the distance of an SDF with a perlin-like noise offset.\n\nNOTE: this operator will break the Lipschitz  continuity of your field and will cause artifacts when raymaching.\nIt's sometimes possible to reduce some of these artifacts, be reducing the step-size for raymarching.\n\nPlease check the Additional documentation in [RaymarchSdf]",
+  "Description": "Displaces the distance of an SDF with a Perlin-like noise offset.\n\nNOTE: this operator will break the Lipschitz continuity of your field and will cause artifacts when raymarching.\nIt's sometimes possible to reduce some of these artifacts by reducing the step size for raymarching.\n\nPlease check the Additional documentation in [RaymarchSdf]",
   "InputUis": [
     {
       "InputId": "1799f18f-92c5-4885-b6c1-6a196eee805f"/*InputField*/,
@@ -16,7 +16,7 @@
         "X": -200.0,
         "Y": 135.0
       },
-      "Description": "Amount of the displacemnt.",
+      "Description": "Amount of the displacement.",
       "AddPadding": "True"
     },
     {

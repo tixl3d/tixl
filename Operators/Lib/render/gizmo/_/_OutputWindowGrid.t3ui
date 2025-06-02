@@ -1,6 +1,6 @@
 {
   "Id": "e5588101-5686-4b02-ab7d-e58199ba552e"/*_OutputWindowGrid*/,
-  "Description": "An internal wrapped used by the editor output window. \n\nShould not be used and must not have input parameters.\n\nPlease consider using [GridPlane].",
+  "Description": "An internal wrapper used by the editor output window.\n\nShould not be used and must not have input parameters.\n\nPlease consider using [GridPlane].",
   "SymbolTags": "16",
   "InputUis": [],
   "SymbolChildUis": [

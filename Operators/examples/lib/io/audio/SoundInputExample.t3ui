@@ -1,6 +1,6 @@
 {
   "Id": "012119bf-aeec-4134-b7aa-6bc7f9816800"/*SoundInputExample*/,
-  "Description": "Shows how to [DetectBpm] is used to do a bpm sweep over a range of bpm-rates and visualize the energy differences for all rates in a plot chart.\n",
+  "Description": "Shows how [DetectBpm] is used to do a bpm sweep over a range of bpm rates and visualize the energy differences for all rates in a plot chart.\n",
   "InputUis": [],
   "SymbolChildUis": [
     {

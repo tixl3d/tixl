@@ -1,4 +1,4 @@
-namespace Examples.lib.image.fx.distort;
+namespace Examples.Lib.image.fx.distort;
 
 [Guid("8c370b92-c977-449f-8d35-15abfb3f0e29")]
  internal sealed class ChromaticDistortionExample : Instance<ChromaticDistortionExample>

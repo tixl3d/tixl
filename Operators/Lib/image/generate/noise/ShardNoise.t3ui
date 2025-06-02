@@ -1,6 +1,6 @@
 {
   "Id": "dc34c54b-f856-4fd2-a182-68fd75189d7d"/*ShardNoise*/,
-  "Description": "A port of @ENDESGA's SHARD NOISE shader\nIt can be used clouds/fog/metal/crystal textures and more \nCheck the link below. \n\n\nAvailable Noise Ops [WorleyNoise] [FractalNoise] [ShardNoise]",
+  "Description": "A port of @ENDESGA's SHARD NOISE shader\nIt can be used for clouds/fog/metal/crystal textures and more \nCheck the link below. \n\n\nAvailable Noise Ops [WorleyNoise] [FractalNoise] [ShardNoise]",
   "SymbolTags": "8",
   "InputUis": [
     {

@@ -1,6 +1,6 @@
 {
   "Id": "7b21f10b-3548-4a23-95df-360addaeb03d"/*BuildRandomString*/,
-  "Description": "Produces a wide selection of text writer effects that \ncan be linked to AudioReactions. Interesting Setups are\n\n[MockStrings]->[GetStringPart]->[ScrambleString]",
+  "Description": "Produces a wide selection of text writer effects that \ncan be linked to AudioReactions. Interesting setups are\n\n[MockStrings]->[GetStringPart]->[ScrambleString]",
   "SymbolTags": "72",
   "InputUis": [
     {

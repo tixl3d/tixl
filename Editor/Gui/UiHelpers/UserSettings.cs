@@ -78,6 +78,7 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         public bool ResetTimeAfterPlayback;
         public float SnapStrength = 5;
         public ValueEditMethods ValueEditMethod;
+        public int ValueEditSmoothing = 0;
         public float ScrollSmoothing = 0.075f;
         public float MaxCurveRadius = 350;
 

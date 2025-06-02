@@ -1,6 +1,6 @@
 {
   "Id": "947ad81e-47da-46c3-9b1d-8e578174d876"/*DefineLensFlare*/,
-  "Description": "Generates a list of Sprite positions that can be joined and rendered as sprites. ",
+  "Description": "Generates a list of sprite positions that can be joined and rendered as sprites. ",
   "SymbolTags": "16",
   "InputUis": [
     {
@@ -29,7 +29,7 @@
         "Y": 765.0
       },
       "GroupTitle": "Effects for Zones",
-      "Description": "A effect that is added to the brightness if the sprites or light are inside one of the defined effect zones)."
+      "Description": "An effect that is added to the brightness if the sprites or light are inside one of the defined effect zones)."
     },
     {
       "InputId": "1c11cb25-05f8-4422-aa16-db57e8cd2e0b"/*EdgeFxZone*/,
@@ -37,7 +37,7 @@
         "X": -200.0,
         "Y": 675.0
       },
-      "Description": "Defines the edge region with distance from center and width towards both side of. Examples:\n\n1.0 + 0.1 (a very thin border at the edge)\n0.8  + 2.0 (a very wied border mostly outside of the screen)\n\n"
+      "Description": "Defines the edge region with distance from center and width towards both sides. Examples:\n\n1.0 + 0.1 (a very thin border at the edge)\n0.8  + 2.0 (a very wide border mostly outside of the screen)\n\n"
     },
     {
       "InputId": "1c250003-cf16-44df-9a5e-f9fcf331617c"/*DistributeSpread*/,
@@ -54,7 +54,7 @@
         "X": -200.0,
         "Y": 855.0
       },
-      "Description": "Controls each sprite is oriented on the screen."
+      "Description": "Controls how each sprite is oriented on the screen."
     },
     {
       "InputId": "2a1285b1-63ea-46a5-8d96-b7ba33edd88b"/*RandomizeSize*/,
@@ -70,7 +70,7 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "Description": "Restrict the lense flare to the single light.  Use -1 to apply to all."
+      "Description": "Restrict the lens flare to the single light. Use -1 to apply to all."
     },
     {
       "InputId": "520ee127-f542-4ad8-a6ea-4a24a70ade4d"/*FxZoneBrightness*/,
@@ -85,7 +85,7 @@
         "X": -200.0,
         "Y": 360.0
       },
-      "Description": "Randomization applied the original color. Black adds no variation.\nIncrease Alpha channel to add variation to the opacity."
+      "Description": "Randomization applied to the original color. Black adds no variation.\nIncrease Alpha channel to add variation to the opacity."
     },
     {
       "InputId": "59ba312f-c74f-4e76-8830-57c2effa0ff1"/*SpriteCount*/,
@@ -118,7 +118,7 @@
         "X": -200.0,
         "Y": 315.0
       },
-      "Description": "Distributes the rotation. This be really useful for definiting stars.\n\nUse...\n- 3 sprites and 0.66 for 6 lines\n- 2 sprites and 0.5 for 4 lines",
+      "Description": "Distributes the rotation. This can be really useful for defining stars.\n\nUse...\n- 3 sprites and 0.66 for 6 lines\n- 2 sprites and 0.5 for 4 lines",
       "Min": 0.0,
       "Max": 1.0
     },
@@ -200,7 +200,7 @@
         "X": -200.0,
         "Y": 585.0
       },
-      "Description": "Additional random offset to the spreaded sprite position horizontally and vertically.",
+      "Description": "Additional random offset to the spread sprite position horizontally and vertically.",
       "UseVec2Control": "Position"
     },
     {
@@ -218,7 +218,7 @@
         "X": -200.0,
         "Y": 90.0
       },
-      "Description": "Moves the spreads sprites on the light/screen center line. \n0 - the center of light\n1 - the screen center\n"
+      "Description": "Moves the spread sprites on the light/screen center line. \n0 - the center of light\n1 - the screen center\n"
     }
   ],
   "SymbolChildUis": [],

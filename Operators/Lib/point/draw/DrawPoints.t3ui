@@ -1,6 +1,6 @@
 {
   "Id": "ffd94e5a-bc98-4e70-84d8-cce831e6925f"/*DrawPoints*/,
-  "Description": "Draws a point buffer with the set camera, transform, and fog. The points are drawn as camera-facing billboards, ignoring the point orientation. The W attribute of the points is used for scaling. This can be controlled with the UseWForSize parameter.\n\nYou can connect a texture to override the round shape.\n\nThere are many Operators allowing you to create and manipulate point buffers in countless ways. Please have a look at the examples listed below.\n\nFor additional effects, you can experiment with different blend modes or disable depth testing. Note, however, that the points are drawn in the order they are defined in the buffer and not sorted by distance to the camera. This can introduce unwanted artifacts with transparent blending.\n\nAlthough drawing points is fast, drawing very large points can lead to high fill rates and can drastically impact render performance.\n\nSome notes regarding the size: For historic reasons we apply a 1/10 factor on the size: A point with W=1 will have a radius of 0.01 world units. So a scale of 5 draws a point with a 1 unit diameter.\n\n\nAlso see: [HowToDrawThings], [HowToUsePoints], [DrawLines], [DrawRibbons].\nFor a Operator with more Options see [DrawBillboards].",
+  "Description": "Draws a point buffer with the set camera, transform, and fog. The points are drawn as camera-facing billboards, ignoring the point orientation. The W attribute of the points is used for scaling. This can be controlled with the UseWForSize parameter.\n\nYou can connect a texture to override the round shape.\n\nThere are many Operators allowing you to create and manipulate point buffers in countless ways. Please have a look at the examples listed below.\n\nFor additional effects, you can experiment with different blend modes or disable depth testing. Note, however, that the points are drawn in the order they are defined in the buffer and not sorted by distance to the camera. This can introduce unwanted artifacts with transparent blending.\n\nAlthough drawing points is fast, drawing very large points can lead to high fill rates and can drastically impact render performance.\n\nSome notes regarding the size: For historic reasons we apply a 1/10 factor on the size: A point with W=1 will have a radius of 0.01 world units. So a scale of 5 draws a point with a 1 unit diameter.\n\n\nAlso see: [HowToDrawThings], [HowToUsePoints], [DrawLines], [DrawRibbons].\nFor an Operator with more Options see [DrawBillboards].",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -9,7 +9,7 @@
         "X": 2062.5884,
         "Y": 3953.3596
       },
-      "Description": "Points closer to the camera Fade out.",
+      "Description": "Points closer to the camera fade out.",
       "AddPadding": "True"
     },
     {
@@ -46,7 +46,7 @@
         "X": 2223.4253,
         "Y": 4431.701
       },
-      "Description": "Defines whether Points cover themselves or are covered by or covers other 3D elements."
+      "Description": "Defines whether points cover themselves or are covered by or cover other 3D elements."
     },
     {
       "InputId": "814fc516-250f-4383-8f20-c2a358bbe4e1"/*EnableZWrite*/,
@@ -54,7 +54,7 @@
         "X": 2223.4253,
         "Y": 4466.701
       },
-      "Description": "Defines whether Points cover themselves or are covered by or covers other 3D elements.",
+      "Description": "Defines whether points cover themselves or are covered by or cover other 3D elements.",
       "AddPadding": "True"
     },
     {
@@ -63,7 +63,7 @@
         "X": 1184.0911,
         "Y": 4204.8726
       },
-      "Description": "Input for a Texturemap",
+      "Description": "Input for a texture map",
       "AddPadding": "True"
     },
     {
@@ -98,7 +98,7 @@
         "Y": 4824.5693
       },
       "GroupTitle": "OBSOLETE",
-      "Description": "Defines whether the \"W\" value of the Gpoints used has an influence on the size of the rendered Points"
+      "Description": "Defines whether the \"W\" value of the Gpoints used has an influence on the size of the rendered points"
     },
     {
       "InputId": "e40aeedd-49fe-467c-b886-064a1024cef3"/*ScaleFactor*/,

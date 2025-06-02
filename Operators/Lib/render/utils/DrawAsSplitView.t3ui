@@ -1,6 +1,6 @@
 {
   "Id": "f19a9234-cd23-4229-a794-aa9d97ad8027"/*DrawAsSplitView*/,
-  "Description": "Renders the connected draw commands as vertical ViewRect slices with optional labels.\n\nThis can be quite interesting as an effect or for example purposes to show multiple variations.",
+  "Description": "Renders the connected draw commands as vertical ViewRect slices with optional labels.\n\nThis can be quite interesting as an effect or, for example, to show multiple variations.",
   "SymbolTags": "66",
   "InputUis": [
     {

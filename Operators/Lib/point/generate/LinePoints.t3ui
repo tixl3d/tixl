@@ -39,7 +39,7 @@
         "X": 297.56772,
         "Y": 1876.1355
       },
-      "Description": "Delta added to the the start width.",
+      "Description": "Delta added to the start width.",
       "Format": "{0:0.000} ±"
     },
     {
@@ -73,7 +73,7 @@
         "X": -78.61072,
         "Y": 1098.0425
       },
-      "Description": "Color at the start of the line (I.e. at the Center)",
+      "Description": "Color at the start of the line (i.e. at the Center)",
       "AddPadding": "True",
       "Min": 0.0,
       "Max": 1.0,
@@ -85,7 +85,7 @@
         "X": 71.38928,
         "Y": 840.04254
       },
-      "Description": "A factor multiplied to the direction of the line. \nDirection of 2, 0, 0  × 1  and 1, 0, 0 × 2 are equavilent.",
+      "Description": "A factor multiplied to the direction of the line. \nDirection of 2, 0, 0  × 1  and 1, 0, 0 × 2 are equivalent.",
       "AddPadding": "True"
     },
     {
@@ -95,7 +95,7 @@
         "Y": 1581.2628
       },
       "GroupTitle": "Point Orientation",
-      "Description": "Sadly there is no simple method to define the orientation of the points.\n\nSimple: Ignores Line direction and use the Orientation and Angle\nUp Vector: Orient X towards the direction. This can have unpredictable results when line is pointing up or when using Orientation Angles."
+      "Description": "Sadly there is no simple method to define the orientation of the points.\n\nSimple: Ignores Line direction and uses the Orientation and Angle\nUp Vector: Orient X towards the direction. This can have unpredictable results when the line is pointing up or when using Orientation Angles."
     },
     {
       "InputId": "8f3eab23-6e6a-43dc-969e-c5ef3b8e3fe0"/*F2*/,
@@ -118,7 +118,7 @@
         "X": 71.38928,
         "Y": 1423.0425
       },
-      "Description": "Twist the point orientations around the direction axis. This can ue useful if the line points are used as targers for repeating other elements, e.g, to build a spiral staircase.",
+      "Description": "Twist the point orientations around the direction axis. This can be useful if the line points are used as targets for repeating other elements, e.g., to build a spiral staircase.",
       "Min": -180.0,
       "Max": 180.0,
       "Format": "{0:0.0}°"
@@ -165,7 +165,7 @@
         "Y": 1462.0514
       },
       "GroupTitle": "Options",
-      "Description": "When combining multiple lines into a single buffer, check this option will prevent connecting them."
+      "Description": "When combining multiple lines into a single buffer, checking this option will prevent connecting them."
     }
   ],
   "SymbolChildUis": [

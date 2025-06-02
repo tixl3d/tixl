@@ -1,4 +1,4 @@
-namespace Examples.lib.render.shading;
+namespace Examples.Lib.render.shading;
 
 [Guid("81337795-7e15-4335-a067-6d2c54a7b4b8")]
  internal sealed class SliceViewPortExample : Instance<SliceViewPortExample>

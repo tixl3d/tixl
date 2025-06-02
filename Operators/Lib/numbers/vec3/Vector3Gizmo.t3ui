@@ -1,6 +1,6 @@
 {
   "Id": "e9dc80e1-8898-4b77-b515-bf6d589302de"/*Vector3Gizmo*/,
-  "Description": "Creates a 3D Gizmo in the Output View (if gizmos are toggled on) and sends out the position data as a [Vector3].\nUseful to control the position of anything in 3D space that does not have a built in gizmo.\nBut can be used to control anything that takes a Vec3, RGB Colors for example.\n\nSimilar to [Locator]",
+  "Description": "Creates a 3D Gizmo in the Output View (if gizmos are toggled on) and sends out the position data as a [Vector3].\nUseful to control the position of anything in 3D space that does not have a built-in gizmo.\nBut can be used to control anything that takes a Vec3, RGB colors for example.\n\nSimilar to [Locator]",
   "InputUis": [
     {
       "InputId": "059ceeaa-8683-4d6e-aca3-c95d411663f0"/*ShowGizmo*/,
@@ -8,7 +8,7 @@
         "X": -200.0,
         "Y": 75.0
       },
-      "Description": "toggles the visibility of the gizmo in the Output view",
+      "Description": "Toggles the visibility of the gizmo in the Output view",
       "AddPadding": "True"
     },
     {

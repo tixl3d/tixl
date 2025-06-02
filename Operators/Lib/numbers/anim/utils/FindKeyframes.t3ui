@@ -1,6 +1,6 @@
 {
   "Id": "127e1eb9-aca9-4f8e-b0c9-b709c8a0745a"/*FindKeyframes*/,
-  "Description": "Experimental operator to access keyframe times of another operator instance. This can be useful to build interactive usecases that rely on setting the playback time.",
+  "Description": "Experimental operator to access keyframe times of another operator instance. This can be useful to build interactive use cases that rely on setting the playback time.",
   "SymbolTags": "64",
   "InputUis": [
     {

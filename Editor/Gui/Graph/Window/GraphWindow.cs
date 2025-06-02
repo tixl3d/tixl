@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using ImGuiNET;
 using T3.Core.Animation;
+using T3.Core.DataTypes.Vector;
 using T3.Editor.Gui.Graph.Dialogs;
 using T3.Editor.Gui.Graph.Interaction;
 using T3.Editor.Gui.Interaction.TransformGizmos;
@@ -159,10 +160,13 @@ internal sealed class GraphWindow : Windows.Window
         if (ProjectView.InstView == null)
             return;
 
-        ImageBackgroundFading.HandleImageBackgroundFading(ProjectView.GraphImageBackground, out var backgroundImageOpacity);
-
-        ProjectView.GraphImageBackground.Draw(backgroundImageOpacity);
-
+        
+        if (UserSettings.Config.FocusMode)
+        {
+            ImageBackgroundFading.HandleImageBackgroundFading(ProjectView.GraphImageBackground, out var backgroundImageOpacity);
+            ProjectView.GraphImageBackground.Draw(backgroundImageOpacity);
+        }
+        
         ImGui.SetCursorPos(Vector2.Zero);
 
         var graphHiddenWhileInteractiveWithBackground = ProjectView.GraphImageBackground.IsActive && TransformGizmoHandling.IsDragging;
@@ -184,9 +188,13 @@ internal sealed class GraphWindow : Windows.Window
                          | ImGuiWindowFlags.NoDecoration
                          | ImGuiWindowFlags.NoTitleBar
                          | ImGuiWindowFlags.NoBackground
-                         | ImGuiWindowFlags.ChildWindow);
+                         | ImGuiWindowFlags.ChildWindow
+                         );
         {
+            // For some reason, the BeginChild does not correctly set the clipping leading to spill over. So we set it explicitely
+            drawList.PushClipRect(ImGui.GetWindowPos(), ImGui.GetWindowPos() + ImGui.GetWindowSize(), false);
             DrawGraphContent(drawList);
+            drawList.PopClipRect();
         }
         ImGui.EndChild();
 
@@ -254,8 +262,15 @@ internal sealed class GraphWindow : Windows.Window
         // Draw content
         drawList.ChannelsSetCurrent(0);
         {
-            ImageBackgroundFading.HandleGraphFading(ProjectView.GraphImageBackground, drawList, out var graphOpacity);
+            var graphOpacity = 1f;
+            if (UserSettings.Config.FocusMode)
+            {
+                ImageBackgroundFading.HandleGraphFading(ProjectView.GraphImageBackground, drawList, out  graphOpacity);
+            }
 
+            if (ProjectView.GraphImageBackground.HasInteractionFocus)
+                graphOpacity *= 0.2f;
+            
             var isGraphHidden = graphOpacity <= 0;
             if (!isGraphHidden && GraphCanvas != null)
             {
@@ -279,7 +294,7 @@ internal sealed class GraphWindow : Windows.Window
 
                 ImGui.EndGroup();
 
-                if(ProjectView != null)
+                if(ProjectView != null && !ProjectView.GraphImageBackground.HasInteractionFocus)
                     ParameterPopUp.DrawParameterPopUp(ProjectView);
             }
         }

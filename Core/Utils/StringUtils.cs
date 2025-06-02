@@ -217,6 +217,20 @@ public static class StringUtils
         nextChar = default;
         return -1;
     }
+    
+    public static int LineCount(this string  input)
+    {
+        if (string.IsNullOrEmpty(input))
+            return 0;
+
+        int count = 1; // At least one line if the string is not empty
+        for (int i = 0; i < input.Length; i++)
+        {
+            if (input[i] == '\n')
+                count++;
+        }
+        return count;
+    }    
 
     public static int IndexOf(this ReadOnlySpan<char> span, char c, bool ignoreCase)
     {

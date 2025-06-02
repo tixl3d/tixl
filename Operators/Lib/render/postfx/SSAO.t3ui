@@ -1,6 +1,6 @@
 {
   "Id": "13d5260d-4e50-48f8-909c-7d84d6f0a43f"/*SSAO*/,
-  "Description": "Adds a Screen Space Ambient Occlusion (SSAO) effect to a 3D rendered scene.\n\nWith this effect, a shading layer can be added in estimates how much a point or surface in the scene is exposed to ambient light.",
+  "Description": "Adds a Screen Space Ambient Occlusion (SSAO) effect to a 3D rendered scene.\n\nWith this effect, a shading layer can be added that estimates how much a point or surface in the scene is exposed to ambient light.",
   "SymbolTags": "1",
   "InputUis": [
     {

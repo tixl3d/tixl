@@ -47,7 +47,6 @@ internal static class OutputPicking
             var selectedWithoutRelease = !appearing
                                          && ImGui.IsMouseDown(ImGuiMouseButton.Left)
                                          && !hovered2;
-            var isFirst = true;
 
             foreach (var o in context.ActiveItem.SymbolUi!.OutputUis.Values)
             {
@@ -116,8 +115,6 @@ internal static class OutputPicking
                     context.StateMachine.SetState(GraphStates.DragConnectionEnd, context);
                     ImGui.CloseCurrentPopup();
                 }
-
-                isFirst = false;
             }
 
             ImGui.EndPopup();

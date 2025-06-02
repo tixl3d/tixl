@@ -1,4 +1,4 @@
-namespace Examples.lib.image.fx.stylize;
+namespace Examples.Lib.image.fx.stylize;
 
 [Guid("2ff86df2-6492-4996-bd5e-fc12ec2e0947")]
  internal sealed class AsciiRenderExample : Instance<AsciiRenderExample>

@@ -1,13 +1,13 @@
 {
-  "Id": "25307357-6f6c-45b1-a38d-de635510a845",
+  "Id": "25307357-6f6c-45b1-a38d-de635510a845"/*SpoutInput*/,
   "Inputs": [
-    {
-      "Id": "f7a7a410-fb91-448c-a0fe-ba4278d82107"/*Command*/,
-      "DefaultValue": null
-    },
     {
       "Id": "c5c487d2-3ec0-49e3-9ea5-0b1238e82233"/*ReceiverName*/,
       "DefaultValue": "Spout Demo Sender"
+    },
+    {
+      "Id": "f7a7a410-fb91-448c-a0fe-ba4278d82107"/*Command*/,
+      "DefaultValue": null
     }
   ],
   "Children": [],

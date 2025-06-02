@@ -1,6 +1,6 @@
 {
   "Id": "eaeb8937-f6ff-4a4a-8f00-27484285cd2d"/*DoyleSpiralPoints2*/,
-  "Description": "Generate a set of points that with decreasing to sizes that can be used to draw a Doyle spiral:\n\nIn the mathematics of circle packing, a Doyle spiral is a pattern of non-crossing circles in the plane in which each circle is surrounded by a ring of six tangent circles. \nThese patterns contain spiral arms formed by circles linked through opposite points of tangency, with their centers on logarithmic spirals of three different shapes. ",
+  "Description": "Generate a set of points with decreasing sizes that can be used to draw a Doyle spiral:\n\nIn the mathematics of circle packing, a Doyle spiral is a pattern of non-crossing circles in the plane in which each circle is surrounded by a ring of six tangent circles. \nThese patterns contain spiral arms formed by circles linked through opposite points of tangency, with their centers on logarithmic spirals of three different shapes. ",
   "SymbolTags": "64",
   "InputUis": [
     {
@@ -34,7 +34,7 @@
         "X": -1305.205,
         "Y": 1447.432
       },
-      "Description": "Scales the inner points of the spiral cutting pff points by reducing their size"
+      "Description": "Scales the inner points of the spiral cutting off points by reducing their size"
     },
     {
       "InputId": "5af0a50e-0da1-4800-9fef-c1217eb2368a"/*ScaleBias*/,
@@ -73,7 +73,7 @@
         "X": -1339.0762,
         "Y": 896.875
       },
-      "Description": "Defines of how many points one step consists of",
+      "Description": "Defines how many points one step consists of",
       "AddPadding": "True"
     },
     {

@@ -17,7 +17,7 @@
         "X": -8.929016,
         "Y": 351.24237
       },
-      "Description": "Defines how the area around the image is will be rendered"
+      "Description": "Defines how the area around the image will be rendered"
     },
     {
       "InputId": "53538db0-2b65-4c92-80b1-ea6aecbc49ae"/*Stretch*/,
@@ -51,7 +51,7 @@
         "X": 291.07098,
         "Y": 452.24237
       },
-      "Description": "Defines the Image filtering used"
+      "Description": "Defines the image filtering used"
     },
     {
       "InputId": "6a786aa9-edf4-4363-9e34-0ddc7e763f0b"/*Rotation*/,
@@ -92,7 +92,7 @@
         "X": 291.07098,
         "Y": 407.24237
       },
-      "Description": "Defines whether Mipmaps should be generated"
+      "Description": "Defines whether mipmaps should be generated"
     }
   ],
   "SymbolChildUis": [

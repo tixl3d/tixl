@@ -1,6 +1,6 @@
 {
   "Id": "a835ab86-29c1-438e-a7f7-2e297108bfd5"/*TorusMesh*/,
-  "Description": "Generates a procedural three-dimensional torus mesh which can be rendered with [DrawMesh] , [DrawMeshUnlit] and [DrawMeshHatched] among others.\nAlso known as: Donut\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToDrawThings].\n\nIt can also become the source for a particle system with [MeshVerticesToPoints] or [PointsOnMesh].\nTo import static 3D meshes from other programs refer to [LoadObj].",
+  "Description": "Generates a procedural three-dimensional torus mesh which can be rendered with [DrawMesh], [DrawMeshUnlit] and [DrawMeshHatched] among others.\nAlso known as: Donut\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToDrawThings].\n\nIt can also become the source for a particle system with [MeshVerticesToPoints] or [PointsOnMesh].\nTo import static 3D meshes from other programs refer to [LoadObj].",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -39,7 +39,7 @@
         "Y": 90.0
       },
       "GroupTitle": "Tesselation",
-      "Description": "Controls the tesselation.\n1. Along the Radius.\n2. Along the Thickness."
+      "Description": "Controls the tessellation.\n1. Along the Radius.\n2. Along the Thickness."
     },
     {
       "InputId": "f3e7341c-0c81-42af-ba48-b43d345188c1"/*Fill*/,

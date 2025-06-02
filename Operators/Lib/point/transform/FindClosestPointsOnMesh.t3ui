@@ -1,6 +1,6 @@
 {
   "Id": "58afd953-d3fd-44a9-b54b-ccb287edc40c"/*FindClosestPointsOnMesh*/,
-  "Description": "Combines points and a mesh and finds the nearest neighbors between points and mesh.\nUseful to visualize 'scan effect's and allows the display of complex details.\n\nThe example shows the necessary structure.\n\nNeeds Points such as [GridPoints], [SpherePoints] etc.\nNeeds a mesh such as [LoadObj], [TorusMesh] etc.\n\nBecomes visible with [DrawPoints] and [DrawLines] or similar.",
+  "Description": "Combines points and a mesh and finds the nearest neighbors between points and mesh.\nUseful to visualize 'scan effects' and allows the display of complex details.\n\nThe example shows the necessary structure.\n\nNeeds Points such as [GridPoints], [SpherePoints] etc.\nNeeds a mesh such as [LoadObj], [TorusMesh] etc.\n\nBecomes visible with [DrawPoints] and [DrawLines] or similar.",
   "SymbolTags": "8",
   "InputUis": [
     {

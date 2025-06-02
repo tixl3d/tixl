@@ -11,10 +11,10 @@
 - [?] Connections from input are sometimes not correctly evaluated 
 - [x] Picking video files from resource does not work.
 
-- [ ] Publish as input does not create connection
 - [x] In Parameter window bypassable button should be disabled if not available
 - [x] Prevent Keyboard Camera interaction while input field is active 
 - [x] Exit should ask before quit
+- [ ] Rearranging parameters with additional annotations (e.g. ShaderParameters) breaks operator 
 
 ## Project handling
 
@@ -30,19 +30,20 @@
 - [x] Allow dragging connections from vertical output slot
 - [x] Dragging gradient widget handles drags canvas too
 - [x] Snapping connecting start to output not working of ops who's output is already snapped
-- [ ] Add hint message to hold shift for keeping connections
-- [ ] Add annotations
+- [x] Add annotations
 - [x] Parameter window in fullscreen
-- [ ] Fix background control in mag graph
-- [ ] Allow dragging connection from horizontal input slot
-- [ ] Allow clicking vertical input slot
+- [x] Fix split between multi input parameters
+- [x] Fix background control in mag graph
+- [x] Allow dragging connection from horizontal input slot
+- [x] Allow clicking vertical input slot
+- [ ] Publish as input does not create connection
 - [ ] Split Connections
 - [ ] Rewiring of vertical connection lines
-- [ ] Panning/Zooming in CurveEdit-Popup opened from SampleCurveOp is broken 
-- [ ] ShaderGraphNode should be bypassable
 - [ ] LoadImage has no thumbnail
-- 
+- [ ] Panning/Zooming in CurveEdit-Popup opened from SampleCurveOp is broken 
 
+- [ ] Add hint message to hold shift for keeping connections
+- 
 ## Timeline
 
 - [ ] Soundtrack image is incorrectly scaled with playback?
@@ -51,7 +52,7 @@
 
 ## UI-Scaling Issues (at x1.5):
 
-- [ ] Perlin-Noise graph cut off
+- [x] Perlin-Noise graph cut off
 - [ ] Timeline-Clips too narrow
 - [ ] Full-Screen cuts of timeline ruler units
 - [ ] MagGraph-Labels too small
@@ -87,19 +88,21 @@
 - [ ] Combine flood fill with 3d
 - [ ] FieldToImage
 - [ ] Flexible shader injection (e.g. DrawMesh normals, etc.)
-
-
+- [ ] ShaderGraphNode should be bypassable
+- [ ] Undo/Redo seems to be broken when editing custom SDF shaders
 
 ## Documentation
 
-- [ ] Fix WIKI export does not include input descriptions
+- [x] Fix WIKI export does not include input descriptions
 
 ## General UX-ideas:
+
+- [ ] Add mono-space font for code fragments
 - [ ] StatusProvideIcon should support non-warning indicator
 - [ ] Separate Value Clamping for lower and upper values 
 - [ ] Drag and drop of files (copy them to resources folder and create LoadXYZ instance...)
 - [ ] With Tapping and Beat-Lock, no Idle-Animation should probably "pause" all playback?
-- 
+ 
 
 
 ## Refactoring

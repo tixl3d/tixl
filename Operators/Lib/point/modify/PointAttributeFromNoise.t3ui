@@ -1,6 +1,6 @@
 {
   "Id": "7af59063-88d2-4697-985c-e09b8c77a43f"/*PointAttributeFromNoise*/,
-  "Description": "Changes point attributes with a built in noise function.",
+  "Description": "Changes point attributes with a built-in noise function.",
   "SymbolTags": "8",
   "InputUis": [
     {

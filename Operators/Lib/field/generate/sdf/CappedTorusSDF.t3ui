@@ -1,6 +1,6 @@
 {
   "Id": "b85198a8-6475-45e1-b2d2-83ec8f59d6ed"/*CappedTorusSDF*/,
-  "Description": "Generates a procedural torus field with which can be capped (with rounded edges).\nIt can be rendered with [RaymarchField] and visualized with [VisualizeFieldDistance].\nAlso known as Cube SDF.\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToRaymarchField].\n\nIt can be modified with [BendField] , [TransformField] , [PolarRepeat] and more.\n\nSimilar nodes: [BoxSDF], [ChainLinkSDF], [FractalSDF].\n\nTo use a Mesh made of polygons refer to [TorusMesh].",
+  "Description": "Generates a procedural torus field which can be capped (with rounded edges).\nIt can be rendered with [RaymarchField] and visualized with [VisualizeFieldDistance].\nAlso known as Cube SDF.\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToRaymarchField].\n\nIt can be modified with [BendField], [TransformField], [PolarRepeat] and more.\n\nSimilar nodes: [BoxSDF], [ChainLinkSDF], [FractalSDF].\n\nTo use a mesh made of polygons refer to [TorusMesh].",
   "InputUis": [
     {
       "InputId": "00cec9de-3be4-403f-8677-dcc2ef473708"/*Radius*/,

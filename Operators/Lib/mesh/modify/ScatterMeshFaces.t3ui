@@ -1,6 +1,6 @@
 {
   "Id": "daacabd8-0338-4998-898f-94580abd8eac"/*ScatterMeshFaces*/,
-  "Description": "This op is similar to [DisplaceMesh]. However, it uses faces centers instead of the vertices to \"scatter\" a mesh while keeping the size of the individual faces.\n\nPlease note that this effects works best with flat shader meshes created by [SplitMeshVertices], because this operator will generate artifacts for Meshes that use shared vertices.\n",
+  "Description": "This op is similar to [DisplaceMesh]. However, it uses face centers instead of the vertices to \"scatter\" a mesh while keeping the size of the individual faces.\n\nPlease note that this effect works best with flat shader meshes created by [SplitMeshVertices], because this operator will generate artifacts for meshes that use shared vertices.\n",
   "SymbolTags": "8",
   "InputUis": [
     {

@@ -1,6 +1,6 @@
 {
   "Id": "b5709297-c714-4019-9d0b-6982590b5590"/*DisplaceMeshNoise*/,
-  "Description": "Displaces a Mesh with perlin noise.",
+  "Description": "Displaces a Mesh with Perlin noise.",
   "SymbolTags": "65",
   "InputUis": [
     {

@@ -1,6 +1,6 @@
 {
   "Id": "db162ead-71a4-4835-95c8-6a719511314e"/*MidiTestGround*/,
-  "Description": "A small project to test using midi controllers for snapshots and other features.",
+  "Description": "A small project to test using MIDI controllers for snapshots and other features.",
   "InputUis": [],
   "SymbolChildUis": [
     {

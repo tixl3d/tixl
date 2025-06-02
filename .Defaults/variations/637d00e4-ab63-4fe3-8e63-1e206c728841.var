@@ -1,0 +1,435 @@
+{
+  "Id": "637d00e4-ab63-4fe3-8e63-1e206c728841",
+  "Variations": [
+    {
+      "Id": "726e57b9-063a-47a0-b894-54b1df41b4d5",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "untitled",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bde89b93-224c-4a3f-85ab-d85b0401c02a": "float4 p2 = float4(p, 1.);\nfor(int i = 0; i < 8; i++){\n    p2.xyz = mod(p2.xyz - 1, B) -1;   // B: 2\n    p2*=C / dot(p2.xyz ,p2.xyz);   // C: 1.4\n}\nreturn ( length(p2.xz / p2.w) * A);  // A: 0.25",
+          "3c366d34-c398-410e-972b-d8cc2baffddb": 0.28,
+          "874ae9c8-5835-4d0c-9bef-253ac75d19b2": 2.0,
+          "56e5d5ec-ec59-4ea0-85c1-1eca3dcb5790": 1.3113127
+        }
+      }
+    },
+    {
+      "Id": "533787be-0b98-41ed-a20a-6dda242ecaaa",
+      "IsPreset": true,
+      "ActivationIndex": 4,
+      "Title": "SinBlobs",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 186.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bde89b93-224c-4a3f-85ab-d85b0401c02a": "    float scale = A;\n    float thickness = B;\n    float bias = C;\n\n    p *= scale;\n    return (abs(dot(sin(p*.5 + Offset), cos(p.zxy * 1.23)) - bias) / scale - thickness)*0.55;\n",
+          "64f1812f-7ebd-4231-8a6a-0bbc302bfaff": {
+            "X": 2.57,
+            "Y": -2.18,
+            "Z": 0.0
+          },
+          "3c366d34-c398-410e-972b-d8cc2baffddb": 2.91,
+          "874ae9c8-5835-4d0c-9bef-253ac75d19b2": 0.03,
+          "56e5d5ec-ec59-4ea0-85c1-1eca3dcb5790": 1.26
+        }
+      }
+    },
+    {
+      "Id": "15174e6b-3869-456a-af72-b048bee8a61e",
+      "IsPreset": true,
+      "ActivationIndex": 5,
+      "Title": "SineBlobs/Stretchy",
+      "PosOnCanvas": {
+        "X": 163.00005,
+        "Y": 186.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bde89b93-224c-4a3f-85ab-d85b0401c02a": "    float scale = A;\n    float thickness = B;\n    float bias = C;\n\n    p *= scale;\n    return (abs(dot(sin(p*.5 + Offset), cos(p.zxy * 1.23)) - bias) / scale - thickness)*0.55;\n",
+          "64f1812f-7ebd-4231-8a6a-0bbc302bfaff": {
+            "X": 2.88,
+            "Y": 10.0,
+            "Z": -0.06
+          },
+          "3c366d34-c398-410e-972b-d8cc2baffddb": 4.14,
+          "874ae9c8-5835-4d0c-9bef-253ac75d19b2": 0.16,
+          "56e5d5ec-ec59-4ea0-85c1-1eca3dcb5790": 1.85
+        }
+      }
+    },
+    {
+      "Id": "863a1c20-78ec-4d85-ae01-bf574ea2a65a",
+      "IsPreset": true,
+      "ActivationIndex": 5,
+      "Title": "BrokenCave",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bde89b93-224c-4a3f-85ab-d85b0401c02a": "float4 p2 = float4(p, 1.);\nfor(int i = 0; i < 8; i++){\n    p2.xyz = mod(p2.xyz - 1, B) -1;   // B: 2\n    p2*=C / dot(p2.xyz ,p2.xyz);   // C: 1.4\n}\nreturn ( length(p2.xz / p2.w) * A);  // A: 0.25",
+          "3c366d34-c398-410e-972b-d8cc2baffddb": 0.274,
+          "874ae9c8-5835-4d0c-9bef-253ac75d19b2": 2.07,
+          "56e5d5ec-ec59-4ea0-85c1-1eca3dcb5790": 2.0
+        }
+      }
+    },
+    {
+      "Id": "b1dcf56c-36fa-44f6-b5c9-cb87ed9f54b6",
+      "IsPreset": true,
+      "ActivationIndex": 6,
+      "Title": "SphereCave",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 279.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bde89b93-224c-4a3f-85ab-d85b0401c02a": "// From https://jbaker.graphics/writings/DEC.html\nfloat4 p2 = float4(p.yxz, 1);\nfor(int i = 0; i < 8; i++){\n  p2.xyz = mod(p2.xyz - 1, 2 + C) - 1; // C: 0.0\n  p2*=(B/dot(p2.xyz, p2.xyz));  // B: 1.2\n}\np2/=p2.w;\nreturn abs(p2.x) * A;  // A: 0.25",
+          "3c366d34-c398-410e-972b-d8cc2baffddb": 0.22,
+          "874ae9c8-5835-4d0c-9bef-253ac75d19b2": 1.16,
+          "56e5d5ec-ec59-4ea0-85c1-1eca3dcb5790": 0.0
+        }
+      }
+    },
+    {
+      "Id": "2b986d0d-bd85-42e8-9971-1958c5024699",
+      "IsPreset": true,
+      "ActivationIndex": 7,
+      "Title": "SphereCave Broken",
+      "PosOnCanvas": {
+        "X": 163.00005,
+        "Y": 279.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bde89b93-224c-4a3f-85ab-d85b0401c02a": "// From https://jbaker.graphics/writings/DEC.html\nfloat4 p2 = float4(p.yxz, 1);\nfor(int i = 0; i < 8; i++){\n  p2.xyz = mod(p2.xyz - 1, 2 + C) - 1; // C: 0.0\n  p2*=(B/dot(p2.xyz, p2.xyz));  // B: 1.2\n}\np2/=p2.w;\nreturn abs(p2.x) * A;  // A: 0.25",
+          "3c366d34-c398-410e-972b-d8cc2baffddb": 0.22,
+          "874ae9c8-5835-4d0c-9bef-253ac75d19b2": 1.16,
+          "56e5d5ec-ec59-4ea0-85c1-1eca3dcb5790": 0.03
+        }
+      }
+    },
+    {
+      "Id": "755d2511-b5d7-409a-a854-1ccea9784e62",
+      "IsPreset": true,
+      "ActivationIndex": 8,
+      "Title": "BoxFold",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 372.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bde89b93-224c-4a3f-85ab-d85b0401c02a": "// box fold gaziya5 aka gaz on https://jbaker.graphics/writings/DEC.html\np=abs(p)-15.;\nif(p.x < p.z)p.xz=p.zx;\nif(p.y < p.z)p.yz=p.zy;\nif(p.x < p.y)p.xy=p.yx;\nfloat s=2.;\nfor (int i=0; i<8; i++){\n  p=-sign(p)*(abs(abs(abs(p)-2.)-1.)-1.);\n  float r=-1.55/max(.41,dot(p,p));\n  s*=r; p*=r; p-=.5;\n}\ns=abs(s);\nreturn dot(p,normalize(float3(1,2,3)))/s;",
+          "3c366d34-c398-410e-972b-d8cc2baffddb": 0.22,
+          "874ae9c8-5835-4d0c-9bef-253ac75d19b2": 1.16,
+          "56e5d5ec-ec59-4ea0-85c1-1eca3dcb5790": 0.03
+        }
+      }
+    },
+    {
+      "Id": "cba2dc4f-557f-49e5-a639-5f660bda610e",
+      "IsPreset": true,
+      "ActivationIndex": 9,
+      "Title": "BoxFold / 2",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 372.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bde89b93-224c-4a3f-85ab-d85b0401c02a": "// box fold gaziya5 aka gaz on https://jbaker.graphics/writings/DEC.html\np=abs(p)-A * 10; // A: 15\nif(p.x < p.z)p.xz=p.zx;\nif(p.y < p.z)p.yz=p.zy;\nif(p.x < p.y)p.xy=p.yx;\nfloat s=2.;\nfor (int i=0; i<8; i++){\n  p=-sign(p)*(abs(abs(abs(p)-2.)-1.)-1.);\n  float r=-B/max(.41,dot(p,p)); // B: 1.55\n  s*=r; p*=r; p-=.5;\n}\ns=abs(s);\nreturn dot(p,normalize(float3(1,2,3)))/s;",
+          "3c366d34-c398-410e-972b-d8cc2baffddb": 1.982,
+          "874ae9c8-5835-4d0c-9bef-253ac75d19b2": 1.391,
+          "56e5d5ec-ec59-4ea0-85c1-1eca3dcb5790": 0.145
+        }
+      }
+    },
+    {
+      "Id": "66fa98d0-e6f2-42e7-b7d3-f4d2ca04d299",
+      "IsPreset": true,
+      "ActivationIndex": 10,
+      "Title": "SpiderCave1",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 465.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bde89b93-224c-4a3f-85ab-d85b0401c02a": "// by gaziya5 aka gaz on https://jbaker.graphics/writings/DEC.html\nfloat s=A;  // A: 3\nfor(int i = 0; i < 4; i++) {\n  p=mod(p-1, 2)-1;   \n  float r=B / dot(p,p); // B: 1.2\n  p*=r; s*=r;\n}\np = abs(p)-C; // C: 0.8\nif (p.x < p.z) p.xz = p.zx;\nif (p.y < p.z) p.yz = p.zy;\nif (p.x < p.y) p.xy = p.yx;\nreturn length(cross(p,normalize(float3(0,1,1))))/s-.001;",
+          "3c366d34-c398-410e-972b-d8cc2baffddb": 3.0,
+          "874ae9c8-5835-4d0c-9bef-253ac75d19b2": 1.206,
+          "56e5d5ec-ec59-4ea0-85c1-1eca3dcb5790": 0.8
+        }
+      }
+    },
+    {
+      "Id": "ab216d13-bec8-4bf7-ba17-c51080b5335a",
+      "IsPreset": true,
+      "ActivationIndex": 11,
+      "Title": "SpiderCave / HexField",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 465.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bde89b93-224c-4a3f-85ab-d85b0401c02a": "// by gaziya5 aka gaz on https://jbaker.graphics/writings/DEC.html\nfloat s=A;  // A: 3\nfor(int i = 0; i < 4; i++) {\n  p=mod(p-1, 2)-1;   \n  float r=B / dot(p,p); // B: 1.2\n  p*=r; s*=r;\n}\np = abs(p)-C; // C: 0.8\nif (p.x < p.z) p.xz = p.zx;\nif (p.y < p.z) p.yz = p.zy;\nif (p.x < p.y) p.xy = p.yx;\nreturn length(cross(p,normalize(float3(0,1,1))))/s-.001;",
+          "3c366d34-c398-410e-972b-d8cc2baffddb": 1.64,
+          "874ae9c8-5835-4d0c-9bef-253ac75d19b2": 0.81,
+          "56e5d5ec-ec59-4ea0-85c1-1eca3dcb5790": 0.984
+        }
+      }
+    },
+    {
+      "Id": "9d5be05c-9f32-4956-b8ac-358306e1907e",
+      "IsPreset": true,
+      "ActivationIndex": 11,
+      "Title": "WireCube",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 558.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bde89b93-224c-4a3f-85ab-d85b0401c02a": "float s=A, r2; // A: 2\np=abs(p);\nfor(int i=0; i<12;i++) {\n  p=1 - abs(p - 1);\n  r2= B / dot(p, p); // B: 1.2\n  p*=r2; s*=r2;\n}\nreturn length(cross(p,normalize(float3(1,1,1))))/s - C; // C: 0.003",
+          "3c366d34-c398-410e-972b-d8cc2baffddb": 2.0,
+          "874ae9c8-5835-4d0c-9bef-253ac75d19b2": 1.2,
+          "56e5d5ec-ec59-4ea0-85c1-1eca3dcb5790": 0.005
+        }
+      }
+    },
+    {
+      "Id": "541ee04d-4300-4599-8557-4428af569902",
+      "IsPreset": true,
+      "ActivationIndex": 13,
+      "Title": "WireCube / Balls",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 558.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bde89b93-224c-4a3f-85ab-d85b0401c02a": "float s=A, r2; // A: 2\np=abs(p);\nfor(int i=0; i<12;i++) {\n  p=1 - abs(p - 1);\n  r2= B / dot(p, p); // B: 1.2\n  p*=r2; s*=r2;\n}\nreturn length(cross(p,normalize(float3(1,1,1))))/s - C; // C: 0.003",
+          "3c366d34-c398-410e-972b-d8cc2baffddb": 2.02,
+          "874ae9c8-5835-4d0c-9bef-253ac75d19b2": 2.07,
+          "56e5d5ec-ec59-4ea0-85c1-1eca3dcb5790": 0.005
+        }
+      }
+    },
+    {
+      "Id": "8550d54b-5897-473b-80b1-69d85d398ab3",
+      "IsPreset": true,
+      "ActivationIndex": 13,
+      "Title": "Pyramid",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 558.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bde89b93-224c-4a3f-85ab-d85b0401c02a": "// by gaziya5 aka gaz on https://jbaker.graphics/writings/DEC.html\np = p.xzy;\n\n// A: 2.2    // B: 0.8   // C: 0.3\nfloat scale = A, off0 = B, off1 = C, off2 = 0.82;\n//float3 off =float3(2, .2, .1);\nfloat3 off = Offset;\nfloat s=1.0;\nfor(int i = 0; ++i < 20; ) {\n  p.xy = abs(p.xy);\n  p.xy = fold45(p.xy);\n  p.y -= off0;\n  p.y = -abs(p.y);\n  p.y += off0;\n  p.x += off1;\n  p.xz = fold45(p.xz);\n  p.x -= off2;\n  p.xz = fold45(p.xz);\n  p.x += off1;\n  p -= off;\n  p *= scale;\n  p += off;\n  s *= scale;\n}\nreturn length(p)/s;",
+          "64f1812f-7ebd-4231-8a6a-0bbc302bfaff": {
+            "X": 1.11,
+            "Y": 0.59,
+            "Z": 0.21
+          },
+          "3c366d34-c398-410e-972b-d8cc2baffddb": 2.2,
+          "874ae9c8-5835-4d0c-9bef-253ac75d19b2": 0.8,
+          "56e5d5ec-ec59-4ea0-85c1-1eca3dcb5790": 0.3,
+          "48a0699d-1207-4e18-ab9b-4da7f77cc7aa": "#define fold45(p)(p.y>p.x)?p.yx:p"
+        }
+      }
+    },
+    {
+      "Id": "3db021fa-18d2-46b5-80c7-942e99901e6b",
+      "IsPreset": true,
+      "ActivationIndex": 14,
+      "Title": "PipeMaze",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 651.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "64f1812f-7ebd-4231-8a6a-0bbc302bfaff": {
+            "X": 1.2,
+            "Y": 0.06,
+            "Z": 1.32
+          },
+          "3c366d34-c398-410e-972b-d8cc2baffddb": 3.143,
+          "bde89b93-224c-4a3f-85ab-d85b0401c02a": "// by yonatan on https://jbaker.graphics/writings/DEC.html\np=frac(p)-.5;\n//float3 O=float3(2.,0, 3.);\nfloat3 O = Offset;\nfor(int j=0;j++<7;){\n  p=abs(p);\n  p=(p.x < p.y?p.zxy:p.zyx)* A - O; // A: 3\n  if(p.z < -.5*O.z)\n  p.z+=O.z;\n}\nreturn length(p.xy)/3e3;"
+        }
+      }
+    },
+    {
+      "Id": "f8804503-b7c0-4bd3-882f-10065592aef3",
+      "IsPreset": true,
+      "ActivationIndex": 15,
+      "Title": "PipeMaze2",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 651.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "64f1812f-7ebd-4231-8a6a-0bbc302bfaff": {
+            "X": 0.8,
+            "Y": 0.06,
+            "Z": 1.32
+          },
+          "3c366d34-c398-410e-972b-d8cc2baffddb": 3.21,
+          "874ae9c8-5835-4d0c-9bef-253ac75d19b2": -0.03,
+          "56e5d5ec-ec59-4ea0-85c1-1eca3dcb5790": 0.511,
+          "bde89b93-224c-4a3f-85ab-d85b0401c02a": "// by yonatan on https://jbaker.graphics/writings/DEC.html\n\np=frac(p)- C; // C: 0.5\n\n//float3 O=float3(2.,0, 3.);\nfloat3 O = Offset;\nfor(int j=0;j++<7;){\n  p=abs(p);\n  p=(p.x < p.y?p.zxy:p.zyx)* A - O; // A: 3\n  if(p.z < -B * O.z) // B: 0.5\n  p.z+=O.z;\n}\nreturn length(p.xy)/3e3;"
+        }
+      }
+    },
+    {
+      "Id": "5009fbcb-d072-449d-b1be-f2d1716555c2",
+      "IsPreset": true,
+      "ActivationIndex": 16,
+      "Title": "BrokenFill",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 744.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "64f1812f-7ebd-4231-8a6a-0bbc302bfaff": {
+            "X": 0.0,
+            "Y": -0.02,
+            "Z": 0.0
+          },
+          "3c366d34-c398-410e-972b-d8cc2baffddb": 1.994,
+          "874ae9c8-5835-4d0c-9bef-253ac75d19b2": 0.842,
+          "56e5d5ec-ec59-4ea0-85c1-1eca3dcb5790": 1.71,
+          "bde89b93-224c-4a3f-85ab-d85b0401c02a": "// by gaziya5 aka gaz on https://jbaker.graphics/writings/DEC.html\nfloat i,g,d=1.,s,h;\nfloat3 e,q;\ns=A; h=B;  // A: 2   B: 0.3\nfor(int j=0;j++<8;){\n  p=abs(p)-1.; q=p;\n  for(int k=0;++k<3;)\n    p-=clamp(dot(q,e=float3(9>>k&1,k>>1&1,k&1)-.5),-h,h)*e*2.;\n  p*=C;s*=C;  //C: 1.4\n}\nreturn length(p)/(4.*s);",
+          "48a0699d-1207-4e18-ab9b-4da7f77cc7aa": ""
+        }
+      }
+    },
+    {
+      "Id": "a3d9ab6d-188e-45b3-b582-f72791488b10",
+      "IsPreset": true,
+      "ActivationIndex": 17,
+      "Title": "DiamondPearls",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 837.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "64f1812f-7ebd-4231-8a6a-0bbc302bfaff": {
+            "X": -0.42,
+            "Y": 0.71,
+            "Z": -0.44
+          },
+          "3c366d34-c398-410e-972b-d8cc2baffddb": 1.1,
+          "bde89b93-224c-4a3f-85ab-d85b0401c02a": "// by gaziya5 aka gaz on https://jbaker.graphics/writings/DEC.html\nfloat s=2, l=0.;\n\nfloat3 d= Offset;// float3(1,-2,-1);\n\n\np=abs(p);\nfor(int j=0;j<8;j++) {\n  p=1.-abs(abs(p-2.)-1.);\n  p*=l=A / dot(p,p), s*=l; //A: 1.1\n}\nreturn dot(p,normalize(d))/s;",
+          "48a0699d-1207-4e18-ab9b-4da7f77cc7aa": ""
+        }
+      }
+    },
+    {
+      "Id": "79dda51b-8ebe-4b07-9595-fec1bf337ac9",
+      "IsPreset": true,
+      "ActivationIndex": 18,
+      "Title": "DiamondHive/Caves",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 837.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "64f1812f-7ebd-4231-8a6a-0bbc302bfaff": {
+            "X": -1.33,
+            "Y": -0.35,
+            "Z": -0.53
+          },
+          "3c366d34-c398-410e-972b-d8cc2baffddb": 6.5,
+          "874ae9c8-5835-4d0c-9bef-253ac75d19b2": 0.008,
+          "bde89b93-224c-4a3f-85ab-d85b0401c02a": "// by gaziya5 aka gaz on https://jbaker.graphics/writings/DEC.html\nfloat s=2, l=0;\n\nfloat3 d= Offset;// float3(1,-2,-1);\n\n\np=abs(p);\nfor(int j=0;j<8;j++) {\n  p=1.-abs(abs(p-2)-1.);\n  p*=l=A / dot(p,p), s*=l; //A: 1.1\n}\nreturn dot(p,normalize(d))/s;",
+          "48a0699d-1207-4e18-ab9b-4da7f77cc7aa": ""
+        }
+      }
+    },
+    {
+      "Id": "cd192af5-3061-4757-a520-773d0be0f0f6",
+      "IsPreset": true,
+      "ActivationIndex": 19,
+      "Title": "HoleGrid2",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 930.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "3c366d34-c398-410e-972b-d8cc2baffddb": 1.44,
+          "874ae9c8-5835-4d0c-9bef-253ac75d19b2": -0.073,
+          "56e5d5ec-ec59-4ea0-85c1-1eca3dcb5790": -0.0,
+          "bde89b93-224c-4a3f-85ab-d85b0401c02a": "// by gaziya5 aka gaz on https://jbaker.graphics/writings/DEC.html\nfloat s=2., l=0.;\np=abs(p);\nfor(int j=0;j++<6;) {\n  p=-sign(p)*(abs(abs(abs(p)-2.)-1.)-1.);\n\n  p*=l=-A/dot(p,p); // A: 1.3\n  p-=B, s*=l; // B: 0.15\n  p+=Offset;\n}\nreturn length(p)/s - C; // C:Thickness",
+          "48a0699d-1207-4e18-ab9b-4da7f77cc7aa": ""
+        }
+      }
+    },
+    {
+      "Id": "b86fd2c0-09f7-419e-b7df-0844ce4d4617",
+      "IsPreset": true,
+      "ActivationIndex": 20,
+      "Title": "Lump Of stuff",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 930.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "64f1812f-7ebd-4231-8a6a-0bbc302bfaff": {
+            "X": 1.9,
+            "Y": 0.236,
+            "Z": -0.98
+          },
+          "3c366d34-c398-410e-972b-d8cc2baffddb": 1.44,
+          "874ae9c8-5835-4d0c-9bef-253ac75d19b2": 0.153,
+          "56e5d5ec-ec59-4ea0-85c1-1eca3dcb5790": 0.09,
+          "bde89b93-224c-4a3f-85ab-d85b0401c02a": "// by gaziya5 aka gaz on https://jbaker.graphics/writings/DEC.html\nfloat s=2., l=0.;\np=abs(p);\nfor(int j=0;j++<6;) {\n  p=-sign(p)*(abs(abs(abs(p)-2.)-1.)-1.);\n\n  p*=l=-A/dot(p,p); // A: 1.3\n  p-=B, s*=l; // B: 0.15\n  p+=Offset;\n}\nreturn length(p)/s - C; // C:Thickness",
+          "48a0699d-1207-4e18-ab9b-4da7f77cc7aa": ""
+        }
+      }
+    },
+    {
+      "Id": "8d9d7cc0-cf2d-43ab-b637-0917e14ec0e4",
+      "IsPreset": true,
+      "ActivationIndex": 21,
+      "Title": "TetraederSprouts",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 930.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "64f1812f-7ebd-4231-8a6a-0bbc302bfaff": {
+            "X": 1.92,
+            "Y": 0.236,
+            "Z": -0.98
+          },
+          "3c366d34-c398-410e-972b-d8cc2baffddb": 3.32,
+          "874ae9c8-5835-4d0c-9bef-253ac75d19b2": 8.63,
+          "56e5d5ec-ec59-4ea0-85c1-1eca3dcb5790": 3.645,
+          "bde89b93-224c-4a3f-85ab-d85b0401c02a": "// by kamoshika on https://jbaker.graphics/writings/DEC.html\n\nfloat i,d;\nfloat b=sqrt(A); // A:3\nfloat3 Q= float3(mod(p,b*2.)-b);\nfloat a=1.1; d=9.; // A:1.1\nfor(int j=0;j++<7;){\n  Q=abs(Q);\n  d=min(d,(dot(Q,float3(1,1,1)/b)-1)/a);\n  Q= Q*C - B/b;a*= C; // B: 6  //C: 3\n}\nreturn d;",
+          "48a0699d-1207-4e18-ab9b-4da7f77cc7aa": ""
+        }
+      }
+    }
+  ]
+}

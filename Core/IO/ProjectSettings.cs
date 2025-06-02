@@ -28,6 +28,7 @@ public class ProjectSettings : Settings<ProjectSettings.ConfigData>
 
         // Profiling
         public bool EnableBeatSyncProfiling = false;
+        public float BeatSyncOffsetMs = 0;
     }
 }
 

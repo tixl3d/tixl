@@ -1,5 +1,6 @@
 ﻿using T3.Core.Animation;
 using T3.Core.Audio;
+using T3.Core.IO;
 
 namespace T3.Editor.Gui.Interaction.Timing;
 
@@ -149,7 +150,7 @@ public static class BeatTiming
 
             if (_resynced)
             {
-                BeatTime = _barTimeAverage.UpdateAndCompute(BeatSynchronizer.BarProgress) + 0.05f;
+                BeatTime = _barTimeAverage.UpdateAndCompute(BeatSynchronizer.BarProgress) + ProjectSettings.Config.BeatSyncOffsetMs / 1000;
                 _beatDuration =   (float)(60f / BeatSynchronizer.CurrentBpm);
             }
             else
@@ -214,41 +215,4 @@ public static class BeatTiming
     private const double Threshold = 0.3;
 
     private static readonly SlidingAverage _barTimeAverage = new(10);
-}
-
-internal class SlidingAverage
-{
-    public SlidingAverage(int maxLength)
-    {
-        _length = maxLength;
-        _queue = new Queue<double>(maxLength);
-    }
-        
-    public  double UpdateAndCompute(double current)
-    {
-        _queue.Enqueue(current);
-        _currentSum += current;
-
-        var tailValue = current;
-        
-        if (_queue.Count > _length)
-        {
-            tailValue = _queue.Dequeue();
-            _currentSum -= tailValue;
-        }
-
-        var delta = (current - tailValue);
-
-        var averageStrength = 0.0;
-        if (_queue.Count > 0)
-        {
-            averageStrength = _currentSum / _queue.Count;
-        }
-
-        return averageStrength + Math.Max(0,delta /2);
-    }
-
-    private readonly int _length;
-    private readonly Queue<double> _queue;
-    private double _currentSum;
 }

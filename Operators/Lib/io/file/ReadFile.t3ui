@@ -17,7 +17,7 @@
         "X": 0.0,
         "Y": 135.0
       },
-      "Description": "triggers a new scan of the selected file",
+      "Description": "Triggers a new scan of the selected file",
       "AddPadding": "True"
     }
   ],

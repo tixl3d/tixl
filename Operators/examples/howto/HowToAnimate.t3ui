@@ -713,7 +713,7 @@
     },
     {
       "Id": "61c00d70-55f1-496d-ab8b-d75387a440e6",
-      "Title": "Using time. Notice that Tooll's time is not in secs but in musical bars -\n4 beats is 1 bar. 4 bars form a measure. This means that your animation\nwill work for all BPM-rates!\n\n\n",
+      "Title": "Using time. Notice that Tooll's time is not in secs but in musical bars -\n4 beats is 1 bar. 4 bars form a measure. This means that your animation\nwill work for all BPM rates!\n\n\n",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -749,7 +749,7 @@
     },
     {
       "Id": "7333c3c1-a0f0-41c9-9fd8-518804226909",
-      "Title": "Musicians might know the [AnimValue] operator as\n\"LFO\" (Low-frequency operator).\n\nYou can adjust its main parameters directly by holding \nthe CTRL key.\n- Drag Up/Down on the left adjusts the rate in steps /4x4\n- Drag the graph to adjust ratio and Bias",
+      "Title": "Musicians might know the [AnimValue] operator as\n\"LFO\" (Low-frequency operator).\n\nYou can adjust its main parameters directly by holding \nthe CTRL key.\n- Drag Up/Down on the left adjusts the rate in steps /4x4\n- Drag the graph to adjust ratio and bias",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -911,7 +911,7 @@
     },
     {
       "Id": "ed0d2b3a-8791-4b08-a04b-408338187908",
-      "Title": "If you click on \"Dope\" / \"Curve\" in the Time Control Bar,\nyou can toggle between Dopesheet and Curve mode.\nDragging keyframes while holding the Shift-key toggles\nsnapping.",
+      "Title": "If you click on \"Dope\" / \"Curve\" in the Time Control Bar,\nyou can toggle between Dopesheet and Curve mode.\nDragging keyframes while holding the Shift key toggles\nsnapping.",
       "Color": {
         "X": 0.6,
         "Y": 0.6,

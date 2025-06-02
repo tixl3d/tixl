@@ -6,15 +6,8 @@
     {
       "ChildId": "0be503bb-fccd-437e-8d49-cbcaa7526299"/*Glow*/,
       "Position": {
-        "X": 1737.6465,
-        "Y": 86.52734
-      }
-    },
-    {
-      "ChildId": "12a664af-4e22-4456-8245-cb8e66b24376"/*TriggerAnim*/,
-      "Position": {
-        "X": 1587.6465,
-        "Y": 142.52734
+        "X": 1713.7195,
+        "Y": 232.75653
       }
     },
     {
@@ -27,87 +20,87 @@
     {
       "ChildId": "15073673-0845-403f-b20d-d1c44a93b10b"/*AnimValue*/,
       "Position": {
-        "X": 1570.8002,
-        "Y": 241.0387
+        "X": 1573.7195,
+        "Y": 267.75653
       }
     },
     {
-      "ChildId": "1940454c-9f73-461a-b9c3-d965dd2a33ee"/*Time*/,
+      "ChildId": "1d6bee8b-1ca3-43cf-811d-726f54678d25"/*AnimValue*/,
       "Position": {
-        "X": 1072.5331,
-        "Y": 275.1012
+        "X": 1189.2161,
+        "Y": 235.29291
       }
     },
     {
       "ChildId": "1e5f8b49-ed9a-49af-9116-666981d234ce"/*ColorGrade*/,
       "Position": {
-        "X": 1587.6465,
-        "Y": 86.52734
+        "X": 1396.2317,
+        "Y": 173.09814
       },
       "SnapshotGroupIndex": "1"
     },
     {
       "ChildId": "2075e53d-5de9-4f5b-8bfd-dc0c0b2aab9d"/*SortPixelGlitch*/,
       "Position": {
-        "X": 1246.2317,
-        "Y": 68.098145
+        "X": 1396.2317,
+        "Y": -1.9018555
       },
       "SnapshotGroupIndex": "1"
     },
     {
       "ChildId": "2f1c2843-084c-4f5e-9646-1f22897f021b"/*Add*/,
       "Position": {
-        "X": 450.0,
-        "Y": 0.0
+        "X": 1116.2317,
+        "Y": -106.901855
       }
     },
     {
       "ChildId": "3b838d2f-6419-4a4e-a0e6-f9785f97efa5"/*Modulo*/,
       "Position": {
-        "X": 300.0,
-        "Y": 0.0
+        "X": 1116.2317,
+        "Y": -141.90186
       }
     },
     {
       "ChildId": "4f58a4ee-26de-4d3c-983b-e6bbcb4748d3"/*IntToFloat*/,
       "Position": {
-        "X": 150.0,
+        "X": 160.0,
         "Y": 83.0
       }
     },
     {
       "ChildId": "578b2c47-7aaa-452c-b353-954d0faca953"/*PlayVideo*/,
       "Position": {
-        "X": 900.0,
-        "Y": 0.0
+        "X": 1396.2317,
+        "Y": -106.901855
       }
     },
     {
       "ChildId": "61a45b71-8ce3-4069-ae08-98eb8b4745c6"/*Accumulator*/,
       "Position": {
-        "X": 1096.2317,
-        "Y": 150.09814
+        "X": 1106.2317,
+        "Y": 172.09814
       }
     },
     {
       "ChildId": "68a0b9dc-0a86-4bc4-9ec2-850bd28c5556"/*Layer2d*/,
       "Position": {
-        "X": 2181.4553,
-        "Y": 53.950516
+        "X": 1396.2317,
+        "Y": 278.09814
       }
     },
     {
       "ChildId": "6a736b3e-e754-41e8-a511-00e52c577754"/*Counter*/,
       "Position": {
-        "X": 450.0,
-        "Y": 83.0
+        "X": 976.2317,
+        "Y": -36.901855
       }
     },
     {
       "ChildId": "6af1d101-84d8-44bd-b0e7-5cbe2bf308aa"/*WasTrigger*/,
       "Position": {
-        "X": 168.31958,
-        "Y": 175.26627
+        "X": 836.2317,
+        "Y": -36.901855
       }
     },
     {
@@ -120,72 +113,72 @@
     {
       "ChildId": "7ba9c7c8-c167-4cd9-8040-209936b8a448"/*Value*/,
       "Position": {
-        "X": 750.0,
-        "Y": 0.0
+        "X": 1256.2317,
+        "Y": -71.901855
       }
     },
     {
       "ChildId": "7e5052c4-1a88-4f3e-8401-1d85c7a35b09"/*Grain*/,
       "Position": {
-        "X": 1050.0,
-        "Y": 0.0
+        "X": 1396.2317,
+        "Y": -36.901855
+      }
+    },
+    {
+      "ChildId": "8c317708-6da9-4c4e-9ad3-645553fb2c33"/*Bloom*/,
+      "Position": {
+        "X": 1396.2317,
+        "Y": 208.09814
       }
     },
     {
       "ChildId": "9694fd55-9807-4649-8bf8-7c81c45ba9c9"/*TriggerAnim*/,
       "Position": {
-        "X": 1096.2317,
-        "Y": 94.098145
+        "X": 1256.2317,
+        "Y": 33.098145
       },
       "SnapshotGroupIndex": "1"
     },
     {
       "ChildId": "a69c9386-d3de-4d5f-8fc4-79bba484e933"/*Accumulator*/,
       "Position": {
-        "X": 1119.2063,
-        "Y": 218.24492
+        "X": 1256.2317,
+        "Y": 103.098145
       }
     },
     {
       "ChildId": "bbb162e7-9c77-4f81-9d93-ab3a31bd3e17"/*TriggerAnim*/,
       "Position": {
-        "X": 946.2317,
-        "Y": 150.09814
+        "X": 966.2317,
+        "Y": 172.09814
       }
     },
     {
       "ChildId": "c318fbdc-013f-43d7-a368-b67f949b8981"/*TriggerAnim*/,
       "Position": {
-        "X": 923.46454,
-        "Y": 240.33664
+        "X": 1116.2316,
+        "Y": 103.09816
       }
     },
     {
       "ChildId": "cbb0851d-01bb-40ee-9867-9eee48305f95"/*Add*/,
       "Position": {
-        "X": 600.0,
-        "Y": 0.0
+        "X": 1116.2317,
+        "Y": -71.901855
       }
     },
     {
       "ChildId": "df9cbbb7-6220-456b-94c8-1933ab1d415b"/*AnimValue*/,
       "Position": {
-        "X": 1836.6653,
-        "Y": 263.38037
-      }
-    },
-    {
-      "ChildId": "e55ab1c9-8323-43c6-aaf7-62916af504b2"/*Modulo*/,
-      "Position": {
-        "X": 939.4806,
-        "Y": 674.36426
+        "X": 1256.2317,
+        "Y": 313.09814
       }
     },
     {
       "ChildId": "e5f547e2-1af9-49b4-8ee4-b98129ee229f"/*RunTime*/,
       "Position": {
-        "X": 129.38405,
-        "Y": 7.9292297
+        "X": 1116.2317,
+        "Y": -176.90186
       }
     },
     {
@@ -196,23 +189,9 @@
       }
     },
     {
-      "ChildId": "f329abd4-c9ed-4b27-8294-620b1b0f6f45"/*Time*/,
-      "Position": {
-        "X": 789.4806,
-        "Y": 674.36426
-      }
-    },
-    {
-      "ChildId": "f8c96c1e-6564-40db-9dfb-bd6b7cd9e86b"/*SampleGradient*/,
-      "Position": {
-        "X": 1162.9841,
-        "Y": 473.07764
-      }
-    },
-    {
       "ChildId": "fc00f2df-0d49-411c-ae92-b65d49281edf"/*GetIntVar*/,
       "Position": {
-        "X": 0.0,
+        "X": 20.0,
         "Y": 83.0
       }
     }
@@ -221,28 +200,8 @@
     {
       "OutputId": "a0db06b3-6eca-46ae-b009-5082bba45225"/*Output*/,
       "Position": {
-        "X": 2629.484,
-        "Y": 133.58862
-      }
-    }
-  ],
-  "Annotations": [
-    {
-      "Id": "38d3fdaa-ee9f-4745-85bf-1f2278a76c07",
-      "Title": "Movie Cuts",
-      "Color": {
-        "X": 0.6,
-        "Y": 0.6,
-        "Z": 0.6,
-        "W": 1.0
-      },
-      "Position": {
-        "X": -60.0,
-        "Y": -60.0
-      },
-      "Size": {
-        "X": 2572.3242,
-        "Y": 373.22314
+        "X": 1396.2317,
+        "Y": 348.09814
       }
     }
   ]

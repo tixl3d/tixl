@@ -17,7 +17,7 @@
         "Y": 1874.4431
       },
       "GroupTitle": "OBSOLETE LEGACY PARAMS",
-      "Description": "Defines whether the \"W\"-Value of the Gpoints used has an influence on the size of the rendered Points"
+      "Description": "Defines whether the \"W\"-Value of the GPoints used has an influence on the size of the rendered Points"
     },
     {
       "InputId": "28f85ae9-ebae-4300-8aa0-738c6327cc44"/*TransitionProgress*/,

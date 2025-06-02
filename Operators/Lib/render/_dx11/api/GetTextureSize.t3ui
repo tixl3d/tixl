@@ -48,6 +48,13 @@
         "X": 0.0,
         "Y": 100.0
       }
+    },
+    {
+      "OutputId": "cdec05b6-9ee8-48f8-811f-3d1de18a251f"/*IsCubeMap*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 200.0
+      }
     }
   ]
 }

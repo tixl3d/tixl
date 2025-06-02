@@ -9,7 +9,7 @@
         "X": 51.512096,
         "Y": 91.99597
       },
-      "Description": "triggers a refresh of the defined URL to update the result",
+      "Description": "Triggers a refresh of the defined URL to update the result",
       "AddPadding": "True"
     },
     {

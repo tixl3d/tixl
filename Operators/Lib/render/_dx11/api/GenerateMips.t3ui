@@ -1,6 +1,6 @@
 {
   "Id": "32a6a351-6d22-4915-aa0e-e0483b7f4e76"/*GenerateMips*/,
-  "Description": "Executes computing the mipmaps. This requires the mipmap feature to be enabled in the [Texture2d].\n\nIn most usecases this is done automatically and you don't need to care about this.",
+  "Description": "Executes computing the mipmaps. This requires the mipmap feature to be enabled in the [Texture2d].\n\nIn most use cases this is done automatically and you don't need to care about this.",
   "SymbolTags": "24",
   "InputUis": [
     {
@@ -18,6 +18,13 @@
       "Position": {
         "X": 118.6056,
         "Y": 34.721115
+      }
+    },
+    {
+      "OutputId": "dbf236aa-1905-442a-b2e0-759e9f33c1c9"/*Activate*/,
+      "Position": {
+        "X": 118.6056,
+        "Y": 134.72112
       }
     }
   ]

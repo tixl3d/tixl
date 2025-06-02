@@ -1,6 +1,6 @@
 {
   "Id": "e1c294b5-1ea8-435e-a437-26d280d3c2f4"/*GodRays*/,
-  "Description": "Uses the z-buffer to draw god rays.\n\nA different approach [LightRaysFx]\n\nUseful Ops for a PostFX Pipeline: [MotionBlur] [DepthOfField] [ChromaticAbberation] [Glow] [Grain] [Blur]",
+  "Description": "Uses the z-buffer to draw god rays.\n\nA different approach [LightRaysFx]\n\nUseful Ops for a PostFX Pipeline: [MotionBlur] [DepthOfField] [ChromaticAberration] [Glow] [Grain] [Blur]",
   "SymbolTags": "65",
   "InputUis": [
     {
@@ -54,7 +54,7 @@
         "X": -1117.0369,
         "Y": 26.72271
       },
-      "Description": "Center / Position of the Lightsource\nProTip: Use the position of a [Locator] for a [Pointlight] and as an Input"
+      "Description": "Center / Position of the Light source\nProTip: Use the position of a [Locator] for a [Pointlight] and as an Input"
     },
     {
       "InputId": "59568136-2903-4fd5-a504-8a6308a2a2dc"/*Samples*/,

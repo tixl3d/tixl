@@ -1,6 +1,6 @@
 {
   "Id": "0f40e5e5-e406-4f87-854b-fbdd670b5504"/*SamplePointsByCameraDistance*/,
-  "Description": "Changes the W value / F value of existing points based on their distance to the active camera.\nFor example, to make distant points appear larger or smaller than nearby points, etc.\nNeeds a Point source such as: [GridPoints], [RadialPoints], [SpherePoints] etc.\nAnd [DrawPoints], [DrawLines] or similar in order to view the result.\n\nUseful Combinations: [GridPoints] [TransformPoints]",
+  "Description": "Changes the W value / F value of existing points based on their distance to the active camera.\nFor example, to make distant points appear larger or smaller than nearby points, etc.\nNeeds a point source such as: [GridPoints], [RadialPoints], [SpherePoints] etc.\nAnd [DrawPoints], [DrawLines] or similar in order to view the result.\n\nUseful combinations: [GridPoints] [TransformPoints]",
   "SymbolTags": "8",
   "InputUis": [
     {

@@ -1,6 +1,6 @@
 {
   "Id": "045e834a-f0ee-432b-8e14-19cadc497577"/*SubString*/,
-  "Description": "Returns a subString of the connect string. \nThis can be useful for trimming a string to a maximun length.",
+  "Description": "Returns a substring of the connect string. \nThis can be useful for trimming a string to a maximum length.",
   "SymbolTags": "1",
   "InputUis": [
     {

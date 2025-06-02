@@ -17,7 +17,7 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "Description": "increases the speed at which the curves are drawn"
+      "Description": "Increases the speed at which the curves are drawn"
     },
     {
       "InputId": "2c9a6b15-ac0d-4708-a6c8-2834cfc3086c"/*Amplitude*/,
@@ -25,7 +25,7 @@
         "X": -200.0,
         "Y": 270.0
       },
-      "Description": "Increases the highest and lowest point of the curves",
+      "Description": "Increases the highest and lowest points of the curves",
       "AddPadding": "True",
       "Min": -1.0,
       "Max": 1.0,
@@ -46,7 +46,7 @@
         "X": -200.0,
         "Y": 135.0
       },
-      "Description": "Increases / decreases the time it takes to draw a curve for each curve",
+      "Description": "Increases/decreases the time it takes to draw a curve for each curve",
       "AddPadding": "True",
       "Min": -1.0,
       "Max": 1.0,
@@ -58,7 +58,7 @@
         "X": -200.0,
         "Y": 225.0
       },
-      "Description": "Increases / decreases the values of the curves on the vertical axis up and down",
+      "Description": "Increases/decreases the values of the curves on the vertical axis up and down",
       "UseVec2Control": "Position"
     },
     {

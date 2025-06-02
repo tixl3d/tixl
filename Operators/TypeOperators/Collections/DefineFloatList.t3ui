@@ -1,6 +1,6 @@
 {
   "Id": "7ba0451c-9b8d-46a7-bfac-9dcb15e00023"/*DefineFloatList*/,
-  "Description": "Creates and initialized a list of float values",
+  "Description": "Creates and initializes a list of float values",
   "InputUis": [
     {
       "InputId": "2b51b0be-25d1-4b7f-832d-8bc5498e5620"/*ResetTrigger*/,

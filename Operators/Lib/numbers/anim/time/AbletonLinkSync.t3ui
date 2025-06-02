@@ -1,6 +1,6 @@
 {
   "Id": "31ab98ec-5e79-4667-9a85-2fb168f41fa1"/*AbletonLinkSync*/,
-  "Description": "An experimental implementation of the AbletonLink synchronization.\n\nThis operator uses the library provided by Ableton to identify available Ableton Link sources and automatically connects to them.\nAll instances of this operator share the same connection. To align the timing information provided by Link with Tooll's time units, we also provide a various output timing formats.\n\nThis operator can by combined with [SetPlaybackTime] or [SetBpm]. \n\nNote: if the connection is cancelled by the host or client, it might be necessary to trigger reconnect.",
+  "Description": "An experimental implementation of the Ableton Link synchronization.\n\nThis operator uses the library provided by Ableton to identify available Ableton Link sources and automatically connects to them.\nAll instances of this operator share the same connection. To align the timing information provided by Link with Tooll's time units, we also provide various output timing formats.\n\nThis operator can be combined with [SetPlaybackTime] or [SetBpm]. \n\nNote: if the connection is cancelled by the host or client, it might be necessary to trigger reconnect.",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -34,7 +34,7 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "Description": "We attempt to map the incoming timing signals to Tooll's measure units.\n\n- Measure: 1 unit per bar (e.g. per 4 beats)\n- Phase: Phase returned by Link\n- Beats: Beats returned by Link offset by start measure\n- Time: Time returned by Link / 1000\n- Quantum: In order to enable the desired bar and loop alignment, an application provides a quantum value to Link that specifies, in beats, the desired unit of phase synchronization. Link guarantees that session participants with the same quantum value will be phase aligned, meaning that if two participants have a 4 beat quantum, beat 3 on one participant’s timeline could correspond to beat 11 on another’s, but not beat 12 (see link documentation)\n"
+      "Description": "We attempt to map the incoming timing signals to Tooll's measure units.\n\n- Measure: 1 unit per bar (e.g. per 4 beats)\n- Phase: Phase returned by Link\n- Beats: Beats returned by Link offset by start measure\n- Time: Time returned by Link / 1000\n- Quantum: In order to enable the desired bar and loop alignment, an application provides a quantum value to Link that specifies, in beats, the desired unit of phase synchronization. Link guarantees that session participants with the same quantum value will be phase aligned, meaning that if two participants have a 4 beat quantum, beat 3 on one participant’s timeline could correspond to beat 11 on another’s, but not beat 12 (see Link documentation)\n"
     },
     {
       "InputId": "ecf5d5ab-bb9f-4c48-9b33-8827e94dd286"/*PauseIfDisconnected*/,
@@ -42,7 +42,7 @@
         "X": -200.0,
         "Y": 225.0
       },
-      "Description": "Normally Ableton link would keep playing even if connection gets lost. If this option is enabled the output will be paused if there are no other peers."
+      "Description": "Normally Ableton Link would keep playing even if connection gets lost. If this option is enabled the output will be paused if there are no other peers."
     },
     {
       "InputId": "f4e75e75-5113-4f22-a1dd-b897a5745f1d"/*TriggerReconnect*/,
@@ -50,7 +50,7 @@
         "X": -200.0,
         "Y": 135.0
       },
-      "Description": "Closes and restarts the connection. This my be necessary if the host cancelles the connection."
+      "Description": "Closes and restarts the connection. This may be necessary if the host cancels the connection."
     }
   ],
   "SymbolChildUis": [],

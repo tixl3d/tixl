@@ -3,27 +3,27 @@
   "Description": "Returns integer values from 0 to 9 for pressed numeric keys.",
   "InputUis": [
     {
-      "InputId": "22266196-d8c5-4727-af12-9e53d7cb5720"/*Mode*/,
-      "Position": {
-        "X": -200.0,
-        "Y": 45.0
-      }
-    },
-    {
-      "InputId": "75ec0c96-3b8f-4c57-9a82-e47c2cf2e46c"/*Key*/,
+      "InputId": "2aa9e2e4-1830-4483-88e5-1f2ca50bfe3f"/*Zone*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
+      }
+    },
+    {
+      "InputId": "8846aa50-e4d0-433c-9e5b-013a93f17f79"/*Mode*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
       }
     }
   ],
   "SymbolChildUis": [],
   "OutputUis": [
     {
-      "OutputId": "c645b71d-bd78-403c-b61f-5c1599bbd770"/*Result*/,
+      "OutputId": "64b9dec6-2b3a-4d7e-a174-991c8a8b92ce"/*PressedNumber*/,
       "Position": {
-        "X": 0.0,
-        "Y": 100.0
+        "X": 300.0,
+        "Y": 200.0
       }
     }
   ]

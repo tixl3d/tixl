@@ -1,6 +1,6 @@
 {
   "Id": "a53a0643-8daa-49c2-9c8c-34cfe5ad8030"/*_VisualizePointFields*/,
-  "Description": "A small helper to visualize the extend of point fields.\nOnly useful for examples.",
+  "Description": "A small helper to visualize the extent of point fields.\nOnly useful for examples.",
   "SymbolTags": "16",
   "InputUis": [
     {
@@ -36,7 +36,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "163d09dc-98aa-4048-9054-39e287d1706d"/*RepeatAtGPoints*/,
-      "Comment": "Clone multiple points with varient Size and Opacity on these points.",
+      "Comment": "Clone multiple points with variant Size and Opacity on these points.",
       "Position": {
         "X": 216.89514,
         "Y": 57.343323
@@ -73,7 +73,7 @@
     },
     {
       "ChildId": "938e051f-9776-4d01-b63a-55b21323d827"/*RepeatAtGPoints*/,
-      "Comment": "Draw some rings to visualize the field extend.",
+      "Comment": "Draw some rings to visualize the field extent.",
       "Position": {
         "X": 366.89514,
         "Y": 57.343323

@@ -1,6 +1,6 @@
 {
   "Id": "695d20dc-d1fe-4648-80fb-e1159b8aead4"/*SelectPointsWithField*/,
-  "Description": "Allows to select and add values to points in 3D space via SDF Objects / Fields.\nSimilar to [SelectPoints].\nNeeds any SDF such as [BoxSDF], [ChainLinkSDF], [FractalSDF] as an Input to select the points.\nAnd any form of points such as: [GridPoints], [RadialPoints], [SpherePoints], [PointsOnMesh] etc.",
+  "Description": "Allows selecting and adding values to points in 3D space via SDF Objects/Fields.\nSimilar to [SelectPoints].\nNeeds any SDF such as [BoxSDF], [ChainLinkSDF], [FractalSDF] as an input to select the points.\nAnd any form of points such as: [GridPoints], [RadialPoints], [SpherePoints], [PointsOnMesh], etc.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -39,7 +39,8 @@
       "Position": {
         "X": 760.7295,
         "Y": 1560.1677
-      }
+      },
+      "UseVec2Control": "Range"
     },
     {
       "InputId": "74bc9dbf-015e-4182-95ef-cfca4be09f32"/*StrengthFactor*/,

@@ -1,4 +1,4 @@
-namespace Examples.lib.point;
+namespace Examples.Lib.point;
 
 [Guid("e6d19a14-54b7-4554-8e92-9001b2530937")]
  internal sealed class BiasAndGainExample : Instance<BiasAndGainExample>

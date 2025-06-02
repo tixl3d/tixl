@@ -1,6 +1,6 @@
 {
   "Id": "b23f04e1-a648-4734-9b8e-265c794a0811"/*RevisionSoundRev*/,
-  "Description": "A visual VJ experiments with synced words. Requires correct soundtrack an playback timing.",
+  "Description": "A visual VJ experiment with synced words. Requires correct soundtrack and playback timing.",
   "InputUis": [],
   "SymbolChildUis": [
     {

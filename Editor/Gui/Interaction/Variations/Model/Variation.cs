@@ -120,6 +120,8 @@ public sealed class Variation : ISelectableCanvasObject
                 continue;
             }
             
+            var symbolUi = symbolForChanges.GetSymbolUi();
+            
             foreach (var (inputIdString, valueToken) in o)
             {
                 if (!JsonUtils.TryGetGuid(inputIdString, out var inputId))
@@ -136,16 +138,24 @@ public sealed class Variation : ISelectableCanvasObject
                     continue;
                 }
 
-                if (input != null)
-                {
-                    var inputValue = InputValueCreators.Entries[input.DefaultValue.ValueType]();
-                    inputValue.SetValueFromJson(valueToken);
-                    changeList[inputId] = inputValue;
-                }
-                else
+                if (input == null)
                 {
                     Log.Warning("Can't find input?");
+                    continue;
                 }
+
+                if (symbolUi.InputUis.TryGetValue(inputId, out var inputUi))
+                {
+                    if (inputUi.ExcludedFromPresets)
+                    {
+                        Log.Warning($"Skipping input {symbolUi}.{inputUi} excluded from presets.");
+                        continue;
+                    }
+                }
+                
+                var inputValue = InputValueCreators.Entries[input.DefaultValue.ValueType]();
+                inputValue.SetValueFromJson(valueToken);
+                changeList[inputId] = inputValue;
             }
             
             if (changeList.Count > 0)

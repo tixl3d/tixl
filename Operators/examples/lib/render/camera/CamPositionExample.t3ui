@@ -6,7 +6,7 @@
   "SymbolChildUis": [
     {
       "ChildId": "099a644e-b04a-4a40-898e-7f461a96940b"/*DrawLines*/,
-      "Comment": "And yes, this is a very ugly trick: to fade the cells out, we just draw 100 cell on top of each other.\n\nThis is not a very performant way to do this.",
+      "Comment": "And yes, this is a very ugly trick: to fade the cells out, we just draw 100 cells on top of each other.\n\nThis is not a very performant way to do this.",
       "Position": {
         "X": 2293.9744,
         "Y": 555.3747
@@ -42,7 +42,7 @@
     },
     {
       "ChildId": "172e2960-77d0-4f9c-88bd-6811041c54ab"/*Group*/,
-      "Comment": "Note how the [CamPosition] operator needs to be connect so it is updated first with the current camera set in the context.",
+      "Comment": "Note how the [CamPosition] operator needs to be connected so it is updated first with the current camera set in the context.",
       "Position": {
         "X": 1321.6868,
         "Y": -27.40857
@@ -103,7 +103,7 @@
     },
     {
       "ChildId": "2f0ee70b-bb1a-44a9-a4ae-c85e9de9826a"/*AddVec3*/,
-      "Comment": "..then have we have to add have a cell width.",
+      "Comment": "..then we have to add half a cell width.",
       "Position": {
         "X": 1543.9744,
         "Y": 555.3747
@@ -188,7 +188,7 @@
     },
     {
       "ChildId": "8ef6b90a-829c-402a-a434-78a6f6c7bd4e"/*CenterPoint*/,
-      "Comment": "another point with the y-axis zeroed out.",
+      "Comment": "Another point with the y-axis zeroed out.",
       "Position": {
         "X": 1849.7402,
         "Y": 336.2907
@@ -348,7 +348,7 @@
     },
     {
       "ChildId": "fdf61255-1945-4d60-b3ed-6e547adc9c77"/*RadialPoints*/,
-      "Comment": "Disable line mode and adjust orientation of circle and its point so that each point's z-axis is pointing outwards.",
+      "Comment": "Disable line mode and adjust orientation of circle and its points so that each point's z-axis is pointing outwards.",
       "Position": {
         "X": 828.4601,
         "Y": 111.223145

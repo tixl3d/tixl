@@ -19,7 +19,7 @@
         "Y": 45.0
       },
       "GroupTitle": "Options",
-      "Description": "If the value has changed more than is defined here the output boolean will be set accordingly"
+      "Description": "If the value has changed more than is defined here, the output boolean will be set accordingly"
     },
     {
       "InputId": "7f5fb125-8aca-4344-8b30-e7d4e7873c1c"/*Value*/,

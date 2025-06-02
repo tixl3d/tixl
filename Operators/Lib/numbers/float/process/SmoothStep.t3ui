@@ -9,7 +9,7 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "Description": "Defines the degree to which falling / lower values are drawn smoothly"
+      "Description": "Defines the degree to which falling/lower values are drawn smoothly"
     },
     {
       "InputId": "338e3b0b-4012-4c7d-899b-12b7384f5a80"/*Max*/,
@@ -17,7 +17,7 @@
         "X": -200.0,
         "Y": 45.0
       },
-      "Description": "Defines the degree to which rising / high values are drawn smoothly"
+      "Description": "Defines the degree to which rising/high values are drawn smoothly"
     },
     {
       "InputId": "fe01e41c-bd3b-441c-82f6-6c972097e155"/*Value*/,

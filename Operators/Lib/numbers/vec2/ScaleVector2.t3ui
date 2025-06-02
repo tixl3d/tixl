@@ -1,6 +1,6 @@
 {
   "Id": "4bbc6fac-789d-496e-9833-a0af78c31c98"/*ScaleVector2*/,
-  "Description": "Multiplies two incoming [Vector2]'s with each other",
+  "Description": "Multiplies two incoming [Vector2]s with each other",
   "InputUis": [
     {
       "InputId": "927443fe-4338-462a-bf78-90a08f77467b"/*UniformScale*/,
@@ -8,7 +8,7 @@
         "X": -200.0,
         "Y": 90.0
       },
-      "Description": "factor to multiply the incoming vectors uniformly",
+      "Description": "Factor to multiply the incoming vectors uniformly",
       "AddPadding": "True"
     },
     {

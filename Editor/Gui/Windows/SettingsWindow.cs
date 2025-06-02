@@ -66,6 +66,16 @@ internal sealed class SettingsWindow : Window
                                                           "Value input method",
                                                           "The control that pops up when dragging on a number value"
                                                          );
+
+                    changed |= FormInputs.AddInt("Value input smoothing", 
+                                                 ref UserSettings.Config.ValueEditSmoothing, 
+                                                 0, 20, 0.1f,
+                                                 """
+                                                 Smoothes the result of value edit controllers. 
+                                                 This introduces a delay but might look more conformable to the audience
+                                                 of a live performance.
+                                                 """,
+                                                 UserSettings.Defaults.ValueEditSmoothing);
                     FormInputs.AddVerticalSpace();
                     FormInputs.SetIndentToParameters();
                     FormInputs.AddSectionSubHeader("Graph style");
@@ -408,6 +418,17 @@ internal sealed class SettingsWindow : Window
                                                       ProjectSettings.Defaults.EnableBeatSyncProfiling);
                     
                     FormInputs.SetIndentToParameters();
+                    changed |= FormInputs.AddFloat("Beat Sync Offset (ms)",
+                                                   ref ProjectSettings.Config.BeatSyncOffsetMs,
+                                                   -200f, 200f, 0.01f, 
+                                                   true,
+                                                   """
+                                                   When using beat lock through audio analysis, you can slightly offset the phase. 
+                                                   
+                                                   This might be useful to tighten the sync between audio and video, e.g. if the visual output is delayed by video-processing devices.
+                                                   """,
+                                                   ProjectSettings.Defaults.BeatSyncOffsetMs);
+                    FormInputs.SetIndentToLeft();
 
                     if (UserSettings.Config.LogCsCompilationDetails)
                     {

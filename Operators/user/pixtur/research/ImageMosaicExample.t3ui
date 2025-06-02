@@ -1,6 +1,6 @@
 {
   "Id": "56238f0c-bb4c-4883-ab13-80a64887ccd2"/*ImageMosaicExample*/,
-  "Description": "A example for a complex shader setup. Please read the full tutorial linked in the description.",
+  "Description": "An example for a complex shader setup. Please read the full tutorial linked in the description.",
   "InputUis": [
     {
       "InputId": "4d3108c8-9b64-41e8-9550-880d59f411f9"/*FolderPath*/,

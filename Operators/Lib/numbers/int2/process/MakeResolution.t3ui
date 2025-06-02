@@ -1,6 +1,6 @@
 {
   "Id": "58d86d45-f32d-4ddb-8eab-180161e05b2a"/*MakeResolution*/,
-  "Description": "Creates and int2 from two single ints\n\nTechnically the same as [int2] with different naming",
+  "Description": "Creates an int2 from two single ints\n\nTechnically the same as [int2] with different naming",
   "SymbolTags": "4096",
   "InputUis": [
     {
@@ -17,7 +17,7 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "Description": "X Value defines the width"
+      "Description": "X value defines the width"
     }
   ],
   "SymbolChildUis": [],

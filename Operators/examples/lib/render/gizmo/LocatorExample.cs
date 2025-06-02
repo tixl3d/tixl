@@ -1,4 +1,4 @@
-namespace Examples.lib.render.gizmo;
+namespace Examples.Lib.render.gizmo;
 
 [Guid("523bf3f7-d8f6-459b-a7fb-f681dce9e697")]
  internal sealed class LocatorExample : Instance<LocatorExample>

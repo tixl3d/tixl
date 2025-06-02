@@ -1,6 +1,6 @@
 {
   "Id": "4b207e35-64b4-4833-977c-da6c7154a081"/*Sharpen*/,
-  "Description": "Sharpens the incoming image.\n\nCheck out the [ReactionDiffusionExample] for a more advanced usecase",
+  "Description": "Sharpens the incoming image.\n\nCheck out the [ReactionDiffusionExample] for a more advanced use case",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -17,7 +17,7 @@
         "X": 132.69783,
         "Y": 29.375793
       },
-      "Description": "Defines the radius of the sharpen effect.\nFor normal image sharpening, small values are recommended (~1-3), larger radii are useful for more creative applications and image stylisation."
+      "Description": "Defines the radius of the sharpen effect.\nFor normal image sharpening, small values are recommended (~1-3), larger radii are useful for more creative applications and image stylization."
     },
     {
       "InputId": "def5bcf3-d499-41ad-82b8-1b9706ebaab6"/*Strength*/,

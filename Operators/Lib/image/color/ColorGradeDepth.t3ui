@@ -1,6 +1,6 @@
 {
   "Id": "a1e3b8d3-3888-4e18-80e4-f6c65a136e75"/*ColorGradeDepth*/,
-  "Description": "A advanced color grade that uses a depth buffer based gradient look for additional effects.\n\nUseful combinations: [SetFog]",
+  "Description": "An advanced color grade that uses a depth buffer-based gradient look for additional effects.\n\nUseful combinations: [SetFog]",
   "SymbolTags": "8",
   "InputUis": [
     {

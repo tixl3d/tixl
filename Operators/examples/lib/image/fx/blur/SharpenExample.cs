@@ -1,4 +1,4 @@
-namespace Examples.lib.image.fx.blur;
+namespace Examples.Lib.image.fx.blur;
 
 [Guid("eccd22ed-1a59-4655-b811-10790871cd4c")]
  internal sealed class SharpenExample : Instance<SharpenExample>

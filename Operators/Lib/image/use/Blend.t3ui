@@ -1,6 +1,6 @@
 {
   "Id": "9f43f769-d32a-4f49-92ac-e0be3ba250cf"/*Blend*/,
-  "Description": "Blends two images.\n\nIf you want do cross fade (mix) images, consider using [BlendImages]\n\nAll blend ops and similar: [BlendImages] [Blend] [BlendWithMask] [Combine3Images]",
+  "Description": "Blends two images.\n\nIf you want to cross fade (mix) images, consider using [BlendImages]\n\nAll blend ops and similar: [BlendImages] [Blend] [BlendWithMask] [Combine3Images]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -17,7 +17,7 @@
         "X": -48.61692,
         "Y": 181.24069
       },
-      "Description": "A optional color multiplied. The alpha channel can be used to fade out the image.\n\nConsider connecting this to a [SampleGradient]."
+      "Description": "An optional color multiplied. The alpha channel can be used to fade out the image.\n\nConsider connecting this to a [SampleGradient]."
     },
     {
       "InputId": "93e63b73-e572-4bb2-bbbd-11bbffad89e7"/*Resolution*/,
@@ -25,7 +25,7 @@
         "X": -49.949135,
         "Y": 506.8235
       },
-      "Description": "The target resolution. Please make sure the check the documentation on how T3 handles resolutions."
+      "Description": "The target resolution. Please make sure to check the documentation on how T3 handles resolutions."
     },
     {
       "InputId": "abaa52e9-7d3d-4ae5-89d2-5251f61e5392"/*ImageA*/,
@@ -61,7 +61,7 @@
         "Y": 316.24066
       },
       "GroupTitle": "Advanced Settings",
-      "Description": "If used with blend-modes other than normal, that blend mode will only be used for if the alpha channel is below 0.5.\nAbove that the image will be fully blended with normal mode.\n\nAs an example: If blended with Screen-mode...\n- Alpha= 0.0: none of the image will be visible\n- Alpha = 0.5: the image will be fully visible with screen mode\n- Alpha = 1.0: the image will be fully visible with normal mode\n\n"
+      "Description": "If used with blend modes other than normal, that blend mode will only be used if the alpha channel is below 0.5.\nAbove that, the image will be fully blended with normal mode.\n\nAs an example: If blended with Screen mode...\n- Alpha = 0.0: none of the image will be visible\n- Alpha = 0.5: the image will be fully visible with screen mode\n- Alpha = 1.0: the image will be fully visible with normal mode\n\n"
     },
     {
       "InputId": "d7b83780-c4be-4337-b1df-0c98310b1926"/*GenerateMips*/,

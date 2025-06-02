@@ -1,6 +1,6 @@
 {
   "Id": "d5516087-f7dd-44d4-a7e1-3c18767de921"/*ConvertColors*/,
-  "Description": "Converts between different color spaces. \n\nPlease note that for high precision (e.g. when converting back and forth between color spaces) you should change the render taget format to 32bit.",
+  "Description": "Converts between different color spaces. \n\nPlease note that for high precision (e.g. when converting back and forth between color spaces) you should change the render target format to 32bit.",
   "SymbolTags": "8",
   "InputUis": [
     {

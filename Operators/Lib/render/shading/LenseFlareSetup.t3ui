@@ -9,7 +9,7 @@
         "X": -562.30884,
         "Y": 339.61475
       },
-      "Description": "Automatically creates different combinations / styles of LenseFlares.\n\nElements include: Centerglow, Star, Color, Sprites, Iris, Sparkle and Shimmer settings.",
+      "Description": "Automatically creates different combinations / styles of LensFlares.\n\nElements include: Centerglow, Star, Color, Sprites, Iris, Sparkle and Shimmer settings.",
       "AddPadding": "True"
     },
     {
@@ -18,7 +18,7 @@
         "X": -562.30884,
         "Y": 294.61475
       },
-      "Description": "Controls the brightness of the Lenseflare in relation to the intensity of the light source."
+      "Description": "Controls the brightness of the Lensflare in relation to the intensity of the light source."
     },
     {
       "InputId": "aab1250a-de9c-4bfd-ab0f-8d4eed8b57e2"/*RandomizeColor*/,
@@ -35,7 +35,7 @@
         "X": -562.30884,
         "Y": 384.61475
       },
-      "Description": "Select the Index / ID of the Pointlight to which the Lenseflare is attached.",
+      "Description": "Select the Index / ID of the Pointlight to which the Lensflare is attached.",
       "AddPadding": "True"
     }
   ],

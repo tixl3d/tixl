@@ -9,7 +9,7 @@
         "X": -741.99115,
         "Y": 1510.8385
       },
-      "Description": "If enabled, the grandients and curves are mirrored when spread mode is active."
+      "Description": "If enabled, the gradients and curves are mirrored when spread mode is active."
     },
     {
       "InputId": "0544aca0-8110-40dc-a6bf-b35d8e7bd57a"/*SpreadPhase*/,
@@ -17,7 +17,7 @@
         "X": -741.99115,
         "Y": 1465.8385
       },
-      "Description": "Can offset the spreadding range. This can be useful for \"sliding\" through a gradient of colors or sizes."
+      "Description": "Can offset the spreading range. This can be useful for \"sliding\" through a gradient of colors or sizes."
     },
     {
       "InputId": "14e0d722-9441-4bc0-b164-e0b8cae990e3"/*RotateZ*/,
@@ -36,7 +36,7 @@
         "Y": 1420.8385
       },
       "GroupTitle": "Spreading...",
-      "Description": "If using the Spread mode in on of the parameters above, this will change the with of the slice that settings (e.g. Colors) is applied. ",
+      "Description": "If using the Spread mode in one of the parameters above, this will change the width of the slice that settings (e.g. Colors) are applied to. ",
       "Min": 0.0,
       "Max": 10.0
     },
@@ -55,7 +55,7 @@
         "X": -742.93713,
         "Y": 1733.2015
       },
-      "Description": "Defines the number of cells in the connect texture atlas. This can be useful for distribution different random sprites with a single draw call."
+      "Description": "Defines the number of cells in the connect texture atlas. This can be useful for distributing different random sprites with a single draw call."
     },
     {
       "InputId": "2e116e07-ee18-4b2a-a708-b0dca510a8dd"/*FxTextureAmount*/,
@@ -80,7 +80,7 @@
         "X": -784.04156,
         "Y": 525.03925
       },
-      "Description": "Moves the Billboards local point space.",
+      "Description": "Moves the Billboards' local point space.",
       "AddPadding": "True"
     },
     {
@@ -97,7 +97,7 @@
         "X": -816.74774,
         "Y": 400.61105
       },
-      "Description": "If enabled, the points stretch attribute will be applied to the drawn billboards."
+      "Description": "If enabled, the points' stretch attribute will be applied to the drawn billboards."
     },
     {
       "InputId": "62c511b9-ca36-48db-a9cf-13c929f81db6"/*EnableDepthWrite*/,
@@ -121,7 +121,7 @@
         "X": -782.7926,
         "Y": 1127.0579
       },
-      "Description": "Defines how colors from the gradient will be sampled: \n\n- RandomWithPhase will pick a random color. This will smoothly animate when changing RandomPhase.\n- Scatter will pick a random color. Each points gets a random position that will NOT change.\n- Spread will use the point's ordering in the buffer. 0 for the first point and 1 for the last. This spreading can be adjusted with the Spread options below.\n- W uses the \"w\" attribute of the points. This can be useful when combined with a [ParticleSystem] that returns particle age in the W attribute.\n- FogDistance can be combined with a [SetFog] operator to colorize points depending on their distance to the camera."
+      "Description": "Defines how colors from the gradient will be sampled: \n\n- RandomWithPhase will pick a random color. This will smoothly animate when changing RandomPhase.\n- Scatter will pick a random color. Each point gets a random position that will NOT change.\n- Spread will use the point's ordering in the buffer. 0 for the first point and 1 for the last. This spreading can be adjusted with the Spread options below.\n- W uses the \"w\" attribute of the points. This can be useful when combined with a [ParticleSystem] that returns particle age in the W attribute.\n- FogDistance can be combined with a [SetFog] operator to colorize points depending on their distance to the camera."
     },
     {
       "InputId": "76c52e1f-1767-4635-86a1-93e44cc2a487"/*RandomPosition*/,
@@ -129,7 +129,7 @@
         "X": -783.96234,
         "Y": 836.94696
       },
-      "Description": "Amound of random offset along X, Y and Z axis.",
+      "Description": "Amount of random offset along X, Y and Z axis.",
       "AddPadding": "True"
     },
     {
@@ -138,7 +138,7 @@
         "X": -799.742,
         "Y": 1914.0698
       },
-      "Description": "The FX texture is an additional method of styling the sprites. It's applied in screenspace. \nAs an example: You coud connect a [Blob] image to fade out the sprites at the edges of the screen.",
+      "Description": "The FX texture is an additional method of styling the sprites. It's applied in screen space. \nAs an example: You could connect a [Blob] image to fade out the sprites at the edges of the screen.",
       "AddPadding": "True"
     },
     {
@@ -237,7 +237,7 @@
         "X": -741.99115,
         "Y": 1566.8385
       },
-      "Description": "If enabled will repeat the speading slice. This can be especially useful when combined with smaller Spread length and Spread Offset."
+      "Description": "If enabled, will repeat the spreading slice. This can be especially useful when combined with smaller Spread length and Spread Offset."
     },
     {
       "InputId": "b5477de9-4c59-47e8-89d6-93c9e2246dcd"/*FxTextureMode*/,
@@ -264,7 +264,7 @@
         "Y": 1307.1677
       },
       "GroupTitle": "Scale Variation...",
-      "Description": "Defines how the scale curve below will be sampled in the range between 0 .. 1. \n\n- RandomWithPhase will pick a random scale position. This will smoothly animate when changing RandomPhase.\n- Scatter will pick a random scale from the curve. Each points gets a random scale that will NOT change.\n- Spread will use the point's ordering in the buffer. 0 for the first point and 1 for the last. This spreading can be adjusted with the Spread options below.\n- W uses the \"w\" attribute of the points.\n- FogDistance can be combined with a [SetFog] operator to scale points depending on their distance to the camera."
+      "Description": "Defines how the scale curve below will be sampled in the range between 0 .. 1. \n\n- RandomWithPhase will pick a random scale position. This will smoothly animate when changing RandomPhase.\n- Scatter will pick a random scale from the curve. Each point gets a random scale that will NOT change.\n- Spread will use the point's ordering in the buffer. 0 for the first point and 1 for the last. This spreading can be adjusted with the Spread options below.\n- W uses the \"w\" attribute of the points.\n- FogDistance can be combined with a [SetFog] operator to scale points depending on their distance to the camera."
     },
     {
       "InputId": "dd345d58-09e4-4353-93e7-c20e576f0e82"/*ColorVariations*/,

@@ -1,4 +1,4 @@
-namespace Examples.lib.numbers.vec2;
+namespace Examples.Lib.numbers.vec2;
 
 [Guid("3dd015ed-5d7a-4b0e-a6da-958c58f716bb")]
  internal sealed class GridPositionExample : Instance<GridPositionExample>

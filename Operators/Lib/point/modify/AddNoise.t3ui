@@ -52,7 +52,7 @@
         "Y": 986.61896
       },
       "GroupTitle": "Settings",
-      "Description": "Defines the frequency, i.e. how fast the points move."
+      "Description": "Defines the frequency, i.e., how fast the points move."
     },
     {
       "InputId": "96b296e9-f15a-4543-a850-8078c583ee94"/*StrengthFactor*/,
@@ -76,7 +76,7 @@
         "X": -354.29822,
         "Y": 1031.619
       },
-      "Description": "Defines the phase of the noise and can be animated with a [Value], e.g. using [Time]."
+      "Description": "Defines the phase of the noise and can be animated with a [Value], e.g., using [Time]."
     },
     {
       "InputId": "c2df1fa3-88e1-4be2-954e-8c44edd9d421"/*AmountDistribution*/,
@@ -84,7 +84,7 @@
         "X": -351.6601,
         "Y": 1169.9845
       },
-      "Description": "Multiplier for the individual axes to amplify / attenuate the noise in certain directions.",
+      "Description": "Multiplier for the individual axes to amplify/attenuate the noise in certain directions.",
       "AddPadding": "True"
     }
   ],

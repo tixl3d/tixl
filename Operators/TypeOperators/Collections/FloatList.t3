@@ -2,16 +2,10 @@
   "Id": "db22a341-09f6-4953-b252-61b343159650"/*FloatList*/,
   "Inputs": [
     {
-      "Id": "6bf87714-c2f3-41b6-899b-cb4baab7d9f1"/*ResetTrigger*/,
-      "DefaultValue": false
-    },
-    {
-      "Id": "8d131bbb-0740-4a08-955d-d24ebe25223c"/*ListLenght*/,
-      "DefaultValue": 0
-    },
-    {
-      "Id": "fbc0c7c9-e468-4a21-917d-beb05e3c1962"/*DefaultValue*/,
-      "DefaultValue": 0.0
+      "Id": "7d1ba868-209f-4419-962b-f13c36a7d19d"/*List*/,
+      "DefaultValue": {
+        "Values": []
+      }
     }
   ],
   "Children": [],

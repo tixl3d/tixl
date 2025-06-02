@@ -1,6 +1,6 @@
 {
   "Id": "58351c8f-4a73-448e-b7bb-69412e71bd76"/*ExecuteBufferUpdate*/,
-  "Description": "Executes some operators before returning the resulting buffer.\n\nThis is basically how most compute shaders are executabled before returning the result.",
+  "Description": "Executes some operators before returning the resulting buffer.\n\nThis is basically how most compute shaders are executed before returning the result.",
   "SymbolTags": "8",
   "InputUis": [
     {

@@ -1,4 +1,4 @@
-﻿using ImGuiNET;
+using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 
 namespace T3.Editor.Gui.Styling;
@@ -24,40 +24,52 @@ public static class T3Style
     public static void Apply()
     {
         var style = ImGui.GetStyle();
+        // Text
         style.Colors[(int)ImGuiCol.Text] = UiColors.Text;
         style.Colors[(int)ImGuiCol.TextDisabled] = UiColors.TextDisabled;
+        // Button
         style.Colors[(int)ImGuiCol.Button] = UiColors.BackgroundButton;
         style.Colors[(int)ImGuiCol.ButtonHovered] = UiColors.BackgroundHover;
+        style.Colors[(int)ImGuiCol.ButtonActive] = UiColors.BackgroundActive;
+        // Border
         style.Colors[(int)ImGuiCol.Border] =  UiColors.PopupBorder;
         style.Colors[(int)ImGuiCol.BorderShadow] = UiColors.BackgroundGaps;
-        style.Colors[(int)ImGuiCol.FrameBg] = UiColors.BackgroundInputField;
-        
+        // Frame
+        style.Colors[(int)ImGuiCol.FrameBg] = UiColors.BackgroundInputField; 
         style.Colors[(int)ImGuiCol.FrameBgHovered] = UiColors.BackgroundInputFieldHover;
         style.Colors[(int)ImGuiCol.FrameBgActive] = UiColors.BackgroundInputFieldActive;
-        
+        // ScrollBar
         style.Colors[(int)ImGuiCol.ScrollbarBg] = UiColors.ScrollbarBackground;
         style.Colors[(int)ImGuiCol.ScrollbarGrab] = UiColors.ScrollbarHandle;
+
         style.Colors[(int)ImGuiCol.ResizeGrip] = UiColors.WindowResizeHandle;
+
         style.Colors[(int)ImGuiCol.ModalWindowDimBg] = Color.Transparent;
+
         style.Colors[(int)ImGuiCol.MenuBarBg] = UiColors.BackgroundGaps;
+
         style.Colors[(int)ImGuiCol.Separator] = UiColors.BackgroundGaps;
         style.Colors[(int)ImGuiCol.SeparatorHovered] = UiColors.BackgroundActive;
-        style.Colors[(int)ImGuiCol.ButtonActive] = UiColors.BackgroundActive;
-        
-        style.Colors[(int)ImGuiCol.TabUnfocused] = UiColors.BackgroundTabInActive;
+
         style.Colors[(int)ImGuiCol.WindowBg] = UiColors.BackgroundGaps; // Only shines through at window edges
         style.Colors[(int)ImGuiCol.ChildBg] = UiColors.WindowBackground; // Graph see through strength
         style.Colors[(int)ImGuiCol.PopupBg] = UiColors.BackgroundPopup;
-        //style.Colors[(int)ImGuiCol.] =  UiColors.BackgroundPopup;
 
         style.Colors[(int)ImGuiCol.CheckMark] = UiColors.CheckMark;
-        style.Colors[(int)ImGuiCol.TabActive] = UiColors.BackgroundTabActive;
+        // Tab
         style.Colors[(int)ImGuiCol.Tab] = UiColors.BackgroundTabInActive;
+        style.Colors[(int)ImGuiCol.TabHovered] = UiColors.BackgroundActive.Rgba;
+        style.Colors[(int)ImGuiCol.TabActive] = UiColors.BackgroundTabActive;
         style.Colors[(int)ImGuiCol.TabUnfocusedActive] = UiColors.BackgroundTabActive;
         style.Colors[(int)ImGuiCol.TabUnfocused] = UiColors.BackgroundTabInActive;
+        // Title
         style.Colors[(int)ImGuiCol.TitleBgActive] = UiColors.BackgroundGaps;
         style.Colors[(int)ImGuiCol.TitleBg] = UiColors.BackgroundGaps;
-                
+        // Header
+        style.Colors[(int)ImGuiCol.Header] = UiColors.BackgroundActive.Fade(0.5f);
+        style.Colors[(int)ImGuiCol.HeaderHovered] = UiColors.BackgroundActive;
+        style.Colors[(int)ImGuiCol.HeaderActive] = UiColors.BackgroundActive.Fade(0.8f);
+
         style.WindowPadding = Vector2.Zero;
         style.FramePadding = new Vector2(7, 4);
         style.ItemSpacing = new Vector2(1, 1.49f);

@@ -1,6 +1,6 @@
 {
   "Id": "b5102fba-f05b-43fc-aa1d-613fe1d68ad2"/*Grain*/,
-  "Description": "Adds animated image pixel noise similar to that of an analog TV or film grain.\n\nProTip: While this effect can be used in real-time applications at virtually no cost, it can have a significant negative impact on the effectiveness of image and video compression methods.\n\n- This means that video streams and video files can lose quality and require more bandwidth or memory. \n- Individual videos and image sequences can require considerably more storage space.\n\nUseful Ops for a PostFX Pipeline: [MotionBlur] [DepthOfField] [ChromaticAbberation] [Glow] [Grain] [Blur]",
+  "Description": "Adds animated image pixel noise similar to that of an analog TV or film grain.\n\nProTip: While this effect can be used in real-time applications at virtually no cost, it can have a significant negative impact on the effectiveness of image and video compression methods.\n\n- This means that video streams and video files can lose quality and require more bandwidth or memory.\n- Individual videos and image sequences can require considerably more storage space.\n\nUseful Ops for a PostFX Pipeline: [MotionBlur] [DepthOfField] [ChromaticAberration] [Glow] [Grain] [Blur]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -38,7 +38,7 @@
         "X": -200.0,
         "Y": 360.0
       },
-      "Description": "Enables generation of mipmaps.\n\nProTip: This can be useful and produces better results, if \"Grain\" is not used as a pure posteffect, but is applied to a surface which is rendered in 3D space from different distances and angles. For example a television / CCTV screen during a fly-through.",
+      "Description": "Enables generation of mipmaps.\n\nProTip: This can be useful and produces better results if \"Grain\" is not used as a pure post effect, but is applied to a surface which is rendered in 3D space from different distances and angles. For example, a television / CCTV screen during a fly-through.",
       "AddPadding": "True"
     },
     {
@@ -83,7 +83,7 @@
         "X": -200.0,
         "Y": 225.0
       },
-      "Description": "Controls the speed of the animation\n\nLow values can look like noise in liquids\n\nHigh Values (50 an up) can look like TV Static or Filmgrain",
+      "Description": "Controls the speed of the animation\n\nLow values can look like noise in liquids\n\nHigh values (50 and up) can look like TV static or film grain",
       "Min": 0.0,
       "Max": 20.0,
       "Scale": 0.01

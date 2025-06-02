@@ -1,0 +1,214 @@
+{
+  "Id": "983d8a34-e225-456b-9f12-806eede743e3"/*MoveToSDF*/,
+  "Description": "Applies raymarching to estimate the closest points of the given set of points.",
+  "InputUis": [
+    {
+      "InputId": "01a17268-d6d0-4243-b5e5-0217db137ba6"/*WriteDistanceMode*/,
+      "Position": {
+        "X": 976.5911,
+        "Y": 1673.2859
+      },
+      "Description": "Allows to store the distance to the SDF in one of the FX attributes. This might be useful in combinations with [RepeatAtPoints]."
+    },
+    {
+      "InputId": "03bdab33-35a1-410b-b032-61efa1dffb9c"/*SetOrientation*/,
+      "Position": {
+        "X": 836.591,
+        "Y": 1708.2859
+      },
+      "Description": "Apply the SDF normal direction as new point orientation.\nThis uses an up vector and might be prone to instabilities."
+    },
+    {
+      "InputId": "11c1db02-0897-4a87-85c5-c9aced73ed54"/*Points*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 679.0911,
+        "Y": 1136.442
+      },
+      "Description": "The original points."
+    },
+    {
+      "InputId": "168d56f3-fbe2-40a6-b9a1-f85f37a16b79"/*AmountFactor*/,
+      "Position": {
+        "X": 976.591,
+        "Y": 1778.2859
+      }
+    },
+    {
+      "InputId": "42e46e25-0d3b-40cb-a32c-fb9af373220d"/*NormalSamplingDistance*/,
+      "Position": {
+        "X": 973.82806,
+        "Y": 1579.262
+      },
+      "Description": "We have to rely on the field's gradient to estimate step direction.\nDepending on the provided field, increasing this distance \"blurs\" the field and thus helps with local inconsistencies."
+    },
+    {
+      "InputId": "cc76145b-dc10-4c36-b45b-2549c026cb12"/*MinDistance*/,
+      "Position": {
+        "X": 973.82806,
+        "Y": 1509.262
+      },
+      "Description": "The distance at which the raymarching is stopped.",
+      "Min": 0.0
+    },
+    {
+      "InputId": "d48504a4-9826-4166-86a3-528290796a03"/*StepDistanceFactor*/,
+      "Position": {
+        "X": 973.82806,
+        "Y": 1544.262
+      },
+      "Description": "We have to rely on the field's gradient to estimate the marching directions.\nThis factor is applied on the distance field steps and can help with fields that don't have a constant Lipschitz property.",
+      "Min": 0.0,
+      "Max": 1.0,
+      "Clamp": true
+    },
+    {
+      "InputId": "e024f44c-3ebd-4972-ae4f-43b5305df425"/*Amount*/,
+      "Position": {
+        "X": 973.8282,
+        "Y": 1474.262
+      },
+      "Description": "The factor how much the of the effect is applied.\nThis can also be negative to move points away from the surface."
+    },
+    {
+      "InputId": "e153cc10-a554-4e18-bece-691956df573f"/*Field*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 537.42883,
+        "Y": 972.1018
+      },
+      "Description": "The SDF field providing the distance."
+    },
+    {
+      "InputId": "f7861f70-9eeb-42aa-93b5-230f03f645be"/*MaxSteps*/,
+      "Position": {
+        "X": 836.5911,
+        "Y": 1638.2859
+      },
+      "Description": "The maximum number of steps for marching the field.\nThe max is clamped internally to 100."
+    },
+    {
+      "InputId": "f8f3e984-421b-4e1e-abb1-8d75afb5b64d"/*SetColor*/,
+      "Position": {
+        "X": 836.59094,
+        "Y": 1743.2859
+      }
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0e1be8c4-8650-4fd6-93eb-688cf2fd7a76"/*CalcDispatchCount*/,
+      "Position": {
+        "X": 1102.0197,
+        "Y": 1038.6473
+      }
+    },
+    {
+      "ChildId": "172bbeb6-0b68-4182-903b-7abfb7cc6092"/*GetBufferComponents*/,
+      "Position": {
+        "X": 1113.5082,
+        "Y": 1302.9595
+      }
+    },
+    {
+      "ChildId": "17d76035-1a74-4cb4-ac81-b3e94b512c57"/*ExecuteBufferUpdate*/,
+      "Position": {
+        "X": 1617.85,
+        "Y": 968.7345
+      }
+    },
+    {
+      "ChildId": "4cb22404-67be-4ea0-b048-f0a2a62dd74d"/*IntsToBuffer*/,
+      "Position": {
+        "X": 1116.5911,
+        "Y": 1638.2859
+      }
+    },
+    {
+      "ChildId": "57e314ce-d022-4e5f-a97b-9531cfd8c0b5"/*ReadFile*/,
+      "Position": {
+        "X": 537.42883,
+        "Y": 1007.10175
+      }
+    },
+    {
+      "ChildId": "629d3e1d-4878-488b-9fad-d42d7631bb45"/*GetBufferComponents*/,
+      "Position": {
+        "X": 829.0911,
+        "Y": 1136.442
+      }
+    },
+    {
+      "ChildId": "7d20e551-f950-4239-913f-10562bce2567"/*FloatsToBuffer*/,
+      "Position": {
+        "X": 1113.8281,
+        "Y": 1439.262
+      }
+    },
+    {
+      "ChildId": "849b3c6c-85c9-44ea-b999-e59f9879e18e"/*ClampInt*/,
+      "Position": {
+        "X": 976.5911,
+        "Y": 1638.2859
+      }
+    },
+    {
+      "ChildId": "9acae948-bea6-48bc-8c20-4ce905e7eace"/*Execute*/,
+      "Position": {
+        "X": 1467.85,
+        "Y": 968.7345
+      }
+    },
+    {
+      "ChildId": "9c5d4a86-108c-4163-8ee9-b4af3f8ef880"/*StructuredBufferWithViews*/,
+      "Position": {
+        "X": 1113.5082,
+        "Y": 1232.9595
+      }
+    },
+    {
+      "ChildId": "9e020b60-72f8-41fe-ba39-e2fdedaa5064"/*BoolToInt*/,
+      "Position": {
+        "X": 976.591,
+        "Y": 1708.2859
+      }
+    },
+    {
+      "ChildId": "9e927a6d-8006-4104-9710-222b04cf102f"/*BoolToInt*/,
+      "Position": {
+        "X": 976.591,
+        "Y": 1743.2859
+      }
+    },
+    {
+      "ChildId": "a8c3887a-67e2-4176-9f91-c56ac9420674"/*ComputeShaderStage*/,
+      "Position": {
+        "X": 1317.85,
+        "Y": 968.7345
+      }
+    },
+    {
+      "ChildId": "c2f4dfde-56b8-4acc-81f4-aa2df4876be5"/*ComputeShaderFromSource*/,
+      "Position": {
+        "X": 817.42883,
+        "Y": 972.1018
+      }
+    },
+    {
+      "ChildId": "e4dd6046-c4a6-4cc4-91ff-6953dd957b07"/*GenerateShaderGraphCode*/,
+      "Position": {
+        "X": 677.42883,
+        "Y": 972.1018
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "d4009672-7c93-4962-81d7-656cbe70de2e"/*Result2*/,
+      "Position": {
+        "X": 1767.85,
+        "Y": 968.7345
+      }
+    }
+  ]
+}

@@ -47,7 +47,7 @@
     },
     {
       "ChildId": "0c46252b-751b-4b5b-9d1f-91fc427c3bab"/*klak klak klak*/,
-      "Comment": "TODO: Connected to sub bass comming in later.",
+      "Comment": "TODO: Connected to sub bass coming in later.",
       "Position": {
         "X": -7022.917,
         "Y": 2816.2466
@@ -83,7 +83,7 @@
     },
     {
       "ChildId": "15646ca6-132d-49dd-974e-83a127f5a8f4"/*Clap*/,
-      "Comment": "TODO: Connected to sub bass comming in later.",
+      "Comment": "TODO: Connected to sub bass coming in later.",
       "Position": {
         "X": -6835.975,
         "Y": 1505.908
@@ -161,7 +161,7 @@
     },
     {
       "ChildId": "254c34ab-f214-4eb4-b128-eca513559ebb"/*_SwitchSyncTriggers*/,
-      "Comment": "TODO: Connected to sub bass comming in later.",
+      "Comment": "TODO: Connected to sub bass coming in later.",
       "Position": {
         "X": -7019.589,
         "Y": 2932.7937
@@ -218,7 +218,7 @@
     },
     {
       "ChildId": "2d8d02d9-80bf-400a-bda2-d216c2bf6de3"/*Slow bass*/,
-      "Comment": "TODO: Connected to sub bass comming in later.",
+      "Comment": "TODO: Connected to sub bass coming in later.",
       "Position": {
         "X": -7029.019,
         "Y": 2633.9238
@@ -226,7 +226,7 @@
     },
     {
       "ChildId": "30586e25-0a89-41f5-a01f-83d37f78e161"/*Clap*/,
-      "Comment": "TODO: Connected to sub bass comming in later.",
+      "Comment": "TODO: Connected to sub bass coming in later.",
       "Position": {
         "X": -6832.6416,
         "Y": 1268.8889
@@ -283,7 +283,7 @@
     },
     {
       "ChildId": "41b5ab70-4c0d-473c-beb8-1aa88567dabd"/*Clap*/,
-      "Comment": "TODO: Connected to sub bass comming in later.",
+      "Comment": "TODO: Connected to sub bass coming in later.",
       "Position": {
         "X": -6846.1265,
         "Y": 1364.5778
@@ -597,7 +597,7 @@
     },
     {
       "ChildId": "79232fc1-5607-4551-b960-a8e59dacf0ee"/*Synth*/,
-      "Comment": "TODO: Connected to sub bass comming in later.",
+      "Comment": "TODO: Connected to sub bass coming in later.",
       "Position": {
         "X": -6820.0254,
         "Y": 1155.3428
@@ -748,7 +748,7 @@
     },
     {
       "ChildId": "9267f751-0ca3-4ca8-ade9-7b1361670b9f"/*Clap*/,
-      "Comment": "TODO: Connected to sub bass comming in later.",
+      "Comment": "TODO: Connected to sub bass coming in later.",
       "Position": {
         "X": -6844.951,
         "Y": 923.5943
@@ -1040,7 +1040,7 @@
     },
     {
       "ChildId": "d641f91c-739b-4fea-9795-df0159dea93f"/*BuzzBass*/,
-      "Comment": "TODO: Connected to sub bass comming in later.",
+      "Comment": "TODO: Connected to sub bass coming in later.",
       "Position": {
         "X": -6836.847,
         "Y": 1041.7966
@@ -1167,7 +1167,7 @@
     },
     {
       "ChildId": "eff25c59-f43d-4545-8486-9bc0ee07ef08"/*Beat*/,
-      "Comment": "TODO: Connected to sub bass comming in later.",
+      "Comment": "TODO: Connected to sub bass coming in later.",
       "Position": {
         "X": -6829.055,
         "Y": 826.9386
@@ -1277,7 +1277,7 @@
   "Annotations": [
     {
       "Id": "49df3f0d-31ca-4e92-993b-3178743c360e",
-      "Title": "# CHECKLIST\n\n- Disable Wifi\n- Start OBS\n\n- Resolution to 1080p\n- TimeLine mode\n- switch to 120 BPM\n- Hide Content and Code\n- Go through all scenes and switch to S1\n- Check NDI\n- Disable IsSimulation\n\n- Show WAKE\n- Start Capture\n",
+      "Title": "# CHECKLIST\n\n- Disable Wifi\n- Start OBS\n\n- Resolution to 1080p\n- Timeline mode\n- Switch to 120 BPM\n- Hide Content and Code\n- Go through all scenes and switch to S1\n- Check NDI\n- Disable IsSimulation\n\n- Show WAKE\n- Start Capture\n",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -1331,7 +1331,7 @@
     },
     {
       "Id": "e70b56c9-1980-4bb2-a18b-acf6afdca882",
-      "Title": "First 2mins",
+      "Title": "First 2 mins",
       "Color": {
         "X": 0.6,
         "Y": 0.6,

@@ -1,6 +1,6 @@
 {
   "Id": "93e2f11a-18a2-4dcb-86df-c452d340b409"/*BlendMeshVertices*/,
-  "Description": "Blends between two sets of mesh vertices. This only yields meaningful (i.e., predictable results) for meshes with the same vertex count and topology.",
+  "Description": "Blends between two sets of mesh vertices. This only yields meaningful (i.e., predictable) results for meshes with the same vertex count and topology.",
   "SymbolTags": "64",
   "InputUis": [
     {
@@ -9,7 +9,7 @@
         "X": -452.91107,
         "Y": 953.6807
       },
-      "Description": "Defines the Range width when the 'BlendMode' is set to 'RangeBlend' or 'RangeBlendSmooth'"
+      "Description": "Defines the range width when the 'BlendMode' is set to 'RangeBlend' or 'RangeBlendSmooth'"
     },
     {
       "InputId": "3f4ed7b1-dbb6-4736-b323-31ea8fad870e"/*Scatter*/,
@@ -17,7 +17,7 @@
         "X": -452.91107,
         "Y": 998.6807
       },
-      "Description": "Adds a random noise to the vertices position during the transition"
+      "Description": "Adds random noise to the vertices' position during the transition"
     },
     {
       "InputId": "42941c1f-c53e-45ed-876c-f9043753a473"/*Pairing*/,
@@ -61,7 +61,7 @@
         "X": -453.51883,
         "Y": 769.64264
       },
-      "Description": "Defines the transition between the two meshes\n0 = Mesh A is displayed without changes\n1 = Mesh B is displayed without changes\nIf the 'BlendMode' ist set to 'Blend', the vertices overshoot at values lower than 0 and higher than 1.\nIf the 'Blendmode' is set to 'RangeBlendSmooth', the transition loops.",
+      "Description": "Defines the transition between the two meshes\n0 = Mesh A is displayed without changes\n1 = Mesh B is displayed without changes\nIf the 'BlendMode' is set to 'Blend', the vertices overshoot at values lower than 0 and higher than 1.\nIf the 'BlendMode' is set to 'RangeBlendSmooth', the transition loops.",
       "AddPadding": "True",
       "Min": 0.0,
       "Max": 1.0

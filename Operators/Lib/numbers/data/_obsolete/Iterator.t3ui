@@ -1,6 +1,6 @@
 {
   "Id": "dd201330-6eab-43b9-b601-2e491ab18feb"/*Iterator*/,
-  "Description": "Returns the current element of the [IterateList] ",
+  "Description": "Returns the current element of the [IterateList]",
   "SymbolTags": "4224",
   "InputUis": [
     {

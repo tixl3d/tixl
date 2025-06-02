@@ -1,6 +1,6 @@
 {
   "Id": "ed0f5188-8888-453e-8db4-20d87d18e9f4"/*Boolean*/,
-  "Description": "Defines a boolean value that can be true or false. Also offers a convenient toggle control in the graph.\nIf you give it an intance name, it'll appear on the operator. You can also change its color appearance.\n\nThis operator is also known as a toggle button in some other apps.",
+  "Description": "Defines a boolean value that can be true or false. Also offers a convenient toggle control in the graph.\nIf you give it an instance name, it'll appear on the operator. You can also change its color appearance.\n\nThis operator is also known as a toggle button in some other apps.",
   "InputUis": [
     {
       "InputId": "49b3fa80-4027-4297-82cd-10a36882ed9d"/*ColorInGraph*/,

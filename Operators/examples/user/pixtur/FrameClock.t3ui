@@ -1,6 +1,6 @@
 {
   "Id": "08e40de8-aa4d-48d9-978d-690cd687220c"/*FrameClock*/,
-  "Description": "Renders a clock with precise frame information at 60fps.\nThis can be useful for test-renderings.",
+  "Description": "Renders a clock with precise frame information at 60fps.\nThis can be useful for test renderings.",
   "SymbolTags": "66",
   "InputUis": [],
   "SymbolChildUis": [

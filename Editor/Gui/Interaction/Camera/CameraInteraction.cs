@@ -311,7 +311,7 @@ internal sealed class CameraInteraction
         if (!ImGui.IsWindowHovered(ImGuiHoveredFlags.ChildWindows) || ImGui.GetIO().KeyCtrl)
             return false;
 
-        if (ImGui.IsAnyItemActive())
+        if (!ImGui.IsWindowFocused(ImGuiFocusedFlags.ChildWindows))
             return false;
 
         var acc = CameraInteractionParameters.CameraAcceleration * UserSettings.Config.CameraSpeed * _deltaTime * 60;

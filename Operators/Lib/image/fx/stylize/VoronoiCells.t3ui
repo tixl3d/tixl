@@ -33,7 +33,7 @@
         "Y": 117.368774
       },
       "GroupTitle": "Settings",
-      "Description": "Defines the scaling of the effect / the amount of voronoi-cells visible"
+      "Description": "Defines the scaling of the effect / the amount of Voronoi cells visible"
     },
     {
       "InputId": "c81900c4-3478-4a53-b6e6-4e9a09c81a91"/*Background*/,

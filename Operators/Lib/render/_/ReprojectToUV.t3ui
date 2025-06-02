@@ -1,6 +1,6 @@
 {
   "Id": "4238439e-a6b4-4390-9984-e6ebf19c3a69"/*ReprojectToUV*/,
-  "Description": "Uses a camera projection and the UV layout of the incoming mesh to reproject an image onto a geometry.\n\nThis can useful for uses like projection mapping or immersive media installations.\n\nNote:\n\nFor the setup to work correctly make sure that...\n- the FOV of the viewer camera is wide enough.\n- the aspect ratio of the viewer camera matches the texture resolution\n\nSee [ReprojectToUvExample].\n\n\nFor simple methods to change the UVs of meshes, see [MeshProjectUV] or [TransformMeshUVs].",
+  "Description": "Uses a camera projection and the UV layout of the incoming mesh to reproject an image onto a geometry.\n\nThis can be useful for uses like projection mapping or immersive media installations.\n\nNote:\n\nFor the setup to work correctly make sure that...\n- the FOV of the viewer camera is wide enough.\n- the aspect ratio of the viewer camera matches the texture resolution\n\nSee [ReprojectToUvExample].\n\n\nFor simple methods to change the UVs of meshes, see [MeshProjectUV] or [TransformMeshUVs].",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -37,7 +37,7 @@
         "X": 1053.3485,
         "Y": 4931.0044
       },
-      "Description": "defines the clear color",
+      "Description": "Defines the clear color",
       "Min": 0.0,
       "Max": 1.0,
       "Clamp": true
@@ -57,7 +57,7 @@
         "X": 1053.3485,
         "Y": 4976.0044
       },
-      "Description": "defines the DirectX format of rendering (colordepths, channels etc.)",
+      "Description": "Defines the DirectX format of rendering (color depths, channels, etc.)",
       "AddPadding": "True"
     },
     {

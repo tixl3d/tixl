@@ -224,7 +224,7 @@
     },
     {
       "ChildId": "aa7df5f4-145b-447b-b3aa-a1b6f5f196bb"/*TransformPoints*/,
-      "Comment": "fix the orientation of the points ",
+      "Comment": "Fix the orientation of the points ",
       "Position": {
         "X": 680.2251,
         "Y": -358.12167

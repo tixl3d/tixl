@@ -23,6 +23,7 @@ internal sealed class All : Instance<All>
         }
             
         Result.Value = result & anyConnected;
+        Input.DirtyFlag.Clear();
     }
 
     [Input(Guid = "cf59ae3e-d111-479f-a42b-c5c014e65b32")]

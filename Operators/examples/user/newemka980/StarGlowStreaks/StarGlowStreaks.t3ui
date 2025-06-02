@@ -47,7 +47,7 @@
         "X": 132.69783,
         "Y": 299.3758
       },
-      "Description": "Experimental! 0 = Best quality , 7  = Lowest quality \nYou need to activate GenerateMips on the RenderTarget if you want to use the lower qualities.\nAs it's based on MipMaps, a lower quality should be less expensive. \n"
+      "Description": "Experimental! 0 = Best quality, 7 = Lowest quality \nYou need to activate GenerateMips on the RenderTarget if you want to use the lower qualities.\nAs it's based on MipMaps, a lower quality should be less expensive. \n"
     },
     {
       "InputId": "afcba3d4-b7db-40bd-919a-d4f49b1bf7fc"/*Image*/,

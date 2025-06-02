@@ -214,7 +214,7 @@ internal sealed partial class EditableSymbolProject
 
     private void OnFileRenamed(object sender, RenamedEventArgs args)
     {
-        BlockingWindow.Instance.ShowMessageBox($"File {args.OldFullPath} renamed to {args.FullPath}. Please do not do this while the editor is running.");
+        Log.Debug($"File {args.OldFullPath} renamed to {args.FullPath}.");
         MarkAsNeedingRecompilation();
     }
 

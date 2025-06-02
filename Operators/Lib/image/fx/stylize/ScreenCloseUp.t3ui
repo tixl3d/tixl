@@ -1,6 +1,6 @@
 {
   "Id": "aaa64b7b-abe4-499e-ae29-a4d3df561c33"/*ScreenCloseUp*/,
-  "Description": "Uses the incoming 2D image and puts it on a virtual LCD / screen in a 3D scene that looks as if it is being filmed by a real camera (including depth of field etc)\n\nWorks great with [PlayVideo] or any [RenderTarget] or [ScreenCapture].\n\nAdditional ops can be used to emphasize the illusion of a real camera such as: [ChromaticAbberation], [ColorGrade], [Grain]",
+  "Description": "Uses the incoming 2D image and puts it on a virtual LCD/screen in a 3D scene that looks as if it is being filmed by a real camera (including depth of field etc)\n\nWorks great with [PlayVideo] or any [RenderTarget] or [ScreenCapture].\n\nAdditional ops can be used to emphasize the illusion of a real camera such as: [ChromaticAbberation], [ColorGrade], [Grain]",
   "InputUis": [
     {
       "InputId": "4b2ea8f2-dfe3-4e59-a140-5d5427e5c1ce"/*Glossy*/,
@@ -17,7 +17,7 @@
         "X": 784.3391,
         "Y": -26.406616
       },
-      "Description": "Tilts / offsets the virtual camera without moving the target \nX = Left / Right\nY = Up / Down",
+      "Description": "Tilts/offsets the virtual camera without moving the target \nX = Left / Right\nY = Up / Down",
       "Min": -90.0,
       "Max": 90.0,
       "Clamp": true,
@@ -38,7 +38,7 @@
         "X": 773.00995,
         "Y": 157.54285
       },
-      "Description": "Offsets the Target of the virtual camera",
+      "Description": "Offsets the target of the virtual camera",
       "UseVec2Control": "Position"
     },
     {
@@ -48,7 +48,7 @@
         "Y": -222.7555
       },
       "GroupTitle": "CameraPosition",
-      "Description": "Defines the distance to the virtual LCD / Screen",
+      "Description": "Defines the distance to the virtual LCD/Screen",
       "Min": -0.5,
       "Max": 0.95,
       "Scale": 0.001,

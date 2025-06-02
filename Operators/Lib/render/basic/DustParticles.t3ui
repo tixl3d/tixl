@@ -28,7 +28,7 @@
         "X": -1358.6415,
         "Y": 719.25867
       },
-      "Description": "changes the thickness of the trails"
+      "Description": "Changes the thickness of the trails"
     },
     {
       "InputId": "3783617d-17d5-4052-b732-60c61948ca1f"/*NoiseVariation*/,
@@ -36,7 +36,7 @@
         "X": -1359.4902,
         "Y": 490.22437
       },
-      "Description": "Adds a per particle noise variation"
+      "Description": "Adds a per-particle noise variation"
     },
     {
       "InputId": "49337c9b-7016-4093-b695-f7d1dd948fa1"/*FadeNearest*/,
@@ -53,7 +53,7 @@
         "X": -1380.4293,
         "Y": 1388.5939
       },
-      "Description": "Enables / disables Z-Writing / sorting"
+      "Description": "Enables / disables Z-writing / sorting"
     },
     {
       "InputId": "70f0f867-a4de-44da-b8e3-a7e95e1740a3"/*Size*/,
@@ -61,7 +61,7 @@
         "X": -1411.95,
         "Y": 224.68898
       },
-      "Description": "Defines the Size of the particles"
+      "Description": "Defines the size of the particles"
     },
     {
       "InputId": "9b42caa4-040a-4f83-8822-bc5bfbdff334"/*Texture_*/,
@@ -89,7 +89,7 @@
         "X": -1380.4293,
         "Y": 1433.5939
       },
-      "Description": "Defines what blendmode is used to render the particles"
+      "Description": "Defines what blend mode is used to render the particles"
     },
     {
       "InputId": "bafd96cc-c886-4392-8f57-592cb8651181"/*TrailLength*/,
@@ -120,7 +120,7 @@
         "X": -1359.4902,
         "Y": 535.22437
       },
-      "Description": "Changes the Phase / Random Seed of the Noise Animation"
+      "Description": "Changes the phase / random seed of the noise animation"
     },
     {
       "InputId": "df0a84c2-a1e9-492f-903a-5ef7511c6ec8"/*Count*/,
@@ -141,7 +141,7 @@
         "X": -1430.8794,
         "Y": 80.6439
       },
-      "Description": "Offsets the Volume that spawns and wraps the particles from the position of the camera",
+      "Description": "Offsets the volume that spawns and wraps the particles from the position of the camera",
       "AddPadding": "True"
     },
     {
@@ -160,7 +160,7 @@
         "Y": -54.35611
       },
       "GroupTitle": "Particles",
-      "Description": "If no particles are visible double click to reset the particle simulation\n\nThis can become necessary if a change in parameters such as 'count' or 'WrapSize' result in no particles being displayed"
+      "Description": "If no particles are visible double-click to reset the particle simulation\n\nThis can become necessary if a change in parameters such as 'count' or 'WrapSize' results in no particles being displayed"
     },
     {
       "InputId": "fd8340d5-b604-4605-9c3a-a57477d85919"/*TrailColor*/,

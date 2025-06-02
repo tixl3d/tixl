@@ -1,6 +1,6 @@
 {
   "Id": "185452c6-f299-42a3-b618-c6aa00d66c62"/*DefineGradient*/,
-  "Description": "Defines a Gradient from a set of Colors and positions.\nThis can be useful for animating gradients.\n\nPosition outside the range of 0 ... 1 will be ignored.",
+  "Description": "Defines a gradient from a set of colors and positions.\nThis can be useful for animating gradients.\n\nPositions outside the range of 0 ... 1 will be ignored.",
   "SymbolTags": "64",
   "InputUis": [
     {

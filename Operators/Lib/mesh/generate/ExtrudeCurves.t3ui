@@ -1,6 +1,6 @@
 {
   "Id": "816336a8-e214-4d2c-b8f9-05b1aa3ff2e2"/*ExtrudeCurves*/,
-  "Description": "Generates a mesh by extruding a set of points along a set of other points.\n\nThe extrusion is done along the z-axis. This means that the rail points should be aligned in a way that z is pointing along the rail.\n\nAlso the normals are directly taken from the extruded points z-axis. You can use the [VisualizePoints] to verify the alignment and adjust it it [TransformPoints] in point space.",
+  "Description": "Generates a mesh by extruding a set of points along a set of other points.\n\nThe extrusion is done along the z-axis. This means that the rail points should be aligned in a way that z is pointing along the rail.\n\nAlso, the normals are directly taken from the extruded points' z-axis. You can use the [VisualizePoints] to verify the alignment and adjust it in [TransformPoints] in point space.",
   "SymbolTags": "8",
   "InputUis": [
     {

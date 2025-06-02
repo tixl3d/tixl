@@ -1,4 +1,4 @@
-namespace Examples.lib.render.camera;
+namespace Examples.Lib.render.camera;
 
 [Guid("5317ade3-d4df-480d-872d-a17c63909da0")]
  internal sealed class CameraExample : Instance<CameraExample>

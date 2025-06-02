@@ -1,6 +1,6 @@
 {
   "Id": "eb818dd0-0c9c-40ee-b76e-2148f958b987"/*ScaleResolution*/,
-  "Description": "Non-Uniformly scales / multiplies an int2 which is used for defining resolutions\n\nFor a similar operator with less settings see [ScaleSize]\n\nAlso see [MakeResolution], [int2] etc.",
+  "Description": "Non-uniformly scales/multiplies an int2 which is used for defining resolutions\n\nFor a similar operator with fewer settings see [ScaleSize]\n\nAlso see [MakeResolution], [int2], etc.",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -26,7 +26,7 @@
         "X": -200.0,
         "Y": 90.0
       },
-      "Description": "Can limit the output to resolutions that are valid for textures (e.g. Powers of 2)"
+      "Description": "Can limit the output to resolutions that are valid for textures (e.g. powers of 2)"
     }
   ],
   "SymbolChildUis": [],

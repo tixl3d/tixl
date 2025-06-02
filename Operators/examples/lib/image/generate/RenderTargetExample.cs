@@ -1,4 +1,4 @@
-namespace Examples.lib.image.generate;
+namespace Examples.Lib.image.generate;
 
 [Guid("7d7c9abb-1742-407e-85c7-ba4f6e87f390")]
  internal sealed class RenderTargetExample : Instance<RenderTargetExample>

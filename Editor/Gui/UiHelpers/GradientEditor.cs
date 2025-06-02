@@ -399,6 +399,6 @@ public static class GradientEditor
 
     private const float RemoveThreshold = 35;
     private const float RequiredHeightForHandles = 20;
-    private const int MinInsertHeight = 20;
+    private const int MinInsertHeight = 15;
     public static readonly Vector2 StepHandleSize = new(14, 24);
 }

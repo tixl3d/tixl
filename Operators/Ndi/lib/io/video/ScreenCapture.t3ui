@@ -1,6 +1,6 @@
 {
   "Id": "80032e95-90ec-486d-92a4-ff3d225e556e"/*ScreenCapture*/,
-  "Description": "Loads and renders the content of the entire screen, similar to screen capturing software like OBS (Open Broadcaster Software).\n\nUseful combinations: Can be rendered to a file / image sequence within TiXLs 'Render To File' Window to make a recording of TiXLs UI. \nCan be combined with [ScreenCloseUp] to make it look like the monitor is being filmed with a real camera.\nCan also be used to add 2d effects on the captured image like [Pixelate], [SortPixel] etc.",
+  "Description": "Loads and renders the content of the entire screen, similar to screen capturing software like OBS (Open Broadcaster Software).\n\nUseful combinations: Can be rendered to a file/image sequence within TiXL's 'Render To File' window to make a recording of TiXL's UI.\nCan be combined with [ScreenCloseUp] to make it look like the monitor is being filmed with a real camera.\nCan also be used to add 2D effects on the captured image like [Pixelate], [SortPixel], etc.",
   "InputUis": [
     {
       "InputId": "633199d4-1950-48e3-ace9-0e266c7e5771"/*ScreenIndex*/,
@@ -8,7 +8,7 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "Description": "Defines which screen is recorded (e.g. for multi-monitor systems)"
+      "Description": "Defines which screen is recorded (e.g., for multi-monitor systems)"
     },
     {
       "InputId": "9acd5b21-cac7-4a1e-b7a8-1552ad0a907d"/*TimeOut*/,
@@ -16,7 +16,7 @@
         "X": -200.0,
         "Y": 45.0
       },
-      "Description": "Defines the TimeOut",
+      "Description": "Defines the timeout",
       "AddPadding": "True"
     }
   ],

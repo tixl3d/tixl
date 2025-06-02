@@ -1,6 +1,6 @@
 {
   "Id": "53127485-e2c7-4be8-aff2-da5790799593"/*LogMessage*/,
-  "Description": "Prints a message to console log. \nThis can be useful for debugging updates, caching and timing in complex graph networks.",
+  "Description": "Prints a message to the console log. \nThis can be useful for debugging updates, caching, and timing in complex graph networks.",
   "SymbolTags": "8",
   "InputUis": [
     {

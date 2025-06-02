@@ -1,6 +1,6 @@
 {
   "Id": "5cf7a1e2-7369-4e74-a7a9-b0eae61bdc21"/*WorleyNoise*/,
-  "Description": "Also called Voronoi noise and cellular noise.\nIt allows to create nice textures, from organic to science fiction spaceship hull. \n\nIt has various methods like:\n* Manhattan Worley\n* Chebyshev Worley\n\nCombine it with [Steps] or / and [DetectEdges] for example. \n\nAvailable Noise Ops [WorleyNoise] [FractalNoise] [ShardNoise]",
+  "Description": "Also called Voronoi noise and cellular noise.\nIt allows creating nice textures, from organic to science fiction spaceship hull. \n\nIt has various methods like:\n* Manhattan Worley\n* Chebyshev Worley\n\nCombine it with [Steps] or / and [DetectEdges] for example. \n\nAvailable Noise Ops [WorleyNoise] [FractalNoise] [ShardNoise]",
   "SymbolTags": "8",
   "InputUis": [
     {

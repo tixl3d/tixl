@@ -1,6 +1,6 @@
 {
   "Id": "62cdbff3-cb29-4745-92b1-02490e35345d"/*TryParse*/,
-  "Description": "Tries to parse a string to a float number, if failing, the default value is used instead.",
+  "Description": "Tries to parse a string to a float number; if failing, the default value is used instead.",
   "SymbolTags": "8",
   "InputUis": [
     {

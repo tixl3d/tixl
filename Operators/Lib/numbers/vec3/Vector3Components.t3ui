@@ -1,6 +1,6 @@
 {
   "Id": "a8083b41-951e-41f2-bb8a-9b511da26102"/*Vector3Components*/,
-  "Description": "Converts a Vector3 into three individual values\n\nOppositve of [Vector3]",
+  "Description": "Converts a Vector3 into three individual values\n\nOpposite of [Vector3]",
   "InputUis": [
     {
       "InputId": "bc217d95-25d4-44e8-b5ba-05b7facd9a20"/*Value*/,

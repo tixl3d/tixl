@@ -1,6 +1,6 @@
 {
   "Id": "a8f108a4-4d0a-4335-a3b5-f723239c25d1"/*VennDiagram*/,
-  "Description": "Illustrates how to build a diagram from lines and texts.",
+  "Description": "Illustrates how to build a diagram from lines and text.",
   "InputUis": [
     {
       "InputId": "64577bef-d074-4439-b797-85ca5519bab5"/*Input2*/,

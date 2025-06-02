@@ -34,7 +34,7 @@
     },
     {
       "ChildId": "0de0c53d-e203-465a-9ace-2c22c0f83cf7"/*SetAttributesWithPointFields*/,
-      "Comment": "Try to adjust the WCurve.\nYou can click the icon to open the popup.\n\nIn there holding the shift key will snap to grid lines.",
+      "Comment": "Try to adjust the WCurve.\nYou can click the icon to open the popup.\n\nIn there, holding the shift key will snap to grid lines.",
       "Position": {
         "X": 1203.5074,
         "Y": 2006.5778
@@ -293,7 +293,7 @@
     },
     {
       "ChildId": "7475f895-c85a-4973-81ce-b05ffb0225e6"/*Range*/,
-      "Comment": "We reduce the range to sharped the edge.",
+      "Comment": "We reduce the range to sharpen the edge.",
       "Position": {
         "X": 924.65845,
         "Y": 1920.5591
@@ -336,7 +336,7 @@
     },
     {
       "ChildId": "99be16e0-9e2a-4c67-aa3f-8e9b6c420a7e"/*RenderWithMotionBlur*/,
-      "Comment": "The [SetAttributesWithPointFields] effect deterministic.\nThis mains unlike with particle effects you can rewind the time and it will always produce the same effects.\n\nThis allows use to Render with motion blur.",
+      "Comment": "The [SetAttributesWithPointFields] effect is deterministic.\nThis means unlike with particle effects you can rewind the time and it will always produce the same effects.\n\nThis allows us to render with motion blur.",
       "Position": {
         "X": 2024.2947,
         "Y": 333.45605
@@ -374,7 +374,7 @@
     },
     {
       "ChildId": "a1218a11-e560-4330-9acf-61b694e3e653"/*LinePoints*/,
-      "Comment": "We generate a 50 points in a line.",
+      "Comment": "We generate 50 points in a line.",
       "Position": {
         "X": 620.76715,
         "Y": 941.7515
@@ -382,7 +382,7 @@
     },
     {
       "ChildId": "a1658e95-3c8a-4b04-b185-23c3d78d53c6"/*OscillateVec3*/,
-      "Comment": "We use Perlin noise to generate some random rotation angles.\nNotice how the Periods are not factors of each other. So the process should be non-repetitive.",
+      "Comment": "We use Perlin noise to generate some random rotation angles.\nNotice how the periods are not factors of each other, so the process should be non-repetitive.",
       "Position": {
         "X": 507.34485,
         "Y": 747.0593
@@ -411,7 +411,7 @@
     },
     {
       "ChildId": "a962f542-a7fb-446c-ae66-61635c4541c9"/*Offset*/,
-      "Comment": "And we increase the offet to extend the effect.",
+      "Comment": "And we increase the offset to extend the effect.",
       "Position": {
         "X": 924.65845,
         "Y": 1963.5586
@@ -426,7 +426,7 @@
     },
     {
       "ChildId": "aec47179-d09e-4890-ae5d-5851c8781817"/*Offset*/,
-      "Comment": "The Offset parameter extends for reduces the edge.",
+      "Comment": "The Offset parameter extends or reduces the edge.",
       "Position": {
         "X": 506.79196,
         "Y": 1419.603
@@ -596,7 +596,7 @@
   "Annotations": [
     {
       "Id": "1b80b1fa-e5a1-43e2-9888-02e7e335872b",
-      "Title": "Try to select both operators.\nIf you enabeld gizmos, you should\nbe able to move them around in the \noutput window.",
+      "Title": "Try to select both operators.\nIf you enabled gizmos, you should\nbe able to move them around in the \noutput window.",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -722,7 +722,7 @@
     },
     {
       "Id": "de58254a-fd4a-447f-9bb3-45b40cbd92b4",
-      "Title": "There are probably way simpler methods to achive a similar effect,\nbut it illustrates some aspects of how point attributes can be applied.",
+      "Title": "There are probably way simpler methods to achieve a similar effect,\nbut it illustrates some aspects of how point attributes can be applied.",
       "Color": {
         "X": 0.6,
         "Y": 0.6,

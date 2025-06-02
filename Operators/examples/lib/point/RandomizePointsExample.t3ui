@@ -35,7 +35,7 @@
     },
     {
       "ChildId": "0a02043d-7069-4603-8e6c-101909316a10"/*ResampleLinePoints*/,
-      "Comment": "We resample the lines to smoothen things out.",
+      "Comment": "We resample the lines to smooth things out.",
       "Position": {
         "X": -378.99054,
         "Y": 678.0498
@@ -311,7 +311,7 @@
     },
     {
       "ChildId": "8f34fa82-3c3d-4adb-b085-387f8979d70a"/*TransformPoints*/,
-      "Comment": "We rotate all points in the local point space. This will give it a slightly itallic look later.",
+      "Comment": "We rotate all points in the local point space. This will give it a slightly italic look later.",
       "Position": {
         "X": -678.9907,
         "Y": 678.0498

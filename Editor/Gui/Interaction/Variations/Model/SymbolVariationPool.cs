@@ -9,6 +9,7 @@ using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.UserData;
 using T3.Core.Utils;
+using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.Commands.Variations;
@@ -295,6 +296,7 @@ internal sealed class SymbolVariationPool
     public Variation CreatePresetForInstanceSymbol(Instance instance)
     {
         var changes = new Dictionary<Guid, InputValue>();
+        var symbolUi = instance.Symbol.GetSymbolUi();
 
         foreach (var input in instance.Inputs)
         {
@@ -302,6 +304,16 @@ internal sealed class SymbolVariationPool
             {
                 continue;
             }
+            
+            if(symbolUi.InputUis.TryGetValue(input.Id, out var inputUi))
+            {
+                if (inputUi.ExcludedFromPresets)
+                {
+                    Log.Debug($"Exclude {symbolUi}.{inputUi.InputDefinition.Name} for preset.");
+                    continue;
+                }
+            }
+            
 
             if (ValueUtils.BlendMethods.ContainsKey(input.Input.Value.ValueType))
             {

@@ -1,6 +1,6 @@
 {
   "Id": "03c157ef-f0bc-4a2e-b862-775c6e886997"/*RemapVec2*/,
-  "Description": "Remaps in incoming Vec2 from one value range to another. This can be useful for conforming vectors to a range for inverting components.\n",
+  "Description": "Remaps an incoming Vec2 from one value range to another. This can be useful for conforming vectors to a range or for inverting components.\n",
   "InputUis": [
     {
       "InputId": "0e1c8a24-5183-4dca-9726-39368ac4a6c4"/*RangeOutMin*/,

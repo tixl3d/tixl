@@ -1,4 +1,4 @@
-namespace Examples.lib.render.sprite;
+namespace Examples.Lib.render.sprite;
 
 [Guid("876e870a-2e34-4adb-bdc9-878b312e633b")]
  internal sealed class DrawPointSpritesShadedExample : Instance<DrawPointSpritesShadedExample>

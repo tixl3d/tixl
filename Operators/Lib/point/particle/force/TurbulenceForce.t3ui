@@ -45,7 +45,7 @@
         "X": -1348.7484,
         "Y": 378.40393
       },
-      "Description": "Multiplier for the individual axes to amplify / attenuate the noise in certain directions.",
+      "Description": "Multiplier for the individual axes to amplify/attenuate the noise in certain directions.",
       "AddPadding": "True",
       "Min": 0.0,
       "Max": 5.0,

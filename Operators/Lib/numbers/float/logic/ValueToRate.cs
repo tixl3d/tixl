@@ -14,38 +14,50 @@ internal sealed class ValueToRate : Instance<ValueToRate>
         Result.UpdateAction += Update;
     }
 
-    /**
-     * 0   1/3  2/3   3/3
-     * |----|----|----|
-     */
     private void Update(EvaluationContext context)
     {
-        var v = Value.GetValue(context);
+        var ratesIsDirty = Rates.IsDirty;
+        var ratesString = Rates.GetValue(context);
+        UpdateRatios(ratesIsDirty, ratesString);
+        
+        var stepCount = _ratios.Count;
+        var f = Value.GetValue(context).Clamp(0, 0.99f);
 
-        var rates = Rates.GetValue(context);
-        if (string.IsNullOrEmpty(rates))
-            return;
-
-        var lines = rates.Split('\n');
-        var stepCount = lines.Length;
-        //var index = (int)((v - 1f / stepCount) * stepCount);
-        var index = (int)((stepCount*v).Clamp(0,stepCount));
-        if (index < 0 || index >= stepCount)
-            return;
-
-        var str = lines[index];
-        float result = 0;
-        try
-        {
-            result = float.Parse(str, CultureInfo.InvariantCulture.NumberFormat);
-        }
-        catch (Exception e)
-        {
-            Log.Warning("Failed to convert number:" + e.Message);
-        }
+        var result = stepCount switch
+                         {
+                             0 => 1,
+                             _ => _ratios[(int)((stepCount - 1) * f + 0.5f)]
+                         };
 
         Result.Value = result;
     }
+
+    private void UpdateRatios(bool ratesIsDirty, string ratesString)
+    {
+        if (!ratesIsDirty || ratesString == _ratesStrings) 
+            return;
+        
+        _ratesStrings = ratesString;
+        _ratios. Clear();
+        if (string.IsNullOrEmpty(_ratesStrings))
+            return;
+        
+        foreach (var line in ratesString.Split('\n'))
+        {
+            if (float.TryParse(line, CultureInfo.InvariantCulture.NumberFormat, out var f))
+            {
+                _ratios.Add(f);
+            }
+            else
+            {
+                Log.Warning($"Can't convert {line} to float ratio", this);
+            }
+        }
+            
+    }
+
+    private readonly List<float> _ratios = [];
+    private string _ratesStrings;
 
     [Input(Guid = "4f2dad75-0f45-498a-9a1a-7571dc9f0b09")]
     public readonly InputSlot<float> Value = new();

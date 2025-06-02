@@ -1,5 +1,6 @@
 {
   "Id": "1b149f1f-529c-4418-ac9d-3871f24a9e38"/*Displace*/,
+  "Description": "",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -7,7 +8,7 @@
       "Position": {
         "X": 24.449814,
         "Y": 541.8907
-      },
+      }
     },
     {
       "InputId": "0f2867ab-a65e-4bf3-b1b5-9c241690ba5f"/*Displacement*/,
@@ -42,7 +43,7 @@
         "X": 24.44983,
         "Y": 716.89075
       },
-      "GroupTitle": "Sampling",
+      "GroupTitle": "Sampling"
     },
     {
       "InputId": "6a5c120f-7c04-439b-ad2d-6f78ceb3b378"/*DisplaceMode*/,
@@ -74,7 +75,7 @@
         "X": 24.44983,
         "Y": 786.89075
       },
-      "GroupTitle": "Quality",
+      "GroupTitle": "Quality"
     },
     {
       "InputId": "d0508dfa-89cf-4713-8f5e-893dd5bfc3f4"/*Image*/,
@@ -99,7 +100,7 @@
       "Position": {
         "X": -115.55017,
         "Y": 856.89075
-      },
+      }
     }
   ],
   "SymbolChildUis": [

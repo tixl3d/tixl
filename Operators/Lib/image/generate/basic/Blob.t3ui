@@ -82,7 +82,7 @@
         "X": 166.71823,
         "Y": 501.74536
       },
-      "Description": "Blend mode between the generated blob graphic and the backgrund image, if one is provided."
+      "Description": "Blend mode between the generated blob graphic and the background image, if one is provided."
     },
     {
       "InputId": "d2b0dd99-c289-4c1b-9335-c29a6b4a6ba3"/*Color*/,

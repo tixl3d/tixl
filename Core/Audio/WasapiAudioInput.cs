@@ -125,8 +125,7 @@ public static class WasapiAudioInput
         }
 
         ActiveInputDeviceName = device.DeviceInfo.Name;
-        var result = BassWasapi.Start();
-        //Log.Debug("Wasapi.StartInputCapture() -> BassWasapi.Start():" + result);
+        BassWasapi.Start();
     }
         
     private static void Stop()
