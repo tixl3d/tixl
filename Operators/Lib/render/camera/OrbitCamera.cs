@@ -130,8 +130,8 @@ internal sealed class OrbitCamera : Instance<OrbitCamera>
         _cameraDefinition.Roll = roll;
         _cameraDefinition.Up = up;
         _cameraDefinition.AspectRatio = aspectRatio;
-        _cameraDefinition.NearFarClip = clip;
-        _cameraDefinition.Fov = fov;
+        _cameraDefinition.ClipPlanes = clip;
+        _cameraDefinition.FieldOfView = fov;
         _cameraDefinition.PositionOffset = positionOffset;
         _cameraDefinition.RotationOffset = rotOffset;
 

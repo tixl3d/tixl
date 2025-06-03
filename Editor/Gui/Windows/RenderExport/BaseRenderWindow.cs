@@ -93,7 +93,7 @@ internal abstract class BaseRenderWindow : Window
         var endTimeInSeconds = ReferenceTimeToSeconds(_endTimeInBars, _timeReference);
         FrameCount = (int)Math.Round((endTimeInSeconds - startTimeInSeconds) * Fps);
         
-        FormInputs.AddFloat($"ResolutionFactor", ref _resolutionFactor, 0.125f, 4, 0.1f, true,
+        FormInputs.AddFloat($"Resolution Factor", ref _resolutionFactor, 0.125f, 4, 0.1f, true,
                             "A factor applied to the output resolution of the rendered frames.");
         
         if (FormInputs.AddInt($"Motion Blur Samples", ref _overrideMotionBlurSamples, -1, 50, 1,

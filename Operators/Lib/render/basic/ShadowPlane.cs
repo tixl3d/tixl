@@ -14,7 +14,7 @@ internal sealed class ShadowPlane : Instance<ShadowPlane>
     public readonly InputSlot<float> PlaneSize = new InputSlot<float>();
 
     [Input(Guid = "16527748-fe55-4ced-b08d-6c94377c5563")]
-    public readonly InputSlot<float> FOV = new InputSlot<float>();
+    public readonly InputSlot<float> FieldOfView = new InputSlot<float>();
 
     [Input(Guid = "2f90c70b-7979-4426-aad2-7e715e7c1691", MappedType = typeof(Resolutions))]
     public readonly InputSlot<int> Resolution = new InputSlot<int>();

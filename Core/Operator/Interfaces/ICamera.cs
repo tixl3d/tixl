@@ -1,4 +1,4 @@
-﻿using T3.Core.Utils;
+using T3.Core.Utils;
 using T3.Core.Utils.Geometry;
 
 namespace T3.Core.Operator.Interfaces;
@@ -16,14 +16,14 @@ public interface ICamera
 
 public struct CameraDefinition
 {
-    public Vector2 NearFarClip;
-    public Vector2 ViewPortShift;
+    public Vector2 ClipPlanes;
+    public Vector2 LensShift;
     public Vector3 PositionOffset;
     public Vector3 Position;
     public Vector3 Target;
     public Vector3 Up;
     public float AspectRatio;
-    public float Fov;
+    public float FieldOfView;
     public float Roll;
     public Vector3 RotationOffset;
     public bool OffsetAffectsTarget;
@@ -32,14 +32,14 @@ public struct CameraDefinition
     {
         return new CameraDefinition
                    {
-                       NearFarClip = MathUtils.Lerp(a.NearFarClip, b.NearFarClip, f),
-                       ViewPortShift = MathUtils.Lerp(a.ViewPortShift, b.ViewPortShift, f),
+                       ClipPlanes = MathUtils.Lerp(a.ClipPlanes, b.ClipPlanes, f),
+                       LensShift = MathUtils.Lerp(a.LensShift, b.LensShift, f),
                        PositionOffset = MathUtils.Lerp(a.PositionOffset, b.PositionOffset, f),
                        Position = MathUtils.Lerp(a.Position, b.Position, f),
                        Target = MathUtils.Lerp(a.Target, b.Target, f),
                        Up = MathUtils.Lerp(a.Up, b.Up, f),
                        AspectRatio = MathUtils.Lerp(a.AspectRatio, b.AspectRatio, f),
-                       Fov = MathUtils.Lerp(a.Fov, b.Fov, f),
+                       FieldOfView = MathUtils.Lerp(a.FieldOfView, b.FieldOfView, f),
                        Roll = MathUtils.Lerp(a.Roll, b.Roll, f),
                        RotationOffset = MathUtils.Lerp(a.RotationOffset, b.RotationOffset, f),
                        OffsetAffectsTarget = f < 0.5 ? a.OffsetAffectsTarget : b.OffsetAffectsTarget,
@@ -48,9 +48,9 @@ public struct CameraDefinition
 
     public void BuildProjectionMatrices(out Matrix4x4 camToClipSpace, out Matrix4x4 worldToCamera)
     {
-        camToClipSpace = GraphicsMath.PerspectiveFovRH(Fov, AspectRatio, NearFarClip.X, NearFarClip.Y);
-        camToClipSpace.M31 = ViewPortShift.X;
-        camToClipSpace.M32 = ViewPortShift.Y;
+        camToClipSpace = GraphicsMath.PerspectiveFovRH(FieldOfView, AspectRatio, ClipPlanes.X, ClipPlanes.Y);
+        camToClipSpace.M31 = LensShift.X;
+        camToClipSpace.M32 = LensShift.Y;
 
         var eye = Position;
         if (!OffsetAffectsTarget)

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using System.Text;
 
 // ReSharper disable MemberCanBePrivate.Global
 
@@ -11,6 +12,37 @@ namespace T3.Core.Utils;
 [SuppressMessage("ReSharper", "MemberCanBeInternal")]
 public static class StringUtils
 {
+    public static string SpaceCamelCap(this string s)
+    {
+        if (string.IsNullOrEmpty(s))
+            return s;
+
+        StringBuilder result = new StringBuilder(s.Length + 5);
+
+        if (s.Length > 0)
+        {
+            result.Append(char.ToUpper(s[0]));
+        }
+
+        char previouschar = s[0];
+
+        for (int i = 1; i < s.Length; i++)
+        {
+            char c = s[i];
+            if ((char.IsNumber(previouschar) && !char.IsNumber(c)) || (char.IsNumber(c) && !char.IsNumber(previouschar)))
+            {
+                result.Append(" ");
+            }
+            else if (char.IsUpper(c))
+            {
+                result.Append(" ");
+            }
+            result.Append(c);
+            previouschar = c;
+        }
+        return result.ToString();
+    }
+
     public static unsafe bool Equals(ReadOnlySpan<char> a, ReadOnlySpan<char> b, bool ignoreCase)
     {
         var aLength = a.Length;

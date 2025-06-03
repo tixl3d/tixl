@@ -57,14 +57,14 @@ internal sealed class Camera : Instance<Camera>, ICamera, ICameraPropertiesProvi
 
         _cameraDefinition = new CameraDefinition
                                 {
-                                    NearFarClip = NearFarClip.GetValue(context),
-                                    ViewPortShift = ViewportShift.GetValue(context),
+                                    ClipPlanes = ClipPlanes.GetValue(context),
+                                    LensShift = LensShift.GetValue(context),
                                     PositionOffset = PositionOffset.GetValue(context),
                                     Position = Position.GetValue(context),
                                     Target = Target.GetValue(context),
                                     Up = Up.GetValue(context),
                                     AspectRatio = aspectRatio,
-                                    Fov = FOV.GetValue(context).ToRadians(),
+                                    FieldOfView = FieldOfView.GetValue(context).ToRadians(),
                                     Roll = Roll.GetValue(context),
                                     RotationOffset = RotationOffset.GetValue(context),
                                     OffsetAffectsTarget = AlsoOffsetTarget.GetValue(context)
@@ -141,7 +141,7 @@ internal sealed class Camera : Instance<Camera>, ICamera, ICameraPropertiesProvi
     public readonly InputSlot<Vector3> Target = new();
         
     [Input(Guid = "7BDE5A5A-CE82-4903-92FF-14E540A605F0")]
-    public readonly InputSlot<float> FOV = new();
+    public readonly InputSlot<float> FieldOfView = new();
         
     [Input(Guid = "764CA304-FC86-48A9-9C82-A04FAC7EADB2")]
     public readonly InputSlot<float> Roll = new();
@@ -158,12 +158,12 @@ internal sealed class Camera : Instance<Camera>, ICamera, ICameraPropertiesProvi
     public readonly InputSlot<Vector3> RotationOffset = new();
         
     [Input(Guid = "AE275370-A684-42FB-AB7A-50E16D24082D")]
-    public readonly InputSlot<Vector2> ViewportShift = new();
+    public readonly InputSlot<Vector2> LensShift = new();
         
     // --- options
         
     [Input(Guid = "199D4CE0-AAB1-403A-AD42-216EF1061A0E")]
-    public readonly InputSlot<Vector2> NearFarClip = new();
+    public readonly InputSlot<Vector2> ClipPlanes = new();
         
     [Input(Guid = "F66E91A1-B991-48C3-A8C9-33BCAD0C2F6F")]
     public readonly InputSlot<float> AspectRatio = new();
