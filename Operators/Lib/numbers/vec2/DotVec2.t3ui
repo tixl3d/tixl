@@ -1,0 +1,30 @@
+{
+  "Id": "0db4fd9b-7996-47e1-a4cc-debfd04a18f4"/*DotVec2*/,
+  "Description": "Applies a dot product to two Vec2's",
+  "InputUis": [
+    {
+      "InputId": "3f28ec3a-e7ab-41f5-95d4-e3cc5b6357f9"/*Input2*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      }
+    },
+    {
+      "InputId": "bac6bef8-1bf3-4f74-9198-c06dec48610c"/*Input1*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "18591f1a-87f0-49fc-8608-b30b98364b67"/*Result*/,
+      "Position": {
+        "X": 100.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "Id": "0db4fd9b-7996-47e1-a4cc-debfd04a18f4"/*DotVec2*/,
+  "Inputs": [
+    {
+      "Id": "3f28ec3a-e7ab-41f5-95d4-e3cc5b6357f9"/*Input2*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "Id": "bac6bef8-1bf3-4f74-9198-c06dec48610c"/*Input1*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

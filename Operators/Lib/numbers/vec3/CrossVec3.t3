@@ -1,0 +1,23 @@
+{
+  "Id": "6cc830f0-cbc5-430d-9f32-1eab47b44693"/*CrossVec3*/,
+  "Inputs": [
+    {
+      "Id": "5d81821a-19d1-4961-b895-09c25f3f6afe"/*Input2*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "c88f66a4-8702-48ed-9693-29b3eac044f9"/*Input1*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

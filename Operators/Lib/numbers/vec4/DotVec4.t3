@@ -1,0 +1,25 @@
+{
+  "Id": "0acc2bdb-f8e6-4280-aa89-702f1cb7722b"/*DotVec4*/,
+  "Inputs": [
+    {
+      "Id": "063073d6-7ef7-4409-99b7-68f5a40a0d83"/*Input2*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0,
+        "W": 0.0
+      }
+    },
+    {
+      "Id": "cf1ec3c4-8b42-4c12-ba10-ca1db88c1a97"/*Input1*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0,
+        "W": 0.0
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}
