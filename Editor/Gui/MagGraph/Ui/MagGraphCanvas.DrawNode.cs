@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Model;
@@ -142,7 +142,7 @@ internal sealed partial class MagGraphCanvas
         if (isSelected)
         {
             drawList.AddRect(pMinVisible, pMaxVisible, UiColors.ForegroundFull.Fade(_context.GraphOpacity),
-                             CanvasScale < 0.5 ? 0 : 6 * CanvasScale,
+                             CanvasScale < 0.5 ? 0 : 5 * CanvasScale,
                              imDrawFlags);
         }
         
@@ -151,7 +151,7 @@ internal sealed partial class MagGraphCanvas
         if (isHighlighted)
         {
             drawList.AddRect(pMinVisible, pMaxVisible, UiColors.ForegroundFull.Fade(Blink),
-                             CanvasScale < 0.5 ? 0 : 6 * CanvasScale,
+                             CanvasScale < 0.5 ? 0 : 5 * CanvasScale,
                              imDrawFlags);
         }
 
@@ -316,7 +316,7 @@ internal sealed partial class MagGraphCanvas
                     }
 
                     // Draw selection outline...
-                    drawList.AddRect(pMinVisible, pMaxVisible, UiColors.ForegroundFull.Fade(_hoverPickingProgress * 0.4f), 6 * CanvasScale, imDrawFlags);
+                    drawList.AddRect(pMinVisible, pMaxVisible, UiColors.ForegroundFull.Fade(_hoverPickingProgress * 0.4f), CanvasScale < 0.5 ? 0 : 5 * CanvasScale, imDrawFlags);
 
                     ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(8, 8));
                     ImGui.PushStyleVar(ImGuiStyleVar.WindowRounding, 3);

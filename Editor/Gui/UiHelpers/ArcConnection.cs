@@ -258,7 +258,7 @@ internal static class GraphConnectionDrawer
     private static int ComputerSegmentCount(float arcLengthRad, float canvasScale)
     {
         var circleResolution = (int) canvasScale.RemapAndClamp(0.2f, 1.5f, 6, 15);
-        return (int)(arcLengthRad * circleResolution).Clamp(1,100);
+        return (int)(arcLengthRad * circleResolution).Clamp(1, UserSettings.Config.MaxSegmentCount);
     }
     
     private static float ComputeInnerTangentAngle(Vector2 centerA, float radiusA, Vector2 centerB, float radiusB, bool flipped = false)

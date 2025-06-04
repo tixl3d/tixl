@@ -81,6 +81,7 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         public int ValueEditSmoothing = 0;
         public float ScrollSmoothing = 0.075f;
         public float MaxCurveRadius = 350;
+        public int MaxSegmentCount = 32;
 
         public float ClickThreshold = 5; // Increase for high-res display and pen tablets
         public bool AdjustCameraSpeedWithMouseWheel = false;

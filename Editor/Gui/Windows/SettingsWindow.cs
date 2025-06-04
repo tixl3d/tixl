@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using ImGuiNET;
 using Operators.Utils;
 using T3.Core.IO;
@@ -101,6 +101,9 @@ internal sealed class SettingsWindow : Window
                                                        ref UserSettings.Config.MaxCurveRadius,
                                                        0.0f, 1000f, 1f, true, "Controls the roundness of curve lines",
                                                        UserSettings.Defaults.MaxCurveRadius);
+                        changed |= FormInputs.AddInt("Connection segments",
+                                                       ref UserSettings.Config.MaxSegmentCount, 1, 100, 1f,
+                                                       "Controls the number of segments used to draw connections between operators.", UserSettings.Defaults.MaxSegmentCount);
                     }
                     else
                     {
