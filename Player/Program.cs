@@ -140,12 +140,19 @@ internal static partial class Program
                                Usage = Usage.RenderTargetOutput,
                            };
 
+            //Try to load 11.1 if possible, revert to 11.0 auto
+            FeatureLevel[] levels =
+{
+                FeatureLevel.Level_11_1,
+                FeatureLevel.Level_11_0,
+            };
+
             // Create Device and SwapChain
-            #if DEBUG || FORCE_D3D_DEBUG
-            var deviceCreationFlags = DeviceCreationFlags.Debug;
-            #else
-                var deviceCreationFlags = DeviceCreationFlags.None;
-            #endif
+#if DEBUG || FORCE_D3D_DEBUG
+            var deviceCreationFlags = DeviceCreationFlags.Debug | DeviceCreationFlags.BgraSupport;
+#else
+                var deviceCreationFlags = DeviceCreationFlags.None | DeviceCreationFlags.BgraSupport;
+#endif
             Device.CreateWithSwapChain(DriverType.Hardware, deviceCreationFlags, desc, out _device, out _swapChain);
             ResourceManager.Init(_device);
             _deviceContext = _device.ImmediateContext;
@@ -157,7 +164,7 @@ internal static partial class Program
                 cursor.SetVisible(false);
             }
 
-            // Ignore all windows events
+            // Ign ore all windows events
             var factory = _swapChain.GetParent<Factory>();
             factory.MakeWindowAssociation(_renderForm.Handle, WindowAssociationFlags.IgnoreAll);
 

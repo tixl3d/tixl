@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
@@ -44,7 +44,7 @@ internal sealed class AppWindow
                                                                   IsWindowed = true,
                                                                   OutputHandle = Form.Handle,
                                                                   SampleDescription = new SampleDescription(1, 0),
-                                                                  SwapEffect = SwapEffect.Discard,
+                                                                  SwapEffect = SwapEffect.FlipDiscard,
                                                                   Usage = Usage.RenderTargetOutput
                                                               };
 

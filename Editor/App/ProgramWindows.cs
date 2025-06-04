@@ -141,9 +141,17 @@ internal static class ProgramWindows
             var selectedAdapter = factory.GetAdapter1(selectedAdapterIndex);
             ActiveGpu = selectedAdapter.Description.Description;
 
+            //Try to load 11.1 if possible, revert to 11.0 auto
+            FeatureLevel[] levels =
+{
+                FeatureLevel.Level_11_1,
+                FeatureLevel.Level_11_0,
+            };
+
             // Create Device and SwapChain with the selected adapter
             Device.CreateWithSwapChain(selectedAdapter, // Pass the selected adapter
-                                       DeviceCreationFlags.Debug,
+                                       DeviceCreationFlags.Debug | DeviceCreationFlags.BgraSupport,
+                                       levels,
                                        Main.SwapChainDescription,
                                        out device,
                                        out var swapchain);
