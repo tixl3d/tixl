@@ -16,7 +16,8 @@
         "X": -200.0,
         "Y": 45.0
       },
-      "Description": "Defines how much the edge is rounded / beveled"
+      "Description": "Defines how much the edge is rounded / beveled",
+      "AddPadding": "True"
     },
     {
       "InputId": "951b2983-1359-41e4-8fb0-8d97c50ed8d6"/*Center*/,
