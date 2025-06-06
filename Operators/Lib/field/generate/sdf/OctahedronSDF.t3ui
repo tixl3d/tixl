@@ -1,0 +1,55 @@
+{
+  "Id": "fdb85ece-201b-49dc-899b-f044a98ac414"/*OctahedronSDF*/,
+  "Description": "Generates a octahedron distande field.\n[BoxSDF] [PlaneSDF] [CombineSDF] [RaymarchField] \n",
+  "InputUis": [
+    {
+      "InputId": "23012866-4820-4072-8cd8-82d6bdedf13d"/*Size*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      }
+    },
+    {
+      "InputId": "2811b696-3d09-46f7-84ac-045eb7fe82b0"/*Center*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "921ec8f2-cd50-459b-8f0a-990de5deea64"/*EdgeRadius*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Min": 0.002,
+      "Max": 0.5
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "1cda6720-72cb-4aeb-a665-2fc35d787539"/*Result*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "Links": [
+    {
+      "Id": "1973a0dc-ca72-4621-bc3e-4b34db36c886",
+      "Title": "Octahedron - distance ",
+      "Description": "Exact",
+      "LinkUrl": "https://www.shadertoy.com/view/wsSGDG",
+      "LinkType": "Source"
+    },
+    {
+      "Id": "99f321bd-89a3-43eb-85e9-dd2be8fccd76",
+      "Title": "Inigo Quilez 3D SDFs",
+      "Description": "",
+      "LinkUrl": "https://iquilezles.org/articles/distfunctions/",
+      "LinkType": "Documentation"
+    }
+  ]
+}
