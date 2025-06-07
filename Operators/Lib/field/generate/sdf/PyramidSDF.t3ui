@@ -1,0 +1,44 @@
+{
+  "Id": "5b8604d0-65f4-45c9-9e85-4a044005a778"/*PyramidSDF*/,
+  "Description": "Generates a pyramid distande field.\n[BoxSDF] [PlaneSDF] [CombineSDF] [RaymarchField] ",
+  "InputUis": [
+    {
+      "InputId": "09320506-1e5c-4da8-b522-9f89c143277f"/*Axis*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "5b3e69cf-cb55-4428-b78c-76f4f22cf2ac"/*Rounding*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      }
+    },
+    {
+      "InputId": "8d5c22bb-2910-4415-9bf8-ab304e35a5b2"/*Height*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      }
+    },
+    {
+      "InputId": "92c03574-31e5-4ce2-9a76-ecab5f64d732"/*Center*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "566667bd-e78b-4971-b567-3e1c3ea68701"/*Result*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}
