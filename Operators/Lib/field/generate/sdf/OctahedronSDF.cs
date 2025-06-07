@@ -28,7 +28,7 @@ internal sealed class OctahedronSDF : Instance<OctahedronSDF>
     {
         c.Globals["fsdOctahedron"] = """
                                       float fsdOctahedron(float3 p, float3 center, float s, float ra) {
-                                          p = abs(p);
+                                          p = abs(p)-center;
                                           float m = p.x + p.y + p.z - s;
                                           float3 r = 3.0 * p - m;
                                           float3 o = min(r, 0.0);
