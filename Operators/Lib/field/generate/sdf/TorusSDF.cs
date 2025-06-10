@@ -1,3 +1,4 @@
+using System.Drawing;
 using T3.Core.DataTypes.ShaderGraph;
 using T3.Core.Utils;
 
@@ -20,14 +21,14 @@ internal sealed class TorusSDF : Instance<TorusSDF>
     private void Update(EvaluationContext context)
     {
         var axis = Axis.GetEnumValue<AxisTypes>(context);
-
+        
         var templateChanged = axis != _axis;
         if (templateChanged)
         {
             _axis = axis;
             ShaderNode.FlagCodeChanged();
         }
-
+       
         ShaderNode.Update(context);
     }
 
@@ -37,9 +38,9 @@ internal sealed class TorusSDF : Instance<TorusSDF>
     {
         c.Globals["fTorus"]
             = """
-              float fTorus(float3 p, float2 size) {
-                  float2 q = float2(length(p.xy) - size.x, p.z);
-                  return length(q) - size.y;
+              float fTorus(float3 p, float radius, float thickness) {
+                  float2 q = float2(length(p.xy) - radius, p.z);
+                  return length(q) - thickness;
               }
               """;
     }
@@ -47,8 +48,8 @@ internal sealed class TorusSDF : Instance<TorusSDF>
     public void GetPreShaderCode(CodeAssembleContext c, int inputIndex)
     {
         var a = _axisCodes0[(int)_axis];
-
-        c.AppendCall($"f{c}.w = fTorus(p{c}.{a} - {ShaderNode}Center.{a} , {ShaderNode}Size);");
+       
+        c.AppendCall($"f{c}.w = fTorus(p{c}.{a} - {ShaderNode}Center.{a}, {ShaderNode}Radius, {ShaderNode}Thickness);");
         c.AppendCall($"f{c}.xyz = p.w < 0.5 ?  p{c}.xyz : 1;"); // save local space
     }
 
@@ -74,7 +75,11 @@ internal sealed class TorusSDF : Instance<TorusSDF>
 
     [GraphParam]
     [Input(Guid = "5fe2ab92-f8e5-400d-b5a3-197f20570d6f")]
-    public readonly InputSlot<Vector2> Size = new();
+    public readonly InputSlot<float> Radius = new();
+
+    [GraphParam]
+    [Input(Guid = "6a392bc1-2adf-4a50-bb3f-5d4f2a63bf0b")]
+    public readonly InputSlot<float> Thickness = new();
 
     [Input(Guid = "522A9640-CA8C-47E6-AD36-5C316A9092AE", MappedType = typeof(AxisTypes))]
     public readonly InputSlot<int> Axis = new();

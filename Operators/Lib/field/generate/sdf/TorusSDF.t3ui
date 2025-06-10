@@ -1,34 +1,42 @@
 {
   "Id": "a54e0946-71d0-4985-90bc-184cdb1b6b34"/*TorusSDF*/,
   "Description": "Generates a procedural torus field which can be rendered with [RaymarchField] and visualized with [VisualizeFieldDistance].\nAlso known as: Donut SDF\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToRaymarchField].\n\nIt can be modified with [BendField], [TransformField], [PolarRepeat], and more.\n\nSimilar nodes: [BoxSDF], [ChainLinkSDF], [FractalSDF].\n\nTo use a Mesh made of polygons refer to [TorusMesh].",
-  "InputUis": [
-    {
-      "InputId": "522a9640-ca8c-47e6-ad36-5c316a9092ae"/*Axis*/,
-      "Position": {
-        "X": -200.0,
-        "Y": 0.0
-      },
-      "GroupTitle": "Shader Varations",
-      "Description": "Defines the axis along which the field is aligned"
-    },
-    {
-      "InputId": "5fe2ab92-f8e5-400d-b5a3-197f20570d6f"/*Size*/,
-      "Position": {
-        "X": -200.0,
-        "Y": 45.0
-      },
-      "Description": "Defines the size and thickness of the Torus\nX = ring size\nY = ring thickness",
-      "AddPadding": "True"
-    },
-    {
-      "InputId": "dbc72bd7-6191-4145-a69f-d17b3808b3ab"/*Center*/,
-      "Position": {
-        "X": -200.0,
-        "Y": 0.0
-      },
-      "Description": "Transforms the center of the object"
-    }
-  ],
+    "InputUis": [
+        {
+            "InputId": "522a9640-ca8c-47e6-ad36-5c316a9092ae" /*Axis*/,
+            "Position": {
+                "X": -200.0,
+                "Y": 0.0
+            },
+            "GroupTitle": "Shader Varations",
+            "Description": "Defines the axis along which the field is aligned"
+        },
+        {
+            "InputId": "5fe2ab92-f8e5-400d-b5a3-197f20570d6f" /*Radius*/,
+            "Position": {
+                "X": -200.0,
+                "Y": 45.0
+            },
+            "Description": "Defines the main radius of the Torus",
+            "AddPadding": "True"
+        },
+        {
+            "InputId": "6a392bc1-2adf-4a50-bb3f-5d4f2a63bf0b" /*Thickness*/,
+            "Position": {
+                "X": -200.0,
+                "Y": 90.0
+            },
+            "Description": "Defines the thickness of the Torus"
+        },
+        {
+            "InputId": "dbc72bd7-6191-4145-a69f-d17b3808b3ab" /*Center*/,
+            "Position": {
+                "X": -200.0,
+                "Y": 0.0
+            },
+            "Description": "Transforms the center of the object"
+        }
+    ],
   "SymbolChildUis": [],
   "OutputUis": [
     {
