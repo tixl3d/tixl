@@ -59,7 +59,7 @@ float4 psMain(vsOutput psInput) : SV_TARGET
     hsb.z *= Exposure;
 
     // Shift Hue
-    float hueShift = Hue * fx.g;
+    float hueShift = Hue + fx.g;
     hsb.x = mod((hsb.x + hueShift / 1), 1);
 
     // Adjust saturation
