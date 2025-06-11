@@ -1,5 +1,5 @@
 {
-  "Id": "3c8003e8-70ca-4d71-9294-3df845bbb4a5"/*HueShift*/,
+  "Id": "3c8003e8-70ca-4d71-9294-3df845bbb4a5"/*HSE*/,
   "Description": "Allows to quickly adjust the Hue, Saturation and Exposure of a texture 2D. \nThe Hue can also be controlled by greyscale Fx Texture (only the green channel is used). \n\n[AdjustColors]",
   "InputUis": [
     {

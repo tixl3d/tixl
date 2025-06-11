@@ -1,7 +1,7 @@
 namespace Lib.image.color;
 
 [Guid("3c8003e8-70ca-4d71-9294-3df845bbb4a5")]
-internal sealed class HueShift : Instance<HueShift>
+internal sealed class HSE : Instance<HSE>
 {
     [Output(Guid = "28128f9d-4bd6-4c68-84e2-369f2e738443")]
     public readonly Slot<Texture2D> Output = new();
