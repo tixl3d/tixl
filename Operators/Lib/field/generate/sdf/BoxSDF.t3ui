@@ -3,12 +3,21 @@
   "Description": "Generates a procedural cylinder field with rounded edges which can be rendered with [RaymarchField] and visualized with [VisualizeFieldDistance].\nAlso known as Cube SDF.\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToRaymarchField].\n\nIt can be modified with [BendField], [TransformField], [PolarRepeat] and more.\n\nSimilar nodes: [BoxSDF], [ChainLinkSDF], [FractalSDF].\n\nTo use a Mesh made of polygons refer to [CubeMesh].",
   "InputUis": [
     {
+      "InputId": "734179fa-aaf8-46d0-b827-e71555dad6a0"/*UniformScale*/,
+      "Position": {
+        "X": -200.0,
+        "Y": -45.0
+      },
+      "Description": "Scales the box uniformly in all directions"
+    },
+    {
       "InputId": "787e5d70-0aba-400f-8616-6ece6c5895bc"/*EdgeRadius*/,
       "Position": {
         "X": -200.0,
         "Y": 45.0
       },
-      "Description": "Defines how much the edge is rounded / beveled"
+      "Description": "Defines how much the edge is rounded / beveled",
+      "AddPadding": "True"
     },
     {
       "InputId": "951b2983-1359-41e4-8fb0-8d97c50ed8d6"/*Center*/,

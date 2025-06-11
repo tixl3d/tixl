@@ -1,26 +1,27 @@
 {
   "Id": "a54e0946-71d0-4985-90bc-184cdb1b6b34"/*TorusSDF*/,
-  "Inputs": [
-    {
-      "Id": "522a9640-ca8c-47e6-ad36-5c316a9092ae"/*Axis*/,
-      "DefaultValue": 2
-    },
-    {
-      "Id": "5fe2ab92-f8e5-400d-b5a3-197f20570d6f"/*Size*/,
-      "DefaultValue": {
-        "X": 1.0,
-        "Y": 0.5
-      }
-    },
-    {
-      "Id": "dbc72bd7-6191-4145-a69f-d17b3808b3ab"/*Center*/,
-      "DefaultValue": {
-        "X": 0.0,
-        "Y": 0.0,
-        "Z": 0.0
-      }
-    }
-  ],
+    "Inputs": [
+        {
+            "Id": "522a9640-ca8c-47e6-ad36-5c316a9092ae" /*Axis*/,
+            "DefaultValue": 2
+        },
+        {
+            "Id": "5fe2ab92-f8e5-400d-b5a3-197f20570d6f" /*Radius*/,
+            "DefaultValue": 1.0
+        },
+        {
+            "Id": "6a392bc1-2adf-4a50-bb3f-5d4f2a63bf0b" /*Thickness*/,
+            "DefaultValue": 0.5
+        },
+        {
+            "Id": "dbc72bd7-6191-4145-a69f-d17b3808b3ab" /*Center*/,
+            "DefaultValue": {
+                "X": 0.0,
+                "Y": 0.0,
+                "Z": 0.0
+            }
+        }
+    ],
   "Children": [],
   "Connections": []
 }

@@ -225,7 +225,7 @@
       "Outputs": []
     },
     {
-      "Id": "2bc2afa6-1c09-42df-9505-fe4816a84fe4"/*PolarRepeat*/,
+      "Id": "2bc2afa6-1c09-42df-9505-fe4816a84fe4"/*RepeatPolar*/,
       "SymbolId": "1d9f133d-eba6-4b28-9dfd-08f6c5417ed6",
       "InputValues": [
         {
@@ -582,12 +582,14 @@
       "Name": "Rim",
       "InputValues": [
         {
-          "Id": "5fe2ab92-f8e5-400d-b5a3-197f20570d6f"/*Size*/,
-          "Type": "System.Numerics.Vector2",
-          "Value": {
-            "X": 0.95,
-            "Y": 0.02
-          }
+          "Id": "5fe2ab92-f8e5-400d-b5a3-197f20570d6f"/*Radius*/,
+          "Type": "System.Single",
+          "Value": 0.993
+        },
+        {
+          "Id": "6a392bc1-2adf-4a50-bb3f-5d4f2a63bf0b"/*Thickness*/,
+          "Type": "System.Single",
+          "Value": 0.042
         }
       ],
       "Outputs": []
@@ -797,12 +799,14 @@
           "Value": 0
         },
         {
-          "Id": "5fe2ab92-f8e5-400d-b5a3-197f20570d6f"/*Size*/,
-          "Type": "System.Numerics.Vector2",
-          "Value": {
-            "X": 0.027,
-            "Y": 0.027
-          }
+          "Id": "5fe2ab92-f8e5-400d-b5a3-197f20570d6f"/*Radius*/,
+          "Type": "System.Single",
+          "Value": 0.027
+        },
+        {
+          "Id": "6a392bc1-2adf-4a50-bb3f-5d4f2a63bf0b"/*Thickness*/,
+          "Type": "System.Single",
+          "Value": 0.027
         },
         {
           "Id": "dbc72bd7-6191-4145-a69f-d17b3808b3ab"/*Center*/,
@@ -920,7 +924,7 @@
       "Outputs": []
     },
     {
-      "Id": "e66d715b-83c8-4bf5-9f4d-fde3b006ad3e"/*PolarRepeat*/,
+      "Id": "e66d715b-83c8-4bf5-9f4d-fde3b006ad3e"/*RepeatPolar*/,
       "SymbolId": "1d9f133d-eba6-4b28-9dfd-08f6c5417ed6",
       "InputValues": [
         {
@@ -941,12 +945,14 @@
       "SymbolId": "a54e0946-71d0-4985-90bc-184cdb1b6b34",
       "InputValues": [
         {
-          "Id": "5fe2ab92-f8e5-400d-b5a3-197f20570d6f"/*Size*/,
-          "Type": "System.Numerics.Vector2",
-          "Value": {
-            "X": 0.993,
-            "Y": 0.042
-          }
+          "Id": "5fe2ab92-f8e5-400d-b5a3-197f20570d6f"/*Radius*/,
+          "Type": "System.Single",
+          "Value": 0.993
+        },
+        {
+          "Id": "6a392bc1-2adf-4a50-bb3f-5d4f2a63bf0b"/*Thickness*/,
+          "Type": "System.Single",
+          "Value": 0.042
         }
       ],
       "Outputs": []
