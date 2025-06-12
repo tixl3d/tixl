@@ -42,4 +42,5 @@ jobs:
       - name: Upload Installer
         uses: actions/upload-artifact@v4
         with:
+          name: installer
           path: Installer\Output\*.exe
