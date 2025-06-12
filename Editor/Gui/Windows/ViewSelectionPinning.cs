@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System.Diagnostics.CodeAnalysis;
 using ImGuiNET;
 using T3.Core.Operator;
@@ -84,7 +84,14 @@ internal sealed class ViewSelectionPinning
 
         ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
 
-        if (ImGui.BeginCombo("##pinning", pinnedOrSelectedInstance.Symbol.Name + suffix))
+        var symbolName = pinnedOrSelectedInstance.Symbol.Name;
+        var symbolChildName = pinnedOrSelectedInstance.SymbolChild?.Name;
+        if (!string.IsNullOrEmpty(symbolChildName))
+        {
+            symbolName = $"\"{symbolChildName}\" {symbolName}";
+        }
+        
+        if (ImGui.BeginCombo("##pinning", symbolName + suffix))
         {
             ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(6, 6));
             if (_isPinned)
