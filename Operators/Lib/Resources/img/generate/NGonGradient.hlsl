@@ -115,6 +115,26 @@ inline float2 rotatePoint(float2 p, float angle)
         p.x * sinAngle + p.y * cosAngle);
 }
 
+float PingPongRepeat(float x, float pingPong, float repeat)
+{
+    float baseValue = x;
+    float repeatValue = frac(baseValue);
+    float pingPongValue = 1.0 - abs(frac(x * 0.5) * 2.0 - 1.0);
+    float singlePingPong = abs(x);
+
+    // Select pingpong type: single or repeating
+    float pingPongOutput = lerp(singlePingPong, pingPongValue, step(0.5, repeat));
+
+    // Select between base, repeat, or pingpong
+    float value = lerp(baseValue, repeatValue, step(0.5, repeat)); // If repeat, use repeatValue
+    value = lerp(value, pingPongOutput, step(0.5, pingPong));      // If pingpong, override with pingpong
+
+    // Clamp final result if not repeating
+    value = lerp(saturate(value), value, step(0.5, repeat)); // If NOT repeating, clamp to [0..1]
+
+    return value;
+}
+
 float4 psMain(vsOutput psInput) : SV_TARGET
 {
     float aspectRatio = TargetWidth / TargetHeight;
@@ -133,15 +153,7 @@ float4 psMain(vsOutput psInput) : SV_TARGET
     float c = sdRegularPolygon(p, Radius, Sides) * 2 - Offset * Width ;
 
     float4 orgColor = ImageA.Sample(texSampler, psInput.texCoord);
-
-    c = PingPong > 0.5
-            ? (Repeat < 0.5 ? (abs(c) / Width)
-                            : 1.000001 - abs(fmod(c, Width * 1.99999) - Width) / Width)
-            : c / Width;
-
-    c = Repeat > 0.5
-            ? fmod(c, 1)
-            : saturate(c);
+    c = PingPongRepeat(c / Width, PingPong, Repeat);
 
     float dBiased = ApplyGainAndBias(c, GainAndBias);
     dBiased = clamp(dBiased, 0.001, 0.999);
