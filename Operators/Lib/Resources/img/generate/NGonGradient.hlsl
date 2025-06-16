@@ -108,11 +108,12 @@ float sdRegularPolygon(in float2 p, in float r, in float n)
 // Function to rotate a point around the origin
 inline float2 rotatePoint(float2 p, float angle)
 {
+    angle = radians(angle); // Convert angle to radians
     float cosAngle = cos(angle);
     float sinAngle = sin(angle);
     return float2(
-        p.x * cosAngle - p.y * sinAngle,
-        p.x * sinAngle + p.y * cosAngle);
+        p.x * cosAngle + p.y * sinAngle,
+        p.x * sinAngle - p.y * cosAngle);
 }
 
 float PingPongRepeat(float x, float pingPong, float repeat)
@@ -143,10 +144,7 @@ float4 psMain(vsOutput psInput) : SV_TARGET
     p.x *= aspectRatio;
 
     // Rotate
-    // Convert the rotation angle from degrees to radians
-    float rotationRadians = radians(Rotate);
-    // Apply the rotation to the point
-    p = rotatePoint(p, rotationRadians);
+    p = rotatePoint(p, Rotate);
 
     p += Position.yx;
     //float c = sdNgon(p, Radius, Sides) * 2 - Offset * Width;

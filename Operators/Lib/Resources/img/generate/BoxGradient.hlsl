@@ -72,11 +72,12 @@ float sdRoundedBox(in float2 p, in float2 b, in float4 r)
 // Function to rotate a point around the origin
 inline float2 rotatePoint(float2 p, float angle)
 {
+    angle = radians(angle); // Convert angle to radians
     float cosAngle = cos(angle);
     float sinAngle = sin(angle);
     return float2(
-        p.x * cosAngle - p.y * sinAngle,
-        p.x * sinAngle + p.y * cosAngle);
+        p.x * cosAngle + p.y * sinAngle,
+        p.x * sinAngle - p.y * cosAngle);
 }
 
 float4 psMain(vsOutput psInput) : SV_TARGET
@@ -88,10 +89,9 @@ float4 psMain(vsOutput psInput) : SV_TARGET
     p -= 0.5;
     p.x *= aspectRation;
     p += Center * float2(-1, 1);
-    // Convert the rotation angle from degrees to radians
-    float rotationRadians = radians(Rotation);
+    
     // Apply the rotation to the point
-    p = rotatePoint(p, rotationRadians);
+    p = rotatePoint(p, Rotation);
 
     float c = 0;
 
