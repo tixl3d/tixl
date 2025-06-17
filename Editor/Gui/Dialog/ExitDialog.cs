@@ -11,6 +11,8 @@ namespace T3.Editor.Gui.Dialog;
 
 internal sealed class ExitDialog : ModalDialog
 {
+    private bool _exitAfterSave = false;
+
     internal void Draw()
     {
         DialogSize = new Vector2(330, 200);
@@ -23,6 +25,19 @@ internal sealed class ExitDialog : ModalDialog
             if (changeCount > 0)
             {
                 ImGui.Text($"Your have {changeCount} unsaved changes.");
+                if (ImGui.Button("Save and Exit") && !T3Ui.IsCurrentlySaving)
+                {
+                    _exitAfterSave = true;
+                    T3Ui.SaveInBackground(saveAll: false);
+                }
+              
+            }
+            // Check if we should exit after save completed
+            if (_exitAfterSave && !T3Ui.IsCurrentlySaving && GetChangedSymbolCount() == 0)
+            {
+                _exitAfterSave = false;
+                Log.Debug("Exiting after saving");
+                EditorUi.Instance.ExitApplication();
             }
 
             FormInputs.AddVerticalSpace();
@@ -33,12 +48,12 @@ internal sealed class ExitDialog : ModalDialog
             var buttonSize = new Vector2(100f, 40f);
             var size = ImGui.GetContentRegionAvail();
             var spacing = (size.X - 200f);
-            
+
             if (ImGui.Button("Cancel", buttonSize))
             {
                 ImGui.CloseCurrentPopup();
             }
-                        
+
             ImGui.SameLine(0, spacing);
 
             ImGui.PushFont(Fonts.FontBold);
