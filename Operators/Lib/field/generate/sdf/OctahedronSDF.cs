@@ -4,10 +4,17 @@ namespace Lib.field.generate.sdf;
 
 [Guid("fdb85ece-201b-49dc-899b-f044a98ac414")]
 internal sealed class OctahedronSDF : Instance<OctahedronSDF>
-,IGraphNodeOp
+                                    , ITransformable
+                                    , IGraphNodeOp
+
 {
     [Output(Guid = "1cda6720-72cb-4aeb-a665-2fc35d787539")]
     public readonly Slot<ShaderGraphNode> Result = new();
+
+    IInputSlot ITransformable.TranslationInput => Center;
+    IInputSlot ITransformable.RotationInput => null;
+    IInputSlot ITransformable.ScaleInput => null;
+    public Action<Instance, EvaluationContext> TransformCallback { get; set; }
 
     public OctahedronSDF()
     {
@@ -18,6 +25,7 @@ internal sealed class OctahedronSDF : Instance<OctahedronSDF>
 
     private void Update(EvaluationContext context)
     {
+        TransformCallback?.Invoke(this, context); //needed for Gizmo
         ShaderNode.Update(context);
     }
 
@@ -28,7 +36,8 @@ internal sealed class OctahedronSDF : Instance<OctahedronSDF>
     {
         c.Globals["fsdOctahedron"] = """
                                       float fsdOctahedron(float3 p, float3 center, float s, float ra) {
-                                          p= abs(p)-center;
+                                          p-= center;
+                                          p= abs(p);
                                           float m = (p.x + p.y + p.z - s) / 3.0;
                                           float3 o = p - m;
                                           float3 k = min(o, 0.0);
