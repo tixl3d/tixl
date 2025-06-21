@@ -23,17 +23,18 @@ internal sealed class OctahedronSDF : Instance<OctahedronSDF>
 
     public ShaderGraphNode ShaderNode { get; }
 
-
+    //Ocathedron SDF by TheTurk (check comments): https://www.shadertoy.com/view/wsSGDG
     void IGraphNodeOp.AddDefinitions(CodeAssembleContext c)
     {
         c.Globals["fsdOctahedron"] = """
                                       float fsdOctahedron(float3 p, float3 center, float s, float ra) {
-                                          p = abs(p)-center;
-                                          float m = p.x + p.y + p.z - s;
-                                          float3 r = 3.0 * p - m;
-                                          float3 o = min(r, 0.0);
-                                          o = max(r*2.0 - o*3.0 + (o.x+o.y+o.z), 0.0);
-                                          return length(p - s*o/(o.x+o.y+o.z))-ra;
+                                          p= abs(p)-center;
+                                          float m = (p.x + p.y + p.z - s) / 3.0;
+                                          float3 o = p - m;
+                                          float3 k = min(o, 0.0);
+                                          o = o + (k.x + k.y + k.z) * 0.5 - k * 1.5;
+                                          o = clamp(o, 0.0, s); 
+                                          return length(p - o) * sign(m)-ra;
                                       }
                                       """;
     }
