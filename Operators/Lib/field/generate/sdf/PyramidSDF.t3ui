@@ -10,14 +10,21 @@
       }
     },
     {
-      "InputId": "5b3e69cf-cb55-4428-b78c-76f4f22cf2ac"/*Rounding*/,
+        "InputId": "5b3e69cf-cb55-4428-b78c-76f4f22cf2ac" /*Rounding*/,
+        "Position": {
+            "X": -200.0,
+            "Y": 45.0
+        }
+    },
+    {
+      "InputId": "471d9c3b-ba5e-4b73-93cf-fb8ba76bf70e"/*UniformScale*/,
       "Position": {
         "X": -200.0,
-        "Y": 45.0
+        "Y": -45.0
       }
     },
     {
-      "InputId": "8d5c22bb-2910-4415-9bf8-ab304e35a5b2"/*Height*/,
+      "InputId": "8d5c22bb-2910-4415-9bf8-ab304e35a5b2"/*Scale*/,
       "Position": {
         "X": -200.0,
         "Y": 45.0
@@ -39,6 +46,15 @@
         "X": 0.0,
         "Y": 0.0
       }
+    }
+  ],
+  "Links": [
+    {
+      "Id": "17017d1f-c96c-46dd-9ddf-e3b2432debd8",
+      "Title": "Pyramid SDF by TheTurk",
+      "Description": "",
+      "LinkUrl": "https://www.shadertoy.com/view/Ntd3DX",
+      "LinkType": "Source"
     }
   ]
 }
