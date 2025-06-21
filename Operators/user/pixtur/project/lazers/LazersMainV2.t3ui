@@ -506,13 +506,6 @@
       }
     },
     {
-      "ChildId": "a58afbae-8e6e-4b2d-aa12-5df6b66f280f"/*DepthOfField*/,
-      "Position": {
-        "X": 1740.8951,
-        "Y": 969.5515
-      }
-    },
-    {
       "ChildId": "a6dbadde-f306-4ce3-9b8f-2b576a31fd77"/*OscillateVec3*/,
       "Position": {
         "X": -378.61658,

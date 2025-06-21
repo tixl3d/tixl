@@ -30,6 +30,26 @@ struct vsOutput
     float2 texCoord : TEXCOORD;
 };
 
+float PingPongRepeat(float x, float pingPong, float repeat)
+{
+    float baseValue = x;
+    float repeatValue = frac(baseValue);
+    float pingPongValue = 1.0 - abs(frac(x * 0.5) * 2.0 - 1.0);
+    float singlePingPong = abs(x);
+
+    // Select pingpong type: single or repeating
+    float pingPongOutput = lerp(singlePingPong, pingPongValue, step(0.5, repeat));
+
+    // Select between base, repeat, or pingpong
+    float value = lerp(baseValue, repeatValue, step(0.5, repeat)); // If repeat, use repeatValue
+    value = lerp(value, pingPongOutput, step(0.5, pingPong));      // If pingpong, override with pingpong
+
+    // Clamp final result if not repeating
+    value = lerp(saturate(value), value, step(0.5, repeat)); // If NOT repeating, clamp to [0..1]
+
+    return value;
+}
+
 Texture2D<float4> ImageA : register(t0);
 Texture2D<float4> Gradient : register(t1);
 sampler texSampler : register(s0);
@@ -52,11 +72,12 @@ float sdRoundedBox(in float2 p, in float2 b, in float4 r)
 // Function to rotate a point around the origin
 inline float2 rotatePoint(float2 p, float angle)
 {
+    angle = radians(angle); // Convert angle to radians
     float cosAngle = cos(angle);
     float sinAngle = sin(angle);
     return float2(
-        p.x * cosAngle - p.y * sinAngle,
-        p.x * sinAngle + p.y * cosAngle);
+        p.x * cosAngle + p.y * sinAngle,
+        p.x * sinAngle - p.y * cosAngle);
 }
 
 float4 psMain(vsOutput psInput) : SV_TARGET
@@ -68,10 +89,9 @@ float4 psMain(vsOutput psInput) : SV_TARGET
     p -= 0.5;
     p.x *= aspectRation;
     p += Center * float2(-1, 1);
-    // Convert the rotation angle from degrees to radians
-    float rotationRadians = radians(Rotation);
+    
     // Apply the rotation to the point
-    p = rotatePoint(p, rotationRadians);
+    p = rotatePoint(p, Rotation);
 
     float c = 0;
 
@@ -79,14 +99,7 @@ float4 psMain(vsOutput psInput) : SV_TARGET
 
     float4 orgColor = ImageA.Sample(texSampler, psInput.texCoord);
 
-    c = PingPong > 0.5
-            ? (Repeat < 0.5 ? (abs(c) / Width)
-                            : 1.000001 - abs(fmod(c, Width * 1.99999) - Width) / Width)
-            : c / Width;
-
-    c = Repeat > 0.5
-            ? fmod(c, 1)
-            : saturate(c);
+    c = PingPongRepeat(c / Width, PingPong, Repeat);
 
     float dBiased = ApplyGainAndBias(c, GainAndBias);
 

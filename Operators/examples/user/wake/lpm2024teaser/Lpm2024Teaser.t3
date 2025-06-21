@@ -886,7 +886,7 @@
           }
         },
         {
-          "Id": "ae275370-a684-42fb-ab7a-50e16d24082d"/*ViewportShift*/,
+          "Id": "ae275370-a684-42fb-ab7a-50e16d24082d"/*LensShift*/,
           "Type": "System.Numerics.Vector2",
           "Value": {
             "X": -0.51,

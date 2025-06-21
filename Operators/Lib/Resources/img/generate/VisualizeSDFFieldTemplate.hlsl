@@ -55,11 +55,13 @@ vsOutput vsMain4(uint vertexId : SV_VertexID)
     return output;
 }
 
-//=== Globals =======================================================
-/*{GLOBALS}*/
+sampler ClampedSampler : register(s0);
 
 //=== Resources =====================================================
 /*{RESOURCES(t0)}*/
+
+//=== Globals =======================================================
+/*{GLOBALS}*/
 
 //=== Field functions ===============================================
 /*{FIELD_FUNCTIONS}*/
@@ -89,11 +91,6 @@ float3 GetNormalNonNormalized(float3 p)
            GetDistance(p + float3(-NormalSamplingDistance, -NormalSamplingDistance, NormalSamplingDistance)) * float3(-1, -1, 1) +
            GetDistance(p + float3(NormalSamplingDistance, NormalSamplingDistance, NormalSamplingDistance)) * float3(1, 1, 1);
     //);
-}
-
-inline float fmod(float x, float y)
-{
-    return (x - y * floor(x / y));
 }
 
 #define PI acos(-1.)

@@ -1,0 +1,23 @@
+{
+  "Id": "58ff3790-5ec5-4113-8e37-a934c3a7fdcd"/*RepeatAxis*/,
+  "Inputs": [
+    {
+      "Id": "1c437dc9-aabf-404a-b23d-99ca677b6eb7"/*Size*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "6262f448-92fb-41ed-8613-2b387f2e72f2"/*InputField*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "a1b0fb9c-1e12-480c-8cf6-6bd7ed95f02e"/*Axis*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "f590393a-c318-4254-91b3-4f8e3d3de937"/*Mirror*/,
+      "DefaultValue": false
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

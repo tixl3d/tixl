@@ -10,7 +10,7 @@
       "DefaultValue": true
     },
     {
-      "Id": "199d4ce0-aab1-403a-ad42-216ef1061a0e"/*NearFarClip*/,
+      "Id": "199d4ce0-aab1-403a-ad42-216ef1061a0e"/*ClipPlanes*/,
       "DefaultValue": {
         "X": 0.01,
         "Y": 1000.0
@@ -29,7 +29,7 @@
       "DefaultValue": 0.0
     },
     {
-      "Id": "7bde5a5a-ce82-4903-92ff-14e540a605f0"/*FOV*/,
+      "Id": "7bde5a5a-ce82-4903-92ff-14e540a605f0"/*FieldOfView*/,
       "DefaultValue": 45.0
     },
     {
@@ -41,7 +41,7 @@
       }
     },
     {
-      "Id": "ae275370-a684-42fb-ab7a-50e16d24082d"/*ViewportShift*/,
+      "Id": "ae275370-a684-42fb-ab7a-50e16d24082d"/*LensShift*/,
       "DefaultValue": {
         "X": 0.0,
         "Y": 0.0

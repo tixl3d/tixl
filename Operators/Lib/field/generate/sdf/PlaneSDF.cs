@@ -5,10 +5,18 @@ namespace Lib.field.generate.sdf;
 
 [Guid("883e01f5-44ee-4724-9e6e-f885255c17e5")]
 internal sealed class PlaneSDF : Instance<PlaneSDF>
-                               , IGraphNodeOp
+                                        , ITransformable
+                                        , IGraphNodeOp
+
 {
     [Output(Guid = "82527072-beb2-492f-b737-faf9ed454e3f")]
     public readonly Slot<ShaderGraphNode> Result = new();
+
+    // ITransformable interface implementation (Gizmo support)
+    IInputSlot ITransformable.TranslationInput => Center;
+    IInputSlot ITransformable.RotationInput => null;
+    IInputSlot ITransformable.ScaleInput => null;
+    public Action<Instance, EvaluationContext> TransformCallback { get; set; }
 
     public PlaneSDF()
     {
@@ -19,6 +27,7 @@ internal sealed class PlaneSDF : Instance<PlaneSDF>
 
     private void Update(EvaluationContext context)
     {
+        TransformCallback?.Invoke(this, context); // Needed for Gizmo support
         ShaderNode.Update(context);
         
         var axis = Axis.GetEnumValue<AxisTypes>(context);
@@ -36,7 +45,8 @@ internal sealed class PlaneSDF : Instance<PlaneSDF>
     public void GetPreShaderCode(CodeAssembleContext c, int inputIndex)
     {
         var a = _axisCodes0[(int)_axis];
-        c.AppendCall($"f{c}.w = p{c}.{a} + {ShaderNode}Center.{a};");
+        var sign = _axisSigns[(int)_axis];
+        c.AppendCall($"f{c}.w = {sign}p{c}.{a} - {ShaderNode}Center.{a};");
     }
 
     private readonly string[] _axisCodes0 =
@@ -44,6 +54,19 @@ internal sealed class PlaneSDF : Instance<PlaneSDF>
             "x",
             "y",
             "z",
+            "x",
+            "y",
+            "z",
+        ];
+    
+    private readonly string[] _axisSigns =
+        [
+            "",
+            "",
+            "",
+            "-",
+            "-",
+            "-",
         ];
 
     private AxisTypes _axis;
@@ -53,6 +76,9 @@ internal sealed class PlaneSDF : Instance<PlaneSDF>
         X,
         Y,
         Z,
+        NegX,
+        NegY,
+        NegZ,
     }
 
     [GraphParam]

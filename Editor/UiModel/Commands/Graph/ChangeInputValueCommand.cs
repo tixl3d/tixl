@@ -97,7 +97,8 @@ public sealed class ChangeInputValueCommand : ICommand
             
         if (!inputParentSymbol.Children.TryGetValue(_childId, out var symbolChild))
         {
-            Log.Error($"Can't assign value to missing symbolChild {_childId}");
+            // This can happen if blended instances are deleted
+            Log.Debug($"Can't assign value to missing symbolChild {_childId}");
             return;
         }
         var input = symbolChild.Inputs[_inputId];

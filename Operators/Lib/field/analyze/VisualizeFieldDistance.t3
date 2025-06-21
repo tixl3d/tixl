@@ -37,7 +37,7 @@
     {
       "Id": "8f8cad00-c152-47e6-8a4c-55f88ab985e2"/*Rotation*/,
       "DefaultValue": {
-        "X": 90.0,
+        "X": -90.0,
         "Y": 0.0,
         "Z": 0.0
       }

@@ -29,11 +29,12 @@ cbuffer Params : register(b2)
 StructuredBuffer<Point> SourcePoints : t0;
 RWStructuredBuffer<Point> ResultPoints : u0;
 
-//=== Global functions ==============================================
-/*{GLOBALS}*/
 
 //=== Additional Resources ==========================================
 /*{RESOURCES(t1)}*/
+
+//=== Global functions ==============================================
+/*{GLOBALS}*/
 
 //=== Field functions ===============================================
 /*{FIELD_FUNCTIONS}*/
@@ -89,6 +90,7 @@ static const float NoisePhase = 0;
     float sumD = 0;
     float3 pp = pos;
     float4 field = 1;
+    float3 n;
     for (int stepIndex = 0; stepIndex < MaxSteps; stepIndex++)
     {
         float d = GetDistance(pp);
@@ -98,7 +100,7 @@ static const float NoisePhase = 0;
         if (abs(d) < MinDistance)
             break;
 
-        float3 n = GetNormal(pp);
+        n = GetNormal(pp);
         pp -= n * d * StepDistanceFactor;
     }
 
@@ -121,12 +123,12 @@ static const float NoisePhase = 0;
             p.FX2 = totalDistance;
         }
     }
+
     p.Position = lerp(p.Position, pp, amount);
 
     if (SetOrientation)
     {
-        float flip = sumD < 0 ? -1 : 1;
-        p.Rotation = qSlerp(p.Rotation, normalize(qLookAt(total * flip, float3(0, 1, 0))), amount);
+        p.Rotation = qSlerp(p.Rotation, normalize(qLookAt(n, float3(0, 1, 0))), amount);
     }
 
     if (SetColor)

@@ -1,0 +1,70 @@
+{
+  "Id": "3c8003e8-70ca-4d71-9294-3df845bbb4a5"/*HSE*/,
+  "Description": "Allows to quickly adjust the Hue, Saturation and Exposure of a texture 2D. \nThe Hue can also be controlled by greyscale Fx Texture (only the green channel is used). \n\n[AdjustColors]",
+  "InputUis": [
+    {
+      "InputId": "258d4260-e693-4c55-a251-fadce351408c"/*Texture2d*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 170.85239,
+        "Y": 164.75134
+      }
+    },
+    {
+      "InputId": "67548eca-6a4f-4653-8cd3-6b320ec27b59"/*Hue*/,
+      "Position": {
+        "X": 172.47906,
+        "Y": 256.0015
+      },
+      "GroupTitle": "Hue shifting",
+      "Min": 0.0,
+      "Max": 1.0
+    },
+    {
+      "InputId": "b1d28822-af80-4c22-8f18-e22fb16f6dcf"/*Exposure*/,
+      "Position": {
+        "X": 169.67125,
+        "Y": 341.40356
+      },
+      "Min": -5.0,
+      "Max": 5.0,
+      "Scale": 0.02
+    },
+    {
+      "InputId": "b3b65a98-6eba-4a10-89bb-7999385b590c"/*FxTexture*/,
+      "Position": {
+        "X": 172.15663,
+        "Y": 206.87686
+      }
+    },
+    {
+      "InputId": "edbef57d-8d68-4978-8d4d-6d882058f018"/*Saturation*/,
+      "Position": {
+        "X": 171.07515,
+        "Y": 300.59167
+      },
+      "GroupTitle": "Extra parameters",
+      "Min": -2.0,
+      "Max": 2.0,
+      "Scale": 0.02
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "9d77d29a-2306-4539-82e1-f77b95d01235"/*_multiImageFxSetupStatic*/,
+      "Position": {
+        "X": 489.32697,
+        "Y": 154.92328
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "28128f9d-4bd6-4c68-84e2-369f2e738443"/*Output*/,
+      "Position": {
+        "X": 629.32697,
+        "Y": 154.92328
+      }
+    }
+  ]
+}

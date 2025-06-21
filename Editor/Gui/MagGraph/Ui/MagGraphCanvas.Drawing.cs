@@ -67,7 +67,7 @@ internal sealed partial class MagGraphCanvas
 
                 // Prepare UiModel for frame
                 _context.Layout.ComputeLayout(_context);
-                _context.ItemMovement.PrepareFrame();
+                _context.ItemMovement.PrepareFrame(_context);
         
                 if (_context.StateMachine.CurrentState == GraphStates.Default)
                 {

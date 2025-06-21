@@ -8,6 +8,7 @@
         "X": -200.0,
         "Y": 75.0
       },
+      "GroupTitle": "Shader Variation",
       "Description": "Defines the axis around which the field is to be warped"
     },
     {
@@ -17,8 +18,9 @@
         "Y": 45.0
       },
       "Description": "Defines the amount of twisting",
-      "Min": -0.5,
-      "Max": 0.5
+      "Min": -180.0,
+      "Max": 180.0,
+      "Format": "{0:0.0}°"
     },
     {
       "InputId": "84dd59ce-4726-4604-afee-92ffdec0e3f5"/*InputField*/,

@@ -64,8 +64,8 @@ public sealed partial class SymbolUi
 
     internal void FlagAsModified()
     {
-        var stackTrace = new StackTrace();
-        var method = stackTrace.GetFrame(1)?.GetMethod();        
+        //var stackTrace = new StackTrace();
+        //var method = stackTrace.GetFrame(1)?.GetMethod();        
         
         //Log.Debug($" SymbolUi FlagAsModified called by {method}");
         _hasBeenModified = true;

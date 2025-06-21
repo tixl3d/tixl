@@ -5,10 +5,17 @@ namespace Lib.field.generate.sdf;
 
 [Guid("1e1e65cd-3564-45e1-88f8-6cb4b4b18c5a")]
 internal sealed class PrismSDF : Instance<PrismSDF>
-,IGraphNodeOp
+                                        , ITransformable
+                                        , IGraphNodeOp
 {
     [Output(Guid = "e3d6161a-68bd-41e6-882c-5092a61fc449")]
     public readonly Slot<ShaderGraphNode> Result = new();
+
+    // ITransformable interface implementation (Gizmo support)
+    IInputSlot ITransformable.TranslationInput => Center;
+    IInputSlot ITransformable.RotationInput => null;
+    IInputSlot ITransformable.ScaleInput => null;
+    public Action<Instance, EvaluationContext> TransformCallback { get; set; }
 
     public PrismSDF()
     {
@@ -19,6 +26,7 @@ internal sealed class PrismSDF : Instance<PrismSDF>
 
     private void Update(EvaluationContext context)
     {
+        TransformCallback?.Invoke(this, context); // Needed for Gizmo support
         ShaderNode.Update(context);
 
         var axis = Axis.GetEnumValue<AxisTypes>(context);

@@ -91,9 +91,14 @@
       "SymbolId": "04858a08-f0fe-4536-9152-686659f0ab58",
       "InputValues": [
         {
+          "Id": "2342df71-a162-4db7-afc3-514916239897"/*EnableZWrite*/,
+          "Type": "System.Boolean",
+          "Value": false
+        },
+        {
           "Id": "956b735b-c38a-4e8e-8186-caf4d36d4d20"/*EnableZTest*/,
           "Type": "System.Boolean",
-          "Value": true
+          "Value": false
         }
       ],
       "Outputs": []

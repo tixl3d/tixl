@@ -379,7 +379,7 @@ internal static class SymbolUiJson
                 childUi.SnapshotGroupIndex = (childEntry[nameof(SymbolUi.Child.SnapshotGroupIndex)] ?? -1).Value<int>();
             }
 
-            childUi.Style = JsonUtils.TryGetEnum(childEntry[JsonKeys.Style], out SymbolUi.Child.Styles childStyle)
+            childUi.Style = JsonUtils.TryGetEnumValue(childEntry[JsonKeys.Style], out SymbolUi.Child.Styles childStyle)
                                 ? childStyle
                                 : SymbolUi.Child.Styles.Default;
 
@@ -390,7 +390,7 @@ internal static class SymbolUiJson
                 foreach (var styleEntry in (JArray)conStyleEntry)
                 {
                     if (!JsonUtils.TryGetGuid(styleEntry[JsonKeys.Id], out var id)
-                        || !JsonUtils.TryGetEnum(styleEntry[JsonKeys.Style], out SymbolUi.Child.ConnectionStyles style))
+                        || !JsonUtils.TryGetEnumValue(styleEntry[JsonKeys.Style], out SymbolUi.Child.ConnectionStyles style))
                     {
                         Log.Warning($"Skipping connection style override for invalid id or style");
                         continue;

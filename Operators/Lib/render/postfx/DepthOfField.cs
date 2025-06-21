@@ -19,16 +19,10 @@ internal sealed class DepthOfField : Instance<DepthOfField>
     [Input(Guid = "97b76d02-e735-4e93-88ad-5c9b8766a63c")]
     public readonly InputSlot<float> FocusDistance = new();
 
-    [Input(Guid = "1592e94b-a20d-463c-baec-5fb5dfa85532")]
-    public readonly InputSlot<Vector4> BackgroundColor = new();
-
     [Input(Guid = "493c40f0-21e6-466b-afc2-eff570229c86")]
     public readonly InputSlot<int> MaxSamples = new();
 
     [Input(Guid = "40de51d8-91dd-461d-a7be-d4096313eec2")]
     public readonly InputSlot<Vector2> NearFarRange = new();
-
-    [Input(Guid = "22f5e8db-0b80-47dc-b30b-4bc49d9fad59")]
-    public readonly InputSlot<Command> Command = new();
 
 }

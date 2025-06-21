@@ -1,0 +1,23 @@
+{
+  "Id": "faa3e182-96e6-45e7-b037-fb2acd88825b"/*ArtnetPixelOutput*/,
+  "Inputs": [
+    {
+      "Id": "4598c09c-f463-426f-ab1b-c9be10c0ff75"/*Points*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "508ebec1-cd2b-49bf-b77d-787fa3a8c138"/*IpAddress*/,
+      "DefaultValue": "10.0.0.146"
+    },
+    {
+      "Id": "d2e1f0c3-a4b5-4c6d-8e7f-9a0b1c2d3e4f"/*ArtNetSendRate*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "db583506-fd7a-4109-9f37-489c27f237b8"/*Reconnect*/,
+      "DefaultValue": false
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

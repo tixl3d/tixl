@@ -7,7 +7,7 @@
     },
     {
       "Id": "4935f569-8d23-495d-bb87-9a39e5b3981e"/*Amount*/,
-      "DefaultValue": 0.5
+      "DefaultValue": 0.0
     },
     {
       "Id": "84dd59ce-4726-4604-afee-92ffdec0e3f5"/*InputField*/,

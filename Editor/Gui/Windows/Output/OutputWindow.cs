@@ -54,7 +54,7 @@ internal sealed class OutputWindow : Window
     //         w.DrawOneInstance();
     //     }
     // }
-    
+
     public static OutputWindow GetPrimaryOutputWindow()
     {
         return GetVisibleInstances().FirstOrDefault();
@@ -84,22 +84,22 @@ internal sealed class OutputWindow : Window
 
     protected override void DrawContent()
     {
-        ImGui.BeginChild("##content", 
-                         new Vector2(0, ImGui.GetWindowHeight()), 
+        ImGui.BeginChild("##content",
+                         new Vector2(0, ImGui.GetWindowHeight()),
                          false,
-                         ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoScrollWithMouse );
+                         ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoScrollWithMouse);
         {
             // Very ugly hack to prevent scaling the output above window size
             var keepScale = T3Ui.UiScaleFactor;
-                
+
             // Draw output
             _imageCanvas.SetAsCurrent();
 
             // Move down to avoid overlapping with toolbar
             ImGui.SetCursorPos(ImGui.GetWindowContentRegionMin() + new Vector2(0, 40));
 
-            var okay =Pinning.TryGetPinnedOrSelectedInstance(out var drawnInstance,  out var graphCanvas);
-            
+            var okay = Pinning.TryGetPinnedOrSelectedInstance(out var drawnInstance, out var graphCanvas);
+
             if (graphCanvas != null)
             {
                 Pinning.TryGetPinnedEvaluationInstance(graphCanvas?.Structure, out var evaluationInstance);
@@ -107,18 +107,20 @@ internal sealed class OutputWindow : Window
                 var drawnType = UpdateAndDrawOutput(drawnInstance, evaluationInstance);
                 ImageOutputCanvas.Deactivate();
                 _camSelectionHandling.Update(drawnInstance, drawnType);
-                var editingFlags = _camSelectionHandling.PreventCameraInteraction | _camSelectionHandling.PreventImageCanvasInteraction |  drawnType != typeof(Texture2D)
+                var editingFlags = _camSelectionHandling.PreventCameraInteraction | _camSelectionHandling.PreventImageCanvasInteraction |
+                                   drawnType != typeof(Texture2D)
                                        ? T3Ui.EditingFlags.PreventMouseInteractions
                                        : T3Ui.EditingFlags.None;
 
-                if((editingFlags&T3Ui.EditingFlags.PreventMouseInteractions) !=0)
+                if ((editingFlags & T3Ui.EditingFlags.PreventMouseInteractions) != 0)
                     T3Ui.UiScaleFactor = 1;
-                
+
                 _imageCanvas.Update(editingFlags);
 
                 T3Ui.UiScaleFactor = keepScale;
                 DrawToolbar(drawnType);
             }
+
             CustomComponents.DrawWindowFocusFrame();
         }
         ImGui.EndChild();
@@ -163,22 +165,68 @@ internal sealed class OutputWindow : Window
             CustomComponents.TooltipForLastItem(label, shortCut);
         }
 
-        ImGui.SameLine();
-
-        var showGizmos = _evaluationContext.ShowGizmos != GizmoVisibility.Off;
-        if (CustomComponents.ToggleIconButton(Icon.Grid, "##gizmos", ref showGizmos, Vector2.One * ImGui.GetFrameHeight()))
+        // Show gizmos
         {
-            _evaluationContext.ShowGizmos = showGizmos
-                                                ? GizmoVisibility.On
-                                                : GizmoVisibility.Off;
+            ImGui.SameLine();
+            var showGizmos = _evaluationContext.ShowGizmos != GizmoVisibility.Off;
+            if (CustomComponents.ToggleIconButton(Icon.Grid, "##gizmos", ref showGizmos, Vector2.One * ImGui.GetFrameHeight()))
+            {
+                _evaluationContext.ShowGizmos = showGizmos
+                                                    ? GizmoVisibility.On
+                                                    : GizmoVisibility.Off;
+            }
+
+            CustomComponents.TooltipForLastItem("Toggle gizmos and floor grid.",
+                                                "Gizmos are available for selected transform operators and can be dragged to adjust their position.");
         }
 
-        CustomComponents.TooltipForLastItem("Toggle gizmos and floor grid.",
-                                            "Gizmos are available for selected transform operators and can be dragged to adjust their position.");
+        // Gizmo Transform mode
+        if (_evaluationContext.ShowGizmos != GizmoVisibility.Off)
+        {
+            var size = Vector2.One * ImGui.GetFrameHeight(); // Calculate before pushing font
+
+            var icon = _evaluationContext.TransformGizmoMode switch
+                           {
+                               TransformGizmoModes.None   => "" + (char)Icon.Hidden,
+                               TransformGizmoModes.Select => "" + (char)Icon.Pipette,
+                               TransformGizmoModes.Move   => "" + (char)Icon.Move,
+                               TransformGizmoModes.Rotate => "" + (char)Icon.Rotate,
+                               TransformGizmoModes.Scale  => "" + (char)Icon.Scale,
+                               _                          => throw new ArgumentOutOfRangeException()
+                           };
+
+            ImGui.SameLine();
+            ImGui.PushFont(Icons.IconFont);
+            if (ImGui.Button(icon, size))
+                ImGui.OpenPopup("_TransformGizmoSelection");
+
+            ImGui.PopFont();
+
+            if (ImGui.BeginPopup("_TransformGizmoSelection"))
+            {
+                if (ImGui.MenuItem("Move", null, _evaluationContext.TransformGizmoMode == TransformGizmoModes.Move))
+                {
+                    _evaluationContext.TransformGizmoMode = TransformGizmoModes.Move;
+                }
+
+                if (ImGui.MenuItem("Rotate", null, _evaluationContext.TransformGizmoMode == TransformGizmoModes.Rotate))
+                {
+                    _evaluationContext.TransformGizmoMode = TransformGizmoModes.Rotate;
+                }
+
+                if (ImGui.MenuItem("Scale", null, _evaluationContext.TransformGizmoMode == TransformGizmoModes.Scale))
+                {
+                    _evaluationContext.TransformGizmoMode = TransformGizmoModes.Scale;
+                }
+
+                ImGui.EndPopup();
+            }
+        }
+
         ImGui.SameLine();
 
         _camSelectionHandling.DrawCameraControlSelection();
-            
+
         ResolutionHandling.DrawSelector(ref _selectedResolution, _resolutionDialog);
 
         ImGui.SameLine();
@@ -186,7 +234,7 @@ internal sealed class OutputWindow : Window
         CustomComponents.TooltipForLastItem("Adjust background color of view");
         ImGui.PopStyleColor();
 
-        var texture = GetCurrentTexture();  
+        var texture = GetCurrentTexture();
         // if (texture != null)
         if (drawnType == typeof(Texture2D) || drawnType == typeof(Command))
         {
@@ -198,7 +246,6 @@ internal sealed class OutputWindow : Window
 
             if (CustomComponents.IconButton(Icon.Snapshot, new Vector2(ImGui.GetFrameHeight(), ImGui.GetFrameHeight())))
             {
-                
                 if (!Directory.Exists(folder))
                 {
                     Directory.CreateDirectory(folder);

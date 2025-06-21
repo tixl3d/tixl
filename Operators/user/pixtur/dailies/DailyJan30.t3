@@ -7,16 +7,6 @@
       "SymbolId": "53d3eebd-4ead-4965-b26d-10a8bbd48182",
       "InputValues": [
         {
-          "Id": "1592e94b-a20d-463c-baec-5fb5dfa85532"/*BackgroundColor*/,
-          "Type": "System.Numerics.Vector4",
-          "Value": {
-            "X": 1.0,
-            "Y": 1.0,
-            "Z": 1.0,
-            "W": 1.0
-          }
-        },
-        {
           "Id": "3655d507-96b3-4ded-9cef-886ea703ca89"/*Amount*/,
           "Type": "System.Single",
           "Value": 1.65
@@ -788,12 +778,6 @@
       "SourceSlotId": "44a192a6-ece7-4501-81d6-d0cc1d50bb93",
       "TargetParentOrChildId": "00000000-0000-0000-0000-000000000000",
       "TargetSlotId": "464634f2-8e29-47f5-9260-997164c1dbb5"
-    },
-    {
-      "SourceParentOrChildId": "437ca2ee-2512-4135-9035-30cb77765610",
-      "SourceSlotId": "963611e7-f55e-4c94-96e6-34e195558a2b",
-      "TargetParentOrChildId": "006c6eed-1538-4fda-b7a9-bee48ecc6fb2",
-      "TargetSlotId": "1592e94b-a20d-463c-baec-5fb5dfa85532"
     },
     {
       "SourceParentOrChildId": "a4dbc8a6-2dfc-4de9-ace4-27680abc4f5d",

@@ -5,10 +5,17 @@ namespace Lib.field.generate.sdf;
 
 [Guid("67f21840-dc9a-4390-aa45-234ce81c8717")]
 internal sealed class CylinderSDF : Instance<CylinderSDF>
-,IGraphNodeOp
+                                        , ITransformable
+                                        , IGraphNodeOp
 {
     [Output(Guid = "e3690acf-e989-4327-8ee9-441bb48ac3a4")]
     public readonly Slot<ShaderGraphNode> Result = new();
+
+    // ITransformable interface implementation (Gizmo support)
+    IInputSlot ITransformable.TranslationInput => Center;
+    IInputSlot ITransformable.RotationInput => null;
+    IInputSlot ITransformable.ScaleInput => null;
+    public Action<Instance, EvaluationContext> TransformCallback { get; set; }
 
     public CylinderSDF()
     {
@@ -19,6 +26,7 @@ internal sealed class CylinderSDF : Instance<CylinderSDF>
 
     private void Update(EvaluationContext context)
     {
+        TransformCallback?.Invoke(this, context); // Needed for Gizmo support
         ShaderNode.Update(context);
 
         var axis = Axis.GetEnumValue<AxisTypes>(context);

@@ -1,0 +1,24 @@
+{
+  "Id": "0e881c4d-c4ed-42c1-a2c9-d076b0489395"/*PointsToRGBList*/,
+  "Description": "",
+  "InputUis": [
+    {
+      "InputId": "b98449e7-b7ef-4b15-883c-28bf7662c987"/*Points*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -206.38298,
+        "Y": -0.95744324
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "74a3f459-f0d6-411c-9dc8-d3748f019fad"/*Result*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

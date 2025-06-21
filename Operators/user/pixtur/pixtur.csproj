@@ -8,9 +8,9 @@
     <AssemblyName>$(RootNamespace)</AssemblyName>
     <Configurations>Debug;Release</Configurations>
     <Platforms>AnyCPU</Platforms>
-    <VersionPrefix>1.1.13</VersionPrefix>
+    <VersionPrefix>1.1.14</VersionPrefix>
     <HomeGuid>00000000-0000-0000-0000-000000000000</HomeGuid>
-    <EditorVersion>$(TixlVersion)</EditorVersion>
+    <EditorVersion>4.0.3</EditorVersion>
     <IsEditorOnly>false</IsEditorOnly>
     <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
   </PropertyGroup>
@@ -49,11 +49,9 @@
     <Using Alias="Format" Include="SharpDX.DXGI.Format" />
     <Using Alias="Texture2DDescription" Include="SharpDX.Direct3D11.Texture2DDescription" />
     <Using Alias="Texture3DDescription" Include="SharpDX.Direct3D11.Texture3DDescription" />
-    <Using Alias="RenderTargetBlendDescription"
-      Include="SharpDX.Direct3D11.RenderTargetBlendDescription" />
+    <Using Alias="RenderTargetBlendDescription" Include="SharpDX.Direct3D11.RenderTargetBlendDescription" />
     <Using Alias="SamplerState" Include="SharpDX.Direct3D11.SamplerState" />
-    <Using Alias="UnorderedAccessViewBufferFlags"
-      Include="SharpDX.Direct3D11.UnorderedAccessViewBufferFlags" />
+    <Using Alias="UnorderedAccessViewBufferFlags" Include="SharpDX.Direct3D11.UnorderedAccessViewBufferFlags" />
     <Using Alias="RawRectangle" Include="SharpDX.Mathematics.Interop.RawRectangle" />
     <Using Alias="RawViewportF" Include="SharpDX.Mathematics.Interop.RawViewportF" />
     <Using Alias="ResourceUsage" Include="SharpDX.Direct3D11.ResourceUsage" />
@@ -91,8 +89,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$../../../../../Core/Core.csproj" Private="false" PrivateAssets="all" />
-    <ProjectReference Include="$../../../../../Logging/Logging.csproj" Private="false"
-      PrivateAssets="all" />
+    <ProjectReference Include="$../../../../../Logging/Logging.csproj" Private="false" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AssetRipper.SharpGLTF.Runtime" Version="1.0.2" />
@@ -143,7 +140,6 @@
         }
       </OperatorPackageInfoJson>
     </PropertyGroup>
-    <WriteLinesToFile File="$(OutputPath)/OperatorPackage.json" Lines="$(OperatorPackageInfoJson)"
-      Overwrite="True" Encoding="UTF-8" />
+    <WriteLinesToFile File="$(OutputPath)/OperatorPackage.json" Lines="$(OperatorPackageInfoJson)" Overwrite="True" Encoding="UTF-8" />
   </Target>
 </Project>

@@ -1,0 +1,41 @@
+{
+  "Id": "ca6f09ec-bbc4-4365-8210-bc10cd8d9f94"/*MergeIntLists*/,
+  "Description": "Builds a integer  list buffer of defined size and allows to merge int lists into that.\n\nThis can be useful for defining [ArtNetOutput] packages.",
+  "InputUis": [
+    {
+      "InputId": "387fb1db-944f-4eb1-bb6f-b149e4a51a42"/*StartIndices*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      },
+      "Description": "An optional list of start indices. \n\nIf set, it will start to write the connected lists to the defined indices.\nE.g. if the indices are set to [0 and 20] the second list will be written starting from index.\nIf the first list is longer than 20 it will be "
+    },
+    {
+      "InputId": "9e60f3e7-a891-4a68-b186-21bc0145bdc6"/*MaxSize*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "Enforces the lenght of the resulting list if 0 or larger."
+    },
+    {
+      "InputId": "bdfe5576-2f45-473d-bb9d-95fc453fc774"/*InputLists*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      },
+      "Description": "A list of int lists that should be merged."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "f28370f0-f0c6-418f-8fbf-167a7d1035fe"/*Result*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 200.0
+      }
+    }
+  ]
+}

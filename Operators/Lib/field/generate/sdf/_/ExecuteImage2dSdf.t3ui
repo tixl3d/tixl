@@ -1,0 +1,46 @@
+{
+  "Id": "8fd60f01-9960-47fb-a730-45b50b9b94d2"/*ExecuteImage2dSdf*/,
+  "Description": "Internal implementation of [Image2dSDF]. You will not need this operator.",
+  "SymbolTags": "24",
+  "InputUis": [
+    {
+      "InputId": "5d256e1e-7189-4239-a1dd-717d909382a0"/*Scale*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 360.0
+      }
+    },
+    {
+      "InputId": "7c1b8678-3961-43e7-9f61-df4c82fb5c63"/*Offset*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 435.0
+      }
+    },
+    {
+      "InputId": "b9c106bb-8a49-47ca-ace5-3ba0d1373bf1"/*Size*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 285.0
+      }
+    },
+    {
+      "InputId": "bd8e1e6a-65bf-431c-a0f1-38c7858af0f5"/*SdfImageSrv*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 210.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "b4922e19-3c13-4536-876c-3169e6532343"/*Result*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

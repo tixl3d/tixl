@@ -19,7 +19,7 @@
       }
     },
     {
-      "InputId": "199d4ce0-aab1-403a-ad42-216ef1061a0e"/*NearFarClip*/,
+      "InputId": "199d4ce0-aab1-403a-ad42-216ef1061a0e"/*ClipPlanes*/,
       "Position": {
         "X": 0.0,
         "Y": 0.0
@@ -48,7 +48,7 @@
       "Format": "{0:0.0}°"
     },
     {
-      "InputId": "7bde5a5a-ce82-4903-92ff-14e540a605f0"/*FOV*/,
+      "InputId": "7bde5a5a-ce82-4903-92ff-14e540a605f0"/*FieldOfView*/,
       "Position": {
         "X": 0.0,
         "Y": 0.0
@@ -69,7 +69,7 @@
       "Scale": 0.01
     },
     {
-      "InputId": "ae275370-a684-42fb-ab7a-50e16d24082d"/*ViewportShift*/,
+      "InputId": "ae275370-a684-42fb-ab7a-50e16d24082d"/*LensShift*/,
       "Position": {
         "X": 0.0,
         "Y": 135.0

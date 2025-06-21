@@ -161,7 +161,7 @@ public partial class SymbolPackage
                      });        
         
         RegisterType(typeof(System.Collections.Generic.List<float>), "List<float>",
-                     () => new InputValue<List<float>>(new List<float>()),
+                     () => new InputValue<List<float>>([]),
                      (writer, obj) =>
                      {
                          var list = (List<float>)obj;
@@ -180,6 +180,26 @@ public partial class SymbolPackage
 
                          return list;
                      });
+        RegisterType(typeof(System.Collections.Generic.List<int>), "List<int>",
+                     () => new InputValue<List<int>>(new List<int>()),
+                     (writer, obj) =>
+                     {
+                         var list = (List<int>)obj;
+                         writer.WriteStartObject();
+                         writer.WritePropertyName("Values");
+                         writer.WriteStartArray();
+                         list.ForEach(writer.WriteValue);
+                         writer.WriteEndArray();
+                         writer.WriteEndObject();
+                     },
+                     jsonToken =>
+                     {
+                         var entries = jsonToken["Values"];
+                         var list = new List<int>(entries.Count());
+                         list.AddRange(entries.Select(entry => entry.Value<int>()));
+                         return list;
+                     });        
+        
         RegisterType(typeof(System.Collections.Generic.List<string>), "List<string>",
                      () => new InputValue<List<string>>(new List<string>()),
                      (writer, obj) =>

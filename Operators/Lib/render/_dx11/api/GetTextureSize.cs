@@ -95,7 +95,7 @@ internal sealed class GetTextureSize : Instance<GetTextureSize>
         UseOverride,
     }
 
-    private bool _alwaysDirty = true;
+    private bool _alwaysDirty = false;
 
     [Input(Guid = "8b15d8e1-10c7-41e1-84db-a85e31e0c909")]
     public readonly InputSlot<Texture2D> Texture = new();

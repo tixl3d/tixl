@@ -3,15 +3,15 @@
   "Inputs": [
     {
       "Id": "00cec9de-3be4-403f-8677-dcc2ef473708"/*Radius*/,
-      "DefaultValue": 1.0
+      "DefaultValue": 2.0
     },
     {
       "Id": "d37914dd-7bbd-47fa-ad90-9921621afb9e"/*Fill*/,
-      "DefaultValue": 1.0
+      "DefaultValue": 2.0
     },
     {
       "Id": "e1dc5cdc-24d2-409f-9ea6-6dd14fdb70d3"/*Thickness*/,
-      "DefaultValue": 1.0
+      "DefaultValue": 0.5
     },
     {
       "Id": "f5a24e80-741a-49c5-9a0b-d7074e80940a"/*Center*/,

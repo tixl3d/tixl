@@ -1,0 +1,260 @@
+{
+  "Id": "258f6274-1a52-47d3-a991-7b3d08829c08"/*Image2dSDFExample*/,
+  "Description": "How to use [Image2dSDF] in combination with [JumpFloodFill] to generate 3d text.",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0bfac29e-75a3-4931-8fef-f85db855edb5"/*OrbitCamera*/,
+      "Position": {
+        "X": 1103.9863,
+        "Y": 406.58643
+      }
+    },
+    {
+      "ChildId": "0eb5d49a-c211-4e83-b410-99b1a4fce1a6"/*RaymarchField*/,
+      "Position": {
+        "X": 963.98535,
+        "Y": 301.58643
+      }
+    },
+    {
+      "ChildId": "1e45443a-03c7-4185-bbf4-1be0d69e7d73"/*SampleFieldPoints*/,
+      "Position": {
+        "X": 1105.3662,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "1e6963c2-d528-4872-a35a-098e37669260"/*ChangeCase*/,
+      "Position": {
+        "X": 437.25586,
+        "Y": 141.68604
+      }
+    },
+    {
+      "ChildId": "2b43555a-79ca-4406-a10f-cc35f254f21e"/*AnimValue*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 561.3779
+      }
+    },
+    {
+      "ChildId": "2d29c11e-d64d-472b-88d2-dff45e34f6e7"/*CombineSDF*/,
+      "Position": {
+        "X": 437.25586,
+        "Y": 491.68604
+      }
+    },
+    {
+      "ChildId": "341ecf4b-427a-4bef-b298-11b2824c528b"/*AnimRandomString*/,
+      "Position": {
+        "X": 437.25586,
+        "Y": 106.686035
+      }
+    },
+    {
+      "ChildId": "3a8f6b59-7840-4a53-8f58-d0f27a82f896"/*RenderTarget*/,
+      "Position": {
+        "X": 1103.9863,
+        "Y": 441.58643
+      }
+    },
+    {
+      "ChildId": "5cb7ff22-121f-4a57-b107-f8a3f7d6ff20"/*VisualizeFieldDistance*/,
+      "Position": {
+        "X": 963.98535,
+        "Y": 336.58643
+      }
+    },
+    {
+      "ChildId": "62b1ebbd-2d1e-4bd8-9187-6462ff2d7037"/*Group*/,
+      "Position": {
+        "X": 1103.9863,
+        "Y": 266.58643
+      }
+    },
+    {
+      "ChildId": "6d36f344-fb0b-415b-a448-eabf16e900bf"/*CombineSDF*/,
+      "Position": {
+        "X": 437.25586,
+        "Y": 421.68604
+      }
+    },
+    {
+      "ChildId": "78640f0c-2508-4e8d-84cc-c939461c3599"/*ShowDebug*/,
+      "Position": {
+        "X": 1105.3662,
+        "Y": 105.0
+      }
+    },
+    {
+      "ChildId": "823be133-6435-4950-b385-3fd944e54a79"/*ToggleBoolean*/,
+      "Position": {
+        "X": 965.3662,
+        "Y": 175.0
+      }
+    },
+    {
+      "ChildId": "836ff17c-edbc-4eab-a6df-7dab4211ee7b"/*SetSDFMaterial*/,
+      "Position": {
+        "X": 226.12402,
+        "Y": 675.4575
+      }
+    },
+    {
+      "ChildId": "897fddd3-0a27-4ff0-9517-9e794d1746c9"/*RenderTarget*/,
+      "Position": {
+        "X": 437.25586,
+        "Y": 211.68604
+      }
+    },
+    {
+      "ChildId": "92334546-582e-40b3-a906-59ffd15b0d3f"/*PushPullSDF*/,
+      "Position": {
+        "X": 140.0,
+        "Y": 526.3779
+      }
+    },
+    {
+      "ChildId": "92ca5d30-4f70-40e7-bb46-1e9b32b27488"/*_DrawPointInfo*/,
+      "Position": {
+        "X": 1105.3662,
+        "Y": 70.0
+      }
+    },
+    {
+      "ChildId": "931d9c92-d449-4f4e-997f-572b56bc29f8"/*GridPoints*/,
+      "Position": {
+        "X": 965.3662,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "a18b35cd-7cb1-41cf-9f4f-c5339996e0d6"/*SetMaterial*/,
+      "Position": {
+        "X": 1103.9863,
+        "Y": 371.58643
+      }
+    },
+    {
+      "ChildId": "a312ad96-615d-452f-87db-518104d10700"/*CombineSDF*/,
+      "Position": {
+        "X": 437.25586,
+        "Y": 351.68604
+      }
+    },
+    {
+      "ChildId": "a448b3c2-905f-4e26-bb7b-b9d9e0277036"/*FractalSDF*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 456.37793
+      }
+    },
+    {
+      "ChildId": "a9121a79-6578-4414-bd94-be383ced5f18"/*Text*/,
+      "Position": {
+        "X": 437.25586,
+        "Y": 176.68604
+      }
+    },
+    {
+      "ChildId": "ab94ccab-694a-4cbf-97a4-c80c899f6809"/*Bloom*/,
+      "Position": {
+        "X": 1103.9863,
+        "Y": 476.58643
+      }
+    },
+    {
+      "ChildId": "bfd25b1a-dcf1-47cc-8c8c-0e064cbe57e1"/*SetSDFMaterial*/,
+      "Position": {
+        "X": 297.25586,
+        "Y": 386.68604
+      }
+    },
+    {
+      "ChildId": "c279fcf6-f49d-4f06-be5c-52cd11fa9b5f"/*DrawPoints*/,
+      "Position": {
+        "X": 965.3662,
+        "Y": 140.0
+      }
+    },
+    {
+      "ChildId": "c27b1acc-0b8f-4071-8fbe-e99968c74a4b"/*Image2dSDF*/,
+      "Position": {
+        "X": 437.25586,
+        "Y": 281.68604
+      }
+    },
+    {
+      "ChildId": "c5579d09-027f-40de-ab2d-9288fda103fe"/*TransformField*/,
+      "Position": {
+        "X": 140.0,
+        "Y": 456.37793
+      }
+    },
+    {
+      "ChildId": "c836a9e6-8dba-4c4d-a404-90b1ab6ea76e"/*JumpFloodFill*/,
+      "Position": {
+        "X": 437.25586,
+        "Y": 246.68604
+      }
+    },
+    {
+      "ChildId": "cd6c06dd-b922-4e92-9deb-65ab3872ba67"/*SphereSDF*/,
+      "Position": {
+        "X": 157.25586,
+        "Y": 386.68604
+      }
+    },
+    {
+      "ChildId": "d92896df-df98-4e61-9380-19592a414ece"/*SphereSDF*/,
+      "Position": {
+        "X": 86.12402,
+        "Y": 675.4575
+      }
+    },
+    {
+      "ChildId": "f4a2345b-c506-46c4-b323-9b9e2f6e7a96"/*SetSDFMaterial*/,
+      "Position": {
+        "X": 437.25586,
+        "Y": 316.68604
+      }
+    },
+    {
+      "ChildId": "fb834ebc-6d2a-4312-bc4c-ca3b7dca4bb7"/*PerlinNoise3*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 491.37793
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "4b8f83a1-5656-4e37-a168-9d5d90d654ee"/*Result*/,
+      "Position": {
+        "X": 1515.3662,
+        "Y": 350.22876
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "1ce9ab50-1078-4ca8-82ba-28e0bc634636",
+      "Label": "Text SDF experiment",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -111.70508,
+        "Y": -92.34766
+      },
+      "Size": {
+        "X": 1566.0879,
+        "Y": 951.9746
+      }
+    }
+  ]
+}

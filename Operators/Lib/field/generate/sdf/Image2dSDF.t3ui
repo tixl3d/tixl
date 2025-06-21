@@ -1,0 +1,59 @@
+{
+  "Id": "2446df39-b455-428a-807d-73c0e6cbab79"/*Image2dSDF*/,
+  "Description": "Uses the grayscale information of a texture as (signed) distance data.\nThis works nicely with [JumpFloodFill]",
+  "InputUis": [
+    {
+      "InputId": "1bcd6582-0e81-4980-bebe-ccf0d856299c"/*ImageSize*/,
+      "Position": {
+        "X": 893.9691,
+        "Y": 722.1224
+      }
+    },
+    {
+      "InputId": "59297115-f0cd-449e-be89-8a7ccbb0aa44"/*Offset*/,
+      "Position": {
+        "X": 893.9691,
+        "Y": 792.1224
+      }
+    },
+    {
+      "InputId": "c817ea37-e994-462b-ad8a-7e4cadf2f9a5"/*SdfImage*/,
+      "Position": {
+        "X": 1033.9694,
+        "Y": 617.1224
+      }
+    },
+    {
+      "InputId": "d7ed4ea1-0472-4535-8f39-fd440400d11d"/*SdfScale*/,
+      "Position": {
+        "X": 893.9691,
+        "Y": 757.1224
+      }
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "838dbb18-c2c9-485b-a293-f177afa807e6"/*ExecuteImage2dSdf*/,
+      "Position": {
+        "X": 1033.9691,
+        "Y": 687.1224
+      }
+    },
+    {
+      "ChildId": "fef5b00d-ad54-430b-9069-ce445e9aa0b5"/*SrvFromTexture2d*/,
+      "Position": {
+        "X": 1033.9691,
+        "Y": 652.1224
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "4a3cb304-17f2-4817-a8e1-369ea5361da8"/*Result*/,
+      "Position": {
+        "X": 1173.9692,
+        "Y": 687.1224
+      }
+    }
+  ]
+}

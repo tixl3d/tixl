@@ -1,4 +1,5 @@
-﻿namespace T3.Editor.Gui.UiHelpers;
+﻿#nullable enable
+namespace T3.Editor.Gui.UiHelpers;
 
 public static class ParameterNameSpacer
 {

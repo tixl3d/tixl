@@ -119,25 +119,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
         {
             drawList.AddRectFilled(new Vector2(min.X, min.Y),
                                    new Vector2(max.X, max.Y), UiColors.ForegroundFull.Fade(0.04f));
-
-            if (layerHovered)
-            {
-                ImGui.BeginTooltip();
-
-                ImGui.PushFont(Fonts.FontSmall);
-                ImGui.TextUnformatted(parameter.Input.Input.Name);
-                FrameStats.AddHoveredId(parameter.Input.Parent.SymbolChildId);
-
-                foreach (var curve in parameter.Curves)
-                {
-                    var v = curve.GetSampledValue(mouseTime);
-                    ImGui.TextUnformatted($"{v:0.00}");
-                }
-
-                ImGui.PopFont();
-
-                ImGui.EndTooltip();
-            }
+            
         }
 
         // Draw label and pinning

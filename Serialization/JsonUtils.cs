@@ -18,9 +18,11 @@ public static class JsonUtils
 
     public static T? ReadToken<T>(JToken o, string name, T? defaultValue = default)
     {
-        var jSettingsToken = o[name];
-        return jSettingsToken == null ? defaultValue : jSettingsToken.Value<T>();
+        var jToken = o[name];
+        return jToken == null ? defaultValue : jToken.Value<T>();
     }
+    
+
 
     public static T? TryLoadingJson<T>(string filepath) where T : class
     {
@@ -64,6 +66,11 @@ public static class JsonUtils
         }
     }
 
+
+
+
+    
+    
     public static bool TrySaveJson<T>(T dataObject, string filepath) 
     {
         if (string.IsNullOrEmpty(filepath))
@@ -111,23 +118,38 @@ public static class JsonUtils
         return Guid.TryParse(guidString, out guid);
     }
 
-    public static bool TryGetEnum<T>(JToken? token, out T enumValue) where T : struct, Enum
+    public static bool TryReadToken<T>(this JToken? token, [NotNullWhen(true)] out  T?  result)
     {
-        if (token == null)
-        {
-            enumValue = default;
+        result = default;
+        if(token == null )
             return false;
-        }
-
-        var stringValue = token.Value<string>() ?? string.Empty;
-
-        if (Enum.TryParse<T>(stringValue, out var result))
-        {
-            enumValue = result;
-            return true;
-        }
-
+        
+        result = token.Value<T>() ?? default;
+        return result != null;
+    }
+    
+    
+    public static bool TryGetEnumValue<T>(JToken? token, out T enumValue) where T : struct, Enum
+    {
         enumValue = default;
-        return false;
+        var stringValue = token?.Value<string>();
+        if (string.IsNullOrEmpty(stringValue))
+            return false;
+
+        if (!Enum.TryParse<T>(stringValue, out var result)) 
+            return false;
+        
+        enumValue = result;
+        return true;
+    }
+    
+    public static T GetEnumValue<T>(this JToken? token, T fallback = default) where T : struct, Enum
+    {
+        var s = token?.Value<string>();
+
+        if (string.IsNullOrEmpty(s))
+            return default; 
+
+        return Enum.TryParse<T>(s, out var result) ? result : fallback;
     }
 }

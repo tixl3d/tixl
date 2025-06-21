@@ -87,6 +87,15 @@ internal static class GraphContextMenu
         {
             context.EditCommentDialog.ShowNextFrame();
         }
+        
+        if (ImGui.MenuItem("Align select left",
+                           KeyboardBinding.ListKeyboardShortcuts(UserActions.AlignSelectionLeft, false),
+                           selected: false,
+                           enabled: context.StateMachine.CurrentState == GraphStates.Default && selectedChildUis.Count > 1))
+        {
+            Modifications.AlignSelectionToLeft(context);
+        }
+        
 
         // if (ImGui.MenuItem("Arrange sub graph",
         //                    KeyboardBinding.ListKeyboardShortcuts(UserActions.LayoutSelection, false),

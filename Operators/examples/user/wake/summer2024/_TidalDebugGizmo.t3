@@ -118,12 +118,6 @@
       "Outputs": []
     },
     {
-      "Id": "1db7817b-d56a-4403-a8da-92b59c0f86df"/*PointSimulation*/,
-      "SymbolId": "10507c42-1240-47cc-9569-5e3f1c733e99",
-      "InputValues": [],
-      "Outputs": []
-    },
-    {
       "Id": "2092e9e1-e07c-485f-bbf8-6b44129a4e99"/*DrawLines*/,
       "SymbolId": "836f211f-b387-417c-8316-658e0dc6e117",
       "InputValues": [

@@ -9,14 +9,14 @@
           "PostCurve": "Constant",
           "Keys": [
             {
-              "Time": 0.0,
-              "Value": 0.0,
+              "Time": -0.0118,
+              "Value": 1.0,
               "InType": "Linear",
               "OutType": "Linear",
               "InEditMode": "Linear",
               "OutEditMode": "Linear",
-              "InTangentAngle": 0.7853981633974483,
-              "OutTangentAngle": 3.9269908169872414
+              "InTangentAngle": 0.0,
+              "OutTangentAngle": 3.141592653589793
             },
             {
               "Time": 1.0,
@@ -25,8 +25,8 @@
               "OutType": "Linear",
               "InEditMode": "Linear",
               "OutEditMode": "Linear",
-              "InTangentAngle": 0.7853981633974483,
-              "OutTangentAngle": -2.356194490192345
+              "InTangentAngle": 0.0,
+              "OutTangentAngle": -3.141592653589793
             }
           ]
         }

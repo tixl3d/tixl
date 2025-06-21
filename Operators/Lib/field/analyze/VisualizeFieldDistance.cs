@@ -1,11 +1,22 @@
 namespace Lib.field.analyze;
 
 [Guid("89dd9ee0-8754-4e4c-abdc-74425c39dcc2")]
-public class VisualizeFieldDistance : Instance<VisualizeFieldDistance>
+public class VisualizeFieldDistance : Instance<VisualizeFieldDistance>, ITransformable
 {
     [Output(Guid = "a6fb7868-37ea-48c8-921a-aa097cca885c")]
-    public readonly Slot<Command> DrawCommand = new();
+    public readonly TransformCallbackSlot<Command> DrawCommand = new();
 
+    public VisualizeFieldDistance()
+    {
+        DrawCommand.TransformableOp = this;
+    }        
+    
+    IInputSlot ITransformable.TranslationInput => Center;
+    IInputSlot ITransformable.RotationInput => Rotation;
+    IInputSlot ITransformable.ScaleInput => null;
+    public Action<Instance, EvaluationContext> TransformCallback { get; set; }
+
+    
         [Input(Guid = "cce60e8d-3254-4838-8120-d0c777f73b93")]
         public readonly InputSlot<T3.Core.DataTypes.ShaderGraphNode> SdfField = new InputSlot<T3.Core.DataTypes.ShaderGraphNode>();
 

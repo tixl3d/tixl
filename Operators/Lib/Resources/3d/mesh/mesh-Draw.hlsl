@@ -138,9 +138,16 @@ static FragmentMaterial frag;
 //-------------------------------------------------------------------
 inline float4 GetField(float4 p)
 {
+#ifndef USE_WORLDSPACE
     p.xyz = mul(float4(p.xyz, 1), WorldToObject).xyz;
+#endif
     float4 f = 1;
     /*{FIELD_CALL}*/
+
+#ifndef USE_WORLDSPACE
+    float uniformScale = length(ObjectToWorld[0].xyz);
+    f.w *= uniformScale;
+#endif
     return f;
 }
 
@@ -264,6 +271,6 @@ float4 psMain(psInput pin) : SV_TARGET
     litColor += float4(EmissiveColorMap.Sample(TexSampler, pin.texCoord).rgb * EmissiveColor.rgb, 0);
     litColor.rgb = lerp(litColor.rgb, FogColor.rgb, pin.fog * FogColor.a);
     litColor.a *= albedo.a;
-    litColor *= GetField(float4(pin.worldPosition.xyz, 0));
+    litColor.rgb *= GetField(float4(pin.worldPosition.xyz, 0)).rgb;
     return litColor;
 }

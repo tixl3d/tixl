@@ -92,11 +92,6 @@
           "Value": "USB MIDI Interface"
         },
         {
-          "Id": "6c15e743-9a70-47e7-a0a4-75636817e441"/*PrintLogMessages*/,
-          "Type": "System.Boolean",
-          "Value": true
-        },
-        {
           "Id": "7c681ee6-d071-4284-8585-1c3e03a089ea"/*TeachTrigger*/,
           "Type": "System.Boolean",
           "Value": false

@@ -23,14 +23,23 @@ internal static class GraphTitleAndBreadCrumbs
         var composition = components.InstView;
         Debug.Assert(composition != null);
         ImGui.SetCursorScreenPos(ImGui.GetWindowPos() + new Vector2(1, 1));
-        if (ImGui.Button("Hub"))
+        var frameHeight = ImGui.GetFrameHeight();
+        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, UiColors.BackgroundActive.Rgba);
+        
+        if(CustomComponents.IconButton(Icon.Hub, Vector2.One * frameHeight))
         {
             components.Close();
         }
+        ImGui.PopStyleColor();
+        CustomComponents.TooltipForLastItem("Project Hub");
         
-        FormInputs.AddVerticalSpace();
+        //FormInputs.AddVerticalSpace();
+        if (composition.Instance.Parent == null)
+            return;
+        
+        //ImGui.SameLine();
         var parents = Structure.CollectParentInstances(composition.Instance);
-
+        
         ImGui.PushStyleColor(ImGuiCol.Button, Color.Transparent.Rgba);
         ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
         ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(1, 1));
@@ -41,20 +50,19 @@ internal static class GraphTitleAndBreadCrumbs
             {
                 if (isFirstChild)
                 {
+                    DrawSeparator(_breadCrumbProject, 8);
                     isFirstChild=false;
-                    ImGui.SameLine(7);
+                    ImGui.SameLine(0,0);
                 }
                 else
                 {
                     ImGui.SameLine(0);
                 }
-                        
-                        
-
+                
                 ImGui.PushID(p.SymbolChildId.GetHashCode());
 
                 ImGui.PushFont(Fonts.FontSmall);
-                var clicked = ImGui.Button(p.Symbol.Name);
+                var clicked = ImGui.Button(p.Symbol.Name, new Vector2(0, frameHeight));
                 ImGui.PopFont();
                         
                 if (p.Parent == null && ImGui.BeginItemTooltip())
@@ -69,17 +77,25 @@ internal static class GraphTitleAndBreadCrumbs
                     break;
                 }
 
-                ImGui.SameLine();
-                ImGui.PopID();
-                ImGui.PushFont(Icons.IconFont);
-                ImGui.TextUnformatted(_breadCrumbSeparator);
-                ImGui.PopFont();
+                DrawSeparator(_breadCrumbSeparator);
             }
-                    
-                    
         }
         ImGui.PopStyleVar(2);
         ImGui.PopStyleColor(2);
+        return;
+
+        void DrawSeparator(string iconString, float padding = 0)
+        {
+            ImGui.SameLine(0, padding);
+            ImGui.PopID();
+            ImGui.PushFont(Icons.IconFont);
+            var yPadding = (frameHeight - Icons.IconFont.FontSize) / 2;
+            ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(10,yPadding));
+            ImGui.AlignTextToFramePadding();
+            ImGui.TextUnformatted(iconString);
+            ImGui.PopStyleVar();
+            ImGui.PopFont();
+        }
     }
 
     private static void PopulateDependenciesTooltip(Instance p)
@@ -117,4 +133,5 @@ internal static class GraphTitleAndBreadCrumbs
         ImGui.PopStyleColor();
     }
     private static readonly string _breadCrumbSeparator = (char)Icon.ChevronRight + "";
+    private static readonly string _breadCrumbProject = (char)Icon.FolderOpen + "";
 }

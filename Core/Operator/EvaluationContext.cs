@@ -20,6 +20,15 @@ public enum GizmoVisibility
     IfSelected = 2,
 }
 
+public enum TransformGizmoModes
+{
+    None = 0,
+    Select = 1,
+    Move = 2,
+    Rotate = 3,
+    Scale = 4,
+}
+
 public class EvaluationContext
 {
     public EvaluationContext()
@@ -123,6 +132,7 @@ public class EvaluationContext
     public System.Numerics.Vector4 ForegroundColor { get; set; } = Vector4.One;
         
     public GizmoVisibility ShowGizmos { get; set; }
+    public TransformGizmoModes TransformGizmoMode { get; set; } = TransformGizmoModes.Move;
     
     #region context variables
     public Dictionary<string, float> FloatVariables { get; } = new();

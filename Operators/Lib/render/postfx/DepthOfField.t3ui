@@ -4,24 +4,6 @@
   "SymbolTags": "1",
   "InputUis": [
     {
-      "InputId": "1592e94b-a20d-463c-baec-5fb5dfa85532"/*BackgroundColor*/,
-      "Position": {
-        "X": -293.73135,
-        "Y": -518.48566
-      },
-      "Description": "Defines the BackgroundColor.",
-      "AddPadding": "True"
-    },
-    {
-      "InputId": "22f5e8db-0b80-47dc-b30b-4bc49d9fad59"/*Command*/,
-      "Position": {
-        "X": -293.73135,
-        "Y": -553.48566
-      },
-      "Description": "Internal Input.",
-      "AddPadding": "True"
-    },
-    {
       "InputId": "3655d507-96b3-4ded-9cef-886ea703ca89"/*Amount*/,
       "Position": {
         "X": 386.16498,
@@ -61,16 +43,16 @@
       "InputId": "bc1685a8-0a92-460f-85ca-7f096db965f0"/*TextureBuffer*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -153.73135,
-        "Y": -588.4856
+        "X": -153.90164,
+        "Y": -606.87604
       }
     },
     {
       "InputId": "c2e7ebf7-5056-4380-9a9f-850b350804c9"/*DepthBuffer*/,
       "Relevancy": "Required",
       "Position": {
-        "X": 144.919,
-        "Y": -388.59326
+        "X": 72.37915,
+        "Y": -432.52582
       }
     }
   ],
@@ -116,13 +98,6 @@
       }
     },
     {
-      "ChildId": "22807a28-d947-447e-9927-d0b97f91d2a5"/*RenderTarget*/,
-      "Position": {
-        "X": -153.73135,
-        "Y": -553.48566
-      }
-    },
-    {
       "ChildId": "22863174-3373-4d15-82c0-3b3d1fba4b5e"/*SrvFromTexture2d*/,
       "Position": {
         "X": 1057.717,
@@ -132,8 +107,8 @@
     {
       "ChildId": "2928b9be-0f22-4dcf-a1f9-a3ad02524b62"/*GetTextureSize*/,
       "Position": {
-        "X": -13.731354,
-        "Y": -518.4856
+        "X": 92.5242,
+        "Y": -508.26868
       }
     },
     {
@@ -148,13 +123,6 @@
       "Position": {
         "X": 526.165,
         "Y": -273.2119
-      }
-    },
-    {
-      "ChildId": "6a8ae91d-4ab1-4166-b8c3-967ca282466c"/*UseFallbackTexture*/,
-      "Position": {
-        "X": 284.919,
-        "Y": -388.59326
       }
     },
     {
@@ -221,17 +189,10 @@
       }
     },
     {
-      "ChildId": "edfb0083-3f2f-4c1e-8db7-2fe1877194cd"/*UseFallbackTexture*/,
-      "Position": {
-        "X": -13.731354,
-        "Y": -588.4856
-      }
-    },
-    {
       "ChildId": "f6c88a1e-d7bc-4ef4-b67c-539828f15e8c"/*ComputeShader*/,
       "Position": {
-        "X": 488.9286,
-        "Y": -424.53577
+        "X": 534.90454,
+        "Y": -449.22656
       }
     }
   ],

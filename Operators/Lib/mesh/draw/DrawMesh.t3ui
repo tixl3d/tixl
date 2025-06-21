@@ -27,6 +27,7 @@
         "X": 1816.4573,
         "Y": 3098.7122
       },
+      "GroupTitle": "Field Overrides...",
       "Description": "An optional shader graph with a color function. \n\nIt will use the world position.xyz to generate a color that is multiplied before drawing the fragment.\nTry [SphereField]->[SdfToColor]->.FragmentField."
     },
     {
@@ -45,6 +46,15 @@
       },
       "GroupTitle": "Appearance",
       "Description": "Defines the shading color of the mesh.\nIf a [SetMaterial] is used, these colors are multiplied with its settings."
+    },
+    {
+      "InputId": "96df9e72-189f-4efc-82a6-b2f482166e34"/*ShaderDefines*/,
+      "Position": {
+        "X": 1816.4573,
+        "Y": 3168.7122
+      },
+      "Description": "Additional shader code that can be injected before rendering. \nUsing this requirese knowledge about the internal implementation. Passing invalid code will break the rendering.\nThis is similar to shader flags but most powerful because it also allows to define methods that are applied before rendering the fragment.\n\nOptions are...\n\n#define USE_WORLDSPACE",
+      "Usage": "Multiline"
     },
     {
       "InputId": "97429e1f-3f30-4789-89a6-8e930e356ee6"/*Mesh*/,

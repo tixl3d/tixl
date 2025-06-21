@@ -99,6 +99,7 @@
     <ProjectReference Include="..\..\Logging\Logging.csproj" Private="false" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Palink.ArtNet" Version="1.0.0" />
     <PackageReference Include="Rug.Osc" Version="1.2.5">
       <NoWarn>NU1701</NoWarn>
     </PackageReference>

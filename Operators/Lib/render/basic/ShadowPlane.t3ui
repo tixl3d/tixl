@@ -4,7 +4,7 @@
   "SymbolTags": "64",
   "InputUis": [
     {
-      "InputId": "16527748-fe55-4ced-b08d-6c94377c5563"/*FOV*/,
+      "InputId": "16527748-fe55-4ced-b08d-6c94377c5563"/*FieldOfView*/,
       "Position": {
         "X": -446.21228,
         "Y": 138.63855

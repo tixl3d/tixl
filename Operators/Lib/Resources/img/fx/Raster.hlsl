@@ -55,14 +55,13 @@ float4 psMain(vsOutput psInput) : SV_TARGET
 
     float edgeSmooth = Feather / ScaleFactor;
 
+    p.x *= aspectRatio;
+
     // Rotate
     float imageRotationRad = (-Rotate - 90) / 180 * 3.141578;
 
     float sina = sin(-imageRotationRad - 3.141578 / 2);
     float cosa = cos(-imageRotationRad - 3.141578 / 2);
-
-    p.x *= aspectRatio;
-
     p = float2(
         cosa * p.x - sina * p.y,
         cosa * p.y + sina * p.x);

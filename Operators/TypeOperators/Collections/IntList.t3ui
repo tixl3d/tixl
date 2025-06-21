@@ -1,0 +1,23 @@
+{
+  "Id": "c35dc0e1-75cb-434e-b594-b2a4fb687d55"/*IntList*/,
+  "Description": "A collection of int values. This can be useful to define indices.",
+  "InputUis": [
+    {
+      "InputId": "0e068da1-1e4b-40ab-b86f-c05622d34717"/*List*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "17714f77-deb8-4d97-9045-76b351fa5a12"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    }
+  ]
+}

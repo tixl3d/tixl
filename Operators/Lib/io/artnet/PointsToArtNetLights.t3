@@ -1,0 +1,145 @@
+{
+  "Id": "c9d7cd19-7fc6-4491-8dfa-3808725c7857"/*PointsToArtNetLights*/,
+  "Inputs": [
+    {
+      "Id": "013cc355-91d6-4ea6-b9f7-f1817b89e4a3"/*RedChannel*/,
+      "DefaultValue": 5
+    },
+    {
+      "Id": "098f1662-6f47-4dd0-9a73-4c4814aefb23"/*CustomVar2Channel*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "1348ed7c-79f8-48c6-ac00-e60fb40050db"/*FixtureChannelSize*/,
+      "DefaultValue": 10
+    },
+    {
+      "Id": "18cc3a73-3a1a-4370-87b7-e5cd44f4a3ab"/*SetCustomVar2*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "1cb93e97-0161-4a77-bbc7-ff30c1972cf8"/*GetF2*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "25e5f0ce-5ec8-4c99-beb1-317c6911a128"/*SetCustomVar1*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "47d7294f-6f73-4e21-ac9a-0fc0817283fb"/*TiltChannel*/,
+      "DefaultValue": 3
+    },
+    {
+      "Id": "4922acd8-ab83-4394-8118-c555385c2ce9"/*GetRotation*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "4a40e022-d206-447c-bda3-d534f231c816"/*TiltFineChannel*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "4d4b3425-e6ad-4834-a8a7-06c9f9c2b909"/*PanFineChannel*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "50e849e8-5582-432e-98f7-d8e036273864"/*CustomVar1*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "5cdc69f7-45ec-4eec-bfb6-960d6245dafb"/*GetColor*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "61b48e46-c3d1-46e3-a470-810d55f30aa6"/*Points*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "6e8b4125-0e8c-430b-897d-2231bb4c8f6f"/*TiltRange*/,
+      "DefaultValue": {
+        "X": -90.0,
+        "Y": 90.0
+      }
+    },
+    {
+      "Id": "7bf3e057-b9eb-43d2-8e1a-64c1c3857ca1"/*InvertPan*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "876ef5b5-f2c6-4501-9e55-00b9a553a2e3"/*SetCustomVar3*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "9000c279-73e4-4de8-a1f8-c3914eaaf533"/*PanChannel*/,
+      "DefaultValue": 1
+    },
+    {
+      "Id": "91c78090-be10-4203-827e-d2ef1b93317e"/*GetF1*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "970769f4-116f-418d-87a7-cda28e44d063"/*GreenChannel*/,
+      "DefaultValue": 6
+    },
+    {
+      "Id": "ac9a709e-6dc0-40ca-9f70-350e655a2630"/*CustomVar3Channel*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "afd3aa99-c892-4b87-ad3f-f97461e8a934"/*WithReferencePoints*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "b08c920f-0d6b-4820-bc2d-81a47d5f1147"/*CustomVar1Channel*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "b7061834-66aa-4f7f-91f9-10ebfe16713f"/*F1Channel*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "ba8d8f32-792c-4675-a5f5-415c16db8c66"/*AxisOrder*/,
+      "DefaultValue": 3
+    },
+    {
+      "Id": "cf2c3308-8f3f-442d-a563-b419f12e7ad1"/*RGBToCMY*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "d16d7c5c-2795-4fde-85fd-13b515191fbe"/*CustomVar3*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "d755342b-9a9e-4c78-8376-81579d8c0909"/*BlueChannel*/,
+      "DefaultValue": 7
+    },
+    {
+      "Id": "d77be0d1-5fb9-4d26-9e4a-e16497e4759c"/*F2Channel*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "e7a48fe0-d788-4f12-a9d4-52472519da09"/*CustomVar2*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "e96655be-6bc7-4ca4-bf74-079a07570d74"/*ShortestPathPanTilt*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "f13edebd-b44f-49e9-985e-7e3feb886fea"/*AlphaChannel*/,
+      "DefaultValue": 8
+    },
+    {
+      "Id": "f50da250-606d-4a15-a25e-5458f540e527"/*PanRange*/,
+      "DefaultValue": {
+        "X": -180.0,
+        "Y": 180.0
+      }
+    },
+    {
+      "Id": "f85ecf9f-0c3d-4c10-8ba7-480aa2c7a667"/*InvertTilt*/,
+      "DefaultValue": false
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

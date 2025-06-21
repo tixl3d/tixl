@@ -1,0 +1,55 @@
+{
+  "Id": "faa3e182-96e6-45e7-b037-fb2acd88825b"/*ArtnetPixelOutput*/,
+  "Description": "",
+  "InputUis": [
+    {
+      "InputId": "4598c09c-f463-426f-ab1b-c9be10c0ff75"/*Points*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": -45.0
+      }
+    },
+    {
+      "InputId": "508ebec1-cd2b-49bf-b77d-787fa3a8c138"/*IpAddress*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Usage": "Default"
+    },
+    {
+      "InputId": "d2e1f0c3-a4b5-4c6d-8e7f-9a0b1c2d3e4f"/*ArtNetSendRate*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 120.0
+      }
+    },
+    {
+      "InputId": "db583506-fd7a-4109-9f37-489c27f237b8"/*Reconnect*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "28e5a0a6-6dee-4771-b3ea-5c95862b34f8"/*Result*/,
+      "Position": {
+        "X": -50.0,
+        "Y": -45.0
+      }
+    }
+  ],
+  "Links": [
+    {
+      "Id": "7d97a2ce-9297-4bac-b947-91dca0c12e4c",
+      "Title": "An introduction to OSC",
+      "Description": "",
+      "LinkUrl": "https://opensoundcontrol.stanford.edu/spec-1_0.html#introduction",
+      "LinkType": "Reference"
+    }
+  ]
+}

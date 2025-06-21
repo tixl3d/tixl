@@ -50,16 +50,16 @@ internal sealed class ExecuteRepeatFieldAtPoints : Instance<ExecuteRepeatFieldAt
 
     void IGraphNodeOp.AddDefinitions(CodeAssembleContext c)
     {
-        c.Globals[nameof(ShaderGraphIncludes.GetColorBlendFactor)] = ShaderGraphIncludes.GetColorBlendFactor;
-        
         // This is initialized in ComputePointTransformMatrix.hlsl
-        c.Globals["PointMatrix"] = """
+        c.ResourceTypes["PointMatrix"] = """
                                  struct PointTransform
                                  {
                                      float4x4 WorldToPointObject;
                                      float4 PointColor;
                                  };
                                  """;
+        
+        c.Globals[nameof(ShaderGraphIncludes.GetColorBlendFactor)] = ShaderGraphIncludes.GetColorBlendFactor;
         
         // Register global method
         switch (_combineMethod)

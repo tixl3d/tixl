@@ -6,6 +6,7 @@ using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
 using T3.Core.Rendering.Material;
 using T3.Editor.Gui.InputUi.CombinedInputs;
+using T3.Editor.Gui.InputUi.ListInputs;
 using T3.Editor.Gui.InputUi.SimpleInputUis;
 using T3.Editor.Gui.InputUi.SingleControl;
 using T3.Editor.Gui.InputUi.VectorInputs;
@@ -106,6 +107,7 @@ internal static class UiRegistration
         RegisterIOType(typeof(Quaternion), () => new Vector4InputUi(), () => new VectorOutputUi<Quaternion>());
 
         RegisterIOType(typeof(List<float>), () => new FloatListInputUi(), () => new FloatListOutputUi());
+        RegisterIOType(typeof(List<int>), () => new IntListInputUi(), () => new IntListOutputUi());
         RegisterIOType(typeof(string), () => new StringInputUi(), () => new StringOutputUi());
         RegisterIOType(typeof(List<string>), () => new StringListInputUi(), () => new StringListOutputUi());
 

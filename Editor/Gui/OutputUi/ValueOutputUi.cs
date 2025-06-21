@@ -6,6 +6,10 @@ using T3.Editor.SystemUi;
 
 namespace T3.Editor.Gui.OutputUi;
 
+/// <summary>
+/// A generic fallback output UI that is show in the output window if
+/// no matching output method is defined.
+/// </summary>
 internal sealed class ValueOutputUi<T> : OutputUi<T>
 {
     public override IOutputUi Clone()

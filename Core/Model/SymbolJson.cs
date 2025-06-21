@@ -154,8 +154,8 @@ public static class SymbolJson
     {
         var childrenJson = symbolReadResult.ChildrenJsonArray;
 
-        if (childrenJson.Length == 0)
-            return true;
+        // if (childrenJson.Length == 0)
+        //     return true;
 
         var parent = symbolReadResult.Symbol;
         if (parent == null)

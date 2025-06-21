@@ -277,6 +277,12 @@ internal static class Icons
             new (Icon.Bookmark, slotIndex:96),
             new (Icon.Dependencies, slotIndex:97),
             new (Icon.Referenced, slotIndex:98),
+            new (Icon.AddFolder, slotIndex:99),
+            new (Icon.Folder, slotIndex:100),
+            new (Icon.FolderOpen, slotIndex:101),
+            new (Icon.FileImage, slotIndex:102),
+            new (Icon.FileDocument, slotIndex:103),
+            new (Icon.Hub, slotIndex:104),
         };
 
     public static readonly string IconAtlasPath = Path.Combine(SharedResources.Directory, @"images\editor\t3-icons.png");
@@ -383,4 +389,10 @@ public enum Icon
     Bookmark,
     Dependencies,
     Referenced,
+    AddFolder,
+    Folder,
+    FolderOpen,
+    FileImage,
+    FileDocument,
+    Hub
 }

@@ -559,7 +559,7 @@ internal abstract class ScalableCanvas : IScalableCanvas
 
         return this is TimeLineCanvas
                    ? new Vector2(scale.X.Clamp(0.01f, 5000), scale.Y.Clamp(0.01f, 5000))
-                   : new Vector2(scale.X.Clamp(0.1f, 40), scale.Y.Clamp(0.1f, 40));
+                   : new Vector2(scale.X.Clamp(0.02f, 40), scale.Y.Clamp(0.02f, 40));
     }
 
     public void ZoomWithMouseWheel(MouseState mouseState, out bool zoomed)

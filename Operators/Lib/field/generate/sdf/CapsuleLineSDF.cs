@@ -4,10 +4,16 @@ namespace Lib.field.generate.sdf;
 
 [Guid("752e4358-05e0-4651-a147-f141138f5244")]
 internal sealed class CapsuleLineSDF : Instance<CapsuleLineSDF>
-,IGraphNodeOp
+                                     , IGraphNodeOp, ITransformable
 {
     [Output(Guid = "1d6a73c3-1a6a-452a-a4a2-ddee308aa0ae")]
     public readonly Slot<ShaderGraphNode> Result = new();
+
+    // ITransformable interface implementation (Gizmo support)
+    IInputSlot ITransformable.TranslationInput => EndPoint;
+    IInputSlot ITransformable.RotationInput => null;
+    IInputSlot ITransformable.ScaleInput => null;
+    public Action<Instance, EvaluationContext> TransformCallback { get; set; }
 
     public CapsuleLineSDF()
     {
@@ -18,6 +24,7 @@ internal sealed class CapsuleLineSDF : Instance<CapsuleLineSDF>
 
     private void Update(EvaluationContext context)
     {
+        TransformCallback?.Invoke(this, context); // Needed for Gizmo support
         ShaderNode.Update(context);
     }
 

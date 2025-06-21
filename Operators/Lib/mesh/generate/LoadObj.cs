@@ -83,14 +83,22 @@ internal sealed class LoadObj : Instance<LoadObj>, IDescriptiveFilename, IStatus
             _resource.MarkFileAsChanged();
         }
 
-        _warningMessage = string.Empty;
 
-        Data.Value = _resource.GetValue(context)?.DataBuffers;
+        if (_resource.TryGetValue(context, out var meshDataSet))
+        {
+            Data.Value = meshDataSet.DataBuffers;
+            _warningMessage = string.Empty;
+        }
+        else
+        {  
+            _warningMessage = $"Failed loading {SourcePathSlot.Value}";
+        }
     }
 
     public InputSlot<string> SourcePathSlot => Path;
     private ObjMesh.SortDirections _vertexSorting;
     private bool _useGpuCaching;
+    
 
     private sealed class MeshDataSet : IDisposable
     {

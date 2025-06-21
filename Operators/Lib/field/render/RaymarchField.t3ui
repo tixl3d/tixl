@@ -6,8 +6,8 @@
     {
       "InputId": "0b4d60de-261f-4dbf-ad44-6395cda3a496"/*MinDistance*/,
       "Position": {
-        "X": 218.2935,
-        "Y": 808.45105
+        "X": 104.6602,
+        "Y": 720.8185
       },
       "Description": "The distance threshold when the raymarching is marked as completed.",
       "Min": 0.0,
@@ -17,16 +17,16 @@
     {
       "InputId": "1251368b-f8f4-4210-be1e-4d05223caf21"/*DistToColor*/,
       "Position": {
-        "X": 218.2935,
-        "Y": 1263.451
+        "X": 104.6602,
+        "Y": 1175.8185
       },
       "Description": "A minor factor that can help to reduce edge artifacts for compositing into the scene."
     },
     {
       "InputId": "3148d927-8779-47ab-9e0a-fa63206f3002"/*MaxSteps*/,
       "Position": {
-        "X": 218.2935,
-        "Y": 738.45105
+        "X": 104.6602,
+        "Y": 650.8185
       },
       "GroupTitle": "Quality",
       "Description": "The number of raymarching steps. This has a major impact on the quality and performance. Normal values are between 50 and 150.\n",
@@ -37,23 +37,23 @@
       "InputId": "340ca675-9356-4548-ba64-732181bebeef"/*SdfField*/,
       "Relevancy": "Required",
       "Position": {
-        "X": 589.1019,
-        "Y": 420.65332
+        "X": 541.9152,
+        "Y": 351.31775
       }
     },
     {
       "InputId": "3a23730d-09b9-44bd-84b7-c252dd83e1f9"/*UVMapping*/,
       "Position": {
-        "X": 309.10193,
-        "Y": 560.6533
+        "X": 261.91522,
+        "Y": 491.31775
       },
       "Description": "Provides various options to generate UVs for the field."
     },
     {
       "InputId": "561768f6-adf6-4d3d-a36a-20b6f35ff151"/*StepSize*/,
       "Position": {
-        "X": 218.2935,
-        "Y": 773.45105
+        "X": 104.6602,
+        "Y": 685.8185
       },
       "Description": "An initial scaling factor. Lowering this can be useful to reduce artifacts caused by invalid Lipschitz continuities (e.g. by applying noise).",
       "Min": 0.9,
@@ -62,24 +62,24 @@
     {
       "InputId": "89218016-a0ca-4150-95d4-23f415cf07f0"/*TextureScale*/,
       "Position": {
-        "X": 218.2935,
-        "Y": 1158.4509
+        "X": 104.6602,
+        "Y": 1070.8182
       },
       "Description": "Scale texture defined by the [SetMaterial]."
     },
     {
       "InputId": "9715075b-b02b-4290-9332-9bbfe67933f2"/*Color*/,
       "Position": {
-        "X": 78.29352,
-        "Y": 878.45105
+        "X": -486.14932,
+        "Y": 794.4215
       },
       "Description": "A color multiplier. You could also use [SetSDFMaterial] or [SetMaterial] for this."
     },
     {
       "InputId": "adeb374b-bce0-4af2-867b-efb3ce6289c9"/*MaxDistance*/,
       "Position": {
-        "X": 218.29349,
-        "Y": 843.45105
+        "X": 104.66019,
+        "Y": 755.8185
       },
       "Description": "A threshold after which the raymarching is aborted.",
       "Min": 0.0,
@@ -88,8 +88,8 @@
     {
       "InputId": "e3a85c27-b94c-4e77-b0c2-4644cd3a22d4"/*AmbientOcclusion*/,
       "Position": {
-        "X": 78.29346,
-        "Y": 1018.45105
+        "X": -35.339844,
+        "Y": 930.8185
       },
       "Description": "Will apply an ambient occlusion color depending on the AO Distance parameter.\nYou can use the alpha channel to control the intensity.\nAlso try light colors to add some kind of inner glow effect.",
       "AddPadding": "True"
@@ -97,8 +97,8 @@
     {
       "InputId": "f14e7a2f-cd4e-4399-b137-ea0b87c7dfbd"/*NormalSamplingD*/,
       "Position": {
-        "X": 218.29349,
-        "Y": 1228.451
+        "X": 104.66019,
+        "Y": 1140.8185
       },
       "Description": "Defines the look-up distance when calculating the surface normal. This controls how sharp objects appear.\nToo small values will cause artifacts. Larger values will apply some sort of smoothing effect.",
       "AddPadding": "True",
@@ -108,8 +108,8 @@
     {
       "InputId": "ffb73f4d-6d24-4f4c-866b-5bdd6f876e6f"/*AoDistance*/,
       "Position": {
-        "X": 218.29349,
-        "Y": 1193.4509
+        "X": 104.66019,
+        "Y": 1105.8182
       },
       "GroupTitle": "Appearance",
       "Description": "Controls the distance and intensity of the Ambient Occlusion."
@@ -127,56 +127,35 @@
       "ChildId": "05e4ebe9-4a6a-4d64-a941-9a496839cc68"/*InputAssemblerStage*/,
       "Position": {
         "X": 1350.3239,
-        "Y": 644.25226
+        "Y": 609.25226
       }
     },
     {
       "ChildId": "0667216d-478f-4854-a1e6-6b311b598306"/*PickStringPart*/,
       "Position": {
-        "X": 449.10193,
-        "Y": 525.6533
+        "X": 401.91522,
+        "Y": 456.31775
       }
     },
     {
       "ChildId": "09f45b55-216a-4b5c-bc33-05f7308923dc"/*Rasterizer*/,
       "Position": {
         "X": 1350.3239,
-        "Y": 679.25226
-      }
-    },
-    {
-      "ChildId": "0a8c9314-35b3-410c-a2ea-560f15320e7d"/*SetPixelAndVertexShaderStage*/,
-      "Position": {
-        "X": 1097.4438,
-        "Y": 1398.1482
-      }
-    },
-    {
-      "ChildId": "18a07e70-e561-4fab-9272-41f53bdc94e0"/*SamplerState*/,
-      "Position": {
-        "X": 957.44385,
-        "Y": 1923.1482
-      }
-    },
-    {
-      "ChildId": "1d17bbd1-b403-4b76-9048-74df06416a66"/*SrvFromTexture2d*/,
-      "Position": {
-        "X": 957.44385,
-        "Y": 1853.1482
+        "Y": 644.25226
       }
     },
     {
       "ChildId": "1d29ab95-330a-48d5-a0f3-76ce20ba669b"/*Draw*/,
       "Position": {
         "X": 1350.3239,
-        "Y": 714.25214
+        "Y": 784.25214
       }
     },
     {
       "ChildId": "1e4f59e7-18e4-40b0-b8cf-f18f2b5a346d"/*BlendOnWhites*/,
       "Position": {
         "X": 889.58496,
-        "Y": 342.71463
+        "Y": 272.71463
       }
     },
     {
@@ -184,13 +163,6 @@
       "Position": {
         "X": 852.9934,
         "Y": 963.5422
-      }
-    },
-    {
-      "ChildId": "30b64d06-d22b-46d1-82ca-ec54d9b9dcba"/*GetPbrParameters*/,
-      "Position": {
-        "X": 817.44385,
-        "Y": 1643.1482
       }
     },
     {
@@ -203,15 +175,8 @@
     {
       "ChildId": "41605222-0a75-4d34-a466-0aa5e3c5cb91"/*ReadFile*/,
       "Position": {
-        "X": 449.10193,
-        "Y": 490.65332
-      }
-    },
-    {
-      "ChildId": "45ca55ac-763b-4466-b4fd-e3e8b9581ae1"/*TransformsConstBuffer*/,
-      "Position": {
-        "X": 957.44385,
-        "Y": 1538.1482
+        "X": 401.91522,
+        "Y": 421.31775
       }
     },
     {
@@ -246,21 +211,21 @@
       "ChildId": "78c0ec94-be6d-4c71-943c-5e43905ce3b8"/*RasterizerState*/,
       "Position": {
         "X": 1210.3239,
-        "Y": 679.25226
+        "Y": 644.25226
       }
     },
     {
-      "ChildId": "961f2082-4e36-4a44-967c-fa0576700f1c"/*clampedSampler*/,
+      "ChildId": "92619ddd-a214-488f-9d3c-a5cad970aba6"/*OutputMergerStage*/,
       "Position": {
-        "X": 957.44385,
-        "Y": 1958.1482
+        "X": 1338.9772,
+        "Y": 982.2069
       }
     },
     {
-      "ChildId": "a0a5bf66-c03a-4279-995b-ebce612330c7"/*ContextCBuffers*/,
+      "ChildId": "963ef259-cf61-4a33-bbcb-479da9d729c5"/*BlendColors*/,
       "Position": {
-        "X": 957.44385,
-        "Y": 1573.1482
+        "X": -346.14932,
+        "Y": 794.4215
       }
     },
     {
@@ -271,15 +236,15 @@
         "Y": 751.5494
       },
       "Position": {
-        "X": 358.2935,
-        "Y": 703.45105
+        "X": 244.66019,
+        "Y": 615.8185
       }
     },
     {
       "ChildId": "a6abf7ea-3d55-4136-ad8e-c25828bb6f0c"/*BlendState*/,
       "Position": {
         "X": 1029.585,
-        "Y": 342.71463
+        "Y": 272.71463
       }
     },
     {
@@ -292,8 +257,8 @@
     {
       "ChildId": "b8773240-5218-4217-8475-975199bc0235"/*GenerateShaderGraphCode*/,
       "Position": {
-        "X": 589.1019,
-        "Y": 455.65332
+        "X": 541.9152,
+        "Y": 386.31775
       }
     },
     {
@@ -306,22 +271,15 @@
     {
       "ChildId": "d211bef5-f50f-447f-aa59-fd771fb0115d"/*Vector4Components*/,
       "Position": {
-        "X": 218.29349,
-        "Y": 878.45105
-      }
-    },
-    {
-      "ChildId": "d42c25ed-6a0d-441d-81e5-46afb1cc1fb0"/*PixelShaderFromSource*/,
-      "Position": {
-        "X": 957.44385,
-        "Y": 1433.1482
+        "X": 104.66019,
+        "Y": 790.8185
       }
     },
     {
       "ChildId": "db0daf0f-2e6b-4252-86f6-cb6c882bf3ed"/*Vector4Components*/,
       "Position": {
-        "X": 218.29349,
-        "Y": 1018.45105
+        "X": 104.66019,
+        "Y": 930.8185
       }
     },
     {
@@ -329,6 +287,13 @@
       "Position": {
         "X": 852.9934,
         "Y": 648.5422
+      }
+    },
+    {
+      "ChildId": "e6544c1b-7650-4abc-8d61-86b0b62b8079"/*DepthStencilState*/,
+      "Position": {
+        "X": 1152.7358,
+        "Y": 868.8868
       }
     },
     {
@@ -343,6 +308,13 @@
       "Position": {
         "X": 1169.585,
         "Y": 272.71463
+      }
+    },
+    {
+      "ChildId": "fe2fd76e-15eb-4ea0-9356-042577214232"/*GetForegroundColor*/,
+      "Position": {
+        "X": -486.14932,
+        "Y": 829.4215
       }
     }
   ],

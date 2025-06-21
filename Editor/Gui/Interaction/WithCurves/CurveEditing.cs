@@ -97,7 +97,7 @@ public abstract class CurveEditing
 
             if (ImGui.BeginMenu("Before curve..."))
             {
-                foreach (Utils.OutsideCurveBehavior mapping in Enum.GetValues(typeof(Utils.OutsideCurveBehavior)))
+                foreach (CurveUtils.OutsideCurveBehavior mapping in Enum.GetValues(typeof(CurveUtils.OutsideCurveBehavior)))
                 {
                     if (ImGui.MenuItem(mapping.ToString(), null))
                     {
@@ -111,7 +111,7 @@ public abstract class CurveEditing
 
             if (ImGui.BeginMenu("After curve..."))
             {
-                foreach (Utils.OutsideCurveBehavior mapping in Enum.GetValues(typeof(Utils.OutsideCurveBehavior)))
+                foreach (CurveUtils.OutsideCurveBehavior mapping in Enum.GetValues(typeof(CurveUtils.OutsideCurveBehavior)))
                 {
                     if (ImGui.MenuItem(mapping.ToString(), null))
                     {
@@ -246,7 +246,7 @@ public abstract class CurveEditing
                                  });
     }
 
-    private void ApplyPostCurveMapping(Utils.OutsideCurveBehavior mapping)
+    private void ApplyPostCurveMapping(CurveUtils.OutsideCurveBehavior mapping)
     {
         foreach (var curve in GetAllCurves())
         {
@@ -254,7 +254,7 @@ public abstract class CurveEditing
         }
     }
 
-    private void ApplyPreCurveMapping(Utils.OutsideCurveBehavior mapping)
+    private void ApplyPreCurveMapping(CurveUtils.OutsideCurveBehavior mapping)
     {
         foreach (var curve in GetAllCurves())
         {

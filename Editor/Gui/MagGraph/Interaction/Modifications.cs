@@ -14,6 +14,41 @@ namespace T3.Editor.Gui.MagGraph.Interaction;
 
 internal static class Modifications
 {
+
+    internal static ChangeSymbol.SymbolModificationResults AlignSelectionToLeft(GraphUiContext context)
+    {
+        var results = ChangeSymbol.SymbolModificationResults.Nothing;
+        
+        if (context.Selector.Selection.Count == 0)
+            return results;
+
+        if(!SymbolUiRegistry.TryGetSymbolUi(context.CompositionInstance.Symbol.Id, out var compositionUi))
+        {
+            Log.Warning("Can't find composition ui?");
+            return results;
+        }
+
+        var minX = float.PositiveInfinity;
+        foreach (var i in context.Selector.Selection)
+        {
+            minX = MathF.Min(minX, i.PosOnCanvas.X);
+        }
+        
+        var moveCommand = new ModifyCanvasElementsCommand(compositionUi.Symbol.Id, context.Selector.Selection, context.Selector );
+        
+        foreach (var i in context.Selector.Selection)
+        {
+            var pos = i.PosOnCanvas;
+            pos.X = minX;
+            i.PosOnCanvas= pos;
+        }
+        
+        moveCommand.StoreCurrentValues();
+        UndoRedoStack.Add(moveCommand);
+        return ChangeSymbol.SymbolModificationResults.Nothing;
+    }
+    
+    
     /// <summary>
     /// Deletes the selected items and tries to collapse the gaps and patches the connection gaps is possible
     /// </summary>

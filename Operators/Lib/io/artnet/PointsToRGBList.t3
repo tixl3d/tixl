@@ -1,0 +1,11 @@
+{
+  "Id": "0e881c4d-c4ed-42c1-a2c9-d076b0489395"/*PointsToRGBList*/,
+  "Inputs": [
+    {
+      "Id": "b98449e7-b7ef-4b15-883c-28bf7662c987"/*Points*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

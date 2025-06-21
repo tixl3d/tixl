@@ -570,7 +570,7 @@ public abstract class InputValueUi<T> : IInputUi
         if (inputToken == null)
             return;
 
-        Relevancy = JsonUtils.TryGetEnum<Relevancy>(inputToken["Relevancy"], out var relevancy) 
+        Relevancy = JsonUtils.TryGetEnumValue<Relevancy>(inputToken["Relevancy"], out var relevancy) 
                         ? relevancy 
                         : DefaultRelevancy;
         

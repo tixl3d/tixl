@@ -1,0 +1,23 @@
+{
+  "Id": "ca6f09ec-bbc4-4365-8210-bc10cd8d9f94"/*MergeIntLists*/,
+  "Inputs": [
+    {
+      "Id": "387fb1db-944f-4eb1-bb6f-b149e4a51a42"/*StartIndices*/,
+      "DefaultValue": {
+        "Values": []
+      }
+    },
+    {
+      "Id": "9e60f3e7-a891-4a68-b186-21bc0145bdc6"/*MaxSize*/,
+      "DefaultValue": -1
+    },
+    {
+      "Id": "bdfe5576-2f45-473d-bb9d-95fc453fc774"/*InputLists*/,
+      "DefaultValue": {
+        "Values": []
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

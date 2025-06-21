@@ -252,16 +252,6 @@
       "SymbolId": "53d3eebd-4ead-4965-b26d-10a8bbd48182",
       "InputValues": [
         {
-          "Id": "1592e94b-a20d-463c-baec-5fb5dfa85532"/*BackgroundColor*/,
-          "Type": "System.Numerics.Vector4",
-          "Value": {
-            "X": 1.0,
-            "Y": 1.0,
-            "Z": 1.0,
-            "W": 1.0
-          }
-        },
-        {
           "Id": "3655d507-96b3-4ded-9cef-886ea703ca89"/*Amount*/,
           "Type": "System.Single",
           "Value": 0.35

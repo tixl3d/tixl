@@ -36,6 +36,5 @@ internal sealed class MagGraphAnnotation : ISelectableCanvasObject, IValueSnapAt
             snapResult.TryToImproveWithAnchorValue(DampedPosOnCanvas.Y);
             snapResult.TryToImproveWithAnchorValue(DampedPosOnCanvas.Y + DampedSize.Y);
         }
-
     }
 }

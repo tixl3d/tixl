@@ -101,7 +101,8 @@
       "Position": {
         "X": -6.2594147,
         "Y": 914.6292
-      }
+      },
+      "UseVec2Control": "Range"
     },
     {
       "InputId": "e104b69f-c9ca-4125-b99f-f85f48409aa0"/*CamNearFarClip*/,

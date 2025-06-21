@@ -18,6 +18,7 @@ public class ProjectSettings : Settings<ProjectSettings.ConfigData>
         public bool EnablePlaybackControlWithKeyboard = true;
 
         public bool SkipOptimization;
+        public bool EnableDirectXDebug;
         
         public bool LogAssemblyVersionMismatches = false;
             
@@ -26,6 +27,8 @@ public class ProjectSettings : Settings<ProjectSettings.ConfigData>
         public WindowMode DefaultWindowMode = WindowMode.Fullscreen;
         public int DefaultOscPort = 8000;
 
+        
+        
         // Profiling
         public bool EnableBeatSyncProfiling = false;
         public float BeatSyncOffsetMs = 0;

@@ -67,6 +67,8 @@ internal enum UserActions
     ZoomIn,
     ZoomOut,
 
+    AlignSelectionLeft,
+    
     NavigateBackwards,
     NavigateForward,
 
@@ -328,6 +330,8 @@ internal sealed class KeyboardBinding
                   new KeyboardBinding(UserActions.SelectToBelow, new KeyCombination(Key.CursorDown)) { _needsWindowFocus = true },
                   new KeyboardBinding(UserActions.SelectToLeft, new KeyCombination(Key.CursorLeft)) { _needsWindowFocus = true },
 
+                  new KeyboardBinding(UserActions.AlignSelectionLeft, new KeyCombination(Key.A, alt:true)) { _needsWindowFocus = true },
+                  
                   // Layout and window management
                   new KeyboardBinding(UserActions.ToggleAllUiElements, new KeyCombination(Key.Esc, shift: true)),
                   new KeyboardBinding(UserActions.ToggleFullscreen, new KeyCombination(Key.F11)),

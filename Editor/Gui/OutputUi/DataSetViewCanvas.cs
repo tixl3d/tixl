@@ -652,7 +652,7 @@ public sealed class DataSetViewCanvas
     private bool _onlyRecentEvents = true;
     private bool _scroll = true;
     public bool ShowInteraction = true;
-    public int MaxTreeLevel = 2;
+    public int MaxTreeLevel = 3;
     private double _selectRangeStart;
     private double _selectRangeEnd;
     private double _firstEventTime;

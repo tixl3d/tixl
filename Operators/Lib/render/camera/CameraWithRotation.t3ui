@@ -28,7 +28,7 @@
       "Clamp": true
     },
     {
-      "InputId": "2ba9e2c0-f494-49aa-9030-172177f06eda"/*ViewportShift*/,
+      "InputId": "2ba9e2c0-f494-49aa-9030-172177f06eda"/*LensShift*/,
       "Position": {
         "X": 0.0,
         "Y": 135.0
@@ -72,7 +72,7 @@
       }
     },
     {
-      "InputId": "766a9e48-9f3b-4204-973c-751bb7180400"/*NearFarClip*/,
+      "InputId": "766a9e48-9f3b-4204-973c-751bb7180400"/*ClipPlanes*/,
       "Position": {
         "X": 0.0,
         "Y": 0.0

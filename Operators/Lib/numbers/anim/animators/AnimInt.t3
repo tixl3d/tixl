@@ -6,32 +6,12 @@
       "DefaultValue": 1.0
     },
     {
-      "Id": "2dbc22a0-f8c7-4545-941f-544250e760d9"/*Bias*/,
-      "DefaultValue": 0.5
-    },
-    {
-      "Id": "33a4f3f1-2344-4785-a97e-0ff631370484"/*Amplitude*/,
-      "DefaultValue": 1.0
-    },
-    {
-      "Id": "4c8d2efc-f4e0-4199-90cf-815f77d390ad"/*Ratio*/,
-      "DefaultValue": 1.0
-    },
-    {
       "Id": "5b3d75c9-aac5-44d7-9e68-828cd87cdc0c"/*Phase*/,
       "DefaultValue": 0.0
     },
     {
       "Id": "72da2976-f1a6-4b3e-a8f0-b43e278e5056"/*AllowSpeedFactor*/,
       "DefaultValue": 1
-    },
-    {
-      "Id": "8e6216f0-ca8e-4218-b174-24cc19e781c8"/*Shape*/,
-      "DefaultValue": 1
-    },
-    {
-      "Id": "a7915472-8744-409b-80aa-eb3c9c7fe9ba"/*Offset*/,
-      "DefaultValue": 0.0
     },
     {
       "Id": "e037f3b2-c5eb-4d89-bcbc-ad80aca1cd36"/*OverrideTime*/,

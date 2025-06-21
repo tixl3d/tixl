@@ -71,7 +71,6 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         // Interaction
         public bool WarnBeforeLibEdit = true;
         public bool SmartGroupDragging = false;
-        public bool DisconnectOnUnsnap = true;
         
         public readonly bool ShowExplicitTextureFormatInOutputWindow = false;
         public bool UseArcConnections = true;
@@ -80,9 +79,13 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         public ValueEditMethods ValueEditMethod;
         public int ValueEditSmoothing = 0;
         public float ScrollSmoothing = 0.075f;
+        
+        // Mag Graph
+        public bool DisconnectOnUnsnap = true;
         public float MaxCurveRadius = 350;
         public int MaxSegmentCount = 32;
-
+        public bool EnableHorizontalSnapping = false;
+        
         public bool AddSpacesToParameterNames = true;
 
         public float ClickThreshold = 5; // Increase for high-res display and pen tablets
@@ -141,8 +144,10 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
 
         public string ColorThemeName = string.Empty;
             
+        // Other
         public bool ExpandSpectrumVisualizerVertically = true;
-            
+        public int GridOutputColumnCount = 16;
+
         //private string _defaultNewProjectDirectory = _defaultProjectFolder;
         //public string DefaultNewProjectDirectory => _defaultNewProjectDirectory ??= _defaultProjectFolder;
 

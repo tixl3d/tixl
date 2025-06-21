@@ -1,0 +1,33 @@
+{
+  "Id": "98efc7c8-cafd-45ee-8746-14f37e9f59f8"/*ArtnetOutput*/,
+  "Inputs": [
+    {
+      "Id": "168d0023-554f-46cd-9e62-8f3d1f564b8d"/*SendTrigger*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "34aeeda5-72b0-4f13-bfd3-4ad5cf42b24f"/*StartUniverse*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "35a5efd8-b670-4f2d-bde0-380789e85e0c"/*SubNetMask*/,
+      "DefaultValue": "255.255.255.0"
+    },
+    {
+      "Id": "73babdb1-f88f-4e4d-aa3f-0536678b0793"/*Reconnect*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "f7520a37-c2d4-41fa-a6ba-a6ed0423a4ec"/*InputsValues*/,
+      "DefaultValue": {
+        "Values": []
+      }
+    },
+    {
+      "Id": "fcbfe87b-b8aa-461c-a5ac-b22bb29ad36d"/*LocalIpAddress*/,
+      "DefaultValue": "10.10.0.0"
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

@@ -1,0 +1,13 @@
+{
+  "Id": "c35dc0e1-75cb-434e-b594-b2a4fb687d55"/*IntList*/,
+  "Inputs": [
+    {
+      "Id": "0e068da1-1e4b-40ab-b86f-c05622d34717"/*List*/,
+      "DefaultValue": {
+        "Values": []
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

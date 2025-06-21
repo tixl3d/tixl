@@ -116,11 +116,13 @@ vsOutput vsMain4(uint vertexId : SV_VertexID)
     return output;
 }
 
-//=== Global functions ==============================================
-/*{GLOBALS}*/
 
 //=== Additional Resources ==========================================
 /*{RESOURCES(t6)}*/
+
+//=== Global functions ==============================================
+/*{GLOBALS}*/
+
 
 //=== Field functions ===============================================
 /*{FIELD_FUNCTIONS}*/
@@ -258,7 +260,8 @@ PSOutput psMain(vsOutput input)
 #endif
 
     // float4 albedo = BaseColorMap.Sample(TexSampler, uv) *
-    float4 albedo = float4(GetField(float4(p, 1)).rgb, 1) * BaseColorMap.Sample(TexSampler, uv);
+    float4 fieldColor = float4(GetField(float4(p, 1)).rgb, 1);
+    float4 albedo = BaseColorMap.Sample(TexSampler, uv);
     // float4 fieldAlbedo = GetField(float4(p,1));
 
     float4 roughnessMetallicOcclusion = RSMOMap.Sample(TexSampler, uv);
@@ -356,15 +359,16 @@ PSOutput psMain(vsOutput input)
 
     // Fog
     float depth = dot(eye - p, -input.viewDir);
-    if (FogDistance > 0)
-    {
-        float fog = pow(saturate(depth / FogDistance), FogBias);
-        litColor.rgb = lerp(litColor.rgb, FogColor.rgb, fog * FogColor.a);
-    }
+    float fog = FogDistance <= 0 ? 0 : pow(saturate(depth / FogDistance), FogBias);
+
+    litColor.rgb = lerp(litColor.rgb * fieldColor.rgb, FogColor.rgb, fog * FogColor.a);
+
+    // litColor.rgb *= fieldColor.rgb;
 
     litColor += float4(EmissiveColorMap.Sample(TexSampler, uv).rgb * EmissiveColor.rgb, 0);
     litColor.a *= albedo.a;
-    litColor.rgb = lerp(AmbientOcclusion.rgb, litColor.rgb, ComputeAO(p, normal, AODistance, 3, AmbientOcclusion.a));
+
+    litColor.rgb = lerp(AmbientOcclusion.rgb, litColor.rgb, ComputeAO(p, normal, AODistance, 3, AmbientOcclusion.a * (1 - fog)));
 
     PSOutput result;
     result.color = clamp(litColor, 0, float4(1000, 1000, 1000, 1));

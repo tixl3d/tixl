@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -6,7 +7,7 @@ using T3.Serialization;
 
 namespace T3.Core.Animation;
 
-public class VDefinition
+public sealed class VDefinition
 {
     public enum Interpolation
     {
@@ -32,28 +33,17 @@ public class VDefinition
         set => _u = Math.Round(value, Curve.TIME_PRECISION);
     }
             
-    public double Value { get; set; }
-    public Interpolation InType { get; set; }
-    public Interpolation OutType { get; set; }
+    public double Value { get; set; } = 0.0;
+    public Interpolation InType { get; set; } = Interpolation.Linear;
+    public Interpolation OutType { get; set; } = Interpolation.Linear;
 
-    public EditMode InEditMode { get; set; }
-    public EditMode OutEditMode { get; set; }
+    public EditMode InEditMode { get; set; } = EditMode.Linear;
+    public EditMode OutEditMode { get; set; } = EditMode.Linear;
 
     public double InTangentAngle { get; set; }
     public double OutTangentAngle { get; set; }
     public bool Weighted { get; set; }
     public bool BrokenTangents { get; set; }
-
-    public VDefinition()
-    {
-        Value = 0.0;
-        InType = Interpolation.Linear;
-        OutType = Interpolation.Linear;
-        InEditMode = EditMode.Linear;
-        OutEditMode = EditMode.Linear;
-        InTangentAngle = 0.0;
-        OutTangentAngle = 0.0;
-    }
 
     public VDefinition Clone()
     {
@@ -82,27 +72,27 @@ public class VDefinition
         OutTangentAngle = def.OutTangentAngle;            
     }
 
-    public void Read(JToken jsonV)
+    internal void Read(JToken jsonV)
     {
-        Value = jsonV["Value"].Value<double>();
-        InType = (Interpolation)Enum.Parse(typeof(Interpolation), jsonV["InType"].Value<string>());
-        OutType = (Interpolation)Enum.Parse(typeof(Interpolation), jsonV["OutType"].Value<string>());
+        Value = jsonV.Value<double>(nameof(Value));
+        InType = jsonV[nameof(InType)].GetEnumValue(Interpolation.Linear);
+        OutType = jsonV[nameof(OutType)].GetEnumValue(Interpolation.Linear);
+        
+        InTangentAngle = jsonV.Value<double>(nameof(InTangentAngle));
+        OutTangentAngle = jsonV.Value<double>(nameof(OutTangentAngle));
 
-        InTangentAngle = jsonV.Value<double>("InTangentAngle");
-        OutTangentAngle = jsonV.Value<double>("OutTangentAngle");
-
-        InEditMode = (EditMode)Enum.Parse(typeof(EditMode), jsonV["InEditMode"].Value<string>());
-        OutEditMode = (EditMode)Enum.Parse(typeof(EditMode), jsonV["OutEditMode"].Value<string>());
+        InEditMode = jsonV[nameof(InEditMode)].GetEnumValue(EditMode.Linear);
+        OutEditMode = jsonV[nameof(OutEditMode)].GetEnumValue(EditMode.Linear);
     }
 
-    public void Write(JsonTextWriter writer)
+    internal void Write(JsonTextWriter writer)
     {
-        writer.WriteValue("Value", Value);
-        writer.WriteObject("InType", InType);
-        writer.WriteObject("OutType", OutType);
-        writer.WriteObject("InEditMode", InEditMode);
-        writer.WriteObject("OutEditMode", OutEditMode);
-        writer.WriteValue("InTangentAngle", InTangentAngle);
-        writer.WriteValue("OutTangentAngle", OutTangentAngle);
+        writer.WriteValue(nameof(Value), Value);
+        writer.WriteObject(nameof(InType), InType);
+        writer.WriteObject(nameof(OutType), OutType);
+        writer.WriteObject(nameof(InEditMode), InEditMode);
+        writer.WriteObject(nameof(OutEditMode), OutEditMode);
+        writer.WriteValue(nameof(InTangentAngle), InTangentAngle);
+        writer.WriteValue(nameof(OutTangentAngle), OutTangentAngle);
     }
-};
+}

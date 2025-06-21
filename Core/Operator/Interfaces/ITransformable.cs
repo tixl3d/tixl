@@ -3,13 +3,11 @@ using T3.Core.Operator.Slots;
 
 namespace T3.Core.Operator.Interfaces;
 
+/// <summary>
+/// Allows operators to be controlled by a 3d transform gizmo
+/// </summary>
 public interface ITransformable
 {
-    // // Type Type { get; } // c#8 default interface impl would be nice for this
-    // System.Numerics.Vector3 Translation { get; set; }
-    // System.Numerics.Vector3 Rotation { get; set; }
-    // System.Numerics.Vector3 Scale { get; set; }
-        
     IInputSlot TranslationInput { get; }
     IInputSlot RotationInput { get;  }
     IInputSlot ScaleInput { get;  }

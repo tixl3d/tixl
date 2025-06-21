@@ -147,8 +147,8 @@ internal static class CustomComponents
                                  : UiColors.TextDisabled.Rgba;
         ImGui.PushStyleColor(ImGuiCol.Text, stateTextColor);
 
-        var padding = string.IsNullOrEmpty(label) ? new Vector2(0.1f, 0.5f) : new Vector2(0.5f, 0.5f);
-        ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, padding);
+        var align = string.IsNullOrEmpty(label) ? new Vector2(0.1f, 0.5f) : new Vector2(0.5f, 0.5f);
+        ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, align);
         ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Vector2.Zero);
 
         ImGui.PushFont(Icons.IconFont);
@@ -821,13 +821,15 @@ internal static class CustomComponents
         }
     }
 
-    public static void StylizedText(string text, ImFontPtr imFont, Color color)
+    public static void StylizedText(string text, ImFontPtr imFont, Color color, bool addPadding= false)
     {
         ImGui.PushFont(imFont);
         ImGui.PushStyleColor(ImGuiCol.Text, color.Rgba);
         ImGui.TextUnformatted(text);
         ImGui.PopStyleColor();
         ImGui.PopFont();
-        ImGui.Dummy(new Vector2(1, 5 * T3Ui.UiScaleFactor));
+        
+        if(addPadding)
+            ImGui.Dummy(new Vector2(1, 5 * T3Ui.UiScaleFactor));
     }
 }

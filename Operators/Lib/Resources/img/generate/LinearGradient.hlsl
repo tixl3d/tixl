@@ -40,6 +40,26 @@ inline float fmod(float x, float y)
     return (x - y * floor(x / y));
 }
 
+float PingPongRepeat(float x, float pingPong, float repeat)
+{
+    float baseValue = x + 0.5;
+    float repeatValue = frac(baseValue);
+    float pingPongValue = 1.0 - abs(frac(x * 0.5) * 2.0 - 1.0);
+    float singlePingPong = abs(x);
+
+    // Select pingpong type: single or repeating
+    float pingPongOutput = lerp(singlePingPong, pingPongValue, step(0.5, repeat));
+
+    // Select between base, repeat, or pingpong
+    float value = lerp(baseValue, repeatValue, step(0.5, repeat)); // If repeat, use repeatValue
+    value = lerp(value, pingPongOutput, step(0.5, pingPong));      // If pingpong, override with pingpong
+
+    // Clamp final result if not repeating
+    value = lerp(saturate(value), value, step(0.5, repeat)); // If NOT repeating, clamp to [0..1]
+
+    return value;
+}
+
 float4 psMain(vsOutput psInput) : SV_TARGET
 {
     float2 uv = psInput.texCoord;
@@ -62,26 +82,12 @@ float4 psMain(vsOutput psInput) : SV_TARGET
 
     float c = dot(p - Center, angle);
     c += Offset;
-    c = PingPong > 0.5
-            ? (Repeat < 0.5 ? (abs(c) / Width)
-                            //: (1.0000 - abs(fmod(c, Width * 2) - Width) / Width))
-                            : (1.0000 - abs(fmod((c + 0.5 / TargetHeight) / Width, 2) - 1)))
-            : c / Width + 0.5;
-
-    c = Repeat > 0.5
-            ? fmod(c, 1)
-            : saturate(c);
+    c = PingPongRepeat(c / Width, PingPong > 0.5, Repeat > 0.5);
 
     float dBiased = ApplyGainAndBias(saturate(c), GainAndBias);
-    // float dBiased = Bias >= 0
-    //                     ? pow(c, Bias + 1)
-    //                     : 1 - pow(clamp(1 - c, 0, 10), -Bias + 1);
-
     dBiased = clamp(dBiased, 0.000001, 0.99999);
-    // dBiased = c;
 
     float4 gradient = Gradient.Sample(clampedSampler, float2(dBiased, 0));
-    // return gradient;
 
     if (IsTextureValid < 0.5)
         return gradient;

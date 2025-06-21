@@ -6,11 +6,12 @@
       "DefaultValue": 2
     },
     {
-      "Id": "5fe2ab92-f8e5-400d-b5a3-197f20570d6f"/*Size*/,
-      "DefaultValue": {
-        "X": 1.0,
-        "Y": 0.5
-      }
+      "Id": "5fe2ab92-f8e5-400d-b5a3-197f20570d6f"/*Radius*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "6a392bc1-2adf-4a50-bb3f-5d4f2a63bf0b"/*Thickness*/,
+      "DefaultValue": 0.5
     },
     {
       "Id": "dbc72bd7-6191-4145-a69f-d17b3808b3ab"/*Center*/,

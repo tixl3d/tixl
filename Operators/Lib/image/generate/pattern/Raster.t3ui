@@ -130,7 +130,8 @@
         "Y": 167.12245
       },
       "GroupTitle": "Transform Raster",
-      "Description": "Offsets the position of the raster texture.\nAn offset of 1 is equivalent to the distance between dots."
+      "Description": "Offsets the position of the raster texture.\nAn offset of 1 is equivalent to the distance between dots.",
+      "UseVec2Control": "Position"
     },
     {
       "InputId": "c1378bbd-70df-4b6e-876f-5f1f1c59a617"/*RedToDotSize*/,

@@ -4,6 +4,7 @@ using SharpDX;
 using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
+using T3.Core.IO;
 using T3.Core.Resource;
 using T3.Core.SystemUi;
 using T3.Editor.Gui;
@@ -148,13 +149,36 @@ internal static class ProgramWindows
                 FeatureLevel.Level_11_0,
             };
 
+            
+            
             // Create Device and SwapChain with the selected adapter
-            Device.CreateWithSwapChain(selectedAdapter, // Pass the selected adapter
-                                       DeviceCreationFlags.Debug | DeviceCreationFlags.BgraSupport,
-                                       levels,
-                                       Main.SwapChainDescription,
-                                       out device,
-                                       out var swapchain);
+            var deviceCreationFlags = DeviceCreationFlags.BgraSupport;
+
+            if (ProjectSettings.Config.EnableDirectXDebug)
+                deviceCreationFlags |= DeviceCreationFlags.Debug;
+            
+            Log.Debug("Creating Device...");
+
+            SwapChain swapchain;
+            try
+            {
+                Device.CreateWithSwapChain(selectedAdapter,
+                                           deviceCreationFlags,
+                                           levels,
+                                           Main.SwapChainDescription,
+                                           out device,
+                                           out  swapchain);
+            }
+            catch (Exception e)
+            {
+                Log.Warning("Failed to create device with advanced features. Trying basic settings. " + e.Message);
+                Device.CreateWithSwapChain(selectedAdapter,
+                                           DeviceCreationFlags.None,
+                                           levels,
+                                           Main.SwapChainDescription,
+                                           out device,
+                                           out  swapchain);
+            }
 
             _device = device;
             _deviceContext = device.ImmediateContext;

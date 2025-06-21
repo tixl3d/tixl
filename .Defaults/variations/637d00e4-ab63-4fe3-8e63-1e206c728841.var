@@ -430,6 +430,23 @@
           "48a0699d-1207-4e18-ab9b-4da7f77cc7aa": ""
         }
       }
+    },
+    {
+      "Id": "1c7326c5-3cfc-4529-afe6-8b5193cf96c4",
+      "IsPreset": true,
+      "ActivationIndex": 22,
+      "Title": "City Fractor",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 1023.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "3c366d34-c398-410e-972b-d8cc2baffddb": 2.0,
+          "874ae9c8-5835-4d0c-9bef-253ac75d19b2": 0.8,
+          "bde89b93-224c-4a3f-85ab-d85b0401c02a": "// Based on https://www.shadertoy.com/view/cdG3Wd \n// by @XorDev (with support from FabriceNeyret2 & coyote)\nfloat dist = 0.0;\nfor (float scale = 100.0; scale > 0.1; scale *= 0.4)\n{\n    // Rotate octave 2 radians\n    float angle = A; // A: 2.0\n    float c = cos(angle);\n    float s = sin(angle);\n    float2x2 rot = float2x2(c, -s, s, c);\n    p.xz = mul(p.xz, rot);\n\n    p = abs(mod(p, scale * A) - scale);\n    p = scale * B - p; // B: 0.8\n\n    float3 cubes = min(p, p.xxx);\n    cubes = min(cubes, p.zzz);\n\n    dist = max(dist, cubes.y);\n}\nreturn dist;"
+        }
+      }
     }
   ]
 }

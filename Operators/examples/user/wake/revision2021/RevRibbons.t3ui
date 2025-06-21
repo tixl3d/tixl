@@ -188,8 +188,8 @@
     {
       "ChildId": "5fa2a015-74cb-4a7a-9104-4f275a777cbe"/*SyncedRandomScroller*/,
       "Position": {
-        "X": 1850.6312,
-        "Y": 159.35669
+        "X": 1905.6952,
+        "Y": 96.62542
       }
     },
     {
@@ -401,10 +401,17 @@
       }
     },
     {
+      "ChildId": "cb37a8cc-d64a-4262-9168-450d08987dc0"/*RenderTarget*/,
+      "Position": {
+        "X": 1734.9186,
+        "Y": 197.84563
+      }
+    },
+    {
       "ChildId": "cec5d414-bd1a-42fe-b858-5a814b22764c"/*DepthOfField*/,
       "Position": {
-        "X": 1700.3167,
-        "Y": 264.78806
+        "X": 1874.9186,
+        "Y": 197.84563
       }
     },
     {

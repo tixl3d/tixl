@@ -10,6 +10,11 @@ namespace T3.Core.DataTypes.ShaderGraph;
 public sealed class CodeAssembleContext
 {
     /**
+     * Resource types that need to be defined before resources...
+     */
+    public readonly Dictionary<string, string> ResourceTypes = new();
+    
+    /**
      * A dictionary containing the pure methods that can be reuses by
      * one or more graph nodes.
      */

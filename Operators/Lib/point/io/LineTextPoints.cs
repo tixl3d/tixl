@@ -198,7 +198,7 @@ internal sealed class LineTextPoints : Instance<LineTextPoints>
             cursorPos.X += glyph.AdvanceX;
 
             cursorX += glyph.AdvanceX;
-            cursorX += characterSpacing * MathF.Abs(_lineFont.UnitsPerEm) * 0.01f;
+            cursorX += characterSpacing * MathF.Abs(_lineFont?.UnitsPerEm ?? 0) * 0.01f;
             lastCharForKerning = c;
         }
 

@@ -149,12 +149,11 @@ sampler texSampler : register(s0);
     p.FX2 += factors[Attribute_F2] * strength;
 
     float4 deltaRot = float4(0, 0, 0, 1);
-    deltaRot = qMul(deltaRot, qFromAngleAxis(factors[Attribute_Rotate_X] * TAU, float3(1, 0, 0)));
-    deltaRot = qMul(deltaRot, qFromAngleAxis(factors[Attribute_Rotate_X] * TAU, float3(0, 1, 0)));
-    deltaRot = qMul(deltaRot, qFromAngleAxis(factors[Attribute_Rotate_X] * TAU, float3(0, 0, 1)));
+    deltaRot = qMul(deltaRot, qFromAngleAxis(radians(-factors[Attribute_Rotate_X]), float3(1, 0, 0)));
+    deltaRot = qMul(deltaRot, qFromAngleAxis(radians(-factors[Attribute_Rotate_Y]), float3(0, 1, 0)));
+    deltaRot = qMul(deltaRot, qFromAngleAxis(radians(-factors[Attribute_Rotate_Z]), float3(0, 0, 1)));
 
-    deltaRot = normalize(deltaRot);
-    p.Rotation = qMul(deltaRot, deltaRot);
+    p.Rotation = normalize(deltaRot);
 
     // // Rotation
     // // ResultPoints[index].Rotation = p.Rotation;

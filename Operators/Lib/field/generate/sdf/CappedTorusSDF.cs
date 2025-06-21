@@ -4,10 +4,17 @@ namespace Lib.field.generate.sdf;
 
 [Guid("b85198a8-6475-45e1-b2d2-83ec8f59d6ed")]
 internal sealed class CappedTorusSDF : Instance<CappedTorusSDF>
-,IGraphNodeOp
+                                        , ITransformable
+                                        , IGraphNodeOp
 {
     [Output(Guid = "170b545f-c7c0-47d9-8b19-d8d8e8a3d2fa")]
     public readonly Slot<ShaderGraphNode> Result = new();
+
+    // ITransformable interface implementation (Gizmo support)
+    IInputSlot ITransformable.TranslationInput => Center;
+    IInputSlot ITransformable.RotationInput => null;
+    IInputSlot ITransformable.ScaleInput => null;
+    public Action<Instance, EvaluationContext> TransformCallback { get; set; }
 
     public CappedTorusSDF()
     {
@@ -18,6 +25,7 @@ internal sealed class CappedTorusSDF : Instance<CappedTorusSDF>
 
     private void Update(EvaluationContext context)
     {
+        TransformCallback?.Invoke(this, context); // Needed for Gizmo support
         ShaderNode.Update(context);
     }
 

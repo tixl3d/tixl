@@ -15,6 +15,10 @@
 - [x] Prevent Keyboard Camera interaction while input field is active 
 - [x] Exit should ask before quit
 - [ ] Rearranging parameters with additional annotations (e.g. ShaderParameters) breaks operator 
+- [ ] Pre/Post Curve modes are applied to all (not just selected curves)
+- [ ] Indicate Pre/Post curve moves in timeline
+- [ ] Ask before removing inputs and outputs (can't be undone)
+- [ ] SequenceAnimUi should be visible before evaluation (Check AnimValue)
 
 ## Project handling
 

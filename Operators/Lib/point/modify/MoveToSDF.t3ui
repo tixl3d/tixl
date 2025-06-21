@@ -74,8 +74,8 @@
       "InputId": "e153cc10-a554-4e18-bece-691956df573f"/*Field*/,
       "Relevancy": "Required",
       "Position": {
-        "X": 537.42883,
-        "Y": 972.1018
+        "X": 381.89795,
+        "Y": 960.0759
       },
       "Description": "The SDF field providing the distance."
     },
@@ -127,8 +127,8 @@
     {
       "ChildId": "57e314ce-d022-4e5f-a97b-9531cfd8c0b5"/*ReadFile*/,
       "Position": {
-        "X": 537.42883,
-        "Y": 1007.10175
+        "X": 381.89795,
+        "Y": 995.0758
       }
     },
     {
@@ -190,15 +190,15 @@
     {
       "ChildId": "c2f4dfde-56b8-4acc-81f4-aa2df4876be5"/*ComputeShaderFromSource*/,
       "Position": {
-        "X": 817.42883,
-        "Y": 972.1018
+        "X": 865.1533,
+        "Y": 869.8349
       }
     },
     {
       "ChildId": "e4dd6046-c4a6-4cc4-91ff-6953dd957b07"/*GenerateShaderGraphCode*/,
       "Position": {
-        "X": 677.42883,
-        "Y": 972.1018
+        "X": 521.89795,
+        "Y": 960.0759
       }
     }
   ],

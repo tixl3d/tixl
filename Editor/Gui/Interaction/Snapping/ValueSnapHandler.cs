@@ -31,7 +31,7 @@ internal sealed class ValueSnapHandler
     public bool TryCheckForSnapping(double targetValue, 
                                     out double snappedValue,
                                     float canvasScale = 1,
-                                    List<IValueSnapAttractor>? ignoredAttractors = null,
+                                    IEnumerable<IValueSnapAttractor>? ignoredAttractors = null,
                                     IEnumerable<IValueSnapAttractor>? moreAttractors = null)
     {
         _snapResult.ResetForTargetValue(targetValue, canvasScale);

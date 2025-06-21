@@ -113,5 +113,8 @@ internal sealed class DrawMesh : Instance<DrawMesh>, ICustomDropdownHolder, ICom
         [Input(Guid = "2fdf0184-1459-4589-9633-2c739462ed66")]
         public readonly InputSlot<T3.Core.DataTypes.ShaderGraphNode> FragmentField = new InputSlot<T3.Core.DataTypes.ShaderGraphNode>();
 
+        [Input(Guid = "96df9e72-189f-4efc-82a6-b2f482166e34")]
+        public readonly InputSlot<string> ShaderDefines = new InputSlot<string>();
+
 
 }

@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
+using T3.Editor.Gui.Interaction.Snapping;
 using T3.Editor.Gui.OutputUi;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
@@ -12,7 +13,7 @@ using T3.Editor.UiModel.Selection;
 
 namespace T3.Editor.Gui.MagGraph.Model;
 
-internal sealed class MagGraphItem : ISelectableCanvasObject
+internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttractor
 {
     public enum Variants
     {
@@ -133,6 +134,8 @@ internal sealed class MagGraphItem : ISelectableCanvasObject
     public const float LineHeight = 35;
     public static readonly Vector2 GridSize = new(Width, LineHeight);
 
+    public ImRect Bounds => ImRect.RectWithSize(PosOnCanvas, Size);
+    
     public static ImRect GetItemsBounds(IEnumerable<MagGraphItem> items)
     {
         ImRect extend = default;
@@ -260,6 +263,20 @@ internal sealed class MagGraphItem : ISelectableCanvasObject
 
     public const int FreeAnchor = -1;
 
+    void IValueSnapAttractor.CheckForSnap(ref SnapResult snapResult)
+    {
+        if (snapResult.Orientation == SnapResult.Orientations.Horizontal)
+        {
+            snapResult.TryToImproveWithAnchorValue(DampedPosOnCanvas.X);
+            //snapResult.TryToImproveWithAnchorValue(DampedPosOnCanvas.X + Size.X);
+        }
+        else  if (snapResult.Orientation == SnapResult.Orientations.Vertical)
+        {
+            snapResult.TryToImproveWithAnchorValue(DampedPosOnCanvas.Y);
+            //snapResult.TryToImproveWithAnchorValue(DampedPosOnCanvas.Y + Size.Y);
+        }
+    }
+    
     //
     // public void ForOutputAnchors(Action<AnchorPoint> call)
     // {

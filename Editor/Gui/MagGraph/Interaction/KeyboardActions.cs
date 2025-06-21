@@ -35,11 +35,21 @@ internal static class KeyboardActions
             result |= ChangeSymbol.SymbolModificationResults.StructureChanged;
         }
 
-        if (!T3Ui.IsCurrentlySaving && KeyboardBinding.Triggered(UserActions.DeleteSelection))
+        if (!T3Ui.IsCurrentlySaving && KeyboardBinding.Triggered(UserActions.DeleteSelection)
+                                    && context.Selector.Selection.Count > 0
+                                    && context.StateMachine.CurrentState == GraphStates.Default)
         {
             result |= Modifications.DeleteSelection(context);
         }
 
+        if (!T3Ui.IsCurrentlySaving 
+            && KeyboardBinding.Triggered(UserActions.AlignSelectionLeft)
+            && context.Selector.Selection.Count > 1
+            && context.StateMachine.CurrentState == GraphStates.Default)
+        {
+            result |= Modifications.AlignSelectionToLeft(context);
+        }
+        
         if (KeyboardBinding.Triggered(UserActions.ToggleDisabled))
         {
             NodeActions.ToggleDisabledForSelectedElements(context.Selector);

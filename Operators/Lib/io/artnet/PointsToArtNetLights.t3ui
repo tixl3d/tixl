@@ -1,0 +1,322 @@
+{
+  "Id": "c9d7cd19-7fc6-4491-8dfa-3808725c7857"/*PointsToArtNetLights*/,
+  "Description": "",
+  "InputUis": [
+    {
+      "InputId": "013cc355-91d6-4ea6-b9f7-f1817b89e4a3"/*RedChannel*/,
+      "Position": {
+        "X": -204.96455,
+        "Y": 792.30493
+      },
+      "Min": 0,
+      "Max": 512,
+      "Scale": 1.0
+    },
+    {
+      "InputId": "098f1662-6f47-4dd0-9a73-4c4814aefb23"/*CustomVar2Channel*/,
+      "Position": {
+        "X": -204.96455,
+        "Y": 1542.3049
+      },
+      "Min": 0,
+      "Max": 512,
+      "Scale": 1.0,
+      "Clamp": true
+    },
+    {
+      "InputId": "1348ed7c-79f8-48c6-ac00-e60fb40050db"/*FixtureChannelSize*/,
+      "Position": {
+        "X": -204.96455,
+        "Y": 1242.3049
+      },
+      "Description": "The number of channels for each point. \nE.g. for two points with size of 5  we write 10 to the value list.\n\nThe price alignment can be merged with [MergeFloatLists]",
+      "AddPadding": "True",
+      "Min": 0,
+      "Max": 512,
+      "Scale": 1.0
+    },
+    {
+      "InputId": "18cc3a73-3a1a-4370-87b7-e5cd44f4a3ab"/*SetCustomVar2*/,
+      "Position": {
+        "X": -204.96455,
+        "Y": 1317.3049
+      },
+      "GroupTitle": "CustomVar2"
+    },
+    {
+      "InputId": "1cb93e97-0161-4a77-bbc7-ff30c1972cf8"/*GetF2*/,
+      "Position": {
+        "X": -204.96455,
+        "Y": 417.30493
+      },
+      "GroupTitle": "F2"
+    },
+    {
+      "InputId": "25e5f0ce-5ec8-4c99-beb1-317c6911a128"/*SetCustomVar1*/,
+      "Position": {
+        "X": -204.96455,
+        "Y": 1242.3049
+      },
+      "GroupTitle": "CustomVar1"
+    },
+    {
+      "InputId": "47d7294f-6f73-4e21-ac9a-0fc0817283fb"/*TiltChannel*/,
+      "Position": {
+        "X": -204.96455,
+        "Y": 642.30493
+      },
+      "Min": 0,
+      "Max": 512,
+      "Scale": 1.0
+    },
+    {
+      "InputId": "4922acd8-ab83-4394-8118-c555385c2ce9"/*GetRotation*/,
+      "Position": {
+        "X": -204.96455,
+        "Y": 192.30495
+      },
+      "GroupTitle": "Rotation"
+    },
+    {
+      "InputId": "4a40e022-d206-447c-bda3-d534f231c816"/*TiltFineChannel*/,
+      "Position": {
+        "X": -204.96455,
+        "Y": 717.30493
+      },
+      "Min": 0,
+      "Max": 512,
+      "Scale": 1.0
+    },
+    {
+      "InputId": "4d4b3425-e6ad-4834-a8a7-06c9f9c2b909"/*PanFineChannel*/,
+      "Position": {
+        "X": -204.96455,
+        "Y": 567.30493
+      },
+      "Min": 0,
+      "Max": 512,
+      "Scale": 1.0
+    },
+    {
+      "InputId": "50e849e8-5582-432e-98f7-d8e036273864"/*CustomVar1*/,
+      "Position": {
+        "X": -204.96455,
+        "Y": 1692.3049
+      },
+      "AddPadding": "True",
+      "Min": 0,
+      "Max": 255,
+      "Scale": 1.0,
+      "Clamp": true
+    },
+    {
+      "InputId": "5cdc69f7-45ec-4eec-bfb6-960d6245dafb"/*GetColor*/,
+      "Position": {
+        "X": -26.241165,
+        "Y": 277.234
+      },
+      "GroupTitle": "Color"
+    },
+    {
+      "InputId": "61b48e46-c3d1-46e3-a470-810d55f30aa6"/*Points*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -206.38298,
+        "Y": -0.95744324
+      },
+      "Description": "The source points. When WithReferencePoints is activated, the buffer should have twice the length with the points comming first and the reference points appended."
+    },
+    {
+      "InputId": "6e8b4125-0e8c-430b-897d-2231bb4c8f6f"/*TiltRange*/,
+      "Position": {
+        "X": -204.96455,
+        "Y": 1992.3049
+      },
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "7bf3e057-b9eb-43d2-8e1a-64c1c3857ca1"/*InvertPan*/,
+      "Position": {
+        "X": -204.96455,
+        "Y": 1917.3049
+      }
+    },
+    {
+      "InputId": "876ef5b5-f2c6-4501-9e55-00b9a553a2e3"/*SetCustomVar3*/,
+      "Position": {
+        "X": -204.96455,
+        "Y": 1392.3049
+      },
+      "GroupTitle": "CustomVar3"
+    },
+    {
+      "InputId": "9000c279-73e4-4de8-a1f8-c3914eaaf533"/*PanChannel*/,
+      "Position": {
+        "X": -204.96455,
+        "Y": 492.30493
+      },
+      "Min": 0,
+      "Max": 512,
+      "Scale": 1.0,
+      "Clamp": true
+    },
+    {
+      "InputId": "91c78090-be10-4203-827e-d2ef1b93317e"/*GetF1*/,
+      "Position": {
+        "X": -204.96455,
+        "Y": 342.30493
+      },
+      "GroupTitle": "F1"
+    },
+    {
+      "InputId": "970769f4-116f-418d-87a7-cda28e44d063"/*GreenChannel*/,
+      "Position": {
+        "X": -204.96455,
+        "Y": 867.30493
+      },
+      "Min": 0,
+      "Max": 512,
+      "Scale": 1.0
+    },
+    {
+      "InputId": "ac9a709e-6dc0-40ca-9f70-350e655a2630"/*CustomVar3Channel*/,
+      "Position": {
+        "X": -204.96455,
+        "Y": 1617.3049
+      },
+      "Min": 0,
+      "Max": 512,
+      "Scale": 1.0,
+      "Clamp": true
+    },
+    {
+      "InputId": "afd3aa99-c892-4b87-ad3f-f97461e8a934"/*WithReferencePoints*/,
+      "Position": {
+        "X": -206.38298,
+        "Y": 74.04256
+      },
+      "Description": "Uses a second set of points to define the rest position and orientation of the fixture in space."
+    },
+    {
+      "InputId": "b08c920f-0d6b-4820-bc2d-81a47d5f1147"/*CustomVar1Channel*/,
+      "Position": {
+        "X": -204.96455,
+        "Y": 1467.3049
+      },
+      "Min": 0,
+      "Max": 512,
+      "Scale": 1.0,
+      "Clamp": true
+    },
+    {
+      "InputId": "b7061834-66aa-4f7f-91f9-10ebfe16713f"/*F1Channel*/,
+      "Position": {
+        "X": -204.96455,
+        "Y": 1092.3049
+      },
+      "Min": 0,
+      "Max": 512,
+      "Scale": 1.0
+    },
+    {
+      "InputId": "ba8d8f32-792c-4675-a5f5-415c16db8c66"/*AxisOrder*/,
+      "Position": {
+        "X": -204.96455,
+        "Y": 267.30493
+      }
+    },
+    {
+      "InputId": "cf2c3308-8f3f-442d-a563-b419f12e7ad1"/*RGBToCMY*/,
+      "Position": {
+        "X": -204.96455,
+        "Y": 2067.305
+      }
+    },
+    {
+      "InputId": "d16d7c5c-2795-4fde-85fd-13b515191fbe"/*CustomVar3*/,
+      "Position": {
+        "X": -204.96455,
+        "Y": 1842.3049
+      },
+      "AddPadding": "True",
+      "Min": 0,
+      "Max": 255,
+      "Scale": 1.0,
+      "Clamp": true
+    },
+    {
+      "InputId": "d755342b-9a9e-4c78-8376-81579d8c0909"/*BlueChannel*/,
+      "Position": {
+        "X": -204.96455,
+        "Y": 942.30493
+      },
+      "Min": 0,
+      "Max": 512,
+      "Scale": 1.0
+    },
+    {
+      "InputId": "d77be0d1-5fb9-4d26-9e4a-e16497e4759c"/*F2Channel*/,
+      "Position": {
+        "X": -204.96455,
+        "Y": 1167.3049
+      },
+      "Min": 0,
+      "Max": 512,
+      "Scale": 1.0
+    },
+    {
+      "InputId": "e7a48fe0-d788-4f12-a9d4-52472519da09"/*CustomVar2*/,
+      "Position": {
+        "X": -204.96455,
+        "Y": 1767.3049
+      },
+      "AddPadding": "True",
+      "Min": 0,
+      "Max": 255,
+      "Scale": 1.0,
+      "Clamp": true
+    },
+    {
+      "InputId": "e96655be-6bc7-4ca4-bf74-079a07570d74"/*ShortestPathPanTilt*/,
+      "Position": {
+        "X": -204.96455,
+        "Y": 342.30493
+      }
+    },
+    {
+      "InputId": "f13edebd-b44f-49e9-985e-7e3feb886fea"/*AlphaChannel*/,
+      "Position": {
+        "X": -204.96455,
+        "Y": 1017.30493
+      },
+      "Min": 0,
+      "Max": 512,
+      "Scale": 1.0
+    },
+    {
+      "InputId": "f50da250-606d-4a15-a25e-5458f540e527"/*PanRange*/,
+      "Position": {
+        "X": -204.96455,
+        "Y": 1917.3049
+      },
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "f85ecf9f-0c3d-4c10-8ba7-480aa2c7a667"/*InvertTilt*/,
+      "Position": {
+        "X": -204.96455,
+        "Y": 1992.3049
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "8dc2db32-d7a3-4b3a-a000-93c3107d19e4"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    }
+  ]
+}

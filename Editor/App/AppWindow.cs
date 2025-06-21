@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
@@ -36,7 +36,6 @@ internal sealed class AppWindow
 
     internal SwapChainDescription SwapChainDescription => new()
                                                               {
-                                                                  BufferCount = 3,
                                                                   ModeDescription = new ModeDescription(Width,
                                                                                                         Height,
                                                                                                         new Rational(60, 1),
@@ -44,7 +43,13 @@ internal sealed class AppWindow
                                                                   IsWindowed = true,
                                                                   OutputHandle = Form.Handle,
                                                                   SampleDescription = new SampleDescription(1, 0),
-                                                                  SwapEffect = SwapEffect.FlipDiscard,
+                                                                  
+                                                                  // Working consistently
+                                                                  BufferCount = 2,
+                                                                  SwapEffect = SwapEffect.Discard,
+                                                                  
+                                                                  //BufferCount = 2,
+                                                                  //SwapEffect = SwapEffect.FlipDiscard,
                                                                   Usage = Usage.RenderTargetOutput
                                                               };
 

@@ -18,7 +18,7 @@ internal static class T3Metrics
     {
         _watchImgRenderTime.Stop();
         _uiRenderDurationMs = (float)((double)_watchImgRenderTime.ElapsedTicks / Stopwatch.Frequency * 1000.0);
-        _frameDurations.Enqueue(_uiRenderDurationMs);
+        _uiRenderDurations.Enqueue(_uiRenderDurationMs);
 
         // Collect GC
         var currentGCCount = GC.GetTotalAllocatedBytes(); // Gen 0 collections
@@ -47,32 +47,15 @@ internal static class T3Metrics
         {
             CustomComponents.BeginTooltip();
             {
-                _frameDurations.CopyTo(_floatGraphBuffer);
-                ImGui.PlotLines("##test", ref _floatGraphBuffer[0], _frameDurations.Count, 0,
-                                null,
-                                0.00f, 15f
-                               );
-
-                var average = _floatGraphBuffer.Average();
-                var min = _floatGraphBuffer.Min();
-                var jitter = _floatGraphBuffer.Max() - min;
-
-                _gcAllocationsInKb.CopyTo(_floatGraphBuffer);
-                var averageGC = _floatGraphBuffer.Average();
-
-                ImGui.Text($"""
-                            UI: {_peakUiRenderDurationMs:0.0}ms (~{average:0.0}  {min:0.0}  +{jitter:0.0})
+                DrawLabeledGraph(_frameDurations, "Frame","ms", 30);
+                DrawLabeledGraph(_uiRenderDurations, "UI","ms", 30);                
+                DrawLabeledGraph(_gcAllocationsInKb, "GC","kB", 400);
+                
+                ImGui.TextUnformatted($"""
                             Render: {_peakDeltaTimeMs:0.0}ms
                             VSync: {(T3Ui.UseVSync ? "On" : "Off")} (Click to toggle)
-                            GC: {averageGC:0.0}k
                             """);
-
-                ImGui.PlotLines("##test", ref _floatGraphBuffer[0], _gcAllocationsInKb.Count, 0,
-                                null,
-                                0,
-                                1000
-                               );
-
+                
                 ImGui.Spacing();
 
                 ImGui.PushFont(Fonts.FontSmall);
@@ -104,10 +87,14 @@ internal static class T3Metrics
                                       : _uiRenderDurationMs;
 
         var deltaTimeMs = ImGui.GetIO().DeltaTime * 1000;
-        if (deltaTimeMs > ExpectedFrameDurationMs * 0.8f && deltaTimeMs < ExpectedFrameDurationMs * 1.25f)
-        {
-            deltaTimeMs = ExpectedFrameDurationMs;
-        }
+        _frameDurations.Enqueue(deltaTimeMs);
+        
+        // avoid jittering
+        // if (deltaTimeMs > ExpectedFrameDurationMs * 0.8f && deltaTimeMs < ExpectedFrameDurationMs * 1.25f)
+        // {
+        //     deltaTimeMs = ExpectedFrameDurationMs;
+        // }
+        
 
         _peakDeltaTimeMs = _peakDeltaTimeMs > deltaTimeMs
                                ? MathUtils.Lerp(_peakDeltaTimeMs, deltaTimeMs, 0.05f)
@@ -141,6 +128,23 @@ internal static class T3Metrics
         // ImGui.PopFont();
     }
 
+    private static void DrawLabeledGraph(CircularBuffer<float> history, string label, string unit, float max)
+    {
+        if (history.Count < 1)
+            return;
+        
+        history.CopyTo(_floatGraphBuffer);
+        var average = _floatGraphBuffer.Average();
+        var min = _floatGraphBuffer.Min();
+        var jitter = _floatGraphBuffer.Max() - min;
+        var last = _floatGraphBuffer[^1];
+        ImGui.TextUnformatted($"{label}: {last:0.0}{unit} (~{average:0.0}  [{min:0.0} ..  +{jitter:0.0}])");
+        ImGui.PlotLines("##uiDurations", ref _floatGraphBuffer[0], _uiRenderDurations.Count, 0,
+                        null,
+                        0.00f, max
+                       );
+    }
+
     private static uint ColorForUiBar => UiColors.ForegroundFull.Fade(0.4f);
     private static uint ColorForFramerateBar => UiColors.ForegroundFull.Fade(0.1f);
     private const float ExpectedFramerate = 60;
@@ -156,6 +160,7 @@ internal static class T3Metrics
     private static readonly Stopwatch _watchImgRenderTime = new();
     private const int BufferSize = 100;
     private static readonly float[] _floatGraphBuffer = new float[BufferSize]; // reusable to avoid allocations
+    private static readonly CircularBuffer<float> _uiRenderDurations = new(BufferSize);
     private static readonly CircularBuffer<float> _frameDurations = new(BufferSize);
     private static readonly CircularBuffer<float> _gcAllocationsInKb = new(BufferSize);
 }

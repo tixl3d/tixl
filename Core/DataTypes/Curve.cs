@@ -22,13 +22,13 @@ public class Curve : IEditableInputType
         return new Curve { _state = _state.Clone() };
     }
 
-    public Animation.Utils.OutsideCurveBehavior PreCurveMapping
+    public Animation.CurveUtils.OutsideCurveBehavior PreCurveMapping
     {
         get => _state.PreCurveMapping;
         set => _state.PreCurveMapping = value;
     }
 
-    public Animation.Utils.OutsideCurveBehavior PostCurveMapping
+    public Animation.CurveUtils.OutsideCurveBehavior PostCurveMapping
     {
         get => _state.PostCurveMapping;
         set => _state.PostCurveMapping = value;

@@ -875,7 +875,7 @@
       "SymbolId": "746d886c-5ab6-44b1-bb15-f3ce2fadf7e6",
       "InputValues": [
         {
-          "Id": "199d4ce0-aab1-403a-ad42-216ef1061a0e"/*NearFarClip*/,
+          "Id": "199d4ce0-aab1-403a-ad42-216ef1061a0e"/*ClipPlanes*/,
           "Type": "System.Numerics.Vector2",
           "Value": {
             "X": 0.01,
@@ -892,7 +892,7 @@
           }
         },
         {
-          "Id": "7bde5a5a-ce82-4903-92ff-14e540a605f0"/*FOV*/,
+          "Id": "7bde5a5a-ce82-4903-92ff-14e540a605f0"/*FieldOfView*/,
           "Type": "System.Single",
           "Value": 90.0
         }

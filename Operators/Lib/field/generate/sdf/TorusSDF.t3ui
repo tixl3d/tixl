@@ -12,13 +12,21 @@
       "Description": "Defines the axis along which the field is aligned"
     },
     {
-      "InputId": "5fe2ab92-f8e5-400d-b5a3-197f20570d6f"/*Size*/,
+      "InputId": "5fe2ab92-f8e5-400d-b5a3-197f20570d6f"/*Radius*/,
       "Position": {
         "X": -200.0,
         "Y": 45.0
       },
-      "Description": "Defines the size and thickness of the Torus\nX = ring size\nY = ring thickness",
+      "Description": "Defines the main radius of the Torus",
       "AddPadding": "True"
+    },
+    {
+      "InputId": "6a392bc1-2adf-4a50-bb3f-5d4f2a63bf0b"/*Thickness*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      },
+      "Description": "Defines the thickness of the Torus"
     },
     {
       "InputId": "dbc72bd7-6191-4145-a69f-d17b3808b3ab"/*Center*/,

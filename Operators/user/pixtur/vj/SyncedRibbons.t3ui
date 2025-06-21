@@ -1,6 +1,7 @@
 {
   "Id": "dda7898a-00c3-40c9-9fcd-020706969733"/*SyncedRibbons*/,
   "Description": "A weird blurry VJ-Scene, that's quite versatile",
+  "SymbolTags": "1232",
   "InputUis": [],
   "SymbolChildUis": [
     {
@@ -76,8 +77,8 @@
     {
       "ChildId": "47dc8426-51d1-445a-b132-115e178030fa"/*Add*/,
       "Position": {
-        "X": 1048.7373,
-        "Y": 830.96094
+        "X": 1063.789,
+        "Y": 883.74445
       }
     },
     {
@@ -97,8 +98,8 @@
     {
       "ChildId": "59329ea9-8ef5-43d0-a623-d17c64b109b5"/*Vector3*/,
       "Position": {
-        "X": 1348.7373,
-        "Y": 767.96094
+        "X": 1458.1259,
+        "Y": 670.64136
       }
     },
     {
@@ -146,8 +147,8 @@
     {
       "ChildId": "8649ebd4-46ba-4918-9b59-31b8fd882176"/*RenderTarget*/,
       "Position": {
-        "X": 1798.7373,
-        "Y": 270.96094
+        "X": 1473.2313,
+        "Y": 158.32251
       }
     },
     {
@@ -158,10 +159,24 @@
       }
     },
     {
+      "ChildId": "97406bb8-38f1-47bd-bd33-60310f42c0f2"/*Modulo*/,
+      "Position": {
+        "X": 1318.1259,
+        "Y": 705.64136
+      }
+    },
+    {
       "ChildId": "9abe272f-35b6-41d4-9dae-c2bedb941084"/*_LegacyAudioReaction*/,
       "Position": {
-        "X": 1198.7373,
-        "Y": 767.96094
+        "X": 1038.1259,
+        "Y": 705.64136
+      }
+    },
+    {
+      "ChildId": "9dc28615-8648-4c46-ae0b-b394e1c00bd5"/*Abs*/,
+      "Position": {
+        "X": 1178.1259,
+        "Y": 705.64136
       }
     },
     {
@@ -195,8 +210,8 @@
     {
       "ChildId": "b885053b-521d-40b4-8720-2c0341205eac"/*DepthOfField*/,
       "Position": {
-        "X": 1648.7373,
-        "Y": 270.96094
+        "X": 1678.3289,
+        "Y": 100.57149
       }
     },
     {
@@ -216,29 +231,29 @@
     {
       "ChildId": "c9c72de1-239e-4215-a9aa-8fe235b72f0f"/*Time*/,
       "Position": {
-        "X": 898.7373,
-        "Y": 830.96094
+        "X": 923.78894,
+        "Y": 883.74445
       }
     },
     {
       "ChildId": "caed5280-42f3-4b0e-a909-285ef965c2c8"/*SyncedRandomScroller*/,
       "Position": {
-        "X": 1948.7373,
-        "Y": 117.96094
+        "X": 1934.4188,
+        "Y": 402.6116
       }
     },
     {
       "ChildId": "cd342a6c-b1be-4c2e-9ca6-c36b7b0a73da"/*PerlinNoise3*/,
       "Position": {
-        "X": 1348.7373,
-        "Y": 830.96094
+        "X": 1343.789,
+        "Y": 883.74445
       }
     },
     {
       "ChildId": "cfa0c808-cbdd-41c1-8882-ce69d2172383"/*Damp*/,
       "Position": {
-        "X": 1198.7373,
-        "Y": 830.96094
+        "X": 1203.789,
+        "Y": 883.74445
       }
     },
     {
@@ -286,8 +301,8 @@
     {
       "ChildId": "fa7fdb8f-af2f-41b8-9c88-d56fbc71028b"/*SimForceOffset*/,
       "Position": {
-        "X": 748.7373,
-        "Y": 465.96094
+        "X": 661.6812,
+        "Y": 473.40652
       }
     },
     {

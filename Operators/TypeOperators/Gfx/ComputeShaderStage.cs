@@ -39,6 +39,10 @@ public sealed class ComputeShaderStage : Instance<ComputeShaderStage>, IRenderSt
         if (_uavs.Length == 0 || _cs == null)
             return;
 
+        
+        _prevRenderTargetViews = device.ImmediateContext.OutputMerger.GetRenderTargets(1);
+        device.ImmediateContext.OutputMerger.GetRenderTargets(out _prevDepthStencilView);
+        
         csStage.Set(_cs);
         csStage.SetConstantBuffers(0, _constantBuffers.Length, _constantBuffers);
         csStage.SetShaderResources(0, _shaderResourceViews.Length, _shaderResourceViews);
@@ -74,6 +78,14 @@ public sealed class ComputeShaderStage : Instance<ComputeShaderStage>, IRenderSt
         {
             deviceContext.Dispatch(dispatchCount.X, dispatchCount.Y, dispatchCount.Z);
         }
+        
+        if (_prevRenderTargetViews.Length > 0)
+            deviceContext.OutputMerger.SetRenderTargets(_prevDepthStencilView, _prevRenderTargetViews);
+            
+        foreach (var rtv in _prevRenderTargetViews)
+            rtv.Dispose();            
+            
+        Utilities.Dispose(ref _prevDepthStencilView);
 
         
         // unbind resources
@@ -182,6 +194,6 @@ public sealed class ComputeShaderStage : Instance<ComputeShaderStage>, IRenderSt
     [Input(Guid = "4047c9e7-1edb-4c71-b85c-c1b87058c81c")]
     public readonly MultiInputSlot<SharpDX.Direct3D11.SamplerState> SamplerStates = new();
 
-
-        
+    private RenderTargetView[]? _prevRenderTargetViews;
+    private DepthStencilView? _prevDepthStencilView;
 }

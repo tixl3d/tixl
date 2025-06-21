@@ -3,8 +3,10 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using ImGuiNET;
+using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
+using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.MagGraph.Interaction;
 using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.OutputUi;
@@ -55,7 +57,7 @@ internal sealed class MagGraphLayout
 
         // TODO: This only needs to be done, on structural changes or when items have been moved
         UpdateConnectionLayout();
-        ComputeVerticalStackBoundaries();
+        ComputeVerticalStackBoundaries(context.Canvas);
     }
 
     public void FlagStructureAsChanged()
@@ -705,42 +707,43 @@ internal sealed class MagGraphLayout
             }
         }
     }
+    
+    // Reuse list to avoid allocations
+    private static readonly List<MagGraphItem> _listStackedItems = new(32);
 
     /// <summary>
     /// This improves the layout of arc connections inputs into multiple stacked ops so they
     /// avoid overlap.
     /// </summary>
-    private void ComputeVerticalStackBoundaries()
+    private void ComputeVerticalStackBoundaries(ScalableCanvas canvas)
     {
-        // Reuse list to avoid allocations
-        var listStackedItems = new List<MagGraphItem>();
         MagGraphItem? previousItem = null;
-        ImGui.GetWindowDrawList();
+        var dl = ImGui.GetWindowDrawList();
 
-        listStackedItems.Clear();
-        foreach (var item in Items.Values.OrderBy(i => MathF.Round(i.PosOnCanvas.X * 1f)).ThenBy(i => i.PosOnCanvas.Y))
+        _listStackedItems.Clear();
+        foreach (var item in Items.Values.OrderBy(i => MathF.Round(i.PosOnCanvas.X)).ThenBy(i => i.PosOnCanvas.Y))
         {
             item.VerticalStackArea = item.Area;
 
             if (previousItem == null)
             {
-                listStackedItems.Clear();
-                listStackedItems.Add(item);
+                _listStackedItems.Clear();
+                _listStackedItems.Add(item);
                 previousItem = item;
                 continue;
             }
 
             // is stacked?
-            if (Math.Abs(item.PosOnCanvas.X - previousItem.PosOnCanvas.X) < 20f
-                && Math.Abs(item.PosOnCanvas.Y - previousItem.Area.Max.Y) < 20f)
+            if (Math.Abs(item.PosOnCanvas.X - previousItem.PosOnCanvas.X) < 10f
+                && Math.Abs(item.PosOnCanvas.Y - previousItem.Area.Max.Y) < 80f)
             {
-                listStackedItems.Add(item);
+                _listStackedItems.Add(item);
                 previousItem = item;
             }
             else
             {
                 ApplyStackToItems();
-                listStackedItems.Add(item);
+                _listStackedItems.Add(item);
                 previousItem = item;
             }
         }
@@ -751,21 +754,21 @@ internal sealed class MagGraphLayout
 
         void ApplyStackToItems()
         {
-            if (listStackedItems.Count > 1)
+            if (_listStackedItems.Count > 1)
             {
-                var stackArea = new ImRect(listStackedItems[0].PosOnCanvas,
-                                           listStackedItems[^1].Area.Max);
-                foreach (var x in listStackedItems)
+                var stackArea = new ImRect(_listStackedItems[0].PosOnCanvas,
+                                           _listStackedItems[^1].Area.Max);
+                foreach (var x in _listStackedItems)
                 {
                     x.VerticalStackArea = stackArea;
                 }
 
                 // Draw Debug
-                // var aOnScreen = context.Canvas.TransformRect(stackArea);
+                // var aOnScreen = canvas.TransformRect(stackArea);
                 // dl.AddRect(aOnScreen.Min, aOnScreen.Max, Color.Green);
             }
 
-            listStackedItems.Clear();
+            _listStackedItems.Clear();
         }
     }
 

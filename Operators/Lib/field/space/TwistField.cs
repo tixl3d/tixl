@@ -19,70 +19,46 @@ internal sealed class TwistField : Instance<TwistField>
 
     private void Update(EvaluationContext context)
     {
-        ShaderNode.Update(context);
-
         var axis = Axis.GetEnumValue<AxisTypes>(context);
         var templateChanged = axis != _axis;
-        if (!templateChanged)
-            return;
+        if (templateChanged)
+        {
+            _axis = axis;
+            ShaderNode.FlagCodeChanged();
+        }
 
-        _axis = axis;
-        ShaderNode.FlagCodeChanged();
+        ShaderNode.Update(context);
     }
 
     public ShaderGraphNode ShaderNode { get; }
 
-    public void GetPreShaderCode(CodeAssembleContext c, int inputIndex)
+    void IGraphNodeOp.AddDefinitions(CodeAssembleContext c)
     {
-        switch (_axis)
-        {
-            case AxisTypes.X:
-                c.Globals["TwistX"] = """
-                                      void opTwistX(inout float3 p, float k) {
-                                          float c = cos(k * p.x);
-                                          float s = sin(k * p.x);
-                                          float2x2  m = float2x2(c,-s,s,c);
-                                          p.yzx = float3(mul(m,p.yz), p.x);
-                                      }
-                                      """;
-                break;
-            case AxisTypes.Y:
-                c.Globals["TwistY"] = """
-                                      void opTwistY(inout float3 p, float k) {
-                                          float c = cos(k * p.y);
-                                          float s = sin(k * p.y);
-                                          float2x2  m = float2x2(c,-s,s,c);
-                                          p.xzy = float3(mul(m,p.xz), p.y);
-                                      }
-                                      """;
-                break;
-            case AxisTypes.Z:
-                c.Globals["TwistZ"] = """
-                                      void opTwistZ(inout float3 p, float k) {
-                                          float c = cos(k * p.z);
-                                          float s = sin(k * p.z);
-                                          float2x2  m = float2x2(c,-s,s,c);
-                                          p.xyz = float3(mul(m,p.xy), p.z);
-                                      }
-                                      """;
-                break;
-        }
-
-        var twistOp = _axis switch
-                          {
-                              AxisTypes.X => "opTwistX",
-                              AxisTypes.Y => "opTwistY",
-                              AxisTypes.Z => "opTwistZ",
-                              _           => throw new ArgumentOutOfRangeException()
-                          };
-        c.AppendCall($"{twistOp}(p{c}.xyz, {ShaderNode}Amount);");
+        c.Globals["opTwist"] = """
+                               void opTwist(inout float3 p, float k) {
+                                 k/= (180 / 3.14157892);
+                                   float c = cos(k * p.z);
+                                   float s = sin(k * p.z);
+                                   float2x2  m = float2x2(c,-s,s,c);
+                                   p = float3(mul(m,p.xy), p.z);
+                               }
+                               """;
     }
 
-    public void GetPostShaderCode(CodeAssembleContext c, int inputIndex)
+    public void GetPreShaderCode(CodeAssembleContext c, int inputIndex)
     {
+        var axi = _axisCodes[(int)_axis];
+        c.AppendCall($"opTwist(p{c}.{axi}, {ShaderNode}Amount);");
     }
 
     private AxisTypes _axis;
+
+    private readonly string[] _axisCodes =
+        [
+            "yzx",
+            "xzy",
+            "xyz",
+        ];
 
     private enum AxisTypes
     {
@@ -93,11 +69,12 @@ internal sealed class TwistField : Instance<TwistField>
 
     [Input(Guid = "84DD59CE-4726-4604-AFEE-92FFDEC0E3F5")]
     public readonly InputSlot<ShaderGraphNode> InputField = new();
+    
+    [GraphParam]
+    [Input(Guid = "4935F569-8D23-495D-BB87-9A39E5B3981E")]
+    public readonly InputSlot<float> Amount = new();
 
     [Input(Guid = "195F4642-52F7-4C95-9127-07F6175549F5", MappedType = typeof(AxisTypes))]
     public readonly InputSlot<int> Axis = new();
 
-    [GraphParam]
-    [Input(Guid = "4935F569-8D23-495D-BB87-9A39E5B3981E")]
-    public readonly InputSlot<float> Amount = new();
 }

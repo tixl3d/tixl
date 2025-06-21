@@ -640,7 +640,7 @@
       "SymbolId": "d38fe24e-be01-4a22-9595-b06bc906bf49",
       "InputValues": [
         {
-          "Id": "16527748-fe55-4ced-b08d-6c94377c5563"/*FOV*/,
+          "Id": "16527748-fe55-4ced-b08d-6c94377c5563"/*FieldOfView*/,
           "Type": "System.Single",
           "Value": 150.0
         },
@@ -1272,7 +1272,7 @@
       "SymbolId": "d38fe24e-be01-4a22-9595-b06bc906bf49",
       "InputValues": [
         {
-          "Id": "16527748-fe55-4ced-b08d-6c94377c5563"/*FOV*/,
+          "Id": "16527748-fe55-4ced-b08d-6c94377c5563"/*FieldOfView*/,
           "Type": "System.Single",
           "Value": 150.0
         },

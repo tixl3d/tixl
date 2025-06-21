@@ -221,6 +221,7 @@ internal sealed class GenerateShaderGraphCode : Instance<GenerateShaderGraphCode
     /// <param name="templateCode"></param>
     private void InjectResourcesCode(ref string templateCode)
     {
+        // Find target span...
         const string resourcesStartHook = "/*{RESOURCES(";
 
         var resourceHookIndex = templateCode.IndexOf(resourcesStartHook, StringComparison.Ordinal);
@@ -239,7 +240,16 @@ internal sealed class GenerateShaderGraphCode : Instance<GenerateShaderGraphCode
         if (!int.TryParse(xxx, out var index))
             return;
 
+        // Build and inject...
         _resourceDefinitionsBuilder.Clear();
+
+        // ... resource definition (like structs, etc)
+        foreach (var rd in _codeAssembleContext.ResourceTypes.Values)
+        {
+            _resourceDefinitionsBuilder.AppendLine(rd);
+        }
+        
+        // ... resource registrations
         foreach (var rr in _resourceReferences)
         {
             _resourceDefinitionsBuilder.AppendLine($"{rr.Definition}:register({t}{index});");
