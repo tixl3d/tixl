@@ -51,6 +51,7 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
                 (vertices, triangles) = GenerateIcosahedron();
                 if (subdivisions > 0)
                 {
+                   // SubdivideMesh(ref vertices, ref triangles, subdivisions);
                     SubdivideMeshFlat(ref vertices, ref triangles, subdivisions);
                 }
             }
@@ -89,7 +90,20 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
 
                 // Apply rotation and offset
                 pos = Vector3.Transform(pos + offset, rotationMatrix) + centerVec;
-                var uv = uvMapper.CalculateUV(vertices[i], normals[i]);
+                
+                var uv = new Vector2(0.5f, 0.5f); // Default UV
+                uv = uvMapper.CalculateUV(vertices[i], normals[i], i % 3, (int)phi / 3);
+               /* if (shadingMode == (int)ShadingModes.Smoothed)
+                {
+                    uv = uvMapper.CalculateUV(vertices[i], normals[i], i % 3, -1);
+                   // uv = uvMapper.CalculateUV(vertices[i], normals[i], i % 3, (int)phi / 3);
+                }
+                else if (shadingMode == (int)ShadingModes.Flat)
+                {
+                    uv = uvMapper.CalculateUV(vertices[i], normals[i], i % 3, (int)phi / 3);
+                }*/
+                   
+                //var uv = uvMapper.CalculateUV(vertices[i], normals[i]);
                 _vertexBufferData[i] = new PbrVertex
                 {
                     Position = pos,
@@ -138,18 +152,18 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
     private static (Vector3[] vertices, Int3[] triangles) GenerateIcosahedron()
     {
         var baseVertices = new Vector3[12];
-        baseVertices[0] = Vector3.Normalize(new Vector3(-1, t, 0));
-        baseVertices[1] = Vector3.Normalize(new Vector3(1, t, 0));
-        baseVertices[2] = Vector3.Normalize(new Vector3(-1, -t, 0));
-        baseVertices[3] = Vector3.Normalize(new Vector3(1, -t, 0));
-        baseVertices[4] = Vector3.Normalize(new Vector3(0, -1, t));
-        baseVertices[5] = Vector3.Normalize(new Vector3(0, 1, t));
-        baseVertices[6] = Vector3.Normalize(new Vector3(0, -1, -t));
-        baseVertices[7] = Vector3.Normalize(new Vector3(0, 1, -t));
-        baseVertices[8] = Vector3.Normalize(new Vector3(t, 0, -1));
-        baseVertices[9] = Vector3.Normalize(new Vector3(t, 0, 1));
-        baseVertices[10] = Vector3.Normalize(new Vector3(-t, 0, -1));
-        baseVertices[11] = Vector3.Normalize(new Vector3(-t, 0, 1));
+        baseVertices[0] = Vector3.Normalize(new Vector3(-1, phi, 0));
+        baseVertices[1] = Vector3.Normalize(new Vector3(1, phi, 0));
+        baseVertices[2] = Vector3.Normalize(new Vector3(-1, -phi, 0));
+        baseVertices[3] = Vector3.Normalize(new Vector3(1, -phi, 0));
+        baseVertices[4] = Vector3.Normalize(new Vector3(0, -1, phi));
+        baseVertices[5] = Vector3.Normalize(new Vector3(0, 1, phi));
+        baseVertices[6] = Vector3.Normalize(new Vector3(0, -1, -phi));
+        baseVertices[7] = Vector3.Normalize(new Vector3(0, 1, -phi));
+        baseVertices[8] = Vector3.Normalize(new Vector3(phi, 0, -1));
+        baseVertices[9] = Vector3.Normalize(new Vector3(phi, 0, 1));
+        baseVertices[10] = Vector3.Normalize(new Vector3(-phi, 0, -1));
+        baseVertices[11] = Vector3.Normalize(new Vector3(-phi, 0, 1));
 
         // Original triangles (20 faces)
         var baseTriangles = new Int3[20];
@@ -197,20 +211,20 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
     {
         var vertices = new Vector3[12];
         // Create and normalize vertices
-        vertices[0] = Vector3.Normalize(new Vector3(-1, t, 0));
-        vertices[1] = Vector3.Normalize(new Vector3(1, t, 0));
-        vertices[2] = Vector3.Normalize(new Vector3(-1, -t, 0));
-        vertices[3] = Vector3.Normalize(new Vector3(1, -t, 0));
+        vertices[0] = Vector3.Normalize(new Vector3(-1, phi, 0));
+        vertices[1] = Vector3.Normalize(new Vector3(1, phi, 0));
+        vertices[2] = Vector3.Normalize(new Vector3(-1, -phi, 0));
+        vertices[3] = Vector3.Normalize(new Vector3(1, -phi, 0));
 
-        vertices[4] = Vector3.Normalize(new Vector3(0, -1, t));
-        vertices[5] = Vector3.Normalize(new Vector3(0, 1, t));
-        vertices[6] = Vector3.Normalize(new Vector3(0, -1, -t));
-        vertices[7] = Vector3.Normalize(new Vector3(0, 1, -t));
+        vertices[4] = Vector3.Normalize(new Vector3(0, -1, phi));
+        vertices[5] = Vector3.Normalize(new Vector3(0, 1, phi));
+        vertices[6] = Vector3.Normalize(new Vector3(0, -1, -phi));
+        vertices[7] = Vector3.Normalize(new Vector3(0, 1, -phi));
 
-        vertices[8] = Vector3.Normalize(new Vector3(t, 0, -1));
-        vertices[9] = Vector3.Normalize(new Vector3(t, 0, 1));
-        vertices[10] = Vector3.Normalize(new Vector3(-t, 0, -1));
-        vertices[11] = Vector3.Normalize(new Vector3(-t, 0, 1));
+        vertices[8] = Vector3.Normalize(new Vector3(phi, 0, -1));
+        vertices[9] = Vector3.Normalize(new Vector3(phi, 0, 1));
+        vertices[10] = Vector3.Normalize(new Vector3(-phi, 0, -1));
+        vertices[11] = Vector3.Normalize(new Vector3(-phi, 0, 1));
 
         var triangles = new Int3[20];
         // 5 faces around point 0
@@ -391,90 +405,55 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
     // Interface for UV mapping strategies
     private interface IUvMapper
     {
-        Vector2 CalculateUV(Vector3 vertex, Vector3 normal);
+        Vector2 CalculateUV(Vector3 vertex, Vector3 normal, int vertexIndex, int triangleIndex);
     }
 
     private class Faces : IUvMapper
     {
-        public Vector2 CalculateUV(Vector3 vertex, Vector3 normal)
+        // Predefined UV coordinates for each vertex in each face
+        private static readonly Vector2[] _faceUvs = new Vector2[]
         {
+        // Triangle 0 (0, 11, 5)
+        new Vector2(0.5f, 1.0f),  // vertex 0
+        new Vector2(0.067f, 0.250f),   // vertex 11
+        new Vector2(0.933f, 0.250f),   // vertex 5
+        
+        // Triangle 1 (0, 5, 1)
+        /*new Vector2(0.5f, 1.0f),   // vertex 0
+        new Vector2(1.0f, 0.0f),   // vertex 5
+        new Vector2(0.0f, 0.0f),   // vertex 1
+        
+        // Triangle 2 (0, 1, 7)
+        new Vector2(0.5f, 1.0f),   // vertex 0
+        new Vector2(0.0f, 0.0f),   // vertex 1
+        new Vector2(1.0f, 0.0f),   // vertex 7*/
+
+            // Continue for all 20 triangles...
+            // You'll need to define UVs for all faces following the same pattern
+        };
+
+        public Vector2 CalculateUV(Vector3 vertex, Vector3 normal, int vertexIndex, int triangleIndex)
+        {
+            // For flat shading, each triangle has its own set of vertices
+            if (triangleIndex >= 0 && triangleIndex * 3 + vertexIndex < _faceUvs.Length)
+            {
+                return _faceUvs[triangleIndex * 3 + vertexIndex];
+            }
+
+            // Fallback for unexpected cases
             return new Vector2(0.5f, 0.5f);
         }
     }
 
     private class Unwrapped : IUvMapper
     {
-        public Vector2 CalculateUV(Vector3 vertex, Vector3 normal)
+        public Vector2 CalculateUV(Vector3 vertex, Vector3 normal, int vertexIndex, int triangleIndex)
         {
             // Blender-style spherical unwrapping
             float u = 0.5f + MathF.Atan2(vertex.Z, vertex.X) / (2 * MathF.PI);
             float v = 0.5f + MathF.Asin(vertex.Y) / MathF.PI;
             return new Vector2(u, v);
         }
-    }
-
-    private void GenerateFaceUVMesh(Vector3[] vertices, Int3[] triangles, float scale, Vector2 stretch, Vector3 pivot, Vector3 rotation, Vector3 center)
-    {
-        var faceUvs = new Vector2[]
-        {
-        new Vector2(0.5f, 0.0f),   // Top
-        new Vector2(1.0f, 1.0f),   // Bottom right
-        new Vector2(0.0f, 1.0f),   // Bottom left
-        };
-
-        var centerVec = new Vector3(center.X, center.Y, center.Z);
-        var offset = new Vector3(
-            stretch.X * scale * (pivot.X - 0.5f),
-            stretch.Y * scale * (pivot.Y - 0.5f),
-            stretch.X * scale * (pivot.Z - 0.5f) // or stretch.Z if you prefer
-        );
-
-        float yaw = rotation.Y.ToRadians();
-        float pitch = rotation.X.ToRadians();
-        float roll = rotation.Z.ToRadians();
-        var rotationMatrix = Matrix4x4.CreateFromYawPitchRoll(yaw, pitch, roll);
-
-        var vertexList = new List<PbrVertex>();
-        var indexList = new List<Int3>();
-
-        for (int i = 0; i < triangles.Length; i++)
-        {
-            var tri = triangles[i];
-
-            for (int j = 0; j < 3; j++)
-            {
-                int index = (j == 0) ? tri.X : (j == 1) ? tri.Y : tri.Z;
-                var pos = Vector3.Normalize(vertices[index]);
-
-                var transformedPos = new Vector3(
-                    pos.X * scale * stretch.X,
-                    pos.Y * scale * stretch.Y,
-                    pos.Z * scale * stretch.X // replace with stretch.Z if needed
-                );
-
-                transformedPos = Vector3.Transform(transformedPos + offset, rotationMatrix) + centerVec;
-
-                var normal = Vector3.TransformNormal(pos, rotationMatrix);
-                var tangent = Vector3.Cross(normal, Vector3.UnitY);
-                var bitangent = Vector3.Cross(normal, Vector3.UnitX);
-
-                vertexList.Add(new PbrVertex
-                {
-                    Position = transformedPos,
-                    Normal = normal,
-                    Tangent = tangent,
-                    Bitangent = bitangent,
-                    Texcoord = faceUvs[j],
-                    Selection = 1
-                });
-            }
-
-            int baseIndex = i * 3;
-            indexList.Add(new Int3(baseIndex, baseIndex + 1, baseIndex + 2));
-        }
-
-        _vertexBufferData = vertexList.ToArray();
-        _indexBufferData = indexList.ToArray();
     }
 
     private Buffer _vertexBuffer;
@@ -486,7 +465,7 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
     private readonly BufferWithViews _indexBufferWithViews = new();
 
     private readonly MeshBuffers _data = new();
-    private static readonly float t = (1f + MathF.Sqrt(5f)) / 2f; // Golden ratio, used in icosahedron generation
+    private static readonly float phi = (1f + MathF.Sqrt(5f)) / 2f; // Golden ratio, used in icosahedron generation
 
     private enum UvModes
     {
