@@ -1,0 +1,23 @@
+{
+  "Id": "fdb85ece-201b-49dc-899b-f044a98ac414"/*OctahedronSDF*/,
+  "Inputs": [
+    {
+      "Id": "23012866-4820-4072-8cd8-82d6bdedf13d"/*Size*/,
+      "DefaultValue": 0.5
+    },
+    {
+      "Id": "2811b696-3d09-46f7-84ac-045eb7fe82b0"/*Center*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "921ec8f2-cd50-459b-8f0a-990de5deea64"/*EdgeRadius*/,
+      "DefaultValue": 0.002
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

@@ -1,0 +1,35 @@
+{
+  "Id": "5b8604d0-65f4-45c9-9e85-4a044005a778"/*PyramidSDF*/,
+  "Inputs": [
+    {
+      "Id": "09320506-1e5c-4da8-b522-9f89c143277f"/*Axis*/,
+      "DefaultValue": 1
+    },
+    {
+      "Id": "5b3e69cf-cb55-4428-b78c-76f4f22cf2ac" /*Rounding*/,
+      "DefaultValue": 0.05
+    },
+    {
+      "Id": "471d9c3b-ba5e-4b73-93cf-fb8ba76bf70e"/*UniformScale*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "8d5c22bb-2910-4415-9bf8-ab304e35a5b2"/*Scale*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 1.0,
+        "Z": 1.0
+      }
+    },
+    {
+      "Id": "92c03574-31e5-4ce2-9a76-ecab5f64d732"/*Center*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}
