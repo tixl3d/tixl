@@ -1,0 +1,121 @@
+{
+  "Id": "786ad268-9a76-4675-a755-6c2922fb3916"/*DrawMeshChunksAtPointsExample*/,
+  "Description": "",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "1268482d-9ee9-413c-a3e1-66e9f1ae9bf9"/*Group*/,
+      "Position": {
+        "X": 1568.9628,
+        "Y": 235.90552
+      }
+    },
+    {
+      "ChildId": "1831ee2a-6388-4a44-84a0-72d8f5a51784"/*DrawMeshChunksAtPoints*/,
+      "Position": {
+        "X": 1322.9348,
+        "Y": 123.78003
+      }
+    },
+    {
+      "ChildId": "1de3bd02-d57d-43db-92b5-e5cb0fa82edf"/*OscillateVec3*/,
+      "Position": {
+        "X": 380.07007,
+        "Y": 461.74292
+      }
+    },
+    {
+      "ChildId": "3633549b-08e5-45fa-ae43-d355752eb4af"/*Any*/,
+      "Position": {
+        "X": 150.0,
+        "Y": 351.89307
+      }
+    },
+    {
+      "ChildId": "36c7defb-33e8-47c6-85b9-dfd1564540a2"/*UseMaterial*/,
+      "Position": {
+        "X": 1322.9348,
+        "Y": 263.78003
+      }
+    },
+    {
+      "ChildId": "89f18dc5-db69-47ce-ac83-74324b73c7c1"/*DrawPoints*/,
+      "Position": {
+        "X": 1318.0918,
+        "Y": 454.12036
+      }
+    },
+    {
+      "ChildId": "8c1dfe31-fcd1-4742-b551-8f62c32c9cbe"/*Trigger*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 394.89233
+      }
+    },
+    {
+      "ChildId": "96b49ce2-7b24-40e4-8d42-04a386bc812e"/*Camera*/,
+      "Position": {
+        "X": 1737.693,
+        "Y": 256.74878
+      }
+    },
+    {
+      "ChildId": "b40546a6-0933-4e5e-b93c-85e3bf1471c9"/*SetAttributesWithPointFields*/,
+      "Position": {
+        "X": 952.5442,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "c010f70e-7bba-4a74-89a0-770d2a312b1f"/*Bloom*/,
+      "Position": {
+        "X": 1737.693,
+        "Y": 326.74878
+      }
+    },
+    {
+      "ChildId": "c379b495-41a8-4b64-885e-ed36e13464d5"/*Point*/,
+      "Position": {
+        "X": 681.3854,
+        "Y": 461.64697
+      }
+    },
+    {
+      "ChildId": "ecd66ca4-cb9c-46e6-bdc5-eb353bcbcf75"/*LoadGltfScene*/,
+      "Position": {
+        "X": 385.35425,
+        "Y": 172.04565
+      }
+    },
+    {
+      "ChildId": "ee132b30-b9fe-45b2-bb0c-2d79239947e0"/*Once*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 351.89307
+      }
+    },
+    {
+      "ChildId": "eea3161f-bcad-4b58-ba18-07e6883d1a33"/*_GetSceneDefinitionPoints*/,
+      "Position": {
+        "X": 753.594,
+        "Y": 75.926025
+      }
+    },
+    {
+      "ChildId": "fd1f1bb5-e5b2-427d-8b43-41dc18a6896c"/*RenderTarget*/,
+      "Position": {
+        "X": 1737.693,
+        "Y": 291.74878
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "760a21b6-b8de-4968-8a5b-d3ac2a7e3938"/*Result*/,
+      "Position": {
+        "X": 2147.6929,
+        "Y": 243.37146
+      }
+    }
+  ]
+}
