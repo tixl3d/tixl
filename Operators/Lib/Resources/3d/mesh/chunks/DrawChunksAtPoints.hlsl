@@ -104,8 +104,8 @@ psInput vsMain(uint id : SV_VertexID)
     PbrVertex vertex = PbrVertices[vertexIndex];
     float4 posInObject = float4(vertex.Position, 1);
 
-    float resizeFromW = UseWForSize ? Points[pointIndex].W : 1;
-    float3 resizeFromStretch = UseStretch ? Points[pointIndex].Stretch : 1;
+    float resizeFromW = UseWForSize ? Points[pointIndex].FX1 : 1;
+    float3 resizeFromStretch = UseStretch ? Points[pointIndex].Scale : 1;
     posInObject.xyz *= max(0, resizeFromW) * Size * resizeFromStretch;
     float4x4 orientationMatrix = transpose(qToMatrix(normalize(Points[pointIndex].Rotation)));
     posInObject = mul(float4(posInObject.xyz, 1), orientationMatrix);
