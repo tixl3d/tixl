@@ -207,7 +207,7 @@ internal static class TimeControls
                 break;
         }
 
-        if (CustomComponents.JogDial(formattedTime, ref delta, new Vector2(100, ControlSize.Y)))
+        if (CustomComponents.JogDial(formattedTime, ref delta, new Vector2(100 * T3Ui.UiScaleFactor, ControlSize.Y)))
         {
             playback.PlaybackSpeed = 0;
             playback.TimeInBars += delta;
@@ -243,17 +243,41 @@ internal static class TimeControls
                                                     ? UiColors.TextDisabled
                                                     : new Vector4(0, 0, 0, 0.5f));
 
-            if (CustomComponents.IconButton(Icon.BeatGrid, ControlSize))
+            // Create invisible button with same size as icon buttons would have
+            
+            if (ImGui.Button("##idleMotionToggle", ControlSize))
             {
                 UserSettings.Config.EnableIdleMotion = !UserSettings.Config.EnableIdleMotion;
             }
 
+            // Tooltip (same as before)
             CustomComponents.TooltipForLastItem("Idle Motion - Keeps beat time running",
                                                 "This will keep updating the output [Time]\nwhich is useful for procedural animation and syncing.");
 
+            var drawList = ImGui.GetWindowDrawList();
+            var min = ImGui.GetItemRectMin();
+            var max = ImGui.GetItemRectMax();
+            var center = (min + max) * 0.5f;
+
+            // Draw beat grid background
+            const int gridSize = 4;
+            const int cellCount = 4;
+            var cellSize = gridSize * T3Ui.UiScaleFactor;
+            var gridOffset = center - new Vector2(cellSize * cellCount * 0.5f);
+
+            for (int x = 0; x < cellCount; x++)
+            {
+                for (int y = 0; y < cellCount; y++)
+                {
+                    var cellMin = gridOffset + new Vector2(x * cellSize, y * cellSize);
+                    var cellMax = cellMin + new Vector2(cellSize - 1, cellSize - 1);
+                    drawList.AddRectFilled(cellMin, cellMax, UiColors.Gray.Fade(0.2f));
+                }
+            }
+
+            // If idle motion is enabled, draw the animated indicator
             if (UserSettings.Config.EnableIdleMotion)
             {
-                var center = (ImGui.GetItemRectMin() + ImGui.GetItemRectMax()) / 2;
                 var beat = (int)(playback.FxTimeInBars * 4) % 4;
                 var beatPulse = (playback.FxTimeInBars * 4) % 4 - beat;
                 var bar = (int)(playback.FxTimeInBars) % 4;
@@ -264,15 +288,16 @@ internal static class TimeControls
                 if (bar < 0)
                     bar = 4 + bar;
 
-                const int gridSize = 4;
-                var drawList = ImGui.GetWindowDrawList();
-                var min = center - new Vector2(7, 7) * T3Ui.UiScaleFactor + new Vector2(beat * gridSize, bar * gridSize) * T3Ui.UiScaleFactor;
+                var indicatorMin = gridOffset + new Vector2(beat * cellSize, bar * cellSize);
+                var indicatorMax = indicatorMin + new Vector2(cellSize - 1, cellSize - 1);
 
-                drawList.AddRectFilled(min, min + new Vector2(gridSize - 1, gridSize - 1),
+                drawList.AddRectFilled(indicatorMin, indicatorMax,
                                        Color.Mix(UiColors.StatusAnimated,
                                                  UiColors.Gray,
                                                  (float)beatPulse));
             }
+
+            
 
             ImGui.PopStyleColor();
             ImGui.SameLine();
