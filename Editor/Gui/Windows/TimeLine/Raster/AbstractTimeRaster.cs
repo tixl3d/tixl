@@ -1,4 +1,4 @@
-﻿using ImGuiNET;
+using ImGuiNET;
 using T3.Core.Animation;
 using T3.Core.Utils;
 using T3.Editor.Gui.Interaction.Snapping;
@@ -78,8 +78,9 @@ public abstract class AbstractTimeRaster : IValueSnapAttractor
                     if (raster.Label != "")
                     {
                         var output = BuildLabel(raster, timeInUnits);
-
-                        var p = topLeft + new Vector2(xIndex + 1, viewHeight - 17 * T3Ui.UiScaleFactor);
+                        // Get exact text size
+                        var textSize = ImGui.CalcTextSize(output);
+                        var p = topLeft + new Vector2(xIndex + 1, viewHeight - textSize.Y);
                         drawList.AddText(p, textColor, output);
                     }
                 }
