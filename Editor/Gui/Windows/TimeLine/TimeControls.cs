@@ -207,7 +207,7 @@ internal static class TimeControls
                 break;
         }
 
-        if (CustomComponents.JogDial(formattedTime, ref delta, new Vector2(100 * T3Ui.UiScaleFactor, ControlSize.Y)))
+        if (CustomComponents.JogDial(formattedTime, ref delta, new Vector2(StandardWidth, ControlSize.Y)))
         {
             playback.PlaybackSpeed = 0;
             playback.TimeInBars += delta;
@@ -260,17 +260,19 @@ internal static class TimeControls
             var center = (min + max) * 0.5f;
 
             // Draw beat grid background
-            const int gridSize = 4;
             const int cellCount = 4;
-            var cellSize = gridSize * T3Ui.UiScaleFactor;
-            var gridOffset = center - new Vector2(cellSize * cellCount * 0.5f);
+            var cellSize = CellSize;
+            var gridOffset = center - GridSize;
+
+            // Pre-calculate the cell size minus 1 for the rect size
+            var rectSize = new Vector2(cellSize - 1, cellSize - 1);
 
             for (int x = 0; x < cellCount; x++)
             {
                 for (int y = 0; y < cellCount; y++)
                 {
                     var cellMin = gridOffset + new Vector2(x * cellSize, y * cellSize);
-                    var cellMax = cellMin + new Vector2(cellSize - 1, cellSize - 1);
+                    var cellMax = cellMin + rectSize;
                     drawList.AddRectFilled(cellMin, cellMax, UiColors.Gray.Fade(0.2f));
                 }
             }
@@ -343,7 +345,7 @@ internal static class TimeControls
         if (settings.Syncing == PlaybackSettings.SyncModes.Tapping)
         {
             var bpm = BeatTiming.Bpm;
-            if (SingleValueEdit.Draw(ref bpm, new Vector2(100 * T3Ui.UiScaleFactor, ControlSize.Y), 1, 360, true, 0.01f, "{0:0.00 BPM}") ==
+            if (SingleValueEdit.Draw(ref bpm, new Vector2(StandardWidth, ControlSize.Y), 1, 360, true, 0.01f, "{0:0.00 BPM}") ==
                 InputEditStateFlags.Modified)
             {
                 BeatTiming.SetBpmRate(bpm);
@@ -620,7 +622,37 @@ internal static class TimeControls
     }
 
     public static double _lastPlaybackStartTime;
+    // beat grid optimizations
+    private static float _lastUiScaleFactor = -1f;
+    private static float _cachedCellSize;
+    private static Vector2 _cachedGridSize;
 
+    private static float CellSize
+    {
+        get
+        {
+            if (Math.Abs(_lastUiScaleFactor - T3Ui.UiScaleFactor) > 0.001f)
+            {
+                _lastUiScaleFactor = T3Ui.UiScaleFactor;
+                _cachedCellSize = 4f * T3Ui.UiScaleFactor;
+                _cachedGridSize = new Vector2(_cachedCellSize * 4 * 0.5f);
+            }
+            return _cachedCellSize;
+        }
+    }
+
+    private static Vector2 GridSize
+    {
+        get
+        {
+            // Trigger cache update if needed
+            _ = CellSize;
+            return _cachedGridSize;
+        }
+    }
+    // end of beat grid optimizations
+
+    private static float StandardWidth => 100f * T3Ui.UiScaleFactor;
     public static Vector2 ControlSize => new Vector2(45, 28) * T3Ui.UiScaleFactor;
     public static Vector2 DopeCurve => new Vector2(95, 28) * T3Ui.UiScaleFactor;
 
