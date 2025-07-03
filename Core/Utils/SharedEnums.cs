@@ -1,4 +1,4 @@
-﻿// ReSharper disable UnusedMember.Global
+// ReSharper disable UnusedMember.Global
 namespace T3.Core.Utils;
 
 public class SharedEnums
@@ -12,6 +12,8 @@ public class SharedEnums
         None,
         PreMultipliedExperimental,
         BlendOnWhite,
+        BlendOnWhite01,
+        UseImage_Alpha,
     }
 
     public enum RgbBlendModes
