@@ -57,14 +57,19 @@
       "Name": "BlendOnWhites01",
       "InputValues": [
         {
-          "Id": "56c398ce-fe71-47eb-a33f-11eec8f82e79"/*SourceBlend*/,
-          "Type": "SharpDX.Direct3D11.BlendOption",
-          "Value": "Zero"
-        },
-        {
           "Id": "7f535169-8f65-4186-866d-59c2b89d7da2"/*BlendEnabled*/,
           "Type": "System.Boolean",
           "Value": true
+        },
+        {
+          "Id": "8dc53fe4-79bb-43e4-9d4a-4e06f9a3214c"/*DestinationBlend*/,
+          "Type": "SharpDX.Direct3D11.BlendOption",
+          "Value": "InverseSourceColor"
+        },
+        {
+          "Id": "f56e4281-356a-451a-88f1-9cd8ad95d1a5"/*BlendOperation*/,
+          "Type": "SharpDX.Direct3D11.BlendOperation",
+          "Value": "ReverseSubtract"
         }
       ],
       "Outputs": []
@@ -344,6 +349,16 @@
           "Id": "7f535169-8f65-4186-866d-59c2b89d7da2"/*BlendEnabled*/,
           "Type": "System.Boolean",
           "Value": true
+        },
+        {
+          "Id": "8dc53fe4-79bb-43e4-9d4a-4e06f9a3214c"/*DestinationBlend*/,
+          "Type": "SharpDX.Direct3D11.BlendOption",
+          "Value": "SourceAlpha"
+        },
+        {
+          "Id": "f56e4281-356a-451a-88f1-9cd8ad95d1a5"/*BlendOperation*/,
+          "Type": "SharpDX.Direct3D11.BlendOperation",
+          "Value": "ReverseSubtract"
         }
       ],
       "Outputs": []
