@@ -1,7 +1,5 @@
 using T3.Core.Utils;
 
-//using T3.Operators.Types.Id_c5e39c67_256f_4cb9_a635_b62a0d9c796c;
-
 namespace Lib.numbers.anim._obsolete;
 
 [Guid("11882635-4757-4cac-a024-70bb4e8b504c")]
@@ -9,7 +7,7 @@ public sealed class Counter : Instance<Counter>
 {
     [Output(Guid = "c53e3a03-3a6d-4547-abbf-7901b5045539", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
     public readonly Slot<float> Result = new();
-        
+
     [Output(Guid = "BAE829AD-8454-4625-BDE4-A7AB62F579A4", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
     public readonly Slot<bool> WasStep = new();
 
@@ -38,24 +36,24 @@ public sealed class Counter : Instance<Counter>
                 _speedFactor = 1;
                 break;
             case SpeedFactors.FactorA:
-            {
-                if (!context.FloatVariables.TryGetValue(SpeedFactorA, out _speedFactor))
-                    _speedFactor = 1;
-                    
-                break;
-            }
+                {
+                    if (!context.FloatVariables.TryGetValue(SpeedFactorA, out _speedFactor))
+                        _speedFactor = 1;
+
+                    break;
+                }
             case SpeedFactors.FactorB:
                 if (!context.FloatVariables.TryGetValue(SpeedFactorB, out _speedFactor))
                     _speedFactor = 1;
-            
+
                 break;
-                
+
             default:
                 Log.Debug($"Incorrect speed factor mode {f} in Counter", this);
                 _speedFactor = 1;
                 break;
         }
-            
+
         if (!_initialized || reset || float.IsNaN(_count))
         {
             _count = 0;
@@ -76,24 +74,27 @@ public sealed class Counter : Instance<Counter>
             }
         }
 
+        // Store previous count before updating
+        var previousCount = _count;
+
         if (jump)
         {
             if (modulo > 0.001f)
             {
                 _jumpStartOffset = _jumpTargetOffset;
-                _jumpTargetOffset +=  1;
+                _jumpTargetOffset += 1;
             }
             else
             {
                 _jumpStartOffset = _count;
                 _jumpTargetOffset = _count + increment;
             }
-            _lastJumpTime = _beatTime; 
+            _lastJumpTime = _beatTime;
         }
 
         if (_blending >= 0.001)
         {
-            var t = (Fragment / _blending).Clamp(0,1);
+            var t = (Fragment / _blending).Clamp(0, 1);
             if (smoothBlending)
                 t = MathUtils.SmootherStep(0, 1, t);
 
@@ -112,22 +113,30 @@ public sealed class Counter : Instance<Counter>
         {
             Result.Value = _count + startPosition;
         }
-            
-        WasStep.Value = jump;
+
+        // WasStep.Value = jump;
+        // Improved WasStep logic similar to AnimValue's WasHit
+        if (Math.Abs(context.LocalFxTime - _lastUpdateTime) > double.Epsilon)
+        {
+            _lastUpdateTime = context.LocalFxTime;
+            WasStep.Value = (int)previousCount != (int)_count;
+        }
+
         Result.DirtyFlag.Clear();
         WasStep.DirtyFlag.Clear();
     }
- 
-    private enum SpeedFactors {
+
+    private enum SpeedFactors
+    {
         None,
         FactorA,
         FactorB,
     }
-        
+
     private const string SpeedFactorA = "SpeedFactorA";
     private const string SpeedFactorB = "SpeedFactorB";
 
-        
+
     public float Fragment =>
         UseRate
             ? (float)((_beatTime - _lastJumpTime) * _rate).Clamp(0, 1)
@@ -135,7 +144,7 @@ public sealed class Counter : Instance<Counter>
 
     private bool UseRate => _rate > -1 && !TriggerIncrement.HasInputConnections;
 
-    private float _speedFactor=1;
+    private float _speedFactor = 1;
     private float _rate;
     private float _phase;
 
@@ -149,28 +158,7 @@ public sealed class Counter : Instance<Counter>
     private float _jumpStartOffset;
     private float _jumpTargetOffset;
 
-    // private void Update (EvaluationContext context)
-    // {
-    //     if (TriggerReset.GetValue(context))
-    //     {
-    //         _value = StartValue.GetValue(context);
-    //     }
-    //     
-    //     
-    //     var countTriggered = TriggerCount.GetValue(context);
-    //     if (countTriggered != _lastCountTriggered)
-    //     {
-    //         if (countTriggered)
-    //             _value += Increment.GetValue(context);
-    //             
-    //         _lastCountTriggered = countTriggered;
-    //     }
-    //
-    //     Result.Value = _value;
-    // }
-    //
-    // private float _value;
-    // private bool _lastCountTriggered;
+    private double _lastUpdateTime = double.NegativeInfinity;
 
     [Input(Guid = "eefdb8ca-68e7-4e39-b302-22eb8930fb8c")]
     public readonly InputSlot<bool> TriggerIncrement = new();
@@ -196,10 +184,9 @@ public sealed class Counter : Instance<Counter>
     [Input(Guid = "B04D475B-A898-421B-BF26-AE5CF982A351")]
     public readonly InputSlot<float> Blending = new();
 
-
     [Input(Guid = "E0C386B9-A987-4D11-9171-2971FA759827")]
     public readonly InputSlot<bool> SmoothBlending = new();
-        
+
     [Input(Guid = "C386B9E0-A987-4D11-9171-2971FA759827", MappedType = typeof(SpeedFactors))]
     public readonly InputSlot<int> AllowSpeedFactor = new();
 
