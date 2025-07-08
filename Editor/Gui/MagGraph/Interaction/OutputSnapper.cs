@@ -65,7 +65,7 @@ internal static class OutputSnapper
 
             if (Structure.CheckForCycle(context.CompositionInstance.Symbol, connectionToAdd))
             {
-                Log.Debug("Sorry, this connection would create a cycle.");
+                Log.Debug("This action is not allowed. This connection would create a cycle.");
                 continue;
             }
             

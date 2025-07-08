@@ -10,7 +10,7 @@ namespace T3.Editor.Gui.Graph.Dialogs;
 
 internal sealed class CombineToSymbolDialog : ModalDialog
 {
-    public ChangeSymbol.SymbolModificationResults Draw(Instance compositionOp, ProjectView projectView, ref string nameSpace,
+    public ChangeSymbol.SymbolModificationResults Draw(Guid symbolGuid, ProjectView projectView, ref string nameSpace,
                                                  ref string combineName, ref string description)
     {
         var result = ChangeSymbol.SymbolModificationResults.Nothing;
@@ -40,7 +40,9 @@ internal sealed class CombineToSymbolDialog : ModalDialog
                     
                 if (CustomComponents.DisablableButton("Combine", symbolNamesValid, enableTriggerWithReturn: false))
                 {
-                    var compositionSymbolUi = compositionOp.GetSymbolUi();
+                    if(!SymbolUiRegistry.TryGetSymbolUi(symbolGuid, out var compositionSymbolUi))
+                        throw new Exception($"Can't find symbol ui for symbol {symbolGuid}");
+                    
                     Combine.CombineAsNewType(compositionSymbolUi, _projectToCopyTo, selectedChildUis, selectedAnnotations, combineName, nameSpace, description,
                                              _shouldBeTimeClip);
                     _shouldBeTimeClip = false; // Making timeclips this is normally a one-off operation

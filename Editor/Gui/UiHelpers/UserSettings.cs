@@ -145,6 +145,9 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         public string ColorThemeName = string.Empty;
             
         // Other
+
+        public string KeyBindingName = string.Empty;
+
         public bool ExpandSpectrumVisualizerVertically = true;
         public int GridOutputColumnCount = 16;
 

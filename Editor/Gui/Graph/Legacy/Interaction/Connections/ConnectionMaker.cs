@@ -376,7 +376,7 @@ internal static class ConnectionMaker
 
             if (Structure.CheckForCycle(sourceInstance.Outputs[0], targetUi.Id))
             {
-                Log.Debug("Sorry, you can't do this. This connection would result in a cycle.");
+                Log.Debug("This action is not allowed. This connection would result in a cycle.");
                 AbortOperation(inProgress);
             }
         }
@@ -464,7 +464,7 @@ internal static class ConnectionMaker
         var targetId = tempConnection.TargetParentOrChildId;
         if (Structure.CheckForCycle(sourceInstance, targetId))
         {
-            Log.Debug("Sorry, you can't do this. This connection would result in a cycle.");
+            Log.Debug("This action is not allowed. This connection would result in a cycle.");
             tempConnections.Clear();
             ConnectionSnapEndHelper.ResetSnapping();
             return;
@@ -844,8 +844,8 @@ internal static class ConnectionMaker
         inProgressCommand.AddExecutedCommandForUndo(moveCommand); // FIXME: this will break consistency check 
         
         var siblingDict = parent.Children;
-        if (!siblingDict.TryGetValue(oldConnection.SourceParentOrChildId, out var sourceInstance)
-            || !siblingDict.TryGetValue(oldConnection.TargetParentOrChildId, out var targetInstance))
+        if (!siblingDict.TryGetChildInstance(oldConnection.SourceParentOrChildId, out var sourceInstance)
+            || !siblingDict.TryGetChildInstance(oldConnection.TargetParentOrChildId, out var targetInstance))
         {
             Log.Warning("Can't split this connection");
             return;

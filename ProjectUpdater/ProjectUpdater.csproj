@@ -5,6 +5,7 @@
     <VersionPrefix>$(TixlVersion)</VersionPrefix>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+      <Deterministic>true</Deterministic>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Core\Core.csproj" />
+    <ProjectReference Include="..\Core\Core.csproj" Private="false"/>
   </ItemGroup>
 
 </Project>

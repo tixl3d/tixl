@@ -1,6 +1,7 @@
 #nullable enable
 using ImGuiNET;
 using T3.Editor.Gui.Interaction;
+using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.ProjectHandling;
@@ -22,14 +23,14 @@ internal static class GraphBookmarkNavigation
 
         for (var i = 0; i < _saveBookmarkActions.Length; i++)
         {
-            if (KeyboardBinding.Triggered(_saveBookmarkActions[i]))
+            if (KeyActionHandling.Triggered(_saveBookmarkActions[i]))
             {
                 SaveBookmark(components, i);
                 _lastInteractionFrame = ImGui.GetFrameCount();
                 break;
             }
 
-            else if (KeyboardBinding.Triggered(_loadBookmarkActions[i]))
+            else if (KeyActionHandling.Triggered(_loadBookmarkActions[i]))
             {
                 LoadBookmark(components, i);
                 _lastInteractionFrame = ImGui.GetFrameCount();
@@ -51,7 +52,7 @@ internal static class GraphBookmarkNavigation
             for (var index = 0; index < _loadBookmarkActions.Length; index++)
             {
                 var action = _loadBookmarkActions[index];
-                var shortcuts = KeyboardBinding.ListKeyboardShortcuts(action, showLabel:false);
+                var shortcuts = action.ListShortcuts();
                 var isAvailable = DoesBookmarkExist(index);
                 if (ImGui.MenuItem(action.ToString(), shortcuts, false, enabled: isAvailable))
                 {
@@ -68,7 +69,7 @@ internal static class GraphBookmarkNavigation
             for (var index = 0; index < _saveBookmarkActions.Length; index++)
             {
                 var action = _saveBookmarkActions[index];
-                var shortcuts = KeyboardBinding.ListKeyboardShortcuts(action, showLabel:false);
+                var shortcuts = action.ListShortcuts();
                     
                 if (ImGui.MenuItem(action.ToString(), shortcuts))
                 {

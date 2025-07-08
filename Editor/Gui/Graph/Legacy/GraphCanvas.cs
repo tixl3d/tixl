@@ -13,6 +13,7 @@ using T3.Editor.Gui.Graph.Interaction;
 using T3.Editor.Gui.Graph.Legacy.Interaction;
 using T3.Editor.Gui.Graph.Legacy.Interaction.Connections;
 using T3.Editor.Gui.Interaction;
+using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.Interaction.Variations;
 using T3.Editor.Gui.MagGraph.Interaction;
 using T3.Editor.Gui.OutputUi;
@@ -184,31 +185,31 @@ internal sealed class GraphCanvas : ScalableCanvas, IGraphCanvas
             var compositionUi = compositionOp.GetSymbolUi();
             //compositionUi.FlagAsModified();
 
-            if (KeyboardBinding.Triggered(UserActions.FocusSelection))
+            if (KeyActionHandling.Triggered(UserActions.FocusSelection))
                 FocusViewToSelection();
 
-            if (!T3Ui.IsCurrentlySaving && KeyboardBinding.Triggered(UserActions.Duplicate))
+            if (!T3Ui.IsCurrentlySaving && KeyActionHandling.Triggered(UserActions.Duplicate))
             {
                 NodeActions.CopySelectedNodesToClipboard(_nodeSelection, compositionOp);
                 NodeActions.PasteClipboard(_nodeSelection, this, compositionOp);
             }
 
-            if (!T3Ui.IsCurrentlySaving && KeyboardBinding.Triggered(UserActions.DeleteSelection))
+            if (!T3Ui.IsCurrentlySaving && KeyActionHandling.Triggered(UserActions.DeleteSelection))
             {
                 NodeActions.DeleteSelectedElements(_nodeSelection, compositionUi);
             }
 
-            if (KeyboardBinding.Triggered(UserActions.ToggleDisabled))
+            if (KeyActionHandling.Triggered(UserActions.ToggleDisabled))
             {
                 NodeActions.ToggleDisabledForSelectedElements(_nodeSelection);
             }
 
-            if (KeyboardBinding.Triggered(UserActions.ToggleBypassed))
+            if (KeyActionHandling.Triggered(UserActions.ToggleBypassed))
             {
                 NodeActions.ToggleBypassedForSelectedElements(_nodeSelection);
             }
 
-            if (KeyboardBinding.Triggered(UserActions.PinToOutputWindow))
+            if (KeyActionHandling.Triggered(UserActions.PinToOutputWindow))
             {
                 if (UserSettings.Config.FocusMode)
                 {
@@ -224,7 +225,7 @@ internal sealed class GraphCanvas : ScalableCanvas, IGraphCanvas
                 }
             }
 
-            if (KeyboardBinding.Triggered(UserActions.DisplayImageAsBackground))
+            if (KeyActionHandling.Triggered(UserActions.DisplayImageAsBackground))
             {
                 var selectedImage = _nodeSelection.GetFirstSelectedInstance();
                 if (selectedImage != null && ProjectView.Focused != null)
@@ -234,22 +235,22 @@ internal sealed class GraphCanvas : ScalableCanvas, IGraphCanvas
                 }
             }
 
-            if (KeyboardBinding.Triggered(UserActions.CopyToClipboard))
+            if (KeyActionHandling.Triggered(UserActions.CopyToClipboard))
             {
                 NodeActions.CopySelectedNodesToClipboard(_nodeSelection, compositionOp);
             }
 
-            if (!T3Ui.IsCurrentlySaving && KeyboardBinding.Triggered(UserActions.PasteFromClipboard))
+            if (!T3Ui.IsCurrentlySaving && KeyActionHandling.Triggered(UserActions.PasteFromClipboard))
             {
                 NodeActions.PasteClipboard(_nodeSelection, this, compositionOp);
             }
 
-            if (KeyboardBinding.Triggered(UserActions.LayoutSelection))
+            if (KeyActionHandling.Triggered(UserActions.LayoutSelection))
             {
                 _nodeGraphLayouting.ArrangeOps(compositionOp);
             }
 
-            if (!T3Ui.IsCurrentlySaving && KeyboardBinding.Triggered(UserActions.AddAnnotation))
+            if (!T3Ui.IsCurrentlySaving && KeyActionHandling.Triggered(UserActions.AddAnnotation))
             {
                 var newAnnotation = NodeActions.AddAnnotation(_nodeSelection, this, compositionOp);
                 _graph.RenameAnnotation(newAnnotation);
@@ -258,12 +259,12 @@ internal sealed class GraphCanvas : ScalableCanvas, IGraphCanvas
             IReadOnlyList<Guid> navigationPath = null;
 
             // Navigation
-            if (KeyboardBinding.Triggered(UserActions.NavigateBackwards))
+            if (KeyActionHandling.Triggered(UserActions.NavigateBackwards))
             {
                 navigationPath = _navigationHistory.NavigateBackwards();
             }
 
-            if (KeyboardBinding.Triggered(UserActions.NavigateForward))
+            if (KeyActionHandling.Triggered(UserActions.NavigateForward))
             {
                 navigationPath = _navigationHistory.NavigateForward();
             }
@@ -271,32 +272,32 @@ internal sealed class GraphCanvas : ScalableCanvas, IGraphCanvas
             if (navigationPath != null)
                 _projectView.TrySetCompositionOp(navigationPath);
 
-            if (KeyboardBinding.Triggered(UserActions.SelectToAbove))
+            if (KeyActionHandling.Triggered(UserActions.SelectToAbove))
             {
                 _nodeNavigation.SelectAbove();
             }
 
-            if (KeyboardBinding.Triggered(UserActions.SelectToRight))
+            if (KeyActionHandling.Triggered(UserActions.SelectToRight))
             {
                 _nodeNavigation.SelectRight();
             }
 
-            if (KeyboardBinding.Triggered(UserActions.SelectToBelow))
+            if (KeyActionHandling.Triggered(UserActions.SelectToBelow))
             {
                 _nodeNavigation.SelectBelow();
             }
 
-            if (KeyboardBinding.Triggered(UserActions.AddComment))
+            if (KeyActionHandling.Triggered(UserActions.AddComment))
             {
                 EditCommentDialog.ShowNextFrame();
             }
 
-            if (KeyboardBinding.Triggered(UserActions.SelectToLeft))
+            if (KeyActionHandling.Triggered(UserActions.SelectToLeft))
             {
                 _nodeNavigation.SelectLeft();
             }
 
-            if (KeyboardBinding.Triggered(UserActions.DisplayImageAsBackground))
+            if (KeyActionHandling.Triggered(UserActions.DisplayImageAsBackground))
             {
                 var selectedImage = _nodeSelection.GetFirstSelectedInstance();
                 if (selectedImage != null)
@@ -376,7 +377,7 @@ internal sealed class GraphCanvas : ScalableCanvas, IGraphCanvas
 
         var isOnBackground = ImGui.IsWindowFocused() && !ImGui.IsAnyItemActive();
         var shouldHandleFenceSelection = isSomething
-                                         || isOnBackground && (ImGui.IsMouseDoubleClicked(0) || KeyboardBinding.Triggered(UserActions.CloseOperator));
+                                         || isOnBackground && (ImGui.IsMouseDoubleClicked(0) || KeyActionHandling.Triggered(UserActions.CloseOperator));
 
         if (shouldHandleFenceSelection)
         {
@@ -416,19 +417,23 @@ internal sealed class GraphCanvas : ScalableCanvas, IGraphCanvas
         if (FrameStats.Current.OpenedPopUpName == string.Empty)
             CustomComponents.DrawContextMenuForScrollCanvas(() => DrawContextMenuContent(compositionInstance), ref _contextMenuIsOpen);
 
-        _duplicateSymbolDialog.Draw(compositionInstance, _nodeSelection.GetSelectedChildUis().ToList(), ref _nameSpaceForDialogEdits,
+        var symbolId = compositionInstance.Symbol.Id;
+        compositionInstance = null; // for assembly unloading
+        _duplicateSymbolDialog.Draw(symbolId, _nodeSelection.GetSelectedChildUis().ToList(), ref _nameSpaceForDialogEdits,
                                     ref _symbolNameForDialogEdits,
                                     ref _symbolDescriptionForDialog);
-        _combineToSymbolDialog.Draw(compositionInstance, _projectView,
+        _combineToSymbolDialog.Draw(symbolId, _projectView,
                                     ref _nameSpaceForDialogEdits,
                                     ref _symbolNameForDialogEdits,
                                     ref _symbolDescriptionForDialog);
+        
+        compositionInstance = _projectView.CompositionInstance;
 
         _renameSymbolDialog.Draw(_nodeSelection.GetSelectedChildUis().ToList(), ref _symbolNameForDialogEdits);
 
         EditCommentDialog.Draw(_nodeSelection);
 
-        if (compositionInstance != _projectView.OpenedProject.RootInstance && !compositionInstance.Symbol.SymbolPackage.IsReadOnly)
+        if (compositionInstance != _projectView.RootInstance && !compositionInstance.Symbol.SymbolPackage.IsReadOnly)
         {
             var symbol = compositionInstance.Symbol;
             _addInputDialog.Draw(symbol);
@@ -496,7 +501,7 @@ internal sealed class GraphCanvas : ScalableCanvas, IGraphCanvas
         {
             if (node is SymbolUi.Child symbolChildUi)
             {
-                if (!compositionOp.TryGetChildInstance(symbolChildUi.Id, false, out var instance, out _))
+                if (!compositionOp.Children.TryGetChildInstance(symbolChildUi.Id, out var instance))
                 {
                     Log.Error("Can't find instance");
                 }
@@ -588,7 +593,7 @@ internal sealed class GraphCanvas : ScalableCanvas, IGraphCanvas
         var selectedChildUis = _nodeSelection.GetSelectedChildUis().ToList();
         var nextUndoTitle = UndoRedoStack.CanUndo ? $" ({UndoRedoStack.GetNextUndoTitle()})" : string.Empty;
         if (ImGui.MenuItem("Undo" + nextUndoTitle,
-                           shortcut: KeyboardBinding.ListKeyboardShortcuts(UserActions.Undo, false),
+                           shortcut: UserActions.Undo.ListShortcuts(),
                            selected: false,
                            enabled: UndoRedoStack.CanUndo))
         {
@@ -613,7 +618,7 @@ internal sealed class GraphCanvas : ScalableCanvas, IGraphCanvas
 
         var allSelectedDisabled = selectedChildUis.TrueForAll(selectedChildUi => selectedChildUi.SymbolChild.IsDisabled);
         if (ImGui.MenuItem("Disable",
-                           KeyboardBinding.ListKeyboardShortcuts(UserActions.ToggleDisabled, false),
+                           UserActions.ToggleDisabled.ListShortcuts(),
                            selected: allSelectedDisabled,
                            enabled: selectedChildUis.Count > 0))
         {
@@ -622,7 +627,7 @@ internal sealed class GraphCanvas : ScalableCanvas, IGraphCanvas
 
         var allSelectedBypassed = selectedChildUis.TrueForAll(selectedChildUi => selectedChildUi.SymbolChild.IsBypassed);
         if (ImGui.MenuItem("Bypassed",
-                           KeyboardBinding.ListKeyboardShortcuts(UserActions.ToggleBypassed, false),
+                           UserActions.ToggleBypassed.ListShortcuts(),
                            selected: allSelectedBypassed,
                            enabled: selectedChildUis.Count > 0))
         {
@@ -635,7 +640,7 @@ internal sealed class GraphCanvas : ScalableCanvas, IGraphCanvas
         }
 
         if (ImGui.MenuItem("Add Comment",
-                           KeyboardBinding.ListKeyboardShortcuts(UserActions.AddComment, false),
+                           UserActions.AddComment.ListShortcuts(),
                            selected: false,
                            enabled: oneOpSelected))
         {
@@ -643,7 +648,7 @@ internal sealed class GraphCanvas : ScalableCanvas, IGraphCanvas
         }
 
         if (ImGui.MenuItem("Arrange sub graph",
-                           KeyboardBinding.ListKeyboardShortcuts(UserActions.LayoutSelection, false),
+                           UserActions.LayoutSelection.ListShortcuts(),
                            selected: false,
                            enabled: someOpsSelected))
         {
@@ -725,7 +730,7 @@ internal sealed class GraphCanvas : ScalableCanvas, IGraphCanvas
                           && selectedChildUis[0].SymbolChild.Symbol.OutputDefinitions.Count > 0
                           && selectedChildUis[0].SymbolChild.Symbol.OutputDefinitions[0].ValueType == typeof(T3.Core.DataTypes.Texture2D);
             if (ImGui.MenuItem("Set image as graph background",
-                               KeyboardBinding.ListKeyboardShortcuts(UserActions.DisplayImageAsBackground, false),
+                               UserActions.DisplayImageAsBackground.ListShortcuts(),
                                selected: false,
                                enabled: isImage))
             {
@@ -744,14 +749,14 @@ internal sealed class GraphCanvas : ScalableCanvas, IGraphCanvas
         ImGui.Separator();
 
         if (ImGui.MenuItem("Copy",
-                           KeyboardBinding.ListKeyboardShortcuts(UserActions.CopyToClipboard, false),
+                           UserActions.CopyToClipboard.ListShortcuts(),
                            selected: false,
                            enabled: someOpsSelected))
         {
             NodeActions.CopySelectedNodesToClipboard(_nodeSelection, compositionOp);
         }
 
-        if (ImGui.MenuItem("Paste", KeyboardBinding.ListKeyboardShortcuts(UserActions.PasteFromClipboard, false)))
+        if (ImGui.MenuItem("Paste", UserActions.PasteFromClipboard.ListShortcuts()))
         {
             NodeActions.PasteClipboard(_nodeSelection, this, compositionOp);
         }
@@ -770,7 +775,7 @@ internal sealed class GraphCanvas : ScalableCanvas, IGraphCanvas
         }
 
         if (ImGui.MenuItem("Duplicate",
-                           KeyboardBinding.ListKeyboardShortcuts(UserActions.Duplicate, false),
+                           UserActions.Duplicate.ListShortcuts(),
                            selected: false,
                            enabled: selectedChildUis.Count > 0 && !isSaving))
         {
@@ -856,7 +861,7 @@ internal sealed class GraphCanvas : ScalableCanvas, IGraphCanvas
             }
 
             if (ImGui.MenuItem("Add Annotation",
-                               shortcut: KeyboardBinding.ListKeyboardShortcuts(UserActions.AddAnnotation, false),
+                               shortcut: UserActions.AddAnnotation.ListShortcuts(),
                                selected: false,
                                enabled: true))
             {

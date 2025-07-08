@@ -993,7 +993,8 @@ internal sealed partial class MagGraphCanvas
 
         if (item.Variant == MagGraphItem.Variants.Operator)
         {
-            if (item.Instance is IStatusProvider statusProvider)
+            var instance = item.Instance;
+            if (instance is IStatusProvider statusProvider)
             {
                 var statusLevel = statusProvider.GetStatusLevel();
                 if (statusLevel != IStatusProvider.StatusLevel.Success && statusLevel != IStatusProvider.StatusLevel.Undefined)
@@ -1011,7 +1012,58 @@ internal sealed partial class MagGraphCanvas
                     CustomComponents.TooltipForLastItem(UiColors.StatusWarning, statusLevel.ToString(), statusProvider.GetStatusMessage(), false);
                 }
             }
+            
+            #if DEBUG
+            var s = item.Size.Y * 0.15f * CanvasScale;
+            ImGui.SetCursorScreenPos(pMinVisible + new Vector2(s, pMaxVisible.Y - pMinVisible.Y - s));
+            ImGui.InvisibleButton("#status", new Vector2(s, s));
+            Icons.DrawIconOnLastItem(Icon.HelpOutline, Color.White with {A = 0.1f});
+
+            if (ImGui.BeginItemTooltip())
+            {
+                DrawInstanceStatus(instance);
+                ImGui.EndTooltip();
+            }
+            #endif
         }
+
+        #if DEBUG
+        return;
+        static void DrawInstanceStatus(Instance instance)
+        {
+            var status = instance.Status;
+            var id = Symbol.Child.HashCodeOf(instance.InstancePath);
+            ImGui.BeginDisabled();
+            DrawFlags(status, id);
+           /* instance.Children.GetExistingCounts(out var cound, out var existingCount, out var childFlags, out var nestedCount, out var nestedExistingCount, out var nestedFlags);
+            ImGui.TextUnformatted($"My Children: {existingCount}/{cound}, Nested Children: {nestedExistingCount}/{nestedCount}");
+            DrawFlags(nestedFlags, id + 1);
+            */
+            ImGui.EndDisabled();
+            return;
+            
+            static void DrawFlags(Instance.InstanceStatus status, int id)
+            {
+                var isInitialized = (status & Instance.InstanceStatus.Initialized) == Instance.InstanceStatus.Initialized;
+                ImGui.Checkbox($"Initialized ##initflag{id}" , ref isInitialized);
+            
+                var isActive = (status & Instance.InstanceStatus.Active) == Instance.InstanceStatus.Active;
+                ImGui.Checkbox($"Active ##activeflag{id}", ref isActive);
+            
+                var isBypassed = (status & Instance.InstanceStatus.Bypassed) == Instance.InstanceStatus.Bypassed;
+                ImGui.Checkbox($"Bypassed ##bypassflag{id}", ref isBypassed);
+            
+                var isConnectedInternally = (status & Instance.InstanceStatus.ConnectedInternally) == Instance.InstanceStatus.ConnectedInternally;
+                ImGui.Checkbox($"ConnectedInternally ##connectedflag{id}", ref isConnectedInternally);
+            
+                var isDisposed = (status & Instance.InstanceStatus.Disposed) == Instance.InstanceStatus.Disposed;
+                ImGui.Checkbox($"Disposed ##disposedflag{id}", ref isDisposed);
+            
+                var isResourceFoldersDirty = (status & Instance.InstanceStatus.ResourceFoldersDirty) == Instance.InstanceStatus.ResourceFoldersDirty;
+                ImGui.Checkbox($"ResourceFoldersDirty ##resourcedirtyflag{id}", ref isResourceFoldersDirty);
+            }
+        }
+        #endif
     }
 
 
@@ -1089,7 +1141,7 @@ internal sealed partial class MagGraphCanvas
 
         // Unfortunately we have to test if symbolChild of instance is still valid.
         // This might not be the case for operators like undo/redo.
-        if (instance.Parent != null && instance.Parent.Children.TryGetValue(instance.SymbolChildId, out _))
+        if (instance.Parent != null && instance.Parent.Children.TryGetChildInstance(instance.SymbolChildId, out _))
             return drawFunction(instance, drawList, selectableScreenRect, canvasScale);
 
         return SymbolUi.Child.CustomUiResult.None;

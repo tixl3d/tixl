@@ -154,7 +154,7 @@ internal sealed class NodeGraphLayouting
             sortedIn.Add(connectedChildUi);
             //NodeSelection.AddSelection(connectedChildUi);
 
-            if (composition.Children.TryGetValue(connectedChildUi.Id, out var instance))
+            if (composition.Children.TryGetChildInstance(connectedChildUi.Id, out var instance))
             {
                 _nodeSelection.AddSelection(connectedChildUi, instance);
             }

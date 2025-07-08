@@ -6,6 +6,7 @@ using T3.Core.Compilation;
 using T3.Core.DataTypes;
 using T3.Core.Logging;
 using T3.Core.Model;
+using T3.Core.UserData;
 using PixelShader = T3.Core.DataTypes.PixelShader;
 using Texture2D = T3.Core.DataTypes.Texture2D;
 using VertexShader = T3.Core.DataTypes.VertexShader;
@@ -17,7 +18,7 @@ namespace T3.Core.Resource;
 /// </summary>
 public static class SharedResources
 {
-    public static readonly string Directory = Path.Combine(RuntimeAssemblies.CoreDirectory, ResourceManager.ResourcesSubfolder);
+    public static readonly string Directory = Path.Combine(RuntimeAssemblies.CoreDirectory, FileLocations.ResourcesSubfolder);
     public static readonly IResourcePackage ResourcePackage = new SharedResourceObject();
         
     static SharedResources()

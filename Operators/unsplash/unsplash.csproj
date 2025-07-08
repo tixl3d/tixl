@@ -14,7 +14,7 @@
     <EditorVersion>$(TixlVersion)</EditorVersion>
     <IsEditorOnly>false</IsEditorOnly>
     <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <Deterministic>true</Deterministic>
   </PropertyGroup>
   <ItemGroup>
     <Using Include="System" />
@@ -92,8 +92,8 @@
     <Using Alias="SampleDescription" Include="SharpDX.DXGI.SampleDescription" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Core\Core.csproj" PrivateAssets="all" />
-    <ProjectReference Include="..\..\Logging\Logging.csproj" PrivateAssets="all" />
+    <ProjectReference Include="..\..\Core\Core.csproj" Private="false" />
+    <ProjectReference Include="..\..\Logging\Logging.csproj" Private="false" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="unsplasharp.api" Version="0.7.0" />
@@ -151,4 +151,10 @@
     <WriteLinesToFile File="$(OutputPath)/OperatorPackage.json" Lines="$(OperatorPackageInfoJson)"
       Overwrite="True" Encoding="UTF-8" />
   </Target>
+
+
+    <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild">
+        <!-- Clear previous files in the export folder -->
+        <RemoveDir Directories="bin/$(Configuration)"/>
+    </Target>
 </Project>

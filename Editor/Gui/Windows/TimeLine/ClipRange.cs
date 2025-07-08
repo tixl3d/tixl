@@ -13,7 +13,7 @@ internal sealed class ClipRange : IValueSnapAttractor
     /// <summary>
     /// Visualizes the mapped time area within a <see cref="TimeClip"/> content  
     /// </summary>
-    public void Draw(TimeLineCanvas canvas, ITimeClip timeClip, ImDrawListPtr drawlist, ValueSnapHandler snapHandler)
+    public void Draw(TimeLineCanvas canvas, TimeClip timeClip, ImDrawListPtr drawlist, ValueSnapHandler snapHandler)
     {
         if (timeClip == null)
             return;
@@ -130,7 +130,7 @@ internal sealed class ClipRange : IValueSnapAttractor
     private static readonly Color _timeRangeMarkerColor = UiColors.StatusAnimated.Fade(0.5f);
 
     //private static Playback _playback;
-    private static ITimeClip _timeClip;
+    private static TimeClip _timeClip;
     
     #region implement snapping interface -----------------------------------
     void IValueSnapAttractor.CheckForSnap(ref SnapResult snapResult)

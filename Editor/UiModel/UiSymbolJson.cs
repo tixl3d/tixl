@@ -354,8 +354,23 @@ internal static class SymbolUiJson
 
             if (!parentSymbol.Children.TryGetValue(childId, out var symbolChild))
             {
-                Log.Warning($"Skipping UI child definition in {parentSymbol.Name} {symbolId} for undefined child {childId}");
-                continue;
+                foreach (var child in parentSymbol.Children.Values)
+                {
+                    // check for duplication / changed child ids
+                    if (child.PreviousId.HasValue && child.PreviousId == childId)
+                    {
+                        symbolChild = child;
+                        childId = child.Id;
+                        child.ClearPreviousId();
+                        break;
+                    }
+                }
+
+                if (symbolChild == null)
+                {
+                    Log.Warning($"Skipping UI child definition in {parentSymbol.Name} {symbolId} for undefined child {childId}");
+                    continue;
+                }
             }
 
             var childUi = new SymbolUi.Child(symbolChild.Id, parentSymbol.Id, (EditorSymbolPackage)parentSymbol.SymbolPackage);

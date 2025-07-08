@@ -88,18 +88,29 @@ public sealed partial class SymbolUi : ISelectionContainer
     internal void UpdateConsistencyWithSymbol(Symbol? symbol = null)
     {
         symbol ??= Symbol;
+        var package = (EditorSymbolPackage)symbol.SymbolPackage;
         // Check if child entries are missing
         foreach (var child in symbol.Children.Values)
         {
             var childId = child.Id;
             if (!ChildUis.TryGetValue(childId, out _))
             {
-                Log.Debug($"Found no symbol child ui entry for symbol child '{child.ReadableName}' - creating a new one");
-                var childUi = new Child(childId, _id, (EditorSymbolPackage)symbol.SymbolPackage)
+                if (child.PreviousId != null && ChildUis.TryGetValue(child.PreviousId.Value, out var previousUi))
+                {
+                    // if we have a previous ui, we can copy the position and other properties from it
+                    Log.Debug($"Found a child ui entry that was duplicated for '{child.ReadableName}' - creating a copy");
+                    _childUis[childId] = Child.CreateCopy(previousUi, childId, _id, package);
+                    _childUis.Remove(child.PreviousId.Value);
+                    child.ClearPreviousId();
+                }
+                else
+                {
+                    Log.Debug($"Found no symbol child ui entry for symbol child '{child.ReadableName}' - creating a new one");
+                    _childUis[childId] = new Child(childId, _id, (EditorSymbolPackage)symbol.SymbolPackage)
                                   {
                                       PosOnCanvas = new Vector2(100, 100),
                                   };
-                _childUis.Add(childId, childUi);
+                }
             }
         }
 

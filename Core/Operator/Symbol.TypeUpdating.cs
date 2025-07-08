@@ -9,27 +9,33 @@ namespace T3.Core.Operator;
 
 public sealed partial class Symbol
 {
-    internal void UpdateInstanceType(bool forceTypeUpdate = false)
+    internal bool UpdateInstanceType(bool forceTypeUpdate)
     {
-        if (!NeedsTypeUpdate && !forceTypeUpdate)
-            return;
-        
-        NeedsTypeUpdate = false;
-        
-        UpdateSlotsAndConnectionsForType(out var oldInputDefinitions, out var oldOutputDefinitions);
-
-        var slotChanges = new SlotChangeInfo(oldInputDefinitions, oldOutputDefinitions, InputDefinitions, OutputDefinitions);
-
-        var count = _childrenCreatedFromMe.Count;
-        if (count == 0)
-            return;
-
-        foreach (var child in _childrenCreatedFromMe)
+        lock (_creationLock)
         {
-            child.UpdateIOAndConnections(slotChanges);
+            if (!NeedsTypeUpdate && !forceTypeUpdate)
+            {
+                return false;
+            }
+
+            NeedsTypeUpdate = false;
+            UpdateSlotsAndConnectionsForType(out var oldInputDefinitions, out var oldOutputDefinitions);
+            
+            if(oldOutputDefinitions.Count == 0 && OutputDefinitions.Count == 0 || _childrenCreatedFromMe.Count == 0)
+            {
+                // if there are no outputs, we can skip the update
+                return true;
+            }
+
+            var slotChanges = new SlotChangeInfo(oldInputDefinitions, oldOutputDefinitions, InputDefinitions, OutputDefinitions);
+            
+            foreach (var child in _childrenCreatedFromMe.Values)
+            {
+                child.UpdateIOAndConnections(slotChanges);
+            }
         }
 
-        return;
+        return true;
 
         void UpdateSlotsAndConnectionsForType(out List<InputDefinition> removedInputDefinitions, out List<OutputDefinition> removedOutputDefinitions)
         {
@@ -57,7 +63,7 @@ public sealed partial class Symbol
                     var isMultiInput = info.IsMultiInput;
                     var valueType = info.GenericArguments[0];
                     
-                    if(TryCreateInputDefinition(id, info.Name, isMultiInput, valueType, _instanceType, out var inputDef))
+                    if(TryCreateInputDefinition(id, info.Name, isMultiInput, valueType, InstanceType, out var inputDef))
                         InputDefinitions.Add(inputDef);
                 }
             }
@@ -155,16 +161,24 @@ public sealed partial class Symbol
 
     }
 
+
     private void RemoveConnections(IEnumerable<ConnectionEntry> connectionsToRemoveWithinSymbol)
     {
-        foreach (var entry in connectionsToRemoveWithinSymbol.OrderByDescending(x => x.ConnectionIndex))
+        lock (_creationLock)
         {
-            Connections.RemoveAt(entry.ConnectionIndex);
-            foreach (var child in _childrenCreatedFromMe)
+            foreach (var entry in connectionsToRemoveWithinSymbol.OrderByDescending(x => x.ConnectionIndex).ThenByDescending(x => x.MultiInputIndex))
             {
-                child.RemoveConnectionFromInstances(entry);
+                RemoveConnectionEntry(entry);
             }
-           
+        }
+    }
+
+    private void RemoveConnectionEntry(ConnectionEntry entry)
+    {
+        Connections.RemoveAt(entry.ConnectionIndex);
+        foreach (var child in _childrenCreatedFromMe.Values)
+        {
+            child.RemoveConnectionFromInstances(entry.Connection, entry.MultiInputIndex);
         }
     }
 
@@ -255,16 +269,20 @@ public sealed partial class Symbol
 
     public void ReplaceWithContentsOf(Symbol newSymbol)
     {
-        if (newSymbol == this)
+        // clear instances of self and any nested operators that may have been read-only and modified
+        lock (_creationLock)
         {
-            SymbolRegistry.SymbolsByType[InstanceType] = this; // todo: ugly - the other one replaced this value with itself when it was created
-            return;
+            foreach (var child in _childrenCreatedFromMe.Values)
+            {
+                child.DestroyAllInstances();
+            }
         }
 
-        var otherChildren = newSymbol._children;
-        foreach (var child in otherChildren)
+        // clear our children
+        foreach (var child in _children.Values.ToArray())
         {
-            _children.TryAdd(child.Key, child.Value);
+            child.Dispose();
+            _children.Remove(child.Id, out _);
         }
 
         Connections.Clear();
@@ -275,7 +293,22 @@ public sealed partial class Symbol
         OutputDefinitions.AddRange(newSymbol.OutputDefinitions);
         Animator = newSymbol.Animator;
         PlaybackSettings = newSymbol.PlaybackSettings;
+        
+        // todo: ugly - the other one replaced this value with itself when it was created
+        ApplyInstanceType(InstanceType);
+    }
 
-        SymbolRegistry.SymbolsByType[InstanceType] = this; // todo: ugly - the other one replaced this value with itself when it was created
+    public void RemoveAllReferencesToType()
+    {
+        lock (_creationLock)
+        {
+            foreach (var child in _childrenCreatedFromMe.Values)
+            {
+                child.PrepareForReload();
+            }
+        }
+
+        ApplyInstanceType(null);
+        
     }
 }

@@ -62,14 +62,14 @@ public class Slot<T> : ISlot
 
         _isDisabled = shouldBeDisabled;
     }
-        
-    public bool TryGetAsMultiInputTyped(out MultiInputSlot<T> multiInput)
+
+    internal bool TryGetAsMultiInputTyped(out MultiInputSlot<T> multiInput)
     {
         multiInput = _thisAsMultiInputSlot;
         return _isMultiInput;
     }
 
-    public virtual bool TrySetBypassToInput(Slot<T> targetSlot)
+    internal virtual bool TrySetBypassToInput(Slot<T> targetSlot)
     {
         if (_keepOriginalUpdateAction != null)
         {
@@ -85,7 +85,7 @@ public class Slot<T> : ISlot
         return true;
     }
 
-    public void OverrideWithAnimationAction(Action<EvaluationContext> newAction)
+    internal void OverrideWithAnimationAction(Action<EvaluationContext> newAction)
     {
         // Animation actions are updated regardless if operator was already animated
         if (_keepOriginalUpdateAction == null)
@@ -168,7 +168,7 @@ public class Slot<T> : ISlot
         Value = InputConnections[0].GetValue(context);
     }
         
-    public void ByPassUpdate(EvaluationContext context)
+    protected void ByPassUpdate(EvaluationContext context)
     {
         Value = _targetInputForBypass.GetValue(context);
     }

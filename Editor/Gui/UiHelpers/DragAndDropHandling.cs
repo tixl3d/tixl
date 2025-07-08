@@ -6,7 +6,7 @@ using T3.Core.DataTypes.Vector;
 
 namespace T3.Editor.Gui.UiHelpers;
 
-internal static class DragHandling
+internal static class DragAndDropHandling
 {
     /// <summary>
     /// This should be called once per frame 

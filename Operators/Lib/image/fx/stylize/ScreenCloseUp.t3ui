@@ -55,10 +55,20 @@
       "Clamp": true
     },
     {
+      "InputId": "e10c3708-9696-4d15-81b5-93eb4026937b"/*BackgroundColor*/,
+      "Position": {
+        "X": 1214.989,
+        "Y": 249.89746
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "Clamp": true
+    },
+    {
       "InputId": "ec096545-6cc7-45b0-8eb6-2100e52d3815"/*DepthOfField*/,
       "Position": {
         "X": 1756.526,
-        "Y": 170.16101
+        "Y": 205.16101
       },
       "Description": "Defines how large the depth of field range is",
       "AddPadding": "True"
@@ -356,7 +366,7 @@
       "OutputId": "9cd53ad3-17f8-44eb-8b54-684b9ba4732d"/*Output*/,
       "Position": {
         "X": 1896.526,
-        "Y": 240.16101
+        "Y": 275.161
       }
     }
   ],

@@ -19,7 +19,7 @@ internal sealed class DuplicateSymbolDialog : ModalDialog
     public event Action? Closed;
         
     /** returns true if modified */
-    public ChangeSymbol.SymbolModificationResults Draw(Instance compositionOp, List<SymbolUi.Child> selectedChildUis, ref string nameSpace, ref string newTypeName, ref string description, bool isReload = false)
+    public ChangeSymbol.SymbolModificationResults Draw(Guid symbolGuid, List<SymbolUi.Child> selectedChildUis, ref string nameSpace, ref string newTypeName, ref string description, bool isReload = false)
     {
         //DialogSize = new Vector2(500, 450) * T3Ui.UiScaleFactor;
         var result = ChangeSymbol.SymbolModificationResults.Nothing;
@@ -71,7 +71,9 @@ internal sealed class DuplicateSymbolDialog : ModalDialog
                     
                 if (CustomComponents.DisablableButton("Duplicate", symbolNamesValid, enableTriggerWithReturn: false))
                 {
-                    var compositionSymbolUi = compositionOp.GetSymbolUi();
+                    if(!SymbolUiRegistry.TryGetSymbolUi(symbolGuid, out var compositionSymbolUi))
+                        throw new InvalidOperationException($"Failed to find symbol ui for {symbolGuid}");
+                    
                     var position = selectedChildUis.First().PosOnCanvas + new Vector2(0, 100);
 
                     Duplicate.DuplicateAsNewType(compositionSymbolUi, _projectToCopyTo, selectedChildUis.First().SymbolChild.Symbol.Id, newTypeName, nameSpace, description,

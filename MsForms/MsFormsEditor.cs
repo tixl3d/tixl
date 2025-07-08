@@ -13,6 +13,9 @@ public class MsFormsEditor : MsForms, IEditorSystemUiService
 
     void IEditorSystemUiService.SetClipboardText(string text)
     {
+        if (string.IsNullOrEmpty(text))
+            return;
+        
         try
         {
             Clipboard.SetText(text, TextDataFormat.UnicodeText);

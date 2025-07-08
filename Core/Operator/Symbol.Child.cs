@@ -8,8 +8,8 @@ using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using T3.Core.Compilation;
 using T3.Core.DataTypes;
-using T3.Core.DataTypes.ShaderGraph;
 using T3.Core.Logging;
+using T3.Core.Model;
 using T3.Core.Operator.Slots;
 using T3.Core.Utils;
 using Texture2D = T3.Core.DataTypes.Texture2D;
@@ -24,7 +24,7 @@ public partial class Symbol
     public sealed class Child
     {
         /// <summary>A reference to the <see cref="Symbol"/> this is an instance from.</summary>
-        public Symbol Symbol { get; init; }
+        public Symbol Symbol { get; }
 
         public Guid Id { get; }
 
@@ -36,6 +36,7 @@ public partial class Symbol
         public bool HasCustomName => !string.IsNullOrEmpty(Name);
 
         public bool IsBypassed { get => _isBypassed; set => SetBypassed(value); }
+
         public bool IsDisabled
         {
             get
@@ -54,21 +55,34 @@ public partial class Symbol
         }
 
         public Dictionary<Guid, Input> Inputs { get; private init; } = new();
-        public Dictionary<Guid, Output> Outputs { get; private init; } = new();
-        internal IReadOnlyList<Instance> Instances => _instancesOfSelf;
-        private readonly List<Instance> _instancesOfSelf = new();
+        public Dictionary<Guid, Output> Outputs { get; private init; } = new(); 
+        internal IEnumerable<Instance> Instances
+        {
+            get
+            {
+                lock(_creationLock)
+                    return _instancesOfSelf.Values;
+            }
+        }
 
+        private readonly Dictionary<int, Instance> _instancesOfSelf = [];
+        private readonly object _creationLock;
+        // ReSharper disable once NotAccessedField.Local
         private readonly bool _isGeneric;
 
-        internal Child(Symbol symbol, Guid childId, Symbol? parent, string? name, bool isBypassed)
+        public Guid? PreviousId { get; private set; }
+
+
+        internal Child(Symbol symbol, Guid childId, Symbol? parent, string? name, bool isBypassed, object creationLock, Guid? previousId = null)
         {
+            _creationLock = creationLock;
             Symbol = symbol;
             Id = childId;
             Parent = parent;
             Name = name ?? string.Empty;
             _isBypassed = isBypassed;
             _isGeneric = symbol.IsGeneric;
-            symbol._childrenCreatedFromMe.Add(this);
+            PreviousId = previousId;
 
             foreach (var inputDefinition in symbol.InputDefinitions)
             {
@@ -108,6 +122,7 @@ public partial class Symbol
                 if (Outputs.TryGetValue(outputDef.Id, out var childOutput))
                 {
                     childOutput.IsDisabled = shouldBeDisabled;
+
                 }
                 else
                 {
@@ -120,7 +135,7 @@ public partial class Symbol
             foreach (var parentInstance in Parent.InstancesOfSelf)
             {
                 // This parent doesn't have an instance of our SymbolChild. Ignoring and continuing.
-                if (!parentInstance.Children.TryGetValue(Id, out var matchingChildInstance))
+                if (!parentInstance.Children.TryGetChildInstance(Id, out var matchingChildInstance))
                     continue;
 
                 // Set disabled status on all outputs of each instance
@@ -147,7 +162,7 @@ public partial class Symbol
 
             private DirtyFlagTrigger? _dirtyFlagTrigger = null;
 
-            public Output(Symbol.OutputDefinition outputDefinition, IOutputData outputData)
+            internal Output(Symbol.OutputDefinition outputDefinition, IOutputData outputData)
             {
                 OutputDefinition = outputDefinition;
                 OutputData = outputData;
@@ -209,6 +224,8 @@ public partial class Symbol
             }
         }
         #endregion
+        
+        #region Bypass
 
         private bool _isBypassed;
 
@@ -223,38 +240,25 @@ public partial class Symbol
             var mainInput = Symbol.InputDefinitions[0];
             var mainOutput = Symbol.OutputDefinitions[0];
 
-            if (mainInput.DefaultValue.ValueType != mainOutput.ValueType)
+            var defaultValueType = mainInput.DefaultValue.ValueType;
+            if (defaultValueType != mainOutput.ValueType)
                 return false;
 
-            if (mainInput.DefaultValue.ValueType == typeof(Command))
-                return true;
-
-            if (mainInput.DefaultValue.ValueType == typeof(Texture2D))
-                return true;
-
-            if (mainInput.DefaultValue.ValueType == typeof(BufferWithViews))
-                return true;
-
-            if (mainInput.DefaultValue.ValueType == typeof(MeshBuffers))
-                return true;
-
-            if (mainInput.DefaultValue.ValueType == typeof(float))
-                return true;
-
-            if (mainInput.DefaultValue.ValueType == typeof(Vector2))
-                return true;
-
-            if (mainInput.DefaultValue.ValueType == typeof(Vector3))
-                return true;
-
-            if (mainInput.DefaultValue.ValueType == typeof(string))
-                return true;
-
-            if (mainInput.DefaultValue.ValueType == typeof(ShaderGraphNode))
-                return true;
-
-            return false;
+            return _bypassableTypes.Contains(defaultValueType);
         }
+        
+        private static readonly Type[] _bypassableTypes =
+        {
+            typeof(Command),
+            typeof(Texture2D),
+            typeof(BufferWithViews),
+            typeof(MeshBuffers),
+            typeof(float),
+            typeof(Vector2),
+            typeof(Vector3),
+            typeof(string),
+            typeof(ShaderGraphNode)
+        };
 
         private void SetBypassed(bool shouldBypass)
         {
@@ -271,10 +275,13 @@ public partial class Symbol
                 return;
             }
 
-            if (_instancesOfSelf.Count == 0)
+            lock (_creationLock)
             {
-                _isBypassed = shouldBypass; // while duplicating / cloning as new symbol there are no instances yet.
-                return;
+                if (_instancesOfSelf.Count == 0)
+                {
+                    _isBypassed = shouldBypass; // while duplicating / cloning as new symbol there are no instances yet.
+                    return;
+                }
             }
 
             // check if there is a connection
@@ -296,177 +303,39 @@ public partial class Symbol
             foreach (var parentInstance in Parent.InstancesOfSelf)
             {
                 var instance = parentInstance.Children[id];
-                SetBypassForInstance(instance, shouldBypass);
+                Instance.SetBypassFor(instance, shouldBypass);
             }
 
             _isBypassed = shouldBypass;
         }
-
-        private static bool SetBypassForInstance(Instance instance, bool shouldBypass, bool invalidate = true)
-        {
-            var mainInputSlot = instance.Inputs[0];
-            var mainOutputSlot = instance.Outputs[0];
-
-            var wasByPassed = false;
-
-            switch (mainOutputSlot)
-            {
-                case Slot<Command> commandOutput when mainInputSlot is Slot<Command> commandInput:
-                    if (shouldBypass)
-                    {
-                        wasByPassed = commandOutput.TrySetBypassToInput(commandInput);
-                    }
-                    else
-                    {
-                        commandOutput.RestoreUpdateAction();
-                    }
-
-                    if (invalidate)
-                        InvalidateConnected(commandInput);
-                    break;
-
-                case Slot<BufferWithViews> bufferOutput when mainInputSlot is Slot<BufferWithViews> bufferInput:
-                    if (shouldBypass)
-                    {
-                        wasByPassed = bufferOutput.TrySetBypassToInput(bufferInput);
-                    }
-                    else
-                    {
-                        bufferOutput.RestoreUpdateAction();
-                    }
-
-                    if (invalidate)
-                        InvalidateConnected(bufferInput);
-                    
-                    break;
-                case Slot<MeshBuffers> bufferOutput when mainInputSlot is Slot<MeshBuffers> bufferInput:
-                    if (shouldBypass)
-                    {
-                        wasByPassed = bufferOutput.TrySetBypassToInput(bufferInput);
-                    }
-                    else
-                    {
-                        bufferOutput.RestoreUpdateAction();
-                    }
-
-                    if (invalidate)
-                        InvalidateConnected(bufferInput);
-
-                    break;
-                case Slot<Texture2D> texture2dOutput when mainInputSlot is Slot<Texture2D> texture2dInput:
-                    if (shouldBypass)
-                    {
-                        wasByPassed = texture2dOutput.TrySetBypassToInput(texture2dInput);
-                    }
-                    else
-                    {
-                        texture2dOutput.RestoreUpdateAction();
-                    }
-
-                    if (invalidate)
-                        InvalidateConnected(texture2dInput);
-
-                    break;
-                case Slot<float> floatOutput when mainInputSlot is Slot<float> floatInput:
-                    if (shouldBypass)
-                    {
-                        wasByPassed = floatOutput.TrySetBypassToInput(floatInput);
-                    }
-                    else
-                    {
-                        floatOutput.RestoreUpdateAction();
-                    }
-
-                    if (invalidate)
-                        InvalidateConnected(floatInput);
-
-                    break;
-
-                case Slot<System.Numerics.Vector2> vec2Output when mainInputSlot is Slot<System.Numerics.Vector2> vec2Input:
-                    if (shouldBypass)
-                    {
-                        wasByPassed = vec2Output.TrySetBypassToInput(vec2Input);
-                    }
-                    else
-                    {
-                        vec2Output.RestoreUpdateAction();
-                    }
-
-                    if (invalidate)
-                        InvalidateConnected(vec2Input);
-
-                    break;
-                case Slot<System.Numerics.Vector3> vec3Output when mainInputSlot is Slot<System.Numerics.Vector3> vec3Input:
-                    if (shouldBypass)
-                    {
-                        wasByPassed = vec3Output.TrySetBypassToInput(vec3Input);
-                    }
-                    else
-                    {
-                        vec3Output.RestoreUpdateAction();
-                    }
-
-                    if (invalidate)
-                        InvalidateConnected(vec3Input);
-
-                    break;
-                case Slot<string> stringOutput when mainInputSlot is Slot<string> stringInput:
-                    if (shouldBypass)
-                    {
-                        wasByPassed = stringOutput.TrySetBypassToInput(stringInput);
-                    }
-                    else
-                    {
-                        stringOutput.RestoreUpdateAction();
-                    }
-
-                    if (invalidate)
-                        InvalidateConnected(stringInput);
-                    break;
-            }
-
-            return wasByPassed;
-        }
-
-        private static void InvalidateConnected<T>(Slot<T> bufferInput)
-        {
-            if (bufferInput.TryGetAsMultiInputTyped(out var multiInput))
-            {
-                foreach (var connection in multiInput.CollectedInputs)
-                {
-                    InvalidateParentInputs(connection);
-                }
-            }
-            else
-            {
-                var connection = bufferInput.FirstConnection;
-                InvalidateParentInputs(connection);
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            void InvalidateParentInputs(ISlot connection)
-            {
-                if (connection.ValueType == typeof(string))
-                    return;
-
-                connection.DirtyFlag.Invalidate();
-            }
-        }
+        
+        #endregion Bypass
 
         public override string ToString()
         {
             return Parent?.Name + ">" + ReadableName;
         }
 
-        internal static Guid CreateIdDeterministically(Symbol symbol, Symbol? parent)
+        internal static unsafe Guid CreateIdDeterministically(Symbol symbol, Symbol? parent, Guid? extra = null)
         {
             //deterministically create a new guid from the symbol id
             using var hashComputer = IncrementalHash.CreateHash(HashAlgorithmName.SHA1);
-            hashComputer.AppendData(symbol.Id.ToByteArray(), 0, 16);
+            var symbolId = symbol.Id;
+            var symbolIdBytes = new ReadOnlySpan<byte>(&symbolId, 16);
+            hashComputer.AppendData(symbolIdBytes);
 
             if (parent != null)
             {
-                hashComputer.AppendData(parent.Id.ToByteArray(), 0, 16);
+                var parentId = parent.Id;
+                var parentIdBytes = new ReadOnlySpan<byte>(&parentId, 16);
+                hashComputer.AppendData(parentIdBytes);
+            }
+
+            if (extra != null)
+            {
+                var val = extra.Value;
+                var bytes = new ReadOnlySpan<byte>(&val, 16);
+                hashComputer.AppendData(bytes);
             }
 
             // SHA1 is 20 bytes long, but we only need 16 bytes for a guid
@@ -474,68 +343,81 @@ public partial class Symbol
             return new Guid(newGuidBytes);
         }
 
-        internal void DestroyChildInstances(Child child)
+        internal void RemoveChildInstancesOf(Child child)
         {
             var idToDestroy = child.Id;
-            foreach (var instance in _instancesOfSelf)
+            lock (_creationLock)
             {
-                if (instance.ChildInstances.Remove(idToDestroy, out var childInstance))
+                foreach (var instanceKvp in _instancesOfSelf)
                 {
-                    childInstance.Dispose(child);
+                    var instance = instanceKvp.Value;
+                    if (instance.Children.TryGetChildInstance(idToDestroy, out var childInstance, false))
+                    {
+                        childInstance.Dispose(null);
+                    }
                 }
             }
         }
 
-        private void DestroyAndClearAllInstances()
+        private void DestroyAndClearAllInstances(SymbolPackage? onlyDisposeInPackage)
         {
-            for (int i = _instancesOfSelf.Count - 1; i >= 0; i--)
+            lock (_creationLock)
             {
-                DestroyAndRemoveInstanceAtIndex(i);
+                var allInstances = _instancesOfSelf.Values.ToArray();
+                for (int i = allInstances.Length - 1; i >= 0; i--)
+                {
+                    allInstances[i].Dispose(onlyDisposeInPackage); // removes self from _instancesOfSelf dict
+                }
+                
+                Debug.Assert(_instancesOfSelf.Count == 0, $"All instances of {Symbol.Name} should have been disposed, but {_instancesOfSelf.Count} remain.");
             }
-        }
-
-        private void DestroyAndRemoveInstanceAtIndex(int index)
-        {
-            _instancesOfSelf[index].Dispose(this, index);
         }
 
         internal void Dispose()
         {
-            DestroyAndClearAllInstances();
-            var removed = Symbol._childrenCreatedFromMe.Remove(this);
-            Debug.Assert(removed);
+            DestroyAndClearAllInstances(null);
+            lock (_creationLock)
+            {
+                var removed = Symbol._childrenCreatedFromMe.Remove(Id, out _);
+                Debug.Assert(removed);
+            }
         }
 
         internal void AddChildInstances(Child newChild, ICollection<Instance> listToAddNewInstancesTo)
         {
-            foreach (var instance in _instancesOfSelf)
+            lock (_creationLock)
             {
-                if (newChild.TryCreateNewInstance(instance, out var newInstance))
+                foreach (var instance in _instancesOfSelf.Values)
                 {
-                    listToAddNewInstancesTo.Add(newInstance);
+                    var path = instance.InstancePath.Append(newChild.Id).ToArray();
+                    if (newChild.TryGetOrCreateInstance(path, out var newInstance, out var created, true))
+                    {
+                        if (created)
+                        {
+                            listToAddNewInstancesTo.Add(newInstance);
+                        }
+                    }
                 }
             }
         }
 
-        internal void UpdateIOAndConnections(SlotChangeInfo slotChanges)
+        internal bool UpdateIOAndConnections(SlotChangeInfo slotChanges)
         {
-            var hasParent = Parent != null;
-
             UpdateSymbolChildIO(this, slotChanges);
 
-            if (!hasParent)
-            {
-                DestroyAndClearAllInstances();
+            if (Parent == null)
+            { 
+                DestroyAndClearAllInstances(Symbol.SymbolPackage);
                 // just destroy all instances - we have no connections to worry about since we dont have a parent
-                return;
+                return false;
             }
 
             // we dont need to update our instances/connections - our parents do that for us if they need it
-            if (Parent != null && Parent.NeedsTypeUpdate)
+            if (Parent.NeedsTypeUpdate && Parent.SymbolPackage == Symbol.SymbolPackage)
             {
                 // destroy all instances if necessary? probably not...
                 //DestroyAndClearAllInstances();
-                return;
+                return false;
             }
 
             // deal with removed connections
@@ -543,6 +425,7 @@ public partial class Symbol
             // get all connections that belong to this instance
             var connectionsToReplace = parentConnections.FindAll(c => c.SourceParentOrChildId == Id ||
                                                                       c.TargetParentOrChildId == Id);
+
             // first remove those connections where the inputs/outputs doesn't exist anymore
             var connectionsToRemove =
                 connectionsToReplace.FindAll(c =>
@@ -568,197 +451,144 @@ public partial class Symbol
             }
 
             // now create the entries for those that will be reconnected after the instance has been replaced. Take care of the multi input order
-            connectionsToReplace.Reverse();
+            //connectionsToReplace.Reverse();
 
-            var connectionEntriesToReplace = new List<ConnectionEntry>(connectionsToReplace.Count);
             foreach (var con in connectionsToReplace)
             {
-                if (Parent.TryGetMultiInputIndexOf(con, out var foundAtConnectionIndex, out var multiInputIndex))
-                {
-                    connectionEntriesToReplace.Add(new ConnectionEntry
-                                                       {
-                                                           Connection = con,
-                                                           MultiInputIndex = multiInputIndex,
-                                                           ConnectionIndex = foundAtConnectionIndex
-                                                       });
-                }
+                Parent.ReplaceConnection(con);
             }
-
-            Parent.RemoveConnections(connectionEntriesToReplace);
-
-            // Recreate all instances fresh
-            for (var index = _instancesOfSelf.Count - 1; index >= 0; index--)
-            {
-                var parent = _instancesOfSelf[index].Parent;
-                DestroyAndRemoveInstanceAtIndex(index);
-
-                if (!TryCreateNewInstance(parent, newInstance: out _))
-                {
-                    Log.Error($"Could not recreate instance of symbol: {Symbol.Name} with parent: {Parent.Name}");
-                }
-            }
-
-            // ... and add the connections again
-            foreach (var entry in connectionEntriesToReplace.OrderBy(x => x.ConnectionIndex))
-            {
-                var connection = entry.Connection;
-                Parent.AddConnection(connection, entry.MultiInputIndex);
-            }
+            
+            return false;
         }
 
-        internal bool TryCreateNewInstance(Instance? parentInstance,
+        private bool TryCreateNewInstance(Instance? parentInstance,
                                            [NotNullWhen(true)] out Instance? newInstance)
         {
-            if (!TryCreateInstance(parentInstance, out newInstance, out var reason))
+            var path = parentInstance == null ? [Id] : parentInstance.InstancePath.Append(Id).ToArray();
+            var parent = parentInstance?.SymbolChild;
+            var pathHash = HashCodeOf(path);
+            lock (_creationLock)
             {
-                Log.Error(reason);
-                return false;
-            }
-
-            _instancesOfSelf.Add(newInstance);
-
-            if (parentInstance != null)
-            {
-                Instance.AddChildTo(parentInstance, newInstance);
-            }
-
-            // cache property accesses for performance
-            var newInstanceInputDefinitions = Symbol.InputDefinitions;
-            var newInstanceInputDefinitionCount = newInstanceInputDefinitions.Count;
-
-            var newInstanceInputs = newInstance.Inputs;
-            var newInstanceInputCount = newInstanceInputs.Count;
-
-            var symbolChildInputs = Inputs;
-
-            // set up the inputs for the child instance
-            for (int i = 0; i < newInstanceInputDefinitionCount; i++)
-            {
-                if (i >= newInstanceInputCount)
+                if (_instancesOfSelf.TryGetValue(pathHash, out newInstance))
                 {
-                    Log.Warning($"Skipping undefined input index");
-                    continue;
+                    // instance already exists
+                    //return true;
+                    throw new InvalidOperationException($"Instance {Name} with id ({Id}) already exists at path {string.Join(" > ", path)}");
                 }
 
-                var inputDefinitionId = newInstanceInputDefinitions[i].Id;
-                var inputSlot = newInstanceInputs[i];
-                if (!symbolChildInputs.TryGetValue(inputDefinitionId, out var input))
+                if (!TryCreateAndConnectInstance(parent, parentInstance, path, out newInstance, out var reason))
                 {
-                    Log.Warning($"Skipping undefined input: {inputDefinitionId}");
-                    continue;
+                    Log.Error(reason);
+                    return false;
                 }
-
-                inputSlot.Input = input;
-                inputSlot.Id = inputDefinitionId;
-            }
-
-            // cache property accesses for performance
-            var childOutputDefinitions = Symbol.OutputDefinitions;
-            var childOutputDefinitionCount = childOutputDefinitions.Count;
-
-            var childOutputs = newInstance.Outputs;
-
-            var symbolChildOutputs = Outputs;
-
-            // set up the outputs for the child instance
-            for (int i = 0; i < childOutputDefinitionCount; i++)
-            {
-                Debug.Assert(i < childOutputs.Count);
-                var outputDefinition = childOutputDefinitions[i];
-                var id = outputDefinition.Id;
-                if (i >= childOutputs.Count)
-                {
-                    Log.Warning($"Skipping undefined output: {id}");
-                    continue;
-                }
-
-                var outputSlot = childOutputs[i];
-                outputSlot.Id = id;
-                var symbolChildOutput = symbolChildOutputs[id];
-                if (outputDefinition.OutputDataType != null)
-                {
-                    // output is using data, so link it
-                    if (outputSlot is IOutputDataUser outputDataConsumer)
-                    {
-                        outputDataConsumer.SetOutputData(symbolChildOutput.OutputData);
-                    }
-                }
-
-                outputSlot.DirtyFlag.Trigger = symbolChildOutput.DirtyFlagTrigger;
-                outputSlot.IsDisabled = symbolChildOutput.IsDisabled;
+                
             }
 
             return true;
 
-            bool TryCreateInstance(Instance? parent,
+            bool TryCreateAndConnectInstance(Symbol.Child? parentSymbolChild, Instance? parentInst, Guid[] newInstancePath,
                                    [NotNullWhen(true)] out Instance? newInstance,
                                    [NotNullWhen(false)] out string? reason2)
             {
-                if (parent != null && parent.Children.ContainsKey(Id))
+                if(parentSymbolChild != null)
                 {
-                    reason2 = $"Instance {Name} with id ({Id}) already exists in {parent.Symbol}";
-                    newInstance = null;
-                    return false;
+                    if(parentSymbolChild.Symbol != Parent)
+                    {
+                        throw new InvalidOperationException($"Parent symbol {parentSymbolChild.Symbol} does not match {Symbol}");
+                    }
+                    
+                    if (newInstancePath[^2] != parentSymbolChild.Id)
+                    {
+                        throw new InvalidOperationException($"Instance path does not match parent id {parentSymbolChild.Id}");
+                    }
+                }
+                else
+                {
+                    if(Parent != null)
+                        throw new InvalidOperationException("symbol child has no parent but parent instance provided is not null");
                 }
 
                 // make sure we're not instantiating a child that needs to be updated again later
-                if (Symbol.NeedsTypeUpdate)
-                {
-                    Symbol.UpdateInstanceType();
-                }
+                //Symbol.UpdateInstanceType();
 
                 if (!TryInstantiate(out newInstance, out reason2))
                 {
                     Log.Error(reason2);
                     return false;
                 }
-
-                newInstance.SetChildId(Id);
-
-                newInstance.Parent = parent;
-
-                Instance.SortInputSlotsByDefinitionOrder(newInstance);
-
-                // populates child instances of the new instance
-                foreach (var child in Symbol.Children.Values)
+                
+                if (!_instancesOfSelf.TryAdd(pathHash, newInstance))
                 {
-                    var success = child.TryCreateNewInstance(newInstance, out _);
+                    throw new InvalidOperationException("Attempted to create a new instance when one already exists at that path");
                 }
+                
+                newInstance.SetSymbolInfo(this, parentSymbolChild, newInstancePath, pathHash);
+                newInstance.Initialize(parentInst);
+                
+                // cache property accesses for performance
+                var newInstanceInputDefinitions = Symbol.InputDefinitions;
+                var newInstanceInputDefinitionCount = newInstanceInputDefinitions.Count;
 
-                // create connections between child instances populated with CreateAndAddNewChildInstance
-                var connections = Symbol.Connections;
+                var newInstanceInputs = newInstance.Inputs;
+                var newInstanceInputCount = newInstanceInputs.Count;
 
-                // if connections already exist for the symbol, remove any that shouldn't exist anymore
-                if (connections.Count != 0)
+                var symbolChildInputs = Inputs;
+
+                // set up the inputs for the child instance
+                for (int i = 0; i < newInstanceInputDefinitionCount; i++)
                 {
-                    var conHashToCount = new Dictionary<ulong, int>(connections.Count);
-                    for (var index = 0; index < connections.Count; index++) // warning: the order in which these are processed matters
+                    if (i >= newInstanceInputCount)
                     {
-                        var connection = connections[index];
-                        ulong highPart = 0xFFFFFFFF & (ulong)connection.TargetSlotId.GetHashCode();
-                        ulong lowPart = 0xFFFFFFFF & (ulong)connection.TargetParentOrChildId.GetHashCode();
-                        ulong hash = (highPart << 32) | lowPart;
-                        if (!conHashToCount.TryGetValue(hash, out int count))
-                            conHashToCount.Add(hash, 0);
-
-                        if (!newInstance.TryAddConnection(connection, count))
-                        {
-                            Log.Warning($"Removing obsolete connecting in {Symbol}...");
-                            connections.RemoveAt(index);
-                            index--;
-                            continue;
-                        }
-
-                        conHashToCount[hash] = count + 1;
+                        Log.Warning($"Skipping undefined input index");
+                        continue;
                     }
+
+                    var inputDefinitionId = newInstanceInputDefinitions[i].Id;
+                    var inputSlot = newInstanceInputs[i];
+                    if (!symbolChildInputs.TryGetValue(inputDefinitionId, out var input))
+                    {
+                        Log.Warning($"Skipping undefined input: {inputDefinitionId}");
+                        continue;
+                    }
+
+                    inputSlot.Input = input;
+                    inputSlot.Id = inputDefinitionId;
                 }
 
-                // connect animations if available
-                Symbol.Animator.CreateUpdateActionsForExistingCurves(newInstance.Children.Values);
+                // cache property accesses for performance
+                var childOutputDefinitions = Symbol.OutputDefinitions;
+                var childOutputDefinitionCount = childOutputDefinitions.Count;
 
-                if (_isBypassed)
+                var childOutputs = newInstance.Outputs;
+
+                var symbolChildOutputs = Outputs;
+
+                // set up the outputs for the child instance
+                for (int i = 0; i < childOutputDefinitionCount; i++)
                 {
-                    SetBypassForInstance(newInstance, true, invalidate: false);
+                    Debug.Assert(i < childOutputs.Count);
+                    var outputDefinition = childOutputDefinitions[i];
+                    var id = outputDefinition.Id;
+                    if (i >= childOutputs.Count)
+                    {
+                        Log.Warning($"Skipping undefined output: {id}");
+                        continue;
+                    }
+
+                    var outputSlot = childOutputs[i];
+                    outputSlot.Id = id;
+                    var symbolChildOutput = symbolChildOutputs[id];
+                    if (outputDefinition.OutputDataType != null)
+                    {
+                        // output is using data, so link it
+                        if (outputSlot is IOutputDataUser outputDataConsumer)
+                        {
+                            outputDataConsumer.SetOutputData(symbolChildOutput.OutputData);
+                        }
+                    }
+
+                    outputSlot.DirtyFlag.Trigger = symbolChildOutput.DirtyFlagTrigger;
+                    outputSlot.IsDisabled = symbolChildOutput.IsDisabled;
                 }
 
                 return true;
@@ -766,8 +596,7 @@ public partial class Symbol
                 bool TryInstantiate([NotNullWhen(true)] out Instance? instance,
                                     [NotNullWhen(false)] out string? reason3)
                 {
-                    var symbolPackage = Symbol.SymbolPackage;
-                    if (symbolPackage.AssemblyInformation.OperatorTypeInfo.TryGetValue(Symbol.Id, out var typeInfo))
+                    if (Symbol.SymbolPackage.AssemblyInformation.OperatorTypeInfo.TryGetValue(Symbol.Id, out var typeInfo))
                     {
                         var constructor = typeInfo.GetConstructor();
                         try
@@ -817,96 +646,316 @@ public partial class Symbol
             }
         }
 
-        internal void AddConnectionToInstances(Connection connection, int multiInputIndex)
+        internal void AddConnectionToInstances(Connection connection, int multiInputIndex, bool allowCreate)
         {
-            foreach (var instance in _instancesOfSelf)
+            lock (_creationLock)
             {
-                instance.TryAddConnection(connection, multiInputIndex);
+                foreach (var instance in _instancesOfSelf.Values)
+                {
+                    instance.TryAddConnection(connection, multiInputIndex, allowCreate);
+                }
             }
-        }
-
-        internal void RemoveConnectionFromInstances(in ConnectionEntry entry)
-        {
-            RemoveConnectionFromInstances(entry.Connection, entry.MultiInputIndex);
         }
 
         internal void RemoveConnectionFromInstances(Connection connection, int multiInputIndex)
         {
-            foreach (var instance in _instancesOfSelf)
+            lock (_creationLock)
             {
-                if (instance.TryGetTargetSlot(connection, out var targetSlot))
+                foreach (var instance in _instancesOfSelf.Values)
                 {
-                    targetSlot.RemoveConnection(multiInputIndex);
+                    if (instance.TryGetTargetSlot(connection, out var targetSlot, false))
+                    {
+                        targetSlot.RemoveConnection(multiInputIndex);
+                    }
                 }
             }
         }
 
         internal void InvalidateInputDefaultInInstances(in Guid inputId)
         {
-            foreach (var instance in _instancesOfSelf)
+            lock (_creationLock)
             {
-                var inputSlots = instance.Inputs;
-                for (int i = 0; i < inputSlots.Count; i++)
+                foreach (var instance in _instancesOfSelf.Values)
                 {
-                    var slot = inputSlots[i];
-                    if (slot.Id != inputId)
-                        continue;
+                    var inputSlots = instance.Inputs;
+                    for (int i = 0; i < inputSlots.Count; i++)
+                    {
+                        var slot = inputSlots[i];
+                        if (slot.Id != inputId)
+                            continue;
 
-                    if (!slot.Input.IsDefault)
-                        continue;
+                        if (!slot.Input.IsDefault)
+                            continue;
 
-                    slot.DirtyFlag.Invalidate();
-                    break;
+                        slot.DirtyFlag.Invalidate();
+                        break;
+                    }
                 }
             }
         }
 
         internal void InvalidateInputInChildren(in Guid inputId, in Guid childId)
         {
-            for (int i = 0; i < _instancesOfSelf.Count; i++)
+            lock (_creationLock)
             {
-                var instance = _instancesOfSelf[i];
-                //var child = instance.Children[childId];
-                if (!instance.Children.TryGetValue(childId, out var child))
+                foreach (var instanceInfo in _instancesOfSelf)
                 {
-                    Log.Debug("Failed to invalidate missing child");
-                    continue;
-                }
-
-                var inputSlots = child.Inputs;
-                for (int j = 0; j < inputSlots.Count; j++)
-                {
-                    var slot = inputSlots[j];
-                    if (slot.Id != inputId)
+                    var instance = instanceInfo.Value;
+                    
+                    //var child = instance.Children[childId];
+                    if (!instance.Children.TryGetChildInstance(childId, out var child))
+                    {
+                        Log.Debug("Failed to invalidate missing child");
                         continue;
+                    }
 
-                    slot.DirtyFlag.Invalidate();
-                    break;
+                    var inputSlots = child.Inputs;
+                    for (int j = 0; j < inputSlots.Count; j++)
+                    {
+                        var slot = inputSlots[j];
+                        if (slot.Id != inputId)
+                            continue;
+
+                        slot.DirtyFlag.Invalidate();
+                        break;
+                    }
                 }
             }
         }
 
         internal void SortInputSlotsByDefinitionOrder()
         {
-            foreach (var instance in _instancesOfSelf)
+            lock (_creationLock)
             {
-                Instance.SortInputSlotsByDefinitionOrder(instance);
+                foreach (var instance in _instancesOfSelf.Values)
+                {
+                    Instance.SortInputSlotsByDefinitionOrder(instance);
+                }
             }
         }
 
-        internal void RemoveInstance(Instance child, int index)
+        internal void RemoveDisposedInstance(Instance child, int hash)
         {
-            if (index == -1)
+            lock (_creationLock)
             {
-                index = _instancesOfSelf.IndexOf(child);
-                if (index == -1)
+                if (!_instancesOfSelf.Remove(hash))
                 {
                     Log.Error($"Could not find instance {child} to remove from {this}");
-                    return;
+                }
+            }
+        }
+
+        internal void PrepareForReload()
+        {
+            DestroyAndClearAllInstances(Symbol.SymbolPackage);
+        }
+
+        public bool TryGetOrCreateInstance(IReadOnlyList<Guid> path, [NotNullWhen(true)] out Instance? instance, out bool created, bool allowCreate = true)
+        {
+            // throw exceptions if the path is invalid
+            if (path.Count == 0)
+            {
+                throw new ArgumentException("Path must not be empty");
+            }
+            
+            if(!path[^1].Equals(Id))
+            {
+                throw new ArgumentException($"Path must end with {Id}");
+            }
+
+            if (Parent == null)
+            {
+                if(path.Count != 1)
+                    throw new ArgumentException("Path must be of length 1 if parent is null");
+                
+                if(path[0] != Id)
+                    throw new ArgumentException($"Path must be {Id} if parent is null");
+            }
+            else if (path.Count < 2)
+            {
+                throw new ArgumentException("Path must be of length 2 or more if parent is not null");
+            }
+            
+            var hash = HashCodeOf(path);
+
+            lock (_creationLock)
+            {
+                if (_instancesOfSelf.TryGetValue(hash, out instance))
+                {
+                    // instance already exists
+                    created = false;
+
+                    if (allowCreate)
+                    {
+                        if (instance.TryGetParentInstance(out var parent, allowCreate) && parent is { NeedsInternalReconnections: true, Initialized: true })
+                        {
+                            parent.ReconnectChildren();
+                        }
+                        else if (instance.NeedsInternalReconnections && allowCreate)
+                        {
+                            instance.ReconnectChildren();
+                        }
+                    }
+
+                    return true;
+                }
+                
+                if(!allowCreate)
+                {
+                    created = false;
+                    return false;
+                }
+
+                if (Parent == null)
+                {
+                    created = TryCreateNewInstance(null, out instance);
+                    return created;
+                }
+
+                if (TryGetParentInstance(path, out created, out var parentInstance))
+                {
+                    // try to get our instance straight from the parent
+                    if (!parentInstance.Children.TryGetChildInstance(Id, out instance, false))
+                    {
+                        // since we dont exist yet, lets create us
+                        created = TryCreateNewInstance(parentInstance, out instance);
+                        return created;
+                    }
+
+                    // if we're here, we already exist in the parent instance
+                    // we just need to make sure we add our instance to our own collection
+                    Debug.Assert(_instancesOfSelf.ContainsKey(hash));
+                    return true;
                 }
             }
 
-            _instancesOfSelf.RemoveAt(index);
+            created = false;
+            return false;
+
+            Child GetParentAsChild(IReadOnlyList<Guid> readOnlyList)
+            {
+                var parentSymbolChildId = readOnlyList[^2];
+                var parentSymbolChild = Parent.ChildrenCreatedFromMe[parentSymbolChildId];
+                return parentSymbolChild;
+            }
+
+            bool TryGetParentInstance(IReadOnlyList<Guid> guids, out bool wasCreated, [NotNullWhen(true)] out Instance? parentInstance)
+            {
+                var parentSymbolChild = GetParentAsChild(guids);
+                var parentPath = guids.SkipLast(1).ToArray();
+                var gotParent = parentSymbolChild.TryGetOrCreateInstance(parentPath, out parentInstance, out wasCreated);
+                return gotParent;
+            }
+
+            void EnsureInstanceSlotsAreConnected(IReadOnlyList<Guid> instancePath, Instance existingInstance)
+            {
+                if (existingInstance is { NeedsInternalReconnections: true })
+                {
+                    existingInstance.ReconnectChildren();
+                }
+
+                if (Parent is null)
+                {
+                    // if we have no parent we have no connections to reconnect
+                    return;
+                }
+                
+                if(TryGetParentInstance(instancePath, out var wasCreated, out var parent))
+                {
+                    if (wasCreated)
+                    {
+                        // if the parent was just created via this invocation, then this instance should have been marked as not needing reconnections
+                        // so we can skip this
+                        Log.Debug("Recreated parent instance from child reference", parent);
+                        Debug.Assert(!existingInstance.NeedsInternalReconnections);
+                        return;
+                    }
+                    
+                    if (parent.NeedsInternalReconnections)
+                    {
+                        parent.ReconnectChildren();
+                        Log.Debug("Regenerated connections for parent", parent);
+                    }
+                }
+                else 
+                {
+                    Log.Error("Instance needs reconnections but parent is null - this probably shouldn't happen", existingInstance);
+                }
+            }
+        }
+        
+
+        public static int HashCodeOf(IReadOnlyList<Guid> path)
+        {
+            int hash = path[0].GetHashCode();
+            for (int i = 1; i < path.Count; i++)
+            {
+                hash = HashCode.Combine(hash, path[i].GetHashCode());
+            }
+            return hash;
+        }
+
+        public void ClearPreviousId()
+        {
+            PreviousId = null;
+        }
+
+  
+
+        public bool SearchForChild(Guid search, [NotNullWhen(true)] out Child? child, [NotNullWhen(true)] out IReadOnlyList<Guid>? path)
+        {
+            return SearchForChild(search, ReadOnlySpan<Guid>.Empty, out child, out path);
+        }
+
+        private bool SearchForChild(Guid search, ReadOnlySpan<Guid> path, out Child? child, [NotNullWhen(true)] out IReadOnlyList<Guid>? fullPath)
+        {
+            Span<Guid> pathIncludingMe = stackalloc Guid[path.Length + 1];
+            path.CopyTo(pathIncludingMe);
+            pathIncludingMe[^1] = Id;
+            if (Id == search)
+            {
+                child = this;
+                fullPath = pathIncludingMe.ToArray();
+                return true;
+            }
+
+            var symbol = Symbol;
+            foreach (var symbolChild in symbol.Children.Values)
+            {
+                if(symbolChild.SearchForChild(search, pathIncludingMe, out var foundChild, out var foundPath))
+                {
+                    child = foundChild;
+                    fullPath = foundPath;
+                    return true;
+                }
+            }
+            
+            child = null;
+            fullPath = null;
+            return false;
+        }
+
+        internal void ReconnectAllChildren()
+        {
+            lock (_creationLock)
+            {
+                foreach (var inst in _instancesOfSelf.Values)
+                {
+                    inst.ReconnectChildren();
+                }
+            }
+        }
+
+        internal void DestroyAllInstances()
+        {
+            lock (_creationLock)
+            {
+                // toArray as a defensive copy - these instances will be removed from the dictionary as a result of calling this func
+                foreach(var instance in _instancesOfSelf.Values.ToArray())
+                {
+                    instance.Dispose(null);
+                }
+            }
         }
     }
 }

@@ -22,6 +22,7 @@
         <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="9.0.1" />
         <PackageReference Include="NAudio.Midi" Version="2.2.1" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+        <PackageReference Include="NuGet.Configuration" Version="6.13.2" />
         <PackageReference Include="Rug.Osc" Version="1.2.5">
             <NoWarn>NU1701</NoWarn>
         </PackageReference>
@@ -31,6 +32,7 @@
         <PackageReference Include="SharpDX.Mathematics" Version="4.2.0" />
         <PackageReference Include="SharpDX.MediaFoundation" Version="4.2.0" />
         <PackageReference Include="SharpDX.XInput" Version="4.2.0" />
+        <PackageReference Include="SharpGLTF.Core" Version="1.0.4" />
         <PackageReference Include="System.ServiceModel.Primitives" Version="4.9.0" />
     </ItemGroup>
 

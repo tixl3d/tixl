@@ -39,13 +39,13 @@ internal static class Compiler
         var projectFile = compilationOptions.ProjectFile;
 
         var buildModeName = compilationOptions.BuildMode == BuildMode.Debug ? "Debug" : "Release";
-        var targetDirectory = compilationOptions.TargetDirectory ?? projectFile.GetBuildTargetDirectory();
         
         var restoreArg = compilationOptions.RestoreNuGet ? "" : "--no-restore";
         
         // construct command
-        const string fmt = "$env:DOTNET_CLI_UI_LANGUAGE=\"en\"; dotnet build '{0}' --nologo --configuration {1} --verbosity {2} --output '{3}' {4} --no-self-contained -property:PreferredUILang=en-US";
-        return string.Format(fmt, projectFile.FullPath, buildModeName, _verbosityArgs[compilationOptions.Verbosity], targetDirectory, restoreArg);
+        const string fmt = "$env:DOTNET_CLI_UI_LANGUAGE=\"en\"; dotnet build '{0}' --nologo --configuration {1} --verbosity {2} {3} " +
+                           "--no-dependencies -property:PreferredUILang=en-US";
+        return string.Format(fmt, projectFile.FullPath, buildModeName, _verbosityArgs[compilationOptions.Verbosity], restoreArg);
     }
 
     /// <summary>
@@ -87,13 +87,13 @@ internal static class Compiler
     /// <summary>
     /// The struct that holds the information necessary to create the dotnet build command
     /// </summary>
-    private readonly record struct CompilationOptions(CsProjectFile ProjectFile, BuildMode BuildMode, string? TargetDirectory, CompilerOptions.Verbosity Verbosity, bool RestoreNuGet);
+    private readonly record struct CompilationOptions(CsProjectFile ProjectFile, BuildMode BuildMode, CompilerOptions.Verbosity Verbosity, bool RestoreNuGet);
     
     private static ProcessCommander<CompilationOptions>? _processCommander;
     private static readonly System.Threading.Lock _processLock = new();
     private static readonly Stopwatch _stopwatch = new();
 
-    internal static bool TryCompile(CsProjectFile projectFile, BuildMode buildMode, bool nugetRestore, string? targetDirectory = null)
+    internal static bool TryCompile(CsProjectFile projectFile, BuildMode buildMode, bool nugetRestore)
     {
         var verbosity = CompilerOptions.Verbosity.Normal;
         if (UserSettings.Config != null)
@@ -119,7 +119,7 @@ internal static class Compiler
             
         Log.Debug($"Compiling {projectFile.Name} in {buildMode} mode");
 
-        var compilationOptions = new CompilationOptions(projectFile, buildMode, targetDirectory, verbosity, nugetRestore);
+        var compilationOptions = new CompilationOptions(projectFile, buildMode, verbosity, nugetRestore);
         var command = new Command<CompilationOptions>(GetCommandFor, Evaluate);
 
         var noOutput = UserSettings.Config == null || UserSettings.Config.LogCsCompilationDetails==false;

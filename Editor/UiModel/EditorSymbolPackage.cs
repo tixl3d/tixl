@@ -7,7 +7,10 @@ using T3.Core.Compilation;
 using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Core.Resource;
+using T3.Core.SystemUi;
+using T3.Core.UserData;
 using T3.Core.Utils;
+using T3.Editor.Compilation;
 using T3.Editor.External;
 using T3.Editor.Gui.ChildUi;
 
@@ -26,25 +29,27 @@ internal class EditorSymbolPackage : SymbolPackage
     /// Constructor for a successfully compiled package
     /// </summary>
     /// <param name="assembly">Main assembly of the package</param>
-    public EditorSymbolPackage(AssemblyInformation assembly) : base(assembly)
+    /// <param name="directory">The main package directory, if different from the directory from the provided assembly information</param>
+    /// <param name="initializeResources"></param>
+    public EditorSymbolPackage(AssemblyInformation assembly, string? directory, bool initializeResources = true) : base(assembly, directory, initializeResources)
     {
         Log.Debug($"Added package {assembly.Name}");
         SymbolAdded += OnSymbolAdded;
+        assembly.Unloaded += OnAssemblyUnloaded;
+        assembly.UnloadComplete += OnAssemblyUnloadComplete;
     }
 
-    protected EditorSymbolPackage(AssemblyInformation assembly, string directory) : base(assembly, directory)
+    private void OnAssemblyUnloadComplete(AssemblyInformation obj)
     {
-        Log.Debug($"Added package {assembly.Name} in directory {directory}");
-        SymbolAdded += OnSymbolAdded;
+        UnloadInProgress = false;
     }
-
 
     protected virtual void OnSymbolAdded(string? path, Symbol symbol)
     {
         var id = symbol.Id;
         if (_filePathHandlers.TryGetValue(id, out var handler))
             return;
-        
+
         handler = new SymbolPathHandler(symbol, path);
         _filePathHandlers[id] = handler;
     }
@@ -78,11 +83,12 @@ internal class EditorSymbolPackage : SymbolPackage
     public void LoadUiFiles(bool parallel, List<Symbol> newlyReadSymbols, out SymbolUi[] newlyReadSymbolUis,
                             out SymbolUi[] preExistingSymbolUis)
     {
+        NeedsAssemblyLoad = false;
         var newSymbols = newlyReadSymbols.ToDictionary(result => result.Id, symbol => symbol);
         var newSymbolsWithoutUis = new ConcurrentDictionary<Guid, Symbol>(newSymbols);
         preExistingSymbolUis = SymbolUiDict.Values.ToArray();
         Log.Debug($"{AssemblyInformation.Name}: Loading Symbol UIs from \"{Folder}\"");
-        
+
         var enumerator = parallel ? SymbolUiSearchFiles.AsParallel() : SymbolUiSearchFiles;
         var newlyReadSymbolUiList = enumerator
                                    .Select(JsonFileResult<SymbolUi>.ReadAndCreate)
@@ -137,13 +143,13 @@ internal class EditorSymbolPackage : SymbolPackage
     public void RegisterUiSymbols(SymbolUi[] newSymbolUis, SymbolUi[] preExistingSymbolUis)
     {
         Log.Debug($@"{DisplayName}: Registering UI entries...");
-        
+
         foreach (var symbolUi in preExistingSymbolUis)
         {
             RegisterSymbolUi(symbolUi);
         }
-        
-        foreach(var symbolUi in newSymbolUis)
+
+        foreach (var symbolUi in newSymbolUis)
         {
             RegisterSymbolUi(symbolUi);
         }
@@ -152,44 +158,35 @@ internal class EditorSymbolPackage : SymbolPackage
 
         void RegisterSymbolUi(SymbolUi symbolUi)
         {
-            var symbol = symbolUi.Symbol;
-            var operatorInfo = AssemblyInformation.OperatorTypeInfo[symbol.Id];
-            
-            if (operatorInfo.IsDescriptiveFileNameType)
-            {
-                CustomChildUiRegistry.Register(symbol.InstanceType, DescriptiveUi.DrawChildUiDelegate, _customUiTypes);
-            }
-            
             symbolUi.UpdateConsistencyWithSymbol();
             symbolUi.ClearModifiedFlag();
             //Log.Debug($"Add UI for {symbolUi.Symbol.Name} {symbolUi.Symbol.Id}");
         }
     }
-    
+
     public override void Dispose()
     {
         ClearSymbolUis();
         base.Dispose();
-        UnregisterAllCustomUi();
         ShaderLinter.RemovePackage(this);
-    }
-
-    private void ClearSymbolUis() 
-    {
-        var symbolUis = SymbolUiDict.Values.ToArray();
-
-        foreach (var symbolUi in symbolUis)
+        return;
+        
+        void ClearSymbolUis()
         {
-            try
+            var symbolUis = SymbolUiDict.Values.ToArray();
+
+            foreach (var symbolUi in symbolUis)
             {
-                var symbol = symbolUi.Symbol;
-                SymbolUiDict.TryRemove(symbol.Id, out _);
-                CustomChildUiRegistry.Remove(symbol.InstanceType);
+                try
+                {
+                    var symbol = symbolUi.Symbol;
+                    SymbolUiDict.TryRemove(symbol.Id, out _);
+                }
+                catch (KeyNotFoundException)
+                {
+                    Log.Warning("Can't remove obsolete symbol.");
+                }
             }
-            catch (KeyNotFoundException)
-            {
-                Log.Warning("Can't remove obsolete symbol.");                
-            } 
         }
     }
 
@@ -202,10 +199,10 @@ internal class EditorSymbolPackage : SymbolPackage
         int sourceCodeCount = 0;
         int sourceCodeAttempts = 0;
         #endif
-        
+
         SourceCodeSearchFiles
-                 .AsParallel()
-                 .ForAll(ParseCodeFile);
+           .AsParallel()
+           .ForAll(ParseCodeFile);
 
         #if DEBUG
         if (sourceCodeCount == 0 && sourceCodeAttempts != 0)
@@ -217,7 +214,7 @@ internal class EditorSymbolPackage : SymbolPackage
             Log.Debug($"{AssemblyInformation.Name}: Found {sourceCodeCount} operator source code files out of {sourceCodeAttempts} C# files.");
         }
         #endif
-        
+
         return;
 
         void ParseCodeFile(string file)
@@ -237,7 +234,7 @@ internal class EditorSymbolPackage : SymbolPackage
 
                 if (!StringUtils.TryFindIgnoringAllWhitespace(line, "[Guid(\"", StringUtils.SearchResultIndex.AfterTerm, out var guidStartIndex))
                     continue;
-                
+
                 var indexOfQuote = line.IndexOf('"', guidStartIndex);
                 var guidSpan = line.AsSpan(guidStartIndex, indexOfQuote - guidStartIndex);
 
@@ -259,11 +256,10 @@ internal class EditorSymbolPackage : SymbolPackage
             #if DEBUG
             Interlocked.Increment(ref sourceCodeCount);
             #endif
-            
+
             OnSourceCodeLocated(file, guid);
         }
     }
-
 
     public bool TryGetSourceCodePath(Symbol symbol, out string? path)
     {
@@ -276,7 +272,6 @@ internal class EditorSymbolPackage : SymbolPackage
         path = null;
         return false;
     }
-
 
     public void InitializeShaderLinting(IReadOnlyList<IResourcePackage> sharedShaderPackages)
     {
@@ -295,18 +290,41 @@ internal class EditorSymbolPackage : SymbolPackage
     protected readonly ConcurrentDictionary<Guid, SymbolUi> SymbolUiDict = new();
     public IReadOnlyDictionary<Guid, SymbolUi> SymbolUis => SymbolUiDict;
 
-    protected virtual IEnumerable<string> SymbolUiSearchFiles =>
-        Directory.EnumerateFiles(Path.Combine(Folder, SymbolUiSubFolder), $"*{SymbolUiExtension}", SearchOption.AllDirectories);
-    
-    protected virtual IEnumerable<string> SourceCodeSearchFiles => Directory.EnumerateFiles(Path.Combine(Folder, SourceCodeSubFolder), $"*{SourceCodeExtension}", SearchOption.AllDirectories);
+    protected virtual IEnumerable<string> SymbolUiSearchFiles
+    {
+        get
+        {
+            var dir = Path.Combine(Folder, FileLocations.SymbolUiSubFolder);
+            if (!Directory.Exists(dir))
+            {
+                return [];
+            }
+            
+            return Directory.EnumerateFiles(dir, $"*{SymbolUiExtension}", SearchOption.AllDirectories);
+        }
+    }
+
+    protected virtual IEnumerable<string> SourceCodeSearchFiles
+    {
+        get
+        {
+            var dir = Path.Combine(Folder, FileLocations.SourceCodeSubFolder);
+            
+            if (!Directory.Exists(dir))
+            {
+                return [];
+            }
+            
+            return Directory.EnumerateFiles(dir, $"*{SourceCodeExtension}", SearchOption.AllDirectories);
+        }
+    }
+
     private readonly ConcurrentDictionary<Guid, SymbolPathHandler> _filePathHandlers = new();
     protected IDictionary<Guid, SymbolPathHandler> FilePathHandlers => _filePathHandlers;
     public Guid HomeSymbolId => ReleaseInfo.HomeGuid;
 
     internal const string SourceCodeExtension = ".cs";
     public const string SymbolUiExtension = ".t3ui";
-    public const string SymbolUiSubFolder = "SymbolUis";
-    public const string SourceCodeSubFolder = "SourceCode";
 
     public static IEnumerable<Symbol> AllSymbols => AllPackages
                                                    .Cast<EditorSymbolPackage>()
@@ -322,7 +340,7 @@ internal class EditorSymbolPackage : SymbolPackage
     {
         var symbol = symbolUi.Symbol;
         var id = symbol.Id;
-        
+
         if (!_filePathHandlers.TryGetValue(id, out var pathHandler))
         {
             throw new Exception($"No path handler found for symbol {id}");
@@ -333,30 +351,35 @@ internal class EditorSymbolPackage : SymbolPackage
         {
             throw new Exception($"No symbol path found for symbol {id}");
         }
-        
+
         var symbolUiPath = pathHandler.UiFilePath;
         if (symbolUiPath == null)
         {
             throw new Exception($"No symbol ui path found for symbol {id}");
         }
-        
+
         // reload single ui
         var symbolJson = JsonFileResult<Symbol>.ReadAndCreate(symbolPath);
         var result = SymbolJson.ReadSymbolRoot(symbol.Id, symbolJson.JToken, symbol.InstanceType, this);
-        var newSymbol = result.Symbol;
-
-        if (!TryReadAndApplyChildren(result))
+        if (result.Symbol == null)
         {
-            symbol.ReplaceWithContentsOf(symbol); // ugly but necessary to make sure the right symbol is in the registry
-            Log.Error($"Failed to reload symbol for symbol {id}");
+            Log.Error($"Failed to reload read-only symbol {symbol} for {id} from {symbolPath}");
             return;
         }
         
-        // transfer instances over to the new symbol and update them
-        symbol.ReplaceWithContentsOf(newSymbol);
+        symbol.ReplaceWithContentsOf(result.Symbol);
+        
+        // hacky workaround to avoid creating duplicate children in the next step
+        var fakeResult = result with { Symbol = symbol };
+
+        if (!TryReadAndApplyChildren(fakeResult))
+        {
+            Log.Error($"Failed to reload symbol for symbol {id}");
+            return;
+        }
 
         UpdateSymbolInstances(symbol, forceTypeUpdate: true);
-        
+
         var symbolUiJson = JsonFileResult<SymbolUi>.ReadAndCreate(symbolUiPath);
 
         if (!SymbolUiJson.TryReadSymbolUi(symbolUiJson.JToken, symbol, out var newSymbolUi))
@@ -374,42 +397,132 @@ internal class EditorSymbolPackage : SymbolPackage
     {
         return SymbolUiDict.TryGetValue(rSymbolId, out symbolUi);
     }
-    
+
     // todo - output should be an IDisposable wrapper and RemoveSymbolUi should be called in Dispose and made private
     internal bool TryCreateNewSymbol<T>([NotNullWhen(true)] out SymbolUi? symbolUi)
     {
         var containerOp = CreateSymbol(typeof(T), Guid.NewGuid());
-        
+
         if (!SymbolDict.TryAdd(containerOp.Id, containerOp))
         {
             Log.Error($"Failed to add new symbol for {containerOp.Name} ({containerOp.Id})");
             symbolUi = null;
             return false;
         }
-        
+
         symbolUi = new SymbolUi(containerOp, true);
         if (SymbolUiDict.TryAdd(containerOp.Id, symbolUi))
             return true;
-        
+
         Log.Error($"Failed to add new symbol ui for {containerOp.Name} ({containerOp.Id})");
         return false;
     }
-    
+
     internal bool RemoveSymbolUi(SymbolUi newContainerUi)
     {
         var symbolId = newContainerUi.Symbol.Id;
         return SymbolUiDict.TryRemove(symbolId, out _) && SymbolDict.TryRemove(symbolId, out _);
     }
-    
-    protected void UnregisterAllCustomUi()
+
+    protected sealed override void OnSymbolsLoaded()
     {
-        for (var index = _customUiTypes.Count - 1; index >= 0; index--)
+        var assemblyInformation = AssemblyInformation;
+        var types = assemblyInformation.TypesInheritingFrom(typeof(IEditorUiExtension)).ToArray();
+        
+        // register descriptive UI
+        foreach (var operatorInfo in assemblyInformation.OperatorTypeInfo.Values)
         {
-            var type = _customUiTypes[index];
-            CustomChildUiRegistry.Remove(type);
-            _customUiTypes.RemoveAt(index);
+            if (operatorInfo.IsDescriptiveFileNameType)
+            {
+                CustomChildUiRegistry.Register(operatorInfo.Type, DescriptiveUi.DrawChildUiDelegate, _descriptiveUiTypes);
+            }
+        }
+
+        // load ui initializers
+        foreach (var type in types)
+        {
+            var activated = assemblyInformation.CreateInstance(type);
+            if (activated == null)
+            {
+                Log.Error($"Created null object for {type.Name}");
+                continue;
+            }
+
+            var extension = (IEditorUiExtension)activated;
+            try
+            {
+                extension.Initialize();
+            }
+            catch (Exception e)
+            {
+                Log.Error($"Failed to initialize UI extension {type.Name}: {e}");
+                continue;
+            }
+
+            Log.Info($"Loaded UI initializer for {assemblyInformation.Name}: {type.Name}");
+            _extensions.Add(extension);
+        }
+
+        if (_extensions.Count != 0 && assemblyInformation.OperatorTypeInfo.Count > 0)
+        {
+            BlockingWindow.Instance.ShowMessageBox("Custom UI extensions are not supported in projects that also have symbols defined. " +
+                                                   "This may cause issues with exporting. It is recommended to start a new C# project for custom UIs.",
+                                                   "Warning");
         }
     }
+
+    public bool NeedsAssemblyLoad { get; private set; } = true;
     
-    private readonly List<Type> _customUiTypes = [];
+    // remove all possible references to the assembly
+    private void OnAssemblyUnloaded(AssemblyInformation asm)
+    {
+        UnloadInProgress = true;
+        try
+        {
+            AssemblyUnloading?.Invoke();
+        }
+        catch (Exception e)
+        {
+            Log.Error($"Failed to unload assembly {asm.Name}: {e}");
+        }
+        Log.Info("Unloading assembly " + asm.Name);
+        //remove type information from symbols
+        
+        // it is critical that all references to the assembly are removed to allow the assembly to be unloaded
+        // this includes all instances
+        foreach (var symbol in SymbolDict.Values)
+        {
+            symbol.RemoveAllReferencesToType();
+        }
+        
+        
+        // unload custom UIs
+        for (var index = _extensions.Count - 1; index >= 0; index--)
+        {
+            var extension = _extensions[index];
+            _extensions.RemoveAt(index);
+            try
+            {
+                extension.Uninitialize();
+            }
+            catch (Exception e)
+            {
+                Log.Error($"Failed to uninitialize UI extension {extension.GetType().Name}: {e}");
+            }
+        }
+        
+        // unload descriptive uis
+        for (var index = _descriptiveUiTypes.Count - 1; index >= 0; index--)
+        {
+            var type = _descriptiveUiTypes[index];
+            CustomChildUiRegistry.Remove(type, _descriptiveUiTypes);
+        }
+        
+        NeedsAssemblyLoad = true;
+    }
+
+    protected bool UnloadInProgress { get; private set; }
+    public event Action? AssemblyUnloading;
+    private readonly List<Type> _descriptiveUiTypes = [];
+    private readonly List<IEditorUiExtension> _extensions = [];
 }

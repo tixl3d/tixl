@@ -33,7 +33,6 @@ internal sealed class AddInputDialog : ModalDialog
             {
                 InputsAndOutputs.AddInputToSymbol(_parameterName, _multiInput, _selectedType!, symbol);
                 _parameterName = string.Empty;
-                results = ChangeSymbol.SymbolModificationResults.ProjectViewDiscarded;
             }
 
             ImGui.SameLine();

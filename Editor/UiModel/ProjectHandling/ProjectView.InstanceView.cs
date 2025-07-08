@@ -19,9 +19,8 @@ internal sealed partial class ProjectView
 
         // we don't expose these publicly so the Symbol must be fetched, ensuring correctness of any retrieved symbol Id
         private readonly Guid _symbolId;
-        private readonly Guid? _parentSymbolId;
-        private readonly Guid? _parentSymbolChildId;
-        private readonly bool _hasParent;
+        private readonly Symbol? _parentSymbol;
+        private readonly IReadOnlyList<Guid> _instancePath;
 
         // true if the symbol's package is read-only (i.e. not an editable project)
         public bool IsReadOnly { get; }
@@ -91,43 +90,22 @@ internal sealed partial class ProjectView
         {
             get
             {
-                // if an instance does not have a parent (e.g. the root instance), we cannot get the instance with a simple lookup from the parent
-                // as we do below, which we would prefer rather than relying on a cached instance.
-                if (!_hasParent)
+                if(Symbol.TryGetOrCreateInstance(_instancePath, _parentSymbol, out var instance))
                 {
-                    // warning: this avoids caching our instance locally, but we must ensure that no more than one parentless instance of any symbol exists
-                    // at any given time. The following function should do so.
-                    if (!Symbol.TryGetParentlessInstance(out var instance))
-                        throw new Exception("No parentless instance found or created.");
-
                     return instance;
                 }
-
-                if (!SymbolRegistry.TryGetSymbol(_parentSymbolId!.Value, out var parentSymbol))
-                {
-                    throw new Exception($"Could not find parent symbol with id {_parentSymbolId}");
-                }
-
-                if (!parentSymbol.InstancesOfSelf.Any())
-                {
-                    throw new Exception($"Could not find any instances parent symbol with id {_parentSymbolId}");
-                }
-
-
-                return parentSymbol.InstancesOfSelf // all instances of our parent's symbol
-                                   .First(x => x.SymbolChildId == _parentSymbolChildId) // find our specific parent instance
-                                   .Children[SymbolChildId]; // find us!
+                
+                throw new Exception($"Could not find instance with id {_symbolId} and child id {SymbolChildId}. Symbol type: \"{Symbol.InstanceType}\"");
             }
         }
 
         private InstanceView(Instance instance)
         {
+            _instancePath = instance.InstancePath;
             var parent = instance.Parent;
             if (parent != null)
             {
-                _hasParent = true;
-                _parentSymbolId = parent.Symbol.Id;
-                _parentSymbolChildId = parent.SymbolChildId;
+                _parentSymbol = parent.Symbol;
             }
 
             SymbolChildId = instance.SymbolChildId;
@@ -163,7 +141,7 @@ internal sealed partial class ProjectView
         public bool Is(Instance newCompositionOp)
         {
             var othersKey = new InstanceViewKey(newCompositionOp.SymbolChildId, newCompositionOp.Parent?.Symbol.Id);
-            var myKey = new InstanceViewKey(SymbolChildId, _parentSymbolId);
+            var myKey = new InstanceViewKey(SymbolChildId, _parentSymbol?.Id);
             return othersKey == myKey;
         }
 
@@ -180,7 +158,7 @@ internal sealed partial class ProjectView
 
             lock (_viewsBySymbolChildId)
             {
-                var key = new InstanceViewKey(SymbolChildId, _parentSymbolId);
+                var key = new InstanceViewKey(SymbolChildId, _parentSymbol?.Id);
                 _viewsBySymbolChildId.Remove(key);
             }
         }

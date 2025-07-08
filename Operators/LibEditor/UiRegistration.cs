@@ -80,9 +80,9 @@ public class UiRegistration : IEditorUiExtension
             TemplateDefinition.RemoveTemplateDefinition(templateDefinition);
         }
         
-        foreach (var type in _types)
+        foreach (var type in _types.ToArray())
         {
-            CustomChildUiRegistry.Remove(type);
+            CustomChildUiRegistry.Remove(type, _types);
         }
         
         Log.Debug("Unregistered UI Entries");

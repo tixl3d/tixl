@@ -8,6 +8,7 @@ using T3.Core.Animation;
 using T3.Core.Compilation;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Logging;
+using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using Texture2D = T3.Core.DataTypes.Texture2D;
@@ -22,20 +23,13 @@ internal static partial class Program
         Log.Info($"Loading operators from \"{searchDirectory}\"...");
 
         var assemblies = Directory.GetDirectories(searchDirectory, "*", SearchOption.TopDirectoryOnly)
-                                  .SelectMany(packageDir =>
+                                  .Select(packageDir =>
                                               {
                                                   Log.Debug($"Searching for dlls in {packageDir}...");
-                                                  return Directory.GetFiles(packageDir, "*.dll", SearchOption.TopDirectoryOnly)
-                                                                  .Select(file =>
-                                                                          {
-                                                                              var relativePath = Path.GetRelativePath(searchDirectory, file);
-                                                                              Log.Debug($"Found dll: {relativePath}");
-                                                                              
-                                                                              RuntimeAssemblies.TryLoadAssemblyInformation(file, false, out var info);
-                                                                              return info;
-                                                                          })
-                                                                  .Where(info => info is { IsEditorOnly: false });
-                                              }).ToArray();
+                                                  return new AssemblyInformation(packageDir);
+                                              })
+                                  .Where(x => x != null)
+                                  .ToArray();
         
         Log.Debug($"Finished loading {assemblies.Length} operator assemblies. Loading symbols...");
         var packageLoadInfo = assemblies
@@ -50,7 +44,7 @@ internal static partial class Program
 
         packageLoadInfo
            .AsParallel()
-           .ForAll(packageInfo => packageInfo.Package.ApplySymbolChildren(packageInfo.NewlyLoadedSymbols));
+           .ForAll(packageInfo => SymbolPackage.ApplySymbolChildren(packageInfo.NewlyLoadedSymbols));
     }
     
     private static void PreloadShadersAndResources(double durationSecs,

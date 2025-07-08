@@ -350,13 +350,21 @@ public static class MathUtils
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float Remap(float value, float inMin, float inMax, float outMin, float outMax)
+    public static float Remap(this float value, float inMin, float inMax, float outMin, float outMax)
     {
         var factor = (value - inMin) / (inMax - inMin);
         var v = factor * (outMax - outMin) + outMin;
         return v;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static double Remap(this double value, double inMin, double inMax, double outMin, double outMax)
+    {
+        var factor = (value - inMin) / (inMax - inMin);
+        var v = factor * (outMax - outMin) + outMin;
+        return v;
+    }
+    
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static double RemapAndClamp(double value, double inMin, double inMax, double outMin, double outMax)
     {

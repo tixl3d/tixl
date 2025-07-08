@@ -1,9 +1,9 @@
 #nullable enable
 using SharpDX.Direct3D11;
+using SilkWindows;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using SilkWindows;
 using T3.Core.Compilation;
 using T3.Core.IO;
 using T3.Core.Resource;
@@ -12,7 +12,9 @@ using T3.Core.UserData;
 using T3.Editor.App;
 using T3.Editor.Compilation;
 using T3.Editor.Gui;
+using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Camera;
+using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.Interaction.StartupCheck;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
@@ -65,6 +67,9 @@ internal static class Program
 
         Console.WriteLine("Validating startup location");
         StartupValidation.ValidateNotRunningFromSystemFolder();
+        
+        Console.WriteLine("Validating execution policy");
+        StartupValidation.ValidateExecutionPolicy();
 
         Console.WriteLine("Enabling DPI aware scaling");
         EditorUi.Instance.EnableDpiAwareScaling();
@@ -85,7 +90,7 @@ internal static class Program
         Console.WriteLine("Initializing logging");
         Log.AddWriter(splashScreen);
         Log.AddWriter(new ConsoleWriter());
-        Log.AddWriter(FileWriter.CreateDefault(FileLocations.SettingsPath, out var logPath));
+        Log.AddWriter(FileWriter.CreateDefault(FileLocations.SettingsDirectory, out var logPath));
         Log.AddWriter(StatusErrorLine);
         Log.AddWriter(ConsoleLogWindow);
             
@@ -137,6 +142,8 @@ internal static class Program
         SharedResources.Initialize();
 
         Log.Debug("Initialize User Interface...");
+        KeyActionHandling.InitializeFrame();
+        KeyMapSwitching.Initialize();
 
         bool forceRecompileProjects;
             

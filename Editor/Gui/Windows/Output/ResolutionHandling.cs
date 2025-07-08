@@ -1,12 +1,13 @@
 ﻿using ImGuiNET;
 using T3.Core.DataTypes.Vector;
+using T3.Core.UserData;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Serialization;
 
 namespace T3.Editor.Gui.Windows.Output;
 
-public static class ResolutionHandling
+internal static class ResolutionHandling
 {
     public static void DrawSelector(ref Resolution selectedResolution, EditResolutionDialog resolutionDialog)
     {
@@ -55,11 +56,11 @@ public static class ResolutionHandling
         
     public static void Save()
     {
-        JsonUtils.TrySaveJson(_resolutions, FilePath);    
+        JsonUtils.TrySaveJson(_resolutions, _filePath);    
     }
         
     public static List<Resolution> Resolutions => _resolutions
-                                                      ??= JsonUtils.TryLoadingJson<List<Resolution>>(FilePath)
+                                                      ??= JsonUtils.TryLoadingJson<List<Resolution>>(_filePath)
                                                           ??  new()
                                                                   {
                                                                       new("Fill", 0, 0, useAsAspectRatio: true),
@@ -73,10 +74,9 @@ public static class ResolutionHandling
                                                                       new("8k", 1920 * 4, 1080 * 4),
                                                                       new("4k Portrait", 1080 * 2, 1920 * 2),
                                                                   };
+    
     private static List<Resolution> _resolutions;
-        
-    private const string FilePath = ".t3/resolutions.json";
-
+    private static readonly string _filePath = System.IO.Path.Combine(FileLocations.SettingsDirectory, "resolutions.json");
     public static readonly Resolution DefaultResolution = Resolutions[0];
     private static Resolution _resolutionForEdit = new("untitled", 256, 256);
 

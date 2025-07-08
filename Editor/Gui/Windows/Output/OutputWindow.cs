@@ -3,6 +3,7 @@ using System.IO;
 using T3.Core.DataTypes;
 using T3.Core.Operator;
 using T3.Editor.Gui.Interaction;
+using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.OutputUi;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
@@ -148,7 +149,7 @@ internal sealed class OutputWindow : Window
                                              _imageCanvas.ViewMode == ImageOutputCanvas.Modes.Fitted
                                                  ? CustomComponents.ButtonStates.Disabled
                                                  : CustomComponents.ButtonStates.Normal)
-                || KeyboardBinding.Triggered(UserActions.FocusSelection))
+                || KeyActionHandling.Triggered(UserActions.FocusSelection))
             {
                 if (drawnType == typeof(Texture2D))
                 {
@@ -161,7 +162,7 @@ internal sealed class OutputWindow : Window
             }
 
             var label = drawnType == typeof(Texture2D) ? "Fit image to view" : "Reset view or camera position";
-            var shortCut = KeyboardBinding.ListKeyboardShortcuts(UserActions.FocusSelection);
+            var shortCut = KeyActionHandling.ListShortcuts(UserActions.FocusSelection);
             CustomComponents.TooltipForLastItem(label, shortCut);
         }
 

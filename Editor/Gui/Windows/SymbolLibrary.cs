@@ -176,7 +176,7 @@ internal sealed class SymbolLibrary : Window
             }
             else
             {
-                if (DragHandling.IsDragging)
+                if (DragAndDropHandling.IsDragging)
                 {
                     ImGui.SameLine();
                     ImGui.PushID("DropButton");
@@ -208,7 +208,7 @@ internal sealed class SymbolLibrary : Window
 
     private static void HandleDropTarget(NamespaceTreeNode subtree)
     {
-        if (!DragHandling.TryGetDataDroppedLastItem(DragHandling.SymbolDraggingId, out var data))
+        if (!DragAndDropHandling.TryGetDataDroppedLastItem(DragAndDropHandling.SymbolDraggingId, out var data))
             return;
 
         if (!Guid.TryParse(data, out var symbolId))
@@ -433,7 +433,7 @@ internal sealed class SymbolLibrary : Window
         if (IsSymbolCurrentCompositionOrAParent(symbol))
             return;
 
-        DragHandling.HandleDragSourceForLastItem(DragHandling.SymbolDraggingId, symbol.Id.ToString(), "Create instance");
+        DragAndDropHandling.HandleDragSourceForLastItem(DragAndDropHandling.SymbolDraggingId, symbol.Id.ToString(), "Create instance");
 
         if (!ImGui.IsItemDeactivated())
             return;

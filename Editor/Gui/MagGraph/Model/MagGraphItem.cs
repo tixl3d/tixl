@@ -41,7 +41,18 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
 
     public SymbolUi? SymbolUi;
     public Symbol.Child? SymbolChild;
-    public Instance? Instance;
+    public IReadOnlyList<Guid>? InstancePath;
+    public Instance? Instance
+    {
+        get
+        {
+            if (InstancePath == null || SymbolChild == null)
+                return null;
+
+            SymbolChild.TryGetOrCreateInstance(InstancePath, out var instance, out _, true);
+            return instance;
+        }
+    }
 
     public string ReadableName
     {

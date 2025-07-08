@@ -7,6 +7,7 @@ using T3.Core.Utils;
 using T3.Editor.Gui.InputUi.VectorInputs;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Animation;
+using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.Interaction.Snapping;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
@@ -51,18 +52,18 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
 
         ImGui.BeginGroup();
         {
-            if (KeyboardBinding.Triggered(UserActions.FocusSelection))
+            if (KeyActionHandling.Triggered(UserActions.FocusSelection))
             {
                 ViewAllOrSelectedKeys(alsoChangeTimeRange: true);
             }
 
-            if (KeyboardBinding.Triggered(UserActions.Duplicate))
+            if (KeyActionHandling.Triggered(UserActions.Duplicate))
             {
                 symbolUi.FlagAsModified();
                 DuplicateSelectedKeyframes(TimeLineCanvas.Playback.TimeInBars);
             }
 
-            if (KeyboardBinding.Triggered(UserActions.InsertKeyframe))
+            if (KeyActionHandling.Triggered(UserActions.InsertKeyframe))
             {
                 symbolUi.FlagAsModified();
                 foreach (var p in AnimationParameters)
@@ -72,7 +73,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
                     
             }
 
-            if (KeyboardBinding.Triggered(UserActions.InsertKeyframeWithIncrement))
+            if (KeyActionHandling.Triggered(UserActions.InsertKeyframeWithIncrement))
             {
                 symbolUi.FlagAsModified();
                 SelectedKeyframes.Clear();
@@ -194,7 +195,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
             
             if (!isAnyKeysSelected && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
             {
-                if (compositionOp.Children.TryGetValue(parameter.ChildUi.SymbolChild.Id, out _))
+                if (compositionOp.Children.TryGetChildInstance(parameter.ChildUi.SymbolChild.Id, out _))
                 {
                     ProjectView.Focused?.NodeSelection.Clear();
                     ProjectView.Focused?.NodeSelection.SelectCompositionChild(compositionOp, parameter.ChildUi.Id);

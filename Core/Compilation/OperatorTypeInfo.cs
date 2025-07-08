@@ -49,7 +49,7 @@ public sealed class OperatorTypeInfo
     internal readonly List<OutputSlotInfo> Outputs;
     public readonly IReadOnlyList<string> MemberNames;
     private readonly Type[]? _genericArguments;
-    internal readonly Type Type;
+    public readonly Type Type;
     public readonly bool IsDescriptiveFileNameType;
     public readonly ExtractableTypeInfo ExtractableTypeInfo;
     

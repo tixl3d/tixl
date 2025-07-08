@@ -210,7 +210,7 @@ public static class ThemeHandling
     }
 
     internal static readonly List<ColorTheme> Themes = [];
-    internal static string ThemeFolder => Path.Combine(FileLocations.SettingsPath, FileLocations.ThemeSubFolder);
+    internal static string ThemeFolder => Path.Combine(FileLocations.SettingsDirectory, FileLocations.ThemeSubFolder);
     private static string DefaultThemeFolder => Path.Combine(FileLocations.ReadOnlySettingsPath, FileLocations.ThemeSubFolder);
     internal static ColorTheme FactoryTheme = null!;
     

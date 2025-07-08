@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using ImGuiNET;
 using T3.Editor.Gui.Styling;
 
@@ -151,11 +151,21 @@ internal abstract class Window
     {
     }
 
+    List<Window> _instancesToDraw = new List<Window>();
+
     private void DrawAllInstances()
     {
-        foreach (var w in GetInstances().ToArray())
+        _instancesToDraw.Clear();
+        IReadOnlyList<Window> instances = GetInstances();
+        
+        //This replaces the ToArray but is GC free, replace foreach as in eventually adds an enumerator allocation
+        for (int i = 0; i < instances.Count; i++)
         {
-            w.DrawOneInstance();
+            _instancesToDraw.Add(instances[i]);
+        }
+        for (int i = 0; i < _instancesToDraw.Count; i++)
+        {
+            _instancesToDraw[i].DrawOneInstance();
         }
     }
 

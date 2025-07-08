@@ -1,0 +1,117 @@
+{
+  "Id": "b4288f74-7997-40f4-bc4c-2833bf3797de"/*VideoClip*/,
+  "Description": "",
+  "InputUis": [
+    {
+      "InputId": "69c0c1fd-ca53-4943-9e26-6c78d79555be"/*Loop*/,
+      "Position": {
+        "X": 339.13132,
+        "Y": 36.050827
+      }
+    },
+    {
+      "InputId": "88ca47b1-66af-4f59-9266-c1781d9101e5"/*ShowTimeCode*/,
+      "Position": {
+        "X": 339.13132,
+        "Y": 235.45197
+      }
+    },
+    {
+      "InputId": "a5f0efc1-2f2d-41a5-91f4-162febf046b2"/*ResynchThreshold*/,
+      "Position": {
+        "X": 339.13132,
+        "Y": -33.949173
+      }
+    },
+    {
+      "InputId": "c064afe1-0078-48eb-be6a-4616f7c5a383"/*FilePath*/,
+      "Position": {
+        "X": -188.89662,
+        "Y": -62.692398
+      },
+      "Usage": "FilePath",
+      "FileFilter": "All Files|*.*|Video files (mp4,webm,mpeg,m4v,mkv)|*.mp4;*.webm;*.mpeg;*.m4v;*.mkv"
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0d6fcdc1-7c04-45f8-9a5c-c33e59f3ec87"/*Execute*/,
+      "Position": {
+        "X": 479.13132,
+        "Y": 200.45197
+      }
+    },
+    {
+      "ChildId": "3d45156f-be39-4393-9bb1-b5514bc956c0"/*CombineStrings*/,
+      "Position": {
+        "X": 156.88306,
+        "Y": 166.9422
+      }
+    },
+    {
+      "ChildId": "5838f596-567e-48cd-83b2-4b85cf25a09d"/*PlayVideo*/,
+      "Position": {
+        "X": 479.13132,
+        "Y": -68.94917
+      }
+    },
+    {
+      "ChildId": "6e7f0afa-90ca-486f-b112-89a19f544c1c"/*Text*/,
+      "Position": {
+        "X": 479.13132,
+        "Y": 165.45197
+      }
+    },
+    {
+      "ChildId": "98d97f0e-0d18-42b4-92fd-30d98be78e0b"/*FilePathParts*/,
+      "Position": {
+        "X": 16.883057,
+        "Y": 131.9422
+      }
+    },
+    {
+      "ChildId": "9f67b61e-b9f0-4199-a63d-2654798331c5"/*Time2*/,
+      "Position": {
+        "X": -188.89662,
+        "Y": 1.7412567
+      }
+    },
+    {
+      "ChildId": "ba579db7-b4bf-4a25-910b-64952e4201c2"/*Layer2d*/,
+      "Position": {
+        "X": 479.13132,
+        "Y": 106.05083
+      }
+    },
+    {
+      "ChildId": "bc1c0497-6e4d-4fa2-9e97-645e53158ecc"/*TimeToString*/,
+      "Position": {
+        "X": 16.883057,
+        "Y": 201.9422
+      }
+    },
+    {
+      "ChildId": "cf433af9-1257-4684-954a-04858e74116b"/*Execute*/,
+      "Position": {
+        "X": 703.7785,
+        "Y": 124.13817
+      }
+    },
+    {
+      "ChildId": "da318983-b8e7-4ecb-8f96-75541ce82671"/*ConvertFormat*/,
+      "Position": {
+        "X": 479.13132,
+        "Y": 71.05083
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "1503d637-b9fe-4323-8626-e54252e997ee"/*Output2*/,
+      "Position": {
+        "X": 703.7785,
+        "Y": 194.13815
+      }
+    }
+  ]
+}

@@ -4,6 +4,7 @@
     <TargetFramework>$(TixlNetCoreFrameworkVersion)</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+      <Deterministic>true</Deterministic>
   </PropertyGroup>
 
   <ItemGroup>

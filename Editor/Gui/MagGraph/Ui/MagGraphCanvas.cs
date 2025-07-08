@@ -10,7 +10,6 @@ using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
-using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Modification;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
@@ -30,9 +29,7 @@ internal sealed partial class MagGraphCanvas : ScalableCanvas, IGraphCanvas
                                                 out var graphImageBackground);
 
         var projectView = new ProjectView(openedProject, navigationHistory, nodeSelection, graphImageBackground);
-
-        projectView.SetCompositionOp(openedProject.RootInstance);
-
+        
         if (projectView.CompositionInstance == null)
         {
             Log.Error("Can't create graph without defined composition op");
@@ -213,13 +210,13 @@ internal sealed partial class MagGraphCanvas : ScalableCanvas, IGraphCanvas
     // }
     private void HandleSymbolDropping(GraphUiContext context)
     {
-        if (!DragHandling.IsDragging)
+        if (!DragAndDropHandling.IsDragging)
             return;
 
         ImGui.SetCursorPos(Vector2.Zero);
         ImGui.InvisibleButton("## drop", ImGui.GetWindowSize());
 
-        if (!DragHandling.TryGetDataDroppedLastItem(DragHandling.SymbolDraggingId, out var data))
+        if (!DragAndDropHandling.TryGetDataDroppedLastItem(DragAndDropHandling.SymbolDraggingId, out var data))
             return;
 
         if (!Guid.TryParse(data, out var guid))

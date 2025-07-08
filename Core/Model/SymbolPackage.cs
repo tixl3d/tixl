@@ -12,6 +12,7 @@ using T3.Core.Logging;
 using T3.Core.Operator;
 using T3.Core.Resource;
 using T3.Core.Stats;
+using T3.Core.UserData;
 
 // ReSharper disable RedundantNameQualifier
 
@@ -28,15 +29,22 @@ namespace T3.Core.Model;
 ///</remarks>
 public abstract partial class SymbolPackage : IResourcePackage
 {
-    public virtual AssemblyInformation AssemblyInformation { get; }
+    public readonly AssemblyInformation AssemblyInformation;
     public string Folder { get; }
     
     public virtual string DisplayName => AssemblyInformation.Name;
 
-    protected virtual IEnumerable<string> SymbolSearchFiles =>
-        Directory.EnumerateFiles(Path.Combine(Folder, SymbolsSubfolder), $"*{SymbolExtension}", SearchOption.AllDirectories);
+    protected virtual IEnumerable<string> SymbolSearchFiles
+    {
+        get
+        {
+            var dir = Path.Combine(Folder, FileLocations.SymbolsSubfolder);
+            if (!Directory.Exists(dir))
+                return [];
+            return Directory.EnumerateFiles(dir, $"*{SymbolExtension}", SearchOption.AllDirectories);
+        }
+    }
 
-    public const string SymbolsSubfolder = "Symbols";
     protected event Action<string?, Symbol>? SymbolAdded;
     protected event Action<Symbol>? SymbolUpdated;
     protected event Action<Guid>? SymbolRemoved;
@@ -67,22 +75,25 @@ public abstract partial class SymbolPackage : IResourcePackage
         RegisterTypes();
     }
 
-    protected SymbolPackage(AssemblyInformation assembly, string? directory = null)
+    protected SymbolPackage(AssemblyInformation assembly, string? mainDirectory, bool initializeResources )
     {
         AssemblyInformation = assembly;
-        Folder = directory ?? assembly.Directory;
+        Folder = mainDirectory ?? assembly.Directory;
         lock(_allPackages)
             _allPackages.Add(this);
-        
-        // ReSharper disable once VirtualMemberCallInConstructor
-        InitializeResources(assembly);
+
+        if (initializeResources)
+        {
+            // ReSharper disable once VirtualMemberCallInConstructor
+            InitializeResources();
+        }
     }
 
-    protected virtual void InitializeResources(AssemblyInformation assemblyInformation)
+    protected virtual void InitializeResources()
     {
-        ResourcesFolder = Path.Combine(Folder, ResourceManager.ResourcesSubfolder);
+        ResourcesFolder = Path.Combine(Folder, FileLocations.ResourcesSubfolder);
         Directory.CreateDirectory(ResourcesFolder);
-        ResourceManager.AddSharedResourceFolder(this, assemblyInformation.ShouldShareResources);
+        ResourceManager.AddSharedResourceFolder(this, AssemblyInformation.ShouldShareResources);
     }
 
     public virtual void Dispose()
@@ -98,21 +109,22 @@ public abstract partial class SymbolPackage : IResourcePackage
         
         AssemblyInformation.Unload();
         // Todo - symbol instance destruction...?
-    }
 
-    private void ClearSymbols()
-    {
-        if (SymbolDict.Count == 0)
-            return;
-
-        var symbols = SymbolDict.Values.ToArray();
-        foreach (var symbol in symbols)
+        return;
+        void ClearSymbols()
         {
-            var id = symbol.Id;
-            SymbolDict.Remove(id, out _);
+            if (SymbolDict.Count == 0)
+                return;
+
+            var symbols = SymbolDict.Values.ToArray();
+            foreach (var symbol in symbols)
+            {
+                var id = symbol.Id;
+                SymbolDict.Remove(id, out _);
+            }
         }
     }
-
+    
     /// <summary>
     /// Loads symbols from the assembly and locates their symbol .t3/json files
     /// </summary>
@@ -132,25 +144,34 @@ public abstract partial class SymbolPackage : IResourcePackage
             return;
         }
 
-        ConcurrentDictionary<Guid, Type> newTypes = new();
+        IDictionary<Guid, Type> newTypes;
 
         var removedSymbolIds = new HashSet<Guid>(SymbolDict.Keys);
         ConcurrentBag<Symbol> updatedSymbols = new();
 
         if (parallel)
         {
+            newTypes = new ConcurrentDictionary<Guid, Type>();
             AssemblyInformation.OperatorTypeInfo
                                .AsParallel()
                                .ForAll(kvp => LoadTypes(kvp.Key, kvp.Value.Type, newTypes, updatedSymbols));
         }
         else
         {
+            newTypes = new Dictionary<Guid, Type>();
             foreach (var (guid, type) in AssemblyInformation.OperatorTypeInfo)
             {
                 LoadTypes(guid, type.Type, newTypes, updatedSymbols);
             }
         }
 
+        // gather slot changes
+        foreach (var symbol in updatedSymbols)
+        {
+            symbol.UpdateInstanceType(true);
+        } 
+        
+        // update symbol instances 
         foreach (var symbol in updatedSymbols)
         {
             UpdateSymbolInstances(symbol);
@@ -169,7 +190,7 @@ public abstract partial class SymbolPackage : IResourcePackage
         newlyRead = [];
         allNewSymbols = [];
         
-        if (!newTypes.IsEmpty)
+        if (newTypes.Count != 0)
         {
             var searchFileEnumerator = parallel ? SymbolSearchFiles.AsParallel() : SymbolSearchFiles;
             var symbolsRead = searchFileEnumerator
@@ -224,27 +245,32 @@ public abstract partial class SymbolPackage : IResourcePackage
             SymbolAdded?.Invoke(null, symbol);
         }
 
+        OnSymbolsLoaded();
         return;
 
-        void LoadTypes(Guid guid, Type type, ConcurrentDictionary<Guid, Type> newTypesDict, ConcurrentBag<Symbol> updated)
+        void LoadTypes(Guid guid, Type type, IDictionary<Guid, Type> newTypesDict, ConcurrentBag<Symbol> updated)
         {
             if (SymbolDict.TryGetValue(guid, out var symbol))
             {
                 removedSymbolIds.Remove(guid);
                 if (symbol == null) // this should never happen??
                 {
-                    Log.Error($"Skipping update of invalid symbol {guid}.");
+                    Log.Error($"Skipping update of invalid symbol {guid}. Symbol entry was null - this is a bug.");
                     return;
                 }
 
-                // we already have this symbol, so mark it as updated
+                // we already have this symbol, so mark it as updated (but dont actually update it yet)
                 symbol.UpdateTypeWithoutUpdatingDefinitionsOrInstances(type, this);
                 updated.Add(symbol);
             }
-            else
+            else 
             {
                 // it's a new type!!
-                newTypesDict.TryAdd(guid, type);
+                if (!newTypesDict.TryAdd(guid, type))
+                {
+                    Log.Error($"{DisplayName}: Failed to add new type {type} with guid '{guid}' - " +
+                              "is there another operator type with the same guid in this project?");
+                }
             }
         }
 
@@ -258,10 +284,12 @@ public abstract partial class SymbolPackage : IResourcePackage
             }
             catch(Exception e)
             {
-                throw new FileCorruptedException(jsonInfo.FilePath, e.Message);
+                throw new FileCorruptedException(jsonInfo.FilePath, e.ToString());
             }
         }
     }
+    
+    protected virtual void OnSymbolsLoaded(){}
 
     protected static void UpdateSymbolInstances(Symbol symbol, bool forceTypeUpdate = false)
     {
@@ -275,11 +303,9 @@ public abstract partial class SymbolPackage : IResourcePackage
     }
 
 
-    public void ApplySymbolChildren(List<SymbolJson.SymbolReadResult> symbolsRead)
+    public static void ApplySymbolChildren(List<SymbolJson.SymbolReadResult> symbolsRead)
     {
-        //Log.Debug($"{AssemblyInformation.Name}: Applying symbol children...");
         Parallel.ForEach(symbolsRead, result => TryReadAndApplyChildren(result));
-        //Log.Debug($"{AssemblyInformation.Name}: Done applying symbol children.");
     }
 
     protected static bool TryReadAndApplyChildren(SymbolJson.SymbolReadResult result)
@@ -321,8 +347,6 @@ public abstract partial class SymbolPackage : IResourcePackage
     public string Alias => AssemblyInformation.Name;
     public virtual bool IsReadOnly => true;
 
-    internal bool TryGetSymbol(Guid symbolId, [NotNullWhen(true)] out Symbol? symbol) => SymbolDict.TryGetValue(symbolId, out symbol);
-
     public void AddResourceDependencyOn(FileResource resource)
     {
         if (!TryGetDependencyCounter(resource, out var dependencyCount))
@@ -349,7 +373,11 @@ public abstract partial class SymbolPackage : IResourcePackage
         if (!TryGetDependencyCounter(symbol, out var dependency))
             return;
         
-        dependency.SymbolChildCount++;
+        if(dependency.SymbolChildCount++ == 0)
+        {
+            // this is the first reference to this package
+            DependencyDict.TryAdd((SymbolPackage)dependency.Package, dependency);
+        }
     }
     
     public void RemoveDependencyOn(Symbol symbol)
@@ -366,7 +394,7 @@ public abstract partial class SymbolPackage : IResourcePackage
 
     private void RemoveIfNoRemainingReferences(DependencyCounter dependency)
     {
-        if (dependency.SymbolChildCount == 0 && dependency.ResourceCount == 0)
+        if (dependency is { SymbolChildCount: 0, ResourceCount: 0 })
         {
             DependencyDict.Remove((SymbolPackage)dependency.Package, out _);
         }
@@ -388,13 +416,14 @@ public abstract partial class SymbolPackage : IResourcePackage
                                 {
                                     Package = symbolPackage
                                 };
-        DependencyDict.TryAdd(symbolPackage, dependencyCounter);
+        if (DependencyDict.TryAdd(symbolPackage, dependencyCounter))
+        {
+            // this is the first reference to this package
+            return true;
+        }
 
-        return true;
-    }
-
-    protected virtual void OnDependenciesChanged()
-    {
+        // another thread added it in the meantime??
+        return DependencyDict.TryGetValue(symbolPackage, out dependencyCounter);
     }
 
     public bool OwnsNamespace(string namespaceName)
@@ -417,5 +446,3 @@ public sealed record DependencyCounter
         return $"{Package.DisplayName}: Symbol References: {SymbolChildCount}, Resource References: {ResourceCount}";
     }
 }
-
-public readonly record struct PackageWithReleaseInfo(SymbolPackage Package, ReleaseInfo ReleaseInfo);

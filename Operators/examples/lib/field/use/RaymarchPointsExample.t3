@@ -49,12 +49,12 @@
         {
           "Id": "75b28b25-02bf-4926-8d27-2a547231f40a"/*Mode*/,
           "Type": "System.Int32",
-          "Value": 0
+          "Value": 1
         },
         {
           "Id": "86fbda4c-5c1b-42b0-a35f-ebcccd6cc648"/*MaxReflectionCount*/,
           "Type": "System.Int32",
-          "Value": 6
+          "Value": 2
         }
       ],
       "Outputs": []
@@ -83,7 +83,7 @@
           "Type": "T3.Core.DataTypes.Gradient",
           "Value": {
             "Gradient": {
-              "Interpolation": "Smooth",
+              "Interpolation": "Linear",
               "Steps": [
                 {
                   "Id": "29bbaf02-8ca4-422c-9ccb-0732f7140fb2",
@@ -239,7 +239,7 @@
         {
           "Id": "414c8045-5086-4449-9d9a-03f28c3966b3"/*PointSize*/,
           "Type": "System.Single",
-          "Value": 0.48
+          "Value": 0.22
         },
         {
           "Id": "7acc95ad-d317-42fc-97f8-85f48d7e516f"/*EnableZTest*/,
@@ -539,7 +539,7 @@
                 },
                 {
                   "Id": "59411468-ae28-4244-9af8-d08d0428b40f",
-                  "NormalizedPosition": 0.5138168,
+                  "NormalizedPosition": 0.49919742,
                   "Color": {
                     "R": 1.0,
                     "G": 1.0,
@@ -570,6 +570,95 @@
           "Id": "840aa616-6983-4840-a58b-d5396a91c2f9"/*Mapping*/,
           "Type": "System.Int32",
           "Value": 2
+        }
+      ],
+      "Outputs": []
+    },
+    {
+      "Id": "eba1b97e-49f1-41d0-aeba-978456815a41"/*Gradient*/,
+      "SymbolId": "8211249d-7a26-4ad0-8d84-56da72a5c536",
+      "Name": "Gradient",
+      "InputValues": [
+        {
+          "Id": "eff10fad-cf95-4133-91db-efc41258cd1b"/*Gradient*/,
+          "Type": "T3.Core.DataTypes.Gradient",
+          "Value": {
+            "Gradient": {
+              "Interpolation": "Linear",
+              "Steps": [
+                {
+                  "Id": "29bbaf02-8ca4-422c-9ccb-0732f7140fb2",
+                  "NormalizedPosition": 0.0,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.04149252,
+                    "B": 0.0,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "acecee5d-b68a-4cef-9ba2-d534623a01be",
+                  "NormalizedPosition": 0.16666667,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.9500792,
+                    "B": 0.0,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "022c11fd-7e8c-4174-b612-9da0d8801d1c",
+                  "NormalizedPosition": 0.33333334,
+                  "Color": {
+                    "R": 0.0,
+                    "G": 1.0,
+                    "B": 0.13341331,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "6a721d6b-8c33-4bc3-8655-4852de949e80",
+                  "NormalizedPosition": 0.5,
+                  "Color": {
+                    "R": 0.10326699,
+                    "G": 0.7896903,
+                    "B": 0.83732057,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "db8ee22f-d64f-409f-a520-cea5410182fd",
+                  "NormalizedPosition": 0.6666667,
+                  "Color": {
+                    "R": 0.0,
+                    "G": 0.6253992,
+                    "B": 0.98564595,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "c00b5f10-cdcb-4835-a663-2a39137cc0f1",
+                  "NormalizedPosition": 0.8333333,
+                  "Color": {
+                    "R": 0.9081521,
+                    "G": 0.0,
+                    "B": 1.0,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "dac3370d-83bc-4c76-95aa-2c2439193785",
+                  "NormalizedPosition": 1.0,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.0,
+                    "B": 0.010892391,
+                    "A": 1.0
+                  }
+                }
+              ]
+            }
+          }
         }
       ],
       "Outputs": []
@@ -605,6 +694,12 @@
       "SourceSlotId": "db1073a1-b9d8-4d52-bc5c-7ae8c0ee1ac3",
       "TargetParentOrChildId": "17797167-f572-4294-be49-428770682c52",
       "TargetSlotId": "38046ede-e786-4cb1-ac17-de6cb7b91c32"
+    },
+    {
+      "SourceParentOrChildId": "eba1b97e-49f1-41d0-aeba-978456815a41",
+      "SourceSlotId": "9f3d0701-86e8-436e-8652-918ba23b2cef",
+      "TargetParentOrChildId": "17797167-f572-4294-be49-428770682c52",
+      "TargetSlotId": "7c944690-d5b2-4894-a178-97593ecd797a"
     },
     {
       "SourceParentOrChildId": "11b3a284-bd7b-41e6-8d2b-a2dd577bdfb6",
@@ -727,6 +822,12 @@
       "TargetSlotId": "e14366ed-0591-424d-a8ab-36f8380dd614"
     },
     {
+      "SourceParentOrChildId": "64dfbce4-665c-4428-8995-88911de5e0de",
+      "SourceSlotId": "e178ef02-c9ac-48cd-a8cb-df3aec5941bb",
+      "TargetParentOrChildId": "ae0ecc52-7c05-42de-ba59-a1a10062e6ec",
+      "TargetSlotId": "9e961f73-1ee7-4369-9ac7-5c653e570b6f"
+    },
+    {
       "SourceParentOrChildId": "853490c5-d2d4-4bbd-9b1b-7e3a1495080b",
       "SourceSlotId": "73ebf863-ba71-421c-bee7-312f13c5eff0",
       "TargetParentOrChildId": "ae0ecc52-7c05-42de-ba59-a1a10062e6ec",
@@ -741,12 +842,6 @@
     {
       "SourceParentOrChildId": "4e0dfbe5-236d-4077-8d26-32e1b719d253",
       "SourceSlotId": "b73347d9-9d9f-4929-b9df-e2d6db722856",
-      "TargetParentOrChildId": "ae0ecc52-7c05-42de-ba59-a1a10062e6ec",
-      "TargetSlotId": "9e961f73-1ee7-4369-9ac7-5c653e570b6f"
-    },
-    {
-      "SourceParentOrChildId": "64dfbce4-665c-4428-8995-88911de5e0de",
-      "SourceSlotId": "e178ef02-c9ac-48cd-a8cb-df3aec5941bb",
       "TargetParentOrChildId": "ae0ecc52-7c05-42de-ba59-a1a10062e6ec",
       "TargetSlotId": "9e961f73-1ee7-4369-9ac7-5c653e570b6f"
     },

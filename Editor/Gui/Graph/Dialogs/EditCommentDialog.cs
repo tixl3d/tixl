@@ -26,7 +26,7 @@ internal sealed class EditCommentDialog : ModalDialog
                 var symbolChildUi = symbolUi.ChildUis[instance.SymbolChildId];
                 if (symbolChildUi == null)
                 {
-                    CustomComponents.EmptyWindowMessage("Sorry, can't find UI definition for operator.");
+                    CustomComponents.EmptyWindowMessage("Unable to find a UI definition for the operator.");
                 }
                 else
                 {

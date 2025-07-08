@@ -21,7 +21,7 @@ public static class UserData
     static UserData()
     {
         Directory.CreateDirectory(FileLocations.ReadOnlySettingsPath);
-        Directory.CreateDirectory(FileLocations.SettingsPath);
+        Directory.CreateDirectory(FileLocations.SettingsDirectory);
     }
 
     public static bool TryLoadOrInitializeUserData<T>(string relativeFilePath, [NotNullWhen(true)] out T? result)
@@ -94,7 +94,7 @@ public static class UserData
     private static string GetFilePath(string relativeFilePath, UserDataLocation location)
     {
         var filePath = Path.Combine(location == UserDataLocation.User 
-                                        ? FileLocations.SettingsPath 
+                                        ? FileLocations.SettingsDirectory 
                                         : FileLocations.ReadOnlySettingsPath, relativeFilePath);
         return filePath;
     }
@@ -146,7 +146,7 @@ public static class UserData
 
     public static bool CanLoad(string relativeFileName)
     {
-        var filePath = Path.Combine(FileLocations.SettingsPath, relativeFileName);
+        var filePath = Path.Combine(FileLocations.SettingsDirectory, relativeFileName);
         if (File.Exists(filePath))
         {
             return true;

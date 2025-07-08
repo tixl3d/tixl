@@ -198,10 +198,10 @@ internal sealed class StairCombineSDF : Instance<StairCombineSDF>
                     c.AppendCall($"f{pc}.w = fOpDifferenceStairs(f{pc}.w, f{c}.w, {n}K, {n}Steps);");
                     break;
                 case CombineMethods.Groove:
-                    c.AppendCall($"f{pc}.w = fOpGroove(f{pc}.w, f{c}.w, {n}K, {n}Steps););");
+                    c.AppendCall($"f{pc}.w = fOpGroove(f{pc}.w, f{c}.w, {n}K, {n}Steps);");
                     break;
                 case CombineMethods.Tongue:
-                    c.AppendCall($"f{pc}.w = fOpTongue(f{pc}.w, f{c}.w, {n}K, {n}Steps););");
+                    c.AppendCall($"f{pc}.w = fOpTongue(f{pc}.w, f{c}.w, {n}K, {n}Steps);");
                     break;
             }
 

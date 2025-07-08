@@ -2,6 +2,7 @@
 using T3.Core.DataTypes;
 using T3.Core.Operator;
 using T3.Editor.Gui.Interaction.WithCurves;
+using T3.Editor.Gui.UiHelpers;
 
 namespace T3.Editor.Gui.Windows.TimeLine;
 
@@ -55,7 +56,23 @@ internal abstract class AnimationParameterEditing : CurveEditing
 
     protected override void ViewAllOrSelectedKeys(bool alsoChangeTimeRange = false)
     {
-        var bounds = GetBoundsOnCanvas(GetSelectedOrAllPoints());
+        var hasSomeKeys = TryGetBoundsOnCanvas(GetSelectedOrAllPoints(), out var bounds);
+        if (this is DopeSheetArea dopeSheet)
+        {
+            if (dopeSheet.TimeLineCanvas.LayersArea.TryGetBounds(out var clipBounds))
+            {
+                if (hasSomeKeys)
+                {
+                    bounds.Min.X = MathF.Min(bounds.Min.X, clipBounds.Min.X);
+                    bounds.Max.X = MathF.Max(bounds.Max.X, clipBounds.Max.X);
+                }
+                else
+                {
+                    bounds= clipBounds;
+                }
+            }
+        }
+        
         TimeLineCanvas.Current.SetScopeToCanvasArea(bounds, flipY:true, null, 300, 100);
     }
 

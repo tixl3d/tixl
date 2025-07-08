@@ -1,6 +1,8 @@
 #nullable enable
 using System.Diagnostics;
+using System.IO.Packaging;
 using T3.Core.Operator;
+using T3.Core.Resource;
 using T3.Editor.Gui.Graph;
 using T3.Editor.Gui.Graph.Dialogs;
 using T3.Editor.Gui.Graph.Window;
@@ -27,13 +29,46 @@ internal sealed partial class ProjectView
     public InstanceView? InstView => _instView;
     public Instance? CompositionInstance => InstView?.Instance;
 
+    public Instance RootInstance => GetRoot();
+    private bool _subscribedToRootDisposing;
+
+    private Instance GetRoot()
+    {
+        var package = OpenedProject.Package;
+        if (!package.Symbols.TryGetValue(package.HomeSymbolId, out var rootSymbol))
+        {
+            throw new Exception("Root symbol not found in project.");
+        }
+
+        if (!rootSymbol.TryGetParentlessInstance(out var rootInstance))
+        {
+            throw new Exception("Root instance could not be created?");
+        }
+                
+        if(!_subscribedToRootDisposing)
+        {
+            _subscribedToRootDisposing = true;
+            rootInstance.Disposing += OnRootDisposed;
+        }
+        return rootInstance;
+    }
+
+    private void OnRootDisposed(IResourceConsumer rootAsResourceConsumer)
+    {
+        _subscribedToRootDisposing = false;
+        rootAsResourceConsumer.Disposing -= OnRootDisposed;
+
+        NodeSelection.Clear();
+        FlagChanges(ProjectView.ChangeTypes.Children | ProjectView.ChangeTypes.Composition);
+    }
+
 
 
     private readonly Stack<InstanceView> _compositionsAwaitingDisposal = [];
     private readonly Stack<InstanceView> _compositionReloadStack = [];
     private bool _waitingOnReload;
 
-    public void SetCompositionOp(Instance? newCompositionOp)
+    private void SetCompositionOp(Instance? newCompositionOp)
     {
         if (newCompositionOp == null)
         {
@@ -101,13 +136,14 @@ internal sealed partial class ProjectView
 
         void ShowSymbolReloadDialog(InstanceView composition)
         {
-            var instance = composition.Instance;
-            var parent = instance.Parent;
-            var symbolChildUi = parent?.GetSymbolUi().ChildUis[instance.SymbolChildId];
-            if (symbolChildUi != null && parent != null)
+            var symbolChildId = composition.SymbolChildId;
+            var symbol = composition.Symbol;
+            var symbolChildUi = composition.Instance.Parent?.GetSymbolUi().ChildUis[symbolChildId];
+            if (symbolChildUi != null && composition.Instance.Parent != null)
             {
+                var parentSymbolId = composition.Instance.Parent.Symbol.Id;
                 _duplicateSymbolDialog.ShowNextFrame(); // actually shows this frame
-                _duplicateSymbolDialog.Draw(compositionOp: parent,
+                _duplicateSymbolDialog.Draw(symbolGuid: parentSymbolId,
                                             selectedChildUis: [symbolChildUi],
                                             nameSpace: ref _dupeReadonlyNamespace,
                                             newTypeName: ref _dupeReadonlyName,
@@ -128,7 +164,6 @@ internal sealed partial class ProjectView
                 _duplicateSymbolDialog.Closed -= ReloadSymbol;
                 _compositionReloadStack.Pop();
                 _waitingOnReload = false;
-                var symbol = instance.Symbol;
                 var symbolPackage = (EditorSymbolPackage)symbol.SymbolPackage;
                 symbolPackage.Reload(symbol.GetSymbolUi());
             }
@@ -174,7 +209,7 @@ internal sealed partial class ProjectView
         NodeNavigation = new NodeNavigation(openedProject.Structure, NavigationHistory, getCompositionOp);
         TimeLineCanvas = new TimeLineCanvas(NodeSelection, getCompositionOp, TrySetCompositionOpToChild);
         
-        SetCompositionOp(openedProject.RootInstance);
+        SetCompositionOp(RootInstance);
     }
 
     public static void CreateIndependentComponents(OpenedProject openedProject, out NavigationHistory navigationHistory, out NodeSelection nodeSelection,
@@ -223,7 +258,7 @@ internal sealed partial class ProjectView
                                              && InstView.SymbolChildId == newCompositionInstance.SymbolChildId;
         if (targetCompositionAlreadyActive)
         {
-            if (newIdPath[0] != OpenedProject.RootInstance.SymbolChildId)
+            if (newIdPath[0] != RootInstance.SymbolChildId)
             {
                 throw new Exception("Root instance is not the first element in the path");
             }
@@ -322,8 +357,6 @@ internal sealed partial class ProjectView
             if (graphWindow.Config.Visible && graphWindow.ProjectView != null)
                 Focused = graphWindow.ProjectView;
         }
-
-        OpenedProject.UnregisterView(this);
     }
     
     public void SetAsFocused()

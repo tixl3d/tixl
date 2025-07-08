@@ -39,6 +39,13 @@
       }
     },
     {
+      "InputId": "6e1099f2-78d7-4807-ba06-6b5354fb6ac9"/*NormalSamplingDistance*/,
+      "Position": {
+        "X": 445.557,
+        "Y": 832.25055
+      }
+    },
+    {
       "InputId": "8145f581-65bf-4965-81e9-2aed3622039f"/*RandomSurfaceDistance*/,
       "Position": {
         "X": 445.557,
@@ -95,14 +102,14 @@
       "ChildId": "299a8fd7-db02-46bb-9a48-198bf7f4db0f"/*_ExecuteParticleUpdate*/,
       "Position": {
         "X": 1134.8295,
-        "Y": 637.7593
+        "Y": 672.7593
       }
     },
     {
       "ChildId": "2d96af48-a019-4b08-a3b0-71466a6850d7"/*HasTimeChanged*/,
       "Position": {
         "X": 994.8294,
-        "Y": 672.7593
+        "Y": 707.7593
       }
     },
     {
@@ -129,8 +136,8 @@
     {
       "ChildId": "8a70f9f8-ac44-45b1-b26a-7f6419a3883e"/*CalcDispatchCount*/,
       "Position": {
-        "X": 957.9282,
-        "Y": 509.55298
+        "X": 932.21576,
+        "Y": 438.99338
       }
     },
     {
@@ -160,7 +167,7 @@
       "OutputId": "90e8bd09-857a-4de0-b7a6-ab2be17af8ae"/*Particles*/,
       "Position": {
         "X": 1134.8295,
-        "Y": 707.7593
+        "Y": 742.7593
       }
     }
   ]

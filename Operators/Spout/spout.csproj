@@ -13,7 +13,6 @@
     <EditorVersion>4.0.3</EditorVersion>
     <IsEditorOnly>false</IsEditorOnly>
     <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>0108;9084</NoWarn>
   </PropertyGroup>
@@ -100,10 +99,14 @@
       <NoWarn>NU1701</NoWarn>
     </PackageReference>
   </ItemGroup>
-  <Target Name="CopyNative" AfterTargets="AfterBuild">
-    <Copy SourceFiles="../../Dependencies/Spout.dll" DestinationFolder="$(OutputPath)" />
-    <Copy SourceFiles="../../Dependencies/SpoutDX.dll" DestinationFolder="$(OutputPath)" />
-  </Target>
+
+  <!-- Native dependencies -->
+  <ItemGroup>
+    <Content Include="./dependencies/**/*" CopyToOutputDirectory="PreserveNewest">
+      <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Content>
+  </ItemGroup>
+
   <!-- Include Resources/** into output/Resources -->
   <ItemGroup Condition="'$(Configuration)' == 'Release'">
     <Content Include="Resources/**/*" Exclude="bin/**">
@@ -126,16 +129,6 @@
   <ItemGroup Label="OperatorPackages">
     <Operators Include="lib" Version="1.0.0" ResourcesOnly="False" />
     <Operators Include="Types" Version="1.0.0" ResourcesOnly="False" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="..\..\Dependencies\Spout.dll">
-      <Visible>false</Visible>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\..\Dependencies\SpoutDX.dll">
-      <Visible>false</Visible>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <Target Name="CreatePackageInfo" AfterTargets="AfterBuild">
     <ItemGroup Label="Define json structure of referenced operator packages">
@@ -166,4 +159,9 @@
     </PropertyGroup>
     <WriteLinesToFile File="$(OutputPath)/OperatorPackage.json" Lines="$(OperatorPackageInfoJson)" Overwrite="True" Encoding="UTF-8" />
   </Target>
+
+<Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild">
+<!-- Clear previous files in the export folder -->
+<RemoveDir Directories="bin/$(Configuration)"/>
+</Target> 
 </Project>

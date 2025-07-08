@@ -7,6 +7,7 @@ using T3.Core.SystemUi;
 using T3.Core.Utils;
 using T3.Editor.Gui.Graph.Window;
 using T3.Editor.Gui.Interaction;
+using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.UiHelpers.Wiki;
@@ -194,7 +195,7 @@ internal static class AppMenuBar
                 T3Ui.NewProjectDialog.ShowNextFrame();
             }
 
-            if (ImGui.MenuItem("New Operator...", KeyboardBinding.ListKeyboardShortcuts(UserActions.New, false), false, showNewTemplateOption))
+            if (ImGui.MenuItem("New Operator...", UserActions.New.ListShortcuts(), false, showNewTemplateOption))
             {
                 T3Ui.CreateFromTemplateDialog.ShowNextFrame();
             }
@@ -212,7 +213,7 @@ internal static class AppMenuBar
                     {
                         if (GraphWindow.GraphWindowInstances.Count > 0)
                         {
-                            BlockingWindow.Instance.ShowMessageBox("Would you like to create a new window?", "Opening " + name, "Yes", "No");
+                            BlockingWindow.Instance.ShowMessageBox("Would you like to open this project in a new window?", "Opening " + name, "Yes", "No");
                         }
 
                         Log.Error("Not implemented yet");
@@ -252,20 +253,20 @@ internal static class AppMenuBar
             // Disabled, at least for now, as this is an incomplete (or not even started) operation on the Main branch atm
             if (ImGui.MenuItem("Import Operators", null, false, !T3Ui.IsCurrentlySaving))
             {
-                BlockingWindow.Instance.ShowMessageBox("This feature is not yet implemented on the main branch - stay tuned for updates!",
+                BlockingWindow.Instance.ShowMessageBox("This feature is not yet available in the main branch. Stay tuned for updates!",
                                                        "Not yet implemented");
                 //_importDialog.ShowNextFrame();
             }
 
             ImGui.Separator();
-            if (ImGui.MenuItem("Disable Keyboard ShortCuts", KeyboardBinding.ListKeyboardShortcuts(UserActions.Save, false), !UserSettings.Config.EnableKeyboardShortCuts))
+            if (ImGui.MenuItem("Disable Keyboard ShortCuts", UserActions.Save.ListShortcuts(), !UserSettings.Config.EnableKeyboardShortCuts))
             {
                 UserSettings.Config.EnableKeyboardShortCuts = !UserSettings.Config.EnableKeyboardShortCuts;
             }
             
             ImGui.Separator();
 
-            if (ImGui.MenuItem("Save Changes", KeyboardBinding.ListKeyboardShortcuts(UserActions.Save, false), false, !T3Ui.IsCurrentlySaving))
+            if (ImGui.MenuItem("Save Changes", UserActions.Save.ListShortcuts(), false, !T3Ui.IsCurrentlySaving))
             {
                 T3Ui.SaveInBackground(saveAll: false);
             }
@@ -373,7 +374,7 @@ internal static class AppMenuBar
             ImGui.MenuItem("Graph Minimap", "", ref UserSettings.Config.ShowMiniMap);
             ImGui.MenuItem("Graph Toolbar", "", ref UserSettings.Config.ShowToolbar);
             ImGui.MenuItem("Timeline", "", ref UserSettings.Config.ShowTimeline);
-            if (ImGui.MenuItem("Toggle All", KeyboardBinding.ListKeyboardShortcuts(UserActions.ToggleAllUiElements, false), false,
+            if (ImGui.MenuItem("Toggle All", UserActions.ToggleAllUiElements.ListShortcuts(), false,
                                !T3Ui.IsCurrentlySaving))
             {
                 T3Ui.ToggleAllUiElements();
@@ -383,7 +384,7 @@ internal static class AppMenuBar
 
             ImGui.MenuItem("Interactions Overlay", "", ref UserSettings.Config.ShowInteractionOverlay);
             ImGui.Separator();
-            ImGui.MenuItem("Fullscreen", KeyboardBinding.ListKeyboardShortcuts(UserActions.ToggleFullscreen, false), ref UserSettings.Config.FullScreen);
+            ImGui.MenuItem("Fullscreen", UserActions.ToggleFullscreen.ListShortcuts(), ref UserSettings.Config.FullScreen);
 
             var screens = EditorUi.Instance.AllScreens;
             if (ImGui.BeginMenu("Fullscreen Display"))
@@ -404,7 +405,7 @@ internal static class AppMenuBar
 
             ImGui.Separator();
 
-            if (ImGui.MenuItem("Focus Mode", KeyboardBinding.ListKeyboardShortcuts(UserActions.ToggleFocusMode, false), UserSettings.Config.FocusMode))
+            if (ImGui.MenuItem("Focus Mode", UserActions.ToggleFocusMode.ListShortcuts(), UserSettings.Config.FocusMode))
             {
                 T3Ui.ToggleFocusMode();
             }

@@ -2,6 +2,7 @@
 using ImGuiNET;
 using T3.Core.Resource;
 using T3.Core.SystemUi;
+using T3.Core.UserData;
 using T3.Editor.SystemUi;
 
 namespace T3.Editor.Gui.UiHelpers;
@@ -110,12 +111,12 @@ public static class FileOperations
 
     private static string GetAbsoluteResourcePath()
     {
-        return Path.Combine(Path.GetFullPath("."), ResourceManager.ResourcesSubfolder);
+        return Path.Combine(Path.GetFullPath("."), FileLocations.ResourcesSubfolder);
     }
 
     private static string GetAbsoluteDirectory(string relativeFilepath)
     {
         var absolutePath = GetAbsoluteResourcePath();
-        return Path.GetDirectoryName(Path.Combine(absolutePath, relativeFilepath.Replace(ResourceManager.ResourcesSubfolder + "\\", "")));
+        return Path.GetDirectoryName(Path.Combine(absolutePath, relativeFilepath.Replace(FileLocations.ResourcesSubfolder + "\\", "")));
     }
 }

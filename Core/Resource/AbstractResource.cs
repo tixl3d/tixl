@@ -43,7 +43,7 @@ public sealed class Resource<T> : IDisposable, IResource
 
         _onFileChanged = OnFileUpdate;
         _valueFactory = ValueFactory;
-        _onDispose = Dispose;
+        _onDispose = OnOwnerDisposed;
 
         if (owner != null)
             owner.Disposing += _onDispose;
@@ -279,6 +279,13 @@ public sealed class Resource<T> : IDisposable, IResource
     #endregion
 
     #region Value Disposal
+
+    private void OnOwnerDisposed(IResourceConsumer owner)
+    {
+        if(owner != _owner)
+            throw new Exception($"Owner mismatch: {owner} != {_owner}");
+        Dispose();
+    }
     public void Dispose()
     {
         if (_isDisposed)
@@ -334,7 +341,7 @@ public sealed class Resource<T> : IDisposable, IResource
     private readonly Func<T?> _valueFactory;
     private bool _isDisposed;
     private readonly TryGenerate<T> _tryGenerate;
-    private readonly Action _onDispose;
+    private readonly Action<IResourceConsumer> _onDispose;
     private readonly bool _allowDisposal;
     private const LazyThreadSafetyMode ThreadSafetyMode = LazyThreadSafetyMode.None;
     internal event Action? Changed;

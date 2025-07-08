@@ -4,6 +4,7 @@ using T3.Core.DataTypes;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Editor.Gui.Interaction;
+using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.Interaction.Variations.Model;
 using T3.Editor.Gui.OutputUi;
 using T3.Editor.Gui.Styling;
@@ -37,7 +38,7 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
         UpdateCanvas(out _);
 
         // Complete deferred actions
-        if (!T3Ui.IsCurrentlySaving && KeyboardBinding.Triggered(UserActions.DeleteSelection))
+        if (!T3Ui.IsCurrentlySaving && UserActions.DeleteSelection.Triggered())
             DeleteSelectedElements();
             
         bool pinnedOutputChanged = false;
@@ -68,7 +69,7 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
             RefreshView();
         }
 
-        if(KeyboardBinding.Triggered(UserActions.FocusSelection) || _resetViewRequested)
+        if(KeyActionHandling.Triggered(UserActions.FocusSelection) || _resetViewRequested)
         {
             ResetView();
         }

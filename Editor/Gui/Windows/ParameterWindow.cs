@@ -93,10 +93,22 @@ internal sealed class ParameterWindow : Window
         if (instance == null)
             return;
 
+        var symbol = instance.Symbol;
+        var parentSymbol = instance.Parent?.Symbol;
+        var path = instance.InstancePath;
+        // ReSharper disable once RedundantAssignment
+        instance = null; //allow unload of instance type in case a recompilation occurs
+        
         // Draw dialogs
-        OperatorHelp.EditDescriptionDialog.Draw(instance.Symbol); // TODO: This is probably not required...
+        OperatorHelp.EditDescriptionDialog.Draw(symbol); // TODO: This is probably not required...
         RenameInputDialog.Draw();
 
+        if (!symbol.TryGetOrCreateInstance(path, parentSymbol, out instance))
+        {
+            Log.Error($"Failed to get instance for {symbol.Name} with path {string.Join(",", path)}");
+            return;
+        }
+        
         if (!TryGetUiDefinitions(instance, out var symbolUi, out var symbolChildUi))
             return;
 

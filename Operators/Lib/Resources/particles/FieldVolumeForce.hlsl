@@ -34,12 +34,14 @@ cbuffer Params : register(b2)
 RWStructuredBuffer<Particle> Particles : u0;
 StructuredBuffer<PbrVertex> Vertices : t0;
 StructuredBuffer<int3> Indices : t1;
+sampler ClampedSampler : s0;
 
-//=== Globals =======================================================
+//=== Additional Resources ==========================================
+/*{RESOURCES(t6)}*/
+
+//=== Global functions ==============================================
 /*{GLOBALS}*/
 
-//=== Resources =====================================================
-/*{RESOURCES(t0)}*/
 
 //=== Field functions ===============================================
 /*{FIELD_FUNCTIONS}*/

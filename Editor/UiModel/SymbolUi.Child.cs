@@ -65,6 +65,24 @@ public partial class SymbolUi
             _parentSymbolPackage = parentSymbolPackage;
         }
 
+        internal static Child CreateCopy(Child original, Guid symbolChildId, Guid symbolId, EditorSymbolPackage parentSymbolPackage)
+        {
+            var newChild = new Child(symbolChildId, symbolId, parentSymbolPackage)
+            {
+                PosOnCanvas = original.PosOnCanvas,
+                Size = original.Size,
+                Style = original.Style,
+                Comment = original.Comment,
+                SnapshotGroupIndex = original.SnapshotGroupIndex,
+            };
+            foreach(var overridePair in original.ConnectionStyleOverrides)
+            {
+                newChild.ConnectionStyleOverrides[overridePair.Key] = overridePair.Value;
+            }
+            
+            return newChild;
+        }
+
         internal void UpdateSymbolPackage(EditorSymbolPackage parentSymbolPackage)
         {
             _parentSymbolPackage = parentSymbolPackage;

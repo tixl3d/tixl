@@ -5,6 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <OutputType>Exe</OutputType>
+        <Deterministic>true</Deterministic>
     </PropertyGroup>
 
     <ItemGroup>

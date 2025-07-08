@@ -33,7 +33,7 @@ internal sealed class ChangeSymbolNamespaceCommand : ICommand
         var reason = _changeNamespaceAction(_symbolId, newNamespace, sourceProject, targetProject);
 
         if (!string.IsNullOrWhiteSpace(reason))
-            BlockingWindow.Instance.ShowMessageBox(reason, "Could not rename namespace");
+            BlockingWindow.Instance.ShowMessageBox(reason, "Could not rename the namespace");
     }
 
     private readonly Guid _symbolId;

@@ -17,7 +17,7 @@ public sealed class TempResourceConsumer : IResourceConsumer
     
     public IReadOnlyList<IResourcePackage> AvailableResourcePackages { get; }
     public SymbolPackage? Package => _package;
-    public event Action? Disposing;
+    public event Action<IResourceConsumer>? Disposing;
             
-    public void TriggerDispose() => Disposing?.Invoke();
+    public void TriggerDispose() => Disposing?.Invoke(this);
 }

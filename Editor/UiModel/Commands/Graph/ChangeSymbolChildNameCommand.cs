@@ -28,9 +28,10 @@ public sealed class ChangeSymbolChildNameCommand : ICommand
     {
         if (!SymbolUiRegistry.TryGetSymbolUi(_parentSymbolId, out var symbolUi))
             throw new Exception("Symbol not found: " + _parentSymbolId);
+        
         var symbolParent = symbolUi.Symbol;
-        var symbol = symbolParent.Children[_symbolChildId];
-        symbol.Name = newName;
+        var symbolChild = symbolParent.Children[_symbolChildId];
+        symbolChild.Name = newName;
         symbolUi.FlagAsModified();
     }
 

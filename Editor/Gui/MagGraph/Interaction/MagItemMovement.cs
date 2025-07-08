@@ -562,7 +562,7 @@ internal sealed partial class MagItemMovement
 
             if (capturedConnections.Contains(topC))
                 continue;
-
+            
             var linkedOutConnection = topC;
 
             // Find matching linked connections
@@ -588,7 +588,7 @@ internal sealed partial class MagItemMovement
                 capturedConnections.Add(linkedOutConnection);
             }
 
-            if (linkedOutConnection != topC)
+            if (linkedOutConnection != topC && topC.Type == linkedOutConnection.Type)
             {
                 pairs.Add(new SnapCollapseConnectionPair(topC, linkedOutConnection));
             }

@@ -1269,7 +1269,7 @@ internal sealed class GraphNode
             var connectionSourceId = connection.SourceParentOrChildId;
 
             if (compositionUi.ChildUis.TryGetValue(connectionSourceId, out var connectionSourceUi) && 
-                compositionOp.Children.TryGetValue(connectionSourceId, out var instance))
+                compositionOp.Children.TryGetChildInstance(connectionSourceId, out var instance))
             {
                 var outputDef = connectionSourceUi.SymbolChild.Symbol.OutputDefinitions.SingleOrDefault(outp => outp.Id == connection.SourceSlotId);
                 var output = instance.Outputs.SingleOrDefault(outp => outp.Id == connection.SourceSlotId);

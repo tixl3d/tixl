@@ -10,6 +10,7 @@
         <TargetFramework>net9.0-windows</TargetFramework>
         <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
         <EnableUnsafeBinaryFormatterSerialization>true</EnableUnsafeBinaryFormatterSerialization>
+        <Deterministic>true</Deterministic>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
@@ -47,4 +48,8 @@
         <ProjectReference Include="..\SilkWindows\SilkWindows.csproj" />
     </ItemGroup>
 
+    <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild">
+        <!-- Clear previous files in the export folder -->
+        <RemoveDir Directories="bin/$(Configuration)"/>
+    </Target>
 </Project>

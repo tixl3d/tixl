@@ -27,4 +27,7 @@ internal sealed class ScreenCloseUp : Instance<ScreenCloseUp>
         [Input(Guid = "ec096545-6cc7-45b0-8eb6-2100e52d3815")]
         public readonly InputSlot<float> DepthOfField = new InputSlot<float>();
 
+        [Input(Guid = "e10c3708-9696-4d15-81b5-93eb4026937b")]
+        public readonly InputSlot<System.Numerics.Vector4> BackgroundColor = new InputSlot<System.Numerics.Vector4>();
+
 }

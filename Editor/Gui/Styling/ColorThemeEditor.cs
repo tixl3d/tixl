@@ -1,4 +1,4 @@
-#nullable enable
+﻿#nullable enable
 using System.Reflection;
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
@@ -39,7 +39,7 @@ internal static class ColorThemeEditor
                                    $"""
                                    Choose a color theme for editing, then apply your modifications and save them. 
                                    You have the option to create new themes by altering the name and save. 
-                                   Themes are saved as files in {FileLocations.SettingsPath}.
+                                   Themes are saved as files in {FileLocations.SettingsDirectory}.
                                    """))
         {
             var selectedTheme = ThemeHandling.Themes.FirstOrDefault(t => t.Name == UserSettings.Config.ColorThemeName);

@@ -57,7 +57,7 @@ public sealed class TransformCallbackSlot<T> : Slot<T>
         _isDisabled = shouldBeDisabled;
     }
 
-    public override bool TrySetBypassToInput(Slot<T> targetSlot)
+    internal override bool TrySetBypassToInput(Slot<T> targetSlot)
     {
         if (_keepOriginalUpdateAction != null)
         {

@@ -8,6 +8,7 @@
         <Configurations>Debug;Release</Configurations>
         <Platforms>AnyCPU</Platforms>
         <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
+        <Deterministic>true</Deterministic>
     </PropertyGroup>
 
     <ItemGroup>

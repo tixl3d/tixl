@@ -79,7 +79,7 @@ internal static partial class Program
 
         ProjectSettings.Config = exportSettings!.ConfigData;
             
-        var logDirectory = Path.Combine(Core.UserData.FileLocations.SettingsPath, "Player" , exportSettings.Author, exportSettings.ApplicationTitle);
+        var logDirectory = Path.Combine(Core.UserData.FileLocations.SettingsDirectory, "Player" , exportSettings.Author, exportSettings.ApplicationTitle);
         var fileWriter = FileWriter.CreateDefault(logDirectory, out var logPath);
         try
         {

@@ -160,7 +160,7 @@ internal static class NodeActions
             return;
         }
 
-        if (compositionOp.TryGetChildInstance(selection[0].Id, false, out var child, out _))
+        if (compositionOp.Children.TryGetChildInstance(selection[0].Id, out var child))
         {
             outputWindow.Pinning.PinInstance(child, components);
         }
@@ -194,7 +194,7 @@ internal static class NodeActions
             }
             
             using var reader = new StringReader(text);
-            var jsonReader = new JsonTextReader(reader);
+            using var jsonReader = new JsonTextReader(reader);
             if (JToken.ReadFrom(jsonReader, SymbolJson.LoadSettings) is not JArray jArray)
                 return;
 
@@ -496,7 +496,7 @@ internal static class NodeActions
             if (node is not SymbolUi.Child childUi)
                 continue;
 
-            if (!compositionOp.Children.TryGetValue(childUi.Id, out var instance) || instance.Parent == null)
+            if (!compositionOp.Children.TryGetChildInstance(childUi.Id, out var instance) || instance.Parent == null)
             {
                 Log.Error("Can't disconnect missing instance");
                 continue;

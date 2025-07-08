@@ -75,6 +75,7 @@ RWStructuredBuffer<Point> ResultPoints : u1;
 
         Particles[gi].Position = EmitPoints[addIndex].Position;
         Particles[gi].Rotation = EmitPoints[addIndex].Rotation;
+        
         Particles[gi].Radius = EmitPoints[addIndex].Scale.x * RadiusFromW;
         Particles[gi].BirthTime = Time;
         Particles[gi].Velocity = qRotateVec3(float3(0, 0, 1), normalize(Particles[gi].Rotation)) * InitialVelocity;
@@ -84,6 +85,7 @@ RWStructuredBuffer<Point> ResultPoints : u1;
         Particles[gi].Color = EmitPoints[addIndex].Color;
         // Particles[gi].Color = EmitPoints[addIndex].Color;
         ResultPoints[gi].Scale = EmitPoints[addIndex].Scale;
+        ResultPoints[gi].FX1 = EmitPoints[addIndex].FX1;
         ResultPoints[gi].FX2 = EmitPoints[addIndex].FX2;
         ResultPoints[gi].Color = EmitPoints[addIndex].Color;
 
@@ -129,7 +131,7 @@ RWStructuredBuffer<Point> ResultPoints : u1;
     if (WMode == W_KEEP_ORIGINAL)
     {
         // Maybe we could skip this?
-        ResultPoints[gi].Scale = Particles[gi].Radius / RadiusFromW;
+        //ResultPoints[gi].Scale = Particles[gi].Radius / RadiusFromW;
     }
     else if (WMode == W_PARTICLE_AGE)
     {

@@ -3,6 +3,7 @@ using ImGuiNET;
 using T3.Core.Animation;
 using T3.Core.DataTypes;
 using T3.Core.Operator;
+using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.TimeLine;
@@ -59,103 +60,108 @@ public abstract class CurveEditing
             var editModes = selectedInterpolations as VDefinition.EditMode[] ?? selectedInterpolations.ToArray();
 
             bool changed = false;
-
-            if (ImGui.MenuItem("Smooth", null, editModes.Contains(VDefinition.EditMode.Smooth)))
+            if (SelectedKeyframes.Count > 0)
             {
-                OnSmooth();
-                UpdateAllTangents();
-                changed = true;
-            }
+                CustomComponents.HintLabel("Interpolation...");
 
-            if (ImGui.MenuItem("Cubic", null, editModes.Contains(VDefinition.EditMode.Cubic)))
-            {
-                OnCubic();
-                UpdateAllTangents();
-                changed = true;
-            }
-
-            if (ImGui.MenuItem("Horizontal", null, editModes.Contains(VDefinition.EditMode.Horizontal)))
-            {
-                OnHorizontal();
-                UpdateAllTangents();
-                changed = true;
-            }
-
-            if (ImGui.MenuItem("Constant", null, editModes.Contains(VDefinition.EditMode.Constant)))
-            {
-                OnConstant();
-                UpdateAllTangents();
-                changed = true;
-            }
-
-            if (ImGui.MenuItem("Linear", null, editModes.Contains(VDefinition.EditMode.Linear)))
-            {
-                OnLinear();
-                UpdateAllTangents();
-                changed = true;
-            }
-
-            if (ImGui.BeginMenu("Before curve..."))
-            {
-                foreach (CurveUtils.OutsideCurveBehavior mapping in Enum.GetValues(typeof(CurveUtils.OutsideCurveBehavior)))
+                if (ImGui.MenuItem("Smooth", null, editModes.Contains(VDefinition.EditMode.Smooth)))
                 {
-                    if (ImGui.MenuItem(mapping.ToString(), null))
-                    {
-                        ApplyPreCurveMapping(mapping);
-                        changed = true;
-                    }
+                    OnSmooth();
+                    UpdateAllTangents();
+                    changed = true;
                 }
 
-                ImGui.EndMenu();
-            }
-
-            if (ImGui.BeginMenu("After curve..."))
-            {
-                foreach (CurveUtils.OutsideCurveBehavior mapping in Enum.GetValues(typeof(CurveUtils.OutsideCurveBehavior)))
+                if (ImGui.MenuItem("Cubic", null, editModes.Contains(VDefinition.EditMode.Cubic)))
                 {
-                    if (ImGui.MenuItem(mapping.ToString(), null))
-                    {
-                        ApplyPostCurveMapping(mapping);
-                        changed = true;
-                    }
+                    OnCubic();
+                    UpdateAllTangents();
+                    changed = true;
                 }
 
-                ImGui.EndMenu();
+                if (ImGui.MenuItem("Horizontal", null, editModes.Contains(VDefinition.EditMode.Horizontal)))
+                {
+                    OnHorizontal();
+                    UpdateAllTangents();
+                    changed = true;
+                }
+
+                if (ImGui.MenuItem("Constant", null, editModes.Contains(VDefinition.EditMode.Constant)))
+                {
+                    OnConstant();
+                    UpdateAllTangents();
+                    changed = true;
+                }
+
+                if (ImGui.MenuItem("Linear", null, editModes.Contains(VDefinition.EditMode.Linear)))
+                {
+                    OnLinear();
+                    UpdateAllTangents();
+                    changed = true;
+                }
+
+                ImGui.Separator();
+
+                if (ImGui.BeginMenu("Before curve...", SelectedKeyframes.Count > 0))
+                {
+                    foreach (CurveUtils.OutsideCurveBehavior mapping in Enum.GetValues(typeof(CurveUtils.OutsideCurveBehavior)))
+                    {
+                        if (ImGui.MenuItem(mapping.ToString(), null))
+                        {
+                            ApplyPreCurveMapping(mapping);
+                            changed = true;
+                        }
+                    }
+
+                    ImGui.EndMenu();
+                }
+
+                if (ImGui.BeginMenu("After curve...", SelectedKeyframes.Count > 0))
+                {
+                    foreach (CurveUtils.OutsideCurveBehavior mapping in Enum.GetValues(typeof(CurveUtils.OutsideCurveBehavior)))
+                    {
+                        if (ImGui.MenuItem(mapping.ToString(), null))
+                        {
+                            ApplyPostCurveMapping(mapping);
+                            changed = true;
+                        }
+                    }
+
+                    ImGui.EndMenu();
+                }
+
+                if (ImGui.MenuItem("Delete keyframes", SelectedKeyframes.Count > 0))
+                {
+                    DeleteSelectedKeyframes(composition);
+                    changed = true;
+                }
+
+                if (ImGui.MenuItem("Recount values", SelectedKeyframes.Count > 0))
+                {
+                    var value = 0;
+                    ForSelectedOrAllPointsDo((vDef) =>
+                                             {
+                                                 vDef.Value = value;
+                                                 value++;
+                                             });
+
+                    changed = true;
+                }
+
+                if (TimeLineCanvas.Current != null && ImGui.MenuItem("Duplicate keyframes", SelectedKeyframes.Count > 0))
+                {
+                    DuplicateSelectedKeyframes(TimeLineCanvas.Current.Playback.TimeInBars);
+                    changed = true;
+                }
             }
 
-            if (ImGui.MenuItem(SelectedKeyframes.Count > 0 ? "View Selected" : "View All", "F"))
+            if (ImGui.MenuItem(SelectedKeyframes.Count > 0 ? "View Selected" : "View All", UserActions.FocusSelection.ListShortcuts()))
                 ViewAllOrSelectedKeys();
-
-            if (ImGui.MenuItem("Delete keyframes"))
-            {
-                DeleteSelectedKeyframes(composition);
-                changed = true;
-            }
-
-            if (ImGui.MenuItem("Recount values"))
-            {
-                var value = 0;
-                ForSelectedOrAllPointsDo((vDef) =>
-                                         {
-                                             vDef.Value = value;
-                                             value++;
-                                         });
-                    
-                changed = true;
-            }
-
-            if (TimeLineCanvas.Current != null && ImGui.MenuItem("Duplicate keyframes"))
-            {
-                DuplicateSelectedKeyframes(TimeLineCanvas.Current.Playback.TimeInBars);
-                changed = true;
-            }
 
             if (changed)
             {
                 composition.GetSymbolUi().FlagAsModified();
             }
         }
-
     }
 
     private void UpdateAllTangents()
@@ -174,11 +180,12 @@ public abstract class CurveEditing
     {
         var selectedOrAllPoints = GetSelectedOrAllPoints().ToList();
         var cmd = new ChangeKeyframesCommand(selectedOrAllPoints, GetAllCurves());
-            
+
         foreach (var keyframe in selectedOrAllPoints)
         {
             doFunc(keyframe);
         }
+
         cmd.StoreCurrentValues();
         UndoRedoStack.Add(cmd);
     }
@@ -221,7 +228,6 @@ public abstract class CurveEditing
                                      vDef.OutType = VDefinition.Interpolation.Spline;
                                      vDef.OutTangentAngle = Math.PI;
                                  });
-            
     }
 
     private void OnConstant()
@@ -333,12 +339,15 @@ public abstract class CurveEditing
         }
     }
 
-    protected static ImRect GetBoundsOnCanvas(IEnumerable<VDefinition> keyframes)
+    protected static bool TryGetBoundsOnCanvas(IEnumerable<VDefinition> keyframes, out ImRect bounds)
     {
-        var bounds = new ImRect(-Vector2.One, Vector2.One);
+        var foundOneOrMoreKeys = false;
+        
+        bounds = new ImRect(-Vector2.One, Vector2.One);
         var isFirst = true;
-        foreach(var k in keyframes)
+        foreach (var k in keyframes)
         {
+            foundOneOrMoreKeys = true;
             var p = new Vector2((float)k.U, (float)k.Value);
 
             if (isFirst)
@@ -352,7 +361,6 @@ public abstract class CurveEditing
             }
         }
 
-        //bounds.Expand(0.2f);
-        return bounds;
+        return foundOneOrMoreKeys;
     }
 }

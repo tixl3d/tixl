@@ -62,7 +62,7 @@ internal sealed class SnapshotCanvas : VariationBaseCanvas
                     if (!selectedVariation.ParameterSetsForChildIds.ContainsKey(symbolChildUi.Id))
                         continue;
 
-                    if (instanceForBlendOperations.Children.TryGetValue(symbolChildUi.Id, out var instance))
+                    if (instanceForBlendOperations.Children.TryGetChildInstance(symbolChildUi.Id, out var instance))
                         nodeSelection.AddSelection(symbolChildUi, instance);
                 }
             }

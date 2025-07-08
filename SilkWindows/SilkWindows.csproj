@@ -5,6 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>annotations</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <Deterministic>true</Deterministic>
     </PropertyGroup>
 
     <ItemGroup>

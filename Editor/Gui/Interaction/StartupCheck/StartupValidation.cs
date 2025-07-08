@@ -10,7 +10,7 @@ namespace T3.Editor.Gui.Interaction.StartupCheck;
 /// Looks for required files and folders
 /// and shows a warning popup instead of an exception...
 /// </summary>
-public static class StartupValidation
+internal static class StartupValidation
 {
     public static void CheckInstallation()
     {
@@ -88,7 +88,7 @@ public static class StartupValidation
             var startupPath = Path.GetFullPath(".");
             sb.Append($"Startup folder is:\n{startupPath}\n\n");
                 
-            sb.Append($"We can't find the following files...\n\n  {string.Join("\n  ", missingPaths)}");
+            sb.Append($"We are unable to find the following files...\n\n  {string.Join("\n  ", missingPaths)}");
             sb.Append("\n\n");
             sb.Append(Message);
             string[] buttons;
@@ -96,7 +96,7 @@ public static class StartupValidation
             if (!string.IsNullOrEmpty(URL))
             {
                 sb.Append("\n\n");
-                sb.Append("Click Yes to get help");
+                sb.Append("Click Yes to get help.");
                 buttons = [helpButton, "Just close"];
             }
             else
@@ -117,7 +117,7 @@ public static class StartupValidation
         }
     }
 
-    public static void ValidateNotRunningFromSystemFolder()
+    internal static void ValidateNotRunningFromSystemFolder()
     {
         var currentDir = Directory.GetCurrentDirectory();
         var specialFolders = new[]
@@ -134,7 +134,7 @@ public static class StartupValidation
             if (currentDir.IndexOf(folderPath, StringComparison.OrdinalIgnoreCase) < 0)
                 continue;
 
-            BlockingWindow.Instance.ShowMessageBox($"Tooll can't be started from {folderPath}", @"Error", "Ok");
+            BlockingWindow.Instance.ShowMessageBox("Tooll cannot be started from {folderPath}", @"Error", "Ok");
             EditorUi.Instance.ExitApplication();
         }
             
@@ -143,7 +143,7 @@ public static class StartupValidation
         if (!directoryInfo.Attributes.HasFlag(FileAttributes.ReadOnly))
             return;
             
-        BlockingWindow.Instance.ShowMessageBox($"Can't write to current working directory: {currentDir}.", @"Error", "Ok");
+        BlockingWindow.Instance.ShowMessageBox($"Cannot write to the current working directory: {currentDir}.", @"Error", "Ok");
         EditorUi.Instance.ExitApplication();
     }
 
@@ -161,4 +161,65 @@ public static class StartupValidation
                                                @"Error", "Ok");
         EditorUi.Instance.ExitApplication();
     }
+
+    internal static void ValidateExecutionPolicy()
+    {
+        if (IsExecutionPolicySufficient()) 
+            return;
+        
+        if (TrySetExecutionPolicyToRemoteSigned()) 
+            return;
+        
+        BlockingWindow.Instance.ShowMessageBox($"Cannot proceed: PowerShell script execution is too restricted..",
+                                               @"Error", "Ok");
+        EditorUi.Instance.ExitApplication();        
+    }
+    
+    private static bool IsExecutionPolicySufficient()
+    {
+        var process = new System.Diagnostics.Process
+                          {
+                              StartInfo = new System.Diagnostics.ProcessStartInfo
+                                              {
+                                                  FileName = "powershell",
+                                                  Arguments = "-Command \"Get-ExecutionPolicy -Scope CurrentUser\"",
+                                                  RedirectStandardOutput = true,
+                                                  UseShellExecute = false,
+                                                  CreateNoWindow = true
+                                              }
+                          };
+
+        process.Start();
+        var output = process.StandardOutput.ReadToEnd().Trim();
+        process.WaitForExit();
+        return output != "Restricted" && output != "AllSigned";
+    }
+    
+    private static bool TrySetExecutionPolicyToRemoteSigned()
+    {
+        var process = new System.Diagnostics.Process
+                          {
+                              StartInfo = new System.Diagnostics.ProcessStartInfo
+                                              {
+                                                  FileName = "powershell",
+                                                  Arguments = "-Command \"Set-ExecutionPolicy -Scope CurrentUser RemoteSigned -Force\"",
+                                                  UseShellExecute = true, // This allows UAC prompt if needed
+                                                  Verb = "runas" // Elevate
+                                              }
+                          };
+
+        try
+        {
+            process.Start();
+            process.WaitForExit();
+            return process.ExitCode == 0;
+        }
+        catch (System.ComponentModel.Win32Exception ex)
+        {
+            // User refused elevation or it's blocked
+            Log.Warning("Failed to elevate: " + ex.Message);
+            return false;
+        }
+    }    
+    
 }

@@ -31,11 +31,11 @@ internal sealed partial class MagGraphCanvas
         }
         
         // General pre-update
-        if ((result & ChangeSymbol.SymbolModificationResults.ProjectViewDiscarded) != 0)
+        //if ((result & ChangeSymbol.SymbolModificationResults.ProjectViewDiscarded) != 0)
         {
-            Log.Debug("Skip graph draw after composition update...");
+          //  Log.Debug("Skip graph draw after composition update...");
         }
-        else
+        //else
         {
             if (_context.ProjectView.InstView is not { IsValid: true })
             {

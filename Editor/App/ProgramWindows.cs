@@ -79,9 +79,9 @@ internal static class ProgramWindows
 
             if (factory.GetAdapterCount() == 0)
             {
-                BlockingWindow.Instance.ShowMessageBox("We unable to find any graphics adapters",
+                BlockingWindow.Instance.ShowMessageBox("We are unable to find any graphics adapters",
                                                        "Oh noooo",
-                                                       "Ok... /:");
+                                                       "OK");
                 Environment.Exit(0);
             }
 
@@ -194,8 +194,8 @@ internal static class ProgramWindows
             {
                 var result =
                     BlockingWindow.Instance
-                                  .ShowMessageBox("You need to install Windows Graphics diagnostics tools.\n\nClick Ok to download this Windows component directly from Microsoft.",
-                                                  "Windows component missing", "Ok", "Cancel");
+                                  .ShowMessageBox("You need to install the Windows Graphics Diagnostics Tools.\n\nClick OK to download this Windows component directly from Microsoft.",
+                                                  "Windows Component Missing", "OK", "Cancel");
                 if (result == "Ok")
                 {
                     CoreUi.Instance
@@ -226,7 +226,7 @@ internal static class ProgramWindows
 
     private static void OnCloseMainWindow(object sender, CancelEventArgs args)
     {
-        if (EditableSymbolProject.IsSaving)
+        if (EditableSymbolProject.AllProjects.Any(x => x.IsSaving))
         {
             args.Cancel = true;
             Log.Debug($"Cancel closing because save-operation is in progress.");

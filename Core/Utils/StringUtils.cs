@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 
 // ReSharper disable MemberCanBePrivate.Global
 
@@ -440,6 +441,27 @@ public static class StringUtils
 
         var days = timeSpan.Value.TotalDays;
         return $"{days:0.0} days ago";
+    }
+
+    private static readonly Regex _matchFileVersionPattern = new(@"\b(\d{1,4})\b");
+    
+    public static string AppendOrIncrementVersionNumber(this string original)
+    {
+        if (string.IsNullOrEmpty(original))
+            return original;
+        
+        var result = _matchFileVersionPattern.Match(original);
+        if (result.Success)
+        {
+            var versionString = result.Groups[1].Value;
+            if (!int.TryParse(versionString, out var versionNumber)) 
+                return original;
+
+            var newVersionString = (versionNumber + 1).ToString();
+            return original.Replace(versionString, newVersionString);            
+        }
+
+        return original + " 2";
     }
 
     /// <summary>

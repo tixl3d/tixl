@@ -5,7 +5,6 @@ using System.Threading;
 using Newtonsoft.Json;
 using T3.Core.Model;
 using T3.Core.Operator;
-using T3.Core.SystemUi;
 
 namespace T3.Editor.UiModel;
 
@@ -24,6 +23,31 @@ internal sealed partial class EditableSymbolProject
         MarkAsSaving();
         WriteAllSymbolFilesOf(SymbolUiDict.Values);
         UnmarkAsSaving();
+    }
+
+    internal void Update(out bool needsUpdating)
+    {
+        if(CodeExternallyModified)
+        {
+            CodeExternallyModified = false;
+            if (_lastRecompilationTimeUtc.HasValue && (DateTime.UtcNow - _lastRecompilationTimeUtc.Value).TotalSeconds < 0.5f)
+            {
+                Log.Info($"{DisplayName}: Skipping recompilation due to a presumed-misfired file change event");
+                needsUpdating = false;
+                return;
+            }
+            
+            Log.Info($"{DisplayName}: Recompiling project due to external code change...");
+            needsUpdating = true;
+            if(!TryRecompile(false))
+            {
+                Log.Error($"{DisplayName}: Recompilation failed.");
+            }
+        }
+        else
+        {
+            needsUpdating = false;
+        }
     }
 
     internal void SaveModifiedSymbols()
@@ -184,19 +208,23 @@ internal sealed partial class EditableSymbolProject
 
         using var sw = new StreamWriter(sourcePath, _saveOptions);
         sw.Write(sourceCode);
-        MarkAsNeedingRecompilation();
     }
 
-    private void MarkAsSaving()
-    {
-        Interlocked.Increment(ref _savingCount);
-        _csFileWatcher.EnableRaisingEvents = false;
-    }
+    public bool CodeExternallyModified { get; private set; }
+    private DateTime? _lastRecompilationTimeUtc;
+
+    private void MarkAsSaving() => _csFileWatcher.EnableRaisingEvents = Interlocked.Increment(ref _savingCount) <= 0;
 
     private void UnmarkAsSaving()
     {
-        Interlocked.Decrement(ref _savingCount);
-        _csFileWatcher.EnableRaisingEvents = true;
+        var count = Interlocked.Decrement(ref _savingCount);
+        if (count < 0)
+        {
+            Log.Error($"Saving count is negative: {count}. This should not happen.");
+            _savingCount = count = 0;
+        }
+        
+        _csFileWatcher.EnableRaisingEvents = count <= 0;
     }
 
     private void OnFileChanged(object sender, FileSystemEventArgs args)
@@ -208,14 +236,17 @@ internal sealed partial class EditableSymbolProject
         // generated file by dotnet - ignore
         if(name.EndsWith("AssemblyInfo.cs"))
             return;
-        
-        MarkAsNeedingRecompilation();
+
+        Log.Info($"{DisplayName}: Code file changed: {name}");
+        CodeExternallyModified = true;
+        //TryRecompile(true); // don't recompile here - we need to make sure this happens on the main thread
     }
 
-    private void OnFileRenamed(object sender, RenamedEventArgs args)
+    private void OnCodeFileRenamed(object sender, RenamedEventArgs args)
     {
-        Log.Debug($"File {args.OldFullPath} renamed to {args.FullPath}.");
-        MarkAsNeedingRecompilation();
+        Log.Error($"{DisplayName}: File {args.OldFullPath} renamed to {args.FullPath}. Please do not do this while the editor is running.");
+        CodeExternallyModified = true;
+        //TryRecompile(true); // don't recompile here - we need to make sure this happens on the main thread
     }
 
     public override void LocateSourceCodeFiles()
@@ -225,11 +256,12 @@ internal sealed partial class EditableSymbolProject
         UnmarkAsSaving();
     }
 
-    public static bool IsSaving => Interlocked.Read(ref _savingCount) > 0 || IsCompiling(out _);
-    private static long _savingCount;
+    public bool IsSaving => Interlocked.Read(ref _savingCount) > 0;
+    private long _savingCount;
     private static readonly FileStreamOptions _saveOptions = new() { Mode = FileMode.Create, Access = FileAccess.ReadWrite };
 
     private const bool AutoOrganizeOnStartup = false;
+    private readonly Dictionary<Guid, string> _pendingSource = new();
 
     private sealed class CodeFileWatcher : FileSystemWatcher
     {

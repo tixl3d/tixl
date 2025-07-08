@@ -3,59 +3,26 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Runtime.CompilerServices;
 using T3.Core.Logging;
 using T3.Core.Model;
 using T3.Core.Operator.Slots;
 using T3.Core.Resource;
-using T3.Core.Utils;
 
 namespace T3.Core.Operator;
 
-public abstract class Instance :  IGuidPathContainer, IResourceConsumer
+public abstract partial class Instance :  IGuidPathContainer, IResourceConsumer
 {
     public abstract Type Type { get; }
 
-    public Guid SymbolChildId { get; private set; } = Guid.Empty;
-
-    internal void SetChildId(Guid symbolChildId)
-    {
-        if(SymbolChildId != Guid.Empty)
-            throw new InvalidOperationException("Instance already has a symbol child");
-            
-        SymbolChildId = symbolChildId;
-    }
-
-    public Symbol.Child? SymbolChild => _parent?.Symbol.Children[SymbolChildId];
-
-    private Instance? _parent;
-
-    public Instance? Parent
-    {
-        get => _parent;
-        internal set
-        {
-            _parent = value;
-            _resourceFoldersDirty = true;
-        }
-    }
-        
-    SymbolPackage IResourceConsumer.Package => Symbol.SymbolPackage;
-    public event Action? Disposing;
+    public Guid SymbolChildId => SymbolChild.Id;
+    public InstanceChildren Children { get; private set; }
+    public event Action<IResourceConsumer>? Disposing;
 
     public abstract Symbol Symbol { get; }
-
-    private readonly List<ISlot> _outputs = [];
+    public Symbol.Child SymbolChild { get; private set; }
     public readonly IReadOnlyList<ISlot> Outputs;
-
-    internal readonly Dictionary<Guid, Instance> ChildInstances = new();
-    public readonly IReadOnlyDictionary<Guid, Instance> Children;
-    private readonly List<IInputSlot> _inputs = [];
     public readonly IReadOnlyList<IInputSlot> Inputs;
-
-    private bool _hasDisposed;
-    public bool IsDisposed => _hasDisposed;
+    public IReadOnlyList<Guid> InstancePath { get; private set; }
 
     public IReadOnlyList<IResourcePackage> AvailableResourcePackages
     {
@@ -65,6 +32,120 @@ public abstract class Instance :  IGuidPathContainer, IResourceConsumer
             return _availableResourcePackages;
         }
     }
+
+    private Guid[]? _parentPath;
+    private Symbol.Child? _parentSymbolChild;
+
+    private int? _pathHash;
+    private List<SymbolPackage> _availableResourcePackages = [];
+
+    private readonly List<ISlot> _outputs = [];
+    private readonly List<IInputSlot> _inputs = [];
+
+    protected Instance()
+    {
+        Outputs = _outputs;
+        Inputs = _inputs;
+    }
+
+    internal void SetSymbolInfo(Symbol.Child child, Symbol.Child? parent, IReadOnlyList<Guid> instancePath, int pathHash)
+    {
+        if(SymbolChild != null)
+            throw new InvalidOperationException("Instance already has a symbol child");
+        
+        if (instancePath.Count > 1)
+        {
+            _parentPath = new Guid[instancePath.Count - 1];
+            for (var i = 0; i < _parentPath.Length; i++)
+            {
+                _parentPath[i] = instancePath[i];
+            }
+        }
+        
+        InstancePath = instancePath;
+        _pathHash = pathHash;
+        SymbolChild = child;
+        _parentSymbolChild = parent;
+        Children = new InstanceChildren(instancePath, child);
+    }
+    
+    internal void Initialize(Instance? parentInstance)
+    {
+        SortInputSlotsByDefinitionOrder(this);
+        
+        Debug.Assert(_status == default);
+
+        parentInstance ??= Parent;
+        if (parentInstance is { Initialized: true, IsReconnecting: false })
+        {
+            // mark parent as needing reconnections if it's already initialized
+            parentInstance.MarkNeedsConnections();
+        }
+
+        _status |= InstanceStatus.ResourceFoldersDirty; // we need to mark resource folders as dirty, so they are loaded by ops that need them
+        foreach (var childInstance in Children.PreExistingValues)
+        {
+            childInstance.MarkResourceFoldersDirty();
+        }
+        
+        ReconnectChildren();
+        
+        _status |= InstanceStatus.Initialized;
+        _status |= InstanceStatus.Active;
+    }
+
+    private void MarkResourceFoldersDirty()
+    {
+        _status |= InstanceStatus.ResourceFoldersDirty;
+        foreach(var child in Children.PreExistingValues)
+        {
+            child.MarkResourceFoldersDirty();
+        }
+    }
+
+    public Instance? Parent
+    {
+        get
+        {
+            // a procedural lookup from the parent,
+            // since we cannot count on it existing at all times (particularly during loading or unloading)
+            if (_parentSymbolChild == null)
+            {
+                return null;
+            }
+            
+            if (_parentPath == null)
+                throw new InvalidOperationException($"Parent path is not initialized.");
+            
+            if(_parentSymbolChild.TryGetOrCreateInstance(_parentPath, out var parentInstance, out _))
+            {
+                return parentInstance;
+            }
+            Log.Error($"Could not find parent instance for {_parentSymbolChild} with path {_parentPath}");
+            return null;
+        }
+    }
+
+    internal bool TryGetParentInstance([NotNullWhen(true)] out Instance? instance, bool allowCreate)
+    {
+        if (_parentSymbolChild == null || _parentPath == null)
+        {
+            instance = null;
+            return false;
+        }
+        
+        if(_parentSymbolChild!.TryGetOrCreateInstance(_parentPath, out var parentInstance, out _, allowCreate))
+        {
+            instance = parentInstance;
+            return true;
+        }
+
+        instance = null;
+        return false;
+    }
+
+    SymbolPackage IResourceConsumer.Package => Symbol.SymbolPackage;
+
 
     /// <summary>
     /// get input without GC allocations 
@@ -83,47 +164,45 @@ public abstract class Instance :  IGuidPathContainer, IResourceConsumer
         return null;
     }
 
-    protected Instance()
-    {
-        Outputs = _outputs;
-        Inputs = _inputs;
-        Children = ChildInstances;
-    }
-
     ~Instance()
     {
-        if (!_hasDisposed)
+        if ((_status & InstanceStatus.Disposed) == 0)
         {
-            Log.Error($"Instance {this} was not disposed properly");
+            Log.Error($"Instance {GetType()} was not disposed properly");
             // todo : do we want to invoke disposal here? could this prevent memory leaks or other shutdown/reload issues?
+            // would it cause thread safety issues? probably..
+            // but currently this is using a disposal pattern designed around finalizers (disposing = true), etc
         }
     }
 
-    internal void Dispose(Symbol.Child symbolChild, int index = -1)
+    internal void Dispose(SymbolPackage? packageToDispose)
     {
-        if (_hasDisposed)
+        if ((_status & InstanceStatus.Disposed) != 0)
         {
             throw new Exception($"{this} has already been disposed\n" + Environment.StackTrace);
         }
         
-        _hasDisposed = true;
+        _status &= ~InstanceStatus.Active; // remove active status
+        Children.Dispose(packageToDispose);
+        
+        // clear connections - they need to be repopulated with valid connections next time
+        // we don't clear outputs as they are solely connected to by internal instances
+        var disconnectCount = DisconnectInputs();
 
-        try
+        // we should let the parent know it's missing someone
+        if (disconnectCount != 0 && TryGetParentInstance(out var parentInstance, false))
         {
-            Disposing?.Invoke();
+            parentInstance.MarkNeedsConnections();
         }
-        catch (Exception e)
-        {
-            Log.Error($"Error on dispose event for {this}: {e}");
+        
+        // if a package was specified that is not our own, we can live to see another day
+        if (packageToDispose != null && Symbol.SymbolPackage != packageToDispose)
+        { 
+            return;
         }
-
-        // kill children
-        while (ChildInstances.Values.Count > 0)
-        {
-            var child = ChildInstances.Values.Last();
-            child.Dispose(child.SymbolChild!);
-        }
-
+        
+        _status |= InstanceStatus.Disposed;
+        
         try
         {
             Dispose(true);
@@ -133,155 +212,32 @@ public abstract class Instance :  IGuidPathContainer, IResourceConsumer
             Log.Error($"Error disposing instance {this}: {e}");
         }
 
-        Parent?.ChildInstances.Remove(SymbolChildId);
-        symbolChild.RemoveInstance(this, index);
-    }
-
-    protected virtual void Dispose(bool disposing)
-    {
-    }
-
-    protected void SetupInputAndOutputsFromType()
-    {
-        var symbol = SymbolRegistry.SymbolsByType[Type];
-        var assemblyInfo = symbol.SymbolPackage.AssemblyInformation;
-        if (!assemblyInfo.OperatorTypeInfo.TryGetValue(symbol.Id, out var operatorTypeInfo))
+        // and remove ourselves from the symbol child
+        SymbolChild.RemoveDisposedInstance(this, _pathHash!.Value);
+        
+        // any resources we have should be disposed of by the child class
+        try
         {
-            Log.Error($"Can't find operatorTypeInfo for id {symbol} {symbol.Id} in {assemblyInfo}");
-            Debug.Assert(false);
-            return;
+            Disposing?.Invoke(this);
+        }
+        catch (Exception e)
+        {
+            Log.Error($"Error on dispose event for {this}: {e}");
         }
         
-        //var operatorTypeInfo = assemblyInfo.OperatorTypeInfo[symbol.Id];
-        foreach (var input in operatorTypeInfo.Inputs)
-        {
-            var attribute = input.Attribute;
-            var inputSlot = input.GetSlotObject(this);
-            inputSlot.Parent = this;
-            inputSlot.Id = attribute.Id;
-            inputSlot.MappedType = attribute.MappedType;
-            _inputs.Add(inputSlot);
-        }
-
-        // outputs identified by attribute
-        foreach (var output in operatorTypeInfo.Outputs)
-        {
-            var slot = output.GetSlotObject(this);
-            slot.Parent = this;
-            slot.Id = output.Attribute.Id;
-            _outputs.Add(slot);
-        }
-    }
-
-    internal bool TryAddConnection(Symbol.Connection connection, int multiInputIndex)
-    {
-        var gotSource = TryGetSourceSlot(connection, out var sourceSlot);
-        var gotTarget = TryGetTargetSlot(connection, out var targetSlot);
-
-        if (!gotSource || !gotTarget)
-            return false;
-
-        targetSlot!.AddConnection(sourceSlot, multiInputIndex);
-        sourceSlot!.DirtyFlag.Invalidate();
-        return true;
-    }
-
-    private bool TryGetSourceSlot(Symbol.Connection connection, [NotNullWhen(true)] out ISlot? sourceSlot)
-    {
-        var compositionInstance = this;
-
-        // Get source Instance
-        IEnumerable<ISlot> sourceSlotList;
-            
-        var sourceParentOrChildId = connection.SourceParentOrChildId;
-        if (sourceParentOrChildId == Guid.Empty)
-        {
-            sourceSlotList = compositionInstance.Inputs;
-        }
-        else
-        {
-            Instance? sourceInstance = null;
-            foreach (var child in compositionInstance.Children.Values)
-            {
-                if (child.SymbolChildId != sourceParentOrChildId)
-                    continue;
-
-                sourceInstance = child;
-                break;
-            }
-
-            if (sourceInstance == null)
-            {
-                Log.Error($"Connection in {this} has incorrect source child : {sourceParentOrChildId}");
-                sourceSlot = null;
-                return false;
-            }
-
-            sourceSlotList = sourceInstance.Outputs;
-        }
-
-        // Get source Slot
-        sourceSlot = null;
-        var gotSourceSlot = false;
-            
-        foreach(var slot in sourceSlotList)
-        {
-            if (slot.Id != connection.SourceSlotId)
-                continue;
-                
-            sourceSlot = slot;
-            gotSourceSlot = true;
-            break;
-        }
-            
-        return gotSourceSlot;
-    }
-
-    internal bool TryGetTargetSlot(Symbol.Connection connection, [NotNullWhen(true)] out ISlot? targetSlot)
-    {
-        var compositionInstance = this;
-
-        // Get target Instance
-        var targetParentOrChildId = connection.TargetParentOrChildId;
-        IEnumerable<ISlot> targetSlotList;
-
-        if (targetParentOrChildId == Guid.Empty)
-        {
-            targetSlotList = compositionInstance.Outputs;
-        }
-        else
-        {
-            compositionInstance.Children.TryGetValue(targetParentOrChildId, out var targetInstance);
-            if (targetInstance == null)
-            {
-                Log.Error($"Connection in {this} has incorrect target child: {targetParentOrChildId}");
-                targetSlot = null;
-                return false;
-            }
-            
-            targetSlotList = targetInstance.Inputs;
-        }
-
-        var gotTargetSlot = false;
-        foreach(var slot in targetSlotList)
-        {
-            if (slot.Id != connection.TargetSlotId)
-                continue;
-                
-            targetSlot = slot;
-            return true;
-        }
-
-        targetSlot = null;
-        return gotTargetSlot;
+        // warning CA1816: Dispose methods should call SuppressFinalize on themselves
+        // it doesn't recognize this as a dispose method due to its argument type
+        #pragma warning disable CA1816
+        GC.SuppressFinalize(this);
+        #pragma warning restore CA1816
     }
 
     private static void GatherResourcePackages(Instance? instance, ref List<SymbolPackage> resourceFolders)
     {
-        if (instance == null || !instance._resourceFoldersDirty)
+        if((instance!._status & InstanceStatus.ResourceFoldersDirty) == 0) 
             return;
             
-        instance._resourceFoldersDirty = false;
+        instance._status &= ~InstanceStatus.ResourceFoldersDirty;
 
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if (resourceFolders != null)
@@ -292,7 +248,7 @@ public abstract class Instance :  IGuidPathContainer, IResourceConsumer
         {
             resourceFolders = [];
         }
-            
+
         while (instance != null)
         {
             var package = instance.Symbol.SymbolPackage;
@@ -301,82 +257,9 @@ public abstract class Instance :  IGuidPathContainer, IResourceConsumer
                 resourceFolders.Add(package);
             }
 
-            instance = instance._parent;
+            instance = instance.Parent;
         }
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    protected internal bool TryGetFilePath(string relativePath, out string absolutePath, bool isFolder = false)
-    {
-        return ResourceManager.TryResolvePath(relativePath, this, out absolutePath, out _, isFolder);
-    }
-        
-        
-    internal static void SortInputSlotsByDefinitionOrder(Instance instance)
-    {
-        // order the inputs by the given input definitions. original order is coming from code, but input def order is the relevant one
-        var inputs = instance._inputs;
-        var inputDefinitions = instance.Symbol.InputDefinitions;
-        int numInputs = inputs.Count;
-        var lastIndex = numInputs - 1;
-
-        for (int i = 0; i < lastIndex; i++)
-        {
-            Guid inputId = inputDefinitions[i].Id;
-            if (inputs[i].Id != inputId)
-            {
-                int index = inputs.FindIndex(i + 1, input => input.Id == inputId);
-                if (index == -1)
-                    continue;
-                //Debug.Assert(index >= 0);
-                inputs.Swap(i, index);
-                Debug.Assert(inputId == inputs[i].Id);
-            }
-        }
-
-        #if DEBUG
-            if (numInputs > 0)
-            {
-#if SKIP_ASSERTS
-                Debug.Assert(inputs.Count == inputDefinitions.Count);
-#endif
-            }
-        #endif
-    }
-
-    public IReadOnlyList<Guid> InstancePath => OperatorUtils.BuildIdPathForInstance(this);
-
-    private List<SymbolPackage> _availableResourcePackages = [];
-    private bool _resourceFoldersDirty = true;
-
-
-    internal static void AddChildTo(Instance parentInstance, Instance childInstance)
-    {
-        parentInstance.ChildInstances.Add(childInstance.SymbolChildId, childInstance);
-    }
-
-    public sealed override string ToString()
-    {
-        const string fmt = "{0} ({1})";
-        return _asString ??= string.Format(fmt, GetType().Name, SymbolChildId.ToString());
     }
 
     private string? _asString;
-}
-
-public class Instance<T> : Instance where T : Instance
-{
-    private static readonly Type _staticType = typeof(T);
-        
-    // this intended to be a different symbol per-type
-    // ReSharper disable once StaticMemberInGenericType
-    private static readonly Symbol StaticSymbol = SymbolRegistry.SymbolsByType[_staticType];
-        
-    public sealed override Type Type => _staticType;
-    public sealed override Symbol Symbol => StaticSymbol;
-
-    protected Instance()
-    {
-        SetupInputAndOutputsFromType();
-    }
 }

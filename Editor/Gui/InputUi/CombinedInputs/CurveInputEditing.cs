@@ -5,6 +5,7 @@ using T3.Core.DataTypes;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Editor.Gui.Interaction;
+using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.Interaction.WithCurves;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.Windows.TimeLine;
@@ -312,12 +313,12 @@ public static class CurveInputEditing
                     interaction.HandleFenceSelection(selectionFence);
 
                     // Handle keyboard interaction 
-                    if (ImGui.IsWindowHovered() && KeyboardBinding.Triggered(UserActions.FocusSelection))
+                    if (ImGui.IsWindowHovered() && KeyActionHandling.Triggered(UserActions.FocusSelection))
                     {
                         interaction.ViewAllOrSelectedKeys();
                     }
 
-                    if (ImGui.IsWindowHovered() && KeyboardBinding.Triggered(UserActions.DeleteSelection))
+                    if (ImGui.IsWindowHovered() && KeyActionHandling.Triggered(UserActions.DeleteSelection))
                     {
                         interaction.DeleteSelectedKeyframes(compositionOp);
                     }
@@ -326,7 +327,7 @@ public static class CurveInputEditing
                     HandleCreateNewKeyframes(curve);
                     if (NeedToAdjustScopeAfterFirstRendering)
                     {
-                        var bounds = GetBoundsOnCanvas(interaction.GetAllKeyframes());
+                        TryGetBoundsOnCanvas(interaction.GetAllKeyframes(), out var bounds);
                         SetScopeToCanvasArea(bounds, flipY: true, ProjectView.Focused?.GraphCanvas, 30, 15);
                         NeedToAdjustScopeAfterFirstRendering = false;
                     }

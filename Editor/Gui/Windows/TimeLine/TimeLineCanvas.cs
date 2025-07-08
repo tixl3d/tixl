@@ -4,11 +4,13 @@ using T3.Core.DataTypes;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Editor.Gui.Interaction;
+using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.Interaction.Timing;
 using T3.Editor.Gui.Interaction.WithCurves;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.TimeLine.Raster;
+using T3.Editor.Gui.Windows.TimeLine.TimeClips;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
@@ -23,14 +25,14 @@ namespace T3.Editor.Gui.Windows.TimeLine;
 /// </summary>
 internal sealed class TimeLineCanvas : CurveEditCanvas
 {
-    public TimeLineCanvas(NodeSelection nodeSelection, Func<Instance> getCompositionOp, Func<Guid, bool> requestChildComposition)
+    public TimeLineCanvas(NodeSelection nodeSelection, Func<Instance> getCompositionOp, Func<Guid, bool> requestChildCompositionFunc)
     {
         _nodeSelection = nodeSelection;
         
         DopeSheetArea = new DopeSheetArea(SnapHandlerForU, this);
         _timelineCurveEditArea = new TimelineCurveEditArea(this, SnapHandlerForU, SnapHandlerForV);
         _timeSelectionRange = new TimeSelectionRange(this, SnapHandlerForU);
-        LayersArea = new LayersArea(SnapHandlerForU, this, getCompositionOp, requestChildComposition);
+        LayersArea = new LayersArea(this, getCompositionOp, requestChildCompositionFunc, SnapHandlerForU);
 
         SnapHandlerForV.AddSnapAttractor(_horizontalRaster);
         SnapHandlerForU.AddSnapAttractor(_clipRange);
@@ -84,13 +86,13 @@ internal sealed class TimeLineCanvas : CurveEditCanvas
                              |ImGuiWindowFlags.NoScrollWithMouse);
 
             {
-                if (KeyboardBinding.Triggered(UserActions.DeleteSelection))
+                if (KeyActionHandling.Triggered(UserActions.DeleteSelection))
                     DeleteSelectedElements(compositionOp);
                     
                 switch (Mode)
                 {
                     case Modes.DopeView:
-                        LayersArea.Draw(compositionOp, Playback);
+                        LayersArea.Draw(compositionOp, Playback, SnapHandlerForU);
                         DopeSheetArea.Draw(compositionOp, SelectedAnimationParameters);
                         break;
                     case Modes.CurveEditor:
@@ -109,6 +111,8 @@ internal sealed class TimeLineCanvas : CurveEditCanvas
                 {
                     _clipRange.Draw(this, compositionTimeClip, Drawlist, SnapHandlerForU);
                 }
+
+                CustomComponents.HandleDragScrolling(this);
             }
                 
             ImGui.EndChild();

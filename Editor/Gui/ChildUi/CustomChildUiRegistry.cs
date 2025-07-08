@@ -14,13 +14,28 @@ public static class CustomChildUiRegistry
 
     public static void Register(Type type, DrawChildUiDelegate drawChildUiDelegate, ICollection<Type> types)
     {
-        if(EntriesRw.TryAdd(type, drawChildUiDelegate))
+        if (EntriesRw.TryAdd(type, drawChildUiDelegate))
+        {
             types.Add(type);
+            Log.Debug("Registered custom child UI for type: " + type);
+        }
     }
 
-    internal static bool TryGetValue(Type type, [NotNullWhen(true)] out DrawChildUiDelegate? o) => EntriesRw.TryGetValue(type, out o);
+    internal static bool TryGetValue(Type type, [NotNullWhen(true)] out DrawChildUiDelegate? o)
+    {
+        return EntriesRw.TryGetValue(type, out o);
+    }
 
-    public static bool Remove(Type symbolInstanceType) => EntriesRw.TryRemove(symbolInstanceType, out var _);
+    public static bool Remove(Type symbolInstanceType, ICollection<Type> types)
+    {
+        if (EntriesRw.TryRemove(symbolInstanceType, out _))
+        {
+            types.Remove(symbolInstanceType);
+            return true;
+        }
+
+        return false;
+    }
 }
 
 public delegate SymbolUi.Child.CustomUiResult DrawChildUiDelegate(Instance instance, ImDrawListPtr drawList, ImRect area, Vector2 scale);

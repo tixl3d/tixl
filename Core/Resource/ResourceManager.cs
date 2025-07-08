@@ -14,8 +14,6 @@ namespace T3.Core.Resource;
 /// </summary>
 public static partial class ResourceManager
 {
-    public const string ResourcesSubfolder = "Resources";
-    public const string DependenciesFolder = "dependencies";
     public const char PathSeparator = '/';
 
 

@@ -152,7 +152,10 @@ internal sealed class MagGraphLayout
                                  Id = childId,
                                  // Instance = childInstance,
                                  Selectable = childUi,
-                                 DampedPosOnCanvas = childUi.PosOnCanvas
+                                 SymbolChild = childInstance.SymbolChild,
+                                 ChildUi =  childUi,
+                                 DampedPosOnCanvas = childUi.PosOnCanvas,
+                                 InstancePath = childInstance.InstancePath,
                                  // SymbolUi = symbolUi,
                                  // SymbolChild = childUi.SymbolChild,
                                  // ChildUi = childUi,
@@ -166,7 +169,7 @@ internal sealed class MagGraphLayout
 
             opItem.Variant = MagGraphItem.Variants.Operator;
             //opItem.Id = childId;
-            opItem.Instance = childInstance;
+            opItem.InstancePath = childInstance.InstancePath;
             opItem.Selectable = childUi;
             opItem.SymbolUi = symbolUi;
             opItem.SymbolChild = childUi.SymbolChild;
@@ -189,7 +192,8 @@ internal sealed class MagGraphLayout
                                       {
                                           Variant = MagGraphItem.Variants.Input,
                                           Id = input.Id,
-                                          Instance = compositionOp,
+                                          SymbolChild = compositionOp.SymbolChild,
+                                          InstancePath = compositionOp.InstancePath,
                                           Selectable = inputUi,
                                           Size = MagGraphItem.GridSize,
                                           DampedPosOnCanvas = inputUi.PosOnCanvas,
@@ -213,7 +217,8 @@ internal sealed class MagGraphLayout
                                        {
                                            Variant = MagGraphItem.Variants.Output,
                                            Id = output.Id,
-                                           Instance = compositionOp,
+                                           SymbolChild = compositionOp.SymbolChild,
+                                           InstancePath = compositionOp.InstancePath,
                                            Selectable = outputUi,
                                            Size = MagGraphItem.GridSize,
                                            DampedPosOnCanvas = outputUi.PosOnCanvas,
@@ -365,13 +370,14 @@ internal sealed class MagGraphLayout
                                             List<MagGraphItem.OutputLine> outputLines,
                                             HashSet<int>? connectedOutputs = null)
     {
-        Debug.Assert(item.Instance != null && item.SymbolUi != null);
+        var instance = item.Instance;
+        Debug.Assert(instance != null && item.SymbolUi != null);
         int visibleIndex = 0;
         item.HasHiddenOutputs = false;
 
-        for (var inputLineIndex = 0; inputLineIndex < item.Instance.Inputs.Count; inputLineIndex++)
+        for (var inputLineIndex = 0; inputLineIndex < instance.Inputs.Count; inputLineIndex++)
         {
-            var input = item.Instance.Inputs[inputLineIndex];
+            var input = instance.Inputs[inputLineIndex];
             if (!item.SymbolUi.InputUis.TryGetValue(input.Id, out var inputUi))
             {
                 Log.Warning("Can't find input? " + input.Id);
@@ -492,9 +498,9 @@ internal sealed class MagGraphLayout
         var hasNoInputs = visibleIndex == 0;
 
         // Collect outputs
-        for (var outputIndex = 0; outputIndex < item.Instance.Outputs.Count; outputIndex++)
+        for (var outputIndex = 0; outputIndex < instance.Outputs.Count; outputIndex++)
         {
-            var output = item.Instance.Outputs[outputIndex];
+            var output = instance.Outputs[outputIndex];
             if (!item.SymbolUi.OutputUis.TryGetValue(output.Id, out var outputUi))
             {
                 Log.Warning("Can't find outputUi:" + output.Id);

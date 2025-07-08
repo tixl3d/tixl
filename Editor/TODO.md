@@ -52,9 +52,11 @@
 - 
 ## Timeline
 
+- [x] Implement delete clips
 - [ ] Soundtrack image is incorrectly scaled with playback?
 - [ ] After deleting and restart recompilation of image is triggered, but image in timeline is not updated?
       Path not found: '/pixtur.still.Gheo/soundtrack/DARKrebooted-v1.0.mp3' (Resolved to '').
+- [ ] Allow Dragging up/down with right mouse-button
 
 ## UI-Scaling Issues (at x1.5):
 

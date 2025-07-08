@@ -31,6 +31,8 @@ cbuffer Params : register(b2)
 StructuredBuffer<Point> SourcePoints : t0;
 RWStructuredBuffer<Point> ResultPoints : u0;
 
+sampler ClampedSampler :s0;
+
 //=== Additional Resources ==========================================
 /*{RESOURCES(t1)}*/
 

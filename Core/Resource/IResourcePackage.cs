@@ -19,5 +19,5 @@ public interface IResourceConsumer
 {
     public IReadOnlyList<IResourcePackage> AvailableResourcePackages { get; }
     public SymbolPackage? Package { get; }
-    public event Action? Disposing;
+    public event Action<IResourceConsumer>? Disposing;
 }

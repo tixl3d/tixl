@@ -3,14 +3,14 @@ using T3.Core.Utils;
 namespace Lib.numbers.anim.time;
 
 [Guid("32325c5b-53f7-4414-b4dd-a436e45528b0")]
-internal sealed class SetCommandTime : Instance<SetCommandTime>
+internal sealed class SetTime : Instance<SetTime>
 {
        
     [Output(Guid = "FE01C3B6-72E2-494E-8511-6D50C527463F")]
     public readonly Slot<Command> Result = new();
 
         
-    public SetCommandTime()
+    public SetTime()
     {
         Result.UpdateAction += Update;
     }

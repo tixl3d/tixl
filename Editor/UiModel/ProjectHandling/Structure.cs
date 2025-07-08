@@ -14,16 +14,45 @@ namespace T3.Editor.UiModel.ProjectHandling;
 /// </summary>
 internal sealed class Structure
 {
-    private readonly Func<Instance> _getRootInstance;
+    private readonly Func<Symbol.Child> _getRoot;
 
-    public Structure(Func<Instance> getRootInstance)
+    public Structure(Func<Symbol.Child> getRoot)
     {
-        _getRootInstance = getRootInstance;
+        _getRoot = getRoot;
     }
 
-    public Instance? GetInstanceFromIdPath(IReadOnlyList<Guid>? compositionPath)
+    public Instance? GetInstanceFromIdPath(IReadOnlyList<Guid>? childPath)
     {
-        return TryGetInstanceFromIdPath(compositionPath, out var instance) ? instance : null;
+        if (childPath == null || childPath.Count == 0)
+        {
+            return null;
+        }
+
+        var rootSymbolChild = _getRoot();
+        if (rootSymbolChild == null)
+        {
+            Log.Error("Root does not exist? \n" + Environment.StackTrace);
+            return null;
+        }
+
+        if (childPath[0] != rootSymbolChild.Id)
+        {
+            Log.Warning("Can't access instance after root changed.\n" + Environment.StackTrace);
+            return null;
+        }
+        
+        var current = rootSymbolChild;
+        for (int i = 1; i < childPath.Count; i++)
+        {
+            if (!current.Symbol.Children.TryGetValue(childPath[i], out current))
+            {
+                Log.Error("Did not find child in path provided.\n" + Environment.StackTrace);
+                return null;
+            }
+        }
+        
+        _ = current.TryGetOrCreateInstance(childPath, out var instance, out _);
+        return instance;
     }
 
     public List<string> GetReadableInstancePath(IReadOnlyList<Guid>? path, bool includeLeave = true)
@@ -83,7 +112,7 @@ internal sealed class Structure
         return newList;
     }
 
-    public static ITimeClip? GetCompositionTimeClip(Instance? compositionOp)
+    public static TimeClip? GetCompositionTimeClip(Instance? compositionOp)
     {
         if (compositionOp == null)
         {
@@ -102,13 +131,17 @@ internal sealed class Structure
     /// <summary>
     /// This is slow and should be refactored into something else
     /// </summary>
-    public static IEnumerable<ITimeClip> GetAllTimeClips(Instance compositionOp)
+    public static IEnumerable<TimeClip> GetAllTimeClips(Instance compositionOp)
     {
         foreach (var child in compositionOp.Children.Values)
         {
-            foreach (var clipProvider in child.Outputs.OfType<ITimeClipProvider>())
+            var outputs = child.Outputs;
+            for (var i = 0; i < outputs.Count; i++)
             {
-                yield return clipProvider.TimeClip; //CHANGE
+                if (outputs[i] is ITimeClipProvider clipProvider)
+                {
+                    yield return clipProvider.TimeClip; 
+                }
             }
         }
     }
@@ -118,20 +151,14 @@ internal sealed class Structure
                                                         [NotNullWhen(true)] out SymbolUi.Child? childUi,
                                                         [NotNullWhen(true)] out Instance? instance)
     {
-        if (!compositionOp.Children.TryGetValue(id, out instance))
+        if (!compositionOp.Children.TryGetChildInstance(id, out instance))
         {
-            Log.Assert($"Can't select child with id {id} in composition {compositionOp}");
+            Log.Warning($"Failed to get instance for {id} in {compositionOp.Symbol.Name}");
             childUi = null;
             return false;
         }
-
-        childUi = instance.GetChildUi();
-        if (childUi == null)
-        {
-            Log.Assert($"Can't select child with id {id} in composition {compositionOp}");
-            return false;
-        }
-
+        
+        childUi = instance.SymbolChild.GetChildUi();
         return true;
     }
 
@@ -312,45 +339,6 @@ internal sealed class Structure
         }
     }
 
-    private bool TryGetInstanceFromIdPath([NotNullWhen(true)] IReadOnlyList<Guid>? childPath, [NotNullWhen(true)] out Instance? instance)
-    {
-        if (childPath == null || childPath.Count == 0)
-        {
-            instance = null;
-            return false;
-        }
-
-        var rootInstance = _getRootInstance();
-        var rootId = rootInstance.SymbolChildId;
-
-        if (childPath[0] != rootId)
-        {
-            instance = null;
-            Log.Warning("Can't access instance after root changed.\n" + Environment.StackTrace);
-            return false;
-        }
-
-        instance = rootInstance;
-        var pathCount = childPath.Count;
-
-        if (pathCount == 1)
-        {
-            return true;
-        }
-
-        for (int i = 1; i < pathCount; i++)
-        {
-            if (!instance.Children.TryGetValue(childPath[i], out instance))
-            {
-                //Log.Error("Did not find instance in path provided.\n" + Environment.StackTrace);
-                instance = null;
-                return false;
-            }
-        }
-
-        return true;
-    }
-
     public static bool TryGetInstanceFromPath(IReadOnlyList<Guid> entrySourceIdPath, out Instance? hoveredSourceInstance,
                                               out List<string> readableInstancePath)
     {
@@ -361,7 +349,7 @@ internal sealed class Structure
         hoveredSourceInstance = hasInstancePath && focusedView != null
                                     ? focusedView.Structure.GetInstanceFromIdPath(childIdPath)
                                     : null;
-        
+
         readableInstancePath = hoveredSourceInstance != null ? focusedView!.Structure.GetReadableInstancePath(childIdPath) : [];
         return hasInstancePath;
     }

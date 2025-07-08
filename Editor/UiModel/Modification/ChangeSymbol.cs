@@ -5,6 +5,12 @@ using T3.Editor.UiModel.Selection;
 
 namespace T3.Editor.UiModel.Modification;
 
+/// <summary>
+/// Replace a symbol with another symbol.
+/// </summary>
+/// <remarks>
+/// Maybe this method has to be refactored or deprecated.
+/// </remarks>
 internal static class ChangeSymbol
 {
     public static void ChangeOperatorSymbol(NodeSelection nodeSelection, Instance compositionOp, List<SymbolUi.Child> selectedChildUis, Symbol symbol)
@@ -207,11 +213,5 @@ internal static class ChangeSymbol
         /// A change that should trigger cache invalidation of UI structures for connections, nodes, etc.
         /// </summary>
         StructureChanged,
-        
-        /// <summary>
-        /// Some dialog will trigger the recompilation of user projects can the only be resolved after reloading
-        /// symbol definition after the next frame. 
-        /// </summary>
-        ProjectViewDiscarded,
     }
 }

@@ -7,6 +7,7 @@
         <RootNamespace>T3.Core.Logging</RootNamespace>
         <Configurations>Debug;Release</Configurations>
         <Platforms>AnyCPU</Platforms>
+        <Deterministic>true</Deterministic>
     </PropertyGroup>
 
 </Project>

@@ -33,8 +33,11 @@ internal abstract class CurveEditCanvas : ScalableCanvas, ITimeObjectManipulatio
             Drawlist = ImGui.GetWindowDrawList();
             UpdateCanvas(out var interactionState, flags);
             Drawlist = ImGui.GetWindowDrawList();
-                
-            HandleFenceUpdate(selectionFence, out _);
+
+            if (!T3Ui.IsAnyPopupOpen)
+            {
+                HandleFenceUpdate(selectionFence, out _);
+            }
             drawAdditionalCanvasContent(interactionState);
 
             SnapHandlerForU.DrawSnapIndicator(this);
@@ -136,7 +139,7 @@ internal abstract class CurveEditCanvas : ScalableCanvas, ITimeObjectManipulatio
         {
             _commands.Add(manipulators.StartDragCommand(compositionSymbolId));
         }
-        _macro = new MacroCommand("Manipulate Keyframes", _commands);
+        _macro = new MacroCommand("Move Timeline Items", _commands);
         return null;
     }
 

@@ -18,28 +18,7 @@ internal static class SymbolUiRegistry
 
         throw new Exception($"Can't find symbol ui for symbol {id}");
     }
-
-    public static bool TryGetChildInstance(this Instance instance, Guid id, bool recursive, [NotNullWhen(true)] out Instance? child, [NotNullWhen(true)] out IReadOnlyList<Guid>? pathFromRoot)
-    {
-        if (instance.Children.TryGetValue(id, out child))
-        {
-            pathFromRoot = child.InstancePath;
-            return true;
-        }
-
-        if (recursive)
-        {
-            foreach (var childInstance in instance.Children.Values)
-            {
-                if (TryGetChildInstance(childInstance, id, true, out child, out pathFromRoot))
-                    return true;
-            }
-        }
-
-        pathFromRoot = null;
-        return false;
-    }
-
+    
     public static bool TryGetSymbolUi(Guid symbolId, [NotNullWhen(true)] out SymbolUi? symbolUi)
     {
         foreach(var package in SymbolPackage.AllPackages)

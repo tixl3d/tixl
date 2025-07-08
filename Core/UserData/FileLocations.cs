@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using T3.Core.Compilation;
 
@@ -14,21 +14,22 @@ public static class FileLocations
     public const string ThemeSubFolder = "Themes";
     public const string RenderSubFolder = "RenderOutput";
     public const string ExportFolderName = "T3Exports";
-    public static string TempFolder => Path.Combine(SettingsPath, "Tmp");
+    public const string KeyBindingSubFolder = "KeyBindings";
+    public static string TempFolder => Path.Combine(SettingsDirectory, "Tmp");
 
     
     /// <summary>
     /// We extract this because this will later not be available for published versions.
     /// Providing this at this location will help refactoring later. 
     /// </summary>
-    public static string StartFolder => RuntimeAssemblies.CoreDirectory!;
+    private static string StartFolder => RuntimeAssemblies.CoreDirectory!;
     
     /// <summary>
     /// A subfolder next in the editor start folder.
     /// </summary>
     public static string ReadOnlySettingsPath => Path.Combine(StartFolder, ".tixl");
     
-    public static readonly string SettingsPath =
+    public static readonly string SettingsDirectory =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), 
                      AppSubFolder
                      
@@ -39,4 +40,9 @@ public static class FileLocations
                      );
     
     public static readonly string DefaultProjectFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), AppSubFolder);
+    public const string ResourcesSubfolder = "Resources";
+    public const string DependenciesFolder = "dependencies";
+    public const string SymbolsSubfolder = "Symbols";
+    public const string SymbolUiSubFolder = "SymbolUis";
+    public const string SourceCodeSubFolder = "SourceCode";
 }

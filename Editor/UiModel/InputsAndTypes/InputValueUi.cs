@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System.Diagnostics;
 using ImGuiNET;
 using Newtonsoft.Json;
@@ -344,12 +344,12 @@ public abstract class InputValueUi<T> : IInputUi
                                                 {
                                                     if (ImGui.MenuItem("Jump To Previous Keyframe", hasKeyframeBefore))
                                                     {
-                                                        UserActionRegistry.DeferredActions.Add(UserActions.PlaybackJumpToPreviousKeyframe);
+                                                        UserActionRegistry.QueueAction(UserActions.PlaybackJumpToPreviousKeyframe);
                                                     }
 
                                                     if (ImGui.MenuItem("Jump To Next Keyframe", hasKeyframeBefore))
                                                     {
-                                                        UserActionRegistry.DeferredActions.Add(UserActions.PlaybackJumpToNextKeyframe);
+                                                        UserActionRegistry.QueueAction(UserActions.PlaybackJumpToNextKeyframe);
                                                     }
 
                                                     if (hasKeyframeAtCurrentTime)

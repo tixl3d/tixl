@@ -7,6 +7,7 @@ using Microsoft.Build.Construction;
 using T3.Core.Compilation;
 using T3.Core.Model;
 using T3.Core.Resource;
+using T3.Core.UserData;
 using T3.Editor.UiModel;
 
 namespace T3.Editor.Compilation;
@@ -26,6 +27,7 @@ internal static partial class ProjectXml
         rootElement.AddDefaultContent();
         rootElement.AddOpPackageItemGroup();
         rootElement.AddPackageInfoTarget();
+        rootElement.AddCleanBuildTarget();
         return rootElement;
     }
 
@@ -177,6 +179,28 @@ internal static partial class ProjectXml
         item.AddMetadata(nameof(OperatorPackageReference.ResourcesOnly), resourcesOnly.ToString(), true);
     }
 
+    internal static bool AddCleanBuildTarget(this ProjectRootElement project)
+    {
+        // find existing target
+        const string targetName = "ClearBuildOutput";
+        var target = project.Targets.FirstOrDefault(x => x.Name == targetName);
+        if (target != null)
+        {
+            return false;
+        }
+
+        // create new target
+        target = project.AddTarget(targetName);
+        target.BeforeTargets = "BeforeBuild";
+        target.AddTask("RemoveDir").SetParameter("Directories", "bin/$(Configuration)");
+        return true;
+        /*
+<Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild">
+<!-- Clear previous files in the export folder -->
+<RemoveDir Directories="bin/$(Configuration)"/>
+</Target>  */
+    }
+    
     private static void AddPackageInfoTarget(this ProjectRootElement project)
     {
         var target = project.AddTarget("CreatePackageInfo");
@@ -223,7 +247,7 @@ internal static partial class ProjectXml
         const string outputPathVariable = "OutputPath"; // built-in variable to get the output path of the project
 
         var task = target.AddTask("WriteLinesToFile");
-        task.SetParameter("File", UnevaluatedVariable(outputPathVariable) + '/' + RuntimeAssemblies.PackageInfoFileName);
+        task.SetParameter("File", UnevaluatedVariable(outputPathVariable) + '/' + ReleaseInfo.FileName);
         task.SetParameter("Lines", UnevaluatedVariable(fullJsonTagName));
         task.SetParameter("Overwrite", "True");
         task.SetParameter("Encoding", "UTF-8");
@@ -294,11 +318,12 @@ internal static partial class ProjectXml
                     (Type: PropertyType.Nullable, Value: "enable"),
                     (Type: PropertyType.EditorVersion, Value: Program.Version.ToBasicVersionString()),
                     (Type: PropertyType.IsEditorOnly, Value: "false"),
-                    (Type: PropertyType.ImplicitUsings, Value: "disabled")
+                    (Type: PropertyType.ImplicitUsings, Value: "disabled"),
+                    (Type: PropertyType.Deterministic, Value: "true")
                 }
            .ToFrozenDictionary(keySelector: x => x.Type, elementSelector: x => x.Value);
 
-    private static readonly TagValue[] _defaultReferenceTags = [new TagValue(Tag: MetadataTagType.Private, Value: "true", AddAsAttribute: true)];
+    private static readonly TagValue[] _defaultReferenceTags = [new TagValue(Tag: MetadataTagType.Private, Value: "false", AddAsAttribute: true)];
 
     private static readonly Reference[] _defaultReferences =
         [
@@ -318,24 +343,24 @@ internal static partial class ProjectXml
             [CreateIncludePath(args: ["bin", IncludeAllStr]), CreateIncludePath(args: ["obj", IncludeAllStr])];
 
     private const string FileIncludeFmt = IncludeAllStr + @"{0}";
-    internal const string DependenciesFolder = ResourceManager.DependenciesFolder;
+    internal const string DependenciesFolder = FileLocations.DependenciesFolder;
 
     private static readonly ContentInclude.Group[] _defaultContent =
         [
             new ContentInclude.Group(Condition: null, Content: new ContentInclude(include: CreateIncludePath(args: [".", DependenciesFolder, IncludeAllStr]))),
             new ContentInclude.Group(Condition: _releaseConfigCondition, Content:
                 [
-                    new ContentInclude(include: CreateIncludePath(args: [ResourceManager.ResourcesSubfolder, IncludeAllStr]),
-                                       linkDirectory: ResourceManager.ResourcesSubfolder,
+                    new ContentInclude(include: CreateIncludePath(args: [FileLocations.ResourcesSubfolder, IncludeAllStr]),
+                                       linkDirectory: FileLocations.ResourcesSubfolder,
                                        exclude: _excludeFoldersFromOutput),
                     new ContentInclude(include: string.Format(format: FileIncludeFmt, arg0: SymbolPackage.SymbolExtension),
-                                       linkDirectory: SymbolPackage.SymbolsSubfolder,
+                                       linkDirectory: FileLocations.SymbolsSubfolder,
                                        exclude: _excludeFoldersFromOutput),
                     new ContentInclude(include: string.Format(format: FileIncludeFmt, arg0: EditorSymbolPackage.SymbolUiExtension),
-                                       linkDirectory: EditorSymbolPackage.SymbolUiSubFolder,
+                                       linkDirectory: FileLocations.SymbolUiSubFolder,
                                        exclude: _excludeFoldersFromOutput),
                     new ContentInclude(include: string.Format(format: FileIncludeFmt, arg0: EditorSymbolPackage.SourceCodeExtension),
-                                       linkDirectory: EditorSymbolPackage.SourceCodeSubFolder,
+                                       linkDirectory: FileLocations.SourceCodeSubFolder,
                                        exclude: _excludeFoldersFromOutput)
                 ])
         ];
@@ -435,7 +460,9 @@ internal enum PropertyType
     EditorVersion,
     AssemblyName,
     IsEditorOnly,
-    ImplicitUsings
+    ImplicitUsings,
+    Deterministic, 
+    OutputPath
 }
 
 internal enum ItemType
@@ -446,7 +473,7 @@ internal enum ItemType
 
     /// <summary>
     /// Not technically a type seen in MSBuild, but used in T3 to refer to assemblies references from the t3 editor at runtime
-    /// using <see cref="RuntimeAssemblies.EnvironmentVariableName"/>. See <see cref="ProjectXml._itemTypeNames"/>.
+    /// using <see cref="ProjectSetup.EnvironmentVariableName"/>. See <see cref="ProjectXml._itemTypeNames"/>.
     /// </summary>
     EditorReference,
     OperatorPackage,
@@ -471,7 +498,7 @@ internal readonly struct Reference(ItemType type, string include, params TagValu
     public readonly ItemType Type = type;
 
     public readonly string Include = type == ItemType.EditorReference
-                                         ? Path.Combine(ProjectXml.UnevaluatedVariable(RuntimeAssemblies.EnvironmentVariableName), include)
+                                         ? Path.Combine(ProjectXml.UnevaluatedVariable(ProjectSetup.EnvironmentVariableName), include)
                                          : include;
 
     public readonly TagValue[] Tags = tags ?? Array.Empty<TagValue>();

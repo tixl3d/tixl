@@ -153,3 +153,41 @@ public static class JsonUtils
         return Enum.TryParse<T>(s, out var result) ? result : fallback;
     }
 }
+
+public sealed class SafeEnumConverter<T> : JsonConverter<T> where T : struct, Enum
+{
+    public override T ReadJson(JsonReader reader, Type objectType, T existingValue, bool hasExistingValue, JsonSerializer serializer)
+    {
+        try
+        {
+            switch (reader.TokenType)
+            {
+                case JsonToken.String:
+                {
+                    var str = reader.Value.ToString();
+                    if (Enum.TryParse(str, ignoreCase: true, out T result) && Enum.IsDefined(typeof(T), result))
+                        return result;
+                    break;
+                }
+                case JsonToken.Integer:
+                {
+                    int intVal = Convert.ToInt32(reader.Value);
+                    if (Enum.IsDefined(typeof(T), intVal))
+                        return (T)Enum.ToObject(typeof(T), intVal);
+                    break;
+                }
+            }
+        }
+        catch
+        {
+            Log.Warning($"Failed to read enum {reader.Value} as {typeof(T)}");
+        }
+
+        return default; // fallback value
+    }
+
+    public override void WriteJson(JsonWriter writer, T value, JsonSerializer serializer)
+    {
+        writer.WriteValue(value.ToString());
+    }
+}

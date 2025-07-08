@@ -62,7 +62,7 @@ internal static class ConnectionSplitHelper
                 var op = components.CompositionInstance!;
 
                 Symbol.Child? sourceOp = null;
-                if (op.Children.TryGetValue(connection.SourceParentOrChildId, out var sourceOpInstance))
+                if (op.Children.TryGetChildInstance(connection.SourceParentOrChildId, out var sourceOpInstance))
                 {
                     sourceOp = sourceOpInstance.SymbolChild;
                     outputDefinition = sourceOpInstance.Symbol.OutputDefinitions.SingleOrDefault(outDef => outDef.Id == connection.SourceSlotId);

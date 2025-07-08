@@ -298,7 +298,7 @@ internal static class AutoBackup
 
     private static readonly Stopwatch _stopwatch = Stopwatch.StartNew();
     private static bool _isSaving;
-    internal static string BackupDirectory => Path.Combine(FileLocations.SettingsPath, "Backup");
+    internal static string BackupDirectory => Path.Combine(FileLocations.SettingsDirectory, "Backup");
 
     private static string[] SourcePaths
     {

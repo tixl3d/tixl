@@ -87,12 +87,10 @@ internal static class Modifications
                     if (item.Variant == MagGraphItem.Variants.Input)
                     {
                         deletedInputUis.Add(item.Selectable as IInputUi);
-                        results |= ChangeSymbol.SymbolModificationResults.ProjectViewDiscarded;
                     }
                     else if (item.Variant == MagGraphItem.Variants.Output)
                     {
                         deletedOutputUis.Add(item.Selectable as IOutputUi);
-                        results |= ChangeSymbol.SymbolModificationResults.ProjectViewDiscarded;
                     }
 
                     continue;

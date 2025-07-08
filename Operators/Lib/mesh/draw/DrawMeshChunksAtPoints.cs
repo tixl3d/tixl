@@ -33,7 +33,7 @@ internal sealed class DrawMeshChunksAtPoints : Instance<DrawMeshChunksAtPoints>
     public readonly InputSlot<CullMode> CullMode = new InputSlot<CullMode>();
 
     [Input(Guid = "5ff607e0-a3db-4ece-93dc-3713669def9e")]
-    public readonly InputSlot<bool> UseWForSize = new InputSlot<bool>();
+    public readonly InputSlot<bool> UseF1ForSize = new InputSlot<bool>();
 
     [Input(Guid = "010d4e6c-26b8-444e-8d22-3be0d93222ef")]
     public readonly InputSlot<float> AlphaCutOff = new InputSlot<float>();

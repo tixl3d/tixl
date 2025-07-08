@@ -1,7 +1,7 @@
 namespace Lib.flow;
 
 [Guid("3036067a-a4c2-434b-b0e3-ac95c5c943f4")]
-internal sealed class TimeClip : Instance<TimeClip>
+internal sealed class TimeClip : Instance<TimeClip> , IPreventingTimeRemap
 {
     [Output(Guid = "de6ff8b5-40fe-47fa-b9f2-d926b17f9a7f")]
     public readonly TimeClipSlot<Command> Output = new();
@@ -9,10 +9,13 @@ internal sealed class TimeClip : Instance<TimeClip>
     public TimeClip()
     {
         Output.UpdateAction += Update;
+        //Output.TimeClip.UsedForRegionMapping = false;
     }
 
     private void Update(EvaluationContext context)
     {
+        Output.TimeClip.UsedForRegionMapping = false;
+        
         var startTime = Output.TimeClip.TimeRange.Start;
         var endTime = Output.TimeClip.TimeRange.End;
         var normalizedTime = (context.LocalFxTime - startTime) / (endTime - startTime);

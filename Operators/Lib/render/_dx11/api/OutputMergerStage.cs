@@ -84,7 +84,7 @@ internal sealed class OutputMergerStage : Instance<OutputMergerStage> {
         var deviceContext = ResourceManager.Device.ImmediateContext;
         var outputMerger = deviceContext.OutputMerger;
 
-        outputMerger.BlendState = _prevBlendState;
+        outputMerger.SetBlendState(_prevBlendState, _prevBlendFactor, _prevSampleMask);
         if (_renderTargetViews.Length > 0)
             outputMerger.SetRenderTargets(_prevDepthStencilView, _prevRenderTargetViews);
         

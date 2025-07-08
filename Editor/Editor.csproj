@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-    <Import Project="$(SolutionDir)/Tixl.props" />
+    <Import Project="$(SolutionDir)/Tixl.props"/>
     <PropertyGroup>
         <TargetFramework>$(TixlNetFrameworkVersion)</TargetFramework>
         <VersionPrefix>$(TixlVersion)</VersionPrefix>
@@ -11,6 +11,7 @@
         <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
         <RuntimeIdentifiers>win-x64;linux-x64;osx-x64</RuntimeIdentifiers>
         <EnableUnsafeBinaryFormatterSerialization>true</EnableUnsafeBinaryFormatterSerialization>
+        <Deterministic>true</Deterministic>
         <Configurations>Debug;Release</Configurations>
         <Platforms>AnyCPU</Platforms>
         <AssemblyName>TiXL</AssemblyName>
@@ -47,31 +48,31 @@
 
     <!-- ======================= Nuget References =========================== -->
     <ItemGroup>
-        <PackageReference Include="ImGui.NET" Version="1.89.9.3" />
-        <PackageReference Include="Microsoft.Build" Version="17.9.5" />
-        <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.9.0-2.final" />
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.9.0-2.final" />
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.9.0-2.final" />
-        <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="4.9.0-2.final" />
+        <PackageReference Include="ImGui.NET" Version="1.89.9.3"/>
+        <PackageReference Include="Microsoft.Build" Version="17.9.5"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.9.0-2.final"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.9.0-2.final"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.9.0-2.final"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="4.9.0-2.final"/>
         <PackageReference Include="Rug.Osc" Version="1.2.5">
             <NoWarn>NU1701</NoWarn>
         </PackageReference>
-        <PackageReference Include="Sentry" Version="4.1.1" />
+        <PackageReference Include="Sentry" Version="4.1.1"/>
         <PackageReference Include="SharpDX.Desktop" Version="4.2.0">
             <NoWarn>NU1701</NoWarn>
         </PackageReference>
-        <PackageReference Include="System.Management" Version="9.0.4" />
-        <PackageReference Include="System.Runtime.Serialization.Formatters" Version="9.0.4" />
+        <PackageReference Include="System.Management" Version="9.0.4"/>
+        <PackageReference Include="System.Runtime.Serialization.Formatters" Version="9.0.4"/>
     </ItemGroup>
     <!-- ===============================//======================================= -->
 
     <!-- ======================= Project References =========================== -->
     <ItemGroup>
-        <ProjectReference Include="..\Core\Core.csproj" />
-        <ProjectReference Include="..\Logging\Logging.csproj" />
-        <ProjectReference Include="..\MsForms\MsForms.csproj" />
-        <ProjectReference Include="..\ProcessRunner\ProcessRunner.csproj" />
-        <ProjectReference Include="..\SilkWindows\SilkWindows.csproj" />
+        <ProjectReference Include="..\Core\Core.csproj"/>
+        <ProjectReference Include="..\Logging\Logging.csproj"/>
+        <ProjectReference Include="..\MsForms\MsForms.csproj"/>
+        <ProjectReference Include="..\ProcessRunner\ProcessRunner.csproj"/>
+        <ProjectReference Include="..\SilkWindows\SilkWindows.csproj"/>
     </ItemGroup>
     <!-- ===============================//======================================= -->
 
@@ -92,22 +93,22 @@
     <!--This
     copies all files in the `.Defaults` folder into the output/.tixl folder-->
     <ItemGroup>
-        <DefaultUserConfigs Include="../.Defaults/**/*" />
+        <DefaultUserConfigs Include="../.Defaults/**/*"/>
     </ItemGroup>
 
     <Target Name="CopyDefaults" AfterTargets="AfterBuild">
-        <Copy SourceFiles="@(DefaultUserConfigs)" SkipUnchangedFiles="true" UseHardlinksIfPossible="true" DestinationFiles="@(DefaultUserConfigs->'$(OutputPath)/.tixl/%(RecursiveDir)%(Filename)%(Extension)')" />
+        <Copy SourceFiles="@(DefaultUserConfigs)" SkipUnchangedFiles="true" UseHardlinksIfPossible="true" DestinationFiles="@(DefaultUserConfigs->'$(OutputPath)/.tixl/%(RecursiveDir)%(Filename)%(Extension)')"/>
     </Target>
     <!-- ==========================//================================ -->
 
     <!-- ======================= Resources =========================== -->
     <!-- This copies t3/Resources into the output directory -->
     <ItemGroup>
-        <Resources Include="../Resources/**/*" Visible="false" />
+        <Resources Include="../Resources/**/*" Visible="false"/>
     </ItemGroup>
 
     <Target Name="CopyResources" AfterTargets="AfterBuild">
-        <Copy SourceFiles="@(Resources)" SkipUnchangedFiles="true" UseHardlinksIfPossible="true" DestinationFiles="@(Resources->'$(OutputPath)/Resources/%(RecursiveDir)%(Filename)%(Extension)')" />
+        <Copy SourceFiles="@(Resources)" SkipUnchangedFiles="true" UseHardlinksIfPossible="true" DestinationFiles="@(Resources->'$(OutputPath)/Resources/%(RecursiveDir)%(Filename)%(Extension)')"/>
     </Target>
     <!-- ===========================//=============================== -->
 
@@ -125,41 +126,92 @@
     <!-- This copies the Player build into the output directory -->
     <!-- Notice the similarities (and differences) between this and the CopyLibs target below -->
     <ItemGroup>
-        <Player Include="../Player/$(RelativeBuildFolder)/**/*" Visible="false" />
+        <Player Include="../Player/$(RelativeBuildFolder)/**/*" Visible="false"/>
     </ItemGroup>
     <Target Name="CopyPlayer" AfterTargets="AfterBuild">
-        <Copy SourceFiles="@(Player)" SkipUnchangedFiles="true" UseHardlinksIfPossible="true" DestinationFiles="@(Player->'$(OutputPath)/Player/%(RecursiveDir)%(Filename)%(Extension)')" />
+        <Copy SourceFiles="@(Player)" SkipUnchangedFiles="true" UseHardlinksIfPossible="true" DestinationFiles="@(Player->'$(OutputPath)/Player/%(RecursiveDir)%(Filename)%(Extension)')"/>
     </Target>
     <!-- =========================//=============================== -->
 
     <!-- ======================== Operator Packages ========================== -->
-    <!-- This copies built-in operator projects into the output directory -->
-    <!-- There might be a better (and less manual) way to do this, but this is the best we have
-    right now. -->
-    <Target Name="CopyLibs" AfterTargets="AfterBuild" Condition=" '$(Configuration)' == 'Release' ">
 
+    <!-- Specify the operator packages in the Operators directory to be included in Release builds - 
+    their csproj file name should match their directory name -->
+    <ItemGroup>
+        <PackageNames Include="lib"/>
+        <PackageNames Include="examples"/>
+        <PackageNames Include="TypeOperators"/>
+        <PackageNames Include="LibEditor"/>
+        <!-- <PackageNames Include="pixtur"/>-->
+        <PackageNames Include="unsplash"/>
+        <PackageNames Include="spout"/>
+        <PackageNames Include="ndi"/>
+        <!-- Add more as needed -->
+    </ItemGroup>
+
+    <PropertyGroup>
+        <OperatorDirectoryName>Operators</OperatorDirectoryName>
+    </PropertyGroup>
+
+    <!-- =========================//================================ -->
+
+    <!-- ======================== Copy Selected Packages ========================== -->
+    <!-- This copies built-in operator projects into the output directory -->
+
+    <!-- This is a "function" that finds the package's build files and does the copy. 
+    It is not invoked without another target "calling" it. 
+    Specifically, it parses the csproj file for a version and finds the appropriate build folder to copy from. -->
+    <Target Name="CopyTixlOpProject">
         <PropertyGroup>
-            <Ops>../Operators</Ops>
-            <UserOps>../Operators/user</UserOps>
-            <ExportFolder>$(OutputPath)/Operators</ExportFolder>
+            <SourceDir>$(SolutionDir)$(ParentFolder)/$(PackageName)</SourceDir>
+            <DestinationDir>$(OutputPath)/$(OperatorDirectoryName)</DestinationDir>
         </PropertyGroup>
 
+        <Message Importance="high" Text="Attempting to copy $(PackageName)..."/>
+
+        <!-- Use XmlPeek to extract the version from the csproj file of the package -->
+        <!-- Left here as an example in case we need to use it for extracting the target framework in the future -->
+        <!-- <XmlPeek XmlInputPath="$(SourceDir)/$(PackageName).csproj" Query="//VersionPrefix/text()">
+             <Output TaskParameter="Result" ItemName="projVersion"/>
+         </XmlPeek>
+        <Message Importance="high" Text="Found version for $(PackageName): @(projVersion)"/>-->
+
+        <!-- Define the package build directory based on the version found
+            This should match the OutputPath defined by the project -->
+        <PropertyGroup>
+            <PackageBuildDirectory>$(SourceDir)/bin/$(Configuration)/$(TixlNetFrameworkVersion)</PackageBuildDirectory>
+        </PropertyGroup>
+
+        <Message Importance="high" Text="Path for $(PackageName): $(PackageBuildDirectory)"/>
+
         <ItemGroup>
-            <!-- This is a list of all the built-in operator projects. 'Include' refers to project
-            directory, 'SubFolder' to export subfolder -->
-            <Lib Include="$(Ops)/lib/$(RelativeBuildFolder)/**" SubFolder="lib" />
-            <TypeOperators Include="$(Ops)/TypeOperators/$(RelativeBuildFolder)/**" SubFolder="TypeOperators" />
-            <LibEditor Include="$(Ops)/LibEditor/$(RelativeBuildFolder)/**" SubFolder="LibEditor" />
-            <Examples Include="$(Ops)/examples/$(RelativeBuildFolder)/**" SubFolder="examples" />
-            <Unsplash Include="$(Ops)/unsplash/$(RelativeBuildFolder)/**" SubFolder="unsplash" />
-            <Ndi Include="$(Ops)/Ndi/$(RelativeBuildFolder)/**" SubFolder="Ndi" />
-            <Spout Include="$(Ops)/Spout/$(RelativeBuildFolder)/**" SubFolder="Spout" />
-            <pixtur Include="$(UserOps)/pixtur/$(RelativeBuildFolder)/**" SubFolder="pixtur" />
+            <ProjectFiles Include="$(PackageBuildDirectory)/**"/>
         </ItemGroup>
 
-        <!-- Copy Dlls and symbols using the items and subfolders defined above -->
-        <Copy SourceFiles="@(Lib);@(TypeOperators);@(LibEditor);@(Examples);@(Unsplash);@(Ndi);@(Spout);@(pixtur)" DestinationFolder="$(ExportFolder)/%(SubFolder)/%(RecursiveDir)" SkipUnchangedFiles="true" UseHardlinksIfPossible="true" />
-    </Target>
-    <!-- ==================================//====================================== -->
+        <!-- Clear previous files in the export folder (redundant, so commented for example -->
+        <!--<RemoveDir Directories="$(DestinationDir)/$(PackageName)/"/>-->
 
+        <!-- Copy the files from the project directory to the export folder -->
+        <Copy SourceFiles="@(ProjectFiles)" DestinationFolder="$(DestinationDir)/$(PackageName)/%(RecursiveDir)" UseHardlinksIfPossible="true"/>
+    </Target>
+
+    <!-- Invokes the above target for all of the packages defined by the PackageNames property -->
+    <Target Name="CopyTixlOperators" AfterTargets="AfterBuild" Condition="'$(Configuration)' == 'Release'">
+        <MSBuild Projects="$(MSBuildProjectFullPath)"
+                 Targets="CopyTixlOpProject"
+                 Properties="PackageName=%(PackageNames.Identity);ParentFolder=$(OperatorDirectoryName)"/>
+
+        <!-- special case for pixtur project being nested under Operators/user/ -->
+        <MSBuild Projects="$(MSBuildProjectFullPath)"
+                 Targets="CopyTixlOpProject"
+                 Properties="PackageName=pixtur;ParentFolder=$(OperatorDirectoryName)/user"/>
+    </Target>
+
+
+    <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild">
+        <!-- Clear previous files in the export folder -->
+        <RemoveDir Directories="bin/$(Configuration)"/>
+    </Target>
+
+    <!-- =========================//================================ -->
 </Project>

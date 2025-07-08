@@ -5,9 +5,9 @@ using System.Text.Json;
 using ImGuiNET;
 using Sentry;
 using T3.Core.Animation;
-using T3.Core.Compilation;
 using T3.Core.SystemUi;
 using T3.Core.Utils;
+using T3.Editor.Compilation;
 using T3.Editor.Gui.AutoBackup;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.SystemUi;
@@ -87,52 +87,62 @@ internal static class CrashReporting
         WriteCrashReportFile(sentryEvent);
 
         // We only show crash report dialog in release mode 
+        
         #if RELEASE
-        var lastBackupTime = AutoBackup.GetTimeOfLastBackup().GetReadableRelativeTime();
-
-        var message = $"""
-                       TiXL crashed. We're really sorry.
-
-                       The last backup was saved {lastBackupTime} to...
-                       {AutoBackup.BackupDirectory}
-                        
-                       Please refer to Help > Using Backups on what to do next.
-                       """;
-
-        if (json != null)
-        {
-            message += """
-                       
-                        When this window closes, the current operator will be copied to your clipboard. 
-                        """;
-        }
-
-        message += "\n\n" + (sentryEvent.Exception?.ToString() ?? Environment.StackTrace);
-
-        const string confirmation = "Send crash report (it really helps!)";
-        var result = BlockingWindow.Instance.ShowMessageBox(message, 
-                                                            @"☠🙈 Damn!", 
-                                                            confirmation, 
-                                                            "No thanks");
-
-        if (json != null)
-        {
-            EditorUi.Instance.SetClipboardText(json);
-        }
-
-        var sendingEnabled = result == confirmation;
-
-        if (!string.IsNullOrWhiteSpace(LogPath))
-        {
-            CoreUi.Instance.OpenWithDefaultApplication(LogPath);
-        }
-
-        return sendingEnabled ? sentryEvent : null;
+        var inReleaseMode = true;
         #else
-        WriteReportToLog(sentryEvent, false);
-        CoreUi.Instance.SetUnhandledExceptionMode(true);
-        return null;
+        var inReleaseMode = false;
         #endif
+        
+        if (inReleaseMode)
+        {
+            var lastBackupTime = AutoBackup.GetTimeOfLastBackup().GetReadableRelativeTime();
+
+            var message = $"""
+                           TiXL crashed. We're really sorry.
+
+                           The last backup was saved {lastBackupTime} to...
+                           {AutoBackup.BackupDirectory}
+                            
+                           Please refer to Help > Using Backups on what to do next.
+                           """;
+
+            if (json != null)
+            {
+                message += """
+
+                           When this window closes, the current operator will be copied to your clipboard. 
+                           """;
+            }
+
+            message += "\n\n" + (sentryEvent.Exception?.ToString() ?? Environment.StackTrace);
+
+            const string confirmation = "Send crash report (it really helps!)";
+            var result = BlockingWindow.Instance.ShowMessageBox(message,
+                                                                @"☠🙈 Damn!",
+                                                                confirmation,
+                                                                "No thanks");
+
+            if (json != null)
+            {
+                EditorUi.Instance.SetClipboardText(json);
+            }
+
+            var sendingEnabled = result == confirmation;
+
+            if (!string.IsNullOrWhiteSpace(LogPath))
+            {
+                CoreUi.Instance.OpenWithDefaultApplication(LogPath);
+            }
+
+            return sendingEnabled ? sentryEvent : null;
+        }
+        else
+        {
+            WriteReportToLog(sentryEvent, false);
+            CoreUi.Instance.SetUnhandledExceptionMode(true);
+            return null;
+        }
     }
 
     private static void WriteReportToLog(SentryEvent sentryEvent, bool sendingEnabled)

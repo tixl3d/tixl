@@ -528,7 +528,7 @@ internal abstract class ScalableCanvas : IScalableCanvas
             && (isInteractable || isPanning)
             && (flags&T3Ui.EditingFlags.PreventPanningWithMouse) == 0
             && ((
-                    ImGui.IsMouseDragging(ImGuiMouseButton.Left) && ImGui.GetIO().KeyAlt)
+                    ImGui.IsMouseDragging(ImGuiMouseButton.Left) && ImGui.GetIO().KeyAlt && this is not TimeLineCanvas)
                 || (!UserSettings.Config.MiddleMouseButtonZooms && ImGui.IsMouseDragging(ImGuiMouseButton.Middle) && !ImGui.GetIO().KeyAlt)
                 || (ImGui.IsMouseDragging(ImGuiMouseButton.Right) && !ImGui.GetIO().KeyAlt))
             )

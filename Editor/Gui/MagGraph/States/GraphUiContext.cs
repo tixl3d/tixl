@@ -220,24 +220,24 @@ internal sealed class GraphUiContext
         EditCommentDialog.Draw(Selector);
         var results = ChangeSymbol.SymbolModificationResults.Nothing;
         
-        var compInstance = projectView.CompositionInstance;
-        if (compInstance != null)
+        if (projectView.CompositionInstance != null)
         {
-            if (compInstance != projectView.OpenedProject.RootInstance 
-                && !compInstance.Symbol.SymbolPackage.IsReadOnly)
+            var symbol = projectView.InstView!.Symbol;
+            if (projectView.CompositionInstance != projectView.RootInstance 
+                && !symbol.SymbolPackage.IsReadOnly)
             {
-                var symbol = compInstance.Symbol;
                 results |= AddInputDialog.Draw(symbol);
                 results |= AddOutputDialog.Draw(symbol);
             }
-            results |= DuplicateSymbolDialog.Draw(compInstance, 
+            
+            results |= DuplicateSymbolDialog.Draw(symbol.Id, 
                                                   projectView.NodeSelection.GetSelectedChildUis().ToList(), 
                                                   ref NameSpaceForDialogEdits,
                                                   ref SymbolNameForDialogEdits,
                                                   ref SymbolDescriptionForDialog);
             
             
-            results |= CombineToSymbolDialog.Draw(compInstance, projectView,
+            results |= CombineToSymbolDialog.Draw(symbol.Id, projectView,
                                                   ref NameSpaceForDialogEdits,
                                                   ref SymbolNameForDialogEdits,
                                                   ref SymbolDescriptionForDialog);

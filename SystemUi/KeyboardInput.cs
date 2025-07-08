@@ -15,10 +15,20 @@ public static class KeyHandler
 
     public static void SetKeyDown(Key keyCode) => SetKeyPressed((int)keyCode, true);
     public static void SetKeyDown(int keyCode) => SetKeyPressed(keyCode, true);
-        
-
+    
     public static void SetKeyUp(Key keyCode) => SetKeyPressed((int)keyCode, false);
     public static void SetKeyUp(int keyCode) => SetKeyPressed(keyCode, false);
+
+    public static Key GetPressedKey()
+    {
+        for (var index = 0; index < PressedKeysPrivate.Length; index++)
+        {
+            if (PressedKeysPrivate[index])
+                return (Key)index;
+        }
+
+        return Key.Undefined;
+    }
         
     public static bool IsKeyPressed(int keyCode)
     {
@@ -49,6 +59,7 @@ public static class KeyHandler
 /// </summary>
 public enum Key // Todo: can we make this frontend-agnostic?
 {
+    Undefined = 0,
     D0 = 48,
     D1 = 49,
     D2 = 50,

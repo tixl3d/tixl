@@ -27,7 +27,6 @@ public sealed class AddOutputDialog : ModalDialog
             if (CustomComponents.DisablableButton("Add", isValid))
             {
                 InputsAndOutputs.AddOutputToSymbol(_parameterName, _isTimeClip, _selectedType, symbol);
-                result = ChangeSymbol.SymbolModificationResults.ProjectViewDiscarded;
                 _parameterName = string.Empty;
             }
 

@@ -1,6 +1,7 @@
 #nullable enable
 using System.Diagnostics;
 using System.IO;
+using System.Windows.Forms.VisualStyles;
 using T3.Core.Compilation;
 using T3.Core.Operator;
 using T3.Core.Resource;
@@ -15,20 +16,22 @@ namespace T3.Editor.UiModel;
 [DebuggerDisplay("{DisplayName}")]
 internal sealed partial class EditableSymbolProject : EditorSymbolPackage
 {
-    public override AssemblyInformation AssemblyInformation => CsProjectFile.Assembly!;
     public override string DisplayName { get; }
 
     /// <summary>
     /// Create a new <see cref="EditableSymbolProject"/> using the given <see cref="CsProjectFile"/>.
     /// </summary>
-    public EditableSymbolProject(CsProjectFile csProjectFile) : base(assembly: csProjectFile.Assembly!, directory: csProjectFile.Directory)
+    public EditableSymbolProject(CsProjectFile csProjectFile) : base(assembly: AssemblyInformation.CreateUninitialized(), directory: csProjectFile.Directory, false)
     {
+        AssemblyInformation.Initialize(csProjectFile.GetBuildTargetDirectory(), false);
         CsProjectFile = csProjectFile;
         Log.Info($"Adding project {csProjectFile.Name}...");
-        _csFileWatcher = new CodeFileWatcher(this, OnFileChanged, OnFileRenamed);
+        _csFileWatcher = new CodeFileWatcher(this, OnFileChanged, OnCodeFileRenamed);
+        _csFileWatcher.EnableRaisingEvents = true;
         DisplayName = $"{csProjectFile.Name} ({CsProjectFile.RootNamespace})";
         SymbolUpdated += OnSymbolUpdated;
         SymbolRemoved += OnSymbolRemoved;
+        InitializeResources();
     }
 
     public void OpenProjectInCodeEditor()
@@ -97,7 +100,7 @@ internal sealed partial class EditableSymbolProject : EditorSymbolPackage
     }
 
 
-    private string ExcludeFolder => Path.Combine(Folder, "bin");
+    private static readonly string[] FolderExclusions = { "bin", "obj", "dependencies" };
 
     protected override IEnumerable<string> SymbolUiSearchFiles => FindFilesOfType(SymbolUiExtension);
 
@@ -107,15 +110,16 @@ internal sealed partial class EditableSymbolProject : EditorSymbolPackage
 
     private IEnumerable<string> FindFilesOfType(string fileExtension)
     {
-        return Directory.EnumerateDirectories(Folder)
-                        .Where(x => !x.StartsWith(ExcludeFolder))
-                        .SelectMany(x => Directory.EnumerateFiles(x, $"*{fileExtension}", SearchOption.AllDirectories))
-                        .Concat(Directory.EnumerateFiles(Folder, $"*{fileExtension}"));
+        var directoryInfo = new DirectoryInfo(Folder);
+        return directoryInfo.EnumerateDirectories()
+                        .Where(x => !FolderExclusions.Contains(x.Name))
+                        .SelectMany(x => x.EnumerateFiles($"*{fileExtension}", SearchOption.AllDirectories))
+                        .Concat(directoryInfo.EnumerateFiles($"*{fileExtension}")).Select(x => x.FullName);
     }
 
-    protected override void InitializeResources(AssemblyInformation assembly)
+    protected override void InitializeResources()
     {
-        base.InitializeResources(assembly);
+        base.InitializeResources();
         _resourceFileWatcher = new ResourceFileWatcher(ResourcesFolder);
     }
 
@@ -134,6 +138,7 @@ internal sealed partial class EditableSymbolProject : EditorSymbolPackage
     private ResourceFileWatcher? _resourceFileWatcher;
     public override ResourceFileWatcher? FileWatcher => _resourceFileWatcher;
     public override bool IsReadOnly => false;
+    
 
     public static IEnumerable<EditableSymbolProject> AllProjects => ProjectSetup.AllPackages.Where(x => x is EditableSymbolProject).Cast<EditableSymbolProject>();
 }

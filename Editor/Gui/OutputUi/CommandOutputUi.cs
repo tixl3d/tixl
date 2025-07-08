@@ -116,7 +116,7 @@ internal sealed class CommandOutputUi : OutputUi<Command>
         return true;
     }
         
-    private void OnGridInstanceDisposed()
+    private void OnGridInstanceDisposed(IResourceConsumer gridInstanceAsResourceConsumer)
     {
         _gridOutputs = null;
         _gridInstance!.Disposing -= _onGridInstanceDisposed;
@@ -243,6 +243,6 @@ internal sealed class CommandOutputUi : OutputUi<Command>
     // instance management
     private readonly Symbol? _outputWindowGridSymbol;
     private Instance? _gridInstance;
-    private readonly Action _onGridInstanceDisposed;
+    private readonly Action<IResourceConsumer> _onGridInstanceDisposed;
     private IReadOnlyList<ISlot>? _gridOutputs;
 }

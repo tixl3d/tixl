@@ -133,7 +133,7 @@ public sealed partial class DX11ShaderCompiler : ShaderCompiler
 
         public void Dispose()
         {
-            Disposing?.Invoke(); // Notify subscribers
+            Disposing?.Invoke(this); // Notify subscribers
             _streamReader?.Dispose();
         }
 
@@ -159,6 +159,6 @@ public sealed partial class DX11ShaderCompiler : ShaderCompiler
 
         public IReadOnlyList<IResourcePackage> AvailableResourcePackages { get; }
         public SymbolPackage Package { get; }
-        public event Action Disposing;
+        public event Action<IResourceConsumer> Disposing;
     }
 }

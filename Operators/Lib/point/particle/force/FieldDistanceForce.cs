@@ -31,6 +31,9 @@ internal sealed class FieldDistanceForce : Instance<FieldDistanceForce>
 
         [Input(Guid = "94d3ad87-0509-4fd4-9644-e2cb557f6789")]
         public readonly InputSlot<float> RandomPhase = new InputSlot<float>();
+
+        [Input(Guid = "6e1099f2-78d7-4807-ba06-6b5354fb6ac9")]
+        public readonly InputSlot<float> NormalSamplingDistance = new InputSlot<float>();
         
         
     private enum Modes {

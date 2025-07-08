@@ -230,7 +230,7 @@ public sealed class SearchDialog : ModalDialog
 
         var composition = _searchMode switch
                               {
-                                  SearchModes.Global             => components.OpenedProject.RootInstance,
+                                  SearchModes.Global             => components.RootInstance,
                                   SearchModes.Local              => compositionOp,
                                   SearchModes.LocalAndInChildren => compositionOp,
                                   _                              => throw new ArgumentOutOfRangeException()

@@ -41,7 +41,7 @@ public static class StartUp
         var isThereABackup = !string.IsNullOrEmpty(AutoBackup.AutoBackup.GetLatestArchiveFilePath());
         if (!isThereABackup)
         {
-            var result2 = BlockingWindow.Instance.ShowMessageBox("It looks like the last startup failed.\nSadly there is no backup yet.", "Startup Failed", "Retry", "Cancel");
+            var result2 = BlockingWindow.Instance.ShowMessageBox("It looks like the last startup failed.\nUnfortunately, there is no backup yet.", "Startup Failed", "Retry", "Cancel");
             if (result2 != "Retry")
             {
                 Log.Info("User cancelled startup.");
@@ -57,11 +57,11 @@ public static class StartUp
         var timeSpan = StringUtils.GetReadableRelativeTime(timeOfLastBackup);
 
         const string caption = "Oh no! Start up problems...";
-        string message = "It looks like last start up was incomplete.\n\n" +
-                         "You can press...\n\n" +
-                         $"  YES to restore latest backup {timeSpan}\n" +
-                         "  NO to open a link to documentation\n" +
-                         "  CANCEL to attempt starting anyways.\n";
+        string message = "It looks like the last startup was incomplete.\n\n" +
+                         "You can choose:\n\n" +
+                         $"  YES to restore the latest backup ({timeSpan})\n" +
+                         "  NO to open the documentation\n" +
+                         "  CANCEL to attempt starting anyway.\n";
 
         const string restore = "Restore backup";
         const string openDoc = "Open documentation";
@@ -75,13 +75,13 @@ public static class StartUp
                 if (wasSuccessful)
                 {
                     FlagStartupSequenceComplete();
-                    BlockingWindow.Instance.ShowMessageBox("Backup restored. Click OK to restart.\nFingers crossed.", "Complete", "Ok");
+                    BlockingWindow.Instance.ShowMessageBox("Backup restored. Click OK to restart.\nFingers crossed!", "Complete", "Ok");
                     //Application.Exit();
                     Environment.Exit(0);
                 }
                 else
                 {
-                    BlockingWindow.Instance.ShowMessageBox("Restoring backup failed.\nYou might want to try an earlier archive in .t3\\backup\\...", "Failed",
+                    BlockingWindow.Instance.ShowMessageBox("Restoring the backup failed.\nYou might want to try an earlier archive in .t3\\backup\\...", "Failed",
                                                            "Ok");
                     Environment.Exit(0);
                 }
@@ -99,5 +99,5 @@ public static class StartUp
     }
 
     private const string HelpUrl = "https://github.com/tixl3d/tixl/wiki/installation#setup-and-installation";
-    private static string StartUpLockFilePath => Path.Combine(FileLocations.SettingsPath, "startingUp");
+    private static string StartUpLockFilePath => Path.Combine(FileLocations.SettingsDirectory, "startingUp");
 }

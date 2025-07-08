@@ -1,7 +1,10 @@
 using System;
+using System.Linq;
 using T3.Core.Animation;
 using T3.Core.IO;
 using T3.Core.Logging;
+using T3.Core.Utils;
+
 // ReSharper disable ForCanBeConvertedToForeach
 
 namespace T3.Core.Operator.Slots;
@@ -21,6 +24,13 @@ internal interface IOutputDataUser<T> : IOutputDataUser
 {
 }
 
+/// <summary>
+/// An unfortunate workaround to allow flagging operators that should not update their source time region when being dragged
+/// in the timeline. This primarily useful for ops like [TimeClip] that do not involve content nested in their sub elements.
+/// Also see <see cref="TimeClip.UsedForRegionMapping"/>.
+/// </summary>
+public interface IPreventingTimeRemap;
+
 public sealed class TimeClipSlot<T> : Slot<T>, ITimeClipProvider, IOutputDataUser<TimeClip>
 {
     public TimeClip TimeClip { get; private set; }
@@ -34,6 +44,7 @@ public sealed class TimeClipSlot<T> : Slot<T>, ITimeClipProvider, IOutputDataUse
     {
         TimeClip = (TimeClip)data;
         TimeClip.Id = Parent.SymbolChildId;
+        TimeClip.UsedForRegionMapping = Parent is not IPreventingTimeRemap;
     }
 
     public UpdateStates LastUpdateStatus;
@@ -48,8 +59,13 @@ public sealed class TimeClipSlot<T> : Slot<T>, ITimeClipProvider, IOutputDataUse
 
         // TODO: Setting local time should flag time accessors as dirty 
         var prevTime = context.LocalTime;
-        double factor = (context.LocalTime - TimeClip.TimeRange.Start) / (TimeClip.TimeRange.End - TimeClip.TimeRange.Start);
-        context.LocalTime = factor * (TimeClip.SourceRange.End - TimeClip.SourceRange.Start) + TimeClip.SourceRange.Start;
+        var prevFxTime = context.LocalFxTime;
+        
+        context.LocalTime = prevTime.Remap(TimeClip.TimeRange.Start, TimeClip.TimeRange.End,
+                                           TimeClip.SourceRange.Start, TimeClip.SourceRange.End);
+        
+        context.LocalFxTime = prevFxTime.Remap(TimeClip.TimeRange.Start, TimeClip.TimeRange.End,
+                                               TimeClip.SourceRange.Start, TimeClip.SourceRange.End);
 
         if (_baseUpdateAction == null)
         {
@@ -61,6 +77,7 @@ public sealed class TimeClipSlot<T> : Slot<T>, ITimeClipProvider, IOutputDataUse
         }
 
         context.LocalTime = prevTime;
+        context.LocalFxTime = prevFxTime;
         LastUpdateStatus = UpdateStates.Active;
     }
 
@@ -105,7 +122,7 @@ public sealed class TimeClipSlot<T> : Slot<T>, ITimeClipProvider, IOutputDataUse
 
     protected override int InvalidationOverride()
     {
-        // Slot is an output of an composition op
+        // Slot is an output of a composition op
         if (HasInputConnections)
         {
             return InputConnections[0].Invalidate();

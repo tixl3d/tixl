@@ -1,14 +1,4 @@
-using SharpDX.Direct3D11;
-using SharpDX.DXGI;
 using SpoutDX;
-using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using T3.Core.Logging;
-using T3.Core.Operator;
-using T3.Core.Operator.Attributes;
-using T3.Core.Operator.Slots;
-using T3.Core.Resource;
 using DeviceContext = OpenGL.DeviceContext;
 using Resource = SharpDX.DXGI.Resource;
 using DXTexture2D = SharpDX.Direct3D11.Texture2D;
@@ -23,6 +13,12 @@ public class SpoutOutput : Instance<SpoutOutput>
 
     public SpoutOutput()
     {
+        if (!_triedForceLoad)
+        {
+            _triedForceLoad = true;
+           // Symbol.SymbolPackage.TryLoadNativeDependencies("Spout", "SpoutDX");
+        }
+        
         TextureOutput.UpdateAction = Update;
         _instance++;
     }
@@ -104,7 +100,7 @@ public class SpoutOutput : Instance<SpoutOutput>
         {
             _spoutDX = new SpoutDX.SpoutDX();
             _spoutDX.OpenDirectX11(_device);
-            Console.WriteLine(@$"Spout output is using adapter {GetAdapterName()}");
+            Log.Debug(@$"Spout output is using adapter {GetAdapterName()}");
 
             // create new sender and read back the actual name chosen by spout
             // (which may be different if you have multiple senders of the same name)
@@ -145,9 +141,19 @@ public class SpoutOutput : Instance<SpoutOutput>
             if (!InitializeSpout(senderName, (uint)width, (uint)height))
                 return false;
         }
-        catch (Exception e)
+        catch (InvalidOperationException e)
         {
             Log.Debug("Initialization of Spout failed. Are Spout.dll and SpoutDX.dll present in the executable folder?", this);
+            Log.Debug(e.ToString());
+            
+            _spoutDX?.ReleaseSender();
+            _spoutDX?.CloseDirectX11();
+            _spoutDX?.Dispose();
+            _spoutDX = null;
+            return false;
+        }
+        catch (Exception e)
+        {
             Log.Debug(e.ToString());
             _spoutDX?.ReleaseSender();
             _spoutDX?.CloseDirectX11();
@@ -261,6 +267,7 @@ public class SpoutOutput : Instance<SpoutOutput>
     private uint _width; // current width of our sender
     private uint _height; // current height of our sender
     private ID3D11Texture2D _texture; // texture to send
+    private bool _triedForceLoad = false; // have we tried to force load the native dependencies?
 
     // hold several textures internally to speed up calculations
     private const int NumTextureEntries = 2;

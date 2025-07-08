@@ -343,7 +343,22 @@ internal sealed class PlaceholderCreation
         }
 
         var newSymbolChild = newChildUi.SymbolChild;
-        var newInstance = context.CompositionInstance.Children[newChildUi.Id];
+
+        Instance newInstance;
+        try
+        {
+            newInstance = context.CompositionInstance.Children[newChildUi.Id];
+        }
+        catch (Exception e)
+        {
+            // This can happen if compilation of instance failed (e.g. because there is syntax error in the
+            // operator's c# code. Failing gracefully here will reveal these compilation errors in the console log.
+            Log.Error($"Failed to access newly created symbol child {newChildUi.Id}");
+            return;
+        }
+        
+        
+        //var newInstance = context.CompositionInstance.Children[newChildUi.Id];
         context.Selector.SetSelection(newChildUi, newInstance);
 
         // Connect to focus node...
@@ -565,8 +580,9 @@ internal sealed class PlaceholderCreation
                               Selectable = newChildUi,
                               Size = default,
                               SymbolUi = symbol.GetSymbolUi(),
-                              SymbolChild = null,
-                              Instance = newInstance,
+                              SymbolChild = newChildUi.SymbolChild,
+                              InstancePath = newInstance.InstancePath,
+                              
                           };
 
         List<MagGraphItem.InputLine> inputLines = [];

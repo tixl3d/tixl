@@ -10,9 +10,11 @@ using T3.Core.Operator;
 using T3.Core.Operator.Interfaces;
 using T3.Core.Resource;
 using T3.Editor.App;
+using T3.Editor.Compilation;
 using T3.Editor.Gui.Dialog;
 using T3.Editor.Gui.Graph.Dialogs;
 using T3.Editor.Gui.Interaction;
+using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.Interaction.Midi;
 using T3.Editor.Gui.Interaction.Timing;
 using T3.Editor.Gui.Interaction.Variations;
@@ -21,7 +23,6 @@ using T3.Editor.Gui.Templates;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.Layouts;
 using T3.Editor.Gui.Windows.Output;
-using T3.Editor.Gui.Windows.RenderExport;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Helpers;
@@ -61,7 +62,7 @@ public static class T3Ui
     {
         Profiling.KeepFrameData();
         ImGui.PushStyleColor(ImGuiCol.Text, UiColors.Text.Rgba);
-        DragHandling.Update();
+        DragAndDropHandling.Update();
 
         CustomComponents.BeginFrame();
         FormInputs.BeginFrame();
@@ -69,7 +70,9 @@ public static class T3Ui
 
         // Prepare the current frame 
         RenderStatsCollector.StartNewFrame();
-            
+        
+        UpdateProjectsIfNecessary();
+
         if (!Playback.Current.IsRenderingToFile && ProjectView.Focused != null)
         {
             PlaybackUtils.UpdatePlaybackAndSyncing();
@@ -89,7 +92,7 @@ public static class T3Ui
         
         FitViewToSelectionHandling.ProcessNewFrame();
         SrvManager.RemoveForDisposedTextures();
-        KeyboardBinding.InitFrame();
+        KeyActionHandling.InitializeFrame();
         
         CompatibleMidiDeviceHandling.UpdateConnectedDevices();
 
@@ -145,6 +148,26 @@ public static class T3Ui
         Profiling.EndFrameData();
     }
 
+    private static void UpdateProjectsIfNecessary()
+    {
+        foreach(var project in EditableSymbolProject.AllProjects)
+        {
+            project.Update(out var needsUpdating);
+            if (needsUpdating)
+            {
+                _modifiedProjects.Add(project);
+            }
+        }
+
+        if (_modifiedProjects.Count > 0)
+        {
+            var projects = _modifiedProjects.Cast<EditorSymbolPackage>().ToArray();
+            ProjectSetup.UpdateSymbolPackages(projects);
+        }
+        
+        _modifiedProjects.Clear();
+    }
+
     private static void InvalidateSelectedOpsForTransformGizmo(NodeSelection nodeSelection)
     {
         // Keep invalidating selected op to enforce rendering of Transform gizmo  
@@ -175,31 +198,31 @@ public static class T3Ui
 
     private static void TriggerGlobalActionsFromKeyBindings()
     {
-        if (KeyboardBinding.Triggered(UserActions.Undo))
+        if (KeyActionHandling.Triggered(UserActions.Undo))
         {
             UndoRedoStack.Undo();
         }
-        else if (KeyboardBinding.Triggered(UserActions.Redo))
+        else if (KeyActionHandling.Triggered(UserActions.Redo))
         {
             UndoRedoStack.Redo();
         }
-        else if (KeyboardBinding.Triggered(UserActions.Save))
+        else if (KeyActionHandling.Triggered(UserActions.Save))
         {
             SaveInBackground(saveAll: false);
         }
-        else if (KeyboardBinding.Triggered(UserActions.ToggleAllUiElements))
+        else if (KeyActionHandling.Triggered(UserActions.ToggleAllUiElements))
         {
             ToggleAllUiElements();
         }
-        else if (KeyboardBinding.Triggered(UserActions.SearchGraph))
+        else if (KeyActionHandling.Triggered(UserActions.SearchGraph))
         {
             _searchDialog.ShowNextFrame();
         }
-        else if (KeyboardBinding.Triggered(UserActions.ToggleFullscreen))
+        else if (KeyActionHandling.Triggered(UserActions.ToggleFullscreen))
         {
             UserSettings.Config.FullScreen = !UserSettings.Config.FullScreen;
         }
-        else if (KeyboardBinding.Triggered(UserActions.ToggleFocusMode)) ToggleFocusMode();
+        else if (KeyActionHandling.Triggered(UserActions.ToggleFocusMode)) ToggleFocusMode();
     }
 
     internal static void ToggleFocusMode()
@@ -293,7 +316,7 @@ public static class T3Ui
         if(!symbolUi.ChildUis.TryGetValue(symbolChildId, out var sourceChildUi))
             return;
         
-        if(!compositionOp.Children.TryGetValue(symbolChildId, out var selectionTargetInstance))
+        if(!compositionOp.Children.TryGetChildInstance(symbolChildId, out var selectionTargetInstance))
             return;
         
         components.NodeSelection.SetSelection(sourceChildUi, selectionTargetInstance);
@@ -360,6 +383,7 @@ public static class T3Ui
     internal static readonly NewProjectDialog NewProjectDialog = new();
     internal static readonly ExitDialog ExitDialog = new();
     internal static readonly TextureBgraReadAccess TextureBgraReadAccess = new();
+    private static readonly List<EditableSymbolProject> _modifiedProjects = new();
 
     [Flags]
     public enum EditingFlags

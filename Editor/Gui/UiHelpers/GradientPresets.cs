@@ -29,6 +29,6 @@ internal static class GradientPresets
     
     private static List<Gradient> _presets;
 
-    private static string FilePath => Path.Combine(FileLocations.SettingsPath, FileName);
+    private static string FilePath => Path.Combine(FileLocations.SettingsDirectory, FileName);
     private const string FileName = "gradients.json";
 }

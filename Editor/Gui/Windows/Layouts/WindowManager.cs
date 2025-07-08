@@ -2,6 +2,7 @@
 using ImGuiNET;
 using T3.Editor.Gui.Graph.Window;
 using T3.Editor.Gui.Interaction;
+using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.Exploration;
 using T3.Editor.Gui.Windows.Output;
@@ -20,7 +21,7 @@ internal static partial class WindowManager
             
         LayoutHandling.ProcessKeyboardShortcuts();
 
-        if (KeyboardBinding.Triggered(UserActions.ToggleVariationsWindow))
+        if (KeyActionHandling.Triggered(UserActions.ToggleVariationsWindow))
         {
             ToggleWindowTypeVisibility<VariationsWindow>();
         }
