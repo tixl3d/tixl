@@ -23,10 +23,9 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
             var pivot = Pivot.GetValue(context);
             var rotation = Rotation.GetValue(context);
             var center = Center.GetValue(context);
-            var subdivisions = Subdivisions.GetValue(context).Clamp(0, 5); // Limit subdivisions for performance
+            var subdivisions = Subdivisions.GetValue(context).Clamp(0, 5);
             var uvMapMode = TexCoord.GetValue(context);
             IUvMapper uvMapper = GetUvMapper(uvMapMode);
-
             var shadingMode = Shading.GetValue(context);
 
             float yaw = rotation.Y.ToRadians();
@@ -34,35 +33,26 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
             float roll = rotation.Z.ToRadians();
             var rotationMatrix = Matrix4x4.CreateFromYawPitchRoll(yaw, pitch, roll);
 
-            // Declare variables first
-            Vector3[] vertices = null;
-            Int3[] triangles = null;
-
-            if (shadingMode == (int)ShadingModes.Smoothed)
+            // Generate mesh using flat shading structure
+            var (vertices, triangles) = GenerateIcosahedron();
+            if (subdivisions > 0)
             {
-                (vertices, triangles) = GenerateSmoothIcosahedron();
-                if (subdivisions > 0)
-                {
-                    SubdivideMesh(ref vertices, ref triangles, subdivisions);
-                }
-            }
-            else if (shadingMode == (int)ShadingModes.Flat)
-            {
-                (vertices, triangles) = GenerateIcosahedron();
-                if (subdivisions > 0)
-                {
-                   // SubdivideMesh(ref vertices, ref triangles, subdivisions);
-                    SubdivideMeshFlat(ref vertices, ref triangles, subdivisions);
-                }
+                SubdivideMeshFlat(ref vertices, ref triangles, subdivisions);
             }
 
-            //if (subdivisions > 0)
-            //{
-            //    SubdivideMesh(ref vertices, ref triangles, subdivisions);
-            //}
+            // Calculate normals based on shading mode
+            var normals = (shadingMode == (int)ShadingModes.Smoothed)
+                ? CalculateSmoothNormals(vertices, triangles)
+                : CalculateFlatNormals(vertices, triangles);
 
-            // Calculate normals (after subdivision)
-            var normals = CalculateNormals(vertices, triangles);
+            // Debug: Log a few normals to compare
+            if (vertices.Length >= 3)
+            {
+                Log.Debug($"Shading: {(shadingMode == (int)ShadingModes.Smoothed ? "Smooth" : "Flat")}");
+                Log.Debug($"Normal[0]: {normals[0]}");
+                Log.Debug($"Normal[1]: {normals[1]}");
+                Log.Debug($"Normal[2]: {normals[2]}");
+            }
 
             // Create buffers
             if (_vertexBufferData.Length != vertices.Length)
@@ -74,36 +64,23 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
             // Transform vertices
             var centerVec = new Vector3(center.X, center.Y, center.Z);
             var offset = new Vector3(
-                 stretch.X * scale * (pivot.X),
-                 stretch.Y * scale * (pivot.Y),
-                 stretch.X * scale * (pivot.Z) // Use pivot.Z instead of pivot.X
+                stretch.X * scale * pivot.X,
+                stretch.Y * scale * pivot.Y,
+                stretch.X * scale * pivot.Z
             );
 
             for (int i = 0; i < vertices.Length; i++)
             {
-                // Apply scale and stretch
                 var pos = new Vector3(
                     vertices[i].X * scale * stretch.X,
                     vertices[i].Y * scale * stretch.Y,
-                    vertices[i].Z * scale * stretch.X // Or create stretch.Z if you want independent Z scaling
+                    vertices[i].Z * scale * stretch.X
                 );
 
-                // Apply rotation and offset
                 pos = Vector3.Transform(pos + offset, rotationMatrix) + centerVec;
-                
-                var uv = new Vector2(0.5f, 0.5f); // Default UV
-                uv = uvMapper.CalculateUV(vertices[i], normals[i], i % 3, (int)phi / 3);
-               /* if (shadingMode == (int)ShadingModes.Smoothed)
-                {
-                    uv = uvMapper.CalculateUV(vertices[i], normals[i], i % 3, -1);
-                   // uv = uvMapper.CalculateUV(vertices[i], normals[i], i % 3, (int)phi / 3);
-                }
-                else if (shadingMode == (int)ShadingModes.Flat)
-                {
-                    uv = uvMapper.CalculateUV(vertices[i], normals[i], i % 3, (int)phi / 3);
-                }*/
-                   
-                //var uv = uvMapper.CalculateUV(vertices[i], normals[i]);
+
+                var uv = uvMapper.CalculateUV(vertices[i], normals[i], i % 3, i / 3); // Use i / 3 for triangle index
+
                 _vertexBufferData[i] = new PbrVertex
                 {
                     Position = pos,
@@ -144,10 +121,9 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
         }
         catch (Exception e)
         {
-            Log.Error("Failed to create icosahedron mesh:" + e.Message);
+            Log.Error("Failed to create icosahedron mesh: " + e.Message);
         }
     }
-
 
     private static (Vector3[] vertices, Int3[] triangles) GenerateIcosahedron()
     {
@@ -194,107 +170,119 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
 
         foreach (var tri in baseTriangles)
         {
-            // Add the 3 vertices of the triangle (duplicated for flat shading)
             int v0 = vertices.Count;
             vertices.Add(baseVertices[tri.X]);
             vertices.Add(baseVertices[tri.Y]);
             vertices.Add(baseVertices[tri.Z]);
-
-            // Add the triangle indices (pointing to the new vertices)
             triangles.Add(new Int3(v0, v0 + 1, v0 + 2));
         }
 
         return (vertices.ToArray(), triangles.ToArray());
     }
 
-    private static (Vector3[] vertices, Int3[] triangles) GenerateSmoothIcosahedron()
+    private static Vector3[] CalculateFlatNormals(Vector3[] vertices, Int3[] triangles)
     {
-        var vertices = new Vector3[12];
-        // Create and normalize vertices
-        vertices[0] = Vector3.Normalize(new Vector3(-1, phi, 0));
-        vertices[1] = Vector3.Normalize(new Vector3(1, phi, 0));
-        vertices[2] = Vector3.Normalize(new Vector3(-1, -phi, 0));
-        vertices[3] = Vector3.Normalize(new Vector3(1, -phi, 0));
+        var normals = new Vector3[vertices.Length];
 
-        vertices[4] = Vector3.Normalize(new Vector3(0, -1, phi));
-        vertices[5] = Vector3.Normalize(new Vector3(0, 1, phi));
-        vertices[6] = Vector3.Normalize(new Vector3(0, -1, -phi));
-        vertices[7] = Vector3.Normalize(new Vector3(0, 1, -phi));
+        for (int i = 0; i < triangles.Length; i++)
+        {
+            var tri = triangles[i];
+            Vector3 v1 = vertices[tri.X];
+            Vector3 v2 = vertices[tri.Y];
+            Vector3 v3 = vertices[tri.Z];
 
-        vertices[8] = Vector3.Normalize(new Vector3(phi, 0, -1));
-        vertices[9] = Vector3.Normalize(new Vector3(phi, 0, 1));
-        vertices[10] = Vector3.Normalize(new Vector3(-phi, 0, -1));
-        vertices[11] = Vector3.Normalize(new Vector3(-phi, 0, 1));
+            Vector3 normal = Vector3.Normalize(Vector3.Cross(v2 - v1, v3 - v1));
 
-        var triangles = new Int3[20];
-        // 5 faces around point 0
-        triangles[0] = new Int3(0, 11, 5);
-        triangles[1] = new Int3(0, 5, 1);
-        triangles[2] = new Int3(0, 1, 7);
-        triangles[3] = new Int3(0, 7, 10);
-        triangles[4] = new Int3(0, 10, 11);
+            normals[tri.X] = normal;
+            normals[tri.Y] = normal;
+            normals[tri.Z] = normal;
+        }
 
-        // 5 adjacent faces
-        triangles[5] = new Int3(1, 5, 9);
-        triangles[6] = new Int3(5, 11, 4);
-        triangles[7] = new Int3(11, 10, 2);
-        triangles[8] = new Int3(10, 7, 6);
-        triangles[9] = new Int3(7, 1, 8);
-
-        // 5 faces around point 3
-        triangles[10] = new Int3(3, 9, 4);
-        triangles[11] = new Int3(3, 4, 2);
-        triangles[12] = new Int3(3, 2, 6);
-        triangles[13] = new Int3(3, 6, 8);
-        triangles[14] = new Int3(3, 8, 9);
-
-        // 5 adjacent faces
-        triangles[15] = new Int3(4, 9, 5);
-        triangles[16] = new Int3(2, 4, 11);
-        triangles[17] = new Int3(6, 2, 10);
-        triangles[18] = new Int3(8, 6, 7);
-        triangles[19] = new Int3(9, 8, 1);
-
-        return (vertices, triangles);
+        return normals;
     }
 
-    // Subdivide mesh using loop subdivision
-    private static void SubdivideMesh(ref Vector3[] vertices, ref Int3[] triangles, int levels)
+    private static Vector3[] CalculateSmoothNormals(Vector3[] vertices, Int3[] triangles)
     {
-        for (int i = 0; i < levels; i++)
+        var normals = new Vector3[vertices.Length];
+
+        // Group vertices by position to identify duplicates
+        var positionToIndices = new Dictionary<Vector3, List<int>>(new Vector3EqualityComparer());
+        for (int i = 0; i < vertices.Length; i++)
         {
-            var newTriangles = new List<Int3>(triangles.Length * 4);
-            var newVertices = new List<Vector3>(vertices);
-            var edgeMap = new Dictionary<long, int>();
+            if (!positionToIndices.ContainsKey(vertices[i]))
+                positionToIndices[vertices[i]] = new List<int>();
+            positionToIndices[vertices[i]].Add(i);
+        }
 
-            for (int t = 0; t < triangles.Length; t++)
+        // Calculate face normals and accumulate for each vertex position
+        var positionNormals = new Dictionary<Vector3, Vector3>(new Vector3EqualityComparer());
+        var positionTriangleCount = new Dictionary<Vector3, int>(new Vector3EqualityComparer());
+
+        for (int i = 0; i < triangles.Length; i++)
+        {
+            var tri = triangles[i];
+            Vector3 v1 = vertices[tri.X];
+            Vector3 v2 = vertices[tri.Y];
+            Vector3 v3 = vertices[tri.Z];
+
+            Vector3 normal = Vector3.Normalize(Vector3.Cross(v2 - v1, v3 - v1));
+
+            // Accumulate normal for each vertex position
+            foreach (var v in new[] { v1, v2, v3 })
             {
-                int v1 = triangles[t].X;
-                int v2 = triangles[t].Y;
-                int v3 = triangles[t].Z;
-
-                // Get or create edge vertices
-                int a = GetEdgePoint(v1, v2, ref vertices, ref newVertices, ref edgeMap);
-                int b = GetEdgePoint(v2, v3, ref vertices, ref newVertices, ref edgeMap);
-                int c = GetEdgePoint(v3, v1, ref vertices, ref newVertices, ref edgeMap);
-
-                // Add new triangles
-                newTriangles.Add(new Int3(v1, a, c));
-                newTriangles.Add(new Int3(v2, b, a));
-                newTriangles.Add(new Int3(v3, c, b));
-                newTriangles.Add(new Int3(a, b, c));
+                if (!positionNormals.ContainsKey(v))
+                {
+                    positionNormals[v] = Vector3.Zero;
+                    positionTriangleCount[v] = 0;
+                }
+                positionNormals[v] += normal;
+                positionTriangleCount[v]++;
             }
+        }
 
-            // Project all vertices to sphere (normalize)
-            for (int v = 0; v < newVertices.Count; v++)
+        // Average normals per position
+        foreach (var kvp in positionNormals)
+        {
+            var pos = kvp.Key;
+            var normalSum = kvp.Value;
+            var count = positionTriangleCount[pos];
+            var averagedNormal = count > 0 ? Vector3.Normalize(normalSum / count) : Vector3.UnitY;
+
+            // Assign averaged normal to all vertices at this position
+            foreach (var index in positionToIndices[pos])
             {
-                newVertices[v] = Vector3.Normalize(newVertices[v]);
+                normals[index] = averagedNormal;
             }
+        }
 
-            triangles = newTriangles.ToArray();
-            vertices = newVertices.ToArray();
+        return normals;
+    }
+
+    // Helper class for comparing Vector3 positions with a small tolerance
+    private class Vector3EqualityComparer : IEqualityComparer<Vector3>
+    {
+        private const float Epsilon = 0.0001f;
+
+        public bool Equals(Vector3 a, Vector3 b)
+        {
+            return Math.Abs(a.X - b.X) < Epsilon &&
+                   Math.Abs(a.Y - b.Y) < Epsilon &&
+                   Math.Abs(a.Z - b.Z) < Epsilon;
+        }
+
+        public int GetHashCode(Vector3 obj)
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = hash * 23 + obj.X.GetHashCode();
+                hash = hash * 23 + obj.Y.GetHashCode();
+                hash = hash * 23 + obj.Z.GetHashCode();
+                return hash;
+            }
         }
     }
+
 
     // Subdivide mesh for flat shading (each triangle gets its own vertices)
     private static void SubdivideMeshFlat(ref Vector3[] vertices, ref Int3[] triangles, int levels)
@@ -345,53 +333,7 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
         }
     }
 
-    private static int GetEdgePoint(int a, int b, ref Vector3[] vertices, ref List<Vector3> newVertices, ref Dictionary<long, int> edgeMap)
-    {
-        // Create a unique key for the edge (order-independent)
-        long key = ((long)Math.Min(a, b) << 32) + Math.Max(a, b);
-
-        if (edgeMap.TryGetValue(key, out int index))
-        {
-            return index;
-        }
-
-        // Create new vertex at midpoint
-        Vector3 newVertex = (vertices[a] + vertices[b]) * 0.5f;
-
-        int newIndex = newVertices.Count;
-        newVertices.Add(newVertex);
-        edgeMap[key] = newIndex;
-
-        return newIndex;
-    }
-
-    private static Vector3[] CalculateNormals(Vector3[] vertices, Int3[] triangles)
-    {
-        var normals = new Vector3[vertices.Length];
-
-        foreach (var tri in triangles)
-        {
-            Vector3 v1 = vertices[tri.X];
-            Vector3 v2 = vertices[tri.Y];
-            Vector3 v3 = vertices[tri.Z];
-
-            Vector3 normal = Vector3.Cross(v2 - v1, v3 - v1);
-            normal = Vector3.Normalize(normal); // Normalize triangle normal
-
-            normals[tri.X] += normal;
-            normals[tri.Y] += normal;
-            normals[tri.Z] += normal;
-        }
-
-        // Actually normalize all normals
-        for (int i = 0; i < normals.Length; i++)
-        {
-            if (normals[i].LengthSquared() > 0)
-                normals[i] = Vector3.Normalize(normals[i]);
-        }
-
-        return normals;
-    }
+    
 
     private IUvMapper GetUvMapper(int uvMapMode)
     {
@@ -410,37 +352,26 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
 
     private class Faces : IUvMapper
     {
-        // Predefined UV coordinates for each vertex in each face
-        private static readonly Vector2[] _faceUvs = new Vector2[]
+        // UV coordinates that repeat every 3 vertices
+        private static readonly Vector2[] _baseUvs = new Vector2[3]
         {
-        // Triangle 0 (0, 11, 5)
-        new Vector2(0.5f, 1.0f),  // vertex 0
-        new Vector2(0.067f, 0.250f),   // vertex 11
-        new Vector2(0.933f, 0.250f),   // vertex 5
-        
-        // Triangle 1 (0, 5, 1)
-        /*new Vector2(0.5f, 1.0f),   // vertex 0
-        new Vector2(1.0f, 0.0f),   // vertex 5
-        new Vector2(0.0f, 0.0f),   // vertex 1
-        
-        // Triangle 2 (0, 1, 7)
-        new Vector2(0.5f, 1.0f),   // vertex 0
-        new Vector2(0.0f, 0.0f),   // vertex 1
-        new Vector2(1.0f, 0.0f),   // vertex 7*/
-
-            // Continue for all 20 triangles...
-            // You'll need to define UVs for all faces following the same pattern
+        new Vector2(0.5f, 1.0f),    // vertex 0 (center top)
+        new Vector2(0.067f, 0.250f), // vertex 11 (left bottom)
+        new Vector2(0.933f, 0.250f)  // vertex 5 (right bottom)
         };
 
         public Vector2 CalculateUV(Vector3 vertex, Vector3 normal, int vertexIndex, int triangleIndex)
         {
-            // For flat shading, each triangle has its own set of vertices
-            if (triangleIndex >= 0 && triangleIndex * 3 + vertexIndex < _faceUvs.Length)
+            // The pattern repeats every 3 vertices, so we can use modulo
+            int uvIndex = vertexIndex % 3;
+
+            if (uvIndex >= 0 && uvIndex < _baseUvs.Length)
             {
-                return _faceUvs[triangleIndex * 3 + vertexIndex];
+                return _baseUvs[uvIndex];
             }
 
             // Fallback for unexpected cases
+            Log.Warning($"Invalid UV index: {uvIndex}. Using fallback UV.");
             return new Vector2(0.5f, 0.5f);
         }
     }
