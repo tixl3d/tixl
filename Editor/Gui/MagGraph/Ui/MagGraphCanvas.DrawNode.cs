@@ -1012,19 +1012,20 @@ internal sealed partial class MagGraphCanvas
                     CustomComponents.TooltipForLastItem(UiColors.StatusWarning, statusLevel.ToString(), statusProvider.GetStatusMessage(), false);
                 }
             }
-            
-            #if DEBUG
-            var s = item.Size.Y * 0.15f * CanvasScale;
-            ImGui.SetCursorScreenPos(pMinVisible + new Vector2(s, pMaxVisible.Y - pMinVisible.Y - s));
-            ImGui.InvisibleButton("#status", new Vector2(s, s));
-            Icons.DrawIconOnLastItem(Icon.HelpOutline, Color.White with {A = 0.1f});
 
-            if (ImGui.BeginItemTooltip())
+            if (UserSettings.Config.ShowOperatorStats)
             {
-                DrawInstanceStatus(instance);
-                ImGui.EndTooltip();
+                var s = item.Size.Y * 0.15f * CanvasScale;
+                ImGui.SetCursorScreenPos(pMinVisible + new Vector2(s, pMaxVisible.Y - pMinVisible.Y - s));
+                ImGui.InvisibleButton("#status", new Vector2(s, s));
+                Icons.DrawIconOnLastItem(Icon.HelpOutline, Color.White with {A = 0.1f});
+
+                if (ImGui.BeginItemTooltip())
+                {
+                    DrawInstanceStatus(instance);
+                    ImGui.EndTooltip();
+                }
             }
-            #endif
         }
 
         #if DEBUG

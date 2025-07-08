@@ -153,6 +153,7 @@ internal static class Program
         forceRecompileProjects = args is {Length: > 0} && args.Any(arg => arg == "--force-recompile");
         #endif
 
+        Log.Debug("Loading projects...");
         // Initialize UI and load complete symbol model
         if (!ProjectSetup.TryLoadAll(forceRecompileProjects, out var uiException))
         {

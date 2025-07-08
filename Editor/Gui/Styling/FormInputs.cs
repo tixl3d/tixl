@@ -31,9 +31,9 @@ internal static class FormInputs
         ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
         ImGui.PushFont(Fonts.FontBold);
         
-        AddVerticalSpace(7);
+        AddVerticalSpace(15 * T3Ui.UiScaleFactor);
         ImGui.TextUnformatted(label);
-        AddVerticalSpace(5);
+        AddVerticalSpace(5 * T3Ui.UiScaleFactor);
         ImGui.PopFont();
         ImGui.PopStyleColor();
     }

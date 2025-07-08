@@ -261,6 +261,30 @@ internal sealed class SettingsWindow : Window
                     FormInputs.AddSectionHeader("Project specific settings");
                     FormInputs.AddVerticalSpace();
 
+                    FormInputs.AddSectionSubHeader("Project Settings");
+                    changed |= FormInputs.AddStringInput("Project Directory",
+                                                         ref UserSettings.Config.ProjectsFolder,
+                                                         "Nickname",
+                                                         Directory.Exists(UserSettings.Config.ProjectsFolder) ? null : "Folder does not exists",
+                                                         """
+                                                         A writable directory for your projects.
+                                                         Changing it will require a restart!
+                                                         """,
+                                                         FileLocations.DefaultProjectFolder);
+                    FormInputs.AddVerticalSpace();
+                    FormInputs.SetIndentToLeft();
+                    
+                    changed |= FormInputs.AddCheckBox("Enable Backup",
+                                                      ref UserSettings.Config.EnableAutoBackup,
+                                                      $"""
+                                                       Save backups of your projects every {AutoBackup.AutoBackup.SecondsBetweenSaves / 60} min. Backup files will be thinned out so fewer backups are kept the older they are.
+                                                       The total number of files stored will not exceed 40.
+                                                       Files exceed 100mb will not be archived.
+
+                                                       They are saved as zip-archives to {AutoBackup.AutoBackup.BackupDirectory}.
+                                                       """,
+                                                      UserSettings.Defaults.EnableAutoBackup);
+                    
                     FormInputs.AddSectionSubHeader("Performance Settings");
                     FormInputs.SetIndentToLeft();
 
@@ -278,28 +302,22 @@ internal sealed class SettingsWindow : Window
                                                                      Changing this option requires a restart.
                                                                      """,
                                                                      ProjectSettings.Config.EnableDirectXDebug);
+                    
+                    FormInputs.AddSectionSubHeader("Audio Sync");
                     FormInputs.SetIndentToParameters();
-                    FormInputs.AddVerticalSpace();
-                    FormInputs.AddSectionSubHeader("Project Settings");
-                    changed |= FormInputs.AddStringInput("Project Directory",
-                                                         ref UserSettings.Config.ProjectsFolder,
-                                                         "Nickname",
-                                                         Directory.Exists(UserSettings.Config.ProjectsFolder) ? null : "Folder does not exists",
-                                                         """
-                                                         A writable directory for your projects.
-                                                         Changing it will require a restart!
-                                                         """,
-                                                         FileLocations.DefaultProjectFolder);
-                    FormInputs.AddVerticalSpace();
-                    changed |= FormInputs.AddCheckBox("Enable Backup",
-                                                      ref UserSettings.Config.EnableAutoBackup,
-                                                      $"""
-                                                       Save backups of your projects every {AutoBackup.AutoBackup.SecondsBetweenSaves / 60} min. Backup files will be thinned out so fewer backups are kept the older they are.
-                                                       The total number of files stored will not exceed 40.
+                    changed |= FormInputs.AddFloat("Beat Sync Offset (ms)",
+                                                   ref ProjectSettings.Config.BeatSyncOffsetMs,
+                                                   -200f, 200f, 0.01f, 
+                                                   true,
+                                                   """
+                                                   When using beat lock through audio analysis, you can slightly offset the phase. 
 
-                                                       They are saved as zip-archives to {AutoBackup.AutoBackup.BackupDirectory}.
-                                                       """,
-                                                      UserSettings.Defaults.EnableAutoBackup);
+                                                   This might be useful to tighten the sync between audio and video, e.g. if the visual output is delayed by video-processing devices.
+                                                   """,
+                                                   ProjectSettings.Defaults.BeatSyncOffsetMs);
+                    
+                    FormInputs.SetIndentToParameters();
+
 
                     FormInputs.AddVerticalSpace();
                     
@@ -407,6 +425,7 @@ internal sealed class SettingsWindow : Window
                     KeyMapEditor.DrawEditor();
 
                     break;
+                
                 case Categories.Profiling:
                 {
                     FormInputs.AddSectionHeader("Profiling and debugging");
@@ -414,12 +433,14 @@ internal sealed class SettingsWindow : Window
                     CustomComponents.HelpText("Enabling this will add slight performance overhead.\nChanges will require a restart of Tooll.");
                     FormInputs.AddVerticalSpace();
 
+                    FormInputs.SetIndentToParameters();
+                    FormInputs.AddSectionSubHeader("Log events");
                     FormInputs.SetIndentToLeft();
-
                     changed |= FormInputs.AddCheckBox("Enable Frame Profiling",
                                                       ref UserSettings.Config.EnableFrameProfiling,
                                                       "A basic frame profile for the duration of frame processing. Overhead is minimal.",
                                                       UserSettings.Defaults.EnableFrameProfiling);
+                    
                     changed |= FormInputs.AddCheckBox("Keep Log Messages",
                                                       ref UserSettings.Config.KeepTraceForLogMessages,
                                                       "Store log messages in the profiling data. This can be useful to see correlation between frame drops and log messages.",
@@ -429,50 +450,56 @@ internal sealed class SettingsWindow : Window
                                                       ref UserSettings.Config.EnableGCProfiling,
                                                       "Log garbage collection information. This can be useful to see correlation between frame drops and GC activity.",
                                                       UserSettings.Defaults.EnableGCProfiling);
-
-                    FormInputs.AddVerticalSpace();
-                    changed |= FormInputs.AddCheckBox("Log C# Compilation Details",
-                                                      ref UserSettings.Config.LogCsCompilationDetails,
-                                                      "Logs additional compilation details with the given severity",
-                                                      UserSettings.Defaults.LogCsCompilationDetails);
-
-                    FormInputs.AddVerticalSpace();
+                    
                     changed |= FormInputs.AddCheckBox("Profile Beat Syncing",
                                                       ref ProjectSettings.Config.EnableBeatSyncProfiling,
                                                       "Logs beat sync timing to IO Window",
                                                       ProjectSettings.Defaults.EnableBeatSyncProfiling);
-                    
-                    FormInputs.SetIndentToParameters();
-                    changed |= FormInputs.AddFloat("Beat Sync Offset (ms)",
-                                                   ref ProjectSettings.Config.BeatSyncOffsetMs,
-                                                   -200f, 200f, 0.01f, 
-                                                   true,
-                                                   """
-                                                   When using beat lock through audio analysis, you can slightly offset the phase. 
-                                                   
-                                                   This might be useful to tighten the sync between audio and video, e.g. if the visual output is delayed by video-processing devices.
-                                                   """,
-                                                   ProjectSettings.Defaults.BeatSyncOffsetMs);
-                    FormInputs.SetIndentToLeft();
 
-                    if (UserSettings.Config.LogCsCompilationDetails)
+                    FormInputs.AddSectionSubHeader("Compilation");
+                    
+                    // Compilation details
                     {
-                        FormInputs.SetIndentToParameters();
-                        changed |= FormInputs.AddEnumDropdown(ref UserSettings.Config.CompileCsVerbosity,
-                                                              "C# compiler logs",
-                                                              null,
-                                                              UserSettings.Defaults.CompileCsVerbosity
-                                                             );
+                        
+                        changed |= FormInputs.AddCheckBox("Log Assembly Version mismatches",
+                                                          ref ProjectSettings.Config.LogAssemblyVersionMismatches,
+                                                          """
+                                                          Version mismatches are frequently caused by slightly outdated 3rd party library that we depend on.
+                                                          These are only relevant in situations where you need to debug or analyse assembly loading problems. 
+                                                          """,
+                                                          ProjectSettings.Defaults.LogAssemblyVersionMismatches);                        
+                        
+                        
+                        changed |= FormInputs.AddCheckBox("Log C# Compilation Details",
+                                                          ref UserSettings.Config.LogCsCompilationDetails,
+                                                          "Logs additional compilation details with the given severity",
+                                                          UserSettings.Defaults.LogCsCompilationDetails);
+
+                        if (UserSettings.Config.LogCsCompilationDetails)
+                        {
+                            FormInputs.SetIndentToParameters();
+                            changed |= FormInputs.AddEnumDropdown(ref UserSettings.Config.CompileCsVerbosity,
+                                                                  "C# compiler logs",
+                                                                  null,
+                                                                  UserSettings.Defaults.CompileCsVerbosity
+                                                                 );
+                        }
+
                     }
+                    FormInputs.AddVerticalSpace();
+                    FormInputs.SetIndentToLeft();
+                    
+                    changed |= FormInputs.AddCheckBox("Show Operator status indicators",
+                                                      ref UserSettings.Config.ShowOperatorStats,
+                                                      """
+                                                      Draws an context overlay with various operator stats. 
+                                                      """,
+                                                      UserSettings.Defaults.ShowOperatorStats);
 
                     FormInputs.AddVerticalSpace();
-                    changed |= FormInputs.AddCheckBox("Log Assembly Version mismatches",
-                                                      ref ProjectSettings.Config.LogAssemblyVersionMismatches,
-                                                      """
-                                                      Version mismatches are frequently caused by slightly outdated 3rd party library that we depend on.
-                                                      These are only relevant in situations where you need to debug or analyse assembly loading problems. 
-                                                      """,
-                                                      ProjectSettings.Defaults.LogAssemblyVersionMismatches);
+                    
+
+                    
 
                     break;
                 }

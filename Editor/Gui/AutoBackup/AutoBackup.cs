@@ -55,10 +55,12 @@ internal static class AutoBackup
         var zipFilePath = Path.Join(BackupDirectory, $"#{index:D5}-{DateTime.Now:yyyy_MM_dd-HH_mm_ss_fff}.zip");
 
         var excludedDirs = new[] { "bin", "obj", ".git", "Render", "ImageSequence", "Screenshots" };
+        const long maxSizeBytes = 100 * 1024 * 1024; // 100 MB
+
         try
         {
             using var archive = ZipFile.Open(zipFilePath, ZipArchiveMode.Create);
-            
+
             foreach (var sourcePath in SourcePaths)
             {
                 if (!Directory.Exists(sourcePath))
@@ -73,6 +75,10 @@ internal static class AutoBackup
 
                     var parts = relativePath.Split(Path.DirectorySeparatorChar);
                     if (parts.Any(part => excludedDirs.Contains(part, StringComparer.OrdinalIgnoreCase)))
+                        continue;
+
+                    var fileInfo = new FileInfo(filepath);
+                    if (fileInfo.Length > maxSizeBytes)
                         continue;
 
                     archive.CreateEntryFromFile(filepath, relativePath, CompressionLevel.Fastest);
