@@ -24,6 +24,7 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
             var rotation = Rotation.GetValue(context);
             var center = Center.GetValue(context);
             var subdivisions = Subdivisions.GetValue(context).Clamp(0, 5);
+            var spherical = Spherical.GetValue(context);
             var uvMapMode = TexCoord.GetValue(context);
             IUvMapper uvMapper = GetUvMapper(uvMapMode);
             var shadingMode = Shading.GetValue(context);
@@ -37,7 +38,7 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
             var (vertices, triangles) = GenerateIcosahedron();
             if (subdivisions > 0)
             {
-                SubdivideMeshFlat(ref vertices, ref triangles, subdivisions);
+                SubdivideMeshFlat(ref vertices, ref triangles, subdivisions, spherical);
             }
 
             // Calculate normals based on shading mode
@@ -285,7 +286,7 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
 
 
     // Subdivide mesh for flat shading (each triangle gets its own vertices)
-    private static void SubdivideMeshFlat(ref Vector3[] vertices, ref Int3[] triangles, int levels)
+    private static void SubdivideMeshFlat(ref Vector3[] vertices, ref Int3[] triangles, int levels, bool spherical = true)
     {
         for (int i = 0; i < levels; i++)
         {
@@ -298,30 +299,30 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
                 Vector3 v2 = vertices[triangles[t].Y];
                 Vector3 v3 = vertices[triangles[t].Z];
 
-                // Calculate midpoints (but don't share them between triangles)
-                Vector3 a = Vector3.Normalize((v1 + v2) * 0.5f);
-                Vector3 b = Vector3.Normalize((v2 + v3) * 0.5f);
-                Vector3 c = Vector3.Normalize((v3 + v1) * 0.5f);
+                // Calculate midpoints (linear interpolation)
+                Vector3 a = (v1 + v2) * 0.5f;
+                Vector3 b = (v2 + v3) * 0.5f;
+                Vector3 c = (v3 + v1) * 0.5f;
 
-                // Add all vertices (original and new)
+                // Add all vertices (optionally normalize)
                 int baseIndex = newVertices.Count;
-                newVertices.Add(Vector3.Normalize(v1));
-                newVertices.Add(Vector3.Normalize(a));
-                newVertices.Add(Vector3.Normalize(c));
+                newVertices.Add(spherical ? Vector3.Normalize(v1) : v1);
+                newVertices.Add(spherical ? Vector3.Normalize(a) : a);
+                newVertices.Add(spherical ? Vector3.Normalize(c) : c);
 
-                newVertices.Add(Vector3.Normalize(v2));
-                newVertices.Add(Vector3.Normalize(b));
-                newVertices.Add(Vector3.Normalize(a));
+                newVertices.Add(spherical ? Vector3.Normalize(v2) : v2);
+                newVertices.Add(spherical ? Vector3.Normalize(b) : b);
+                newVertices.Add(spherical ? Vector3.Normalize(a) : a);
 
-                newVertices.Add(Vector3.Normalize(v3));
-                newVertices.Add(Vector3.Normalize(c));
-                newVertices.Add(Vector3.Normalize(b));
+                newVertices.Add(spherical ? Vector3.Normalize(v3) : v3);
+                newVertices.Add(spherical ? Vector3.Normalize(c) : c);
+                newVertices.Add(spherical ? Vector3.Normalize(b) : b);
 
-                newVertices.Add(Vector3.Normalize(a));
-                newVertices.Add(Vector3.Normalize(b));
-                newVertices.Add(Vector3.Normalize(c));
+                newVertices.Add(spherical ? Vector3.Normalize(a) : a);
+                newVertices.Add(spherical ? Vector3.Normalize(b) : b);
+                newVertices.Add(spherical ? Vector3.Normalize(c) : c);
 
-                // Add new triangles (12 total)
+                // Add new triangles (same as before)
                 newTriangles.Add(new Int3(baseIndex + 0, baseIndex + 1, baseIndex + 2));
                 newTriangles.Add(new Int3(baseIndex + 3, baseIndex + 4, baseIndex + 5));
                 newTriangles.Add(new Int3(baseIndex + 6, baseIndex + 7, baseIndex + 8));
@@ -333,7 +334,7 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
         }
     }
 
-    
+
 
     private IUvMapper GetUvMapper(int uvMapMode)
     {
@@ -412,7 +413,10 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
 
     [Input(Guid = "2e8c23d8-01ac-4f53-b628-91d9ab094278")] 
     public readonly InputSlot<int> Subdivisions = new();
-    
+
+    [Input(Guid = "32a77592-eaa1-43e8-b1ab-74b989ecbccd")]
+    public readonly InputSlot<bool> Spherical = new();
+
     [Input(Guid = "e062431e-0741-446d-ace9-e7e91080ed9f")] 
     public readonly InputSlot<Vector2> Stretch = new();
     
