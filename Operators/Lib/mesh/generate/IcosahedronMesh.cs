@@ -160,15 +160,15 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
         baseTriangles[8] = new Int3(10, 7, 6);
         baseTriangles[9] = new Int3(11, 10, 2);
         baseTriangles[10] = new Int3(3, 9, 4);
-        baseTriangles[11] = new Int3(3, 4, 2);
-        baseTriangles[12] = new Int3(3, 2, 6);
-        baseTriangles[13] = new Int3(3, 6, 8);
-        baseTriangles[14] = new Int3(3, 8, 9);
+        baseTriangles[11] = new Int3(3, 8, 9);
+        baseTriangles[12] = new Int3(3, 6, 8);
+        baseTriangles[13] = new Int3(3, 2, 6);
+        baseTriangles[14] = new Int3(3, 4, 2);
         baseTriangles[15] = new Int3(4, 9, 5);
-        baseTriangles[16] = new Int3(2, 4, 11);
-        baseTriangles[17] = new Int3(6, 2, 10);
-        baseTriangles[18] = new Int3(8, 6, 7);
-        baseTriangles[19] = new Int3(9, 8, 1);
+        baseTriangles[16] = new Int3(9, 8, 1);
+        baseTriangles[17] = new Int3(8, 6, 7);
+        baseTriangles[18] = new Int3(6, 2, 10);
+        baseTriangles[19] = new Int3(2, 4, 11);
 
         // Split vertices for flat shading (each triangle gets its own vertices)
         var vertices = new List<Vector3>();
@@ -526,10 +526,12 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
 
                 Vector2[] triangleUVs = new Vector2[3]
                 {
-                new Vector2(0.090911f, 0.157461f),
+                    new Vector2(0.181819f, 0.314921f),
+                    new Vector2(0.0f, 0.314921f),
+                    new Vector2(0.090911f, 0.157461f),
                 
-                new Vector2(0.181819f, 0.314921f),
-                new Vector2(0.0f, 0.314921f)
+                
+                
                 };
 
                 Vector2 uv = triangleUVs[vertexIndex];
@@ -560,9 +562,11 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
                 float cellWidth = 0.909091f / 5; // Divide space into 5 columns
                 Vector2[] triangleUVs = new Vector2[3]
                 {
-                new Vector2(0.09091f, 0.472382f),
-                new Vector2(0.0f, 0.314921f),
-                new Vector2(0.181819f, 0.314921f)
+                    new Vector2(0.0f, 0.314921f),
+                    new Vector2(0.181819f, 0.314921f),
+                    new Vector2(0.09091f, 0.472382f),
+                    
+                
                 };
                 Vector2 uv = triangleUVs[vertexIndex];
                 uv.Y -= 0.157461f ; // Adjust Y for the third row
