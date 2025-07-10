@@ -1,3 +1,4 @@
+using System;
 using T3.Core.Rendering;
 using T3.Core.Utils;
 using T3.Core.Utils.Geometry;
@@ -32,7 +33,11 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
             float yaw = rotation.Y.ToRadians();
             float pitch = rotation.X.ToRadians();
             float roll = rotation.Z.ToRadians();
-            var rotationMatrix = Matrix4x4.CreateFromYawPitchRoll(yaw, pitch, roll);
+
+            // Apply the icosahedron tilt adjustment
+            float rollOffset = roll - _icosahedronTiltAngle;
+           
+            var rotationMatrix = Matrix4x4.CreateFromYawPitchRoll(yaw, pitch, rollOffset);
 
             // Generate mesh using flat shading structure
             var (vertices, triangles) = GenerateIcosahedron();
@@ -149,11 +154,11 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
         baseTriangles[2] = new Int3(0, 1, 7);
         baseTriangles[3] = new Int3(0, 7, 10);
         baseTriangles[4] = new Int3(0, 10, 11);
-        baseTriangles[5] = new Int3(1, 5, 9);
-        baseTriangles[6] = new Int3(5, 11, 4);
-        baseTriangles[7] = new Int3(11, 10, 2);
+        baseTriangles[5] = new Int3(5, 11, 4);
+        baseTriangles[6] = new Int3(1, 5, 9);
+        baseTriangles[7] = new Int3(7, 1, 8);
         baseTriangles[8] = new Int3(10, 7, 6);
-        baseTriangles[9] = new Int3(7, 1, 8);
+        baseTriangles[9] = new Int3(11, 10, 2);
         baseTriangles[10] = new Int3(3, 9, 4);
         baseTriangles[11] = new Int3(3, 4, 2);
         baseTriangles[12] = new Int3(3, 2, 6);
@@ -342,6 +347,7 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
         {
             0 => new Faces(),           // Standard
             1 => new Unwrapped(),        // Unwrapped 
+            2 => new Atlas(),            // Atlas
             _ => new Faces()            // Default fallback
         };
     }
@@ -388,6 +394,160 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
         }
     }
 
+    private class Atlas : IUvMapper
+    {
+        // UV coordinates for each vertex of the 20 triangles (60 vertices total)
+        private static readonly Vector2[] _faceUvs = new Vector2[60]
+        {
+        // Triangle 0 (0, 11, 5)
+        new Vector2(0.09091f, 0.472382f),  // vertex 0
+        new Vector2(0.0f, 0.314921f),   // vertex 11
+        new Vector2(0.181819f, 0.314921f),   // vertex 5
+
+        // Triangle 1 (0, 5, 1)
+        new Vector2(0.09091f, 0.472382f),
+        new Vector2(0.0f, 0.314921f),
+        new Vector2(0.181819f, 0.314921f),
+
+        // Triangle 2 (0, 1, 7)
+        new Vector2(0.09091f, 0.472382f),
+        new Vector2(0.0f, 0.314921f),
+        new Vector2(0.181819f, 0.314921f),
+
+        // Triangle 3 (0, 7, 10)
+        new Vector2(0.09091f, 0.472382f),
+        new Vector2(0.0f, 0.314921f),
+        new Vector2(0.181819f, 0.314921f),
+
+        // Triangle 4 (0, 10, 11)
+        new Vector2(0.09091f, 0.472382f),
+        new Vector2(0.0f, 0.314921f),
+        new Vector2(0.181819f, 0.314921f),
+
+        // Triangle 5 (1, 5, 9)
+        new Vector2(0.09091f, 0.472382f),
+        new Vector2(0.0f, 0.314921f),
+        new Vector2(0.181819f, 0.314921f),
+
+        // Triangle 6 (5, 11, 4)
+        new Vector2(0.09091f, 0.472382f),
+        new Vector2(0.0f, 0.314921f),
+        new Vector2(0.181819f, 0.314921f),
+
+        // Triangle 7 (11, 10, 2)
+        new Vector2(0.09091f, 0.472382f),
+        new Vector2(0.0f, 0.314921f),
+        new Vector2(0.181819f, 0.314921f),
+
+        // Triangle 8 (10, 7, 6)
+        new Vector2(0.09091f, 0.472382f),
+        new Vector2(0.0f, 0.314921f),
+        new Vector2(0.181819f, 0.314921f),
+
+        // Triangle 9 (7, 1, 8)
+        new Vector2(0.09091f, 0.472382f),
+        new Vector2(0.0f, 0.314921f),
+        new Vector2(0.181819f, 0.314921f),
+
+        // Triangle 10 (3, 9, 4)
+        new Vector2(0.09091f, 0.472382f),
+        new Vector2(0.0f, 0.314921f),
+        new Vector2(0.181819f, 0.314921f),
+
+        // Triangle 11 (3, 4, 2)
+        new Vector2(0.09091f, 0.472382f),
+        new Vector2(0.0f, 0.314921f),
+        new Vector2(0.181819f, 0.314921f),
+
+        // Triangle 12 (3, 2, 6)
+        new Vector2(0.09091f, 0.472382f),
+        new Vector2(0.0f, 0.314921f),
+        new Vector2(0.181819f, 0.314921f),
+
+        // Triangle 13 (3, 6, 8)
+        new Vector2(0.09091f, 0.472382f),
+        new Vector2(0.0f, 0.314921f),
+        new Vector2(0.181819f, 0.314921f),
+
+        // Triangle 14 (3, 8, 9)
+        new Vector2(0.09091f, 0.472382f),
+        new Vector2(0.0f, 0.314921f),
+        new Vector2(0.181819f, 0.314921f),
+
+        // Triangle 15 (4, 9, 5)
+        new Vector2(0.09091f, 0.472382f),
+        new Vector2(0.0f, 0.314921f),
+        new Vector2(0.181819f, 0.314921f),
+
+        // Triangle 16 (2, 4, 11)
+        new Vector2(0.09091f, 0.472382f),
+        new Vector2(0.0f, 0.314921f),
+        new Vector2(0.181819f, 0.314921f),
+
+        // Triangle 17 (6, 2, 10)
+        new Vector2(0.09091f, 0.472382f),
+        new Vector2(0.0f, 0.314921f),
+        new Vector2(0.181819f, 0.314921f),
+
+        // Triangle 18 (8, 6, 7)
+        new Vector2(0.09091f, 0.472382f),
+        new Vector2(0.0f, 0.314921f),
+        new Vector2(0.181819f, 0.314921f),
+
+        // Triangle 19 (9, 8, 1)
+        new Vector2(0.09091f, 0.472382f),
+        new Vector2(0.0f, 0.314921f),
+        new Vector2(0.181819f, 0.314921f),
+        };
+
+        public Vector2 CalculateUV(Vector3 vertex, Vector3 normal, int vertexIndex, int triangleIndex)
+        {
+            int uvIndex = triangleIndex * 3 + vertexIndex;
+            // For the first 5 triangles, arrange them horizontally
+            if (triangleIndex < 5)
+            {
+                float cellWidth = 0.909091f / 5; // Divide space into 5 columns
+
+                Vector2[] triangleUVs = new Vector2[3]
+                {
+                new Vector2(0.09091f, 0.472382f),
+                new Vector2(0.0f, 0.314921f),
+                new Vector2(0.181819f, 0.314921f) 
+                };
+
+                Vector2 uv = triangleUVs[vertexIndex];
+                uv.X += triangleIndex * cellWidth;
+                return uv;
+            }
+
+            else if (triangleIndex >= 5 && triangleIndex < 10)
+            {
+                float cellWidth = 0.909091f / 5; // Divide space into 5 columns
+
+                Vector2[] triangleUVs = new Vector2[3]
+                {
+                new Vector2(0.090911f, 0.157461f),
+                
+                new Vector2(0.181819f, 0.314921f),
+                new Vector2(0.0f, 0.314921f)
+                };
+
+                Vector2 uv = triangleUVs[vertexIndex];
+                uv.X += (triangleIndex-5) * cellWidth;
+                return uv;
+            }
+
+
+            else if (uvIndex >= 0 && uvIndex < _faceUvs.Length)
+            {
+                return _faceUvs[uvIndex];
+            }
+
+            // Fallback for remaining triangles
+            return new Vector2(0.5f, 0.5f);
+        }
+    }
+
     private Buffer _vertexBuffer;
     private PbrVertex[] _vertexBufferData = new PbrVertex[0];
     private readonly BufferWithViews _vertexBufferWithViews = new();
@@ -399,10 +559,13 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
     private readonly MeshBuffers _data = new();
     private static readonly float phi = (1f + MathF.Sqrt(5f)) / 2f; // Golden ratio, used in icosahedron generation
 
+    private static readonly float _icosahedronTiltAngle = MathF.Atan(2f / (2f * phi));  // Pre-calculate the tilt angle
+
     private enum UvModes
     {
         Faces,
         Unwrapped,
+        Atlas,
     }
 
     private enum ShadingModes
