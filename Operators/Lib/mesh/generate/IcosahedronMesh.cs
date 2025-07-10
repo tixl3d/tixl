@@ -537,6 +537,38 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
                 return uv;
             }
 
+            else if (triangleIndex >= 10 && triangleIndex < 15)
+            {
+                float cellWidth = 0.909091f / 5; // Divide space into 5 columns
+
+                Vector2[] triangleUVs = new Vector2[3]
+                {
+                new Vector2(0.090911f, 0.157461f),
+
+                new Vector2(0.181819f, 0.314921f),
+                new Vector2(0.0f, 0.314921f)
+                };
+
+                Vector2 uv = triangleUVs[vertexIndex];
+                uv.Y -= 0.157461f; // Adjust Y for the second row
+                uv.X += (triangleIndex - 10) * cellWidth + cellWidth * 0.5f;
+                return uv;
+            }
+
+            else if (triangleIndex >= 15 && triangleIndex < 20)
+            {
+                float cellWidth = 0.909091f / 5; // Divide space into 5 columns
+                Vector2[] triangleUVs = new Vector2[3]
+                {
+                new Vector2(0.09091f, 0.472382f),
+                new Vector2(0.0f, 0.314921f),
+                new Vector2(0.181819f, 0.314921f)
+                };
+                Vector2 uv = triangleUVs[vertexIndex];
+                uv.Y -= 0.157461f ; // Adjust Y for the third row
+                uv.X += (triangleIndex - 15) * cellWidth + cellWidth * 0.5f;
+                return uv;
+            }
 
             else if (uvIndex >= 0 && uvIndex < _faceUvs.Length)
             {
