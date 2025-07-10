@@ -52,13 +52,13 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
                 : CalculateFlatNormals(vertices, triangles);
 
             // Debug: Log a few normals to compare
-            if (vertices.Length >= 3)
+           /* if (vertices.Length >= 3)
             {
                 Log.Debug($"Shading: {(shadingMode == (int)ShadingModes.Smoothed ? "Smooth" : "Flat")}");
                 Log.Debug($"Normal[0]: {normals[0]}");
                 Log.Debug($"Normal[1]: {normals[1]}");
                 Log.Debug($"Normal[2]: {normals[2]}");
-            }
+            }*/
 
             // Create buffers
             if (_vertexBufferData.Length != vertices.Length)
@@ -347,8 +347,8 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
         {
             0 => new Faces(),           // Standard
             1 => new Unwrapped(),        // Unwrapped 
-            2 => new Atlas(),
-            3 => new FacesSub(Subdivisions.Value),// Atlas
+            2 => new Atlas(Subdivisions.Value),
+            3 => new FacesSub(Subdivisions.Value),
             _ => new Faces()            // Default fallback
         };
     }
@@ -513,87 +513,315 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
 
     private class Atlas : IUvMapper
     {
+        private int _subdivisionLevel = 0;
+
+        public Atlas(int subdivisionLevel)
+        {
+            _subdivisionLevel = subdivisionLevel;
+        }
+
         public Vector2 CalculateUV(Vector3 vertex, Vector3 normal, int vertexIndex, int triangleIndex)
         {
-            int uvIndex = triangleIndex * 3 + vertexIndex;
-            // For the first 5 triangles, arrange them horizontally
+            if (_subdivisionLevel == 0)
+            {
+                // No subdivision - use original hard-coded UVs
+                return GetNonSubdividedUV(triangleIndex, vertexIndex);
+            }
+
+            // Calculate which original face this triangle belongs to
+            int subTrianglesPerFace = (int)Math.Pow(4, _subdivisionLevel);
+            int originalFaceIndex = triangleIndex / subTrianglesPerFace;
+            originalFaceIndex = originalFaceIndex % 20; // Ensure we don't exceed 20 faces
+
+            // Calculate which sub-triangle within the original face
+            int subTriangleIndex = triangleIndex % subTrianglesPerFace;
+
+            // Get the base UV pattern for this original face
+            Vector2[] baseTriangleUvs = GetBaseTriangleUvs(originalFaceIndex);
+
+            // Get the base UV for this vertex position in the triangle
+            int uvIndex = vertexIndex % 3;
+            Vector2 baseUV = baseTriangleUvs[uvIndex];
+
+            // Apply tessellation
+            Vector2 tessellatedUV = AtlasTessellateUV(baseUV, baseTriangleUvs, subTriangleIndex, _subdivisionLevel);
+
+            return tessellatedUV;
+        }
+
+        private Vector2 AtlasTessellateUV(Vector2 baseUV, Vector2[] baseTriangleUvs, int subTriangleIndex, int subdivisionLevel)
+        {
+            if (subdivisionLevel == 0)
+                return baseUV;
+
+            // Start with the original triangle coordinates
+            Vector2 currentV0 = baseTriangleUvs[0];
+            Vector2 currentV1 = baseTriangleUvs[1];
+            Vector2 currentV2 = baseTriangleUvs[2];
+
+            // Work backwards through subdivision levels
+            int currentIndex = subTriangleIndex;
+            for (int level = subdivisionLevel; level > 0; level--)
+            {
+                int trianglesAtThisLevel = (int)Math.Pow(4, level - 1);
+                int quadrant = currentIndex / trianglesAtThisLevel;
+                currentIndex = currentIndex % trianglesAtThisLevel;
+
+                // Calculate midpoints
+                Vector2 mid01 = (currentV0 + currentV1) * 0.5f;
+                Vector2 mid12 = (currentV1 + currentV2) * 0.5f;
+                Vector2 mid20 = (currentV2 + currentV0) * 0.5f;
+
+                // Match the exact subdivision pattern from SubdivideMeshFlat:
+                switch (quadrant)
+                {
+                    case 0: // First sub-triangle: v0, a, c
+                        currentV1 = mid01;
+                        currentV2 = mid20;
+                        break;
+                    case 1: // Second sub-triangle: v1, b, a
+                            // We need to track which original vertex this corresponds to
+                        if (currentV0 == baseTriangleUvs[0] && currentV1 == baseTriangleUvs[1] && currentV2 == baseTriangleUvs[2])
+                        {
+                            // First level - use original v1
+                            currentV0 = baseTriangleUvs[1];
+                            currentV1 = mid12;
+                            currentV2 = mid01;
+                        }
+                        else
+                        {
+                            // Subsequent levels - we need to determine which vertex we're working with
+                            if (baseUV == baseTriangleUvs[1]) // This is the original v1
+                            {
+                                currentV0 = baseTriangleUvs[1];
+                                currentV1 = mid12;
+                                currentV2 = mid01;
+                            }
+                            else if (baseUV == mid01) // This is a midpoint
+                            {
+                                currentV0 = mid01;
+                                currentV1 = (mid01 + mid12) * 0.5f;
+                                currentV2 = (mid01 + mid20) * 0.5f;
+                            }
+                            else // This is another midpoint
+                            {
+                                currentV0 = mid12;
+                                currentV1 = (mid12 + mid01) * 0.5f;
+                                currentV2 = (mid12 + mid20) * 0.5f;
+                            }
+                        }
+                        break;
+                    case 2: // Third sub-triangle: v2, c, b
+                        if (currentV0 == baseTriangleUvs[0] && currentV1 == baseTriangleUvs[1] && currentV2 == baseTriangleUvs[2])
+                        {
+                            // First level - use original v2
+                            currentV0 = baseTriangleUvs[2];
+                            currentV1 = mid20;
+                            currentV2 = mid12;
+                        }
+                        else
+                        {
+                            if (baseUV == baseTriangleUvs[2]) // This is the original v2
+                            {
+                                currentV0 = baseTriangleUvs[2];
+                                currentV1 = mid20;
+                                currentV2 = mid12;
+                            }
+                            else if (baseUV == mid20) // This is a midpoint
+                            {
+                                currentV0 = mid20;
+                                currentV1 = (mid20 + mid12) * 0.5f;
+                                currentV2 = (mid20 + mid01) * 0.5f;
+                            }
+                            else // This is another midpoint
+                            {
+                                currentV0 = mid12;
+                                currentV1 = (mid12 + mid20) * 0.5f;
+                                currentV2 = (mid12 + mid01) * 0.5f;
+                            }
+                        }
+                        break;
+                    case 3: // Fourth sub-triangle: a, b, c
+                        currentV0 = mid01;
+                        currentV1 = mid12;
+                        currentV2 = mid20;
+                        break;
+                }
+            }
+
+            // Now interpolate the base UV coordinate within the final triangle
+            if (baseUV == baseTriangleUvs[0]) // first vertex
+                return currentV0;
+            else if (baseUV == baseTriangleUvs[1]) // second vertex
+                return currentV1;
+            else if (baseUV == baseTriangleUvs[2]) // third vertex
+                return currentV2;
+            else
+            {
+                // For subdivided vertices, we need to determine which midpoint they correspond to
+                // This is more complex and might require additional tracking
+                // For now, we'll return the average of the current triangle
+                return (currentV0 + currentV1 + currentV2) / 3f;
+            }
+        }
+
+        private Vector2 GetNonSubdividedUV(int triangleIndex, int vertexIndex)
+        {
+            // Original hard-coded UV logic from the Atlas class
             if (triangleIndex < 5)
             {
-                float cellWidth = 0.909091f / 5; // Divide space into 5 columns
-
+                float cellWidth = 0.909091f / 5;
                 Vector2[] triangleUVs = new Vector2[3]
                 {
                 new Vector2(0.09091f, 0.472382f),
                 new Vector2(0.0f, 0.314921f),
-                new Vector2(0.181819f, 0.314921f) 
+                new Vector2(0.181819f, 0.314921f)
                 };
-
                 Vector2 uv = triangleUVs[vertexIndex];
                 uv.X += triangleIndex * cellWidth;
                 return uv;
             }
-
-            else if (triangleIndex >= 5 && triangleIndex < 10)
+            else if (triangleIndex < 10)
             {
-                float cellWidth = 0.909091f / 5; // Divide space into 5 columns
-
+                float cellWidth = 0.909091f / 5;
                 Vector2[] triangleUVs = new Vector2[3]
                 {
-                    new Vector2(0.181819f, 0.314921f),
-                    new Vector2(0.0f, 0.314921f),
-                    new Vector2(0.090911f, 0.157461f),
+                new Vector2(0.181819f, 0.314921f),
+                new Vector2(0.0f, 0.314921f),
+                new Vector2(0.090911f, 0.157461f),
                 };
-
                 Vector2 uv = triangleUVs[vertexIndex];
-                uv.X += (triangleIndex-5) * cellWidth;
+                uv.X += (triangleIndex - 5) * cellWidth;
                 return uv;
             }
-
-            else if (triangleIndex >= 10 && triangleIndex < 15)
+            else if (triangleIndex < 15)
             {
-                float cellWidth = 0.909091f / 5; // Divide space into 5 columns
-
+                float cellWidth = 0.909091f / 5;
                 Vector2[] triangleUVs = new Vector2[3]
                 {
                 new Vector2(0.090911f, 0.157461f),
                 new Vector2(0.181819f, 0.314921f),
                 new Vector2(0.0f, 0.314921f)
                 };
-
                 Vector2 uv = triangleUVs[vertexIndex];
-                uv.Y -= 0.157461f; // Adjust Y for the second row
+                uv.Y -= 0.157461f;
                 uv.X += (triangleIndex - 10) * cellWidth + cellWidth * 0.5f;
-                return uv;
-            }
-
-            else if (triangleIndex >= 15 && triangleIndex < 20)
-            {
-                float cellWidth = 0.909091f / 5; // Divide space into 5 columns
-                Vector2[] triangleUVs = new Vector2[3]
-                {
-                    new Vector2(0.0f, 0.314921f),
-                    new Vector2(0.181819f, 0.314921f),
-                    new Vector2(0.09091f, 0.472382f),
-                };
-                Vector2 uv = triangleUVs[vertexIndex];
-                uv.Y -= 0.157461f ; // Adjust Y for the third row
-                uv.X += (triangleIndex - 15) * cellWidth + cellWidth * 0.5f;
                 return uv;
             }
             else
             {
-                // If we reach here, it means the triangle index is out of bounds
-                Log.Warning($"Invalid triangle index: {triangleIndex}. Using fallback UV.");
+                float cellWidth = 0.909091f / 5;
                 Vector2[] triangleUVs = new Vector2[3]
                 {
-                    new Vector2(0.0f, 0.314921f),
-                    new Vector2(0.181819f, 0.314921f),
-                    new Vector2(0.09091f, 0.472382f),
+                new Vector2(0.0f, 0.314921f),
+                new Vector2(0.181819f, 0.314921f),
+                new Vector2(0.09091f, 0.472382f),
                 };
                 Vector2 uv = triangleUVs[vertexIndex];
+                uv.Y -= 0.157461f;
+                uv.X += (triangleIndex - 15) * cellWidth + cellWidth * 0.5f;
                 return uv;
             }
-            
+        }
+
+        private Vector2[] GetBaseTriangleUvs(int originalFaceIndex)
+        {
+            // This returns the UV coordinates based on the original face index
+            // The pattern matches the original hard-coded UVs in the Atlas class
+
+            if (originalFaceIndex < 5)
+            {
+                return new Vector2[3]
+                {
+                new Vector2(0.09091f, 0.472382f),
+                new Vector2(0.0f, 0.314921f),
+                new Vector2(0.181819f, 0.314921f)
+                };
+            }
+            else if (originalFaceIndex < 10)
+            {
+                return new Vector2[3]
+                {
+                new Vector2(0.181819f, 0.314921f),
+                new Vector2(0.0f, 0.314921f),
+                new Vector2(0.090911f, 0.157461f),
+                };
+            }
+            else if (originalFaceIndex < 15)
+            {
+                return new Vector2[3]
+                {
+                new Vector2(0.090911f, 0.157461f),
+                new Vector2(0.181819f, 0.314921f),
+                new Vector2(0.0f, 0.314921f)
+                };
+            }
+            else
+            {
+                return new Vector2[3]
+                {
+                new Vector2(0.0f, 0.314921f),
+                new Vector2(0.181819f, 0.314921f),
+                new Vector2(0.09091f, 0.472382f),
+                };
+            }
+        }
+
+        private Vector2 TessellateUV(Vector2 baseUV, Vector2[] baseTriangleUvs, int subTriangleIndex, int subdivisionLevel)
+        {
+            if (subdivisionLevel == 0)
+                return baseUV;
+
+            // Start with the original triangle coordinates
+            Vector2 v0 = baseTriangleUvs[0];
+            Vector2 v1 = baseTriangleUvs[1];
+            Vector2 v2 = baseTriangleUvs[2];
+
+            // Work backwards through subdivision levels
+            int currentIndex = subTriangleIndex;
+            for (int level = subdivisionLevel; level > 0; level--)
+            {
+                int trianglesAtThisLevel = (int)Math.Pow(4, level - 1);
+                int quadrant = currentIndex / trianglesAtThisLevel;
+                currentIndex = currentIndex % trianglesAtThisLevel;
+
+                // Calculate midpoints
+                Vector2 mid01 = (v0 + v1) * 0.5f;
+                Vector2 mid12 = (v1 + v2) * 0.5f;
+                Vector2 mid20 = (v2 + v0) * 0.5f;
+
+                // Match the exact subdivision pattern from SubdivideMeshFlat:
+                switch (quadrant)
+                {
+                    case 0: // First sub-triangle: v0, mid01, mid20
+                        v1 = mid01;
+                        v2 = mid20;
+                        break;
+                    case 1: // Second sub-triangle: v1, mid12, mid01
+                        v0 = baseTriangleUvs[1]; // Use original v1
+                        v1 = mid12;
+                        v2 = mid01;
+                        break;
+                    case 2: // Third sub-triangle: v2, mid20, mid12
+                        v0 = baseTriangleUvs[2]; // Use original v2
+                        v1 = mid20;
+                        v2 = mid12;
+                        break;
+                    case 3: // Fourth sub-triangle: mid01, mid12, mid20
+                        v0 = mid01;
+                        v1 = mid12;
+                        v2 = mid20;
+                        break;
+                }
+            }
+
+            // Now interpolate the base UV coordinate within the final triangle
+            if (baseUV == baseTriangleUvs[0]) // first vertex
+                return v0;
+            else if (baseUV == baseTriangleUvs[1]) // second vertex
+                return v1;
+            else // third vertex
+                return v2;
         }
     }
 
