@@ -86,6 +86,11 @@
           "Id": "56cd97c5-f4f1-4eb4-a53c-312373ee7706"/*WIsWeight*/,
           "Type": "System.Boolean",
           "Value": true
+        },
+        {
+          "Id": "a2b65311-d1fd-491e-8787-2f9216f3574a"/*StrengthFactor*/,
+          "Type": "System.Int32",
+          "Value": 2
         }
       ],
       "Outputs": []
@@ -94,11 +99,6 @@
       "Id": "41ead94a-a6fb-4029-bc22-89b512d196cd"/*DrawPoints*/,
       "SymbolId": "ffd94e5a-bc98-4e70-84d8-cce831e6925f",
       "InputValues": [
-        {
-          "Id": "414c8045-5086-4449-9d9a-03f28c3966b3"/*PointSize*/,
-          "Type": "System.Single",
-          "Value": 0.21
-        },
         {
           "Id": "d0a58cde-d292-4ceb-ba50-6965eb3ee3dd"/*UseWForSize*/,
           "Type": "System.Boolean",
@@ -129,13 +129,9 @@
       "SymbolId": "371d72b8-69d4-4ced-beda-271386ad2fd6",
       "InputValues": [
         {
-          "Id": "1b762425-c35a-4ba0-bbed-71d6c42a082b"/*VolumeRotate*/,
-          "Type": "System.Numerics.Vector3",
-          "Value": {
-            "X": 0.0,
-            "Y": 0.0,
-            "Z": 400.0
-          }
+          "Id": "2c5e5bb5-6023-4ff4-906d-d0a905110e95"/*VolumeShape*/,
+          "Type": "System.Int32",
+          "Value": 0
         },
         {
           "Id": "33e347d3-3edd-4428-bd82-dbe87daf063d"/*ClampResult*/,
@@ -143,9 +139,22 @@
           "Value": false
         },
         {
+          "Id": "418d7362-3c4b-4749-8f11-62a953065689"/*GainAndBias*/,
+          "Type": "System.Numerics.Vector2",
+          "Value": {
+            "X": 0.48,
+            "Y": 0.65
+          }
+        },
+        {
           "Id": "56bf96b4-e7c4-4747-b57a-64a39e0d6314"/*FallOff*/,
           "Type": "System.Single",
-          "Value": 4.1
+          "Value": 4.0
+        },
+        {
+          "Id": "ba43de42-bde5-4d7f-b2fa-73e6e86fbaf6"/*WriteTo*/,
+          "Type": "System.Int32",
+          "Value": 2
         },
         {
           "Id": "ef02525a-3a75-4ae7-bc01-7581efeda246"/*VolumeScale*/,

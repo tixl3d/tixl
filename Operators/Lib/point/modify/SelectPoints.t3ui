@@ -1,6 +1,6 @@
 {
   "Id": "371d72b8-69d4-4ced-beda-271386ad2fd6"/*SelectPoints*/,
-  "Description": "Simulates a selection of points by setting the W attribute.",
+  "Description": "Simulates a selection of points by setting the F1 or F2 attribute.",
   "SymbolTags": "1",
   "InputUis": [
     {
