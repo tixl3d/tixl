@@ -28,7 +28,9 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
             var subdivisions = Subdivisions.GetValue(context).Clamp(0, 5);
             var spherical = Spherical.GetValue(context);
             var uvMapMode = TexCoord.GetValue(context);
+            var uvMapMode2 = TexCoord2.GetValue(context);
             IUvMapper uvMapper = GetUvMapper(uvMapMode, subdivisions);
+            IUvMapper uvMapper2 = GetUvMapper(uvMapMode2, subdivisions);
             var shadingMode = Shading.GetValue(context);
 
             float yaw = rotation.Y.ToRadians();
@@ -87,6 +89,7 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
                 pos = Vector3.Transform(pos + offset, rotationMatrix) + centerVec;
 
                 var uv = uvMapper.CalculateUV(vertices[i], normals[i], i % 3, i / 3); // Use i / 3 for triangle index
+                var uv2 = uvMapper2.CalculateUV(vertices[i], normals[i], i % 3, i / 3);
 
                 _vertexBufferData[i] = new PbrVertex
                 {
@@ -95,6 +98,7 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
                     Tangent = Vector3.TransformNormal(Vector3.Cross(normals[i], Vector3.UnitY), rotationMatrix),
                     Bitangent = Vector3.TransformNormal(Vector3.Cross(normals[i], Vector3.UnitX), rotationMatrix),
                     Texcoord = uv,
+                    Texcoord2 = uv2,
                     Selection = 1,
                 };
             }
@@ -350,6 +354,7 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
             1 => new Unwrapped(),        // Unwrapped 
             2 => new Atlas(level),
             3 => new FacesSub(level),
+            4 => new GridFacesSub(level),
             _ => new Faces()            // Default fallback
         };
     }
@@ -383,12 +388,12 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
     private class FacesSub : IUvMapper
     {
         // Base UV coordinates for a single triangle face
-        private static readonly Vector2[] _baseUvs = new Vector2[3]
+       /* private static readonly Vector2[] _baseUvs = new Vector2[3]
         {
         new Vector2(0.5f, 1.0f),      // vertex 0 (center top)
         new Vector2(0.067f, 0.250f),  // vertex 1 (left bottom)
         new Vector2(0.933f, 0.250f)   // vertex 2 (right bottom)
-        };
+        };*/
 
         private int _subdivisionLevel = 0;
 
@@ -423,9 +428,87 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
            // Vector2 tessellatedUV = TessellateUVFace(baseUV, subTriangleIndex, _subdivisionLevel);
             return TessellateUV(baseUV, _baseUvs, subTriangleIndex, _subdivisionLevel);
             //return tessellatedUV;
+        }  
+    }
+
+    private class GridFacesSub : IUvMapper // Look ma no llm! tbh I used Blender to get the base UVs for this
+    {
+        private int _subdivisionLevel = 0;
+      
+        public GridFacesSub(int subdivisionLevel)
+        {
+            _subdivisionLevel = subdivisionLevel.Clamp(0, 5);
         }
 
-        
+        public Vector2 CalculateUV(Vector3 vertex, Vector3 normal, int vertexIndex, int triangleIndex)
+        {
+            /* if (_subdivisionLevel == 0)
+             {
+                 return GetNonSubdividedUV(triangleIndex, vertexIndex);
+             }*/
+
+            int subTrianglesPerFace = (int)Math.Pow(4, _subdivisionLevel);
+            int originalFaceIndex = triangleIndex / subTrianglesPerFace;
+            originalFaceIndex = originalFaceIndex % 20;
+            int subTriangleIndex = triangleIndex % subTrianglesPerFace;
+
+            Vector2[] baseTriangleUvs = GetBaseTriangleUvs(originalFaceIndex);
+            int uvIndex = vertexIndex % 3;
+            Vector2 baseUV = baseTriangleUvs[uvIndex];
+
+            //return TessellateUVFace(baseUV, subTriangleIndex, _subdivisionLevel);
+            return TessellateUV(baseUV, baseTriangleUvs, subTriangleIndex, _subdivisionLevel);
+        }
+
+        private Vector2[] GetBaseTriangleUvs(int originalFaceIndex)
+        {
+            const float cellH = 1.0f / 5;
+            const float cellV = 1.0f / 2;
+            
+            int groupIndex = originalFaceIndex / 5;
+            int faceInGroup = originalFaceIndex % 5;
+            float xOffset = faceInGroup * cellH;
+            xOffset += (0.2f - 0.181819f) * 0.5f; // Center the UVs horizontally
+
+            if (originalFaceIndex < 5) // First group (faces 0-4)
+            {
+                return new Vector2[3]
+                {
+                    new Vector2(0.0f + xOffset, 0.75f ),       // Left vertex 
+                    new Vector2(0.181819f + xOffset, 0.75f),   // Right vertex
+                    new Vector2(0.09091f + xOffset, 0.907461f)    // Top center 
+                };
+            }
+            else if (originalFaceIndex < 10) // Second group (faces 5-9)
+            {
+                return new Vector2[3]
+                {
+                    new Vector2(0.181819f + xOffset, 0.75f),  // Right vertex
+                    new Vector2(0.0f + xOffset, 0.75f),        // Left vertex
+                    new Vector2(0.090911f + xOffset, 0.59254f  )    // Bottom center 
+                };
+            }
+            else if (originalFaceIndex < 15) // Third group (faces 10-14)
+            {
+                // Apply Y shift downward (-0.157461) and X shift (+cellHWidth/2)
+                return new Vector2[3]
+                {
+                    new Vector2(0.0f + xOffset, 0.75f - cellV ),       // Left vertex 
+                    new Vector2(0.181819f + xOffset, 0.75f- cellV),   // Right vertex
+                    new Vector2(0.09091f + xOffset, 0.907461f- cellV)   // Top center
+                };
+            }
+            else // Fourth group (faces 15-19)
+            {
+                // Apply Y shift downward (-0.157461) and X shift (+cellHWidth/2)
+                return new Vector2[3]
+                {
+                    new Vector2(0.181819f + xOffset, 0.75f- cellV),  // Right vertex
+                    new Vector2(0.0f + xOffset, 0.75f - cellV),        // Left vertex
+                    new Vector2(0.090911f + xOffset, 0.59254f - cellV  )    // Bottom center 
+                };
+            }
+        }
     }
 
     private class Unwrapped : IUvMapper
@@ -584,7 +667,7 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
 
     private static readonly float _icosahedronTiltAngle = MathF.Atan(2f / (2f * phi));  // Pre-calculate the tilt angle
 
-    // the base UV coordinates for a triangle face
+    // Base UV coordinates for a single triangle face
     private static readonly Vector2[] _baseUvs = new Vector2[3]
         {
         new Vector2(0.5f, 1.0f),    // vertex 0 (center top)
@@ -597,7 +680,8 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
         Faces,
         Unwrapped,
         Atlas,
-        FacesSub, 
+        FacesSub,
+        GridFacesSub,
     }
 
     private enum ShadingModes
@@ -630,6 +714,9 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
     [Input(Guid = "FFD87531-8B82-4F31-9AA9-8459F92A4798", MappedType = typeof(UvModes))]
     public readonly InputSlot<int> TexCoord = new();
     
+    [Input(Guid = "08dd88b7-cd91-4f17-91d9-08de5b260e7a", MappedType = typeof(UvModes))]
+    public readonly InputSlot<int> TexCoord2 = new();
+
     [Input(Guid = "7438A4CA-1FA7-48CF-AD85-0E7067AE54CC", MappedType = typeof(ShadingModes))]
     public readonly InputSlot<int> Shading = new();
 }

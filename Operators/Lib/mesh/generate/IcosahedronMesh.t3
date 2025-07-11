@@ -43,6 +43,10 @@
     {
       "Id": "ffd87531-8b82-4f31-9aa9-8459f92a4798"/*TexCoord*/,
       "DefaultValue": 0
+    },
+    {
+      "Id": "08dd88b7-cd91-4f17-91d9-08de5b260e7a"/*TexCoord2*/,
+      "DefaultValue": 0
     }
   ],
   "Children": [],

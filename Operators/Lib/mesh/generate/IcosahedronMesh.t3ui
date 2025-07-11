@@ -50,6 +50,13 @@
         "X": -200.0,
         "Y": 450.0
       }
+    },
+    {
+      "InputId": "08dd88b7-cd91-4f17-91d9-08de5b260e7a"/*TexCoord2*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 450.0
+      }
     }
   ],
   "SymbolChildUis": [],
