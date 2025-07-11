@@ -28,7 +28,7 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
             var subdivisions = Subdivisions.GetValue(context).Clamp(0, 5);
             var spherical = Spherical.GetValue(context);
             var uvMapMode = TexCoord.GetValue(context);
-            IUvMapper uvMapper = GetUvMapper(uvMapMode);
+            IUvMapper uvMapper = GetUvMapper(uvMapMode, subdivisions);
             var shadingMode = Shading.GetValue(context);
 
             float yaw = rotation.Y.ToRadians();
@@ -342,14 +342,14 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
 
 
 
-    private IUvMapper GetUvMapper(int uvMapMode)
+    private IUvMapper GetUvMapper(int uvMapMode, int level)
     {
         return uvMapMode switch
         {
             0 => new Faces(),           // Standard
             1 => new Unwrapped(),        // Unwrapped 
-            2 => new Atlas(Subdivisions.Value),
-            3 => new FacesSub(Subdivisions.Value),
+            2 => new Atlas(level),
+            3 => new FacesSub(level),
             _ => new Faces()            // Default fallback
         };
     }
@@ -362,12 +362,7 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
     private class Faces : IUvMapper
     {
         // UV coordinates that repeat every 3 vertices
-        private static readonly Vector2[] _baseUvs = new Vector2[3]
-        {
-        new Vector2(0.5f, 1.0f),    // vertex 0 (center top)
-        new Vector2(0.067f, 0.250f), // vertex 11 (left bottom)
-        new Vector2(0.933f, 0.250f)  // vertex 5 (right bottom)
-        };
+        
 
         public Vector2 CalculateUV(Vector3 vertex, Vector3 normal, int vertexIndex, int triangleIndex)
         {
@@ -384,7 +379,7 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
             return new Vector2(0.5f, 0.5f);
         }
     }
-
+    
     private class FacesSub : IUvMapper
     {
         // Base UV coordinates for a single triangle face
@@ -425,80 +420,12 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
 
             // Now we need to map this to the subdivided space
             // We'll use a recursive approach to find the correct sub-triangle position
-            Vector2 tessellatedUV = TessellateUV(baseUV, subTriangleIndex, _subdivisionLevel);
-
-            return tessellatedUV;
+           // Vector2 tessellatedUV = TessellateUVFace(baseUV, subTriangleIndex, _subdivisionLevel);
+            return TessellateUV(baseUV, _baseUvs, subTriangleIndex, _subdivisionLevel);
+            //return tessellatedUV;
         }
 
-        private Vector2 TessellateUV(Vector2 baseUV, int subTriangleIndex, int subdivisionLevel)
-        {
-            if (subdivisionLevel == 0)
-                return baseUV;
-
-            // Start with the original triangle coordinates
-            Vector2 v0 = _baseUvs[0]; // top
-            Vector2 v1 = _baseUvs[1]; // left bottom
-            Vector2 v2 = _baseUvs[2]; // right bottom
-
-            // Calculate the current triangle's position through subdivision levels
-            Vector2 currentV0 = v0;
-            Vector2 currentV1 = v1;
-            Vector2 currentV2 = v2;
-
-            int currentIndex = subTriangleIndex;
-
-            // Work backwards through subdivision levels
-            for (int level = subdivisionLevel; level > 0; level--)
-            {
-                int trianglesAtThisLevel = (int)Math.Pow(4, level - 1);
-                int quadrant = currentIndex / trianglesAtThisLevel;
-                currentIndex = currentIndex % trianglesAtThisLevel;
-
-                // Calculate midpoints
-                Vector2 mid01 = (currentV0 + currentV1) * 0.5f; // a
-                Vector2 mid12 = (currentV1 + currentV2) * 0.5f; // b
-                Vector2 mid20 = (currentV2 + currentV0) * 0.5f; // c
-
-                // Match the exact subdivision pattern from SubdivideMeshFlat:
-                // Triangle 0: v1, a, c  -> v0, mid01, mid20
-                // Triangle 1: v2, b, a  -> v1, mid12, mid01
-                // Triangle 2: v3, c, b  -> v2, mid20, mid12
-                // Triangle 3: a, b, c   -> mid01, mid12, mid20
-                switch (quadrant)
-                {
-                    case 0: // First sub-triangle: v0, mid01, mid20
-                        currentV1 = mid01;
-                        currentV2 = mid20;
-                        break;
-                    case 1: // Second sub-triangle: v1, mid12, mid01
-                        currentV0 = currentV1; // Use original v1
-                        currentV1 = mid12;
-                        currentV2 = mid01;
-                        break;
-                    case 2: // Third sub-triangle: v2, mid20, mid12
-                        currentV0 = currentV2; // Use original v2
-                        currentV1 = mid20;
-                        currentV2 = mid12;
-                        break;
-                    case 3: // Fourth sub-triangle: mid01, mid12, mid20
-                        currentV0 = mid01;
-                        currentV1 = mid12;
-                        currentV2 = mid20;
-                        break;
-                }
-            }
-
-            // Now interpolate the base UV coordinate within the final triangle
-            Vector2 result;
-            if (baseUV == _baseUvs[0]) // top vertex
-                result = currentV0;
-            else if (baseUV == _baseUvs[1]) // left vertex
-                result = currentV1;
-            else // right vertex
-                result = currentV2;
-
-            return result;
-        }
+        
     }
 
     private class Unwrapped : IUvMapper
@@ -524,10 +451,10 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
 
         public Vector2 CalculateUV(Vector3 vertex, Vector3 normal, int vertexIndex, int triangleIndex)
         {
-            if (_subdivisionLevel == 0)
+           /* if (_subdivisionLevel == 0)
             {
                 return GetNonSubdividedUV(triangleIndex, vertexIndex);
-            }
+            }*/
 
             int subTrianglesPerFace = (int)Math.Pow(4, _subdivisionLevel);
             int originalFaceIndex = triangleIndex / subTrianglesPerFace;
@@ -538,123 +465,10 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
             int uvIndex = vertexIndex % 3;
             Vector2 baseUV = baseTriangleUvs[uvIndex];
            
-
-            return AtlasTessellateUV(baseUV, baseTriangleUvs, subTriangleIndex, _subdivisionLevel);
+            //return TessellateUVFace(baseUV, subTriangleIndex, _subdivisionLevel);
+            return TessellateUV(baseUV, baseTriangleUvs, subTriangleIndex, _subdivisionLevel);
         }
-
-        private Vector2 AtlasTessellateUV(Vector2 baseUV, Vector2[] baseTriangleUvs, int subTriangleIndex, int subdivisionLevel)
-        {
-            if (subdivisionLevel == 0)
-                return baseUV;
-
-            Vector2 currentV0 = baseTriangleUvs[0];
-            Vector2 currentV1 = baseTriangleUvs[1];
-            Vector2 currentV2 = baseTriangleUvs[2];
-
-            int currentIndex = subTriangleIndex;
-            for (int level = subdivisionLevel; level > 0; level--)
-            {
-                int trianglesAtThisLevel = (int)Math.Pow(4, level - 1);
-                int quadrant = currentIndex / trianglesAtThisLevel;
-                currentIndex = currentIndex % trianglesAtThisLevel;
-
-                Vector2 mid01 = (currentV0 + currentV1) * 0.5f;
-                Vector2 mid12 = (currentV1 + currentV2) * 0.5f;
-                Vector2 mid20 = (currentV2 + currentV0) * 0.5f;
-
-                switch (quadrant)
-                {
-                    case 0:
-                        currentV1 = mid01;
-                        currentV2 = mid20;
-                        break;
-                    case 1:
-                        currentV0 = currentV1;
-                        currentV1 = mid12;
-                        currentV2 = mid01;
-                        break;
-                    case 2:
-                        currentV0 = currentV2;
-                        currentV1 = mid20;
-                        currentV2 = mid12;
-                        break;
-                    case 3:
-                        currentV0 = mid01;
-                        currentV1 = mid12;
-                        currentV2 = mid20;
-                        break;
-                }
-            }
-
-            // Determine which vertex to return based on the original baseUV
-            if (baseUV == baseTriangleUvs[0]) return currentV0;
-            if (baseUV == baseTriangleUvs[1]) return currentV1;
-            if (baseUV == baseTriangleUvs[2]) return currentV2;
-
-            // For midpoints, return the interpolated value
-            return (currentV0 + currentV1 + currentV2) / 3f;
-        }
-
-        private Vector2 GetNonSubdividedUV(int triangleIndex, int vertexIndex)
-        {
-            const float cellWidth = 0.909091f / 5;
-            Vector2 uv;
-            if (triangleIndex < 5)
-            {
-                
-                Vector2[] triangleUVs = new Vector2[3]
-                {
-                new Vector2(0.09091f, 0.472382f),
-                new Vector2(0.0f, 0.314921f),
-                new Vector2(0.181819f, 0.314921f)
-                };
-                uv = triangleUVs[vertexIndex];
-                uv.X += triangleIndex * cellWidth;
-            }
-            else if (triangleIndex < 10)
-            {
-                
-                Vector2[] triangleUVs = new Vector2[3]
-                {
-                new Vector2(0.181819f, 0.314921f),
-                new Vector2(0.0f, 0.314921f),
-                new Vector2(0.090911f, 0.157461f),
-                };
-                uv = triangleUVs[vertexIndex];
-                uv.X += (triangleIndex - 5) * cellWidth;
-            }
-            else if (triangleIndex < 15)
-            {
-                
-                Vector2[] triangleUVs = new Vector2[3]
-                {
-                new Vector2(0.090911f, 0.157461f),
-                new Vector2(0.181819f, 0.314921f),
-                new Vector2(0.0f, 0.314921f)
-                };
-                uv = triangleUVs[vertexIndex];
-                uv.Y -= 0.157461f;
-                uv.X += (triangleIndex - 10) * cellWidth + cellWidth * 0.5f;
-            }
-            else
-            {
-                
-                Vector2[] triangleUVs = new Vector2[3]
-                {
-                new Vector2(0.0f, 0.314921f),
-                new Vector2(0.181819f, 0.314921f),
-                new Vector2(0.09091f, 0.472382f),
-                };
-                uv = triangleUVs[vertexIndex];
-                uv.Y -= 0.157461f;
-                uv.X += (triangleIndex - 15) * cellWidth + cellWidth * 0.5f;
-            }
-
-            // Normalize Y coordinate
-            uv.Y /= currentMaxY;
-            return uv;
-        }
-
+        
         private Vector2[] GetBaseTriangleUvs(int originalFaceIndex)
         {
             const float cellWidth = 0.909091f / 5;
@@ -704,6 +518,59 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
         }
     }
 
+    private static Vector2 TessellateUV(Vector2 baseUV, Vector2[] baseTriangleUvs, int subTriangleIndex, int subdivisionLevel)
+    {
+        if (subdivisionLevel == 0)
+            return baseUV;
+
+        Vector2 currentV0 = baseTriangleUvs[0];
+        Vector2 currentV1 = baseTriangleUvs[1];
+        Vector2 currentV2 = baseTriangleUvs[2];
+
+        int currentIndex = subTriangleIndex;
+        for (int level = subdivisionLevel; level > 0; level--)
+        {
+            int trianglesAtThisLevel = (int)Math.Pow(4, level - 1);
+            int quadrant = currentIndex / trianglesAtThisLevel;
+            currentIndex = currentIndex % trianglesAtThisLevel;
+
+            Vector2 mid01 = (currentV0 + currentV1) * 0.5f;
+            Vector2 mid12 = (currentV1 + currentV2) * 0.5f;
+            Vector2 mid20 = (currentV2 + currentV0) * 0.5f;
+
+            switch (quadrant)
+            {
+                case 0:
+                    currentV1 = mid01;
+                    currentV2 = mid20;
+                    break;
+                case 1:
+                    currentV0 = currentV1;
+                    currentV1 = mid12;
+                    currentV2 = mid01;
+                    break;
+                case 2:
+                    currentV0 = currentV2;
+                    currentV1 = mid20;
+                    currentV2 = mid12;
+                    break;
+                case 3:
+                    currentV0 = mid01;
+                    currentV1 = mid12;
+                    currentV2 = mid20;
+                    break;
+            }
+        }
+
+        // Determine which vertex to return based on the original baseUV
+        if (baseUV == baseTriangleUvs[0]) return currentV0;
+        if (baseUV == baseTriangleUvs[1]) return currentV1;
+        if (baseUV == baseTriangleUvs[2]) return currentV2;
+
+        // For midpoints, return the interpolated value
+        return (currentV0 + currentV1 + currentV2) / 3f;
+    }
+
     private Buffer _vertexBuffer;
     private PbrVertex[] _vertexBufferData = new PbrVertex[0];
     private readonly BufferWithViews _vertexBufferWithViews = new();
@@ -716,6 +583,14 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
     private static readonly float phi = (1f + MathF.Sqrt(5f)) / 2f; // Golden ratio, used in icosahedron generation
 
     private static readonly float _icosahedronTiltAngle = MathF.Atan(2f / (2f * phi));  // Pre-calculate the tilt angle
+
+    // the base UV coordinates for a triangle face
+    private static readonly Vector2[] _baseUvs = new Vector2[3]
+        {
+        new Vector2(0.5f, 1.0f),    // vertex 0 (center top)
+        new Vector2(0.067f, 0.250f), // vertex 11 (left bottom)
+        new Vector2(0.933f, 0.250f)  // vertex 5 (right bottom)
+        };
 
     private enum UvModes
     {
