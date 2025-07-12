@@ -27,6 +27,7 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
             var center = Center.GetValue(context);
             var subdivisions = Subdivisions.GetValue(context).Clamp(0, 5);
             var spherical = Spherical.GetValue(context);
+            var strength = Strength.GetValue(context);
             var uvMapMode = TexCoord.GetValue(context);
             var uvMapMode2 = TexCoord2.GetValue(context);
             IUvMapper uvMapper = GetUvMapper(uvMapMode, subdivisions);
@@ -44,10 +45,16 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
 
             // Generate mesh using flat shading structure
             var (vertices, triangles) = GenerateIcosahedron();
+
             if (subdivisions > 0)
-            {
-                SubdivideMeshFlat(ref vertices, ref triangles, subdivisions, spherical);
-            }
+                SubdivideMeshFlat(ref vertices, ref triangles, subdivisions, strength, spherical);
+
+            if (uvMapper is Unwrapped unwrappedUv)
+                unwrappedUv.Prepare(vertices, triangles);
+
+            if (uvMapper2 is Unwrapped unwrappedUv2)
+                unwrappedUv2.Prepare(vertices, triangles);
+
 
             // Calculate normals based on shading mode
             var normals = (shadingMode == (int)ShadingModes.Smoothed)
@@ -77,7 +84,7 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
                 stretch.Y * scale * pivot.Y,
                 stretch.X * scale * pivot.Z
             );
-
+            
             for (int i = 0; i < vertices.Length; i++)
             {
                 var pos = new Vector3(
@@ -87,7 +94,7 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
                 );
 
                 pos = Vector3.Transform(pos + offset, rotationMatrix) + centerVec;
-
+                
                 var uv = uvMapper.CalculateUV(vertices[i], normals[i], i % 3, i / 3); // Use i / 3 for triangle index
                 var uv2 = uvMapper2.CalculateUV(vertices[i], normals[i], i % 3, i / 3);
 
@@ -296,7 +303,7 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
 
 
     // Subdivide mesh for flat shading (each triangle gets its own vertices)
-    private static void SubdivideMeshFlat(ref Vector3[] vertices, ref Int3[] triangles, int levels, bool spherical = true)
+    private static void SubdivideMeshFlat(ref Vector3[] vertices, ref Int3[] triangles, int levels, float strength, bool spherical = true)
     {
         for (int i = 0; i < levels; i++)
         {
@@ -316,21 +323,21 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
 
                 // Add all vertices (optionally normalize)
                 int baseIndex = newVertices.Count;
-                newVertices.Add(spherical ? Vector3.Normalize(v1) : v1);
-                newVertices.Add(spherical ? Vector3.Normalize(a) : a);
-                newVertices.Add(spherical ? Vector3.Normalize(c) : c);
+                newVertices.Add(spherical ? MathUtils.Lerp(v1, Vector3.Normalize(v1), strength) : v1);
+                newVertices.Add(spherical ? MathUtils.Lerp(a, Vector3.Normalize(a), strength) : a);
+                newVertices.Add(spherical ? MathUtils.Lerp(c, Vector3.Normalize(c), strength) : c);
 
-                newVertices.Add(spherical ? Vector3.Normalize(v2) : v2);
-                newVertices.Add(spherical ? Vector3.Normalize(b) : b);
-                newVertices.Add(spherical ? Vector3.Normalize(a) : a);
+                newVertices.Add(spherical ? MathUtils.Lerp(v2, Vector3.Normalize(v2), strength) : v2);
+                newVertices.Add(spherical ? MathUtils.Lerp(b, Vector3.Normalize(b), strength) : b);
+                newVertices.Add(spherical ? MathUtils.Lerp(a, Vector3.Normalize(a), strength) : a);
 
-                newVertices.Add(spherical ? Vector3.Normalize(v3) : v3);
-                newVertices.Add(spherical ? Vector3.Normalize(c) : c);
-                newVertices.Add(spherical ? Vector3.Normalize(b) : b);
+                newVertices.Add(spherical ? MathUtils.Lerp(v3, Vector3.Normalize(v3), strength) : v3);
+                newVertices.Add(spherical ? MathUtils.Lerp(c, Vector3.Normalize(c), strength) : c);
+                newVertices.Add(spherical ? MathUtils.Lerp(b, Vector3.Normalize(b), strength) : b);
 
-                newVertices.Add(spherical ? Vector3.Normalize(a) : a);
-                newVertices.Add(spherical ? Vector3.Normalize(b) : b);
-                newVertices.Add(spherical ? Vector3.Normalize(c) : c);
+                newVertices.Add(spherical ? MathUtils.Lerp(a, Vector3.Normalize(a), strength) : a);
+                newVertices.Add(spherical ? MathUtils.Lerp(b, Vector3.Normalize(b), strength) : b);
+                newVertices.Add(spherical ? MathUtils.Lerp(c, Vector3.Normalize(c), strength) : c);
 
                 // Add new triangles (same as before)
                 newTriangles.Add(new Int3(baseIndex + 0, baseIndex + 1, baseIndex + 2));
@@ -474,9 +481,10 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
             {
                 return new Vector2[3]
                 {
+                    new Vector2(0.09091f + xOffset, 0.907461f),    // Top center 
                     new Vector2(0.0f + xOffset, 0.75f ),       // Left vertex 
                     new Vector2(0.181819f + xOffset, 0.75f),   // Right vertex
-                    new Vector2(0.09091f + xOffset, 0.907461f)    // Top center 
+                    
                 };
             }
             else if (originalFaceIndex < 10) // Second group (faces 5-9)
@@ -493,9 +501,10 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
                 // Apply Y shift downward (-0.157461) and X shift (+cellHWidth/2)
                 return new Vector2[3]
                 {
+                    new Vector2(0.09091f + xOffset, 0.907461f- cellV),   // Top center
                     new Vector2(0.0f + xOffset, 0.75f - cellV ),       // Left vertex 
                     new Vector2(0.181819f + xOffset, 0.75f- cellV),   // Right vertex
-                    new Vector2(0.09091f + xOffset, 0.907461f- cellV)   // Top center
+                    
                 };
             }
             else // Fourth group (faces 15-19)
@@ -513,14 +522,85 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
 
     private class Unwrapped : IUvMapper
     {
+        private Dictionary<(int triangleIndex, int vertexIndex), Vector2> _fixedUvs;
+        private HashSet<int> _flippedTriangles;
+
+        // Precomputes UVs with seam fix, must be called before CalculateUV
+        public void Prepare(Vector3[] vertices, Int3[] triangles)
+        {
+            _fixedUvs = new Dictionary<(int, int), Vector2>();
+            _flippedTriangles = new HashSet<int>();
+
+            for (int triIndex = 0; triIndex < triangles.Length; triIndex++)
+            {
+                var tri = triangles[triIndex];
+                int[] indices = new[] { tri.X, tri.Y, tri.Z };
+                Vector2[] uvs = new Vector2[3];
+
+                // Step 1: Compute spherical UVs
+                for (int i = 0; i < 3; i++)
+                {
+                    // Match tilt rotation                     
+                    var tilt = Matrix4x4.CreateFromYawPitchRoll(
+                        yaw: 0f,
+                        pitch: 0f,  
+                        roll: -_icosahedronTiltAngle
+                    );
+
+                    // Rotate vertex into UV-mapping space
+                    Vector3 v = Vector3.Transform(vertices[indices[i]], tilt);
+
+                    // Then compute spherical UVs from rotated point
+                    float u = 0.5f + MathF.Atan2(v.Z, v.X) / (2 * MathF.PI);
+                    float vCoord = 0.5f + MathF.Asin(v.Y) / MathF.PI;
+                    if (u < 0f) u += 1f;
+                    if (u >= 1f) u -= 1f;
+                    uvs[i] = new Vector2(u, vCoord);
+                }
+
+                // Step 2: Seam fix
+                float minU = MathF.Min(uvs[0].X, MathF.Min(uvs[1].X, uvs[2].X));
+                float maxU = MathF.Max(uvs[0].X, MathF.Max(uvs[1].X, uvs[2].X));
+                bool wraps = (maxU - minU) > 0.5f;
+                for (int i = 0; i < 3; i++)
+                    if (wraps && uvs[i].X < 0.5f)
+                        uvs[i].X += 1f;
+
+                // Step 3: Check UV winding and flip if necessary
+                var uvA = new Vector3(uvs[0], 0);
+                var uvB = new Vector3(uvs[1], 0);
+                var uvC = new Vector3(uvs[2], 0);
+                var uvNormal = Vector3.Cross(uvB - uvA, uvC - uvA);
+                bool flipped = uvNormal.Z < 0;
+
+                if (flipped)
+                {
+                    // Flip UVs
+                    (uvs[1], uvs[2]) = (uvs[2], uvs[1]);
+                    _flippedTriangles.Add(triIndex);
+                }
+
+                // Store fixed UVs with vertex mapping order preserved (adjusted if flipped)
+                for (int i = 0; i < 3; i++)
+                {
+                    int fixedIndex = flipped ? (i == 1 ? 2 : i == 2 ? 1 : 0) : i;
+                    _fixedUvs[(triIndex, i)] = uvs[fixedIndex];
+                }
+            }
+        }
+
+
         public Vector2 CalculateUV(Vector3 vertex, Vector3 normal, int vertexIndex, int triangleIndex)
         {
-            // Blender-style spherical unwrapping
-            float u = 0.5f + MathF.Atan2(vertex.Z, vertex.X) / (2 * MathF.PI);
-            float v = 0.5f + MathF.Asin(vertex.Y) / MathF.PI;
-            return new Vector2(u, v);
+            if (_fixedUvs.TryGetValue((triangleIndex, vertexIndex), out var uv))
+                return uv* new Vector2(-1f,1f) + new Vector2(1f,0f);
+
+            return new Vector2(0.5f, 0.5f); // fallback
         }
     }
+
+
+
 
     private class Atlas : IUvMapper
     {
@@ -695,6 +775,9 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
 
     [Input(Guid = "32a77592-eaa1-43e8-b1ab-74b989ecbccd")]
     public readonly InputSlot<bool> Spherical = new();
+    
+    [Input(Guid = "63866397-F64E-486A-8C6D-862FFD3ED42E")]
+    public readonly InputSlot<float> Strength = new();
 
     [Input(Guid = "e062431e-0741-446d-ace9-e7e91080ed9f")] 
     public readonly InputSlot<Vector2> Stretch = new();

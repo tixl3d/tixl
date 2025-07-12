@@ -128,6 +128,15 @@
           "Value": true
         },
         {
+          "Id": "9e24c5d1-191a-4c1a-b88e-03df826fffc0"/*Translation*/,
+          "Type": "System.Numerics.Vector3",
+          "Value": {
+            "X": -0.5,
+            "Y": -0.5,
+            "Z": 0.0
+          }
+        },
+        {
           "Id": "b864bb2d-a9fd-4e63-8d3d-b0cc8da6a13c"/*EnableProfiling*/,
           "Type": "System.Boolean",
           "Value": false
@@ -222,11 +231,16 @@
           "Value": 0
         },
         {
+          "Id": "ae7f7e83-fa18-44fd-b639-3bd0dbd3ac06"/*VerticalAlign*/,
+          "Type": "System.Int32",
+          "Value": 1
+        },
+        {
           "Id": "de0fed7d-d2af-4424-baf3-81606e26559f"/*Position*/,
           "Type": "System.Numerics.Vector2",
           "Value": {
-            "X": 0.0,
-            "Y": -0.07
+            "X": -0.5,
+            "Y": -0.57
           }
         }
       ],
