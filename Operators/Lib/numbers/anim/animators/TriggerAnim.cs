@@ -74,7 +74,7 @@ public sealed class TriggerAnim : Instance<TriggerAnim>
                     {
                         _triggerTime = currentTime;
                         _currentDirection = Directions.Forward;
-                        LastFraction = -_delay;
+                        LastFraction = 0;
                     }
                 }
                 else
@@ -97,16 +97,16 @@ public sealed class TriggerAnim : Instance<TriggerAnim>
             {
                 case Directions.Forward:
                 {
-                    LastFraction = _startProgress + dp;
-                    if (LastFraction >= 1)
-                    {
-                        HasCompleted.Value = true;
-                        LastFraction = 1;
-                        _currentDirection = Directions.None;
+                        var delayedDp = (currentTime - _triggerTime < _delay) ? 0 : (float)((currentTime - _triggerTime - _delay) / _duration);
+                        LastFraction = _startProgress + delayedDp;
+                        if (LastFraction >= 1)
+                        {
+                            HasCompleted.Value = true;
+                            LastFraction = 1;
+                            _currentDirection = Directions.None;
+                        }
+                        break;
                     }
-
-                    break;
-                }
                 case Directions.Backwards:
                 {
                     LastFraction = _startProgress - dp;
@@ -126,16 +126,24 @@ public sealed class TriggerAnim : Instance<TriggerAnim>
             {
                 case Directions.Forward:
                 {
-                    LastFraction = (currentTime - _triggerTime + 0.00001f)/_duration;
-                    if(LastFraction >= 1)
-                    {
-                        LastFraction = 1;
-                        HasCompleted.Value = true;
-                        _currentDirection = Directions.None;
+                        // Apply delay to the progress calculation
+                        var timeSinceTrigger = currentTime - _triggerTime;
+                        if (timeSinceTrigger < _delay)
+                        {
+                            LastFraction = 0;
+                        }
+                        else
+                        {
+                            LastFraction = (timeSinceTrigger - _delay) / _duration;
+                            if (LastFraction >= 1)
+                            {
+                                LastFraction = 1;
+                                HasCompleted.Value = true;
+                                _currentDirection = Directions.None;
+                            }
+                        }
+                        break;
                     }
-
-                    break;
-                }
                 case Directions.Backwards:
                 {
                     LastFraction =   1+( _triggerTime- currentTime )/_duration;
