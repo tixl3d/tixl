@@ -3,7 +3,7 @@ using T3.Core.Utils;
 namespace Lib.numbers.anim._obsolete;
 
 [Guid("9cb4d49e-135b-400b-a035-2b02c5ea6a72")]
-internal sealed class Time : Instance<Time>
+internal sealed class _Time_old : Instance<_Time_old>
 {
     [Output(Guid = "b20573fe-7a7e-48e1-9370-744288ca6e32", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
     public readonly Slot<float> TimeInBars = new();
@@ -12,7 +12,7 @@ internal sealed class Time : Instance<Time>
     public readonly Slot<float> TimeInSecs = new();
 
         
-    public Time()
+    public _Time_old()
     {
         TimeInBars.UpdateAction += Update;
         TimeInSecs.UpdateAction += Update;

@@ -1,0 +1,51 @@
+{
+    "Id": "9cb4d49e-135b-400b-a035-2b02c5ea6a72" /*_Time_old*/,
+    "Description": "Returns the current time from the \"context\".\n\nIn most situations this will be the playback time in bars (not seconds!) as number. But this could also be overridden by [SetCommandTime], [TimeClip], during beat tapping, or during rendering an image sequence. Like many music applications, Tooll uses bars to represent time. This allows to easily sync animations to varying soundtracks or BPM-rates. At 120 Beats per Minute 1 bar is equivalent to 2 seconds.\n\nThis operator has a somewhat confusing interface and has been tagged as obsolete. Please consider using [Time2].\n\nTips:\n\n- Add a [Modulo] or other math operators to repeat a time range.\n- Consider using [AnimValue] for other deterministic time values.\n- If you want to restart the timer during playback, try the [Modulo] operator.\n- Consider [RunTime] to get time time since application start.\n\nAKA: clock, seconds, bars\n\nAlso see [Accumulator] for a similar Operator.\nFor a variant that does not count up linearly but in steps, [Counter]",
+    "InputUis": [
+        {
+            "InputId": "2d9c040d-5244-40ac-8090-d8d57323487b" /*SpeedFactor*/,
+            "Position": {
+                "X": -200.0,
+                "Y": 0.0
+            },
+            "Description": "This parameter is equivalent to appending a [Multiply] operator. Note the animating this will probably resulting into very rapid changes. You might consider [Accumulator] to achieve smooth but non-deterministic changes in animation speed.",
+            "Min": -5.0,
+            "Max": 5.0,
+            "Format": "{0:0.000} ×"
+        },
+        {
+            "InputId": "8da7d58d-10a5-4378-8f44-b98f87ec2697" /*Mode*/,
+            "Position": {
+                "X": -200.0,
+                "Y": 0.0
+            },
+            "Description": "Selects the time representation used:\n\n- LocalFxTimeInBars: Use context time in bars (not seconds!) with applied Idle Motion.\n- LocalTimeInBars: Use context time, without Idle Motion.\n- LocalTimeInSec: Use the current BPM to convert to seconds.\n- PlaybackTimeInBars: Ignore time overrides."
+        }
+    ],
+    "SymbolChildUis": [],
+    "OutputUis": [
+        {
+            "OutputId": "b20573fe-7a7e-48e1-9370-744288ca6e32" /*TimeInBars*/,
+            "Position": {
+                "X": 0.0,
+                "Y": 0.0
+            }
+        },
+        {
+            "OutputId": "a606b326-f3af-470b-b6e5-3175f7a54e31" /*TimeInSecs*/,
+            "Position": {
+                "X": 0.0,
+                "Y": 0.0
+            }
+        }
+    ],
+    "Links": [
+        {
+            "Id": "09b2abf8-ec45-4248-8d85-ffc32c65c5c4",
+            "Title": "Time Magic",
+            "Description": "A 4min video tutorial about overriding time.",
+            "LinkUrl": "https://www.youtube.com/watch?v=COd7gkJB0KQ&list=PLj-rnPROvbn2cfnUwuyb5gRj-juOYUC7T&index=22",
+            "LinkType": "TutorialVideo"
+        }
+    ]
+}

@@ -4,14 +4,14 @@ using T3.Core.Utils;
 namespace Lib.numbers.anim.time;
 
 [Guid("b0d75f21-df33-460b-beab-d8c5e1f23e5e")]
-internal sealed class Time2 : Instance<Time2>
+internal sealed class Time : Instance<Time>
 {
     [Output(Guid = "fd3049aa-4c22-405b-b9b4-0a2474d0e377", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
-    public readonly Slot<float> Time = new();
+    public readonly Slot<float> Timefloat = new();
 
-    public Time2()
+    public Time()
     {
-        Time.UpdateAction += Update;
+        Timefloat.UpdateAction += Update;
     }
 
     private void Update(EvaluationContext context)
@@ -31,11 +31,11 @@ internal sealed class Time2 : Instance<Time2>
 
         if (Units.GetValue(context) == 1)
         {
-            Time.Value = (float)context.Playback.SecondsFromBars(time * SpeedFactor.GetValue(context));
+            Timefloat.Value = (float)context.Playback.SecondsFromBars(time * SpeedFactor.GetValue(context));
         }
         else
         {
-            Time.Value = (float)(time * SpeedFactor.GetValue(context));
+            Timefloat.Value = (float)(time * SpeedFactor.GetValue(context));
         }
     }
 
