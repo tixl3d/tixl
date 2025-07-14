@@ -237,32 +237,21 @@ public sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
                                  });
         }
 
-        if (_ib == null || _indexBufferSize < drawData.TotalIdxCount)
-        {
-            DisposeObj(ref _ib);
-            _indexBufferSize = drawData.TotalIdxCount + 10000;
-            _ib = new Buffer(_device,
-                             new BufferDescription()
-                                 {
-                                     SizeInBytes = _indexBufferSize * Unsafe.SizeOf<ushort>(),
-                                     Usage = ResourceUsage.Dynamic,
-                                     BindFlags = BindFlags.IndexBuffer,
-                                     CpuAccessFlags = CpuAccessFlags.Write
-                                 });
-        }
-
         // Copy and convert all vertices into a single contiguous buffer
-        _deviceContext.MapSubresource(_vb, MapMode.WriteDiscard, SharpDX.Direct3D11.MapFlags.None, out var vbStream);
-        _deviceContext.MapSubresource(_ib, MapMode.WriteDiscard, SharpDX.Direct3D11.MapFlags.None, out var ibStream);
+        IntPtr vbPtr = _deviceContext.MapSubresource(_vb, MapMode.WriteDiscard, SharpDX.Direct3D11.MapFlags.None, out _).DataPointer;
+        IntPtr ibPtr = _deviceContext.MapSubresource(_ib, MapMode.WriteDiscard, SharpDX.Direct3D11.MapFlags.None, out _).DataPointer;
+
         for (int n = 0; n < drawData.CmdListsCount; n++)
         {
-            ImDrawListPtr cmdList = drawData.CmdLists[n];
-            vbStream.WriteRange(cmdList.VtxBuffer.Data, (uint)(cmdList.VtxBuffer.Size * Unsafe.SizeOf<ImDrawVert>()));
-            ibStream.WriteRange(cmdList.IdxBuffer.Data, (uint)(cmdList.IdxBuffer.Size * Unsafe.SizeOf<ushort>()));
+            ImDrawListPtr cmd_list = drawData.CmdLists[n];
+
+            SharpDX.Utilities.CopyMemory(vbPtr, cmd_list.VtxBuffer.Data, cmd_list.VtxBuffer.Size * Unsafe.SizeOf<ImDrawVert>());
+            SharpDX.Utilities.CopyMemory(ibPtr, cmd_list.IdxBuffer.Data, cmd_list.IdxBuffer.Size * 2);
+
+            vbPtr += cmd_list.VtxBuffer.Size * Unsafe.SizeOf<ImDrawVert>();
+            ibPtr += cmd_list.IdxBuffer.Size * 2;
         }
 
-        vbStream.Dispose();
-        ibStream.Dispose();
         _deviceContext.UnmapSubresource(_vb, 0);
         _deviceContext.UnmapSubresource(_ib, 0);
     }
@@ -446,6 +435,16 @@ public sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
 
         // Create the constant buffer
         _vertexConstantBuffer = ResourceUtils.CreateDynamicConstantBuffer(_device, Unsafe.SizeOf<Matrix4x4>());
+
+        //CReate the index buffer (max short value)
+        _ib = new Buffer(_device,
+                 new BufferDescription()
+                 {
+                     SizeInBytes = ushort.MaxValue * Unsafe.SizeOf<ushort>(),
+                     Usage = ResourceUsage.Dynamic,
+                     BindFlags = BindFlags.IndexBuffer,
+                     CpuAccessFlags = CpuAccessFlags.Write
+                 });
 
         // Create the pixel shader
         string pixelShader =
@@ -691,7 +690,7 @@ public sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
     private RasterizerState _rasterizerState;
     private BlendState _blendState;
     private DepthStencilState _depthStencilState;
-    private int _vertexBufferSize = 5000, _indexBufferSize = 1000;
+    private int _vertexBufferSize = 5000;
 
     private int _windowWidth;
     private int _windowHeight;
