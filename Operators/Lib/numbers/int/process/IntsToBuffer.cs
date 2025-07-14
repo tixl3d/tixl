@@ -1,5 +1,6 @@
 using SharpDX;
 using SharpDX.Direct3D11;
+using T3.Core.Rendering;
 
 // SharpDX.Direct3D11.Buffer;
 //using Utilities = T3.Core.Utils.Utilities;
@@ -39,30 +40,14 @@ internal sealed class IntsToBuffer : Instance<IntsToBuffer>
         Params.DirtyFlag.Clear();
 
         var device = ResourceManager.Device;
-        var size = sizeof(float) * array.Length;
-        using (var data = new DataStream(size, true, true))
-        {
-            data.WriteRange(array);
-            data.Position = 0;
+        var size = sizeof(int) * array.Length;
 
-            if (Result.Value == null || Result.Value.Description.SizeInBytes != size)
-            {
-                Utilities.Dispose(ref Result.Value);
-                var bufferDesc = new BufferDescription
-                                     {
-                                         Usage = ResourceUsage.Default,
-                                         SizeInBytes = size,
-                                         BindFlags = BindFlags.ConstantBuffer
-                                     };
-                Result.Value = new Buffer(device, data, bufferDesc);
-            }
-            else
-            {
-                device.ImmediateContext.UpdateSubresource(new DataBox(data.DataPointer, 0, 0), Result.Value, 0);
-            }
+        if (ResourceUtils.GetDynamicConstantBuffer(device, ref Result.Value, size))
+        {
+            Result.Value.DebugName = nameof(IntsToBuffer); // no need to copy string every frame if constant
         }
 
-        Result.Value.DebugName = nameof(IntsToBuffer);
+        ResourceUtils.WriteDynamicBufferData<int>(device.ImmediateContext, Result.Value, array.AsSpan());
     }
 
 

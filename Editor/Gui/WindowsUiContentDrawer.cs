@@ -10,6 +10,7 @@ using SharpDX.DXGI;
 using SharpDX.Mathematics.Interop;
 using SharpDX.WIC;
 using T3.Core.Operator.Slots;
+using T3.Core.Rendering;
 using T3.Core.Resource;
 using T3.Core.SystemUi;
 using T3.Editor.App;
@@ -276,10 +277,8 @@ public sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
         // Our visible imgui space lies from draw_data->DisplayPos (top left) to draw_data->DisplayPos+data_data->DisplaySize (bottom right). 
         var imGuiIO = ImGui.GetIO();
         var projectionMatrix = Matrix4x4.CreateOrthographicOffCenter(0.0f, imGuiIO.DisplaySize.X, imGuiIO.DisplaySize.Y, 0.0f, -1.0f, 1.0f);
-        _deviceContext.MapSubresource(_vertexConstantBuffer, MapMode.WriteDiscard, SharpDX.Direct3D11.MapFlags.None, out var cbStream);
-        cbStream.Write(projectionMatrix);
-        cbStream.Dispose();
-        _deviceContext.UnmapSubresource(_vertexConstantBuffer, 0);
+
+        ResourceUtils.WriteDynamicBufferData<Matrix4x4>(_deviceContext, _vertexConstantBuffer, projectionMatrix);
 
         // Backup DX state that will be modified to restore it afterwards (unfortunately this is very ugly looking and verbose. Close your eyes!)
         _deviceContext.Rasterizer.GetScissorRectangles(_prevScissorRects);
@@ -446,14 +445,7 @@ public sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
                                            });
 
         // Create the constant buffer
-        _vertexConstantBuffer = new Buffer(_device,
-                                           new BufferDescription()
-                                               {
-                                                   SizeInBytes = 4 * 4 * 4 /*TODO sizeof(Matrix4x4)*/,
-                                                   Usage = ResourceUsage.Dynamic,
-                                                   BindFlags = BindFlags.ConstantBuffer,
-                                                   CpuAccessFlags = CpuAccessFlags.Write
-                                               });
+        _vertexConstantBuffer = ResourceUtils.CreateDynamicConstantBuffer(_device, Unsafe.SizeOf<Matrix4x4>());
 
         // Create the pixel shader
         string pixelShader =

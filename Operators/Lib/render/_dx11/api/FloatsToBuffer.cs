@@ -1,5 +1,6 @@
 using SharpDX;
 using SharpDX.Direct3D11;
+using T3.Core.Rendering;
 using Utilities = T3.Core.Utils.Utilities;
 
 namespace Lib.render._dx11.api;
@@ -27,14 +28,15 @@ internal sealed class FloatsToBuffer : Instance<FloatsToBuffer>
 
             var totalFloatCount = floatParamCount + vec4ArrayLength * 4 * 4;
 
-            var arraySize = (totalFloatCount / 4 + (totalFloatCount % 4 == 0 ? 0 : 1)) * 4; // always 16byte slices for alignment
+            var arraySize = totalFloatCount; //Note (vux) alignment handled on buffer creation
+            //note : luckily in .net 10 that eventually goes to the stack
             var array = new float[arraySize];
 
             if (array.Length == 0)
                 return;
 
             var totalFloatIndex = 0;
-                
+
             foreach (var aInput in matrixParams)
             {
                 var aaa = aInput.GetValue(context);
@@ -59,28 +61,13 @@ internal sealed class FloatsToBuffer : Instance<FloatsToBuffer>
             var device = ResourceManager.Device;
 
             var size = sizeof(float) * array.Length;
-            using (var data = new DataStream(size, true, true))
-            {
-                data.WriteRange(array);
-                data.Position = 0;
 
-                if (Buffer.Value == null || Buffer.Value.Description.SizeInBytes != size)
-                {
-                    Utilities.Dispose(ref Buffer.Value);
-                    var bufferDesc = new BufferDescription
-                                         {
-                                             Usage = ResourceUsage.Default,
-                                             SizeInBytes = size,
-                                             BindFlags = BindFlags.ConstantBuffer
-                                         };
-                    Buffer.Value = new Buffer(device, data, bufferDesc);
-                }
-                else
-                {
-                    device.ImmediateContext.UpdateSubresource(new DataBox(data.DataPointer, 0, 0), Buffer.Value, 0);
-                }
+            if (ResourceUtils.GetDynamicConstantBuffer(device, ref Buffer.Value, size))
+            {
+                Buffer.Value.DebugName = nameof(FloatsToBuffer); // no need to copy string every frame if constant
             }
-            Buffer.Value.DebugName = nameof(FloatsToBuffer);
+
+            ResourceUtils.WriteDynamicBufferData<float>(device.ImmediateContext, Buffer.Value, array.AsSpan());
         }
         catch (Exception e)
         {

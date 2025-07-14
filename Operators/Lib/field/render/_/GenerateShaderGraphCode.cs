@@ -2,6 +2,7 @@ using Lib.render._dx11.api;
 using SharpDX;
 using SharpDX.Direct3D11;
 using T3.Core.DataTypes.ShaderGraph;
+using T3.Core.Rendering;
 using T3.Core.Stats;
 using Utilities = T3.Core.Utils.Utilities;
 
@@ -285,40 +286,24 @@ internal sealed class GenerateShaderGraphCode : Instance<GenerateShaderGraphCode
         {
             if (floatParams == null || floatParams.Count == 0)
                 return;
-            
-            var arraySize = (floatParams.Count / 4 + (floatParams.Count % 4 == 0 ? 0 : 1)) * 4; // always 16byte slices for alignment
+
+            var arraySize = floatParams.Count;
             var array = new float[arraySize];
             
             for (var i = 0; i < floatParams.Count; i++)
             {
                 array[i] = floatParams[i];
             }
-            
+
             var device = ResourceManager.Device;
+            var size = sizeof(int) * array.Length;
 
-            var size = sizeof(float) * array.Length;
-            using (var data = new DataStream(size, true, true))
+            if (ResourceUtils.GetDynamicConstantBuffer(device, ref floatSlotBuffer.Value, size))
             {
-                data.WriteRange(array);
-                data.Position = 0;
-
-                if (floatSlotBuffer.Value == null || floatSlotBuffer.Value.Description.SizeInBytes != size)
-                {
-                    Utilities.Dispose(ref floatSlotBuffer.Value);
-                    var bufferDesc = new BufferDescription
-                                         {
-                                             Usage = ResourceUsage.Default,
-                                             SizeInBytes = size,
-                                             BindFlags = BindFlags.ConstantBuffer
-                                         };
-                    floatSlotBuffer.Value = new Buffer(device, data, bufferDesc);
-                }
-                else
-                {
-                    device.ImmediateContext.UpdateSubresource(new DataBox(data.DataPointer, 0, 0), floatSlotBuffer.Value, 0);
-                }
+                floatSlotBuffer.Value.DebugName = nameof(FloatsToBuffer); // no need to copy string every frame if constant
             }
-            floatSlotBuffer.Value.DebugName = nameof(FloatsToBuffer);
+
+            ResourceUtils.WriteDynamicBufferData<float>(device.ImmediateContext, floatSlotBuffer.Value, array.AsSpan());
         }
         catch (Exception e)
         {
