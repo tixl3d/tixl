@@ -4,7 +4,7 @@
   "SymbolTags": "1",
   "InputUis": [
     {
-      "InputId": "05e0b0e3-6e79-48bd-a356-3dcb65c9040f"/*FlatShading*/,
+      "InputId": "05e0b0e3-6e79-48bd-a356-3dcb65c9040f"/*Shading*/,
       "Position": {
         "X": 1622.4233,
         "Y": 3720.1924
@@ -125,6 +125,13 @@
   ],
   "SymbolChildUis": [
     {
+      "ChildId": "01992f57-197e-459f-938f-159805816b8d"/*IntToFloat*/,
+      "Position": {
+        "X": 1885.1946,
+        "Y": 3769.764
+      }
+    },
+    {
       "ChildId": "036bd517-a749-4fc7-bdf1-3845d2e51166"/*linearSampler*/,
       "Position": {
         "X": 2221.8616,
@@ -193,13 +200,6 @@
       "Position": {
         "X": 2863.2698,
         "Y": 3271.7793
-      }
-    },
-    {
-      "ChildId": "4af88bae-fa50-45e2-8ae8-43d564c6d5f8"/*BoolToFloat*/,
-      "Position": {
-        "X": 1791.5083,
-        "Y": 3720.9985
       }
     },
     {
