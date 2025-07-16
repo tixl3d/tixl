@@ -21,7 +21,8 @@ cbuffer Params : register(b1)
 {
     float4 Color;
     float AlphaCutOff;
-    float Debug;
+    //float Debug;
+    float UseFlatShading;
 };
 
 cbuffer FogParams : register(b2)
@@ -145,8 +146,10 @@ inline float4 GetField(float4 p)
     /*{FIELD_CALL}*/
 
 #ifndef USE_WORLDSPACE
+    float originalAlpha = f.w;
     float uniformScale = length(ObjectToWorld[0].xyz);
     f.w *= uniformScale;
+    f.w = originalAlpha; // Restore original alpha
 #endif
     return f;
 }
@@ -177,10 +180,34 @@ float4 psMain(psInput pin) : SV_TARGET
     float3 Lo = normalize(eyePosition.xyz - pin.worldPosition);
 
     // Get current fragment's normal and transform to world space.
-    float4 normalMap = NormalMap.Sample(TexSampler, pin.texCoord);
-
-    float3 N = normalize(2.0 * normalMap.rgb - 1.0);
-    N = normalize(mul(N, pin.tbnToWorld));
+       float3 N;
+    if (UseFlatShading > 0.5)
+    {
+        // Flat shading: calculate geometric normal from world position derivatives
+        float3 dpdx = ddx(pin.worldPosition);
+        float3 dpdy = ddy(pin.worldPosition);
+        float3 geometricNormal = normalize(cross(dpdy, dpdx));
+        
+        // Apply normal map details on top of flat normal
+        float4 normalMap = NormalMap.Sample(TexSampler, pin.texCoord);
+        float3 normalDetail = normalize(2.0 * normalMap.rgb - 1.0);
+        
+        // Create TBN basis using geometric normal and derivatives
+        float3 T = normalize(dpdx);
+        float3 B = normalize(cross(geometricNormal, T));
+        T = cross(B, geometricNormal); // Reorthogonalize
+        float3x3 flatTBN = float3x3(T, B, geometricNormal);
+        
+        // Apply normal map in flat shading tangent space
+        N = normalize(mul(normalDetail, flatTBN));
+    }
+    else
+    {
+        // Standard shading: use interpolated normals with normal mapping
+        float4 normalMap = NormalMap.Sample(TexSampler, pin.texCoord);
+        N = normalize(2.0 * normalMap.rgb - 1.0);
+        N = normalize(mul(N, pin.tbnToWorld));
+    }
 
     // Angle between surface normal and outgoing light direction.
     frag.cosLo = abs(dot(N, Lo));

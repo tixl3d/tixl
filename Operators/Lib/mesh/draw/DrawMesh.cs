@@ -95,6 +95,9 @@ internal sealed class DrawMesh : Instance<DrawMesh>, ICustomDropdownHolder, ICom
     [Input(Guid = "9e957f4a-6502-4905-8d97-331f8b54097c")]
     public readonly InputSlot<CullMode> Culling = new InputSlot<CullMode>();
 
+    [Input(Guid = "05e0b0e3-6e79-48bd-a356-3dcb65c9040f")]
+    public readonly InputSlot<bool> FlatShading = new InputSlot<bool>();
+
     [Input(Guid = "b50b3fc7-35e1-421d-be0a-b3008a54c33c")]
     public readonly InputSlot<bool> EnableZTest = new InputSlot<bool>();
 
@@ -115,6 +118,4 @@ internal sealed class DrawMesh : Instance<DrawMesh>, ICustomDropdownHolder, ICom
 
         [Input(Guid = "96df9e72-189f-4efc-82a6-b2f482166e34")]
         public readonly InputSlot<string> ShaderDefines = new InputSlot<string>();
-
-
 }

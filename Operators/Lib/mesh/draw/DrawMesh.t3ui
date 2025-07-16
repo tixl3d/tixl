@@ -4,6 +4,14 @@
   "SymbolTags": "1",
   "InputUis": [
     {
+      "InputId": "05e0b0e3-6e79-48bd-a356-3dcb65c9040f"/*FlatShading*/,
+      "Position": {
+        "X": 1622.4233,
+        "Y": 3720.1924
+      },
+      "Description": "If enabled, the mesh is rendered with flat shading."
+    },
+    {
       "InputId": "155c2396-0e05-4437-8171-288048b1158a"/*Filter*/,
       "Position": {
         "X": 2404.7104,
@@ -185,6 +193,13 @@
       "Position": {
         "X": 2863.2698,
         "Y": 3271.7793
+      }
+    },
+    {
+      "ChildId": "4af88bae-fa50-45e2-8ae8-43d564c6d5f8"/*BoolToFloat*/,
+      "Position": {
+        "X": 1791.5083,
+        "Y": 3720.9985
       }
     },
     {
