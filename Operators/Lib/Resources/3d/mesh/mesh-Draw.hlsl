@@ -145,12 +145,6 @@ inline float4 GetField(float4 p)
     float4 f = 1;
     /*{FIELD_CALL}*/
 
-#ifndef USE_WORLDSPACE
-    float originalAlpha = f.w;
-    float uniformScale = length(ObjectToWorld[0].xyz);
-    f.w *= uniformScale;
-    f.w = originalAlpha; // Restore original alpha
-#endif
     return f;
 }
 
