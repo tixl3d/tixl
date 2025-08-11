@@ -31,31 +31,23 @@ internal sealed class BendField : Instance<BendField>
     }
 
     public ShaderGraphNode ShaderNode { get; }
-
-    public void GetPreShaderCode(CodeAssembleContext c, int inputIndex)
+    
+    void IGraphNodeOp.AddDefinitions(CodeAssembleContext c)
     {
-        c.Globals["Bend"] = """
-                            void opBend(inout float2 p, float k) {
-                                float c = cos(k*p.x);
-                                float s = sin(k*p.x);
-                                float2x2  m = float2x2(c,-s,s,c);
-                                p = mul(m,p.xy);
+        c.Globals["opBend"] = """
+                            void opBend(inout float3 p, float k) {
+                                k/= (180 / 3.14157892);
+                                float c = cos(k * p.x);
+                                float s = sin(k * p.x);
+                                float2x2  m = float2x2(c, -s, s, c);
+                                p = float3(mul(m,p.xz), p.y);
                             }
                             """;
-        
-        c.Globals["PI"] = """
-                            #ifndef PI
-                            #define PI 3.14159265359
-                            #endif
-                            """;
-
-        c.Globals["mod"] = """
-                             #ifndef mod
-                             #define mod(x, y) ((x) - (y) * floor((x) / (y)))
-                             #endif
-                             """;
-        
-        c.AppendCall($"opBend({c}p.{_axisCodes0[(int)_axis]}, {ShaderNode}Amount);");
+    }
+    public void GetPreShaderCode(CodeAssembleContext c, int inputIndex)
+    {
+        var axi = _axisCodes0[(int)_axis];
+        c.AppendCall($"opBend(p{c}.{axi}, {ShaderNode}Amount);");
     }
 
     public void GetPostShaderCode(CodeAssembleContext c, int inputIndex)
@@ -64,9 +56,9 @@ internal sealed class BendField : Instance<BendField>
     
     private readonly string[] _axisCodes0 =
         [
-            "zy",
-            "zx",
-            "yx",
+            "zyx",
+            "zxy",
+            "yxz",
         ];
 
     private AxisTypes _axis;
