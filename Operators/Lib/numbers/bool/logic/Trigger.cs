@@ -20,7 +20,10 @@ public sealed class Trigger : Instance<Trigger>
         var onlyOnDown = OnlyOnDown.GetValue(context);
 
         Result.Value = onlyOnDown ? wasHit : value;
-        
+
+        var needsRefreshNextFrame = onlyOnDown && wasHit;
+        Result.DirtyFlag.Trigger = needsRefreshNextFrame ? DirtyFlagTrigger.Animated : DirtyFlagTrigger.None;
+
         ColorInGraph.DirtyFlag.Clear();
         Result.DirtyFlag.Clear();
     }
