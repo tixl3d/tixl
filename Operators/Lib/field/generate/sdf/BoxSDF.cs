@@ -33,16 +33,17 @@ internal sealed class BoxSDF : Instance<BoxSDF>, ITransformable
     void IGraphNodeOp.AddDefinitions(CodeAssembleContext c)
     {
         c.Globals["fRoundedRect"] = """
-                                      float fRoundedRect(float3 p, float3 center, float3 size, float r) {
-                                          float3 q = abs(p- center) - size + r;
-                                          return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0) - r;
+                                      float fRoundedRect(float3 p, float3 center, float3 size, float r, float scale) {
+                                      scale *= 0.5;
+                                      float3 q = abs(p - center) - (size * scale) + r;
+                                      return length(max(q, 0.0)) + min(max(q.x, max(q.y, q.z)), 0.0) - r;
                                       }
                                       """;
     }
     
     public void GetPreShaderCode(CodeAssembleContext c, int inputIndex)
     {
-        c.AppendCall($"f{c}.w = fRoundedRect(p{c}.xyz, {ShaderNode}Center, {ShaderNode}Size * {ShaderNode}UniformScale * 0.5, {ShaderNode}EdgeRadius);");
+        c.AppendCall($"f{c}.w = fRoundedRect(p{c}.xyz, {ShaderNode}Center, {ShaderNode}Size , {ShaderNode}EdgeRadius ,{ShaderNode}UniformScale );");
         //c.AppendCall($"f{c}.xyz = p{c}.xyz;");
         c.AppendCall($"f{c}.xyz = p.w < 0.5 ?  p{c}.xyz : 1;"); // save local space
     }
