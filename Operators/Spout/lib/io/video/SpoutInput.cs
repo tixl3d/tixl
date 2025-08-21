@@ -22,9 +22,13 @@ public class SpoutInput : Instance<SpoutInput>
     [Output(Guid = "10955469-F5C0-476D-8A1B-9CB2803820A9", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
     public readonly Slot<Texture2D> Texture = new();
 
+    [Output(Guid = "B1662AE3-76C2-450D-B4A2-101EE410762B", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
+    public readonly Slot<int> UpdateCount = new();
+
     public SpoutInput()
     {
         Texture.UpdateAction = Update;
+        UpdateCount.UpdateAction = Update;
         _instance++;
     }
 
@@ -276,6 +280,7 @@ public class SpoutInput : Instance<SpoutInput>
             immediateContext.CopyResource(readTexture, sharedImage);
 
             Texture.Value = sharedImage;
+            UpdateCount.Value++;
         }
         catch (Exception e)
         {
