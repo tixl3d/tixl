@@ -103,7 +103,7 @@ float3 rgb2hsb(float3 c)
         float4 HSBa = float4(rgb2hsb(p.Color.rgb), p.Color.a);
         HSBa += biasedB * RandomizeColor * strength;
         HSBa.x = fmod(HSBa.x, 1);
-        float4 rgba = float4(hsb2rgb(HSBa.xyz), HSBa.a);
+        rgba = float4(hsb2rgb(HSBa.xyz), HSBa.a);
     }
 
     p.Color = ClampColorsEtc
