@@ -14,6 +14,16 @@
       "DefaultValue": 9000
     },
     {
+      "Id": "72e9e11f-6fec-472f-87ad-370369a0afc5"/*IntValuesList*/,
+      "DefaultValue": {
+        "Values": []
+      }
+    },
+    {
+      "Id": "73a7a272-b313-44d3-ba17-d8a188bd961a"/*IntValues*/,
+      "DefaultValue": 0
+    },
+    {
       "Id": "827c7ae2-c129-4d04-a715-328c0a86bf8a"/*Values*/,
       "DefaultValue": 0.0
     },

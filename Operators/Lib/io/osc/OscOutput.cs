@@ -17,6 +17,7 @@ internal sealed class OscOutput : Instance<OscOutput>, IStatusProvider
     {
         // We can't initialize this in constructor because parent is not set yet
         _valuesInput ??= GetSymbolInput(Values);
+        _intValuesInput ??= GetSymbolInput(IntValues);
         _stringsInput ??= GetSymbolInput(Strings);
         _valuesListInput ??= GetSymbolInput(ValuesList);
 
@@ -140,6 +141,77 @@ internal sealed class OscOutput : Instance<OscOutput>, IStatusProvider
             }
         }
 
+        // Handle IntValuesList input
+        var intValuesList = IntValuesList.GetValue(context);
+        if (intValuesList != null && intValuesList.Count > 0)
+        {
+            // If we have a ValuesList, use it instead of individual values
+            if (_intValues.Count != intValuesList.Count || !_intValues.SequenceEqual(intValuesList))
+            {
+                _intValues.Clear();
+                _intValues.AddRange(intValuesList);
+                somethingHasChanged = true;
+            }
+        }
+        else
+        {
+            
+            var connectedIntValues = IntValues.GetCollectedTypedInputs();
+            var connectedIntValueCount = connectedIntValues.Count;
+            var isIntValueDefault = IsInputDefault(_intValuesInput);
+            var totalIntValueCount = connectedIntValueCount > 0
+                                         ? connectedIntValueCount
+                                         : isIntValueDefault ? 0 : 1;
+                
+            // Rebuild list
+            if (totalIntValueCount != _intValues.Count)
+            {
+                _intValues.Clear();
+                if (connectedIntValueCount == 0)
+                {
+                    if (!isIntValueDefault)
+                        _intValues.Add(IntValues.GetValue(context));
+                }
+                else
+                {
+                    foreach (var intValue in connectedIntValues)
+                    {
+                        _intValues.Add(intValue.GetValue(context));
+                    }
+                }
+                somethingHasChanged = true;
+            }
+            // Update existing values
+            else
+            {
+                if (connectedIntValueCount == 0)
+                {
+                    if (!isIntValueDefault)
+                    {
+                        var newValue = IntValues.GetValue(context);
+                        if (Math.Abs(_intValues[0] - newValue) > 0.0001f)
+                        {
+                            somethingHasChanged = true;
+                            _intValues[0] = newValue;
+                        }
+                    }
+                }
+                else
+                {
+                    for (var index = 0; index < connectedIntValues.Count; index++)
+                    {
+                        var newValue = connectedIntValues[index].GetValue(context);
+                        var lastValue = _intValues[index];
+                        if (Math.Abs(newValue - lastValue) > 0.0001f)
+                        {
+                            _intValues[index] = newValue;
+                            somethingHasChanged = true;
+                        }
+                    }
+                }
+            }
+        }
+
         // Rest of the original code remains the same...
         // Rebuild string list
         {
@@ -203,14 +275,18 @@ internal sealed class OscOutput : Instance<OscOutput>, IStatusProvider
         {
             try
             {
-                var parameters = new object[_strings.Count + _values.Count];
+                var parameters = new object[_strings.Count + _values.Count + _intValues.Count];
                 for (var i = 0; i < _values.Count; i++)
                 {
                     parameters[i] = _values[i];
                 }
+                for (var i = 0; i < _intValues.Count; i++)
+                {
+                    parameters[i + _values.Count] = _intValues[i];
+                }
                 for (var i = 0; i < _strings.Count; i++)
                 {
-                    parameters[i + _values.Count] = _strings[i];
+                    parameters[i + _intValues.Count + _values.Count] = _strings[i];
                 }
 
                 var message = new OscMessage(oscAddress, parameters);
@@ -232,6 +308,7 @@ internal sealed class OscOutput : Instance<OscOutput>, IStatusProvider
     }
 
     private readonly List<float> _values = new();
+    private readonly List<int> _intValues = new();
     private readonly List<string> _strings = new();
 
     protected override void Dispose(bool isDisposing)
@@ -298,6 +375,7 @@ internal sealed class OscOutput : Instance<OscOutput>, IStatusProvider
     private int _port;
 
     private Symbol.Child.Input _valuesInput;
+    private Symbol.Child.Input _intValuesInput;
     private Symbol.Child.Input _stringsInput;
     private Symbol.Child.Input _valuesListInput;
     private IPAddress _newIpAddress = null;
@@ -330,6 +408,12 @@ internal sealed class OscOutput : Instance<OscOutput>, IStatusProvider
 
         [Input(Guid = "b8651d7e-4efa-447f-b077-a73c46b01c2e")]
         public readonly InputSlot<System.Collections.Generic.List<float>> ValuesList = new InputSlot<System.Collections.Generic.List<float>>();
+
+        [Input(Guid = "73A7A272-B313-44D3-BA17-D8A188BD961A")]
+        public readonly MultiInputSlot<int> IntValues = new MultiInputSlot<int>();
+
+        [Input(Guid = "72E9E11F-6FEC-472F-87AD-370369A0AFC5")]
+        public readonly InputSlot<System.Collections.Generic.List<int>> IntValuesList = new InputSlot<System.Collections.Generic.List<int>>();
 
         [Input(Guid = "d5e9e9be-093b-4d57-9070-9b2cf33aa45b")]
         public readonly MultiInputSlot<string> Strings = new MultiInputSlot<string>();

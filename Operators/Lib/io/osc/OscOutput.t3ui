@@ -31,6 +31,23 @@
       "Max": 65335
     },
     {
+      "InputId": "72e9e11f-6fec-472f-87ad-370369a0afc5"/*IntValuesList*/,
+      "Relevancy": "Relevant",
+      "Position": {
+        "X": -200.0,
+        "Y": 345.0
+      }
+    },
+    {
+      "InputId": "73a7a272-b313-44d3-ba17-d8a188bd961a"/*IntValues*/,
+      "Relevancy": "Relevant",
+      "Position": {
+        "X": -200.0,
+        "Y": 180.0
+      },
+      "Description": "One or more values to send. You can connect multiple int values to send.\n\nThis parameter is ignored (not sent) if default. Click on the parameter name to reset it."
+    },
+    {
       "InputId": "827c7ae2-c129-4d04-a715-328c0a86bf8a"/*Values*/,
       "Relevancy": "Relevant",
       "Position": {
