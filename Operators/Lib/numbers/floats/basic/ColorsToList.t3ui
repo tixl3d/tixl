@@ -3,23 +3,23 @@
   "Description": "",
   "InputUis": [
     {
-      "InputId": "ad89516b-5a4e-4615-a998-5737c921eb2d"/*Input*/,
-      "Relevancy": "Required",
+      "InputId": "011cb37b-edd1-47fe-8072-7e67c4d5b571"/*Colors*/,
       "Position": {
-        "X": 0.0,
+        "X": -200.0,
         "Y": 0.0
       },
-      "Min": -100.0,
-      "Max": 100.0
+      "Min": 0.0,
+      "Max": 1.0,
+      "Clamp": true
     }
   ],
   "SymbolChildUis": [],
   "OutputUis": [
     {
-      "OutputId": "6ee060cc-0d84-4f0b-b354-e1c89f2129b1"/*Result*/,
+      "OutputId": "8db5dc8b-9521-4a30-9b84-e979d2c34ae7"/*Result*/,
       "Position": {
-        "X": 0.0,
-        "Y": 0.0
+        "X": 300.0,
+        "Y": 200.0
       }
     }
   ]

@@ -311,7 +311,7 @@
       }
     },
     {
-      "ChildId": "844b68ef-9b13-4184-bd7f-c21f557ef417"/*PointTrail*/,
+      "ChildId": "844b68ef-9b13-4184-bd7f-c21f557ef417"/*PointTrailFast*/,
       "Position": {
         "X": 1835.0787,
         "Y": 369.77933
@@ -390,7 +390,7 @@
       }
     },
     {
-      "ChildId": "bacdb11e-b5ee-4740-b633-ec709d9a3096"/*DelayTrigger*/,
+      "ChildId": "bacdb11e-b5ee-4740-b633-ec709d9a3096"/*DelayTriggerChange*/,
       "Position": {
         "X": 767.81476,
         "Y": 276.95142

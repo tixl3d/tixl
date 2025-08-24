@@ -4,44 +4,81 @@
   "SymbolTags": "8",
   "InputUis": [
     {
-      "InputId": "13184872-063b-473a-bf3d-68cd1356a261"/*StretchZ*/,
+      "InputId": "0a8bbf07-d77e-46e5-8598-d49e0c21735c"/*Stretch*/,
       "Position": {
-        "X": -685.22125,
-        "Y": 1906.5349
-      },
-      "Description": "Defines how much Z is stretched."
+        "X": 892.57996,
+        "Y": 2197.6238
+      }
     },
     {
       "InputId": "67b24f6d-61d1-49df-9e86-4555474f91b4"/*OffsetByTBN*/,
       "Position": {
-        "X": -685.22125,
-        "Y": 1861.5349
+        "X": 1032.58,
+        "Y": 2372.6238
       },
+      "GroupTitle": "Additional Effects",
       "Description": "Moves the points along one of the axes of the normal"
     },
     {
-      "InputId": "9361aeff-d96f-400c-8837-7d98fb6da99e"/*W*/,
+      "InputId": "71d65094-f6a6-4ea7-8e3a-c0c95db5cff0"/*OffsetScale*/,
       "Position": {
-        "X": -685.22125,
-        "Y": 1816.5349
+        "X": 1083.1095,
+        "Y": 2687.7102
+      }
+    },
+    {
+      "InputId": "803dc471-081f-48c8-b1b5-f5b5e4673518"/*Texture*/,
+      "Position": {
+        "X": 1172.58,
+        "Y": 2031.0386
+      }
+    },
+    {
+      "InputId": "9361aeff-d96f-400c-8837-7d98fb6da99e"/*Fx1*/,
+      "Position": {
+        "X": 1172.58,
+        "Y": 2302.6238
       },
-      "GroupTitle": "Settings",
+      "GroupTitle": "Set Attributes",
       "Description": "Scales the W / size of the points."
     },
     {
       "InputId": "bad1db42-201c-4d3b-8e62-82e812a8388f"/*InputMesh*/,
       "Position": {
-        "X": -685.22125,
-        "Y": 1771.5349
+        "X": 779.10333,
+        "Y": 1740.9166
       },
       "Description": "Mesh input via [LoadObj] for example"
     },
     {
+      "InputId": "d5288530-4e29-4a6d-9175-7e43e2880f1d"/*ScaleWithFaceArea*/,
+      "Position": {
+        "X": 1032.58,
+        "Y": 2617.6238
+      }
+    },
+    {
+      "InputId": "df3005ad-76ca-423a-95f5-4a29ae1284ca"/*ScaleUniform*/,
+      "Position": {
+        "X": 892.57996,
+        "Y": 2232.6238
+      },
+      "GroupTitle": "Set Point Scale"
+    },
+    {
+      "InputId": "ec278884-ccce-482a-934e-571b48aa36a7"/*Fx2*/,
+      "Position": {
+        "X": 1172.58,
+        "Y": 2337.6238
+      }
+    },
+    {
       "InputId": "ffe056e2-c937-4d91-a2ad-73e7988ea994"/*Color*/,
       "Position": {
-        "X": -685.22125,
-        "Y": 1951.5349
+        "X": 1032.58,
+        "Y": 2477.6238
       },
+      "GroupTitle": "Set Colors",
       "Description": "Defines the color of the points",
       "Min": 0.0,
       "Max": 1.0,
@@ -57,99 +94,134 @@
         "Y": 790.1424
       },
       "Position": {
-        "X": 103.286194,
-        "Y": 1608.9531
+        "X": 1312.58,
+        "Y": 2162.6238
       }
     },
     {
-      "ChildId": "3fc45ea2-d624-44a7-8d4b-101350281789"/*GetSRVProperties*/,
+      "ChildId": "0eae9e29-1d00-4215-a90d-5c205787c0bc"/*Vector3Components*/,
       "Position": {
-        "X": 865.018,
-        "Y": 1716.9259
+        "X": 1172.58,
+        "Y": 2197.6238
       }
     },
     {
-      "ChildId": "522568de-5384-4131-8358-fd9795611fed"/*Value*/,
+      "ChildId": "0f545e08-082b-4392-80f6-9ffc50de71cc"/*ScaleVector3*/,
       "Position": {
-        "X": -344.1967,
-        "Y": 1887.4171
+        "X": 1032.58,
+        "Y": 2197.6238
       }
     },
     {
       "ChildId": "5a875125-82e9-41ed-9248-2692d05d1e5a"/*GetIndices*/,
       "Position": {
-        "X": 685.3213,
-        "Y": 1620.3024
+        "X": 974.58276,
+        "Y": 1918.169
       }
     },
     {
       "ChildId": "5e4a88a1-7a40-4ecb-8690-272f33a98488"/*Vector4Components*/,
       "Position": {
-        "X": -239.58731,
-        "Y": 2146.2175
+        "X": 1172.58,
+        "Y": 2477.6238
       }
     },
     {
       "ChildId": "64a97ffa-5d37-4f71-8600-ce1b96356fec"/*ExecuteBufferUpdate*/,
       "Position": {
-        "X": 1600.4463,
-        "Y": 1473.4531
+        "X": 1551.269,
+        "Y": 1904.9056
       }
     },
     {
       "ChildId": "731a874d-edcf-4696-ba28-74eb2b99c345"/*StructuredBufferWithViews*/,
       "Position": {
-        "X": 1043.285,
-        "Y": 2119.539
+        "X": 1312.58,
+        "Y": 1800.1821
       }
     },
     {
       "ChildId": "7e461b94-7a0e-4cdf-b6f0-c658f81f36b6"/*ComputeShader*/,
       "Position": {
-        "X": 1014.63226,
-        "Y": 1408.5128
+        "X": 1172.58,
+        "Y": 1640.7386
       }
     },
     {
       "ChildId": "811deaa0-7f9c-49a4-b722-6126179566e9"/*CalcDispatchCount*/,
       "Position": {
-        "X": 1175.8983,
-        "Y": 1467.5566
+        "X": 1312.58,
+        "Y": 1675.7386
+      }
+    },
+    {
+      "ChildId": "98fb6080-dddb-4f69-b4ca-46398592966a"/*SrvFromTexture2d*/,
+      "Position": {
+        "X": 1312.58,
+        "Y": 2101.0386
       }
     },
     {
       "ChildId": "a60671a7-e9f8-43ed-a965-bbf8c05650d8"/*_MeshBufferComponents*/,
       "Position": {
-        "X": 482.7123,
-        "Y": 1670.6775
+        "X": 779.10333,
+        "Y": 1775.9166
+      }
+    },
+    {
+      "ChildId": "b9775dd0-0edf-44f3-8576-7da193f57b40"/*SamplerState*/,
+      "Position": {
+        "X": 1312.58,
+        "Y": 1968.7568
       }
     },
     {
       "ChildId": "bc6b09a9-48f4-47e3-9dc1-f173c6b8fbbb"/*GetVertices*/,
       "Position": {
-        "X": 703.76184,
-        "Y": 1844.9507
+        "X": 974.58276,
+        "Y": 1790.5923
       }
     },
     {
       "ChildId": "becb3679-ebff-4ab8-9110-8560e2bc94cc"/*Vector3Components*/,
       "Position": {
-        "X": -201.50833,
-        "Y": 1711.1598
+        "X": 1172.58,
+        "Y": 2372.6238
+      }
+    },
+    {
+      "ChildId": "c8e2be96-b56d-489e-875a-aff5d93a1b8b"/*UseFallbackTexture*/,
+      "Position": {
+        "X": 1312.58,
+        "Y": 2031.0386
       }
     },
     {
       "ChildId": "d1870851-3e14-42eb-8aa2-45335642570b"/*GetBufferComponents*/,
       "Position": {
-        "X": 1215.6697,
-        "Y": 2067.6594
+        "X": 1312.58,
+        "Y": 1870.1816
       }
     },
     {
       "ChildId": "e2b9980a-6b56-432d-b7f2-f4c1bc4f5816"/*ComputeShaderStage*/,
       "Position": {
-        "X": 1397.4193,
-        "Y": 1439.008
+        "X": 1551.269,
+        "Y": 1624.9056
+      }
+    },
+    {
+      "ChildId": "f32af495-5628-46bb-8211-2cfd1349dfe3"/*BoolToFloat*/,
+      "Position": {
+        "X": 1172.58,
+        "Y": 2617.6238
+      }
+    },
+    {
+      "ChildId": "f7a17e74-f808-4806-9621-69a5c5724b89"/*LoadImage*/,
+      "Position": {
+        "X": 1172.5798,
+        "Y": 2066.0386
       }
     }
   ],
@@ -157,8 +229,8 @@
     {
       "OutputId": "f40d8abc-a97c-4dba-8811-b19042db1c66"/*OutBuffer*/,
       "Position": {
-        "X": 2232.3826,
-        "Y": 1504.6046
+        "X": 1551.269,
+        "Y": 1974.9056
       }
     }
   ]

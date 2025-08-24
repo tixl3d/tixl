@@ -514,7 +514,7 @@
       "Outputs": []
     },
     {
-      "Id": "54b7ed17-4c2c-4ca1-a9f0-581022f03379"/*DelayTrigger*/,
+      "Id": "54b7ed17-4c2c-4ca1-a9f0-581022f03379"/*DelayTriggerChange*/,
       "SymbolId": "fbd9ac37-4427-4852-95d7-d8383fefbe36",
       "InputValues": [
         {
@@ -704,7 +704,7 @@
       "Outputs": []
     },
     {
-      "Id": "78312a95-d442-4101-9998-eb35ca305cda"/*DelayTrigger*/,
+      "Id": "78312a95-d442-4101-9998-eb35ca305cda"/*DelayTriggerChange*/,
       "SymbolId": "fbd9ac37-4427-4852-95d7-d8383fefbe36",
       "InputValues": [
         {

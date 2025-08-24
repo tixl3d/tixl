@@ -426,7 +426,7 @@
       }
     },
     {
-      "ChildId": "d3a12d43-fad0-4264-a268-1b40f5ca9875"/*DelayTrigger*/,
+      "ChildId": "d3a12d43-fad0-4264-a268-1b40f5ca9875"/*DelayTriggerChange*/,
       "Position": {
         "X": -295.40106,
         "Y": -848.19324

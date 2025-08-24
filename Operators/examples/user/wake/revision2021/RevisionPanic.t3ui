@@ -75,7 +75,7 @@
       }
     },
     {
-      "ChildId": "1b6211c4-4a38-41db-a930-dfe67b3ecc4d"/*PointTrail*/,
+      "ChildId": "1b6211c4-4a38-41db-a930-dfe67b3ecc4d"/*PointTrailFast*/,
       "Position": {
         "X": 1027.9387,
         "Y": 1169.7466

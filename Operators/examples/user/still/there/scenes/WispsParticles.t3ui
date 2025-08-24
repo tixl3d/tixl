@@ -102,7 +102,7 @@
       }
     },
     {
-      "ChildId": "19d6992a-213d-4a6b-918d-c961681ed59a"/*PointTrail*/,
+      "ChildId": "19d6992a-213d-4a6b-918d-c961681ed59a"/*PointTrailFast*/,
       "Position": {
         "X": -398.01703,
         "Y": -114.454346
@@ -426,13 +426,6 @@
       "Position": {
         "X": 177.05637,
         "Y": 2669.8555
-      }
-    },
-    {
-      "ChildId": "78770838-7cdb-41ee-8dfd-d2265f110aad"/*DrawPoints*/,
-      "Position": {
-        "X": 825.58954,
-        "Y": 895.3672
       }
     },
     {

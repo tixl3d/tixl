@@ -3,32 +3,37 @@
   "Description": "",
   "InputUis": [
     {
-      "InputId": "0a8663a0-5630-4e53-8400-1d050ec1c470"/*ModuloValue*/,
+      "InputId": "2b616fb0-2966-45a9-a0cc-da960ca509cf"/*EntryPoint*/,
       "Position": {
-        "X": 197.0,
-        "Y": 328.0
+        "X": -200.0,
+        "Y": 75.0
       },
-      "Min": -100.0,
-      "Max": 100.0,
-      "Scale": 0.01
+      "Usage": "Default"
     },
     {
-      "InputId": "a379d0ad-0719-4e49-8e4e-e63f41c7a18a"/*Value*/,
+      "InputId": "a192e8cc-2874-4f02-bbf1-4622e99666e1"/*ShaderSource*/,
       "Position": {
-        "X": 36.0,
-        "Y": 334.0
+        "X": -200.0,
+        "Y": 0.0
       },
-      "Min": -100.0,
-      "Max": 100.0
+      "Usage": "Default"
+    },
+    {
+      "InputId": "baa49d7d-127c-4c93-ae90-7e4db3598af9"/*DebugName*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      },
+      "Usage": "Default"
     }
   ],
   "SymbolChildUis": [],
   "OutputUis": [
     {
-      "OutputId": "a71983f8-1310-4847-85e3-14079ff3ce0b"/*Result*/,
+      "OutputId": "c513f15d-3a7e-4501-b825-ef3e585293c7"/*VertexShader*/,
       "Position": {
-        "X": 133.0,
-        "Y": 38.0
+        "X": 300.0,
+        "Y": 200.0
       }
     }
   ]

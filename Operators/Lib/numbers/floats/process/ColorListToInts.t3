@@ -1,5 +1,5 @@
 {
-  "Id": "784b280f-bbde-4c8e-9ca7-66de5b567672"/*ColorListToIntList*/,
+  "Id": "784b280f-bbde-4c8e-9ca7-66de5b567672"/*ColorListToInts*/,
   "Inputs": [
     {
       "Id": "4f8b8e1c-520c-49c4-829e-62d34887958e"/*ColorLists*/,

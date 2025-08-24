@@ -1,0 +1,258 @@
+{
+  "Id": "25db2a97-38b2-4503-8842-fab3922d7a6c"/*PointTrailFast*/,
+  "Description": "Keeps previous copies of points in a cycling buffer that can be used to draw trails and other effects.\nHint: If some features don't work as expected try [PointTrail2]\n\nCan be used with [DrawPoints] [DrawLines] [DrawBillboards] and similar",
+  "SymbolTags": "1",
+  "InputUis": [
+    {
+      "InputId": "4389838c-fd1d-4400-b8e5-f373a05adff7"/*GPoints*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -617.11475,
+        "Y": 46.12413
+      },
+      "Description": "Point input"
+    },
+    {
+      "InputId": "56eac471-ad48-41ec-b617-cbcb67646c97"/*AddSeperatorThreshold*/,
+      "Position": {
+        "X": 114.478745,
+        "Y": 633.0454
+      },
+      "GroupTitle": "Options",
+      "Description": "Defines the threshold for the separator"
+    },
+    {
+      "InputId": "63621a98-874b-4d1a-9724-f4fa70b8ccf1"/*Reset*/,
+      "Position": {
+        "X": -617.0139,
+        "Y": -219.02551
+      },
+      "Description": "Resets the trail when clicked"
+    },
+    {
+      "InputId": "6a2cb3f0-3b5a-4551-a809-3dc172bb7d79"/*TrailLength*/,
+      "Position": {
+        "X": -1004.27905,
+        "Y": 442.45508
+      },
+      "Description": "Defines the length of the trail by the amount of points added",
+      "Min": 1,
+      "Clamp": true
+    },
+    {
+      "InputId": "bcb7260e-8a84-4987-83ca-f31981ae94aa"/*IsEnabled*/,
+      "Position": {
+        "X": 463.73843,
+        "Y": 749.4218
+      },
+      "Description": "Enables / disables the trail",
+      "AddPadding": "True"
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "01f94c78-be6b-48dc-977d-1c9ce6d4e667"/*_omit*/,
+      "Position": {
+        "X": 114.47873,
+        "Y": 536.2267
+      }
+    },
+    {
+      "ChildId": "0899e1e9-7904-48ab-a49d-fa5ea788265b"/*StructuredBufferWithViews*/,
+      "Position": {
+        "X": -312.24878,
+        "Y": 214.67053
+      }
+    },
+    {
+      "ChildId": "09e0f893-38b8-4c1d-b621-9c3f0067abf6"/*HasTimeChanged*/,
+      "Position": {
+        "X": 463.73843,
+        "Y": 784.4218
+      }
+    },
+    {
+      "ChildId": "0c8caa25-78dd-4af4-a3ad-6a64fb6f7b77"/*Any*/,
+      "Position": {
+        "X": -477.01392,
+        "Y": -289.0255
+      }
+    },
+    {
+      "ChildId": "26138413-215b-4abe-a509-8b11b14eeb28"/*FloatsToBuffer*/,
+      "Position": {
+        "X": 254.47873,
+        "Y": 598.0454
+      }
+    },
+    {
+      "ChildId": "4db19a19-38f3-4fdd-a2c9-d258eee8772f"/*ComputeShaderStage*/,
+      "Position": {
+        "X": 523.55054,
+        "Y": 309.1423
+      }
+    },
+    {
+      "ChildId": "51038808-7536-4ee1-a759-2bc62c6dd268"/*All*/,
+      "Position": {
+        "X": 603.7384,
+        "Y": 749.4218
+      }
+    },
+    {
+      "ChildId": "579708d8-8488-40d9-a63e-98e4977d65d9"/*ComputeShader*/,
+      "Position": {
+        "X": -179.83272,
+        "Y": -248.92209
+      }
+    },
+    {
+      "ChildId": "5f0bdce4-6134-4870-b65b-c570117003cd"/*HasTimeChanged*/,
+      "Position": {
+        "X": -617.0139,
+        "Y": -289.0255
+      }
+    },
+    {
+      "ChildId": "671fe7f3-b820-4bd1-a793-f7a3996c98d3"/*Execute*/,
+      "Position": {
+        "X": 241.40436,
+        "Y": -124.11795
+      }
+    },
+    {
+      "ChildId": "7439911c-859f-4f0e-be2c-188b4fa1e890"/*CalcDispatchCount*/,
+      "Position": {
+        "X": 254.47873,
+        "Y": 341.14618
+      }
+    },
+    {
+      "ChildId": "77fa6ac7-ed5c-4b0e-b7d8-c38152be5ef5"/*MultiplyInt*/,
+      "Position": {
+        "X": -312.24878,
+        "Y": 144.67052
+      }
+    },
+    {
+      "ChildId": "81c25e23-2498-40aa-82ab-41b0bd8c169a"/*GetBufferComponents*/,
+      "Position": {
+        "X": -312.24878,
+        "Y": 249.67053
+      }
+    },
+    {
+      "ChildId": "a7193711-4814-4e56-9964-3aa854204ee7"/*ComputeShaderStage*/,
+      "Position": {
+        "X": 241.40436,
+        "Y": -229.11795
+      }
+    },
+    {
+      "ChildId": "a7679861-774f-4f51-a033-9df26d777121"/*FrameCount*/,
+      "Position": {
+        "X": 114.47873,
+        "Y": 431.22668
+      }
+    },
+    {
+      "ChildId": "acb045c1-7104-4d75-936f-e09df6e0e9d0"/*Execute*/,
+      "Position": {
+        "X": 887.72363,
+        "Y": 492.55368
+      }
+    },
+    {
+      "ChildId": "af0eccfc-3655-4aed-ba13-72e5e4b857e1"/*ComputeShader*/,
+      "Position": {
+        "X": 114.47873,
+        "Y": 306.14618
+      }
+    },
+    {
+      "ChildId": "b00a56e7-cdb5-44c4-ae06-d047f320bd6f"/*AddInts*/,
+      "Style": "Expanded",
+      "Size": {
+        "X": 110.0,
+        "Y": 49.0
+      },
+      "Position": {
+        "X": -864.27905,
+        "Y": 442.45508
+      }
+    },
+    {
+      "ChildId": "bc378a28-7ae4-43e5-9b66-15114b7c163e"/*CalcDispatchCount*/,
+      "Position": {
+        "X": -39.832718,
+        "Y": -213.92209
+      }
+    },
+    {
+      "ChildId": "c8f4458e-7dc5-41f8-925a-81490cdda3ca"/*IntsToBuffer*/,
+      "Position": {
+        "X": 254.47873,
+        "Y": 431.22668
+      }
+    },
+    {
+      "ChildId": "c93bb7cc-79f4-4aa4-b857-49e8f73a2eac"/*ExecuteBufferUpdate*/,
+      "Position": {
+        "X": 887.72363,
+        "Y": 562.55365
+      }
+    },
+    {
+      "ChildId": "d52520c4-cab7-4dc1-97d0-aa00f943d221"/*GetBufferComponents*/,
+      "Position": {
+        "X": -477.11475,
+        "Y": 46.12413
+      }
+    },
+    {
+      "ChildId": "f58e6118-455c-432e-9d96-1c60ee229afd"/*HasIntChanged*/,
+      "Position": {
+        "X": -617.0139,
+        "Y": -254.02551
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "6e3ca38f-78d6-4e2b-b8ab-10a906e058e2"/*OutBuffer*/,
+      "Position": {
+        "X": 887.72363,
+        "Y": 667.5537
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "3120848f-c71d-4ff1-91e4-b7397bce08d8",
+      "Title": "Clear buffer",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -678.0952,
+        "Y": -325.05737
+      },
+      "Size": {
+        "X": 1125.7358,
+        "Y": 315.0489
+      }
+    }
+  ],
+  "Links": [
+    {
+      "Id": "b4f950e2-7584-44f2-a499-3986df5470ec",
+      "Title": "Tutorial Video",
+      "Description": "",
+      "LinkUrl": "https://youtu.be/ElW_0uaeiNA?feature=shared",
+      "LinkType": "TutorialVideo"
+    }
+  ]
+}

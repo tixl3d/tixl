@@ -2,8 +2,13 @@
   "Id": "3a246cf1-22da-4070-8504-08cd1c9c5c40"/*ColorsToList*/,
   "Inputs": [
     {
-      "Id": "ad89516b-5a4e-4615-a998-5737c921eb2d"/*Input*/,
-      "DefaultValue": 0.0
+      "Id": "011cb37b-edd1-47fe-8072-7e67c4d5b571"/*Colors*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 1.0,
+        "Z": 1.0,
+        "W": 1.0
+      }
     }
   ],
   "Children": [],

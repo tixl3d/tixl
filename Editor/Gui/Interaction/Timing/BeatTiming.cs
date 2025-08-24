@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using T3.Core.Animation;
 using T3.Core.Audio;
+using T3.Core.IO;
 
 namespace T3.Editor.Gui.Interaction.Timing;
 
@@ -155,8 +156,8 @@ internal static class BeatTiming
                 _measureCount++;
                 _measureStartTime += MeasureDuration;
             }
-
-            if (_resynced)
+            
+            if (playback.Settings.EnableAudioBeatLocking && _resynced)
             {
                 BeatTime = _barTimeAverage.UpdateAndCompute(BeatSynchronizer.BarProgress) 
                            + playback.BarsFromSeconds(playbackSettings.BeatLockAudioOffsetSec);

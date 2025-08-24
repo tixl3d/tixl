@@ -20,7 +20,7 @@
       "Outputs": []
     },
     {
-      "Id": "3e65c63d-0c2b-43eb-89e8-6ba8dcfafb01"/*PointTrail*/,
+      "Id": "3e65c63d-0c2b-43eb-89e8-6ba8dcfafb01"/*PointTrailFast*/,
       "SymbolId": "25db2a97-38b2-4503-8842-fab3922d7a6c",
       "InputValues": [],
       "Outputs": []
@@ -224,7 +224,7 @@
       "Outputs": []
     },
     {
-      "Id": "e6a5e679-3181-4851-ba12-5c88241efc57"/*PointTrail*/,
+      "Id": "e6a5e679-3181-4851-ba12-5c88241efc57"/*PointTrailFast*/,
       "SymbolId": "25db2a97-38b2-4503-8842-fab3922d7a6c",
       "InputValues": [
         {
@@ -236,7 +236,7 @@
       "Outputs": []
     },
     {
-      "Id": "ef09cbf8-2ae8-4c26-98f5-a048a20d93c0"/*PointTrail*/,
+      "Id": "ef09cbf8-2ae8-4c26-98f5-a048a20d93c0"/*PointTrailFast*/,
       "SymbolId": "25db2a97-38b2-4503-8842-fab3922d7a6c",
       "InputValues": [],
       "Outputs": []

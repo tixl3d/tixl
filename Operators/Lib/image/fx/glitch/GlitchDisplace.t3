@@ -124,7 +124,7 @@
         {
           "Id": "24646f06-1509-43ce-94c6-eeb608ad97cd"/*Source*/,
           "Type": "System.String",
-          "Value": "Resources\\lib\\points\\draw\\GlitchDisplace.hlsl"
+          "Value": "Resources/lib/points/draw/GlitchDisplace.hlsl"
         },
         {
           "Id": "501338b3-f432-49a5-bdbd-bcf209671305"/*EntryPoint*/,
@@ -246,7 +246,7 @@
       "Outputs": []
     },
     {
-      "Id": "6b4a1f92-eb08-4365-8423-34680637662f"/*GridPoints*/,
+      "Id": "6b4a1f92-eb08-4365-8423-34680637662f"/*_GridPoints_Old*/,
       "SymbolId": "3ee8f66d-68df-43c1-b0eb-407259bf7e86",
       "InputValues": [
         {
@@ -313,7 +313,7 @@
         {
           "Id": "78fb7501-74d9-4a27-8db2-596f25482c87"/*Source*/,
           "Type": "System.String",
-          "Value": "Resources\\lib\\points\\draw\\GlitchDisplace.hlsl"
+          "Value": "Resources/lib/points/draw/GlitchDisplace.hlsl"
         },
         {
           "Id": "9a8b500e-c3b1-4be1-8270-202ef3f90793"/*EntryPoint*/,

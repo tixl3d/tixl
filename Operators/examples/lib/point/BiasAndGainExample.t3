@@ -104,7 +104,7 @@
       "Outputs": []
     },
     {
-      "Id": "169638a0-d212-4881-b3ad-dc9be22e4157"/*DelayTrigger*/,
+      "Id": "169638a0-d212-4881-b3ad-dc9be22e4157"/*DelayTriggerChange*/,
       "SymbolId": "fbd9ac37-4427-4852-95d7-d8383fefbe36",
       "InputValues": [
         {

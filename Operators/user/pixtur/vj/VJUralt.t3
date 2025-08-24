@@ -2234,6 +2234,8 @@
     "Syncing": 0,
     "AudioDecayFactor": 0.9,
     "AudioGainFactor": 1.0,
-    "AudioInputDeviceName": "Echo Cancelling Speakerphone (C3422WE)"
+    "AudioInputDeviceName": "Echo Cancelling Speakerphone (C3422WE)",
+    "EnableAudioBeatLocking": "False",
+    "BeatLockAudioOffsetSec": "0"
   }
 }

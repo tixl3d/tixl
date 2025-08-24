@@ -106,7 +106,7 @@
       "Outputs": []
     },
     {
-      "Id": "16f95c9a-e7cc-490a-bdb3-b9a955b61c4c"/*PointTrail*/,
+      "Id": "16f95c9a-e7cc-490a-bdb3-b9a955b61c4c"/*PointTrailFast*/,
       "SymbolId": "25db2a97-38b2-4503-8842-fab3922d7a6c",
       "InputValues": [
         {

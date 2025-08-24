@@ -36,6 +36,12 @@ internal sealed class CustomSDF : Instance<CustomSDF>
 
     void IGraphNodeOp.AddDefinitions(CodeAssembleContext c)
     {
+        c.Definitions.AppendLine("""
+                                 #ifndef mod
+                                 #define mod(x, y) ((x) - (y) * floor((x) / (y)))
+                                 #endif
+                                 """);
+        
         c.Definitions.Append(_defines);
         c.Definitions.AppendLine();
 

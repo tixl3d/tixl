@@ -116,7 +116,7 @@
       }
     },
     {
-      "ChildId": "4a7a9b2c-b130-4e74-ac1e-bc09993330a7"/*DelayTrigger*/,
+      "ChildId": "4a7a9b2c-b130-4e74-ac1e-bc09993330a7"/*DelayTriggerChange*/,
       "Position": {
         "X": 6.2752686,
         "Y": 3893.0737
@@ -144,7 +144,7 @@
       }
     },
     {
-      "ChildId": "5d43b49d-344d-47a6-854d-db0fd044cc8b"/*GridPoints*/,
+      "ChildId": "5d43b49d-344d-47a6-854d-db0fd044cc8b"/*_GridPoints_Old*/,
       "Position": {
         "X": -177.84131,
         "Y": 3514.984

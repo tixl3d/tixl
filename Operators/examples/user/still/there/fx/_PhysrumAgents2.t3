@@ -73,7 +73,7 @@
         {
           "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
           "Type": "System.String",
-          "Value": "Resources\\user\\pixtur\\research\\ComputeShaderCourse\\03-MovingAgents1\\shaders\\ca-update-grid.hlsl"
+          "Value": "Resources/user/pixtur/research/ComputeShaderCourse/03-MovingAgents1/shaders/ca-update-grid.hlsl"
         }
       ],
       "Outputs": []
@@ -170,7 +170,7 @@
         {
           "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
           "Type": "System.String",
-          "Value": "Resources\\user\\still\\proj-there\\physarumfx\\partial-physarum-fx-cs.hlsl"
+          "Value": "Resources/user/still/proj-there/physarumfx/partial-physarum-fx-cs.hlsl"
         }
       ],
       "Outputs": []

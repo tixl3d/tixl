@@ -3,10 +3,9 @@
   "Description": "",
   "InputUis": [
     {
-      "InputId": "193d2050-2184-4a0b-af27-463f505a9255"/*Input*/,
-      "Relevancy": "Required",
+      "InputId": "6ab7e3fe-955f-44d2-a99d-e743d7f05f45"/*Input*/,
       "Position": {
-        "X": 0.0,
+        "X": -200.0,
         "Y": 0.0
       }
     },
@@ -22,10 +21,10 @@
   "SymbolChildUis": [],
   "OutputUis": [
     {
-      "OutputId": "d270da4a-3f84-493c-adc3-35c582749ca1"/*Selected*/,
+      "OutputId": "187bba48-6466-4acb-912f-494868933135"/*Selected*/,
       "Position": {
-        "X": 0.0,
-        "Y": 0.0
+        "X": 300.0,
+        "Y": 200.0
       }
     }
   ]

@@ -562,7 +562,7 @@
       }
     },
     {
-      "ChildId": "7cd5eb2c-3790-47e1-ae71-e21b74e177a5"/*PointTrail*/,
+      "ChildId": "7cd5eb2c-3790-47e1-ae71-e21b74e177a5"/*PointTrailFast*/,
       "Position": {
         "X": 157.42078,
         "Y": 4696.169
@@ -576,7 +576,7 @@
       }
     },
     {
-      "ChildId": "7f54e776-9e4d-4eaa-8313-932bd0945ec9"/*PointTrail*/,
+      "ChildId": "7f54e776-9e4d-4eaa-8313-932bd0945ec9"/*PointTrailFast*/,
       "Position": {
         "X": -79.99634,
         "Y": 1310.1936

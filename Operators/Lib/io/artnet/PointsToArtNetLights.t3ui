@@ -150,6 +150,13 @@
       "GroupTitle": "CustomVar3"
     },
     {
+      "InputId": "8ceece78-9a08-4c7b-8fea-740e8e5929a6"/*WhiteChannel*/,
+      "Position": {
+        "X": -204.96455,
+        "Y": 1092.3049
+      }
+    },
+    {
       "InputId": "9000c279-73e4-4de8-a1f8-c3914eaaf533"/*PanChannel*/,
       "Position": {
         "X": -204.96455,

@@ -2,12 +2,9 @@
   "Id": "95817796-c125-4a9c-8996-ee8b6f089156"/*PickColorFromList*/,
   "Inputs": [
     {
-      "Id": "193d2050-2184-4a0b-af27-463f505a9255"/*Input*/,
+      "Id": "6ab7e3fe-955f-44d2-a99d-e743d7f05f45"/*Input*/,
       "DefaultValue": {
-        "Values": [
-          5.0,
-          17.0
-        ]
+        "Values": []
       }
     },
     {

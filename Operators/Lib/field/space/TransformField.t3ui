@@ -56,6 +56,13 @@
       }
     },
     {
+      "InputId": "dd53654b-d2f9-4656-b26c-95927f059b31"/*RotateFieldVecs*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 300.0
+      }
+    },
+    {
       "InputId": "f53f3311-e1fc-418b-8861-74adc175d5fa"/*Shear*/,
       "Position": {
         "X": -200.0,

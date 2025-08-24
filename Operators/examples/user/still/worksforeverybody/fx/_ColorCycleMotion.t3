@@ -133,7 +133,7 @@
       "SymbolId": "2a0c932a-eb81-4a7d-aeac-836a23b0b789",
       "InputValues": [
         {
-          "Id": "68e31eaa-1481-48f4-b742-5177a241fe6d"/*Value*/,
+          "Id": "68e31eaa-1481-48f4-b742-5177a241fe6d"/*FloatValue*/,
           "Type": "System.Single",
           "Value": -0.3
         }
@@ -383,7 +383,7 @@
       "SymbolId": "2a0c932a-eb81-4a7d-aeac-836a23b0b789",
       "InputValues": [
         {
-          "Id": "68e31eaa-1481-48f4-b742-5177a241fe6d"/*Value*/,
+          "Id": "68e31eaa-1481-48f4-b742-5177a241fe6d"/*FloatValue*/,
           "Type": "System.Single",
           "Value": 0.0
         }
@@ -436,7 +436,7 @@
       "SymbolId": "2a0c932a-eb81-4a7d-aeac-836a23b0b789",
       "InputValues": [
         {
-          "Id": "68e31eaa-1481-48f4-b742-5177a241fe6d"/*Value*/,
+          "Id": "68e31eaa-1481-48f4-b742-5177a241fe6d"/*FloatValue*/,
           "Type": "System.Single",
           "Value": 0.01
         },
@@ -465,7 +465,7 @@
       "SymbolId": "2a0c932a-eb81-4a7d-aeac-836a23b0b789",
       "InputValues": [
         {
-          "Id": "68e31eaa-1481-48f4-b742-5177a241fe6d"/*Value*/,
+          "Id": "68e31eaa-1481-48f4-b742-5177a241fe6d"/*FloatValue*/,
           "Type": "System.Single",
           "Value": 0.005
         }

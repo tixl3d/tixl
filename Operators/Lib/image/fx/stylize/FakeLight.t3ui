@@ -7,8 +7,8 @@
       "InputId": "00c53b57-7347-4ebc-97d7-1ab48483f09b"/*HeightMap*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -764.6415,
-        "Y": 5.323948
+        "X": -535.3144,
+        "Y": -29.777142
       }
     },
     {
@@ -48,8 +48,8 @@
       "InputId": "56eccacb-65ac-4813-ad7e-fad8e581f570"/*LightMap*/,
       "Relevancy": "Relevant",
       "Position": {
-        "X": -761.0598,
-        "Y": 140.2838
+        "X": -339.6646,
+        "Y": 181.23804
       }
     },
     {
@@ -118,8 +118,8 @@
     {
       "ChildId": "67c9ad24-252d-4a95-87ab-6847cd2d8958"/*Blur*/,
       "Position": {
-        "X": -444.3788,
-        "Y": -70.918106
+        "X": -149.52972,
+        "Y": -63.89789
       }
     },
     {

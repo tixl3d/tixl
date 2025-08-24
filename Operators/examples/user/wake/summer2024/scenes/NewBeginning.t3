@@ -812,7 +812,7 @@
       "Outputs": []
     },
     {
-      "Id": "844b68ef-9b13-4184-bd7f-c21f557ef417"/*PointTrail*/,
+      "Id": "844b68ef-9b13-4184-bd7f-c21f557ef417"/*PointTrailFast*/,
       "SymbolId": "25db2a97-38b2-4503-8842-fab3922d7a6c",
       "InputValues": [
         {
@@ -1019,7 +1019,7 @@
       "Outputs": []
     },
     {
-      "Id": "bacdb11e-b5ee-4740-b633-ec709d9a3096"/*DelayTrigger*/,
+      "Id": "bacdb11e-b5ee-4740-b633-ec709d9a3096"/*DelayTriggerChange*/,
       "SymbolId": "fbd9ac37-4427-4852-95d7-d8383fefbe36",
       "InputValues": [
         {

@@ -12,7 +12,8 @@ cbuffer Params : register(b0)
     float2 GainAndBias;
     float Scatter;
 
-    float2 FieldValueRange;
+    float Center;
+    float Range;
 }
 
 cbuffer Params : register(b1)
@@ -28,6 +29,7 @@ cbuffer Params : register(b2)
     int StrengthFactor;
 
     int WriteTo;
+    int MappingMode;
 }
 
 StructuredBuffer<Point> SourcePoints : t0;
@@ -66,6 +68,21 @@ static const float NoisePhase = 0;
 #define ModeMultiply 3
 #define ModeInvert 4
 
+#define SPREADMODE_BUFFER 0
+#define SPREADMODE_W 1
+#define SPREADMODE_SELECTION 2
+
+#define MAPPING_CENTERED 0
+#define MAPPING_FORSTART 1
+#define MAPPING_PINGPONG 2
+#define MAPPING_REPEAT 3
+#define MAPPING_USEORIGINALW 4
+
+inline float fmod(float x, float y)
+{
+    return (x - y * floor(x / y));
+}
+
 [numthreads(64, 1, 1)] void main(uint3 i : SV_DispatchThreadID)
 {
     uint numStructs, stride;
@@ -82,51 +99,78 @@ static const float NoisePhase = 0;
     }
 
     float3 pos = p.Position;
-
-    float s = GetDistance(pos);
-
-    s = (s - FieldValueRange.x) / (FieldValueRange.y - FieldValueRange.x);
+    float3 d = mod(pos, 1);
 
     float scatter = Scatter * (hash11u(i.x) - 0.5);
 
-    s = ApplyGainAndBias(s, GainAndBias);
+    float f0 = GetDistance(pos) + scatter * Range;
 
-    float w = WriteTo == 0
-                  ? 1
-              : (WriteTo == 1) ? p.FX1
-                               : p.FX2;
+    float f = 0;
+    switch (MappingMode)
+    {
+    case MAPPING_CENTERED:
+        f = (f0 + Range / 2) / Range - Center / (Range * 0.5f);
+        break;
+    case MAPPING_FORSTART:
+        f = f0 / Range - Center;
+        break;
 
-    float strength = Strength * (StrengthFactor == 0
-                                     ? 1
-                                 : (StrengthFactor == 1) ? p.FX1
-                                                         : p.FX2);
+    case MAPPING_PINGPONG:
+        f = fmod((2 * f0 - 2 * Center * Range - 1) / Range, 2);
+        f += -1;
+        f = abs(f);
+        break;
+
+    case MAPPING_REPEAT:
+        f = f0 / Range - 0.5 - Center;
+        f = fmod(f, 1);
+        break;
+    }
+
+    // s = (s - FieldValueRange.x) / (FieldValueRange.y - FieldValueRange.x);
+
+    f = 1 - ApplyGainAndBias(f, GainAndBias);
+
+    float org = WriteTo == 0
+                    ? 1
+                : (WriteTo == 1) ? p.FX1
+                                 : p.FX2;
 
     if (SelectMode == ModeOverride)
     {
-        s *= strength;
+        // s *= strength;
     }
     else if (SelectMode == ModeAdd)
     {
-        s += w * strength;
+        f += org; // * strength;
     }
     else if (SelectMode == ModeSub)
     {
-        s = w - s * strength;
+        f = org - f;
     }
     else if (SelectMode == ModeMultiply)
     {
-        s = lerp(w, w * s, strength);
+        f *= org;
     }
     else if (SelectMode == ModeInvert)
     {
-        s = s * (1 - w);
+        f = 1 - f * org;
     }
 
-    float result = (DiscardNonSelected && s <= 0)
-                       ? NAN
-                   : (ClampResult)
-                       ? saturate(s)
-                       : s;
+    // float result = (DiscardNonSelected && s <= 0)
+    //                    ? NAN
+    //                : (ClampResult)
+    //                    ? saturate(s)
+    //                    : s;
+
+    float strength = Strength * ((StrengthFactor == 0
+                                      ? 1
+                                  : (StrengthFactor == 1) ? p.FX1
+                                                          : p.FX2));
+
+    float result = lerp(org, f, strength);
+
+    result = lerp(result, saturate(result), ClampResult);
 
     switch (WriteTo)
     {
@@ -137,10 +181,6 @@ static const float NoisePhase = 0;
         p.FX2 = result;
         break;
     }
-    // p.Selected = result;
-    //  if (SetW)
-    //  {
-    //      p.W = result;
-    //  }
+
     ResultPoints[i.x] = p;
 }

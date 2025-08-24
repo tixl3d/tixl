@@ -519,7 +519,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\user\\still\\proj-worksforeverybody\\geometry\\2nd-reality\\ship.obj"
+          "Value": "Resources/user/still/proj-worksforeverybody/geometry/2nd-reality/ship.obj"
         }
       ],
       "Outputs": []
@@ -669,7 +669,7 @@
         {
           "Id": "ef2a461d-c66d-44d8-8b0e-e48a57ec991f"/*FilePath*/,
           "Type": "System.String",
-          "Value": "Resources\\user\\still\\proj-worksforeverybody\\svg\\ceci.svg"
+          "Value": "Resources/user/still/proj-worksforeverybody/svg/ceci.svg"
         }
       ],
       "Outputs": []
@@ -764,7 +764,7 @@
         {
           "Id": "895dab2c-e3be-4e73-9c96-0f6101cea113"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\user\\still\\proj-worksforeverybody\\geometry\\2nd-reality\\city-lines.obj"
+          "Value": "Resources/user/still/proj-worksforeverybody/geometry/2nd-reality/city-lines.obj"
         },
         {
           "Id": "dcacd412-1885-4a10-b073-54192f074ae8"/*Mode*/,
@@ -1321,7 +1321,7 @@
         {
           "Id": "ef2a461d-c66d-44d8-8b0e-e48a57ec991f"/*FilePath*/,
           "Type": "System.String",
-          "Value": "Resources\\user\\still\\proj-worksforeverybody\\svg\\revision-logo-2b.svg"
+          "Value": "Resources/user/still/proj-worksforeverybody/svg/revision-logo-2b.svg"
         }
       ],
       "Outputs": []
@@ -2282,7 +2282,7 @@
         {
           "Id": "ef2a461d-c66d-44d8-8b0e-e48a57ec991f"/*FilePath*/,
           "Type": "System.String",
-          "Value": "Resources\\user\\still\\proj-worksforeverybody\\svg\\revision-logo-2d.svg"
+          "Value": "Resources/user/still/proj-worksforeverybody/svg/revision-logo-2d.svg"
         }
       ],
       "Outputs": []
@@ -3593,7 +3593,7 @@
         {
           "Id": "895dab2c-e3be-4e73-9c96-0f6101cea113"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\user\\still\\proj-worksforeverybody\\geometry\\2nd-reality\\ship.obj"
+          "Value": "Resources/user/still/proj-worksforeverybody/geometry/2nd-reality/ship.obj"
         },
         {
           "Id": "dcacd412-1885-4a10-b073-54192f074ae8"/*Mode*/,
@@ -4151,7 +4151,7 @@
         {
           "Id": "ef2a461d-c66d-44d8-8b0e-e48a57ec991f"/*FilePath*/,
           "Type": "System.String",
-          "Value": "Resources\\user\\still\\proj-worksforeverybody\\svg\\revision-logo-2a.svg"
+          "Value": "Resources/user/still/proj-worksforeverybody/svg/revision-logo-2a.svg"
         }
       ],
       "Outputs": []
@@ -4303,7 +4303,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\user\\still\\proj-worksforeverybody\\geometry\\2nd-reality\\city-holdout.obj"
+          "Value": "Resources/user/still/proj-worksforeverybody/geometry/2nd-reality/city-holdout.obj"
         }
       ],
       "Outputs": []
@@ -4395,7 +4395,7 @@
         {
           "Id": "ef2a461d-c66d-44d8-8b0e-e48a57ec991f"/*FilePath*/,
           "Type": "System.String",
-          "Value": "Resources\\user\\still\\proj-worksforeverybody\\svg\\revision-logo-2c.svg"
+          "Value": "Resources/user/still/proj-worksforeverybody/svg/revision-logo-2c.svg"
         }
       ],
       "Outputs": []

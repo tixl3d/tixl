@@ -1,0 +1,19 @@
+{
+  "Id": "1f85f846-0a59-44f3-8e3e-4c2357893494"/*AnimTrigger*/,
+  "Inputs": [
+    {
+      "Id": "a8e49df7-3388-4532-8efe-766ea3a47108"/*Rate*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "be941605-4af3-445e-93a6-c830eebb3ed5"/*AllowSpeedFactor*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "cfa3d623-f655-4386-8458-2fbd273a2b88"/*Phase*/,
+      "DefaultValue": 0.0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

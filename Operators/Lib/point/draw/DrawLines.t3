@@ -44,7 +44,7 @@
     },
     {
       "Id": "c78378f5-8306-4586-af6b-99cea40fa9a9"/*FadeOutTooLong*/,
-      "DefaultValue": 9999999.0
+      "DefaultValue": -1.0
     },
     {
       "Id": "c9cf2182-1297-463c-b5c1-d4ee7ad0895c"/*EnableZWrite*/,

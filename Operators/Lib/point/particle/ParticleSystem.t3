@@ -7,7 +7,7 @@
     },
     {
       "Id": "21c666bb-a28f-498c-a834-a2ba4aca78a7"/*EmitMode*/,
-      "DefaultValue": 0
+      "DefaultValue": 1
     },
     {
       "Id": "38392c86-4a1b-4b6f-ac32-26920a73e1e2"/*EmitVelocity*/,
@@ -43,7 +43,7 @@
     },
     {
       "Id": "a7350ba8-08be-4afc-92f1-d223ee9bcbeb"/*SetFx1To*/,
-      "DefaultValue": 0
+      "DefaultValue": 1
     },
     {
       "Id": "b2c8f7cf-fdf5-4819-98ec-2c70ee9e8bc6"/*RadiusFromW*/,

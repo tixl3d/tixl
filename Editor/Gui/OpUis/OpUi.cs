@@ -74,7 +74,6 @@ public static class OpUi
               {
                   { Guid.Parse("11882635-4757-4cac-a024-70bb4e8b504c"), CounterUi.DrawChildUi },
                   { Guid.Parse("8211249d-7a26-4ad0-8d84-56da72a5c536"), GradientSliderUi.DrawChildUi },
-                  { Guid.Parse("ea7b8491-2f8e-4add-b0b1-fd068ccfed0d"), AnimValueUi.DrawChildUi },
 
                   { Guid.Parse("b724ea74-d5d7-4928-9cd1-7a7850e4e179"), SampleCurveUi.DrawChildUi },
                   { Guid.Parse("3b0eb327-6ad8-424f-bca7-ccbfa2c9a986"), _JitterUi.DrawChildUi },
@@ -83,8 +82,11 @@ public static class OpUi
                   { Guid.Parse("5d7d61ae-0a41-4ffa-a51d-93bab665e7fe"), ValueUi.DrawChildUi },
                   { Guid.Parse("cc07b314-4582-4c2c-84b8-bb32f59fc09b"), IntValueUi.DrawChildUi },
                   { Guid.Parse("f0acd1a4-7a98-43ab-a807-6d1bd3e92169"), RemapUi.DrawChildUi },
+                  
+                  { Guid.Parse("ea7b8491-2f8e-4add-b0b1-fd068ccfed0d"), AnimValueUi.DrawChildUi },
                   { Guid.Parse("af79ee8c-d08d-4dca-b478-b4542ed69ad8"), AnimVec2Ui.DrawChildUi },
                   { Guid.Parse("7814fd81-b8d0-4edf-b828-5165f5657344"), AnimVec3Ui.DrawChildUi },
+                  { Guid.Parse("1f85f846-0a59-44f3-8e3e-4c2357893494"), AnimBoolUi.DrawChildUi },
                   { Guid.Parse("94a392e6-3e03-4ccf-a114-e6fafa263b4f"), SequenceAnimUi.DrawChildUi },
                   { Guid.Parse("95d586a2-ee14-4ff5-a5bb-40c497efde95"), TriggerAnimUi.DrawChildUi },
                   { Guid.Parse("59a0458e-2f3a-4856-96cd-32936f783cc5"), MidiInputUi.DrawChildUi },

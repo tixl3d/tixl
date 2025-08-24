@@ -2,10 +2,6 @@
   "Id": "4dd8a618-eb3b-40af-9851-89c50683d83e"/*CombineBuffers*/,
   "Inputs": [
     {
-      "Id": "a9fd34c5-2583-4014-ab36-ea6c33362d78"/*IsEnabled*/,
-      "DefaultValue": true
-    },
-    {
       "Id": "b5d25dfd-5d9f-4b5b-b3f5-36b93b13cba3"/*Input*/,
       "DefaultValue": null
     }

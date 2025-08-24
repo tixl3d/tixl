@@ -1,5 +1,5 @@
 {
-  "Id": "695d20dc-d1fe-4648-80fb-e1159b8aead4"/*SelectPointsWithField*/,
+  "Id": "695d20dc-d1fe-4648-80fb-e1159b8aead4"/*SelectPointsWithSDF*/,
   "Description": "Allows selecting and adding values to points in 3D space via SDF Objects/Fields.\nSimilar to [SelectPoints].\nNeeds any SDF such as [BoxSDF], [ChainLinkSDF], [FractalSDF] as an input to select the points.\nAnd any form of points such as: [GridPoints], [RadialPoints], [SpherePoints], [PointsOnMesh], etc.",
   "SymbolTags": "1",
   "InputUis": [
@@ -7,19 +7,26 @@
       "InputId": "03558959-4190-4b5b-a544-b17d56fb77da"/*ClampResult*/,
       "Position": {
         "X": 747.8982,
-        "Y": 1734.7737
+        "Y": 1970.8657
       },
-      "AddPadding": "True"
+      "GroupTitle": "Options"
     },
     {
       "InputId": "07177f13-ef76-4e81-91b5-49cf8eb73cbd"/*Mode*/,
       "Position": {
         "X": 887.8982,
-        "Y": 1699.7737
+        "Y": 1935.8657
       }
     },
     {
-      "InputId": "3da5b21f-f31b-4f11-9f1c-0deee0efac40"/*Field*/,
+      "InputId": "1f929520-deb1-454e-a999-12dcdef29081"/*Range*/,
+      "Position": {
+        "X": 900.7295,
+        "Y": 1595.1677
+      }
+    },
+    {
+      "InputId": "3da5b21f-f31b-4f11-9f1c-0deee0efac40"/*SdfField*/,
       "Relevancy": "Required",
       "Position": {
         "X": 537.42883,
@@ -35,18 +42,10 @@
       "AddPadding": "True"
     },
     {
-      "InputId": "7169297b-9597-4922-b3e3-01b560039153"/*FieldValueRange*/,
-      "Position": {
-        "X": 760.7295,
-        "Y": 1560.1677
-      },
-      "UseVec2Control": "Range"
-    },
-    {
       "InputId": "74bc9dbf-015e-4182-95ef-cfca4be09f32"/*StrengthFactor*/,
       "Position": {
         "X": 887.8982,
-        "Y": 1804.7737
+        "Y": 2040.8657
       }
     },
     {
@@ -61,17 +60,23 @@
       "InputId": "b0b20881-ccb2-46e6-b936-db892ac04202"/*WriteTo*/,
       "Position": {
         "X": 887.89825,
-        "Y": 1839.7737
+        "Y": 2075.8657
       },
       "AddPadding": "True"
+    },
+    {
+      "InputId": "b7bd5d38-03ed-46da-ae4f-bfea990104ae"/*Offset*/,
+      "Position": {
+        "X": 900.72943,
+        "Y": 1560.1677
+      }
     },
     {
       "InputId": "bc002ec2-cd53-4cf3-800c-868f2cacbb0c"/*DiscardNonSelected*/,
       "Position": {
         "X": 747.89825,
-        "Y": 1769.7737
-      },
-      "GroupTitle": "Advanced"
+        "Y": 2005.8657
+      }
     },
     {
       "InputId": "c9fbe013-7050-4714-a43d-68960d6afbea"/*BiasAndGain*/,
@@ -84,6 +89,14 @@
       "Clamp": true,
       "Format": "{0:0.000}",
       "UseVec2Control": "BiasAndGain"
+    },
+    {
+      "InputId": "e3fe99fb-f1c3-4e73-ba7a-d260afcb3a22"/*Mapping*/,
+      "Position": {
+        "X": 887.89813,
+        "Y": 2110.8657
+      },
+      "GroupTitle": "Selection Range"
     },
     {
       "InputId": "f38834a9-1bfe-4edc-9b70-2d0c57967556"/*Strength*/,
@@ -127,7 +140,7 @@
       "ChildId": "4417c142-2884-4500-964e-a124d5cc302f"/*IntsToBuffer*/,
       "Position": {
         "X": 1027.8982,
-        "Y": 1699.7737
+        "Y": 1935.8657
       }
     },
     {
@@ -141,21 +154,14 @@
       "ChildId": "5825a168-0557-409e-b486-ffdd384fe1f0"/*BoolToInt*/,
       "Position": {
         "X": 887.8982,
-        "Y": 1734.7737
-      }
-    },
-    {
-      "ChildId": "5c7432d7-43c6-4800-abab-69f333c8e613"/*Vector2Components*/,
-      "Position": {
-        "X": 900.72943,
-        "Y": 1560.1677
+        "Y": 1970.8657
       }
     },
     {
       "ChildId": "661910b2-98b8-48d9-8fdf-215928052088"/*BoolToInt*/,
       "Position": {
         "X": 887.89825,
-        "Y": 1769.7737
+        "Y": 2005.8657
       }
     },
     {

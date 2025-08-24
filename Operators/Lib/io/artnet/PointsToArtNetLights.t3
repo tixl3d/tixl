@@ -69,6 +69,10 @@
       "DefaultValue": false
     },
     {
+      "Id": "8ceece78-9a08-4c7b-8fea-740e8e5929a6"/*WhiteChannel*/,
+      "DefaultValue": 0
+    },
+    {
       "Id": "9000c279-73e4-4de8-a1f8-c3914eaaf533"/*PanChannel*/,
       "DefaultValue": 1
     },

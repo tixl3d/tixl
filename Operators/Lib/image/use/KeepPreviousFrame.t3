@@ -40,7 +40,7 @@
       "Outputs": []
     },
     {
-      "Id": "3e77b2db-62e9-4c38-b58b-ea8d2d65a78c"/*DelayTrigger*/,
+      "Id": "3e77b2db-62e9-4c38-b58b-ea8d2d65a78c"/*DelayTriggerChange*/,
       "SymbolId": "fbd9ac37-4427-4852-95d7-d8383fefbe36",
       "InputValues": [],
       "Outputs": []

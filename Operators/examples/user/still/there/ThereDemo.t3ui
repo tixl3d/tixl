@@ -96,8 +96,8 @@
     {
       "ChildId": "24687271-cace-4b26-8004-57fcc223cf01"/*SimDirectionalOffset*/,
       "Position": {
-        "X": -990.6214,
-        "Y": -400.63217
+        "X": -847.1438,
+        "Y": -403.88074
       }
     },
     {
@@ -171,7 +171,7 @@
       }
     },
     {
-      "ChildId": "4ebee493-b2a6-419e-9461-8bd1a0ba8b84"/*PointTrail*/,
+      "ChildId": "4ebee493-b2a6-419e-9461-8bd1a0ba8b84"/*PointTrailFast*/,
       "Position": {
         "X": -847.1438,
         "Y": -438.88074

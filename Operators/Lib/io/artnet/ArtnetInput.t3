@@ -4,6 +4,18 @@
     {
       "Id": "19bde769-3992-4cf0-a0b4-e3ae25c03c79"/*StartUniverse*/,
       "DefaultValue": 0
+    },
+    {
+      "Id": "3d085f6f-6f4a-4876-805f-22f25497a731"/*Active*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "a38c29b6-057d-4883-9366-139366113b63"/*Timeout*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "c18a9359-3ef8-4e0d-85d8-51f725357388"/*NumUniverses*/,
+      "DefaultValue": 0
     }
   ],
   "Children": [],

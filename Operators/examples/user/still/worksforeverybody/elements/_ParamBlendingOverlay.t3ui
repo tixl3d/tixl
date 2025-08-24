@@ -229,7 +229,7 @@
       }
     },
     {
-      "ChildId": "54b7ed17-4c2c-4ca1-a9f0-581022f03379"/*DelayTrigger*/,
+      "ChildId": "54b7ed17-4c2c-4ca1-a9f0-581022f03379"/*DelayTriggerChange*/,
       "Position": {
         "X": -943.8965,
         "Y": 468.2542
@@ -320,7 +320,7 @@
       }
     },
     {
-      "ChildId": "78312a95-d442-4101-9998-eb35ca305cda"/*DelayTrigger*/,
+      "ChildId": "78312a95-d442-4101-9998-eb35ca305cda"/*DelayTriggerChange*/,
       "Position": {
         "X": -1703.1611,
         "Y": 481.6323

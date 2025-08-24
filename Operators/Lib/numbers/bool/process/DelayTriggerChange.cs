@@ -5,7 +5,7 @@ using T3.Core.Utils;
 namespace Lib.numbers.@bool.process;
 
 [Guid("fbd9ac37-4427-4852-95d7-d8383fefbe36")]
-internal sealed class DelayTrigger : Instance<DelayTrigger>
+internal sealed class DelayTriggerChange : Instance<DelayTriggerChange>
 {
     [Output(Guid = "04febb7c-e4c8-4252-9606-be433f82c8ad", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
     public readonly Slot<bool> DelayedTrigger = new();
@@ -14,7 +14,7 @@ internal sealed class DelayTrigger : Instance<DelayTrigger>
     public readonly Slot<float> RemainingTime = new();
 
         
-    public DelayTrigger()
+    public DelayTriggerChange()
     {
         DelayedTrigger.UpdateAction += Update;
         RemainingTime.UpdateAction += Update;

@@ -161,6 +161,10 @@ public static class WasapiAudioInput
         }
     }
 
+    /// <summary>
+    /// This is call async (potentially several times per frame) whenever new
+    /// audio-data arrives
+    /// </summary>
     private static int ProcessDataCallback(IntPtr buffer, int length, IntPtr user)
     {
         var time = Playback.RunTimeInSecs;  // Keep because timer is still running 
@@ -185,11 +189,12 @@ public static class WasapiAudioInput
         
         AudioAnalysis.ProcessUpdate(playbackSettings?.AudioGainFactor?? 1,
                                     playbackSettings?.AudioDecayFactor?? 0.9f);
-            
-        if(playbackSettings.EnableAudioBeatLocking)
-            BeatSynchronizer.UpdateBeatTimer();
 
-        //Log.Debug($"Process with {length} #{_fftUpdatesSinceLastFrame}  L:{audioLevel:0.0}  DevBufLen:{BassWasapi.Info.BufferLength}");
+        if (playbackSettings.EnableAudioBeatLocking)
+        {
+            BeatSynchronizer.UpdateBeatTimer();
+        }
+        
         return length;
     }
 

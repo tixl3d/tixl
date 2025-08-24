@@ -2,12 +2,16 @@
   "Id": "18e09bad-5b18-439f-b5fc-ef61ce54b190"/*VertexShaderFromSource*/,
   "Inputs": [
     {
-      "Id": "0a8663a0-5630-4e53-8400-1d050ec1c470"/*ModuloValue*/,
-      "DefaultValue": 1.0
+      "Id": "2b616fb0-2966-45a9-a0cc-da960ca509cf"/*EntryPoint*/,
+      "DefaultValue": ""
     },
     {
-      "Id": "a379d0ad-0719-4e49-8e4e-e63f41c7a18a"/*Value*/,
-      "DefaultValue": 0.0
+      "Id": "a192e8cc-2874-4f02-bbf1-4622e99666e1"/*ShaderSource*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "baa49d7d-127c-4c93-ae90-7e4db3598af9"/*DebugName*/,
+      "DefaultValue": ""
     }
   ],
   "Children": [],

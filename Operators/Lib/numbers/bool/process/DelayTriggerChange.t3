@@ -1,5 +1,5 @@
 {
-  "Id": "fbd9ac37-4427-4852-95d7-d8383fefbe36"/*DelayTrigger*/,
+  "Id": "fbd9ac37-4427-4852-95d7-d8383fefbe36"/*DelayTriggerChange*/,
   "Inputs": [
     {
       "Id": "1d86c7d6-95c1-416c-a643-28745e099a53"/*TimeMode*/,

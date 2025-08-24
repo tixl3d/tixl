@@ -18,6 +18,10 @@
       "DefaultValue": "255.0.0.0"
     },
     {
+      "Id": "65fb88ec-5772-4973-bd8b-bb2cb9f557e7"/*PrintArtnetPoll*/,
+      "DefaultValue": false
+    },
+    {
       "Id": "73babdb1-f88f-4e4d-aa3f-0536678b0793"/*Reconnect*/,
       "DefaultValue": false
     },

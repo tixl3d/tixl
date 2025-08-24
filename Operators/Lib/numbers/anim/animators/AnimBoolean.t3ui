@@ -1,0 +1,37 @@
+{
+  "Id": "1f85f846-0a59-44f3-8e3e-4c2357893494"/*AnimTrigger*/,
+  "Description": "",
+  "InputUis": [
+    {
+      "InputId": "a8e49df7-3388-4532-8efe-766ea3a47108"/*Rate*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      }
+    },
+    {
+      "InputId": "be941605-4af3-445e-93a6-c830eebb3ed5"/*AllowSpeedFactor*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 195.0
+      }
+    },
+    {
+      "InputId": "cfa3d623-f655-4386-8458-2fbd273a2b88"/*Phase*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 120.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "4b2820f8-f7e5-4973-81f6-7fa6b69d0509"/*WasStep*/,
+      "Position": {
+        "X": 149.09799,
+        "Y": 93.17799
+      }
+    }
+  ]
+}

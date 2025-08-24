@@ -57,10 +57,6 @@
     {
       "Id": "dd511aab-0472-4109-9c10-cc1ab5042499"/*EnableZWrite*/,
       "DefaultValue": true
-    },
-    {
-      "Id": "f5ec8952-01e0-42db-8c8d-29db44cc3151"/*UseWForSize*/,
-      "DefaultValue": true
     }
   ],
   "Children": [

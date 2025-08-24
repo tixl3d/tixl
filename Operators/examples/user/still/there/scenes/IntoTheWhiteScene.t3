@@ -50,7 +50,7 @@
         {
           "Id": "e7c1f0af-da6d-4e33-ac86-7dc96bfe7eb3"/*BoolValue*/,
           "Type": "System.Boolean",
-          "Value": false
+          "Value": true
         }
       ],
       "Outputs": []
@@ -142,7 +142,7 @@
       "Outputs": []
     },
     {
-      "Id": "ce9c6e79-c616-4ca8-8a24-08ff123e8887"/*PointTrail*/,
+      "Id": "ce9c6e79-c616-4ca8-8a24-08ff123e8887"/*PointTrailFast*/,
       "SymbolId": "25db2a97-38b2-4503-8842-fab3922d7a6c",
       "InputValues": [
         {

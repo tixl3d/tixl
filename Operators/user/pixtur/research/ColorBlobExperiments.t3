@@ -232,7 +232,7 @@
       "Outputs": []
     },
     {
-      "Id": "4a7a9b2c-b130-4e74-ac1e-bc09993330a7"/*DelayTrigger*/,
+      "Id": "4a7a9b2c-b130-4e74-ac1e-bc09993330a7"/*DelayTriggerChange*/,
       "SymbolId": "fbd9ac37-4427-4852-95d7-d8383fefbe36",
       "InputValues": [],
       "Outputs": []
@@ -268,7 +268,7 @@
       "Outputs": []
     },
     {
-      "Id": "5d43b49d-344d-47a6-854d-db0fd044cc8b"/*GridPoints*/,
+      "Id": "5d43b49d-344d-47a6-854d-db0fd044cc8b"/*_GridPoints_Old*/,
       "SymbolId": "3ee8f66d-68df-43c1-b0eb-407259bf7e86",
       "InputValues": [
         {

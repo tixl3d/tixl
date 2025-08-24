@@ -1,5 +1,5 @@
 {
-  "Id": "784b280f-bbde-4c8e-9ca7-66de5b567672"/*ColorListToIntList*/,
+  "Id": "784b280f-bbde-4c8e-9ca7-66de5b567672"/*ColorListToInts*/,
   "Description": "Converts a color list into to a list of integer values. \nThis can beu useful for sending them with [ArtNetOutput]",
   "InputUis": [
     {

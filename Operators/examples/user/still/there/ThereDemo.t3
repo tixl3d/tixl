@@ -495,7 +495,7 @@
       "Outputs": []
     },
     {
-      "Id": "4ebee493-b2a6-419e-9461-8bd1a0ba8b84"/*PointTrail*/,
+      "Id": "4ebee493-b2a6-419e-9461-8bd1a0ba8b84"/*PointTrailFast*/,
       "SymbolId": "25db2a97-38b2-4503-8842-fab3922d7a6c",
       "InputValues": [
         {
@@ -2521,6 +2521,8 @@
     "AudioDecayFactor": 0.98,
     "AudioGainFactor": 1.0,
     "AudioInputDeviceName": "",
+    "EnableAudioBeatLocking": "False",
+    "BeatLockAudioOffsetSec": "0",
     "AudioClips": [
       {
         "Id": "00000000-0000-0000-0000-000000000000",

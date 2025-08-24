@@ -166,7 +166,7 @@
       }
     },
     {
-      "ChildId": "116e7461-4311-4ef0-b5fb-5d97d712f50d"/*DelayTrigger*/,
+      "ChildId": "116e7461-4311-4ef0-b5fb-5d97d712f50d"/*DelayTriggerChange*/,
       "Position": {
         "X": -3269.855,
         "Y": 6000.25

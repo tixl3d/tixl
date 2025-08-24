@@ -4,6 +4,13 @@
   "SymbolTags": "1",
   "InputUis": [
     {
+      "InputId": "11657d72-6ad9-41d9-ab5a-de7177af5be4"/*OverrideInterpolation*/,
+      "Position": {
+        "X": 197.0,
+        "Y": 448.0
+      }
+    },
+    {
       "InputId": "76cf4a72-2d25-48cb-a1ec-08d0ddabb053"/*Interpolation*/,
       "Position": {
         "X": 197.0,

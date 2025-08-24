@@ -3602,7 +3602,7 @@
       "Outputs": []
     },
     {
-      "Id": "c5c5eeef-c508-4655-88e3-979216043054"/*PointTrail*/,
+      "Id": "c5c5eeef-c508-4655-88e3-979216043054"/*PointTrailFast*/,
       "SymbolId": "25db2a97-38b2-4503-8842-fab3922d7a6c",
       "InputValues": [
         {
@@ -6459,6 +6459,8 @@
     "AudioDecayFactor": 0.9,
     "AudioGainFactor": 1.02,
     "AudioInputDeviceName": "Speakers (Realtek(R) Audio)",
+    "EnableAudioBeatLocking": "False",
+    "BeatLockAudioOffsetSec": "0",
     "AudioClips": [
       {
         "Id": "00000000-0000-0000-0000-000000000000",

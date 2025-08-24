@@ -871,18 +871,13 @@
       "Outputs": []
     },
     {
-      "Id": "713106be-b818-4ceb-bbab-70294d078956"/*PointTrail2*/,
+      "Id": "713106be-b818-4ceb-bbab-70294d078956"/*PointTrail*/,
       "SymbolId": "945014cf-ba0b-40b3-85f9-f7deed70fa8d",
       "InputValues": [
         {
           "Id": "9a3998f9-f68a-4f8f-84dc-643e89f8c4f2"/*TrailLength*/,
           "Type": "System.Int32",
           "Value": 200
-        },
-        {
-          "Id": "a5448c00-a6d4-476e-bf41-826fdff531cc"/*AddSeperatorThreshold*/,
-          "Type": "System.Single",
-          "Value": 0.16
         }
       ],
       "Outputs": []

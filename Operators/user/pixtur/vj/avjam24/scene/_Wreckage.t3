@@ -1226,7 +1226,9 @@
     "Syncing": 0,
     "AudioDecayFactor": 0.85,
     "AudioGainFactor": 1.0,
-    "AudioInputDeviceName": ""
+    "AudioInputDeviceName": "",
+    "EnableAudioBeatLocking": "False",
+    "BeatLockAudioOffsetSec": "0"
   },
   "Animator": [
     {

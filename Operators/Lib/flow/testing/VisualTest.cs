@@ -104,6 +104,8 @@ internal sealed class VisualTest : Instance<VisualTest>
 
     private bool  TryUpdateImage(EvaluationContext context, int index, out float usedTime, out Texture2D image)
     {
+        ResourceManager.Device.ImmediateContext.Flush();
+         
         usedTime = 0;
         var previousKeyframeTime = context.LocalTime;
         var previousEffectTime = context.LocalFxTime;

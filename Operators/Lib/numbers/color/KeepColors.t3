@@ -2,20 +2,25 @@
   "Id": "2ccc7c43-5a5f-4b4e-aca7-078a5121bdb3"/*KeepColors*/,
   "Inputs": [
     {
-      "Id": "66391dcf-1415-4f85-bcf6-360640d7a2e8"/*Value*/,
-      "DefaultValue": 0.0
-    },
-    {
-      "Id": "8308d81b-3d9a-40a5-a2a3-8fb5eac201cc"/*AddValueToList*/,
+      "Id": "8308d81b-3d9a-40a5-a2a3-8fb5eac201cc"/*AddColorToList*/,
       "DefaultValue": true
     },
     {
-      "Id": "af59eb80-a803-421b-8a0a-d11e307bc49f"/*BufferLength*/,
+      "Id": "af59eb80-a803-421b-8a0a-d11e307bc49f"/*MaxLength*/,
       "DefaultValue": 100
     },
     {
       "Id": "b2e05ddc-0000-453a-a531-87a6739d0c85"/*Reset*/,
       "DefaultValue": false
+    },
+    {
+      "Id": "be2d418b-ce5e-4545-abc0-4e56b5665a75"/*Color*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 1.0,
+        "Z": 1.0,
+        "W": 1.0
+      }
     }
   ],
   "Children": [],

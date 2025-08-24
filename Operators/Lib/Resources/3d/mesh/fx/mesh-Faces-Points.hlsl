@@ -6,27 +6,32 @@
 
 cbuffer Params : register(b0)
 {
+    float3 Scale;
+    float Fx1;
+
+    float Fx2;
     float3 OffsetByTBN;
-    float OffsetScale;
-    
+
     float4 Color;
-    float Size;
-    float StretchZ;
+
+    float EnableScaleWithFaceArea;
+    float OffsetScale;
 }
 
 StructuredBuffer<int3> Faces : t0;
 StructuredBuffer<PbrVertex> SourceVertices : t1;
+Texture2D<float4> Texture : t2;
+sampler LinearSampler : register(s0);
 
-RWStructuredBuffer<LegacyPoint> ResultPoints : u0;
-
+RWStructuredBuffer<Point> ResultPoints : u0;
 
 float CalculateTriangleArea(float3 vertexA, float3 vertexB, float3 vertexC)
 {
     float3 side1 = vertexB - vertexA;
     float3 side2 = vertexC - vertexA;
-    
+
     float3 crossProduct = cross(side1, side2);
-    
+
     return 0.5 * length(crossProduct);
 }
 
@@ -54,20 +59,19 @@ float3 CalculateInscribedCircleCenter(float3 vertexA, float3 vertexB, float3 ver
     return center;
 }
 
-
 float CalculateInscribedCircleRadius(float3 vertexA, float3 vertexB, float3 vertexC)
 {
     // Calculate the lengths of the sides
     float a = length(vertexB - vertexC);
     float b = length(vertexC - vertexA);
     float c = length(vertexA - vertexB);
-    
+
     // Calculate semi-perimeter
     float s = (a + b + c) * 0.5;
-    
+
     // Calculate area using Heron's formula
     float area = sqrt(s * (s - a) * (s - b) * (s - c));
-    
+
     // Radius of inscribed circle
     return area / s;
 }
@@ -80,7 +84,7 @@ void CalculateTangentBitangent(
     // Calculate the edges of the triangle
     float3 edge1 = vertexB - vertexA;
     float3 edge2 = vertexC - vertexA;
-    
+
     // Calculate the difference in texture coordinates
     float2 deltaUV1 = uvB - uvA;
     float2 deltaUV2 = uvC - uvA;
@@ -103,9 +107,6 @@ void CalculateTangentBitangent(
     bitangent = cross(normal, tangent);
 }
 
-
-
-
 [numthreads(64, 1, 1)] void main(uint3 i : SV_DispatchThreadID)
 {
     uint numFaces, stride;
@@ -116,7 +117,7 @@ void CalculateTangentBitangent(
     }
 
     int faceIndex = i.x;
-    
+
     int3 faceVertices = Faces[faceIndex];
 
     float3 a = SourceVertices[faceVertices.x].Position;
@@ -127,9 +128,11 @@ void CalculateTangentBitangent(
     float2 uv1 = SourceVertices[faceVertices.y].TexCoord;
     float2 uv2 = SourceVertices[faceVertices.z].TexCoord;
 
-    float3 pCenter = CalculateInscribedCircleCenter(a,  b,  c);
+    float2 uvCenter = (uv0 + uv1 + uv2) / 3;
 
-    uint index = i.x; 
+    float3 pCenter = CalculateInscribedCircleCenter(a, b, c);
+
+    uint index = i.x;
     PbrVertex v = SourceVertices[index];
 
     float3 normal = normalize(cross(a - b, a - c)); // Calculate the face normal
@@ -142,11 +145,15 @@ void CalculateTangentBitangent(
     float3 upVector = float3(0, 1, 0);
     float4 orientation = qLookAt(normal, upVector);
 
-    ResultPoints[index].W = CalculateInscribedCircleRadius(a, b, c) * Size;
     ResultPoints[index].Position = pCenter;
     ResultPoints[index].Rotation = normalize(orientation);
-    ResultPoints[index].Color = Color;
-    ResultPoints[index].Selected = 1;
-    ResultPoints[index].Stretch.xy = 1;
-    ResultPoints[index].Stretch.z = CalculateTriangleArea(a, b, c) * StretchZ;
+    ResultPoints[index].Color = Color * Texture.SampleLevel(LinearSampler, uvCenter, 0);
+    ResultPoints[index].FX1 = Fx1;
+    ResultPoints[index].FX2 = Fx1;
+    // ResultPoints[index].Scale.xy = 1;
+    // ResultPoints[index].Scale.z = CalculateTriangleArea(a, b, c) * StretchZ;
+    ResultPoints[index].Scale = lerp(1,
+                                     CalculateInscribedCircleRadius(a, b, c),
+                                     EnableScaleWithFaceArea) *
+                                Scale;
 }

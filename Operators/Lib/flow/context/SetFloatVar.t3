@@ -2,7 +2,7 @@
   "Id": "2a0c932a-eb81-4a7d-aeac-836a23b0b789"/*SetFloatVar*/,
   "Inputs": [
     {
-      "Id": "68e31eaa-1481-48f4-b742-5177a241fe6d"/*Value*/,
+      "Id": "68e31eaa-1481-48f4-b742-5177a241fe6d"/*FloatValue*/,
       "DefaultValue": 0.0
     },
     {

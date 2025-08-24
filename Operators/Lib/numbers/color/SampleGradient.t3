@@ -2,6 +2,10 @@
   "Id": "8211249d-7a26-4ad0-8d84-56da72a5c536"/*SampleGradient*/,
   "Inputs": [
     {
+      "Id": "11657d72-6ad9-41d9-ab5a-de7177af5be4"/*OverrideInterpolation*/,
+      "DefaultValue": false
+    },
+    {
       "Id": "76cf4a72-2d25-48cb-a1ec-08d0ddabb053"/*Interpolation*/,
       "DefaultValue": 0
     },

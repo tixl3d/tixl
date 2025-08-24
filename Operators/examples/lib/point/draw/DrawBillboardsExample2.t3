@@ -265,7 +265,7 @@
       "Outputs": []
     },
     {
-      "Id": "4c58ad95-61fb-4306-a075-5a92d1fd1f5a"/*GridPoints*/,
+      "Id": "4c58ad95-61fb-4306-a075-5a92d1fd1f5a"/*_GridPoints_Old*/,
       "SymbolId": "3ee8f66d-68df-43c1-b0eb-407259bf7e86",
       "InputValues": [
         {
@@ -877,7 +877,7 @@
       "Outputs": []
     },
     {
-      "Id": "de841817-b3c2-4ae8-bc92-4a2cfbda3c68"/*GridPoints*/,
+      "Id": "de841817-b3c2-4ae8-bc92-4a2cfbda3c68"/*_GridPoints_Old*/,
       "SymbolId": "3ee8f66d-68df-43c1-b0eb-407259bf7e86",
       "InputValues": [
         {
@@ -1039,7 +1039,7 @@
       "Outputs": []
     },
     {
-      "Id": "f4e76a7e-c3b9-4d6e-b9b3-9fb38ce1f138"/*GridPoints*/,
+      "Id": "f4e76a7e-c3b9-4d6e-b9b3-9fb38ce1f138"/*_GridPoints_Old*/,
       "SymbolId": "3ee8f66d-68df-43c1-b0eb-407259bf7e86",
       "InputValues": [
         {
@@ -1420,6 +1420,8 @@
     "Syncing": 0,
     "AudioDecayFactor": 0.9,
     "AudioGainFactor": 1.0,
-    "AudioInputDeviceName": "T-Bone (SC420 USB Microphone)"
+    "AudioInputDeviceName": "T-Bone (SC420 USB Microphone)",
+    "EnableAudioBeatLocking": "False",
+    "BeatLockAudioOffsetSec": "0"
   }
 }

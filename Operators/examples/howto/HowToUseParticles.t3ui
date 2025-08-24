@@ -582,7 +582,7 @@
       }
     },
     {
-      "ChildId": "d8dd2bde-47f7-4f09-8a6a-cfcdab775007"/*PointTrail*/,
+      "ChildId": "d8dd2bde-47f7-4f09-8a6a-cfcdab775007"/*PointTrailFast*/,
       "Comment": "These are very long trails leading to roughly 10 million points connected by particles.\n\nNotice how we also insert separators if the distance between source points is too large.",
       "Position": {
         "X": 1051.3545,

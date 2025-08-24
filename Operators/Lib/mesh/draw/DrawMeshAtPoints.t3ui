@@ -114,15 +114,6 @@
       },
       "GroupTitle": "Draw Options",
       "Description": "This defines whether the mesh covers itself or is covered by or covers other meshes."
-    },
-    {
-      "InputId": "f5ec8952-01e0-42db-8c8d-29db44cc3151"/*UseWForSize*/,
-      "Position": {
-        "X": 1980.2268,
-        "Y": 4822.922
-      },
-      "GroupTitle": "Obsolete Parameters",
-      "Description": "Defines whether the \"W\" value determines how large the meshes are displayed."
     }
   ],
   "SymbolChildUis": [

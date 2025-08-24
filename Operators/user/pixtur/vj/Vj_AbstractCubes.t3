@@ -1716,7 +1716,7 @@
       "Outputs": []
     },
     {
-      "Id": "7cd5eb2c-3790-47e1-ae71-e21b74e177a5"/*PointTrail*/,
+      "Id": "7cd5eb2c-3790-47e1-ae71-e21b74e177a5"/*PointTrailFast*/,
       "SymbolId": "25db2a97-38b2-4503-8842-fab3922d7a6c",
       "InputValues": [
         {
@@ -1745,7 +1745,7 @@
       "Outputs": []
     },
     {
-      "Id": "7f54e776-9e4d-4eaa-8313-932bd0945ec9"/*PointTrail*/,
+      "Id": "7f54e776-9e4d-4eaa-8313-932bd0945ec9"/*PointTrailFast*/,
       "SymbolId": "25db2a97-38b2-4503-8842-fab3922d7a6c",
       "InputValues": [
         {

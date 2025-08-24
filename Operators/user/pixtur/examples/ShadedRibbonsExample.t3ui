@@ -4,7 +4,7 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "00040050-2e83-4b65-92cd-79dc890aa7be"/*GridPoints*/,
+      "ChildId": "00040050-2e83-4b65-92cd-79dc890aa7be"/*_GridPoints_Old*/,
       "Position": {
         "X": 0.0,
         "Y": 43.0
@@ -25,7 +25,7 @@
       }
     },
     {
-      "ChildId": "3c45596c-10fa-4c5b-b253-7452ab79a28a"/*GridPoints*/,
+      "ChildId": "3c45596c-10fa-4c5b-b253-7452ab79a28a"/*_GridPoints_Old*/,
       "Position": {
         "X": 0.0,
         "Y": 0.0
