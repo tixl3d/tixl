@@ -5,57 +5,120 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "1a0b52ae-f04d-4914-aa50-9ab63692dd7e"/*TriggerAnim*/,
+      "ChildId": "058c0708-4fc8-4967-a39c-6048589a7758"/*AnimValue*/,
       "Position": {
-        "X": 767.228,
-        "Y": 379.77863
+        "X": 827.2755,
+        "Y": -15.7092285
       }
     },
     {
-      "ChildId": "1b1a38f2-f672-446a-8ecf-e54e260aca94"/*RandomizePoints*/,
+      "ChildId": "0be4fb97-fc51-4d6b-adba-42b27e8ed840"/*TriggerAnim*/,
       "Position": {
-        "X": 806.24976,
-        "Y": 17.32959
+        "X": 565.8425,
+        "Y": -383.09348
       }
     },
     {
-      "ChildId": "2ab307d0-1bee-4a4e-b015-51ab0a00e47d"/*Blast it!*/,
+      "ChildId": "10168210-b0ef-4917-a34e-2050a42a6fdf"/*Time 10.000*/,
       "Position": {
-        "X": 584.8385,
-        "Y": 360.14276
+        "X": 970.03125,
+        "Y": -147.60257
       }
     },
     {
-      "ChildId": "312c9c6e-0347-4b4a-898b-8b8284512ba4"/*_Time_old*/,
+      "ChildId": "150fa49d-055d-4fef-af9e-49103441606b"/*Time 0.010*/,
       "Position": {
-        "X": 635.4922,
-        "Y": 58.054688
+        "X": 968.7439,
+        "Y": -285.3278
       }
     },
     {
-      "ChildId": "32d20d90-89e4-4cdf-b63a-0b77805b8ca9"/*Transform*/,
+      "ChildId": "164bd5b2-ec47-40ce-bfdd-69589882fe6a"/*Remap*/,
       "Position": {
-        "X": 172.20447,
-        "Y": 212.33447
+        "X": 827.2755,
+        "Y": 19.290771
       }
     },
     {
-      "ChildId": "50c3b8f6-c7ec-4610-bf85-2aeadd7e4521"/*Camera*/,
-      "Position": {
-        "X": 1556.2498,
-        "Y": 17.32959
-      }
-    },
-    {
-      "ChildId": "538500b9-0b5f-4eea-a4a4-a6a665331861"/*AddNoise*/,
+      "ChildId": "1961f04e-769f-4ebd-bf09-1c704d2c26ab"/*AddNoise*/,
       "Comment": "We use the W as weight to control the noise",
       "Position": {
-        "X": 1256.2498,
-        "Y": 17.32959
+        "X": 1108.7439,
+        "Y": -355.3278
       }
     },
     {
-      "ChildId": "6099b0f3-8565-4eff-916c-d68feb33a6bd"/*Scale*/,
+      "ChildId": "1d937046-3861-4b5b-9a60-aaff525ac9e1"/*TriggerAnim*/,
+      "Position": {
+        "X": 968.7439,
+        "Y": -320.3278
+      }
+    },
+    {
+      "ChildId": "218d950f-56bb-491b-96ce-03d892662cd8"/*Camera*/,
+      "Position": {
+        "X": 1107.2755,
+        "Y": -15.7092285
+      }
+    },
+    {
+      "ChildId": "38c43f06-b2d4-4055-9e0e-f95eadb621ef"/*LinearGradient*/,
+      "Position": {
+        "X": 495.5074,
+        "Y": -698.95026
+      }
+    },
+    {
+      "ChildId": "40000e23-cabb-4ad3-8c04-9405d13fd3ff"/*Position*/,
+      "Position": {
+        "X": 967.2755,
+        "Y": 19.290771
+      }
+    },
+    {
+      "ChildId": "476b6ff1-5f72-4ae6-b7b6-19870c8c53b3"/*AttributesFromImageChannels*/,
+      "Position": {
+        "X": 1108.7439,
+        "Y": -460.3278
+      }
+    },
+    {
+      "ChildId": "4c58a87e-c7ce-46b1-addd-10ec6262d900"/*DrawPoints*/,
+      "Position": {
+        "X": 1107.298,
+        "Y": -75.98813
+      }
+    },
+    {
+      "ChildId": "4cd67aa8-3022-4fc5-a160-fd7457d6d1f8"/*Bloom*/,
+      "Position": {
+        "X": 1107.2755,
+        "Y": 89.29077
+      }
+    },
+    {
+      "ChildId": "4e33a297-a247-4126-89b9-fe5f802d9d6c"/*Text*/,
+      "Position": {
+        "X": 495.5074,
+        "Y": -497.15192
+      }
+    },
+    {
+      "ChildId": "5c8af0ff-9efd-4fdd-878e-07ede970f342"/*RenderTarget*/,
+      "Position": {
+        "X": 724.7837,
+        "Y": -592.7804
+      }
+    },
+    {
+      "ChildId": "60658c6f-ad40-403a-9e69-aecc43df21d5"/*RandomizePoints*/,
+      "Position": {
+        "X": 1110.0312,
+        "Y": -182.60257
+      }
+    },
+    {
+      "ChildId": "6b5a0d53-eba9-43f6-8251-f21519bdd465"/*Scale*/,
       "Style": "Resizable",
       "Size": {
         "X": 127.659935,
@@ -63,87 +126,100 @@
       },
       "Comment": "We need to adjust the scale a little",
       "Position": {
-        "X": 762.62244,
-        "Y": 108.64047
+        "X": 940.1102,
+        "Y": -538.57806
       }
     },
     {
-      "ChildId": "79f2287f-bf70-49e6-ae0f-5d59d108e629"/*TriggerAnim*/,
+      "ChildId": "6eaa025c-0458-4224-8b2e-4f7f36b485cd"/*Transform*/,
       "Position": {
-        "X": 767.228,
-        "Y": 323.77863
+        "X": 495.5074,
+        "Y": -462.15186
       }
     },
     {
-      "ChildId": "7b5ad32f-cd07-43bd-b8ad-329e9ac4bee9"/*_GridPoints_Old*/,
+      "ChildId": "71df20be-ee01-42f8-ba16-2de4eef9773e"/*RenderTarget*/,
       "Position": {
-        "X": 635.4922,
-        "Y": 15.0546875
+        "X": 726.4035,
+        "Y": -461.74603
       }
     },
     {
-      "ChildId": "7b72a02c-da25-4791-85a8-224490f4f4c5"/*DrawPoints*/,
+      "ChildId": "82fa5cfb-2599-49d4-a4b9-341d59b1bda5"/*Transform*/,
       "Position": {
-        "X": 1406.2498,
-        "Y": 17.32959
+        "X": 495.5074,
+        "Y": -547.8204
       }
     },
     {
-      "ChildId": "95e6d183-246c-4793-86b1-eb51feaad129"/*RenderTarget*/,
+      "ChildId": "937e419f-f83c-4110-8d52-67331603819a"/*RenderTarget*/,
       "Position": {
-        "X": 1706.2498,
-        "Y": 17.32959
+        "X": 1107.2755,
+        "Y": 54.29077
       }
     },
     {
-      "ChildId": "9a490615-d823-4feb-9952-bf07c63d1d26"/*SamplePointColorAttributes*/,
-      "Comment": "Use the alpha channel of BaseColor to blend in the texture ",
+      "ChildId": "a884584f-8216-4ee7-8d63-20e35a9380a1"/*Layer2d*/,
       "Position": {
-        "X": 956.24976,
-        "Y": 17.32959
+        "X": 495.5074,
+        "Y": -628.95026
       }
     },
     {
-      "ChildId": "bad78233-030f-4e79-82d0-352b69c235a5"/*Text*/,
+      "ChildId": "aa3005be-56c9-49a8-abb9-0c60979220eb"/*SamplePointColorAttributes*/,
       "Position": {
-        "X": 22.204468,
-        "Y": 212.33447
+        "X": 1099.5195,
+        "Y": -628.59595
       }
     },
     {
-      "ChildId": "bc8a7e17-19aa-43ff-bf95-303b005d6108"/*_Time_old*/,
+      "ChildId": "b3516c47-c239-4331-8656-650b74c1febd"/*AnimValue*/,
       "Position": {
-        "X": 1106.2498,
-        "Y": 99.32959
+        "X": 326.68155,
+        "Y": -662.0285
       }
     },
     {
-      "ChildId": "c0396e08-267b-48c8-9080-0433db29e4a2"/*SamplePointAttributes_v1*/,
-      "Comment": "We control/modify the W value of the points ",
+      "ChildId": "bf5d0b67-8338-4f08-b4a8-943d2775d559"/*Multiply*/,
+      "Comment": "For some reason I need to divide by 2 the scale",
       "Position": {
-        "X": 1106.2498,
-        "Y": 17.32959
+        "X": 933.6761,
+        "Y": -391.79767
       }
     },
     {
-      "ChildId": "daae070b-cf24-4c88-a460-f11f6d076a72"/*LinearGradient*/,
+      "ChildId": "c4757daa-26fd-43f4-bd42-31c3de9a6d15"/*Group*/,
       "Position": {
-        "X": 953.6305,
-        "Y": 288.92487
+        "X": 724.7837,
+        "Y": -697.7804
       }
     },
     {
-      "ChildId": "f7d4a523-c023-4f20-80cf-5956f54218ec"/*LinearGradient*/,
+      "ChildId": "cd0f456a-6389-458f-9d5c-6996be3e7b3f"/*Blast it!*/,
       "Position": {
-        "X": 472.979,
-        "Y": 159.66663
+        "X": 393.8303,
+        "Y": -321.74686
       }
     },
     {
-      "ChildId": "f8d9ba73-f120-4601-9f87-e2b140ecf7d5"/*RenderTarget*/,
+      "ChildId": "cf2717b5-4a81-4f16-8564-ad86db071b21"/*LinearGradient*/,
       "Position": {
-        "X": 322.20447,
-        "Y": 212.33447
+        "X": 726.4035,
+        "Y": -426.74603
+      }
+    },
+    {
+      "ChildId": "cfe22768-fae6-4427-9807-11cc6b587ea4"/*Text*/,
+      "Position": {
+        "X": 495.5074,
+        "Y": -582.8205
+      }
+    },
+    {
+      "ChildId": "eaee2573-b3f4-4eaf-9843-28d0373b53a2"/*GridPoints*/,
+      "Position": {
+        "X": 1099.9982,
+        "Y": -749.57855
       }
     }
   ],
@@ -151,8 +227,64 @@
     {
       "OutputId": "7bd91d7a-6b16-4837-b43c-f3f99b66ac86"/*ColorBuffer*/,
       "Position": {
-        "X": 1946.2123,
-        "Y": 16.606201
+        "X": 1303.1737,
+        "Y": 88.91235
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "4c5673b2-ee55-417a-9fe8-ffde739faf7b",
+      "Title": "We sample a texture\nto set Fx1 in order to\ncontrol AddNoise",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 928.2876,
+        "Y": -486.9318
+      },
+      "Size": {
+        "X": 330.92175,
+        "Y": 272.72873
+      }
+    },
+    {
+      "Id": "6236b75c-515c-4857-8e32-9dbe69c095fc",
+      "Title": "We sample a texture\nto color the points",
+      "Color": {
+        "X": 0.042553186,
+        "Y": 1.0,
+        "Z": 0.0,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 928.2876,
+        "Y": -655.2754
+      },
+      "Size": {
+        "X": 330.92175,
+        "Y": 168.3436
+      }
+    },
+    {
+      "Id": "684c6c2d-583e-40e3-bedf-c055806e4632",
+      "Title": "Just adding a bit of varation\nto the points' brightness",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 928.2876,
+        "Y": -214.20306
+      },
+      "Size": {
+        "X": 330.92175,
+        "Y": 109.203064
       }
     }
   ]
