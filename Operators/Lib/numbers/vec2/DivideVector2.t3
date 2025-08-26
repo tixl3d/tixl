@@ -1,0 +1,25 @@
+{
+  "Id": "c20452bc-ff82-4684-bc49-77fe59d2df46"/*DivideVector2*/,
+  "Inputs": [
+    {
+      "Id": "65B844DE-7ED6-4D3A-9ECD-E499F1523FB5"/*UniformScale*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "cab9a7a3-e32d-42ea-a6b4-247b5ed79b5f"/*B*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 1.0
+      }
+    },
+    {
+      "Id": "d21dbb6f-db32-4a79-80a0-ad36af9306e0"/*A*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}
