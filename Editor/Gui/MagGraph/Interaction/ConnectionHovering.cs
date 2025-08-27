@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Model;
@@ -13,6 +13,7 @@ using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows;
 using T3.Editor.UiModel;
+using static T3.Core.Operator.Symbol;
 using Color = T3.Core.DataTypes.Vector.Color;
 using Vector2 = System.Numerics.Vector2;
 
@@ -159,12 +160,17 @@ internal sealed class ConnectionHovering
 
     private static void DrawTooltipForSingleOutput(GraphUiContext context, HoverPoint bestMatchLastFrame)
     {
+
+        
+        if (UserSettings.Config.HoverMode == UserSettings.GraphHoverModes.Disabled)
+            return;
+
         ImGui.BeginTooltip();
         {
             var connection = bestMatchLastFrame.Connection;
+            var typeName = TypeNameRegistry.Entries.GetValueOrDefault(connection.Type, connection.Type.Name);
             var sourceOpInstance = connection.SourceItem.Instance;
             var outputSlot = connection.SourceOutput;
-
             var targetOp = connection.TargetItem.Instance;
 
             if (connection.SourceItem.SymbolUi != null
@@ -173,25 +179,53 @@ internal sealed class ConnectionHovering
                 && targetOp != null
                 && connection.TargetItem.SymbolUi != null)
             {
-                //var width = 160f;
-                ImGui.SetNextWindowSizeConstraints(new Vector2(200, 200 * 9 / 16f), new Vector2(200, 200 * 9 / 16f));
+                SymbolUi sourceOpUi;
+                IOutputUi sourceOutputUi;
 
-                var sourceOpUi = ToolTipContentDrawer.DrawForOutput( outputSlot, out var sourceOutputUi);
+                // Handle different hover modes
+                if (UserSettings.Config.HoverMode == UserSettings.GraphHoverModes.Live)
+                {
+                    // Live mode: always show thumbnail
+                    sourceOpUi = ToolTipContentDrawer.DrawForOutput(outputSlot, out sourceOutputUi);
+                }
+                else if (UserSettings.Config.HoverMode == UserSettings.GraphHoverModes.LastValue)
+                {
+                    // LastValue mode: show thumbnail for all types except Texture2D
+                    if (typeName != "Texture2D")
+                    {
+                        sourceOpUi = ToolTipContentDrawer.DrawForOutput(outputSlot, out sourceOutputUi);
+                    }
+                    else
+                    {
+                        // For Texture2D in LastValue mode, just get the UI elements without drawing thumbnail
+                        sourceOpUi = sourceOpInstance.GetSymbolUi();
+                        sourceOutputUi = sourceOpUi.OutputUis[outputSlot.Id];
+                    }
+                }
+                else
+                {
+                    // Fallback for any other modes
+                    sourceOpUi = sourceOpInstance.GetSymbolUi();
+                    sourceOutputUi = sourceOpUi.OutputUis[outputSlot.Id];
+                }
+
+                // Draw connection information
                 ImGui.PushFont(Fonts.FontSmall);
                 var connectionSource = sourceOpUi.Symbol.Name + "." + sourceOutputUi.OutputDefinition.Name;
-                
+
                 ImGui.TextColored(UiColors.TextMuted, connectionSource);
                 var symbolChildInput = connection.TargetItem.SymbolUi.InputUis[connection.TargetInput.Id];
 
                 ImGui.SameLine();
-                var typeName = TypeNameRegistry.Entries.GetValueOrDefault(connection.Type, connection.Type.Name);
-                ImGui.TextUnformatted("<" +  typeName + ">");
-                var inputIndex = connection.MultiInputIndex > 0 ? "[" + connection.MultiInputIndex + "]" : String.Empty;
+                
+                ImGui.TextUnformatted("<" + typeName + ">");
+
+                var inputIndex = connection.MultiInputIndex > 0 ? "[" + connection.MultiInputIndex + "]" : string.Empty;
                 var connectionTarget = "--> " + targetOp.Symbol.Name + "." + symbolChildInput.InputDefinition.Name + inputIndex;
                 ImGui.TextColored(UiColors.TextMuted, connectionTarget);
+
                 ImGui.PopFont();
 
-                //var nodeSelection = context.Selector;
                 FrameStats.AddHoveredId(targetOp.SymbolChildId);
                 FrameStats.AddHoveredId(connection.SourceItem.Id);
             }
