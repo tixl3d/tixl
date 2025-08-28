@@ -393,7 +393,7 @@ internal static class TimeControls
 
             ImGui.SameLine();
 
-            ImGui.Button("Sync", ControlSize);
+            ImGui.Button("Sync", SyncButton);
             if (ImGui.IsItemHovered())
             {
                 if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
@@ -695,6 +695,7 @@ internal static class TimeControls
     private static float StandardWidth => 100f * T3Ui.UiScaleFactor;
     public static Vector2 ControlSize => new Vector2(35, 28) * T3Ui.UiScaleFactor;
     private static Vector2 DopeCurve => new Vector2(95, 28) * T3Ui.UiScaleFactor;
+    private static Vector2 SyncButton => new Vector2(45, 28) * T3Ui.UiScaleFactor;
 
     private static readonly DataSetViewCanvas _dataSetView = new()
                                                                  {
