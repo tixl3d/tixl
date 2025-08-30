@@ -1,8 +1,37 @@
 {
   "Id": "ddf3077b-6273-4023-88e5-2948312e012b"/*ReactionDiffusionExample*/,
   "Description": "An example of how to use the sharpen effect in a feedback loop to create a reaction diffusion texture",
-  "InputUis": [],
+  "InputUis": [
+    {
+      "InputId": "18be02e7-bdce-4ee7-bd1e-286cc8b860cd"/*RunReaction*/,
+      "Position": {
+        "X": -1358.4706,
+        "Y": 1002.14795
+      }
+    }
+  ],
   "SymbolChildUis": [
+    {
+      "ChildId": "01969df7-35bb-45d4-9b9a-4bcb245e0566"/*RenderTarget*/,
+      "Position": {
+        "X": -460.90076,
+        "Y": 834.20166
+      }
+    },
+    {
+      "ChildId": "02b1b9e5-222d-48c0-bff9-77c636937a9b"/*FractalNoise*/,
+      "Position": {
+        "X": -1781.052,
+        "Y": 1623.3518
+      }
+    },
+    {
+      "ChildId": "07b1d60b-e59e-42ea-b87a-21a9fe6c3884"/*AnimValue*/,
+      "Position": {
+        "X": -1248.6877,
+        "Y": 596.7134
+      }
+    },
     {
       "ChildId": "138449b9-477f-4710-a2b5-40a8b1261230"/*ShardNoise*/,
       "Position": {
@@ -11,10 +40,24 @@
       }
     },
     {
+      "ChildId": "16ead410-adf2-4697-97eb-258dd36fc2d8"/*Not*/,
+      "Position": {
+        "X": -1218.4708,
+        "Y": 1002.14795
+      }
+    },
+    {
+      "ChildId": "1ddbf6d7-9eca-4f04-a9b7-7318e79a3078"/*Trigger*/,
+      "Position": {
+        "X": -919.89514,
+        "Y": -229.46466
+      }
+    },
+    {
       "ChildId": "217f4573-d912-42bc-9806-f7800e7e4dc3"/*BoolToInt*/,
       "Position": {
-        "X": -833.5519,
-        "Y": -456.4306
+        "X": -769.64325,
+        "Y": -456.15884
       }
     },
     {
@@ -25,10 +68,43 @@
       }
     },
     {
+      "ChildId": "254b98d8-8250-4e81-97cc-e67cab56e89a"/*Sharpen*/,
+      "Style": "Expanded",
+      "Size": {
+        "X": 110.0,
+        "Y": 62.0
+      },
+      "Position": {
+        "X": -1108.6879,
+        "Y": 391.86646
+      }
+    },
+    {
+      "ChildId": "2a44deba-c353-4133-ae05-06997fc30a67"/*Trigger*/,
+      "Position": {
+        "X": -1218.4708,
+        "Y": 967.14795
+      }
+    },
+    {
+      "ChildId": "2b17b647-c998-4271-8a17-499d2e019892"/*Once*/,
+      "Position": {
+        "X": -919.89514,
+        "Y": -284.83734
+      }
+    },
+    {
+      "ChildId": "2d4f256a-2b8b-445b-95bc-2b80ae1f20b9"/*ToneMapping*/,
+      "Position": {
+        "X": -638.4511,
+        "Y": 1515.9016
+      }
+    },
+    {
       "ChildId": "322cc3c7-2281-4d84-8da2-bfef532155d2"/*HasTimeChanged*/,
       "Position": {
-        "X": -983.5519,
-        "Y": -456.4306
+        "X": -964.4795,
+        "Y": -442.36093
       }
     },
     {
@@ -39,10 +115,66 @@
       }
     },
     {
+      "ChildId": "3aa54602-f6a0-4a93-967b-79b2b01d9436"/*SampleGradient*/,
+      "Position": {
+        "X": -1348.4574,
+        "Y": 704.454
+      }
+    },
+    {
+      "ChildId": "438c3dc7-19e6-41dc-bdfc-b743d9feea90"/*Vector2*/,
+      "Position": {
+        "X": -1349.9663,
+        "Y": 1929.4473
+      }
+    },
+    {
+      "ChildId": "48bbd5a2-b896-4791-adf4-f7c0b0a11264"/*Blur*/,
+      "Position": {
+        "X": -1560.833,
+        "Y": 1515.4894
+      }
+    },
+    {
+      "ChildId": "4c1f9d40-2bde-4c66-b5bd-17ca1d3a9756"/*LoadImage*/,
+      "Position": {
+        "X": -1564.8782,
+        "Y": 1687.1682
+      }
+    },
+    {
+      "ChildId": "4c74f00b-6564-4956-8e34-d855e984d149"/*Blend*/,
+      "Position": {
+        "X": -1108.096,
+        "Y": 651.62854
+      }
+    },
+    {
+      "ChildId": "4c9dd3a4-d707-4385-b504-a3f584682f33"/*HSBToColor*/,
+      "Position": {
+        "X": -1921.052,
+        "Y": 843.8131
+      }
+    },
+    {
+      "ChildId": "4e4ba716-fe19-46ba-9ff1-09a2b080ce00"/*Text*/,
+      "Position": {
+        "X": -1770.9227,
+        "Y": 826.47705
+      }
+    },
+    {
       "ChildId": "4f92d61f-1b3f-4dad-bb38-f3d1a0fe23ef"/*RenderTarget*/,
       "Position": {
         "X": -475.84436,
         "Y": -612.8398
+      }
+    },
+    {
+      "ChildId": "510466b1-ff33-4fdf-8c73-c1a9158131f7"/*Any*/,
+      "Position": {
+        "X": -734.51715,
+        "Y": -269.18854
       }
     },
     {
@@ -67,6 +199,77 @@
       }
     },
     {
+      "ChildId": "580045f1-733f-4a42-b83d-f424a9aeb5cc"/*UseTextureReference*/,
+      "Position": {
+        "X": -1739.375,
+        "Y": 1423.4087
+      }
+    },
+    {
+      "ChildId": "58c5611e-632c-4fd2-a28b-6d781781dfac"/*Point*/,
+      "Position": {
+        "X": -1209.4487,
+        "Y": 1784.4275
+      }
+    },
+    {
+      "ChildId": "5991c8d0-4658-48c0-97a5-8adb7a9d8a29"/*Any*/,
+      "Position": {
+        "X": -1078.4703,
+        "Y": 897.14795
+      }
+    },
+    {
+      "ChildId": "5dd02fd4-10f4-4ae8-b832-30fab52a1cd8"/*Displace*/,
+      "Position": {
+        "X": -1560.833,
+        "Y": 1585.4894
+      }
+    },
+    {
+      "ChildId": "660510a6-d5f0-4a67-adc4-7fb7f7d05f8c"/*BoolToInt*/,
+      "Position": {
+        "X": -1078.4703,
+        "Y": 1037.1481
+      }
+    },
+    {
+      "ChildId": "663de7f2-5803-4f56-9a30-52204044d683"/*ShardNoise*/,
+      "Position": {
+        "X": -1399.7118,
+        "Y": 559.90576
+      }
+    },
+    {
+      "ChildId": "66d82d8a-6334-48b2-80cc-9d61be0fd89b"/*HasTimeChanged*/,
+      "Position": {
+        "X": -1218.4708,
+        "Y": 932.14795
+      }
+    },
+    {
+      "ChildId": "674b8817-ad19-48a5-8105-ef1419c099f0"/*Blur*/,
+      "Position": {
+        "X": -1108.6879,
+        "Y": 278.00452
+      }
+    },
+    {
+      "ChildId": "697597b7-0e16-43f7-a568-b397ca5e56b2"/*_AdjustFeedbackImage*/,
+      "Comment": "This operator deserves more visibility",
+      "Position": {
+        "X": -1108.6879,
+        "Y": 243.00455
+      }
+    },
+    {
+      "ChildId": "6ec4a6eb-49e8-4f49-abd3-20a3a68bd358"/*Ease*/,
+      "Position": {
+        "X": -1489.9663,
+        "Y": 1964.4473
+      }
+    },
+    {
       "ChildId": "6edcff7e-c8f2-4616-9ec1-3b5a6c908487"/*Displace*/,
       "Position": {
         "X": -983.5519,
@@ -81,10 +284,59 @@
       }
     },
     {
+      "ChildId": "736d91d5-9836-4587-b1b0-7218d800d0a2"/*ColorGrade*/,
+      "Position": {
+        "X": -1191.2548,
+        "Y": 1564.4423
+      }
+    },
+    {
+      "ChildId": "73fee9b4-d83d-4b93-a054-1c4b8cca3e1f"/*RenderTarget*/,
+      "Position": {
+        "X": -1540.3048,
+        "Y": 651.98413
+      }
+    },
+    {
+      "ChildId": "74a82652-c342-4e45-81f9-44adcec9313e"/*BoolToFloat*/,
+      "Position": {
+        "X": -1629.9663,
+        "Y": 1964.4473
+      }
+    },
+    {
+      "ChildId": "76d7cc39-a45e-4f20-9509-43ef6a062e16"/*AnimValue*/,
+      "Position": {
+        "X": -1538.9916,
+        "Y": 741.67676
+      }
+    },
+    {
+      "ChildId": "7ece4bb2-a18f-4885-a6dc-dd5df0d4bec0"/*LinearGradient*/,
+      "Position": {
+        "X": -460.90076,
+        "Y": 904.20154
+      }
+    },
+    {
+      "ChildId": "857e8abd-5280-4967-b4e5-5adc757ce91d"/*RenderTarget*/,
+      "Position": {
+        "X": -815.1897,
+        "Y": 1516.5347
+      }
+    },
+    {
       "ChildId": "857fe2b9-5743-4f83-a725-3e2cdcb6fd32"/*AnimValue*/,
       "Position": {
         "X": -1743.6857,
         "Y": -475.3975
+      }
+    },
+    {
+      "ChildId": "88bdfbd8-591c-404e-98be-7f2ae2ebd0d1"/*UseTextureReference*/,
+      "Position": {
+        "X": -1282.3715,
+        "Y": 187.38196
       }
     },
     {
@@ -100,10 +352,73 @@
       }
     },
     {
+      "ChildId": "8d0b22c1-a716-4a35-988f-bf8d2a79a2e7"/*Layer2d*/,
+      "Position": {
+        "X": -1369.1438,
+        "Y": 1158.4087
+      }
+    },
+    {
+      "ChildId": "9062b0b7-0014-4efc-b3d3-b78ea17234d4"/*HSBToColor*/,
+      "Position": {
+        "X": -1318.5526,
+        "Y": 763.59644
+      }
+    },
+    {
+      "ChildId": "918d3255-acf7-4e5c-8003-02f5c678f751"/*Ease*/,
+      "Position": {
+        "X": -1296.9504,
+        "Y": 427.01758
+      }
+    },
+    {
       "ChildId": "9503bcba-c1d5-401f-a339-87ed5eb27bff"/*Blur*/,
       "Position": {
         "X": -1433.5519,
         "Y": -544.3398
+      }
+    },
+    {
+      "ChildId": "9714c273-41d8-4c4c-83f5-a48c30039ffc"/*Blur*/,
+      "Position": {
+        "X": -1564.8782,
+        "Y": 1722.1682
+      }
+    },
+    {
+      "ChildId": "99832cb5-9eaf-4dc8-8e2b-7463890932fe"/*Displace*/,
+      "Position": {
+        "X": -1108.6877,
+        "Y": 526.7134
+      }
+    },
+    {
+      "ChildId": "9aef29ef-0f21-422b-8fd3-86b6c09cb9d9"/*DrawScreenQuad*/,
+      "Position": {
+        "X": -1108.8555,
+        "Y": 787.86084
+      }
+    },
+    {
+      "ChildId": "9cc15a6c-cf1d-44ec-b034-0201c1586b51"/*AnimValue*/,
+      "Position": {
+        "X": -1633.7115,
+        "Y": 1837.6892
+      }
+    },
+    {
+      "ChildId": "9d27bc71-9c88-4fe6-9eae-572c26164438"/*AnimValue*/,
+      "Position": {
+        "X": -1296.9504,
+        "Y": 392.01758
+      }
+    },
+    {
+      "ChildId": "a02d8391-fbf1-4d80-8ae0-779724f26031"/*Time*/,
+      "Position": {
+        "X": -1539.7118,
+        "Y": 594.90576
       }
     },
     {
@@ -114,10 +429,99 @@
       }
     },
     {
+      "ChildId": "b02fad1d-b00e-4a73-b47a-c0e8769dd6df"/*Switch*/,
+      "Style": "Expanded",
+      "Size": {
+        "X": 110.0,
+        "Y": 88.0
+      },
+      "Position": {
+        "X": -867.5067,
+        "Y": 790.83655
+      }
+    },
+    {
+      "ChildId": "b73fb1ae-187e-44ed-ac82-e631bd347ebd"/*Layer2d*/,
+      "Position": {
+        "X": -1209.9663,
+        "Y": 1894.4473
+      }
+    },
+    {
+      "ChildId": "bd4989c8-c00e-4d62-a107-0f76975b4b9a"/*ToggleBoolean*/,
+      "Position": {
+        "X": -1629.9663,
+        "Y": 1929.4473
+      }
+    },
+    {
+      "ChildId": "bd54c7ea-999a-49cb-a16e-a014e09dea58"/*Blend*/,
+      "Position": {
+        "X": -1387.5103,
+        "Y": 1571.5284
+      }
+    },
+    {
+      "ChildId": "c719b94d-0af8-4468-9f2e-dc598d8e6eb6"/*Once*/,
+      "Position": {
+        "X": -1218.4708,
+        "Y": 897.14795
+      }
+    },
+    {
+      "ChildId": "c797ee26-4759-462b-97d2-9ab1925e3c52"/*DrawPoints*/,
+      "Position": {
+        "X": -1209.4487,
+        "Y": 1819.4275
+      }
+    },
+    {
+      "ChildId": "c93fdad9-640d-471f-8e33-b4e054ffa4df"/*Time*/,
+      "Position": {
+        "X": -1921.052,
+        "Y": 1658.3518
+      }
+    },
+    {
+      "ChildId": "ca20af9f-8e1c-46dc-a355-7535804e5d65"/*Execute*/,
+      "Position": {
+        "X": -1026.5404,
+        "Y": 1608.3551
+      }
+    },
+    {
+      "ChildId": "cf4ed0d8-713a-481d-b48c-041991177990"/*Execute*/,
+      "Position": {
+        "X": -668.54407,
+        "Y": 831.3297
+      }
+    },
+    {
+      "ChildId": "d4ea38ee-5f14-4d64-9ee5-4aab91ea5f82"/*Layer2d*/,
+      "Position": {
+        "X": -1191.2548,
+        "Y": 1599.4423
+      }
+    },
+    {
       "ChildId": "e4003e13-5ea5-4b94-ad68-2628bf4b1fa8"/*UseTextureReference*/,
       "Position": {
         "X": -1921.052,
         "Y": -606.61615
+      }
+    },
+    {
+      "ChildId": "e6febacd-db05-458e-afff-dae224a0e1aa"/*Sharpen*/,
+      "Position": {
+        "X": -1560.833,
+        "Y": 1550.4894
+      }
+    },
+    {
+      "ChildId": "ee303027-b312-4364-a7ea-670d80b1ea31"/*AnimVec3*/,
+      "Position": {
+        "X": -1349.4487,
+        "Y": 1784.4275
       }
     },
     {
@@ -131,14 +535,114 @@
         "X": -1583.5519,
         "Y": -544.3398
       }
+    },
+    {
+      "ChildId": "fab0e960-e18c-4de4-882c-1fbc47db189b"/*BoxGradient*/,
+      "Position": {
+        "X": -1349.9663,
+        "Y": 1894.4473
+      }
     }
   ],
   "OutputUis": [
     {
       "OutputId": "7f8c561d-9683-4504-9e25-61064f7f6345"/*ImgOutput*/,
       "Position": {
-        "X": -325.84436,
-        "Y": -612.8398
+        "X": -460.90076,
+        "Y": 939.20154
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "6d741236-5f5c-4a2f-a48e-f6b55111c488",
+      "Label": "One more",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -1981.052,
+        "Y": 1303.4087
+      },
+      "Size": {
+        "X": 1532.5367,
+        "Y": 754.7014
+      }
+    },
+    {
+      "Id": "7cbed3db-c654-4cc4-946e-e01badd6e0df",
+      "Title": "This was added to the original example\nto make it more accessible.",
+      "Color": {
+        "X": 0.0,
+        "Y": 0.5992908,
+        "Z": 0.29327,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -959.4314,
+        "Y": -345.8534
+      },
+      "Size": {
+        "X": 406.86853,
+        "Y": 203.43433
+      }
+    },
+    {
+      "Id": "924ececd-addc-4274-888c-a35ca9b498a4",
+      "Label": "Core of Reaction Diffusion",
+      "Color": {
+        "X": 0.23404253,
+        "Y": 1.0,
+        "Z": 0.0,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -1131.1814,
+        "Y": 358.55786
+      },
+      "Size": {
+        "X": 210.0,
+        "Y": 135.77765
+      }
+    },
+    {
+      "Id": "d23b3e4e-7f96-493b-ab5e-ac657666fa02",
+      "Title": "Note that reaction diffusion is a feedback loop effect",
+      "Label": "New fancy Example",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -1981.052,
+        "Y": 67.38196
+      },
+      "Size": {
+        "X": 1690.1509,
+        "Y": 1236.0267
+      }
+    },
+    {
+      "Id": "d53dbd26-8900-42a1-9c87-53eb9043c7f0",
+      "Label": "Original Reaction Diffusion Example",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -1981.052,
+        "Y": -732.8398
+      },
+      "Size": {
+        "X": 1675.2076,
+        "Y": 752.953
       }
     }
   ]

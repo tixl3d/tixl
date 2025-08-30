@@ -15,4 +15,7 @@ internal sealed class Sharpen : Instance<Sharpen>
 
     [Input(Guid = "def5bcf3-d499-41ad-82b8-1b9706ebaab6")]
     public readonly InputSlot<float> Strength = new();
+
+        [Input(Guid = "9890a8ec-9362-4e34-aec4-a6abcc19debd")]
+        public readonly InputSlot<bool> Clamping = new InputSlot<bool>();
 }

@@ -2,6 +2,7 @@ cbuffer ParamConstants : register(b0)
 {
     float SampleRadius;
     float Strength;
+    float Clamping;
 }
 
 cbuffer Resolution : register(b1)
@@ -53,7 +54,9 @@ float4 psMain(vsOutput input) : SV_TARGET
     float colorRB = desaturate(Image.Sample(texSampler, uv + float2( pX, -pY)));
     
     float4 final = col + col * Strength * (8.0*desaturate(col) - colorL - colorR - colorA - colorB - colorLA - colorRA - colorLB - colorRB);
-
+    if (Clamping > 0.0){
+        final = saturate(final);
+    }
     return final;
 }
 

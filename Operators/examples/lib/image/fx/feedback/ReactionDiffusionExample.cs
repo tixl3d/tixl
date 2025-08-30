@@ -6,5 +6,8 @@ namespace Examples.Lib.image.fx.feedback;
     [Output(Guid = "7f8c561d-9683-4504-9e25-61064f7f6345")]
     public readonly Slot<Texture2D> ImgOutput = new();
 
+        [Input(Guid = "18be02e7-bdce-4ee7-bd1e-286cc8b860cd")]
+        public readonly InputSlot<bool> RunReaction = new InputSlot<bool>();
+
 
 }

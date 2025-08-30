@@ -4,6 +4,13 @@
   "SymbolTags": "1",
   "InputUis": [
     {
+      "InputId": "9890a8ec-9362-4e34-aec4-a6abcc19debd"/*Clamping*/,
+      "Position": {
+        "X": 132.69783,
+        "Y": 119.18652
+      }
+    },
+    {
       "InputId": "cdc10025-36a4-4fae-ad59-110ea9343cb0"/*Image*/,
       "Relevancy": "Required",
       "Position": {
@@ -30,6 +37,13 @@
   ],
   "SymbolChildUis": [
     {
+      "ChildId": "731c76e2-57bf-4fe5-b259-d332d006a1b6"/*BoolToFloat*/,
+      "Position": {
+        "X": 304.73257,
+        "Y": 111.34497
+      }
+    },
+    {
       "ChildId": "9d63c269-a033-4a94-a54f-4bbb45452440"/*_ImageFxShaderSetupStatic*/,
       "Style": "Resizable",
       "Size": {
@@ -37,8 +51,8 @@
         "Y": 258.05994
       },
       "Position": {
-        "X": 315.50687,
-        "Y": -95.57324
+        "X": 462.83044,
+        "Y": 3.4475098
       }
     }
   ],
@@ -46,8 +60,8 @@
     {
       "OutputId": "d412319c-42be-480d-a4e5-60b5b5b1722d"/*TextureOutput*/,
       "Position": {
-        "X": 475.91788,
-        "Y": -37.36659
+        "X": 666.714,
+        "Y": 49.578476
       }
     }
   ]
