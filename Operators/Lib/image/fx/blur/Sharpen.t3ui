@@ -8,7 +8,8 @@
       "Position": {
         "X": 132.69783,
         "Y": 119.18652
-      }
+      },
+      "Description": "Helps to get a smooth render for reaction diffusion"
     },
     {
       "InputId": "cdc10025-36a4-4fae-ad59-110ea9343cb0"/*Image*/,
