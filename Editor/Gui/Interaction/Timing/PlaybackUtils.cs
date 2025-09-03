@@ -12,8 +12,8 @@ namespace T3.Editor.Gui.Interaction.Timing;
 
 public static class PlaybackUtils
 {
-    public static IBpmProvider? BpmProvider;
-    public static ITapProvider? TapProvider;
+    public static BpmProvider BpmProvider = BpmProvider.Instance;
+    public static TapProvider TapProvider = TapProvider.Instance;
 
     internal static void UpdatePlaybackAndSyncing()
     {

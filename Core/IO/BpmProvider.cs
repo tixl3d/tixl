@@ -1,6 +1,11 @@
-using T3.Core.IO;
+using System;
 
-namespace Lib.Utils;
+namespace T3.Core.IO;
+
+public interface IBpmProvider
+{
+    public bool TryGetNewBpmRate(out float bpm);
+}
 
 public sealed class BpmProvider : IBpmProvider
 {
@@ -8,6 +13,7 @@ public sealed class BpmProvider : IBpmProvider
     
     private BpmProvider()
     {
+        
         if(Instance != null)
             throw new Exception("BpmProvider is a singleton and should not be instantiated more than once");
     }

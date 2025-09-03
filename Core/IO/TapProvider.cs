@@ -1,6 +1,13 @@
-using T3.Core.IO;
+using System;
 
-namespace Lib.Utils;
+namespace T3.Core.IO;
+
+public interface ITapProvider
+{
+    public bool BeatTapTriggered { get; }
+    public bool ResyncTriggered { get; }
+    public float SlideSyncTime { get; }
+}
 
 public sealed class TapProvider : ITapProvider
 {
