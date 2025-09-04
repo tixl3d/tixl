@@ -6,9 +6,16 @@
       "InputId": "0fc76369-788a-4ffe-9dde-8eea5f10cf32"/*TargetIpAddress*/,
       "Position": {
         "X": -200.0,
-        "Y": 300.0
+        "Y": 600.0
       },
-      "Usage": "Default"
+      "Usage": "CustomDropdown"
+    },
+    {
+      "InputId": "168d0023-554f-46cd-9e62-8f3d1f564b8d"/*SendTrigger*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 300.0
+      }
     },
     {
       "InputId": "34aeeda5-72b0-4f13-bfd3-4ad5cf42b24f"/*StartUniverse*/,
@@ -18,33 +25,55 @@
       }
     },
     {
-      "InputId": "7c15da5f-cfa1-4339-aceb-4ed0099ea041"/*SendUnicast*/,
+      "InputId": "35a5efd8-b670-4f2d-bde0-380789e85e0c"/*SubNetMask*/,
       "Position": {
         "X": -200.0,
         "Y": 225.0
+      },
+      "Usage": "Default"
+    },
+    {
+      "InputId": "65fb88ec-5772-4973-bd8b-bb2cb9f557e7"/*PrintArtnetPoll*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 675.0
       }
     },
     {
-      "InputId": "9e23335a-d63a-4286-930e-c63e86d0e6f0"/*LocalIpAddress*/,
-      "Position": {
-        "X": -200.0,
-        "Y": 0.0
-      },
-      "Usage": "CustomDropdown"
-    },
-    {
-      "InputId": "c1f747f5-3634-4142-a16d-346743a13728"/*MaxFps*/,
+      "InputId": "73babdb1-f88f-4e4d-aa3f-0536678b0793"/*Reconnect*/,
       "Position": {
         "X": -200.0,
         "Y": 375.0
       }
     },
     {
+      "InputId": "7c15da5f-cfa1-4339-aceb-4ed0099ea041"/*SendUnicast*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 525.0
+      }
+    },
+    {
+      "InputId": "d293bb33-2fba-4048-99b8-86aa15a478f2"/*SendSync*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 450.0
+      }
+    },
+    {
       "InputId": "f7520a37-c2d4-41fa-a6ba-a6ed0423a4ec"/*InputsValues*/,
       "Position": {
         "X": -200.0,
-        "Y": 150.0
+        "Y": 0.0
       }
+    },
+    {
+      "InputId": "fcbfe87b-b8aa-461c-a5ac-b22bb29ad36d"/*LocalIpAddress*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      },
+      "Usage": "CustomDropdown"
     }
   ],
   "SymbolChildUis": [],
