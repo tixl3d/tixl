@@ -1,4 +1,5 @@
 using T3.Core.Utils;
+using T3.Core.IO;
 
 namespace Lib.numbers.anim.vj;
 
@@ -15,15 +16,22 @@ internal sealed class ForwardBeatTaps : Instance<ForwardBeatTaps>
         
     private void Update(EvaluationContext context)
     {
+        var tapProvider = TapProvider.Instance;
+
+        // Handle beat tap trigger
         BeatTapTriggered = MathUtils.WasTriggered(TriggerBeatTap.GetValue(context), ref _wasBeatTriggered);
+        tapProvider.BeatTapTriggered = BeatTapTriggered;
+
+        // Handle resync trigger
         ResyncTriggered = MathUtils.WasTriggered(TriggerResync.GetValue(context), ref _wasResyncTriggered);
-            
-            
+        tapProvider.ResyncTriggered = ResyncTriggered;
+
         var offset = SlideSyncTimeOffset.GetValue(context);
         if (!float.IsNaN(offset))
         {
             //Log.Debug($"Set Slide time {offset}", this);
-            SlideSyncTime = offset; 
+            SlideSyncTime = offset;
+            tapProvider.SlideSyncTime = SlideSyncTime;
         }
             
         // Evaluate subtree
@@ -32,8 +40,8 @@ internal sealed class ForwardBeatTaps : Instance<ForwardBeatTaps>
 
     private bool _wasBeatTriggered;
     private bool _wasResyncTriggered;
-        
-        
+
+
     // These will be process every frame by the editor
     public static bool BeatTapTriggered { get; private set; }
     public static bool ResyncTriggered { get; private set; }

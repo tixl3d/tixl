@@ -1,6 +1,6 @@
 {
   "Id": "79db48d8-38d3-47ca-9c9b-85dde2fa660d"/*ForwardBeatTaps*/,
-  "Description": "A helper op that forwards beat tapping to T3 interfaces. \nThis can be useful for tapping BPM rate with a MIDI controller.\n",
+  "Description": "A helper op that forwards beat tapping to TiXL interfaces. \nThis can be useful for tapping BPM rate with a MIDI controller.\n[MidiInput] [Trigger] [Gamepad]\n",
   "SymbolTags": "64",
   "InputUis": [
     {
