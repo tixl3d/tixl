@@ -124,6 +124,7 @@ internal sealed class ParameterWindow : Window
         switch (_viewMode)
         {
             case ViewModes.Parameters:
+                DrawChildNameAndFlags(instance);
                 DrawParametersArea(instance, symbolChildUi, symbolUi);
                 break;
             case ViewModes.Settings:
@@ -166,14 +167,17 @@ internal sealed class ParameterWindow : Window
             ImGui.TextUnformatted(" in ");
             ImGui.PopStyleColor();
 
-            ImGui.SameLine();
-            ImGui.TextUnformatted(op.Symbol.SymbolPackage.RootNamespace);
+            /*ImGui.SameLine();
+            ImGui.TextUnformatted(op.Symbol.SymbolPackage.RootNamespace);*/
 
             ImGui.SameLine();
 
             var namespaceForEdit = op.Symbol.Namespace ?? "";
-            const int rightPaddingForHelpIcon = 90;
-            ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X - rightPaddingForHelpIcon);
+
+            var iconSize = ImGui.GetFrameHeight(); // Assuming all icons are roughly frame height
+            var totalIconSpace = (iconSize * 3) + (2 * ImGui.GetStyle().ItemSpacing.X); // 3 icons, 2 spaces between
+
+            ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X - totalIconSpace);
 
             var symbol = op.Symbol;
             var package = symbol.SymbolPackage;
@@ -233,6 +237,7 @@ internal sealed class ParameterWindow : Window
                 }
             }
         }
+
         ImGui.EndChild();
         ImGui.PopStyleVar();
         return modified;
@@ -389,7 +394,7 @@ internal sealed class ParameterWindow : Window
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(5, 5));
         ImGui.BeginChild("parameters", Vector2.Zero, false, ImGuiWindowFlags.AlwaysUseWindowPadding);
 
-        DrawChildNameAndFlags(instance);
+        
 
         var selectedChildSymbolUi = instance.GetSymbolUi();
         
@@ -414,17 +419,29 @@ internal sealed class ParameterWindow : Window
 
         var symbolChildUi = op.GetChildUi();
 
+        // Add spacing before
+        FormInputs.AddVerticalSpace(5);
+        ImGui.Indent(5);
+
         // SymbolChild Name
         if (symbolChildUi != null)
         {
-            ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X - 180); //we close the gap after Bypass button 
+            // Calculate button widths using the longer text variants for consistent spacing
+            ImGui.PushFont(Fonts.FontBold);
+            var disabledWidth = ImGui.CalcTextSize("DISABLED").X + (ImGui.GetStyle().FramePadding.X * 2);
+            var bypassedWidth = ImGui.CalcTextSize("BYPASSED").X + (ImGui.GetStyle().FramePadding.X * 2);
+            ImGui.PopFont();
+
+            var totalButtonSpace = disabledWidth + bypassedWidth + ImGui.GetStyle().ItemSpacing.X;
+
+            ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X - totalButtonSpace);
 
             var nameForEdit = symbolChildUi.SymbolChild.Name;
 
             ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 5);
             if (ImGui.InputText("##symbolChildName", ref nameForEdit, 128))
             {
-                if(_symbolChildNameCommand != null)
+                if (_symbolChildNameCommand != null)
                     _symbolChildNameCommand.NewName = nameForEdit;
                 symbolChildUi.SymbolChild.Name = nameForEdit;
             }
@@ -438,9 +455,9 @@ internal sealed class ParameterWindow : Window
 
             if (ImGui.IsItemDeactivatedAfterEdit())
             {
-                if(_symbolChildNameCommand != null)
+                if (_symbolChildNameCommand != null)
                     UndoRedoStack.Add(_symbolChildNameCommand);
-                
+
                 _symbolChildNameCommand = null;
             }
 
@@ -459,7 +476,7 @@ internal sealed class ParameterWindow : Window
                 {
                     ImGui.PushStyleColor(ImGuiCol.Button, UiColors.StatusAttention.Rgba);
                     ImGui.PushStyleColor(ImGuiCol.Text, UiColors.Text.Rgba);
-                    if (ImGui.Button("DISABLED", new Vector2(90, 0)))
+                    if (ImGui.Button("DISABLED", new Vector2(disabledWidth, ImGui.GetFrameHeight())))
                     {
                         UndoRedoStack.AddAndExecute(new ChangeInstanceIsDisabledCommand(symbolChildUi, false));
                     }
@@ -469,7 +486,7 @@ internal sealed class ParameterWindow : Window
                 else
                 {
                     ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-                    if (ImGui.Button("ENABLED", new Vector2(90, 0)))
+                    if (ImGui.Button("ENABLED", new Vector2(disabledWidth, ImGui.GetFrameHeight())))
                     {
                         UndoRedoStack.AddAndExecute(new ChangeInstanceIsDisabledCommand(symbolChildUi, true));
                     }
@@ -490,7 +507,7 @@ internal sealed class ParameterWindow : Window
                     ImGui.PushStyleColor(ImGuiCol.Text, UiColors.Text.Rgba);
 
                     // TODO: check if bypassable
-                    if (ImGui.Button("BYPASSED", new Vector2(90, 0)))
+                    if (ImGui.Button("BYPASSED", new Vector2(bypassedWidth, ImGui.GetFrameHeight())))
                     {
                         UndoRedoStack.AddAndExecute(new ChangeInstanceBypassedCommand(symbolChildUi.SymbolChild, false));
                     }
@@ -508,13 +525,13 @@ internal sealed class ParameterWindow : Window
                         ImGui.BeginDisabled();
                     }
 
-                    if (ImGui.Button("BYPASS", new Vector2(90, 0)))
+                    if (ImGui.Button("BYPASS", new Vector2(bypassedWidth, ImGui.GetFrameHeight())))
                     {
                         UndoRedoStack.AddAndExecute(new ChangeInstanceBypassedCommand(symbolChildUi.SymbolChild, true));
                     }
 
                     if (!bypassable)
-                    { 
+                    {
                         CustomComponents.TooltipForLastItem("This operator cannot be bypassed");
                         ImGui.EndDisabled();
                     }
@@ -527,6 +544,8 @@ internal sealed class ParameterWindow : Window
             ImGui.PopStyleColor();
         }
 
+        ImGui.Unindent(5);
+       
         FormInputs.AddVerticalSpace(5);
     }
 
@@ -742,5 +761,4 @@ internal sealed class ParameterWindow : Window
 
     private readonly ParameterSettings _parameterSettings = new();
     public static readonly RenameInputDialog RenameInputDialog = new();
-
 }
