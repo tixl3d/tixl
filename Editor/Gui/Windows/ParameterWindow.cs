@@ -168,13 +168,13 @@ internal sealed class ParameterWindow : Window
             ImGui.PopStyleColor();
 
             /*ImGui.SameLine();
-            ImGui.TextUnformatted(op.Symbol.SymbolPackage.RootNamespace);*/
+            ImGui.TextUnformatted(op.Symbol.SymbolPackage.RootNamespace);*/ // This is redundant I keep it commented out for now just in case
 
             ImGui.SameLine();
 
             var namespaceForEdit = op.Symbol.Namespace ?? "";
 
-            var iconSize = ImGui.GetFrameHeight(); // Assuming all icons are roughly frame height
+            var iconSize = ImGui.GetFrameHeight(); 
             var totalIconSpace = (iconSize * 3) + (2 * ImGui.GetStyle().ItemSpacing.X); // 3 icons, 2 spaces between
 
             ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X - totalIconSpace);
@@ -420,7 +420,7 @@ internal sealed class ParameterWindow : Window
         var symbolChildUi = op.GetChildUi();
 
         // Add spacing before
-        FormInputs.AddVerticalSpace(5);
+        FormInputs.AddVerticalSpace(3);
         ImGui.Indent(5);
 
         // SymbolChild Name
@@ -432,7 +432,7 @@ internal sealed class ParameterWindow : Window
             var bypassedWidth = ImGui.CalcTextSize("BYPASSED").X + (ImGui.GetStyle().FramePadding.X * 2);
             ImGui.PopFont();
 
-            var totalButtonSpace = disabledWidth + bypassedWidth + ImGui.GetStyle().ItemSpacing.X;
+            var totalButtonSpace = disabledWidth + bypassedWidth + ImGui.GetStyle().ItemSpacing.X + 5; // +5 for some extra spacing on the right
 
             ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X - totalButtonSpace);
 
@@ -545,8 +545,7 @@ internal sealed class ParameterWindow : Window
         }
 
         ImGui.Unindent(5);
-       
-        FormInputs.AddVerticalSpace(5);
+      
     }
 
     /// <summary>
