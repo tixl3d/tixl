@@ -1,4 +1,4 @@
-﻿using ImGuiNET;
+using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.UserData;
 using T3.Editor.Gui.Styling;
@@ -16,7 +16,7 @@ internal static class ResolutionHandling
             Save();
         }
 
-        ImGui.SetNextItemWidth(100);
+        ImGui.SetNextItemWidth(100*T3Ui.UiScaleFactor);
         if (ImGui.BeginCombo("##ResolutionSelection", selectedResolution.Title, ImGuiComboFlags.HeightLargest))
         {
             foreach (var resolution in Resolutions.ToArray())

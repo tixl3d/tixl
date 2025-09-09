@@ -39,9 +39,9 @@ internal sealed class ViewSelectionPinning
         nodeSelection.PinnedIds.Clear();
         if (_isPinned)
             nodeSelection.PinnedIds.Add(pinnedOrSelectedInstance.SymbolChildId);
-
+        var iconSize = new Vector2(ImGui.GetFrameHeight(), ImGui.GetFrameHeight());
         if (CustomComponents.IconButton(Icon.Pin,
-                                        new Vector2(T3Style.ToolBarHeight, T3Style.ToolBarHeight) * T3Ui.UiScaleFactor,
+                                        iconSize,
                                         _isPinned ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Dimmed
                                        ))
         {
@@ -62,7 +62,7 @@ internal sealed class ViewSelectionPinning
         {
             ImGui.SameLine();
             if (CustomComponents.IconButton(Icon.PlayOutput,
-                                            new Vector2(T3Style.ToolBarHeight, T3Style.ToolBarHeight) * T3Ui.UiScaleFactor,
+                                            iconSize,
                                             isPinnedToSelected ? CustomComponents.ButtonStates.Disabled : CustomComponents.ButtonStates.Normal
                                            )
                 && !isPinnedToSelected
@@ -78,7 +78,7 @@ internal sealed class ViewSelectionPinning
         }
 
         ImGui.SameLine();
-        ImGui.SetNextItemWidth(200);
+        ImGui.SetNextItemWidth(200*T3Ui.UiScaleFactor);
         var suffix = _isPinned ? " (pinned)" : " (selected)";
 
         if (TryGetPinnedEvaluationInstance(canvas.Structure, out var pinnedEvaluationInstance))

@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using ImGuiNET;
 using T3.Core.Animation;
 using T3.Core.DataTypes;
@@ -251,7 +251,7 @@ internal sealed class CameraSelectionHandling
         if (_drawnInstance == null)
             return;
 
-        ImGui.SetNextItemWidth(145);
+        ImGui.SetNextItemWidth(145*T3Ui.UiScaleFactor);
 
         var label = String.Empty;
 
@@ -291,7 +291,7 @@ internal sealed class CameraSelectionHandling
             ImGui.SetNextWindowPos(new Vector2(min.X, max.Y));
         }
 
-        Icons.DrawIconAtScreenPosition(Icon.Camera, min + new Vector2(4, 7), ImGui.GetWindowDrawList(), labelColor);
+        Icons.DrawIconAtScreenPosition(Icon.Camera, min + new Vector2(5, 7) * T3Ui.UiScaleFactor, ImGui.GetWindowDrawList(), labelColor);
 
         if (ImGui.BeginPopup("cameraPopup", ImGuiWindowFlags.None))
         {
