@@ -764,7 +764,7 @@ internal sealed class MagGraphLayout
 
             // is stacked?
             if (!(Math.Abs(item.PosOnCanvas.X - previousItem.PosOnCanvas.X) < 10f)
-                || !(Math.Abs(item.PosOnCanvas.Y - previousItem.Area.Max.Y) < 80f))
+                || !(Math.Abs(item.PosOnCanvas.Y - previousItem.Area.Max.Y) < 180f))
             {
                 ApplyStackToItems();
             }

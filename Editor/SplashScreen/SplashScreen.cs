@@ -52,7 +52,7 @@ internal sealed class SplashScreen : ISplashScreen
                                               TextAlign = ContentAlignment.BottomLeft,
                                               BackColor = Color.Transparent,
                                               ForeColor = Color.DimGray,
-                                              Text = "" + Program.VersionText,
+                                              Text = Program.FormattedEditorVersion,
                                               UseMnemonic = false,
                                               Font = new Font("Arial", 8),
                                               Anchor = AnchorStyles.Bottom | AnchorStyles.Left,

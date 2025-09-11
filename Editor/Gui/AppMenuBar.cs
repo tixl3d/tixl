@@ -177,7 +177,7 @@ internal static class AppMenuBar
         //ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 2);
 
         ImGui.PushStyleColor(ImGuiCol.Text, UiColors.ForegroundFull.Fade(0.2f).Rgba);
-        ImGui.TextUnformatted("v" + Program.VersionText);
+        ImGui.TextUnformatted(Program.FormattedEditorVersion);
         ImGui.PopStyleColor();
     }
 

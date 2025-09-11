@@ -3,10 +3,12 @@ using ImGuiNET;
 using Operators.Utils;
 using T3.Core.IO;
 using T3.Core.UserData;
+using T3.Core.Utils;
 using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.Interaction.Midi;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.UiModel.Helpers;
 
 namespace T3.Editor.Gui.Windows;
 
@@ -269,14 +271,24 @@ internal sealed class SettingsWindow : Window
                     FormInputs.AddSectionSubHeader("Project Settings");
                     changed |= FormInputs.AddStringInput("Project Directory",
                                                          ref UserSettings.Config.ProjectsFolder,
-                                                         "Nickname",
+                                                         "Folder",
                                                          Directory.Exists(UserSettings.Config.ProjectsFolder) ? null : "Folder does not exists",
                                                          """
                                                          A writable directory for your projects.
                                                          Changing it will require a restart!
                                                          """,
                                                          FileLocations.DefaultProjectFolder);
+                    
                     FormInputs.AddVerticalSpace();
+                    changed |= FormInputs.AddStringInput("UserName",
+                                                         ref UserSettings.Config.UserName,
+                                                         "Nickname",
+                                                          GraphUtils.IsValidProjectName(UserSettings.Config.UserName)? null :"Must not contain spaces or special characters",
+                                                           """
+                                                           Enter your nickname to group your projects into a namespace.
+                                                           Your nickname should be short and not contain spaces or special characters.
+                                                           """,
+                                                           Environment.UserName.ToValidClassName("Unknown"));                    
                     FormInputs.SetIndentToLeft();
                     
                     changed |= FormInputs.AddCheckBox("Enable Backup",

@@ -284,8 +284,16 @@ internal class EditorSymbolPackage : SymbolPackage
     {
         get
         {
-            var releaseInfo = ReleaseInfo;
-            return releaseInfo.HomeGuid != Guid.Empty && Symbols.ContainsKey(releaseInfo.HomeGuid);
+            try
+            {
+                var releaseInfo = ReleaseInfo;
+                return releaseInfo.HomeGuid != Guid.Empty && Symbols.ContainsKey(releaseInfo.HomeGuid);
+            }
+            catch (Exception e)
+            {
+                Log.Warning("Failed to parse project:" + e.Message);
+                return false;
+            }
         }
     }
 

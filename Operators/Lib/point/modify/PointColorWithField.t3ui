@@ -1,0 +1,134 @@
+{
+  "Id": "2fdb72b0-ac0b-4269-8822-e7d38497835a"/*PointColorWithField*/,
+  "Description": "Uses a color field to set point colors from their position in that field.",
+  "InputUis": [
+    {
+      "InputId": "39b6eee6-c9e0-4b48-8e37-ed11f4fbf326"/*Points*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 679.0911,
+        "Y": 1136.442
+      }
+    },
+    {
+      "InputId": "924b6cc7-606b-4ff2-bcb9-ef3dcc9fe4d5"/*SdfField*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 537.42883,
+        "Y": 972.1018
+      }
+    },
+    {
+      "InputId": "a2d27386-0d39-4b93-aa9a-799b02241aab"/*StrengthFactor*/,
+      "Position": {
+        "X": 900.7295,
+        "Y": 1545.8286
+      }
+    },
+    {
+      "InputId": "fbb45b98-1168-45ad-a10a-e7f5db96472c"/*Strength*/,
+      "Position": {
+        "X": 900.72943,
+        "Y": 1420.1677
+      },
+      "AddPadding": "True",
+      "Min": 0.0,
+      "Max": 1.0
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0111295c-74e2-4687-82e2-3f44e747c7aa"/*GenerateShaderGraphCode*/,
+      "Position": {
+        "X": 677.42883,
+        "Y": 972.1018
+      }
+    },
+    {
+      "ChildId": "09f288bf-0f0e-4878-8822-a0fa6d58b505"/*ReadFile*/,
+      "Position": {
+        "X": 325.99554,
+        "Y": 1036.9863
+      }
+    },
+    {
+      "ChildId": "1e5e089a-b9b1-4256-9ab4-53d9afcaf5a5"/*CalcDispatchCount*/,
+      "Position": {
+        "X": 1102.0197,
+        "Y": 1038.6473
+      }
+    },
+    {
+      "ChildId": "3a188ac3-75a6-486d-88de-60fe4b908757"/*Execute*/,
+      "Position": {
+        "X": 1643.5919,
+        "Y": 1543.2356
+      }
+    },
+    {
+      "ChildId": "4943a47b-4a86-471a-8061-df2ddc2287de"/*ComputeShaderStage*/,
+      "Position": {
+        "X": 1646.6265,
+        "Y": 987.86115
+      }
+    },
+    {
+      "ChildId": "6dab391f-89f7-4370-bf8d-e3cbb9dd7cd5"/*GetBufferComponents*/,
+      "Position": {
+        "X": 1085.3048,
+        "Y": 1277.8899
+      }
+    },
+    {
+      "ChildId": "728ed997-cb0f-4dfd-8fb9-de5562bec85c"/*StructuredBufferWithViews*/,
+      "Position": {
+        "X": 1085.3048,
+        "Y": 1207.8899
+      }
+    },
+    {
+      "ChildId": "840ac8b9-322d-4474-9107-2f97e497e28e"/*ExecuteBufferUpdate*/,
+      "Position": {
+        "X": 1646.6265,
+        "Y": 1232.8611
+      }
+    },
+    {
+      "ChildId": "9f5d5b5b-c9b4-4390-b6f2-9da2759121af"/*IntsToBuffer*/,
+      "Position": {
+        "X": 1040.7295,
+        "Y": 1545.8286
+      }
+    },
+    {
+      "ChildId": "c3194616-4f58-462b-b494-bdb7618dfec7"/*FloatsToBuffer*/,
+      "Position": {
+        "X": 1040.7295,
+        "Y": 1385.1677
+      }
+    },
+    {
+      "ChildId": "d49ab319-b989-40ab-bdd9-d0acffacffa3"/*ComputeShaderFromSource*/,
+      "Position": {
+        "X": 817.42883,
+        "Y": 972.1018
+      }
+    },
+    {
+      "ChildId": "ed4070ce-ff7f-4e6f-8efc-10ae0b6a56e5"/*GetBufferComponents*/,
+      "Position": {
+        "X": 829.0911,
+        "Y": 1136.442
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "e9df0581-62c5-4d5d-9466-e88871d59dea"/*Result2*/,
+      "Position": {
+        "X": 1646.6265,
+        "Y": 1302.8613
+      }
+    }
+  ]
+}

@@ -32,19 +32,23 @@ internal static class Program
 
     public static Version Version => RuntimeAssemblies.Version;
     private static string? _versionText;
-    public static string VersionText
+    
+    public static string VersionText => _versionText ??= Version.ToBasicVersionString();
+
+    private static string? _readableVersion;
+    public static string FormattedEditorVersion
     {
         get
         {
-            if (_versionText == null)
+            if (_readableVersion == null)
             {
-                _versionText = Version.ToBasicVersionString();
+                _readableVersion ??= "v" + Version;
                 #if DEBUG
-                    _versionText += " Debug";
-                #endif
+                    _readableVersion += " Debug";
+                #endif                
             }
 
-            return _versionText;
+            return _readableVersion;
         }
     }
 
@@ -93,7 +97,7 @@ internal static class Program
         Log.AddWriter(StatusErrorLine);
         Log.AddWriter(ConsoleLogWindow);
             
-        Log.Info($"Starting {VersionText}");
+        Log.Info($"Starting {FormattedEditorVersion}");
             
         CrashReporting.LogPath = logPath;
         //if (IsStandAlone)
@@ -117,7 +121,7 @@ internal static class Program
         var projectSettings = new ProjectSettings(saveOnQuit: true);
 
         Log.Debug("Initializing ProgramWindows...");
-        ProgramWindows.InitializeMainWindow(VersionText, out var device);
+        ProgramWindows.InitializeMainWindow(FormattedEditorVersion, out var device);
 
         Device = device;
 

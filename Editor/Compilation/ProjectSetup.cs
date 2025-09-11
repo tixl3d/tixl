@@ -20,15 +20,15 @@ internal static partial class ProjectSetup
     public const string EnvironmentVariableName = "T3_ASSEMBLY_PATH";
     static ProjectSetup()
     {
-        
         SetEnvironmentVariable(EnvironmentVariableName, RuntimeAssemblies.CoreDirectory);
     }
 
 
     public static string ToBasicVersionString(this Version versionPrefix)
     {
-        return $"{versionPrefix.Major}.{versionPrefix.Minor}.{versionPrefix.Build}.{versionPrefix.Revision}";
+        return $"{versionPrefix.Major}.{versionPrefix.Minor}.{versionPrefix.Build}";
     }
+
     
     private static void SetEnvironmentVariable(string envVar, string envValue)
     {

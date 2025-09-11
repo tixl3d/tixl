@@ -46,11 +46,7 @@ internal static class ValueUi
         var symbolChild = instance.SymbolChild;
         drawList.PushClipRect(area.Min, area.Max, true);
 
-        var isAnimated = instance.Parent?.Symbol.Animator.IsInputSlotAnimated(data.Float) ?? false;
-
-        var value = (isAnimated || data.Float.HasInputConnections)
-                        ? (double)data.Float.Value
-                        : (double)data.Float.TypedInputValue.Value;
+        double value = data.Float.GetCurrentValue();
 
         var isActive = false;
         // Draw slider

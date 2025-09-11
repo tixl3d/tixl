@@ -265,7 +265,7 @@ internal static class GraphContextMenu
         {
             if (ImGui.BeginMenu("Symbol definition...", !isSaving))
             {
-                if (ImGui.MenuItem("Rename Symbol", oneOpSelected))
+                if (ImGui.MenuItem("Rename Symbol", oneOpSelected && !selectedChildUis[0].SymbolChild.Symbol.SymbolPackage.IsReadOnly))
                 {
                     context.RenameSymbolDialog.ShowNextFrame();
                     context.SymbolNameForDialogEdits = selectedChildUis[0].SymbolChild.Symbol.Name;

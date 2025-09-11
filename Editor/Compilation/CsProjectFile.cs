@@ -284,7 +284,7 @@ internal sealed class CsProjectFile
     {
         _projectRootElement.SetOrAddProperty(PropertyType.EditorVersion, Program.Version.ToBasicVersionString());
         var version = Version;
-        var newVersion = new Version(version.Major + majorModify, version.Minor + minorModify, version.Build + buildModify, version.Revision);
+        var newVersion = new Version(version.Major + majorModify, version.Minor + minorModify, version.Build + buildModify);
         _projectRootElement.SetOrAddProperty(PropertyType.VersionPrefix, newVersion.ToBasicVersionString());
         try
         {

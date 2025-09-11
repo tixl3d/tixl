@@ -41,7 +41,7 @@ internal sealed class AboutDialog : ModalDialog
             ImGui.SameLine();
             ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
 
-            FormInputs.AddSectionHeader("v." + Program.VersionText);
+            FormInputs.AddSectionHeader(Program.FormattedEditorVersion);
             ImGui.PopStyleColor();
             ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, mySpacing);
            

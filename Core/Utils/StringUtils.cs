@@ -529,4 +529,18 @@ public static class StringUtils
         var alphanumeric = base64.Replace("+", "").Replace("/", "").Replace("=", "");
         return alphanumeric[..length];
     }
+    
+    
+    public static string ToValidClassName(this string input, string fallback = "ClassName")
+    {
+        if (string.IsNullOrWhiteSpace(input))
+            return fallback;
+        
+        var cleaned = Regex.Replace(input, @"[^a-zA-Z0-9_]", "");
+        
+        if (char.IsDigit(cleaned, 0))
+            cleaned = "_" + cleaned;
+        
+        return string.IsNullOrEmpty(cleaned) ? "ClassName" : cleaned;
+    }
 }
