@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System.Drawing;
 using ImGuiNET;
 using T3.Core.DataTypes;
@@ -26,7 +26,7 @@ internal static class ColorEditPopup
 
         var edited = InputEditStateFlags.Nothing;
         var cColor = new Color(color);
-        ImGui.SetNextWindowSize(new Vector2(257, 360));
+        ImGui.SetNextWindowSize(new Vector2(257, 360) * T3Ui.UiScaleFactor);
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Vector2.Zero);
         var dontCloseIfColorPicking = ImGui.GetIO().KeyAlt ? ImGuiWindowFlags.Modal : ImGuiWindowFlags.None;
 
@@ -98,8 +98,8 @@ internal static class ColorEditPopup
         dl.AddText(pos + new Vector2(55, 2 + 10), UiColors.ForegroundFull, $"{(pickedColor.G * 255):0}");
         dl.AddText(pos + new Vector2(55, 2 + 20), UiColors.ForegroundFull, $"{(pickedColor.B * 255):0}");
             
-        var swatchSize = new Vector2(3, 32);
-        var swatchPos = pos + new Vector2(3, 3);
+        var swatchSize = new Vector2(3, 32) * T3Ui.UiScaleFactor;
+        var swatchPos = pos + new Vector2(3, 3) * T3Ui.UiScaleFactor;
         dl.AddRectFilled(swatchPos, swatchPos+ swatchSize, pickedColor );
         ImGui.PopFont();
 
@@ -120,7 +120,7 @@ internal static class ColorEditPopup
         var edited = InputEditStateFlags.Nothing;
         ImGui.Dummy(new Vector2(10, 10));
 
-        var wheelRadius = 209f;
+        var wheelRadius = 209f * T3Ui.UiScaleFactor;
         var windowPos = ImGui.GetCursorScreenPos() + new Vector2(10, 10);
         var size = new Vector2(wheelRadius, wheelRadius);
         var clampedV = v.Clamp(0, 1);
@@ -183,12 +183,12 @@ internal static class ColorEditPopup
 
         var opaqueColor = cColor;
         opaqueColor.A = 1;
-
+        var borderThickness = Vector2.One* T3Ui.UiScaleFactor;
         // Draw value slider 
         {
             var barHeight = wheelRadius;
-            const float barWidth = 10;
-            var pMin = windowPos + new Vector2(size.X + 10, 0);
+            var barWidth = 10 * T3Ui.UiScaleFactor;
+            var pMin = windowPos + new Vector2(size.X + barWidth, 0);
             var visibleBarSize = new Vector2(barWidth, barHeight);
             var pMax = pMin + visibleBarSize;
 
@@ -196,18 +196,18 @@ internal static class ColorEditPopup
             if (hrdEditEnabled)
             {
                 var hdrOffset = new Vector2(0, -300);
-                drawList.AddRectFilled(pMin - Vector2.One + hdrOffset, pMax + Vector2.One, Color.Black);
+                drawList.AddRectFilled(pMin - borderThickness + hdrOffset, pMax + borderThickness, Color.Black);
             }
             else
             {
-                drawList.AddRectFilled(pMin - Vector2.One, pMax + Vector2.One, Color.Black);
+                drawList.AddRectFilled(pMin - borderThickness, pMax + borderThickness, Color.Black);
                 if (cColor.V > 1)
                 {
-                    var offset = new Vector2(4,-5);
+                    var offset = new Vector2(4.5f,-5) * T3Ui.UiScaleFactor;
                     drawList.AddTriangleFilled(
-                                               pMin + new Vector2(-6,0) + offset,
-                                               pMin + new Vector2(0,-10) + offset,
-                                               pMin + new Vector2(6,0) + offset,
+                                               pMin + new Vector2(-6,0) * T3Ui.UiScaleFactor + offset,
+                                               pMin + new Vector2(0,-10) * T3Ui.UiScaleFactor + offset,
+                                               pMin + new Vector2(6,0) * T3Ui.UiScaleFactor + offset,
                                                UiColors.ForegroundFull
                                               );
                 }
@@ -235,7 +235,7 @@ internal static class ColorEditPopup
             {
                 var mappedHdrValue = GetYFromHdr(compareValue);
                 var handlePos = new Vector2(0, barHeight * (1 - mappedHdrValue)) + pMin;
-                drawList.AddRectFilled(handlePos, handlePos + new Vector2(barWidth + 2, 2), UiColors.ForegroundFull.Fade(0.5f));
+                drawList.AddRectFilled(handlePos, handlePos + new Vector2(barWidth + 2, 2 * T3Ui.UiScaleFactor), UiColors.ForegroundFull.Fade(0.5f));
             }
 
             // Draw indicator
@@ -244,8 +244,8 @@ internal static class ColorEditPopup
                 var mappedHdrValue = GetYFromHdr(cColor.V);
 
                 var handlePos = new Vector2(0, barHeight * (1 - mappedHdrValue)) + pMin;
-                drawList.AddRectFilled(handlePos - Vector2.One, handlePos + new Vector2(barWidth + 2, 3), UiColors.BackgroundFull);
-                drawList.AddRectFilled(handlePos, handlePos + new Vector2(barWidth + 2, 2), UiColors.ForegroundFull);
+                drawList.AddRectFilled(handlePos - borderThickness, handlePos + new Vector2(barWidth + 2, 3 * T3Ui.UiScaleFactor), UiColors.BackgroundFull);
+                drawList.AddRectFilled(handlePos, handlePos + new Vector2(barWidth + 2, 2* T3Ui.UiScaleFactor) , UiColors.ForegroundFull);
             }
             ImGui.SetCursorScreenPos(pMin - new Vector2(10, 0));
             ImGui.InvisibleButton("intensitySlider", new Vector2(visibleBarSize.X * 4, visibleBarSize.Y));
@@ -277,15 +277,15 @@ internal static class ColorEditPopup
 
         // Draw alpha slider 
         {
-            var barHeight = 10;
+            var barHeight = 10 * T3Ui.UiScaleFactor;
             var barWidth = wheelRadius;
 
-            var pMin = windowPos + new Vector2(0, size.X + 10);
+            var pMin = windowPos + new Vector2(0, size.X + barHeight);
             var barSize = new Vector2(barWidth, barHeight);
             var pMax = pMin + barSize;
 
             var area = new ImRect(pMin, pMax);
-            drawList.AddRectFilled(pMin - Vector2.One, pMax + Vector2.One, new Color(0.1f, 0.1f, 0.1f));
+            drawList.AddRectFilled(pMin - Vector2.One * T3Ui.UiScaleFactor, pMax + Vector2.One * T3Ui.UiScaleFactor, new Color(0.1f, 0.1f, 0.1f));
             CustomComponents.FillWithStripes(drawList, area, 1);
 
             drawList.AddRectFilledMultiColor(pMin, pMax,
@@ -298,16 +298,16 @@ internal static class ColorEditPopup
             {
                 var handlePos = new Vector2(barWidth * compareColor.W, 0) + pMin;
                 drawList.AddRectFilled(handlePos,
-                                       handlePos + new Vector2(2, barHeight + 2), UiColors.ForegroundFull.Fade(0.5f));
+                                       handlePos + new Vector2(2 * T3Ui.UiScaleFactor, barHeight + 2), UiColors.ForegroundFull.Fade(0.5f));
             }
                 
             // Draw handle
             {
                 var handlePos = new Vector2(barWidth * cColor.A, 0) + pMin;
                 drawList.AddRectFilled(handlePos - Vector2.One,
-                                       handlePos + new Vector2(3, barHeight + 2), UiColors.BackgroundFull);
+                                       handlePos + new Vector2(3 * T3Ui.UiScaleFactor, barHeight + 2), UiColors.BackgroundFull);
                 drawList.AddRectFilled(handlePos,
-                                       handlePos + new Vector2(2, barHeight + 2), UiColors.ForegroundFull);
+                                       handlePos + new Vector2(2 * T3Ui.UiScaleFactor, barHeight + 2), UiColors.ForegroundFull);
             }
 
             ImGui.SetCursorScreenPos(pMin - new Vector2(0, 10));
@@ -356,17 +356,17 @@ internal static class ColorEditPopup
     private static InputEditStateFlags DrawColorInputs(ref Color cColor, float hNormalized, float linearSaturation, float v)
     {
         var edited = InputEditStateFlags.Nothing;
-
-        const float inputWidth = 45;
+        var width = ImGui.GetContentRegionAvail().X;
+        var inputWidth = 45 * T3Ui.UiScaleFactor;
         ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(2, 1));
         var inputSize = new Vector2(inputWidth, ImGui.GetFrameHeight());
 
         ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
         ImGui.AlignTextToFramePadding();
-
+        var irgbaWidth = ImGui.CalcTextSize("IRGBA").X + (ImGui.GetStyle().FramePadding.X * 2);
         {
             ImGui.PushStyleColor(ImGuiCol.Button, Color.Transparent.Rgba);
-            if (ImGui.Button((_inputMode + "...").ToUpperInvariant()))
+            if (ImGui.Button((_inputMode + " ").ToUpperInvariant(), new Vector2(irgbaWidth, ImGui.GetFrameHeight())))
             {
                 _inputMode = (ColorInputModes)((int)(_inputMode + 1) % Enum.GetNames(typeof(ColorInputModes)).Length);
             }
@@ -539,6 +539,7 @@ internal static class ColorEditPopup
             }
             case ColorInputModes.Hex:
                 var html = cColor.ToHTML();
+                ImGui.SetNextItemWidth(width - irgbaWidth - 10 * T3Ui.UiScaleFactor);
                 if (ImGui.InputText("##hex", ref html, 10))
                 {
                     try
@@ -573,8 +574,8 @@ internal static class ColorEditPopup
 
         ImGui.BeginChild("##swatches");
         ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, Vector2.Zero);
-        FormInputs.AddVerticalSpace();
-        ImGui.Indent(7);
+       // FormInputs.AddVerticalSpace(2);
+        ImGui.Indent(10);
         ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
         ImGui.TextUnformatted("Used colors...");
         ImGui.PopStyleColor();
@@ -595,7 +596,7 @@ internal static class ColorEditPopup
             if (!ColorUsage.ColorUses.TryGetValue(usedColor, out var uses))
                 continue;
 
-            if (index % 14 > 0)
+            if (index % 15 > 0)
             {
                 ImGui.SameLine();
             }
@@ -604,7 +605,7 @@ internal static class ColorEditPopup
 
             // Draw color swatch
             {
-                ImGui.InvisibleButton($"Color {usedColor:0.00000}", Vector2.One * 16);
+                ImGui.InvisibleButton($"Color {usedColor:0.00000}", Vector2.One * 16 * T3Ui.UiScaleFactor);
                 if (ImGui.IsItemHovered())
                 {
                     CustomComponents.TooltipForLastItem($"{c} used {uses.Count}×", "CTRL+Click to select operators");
@@ -642,7 +643,7 @@ internal static class ColorEditPopup
                 }
 
                 var min = ImGui.GetItemRectMin();
-                var max = ImGui.GetItemRectMax() - Vector2.One;
+                var max = ImGui.GetItemRectMax() - Vector2.One ;
                 wdl.AddText(Icons.IconFont, 13, min, new Color(0.1f), "" + (char)T3.Editor.Gui.Styling.Icon.Stripe4PxPattern);
 
                 var opaqueColor = new Color(
