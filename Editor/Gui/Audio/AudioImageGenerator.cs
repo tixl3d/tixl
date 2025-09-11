@@ -164,7 +164,7 @@ internal static class AudioImageGenerator
         if (sampleCount <= 0)
         {
             // Fill with background if no samples
-            for (int y = waveformStartY; y < waveformStartY + waveformHeight; y++)
+            for (var y = waveformStartY; y < waveformStartY + waveformHeight; y++)
             {
                 image.SetPixel(sampleIndex, y, Color.FromArgb(0, 16, 16, 16)); // Transparent dark background
             }
@@ -172,79 +172,50 @@ internal static class AudioImageGenerator
         }
 
         // Calculate RMS (Root Mean Square) and peak for this sample chunk
-        float rms = 0f;
-        float peak = 0f;
-
-        for (int i = 0; i < sampleCount; i++)
+        var rms = 0f;
+        for (var i = 0; i < sampleCount; i++)
         {
-            float sample = Math.Abs(audioBuffer[i]);
+            var sample = Math.Abs(audioBuffer[i]);
             rms += sample * sample;
-            peak = Math.Max(peak, sample);
+            
         }
         rms = (float)Math.Sqrt(rms / sampleCount);
 
         // Use the maximum value found so far to normalize
-        const float maxExpectedAmplitude = 1.1f;
-        const float headroom = 1.3f; // 20% headroom to handle occasional peaks
+        const float maxExpectedAmplitude = 1.0f;
+        const float headroom = 1.2f; // 20% headroom to handle occasional peaks
 
         // Normalize to the expected range
-        float normalizedPeak = Math.Clamp(peak / maxExpectedAmplitude, 0f, 1f) * headroom;
-        float normalizedRms = Math.Clamp(rms / maxExpectedAmplitude, 0f, 1f) * headroom;
+
+        var normalizedRms = Math.Clamp(rms / maxExpectedAmplitude, 0f, 1f) * headroom;
 
         // Scale to pixel height (use 95% of available space for headroom)
-        var maxAmplitudePixels = (int)((waveformHeight / 2) * 0.70f);
-        var peakAmplitudePixels = (int)(normalizedPeak * maxAmplitudePixels);
+        var maxAmplitudePixels = (int)((waveformHeight / 2) * 0.95f);
+        
         var rmsAmplitudePixels = (int)(normalizedRms * maxAmplitudePixels);
 
         // Calculate color based on RMS volume
-        Color rmsColor = GetVolumeColor(normalizedRms);
-        Color peakColor = GetVolumeColor(normalizedPeak);
+        var rmsColor = GetVolumeColor(normalizedRms);
+        
 
         // Clear the column first (solid dark background)
-        for (int y = waveformStartY; y < waveformStartY + waveformHeight; y++)
+        for (var y = waveformStartY; y < waveformStartY + waveformHeight; y++)
         {
             image.SetPixel(sampleIndex, y, Color.FromArgb(0, 16, 16, 16)); // transparent dark background
         }
         // Draw RMS as a solid filled area with volume - based color
-if (rmsAmplitudePixels > 0)
+        if (rmsAmplitudePixels > 0)
         {
-            for (int offset = -rmsAmplitudePixels; offset <= rmsAmplitudePixels; offset++)
+            for (var offset = -rmsAmplitudePixels; offset <= rmsAmplitudePixels; offset++)
             {
-                int y = waveformCenterY + offset;
+                var y = waveformCenterY + offset;
                 if (y >= waveformStartY && y < waveformStartY + waveformHeight)
                 {
                     image.SetPixel(sampleIndex, y, rmsColor);
                 }
             }
         }
-
-        // Draw peak waveform additively blended with existing colors
-        if (peakAmplitudePixels > 0)
-        {
-            // Draw positive peak
-            for (int offset = 0; offset <= peakAmplitudePixels; offset++)
-            {
-                int y = waveformCenterY - offset;
-                if (y >= waveformStartY && y < waveformStartY + waveformHeight)
-                {
-                    var existingColor = image.GetPixel(sampleIndex, y);
-                    var blendedColor = BlendColors(existingColor, peakColor);
-                    image.SetPixel(sampleIndex, y, blendedColor);
-                }
-            }
-
-            // Draw negative peak
-            for (int offset = 0; offset <= peakAmplitudePixels; offset++)
-            {
-                int y = waveformCenterY + offset;
-                if (y >= waveformStartY && y < waveformStartY + waveformHeight)
-                {
-                    var existingColor = image.GetPixel(sampleIndex, y);
-                    var blendedColor = BlendColors(existingColor, peakColor);
-                    image.SetPixel(sampleIndex, y, blendedColor);
-                }
-            }
-        }
+       
 
         // Draw center line for reference
         if (waveformCenterY >= waveformStartY && waveformCenterY < waveformStartY + waveformHeight)
@@ -252,24 +223,7 @@ if (rmsAmplitudePixels > 0)
             image.SetPixel(sampleIndex, waveformCenterY, Color.FromArgb(255, 64, 64, 64)); // Solid gray
         }
 
-        // For very low amplitude signals, draw a minimal indicator
-        if (peakAmplitudePixels == 0 && rmsAmplitudePixels == 0 && peak > 0)
-        {
-            Color quietColor = GetVolumeColor(normalizedRms);
-            image.SetPixel(sampleIndex, waveformCenterY - 1, quietColor);
-            image.SetPixel(sampleIndex, waveformCenterY + 1, quietColor);
-        }
-    }
-
-    private static Color BlendColors(Color existing, Color newColor)
-    {
-        // Additive blending with clamping to prevent overflow
-        int r = Math.Min(255, existing.R + newColor.R);
-        int g = Math.Min(255, existing.G + newColor.G);
-        int b = Math.Min(255, existing.B + newColor.B);
-        int a = Math.Max(existing.A, newColor.A); // Use maximum alpha
-
-        return Color.FromArgb(a, r, g, b);
+        
     }
 
     private static Color GetVolumeColor(float normalizedVolume)
@@ -277,40 +231,27 @@ if (rmsAmplitudePixels > 0)
         // Clamp volume to 0-1 range
         float volume = Math.Clamp(normalizedVolume, 0f, 1f);
 
-        // Color gradient with red only in top 1%:
-        // Quiet: 0-0.5 (50% of range) - blue to green
-        // Medium: 0.5-0.99 (49% of range) - green to yellow to orange
-        // Loud: 0.99-1.0 (1% of range) - orange to red
-
-        if (volume < 0.5f) // Quiet - blue to green (50% of range)
+        // Blue to green to yellow gradient (no red)
+        if (volume < 0.5f) // Blue to green
         {
             float t = volume / 0.5f;
             return Color.FromArgb(128,
                 (int)(0),                                    // R
-                (int)(t * 128),                              // G
-                (int)(128 * (1 - t))                         // B
+                (int)(t * 255),                              // G
+                (int)(255 * (1 - t))                         // B
             );
         }
-        else if (volume < 0.99f) // Medium - green to yellow to orange (49% of range)
+        else // Green to yellow
         {
-            float t = (volume - 0.5f) / 0.49f;
+            float t = (volume - 0.5f) / 0.5f;
             return Color.FromArgb(128,
-                (int)(t * 255),                              // R
-                (int)(128 + t * 127),                        // G
-                (int)(0)                                     // B
-            );
-        }
-        else // Loud - orange to red (1% of range)
-        {
-            float t = (volume - 0.99f) / 0.01f;
-            return Color.FromArgb(128,
-                (int)((128 + t * 127)),                                  // R
-                (int)(0),                        // G
-                (int)(128)                                     // B
+                (int)(t *255),                              // R
+                (int)(255 * (1 - t)),                       // G
+                (int)(t * 255)                              // B
             );
         }
     }
-
+    // Alternative color schemes
     private static Color GetVolumeColorFire(float normalizedVolume)
     {
         float volume = Math.Clamp(normalizedVolume, 0f, 1f);
