@@ -250,7 +250,7 @@ internal sealed class TimeLineCanvas : CurveEditCanvas
 
         ImGui.SetCursorPos(new Vector2(0, max.Y - clampedSize.Y));
         var screenPos = ImGui.GetCursorScreenPos();
-        ImGui.GetWindowDrawList().AddRectFilled(screenPos, screenPos + new Vector2(clampedSize.X, clampedSize.Y), UiColors.BackgroundFull.Fade(0.1f));
+        ImGui.GetWindowDrawList().AddRectFilled(screenPos, screenPos + new Vector2(clampedSize.X, clampedSize.Y), UiColors.BackgroundFull.Fade(0.2f));
 
         ImGui.InvisibleButton("##TimeDrag", clampedSize);
 

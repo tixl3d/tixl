@@ -33,12 +33,31 @@ internal sealed class TimeLineImage
         var songDurationInBars = (float)(clip.LengthInSeconds * clip.Bpm / 240);
         var xMin = TimeLineCanvas.Current.TransformX((float) clip.StartTime);
         var xMax = TimeLineCanvas.Current.TransformX(songDurationInBars + (float)clip.StartTime);
-            
+
         if (_srv is { IsDisposed: false })
         {
-            drawList.AddImage((IntPtr)_srv, 
-                              new Vector2(xMin, yMin), 
-                              new Vector2(xMax, yMin + size.Y));
+            Vector2 startPos, endPos;
+
+            switch (CurrentDisplayMode)
+            {
+                case DisplayMode.Waveform:
+                    startPos = new Vector2(xMin, yMin - size.Y);
+                    endPos = new Vector2(xMax, yMin + size.Y);
+                    break;
+
+                case DisplayMode.Both:
+                    startPos = new Vector2(xMin, yMin);
+                    endPos = new Vector2(xMax, yMin + size.Y);
+                    break;
+
+                case DisplayMode.Spectrum:
+                default:
+                    startPos = new Vector2(xMin, yMin);
+                    endPos = new Vector2(xMax, yMin + size.Y * 2);
+                    break;
+            }
+
+            drawList.AddImage((IntPtr)_srv, startPos, endPos);
         }
     }
 
@@ -71,4 +90,13 @@ internal sealed class TimeLineImage
     private static string? _loadedImagePath;
     private static ShaderResourceView? _srv;
     private static Resource<Texture2D>? _textureResource;
+
+    public enum DisplayMode
+    {
+        Spectrum,    // yMin to yMin + size.Y*2
+        Waveform,    // yMin - size.Y to yMin + size.Y  
+        Both   // yMin to yMin + size.Y
+    }
+
+    public static DisplayMode CurrentDisplayMode { get; set; } = DisplayMode.Spectrum;
 }
