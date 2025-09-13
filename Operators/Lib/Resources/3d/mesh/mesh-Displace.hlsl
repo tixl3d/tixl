@@ -14,6 +14,7 @@ cbuffer Params : register(b0)
     float UseVertexSelection;
 
     float3 MainOffset;
+    float UvSelection;
 }
 
 StructuredBuffer<PbrVertex> SourceVertices : t0;        
@@ -35,14 +36,26 @@ void main(uint3 i : SV_DispatchThreadID)
 
     PbrVertex v = SourceVertices[gi];
     ResultVertices[gi] = SourceVertices[gi];
-
+    
     float weight = 1;
 
     float3 posInWorld = v.Position;
- 
+
     float2 uv =SourceVertices[gi].TexCoord * ScaleUV;
+
+    if(UvSelection > 0.5) 
+    {
+        uv =SourceVertices[gi].TexCoord2 * ScaleUV;
+    }
+    
     float4 texColor = DisplaceMap.SampleLevel(texSampler, uv, 0); 
     float3x3 TBN = float3x3(v.Tangent, v.Bitangent, v.Normal);
+    
+    
+    float amount = Amount;
+    if (UseVertexSelection > 0.5){
+        amount = Amount * SourceVertices[gi].Selected;
+    }
     
     float3 offset = 0;
     if(Mode < 0.5) 
@@ -51,15 +64,15 @@ void main(uint3 i : SV_DispatchThreadID)
                 (   
                     (texColor.r + texColor.g + texColor.b)/3 * texColor.a * float3(0,0,1) * Distribution 
                     + MainOffset
-                ) * Amount
+                ) * amount
         ,TBN);
     }
     else if(Mode< 1.5) 
     {
-        offset= mul((texColor.rgb * texColor.a * Distribution + MainOffset) * Amount, TBN);
+        offset= mul((texColor.rgb * texColor.a * Distribution + MainOffset) * amount, TBN);
     }
     else {
-        offset= (texColor.rgb * texColor.a * Distribution + MainOffset)  * Amount;
+        offset= (texColor.rgb * texColor.a * Distribution + MainOffset)  * amount;
     } 
 
     ResultVertices[gi].Position = v.Position + offset;

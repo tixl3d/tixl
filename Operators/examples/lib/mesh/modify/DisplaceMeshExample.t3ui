@@ -1,0 +1,233 @@
+{
+  "Id": "6726bfb3-79cf-46d2-8052-32933e3940be"/*DisplaceMeshExample*/,
+  "Description": "In this example we see a particular but interesting use case of [DisplaceMesh].\nA mesh can carry two sets of UVs coordinates, this allow to displace the mesh according to its first UV map (TexCoord) while applying the texture with the second UV map (TexCoord2).",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "198d9fe9-c3ac-40ba-9777-eb6cea51d82a"/*ShardNoise*/,
+      "Position": {
+        "X": 486.20026,
+        "Y": 45.64212
+      }
+    },
+    {
+      "ChildId": "2bcf6c9b-0fa9-4053-841b-a4b3828b70e7"/*SelectVertices*/,
+      "Comment": "Turn on the Gizmo",
+      "Position": {
+        "X": 293.9406,
+        "Y": -176.2507
+      }
+    },
+    {
+      "ChildId": "34d06f5a-3267-4cc5-a040-2c031db3db65"/*Transform*/,
+      "Position": {
+        "X": 453.11188,
+        "Y": 399.49005
+      }
+    },
+    {
+      "ChildId": "3e721e91-3c5f-438b-a9dd-62b4b3ac0c5a"/*AnimValue*/,
+      "Position": {
+        "X": 13.940613,
+        "Y": -106.2507
+      }
+    },
+    {
+      "ChildId": "7415092e-8992-45dc-a930-8e10da92f363"/*AnimValue*/,
+      "Position": {
+        "X": 33.111877,
+        "Y": 539.49005
+      }
+    },
+    {
+      "ChildId": "76b4bbd7-02a0-47e3-87a7-3b3ac65dd669"/*SetMaterial*/,
+      "Comment": "The texture is applied with TexCoord",
+      "Position": {
+        "X": 562.88214,
+        "Y": 242.54272
+      }
+    },
+    {
+      "ChildId": "794d02cc-dda0-4a12-894b-52f61994b8f1"/*DisplaceMesh*/,
+      "Position": {
+        "X": 626.2002,
+        "Y": 10.64212
+      }
+    },
+    {
+      "ChildId": "82b5e492-c047-46d6-a5c5-a10a82aa04cf"/*DrawMesh*/,
+      "Position": {
+        "X": 562.88214,
+        "Y": 207.54272
+      }
+    },
+    {
+      "ChildId": "888653fe-54f3-46fb-8f61-512d18a4678f"/*NGonGradient*/,
+      "Position": {
+        "X": 397.70178,
+        "Y": 249.5069
+      }
+    },
+    {
+      "ChildId": "94820757-164f-4dcc-b188-3706e4209d2e"/*Vector3*/,
+      "Position": {
+        "X": 173.11188,
+        "Y": 504.49005
+      }
+    },
+    {
+      "ChildId": "9991dabb-bdc8-4364-ba55-23ceb28970bb"/*Time*/,
+      "Position": {
+        "X": 346.20026,
+        "Y": 80.64212
+      }
+    },
+    {
+      "ChildId": "a02b77bb-2fb8-4a2b-96cc-300eabef242e"/*Camera*/,
+      "Position": {
+        "X": 453.11188,
+        "Y": 469.49005
+      }
+    },
+    {
+      "ChildId": "a4808dfc-97a0-4b3f-ae77-a62bba3f61a1"/*Bloom*/,
+      "Position": {
+        "X": 453.11188,
+        "Y": 539.49005
+      }
+    },
+    {
+      "ChildId": "ade20e1b-26fd-4244-ba3a-a8192d4ba2ef"/*AnimValue*/,
+      "Position": {
+        "X": -22.298096,
+        "Y": 319.5069
+      }
+    },
+    {
+      "ChildId": "b1aeb062-71de-4744-b6a6-39989db25696"/*ToneMapping*/,
+      "Position": {
+        "X": 453.11188,
+        "Y": 574.49005
+      }
+    },
+    {
+      "ChildId": "bff203f7-fb70-4010-902a-e3d54df8e2f5"/*HSLToColor*/,
+      "Position": {
+        "X": 117.701904,
+        "Y": 284.5069
+      }
+    },
+    {
+      "ChildId": "c3279d62-cae0-4587-a7da-522a3cc3d506"/*DefineGradient*/,
+      "Position": {
+        "X": 257.70178,
+        "Y": 284.5069
+      }
+    },
+    {
+      "ChildId": "e1833538-abaf-4d2a-8d35-9ea2c749330e"/*RenderTarget*/,
+      "Position": {
+        "X": 453.11188,
+        "Y": 504.49005
+      }
+    },
+    {
+      "ChildId": "e7f9c056-1f9d-47b5-8fe5-054a1ef3793a"/*IcosahedronMesh*/,
+      "Position": {
+        "X": 5.003845,
+        "Y": -302.75342
+      }
+    },
+    {
+      "ChildId": "e8d54c69-a038-4ba0-a06a-d5e3b993b5a2"/*Vector3*/,
+      "Position": {
+        "X": 153.94061,
+        "Y": -141.2507
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "7ced0db6-97b0-4459-8bc0-26df7a2fbb70"/*ColorBuffer*/,
+      "Position": {
+        "X": 593.1119,
+        "Y": 574.49005
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "707db091-8aef-4fd6-87a5-9e52dc6fd202",
+      "Label": "TexCoord2 is used to displace the mesh",
+      "Color": {
+        "X": 0.106382966,
+        "Y": 1.0,
+        "Z": 0.0,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -49.243774,
+        "Y": -45.325012
+      },
+      "Size": {
+        "X": 822.7649,
+        "Y": 206.20148
+      }
+    },
+    {
+      "Id": "a72a9f67-9ea0-450a-95b2-e8269b3e0e02",
+      "Label": "TexCoord is used to apply the texture",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -49.243774,
+        "Y": 160.87646
+      },
+      "Size": {
+        "X": 822.7649,
+        "Y": 215.38934
+      }
+    },
+    {
+      "Id": "b02cc817-df57-4f74-b9c4-e863e3a11c21",
+      "Label": "Select where the mesh displacement will occur",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -49.243774,
+        "Y": -240.5238
+      },
+      "Size": {
+        "X": 822.7649,
+        "Y": 195.19879
+      }
+    },
+    {
+      "Id": "c564179b-f33a-48da-bbf6-89be24ae9581",
+      "Title": "Generates a mesh with two sets of UV coordinates",
+      "Label": "IcosahedronMesh ",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -49.243774,
+        "Y": -393.9914
+      },
+      "Size": {
+        "X": 372.4541,
+        "Y": 153.46759
+      }
+    }
+  ]
+}
