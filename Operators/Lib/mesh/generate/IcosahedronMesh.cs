@@ -2,10 +2,11 @@ using T3.Core.Rendering;
 using T3.Core.Utils;
 
 namespace Lib.mesh.generate;
+
 [Guid("E0CEAD3C-E19C-4726-8B5C-A9FEFBF96AB9")]
 internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
 {
-    [Output(Guid = "9c86f704-a28f-4d2a-b7c0-15648f982463")] 
+    [Output(Guid = "9c86f704-a28f-4d2a-b7c0-15648f982463")]
     public readonly Slot<MeshBuffers> Data = new();
 
     public IcosahedronMesh()
@@ -27,17 +28,17 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
             var strength = Strength.GetValue(context);
             var uvMapMode = TexCoord.GetValue(context);
             var uvMapMode2 = TexCoord2.GetValue(context);
-            IUvMapper uvMapper = GetUvMapper(uvMapMode, subdivisions);
-            IUvMapper uvMapper2 = GetUvMapper(uvMapMode2, subdivisions);
+            var uvMapper = GetUvMapper(uvMapMode, subdivisions);
+            var uvMapper2 = GetUvMapper(uvMapMode2, subdivisions);
             var shadingMode = Shading.GetValue(context);
 
-            float yaw = rotation.Y.ToRadians();
-            float pitch = rotation.X.ToRadians();
-            float roll = rotation.Z.ToRadians();
+            var yaw = rotation.Y.ToRadians();
+            var pitch = rotation.X.ToRadians();
+            var roll = rotation.Z.ToRadians();
 
             // Apply the icosahedron tilt adjustment
-            float rollOffset = roll - _icosahedronTiltAngle;
-           
+            var rollOffset = roll - _icosahedronTiltAngle;
+
             var rotationMatrix = Matrix4x4.CreateFromYawPitchRoll(yaw, pitch, rollOffset);
 
             // Generate mesh using flat shading structure
@@ -59,13 +60,13 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
                 : CalculateFlatNormals(vertices, triangles);
 
             // Debug: Log a few normals to compare
-           /* if (vertices.Length >= 3)
-            {
-                Log.Debug($"Shading: {(shadingMode == (int)ShadingModes.Smoothed ? "Smooth" : "Flat")}");
-                Log.Debug($"Normal[0]: {normals[0]}");
-                Log.Debug($"Normal[1]: {normals[1]}");
-                Log.Debug($"Normal[2]: {normals[2]}");
-            }*/
+            /* if (vertices.Length >= 3)
+             {
+                 Log.Debug($"Shading: {(shadingMode == (int)ShadingModes.Smoothed ? "Smooth" : "Flat")}");
+                 Log.Debug($"Normal[0]: {normals[0]}");
+                 Log.Debug($"Normal[1]: {normals[1]}");
+                 Log.Debug($"Normal[2]: {normals[2]}");
+             }*/
 
             // Create buffers
             if (_vertexBufferData.Length != vertices.Length)
@@ -81,7 +82,7 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
                 stretch.Y * scale * pivot.Y,
                 stretch.X * scale * pivot.Z
             );
-            
+
             for (int i = 0; i < vertices.Length; i++)
             {
                 var pos = new Vector3(
@@ -91,7 +92,7 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
                 );
 
                 pos = Vector3.Transform(pos + offset, rotationMatrix) + centerVec;
-                
+
                 var uv = uvMapper.CalculateUV(vertices[i], normals[i], i % 3, i / 3); // Use i / 3 for triangle index
                 var uv2 = uvMapper2.CalculateUV(vertices[i], normals[i], i % 3, i / 3);
 
@@ -108,7 +109,7 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
             }
 
             // Fill index buffer
-            for (int i = 0; i < triangles.Length; i++)
+            for (var i = 0; i < triangles.Length; i++)
             {
                 _indexBufferData[i] = new Int3(
                     triangles[i].X,
@@ -185,7 +186,7 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
 
         foreach (var tri in baseTriangles)
         {
-            int v0 = vertices.Count;
+            var v0 = vertices.Count;
             vertices.Add(baseVertices[tri.X]);
             vertices.Add(baseVertices[tri.Y]);
             vertices.Add(baseVertices[tri.Z]);
@@ -199,7 +200,7 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
     {
         var normals = new Vector3[vertices.Length];
 
-        for (int i = 0; i < triangles.Length; i++)
+        for (var i = 0; i < triangles.Length; i++)
         {
             var tri = triangles[i];
             Vector3 v1 = vertices[tri.X];
@@ -222,7 +223,7 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
 
         // Group vertices by position to identify duplicates
         var positionToIndices = new Dictionary<Vector3, List<int>>(new Vector3EqualityComparer());
-        for (int i = 0; i < vertices.Length; i++)
+        for (var i = 0; i < vertices.Length; i++)
         {
             if (!positionToIndices.ContainsKey(vertices[i]))
                 positionToIndices[vertices[i]] = new List<int>();
@@ -233,14 +234,14 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
         var positionNormals = new Dictionary<Vector3, Vector3>(new Vector3EqualityComparer());
         var positionTriangleCount = new Dictionary<Vector3, int>(new Vector3EqualityComparer());
 
-        for (int i = 0; i < triangles.Length; i++)
+        for (var i = 0; i < triangles.Length; i++)
         {
             var tri = triangles[i];
-            Vector3 v1 = vertices[tri.X];
-            Vector3 v2 = vertices[tri.Y];
-            Vector3 v3 = vertices[tri.Z];
+            var v1 = vertices[tri.X];
+            var v2 = vertices[tri.Y];
+            var v3 = vertices[tri.Z];
 
-            Vector3 normal = Vector3.Normalize(Vector3.Cross(v2 - v1, v3 - v1));
+            var normal = Vector3.Normalize(Vector3.Cross(v2 - v1, v3 - v1));
 
             // Accumulate normal for each vertex position
             foreach (var v in new[] { v1, v2, v3 })
@@ -302,24 +303,24 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
     // Subdivide mesh for flat shading (each triangle gets its own vertices)
     private static void SubdivideMeshFlat(ref Vector3[] vertices, ref Int3[] triangles, int levels, float strength, bool spherical = true)
     {
-        for (int i = 0; i < levels; i++)
+        for (var i = 0; i < levels; i++)
         {
             var newTriangles = new List<Int3>(triangles.Length * 4);
             var newVertices = new List<Vector3>();
 
-            for (int t = 0; t < triangles.Length; t++)
+            for (var t = 0; t < triangles.Length; t++)
             {
-                Vector3 v1 = vertices[triangles[t].X];
-                Vector3 v2 = vertices[triangles[t].Y];
-                Vector3 v3 = vertices[triangles[t].Z];
+                var v1 = vertices[triangles[t].X];
+                var v2 = vertices[triangles[t].Y];
+                var v3 = vertices[triangles[t].Z];
 
                 // Calculate midpoints (linear interpolation)
-                Vector3 a = (v1 + v2) * 0.5f;
-                Vector3 b = (v2 + v3) * 0.5f;
-                Vector3 c = (v3 + v1) * 0.5f;
+                var a = (v1 + v2) * 0.5f;
+                var b = (v2 + v3) * 0.5f;
+                var c = (v3 + v1) * 0.5f;
 
                 // Add all vertices (optionally normalize)
-                int baseIndex = newVertices.Count;
+                var baseIndex = newVertices.Count;
                 newVertices.Add(spherical ? MathUtils.Lerp(v1, Vector3.Normalize(v1), strength) : v1);
                 newVertices.Add(spherical ? MathUtils.Lerp(a, Vector3.Normalize(a), strength) : a);
                 newVertices.Add(spherical ? MathUtils.Lerp(c, Vector3.Normalize(c), strength) : c);
@@ -371,7 +372,7 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
     private class Faces : IUvMapper
     {
         // UV coordinates that repeat every 3 vertices
-        
+
 
         public Vector2 CalculateUV(Vector3 vertex, Vector3 normal, int vertexIndex, int triangleIndex)
         {
@@ -388,61 +389,51 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
             return new Vector2(0.5f, 0.5f);
         }
     }
-    
-    private class FacesSub : IUvMapper
+
+    private class FacesSub(int subdivisionLevel) : IUvMapper
     {
         // Base UV coordinates for a single triangle face
-       /* private static readonly Vector2[] _baseUvs = new Vector2[3]
-        {
-        new Vector2(0.5f, 1.0f),      // vertex 0 (center top)
-        new Vector2(0.067f, 0.250f),  // vertex 1 (left bottom)
-        new Vector2(0.933f, 0.250f)   // vertex 2 (right bottom)
-        };*/
+        /* private static readonly Vector2[] _baseUvs = new Vector2[3]
+         {
+         new Vector2(0.5f, 1.0f),      // vertex 0 (center top)
+         new Vector2(0.067f, 0.250f),  // vertex 1 (left bottom)
+         new Vector2(0.933f, 0.250f)   // vertex 2 (right bottom)
+         };*/
 
-        private int _subdivisionLevel = 0;
-
-        public FacesSub(int subdivisionLevel)
-        {
-            _subdivisionLevel = subdivisionLevel;
-        }
+        private int _subdivisionLevel = subdivisionLevel;
 
         public Vector2 CalculateUV(Vector3 vertex, Vector3 normal, int vertexIndex, int triangleIndex)
         {
             if (_subdivisionLevel == 0)
             {
                 // No subdivision - use base UVs
-                int _uvIndex = vertexIndex % 3;
+                var _uvIndex = vertexIndex % 3;
                 return _baseUvs[_uvIndex];
             }
 
             // Calculate which original face this triangle belongs to
-            int subTrianglesPerFace = (int)Math.Pow(4, _subdivisionLevel);
-            int originalFaceIndex = triangleIndex / subTrianglesPerFace;
+            var subTrianglesPerFace = (int)Math.Pow(4, _subdivisionLevel);
+            var originalFaceIndex = triangleIndex / subTrianglesPerFace;
             originalFaceIndex = originalFaceIndex % 20; // Ensure we don't exceed 20 faces
 
             // Calculate which sub-triangle within the original face
-            int subTriangleIndex = triangleIndex % subTrianglesPerFace;
+            var subTriangleIndex = triangleIndex % subTrianglesPerFace;
 
             // Get the base UV for this vertex position in the triangle
-            int uvIndex = vertexIndex % 3;
-            Vector2 baseUV = _baseUvs[uvIndex];
+            var uvIndex = vertexIndex % 3;
+            var baseUV = _baseUvs[uvIndex];
 
             // Now we need to map this to the subdivided space
             // We'll use a recursive approach to find the correct sub-triangle position
-           // Vector2 tessellatedUV = TessellateUVFace(baseUV, subTriangleIndex, _subdivisionLevel);
+            // Vector2 tessellatedUV = TessellateUVFace(baseUV, subTriangleIndex, _subdivisionLevel);
             return TessellateUV(baseUV, _baseUvs, subTriangleIndex, _subdivisionLevel);
             //return tessellatedUV;
-        }  
+        }
     }
 
-    private class GridFacesSub : IUvMapper // Look ma no llm! tbh I used Blender to get the base UVs for this
+    private class GridFacesSub(int subdivisionLevel) : IUvMapper // Look ma no llm! tbh I used Blender to get the base UVs for this
     {
-        private int _subdivisionLevel = 0;
-      
-        public GridFacesSub(int subdivisionLevel)
-        {
-            _subdivisionLevel = subdivisionLevel.Clamp(0, 5);
-        }
+        private readonly int _subdivisionLevel = subdivisionLevel.Clamp(0, 5);
 
         public Vector2 CalculateUV(Vector3 vertex, Vector3 normal, int vertexIndex, int triangleIndex)
         {
@@ -451,14 +442,14 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
                  return GetNonSubdividedUV(triangleIndex, vertexIndex);
              }*/
 
-            int subTrianglesPerFace = (int)Math.Pow(4, _subdivisionLevel);
-            int originalFaceIndex = triangleIndex / subTrianglesPerFace;
+            var subTrianglesPerFace = (int)Math.Pow(4, _subdivisionLevel);
+            var originalFaceIndex = triangleIndex / subTrianglesPerFace;
             originalFaceIndex = originalFaceIndex % 20;
-            int subTriangleIndex = triangleIndex % subTrianglesPerFace;
+            var subTriangleIndex = triangleIndex % subTrianglesPerFace;
 
-            Vector2[] baseTriangleUvs = GetBaseTriangleUvs(originalFaceIndex);
-            int uvIndex = vertexIndex % 3;
-            Vector2 baseUV = baseTriangleUvs[uvIndex];
+            var baseTriangleUvs = GetBaseTriangleUvs(originalFaceIndex);
+            var uvIndex = vertexIndex % 3;
+            var baseUV = baseTriangleUvs[uvIndex];
 
             //return TessellateUVFace(baseUV, subTriangleIndex, _subdivisionLevel);
             return TessellateUV(baseUV, baseTriangleUvs, subTriangleIndex, _subdivisionLevel);
@@ -468,51 +459,51 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
         {
             const float cellH = 1.0f / 5;
             const float cellV = 1.0f / 2;
-            
-            int groupIndex = originalFaceIndex / 5;
-            int faceInGroup = originalFaceIndex % 5;
-            float xOffset = faceInGroup * cellH;
+
+            var groupIndex = originalFaceIndex / 5;
+            var faceInGroup = originalFaceIndex % 5;
+            var xOffset = faceInGroup * cellH;
             xOffset += (0.2f - 0.181819f) * 0.5f; // Center the UVs horizontally
 
             if (originalFaceIndex < 5) // First group (faces 0-4)
             {
-                return new Vector2[3]
-                {
+                return
+                [
                     new Vector2(0.09091f + xOffset, 0.907461f),    // Top center 
                     new Vector2(0.0f + xOffset, 0.75f ),       // Left vertex 
                     new Vector2(0.181819f + xOffset, 0.75f),   // Right vertex
                     
-                };
+                ];
             }
             else if (originalFaceIndex < 10) // Second group (faces 5-9)
             {
-                return new Vector2[3]
-                {
+                return
+                [
                     new Vector2(0.181819f + xOffset, 0.75f),  // Right vertex
                     new Vector2(0.0f + xOffset, 0.75f),        // Left vertex
                     new Vector2(0.090911f + xOffset, 0.59254f  )    // Bottom center 
-                };
+                ];
             }
             else if (originalFaceIndex < 15) // Third group (faces 10-14)
             {
                 // Apply Y shift downward (-0.157461) and X shift (+cellHWidth/2)
-                return new Vector2[3]
-                {
+                return
+                [
                     new Vector2(0.09091f + xOffset, 0.907461f- cellV),   // Top center
                     new Vector2(0.0f + xOffset, 0.75f - cellV ),       // Left vertex 
                     new Vector2(0.181819f + xOffset, 0.75f- cellV),   // Right vertex
                     
-                };
+                ];
             }
             else // Fourth group (faces 15-19)
             {
                 // Apply Y shift downward (-0.157461) and X shift (+cellHWidth/2)
-                return new Vector2[3]
-                {
+                return
+                [
                     new Vector2(0.181819f + xOffset, 0.75f- cellV),  // Right vertex
                     new Vector2(0.0f + xOffset, 0.75f - cellV),        // Left vertex
                     new Vector2(0.090911f + xOffset, 0.59254f - cellV  )    // Bottom center 
-                };
+                ];
             }
         }
     }
@@ -528,38 +519,38 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
             _fixedUvs = new Dictionary<(int, int), Vector2>();
             _flippedTriangles = new HashSet<int>();
 
-            for (int triIndex = 0; triIndex < triangles.Length; triIndex++)
+            for (var triIndex = 0; triIndex < triangles.Length; triIndex++)
             {
                 var tri = triangles[triIndex];
-                int[] indices = new[] { tri.X, tri.Y, tri.Z };
-                Vector2[] uvs = new Vector2[3];
+                var indices = new[] { tri.X, tri.Y, tri.Z };
+                var uvs = new Vector2[3];
 
                 // Step 1: Compute spherical UVs
-                for (int i = 0; i < 3; i++)
+                for (var i = 0; i < 3; i++)
                 {
                     // Match tilt rotation                     
                     var tilt = Matrix4x4.CreateFromYawPitchRoll(
                         yaw: 0f,
-                        pitch: 0f,  
+                        pitch: 0f,
                         roll: -_icosahedronTiltAngle
                     );
 
                     // Rotate vertex into UV-mapping space
-                    Vector3 v = Vector3.Transform(vertices[indices[i]], tilt);
+                    var v = Vector3.Transform(vertices[indices[i]], tilt);
 
                     // Then compute spherical UVs from rotated point
-                    float u = 0.5f + MathF.Atan2(v.Z, v.X) / (2 * MathF.PI);
-                    float vCoord = 0.5f + MathF.Asin(v.Y) / MathF.PI;
+                    var u = 0.5f + MathF.Atan2(v.Z, v.X) / (2 * MathF.PI);
+                    var vCoord = 0.5f + MathF.Asin(v.Y) / MathF.PI;
                     if (u < 0f) u += 1f;
                     if (u >= 1f) u -= 1f;
                     uvs[i] = new Vector2(u, vCoord);
                 }
 
                 // Step 2: Seam fix
-                float minU = MathF.Min(uvs[0].X, MathF.Min(uvs[1].X, uvs[2].X));
-                float maxU = MathF.Max(uvs[0].X, MathF.Max(uvs[1].X, uvs[2].X));
-                bool wraps = (maxU - minU) > 0.5f;
-                for (int i = 0; i < 3; i++)
+                var minU = MathF.Min(uvs[0].X, MathF.Min(uvs[1].X, uvs[2].X));
+                var maxU = MathF.Max(uvs[0].X, MathF.Max(uvs[1].X, uvs[2].X));
+                var wraps = (maxU - minU) > 0.5f;
+                for (var i = 0; i < 3; i++)
                     if (wraps && uvs[i].X < 0.5f)
                         uvs[i].X += 1f;
 
@@ -568,7 +559,7 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
                 var uvB = new Vector3(uvs[1], 0);
                 var uvC = new Vector3(uvs[2], 0);
                 var uvNormal = Vector3.Cross(uvB - uvA, uvC - uvA);
-                bool flipped = uvNormal.Z < 0;
+                var flipped = uvNormal.Z < 0;
 
                 if (flipped)
                 {
@@ -590,7 +581,7 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
         public Vector2 CalculateUV(Vector3 vertex, Vector3 normal, int vertexIndex, int triangleIndex)
         {
             if (_fixedUvs.TryGetValue((triangleIndex, vertexIndex), out var uv))
-                return uv* new Vector2(-1f,1f) + new Vector2(1f,0f);
+                return uv * new Vector2(-1f, 1f) + new Vector2(1f, 0f);
 
             return new Vector2(0.5f, 0.5f); // fallback
         }
@@ -599,81 +590,76 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
 
 
 
-    private class Atlas : IUvMapper
+    private class Atlas(int subdivisionLevel) : IUvMapper
     {
-        private int _subdivisionLevel = 0;
-        const float currentMaxY = 0.472382f;
-
-        public Atlas(int subdivisionLevel)
-        {
-            _subdivisionLevel = subdivisionLevel.Clamp(0, 5);
-        }
+        private readonly int _subdivisionLevel = subdivisionLevel.Clamp(0, 5);
+        private const float currentMaxY = 0.472382f;
 
         public Vector2 CalculateUV(Vector3 vertex, Vector3 normal, int vertexIndex, int triangleIndex)
         {
-           /* if (_subdivisionLevel == 0)
-            {
-                return GetNonSubdividedUV(triangleIndex, vertexIndex);
-            }*/
+            /* if (_subdivisionLevel == 0)
+             {
+                 return GetNonSubdividedUV(triangleIndex, vertexIndex);
+             }*/
 
-            int subTrianglesPerFace = (int)Math.Pow(4, _subdivisionLevel);
-            int originalFaceIndex = triangleIndex / subTrianglesPerFace;
+            var subTrianglesPerFace = (int)Math.Pow(4, _subdivisionLevel);
+            var originalFaceIndex = triangleIndex / subTrianglesPerFace;
             originalFaceIndex = originalFaceIndex % 20;
-            int subTriangleIndex = triangleIndex % subTrianglesPerFace;
+            var subTriangleIndex = triangleIndex % subTrianglesPerFace;
 
-            Vector2[] baseTriangleUvs = GetBaseTriangleUvs(originalFaceIndex);
-            int uvIndex = vertexIndex % 3;
-            Vector2 baseUV = baseTriangleUvs[uvIndex];
-           
+            var baseTriangleUvs = GetBaseTriangleUvs(originalFaceIndex);
+            var uvIndex = vertexIndex % 3;
+            var baseUV = baseTriangleUvs[uvIndex];
+
             //return TessellateUVFace(baseUV, subTriangleIndex, _subdivisionLevel);
             return TessellateUV(baseUV, baseTriangleUvs, subTriangleIndex, _subdivisionLevel);
         }
-        
-        private Vector2[] GetBaseTriangleUvs(int originalFaceIndex)
+
+        private static Vector2[] GetBaseTriangleUvs(int originalFaceIndex)
         {
             const float cellWidth = 0.909091f / 5;
             const float yShift = 0.157461f;
-            int groupIndex = originalFaceIndex / 5;
-            int faceInGroup = originalFaceIndex % 5;
-            float xOffset = faceInGroup * cellWidth;
+            var groupIndex = originalFaceIndex / 5;
+            var faceInGroup = originalFaceIndex % 5;
+            var xOffset = faceInGroup * cellWidth;
 
             if (originalFaceIndex < 5) // First group (faces 0-4)
             {
-                return new Vector2[3]
-                {
+                return
+                [
             new Vector2(0.09091f + xOffset, 1.0f),                     // Top vertex (0.472382 normalized)
             new Vector2(0.0f + xOffset, 0.314921f / currentMaxY),      // Left vertex (~0.6667)
             new Vector2(0.181819f + xOffset, 0.314921f / currentMaxY)  // Right vertex
-                };
+                ];
             }
             else if (originalFaceIndex < 10) // Second group (faces 5-9)
             {
-                return new Vector2[3]
-                {
+                return
+                [
             new Vector2(0.181819f + xOffset, 0.314921f / currentMaxY),  // Right vertex
             new Vector2(0.0f + xOffset, 0.314921f / currentMaxY),        // Left vertex
             new Vector2(0.090911f + xOffset, 0.157461f / currentMaxY)    // Bottom center (~0.3333)
-                };
+                ];
             }
             else if (originalFaceIndex < 15) // Third group (faces 10-14)
             {
                 // Apply Y shift downward (-0.157461) and X shift (+cellWidth/2)
-                return new Vector2[3]
-                {
+                return
+                [
             new Vector2(0.090911f + xOffset + cellWidth * 0.5f, (0.157461f - yShift) / currentMaxY),  // Bottom center (~0.0)
             new Vector2(0.181819f + xOffset + cellWidth * 0.5f, (0.314921f - yShift) / currentMaxY),  // Right vertex (~0.3333)
             new Vector2(0.0f + xOffset + cellWidth * 0.5f, (0.314921f - yShift) / currentMaxY)        // Left vertex
-                };
+                ];
             }
             else // Fourth group (faces 15-19)
             {
                 // Apply Y shift downward (-0.157461) and X shift (+cellWidth/2)
-                return new Vector2[3]
-                {
+                return
+                [
             new Vector2(0.0f + xOffset + cellWidth * 0.5f, (0.314921f - yShift) / currentMaxY),       // Left vertex (~0.3333)
             new Vector2(0.181819f + xOffset + cellWidth * 0.5f, (0.314921f - yShift) / currentMaxY),   // Right vertex
             new Vector2(0.09091f + xOffset + cellWidth * 0.5f, (0.472382f - yShift) / currentMaxY)    // Top center (~0.6667)
-                };
+                ];
             }
         }
     }
@@ -683,20 +669,20 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
         if (subdivisionLevel == 0)
             return baseUV;
 
-        Vector2 currentV0 = baseTriangleUvs[0];
-        Vector2 currentV1 = baseTriangleUvs[1];
-        Vector2 currentV2 = baseTriangleUvs[2];
+        var currentV0 = baseTriangleUvs[0];
+        var currentV1 = baseTriangleUvs[1];
+        var currentV2 = baseTriangleUvs[2];
 
-        int currentIndex = subTriangleIndex;
-        for (int level = subdivisionLevel; level > 0; level--)
+        var currentIndex = subTriangleIndex;
+        for (var level = subdivisionLevel; level > 0; level--)
         {
-            int trianglesAtThisLevel = (int)Math.Pow(4, level - 1);
-            int quadrant = currentIndex / trianglesAtThisLevel;
+            var trianglesAtThisLevel = (int)Math.Pow(4, level - 1);
+            var quadrant = currentIndex / trianglesAtThisLevel;
             currentIndex = currentIndex % trianglesAtThisLevel;
 
-            Vector2 mid01 = (currentV0 + currentV1) * 0.5f;
-            Vector2 mid12 = (currentV1 + currentV2) * 0.5f;
-            Vector2 mid20 = (currentV2 + currentV0) * 0.5f;
+            var mid01 = (currentV0 + currentV1) * 0.5f;
+            var mid12 = (currentV1 + currentV2) * 0.5f;
+            var mid20 = (currentV2 + currentV0) * 0.5f;
 
             switch (quadrant)
             {
@@ -745,12 +731,12 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
     private static readonly float _icosahedronTiltAngle = MathF.Atan(2f / (2f * phi));  // Pre-calculate the tilt angle
 
     // Base UV coordinates for a single triangle face
-    private static readonly Vector2[] _baseUvs = new Vector2[3]
-        {
+    private static readonly Vector2[] _baseUvs =
+        [
         new Vector2(0.5f, 1.0f),    // vertex 0 (center top)
         new Vector2(0.067f, 0.250f), // vertex 11 (left bottom)
         new Vector2(0.933f, 0.250f)  // vertex 5 (right bottom)
-        };
+        ];
 
     private enum UvModes
     {
@@ -767,33 +753,33 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
         Smoothed,
     }
 
-    [Input(Guid = "2e8c23d8-01ac-4f53-b628-91d9ab094278")] 
+    [Input(Guid = "2e8c23d8-01ac-4f53-b628-91d9ab094278")]
     public readonly InputSlot<int> Subdivisions = new();
 
     [Input(Guid = "32a77592-eaa1-43e8-b1ab-74b989ecbccd")]
     public readonly InputSlot<bool> Spherical = new();
-    
+
     [Input(Guid = "63866397-F64E-486A-8C6D-862FFD3ED42E")]
     public readonly InputSlot<float> Strength = new();
 
-    [Input(Guid = "e062431e-0741-446d-ace9-e7e91080ed9f")] 
+    [Input(Guid = "e062431e-0741-446d-ace9-e7e91080ed9f")]
     public readonly InputSlot<Vector2> Stretch = new();
-    
-    [Input(Guid = "bba90ae7-689f-41d3-8a48-4f1cdb42adab")] 
+
+    [Input(Guid = "bba90ae7-689f-41d3-8a48-4f1cdb42adab")]
     public readonly InputSlot<float> Scale = new();
-    
-    [Input(Guid = "486c1717-20cf-4cf9-951e-cedd51c88262")] 
+
+    [Input(Guid = "486c1717-20cf-4cf9-951e-cedd51c88262")]
     public readonly InputSlot<Vector3> Pivot = new();
-    
-    [Input(Guid = "bbeccca7-9e1c-4702-bbd4-1cf0c9409354")] 
+
+    [Input(Guid = "bbeccca7-9e1c-4702-bbd4-1cf0c9409354")]
     public readonly InputSlot<Vector3> Center = new();
-    
-    [Input(Guid = "96D161DA-F459-427C-BE67-E8F1B47D233D")] 
+
+    [Input(Guid = "96D161DA-F459-427C-BE67-E8F1B47D233D")]
     public readonly InputSlot<Vector3> Rotation = new();
-   
+
     [Input(Guid = "FFD87531-8B82-4F31-9AA9-8459F92A4798", MappedType = typeof(UvModes))]
     public readonly InputSlot<int> TexCoord = new();
-    
+
     [Input(Guid = "08dd88b7-cd91-4f17-91d9-08de5b260e7a", MappedType = typeof(UvModes))]
     public readonly InputSlot<int> TexCoord2 = new();
 
