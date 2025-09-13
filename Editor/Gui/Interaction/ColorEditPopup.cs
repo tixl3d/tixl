@@ -643,8 +643,8 @@ internal static class ColorEditPopup
                 }
 
                 var min = ImGui.GetItemRectMin();
-                var max = ImGui.GetItemRectMax() - Vector2.One ;
-                wdl.AddText(Icons.IconFont, 13, min, new Color(0.1f), "" + (char)T3.Editor.Gui.Styling.Icon.Stripe4PxPattern);
+                var max = ImGui.GetItemRectMax() - Vector2.One * T3Ui.UiScaleFactor;
+                wdl.AddText(Icons.IconFont, 13 * T3Ui.UiScaleFactor, min, new Color(0.1f), "" + (char)T3.Editor.Gui.Styling.Icon.Stripe4PxPattern);
 
                 var opaqueColor = new Color(
                                             usedColor.X,
@@ -677,7 +677,7 @@ internal static class ColorEditPopup
 
                 if (usedColor == activeRoundedColor)
                 {
-                    wdl.AddRect(min - Vector2.One, max + Vector2.One, UiColors.ForegroundFull, 1);
+                    wdl.AddRect(min - Vector2.One * T3Ui.UiScaleFactor, max + Vector2.One * T3Ui.UiScaleFactor, UiColors.ForegroundFull, 1);
                     wdl.AddRect(min, max, UiColors.BackgroundFull, 1);
                 }
             }
