@@ -118,10 +118,10 @@ internal static class CustomComponents
         var clicked = false;
         if (isSelected)
         {
-            ImGui.PushStyleColor(ImGuiCol.Button, UiColors.Text.Rgba);
-            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, UiColors.Text.Rgba);
-            ImGui.PushStyleColor(ImGuiCol.ButtonActive, UiColors.Text.Rgba);
-            ImGui.PushStyleColor(ImGuiCol.Text, UiColors.WindowBackground.Rgba);
+            ImGui.PushStyleColor(ImGuiCol.Button, isSelected ? UiColors.BackgroundActive.Fade(0.7f).Rgba : UiColors.BackgroundButton.Rgba);
+            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, isSelected ? UiColors.BackgroundActive.Rgba : UiColors.BackgroundButton.Fade(0.7f).Rgba);
+            ImGui.PushStyleColor(ImGuiCol.Text, UiColors.Text.Rgba);
+            ImGui.PushStyleColor(ImGuiCol.ButtonActive, isSelected ? UiColors.BackgroundActive.Fade(0.7f).Rgba : UiColors.BackgroundButton.Fade(0.7f).Rgba);
         }
 
         if (ImGui.Button(label, size) || trigger)

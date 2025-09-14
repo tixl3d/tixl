@@ -336,10 +336,10 @@ internal static class FormInputs
 
     private static bool DrawSelectButton(string name, bool isSelected, float width = 0)
     {
-        ImGui.PushStyleColor(ImGuiCol.Button, isSelected ? UiColors.BackgroundActive.Rgba : UiColors.BackgroundButton.Rgba);
-        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, isSelected ? UiColors.BackgroundActive.Rgba : UiColors.BackgroundButton.Rgba);
-        ImGui.PushStyleColor(ImGuiCol.Text, UiColors.ForegroundFull.Rgba);
-        ImGui.PushStyleColor(ImGuiCol.ButtonActive, UiColors.BackgroundActive.Fade(0.7f).Rgba);
+        ImGui.PushStyleColor(ImGuiCol.Button, isSelected ? UiColors.BackgroundActive.Fade(0.7f).Rgba : UiColors.BackgroundButton.Rgba);
+        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, isSelected ? UiColors.BackgroundActive.Rgba : UiColors.BackgroundButton.Fade(0.7f).Rgba);
+        ImGui.PushStyleColor(ImGuiCol.Text, UiColors.Text.Rgba);
+        ImGui.PushStyleColor(ImGuiCol.ButtonActive, isSelected ? UiColors.BackgroundActive.Fade(0.7f).Rgba : UiColors.BackgroundButton.Fade(0.7f).Rgba);
 
         var clicked = ImGui.Button(name, new Vector2(width, 0));
         ImGui.PopStyleColor(4);
