@@ -25,73 +25,68 @@ internal static class VectorValueEdit
 
         return resultingEditState;
     }
-        
-    // Integer control
+
+    /// <summary>
+    /// Integer control, with optional +/- buttons if only one component
+    /// </summary>
     internal static InputEditStateFlags Draw(int[] components, int min, int max, float scale, bool clampMin, bool clampMax)
     {
-        var buttonsize = Vector2.One * ImGui.GetFrameHeight();
-
-        var componentsCount = components.Length;
-
         var resultingEditState = InputEditStateFlags.Nothing;
+        var hasButtons = components.Length == 1;
 
-        if (componentsCount == 1)
+        // Calculate sizes
+        var width = ImGui.GetContentRegionAvail().X / components.Length - 1;
+        var buttonSize = hasButtons ? Vector2.One * ImGui.GetFrameHeight() : Vector2.Zero;
+        var fieldWidth = hasButtons ? width - buttonSize.X * 2 : width;
+        var size = new Vector2(fieldWidth, 0);
+
+        for (var index = 0; index < components.Length; index++)
         {
-            var width = ImGui.GetContentRegionAvail().X / components.Length - 1;
-            width -= buttonsize.X * 2; // for the buttons
-            var size = new Vector2(width, 0); 
+            if (index > 0)
+                ImGui.SameLine();
 
-            for (var index = 0; index < components.Length; index++)
+            ImGui.PushID(index);
+
+            // Draw the input field
+            resultingEditState |= SingleValueEdit.Draw(ref components[index], size, min, max, clampMin, clampMax);
+
+            // Draw +/- buttons for single component
+            if (hasButtons)
             {
-                if (index > 0)
-               
+                var increment = ImGui.GetIO().KeyShift ? SHIFT_INCREMENT : 1;
                 ImGui.SameLine();
-                ImGui.PushID(index);
-                resultingEditState |= SingleValueEdit.Draw(ref components[index], size, min, max, clampMin, clampMax);
-                ImGui.PopID();
-
-                ImGui.SameLine();
-                if (ImGui.Button("-", buttonsize))
+                if (DrawButton("-", buttonSize, components[index] > min))
                 {
-                    if (ImGui.GetIO().KeyShift)
-                        components[index] -= 10;
-                    else
-                        components[index]--;
-
-                    resultingEditState |= InputEditStateFlags.ModifiedAndFinished;
-
-                }
-
-                ImGui.SameLine();
-                if (ImGui.Button("+", buttonsize))
-                {
-                    if (ImGui.GetIO().KeyShift)
-                        components[index] += 10;
-                    else
-                        components[index]++;
-
+                    components[index] = Math.Max(min, components[index] - increment);
                     resultingEditState |= InputEditStateFlags.ModifiedAndFinished;
                 }
 
-            }
-        }
-        else
-        {
-            var width = ImGui.GetContentRegionAvail().X / components.Length - 1;
-            
-            var size = new Vector2(width, 0);
-            for (var index = 0; index < components.Length; index++)
-            {
-                if (index > 0)
-                
                 ImGui.SameLine();
-
-                ImGui.PushID(index);
-                resultingEditState |= SingleValueEdit.Draw(ref components[index], size, min, max, clampMin, clampMax);
-                ImGui.PopID();
+                if (DrawButton("+", buttonSize, components[index] < max))
+                {
+                    components[index] = Math.Min(max, components[index] + increment);
+                    resultingEditState |= InputEditStateFlags.ModifiedAndFinished;
+                }
             }
+
+            ImGui.PopID();
         }
 
         return resultingEditState;
     }
+
+    private static bool DrawButton(string label, Vector2 size, bool enabled)
+    {
+        if (!enabled)
+            ImGui.BeginDisabled();
+
+        var result = ImGui.Button(label, size);
+
+        if (!enabled)
+            ImGui.EndDisabled();
+
+        return result;
+    }
+
+    private const int SHIFT_INCREMENT = 10;
 }
