@@ -1,4 +1,4 @@
-﻿using ImGuiNET;
+using ImGuiNET;
 using T3.Editor.UiModel.InputsAndTypes;
 
 namespace T3.Editor.Gui.Interaction;
@@ -29,18 +29,67 @@ internal static class VectorValueEdit
     // Integer control
     internal static InputEditStateFlags Draw(int[] components, int min, int max, float scale, bool clampMin, bool clampMax)
     {
-        var width = ImGui.GetContentRegionAvail().X / components.Length-1;
-        var size = new Vector2(width, 0);
+        var buttonsize = Vector2.One * ImGui.GetFrameHeight();
+
+        var componentsCount = components.Length;
 
         var resultingEditState = InputEditStateFlags.Nothing;
-        for (var index = 0; index < components.Length; index++)
+
+        if (componentsCount == 1)
         {
-            if (index > 0)
+            var width = ImGui.GetContentRegionAvail().X / components.Length - 1;
+            width -= buttonsize.X * 2; // for the buttons
+            var size = new Vector2(width, 0); 
+
+            for (var index = 0; index < components.Length; index++)
+            {
+                if (index > 0)
+               
+                ImGui.SameLine();
+                ImGui.PushID(index);
+                resultingEditState |= SingleValueEdit.Draw(ref components[index], size, min, max, clampMin, clampMax);
+                ImGui.PopID();
+
+                ImGui.SameLine();
+                if (ImGui.Button("-", buttonsize))
+                {
+                    if (ImGui.GetIO().KeyShift)
+                        components[index] -= 10;
+                    else
+                        components[index]--;
+
+                    resultingEditState |= InputEditStateFlags.ModifiedAndFinished;
+
+                }
+
+                ImGui.SameLine();
+                if (ImGui.Button("+", buttonsize))
+                {
+                    if (ImGui.GetIO().KeyShift)
+                        components[index] += 10;
+                    else
+                        components[index]++;
+
+                    resultingEditState |= InputEditStateFlags.ModifiedAndFinished;
+                }
+
+            }
+        }
+        else
+        {
+            var width = ImGui.GetContentRegionAvail().X / components.Length - 1;
+            
+            var size = new Vector2(width, 0);
+            for (var index = 0; index < components.Length; index++)
+            {
+                if (index > 0)
+                
                 ImGui.SameLine();
 
-            ImGui.PushID(index);
-            resultingEditState |= SingleValueEdit.Draw(ref components[index], size, min, max, clampMin, clampMax);
-            ImGui.PopID();
+                ImGui.PushID(index);
+                resultingEditState |= SingleValueEdit.Draw(ref components[index], size, min, max, clampMin, clampMax);
+                ImGui.PopID();
+            }
         }
 
         return resultingEditState;
