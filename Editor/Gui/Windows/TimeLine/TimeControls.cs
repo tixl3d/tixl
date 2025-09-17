@@ -606,7 +606,7 @@ internal static class TimeControls
         if (CustomComponents.IconButton(Icon.Stripe4PxPattern, ControlSize))
         {
             // Cycle through the three display modes
-            TimeLineImage.CurrentDisplayMode = (TimeLineImage.DisplayMode)(((int)TimeLineImage.CurrentDisplayMode + 1) % 3);
+            TimeLineImage.CurrentDisplayMode = (TimeLineImage.DisplayMode)(((int)TimeLineImage.CurrentDisplayMode + 1) % 4);
         }
 
         // Add tooltip to show current mode

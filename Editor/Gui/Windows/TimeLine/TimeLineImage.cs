@@ -5,6 +5,7 @@ using T3.Core.Audio;
 using T3.Core.DataTypes;
 using T3.Core.Resource;
 using T3.Editor.Gui.Audio;
+using T3.Editor.Gui.Styling;
 using Texture2D = T3.Core.DataTypes.Texture2D;
 
 namespace T3.Editor.Gui.Windows.TimeLine;
@@ -55,9 +56,22 @@ internal sealed class TimeLineImage
                     startPos = new Vector2(xMin, yMin);
                     endPos = new Vector2(xMax, yMin + size.Y * 2);
                     break;
+                case DisplayMode.Duration:
+                    startPos = new Vector2(xMin, yMin);
+                    endPos = new Vector2(xMax, yMin + size.Y);
+                    break;
             }
+            if (DisplayMode.Duration == CurrentDisplayMode)
+            {
+                drawList.AddRectFilled(startPos, endPos, UiColors.BackgroundFull.Fade(0.2f));
 
-            drawList.AddImage((IntPtr)_srv, startPos, endPos);
+            }
+            else
+            {
+                drawList.AddImage((IntPtr)_srv, startPos, endPos);
+            }
+               
+            
         }
     }
 
@@ -95,7 +109,8 @@ internal sealed class TimeLineImage
     {
         Spectrum,    // yMin to yMin + size.Y*2
         Waveform,    // yMin - size.Y to yMin + size.Y  
-        Both   // yMin to yMin + size.Y
+        Both,
+        Duration// yMin to yMin + size.Y
     }
 
     public static DisplayMode CurrentDisplayMode { get; set; } = DisplayMode.Spectrum;
