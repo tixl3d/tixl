@@ -1,9 +1,3 @@
-using T3.Core.DataTypes;
-using T3.Core.Operator;
-using T3.Core.Operator.Attributes;
-using T3.Core.Operator.Slots;
-using System.Runtime.InteropServices;
-
 namespace Examples.Lib.point.modify{
     [Guid("a47622c0-dabc-41bc-b7b0-e79e34000182")]
     internal sealed class PairPointsForGridWalkLinesExample : Instance<PairPointsForGridWalkLinesExample>

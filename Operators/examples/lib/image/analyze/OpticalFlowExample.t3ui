@@ -170,7 +170,7 @@
       }
     },
     {
-      "ChildId": "76a0c247-2288-4a72-b274-69faf81ff98c"/*RepeatAtGPoints*/,
+      "ChildId": "76a0c247-2288-4a72-b274-69faf81ff98c"/*RepeatAtPoints*/,
       "Position": {
         "X": 1143.7776,
         "Y": 1014.17413

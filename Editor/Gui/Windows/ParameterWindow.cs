@@ -72,7 +72,8 @@ internal sealed class ParameterWindow : Window
 
         var id = instance?.SymbolChildId ?? Guid.Empty;
 
-        if (id != _lastSelectedInstanceId)
+        _selectionChanged = id != _lastSelectedInstanceId;
+        if (_selectionChanged)
         {
             _lastSelectedInstanceId = id;
             _viewMode = ViewModes.Parameters;
@@ -97,7 +98,7 @@ internal sealed class ParameterWindow : Window
         var parentSymbol = instance.Parent?.Symbol;
         var path = instance.InstancePath;
         // ReSharper disable once RedundantAssignment
-        instance = null; //allow unload of instance type in case a recompilation occurs
+        instance = null; //allow to unload of instance type in case a recompilation occurs
         
         // Draw dialogs
         OperatorHelp.EditDescriptionDialog.Draw(symbol); // TODO: This is probably not required...
@@ -394,7 +395,9 @@ internal sealed class ParameterWindow : Window
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(5, 5));
         ImGui.BeginChild("parameters", Vector2.Zero, false, ImGuiWindowFlags.AlwaysUseWindowPadding);
 
-        
+        // Scroll back up on operator change
+        if (_selectionChanged)
+            ImGui.SetScrollY(0);
 
         var selectedChildSymbolUi = instance.GetSymbolUi();
         
@@ -757,6 +760,7 @@ internal sealed class ParameterWindow : Window
     private static IInputSlot? _inputSlotForActiveCommand;
     private static int _instanceCounter;
     private Guid _lastSelectedInstanceId;
+    private bool _selectionChanged;
 
     private readonly ParameterSettings _parameterSettings = new();
     public static readonly RenameInputDialog RenameInputDialog = new();

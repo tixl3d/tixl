@@ -30,6 +30,13 @@
       "Description": "Applies a channel weight to the axis."
     },
     {
+      "InputId": "9ad4555a-33c4-4853-b4f9-e885cfb6ef81"/*UvSelection*/,
+      "Position": {
+        "X": 273.30417,
+        "Y": 2093.7844
+      }
+    },
+    {
       "InputId": "bbb330cb-6f13-445a-8e7c-c5610380f1ff"/*Mode*/,
       "Position": {
         "X": 273.30414,
@@ -187,6 +194,13 @@
       "Position": {
         "X": 953.4684,
         "Y": 1294.7141
+      }
+    },
+    {
+      "ChildId": "ab16fc93-a727-4868-94d7-1c22916c23f2"/*IntToFloat*/,
+      "Position": {
+        "X": 413.30417,
+        "Y": 2093.7844
       }
     },
     {

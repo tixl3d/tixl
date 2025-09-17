@@ -344,7 +344,7 @@
       "Outputs": []
     },
     {
-      "Id": "22904c6a-dc1f-4134-b164-99c1cdb31ecc"/*RepeatAtGPoints*/,
+      "Id": "22904c6a-dc1f-4134-b164-99c1cdb31ecc"/*RepeatAtPoints*/,
       "SymbolId": "780edb20-f83f-494c-ab17-7015e2311250",
       "InputValues": [],
       "Outputs": []
@@ -1422,11 +1422,6 @@
           "Id": "5894156a-cc31-4236-908c-de0e5385fd84"/*Strength*/,
           "Type": "System.Single",
           "Value": 35.8
-        },
-        {
-          "Id": "6c2ab161-da81-47c2-8008-222cf994179c"/*UseWAsWeight*/,
-          "Type": "System.Single",
-          "Value": 1.0
         },
         {
           "Id": "929db7b2-f19c-4a28-b4c2-187365b99760"/*Frequency*/,

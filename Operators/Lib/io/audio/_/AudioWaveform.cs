@@ -1,6 +1,4 @@
-using ManagedBass;
 using T3.Core.Audio;
-using T3.Core.Utils;
 
 namespace Lib.io.audio._;
 

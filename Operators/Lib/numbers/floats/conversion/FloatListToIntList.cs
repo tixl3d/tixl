@@ -1,8 +1,4 @@
-using System.Collections.Generic;
-using System.Linq;
-using T3.Core.Operator;
-using T3.Core.Operator.Slots;
-using T3.Core.Operator.Attributes;
+
 
 // The `using static T3.Core.Operator.Symbol.Child;` statement from the prompt
 // is not required for the logic within this specific class.

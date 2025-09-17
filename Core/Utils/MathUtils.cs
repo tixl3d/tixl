@@ -122,6 +122,11 @@ public static class MathUtils
 
         return h32 ^ (h32 >> 16);
     }
+    
+    public static int XxHash(int p)
+    {
+        return (int)XxHash((uint)p);
+    }
         
     public static float Hash01( uint x )
     {

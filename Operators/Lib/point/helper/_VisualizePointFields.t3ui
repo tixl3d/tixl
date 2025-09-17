@@ -35,7 +35,7 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "163d09dc-98aa-4048-9054-39e287d1706d"/*RepeatAtGPoints*/,
+      "ChildId": "163d09dc-98aa-4048-9054-39e287d1706d"/*RepeatAtPoints*/,
       "Comment": "Clone multiple points with variant Size and Opacity on these points.",
       "Position": {
         "X": 216.89514,
@@ -43,7 +43,7 @@
       }
     },
     {
-      "ChildId": "234bb14a-8a9c-47d6-8f71-10f4b3791909"/*RepeatAtGPoints*/,
+      "ChildId": "234bb14a-8a9c-47d6-8f71-10f4b3791909"/*RepeatAtPoints*/,
       "Position": {
         "X": 366.89514,
         "Y": -11.656677
@@ -72,7 +72,7 @@
       }
     },
     {
-      "ChildId": "938e051f-9776-4d01-b63a-55b21323d827"/*RepeatAtGPoints*/,
+      "ChildId": "938e051f-9776-4d01-b63a-55b21323d827"/*RepeatAtPoints*/,
       "Comment": "Draw some rings to visualize the field extent.",
       "Position": {
         "X": 366.89514,

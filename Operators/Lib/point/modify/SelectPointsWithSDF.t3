@@ -2,7 +2,7 @@
   "Id": "695d20dc-d1fe-4648-80fb-e1159b8aead4"/*SelectPointsWithSDF*/,
   "Inputs": [
     {
-      "Id": "03558959-4190-4b5b-a544-b17d56fb77da"/*ClampResult*/,
+      "Id": "03558959-4190-4b5b-a544-b17d56fb77da"/*ClampNegative*/,
       "DefaultValue": true
     },
     {

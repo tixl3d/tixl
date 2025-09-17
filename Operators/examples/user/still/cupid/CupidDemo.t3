@@ -1436,11 +1436,6 @@
           "Value": 22.0
         },
         {
-          "Id": "6c2ab161-da81-47c2-8008-222cf994179c"/*UseWAsWeight*/,
-          "Type": "System.Single",
-          "Value": -1.0
-        },
-        {
           "Id": "929db7b2-f19c-4a28-b4c2-187365b99760"/*Frequency*/,
           "Type": "System.Single",
           "Value": 0.90000004

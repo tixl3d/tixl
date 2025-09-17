@@ -51,7 +51,7 @@
       "Outputs": []
     },
     {
-      "Id": "2af0e877-49ea-4b4e-a227-ba92bde6eef0"/*RepeatAtGPoints*/,
+      "Id": "2af0e877-49ea-4b4e-a227-ba92bde6eef0"/*RepeatAtPoints*/,
       "SymbolId": "780edb20-f83f-494c-ab17-7015e2311250",
       "InputValues": [
         {

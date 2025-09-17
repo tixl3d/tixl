@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using T3.Core.Animation;
 using T3.Core.Utils;
-using T3.Core.Video;
 
 // ReSharper disable ForCanBeConvertedToForeach
 

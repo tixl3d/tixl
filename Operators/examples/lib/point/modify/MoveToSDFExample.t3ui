@@ -134,7 +134,7 @@
       }
     },
     {
-      "ChildId": "de9a4dc9-3fbc-49bc-8ea6-f56f0f6d6d31"/*RepeatAtGPoints*/,
+      "ChildId": "de9a4dc9-3fbc-49bc-8ea6-f56f0f6d6d31"/*RepeatAtPoints*/,
       "Comment": "...repeating some circles at those points.",
       "Position": {
         "X": 748.5374,

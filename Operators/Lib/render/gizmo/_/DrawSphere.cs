@@ -1,9 +1,3 @@
-using T3.Core.DataTypes;
-using T3.Core.Operator;
-using T3.Core.Operator.Attributes;
-using T3.Core.Operator.Slots;
-using System.Runtime.InteropServices;
-
 namespace Lib.render.gizmo._{
     [Guid("3b97856c-5397-402e-85ca-5d227af348dd")]
     internal sealed class DrawSphere : Instance<DrawSphere>

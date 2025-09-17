@@ -157,7 +157,7 @@
       }
     },
     {
-      "ChildId": "4c9dd3a4-d707-4385-b504-a3f584682f33"/*HSBToColor*/,
+      "ChildId": "4c9dd3a4-d707-4385-b504-a3f584682f33"/*HSLToColor*/,
       "Position": {
         "X": -1921.052,
         "Y": 843.8131
@@ -373,7 +373,7 @@
       }
     },
     {
-      "ChildId": "9062b0b7-0014-4efc-b3d3-b78ea17234d4"/*HSBToColor*/,
+      "ChildId": "9062b0b7-0014-4efc-b3d3-b78ea17234d4"/*HSLToColor*/,
       "Position": {
         "X": -1318.5526,
         "Y": 763.59644

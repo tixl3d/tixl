@@ -13,7 +13,7 @@
       "SymbolId": "695d20dc-d1fe-4648-80fb-e1159b8aead4",
       "InputValues": [
         {
-          "Id": "03558959-4190-4b5b-a544-b17d56fb77da"/*ClampResult*/,
+          "Id": "03558959-4190-4b5b-a544-b17d56fb77da"/*ClampNegative*/,
           "Type": "System.Boolean",
           "Value": false
         },
@@ -131,7 +131,7 @@
       "SymbolId": "695d20dc-d1fe-4648-80fb-e1159b8aead4",
       "InputValues": [
         {
-          "Id": "03558959-4190-4b5b-a544-b17d56fb77da"/*ClampResult*/,
+          "Id": "03558959-4190-4b5b-a544-b17d56fb77da"/*ClampNegative*/,
           "Type": "System.Boolean",
           "Value": true
         },

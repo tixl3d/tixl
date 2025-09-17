@@ -36,6 +36,9 @@ internal sealed class StatusErrorLine : ILogWriter
             const int maxLength = 100;
             if (firstLine.Length > maxLength)
                 firstLine = firstLine[..maxLength];
+
+            if (firstLine.Length == 0)
+                return;
             
             var width = ImGui.CalcTextSize(firstLine).X;
             

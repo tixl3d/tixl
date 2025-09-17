@@ -1,4 +1,3 @@
-using System.Drawing;
 using T3.Core.DataTypes.ShaderGraph;
 using T3.Core.Utils;
 

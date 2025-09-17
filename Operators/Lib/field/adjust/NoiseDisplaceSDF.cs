@@ -27,27 +27,27 @@ internal sealed class NoiseDisplaceSDF : Instance<NoiseDisplaceSDF>
     {
         c.Globals["fSimplexNoiseDisplace"]
             = """
-              float mod289(float x) {
+              float _noiseOffset_mod289(float x) {
                   return x - floor(x * (1.0 / 289.0)) * 289.0;
               }
 
-              float3 mod289(float3 x) {
+              float3 _noiseOffset_mod289(float3 x) {
                   return x - floor(x * (1.0 / 289.0)) * 289.0;
               }
 
-              float4 mod289(float4 x) {
+              float4 _noiseOffset_mod289(float4 x) {
                   return x - floor(x * (1.0 / 289.0)) * 289.0;
               }
 
-              float4 permute(float4 x) {
-                  return mod289(((x * 34.0) + 1.0) * x);
+              float4 _noiseOffset_permute(float4 x) {
+                  return _noiseOffset_mod289(((x * 34.0) + 1.0) * x);
               }
 
-              float4 taylorInvSqrt(float4 r) {
+              float4 _noiseOffset_taylorInvSqrt(float4 r) {
                   return 1.79284291400159 - 0.85373472095314 * r;
               }
 
-              float simplexNoise3D(float3 v) {
+              float _noiseOffset_simplexNoise3D(float3 v) {
                   const float2  C = float2(1.0 / 6.0, 1.0 / 3.0);
                   const float4  D = float4(0.0, 0.5, 1.0, 2.0);
               
@@ -66,8 +66,8 @@ internal sealed class NoiseDisplaceSDF : Instance<NoiseDisplaceSDF>
                   float3 x3 = x0 - 0.5;
               
                   // Permutations
-                  i = mod289(i);
-                  float4 p = permute(permute(permute(
+                  i = _noiseOffset_mod289(i);
+                  float4 p = _noiseOffset_permute(_noiseOffset_permute(_noiseOffset_permute(
                                i.z + float4(0.0, i1.z, i2.z, 1.0))
                              + i.y + float4(0.0, i1.y, i2.y, 1.0))
                              + i.x + float4(0.0, i1.x, i2.x, 1.0));
@@ -99,7 +99,7 @@ internal sealed class NoiseDisplaceSDF : Instance<NoiseDisplaceSDF>
                   float3 g3 = float3(a1.zw, h.w);
               
                   // Normalize gradients
-                  float4 norm = taylorInvSqrt(float4(dot(g0,g0), dot(g1,g1), dot(g2,g2), dot(g3,g3)));
+                  float4 norm = _noiseOffset_taylorInvSqrt(float4(dot(g0,g0), dot(g1,g1), dot(g2,g2), dot(g3,g3)));
                   g0 *= norm.x;
                   g1 *= norm.y;
                   g2 *= norm.z;
@@ -112,7 +112,7 @@ internal sealed class NoiseDisplaceSDF : Instance<NoiseDisplaceSDF>
               }
 
               float fSimplexNoiseDisplace(float3 pos, float amount, float scale, float3 offset) {
-                  return simplexNoise3D(pos / scale + offset ) * amount;
+                  return _noiseOffset_simplexNoise3D(pos / scale + offset ) * amount;
               }
               """;
     }

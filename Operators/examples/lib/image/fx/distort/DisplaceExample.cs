@@ -1,9 +1,3 @@
-using T3.Core.DataTypes;
-using T3.Core.Operator;
-using T3.Core.Operator.Attributes;
-using T3.Core.Operator.Slots;
-using System.Runtime.InteropServices;
-
 namespace Examples.Lib.image.fx.distort{
     [Guid("5364ffce-d804-4b1f-a2f9-3603d2a2abd4")]
     internal sealed class DisplaceExample : Instance<DisplaceExample>

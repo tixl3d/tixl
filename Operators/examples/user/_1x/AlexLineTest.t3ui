@@ -201,7 +201,7 @@
       }
     },
     {
-      "ChildId": "1d55ae3d-d236-425b-8ef4-148788aa2136"/*RepeatAtGPoints*/,
+      "ChildId": "1d55ae3d-d236-425b-8ef4-148788aa2136"/*RepeatAtPoints*/,
       "Position": {
         "X": 0.0,
         "Y": 1388.9164
@@ -439,7 +439,7 @@
       }
     },
     {
-      "ChildId": "59355fcd-105a-4dab-bc21-4db1194688ea"/*RepeatAtGPoints*/,
+      "ChildId": "59355fcd-105a-4dab-bc21-4db1194688ea"/*RepeatAtPoints*/,
       "Position": {
         "X": 0.0,
         "Y": 1388.9164

@@ -1,6 +1,3 @@
-using Lib.image.transform;
-using System;
-using System.Windows.Forms;
 using T3.Core.Rendering;
 using T3.Core.Utils;
 using T3.Core.Utils.Geometry;

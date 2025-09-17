@@ -23,7 +23,7 @@ internal sealed partial class MagGraphView
 
         drawList.PushClipRect(pMin, pMax, true); // Start with a simple rectangular clip 
         // Background
-        var backgroundColor = ColorVariations.AnnotationBackground.Apply(magAnnotation.Annotation.Color).Fade(0.4f);
+        var backgroundColor = ColorVariations.AnnotationBackground.Apply(magAnnotation.Annotation.Color).Fade(0.8f);
 
         var rounding = 8;// * canvas.Scale.X; 
         var flags = ImDrawFlags.RoundCornersTop | ImDrawFlags.RoundCornersBottomLeft;

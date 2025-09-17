@@ -2,8 +2,8 @@
   "Id": "6095a1f7-0633-4a6b-8eb0-331db20a814e"/*IntsToList*/,
   "Inputs": [
     {
-      "Id": "cfc02c47-b0a9-477b-8d88-7d0da83f61a6"/*Input*/,
-      "DefaultValue": 0.0
+      "Id": "2be3761c-d07c-408b-91f4-17088bb19fb8"/*Input*/,
+      "DefaultValue": 0
     }
   ],
   "Children": [],

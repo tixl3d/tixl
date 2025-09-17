@@ -93,8 +93,25 @@ public static partial class ResourceManager
         Func<string, string, SearchOption, IEnumerable<string>> searchFunc = useFolder
                                                                                  ? Directory.EnumerateDirectories
                                                                                  : Directory.EnumerateFiles;
+
+        var directory = package.ResourcesFolder;
+        if (!Directory.Exists(directory))
+        {
+            yield break;
+        }
         
-        foreach (var path in searchFunc(package.ResourcesFolder, "*", SearchOption.AllDirectories))
+        IEnumerable<string> paths;
+        try
+        {
+            paths = searchFunc(directory, "*", SearchOption.AllDirectories);
+        }
+        catch (Exception e)
+        {
+            Log.Debug("Failed to scan resources: " + e.Message);
+            yield break; // can't even start enumeration
+        }
+        
+        foreach (var path in paths)
         {
             path.ToForwardSlashesUnsafe();
             var lastSlashIndex = path.LastIndexOf('/');
@@ -134,14 +151,14 @@ public static partial class ResourceManager
                 case PathMode.Relative:
                     if(!_relativePathsCache.TryGetValue(path, out result))
                     {
-                        result = path[(package.ResourcesFolder.Length + 1)..];
+                        result = path[(directory.Length + 1)..];
                         _relativePathsCache.TryAdd(path, result);
                     }
                     break;
                 case PathMode.Aliased:
                     if(!_aliasedPathsCache.TryGetValue(path, out result))
                     {
-                        result = $"/{package.Alias}/{path.AsSpan()[(package.ResourcesFolder.Length + 1)..]}";
+                        result = $"/{package.Alias}/{path.AsSpan()[(directory.Length + 1)..]}";
                         _aliasedPathsCache.TryAdd(path, result);
                     }
                     break;

@@ -10,7 +10,8 @@
       },
       "Min": 0,
       "Scale": 1.0,
-      "Clamp": true
+      "ClampMin": true,
+      "ClampMax": true
     },
     {
       "InputId": "24b5d450-4e83-49db-88b1-7d688e64585d"/*LocalIpAddress*/,

@@ -45,7 +45,7 @@
     },
     {
       "Id": "d89c518c-a862-4f46-865b-0380350b7417"/*Size*/,
-      "DefaultValue": 50.0
+      "DefaultValue": 150.0
     },
     {
       "Id": "de0fed7d-d2af-4424-baf3-81606e26559f"/*Position*/,

@@ -9,6 +9,7 @@ using NuGet.Configuration;
 using NuGet.Frameworks;
 using T3.Core.Logging;
 using Microsoft.Extensions.DependencyModel;
+using T3.Core.IO;
 
 namespace T3.Core.Compilation;
 
@@ -127,7 +128,9 @@ internal sealed partial class TixlAssemblyLoadContext
             }
         }
 
-        Log.Error($"{Name}: Could not find nuget assembly '{asmName}'.");
+        if(ProjectSettings.Config.LogAssemblyLoadingDetails)
+            Log.Error($"{Name}: Could not find nuget assembly '{asmName}'.");
+        
         return null;
     }
 

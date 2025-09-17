@@ -21,6 +21,27 @@
           "2693cb7d-33b3-4a0c-929f-e6911d2d4a0c": 3
         }
       }
+    },
+    {
+      "Id": "bfd60984-0c9a-4e10-9959-2e8df012d6f9",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Slow random Rotate",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "03df41a8-3d72-47b1-b854-81e6e59e7cb4": 0.055555556,
+          "c427d83b-1046-4b8d-b44a-e616a64a702a": {
+            "X": 1.0,
+            "Y": 1.0,
+            "Z": 1.0
+          },
+          "e0f4333d-8bee-4f9e-bb29-9f76bd72e61f": 180.0
+        }
+      }
     }
   ]
 }

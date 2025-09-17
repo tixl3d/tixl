@@ -13,15 +13,17 @@ internal sealed class OpenedProject
 
     public static readonly Dictionary<EditorSymbolPackage, OpenedProject> OpenedProjects = new();
 
-    public static bool TryCreate(EditorSymbolPackage project, [NotNullWhen(true)] out OpenedProject? openedProject)
+    public static bool TryCreate(EditorSymbolPackage project, [NotNullWhen(true)] out OpenedProject? openedProject, [NotNullWhen(false)] out string? failureLog)
     {
         if (OpenedProjects.TryGetValue(project, out openedProject))
         {
+            failureLog = null;
             return true;
         }
         
-        if (!project.HasHome)
+        if (!project.HasHomeSymbol(out failureLog))
         {
+            failureLog ??= "project has no home?";
             openedProject = null;
             return false;
         }

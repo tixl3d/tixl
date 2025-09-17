@@ -148,7 +148,7 @@ public sealed class Variation : ISelectableCanvasObject
                 {
                     if (inputUi.ExcludedFromPresets)
                     {
-                        Log.Warning($"Skipping input {symbolUi}.{inputUi} excluded from presets.");
+                        //Log.Warning($"Skipping input {symbolUi}.{inputUi} excluded from presets.");
                         continue;
                     }
                 }

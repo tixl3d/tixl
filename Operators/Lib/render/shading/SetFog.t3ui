@@ -23,7 +23,8 @@
       "AddPadding": "True",
       "Min": 0.0,
       "Max": 100.0,
-      "Scale": 0.1
+      "Scale": 0.1,
+      "ClampMin": true
     },
     {
       "InputId": "afadb109-37b2-49aa-8c32-627cc35fd574"/*Command*/,

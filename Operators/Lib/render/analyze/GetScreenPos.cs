@@ -1,6 +1,3 @@
-using T3.Core.Utils;
-using T3.Core.Utils.Geometry;
-
 namespace Lib.render.analyze;
 
 [Guid("56779460-e3e2-401b-8836-f11917b55431")]

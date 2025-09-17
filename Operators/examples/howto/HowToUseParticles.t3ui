@@ -219,7 +219,7 @@
       }
     },
     {
-      "ChildId": "628ae78f-9eae-4479-89c1-5dcc580d62bd"/*RepeatAtGPoints*/,
+      "ChildId": "628ae78f-9eae-4479-89c1-5dcc580d62bd"/*RepeatAtPoints*/,
       "Comment": "We can also clone other points at the particles' positions.",
       "Position": {
         "X": 1040.5278,

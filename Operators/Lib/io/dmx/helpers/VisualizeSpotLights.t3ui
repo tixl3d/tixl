@@ -44,7 +44,7 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "128b6ee0-9cd0-4504-b4c5-7986b6e0c8ff"/*RepeatAtGPoints*/,
+      "ChildId": "128b6ee0-9cd0-4504-b4c5-7986b6e0c8ff"/*RepeatAtPoints*/,
       "Position": {
         "X": 270.29633,
         "Y": 268.13144
@@ -142,7 +142,7 @@
       }
     },
     {
-      "ChildId": "b1261f42-dc1d-4542-a144-0f6303ab8592"/*RepeatAtGPoints*/,
+      "ChildId": "b1261f42-dc1d-4542-a144-0f6303ab8592"/*RepeatAtPoints*/,
       "Position": {
         "X": 271.16476,
         "Y": 556.28296

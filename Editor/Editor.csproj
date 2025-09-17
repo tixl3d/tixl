@@ -3,6 +3,8 @@
     <PropertyGroup>
         <TargetFramework>$(TixlNetFrameworkVersion)</TargetFramework>
         <VersionPrefix>$(TixlVersion)</VersionPrefix>
+        <VersionSuffix>$(TixlVersionSuffix)</VersionSuffix>
+        <InformationalVersion>$(Version)</InformationalVersion>
         <OutputType>Exe</OutputType>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <StartupObject>T3.Editor.Program</StartupObject>

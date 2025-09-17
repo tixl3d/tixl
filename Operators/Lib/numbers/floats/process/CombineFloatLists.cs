@@ -1,5 +1,3 @@
-using T3.Core.Utils;
-
 namespace Lib.numbers.floats.process;
 
 [Guid("2572b5f2-40af-442c-9354-7a9fa5bd378f")]

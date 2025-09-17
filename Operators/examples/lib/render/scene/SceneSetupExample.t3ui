@@ -145,7 +145,7 @@
       }
     },
     {
-      "ChildId": "7d4f306a-473b-4cbe-96cd-008a72979fdc"/*RepeatAtGPoints*/,
+      "ChildId": "7d4f306a-473b-4cbe-96cd-008a72979fdc"/*RepeatAtPoints*/,
       "Position": {
         "X": 1209.5544,
         "Y": 766.4501
@@ -166,7 +166,7 @@
       }
     },
     {
-      "ChildId": "ae095717-bfde-4199-be17-92346f90ced0"/*RepeatAtGPoints*/,
+      "ChildId": "ae095717-bfde-4199-be17-92346f90ced0"/*RepeatAtPoints*/,
       "Comment": "We change connection type.",
       "Position": {
         "X": 1232.5807,

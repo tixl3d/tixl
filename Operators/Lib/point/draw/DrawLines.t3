@@ -6,20 +6,12 @@
       "DefaultValue": 0
     },
     {
-      "Id": "039e11ea-2155-4f90-aa8a-74ead604679c"/*UseWForWidth*/,
-      "DefaultValue": 1.0
-    },
-    {
       "Id": "28f85ae9-ebae-4300-8aa0-738c6327cc44"/*TransitionProgress*/,
       "DefaultValue": 0.0
     },
     {
       "Id": "520c428e-77b0-44d7-95af-d1cbf9b7e4a7"/*UvScaleFX*/,
       "DefaultValue": 0
-    },
-    {
-      "Id": "567794ab-b3d3-43f6-ae95-4d654f797577"/*UseWAsTexCoordV*/,
-      "DefaultValue": false
     },
     {
       "Id": "75419a73-8a3e-4538-9a1d-e3b0ce7f8561"/*Color*/,

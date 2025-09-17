@@ -281,9 +281,9 @@ internal sealed class UiElements
                 {
                     if (!isOpened)
                     {
-                        if (!OpenedProject.TryCreate(package, out openedProject))
+                        if (!OpenedProject.TryCreate(package, out openedProject, out var error))
                         {
-                            Log.Warning("Failed to load project");
+                            Log.Warning($"Failed to load project: {error}");
                             continue;
                         }
                     }

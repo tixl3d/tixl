@@ -263,7 +263,7 @@ public static class T3Ui
             UserSettings.Config.ShowMainMenu = false;
             UserSettings.Config.ShowTitleAndDescription = false;
             UserSettings.Config.ShowToolbar = false;
-            //UserSettings.Config.ShowTimeline = false;
+            UserSettings.Config.ShowTimeline = false;
         }
         else
         {

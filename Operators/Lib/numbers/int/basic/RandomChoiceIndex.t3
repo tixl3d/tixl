@@ -1,0 +1,15 @@
+{
+  "Id": "74901305-773d-4246-b962-2478096159b7"/*RandomChoiceIndex*/,
+  "Inputs": [
+    {
+      "Id": "009e80fa-7f42-4db6-abd8-91039602bed6"/*Mod*/,
+      "DefaultValue": 1
+    },
+    {
+      "Id": "b84a35a2-8eb9-45a2-ae68-bfce77fc1616"/*Value*/,
+      "DefaultValue": 0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

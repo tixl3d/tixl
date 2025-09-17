@@ -1,6 +1,5 @@
 #nullable enable
 using T3.Core.DataTypes.ShaderGraph;
-using T3.Core.Utils;
 
 namespace Lib.field.generate.sdf._;
 

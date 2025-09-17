@@ -7,7 +7,7 @@
     },
     {
       "Id": "b9a9ba6a-53b5-463d-8161-6677019e78ca"/*K*/,
-      "DefaultValue": 0.0
+      "DefaultValue": 0.5
     },
     {
       "Id": "d17f87db-7500-4780-aece-d8400cfe4da0"/*CombineMethod*/,

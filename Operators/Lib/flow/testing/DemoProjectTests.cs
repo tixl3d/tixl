@@ -1,9 +1,3 @@
-using System;
-using T3.Core.Operator;
-using T3.Core.Operator.Attributes;
-using T3.Core.Operator.Slots;
-using System.Runtime.InteropServices;
-
 namespace Lib.flow.testing{
     [Guid("cf9a082f-490c-4b59-8a9a-eee161420d06")]
     internal sealed class DemoProjectTests : Instance<DemoProjectTests>

@@ -186,9 +186,9 @@ internal static partial class PlayerExporter
             if (package is EditableSymbolProject project)
             {
                 project.SaveModifiedSymbols();
-                if (!project.CsProjectFile.TryCompileRelease(false))
+                if (!project.CsProjectFile.TryCompileRelease(false, out var failureLog))
                 {
-                    reason = $"Failed to compile project \"{packageName}\"";
+                    reason = $"Failed to compile project \"{packageName}\" - \n{failureLog}";
                     return false;
                 }
 

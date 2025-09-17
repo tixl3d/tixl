@@ -1,4 +1,5 @@
 #nullable enable
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.InteropServices;
 using Microsoft.Build.Construction;
@@ -264,10 +265,11 @@ internal sealed class CsProjectFile
     /// Compiles/recompiles this project in debug mode for runtime use in the Editor.
     /// </summary>
     /// <param name="nugetRestore">True if NuGet packages should be restored</param>
+    /// <param name="output">The output of the compilation process</param>
     /// <returns>True if successful</returns>
-    public bool TryRecompile(bool nugetRestore)
+    public bool TryRecompile(bool nugetRestore, [NotNullWhen(false)] out string? output)
     {
-        if (!Compiler.TryCompile(this, EditorBuildMode, nugetRestore))
+        if (!Compiler.TryCompile(this, EditorBuildMode, nugetRestore, out output))
         {
             return false;
         }
@@ -301,10 +303,11 @@ internal sealed class CsProjectFile
     /// For building release-mode assemblies for use in the Player. All other runtime-compilation is done in debug mode.
     /// </summary>
     /// <param name="nugetRestore">True if NuGet packages should be restored</param>
+    /// <param name="output">Compilation process output in case of failure</param>
     /// <returns>True if successful</returns>
-    public bool TryCompileRelease(bool nugetRestore)
+    public bool TryCompileRelease(bool nugetRestore, [NotNullWhen(false)] out string? output)
     {
-        return Compiler.TryCompile(this, PlayerBuildMode, nugetRestore);
+        return Compiler.TryCompile(this, PlayerBuildMode, nugetRestore, out output);
     }
 
     /// <summary>

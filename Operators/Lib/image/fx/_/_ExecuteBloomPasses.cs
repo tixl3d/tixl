@@ -3,7 +3,6 @@ using SharpDX.Direct3D11;
 using SharpDX.Mathematics.Interop;
 using T3.Core.Rendering;
 using T3.Core.Utils;
-using Color = T3.Core.DataTypes.Vector.Color;
 using Utilities = T3.Core.Utils.Utilities;
 
 // ReSharper disable RedundantNameQualifier

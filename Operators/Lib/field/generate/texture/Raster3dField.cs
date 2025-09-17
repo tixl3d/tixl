@@ -1,6 +1,4 @@
 using T3.Core.DataTypes.ShaderGraph;
-using T3.Core.Utils;
-using T3.Core.Utils.Geometry;
 
 namespace Lib.field.generate.texture;
 

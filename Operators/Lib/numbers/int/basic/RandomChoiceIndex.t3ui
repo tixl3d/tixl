@@ -1,0 +1,32 @@
+{
+  "Id": "74901305-773d-4246-b962-2478096159b7"/*RandomChoiceIndex*/,
+  "Description": "Returns a random index for a given seed that can be used to pick from a list or scene.\n\nThe index will remain in the giving Modulo range and never repeat an index.",
+  "InputUis": [
+    {
+      "InputId": "009e80fa-7f42-4db6-abd8-91039602bed6"/*Mod*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Min": 2,
+      "ClampMin": true
+    },
+    {
+      "InputId": "b84a35a2-8eb9-45a2-ae68-bfce77fc1616"/*Value*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "8509fd5c-8314-4f6e-906f-5bae82dfeace"/*Result*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

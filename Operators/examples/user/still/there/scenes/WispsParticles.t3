@@ -588,11 +588,6 @@
           "Value": 1
         },
         {
-          "Id": "039e11ea-2155-4f90-aa8a-74ead604679c"/*UseWForWidth*/,
-          "Type": "System.Single",
-          "Value": 0.99
-        },
-        {
           "Id": "df158fcf-3042-48cf-8383-7bf4c1bcb8a6"/*LineWidth*/,
           "Type": "System.Single",
           "Value": 0.017
@@ -714,8 +709,8 @@
           "Id": "b4a8c16d-5a0f-4867-ae03-92a675abe709"/*Translation*/,
           "Type": "System.Numerics.Vector3",
           "Value": {
-            "X": 0.0,
-            "Y": 0.0,
+            "X": -0.03159237,
+            "Y": 0.021564245,
             "Z": -10.0
           }
         }
@@ -927,7 +922,7 @@
       "Outputs": []
     },
     {
-      "Id": "521d2e37-8879-4f7e-a817-4c9b1a5a4bd9"/*RepeatAtGPoints*/,
+      "Id": "521d2e37-8879-4f7e-a817-4c9b1a5a4bd9"/*RepeatAtPoints*/,
       "SymbolId": "780edb20-f83f-494c-ab17-7015e2311250",
       "InputValues": [
         {
@@ -1233,11 +1228,6 @@
       "Id": "6cb4cdb6-2e43-457f-9187-a1a843ced407"/*DrawLines*/,
       "SymbolId": "836f211f-b387-417c-8316-658e0dc6e117",
       "InputValues": [
-        {
-          "Id": "567794ab-b3d3-43f6-ae95-4d654f797577"/*UseWAsTexCoordV*/,
-          "Type": "System.Boolean",
-          "Value": true
-        },
         {
           "Id": "9ba2aa59-e55b-4ebe-aa98-0f79ed77c7aa"/*EnableZTest*/,
           "Type": "System.Boolean",
@@ -1776,11 +1766,6 @@
       "Id": "a0ec90ca-1e61-4c7c-8f28-3fd58598c063"/*DrawLines*/,
       "SymbolId": "836f211f-b387-417c-8316-658e0dc6e117",
       "InputValues": [
-        {
-          "Id": "039e11ea-2155-4f90-aa8a-74ead604679c"/*UseWForWidth*/,
-          "Type": "System.Single",
-          "Value": 2.8
-        },
         {
           "Id": "75419a73-8a3e-4538-9a1d-e3b0ce7f8561"/*Color*/,
           "Type": "System.Numerics.Vector4",
@@ -2794,11 +2779,6 @@
       "Id": "f0294bc8-8c7f-4907-b98f-99a04b235d9c"/*DrawLines*/,
       "SymbolId": "836f211f-b387-417c-8316-658e0dc6e117",
       "InputValues": [
-        {
-          "Id": "567794ab-b3d3-43f6-ae95-4d654f797577"/*UseWAsTexCoordV*/,
-          "Type": "System.Boolean",
-          "Value": true
-        },
         {
           "Id": "75419a73-8a3e-4538-9a1d-e3b0ce7f8561"/*Color*/,
           "Type": "System.Numerics.Vector4",

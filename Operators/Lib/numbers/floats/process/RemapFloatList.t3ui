@@ -31,7 +31,8 @@
       },
       "Min": 0.0,
       "Max": 1.0,
-      "Clamp": true
+      "ClampMin": true,
+      "ClampMax": true
     },
     {
       "InputId": "b518b98c-9f9b-43bb-ab1a-e26d82e6290f"/*RangeOutMax*/,
@@ -56,5 +57,13 @@
     }
   ],
   "SymbolChildUis": [],
-  "OutputUis": []
+  "OutputUis": [
+    {
+      "OutputId": "b6ed9d22-e8c4-458e-9bdc-0d65eca208c5"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    }
+  ]
 }

@@ -35,7 +35,8 @@ internal partial class EditableSymbolProject
                            Guid newSymbolId, 
                            string nameSpace, 
                            [NotNullWhen(true)] out Symbol? newSymbol, 
-                           [NotNullWhen(true)] out SymbolUi? newSymbolUi)
+                           [NotNullWhen(true)] out SymbolUi? newSymbolUi,
+                           [NotNullWhen(false)] out string? failureLog)
     {
         var path = SymbolPathHandler.GetCorrectPath(newSymbolName, nameSpace, Folder, CsProjectFile.RootNamespace!, SourceCodeExtension);
             
@@ -51,7 +52,7 @@ internal partial class EditableSymbolProject
         }
         catch
         {
-            Log.Error($"Could not write source code to {path}");
+            failureLog = $"Could not write source code to {path}";
             newSymbol = null;
             newSymbolUi = null;
             UnmarkAsSaving();
@@ -61,7 +62,7 @@ internal partial class EditableSymbolProject
         // non-breaking change - increment build number
         CsProjectFile.IncrementBuildNumber(1);
         
-        if (TryRecompile(true))
+        if (TryRecompile(true, out failureLog))
         {
             newSymbolUi = null;
             var gotSymbol = SymbolDict.TryGetValue(newSymbolId, out newSymbol) 
@@ -125,7 +126,7 @@ internal partial class EditableSymbolProject
             
         CsProjectFile.UpdateVersionForIOChange(1);
 
-        if (TryRecompile(true))
+        if (TryRecompile(true, out var failureLog))
         {
             reason = null;
             return true;
@@ -137,7 +138,7 @@ internal partial class EditableSymbolProject
         symbolUi.FlagAsModified();
         SaveModifiedSymbols();
 
-        reason = "Failed to compile";
+        reason = failureLog;
         return false;
     }
 
@@ -176,7 +177,10 @@ internal partial class EditableSymbolProject
 
             var substitutedNamespace = Regex.Replace(symbol.Namespace, sourceNamespace, newNamespace);
 
-            ChangeNamespaceOf(symbol, substitutedNamespace, newDestinationProject, sourceNamespace);
+            if (!ChangeNamespaceOf(symbol, substitutedNamespace, newDestinationProject, sourceNamespace, out var reason))
+            {
+                Log.Error(reason);
+            }
         }
     }
 
@@ -212,12 +216,12 @@ internal partial class EditableSymbolProject
             if (currentNamespace == nameSpace)
                 return reason;
 
-            sourceProject.ChangeNamespaceOf(symbol, nameSpace, targetProject);
-            return reason;
+            sourceProject.ChangeNamespaceOf(symbol, nameSpace, targetProject, null, out reason);
+            return reason ?? "";
         }
     }
 
-    private bool TryRecompile(bool updatePackage)
+    private bool TryRecompile(bool updatePackage, [NotNullWhen(false)] out string? failureLog)
     {
         SaveModifiedSymbols();
         MarkAsSaving();
@@ -229,7 +233,7 @@ internal partial class EditableSymbolProject
         }
         
         bool success = false;
-        if (CsProjectFile.TryRecompile(false))
+        if (CsProjectFile.TryRecompile(false, out failureLog))
         {
             AssemblyInformation.ChangeAssemblyDirectory(CsProjectFile.GetBuildTargetDirectory());
             success = true;
@@ -270,12 +274,12 @@ internal partial class EditableSymbolProject
         return false;
     }
 
-    private bool ChangeNamespaceOf(Symbol symbol, string newNamespace, EditableSymbolProject newDestinationProject, string? sourceNamespace = null)
+    private bool ChangeNamespaceOf(Symbol symbol, string newNamespace, EditableSymbolProject newDestinationProject, string? sourceNamespace, [NotNullWhen(false)] out string? failureLog)
     {
         var id = symbol.Id;
         if (HasHome && ReleaseInfo.HomeGuid == id)
         {
-            Log.Error($"Cannot change namespace of home symbol {symbol}");
+            failureLog = $"Cannot change namespace of home symbol {symbol}";
             return false;
         }
             
@@ -286,13 +290,13 @@ internal partial class EditableSymbolProject
         {
             if (!TryConvertToValidCodeNamespace(sourceNamespace, out var sourceCodeNamespace))
             {
-                Log.Error($"Source namespace {sourceNamespace} is not a valid namespace. This is a bug.");
+                failureLog = $"Source namespace {sourceNamespace} is not a valid namespace. This is a bug.";
                 return false;
             }
 
             if (!TryConvertToValidCodeNamespace(newNamespace, out var newCodeNamespace))
             {
-                Log.Error($"{newNamespace} is not a valid namespace.");
+                failureLog = $"{newNamespace} is not a valid namespace.";
                 return false;
             }
 
@@ -301,7 +305,7 @@ internal partial class EditableSymbolProject
         }
         else
         {
-            Log.Error($"Could not find source code for {symbol.Name} in {CsProjectFile.Name} ({id})");
+            failureLog = $"Could not find source code for {symbol.Name} in {CsProjectFile.Name} ({id})";
             return false;
         }
 
@@ -320,7 +324,7 @@ internal partial class EditableSymbolProject
         if (newDestinationProject != this)
         {
             newDestinationProject.MarkAsSaving(); // prevent unnecessary alerts while moving symbol files during save
-            if (!TryRecompile(false))
+            if (!TryRecompile(false, out failureLog))
             {
                 newDestinationProject.UnmarkAsSaving();
                 Revert();
@@ -328,7 +332,7 @@ internal partial class EditableSymbolProject
             else
             {
                 newDestinationProject.UnmarkAsSaving();
-                if (!newDestinationProject.TryRecompile(false))
+                if (!newDestinationProject.TryRecompile(false, out failureLog))
                 {
                     Revert();
                 }
@@ -348,7 +352,7 @@ internal partial class EditableSymbolProject
         }
         else
         {
-            if (!TryRecompile(false))
+            if (!TryRecompile(false, out failureLog))
             {
                 success = false;
 

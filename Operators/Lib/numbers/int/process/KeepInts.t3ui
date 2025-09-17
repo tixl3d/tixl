@@ -1,0 +1,44 @@
+{
+  "Id": "209aa9d9-0ba8-42da-8a6a-5ff9fdf09f0c"/*KeepInts*/,
+  "Description": "Keeps integer values in a list",
+  "InputUis": [
+    {
+      "InputId": "2773b599-cb2d-43e5-a1d7-726772222b04"/*Reset*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      }
+    },
+    {
+      "InputId": "65e2ef46-fe76-47a8-9c61-58db4992230a"/*BufferLength*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      }
+    },
+    {
+      "InputId": "e32048ba-449e-48fe-891b-8c16e9d8172c"/*AddValueToList*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      }
+    },
+    {
+      "InputId": "f9598f16-8fdb-40ca-809a-13af7b818ad9"/*Value*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "89ea9253-5aa3-440c-b15b-54b195b7435f"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    }
+  ]
+}

@@ -445,7 +445,7 @@
       "Outputs": []
     },
     {
-      "Id": "a12f871a-93c0-4bca-a15a-a32dff6fb0e6"/*PointsToArtNetLights*/,
+      "Id": "a12f871a-93c0-4bca-a15a-a32dff6fb0e6"/*PointsToDMXLights*/,
       "SymbolId": "c9d7cd19-7fc6-4491-8dfa-3808725c7857",
       "InputValues": [
         {
@@ -500,11 +500,6 @@
           "Id": "970769f4-116f-418d-87a7-cda28e44d063"/*GreenChannel*/,
           "Type": "System.Int32",
           "Value": 9
-        },
-        {
-          "Id": "afd3aa99-c892-4b87-ad3f-f97461e8a934"/*WithReferencePoints*/,
-          "Type": "System.Boolean",
-          "Value": true
         },
         {
           "Id": "ba8d8f32-792c-4675-a5f5-415c16db8c66"/*AxisOrder*/,
@@ -706,7 +701,7 @@
       "Outputs": []
     },
     {
-      "Id": "f9d58c9b-1153-4417-8bc1-92fd7c747b15"/*PointsToArtNetLights*/,
+      "Id": "f9d58c9b-1153-4417-8bc1-92fd7c747b15"/*PointsToDMXLights*/,
       "SymbolId": "c9d7cd19-7fc6-4491-8dfa-3808725c7857",
       "InputValues": [
         {

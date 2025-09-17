@@ -95,7 +95,7 @@
       "Outputs": []
     },
     {
-      "Id": "11508c7f-67f6-4f83-8cff-4dd6bf0decf9"/*RepeatAtGPoints*/,
+      "Id": "11508c7f-67f6-4f83-8cff-4dd6bf0decf9"/*RepeatAtPoints*/,
       "SymbolId": "780edb20-f83f-494c-ab17-7015e2311250",
       "InputValues": [],
       "Outputs": []
@@ -217,7 +217,7 @@
       "Outputs": []
     },
     {
-      "Id": "59b64a6f-63b2-45c7-9ebd-e0b1edf8c02f"/*RepeatAtGPoints*/,
+      "Id": "59b64a6f-63b2-45c7-9ebd-e0b1edf8c02f"/*RepeatAtPoints*/,
       "SymbolId": "780edb20-f83f-494c-ab17-7015e2311250",
       "InputValues": [
         {
@@ -288,11 +288,6 @@
       "Id": "890ed6a2-cdf5-4b38-a765-2c8f1fec49c4"/*DrawLines*/,
       "SymbolId": "836f211f-b387-417c-8316-658e0dc6e117",
       "InputValues": [
-        {
-          "Id": "567794ab-b3d3-43f6-ae95-4d654f797577"/*UseWAsTexCoordV*/,
-          "Type": "System.Boolean",
-          "Value": false
-        },
         {
           "Id": "75419a73-8a3e-4538-9a1d-e3b0ce7f8561"/*Color*/,
           "Type": "System.Numerics.Vector4",
@@ -433,7 +428,7 @@
       "Outputs": []
     },
     {
-      "Id": "97e985d1-08ad-4dc3-863e-52a541710a9e"/*RepeatAtGPoints*/,
+      "Id": "97e985d1-08ad-4dc3-863e-52a541710a9e"/*RepeatAtPoints*/,
       "SymbolId": "780edb20-f83f-494c-ab17-7015e2311250",
       "InputValues": [],
       "Outputs": []

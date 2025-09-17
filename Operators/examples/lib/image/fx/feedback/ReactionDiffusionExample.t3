@@ -360,11 +360,11 @@
       "Outputs": []
     },
     {
-      "Id": "4c9dd3a4-d707-4385-b504-a3f584682f33"/*HSBToColor*/,
+      "Id": "4c9dd3a4-d707-4385-b504-a3f584682f33"/*HSLToColor*/,
       "SymbolId": "1677fd74-6e54-479a-b478-c2ac77288f9c",
       "InputValues": [
         {
-          "Id": "115e3d92-2e91-447d-ba81-18a508d3d36a"/*Brightness*/,
+          "Id": "115e3d92-2e91-447d-ba81-18a508d3d36a"/*Lightness*/,
           "Type": "System.Single",
           "Value": 1.0
         },
@@ -946,11 +946,11 @@
       "Outputs": []
     },
     {
-      "Id": "9062b0b7-0014-4efc-b3d3-b78ea17234d4"/*HSBToColor*/,
+      "Id": "9062b0b7-0014-4efc-b3d3-b78ea17234d4"/*HSLToColor*/,
       "SymbolId": "1677fd74-6e54-479a-b478-c2ac77288f9c",
       "InputValues": [
         {
-          "Id": "115e3d92-2e91-447d-ba81-18a508d3d36a"/*Brightness*/,
+          "Id": "115e3d92-2e91-447d-ba81-18a508d3d36a"/*Lightness*/,
           "Type": "System.Single",
           "Value": 18.3
         },

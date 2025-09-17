@@ -617,7 +617,7 @@
       "SnapshotGroupIndex": "1"
     },
     {
-      "ChildId": "fb518761-eb57-44ac-b5f3-05705d43679c"/*RepeatAtGPoints*/,
+      "ChildId": "fb518761-eb57-44ac-b5f3-05705d43679c"/*RepeatAtPoints*/,
       "Position": {
         "X": 2913.168,
         "Y": -1193.7816

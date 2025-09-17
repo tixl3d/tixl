@@ -278,7 +278,7 @@
       "Outputs": []
     },
     {
-      "Id": "5a097c64-5d2d-4609-b8e9-6fe8784588cc"/*RepeatAtGPoints*/,
+      "Id": "5a097c64-5d2d-4609-b8e9-6fe8784588cc"/*RepeatAtPoints*/,
       "SymbolId": "780edb20-f83f-494c-ab17-7015e2311250",
       "InputValues": [
         {
@@ -418,11 +418,6 @@
       "Id": "9ecce48e-6536-4b24-8985-8eb43192da4c"/*DrawLines*/,
       "SymbolId": "836f211f-b387-417c-8316-658e0dc6e117",
       "InputValues": [
-        {
-          "Id": "039e11ea-2155-4f90-aa8a-74ead604679c"/*UseWForWidth*/,
-          "Type": "System.Single",
-          "Value": 0.0
-        },
         {
           "Id": "75419a73-8a3e-4538-9a1d-e3b0ce7f8561"/*Color*/,
           "Type": "System.Numerics.Vector4",

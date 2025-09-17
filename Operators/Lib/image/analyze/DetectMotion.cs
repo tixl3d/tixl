@@ -1,11 +1,3 @@
-using System;
-using T3.Core.DataTypes;
-using T3.Core.DataTypes;
-using T3.Core.Operator;
-using T3.Core.Operator.Attributes;
-using T3.Core.Operator.Slots;
-using System.Runtime.InteropServices;
-
 namespace Lib.image.analyze{
     [Guid("830df85c-51df-4d55-956c-e6810e8e3081")]
     internal sealed class DetectMotion : Instance<DetectMotion>

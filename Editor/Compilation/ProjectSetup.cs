@@ -41,14 +41,13 @@ internal static partial class ProjectSetup
 
         Environment.SetEnvironmentVariable(envVar, envValue, EnvironmentVariableTarget.User);
     }
-    public static bool TryCreateProject(string nameSpace, bool shareResources, [NotNullWhen(true)] out EditableSymbolProject? newProject)
+    public static bool TryCreateProject(string nameSpace, bool shareResources, [NotNullWhen(true)] out EditableSymbolProject? newProject, [NotNullWhen(false)] out string? failureLog)
     {
         var name = nameSpace.Split('.').Last();
         var newCsProj = CsProjectFile.CreateNewProject(name, nameSpace, shareResources, UserSettings.Config.ProjectsFolder);
 
-        if (!newCsProj.TryRecompile(true))
+        if (!newCsProj.TryRecompile(true, out failureLog))
         {
-            Log.Error("Failed to compile new project");
             newProject = null;
             return false;
         }
@@ -57,7 +56,7 @@ internal static partial class ProjectSetup
         
         if(!newProject.AssemblyInformation.TryGetReleaseInfo(out var releaseInfo))
         {
-            Log.Error($"Failed to get release info for project {name}");
+            failureLog = $"Failed to get release info for project {name}";
             newProject.Dispose();
             newProject = null;
             return false;
@@ -65,7 +64,7 @@ internal static partial class ProjectSetup
         
         if (releaseInfo.HomeGuid == Guid.Empty)
         {
-            Log.Error($"No project home found for project {name}");
+            failureLog = $"No project home found for project {name}";
             newProject = null;
             return false;
         }

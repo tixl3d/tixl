@@ -1,0 +1,13 @@
+{
+  "Id": "308bb0d1-337b-4c59-9233-6c7bdacf9633"/*CombineColorLists*/,
+  "Inputs": [
+    {
+      "Id": "f8c4bab9-1f10-40f8-849e-4a6e6fd23972"/*InputLists*/,
+      "DefaultValue": {
+        "Values": []
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

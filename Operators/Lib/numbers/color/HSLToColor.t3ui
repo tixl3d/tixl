@@ -4,7 +4,7 @@
   "SymbolTags": "1",
   "InputUis": [
     {
-      "InputId": "115e3d92-2e91-447d-ba81-18a508d3d36a"/*Brightness*/,
+      "InputId": "115e3d92-2e91-447d-ba81-18a508d3d36a"/*Lightness*/,
       "Position": {
         "X": 0.0,
         "Y": 0.0

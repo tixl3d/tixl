@@ -4,6 +4,7 @@ using SilkWindows;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Reflection;
 using T3.Core.Compilation;
 using T3.Core.IO;
 using T3.Core.Resource;
@@ -35,19 +36,37 @@ internal static class Program
     
     public static string VersionText => _versionText ??= Version.ToBasicVersionString();
 
+
     private static string? _readableVersion;
     public static string FormattedEditorVersion
     {
         get
         {
-            if (_readableVersion == null)
-            {
-                _readableVersion ??= "v" + Version;
-                #if DEBUG
-                    _readableVersion += " Debug";
-                #endif                
-            }
+            if (_readableVersion != null) 
+                return _readableVersion;
+            
+            var asm = typeof(Editor.Program).Assembly;
+            var semver = asm.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+                           ?.InformationalVersion; // "1.9.0-rc.1" (maybe "+sha")
 
+            _readableVersion = semver ?? asm.GetName().Version?.ToString() ?? "0.0.0.0";
+            
+            var plusIndex = _readableVersion.IndexOf('+');
+            var shortenedSha = string.Empty;
+            if (plusIndex > 0)
+            {
+                var end = Math.Min(_readableVersion.Length, plusIndex + 1 + 6); // '+' + 6 hex
+                shortenedSha = _readableVersion[(plusIndex+1)..end];
+                _readableVersion = _readableVersion[..(plusIndex)];
+            }
+            
+            #if DEBUG
+            const string buildTypeSuffix = " Debug";
+            #else
+            const string buildTypeSuffix = "";
+            #endif
+            
+            _readableVersion = $"v{_readableVersion} {shortenedSha}{buildTypeSuffix}";
             return _readableVersion;
         }
     }

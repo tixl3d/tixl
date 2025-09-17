@@ -136,10 +136,10 @@ internal static class Combine
 
         // compile new instance type
 
-        var success = project.TryCompile(newSource, newSymbolName, newSymbolId, nameSpace, out var newSymbol, out var newSymbolUi);
+        var success = project.TryCompile(newSource, newSymbolName, newSymbolId, nameSpace, out var newSymbol, out var newSymbolUi, out var failureLog);
         if (!success)
         {
-            Log.Error($"Could not compile new symbol '{newSymbolName}'");
+            Log.Error($"Could not compile new symbol '{newSymbolName}': {failureLog}");
             return;
         }
 

@@ -4,7 +4,7 @@
   "SymbolTags": "1",
   "InputUis": [
     {
-      "InputId": "13852947-11aa-4f54-b415-6867421f3bc0"/*WStretchAmount*/,
+      "InputId": "13852947-11aa-4f54-b415-6867421f3bc0"/*Stretch*/,
       "Position": {
         "X": 927.6345,
         "Y": 1430.9271
@@ -16,14 +16,14 @@
       "InputId": "42fc43a2-c06c-466b-833f-e8bc28615553"/*ScaleFactor*/,
       "Position": {
         "X": 1067.6344,
-        "Y": 1749.1138
+        "Y": 1714.1138
       }
     },
     {
-      "InputId": "631a4691-0774-40c7-a8fa-4b9ee76854d6"/*UseStretch*/,
+      "InputId": "631a4691-0774-40c7-a8fa-4b9ee76854d6"/*ApplyPointScale*/,
       "Position": {
         "X": 927.6344,
-        "Y": 1605.9271
+        "Y": 1570.9271
       },
       "Description": "Controls whether the \"Stretching\" values from operators such as [RandomizePoints] or [TransformPoints] are used."
     },
@@ -31,8 +31,8 @@
       "InputId": "a7960188-ff39-4176-9d22-bc9d7e0cb2b5"/*Points*/,
       "Relevancy": "Required",
       "Position": {
-        "X": 241.10388,
-        "Y": 1496.4197
+        "X": 263.15887,
+        "Y": 1332.1099
       },
       "Description": "Input for Points such as [SpherePoints], [GridPoints] or [PointsOnMesh] etc."
     },
@@ -40,18 +40,10 @@
       "InputId": "abd961af-e76f-415b-a6ac-afb1cf08a1de"/*Scale*/,
       "Position": {
         "X": 1067.6345,
-        "Y": 1570.9271
+        "Y": 1535.9271
       },
       "GroupTitle": "Settings",
       "Description": "Defines the size of the meshes that are distributed at the points."
-    },
-    {
-      "InputId": "adfa0cb7-257f-4f03-b847-99a6bb317992"/*UseWForSize*/,
-      "Position": {
-        "X": 927.6345,
-        "Y": 1535.9271
-      },
-      "Description": "Defines whether the \"W\" value will influence the scaling of the incoming meshes."
     },
     {
       "InputId": "f8fb6e15-00dd-485e-a7fe-fa75c77182c2"/*InputMesh*/,
@@ -65,13 +57,6 @@
     }
   ],
   "SymbolChildUis": [
-    {
-      "ChildId": "16be87c6-24a1-4316-9054-7785c0e1c1fd"/*BoolToFloat*/,
-      "Position": {
-        "X": 1067.6345,
-        "Y": 1535.9271
-      }
-    },
     {
       "ChildId": "1b79609d-fe80-46e0-91c4-8e34e31ec324"/*ComputeShader*/,
       "Position": {
@@ -138,8 +123,8 @@
     {
       "ChildId": "4ea7b21e-f7a8-41ed-ba76-0f1e55774762"/*PointCount*/,
       "Position": {
-        "X": 381.10388,
-        "Y": 1531.4197
+        "X": 403.15887,
+        "Y": 1367.1099
       }
     },
     {
@@ -183,8 +168,8 @@
     {
       "ChildId": "7073c14a-377c-4d50-9b36-d63c3bb4f1b6"/*GetBufferComponents*/,
       "Position": {
-        "X": 381.10388,
-        "Y": 1496.4197
+        "X": 403.15887,
+        "Y": 1332.1099
       }
     },
     {
@@ -262,7 +247,7 @@
       "ChildId": "bfb0f7b3-0b54-4914-aa26-68455b62b27b"/*BoolToFloat*/,
       "Position": {
         "X": 1067.6344,
-        "Y": 1605.9271
+        "Y": 1570.9271
       }
     },
     {

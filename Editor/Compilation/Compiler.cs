@@ -1,6 +1,7 @@
 #nullable enable
 using System.Collections.Frozen;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
 using T3.Editor.Gui.UiHelpers;
@@ -112,13 +113,23 @@ internal static class Compiler
         return (outputBuilder.ToString(), process.ExitCode);
     }
 
-    internal static bool TryCompile(CsProjectFile projectFile, BuildMode buildMode, bool nugetRestore)
+    /// <summary>
+    /// Attempts to compile the given project file.
+    /// </summary>
+    /// <param name="projectFile">The project to compile</param>
+    /// <param name="buildMode">Building in debug or release mode - debug is for in-progress editable packages, and release is for published packages and players</param>
+    /// <param name="nugetRestore">Whether to perform a "dotnet restore" prior to compiling</param>
+    /// <param name="output">Contains build process output when compilation fails</param>
+    /// <returns></returns>
+    internal static bool TryCompile(CsProjectFile projectFile, BuildMode buildMode, bool nugetRestore, [NotNullWhen(false)] out string? output)
     {
         var verbosity = UserSettings.Config?.CompileCsVerbosity ?? CompilerOptions.Verbosity.Normal;
-
+        output = null;
+        
         if (nugetRestore)
         {
             var (restoreOutput, restoreExitCode) = RunCommand($"dotnet restore \"{projectFile.FullPath}\" --nologo", projectFile.Directory);
+            output = restoreOutput;
             if (restoreExitCode != 0)
             {
                 Log.Error($"Restore failed:\n{restoreOutput}");
@@ -154,6 +165,11 @@ internal static class Compiler
             Log.Error(logMessage);
         else
             Log.Info(logMessage);
+
+        if (!success)
+        {
+            output = output == null ? logOutput : $"Restore output: ```\n{output}\n```\n Build output: \n```\n{output}\n```\n";
+        }
 
         return success;
     }

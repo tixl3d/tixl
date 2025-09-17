@@ -47,9 +47,9 @@ internal static class Duplicate
         newSource = ReplaceGuidAttributeWith(newSymbolId, newSource);
         Log.Debug(newSource);
 
-        if (!project.TryCompile(newSource, newTypeName, newSymbolId, nameSpace, out var newSymbol, out _))
+        if (!project.TryCompile(newSource, newTypeName, newSymbolId, nameSpace, out var newSymbol, out _, out var failureLog))
         {
-            Log.Error($"Could not compile new symbol '{newTypeName}'");
+            Log.Error($"Could not compile new symbol '{newTypeName}': {failureLog}");
             return null;
         }
 

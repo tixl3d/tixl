@@ -1,10 +1,3 @@
-using T3.Core.DataTypes;
-using T3.Core.DataTypes;
-using T3.Core.Operator;
-using T3.Core.Operator.Attributes;
-using T3.Core.Operator.Slots;
-using System.Runtime.InteropServices;
-
 namespace Examples.Lib.field.use{
     [Guid("ba564ef5-bb9d-4b69-b3fe-65709cdd279e")]
     internal sealed class RaymarchPointsExample : Instance<RaymarchPointsExample>

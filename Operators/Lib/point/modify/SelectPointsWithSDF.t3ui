@@ -4,12 +4,13 @@
   "SymbolTags": "1",
   "InputUis": [
     {
-      "InputId": "03558959-4190-4b5b-a544-b17d56fb77da"/*ClampResult*/,
+      "InputId": "03558959-4190-4b5b-a544-b17d56fb77da"/*ClampNegative*/,
       "Position": {
         "X": 747.8982,
         "Y": 1970.8657
       },
-      "GroupTitle": "Options"
+      "GroupTitle": "Options",
+      "Description": "Prevent the result from becoming negative (which could lead to points with inverted scale)."
     },
     {
       "InputId": "07177f13-ef76-4e81-91b5-49cf8eb73cbd"/*Mode*/,
@@ -76,7 +77,8 @@
       "Position": {
         "X": 747.89825,
         "Y": 2005.8657
-      }
+      },
+      "Description": "Converts points with zero or below selection to Separators (Scale = NaN) so they will not be rendered."
     },
     {
       "InputId": "c9fbe013-7050-4714-a43d-68960d6afbea"/*BiasAndGain*/,

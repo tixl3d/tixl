@@ -1,0 +1,19 @@
+{
+  "Id": "6ca6420a-4c05-4c33-81a3-1a9c4872e29d"/*RotateField*/,
+  "Inputs": [
+    {
+      "Id": "0d071ddf-ba11-4d85-848a-10d8adc793fe"/*Axis*/,
+      "DefaultValue": 2
+    },
+    {
+      "Id": "203e8a9b-948f-492d-944a-fe210f7c68a4"/*Rotation*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "2e930b97-159d-4e29-ac28-1ff5c796820f"/*InputField*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

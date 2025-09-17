@@ -103,7 +103,7 @@ internal static class SingleValueEdit
                     ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, new Vector2(horizontalAlign,0.5f));
                     ImGui.Button(FormatValueForButton(ref _editValue) + "###button", size);
                     ImGui.PopStyleVar();
-                    DrawValueRangeIndicator(value, min, max);
+                    DrawValueRangeIndicator(value, min, max, true);
                     ImGui.PopStyleColor(3);
 
                     if (ImGui.IsMouseReleased(0))
@@ -424,64 +424,66 @@ internal static class SingleValueEdit
         ImGui.GetWindowDrawList().AddText(keepPos + new Vector2(4, 4), color1, label);
     }
 
-    private static void DrawValueRangeIndicator(double value, double min, double max)
+    private static void DrawValueRangeIndicator(double value, double min, double max, bool isActive = false)
     {
-        if (!double.IsInfinity(min) || !double.IsInfinity(max))
+        if (double.IsInfinity(min) && double.IsInfinity(max)) 
+            return;
+
+        var itemSize = ImGui.GetItemRectSize();
+        var itemPos = ImGui.GetItemRectMin();
+
+        var center = 0.0;
+        if (Math.Abs(min) > 0.001f)
         {
-            var itemSize = ImGui.GetItemRectSize();
-            var itemPos = ImGui.GetItemRectMin();
+            center = MathUtils.RemapAndClamp(0, min, max, 0, itemSize.X);
+            // center = MathUtils.RemapAndClamp((min + max) * 0.5, min, max, 0, itemSize.X);
+        }
 
-            var center = 0.0;
-            if (Math.Abs(min) > 0.001f)
-            {
-                center = MathUtils.RemapAndClamp(0, min, max, 0, itemSize.X);
-                // center = MathUtils.RemapAndClamp((min + max) * 0.5, min, max, 0, itemSize.X);
-            }
+        var end = MathUtils.RemapAndClamp(value, min, max, 0, itemSize.X);
+        var orgCenter = center;
 
-            var end = MathUtils.RemapAndClamp(value, min, max, 0, itemSize.X);
-            var orgCenter = center;
+        if (center > end)
+        {
+            (center, end) = (end, center);
+        }
 
-            if (center > end)
-            {
-                (center, end) = (end, center);
-            }
+        var p1 = itemPos + new Vector2((float)center, 0);
+        var p2 = itemPos + new Vector2((float)end, itemSize.Y);
+        
+        var areaColor = UiColors.ForegroundFull.Fade(isActive ? 0.5f : 0.05f);
+        var centerColor = UiColors.ForegroundFull.Fade(isActive ? 0.5f : 0.1f);
+        var symbolColor = UiColors.ForegroundFull.Fade(isActive ? 0.8f : 0.06f);
+        ImGui.GetWindowDrawList().AddRectFilled(p1, p2, areaColor);
 
-            var p1 = itemPos + new Vector2((float)center, 0);
-            var p2 = itemPos + new Vector2((float)end, itemSize.Y);
-            ImGui.GetWindowDrawList().AddRectFilled(p1, p2, _valueIndicatorColor);
+        // Indicate center
+        var alignment = center < orgCenter ? -1 : 0;
+        ImGui.GetWindowDrawList().AddRectFilled(
+                                                ImGui.GetItemRectMin() + new Vector2((float)orgCenter + alignment, 0),
+                                                ImGui.GetItemRectMin() + new Vector2((float)orgCenter + alignment + 1, itemSize.Y),
+                                                centerColor);
 
-            // Indicate center
-            var alignment = center < orgCenter ? -1 : 0;
-            ImGui.GetWindowDrawList().AddRectFilled(
-                                                    ImGui.GetItemRectMin() + new Vector2((float)orgCenter + alignment, 0),
-                                                    ImGui.GetItemRectMin() + new Vector2((float)orgCenter + alignment + 1, itemSize.Y),
-                                                    _valueIndicatorColor);
-
-            // Indicate overflow
-            if (value < min)
-            {
-                var triangleCenter = new Vector2(itemPos.X + 5, itemPos.Y + itemSize.Y - 5);
-                ImGui.GetWindowDrawList().AddTriangleFilled(
-                                                            triangleCenter + new Vector2(-3, 0),
-                                                            triangleCenter + new Vector2(2, -4),
-                                                            triangleCenter + new Vector2(2, 4),
-                                                            new Color(1, 1, 1, 0.2f)
-                                                           );
-            }
-            else if (value > max)
-            {
-                var triangleCenter = new Vector2(itemPos.X + itemSize.X - 3, itemPos.Y + itemSize.Y - 5);
-                ImGui.GetWindowDrawList().AddTriangleFilled(
-                                                            triangleCenter + new Vector2(-2, -4),
-                                                            triangleCenter + new Vector2(3, 0),
-                                                            triangleCenter + new Vector2(-2, 4),
-                                                            new Color(1, 1, 1, 0.2f)
-                                                           );
-            }
+        // Indicate overflow
+        if (value < min)
+        {
+            var triangleCenter = new Vector2(itemPos.X + 5, itemPos.Y + itemSize.Y - 5);
+            ImGui.GetWindowDrawList().AddTriangleFilled(
+                                                        triangleCenter + new Vector2(-3, 0),
+                                                        triangleCenter + new Vector2(2, -4),
+                                                        triangleCenter + new Vector2(2, 4),
+                                                        symbolColor
+                                                       );
+        }
+        else if (value > max)
+        {
+            var triangleCenter = new Vector2(itemPos.X + itemSize.X - 3, itemPos.Y + itemSize.Y - 5);
+            ImGui.GetWindowDrawList().AddTriangleFilled(
+                                                        triangleCenter + new Vector2(-2, -4),
+                                                        triangleCenter + new Vector2(3, 0),
+                                                        triangleCenter + new Vector2(-2, 4),
+                                                        symbolColor
+                                                       );
         }
     }
-
-    private static readonly Color _valueIndicatorColor = new(1, 1, 1, 0.09f);
 
     private enum InputStates
     {

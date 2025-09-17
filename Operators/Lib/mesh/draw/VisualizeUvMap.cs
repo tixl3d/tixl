@@ -1,12 +1,3 @@
-using T3.Core.DataTypes;
-using T3.Core.DataTypes;
-using T3.Core.DataTypes;
-using T3.Core.DataTypes;
-using T3.Core.Operator;
-using T3.Core.Operator.Attributes;
-using T3.Core.Operator.Slots;
-using System.Runtime.InteropServices;
-
 namespace Lib.mesh.draw{
     [Guid("0920c9cf-91b3-42ee-9db4-a5a63c16d71e")]
     internal sealed class VisualizeUvMap : Instance<VisualizeUvMap>

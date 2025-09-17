@@ -1,9 +1,3 @@
-using System;
-using T3.Core.Operator;
-using T3.Core.Operator.Attributes;
-using T3.Core.Operator.Slots;
-using System.Runtime.InteropServices;
-
 namespace Lib.flow.testing{
     [Guid("340f164b-c3c3-4a36-9ca6-19312fed4438")]
     internal sealed class ParticleTests : Instance<ParticleTests>

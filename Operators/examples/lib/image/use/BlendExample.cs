@@ -1,9 +1,3 @@
-using T3.Core.DataTypes;
-using T3.Core.Operator;
-using T3.Core.Operator.Attributes;
-using T3.Core.Operator.Slots;
-using System.Runtime.InteropServices;
-
 namespace Examples.Lib.image.use{
     [Guid("40c5312c-9684-4821-8b05-e8d6c40da07b")]
     internal sealed class BlendExample : Instance<BlendExample>

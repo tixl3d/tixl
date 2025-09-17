@@ -1,5 +1,3 @@
-using SharpDX;
-using SharpDX.Direct3D11;
 using T3.Core.Rendering;
 
 // SharpDX.Direct3D11.Buffer;

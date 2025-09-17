@@ -27,7 +27,7 @@
       }
     },
     {
-      "ChildId": "13a453ea-ad12-4a01-86a4-7aee5fdd7def"/*RepeatAtGPoints*/,
+      "ChildId": "13a453ea-ad12-4a01-86a4-7aee5fdd7def"/*RepeatAtPoints*/,
       "Position": {
         "X": 2143.9744,
         "Y": 555.3747
@@ -138,7 +138,7 @@
       }
     },
     {
-      "ChildId": "735dddfb-f47b-46e2-802e-f4064190f844"/*RepeatAtGPoints*/,
+      "ChildId": "735dddfb-f47b-46e2-802e-f4064190f844"/*RepeatAtPoints*/,
       "Position": {
         "X": 1993.55,
         "Y": 855.95105
@@ -173,7 +173,7 @@
       }
     },
     {
-      "ChildId": "8c1887bd-56ce-4323-80f1-cef0d0c1f0b0"/*RepeatAtGPoints*/,
+      "ChildId": "8c1887bd-56ce-4323-80f1-cef0d0c1f0b0"/*RepeatAtPoints*/,
       "Position": {
         "X": 1993.55,
         "Y": 729.951
@@ -195,7 +195,7 @@
       }
     },
     {
-      "ChildId": "95a7f9ba-a7b7-4695-b422-81f4a10fdaa6"/*RepeatAtGPoints*/,
+      "ChildId": "95a7f9ba-a7b7-4695-b422-81f4a10fdaa6"/*RepeatAtPoints*/,
       "Comment": "We repeat some radial points at the floor point to indicate the base",
       "Position": {
         "X": 2135.8647,

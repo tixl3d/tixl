@@ -80,7 +80,7 @@
       "Outputs": []
     },
     {
-      "Id": "35b6bc7c-fec1-4d3a-8b85-96bec4d889f9"/*RepeatAtGPoints*/,
+      "Id": "35b6bc7c-fec1-4d3a-8b85-96bec4d889f9"/*RepeatAtPoints*/,
       "SymbolId": "780edb20-f83f-494c-ab17-7015e2311250",
       "InputValues": [
         {

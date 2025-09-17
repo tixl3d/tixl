@@ -157,20 +157,16 @@ inline float fmod(float x, float y)
         f = 1 - f * org;
     }
 
-    // float result = (DiscardNonSelected && s <= 0)
-    //                    ? NAN
-    //                : (ClampResult)
-    //                    ? saturate(s)
-    //                    : s;
+    p.Scale *= (DiscardNonSelected && f <= 0) ? NAN : 1;
 
     float strength = Strength * ((StrengthFactor == 0
                                       ? 1
                                   : (StrengthFactor == 1) ? p.FX1
                                                           : p.FX2));
 
-    float result = lerp(org, f, strength);
+    float result = lerp(org, f * abs(strength + 1), strength);
 
-    result = lerp(result, saturate(result), ClampResult);
+    result = ClampResult ? max(0, result) : result;
 
     switch (WriteTo)
     {

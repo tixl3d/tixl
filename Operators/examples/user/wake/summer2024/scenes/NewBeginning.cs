@@ -1,16 +1,3 @@
-using System;
-using System;
-using System;
-using System;
-using System;
-using System;
-using System;
-using T3.Core.DataTypes;
-using T3.Core.Operator;
-using T3.Core.Operator.Attributes;
-using T3.Core.Operator.Slots;
-using System.Runtime.InteropServices;
-
 namespace Examples.user.wake.summer2024.scenes{
     [Guid("6dda24f8-6e7b-4edf-bbb6-3a9e8ac3e26b")]
     internal sealed class NewBeginning : Instance<NewBeginning>

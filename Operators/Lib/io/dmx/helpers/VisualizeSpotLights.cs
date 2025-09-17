@@ -1,10 +1,3 @@
-using T3.Core.DataTypes;
-using T3.Core.DataTypes;
-using T3.Core.Operator;
-using T3.Core.Operator.Attributes;
-using T3.Core.Operator.Slots;
-using System.Runtime.InteropServices;
-
 namespace Lib.io.dmx.helpers{
     [Guid("f9c60c86-1ee0-4fa9-bcdb-19ef8abe9922")]
     internal sealed class VisualizeSpotLights : Instance<VisualizeSpotLights>

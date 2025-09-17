@@ -1,16 +1,6 @@
 #nullable enable
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using System.Text;
-using T3.Core.Operator;
-using T3.Core.Operator.Attributes;
-using T3.Core.Operator.Slots;
-using T3.Core.Utils;
-using T3.Core.Logging;
 
 namespace Lib.io.udp;
 

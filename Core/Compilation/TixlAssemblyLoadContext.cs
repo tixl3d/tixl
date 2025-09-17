@@ -329,6 +329,9 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
 
         void LogResolution(Assembly? resultAsm, AssemblyName searchName)
         {
+            if (!ProjectSettings.Config.LogAssemblyLoadingDetails)
+                return;
+            
             if (resultAsm != null)
             {
                 // check versions of the assembly - if different, log a warning.

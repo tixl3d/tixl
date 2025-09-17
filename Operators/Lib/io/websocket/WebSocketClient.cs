@@ -1,16 +1,6 @@
 #nullable enable
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.WebSockets;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using T3.Core.Logging;
-using T3.Core.Operator;
-using T3.Core.Operator.Attributes;
-using T3.Core.Operator.Slots;
 using T3.Core.Utils;
 using System.Text.Json; // Added for JSON parsing
 using System.Globalization; // Added for CultureInfo.InvariantCulture

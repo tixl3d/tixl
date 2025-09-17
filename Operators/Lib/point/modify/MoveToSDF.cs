@@ -1,5 +1,3 @@
-using T3.Core.DataTypes.ShaderGraph;
-
 namespace Lib.point.modify;
 
 [Guid("983d8a34-e225-456b-9f12-806eede743e3")]

@@ -26,8 +26,7 @@
       "Min": 0.01,
       "Max": 1000.0,
       "Scale": 0.001,
-      "ClampMin": true,
-      "ClampMax": true
+      "ClampMin": true
     },
     {
       "InputId": "98155900-1bb9-427a-9c4e-0988fec806cd"/*Intensity*/,
@@ -35,7 +34,9 @@
         "X": -33.625046,
         "Y": 165.16278
       },
-      "Description": "Increases or decreases the intensity of the light in relation to its decay.\n"
+      "Description": "Increases or decreases the intensity of the light in relation to its decay.\n",
+      "Min": 0.0,
+      "ClampMin": true
     },
     {
       "InputId": "b5ee1e4b-3c8c-48df-bbcf-aac614de6ec9"/*ShowGizmo*/,

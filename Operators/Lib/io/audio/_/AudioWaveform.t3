@@ -1,6 +1,6 @@
 {
-    "Id": "55E338F7-6D8C-4B61-8E10-9BB4D5FCFF91" /*AudioWaveform*/,
-    "Inputs": [],
-    "Children": [],
-    "Connections": []
+  "Id": "55e338f7-6d8c-4b61-8e10-9bb4d5fcff91"/*AudioWaveform*/,
+  "Inputs": [],
+  "Children": [],
+  "Connections": []
 }

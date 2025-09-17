@@ -1,9 +1,3 @@
-using System;
-using T3.Core.Operator;
-using T3.Core.Operator.Attributes;
-using T3.Core.Operator.Slots;
-using System.Runtime.InteropServices;
-
 namespace Lib.flow{
     [Guid("6647b9fd-a99f-45c8-864f-a2f0a7b61857")]
     internal sealed class ShaderTests : Instance<ShaderTests>

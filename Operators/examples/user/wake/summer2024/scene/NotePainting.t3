@@ -95,11 +95,6 @@
       "SymbolId": "836f211f-b387-417c-8316-658e0dc6e117",
       "InputValues": [
         {
-          "Id": "567794ab-b3d3-43f6-ae95-4d654f797577"/*UseWAsTexCoordV*/,
-          "Type": "System.Boolean",
-          "Value": true
-        },
-        {
           "Id": "c9cf2182-1297-463c-b5c1-d4ee7ad0895c"/*EnableZWrite*/,
           "Type": "System.Boolean",
           "Value": true

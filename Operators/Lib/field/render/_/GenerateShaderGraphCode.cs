@@ -1,10 +1,7 @@
 using Lib.render._dx11.api;
-using SharpDX;
-using SharpDX.Direct3D11;
 using T3.Core.DataTypes.ShaderGraph;
 using T3.Core.Rendering;
 using T3.Core.Stats;
-using Utilities = T3.Core.Utils.Utilities;
 
 namespace Lib.field.render._;
 

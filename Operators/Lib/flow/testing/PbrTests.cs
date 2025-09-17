@@ -1,9 +1,3 @@
-using System;
-using T3.Core.Operator;
-using T3.Core.Operator.Attributes;
-using T3.Core.Operator.Slots;
-using System.Runtime.InteropServices;
-
 namespace Lib.flow.testing{
     [Guid("e7cecfc5-e6e5-4fb7-aadf-0f7b7dfef154")]
     internal sealed class PbrTests : Instance<PbrTests>

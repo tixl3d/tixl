@@ -19,11 +19,6 @@
           "Id": "5894156a-cc31-4236-908c-de0e5385fd84"/*Strength*/,
           "Type": "System.Single",
           "Value": 12.7
-        },
-        {
-          "Id": "6c2ab161-da81-47c2-8008-222cf994179c"/*UseWAsWeight*/,
-          "Type": "System.Single",
-          "Value": 1.0
         }
       ],
       "Outputs": []
@@ -77,7 +72,7 @@
       "Outputs": []
     },
     {
-      "Id": "5b4d2a29-64ae-4cca-b241-a067a4c699aa"/*RepeatAtGPoints*/,
+      "Id": "5b4d2a29-64ae-4cca-b241-a067a4c699aa"/*RepeatAtPoints*/,
       "SymbolId": "780edb20-f83f-494c-ab17-7015e2311250",
       "InputValues": [],
       "Outputs": []
@@ -276,7 +271,7 @@
       ]
     },
     {
-      "Id": "c03b3503-d80a-498f-ad9b-7d045f70acc3"/*RepeatAtGPoints*/,
+      "Id": "c03b3503-d80a-498f-ad9b-7d045f70acc3"/*RepeatAtPoints*/,
       "SymbolId": "780edb20-f83f-494c-ab17-7015e2311250",
       "InputValues": [],
       "Outputs": []
@@ -317,16 +312,6 @@
       "Id": "dfa0cdcd-3963-496c-99fb-56e3c5e77f69"/*DrawLines*/,
       "SymbolId": "836f211f-b387-417c-8316-658e0dc6e117",
       "InputValues": [
-        {
-          "Id": "039e11ea-2155-4f90-aa8a-74ead604679c"/*UseWForWidth*/,
-          "Type": "System.Single",
-          "Value": -0.59
-        },
-        {
-          "Id": "567794ab-b3d3-43f6-ae95-4d654f797577"/*UseWAsTexCoordV*/,
-          "Type": "System.Boolean",
-          "Value": false
-        },
         {
           "Id": "df158fcf-3042-48cf-8383-7bf4c1bcb8a6"/*LineWidth*/,
           "Type": "System.Single",

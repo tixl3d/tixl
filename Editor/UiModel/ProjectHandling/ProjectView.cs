@@ -283,9 +283,9 @@ internal sealed partial class ProjectView
         // This happens when jumping out of an open.
         if (ScalableCanvas != null)
         {
-            if (alsoSelectChildId != null)
+            if (alsoSelectChildId != null && InstView.Instance.Children.TryGetChildInstance(alsoSelectChildId.Value, out var instance))
             {
-                var instance = InstView.Instance.Children[alsoSelectChildId.Value];
+                //var instance = InstView.Instance.Children[alsoSelectChildId.Value];
                 NodeSelection.SetSelection(instance.GetChildUi()!, instance);
                 var bounds = NodeSelection.GetSelectionBounds(NodeSelection, instance, 400);
                 //var viewScope = ScalableCanvas.GetScopeForCanvasArea(bounds);

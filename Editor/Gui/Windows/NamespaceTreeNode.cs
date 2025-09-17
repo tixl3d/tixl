@@ -41,27 +41,44 @@ internal sealed class NamespaceTreeNode
         Symbols.Clear();
     }
 
+    private static readonly List<string> _rootProjectNames = [
+            "Lib.",
+            "Types.",
+            "Examples.",
+            "t3.",
+        ]; 
+    
     internal void PopulateCompleteTree()
     {
-        Name = RootNodeId;
-        Clear();
-
-        foreach (var symbol in EditorSymbolPackage.AllSymbols.OrderBy(symbol => symbol.Namespace + symbol.Name))
-        {
-            SortInOperator(symbol);
-        }
+        PopulateCompleteTree(filterAction: null);
     }
-    // define an action delegate that takes a Symbol and returns a bool
-
-    internal void PopulateCompleteTree(Predicate<SymbolUi> filterAction)
+    
+    // Define an action delegate that takes a Symbol and returns a bool
+    internal void PopulateCompleteTree(Predicate<SymbolUi>? filterAction)
     {
         Name = RootNodeId;
         Clear();
+        
+        var ordered = EditorSymbolPackage.AllSymbolUis
+                                         .OrderBy(ui =>
+                                                  {
+                                                      var ns = ui.Symbol.Namespace ?? string.Empty;
 
-        foreach (var ui in EditorSymbolPackage.AllSymbolUis.OrderBy(ui => ui.Symbol.Namespace + ui.Symbol.Name))
+                                                      // Find matching root index
+                                                      var index = _rootProjectNames.FindIndex(p => ns.StartsWith(p, StringComparison.Ordinal));
+                                                      if (index < 0)
+                                                          index = int.MaxValue;
+
+                                                      return (index, ns + ui.Symbol.Name);
+                                                  });        
+
+        foreach (var ui in ordered)
         {
-            if(filterAction(ui))
-                SortInOperator(ui.Symbol);
+            var keep = filterAction == null || filterAction(ui);
+            if (!keep)
+                continue;
+            
+            SortInOperator(ui.Symbol);
         }
     }
 

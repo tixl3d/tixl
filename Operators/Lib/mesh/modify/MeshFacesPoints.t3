@@ -19,7 +19,7 @@
     },
     {
       "Id": "71d65094-f6a6-4ea7-8e3a-c0c95db5cff0"/*OffsetScale*/,
-      "DefaultValue": 0.0
+      "DefaultValue": 1.0
     },
     {
       "Id": "803dc471-081f-48c8-b1b5-f5b5e4673518"/*Texture*/,

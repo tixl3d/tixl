@@ -7,7 +7,10 @@
       "Position": {
         "X": 349.7188,
         "Y": 140.57773
-      }
+      },
+      "Min": -1.0,
+      "Max": 1.0,
+      "Scale": 0.05
     },
     {
       "InputId": "29df5011-af91-498d-b2c3-0f73d86f6e51"/*Variation*/,
@@ -16,14 +19,19 @@
         "Y": 175.57773
       },
       "Min": 0.0,
-      "Max": 1.0
+      "Max": 1.0,
+      "ClampMin": true
     },
     {
       "InputId": "81bed221-fa12-4373-b485-0fd237a62304"/*Frequency*/,
       "Position": {
         "X": 349.7188,
         "Y": 105.57773
-      }
+      },
+      "Min": 0.0001,
+      "Max": 1.0,
+      "Scale": 0.01,
+      "ClampMin": true
     },
     {
       "InputId": "c42bd78e-b9e2-4f39-a419-4ee8b482a542"/*Amount*/,
@@ -32,27 +40,34 @@
         "Y": 70.57773
       },
       "Min": 0.0,
-      "Max": 5.0
+      "Max": 5.0,
+      "ClampMin": true
     },
     {
       "InputId": "cdfb619d-8235-4f46-bdf1-b97900832efc"/*AmountFromVelocity*/,
       "Position": {
         "X": -86.355225,
         "Y": 189.99057
-      }
+      },
+      "Min": -5.0,
+      "Max": 5.0,
+      "Format": "{0:0.000} ×"
     },
     {
       "InputId": "e5fc6af0-e70e-46b5-b19b-86cd21e76e89"/*DirectionDistribution*/,
       "Position": {
         "X": 209.71893,
         "Y": 210.57773
-      }
+      },
+      "Min": 0.0,
+      "Max": 2.0,
+      "ClampMin": true
     },
     {
       "InputId": "f0f09ff2-7a42-470d-9c06-8d50e6a30ea4"/*ValueField*/,
       "Position": {
-        "X": -249.08997,
-        "Y": -483.98523
+        "X": 149.2203,
+        "Y": -267.07108
       }
     }
   ],

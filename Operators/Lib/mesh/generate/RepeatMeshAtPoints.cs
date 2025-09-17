@@ -15,17 +15,14 @@ internal sealed class RepeatMeshAtPoints : Instance<RepeatMeshAtPoints>
         [Input(Guid = "abd961af-e76f-415b-a6ac-afb1cf08a1de")]
         public readonly InputSlot<float> Scale = new InputSlot<float>();
 
-        [Input(Guid = "adfa0cb7-257f-4f03-b847-99a6bb317992")]
-        public readonly InputSlot<bool> UseWForSize = new InputSlot<bool>();
-
-        [Input(Guid = "13852947-11aa-4f54-b415-6867421f3bc0")]
-        public readonly InputSlot<System.Numerics.Vector3> WStretchAmount = new InputSlot<System.Numerics.Vector3>();
-
-        [Input(Guid = "631a4691-0774-40c7-a8fa-4b9ee76854d6")]
-        public readonly InputSlot<bool> UseStretch = new InputSlot<bool>();
-
         [Input(Guid = "42fc43a2-c06c-466b-833f-e8bc28615553", MappedType = typeof(ScaleFXModes))]
         public readonly InputSlot<int> ScaleFactor = new InputSlot<int>();
+
+        [Input(Guid = "631a4691-0774-40c7-a8fa-4b9ee76854d6")]
+        public readonly InputSlot<bool> ApplyPointScale = new InputSlot<bool>();
+
+        [Input(Guid = "13852947-11aa-4f54-b415-6867421f3bc0")]
+        public readonly InputSlot<System.Numerics.Vector3> Stretch = new InputSlot<System.Numerics.Vector3>();
         
         private enum ScaleFXModes
         {

@@ -15,8 +15,8 @@ cbuffer Params : register(b1)
     int Resolution;
 }
 
-StructuredBuffer<LegacyPoint> SourcePoints : t0;        
-RWStructuredBuffer<LegacyPoint> ResultPoints : u0;    
+StructuredBuffer<Point> SourcePoints : t0;        
+RWStructuredBuffer<Point> ResultPoints : u0;    
 
 inline int Mod(int val, int repeat)
 {
@@ -36,10 +36,10 @@ void main(uint3 i : SV_DispatchThreadID)
     uint pointU = ((i.x - Mod(i.x, Resolution)  + 1) * _PRIME0 + Seed * _PRIME1) % (Repeat == 0 ? 999999999 : Repeat);
     float hash = hash11u(pointU );
     
-    LegacyPoint p = SourcePoints[i.x];
+    Point p = SourcePoints[i.x];
     if(hash <= Ratio) 
     {
-        p.W = NAN;
+        p.Scale = NAN;
     }
     ResultPoints[i.x] = p;
 }

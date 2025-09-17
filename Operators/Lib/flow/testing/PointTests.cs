@@ -1,9 +1,3 @@
-using System;
-using T3.Core.Operator;
-using T3.Core.Operator.Attributes;
-using T3.Core.Operator.Slots;
-using System.Runtime.InteropServices;
-
 namespace Lib.flow.testing{
     [Guid("9eab73c1-bcca-4a10-8af8-7aa13649a9b6")]
     internal sealed class PointTests : Instance<PointTests>

@@ -33,9 +33,6 @@ internal sealed class AddNoise : Instance<AddNoise>
 
         [Input(Guid = "2d229dc7-a7ec-4fae-b84c-5eea6b91e18a")]
         public readonly InputSlot<System.Numerics.Vector3> NoiseOffset = new InputSlot<System.Numerics.Vector3>();
-
-        [Input(Guid = "6c2ab161-da81-47c2-8008-222cf994179c")]
-        public readonly InputSlot<float> UseWAsWeight = new InputSlot<float>();
         
         private enum FModes
         {

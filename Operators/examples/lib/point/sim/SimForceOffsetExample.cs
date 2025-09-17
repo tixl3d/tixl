@@ -1,9 +1,3 @@
-using T3.Core.DataTypes;
-using T3.Core.Operator;
-using T3.Core.Operator.Attributes;
-using T3.Core.Operator.Slots;
-using System.Runtime.InteropServices;
-
 namespace Examples.Lib.point.sim{
     [Guid("6e43fb51-1974-4020-a5fa-934de5bf04af")]
     internal sealed class SimForceOffsetExample : Instance<SimForceOffsetExample>

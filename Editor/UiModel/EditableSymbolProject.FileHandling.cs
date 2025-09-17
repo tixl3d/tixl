@@ -40,9 +40,10 @@ internal sealed partial class EditableSymbolProject
 
             Log.Info($"{DisplayName}: Recompiling project due to external code change...");
             needsUpdating = true;
-            if (!TryRecompile(false))
+            if (!TryRecompile(false, out var failureLog))
             {
                 Log.Error($"{DisplayName}: Recompilation failed.");
+                Log.Debug(failureLog);
             }
         }
         else

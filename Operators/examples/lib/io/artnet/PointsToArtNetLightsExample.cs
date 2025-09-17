@@ -1,9 +1,3 @@
-using T3.Core.DataTypes;
-using T3.Core.Operator;
-using T3.Core.Operator.Attributes;
-using T3.Core.Operator.Slots;
-using System.Runtime.InteropServices;
-
 namespace Examples.Lib.io.artnet{
     [Guid("10818dcf-87b2-4e17-b8dd-36cf0c2fee69")]
     internal sealed class PointsToArtNetLightsExample : Instance<PointsToArtNetLightsExample>

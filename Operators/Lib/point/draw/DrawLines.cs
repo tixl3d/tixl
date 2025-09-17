@@ -47,12 +47,6 @@ internal sealed class DrawLines : Instance<DrawLines>
         [Input(Guid = "520c428e-77b0-44d7-95af-d1cbf9b7e4a7", MappedType = typeof(UvModes))]
         public readonly InputSlot<int> UvScaleFX = new InputSlot<int>();
 
-        [Input(Guid = "039e11ea-2155-4f90-aa8a-74ead604679c")]
-        public readonly InputSlot<float> UseWForWidth = new InputSlot<float>();
-
-        [Input(Guid = "567794ab-b3d3-43f6-ae95-4d654f797577")]
-        public readonly InputSlot<bool> UseWAsTexCoordV = new InputSlot<bool>();
-
         [Input(Guid = "c78378f5-8306-4586-af6b-99cea40fa9a9")]
         public readonly InputSlot<float> FadeOutTooLong = new InputSlot<float>();
         

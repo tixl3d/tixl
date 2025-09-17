@@ -6,7 +6,6 @@ using SharpDX.WIC;
 using T3.Core.Animation;
 using T3.Core.UserData;
 using T3.Core.Utils;
-using T3.Core.Video;
 using Utilities = T3.Core.Utils.Utilities;
 
 namespace Lib.flow.testing;

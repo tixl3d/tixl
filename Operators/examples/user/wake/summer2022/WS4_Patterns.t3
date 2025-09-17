@@ -382,11 +382,6 @@
       "SymbolId": "836f211f-b387-417c-8316-658e0dc6e117",
       "InputValues": [
         {
-          "Id": "039e11ea-2155-4f90-aa8a-74ead604679c"/*UseWForWidth*/,
-          "Type": "System.Single",
-          "Value": 0.0
-        },
-        {
           "Id": "28f85ae9-ebae-4300-8aa0-738c6327cc44"/*TransitionProgress*/,
           "Type": "System.Single",
           "Value": 3.1

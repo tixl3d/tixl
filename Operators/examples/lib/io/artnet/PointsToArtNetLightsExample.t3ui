@@ -130,7 +130,7 @@
       }
     },
     {
-      "ChildId": "a12f871a-93c0-4bca-a15a-a32dff6fb0e6"/*PointsToArtNetLights*/,
+      "ChildId": "a12f871a-93c0-4bca-a15a-a32dff6fb0e6"/*PointsToDMXLights*/,
       "Position": {
         "X": 383.5266,
         "Y": 763.598
@@ -193,7 +193,7 @@
       }
     },
     {
-      "ChildId": "f9d58c9b-1153-4417-8bc1-92fd7c747b15"/*PointsToArtNetLights*/,
+      "ChildId": "f9d58c9b-1153-4417-8bc1-92fd7c747b15"/*PointsToDMXLights*/,
       "Position": {
         "X": 140.0,
         "Y": 1025.2385

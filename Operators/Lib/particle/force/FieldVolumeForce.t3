@@ -35,7 +35,7 @@
     },
     {
       "Id": "97334c3a-7d1b-4990-a541-70f6ef040197"/*ReflectOnCollision*/,
-      "DefaultValue": false
+      "DefaultValue": true
     },
     {
       "Id": "bf4f4938-e8ca-4b64-aa8b-6247527ad2fd"/*InvertVolume*/,

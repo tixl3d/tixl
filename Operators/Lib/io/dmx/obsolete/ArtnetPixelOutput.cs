@@ -1,15 +1,8 @@
 using SharpDX.Direct3D11;
-using T3.Core.Utils;
 using Utilities = T3.Core.Utils.Utilities;
 using ArtNet.Packets;
 using ArtNet.Sockets;
-using System.Net;
-using SharpDX;
-using System.Collections.Generic;
-using T3.Core.Logging;
 using System.Diagnostics;
-using System.Threading;
-using System;
 
 namespace Lib.io.dmx.obsolete;
 

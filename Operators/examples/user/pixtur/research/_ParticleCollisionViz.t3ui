@@ -1,0 +1,122 @@
+{
+  "Id": "6a978975-3996-4e0b-ae9b-782a49e17c73"/*_ParticleCollisionViz*/,
+  "Description": "A helper that visualizes particles in the 2D collision simulation.",
+  "InputUis": [
+    {
+      "InputId": "3f19cff4-7364-41c7-a21f-bdb1f969c1bc"/*ShowXYRadius*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      }
+    },
+    {
+      "InputId": "5b0c0dac-41ff-4765-933c-0c48e0bbd6bd"/*Points*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "d950ee58-bb4e-40df-bb1c-e3e27c1e894a"/*ShowSpritePlane*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      }
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "01aa93d4-fead-4a18-abe6-bb033058ee8f"/*Execute*/,
+      "Position": {
+        "X": 895.978,
+        "Y": -15.21463
+      }
+    },
+    {
+      "ChildId": "5a20cd43-a7b2-439d-b52a-9d6d468ac16b"/*RadialPoints*/,
+      "Position": {
+        "X": 205.72925,
+        "Y": 305.0
+      }
+    },
+    {
+      "ChildId": "73f3c063-b558-4f28-8902-290bfa14d720"/*RoundedRect*/,
+      "Position": {
+        "X": 316.09808,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "99538f66-e056-46e9-a7e8-a2c9c334fe9a"/*Execute*/,
+      "Position": {
+        "X": 706.6144,
+        "Y": 174.90674
+      }
+    },
+    {
+      "ChildId": "99f13c63-0a69-4667-a74a-a07339d858e0"/*RepeatAtPoints*/,
+      "Position": {
+        "X": 355.72925,
+        "Y": 249.0
+      }
+    },
+    {
+      "ChildId": "9d66fefd-fa1b-43b7-b0bb-b13c8f765ca7"/*Execute*/,
+      "Position": {
+        "X": 711.2564,
+        "Y": -14.179565
+      }
+    },
+    {
+      "ChildId": "a1c7efa2-983e-4254-8fb9-cb8b4db26e9e"/*RenderTarget*/,
+      "Position": {
+        "X": 166.09808,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "c3ab66fc-42b6-4b07-a0af-e9d7ad8a951b"/*DrawBillboards*/,
+      "Position": {
+        "X": 466.09808,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "c7ea988a-334e-4e1c-b043-b8b54e6317e0"/*DrawLines*/,
+      "Position": {
+        "X": 505.72925,
+        "Y": 249.0
+      }
+    },
+    {
+      "ChildId": "db0a550b-484d-46f8-9c22-4f1e26cddc1f"/*Text*/,
+      "Position": {
+        "X": 16.098083,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "f1bd2023-f197-4500-b115-44d0515a8661"/*TransformPoints*/,
+      "Position": {
+        "X": 205.72925,
+        "Y": 249.0
+      }
+    },
+    {
+      "ChildId": "f52a51f0-dab1-4224-8361-e29e6e751d28"/*TransformPoints*/,
+      "Position": {
+        "X": -39.631165,
+        "Y": 103.70694
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "63b28d36-719e-4cda-8212-026b707f05b0"/*Output*/,
+      "Position": {
+        "X": 1045.978,
+        "Y": -15.21463
+      }
+    }
+  ]
+}

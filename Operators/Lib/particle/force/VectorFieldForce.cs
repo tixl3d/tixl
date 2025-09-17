@@ -1,5 +1,3 @@
-using T3.Core.DataTypes.ShaderGraph;
-
 namespace Lib.particle.force;
 
 [Guid("658b6a44-ff5a-42ca-8673-33874b752004")]

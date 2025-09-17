@@ -11,15 +11,6 @@
       }
     },
     {
-      "InputId": "039e11ea-2155-4f90-aa8a-74ead604679c"/*UseWForWidth*/,
-      "Position": {
-        "X": 423.29715,
-        "Y": 1874.4431
-      },
-      "GroupTitle": "OBSOLETE LEGACY PARAMS",
-      "Description": "Defines whether the \"W\"-Value of the GPoints used has an influence on the size of the rendered Points"
-    },
-    {
       "InputId": "28f85ae9-ebae-4300-8aa0-738c6327cc44"/*TransitionProgress*/,
       "Position": {
         "X": 630.759,
@@ -32,15 +23,6 @@
         "X": 630.759,
         "Y": 185.82886
       }
-    },
-    {
-      "InputId": "567794ab-b3d3-43f6-ae95-4d654f797577"/*UseWAsTexCoordV*/,
-      "Position": {
-        "X": 423.29715,
-        "Y": 1919.4431
-      },
-      "Description": "Defines whether the W value of the GPoints used is used to influence the mapping of the texture.",
-      "AddPadding": "True"
     },
     {
       "InputId": "75419a73-8a3e-4538-9a1d-e3b0ce7f8561"/*Color*/,
@@ -81,7 +63,11 @@
       "Position": {
         "X": 630.759,
         "Y": 124.1371
-      }
+      },
+      "Min": -0.01,
+      "Max": 1.0,
+      "Scale": 0.001,
+      "ClampMin": true
     },
     {
       "InputId": "c9cf2182-1297-463c-b5c1-d4ee7ad0895c"/*EnableZWrite*/,
@@ -346,26 +332,6 @@
       "Position": {
         "X": 1489.1333,
         "Y": 772.7663
-      }
-    }
-  ],
-  "Annotations": [
-    {
-      "Id": "90b83ef5-3940-4c06-ae99-ec45c910e725",
-      "Title": "Obsolete",
-      "Color": {
-        "X": 0.6,
-        "Y": 0.6,
-        "Z": 0.6,
-        "W": 1.0
-      },
-      "Position": {
-        "X": 363.29715,
-        "Y": 1814.4431
-      },
-      "Size": {
-        "X": 229.99997,
-        "Y": 190.0
       }
     }
   ]

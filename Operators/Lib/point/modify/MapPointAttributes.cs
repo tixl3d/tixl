@@ -28,6 +28,12 @@ internal sealed class MapPointAttributes : Instance<MapPointAttributes>
         [Input(Guid = "82a1a932-f5c3-41d5-9539-9b21663aee1b")]
         public readonly InputSlot<float> Phase = new InputSlot<float>();
 
+        [Input(Guid = "7be4e933-6183-4e9c-9c10-0468b46f2a45", MappedType = typeof(WriteColorModes))]
+        public readonly InputSlot<int> WriteColor = new InputSlot<int>();
+
+        [Input(Guid = "7c944690-d5b2-4894-a178-97593ecd797a")]
+        public readonly InputSlot<T3.Core.DataTypes.Gradient> Gradient = new InputSlot<T3.Core.DataTypes.Gradient>();
+
         [Input(Guid = "6d16847c-a560-4835-b120-3fb8c278530a", MappedType = typeof(WriteToModes))]
         public readonly InputSlot<int> WriteTo = new InputSlot<int>();
 
@@ -39,12 +45,6 @@ internal sealed class MapPointAttributes : Instance<MapPointAttributes>
 
         [Input(Guid = "cd91ff45-7f21-40fd-86c8-8dd95204c3b3")]
         public readonly InputSlot<T3.Core.DataTypes.Texture2D> ValueTexture = new InputSlot<T3.Core.DataTypes.Texture2D>();
-
-        [Input(Guid = "7be4e933-6183-4e9c-9c10-0468b46f2a45", MappedType = typeof(WriteColorModes))]
-        public readonly InputSlot<int> WriteColor = new InputSlot<int>();
-
-        [Input(Guid = "7c944690-d5b2-4894-a178-97593ecd797a")]
-        public readonly InputSlot<T3.Core.DataTypes.Gradient> Gradient = new InputSlot<T3.Core.DataTypes.Gradient>();
 
     private enum InputModes
     {

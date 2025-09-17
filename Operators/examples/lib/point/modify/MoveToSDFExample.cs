@@ -1,9 +1,3 @@
-using T3.Core.DataTypes;
-using T3.Core.Operator;
-using T3.Core.Operator.Attributes;
-using T3.Core.Operator.Slots;
-using System.Runtime.InteropServices;
-
 namespace Examples.Lib.point.modify{
     [Guid("653100dc-0c7d-4ce2-aa23-fdba8d7d4395")]
     internal sealed class MoveToSDFExample : Instance<MoveToSDFExample>

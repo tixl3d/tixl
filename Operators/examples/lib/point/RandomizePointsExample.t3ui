@@ -5,8 +5,8 @@
     {
       "InputId": "96c77fb4-7137-4cd7-9285-3ea848c18255"/*Float*/,
       "Position": {
-        "X": -200.0,
-        "Y": 0.0
+        "X": 544.9783,
+        "Y": -110.95416
       }
     }
   ],
@@ -15,493 +15,458 @@
       "ChildId": "03516255-7c1a-485b-9c9d-412d71159540"/*SoftTransformPoints*/,
       "Comment": "We slightly twist the end.",
       "Position": {
-        "X": -978.9907,
-        "Y": 678.0498
+        "X": 1075.99,
+        "Y": 516.42145
       }
     },
     {
       "ChildId": "0665672c-a38b-4c0a-8cfe-2804b6e38101"/*TransformPoints*/,
       "Position": {
-        "X": 1106.7427,
-        "Y": -1067.1284
-      }
-    },
-    {
-      "ChildId": "08f2f3b8-6f6a-43e8-93ba-4ff730665123"/*_Time_old*/,
-      "Position": {
-        "X": 394.02667,
-        "Y": 394.11218
+        "X": 1106.1802,
+        "Y": -1274.6958
       }
     },
     {
       "ChildId": "0a02043d-7069-4603-8e6c-101909316a10"/*ResampleLinePoints*/,
       "Comment": "We resample the lines to smooth things out.",
       "Position": {
-        "X": -378.99054,
-        "Y": 678.0498
+        "X": 1075.99,
+        "Y": 656.4214
       }
     },
     {
       "ChildId": "0b6e5f53-062c-4261-b52e-7db209809096"/*RandomizePoints*/,
       "Position": {
-        "X": 544.0267,
-        "Y": 457.11218
-      }
-    },
-    {
-      "ChildId": "11faa31d-b5af-41cd-9a02-9de51da9e1aa"/*RenderTarget*/,
-      "Position": {
-        "X": 694.0267,
-        "Y": 232.11218
+        "X": 1086.3376,
+        "Y": 11.564453
       }
     },
     {
       "ChildId": "14bad5ea-9c7f-4189-91af-59a4900a5622"/*Layer2d*/,
       "Position": {
-        "X": 1493.1807,
-        "Y": -698.9237
+        "X": 1386.1802,
+        "Y": -826.8673
       }
     },
     {
       "ChildId": "1c050527-fbcd-486b-97bb-64798beebfd5"/*DrawPoints*/,
       "Position": {
-        "X": 1256.7427,
-        "Y": -1011.1284
+        "X": 1246.1802,
+        "Y": -1239.6958
       }
     },
     {
       "ChildId": "1cb04a0b-5b30-45f1-9305-5377ea03929c"/*Text*/,
       "Position": {
-        "X": 1203.1726,
-        "Y": -451.58173
+        "X": 1106.1802,
+        "Y": -681.5114
       }
     },
     {
       "ChildId": "1f415b28-e800-4ca2-910c-0fc9fa5f1e5a"/*RemapVec2*/,
       "Position": {
-        "X": 806.7428,
-        "Y": -955.1284
+        "X": 826.1802,
+        "Y": -1239.6958
       }
     },
     {
       "ChildId": "26570840-9126-4e48-a3a3-7cdc922b12a8"/*RandomizePoints*/,
       "Comment": "This is doing the actual squiggly lines. ",
       "Position": {
-        "X": -528.99054,
-        "Y": 678.0498
+        "X": 1075.99,
+        "Y": 621.4215
       }
     },
     {
       "ChildId": "2b53c51b-ef05-45cb-992e-e4e2db01f162"/*Labels*/,
       "Position": {
-        "X": 1503.1726,
-        "Y": -520.2659
+        "X": 1386.1802,
+        "Y": -716.5114
       }
     },
     {
       "ChildId": "2d3d4b56-e269-4d7a-ab9d-9d5b9858d2a5"/*BoolToInt*/,
       "Position": {
-        "X": 593.1811,
-        "Y": -646.9505
+        "X": 1246.1803,
+        "Y": -1001.8673
       }
     },
     {
       "ChildId": "3243e12d-f610-42a4-b954-90baf48b772b"/*RenderTarget*/,
       "Position": {
-        "X": 994.0267,
-        "Y": 232.11218
+        "X": 1226.3374,
+        "Y": 151.56445
       }
     },
     {
       "ChildId": "33a6f0ba-bd12-44b4-8ce9-e8b9df897ed0"/*MouseInput*/,
       "Position": {
-        "X": -630.2654,
-        "Y": -753.401
+        "X": -86.388245,
+        "Y": -885.94305
       }
     },
     {
       "ChildId": "391af845-fc29-4999-9732-2338c4ca386d"/*SelectPoints*/,
       "Position": {
-        "X": 958.2684,
-        "Y": -1034.3894
+        "X": 1106.1802,
+        "Y": -1344.6958
       }
     },
     {
       "ChildId": "3981135e-c5a3-4260-b6bf-d792994909c1"/*RemapVec2*/,
       "Position": {
-        "X": -145.40106,
-        "Y": -904.19324
+        "X": 359.9913,
+        "Y": -970.1465
       }
     },
     {
       "ChildId": "39acc689-3083-41e0-9205-36546c623121"/*BoolToInt*/,
       "Position": {
-        "X": -145.40106,
-        "Y": -848.19324
+        "X": 359.9913,
+        "Y": -935.1465
       }
     },
     {
       "ChildId": "3a811ff1-a192-4e9f-840a-fdff7f7effb5"/*RadialPoints*/,
       "Comment": "We start with a spiral...",
       "Position": {
-        "X": -1128.9907,
-        "Y": 678.0498
+        "X": 1075.99,
+        "Y": 481.42145
       }
     },
     {
       "ChildId": "3abc3d3b-4124-4157-a2d0-a14c777d2c3f"/*_Time_old*/,
       "Position": {
-        "X": 476.70303,
-        "Y": -436.27002
+        "X": 1246.1803,
+        "Y": -1071.8673
       }
     },
     {
       "ChildId": "46732bc1-e318-475b-b5ab-9f19bbd41b21"/*Vector2Components*/,
       "Position": {
-        "X": 903.1726,
-        "Y": -451.58173
+        "X": 826.1802,
+        "Y": -681.5114
       }
     },
     {
       "ChildId": "4724a8d0-d98b-4500-b467-1f9e5bfc16fb"/*RenderTarget*/,
       "Position": {
-        "X": 1841.5125,
-        "Y": -1059.0227
+        "X": 1680.5574,
+        "Y": -1223.0217
       }
     },
     {
-      "ChildId": "4b01d57c-8f26-4cc4-80aa-bb308bcc62b4"/*_Time_old*/,
+      "ChildId": "4e4d978e-220d-46c6-9e39-bfdd747f5c31"/*BiasAndGainExample*/,
       "Position": {
-        "X": 544.0267,
-        "Y": 288.11218
+        "X": 1478.3712,
+        "Y": -418.5747
       }
     },
     {
       "ChildId": "55206f8d-8214-4bed-bf1b-59c2b44b123c"/*BlendPoints*/,
       "Position": {
-        "X": 694.0267,
-        "Y": 288.11218
+        "X": 1226.3374,
+        "Y": -23.435547
       }
     },
     {
       "ChildId": "57857a18-152f-44d0-b2c4-e3848f473291"/*RandomizePoints*/,
       "Position": {
-        "X": 544.0267,
-        "Y": 331.11218
-      }
-    },
-    {
-      "ChildId": "5c63c37b-f44a-43ba-a704-2ab9ab83e6d9"/*Value*/,
-      "Position": {
-        "X": 1022.39075,
-        "Y": -1.0626831
+        "X": 1226.3374,
+        "Y": -93.43555
       }
     },
     {
       "ChildId": "5c6ebdea-765d-47bf-a93f-77b84fe6fbae"/*Curve*/,
       "Position": {
-        "X": 1406.7427,
-        "Y": -1067.1284
+        "X": 1386.1802,
+        "Y": -1274.6958
       }
     },
     {
       "ChildId": "5d861f0b-4b2c-49c8-bc03-36466ba5a355"/*DrawBillboards*/,
       "Position": {
-        "X": 844.0267,
-        "Y": 232.11218
+        "X": 1226.3374,
+        "Y": 81.56445
       }
     },
     {
       "ChildId": "5e7bbe16-5465-45fb-b767-3d4c95b9ac24"/*Blur*/,
       "Position": {
-        "X": 1196.9639,
-        "Y": -699.3054
+        "X": 1386.1802,
+        "Y": -896.8673
       }
     },
     {
       "ChildId": "5f043546-8ab3-4d0b-aaa5-66319bf8df61"/*_GridPoints_Old*/,
       "Position": {
-        "X": 808.2684,
-        "Y": -1034.3894
+        "X": 966.18024,
+        "Y": -1344.6958
       }
     },
     {
-      "ChildId": "69292a81-0d9c-4f9e-a59b-d9b097699376"/*Text*/,
+      "ChildId": "646c9cfe-15b6-4fa1-8157-0af342a6d240"/*GridPoints*/,
       "Position": {
-        "X": 1322.3907,
-        "Y": -1.0626831
+        "X": 1086.3376,
+        "Y": -128.43555
       }
     },
     {
       "ChildId": "6a96f12b-81f7-4204-94c5-f789e2f72e51"/*Text*/,
       "Position": {
-        "X": 1288.3376,
-        "Y": -520.2659
+        "X": 1246.1802,
+        "Y": -716.5114
       }
     },
     {
       "ChildId": "6aba9023-5d35-4971-ba7d-a03879465c94"/*HasVec2Changed*/,
       "Position": {
-        "X": -445.40106,
-        "Y": -848.19324
+        "X": 79.9913,
+        "Y": -935.1465
       }
     },
     {
       "ChildId": "6e956dc2-862a-4a94-93f8-cd051e960143"/*Group*/,
       "Position": {
-        "X": 1691.5125,
-        "Y": -1059.0227
+        "X": 1680.5574,
+        "Y": -1328.0216
       }
     },
     {
       "ChildId": "6ff701bf-1916-4cc6-b947-6010a5f345c8"/*PickVector2*/,
       "Position": {
-        "X": 4.5989685,
-        "Y": -934.19324
+        "X": 499.9913,
+        "Y": -1005.1465
       }
     },
     {
       "ChildId": "710b36d9-ff5b-4379-9b10-4f86ed351056"/*Point*/,
       "Position": {
-        "X": 1106.7427,
-        "Y": -955.1284
+        "X": 1106.1802,
+        "Y": -1239.6958
       }
     },
     {
       "ChildId": "71eb0887-29f4-4171-a208-86fc73f48739"/*RandomizePoints*/,
       "Position": {
-        "X": -66.32788,
-        "Y": 715.26843
+        "X": 1075.99,
+        "Y": 726.4215
       }
     },
     {
       "ChildId": "732b2d9d-7d18-45b5-82ca-b9adce0c699e"/*ColorGrade*/,
       "Position": {
-        "X": 983.6721,
-        "Y": 659.26843
-      }
-    },
-    {
-      "ChildId": "776d8a90-c3df-4117-b762-6aba970b5e1f"/*_GridPoints_Old*/,
-      "Position": {
-        "X": 209.30333,
-        "Y": 471.24573
+        "X": 1495.99,
+        "Y": 866.4215
       }
     },
     {
       "ChildId": "8276b88f-15c0-4eaf-939d-cfd97c9ae39e"/*Group*/,
       "Position": {
-        "X": 533.6721,
-        "Y": 659.26843
+        "X": 1495.99,
+        "Y": 726.4215
       }
     },
     {
       "ChildId": "862e3dc5-d740-4669-84bc-43a38b7eca43"/*FloatToString*/,
       "Position": {
-        "X": 1053.1726,
-        "Y": -395.58173
-      }
-    },
-    {
-      "ChildId": "8987f4f4-9215-4cc3-aeee-40f4872bc722"/*Vector2*/,
-      "Position": {
-        "X": 423.39578,
-        "Y": -997.91547
+        "X": 966.1802,
+        "Y": -646.5114
       }
     },
     {
       "ChildId": "8f34fa82-3c3d-4adb-b085-387f8979d70a"/*TransformPoints*/,
       "Comment": "We rotate all points in the local point space. This will give it a slightly italic look later.",
       "Position": {
-        "X": -678.9907,
-        "Y": 678.0498
+        "X": 1075.99,
+        "Y": 586.42145
       }
     },
     {
       "ChildId": "903bb9dd-7afe-4a7e-ba2c-9b79ddc530a0"/*LinePoints*/,
       "Position": {
-        "X": -66.32788,
-        "Y": 804.26843
+        "X": 935.9902,
+        "Y": 796.4215
+      }
+    },
+    {
+      "ChildId": "9658347a-56b7-4f23-b7bb-ee8c076b3451"/*Time*/,
+      "Position": {
+        "X": 935.9902,
+        "Y": -45.92923
       }
     },
     {
       "ChildId": "97700978-3243-48a1-bef3-caff92bb7e19"/*RandomizePoints*/,
       "Position": {
-        "X": 743.1811,
-        "Y": -689.9505
+        "X": 1386.1802,
+        "Y": -1106.8677
       }
     },
     {
       "ChildId": "9ac0b34b-e39e-42fa-aebf-500a3e8725e1"/*DrawPoints*/,
       "Position": {
-        "X": 893.181,
-        "Y": -692.49493
+        "X": 1386.1802,
+        "Y": -966.86755
       }
     },
     {
       "ChildId": "9f1a8578-bf51-4c45-8c0c-3fd3047ba182"/*DrawLines*/,
       "Position": {
-        "X": 383.67212,
-        "Y": 715.26843
-      }
-    },
-    {
-      "ChildId": "a1c76402-d02b-40e5-a4cd-df329c7ad6cd"/*Vector2Components*/,
-      "Position": {
-        "X": 273.39578,
-        "Y": -997.91547
+        "X": 1355.99,
+        "Y": 761.4215
       }
     },
     {
       "ChildId": "a2fec380-3bb4-4e7d-ba60-c2bee7a6021b"/*ClearSomePoints*/,
       "Comment": "We clear away some gaps to make it resample individual words.",
       "Position": {
-        "X": 233.67212,
-        "Y": 659.26843
+        "X": 1215.99,
+        "Y": 656.4214
       }
     },
     {
       "ChildId": "a8d6f017-85d4-4c68-85b0-8979cc09a487"/*FloatToString*/,
       "Position": {
-        "X": 1053.1726,
-        "Y": -451.58173
+        "X": 966.1802,
+        "Y": -681.5114
       }
     },
     {
       "ChildId": "ad34b7c0-2a4c-421b-ad9b-d6d261dfb5df"/*RandomizePoints*/,
       "Position": {
-        "X": 233.67212,
-        "Y": 726.26843
+        "X": 1215.99,
+        "Y": 761.4215
       }
     },
     {
       "ChildId": "b3f0c621-3bd3-4148-b249-9c2ff84c1387"/*Text*/,
       "Position": {
-        "X": 1203.1726,
-        "Y": -384.58173
+        "X": 1106.1802,
+        "Y": -646.5114
       }
     },
     {
-      "ChildId": "bb53a634-03f4-4355-8fb7-fcffc76ec650"/*RepeatAtGPoints*/,
+      "ChildId": "bb53a634-03f4-4355-8fb7-fcffc76ec650"/*RepeatAtPoints*/,
       "Comment": "We add some streaks. Note how we disabled apply target orientation.",
       "Position": {
-        "X": 83.67212,
-        "Y": 715.26843
+        "X": 1075.99,
+        "Y": 761.4215
       }
     },
     {
       "ChildId": "bd0d46c8-ce2d-4181-a658-61c915f0b536"/*RenderTarget*/,
       "Position": {
-        "X": 1043.1809,
-        "Y": -692.49493
+        "X": 1386.1802,
+        "Y": -931.8673
       }
     },
     {
       "ChildId": "c263b250-74ac-4237-b176-cfd8abfc1bce"/*FilterPoints*/,
       "Comment": "We pick a bunch of points...",
       "Position": {
-        "X": -216.32788,
-        "Y": 715.26843
+        "X": 1075.99,
+        "Y": 691.4215
       }
     },
     {
       "ChildId": "c53487fa-f254-46b7-aeeb-06e61e1653b7"/*RenderTarget*/,
       "Position": {
-        "X": 683.6721,
-        "Y": 659.26843
-      }
-    },
-    {
-      "ChildId": "c9deb25d-70f9-4cda-9818-7f6256e04bc9"/*FloatToString*/,
-      "Position": {
-        "X": 1172.3907,
-        "Y": -1.0626831
+        "X": 1495.99,
+        "Y": 796.4215
       }
     },
     {
       "ChildId": "cdd99d40-d68d-4ca9-928b-ebeeb0d1b13f"/*Transform*/,
       "Position": {
-        "X": 1353.1726,
-        "Y": -451.58173
+        "X": 1246.1802,
+        "Y": -681.5114
       }
     },
     {
       "ChildId": "d3a12d43-fad0-4264-a268-1b40f5ca9875"/*DelayTriggerChange*/,
       "Position": {
-        "X": -295.40106,
-        "Y": -848.19324
+        "X": 219.9913,
+        "Y": -935.1465
       }
     },
     {
       "ChildId": "d56e1e61-4571-46ed-9ee0-8e60f2e70e52"/*LinePoints*/,
       "Position": {
-        "X": 593.1811,
-        "Y": -689.9505
+        "X": 1386.1802,
+        "Y": -1141.8677
       }
     },
     {
       "ChildId": "d6db99d9-fcc9-47b8-9e0a-a9c5eef9f484"/*DrawPoints*/,
       "Position": {
-        "X": 1256.7427,
-        "Y": -955.1284
+        "X": 1246.1802,
+        "Y": -1204.6958
       }
     },
     {
       "ChildId": "db158d11-407b-41ec-a5c4-6dbba0c54b79"/*SetPointAttributes*/,
       "Comment": "Set extend",
       "Position": {
-        "X": 394.02667,
-        "Y": 331.11218
+        "X": 1226.3374,
+        "Y": -128.43555
       }
     },
     {
       "ChildId": "db7230bd-58d3-4883-8b63-3b3c80b80a88"/*Grain*/,
       "Position": {
-        "X": 833.6721,
-        "Y": 659.26843
+        "X": 1495.99,
+        "Y": 831.42126
       }
     },
     {
       "ChildId": "dc77cecb-fbe7-4447-8954-d12667202dce"/*DrawLines*/,
       "Position": {
-        "X": 383.67212,
-        "Y": 659.26843
+        "X": 1355.99,
+        "Y": 656.4214
       }
     },
     {
       "ChildId": "dfca676b-3001-4b60-b4dc-20bdb3bd1f69"/*WaveForm*/,
       "Position": {
-        "X": 1343.1807,
-        "Y": -698.9237
+        "X": 1386.1802,
+        "Y": -861.8673
       }
     },
     {
       "ChildId": "e005d34a-187e-4b07-a91f-affd7ee50c50"/*Vec2ToVec3*/,
       "Position": {
-        "X": 956.7428,
-        "Y": -955.1284
+        "X": 966.1802,
+        "Y": -1239.6958
       }
     },
     {
       "ChildId": "e83ce14d-e18b-45b8-a83e-e68af170cff4"/*PerlinNoise2*/,
       "Position": {
-        "X": -145.40106,
-        "Y": -934.19324
+        "X": 378.82007,
+        "Y": -1010.38806
+      }
+    },
+    {
+      "ChildId": "e83f196c-b9d9-41b9-9360-ff33be53ca75"/*LoadImage*/,
+      "Position": {
+        "X": 1086.3376,
+        "Y": 116.56445
       }
     },
     {
       "ChildId": "fe4104c6-5b65-4d8a-896f-527b9e8802ea"/*DrawLines*/,
       "Position": {
-        "X": 1256.7427,
-        "Y": -1067.1284
+        "X": 1246.1802,
+        "Y": -1274.6958
       }
     },
     {
       "ChildId": "ffa59d51-280e-4d62-8cb7-4f138456b420"/*MapPointAttributes*/,
       "Comment": "We colorize the spiral with a gradient.",
       "Position": {
-        "X": -828.9907,
-        "Y": 678.0498
+        "X": 1075.99,
+        "Y": 551.42145
       }
     }
   ],
@@ -509,12 +474,48 @@
     {
       "OutputId": "d078d68a-e19e-48c9-912d-47e2cb906b42"/*ImgOutput*/,
       "Position": {
-        "X": 1991.5125,
-        "Y": -1059.0227
+        "X": 1680.5574,
+        "Y": -1188.0216
       }
     }
   ],
   "Annotations": [
+    {
+      "Id": "57f14581-a6cb-4d3a-82ba-f955407b4105",
+      "Label": "Alien Script",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 875.9902,
+        "Y": 361.42145
+      },
+      "Size": {
+        "X": 789.99994,
+        "Y": 650.0
+      }
+    },
+    {
+      "Id": "69105b33-2a77-42e0-ac6b-8aefa21c96a5",
+      "Label": "Shuffle Effect",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 875.9902,
+        "Y": -248.43555
+      },
+      "Size": {
+        "X": 789.9999,
+        "Y": 541.926
+      }
+    },
     {
       "Id": "a49aac92-24b7-4378-990e-43236f9f4304",
       "Title": "Pick mouse or random movement",
@@ -525,12 +526,30 @@
         "W": 1.0
       },
       "Position": {
-        "X": -625.43054,
-        "Y": -994.19324
+        "X": -130.03815,
+        "Y": -1065.1465
       },
       "Size": {
         "X": 864.8644,
         "Y": 323.79227
+      }
+    },
+    {
+      "Id": "c2cee375-8487-4b80-8fd2-227504975fb9",
+      "Label": "Visualize Bias and Gain Curve",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -190.03815,
+        "Y": -1464.6958
+      },
+      "Size": {
+        "X": 2040.5955,
+        "Y": 963.1844
       }
     }
   ]

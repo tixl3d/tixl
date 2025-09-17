@@ -66,7 +66,8 @@ internal sealed class SymbolLibrary : Window
             _wasScanned = true;
         }
 
-        CustomComponents.TooltipForLastItem("Scan usage dependencies for symbols", "This can be useful for cleaning up operator name spaces.");
+        CustomComponents.TooltipForLastItem("Scan usage dependencies for symbols", 
+                                            "This can be useful for cleaning up operator name spaces.");
 
         if (_wasScanned)
         {

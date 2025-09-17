@@ -102,6 +102,12 @@ internal static class VariationThumbnail
         ImGui.PushID(variation.Id.GetHashCode());
 
         ImGui.InvisibleButton("##thumbnail", pMax-pMin);
+        var isHovered = ImGui.IsItemVisible() && ImGui.IsItemHovered();
+        if (isHovered)
+        {
+            //Log.Debug("here");
+            drawList.AddRect(pMin + Vector2.One, pMax - Vector2.One, UiColors.ForegroundFull.Fade(0.2f));
+        }
 
         if (_canvas.IsBlendingActive)
         {
@@ -113,7 +119,7 @@ internal static class VariationThumbnail
         else
         {
             // Handle hover
-            if (ImGui.IsItemVisible() && ImGui.IsItemHovered())
+            if (isHovered)
             {
                 
                 if (variation.IsSnapshot)

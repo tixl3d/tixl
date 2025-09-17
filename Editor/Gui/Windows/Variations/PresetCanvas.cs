@@ -48,7 +48,8 @@ internal class PresetCanvas : VariationBaseCanvas
         }
         
         var newVariation = VariationHandling.ActivePoolForPresets.CreatePresetForInstanceSymbol(VariationHandling.ActiveInstanceForPresets);
-        newVariation.PosOnCanvas = FindFreePositionForNewThumbnail(VariationHandling.ActivePoolForPresets.AllVariations);
+        if(VariationHandling.ActivePoolForPresets.AllVariations.Count > 1) 
+            newVariation.PosOnCanvas = FindFreePositionForNewThumbnail(VariationHandling.ActivePoolForPresets.AllVariations);
         
         VariationThumbnail.VariationForRenaming = newVariation;
         VariationHandling.ActivePoolForPresets.SaveVariationsToFile();

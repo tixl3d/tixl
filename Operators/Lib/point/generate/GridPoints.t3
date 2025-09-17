@@ -44,9 +44,9 @@
     {
       "Id": "a3653d07-18b7-491d-8b19-dfb21c4a0683"/*OrientationAxis*/,
       "DefaultValue": {
-        "X": 0.0,
+        "X": 1.0,
         "Y": 0.0,
-        "Z": 1.0
+        "Z": 0.0
       }
     },
     {

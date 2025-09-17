@@ -1,9 +1,3 @@
-using System.Collections.Generic;
-using System.Numerics;
-using T3.Core.Operator;
-using T3.Core.Operator.Attributes;
-using T3.Core.Operator.Slots;
-using System;
 using T3.Core.Utils;
 
 namespace Lib.numbers.floats.process;
