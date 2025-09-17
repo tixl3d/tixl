@@ -273,6 +273,12 @@ internal sealed class TimeLineCanvas : CurveEditCanvas
             Playback.TimeInBars = draggedTime;
         }
 
+        // Add consistency: Clear selection when clicking in drag area (just like other timeline areas)
+        if (ImGui.IsItemClicked() && !ImGui.IsMouseDragging(ImGuiMouseButton.Left))
+        {
+            ClearSelection();
+        }
+
         ImGui.SetCursorPos(Vector2.Zero);
     }
 
