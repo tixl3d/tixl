@@ -152,12 +152,12 @@ float3 ComputeNormal(psInput pin, float3x3 tbnToWorld)
     if (UseFlatShading > 0.5)
     {
         // Flat shading: calculate geometric normal from world position derivatives
-        float3 dpdx = ddx(frag.worldPosition);
-        float3 dpdy = ddy(frag.worldPosition);
+        float3 dpdx = ddx(pin.worldPosition);
+        float3 dpdy = ddy(pin.worldPosition);
         float3 geometricNormal = normalize(cross(dpdy, dpdx));
 
         // Apply normal map details on top of flat normal
-        float4 normalMap = NormalMap.Sample(WrappedSampler, frag.uv);
+        float4 normalMap = NormalMap.Sample(WrappedSampler, pin.texCoord);
         float3 normalDetail = normalize(2.0 * normalMap.rgb - 1.0);
 
         // Create TBN basis using geometric normal and derivatives
@@ -172,7 +172,7 @@ float3 ComputeNormal(psInput pin, float3x3 tbnToWorld)
     else
     {
         // Standard shading: use interpolated normals with normal mapping
-        float4 normalMap = NormalMap.Sample(WrappedSampler, frag.uv);
+        float4 normalMap = NormalMap.Sample(WrappedSampler, pin.texCoord);
         N = normalize(2.0 * normalMap.rgb - 1.0);
         N = normalize(mul(N, tbnToWorld));
     }
