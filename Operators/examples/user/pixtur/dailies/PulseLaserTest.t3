@@ -81,7 +81,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "/user.pixtur/testcontent/MeshTest/MegaHardSurfacePack/obj_06_153.obj"
+          "Value": "/Examples/user/pixtur/testcontent/MeshTest/MegaHardSurfacePack/obj_06_153.obj"
         }
       ],
       "Outputs": []
@@ -415,7 +415,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "/user.pixtur/testcontent/MeshTest/MegaHardSurfacePack/obj_06_153.obj"
+          "Value": "/Examples/user/pixtur/testcontent/MeshTest/MegaHardSurfacePack/obj_06_153.obj"
         }
       ],
       "Outputs": []
@@ -768,7 +768,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "/user.pixtur/testcontent/MeshTest/MegaHardSurfacePack/obj_08_245.obj"
+          "Value": "/Examples/user/pixtur/testcontent/MeshTest/MegaHardSurfacePack/obj_08_245.obj"
         }
       ],
       "Outputs": []

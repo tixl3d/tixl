@@ -265,7 +265,7 @@
         {
           "Id": "24646f06-1509-43ce-94c6-eeb608ad97cd"/*Source*/,
           "Type": "System.String",
-          "Value": "/user.pixtur/convert-buffer-to-texture2d-ps.hlsl"
+          "Value": "/Examples/user/pixtur/convert-buffer-to-texture2d-ps.hlsl"
         },
         {
           "Id": "501338b3-f432-49a5-bdbd-bcf209671305"/*EntryPoint*/,
@@ -808,6 +808,12 @@
     {
       "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
       "SourceSlotId": "ec8f4ff1-6b7a-4050-8086-2565c8f5d3fb",
+      "TargetParentOrChildId": "8e05dbed-0db8-4855-9ff0-5ee950cde29d",
+      "TargetSlotId": "49556d12-4cd1-4341-b9d8-c356668d296c"
+    },
+    {
+      "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "SourceSlotId": "96bdee59-d3b7-4d93-939c-85cab836d6e5",
       "TargetParentOrChildId": "8e05dbed-0db8-4855-9ff0-5ee950cde29d",
       "TargetSlotId": "49556d12-4cd1-4341-b9d8-c356668d296c"
     },
