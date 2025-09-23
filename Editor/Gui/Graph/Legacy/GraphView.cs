@@ -315,33 +315,33 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
 
             if (!io.KeyCtrl && !io.KeyShift && !io.KeyAlt && !editingSomething)
             {
-                if (ImGui.IsKeyDown((ImGuiKey)Key.W))
+                if (UserActions.CameraForward.Triggered())
                 {
                     _dampedScrollVelocity.Y -= InverseTransformDirection(Vector2.One * UserSettings.Config.KeyboardScrollAcceleration).Y;
                 }
 
-                if (ImGui.IsKeyDown((ImGuiKey)Key.S))
+                if (UserActions.CameraBackward.Triggered())
                 {
                     _dampedScrollVelocity.Y += InverseTransformDirection(Vector2.One * UserSettings.Config.KeyboardScrollAcceleration).Y;
                 }
 
-                if (ImGui.IsKeyDown((ImGuiKey)Key.A))
+                if (UserActions.CameraLeft.Triggered())
                 {
                     _dampedScrollVelocity.X -= InverseTransformDirection(Vector2.One * UserSettings.Config.KeyboardScrollAcceleration).X;
                 }
 
-                if (ImGui.IsKeyDown((ImGuiKey)Key.D))
+                if (UserActions.CameraRight.Triggered())
                 {
                     _dampedScrollVelocity.X += InverseTransformDirection(Vector2.One * UserSettings.Config.KeyboardScrollAcceleration).X;
                 }
 
-                if (ImGui.IsKeyDown((ImGuiKey)Key.Q))
+                if (UserActions.CameraDown.Triggered())
                 {
                     var center = WindowPos + WindowSize / 2;
                     ApplyZoomDelta(center, 1.05f, out _);
                 }
 
-                if (ImGui.IsKeyDown((ImGuiKey)Key.E))
+                if (UserActions.CameraUp.Triggered())
                 {
                     var center = WindowPos + WindowSize / 2;
                     ApplyZoomDelta(center, 1 / 1.05f, out _);
@@ -386,7 +386,7 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
         if (shouldHandleFenceSelection)
             HandleFenceSelection(_projectView.CompositionInstance, _selectionFence);
 
-        if (isOnBackground && doubleClicked)
+        if (isOnBackground && (doubleClicked || UserActions.CloseOperator.Triggered()) )
             _projectView.TrySetCompositionOpToParent();
 
         if (tempConnections.Count > 0 && ImGui.IsMouseReleased(0))
