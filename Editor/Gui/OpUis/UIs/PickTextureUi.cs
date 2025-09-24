@@ -1,9 +1,10 @@
 #nullable enable
 using ImGuiNET;
+using T3.Core.DataTypes;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
-using T3.Core.DataTypes;
 using T3.Editor.Gui.Interaction;
+using T3.Editor.Gui.OpUis.WidgetUi;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using Vector2 = System.Numerics.Vector2;
@@ -28,31 +29,21 @@ internal static class PickTextureUi
 
     internal static OpUi.CustomUiResult DrawChildUi(Instance instance,
                                                     ImDrawListPtr drawList,
-                                                    ImRect selectableScreenRect,
+                                                    ImRect screenRect,
                                                     ScalableCanvas canvas,
                                                     ref OpUiBinding? data1)
     {
         data1 ??= new Binding(instance);
         var data = (Binding)data1;
-        var canvasScale = canvas.Scale.X;
         if (!data.IsValid)
             return OpUi.CustomUiResult.None;
 
-        ImGui.PushClipRect(selectableScreenRect.Min, selectableScreenRect.Max, true);
+        ImGui.PushID(instance.SymbolChildId.GetHashCode());
+        ImGui.PushClipRect(screenRect.Min, screenRect.Max, true);
 
-        var h = selectableScreenRect.GetHeight();
-       /* var font = h > 40 ? Fonts.FontLarge
-                          : (h > 25 ? Fonts.FontNormal : Fonts.FontSmall);*/
-
-        ImGui.PushFont(Fonts.FontNormal);
-        ImGui.SetCursorScreenPos(selectableScreenRect.Min + new Vector2(10, 0));
-        ImGui.BeginGroup();
-
-        // Show operator name
-        if (!string.IsNullOrWhiteSpace(instance.SymbolChild.Name))
-        {
-            ImGui.TextUnformatted(instance.SymbolChild.Name);
-        }
+        var canvasScaleY = canvas.Scale.Y;
+        var font = Fonts.FontBold;
+        var labelColor = WidgetElements.GetPrimaryLabelColor(canvasScaleY);
 
         // Current index
         var isAnimated = instance.Parent?.Symbol.Animator.IsInputSlotAnimated(data.Index) ?? false;
@@ -60,63 +51,106 @@ internal static class PickTextureUi
                                ? data.Index.Value
                                : data.Index.TypedInputValue.Value;
 
-        ImGui.TextUnformatted($"PickTexture: {currentValue}");
-
-        // --- Buttons per input (vertical column, show source operator name) ---
         var connections = data.Inputs.GetCollectedTypedInputs();
         if (connections != null && connections.Count > 0)
         {
-            // increase padding so buttons feel taller
-            ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(5, 5));
-            var inputlength = connections.Count;
-            var buttonHeight = (h / inputlength)-5.0f; // increase or reduce as you like
-            for (int i = 0; i < connections.Count; i++)
+            // Calculate layout
+            var margin = 4.0f * canvasScaleY;
+            var buttonSpacing = 5.0f * canvasScaleY;
+            var workingRect = screenRect;
+            workingRect.Expand(-margin);
+
+            // Reserve space for title
+            var titleHeight = font.FontSize + 12.0f * canvasScaleY;
+            var buttonAreaHeight = workingRect.GetHeight() - titleHeight;
+            var buttonHeight = (buttonAreaHeight - (buttonSpacing * (connections.Count - 1))) / connections.Count;
+            buttonHeight = Math.Max(16.0f * canvasScaleY, buttonHeight);
+
+            // Draw title
+            var titleText = !string.IsNullOrWhiteSpace(instance.SymbolChild.Name)
+                ? instance.SymbolChild.Name
+                : $"PickTexture: {currentValue}";
+
+            var titlePos = workingRect.Min + new Vector2(2.0f * canvasScaleY, 2.0f * canvasScaleY);
+            drawList.AddText(font, font.FontSize, titlePos, labelColor, titleText);
+
+            // Draw buttons
+            var buttonTop = workingRect.Min.Y + titleHeight;
+            var buttonLeft = workingRect.Min.X;
+            var buttonWidth = workingRect.GetWidth();
+            //buttonWidth -= 5.0f * canvasScaleY; // reserve space for the animated icon
+            for (var i = 0; i < connections.Count; i++)
             {
                 var srcSlot = connections[i];
-                string label = $"#{i}";
+                var label = $"#{i}";
 
                 var srcInstance = srcSlot?.Parent;
                 if (srcInstance != null)
                 {
                     if (!string.IsNullOrWhiteSpace(srcInstance.SymbolChild.Name))
                     {
-                        // Use instance name if it exists
                         label = srcInstance.SymbolChild.Name;
                     }
                     else if (!string.IsNullOrWhiteSpace(srcInstance.Symbol.Name))
                     {
-                        // Fallback to operator (symbol) name
                         label = srcInstance.Symbol.Name;
                     }
                 }
 
+                var buttonY = buttonTop + i * (buttonHeight + buttonSpacing);
+                var buttonRect = new ImRect(
+                    new Vector2(buttonLeft, buttonY),
+                    new Vector2(buttonLeft + buttonWidth, buttonY + buttonHeight)
+                );
 
-                var isActive = (i == currentValue);
+                var isActive = (i == currentValue % connections.Count);
+                var isHovered = ImGui.IsWindowHovered() && buttonRect.Contains(ImGui.GetMousePos());
+
+                // Determine button color
+                uint buttonColor;
                 if (isActive)
-                    ImGui.PushStyleColor(ImGuiCol.Button, UiColors.BackgroundActive.Rgba);
-
-                // full width (-1) and fixed height
-                if (ImGui.Button(label, new Vector2(selectableScreenRect.GetWidth()-20, buttonHeight)))
                 {
-                    // update the int input's typed value and make the operator re-evaluate
+                    buttonColor = UiColors.BackgroundActive;
+                }
+                else if (isHovered && !data.Index.HasInputConnections)
+                {
+                    buttonColor = UiColors.BackgroundHover;
+                }
+                else
+                {
+                    buttonColor = UiColors.BackgroundButton;
+                }
+
+                // Draw button background
+                drawList.AddRectFilled(buttonRect.Min, buttonRect.Max, buttonColor);
+                // drawList.AddRect(buttonRect.Min, buttonRect.Max, UiColors.Text, 0.0f, ImDrawFlags.None, 1.0f);
+
+                // Draw button text (left-aligned)
+                var textPadding = 8.0f * canvasScaleY;
+                var textPos = new Vector2(buttonRect.Min.X + textPadding, buttonRect.GetCenter().Y - font.FontSize / 2);
+                drawList.AddText(font, font.FontSize, textPos, labelColor, label);
+
+                // Handle click
+                if (isHovered && ImGui.IsMouseClicked(ImGuiMouseButton.Left) && !data.Index.HasInputConnections)
+                {
                     data.Index.TypedInputValue.Value = i;
                     data.Index.DirtyFlag.ForceInvalidate();
                 }
+            }     
+        }
+        else
+        {
+            // No connections - just show title
+            var titleText = !string.IsNullOrWhiteSpace(instance.SymbolChild.Name)
+                ? instance.SymbolChild.Name
+                : $"PickTexture: {currentValue}";
 
-                if (isActive)
-                    ImGui.PopStyleColor();
-            }
-
-            ImGui.PopStyleVar();
+            var titlePos = screenRect.Min + new Vector2(8.0f * canvasScaleY, 8.0f * canvasScaleY);
+            drawList.AddText(font, font.FontSize, titlePos, labelColor, titleText);
         }
 
-
-
-        ImGui.EndGroup();
-        ImGui.PopFont();
-
         ImGui.PopClipRect();
-
+        ImGui.PopID();
         return OpUi.CustomUiResult.Rendered
              | OpUi.CustomUiResult.PreventOpenSubGraph
              | OpUi.CustomUiResult.PreventInputLabels
