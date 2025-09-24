@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using ImGuiNET;
 using T3.Core.Operator;
 using T3.Core.Operator.Interfaces;
@@ -115,7 +115,7 @@ public static class OpUi
                   { Guid.Parse("fdad077d-e919-4f40-a154-36e86245a585"), SetVec3Ui.DrawChildUi },
                   { Guid.Parse("f21de2e1-6af8-4651-90a0-6c662bbb23af"), GetVec3Ui.DrawChildUi },
 
-                  
+                  { Guid.Parse("e6070817-cf2e-4430-87e0-bf3dd15afdb5"), PickTextureUi.DrawChildUi },
                   //
                   // { Guid.Parse("96b1e8f3-0b42-4a01-b82b-44ccbd857400"), SelectVec2FromDictUi.DrawChildUi },
                   // { Guid.Parse("05295c65-7dfd-4570-866e-9b5c4e735569"), SelectBoolFromFloatDictUi.DrawChildUi },
