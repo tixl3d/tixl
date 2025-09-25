@@ -97,7 +97,7 @@ internal sealed class OutputWindow : Window
             _imageCanvas.SetAsCurrent();
 
             // Move down to avoid overlapping with toolbar
-            ImGui.SetCursorPos(ImGui.GetWindowContentRegionMin() + new Vector2(0, 40));
+            ImGui.SetCursorPos(ImGui.GetWindowContentRegionMin() + new Vector2(0, 40)); // this line as no effect?
 
             var okay = Pinning.TryGetPinnedOrSelectedInstance(out var drawnInstance, out var graphCanvas);
 
@@ -119,6 +119,19 @@ internal sealed class OutputWindow : Window
                 _imageCanvas.Update(editingFlags);
 
                 T3Ui.UiScaleFactor = keepScale;
+
+                if (KeyActionHandling.Triggered(UserActions.FocusSelection))
+                {
+                    if (drawnType == typeof(Texture2D))
+                    {
+                        _imageCanvas.SetViewMode(ImageOutputCanvas.Modes.Fitted);
+                    }
+                    else if (drawnType == typeof(Command))
+                    {
+                        _camSelectionHandling.ResetView();
+                    }
+                }
+
                 DrawToolbar(drawnType);
             }
 
@@ -133,9 +146,19 @@ internal sealed class OutputWindow : Window
         ImGui.PushStyleColor(ImGuiCol.FrameBg, UiColors.BackgroundButton.Rgba);
         ImGui.PushStyleColor(ImGuiCol.FrameBgHovered, UiColors.BackgroundHover.Rgba);
         ImGui.PushStyleColor(ImGuiCol.ButtonHovered, UiColors.BackgroundHover.Rgba);
-        
+        ImGui.PushStyleColor(ImGuiCol.ChildBg, Vector4.Zero);
+        ImGui.PushStyleColor(ImGuiCol.ScrollbarBg, new Vector4(0.3f, 0.3f, 0.3f, 0.1f));
+
+        // Set cursor to top of window
+        ImGui.SetCursorPos(ImGui.GetWindowContentRegionMin());
+
+        // Calculate available width
+        var availableWidth = ImGui.GetWindowContentRegionMax().X - ImGui.GetWindowContentRegionMin().X;
+
+        // Begin a horizontally scrollable child region
+        ImGui.BeginChild("##toolbar_scroll", new Vector2(availableWidth, 40), false, ImGuiWindowFlags.HorizontalScrollbar);
+
         {
-            ImGui.SetCursorPos(ImGui.GetWindowContentRegionMin());
             Pinning.DrawPinning();
 
             if (CustomComponents.StateButton("1:1",
@@ -153,8 +176,7 @@ internal sealed class OutputWindow : Window
                 if (CustomComponents.StateButton("Fit",
                                                  _imageCanvas.ViewMode == ImageOutputCanvas.Modes.Fitted
                                                      ? CustomComponents.ButtonStates.Disabled
-                                                     : CustomComponents.ButtonStates.Normal)
-                    || KeyActionHandling.Triggered(UserActions.FocusSelection))
+                                                     : CustomComponents.ButtonStates.Normal))
                 {
                     if (drawnType == typeof(Texture2D))
                     {
@@ -174,6 +196,7 @@ internal sealed class OutputWindow : Window
             // Show gizmos
             {
                 ImGui.SameLine();
+               
                 var showGizmos = _evaluationContext.ShowGizmos != GizmoVisibility.Off;
                 if (CustomComponents.ToggleIconButton(Icon.Grid, "##gizmos", ref showGizmos, Vector2.One * ImGui.GetFrameHeight()))
                 {
@@ -192,14 +215,14 @@ internal sealed class OutputWindow : Window
                 var size = Vector2.One * ImGui.GetFrameHeight(); // Calculate before pushing font
 
                 var icon = _evaluationContext.TransformGizmoMode switch
-                               {
-                                   TransformGizmoModes.None   => "" + (char)Icon.Hidden,
-                                   TransformGizmoModes.Select => "" + (char)Icon.Pipette,
-                                   TransformGizmoModes.Move   => "" + (char)Icon.Move,
-                                   TransformGizmoModes.Rotate => "" + (char)Icon.Rotate,
-                                   TransformGizmoModes.Scale  => "" + (char)Icon.Scale,
-                                   _                          => throw new ArgumentOutOfRangeException()
-                               };
+                {
+                    TransformGizmoModes.None => "" + (char)Icon.Hidden,
+                    TransformGizmoModes.Select => "" + (char)Icon.Pipette,
+                    TransformGizmoModes.Move => "" + (char)Icon.Move,
+                    TransformGizmoModes.Rotate => "" + (char)Icon.Rotate,
+                    TransformGizmoModes.Scale => "" + (char)Icon.Scale,
+                    _ => throw new ArgumentOutOfRangeException()
+                };
 
                 ImGui.SameLine();
                 ImGui.PushFont(Icons.IconFont);
@@ -236,14 +259,18 @@ internal sealed class OutputWindow : Window
             ResolutionHandling.DrawSelector(ref _selectedResolution, _resolutionDialog);
 
             ImGui.SameLine();
-            ColorEditButton.Draw(ref _backgroundColor, new Vector2(ImGui.GetFrameHeight(), ImGui.GetFrameHeight()));
-            CustomComponents.TooltipForLastItem("Adjust background color of view");
+            // the background color button got me confused as it has no effect for Texture2D so I decided to only show it for Command
+            if (drawnType == typeof(Command))
+            {
+                ColorEditButton.Draw(ref _backgroundColor, new Vector2(ImGui.GetFrameHeight(), ImGui.GetFrameHeight()));
+                CustomComponents.TooltipForLastItem("Adjust background color of view");
+            }
+            
         }
 
-        ImGui.PopStyleColor(4);
+        ImGui.PopStyleColor(6);
 
         var texture = GetCurrentTexture();
-        // if (texture != null)
         if (drawnType == typeof(Texture2D) || drawnType == typeof(Command))
         {
             ImGui.SameLine();
@@ -270,12 +297,14 @@ internal sealed class OutputWindow : Window
         ImGui.SameLine();
         ImGui.PushID("CamSpeed");
         var result = SingleValueEdit.Draw(ref UserSettings.Config.CameraSpeed, new Vector2(ImGui.GetFrameHeight() * 2, ImGui.GetFrameHeight()), min: 0.001f, max: 100,
-                                          clampMin: true, 
-                                          clampMax: true, 
-                                          scale: 0.01f, 
+                                          clampMin: true,
+                                          clampMax: true,
+                                          scale: 0.01f,
                                           format: "{0:G3}");
         CustomComponents.TooltipForLastItem("Camera speed when flying with WASD keys.", "TIP: Use mouse wheel while flying to adjust on the fly.");
         ImGui.PopID();
+
+        ImGui.EndChild();
     }
 
     /// <summary>
