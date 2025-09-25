@@ -33,7 +33,7 @@ internal static class ColorEditPopup
         var id = ImGui.GetID("colorPicker");
 
         // Track if popup was open in the previous frame
-        var wasPopupOpen = ImGui.IsPopupOpen(PopupId);
+        _ = ImGui.IsPopupOpen(PopupId);
 
         if (ImGui.BeginPopup(PopupId, dontCloseIfColorPicking))
         {
@@ -60,11 +60,10 @@ internal static class ColorEditPopup
         }
         else
         {
-            // Popup is closing - apply snap-to-black logic here
             if (_openedId == id)
             {
                 // Check if brightness is at minimum threshold and snap to true black
-                if (Math.Abs(cColor.V - 0.001f) < 0.0001f)
+                if (Math.Abs(cColor.V - float.Epsilon) < 0.0001f)
                 {
                     cColor = new Color(0, 0, 0, cColor.A);
                     edited = InputEditStateFlags.ModifiedAndFinished;
@@ -81,7 +80,7 @@ internal static class ColorEditPopup
 
     private static InputEditStateFlags PickColor(ref Color cColor)
     {
-        InputEditStateFlags edited = InputEditStateFlags.Nothing;
+        var edited = InputEditStateFlags.Nothing;
 
         // Pick colors
         var altKeyPressed = ImGui.GetIO().KeyAlt;
@@ -263,10 +262,10 @@ internal static class ColorEditPopup
             if (ImGui.IsItemActive())
             {
                 var clampUpperValue = hrdEditEnabled ? 100 : 1;
-                var normalizedValue = (1 - (ImGui.GetMousePos() - pMin).Y / barHeight).Clamp(0.001f, clampUpperValue); // Changed min from 0 to 0.001f
+                var normalizedValue = (1 - (ImGui.GetMousePos() - pMin).Y / barHeight).Clamp(float.Epsilon, clampUpperValue); 
                 normalizedValue = GetHdrYValue(normalizedValue);
 
-                cColor.V = normalizedValue.Clamp(0.001f, 1000); // Also clamp here to ensure minimum
+                cColor.V = normalizedValue.Clamp(float.Epsilon, 1000); 
                 edited |= InputEditStateFlags.Modified;
             }
 
@@ -409,11 +408,11 @@ internal static class ColorEditPopup
 
                     ImGui.SameLine();
                     ImGui.PushID("s");
-                    if (SingleValueEdit.Draw(ref linearSaturation, inputSize, min: 0.001f, max: 1, clampMin: true, clampMax: true,
+                    if (SingleValueEdit.Draw(ref linearSaturation, inputSize, min: float.Epsilon, max: 1, clampMin: true, clampMax: true,
                                              scale: 0.005f,
                                              format: "{0:0.00}") is InputEditStateFlags.Modified)
                     {
-                        cColor.Saturation = linearSaturation.Clamp(0.001f, 1);
+                        cColor.Saturation = linearSaturation.Clamp(float.Epsilon, 1);
                         edited |= InputEditStateFlags.Modified;
                     }
 
@@ -421,9 +420,9 @@ internal static class ColorEditPopup
 
                     ImGui.SameLine();
                     ImGui.PushID("v");
-                if (SingleValueEdit.Draw(ref v, inputSize, min: 0.001f, max: 20f, clampMin: true, clampMax: false, scale: 0.005f, format: "{0:0.00}") is InputEditStateFlags.Modified)
+                if (SingleValueEdit.Draw(ref v, inputSize, min: float.Epsilon, max: 20f, clampMin: true, clampMax: false, scale: 0.005f, format: "{0:0.00}") is InputEditStateFlags.Modified)
                         {
-                        cColor.V = v.Clamp(0.001f, 20f);
+                        cColor.V = v.Clamp(float.Epsilon, 20f);
                         edited |= InputEditStateFlags.Modified;
                     }
 
@@ -724,8 +723,6 @@ internal static class ColorEditPopup
             FitViewToSelectionHandling.FitViewToSelection();
     }
 
-    private static uint _openedId;
-
     private static Color GetColorAtMousePosition()
     {
         var pos = CoreUi.Instance.Cursor.PositionVec;
@@ -753,6 +750,7 @@ internal static class ColorEditPopup
     private static bool _isHoveringColor;
     private static readonly Bitmap _bmp = new(1, 1);
     public  const string PopupId =  "##colorEdit";
+    private static uint _openedId;
 }
 
 internal static class ColorUsage
