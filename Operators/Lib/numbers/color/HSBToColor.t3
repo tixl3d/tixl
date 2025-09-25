@@ -1,0 +1,23 @@
+{
+  "Id": "13b08a56-0af1-473c-8dbc-20eccbcbd372"/*HSBToColor*/,
+  "Inputs": [
+    {
+      "Id": "436d7556-2d45-4ed3-ad45-657d5b9fa7f4"/*Alpha*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "6bd015a4-d14d-4963-9698-bbad15bd668b"/*Brightness*/,
+      "DefaultValue": 0.50000006
+    },
+    {
+      "Id": "bf1e8706-8eed-4aa8-95bc-062b8db64d53"/*Saturation*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "fe2ea451-3363-4de0-9e29-996b5c076e41"/*Hue*/,
+      "DefaultValue": 0.0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

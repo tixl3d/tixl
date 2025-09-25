@@ -344,7 +344,7 @@ internal static class ColorEditPopup
 
     private enum ColorInputModes
     {
-        Hsl,
+        Hsb,
         Rgba,
         // ReSharper disable once InconsistentNaming
         iRgba,
@@ -370,7 +370,7 @@ internal static class ColorEditPopup
             {
                 _inputMode = (ColorInputModes)((int)(_inputMode + 1) % Enum.GetNames(typeof(ColorInputModes)).Length);
             }
-            CustomComponents.TooltipForLastItem("Click to toggle between HSL, RGBA, integers and Hex input");
+            CustomComponents.TooltipForLastItem("Click to toggle between HSB, RGBA, integers and Hex input");
 
             ImGui.PopStyleColor();
         }
@@ -379,7 +379,7 @@ internal static class ColorEditPopup
 
         switch (_inputMode)
         {
-            case ColorInputModes.Hsl:
+            case ColorInputModes.Hsb:
             {
                 var hueDegrees = hNormalized * 360f;
 
