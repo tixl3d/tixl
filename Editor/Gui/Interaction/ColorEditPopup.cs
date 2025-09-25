@@ -109,8 +109,8 @@ internal static class ColorEditPopup
     private static Vector4 _dampedCompareColor;
 
     private static InputEditStateFlags DrawCircleAndSliders(ref Color cColor, Vector4 compareColor, ref float hNormalized, ref float linearSaturation,
-                                                            float v,
-                                                            ImDrawListPtr drawList)
+                                                        float v,
+                                                        ImDrawListPtr drawList)
     {
         const float saturationWarp = 1.5f;
 
@@ -252,15 +252,10 @@ internal static class ColorEditPopup
             if (ImGui.IsItemActive())
             {
                 var clampUpperValue = hrdEditEnabled ? 100 : 1;
-                var normalizedValue = (1 - (ImGui.GetMousePos() - pMin).Y / barHeight).Clamp(0, clampUpperValue);
+                var normalizedValue = (1 - (ImGui.GetMousePos() - pMin).Y / barHeight).Clamp(0.001f, clampUpperValue); // Changed min from 0 to 0.001f
                 normalizedValue = GetHdrYValue(normalizedValue);
-                // if (normalizedValue > 1)
-                // {
-                //     normalizedValue = MathF.Pow(normalizedValue, 3);
-                // }
 
-                cColor.V = normalizedValue;
-
+                cColor.V = normalizedValue.Clamp(0.001f, 1000); // Also clamp here to ensure minimum
                 edited |= InputEditStateFlags.Modified;
             }
 
@@ -380,48 +375,48 @@ internal static class ColorEditPopup
         switch (_inputMode)
         {
             case ColorInputModes.Hsb:
-            {
-                var hueDegrees = hNormalized * 360f;
-
-                ImGui.PushID("h");
-                if (SingleValueEdit.Draw(ref hueDegrees, inputSize, min: 0, max: 360, clampMin: false, clampMax: false, scale: 1, format: "{0:0.0}") is InputEditStateFlags.Modified)
                 {
-                    if (hueDegrees < 360)
+                    var hueDegrees = hNormalized * 360f;
+
+                    ImGui.PushID("h");
+                    if (SingleValueEdit.Draw(ref hueDegrees, inputSize, min: 0, max: 360, clampMin: false, clampMax: false, scale: 1, format: "{0:0.0}") is InputEditStateFlags.Modified)
                     {
-                        hueDegrees += 360;
+                        if (hueDegrees < 360)
+                        {
+                            hueDegrees += 360;
+                        }
+                        else if (hueDegrees > 360)
+                        {
+                            hueDegrees -= 360;
+                        }
+
+                        cColor.Hue = hueDegrees / 360;
+                        edited |= InputEditStateFlags.Modified;
                     }
-                    else if (hueDegrees > 360)
+
+                    ImGui.PopID();
+
+                    ImGui.SameLine();
+                    ImGui.PushID("s");
+                    if (SingleValueEdit.Draw(ref linearSaturation, inputSize, min: 0.001f, max: 1, clampMin: true, clampMax: true,
+                                             scale: 0.005f,
+                                             format: "{0:0.00}") is InputEditStateFlags.Modified)
                     {
-                        hueDegrees -= 360;
+                        cColor.Saturation = linearSaturation.Clamp(0.001f, 1);
+                        edited |= InputEditStateFlags.Modified;
                     }
 
-                    cColor.Hue = hueDegrees / 360;
-                    edited |= InputEditStateFlags.Modified;
-                }
+                    ImGui.PopID();
 
-                ImGui.PopID();
+                    ImGui.SameLine();
+                    ImGui.PushID("v");
+                if (SingleValueEdit.Draw(ref v, inputSize, min: 0.001f, max: 20f, clampMin: true, clampMax: false, scale: 0.005f, format: "{0:0.00}") is InputEditStateFlags.Modified)
+                        {
+                        cColor.V = v.Clamp(0.001f, 20f);
+                        edited |= InputEditStateFlags.Modified;
+                    }
 
-                ImGui.SameLine();
-                ImGui.PushID("s");
-                if (SingleValueEdit.Draw(ref linearSaturation, inputSize, min: 0, max: 1, clampMin: true, clampMax: true,
-                                         scale: 0.005f,
-                                         format: "{0:0.00}") is InputEditStateFlags.Modified)
-                {
-                    cColor.Saturation = linearSaturation.Clamp(0, 1);
-                    edited |= InputEditStateFlags.Modified;
-                }
-
-                ImGui.PopID();
-
-                ImGui.SameLine();
-                ImGui.PushID("v");
-                if (SingleValueEdit.Draw(ref v, inputSize, min: 0, max: 20, clampMin: true, clampMax: false, scale: 0.005f, format: "{0:0.00}") is InputEditStateFlags.Modified)
-                {
-                    cColor.V = v.Clamp(0, 1000);
-                    edited |= InputEditStateFlags.Modified;
-                }
-
-                ImGui.PopID();
+                    ImGui.PopID();
 
                 ImGui.SameLine();
                 ImGui.Dummy(Vector2.One * 5);
