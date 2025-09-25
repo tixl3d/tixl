@@ -1,0 +1,53 @@
+{
+  "Id": "8a104da8-3995-421f-b756-b6fc06953be3"/*SetRequestedResolutionCmd*/,
+  "Description": "",
+  "InputUis": [
+    {
+      "InputId": "58b2a52c-ece7-420b-9730-e3d0406a5616"/*Resolution*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      }
+    },
+    {
+      "InputId": "a4d09d43-5f81-4b15-85db-e03f917b9764"/*ScaleResolution*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      }
+    },
+    {
+      "InputId": "b05d30d3-3bc4-4517-bd3d-ed2d26f87646"/*StretchResolution*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 120.0
+      }
+    },
+    {
+      "InputId": "c59596ca-984f-4682-88d3-808c60665414"/*Texture*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "6e452022-ede6-455a-a23b-5cb00ed1e1f1"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 700.0
+      }
+    }
+  ],
+  "Links": [
+    {
+      "Id": "f33c0808-ad8e-4719-be7a-c3af9e2a2d36",
+      "Title": "Resolution Magic Tutorial",
+      "Description": "A quick tutorial how Tooll handlers resolutions.",
+      "LinkUrl": "https://www.youtube.com/watch?v=f9E7lwUXfBM",
+      "LinkType": "TutorialVideo"
+    }
+  ]
+}

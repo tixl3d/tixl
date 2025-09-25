@@ -47,7 +47,7 @@
         {
           "Id": "4f9ab443-3885-4a57-9116-6be5824bd95b"/*Amount*/,
           "Type": "System.Single",
-          "Value": 0.178
+          "Value": 0.0
         }
       ],
       "Outputs": []
@@ -337,7 +337,7 @@
         {
           "Id": "8b418dcd-e7cd-4bce-a69e-a9a543426bfe"/*Index*/,
           "Type": "System.Int32",
-          "Value": 1
+          "Value": 0
         }
       ],
       "Outputs": []
@@ -1223,7 +1223,7 @@
         {
           "Id": "cc98bda7-34a5-4c18-9b9e-fabe51b02d71"/*Amount*/,
           "Type": "System.Single",
-          "Value": 0.03
+          "Value": 0.0
         },
         {
           "Id": "ecdccc3c-b7a4-43f7-a4c8-0269ecff916a"/*Variation*/,

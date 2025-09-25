@@ -2,13 +2,17 @@
   "Id": "ca6f09ec-bbc4-4365-8210-bc10cd8d9f94"/*MergeIntLists*/,
   "Inputs": [
     {
+      "Id": "24855d2a-595b-4e3e-81c5-65481c262f64"/*Enabled*/,
+      "DefaultValue": false
+    },
+    {
       "Id": "387fb1db-944f-4eb1-bb6f-b149e4a51a42"/*StartIndices*/,
       "DefaultValue": {
         "Values": []
       }
     },
     {
-      "Id": "9e60f3e7-a891-4a68-b186-21bc0145bdc6"/*MaxSize*/,
+      "Id": "9e60f3e7-a891-4e3e-81c5-65481c262f64"/*MaxSize*/,
       "DefaultValue": -1
     },
     {
@@ -16,6 +20,10 @@
       "DefaultValue": {
         "Values": []
       }
+    },
+    {
+      "Id": "e3315721-2853-449a-af6a-43cd18400470"/*MergeMode*/,
+      "DefaultValue": 0
     }
   ],
   "Children": [],

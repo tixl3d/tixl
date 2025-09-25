@@ -18,6 +18,7 @@ using T3.Editor.Gui.OutputUi;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows;
+using T3.Editor.Gui.Interaction;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.ProjectHandling;
@@ -25,6 +26,7 @@ using T3.Editor.UiModel.Selection;
 using Color = T3.Core.DataTypes.Vector.Color;
 using Texture2D = T3.Core.DataTypes.Texture2D;
 using Vector2 = System.Numerics.Vector2;
+using T3.Editor.Gui.Interaction.Keyboard;
 
 
 namespace T3.Editor.Gui.Graph.Legacy;
@@ -288,7 +290,7 @@ internal sealed class GraphNode
                 // A horrible work around to prevent exception because CompositionOp changed during drawing.
                 // A better solution would defer setting the compositionOp to the beginning of next frame.
                 var justOpenedChild = false;
-                if (hovered && ImGui.IsMouseDoubleClicked(0)
+                if (hovered && (ImGui.IsMouseDoubleClicked(0) || UserActions.OpenOperator.Triggered())
                             && !RenamingOperator.IsOpen
                             && (customUiResult & OpUi.CustomUiResult.PreventOpenSubGraph) == 0)
                 {

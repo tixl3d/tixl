@@ -11,15 +11,13 @@ internal sealed class _RenderFontBuffer : Instance<_RenderFontBuffer>
 
     [Output(Guid = "A0ECA9CE-35AA-497D-B5C9-CDE52A7C8D58")]
     public readonly Slot<int> VertexCount = new();
-
-        
     public _RenderFontBuffer()
     {
         _fontResource = new Resource<BmFontDescription>(Filepath, OnFileChanged);
         _fontResource.AddDependentSlots(Buffer);
         Buffer.UpdateAction += UpdateMesh;
     }
-        
+
     private bool OnFileChanged(FileResource file, BmFontDescription currentValue, out BmFontDescription newValue, out string failureReason)
     {
         if (BmFontDescription.TryInitializeFromFile(file.AbsolutePath, out newValue))
@@ -27,42 +25,124 @@ internal sealed class _RenderFontBuffer : Instance<_RenderFontBuffer>
             failureReason = null;
             return true;
         }
-            
+
         failureReason = "Failed to load font from file";
         return false;
     }
-        
+
+    // Cached state (hot path avoids work if none changed)
+    private string _lastText = string.Empty;
+    private float _lastSize, _lastSpacing, _lastLineHeight;
+    private Vector2 _lastPosition;
+    private Vector4 _lastColor;
+    private int _lastHAlign, _lastVAlign;
+    private BmFontDescription _lastFontRef;
+    private bool _bufferDirty = true;
+
+    private BufferLayout[] _bufferContent = Array.Empty<BufferLayout>();
+    private int _lastVertexCount;
+
+    private static readonly int HorizontalAlignCount = Enum.GetValues(typeof(BmFontDescription.HorizontalAligns)).Length;
+    private static readonly int VerticalAlignCount   = Enum.GetValues(typeof(BmFontDescription.VerticalAligns)).Length;
+
     private void UpdateMesh(EvaluationContext context)
     {
         if (!_fontResource.TryGetValue(context, out var font))
-        {
             return;
-        }
-            
+
         var text = Text.GetValue(context);
-        if (string.IsNullOrEmpty(text) )
-        {
+        if (string.IsNullOrEmpty(text))
             text = " ";
+
+        // Inputs
+        var rawSize        = Size.GetValue(context);
+        var spacing        = Spacing.GetValue(context);
+        var lineHeight     = LineHeight.GetValue(context);
+        var position       = Position.GetValue(context);
+        var color          = Color.GetValue(context);
+        var hAlignInt      = HorizontalAlign.GetValue(context).Clamp(0, HorizontalAlignCount - 1);
+        var vAlignInt      = VerticalAlign.GetValue(context).Clamp(0, VerticalAlignCount - 1);
+
+        // Change detection
+        bool fontChanged       = !ReferenceEquals(font, _lastFontRef);
+        bool textChanged       = !string.Equals(text, _lastText, StringComparison.Ordinal);
+        bool formattingChanged =
+            _lastSize       != rawSize    ||
+            _lastSpacing    != spacing    ||
+            _lastLineHeight != lineHeight ||
+            _lastPosition   != position   ||
+            _lastColor      != color      ||
+            _lastHAlign     != hAlignInt  ||
+            _lastVAlign     != vAlignInt;
+
+        if (fontChanged || textChanged || formattingChanged)
+        {
+            _lastFontRef   = font;
+            _lastText      = text;
+            _lastSize      = rawSize;
+            _lastSpacing   = spacing;
+            _lastLineHeight= lineHeight;
+            _lastPosition  = position;
+            _lastColor     = color;
+            _lastHAlign    = hAlignInt;
+            _lastVAlign    = vAlignInt;
+
+            // Ensure capacity (grow only)
+            if (_bufferContent.Length < text.Length)
+                _bufferContent = new BufferLayout[text.Length];
+
+            // Rebuild CPU buffer
+            _lastVertexCount = RebuildBuffer(
+                font,
+                text,
+                rawSize,
+                spacing,
+                lineHeight,
+                position,
+                color,
+                (BmFontDescription.HorizontalAligns)hAlignInt,
+                (BmFontDescription.VerticalAligns)vAlignInt);
+
+            _bufferDirty = true;
         }
 
-        var lineNumber = 0;
-        var horizontalAlign = (BmFontDescription.HorizontalAligns)HorizontalAlign.GetValue(context).Clamp(0, Enum.GetValues(typeof(BmFontDescription.HorizontalAligns)).Length -1);
-        var verticalAlign = (BmFontDescription.VerticalAligns)VerticalAlign.GetValue(context).Clamp(0, Enum.GetValues(typeof(BmFontDescription.VerticalAligns)).Length -1);
-            
-        var characterSpacing = Spacing.GetValue(context);
-        var lineHeight = LineHeight.GetValue(context);
-        var scaleFactor = 1.0 / font.BmFont.Info.Size * 0.00185; 
-        var size = (float)(Size.GetValue(context)  * scaleFactor); // Scaling to match 1080p 72DPI pt font sizes 
-        var position = Position.GetValue(context);
+        // Upload only when dirty or buffer missing
+        if (_bufferDirty || Buffer.Value == null)
+        {
+            ResourceManager.SetupStructuredBuffer(_bufferContent, ref Buffer.Value);
+            if (Buffer.Value != null)
+                Buffer.Value.DebugName = nameof(_RenderFontBuffer);
+            _bufferDirty = false;
+        }
 
-        var numLinesInText = text.Split('\n').Length;
+        VertexCount.Value = _lastVertexCount;
+    }
 
-        var color = Color.GetValue(context);
-        float textureWidth = font.BmFont.Common.ScaleW;
+    private int RebuildBuffer(BmFontDescription font,
+                              string text,
+                              float rawSize,
+                              float characterSpacing,
+                              float lineHeight,
+                              Vector2 position,
+                              Vector4 color,
+                              BmFontDescription.HorizontalAligns horizontalAlign,
+                              BmFontDescription.VerticalAligns verticalAlign)
+    {
+        // Line count without allocations
+        int numLinesInText = 1;
+        for (int i = 0; i < text.Length; i++)
+            if (text[i] == '\n') numLinesInText++;
+
+        float textureWidth  = font.BmFont.Common.ScaleW;
         float textureHeight = font.BmFont.Common.ScaleH;
+
+        // Scale to match 1080p 72DPI pt sizes (as in original)
+        var scaleFactor = 1.0 / font.BmFont.Info.Size * 0.00185;
+        var size = (float)(rawSize * scaleFactor);
+
         float cursorX = 0;
         float cursorY = 0;
-        const float sdfWidth = 5f; // assumption after some experiments
+        const float sdfWidth = 5f; // heuristic
 
         switch (verticalAlign)
         {
@@ -70,31 +150,27 @@ internal sealed class _RenderFontBuffer : Instance<_RenderFontBuffer>
                 cursorY = font.BmFont.Common.Base * (1 + sdfWidth / font.BmFont.Info.Size);
                 break;
             case BmFontDescription.VerticalAligns.Middle:
-                cursorY = font.BmFont.Common.LineHeight * lineHeight * (numLinesInText - 1) / 2 + font.BmFont.Common.LineHeight / 2f +
-                          font.BmFont.Common.Base * (sdfWidth / font.BmFont.Info.Size);
+                cursorY = font.BmFont.Common.LineHeight * lineHeight * (numLinesInText - 1) / 2
+                          + font.BmFont.Common.LineHeight / 2f
+                          + font.BmFont.Common.Base * (sdfWidth / font.BmFont.Info.Size);
                 break;
             case BmFontDescription.VerticalAligns.Bottom:
                 cursorY = font.BmFont.Common.LineHeight * lineHeight * numLinesInText;
                 break;
         }
 
-        if (_bufferContent == null || _bufferContent.Length != text.Length)
-        {
-            _bufferContent = new BufferLayout[text.Length];
-        }
+        int outputIndex = 0;
+        int currentLineCharacterCount = 0;
+        int lineNumber = 0;
+        int lastChar = 0;
 
-        var outputIndex = 0;
-        var currentLineCharacterCount = 0;
-        var lastChar = 0;
-
-        for (var index = 0; index < text.Length; index++)
+        for (int idx = 0; idx < text.Length; idx++)
         {
-            var c = text[index];
-                
+            char c = text[idx];
+
             if (c == '\n')
             {
-                AdjustLineAlignment();
-
+                AdjustLineAlignment(horizontalAlign, cursorX, characterSpacing, size, currentLineCharacterCount, outputIndex);
                 cursorY -= font.BmFont.Common.LineHeight * lineHeight;
                 cursorX = 0;
                 currentLineCharacterCount = 0;
@@ -109,88 +185,82 @@ internal sealed class _RenderFontBuffer : Instance<_RenderFontBuffer>
                 continue;
             }
 
-
-
             if (lastChar != 0)
             {
-                int key = lastChar | c;
-                if (font.KerningForPairs.TryGetValue(key, out var kerning2))
-                {
-                    cursorX += kerning2;
-                }
+                int key = lastChar | c; // kept as in original
+                if (font.KerningForPairs.TryGetValue(key, out var kerning))
+                    cursorX += kerning;
             }
 
-            var sizeWidth = charInfo.Width * size;
-            var sizeHeight = charInfo.Height * size;
-            var x = position.X + (cursorX + charInfo.XOffset)  * size;
-            var y = position.Y + ((cursorY - charInfo.YOffset)) * size ;
+            float sizeWidth  = charInfo.Width  * size;
+            float sizeHeight = charInfo.Height * size;
+            float x = position.X + (cursorX + charInfo.XOffset) * size;
+            float y = position.Y + ((cursorY - charInfo.YOffset)) * size;
 
             if (charInfo.Width != 1 || charInfo.Height != 1)
             {
-                _bufferContent[outputIndex]
-                    = new BufferLayout
-                          {
-                              Position = new Vector3(x, y, 0),
-                              CharHeight = sizeHeight,
-                              Orientation = Quaternion.Identity,
-                              AspectRatio = sizeWidth / sizeHeight,
-                              Color = color,
-                              UvMinMax = new Vector4(
-                                                     charInfo.X / textureWidth, // uLeft 
-                                                     charInfo.Y / textureHeight, // vTop 
-                                                     (charInfo.X + charInfo.Width) / textureWidth, // uRight 
-                                                     (charInfo.Y + charInfo.Height) / textureHeight // vBottom                              
-                                                    ),
-                              Id = (uint)outputIndex,
-                              LineNumber = (uint)lineNumber,
-                              Offset = new Vector2(charInfo.XOffset, charInfo.YOffset),
-                          };
+                _bufferContent[outputIndex] = new BufferLayout
+                {
+                    Position    = new Vector3(x, y, 0),
+                    CharHeight  = sizeHeight,
+                    Orientation = Quaternion.Identity,
+                    AspectRatio = sizeWidth / sizeHeight,
+                    Color       = color,
+                    UvMinMax    = new Vector4(
+                                    charInfo.X / textureWidth,
+                                    charInfo.Y / textureHeight,
+                                    (charInfo.X + charInfo.Width) / textureWidth,
+                                    (charInfo.Y + charInfo.Height) / textureHeight),
+                    Id          = (uint)outputIndex,
+                    LineNumber  = (uint)lineNumber,
+                    Offset      = new Vector2(charInfo.XOffset, charInfo.YOffset),
+                };
 
                 outputIndex++;
             }
 
             currentLineCharacterCount++;
-            cursorX += charInfo.XAdvance;
-            cursorX += characterSpacing;
+            cursorX += charInfo.XAdvance + characterSpacing;
             lastChar = c;
         }
-        AdjustLineAlignment();
 
-        ResourceManager.SetupStructuredBuffer(_bufferContent, ref Buffer.Value);
-        if(Buffer.Value != null)
-            Buffer.Value.DebugName = nameof(_RenderFontBuffer);
-            
-        VertexCount.Value = outputIndex * 6;
+        // Align last line
+        AdjustLineAlignment(horizontalAlign, cursorX, characterSpacing, size, currentLineCharacterCount, outputIndex);
 
-        return;
-            
-        void AdjustLineAlignment()
+        // Return vertex count (6 per quad)
+        return outputIndex * 6;
+    }
+
+    private void AdjustLineAlignment(BmFontDescription.HorizontalAligns horizontalAlign,
+                                     float cursorX,
+                                     float characterSpacing,
+                                     float size,
+                                     int currentLineCharacterCount,
+                                     int outputIndex)
+    {
+        switch (horizontalAlign)
         {
-            switch (horizontalAlign)
-            {
-                case BmFontDescription.HorizontalAligns.Center:
-                    OffsetLineCharacters((cursorX / 2 - characterSpacing / 2) * size, currentLineCharacterCount, outputIndex);
-                    break;
-                case BmFontDescription.HorizontalAligns.Right:
-                    OffsetLineCharacters(cursorX * size, currentLineCharacterCount, outputIndex);
-                    break;
-            }
+            case BmFontDescription.HorizontalAligns.Center:
+                OffsetLineCharacters((cursorX / 2 - characterSpacing / 2) * size, currentLineCharacterCount, outputIndex);
+                break;
+            case BmFontDescription.HorizontalAligns.Right:
+                OffsetLineCharacters(cursorX * size, currentLineCharacterCount, outputIndex);
+                break;
         }
     }
 
     private void OffsetLineCharacters(float offset, int currentLineCharacterCount, int outputIndex)
     {
-        for (var backIndex = 0; backIndex <= currentLineCharacterCount; backIndex++)
+        for (int backIndex = 0; backIndex <= currentLineCharacterCount; backIndex++)
         {
-            var index0 = outputIndex - backIndex;
+            int index0 = outputIndex - backIndex;
             if (index0 < 0 || index0 >= _bufferContent.Length)
                 continue;
-                
+
             _bufferContent[index0].Position.X -= offset;
         }
     }
 
-    private BufferLayout[] _bufferContent;
     private Resource<BmFontDescription> _fontResource;
 
     [StructLayout(LayoutKind.Explicit, Size = StructSize)]
@@ -204,22 +274,22 @@ internal sealed class _RenderFontBuffer : Instance<_RenderFontBuffer>
 
         [FieldOffset(4 * 4)]
         public float AspectRatio;
-            
+
         [FieldOffset(5 * 4)]
         public Quaternion Orientation;
-            
+
         [FieldOffset(9 * 4)]
         public Vector4 Color;
 
         [FieldOffset(13 * 4)]
         public Vector4 UvMinMax;
-            
+
         [FieldOffset(17 * 4)]
         public uint Id;
-            
+
         [FieldOffset(18 * 4)]
         public uint LineNumber;
-            
+
         [FieldOffset(19 * 4)]
         public Vector2 Offset;
 

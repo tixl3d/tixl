@@ -11,10 +11,24 @@
       "AddPadding": "True"
     },
     {
+      "InputId": "032f3617-e1f3-4b41-a3be-61dd63b9f3ba"/*ForwardVector*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 975.0
+      }
+    },
+    {
       "InputId": "098f1662-6f47-4dd0-9a73-4c4814aefb23"/*CustomVar2Channel*/,
       "Position": {
         "X": -200.0,
         "Y": 2850.0
+      }
+    },
+    {
+      "InputId": "0c57cdd5-e450-4425-954f-c9e4256f83e1"/*InvertZ*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1275.0
       }
     },
     {
@@ -40,6 +54,27 @@
         "Y": 2400.0
       },
       "GroupTitle": "F2"
+    },
+    {
+      "InputId": "1f532994-fb0e-44e4-8a80-7917e1851eae"/*PanAxis*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1350.0
+      }
+    },
+    {
+      "InputId": "1f877cf6-10d9-4d0b-b087-974bd6855e0a"/*TiltAxis*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1125.0
+      }
+    },
+    {
+      "InputId": "23f23213-68e2-45f5-b452-4a86289004c0"/*DebugToLog*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
     },
     {
       "InputId": "25e5f0ce-5ec8-4c99-beb1-317c6911a128"/*SetCustomVar1*/,
@@ -70,6 +105,13 @@
         "Y": 900.0
       },
       "GroupTitle": "Rotation"
+    },
+    {
+      "InputId": "49fefbdb-2652-43db-ae52-ebc2df3e2856"/*InvertX*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1125.0
+      }
     },
     {
       "InputId": "4a40e022-d206-447c-bda3-d534f231c816"/*TiltFineChannel*/,
@@ -126,6 +168,13 @@
       "Position": {
         "X": -200.0,
         "Y": 825.0
+      }
+    },
+    {
+      "InputId": "6d8fc457-0c80-4736-8c25-cc48f07cbbfd"/*InvertY*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1200.0
       }
     },
     {
@@ -225,6 +274,13 @@
       }
     },
     {
+      "InputId": "9c235473-346b-4861-9844-4b584e09f58a"/*RotationOrder*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1050.0
+      }
+    },
+    {
       "InputId": "a9315f88-6024-42e9-9691-4544627f0bef"/*SetCustomVar5*/,
       "Position": {
         "X": -200.0,
@@ -261,10 +317,17 @@
       }
     },
     {
-      "InputId": "ba8d8f32-792c-4675-a5f5-415c16db8c66"/*AxisOrder*/,
+      "InputId": "b8080f4e-4542-4e20-9844-8028bbaf223f"/*GetF2ByPixel*/,
       "Position": {
         "X": -200.0,
-        "Y": 975.0
+        "Y": 2475.0
+      }
+    },
+    {
+      "InputId": "bec9e5a6-40a9-49b2-88bd-01a4ea03d28c"/*GetF1ByPixel*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 2325.0
       }
     },
     {
@@ -361,6 +424,13 @@
       "Position": {
         "X": 300.0,
         "Y": 200.0
+      }
+    },
+    {
+      "OutputId": "da7deb8c-4218-4cae-9ec5-fd7c2e6f4c35"/*VisualizeLights*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 300.0
       }
     }
   ]

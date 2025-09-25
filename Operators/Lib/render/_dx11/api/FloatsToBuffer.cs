@@ -12,6 +12,7 @@ internal sealed class FloatsToBuffer : Instance<FloatsToBuffer>
     {
         Buffer.UpdateAction += Update;
     }
+    private float[] _uploadBuffer = [];
 
     private void Update(EvaluationContext context)
     {
@@ -24,47 +25,49 @@ internal sealed class FloatsToBuffer : Instance<FloatsToBuffer>
             var vec4ArrayLength = matrixParams.Count;
 
             var totalFloatCount = floatParamCount + vec4ArrayLength * 4 * 4;
-
-            var arraySize = totalFloatCount; //Note (vux) alignment handled on buffer creation
-            //note : luckily in .net 10 that eventually goes to the stack
-            var array = new float[arraySize];
-
-            if (array.Length == 0)
+            if (totalFloatCount == 0)
                 return;
+
+            // Ensure buffer large enough
+            if (_uploadBuffer.Length < totalFloatCount)
+                _uploadBuffer = new float[totalFloatCount];
 
             var totalFloatIndex = 0;
 
+            // Fill matrices
             foreach (var aInput in matrixParams)
             {
-                var aaa = aInput.GetValue(context);
-                foreach (var vec4 in aaa)
+                var mat = aInput.GetValue(context);
+                foreach (var vec4 in mat)
                 {
-                    array[totalFloatIndex++] = vec4.X;
-                    array[totalFloatIndex++] = vec4.Y;
-                    array[totalFloatIndex++] = vec4.Z;
-                    array[totalFloatIndex++] = vec4.W;
+                    _uploadBuffer[totalFloatIndex++] = vec4.X;
+                    _uploadBuffer[totalFloatIndex++] = vec4.Y;
+                    _uploadBuffer[totalFloatIndex++] = vec4.Z;
+                    _uploadBuffer[totalFloatIndex++] = vec4.W;
                 }
             }
 
-            // Add Floats
+            // Fill floats
             for (var floatIndex = 0; floatIndex < floatParamCount; floatIndex++)
             {
-                array[totalFloatIndex++] = floatParams[floatIndex].GetValue(context);
+                _uploadBuffer[totalFloatIndex++] = floatParams[floatIndex].GetValue(context);
             }
 
             Params.DirtyFlag.Clear();
             Vec4Params.DirtyFlag.Clear();
 
             var device = ResourceManager.Device;
-
-            var size = sizeof(float) * array.Length;
+            var size = sizeof(float) * totalFloatCount;
 
             if (ResourceUtils.GetDynamicConstantBuffer(device, ref Buffer.Value, size))
             {
-                Buffer.Value.DebugName = nameof(FloatsToBuffer); // no need to copy string every frame if constant
+                Buffer.Value.DebugName = nameof(FloatsToBuffer);
             }
 
-            ResourceUtils.WriteDynamicBufferData<float>(device.ImmediateContext, Buffer.Value, array.AsSpan());
+            // Upload only the part we filled
+            ResourceUtils.WriteDynamicBufferData<float>(
+                                                        device.ImmediateContext, Buffer.Value,
+                                                        _uploadBuffer.AsSpan(0, totalFloatCount));
         }
         catch (Exception e)
         {

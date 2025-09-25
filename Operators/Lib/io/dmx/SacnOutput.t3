@@ -1,5 +1,5 @@
 {
-  "Id": "e5a8d9e6-3c5a-4bbb-9da3-737b6330b9c3"/*SacnOutput*/,
+  "Id": "e5a8d9e6-3c5a-4bbb-9da3-737b6330b9c3"/**/,
   "Inputs": [
     {
       "Id": "1b26f5d5-8141-4b13-b88d-6859ed5a4af8"/*StartUniverse*/,
@@ -25,7 +25,7 @@
     },
     {
       "Id": "6f5c4b3a-2e1d-4f9c-8a7b-3d2e1f0c9b8a"/*MaxFps*/,
-      "DefaultValue": 0
+      "DefaultValue": 30
     },
     {
       "Id": "7a8b9c0d-1e2f-3a4b-5c6d-7e8f9a0b1c2d"/*EnableSync*/,
@@ -41,7 +41,7 @@
     },
     {
       "Id": "9b8a7c6d-5e4f-4012-3456-7890abcdef12"/*SendTrigger*/,
-      "DefaultValue": true
+      "DefaultValue": false
     },
     {
       "Id": "9c233633-959f-4447-b248-4d431c1b18e7"/*LocalIpAddress*/,

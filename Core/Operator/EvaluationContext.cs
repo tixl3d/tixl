@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using SharpDX.Direct3D11;
+﻿using System;
+using System.Collections.Generic;
 using T3.Core.Animation;
 using T3.Core.DataTypes;
 using T3.Core.DataTypes.Vector;
@@ -8,6 +8,7 @@ using T3.Core.Rendering;
 using T3.Core.Rendering.Material;
 using T3.Core.Utils;
 using T3.Core.Utils.Geometry;
+using Buffer = SharpDX.Direct3D11.Buffer;
 using Texture2D = T3.Core.DataTypes.Texture2D;
 
 namespace T3.Core.Operator;
@@ -53,6 +54,21 @@ public sealed class EvaluationContext
         ObjectVariables.Clear();
             
         PbrContextSettings.SetDefaultToContext(this);
+    }
+
+    /// <summary>
+    /// This should be used for testing if operators need update.
+    /// It's in bars.
+    /// </summary>
+    public const float TimeResolutionInBars = 0.001f;
+    
+    public bool HasTimeChanged(ref double lastUpdateTime)
+    {
+        if (Math.Abs(LocalFxTime - lastUpdateTime) < TimeResolutionInBars)
+            return false;
+
+        lastUpdateTime = LocalFxTime;
+        return true;
     }
 
     public void SetViewFromCamera(ICamera camera)

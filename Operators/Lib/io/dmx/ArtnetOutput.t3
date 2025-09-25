@@ -1,5 +1,5 @@
 {
-  "Id": "98efc7c8-cafd-45ee-8746-14f37e9f59f8"/*ArtnetOutput*/,
+  "Id": "98efc7c8-cafd-45ee-8746-14f37e9f59f8"/**/,
   "Inputs": [
     {
       "Id": "0fc76369-788a-4ffe-9dde-8eea5f10cf32"/*TargetIpAddress*/,
@@ -14,7 +14,11 @@
       "DefaultValue": 0
     },
     {
-      "Id": "35a5efd8-b670-4f2d-bde0-380789e85e0c"/*SubNetMask*/,
+      "Id": "4a9e2d3b-8c6f-4b1d-8d7e-9f3a5b2c1d0e"/*Priority*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "5b1d9c8a-7e3f-4a2b-9c8d-1e0f3a5b2c1d"/*SourceName*/,
       "DefaultValue": ""
     },
     {
@@ -22,11 +26,19 @@
       "DefaultValue": false
     },
     {
+      "Id": "6f5c4b3a-2e1d-4f9c-8a7b-3d2e1f0c9b8a"/*MaxFps*/,
+      "DefaultValue": 30
+    },
+    {
       "Id": "73babdb1-f88f-4e4d-aa3f-0536678b0793"/*Reconnect*/,
       "DefaultValue": false
     },
     {
       "Id": "7c15da5f-cfa1-4339-aceb-4ed0099ea041"/*SendUnicast*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "d0e1f2a3-b4c5-4678-9012-3456789abcde"/*PrintToLog*/,
       "DefaultValue": false
     },
     {

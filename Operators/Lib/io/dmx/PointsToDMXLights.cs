@@ -1,6 +1,15 @@
 using SharpDX;
-
-// ReSharper disable MemberCanBePrivate.Global
+using SharpDX.Direct3D11;
+using System;
+using System.Collections.Generic;
+using System.Numerics;
+using T3.Core.DataTypes;
+using T3.Core.Logging;
+using T3.Core.Operator;
+using T3.Core.Operator.Attributes;
+using T3.Core.Operator.Slots;
+using T3.Core.Resource;
+using T3.Core.Utils;
 
 namespace Lib.io.dmx
 {
@@ -10,6 +19,9 @@ namespace Lib.io.dmx
         [Output(Guid = "8DC2DB32-D7A3-4B3A-A000-93C3107D19E4", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
         public readonly Slot<List<int>> Result = new(new List<int>(20));
 
+        [Output(Guid = "da7deb8c-4218-4cae-9ec5-fd7c2e6f4c35")]
+        public readonly Slot<BufferWithViews> VisualizeLights = new();
+
         public PointsToDMXLights()
         {
             Result.UpdateAction = Update;
@@ -17,6 +29,9 @@ namespace Lib.io.dmx
 
         private readonly List<int> _resultItems = [128];
         private const int UniverseSize = 512;
+
+        private BufferWithViews _visualizeBuffer;
+        private Point[] _visualizationPoints = [];
 
         private void Update(EvaluationContext context)
         {
@@ -27,6 +42,7 @@ namespace Lib.io.dmx
             {
                 Log.Warning("EffectedPoints buffer is not connected.", this);
                 Result.Value.Clear();
+                VisualizeLights.Value = null;
                 return;
             }
 
@@ -39,9 +55,9 @@ namespace Lib.io.dmx
             if (referencePointBuffer != null)
             {
                 _referencePointsBufferReader.InitiateRead(referencePointBuffer.Buffer,
-                                                         referencePointBuffer.Srv.Description.Buffer.ElementCount,
-                                                         referencePointBuffer.Buffer.Description.StructureByteStride,
-                                                         OnReferencePointsReadComplete);
+                                                          referencePointBuffer.Srv.Description.Buffer.ElementCount,
+                                                          referencePointBuffer.Buffer.Description.StructureByteStride,
+                                                          OnReferencePointsReadComplete);
                 _referencePointsBufferReader.Update();
             }
             else
@@ -52,12 +68,21 @@ namespace Lib.io.dmx
 
             if (_points != null && _points.Length > 0)
             {
+                if (_visualizationPoints.Length != _points.Length)
+                {
+                    _visualizationPoints = new Point[_points.Length];
+                }
+
                 UpdateChannelData(context, _points);
                 Result.Value = _resultItems;
+
+                UpdateVisualizationBuffer();
+                VisualizeLights.Value = _visualizeBuffer;
             }
             else
             {
                 Result.Value.Clear();
+                VisualizeLights.Value = null;
             }
         }
 
@@ -81,6 +106,7 @@ namespace Lib.io.dmx
         {
             var fixtureChannelSize = FixtureChannelSize.GetValue(context);
             var effectedPointsCount = points.Length;
+            var debugToLog = DebugToLog.GetValue(context);
 
             int fixtureCount;
             int pixelsPerFixture;
@@ -123,71 +149,42 @@ namespace Lib.io.dmx
                 return;
             }
 
-            // Get channel settings once
-            var redCh = RedChannel.GetValue(context);
-            var greenCh = GreenChannel.GetValue(context);
-            var blueCh = BlueChannel.GetValue(context);
-            var whiteCh = WhiteChannel.GetValue(context);
-            var alphaCh = AlphaChannel.GetValue(context);
-
+            // Reverted to a standard for loop to ensure ShortestPathPanTilt works correctly.
             for (var fixtureIndex = 0; fixtureIndex < fixtureCount; fixtureIndex++)
             {
+                bool shouldLogThisFixture = debugToLog && fixtureIndex == 0;
                 for (var i = 0; i < fixtureChannelSize; i++) { _pointChannelValues[i] = 0; }
 
                 var firstPointIndexForFixture = fixtureIndex * pixelsPerFixture;
                 var transformPoint = points[firstPointIndexForFixture];
-
                 Point referencePoint = useReferencePoints ? _referencePoints[fixtureIndex] : transformPoint;
 
-                if (GetRotation.GetValue(context)) ProcessRotation(context, transformPoint, referencePoint, useReferencePoints);
-                if (GetPosition.GetValue(context)) ProcessPosition(context, transformPoint, referencePoint, useReferencePoints);
+                if (shouldLogThisFixture) Log.Debug("--- Fixture 0 Debug ---", this);
 
-                // --- NEW DYNAMIC COLOR PROCESSING ---
-                if (GetColor.GetValue(context) && redCh > 0)
+                // Process Position and Rotation
+                var finalVisOrientation = ProcessTransformations(context, transformPoint, referencePoint, useReferencePoints, shouldLogThisFixture,
+                                                                 out var finalVisPosition);
+
+                // Update visualization points
+                for (var pixelIndex = 0; pixelIndex < pixelsPerFixture; ++pixelIndex)
                 {
-                    var currentDmxChannelIndex = redCh - 1;
-                    var useCmy = RGBToCMY.GetValue(context);
-
-                    for (var pixelIndex = 0; pixelIndex < pixelsPerFixture; pixelIndex++)
+                    var currentIndex = firstPointIndexForFixture + pixelIndex;
+                    if (currentIndex < _visualizationPoints.Length)
                     {
-                        var pointForColor = points[firstPointIndexForFixture + pixelIndex];
-
-                        // Calculate all potential color values
-                        float r = float.IsNaN(pointForColor.Color.X) ? 0f : Math.Clamp(pointForColor.Color.X, 0f, 1f);
-                        float g = float.IsNaN(pointForColor.Color.Y) ? 0f : Math.Clamp(pointForColor.Color.Y, 0f, 1f);
-                        float b = float.IsNaN(pointForColor.Color.Z) ? 0f : Math.Clamp(pointForColor.Color.Z, 0f, 1f);
-
-                        if (useCmy) { r = 1f - r; g = 1f - g; b = 1f - b; }
-
-                        var vR = r * 255.0f;
-                        var vG = g * 255.0f;
-                        var vB = b * 255.0f;
-                        var vW = Math.Min(vR, Math.Min(vG, vB));
-                        var vA = pointForColor.Color.W * 255f;
-
-                        // Write enabled channels sequentially
-                        if (redCh > 0) InsertOrSet(currentDmxChannelIndex++, (int)Math.Round(vR));
-                        if (greenCh > 0) InsertOrSet(currentDmxChannelIndex++, (int)Math.Round(vG));
-                        if (blueCh > 0) InsertOrSet(currentDmxChannelIndex++, (int)Math.Round(vB));
-                        if (whiteCh > 0) InsertOrSet(currentDmxChannelIndex++, (int)Math.Round(vW));
-                        if (alphaCh > 0) InsertOrSet(currentDmxChannelIndex++, (int)Math.Round(vA));
+                        _visualizationPoints[currentIndex] = points[currentIndex];
+                        _visualizationPoints[currentIndex].Position = finalVisPosition;
+                        _visualizationPoints[currentIndex].Orientation = finalVisOrientation;
                     }
                 }
 
-                if (GetF1.GetValue(context)) ProcessF1(context, transformPoint);
-                if (GetF2.GetValue(context)) ProcessF2(context, transformPoint);
+                // Handle Color, Features, and Custom Variables
+                HandleColorAndFeatures(context, points, transformPoint, firstPointIndexForFixture, pixelsPerFixture);
+                HandleCustomVariables(context);
 
-                // Custom Variables...
-                if (SetCustomVar1.GetValue(context) && CustomVar1Channel.GetValue(context) > 0) InsertOrSet(CustomVar1Channel.GetValue(context) - 1, CustomVar1.GetValue(context));
-                if (SetCustomVar2.GetValue(context) && CustomVar2Channel.GetValue(context) > 0) InsertOrSet(CustomVar2Channel.GetValue(context) - 1, CustomVar2.GetValue(context));
-                if (SetCustomVar3.GetValue(context) && CustomVar3Channel.GetValue(context) > 0) InsertOrSet(CustomVar3Channel.GetValue(context) - 1, CustomVar3.GetValue(context));
-                if (SetCustomVar4.GetValue(context) && CustomVar4Channel.GetValue(context) > 0) InsertOrSet(CustomVar4Channel.GetValue(context) - 1, CustomVar4.GetValue(context));
-                if (SetCustomVar5.GetValue(context) && CustomVar5Channel.GetValue(context) > 0) InsertOrSet(CustomVar5Channel.GetValue(context) - 1, CustomVar5.GetValue(context));
-
+                // Add fixture channels to the main result list
                 if (fitInUniverse)
                 {
-                    var currentChannelIndex = _resultItems.Count;
-                    var remainingInUniverse = UniverseSize - (currentChannelIndex % UniverseSize);
+                    var remainingInUniverse = UniverseSize - (_resultItems.Count % UniverseSize);
                     if (fixtureChannelSize > remainingInUniverse)
                     {
                         for (var i = 0; i < remainingInUniverse; i++) { _resultItems.Add(0); }
@@ -198,8 +195,7 @@ namespace Lib.io.dmx
 
             if (fillUniverse)
             {
-                var currentSize = _resultItems.Count;
-                var remainder = currentSize % UniverseSize;
+                var remainder = _resultItems.Count % UniverseSize;
                 if (remainder != 0)
                 {
                     var toAdd = UniverseSize - remainder;
@@ -208,19 +204,186 @@ namespace Lib.io.dmx
             }
         }
 
+        private Quaternion ProcessTransformations(EvaluationContext context, Point transformPoint, Point referencePoint, bool useReferencePoints, bool shouldLog, out Vector3 finalVisPosition)
+        {
+            var getRotation = GetRotation.GetValue(context);
+            var getPosition = GetPosition.GetValue(context);
+
+            var finalVisOrientation = transformPoint.Orientation;
+            if (getRotation)
+            {
+                finalVisOrientation = ProcessRotation(context, transformPoint, referencePoint, useReferencePoints, shouldLog);
+            }
+
+            finalVisPosition = transformPoint.Position;
+            if (getPosition)
+            {
+                finalVisPosition = ProcessPosition(context, transformPoint, referencePoint, useReferencePoints, shouldLog);
+            }
+            else if (getRotation)
+            {
+                finalVisPosition = referencePoint.Position;
+            }
+
+            return finalVisOrientation;
+        }
+
+        private void HandleColorAndFeatures(EvaluationContext context, Point[] points, Point transformPoint, int firstPointIndex, int pixelsPerFixture)
+        {
+            var getColor = GetColor.GetValue(context);
+            var getF1 = GetF1.GetValue(context);
+            var getF2 = GetF2.GetValue(context);
+            var getF1ByPixel = GetF1ByPixel.GetValue(context);
+            var getF2ByPixel = GetF2ByPixel.GetValue(context);
+            var f1Ch = F1Channel.GetValue(context);
+            var f2Ch = F2Channel.GetValue(context);
+            var redCh = RedChannel.GetValue(context);
+
+            bool hasPerPixel = getColor || (getF1 && getF1ByPixel) || (getF2 && getF2ByPixel);
+
+            if (hasPerPixel)
+            {
+                int startCh = redCh;
+                if (!getColor || redCh <= 0)
+                {
+                    if (getF1 && getF1ByPixel && f1Ch > 0) startCh = f1Ch;
+                    else if (getF2 && getF2ByPixel && f2Ch > 0) startCh = f2Ch;
+                }
+                var currentDmxChannelIndex = startCh - 1;
+                var useCmy = RGBToCMY.GetValue(context);
+                var greenCh = GreenChannel.GetValue(context);
+                var blueCh = BlueChannel.GetValue(context);
+                var whiteCh = WhiteChannel.GetValue(context);
+                var alphaCh = AlphaChannel.GetValue(context);
+
+                for (var pixelIndex = 0; pixelIndex < pixelsPerFixture; pixelIndex++)
+                {
+                    var pointForPerPixel = points[firstPointIndex + pixelIndex];
+
+                    if (getColor && redCh > 0)
+                    {
+                        float r = float.IsNaN(pointForPerPixel.Color.X) ? 0f : Math.Clamp(pointForPerPixel.Color.X, 0f, 1f);
+                        float g = float.IsNaN(pointForPerPixel.Color.Y) ? 0f : Math.Clamp(pointForPerPixel.Color.Y, 0f, 1f);
+                        float b = float.IsNaN(pointForPerPixel.Color.Z) ? 0f : Math.Clamp(pointForPerPixel.Color.Z, 0f, 1f);
+
+                        if (useCmy) { r = 1f - r; g = 1f - g; b = 1f - b; }
+
+                        var vR = r * 255.0f;
+                        var vG = g * 255.0f;
+                        var vB = b * 255.0f;
+                        var vW = Math.Min(vR, Math.Min(vG, vB));
+                        var vA = pointForPerPixel.Color.W * 255f;
+
+                        if (redCh > 0) InsertOrSet(currentDmxChannelIndex++, (int)Math.Round(vR));
+                        if (greenCh > 0) InsertOrSet(currentDmxChannelIndex++, (int)Math.Round(vG));
+                        if (blueCh > 0) InsertOrSet(currentDmxChannelIndex++, (int)Math.Round(vB));
+                        if (whiteCh > 0) InsertOrSet(currentDmxChannelIndex++, (int)Math.Round(vW));
+                        if (alphaCh > 0) InsertOrSet(currentDmxChannelIndex++, (int)Math.Round(vA));
+                    }
+
+                    if (getF1 && getF1ByPixel && f1Ch > 0)
+                    {
+                        float f1 = float.IsNaN(pointForPerPixel.F1) ? 0f : Math.Clamp(pointForPerPixel.F1, 0f, 1f);
+                        InsertOrSet(currentDmxChannelIndex++, (int)Math.Round(f1 * 255.0f));
+                    }
+
+                    if (getF2 && getF2ByPixel && f2Ch > 0)
+                    {
+                        float f2 = float.IsNaN(pointForPerPixel.F2) ? 0f : Math.Clamp(pointForPerPixel.F2, 0f, 1f);
+                        InsertOrSet(currentDmxChannelIndex++, (int)Math.Round(f2 * 255.0f));
+                    }
+                }
+            }
+
+            if (getF1 && !getF1ByPixel && f1Ch > 0)
+            {
+                float f1 = float.IsNaN(transformPoint.F1) ? 0f : Math.Clamp(transformPoint.F1, 0f, 1f);
+                InsertOrSet(f1Ch - 1, (int)Math.Round(f1 * 255.0f));
+            }
+
+            if (getF2 && !getF2ByPixel && f2Ch > 0)
+            {
+                float f2 = float.IsNaN(transformPoint.F2) ? 0f : Math.Clamp(transformPoint.F2, 0f, 1f);
+                InsertOrSet(f2Ch - 1, (int)Math.Round(f2 * 255.0f));
+            }
+        }
+
+        private void HandleCustomVariables(EvaluationContext context)
+        {
+            if (SetCustomVar1.GetValue(context) && CustomVar1Channel.GetValue(context) > 0) InsertOrSet(CustomVar1Channel.GetValue(context) - 1, CustomVar1.GetValue(context));
+            if (SetCustomVar2.GetValue(context) && CustomVar2Channel.GetValue(context) > 0) InsertOrSet(CustomVar2Channel.GetValue(context) - 1, CustomVar2.GetValue(context));
+            if (SetCustomVar3.GetValue(context) && CustomVar3Channel.GetValue(context) > 0) InsertOrSet(CustomVar3Channel.GetValue(context) - 1, CustomVar3.GetValue(context));
+            if (SetCustomVar4.GetValue(context) && CustomVar4Channel.GetValue(context) > 0) InsertOrSet(CustomVar4Channel.GetValue(context) - 1, CustomVar4.GetValue(context));
+            if (SetCustomVar5.GetValue(context) && CustomVar5Channel.GetValue(context) > 0) InsertOrSet(CustomVar5Channel.GetValue(context) - 1, CustomVar5.GetValue(context));
+        }
+
+        private void UpdateVisualizationBuffer()
+        {
+            if (_visualizationPoints == null || _visualizationPoints.Length == 0)
+            {
+                _visualizeBuffer = null;
+                return;
+            }
+
+            int pointCount = _visualizationPoints.Length;
+            int stride = Point.Stride;
+
+            Buffer buffer = null;
+            ShaderResourceView srv = null;
+            UnorderedAccessView uav = null;
+
+            ResourceManager.SetupStructuredBuffer(_visualizationPoints,
+                                                  stride * pointCount,
+                                                  stride,
+                                                  ref buffer);
+
+            ResourceManager.CreateStructuredBufferSrv(buffer, ref srv);
+            ResourceManager.CreateStructuredBufferUav(buffer, UnorderedAccessViewBufferFlags.None, ref uav);
+
+            if (_visualizeBuffer == null)
+                _visualizeBuffer = new BufferWithViews();
+
+            _visualizeBuffer.Buffer = buffer;
+            _visualizeBuffer.Srv = srv;
+            _visualizeBuffer.Uav = uav;
+        }
 
         private Vector2 _lastPanTilt = new(float.NaN, float.NaN);
         private Point[] _points = [];
         private Point[] _referencePoints = [];
 
-        private void ProcessRotation(EvaluationContext context, Point point, Point referencePoint, bool calculateRelativeRotation)
+        // --- THIS METHOD IS REVERTED TO THE ORIGINAL WORKING LOGIC ---
+        private Quaternion ProcessRotation(EvaluationContext context, Point point, Point referencePoint, bool calculateRelativeRotation, bool shouldLog)
         {
+            var panAxisSelection = (AxisModes)PanAxis.GetValue(context);
+            var tiltAxisSelection = (AxisModes)TiltAxis.GetValue(context);
+            var panChannel = PanChannel.GetValue(context);
+            var tiltChannel = TiltChannel.GetValue(context);
+
+            bool isPanOutputEnabled = panAxisSelection != AxisModes.Disabled && panChannel > 0;
+            bool isTiltOutputEnabled = tiltAxisSelection != AxisModes.Disabled && tiltChannel > 0;
+
+            if (!isPanOutputEnabled && !isTiltOutputEnabled)
+            {
+                return point.Orientation;
+            }
+
             var rotation = point.Orientation;
             if (float.IsNaN(rotation.X) || float.IsNaN(rotation.Y) || float.IsNaN(rotation.Z) || float.IsNaN(rotation.W))
-                return;
+                return point.Orientation;
 
-            var axisOrder = (RotationModes)AxisOrder.GetValue(context);
-            var initialForwardAxis = Vector3.UnitZ;
+            var forwardVectorSelection = (ForwardVectorModes)ForwardVector.GetValue(context);
+            Vector3 initialForwardAxis;
+            switch (forwardVectorSelection)
+            {
+                case ForwardVectorModes.X: initialForwardAxis = Vector3.UnitX; break;
+                case ForwardVectorModes.Y: initialForwardAxis = Vector3.UnitY; break;
+                case ForwardVectorModes.Z: initialForwardAxis = Vector3.UnitZ; break;
+                case ForwardVectorModes.NegX: initialForwardAxis = -Vector3.UnitX; break;
+                case ForwardVectorModes.NegY: initialForwardAxis = -Vector3.UnitY; break;
+                case ForwardVectorModes.NegZ: initialForwardAxis = -Vector3.UnitZ; break;
+                default: initialForwardAxis = Vector3.UnitZ; break;
+            }
 
             Quaternion activeRotation;
             if (calculateRelativeRotation)
@@ -241,96 +404,192 @@ namespace Lib.io.dmx
             }
 
             var direction = Vector3.Transform(initialForwardAxis, activeRotation);
+
+            if (InvertX.GetValue(context)) direction.X = -direction.X;
+            if (InvertY.GetValue(context)) direction.Y = -direction.Y;
+            if (InvertZ.GetValue(context)) direction.Z = -direction.Z;
+
             direction = Vector3.Normalize(direction);
+            if (shouldLog) Log.Debug($"Direction: {direction:F3}", this);
 
-            float panValue, tiltValue;
-            var calculationMode = axisOrder == RotationModes.ForReferencePoints ? RotationModes.YXZ : axisOrder;
+            float rawPanValue = 0, rawTiltValue = 0;
 
-            switch (calculationMode)
+            Vector3 GetAxisVector(AxisModes axis)
             {
-                case RotationModes.YXZ: panValue = MathF.Atan2(direction.X, direction.Z); tiltValue = MathF.Asin(direction.Y); break;
-                case RotationModes.YZX: panValue = MathF.Atan2(direction.Z, direction.X); tiltValue = MathF.Atan2(direction.Y, MathF.Sqrt(direction.X * direction.X + direction.Z * direction.Z)); break;
-                case RotationModes.ZYX: panValue = MathF.Atan2(direction.Y, direction.X); tiltValue = MathF.Asin(-direction.Z); break;
-                case RotationModes.ZXY: panValue = MathF.Atan2(direction.Y, direction.X); tiltValue = -MathF.Atan2(direction.Z, MathF.Sqrt(direction.X * direction.X + direction.Y * direction.Y)); break;
-                case RotationModes.XZY: panValue = MathF.Atan2(direction.Z, direction.Y); tiltValue = MathF.Asin(-direction.X); break;
-                case RotationModes.XYZ: panValue = MathF.Atan2(-direction.Y, direction.Z); tiltValue = MathF.Asin(direction.X); break;
-                case RotationModes.LegacyZ: panValue = MathF.Atan2(direction.X, direction.Y); tiltValue = MathF.Atan2(direction.Z, MathF.Sqrt(direction.X * direction.X + direction.Y * direction.Y)) - MathF.PI / 2; break;
-                default: panValue = MathF.Atan2(direction.X, direction.Z); tiltValue = MathF.Asin(direction.Y); break;
-            }
-
-            var panRange = PanRange.GetValue(context);
-            var tiltRange = TiltRange.GetValue(context);
-
-            if (panRange.X >= panRange.Y || tiltRange.X >= tiltRange.Y)
-            {
-                Log.Warning("Min range value must be less than max range value for Pan/Tilt.", this);
-                return;
-            }
-
-            var panMin = panRange.X * MathF.PI / 180f;
-            var panMax = panRange.Y * MathF.PI / 180f;
-            var tiltMin = tiltRange.X * MathF.PI / 180f;
-            var tiltMax = tiltRange.Y * MathF.PI / 180f;
-
-            if (ShortestPathPanTilt.GetValue(context) && !float.IsNaN(_lastPanTilt.X))
-            {
-                var prevPan = _lastPanTilt.X;
-                var panSpan = panMax - panMin;
-                var unwrappedPan = panValue;
-
-                if (panSpan > MathF.PI * 1.5f)
+                switch (axis)
                 {
-                    var turns = MathF.Round((prevPan - panValue) / (2 * MathF.PI));
-                    unwrappedPan = panValue + turns * 2 * MathF.PI;
-                    if (unwrappedPan < panMin) unwrappedPan += 2 * MathF.PI;
-                    if (unwrappedPan > panMax) unwrappedPan -= 2 * MathF.PI;
+                    case AxisModes.X: return Vector3.UnitX;
+                    case AxisModes.Y: return Vector3.UnitY;
+                    case AxisModes.Z: return Vector3.UnitZ;
+                    case AxisModes.Disabled: return Vector3.Zero;
+                    default: return Vector3.UnitY;
                 }
-
-                var directPanDiff = MathF.Abs(unwrappedPan - prevPan);
-                var flippedTilt = MathF.PI - tiltValue;
-                var flippedPan = unwrappedPan + MathF.PI;
-                while (flippedPan < panMin) flippedPan += 2 * MathF.PI;
-                while (flippedPan > panMax) flippedPan -= 2 * MathF.PI;
-
-                var flipPanDiff = MathF.Abs(flippedPan - prevPan);
-                var directValid = (unwrappedPan >= panMin && unwrappedPan <= panMax);
-                var flipValid = (flippedPan >= panMin && flippedPan <= panMax);
-
-                if (flipValid && (!directValid || flipPanDiff < directPanDiff))
-                {
-                    panValue = flippedPan;
-                    tiltValue = flippedTilt;
-                }
-                else { panValue = unwrappedPan; }
             }
-            else if (!float.IsNaN(_lastPanTilt.X))
+
+            var panAxisVec = GetAxisVector(panAxisSelection);
+            var tiltAxisVec = GetAxisVector(tiltAxisSelection);
+
+            if (panAxisVec == Vector3.Zero && tiltAxisVec == Vector3.Zero)
             {
-                var panSpan = panMax - panMin;
-                var turns = MathF.Round((_lastPanTilt.X - panValue) / (2 * MathF.PI));
-                panValue = panValue + turns * 2 * MathF.PI;
-                if (panValue < panMin) panValue += 2 * MathF.PI;
-                if (panValue > panMax) panValue -= 2 * MathF.PI;
             }
-            _lastPanTilt = new Vector2(panValue, tiltValue);
+            else if (panAxisVec == Vector3.Zero)
+            {
+                rawPanValue = 0;
+                var projectedDirection = direction - Vector3.Dot(direction, tiltAxisVec) * tiltAxisVec;
+                if (projectedDirection.LengthSquared() > 1e-6f)
+                {
+                    rawTiltValue = MathF.Asin(Vector3.Dot(direction, tiltAxisVec));
+                }
+                else
+                {
+                    rawTiltValue = 0;
+                }
+            }
+            else if (tiltAxisVec == Vector3.Zero)
+            {
+                rawTiltValue = 0;
+                var projectedDirection = direction - Vector3.Dot(direction, panAxisVec) * panAxisVec;
+                if (projectedDirection.LengthSquared() > 1e-6f)
+                {
+                    rawPanValue = MathF.Atan2(Vector3.Dot(direction, Vector3.Cross(panAxisVec, initialForwardAxis)),
+                                              Vector3.Dot(direction, initialForwardAxis));
+                }
+                else
+                {
+                    rawPanValue = 0;
+                }
+            }
+            else
+            {
+                if (panAxisSelection == tiltAxisSelection)
+                {
+                    Log.Warning("Pan and Tilt axes cannot be the same when both are enabled. Halting rotation calculation for this fixture.", this);
+                    rawPanValue = 0;
+                    rawTiltValue = 0;
+                }
+                else
+                {
+                    var fwdAxisVec = Vector3.Cross(tiltAxisVec, panAxisVec);
+                    if (fwdAxisVec.LengthSquared() < 1e-6f)
+                    {
+                        Log.Error("Pan and Tilt axes are collinear, cannot form a unique forward vector. Check axis selections.", this);
+                        rawPanValue = 0;
+                        rawTiltValue = 0;
+                    }
+                    else
+                    {
+                        fwdAxisVec = Vector3.Normalize(fwdAxisVec);
+                        var upComponent = Vector3.Dot(direction, panAxisVec);
+                        var rightComponent = Vector3.Dot(direction, tiltAxisVec);
+                        var forwardComponent = Vector3.Dot(direction, fwdAxisVec);
+                        rawPanValue = MathF.Atan2(rightComponent, forwardComponent);
+                        rawTiltValue = MathF.Asin(Math.Clamp(upComponent, -1f, 1f));
+                    }
+                }
+            }
 
-            if (InvertPan.GetValue(context)) panValue = panMax + panMin - panValue;
-            if (InvertTilt.GetValue(context)) tiltValue = tiltMax + tiltMin - tiltValue;
+            if (shouldLog) Log.Debug($"Raw Angles (rad): Pan={rawPanValue:F3}, Tilt={rawTiltValue:F3}", this);
 
-            panValue = Math.Clamp(panValue, panMin, panMax);
-            tiltValue = Math.Clamp(tiltValue, tiltMin, tiltMax);
+            float finalPanValue = 0f;
+            if (isPanOutputEnabled)
+            {
+                var panRange = PanRange.GetValue(context);
+                if (panRange.X >= panRange.Y)
+                {
+                    Log.Warning("Pan: Min range value must be less than max.", this);
+                }
+                else
+                {
+                    var panMin = panRange.X * MathF.PI / 180f;
+                    var panMax = panRange.Y * MathF.PI / 180f;
+                    var panValue = rawPanValue;
 
-            SetDmxCoarseFine(panValue, PanChannel.GetValue(context), PanFineChannel.GetValue(context), panMin, panMax, panMax - panMin);
-            SetDmxCoarseFine(tiltValue, TiltChannel.GetValue(context), TiltFineChannel.GetValue(context), tiltMin, tiltMax, tiltMax - tiltMin);
+                    if (ShortestPathPanTilt.GetValue(context) && !float.IsNaN(_lastPanTilt.X))
+                    {
+                        var prevPan = _lastPanTilt.X;
+                        var panSpan = panMax - panMin;
+                        if (panSpan > MathF.PI * 1.5f)
+                        {
+                            var turns = MathF.Round((prevPan - panValue) / (2 * MathF.PI));
+                            panValue = panValue + turns * 2 * MathF.PI;
+                            if (panValue < panMin - MathF.PI) panValue += 2 * MathF.PI;
+                            if (panValue > panMax + MathF.PI) panValue -= 2 * MathF.PI;
+                        }
+                    }
+
+                    if (InvertPan.GetValue(context)) panValue = panMax + panMin - panValue;
+
+                    finalPanValue = Math.Clamp(panValue, panMin, panMax);
+                    if (shouldLog) Log.Debug($"Final Pan Angle (rad): {finalPanValue:F3}", this);
+
+                    SetDmxCoarseFine(finalPanValue, panChannel, PanFineChannel.GetValue(context), panMin, panMax, panMax - panMin, shouldLog, "Pan");
+                }
+            }
+
+            float finalTiltValue = 0f;
+            if (isTiltOutputEnabled)
+            {
+                var tiltRange = TiltRange.GetValue(context);
+                if (tiltRange.X >= tiltRange.Y)
+                {
+                    Log.Warning("Tilt: Min range value must be less than max.", this);
+                }
+                else
+                {
+                    var tiltMin = tiltRange.X * MathF.PI / 180f;
+                    var tiltMax = tiltRange.Y * MathF.PI / 180f;
+                    var tiltValue = rawTiltValue;
+
+                    if (InvertTilt.GetValue(context)) tiltValue = tiltMax + tiltMin - tiltValue;
+
+                    finalTiltValue = Math.Clamp(tiltValue, tiltMin, tiltMax);
+                    if (shouldLog) Log.Debug($"Final Tilt Angle (rad): {finalTiltValue:F3}", this);
+
+                    SetDmxCoarseFine(finalTiltValue, tiltChannel, TiltFineChannel.GetValue(context), tiltMin, tiltMax, tiltMax - tiltMin, shouldLog, "Tilt");
+                }
+            }
+
+            _lastPanTilt = new Vector2(finalPanValue, finalTiltValue);
+
+            var panRotation = isPanOutputEnabled ? Quaternion.CreateFromAxisAngle(panAxisVec, finalPanValue) : Quaternion.Identity;
+            var tiltRotation = isTiltOutputEnabled ? Quaternion.CreateFromAxisAngle(tiltAxisVec, finalTiltValue) : Quaternion.Identity;
+
+            Quaternion calculatedOutputRotation;
+            var rotationOrder = (RotationOrderModes)RotationOrder.GetValue(context);
+
+            if (rotationOrder == RotationOrderModes.TiltThenPan)
+            {
+                calculatedOutputRotation = tiltRotation * panRotation;
+            }
+            else
+            {
+                calculatedOutputRotation = panRotation * tiltRotation;
+            }
+
+            if (calculateRelativeRotation)
+            {
+                calculatedOutputRotation = referencePoint.Orientation * calculatedOutputRotation;
+            }
+
+            return calculatedOutputRotation;
         }
 
-        private void ProcessPosition(EvaluationContext context, Point point, Point referencePoint, bool calculateRelativePosition)
+        private Vector3 ProcessPosition(EvaluationContext context, Point point, Point referencePoint, bool calculateRelativePosition, bool shouldLog)
         {
-            var measureAxis = (AxisModes)PositionMeasureAxis.GetValue(context);
+            var positionChannel = PositionChannel.GetValue(context);
+            var positionAxis = (AxisModes)PositionMeasureAxis.GetValue(context);
+
+            if (positionChannel <= 0 || positionAxis == AxisModes.Disabled)
+            {
+                return point.Position;
+            }
+
             var invertDirection = InvertPositionDirection.GetValue(context);
             var distanceRange = PositionDistanceRange.GetValue(context);
 
             Vector3 actualPosition = point.Position;
             Vector3 effectiveReference = Vector3.Zero;
+            Vector3 finalPosition = actualPosition;
 
             if (calculateRelativePosition)
             {
@@ -339,17 +598,11 @@ namespace Lib.io.dmx
 
             float currentDistance = 0f;
 
-            switch (measureAxis)
+            switch (positionAxis)
             {
-                case AxisModes.X:
-                    currentDistance = actualPosition.X - effectiveReference.X;
-                    break;
-                case AxisModes.Y:
-                    currentDistance = actualPosition.Y - effectiveReference.Y;
-                    break;
-                case AxisModes.Z:
-                    currentDistance = actualPosition.Z - effectiveReference.Z;
-                    break;
+                case AxisModes.X: currentDistance = actualPosition.X - effectiveReference.X; break;
+                case AxisModes.Y: currentDistance = actualPosition.Y - effectiveReference.Y; break;
+                case AxisModes.Z: currentDistance = actualPosition.Z - effectiveReference.Z; break;
             }
 
             if (invertDirection)
@@ -363,18 +616,31 @@ namespace Lib.io.dmx
             if (Math.Abs(inMax - inMin) < 0.0001f)
             {
                 Log.Warning("PositionDistanceRange Min and Max values are too close or identical. DMX output for position will be 0.", this);
-                SetDmxCoarseFine(0, PositionChannel.GetValue(context), PositionFineChannel.GetValue(context), 0, 1, 1);
-                return;
+                SetDmxCoarseFine(0, positionChannel, PositionFineChannel.GetValue(context), 0, 1, 1, shouldLog, "Position");
+                return point.Position;
             }
 
+            float clampedDistance = Math.Clamp(currentDistance, inMin, inMax);
             float rangeLength = inMax - inMin;
 
-            SetDmxCoarseFine(currentDistance, PositionChannel.GetValue(context), PositionFineChannel.GetValue(context), inMin, inMax, rangeLength);
+            SetDmxCoarseFine(clampedDistance, positionChannel, PositionFineChannel.GetValue(context), inMin, inMax, rangeLength, shouldLog, "Position");
+
+            float finalClampedDistance = invertDirection ? -clampedDistance : clampedDistance;
+            switch (positionAxis)
+            {
+                case AxisModes.X: finalPosition.X = effectiveReference.X + finalClampedDistance; break;
+                case AxisModes.Y: finalPosition.Y = effectiveReference.Y + finalClampedDistance; break;
+                case AxisModes.Z: finalPosition.Z = effectiveReference.Z + finalClampedDistance; break;
+            }
+
+            return finalPosition;
         }
 
-        private void SetDmxCoarseFine(float value, int coarseChannel, int fineChannel, float inMin, float inMax, float maxRange)
+        private void SetDmxCoarseFine(float value, int coarseChannel, int fineChannel, float inMin, float inMax, float maxRange, bool shouldLog, string name)
         {
             var dmx16 = MapToDmx16(value, inMin, inMax, maxRange);
+            if (shouldLog) Log.Debug($"{name} DMX (16bit): {dmx16}", this);
+
             if (fineChannel > 0)
             {
                 InsertOrSet(coarseChannel - 1, (dmx16 >> 8) & 0xFF);
@@ -395,24 +661,20 @@ namespace Lib.io.dmx
             return (int)Math.Round(Math.Clamp(normalizedValue, 0f, 1f) * 65535.0f);
         }
 
-        private void ProcessF1(EvaluationContext context, Point point) { if (!float.IsNaN(point.F1)) InsertOrSet(F1Channel.GetValue(context) - 1, (int)Math.Round(point.F1 * 255.0f)); }
-        private void ProcessF2(EvaluationContext context, Point point) { if (!float.IsNaN(point.F2)) InsertOrSet(F2Channel.GetValue(context) - 1, (int)Math.Round(point.F2 * 255.0f)); }
-
         private void InsertOrSet(int index, int value)
         {
             if (index < 0) return;
             if (index >= _pointChannelValues.Count)
             {
-                // This can happen if FixtureChannelSize is smaller than the color block. We can either log or ignore.
-                // For now, we'll log, as it's a configuration issue.
                 Log.Warning($"DMX Channel index {index + 1} is out of range (list size: {_pointChannelValues.Count}). Adjust FixtureChannelSize or Channel Assignments.", this);
                 return;
             }
             _pointChannelValues[index] = value;
         }
 
-        private enum RotationModes { YXZ, YZX, ZYX, ZXY, XZY, XYZ, LegacyZ, ForReferencePoints }
-        private enum AxisModes { X, Y, Z }
+        private enum AxisModes { Disabled, X, Y, Z }
+        private enum RotationOrderModes { PanThenTilt, TiltThenPan }
+        private enum ForwardVectorModes { X, Y, Z, NegX, NegY, NegZ }
 
         private readonly List<int> _pointChannelValues = [];
         private readonly StructuredBufferReadAccess _pointsBufferReader = new();
@@ -432,6 +694,9 @@ namespace Lib.io.dmx
 
         [Input(Guid = "850af6c3-d9ef-492c-9cfb-e2589ae5b9ac")]
         public readonly InputSlot<bool> FillUniverse = new InputSlot<bool>();
+
+        [Input(Guid = "23F23213-68E2-45F5-B452-4A86289004C0")]
+        public readonly InputSlot<bool> DebugToLog = new InputSlot<bool>();
 
         [Input(Guid = "df04fce0-c6e5-4039-b03f-e651fc0ec4a9")]
         public readonly InputSlot<bool> GetPosition = new InputSlot<bool>();
@@ -454,11 +719,29 @@ namespace Lib.io.dmx
         [Input(Guid = "4922acd8-ab83-4394-8118-c555385c2ce9")]
         public readonly InputSlot<bool> GetRotation = new InputSlot<bool>();
 
-        [Input(Guid = "ba8d8f32-792c-4675-a5f5-415c16db8c66", MappedType = typeof(RotationModes))]
-        public readonly InputSlot<int> AxisOrder = new InputSlot<int>();
+        [Input(Guid = "032F3617-E1F3-4B41-A3BE-61DD63B9F3BA", MappedType = typeof(ForwardVectorModes))]
+        public readonly InputSlot<int> ForwardVector = new InputSlot<int>();
+
+        [Input(Guid = "9c235473-346b-4861-9844-4b584e09f58a", MappedType = typeof(RotationOrderModes))]
+        public readonly InputSlot<int> RotationOrder = new InputSlot<int>();
+
+        [Input(Guid = "49fefbdb-2652-43db-ae52-ebc2df3e2856")]
+        public readonly InputSlot<bool> InvertX = new InputSlot<bool>();
+
+        [Input(Guid = "6d8fc457-0c80-4736-8c25-cc48f07cbbfd")]
+        public readonly InputSlot<bool> InvertY = new InputSlot<bool>();
+
+        [Input(Guid = "0c57cdd5-e450-4425-954f-c9e4256f83e1")]
+        public readonly InputSlot<bool> InvertZ = new InputSlot<bool>();
+
+        [Input(Guid = "1f532994-fb0e-44e4-8a80-7917e1851eae", MappedType = typeof(AxisModes))]
+        public readonly InputSlot<int> PanAxis = new InputSlot<int>();
 
         [Input(Guid = "7bf3e057-b9eb-43d2-8e1a-64c1c3857ca1")]
         public readonly InputSlot<bool> InvertPan = new InputSlot<bool>();
+
+        [Input(Guid = "1f877cf6-10d9-4d0b-b087-974bd6855e0a", MappedType = typeof(AxisModes))]
+        public readonly InputSlot<int> TiltAxis = new InputSlot<int>();
 
         [Input(Guid = "f85ecf9f-0c3d-4c10-8ba7-480aa2c7a667")]
         public readonly InputSlot<bool> InvertTilt = new InputSlot<bool>();
@@ -508,11 +791,17 @@ namespace Lib.io.dmx
         [Input(Guid = "91c78090-be10-4203-827e-d2ef1b93317e")]
         public readonly InputSlot<bool> GetF1 = new InputSlot<bool>();
 
+        [Input(Guid = "bec9e5a6-40a9-49b2-88bd-01a4ea03d28c")]
+        public readonly InputSlot<bool> GetF1ByPixel = new InputSlot<bool>();
+
         [Input(Guid = "b7061834-66aa-4f7f-91f9-10ebfe16713f")]
         public readonly InputSlot<int> F1Channel = new InputSlot<int>();
 
         [Input(Guid = "1cb93e97-0161-4a77-bbc7-ff30c1972cf8")]
         public readonly InputSlot<bool> GetF2 = new InputSlot<bool>();
+
+        [Input(Guid = "b8080f4e-4542-4e20-9844-8028bbaf223f")]
+        public readonly InputSlot<bool> GetF2ByPixel = new InputSlot<bool>();
 
         [Input(Guid = "d77be0d1-5fb9-4d26-9e4a-e16497e4759c")]
         public readonly InputSlot<int> F2Channel = new InputSlot<int>();

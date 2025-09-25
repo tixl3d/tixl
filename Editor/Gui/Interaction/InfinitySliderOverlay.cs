@@ -100,7 +100,13 @@ internal static class InfinitySliderOverlay
         var iLog10 = Math.Floor(log10);
         var logRemainder = log10 - iLog10;
         var tickValueInterval = Math.Pow(10, iLog10 - 1) * T3Ui.UiScaleFactor;
-        roundedValue = _io.KeyCtrl ? _value : Math.Round(_value / (tickValueInterval / 10)) * (tickValueInterval / 10);
+        var roundInterval = logRemainder switch
+                                {
+                                    > 0.8 => tickValueInterval / 1,
+                                     _ => tickValueInterval/10        
+                                };
+        
+        roundedValue = _io.KeyCtrl ? _value : Math.Round(_value / roundInterval) * roundInterval;
 
         var rSize = new Vector2(Width, 40)  * T3Ui.UiScaleFactor;
         var rCenter = new Vector2(mousePosX, _io.MousePos.Y - rSize.Y);
@@ -139,9 +145,10 @@ internal static class InfinitySliderOverlay
             var negF = 1 - f;
             var valueAtTick = tickIndex * tickValueInterval + _value - valueTickRemainder;
             GetXForValueIfVisible(valueAtTick, valueRange, mousePosX, Width, out var tickX);
-            var isPrimary = Math.Abs(MathUtils.Fmod(valueAtTick + tickValueInterval * 5, tickValueInterval * 10) - tickValueInterval * 5) <
+            var xFactor = 5;
+            var isPrimary = Math.Abs(MathUtils.Fmod(valueAtTick + tickValueInterval * xFactor, tickValueInterval * 10) - tickValueInterval * xFactor) <
                             tickValueInterval / 10;
-            var isPrimary2 = Math.Abs(MathUtils.Fmod(valueAtTick + tickValueInterval * 50, tickValueInterval * 100) - tickValueInterval * 50) <
+            var isPrimary2 = Math.Abs(MathUtils.Fmod(valueAtTick + tickValueInterval * xFactor* 10, tickValueInterval * 100) - tickValueInterval * xFactor * 10) <
                              tickValueInterval / 100;
 
             var fff = MathUtils.SmootherStep(1, 0.8f, (float)logRemainder);
@@ -151,14 +158,13 @@ internal static class InfinitySliderOverlay
                              UiColors.ForegroundFull.Fade(negF * (isPrimary ? 1 : 0.5f * fff)),
                              1
                             );
-
-            var font = isPrimary2 ? Fonts.FontBold : Fonts.FontNormal;
-            var v = Math.Abs(valueAtTick) < 0.0001 ? 0 : valueAtTick;
-            var label = $"{v:G5}";
-
+            
             var ff = (1 - (float)logRemainder * 2);
             if (isPrimary2 || ff < 1)
             {
+                var font = isPrimary2 ? Fonts.FontBold : Fonts.FontNormal;
+                var v = Math.Abs(valueAtTick) < 0.0001 ? 0 : valueAtTick;
+                var label = $"{v:G5}";
                 ImGui.PushFont(font);
                 var size = ImGui.CalcTextSize(label);
                 ImGui.PopFont();

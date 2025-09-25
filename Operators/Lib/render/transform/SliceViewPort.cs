@@ -26,28 +26,32 @@ internal sealed class SliceViewPort : Instance<SliceViewPort>
 
         var repeatView = Mode.GetValue(context) == 0;
             
-        var resolution = context.RequestedResolution;
+        _prevResolution = context.RequestedResolution;
         var cells = CellCounts.GetValue(context);
         cells.Width = Math.Max(cells.Width, 1);
         cells.Height = Math.Max(cells.Height, 1);
-            
+        
+        
         var cellCount = cells.Width * cells.Height;
         Count.Value = Math.Min(cellCount , MaxCells);
             
-        var cellSize = new Vector2(resolution.Width / (float)cells.Width,
-                                   resolution.Height / (float)cells.Height);
+        var cellSize = new Vector2(_prevResolution.Width / (float)cells.Width,
+                                   _prevResolution.Height / (float)cells.Height);
 
         var cellIndex = CellIndex.GetValue(context).Clamp(0,int.MaxValue);
         var modCellIndex = cellIndex % cellCount;
         var columnIndex = modCellIndex % cells.Width;
         var rowIndex = modCellIndex / cells.Width;
 
+        var cellSizeX = cellSize.X * stretch.X;
+        var cellSizeY = cellSize.Y * stretch.Y;
+        
         var newViewPort = new RawViewportF
                               {
                                   X = (columnIndex + (1 - stretch.X) / 2) * cellSize.X,
                                   Y = (rowIndex + (1 - stretch.Y) / 2) * cellSize.Y,
-                                  Width = cellSize.X * stretch.X,
-                                  Height = cellSize.Y * stretch.Y,
+                                  Width = cellSizeX,
+                                  Height = cellSizeY,
                                   MinDepth = 0,
                                   MaxDepth = 1
                               };
@@ -76,8 +80,10 @@ internal sealed class SliceViewPort : Instance<SliceViewPort>
         var rasterizer = deviceContext.Rasterizer;            
             
         _prevViewports = rasterizer.GetViewports<RawViewportF>();
-        _prevRasterizerState = rasterizer.State; 
-            
+        _prevRasterizerState = rasterizer.State;
+
+        context.RequestedResolution = new Int2((int)cellSizeX.Clamp(1,16384),
+                                               (int)cellSizeY.Clamp(1,16384));
         rasterizer.SetViewport(newViewPort);
 
         // Execute subgraph
@@ -85,10 +91,12 @@ internal sealed class SliceViewPort : Instance<SliceViewPort>
 
         rasterizer.SetViewports(_prevViewports, _prevViewports.Length);
         rasterizer.State = _prevRasterizerState;
+        context.RequestedResolution = _prevResolution;
         context.CameraToClipSpace = _prevCameraToClipSpace;
     }
         
     private RawViewportF[] _prevViewports;
+    private Int2 _prevResolution;
 
     [Input(Guid = "21532B24-FED2-403B-ABB1-6FAA19311366")]
     public readonly InputSlot<Command> SubGraph = new ();

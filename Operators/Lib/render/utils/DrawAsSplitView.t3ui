@@ -6,15 +6,15 @@
     {
       "InputId": "3cb0dfab-deaa-4ed4-ba45-ac63e886e212"/*Stretch*/,
       "Position": {
-        "X": -257.30374,
-        "Y": 246.20184
+        "X": 1079.8354,
+        "Y": -60.989014
       }
     },
     {
       "InputId": "987bda72-6a6b-4216-9ecf-d87b7299553d"/*Labels*/,
       "Position": {
-        "X": -257.30374,
-        "Y": 201.20184
+        "X": 476.74084,
+        "Y": 160.89444
       },
       "Usage": "Multiline"
     },
@@ -22,15 +22,15 @@
       "InputId": "a3929303-170b-496a-b8e0-fc5f604a0ec7"/*Commands*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -258.67557,
-        "Y": 59.718597
+        "X": -123.80835,
+        "Y": -228.39215
       }
     },
     {
       "InputId": "b1cdb551-0045-42d4-a6ba-fa8aa0f1f98f"/*Mode*/,
       "Position": {
-        "X": -257.30374,
-        "Y": 291.20184
+        "X": 1079.8354,
+        "Y": -25.989014
       }
     }
   ],
@@ -39,109 +39,137 @@
       "ChildId": "0d67c292-49fb-41c4-bc2d-5b96b98045c6"/*SliceViewPort*/,
       "Comment": "Sadly, we can't reuse the other [SliceViewPort] because we want to override the camera so the labels are facing the camera.",
       "Position": {
-        "X": 1007.59717,
-        "Y": 239.72012
+        "X": 892.85364,
+        "Y": 289.93436
       }
     },
     {
       "ChildId": "0e7e5a81-b2bc-42f6-9c87-460a89f1cdda"/*IntToFloat*/,
       "Position": {
-        "X": 214.98865,
-        "Y": 306.53506
+        "X": 196.74086,
+        "Y": 393.6701
       }
     },
     {
       "ChildId": "114a2a4b-cd0c-4ab0-9ec9-43d26e023d64"/*SliceViewPort*/,
       "Comment": "This operator will slice the viewport. Check out its example in the description.",
       "Position": {
-        "X": 1152.8862,
-        "Y": -47.617584
+        "X": 1219.8354,
+        "Y": -165.98901
       }
     },
     {
       "ChildId": "1e4309a6-554f-400f-9f22-0f167a668317"/*Text*/,
       "Position": {
-        "X": 664.98865,
-        "Y": 237.53506
+        "X": 892.85364,
+        "Y": 184.93436
       }
     },
     {
       "ChildId": "36bc32ce-c53b-41be-aad9-3d9027415dd0"/*Vector2*/,
       "Position": {
-        "X": 514.98865,
-        "Y": 306.53506
+        "X": 476.74084,
+        "Y": 323.6701
       }
     },
     {
       "ChildId": "3ffdae25-c262-4d90-a20a-270bd1201e56"/*SplitString*/,
       "Position": {
-        "X": 364.98865,
-        "Y": 237.53506
+        "X": 476.74084,
+        "Y": 195.89444
+      }
+    },
+    {
+      "ChildId": "49c28772-0993-4f67-b85b-a857c9d45d1e"/*StringLength*/,
+      "Position": {
+        "X": 612.85364,
+        "Y": 429.93436
       }
     },
     {
       "ChildId": "62819993-7f9a-436a-8fc6-4b2e6c49ce7a"/*Switch*/,
       "Comment": "This is 'magic': We route the multiple connections from outside into the [Switch] command here. So, it's not a single input, but as many as are connected on the outside.\nWe then use the total count for looping of each connected element.",
       "Position": {
-        "X": 12.61911,
-        "Y": 51.160156
+        "X": 16.19165,
+        "Y": -228.39215
       }
     },
     {
       "ChildId": "71d3437a-a20d-4b32-8f4a-5e94247b8900"/*Group*/,
       "Position": {
-        "X": 1355.5924,
-        "Y": 1.8659058
+        "X": 1219.8354,
+        "Y": 9.010986
+      }
+    },
+    {
+      "ChildId": "72333a1c-72b8-4598-b2ac-f0462134bc98"/*CompareInt*/,
+      "Position": {
+        "X": 752.85364,
+        "Y": 429.93436
       }
     },
     {
       "ChildId": "764f39e4-f3ff-4afa-8705-54328aafdee9"/*Loop*/,
       "Comment": "Also, check out the example in the operator's description.",
       "Position": {
-        "X": 1505.5924,
-        "Y": 1.8659058
+        "X": 1219.8354,
+        "Y": 79.01099
       }
     },
     {
       "ChildId": "872983c2-dd4d-4e20-a69e-57f2c0fbac54"/*Transform*/,
       "Position": {
-        "X": 814.98865,
-        "Y": 237.53506
+        "X": 892.85364,
+        "Y": 254.93436
       }
     },
     {
       "ChildId": "a03f9238-314a-4f8f-adb1-74ef635403ae"/*PickFromStringList*/,
       "Position": {
-        "X": 514.98865,
-        "Y": 237.53506
+        "X": 476.74084,
+        "Y": 230.89444
       }
     },
     {
       "ChildId": "a7013152-234e-47e1-8089-a9e2ff0ebc4b"/*Camera*/,
       "Position": {
-        "X": 1157.5972,
-        "Y": 239.72012
+        "X": 892.85364,
+        "Y": 464.9344
       }
     },
     {
       "ChildId": "b9325542-79fb-4760-8968-99668b22172b"/*Int2*/,
       "Position": {
-        "X": 702.44324,
-        "Y": 128.91287
+        "X": 481.44684,
+        "Y": -92.56198
       }
     },
     {
       "ChildId": "e1023b46-f22f-489f-b830-b6f9a8c0f6fd"/*GetIntVar*/,
       "Position": {
-        "X": -156.64651,
-        "Y": -41.62857
+        "X": -136.21303,
+        "Y": -23.765808
+      }
+    },
+    {
+      "ChildId": "e59cfdbf-ecc7-410d-93c2-0592ad110c79"/*SetRequestedResolution*/,
+      "Position": {
+        "X": 419.865,
+        "Y": 670.972
+      }
+    },
+    {
+      "ChildId": "eb7bd884-887e-4e87-80da-8d43b6dd8633"/*Execute*/,
+      "Position": {
+        "X": 892.85364,
+        "Y": 394.93436
       }
     },
     {
       "ChildId": "ebb880e6-46b7-4d5a-b1df-47370a46d632"/*Div*/,
       "Position": {
-        "X": 364.98865,
-        "Y": 306.53506
+        "X": 336.74084,
+        "Y": 358.6701
       }
     }
   ],
@@ -149,8 +177,8 @@
     {
       "OutputId": "65456554-355b-41a3-893e-960d28113f53"/*Output*/,
       "Position": {
-        "X": 1655.5924,
-        "Y": 1.8659058
+        "X": 1219.8354,
+        "Y": 149.01099
       }
     }
   ],
@@ -165,12 +193,12 @@
         "W": 1.0
       },
       "Position": {
-        "X": 154.98865,
-        "Y": 177.53506
+        "X": 120.47298,
+        "Y": 107.512634
       },
       "Size": {
-        "X": 1172.6085,
-        "Y": 238.0
+        "X": 962.8029,
+        "Y": 398.3396
       }
     }
   ]

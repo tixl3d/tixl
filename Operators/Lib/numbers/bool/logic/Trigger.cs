@@ -15,6 +15,9 @@ public sealed class Trigger : Instance<Trigger>
 
     private void Update(EvaluationContext context)
     {
+        if (!context.HasTimeChanged(ref _lastUpdateTime))
+            return;
+        
         var value = BoolValue.GetValue(context);
         var wasHit = MathUtils.WasTriggered(value, ref _isSet);
         var onlyOnDown = OnlyOnDown.GetValue(context);
@@ -27,6 +30,8 @@ public sealed class Trigger : Instance<Trigger>
         ColorInGraph.DirtyFlag.Clear();
         Result.DirtyFlag.Clear();
     }
+
+    private double _lastUpdateTime = -1;
 
     private bool _isSet;
         
