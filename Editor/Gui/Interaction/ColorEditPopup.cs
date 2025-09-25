@@ -31,7 +31,10 @@ internal static class ColorEditPopup
         var dontCloseIfColorPicking = ImGui.GetIO().KeyAlt ? ImGuiWindowFlags.Modal : ImGuiWindowFlags.None;
 
         var id = ImGui.GetID("colorPicker");
-        
+
+        // Track if popup was open in the previous frame
+        var wasPopupOpen = ImGui.IsPopupOpen(PopupId);
+
         if (ImGui.BeginPopup(PopupId, dontCloseIfColorPicking))
         {
             if (_openedId != id)
@@ -57,8 +60,16 @@ internal static class ColorEditPopup
         }
         else
         {
+            // Popup is closing - apply snap-to-black logic here
             if (_openedId == id)
             {
+                // Check if brightness is at minimum threshold and snap to true black
+                if (Math.Abs(cColor.V - 0.001f) < 0.0001f)
+                {
+                    cColor = new Color(0, 0, 0, cColor.A);
+                    edited = InputEditStateFlags.ModifiedAndFinished;
+                }
+
                 _openedId = 0;
             }
         }
