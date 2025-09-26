@@ -68,7 +68,7 @@ internal static class PickTextureUi
 
             // Draw title
             var titleText = !string.IsNullOrWhiteSpace(instance.SymbolChild.Name)
-                ? instance.SymbolChild.Name
+                ? $"{instance.SymbolChild.Name}: {currentValue}"
                 : $"PickTexture: {currentValue}";
 
             var titlePos = workingRect.Min + new Vector2(2.0f * canvasScaleY, 2.0f * canvasScaleY);

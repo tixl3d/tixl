@@ -1,6 +1,5 @@
 #nullable enable
 using System.Diagnostics.CodeAnalysis;
-using T3.Core.DataTypes;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Editor.Gui.Interaction.Snapping;
@@ -299,26 +298,7 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
             //snapResult.TryToImproveWithAnchorValue(DampedPosOnCanvas.Y + Size.Y);
         }
     }
-
-    public bool HasMultiInputSlots()
-    {
-        if (Variant != Variants.Operator || InputLines.Length == 0)
-            return false;
-
-        // Check if any multi-input slot has Texture2D type
-        foreach (var inputLine in InputLines)
-        {
-            var isMultiInput = inputLine.InputUi?.InputDefinition?.IsMultiInput == true;
-            var isTextureType = inputLine.Type == typeof(Texture2D);
-
-            if (isMultiInput && isTextureType)
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
+    
     //
     // public void ForOutputAnchors(Action<AnchorPoint> call)
     // {

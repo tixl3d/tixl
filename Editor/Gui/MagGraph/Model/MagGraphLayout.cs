@@ -353,16 +353,8 @@ internal sealed class MagGraphLayout
             item.InputLines = inputLines.ToArray();
             item.OutputLines = outputLines.ToArray();
 
-            // Calculate base height
-            var baseHeight = MagGraphItem.LineHeight * Math.Max(1, visibleIndex);
-
-            // Add extra height for nodes with multi-input slots
-            if (item.HasMultiInputSlots())
-            {
-                baseHeight += MagGraphItem.LineHeight; // Add one more unit of height
-            }
-
-            item.Size = new Vector2(MagGraphItem.Width, baseHeight);
+            //var count = Math.Max(1, item.InputLines.Count + item.OutputLines.Count -2);
+            item.Size = new Vector2(MagGraphItem.Width, MagGraphItem.LineHeight * (Math.Max(1, visibleIndex)));
         }
     }
 
