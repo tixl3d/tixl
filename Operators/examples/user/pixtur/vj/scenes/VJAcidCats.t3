@@ -48,11 +48,6 @@
             "Z": 0.9998608,
             "W": 1.0
           }
-        },
-        {
-          "Id": "ca8724d8-a362-4af4-bdf8-a80a1b0ef72e"/*FolderWithImages*/,
-          "Type": "System.String",
-          "Value": "Resources/images/CatMadness/"
         }
       ],
       "Outputs": []
@@ -1027,25 +1022,15 @@
         {
           "Id": "16231de9-2e85-4a9a-a2d1-99dfac18a0f6"/*PreSaturate*/,
           "Type": "System.Single",
-          "Value": 0.68
-        },
-        {
-          "Id": "423eb712-f7e3-4402-b841-324a9fc91c54"/*VignetteColor*/,
-          "Type": "System.Numerics.Vector4",
-          "Value": {
-            "X": 0.0,
-            "Y": 0.0,
-            "Z": 0.0,
-            "W": 0.0
-          }
+          "Value": 0.61
         },
         {
           "Id": "4dc44a7b-fe7c-4807-aaaa-53fb553de017"/*Gain*/,
           "Type": "System.Numerics.Vector4",
           "Value": {
-            "X": 0.82,
-            "Y": 0.82,
-            "Z": 0.82,
+            "X": 0.37,
+            "Y": 0.37,
+            "Z": 0.37,
             "W": 0.506
           }
         },
@@ -1053,9 +1038,9 @@
           "Id": "e8cc8a26-313e-4399-b800-901019bbaa78"/*Lift*/,
           "Type": "System.Numerics.Vector4",
           "Value": {
-            "X": 0.19,
-            "Y": 0.19,
-            "Z": 0.19,
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0,
             "W": 0.25
           }
         }
@@ -1108,12 +1093,22 @@
                 },
                 {
                   "Id": "83974e9d-5937-4276-a097-c025faa00a34",
-                  "NormalizedPosition": 1.0,
+                  "NormalizedPosition": 0.90548414,
                   "Color": {
-                    "R": 0.76555026,
-                    "G": 0.76555026,
-                    "B": 0.76555026,
+                    "R": 1.0,
+                    "G": 1.0,
+                    "B": 1.0,
                     "A": 0.5
+                  }
+                },
+                {
+                  "Id": "9ecbd6f8-5cc3-438e-8186-6c7a2255af5a",
+                  "NormalizedPosition": 0.9902339,
+                  "Color": {
+                    "R": 0.8516747,
+                    "G": 0.8516747,
+                    "B": 0.8516747,
+                    "A": 1.0
                   }
                 }
               ]
@@ -1339,12 +1334,17 @@
         {
           "Id": "0d56fc27-fa15-4f1e-aa09-f97af93d42c7"/*Duration*/,
           "Type": "System.Single",
-          "Value": 0.57000005
+          "Value": 0.40000004
+        },
+        {
+          "Id": "287fa06c-3e18-43f2-a4e1-0780c946dd84"/*Amplitude*/,
+          "Type": "System.Single",
+          "Value": 0.31423235
         },
         {
           "Id": "9bfd5ae3-9ca6-4f7b-b24b-f554ad4d0255"/*Bias*/,
           "Type": "System.Single",
-          "Value": 0.17
+          "Value": 0.16
         },
         {
           "Id": "c0fa79d5-2c49-4d40-998f-4eb0101ae050"/*Shape*/,

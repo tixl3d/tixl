@@ -19,6 +19,9 @@
 - [ ] Collapse Symbol Library
 - [ ] Add Voronoi Pattern Shader
 - [ ] Add Project image to SdfMaterial
+- [ ] Duplicate as new type should also duplicate variations and snapshot enabled ops!
+- [ ] Variations should be stored at project folder
+- [ ] !!! Indicate read-only operators
 - 
 
 
@@ -27,6 +30,11 @@
 - [ ] Create [HowToUseVariables]
 - [ ] Scaling color to zero clears hue and saturation.
 - [ ] PointList parameter needs max height
+
+- [ ] Idea: bookmark / navigation panel
+- [ ] Snapshots: Somehow fix usecase "update set this parameter for these snapshots"
+- [ ] Snapshots: Layout snapshots like on Controller
+- [ ] 
 
 ## Project handling / Project HUB
 

@@ -257,21 +257,23 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
                 _graph.RenameAnnotation(newAnnotation);
             }
 
-            IReadOnlyList<Guid> navigationPath = null;
-
-            // Navigation
-            if (UserActions.NavigateBackwards.Triggered())
             {
-                navigationPath = _navigationHistory.NavigateBackwards();
-            }
+                IReadOnlyList<Guid> navigationPath = null;
 
-            if (UserActions.NavigateForward.Triggered())
-            {
-                navigationPath = _navigationHistory.NavigateForward();
-            }
+                // Navigation
+                if (UserActions.NavigateBackwards.Triggered())
+                {
+                    navigationPath = _navigationHistory.NavigateBackwards();
+                }
 
-            if (navigationPath != null)
-                _projectView.TrySetCompositionOp(navigationPath);
+                if (UserActions.NavigateForward.Triggered())
+                {
+                    navigationPath = _navigationHistory.NavigateForward();
+                }
+
+                if (navigationPath != null)
+                    _projectView.TrySetCompositionOp(navigationPath);
+            }
 
             if (UserActions.SelectToAbove.Triggered())
             {

@@ -19,9 +19,9 @@ namespace T3.Editor.UiModel.Selection;
 /// </summary>
 internal sealed class NodeSelection : ISelection
 {
-    public NodeSelection(NavigationHistory history, Structure structure)
+    public NodeSelection(NavigationHistory navigationHistory, Structure structure)
     {
-        _history = history;
+        NavigationHistory = navigationHistory;
         _structure = structure;
     }
 
@@ -39,7 +39,7 @@ internal sealed class NodeSelection : ISelection
     /// </summary>
     public void SetSelectionToComposition(Instance instance)
     {
-        _history.UpdateSelectedInstance(instance);
+        NavigationHistory.UpdateSelectedInstance(instance);
         Clear();
         _childUiInstanceIdPaths.Clear();
         _selectedCompositionPath = instance.InstancePath;
@@ -58,7 +58,7 @@ internal sealed class NodeSelection : ISelection
         if (node is SymbolUi.Child)
         {
             Debug.Assert(instance != null);
-            _history.UpdateSelectedInstance(instance);
+            NavigationHistory.UpdateSelectedInstance(instance);
         }
     }
 
@@ -260,7 +260,7 @@ internal sealed class NodeSelection : ISelection
     }
     
     
-    private readonly NavigationHistory _history;
+    public readonly NavigationHistory NavigationHistory;
     private readonly Structure _structure;
 
     //TODO: This should be a dict because selecting many (> 500) ops will lead to framedrops

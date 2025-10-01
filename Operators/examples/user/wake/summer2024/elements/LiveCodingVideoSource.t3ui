@@ -5,22 +5,22 @@
     {
       "InputId": "48778598-865f-4eef-8af9-becb607854a2"/*VideoSyncOffsetInSec*/,
       "Position": {
-        "X": 542.46655,
-        "Y": -76.482086
+        "X": 315.21173,
+        "Y": -96.899506
       }
     },
     {
       "InputId": "5b561b66-ec20-421b-965f-c17f5c881d8b"/*UseNdi*/,
       "Position": {
         "X": 682.46655,
-        "Y": 63.517914
+        "Y": 28.517914
       }
     },
     {
       "InputId": "6e8a488a-a1eb-48e3-862a-8b2667594be7"/*ReferenceVideoPath*/,
       "Position": {
-        "X": 822.46655,
-        "Y": -146.48209
+        "X": 595.21173,
+        "Y": -166.8995
       },
       "Usage": "FilePath"
     },
@@ -37,6 +37,13 @@
     }
   ],
   "SymbolChildUis": [
+    {
+      "ChildId": "0ab448a3-31e4-4b2f-8876-79b4ed69e49b"/*KeyExecuteLines*/,
+      "Position": {
+        "X": 1566.3191,
+        "Y": -71.54933
+      }
+    },
     {
       "ChildId": "0da8b84b-8a9f-42af-a92a-cdc0a05e5468"/*Crop*/,
       "Position": {
@@ -66,6 +73,13 @@
       }
     },
     {
+      "ChildId": "3893679e-1e67-4560-aa80-1fdc83fa0876"/*Layer2d*/,
+      "Position": {
+        "X": 1620.6376,
+        "Y": 288.98267
+      }
+    },
+    {
       "ChildId": "535d87fd-4a6d-45ce-9ade-847b3f5eb045"/*Blend*/,
       "Position": {
         "X": 962.46655,
@@ -75,8 +89,8 @@
     {
       "ChildId": "5b313c01-f85f-4e33-bbba-0c64b0ad2d66"/*Add*/,
       "Position": {
-        "X": 822.46655,
-        "Y": -111.482086
+        "X": 595.21173,
+        "Y": -131.8995
       }
     },
     {
@@ -89,8 +103,8 @@
     {
       "ChildId": "61e01c2e-8064-476a-8609-d596ca054011"/*ConvertTime*/,
       "Position": {
-        "X": 682.46655,
-        "Y": -76.482086
+        "X": 455.21173,
+        "Y": -96.899506
       }
     },
     {
@@ -110,8 +124,8 @@
     {
       "ChildId": "70577c7c-ac8f-45d0-9571-7b34b1b02776"/*Time*/,
       "Position": {
-        "X": 682.46655,
-        "Y": -111.482086
+        "X": 455.21173,
+        "Y": -131.8995
       }
     },
     {
@@ -159,15 +173,15 @@
     {
       "ChildId": "b82c0c1e-7958-46d1-811b-472b1015ea98"/*PlayVideo*/,
       "Position": {
-        "X": 962.46655,
-        "Y": -146.48209
+        "X": 735.21173,
+        "Y": -166.8995
       }
     },
     {
       "ChildId": "ba276a8b-2590-4818-b8fb-3fdb73ed13e6"/*ConvertFormat*/,
       "Position": {
-        "X": 384.91974,
-        "Y": 117.54178
+        "X": 494.10864,
+        "Y": 95.34894
       }
     },
     {
@@ -195,7 +209,7 @@
       "ChildId": "c1aaf2d2-482f-4b01-ac65-975e4bf8ae91"/*BoolToInt*/,
       "Position": {
         "X": 822.46655,
-        "Y": 63.517914
+        "Y": 28.517914
       }
     },
     {

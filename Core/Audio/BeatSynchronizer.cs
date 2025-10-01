@@ -126,8 +126,9 @@ public static class BeatSynchronizer
 
         if (_detectedOnsets.Count > 0)
         {
-            foreach (var onset in _detectedOnsets)
+            for (var index = 0; index < _detectedOnsets.Count; index++)
             {
+                var onset = _detectedOnsets[index];
                 var conceptualBarStartTimeMs = currentTimeMs - _barTime % 1 * BarDurationMs;
 
                 var offsetFromNearestConceptualBarStartMs = (onset.TimeMs - conceptualBarStartTimeMs) % BarDurationMs;
@@ -136,7 +137,7 @@ public static class BeatSynchronizer
                     offsetFromNearestConceptualBarStartMs += BarDurationMs;
 
                 var onsetNormalizedBarPosition = offsetFromNearestConceptualBarStartMs / BarDurationMs;
-                
+
                 foreach (var template in _onsetRhythmicTemplates[(int)onset.Type])
                 {
                     var rawErrorToTemplateNormalized = onsetNormalizedBarPosition - template.NormalizedBarPosition;

@@ -93,7 +93,7 @@ public static class ColorEditButton
             if (MathF.Abs(ImGui.GetMouseDragDelta().Y) > UserSettings.Config.ClickThreshold / 2f)
                 _modifiedSlider = true;
 
-            color.W = (_previousColor.W - ImGui.GetMouseDragDelta().Y / 100).Clamp(0, 1);
+            color.W = (_previousColor.W - ImGui.GetMouseDragDelta().Y * DragFactor/ Height).Clamp(0, 1);
                 
             if(_modifiedSlider)
                 edited |= InputEditStateFlags.Modified;
@@ -115,7 +115,7 @@ public static class ColorEditButton
                 _modifiedSlider = true;
             }
 
-            var newBrightness = (previousHsb.Z - ImGui.GetMouseDragDelta(ImGuiMouseButton.Right).Y / 100).Clamp(0, 1);
+            var newBrightness = (previousHsb.Z - ImGui.GetMouseDragDelta(ImGuiMouseButton.Right).Y * DragFactor/ Height).Clamp(0, 1);
             color = Color.ColorFromHsl(previousHsb.X, previousHsb.Y, newBrightness, _previousColor.W);
             if(_modifiedSlider)
                 edited |= InputEditStateFlags.Modified;
@@ -128,11 +128,10 @@ public static class ColorEditButton
 
     internal static void VerticalColorSlider(Vector4 color, Vector2 pCenter, float valuePos)
     {
-        const int barHeight = 100;
         const int barWidth = 10;
         var drawList = ImGui.GetForegroundDrawList();
-        var pMin = pCenter + new Vector2(15, -barHeight * valuePos);
-        var pMax = pMin + new Vector2(barWidth, barHeight);
+        var pMin = pCenter + new Vector2(15, -Height * valuePos);
+        var pMax = pMin + new Vector2(barWidth, Height);
         var area = new ImRect(pMin, pMax);
         drawList.AddRectFilled(pMin - Vector2.One, pMax + Vector2.One, new Color(0.1f, 0.1f, 0.1f));
         CustomComponents.FillWithStripes(drawList, area, 1);
@@ -150,8 +149,9 @@ public static class ColorEditButton
 
         drawList.AddRectFilled(pCenter, pCenter + new Vector2(barWidth + 15, 1), UiColors.BackgroundFull);
     }
-        
 
+    private static int Height => (int)(200 * T3Ui.UiScaleFactor);
+    private static float DragFactor = ImGui.GetIO().KeyShift ? 0.5f : 1f;
     private static uint _rightClickedItemId;
     private static Vector4 _previousColor;
 }

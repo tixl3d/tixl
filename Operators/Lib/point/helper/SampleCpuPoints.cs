@@ -50,15 +50,15 @@ internal sealed class SampleCpuPoints : Instance<SampleCpuPoints>
         var smoothT = MathUtils.SmootherStep(0, 1, t);
 
         var tLength = TangentScale.GetValue(context) * l;
-        var tA = Vector3.Transform(Vector3.UnitZ *tLength , a.Orientation);
-        var tB = Vector3.Transform(-Vector3.UnitZ *tLength, b.Orientation);
+        var tA = Vector3.Transform(Vector3.UnitZ *tLength , Quaternion.Normalize( a.Orientation));
+        var tB = Vector3.Transform(-Vector3.UnitZ *tLength, Quaternion.Normalize(b.Orientation));
 
         var pos = Bezier.GetPoint(posA, posA + tA, posB + tB, posB, t);
         var tan  = Bezier.GetFirstDerivative(posA, posA + tA, posB + tB, posB, t); // derivative
         
         // Up from authored key orientations
-        var upA = Vector3.Transform(Vector3.UnitY, a.Orientation);
-        var upB = Vector3.Transform(Vector3.UnitY, b.Orientation);
+        var upA = Vector3.Transform(Vector3.UnitY, Quaternion.Normalize(a.Orientation));
+        var upB = Vector3.Transform(Vector3.UnitY, Quaternion.Normalize(b.Orientation));
         var up  = SlerpUnit(upA, upB, MathUtils.SmootherStep(0,1, t));
 
         var pUpA = posA + upA * tLength;
@@ -67,9 +67,9 @@ internal sealed class SampleCpuPoints : Instance<SampleCpuPoints>
         //var up = Bezier.GetPoint(pUpA, upA + tA, pUpB + tB, pUpB, smoothT);
         
         // Z-forward alignment
-        var orientation = LookAtRH_ZForward(tan, Vector3.UnitY);
+        //var orientation = LookAtRH_ZForward(tan, up);
         //var orientation = ComputeOrientation(a.Orientation, b.Orientation, tan,  MathUtils.SmootherStep(0,1,t));
-        //var orientation = ComputeOrientation(a.Orientation, b.Orientation, tan,  t);
+        var orientation = ComputeOrientation(a.Orientation, b.Orientation, tan,  t);
             
         var p = new Point
                     {

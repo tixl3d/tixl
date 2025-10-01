@@ -1,0 +1,52 @@
+{
+  "Id": "3311d9a4-ea17-421f-8d79-bb88390ab7f7",
+  "Variations": [
+    {
+      "Id": "42b57dca-4ae5-4b16-a0b3-1236b285e5ed",
+      "IsPreset": false,
+      "ActivationIndex": 1,
+      "Title": "untitled",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "3ccdb32a-a499-4b5f-af0d-86c255f29b91": {
+          "08624ca6-8b69-48f5-8896-a483b403778e": {
+            "X": 0.0,
+            "Y": -1.0,
+            "Z": 0.0
+          }
+        },
+        "bbb3ceba-fddc-4ea5-96d0-d29f6ea23ac3": {
+          "08ad7bce-1161-4a43-997e-fea2e792ae36": 1.2,
+          "26190514-6762-4322-87e2-393670a476a6": 2
+        },
+        "bd09808c-d877-464c-8910-da1591dca88c": {
+          "996bd2d7-3741-4ade-b1b6-18eb3d884081": {
+            "X": 1.0,
+            "Y": 1.0,
+            "Z": 1.0,
+            "W": 1.0
+          }
+        },
+        "8f3ecb6a-d1ed-4eea-ba63-8b3440352728": {
+          "64f1812f-7ebd-4231-8a6a-0bbc302bfaff": {
+            "X": 0.0,
+            "Y": 0.37,
+            "Z": 0.0
+          },
+          "3c366d34-c398-410e-972b-d8cc2baffddb": 2.0,
+          "874ae9c8-5835-4d0c-9bef-253ac75d19b2": 0.8,
+          "56e5d5ec-ec59-4ea0-85c1-1eca3dcb5790": 0.377,
+          "bde89b93-224c-4a3f-85ab-d85b0401c02a": "p-= Offset;\n// Based on https://www.shadertoy.com/view/cdG3Wd \n// by @XorDev (with support from FabriceNeyret2 & coyote)\nfloat dist = 0.0;\n//int i=0;\nfloat scale = 100;\nfor (int i=0; i<7;i++)\n{\n    scale *= C; // C: 0.4\n    // Rotate octave 2 radians\n    float angle = A; // A: 2.0\n    float c = cos(angle);\n    float s = sin(angle);\n    float2x2 rot = float2x2(c, -s, s, c);\n    p.xz = mul(p.xz, rot);\n\n    p = abs(mod(p, scale * A) - scale);\n    p = scale * B - p; // B: 0.8\n\n    float3 cubes = min(p, p.xxx);\n    cubes = min(cubes, p.zzz);\n\n    dist = max(dist, cubes.y);\n}\nreturn dist;",
+          "48a0699d-1207-4e18-ab9b-4da7f77cc7aa": ""
+        },
+        "0df4e648-a7d6-4de6-8df7-4daa8f58de93": {
+          "9e4f5916-722d-4c4b-b1ca-814958a5b836": 4.5,
+          "4648e514-b48c-4a98-a728-3ebf9bcfa0b7": 1
+        }
+      }
+    }
+  ]
+}
