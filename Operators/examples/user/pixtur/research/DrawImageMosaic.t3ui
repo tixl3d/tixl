@@ -153,6 +153,13 @@
       }
     },
     {
+      "ChildId": "7d626470-0584-4fa9-931d-ba142184a5fc"/*FirstValidTexture*/,
+      "Position": {
+        "X": 681.2117,
+        "Y": 785.6229
+      }
+    },
+    {
       "ChildId": "94ae2ca5-8be3-4f8b-9a08-816ae488f336"/*VertexShader*/,
       "Position": {
         "X": 980.31104,
@@ -206,6 +213,13 @@
       "Position": {
         "X": 981.49194,
         "Y": 542.1752
+      }
+    },
+    {
+      "ChildId": "d7282784-53fa-4378-8630-f90db359d216"/*LoadImage*/,
+      "Position": {
+        "X": 503.64087,
+        "Y": 768.6305
       }
     },
     {
