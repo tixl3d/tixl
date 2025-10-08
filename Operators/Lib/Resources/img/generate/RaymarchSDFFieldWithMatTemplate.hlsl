@@ -271,10 +271,32 @@ PSOutput psMain(vsOutput input)
     float4 normalMapSample = NormalMap.Sample(WrappedSampler, uv);
     float3 tangentNormal = UnpackNormal(normalMapSample);
 
-    // Create tangent space matrix
-    float3 N = normalize(normal);  // Original geometric normal
-    float3 T = normalize(cross(N, float3(0, 0, 1)));  // Tangent
-    float3 B = normalize(cross(N, T));  // Bitangent
+    // Create tangent space matrix with consistent orientation
+    float3 N = normalize(normal);
+    
+    // Choose a reference vector that's unlikely to be parallel to N
+    float3 up = abs(N.y) < 0.999 ? float3(0, 1, 0) : float3(1, 0, 0);
+    
+    // Create tangent and bitangent
+    float3 T = normalize(cross(up, N));
+    float3 B = normalize(cross(N, T));
+    
+    // Ensure consistent handedness for tri-planar mapping
+    float3 blendWeights = absN / (absN.x + absN.y + absN.z);
+    if (absN.x > absN.y && absN.x > absN.z) {
+        // X-dominant face
+        T = normalize(float3(0, sign(N.x), 0));
+        B = normalize(cross(N, T));
+    } else if (absN.y > absN.z) {
+        // Y-dominant face
+        T = normalize(float3(1, 0, 0));
+        B = normalize(cross(N, T));
+    } else {
+        // Z-dominant face
+        T = normalize(float3(1, 0, 0));
+        B = normalize(cross(N, T));
+    }
+    
     float3x3 TBN = float3x3(T, B, N);
 
     // Transform normal from tangent space to world space
