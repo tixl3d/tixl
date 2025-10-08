@@ -179,6 +179,13 @@ float ComputeDepthFromViewZ(float viewZ)
     return clipPos.z / clipPos.w;
 }
 
+float3 UnpackNormal(float4 packedNormal)
+{
+    // Unpack from [0,1] to [-1,1]
+    float3 normal = packedNormal.rgb * 2.0 - 1.0;
+    return normalize(normal);
+}
+
 #include "shared/pbr-render.hlsl"
 
 PSOutput psMain(vsOutput input)
@@ -259,6 +266,22 @@ PSOutput psMain(vsOutput input)
 #else
     float2 uv = fieldPos.yz / TextureScale;
 #endif
+
+    // Sample and unpack normal map
+    float4 normalMapSample = NormalMap.Sample(WrappedSampler, uv);
+    float3 tangentNormal = UnpackNormal(normalMapSample);
+
+    // Create tangent space matrix
+    float3 N = normalize(normal);  // Original geometric normal
+    float3 T = normalize(cross(N, float3(0, 0, 1)));  // Tangent
+    float3 B = normalize(cross(N, T));  // Bitangent
+    float3x3 TBN = float3x3(T, B, N);
+
+    // Transform normal from tangent space to world space
+    float3 finalNormal = normalize(mul(tangentNormal, TBN));
+
+    // Use the final normal in all subsequent calculations
+    normal = finalNormal;
 
     float4 fieldColor = float4(GetField(float4(p, 1)).rgb, 1);
 
