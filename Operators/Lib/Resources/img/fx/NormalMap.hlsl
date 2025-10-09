@@ -73,11 +73,15 @@ float4 psMain(vsOutput psInput) : SV_TARGET
     float2 direction = float2( sin(angle), cos(angle));
 
     if(Mode < Gray_ToRGB) {
-        return float4( normalize(float3(len * direction * Impact, 1))  /2 + 0.5, 1);
+        float3 normal = normalize(float3(len * direction * Impact, 1));
+        normal.y = -normal.y; // Flip Y channel
+        return float4(normal / 2 + 0.5, 1);
     }
 
     if(Mode < Gray_ToRGBNeg) {
-        return float4( normalize(float3(len * direction * Impact, 1)) , 1);
+        float3 normal = normalize(float3(len * direction * Impact, 1));
+        normal.y = -normal.y; // Flip Y channel
+        return float4(normal, 1);
     }
 
     if(Mode < Gray_ToAngleAndMagnitude)

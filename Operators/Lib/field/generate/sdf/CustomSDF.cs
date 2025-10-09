@@ -55,7 +55,7 @@ internal sealed class CustomSDF : Instance<CustomSDF>
     {
         var n = ShaderNode;
         c.AppendCall($"f{c}.w = dCustom{ShaderNode}(p{c}.xyz, {n}Offset, {n}A, {n}B, {n}C);");
-        //c.AppendCall($"f{c}.xyz = p.w < 0.5 ?  p{c}.xyz : 1;"); // save local space
+        c.AppendCall($"f{c}.xyz = p.w < 0.5 ?  p{c}.xyz : 1;"); // save local space
     }
 
     private string _code = string.Empty;

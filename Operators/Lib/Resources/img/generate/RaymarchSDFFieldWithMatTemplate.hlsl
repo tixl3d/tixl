@@ -266,7 +266,8 @@ PSOutput psMain(vsOutput input)
 #else
     float2 uv = fieldPos.yz / TextureScale;
 #endif
-
+    // Flip Y for correct orientation
+    uv = uv * float2(1, -1) + 0.5;
     // Sample and unpack normal map
     float4 normalMapSample = NormalMap.Sample(WrappedSampler, uv);
     float3 tangentNormal = UnpackNormal(normalMapSample);
