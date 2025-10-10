@@ -50,7 +50,7 @@ internal static class PickTextureUi
         var currentValue = (isAnimated || data.Index.HasInputConnections)
                                ? data.Index.Value
                                : data.Index.TypedInputValue.Value;
-
+        var fontSize = Fonts.FontNormal.FontSize * canvasScaleY*.9f;
         var connections = data.Inputs.GetCollectedTypedInputs();
         if (connections != null && connections.Count > 0)
         {
@@ -61,21 +61,21 @@ internal static class PickTextureUi
             workingRect.Expand(-margin);
 
             // Reserve space for title
-            var titleHeight = font.FontSize + 12.0f * canvasScaleY;
-            var buttonAreaHeight = workingRect.GetHeight() - titleHeight;
+            //var titleHeight = font.FontSize + 12.0f * canvasScaleY;
+            var buttonAreaHeight = workingRect.GetHeight();
             var buttonHeight = (buttonAreaHeight - (buttonSpacing * (connections.Count - 1))) / connections.Count;
             buttonHeight = Math.Max(16.0f * canvasScaleY, buttonHeight);
 
             // Draw title
-            var titleText = !string.IsNullOrWhiteSpace(instance.SymbolChild.Name)
+            /*var titleText = !string.IsNullOrWhiteSpace(instance.SymbolChild.Name)
                 ? $"{instance.SymbolChild.Name}: {currentValue}"
-                : $"PickTexture: {currentValue}";
+                : $"PickTexture: {currentValue}";*/
 
-            var titlePos = workingRect.Min + new Vector2(2.0f * canvasScaleY, 2.0f * canvasScaleY);
-            drawList.AddText(font, font.FontSize, titlePos, labelColor, titleText);
+            //var titlePos = workingRect.Min + new Vector2(margin*.5f, 2.0f * canvasScaleY);
+            //drawList.AddText(font, font.FontSize, titlePos, labelColor, titleText);
 
             // Draw buttons
-            var buttonTop = workingRect.Min.Y + titleHeight;
+            var buttonTop = workingRect.Min.Y;
             var buttonLeft = workingRect.Min.X;
             var buttonWidth = workingRect.GetWidth();
             //buttonWidth -= 5.0f * canvasScaleY; // reserve space for the animated icon
@@ -114,39 +114,43 @@ internal static class PickTextureUi
                 }
                 else if (isHovered && !data.Index.HasInputConnections)
                 {
-                    buttonColor = UiColors.BackgroundHover;
+                    buttonColor = UiColors.BackgroundActive.Fade(0.3f);
                 }
                 else
                 {
-                    buttonColor = UiColors.BackgroundButton;
+                    buttonColor = UiColors.BackgroundButton.Fade(0.7f);
                 }
 
                 // Draw button background
                 drawList.AddRectFilled(buttonRect.Min, buttonRect.Max, buttonColor);
                 // drawList.AddRect(buttonRect.Min, buttonRect.Max, UiColors.Text, 0.0f, ImDrawFlags.None, 1.0f);
-
+              
+                
                 // Draw button text (left-aligned)
-                var textPadding = 8.0f * canvasScaleY;
-                var textPos = new Vector2(buttonRect.Min.X + textPadding, buttonRect.GetCenter().Y - font.FontSize / 2);
-                drawList.AddText(font, font.FontSize, textPos, labelColor, label);
+                var textPadding = 4.0f * canvasScaleY;
+                var textPos = new Vector2(buttonRect.Min.X + textPadding, buttonRect.GetCenter().Y - fontSize / 2);
+                drawList.AddText(font, fontSize, textPos, labelColor, label);
 
                 // Handle click
                 if (isHovered && ImGui.IsMouseClicked(ImGuiMouseButton.Left) && !data.Index.HasInputConnections)
                 {
-                    data.Index.TypedInputValue.Value = i;
+                    data.Index.SetTypedInputValue(i);
                     data.Index.DirtyFlag.ForceInvalidate();
                 }
-            }     
+
+                // Draw multi-input region indicator
+                DrawMultiInputRegion(drawList, workingRect, connections.Count, canvasScaleY);
+            }
         }
         else
         {
             // No connections - just show title
             var titleText = !string.IsNullOrWhiteSpace(instance.SymbolChild.Name)
                 ? instance.SymbolChild.Name
-                : $"PickTexture: {currentValue}";
+                : $"PickTexture";
 
             var titlePos = screenRect.Min + new Vector2(8.0f * canvasScaleY, 8.0f * canvasScaleY);
-            drawList.AddText(font, font.FontSize, titlePos, labelColor, titleText);
+            drawList.AddText(font, fontSize, titlePos, labelColor, titleText);
         }
 
         ImGui.PopClipRect();
@@ -156,5 +160,23 @@ internal static class PickTextureUi
              | OpUi.CustomUiResult.PreventInputLabels
              | OpUi.CustomUiResult.AllowThumbnail
              | OpUi.CustomUiResult.PreventTooltip;
+    }
+
+    private static void DrawMultiInputRegion(ImDrawListPtr drawList, ImRect workingRect, int connectionCount, float canvasScaleY)
+    {
+        var color = UiColors.BackgroundActive;
+
+        var regionLeft = workingRect.Min.X - 4.0f * canvasScaleY;
+        var regionTop = workingRect.Min.Y - 4.0f * canvasScaleY;
+        var regionWidth = 4.0f * canvasScaleY;
+        var regionHeight = workingRect.GetHeight() + 8 * canvasScaleY;
+
+        // Define quad points directly without offsets
+        var p1 = new Vector2(regionLeft, regionTop);                    // Top-left
+        var p2 = new Vector2(regionLeft + regionWidth, regionTop + regionWidth); // Top-right (diagonal)
+        var p3 = new Vector2(regionLeft + regionWidth, regionTop + regionHeight - regionWidth); // Bottom-right (diagonal)
+        var p4 = new Vector2(regionLeft, regionTop + regionHeight);     // Bottom-left
+
+        drawList.AddQuadFilled(p1, p2, p3, p4, color);
     }
 }
