@@ -43,6 +43,8 @@ cbuffer Params : register(b1)
 {
     float4 Color;
     float Size;
+    float ScaleFactor;
+    float UsePointScale;
     float AlphaCutOff;
 };
 
@@ -53,7 +55,7 @@ struct psInput
     float4 color : COLOR;
 };
 
-StructuredBuffer<LegacyPoint> Points : t0;
+StructuredBuffer<Point> Points : t0;
 StructuredBuffer<SpriteDef> Sprites : t1;
 Texture2D<float4> fontTexture : register(t2);
 sampler texSampler : register(s0);
@@ -72,10 +74,19 @@ psInput vsMain(uint id: SV_VertexID)
 
     SpriteDef sprite = Sprites[spriteIndex];
 
-    LegacyPoint p = Points[entryIndex];
+    Point p = Points[entryIndex];
 
     float3 quadCorners = Quad[vertexIndex];
-    float3 posInObject =  (-float3(sprite.Pivot, 0) + quadCorners * float3(sprite.Size,0)) * Size * p.W;
+
+    float sizeFxFactor = ScaleFactor == 0
+                             ? 1
+                         : (ScaleFactor == 1) ? p.FX1
+                                          : p.FX2;
+
+    float3 s = Size * sizeFxFactor * (UsePointScale ? p.Scale : 1);
+
+
+    float3 posInObject =  (-float3(sprite.Pivot, 0) + quadCorners * float3(sprite.Size,0)) * s;
 
     float4x4 orientationMatrix = transpose(qToMatrix(p.Rotation));
     posInObject = mul( float4(posInObject.xyz, 1), orientationMatrix);
@@ -87,8 +98,8 @@ psInput vsMain(uint id: SV_VertexID)
 
     float4 uv = float4(sprite.UvMin, sprite.UvMax) * UV[vertexIndex];
     output.texCoord =  uv.xy + uv.zw;
-
-    output.color = sprite.Color * Color;
+  
+    output.color =  Color * p.Color;
     return output;
 }
 

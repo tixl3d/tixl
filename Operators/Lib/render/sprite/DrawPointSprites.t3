@@ -6,6 +6,10 @@
       "DefaultValue": null
     },
     {
+      "Id": "12e1244c-efb7-4bfd-a13c-f94552f153ca"/*UsePointScale*/,
+      "DefaultValue": false
+    },
+    {
       "Id": "32a76e06-db29-40e0-9a4e-29ad88c2f62b"/*Points*/,
       "DefaultValue": null
     },
@@ -16,6 +20,10 @@
     {
       "Id": "9df7e923-76d2-4e98-af72-3a73b47de960"/*EnableDepthWrite*/,
       "DefaultValue": true
+    },
+    {
+      "Id": "c0fdacd9-a887-488a-842d-46d015dae0bb"/*ScaleFactor*/,
+      "DefaultValue": 0
     },
     {
       "Id": "c694946c-37b6-4792-8fc5-4204ede69f90"/*Color*/,
@@ -41,13 +49,19 @@
   ],
   "Children": [
     {
+      "Id": "15573550-5cdc-4119-8a6b-06f624cbebd9"/*BoolToFloat*/,
+      "SymbolId": "9db2fcbf-54b9-4222-878b-80d1a0dc6edf",
+      "InputValues": [],
+      "Outputs": []
+    },
+    {
       "Id": "1ad36aab-2d27-4cbe-8449-51a0cd143d6c"/*PixelShader*/,
       "SymbolId": "f7c625da-fede-4993-976c-e259e0ee4985",
       "InputValues": [
         {
           "Id": "24646f06-1509-43ce-94c6-eeb608ad97cd"/*Source*/,
           "Type": "System.String",
-          "Value": "Resources\\lib\\points\\draw\\DrawPointSprites.hlsl"
+          "Value": "Resources/lib/points/draw/DrawPointSprites.hlsl"
         },
         {
           "Id": "501338b3-f432-49a5-bdbd-bcf209671305"/*EntryPoint*/,
@@ -87,7 +101,7 @@
         {
           "Id": "78fb7501-74d9-4a27-8db2-596f25482c87"/*Source*/,
           "Type": "System.String",
-          "Value": "Resources\\lib\\points\\draw\\DrawPointSprites.hlsl"
+          "Value": "Resources/lib/points/draw/DrawPointSprites.hlsl"
         },
         {
           "Id": "9a8b500e-c3b1-4be1-8270-202ef3f90793"/*EntryPoint*/,
@@ -146,6 +160,12 @@
     {
       "Id": "714f9654-bb6a-4e71-ac11-7768378ec8f1"/*GetSRVProperties*/,
       "SymbolId": "bc489196-9a30-4580-af6f-dc059f226da1",
+      "InputValues": [],
+      "Outputs": []
+    },
+    {
+      "Id": "8474e781-a09a-4672-818f-33a817377116"/*IntToFloat*/,
+      "SymbolId": "17db8a36-079d-4c83-8a2a-7ea4c1aa49e6",
       "InputValues": [],
       "Outputs": []
     },
@@ -311,6 +331,12 @@
     },
     {
       "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "SourceSlotId": "12e1244c-efb7-4bfd-a13c-f94552f153ca",
+      "TargetParentOrChildId": "15573550-5cdc-4119-8a6b-06f624cbebd9",
+      "TargetSlotId": "253b9ae4-fac5-4641-bf0c-d8614606a840"
+    },
+    {
+      "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
       "SourceSlotId": "d815c639-d412-4266-81df-f5889a87b4f6",
       "TargetParentOrChildId": "1e3c26d6-5361-499d-a70e-4522ae42bd85",
       "TargetSlotId": "7a13b834-21e5-4cef-ad5b-23c3770ea763"
@@ -406,6 +432,12 @@
       "TargetSlotId": "e79473f4-3fd2-467e-acda-b27ef7dae6a9"
     },
     {
+      "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "SourceSlotId": "c0fdacd9-a887-488a-842d-46d015dae0bb",
+      "TargetParentOrChildId": "8474e781-a09a-4672-818f-33a817377116",
+      "TargetSlotId": "01809b63-4b4a-47be-9588-98d5998ddb0c"
+    },
+    {
       "SourceParentOrChildId": "b8261969-053f-4395-a68d-39b989814bce",
       "SourceSlotId": "26e300cd-2dbe-49f2-aab5-a60317df5434",
       "TargetParentOrChildId": "aaba3876-2637-4ad1-9684-5f012b4e922d",
@@ -450,6 +482,18 @@
     {
       "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
       "SourceSlotId": "cf7692c9-d6bd-4e93-b89c-14ab507b6da5",
+      "TargetParentOrChildId": "cc734264-2109-4fa1-a0cf-e4a502329ef3",
+      "TargetSlotId": "49556d12-4cd1-4341-b9d8-c356668d296c"
+    },
+    {
+      "SourceParentOrChildId": "8474e781-a09a-4672-818f-33a817377116",
+      "SourceSlotId": "db1073a1-b9d8-4d52-bc5c-7ae8c0ee1ac3",
+      "TargetParentOrChildId": "cc734264-2109-4fa1-a0cf-e4a502329ef3",
+      "TargetSlotId": "49556d12-4cd1-4341-b9d8-c356668d296c"
+    },
+    {
+      "SourceParentOrChildId": "15573550-5cdc-4119-8a6b-06f624cbebd9",
+      "SourceSlotId": "f0321a54-e844-482f-a161-7f137abc54b0",
       "TargetParentOrChildId": "cc734264-2109-4fa1-a0cf-e4a502329ef3",
       "TargetSlotId": "49556d12-4cd1-4341-b9d8-c356668d296c"
     },

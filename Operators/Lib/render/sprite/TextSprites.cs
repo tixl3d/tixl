@@ -229,7 +229,7 @@ internal sealed class TextSprites : Instance<TextSprites>
                                 Orientation = Quaternion.Identity,
                                 F2 = 1,
                                 Scale = Vector3.One,
-                                Color = Vector4.One,
+                                Color = color,
                             });
             outputIndex++;
             currentLineCharacterCount++;

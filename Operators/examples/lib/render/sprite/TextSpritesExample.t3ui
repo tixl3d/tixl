@@ -1,0 +1,302 @@
+{
+  "Id": "23cb02f6-6622-47ef-8772-4fe5ae1d09dc"/*TextSpritesExample*/,
+  "Description": "",
+  "InputUis": [
+    {
+      "InputId": "76724dd9-ddfb-4dce-bcda-90a397f2316c"/*String*/,
+      "Position": {
+        "X": -231.33487,
+        "Y": 522.9679
+      },
+      "Usage": "Multiline"
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "005a7e2a-c143-4f3b-8359-851707535aca"/*AnimValue*/,
+      "Position": {
+        "X": 1160.349,
+        "Y": 143.85223
+      }
+    },
+    {
+      "ChildId": "04ac75ea-2e8e-4258-80ab-7f5d8dc3f10e"/*TextSprites*/,
+      "Position": {
+        "X": 118.74817,
+        "Y": 646.9265
+      }
+    },
+    {
+      "ChildId": "23105735-6642-4924-a536-f0fc300c8f2f"/*LinearGradient*/,
+      "Position": {
+        "X": 1300.349,
+        "Y": 108.852234
+      }
+    },
+    {
+      "ChildId": "2635786d-268b-4532-b058-d279982b0d9e"/*Ease*/,
+      "Position": {
+        "X": 518.339,
+        "Y": 420.9843
+      }
+    },
+    {
+      "ChildId": "269e35f0-bf9c-43f8-bbee-998b0eb6af3c"/*SequenceAnim*/,
+      "Position": {
+        "X": 1140.0402,
+        "Y": 209.81525
+      }
+    },
+    {
+      "ChildId": "2bffe2bc-1070-4003-ab65-ff96e7e2319b"/*RandomizePoints*/,
+      "Position": {
+        "X": 516.35315,
+        "Y": 210.8327
+      }
+    },
+    {
+      "ChildId": "2c5ac424-2244-4d3c-ae43-35ca3c2967f3"/*Execute*/,
+      "Position": {
+        "X": 1556.7045,
+        "Y": 370.66205
+      }
+    },
+    {
+      "ChildId": "3772c28f-2de6-49f5-bcf2-4ef24a418088"/*Layer2d*/,
+      "Position": {
+        "X": 1249.5638,
+        "Y": 832.095
+      }
+    },
+    {
+      "ChildId": "437269f4-142e-49a8-b73d-132f4c5cb3c9"/*SetPointAttributes*/,
+      "Position": {
+        "X": 376.35315,
+        "Y": 210.8327
+      }
+    },
+    {
+      "ChildId": "4b88204e-002e-4a81-a169-a7bd3205aaf3"/*Remap*/,
+      "Position": {
+        "X": 540.7679,
+        "Y": 652.84924
+      }
+    },
+    {
+      "ChildId": "5146a2cc-aa20-4778-8332-6eaa01e03721"/*BlendPoints*/,
+      "Position": {
+        "X": 704.1522,
+        "Y": 164.74774
+      }
+    },
+    {
+      "ChildId": "56ba6309-5fda-4ebe-99b5-e458bf3cfcbe"/*Clamp*/,
+      "Position": {
+        "X": 1140.0402,
+        "Y": 314.81525
+      }
+    },
+    {
+      "ChildId": "5ae5fcae-4e11-4563-918a-abf0b755e3ae"/*ShardNoise*/,
+      "Position": {
+        "X": 1051.4956,
+        "Y": 827.92114
+      }
+    },
+    {
+      "ChildId": "60cdf194-7aea-4e35-9a71-364a133c2d98"/*LinearGradient*/,
+      "Position": {
+        "X": 706.2923,
+        "Y": 498.8756
+      }
+    },
+    {
+      "ChildId": "733799c1-5c6b-477d-8ebd-37ddaf536947"/*Time*/,
+      "Position": {
+        "X": 376.35266,
+        "Y": 245.8327
+      }
+    },
+    {
+      "ChildId": "787c21bd-939b-4baa-b021-b44b60cc8af8"/*Layer2d*/,
+      "Position": {
+        "X": 1308.3662,
+        "Y": 358.29874
+      }
+    },
+    {
+      "ChildId": "78ca2287-f61c-4b2b-bdb2-34a5ce067d47"/*Ease*/,
+      "Position": {
+        "X": 1140.0402,
+        "Y": 279.81525
+      }
+    },
+    {
+      "ChildId": "804160cb-1a3b-47cc-8e8f-648fa75dae78"/*AnimValue*/,
+      "Position": {
+        "X": 378.339,
+        "Y": 315.9843
+      }
+    },
+    {
+      "ChildId": "9fb0168e-7518-4063-80dc-7a57c3570f65"/*PerlinNoise3*/,
+      "Position": {
+        "X": 184.21936,
+        "Y": 143.85223
+      }
+    },
+    {
+      "ChildId": "a9ae5123-055f-4c14-b8c6-755283b913e5"/*RenderTarget*/,
+      "Position": {
+        "X": 1556.7045,
+        "Y": 440.66205
+      }
+    },
+    {
+      "ChildId": "a9d4dcf3-6cb7-4c3e-9694-80000d7afd2f"/*Gradient*/,
+      "Position": {
+        "X": 541.78156,
+        "Y": 496.9403
+      }
+    },
+    {
+      "ChildId": "aff24697-3cef-40d0-93f1-aa05763cb010"/*RadialGradient*/,
+      "Position": {
+        "X": 1308.3662,
+        "Y": 288.29874
+      }
+    },
+    {
+      "ChildId": "b3c090c6-7b56-417c-b3a1-1505720c8b7a"/*Time*/,
+      "Position": {
+        "X": 911.4956,
+        "Y": 862.92114
+      }
+    },
+    {
+      "ChildId": "be4c7f0d-0977-4b6e-a1a7-ebc7450bf3bf"/*Clamp*/,
+      "Position": {
+        "X": 540.7679,
+        "Y": 617.84924
+      }
+    },
+    {
+      "ChildId": "d135a9f8-ec75-4777-8322-38f3677bbf4c"/*ToggleBoolean*/,
+      "Position": {
+        "X": 518.339,
+        "Y": 350.9843
+      }
+    },
+    {
+      "ChildId": "d1daa0a7-2b0f-4a3d-be43-447178066582"/*TransformPoints*/,
+      "Position": {
+        "X": 324.21936,
+        "Y": 108.852234
+      }
+    },
+    {
+      "ChildId": "d8f7ae5b-ccfa-426f-af12-67a6c463b5bc"/*RenderTarget*/,
+      "Position": {
+        "X": 1075.5183,
+        "Y": 690.9606
+      }
+    },
+    {
+      "ChildId": "dd96d6ae-481e-44c8-b745-db810f3604aa"/*AnimValue*/,
+      "Position": {
+        "X": 540.7679,
+        "Y": 582.84924
+      }
+    },
+    {
+      "ChildId": "e400b14a-dc12-4d50-9646-f2be2184598d"/*DrawPointSprites*/,
+      "Position": {
+        "X": 889.15,
+        "Y": 613.9983
+      }
+    },
+    {
+      "ChildId": "e5febe69-e793-4e76-aab3-32d8df9d6dc1"/*BoolToFloat*/,
+      "Position": {
+        "X": 518.339,
+        "Y": 385.9843
+      }
+    },
+    {
+      "ChildId": "e6bd39c6-af24-4635-8ebb-3d456f4bbc58"/*LightRaysFx*/,
+      "Position": {
+        "X": 1249.5638,
+        "Y": 762.095
+      }
+    },
+    {
+      "ChildId": "eaa75dff-66a5-449b-8610-e2a7089beb1c"/*Pixelate*/,
+      "Position": {
+        "X": 1300.349,
+        "Y": 178.85223
+      }
+    },
+    {
+      "ChildId": "f3108f0e-f3bf-4823-9870-8caf147f62b5"/*LinearSamplePointAttributes*/,
+      "Position": {
+        "X": 888.16797,
+        "Y": 465.93848
+      }
+    },
+    {
+      "ChildId": "f86279e5-2348-4671-8788-68f7933165e4"/*Remap*/,
+      "Position": {
+        "X": 1140.0402,
+        "Y": 244.81525
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "acdedfe5-7a22-4ccd-82bc-61628b3eecf7"/*ColorBuffer*/,
+      "Position": {
+        "X": 1696.7045,
+        "Y": 440.66205
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "1872d1bf-d926-453f-b150-4672ba07ffde",
+      "Title": "Allows to take advantage of the points attribute to animate Text",
+      "Label": "TextSprites",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 81.83792,
+        "Y": -11.147766
+      },
+      "Size": {
+        "X": 977.31213,
+        "Y": 808.997
+      }
+    },
+    {
+      "Id": "aa8d18fc-0300-4f9e-bb65-ab9dd2c0ea8b",
+      "Label": "Background",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1080.0402,
+        "Y": -11.147766
+      },
+      "Size": {
+        "X": 398.32605,
+        "Y": 514.44653
+      }
+    }
+  ]
+}
