@@ -1,0 +1,229 @@
+{
+  "Id": "17a48029-6144-4c79-80f1-a53c87cadd33"/*DisplaceMeshVAT*/,
+  "Description": "VAT stands for Vertex Animation Texture. \nThe animation is stored in textures.",
+  "InputUis": [
+    {
+      "InputId": "0a07ec19-0623-4240-9354-1b49383fda86"/*SplitMesh*/,
+      "Position": {
+        "X": -184.10052,
+        "Y": 985.9936
+      }
+    },
+    {
+      "InputId": "480ec4b2-558a-4a64-8a53-55ce1bdcfc18"/*UVOffset*/,
+      "Position": {
+        "X": -184.10052,
+        "Y": 685.9936
+      }
+    },
+    {
+      "InputId": "bae99b0d-70e5-4f34-a052-5ae133bf9fcb"/*RecomputeNormal*/,
+      "Position": {
+        "X": -184.10052,
+        "Y": 910.9936
+      }
+    },
+    {
+      "InputId": "e11db6b9-6217-4c76-9ef2-6bd609f0a79a"/*Normal*/,
+      "Position": {
+        "X": -184.10052,
+        "Y": 835.9936
+      }
+    },
+    {
+      "InputId": "e5c52d40-1d93-40a8-b430-868ff4c77107"/*InputMesh*/,
+      "Position": {
+        "X": -184.10052,
+        "Y": 610.9936
+      }
+    },
+    {
+      "InputId": "f4593d23-e4ca-44b0-85e5-4a0038c450a0"/*Texture*/,
+      "Position": {
+        "X": -184.10052,
+        "Y": 760.9936
+      }
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "001caa7a-7640-4354-8639-d8ae91ca2623"/*Vector2Components*/,
+      "Position": {
+        "X": 517.92395,
+        "Y": 908.16296
+      }
+    },
+    {
+      "ChildId": "14bf5436-c756-4ea0-8f57-b6006d45cb42"/*TransformsConstBuffer*/,
+      "Position": {
+        "X": 711.48376,
+        "Y": 1020.2407
+      }
+    },
+    {
+      "ChildId": "180b903b-4275-4c54-b4b9-0eecd7ed0932"/*RecomputeNormals*/,
+      "Position": {
+        "X": 1862.0299,
+        "Y": 867.1386
+      }
+    },
+    {
+      "ChildId": "2516fa2d-814f-421d-bb75-10b0a1ad76a4"/*FloatsToBuffer*/,
+      "Position": {
+        "X": 710.5575,
+        "Y": 905.1886
+      }
+    },
+    {
+      "ChildId": "4c71c626-bd54-4439-af00-21b3a6098aac"/*GetBufferComponents*/,
+      "Position": {
+        "X": 708.81274,
+        "Y": 1288.1453
+      }
+    },
+    {
+      "ChildId": "4f42c386-55ee-43c7-b454-c4fe9badad4d"/*BoolToInt*/,
+      "Position": {
+        "X": 243.98328,
+        "Y": 1037.072
+      }
+    },
+    {
+      "ChildId": "6b2ab656-23a9-4d42-859e-2eaede1d1849"/*StructuredBufferWithViews*/,
+      "Position": {
+        "X": 514.208,
+        "Y": 1335.4319
+      }
+    },
+    {
+      "ChildId": "875e2b57-44c2-4135-ab14-99ebb1d09fe9"/*PickMeshBuffer*/,
+      "Position": {
+        "X": 1712.0299,
+        "Y": 867.1386
+      }
+    },
+    {
+      "ChildId": "87dd2980-5eeb-436f-b721-f2896bc4d8f4"/*ComputeShader*/,
+      "Position": {
+        "X": 474.7782,
+        "Y": 665.1739
+      }
+    },
+    {
+      "ChildId": "8ef1eb50-057a-4f27-9d02-aae1feabfa44"/*ComputeShaderStage*/,
+      "Position": {
+        "X": 1066.4819,
+        "Y": 776.73676
+      }
+    },
+    {
+      "ChildId": "96c67456-15b6-4f90-a005-2bc8c63a7fe6"/*SplitMeshVertices*/,
+      "Position": {
+        "X": 1567.3207,
+        "Y": 898.9151
+      }
+    },
+    {
+      "ChildId": "98757440-9472-4de8-ae4e-2fe4068e2445"/*IntValue*/,
+      "Position": {
+        "X": 364.208,
+        "Y": 1335.4319
+      }
+    },
+    {
+      "ChildId": "9d7ae57f-b6fb-416f-b6b8-ac626a58a245"/*_AssembleMeshBuffers*/,
+      "Position": {
+        "X": 1393.8844,
+        "Y": 792.3953
+      }
+    },
+    {
+      "ChildId": "a9635c29-c5f3-45fd-a38c-7af9dc35f2fa"/*ExecuteBufferUpdate*/,
+      "Position": {
+        "X": 1216.4819,
+        "Y": 776.73676
+      }
+    },
+    {
+      "ChildId": "b17d3da1-be24-4ebe-a4ec-798b0640cd9c"/*CalcDispatchCount*/,
+      "Position": {
+        "X": 710.5575,
+        "Y": 706.1886
+      }
+    },
+    {
+      "ChildId": "bb73624c-0926-412e-a3f4-7a70965fb0e2"/*BoolToInt*/,
+      "Position": {
+        "X": 243.98328,
+        "Y": 1093.072
+      }
+    },
+    {
+      "ChildId": "bd0a8fa4-9555-45e9-bc72-7d56c3752b7e"/*PickMeshBuffer*/,
+      "Position": {
+        "X": 2044.5876,
+        "Y": 784.67346
+      }
+    },
+    {
+      "ChildId": "c414ff17-3db2-4e4d-96da-8f376f37e26c"/*SrvFromTexture2d*/,
+      "Position": {
+        "X": 710.5575,
+        "Y": 831.1886
+      }
+    },
+    {
+      "ChildId": "cdc20ff0-ce8b-48c2-a33c-2741f0d72e55"/*SrvFromTexture2d*/,
+      "Position": {
+        "X": 710.5575,
+        "Y": 775.1886
+      }
+    },
+    {
+      "ChildId": "da8dde48-ba3d-40cb-aef9-475b382bf600"/*GetBufferComponents*/,
+      "Position": {
+        "X": 224.20801,
+        "Y": 1265.4319
+      }
+    },
+    {
+      "ChildId": "ddce8b41-15c8-4b91-a7a4-733a94c59fca"/*_MeshBufferComponents*/,
+      "Position": {
+        "X": 39.532074,
+        "Y": 1380.349
+      }
+    },
+    {
+      "ChildId": "e52e4417-d854-4642-b8dd-2a8c95d466e5"/*SamplerState*/,
+      "Position": {
+        "X": 712.4555,
+        "Y": 1069.6646
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "df640cce-fb6f-46fe-962d-ffafd80a954d"/*Result*/,
+      "Position": {
+        "X": 2242.5437,
+        "Y": 667.0925
+      }
+    }
+  ],
+  "Links": [
+    {
+      "Id": "167ebd6e-ae37-4dbc-9fdd-6bb2057ea31b",
+      "Title": "Export VAT to DDS",
+      "Description": "allows to export textures as DDS, DXGI format:  R16G16B16A16_FLOAT (because DDS supports negative color values)",
+      "LinkUrl": "https://github.com/matyalatte/Blender-DDS-Addon",
+      "LinkType": "Other"
+    },
+    {
+      "Id": "e619190e-4481-4052-a131-2edd9e9f4a7a",
+      "Title": "Blender addon to generate VAT",
+      "Description": "generates the uvmap and textures for vertex displacement.",
+      "LinkUrl": "https://github.com/JoshRBogart/unreal_tools",
+      "LinkType": "Other"
+    }
+  ]
+}
