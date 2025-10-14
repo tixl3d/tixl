@@ -182,7 +182,7 @@ float4 psMain(vsOutput psInput) : SV_TARGET
     float4 textureValue = inputTexture.SampleLevel(texSampler, sampleUV, 0);
     textureValue.rgb = textureValue.rgb*FxTextureBlend;
 
-    worleyValue = ApplyGainAndBias(worleyValue, GainAndBias.x, GainAndBias.y );
+    worleyValue = ApplyGainAndBias(worleyValue, GainAndBias);
     
     float4 worleyNoise = lerp(ColorB, ColorA, clamp(worleyValue, Clamping.x, Clamping.y));
  
