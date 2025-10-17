@@ -14,16 +14,16 @@
     {
       "InputId": "46d76d8a-5fb6-4138-a88b-950a2e5b8529"/*QualityFactor*/,
       "Position": {
-        "X": 574.45807,
-        "Y": 1260.3137
+        "X": 297.4892,
+        "Y": 1345.1274
       },
       "Description": "A factor that is applied to the sample count for the different roughness levels.\nWhen enabling Live update this has significant(!) impact on your rendering performance, so turn this down until the artifacts are noticable."
     },
     {
       "InputId": "486f4f09-2e4e-43b8-bfbc-2722e77d5dbd"/*Orientation*/,
       "Position": {
-        "X": 574.45807,
-        "Y": 1335.3137
+        "X": 129.08041,
+        "Y": 546.8303
       }
     },
     {
@@ -59,8 +59,8 @@
     {
       "InputId": "71c54c8e-a95f-47e8-b126-0cdaa89ae49b"/*Exposure*/,
       "Position": {
-        "X": 775.7092,
-        "Y": 1066.7955
+        "X": -51.30281,
+        "Y": 1070.1595
       },
       "Description": "Defines the intensity with which the scene is illuminated by the image.\n\nIf changing this value has no effect temporarily turn on and off the \"UpdateLive\" setting.\n"
     },
@@ -79,8 +79,8 @@
     {
       "InputId": "c3c815fa-8672-4d99-99a7-986844f2fc45"/*UpdateLive*/,
       "Position": {
-        "X": 358.13943,
-        "Y": 1135.6758
+        "X": 297.4892,
+        "Y": 1164.3557
       },
       "Description": "Refreshes any changes to the image and exposure settings. This can be kept turned on but will significantly decrease rendering performance.\n\nIf turned on this allows animated \"Exposure\" values and live changes in the incoming image.",
       "AddPadding": "True"
@@ -105,8 +105,8 @@
     {
       "ChildId": "18221d8e-7d80-4258-9a21-23acf7a77206"/*SamplerState*/,
       "Position": {
-        "X": 775.7092,
-        "Y": 1101.7955
+        "X": 795.6145,
+        "Y": 1091.4104
       }
     },
     {
@@ -126,15 +126,22 @@
     {
       "ChildId": "21e433dd-ce81-43a7-9d6c-27b94c067d69"/*BoolToFloat*/,
       "Position": {
-        "X": 574.45807,
-        "Y": 1295.3137
+        "X": 545.03296,
+        "Y": 1382.7236
       }
     },
     {
       "ChildId": "335c2a99-4955-4e1a-8de0-d4cdab570928"/*VertexShader*/,
       "Position": {
-        "X": 775.7092,
-        "Y": 926.79553
+        "X": 795.6145,
+        "Y": 916.4103
+      }
+    },
+    {
+      "ChildId": "407c6b3c-b0ea-47ba-bfe0-6946cd4c24a9"/*Any*/,
+      "Position": {
+        "X": 685.03296,
+        "Y": 1156.8344
       }
     },
     {
@@ -147,15 +154,15 @@
     {
       "ChildId": "5254b03f-0846-458e-add4-340c1afb6552"/*PickTexture*/,
       "Position": {
-        "X": 1089.8207,
-        "Y": 585.0
+        "X": 1095.3191,
+        "Y": 588.2991
       }
     },
     {
       "ChildId": "57d70a8c-f7e8-4529-b4b4-51a8f06bf6db"/*Multiply*/,
       "Position": {
-        "X": 714.45807,
-        "Y": 1260.3137
+        "X": 685.03296,
+        "Y": 1347.7236
       }
     },
     {
@@ -168,22 +175,43 @@
     {
       "ChildId": "66262d33-299d-4752-beb5-845123b5593e"/*BoolToInt*/,
       "Position": {
-        "X": 949.82074,
-        "Y": 690.0
+        "X": 915.7092,
+        "Y": 673.6948
+      }
+    },
+    {
+      "ChildId": "7380e25f-5b8f-4eb5-a4c9-fd015333ac40"/*HasValueChanged*/,
+      "Position": {
+        "X": 545.03296,
+        "Y": 1191.8344
+      }
+    },
+    {
+      "ChildId": "75422e03-5c17-45b7-80d9-8b1d02da87ba"/*HasValueChanged*/,
+      "Position": {
+        "X": 545.03296,
+        "Y": 1261.8344
       }
     },
     {
       "ChildId": "7eb179ca-b424-4a82-9ed6-74999a732dda"/*PixelShader*/,
       "Position": {
-        "X": 775.7092,
-        "Y": 996.79553
+        "X": 795.6145,
+        "Y": 986.4103
+      }
+    },
+    {
+      "ChildId": "7fae9920-a190-43bf-85ab-a03e0da4da19"/*HasValueChanged*/,
+      "Position": {
+        "X": 545.03296,
+        "Y": 1226.8344
       }
     },
     {
       "ChildId": "9457bffd-906c-406e-824f-87665c3894d2"/*BoolToInt*/,
       "Position": {
         "X": 418.4124,
-        "Y": 959.7184
+        "Y": 994.7184
       }
     },
     {
@@ -210,8 +238,8 @@
     {
       "ChildId": "c3cd2794-e1d9-4fc7-a24e-5b32285d990d"/*SrvFromTexture2d*/,
       "Position": {
-        "X": 775.7092,
-        "Y": 1031.7955
+        "X": 795.6145,
+        "Y": 1021.4103
       }
     },
     {
@@ -222,15 +250,15 @@
         "Y": 166.0
       },
       "Position": {
-        "X": 915.7092,
-        "Y": 891.79553
+        "X": 935.6145,
+        "Y": 881.4103
       }
     },
     {
       "ChildId": "c939be06-8698-493f-802d-646663b52d3a"/*GeometryShader*/,
       "Position": {
-        "X": 775.7092,
-        "Y": 961.79553
+        "X": 795.6145,
+        "Y": 951.4103
       }
     },
     {
@@ -250,8 +278,8 @@
     {
       "ChildId": "d97ed28e-9228-401c-916a-254cc67718a9"/*LoadImage*/,
       "Position": {
-        "X": 600.45544,
-        "Y": 343.2203
+        "X": 544.01776,
+        "Y": 350.4251
       }
     },
     {
@@ -271,8 +299,8 @@
     {
       "ChildId": "f57e04d0-e64e-46e2-ae74-e15502303269"/*TextureToCubeMap*/,
       "Position": {
-        "X": 740.45544,
-        "Y": 343.2203
+        "X": 684.01776,
+        "Y": 350.4251
       }
     },
     {
