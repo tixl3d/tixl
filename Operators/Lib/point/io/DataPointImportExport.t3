@@ -1,0 +1,27 @@
+{
+  "Id": "d4e5f6a7-b8c9-4d0e-1f2a-9b8c7d6e5f4a"/*DataPointImportExport*/,
+  "Inputs": [
+    {
+      "Id": "27320742-221f-4383-8241-995083c87b8b"/*PointBufferIn*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "3e5b7c7d-8a9f-4b1e-9c2d-3e4f5a6b7c8d"/*ExportFilePath*/,
+      "DefaultValue": "pointexport.json"
+    },
+    {
+      "Id": "a6b7c8d9-e0f1-4a2b-8c3d-4e5f6a7b8c9d"/*Import*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "b7c8d9e0-f1a2-4b3c-9d4e-5f6a7b8c9d0e"/*Export*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "f8d41a2a-4c27-4a52-a0a2-1304cb04b80f"/*ImportFilePath*/,
+      "DefaultValue": "pointexport.json"
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}
