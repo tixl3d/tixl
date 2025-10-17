@@ -1,20 +1,22 @@
 {
   "Id": "d9a7233d-5d03-4268-a58b-465972852a5b"/*VideoStreamInput*/,
-  "Description": "",
+  "Description": "Receives a video stream from a network source.\n\nThis operator connects to a network video stream (e.g., RTSP, HTTP, RTMP) and provides the video as a texture. It is useful for bringing in live feeds from IP cameras, streaming servers, or other network video sources.\n\nTips:\n- Use the `Connect` toggle to start and stop receiving the stream.\n- If the stream is interrupted, use the `Reconnect` trigger to try and establish the connection again.\n- The `Status` output provides valuable information for debugging connection issues.\n\nAKA: video stream, rtsp, rtmp, http, ip camera, network video",
   "InputUis": [
     {
       "InputId": "2e26e552-68d7-4e2f-8208-831f2a75c96b"/*Connect*/,
       "Position": {
         "X": -200.0,
         "Y": 75.0
-      }
+      },
+      "Description": "Starts or stops the connection to the video stream."
     },
     {
       "InputId": "9a240243-71b5-4235-86a9-d5369a3311a9"/*Reconnect*/,
       "Position": {
         "X": -200.0,
         "Y": 150.0
-      }
+      },
+      "Description": "A trigger to force a reconnection to the video stream."
     },
     {
       "InputId": "a8b0971b-94cb-4c3d-932d-337581b8d83a"/*Url*/,
@@ -22,7 +24,8 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "Usage": "Default"
+      "Usage": "Default",
+      "Description": "The URL of the network video stream (e.g., rtsp://192.168.1.100/stream1)."
     }
   ],
   "SymbolChildUis": [],

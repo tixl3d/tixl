@@ -1,13 +1,14 @@
 {
   "Id": "34e4e63b-2708-4673-b682-1d07d0245e1e"/*UDPOutput*/,
-  "Description": "",
+  "Description": "Sends data to the network using the UDP (User Datagram Protocol).\n\nThis operator sends UDP packets to a specified IP address and port. UDP is a connectionless protocol, which is fast but does not guarantee the delivery or order of messages. Messages can be constructed from multiple parts.\n\nTips:\n- Use `SendOnChange` to automatically send data when `MessageParts` changes.\n- Use `SendTrigger` for manual control over sending messages.\n- To broadcast to all devices on the local network, use a broadcast IP address like '255.255.255.255'.\n\nAKA: udp, network, socket, datagram",
   "InputUis": [
     {
       "InputId": "216a0356-ef4a-413a-a656-7497127e31d4"/*SendOnChange*/,
       "Position": {
         "X": -200.0,
         "Y": 375.0
-      }
+      },
+      "Description": "If enabled, a message is sent automatically whenever the content of `MessageParts` changes."
     },
     {
       "InputId": "24b5d450-4e83-49db-88b1-7d688e64585d"/*TargetIpAddress*/,
@@ -15,6 +16,7 @@
         "X": -200.0,
         "Y": 75.0
       },
+      "Description": "The destination IP address to send the UDP packet to (e.g., '127.0.0.1' for localhost). Use a broadcast address (e.g., '255.255.255.255') to send to all devices on the network.",
       "Usage": "Default"
     },
     {
@@ -22,7 +24,8 @@
       "Position": {
         "X": -200.0,
         "Y": 150.0
-      }
+      },
+      "Description": "The UDP port on the destination device to send messages to."
     },
     {
       "InputId": "59074d76-1f4f-406a-b512-5813f4e3420e"/*MessageParts*/,
@@ -30,6 +33,7 @@
         "X": -200.0,
         "Y": 225.0
       },
+      "Description": "A list of strings or values that will be joined together to form the message to be sent.",
       "Usage": "Default"
     },
     {
@@ -37,7 +41,8 @@
       "Position": {
         "X": -200.0,
         "Y": 525.0
-      }
+      },
+      "Description": "Initializes or re-initializes the network socket. This can be useful if network settings change."
     },
     {
       "InputId": "82933c40-da9e-4340-a227-e9bacf6e2063"/*Separator*/,
@@ -45,6 +50,7 @@
         "X": -200.0,
         "Y": 300.0
       },
+      "Description": "A string used to join the `MessageParts` together before sending.",
       "Usage": "Default"
     },
     {
@@ -53,6 +59,7 @@
         "X": -200.0,
         "Y": 0.0
       },
+      "Description": "The IP address of the network interface to send from. A dropdown shows available addresses. If left empty, the system will choose one automatically.",
       "Usage": "CustomDropdown"
     },
     {
@@ -60,14 +67,16 @@
       "Position": {
         "X": -200.0,
         "Y": 600.0
-      }
+      },
+      "Description": "If enabled, prints sent data and status information to the T3 log. Useful for debugging."
     },
     {
       "InputId": "c7ac22c0-a31e-41f6-b29d-d40956e6688b"/*SendTrigger*/,
       "Position": {
         "X": -200.0,
         "Y": 450.0
-      }
+      },
+      "Description": "A trigger to manually send the message. The message is sent when this value changes from 0 to 1."
     }
   ],
   "SymbolChildUis": [],

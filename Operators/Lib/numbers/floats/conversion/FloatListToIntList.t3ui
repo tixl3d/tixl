@@ -1,13 +1,14 @@
 {
   "Id": "de95667b-4b5e-40fc-a6d1-a672c529960e"/*FloatListToIntList*/,
-  "Description": "",
+  "Description": "Converts a list of floats to a list of integers.\n\nEach float in the input list is converted to an integer. The fractional part is truncated (e.g., 3.9 becomes 3).\n\nTips:\n- This is useful when an operator requires a list of integers, but you have a list of floats.\n\nAKA: cast, convert, float to int, float to integer, truncate",
   "InputUis": [
     {
-      "InputId": "152697b9-b4b5-454e-9cd1-3bc80e88ab5c"/*FloatList*/,
+      "InputId": "152697b9-b4b2-454e-9cd1-3bc80e88ab5c"/*FloatList*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "The list of float values to be converted."
     }
   ],
   "SymbolChildUis": [],

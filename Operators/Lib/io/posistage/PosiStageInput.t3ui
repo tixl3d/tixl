@@ -1,20 +1,22 @@
 {
   "Id": "a9e8d7c6-b5a4-4e1a-8d0f-3c5a7b9e2d1f"/*PosiStageInput*/,
-  "Description": "",
+  "Description": "Receives real-time 3D tracking data using the PosiStageNet protocol.\n\nThis operator listens for PosiStageNet (PSN) packets, which are commonly used in live events and virtual production to stream tracking data for cameras, objects, and performers.\n\nTips:\n- Ensure your tracking system is sending PSN data to the specified `MulticastIpAddress` and `Port`.\n- The output `TrackersAsBuffer` provides the raw tracking data as a structured buffer, which is efficient for use with other operators that process point data.\n- `TrackersAsDict` provides the data as a dictionary, which can be easier for inspecting and extracting specific tracker information.\n\nAKA: posistage, tracking, stage, psn, motion capture",
   "InputUis": [
     {
       "InputId": "0944714d-693d-4251-93a6-e22a2db64f20"/*Listen*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Enables or disables listening for PosiStageNet packets."
     },
     {
       "InputId": "2ebe418d-407e-46d8-b274-13b41c52accf"/*Port*/,
       "Position": {
         "X": -200.0,
         "Y": 225.0
-      }
+      },
+      "Description": "The UDP port to listen for PosiStageNet data on. The default for PSN is typically 12345."
     },
     {
       "InputId": "46c2bf8b-3e0c-4856-aa4a-32943a4b0223"/*MulticastIpAddress*/,
@@ -22,14 +24,16 @@
         "X": -200.0,
         "Y": 150.0
       },
-      "Usage": "Default"
+      "Usage": "Default",
+      "Description": "The multicast IP address to join for receiving PosiStageNet data. The default for PSN is typically 236.10.10.10."
     },
     {
       "InputId": "5e725916-4143-4759-8651-e12185c658d3"/*PrintToLog*/,
       "Position": {
         "X": -200.0,
         "Y": 300.0
-      }
+      },
+      "Description": "If enabled, prints received tracker data and status information to the T3 log. Useful for debugging."
     },
     {
       "InputId": "9e23335a-d63a-4286-930e-c63e86d0e6f0"/*LocalIpAddress*/,
@@ -37,7 +41,8 @@
         "X": -200.0,
         "Y": 75.0
       },
-      "Usage": "CustomDropdown"
+      "Usage": "CustomDropdown",
+      "Description": "The IP address of the network interface to listen on. A dropdown shows available addresses. Ensure this is the interface connected to your tracking network."
     }
   ],
   "SymbolChildUis": [],

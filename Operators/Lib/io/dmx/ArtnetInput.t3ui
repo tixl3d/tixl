@@ -1,6 +1,6 @@
 {
   "Id": "fc03dcd0-6f2f-4507-be06-1ed105607489"/*ArtnetInput*/,
-  "Description": "",
+  "Description": "Receives DMX data over the network using the Art-Net protocol.\n\nThis operator listens for Art-Net packets on the local network, allowing you to receive DMX data from lighting consoles, media servers, or other Art-Net-enabled devices. It can listen to multiple DMX universes simultaneously.\n\nTips:\n- Select the correct `LocalIpAddress` for your network interface.\n- `StartUniverse` and `NumUniverses` define the range of DMX universes to listen to.\n- The output is a list of lists. The outer list corresponds to the universes, and each inner list contains the 512 channel values for that universe.\n\nAKA: artnet, dmx, lighting, sacn",
   "InputUis": [
     {
       "InputId": "19bde769-3992-4cf0-a0b4-e3ae25c03c79"/*StartUniverse*/,
@@ -11,7 +11,8 @@
       "Min": 0,
       "Scale": 1.0,
       "ClampMin": true,
-      "ClampMax": true
+      "ClampMax": true,
+      "Description": "The first DMX universe to listen for. Art-Net universes are often specified as Sub-Net and Universe. This operator uses a single integer, where Universe = StartUniverse % 16 and Sub-Net = StartUniverse / 16."
     },
     {
       "InputId": "24b5d450-4e83-49db-88b1-7d688e64585d"/*LocalIpAddress*/,
@@ -19,35 +20,40 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "Usage": "CustomDropdown"
+      "Usage": "CustomDropdown",
+      "Description": "The IP address of the network interface to listen on. A dropdown shows available addresses. If you have multiple network cards, make sure to select the one connected to your lighting network."
     },
     {
       "InputId": "3d085f6f-6f4a-4876-805f-22f25497a731"/*Active*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Enables or disables listening for Art-Net packets."
     },
     {
       "InputId": "a38c29b6-057d-4883-9366-139366113b63"/*Timeout*/,
       "Position": {
         "X": -505.05722,
         "Y": -109.46149
-      }
+      },
+      "Description": "The time in seconds after which a universe is considered offline if no new data is received."
     },
     {
       "InputId": "a5b6c7d8-e9f0-4123-4567-890abcdef123"/*PrintToLog*/,
       "Position": {
         "X": -505.05722,
         "Y": -34.461487
-      }
+      },
+      "Description": "If enabled, prints status information and errors to the T3 log. Useful for debugging."
     },
     {
       "InputId": "c18a9359-3ef8-4e0d-85d8-51f725357388"/*NumUniverses*/,
       "Position": {
         "X": -505.05722,
         "Y": -184.46149
-      }
+      },
+      "Description": "The number of consecutive DMX universes to listen for, starting from `StartUniverse`."
     }
   ],
   "SymbolChildUis": [],

@@ -1,20 +1,22 @@
 {
   "Id": "f5aabc51-b275-4344-a244-934f4e4f7d3a"/*SerialInput*/,
-  "Description": "",
+  "Description": "Receives data from a serial port.\n\nThis operator listens for incoming data on a specified serial port, allowing communication with external hardware devices such as microcontrollers (e.g., Arduino) or other serial-enabled equipment. It can parse incoming data as individual lines or as a continuous string.\n\nTips:\n- Ensure the `BaudRate` and `PortName` match the settings of the sending device.\n- Use `ReceivedLines` to process multiple incoming messages, especially when the sending device terminates messages with a line ending.\n- `WasTrigger` can be used to trigger other operators when new data arrives.\n\nAKA: arduino, rs232, uart, com, serial reader",
   "InputUis": [
     {
       "InputId": "235c441e-9214-4e3f-84e3-441f8c43098c"/*Connect*/,
       "Position": {
         "X": -200.0,
         "Y": 150.0
-      }
+      },
+      "Description": "Connects or disconnects from the serial port. This can be used to free the port for other applications without deleting the operator."
     },
     {
       "InputId": "4b83b1b5-391b-4a8e-8734-706b1b85169f"/*ListLength*/,
       "Position": {
         "X": -200.0,
         "Y": 150.0
-      }
+      },
+      "Description": "The maximum number of received lines to store in the `ReceivedLines` output."
     },
     {
       "InputId": "8051e8e3-4050-4284-a6a4-2e11c4731804"/*BaudRate*/,
@@ -22,7 +24,7 @@
         "X": -200.0,
         "Y": 75.0
       },
-      "Description": "Default baudrates:\n9600, \n19200, \n38400, \n57600, \n115200, \n230400, \n460800, \n921600",
+      "Description": "The communication speed for the serial port. This must match the setting on the connected device. Common values include 9600, 19200, 38400, 57600, 115200.",
       "Min": 0,
       "Max": 65000,
       "Scale": 1.0
@@ -33,6 +35,7 @@
         "X": -200.0,
         "Y": 0.0
       },
+      "Description": "The name of the serial port to listen on, e.g., 'COM3'. A dropdown shows available ports.",
       "Usage": "CustomDropdown"
     }
   ],

@@ -1,6 +1,6 @@
 {
   "Id": "98efc7c8-cafd-45ee-8746-14f37e9f59f8"/*ArtnetOutput*/,
-  "Description": "",
+  "Description": "Sends DMX data over the network using the Art-Net protocol.\n\nThis operator broadcasts or unicasts DMX data to Art-Net-enabled devices like lighting fixtures, nodes, or media servers. It can send multiple DMX universes simultaneously.\n\nTips:\n- For broadcast, leave `TargetIpAddress` empty. For unicast, specify the IP address of the destination device.\n- The `InputsValues` should be a list of lists. The outer list corresponds to the universes, and each inner list contains the 512 channel values for that universe.\n- Use `SendTrigger` for manual control or connect a value to `InputsValues` to send automatically on change.\n\nAKA: artnet, dmx, lighting, sacn",
   "InputUis": [
     {
       "InputId": "0fc76369-788a-4ffe-9dde-8eea5f10cf32"/*TargetIpAddress*/,
@@ -8,28 +8,32 @@
         "X": -200.0,
         "Y": 600.0
       },
-      "Usage": "CustomDropdown"
+      "Usage": "CustomDropdown",
+      "Description": "The destination IP address for unicast Art-Net packets. If empty, packets are broadcast to the entire network."
     },
     {
       "InputId": "168d0023-554f-46cd-9e62-8f3d1f564b8d"/*SendTrigger*/,
       "Position": {
         "X": -200.0,
         "Y": 300.0
-      }
+      },
+      "Description": "A trigger to manually send the Art-Net data. The data is sent when this value changes from 0 to 1."
     },
     {
       "InputId": "34aeeda5-72b0-4f13-bfd3-4ad5cf42b24f"/*StartUniverse*/,
       "Position": {
         "X": -200.0,
         "Y": 75.0
-      }
+      },
+      "Description": "The first DMX universe to send. Art-Net universes are often specified as Sub-Net and Universe. This operator uses a single integer, where Universe = StartUniverse % 16 and Sub-Net = StartUniverse / 16."
     },
     {
       "InputId": "4a9e2d3b-8c6f-4b1d-8d7e-9f3a5b2c1d0e"/*Priority*/,
       "Position": {
         "X": -200.0,
         "Y": 750.0
-      }
+      },
+      "Description": "The priority of the sent DMX data (0-200). Higher priority data will override lower priority data on the receiving node."
     },
     {
       "InputId": "5b1d9c8a-7e3f-4a2b-9c8d-1e0f3a5b2c1d"/*SourceName*/,
@@ -37,56 +41,64 @@
         "X": -200.0,
         "Y": 825.0
       },
-      "Usage": "Default"
+      "Usage": "Default",
+      "Description": "A user-defined name for this Art-Net source, which can help identify it on the network."
     },
     {
       "InputId": "65fb88ec-5772-4973-bd8b-bb2cb9f557e7"/*PrintArtnetPoll*/,
       "Position": {
         "X": -200.0,
         "Y": 675.0
-      }
+      },
+      "Description": "If enabled, prints information about received Art-Net poll packets to the T3 log. This is useful for discovering other Art-Net nodes on the network."
     },
     {
       "InputId": "6f5c4b3a-2e1d-4f9c-8a7b-3d2e1f0c9b8a"/*MaxFps*/,
       "Position": {
         "X": -200.0,
         "Y": 900.0
-      }
+      },
+      "Description": "Limits the maximum update rate in frames per second. A value of 0 means no limit."
     },
     {
       "InputId": "73babdb1-f88f-4e4d-aa3f-0536678b0793"/*Reconnect*/,
       "Position": {
         "X": -200.0,
         "Y": 375.0
-      }
+      },
+      "Description": "Forces a reconnection of the network socket."
     },
     {
       "InputId": "7c15da5f-cfa1-4339-aceb-4ed0099ea041"/*SendUnicast*/,
       "Position": {
         "X": -200.0,
         "Y": 525.0
-      }
+      },
+      "Description": "If enabled, sends Art-Net packets as unicast to the `TargetIpAddress`. Otherwise, packets are broadcast."
     },
     {
       "InputId": "d0e1f2a3-b4c5-4678-9012-3456789abcde"/*PrintToLog*/,
       "Position": {
         "X": -200.0,
         "Y": 975.0
-      }
+      },
+      "Description": "If enabled, prints status information and errors to the T3 log. Useful for debugging."
     },
     {
       "InputId": "d293bb33-2fba-4048-99b8-86aa15a478f2"/*SendSync*/,
       "Position": {
         "X": -200.0,
         "Y": 450.0
-      }
+      },
+      "Description": "If enabled, an ArtSync packet is sent after the DMX data. This can be used to synchronize updates across multiple Art-Net nodes."
     },
     {
       "InputId": "f7520a37-c2d4-41fa-a6ba-a6ed0423a4ec"/*InputsValues*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "A list of lists containing the DMX channel data. The outer list represents universes, and each inner list contains up to 512 float values (0-1)."
     },
     {
       "InputId": "fcbfe87b-b8aa-461c-a5ac-b22bb29ad36d"/*LocalIpAddress*/,
@@ -94,7 +106,8 @@
         "X": -200.0,
         "Y": 150.0
       },
-      "Usage": "CustomDropdown"
+      "Usage": "CustomDropdown",
+      "Description": "The IP address of the network interface to send from. A dropdown shows available addresses. If you have multiple network cards, make sure to select the one connected to your lighting network."
     }
   ],
   "SymbolChildUis": [],

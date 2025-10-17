@@ -1,6 +1,6 @@
 {
   "Id": "0e881c4d-c4ed-42c1-a2c9-d076b0489395"/*PointsToRGBList*/,
-  "Description": "",
+  "Description": "Converts a buffer of 3D points into a flat list of RGB float values (0-255).\n\nThis operator extracts the color (RGB) from each point in the input buffer and flattens it into a single list of floats, where each point contributes 3 float values (Red, Green, Blue). This can be useful for sending color data to systems that expect a linear list of values.\n\nAKA: rgb, color, points, list, obsolete",
   "InputUis": [
     {
       "InputId": "b98449e7-b7ef-4b15-883c-28bf7662c987"/*Points*/,
@@ -8,7 +8,8 @@
       "Position": {
         "X": -206.38298,
         "Y": -0.95744324
-      }
+      },
+      "Description": "A buffer of 3D points. The `Color` attribute (RGB) of each point will be extracted."
     }
   ],
   "SymbolChildUis": [],
@@ -18,7 +19,8 @@
       "Position": {
         "X": 0.0,
         "Y": 0.0
-      }
+      },
+      "Description": "A list of float values representing the RGB components of all input points, in the range 0-255."
     }
   ]
 }

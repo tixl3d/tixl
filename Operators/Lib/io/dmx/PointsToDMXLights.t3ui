@@ -1,6 +1,6 @@
 {
   "Id": "c9d7cd19-7fc6-4491-8dfa-3808725c7857"/*PointsToDMXLights*/,
-  "Description": "",
+  "Description": "Converts a list of 3D points into a list of DMX channel values for controlling lighting fixtures.\n\nThis is a powerful operator for controlling complex lighting setups, especially moving heads. It takes a list of target points (`EffectedPoints`) and a list of fixture positions (`ReferencePoints`) and calculates the required Pan/Tilt angles for each light. It can also map point color and other attributes to DMX channels.\n\nTips:\n- `FixtureChannelSize` must match the DMX footprint of your physical lights.\n- The various `...Channel` inputs define the DMX mapping for each fixture function (Pan, Tilt, Red, etc.).\n- Use the `VisualizeLights` output with a [VisualizeSpotLights] operator to see a 3D preview of your lighting.\n\nAKA: dmx, lights, fixtures, moving head, pan, tilt, lighting control",
   "InputUis": [
     {
       "InputId": "013cc355-91d6-4ea6-b9f7-f1817b89e4a3"/*RedChannel*/,
@@ -8,28 +8,32 @@
         "X": -200.0,
         "Y": 1875.0
       },
-      "AddPadding": "True"
+      "AddPadding": "True",
+      "Description": "The DMX channel for the red color component."
     },
     {
       "InputId": "032f3617-e1f3-4b41-a3be-61dd63b9f3ba"/*ForwardVector*/,
       "Position": {
         "X": -200.0,
         "Y": 975.0
-      }
+      },
+      "Description": "The direction the fixture is pointing when Pan and Tilt are at their center positions."
     },
     {
       "InputId": "098f1662-6f47-4dd0-9a73-4c4814aefb23"/*CustomVar2Channel*/,
       "Position": {
         "X": -200.0,
         "Y": 2850.0
-      }
+      },
+      "Description": "The DMX channel for the second custom variable."
     },
     {
       "InputId": "0c57cdd5-e450-4425-954f-c9e4256f83e1"/*InvertZ*/,
       "Position": {
         "X": -200.0,
         "Y": 1275.0
-      }
+      },
+      "Description": "Inverts the Z-axis for rotation calculations."
     },
     {
       "InputId": "1348ed7c-79f8-48c6-ac00-e60fb40050db"/*FixtureChannelSize*/,
@@ -37,7 +41,8 @@
         "X": -200.0,
         "Y": 225.0
       },
-      "AddPadding": "True"
+      "AddPadding": "True",
+      "Description": "The number of DMX channels used by a single fixture (its DMX footprint)."
     },
     {
       "InputId": "18cc3a73-3a1a-4370-87b7-e5cd44f4a3ab"/*SetCustomVar2*/,
@@ -45,7 +50,8 @@
         "X": -200.0,
         "Y": 2775.0
       },
-      "GroupTitle": "Var2"
+      "GroupTitle": "Var2",
+      "Description": "Enables setting a constant value for a custom DMX channel."
     },
     {
       "InputId": "1cb93e97-0161-4a77-bbc7-ff30c1972cf8"/*GetF2*/,
@@ -53,28 +59,32 @@
         "X": -200.0,
         "Y": 2400.0
       },
-      "GroupTitle": "F2"
+      "GroupTitle": "F2",
+      "Description": "Enables mapping a float attribute from the points to a DMX channel (e.g., for focus, zoom)."
     },
     {
       "InputId": "1f532994-fb0e-44e4-8a80-7917e1851eae"/*PanAxis*/,
       "Position": {
         "X": -200.0,
         "Y": 1350.0
-      }
+      },
+      "Description": "Defines which rotational axis of the fixture corresponds to Pan."
     },
     {
       "InputId": "1f877cf6-10d9-4d0b-b087-974bd6855e0a"/*TiltAxis*/,
       "Position": {
         "X": -200.0,
         "Y": 1125.0
-      }
+      },
+      "Description": "Defines which rotational axis of the fixture corresponds to Tilt."
     },
     {
       "InputId": "23f23213-68e2-45f5-b452-4a86289004c0"/*DebugToLog*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "If enabled, prints detailed calculation information to the T3 log for debugging."
     },
     {
       "InputId": "25e5f0ce-5ec8-4c99-beb1-317c6911a128"/*SetCustomVar1*/,
@@ -82,21 +92,24 @@
         "X": -200.0,
         "Y": 2550.0
       },
-      "GroupTitle": "Var1"
+      "GroupTitle": "Var1",
+      "Description": "Enables setting a constant value for a custom DMX channel."
     },
     {
       "InputId": "2bea2ccb-89f2-427b-bd9a-95c7038b715e"/*ReferencePoints*/,
       "Position": {
         "X": -200.0,
         "Y": 150.0
-      }
+      },
+      "Description": "A list of points representing the 3D positions of the light fixtures themselves."
     },
     {
       "InputId": "47d7294f-6f73-4e21-ac9a-0fc0817283fb"/*TiltChannel*/,
       "Position": {
         "X": -200.0,
         "Y": 1575.0
-      }
+      },
+      "Description": "The DMX channel for Tilt control (coarse)."
     },
     {
       "InputId": "4922acd8-ab83-4394-8118-c555385c2ce9"/*GetRotation*/,
@@ -104,42 +117,48 @@
         "X": -200.0,
         "Y": 900.0
       },
-      "GroupTitle": "Rotation"
+      "GroupTitle": "Rotation",
+      "Description": "Enables the calculation of Pan and Tilt values to aim the fixture at the target point."
     },
     {
       "InputId": "49fefbdb-2652-43db-ae52-ebc2df3e2856"/*InvertX*/,
       "Position": {
         "X": -200.0,
         "Y": 1125.0
-      }
+      },
+      "Description": "Inverts the X-axis for rotation calculations."
     },
     {
       "InputId": "4a40e022-d206-447c-bda3-d534f231c816"/*TiltFineChannel*/,
       "Position": {
         "X": -200.0,
         "Y": 1650.0
-      }
+      },
+      "Description": "The DMX channel for 16-bit fine Tilt control."
     },
     {
       "InputId": "4d4b3425-e6ad-4834-a8a7-06c9f9c2b909"/*PanFineChannel*/,
       "Position": {
         "X": -200.0,
         "Y": 1425.0
-      }
+      },
+      "Description": "The DMX channel for 16-bit fine Pan control."
     },
     {
       "InputId": "50e849e8-5582-432e-98f7-d8e036273864"/*CustomVar1*/,
       "Position": {
         "X": -200.0,
         "Y": 2700.0
-      }
+      },
+      "Description": "The constant value for the first custom variable."
     },
     {
       "InputId": "58cc3eee-e81e-4bab-b12c-e7bc3cf62dd0"/*CustomVar5*/,
       "Position": {
         "X": -200.0,
         "Y": 3600.0
-      }
+      },
+      "Description": "The constant value for the fifth custom variable."
     },
     {
       "InputId": "5cdc69f7-45ec-4eec-bfb6-960d6245dafb"/*GetColor*/,
@@ -147,35 +166,40 @@
         "X": -200.0,
         "Y": 1725.0
       },
-      "GroupTitle": "Color"
+      "GroupTitle": "Color",
+      "Description": "Enables mapping the point's color attribute to DMX color channels."
     },
     {
       "InputId": "61b48e46-c3d1-46e3-a470-810d55f30aa6"/*EffectedPoints*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "A list of points representing the target positions for the lights to aim at."
     },
     {
       "InputId": "628d96a8-466b-4148-9658-7786833ec989"/*PositionMeasureAxis*/,
       "Position": {
         "X": -200.0,
         "Y": 525.0
-      }
+      },
+      "Description": "Selects which axis (X, Y, or Z) of the point's position to map to the position channel."
     },
     {
       "InputId": "658a19df-e51b-45b4-9f91-cb97a891255a"/*PositionFineChannel*/,
       "Position": {
         "X": -200.0,
         "Y": 825.0
-      }
+      },
+      "Description": "The DMX channel for 16-bit fine position control."
     },
     {
       "InputId": "6d8fc457-0c80-4736-8c25-cc48f07cbbfd"/*InvertY*/,
       "Position": {
         "X": -200.0,
         "Y": 1200.0
-      }
+      },
+      "Description": "Inverts the Y-axis for rotation calculations."
     },
     {
       "InputId": "6e8b4125-0e8c-430b-897d-2231bb4c8f6f"/*TiltRange*/,
@@ -183,42 +207,48 @@
         "X": -200.0,
         "Y": 1500.0
       },
-      "AddPadding": "True"
+      "AddPadding": "True",
+      "Description": "The total range of motion in degrees for the Tilt motor (e.g., 270)."
     },
     {
       "InputId": "7449cd05-54be-484b-854a-d2143340f925"/*FitInUniverse*/,
       "Position": {
         "X": -200.0,
         "Y": 300.0
-      }
+      },
+      "Description": "If enabled, limits the number of processed fixtures to what can fit in a single 512-channel DMX universe, based on `FixtureChannelSize`."
     },
     {
       "InputId": "78a7e683-f4e7-4826-8e39-c8de08e50e5e"/*InvertPositionDirection*/,
       "Position": {
         "X": -200.0,
         "Y": 600.0
-      }
+      },
+      "Description": "Inverts the mapping of the position value to the DMX channel."
     },
     {
       "InputId": "7bf3e057-b9eb-43d2-8e1a-64c1c3857ca1"/*InvertPan*/,
       "Position": {
         "X": -200.0,
         "Y": 1050.0
-      }
+      },
+      "Description": "Inverts the direction of Pan movement."
     },
     {
       "InputId": "7c59a5fb-052a-443c-9e10-cf859fe25658"/*CustomVar5Channel*/,
       "Position": {
         "X": -200.0,
         "Y": 3525.0
-      }
+      },
+      "Description": "The DMX channel for the fifth custom variable."
     },
     {
       "InputId": "850af6c3-d9ef-492c-9cfb-e2589ae5b9ac"/*FillUniverse*/,
       "Position": {
         "X": -200.0,
         "Y": 375.0
-      }
+      },
+      "Description": "If enabled, pads the output list with zeros to a full 512 channels, creating a complete DMX universe."
     },
     {
       "InputId": "876ef5b5-f2c6-4501-9e55-00b9a553a2e3"/*SetCustomVar3*/,
@@ -226,7 +256,8 @@
         "X": -200.0,
         "Y": 3000.0
       },
-      "GroupTitle": "Var3"
+      "GroupTitle": "Var3",
+      "Description": "Enables setting a constant value for a custom DMX channel."
     },
     {
       "InputId": "8880c101-403f-46e0-901e-20ec2dd333e9"/*PositionDistanceRange*/,
@@ -234,14 +265,16 @@
         "X": -200.0,
         "Y": 675.0
       },
-      "AddPadding": "True"
+      "AddPadding": "True",
+      "Description": "The range of motion in 3D units that maps to the full 0-255 DMX range for the position channel."
     },
     {
       "InputId": "8ceece78-9a08-4c7b-8fea-740e8e5929a6"/*WhiteChannel*/,
       "Position": {
         "X": -200.0,
         "Y": 2175.0
-      }
+      },
+      "Description": "The DMX channel for the white color component."
     },
     {
       "InputId": "8dd3fc1c-cd94-4bf0-b948-d6f734916d49"/*SetCustomVar4*/,
@@ -249,14 +282,16 @@
         "X": -200.0,
         "Y": 3225.0
       },
-      "GroupTitle": "Var4"
+      "GroupTitle": "Var4",
+      "Description": "Enables setting a constant value for a custom DMX channel."
     },
     {
       "InputId": "9000c279-73e4-4de8-a1f8-c3914eaaf533"/*PanChannel*/,
       "Position": {
         "X": -200.0,
         "Y": 1350.0
-      }
+      },
+      "Description": "The DMX channel for Pan control (coarse)."
     },
     {
       "InputId": "91c78090-be10-4203-827e-d2ef1b93317e"/*GetF1*/,
@@ -264,21 +299,24 @@
         "X": -200.0,
         "Y": 2250.0
       },
-      "GroupTitle": "F1"
+      "GroupTitle": "F1",
+      "Description": "Enables mapping a float attribute from the points to a DMX channel (e.g., for gobos, prisms)."
     },
     {
       "InputId": "970769f4-116f-418d-87a7-cda28e44d063"/*GreenChannel*/,
       "Position": {
         "X": -200.0,
         "Y": 1950.0
-      }
+      },
+      "Description": "The DMX channel for the green color component."
     },
     {
       "InputId": "9c235473-346b-4861-9844-4b584e09f58a"/*RotationOrder*/,
       "Position": {
         "X": -200.0,
         "Y": 1050.0
-      }
+      },
+      "Description": "The order in which Pan and Tilt rotations are applied."
     },
     {
       "InputId": "a9315f88-6024-42e9-9691-4544627f0bef"/*SetCustomVar5*/,
@@ -286,84 +324,96 @@
         "X": -200.0,
         "Y": 3450.0
       },
-      "GroupTitle": "Var5"
+      "GroupTitle": "Var5",
+      "Description": "Enables setting a constant value for a custom DMX channel."
     },
     {
       "InputId": "ac9a709e-6dc0-40ca-9f70-350e655a2630"/*CustomVar3Channel*/,
       "Position": {
         "X": -200.0,
         "Y": 3075.0
-      }
+      },
+      "Description": "The DMX channel for the third custom variable."
     },
     {
       "InputId": "b08c920f-0d6b-4820-bc2d-81a47d5f1147"/*CustomVar1Channel*/,
       "Position": {
         "X": -200.0,
         "Y": 2625.0
-      }
+      },
+      "Description": "The DMX channel for the first custom variable."
     },
     {
       "InputId": "b29ebe11-89cb-4f86-aee0-cf729fa0d62c"/*CustomVar4*/,
       "Position": {
         "X": -200.0,
         "Y": 3375.0
-      }
+      },
+      "Description": "The constant value for the fourth custom variable."
     },
     {
       "InputId": "b7061834-66aa-4f7f-91f9-10ebfe16713f"/*F1Channel*/,
       "Position": {
         "X": -200.0,
         "Y": 2325.0
-      }
+      },
+      "Description": "The DMX channel for the F1 float attribute."
     },
     {
       "InputId": "b8080f4e-4542-4e20-9844-8028bbaf223f"/*GetF2ByPixel*/,
       "Position": {
         "X": -200.0,
         "Y": 2475.0
-      }
+      },
+      "Description": "Maps the F2 attribute from a texture lookup instead of the point attribute."
     },
     {
       "InputId": "bec9e5a6-40a9-49b2-88bd-01a4ea03d28c"/*GetF1ByPixel*/,
       "Position": {
         "X": -200.0,
         "Y": 2325.0
-      }
+      },
+      "Description": "Maps the F1 attribute from a texture lookup instead of the point attribute."
     },
     {
       "InputId": "cbaf821c-0305-4c74-a632-864081cc9a34"/*CustomVar4Channel*/,
       "Position": {
         "X": -200.0,
         "Y": 3300.0
-      }
+      },
+      "Description": "The DMX channel for the fourth custom variable."
     },
     {
       "InputId": "cf2c3308-8f3f-442d-a563-b419f12e7ad1"/*RGBToCMY*/,
       "Position": {
         "X": -200.0,
         "Y": 1800.0
-      }
+      },
+      "Description": "If enabled, converts RGB color values to CMY for fixtures that use subtractive color mixing."
     },
     {
       "InputId": "d16d7c5c-2795-4fde-85fd-13b515191fbe"/*CustomVar3*/,
       "Position": {
         "X": -200.0,
         "Y": 3150.0
-      }
+      },
+      "Description": "The constant value for the third custom variable."
     },
     {
       "InputId": "d755342b-9a9e-4c78-8376-81579d8c0909"/*BlueChannel*/,
       "Position": {
         "X": -200.0,
         "Y": 2025.0
-      }
+      },
+      "Description": "The DMX channel for the blue color component."
     },
     {
       "InputId": "d77be0d1-5fb9-4d26-9e4a-e16497e4759c"/*F2Channel*/,
       "Position": {
         "X": -200.0,
         "Y": 2475.0
-      }
+      },
+      "Description": "The DMX channel for the F2 float attribute."
     },
     {
       "InputId": "df04fce0-c6e5-4039-b03f-e651fc0ec4a9"/*GetPosition*/,
@@ -371,28 +421,32 @@
         "X": -200.0,
         "Y": 450.0
       },
-      "GroupTitle": "Position"
+      "GroupTitle": "Position",
+      "Description": "Enables mapping a point's position attribute to a DMX channel (e.g., for a moving light on a track)."
     },
     {
       "InputId": "e7a48fe0-d788-4f12-a9d4-52472519da09"/*CustomVar2*/,
       "Position": {
         "X": -200.0,
         "Y": 2925.0
-      }
+      },
+      "Description": "The constant value for the second custom variable."
     },
     {
       "InputId": "e96655be-6bc7-4ca4-bf74-079a07570d74"/*ShortestPathPanTilt*/,
       "Position": {
         "X": -200.0,
         "Y": 1200.0
-      }
+      },
+      "Description": "If enabled, calculates the shortest path for pan/tilt movement to prevent large, unnecessary rotations."
     },
     {
       "InputId": "f13edebd-b44f-49e9-985e-7e3feb886fea"/*AlphaChannel*/,
       "Position": {
         "X": -200.0,
         "Y": 2100.0
-      }
+      },
+      "Description": "The DMX channel for the alpha/intensity/dimmer component."
     },
     {
       "InputId": "f50da250-606d-4a15-a25e-5458f540e527"/*PanRange*/,
@@ -400,21 +454,24 @@
         "X": -200.0,
         "Y": 1275.0
       },
-      "AddPadding": "True"
+      "AddPadding": "True",
+      "Description": "The total range of motion in degrees for the Pan motor (e.g., 540)."
     },
     {
       "InputId": "f85ecf9f-0c3d-4c10-8ba7-480aa2c7a667"/*InvertTilt*/,
       "Position": {
         "X": -200.0,
         "Y": 1125.0
-      }
+      },
+      "Description": "Inverts the direction of Tilt movement."
     },
     {
       "InputId": "fc3ec0d6-8567-4d5f-9a63-5c69fb5988cb"/*PositionChannel*/,
       "Position": {
         "X": -200.0,
         "Y": 750.0
-      }
+      },
+      "Description": "The DMX channel for the position attribute."
     }
   ],
   "SymbolChildUis": [],

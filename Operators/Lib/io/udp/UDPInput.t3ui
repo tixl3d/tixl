@@ -1,27 +1,30 @@
 {
   "Id": "c029b846-b442-458b-933b-653609827b75"/*UDPInput*/,
-  "Description": "",
+  "Description": "Receives data from the network using the UDP (User Datagram Protocol).\n\nThis operator listens for UDP packets on a specified port, allowing communication with other applications or devices that send UDP data. UDP is a connectionless protocol, meaning data is sent without establishing a persistent connection, which is fast but less reliable than TCP.\n\nTips:\n- Ensure the `Port` and `LocalIpAddress` match the sender's destination settings.\n- `WasTrigger` becomes true for one frame whenever a new message is received, which can be used to trigger other actions.\n- Unlike TCP, UDP does not guarantee message delivery or order.\n\nAKA: udp, network, socket, datagram",
   "InputUis": [
     {
       "InputId": "0944714d-693d-4251-93a6-e22a2db64f20"/*Listen*/,
       "Position": {
         "X": -200.0,
         "Y": 150.0
-      }
+      },
+      "Description": "Enables or disables listening for UDP packets."
     },
     {
       "InputId": "2ebe418d-407e-46d8-b274-13b41c52accf"/*Port*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "The UDP port to listen for messages on."
     },
     {
       "InputId": "5e725916-4143-4759-8651-e12185c658d3"/*PrintToLog*/,
       "Position": {
         "X": -200.0,
         "Y": 225.0
-      }
+      },
+      "Description": "If enabled, prints received data and sender information to the T3 log. Useful for debugging."
     },
     {
       "InputId": "9e23335a-d63a-4286-930e-c63e86d0e6f0"/*LocalIpAddress*/,
@@ -29,6 +32,7 @@
         "X": -200.0,
         "Y": 75.0
       },
+      "Description": "The IP address of the network interface to listen on. A dropdown shows available addresses. Use '0.0.0.0' to listen on all available network interfaces.",
       "Usage": "CustomDropdown"
     },
     {
@@ -36,7 +40,8 @@
       "Position": {
         "X": -200.0,
         "Y": 75.0
-      }
+      },
+      "Description": "The maximum number of received lines to store in the `ReceivedLines` output list."
     }
   ],
   "SymbolChildUis": [],

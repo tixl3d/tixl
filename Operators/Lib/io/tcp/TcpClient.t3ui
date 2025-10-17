@@ -1,27 +1,30 @@
 {
   "Id": "a2b3c4d5-e6f7-4890-1234-567890abcdef"/*TcpClient*/,
-  "Description": "",
+  "Description": "Connects to a TCP server to send and receive data.\n\nThis operator establishes a client connection to a specified TCP server. It can send messages constructed from various parts and receives data from the server, which can be processed as a continuous string or as a list of lines.\n\nTips:\n- Use `SendOnChange` to automatically send data whenever the `MessageParts` input changes.\n- For manual control over sending, use the `SendTrigger` input.\n- Check the `IsConnected` output to verify the connection status before attempting to send data.\n\nAKA: tcp, network, socket, client",
   "InputUis": [
     {
       "InputId": "1b2c3d4e-5f6a-4789-0123-456789abcdef"/*SendTrigger*/,
       "Position": {
         "X": -200.0,
         "Y": 525.0
-      }
+      },
+      "Description": "A trigger to manually send the message. The message is sent when this value changes from 0 to 1."
     },
     {
       "InputId": "3c4d5e6f-7a8b-4901-2345-67890abcdef1"/*PrintToLog*/,
       "Position": {
         "X": -200.0,
         "Y": 600.0
-      }
+      },
+      "Description": "If enabled, prints status information, sent/received data, and errors to the T3 log. Useful for debugging."
     },
     {
       "InputId": "a3b4c5d6-e7f8-4901-2345-67890abcdef1"/*Port*/,
       "Position": {
         "X": -200.0,
         "Y": 150.0
-      }
+      },
+      "Description": "The port number on the TCP server to connect to."
     },
     {
       "InputId": "b5c6d7e8-f9a0-4123-4567-890abcdef123"/*MessageParts*/,
@@ -29,21 +32,24 @@
         "X": -200.0,
         "Y": 300.0
       },
-      "Usage": "Default"
+      "Usage": "Default",
+      "Description": "A list of strings or values that will be joined together to form the message to be sent."
     },
     {
       "InputId": "c2d3e4f5-a6b7-4890-1234-567890abcdef"/*Connect*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Initiates or closes the connection to the TCP server."
     },
     {
       "InputId": "d4e5f6a7-b8c9-4012-3456-7890abcdef12"/*ListLength*/,
       "Position": {
         "X": -200.0,
         "Y": 225.0
-      }
+      },
+      "Description": "The maximum number of received lines to store in the `ReceivedLines` output list."
     },
     {
       "InputId": "e6f7a8b9-c0d1-4234-5678-90abcdef1234"/*Separator*/,
@@ -51,7 +57,8 @@
         "X": -200.0,
         "Y": 375.0
       },
-      "Usage": "Default"
+      "Usage": "Default",
+      "Description": "A string used to join the `MessageParts` together before sending."
     },
     {
       "InputId": "f1e2d3c4-b5a6-4789-0123-456789abcdef"/*Host*/,
@@ -59,14 +66,16 @@
         "X": -200.0,
         "Y": 75.0
       },
-      "Usage": "Default"
+      "Usage": "Default",
+      "Description": "The IP address or hostname of the TCP server to connect to (e.g., '127.0.0.1' or 'localhost')."
     },
     {
       "InputId": "f7a8b9c0-d1e2-4345-6789-0abcdef12345"/*SendOnChange*/,
       "Position": {
         "X": -200.0,
         "Y": 450.0
-      }
+      },
+      "Description": "If enabled, a message is sent automatically whenever the content of `MessageParts` changes."
     }
   ],
   "SymbolChildUis": [],

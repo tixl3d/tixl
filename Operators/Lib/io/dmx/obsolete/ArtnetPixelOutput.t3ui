@@ -1,6 +1,6 @@
 {
   "Id": "faa3e182-96e6-45e7-b037-fb2acd88825b"/*ArtnetPixelOutput*/,
-  "Description": "",
+  "Description": "Converts a list of 3D points into Art-Net DMX data for controlling RGB pixel arrays or similar fixtures.\n\nThis operator takes a buffer of points, extracts their color information (RGB from `Point.Color.X/Y/Z`), and assigns them to DMX universes based on the `Point.F2` attribute. It then sends this data as Art-Net packets over the network.\n\nTips:\n- Ensure the `IpAddress` is set to the correct Art-Net node or broadcast address.\n- The `ArtNetSendRate` controls how frequently DMX data is transmitted.\n- Use the `Reconnect` trigger if the network connection is lost or the IP address changes.\n\nAKA: artnet, pixel, rgb, dmx, obsolete",
   "InputUis": [
     {
       "InputId": "4598c09c-f463-426f-ab1b-c9be10c0ff75"/*Points*/,
@@ -8,7 +8,8 @@
       "Position": {
         "X": -200.0,
         "Y": -45.0
-      }
+      },
+      "Description": "A buffer of 3D points. The `Color` attribute (RGB) of each point is used for DMX values, and the `F2` attribute determines the DMX universe."
     },
     {
       "InputId": "508ebec1-cd2b-49bf-b77d-787fa3a8c138"/*IpAddress*/,
@@ -16,21 +17,25 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "Usage": "Default"
+      "Usage": "Default",
+      "Description": "The target IP address of the Art-Net receiver or node (e.g., '192.168.1.100' or '255.255.255.255' for broadcast)."
     },
     {
       "InputId": "d2e1f0c3-a4b5-4c6d-8e7f-9a0b1c2d3e4f"/*ArtNetSendRate*/,
       "Position": {
         "X": -200.0,
         "Y": 120.0
-      }
+      },
+      "Description": "The rate in Hertz (frames per second) at which Art-Net packets are sent. Set to 0 for maximum rate. Default is 44.0.",
+      "Default": 44.0
     },
     {
       "InputId": "db583506-fd7a-4109-9f37-489c27f237b8"/*Reconnect*/,
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Description": "A trigger to force a reconnection to the Art-Net target. The connection is re-established when this value changes from 0 to 1."
     }
   ],
   "SymbolChildUis": [],
@@ -40,7 +45,8 @@
       "Position": {
         "X": -50.0,
         "Y": -45.0
-      }
+      },
+      "Description": "The command output of the operator."
     }
   ],
   "Links": [

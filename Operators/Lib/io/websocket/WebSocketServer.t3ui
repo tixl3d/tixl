@@ -1,6 +1,6 @@
 {
   "Id": "9b4e3c2d-a1f0-4567-89bc-def012345678"/*WebSocketServer*/,
-  "Description": "",
+  "Description": "Creates a WebSocket server to enable real-time, two-way communication with web clients.\n\nThis operator is ideal for building interactive web-based UIs, remote controls, or dashboards that can send data to and receive data from T3. It can broadcast messages to all connected clients and parse incoming messages from them.\n\nTips:\n- Use `Listen` to start and stop the server.\n- The server address will be `ws://[LocalIpAddress]:[Port]/[Path]`.\n- Messages sent from T3 via the `Message` input are broadcast to all connected clients.\n- Incoming messages from clients are available on the `LastReceived...` outputs.\n\nAKA: websocket, server, network, web, socket, real-time",
   "InputUis": [
     {
       "InputId": "0a1b2c3d-4e5f-4678-9012-3456789abcde"/*Message*/,
@@ -8,42 +8,53 @@
         "X": -200.0,
         "Y": 225.0
       },
-      "Usage": "Default"
+      "Usage": "Default",
+      "Description": "The message to be broadcast to all connected clients."
     },
     {
       "InputId": "1d2e3f4a-5b6c-4789-a0b1-c2d3e4f5a6b7"/*Port*/,
       "Position": {
         "X": -200.0,
         "Y": 75.0
-      }
+      },
+      "Description": "The port number for the server to listen on. Default is 8080.",
+      "Default": 8080
     },
     {
       "InputId": "2e725916-4143-4759-8651-e12185c658d3"/*PrintToLog*/,
       "Position": {
         "X": -200.0,
         "Y": 525.0
-      }
+      },
+      "Description": "If enabled, prints connection status, sent/received messages, and errors to the T3 log. Useful for debugging.",
+      "Default": false
     },
     {
       "InputId": "3d4f5e6a-7b8c-9d0e-f1a2-b3c4d5e6f7a8"/*Listen*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Starts or stops the WebSocket server.",
+      "Default": false
     },
     {
       "InputId": "4b5a6f7e-8d9c-4501-2345-6789abcdef01"/*ClientMessageParsingMode*/,
       "Position": {
         "X": -200.0,
         "Y": 600.0
-      }
+      },
+      "Description": "Defines how incoming messages from clients are parsed. 'Raw' treats the message as a single string, while other modes attempt to split or parse the message. Default is Raw.",
+      "Default": 0
     },
     {
       "InputId": "4d3c2b1a-0f9e-4876-5432-10fedcba9876"/*SendTrigger*/,
       "Position": {
         "X": -200.0,
         "Y": 375.0
-      }
+      },
+      "Description": "A trigger to manually broadcast the `Message` to all connected clients. The message is sent when this value changes from 0 to 1.",
+      "Default": false
     },
     {
       "InputId": "5a6f7e8d-9c0b-4412-3456-789abcdef012"/*ClientMessageDelimiter*/,
@@ -51,7 +62,9 @@
         "X": -200.0,
         "Y": 675.0
       },
-      "Usage": "CustomDropdown"
+      "Usage": "CustomDropdown",
+      "Description": "The character or string to use as a delimiter when `ClientMessageParsingMode` is set to 'SpaceSeparated'. Default is a single space.",
+      "Default": " "
     },
     {
       "InputId": "73b1f8c9-9a2e-47c0-b1c8-29c34a2e7d01"/*LocalIpAddress*/,
@@ -59,7 +72,9 @@
         "X": -200.0,
         "Y": 450.0
       },
-      "Usage": "Default"
+      "Usage": "Default",
+      "Description": "The local IP address to bind the server to. Use '0.0.0.0 (Listen on all interfaces)' to listen on all available network interfaces. Default is '0.0.0.0 (Listen on all interfaces)'.",
+      "Default": "0.0.0.0 (Listen on all interfaces)"
     },
     {
       "InputId": "8e7d6c5b-4a3f-4123-b9c8-d7e6f5a4b3c2"/*Path*/,
@@ -67,14 +82,17 @@
         "X": -200.0,
         "Y": 150.0
       },
-      "Usage": "Default"
+      "Usage": "Default",
+      "Description": "The URL path for the WebSocket endpoint (e.g., '/t3-socket'). Default is empty (root path)."
     },
     {
       "InputId": "a0e35517-337a-4770-985a-34cac95b5b5f"/*SendOnChange*/,
       "Position": {
         "X": -200.0,
         "Y": 300.0
-      }
+      },
+      "Description": "If enabled, the `Message` is broadcast automatically to all clients whenever its content changes.",
+      "Default": true
     }
   ],
   "SymbolChildUis": [],
@@ -84,49 +102,56 @@
       "Position": {
         "X": 300.0,
         "Y": 200.0
-      }
+      },
+      "Description": "The command output of the operator."
     },
     {
       "OutputId": "3a2b1c0d-e9f8-4756-a3c1-b5e7d9f0a2b4"/*IsListening*/,
       "Position": {
         "X": 300.0,
         "Y": 300.0
-      }
+      },
+      "Description": "True if the WebSocket server is currently listening for connections."
     },
     {
       "OutputId": "6f5e4d3c-2b1a-4987-ab9c-def012345678"/*ConnectionCount*/,
       "Position": {
         "X": 300.0,
         "Y": 400.0
-      }
+      },
+      "Description": "The number of currently connected WebSocket clients."
     },
     {
       "OutputId": "6f7e8d9c-0b1a-4323-4567-89abcdef0123"/*LastReceivedClientString*/,
       "Position": {
         "X": 300.0,
         "Y": 500.0
-      }
+      },
+      "Description": "The last complete message received from any client, as a raw string."
     },
     {
       "OutputId": "7e8d9c0b-1a2f-4234-5678-9abcdef01234"/*LastReceivedClientParts*/,
       "Position": {
         "X": 300.0,
         "Y": 600.0
-      }
+      },
+      "Description": "The last message received from any client, split into a list of float values. Only valid when ClientMessageParsingMode is set to SpaceSeparated."
     },
     {
       "OutputId": "8d9c0b1a-2f3e-4145-6789-abcdef012345"/*LastReceivedClientDictionary*/,
       "Position": {
         "X": 300.0,
         "Y": 700.0
-      }
+      },
+      "Description": "The last message received from any client, parsed as a JSON dictionary (key-value pairs). Only valid when ClientMessageParsingMode is set to JsonKeyValue."
     },
     {
       "OutputId": "9c0b1a2f-3e4d-4056-789a-bcdef0123456"/*ClientMessageWasTrigger*/,
       "Position": {
         "X": 300.0,
         "Y": 800.0
-      }
+      },
+      "Description": "A trigger that becomes true for one frame each time a new message is received from any client."
     }
   ]
 }

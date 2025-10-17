@@ -1,90 +1,114 @@
 {
   "Id": "cd5a182e-254b-4e65-820b-ff754122614c"/*VideoDeviceInput*/,
-  "Description": "",
+  "Description": "Captures live video from a connected device like a webcam, capture card, or NDI source.\n\nThis operator provides access to video devices available on your system. You can select the device, resolution, and frame rate. It also allows for basic image manipulation like flipping and repositioning.\n\nTips:\n- To save system resources, enable `DeactivateWhenNotShowing`. This will pause the capture when the operator is not being rendered.\n- Use `OpenSettings` to access the device-specific configuration dialog for more advanced options like exposure and color balance.\n- The `Status` output provides useful information for troubleshooting connection issues.\n\nAKA: webcam, camera, capture card, ndi, directshow, video input",
   "InputUis": [
     {
       "InputId": "11f7432d-31f1-44b9-8f75-b1569b314b13"/*CustomFps*/,
       "Position": {
         "X": -200.0,
         "Y": 375.0
-      }
+      },
+      "Description": "Manually specify a frame rate. This will only work if the device and its driver support the requested FPS. Default is 0 (device default).",
+      "Default": 0
     },
     {
       "InputId": "22513b82-e77a-417a-8a46-24e677f072d4"/*DeactivateWhenNotShowing*/,
       "Position": {
         "X": -200.0,
         "Y": 150.0
-      }
+      },
+      "Description": "If enabled, the device is automatically deactivated when its output is not being rendered, which can save significant system resources.",
+      "Default": false
     },
     {
       "InputId": "236d4c5c-0022-4416-a22c-d6df73c306e2"/*Active*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Enables or disables the video capture.",
+      "Default": false
     },
     {
       "InputId": "3022de8a-5d88-4a37-9799-780f2a838a5f"/*FlipVertically*/,
       "Position": {
         "X": -200.0,
         "Y": 450.0
-      }
+      },
+      "Description": "Flips the incoming video image vertically.",
+      "Default": false
     },
     {
       "InputId": "3022de8a-5d88-4a37-9799-780f2a838a6e"/*ApplyRotationData*/,
       "Position": {
         "X": -200.0,
         "Y": 600.0
-      }
+      },
+      "Description": "Applies a rotation to the video image in degrees. This is used for correcting orientation.",
+      "Default": 0.0
     },
     {
       "InputId": "49019d29-873e-4b7c-a897-c575a384a650"/*ResolutionFpsType*/,
       "Position": {
         "X": -200.0,
         "Y": 225.0
-      }
+      },
+      "Description": "Selects how resolution and FPS are determined. 'Custom' allows manual input, otherwise device defaults are used.",
+      "Default": 0
     },
     {
       "InputId": "67e149a5-f7b6-47bc-b147-3b9b11c19c29"/*Reconnect*/,
       "Position": {
         "X": -200.0,
         "Y": 900.0
-      }
+      },
+      "Description": "A trigger to force a reconnection to the video device, which can be useful if the device becomes unresponsive or if settings have been changed externally.",
+      "Default": false
     },
     {
       "InputId": "805602d5-52b2-4a73-a337-12e00c3c91f2"/*Scale*/,
       "Position": {
         "X": -200.0,
         "Y": 825.0
-      }
+      },
+      "Description": "Scales the video image. Part of the `Reposition` transform. Default is 1,1 (no scaling).",
+      "Default": "1,1"
     },
     {
       "InputId": "8d2c28c7-1234-40e2-9388-75574519543d"/*OpenSettings*/,
       "Position": {
         "X": -200.0,
         "Y": 675.0
-      }
+      },
+      "Description": "A trigger to open the video device's native driver settings dialog, if available.",
+      "Default": false
     },
     {
       "InputId": "a57e815d-70c9-4d3b-998c-d13506b8f56e"/*FlipHorizontally*/,
       "Position": {
         "X": -200.0,
         "Y": 525.0
-      }
+      },
+      "Description": "Flips the incoming video image horizontally.",
+      "Default": false
     },
     {
       "InputId": "c9e1c1f6-3a18-4a1c-8a5e-4b4119965b6e"/*CustomResolution*/,
       "Position": {
         "X": -200.0,
         "Y": 300.0
-      }
+      },
+      "Description": "Manually specify a resolution (width and height). This will only work if the device and its driver support the requested resolution. Default is 0,0 (device default).",
+      "Default": "0,0"
     },
     {
       "InputId": "f187a997-7e4a-48c6-81f9-2a27f150a68a"/*Reposition*/,
       "Position": {
         "X": -200.0,
         "Y": 750.0
-      }
+      },
+      "Description": "Applies a 2D translation (X,Y) to the video image. Part of the transformation.",
+      "Default": "0,0"
     },
     {
       "InputId": "f5b900ec-ee17-123e-9972-cdd0580c104e"/*InputDeviceName*/,
@@ -92,7 +116,8 @@
         "X": -200.0,
         "Y": 75.0
       },
-      "Usage": "CustomDropdown"
+      "Usage": "CustomDropdown",
+      "Description": "The name of the video capture device to use. The dropdown lists all devices detected on the system."
     }
   ],
   "SymbolChildUis": [],
@@ -102,28 +127,32 @@
       "Position": {
         "X": 300.0,
         "Y": 200.0
-      }
+      },
+      "Description": "The captured video frame as a texture."
     },
     {
       "OutputId": "868d5ffe-032c-4522-b56b-d96b30841db7"/*UpdateCount*/,
       "Position": {
         "X": 300.0,
         "Y": 300.0
-      }
+      },
+      "Description": "A counter that increments each time a new frame is successfully captured."
     },
     {
       "OutputId": "9c2e4c11-09b6-4f4d-8f99-4a7372d5f2b5"/*Resolution*/,
       "Position": {
         "X": 300.0,
         "Y": 400.0
-      }
+      },
+      "Description": "The actual resolution (width, height) of the captured video stream."
     },
     {
       "OutputId": "a1b2c3d4-5678-90ef-1234-567890abcdef"/*Status*/,
       "Position": {
         "X": 300.0,
         "Y": 500.0
-      }
+      },
+      "Description": "Provides status messages and error information about the video capture device."
     }
   ]
 }

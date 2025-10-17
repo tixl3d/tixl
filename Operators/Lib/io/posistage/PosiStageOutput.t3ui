@@ -1,6 +1,6 @@
 {
   "Id": "f1b2a3c4-d5e6-4f7a-8b9c-0d1e2f3a4b5c"/*PosiStageOutput*/,
-  "Description": "",
+  "Description": "Sends real-time 3D tracking data using the PosiStageNet (PSN) protocol.\n\nThis operator takes a list of points and sends them as PosiStageNet tracker data over the network. This allows T3 to act as a source of tracking information for other applications in a virtual production or live event workflow.\n\nTips:\n- The `TrackerData` input expects a structured buffer of points, where each point represents a tracker with position and orientation.\n- Use `SendOnChange` or `SendTrigger` to control when data is sent.\n- The `Names` input can be used to assign names to the trackers being sent.\n\nAKA: posistage, tracking, stage, psn, motion capture, sender",
   "InputUis": [
     {
       "InputId": "24b5d450-4e83-49db-88b1-7d688e64585d"/*TargetIpAddress*/,
@@ -8,14 +8,16 @@
         "X": -200.0,
         "Y": 150.0
       },
-      "Usage": "Default"
+      "Usage": "Default",
+      "Description": "The destination IP address for the PSN packets. This is often a multicast address like 236.10.10.10."
     },
     {
       "InputId": "36c2bf8b-3e0c-4856-aa4a-32943a4b0223"/*TargetPort*/,
       "Position": {
         "X": -200.0,
         "Y": 225.0
-      }
+      },
+      "Description": "The destination UDP port. The default for PSN is typically 12345."
     },
     {
       "InputId": "4a9e2d3b-8c6f-4b1d-8d7e-9f3a5b2c1d0e"/*ServerName*/,
@@ -23,21 +25,24 @@
         "X": -200.0,
         "Y": 600.0
       },
-      "Usage": "Default"
+      "Usage": "Default",
+      "Description": "A name for this PosiStageNet source, which can help identify it on the receiving end."
     },
     {
       "InputId": "5e725916-4143-4759-8651-e12185c658d3"/*PrintToLog*/,
       "Position": {
         "X": -200.0,
         "Y": 525.0
-      }
+      },
+      "Description": "If enabled, prints information about sent packets to the T3 log for debugging."
     },
     {
       "InputId": "7ab8f2a6-4874-4235-85a5-d0e1f30c0446"/*Connect*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Initializes or re-initializes the network socket."
     },
     {
       "InputId": "9e23335a-d63a-4286-930e-c63e86d0e6f0"/*LocalIpAddress*/,
@@ -45,14 +50,16 @@
         "X": -200.0,
         "Y": 75.0
       },
-      "Usage": "Default"
+      "Usage": "Default",
+      "Description": "The IP address of the network interface to send from. If left empty, the system will choose one automatically."
     },
     {
       "InputId": "b16a0356-ef4a-413a-a656-7497127e31d4"/*SendOnChange*/,
       "Position": {
         "X": -200.0,
         "Y": 300.0
-      }
+      },
+      "Description": "If enabled, sends a packet automatically whenever the `TrackerData` input changes."
     },
     {
       "InputId": "b2b8c4f1-6d0e-4b3a-9c8e-7f1a0d9e6b5b"/*Names*/,
@@ -60,21 +67,24 @@
         "X": -200.0,
         "Y": 675.0
       },
-      "Usage": "Default"
+      "Usage": "Default",
+      "Description": "A list of strings to name the individual trackers. The list should correspond to the points in `TrackerData`."
     },
     {
       "InputId": "c8c4d0f7-c06e-4b1a-9d6c-6f5e4d3c2b1b"/*TrackerData*/,
       "Position": {
         "X": -200.0,
         "Y": 450.0
-      }
+      },
+      "Description": "The input for the structured buffer of points representing the trackers. Each point should have position (Position) and orientation (Rotation)."
     },
     {
       "InputId": "d7ac22c0-a31e-41f6-b29d-d40956e6688b"/*SendTrigger*/,
       "Position": {
         "X": -200.0,
         "Y": 375.0
-      }
+      },
+      "Description": "A trigger to manually send a PosiStageNet packet."
     }
   ],
   "SymbolChildUis": [],

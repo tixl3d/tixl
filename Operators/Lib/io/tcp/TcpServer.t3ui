@@ -1,13 +1,14 @@
 {
   "Id": "0f1e2d3c-4b5a-4678-9012-3456789abcde"/*TcpServer*/,
-  "Description": "",
+  "Description": "Creates a TCP server to listen for incoming connections and receive data.\n\nThis operator starts a TCP server on a specified IP address and port, allowing multiple clients to connect simultaneously. It receives data from all connected clients and can broadcast messages to them.\n\nTips:\n- Use `Listen` to start and stop the server.\n- `ConnectionCount` shows how many clients are currently connected.\n- Messages sent via the `Message` input are broadcast to all connected clients.\n\nAKA: tcp, network, socket, server",
   "InputUis": [
     {
       "InputId": "9a0b1c2d-3e4f-4567-8901-23456789abc0"/*Listen*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Starts or stops the TCP server from listening for new connections."
     },
     {
       "InputId": "a0b1c2d3-e4f5-4678-9012-3456789abcde"/*LocalIpAddress*/,
@@ -15,14 +16,16 @@
         "X": -200.0,
         "Y": 75.0
       },
-      "Usage": "CustomDropdown"
+      "Usage": "CustomDropdown",
+      "Description": "The local IP address for the server to listen on. A dropdown shows available addresses. Using '0.0.0.0' will make the server listen on all available network interfaces."
     },
     {
       "InputId": "b1c2d3e4-f5a6-4789-0123-456789abcdef"/*Port*/,
       "Position": {
         "X": -200.0,
         "Y": 150.0
-      }
+      },
+      "Description": "The port number for the server to listen on."
     },
     {
       "InputId": "c2d3e4f5-a6b7-4890-1234-567890abcdef"/*Message*/,
@@ -30,28 +33,32 @@
         "X": -200.0,
         "Y": 225.0
       },
-      "Usage": "Default"
+      "Usage": "Default",
+      "Description": "The message to be broadcast to all connected clients."
     },
     {
       "InputId": "d3e4f5a6-b7c8-4901-2345-67890abcdef1"/*SendOnChange*/,
       "Position": {
         "X": -200.0,
         "Y": 300.0
-      }
+      },
+      "Description": "If enabled, the `Message` is sent automatically to all clients whenever its content changes."
     },
     {
       "InputId": "e4f5a6b7-c8d9-4012-3456-7890abcdef12"/*SendTrigger*/,
       "Position": {
         "X": -200.0,
         "Y": 375.0
-      }
+      },
+      "Description": "A trigger to manually send the `Message` to all connected clients. The message is sent when this value changes from 0 to 1."
     },
     {
       "InputId": "f5a6b7c8-d9e0-4123-4567-890abcdef123"/*PrintToLog*/,
       "Position": {
         "X": -200.0,
         "Y": 450.0
-      }
+      },
+      "Description": "If enabled, prints status information, connection events, sent/received data, and errors to the T3 log. Useful for debugging."
     }
   ],
   "SymbolChildUis": [],

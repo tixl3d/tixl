@@ -1,13 +1,14 @@
 {
   "Id": "7a610996-913a-443b-921a-12e6b05f4110"/*DMXOutput*/,
-  "Description": "",
+  "Description": "Sends DMX data to a connected DMX interface.\n\nThis operator sends a list of float values as DMX channels to a specified DMX universe via a connected DMX interface (e.g., FTDI-based USB-DMX interfaces). The input `DmxUniverse` should be a list of floats, where each float represents a DMX channel value (0-1).\n\nTips:\n- Ensure the correct `PortName` for your DMX interface is selected.\n- The `DmxUniverse` input expects a list of up to 512 float values. Use operators like `PointsToDMXLights` to generate this data.\n- `MaxFps` can be used to limit the update rate and reduce CPU usage.\n\nAKA: dmx, light, lighting, ftdi",
   "InputUis": [
     {
       "InputId": "0e2f7f23-99a1-428a-9343-263b29831bc3"/*Connect*/,
       "Position": {
         "X": -200.0,
         "Y": 225.0
-      }
+      },
+      "Description": "Connects or disconnects from the DMX interface. This is useful to free the port for other applications without deleting the operator."
     },
     {
       "InputId": "2845601e-2374-4581-8843-169289290176"/*PortName*/,
@@ -15,21 +16,24 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "Usage": "CustomDropdown"
+      "Usage": "CustomDropdown",
+      "Description": "The name of the serial port for the DMX interface, e.g., 'COM3'. A dropdown shows available FTDI devices."
     },
     {
       "InputId": "59381a83-3736-4767-948a-18a81180630c"/*DmxUniverse*/,
       "Position": {
         "X": -200.0,
         "Y": 150.0
-      }
+      },
+      "Description": "A list of up to 512 float values (0-1) representing the DMX channel values for a single universe."
     },
     {
       "InputId": "c1f747f5-3634-4142-a16d-346743a13728"/*MaxFps*/,
       "Position": {
         "X": -200.0,
         "Y": 75.0
-      }
+      },
+      "Description": "Limits the maximum update rate in frames per second. A value of 0 means no limit."
     }
   ],
   "SymbolChildUis": [],
