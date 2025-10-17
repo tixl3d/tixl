@@ -10,17 +10,44 @@ namespace Lib.io.dmx;
 [Guid("fc03dcd0-6f2f-4507-be06-1ed105607489")]
 internal sealed class ArtnetInput : Instance<ArtnetInput>, IStatusProvider, ICustomDropdownHolder
 {
+    private const int ArtNetPort = 6454;
+    private static readonly byte[] _artnetId = "Art-Net\0"u8.ToArray();
+    private readonly ConcurrentDictionary<int, UniverseData> _receivedUniverses = new();
+
+    [Input(Guid = "3d085f6f-6f4a-4876-805f-22f25497a731")]
+    public readonly InputSlot<bool> Active = new();
+
+    // Unique GUID for LocalIpAddress in ArtnetInput
+    [Input(Guid = "24B5D450-4E83-49DB-88B1-7D688E64585D")]
+    public readonly InputSlot<string> LocalIpAddress = new("0.0.0.0 (Any)");
+
+    [Input(Guid = "c18a9359-3ef8-4e0d-85d8-51f725357388")]
+    public readonly InputSlot<int> NumUniverses = new(1);
+
+    [Input(Guid = "A5B6C7D8-E9F0-4123-4567-890ABCDEF123")]
+    public readonly InputSlot<bool> PrintToLog = new();
+
     [Output(Guid = "d3c09c87-c508-4621-a54d-f14d85c3f75f", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
     public readonly Slot<List<int>> Result = new();
+
+    [Input(Guid = "19bde769-3992-4cf0-a0b4-e3ae25c03c79")]
+    public readonly InputSlot<int> StartUniverse = new(1);
+
+    [Input(Guid = "a38c29b6-057d-4883-9366-139366113b63")]
+    public readonly InputSlot<float> Timeout = new(1.2f);
+
+    private string? _lastLocalIp;
+
+    private Thread? _listenerThread;
+    private bool _printToLog; // Added for PrintToLog functionality
+    private volatile bool _runListener;
+    private UdpClient? _udpClient;
+    private bool _wasActive;
 
     public ArtnetInput()
     {
         Result.UpdateAction = Update;
     }
-
-    private string? _lastLocalIp;
-    private bool _wasActive;
-    private bool _printToLog; // Added for PrintToLog functionality
 
     private void Update(EvaluationContext context)
     {
@@ -58,7 +85,7 @@ internal sealed class ArtnetInput : Instance<ArtnetInput>, IStatusProvider, ICus
             }
             else
             {
-                combinedDmxData.AddRange(Enumerable.Repeat(0, 512));
+                combinedDmxData.AddRange(Repeat(0, 512));
             }
         }
 
@@ -122,7 +149,7 @@ internal sealed class ArtnetInput : Instance<ArtnetInput>, IStatusProvider, ICus
             {
                 try
                 {
-                    if (_udpClient == null) break; // Check if client was disposed externally
+                    if (_udpClient == null) break; // Check if a client was disposed externally
                     var data = _udpClient.Receive(ref remoteEndPoint);
 
                     if (data.Length < 18 || !data.AsSpan(0, 8).SequenceEqual(_artnetId) || data[8] != 0x00 || data[9] != 0x50) continue;
@@ -227,17 +254,12 @@ internal sealed class ArtnetInput : Instance<ArtnetInput>, IStatusProvider, ICus
 
         StopListening();
     }
-    
+
     private sealed class UniverseData
     {
         public readonly byte[] DmxData = new byte[512];
         public long LastReceivedTicks;
     }
-
-    private Thread? _listenerThread;
-    private volatile bool _runListener;
-    private UdpClient? _udpClient;
-    private readonly ConcurrentDictionary<int, UniverseData> _receivedUniverses = new();
 
     #region IStatusProvider & ICustomDropdownHolder
     private string _lastStatusMessage = "Inactive";
@@ -253,7 +275,11 @@ internal sealed class ArtnetInput : Instance<ArtnetInput>, IStatusProvider, ICus
     public string GetStatusMessage() => _lastStatusMessage;
 
     string ICustomDropdownHolder.GetValueForInput(Guid id) => id == LocalIpAddress.Id ? LocalIpAddress.Value : string.Empty;
-    IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid id) => id == LocalIpAddress.Id ? GetLocalIPv4Addresses() : Enumerable.Empty<string>();
+
+    IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid id)
+    {
+        return id == LocalIpAddress.Id ? GetLocalIPv4Addresses() : Empty<string>();
+    }
 
     void ICustomDropdownHolder.HandleResultForInput(Guid id, string? s, bool i)
     {
@@ -277,26 +303,4 @@ internal sealed class ArtnetInput : Instance<ArtnetInput>, IStatusProvider, ICus
         }
     }
     #endregion
-
-    private const int ArtNetPort = 6454;
-    private static readonly byte[] _artnetId = "Art-Net\0"u8.ToArray();
-
-    // Unique GUID for LocalIpAddress in ArtnetInput
-    [Input(Guid = "24B5D450-4E83-49DB-88B1-7D688E64585D")]
-    public readonly InputSlot<string> LocalIpAddress = new("0.0.0.0 (Any)");
-
-    [Input(Guid = "3d085f6f-6f4a-4876-805f-22f25497a731")]
-    public readonly InputSlot<bool> Active = new();
-
-    [Input(Guid = "19bde769-3992-4cf0-a0b4-e3ae25c03c79")]
-    public readonly InputSlot<int> StartUniverse = new(1);
-
-    [Input(Guid = "c18a9359-3ef8-4e0d-85d8-51f725357388")]
-    public readonly InputSlot<int> NumUniverses = new(1);
-
-    [Input(Guid = "a38c29b6-057d-4883-9366-139366113b63")]
-    public readonly InputSlot<float> Timeout = new(1.2f);
-
-    [Input(Guid = "A5B6C7D8-E9F0-4123-4567-890ABCDEF123")]
-    public readonly InputSlot<bool> PrintToLog = new();
 }

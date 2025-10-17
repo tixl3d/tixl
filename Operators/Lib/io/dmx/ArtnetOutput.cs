@@ -1,20 +1,9 @@
 #nullable enable
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using T3.Core.Logging;
-using T3.Core.Operator;
-using T3.Core.Operator.Attributes;
-using T3.Core.Operator.Slots;
 using T3.Core.Utils;
 
 namespace Lib.io.dmx;
@@ -28,37 +17,38 @@ internal sealed class ArtnetOutput : Instance<ArtnetOutput>, IStatusProvider, IC
     private const ushort OpPoll = 0x2000;
     private const ushort OpSync = 0x5200;
     private const ushort ProtocolVersion = 14;
-    private static readonly byte[] ArtnetId = "Art-Net\0"u8.ToArray();
+    private static readonly byte[] _artnetId = "Art-Net\0"u8.ToArray();
+
+    // --- State and Configuration ---
+    private readonly ConnectionSettings _connectionSettings = new();
+    private readonly object _dataLock = new();
+    private readonly ConcurrentDictionary<string, string> _discoveredNodes = new();
+    private readonly byte[] _packetBuffer = new byte[18 + 512]; // Reusable buffer for zero-allocation packet creation
 
     [Output(Guid = "499329d0-15e9-410e-9f61-63724dbec937")]
     public readonly Slot<Command> Result = new();
 
-    // --- State and Configuration ---
-    private readonly ConnectionSettings _connectionSettings = new();
-    private volatile bool _printToLog;
-    private bool _wasSendingLastFrame;
-    private string? _lastErrorMessage;
-    private IStatusProvider.StatusLevel _lastStatusLevel = IStatusProvider.StatusLevel.Notice;
-    private IPAddress? _selectedSubnetMask;
-
-    // --- High-Performance Sending Resources ---
-    private Thread? _senderThread;
-    private CancellationTokenSource? _senderCts;
-    private readonly object _dataLock = new();
-    private List<(int universe, byte[] data)>? _dmxDataToSend;
-    private bool _syncToSend;
-    private int _maxFps;
-    private readonly byte[] _packetBuffer = new byte[18 + 512]; // Reusable buffer for zero-allocation packet creation
+    private Thread? _artPollListenerThread;
 
     // --- Discovery (ArtPoll) Resources ---
     private Timer? _artPollTimer;
-    private Thread? _artPollListenerThread;
+    private bool _connected;
+    private List<(int universe, byte[] data)>? _dmxDataToSend;
     private volatile bool _isPolling;
-    private readonly ConcurrentDictionary<string, string> _discoveredNodes = new();
+    private string? _lastErrorMessage;
+    private IStatusProvider.StatusLevel _lastStatusLevel = IStatusProvider.StatusLevel.Notice;
+    private int _maxFps;
+    private volatile bool _printToLog;
+    private IPAddress? _selectedSubnetMask;
+    private CancellationTokenSource? _senderCts;
+
+    // --- High-Performance Sending Resources ---
+    private Thread? _senderThread;
 
     // --- Network and Connection Management ---
     private Socket? _socket;
-    private bool _connected;
+    private bool _syncToSend;
+    private bool _wasSendingLastFrame;
 
     public ArtnetOutput()
     {
@@ -137,6 +127,7 @@ internal sealed class ArtnetOutput : Instance<ArtnetOutput>, IStatusProvider, IC
                 {
                     dmxData[j] = (byte)buffer[i + j].Clamp(0, 255);
                 }
+
                 preparedData.Add((universeIndex, dmxData));
                 universeIndex++;
             }
@@ -161,9 +152,9 @@ internal sealed class ArtnetOutput : Instance<ArtnetOutput>, IStatusProvider, IC
         var token = _senderCts.Token;
 
         _senderThread = new Thread(() => SenderLoop(token))
-        {
-            IsBackground = true, Name = "ArtNetSender", Priority = ThreadPriority.AboveNormal
-        };
+                            {
+                                IsBackground = true, Name = "ArtNetSender", Priority = ThreadPriority.AboveNormal
+                            };
         _senderThread.Start();
     }
 
@@ -177,6 +168,7 @@ internal sealed class ArtnetOutput : Instance<ArtnetOutput>, IStatusProvider, IC
         {
             _senderCts?.Dispose();
         }
+
         _senderCts = null;
         _senderThread = null;
     }
@@ -216,8 +208,10 @@ internal sealed class ArtnetOutput : Instance<ArtnetOutput>, IStatusProvider, IC
                     {
                         Thread.SpinWait(100);
                     }
+
                     continue; // Re-evaluate wait time in the next loop iteration
                 }
+
                 // Reset timing if we fell far behind to prevent a "death spiral"
                 if (now > nextFrameTimeTicks + Stopwatch.Frequency)
                     nextFrameTimeTicks = now;
@@ -262,13 +256,13 @@ internal sealed class ArtnetOutput : Instance<ArtnetOutput>, IStatusProvider, IC
         try
         {
             // 0-7: ID
-            Array.Copy(ArtnetId, 0, _packetBuffer, 0, 8);
+            Array.Copy(_artnetId, 0, _packetBuffer, 0, 8);
             // 8-9: OpCode (Little-Endian)
-            _packetBuffer[8] = (byte)(OpDmx & 0xFF);
-            _packetBuffer[9] = (byte)(OpDmx >> 8);
+            _packetBuffer[8] = OpDmx & 0xFF;
+            _packetBuffer[9] = OpDmx >> 8;
             // 10-11: Protocol Version (Big-Endian)
-            _packetBuffer[10] = (byte)(ProtocolVersion >> 8);
-            _packetBuffer[11] = (byte)(ProtocolVersion & 0xFF);
+            _packetBuffer[10] = ProtocolVersion >> 8;
+            _packetBuffer[11] = ProtocolVersion & 0xFF;
             // 12: Sequence
             _packetBuffer[12] = sequenceNumber;
             // 13: Physical
@@ -298,11 +292,11 @@ internal sealed class ArtnetOutput : Instance<ArtnetOutput>, IStatusProvider, IC
         {
             // This packet is fixed and small, so we can use a stack-allocated buffer for efficiency
             Span<byte> syncPacket = stackalloc byte[12];
-            ArtnetId.CopyTo(syncPacket);
-            syncPacket[8] = (byte)(OpSync & 0xFF);
-            syncPacket[9] = (byte)(OpSync >> 8);
-            syncPacket[10] = (byte)(ProtocolVersion >> 8);
-            syncPacket[11] = (byte)(ProtocolVersion & 0xFF);
+            _artnetId.CopyTo(syncPacket);
+            syncPacket[8] = OpSync & 0xFF;
+            syncPacket[9] = OpSync >> 8;
+            syncPacket[10] = ProtocolVersion >> 8;
+            syncPacket[11] = ProtocolVersion & 0xFF;
 
             socket.SendTo(syncPacket, target);
         }
@@ -344,11 +338,11 @@ internal sealed class ArtnetOutput : Instance<ArtnetOutput>, IStatusProvider, IC
             try
             {
                 Span<byte> pollPacket = stackalloc byte[14];
-                ArtnetId.CopyTo(pollPacket);
-                pollPacket[8] = (byte)(OpPoll & 0xFF);
-                pollPacket[9] = (byte)(OpPoll >> 8);
-                pollPacket[10] = (byte)(ProtocolVersion >> 8);
-                pollPacket[11] = (byte)(ProtocolVersion & 0xFF);
+                _artnetId.CopyTo(pollPacket);
+                pollPacket[8] = OpPoll & 0xFF;
+                pollPacket[9] = OpPoll >> 8;
+                pollPacket[10] = ProtocolVersion >> 8;
+                pollPacket[11] = ProtocolVersion & 0xFF;
                 pollPacket[12] = 2; // TalkToMe: Send ArtPollReply
                 pollPacket[13] = 0; // Priority
 
@@ -373,13 +367,17 @@ internal sealed class ArtnetOutput : Instance<ArtnetOutput>, IStatusProvider, IC
             {
                 Socket? currentSocket;
                 lock (_connectionSettings) currentSocket = _socket;
-                if (currentSocket == null || currentSocket.Available == 0) { Thread.Sleep(10); continue; }
+                if (currentSocket == null || currentSocket.Available == 0)
+                {
+                    Thread.Sleep(10);
+                    continue;
+                }
 
-                var remoteEP = new IPEndPoint(IPAddress.Any, 0) as EndPoint;
-                var receivedBytes = currentSocket.ReceiveFrom(buffer, ref remoteEP);
+                var remoteEp = new IPEndPoint(IPAddress.Any, 0) as EndPoint;
+                var receivedBytes = currentSocket.ReceiveFrom(buffer, ref remoteEp);
 
                 // Basic validation for an ArtPollReply packet
-                if (receivedBytes < 238 || !buffer.AsSpan(0, 8).SequenceEqual(ArtnetId) || buffer[8] != 0x00 || buffer[9] != 0x21) continue;
+                if (receivedBytes < 238 || !buffer.AsSpan(0, 8).SequenceEqual(_artnetId) || buffer[8] != 0x00 || buffer[9] != 0x21) continue;
 
                 var ipAddress = new IPAddress(new[] { buffer[10], buffer[11], buffer[12], buffer[13] });
                 var shortName = Encoding.ASCII.GetString(buffer, 26, 18).TrimEnd('\0');
@@ -387,8 +385,14 @@ internal sealed class ArtnetOutput : Instance<ArtnetOutput>, IStatusProvider, IC
                 var displayName = string.IsNullOrWhiteSpace(shortName) ? ipString : shortName;
                 _discoveredNodes[ipString] = $"{displayName} ({ipString})";
             }
-            catch (SocketException) { if (_isPolling) break; }
-            catch (Exception e) { if (_isPolling && _printToLog) Log.Warning($"Artnet Output: ArtPoll listen error: {e.Message}", this); }
+            catch (SocketException)
+            {
+                if (_isPolling) break;
+            }
+            catch (Exception e)
+            {
+                if (_isPolling && _printToLog) Log.Warning($"Artnet Output: ArtPoll listen error: {e.Message}", this);
+            }
         }
     }
     #endregion
@@ -433,12 +437,13 @@ internal sealed class ArtnetOutput : Instance<ArtnetOutput>, IStatusProvider, IC
                 _lastErrorMessage = "Local IP Address is not valid. Please select a valid network adapter.";
                 return false;
             }
+
             try
             {
                 _socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp)
-                {
-                    Blocking = false
-                };
+                              {
+                                  Blocking = false
+                              };
                 _socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Broadcast, true);
                 _socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
                 _socket.Bind(new IPEndPoint(localIp, ArtNetPort));
@@ -467,7 +472,8 @@ internal sealed class ArtnetOutput : Instance<ArtnetOutput>, IStatusProvider, IC
         return new IPAddress(broadcastBytes);
     }
 
-    private static readonly List<NetworkAdapterInfo> NetworkInterfaces = GetNetworkInterfaces();
+    private static readonly List<NetworkAdapterInfo> _networkInterfaces = GetNetworkInterfaces();
+
     private static List<NetworkAdapterInfo> GetNetworkInterfaces()
     {
         var list = new List<NetworkAdapterInfo> { new(IPAddress.Loopback, IPAddress.Parse("255.0.0.0"), "Localhost") };
@@ -476,10 +482,14 @@ internal sealed class ArtnetOutput : Instance<ArtnetOutput>, IStatusProvider, IC
             list.AddRange(from ni in NetworkInterface.GetAllNetworkInterfaces()
                           where ni.OperationalStatus == OperationalStatus.Up && ni.NetworkInterfaceType != NetworkInterfaceType.Loopback
                           from ip in ni.GetIPProperties().UnicastAddresses
-                          where ip.Address.AddressFamily == AddressFamily.InterNetwork && ip.IPv4Mask != null
+                          where ip.Address.AddressFamily == AddressFamily.InterNetwork
                           select new NetworkAdapterInfo(ip.Address, ip.IPv4Mask, ni.Name));
         }
-        catch (Exception e) { Log.Warning("Could not enumerate network interfaces: " + e.Message); }
+        catch (Exception e)
+        {
+            Log.Warning("Could not enumerate network interfaces: " + e.Message);
+        }
+
         return list;
     }
 
@@ -490,11 +500,11 @@ internal sealed class ArtnetOutput : Instance<ArtnetOutput>, IStatusProvider, IC
 
     private sealed class ConnectionSettings
     {
+        private string? _lastLocalIpStr, _lastTargetIpStr;
+        private bool _lastSendUnicast;
         public IPAddress? LocalIp { get; private set; }
         public IPAddress? SubnetMask { get; private set; }
         public IPEndPoint? TargetEndPoint { get; private set; }
-        private string? _lastLocalIpStr, _lastTargetIpStr;
-        private bool _lastSendUnicast;
 
         public bool Update(string localIpStr, IPAddress? subnetMask, string targetIpStr, bool sendUnicast)
         {
@@ -505,7 +515,8 @@ internal sealed class ArtnetOutput : Instance<ArtnetOutput>, IStatusProvider, IC
             _lastSendUnicast = sendUnicast;
             SubnetMask = subnetMask;
 
-            IPAddress.TryParse(localIpStr, out var parsedLocalIp);
+            IPAddress? parsedLocalIp;
+            IPAddress.TryParse(localIpStr, out parsedLocalIp);
             LocalIp = parsedLocalIp;
 
             IPAddress? targetIp = null;
@@ -513,7 +524,7 @@ internal sealed class ArtnetOutput : Instance<ArtnetOutput>, IStatusProvider, IC
             {
                 IPAddress.TryParse(targetIpStr, out targetIp);
             }
-            else if (LocalIp != null && SubnetMask != null)
+            else if (LocalIp != null && SubnetMask != null) // Added null checks for LocalIp and SubnetMask
             {
                 targetIp = CalculateBroadcastAddress(LocalIp, SubnetMask);
             }
@@ -527,7 +538,12 @@ internal sealed class ArtnetOutput : Instance<ArtnetOutput>, IStatusProvider, IC
     #region IStatusProvider and ICustomDropdownHolder implementation
     public IStatusProvider.StatusLevel GetStatusLevel() => _lastStatusLevel;
     public string? GetStatusMessage() => _lastErrorMessage;
-    public void SetStatus(string m, IStatusProvider.StatusLevel l) { _lastErrorMessage = m; _lastStatusLevel = l; }
+
+    public void SetStatus(string m, IStatusProvider.StatusLevel l)
+    {
+        _lastErrorMessage = m;
+        _lastStatusLevel = l;
+    }
 
     string ICustomDropdownHolder.GetValueForInput(Guid inputId)
     {
@@ -540,13 +556,15 @@ internal sealed class ArtnetOutput : Instance<ArtnetOutput>, IStatusProvider, IC
     {
         if (inputId == LocalIpAddress.Id)
         {
-            foreach (var adapter in NetworkInterfaces) yield return adapter.DisplayName;
+            foreach (var adapter in _networkInterfaces) yield return adapter.DisplayName;
         }
         else if (inputId == TargetIpAddress.Id)
         {
             if (!_isPolling && _discoveredNodes.IsEmpty) yield return "Enable 'Discover Nodes' to search...";
             else if (_isPolling && _discoveredNodes.IsEmpty) yield return "Searching for nodes...";
-            else foreach (var nodeName in _discoveredNodes.Values.OrderBy(name => name)) yield return nodeName;
+            else
+                foreach (var nodeName in _discoveredNodes.Values.OrderBy(name => name))
+                    yield return nodeName;
         }
     }
 
@@ -556,7 +574,7 @@ internal sealed class ArtnetOutput : Instance<ArtnetOutput>, IStatusProvider, IC
 
         if (inputId == LocalIpAddress.Id)
         {
-            var foundAdapter = NetworkInterfaces.FirstOrDefault(i => i.DisplayName == selected);
+            var foundAdapter = _networkInterfaces.FirstOrDefault(i => i.DisplayName == selected);
             if (foundAdapter == null) return;
             LocalIpAddress.SetTypedInputValue(foundAdapter.IpAddress.ToString());
             _selectedSubnetMask = foundAdapter.SubnetMask;
@@ -572,18 +590,43 @@ internal sealed class ArtnetOutput : Instance<ArtnetOutput>, IStatusProvider, IC
     #endregion
 
     #region Inputs
-    [Input(Guid = "F7520A37-C2D4-41FA-A6BA-A6ED0423A4EC")] public readonly MultiInputSlot<List<int>> InputsValues = new();
-    [Input(Guid = "34aeeda5-72b0-4f13-bfd3-4ad5cf42b24f")] public readonly InputSlot<int> StartUniverse = new();
-    [Input(Guid = "fcbfe87b-b8aa-461c-a5ac-b22bb29ad36d")] public readonly InputSlot<string> LocalIpAddress = new();
-    [Input(Guid = "168d0023-554f-46cd-9e62-8f3d1f564b8d")] public readonly InputSlot<bool> SendTrigger = new();
-    [Input(Guid = "73babdb1-f88f-4e4d-aa3f-0536678b0793")] public readonly InputSlot<bool> Reconnect = new();
-    [Input(Guid = "d293bb33-2fba-4048-99b8-86aa15a478f2")] public readonly InputSlot<bool> SendSync = new();
-    [Input(Guid = "7c15da5f-cfa1-4339-aceb-4ed0099ea041")] public readonly InputSlot<bool> SendUnicast = new();
-    [Input(Guid = "0fc76369-788a-4ffe-9dde-8eea5f10cf32")] public readonly InputSlot<string> TargetIpAddress = new();
-    [Input(Guid = "65fb88ec-5772-4973-bd8b-bb2cb9f557e7")] public readonly InputSlot<bool> PrintArtnetPoll = new();
-    [Input(Guid = "4A9E2D3B-8C6F-4B1D-8D7E-9F3A5B2C1D0E")] public readonly InputSlot<int> Priority = new(100);
-    [Input(Guid = "5B1D9C8A-7E3F-4A2B-9C8D-1E0F3A5B2C1D")] public readonly InputSlot<string> SourceName = new("T3 Art-Net Output");
-    [Input(Guid = "6F5C4B3A-2E1D-4F9C-8A7B-3D2E1F0C9B8A")] public readonly InputSlot<int> MaxFps = new(60);
-    [Input(Guid = "D0E1F2A3-B4C5-4678-9012-3456789ABCDE")] public readonly InputSlot<bool> PrintToLog = new();
+    [Input(Guid = "F7520A37-C2D4-41FA-A6BA-A6ED0423A4EC")]
+    public readonly MultiInputSlot<List<int>> InputsValues = new();
+
+    [Input(Guid = "34aeeda5-72b0-4f13-bfd3-4ad5cf42b24f")]
+    public readonly InputSlot<int> StartUniverse = new();
+
+    [Input(Guid = "fcbfe87b-b8aa-461c-a5ac-b22bb29ad36d")]
+    public readonly InputSlot<string> LocalIpAddress = new();
+
+    [Input(Guid = "168d0023-554f-46cd-9e62-8f3d1f564b8d")]
+    public readonly InputSlot<bool> SendTrigger = new();
+
+    [Input(Guid = "73babdb1-f88f-4e4d-aa3f-0536678b0793")]
+    public readonly InputSlot<bool> Reconnect = new();
+
+    [Input(Guid = "d293bb33-2fba-4048-99b8-86aa15a478f2")]
+    public readonly InputSlot<bool> SendSync = new();
+
+    [Input(Guid = "7c15da5f-cfa1-4339-aceb-4ed0099ea041")]
+    public readonly InputSlot<bool> SendUnicast = new();
+
+    [Input(Guid = "0fc76369-788a-4ffe-9dde-8eea5f10cf32")]
+    public readonly InputSlot<string> TargetIpAddress = new();
+
+    [Input(Guid = "65fb88ec-5772-4973-bd8b-bb2cb9f557e7")]
+    public readonly InputSlot<bool> PrintArtnetPoll = new();
+
+    [Input(Guid = "4A9E2D3B-8C6F-4B1D-8D7E-9F3A5B2C1D0E")]
+    public readonly InputSlot<int> Priority = new(100);
+
+    [Input(Guid = "5B1D9C8A-7E3F-4A2B-9C8D-1E0F3A5B2C1D")]
+    public readonly InputSlot<string> SourceName = new("T3 Art-Net Output");
+
+    [Input(Guid = "6F5C4B3A-2E1D-4F9C-8A7B-3D2E1F0C9B8A")]
+    public readonly InputSlot<int> MaxFps = new(60);
+
+    [Input(Guid = "D0E1F2A3-B4C5-4678-9012-3456789ABCDE")]
+    public readonly InputSlot<bool> PrintToLog = new();
     #endregion
 }

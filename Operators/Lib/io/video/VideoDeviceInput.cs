@@ -4,12 +4,69 @@ using DirectShowLib;
 using OpenCvSharp;
 using SharpDX;
 using Device = SharpDX.Direct3D11.Device;
+using FormatType = DirectShowLib.FormatType;
 
 namespace Lib.io.video;
 
 [Guid("cd5a182e-254b-4e65-820b-ff754122614c")]
 public class VideoDeviceInput : Instance<VideoDeviceInput>, ICustomDropdownHolder
 {
+    private const float Epsilon = 1e-4f;
+
+    // Static device information
+    private static List<WebcamWithIndex> _webcamWithIndices;
+    private static Dictionary<string, List<(int Width, int Height, double Fps)>> _webcamCapabilities;
+    private static readonly object _capabilitiesLock = new();
+    private static readonly Lock _staticInitLock = new();
+    private static bool _devicesScanned;
+    private readonly Lock _captureDeviceLock = new();
+    private readonly Lock _lockObject = new();
+
+    [Input(Guid = "236D4C5C-0022-4416-A22C-D6DF73C306E2")]
+    public readonly InputSlot<bool> Active = new();
+
+    [Input(Guid = "3022DE8A-5D88-4A37-9799-780F2A838A6E")]
+    public readonly InputSlot<float> ApplyRotationData = new();
+
+    [Input(Guid = "11F7432D-31F1-44B9-8F75-B1569B314B13")]
+    public readonly InputSlot<int> CustomFps = new();
+
+    [Input(Guid = "C9E1C1F6-3A18-4A1C-8A5E-4B4119965B6E")]
+    public readonly InputSlot<Int2> CustomResolution = new();
+
+    [Input(Guid = "22513B82-E77A-417A-8A46-24E677F072D4")]
+    public readonly InputSlot<bool> DeactivateWhenNotShowing = new();
+
+    [Input(Guid = "A57E815D-70C9-4D3B-998C-D13506B8F56E")]
+    public readonly InputSlot<bool> FlipHorizontally = new();
+
+    [Input(Guid = "3022DE8A-5D88-4A37-9799-780F2A838A5F")]
+    public readonly InputSlot<bool> FlipVertically = new();
+
+    [Input(Guid = "f5b900ec-ee17-123e-9972-cdd0580c104e")]
+    public readonly InputSlot<string> InputDeviceName = new();
+
+    [Input(Guid = "8D2C28C7-1234-40E2-9388-75574519543D")]
+    public readonly InputSlot<bool> OpenSettings = new();
+
+    [Input(Guid = "67E149A5-F7B6-47BC-B147-3B9B11C19C29")]
+    public readonly InputSlot<bool> Reconnect = new();
+
+    [Input(Guid = "F187A997-7E4A-48C6-81F9-2A27F150A68A")]
+    public readonly InputSlot<Vector2> Reposition = new();
+
+    [Output(Guid = "9C2E4C11-09B6-4F4D-8F99-4A7372D5F2B5", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
+    public readonly Slot<Int2> Resolution = new();
+
+    [Input(Guid = "49019D29-873E-4B7C-A897-C575A384A650", MappedType = typeof(ResolutionFpsTypeEnum))]
+    public readonly InputSlot<int> ResolutionFpsType = new();
+
+    [Input(Guid = "805602D5-52B2-4A73-A337-12E00C3C91F2")]
+    public readonly InputSlot<Vector2> Scale = new();
+
+    [Output(Guid = "A1B2C3D4-5678-90EF-1234-567890ABCDEF", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
+    public new readonly Slot<string> Status = new();
+
     // Output slots
     [Output(Guid = "1d0159cc-33d2-46b1-9c0c-7054aa560df5", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
     public readonly Slot<Texture2D> Texture = new();
@@ -17,14 +74,20 @@ public class VideoDeviceInput : Instance<VideoDeviceInput>, ICustomDropdownHolde
     [Output(Guid = "868D5FFE-032C-4522-B56B-D96B30841DB7", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
     public readonly Slot<int> UpdateCount = new();
 
-    [Output(Guid = "9C2E4C11-09B6-4F4D-8F99-4A7372D5F2B5", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
-    public readonly Slot<Int2> Resolution = new();
+    private CancellationTokenSource _cancellationTokenSource;
 
-    [Output(Guid = "A1B2C3D4-5678-90EF-1234-567890ABCDEF", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
-    public new readonly Slot<string> Status = new();
+    // Instance variables
+    private VideoCapture _capture;
+    private Thread _captureThread;
+    private Texture2D _gpuTexture;
+    private int _height;
+    private volatile string _lastStatusMessage = "";
+    private Mat _sharedMat;
+    private int _storeDeviceIndex = -1;
 
-
-
+    // Transformation cache
+    private Mat _transformationMatrix;
+    private int _width;
 
     public VideoDeviceInput()
     {
@@ -393,7 +456,42 @@ public class VideoDeviceInput : Instance<VideoDeviceInput>, ICustomDropdownHolde
         }
     }
 
+    private sealed record CaptureThreadSettings
+    {
+        public readonly int CustomFps;
+        public readonly Int2 CustomResolution;
+        public readonly bool FlipHorizontally;
+        public readonly bool FlipVertically;
+        public readonly Vector2 Reposition;
+        public readonly ResolutionFpsTypeEnum ResolutionFpsType;
+        public readonly float Rotation;
+        public readonly Vector2 Scale;
 
+        public CaptureThreadSettings(VideoDeviceInput owner, EvaluationContext context)
+        {
+            ResolutionFpsType = (ResolutionFpsTypeEnum)owner.ResolutionFpsType.GetValue(context);
+            CustomResolution = owner.CustomResolution.GetValue(context);
+            CustomFps = owner.CustomFps.GetValue(context);
+            FlipVertically = owner.FlipVertically.GetValue(context);
+            FlipHorizontally = owner.FlipHorizontally.GetValue(context);
+            Rotation = owner.ApplyRotationData.GetValue(context);
+            Reposition = owner.Reposition.GetValue(context);
+            Scale = owner.Scale.GetValue(context);
+        }
+
+        public bool HasTransformation()
+        {
+            return Math.Abs(Rotation) > Epsilon ||
+                   Math.Abs(Scale.X - 1.0f) > Epsilon || Math.Abs(Scale.Y - 1.0f) > Epsilon ||
+                   Math.Abs(Reposition.X) > Epsilon || Math.Abs(Reposition.Y) > Epsilon;
+        }
+    }
+
+    private enum ResolutionFpsTypeEnum
+    {
+        DeviceDefault = 0,
+        Custom = 1
+    }
 
     #region Device Configuration UI
     private void OpenVideoSettings()
@@ -571,7 +669,7 @@ public class VideoDeviceInput : Instance<VideoDeviceInput>, ICustomDropdownHolde
                                             {
                                                 streamConfig.GetStreamCaps(j, out var mediaType, capsPtr);
                                                 if (mediaType != null &&
-                                                    mediaType.formatType == DirectShowLib.FormatType.VideoInfo &&
+                                                    mediaType.formatType == FormatType.VideoInfo &&
                                                     mediaType.formatPtr != IntPtr.Zero)
                                                 {
                                                     var vih = Marshal.PtrToStructure<VideoInfoHeader>(mediaType.formatPtr);
@@ -638,106 +736,4 @@ public class VideoDeviceInput : Instance<VideoDeviceInput>, ICustomDropdownHolde
 
     public sealed record WebcamWithIndex(string Name, int Index);
     #endregion
-
-    private sealed record CaptureThreadSettings
-    {
-        public readonly ResolutionFpsTypeEnum ResolutionFpsType;
-        public readonly Int2 CustomResolution;
-        public readonly int CustomFps;
-        public readonly bool FlipVertically;
-        public readonly bool FlipHorizontally;
-        public readonly float Rotation;
-        public readonly Vector2 Reposition;
-        public readonly Vector2 Scale;
-
-        public CaptureThreadSettings(VideoDeviceInput owner, EvaluationContext context)
-        {
-            ResolutionFpsType = (ResolutionFpsTypeEnum)owner.ResolutionFpsType.GetValue(context);
-            CustomResolution = owner.CustomResolution.GetValue(context);
-            CustomFps = owner.CustomFps.GetValue(context);
-            FlipVertically = owner.FlipVertically.GetValue(context);
-            FlipHorizontally = owner.FlipHorizontally.GetValue(context);
-            Rotation = owner.ApplyRotationData.GetValue(context);
-            Reposition = owner.Reposition.GetValue(context);
-            Scale = owner.Scale.GetValue(context);
-        }
-
-        public bool HasTransformation()
-        {
-            return Math.Abs(Rotation) > Epsilon ||
-                   Math.Abs(Scale.X - 1.0f) > Epsilon || Math.Abs(Scale.Y - 1.0f) > Epsilon ||
-                   Math.Abs(Reposition.X) > Epsilon || Math.Abs(Reposition.Y) > Epsilon;
-        }
-    }
-
-    private enum ResolutionFpsTypeEnum
-    {
-        DeviceDefault = 0,
-        Custom = 1
-    }
-    
-    
-    // Static device information
-    private static List<WebcamWithIndex> _webcamWithIndices;
-    private static Dictionary<string, List<(int Width, int Height, double Fps)>> _webcamCapabilities;
-    private static readonly object _capabilitiesLock = new();
-    private static readonly Lock _staticInitLock = new();
-    private static bool _devicesScanned;
-
-    // Instance variables
-    private VideoCapture _capture;
-    private int _storeDeviceIndex = -1;
-    private readonly Lock _lockObject = new();
-    private readonly Lock _captureDeviceLock = new();
-    private Mat _sharedMat;
-    private Thread _captureThread;
-    private CancellationTokenSource _cancellationTokenSource;
-    private Texture2D _gpuTexture;
-    private int _width;
-    private int _height;
-    private volatile string _lastStatusMessage = "";
-
-    // Transformation cache
-    private Mat _transformationMatrix;
-    private const float Epsilon = 1e-4f;
-    
-    [Input(Guid = "236D4C5C-0022-4416-A22C-D6DF73C306E2")]
-    public readonly InputSlot<bool> Active = new();
-
-    [Input(Guid = "f5b900ec-ee17-123e-9972-cdd0580c104e")]
-    public readonly InputSlot<string> InputDeviceName = new();
-
-    [Input(Guid = "22513B82-E77A-417A-8A46-24E677F072D4")]
-    public readonly InputSlot<bool> DeactivateWhenNotShowing = new();
-
-    [Input(Guid = "49019D29-873E-4B7C-A897-C575A384A650", MappedType = typeof(ResolutionFpsTypeEnum))]
-    public readonly InputSlot<int> ResolutionFpsType = new();
-
-    [Input(Guid = "C9E1C1F6-3A18-4A1C-8A5E-4B4119965B6E")]
-    public readonly InputSlot<T3.Core.DataTypes.Vector.Int2> CustomResolution = new();
-
-    [Input(Guid = "11F7432D-31F1-44B9-8F75-B1569B314B13")]
-    public readonly InputSlot<int> CustomFps = new();
-
-    [Input(Guid = "A57E815D-70C9-4D3B-998C-D13506B8F56E")]
-    public readonly InputSlot<bool> FlipHorizontally = new();
-
-    [Input(Guid = "3022DE8A-5D88-4A37-9799-780F2A838A5F")]
-    public readonly InputSlot<bool> FlipVertically = new();
-
-    [Input(Guid = "3022DE8A-5D88-4A37-9799-780F2A838A6E")]
-    public readonly InputSlot<float> ApplyRotationData = new();
-
-    [Input(Guid = "8D2C28C7-1234-40E2-9388-75574519543D")]
-    public readonly InputSlot<bool> OpenSettings = new();
-
-    [Input(Guid = "F187A997-7E4A-48C6-81F9-2A27F150A68A")]
-    public readonly InputSlot<System.Numerics.Vector2> Reposition = new();
-
-    [Input(Guid = "805602D5-52B2-4A73-A337-12E00C3C91F2")]
-    public readonly InputSlot<System.Numerics.Vector2> Scale = new();
-
-    [Input(Guid = "67E149A5-F7B6-47BC-B147-3B9B11C19C29")]
-    public readonly InputSlot<bool> Reconnect = new();
-    
 }

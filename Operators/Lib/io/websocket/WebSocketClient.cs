@@ -1,14 +1,17 @@
 #nullable enable
+using System.Globalization;
 using System.Net.WebSockets;
+using System.Text.Json;
 using System.Threading;
 using T3.Core.Utils;
-using System.Text.Json; // Added for JSON parsing
-using System.Globalization; // Added for CultureInfo.InvariantCulture
+// Added for JSON parsing
+
+// Added for CultureInfo.InvariantCulture
 
 namespace Lib.io.websocket
 {
-    // Moved enum definition here, outside the class, and made it public.
-    public enum MessageParsingMode
+    // Moved the enum definition here, outside the class, and made it public.
+    internal enum MessageParsingMode
     {
         Raw,
         SpaceSeparated,
@@ -18,23 +21,69 @@ namespace Lib.io.websocket
     [Guid("8E9F0A1B-2C3D-4E5F-6A7B-8C9D0E1F2A3B")] // Updated GUID
     internal sealed class WebSocketClient : Instance<WebSocketClient>, IStatusProvider, ICustomDropdownHolder, IDisposable
     {
-        [Output(Guid = "7C8D9E0A-1B2C-43F5-89DE-1234567890AB", DirtyFlagTrigger = DirtyFlagTrigger.Animated)] // Updated GUID
-        public readonly Slot<string> ReceivedString = new();
+        private readonly List<string> _messageHistory = new();
+        private readonly ConcurrentQueue<string> _receivedQueue = new();
+        private readonly object _socketLock = new();
 
-        [Output(Guid = "F2E1D0C9-B8A7-4654-7321-0FEDCBA98765", DirtyFlagTrigger = DirtyFlagTrigger.Animated)] // Updated GUID
-        public readonly Slot<List<string>> ReceivedLines = new();
+        [Input(Guid = "A1B2C3D4-E5F6-4789-0123-456789ABCDEF")]
+        public readonly InputSlot<bool> Connect = new();
 
-        [Output(Guid = "9B8A7C6D-5E4F-4012-3456-7890ABCDEF12", DirtyFlagTrigger = DirtyFlagTrigger.Animated)] // Updated GUID
-        public readonly Slot<bool> WasTrigger = new();
+        [Input(Guid = "1E2D3C4B-5A6F-4879-0123-456789ABCDEF")]
+        public readonly InputSlot<string> Delimiter = new(" ");
 
         [Output(Guid = "C1D2E3F4-5A6B-4789-0C1D-2E3F4A5B6C7D")] // Updated GUID
         public readonly Slot<bool> IsConnected = new();
 
+        [Input(Guid = "D1E2F3A4-B5C6-4789-0123-456789ABCDEF")]
+        public readonly InputSlot<int> ListLength = new(10);
+
+        [Input(Guid = "59074D76-1F4F-406A-B512-5813F4E3420E")]
+        public readonly MultiInputSlot<string> MessageParts = new();
+
+        [Input(Guid = "0F1E2D3C-4B5A-4968-7012-3456789ABCDE")]
+        public readonly InputSlot<int> ParsingMode = new((int)MessageParsingMode.Raw);
+
+        [Input(Guid = "5E725916-4143-4759-8651-E12185C658D3")]
+        public readonly InputSlot<bool> PrintToLog = new();
+
         [Output(Guid = "2D3C4B5A-6F7E-4789-0123-456789ABCDEF", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
         public readonly Slot<Dict<float>> ReceivedDictionary = new(new Dict<float>(0f)); // Corrected initialization
 
+        [Output(Guid = "F2E1D0C9-B8A7-4654-7321-0FEDCBA98765", DirtyFlagTrigger = DirtyFlagTrigger.Animated)] // Updated GUID
+        public readonly Slot<List<string>> ReceivedLines = new();
+
         [Output(Guid = "3C4B5A6F-7E8D-4690-1234-56789ABCDEF0", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
         public readonly Slot<List<float>> ReceivedParts = new(new List<float>()); // Corrected initialization
+
+        [Output(Guid = "7C8D9E0A-1B2C-43F5-89DE-1234567890AB", DirtyFlagTrigger = DirtyFlagTrigger.Animated)] // Updated GUID
+        public readonly Slot<string> ReceivedString = new();
+
+        [Input(Guid = "216A0356-EF4A-413A-A656-7497127E31D4")]
+        public readonly InputSlot<bool> SendOnChange = new(true);
+
+        [Input(Guid = "C7AC22C0-A31E-41F6-B29D-D40956E6688B")]
+        public readonly InputSlot<bool> SendTrigger = new();
+
+        [Input(Guid = "82933C40-DA9E-4340-A227-E9BACF6E2063")]
+        public readonly InputSlot<string> Separator = new(" ");
+
+        [Input(Guid = "B1C2D3E4-F5A6-4789-0123-456789ABCDEF")]
+        public readonly InputSlot<string> Url = new("ws://localhost:8080");
+
+        [Output(Guid = "9B8A7C6D-5E4F-4012-3456-7890ABCDEF12", DirtyFlagTrigger = DirtyFlagTrigger.Animated)] // Updated GUID
+        public readonly Slot<bool> WasTrigger = new();
+
+        private CancellationTokenSource? _cts;
+
+        private readonly Dict<float> _currentReceivedDictionary = new(0f);
+        private readonly List<float> _currentReceivedParts = new();
+        private bool _disposed;
+        private bool _lastConnectState;
+        private string? _lastSentMessage;
+        private string? _lastUrl;
+        private bool _printToLog;
+
+        private ClientWebSocket? _webSocket;
 
         public WebSocketClient()
         {
@@ -46,19 +95,15 @@ namespace Lib.io.websocket
             ReceivedParts.UpdateAction = Update;
         }
 
-        private ClientWebSocket? _webSocket;
-        private CancellationTokenSource? _cts;
-        private bool _lastConnectState;
-        private string? _lastUrl;
-        private string? _lastSentMessage;
-        private readonly object _socketLock = new();
-        private readonly ConcurrentQueue<string> _receivedQueue = new();
-        private readonly List<string> _messageHistory = new();
-        private bool _printToLog;
-        private bool _disposed;
+        public void Dispose()
+        {
+            if (_disposed) return;
+            _disposed = true;
 
-        private Dict<float> _currentReceivedDictionary = new(0f);
-        private List<float> _currentReceivedParts = new();
+            Task.Run(StopAsync);
+            _receivedQueue.Clear();
+            _messageHistory.Clear();
+        }
 
         private void Update(EvaluationContext context)
         {
@@ -147,6 +192,7 @@ namespace Lib.io.websocket
                                 Log.Warning($"WS Client: Could not parse '{part}' as float in SpaceSeparated mode.", this);
                             }
                         }
+
                         break;
                     case MessageParsingMode.JsonKeyValue:
                         try
@@ -177,6 +223,7 @@ namespace Lib.io.websocket
                         {
                             Log.Warning($"WS Client: Failed to parse incoming message as JSON: {e.Message}. Message: '{msg}'", this);
                         }
+
                         break;
                 }
             }
@@ -198,26 +245,32 @@ namespace Lib.io.websocket
         private static bool TryGetFloatFromObject(object arg, out float value)
         {
             value = arg switch
-            {
-                float f => f,
-                int i => i,
-                bool b => b ? 1f : 0f,
-                string s => float.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out var f) ? f : float.NaN,
-                double d => (float)d,
-                JsonElement je =>
-                    je.ValueKind switch
-                    {
-                        JsonValueKind.Number => je.TryGetSingle(out var fVal) ? fVal : (je.TryGetDouble(out var dVal) ? (float)dVal : float.NaN),
-                        JsonValueKind.True => 1f,
-                        JsonValueKind.False => 0f,
-                        JsonValueKind.String => float.TryParse(je.GetString(), NumberStyles.Float, CultureInfo.InvariantCulture, out var fValString) ? fValString : float.NaN,
-                        _ => float.NaN
-                    },
-                _ => float.NaN
-            };
+                        {
+                            float f  => f,
+                            int i    => i,
+                            bool b   => b ? 1f : 0f,
+                            string s => float.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out var f) ? f : float.NaN,
+                            double d => (float)d,
+                            JsonElement je =>
+                                je.ValueKind switch
+                                    {
+                                        JsonValueKind.Number => je.TryGetSingle(out var fVal)
+                                                                    ? fVal
+                                                                    : je.TryGetDouble(out var dVal)
+                                                                        ? (float)dVal
+                                                                        : float.NaN,
+                                        JsonValueKind.True  => 1f,
+                                        JsonValueKind.False => 0f,
+                                        JsonValueKind.String => float.TryParse(je.GetString(), NumberStyles.Float, CultureInfo.InvariantCulture,
+                                                                               out var fValString)
+                                                                    ? fValString
+                                                                    : float.NaN,
+                                        _ => float.NaN
+                                    },
+                            _ => float.NaN
+                        };
             return !float.IsNaN(value);
         }
-
 
         private async Task StartAsync(string url)
         {
@@ -228,6 +281,7 @@ namespace Lib.io.websocket
                 {
                     Log.Error($"WS Client: Invalid URL '{url}'", this);
                 }
+
                 return;
             }
 
@@ -246,6 +300,7 @@ namespace Lib.io.websocket
                 {
                     Log.Debug($"WS Client: Attempting to connect to {url}...", this);
                 }
+
                 await _webSocket!.ConnectAsync(uri, _cts.Token);
                 SetStatus($"Connected to {url}", IStatusProvider.StatusLevel.Success);
                 if (_printToLog)
@@ -262,6 +317,7 @@ namespace Lib.io.websocket
                 {
                     Log.Error($"WS Client: Connect failed to {url}: {e.Message}", this);
                 }
+
                 lock (_socketLock)
                 {
                     _webSocket?.Dispose();
@@ -286,6 +342,7 @@ namespace Lib.io.websocket
                     socketToClose = _webSocket;
                     _webSocket = null;
                 }
+
                 if (_cts != null)
                 {
                     ctsToDispose = _cts;
@@ -303,6 +360,7 @@ namespace Lib.io.websocket
                     {
                         Log.Debug($"WS Client: Closing WebSocket connection.", this);
                     }
+
                     try
                     {
                         await socketToClose.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closed", CancellationToken.None);
@@ -330,6 +388,7 @@ namespace Lib.io.websocket
                 {
                     Log.Debug("WS Client: Disconnected.", this);
                 }
+
                 IsConnected.DirtyFlag.Invalidate();
             }
         }
@@ -352,13 +411,14 @@ namespace Lib.io.websocket
                             break;
                     }
 
-                    var result = await currentSocket!.ReceiveAsync(new ArraySegment<byte>(buffer), cancellationToken);
+                    var result = await currentSocket.ReceiveAsync(new ArraySegment<byte>(buffer), cancellationToken);
                     if (result.MessageType == WebSocketMessageType.Close)
                     {
                         if (_printToLog)
                         {
                             Log.Debug("WS Client: Received close message from server.", this);
                         }
+
                         await StopAsync();
                         break;
                     }
@@ -370,6 +430,7 @@ namespace Lib.io.websocket
                         {
                             Log.Debug($"WS Client ← '{msg}'", this);
                         }
+
                         _receivedQueue.Enqueue(msg);
                         ReceivedString.DirtyFlag.Invalidate();
                         ReceivedLines.DirtyFlag.Invalidate();
@@ -409,7 +470,7 @@ namespace Lib.io.websocket
                 }
 
                 var data = Encoding.UTF8.GetBytes(message);
-                await currentSocket!.SendAsync(data, WebSocketMessageType.Text, true, CancellationToken.None);
+                await currentSocket.SendAsync(data, WebSocketMessageType.Text, true, CancellationToken.None);
 
                 if (_printToLog)
                 {
@@ -423,6 +484,7 @@ namespace Lib.io.websocket
                 {
                     Log.Warning($"WS Client: Send failed: {ex.Message}", this);
                 }
+
                 await StopAsync();
             }
         }
@@ -441,16 +503,6 @@ namespace Lib.io.websocket
             {
                 SetStatus($"Connecting to {_lastUrl}...", IStatusProvider.StatusLevel.Notice);
             }
-        }
-
-        public void Dispose()
-        {
-            if (_disposed) return;
-            _disposed = true;
-
-            Task.Run(StopAsync);
-            _receivedQueue.Clear();
-            _messageHistory.Clear();
         }
 
         #region IStatusProvider
@@ -474,6 +526,7 @@ namespace Lib.io.websocket
             {
                 return ((MessageParsingMode)ParsingMode.Value).ToString();
             }
+
             return string.Empty;
         }
 
@@ -483,7 +536,8 @@ namespace Lib.io.websocket
             {
                 return Enum.GetNames(typeof(MessageParsingMode));
             }
-            return Enumerable.Empty<string>();
+
+            return Empty<string>();
         }
 
         void ICustomDropdownHolder.HandleResultForInput(Guid inputId, string? selected, bool isAListItem)
@@ -497,35 +551,5 @@ namespace Lib.io.websocket
             }
         }
         #endregion
-
-        [Input(Guid = "A1B2C3D4-E5F6-4789-0123-456789ABCDEF")]
-        public readonly InputSlot<bool> Connect = new();
-
-        [Input(Guid = "B1C2D3E4-F5A6-4789-0123-456789ABCDEF")]
-        public readonly InputSlot<string> Url = new("ws://localhost:8080");
-
-        [Input(Guid = "D1E2F3A4-B5C6-4789-0123-456789ABCDEF")]
-        public readonly InputSlot<int> ListLength = new(10);
-
-        [Input(Guid = "59074D76-1F4F-406A-B512-5813F4E3420E")]
-        public readonly MultiInputSlot<string> MessageParts = new();
-
-        [Input(Guid = "82933C40-DA9E-4340-A227-E9BACF6E2063")]
-        public readonly InputSlot<string> Separator = new(" ");
-
-        [Input(Guid = "216A0356-EF4A-413A-A656-7497127E31D4")]
-        public readonly InputSlot<bool> SendOnChange = new(true);
-
-        [Input(Guid = "C7AC22C0-A31E-41F6-B29D-D40956E6688B")]
-        public readonly InputSlot<bool> SendTrigger = new();
-
-        [Input(Guid = "5E725916-4143-4759-8651-E12185C658D3")]
-        public readonly InputSlot<bool> PrintToLog = new();
-
-        [Input(Guid = "0F1E2D3C-4B5A-4968-7012-3456789ABCDE")]
-        public readonly InputSlot<int> ParsingMode = new((int)MessageParsingMode.Raw);
-
-        [Input(Guid = "1E2D3C4B-5A6F-4879-0123-456789ABCDEF")]
-        public readonly InputSlot<string> Delimiter = new(" ");
     }
 }

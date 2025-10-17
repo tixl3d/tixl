@@ -11,20 +11,52 @@ namespace Lib.io.dmx;
 internal sealed class SacnInput : Instance<SacnInput>, IStatusProvider, ICustomDropdownHolder, IDisposable
 {
     private const int SacnPort = 5568;
-    private static readonly byte[] SacnId = "ASC-E1.17\0\0\0"u8.ToArray();
     private const int MinPacketLength = 126;
+    private static readonly byte[] _sacnId = "ASC-E1.17\0\0\0"u8.ToArray();
+    private readonly ConcurrentDictionary<int, UniverseData> _receivedUniverses = new();
+    private readonly HashSet<int> _subscribedUniverses = new();
+
+    [Input(Guid = "ca55c1b3-0669-46f1-bcc4-ee2e7f5a6028")]
+    public readonly InputSlot<bool> Active = new();
+
+    // Unique GUID for LocalIpAddress in SacnInput
+    [Input(Guid = "24B5D450-4E83-49DB-88B1-7D688E64585D")]
+    public readonly InputSlot<string> LocalIpAddress = new("0.0.0.0 (Any)");
+
+    [Input(Guid = "2cffbf1c-ce09-4283-a685-5234e4e49fee")]
+    public readonly InputSlot<int> NumUniverses = new(1);
+
+    // New InputSlot for PrintToLog
+    [Input(Guid = "C3D4E5F6-A7B8-4901-2345-67890ABCDEF1")] // New GUID
+    public readonly InputSlot<bool> PrintToLog = new();
 
     [Output(Guid = "b0bcc3de-de79-42ac-a9cc-ec5a699f252b", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
     public readonly Slot<List<int>> Result = new();
+
+    [Input(Guid = "0c348760-474e-4e30-a8c1-55e59cb1a908")]
+    public readonly InputSlot<int> StartUniverse = new(1);
+
+    [Input(Guid = "bed01653-6cd0-4578-81a9-3eda144ab279")]
+    public readonly InputSlot<float> Timeout = new();
+
+    private IPAddress? _boundIpAddress;
+
+    private volatile bool _isListening; // Made volatile
+    private string? _lastLocalIp;
+    private Thread? _listenerThread;
+    private bool _printToLog; // Added for PrintToLog functionality
+    private volatile bool _runListener;
+    private UdpClient? _udpClient;
 
     public SacnInput()
     {
         Result.UpdateAction = Update;
     }
 
-    private volatile bool _isListening; // Made volatile
-    private string? _lastLocalIp;
-    private bool _printToLog; // Added for PrintToLog functionality
+    public void Dispose()
+    {
+        StopListening();
+    }
 
     private void Update(EvaluationContext context)
     {
@@ -61,13 +93,15 @@ internal sealed class SacnInput : Instance<SacnInput>, IStatusProvider, ICustomD
                 {
                     for (var j = 0; j < 512; j++) dmxSnapshot[j] = universeData.DmxData[j];
                 }
+
                 combinedDmxData.AddRange(dmxSnapshot);
             }
             else
             {
-                combinedDmxData.AddRange(Enumerable.Repeat(0, 512));
+                combinedDmxData.AddRange(Repeat(0, 512));
             }
         }
+
         Result.Value = combinedDmxData;
         UpdateStatusMessage(numUniverses, startUniverse);
     }
@@ -92,6 +126,7 @@ internal sealed class SacnInput : Instance<SacnInput>, IStatusProvider, ICustomD
         {
             Log.Debug("sACN Input: Stopping listener.", this);
         }
+
         _udpClient?.Close(); // This will unblock the Receive call in ListenLoop
         _listenerThread?.Join(200); // Give the thread a moment to shut down
         _listenerThread = null;
@@ -129,9 +164,9 @@ internal sealed class SacnInput : Instance<SacnInput>, IStatusProvider, ICustomD
             {
                 try
                 {
-                    if (_udpClient == null) break; // Check if client was disposed externally
+                    if (_udpClient == null) break; // Check if a client was disposed externally
                     var data = _udpClient.Receive(ref remoteEndPoint);
-                    if (data.Length < MinPacketLength || !data.AsSpan(4, 12).SequenceEqual(SacnId)) continue;
+                    if (data.Length < MinPacketLength || !data.AsSpan(4, 12).SequenceEqual(_sacnId)) continue;
 
                     var universe = (data[113] << 8) | data[114];
                     var propertyValueCount = (data[123] << 8) | data[124];
@@ -144,12 +179,14 @@ internal sealed class SacnInput : Instance<SacnInput>, IStatusProvider, ICustomD
                         System.Buffer.BlockCopy(data, 126, universeData.DmxData, 0, dmxLength);
                         if (dmxLength < 512) Array.Clear(universeData.DmxData, dmxLength, 512 - dmxLength);
                     }
+
                     universeData.LastReceivedTicks = Stopwatch.GetTimestamp();
                     Result.DirtyFlag.Invalidate();
 
                     if (_printToLog)
                     {
-                        Log.Debug($"sACN Input: Received sACN DMX for Universe {universe} from {remoteEndPoint.Address}:{remoteEndPoint.Port}", this); // Corrected here
+                        Log.Debug($"sACN Input: Received sACN DMX for Universe {universe} from {remoteEndPoint.Address}:{remoteEndPoint.Port}",
+                                  this); // Corrected here
                     }
                 }
                 catch (SocketException ex)
@@ -158,6 +195,7 @@ internal sealed class SacnInput : Instance<SacnInput>, IStatusProvider, ICustomD
                     {
                         Log.Warning($"sACN Input receive socket error: {ex.Message} (Error Code: {ex.ErrorCode})", this);
                     }
+
                     break;
                 }
                 catch (Exception e)
@@ -187,7 +225,7 @@ internal sealed class SacnInput : Instance<SacnInput>, IStatusProvider, ICustomD
     private void UpdateUniverseSubscriptions(int startUniverse, int numUniverses)
     {
         if (!_runListener || _udpClient == null || _boundIpAddress == null) return;
-        var requiredUniverses = new HashSet<int>(Enumerable.Range(startUniverse, numUniverses));
+        var requiredUniverses = new HashSet<int>(Range(startUniverse, numUniverses));
         var universesToUnsubscribe = _subscribedUniverses.Except(requiredUniverses).ToList();
         var universesToSubscribe = requiredUniverses.Except(_subscribedUniverses).ToList();
 
@@ -202,8 +240,12 @@ internal sealed class SacnInput : Instance<SacnInput>, IStatusProvider, ICustomD
                     Log.Debug($"sACN Input: Unsubscribed from multicast group for Universe {uni}.", this);
                 }
             }
-            catch (Exception e) { Log.Warning($"sACN Input: Failed to unsubscribe from sACN universe {uni}: {e.Message}", this); }
+            catch (Exception e)
+            {
+                Log.Warning($"sACN Input: Failed to unsubscribe from sACN universe {uni}: {e.Message}", this);
+            }
         }
+
         foreach (var uni in universesToSubscribe)
         {
             try
@@ -215,7 +257,10 @@ internal sealed class SacnInput : Instance<SacnInput>, IStatusProvider, ICustomD
                     Log.Debug($"sACN Input: Subscribed to multicast group for Universe {uni}.", this);
                 }
             }
-            catch (Exception e) { Log.Warning($"sACN Input: Failed to subscribe to sACN universe {uni}: {e.Message}", this); }
+            catch (Exception e)
+            {
+                Log.Warning($"sACN Input: Failed to subscribe to sACN universe {uni}: {e.Message}", this);
+            }
         }
     }
 
@@ -245,7 +290,9 @@ internal sealed class SacnInput : Instance<SacnInput>, IStatusProvider, ICustomD
         else if (_lastStatusLevel != IStatusProvider.StatusLevel.Error)
         {
             var receivedCount = _receivedUniverses.Count;
-            if (receivedCount == 0) SetStatus($"Listening on {localIpDisplay.Split(' ')[0]}:{SacnPort} for {numUniverses} universes (from {startUniverse})... No packets received.", IStatusProvider.StatusLevel.Warning);
+            if (receivedCount == 0)
+                SetStatus($"Listening on {localIpDisplay.Split(' ')[0]}:{SacnPort} for {numUniverses} universes (from {startUniverse})... No packets received.",
+                          IStatusProvider.StatusLevel.Warning);
             else SetStatus($"Listening for {numUniverses} universes. Receiving {receivedCount} active universes.", IStatusProvider.StatusLevel.Success);
         }
     }
@@ -257,25 +304,31 @@ internal sealed class SacnInput : Instance<SacnInput>, IStatusProvider, ICustomD
         return new IPAddress(new byte[] { 239, 255, highByte, lowByte });
     }
 
-    public void Dispose() { StopListening(); }
-
-    private sealed class UniverseData { public readonly byte[] DmxData = new byte[512]; public long LastReceivedTicks; }
-    private Thread? _listenerThread;
-    private volatile bool _runListener;
-    private IPAddress? _boundIpAddress;
-    private UdpClient? _udpClient;
-    private readonly ConcurrentDictionary<int, UniverseData> _receivedUniverses = new();
-    private readonly HashSet<int> _subscribedUniverses = new();
+    private sealed class UniverseData
+    {
+        public readonly byte[] DmxData = new byte[512];
+        public long LastReceivedTicks;
+    }
 
     #region IStatusProvider & ICustomDropdownHolder
     private string _lastStatusMessage = "Inactive."; // Default status on init
     private IStatusProvider.StatusLevel _lastStatusLevel = IStatusProvider.StatusLevel.Notice;
-    public void SetStatus(string message, IStatusProvider.StatusLevel level) { _lastStatusMessage = message; _lastStatusLevel = level; }
+
+    public void SetStatus(string message, IStatusProvider.StatusLevel level)
+    {
+        _lastStatusMessage = message;
+        _lastStatusLevel = level;
+    }
+
     public IStatusProvider.StatusLevel GetStatusLevel() => _lastStatusLevel;
     public string GetStatusMessage() => _lastStatusMessage;
 
     string ICustomDropdownHolder.GetValueForInput(Guid inputId) => inputId == LocalIpAddress.Id ? LocalIpAddress.Value : string.Empty;
-    IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid inputId) => inputId == LocalIpAddress.Id ? GetLocalIPv4Addresses() : Enumerable.Empty<string>();
+
+    IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid inputId)
+    {
+        return inputId == LocalIpAddress.Id ? GetLocalIPv4Addresses() : Empty<string>();
+    }
 
     void ICustomDropdownHolder.HandleResultForInput(Guid inputId, string? selected, bool isAListItem)
     {
@@ -298,14 +351,4 @@ internal sealed class SacnInput : Instance<SacnInput>, IStatusProvider, ICustomD
         }
     }
     #endregion
-
-    // Unique GUID for LocalIpAddress in SacnInput
-    [Input(Guid = "24B5D450-4E83-49DB-88B1-7D688E64585D")] public readonly InputSlot<string> LocalIpAddress = new("0.0.0.0 (Any)");
-    [Input(Guid = "ca55c1b3-0669-46f1-bcc4-ee2e7f5a6028")] public readonly InputSlot<bool> Active = new();
-    [Input(Guid = "0c348760-474e-4e30-a8c1-55e59cb1a908")] public readonly InputSlot<int> StartUniverse = new(1);
-    [Input(Guid = "2cffbf1c-ce09-4283-a685-5234e4e49fee")] public readonly InputSlot<int> NumUniverses = new(1);
-    [Input(Guid = "bed01653-6cd0-4578-81a9-3eda144ab279")] public readonly InputSlot<float> Timeout = new();
-    // New InputSlot for PrintToLog
-    [Input(Guid = "C3D4E5F6-A7B8-4901-2345-67890ABCDEF1")] // New GUID
-    public readonly InputSlot<bool> PrintToLog = new();
 }

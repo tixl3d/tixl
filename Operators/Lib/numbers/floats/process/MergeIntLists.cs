@@ -9,21 +9,45 @@ namespace Lib.numbers.floats.process
     [Guid("ca6f09ec-bbc4-4365-8210-bc10cd8d9f94")]
     internal sealed class MergeIntLists : Instance<MergeIntLists>, IStatusProvider
     {
-        private enum MergeModes
-        {
-            Append,
-            HTP,
-            LTP,
-            FailOver,
-            Average,
-        }
+        private readonly List<int> _ltpCombinedList = new(); // Persistent state for LTP
+        private readonly List<List<int>> _previousSourceLists = new(); // Persistent state for FailOver change detection
+
+        [Input(Guid = "24855D2A-595B-4E3E-81C5-65481C262F64")]
+        public readonly InputSlot<bool> Enabled = new();
+
+        [Input(Guid = "BDFE5576-2F45-473D-BB9D-95FC453FC774")]
+        public readonly MultiInputSlot<List<int>> InputLists = new();
+
+        [Input(Guid = "9E60F3E7-A891-4E3E-81C5-65481C262F64")] // Using a new GUID as MaxSize conflicts (24855D2A-595B-4E3E-81C5-65481C262F64)
+        public readonly InputSlot<int> MaxSize = new();
+
+        [Input(Guid = "e3315721-2853-449a-af6a-43cd18400470", MappedType = typeof(MergeModes))]
+        public readonly InputSlot<int> MergeMode = new();
 
         [Output(Guid = "F28370F0-F0C6-418F-8FBF-167A7D1035FE")]
         public readonly Slot<List<int>> Result = new();
 
+        [Input(Guid = "387FB1DB-944F-4EB1-BB6F-B149E4A51A42")]
+        public readonly InputSlot<List<int>> StartIndices = new();
+
+        // --- STATE-TRACKING FIELDS ---
+        private int _activeFailoverIndex;
+
+        private string _lastErrorMessage = string.Empty;
+
         public MergeIntLists()
         {
             Result.UpdateAction += Update;
+        }
+
+        public IStatusProvider.StatusLevel GetStatusLevel()
+        {
+            return string.IsNullOrEmpty(_lastErrorMessage) ? IStatusProvider.StatusLevel.Success : IStatusProvider.StatusLevel.Warning;
+        }
+
+        public string GetStatusMessage()
+        {
+            return _lastErrorMessage;
         }
 
         private void Update(EvaluationContext context)
@@ -79,10 +103,10 @@ namespace Lib.numbers.floats.process
             {
                 switch (mode)
                 {
-                    case MergeModes.HTP:
+                    case MergeModes.Htp:
                         UpdateHtp(sourceLists, resultList);
                         break;
-                    case MergeModes.LTP:
+                    case MergeModes.Ltp:
                         UpdateLtp(sourceLists, resultList); // Corrected LTP method
                         break;
                     case MergeModes.FailOver:
@@ -123,9 +147,11 @@ namespace Lib.numbers.floats.process
                         {
                             maxValue = sourceList[i];
                         }
+
                         valueFound = true;
                     }
                 }
+
                 resultList.Add(valueFound ? maxValue : 0);
             }
         }
@@ -176,6 +202,7 @@ namespace Lib.numbers.floats.process
             {
                 _previousSourceLists.Add(null);
             }
+
             while (_previousSourceLists.Count > sourceLists.Count)
             {
                 _previousSourceLists.RemoveAt(_previousSourceLists.Count - 1);
@@ -189,14 +216,14 @@ namespace Lib.numbers.floats.process
                 var previousActiveList = _previousSourceLists[_activeFailoverIndex];
 
                 activeListHasChanged = currentActiveList is { Count: > 0 } &&
-                                       !currentActiveList.SequenceEqual(previousActiveList ?? Enumerable.Empty<int>());
+                                       !currentActiveList.SequenceEqual(previousActiveList ?? Empty<int>());
             }
 
             // High-priority check: ALWAYS check if the first list is active again (non-empty and changing).
             // This ensures it returns to primary when it recovers.
             var firstList = sourceLists.FirstOrDefault();
             var previousFirstList = _previousSourceLists.FirstOrDefault();
-            if (firstList is { Count: > 0 } && !firstList.SequenceEqual(previousFirstList ?? Enumerable.Empty<int>()))
+            if (firstList is { Count: > 0 } && !firstList.SequenceEqual(previousFirstList ?? Empty<int>()))
             {
                 _activeFailoverIndex = 0; // Switch back to the primary list
             }
@@ -209,7 +236,7 @@ namespace Lib.numbers.floats.process
                 {
                     var nextList = sourceLists[i];
                     var prevNextList = (i < _previousSourceLists.Count) ? _previousSourceLists[i] : null;
-                    if (nextList is { Count: > 0 } && !nextList.SequenceEqual(prevNextList ?? Enumerable.Empty<int>()))
+                    if (nextList is { Count: > 0 } && !nextList.SequenceEqual(prevNextList ?? Empty<int>()))
                     {
                         _activeFailoverIndex = i; // Switch to the new active list
                         foundNextActive = true;
@@ -223,6 +250,7 @@ namespace Lib.numbers.floats.process
                 {
                     _activeFailoverIndex = 0;
                 }
+
                 // If no list is active and currently selected list becomes empty, default to 0.
                 if (!foundNextActive && (_activeFailoverIndex >= sourceLists.Count || sourceLists[_activeFailoverIndex] is not { Count: > 0 }))
                 {
@@ -266,6 +294,7 @@ namespace Lib.numbers.floats.process
                         count++;
                     }
                 }
+
                 resultList.Add(count > 0 ? (int)(sum / count) : 0);
             }
         }
@@ -341,6 +370,7 @@ namespace Lib.numbers.floats.process
                             {
                                 list.Add(-1); // Padding for non-contiguous appends
                             }
+
                             list.Add(value);
                             writeIndex++;
                         }
@@ -349,31 +379,13 @@ namespace Lib.numbers.floats.process
             }
         }
 
-        [Input(Guid = "BDFE5576-2F45-473D-BB9D-95FC453FC774")]
-        public readonly MultiInputSlot<System.Collections.Generic.List<int>> InputLists = new MultiInputSlot<System.Collections.Generic.List<int>>();
-
-        [Input(Guid = "24855D2A-595B-4E3E-81C5-65481C262F64")]
-        public readonly InputSlot<bool> Enabled = new InputSlot<bool>();
-
-        [Input(Guid = "e3315721-2853-449a-af6a-43cd18400470", MappedType = typeof(MergeModes))]
-        public readonly InputSlot<int> MergeMode = new InputSlot<int>();
-
-        [Input(Guid = "9E60F3E7-A891-4E3E-81C5-65481C262F64")] // Using a new GUID as MaxSize conflicts (24855D2A-595B-4E3E-81C5-65481C262F64)
-        public readonly InputSlot<int> MaxSize = new InputSlot<int>();
-
-        [Input(Guid = "387FB1DB-944F-4EB1-BB6F-B149E4A51A42")]
-        public readonly InputSlot<System.Collections.Generic.List<int>> StartIndices = new InputSlot<System.Collections.Generic.List<int>>();
-
-        private string _lastErrorMessage = string.Empty;
-
-        // --- STATE-TRACKING FIELDS ---
-        private int _activeFailoverIndex;
-        private readonly List<int> _ltpCombinedList = new(); // Persistent state for LTP
-        private readonly List<List<int>> _previousSourceLists = new(); // Persistent state for FailOver change detection
-
-        public IStatusProvider.StatusLevel GetStatusLevel() =>
-            string.IsNullOrEmpty(_lastErrorMessage) ? IStatusProvider.StatusLevel.Success : IStatusProvider.StatusLevel.Warning;
-
-        public string GetStatusMessage() => _lastErrorMessage;
+        private enum MergeModes
+        {
+            Append,
+            Htp,
+            Ltp,
+            FailOver,
+            Average
+        }
     }
 }
