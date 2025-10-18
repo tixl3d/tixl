@@ -1,12 +1,13 @@
 #nullable enable
-using System.Reflection;
 using ImGuiNET;
+using System.Reflection;
 using T3.Core.Audio;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.Utils;
 using T3.Editor.Gui.Interaction;
+using T3.Editor.Gui.OpUis.WidgetUi;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 
@@ -47,7 +48,7 @@ internal static class AudioReactionUi
 
         internal float Sum => (float)(_sumProp?.GetValue(_instance) ?? 0);
 
-        
+
         [BindProperty("ActiveBins")]
         private readonly PropertyInfo? _activeBindsProp = null!;
 
@@ -89,7 +90,7 @@ internal static class AudioReactionUi
 
         if (!data.IsValid)
             return OpUi.CustomUiResult.None;
-
+        var dragWidth = WidgetElements.DrawOperatorDragHandle(screenRect, drawList, canvas.Scale);
         if (!ImGui.IsRectVisible(screenRect.Min, screenRect.Max))
             return OpUi.CustomUiResult.None;
 
@@ -99,7 +100,7 @@ internal static class AudioReactionUi
         {
             return OpUi.CustomUiResult.None;
         }
-
+        screenRect.Min.X += dragWidth;
         ImGui.PushID(instance.SymbolChildId.GetHashCode());
         drawList.PushClipRect(screenRect.Min, screenRect.Max, true);
 
@@ -138,7 +139,7 @@ internal static class AudioReactionUi
                     throw new ArgumentOutOfRangeException();
             }
 
-            for (int barIndex = 0; barIndex < peakBands.Length; barIndex++)
+            for (var barIndex = 0; barIndex < peakBands.Length; barIndex++)
             {
                 var peak = peakBands[barIndex];
 
@@ -149,9 +150,9 @@ internal static class AudioReactionUi
             }
         }
 
-        int binIndex = 0;
+        var binIndex = 0;
         var inactiveColor = UiColors.BackgroundFull.Fade(0.2f);
-        for (int barIndex = 0; barIndex < barsCount; barIndex++)
+        for (var barIndex = 0; barIndex < barsCount; barIndex++)
         {
             var sum = 0f;
             var count = 0;
