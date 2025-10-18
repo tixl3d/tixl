@@ -20,31 +20,31 @@
       }
     },
     {
-      "ChildId": "0923573a-b464-4bd7-838a-bea92d726719"/*Switch*/,
+      "ChildId": "082ccf8e-b422-4c3e-a175-1fbfa27319fe"/*LoadImage*/,
       "Position": {
-        "X": 1834.6418,
-        "Y": -476.54932
+        "X": 938.4488,
+        "Y": -35.779297
       }
     },
     {
-      "ChildId": "22e396f6-e1aa-4882-876e-fc0a4f5042a2"/*Damp*/,
+      "ChildId": "0923573a-b464-4bd7-838a-bea92d726719"/*Switch*/,
       "Position": {
-        "X": 1333.3594,
-        "Y": -380.24008
+        "X": 1544.0864,
+        "Y": -499.83817
       }
     },
     {
       "ChildId": "26ffd00f-70c9-4e0a-af3f-c1be624073cc"/*SphereMesh*/,
       "Position": {
-        "X": 152.29294,
-        "Y": -135.73239
+        "X": 329.8672,
+        "Y": -173.90842
       }
     },
     {
       "ChildId": "2c958555-a713-4ba9-9da4-1b5ddb8db609"/*Transform*/,
       "Position": {
-        "X": 469.59998,
-        "Y": -11.380524
+        "X": 329.8672,
+        "Y": 85.10159
       }
     },
     {
@@ -86,15 +86,8 @@
     {
       "ChildId": "3dce2aee-10cd-4819-a168-64037be06924"/*Transform*/,
       "Position": {
-        "X": 469.59998,
-        "Y": -78.78357
-      }
-    },
-    {
-      "ChildId": "4aab0aa6-df68-44cc-a2ee-d42eb5dd4814"/*TextureToCubeMap*/,
-      "Position": {
-        "X": 770.7882,
-        "Y": 101.50278
+        "X": 329.86713,
+        "Y": -103.90842
       }
     },
     {
@@ -114,29 +107,22 @@
     {
       "ChildId": "76556de7-9829-4f35-8506-481cd5c69bff"/*Green light*/,
       "Position": {
-        "X": 1203.1672,
-        "Y": -292.2083
+        "X": 1190.6332,
+        "Y": -261.56317
       }
     },
     {
       "ChildId": "7eb5cf55-1e2f-4daf-bbca-f3270d4dfe6c"/*Red light*/,
       "Position": {
-        "X": 1352.0043,
-        "Y": -229.75375
+        "X": 1190.6332,
+        "Y": -191.56317
       }
     },
     {
       "ChildId": "804da4a2-fd1d-4cdc-ae28-cccc98e6e4d4"/*SetMaterial*/,
       "Position": {
-        "X": 619.6,
-        "Y": -75.56235
-      }
-    },
-    {
-      "ChildId": "873423ef-89b8-4b2f-8d53-b5d04c09de24"/*Ambient light*/,
-      "Position": {
-        "X": 1483.3594,
-        "Y": -380.24008
+        "X": 329.86713,
+        "Y": -68.90842
       }
     },
     {
@@ -161,22 +147,29 @@
     {
       "ChildId": "8d5706f4-a17e-43bf-a596-2dce31e72271"/*OrbitCamera*/,
       "Position": {
-        "X": 1633.8733,
-        "Y": -552.49817
+        "X": 1404.0864,
+        "Y": -499.83817
       }
     },
     {
       "ChildId": "905d091a-27fb-411a-8567-21cb1ee1fdb5"/*BLue light*/,
       "Position": {
-        "X": 1060.8812,
-        "Y": -334.89014
+        "X": 1190.6332,
+        "Y": -331.56317
+      }
+    },
+    {
+      "ChildId": "9877a560-30d0-454a-bf2f-6e001f56583e"/*EaseVec2*/,
+      "Position": {
+        "X": 1594.5558,
+        "Y": -105.293304
       }
     },
     {
       "ChildId": "98aa74d2-22d1-40ec-bb47-7d994ad7a1a0"/*DrawMesh*/,
       "Position": {
-        "X": 302.29294,
-        "Y": -135.73239
+        "X": 329.8672,
+        "Y": -138.90842
       }
     },
     {
@@ -207,15 +200,15 @@
       "ChildId": "9d521ba9-86d8-4738-9650-2e4dc7e094fe"/*All*/,
       "Comment": "With this operator, we are checking if all lights are on within the scene.",
       "Position": {
-        "X": 899.8698,
-        "Y": -403.2147
+        "X": 657.001,
+        "Y": -379.9259
       }
     },
     {
       "ChildId": "a88febeb-cf85-4f48-9322-949e517df07b"/*Camera*/,
       "Position": {
-        "X": 1633.8733,
-        "Y": -496.49817
+        "X": 1404.0864,
+        "Y": -464.8381
       }
     },
     {
@@ -228,8 +221,8 @@
     {
       "ChildId": "b070472d-a8e2-4a5f-abcc-3473aae4923e"/*SetMaterial*/,
       "Position": {
-        "X": 619.6,
-        "Y": -19.562347
+        "X": 329.8672,
+        "Y": 155.1016
       }
     },
     {
@@ -248,58 +241,65 @@
     {
       "ChildId": "baf44f68-80a0-4874-8f86-e8d81b794e5d"/*DrawMesh*/,
       "Position": {
-        "X": 302.29294,
-        "Y": -68.73239
-      }
-    },
-    {
-      "ChildId": "bda7c7c8-4faf-4b06-a424-a10d38bb77c5"/*BoolToFloat*/,
-      "Position": {
-        "X": 1183.3594,
-        "Y": -380.24008
+        "X": 329.8672,
+        "Y": 50.101593
       }
     },
     {
       "ChildId": "c7fd89d8-4900-4ae1-92d8-82e972c12ed7"/*Not*/,
       "Comment": "If all lights are on, I want to turn off the ambient light.\nSo I need to invert the result of my previous check.",
       "Position": {
-        "X": 1033.3594,
-        "Y": -380.24008
+        "X": 657.001,
+        "Y": -274.9259
       }
     },
     {
       "ChildId": "ca5a96d4-055c-4b14-b565-11bfebc4946f"/*SetEnvironment*/,
       "Position": {
-        "X": 919.6,
-        "Y": -75.56235
+        "X": 1078.4489,
+        "Y": -70.7793
       }
     },
     {
       "ChildId": "cc76c369-5ed5-4155-a8ef-6362cc806770"/*Rotation*/,
       "Position": {
-        "X": 319.59998,
-        "Y": -11.380524
+        "X": 126.63571,
+        "Y": 111.71738
+      }
+    },
+    {
+      "ChildId": "cf5a6552-4260-406b-89df-71dd3cbaf501"/*Ease*/,
+      "Position": {
+        "X": 839.7488,
+        "Y": -221.46829
+      }
+    },
+    {
+      "ChildId": "d38e768f-c847-49f6-9a99-67cb63d0af5c"/*BoolToFloat*/,
+      "Position": {
+        "X": 657.001,
+        "Y": -239.9259
       }
     },
     {
       "ChildId": "d6dc0525-a0c8-4c0a-9f39-b0e0ca040a80"/*CubeMesh*/,
       "Position": {
-        "X": 152.29294,
-        "Y": -68.73239
+        "X": 329.8672,
+        "Y": -19.898407
       }
     },
     {
       "ChildId": "e6e0e705-67d0-45b2-9e5b-263c45cb687c"/*Position*/,
       "Position": {
-        "X": 1515.8817,
-        "Y": -186.45908
+        "X": 1454.5558,
+        "Y": -175.2933
       }
     },
     {
       "ChildId": "e9b9ca99-cacb-4cfc-8562-7b1c32c7fa2f"/*Boolean*/,
       "Position": {
-        "X": -8.917313,
-        "Y": -432.5373
+        "X": -212.23216,
+        "Y": -443.31915
       }
     },
     {
@@ -312,37 +312,37 @@
     {
       "ChildId": "edab65d4-7ce0-499e-b6cf-7a8d32cf01b9"/*Group*/,
       "Position": {
-        "X": 769.6,
-        "Y": -75.56235
+        "X": 520.0772,
+        "Y": -51.16458
       }
     },
     {
       "ChildId": "efadd271-2de7-4266-b20c-8590e074e289"/*PickVector2*/,
       "Position": {
-        "X": 1665.8817,
-        "Y": -255.45908
+        "X": 1594.5558,
+        "Y": -210.2933
       }
     },
     {
       "ChildId": "f516a0d0-5c39-4936-b49d-0bca272bb411"/*BoolToInt*/,
       "Position": {
-        "X": 1515.8817,
-        "Y": -117.459076
+        "X": 1454.5558,
+        "Y": -140.2933
       }
     },
     {
       "ChildId": "f6c0d3a1-fed6-4425-bd4c-1f4f1fda980b"/*BoolToInt*/,
       "Comment": "In order to switch between cameras, this operator converts the bool value to an integer",
       "Position": {
-        "X": 1650.5682,
-        "Y": -427.56726
+        "X": 1404.0864,
+        "Y": -429.8381
       }
     },
     {
       "ChildId": "f8a550ea-5a96-4119-bd95-75228b774b10"/*Vector2*/,
       "Position": {
-        "X": 1515.8817,
-        "Y": -255.45908
+        "X": 1454.5558,
+        "Y": -210.2933
       }
     }
   ],
