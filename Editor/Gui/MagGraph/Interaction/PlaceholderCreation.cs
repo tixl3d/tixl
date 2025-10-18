@@ -39,10 +39,16 @@ internal sealed class PlaceholderCreation
 
         var outputLineIndex = hoverConnection.SourceItem.Instance?.Outputs.IndexOf(hoverConnection.SourceOutput) ?? 0;
 
+        var styleToUse = MagGraphConnection.ConnectionStyles.Unknown;
+        if (hoverConnection.Style is MagGraphConnection.ConnectionStyles.BottomToTop or MagGraphConnection.ConnectionStyles.RightToLeft)
+        {
+            styleToUse = hoverConnection.Style;
+        }
+
         // Add temp connection into placeholder...
         var tempConnectionIn = new MagGraphConnection
                                    {
-                                       Style = MagGraphConnection.ConnectionStyles.Unknown,
+                                       Style = styleToUse,
                                        SourcePos = hoverConnection.SourcePos,
                                        SourceItem = hoverConnection.SourceItem,
                                        SourceOutput = hoverConnection.SourceOutput,

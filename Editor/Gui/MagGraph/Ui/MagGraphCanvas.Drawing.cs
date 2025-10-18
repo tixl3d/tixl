@@ -157,6 +157,10 @@ internal sealed partial class MagGraphView
                 {
                     var sourcePos = new Vector2(tc.SourceItem.Area.Max.X,
                                                 tc.SourceItem.Area.Min.Y + MagGraphItem.GridSize.Y * (0.5f + tc.OutputLineIndex));
+                    if (tc.Style is MagGraphConnection.ConnectionStyles.BottomToTop or MagGraphConnection.ConnectionStyles.BottomToLeft)
+                    {
+                        sourcePos = new Vector2(sourcePos.X - (tc.SourceItem.Area.GetWidth() / 2.0f), tc.SourceItem.Area.Max.Y);
+                    }
 
                     sourcePosOnScreen = TransformPosition(sourcePos);
 
@@ -198,12 +202,24 @@ internal sealed partial class MagGraphView
                 var typeColor = TypeUiRegistry.GetPropertiesForType(tc.Type).Color;
                 var d = Vector2.Distance(sourcePosOnScreen, targetPosOnScreen) / 2;
 
-                drawList.AddBezierCubic(sourcePosOnScreen,
-                                        sourcePosOnScreen + new Vector2(d, 0),
-                                        targetPosOnScreen - new Vector2(d, 0),
-                                        targetPosOnScreen,
-                                        typeColor.Fade(0.6f),
-                                        2);
+                if (tc.Style is MagGraphConnection.ConnectionStyles.BottomToTop or MagGraphConnection.ConnectionStyles.BottomToLeft)
+                {
+                    drawList.AddBezierCubic(sourcePosOnScreen,
+                                            sourcePosOnScreen,
+                                            targetPosOnScreen - new Vector2(d, 0),
+                                            targetPosOnScreen,
+                                            typeColor.Fade(0.6f),
+                                            2);
+                }
+                else
+                {
+                    drawList.AddBezierCubic(sourcePosOnScreen,
+                                            sourcePosOnScreen + new Vector2(d, 0),
+                                            targetPosOnScreen - new Vector2(d, 0),
+                                            targetPosOnScreen,
+                                            typeColor.Fade(0.6f),
+                                            2);
+                }
             }
 
             OutputSnapper.Update(_context);
