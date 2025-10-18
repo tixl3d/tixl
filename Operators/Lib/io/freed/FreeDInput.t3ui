@@ -1,0 +1,106 @@
+{
+  "Id": "1f2e3d4c-5b6a-4988-9a0b-c1d2e3f4a5b6"/*FreeDInput*/,
+  "Description": "Receives camera tracking data over UDP using the FreeD protocol. This is essential for virtual production, augmented reality, and broadcasting, allowing real-time integration with systems like Unreal Engine, Vizrt, or Aximmetry.\n\nAlso see: [FreeDOutput]",
+  "InputUis": [
+    {
+      "InputId": "4b5c6d7e-8f9a-4b1c-c2d3-e4f5a6b7c8d9"/*Listen*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "Enable to open the UDP socket and begin listening for data. Disable to close the connection."
+    },
+    {
+      "InputId": "5c6d7e8f-9a0b-4c2d-d3e4-f5a6b7c8d9e0"/*LocalIpAddress*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      },
+      "Description": "The local network adapter (IP address) to listen on. '0.0.0.0 (Any)' listens on all available adapters, which is usually what you want.",
+      "Usage": "CustomDropdown"
+    },
+    {
+      "InputId": "6d7e8f9a-0b1c-4d3e-e4f5-a6b7c8d9e0f1"/*Port*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      },
+      "Description": "The UDP port to listen on. This must match the port the sender is broadcasting to."
+    },
+    {
+      "InputId": "7e8f9a0b-1c2d-4e5f-a6b7-c8d9e0f1a2b3"/*CameraId*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      },
+      "Description": "Selects a specific camera ID to output on the single-camera outputs (CameraPos, CameraRot, etc.). If set to -1, it automatically selects the camera with the lowest ID."
+    },
+    {
+      "InputId": "8f9a0b1c-2d3e-4f5a-a6b7-c8d9e0f1a2b3"/*PrintToLog*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 300.0
+      },
+      "Description": "Enable to print detailed activity and error messages to the T3 log console for debugging."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "2b3c4d5e-6f7a-4b9c-a0b1-c2d3e4f5a6b7"/*CameraDataAsDict*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    },
+    {
+      "OutputId": "3c4d5e6f-7a8b-9c0d-b1c2-d3e4f5a6b7c8"/*IsListening*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 300.0
+      }
+    },
+    {
+      "OutputId": "8b9c0d1e-2f3a-4b5c-6d7e-8f9a0b1c2d3e"/*CamerasAsBuffer*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 400.0
+      }
+    },
+    {
+      "OutputId": "1a2b3c4d-5e6f-7a8b-9c0d-b1c2d3e4f5a6"/*CameraPos*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 500.0
+      }
+    },
+    {
+      "OutputId": "2b3c4d5e-6f7a-8b9c-0d1e-2f3a4b5c6d7e"/*CameraRot*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 600.0
+      }
+    },
+    {
+      "OutputId": "3c4d5e6f-7a8b-9c0d-1e2f-3a4b5c6d7e8f"/*Zoom*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 700.0
+      }
+    },
+    {
+      "OutputId": "4d5e6f7a-8b9c-0d1e-2f3a-4b5c6d7e8f9a"/*Focus*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 800.0
+      }
+    },
+    {
+      "OutputId": "5e6f7a8b-9c0d-1e2f-3a4b-5c6d7e8f9a0b"/*User*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 900.0
+      }
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "Id": "a9b8c7d6-e5f4-4210-9876-54321fedcba0"/*FreeDOutput*/,
+  "Inputs": [
+    {
+      "Id": "8f9a0b1c-2d3e-4f5a-a6b7-c8d9e0f1a2b3"/*Connect*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "9a0b1c2d-3e4f-4a6b-b7c8-d9e0f1a2b3c4"/*LocalIpAddress*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "a0b1c2d3-e4f5-4a7b-c8d9-e0f1a2b3c4d5"/*TargetIpAddress*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "a2b3c4d5-e6f7-4a9b-8f90-123456789015"/*SendTrigger*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "a6b7c8d9-e0f1-4a3b-b4c5-d6e7f8a9b0c1"/*Position*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "b1c2d3e4-f5a6-4b8c-d9e0-f1a2b3c4d5e6"/*TargetPort*/,
+      "DefaultValue": 7000
+    },
+    {
+      "Id": "b3c4d5e6-f7a8-4b0c-8f90-123456789016"/*PrintToLog*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "c2d3e4f5-a6b7-4c9d-e0f1-a2b3c4d5e6f7"/*CameraId*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "d3e4f5a6-b7c8-4d0e-f1a2-b3c4d5e6f7a8"/*Rotation*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "d9e0f1a2-b3c4-4d6e-8f90-123456789012"/*Focus*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "e0f1a2b3-c4d5-4e7f-9012-345678901234"/*Zoom*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "f1a2b3c4-d5e6-4f8a-8f90-123456789014"/*SendOnChange*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "f1a2b3c4-d5e6-4f8a-9123-456789012345"/*User*/,
+      "DefaultValue": 0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}
