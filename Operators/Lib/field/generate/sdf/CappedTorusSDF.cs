@@ -47,7 +47,7 @@ internal sealed class CappedTorusSDF : Instance<CappedTorusSDF>
         c.Globals["fCappedTorus"] = """
                                     float fCappedTorus(float3 p, float size, float ra, float rb) 
                                     {
-                                        float an = 2.5 * (0.5 + 0.5 * (size * 1.1 + 3)) + offset / 180 * 3.141578;
+                                        float an = 2.5 * (0.5 + 0.5 * (size * 1.1 + 3));
                                         float2 sc = float2(sin(an),cos(an));
                                         p.x = abs(p.x);
                                         float k = (sc.y*p.x>sc.x*p.y) ? dot(p.xy,sc) : length(p.xy);
