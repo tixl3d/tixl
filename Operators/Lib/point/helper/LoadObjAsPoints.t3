@@ -7,7 +7,7 @@
     },
     {
       "Id": "895dab2c-e3be-4e73-9c96-0f6101cea113"/*Path*/,
-      "DefaultValue": "Resources\\common\\meshes\\cube.obj"
+      "DefaultValue": "/t3/meshes/cube.obj"
     },
     {
       "Id": "dcacd412-1885-4a10-b073-54192f074ae8"/*Mode*/,

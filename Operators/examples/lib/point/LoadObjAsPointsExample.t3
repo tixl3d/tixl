@@ -69,7 +69,7 @@
         {
           "Id": "895dab2c-e3be-4e73-9c96-0f6101cea113"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\common\\test-footage\\pointcloud-desk-corner-100k.obj"
+          "Value": "/t3/test-footage/pointcloud-desk-corner-100k.obj"
         },
         {
           "Id": "dcacd412-1885-4a10-b073-54192f074ae8"/*Mode*/,

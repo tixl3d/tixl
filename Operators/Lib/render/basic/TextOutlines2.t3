@@ -7,7 +7,7 @@
     },
     {
       "Id": "21a2292d-1969-41ee-a71f-00a1621f9539"/*FontPath*/,
-      "DefaultValue": "Resources/fonts/Roboto-Black.fnt"
+      "DefaultValue": "/t3/fonts/Roboto-Black.fnt"
     },
     {
       "Id": "2cb6bb45-a74a-4eba-a2f0-2895e8e38b07"/*EnableZTest*/,

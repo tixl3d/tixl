@@ -66,7 +66,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/common/meshes/studio_backdrop_round_90.obj"
+          "Value": "/t3/meshes/studio_backdrop_round_90.obj"
         }
       ],
       "Outputs": []
@@ -191,7 +191,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/common/meshes/marblePlayer.obj"
+          "Value": "/t3/meshes/marblePlayer.obj"
         }
       ],
       "Outputs": []

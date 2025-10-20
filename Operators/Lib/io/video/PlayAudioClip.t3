@@ -19,7 +19,7 @@
     },
     {
       "Id": "e0c927f9-5528-49c5-b457-5aea51f51628"/*Path*/,
-      "DefaultValue": "Resources/common/test-footage/test-720p.mp4"
+      "DefaultValue": "/Examples/user/still/proj-katsumaki/soundtrack/rp-katsumaki-v3.mp3"
     }
   ],
   "Children": [],

@@ -518,7 +518,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/common/meshes/people/boy-standing.obj"
+          "Value": "/t3/meshes/people/boy-standing.obj"
         }
       ],
       "Outputs": []
