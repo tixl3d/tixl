@@ -1,4 +1,4 @@
-﻿using ImGuiNET;
+using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
@@ -156,7 +156,7 @@ public sealed class ParameterSettings
                            itemMin
                            + new Vector2(8, padding + 2),
                            textColor,
-                           inputUi.InputDefinition.Name);
+                           inputUi.InputDefinition.Name.AddSpacesForImGuiOutput());
 
                 // Drag handle
                 if (ImGui.IsItemActive() || (!ImGui.IsAnyItemActive() && ImGui.IsItemHovered()))
@@ -229,7 +229,7 @@ public sealed class ParameterSettings
         {
             if (selectedInputUi != null)
             {
-                FormInputs.AddSectionHeader(selectedInputUi.InputDefinition.Name);
+                FormInputs.AddSectionHeaderParam(selectedInputUi.InputDefinition.Name);
                 ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
                 ImGui.TextUnformatted(selectedInputUi.Type.Name);
                 ImGui.PopStyleColor();

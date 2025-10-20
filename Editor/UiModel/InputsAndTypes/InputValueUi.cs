@@ -229,7 +229,7 @@ public abstract class InputValueUi<T> : IInputUi
                 // Draw Name
                 ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, new Vector2(1.0f, 0.5f));
                 ImGui.PushStyleColor(ImGuiCol.Text, UiColors.ForegroundFull.Rgba);
-                ImGui.Button(input.Name + "##ParamName", new Vector2(ParameterNameWidth, 0.0f));
+                ImGui.Button($"{input.Name.AddSpacesForImGuiOutput()}##ParamName", new Vector2(ParameterNameWidth, 0.0f));
                 ImGui.PopStyleColor();
                 if (ImGui.BeginPopupContextItem("##parameterOptions", 0))
                 {
@@ -349,7 +349,7 @@ public abstract class InputValueUi<T> : IInputUi
 
             // Draw Name
             ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, new Vector2(1.0f, 0.5f));
-            var isClicked = ImGui.Button(input.Name + "##ParamName", new Vector2(ParameterNameWidth, 0.0f));
+            var isClicked = ImGui.Button($"{input.Name.AddSpacesForImGuiOutput()}##ParamName", new Vector2(ParameterNameWidth, 0.0f));
             CustomComponents.ContextMenuForItem
                 (() =>
                  {

@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 
 using ImGuiNET;
 using T3.Core.Operator;
@@ -286,7 +286,7 @@ internal sealed class SymbolLibrary : Window
             ImGui.PushStyleColor(ImGuiCol.ButtonActive, ColorVariations.OperatorBackgroundHover.Apply(color).Rgba);
             ImGui.PushStyleColor(ImGuiCol.Text, ColorVariations.OperatorLabel.Apply(color).Rgba);
 
-            if (ImGui.Button(symbol.Name))
+            if (ImGui.Button(symbol.Name.AddSpacesForImGuiOutput()))
             {
                 //_selectedSymbol = symbol;
             }

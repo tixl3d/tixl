@@ -171,11 +171,10 @@ internal sealed class SettingsWindow : Window
                                                       "This might prevent unintended user interactions while live performing with [KeyInput] operators.",
                                                       UserSettings.Defaults.EnableKeyboardShortCuts);
                     
-                    changed |= FormInputs.AddCheckBox("Readable parameter names",
+                    changed |= FormInputs.AddCheckBox("Display names with spaces",
                                                       ref UserSettings.Config.AddSpacesToParameterNames,
                                                       """
-                                                      Insert spaces to parameters names. E.g. prints "XAxisValue" becomes "X Axis Value".
-                                                      This is purely for output formatting. If you're developing, and used to PascalCase you might not need it.
+                                                      Developers use PascalCase (XAxisValue) when coding. Turn this on to display those names with spaces (X Axis Value) for easier reading.
                                                       """,
                                                       UserSettings.Defaults.AddSpacesToParameterNames);                    
                     

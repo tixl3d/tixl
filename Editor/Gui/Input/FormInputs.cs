@@ -26,7 +26,14 @@ internal static class FormInputs
         ImGui.PopFont();
         //AddVerticalSpace(20);
     }
-    
+
+    public static void AddSectionHeaderParam(string label)
+    {
+        ImGui.PushFont(Fonts.FontLarge);
+        ImGui.Text(label.AddSpacesForImGuiOutput());
+        ImGui.PopFont();
+    }
+
     public static void AddSectionSubHeader(string label)
     {
         ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
