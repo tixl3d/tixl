@@ -4,10 +4,45 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
+      "ChildId": "0630c273-96dd-48ab-9ea8-c87b80dfe065"/*Camera*/,
+      "Position": {
+        "X": 619.03015,
+        "Y": 1017.59595
+      }
+    },
+    {
+      "ChildId": "0bfa245b-412b-458a-874e-c1177f39fd87"/*SpreadLayout*/,
+      "Position": {
+        "X": 107.56741,
+        "Y": 1031.9956
+      }
+    },
+    {
+      "ChildId": "16806d33-2979-46c9-a780-44756267f21f"/*Text*/,
+      "Position": {
+        "X": -32.432587,
+        "Y": 1101.9954
+      }
+    },
+    {
       "ChildId": "198d9fe9-c3ac-40ba-9777-eb6cea51d82a"/*ShardNoise*/,
       "Position": {
         "X": 486.20026,
         "Y": 45.64212
+      }
+    },
+    {
+      "ChildId": "1abc2d41-598d-4c4a-8ed3-92f8f16ff453"/*Blend*/,
+      "Position": {
+        "X": 446.90067,
+        "Y": 1063.582
+      }
+    },
+    {
+      "ChildId": "29417fd2-fa1f-41ba-be37-f9a413bca504"/*VisualizeUvMap*/,
+      "Position": {
+        "X": 604.9641,
+        "Y": 820.6312
       }
     },
     {
@@ -19,10 +54,17 @@
       }
     },
     {
+      "ChildId": "2db190f8-ec78-4333-9172-492970cc3122"/*DrawMesh*/,
+      "Position": {
+        "X": 619.03015,
+        "Y": 912.5959
+      }
+    },
+    {
       "ChildId": "34d06f5a-3267-4cc5-a040-2c031db3db65"/*Transform*/,
       "Position": {
-        "X": 453.11188,
-        "Y": 399.49005
+        "X": 430.75623,
+        "Y": 466.1729
       }
     },
     {
@@ -33,10 +75,38 @@
       }
     },
     {
+      "ChildId": "4185bdff-e793-48aa-822f-07f6bc16e32c"/*RenderTarget*/,
+      "Position": {
+        "X": 271.83908,
+        "Y": 1027.1472
+      }
+    },
+    {
+      "ChildId": "647d7e34-56ea-4034-8c71-e5d7935862a3"/*Text*/,
+      "Position": {
+        "X": -32.432587,
+        "Y": 904.0638
+      }
+    },
+    {
+      "ChildId": "681ebd8b-40d3-4135-a4df-860f9c02a1fa"/*Text*/,
+      "Position": {
+        "X": -32.432587,
+        "Y": 1066.9954
+      }
+    },
+    {
+      "ChildId": "73877fe1-6668-4d06-86bb-a322d5869ff8"/*Execute*/,
+      "Position": {
+        "X": 271.83908,
+        "Y": 957.147
+      }
+    },
+    {
       "ChildId": "7415092e-8992-45dc-a930-8e10da92f363"/*AnimValue*/,
       "Position": {
-        "X": 33.111877,
-        "Y": 539.49005
+        "X": 10.756226,
+        "Y": 606.1729
       }
     },
     {
@@ -55,6 +125,13 @@
       }
     },
     {
+      "ChildId": "80767d8c-8b69-4e4d-8001-3b8b96ed25d4"/*Text*/,
+      "Position": {
+        "X": -32.432617,
+        "Y": 974.0637
+      }
+    },
+    {
       "ChildId": "82b5e492-c047-46d6-a5c5-a10a82aa04cf"/*DrawMesh*/,
       "Position": {
         "X": 562.88214,
@@ -69,10 +146,24 @@
       }
     },
     {
+      "ChildId": "8bdf0419-4f6b-4839-a3af-0948e14aeacf"/*CheckerBoard*/,
+      "Position": {
+        "X": 306.90067,
+        "Y": 1098.582
+      }
+    },
+    {
+      "ChildId": "8e87fe60-d443-4b78-a88d-6873fc7f3e0d"/*RenderTarget*/,
+      "Position": {
+        "X": 619.03015,
+        "Y": 1052.596
+      }
+    },
+    {
       "ChildId": "94820757-164f-4dcc-b188-3706e4209d2e"/*Vector3*/,
       "Position": {
-        "X": 173.11188,
-        "Y": 504.49005
+        "X": 150.75623,
+        "Y": 571.1729
       }
     },
     {
@@ -85,15 +176,22 @@
     {
       "ChildId": "a02b77bb-2fb8-4a2b-96cc-300eabef242e"/*Camera*/,
       "Position": {
-        "X": 453.11188,
-        "Y": 469.49005
+        "X": 430.75623,
+        "Y": 536.1729
       }
     },
     {
       "ChildId": "a4808dfc-97a0-4b3f-ae77-a62bba3f61a1"/*Bloom*/,
       "Position": {
-        "X": 453.11188,
-        "Y": 539.49005
+        "X": 430.75623,
+        "Y": 606.1729
+      }
+    },
+    {
+      "ChildId": "aa79616c-5e70-4bcf-912b-bbfc1d7787f1"/*Text*/,
+      "Position": {
+        "X": -32.432587,
+        "Y": 939.0637
       }
     },
     {
@@ -106,8 +204,22 @@
     {
       "ChildId": "b1aeb062-71de-4744-b6a6-39989db25696"/*ToneMapping*/,
       "Position": {
-        "X": 453.11188,
-        "Y": 574.49005
+        "X": 430.75623,
+        "Y": 641.1729
+      }
+    },
+    {
+      "ChildId": "b5b1d46c-59ec-49f4-a64a-fd59f7b728b2"/*SpreadLayout*/,
+      "Position": {
+        "X": 107.56738,
+        "Y": 904.0638
+      }
+    },
+    {
+      "ChildId": "bafc1aae-34b2-4534-ae3b-7d18126b4b64"/*SetMaterial*/,
+      "Position": {
+        "X": 619.03015,
+        "Y": 947.59595
       }
     },
     {
@@ -115,6 +227,13 @@
       "Position": {
         "X": 117.701904,
         "Y": 284.5069
+      }
+    },
+    {
+      "ChildId": "c30c34d9-a9f4-4387-a3ef-f002f5caa986"/*DisplaceMesh*/,
+      "Position": {
+        "X": 448.34402,
+        "Y": 913.3962
       }
     },
     {
@@ -127,8 +246,8 @@
     {
       "ChildId": "e1833538-abaf-4d2a-8d35-9ea2c749330e"/*RenderTarget*/,
       "Position": {
-        "X": 453.11188,
-        "Y": 504.49005
+        "X": 430.75623,
+        "Y": 571.1729
       }
     },
     {
@@ -144,18 +263,50 @@
         "X": 153.94061,
         "Y": -141.2507
       }
+    },
+    {
+      "ChildId": "fa17460a-ff35-4e15-86e8-186ebfd2dcbe"/*CubeMesh*/,
+      "Position": {
+        "X": -32.432617,
+        "Y": 848.8602
+      }
+    },
+    {
+      "ChildId": "face3555-315e-4cc6-a41f-65850e74b3c3"/*Text*/,
+      "Position": {
+        "X": -32.432587,
+        "Y": 1031.9956
+      }
     }
   ],
   "OutputUis": [
     {
       "OutputId": "7ced0db6-97b0-4459-8bc0-26df7a2fbb70"/*ColorBuffer*/,
       "Position": {
-        "X": 593.1119,
-        "Y": 574.49005
+        "X": 570.7562,
+        "Y": 641.1729
       }
     }
   ],
   "Annotations": [
+    {
+      "Id": "6c8ce3c8-438f-4e1d-94f1-38b5e8269069",
+      "Label": "Checking if Displace and Diffuse maps are matching",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -49.243774,
+        "Y": 743.82007
+      },
+      "Size": {
+        "X": 822.7649,
+        "Y": 449.99963
+      }
+    },
     {
       "Id": "707db091-8aef-4fd6-87a5-9e52dc6fd202",
       "Label": "TexCoord2 is used to displace the mesh",
@@ -172,6 +323,24 @@
       "Size": {
         "X": 822.7649,
         "Y": 206.20148
+      }
+    },
+    {
+      "Id": "7d472719-4692-44f1-83ef-5d4a2ff199e3",
+      "Label": "Camera, Render and PostFX",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -49.243774,
+        "Y": 376.2658
+      },
+      "Size": {
+        "X": 822.7649,
+        "Y": 323.5852
       }
     },
     {
