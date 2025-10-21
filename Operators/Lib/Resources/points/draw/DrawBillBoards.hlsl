@@ -159,16 +159,16 @@ psInput vsMain(uint id : SV_VertexID)
 
     output.fog = 0;
 
-    int2 altasSize = (int2)AtlasSize;
+    int2 atlasSize = (int2)AtlasSize;
 
-    float textureUx = GetUFromMode(TextureAtlasMode, pointId, (f * altasSize.x) % 1, normalizedScatter, p.FX1, output.fog) % altasSize.x;
+    float textureUx = GetUFromMode(TextureAtlasMode, (pointId * atlasSize.x), (f * atlasSize.x) % 1, normalizedScatter, (p.FX1 * atlasSize.x) % 1, output.fog) % atlasSize.x;
     float textureUy = GetUFromMode(TextureAtlasMode, pointId, f, normalizedScatter.wxyz, p.FX1, output.fog);
 
-    int textureCelX = textureUx * altasSize.x;
-    int textureCelY = textureUy * altasSize.y;
+    int textureCelX = textureUx * atlasSize.x;
+    int textureCelY = textureUy * atlasSize.y;
     output.texCoord = (cornerFactors.xy * float2(-1, 1) * 0.5 + 0.5);
-    output.texCoord /= altasSize;
-    output.texCoord += float2(textureCelX, textureCelY) / altasSize;
+    output.texCoord /= atlasSize;
+    output.texCoord += float2(textureCelX, textureCelY) / atlasSize;
 
     float4 posInObject = float4(p.Position, 1);
 
