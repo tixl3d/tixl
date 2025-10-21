@@ -1,0 +1,344 @@
+{
+  "Id": "6e89c814-cc67-40c2-933c-d03ff1b30ef7"/*DrawLinesAlt*/,
+  "Description": "Alternative version of Draw Lines that allow to draw closed shapes by connecting the first and the last points. ",
+  "InputUis": [
+    {
+      "InputId": "0bcf77ac-d6b2-443d-883e-2c05491145cf"/*EnableZTest*/,
+      "Position": {
+        "X": 844.74316,
+        "Y": 639.4281
+      }
+    },
+    {
+      "InputId": "3ad26a8c-18ee-4072-ae22-117ec7aa3b41"/*Texture_*/,
+      "Position": {
+        "X": 490.75897,
+        "Y": 373.78
+      }
+    },
+    {
+      "InputId": "41ec8023-d9f7-46d8-8705-d8043cce33ce"/*UvScaleFX*/,
+      "Position": {
+        "X": 630.759,
+        "Y": 185.82886
+      }
+    },
+    {
+      "InputId": "584039ef-c876-432a-800c-b1366c45242b"/*WrapMode*/,
+      "Position": {
+        "X": 630.7589,
+        "Y": 496.41733
+      }
+    },
+    {
+      "InputId": "73a384b1-f1f8-441f-a0a7-d40e4044e3d5"/*UvScale*/,
+      "Position": {
+        "X": 394.00714,
+        "Y": -117.780136
+      }
+    },
+    {
+      "InputId": "7c62d13d-3df2-46bb-a725-29f52c609d99"/*PointsPerShape*/,
+      "Position": {
+        "X": 254.00711,
+        "Y": -47.78015
+      }
+    },
+    {
+      "InputId": "8c074334-d16f-409e-84c3-01b725c25526"/*BlendMod*/,
+      "Position": {
+        "X": 844.74316,
+        "Y": 604.4281
+      }
+    },
+    {
+      "InputId": "92f4d16f-3100-4c8c-a7dc-37a9f2c548f8"/*LineOffset*/,
+      "Position": {
+        "X": 233.99545,
+        "Y": 7.2333527
+      }
+    },
+    {
+      "InputId": "9e56ca0c-f52f-4f4b-9293-78c8a1585e17"/*Color*/,
+      "Position": {
+        "X": 114.00711,
+        "Y": -362.78012
+      }
+    },
+    {
+      "InputId": "aded76ab-47b3-4421-8939-114ede44805f"/*WidthFactor*/,
+      "Position": {
+        "X": 630.759,
+        "Y": 220.82883
+      }
+    },
+    {
+      "InputId": "d0a13a9f-3f20-4202-b599-7c0b7f03ff9c"/*GPoints*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 704.74335,
+        "Y": 731.009
+      }
+    },
+    {
+      "InputId": "deb76a6f-484b-4732-b3ed-6e3be9d9a27a"/*FadeOutTooLong*/,
+      "Position": {
+        "X": 394.00714,
+        "Y": -82.780136
+      },
+      "Min": -0.01,
+      "Max": 1.0,
+      "Scale": 0.001,
+      "ClampMin": true
+    },
+    {
+      "InputId": "e2572f14-0eff-4a9e-b0d3-82ce20fcd95b"/*LineWidth*/,
+      "Position": {
+        "X": 394.00714,
+        "Y": -222.78014
+      },
+      "Scale": 0.001
+    },
+    {
+      "InputId": "e5d4c25c-a1b0-46f3-b354-64de2331bd1c"/*TransitionProgress*/,
+      "Position": {
+        "X": 394.00714,
+        "Y": -152.78014
+      }
+    },
+    {
+      "InputId": "fb71c6b5-6882-40d4-bccd-86f13e0f6486"/*EnableZWrite*/,
+      "Position": {
+        "X": 844.74316,
+        "Y": 674.4281
+      }
+    },
+    {
+      "InputId": "ff59f227-283b-4469-904c-f3a5d565fdbb"/*ShrinkWithDistance*/,
+      "Position": {
+        "X": 394.00714,
+        "Y": -187.78014
+      }
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "119eae50-6eb9-454e-8961-7647e9589dff"/*Vector4Components*/,
+      "Style": "Resizable",
+      "Size": {
+        "X": 111.079544,
+        "Y": 59.905018
+      },
+      "Position": {
+        "X": 394.00714,
+        "Y": -362.78012
+      }
+    },
+    {
+      "ChildId": "204a9e7a-8967-46d7-a322-43d6c91a7d25"/*ContextCBuffers*/,
+      "Position": {
+        "X": 770.759,
+        "Y": 313.83142
+      }
+    },
+    {
+      "ChildId": "258891e9-9192-4318-92c6-434655607553"/*SetPixelAndVertexShaderStage*/,
+      "Style": "Resizable",
+      "Size": {
+        "X": 140.0,
+        "Y": 315.0
+      },
+      "Position": {
+        "X": 1124.7432,
+        "Y": 202.72704
+      }
+    },
+    {
+      "ChildId": "3df26747-c38b-47aa-8604-2a9f6e8e8b96"/*IntsToBuffer*/,
+      "Position": {
+        "X": 770.759,
+        "Y": 185.82886
+      }
+    },
+    {
+      "ChildId": "4bc32e8c-cbad-4510-87dd-b48c1c287836"/*Rasterizer*/,
+      "Position": {
+        "X": 1124.7432,
+        "Y": 539.65283
+      }
+    },
+    {
+      "ChildId": "507fc48d-0368-42c1-a62f-084b542535cd"/*Draw*/,
+      "Position": {
+        "X": 984.74316,
+        "Y": 941.00885
+      }
+    },
+    {
+      "ChildId": "52a1de9c-f332-4c29-8dd8-af690e28f0fc"/*AddInts*/,
+      "Position": {
+        "X": 1117.8761,
+        "Y": 796.19684
+      }
+    },
+    {
+      "ChildId": "581f2e28-8fc7-4ea1-b95e-fe0e58d8884a"/*GetForegroundColor*/,
+      "Position": {
+        "X": 114.00711,
+        "Y": -327.78012
+      }
+    },
+    {
+      "ChildId": "5a8ac19f-4eb5-495f-a29b-c73eed344942"/*SamplerState*/,
+      "Position": {
+        "X": 770.759,
+        "Y": 461.41733
+      }
+    },
+    {
+      "ChildId": "66b3a889-5c53-453e-931d-8060fae0a127"/*PickBlendMode*/,
+      "Position": {
+        "X": 984.74316,
+        "Y": 604.4281
+      }
+    },
+    {
+      "ChildId": "67d62230-6e99-444f-a2ca-d1ea3313f586"/*ClampInt*/,
+      "Position": {
+        "X": 1117.8761,
+        "Y": 831.19684
+      }
+    },
+    {
+      "ChildId": "71595c19-b924-430e-967f-5ab4c183f856"/*Execute*/,
+      "Style": "Resizable",
+      "Size": {
+        "X": 120.182755,
+        "Y": 287.37302
+      },
+      "Position": {
+        "X": 1349.1333,
+        "Y": 772.7663
+      }
+    },
+    {
+      "ChildId": "7d8903a6-9a21-4a09-80d9-8b6d87306585"/*DepthStencilState*/,
+      "Position": {
+        "X": 984.74316,
+        "Y": 639.4281
+      }
+    },
+    {
+      "ChildId": "97079250-e568-40c9-8a92-32ac0cc5391b"/*FloatsToBuffer*/,
+      "Style": "Resizable",
+      "Size": {
+        "X": 102.369125,
+        "Y": 252.4566
+      },
+      "Position": {
+        "X": 534.00714,
+        "Y": -397.78015
+      }
+    },
+    {
+      "ChildId": "98594268-276f-49fe-b38f-69799bd5023f"/*TransformsConstBuffer*/,
+      "Position": {
+        "X": 770.759,
+        "Y": 270.83142
+      }
+    },
+    {
+      "ChildId": "9987b489-806f-4840-816c-996cd146f080"/**6 -> VertexCount*/,
+      "Position": {
+        "X": 1117.8761,
+        "Y": 866.19684
+      }
+    },
+    {
+      "ChildId": "9a839cef-203e-4128-af61-cb4a290cbf44"/*BlendColors*/,
+      "Position": {
+        "X": 254.00714,
+        "Y": -362.78012
+      }
+    },
+    {
+      "ChildId": "b57c5463-e7a6-4951-8668-a0da1ba291f2"/*OutputMergerStage*/,
+      "Position": {
+        "X": 1124.7432,
+        "Y": 604.4281
+      }
+    },
+    {
+      "ChildId": "b7cfa53f-9aa0-4b55-8bf7-0d9872315261"/*GetBufferComponents*/,
+      "Position": {
+        "X": 844.74335,
+        "Y": 731.009
+      }
+    },
+    {
+      "ChildId": "c3ddf85f-e490-449f-929c-841783453691"/*PixelShader*/,
+      "Position": {
+        "X": 984.74316,
+        "Y": 237.72704
+      }
+    },
+    {
+      "ChildId": "d65ef22f-c334-451c-b344-c279d5fa04bc"/*VertexShader*/,
+      "Position": {
+        "X": 984.7431,
+        "Y": 202.72704
+      }
+    },
+    {
+      "ChildId": "e67df0df-b1fc-4cbe-96a5-5f87d92645d8"/*UseFallbackTexture*/,
+      "Position": {
+        "X": 630.759,
+        "Y": 373.78
+      }
+    },
+    {
+      "ChildId": "e6dcf4be-7cca-47b7-8a75-78ac576a8c76"/*InputAssemblerStage*/,
+      "Position": {
+        "X": 1124.7432,
+        "Y": 130.39796
+      }
+    },
+    {
+      "ChildId": "eb363293-570e-41d5-9336-65854ac54c5b"/*SrvFromTexture2d*/,
+      "Position": {
+        "X": 770.759,
+        "Y": 373.78
+      }
+    },
+    {
+      "ChildId": "f1a98f61-c6ae-4e70-8205-8e72e34c2c73"/*RasterizerState*/,
+      "Position": {
+        "X": 984.74316,
+        "Y": 539.65283
+      }
+    },
+    {
+      "ChildId": "f584a076-eb48-4732-be08-dc3a4088e740"/*IntToFloat*/,
+      "Position": {
+        "X": 394.0071,
+        "Y": -47.78015
+      }
+    },
+    {
+      "ChildId": "fdd3659b-f4ba-488d-aece-43d61df718b5"/*LoadImage*/,
+      "Position": {
+        "X": 490.75897,
+        "Y": 408.77975
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "3b11b346-638d-47b5-8b2c-79e5cdaf7e34"/*Output*/,
+      "Position": {
+        "X": 1489.1333,
+        "Y": 772.7663
+      }
+    }
+  ]
+}
