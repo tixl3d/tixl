@@ -1,6 +1,6 @@
 {
   "Id": "6e89c814-cc67-40c2-933c-d03ff1b30ef7"/*DrawLinesAlt*/,
-  "Description": "Alternative version of Draw Lines that allow to draw closed shapes by connecting the first and the last points. ",
+  "Description": "Alternative version of [DrawLines] that allow to draw closed shapes by connecting the first and the last points. ",
   "InputUis": [
     {
       "InputId": "0bcf77ac-d6b2-443d-883e-2c05491145cf"/*EnableZTest*/,
@@ -24,6 +24,13 @@
       }
     },
     {
+      "InputId": "5396d816-3d18-468d-91af-4003ec13405b"/*SpaceMode*/,
+      "Position": {
+        "X": 209.93845,
+        "Y": 117.51967
+      }
+    },
+    {
       "InputId": "584039ef-c876-432a-800c-b1366c45242b"/*WrapMode*/,
       "Position": {
         "X": 630.7589,
@@ -35,21 +42,24 @@
       "Position": {
         "X": 394.00714,
         "Y": -117.780136
-      }
+      },
+      "AddPadding": "True"
     },
     {
       "InputId": "7c62d13d-3df2-46bb-a725-29f52c609d99"/*PointsPerShape*/,
       "Position": {
         "X": 254.00711,
         "Y": -47.78015
-      }
+      },
+      "Description": "needed when using [RepeatAtPoints]"
     },
     {
       "InputId": "8c074334-d16f-409e-84c3-01b725c25526"/*BlendMod*/,
       "Position": {
         "X": 844.74316,
         "Y": 604.4281
-      }
+      },
+      "AddPadding": "True"
     },
     {
       "InputId": "92f4d16f-3100-4c8c-a7dc-37a9f2c548f8"/*LineOffset*/,
@@ -97,6 +107,7 @@
         "X": 394.00714,
         "Y": -222.78014
       },
+      "AddPadding": "True",
       "Scale": 0.001
     },
     {
@@ -118,7 +129,8 @@
       "Position": {
         "X": 394.00714,
         "Y": -187.78014
-      }
+      },
+      "AddPadding": "True"
     }
   ],
   "SymbolChildUis": [

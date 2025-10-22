@@ -14,6 +14,10 @@
       "DefaultValue": 0
     },
     {
+      "Id": "5396d816-3d18-468d-91af-4003ec13405b"/*SpaceMode*/,
+      "DefaultValue": 0
+    },
+    {
       "Id": "584039ef-c876-432a-800c-b1366c45242b"/*WrapMode*/,
       "DefaultValue": "Clamp"
     },

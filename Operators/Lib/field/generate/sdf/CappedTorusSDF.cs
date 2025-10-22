@@ -63,7 +63,7 @@ internal sealed class CappedTorusSDF : Instance<CappedTorusSDF>
 
 
         var n = ShaderNode;
-        c.AppendCall($"f{c}.w = fCappedTorus(p{c}.{a} - {n}Center, {n}Fill,  {n}Radius, {n}Thickness);");
+        c.AppendCall($"f{c}.w = fCappedTorus(p{c}.{a} - {n}Center.{a}, {n}Fill,  {n}Radius, {n}Thickness);");
         c.AppendCall($"f{c}.xyz = p.w < 0.5 ?  p{c}.xyz : 1;"); // save local space
     }
     
