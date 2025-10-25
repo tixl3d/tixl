@@ -68,13 +68,6 @@
       }
     },
     {
-      "ChildId": "1d0c33b4-9501-4d2c-9ee1-050e97262ed8"/*TextureToCubeMap*/,
-      "Position": {
-        "X": 4699.2056,
-        "Y": 2138.539
-      }
-    },
-    {
       "ChildId": "20ecfb8b-8c87-471e-bba4-b59fea7f2a7a"/*Blob*/,
       "Position": {
         "X": 4333.7886,
@@ -229,6 +222,13 @@
       }
     },
     {
+      "ChildId": "6c2428a6-d947-4f2d-a4ae-dda1e7958bd6"/*SetPointAttributes*/,
+      "Position": {
+        "X": 447.90747,
+        "Y": 1295.7327
+      }
+    },
+    {
       "ChildId": "6c815430-60ef-428b-bd5a-50a10ff3daad"/*TransformMeshUVs*/,
       "Position": {
         "X": 2403.8474,
@@ -261,6 +261,13 @@
       "Position": {
         "X": 5630.016,
         "Y": 1591.9902
+      }
+    },
+    {
+      "ChildId": "7a065b4e-d183-446a-bab6-b7417021a545"/*ToneMapping*/,
+      "Position": {
+        "X": 6414.5854,
+        "Y": 2063.4646
       }
     },
     {

@@ -1,6 +1,7 @@
 {
   "Id": "dd0e8f4c-99bc-4e90-965c-d2d461d4a8fe"/*HowToUseColors*/,
   "Description": "An overview into how to defined, manipulate and use colors.",
+  "SymbolTags": "2",
   "InputUis": [],
   "SymbolChildUis": [
     {

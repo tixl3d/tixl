@@ -623,19 +623,24 @@
       "SymbolId": "f3b66187-34b2-4018-8380-279f9f296ded",
       "InputValues": [
         {
+          "Id": "4f573afe-8815-4fd3-a655-89ec40bf3c22"/*RenderBackground*/,
+          "Type": "System.Boolean",
+          "Value": true
+        },
+        {
           "Id": "71c54c8e-a95f-47e8-b126-0cdaa89ae49b"/*Exposure*/,
           "Type": "System.Single",
-          "Value": 0.17
+          "Value": 0.23
         },
         {
           "Id": "96094239-9d82-4a32-bbb0-e9da7f6501da"/*BackgroundBlur*/,
           "Type": "System.Single",
-          "Value": 0.15
+          "Value": 0.29
         },
         {
           "Id": "c3c815fa-8672-4d99-99a7-986844f2fc45"/*UpdateLive*/,
           "Type": "System.Boolean",
-          "Value": true
+          "Value": false
         }
       ],
       "Outputs": []
@@ -777,7 +782,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "/t3/images/hdri/sunset.dds"
+          "Value": "/t3/images/hdri/sunset.png"
         }
       ],
       "Outputs": []
@@ -1255,8 +1260,8 @@
       "TargetSlotId": "627f766e-056c-413e-8530-838d673bd031"
     },
     {
-      "SourceParentOrChildId": "f81fbef3-4fa1-497f-aa46-7a61b7662d08",
-      "SourceSlotId": "a3c61268-e57c-4ab0-939c-6fc4da0fc574",
+      "SourceParentOrChildId": "d4842061-e4f0-4db5-8283-181131a3fee4",
+      "SourceSlotId": "e0c4fedd-5c2f-46c8-b67d-5667435fb037",
       "TargetParentOrChildId": "a05c8899-a03a-4c50-80e7-53168eeef59b",
       "TargetSlotId": "5c042a08-74b3-4a6b-a420-2fcfa0fc01ee"
     },
@@ -1329,6 +1334,12 @@
     {
       "SourceParentOrChildId": "5d38c4c7-daea-425b-b2b1-3571bdcc088a",
       "SourceSlotId": "d80e1028-a48d-4171-8c8c-e6856bd2143d",
+      "TargetParentOrChildId": "d9c0896c-e3a3-4893-97c5-9a7f5b640c01",
+      "TargetSlotId": "9e961f73-1ee7-4369-9ac7-5c653e570b6f"
+    },
+    {
+      "SourceParentOrChildId": "ebb82747-e2bf-4968-994a-cf00513072e4",
+      "SourceSlotId": "357c4c25-2b08-4470-84b1-9707a3d8e56e",
       "TargetParentOrChildId": "d9c0896c-e3a3-4893-97c5-9a7f5b640c01",
       "TargetSlotId": "9e961f73-1ee7-4369-9ac7-5c653e570b6f"
     },
