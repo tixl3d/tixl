@@ -144,10 +144,15 @@ internal sealed class ParameterWindow : Window
                          | ImGuiWindowFlags.AlwaysUseWindowPadding);
         {
             ImGui.AlignTextToFramePadding();
-            // Namespace and symbol
-            ImGui.PushFont(Fonts.FontBold);
 
+            // Symbol and Namespace
+            ImGui.PushFont(Fonts.FontBold);
             ImGui.TextUnformatted(op.Symbol.Name);
+            if (ImGui.IsItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Left) && (ImGui.GetIO().KeyCtrl))
+            { 
+                ImGui.SetClipboardText("[" + op.Symbol.Name + "]");
+            }
+            CustomComponents.TooltipForLastItem("CTRL + Click to copy Symbol name to clipboard");
             ImGui.PopFont();
 
             ImGui.SameLine();
