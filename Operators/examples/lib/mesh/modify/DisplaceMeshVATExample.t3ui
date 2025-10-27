@@ -81,6 +81,13 @@
       }
     },
     {
+      "ChildId": "3e8bf390-e5c5-4f36-a5cf-4eac127465b5"/*ParticleSystem*/,
+      "Position": {
+        "X": 403.35474,
+        "Y": 1293.3824
+      }
+    },
+    {
       "ChildId": "455ba60e-5ec2-4683-842c-e7a27c167e9d"/*Transform*/,
       "Position": {
         "X": 1020.91943,
@@ -92,6 +99,13 @@
       "Position": {
         "X": 404.72678,
         "Y": 653.95654
+      }
+    },
+    {
+      "ChildId": "461d0eec-943a-425a-9be0-ebc09249a51b"/*TurbulenceForce*/,
+      "Position": {
+        "X": 263.35474,
+        "Y": 1328.3824
       }
     },
     {

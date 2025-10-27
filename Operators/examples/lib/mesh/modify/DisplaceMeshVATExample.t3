@@ -191,6 +191,12 @@
       "Outputs": []
     },
     {
+      "Id": "3e8bf390-e5c5-4f36-a5cf-4eac127465b5"/*ParticleSystem*/,
+      "SymbolId": "e44ae9b6-cd56-4224-8a5d-118eda4cd3f4",
+      "InputValues": [],
+      "Outputs": []
+    },
+    {
       "Id": "455ba60e-5ec2-4683-842c-e7a27c167e9d"/*Transform*/,
       "SymbolId": "284d2183-197d-47fd-b130-873cced78b1c",
       "InputValues": [
@@ -257,6 +263,12 @@
       "Outputs": []
     },
     {
+      "Id": "461d0eec-943a-425a-9be0-ebc09249a51b"/*TurbulenceForce*/,
+      "SymbolId": "3f8376f2-b89a-4ab4-b6dc-a3e8bf88c0a5",
+      "InputValues": [],
+      "Outputs": []
+    },
+    {
       "Id": "4900965e-b020-425c-84fe-63f861e082be"/*PointLight*/,
       "SymbolId": "9c67a8c8-839f-4f67-a949-08cb38b9dffd",
       "InputValues": [
@@ -306,7 +318,7 @@
         {
           "Id": "292e80cf-ba31-4a50-9bf4-83712430f811"/*Path*/,
           "Type": "System.String",
-          "Value": "D:/tooldev/CubeVAT.glb"
+          "Value": "/t3/meshes/CubeVAT.glb"
         },
         {
           "Id": "57f129ae-0b2e-465d-8c0e-f6259fdd37ce"/*CombineBuffer*/,
@@ -350,18 +362,18 @@
           "Id": "313596cc-3854-436b-89da-5fd40164ce76"/*Position*/,
           "Type": "System.Numerics.Vector3",
           "Value": {
-            "X": -1.3314303,
-            "Y": 2.090766,
-            "Z": 9.801957
+            "X": -16.137161,
+            "Y": 2.1594388,
+            "Z": 15.703407
           }
         },
         {
           "Id": "a7acb25c-d60c-43a6-b1df-2cd5c6e183f3"/*Target*/,
           "Type": "System.Numerics.Vector3",
           "Value": {
-            "X": 0.20073609,
-            "Y": -1.3747085,
-            "Z": 0.32889608
+            "X": -1.0402608,
+            "Y": -2.6676607,
+            "Z": -0.5676502
           }
         }
       ],
@@ -410,7 +422,17 @@
     {
       "Id": "77d04e42-f730-4762-80bb-935b126cbb5e"/*RandomizePoints*/,
       "SymbolId": "ec0675d7-6b72-4b15-b141-80bdd2367cd8",
-      "InputValues": [],
+      "InputValues": [
+        {
+          "Id": "270bcf23-35ee-4c4f-aae5-192435b1aee3"/*Position*/,
+          "Type": "System.Numerics.Vector3",
+          "Value": {
+            "X": -0.35,
+            "Y": 0.0,
+            "Z": -0.3
+          }
+        }
+      ],
       "Outputs": []
     },
     {
@@ -442,9 +464,9 @@
           "Id": "313596cc-3854-436b-89da-5fd40164ce76"/*Position*/,
           "Type": "System.Numerics.Vector3",
           "Value": {
-            "X": -0.46123466,
-            "Y": 3.1644623,
-            "Z": 4.4384475
+            "X": 0.8006148,
+            "Y": 3.131157,
+            "Z": 4.400381
           }
         },
         {
@@ -453,7 +475,7 @@
           "Value": {
             "X": -0.043275874,
             "Y": 0.6905942,
-            "Z": -0.47891384
+            "Z": -0.47891387
           }
         }
       ],
@@ -845,12 +867,22 @@
       "SymbolId": "53d3eebd-4ead-4965-b26d-10a8bbd48182",
       "InputValues": [
         {
+          "Id": "3655d507-96b3-4ded-9cef-886ea703ca89"/*Amount*/,
+          "Type": "System.Single",
+          "Value": 15.9
+        },
+        {
           "Id": "40de51d8-91dd-461d-a7be-d4096313eec2"/*NearFarRange*/,
           "Type": "System.Numerics.Vector2",
           "Value": {
             "X": 0.01,
             "Y": 100.0
           }
+        },
+        {
+          "Id": "97b76d02-e735-4e93-88ad-5c9b8766a63c"/*FocusDistance*/,
+          "Type": "System.Single",
+          "Value": 2.99
         }
       ],
       "Outputs": []
@@ -1010,6 +1042,12 @@
       "SourceSlotId": "172dcbd2-a475-4514-8620-38f07a0ea4aa",
       "TargetParentOrChildId": "3cf618b0-442d-47ed-9946-20d66d299e9a",
       "TargetSlotId": "408ae7c7-9aa8-4537-8c55-b5689f8f9b56"
+    },
+    {
+      "SourceParentOrChildId": "461d0eec-943a-425a-9be0-ebc09249a51b",
+      "SourceSlotId": "e5bbe22e-e3f6-4f1f-9db0-fc7632c10639",
+      "TargetParentOrChildId": "3e8bf390-e5c5-4f36-a5cf-4eac127465b5",
+      "TargetSlotId": "c41d9633-1397-4602-a5f8-7808c3d63108"
     },
     {
       "SourceParentOrChildId": "6908030e-5241-4643-a1ca-d8a89d7e1cf2",
