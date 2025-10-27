@@ -12,7 +12,6 @@ public static class KeyboardAndMouseOverlay
     {
         if (!UserSettings.Config.ShowInteractionOverlay)
         {
-            _lastInteractionTime = double.NegativeInfinity;
             return;
         }
 
@@ -43,12 +42,13 @@ public static class KeyboardAndMouseOverlay
         var spacing = 2f * T3Ui.UiScaleFactor;
         var halfspace = spacing * 0.5f;
         const float radspace = 22f;
+        const int segments = 12;
 
         if (ImGui.IsMouseDown(ImGuiMouseButton.Left)
             || ImGui.IsMouseDown(ImGuiMouseButton.Middle)
             || ImGui.IsMouseDown(ImGuiMouseButton.Right))
         {
-            _lastInteractionTime = Playback.RunTimeInSecs;
+            _lastInteractionTime = Playback.RunTimeInSecs;   
         }
 
         // Left mouse 
@@ -56,18 +56,30 @@ public static class KeyboardAndMouseOverlay
             var color = ImGui.IsMouseDown(ImGuiMouseButton.Left) ? UiColors.ForegroundFull.Fade(_widgetFade) : UiColors.ForegroundFull.Fade(0.1f * _widgetFade);
             dl.PathClear();
             dl.PathLineTo(center + new Vector2(-halfspace, -radius));
-            dl.PathArcTo(center - new Vector2(spacing, 0), radius, -MathF.PI / 2, -MathF.PI, 12);
+            dl.PathArcTo(center - new Vector2(spacing, 0), radius, -MathF.PI / 2, -MathF.PI, segments);
             dl.PathLineTo(center + new Vector2(-radspace, 15) * T3Ui.UiScaleFactor);
             dl.PathStroke(color, ImDrawFlags.None, thickness);
+            
+            // Check for double click
+            if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
+            {
+                _lastDoubleClickTime = Playback.RunTimeInSecs;
+            }
+            else if (ImGui.IsMouseClicked(ImGuiMouseButton.Left) && _lastDoubleClickTime >= 0)
+            {
+                _lastDoubleClickTime = 0;
+            }
         }
+
+        DrawDoubleClickIndicator(center + new Vector2(-radspace - 12, -11) * T3Ui.UiScaleFactor, dl);
 
         // right mouse 
         {
             var color = ImGui.IsMouseDown(ImGuiMouseButton.Right) ? UiColors.ForegroundFull.Fade(_widgetFade) : UiColors.ForegroundFull.Fade(0.1f * _widgetFade);
             dl.PathClear();
-            dl.PathLineTo(center + new Vector2(halfspace, -radius));  // X-coordinate flipped
-            dl.PathArcTo(center + new Vector2(spacing, 0), radius, -MathF.PI / 2, 0, 12);  // Center and angles adjusted
-            dl.PathLineTo(center + new Vector2(radspace, 15) * T3Ui.UiScaleFactor);  // X-coordinate flipped
+            dl.PathLineTo(center + new Vector2(halfspace, -radius));
+            dl.PathArcTo(center + new Vector2(spacing, 0), radius, -MathF.PI / 2, 0, segments);
+            dl.PathLineTo(center + new Vector2(radspace, 15) * T3Ui.UiScaleFactor);
             dl.PathStroke(color, ImDrawFlags.None, thickness);
         }
 
@@ -169,10 +181,23 @@ public static class KeyboardAndMouseOverlay
         }
     }
 
+    private static void DrawDoubleClickIndicator(Vector2 position, ImDrawListPtr dl)
+    {
+        var fade = 1 - (float)((Playback.RunTimeInSecs - _lastDoubleClickTime) / FadeoutDuration).Clamp(0, 1);
+
+        if (fade <= 0)
+            return;
+
+        var textColor = UiColors.ForegroundFull.Fade(fade);
+        dl.AddText(Fonts.FontLarge, Fonts.FontLarge.FontSize, position, textColor, "×2");
+    }
+
     private static readonly List<KeyStatus> _previousKeys = new();
     private static double _lastInteractionTime = double.NegativeInfinity;
     private static float _widgetFade = 0;
     private static double _lastMouseWheelInteractionTime;
+
+    private static double _lastDoubleClickTime = double.NegativeInfinity;
 
     private sealed class KeyStatus
     {
