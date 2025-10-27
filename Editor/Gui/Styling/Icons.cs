@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Runtime.CompilerServices;
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
@@ -282,8 +282,9 @@ internal static class Icons
             new(Icon.TreeExpand, slotIndex: 122),
             new(Icon.Target, slotIndex: 123),
             new(Icon.Aim, slotIndex: 124),
-            new(Icon.RotateClockwise, slotIndex: 125),
-            new(Icon.RotateCounterClockwise, slotIndex: 126),
+            new(Icon.RotateCounterClockwise, slotIndex: 125),
+            new(Icon.RotateClockwise, slotIndex: 126),
+            
         };
 
     public static readonly string IconAtlasPath = Path.Combine(SharedResources.Directory, @"images\editor\t3-icons.png");

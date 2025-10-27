@@ -1,4 +1,5 @@
 using ImGuiNET;
+using T3.Editor.Gui.Styling;
 using T3.Editor.UiModel.InputsAndTypes;
 
 namespace T3.Editor.Gui.Interaction;
@@ -9,17 +10,57 @@ internal static class VectorValueEdit
     internal static InputEditStateFlags Draw(float[] components, float min, float max, float scale, bool clampMin, bool clampMax, float rightPadding = 0,
                                              string format = null)
     {
-        var width = (ImGui.GetContentRegionAvail().X - rightPadding) / components.Length-1;
+        var width = (ImGui.GetContentRegionAvail().X - rightPadding) / components.Length - 1;
         var size = new Vector2(width, 0);
 
         var resultingEditState = InputEditStateFlags.Nothing;
+        var hasButtons = components.Length == 1 && format?.EndsWith("°") == true;
+
+        // Calculate sizes for float buttons
+        var buttonSize = hasButtons ? Vector2.One * ImGui.GetFrameHeight() : Vector2.Zero;
+        var fieldWidth = hasButtons ? width - buttonSize.X * 2 : width;
+        var fieldSize = new Vector2(fieldWidth, 0);
+
         for (var index = 0; index < components.Length; index++)
         {
             if (index > 0)
                 ImGui.SameLine();
 
             ImGui.PushID(index);
-            resultingEditState |= SingleValueEdit.Draw(ref components[index], size, min, max, clampMin, clampMax, scale,  format??="{0:0.000}");
+
+            if (hasButtons)
+            {
+                // Draw the input field with adjusted size for buttons
+                resultingEditState |= SingleValueEdit.Draw(ref components[index], fieldSize, min, max, clampMin, clampMax, scale, format ??= "{0:0.000}");
+
+                // Draw +/- buttons for single float component with ° format
+                var increment = ImGui.GetIO().KeyShift ? SHIFT_INCREMENT_FLOAT : DEFAULT_INCREMENT_FLOAT;
+                ImGui.SameLine();
+                ImGui.PushFont(Icons.IconFont);
+                if (DrawButton((char)Icon.RotateCounterClockwise+"", buttonSize, !clampMin || components[index] > min))
+                {
+                    components[index] -= increment;
+                    if (clampMin)
+                        components[index] = Math.Max(min, components[index]);
+                    resultingEditState |= InputEditStateFlags.ModifiedAndFinished;
+                }
+
+                ImGui.SameLine();
+                if (DrawButton((char)Icon.RotateClockwise + "", buttonSize, !clampMax || components[index] < max))
+                {
+                    components[index] += increment;
+                    if (clampMax)
+                        components[index] = Math.Min(max, components[index]);
+                    resultingEditState |= InputEditStateFlags.ModifiedAndFinished;
+                }
+                ImGui.PopFont();
+            }
+            else
+            {
+                // Draw without buttons
+                resultingEditState |= SingleValueEdit.Draw(ref components[index], size, min, max, clampMin, clampMax, scale, format ??= "{0:0.000}");
+            }
+            
             ImGui.PopID();
         }
 
@@ -55,16 +96,20 @@ internal static class VectorValueEdit
             {
                 var increment = ImGui.GetIO().KeyShift ? SHIFT_INCREMENT : 1;
                 ImGui.SameLine();
-                if (DrawButton("-", buttonSize, components[index] > min))
+                if (DrawButton("-", buttonSize, !clampMin || components[index] > min))
                 {
-                    components[index] = Math.Max(min, components[index] - increment);
+                    components[index] -= increment;
+                    if (clampMin)
+                        components[index] = Math.Max(min, components[index]);
                     resultingEditState |= InputEditStateFlags.ModifiedAndFinished;
                 }
 
                 ImGui.SameLine();
-                if (DrawButton("+", buttonSize, components[index] < max))
+                if (DrawButton("+", buttonSize, !clampMax || components[index] < max))
                 {
-                    components[index] = Math.Min(max, components[index] + increment);
+                    components[index] += increment;
+                    if (clampMax)
+                        components[index] = Math.Min(max, components[index]);
                     resultingEditState |= InputEditStateFlags.ModifiedAndFinished;
                 }
             }
@@ -89,4 +134,6 @@ internal static class VectorValueEdit
     }
 
     private const int SHIFT_INCREMENT = 10;
+    private const float DEFAULT_INCREMENT_FLOAT = 90.0f;
+    private const float SHIFT_INCREMENT_FLOAT = 45.0f;
 }
