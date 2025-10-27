@@ -183,12 +183,12 @@ public static class KeyboardAndMouseOverlay
 
     private static void DrawDoubleClickIndicator(Vector2 position, ImDrawListPtr dl)
     {
-        var fade = 1 - (float)((Playback.RunTimeInSecs - _lastDoubleClickTime) / FadeoutDuration).Clamp(0, 1);
+        var timeSince = (float)(Playback.RunTimeInSecs - _lastDoubleClickTime);
 
-        if (fade <= 0)
+        if (timeSince > FadeoutDuration)
             return;
 
-        var textColor = UiColors.ForegroundFull.Fade(fade);
+        var textColor = UiColors.ForegroundFull.Fade(_widgetFade);
         dl.AddText(Fonts.FontLarge, Fonts.FontLarge.FontSize, position, textColor, "×2");
     }
 
