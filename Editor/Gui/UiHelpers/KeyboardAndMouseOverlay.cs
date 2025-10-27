@@ -1,4 +1,4 @@
-﻿using ImGuiNET;
+using ImGuiNET;
 using T3.Core.Animation;
 using T3.Core.Utils;
 using T3.Editor.Gui.Styling;
@@ -8,7 +8,6 @@ namespace T3.Editor.Gui.UiHelpers;
 
 public static class KeyboardAndMouseOverlay
 {
-    
     public static void Draw()
     {
         if (!UserSettings.Config.ShowInteractionOverlay)
@@ -16,12 +15,12 @@ public static class KeyboardAndMouseOverlay
             _lastInteractionTime = double.NegativeInfinity;
             return;
         }
-        
+
         _widgetFade = 1-(float)((Playback.RunTimeInSecs - _lastInteractionTime) / FadeoutDuration).Clamp(0, 1);
-        
+
         var dl = ImGui.GetForegroundDrawList();
-        
-        var pos = ImGui.GetMousePos() + new Vector2(30, 60);
+
+        var pos = ImGui.GetMousePos() + new Vector2(30, -100) * T3Ui.UiScaleFactor;
         if(pos.X + 120 > ImGui.GetIO().DisplaySize.X)
             pos.X = ImGui.GetIO().DisplaySize.X - 120;
 
@@ -31,16 +30,19 @@ public static class KeyboardAndMouseOverlay
             pos.Y -= dy;
             pos.X += dy/2;
         }
-        
+
         var panelSize = new Vector2(120, 90) * T3Ui.UiScaleFactor;
         dl.AddRectFilled(pos, pos + panelSize, UiColors.BackgroundFull.Fade(0.7f * _widgetFade), 10);
-        
+
         UpdatePressedKeys();
         DrawKeys(pos, dl);
 
-        const float radius = 20f;
-        const float thickness = 26f;
-        var center = pos + new Vector2(58, 65);
+        var radius = 20f * T3Ui.UiScaleFactor;
+        var thickness = 26f * T3Ui.UiScaleFactor;
+        var center = pos + new Vector2(panelSize.X / 2, 65 * T3Ui.UiScaleFactor);
+        var spacing = 2f * T3Ui.UiScaleFactor;
+        var halfspace = spacing * 0.5f;
+        const float radspace = 22f;
 
         if (ImGui.IsMouseDown(ImGuiMouseButton.Left)
             || ImGui.IsMouseDown(ImGuiMouseButton.Middle)
@@ -49,37 +51,34 @@ public static class KeyboardAndMouseOverlay
             _lastInteractionTime = Playback.RunTimeInSecs;
         }
 
-        
         // Left mouse 
         {
             var color = ImGui.IsMouseDown(ImGuiMouseButton.Left) ? UiColors.ForegroundFull.Fade(_widgetFade) : UiColors.ForegroundFull.Fade(0.1f * _widgetFade);
             dl.PathClear();
-            dl.PathLineTo(center + new Vector2(-radius,15));
-            dl.PathArcTo(center, radius, -MathF.PI , - MathF.PI/2, 20);
+            dl.PathLineTo(center + new Vector2(-halfspace, -radius));
+            dl.PathArcTo(center - new Vector2(spacing, 0), radius, -MathF.PI / 2, -MathF.PI, 12);
+            dl.PathLineTo(center + new Vector2(-radspace, 15) * T3Ui.UiScaleFactor);
             dl.PathStroke(color, ImDrawFlags.None, thickness);
         }
-        
+
         // right mouse 
         {
             var color = ImGui.IsMouseDown(ImGuiMouseButton.Right) ? UiColors.ForegroundFull.Fade(_widgetFade) : UiColors.ForegroundFull.Fade(0.1f * _widgetFade);
-   
-            center.X += 2;
             dl.PathClear();
-            dl.PathLineTo(center + new Vector2(radius,15));
-            dl.PathArcTo(center, radius,  0 , -MathF.PI/2, 20);
+            dl.PathLineTo(center + new Vector2(halfspace, -radius));  // X-coordinate flipped
+            dl.PathArcTo(center + new Vector2(spacing, 0), radius, -MathF.PI / 2, 0, 12);  // Center and angles adjusted
+            dl.PathLineTo(center + new Vector2(radspace, 15) * T3Ui.UiScaleFactor);  // X-coordinate flipped
             dl.PathStroke(color, ImDrawFlags.None, thickness);
         }
-        
+
         // middle mouse
         {
             var color = ImGui.IsMouseDown(ImGuiMouseButton.Middle) ? UiColors.ForegroundFull.Fade(_widgetFade) : UiColors.ForegroundFull.Fade(0.1f * _widgetFade);
-            
-            center.X -= 1;
-            var size = new Vector2(14, 24);
-            var min = center- size * 0.5f + new Vector2(0,6);
-            dl.AddRectFilled(min, min + size, color, 10);
+            var size = new Vector2(14, 24) * T3Ui.UiScaleFactor;
+            var min = center - size * 0.5f + new Vector2(0, 7) * T3Ui.UiScaleFactor;
+            dl.AddRectFilled(min, min + size, color, 4 * T3Ui.UiScaleFactor);
         }
-        
+
         // mouse wheel
         {
             var fadeFromTime = 1-(float)((Playback.RunTimeInSecs - _lastMouseWheelInteractionTime) / FadeoutDuration).Clamp(0, 1);
@@ -96,19 +95,19 @@ public static class KeyboardAndMouseOverlay
             {
                 _dampedWheelSpin = 0;
             }
-            
+
             const int lineCount = 5;
-            const float height = 34;
-            var size = new Vector2(9, 1);
-            var min = center- size * 0.5f + new Vector2(0,-10);
+            var height = 34 * T3Ui.UiScaleFactor;
+            var size = new Vector2(12, 1) * T3Ui.UiScaleFactor;
+            var min = center - size * 0.5f + new Vector2(0, -10) * T3Ui.UiScaleFactor;
             float step = height / (lineCount + 1);
-            
+
             for (int i = 0; i < lineCount; i++)
             {
                 var f = (float)i / lineCount;
                 var fadeEdge =1- MathF.Abs((f - 0.5f) * 2).Clamp(0, 1);
                 var offset = new Vector2(0, step * i + step * MathUtils.Fmod(_dampedWheelSpin + 0.5f,  1));
-                
+
                 var color = UiColors.ForegroundFull.Fade(fadeFromTime * fadeEdge);
                 dl.AddRectFilled(min + offset, min + size + offset, color, 10);
             }
@@ -151,7 +150,7 @@ public static class KeyboardAndMouseOverlay
                 {
                     _previousKeys.Remove(status);
                     _previousKeys.Add(status);
-                    
+
                 }
 
                 status.IsPressed = pressed;
@@ -163,18 +162,18 @@ public static class KeyboardAndMouseOverlay
                 _lastInteractionTime = time;
             }
             else
-            { 
+            {
                 if(status.FadeProgress > 1 )
                     _previousKeys.Remove(status);
             }
         }
     }
-    
+
     private static readonly List<KeyStatus> _previousKeys = new();
     private static double _lastInteractionTime = double.NegativeInfinity;
     private static float _widgetFade = 0;
     private static double _lastMouseWheelInteractionTime;
-    
+
     private sealed class KeyStatus
     {
         public KeyStatus(int keyIndex, string label, Icon icon = Icon.None )
@@ -184,7 +183,7 @@ public static class KeyboardAndMouseOverlay
 
             Icon = icon;
             Label = label;
-            
+
 
             _keyStates[keyIndex] = this;
         }
@@ -197,24 +196,22 @@ public static class KeyboardAndMouseOverlay
                 return timeSinceRelease / FadeoutDuration;
             }
         }
-        
 
         public bool IsPressed;
         public readonly string Label;
         public Icon Icon;
         public double ReleaseTime = double.NegativeInfinity;
-        
 
     }
-    
+
     private const float FadeoutDuration = 2;
     private const int KeyLookupCount = 512;
     private static float _wheelSpin;
     private static float _dampedWheelSpin;
     private static float _dampedWheelSpinVelocity;
-    
+
     private static readonly KeyStatus[] _keyStates = new KeyStatus[KeyLookupCount];
-    
+
     // ReSharper disable once UnusedMember.Local
     private static readonly KeyStatus[] _keyDefinitions = {
                                                                       new(8, "Backspace"),
@@ -234,7 +231,6 @@ public static class KeyboardAndMouseOverlay
                                                                       new(38, "Up", Icon.ChevronUp),
                                                                       new(39, "Right", Icon.ChevronRight),
                                                                       new(40, "Down", Icon.ChevronDown),
-                                                             
                                                                       new(45, "Ins"),
                                                                       new(46, "Del"),
                                                                       new(48, "0"),
@@ -247,7 +243,6 @@ public static class KeyboardAndMouseOverlay
                                                                       new(55, "7"),
                                                                       new(56, "8"),
                                                                       new(57, "9"),
-                                                             
                                                                       new(65, "A"),
                                                                       new(66, "B"),
                                                                       new(67, "C"),
