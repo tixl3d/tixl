@@ -102,14 +102,21 @@
         "Y": 3973.6714
       },
       "Description": "Defines the color and alpha with which the loaded scene is colored / changed."
+    },
+    {
+      "InputId": "f01f64e6-0344-48cb-8fc5-8b9c12f0b123"/*Shading*/,
+      "Position": {
+        "X": 1050.7762,
+        "Y": 4663.27
+      }
     }
   ],
   "SymbolChildUis": [
     {
       "ChildId": "09b386a7-91fe-42a0-be6e-3cf9fcc46a8e"/*clampedSampler*/,
       "Position": {
-        "X": 1724.4904,
-        "Y": 4430.917
+        "X": 1726.3075,
+        "Y": 4656.04
       }
     },
     {
@@ -168,7 +175,7 @@
       "ChildId": "6839f154-dbec-4da8-a5e3-29d63727b2ca"/*GetPbrParameters*/,
       "Position": {
         "X": 1721.9591,
-        "Y": 4248.074
+        "Y": 4370.6973
       }
     },
     {
@@ -200,8 +207,8 @@
         "Y": 59.905018
       },
       "Position": {
-        "X": 1571.9591,
-        "Y": 4084.0735
+        "X": 1563.504,
+        "Y": 4119.102
       }
     },
     {
@@ -228,15 +235,22 @@
     {
       "ChildId": "cd614e1a-8736-454f-89c8-6bce3a540094"/*GetForegroundColor*/,
       "Position": {
-        "X": 1275.8352,
-        "Y": 3981.3242
+        "X": 1244.6721,
+        "Y": 4000.8918
+      }
+    },
+    {
+      "ChildId": "d519a7ca-2261-4529-8b26-e5265ca2ee51"/*IntToFloat*/,
+      "Position": {
+        "X": 1305.4207,
+        "Y": 4658.9673
       }
     },
     {
       "ChildId": "d79eafd4-ec6b-4d01-a840-8ce45371ef2f"/*linearSampler*/,
       "Position": {
-        "X": 1721.9591,
-        "Y": 4347.074
+        "X": 1726.3075,
+        "Y": 4526.9023
       }
     },
     {
@@ -256,8 +270,8 @@
     {
       "ChildId": "f9120c1f-286c-41ef-89f0-b4f72201b982"/*texSampler*/,
       "Position": {
-        "X": 1721.9591,
-        "Y": 4291.074
+        "X": 1726.3075,
+        "Y": 4479.3574
       }
     },
     {

@@ -84,7 +84,12 @@ public class DrawScene : Instance<DrawScene>
     private readonly List<PbrMaterial> _pbrMaterials = new();
         
     #endregion
-        
+    
+    private enum ShadingModes
+    {
+        Default = 0,
+        Flat = 1,
+    }
 
     [Input(Guid = "22ad6256-f741-4e8f-9a47-4b5b82e2cecf")]
     public readonly InputSlot<T3.Core.DataTypes.SceneSetup> Scene = new InputSlot<T3.Core.DataTypes.SceneSetup>();
@@ -106,6 +111,9 @@ public class DrawScene : Instance<DrawScene>
 
     [Input(Guid = "42e7cc49-5102-4e74-8bea-c7698cb4abca")]
     public readonly InputSlot<SharpDX.Direct3D11.CullMode> Culling = new InputSlot<SharpDX.Direct3D11.CullMode>();
+
+    [Input(Guid = "f01f64e6-0344-48cb-8fc5-8b9c12f0b123", MappedType = typeof(ShadingModes))]
+    public readonly InputSlot<int> Shading = new InputSlot<int>();
 
     [Input(Guid = "121f0f29-36f3-4ef7-9ebf-d14ad65b16a2")]
     public readonly InputSlot<bool> EnableZTest = new InputSlot<bool>();

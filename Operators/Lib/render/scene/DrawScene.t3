@@ -57,6 +57,10 @@
         "Z": 1.0,
         "W": 1.0
       }
+    },
+    {
+      "Id": "f01f64e6-0344-48cb-8fc5-8b9c12f0b123"/*Shading*/,
+      "DefaultValue": 0
     }
   ],
   "Children": [
@@ -90,7 +94,7 @@
         {
           "Id": "24646f06-1509-43ce-94c6-eeb608ad97cd"/*Source*/,
           "Type": "System.String",
-          "Value": "Resources\\lib\\3d\\mesh\\mesh-Draw.hlsl"
+          "Value": "/Lib/3d/mesh/mesh-Draw.hlsl"
         },
         {
           "Id": "501338b3-f432-49a5-bdbd-bcf209671305"/*EntryPoint*/,
@@ -205,7 +209,7 @@
         {
           "Id": "78fb7501-74d9-4a27-8db2-596f25482c87"/*Source*/,
           "Type": "System.String",
-          "Value": "Resources\\lib\\3d\\mesh\\mesh-Draw.hlsl"
+          "Value": "/Lib/3d/mesh/mesh-Draw.hlsl"
         },
         {
           "Id": "9a8b500e-c3b1-4be1-8270-202ef3f90793"/*EntryPoint*/,
@@ -245,6 +249,12 @@
     {
       "Id": "cd614e1a-8736-454f-89c8-6bce3a540094"/*GetForegroundColor*/,
       "SymbolId": "6c1271a0-058f-4ff0-940b-f196e5debdf7",
+      "InputValues": [],
+      "Outputs": []
+    },
+    {
+      "Id": "d519a7ca-2261-4529-8b26-e5265ca2ee51"/*IntToFloat*/,
+      "SymbolId": "17db8a36-079d-4c83-8a2a-7ea4c1aa49e6",
       "InputValues": [],
       "Outputs": []
     },
@@ -383,6 +393,12 @@
       "TargetSlotId": "49556d12-4cd1-4341-b9d8-c356668d296c"
     },
     {
+      "SourceParentOrChildId": "d519a7ca-2261-4529-8b26-e5265ca2ee51",
+      "SourceSlotId": "db1073a1-b9d8-4d52-bc5c-7ae8c0ee1ac3",
+      "TargetParentOrChildId": "669c900d-fdb8-4de0-9eb8-fe3913b1e515",
+      "TargetSlotId": "49556d12-4cd1-4341-b9d8-c356668d296c"
+    },
+    {
       "SourceParentOrChildId": "c7020cbf-1469-4105-81f0-4f11001822d5",
       "SourceSlotId": "b409694a-0980-4992-8525-01871b940cd7",
       "TargetParentOrChildId": "844fa3ed-7810-4f8a-8fcc-a46d2a4f61d8",
@@ -495,6 +511,12 @@
       "SourceSlotId": "49e57c71-cbd3-4f8a-9a96-8fb116c947b0",
       "TargetParentOrChildId": "c7020cbf-1469-4105-81f0-4f11001822d5",
       "TargetSlotId": "78c9b432-a2b8-4aea-81e4-0cd5086b3b94"
+    },
+    {
+      "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "SourceSlotId": "f01f64e6-0344-48cb-8fc5-8b9c12f0b123",
+      "TargetParentOrChildId": "d519a7ca-2261-4529-8b26-e5265ca2ee51",
+      "TargetSlotId": "01809b63-4b4a-47be-9588-98d5998ddb0c"
     },
     {
       "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
