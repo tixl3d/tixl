@@ -189,7 +189,7 @@ public abstract class InputValueUi<T> : IInputUi
                 for (var multiInputIndex = 0; multiInputIndex < allInputs.Count; multiInputIndex++)
                 {
                     ImGui.PushID(multiInputIndex);
-                    if (CustomComponents.RoundedButton(string.Empty, InputArea.ConnectionAreaWidth, ImDrawFlags.RoundCornersLeft))
+                    if (CustomComponents.RoundedButton(string.Empty, InputArea.ConnectionAreaWidth * T3Ui.UiScaleFactor, ImDrawFlags.RoundCornersLeft))
                     {
                         // TODO: implement with proper SelectionManager
                     }
@@ -327,7 +327,7 @@ public abstract class InputValueUi<T> : IInputUi
             if (hasKeyframeAtCurrentTime) iconIndex |= onBit;
             var icon = _keyframeButtonIcons[iconIndex];
 
-            if (CustomComponents.RoundedButton("##icon", InputArea.ConnectionAreaWidth, ImDrawFlags.RoundCornersLeft))
+            if (CustomComponents.RoundedButton("##icon", InputArea.ConnectionAreaWidth * T3Ui.UiScaleFactor, ImDrawFlags.RoundCornersLeft))
             {
                 if (animator.TryGetCurvesForInputSlot(inputSlot, out var curves))
                 {
@@ -612,14 +612,14 @@ public abstract class InputValueUi<T> : IInputUi
 internal static class InputArea
 {
     internal const float ConnectionAreaWidth = 25.0f;
-
+    
     internal static void DrawNormalInputArea<T>(InputSlot<T> inputSlot,
                                                 SymbolUi compositionUi,
                                                 SymbolUi.Child symbolChildUi,
                                                 Symbol.Child.Input input,
                                                 bool isAnimatable, Color typeColor, IReadOnlyList<ConnectionMaker.TempConnection> tempConnections)
     {
-        var buttonClicked = CustomComponents.RoundedButton(string.Empty, ConnectionAreaWidth, ImDrawFlags.RoundCornersLeft);
+        var buttonClicked = CustomComponents.RoundedButton(string.Empty, ConnectionAreaWidth * T3Ui.UiScaleFactor, ImDrawFlags.RoundCornersLeft);
 
         var inputOperation = InputOperations.None;
 
@@ -794,7 +794,7 @@ internal static class InputArea
                                                     Symbol compositionSymbol, SymbolUi.Child symbolChildUi)
     {
         // Connected single inputs
-        if (CustomComponents.RoundedButton(String.Empty, ConnectionAreaWidth, ImDrawFlags.RoundCornersLeft))
+        if (CustomComponents.RoundedButton(String.Empty, ConnectionAreaWidth * T3Ui.UiScaleFactor, ImDrawFlags.RoundCornersLeft))
         {
             var sourceUi = FindConnectedSymbolChildUi(inputSlot.Id, compositionUi, symbolChildUi);
             // Try to find instance
@@ -830,7 +830,7 @@ internal static class InputArea
         ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, new Vector2(0.0f, 0.5f));
         ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
         ImGui.PushFont(Fonts.FontBold);
-        CustomComponents.RoundedButton("##paramName", ConnectionAreaWidth, ImDrawFlags.RoundCornersTopLeft);
+        CustomComponents.RoundedButton("##paramName", ConnectionAreaWidth * T3Ui.UiScaleFactor, ImDrawFlags.RoundCornersTopLeft);
         ImGui.SameLine();
 
         var wasClicked = ImGui.Button($"{name.AddSpacesForImGuiOutput()}...##paramName", new Vector2(parameterNameWidth, 0));
