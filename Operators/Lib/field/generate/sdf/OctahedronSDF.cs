@@ -50,8 +50,8 @@ internal sealed class OctahedronSDF : Instance<OctahedronSDF>
     
     public void GetPreShaderCode(CodeAssembleContext c, int inputIndex)
     {
-        c.AppendCall($"f{c}.w = fsdOctahedron(p{c}.xyz, {ShaderNode}Center, {ShaderNode}Size, {ShaderNode}EdgeRadius);"); 
-
+        c.AppendCall($"f{c}.w = fsdOctahedron(p{c}.xyz, {ShaderNode}Center, {ShaderNode}Size, {ShaderNode}EdgeRadius);");
+        c.AppendCall($"f{c}.xyz = p.w < 0.5 ?  p{c}.xyz : 1;"); 
     }
     
     [GraphParam]
