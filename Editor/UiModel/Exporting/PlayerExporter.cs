@@ -106,7 +106,7 @@ internal static partial class PlayerExporter
         // Update project settings
         var exportSettings = new ExportSettings(OperatorId: symbol.Id,
                                                 ApplicationTitle: symbol.Name,
-                                                WindowMode: WindowMode.Fullscreen,
+                                                WindowMode: ProjectSettings.Config.DefaultWindowMode,
                                                 ConfigData: ProjectSettings.Config,
                                                 Author: symbol.SymbolPackage.AssemblyInformation?.Name ?? string.Empty, // todo - actual author name
                                                 BuildId: Guid.NewGuid(),
