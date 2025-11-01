@@ -1,0 +1,107 @@
+{
+  "Id": "8ec3372c-c5de-4c4d-abe1-cccc3b8dc472"/*SpatialDisplaceSDFExample*/,
+  "Description": "example use of spatial displacement",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "06322ecb-337a-4c9d-9348-dba00b9ad44d"/*Camera*/,
+      "Position": {
+        "X": 624.593,
+        "Y": 119.762695
+      }
+    },
+    {
+      "ChildId": "28fad0c1-c487-4c05-bb4c-e26096d6b12d"/*Stop*/,
+      "Position": {
+        "X": 165.84644,
+        "Y": 127.63721
+      }
+    },
+    {
+      "ChildId": "3ef30460-c175-469a-8f24-654ed523733c"/*InvertFloat*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 162.31396
+      }
+    },
+    {
+      "ChildId": "523ba46a-31c4-4564-8eaa-f59f6b9acf96"/*RepeatFieldLimit*/,
+      "Position": {
+        "X": 400.62842,
+        "Y": 35.0
+      }
+    },
+    {
+      "ChildId": "5f7cabd6-b487-49e7-85bf-e27f9a220e1f"/*RepeatFieldLimit*/,
+      "Position": {
+        "X": 400.62842,
+        "Y": 175.0
+      }
+    },
+    {
+      "ChildId": "5fbf69b9-0963-4b7a-8d7f-483064ff42e3"/*BoxFrameSDF*/,
+      "Position": {
+        "X": 400.62842,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "6ac89cd2-e118-4e10-9397-7f498a039139"/*Float*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 127.313965
+      }
+    },
+    {
+      "ChildId": "71192fb3-a9cb-4412-89c5-ba08d48d46f2"/*RepeatFieldLimit*/,
+      "Position": {
+        "X": 400.62842,
+        "Y": 315.0
+      }
+    },
+    {
+      "ChildId": "7a9802ec-279a-4b64-8b4d-38e0bb29ecaf"/*Start*/,
+      "Position": {
+        "X": 165.84644,
+        "Y": 193.14502
+      }
+    },
+    {
+      "ChildId": "8a9b5229-5103-4ae0-8401-8a12f9072b26"/*RaymarchField*/,
+      "Position": {
+        "X": 624.593,
+        "Y": 84.762695
+      }
+    },
+    {
+      "ChildId": "9428472e-a3b1-495a-8be8-eac1d65f0e62"/*RenderTarget*/,
+      "Position": {
+        "X": 624.593,
+        "Y": 154.7627
+      }
+    },
+    {
+      "ChildId": "ddd8b9dc-99c5-4f29-a95d-ba7ea0a8f2cf"/*Size*/,
+      "Position": {
+        "X": 186.39526,
+        "Y": 63.251465
+      }
+    },
+    {
+      "ChildId": "f1eb67ed-557a-4c50-bba9-7d6420f631d9"/*SpatialDisplaceSDF*/,
+      "Position": {
+        "X": 624.593,
+        "Y": 49.762695
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "adfbfb97-7862-4667-b415-73d92f6540d4"/*ColorBuffer*/,
+      "Position": {
+        "X": 1034.593,
+        "Y": 170.0
+      }
+    }
+  ]
+}
