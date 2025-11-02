@@ -387,7 +387,7 @@ internal sealed partial class MagGraphView
             {
                 int inputIndex;
                 var itemWidth = pMax.X - pMin.X;
-
+                var labelFontSize = Fonts.FontSmall.FontSize / T3Ui.UiScaleFactor * Fonts.FontSmall.Scale * smallFontScaleFactor;
                 for (inputIndex = 0; inputIndex < item.InputLines.Length; inputIndex++)
                 {
                     var inputLine = item.InputLines[inputIndex];
@@ -437,8 +437,8 @@ internal sealed partial class MagGraphView
                         DrawMissingInputIndicator(drawList, pMin + new Vector2(0, GridSizeOnScreen.Y * inputIndex), inputLine);
                     }
 
-                    var inputLabelFontSize = Fonts.FontSmall.FontSize / T3Ui.UiScaleFactor * Fonts.FontSmall.Scale * smallFontScaleFactor;
-                    var yCenter = pMin.Y + GridSizeOnScreen.Y * (inputIndex + 0.5f) - inputLabelFontSize / 2 - 2;
+                    
+                    var yCenter = pMin.Y + GridSizeOnScreen.Y * (inputIndex + 0.5f) - labelFontSize / 2 - 2;
                     var labelPos = new Vector2(pMin.X + 8 * CanvasScale, yCenter);
                     var label = inputLine.InputUi.InputDefinition.Name ?? "?";
                     if (inputLine.MultiInputIndex > 0)
@@ -458,7 +458,7 @@ internal sealed partial class MagGraphView
                     }
 
                     drawList.AddText(Fonts.FontSmall,
-                                     inputLabelFontSize,
+                                     labelFontSize,
                                      labelPos,
                                      labelColor.Fade(0.7f * CanvasScale.RemapAndClamp(0.3f,0.7f, 0,1) ),
                                      label
@@ -493,7 +493,7 @@ internal sealed partial class MagGraphView
                             if (!string.IsNullOrEmpty(valueAsString))
                             {
                                 drawList.AddText(Fonts.FontSmall,
-                                                 inputLabelFontSize,
+                                                 labelFontSize,
                                                  valuePos,
                                                  labelColor.Fade(0.5f),
                                                  valueAsString
@@ -504,8 +504,9 @@ internal sealed partial class MagGraphView
                         }
                     }
                 }
-                
+
                 // Draw output labels...
+               
                 for (var outputIndex = 1; outputIndex < item.OutputLines.Length; outputIndex++)
                 {
                     var outputLine = item.OutputLines[outputIndex];
@@ -514,16 +515,19 @@ internal sealed partial class MagGraphView
 
                     ImGui.PushFont(Fonts.FontSmall);
                     var outputDefinitionName = outputLine.OutputUi.OutputDefinition.Name.AddSpacesForImGuiOutput();
-                    var outputLabelSize = ImGui.CalcTextSize(outputDefinitionName) * smallFontScaleFactor;
+                    var outputLabelSize = ImGui.CalcTextSize(outputDefinitionName);
                     ImGui.PopFont();
 
+                    var fontSizeRatio = labelFontSize / Fonts.FontSmall.FontSize;
+                    var scaledLabelWidth = outputLabelSize.X * fontSizeRatio;
+
+                    var visibleLineHeight = GridSizeOnScreen.Y;
+                    var yCenter = pMin.Y + visibleLineHeight * outputLine.VisibleIndex + visibleLineHeight / 2 - labelFontSize / 2;
+
                     drawList.AddText(Fonts.FontSmall,
-                                     Fonts.FontSmall.FontSize * smallFontScaleFactor,
-                                     pMin
-                                     + new Vector2(-8, 9) * CanvasScale.Clamp(0.1f, 2f)
-                                     + new Vector2(0, GridSizeOnScreen.Y * outputLine.VisibleIndex)
-                                     + new Vector2(MagGraphItem.Width * CanvasScale - outputLabelSize.X, 0),
-                                     labelColor.Fade(0.7f),
+                                     labelFontSize,
+                                     new Vector2(pMin.X + MagGraphItem.Width * CanvasScale - scaledLabelWidth - 8 * CanvasScale, yCenter),
+                                     labelColor.Fade(0.7f * CanvasScale.RemapAndClamp(0.3f, 0.7f, 0, 1)),
                                      outputDefinitionName);
                 }
             }
@@ -800,7 +804,7 @@ internal sealed partial class MagGraphView
             var posOnCanvas = TransformPosition(outputAnchor.PositionOnCanvas);
 
             Vector2 center;
-            bool isPotentialConnectionStartDropTarget = false;
+            var isPotentialConnectionStartDropTarget = false;
             // ...below
             if (outputAnchor.Direction == MagGraphItem.Directions.Vertical)
             {
