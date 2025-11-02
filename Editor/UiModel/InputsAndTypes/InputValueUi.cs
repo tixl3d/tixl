@@ -611,7 +611,7 @@ public abstract class InputValueUi<T> : IInputUi
 
 internal static class InputArea
 {
-    internal const float ConnectionAreaWidth = 25.0f;
+    internal static float ConnectionAreaWidth => 28.0f * T3Ui.UiScaleFactor;
 
     internal static void DrawNormalInputArea<T>(InputSlot<T> inputSlot,
                                                 SymbolUi compositionUi,
