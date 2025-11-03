@@ -16,7 +16,8 @@
       "Position": {
         "X": -817.8021,
         "Y": 768.25977
-      }
+      },
+      "AddPadding": "True"
     },
     {
       "InputId": "835cf0fb-9958-4c60-9cf6-afc2f846b68a"/*Count*/,
