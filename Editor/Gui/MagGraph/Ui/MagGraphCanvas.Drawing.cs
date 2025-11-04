@@ -57,6 +57,7 @@ internal sealed partial class MagGraphView
             if (!_context.PreventInteraction && !FrameStats.Last.OpenedPopupCapturedMouse)
                 UpdateCanvas(out _, editingFlags);
 
+            // Store previous connection lines damped positions before layout recomputes
             if (_context.Layout.MagConnections != null)
             {
                 _previousConnectionPositions.Clear();
@@ -72,6 +73,7 @@ internal sealed partial class MagGraphView
             // Prepare UiModel for frame
             _context.Layout.ComputeLayout(_context);
 
+            // Restore damped positions after layout
             foreach (var c in _context.Layout.MagConnections)
             {
                 if (_previousConnectionPositions.TryGetValue(c.ConnectionHash, out var prevPos))
@@ -300,15 +302,14 @@ internal sealed partial class MagGraphView
     /// <summary>
     /// This a very simple proof-of-concept implementation to test its fidelity.
     /// A simple optimization could be to only do this for some time after a drag manipulation and then apply
-    /// the correct position. Also, this animation does not affect connection lines.
+    /// the correct position.
     ///
     /// It still helps to understand what's going on and feels satisfying. So we're keeping it for now.
     /// </summary>
-    /// 
 
     private void SmoothItemPositions()
     {
-        var dampAmount = 0.7f;
+        const float dampAmount = 0.7f;
 
         foreach (var i in _context.Layout.Items.Values)
         {
