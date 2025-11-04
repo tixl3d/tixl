@@ -1,4 +1,4 @@
-﻿using ImGuiNET;
+using ImGuiNET;
 using T3.Core.Utils;
 using T3.Editor.Gui.MagGraph.Interaction;
 using T3.Editor.Gui.MagGraph.Model;
@@ -40,8 +40,8 @@ internal sealed partial class MagGraphView
         var typeColor = ColorVariations.ConnectionLines.Apply(selectedColor).Fade(MathUtils.Lerp(0.6f, 1, idleFadeProgress));
         var connectionTypeColor = ColorVariations.OperatorLabel.Apply(selectedColor).Fade(MathUtils.Lerp(0.6f, 1, idleFadeProgress));
         
-        var sourcePosOnScreen = TransformPosition(connection.SourcePos);
-        var targetPosOnScreen = TransformPosition(connection.TargetPos);
+        var sourcePosOnScreen = TransformPosition(connection.DampedSourcePos);
+        var targetPosOnScreen = TransformPosition(connection.DampedTargetPos);
 
         var anchorWidth = 1.5f * 2;
         var anchorHeight = 2f * 2;
