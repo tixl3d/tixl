@@ -113,7 +113,9 @@ public static class GradientEditor
         if (canInsertNewStep && ImGui.IsItemHovered() && !ImGui.IsItemActive())
         {
             var handleArea = GetHandleAreaForPosition(normalizedPosition);
-            drawList.AddRect(handleArea.Min + Vector2.One, handleArea.Max - Vector2.One, new Color(1f, 1f, 1f, 0.4f));
+           // drawList.AddRect(handleArea.Min + Vector2.One, handleArea.Max - Vector2.One, new Color(1f, 1f, 1f, 0.4f));
+            drawList.AddLine(handleArea.Min + new Vector2(StepHandleSize.X/2,-14), handleArea.Max - new Vector2(StepHandleSize.X / 2, 0), new Color(0.5f, 0.5f, 0.5f, 1.0f));
+           
         }
 
         // Draw CurveOverlays
@@ -220,7 +222,7 @@ public static class GradientEditor
 
         InputEditStateFlags DrawHandle(Gradient.Step step)
         {
-            var StepHandleSize = new Vector2(14, 16) * T3Ui.UiScaleFactor;
+            //var StepHandleSize = new Vector2(12, 16) * T3Ui.UiScaleFactor;
             var stepModified = InputEditStateFlags.Nothing;
             ImGui.PushID(step.Id.GetHashCode());
             var handleArea = GetHandleAreaForPosition(step.NormalizedPosition);
@@ -236,6 +238,7 @@ public static class GradientEditor
             if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenBlockedByPopup))
             {
                 hoveredStep = step;
+                handleArea.Min.Y = areaOnScreen.Max.Y - StepHandleSize.Y -2*T3Ui.UiScaleFactor;
             }
 
             var isDraggedOutside = false;
@@ -483,5 +486,5 @@ public static class GradientEditor
     private const float RemoveThreshold = 15;
     private const float RequiredHeightForHandles = 20;
     private const int MinInsertHeight = 15;
-    public static Vector2 StepHandleSize => new Vector2(14, 24) * T3Ui.UiScaleFactor;
+    public static Vector2 StepHandleSize => new Vector2(9, 15) * T3Ui.UiScaleFactor;
 }
