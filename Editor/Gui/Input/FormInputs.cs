@@ -609,9 +609,12 @@ internal static class FormInputs
 
     public static void AddVerticalSpace(float size = 10)
     {
-        ImGui.SetCursorPos( new Vector2( ImGui.GetCursorStartPos().X,
+        // This breaks ImGui.Indent for some reason so I commented it out and brought back the Dummy call
+        /*ImGui.SetCursorPos( new Vector2( ImGui.GetCursorStartPos().X,
                                          ImGui.GetCursorPosY() 
-                                         +size * T3Ui.UiScaleFactor));
+                                         +size * T3Ui.UiScaleFactor));*/
+        ImGui.Dummy(new Vector2(1, size * T3Ui.UiScaleFactor));
+
     }
 
     #region layout helpers
