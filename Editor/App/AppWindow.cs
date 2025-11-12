@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
@@ -16,6 +16,7 @@ using Icon = System.Drawing.Icon;
 using Rectangle = System.Drawing.Rectangle;
 using Resource = SharpDX.Direct3D11.Resource;
 using Vector2 = System.Numerics.Vector2;
+using Vector4 = System.Numerics.Vector4;
 
 namespace T3.Editor.App;
 
@@ -92,6 +93,21 @@ internal sealed class AppWindow
         Form.WindowState = FormWindowState.Normal;
         Form.FormBorderStyle = FormBorderStyle.None;
         Form.Bounds = Screen.AllScreens[screenIndex].Bounds;
+  
+    }
+
+    internal void UpdateSpanningBounds(int x, int y, int width, int height)
+    {
+        if (Form.FormBorderStyle == FormBorderStyle.None)
+        {
+            Form.Bounds = new Rectangle(x, y, width, height);
+        }
+        else
+        {
+            _boundsBeforeFullscreen = Form.Bounds;
+            Form.FormBorderStyle = FormBorderStyle.None;
+            Form.Bounds = new Rectangle(x, y, width, height);
+        }
     }
 
     internal void InitViewSwapChain(Factory factory)

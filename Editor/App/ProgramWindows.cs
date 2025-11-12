@@ -7,12 +7,12 @@ using SharpDX.DXGI;
 using T3.Core.IO;
 using T3.Core.Resource;
 using T3.Core.SystemUi;
-using T3.Editor.Gui;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
 using Device = SharpDX.Direct3D11.Device;
 using PixelShader = T3.Core.DataTypes.PixelShader;
 using VertexShader = T3.Core.DataTypes.VertexShader;
+using Vector4 = System.Numerics.Vector4;
 
 namespace T3.Editor.App;
 
@@ -45,16 +45,55 @@ internal static class ProgramWindows
         if (Main.IsFullScreen == UserSettings.Config.FullScreen)
             return;
 
+        var screenCount = Screen.AllScreens.Length;
         if (UserSettings.Config.FullScreen)
         {
-            var screenCount = Screen.AllScreens.Length;
             Main.SetFullScreen(UserSettings.Config.FullScreenIndexMain < screenCount ? UserSettings.Config.FullScreenIndexMain : 0);
-            Viewer.SetFullScreen(UserSettings.Config.FullScreenIndexViewer < screenCount ? UserSettings.Config.FullScreenIndexViewer : 0);
         }
         else
         {
             Main.SetSizeable();
-            Viewer.SetSizeable();
+        }
+    }
+
+    /// <summary>
+    /// Updates the viewer window spanning bounds dynamically
+    /// Called whenever the spanning area selection changes in the Screen Manager
+    /// </summary>
+    internal static void UpdateViewerSpanning(Vector4 spanningBounds)
+    {
+        if (Viewer == null)
+            return;
+
+        // Check if there's a valid spanning area defined
+        if (spanningBounds.Z > 0 && spanningBounds.W > 0)
+        {
+            // Update the viewer window to the spanning bounds
+            Viewer.UpdateSpanningBounds(
+                (int)spanningBounds.X,
+                (int)spanningBounds.Y,
+                (int)spanningBounds.Z,
+                (int)spanningBounds.W
+            );
+        }
+    
+    }
+
+    /// <summary>
+    /// Call this when the secondary render window is enabled/disabled
+    /// to ensure the viewer window is properly configured
+    /// </summary>
+    internal static void UpdateViewerWindowState()
+    {
+        if (Viewer == null)
+            return;
+
+        var spanningBounds = UserSettings.Config.OutputArea;
+
+        // If there's a valid spanning area, apply it
+        if (spanningBounds.Z > 0 && spanningBounds.W > 0)
+        {
+            UpdateViewerSpanning(spanningBounds);
         }
     }
 

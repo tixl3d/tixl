@@ -14,7 +14,6 @@ using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.UiHelpers.Wiki;
 using T3.Editor.Gui.Windows;
 using T3.Editor.Gui.Windows.Layouts;
-using T3.Editor.SystemUi;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.ProjectHandling;
@@ -385,25 +384,7 @@ internal static class AppMenuBar
 
             ImGui.MenuItem("Interactions Overlay", "", ref UserSettings.Config.ShowInteractionOverlay);
             ImGui.Separator();
-            ImGui.MenuItem("Fullscreen", UserActions.ToggleFullscreen.ListShortcuts(), ref UserSettings.Config.FullScreen);
-
-            var screens = EditorUi.Instance.AllScreens;
-            if (ImGui.BeginMenu("Fullscreen Display"))
-            {
-                for (var index = 0; index < screens.Count; index++)
-                {
-                    var screen = screens.ElementAt(index);
-                    var label = $"{screen.DeviceName.Trim(new char[] { '\\', '.' })}" +
-                                $" ({screen.Bounds.Width}x{screen.Bounds.Height})";
-                    if (ImGui.MenuItem(label, "", index == UserSettings.Config.FullScreenIndexMain))
-                    {
-                        UserSettings.Config.FullScreenIndexMain = index;
-                    }
-                }
-
-                ImGui.EndMenu();
-            }
-
+            ImGui.MenuItem("Fullscreen UI", UserActions.ToggleFullscreen.ListShortcuts(), ref UserSettings.Config.FullScreen);
             ImGui.Separator();
 
             if (ImGui.MenuItem("Focus Mode", UserActions.ToggleFocusMode.ListShortcuts(), UserSettings.Config.FocusMode))

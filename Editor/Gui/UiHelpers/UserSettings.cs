@@ -120,8 +120,12 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
 
         // Other settings
         public float GizmoSize = 100;
+
+        // Fullscreen settings
         public int FullScreenIndexMain = 0;
+        // Output window
         public int FullScreenIndexViewer = 0;
+        public Vector4 OutputArea = new(0,0,0,0);
 
         // Timeline
         public float TimeRasterDensity = 1f;
