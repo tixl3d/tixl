@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using ImGuiNET;
@@ -418,6 +418,8 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
 
         return HoverTime;
     }
+
+    private Vector2 _dampedScrollVelocity = Vector2.Zero;
 
     private readonly SelectionFence _selectionFence = new();
     private Vector2 GridSizeOnScreen => TransformDirection(MagGraphItem.GridSize);

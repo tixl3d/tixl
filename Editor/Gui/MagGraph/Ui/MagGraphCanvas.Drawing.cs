@@ -2,6 +2,8 @@ using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator.Interfaces;
 using T3.Core.Utils;
+using T3.Editor.Gui.Interaction;
+using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.MagGraph.Interaction;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.MagGraph.States;
@@ -15,7 +17,7 @@ namespace T3.Editor.Gui.MagGraph.Ui;
 
 internal sealed partial class MagGraphView
 {
-    private Dictionary<int, (Vector2 source, Vector2 target)> _previousConnectionPositions = new();
+    private Dictionary<int, (Vector2 source, Vector2 target)> _previousConnectionPositions = [];
     public void DrawGraph(ImDrawListPtr drawList, float graphOpacity)
     {
         _context.GraphOpacity = graphOpacity;
@@ -56,6 +58,50 @@ internal sealed partial class MagGraphView
 
             if (!_context.PreventInteraction && !FrameStats.Last.OpenedPopupCapturedMouse)
                 UpdateCanvas(out _, editingFlags);
+
+            // Graph View keyboard Controls // not sure if this is the best place for this code but it works for now
+            if (ImGui.IsWindowFocused())
+            {
+                var io = ImGui.GetIO();
+                var editingSomething = ImGui.IsAnyItemActive();
+
+                if (!io.KeyCtrl && !io.KeyShift && !io.KeyAlt && !editingSomething)
+                {
+                    if (UserActions.CameraForward.Triggered())
+                    {
+                        _dampedScrollVelocity.Y -= InverseTransformDirection(Vector2.One * UserSettings.Config.KeyboardScrollAcceleration).Y;
+                    }
+
+                    if (UserActions.CameraBackward.Triggered())
+                    {
+                        _dampedScrollVelocity.Y += InverseTransformDirection(Vector2.One * UserSettings.Config.KeyboardScrollAcceleration).Y;
+                    }
+
+                    if (UserActions.CameraLeft.Triggered())
+                    {
+                        _dampedScrollVelocity.X -= InverseTransformDirection(Vector2.One * UserSettings.Config.KeyboardScrollAcceleration).X;
+                    }
+
+                    if (UserActions.CameraRight.Triggered())
+                    {
+                        _dampedScrollVelocity.X += InverseTransformDirection(Vector2.One * UserSettings.Config.KeyboardScrollAcceleration).X;
+                    }
+
+                    if (UserActions.CameraDown.Triggered())
+                    {
+                        var center = WindowPos + WindowSize / 2;
+                        ApplyZoomDelta(center, 1.05f, out _);
+                    }
+
+                    if (UserActions.CameraUp.Triggered())
+                    {
+                        var center = WindowPos + WindowSize / 2;
+                        ApplyZoomDelta(center, 1 / 1.05f, out _);
+                    }
+                }
+            }
+            ScrollTarget += _dampedScrollVelocity;
+            _dampedScrollVelocity *= 0.85f;
 
             // Store previous connection lines damped positions before layout recomputes
             if (_context.Layout.MagConnections != null)
@@ -309,31 +355,45 @@ internal sealed partial class MagGraphView
 
     private void SmoothItemPositions()
     {
-        const float dampAmount = 0.7f;
+        const float normalDampAmount = 0.6f;
+        const float snapDampAmount = 0.2f; // Much snappier
+        const float snapDuration = 0.15f; // How long the snap effect lasts (in seconds)
+
+        // Check if we're in the snap window
+        var timeSinceSnap = (float)(ImGui.GetTime() - _context.ItemMovement.LastSnapTime);
+        var isRecentlySnapped = timeSinceSnap < snapDuration;
+
+        // Blend between snap and normal damping
+        var dampAmount = isRecentlySnapped
+            ? MathUtils.Lerp(snapDampAmount, normalDampAmount, timeSinceSnap / snapDuration)
+            : normalDampAmount;
 
         foreach (var i in _context.Layout.Items.Values)
         {
-            i.DampedPosOnCanvas = Vector2.Lerp(i.PosOnCanvas, i.DampedPosOnCanvas, dampAmount);
+            // Use faster damping for items that were just snapped
+            var itemDamp = (_context.ItemMovement.DraggedItems.Contains(i) && isRecentlySnapped)
+                ? dampAmount
+                : normalDampAmount;
+
+            i.DampedPosOnCanvas = Vector2.Lerp(i.PosOnCanvas, i.DampedPosOnCanvas, itemDamp);
         }
 
         foreach (var a in _context.Layout.Annotations.Values)
         {
-            a.DampedPosOnCanvas = Vector2.Lerp(a.Annotation.PosOnCanvas, a.DampedPosOnCanvas, dampAmount);
-            a.DampedSize = Vector2.Lerp(a.Annotation.Size, a.DampedSize, dampAmount);
+            a.DampedPosOnCanvas = Vector2.Lerp(a.Annotation.PosOnCanvas, a.DampedPosOnCanvas, normalDampAmount);
+            a.DampedSize = Vector2.Lerp(a.Annotation.Size, a.DampedSize, normalDampAmount);
         }
 
         foreach (var c in _context.Layout.MagConnections)
         {
-            // Initialize damped positions if they're at zero (new connection or reset)
             if (c.DampedSourcePos == Vector2.Zero)
                 c.DampedSourcePos = c.SourcePos;
 
             if (c.DampedTargetPos == Vector2.Zero)
                 c.DampedTargetPos = c.TargetPos;
 
-            c.DampedSourcePos = Vector2.Lerp(c.SourcePos, c.DampedSourcePos, dampAmount);
-            c.DampedTargetPos = Vector2.Lerp(c.TargetPos, c.DampedTargetPos, dampAmount);
-            
+            c.DampedSourcePos = Vector2.Lerp(c.SourcePos, c.DampedSourcePos, normalDampAmount);
+            c.DampedTargetPos = Vector2.Lerp(c.TargetPos, c.DampedTargetPos, normalDampAmount);
         }
     }
 
@@ -410,7 +470,7 @@ internal sealed partial class MagGraphView
 
         var count = new Vector2(window.GetWidth() / screenGridSize.X, window.GetHeight() / screenGridSize.Y);
 
-        for (int ix = 0; ix < 200 && ix <= count.X + 1; ix++)
+        for (var ix = 0; ix < 200 && ix <= count.X + 1; ix++)
         {
             var x = (int)(topLeftOnScreen.X + ix * screenGridSize.X);
             drawList.AddRectFilled(new Vector2(x, window.Min.Y),
@@ -418,7 +478,7 @@ internal sealed partial class MagGraphView
                                    color);
         }
 
-        for (int iy = 0; iy < 200 && iy <= count.Y + 1; iy++)
+        for (var iy = 0; iy < 200 && iy <= count.Y + 1; iy++)
         {
             var y = (int)(topLeftOnScreen.Y + iy * screenGridSize.Y);
             drawList.AddRectFilled(new Vector2(window.Min.X, y),
@@ -438,7 +498,7 @@ internal sealed partial class MagGraphView
     }
 
     private static readonly ImDrawFlags[] _borderRoundings =
-        {
+        [
             ImDrawFlags.RoundCornersAll, //        0000      
             ImDrawFlags.RoundCornersBottom, //     0001                 up
             ImDrawFlags.RoundCornersLeft, //       0010           right
@@ -456,7 +516,7 @@ internal sealed partial class MagGraphView
             ImDrawFlags.RoundCornersNone, //       1101 left down       up
             ImDrawFlags.RoundCornersNone, //       1110 left down right  
             ImDrawFlags.RoundCornersNone, //       1111 left down right up  
-        };
+        ];
 
     internal static float Blink => MathF.Sin((float)ImGui.GetTime() * 10) * 0.5f + 0.5f;
 }
