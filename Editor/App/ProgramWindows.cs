@@ -7,6 +7,7 @@ using SharpDX.DXGI;
 using T3.Core.IO;
 using T3.Core.Resource;
 using T3.Core.SystemUi;
+using T3.Editor.Gui;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
 using Device = SharpDX.Direct3D11.Device;
@@ -183,10 +184,10 @@ internal static class ProgramWindows
 
             //Try to load 11.1 if possible, revert to 11.0 auto
             FeatureLevel[] levels =
-{
+            [
                 FeatureLevel.Level_11_1,
                 FeatureLevel.Level_11_0,
-            };
+            ];
 
             
             
