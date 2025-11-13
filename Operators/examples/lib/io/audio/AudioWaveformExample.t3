@@ -47,7 +47,7 @@
           "Id": "eff02108-2335-46b5-95ba-4235b9a26349"/*LeftRight*/,
           "Type": "T3.Core.DataTypes.Vector.Int2",
           "Value": {
-            "X": -779,
+            "X": -991,
             "Y": -929
           }
         }
