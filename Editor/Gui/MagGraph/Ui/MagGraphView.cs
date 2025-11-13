@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using ImGuiNET;
@@ -126,6 +126,18 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
         if (_context.Layout.Items.TryGetValue(symbolChildUi.Id, out var item))
         {
             _context.Placeholder.OpenForItemInput(_context, item, inputInputDefinition.Id, MagGraphItem.Directions.Horizontal);
+
+            // Calculate where the placeholder will be (to the left of the item)
+            var placeholderPos = item.PosOnCanvas + new Vector2(-MagGraphItem.GridSize.X, 0);
+            var currentVisibleArea = GetVisibleCanvasArea();
+
+            // If placeholder position is outside the left edge of visible area, scroll to make it visible
+            if (placeholderPos.X < currentVisibleArea.Min.X)
+            {
+                var scrollOffset = currentVisibleArea.Min.X - placeholderPos.X*1.01f;
+
+                ScrollTarget = new Vector2(ScrollTarget.X - scrollOffset, ScrollTarget.Y);
+            }
         }
     }
 
