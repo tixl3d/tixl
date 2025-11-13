@@ -1,5 +1,7 @@
-﻿using System.Diagnostics;
 using ImGuiNET;
+using System.Diagnostics;
+using T3.Editor.Gui.Interaction;
+using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.MagGraph.Interaction;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.UiModel.Commands.Graph;
@@ -80,6 +82,28 @@ internal static class GraphStates
                           if (!context.View.IsHovered)
                               return;
 
+                          // Open children or parent component with keyboard
+                          if (UserActions.CloseOperator.Triggered() && ProjectView.Focused != null)
+                          {
+                              ProjectView.Focused.TrySetCompositionOpToParent();
+                          }
+
+                          if (UserActions.OpenOperator.Triggered() && ProjectView.Focused != null)
+                          {
+                              var isWindowActive = ImGui.IsWindowFocused() || ImGui.IsWindowHovered(ImGuiHoveredFlags.AllowWhenBlockedByPopup);
+
+                              // Check if we have either an active (selected) item or a hovered item
+                              var itemToOpen = context.ActiveItem ?? context.HoveredItem;
+
+                              if (isWindowActive && itemToOpen != null && itemToOpen.Variant == MagGraphItem.Variants.Operator)
+                              {
+                                  Debug.Assert(itemToOpen.Instance != null);
+                                  if (itemToOpen.Instance.Children.Count > 0)
+                                  {
+                                      ProjectView.Focused.TrySetCompositionOpToChild(itemToOpen.Instance.SymbolChildId);
+                                  }
+                              }
+                          }
                           // Mouse click
                           var clickedDown = ImGui.IsMouseClicked(ImGuiMouseButton.Left);
                           if (!clickedDown)

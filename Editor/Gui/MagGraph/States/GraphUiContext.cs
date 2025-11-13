@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System.Diagnostics;
 using T3.Core.Operator;
 using T3.Editor.Gui.Graph.Dialogs;
@@ -112,6 +112,9 @@ internal sealed class GraphUiContext
     internal MagGraphItem? ActiveTargetItem;
     internal Guid ActiveTargetInputId { get; set; }
     internal MagGraphItem.Directions ActiveInputDirection { get; set; }
+
+    /** The item that is currently hovered by the mouse */
+    internal MagGraphItem? HoveredItem { get; set; }
 
     /** Only relevant while picking inputs or hovering an op while dragging connecting end. */
     internal MagGraphItem? ItemForInputSelection;
