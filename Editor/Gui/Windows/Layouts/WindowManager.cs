@@ -6,6 +6,7 @@ using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.AssetLib;
 using T3.Editor.Gui.Windows.Exploration;
+using T3.Editor.Gui.Windows.History;
 using T3.Editor.Gui.Windows.Output;
 using T3.Editor.Gui.Windows.RenderExport;
 using T3.Editor.Gui.Windows.SymbolLib;
@@ -63,6 +64,7 @@ internal static partial class WindowManager
                 new ExplorationWindow(),
                 new RenderWindow(),
                 new IoViewWindow(),
+                new HistoryWindow(),
                 Program.ConsoleLogWindow,
                 UtilitiesWindow,    // item shown in TiXL > Development menu
                 SettingsWindow, // item shown in TiXL menu
