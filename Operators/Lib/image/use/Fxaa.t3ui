@@ -1,0 +1,232 @@
+{
+  "Id": "0784b2ea-ac03-4f6e-8de3-4200cb93d651"/*Fxaa*/,
+  "Description": "Fast approXimate Anti-Aliasing is a post-FX, use it to improve SDF / RayMarching. ",
+  "InputUis": [
+    {
+      "InputId": "31ea272e-30ec-4af3-835c-5a92af306689"/*Image*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -407.4456,
+        "Y": 553.07074
+      }
+    },
+    {
+      "InputId": "a87cca92-dd43-4845-bd77-9bfec5b75eec"/*KeepAlpha*/,
+      "Position": {
+        "X": -217.61227,
+        "Y": 943.10583
+      }
+    },
+    {
+      "InputId": "aa56d3df-fa8f-4cb5-9164-f2bfd88dffab"/*Preset*/,
+      "Position": {
+        "X": -190.53949,
+        "Y": 395.8562
+      },
+      "Min": 0,
+      "Max": 5,
+      "ClampMin": true,
+      "ClampMax": true
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0607c574-59f6-4e60-936f-604f1fc7e151"/*VertexShader*/,
+      "Position": {
+        "X": 917.8959,
+        "Y": 636.4485
+      }
+    },
+    {
+      "ChildId": "174cac90-00f5-49c8-b53a-4e1cdbffde6c"/*RenderTarget*/,
+      "Position": {
+        "X": 1053.1002,
+        "Y": 1096.8684
+      }
+    },
+    {
+      "ChildId": "18775a53-341d-43fe-a3a0-51f35a067830"/*RenderTargetBlendDescription*/,
+      "Position": {
+        "X": 633.1002,
+        "Y": 1026.8687
+      }
+    },
+    {
+      "ChildId": "2275a08c-97fa-4ba7-9603-140942f412e7"/*SamplerState*/,
+      "Position": {
+        "X": 917.8958,
+        "Y": 811.4485
+      }
+    },
+    {
+      "ChildId": "299221ce-f405-40e3-bbcc-826e5e3402c7"/*ReadFile*/,
+      "Position": {
+        "X": -190.53949,
+        "Y": 465.8562
+      }
+    },
+    {
+      "ChildId": "3ac36e95-c725-43a1-b874-95acc34a111d"/*OutputMergerStage*/,
+      "Position": {
+        "X": 913.1002,
+        "Y": 1026.8687
+      }
+    },
+    {
+      "ChildId": "492187b0-1f4a-45f5-8cf7-5f3afaa3b49a"/*Div*/,
+      "Position": {
+        "X": 153.66663,
+        "Y": 725.9446
+      }
+    },
+    {
+      "ChildId": "4f4ab338-a1b5-4c93-a2fa-d9f2bdc37667"/*SetPixelAndVertexShaderStage*/,
+      "Position": {
+        "X": 1057.8959,
+        "Y": 636.4485
+      }
+    },
+    {
+      "ChildId": "531fdb46-acc8-4c60-80c7-861038a3b830"/*ReadFile*/,
+      "Position": {
+        "X": -358.76874,
+        "Y": 264.54193
+      }
+    },
+    {
+      "ChildId": "55b30c9a-9fcb-4705-9b92-7dc77685ac3e"/*Div*/,
+      "Position": {
+        "X": 153.66664,
+        "Y": 626.9264
+      }
+    },
+    {
+      "ChildId": "5d7e63a8-5e5f-45c1-8749-48cad7cb8f34"/*ResolutionConstBuffer*/,
+      "Position": {
+        "X": 917.8959,
+        "Y": 741.44836
+      }
+    },
+    {
+      "ChildId": "77b943d4-d292-4227-b07b-2bd546617824"/*InputAssemblerStage*/,
+      "Position": {
+        "X": 913.1002,
+        "Y": 956.86865
+      }
+    },
+    {
+      "ChildId": "7eb6a23c-313c-49be-9ca1-48dd5033b9a6"/*GetTextureSize*/,
+      "Position": {
+        "X": -215.10461,
+        "Y": 848.54224
+      }
+    },
+    {
+      "ChildId": "7f58f46b-f2a7-4af7-b602-2225427c629c"/*BoolToFloat*/,
+      "Position": {
+        "X": -77.61224,
+        "Y": 943.10583
+      }
+    },
+    {
+      "ChildId": "8be71b9f-41f0-4b85-b35e-fbbfa60957b2"/*Rasterizer*/,
+      "Position": {
+        "X": 913.1002,
+        "Y": 991.8688
+      }
+    },
+    {
+      "ChildId": "8bf06cf2-51d8-4120-a30c-4a766a6a8fb8"/*PixelShaderFromSource*/,
+      "Position": {
+        "X": 917.8959,
+        "Y": 671.4485
+      }
+    },
+    {
+      "ChildId": "8f1fdcc0-b12b-4fe5-ad39-359bc45360e1"/*RasterizerState*/,
+      "Position": {
+        "X": 773.1002,
+        "Y": 991.8688
+      }
+    },
+    {
+      "ChildId": "9ea8d5d8-4236-46fe-b31f-856a6b13d71d"/*BlendState*/,
+      "Position": {
+        "X": 773.1002,
+        "Y": 1026.8687
+      }
+    },
+    {
+      "ChildId": "b67a128b-60b9-42fb-8594-3406ad7ce6bf"/*FloatsToBuffer*/,
+      "Position": {
+        "X": 587.0916,
+        "Y": 708.2266
+      }
+    },
+    {
+      "ChildId": "bb5d9e10-27ee-4d2b-9a84-bf1ab7a022cb"/*BoolToFloat*/,
+      "Position": {
+        "X": 447.0916,
+        "Y": 848.2266
+      }
+    },
+    {
+      "ChildId": "c3a927d3-211c-4724-8496-75590e0d42ea"/*CombineStrings*/,
+      "Position": {
+        "X": -50.53949,
+        "Y": 430.8562
+      }
+    },
+    {
+      "ChildId": "c5c073e0-7e68-4d68-8b5f-5d846592148c"/*Execute*/,
+      "Position": {
+        "X": 1053.1002,
+        "Y": 921.8688
+      }
+    },
+    {
+      "ChildId": "ca098ed1-80a3-4d98-9e78-bf90fabdb506"/*PickStringPart*/,
+      "Position": {
+        "X": -50.53949,
+        "Y": 360.8562
+      }
+    },
+    {
+      "ChildId": "cb2bff17-40e7-433d-b3f4-9cb08e83c535"/*Vector2Components*/,
+      "Position": {
+        "X": -40.19508,
+        "Y": 673.6205
+      }
+    },
+    {
+      "ChildId": "d666240f-6f41-47f3-8039-24ec2bbd5949"/*Int2ToVector2*/,
+      "Position": {
+        "X": -40.19508,
+        "Y": 638.6205
+      }
+    },
+    {
+      "ChildId": "d74fe101-e803-4277-acdb-0569eb49d435"/*Draw*/,
+      "Position": {
+        "X": 913.1002,
+        "Y": 1061.8684
+      }
+    },
+    {
+      "ChildId": "f40f9a4b-f3c7-4060-98d6-eb77e3d356c5"/*SrvFromTexture2d*/,
+      "Position": {
+        "X": -40.195084,
+        "Y": 547.19574
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "68a001ad-f80c-4819-b46c-e626a1c0dbff"/*TextureOutput*/,
+      "Position": {
+        "X": 1457.4282,
+        "Y": 613.6046
+      }
+    }
+  ]
+}
