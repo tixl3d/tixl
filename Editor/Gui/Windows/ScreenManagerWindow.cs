@@ -13,10 +13,9 @@ using Icon = T3.Editor.Gui.Styling.Icon;
 using Vector2 = System.Numerics.Vector2;
 
 namespace T3.Editor.Gui.Windows;
-
-internal sealed class ScreenManager : Window
+internal sealed class ScreenManagerWindow : Window
 {
-    internal ScreenManager()
+    internal ScreenManagerWindow()
     {
         Config.Title = "Screen Manager";
         SystemEvents.DisplaySettingsChanged += (_, __) => _layoutDirty = true;
@@ -38,7 +37,7 @@ internal sealed class ScreenManager : Window
     {
         RefreshScreenCache();
         ImGui.Indent(10);
-        FormInputs.AddVerticalSpace(10);
+        FormInputs.AddVerticalSpace();
 
         var windowWidth = ImGui.GetWindowWidth();
 
@@ -60,23 +59,18 @@ internal sealed class ScreenManager : Window
         ImGui.Indent(10);
         FormInputs.AddVerticalSpace(20);
 
-        if (ImGui.Button("Windows Display settings" + new string(' ', 5)))
+        if (ImGui.Button("Windows Display settings    "))
+        {
             OpenWindowsDisplaySettings();
-
+        }    
         Icons.DrawIconOnLastItem(Icon.OpenExternally, UiColors.Text, .99f);
         CustomComponents.TooltipForLastItem("Open Windows display settings to configure screen arrangement, resolution, etc.");
-        ImGui.Dummy(new Vector2(1, 0));
-        ImGui.SameLine(windowWidth - 30);
-        ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-        ImGui.PushFont(Icons.IconFont);
-        Icons.DrawAtCursor(Icon.Tip);
-        ImGui.PopFont();
-        ImGui.PopStyleColor();
+
+        ImGui.SetCursorPosX(windowWidth - 30);
+        Icon.Tip.DrawAtCursor();
         CustomComponents.TooltipForLastItem("Press F11 twice to update the UI position");
 
         FormInputs.AddVerticalSpace(20);
-        
-        
 
         ImGui.Unindent(10);
 
@@ -87,20 +81,18 @@ internal sealed class ScreenManager : Window
         }
     }
 
-
     private static void ApplySpanningChanges()
     {
-        var spanningBounds = UserSettings.Config.OutputArea;
+        var spanning = UserSettings.Config.OutputArea;
+        var spanningBounds = new ImRect(new Vector2(spanning.X, spanning.Y), new Vector2(spanning.Z, spanning.W));
 
-        // Check if spanning area is defined
-        if (spanningBounds.Z > 0 && spanningBounds.W > 0)
+        var isSpanningDefined = spanningBounds.Max.X > 0 && spanningBounds.Max.Y > 0;
+        if (isSpanningDefined)
         {
             // Enable the output window if not already enabled
-            if (!WindowManager.ShowSecondaryRenderWindow)
-            {
-                WindowManager.ShowSecondaryRenderWindow = true;
-            }
-
+            
+            WindowManager.ShowSecondaryRenderWindow = true;
+           
             // Update the viewer window with the new spanning area
             // This will be picked up by the main update loop
             ProgramWindows.UpdateViewerSpanning(spanningBounds);
@@ -112,59 +104,89 @@ internal sealed class ScreenManager : Window
         }
     }
 
-    private static bool IsScreenInSpanningArea(Screen screen, Vector4 spanningArea)
+    private static bool IsScreenInSpanningArea(Screen screen, ImRect spanningArea)
     {
-        if (spanningArea.Z == 0 || spanningArea.W == 0) // No spanning area defined
+        var undefinedSpanning = spanningArea.Max.X == 0 || spanningArea.Max.X == 0;
+        if (undefinedSpanning)
             return false;
 
         var screenBounds = screen.Bounds;
 
         // Check if the screen's bounds are completely within the spanning area
-        return screenBounds.Left >= spanningArea.X &&
-               screenBounds.Right <= spanningArea.X + spanningArea.Z &&
-               screenBounds.Top >= spanningArea.Y &&
-               screenBounds.Bottom <= spanningArea.Y + spanningArea.W;
+        return screenBounds.Left >= spanningArea.Min.X &&
+               screenBounds.Right <= spanningArea.Min.X + spanningArea.Max.X &&
+               screenBounds.Top >= spanningArea.Min.Y &&
+               screenBounds.Bottom <= spanningArea.Min.Y + spanningArea.Max.Y;
     }
 
     private static void AddScreenToSpanning(Screen screen, Screen[] screens)
     {
-        var currentBounds = UserSettings.Config.OutputArea;
-        var screenBounds = screen.Bounds;
+        var spanning = UserSettings.Config.OutputArea;
+        var currentBounds = new ImRect(new Vector2(spanning.X, spanning.Y),
+                                        new Vector2(spanning.Z, spanning.W));
 
-        // Get all screens that are currently in the spanning area
-        var currentScreens = screens.Where(s => IsScreenInSpanningArea(s, currentBounds)).ToList();
+        _spanningWorkList.Clear();
+        var screenAlreadyIncluded = false;
 
-        // Add the new screen
-        if (!currentScreens.Contains(screen))
-            currentScreens.Add(screen);
+        // Build list of screens in spanning area
+        for (var i = 0; i < screens.Length; i++)
+        {
+            if (IsScreenInSpanningArea(screens[i], currentBounds))
+            {
+                _spanningWorkList.Add(screens[i]);
+                if (screens[i] == screen)
+                    screenAlreadyIncluded = true;
+            }
+        }
 
-        // Calculate new combined bounds
-        UpdateSpanningBounds([.. currentScreens]);
+        if (!screenAlreadyIncluded)
+            _spanningWorkList.Add(screen);
+
+        // Now convert list to array only once for UpdateSpanningBounds
+        UpdateSpanningBounds([.. _spanningWorkList]);
     }
 
     private static void RemoveScreenFromSpanning(Screen screen, Screen[] screens)
     {
-        var currentBounds = UserSettings.Config.OutputArea;
+        var spanning = UserSettings.Config.OutputArea;
+        var currentBounds = new ImRect(new Vector2(spanning.X, spanning.Y),
+                                        new Vector2(spanning.Z, spanning.W));
 
-        // Get all screens that are currently in the spanning area, excluding the one to remove
-        var remainingScreens = screens.Where(s => IsScreenInSpanningArea(s, currentBounds) && s != screen).ToArray();
+        _spanningWorkList.Clear();
 
-        // Update bounds with remaining screens
-        UpdateSpanningBounds(remainingScreens);
+        // Build list excluding the screen to remove
+        for (var i = 0; i < screens.Length; i++)
+        {
+            if (IsScreenInSpanningArea(screens[i], currentBounds) && screens[i] != screen)
+            {
+                _spanningWorkList.Add(screens[i]);
+            }
+        }
+
+        UpdateSpanningBounds(_spanningWorkList);
     }
 
-    private static void UpdateSpanningBounds(Screen[] selectedScreens)
+    private static void UpdateSpanningBounds(IList<Screen> selectedScreens)
     {
-        if (selectedScreens.Length == 0)
+        if (selectedScreens.Count == 0)
         {
             UserSettings.Config.OutputArea = new Vector4(0, 0, 0, 0);
             return;
         }
 
-        var minX = selectedScreens.Min(s => s.Bounds.X);
-        var minY = selectedScreens.Min(s => s.Bounds.Y);
-        var maxX = selectedScreens.Max(s => s.Bounds.Right);
-        var maxY = selectedScreens.Max(s => s.Bounds.Bottom);
+        var minX = selectedScreens[0].Bounds.X;
+        var minY = selectedScreens[0].Bounds.Y;
+        var maxX = selectedScreens[0].Bounds.Right;
+        var maxY = selectedScreens[0].Bounds.Bottom;
+
+        for (var i = 1; i < selectedScreens.Count; i++)
+        {
+            var bounds = selectedScreens[i].Bounds;
+            if (bounds.X < minX) minX = bounds.X;
+            if (bounds.Y < minY) minY = bounds.Y;
+            if (bounds.Right > maxX) maxX = bounds.Right;
+            if (bounds.Bottom > maxY) maxY = bounds.Bottom;
+        }
 
         UserSettings.Config.OutputArea = new Vector4(
             minX, minY,
@@ -177,10 +199,19 @@ internal sealed class ScreenManager : Window
         if (screens.Length == 0)
             return new Rectangle(0, 0, 0, 0);
 
-        var minX = screens.Min(s => s.Bounds.X);
-        var minY = screens.Min(s => s.Bounds.Y);
-        var maxX = screens.Max(s => s.Bounds.Right);
-        var maxY = screens.Max(s => s.Bounds.Bottom);
+        var minX = screens[0].Bounds.X;
+        var minY = screens[0].Bounds.Y;
+        var maxX = screens[0].Bounds.Right;
+        var maxY = screens[0].Bounds.Bottom;
+
+        for (var i = 1; i < screens.Length; i++)
+        {
+            var bounds = screens[i].Bounds;
+            if (bounds.X < minX) minX = bounds.X;
+            if (bounds.Y < minY) minY = bounds.Y;
+            if (bounds.Right > maxX) maxX = bounds.Right;
+            if (bounds.Bottom > maxY) maxY = bounds.Bottom;
+        }
 
         return new Rectangle(minX, minY, maxX - minX, maxY - minY);
     }
@@ -221,70 +252,114 @@ internal sealed class ScreenManager : Window
         }
     }
 
-    private static bool IsSpanningAreaLargerThanScreens(Screen[] screens, Vector4 spanningArea)
+    private static bool IsSpanningAreaLargerThanScreens(Screen[] screens, ImRect spanningArea)
     {
-        if (spanningArea.Z == 0 || spanningArea.W == 0)
+        var undefinedSpanning = spanningArea.Max.X == 0 || spanningArea.Max.Y == 0;
+        if (undefinedSpanning)
             return false;
 
-        // Get all screens that are currently in the spanning area
-        var screensInSpanning = screens.Where(s => IsScreenInSpanningArea(s, spanningArea)).ToArray();
+        var totalScreenArea = 0;
+        var screensInSpanningCount = 0;
 
-        if (screensInSpanning.Length == 0)
+        // Single pass without allocations
+        for (var i = 0; i < screens.Length; i++)
+        {
+            if (IsScreenInSpanningArea(screens[i], spanningArea))
+            {
+                totalScreenArea += screens[i].Bounds.Width * screens[i].Bounds.Height;
+                screensInSpanningCount++;
+            }
+        }
+
+        if (screensInSpanningCount == 0)
             return false;
 
-        // Calculate the total area of all screens in the spanning area
-        var totalScreenArea = screensInSpanning.Sum(s => s.Bounds.Width * s.Bounds.Height);
-
-        // Calculate the spanning area
-        var spanningAreaTotal = spanningArea.Z * spanningArea.W;
-
-        // If spanning area is larger than the sum of screen areas, there are gaps
+        var spanningAreaTotal = (int)(spanningArea.Max.X * spanningArea.Max.Y);
         return spanningAreaTotal > totalScreenArea;
     }
 
     private static void RefreshScreenCache()
     {
-        var newScreens = Screen.AllScreens;
+        // Only allocate if display settings actually changed
+        // Screen.AllScreens allocates, so minimize calls
+        var currentScreenCount = Screen.AllScreens.Length;
 
-        // Trigger layout rebuild if number or names differ
-        var screensChanged =
-            _cachedScreens.Length != newScreens.Length ||
-            !_cachedScreens.Select(s => s.DeviceName).SequenceEqual(newScreens.Select(s => s.DeviceName));
-
-        // Trigger rebuild if bounds changed (e.g., moved monitors or changed resolution)
-        if (!screensChanged)
+        if (_cachedScreens.Length != currentScreenCount)
         {
-            for (var i = 0; i < newScreens.Length; i++)
+            _cachedScreens = Screen.AllScreens;
+            _cachedOverallBounds = GetOverallScreenBounds(_cachedScreens);
+            _layoutDirty = true;
+            InvalidateStringCache(); // Clear cached strings
+        }
+        else
+        {
+            // Check for changes without LINQ
+            var hasChanges = false;
+            var newScreens = Screen.AllScreens;
+
+            for (var i = 0; i < _cachedScreens.Length; i++)
             {
-                if (!_cachedScreens[i].Bounds.Equals(newScreens[i].Bounds))
+                if (_cachedScreens[i].DeviceName != newScreens[i].DeviceName ||
+                    !_cachedScreens[i].Bounds.Equals(newScreens[i].Bounds))
                 {
-                    screensChanged = true;
+                    hasChanges = true;
                     break;
                 }
             }
+
+            if (hasChanges)
+            {
+                _cachedScreens = newScreens;
+                _cachedOverallBounds = GetOverallScreenBounds(newScreens);
+                _layoutDirty = true;
+                InvalidateStringCache();
+            }
         }
 
-        if (screensChanged)
-        {
-            _cachedScreens = newScreens;
-            _cachedOverallBounds = GetOverallScreenBounds(newScreens);
-            _layoutDirty = true;
-        }
+        // Spanning area refresh
+        var spanning = UserSettings.Config.OutputArea;
+        _cachedSpanning = new ImRect(new Vector2(spanning.X, spanning.Y),
+                                      new Vector2(spanning.Z, spanning.W));
 
-        // Always refresh spanning area, since user may adjust it via settings
-        _cachedSpanning = UserSettings.Config.OutputArea;
-
-        // Refresh selected spanning screens
         _screensInSpanning.Clear();
-        foreach (var s in _cachedScreens)
-            if (IsScreenInSpanningArea(s, _cachedSpanning))
-                _screensInSpanning.Add(s);
+        for (var i = 0; i < _cachedScreens.Length; i++)
+        {
+            if (IsScreenInSpanningArea(_cachedScreens[i], _cachedSpanning))
+            {
+                _screensInSpanning.Add(_cachedScreens[i]);
+            }
+        }
     }
 
+    private static string GetCachedLabel(int index, bool isPrimary)
+    {
+        var key = isPrimary ? -(index + 1) : (index + 1);
+        if (!_cachedLabels.TryGetValue(key, out var label))
+        {
+            label = $"{index + 1}{(isPrimary ? " (Primary)" : "")}";
+            _cachedLabels[key] = label;
+        }
+        return label;
+    }
 
-    // -------------------------------------------
-    // Helper: Compute scale to fit screens in UI
-    // -------------------------------------------
+    private static string GetCachedResolution(int width, int height)
+    {
+        var key = (width, height);
+        if (!_cachedResolutions.TryGetValue(key, out var resolution))
+        {
+            resolution = $"{width}x{height}";
+            _cachedResolutions[key] = resolution;
+        }
+        return resolution;
+    }
+
+    private static void InvalidateStringCache()
+    {
+        _cachedLabels.Clear();
+        _cachedResolutions.Clear();
+    }
+
+    /** Helper: Compute scale to fit screens in UI  **/
     private static float ComputeScale(Rectangle overallBounds, float windowWidth)
     {
         var baseScale = 0.1f * T3Ui.UiScaleFactor;
@@ -302,9 +377,7 @@ internal sealed class ScreenManager : Window
         return finalScale;
     }
 
-    // -------------------------------------------
-    // DrawScreenLayout() - optimized for low CPU
-    // -------------------------------------------
+    /** DrawScreenLayout() - optimized for low CPU **/
     private static void DrawScreenLayout(Screen[] screens, float scale)
     {
         var drawList = ImGui.GetWindowDrawList();
@@ -330,13 +403,12 @@ internal sealed class ScreenManager : Window
             var min = new Vector2(x, y);
             var max = new Vector2(x + w, y + h);
 
-            var color = UiColors.BackgroundButton.Rgba;
-            drawList.AddRectFilled(min, max, ImGui.ColorConvertFloat4ToU32(color));
-            drawList.AddRect(min, max, ImGui.ColorConvertFloat4ToU32(Vector4.UnitW));
+            drawList.AddRectFilled(min, max, UiColors.BackgroundButton);
+            drawList.AddRect(min, max, UiColors.BackgroundFull.Fade(0.7f));
 
             // Label and resolution
-            var label = $"{i + 1}" + (screen.Primary ? " (Primary)" : "");
-            var resolution = $"{b.Width}x{b.Height}";
+            var label = GetCachedLabel(i, screen.Primary);
+            var resolution = GetCachedResolution(b.Width, b.Height);
             var labelPos = new Vector2(x + w * 0.5f - ImGui.CalcTextSize(label).X / 2, y + h * 0.23f);
             drawList.AddText(labelPos, UiColors.Text, label);
 
@@ -346,16 +418,16 @@ internal sealed class ScreenManager : Window
             ImGui.PopFont();
         }
 
-        // Draw spanning overlay if valid
-        if (_cachedSpanning.Z > 0 && _cachedSpanning.W > 0 && _screensInSpanning.Count > 1)
+        var isSpanningValidForOverlay = _cachedSpanning.Max.X > 0 && _cachedSpanning.Max.Y > 0 && _screensInSpanning.Count > 1;
+        if (isSpanningValidForOverlay)
         {
             var hasGaps = IsSpanningAreaLargerThanScreens(screens, _cachedSpanning);
 
             var rectMin = new Vector2(
-                canvasPos.X + centerOffsetX + (_cachedSpanning.X - overall.X) * scale,
-                canvasPos.Y + (_cachedSpanning.Y - overall.Y) * scale
+                canvasPos.X + centerOffsetX + (_cachedSpanning.Min.X - overall.X) * scale,
+                canvasPos.Y + (_cachedSpanning.Min.Y - overall.Y) * scale
             );
-            var rectMax = rectMin + new Vector2(_cachedSpanning.Z * scale, _cachedSpanning.W * scale);
+            var rectMax = rectMin + new Vector2(_cachedSpanning.Max.X * scale, _cachedSpanning.Max.Y * scale);
 
             drawList.AddRect(rectMin, rectMax, UiColors.BackgroundActive.Fade(0.5f), 0, ImDrawFlags.RoundCornersNone, 2);
 
@@ -368,16 +440,14 @@ internal sealed class ScreenManager : Window
             var text = hasGaps ? "Spanning (with gaps)" : "Spanning";
             var textSize = ImGui.CalcTextSize(text);
             var textPos = new Vector2(
-                labelRectMin.X + ((_cachedSpanning.Z * scale) - textSize.X) * 0.5f,
+                labelRectMin.X + ((_cachedSpanning.Max.X * scale) - textSize.X) * 0.5f,
                 labelRectMin.Y + (labelHeight - textSize.Y) * 0.5f
             );
             drawList.AddText(textPos, UiColors.Text, text);
             ImGui.PopFont();
         }
 
-        // -----------------------------
-        // Child for interactive buttons
-        // -----------------------------
+        /** Child for interactive buttons **/
         ImGui.SetCursorScreenPos(canvasPos + new Vector2(centerOffsetX, 0));
         ImGui.BeginChild("Editor screen selection", neededArea, false, ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoScrollbar);
         var buttonSize = new Vector2(16, 16) * T3Ui.UiScaleFactor;
@@ -435,7 +505,11 @@ internal sealed class ScreenManager : Window
     private static float _cachedScale;
     private static bool _layoutDirty = true;
     private static bool _spanningNeedsUpdate;
-    private static Vector4 _cachedSpanning;
+    private static ImRect _cachedSpanning;
     private static readonly HashSet<Screen> _screensInSpanning = [];
     private static float _lastWindowWidth = -1;
+
+    private static readonly Dictionary<int, string> _cachedLabels = [];
+    private static readonly Dictionary<(int, int), string> _cachedResolutions = [];
+    private static readonly List<Screen> _spanningWorkList = new(8);
 }

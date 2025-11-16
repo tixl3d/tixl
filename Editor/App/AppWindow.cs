@@ -16,7 +16,6 @@ using Icon = System.Drawing.Icon;
 using Rectangle = System.Drawing.Rectangle;
 using Resource = SharpDX.Direct3D11.Resource;
 using Vector2 = System.Numerics.Vector2;
-using Vector4 = System.Numerics.Vector4;
 
 namespace T3.Editor.App;
 

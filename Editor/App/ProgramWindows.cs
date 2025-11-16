@@ -7,13 +7,13 @@ using SharpDX.DXGI;
 using T3.Core.IO;
 using T3.Core.Resource;
 using T3.Core.SystemUi;
-using T3.Editor.Gui;
+using T3.Editor.Gui; // for ReleaseMode
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
 using Device = SharpDX.Direct3D11.Device;
 using PixelShader = T3.Core.DataTypes.PixelShader;
 using VertexShader = T3.Core.DataTypes.VertexShader;
-using Vector4 = System.Numerics.Vector4;
+using Vector2 = System.Numerics.Vector2;
 
 namespace T3.Editor.App;
 
@@ -61,20 +61,20 @@ internal static class ProgramWindows
     /// Updates the viewer window spanning bounds dynamically
     /// Called whenever the spanning area selection changes in the Screen Manager
     /// </summary>
-    internal static void UpdateViewerSpanning(Vector4 spanningBounds)
+    internal static void UpdateViewerSpanning(ImRect spanningBounds)
     {
         if (Viewer == null)
             return;
 
         // Check if there's a valid spanning area defined
-        if (spanningBounds.Z > 0 && spanningBounds.W > 0)
+        if (spanningBounds.Max.X > 0 && spanningBounds.Max.Y > 0)
         {
             // Update the viewer window to the spanning bounds
             Viewer.UpdateSpanningBounds(
-                (int)spanningBounds.X,
-                (int)spanningBounds.Y,
-                (int)spanningBounds.Z,
-                (int)spanningBounds.W
+                (int)spanningBounds.Min.X,
+                (int)spanningBounds.Min.Y,
+                (int)spanningBounds.Max.X,
+                (int)spanningBounds.Max.Y
             );
         }
     
@@ -89,10 +89,11 @@ internal static class ProgramWindows
         if (Viewer == null)
             return;
 
-        var spanningBounds = UserSettings.Config.OutputArea;
+        var spanning = UserSettings.Config.OutputArea;
+        var spanningBounds = new ImRect(new Vector2(spanning.X, spanning.Y), new Vector2(spanning.Z, spanning.W));
 
-        // If there's a valid spanning area, apply it
-        if (spanningBounds.Z > 0 && spanningBounds.W > 0)
+        var isSpanningValid = spanningBounds.Max.X > 0 && spanningBounds.Max.Y > 0;
+        if (isSpanningValid)
         {
             UpdateViewerSpanning(spanningBounds);
         }
