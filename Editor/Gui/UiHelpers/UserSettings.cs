@@ -41,8 +41,7 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         public GraphHoverModes HoverMode = GraphHoverModes.LastValue;
 
         // Projects
-
-        public string ProjectsFolder = FileLocations.DefaultProjectFolder;
+        public List<string> ProjectDirectories = [];
 
         // UI-Elements
         public bool ShowThumbnails = true;

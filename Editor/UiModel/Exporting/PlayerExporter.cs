@@ -40,8 +40,9 @@ internal static partial class PlayerExporter
         // traverse starting at output and collect everything
         var exportData = new ExportData();
         exportData.TryAddSymbol(symbol);
-
-        exportDir = Path.Combine(UserSettings.Config.ProjectsFolder, FileLocations.ExportFolderName, childUi.SymbolChild.ReadableName);
+        
+        // TODO: Make project directory selection smarter
+        exportDir = Path.Combine(UserSettings.Config.ProjectDirectories[0], FileLocations.ExportFolderName, childUi.SymbolChild.ReadableName);
 
         try
         {

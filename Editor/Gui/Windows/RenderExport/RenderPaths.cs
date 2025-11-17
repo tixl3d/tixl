@@ -20,8 +20,9 @@ internal static class RenderPaths
             return Path.Combine(project.Package.Folder, path);
         }
 
+        // TODO: Make project directory selection smarter
         return path.StartsWith('.')
-                   ? Path.Combine(UserSettings.Config.ProjectsFolder, FileLocations.RenderSubFolder, path)
+                   ? Path.Combine(UserSettings.Config.ProjectDirectories[0], FileLocations.RenderSubFolder, path)
                    : path;
     }
 

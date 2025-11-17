@@ -145,7 +145,7 @@ internal sealed class NewProjectDialog : ModalDialog
 
             
             FormInputs.SetIndentToLeft();
-            var projectFolder = System.IO.Path.Combine(UserSettings.Config.ProjectsFolder, _newProjectName);
+            var projectFolder = System.IO.Path.Combine(UserSettings.Config.ProjectDirectories[0], _newProjectName);
             FormInputs.AddHint($"""
                                 Creates a new project. Projects are used to group operators and resources. 
                                 You can find your project in "{projectFolder}".
@@ -181,7 +181,7 @@ internal sealed class NewProjectDialog : ModalDialog
                               $"Project namespace:{_newSubNamespace}\n" +
                               $"Project name:{_newProjectName}\n" +
                               $"Project full name:{fullProjectName}\n" +
-                              $"Projects directory:{UserSettings.Config.ProjectsFolder}\n" +
+                              $"Projects directory:{UserSettings.Config.ProjectDirectories[0]}\n" +
                               "--- \n" +
                               "## Additional details" +
                               "<!--Insert any relevant additional details here, if any-->\n\n";

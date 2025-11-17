@@ -271,15 +271,17 @@ internal sealed class SettingsWindow : Window
                     FormInputs.AddVerticalSpace();
 
                     FormInputs.AddSectionSubHeader("Project Settings");
-                    changed |= FormInputs.AddStringInput("Project Directory",
-                                                         ref UserSettings.Config.ProjectsFolder,
-                                                         "Folder",
-                                                         Directory.Exists(UserSettings.Config.ProjectsFolder) ? null : "Folder does not exists",
-                                                         """
-                                                         A writable directory for your projects.
-                                                         Changing it will require a restart!
-                                                         """,
-                                                         FileLocations.DefaultProjectFolder);
+                    var selectedProjectDirectory = string.Empty;
+                    var projectDirectories = UserSettings.Config.ProjectDirectories ?? new List<string>();
+                    changed |= FormInputs.AddEditableListBox(ref selectedProjectDirectory,
+                                                             projectDirectories,
+                                                             "Project Directories",
+                                                             Directory.Exists,
+                                                             "Folder does not exist",
+                                                             """
+                                                             List of top-level directories to look for projects in
+                                                             """
+                                                            );
                     
                     FormInputs.AddVerticalSpace();
                     changed |= FormInputs.AddStringInput("UserName",

@@ -137,6 +137,11 @@ internal static class Program
         // ReSharper disable once UnusedVariable
         var userSettings = new UserSettings(saveOnQuit: true);
         
+        if (UserSettings.Config.ProjectDirectories.Count == 0)
+        {
+            UserSettings.Config.ProjectDirectories.Add(FileLocations.DefaultProjectFolder);
+        }
+
         // ReSharper disable once UnusedVariable
         var projectSettings = new ProjectSettings(saveOnQuit: true);
 

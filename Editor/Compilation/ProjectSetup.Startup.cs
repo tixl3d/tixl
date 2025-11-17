@@ -163,7 +163,15 @@ internal static partial class ProjectSetup
         static IEnumerable<string> GetProjectDirectories(bool includeBuiltInAsProjects)
         {
             // ReSharper disable once JoinDeclarationAndInitializer
-            string[] topDirectories = [UserSettings.Config.ProjectsFolder];
+            string[] topDirectories = [];
+            
+            foreach (var projectPath in UserSettings.Config.ProjectDirectories)
+            {
+                if (!string.IsNullOrWhiteSpace(projectPath) && Directory.Exists(projectPath))
+                {
+                    topDirectories = topDirectories.Append(projectPath).ToArray();
+                }
+            }
 
             var projectSearchDirectories = topDirectories
                                           .Where(Directory.Exists)
