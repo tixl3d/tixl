@@ -1,5 +1,4 @@
-
-
+//Based on the FXAA 3.11 implementation from Timothy Lottes at NVIDIA
 cbuffer ParamConstants : register(b0)
 {
     float2 rcpFrame;
@@ -12,7 +11,6 @@ cbuffer Resolution : register(b1)
     float TargetHeight;
 }
 
-
 struct vsOutput
 {
     float4 position : SV_POSITION;
@@ -20,8 +18,8 @@ struct vsOutput
 };
 
 Texture2D<float4> Image : register(t0);
-SamplerState anisotropicSampler : register(s0);
-//#define rcpFrame float2(1.0/TargetWidth, 1.0/TargetHeight)
+SamplerState anisotropicSampler: register(s0);
+
 #define FxaaFloat3 float3
 #define FxaaFloat4 float4
 #define FxaaBool2Float(a) (a)
@@ -105,9 +103,9 @@ FXAA_SUBPIX_CAP - Insures fine detail is not completely removed.
                   7.0/8.0 - high amount of filtering
                   1.0 - no capping of sub-pixel aliasing removal
 ============================================================================*/
-
-
-
+#ifndef FXAA_PRESET
+    #define FXAA_PRESET 5
+#endif
 /*--------------------------------------------------------------------------*/
 #if (FXAA_PRESET == 0)
     #define FXAA_EDGE_THRESHOLD      (1.0/4.0)
@@ -624,5 +622,6 @@ float4 psMain(vsOutput input) : SV_TARGET
 	float alpha=1.0f;
 	if(KeepAlpha)alpha=Image.Sample(anisotropicSampler,uv).a;
 	return float4(FxaaPixelShader(
-		uv, tex, rcpFrame.xy), alpha); 
+		uv, tex, rcpFrame ), alpha); 
 }
+
