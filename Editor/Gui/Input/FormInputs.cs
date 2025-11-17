@@ -450,7 +450,7 @@ internal static class FormInputs
                  // Compute reserved right width same as per-item (X + + spacing) so plus aligns exactly
                  var styleBottom = ImGui.GetStyle();
                  var padXBottom = styleBottom.FramePadding.X * 2;
-                 var wXBottom = ImGui.CalcTextSize("X").X + padXBottom;
+                 var wXBottom = ImGui.CalcTextSize("×").X + padXBottom;
                  var wPlusBottom = ImGui.CalcTextSize("+").X + padXBottom;
                  var buttonSpacingBottom = styleBottom.ItemSpacing.X;
                  var reservedRightSame = wXBottom + wPlusBottom + buttonSpacingBottom;
@@ -1071,4 +1071,5 @@ internal static class FormInputs
     private static float _widthRatio = 1;
     private static float LeftParameterPadding => _paramIndent * T3Ui.UiScaleFactor;
     public static float ParameterSpacing => 20 * T3Ui.UiScaleFactor;
+
 }
