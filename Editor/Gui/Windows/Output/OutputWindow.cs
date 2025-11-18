@@ -161,9 +161,9 @@ internal sealed class OutputWindow : Window
 
         // Calculate available width
         var availableWidth = ImGui.GetWindowContentRegionMax().X - ImGui.GetWindowContentRegionMin().X;
-
+        var toolbarHeight = ImGui.GetTextLineHeight() + 22;
         // Begin a horizontally scrollable child region
-        ImGui.BeginChild("##toolbar_scroll", new Vector2(availableWidth, 40), false, ImGuiWindowFlags.HorizontalScrollbar);
+        ImGui.BeginChild("##toolbar_scroll", new Vector2(availableWidth, toolbarHeight), false, ImGuiWindowFlags.HorizontalScrollbar);
 
         Pinning.DrawPinning();
 
