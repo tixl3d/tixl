@@ -103,68 +103,73 @@ internal sealed class FloatListOutputUi : OutputUi<List<float>>
                     CustomComponents.StylizedText(text, Fonts.FontSmall, UiColors.TextMuted);
                 }
 
-                int columnIndex = 0;
-                var max = 0f;
-                var drawList = ImGui.GetWindowDrawList();
-
-                for (var index = 0; index < valueList.Count; index++)
+                ImGui.BeginChild("ScrollableList", new Vector2(0, 0), false,
+                                 ImGuiWindowFlags.AlwaysVerticalScrollbar | ImGuiWindowFlags.AlwaysHorizontalScrollbar);
                 {
+                    int columnIndex = 0;
+                    var max = 0f;
+                    var drawList = ImGui.GetWindowDrawList();
 
-                    if (columnIndex == 0)
+                    for (var index = 0; index < valueList.Count; index++)
                     {
-                        CustomComponents.StylizedText($"#{index}", Fonts.FontSmall, UiColors.TextMuted);
-                    }
 
-                    var v = valueList[index];
-                    var text = $"{v:0.00}";
-                    var textSize = ImGui.CalcTextSize(text);
-
-                    ImGui.SameLine(columnWidth * T3Ui.UiScaleFactor * columnIndex + indexColumnWidth);
-
-                    max = float.Max(max, MathF.Abs(v));
-
-                    // Draw Bar overlay
-                    var normalizedHeight = MathF.Abs( v / viewSettings.LastMax);
-                    if (!normalizedHeight._IsFinite())
-                        normalizedHeight = 0;
-
-                    if (MathF.Abs(normalizedHeight) > 0.00001)
-                    {
-                        if (v > 0)
+                        if (columnIndex == 0)
                         {
-                            var height = (int)(normalizedHeight * Fonts.FontSmall.FontSize - 0.5f);
-                            var pos = ImGui.GetCursorScreenPos() + new Vector2(4, Fonts.FontSmall.FontSize - height);
-                            var size = new Vector2(columnWidth - 2,
-                                                   height);
-                            drawList.AddRectFilled(pos,
-                                                   pos + size,
-                                                   UiColors.BackgroundActive.Fade(0.2f));
+                            CustomComponents.StylizedText($"#{index}", Fonts.FontSmall, UiColors.TextMuted);
                         }
-                        else
+
+                        var v = valueList[index];
+                        var text = $"{v:0.00}";
+                        var textSize = ImGui.CalcTextSize(text);
+
+                        ImGui.SameLine(columnWidth * T3Ui.UiScaleFactor * columnIndex + indexColumnWidth);
+
+                        max = float.Max(max, MathF.Abs(v));
+
+                        // Draw Bar overlay
+                        var normalizedHeight = MathF.Abs(v / viewSettings.LastMax);
+                        if (!normalizedHeight._IsFinite())
+                            normalizedHeight = 0;
+
+                        if (MathF.Abs(normalizedHeight) > 0.00001)
                         {
-                            var height = (int)(normalizedHeight * Fonts.FontSmall.FontSize + 0.5f);
-                            var pos = ImGui.GetCursorScreenPos() + new Vector2(4, 2);
-                            var size = new Vector2(columnWidth - 2, height);
-                            drawList.AddRectFilled(pos, pos + size, UiColors.StatusAttention.Fade(0.2f));
+                            if (v > 0)
+                            {
+                                var height = (int)(normalizedHeight * Fonts.FontSmall.FontSize - 0.5f);
+                                var pos = ImGui.GetCursorScreenPos() + new Vector2(4, Fonts.FontSmall.FontSize - height);
+                                var size = new Vector2(columnWidth - 2,
+                                                       height);
+                                drawList.AddRectFilled(pos,
+                                                       pos + size,
+                                                       UiColors.BackgroundActive.Fade(0.2f));
+                            }
+                            else
+                            {
+                                var height = (int)(normalizedHeight * Fonts.FontSmall.FontSize + 0.5f);
+                                var pos = ImGui.GetCursorScreenPos() + new Vector2(4, 2);
+                                var size = new Vector2(columnWidth - 2, height);
+                                drawList.AddRectFilled(pos, pos + size, UiColors.StatusAttention.Fade(0.2f));
+                            }
+                        }
+
+                        var opacity = (MathF.Pow(normalizedHeight, 0.3f) + 0.3f).Clamp(0, 1) * 0.8f;
+                        var color = v < 0 ? UiColors.StatusAttention : UiColors.Text;
+                        ImGui.PushStyleColor(ImGuiCol.Text, color.Fade(opacity).Rgba);
+                        ImGui.SameLine(columnWidth * T3Ui.UiScaleFactor * (columnIndex + 1) - textSize.X + indexColumnWidth);
+                        ImGui.TextUnformatted(text);
+                        ImGui.PopStyleColor();
+
+                        columnIndex++;
+
+                        if (columnIndex == UserSettings.Config.GridOutputColumnCount)
+                        {
+                            columnIndex = 0;
                         }
                     }
 
-                    var opacity = (MathF.Pow(normalizedHeight, 0.3f) + 0.3f).Clamp(0, 1) * 0.8f;
-                    var color = v < 0 ? UiColors.StatusAttention : UiColors.Text;
-                    ImGui.PushStyleColor(ImGuiCol.Text, color.Fade(opacity).Rgba);
-                    ImGui.SameLine(columnWidth * T3Ui.UiScaleFactor * (columnIndex + 1) - textSize.X + indexColumnWidth);
-                    ImGui.TextUnformatted(text);
-                    ImGui.PopStyleColor();
-
-                    columnIndex++;
-
-                    if (columnIndex == UserSettings.Config.GridOutputColumnCount)
-                    {
-                        columnIndex = 0;
-                    }
+                    viewSettings.LastMax = max;
                 }
-
-                viewSettings.LastMax = max;
+                ImGui.EndChild();
 
                 break;
             }
