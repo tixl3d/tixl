@@ -19,6 +19,11 @@ internal sealed class CombineToSymbolDialog : ModalDialog
         {
             var selectedChildUis = projectView.NodeSelection.GetSelectedChildUis().ToList();
             var selectedAnnotations = projectView.NodeSelection.GetSelectedNodes<Annotation>().ToList();
+
+            if (_projectToCopyTo == null)
+            {
+                EditableSymbolProject.TryGetEditableProjectOfNamespace(nameSpace, out _projectToCopyTo);
+            }
             
             _ = SymbolModificationInputs.DrawProjectDropdown(ref nameSpace, ref _projectToCopyTo);
 
