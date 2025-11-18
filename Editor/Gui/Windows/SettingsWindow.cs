@@ -284,6 +284,18 @@ internal sealed class SettingsWindow : Window
                                                             );
                     
                     FormInputs.AddVerticalSpace();
+                    FormInputs.SetIndentToLeft();
+                    changed |= FormInputs.AddCheckBox("Detect Projects on USB",
+                                                      ref UserSettings.Config.EnableUsbProjectDetection,
+                                                      """
+                                                      When enabled, connected USB drives will be monitored for projects in the "TiXLProjects" folder.
+                                                      This can be useful in cases where you want to work on projects from removable media.
+                                                      """,
+                                                      true
+                                                     );
+                    
+                    FormInputs.SetIndentToParameters();
+                    FormInputs.AddVerticalSpace();
                     changed |= FormInputs.AddStringInput("UserName",
                                                          ref UserSettings.Config.UserName,
                                                          "Nickname",

@@ -42,6 +42,7 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
 
         // Projects
         public List<string> ProjectDirectories = [];
+        public bool EnableUsbProjectDetection = true;
 
         // UI-Elements
         public bool ShowThumbnails = true;
