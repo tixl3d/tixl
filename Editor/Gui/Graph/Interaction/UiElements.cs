@@ -1,4 +1,5 @@
-﻿using ImGuiNET;
+﻿using System.IO;
+using ImGuiNET;
 using T3.Core.SystemUi;
 using T3.Core.Utils;
 using T3.Editor.Gui.Graph.Window;
@@ -256,6 +257,20 @@ internal sealed class UiElements
                 var rootName = package.RootNamespace.Split(".")[^1];
                 if (isOpened)
                     rootName += " (loaded)";
+
+                var rootDir = Path.GetPathRoot(package.Folder);
+                var driveInfo = new DriveInfo(rootDir!);
+                var isOnRemovableMedia = driveInfo.DriveType == DriveType.Removable;
+
+                if (isOnRemovableMedia)
+                {
+                    // draw usb glyph
+                    var textSize = ImGui.CalcTextSize(rootName);
+                    var iconPadding = 4f * T3Ui.UiScaleFactor;
+                    var verticalOffset = (Fonts.FontBold.FontSize - Icons.FontSize) / 2f;
+                    var iconPos = min + new Vector2(20f + textSize.X + iconPadding, padding + verticalOffset);
+                    Icons.DrawIconAtScreenPosition(Icon.Usb, iconPos, dl, UiColors.TextMuted);
+                }
 
                 var y = padding;
                 var x = 20f;

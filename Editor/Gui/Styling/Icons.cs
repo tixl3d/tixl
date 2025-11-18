@@ -257,6 +257,7 @@ internal static class Icons
             new(Icon.RotateCounterClockwise, slotIndex: 125),
             new(Icon.RotateClockwise, slotIndex: 126),
             new(Icon.Stack, slotIndex: 127),
+            new(Icon.Usb, slotIndex: 128),
         };
 
     public static readonly string IconAtlasPath = Path.Combine(SharedResources.Directory, @"images\editor\t3-icons.png");
@@ -398,5 +399,6 @@ public enum Icon
     CameraSpeed,
     RenderAnimation,
     TixlLogo,
-    OpenExternally
+    OpenExternally,
+    Usb
 }
