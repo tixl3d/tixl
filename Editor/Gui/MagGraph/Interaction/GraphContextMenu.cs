@@ -1,4 +1,4 @@
-﻿using ImGuiNET;
+using ImGuiNET;
 using T3.Core.DataTypes;
 using T3.Core.SystemUi;
 using T3.Editor.Gui.Interaction;
@@ -362,6 +362,13 @@ internal static class GraphContextMenu
                     CoreUi.Instance.OpenWithDefaultApplication(exportDir);
                     break;
             }
+        }
+
+        ImGui.Separator();
+ 
+        if (ImGui.MenuItem("Copy Symbol Name to Clipboard", oneOpSelected))
+        {
+            ImGui.SetClipboardText("[" + $"{selectedChildUis[0].SymbolChild.ReadableName}" + "]");
         }
 
         // TODO: Clarify if required
