@@ -1,7 +1,7 @@
 namespace Lib.@string.list;
 
 [Guid("ef357e66-24e9-4f54-8d86-869db74602f4")]
-internal sealed class PickFromStringList : Instance<PickFromStringList>
+internal sealed class PickStringFromList : Instance<PickStringFromList>
 {
     [Output(Guid = "467bb46e-3391-48a7-b0eb-f7fd9d77b60f")]
     public readonly Slot<string> Selected = new();
@@ -10,7 +10,7 @@ internal sealed class PickFromStringList : Instance<PickFromStringList>
     public readonly Slot<int> Count = new();
 
         
-    public PickFromStringList()
+    public PickStringFromList()
     {
         Selected.UpdateAction += Update;
     }
@@ -18,29 +18,20 @@ internal sealed class PickFromStringList : Instance<PickFromStringList>
     private void Update(EvaluationContext context)
     {
         var list = Input.GetValue(context);
-        if (list == null)
-        { 
-            Selected.Value= string.Empty;
+        if (list == null || list.Count == 0)
+        {
+            Selected.Value = string.Empty;
             Count.Value = 0;
             return;
         }
 
-        var count = list.Count;
-        Count.Value = count;
-        if (count == 0)
-        {
-            Selected.Value = string.Empty;
-            return;
-        }
-            
-        if (count < 0)
-            count = -count;
+        Count.Value = list.Count;
 
-        var index = Index.GetValue(context) % count;
-        if (index >= 0 && index < list.Count)
-        {
-            Selected.Value = list[index];
-        }
+        var index = Index.GetValue(context) % list.Count;
+        if (index < 0)
+            index += list.Count;
+
+        Selected.Value = list[index];
     }
 
     [Input(Guid = "8d5e77a6-1ec4-4979-ad26-f7862049bce1")]
