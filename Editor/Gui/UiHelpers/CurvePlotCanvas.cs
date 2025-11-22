@@ -1,4 +1,4 @@
-﻿using ImGuiNET;
+using ImGuiNET;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.Windows.TimeLine.Raster;
@@ -48,7 +48,7 @@ internal sealed class CurvePlotCanvas
 
         if (!_paused)
         {
-            //_canvas.SetScopeToCanvasArea(new ImRect(0, min, 1, max), flipY: true);
+            _canvas.SetScopeToCanvasArea(new ImRect(0, min, 1, max), flipY: true);
             _lastValue = value;
         }
             
