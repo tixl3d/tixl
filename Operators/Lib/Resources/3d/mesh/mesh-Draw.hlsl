@@ -213,12 +213,11 @@ psOutput psMain(psInput pin) : SV_TARGET
     {
         discard;
     }
-
+    
+    float3 worldNormal = frag.N;
     // Output to color buffer (SV_Target0)
     output.Color = litColor;
-    
     // Output to normal buffer (SV_Target1)
-    float3 worldNormal = frag.N;
     output.Normal = float4(worldNormal, 1.0);
     
     return output;

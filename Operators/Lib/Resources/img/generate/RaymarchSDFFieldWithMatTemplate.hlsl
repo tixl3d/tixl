@@ -161,7 +161,8 @@ static float MAX_DIST = 300;
 
 struct PSOutput
 {
-    float4 color : SV_Target;
+    float4 color : SV_Target0;
+    float4 Normal : SV_Target1;
     float depth : SV_Depth;
 };
 
@@ -479,5 +480,6 @@ PSOutput psMain(vsOutput input)
 
     float viewZ = mul(float4(p, 1), WorldToCamera).z;
     result.depth = ComputeDepthFromViewZ(viewZ);
+    result.Normal = float4(normal, 1.0);
     return result;
 }

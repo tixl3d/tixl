@@ -24,6 +24,13 @@
       "Description": "In combination with [UseRenderTarget] this can be used for feedback effects."
     },
     {
+      "InputId": "3782e42e-6a36-4ba2-aaa2-3ee401a3cdf1"/*WithNormalBuffer*/,
+      "Position": {
+        "X": -100.96112,
+        "Y": 107.753784
+      }
+    },
+    {
       "InputId": "4da253b7-4953-439a-b03f-1d515a78bddf"/*Command*/,
       "Relevancy": "Required",
       "Position": {
@@ -109,6 +116,13 @@
       "Position": {
         "X": 29.03888,
         "Y": -97.246216
+      }
+    },
+    {
+      "OutputId": "1caefb48-d7fb-40c1-b5b5-c2cf5837dfa9"/*NormalBuffer*/,
+      "Position": {
+        "X": 29.03888,
+        "Y": 52.753784
       }
     }
   ],
