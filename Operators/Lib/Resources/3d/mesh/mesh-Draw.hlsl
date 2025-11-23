@@ -61,6 +61,12 @@ struct psInput
     float fog : VPOS;
 };
 
+struct psOutput
+{
+    float4 Color : SV_Target0;
+    float4 Normal : SV_Target1;
+};
+
 sampler WrappedSampler : register(s0);
 //sampler LinearSampler : register(s1);
 sampler ClampedSampler : register(s1);
@@ -179,8 +185,11 @@ float3 ComputeNormal(psInput pin, float3x3 tbnToWorld)
     return N;
 }
 
-float4 psMain(psInput pin) : SV_TARGET
+
+psOutput psMain(psInput pin) : SV_TARGET
 {
+    psOutput output;
+    
     float4 roughnessMetallicOcclusion = RSMOMap.Sample(WrappedSampler, pin.texCoord);
 
     frag.Roughness = saturate(roughnessMetallicOcclusion.x + Roughness);
@@ -198,9 +207,19 @@ float4 psMain(psInput pin) : SV_TARGET
     float4 litColor = ComputePbr();
 
     litColor.rgba *= GetField(float4(pin.worldPosition.xyz, 0)).rgba;
+    
+    // Alpha testing
     if (AlphaCutOff > 0 && litColor.a < AlphaCutOff)
     {
         discard;
     }
-    return litColor;
+
+    // Output to color buffer (SV_Target0)
+    output.Color = litColor;
+    
+    // Output to normal buffer (SV_Target1)
+    float3 worldNormal = frag.N;
+    output.Normal = float4(worldNormal, 1.0);
+    
+    return output;
 }
