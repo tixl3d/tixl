@@ -15,9 +15,6 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
     [Output(Guid = "8bb0b18f-4fad-4348-a4fa-95b40c4167a4")]
     public readonly Slot<Texture2D> DepthBuffer = new();
 
-    [Output(Guid = "152312A6-729B-49CB-9AC5-A63105694A6B")]
-    public readonly Slot<Texture2D> VelocityBuffer = new();
-
     [Output(Guid = "1CAEFB48-D7FB-40C1-B5B5-C2CF5837DFA9")]
     public readonly Slot<Texture2D> NormalBuffer = new();
 
@@ -218,8 +215,6 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
         DepthBuffer.DirtyFlag.Clear();
         NormalBuffer.Value = NormalTexture;
         NormalBuffer.DirtyFlag.Clear();
-
-        VelocityBuffer.DirtyFlag.Clear();
 
         _statsCount++;
         _statsCountPixels += size.Height * size.Width;
