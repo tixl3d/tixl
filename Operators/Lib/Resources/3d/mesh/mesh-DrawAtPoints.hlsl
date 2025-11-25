@@ -59,9 +59,6 @@ cbuffer FieldParams : register(b6)
     /*{FLOAT_PARAMS}*/
 };
 
-
-
-
 struct psInput
 {
     float2 texCoord : TEXCOORD;
@@ -70,6 +67,12 @@ struct psInput
     float3 worldPosition : POSITION;
     float3x3 tbnToWorld : TBASIS;
     float fog : VPOS;
+};
+
+struct psOutput
+{
+    float4 Color : SV_Target0;
+    float4 Normal : SV_Target1;
 };
 
 sampler WrappedSampler : register(s0);
@@ -195,8 +198,10 @@ float3 ComputeNormal(psInput pin, float3x3 tbnToWorld)
     return N;
 }
 
-float4 psMain(psInput pin) : SV_TARGET
+psOutput psMain(psInput pin) : SV_TARGET
 {
+    psOutput output;
+
     float4 roughnessMetallicOcclusion = RSMOMap.Sample(WrappedSampler, pin.texCoord);
 
     frag.Roughness = saturate(roughnessMetallicOcclusion.x + Roughness);
@@ -219,6 +224,10 @@ float4 psMain(psInput pin) : SV_TARGET
     {
         discard;
     }
-    return litColor;
 
+    output.Color = litColor;
+
+    output.Normal = float4 (frag.N,1);
+    
+    return output;
 }

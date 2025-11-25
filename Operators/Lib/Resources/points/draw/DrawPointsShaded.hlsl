@@ -82,6 +82,12 @@ struct psInput
     // float3x3 tbnToWorld : TBASIS;
 };
 
+struct psOutput
+{
+    float4 Color : SV_Target0;
+    float4 Normal : SV_Target1;
+};
+
 sampler WrappedSampler : register(s0);
 sampler ClampedSampler : register(s1);
 
@@ -174,8 +180,9 @@ psInput vsMain(uint id : SV_VertexID)
 
 static float3 LightPosition = float3(1, 2, 0);
 
-float4 psMain(psInput pin) : SV_TARGET
+psOutput psMain(psInput pin) : SV_TARGET
 {
+    psOutput output;
     // Sphere Shading...
     float2 p = pin.texCoord * float2(2.0, 2.0) - float2(1.0, 1.0);
     float d = dot(p, p);
@@ -208,5 +215,9 @@ float4 psMain(psInput pin) : SV_TARGET
     if (litColor.a < 0.04)
         discard;
 
-    return litColor;
+    output.Color = litColor;
+
+    output.Normal = float4 (frag.N,1);
+
+    return output;
 }
