@@ -1,3 +1,5 @@
+using T3.Core.Utils;
+
 namespace Lib.numbers.floats.logic;
 
 [Guid("0841cdd4-0106-4f4e-826b-8de23bb5b5f0")]
@@ -20,9 +22,7 @@ internal sealed class PickFloatFromList : Instance<PickFloatFromList>
             return;
         }
 
-        var index = Index.GetValue(context) % list.Count;
-        if (index < 0)
-            index += list.Count;
+        var index = Index.GetValue(context).Mod(list.Count);
 
         Selected.Value = list[index];
     }

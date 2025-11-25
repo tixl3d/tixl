@@ -1,3 +1,5 @@
+using T3.Core.Utils;
+
 namespace Lib.numbers.ints;
 
 [Guid("df218352-52ae-4d11-a0f1-24fce0964af5")]
@@ -20,9 +22,7 @@ internal sealed class PickIntFromList : Instance<PickIntFromList>
             return;
         }
 
-        var index = Index.GetValue(context) % list.Count;
-        if (index < 0)
-            index += list.Count;
+        var index = Index.GetValue(context).Mod(list.Count);
 
         Selected.Value = list[index];
     }

@@ -1,3 +1,5 @@
+using T3.Core.Utils;
+
 namespace Lib.@string.list;
 
 [Guid("ef357e66-24e9-4f54-8d86-869db74602f4")]
@@ -27,9 +29,7 @@ internal sealed class PickStringFromList : Instance<PickStringFromList>
 
         Count.Value = list.Count;
 
-        var index = Index.GetValue(context) % list.Count;
-        if (index < 0)
-            index += list.Count;
+        var index = Index.GetValue(context).Mod(list.Count);
 
         Selected.Value = list[index];
     }
