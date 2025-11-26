@@ -248,7 +248,7 @@ psInput vsMain(uint id : SV_VertexID)
     }
     else
     {
-        float3 axis = (cornerFactors + Offset) * 0.010 * float3(Stretch * textureAspect, 1);
+        float3 axis = (cornerFactors + Offset) * 0.010 * float3(Stretch * (UseScale > 0.5 ? p.Scale.xy : 1) * textureAspect, 1);
         float4 rotation = qMul(normalize(pRotation), qFromAngleAxis((adjustedRotate + 180 + RandomRotate * scatterForScale.x * Randomize) / 180 * PI, RotationAxis));
         axis = qRotateVec3(axis, rotation) * computedScale;
         output.position = mul(posInObject + float4(axis, 0), ObjectToClipSpace);
