@@ -82,6 +82,7 @@ public static class CompatibleMidiDeviceHandling
     private static readonly List<Type> _compatibleControllerTypes
         = new()
               {
+                  typeof(Apc40Mk1),
                   typeof(Apc40Mk2),
                   typeof(ApcMini),
                   typeof(ApcMiniMk2),
