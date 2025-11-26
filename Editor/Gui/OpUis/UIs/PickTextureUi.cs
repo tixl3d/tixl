@@ -56,29 +56,23 @@ internal static class PickTextureUi
         {
             // Calculate layout
             var margin = 4.0f * canvasScaleY;
-            var buttonSpacing = 5.0f * canvasScaleY;
+            var buttonSpacing = 6.0f * canvasScaleY;
             var workingRect = screenRect;
             workingRect.Expand(-margin);
 
-            // Reserve space for title
-            //var titleHeight = font.FontSize + 12.0f * canvasScaleY;
             var buttonAreaHeight = workingRect.GetHeight();
+            if (data.Index.HasInputConnections)
+            {
+                buttonAreaHeight = workingRect.GetHeight() - (35.0f * canvasScaleY);
+            }
             var buttonHeight = (buttonAreaHeight - (buttonSpacing * (connections.Count - 1))) / connections.Count;
             buttonHeight = Math.Max(16.0f * canvasScaleY, buttonHeight);
-
-            // Draw title
-            /*var titleText = !string.IsNullOrWhiteSpace(instance.SymbolChild.Name)
-                ? $"{instance.SymbolChild.Name}: {currentValue}"
-                : $"PickTexture: {currentValue}";*/
-
-            //var titlePos = workingRect.Min + new Vector2(margin*.5f, 2.0f * canvasScaleY);
-            //drawList.AddText(font, font.FontSize, titlePos, labelColor, titleText);
 
             // Draw buttons
             var buttonTop = workingRect.Min.Y;
             var buttonLeft = workingRect.Min.X;
             var buttonWidth = workingRect.GetWidth();
-            //buttonWidth -= 5.0f * canvasScaleY; // reserve space for the animated icon
+
             for (var i = 0; i < connections.Count; i++)
             {
                 var srcSlot = connections[i];
@@ -123,9 +117,7 @@ internal static class PickTextureUi
 
                 // Draw button background
                 drawList.AddRectFilled(buttonRect.Min, buttonRect.Max, buttonColor);
-                // drawList.AddRect(buttonRect.Min, buttonRect.Max, UiColors.Text, 0.0f, ImDrawFlags.None, 1.0f);
-              
-                
+           
                 // Draw button text (left-aligned)
                 var textPadding = 4.0f * canvasScaleY;
                 var textPos = new Vector2(buttonRect.Min.X + textPadding, buttonRect.GetCenter().Y - fontSize / 2);
@@ -139,7 +131,15 @@ internal static class PickTextureUi
                 }
 
                 // Draw multi-input region indicator
-                DrawMultiInputRegion(drawList, workingRect, connections.Count, canvasScaleY);
+                DrawMultiInputRegion(drawList, workingRect, buttonAreaHeight, canvasScaleY);
+            }
+            // Draw current index text if connected
+
+            if (data.Index.HasInputConnections)
+            {
+                var indexText = $"Index: {currentValue}";
+                var titlePos = new Vector2(workingRect.Min.X + 4.0f * canvasScaleY, workingRect.Min.Y + buttonAreaHeight + buttonSpacing*2);
+                drawList.AddText(font, fontSize, titlePos, labelColor, indexText);
             }
         }
         else
@@ -162,17 +162,17 @@ internal static class PickTextureUi
              | OpUi.CustomUiResult.PreventTooltip;
     }
 
-    private static void DrawMultiInputRegion(ImDrawListPtr drawList, ImRect workingRect, int connectionCount, float canvasScaleY)
+    private static void DrawMultiInputRegion(ImDrawListPtr drawList, ImRect workingRect, float regionHeight, float canvasScaleY)
     {
         var color = UiColors.BackgroundActive;
 
         var regionLeft = workingRect.Min.X - 4.0f * canvasScaleY;
         var regionTop = workingRect.Min.Y - 4.0f * canvasScaleY;
         var regionWidth = 4.0f * canvasScaleY;
-        var regionHeight = workingRect.GetHeight() + 8 * canvasScaleY;
+        regionHeight += 8 * canvasScaleY;
 
         // Define quad points directly without offsets
-        var p1 = new Vector2(regionLeft, regionTop);                    // Top-left
+        var p1 = new Vector2(regionLeft, regionTop );                    // Top-left
         var p2 = new Vector2(regionLeft + regionWidth, regionTop + regionWidth); // Top-right (diagonal)
         var p3 = new Vector2(regionLeft + regionWidth, regionTop + regionHeight - regionWidth); // Bottom-right (diagonal)
         var p4 = new Vector2(regionLeft, regionTop + regionHeight);     // Bottom-left
