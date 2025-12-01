@@ -59,6 +59,12 @@ internal sealed class LinearSamplePointAttributes : Instance<LinearSamplePointAt
     [Input(Guid = "743616e2-817a-4b39-a3b1-58b58f3465b2")]
     public readonly InputSlot<Texture2D> Texture = new();
 
+        [Input(Guid = "b14c547a-4dfb-487f-bb03-cc1aa0219175")]
+        public readonly InputSlot<float> Strength = new InputSlot<float>();
+
+        [Input(Guid = "0a5c4f07-53d5-4329-8cb4-4b615e243df9", MappedType = typeof(FModes))]
+        public readonly InputSlot<int> StrengthFactor = new InputSlot<int>();
+
 
     private enum Attributes
     {
@@ -66,13 +72,14 @@ internal sealed class LinearSamplePointAttributes : Instance<LinearSamplePointAt
         For_X = 1,
         For_Y =2,
         For_Z =3,
-        For_W =4,
+        For_F1 =4,
         Rotate_X =5,
         Rotate_Y =6 ,
         Rotate_Z =7,
         Stretch_X = 8,
         Stretch_Y = 9,
         Stretch_Z = 10,
+        For_F2 =11,
     }
 
     private enum Modes
@@ -85,5 +92,12 @@ internal sealed class LinearSamplePointAttributes : Instance<LinearSamplePointAt
     {
         Object,
         Point,
+    }
+    
+    private enum FModes
+    {
+        None,
+        F1,
+        F2,
     }
 }

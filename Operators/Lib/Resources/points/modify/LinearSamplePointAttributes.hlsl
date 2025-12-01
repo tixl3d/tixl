@@ -13,31 +13,38 @@ static const float4 FactorsForPositionAndW[] =
 };
 
 
-cbuffer Params : register(b0)
+cbuffer FloatParams : register(b0)
 {
-    float L;
     float LFactor;
     float LOffset;
 
-    float R;
     float RFactor;
     float ROffset;
 
-    float G;
     float GFactor;
     float GOffset;
 
-    float B;
     float BFactor;
     float BOffset;
 
-    float Mode;
-    float TranslationSpace;
-    float RotationSpace;
+    float Strength;
 }
 
-StructuredBuffer<LegacyPoint> Points : t0;
-RWStructuredBuffer<LegacyPoint> ResultPoints : u0; // output
+cbuffer IntParams : register(b1)
+{
+    int L;
+    int R;
+    int G;
+    int B;
+    int Mode;
+    int TranslationSpace;
+    int RotationSpace;
+    int StrengthFactor;
+}
+
+
+StructuredBuffer<Point> Points : t0;
+RWStructuredBuffer<Point> ResultPoints : u0; // output
 
 Texture2D<float4> inputTexture : register(t1);
 sampler texSampler : register(s0);
@@ -52,7 +59,13 @@ sampler texSampler : register(s0);
     if (i.x >= pointCount)
         return;
 
-    LegacyPoint p = Points[index];
+    Point p = Points[index];
+    
+    float strength = Strength * (StrengthFactor == 0
+                                     ? 1
+                                 : (StrengthFactor == 1) ? p.FX1
+                                                         : p.FX2);
+
 
     float divider = pointCount < 2 ? 1 : (pointCount - 0);
     float f = (float)i.x / divider;
@@ -104,8 +117,7 @@ sampler texSampler : register(s0);
     }
 
     rot2 = normalize(rot2);
-    p.Rotation = qMul(rot, rot2);
-
+    p.Rotation = qSlerp(p.Rotation,  qMul(rot, rot2), strength);
 
     // Stretch
     //float3 stretch = p.Stretch;
@@ -128,9 +140,9 @@ sampler texSampler : register(s0);
 
     
     float3 stretchOffset = Mode < 0.5 ? stretchFactor
-                               : float3(stretchFactor) * p.Stretch;
+                               : float3(stretchFactor) * p.Scale;
 
-    p.Stretch *= stretchOffset;
+    p.Scale *= lerp(1, stretchOffset, strength);
 
     // Position
     float4 ff = FactorsForPositionAndW[(uint)clamp(L, 0, 5.1)] * (gray * LFactor + LOffset) +
@@ -152,10 +164,28 @@ sampler texSampler : register(s0);
     {
         newPos = qRotateVec3(newPos, rot2);
     }
-    p.Position = newPos;
+    p.Position = lerp(p.Position, newPos, strength);
 
-    p.W = Mode < 0.5 ? (p.W + ff.w)
-                                       : (p.W * (1 + ff.w));
+
+    float fx1Factor =
+        (R == 4 ? (c.r * RFactor + ROffset) : 0) +
+        (G == 4 ? (c.g * GFactor + GOffset) : 0) +
+        (B == 4 ? (c.b * BFactor + BOffset) : 0) +
+        (L == 4 ? (gray * LFactor + LOffset) : 0);
+
+    p.FX1 += fx1Factor;
+    p.FX1 = lerp(p.FX1, Mode == 0 ? (p.FX1 + fx1Factor)
+                                    : (p.FX1 * (1 + fx1Factor)), strength);
+
+    float fx2Factor =
+        (R == 11 ? (c.r * RFactor + ROffset) : 0) +
+        (G == 11 ? (c.g * GFactor + GOffset) : 0) +
+        (B == 11 ? (c.b * BFactor + BOffset) : 0) +
+        (L == 11 ? (gray * LFactor + LOffset) : 0);
+
+    //p.FX2 += fx2Factor;
+    p.FX2 = lerp(p.FX2,  Mode == 0 ? (p.FX2 + fx2Factor)
+                                    : (p.FX2 * (1 + fx2Factor)), strength);
 
     ResultPoints[index] = p;
 }
