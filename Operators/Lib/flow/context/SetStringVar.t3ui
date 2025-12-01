@@ -1,0 +1,45 @@
+{
+  "Id": "ce9de603-46c6-493b-b9d4-626f69fa9f44"/*SetStringVar*/,
+  "Description": "",
+  "InputUis": [
+    {
+      "InputId": "0d8ab5a7-5178-4adc-82b2-a73fcc5b52d8"/*SubGraph*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "2a785e9f-696b-4a85-8656-aa3638559bf2"/*FloatValue*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      }
+    },
+    {
+      "InputId": "605c45f5-b7d5-4e52-bd2e-89f38e5e6f7e"/*VariableName*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Usage": "Default"
+    },
+    {
+      "InputId": "72623619-1288-4ccc-b343-426acb9287e2"/*ClearAfterExecution*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "9aff5db6-f137-4c3c-b765-b61d45ba820b"/*Output*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

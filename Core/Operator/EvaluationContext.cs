@@ -155,7 +155,7 @@ public sealed class EvaluationContext
     public Dictionary<string, bool> BoolVariables { get; } = new();
     public Dictionary<string, int> IntVariables { get; } = new();
     public Dictionary<string, float> FloatVariables { get; } = new();
-    
+    public Dictionary<string, string> StringVariables { get; } = new();
     /// <summary>
     /// Used to store objects different from float and int
     /// </summary>

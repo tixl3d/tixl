@@ -1,0 +1,15 @@
+{
+  "Id": "a21368fe-ae46-4945-9187-12cc97ea0345"/*GetStringVar*/,
+  "Inputs": [
+    {
+      "Id": "810792bf-8741-4e35-a57e-563f9b08f6aa"/*FallbackDefault*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "a7d3fb83-b0d3-4a33-b33b-5dfdc26533a3"/*VariableName*/,
+      "DefaultValue": "s"
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}
