@@ -15,22 +15,14 @@ internal sealed class HasValueDecreased : Instance<HasValueDecreased>
     private void Update(EvaluationContext context)
     {
         var v = Value.GetValue(context);
-            
-        var hasDecreased = v < _lastValue + Threshold.GetValue(context);
-        if (hasDecreased != _lastDecrease)
-        {
-            _lastDecrease = hasDecreased;
-            HasDecreased.Value = hasDecreased;
-        }
-        else
-        {
-            HasDecreased.Value = false;
-        }
+        var decrease = v < _lastValue - Threshold.GetValue(context);
+        var hasDecreased = decrease; 
+        HasDecreased.Value = hasDecreased;
+
         _lastValue = v;
     }
-
+    
     private float _lastValue = 0;
-    private bool _lastDecrease;
         
     [Input(Guid = "0ce24e8e-7d35-41a1-85a5-0c55d4247a90")]
     public readonly InputSlot<float> Value = new();
