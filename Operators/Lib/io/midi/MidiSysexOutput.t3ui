@@ -1,0 +1,40 @@
+{
+  "Id": "78cadb24-5a77-41e2-908f-01d61140c769"/*MidiSysexOutput*/,
+  "Description": "",
+  "InputUis": [
+    {
+      "InputId": "611e8c42-9954-421c-8071-1e959478c8fe"/*TriggerSend*/,
+      "Position": {
+        "X": 197.0,
+        "Y": 598.0
+      },
+      "Description": "Allows the user to send a midi sysex commqand to the device of their choice\n\nThis is useful in the case of the APC40 to change device modes.\n\nThis can also "
+    },
+    {
+      "InputId": "d7189d4a-b6c7-4d4f-9cee-1c37ed55b4e5"/*Device*/,
+      "Position": {
+        "X": 197.0,
+        "Y": 508.0
+      },
+      "Usage": "CustomDropdown"
+    },
+    {
+      "InputId": "e054dece-d5ce-4675-9e24-d29e616ce7de"/*SysexString*/,
+      "Position": {
+        "X": 197.0,
+        "Y": 583.0
+      },
+      "Usage": "Default"
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "b996a54f-0fe7-4eb3-8f29-66938eeb113e"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    }
+  ]
+}

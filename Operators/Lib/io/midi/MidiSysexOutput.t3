@@ -1,0 +1,19 @@
+{
+  "Id": "78cadb24-5a77-41e2-908f-01d61140c769"/*MidiSysexOutput*/,
+  "Inputs": [
+    {
+      "Id": "611e8c42-9954-421c-8071-1e959478c8fe"/*TriggerSend*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "d7189d4a-b6c7-4d4f-9cee-1c37ed55b4e5"/*Device*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "e054dece-d5ce-4675-9e24-d29e616ce7de"/*SysexString*/,
+      "DefaultValue": ""
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}
