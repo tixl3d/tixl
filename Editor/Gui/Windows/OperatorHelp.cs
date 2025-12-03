@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System.IO;
 using System.Text.RegularExpressions;
 using ImGuiNET;
@@ -301,7 +301,7 @@ internal sealed class OperatorHelp
             ImGui.SameLine();
             ImGui.PushStyleColor(ImGuiCol.Button, Color.Transparent.Rgba);
 
-            foreach (var (title, description, url, icon) in _cachedLinks)
+            foreach (var (title, url, description, icon) in _cachedLinks)
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, UiColors.StatusAutomated.Rgba);
                 bool clicked;
@@ -318,8 +318,7 @@ internal sealed class OperatorHelp
                 }
 
                 ImGui.PopStyleColor();
-                CustomComponents.TooltipForLastItem(string.IsNullOrEmpty(description) ? description : "Open link in browser",
-                                                    url);
+                CustomComponents.TooltipForLastItem(string.IsNullOrEmpty(description) ? _openLink : description + "\n" + _openLink, url);
 
                 if (clicked)
                     CoreUi.Instance.OpenWithDefaultApplication(url);
@@ -374,4 +373,5 @@ internal sealed class OperatorHelp
     // public bool IsActive => _isDocumentationActive;
     // private bool _isDocumentationActive = false;
     private static float _timeSinceTooltipHovered = 0;
+    private static readonly string _openLink = "Open link in browser:";
 }
