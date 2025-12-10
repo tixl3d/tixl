@@ -47,7 +47,7 @@ internal sealed class SymbolFilter
     public bool OnlyMultiInputs { get; set; }
     public List<SymbolUi> MatchingSymbolUis { get; private set; } = [];
 
-    public void UpdateIfNecessary(NodeSelection? selection, bool forceUpdate = false, int limit = 30)
+    public void UpdateIfNecessary(NodeSelection? selection, bool forceUpdate = false, int limit = 0)
     {
         _needsUpdate |= forceUpdate;
         _needsUpdate |= UpdateFilters(SearchString,
@@ -79,7 +79,9 @@ internal sealed class SymbolFilter
         if (twoPartSearchResult.Success)
         {
             symbolFilter = twoPartSearchResult.Groups[1].Value;
+            //Log.Debug("Symbol Filter: " + symbolFilter);
             presetFilter = twoPartSearchResult.Groups[2].Value;
+            //Log.Debug("Preset Filter: " + presetFilter);
         }
         else
         {
@@ -91,6 +93,7 @@ internal sealed class SymbolFilter
         try
         {
             searchRegex = new Regex(pattern, RegexOptions.IgnoreCase);
+            //Log.Debug("Pattern: " + pattern);
         }
         catch (ArgumentException)
         {
@@ -160,10 +163,22 @@ internal sealed class SymbolFilter
             composition = ProjectView.Focused.CompositionInstance;
         }
 
-        MatchingSymbolUis = MatchingSymbolUis.OrderBy(s => ComputeRelevancy(s, _symbolFilterString, currentProject, composition))
-                                             .Reverse()
-                                             .Take(limit)
-                                             .ToList();
+        if (limit == 0)
+        {
+            MatchingSymbolUis = MatchingSymbolUis.OrderBy(s => ComputeRelevancy(s, _symbolFilterString, currentProject, composition))
+                                                 .Reverse()
+                                                 .Where(s => ComputeRelevancy(s, _symbolFilterString, currentProject, composition) >= 10f) // Ensure there is some relevancy to the results
+                                                 .ToList();
+        }
+        else
+        {
+            MatchingSymbolUis = MatchingSymbolUis.OrderBy(s => ComputeRelevancy(s, _symbolFilterString, currentProject, composition))
+                                                 .Reverse()
+                                                 .Take(limit)
+                                                 .Where(s => ComputeRelevancy(s, _symbolFilterString, currentProject, composition) >= 10f) // Ensure there is some relevancy to the results
+                                                 .ToList();
+        }
+
 
         // Debug log to help tweaking relevancy factors
         // foreach (var s in MatchingSymbolUis)
@@ -198,8 +213,8 @@ internal sealed class SymbolFilter
 
         if (symbolName.Equals(query, StringComparison.InvariantCultureIgnoreCase))
         {
-            _logList.Add("Equals: x5");
-            relevancy *= 5;
+            _logList.Add("Equals: x8.6");
+            relevancy *= 8.6f;
         }
 
         if (symbolName.StartsWith(query, StringComparison.InvariantCultureIgnoreCase))
@@ -211,8 +226,8 @@ internal sealed class SymbolFilter
         {
             if (symbolName.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0)
             {
-                _logList.Add("Contains: x3");
-                relevancy *= 3f;
+                _logList.Add("Contains: x8.4");
+                relevancy *= 8.4f;
             }
         }
 
@@ -223,42 +238,32 @@ internal sealed class SymbolFilter
             relevancy *= 1.01f;
         }
 
-
-        // Add usage count (the following statement is slow and should be cached)
-        var count = SymbolAnalysis.InformationForSymbolIds.TryGetValue(symbol.Id, out var info)
-                        ? info.UsageCount
-                        : 0;
-
-        //symbolUi.Symbol.InstancesOfSymbol.Select(instance =>instance.SymbolChildId).Distinct().Count();
-        var totalUsageCountBoost = (float)(1 + (500.0 * (float)count / SymbolAnalysis.TotalUsageCount));
-        if (count > 0)
-        {
-            _logList.Add($"Used {count}: {totalUsageCountBoost:0.0}");
-        }
-        relevancy *= totalUsageCountBoost;
-
+        
         // Bump if characters match upper characters
         // e.g. "ds" matches "DrawState"
         {
             var pascalCaseMatch = true;
-            var maxIndex = 0;
+            
             var uppercaseQuery = query.ToUpper();
+            var maxIndex = 0;
+
             for (var charIndex = 0; charIndex < uppercaseQuery.Length; charIndex++)
             {
                 var c = uppercaseQuery[charIndex];
-                var indexInName = symbolName.IndexOf(c);
-                if (indexInName < maxIndex)
+                var indexInName = symbolName.IndexOf(c, maxIndex);
+
+                if (indexInName == -1)
                 {
                     pascalCaseMatch = false;
                     break;
                 }
 
-                maxIndex = indexInName;
+                maxIndex = indexInName + 1; // Move past the current character for the next search
             }
 
             if (pascalCaseMatch)
             {
-                _logList.Add($"PascalMath: x2");
+                _logList.Add($"PascalMatch: x4");
                 relevancy *= 4f;
             }
         }
@@ -274,7 +279,7 @@ internal sealed class SymbolFilter
 
             if (symbol.Namespace.StartsWith("examples"))
             {
-                _logList.Add($"Examples x2");
+                _logList.Add($"Examples: x2");
                 relevancy *= 2f;
             }
         }
@@ -295,14 +300,14 @@ internal sealed class SymbolFilter
             // mega-boost symbols from the same package as the current project
             if (currentProject == symbolPackage)
             {
-                _logList.Add($"Proj x2");
+                _logList.Add($"Project: x2");
                 relevancy *= 2f;
             }
 
             // or boost symbols from related namespaces
             else if (symbol.Namespace!.StartsWith(currentProject.RootNamespace))
             {
-                _logList.Add($"RotName x1.9");
+                _logList.Add($"RootName: x1.9");
                 relevancy *= 1.9f;
             }
         }
@@ -315,7 +320,7 @@ internal sealed class SymbolFilter
             // boost symbols from the same package as composition, or from related namespaces
             if (compositionPackage.Symbols.ContainsKey(symbolId) || symbolPackage.RootNamespace.StartsWith(compositionPackage.RootNamespace))
             {
-                _logList.Add($"package: x1.9");
+                _logList.Add($"Package: x1.9");
                 relevancy *= 1.9f;
             }
         }
@@ -323,7 +328,7 @@ internal sealed class SymbolFilter
         // boost user symbols
         if (symbolPackage is EditableSymbolProject)
         {
-            _logList.Add($"Editable x1.9");
+            _logList.Add($"Editable: x1.9");
             relevancy *= 1.9f;
         }
 
@@ -345,8 +350,26 @@ internal sealed class SymbolFilter
         if (matchingConnectionsCount > 0)
         {
             var matchingInputsBoost = 1 + MathF.Pow(matchingConnectionsCount, 0.33f) * 4f;
-            _logList.Add($"matchingInputs x{matchingInputsBoost}");
+            _logList.Add($"matchingInputs: x{matchingInputsBoost}");
             relevancy *= matchingInputsBoost;
+        }
+
+        // If the symbol is at least slightly relevant after all checks, we boost it by usage amount
+        if (relevancy > 10f)
+        {
+            // Add usage count (the following statement is slow and should be cached)
+            var count = SymbolAnalysis.InformationForSymbolIds.TryGetValue(symbol.Id, out var info)
+                            ? info.UsageCount
+                            : 0;
+
+            //symbolUi.Symbol.InstancesOfSymbol.Select(instance =>instance.SymbolChildId).Distinct().Count();
+            
+            var totalUsageCountBoost = (float)(1 + (500.0 * (float)count / SymbolAnalysis.TotalUsageCount));
+            if (count > 0)
+            {
+                _logList.Add($"Used {count}: {totalUsageCountBoost:0.0}");
+            }
+            relevancy *= totalUsageCountBoost;
         }
 
         if (logOutput)
