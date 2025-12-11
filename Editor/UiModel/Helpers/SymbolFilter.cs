@@ -247,11 +247,8 @@ internal sealed class SymbolFilter
             var uppercaseQuery = query.ToUpper();
             var maxIndex = 0;
 
-            for (var charIndex = 0; charIndex < uppercaseQuery.Length; charIndex++)
+            foreach (var indexInName in uppercaseQuery.Select(c => symbolName.IndexOf(c, maxIndex)))
             {
-                var c = uppercaseQuery[charIndex];
-                var indexInName = symbolName.IndexOf(c, maxIndex);
-
                 if (indexInName == -1)
                 {
                     pascalCaseMatch = false;
