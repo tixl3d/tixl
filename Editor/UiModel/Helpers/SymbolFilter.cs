@@ -124,13 +124,13 @@ internal sealed class SymbolFilter
                  if (symbolUiSymbol.InputDefinitions.Count == 0 || symbolUiSymbol.InputDefinitions[0].ValueType != _inputType)
                      continue;
 
-                var matchingInputDef = symbolUiSymbol.GetInputMatchingType(FilterInputType);
+                 var matchingInputDef = symbolUiSymbol.GetInputMatchingType(FilterInputType);
                 
-                if (matchingInputDef == null)
-                    continue;
+                 if (matchingInputDef == null)
+                     continue;
 
-                if (OnlyMultiInputs && !symbolUiSymbol.InputDefinitions[0].IsMultiInput)
-                    continue;
+                 if (OnlyMultiInputs && !symbolUiSymbol.InputDefinitions[0].IsMultiInput)
+                     continue;
             }
 
             if (_outputType != null)
