@@ -79,9 +79,7 @@ internal sealed class SymbolFilter
         if (twoPartSearchResult.Success)
         {
             symbolFilter = twoPartSearchResult.Groups[1].Value;
-            //Log.Debug("Symbol Filter: " + symbolFilter);
             presetFilter = twoPartSearchResult.Groups[2].Value;
-            //Log.Debug("Preset Filter: " + presetFilter);
         }
         else
         {
@@ -93,7 +91,6 @@ internal sealed class SymbolFilter
         try
         {
             searchRegex = new Regex(pattern, RegexOptions.IgnoreCase);
-            //Log.Debug("Pattern: " + pattern);
         }
         catch (ArgumentException)
         {
@@ -124,13 +121,11 @@ internal sealed class SymbolFilter
 
             if (_inputType != null)
             {
-                // if (symbolUiSymbol.InputDefinitions.Count == 0 || symbolUiSymbol.InputDefinitions[0].ValueType != _inputType)
-                //     continue;
-
-                if (symbolUiSymbol.InputDefinitions.Count == 0)
-                    continue;
+                 if (symbolUiSymbol.InputDefinitions.Count == 0 || symbolUiSymbol.InputDefinitions[0].ValueType != _inputType)
+                     continue;
 
                 var matchingInputDef = symbolUiSymbol.GetInputMatchingType(FilterInputType);
+                
                 if (matchingInputDef == null)
                     continue;
 
@@ -141,6 +136,7 @@ internal sealed class SymbolFilter
             if (_outputType != null)
             {
                 var matchingOutputDef = symbolUiSymbol.GetOutputMatchingType(FilterOutputType);
+                
                 if (matchingOutputDef == null)
                     continue;
             }
@@ -329,8 +325,8 @@ internal sealed class SymbolFilter
             relevancy *= 1.9f;
         }
 
-        // Bump operators with matching connections 
-        var matchingConnectionsCount = 0;
+        // Bump operators with matching input connections 
+        var matchingInputConnectionsCount = 0;
         if (targetInputHash != 0)
         {
             foreach (var outputDefinition in symbol.OutputDefinitions.FindAll(o => o.ValueType == filterOutputType))
@@ -339,14 +335,14 @@ internal sealed class SymbolFilter
 
                 if (SymbolAnalysis.ConnectionHashCounts.TryGetValue(connectionHash, out var connectionCount))
                 {
-                    matchingConnectionsCount += connectionCount;
+                    matchingInputConnectionsCount += connectionCount;
                 }
             }
         }
 
-        if (matchingConnectionsCount > 0)
+        if (matchingInputConnectionsCount > 0)
         {
-            var matchingInputsBoost = 1 + MathF.Pow(matchingConnectionsCount, 0.33f) * 4f;
+            var matchingInputsBoost = 1 + MathF.Pow(matchingInputConnectionsCount, 0.33f) * 4f;
             _logList.Add($"matchingInputs: x{matchingInputsBoost}");
             relevancy *= matchingInputsBoost;
         }
