@@ -280,10 +280,12 @@ internal sealed class _SpecularPrefilter : Instance<_SpecularPrefilter>
             
         if (_prevRenderTargetViews.Length > 0)
             deviceContext.OutputMerger.SetRenderTargets(_prevDepthStencilView, _prevRenderTargetViews);
-            
+
         foreach (var rtv in _prevRenderTargetViews)
-            rtv.Dispose();            
-            
+        {
+            rtv.Dispose();
+        }
+
         Utilities.Dispose(ref _prevDepthStencilView);
     }        
 
