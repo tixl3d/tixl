@@ -283,7 +283,7 @@ internal sealed class _SpecularPrefilter : Instance<_SpecularPrefilter>
 
         foreach (var rtv in _prevRenderTargetViews)
         {
-            rtv.Dispose();
+            rtv?.Dispose();
         }
 
         Utilities.Dispose(ref _prevDepthStencilView);
