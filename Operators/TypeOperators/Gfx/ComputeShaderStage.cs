@@ -51,22 +51,22 @@ public sealed class ComputeShaderStage : Instance<ComputeShaderStage>, IRenderSt
         csStage.SetSamplers(0, _samplerStates);
         if (_uavs.Length == 4)
         {
-            csStage.SetUnorderedAccessViews(0, _uavs, new[] { -1, 0, -1, -1 });
+            csStage.SetUnorderedAccessViews(0, _uavs, [-1, 0, -1, -1]);
         }
         else if (_uavs.Length == 1)
         {
             if (counter == -1)
                 csStage.SetUnorderedAccessView(0, _uavs[0]);
             else
-                csStage.SetUnorderedAccessViews(0, _uavs, new[] { counter });
+                csStage.SetUnorderedAccessViews(0, _uavs, [counter]);
         }
         else if (_uavs.Length == 2)
         {
-            csStage.SetUnorderedAccessViews(0, _uavs, new[] { 0, 0 });
+            csStage.SetUnorderedAccessViews(0, _uavs, [0, 0]);
         }
         else if (_uavs.Length == 3)
         {
-            csStage.SetUnorderedAccessViews(0, _uavs, new[] { counter, -1, -1 });
+            csStage.SetUnorderedAccessViews(0, _uavs, [counter, -1, -1]);
         }
         else
         {
@@ -84,7 +84,10 @@ public sealed class ComputeShaderStage : Instance<ComputeShaderStage>, IRenderSt
 
         foreach (var rtv in _prevRenderTargetViews)
         {
-            rtv?.Dispose();            
+            if (rtv == null || rtv.IsDisposed)
+                continue;
+            
+            rtv.Dispose();            
         }
             
         Utilities.Dispose(ref _prevDepthStencilView);

@@ -1,3 +1,5 @@
+#nullable enable
+using System.Diagnostics;
 using SharpDX;
 using SharpDX.Direct3D11;
 using SharpDX.Mathematics.Interop;
@@ -14,7 +16,7 @@ namespace Lib.image.fx._;
 internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
 {
     [Output(Guid = "300c319d-86e8-47ce-9597-e81c5a008c8f")]
-    public readonly Slot<Texture2D> OutputTexture = new();
+    public readonly Slot<Texture2D?> OutputTexture = new();
 
     public _ExecuteBloomPasses()
     {
@@ -50,7 +52,7 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
         var linearSampler = LinearSampler.GetValue(context);
         var sourceSrv = SourceTextureSrv.GetValue(context);
         var colorWeights = ColorWeights.GetValue(context);
-        var colorGradient = BlurGradient.GetValue(context); 
+        var colorGradient = BlurGradient.GetValue(context);
 
         var threshold = Threshold.GetValue(context);
         var intensity = Intensity.GetValue(context);
@@ -91,11 +93,14 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
             OutputTexture.Value = sourceTexture;
             return;
         }
+        
+        Debug.Assert(_brightPassTarget != null);
+        Debug.Assert(_compositeTarget != null);
 
         // --- Update Level Intensities if Shape or Levels changed ---
         if (gainAndBias != _lastGainAndBias || levels != _lastLevels || _levelIntensities.Count != levels) // Check count too for safety
         {
-            CalculateDistribution(gainAndBias, levels, ref  _levelIntensities);
+            CalculateDistribution(gainAndBias, levels, ref _levelIntensities);
             _lastGainAndBias = gainAndBias;
         }
 
@@ -120,7 +125,6 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
 
         device.ImmediateContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
 
-
         // --- Pipeline Steps ---
 
         // 1. Bright Pass
@@ -135,7 +139,7 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
             deviceContext.PixelShader.SetSampler(0, linearSampler);
             deviceContext.PixelShader.SetShaderResource(0, sourceSrv);
             _thresholdParams.Threshold = threshold;
-            _thresholdParams.ColorWeights = new Vector3(colorWeights.X, colorWeights.Y,colorWeights.Z);
+            _thresholdParams.ColorWeights = new Vector3(colorWeights.X, colorWeights.Y, colorWeights.Z);
 
             ResourceManager.SetupConstBuffer(_thresholdParams, ref _thresholdParamsBuffer);
             deviceContext.PixelShader.SetConstantBuffer(0, _thresholdParamsBuffer);
@@ -153,6 +157,10 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
             // ... (lastLevelSrv = _blurTargetsA[level].SRV) ...
             var targetSetA = _blurTargetsA[level];
             var targetSetB = _blurTargetsB[level];
+
+            if (targetSetA == null || targetSetB == null)
+                continue;
+            
             var levelResolution = targetSetA.Resolution;
             // Downsample
             {
@@ -226,6 +234,8 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
             for (var level = levels - 1; level >= 0; --level)
             {
                 var sourceSet = _blurTargetsA[level]; // Blurred result for this level
+                if (sourceSet == null)
+                    continue;
 
                 // Calculate final intensity for this specific pass
                 var normalizedLevelIntensity = _levelIntensities[level]; // Get precalculated value
@@ -241,7 +251,7 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
                     var k = levels <= 1 ? 0.5f : (float)level / (levels - 1);
                     _compositeParamsData.PassColor = colorGradient.Sample(k);
                 }
-                
+
                 _compositeParamsData.InvTargetSize = new Vector2(1.0f / _compositeTarget.Resolution.Width, 1.0f / _compositeTarget.Resolution.Height);
                 _compositeParamsData.InvSourceSize = new Vector2(1.0f / sourceSet.Resolution.Width, 1.0f / sourceSet.Resolution.Height);
                 ResourceManager.SetupConstBuffer(_compositeParamsData, ref _compositeParamsBuffer);
@@ -264,10 +274,19 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
     // RenderTargetSet struct and Lists _blurTargetsA, _blurTargetsB
     private sealed class RenderTargetSet
     {
+        public RenderTargetSet(Device device, Texture2DDescription desc)
+        {
+            Resolution = new Size2(desc.Width, desc.Height);
+            Texture = Texture2D.CreateTexture2D(desc);
+
+            RTV = new RenderTargetView(device, Texture);
+            SRV = new ShaderResourceView(device, Texture);
+        }
+
         public Texture2D Texture;
         public RenderTargetView RTV;
         public ShaderResourceView SRV;
-        public Size2 Resolution;
+        public readonly Size2 Resolution;
 
         public void Dispose()
         {
@@ -277,10 +296,10 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
         }
     }
 
-    private readonly List<RenderTargetSet> _blurTargetsA = new();
-    private readonly List<RenderTargetSet> _blurTargetsB = new();
-    private RenderTargetSet _brightPassTarget;
-    private RenderTargetSet _compositeTarget;
+    private readonly List<RenderTargetSet?> _blurTargetsA = [];
+    private readonly List<RenderTargetSet?> _blurTargetsB = [];
+    private RenderTargetSet? _brightPassTarget;
+    private RenderTargetSet? _compositeTarget;
 
     // Constant Buffers
     [StructLayout(LayoutKind.Explicit, Size = 16)]
@@ -288,15 +307,15 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
     {
         [FieldOffset(0)]
         public Vector3 ColorWeights;
-        
-        [FieldOffset(3*4)]
+
+        [FieldOffset(3 * 4)]
         public float Threshold;
 
         public static readonly ThresholdParams Default = new();
     }
 
     private ThresholdParams _thresholdParams;
-    private Buffer _thresholdParamsBuffer;
+    private Buffer? _thresholdParamsBuffer;
 
     [StructLayout(LayoutKind.Explicit, Size = (4 * 4) + (4 * 4))]
     private struct BlurParameters
@@ -329,21 +348,21 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
     }
 
     private BlurParameters _blurParamsData;
-    private Buffer _blurParamsBuffer;
+    private Buffer? _blurParamsBuffer;
 
-    [StructLayout(LayoutKind.Explicit, Size = 16*4)] // Ensure size/padding matches HLSL
+    [StructLayout(LayoutKind.Explicit, Size = 16 * 4)] // Ensure size/padding matches HLSL
     private struct CompositeParams
     {
         [FieldOffset(0)]
         public Vector2 InvTargetSize;
 
-        [FieldOffset(2*4)]
+        [FieldOffset(2 * 4)]
         public Vector2 InvSourceSize;
 
-        [FieldOffset(4*4)]
+        [FieldOffset(4 * 4)]
         public Vector4 PassColor;
-        
-        [FieldOffset(8*4)]
+
+        [FieldOffset(8 * 4)]
         public float PassIntensity; // Combined overall Intensity * normalized level weight
 
         [FieldOffset(12 * 4)]
@@ -353,7 +372,7 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
     }
 
     private CompositeParams _compositeParamsData;
-    private Buffer _compositeParamsBuffer;
+    private Buffer? _compositeParamsBuffer;
 
     // State Tracking 
     private Size2 _lastResolution = Size2.Zero;
@@ -361,7 +380,6 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
     private int _lastLevels = -1;
     private Vector2 _lastGainAndBias = new(float.NaN, float.NaN);
     private List<float> _levelIntensities = []; // Stores normalized intensity per level
-
 
     // Creates/updates ALL internal resources
     private bool InitializeOrUpdateResources(Size2 initialResolution, Format initialFormat, int numLevels)
@@ -371,12 +389,12 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
                                      _compositeTarget.Texture.IsDisposed ||
                                      _brightPassTarget?.Texture == null ||
                                      _brightPassTarget.Texture.IsDisposed ||
-                                     _blurTargetsA?.Count != numLevels ||
+                                     _blurTargetsA.Count != numLevels ||
                                      _blurTargetsB.Count != numLevels ||
                                      _lastResolution != initialResolution ||
                                      _lastFormat != initialFormat ||
                                      _lastLevels != numLevels ||
-                                     _blurTargetsA?.Count > 0 && (_blurTargetsA[0].Texture == null || _blurTargetsA[0].Texture.IsDisposed);
+                                     _blurTargetsA.Count > 0 && (_blurTargetsA[0]?.Texture == null || _blurTargetsA[0]!.Texture.IsDisposed);
 
         // Check if constant buffers need creation (only happens once or after failure)
         var needsBufferCreation = _thresholdParamsBuffer == null ||
@@ -421,8 +439,8 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
                                           CpuAccessFlags = CpuAccessFlags.None, OptionFlags = ResourceOptionFlags.None, MipLevels = 1,
                                           ArraySize = 1, SampleDescription = new SampleDescription(1, 0)
                                       };
-                _brightPassTarget = CreateRenderTargetSet(device, fullResDesc);
-                _compositeTarget = CreateRenderTargetSet(device, fullResDesc);
+                _brightPassTarget = new RenderTargetSet(device, fullResDesc);
+                _compositeTarget = new RenderTargetSet(device, fullResDesc);
 
                 // Create Downsample Pyramid Targets
                 var currentResolution = initialResolution;
@@ -433,8 +451,8 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
                     var levelDesc = fullResDesc;
                     levelDesc.Width = currentResolution.Width;
                     levelDesc.Height = currentResolution.Height;
-                    _blurTargetsA?.Add(CreateRenderTargetSet(device, levelDesc));
-                    _blurTargetsB.Add(CreateRenderTargetSet(device, levelDesc));
+                    _blurTargetsA?.Add(new RenderTargetSet(device, levelDesc));
+                    _blurTargetsB.Add(new RenderTargetSet(device, levelDesc));
                 }
 
                 // Update tracking info after successful texture creation
@@ -463,17 +481,17 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
     }
 
     // Helper to create a RenderTargetSet
-    private RenderTargetSet CreateRenderTargetSet(Device device, Texture2DDescription desc)
-    {
-        var set = new RenderTargetSet
-                      {
-                          Resolution = new Size2(desc.Width, desc.Height),
-                          Texture = Texture2D.CreateTexture2D(desc)
-                      };
-        set.RTV = new RenderTargetView(device, set.Texture);
-        set.SRV = new ShaderResourceView(device, set.Texture);
-        return set;
-    }
+    // private RenderTargetSet CreateRenderTargetSet(Device device, Texture2DDescription desc)
+    // {
+    //     var set = new RenderTargetSet
+    //                   {
+    //                       Resolution = new Size2(desc.Width, desc.Height),
+    //                       Texture = Texture2D.CreateTexture2D(desc),
+    //                   };
+    //     set.RTV = new RenderTargetView(device, set.Texture);
+    //     set.SRV = new ShaderResourceView(device, set.Texture);
+    //     return set;
+    // }
 
     // CleanupResources disposes everything and resets state
     private void CleanupResources()
@@ -481,17 +499,13 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
         // ... (Dispose textures/views in lists _blurTargetsA/B, _brightPassTarget, _compositeTarget) ...
         foreach (var set in _blurTargetsA)
         {
-            Utilities.Dispose(ref set.RTV);
-            Utilities.Dispose(ref set.SRV);
-            Utilities.Dispose(ref set.Texture);
+            set?.Dispose();
         }
 
         _blurTargetsA.Clear();
         foreach (var set in _blurTargetsB)
         {
-            Utilities.Dispose(ref set.RTV);
-            Utilities.Dispose(ref set.SRV);
-            Utilities.Dispose(ref set.Texture);
+            set?.Dispose();
         }
 
         _blurTargetsB.Clear();
@@ -508,7 +522,6 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
         _lastFormat = Format.Unknown;
         _lastLevels = -1;
         _levelIntensities.Clear();
-
     }
 
     private readonly D3D11StateBackup _stateBackup = new();
@@ -519,7 +532,7 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
         if (disposing)
         {
             CleanupResources();
-            _stateBackup?.Dispose();
+            _stateBackup.Dispose();
         }
 
         base.Dispose(disposing);
@@ -531,39 +544,7 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
     /// </summary>
     private sealed class D3D11StateBackup : System.IDisposable
     {
-        // --- Saved State Members ---
 
-        // Input Assembler
-        private PrimitiveTopology _topology;
-
-        // Vertex Shader (minimal - just shader, assuming VS inputs aren't changed)
-        private SharpDX.Direct3D11.VertexShader _vertexShader;
-
-        // Geometry Shader (minimal - just shader)
-        private SharpDX.Direct3D11.GeometryShader _geometryShader;
-
-        // Pixel Shader (Shader, 1 CB, 2 SRVs, 1 Sampler)
-        private SharpDX.Direct3D11.PixelShader _pixelShader;
-        private SharpDX.Direct3D11.Buffer[] _psConstantBuffers = new Buffer[1]; // Slot 0
-        private SharpDX.Direct3D11.ShaderResourceView[] _psShaderResourceViews = new ShaderResourceView[2]; // Slots 0, 1
-        private SharpDX.Direct3D11.SamplerState[] _psSamplerStates = new SamplerState[1]; // Slot 0
-
-        // Rasterizer Stage
-        private SharpDX.Direct3D11.RasterizerState _rasterizerState;
-        private RawViewportF[] _viewports; // Need to save all active viewports
-
-        // Output Merger Stage
-        private SharpDX.Direct3D11.BlendState _blendState;
-        private RawColor4 _blendFactor;
-        private int _sampleMask;
-        private SharpDX.Direct3D11.DepthStencilState _depthStencilState;
-
-        private SharpDX.Direct3D11.RenderTargetView[]
-            _renderTargetViews = new RenderTargetView[OutputMergerStage.SimultaneousRenderTargetCount]; // Save max possible RTVs
-
-        private SharpDX.Direct3D11.DepthStencilView _depthStencilView;
-
-        private bool _isSaved;
 
         /// <summary>
         /// Saves the relevant D3D11 pipeline states modified by the effect.
@@ -593,10 +574,10 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
 
             // Output Merger
             _blendState = context.OutputMerger.GetBlendState(out _blendFactor, out _sampleMask);
-            
+
             // Suggested API doesn't exist.
             //context.OutputMerger.GetRenderTargets(OutputMergerStage.SimultaneousRenderTargetCount, _renderTargetViews, out _depthStencilView);
-            _renderTargetViews = context.OutputMerger.GetRenderTargets(2);
+            _prevRenderTargetViews = context.OutputMerger.GetRenderTargets(2);
             context.OutputMerger.GetRenderTargets(out _depthStencilView);
             _isSaved = true;
         }
@@ -632,12 +613,12 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
             context.OutputMerger.SetBlendState(_blendState, _blendFactor, _sampleMask);
             //context.OutputMerger.SetDepthStencilState(_depthStencilState, _stencilRef);
             //context.OutputMerger.SetRenderTargets(_depthStencilView, _renderTargetViews); // SetRenderTargets handles null DSV
-            if (_renderTargetViews.Length > 0)
-                context.OutputMerger.SetRenderTargets(_depthStencilView, _renderTargetViews);
-            
-            foreach (var rtv in _renderTargetViews)
-                rtv?.Dispose();                 
-            
+            if (_prevRenderTargetViews.Length > 0)
+                context.OutputMerger.SetRenderTargets(_depthStencilView, _prevRenderTargetViews);
+
+            foreach (var rtv in _prevRenderTargetViews)
+                rtv?.Dispose();
+
             _isSaved = false;
 
             Dispose();
@@ -671,10 +652,10 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
                 Utilities.Dispose(ref _blendState);
                 Utilities.Dispose(ref _depthStencilState);
 
-                for (var i = 0; i < _renderTargetViews.Length; ++i)
+                for (var i = 0; i < _prevRenderTargetViews.Length; ++i)
                 {
-                    Utilities.Dispose(ref _renderTargetViews[i]);
-                    _renderTargetViews[i] = null;
+                    Utilities.Dispose(ref _prevRenderTargetViews[i]);
+                    _prevRenderTargetViews[i] = null;
                 }
 
                 Utilities.Dispose(ref _depthStencilView);
@@ -689,8 +670,43 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
             _viewports = null;
             _isSaved = false;
         }
+        
+        
+        // --- Saved State Members ---
+
+        // Input Assembler
+        private PrimitiveTopology _topology;
+
+        // Vertex Shader (minimal - just shader, assuming VS inputs aren't changed)
+        private SharpDX.Direct3D11.VertexShader? _vertexShader;
+
+        // Geometry Shader (minimal - just shader)
+        private SharpDX.Direct3D11.GeometryShader? _geometryShader;
+
+        // Pixel Shader (Shader, 1 CB, 2 SRVs, 1 Sampler)
+        private SharpDX.Direct3D11.PixelShader? _pixelShader;
+        private Buffer?[] _psConstantBuffers = new Buffer[1]; // Slot 0
+        private ShaderResourceView?[] _psShaderResourceViews = new ShaderResourceView[2]; // Slots 0, 1
+        private SamplerState?[] _psSamplerStates = new SamplerState[1]; // Slot 0
+
+        // Rasterizer Stage
+        private RasterizerState? _rasterizerState;
+        private RawViewportF[]? _viewports; // Need to save all active viewports
+
+        // Output Merger Stage
+        private BlendState? _blendState;
+        private RawColor4 _blendFactor;
+        private int _sampleMask;
+        private DepthStencilState? _depthStencilState;
+
+        private RenderTargetView?[]
+            _prevRenderTargetViews = new RenderTargetView?[OutputMergerStage.SimultaneousRenderTargetCount]; // Save max possible RTVs
+
+        private DepthStencilView? _depthStencilView;
+
+        private bool _isSaved;
     }
-    
+
     /// <summary>
     /// Calculates the frequency distribution for a monotonic gain/bias function,
     /// normalizing the result so the frequencies sum to 1.0.
@@ -700,28 +716,28 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
     {
         if (bucketCount <= 0)
             throw new ArgumentOutOfRangeException(nameof(bucketCount), "Must be greater than 0.");
-        
-        distribution ??= new List<float>(bucketCount);
-        distribution.Clear(); 
-        
+
+        distribution.Clear();
+
         var gain = gainAndBias.X.Clamp(0.002f, 0.95f);
         var bias = gainAndBias.Y.Clamp(0.002f, 0.95f);
         float last = 0;
-        for (var k = 1; k < bucketCount; k++) 
+        for (var k = 1; k < bucketCount; k++)
         {
             var yTarget = (float)k / bucketCount;
 
             if (!TryFindRootBisection(x => x.ApplyGainAndBias(gain, bias) - yTarget, out var r))
                 r = (float)k / bucketCount;
 
-            r= r.Clamp(0, 1);
-            distribution.Add(r-last);
+            r = r.Clamp(0, 1);
+            distribution.Add(r - last);
             last = r;
         }
-        distribution.Add(1-last);
+
+        distribution.Add(1 - last);
     }
 
-    private  float[] _frequencyBoundaries = [];
+    //private float[] _frequencyBoundaries = [];
 
     /// <summary>
     /// Simple Bisection method root finder for monotonic functions in [0, 1].
@@ -733,10 +749,11 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
         const float maxIterations = 20;
         var lowerBound = 0f;
         var upperBound = 1f;
-        
+
         var fLower = function(lowerBound);
-        if (Math.Abs(fLower) < tolerance) { 
-            result =lowerBound;
+        if (Math.Abs(fLower) < tolerance)
+        {
+            result = lowerBound;
             return true;
         }
 
@@ -778,6 +795,7 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
                 upperBound = midpoint;
             }
         }
+
         // Max iterations reached
         return false;
     }
@@ -808,7 +826,6 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
 
     [Input(Guid = "E5548715-1CAE-4792-9E6E-8F9D8DAA9EDF")]
     public readonly InputSlot<Gradient> BlurGradient = new();
-
 
     [Input(Guid = "D5914036-F628-4305-D7B5-1634B219C305")]
     public readonly InputSlot<bool> Clamp = new();

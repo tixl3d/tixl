@@ -415,7 +415,8 @@ namespace T3.Editor.Gui.MagGraph.States
                           {
                               var sourceItem = context.ActiveItem;
                               Debug.Assert(sourceItem != null);
-                              Debug.Assert(sourceItem.OutputLines.Length > 0);
+                              Debug.Assert(sourceItem.OutputLines.Length > 0 ||
+                                           sourceItem.Variant == MagGraphItem.Variants.Output);
                               Debug.Assert(context.ActiveTargetInputId != Guid.Empty);
 
                               // Click

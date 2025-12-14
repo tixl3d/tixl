@@ -1,0 +1,19 @@
+{
+  "Id": "04d557f8-3cc7-471f-8f2f-39090fec63bb"/*ZipStringList*/,
+  "Inputs": [
+    {
+      "Id": "be829559-ab5b-41ee-b104-dc5b0c1a1b2e"/*StringsOne*/,
+      "DefaultValue": {
+        "Values": []
+      }
+    },
+    {
+      "Id": "be829559-ab5b-41ee-b104-dc5b0c1a1b2f"/*StringsTwo*/,
+      "DefaultValue": {
+        "Values": []
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

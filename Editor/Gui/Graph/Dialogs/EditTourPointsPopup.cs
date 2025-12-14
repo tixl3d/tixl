@@ -2,6 +2,7 @@
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
+using T3.Core.Utils;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.MagGraph.Interaction;
 using T3.Editor.Gui.Styling;
@@ -259,6 +260,43 @@ internal static class EditTourPointsPopup
 
                     CustomComponents.TooltipForLastItem("" + tourPoint.ChildId);
                 }
+                
+                if (CanAdd)
+                {
+                    ImGui.SameLine();
+                    if (CustomComponents.IconButton(Icon.Link, Vector2.Zero))
+                        tourPoint.ChildId = _firstSelectedChildId;
+                } 
+                
+                if(tourPoint.ChildId != Guid.Empty)
+                {
+                    ImGui.SameLine(0, 10);
+                    ImGui.SetNextItemWidth(100);
+                    ImGui.PushStyleColor(ImGuiCol.FrameBg, UiColors.BackgroundButton.Rgba);
+                    ImGui.PushStyleColor(ImGuiCol.FrameBgHovered, UiColors.BackgroundButton.Rgba);
+                    ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(4));
+
+                    var label = tourPoint.InputId == Guid.Empty 
+                                    ? "select input" 
+                                    : tourPoint.InputId.ShortenGuid();
+                    
+                    if (ImGui.BeginCombo("##test", label))
+                    {
+                        if (_compositionUi.ChildUis.TryGetValue(tourPoint.ChildId, out var symbolUi))
+                        {
+                            foreach (var i in symbolUi.SymbolChild.Symbol.InputDefinitions)
+                            {
+                                ImGui.Selectable(i.Name, false);
+                            }
+                        }
+                        ImGui.EndCombo();
+                    }
+                    
+                    ImGui.PopStyleColor(2);
+                    ImGui.PopStyleVar();
+                }
+                
+
 
                 var x = ImGui.GetContentRegionAvail().X - ImGui.GetFrameHeight();
                 ImGui.SameLine(x);
@@ -318,6 +356,20 @@ internal static class EditTourPointsPopup
         ImGui.PopStyleColor();
 
         return modified;
+    }
+
+    private static string Test(TourPoint tourPoint)
+    {
+        if (tourPoint.ChildId == Guid.Empty)
+            return string.Empty;
+        
+        if (tourPoint.InputId == Guid.Empty)
+            return string.Empty;
+
+        if (_compositionUi== null || _compositionUi.ChildUis.TryGetValue(tourPoint.ChildId, out var childUi))
+            return string.Empty;
+        
+        return string.Empty;
     }
 
     private static void InsertNewTourPoint(int index)

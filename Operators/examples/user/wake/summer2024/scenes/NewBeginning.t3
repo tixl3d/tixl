@@ -47,7 +47,7 @@
         {
           "Id": "4f9ab443-3885-4a57-9116-6be5824bd95b"/*Amount*/,
           "Type": "System.Single",
-          "Value": 0.42
+          "Value": 0.178
         }
       ],
       "Outputs": []
