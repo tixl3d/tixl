@@ -87,15 +87,17 @@ internal sealed class CommandOutputUi : OutputUi<Command>
         deviceContext.Rasterizer.SetViewports(prevViewports);
         deviceContext.OutputMerger.SetTargets(prevTargets);
 
-        // Clean up ref counts for RTVs
-        for (var i = 0; i < prevTargets.Length; i++)
+        if (prevTargets == null)
         {
-            if (prevTargets[i] == null)
+            Log.Warning("Can't dispose obsolete RenderTargetView after draw. This indicates corrupted a render context.");
+        }
+        else
+        {
+            // Clean up ref counts for RTVs
+            foreach (var t in prevTargets)
             {
-                Log.Warning("Can't dispose obsolete RenderTargetView after draw. This indicates corrupted a render context.");
-                continue;
+                t?.Dispose();
             }
-            prevTargets[i].Dispose();
         }
     }
 
