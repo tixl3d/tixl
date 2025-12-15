@@ -28,8 +28,8 @@ internal sealed class PointTrail : Instance<PointTrail>
     private enum WriteToModes
     {
         None,
-        Fx1,
-        Fx2,
+        F1,
+        F2,
         Scale,
     }
 }

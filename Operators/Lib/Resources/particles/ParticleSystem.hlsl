@@ -50,6 +50,7 @@ RWStructuredBuffer<Point> ResultPoints : u1;
     {
         Particles[gi].BirthTime = NAN;
         Particles[gi].Position = NAN;
+        ResultPoints[gi].Scale = NAN;
     }
 
     // Insert emit points

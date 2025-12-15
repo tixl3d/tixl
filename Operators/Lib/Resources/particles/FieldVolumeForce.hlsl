@@ -96,8 +96,8 @@ float4 q_from_tangentAndNormal(float3 dx, float3 dz)
     if (gi >= maxParticleCount)
         return;
 
-    if (isnan(Particles[gi].BirthTime))
-        return;
+    // if (isnan(Particles[gi].BirthTime))
+    //     return;
 
     float3 pos = Particles[gi].Position;
     float distance = GetDistance(pos);
@@ -127,7 +127,7 @@ float4 q_from_tangentAndNormal(float3 dx, float3 dz)
                             1)), //
                         Amount);
 
-        if (true)
+        if (ApplyColorOnCollision)
         {
             float4 surfaceColor = GetField(float4(pos, 1));
             Particles[gi].Color.rgb = surfaceColor.rgb;

@@ -163,7 +163,7 @@ internal sealed class SymbolFilter
         {
             MatchingSymbolUis = MatchingSymbolUis.OrderBy(s => ComputeRelevancy(s, _symbolFilterString, currentProject, composition))
                                                  .Reverse()
-                                                 .Where(s => ComputeRelevancy(s, _symbolFilterString, currentProject, composition) >= 10f) // Ensure there is some relevancy to the results
+                                                 .Take(100)
                                                  .ToList();
         }
         else
@@ -171,7 +171,6 @@ internal sealed class SymbolFilter
             MatchingSymbolUis = MatchingSymbolUis.OrderBy(s => ComputeRelevancy(s, _symbolFilterString, currentProject, composition))
                                                  .Reverse()
                                                  .Take(limit)
-                                                 .Where(s => ComputeRelevancy(s, _symbolFilterString, currentProject, composition) >= 10f) // Ensure there is some relevancy to the results
                                                  .ToList();
         }
 

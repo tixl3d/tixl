@@ -7,15 +7,15 @@
       "InputId": "3b193782-2a56-4031-a0c6-9ebb576e66a5"/*Points*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -364.42603,
-        "Y": 704.3235
+        "X": 192.3251,
+        "Y": 1020.69006
       }
     },
     {
       "InputId": "519d77c0-5605-433a-b8ce-6d84f99edd7b"/*Count*/,
       "Position": {
-        "X": -361.56836,
-        "Y": 766.3784
+        "X": -367.67493,
+        "Y": 731.94434
       },
       "GroupTitle": "Selection",
       "Description": "Defines how many points are allowed through the filter"
@@ -23,16 +23,16 @@
     {
       "InputId": "537e6055-9c33-4b14-aa17-b34fd9d6bb61"/*Seed*/,
       "Position": {
-        "X": -367.65927,
-        "Y": 1018.95636
+        "X": -87.6749,
+        "Y": 937.7661
       },
       "Description": "Changes the random seed for the scatter effect"
     },
     {
       "InputId": "60cea2c3-02ae-4132-ad11-3f16c2f71b6e"/*ScatterSelect*/,
       "Position": {
-        "X": -367.65927,
-        "Y": 973.9563
+        "X": 52.32511,
+        "Y": 902.7661
       },
       "GroupTitle": "Scattering",
       "Description": "Scatters the selection by adding randomness to the indexes",
@@ -45,8 +45,8 @@
     {
       "InputId": "af0758b6-3876-4c95-a80f-0233b96bc1a7"/*Step*/,
       "Position": {
-        "X": -361.56836,
-        "Y": 856.3784
+        "X": 52.32511,
+        "Y": 972.7661
       },
       "Description": "Defines the distance between the selected points.\nOr defines how many points are skipped during the selection if more than two points are passed through the filter.",
       "AddPadding": "True"
@@ -54,8 +54,8 @@
     {
       "InputId": "f32458a5-f19f-487b-8ae2-a575de0b4ff2"/*StartIndex*/,
       "Position": {
-        "X": -361.56836,
-        "Y": 811.3784
+        "X": -87.6749,
+        "Y": 867.7661
       },
       "Description": "Defines which point is defined as the first / starting point"
     }
@@ -64,50 +64,50 @@
     {
       "ChildId": "0dc76d3b-7e60-459d-abe0-779d5d0dcd9e"/*IntToFloat*/,
       "Position": {
-        "X": -47.369926,
-        "Y": 908.67883
+        "X": 52.32511,
+        "Y": 867.7661
       }
     },
     {
       "ChildId": "4038f156-f640-4850-83ee-c589c08b820f"/*ClampInt*/,
       "Position": {
-        "X": -182.01859,
-        "Y": 759.8851
+        "X": -227.6749,
+        "Y": 731.94434
       }
     },
     {
       "ChildId": "47b9d823-abc9-4915-bf2b-9f523477e080"/*ComputeShader*/,
       "Position": {
-        "X": 122.01576,
-        "Y": 552.8011
+        "X": -227.6749,
+        "Y": 661.94434
       }
     },
     {
       "ChildId": "4f15ef13-4d85-40c1-a9d4-cd58e6f43a51"/*ExecuteBufferUpdate*/,
       "Position": {
-        "X": 641.2465,
-        "Y": 646.7957
+        "X": 491.3331,
+        "Y": 828.8563
       }
     },
     {
       "ChildId": "679dff61-1551-4fb8-8936-fc5852f003d2"/*ComputeShaderStage*/,
       "Position": {
-        "X": 471.04163,
-        "Y": 587.7994
+        "X": 491.3331,
+        "Y": 653.8562
       }
     },
     {
       "ChildId": "7b7029cf-8853-46a5-bb0b-b3f6d19d1f78"/*GetBufferComponents*/,
       "Position": {
-        "X": -213.77097,
-        "Y": 700.4401
+        "X": 192.3251,
+        "Y": 1055.6901
       }
     },
     {
       "ChildId": "941ce9b7-d4da-42f7-a34a-966453db9c50"/*CalcDispatchCount*/,
       "Position": {
-        "X": 273.14893,
-        "Y": 590.2168
+        "X": -87.67489,
+        "Y": 696.94434
       }
     },
     {
@@ -118,29 +118,29 @@
         "Y": 135.58852
       },
       "Position": {
-        "X": 102.63007,
-        "Y": 908.67883
+        "X": 192.3251,
+        "Y": 832.7661
       }
     },
     {
       "ChildId": "c28149ce-aa09-4c42-ad20-603a4d876f15"/*GetBufferComponents*/,
       "Position": {
-        "X": 273.14893,
-        "Y": 659.2168
+        "X": -224.37593,
+        "Y": 1130.354
       }
     },
     {
       "ChildId": "e1b685cc-0bd6-4dce-9727-45c8a14a473a"/*IntToFloat*/,
       "Position": {
-        "X": -46.684986,
-        "Y": 1006.406
+        "X": 52.325108,
+        "Y": 937.7661
       }
     },
     {
       "ChildId": "e7bca03d-a5d1-485f-a9cc-27654b1be4de"/*StructuredBufferWithViews*/,
       "Position": {
-        "X": 77.5927,
-        "Y": 799.58417
+        "X": -224.37593,
+        "Y": 1095.354
       }
     }
   ],
@@ -148,8 +148,8 @@
     {
       "OutputId": "bb886ff1-31a9-47aa-a39a-fa60ebb6c2d6"/*Output*/,
       "Position": {
-        "X": 771.2465,
-        "Y": 646.7957
+        "X": 491.3331,
+        "Y": 898.8563
       }
     }
   ]

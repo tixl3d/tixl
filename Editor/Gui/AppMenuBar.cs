@@ -509,7 +509,7 @@ internal static class AppMenuBar
             new("TiXL Web-Site", "https://tixl.app"),
             new("Latest Releases", "https://github.com/tixl3d/tixl/releases"),
 
-            new("Discord Community", "https://discord.gg/uC4hRRdp",
+            new("Discord Community", "https://discord.com/invite/YmSyQdeH3S",
                 "Join a friendly and welcoming community of enthusiasts. Ask questions, Learn from each other, share or just hang out."),
             new("Meet Up (every 2nd week)", "https://discord.com/invite/WX94pzKj?event=1359348185914544312",
                 "We meet every 2nd week to share our screens answer questions and hang out."),

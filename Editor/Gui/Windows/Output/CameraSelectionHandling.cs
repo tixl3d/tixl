@@ -15,7 +15,7 @@ namespace T3.Editor.Gui.Windows.Output;
 
 /// <summary>
 /// Handles switching and pinning of interactive <see cref="ICamera"/>s for views.
-/// It uses four difference modes, draws the dropdown to switch between them
+/// It uses four different modes and draws the dropdown to switch between them
 /// </summary>
 internal sealed class CameraSelectionHandling
 {
@@ -44,7 +44,7 @@ internal sealed class CameraSelectionHandling
         UseViewer,
 
         /// <summary>
-        /// If rendered op is Command-Type and manipulate first found camera in graph
+        /// If rendered, op is Command-Type and manipulate first found camera in graph
         /// or if rendered Op is ImageType and selected Op is Camera manipulate camera 
         /// </summary>
         AutoUseFirstCam,
@@ -123,6 +123,8 @@ internal sealed class CameraSelectionHandling
         }
 
         _drawnTypeIsCommand = drawnType == typeof(Command);
+        
+        
         switch (_controlMode)
         {
             case ControlModes.SceneViewerFollowing:
@@ -167,7 +169,15 @@ internal sealed class CameraSelectionHandling
                     var isCamOpSelected = IsCamOpSelected();
                     if (!isCamOpSelected)
                     {
-                        cameraForManipulation = _outputWindowViewCamera;
+
+                        if (_drawnTypeIsCommand)
+                        {
+                            cameraForManipulation = _outputWindowViewCamera;
+                        }
+                        else
+                        {
+                            cameraForManipulation = null;
+                        }
                     }
                     else
                     {
@@ -176,7 +186,7 @@ internal sealed class CameraSelectionHandling
                     }
 
                     CameraForRendering = _outputWindowViewCamera;
-                    CameraInteraction.ResetCamera(_outputWindowViewCamera);
+                    //CameraInteraction.ResetCamera(_outputWindowViewCamera);
                 }
                 else
                 {
@@ -186,15 +196,18 @@ internal sealed class CameraSelectionHandling
                 BypassCamera = false;
                 break;
             }
+            case ControlModes.PickedACamera:
+                PreventImageCanvasInteraction = true;
+                break;
         }
 
         if (_controlMode != ControlModes.PickedACamera)
         {
-            CameraForRendering = cameraForManipulation;
+            //CameraForRendering = cameraForManipulation;
         }
         else
         {
-            PreventImageCanvasInteraction = true;
+            //PreventImageCanvasInteraction = true;
         }
 
         CameraForRendering ??= _outputWindowViewCamera;

@@ -46,7 +46,7 @@
       "DefaultValue": 1
     },
     {
-      "Id": "b2c8f7cf-fdf5-4819-98ec-2c70ee9e8bc6"/*RadiusFromW*/,
+      "Id": "b2c8f7cf-fdf5-4819-98ec-2c70ee9e8bc6"/*RadiusFactor*/,
       "DefaultValue": 0.01
     },
     {
