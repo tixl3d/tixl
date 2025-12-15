@@ -5,7 +5,7 @@ cbuffer ParamConstants : register(b0)
     float2 Center;
 
     float ScaleFactor;
-    float Width;
+    float Feather;
     float Radius;
    // float Bias;
     float2 GainAndBias;
@@ -54,12 +54,9 @@ float4 psMain(vsOutput psInput) : SV_TARGET
 
     float adjustedRadius = 2 * Radius * aspectRatio ;
 
-    c+= -adjustedRadius + 2 * abs(Width) / aspectRatio;
-    c = saturate(c / Width);
-
-    /*float dBiased = Bias>= 0
-        ? pow( c, Bias+1)
-        : 1-pow( clamp(1-c,0,10), -Bias+1);*/
+    c+= -adjustedRadius + 2 * abs(Feather) / aspectRatio;
+    
+    c = saturate(c / Feather);
 
     float dBiased = ApplyGainAndBias(c, GainAndBias);
 

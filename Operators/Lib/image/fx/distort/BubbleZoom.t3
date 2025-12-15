@@ -17,7 +17,7 @@
       }
     },
     {
-      "Id": "0ce5b753-bcc0-4102-b011-64e603a50567"/*Gradient*/,
+      "Id": "0ce5b753-bcc0-4102-b011-64e603a50567"/*FeatherGradient*/,
       "DefaultValue": {
         "Gradient": {
           "Interpolation": "Linear",
@@ -47,7 +47,7 @@
       }
     },
     {
-      "Id": "1e93d2b1-d21c-44bd-a96c-9844b9a89c8f"/*Width*/,
+      "Id": "1e93d2b1-d21c-44bd-a96c-9844b9a89c8f"/*Feather*/,
       "DefaultValue": 1.0
     },
     {
@@ -69,7 +69,7 @@
       }
     },
     {
-      "Id": "5bb5934d-28a8-4bd3-a146-f0ecb804170a"/*ScaleFactor*/,
+      "Id": "5bb5934d-28a8-4bd3-a146-f0ecb804170a"/*Magnify*/,
       "DefaultValue": 1.25
     },
     {

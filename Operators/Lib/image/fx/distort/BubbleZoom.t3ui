@@ -31,14 +31,14 @@
       "UseVec2Control": "BiasAndGain"
     },
     {
-      "InputId": "0ce5b753-bcc0-4102-b011-64e603a50567"/*Gradient*/,
+      "InputId": "0ce5b753-bcc0-4102-b011-64e603a50567"/*FeatherGradient*/,
       "Position": {
         "X": 48.348846,
         "Y": -76.75687
       }
     },
     {
-      "InputId": "1e93d2b1-d21c-44bd-a96c-9844b9a89c8f"/*Width*/,
+      "InputId": "1e93d2b1-d21c-44bd-a96c-9844b9a89c8f"/*Feather*/,
       "Position": {
         "X": 188.34885,
         "Y": 63.243134
@@ -74,7 +74,7 @@
       "GroupTitle": "Advanced"
     },
     {
-      "InputId": "5bb5934d-28a8-4bd3-a146-f0ecb804170a"/*ScaleFactor*/,
+      "InputId": "5bb5934d-28a8-4bd3-a146-f0ecb804170a"/*Magnify*/,
       "Position": {
         "X": 188.34885,
         "Y": 28.243134
