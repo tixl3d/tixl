@@ -7,20 +7,11 @@ cbuffer ParamConstants : register(b0)
     float ScaleFactor;
     float Feather;
     float Radius;
-   // float Bias;
     float2 GainAndBias;
     float FlipEffect;
 }
 
-cbuffer TimeConstants : register(b1)
-{
-    float globalTime;
-    float time;
-    float runTime;
-    float beatTime;
-}
-
-cbuffer Resolution : register(b2)
+cbuffer Resolution : register(b1)
 {
     float TargetWidth;
     float TargetHeight;
