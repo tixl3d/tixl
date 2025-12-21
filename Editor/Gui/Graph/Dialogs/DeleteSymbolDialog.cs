@@ -334,7 +334,38 @@ internal sealed class DeleteSymbolDialog : ModalDialog
 
         try
         {
-            var basePath = Path.Combine(symbol.SymbolPackage.Folder, symbol.Name);
+            // Build folder structure from RootNamespace and Symbol.Namespace
+            var packageFolder = symbol.SymbolPackage.Folder;
+            var rootNs = symbol.SymbolPackage.RootNamespace ?? string.Empty;
+            var symbolNs = symbol.Namespace ?? string.Empty;
+
+            var rootParts = string.IsNullOrEmpty(rootNs)
+                                ? Array.Empty<string>()
+                                : rootNs.Split('.');
+            var symbolParts = string.IsNullOrEmpty(symbolNs)
+                                ? Array.Empty<string>()
+                                : symbolNs.Split('.');
+
+            // Strip root namespace prefix from symbol namespace
+            int i = 0;
+            while (i < rootParts.Length && i < symbolParts.Length &&
+                   string.Equals(rootParts[i], symbolParts[i], StringComparison.Ordinal))
+            {
+                i++;
+            }
+
+            var relativeParts = symbolParts.Skip(i).ToArray();
+            string relativePath = relativeParts.Length > 0
+                                      ? Path.Combine(relativeParts)
+                                      : string.Empty;
+
+            var fullSymbolFolder = string.IsNullOrEmpty(relativePath)
+                                       ? packageFolder
+                                       : Path.Combine(packageFolder, relativePath);
+
+            // File name is just symbol.Name.* (no namespace parts in file name)
+            var basePath = Path.Combine(fullSymbolFolder, symbol.Name);
+
             var csPath   = basePath + ".cs";
             var t3Path   = basePath + ".t3";
             var t3UiPath = basePath + ".t3ui";
@@ -342,7 +373,9 @@ internal sealed class DeleteSymbolDialog : ModalDialog
             if (!File.Exists(csPath))
             {
                 reason = $"Could not locate the source file for symbol [{symbol.Name}]\n" +
-                         $"at: {csPath}";
+                         $"RootNamespace: [{rootNs}]\n" +
+                         $"Namespace: [{symbolNs}]\n" +
+                         $"Expected at: {csPath}";
                 return false;
             }
 
