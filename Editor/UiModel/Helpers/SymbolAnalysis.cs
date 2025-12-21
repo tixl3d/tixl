@@ -18,9 +18,8 @@ internal static class SymbolAnalysis
     /// Detailed info per symbol id, filled by UpdateDetails().
     /// </summary>
     internal static readonly Dictionary<Guid, SymbolInformation> InformationForSymbolIds = new(1000);
-
     internal static int TotalUsageCount;
-        
+
     /// <summary>
     /// All connections between input slots stored as hashes (sourceSlotId x targetSlotId).
     /// Used by SymbolBrowser for relevancy weighting of frequent combinations.
@@ -39,7 +38,7 @@ internal static class SymbolAnalysis
     {
         var usages = CollectSymbolUsageCounts();
         ConnectionHashCounts = new Dictionary<int, int>();
-            
+
         foreach (var symbolUi in EditorSymbolPackage.AllSymbolUis)
         {
             var symbolId = symbolUi.Symbol.Id;
@@ -48,7 +47,7 @@ internal static class SymbolAnalysis
                 info = new SymbolInformation();
                 InformationForSymbolIds[symbolId] = info;
             }
-                
+
             // Update connection counts
             foreach (var connection in symbolUi.Symbol.Connections)
             {
@@ -57,7 +56,7 @@ internal static class SymbolAnalysis
                 ConnectionHashCounts.TryGetValue(hash, out var connectionCount);
                 ConnectionHashCounts[hash] = connectionCount + 1;
             }
-                
+
             usages.TryGetValue(symbolId, out var count);
             info.UsageCount = count;
         }
@@ -73,50 +72,28 @@ internal static class SymbolAnalysis
         InformationForSymbolIds.Clear();
         TotalUsageCount = 0;
 
+        // Precompute reverse dependencies once for all symbols
+        var (_, reverseDeps) = CollectUsageAndReverseDependencies();
+
         foreach (var symbolUi in EditorSymbolPackage.AllSymbolUis)
         {
             var symbol = symbolUi.Symbol;
-
             usages.TryGetValue(symbol.Id, out var usageCount);
             TotalUsageCount += usageCount;
-            
-            var requiredSymbols     = CollectRequiredSymbols(symbol);
+
+            var requiredSymbols = CollectRequiredSymbols(symbol);
             var invalidRequirements = CollectInvalidRequirements(symbol, requiredSymbols).ToList();
-            var dependingSymbols    = Structure.CollectDependingSymbols(symbol).Select(s => s.Id).ToHashSet();
-            var examples            = ExampleSymbolLinking.GetExampleIds(symbol.Id);
 
-            var ns          = symbol.Namespace ?? string.Empty;
-            var rootSegment = ns.Split('.')[0];
+            reverseDeps.TryGetValue(symbol.Id, out var deps);
+            var dependingSymbols = deps ?? new HashSet<Guid>();
 
-            InformationForSymbolIds[symbol.Id] = new SymbolInformation
-            {
-                Warnings                     = new List<string>(),
-                RequiredSymbolIds            = requiredSymbols.Select(s => s.Id).ToHashSet(),
-                DependingSymbols             = dependingSymbols,
-                InvalidRequiredIds           = invalidRequirements,
-                ExampleSymbolsIds            = examples,
-                UsageCount                   = usageCount,
-                LacksDescription             = string.IsNullOrWhiteSpace(symbolUi.Description),
-                LacksAllParameterDescription =
-                    symbolUi.InputUis.Count > 2 &&
-                    symbolUi.InputUis.Values.All(i => string.IsNullOrWhiteSpace(i.Description)),
-                LacksSomeParameterDescription =
-                    symbolUi.InputUis.Count > 2 &&
-                    symbolUi.InputUis.Values.Any(i => string.IsNullOrWhiteSpace(i.Description)),
-                LacksParameterGrouping =
-                    symbolUi.InputUis.Count > 4 &&
-                    !symbolUi.InputUis.Values.Any(i => i.AddPadding || !string.IsNullOrEmpty(i.GroupTitle)),
-                IsLibOperator     = rootSegment.Equals("Lib",      StringComparison.Ordinal),
-                IsTypeOperator    = rootSegment.Equals("Types",    StringComparison.Ordinal),
-                IsExampleOperator = rootSegment.Equals("Examples", StringComparison.Ordinal),
-                IsT3Operator      = rootSegment.Equals("t3",       StringComparison.Ordinal),
-                IsSkillOperator   = rootSegment.Equals("Skills",   StringComparison.Ordinal),
-                DependsOnObsoleteOps = requiredSymbols
-                                       .Select(s => s.GetSymbolUi())
-                                       .Any(ui => ui != null &&
-                                                  ui.Tags.HasFlag(SymbolUi.SymbolTags.Obsolete)),
-                Tags = symbolUi.Tags,
-            };
+            InformationForSymbolIds[symbol.Id] = BuildSymbolInformation(
+                symbol,
+                symbolUi,
+                requiredSymbols,
+                invalidRequirements,
+                dependingSymbols,
+                usageCount);
         }
 
         DetailsInitialized = true;
@@ -147,7 +124,7 @@ internal static class SymbolAnalysis
         }
 
         // On-demand analysis for this single symbol
-        var requiredSymbols     = CollectRequiredSymbols(symbol);
+        var requiredSymbols = CollectRequiredSymbols(symbol);
         var invalidRequirements = CollectInvalidRequirements(symbol, requiredSymbols).ToList();
         var (usageCounts, reverseDeps) = CollectUsageAndReverseDependencies();
 
@@ -155,38 +132,13 @@ internal static class SymbolAnalysis
         reverseDeps.TryGetValue(symbol.Id, out var deps);
         var dependingSymbols = deps ?? new HashSet<Guid>();
 
-        var ns          = symbol.Namespace ?? string.Empty;
-        var rootSegment = ns.Split('.')[0];
-
-        info = new SymbolInformation
-        {
-            Warnings                     = new List<string>(),
-            RequiredSymbolIds            = requiredSymbols.Select(s => s.Id).ToHashSet(),
-            DependingSymbols             = dependingSymbols,
-            InvalidRequiredIds           = invalidRequirements,
-            ExampleSymbolsIds            = ExampleSymbolLinking.GetExampleIds(symbol.Id),
-            UsageCount                   = usageCount,
-            LacksDescription             = string.IsNullOrWhiteSpace(symbolUi.Description),
-            LacksAllParameterDescription =
-                symbolUi.InputUis.Count > 2 &&
-                symbolUi.InputUis.Values.All(i => string.IsNullOrWhiteSpace(i.Description)),
-            LacksSomeParameterDescription =
-                symbolUi.InputUis.Count > 2 &&
-                symbolUi.InputUis.Values.Any(i => string.IsNullOrWhiteSpace(i.Description)),
-            LacksParameterGrouping =
-                symbolUi.InputUis.Count > 4 &&
-                !symbolUi.InputUis.Values.Any(i => i.AddPadding || !string.IsNullOrEmpty(i.GroupTitle)),
-            IsLibOperator     = rootSegment.Equals("Lib",      StringComparison.Ordinal),
-            IsTypeOperator    = rootSegment.Equals("Types",    StringComparison.Ordinal),
-            IsExampleOperator = rootSegment.Equals("Examples", StringComparison.Ordinal),
-            IsT3Operator      = rootSegment.Equals("t3",       StringComparison.OrdinalIgnoreCase),
-            IsSkillOperator   = rootSegment.Equals("Skills",   StringComparison.Ordinal),
-            DependsOnObsoleteOps = requiredSymbols
-                                   .Select(s => s.GetSymbolUi())
-                                   .Any(ui => ui != null &&
-                                              ui.Tags.HasFlag(SymbolUi.SymbolTags.Obsolete)),
-            Tags = symbolUi.Tags,
-        };
+        info = BuildSymbolInformation(
+            symbol,
+            symbolUi,
+            requiredSymbols,
+            invalidRequirements,
+            dependingSymbols,
+            usageCount);
 
         return true;
     }
@@ -212,12 +164,80 @@ internal static class SymbolAnalysis
         internal bool IsT3Operator;
         internal bool IsSkillOperator;
         internal bool DependsOnObsoleteOps;
-        internal SymbolUi.SymbolTags Tags;  // Copy to avoid reference to symbolUi
+        internal SymbolUi.SymbolTags Tags; // Copy to avoid reference to symbolUi
     }
 
     // ------------------------------------------------------------------------
     // Shared helpers (used by both bulk and single analysis)
     // ------------------------------------------------------------------------
+
+    private static SymbolInformation BuildSymbolInformation(
+        Symbol symbol,
+        SymbolUi symbolUi,
+        HashSet<Symbol> requiredSymbols,
+        List<Guid> invalidRequirements,
+        HashSet<Guid> dependingSymbols,
+        int usageCount)
+    {
+        GetNamespaceFlags(symbol, out var rootSegment, out var isLib, out var isType,
+                          out var isExample, out var isT3, out var isSkill);
+
+        var inputUis = symbolUi.InputUis.Values;
+
+        var lacksDescription = string.IsNullOrWhiteSpace(symbolUi.Description);
+        var hasManyInputs = symbolUi.InputUis.Count > 2;
+        var lacksAllParamDesc = hasManyInputs &&
+                                inputUis.All(i => string.IsNullOrWhiteSpace(i.Description));
+        var lacksSomeParamDesc = hasManyInputs &&
+                                 inputUis.Any(i => string.IsNullOrWhiteSpace(i.Description));
+
+        var lacksParameterGrouping = symbolUi.InputUis.Count > 4 &&
+                                     !inputUis.Any(i => i.AddPadding || !string.IsNullOrEmpty(i.GroupTitle));
+
+        var dependsOnObsolete = requiredSymbols
+            .Select(s => s.GetSymbolUi())
+            .Any(ui => ui != null && ui.Tags.HasFlag(SymbolUi.SymbolTags.Obsolete));
+
+        return new SymbolInformation
+        {
+            Warnings = new List<string>(),
+            RequiredSymbolIds = requiredSymbols.Select(s => s.Id).ToHashSet(),
+            DependingSymbols = dependingSymbols,
+            InvalidRequiredIds = invalidRequirements,
+            ExampleSymbolsIds = ExampleSymbolLinking.GetExampleIds(symbol.Id),
+            UsageCount = usageCount,
+            LacksDescription = lacksDescription,
+            LacksAllParameterDescription = lacksAllParamDesc,
+            LacksSomeParameterDescription = lacksSomeParamDesc,
+            LacksParameterGrouping = lacksParameterGrouping,
+            IsLibOperator = isLib,
+            IsTypeOperator = isType,
+            IsExampleOperator = isExample,
+            IsT3Operator = isT3,
+            IsSkillOperator = isSkill,
+            DependsOnObsoleteOps = dependsOnObsolete,
+            Tags = symbolUi.Tags,
+        };
+    }
+
+    private static void GetNamespaceFlags(
+        Symbol symbol,
+        out string rootSegment,
+        out bool isLib,
+        out bool isType,
+        out bool isExample,
+        out bool isT3,
+        out bool isSkill)
+    {
+        var ns = symbol.Namespace ?? string.Empty;
+        rootSegment = ns.Split('.')[0];
+
+        isLib = rootSegment.Equals("Lib", StringComparison.Ordinal);
+        isType = rootSegment.Equals("Types", StringComparison.Ordinal);
+        isExample = rootSegment.Equals("Examples", StringComparison.Ordinal);
+        isT3 = rootSegment.Equals("t3", StringComparison.OrdinalIgnoreCase);
+        isSkill = rootSegment.Equals("Skills", StringComparison.Ordinal);
+    }
 
     private static HashSet<Symbol> CollectRequiredSymbols(Symbol root)
     {
@@ -231,19 +251,18 @@ internal static class SymbolAnalysis
             {
                 if (!all.Add(symbolChild.Symbol))
                     continue;
-
                 Collect(symbolChild.Symbol);
             }
         }
     }
-    
+
     /// <summary>
     /// Collect Ids of required symbols that are not within the list of projects
     /// </summary>
     private static IEnumerable<Guid> CollectInvalidRequirements(Symbol root, HashSet<Symbol> requiredSymbols)
     {
         var result = new List<Symbol>();
-        
+
         // Todo: implement this correctly?
         HashSet<string> validPackagesNames = new()
         {
@@ -255,7 +274,6 @@ internal static class SymbolAnalysis
         foreach (var r in requiredSymbols)
         {
             var projectId = r.SymbolPackage.RootNamespace;
-
             if (validPackagesNames.Contains(projectId))
                 continue;
 
@@ -263,16 +281,16 @@ internal static class SymbolAnalysis
         }
 
         return result
-               .OrderBy(s => s.Namespace)
-               .ThenBy(s => s.Name)
-               .Select(s => s.Id);
+            .OrderBy(s => s.Namespace)
+            .ThenBy(s => s.Name)
+            .Select(s => s.Id);
     }
 
     private static Dictionary<Guid, int> CollectSymbolUsageCounts()
     {
         var results = new Dictionary<Guid, int>();
         TotalUsageCount = 0;
-        
+
         foreach (var s in EditorSymbolPackage.AllSymbols)
         {
             foreach (var child in s.Children.Values)
@@ -289,7 +307,7 @@ internal static class SymbolAnalysis
 
         return results;
     }
-    
+
     /// <summary>
     /// Builds per-symbol usage counts and a reverse dependency map in a single pass
     /// over <see cref="EditorSymbolPackage.AllSymbols"/>.
@@ -304,11 +322,9 @@ internal static class SymbolAnalysis
         foreach (var container in EditorSymbolPackage.AllSymbols)
         {
             var containerId = container.Id;
-
             foreach (var child in container.Children.Values)
             {
                 var childId = child.Symbol.Id;
-
                 usageCounts.TryGetValue(childId, out var current);
                 usageCounts[childId] = current + 1;
 
