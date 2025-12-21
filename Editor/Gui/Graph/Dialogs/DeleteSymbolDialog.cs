@@ -176,7 +176,7 @@ internal sealed class DeleteSymbolDialog : ModalDialog
             else
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, UiColors.Text.Rgba);
-                ImGui.TextWrapped($"Symbol [{symbolName}] is not used by other symbols. \nThis is safe to delete.");
+                ImGui.TextWrapped($"Symbol [{symbolName}] is not used by other symbols and can be safely deleted.");
                 ImGui.PopStyleColor();
             }
         }
