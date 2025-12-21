@@ -158,4 +158,10 @@ internal sealed partial class EditableSymbolProject : EditorSymbolPackage
             return _allProjectsCache;
         }
     }
+    
+    //  New helper to force reload internally
+    public void MarkCodeExternallyModified()
+    {
+        CodeExternallyModified = true;
+    }
 }

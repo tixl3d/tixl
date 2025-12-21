@@ -76,10 +76,20 @@ internal static class SymbolUiJson
 
         foreach (var childUi in symbolUi.ChildUis.Values.OrderBy(x => x.Id))
         {
+            // Skip orphaned child UIs whose symbol child no longer exists
+            if (childUi.SymbolChild == null ||
+                !symbolUi.Symbol.Children.TryGetValue(childUi.Id, out var symbolChild))
+            {
+                Log.Warning($"Skipping UI child {childUi.Id} in '{symbolUi.Symbol.Name}' because corresponding symbol child is missing");
+                continue;
+            }
+
             writer.WriteStartObject(); // child entry
             writer.WriteObject(JsonKeys.ChildId, childUi.Id);
+
             {
-                writer.WriteComment(childUi.SymbolChild.ReadableName);
+                writer.WriteComment(symbolChild.ReadableName);
+
                 if (childUi.CollapsedIntoAnnotationFrameId != Guid.Empty)
                 {
                     writer.WriteObject(JsonKeys.AnnotationId, childUi.CollapsedIntoAnnotationFrameId);
@@ -88,6 +98,7 @@ internal static class SymbolUiJson
                 if (childUi.Style != SymbolUi.Child.Styles.Default)
                 {
                     writer.WriteObject(JsonKeys.Style, childUi.Style);
+
                     if (childUi.Size != SymbolUi.Child.DefaultOpSize)
                     {
                         writer.WritePropertyName(JsonKeys.Size);
@@ -121,11 +132,13 @@ internal static class SymbolUiJson
                     writer.WriteEndArray();
                 }
             }
+
             writer.WriteEndObject();
         }
 
         writer.WriteEndArray();
     }
+
 
     private static void WriteOutputUis(SymbolUi symbolUi, JsonTextWriter writer)
     {

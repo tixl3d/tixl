@@ -31,8 +31,12 @@ internal sealed class SymbolLibrary : Window
 
     protected override void DrawContent()
     {
-        if(_subtreeNodeToRename != null)
+        if (_subtreeNodeToRename != null)
             _renameNamespaceDialog.Draw(_subtreeNodeToRename);
+
+        if (_symbolToDelete != null)
+            _deleteSymbolDialog.Draw(_symbolToDelete);
+
 
         ImGui.PushStyleVar(ImGuiStyleVar.IndentSpacing, 10);
 
@@ -66,42 +70,41 @@ internal sealed class SymbolLibrary : Window
             _wasScanned = true;
         }
 
-        CustomComponents.TooltipForLastItem("Scan usage dependencies for symbols", 
+        CustomComponents.TooltipForLastItem("Scan usage dependencies for symbols",
                                             "This can be useful for cleaning up operator name spaces.");
 
         if (_wasScanned)
         {
             _libraryFiltering.DrawSymbolFilters();
         }
-        
 
         ImGui.BeginChild("scrolling", Vector2.Zero, false, ImGuiWindowFlags.NoBackground);
         {
-             if (_libraryFiltering.AnyFilterActive)
-             {
-                 DrawNode(FilteredTree);
-             }
-             else if (string.IsNullOrEmpty(_filter.SearchString))
-             {
-                 DrawNode(_treeNode);
-             }
-             else if (_filter.SearchString.Contains('?'))
-             {
-                 _randomPromptGenerator.DrawRandomPromptList();
-             }
-             else
-             {
-                 DrawFilteredList();
-             }
+            if (_libraryFiltering.AnyFilterActive)
+            {
+                DrawNode(FilteredTree);
+            }
+            else if (string.IsNullOrEmpty(_filter.SearchString))
+            {
+                DrawNode(_treeNode);
+            }
+            else if (_filter.SearchString.Contains('?'))
+            {
+                _randomPromptGenerator.DrawRandomPromptList();
+            }
+            else
+            {
+                DrawFilteredList();
+            }
         }
         ImGui.EndChild();
     }
-    
+
     private static void DrawUsagesAReferencedSymbol()
     {
         if (_symbolUsageReferenceFilter == null)
             return;
-        
+
         ImGui.Text("Usages of " + _symbolUsageReferenceFilter.Name + ":");
         if (ImGui.Button("Clear"))
         {
@@ -115,7 +118,6 @@ internal sealed class SymbolLibrary : Window
             {
                 if (SymbolAnalysis.DetailsInitialized && SymbolAnalysis.InformationForSymbolIds.TryGetValue(_symbolUsageReferenceFilter.Id, out var info))
                 {
-                    // TODO: this should be cached...
                     var allSymbols = EditorSymbolPackage.AllSymbols.ToDictionary(s => s.Id);
 
                     foreach (var id in info.DependingSymbols)
@@ -158,14 +160,15 @@ internal sealed class SymbolLibrary : Window
             }
 
             var isOpen = ImGui.TreeNode(subtree.Name);
+
             CustomComponents.ContextMenuForItem(() =>
-                                                {
-                                                    if (ImGui.MenuItem("Rename Namespace"))
-                                                    {
-                                                        _subtreeNodeToRename = subtree;
-                                                        _renameNamespaceDialog.ShowNextFrame();
-                                                    }
-                                                });
+            {
+                if (ImGui.MenuItem("Rename Namespace"))
+                {
+                    _subtreeNodeToRename = subtree;
+                    _renameNamespaceDialog.ShowNextFrame();
+                }
+            });
 
             if (isOpen)
             {
@@ -260,7 +263,12 @@ internal sealed class SymbolLibrary : Window
     private static Symbol? _symbolUsageReferenceFilter;
     private readonly RandomPromptGenerator _randomPromptGenerator;
     private readonly LibraryFiltering _libraryFiltering;
+    
+    private static readonly DeleteSymbolDialog _deleteSymbolDialog = new();
+    private static bool _showDeleteDialog = true; 
+    private static Symbol? _symbolToDelete;
 
+    // Static back-reference so DrawSymbolItem can set _symbolToDelete
     internal static void DrawSymbolItem(Symbol symbol)
     {
         if (!symbol.TryGetSymbolUi(out var symbolUi))
@@ -313,28 +321,41 @@ internal sealed class SymbolLibrary : Window
             ImGui.PopStyleColor(4);
             HandleDragAndDropForSymbolItem(symbol);
 
-            CustomComponents.ContextMenuForItem(drawMenuItems: () => CustomComponents.DrawSymbolCodeContextMenuItem(symbol), 
-                                                title: symbol.Name,
-                                                id: "##symbolTreeSymbolContextMenu");
+            // Single ImGui popup for this item: code menu + delete entry in one place.
+            if (ImGui.BeginPopupContextItem("##symbolTreeSymbolContextMenu"))
+            {
+                // Existing symbol-specific menu
+                CustomComponents.DrawSymbolCodeContextMenuItem(symbol);
+
+                // Optional separator for clarity
+                ImGui.Separator();
+
+                // Delete symbol menu entry
+                if (ImGui.MenuItem("Delete Symbol"))
+                {
+                    _symbolToDelete = symbol;
+                    _deleteSymbolDialog.ShowNextFrame();
+                }
+
+                ImGui.EndPopup();
+            }
 
             if (SymbolAnalysis.DetailsInitialized && SymbolAnalysis.InformationForSymbolIds.TryGetValue(symbol.Id, out var info))
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-                
-                
-                ListSymbolSetWithTooltip(250,Icon.Dependencies,"{0}", string.Empty, "requires...", info.RequiredSymbolIds.ToList());
+
+                ListSymbolSetWithTooltip(250, Icon.Dependencies, "{0}", string.Empty, "requires...", info.RequiredSymbolIds.ToList());
                 ImGui.PushStyleColor(ImGuiCol.Text, UiColors.StatusAttention.Rgba);
-                ListSymbolSetWithTooltip(300,Icon.None,"{0}", string.Empty, "has invalid references...", info.InvalidRequiredIds);
+                ListSymbolSetWithTooltip(300, Icon.None, "{0}", string.Empty, "has invalid references...", info.InvalidRequiredIds);
                 ImGui.PopStyleColor();
-                
-                if (ListSymbolSetWithTooltip(340, Icon.Referenced, "{0}", " NOT USED",  "used by...", info.DependingSymbols.ToList()))
+
+                if (ListSymbolSetWithTooltip(340, Icon.Referenced, "{0}", " NOT USED", "used by...", info.DependingSymbols.ToList()))
                 {
                     _symbolUsageReferenceFilter = symbol;
                 }
 
                 ImGui.PopStyleColor();
             }
-
 
             if (ExampleSymbolLinking.TryGetExamples(symbol.Id, out var examples))
             {
@@ -354,6 +375,16 @@ internal sealed class SymbolLibrary : Window
                 
         }
         ImGui.PopID();
+        
+        if (_symbolToDelete != null && ImGui.BeginPopupModal("DeleteSymbol", ref _showDeleteDialog))
+        {
+            _deleteSymbolDialog.Draw(_symbolToDelete);
+            if (!_showDeleteDialog)  // Dialog closed
+            {
+                _symbolToDelete = null;
+            }
+            ImGui.EndPopup();
+        }
     }
 
     private static bool ListSymbolSetWithTooltip(float x, Icon icon, string setTitleFormat, string emptySetTitle, string toolTopTitle, List<Guid> symbolSet)
@@ -384,7 +415,6 @@ internal sealed class SymbolLibrary : Window
         }
 
         ImGui.PopID();
-        //ImGui.SameLine();
         return activated;
 
         void DrawTooltip()
