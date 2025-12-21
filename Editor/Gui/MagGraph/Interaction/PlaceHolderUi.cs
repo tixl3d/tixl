@@ -41,13 +41,17 @@ internal static class PlaceHolderUi
 
         WindowContentExtend.GetLastAndReset();
         SymbolBrowsing.Reset();
+
+        _rowHeight = 0;
     }
 
     internal static void Reset()
     {
         Filter.Reset();
         _placeholderItem = null;
-        _selectedSymbolUi = null; // clear references
+        _selectedSymbolUi = null;
+        _rowHeight = 0;
+        _focusInputNextTime = false;
     }
 
     internal static UiResults Draw(GraphUiContext context, out SymbolUi? selectedUi)
@@ -57,7 +61,6 @@ internal static class PlaceHolderUi
         var drawList = ImGui.GetWindowDrawList();
         var uiResult = UiResults.None;
 
-        // Might have been closed from input
         if (_placeholderItem == null)
             return uiResult;
 
@@ -71,26 +74,21 @@ internal static class PlaceHolderUi
         var pMax = context.View.TransformPosition(_placeholderItem.Area.Max);
 
         uiResult |= DrawResultsList(context, new ImRect(pMin, pMax), Filter, _connectionOrientation);
-
-        var clickedOutsidePlaceholder = ImGui.IsMouseClicked(ImGuiMouseButton.Left) && !_placeholderAreaOnScreen.Contains(ImGui.GetMousePos());
-        if (clickedOutsidePlaceholder && uiResult.HasFlag(UiResults.ClickedOutside))
+        
+        // Click outside = mouse click that is NOT in placeholder rect and NOT in results rect.
+        if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
         {
-            uiResult |= UiResults.Cancel;
-        }
+            var mousePos = ImGui.GetMousePos();
+            bool overPlaceholder = _placeholderAreaOnScreen.Contains(mousePos);
+            bool overResults = _resultsAreaOnScreen.Contains(mousePos);
 
-        // TODO: Implement preset search
-        // if (_selectedSymbolUi != null)
-        // {
-        //     if (Filter.PresetFilterString != string.Empty && (Filter.WasUpdated || _selectedItemChanged))
-        //     {
-        //
-        //     }
-        // }
+            bool clickedOutsideBoth = !overPlaceholder && !overResults;
 
-        if (_focusInputNextTime)
-        {
-            ImGui.SetKeyboardFocusHere();
-            _focusInputNextTime = false;
+            if (clickedOutsideBoth)
+            {
+                uiResult |= UiResults.ClickedOutside;
+                uiResult |= UiResults.Cancel;
+            }
         }
 
         selectedUi = _selectedSymbolUi;
@@ -117,13 +115,6 @@ internal static class PlaceHolderUi
         drawList.AddRectFilled(pMinVisible + Vector2.One * canvasScale, pMaxVisible - Vector2.One,
                                UiColors.BackgroundFull, 2 * canvasScale);
 
-        if (_focusInputNextTime)
-        {
-            ImGui.SetKeyboardFocusHere();
-            _focusInputNextTime = false;
-            uiResult |= UiResults.SelectionChanged;
-        }
-
         var labelPos = new Vector2(pMin.X,
                                    (pMin.Y + pMax.Y) / 2 - ImGui.GetFrameHeight() / 2);
 
@@ -144,9 +135,17 @@ internal static class PlaceHolderUi
             ImGui.PushStyleColor(ImGuiCol.FrameBg, Color.Transparent.Rgba);
             ImGui.SetNextItemWidth(item.Size.X);
 
+            ImGui.PushID("SymbolBrowserSearch");
+            if (_focusInputNextTime)
+            {
+                ImGui.SetKeyboardFocusHere();
+                _focusInputNextTime = false;
+            }
+
             ImGui.InputText("##symbolBrowserFilter",
                             ref Filter.SearchString,
                             20, ImGuiInputTextFlags.AutoSelectAll);
+            ImGui.PopID();
 
             ImGui.PopStyleColor();
             ImGui.PopStyleVar();
@@ -181,21 +180,15 @@ internal static class PlaceHolderUi
             _selectedSymbolUi = Filter.MatchingSymbolUis.Count > 0
                                     ? Filter.MatchingSymbolUis[0]
                                     : null;
+            _rowHeight = 0;
             uiResult |= UiResults.SelectionChanged;
         }
 
-        var clickedOutside = false; //ImGui.IsMouseClicked(ImGuiMouseButton.Left) && ImGui.IsWindowHovered();
-        var shouldCancelConnectionMaker = clickedOutside
-                                          //|| ImGui.IsMouseClicked(ImGuiMouseButton.Right)
-                                          || ImGui.IsKeyDown((ImGuiKey)Key.Esc);
-
-        if (shouldCancelConnectionMaker)
+        if (ImGui.IsKeyDown((ImGuiKey)Key.Esc))
         {
             uiResult |= UiResults.Cancel;
-            //Cancel(context);
         }
 
-        ImGui.PopStyleVar();
         if (!ImGui.IsItemActive())
             return uiResult;
 
@@ -241,7 +234,8 @@ internal static class PlaceHolderUi
 
         last.Y = last.Y.Clamp(0, 300);
 
-        var resultAreaOnScreen = ImRect.RectWithSize(resultPosOnScreen, last);
+        // Cache the effective rect of the result child for outside-click detection.
+        _resultsAreaOnScreen = ImRect.RectWithSize(resultPosOnScreen, last);
 
         bool childOpen = ImGui.BeginChild(999, last, true,
                              ImGuiWindowFlags.AlwaysUseWindowPadding
@@ -266,12 +260,6 @@ internal static class PlaceHolderUi
 
         ImGui.PopStyleColor(2);
         ImGui.PopStyleVar(4);
-
-        var wasClickedOutside = ImGui.IsMouseClicked(ImGuiMouseButton.Left) && !resultAreaOnScreen.Contains(ImGui.GetMousePos());
-        if (wasClickedOutside)
-        {
-            result |= UiResults.ClickedOutside;
-        }
 
         return result;
     }
@@ -320,22 +308,19 @@ internal static class PlaceHolderUi
         if (_selectedSymbolUi == null && EditorSymbolPackage.AllSymbolUis.Any())
             _selectedSymbolUi = EditorSymbolPackage.AllSymbolUis.First();
 
-        // --- ImGuiListClipper integration (only when child is visible) ---
         var count = filter.MatchingSymbolUis.Count;
-        if (count > 0 && ImGui.IsAnyItemActive())
+        if (count > 0)
         {
             unsafe
             {
-                // Measure one row height once (symbol name text height).
                 if (_rowHeight <= 0)
                 {
                     var size = ImGui.CalcTextSize(filter.MatchingSymbolUis[0].Symbol.Name);
-                    // Add padding similar to the selectable's visual height.
                     _rowHeight = size.Y + ImGui.GetStyle().FramePadding.Y * 2;
                 }
 
                 ImGuiListClipperPtr clipper = new ImGuiListClipperPtr(ImGuiNative.ImGuiListClipper_ImGuiListClipper());
-                clipper.Begin(count, ImGui.GetTextLineHeightWithSpacing());
+                clipper.Begin(count, _rowHeight);
 
                 while (clipper.Step())
                 {
@@ -398,9 +383,6 @@ internal static class PlaceHolderUi
 
         ImGui.PopStyleVar();
 
-        // var dl = ImGui.GetForegroundDrawList();
-        // dl.AddRect(ImGui.GetItemRectMin(), ImGui.GetItemRectMax(), Color.Green);
-
         var isHovered = ImGui.IsItemHovered();
         if (isHovered)
         {
@@ -410,7 +392,6 @@ internal static class PlaceHolderUi
             ImGui.EndTooltip();
         }
 
-        //ImGui.set
         ImGui.SameLine(ImGui.GetItemRectMin().X - ImGui.GetWindowPos().X);
         ImGui.TextUnformatted(symbolUi.Symbol.Name);
 
@@ -437,11 +418,11 @@ internal static class PlaceHolderUi
     private static bool _focusInputNextTime = true;
     private static SymbolUi? _selectedSymbolUi;
     private static ImRect _placeholderAreaOnScreen;
+    private static ImRect _resultsAreaOnScreen;
     internal static readonly SymbolFilter Filter = new();
     private static MagGraphItem? _placeholderItem;
     private static MagGraphItem.Directions _connectionOrientation = MagGraphItem.Directions.Horizontal;
 
-    // Cached row height for clipper
     private static float _rowHeight = 0;
 
     [Flags]
