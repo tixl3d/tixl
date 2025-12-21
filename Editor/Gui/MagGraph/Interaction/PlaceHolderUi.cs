@@ -1,11 +1,7 @@
 ﻿#nullable enable
 
-using System;
 using System.Diagnostics;
-using System.Linq;
-
 using ImGuiNET;
-
 using T3.Core.DataTypes.Vector;
 using T3.Core.Model;
 using T3.Core.Utils;
@@ -23,9 +19,12 @@ namespace T3.Editor.Gui.MagGraph.Interaction;
 
 internal static class PlaceHolderUi
 {
-    internal static void Open(GraphUiContext context, MagGraphItem placeholderItem,
-                              MagGraphItem.Directions connectionOrientation = MagGraphItem.Directions.Horizontal,
-                              Type? inputFilter = null, Type? outputFilter = null)
+    internal static void Open(
+        GraphUiContext context,
+        MagGraphItem placeholderItem,
+        MagGraphItem.Directions connectionOrientation = MagGraphItem.Directions.Horizontal,
+        Type? inputFilter = null,
+        Type? outputFilter = null)
     {
         _selectedSymbolUi = null;
         _focusInputNextTime = true;
@@ -68,32 +67,47 @@ internal static class PlaceHolderUi
 
         Filter.UpdateIfNecessary(context.Selector);
 
-        uiResult |= DrawSearchInput(context, drawList);
+        uiResult = DrawSearchInput(context, drawList);
 
         var pMin = context.View.TransformPosition(_placeholderItem.PosOnCanvas);
         var pMax = context.View.TransformPosition(_placeholderItem.Area.Max);
 
-        uiResult |= DrawResultsList(context, new ImRect(pMin, pMax), Filter, _connectionOrientation);
-        
+        uiResult = DrawResultsList(context, new ImRect(pMin, pMax), Filter, _connectionOrientation);
+
         // Click outside = mouse click that is NOT in placeholder rect and NOT in results rect.
         if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
         {
             var mousePos = ImGui.GetMousePos();
             bool overPlaceholder = _placeholderAreaOnScreen.Contains(mousePos);
             bool overResults = _resultsAreaOnScreen.Contains(mousePos);
-
             bool clickedOutsideBoth = !overPlaceholder && !overResults;
 
             if (clickedOutsideBoth)
             {
-                uiResult |= UiResults.ClickedOutside;
-                uiResult |= UiResults.Cancel;
+                uiResult = UiResults.ClickedOutside;
+
+                // Preserve semantics of shouldCancelConnectionMaker:
+                var shouldCancelConnectionMaker = true; // clicked outside both
+                if (shouldCancelConnectionMaker)
+                {
+                    uiResult = UiResults.Cancel;
+                    //Cancel(context);    // TODO: Implement cancel behavior if/when needed
+                }
             }
         }
-
+        
         selectedUi = _selectedSymbolUi;
         return uiResult;
     }
+    
+    // TODO: Implement preset search
+    // if (_selectedSymbolUi != null)
+    // {
+    //     if (Filter.PresetFilterString != string.Empty && (Filter.WasUpdated || _selectedItemChanged))
+    //     {
+    //
+    //     }
+    // }
 
     private static UiResults DrawSearchInput(GraphUiContext context, ImDrawListPtr drawList)
     {
@@ -112,8 +126,10 @@ internal static class PlaceHolderUi
         _placeholderAreaOnScreen = ImRect.RectBetweenPoints(pMin, pMax);
 
         // Background and Outline
-        drawList.AddRectFilled(pMinVisible + Vector2.One * canvasScale, pMaxVisible - Vector2.One,
-                               UiColors.BackgroundFull, 2 * canvasScale);
+        drawList.AddRectFilled(pMinVisible + Vector2.One * canvasScale,
+                               pMaxVisible - Vector2.One,
+                               UiColors.BackgroundFull,
+                               2 * canvasScale);
 
         var labelPos = new Vector2(pMin.X,
                                    (pMin.Y + pMax.Y) / 2 - ImGui.GetFrameHeight() / 2);
@@ -144,7 +160,8 @@ internal static class PlaceHolderUi
 
             ImGui.InputText("##symbolBrowserFilter",
                             ref Filter.SearchString,
-                            20, ImGuiInputTextFlags.AutoSelectAll);
+                            20,
+                            ImGuiInputTextFlags.AutoSelectAll);
             ImGui.PopID();
 
             ImGui.PopStyleColor();
@@ -171,7 +188,7 @@ internal static class PlaceHolderUi
         {
             if (_selectedSymbolUi != null)
             {
-                uiResult |= UiResults.Create;
+                uiResult = UiResults.Create;
             }
         }
 
@@ -181,12 +198,19 @@ internal static class PlaceHolderUi
                                     ? Filter.MatchingSymbolUis[0]
                                     : null;
             _rowHeight = 0;
-            uiResult |= UiResults.SelectionChanged;
+            uiResult = UiResults.SelectionChanged;
         }
 
-        if (ImGui.IsKeyDown((ImGuiKey)Key.Esc))
+        // Preserve Esc-based cancel logic with shouldCancelConnectionMaker.
+        var clickedOutside = false; // TODO: wire this up if window-hover based cancel is reintroduced
+        var shouldCancelConnectionMaker = clickedOutside
+                                          // ImGui.IsMouseClicked(ImGuiMouseButton.Right)
+                                          || ImGui.IsKeyDown((ImGuiKey)Key.Esc);
+
+        if (shouldCancelConnectionMaker)
         {
-            uiResult |= UiResults.Cancel;
+            uiResult = UiResults.Cancel;
+            //Cancel(context);    // TODO: Implement cancel behavior if/when needed
         }
 
         if (!ImGui.IsItemActive())
@@ -237,9 +261,11 @@ internal static class PlaceHolderUi
         // Cache the effective rect of the result child for outside-click detection.
         _resultsAreaOnScreen = ImRect.RectWithSize(resultPosOnScreen, last);
 
-        bool childOpen = ImGui.BeginChild(999, last, true,
-                             ImGuiWindowFlags.AlwaysUseWindowPadding
-                             | ImGuiWindowFlags.NoResize);
+        bool childOpen = ImGui.BeginChild(999,
+                                          last,
+                                          true,
+                                          ImGuiWindowFlags.AlwaysUseWindowPadding
+                                          | ImGuiWindowFlags.NoResize);
 
         if (childOpen)
         {
@@ -249,11 +275,11 @@ internal static class PlaceHolderUi
                 || filter.FilterInputType != null
                 || filter.FilterOutputType != null)
             {
-                result |= DrawSearchResultEntries(context, filter);
+                result = DrawSearchResultEntries(context, filter);
             }
             else
             {
-                result |= SymbolBrowsing.Draw(context);
+                result = SymbolBrowsing.Draw(context);
             }
         }
         ImGui.EndChild();
@@ -279,7 +305,7 @@ internal static class PlaceHolderUi
                                  : string.Empty;
 
         var isMultiInput = filter.OnlyMultiInputs ? "[..]" : "";
-        var headerLabel = $"{inputTypeName}{isMultiInput} -> {outputTypeName}";
+        var headerLabel = $"{inputTypeName} {isMultiInput} -> {outputTypeName}";
         ImGui.TextDisabled(headerLabel);
 
         ImGui.PopFont();
@@ -308,14 +334,17 @@ internal static class PlaceHolderUi
         if (_selectedSymbolUi == null && EditorSymbolPackage.AllSymbolUis.Any())
             _selectedSymbolUi = EditorSymbolPackage.AllSymbolUis.First();
 
+        // --- ImGuiListClipper integration (only when child is visible) ---
         var count = filter.MatchingSymbolUis.Count;
-        if (count > 0)
+        if (count > 0 && ImGui.IsAnyItemActive())
         {
             unsafe
             {
+                // Measure one row height once (symbol name text height).
                 if (_rowHeight <= 0)
                 {
                     var size = ImGui.CalcTextSize(filter.MatchingSymbolUis[0].Symbol.Name);
+                    // Add padding similar to the selectable's visual height.
                     _rowHeight = size.Y + ImGui.GetStyle().FramePadding.Y * 2;
                 }
 
@@ -327,14 +356,14 @@ internal static class PlaceHolderUi
                     for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++)
                     {
                         var symbolUi = filter.MatchingSymbolUis[i];
-                        result |= DrawSymbolUiEntry(context, symbolUi);
+                        result = DrawSymbolUiEntry(context, symbolUi);
                     }
                 }
 
                 clipper.End();
             }
         }
-        
+
         WindowContentExtend.ExtendToLastItem(150);
         return result;
     }
@@ -377,12 +406,15 @@ internal static class PlaceHolderUi
                              ImGuiSelectableFlags.None,
                              new Vector2(size.X, 0)))
         {
-            result |= UiResults.Create;
+            result = UiResults.Create;
             _selectedSymbolUi = symbolUi;
         }
 
         ImGui.PopStyleVar();
 
+        // var dl = ImGui.GetForegroundDrawList();
+        // dl.AddRect(ImGui.GetItemRectMin(), ImGui.GetItemRectMax(), Color.Green);
+        
         var isHovered = ImGui.IsItemHovered();
         if (isHovered)
         {
@@ -406,11 +438,12 @@ internal static class PlaceHolderUi
         var projectNamespace = "user." + context.CompositionInstance.Symbol.SymbolPackage.AssemblyInformation.Name + ".";
         var compositionNameSpace = context.CompositionInstance.Symbol.Namespace;
 
-        var isRelevantNamespace = symbolNamespace.StartsWith("Lib.")
-                                  || symbolNamespace.StartsWith("Types.")
-                                  || symbolNamespace.StartsWith("Examples.Lib.")
-                                  || symbolNamespace.StartsWith(projectNamespace)
-                                  || symbolNamespace.StartsWith(compositionNameSpace);
+        var isRelevantNamespace =
+            symbolNamespace.StartsWith("Lib.")
+            || symbolNamespace.StartsWith("Types.")
+            || symbolNamespace.StartsWith("Examples.Lib.")
+            || symbolNamespace.StartsWith(projectNamespace)
+            || symbolNamespace.StartsWith(compositionNameSpace);
 
         return isRelevantNamespace;
     }
@@ -423,6 +456,7 @@ internal static class PlaceHolderUi
     private static MagGraphItem? _placeholderItem;
     private static MagGraphItem.Directions _connectionOrientation = MagGraphItem.Directions.Horizontal;
 
+    // Cached row height for clipper
     private static float _rowHeight = 0;
 
     [Flags]
