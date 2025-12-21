@@ -116,7 +116,7 @@ internal sealed class DeleteSymbolDialog : ModalDialog
             {
                 ImGui.TextColored(
                     UiColors.StatusAttention,
-                    "This symbol is attached to the project namespace. Deleting it can break the project. Delete or rename the namespace instead of this symbol.");
+                    "This symbol is attached to the project namespace.");
             }
             else
             {
