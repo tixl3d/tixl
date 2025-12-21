@@ -131,9 +131,9 @@ internal sealed class DeleteSymbolDialog : ModalDialog
         {
             ImGui.PushStyleColor(ImGuiCol.Text, UiColors.StatusAttention.Rgba);
             ImGui.TextWrapped(
-                $"Symbol [{symbolName}] acts as the main symbol for namespace [{symbol.Namespace}]. " +
-                "Removing it directly can leave the project in a broken state. " +
-                "Use the namespace delete/rename workflow instead of deleting this symbol.");
+                $"Symbol [{symbolName}] acts as the main symbol for namespace [{symbol.Namespace}]. \n" +
+                "Removing it directly can leave the project in a broken state. \n" +
+                "Use the namespace delete workflow (todo) instead of deleting this symbol.");
             ImGui.PopStyleColor();
             return;
         }
@@ -144,14 +144,14 @@ internal sealed class DeleteSymbolDialog : ModalDialog
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, UiColors.StatusAttention.Rgba);
                 ImGui.TextWrapped(
-                    $"Symbol [{symbolName}] is used by [{info.DependingSymbols.Count}] other symbols, " +
+                    $"Symbol [{symbolName}] is used by [{info.DependingSymbols.Count}] other projects/symbols, " +
                     "but deletion is blocked because it belongs to a protected library or read-only package.");
                 ImGui.PopStyleColor();
             }
             else
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, UiColors.StatusAttention.Rgba);
-                ImGui.TextWrapped($"[{symbolName}] is used in [{info.DependingSymbols.Count}] symbol(s):");
+                ImGui.TextWrapped($"[{symbolName}] is used in [{info.DependingSymbols.Count}] projects/symbols:");
                 ImGui.PopStyleColor();
 
                 ImGui.PushStyleColor(ImGuiCol.Text, UiColors.StatusAttention.Rgba);
@@ -159,9 +159,8 @@ internal sealed class DeleteSymbolDialog : ModalDialog
                 ImGui.PopStyleColor();
 
                 ImGui.PushStyleColor(ImGuiCol.Text, UiColors.StatusAttention.Rgba);
-                ImGui.TextWrapped(
-                    "Clicking Delete will force-delete this symbol and automatically disconnect/clean all usages. " +
-                    "This may completely break these projects/symbols, and can NOT be undone.");
+                ImGui.TextWrapped("Clicking Delete will force-delete this symbol and automatically disconnect/clean all usages. " +
+                                  "This may completely break these projects/symbols, and can *NOT* be undone.");
                 ImGui.PopStyleColor();
             }
         }
@@ -170,14 +169,14 @@ internal sealed class DeleteSymbolDialog : ModalDialog
             if (!_allowDeletion)
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, UiColors.StatusAttention.Rgba);
-                ImGui.TextWrapped(
-                    $"Symbol [{symbolName}] is not used by other symbols, but deletion is blocked because it belongs to a protected library or read-only package.");
+                ImGui.TextWrapped($"Symbol [{symbolName}] is not used by other symbols, " +
+                                  $"but deletion is blocked because it belongs to a protected library or read-only package.");
                 ImGui.PopStyleColor();
             }
             else
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, UiColors.Text.Rgba);
-                ImGui.TextWrapped($"Symbol [{symbolName}] is not used by other symbols. Delete it?");
+                ImGui.TextWrapped($"Symbol [{symbolName}] is not used by other symbols. \nThis is safe to delete.");
                 ImGui.PopStyleColor();
             }
         }
@@ -272,7 +271,9 @@ internal sealed class DeleteSymbolDialog : ModalDialog
                     var rectMax   = new System.Numerics.Vector2(
                         cursorPos.X + avail.X,
                         cursorPos.Y + Fonts.FontSmall.FontSize + 4);
-                    drawList.AddRectFilled(rectMin, rectMax, UiColors.GridLines, 0.0f);
+                    var nsLabelBgColor = UiColors.BackgroundFull;
+                    nsLabelBgColor.A = 0.3f;
+                    drawList.AddRectFilled(rectMin, rectMax, nsLabelBgColor, 0.0f);
 
                     ImGui.PushStyleColor(ImGuiCol.Text, UiColors.Text.Rgba);
                     ImGui.PushFont(Fonts.FontSmall);
@@ -299,14 +300,8 @@ internal sealed class DeleteSymbolDialog : ModalDialog
     // ─────────────────────────────────────────────────────────────────────────
     // Deletion helpers
     // ─────────────────────────────────────────────────────────────────────────
-
-    // Original delete (no dependency clean-up) now forwards to the main overload
-    private static bool DeleteSymbol(Symbol symbol, out string reason)
-    {
-        return DeleteSymbol(symbol, null, out reason);
-    }
-
-    // New unified delete: optional dependency clean-up, then delete+reload
+    
+    // Unified delete: optional dependency clean-up, then delete+reload
     private static bool DeleteSymbol(Symbol symbol, HashSet<Guid>? dependingSymbols, out string reason)
     {
         if (dependingSymbols is { Count: > 0 })
@@ -457,7 +452,7 @@ internal sealed class DeleteSymbolDialog : ModalDialog
                 dependingSymbol.RemoveChild(child.Id);
             }
 
-            Log.Info($"Disconnected and removed {childrenUsingSymbol.Count} usages of [{symbolToDelete.Name}] from [{dependingSymbol.Name}]");
+            Log.Debug($"Disconnected and removed {childrenUsingSymbol.Count} usages of [{symbolToDelete.Name}] from [{dependingSymbol.Name}]");
         }
 
         reason = string.Empty;
@@ -512,9 +507,6 @@ internal sealed class DeleteSymbolDialog : ModalDialog
             project.MarkCodeExternallyModified();
             //Log.Info($"*** FORCED project.CodeExternallyModified = true for '{project.DisplayName}' after symbol deletion ***");
         }
-
-        // Immediately trigger save and any pending recompilation
-        //T3Ui.Save(false);
     }
 
     private static void Close()
