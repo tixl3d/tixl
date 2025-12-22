@@ -30,7 +30,7 @@ internal sealed class DeleteSymbolDialog : ModalDialog
         }
 
         LocalSymbolInfo? info = null;
-        if (symbol != null && SymbolAnalysis.TryGetSymbolInfo(symbol, out var analyzedInfo))
+        if (symbol != null && SymbolAnalysis.TryGetSymbolInfo(symbol, out var analyzedInfo, true))
         {
             info = new LocalSymbolInfo(analyzedInfo);
             DrawAnalysisUi(symbol, symbolName, info);

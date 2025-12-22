@@ -103,15 +103,21 @@ internal static class SymbolAnalysis
     /// Fast single-symbol analysis for dialogs, menus, etc.
     /// Uses cached bulk data when available, otherwise computes on-demand.
     /// </summary>
-    internal static bool TryGetSymbolInfo(Symbol symbol, out SymbolInformation info)
+    /// <param name="symbol">The symbol to analyze.</param>
+    /// <param name="info">Returns the collected information for the symbol.</param>
+    /// <param name="forceUpdate">
+    /// If true, forces a fresh analysis for this symbol even if cached data is available.
+    /// If false, uses the cached information when possible.
+    /// </param>
+    internal static bool TryGetSymbolInfo(Symbol symbol, out SymbolInformation info, bool forceUpdate = false)
     {
         info = new SymbolInformation();
 
         if (!symbol.TryGetSymbolUi(out var symbolUi))
             return false;
 
-        // If UpdateDetails has run, return the cached info
-        if (DetailsInitialized && InformationForSymbolIds.TryGetValue(symbol.Id, out var cached))
+        // If UpdateDetails has run and no force update is requested, return the cached info
+        if (!forceUpdate && DetailsInitialized && InformationForSymbolIds.TryGetValue(symbol.Id, out var cached))
         {
             // Keep a copy so callers cannot accidentally mutate the cache.
             info = cached;
@@ -139,6 +145,13 @@ internal static class SymbolAnalysis
             invalidRequirements,
             dependingSymbols,
             usageCount);
+
+        // Optionally refresh the cached entry if details are already initialized
+        // so that subsequent calls without forceUpdate can benefit.
+        if (DetailsInitialized)
+        {
+            InformationForSymbolIds[symbol.Id] = info;
+        }
 
         return true;
     }
