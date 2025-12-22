@@ -45,41 +45,42 @@ internal sealed class DeleteSymbolDialog : ModalDialog
         ImGui.Separator();
         FormInputs.AddVerticalSpace(4);
 
-        // Single delete button handles both normal and force delete
-        ImGui.BeginDisabled(!_allowDeletion);
-        string buttonLabel = "Delete";
-        if (info != null && info.DependingSymbols.Any())
+        // Only draw buttons if deletion is allowed
+        if (_allowDeletion)
         {
-            buttonLabel = "Force delete##1";
-        }
-        
-        if (ImGui.Button(buttonLabel) && _allowDeletion && symbol != null)
-        {
-            bool success;
-            string reason;
-
+            string buttonLabel = "Delete";
             if (info != null && info.DependingSymbols.Any())
             {
-                success = DeleteSymbol(symbol, info.DependingSymbols, out reason);
+                buttonLabel = "Force delete";
             }
-            else
+            
+            if (ImGui.Button(buttonLabel) && symbol != null)
             {
-                success = DeleteSymbol(symbol, null, out reason);
-            }
-    
-            if (!success)
-            {
-                BlockingWindow.Instance.ShowMessageBox(reason, "Could not delete symbol");
-            }
-            else
-            {
-                Close();
-            }
-        }
-        
-        ImGui.EndDisabled();
+                bool success;
+                string reason;
 
-        ImGui.SameLine();
+                if (info != null && info.DependingSymbols.Any())
+                {
+                    success = DeleteSymbol(symbol, info.DependingSymbols, out reason);
+                }
+                else
+                {
+                    success = DeleteSymbol(symbol, null, out reason);
+                }
+    
+                if (!success)
+                {
+                    BlockingWindow.Instance.ShowMessageBox(reason, "Could not delete symbol");
+                }
+                else
+                {
+                    Close();
+                }
+            }
+
+            ImGui.SameLine();
+        }
+
         if (ImGui.Button("Cancel"))
         {
             Close();
@@ -159,7 +160,7 @@ internal sealed class DeleteSymbolDialog : ModalDialog
                 ImGui.PopStyleColor();
 
                 ImGui.PushStyleColor(ImGuiCol.Text, UiColors.StatusAttention.Rgba);
-                ImGui.TextWrapped("Clicking Delete will force-delete this symbol and automatically disconnect/clean all usages. " +
+                ImGui.TextWrapped("Clicking Force delete will automatically disconnect/clean all usages. " +
                                   "This may completely break these projects/symbols, and can *NOT* be undone.");
                 ImGui.PopStyleColor();
             }
