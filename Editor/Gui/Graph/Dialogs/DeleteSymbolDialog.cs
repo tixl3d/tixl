@@ -3,6 +3,7 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using ImGuiNET;
+using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Core.SystemUi;
 using T3.Editor.Gui.Input;
@@ -15,6 +16,7 @@ namespace T3.Editor.Gui.Dialogs;
 
 internal sealed class DeleteSymbolDialog : ModalDialog
 {
+    
     internal void Draw(Symbol symbol)
     {
         if (!BeginDialog("Delete Symbol"))
@@ -24,14 +26,17 @@ internal sealed class DeleteSymbolDialog : ModalDialog
         }
 
         var dialogJustOpened = _symbol == null;
+        var symbolChanged = _symbol != null && (dialogJustOpened || _symbol.Id != symbol.Id);
 
-        if (dialogJustOpened)
+        if (dialogJustOpened || symbolChanged)
         {
             _symbol = symbol;
+            _cachedMatches = null;  // Break cache on any symbol switch
+            _allowDeletion = false; // Reset until re-analyzed
         }
 
         LocalSymbolInfo? info = null;
-        if (symbol != null && SymbolAnalysis.TryGetSymbolInfo(symbol, out var analyzedInfo, true))
+        if (SymbolAnalysis.TryGetSymbolInfo(symbol, out var analyzedInfo, true))
         {
             info = new LocalSymbolInfo(analyzedInfo);
             DrawAnalysisUi(symbol, info);
@@ -44,30 +49,22 @@ internal sealed class DeleteSymbolDialog : ModalDialog
         }
 
         ImGui.Separator();
-        FormInputs.AddVerticalSpace(4);
+        FormInputs.AddVerticalSpace();
 
         // Only draw buttons if deletion is allowed
         if (_allowDeletion)
         {
-            string buttonLabel = "Delete";
-            if (info != null && info.DependingSymbols.Any())
+            var buttonLabel = "Delete";
+            if (info is { DependingSymbols.IsEmpty: false })
             {
                 buttonLabel = "Force delete";
             }
             
-            if (ImGui.Button(buttonLabel) && symbol != null)
+            if (ImGui.Button(buttonLabel))
             {
-                bool success;
-                string reason;
-
-                if (info?.DependingSymbols.Any() == true)
-                {
-                    success = DeleteSymbol(symbol, info.DependingSymbols.ToHashSet(), out reason);
-                }
-                else
-                {
-                    success = DeleteSymbol(symbol, null, out reason);
-                }
+                var success = info is { DependingSymbols.IsEmpty: false } 
+                                  ? DeleteSymbol(symbol, info.DependingSymbols.ToHashSet(), out var reason) 
+                                  : DeleteSymbol(symbol, null, out reason);
     
                 if (!success)
                 {
@@ -86,7 +83,7 @@ internal sealed class DeleteSymbolDialog : ModalDialog
         {
             Close();
         }
-
+        
         EndDialogContent();
         EndDialog();
     }
@@ -102,36 +99,19 @@ internal sealed class DeleteSymbolDialog : ModalDialog
     {
         var isProtected = TryGetRestriction(symbol, info, out var restriction);
         var isNamespaceMain = IsNamespaceMainSymbol(symbol);
-        var symbolName = symbol == null ? "undefined" : symbol.Name;
+        var symbolName = symbol.Name;
 
         _allowDeletion = !isProtected && !symbol.SymbolPackage.IsReadOnly;
 
         ImGui.PushStyleColor(ImGuiCol.Text, UiColors.Text.Rgba);
-        if (isProtected)
-        {
-            ImGui.TextWrapped($"Can not delete [{symbolName}]");
-        }
-        else
-        {
-            ImGui.TextWrapped($"Are you sure you want to delete [{symbolName}]?");
-        }
+        ImGui.TextWrapped(isProtected ? $"Can not delete [{symbolName}]" : $"Are you sure you want to delete [{symbolName}]?");
         ImGui.PopStyleColor();
 
         if (isProtected)
         {
             ImGui.PushFont(Fonts.FontBold);
-            if (isNamespaceMain)
-            {
-                ImGui.TextColored(
-                                  UiColors.StatusAttention,
-                                  "This symbol is attached to the project namespace.");
-            }
-            else
-            {
-                ImGui.TextColored(
-                                  UiColors.StatusAttention,
-                                  $"You can not delete symbols that are {restriction}");
-            }
+            ImGui.TextColored(UiColors.StatusAttention,
+                              isNamespaceMain ? "This symbol is attached to the project namespace." : $"You can not delete symbols that are {restriction}");
             ImGui.PopFont();
         }
 
@@ -143,13 +123,12 @@ internal sealed class DeleteSymbolDialog : ModalDialog
                               Removing it directly can leave the project in a broken state. 
                               Use the namespace delete workflow (todo) instead of deleting this symbol.
                               """);
-
             ImGui.PopStyleColor();
 
             return;
         }
 
-        if (info.DependingSymbols.Any())
+        if (!info.DependingSymbols.IsEmpty)
         {
             if (!_allowDeletion)
             {
@@ -194,7 +173,7 @@ internal sealed class DeleteSymbolDialog : ModalDialog
     }
 
     /// <summary>
-    /// Attempts to retrieve a human-readable restriction reason for the given symbol, such as library membership or read-only status.
+    /// Attempts to retrieve a restriction reason for the given symbol, such as library membership or read-only status.
     /// Returns <see langword="true"/> and sets <paramref name="restriction"/> to a non-null description if restricted;
     /// otherwise returns <see langword="false"/> and sets <paramref name="restriction"/> to <see langword="null"/>.
     /// </summary>
@@ -243,21 +222,18 @@ internal sealed class DeleteSymbolDialog : ModalDialog
         var lastSegment  = lastDotIndex >= 0 ? ns[(lastDotIndex + 1)..] : ns;
         return string.Equals(lastSegment, symbol.Name, StringComparison.Ordinal);
     }
-
+    
     /// <summary>
     /// Represents operator categories for symbols in the analysis system.
-    /// Supports multiple simultaneous classifications via bit flags (Lib, Type, Example, T3, Skill).
-    /// Use HasFlag() to test individual categories or bitwise OR to combine during construction.
     /// </summary>
-    [Flags]
     private enum OperatorType
     {
-        None = 0,
-        Lib = 1 << 0,
-        Type = 1 << 1,
-        Example = 1 << 2,
-        T3 = 1 << 3,
-        Skill = 1 << 4
+        None,
+        Lib,
+        Type,
+        Example,
+        T3,
+        Skill
     }
     
     /// <summary>
@@ -268,11 +244,13 @@ internal sealed class DeleteSymbolDialog : ModalDialog
     {
         public ImmutableHashSet<Guid> DependingSymbols { get; } = ImmutableHashSet.CreateRange(source.DependingSymbols);
         public int UsageCount { get; } = source.UsageCount;
-        public OperatorType OperatorFlags { get; } = (source.IsLibOperator ? OperatorType.Lib : 0) |
-                                                     (source.IsTypeOperator ? OperatorType.Type : 0) |
-                                                     (source.IsExampleOperator ? OperatorType.Example : 0) |
-                                                     (source.IsT3Operator ? OperatorType.T3 : 0) |
-                                                     (source.IsSkillOperator ? OperatorType.Skill : 0);
+        public OperatorType OperatorFlags { get; } =
+            source.IsLibOperator    ? OperatorType.Lib :
+            source.IsTypeOperator   ? OperatorType.Type :
+            source.IsExampleOperator? OperatorType.Example :
+            source.IsT3Operator     ? OperatorType.T3 :
+            source.IsSkillOperator  ? OperatorType.Skill :
+            OperatorType.None;
     }
 
     /// <summary>
@@ -296,15 +274,16 @@ internal sealed class DeleteSymbolDialog : ModalDialog
                             .ToList();
         }
 
-        if (!_cachedMatches.Any())
+        if (_cachedMatches.Count == 0)
             return;
 
-        const float itemHeight = 20.0f;
-        const int   maxVisibleItems = 6;
+        var fontSize = ImGui.GetFontSize();  // Current font size in pixels
+        const int maxVisibleItems = 5;
+        var itemHeight = fontSize + 4.0f;    // Font size + small padding
         var scrollHeight = itemHeight * maxVisibleItems;
 
         if (ImGui.BeginChild("SymbolList",
-                new System.Numerics.Vector2(0, scrollHeight),
+                new Vector2(0, scrollHeight),
                 true))
         {
             var lastGroupName = string.Empty;
@@ -317,32 +296,23 @@ internal sealed class DeleteSymbolDialog : ModalDialog
                     var avail    = ImGui.GetContentRegionAvail();
                     var cursorPos = ImGui.GetCursorScreenPos();
                     var drawList  = ImGui.GetWindowDrawList();
-                    var rectMin   = cursorPos;
-                    var rectMax   = new System.Numerics.Vector2(
-                        cursorPos.X + avail.X,
-                        cursorPos.Y + Fonts.FontSmall.FontSize + 4);
-                    var nsLabelBgColor = UiColors.BackgroundFull.Fade(0.3f);
-                    drawList.AddRectFilled(rectMin, rectMax, nsLabelBgColor, 0.0f);
+                    var rectMax   = new Vector2(cursorPos.X + avail.X,
+                                                cursorPos.Y + Fonts.FontSmall.FontSize + 4);
+                    drawList.AddRectFilled(cursorPos, rectMax, UiColors.BackgroundFull.Fade(0.3f), 0.0f);
 
                     CustomComponents.StylizedText(projectName, Fonts.FontSmall, UiColors.Text);
                     
                 }
 
-                var hasIssues = symbolUi.Tags.HasFlag(SymbolUi.SymbolTags.Obsolete)
-                                || symbolUi.Tags.HasFlag(SymbolUi.SymbolTags.NeedsFix);
-                var color = hasIssues ? UiColors.StatusAttention : UiColors.Text;
-
                 var symbolLabel = "  " + symbolUi.Symbol.Name;
-                CustomComponents.StylizedText(symbolLabel, Fonts.FontSmall, color);
+                CustomComponents.StylizedText(symbolLabel, Fonts.FontSmall, UiColors.Text);
             }
         }
 
         ImGui.EndChild();
     }
-
-    // ─────────────────────────────────────────────────────────────────────────
+    
     // Deletion helpers
-    // ─────────────────────────────────────────────────────────────────────────
     #region Symbol Deletion Helpers
     /// <summary>
     /// Unified symbol deletion: optionally cleans all usages in depending symbols,
@@ -400,39 +370,13 @@ internal sealed class DeleteSymbolDialog : ModalDialog
         try
         {
             // Build folder structure from RootNamespace and Symbol.Namespace
-            var packageFolder = symbol.SymbolPackage.Folder;
-            var rootNs = symbol.SymbolPackage.RootNamespace ?? string.Empty;
-            var symbolNs = symbol.Namespace ?? string.Empty;
+            var rootNs = symbol.SymbolPackage.RootNamespace;
+            var symbolNs = symbol.Namespace;
 
-            var rootParts = string.IsNullOrEmpty(rootNs)
-                                ? Array.Empty<string>()
-                                : rootNs.Split('.');
-            var symbolParts = string.IsNullOrEmpty(symbolNs)
-                                ? Array.Empty<string>()
-                                : symbolNs.Split('.');
-
-            // Strip root namespace prefix from symbol namespace
-            int i = 0;
-            while (i < rootParts.Length && i < symbolParts.Length &&
-                   string.Equals(rootParts[i], symbolParts[i], StringComparison.Ordinal))
-            {
-                i++;
-            }
-
-            var relativeParts = symbolParts.Skip(i).ToArray();
-            string relativePath = relativeParts.Length > 0
-                                      ? Path.Combine(relativeParts)
-                                      : string.Empty;
-
-            var fullSymbolFolder = string.IsNullOrEmpty(relativePath)
-                                       ? packageFolder
-                                       : Path.Combine(packageFolder, relativePath);
-            
-            var basePath = Path.Combine(fullSymbolFolder, symbol.Name);
-
-            var csPath   = basePath + ".cs";
-            var t3Path   = basePath + ".t3";
-            var t3UiPath = basePath + ".t3ui";
+            var project = (EditableSymbolProject)symbol.SymbolPackage;
+            var csPath = SymbolPathHandler.GetCorrectSourceCodePath(symbol.Name, symbolNs, project);
+            var t3Path = SymbolPathHandler.GetCorrectPath(symbol.Name, symbolNs, project.Folder, project.CsProjectFile.RootNamespace, SymbolPackage.SymbolExtension);
+            var t3UiPath = SymbolPathHandler.GetCorrectPath(symbol.Name, symbolNs, project.Folder, project.CsProjectFile.RootNamespace, EditorSymbolPackage.SymbolUiExtension);
             
             var paths = new[] { csPath, t3Path, t3UiPath };
             
@@ -541,12 +485,12 @@ internal sealed class DeleteSymbolDialog : ModalDialog
         reason = string.Empty;
         return true;
     }
-    
+
     /// <summary>
     /// Marks all affected symbol projects (the deleted symbol's project and any projects
     /// containing depending symbols) as externally modified so that they are rebuilt and saved.
     /// </summary>
-    /// <param name="dependingSymbols">
+    /// <param name="dependingSymbolIds">
     /// Optional set of symbol IDs that referenced the deleted symbol and belong to additional
     /// projects that must be marked dirty, or <c>null</c> if there were no dependencies.
     /// </param>
