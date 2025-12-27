@@ -188,13 +188,13 @@ internal sealed class DeleteSymbolDialog : ModalDialog
     /// </returns>
     private static bool TryGetRestriction(Symbol symbol, LocalSymbolInfo info, [NotNullWhen(true)] out string? restriction)
     {
-        restriction = info.OperatorFlags switch
+        restriction = info.OperatorType switch
                           {
-                              OperatorType.Lib                       => "part of the Main Library",
-                              OperatorType.Type                      => "part of the Types Library",
-                              OperatorType.Example                   => "part of the Examples Library",
-                              OperatorType.T3                        => "part of the T3 Library",
-                              OperatorType.Skill                     => "part of the Skills Library",
+                              SymbolAnalysis.OperatorClassification.Lib                       => "part of the Main Library",
+                              SymbolAnalysis.OperatorClassification.Type                      => "part of the Types Library",
+                              SymbolAnalysis.OperatorClassification.Example                   => "part of the Examples Library",
+                              SymbolAnalysis.OperatorClassification.T3                        => "part of the T3 Library",
+                              SymbolAnalysis.OperatorClassification.Skill                     => "part of the Skills Library",
                               _ when IsNamespaceMainSymbol(symbol)   => "the main symbol of this namespace and attached to the project",
                               _ when symbol.SymbolPackage.IsReadOnly => "Read Only",
                               _                                      => null
@@ -223,18 +223,6 @@ internal sealed class DeleteSymbolDialog : ModalDialog
         return string.Equals(lastSegment, symbol.Name, StringComparison.Ordinal);
     }
     
-    /// <summary>
-    /// Represents operator categories for symbols in the analysis system.
-    /// </summary>
-    private enum OperatorType
-    {
-        None,
-        Lib,
-        Type,
-        Example,
-        T3,
-        Skill
-    }
     
     /// <summary>
     /// Lightweight container for symbol dependency and classification data used by the dialog,
@@ -244,13 +232,7 @@ internal sealed class DeleteSymbolDialog : ModalDialog
     {
         public ImmutableHashSet<Guid> DependingSymbols { get; } = ImmutableHashSet.CreateRange(source.DependingSymbols);
         public int UsageCount { get; } = source.UsageCount;
-        public OperatorType OperatorFlags { get; } =
-            source.IsLibOperator    ? OperatorType.Lib :
-            source.IsTypeOperator   ? OperatorType.Type :
-            source.IsExampleOperator? OperatorType.Example :
-            source.IsT3Operator     ? OperatorType.T3 :
-            source.IsSkillOperator  ? OperatorType.Skill :
-            OperatorType.None;
+        public SymbolAnalysis.OperatorClassification OperatorType { get; } = source.OperatorType;
     }
 
     /// <summary>

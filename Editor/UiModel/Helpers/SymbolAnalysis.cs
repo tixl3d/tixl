@@ -171,18 +171,40 @@ internal static class SymbolAnalysis
         internal bool LacksAllParameterDescription;
         internal bool LacksSomeParameterDescription;
         internal bool LacksParameterGrouping;
-        internal bool IsLibOperator;
-        internal bool IsTypeOperator;
-        internal bool IsExampleOperator;
-        internal bool IsT3Operator;
-        internal bool IsSkillOperator;
         internal bool DependsOnObsoleteOps;
         internal SymbolUi.SymbolTags Tags; // Copy to avoid reference to symbolUi
+        internal OperatorClassification OperatorType;
+   
     }
-
-    // ------------------------------------------------------------------------
+    public enum OperatorClassification
+    {
+        Unknown = 0,
+        Lib,
+        Type,
+        Example,
+        T3,
+        Skill,
+    }
+    
     // Shared helpers (used by both bulk and single analysis)
-    // ------------------------------------------------------------------------
+    #region Shared Helpers
+
+    internal static bool TryGetOperatorType(Symbol symbol, out OperatorClassification opType)
+    {
+        var ns = symbol.Namespace ?? string.Empty;
+        var rootSegment = ns.Split('.')[0];
+
+        opType = rootSegment switch
+                     {
+                         "Lib"      => OperatorClassification.Lib,
+                         "Types"    => OperatorClassification.Type,
+                         "Examples" => OperatorClassification.Example,
+                         "t3"       => OperatorClassification.T3,
+                         "Skills"   => OperatorClassification.Skill,
+                         _          => OperatorClassification.Unknown
+                     };
+        return opType != OperatorClassification.Unknown;
+    }
 
     private static SymbolInformation BuildSymbolInformation(
         Symbol symbol,
@@ -192,8 +214,6 @@ internal static class SymbolAnalysis
         HashSet<Guid> dependingSymbols,
         int usageCount)
     {
-        GetNamespaceFlags(symbol, out var rootSegment, out var isLib, out var isType,
-                          out var isExample, out var isT3, out var isSkill);
 
         var inputUis = symbolUi.InputUis.Values;
 
@@ -210,6 +230,8 @@ internal static class SymbolAnalysis
         var dependsOnObsolete = requiredSymbols
             .Select(s => s.GetSymbolUi())
             .Any(ui => ui != null && ui.Tags.HasFlag(SymbolUi.SymbolTags.Obsolete));
+        
+        TryGetOperatorType(symbol, out var opType);
 
         return new SymbolInformation
         {
@@ -223,33 +245,10 @@ internal static class SymbolAnalysis
             LacksAllParameterDescription = lacksAllParamDesc,
             LacksSomeParameterDescription = lacksSomeParamDesc,
             LacksParameterGrouping = lacksParameterGrouping,
-            IsLibOperator = isLib,
-            IsTypeOperator = isType,
-            IsExampleOperator = isExample,
-            IsT3Operator = isT3,
-            IsSkillOperator = isSkill,
             DependsOnObsoleteOps = dependsOnObsolete,
             Tags = symbolUi.Tags,
+            OperatorType = opType
         };
-    }
-
-    private static void GetNamespaceFlags(
-        Symbol symbol,
-        out string rootSegment,
-        out bool isLib,
-        out bool isType,
-        out bool isExample,
-        out bool isT3,
-        out bool isSkill)
-    {
-        var ns = symbol.Namespace ?? string.Empty;
-        rootSegment = ns.Split('.')[0];
-
-        isLib = rootSegment.Equals("Lib", StringComparison.Ordinal);
-        isType = rootSegment.Equals("Types", StringComparison.Ordinal);
-        isExample = rootSegment.Equals("Examples", StringComparison.Ordinal);
-        isT3 = rootSegment.Equals("t3", StringComparison.OrdinalIgnoreCase);
-        isSkill = rootSegment.Equals("Skills", StringComparison.Ordinal);
     }
 
     private static HashSet<Symbol> CollectRequiredSymbols(Symbol root)
@@ -353,4 +352,5 @@ internal static class SymbolAnalysis
 
         return (usageCounts, reverseDeps);
     }
+    #endregion
 }
