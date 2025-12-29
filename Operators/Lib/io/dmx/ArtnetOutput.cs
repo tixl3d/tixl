@@ -41,6 +41,8 @@ internal sealed class ArtnetOutput : Instance<ArtnetOutput>, IStatusProvider, IC
     private volatile bool _printToLog;
     private IPAddress? _selectedSubnetMask;
     private CancellationTokenSource? _senderCts;
+    private double _lastRetryTime;
+    private double _lastNetworkRefreshTime;
 
     // --- High-Performance Sending Resources ---
     private Thread? _senderThread;
@@ -59,8 +61,30 @@ internal sealed class ArtnetOutput : Instance<ArtnetOutput>, IStatusProvider, IC
     {
         _printToLog = PrintToLog.GetValue(context);
 
+        var localIpString = LocalIpAddress.GetValue(context);
+
+        // Restore SubnetMask if it's null (e.g. on load)
+        if (_selectedSubnetMask == null && !string.IsNullOrEmpty(localIpString))
+        {
+            var adapter = _networkInterfaces.FirstOrDefault(ni => ni.IpAddress.ToString() == localIpString);
+            if (adapter == null)
+            {
+                if (context.LocalTime - _lastNetworkRefreshTime > 2.0)
+                {
+                    _lastNetworkRefreshTime = context.LocalTime;
+                    _networkInterfaces = GetNetworkInterfaces();
+                    adapter = _networkInterfaces.FirstOrDefault(ni => ni.IpAddress.ToString() == localIpString);
+                }
+            }
+            
+            if (adapter != null)
+            {
+                _selectedSubnetMask = adapter.SubnetMask;
+            }
+        }
+
         var settingsChanged = _connectionSettings.Update(
-                                                         LocalIpAddress.GetValue(context) ?? string.Empty,
+                                                         localIpString ?? string.Empty,
                                                          _selectedSubnetMask,
                                                          TargetIpAddress.GetValue(context) ?? string.Empty,
                                                          SendUnicast.GetValue(context)
@@ -72,6 +96,14 @@ internal sealed class ArtnetOutput : Instance<ArtnetOutput>, IStatusProvider, IC
             if (_printToLog) Log.Debug("Artnet Output: Reconnecting Art-Net socket...", this);
             CloseSocket();
             _connected = TryConnectArtNet(_connectionSettings.LocalIp);
+        }
+        else if (!_connected && _connectionSettings.LocalIp != null)
+        {
+            if (context.LocalTime - _lastRetryTime > 2.0)
+            {
+                _lastRetryTime = context.LocalTime;
+                _connected = TryConnectArtNet(_connectionSettings.LocalIp);
+            }
         }
 
         var discoverNodes = PrintArtnetPoll.GetValue(context);
@@ -472,7 +504,7 @@ internal sealed class ArtnetOutput : Instance<ArtnetOutput>, IStatusProvider, IC
         return new IPAddress(broadcastBytes);
     }
 
-    private static readonly List<NetworkAdapterInfo> _networkInterfaces = GetNetworkInterfaces();
+    private static List<NetworkAdapterInfo> _networkInterfaces = GetNetworkInterfaces();
 
     private static List<NetworkAdapterInfo> GetNetworkInterfaces()
     {
@@ -508,7 +540,7 @@ internal sealed class ArtnetOutput : Instance<ArtnetOutput>, IStatusProvider, IC
 
         public bool Update(string localIpStr, IPAddress? subnetMask, string targetIpStr, bool sendUnicast)
         {
-            if (_lastLocalIpStr == localIpStr && _lastTargetIpStr == targetIpStr && _lastSendUnicast == sendUnicast) return false;
+            if (_lastLocalIpStr == localIpStr && _lastTargetIpStr == targetIpStr && _lastSendUnicast == sendUnicast && SubnetMask == subnetMask) return false;
 
             _lastLocalIpStr = localIpStr;
             _lastTargetIpStr = targetIpStr;
@@ -556,6 +588,7 @@ internal sealed class ArtnetOutput : Instance<ArtnetOutput>, IStatusProvider, IC
     {
         if (inputId == LocalIpAddress.Id)
         {
+            _networkInterfaces = GetNetworkInterfaces();
             foreach (var adapter in _networkInterfaces) yield return adapter.DisplayName;
         }
         else if (inputId == TargetIpAddress.Id)

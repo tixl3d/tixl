@@ -43,6 +43,7 @@ internal sealed class ArtnetInput : Instance<ArtnetInput>, IStatusProvider, ICus
     private volatile bool _runListener;
     private UdpClient? _udpClient;
     private bool _wasActive;
+    private double _lastRetryTime;
 
     public ArtnetInput()
     {
@@ -62,6 +63,14 @@ internal sealed class ArtnetInput : Instance<ArtnetInput>, IStatusProvider, ICus
             if (active) StartListening();
             _wasActive = active;
             _lastLocalIp = localIp;
+        }
+        else if (active && (_listenerThread == null || !_listenerThread.IsAlive))
+        {
+            if (context.LocalTime - _lastRetryTime > 2.0)
+            {
+                _lastRetryTime = context.LocalTime;
+                StartListening();
+            }
         }
 
         CleanupStaleUniverses(Timeout.GetValue(context));

@@ -38,6 +38,7 @@ internal sealed class SacnOutput : Instance<SacnOutput>, IStatusProvider, ICusto
     private SacnPacketOptions _packetOptions;
     private volatile bool _printToLog;
     private CancellationTokenSource? _senderCts;
+    private double _lastRetryTime;
 
     // --- High-Performance Sending Resources ---
     private Thread? _senderThread;
@@ -67,6 +68,14 @@ internal sealed class SacnOutput : Instance<SacnOutput>, IStatusProvider, ICusto
             if (_printToLog) Log.Debug("sACN Output: Reconnecting sACN socket...", this);
             CloseSocket();
             _connected = TryConnectSacn(_connectionSettings.LocalIp);
+        }
+        else if (!_connected && _connectionSettings.LocalIp != null)
+        {
+            if (context.LocalTime - _lastRetryTime > 2.0)
+            {
+                _lastRetryTime = context.LocalTime;
+                _connected = TryConnectSacn(_connectionSettings.LocalIp);
+            }
         }
 
         var discoverSources = DiscoverSources.GetValue(context);
