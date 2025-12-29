@@ -1,0 +1,31 @@
+{
+  "Id": "a7b3c2d1-8e9f-4a5b-9c6d-7e8f9a0b1c2d"/*MergeFloatLists*/,
+  "Inputs": [
+    {
+      "Id": "B3C4D5E6-F7A8-4B9C-8D7E-9F0A1B2C3D4E"/*Enabled*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "A3B4C5D6-E7F8-4A9B-0C1D-2E3F4A5B6C7D"/*StartIndices*/,
+      "DefaultValue": {
+        "Values": []
+      }
+    },
+    {
+      "Id": "D7E8F9A0-B1C2-4D3E-8F9A-0B1C2D3E4F5A"/*MaxSize*/,
+      "DefaultValue": -1
+    },
+    {
+      "Id": "C5D6E7F8-A9B0-4C1D-8E9F-0A1B2C3D4E5F"/*InputLists*/,
+      "DefaultValue": {
+        "Values": []
+      }
+    },
+    {
+      "Id": "E9F0A1B2-C3D4-4E5F-9A0B-1C2D3E4F5A6B"/*MergeMode*/,
+      "DefaultValue": 0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}
