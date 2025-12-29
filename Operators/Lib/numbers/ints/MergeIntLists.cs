@@ -4,7 +4,7 @@ using T3.Core.Utils;
 // This is kept for completeness, but may not be necessary if TriggerAnim is not used elsewhere.
 // using static Lib.numbers.anim.animators.TriggerAnim;
 
-namespace Lib.numbers.floats.process
+namespace Lib.numbers.ints
 {
     [Guid("ca6f09ec-bbc4-4365-8210-bc10cd8d9f94")]
     internal sealed class MergeIntLists : Instance<MergeIntLists>, IStatusProvider
