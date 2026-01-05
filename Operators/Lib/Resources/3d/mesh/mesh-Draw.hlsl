@@ -23,6 +23,7 @@ cbuffer Params : register(b1)
 
     float AlphaCutOff;
     float UseFlatShading;
+    float SpecularAA;
 };
 
 cbuffer FogParams : register(b2)
@@ -192,12 +193,27 @@ psOutput psMain(psInput pin) : SV_TARGET
     
     float4 roughnessMetallicOcclusion = RSMOMap.Sample(WrappedSampler, pin.texCoord);
 
-    frag.Roughness = saturate(roughnessMetallicOcclusion.x + Roughness);
+    
     frag.Metalness = saturate(roughnessMetallicOcclusion.y + Metal);
     frag.Occlusion = roughnessMetallicOcclusion.z;
     frag.albedo = BaseColorMap.Sample(WrappedSampler, pin.texCoord);
     frag.uv = pin.texCoord;
     frag.N = ComputeNormal(pin, pin.tbnToWorld);
+    // --- Specular anti-aliasing ---
+    // Compute normal variance using screen-space derivatives and increase roughness accordingly.
+    // This reduces specular aliasing on silhouettes and high-frequency normalmap regions.
+    float3 Nx = ddx(frag.N);
+    float3 Ny = ddy(frag.N);
+    float normalVar = max(0.0, max(dot(Nx, Nx), dot(Ny, Ny)));
+    normalVar *= SpecularAA;
+    // convert roughness -> alpha (energy-preserving), combine variance, then convert back
+    float baseR = saturate(roughnessMetallicOcclusion.x + Roughness);
+    float baseR2 = baseR * baseR;
+    float adjustedR = sqrt(baseR2 + normalVar);
+    // optional: clamp to [baseR, 1]
+    adjustedR = saturate(adjustedR);
+
+    frag.Roughness = adjustedR;
     frag.fog = pin.fog;
     frag.worldPosition = pin.worldPosition;
 

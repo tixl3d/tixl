@@ -6,8 +6,8 @@
     {
       "InputId": "05e0b0e3-6e79-48bd-a356-3dcb65c9040f"/*Shading*/,
       "Position": {
-        "X": 1622.4233,
-        "Y": 3720.1924
+        "X": 1526.489,
+        "Y": 3627.165
       },
       "Description": "If enabled, the mesh is rendered with flat shading."
     },
@@ -41,16 +41,16 @@
     {
       "InputId": "4748d9ab-58a4-41d7-a2ee-6f7dfed86211"/*AlphaCutOff*/,
       "Position": {
-        "X": 1920.8883,
-        "Y": 3678.9128
+        "X": 1824.954,
+        "Y": 3585.8855
       },
       "Description": "This value controls transparency if a texture containing an alpha channel is used."
     },
     {
       "InputId": "8c9dee45-d165-48c8-b8dd-b7f47e77fd00"/*Color*/,
       "Position": {
-        "X": 1640.8882,
-        "Y": 3538.9128
+        "X": 1544.9539,
+        "Y": 3445.8855
       },
       "GroupTitle": "Appearance",
       "Description": "Defines the shading color of the mesh.\nIf a [SetMaterial] is used, these colors are multiplied with its settings."
@@ -99,10 +99,22 @@
       "AddPadding": "True"
     },
     {
+      "InputId": "cf8fe9a6-f9f7-4485-9ca5-ae96326ae25f"/*SpecularAA*/,
+      "Position": {
+        "X": 1647.684,
+        "Y": 3337.1091
+      },
+      "Description": "Reduce edges specular shimmering ",
+      "Min": 0.0,
+      "Max": 2.0,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
       "InputId": "d1db33ea-1739-4323-9105-7b236a0e240f"/*WrapMode*/,
       "Position": {
-        "X": 2089.872,
-        "Y": 3997.612
+        "X": 2039.8054,
+        "Y": 4026.683
       },
       "Description": "Defines how the texture behaves when repeated.\n\nWrap: The texture repeats itself continuously\nMirror: The texture is mirrored and repeats infinitely.\nClamp: The texture is cut off at the edge\nBorder: Unclear\nMirrOnce: The texture is mirrored once, then cut off"
     },
@@ -127,8 +139,8 @@
     {
       "ChildId": "01992f57-197e-459f-938f-159805816b8d"/*IntToFloat*/,
       "Position": {
-        "X": 1885.1946,
-        "Y": 3769.764
+        "X": 1824.9539,
+        "Y": 3620.8855
       }
     },
     {
@@ -146,8 +158,8 @@
         "Y": 59.905018
       },
       "Position": {
-        "X": 1920.8882,
-        "Y": 3538.9128
+        "X": 1824.9539,
+        "Y": 3445.8855
       }
     },
     {
@@ -179,8 +191,8 @@
     {
       "ChildId": "2e15e2f9-8bff-4cb1-bf47-b34759e86658"/*GetForegroundColor*/,
       "Position": {
-        "X": 1640.8882,
-        "Y": 3573.9128
+        "X": 1544.9539,
+        "Y": 3480.8855
       }
     },
     {
@@ -259,8 +271,8 @@
     {
       "ChildId": "840e6d54-1fff-44fc-85dd-7c0de4a56561"/*BlendColors*/,
       "Position": {
-        "X": 1780.8882,
-        "Y": 3538.9128
+        "X": 1684.9539,
+        "Y": 3445.8855
       }
     },
     {
@@ -289,6 +301,13 @@
       "Position": {
         "X": 1696.4711,
         "Y": 3933.1995
+      }
+    },
+    {
+      "ChildId": "a1e13772-64b7-4a05-847d-6d268516a299"/*Value*/,
+      "Position": {
+        "X": 1778.1173,
+        "Y": 3661.538
       }
     },
     {
@@ -322,8 +341,8 @@
     {
       "ChildId": "e57d129b-4621-4971-ba62-7ab87cafadcb"/*FloatsToBuffer*/,
       "Position": {
-        "X": 2060.8882,
-        "Y": 3503.9128
+        "X": 1964.9539,
+        "Y": 3410.8855
       }
     },
     {
