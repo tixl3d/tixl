@@ -104,7 +104,7 @@
         "X": 1647.684,
         "Y": 3337.1091
       },
-      "Description": "Reduce edges specular shimmering ",
+      "Description": "This reduces specular aliasing on silhouettes and high-frequency normalmap regions.",
       "Min": 0.0,
       "Max": 2.0,
       "ClampMin": true,
