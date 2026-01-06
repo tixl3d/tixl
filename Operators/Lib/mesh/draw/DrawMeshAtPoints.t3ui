@@ -6,8 +6,8 @@
     {
       "InputId": "0af05ab4-0d77-4f01-a79b-691f58f702ef"/*Size*/,
       "Position": {
-        "X": 2057.5144,
-        "Y": 3423.6265
+        "X": 2053.9766,
+        "Y": 3395.3235
       },
       "Description": "Uniformly scales the meshes using the Points as center of scaling.",
       "Min": 0.0,
@@ -20,6 +20,7 @@
         "X": 2000.9934,
         "Y": 4252.8496
       },
+      "GroupTitle": "Draw Style",
       "Description": "Toggles between colored Wireframe Rendering or default shading method."
     },
     {
@@ -40,6 +41,14 @@
         "Y": 3581.1616
       },
       "Description": "Input for incoming Points which are used to spawn meshes."
+    },
+    {
+      "InputId": "59420e45-cbe2-48d8-961c-3dea5e55b182"/*Shading*/,
+      "Position": {
+        "X": 1913.9767,
+        "Y": 3465.3235
+      },
+      "Description": "Select shading mode"
     },
     {
       "InputId": "69e1f021-4db2-43a1-a4e6-837024350dc1"/*UsePointScale*/,
@@ -74,6 +83,18 @@
       }
     },
     {
+      "InputId": "9ec6c311-22de-411b-9821-0d458f33df7a"/*SpecularAA*/,
+      "Position": {
+        "X": 2053.9766,
+        "Y": 3500.3235
+      },
+      "Description": "This reduces specular aliasing on silhouettes and high-frequency normalmap regions.",
+      "Min": 0.0,
+      "Max": 2.0,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
       "InputId": "a7cb95c4-fb81-49c7-9503-a45589713415"/*ColorField*/,
       "Position": {
         "X": 1851.9666,
@@ -83,8 +104,8 @@
     {
       "InputId": "a8590e4f-2edf-42c9-8bc2-e7b521f8cafc"/*AlphaCutOff*/,
       "Position": {
-        "X": 2057.5144,
-        "Y": 3458.6265
+        "X": 2053.9766,
+        "Y": 3430.3235
       },
       "Description": "This value controls transparency if a texture containing an alpha channel is used.",
       "AddPadding": "True"
@@ -92,11 +113,11 @@
     {
       "InputId": "ba7befdf-270b-4ac0-bfc2-7543e2c3097b"/*Color*/,
       "Position": {
-        "X": 1777.5143,
-        "Y": 3318.6265
+        "X": 1773.9764,
+        "Y": 3290.3235
       },
-      "Description": "Defines the shading color of the mesh.\nIf a [SetMaterial] is used, these colors are multiplied with its settings.",
-      "AddPadding": "True"
+      "GroupTitle": "Appearance",
+      "Description": "Defines the shading color of the mesh.\nIf a [SetMaterial] is used, these colors are multiplied with its settings."
     },
     {
       "InputId": "c0351f55-ad27-4fbd-b3d5-668ff49f0ea0"/*CullMode*/,
@@ -112,8 +133,8 @@
         "X": 2000.9934,
         "Y": 4332.8496
       },
-      "GroupTitle": "Draw Options",
-      "Description": "This defines whether the mesh covers itself or is covered by or covers other meshes."
+      "Description": "This defines whether the mesh covers itself or is covered by or covers other meshes.",
+      "AddPadding": "True"
     }
   ],
   "SymbolChildUis": [
@@ -228,15 +249,15 @@
         "Y": 59.905018
       },
       "Position": {
-        "X": 2057.5144,
-        "Y": 3283.6265
+        "X": 2053.9766,
+        "Y": 3255.3235
       }
     },
     {
       "ChildId": "977451f3-27d6-4d5b-a33a-2fde63cfdc90"/*GetForegroundColor*/,
       "Position": {
-        "X": 1777.5143,
-        "Y": 3283.6265
+        "X": 1773.9764,
+        "Y": 3255.3235
       }
     },
     {
@@ -277,8 +298,15 @@
     {
       "ChildId": "b7afcd08-c2ef-4189-b870-fa367661bf1e"/*BlendColors*/,
       "Position": {
-        "X": 1917.5143,
-        "Y": 3283.6265
+        "X": 1913.9764,
+        "Y": 3255.3235
+      }
+    },
+    {
+      "ChildId": "c22e0965-e177-490e-a2e3-332c88a0538b"/*IntToFloat*/,
+      "Position": {
+        "X": 2053.9766,
+        "Y": 3465.3235
       }
     },
     {
@@ -331,8 +359,8 @@
     {
       "ChildId": "f11729d6-f457-4eea-80c2-ddc5d4fe9382"/*FloatsToBuffer*/,
       "Position": {
-        "X": 2197.5144,
-        "Y": 3248.6265
+        "X": 2193.9766,
+        "Y": 3220.3235
       }
     },
     {

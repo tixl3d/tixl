@@ -22,8 +22,9 @@ cbuffer Params : register(b1)
     float4 Color;
 
     float Scale;
-    float AlphaCutOff;    
-    float UseWForSize;
+    float AlphaCutOff;
+    float UseFlatShading;
+    float SpecularAA;
 };
 
 cbuffer FogParams : register(b2)
@@ -190,12 +191,50 @@ float GetDistance(float3 p3)
 float3 ComputeNormal(psInput pin, float3x3 tbnToWorld)
 {
     float3 N;
+    if (UseFlatShading > 0.5)
+    {
+        // Flat shading: calculate geometric normal from world position derivatives
+        float3 dpdx = ddx(pin.worldPosition);
+        float3 dpdy = ddy(pin.worldPosition);
+        float3 geometricNormal = normalize(cross(dpdy, dpdx));
 
-    // Standard shading: use interpolated normals with normal mapping
-    float4 normalMap = NormalMap.Sample(WrappedSampler, frag.uv);
-    N = normalize(2.0 * normalMap.rgb - 1.0);
-    N = normalize(mul(N, tbnToWorld));
+        // Apply normal map details on top of flat normal
+        float4 normalMap = NormalMap.Sample(WrappedSampler, pin.texCoord);
+        float3 normalDetail = normalize(2.0 * normalMap.rgb - 1.0);
+
+        // Create TBN basis using geometric normal and derivatives
+        float3 T = normalize(dpdx);
+        float3 B = normalize(cross(geometricNormal, T));
+        T = cross(B, geometricNormal); // Reorthogonalize
+        float3x3 flatTBN = float3x3(T, B, geometricNormal);
+
+        // Apply normal map in flat shading tangent space
+        N = normalize(mul(normalDetail, flatTBN));
+    }
+    else
+    {
+        // Standard shading: use interpolated normals with normal mapping
+        float4 normalMap = NormalMap.Sample(WrappedSampler, pin.texCoord);
+        N = normalize(2.0 * normalMap.rgb - 1.0);
+        N = normalize(mul(N, tbnToWorld));
+    }
     return N;
+}
+
+inline float3 AdjustRoughnessForSpecularAA(float baseRoughness)
+{
+ // --- Specular anti-aliasing ---
+    // Compute normal variance using screen-space derivatives and increase roughness accordingly.
+    // This reduces specular aliasing on silhouettes and high-frequency normalmap regions.
+    float3 Nx = ddx(frag.N);
+    float3 Ny = ddy(frag.N);
+    float normalVar = max(0.0, max(dot(Nx, Nx), dot(Ny, Ny)));
+    normalVar *= SpecularAA;
+    // convert roughness -> alpha (energy-preserving), combine variance, then convert back
+    float baseR = saturate(baseRoughness);
+    float baseR2 = baseR * baseR;
+    float adjustedR = sqrt(baseR2 + normalVar);    
+    return saturate(adjustedR);
 }
 
 psOutput psMain(psInput pin) : SV_TARGET
@@ -204,12 +243,13 @@ psOutput psMain(psInput pin) : SV_TARGET
 
     float4 roughnessMetallicOcclusion = RSMOMap.Sample(WrappedSampler, pin.texCoord);
 
-    frag.Roughness = saturate(roughnessMetallicOcclusion.x + Roughness);
+    
     frag.Metalness = saturate(roughnessMetallicOcclusion.y + Metal);
     frag.Occlusion = roughnessMetallicOcclusion.z;
     frag.albedo = BaseColorMap.Sample(WrappedSampler, pin.texCoord) * pin.color;
     frag.uv = pin.texCoord;
     frag.N = ComputeNormal(pin, pin.tbnToWorld);
+    frag.Roughness = AdjustRoughnessForSpecularAA(roughnessMetallicOcclusion.x + Roughness);
     frag.fog = pin.fog;
     frag.worldPosition = pin.worldPosition;
 

@@ -9,7 +9,7 @@
         "X": 1526.489,
         "Y": 3627.165
       },
-      "Description": "If enabled, the mesh is rendered with flat shading."
+      "Description": "Select shading mode"
     },
     {
       "InputId": "155c2396-0e05-4437-8171-288048b1158a"/*Filter*/,

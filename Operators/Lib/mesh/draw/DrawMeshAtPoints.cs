@@ -26,23 +26,29 @@ internal sealed class DrawMeshAtPoints : Instance<DrawMeshAtPoints>
         [Input(Guid = "ba7befdf-270b-4ac0-bfc2-7543e2c3097b")]
         public readonly InputSlot<System.Numerics.Vector4> Color = new InputSlot<System.Numerics.Vector4>();
 
+        [Input(Guid = "a8590e4f-2edf-42c9-8bc2-e7b521f8cafc")]
+        public readonly InputSlot<float> AlphaCutOff = new InputSlot<float>();
+
+        [Input(Guid = "6c36bf68-e22f-419d-9ec0-f60a83d6a560", MappedType = typeof(SharedEnums.BlendModes))]
+        public readonly InputSlot<int> BlendMode = new InputSlot<int>();
+
+        [Input(Guid = "22b0817f-3149-4713-b87b-89c54300cde8", MappedType = typeof(FillMode))]
+        public readonly InputSlot<int> FillMode = new InputSlot<int>();
+
+        [Input(Guid = "c0351f55-ad27-4fbd-b3d5-668ff49f0ea0")]
+        public readonly InputSlot<SharpDX.Direct3D11.CullMode> CullMode = new InputSlot<SharpDX.Direct3D11.CullMode>();
+
+        [Input(Guid = "59420e45-cbe2-48d8-961c-3dea5e55b182", MappedType = typeof(ShadingModes))]
+        public readonly InputSlot<int> Shading = new InputSlot<int>();
+
+        [Input(Guid = "9ec6c311-22de-411b-9821-0d458f33df7a")]
+        public readonly InputSlot<float> SpecularAA = new InputSlot<float>();
+
         [Input(Guid = "dd511aab-0472-4109-9c10-cc1ab5042499")]
         public readonly InputSlot<bool> EnableZWrite = new InputSlot<bool>();
 
         [Input(Guid = "70f4cc27-f901-4faa-aa2e-b4cd2a50ff73")]
         public readonly InputSlot<bool> EnableZTest = new InputSlot<bool>();
-
-        [Input(Guid = "6c36bf68-e22f-419d-9ec0-f60a83d6a560", MappedType = typeof(SharedEnums.BlendModes))]
-        public readonly InputSlot<int> BlendMode = new InputSlot<int>();
-
-        [Input(Guid = "c0351f55-ad27-4fbd-b3d5-668ff49f0ea0")]
-        public readonly InputSlot<SharpDX.Direct3D11.CullMode> CullMode = new InputSlot<SharpDX.Direct3D11.CullMode>();
-
-        [Input(Guid = "22b0817f-3149-4713-b87b-89c54300cde8", MappedType = typeof(FillMode))]
-        public readonly InputSlot<int> FillMode = new InputSlot<int>();
-
-        [Input(Guid = "a8590e4f-2edf-42c9-8bc2-e7b521f8cafc")]
-        public readonly InputSlot<float> AlphaCutOff = new InputSlot<float>();
 
         [Input(Guid = "a7cb95c4-fb81-49c7-9503-a45589713415")]
         public readonly InputSlot<T3.Core.DataTypes.ShaderGraphNode> ColorField = new InputSlot<T3.Core.DataTypes.ShaderGraphNode>();
@@ -53,4 +59,9 @@ internal sealed class DrawMeshAtPoints : Instance<DrawMeshAtPoints>
             F1 = 1,
             F2 = 2,
         }
+    private enum ShadingModes
+    {
+        Default = 0,
+        Flat = 1,
+    }
 }
