@@ -1,0 +1,46 @@
+{
+  "Id": "02aed181-4bf1-48f8-ac2a-93d66c170c0c"/*EaseKeys*/,
+  "Description": "This operator creates smooth, ease-in-out transitions by overriding the easing of keyframes. Customize the transition style with options like cubic, exponential, or back easing, or choose a linear fallback for a simple interpolation. \n[EaseVec2Keys] [EaseVec3Keys]",
+  "InputUis": [
+    {
+      "InputId": "73c822ca-560c-4e86-b4ff-0ae722d7a371"/*Value*/,
+      "Position": {
+        "X": 36.0,
+        "Y": 334.0
+      }
+    },
+    {
+      "InputId": "ca4739a7-be8b-4e65-bbcf-593772bd0c5d"/*Direction*/,
+      "Position": {
+        "X": 36.0,
+        "Y": 604.0
+      }
+    },
+    {
+      "InputId": "375b49e7-bc67-46cf-a687-2cad66e6fd76"/*Interpolation*/,
+      "Position": {
+        "X": 36.0,
+        "Y": 514.0
+      }
+    },
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "3543e169-91ca-45ed-9b17-675f67a03a51"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    }
+  ],
+  "Links": [
+    {
+      "Id": "11312bc4-15f5-4e8e-8b42-fdaa59c77645",
+      "Title": "easings.net",
+      "Description": "This page helps you choose the right easing function.",
+      "LinkUrl": "https://easings.net/",
+      "LinkType": "Reference"
+    }
+  ]
+}
