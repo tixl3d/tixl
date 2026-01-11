@@ -49,6 +49,11 @@ internal sealed class EaseVec2Keys : Instance<EaseVec2Keys>
                 _targetValue[i] = (float)nextKey.Value;
                 duration = Math.Max((float)(nextKey.U - previousKey.U), 0.0001f);
             }
+            else
+            {
+                Result.Value[i] = Value.GetValue(context)[i];
+                return;
+            }
 
             // Calculate progress based on elapsed time and duration
             var elapsedTime = (float)currentTime - _startTime[i];

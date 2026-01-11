@@ -51,6 +51,7 @@ internal sealed class EaseKeys : Instance<EaseKeys>
         else
         {
             Result.Value = Value.GetValue(context);
+            return;
         }
 
         // Calculate progress based on elapsed time and duration
