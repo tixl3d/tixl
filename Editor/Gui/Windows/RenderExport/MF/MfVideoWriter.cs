@@ -69,6 +69,12 @@ internal abstract class MfVideoWriter : IDisposable
                 throw new InvalidOperationException("Empty image handed over");
             }
 
+            if (currentDesc.Width != _videoPixelSize.Width || currentDesc.Height != _videoPixelSize.Height)
+            {
+                Log.Debug($"Skipping frame: resolution mismatch. Expected {_videoPixelSize.Width}x{_videoPixelSize.Height}, got {currentDesc.Width}x{currentDesc.Height}");
+                return false;
+            }
+
             // Setup writer
             if (SinkWriter == null)
             {
@@ -336,7 +342,7 @@ internal abstract class MfVideoWriter : IDisposable
             try
             {
                 SinkWriter.NotifyEndOfSegment(_streamIndex);
-                if (_frameIndex > 0)
+                if (_frameIndex >= 0)
                 {
                     SinkWriter.Finalize();
                 }

@@ -34,8 +34,11 @@ internal sealed class BmFontDescription
                 Log.Error("Failed to load font " + filepath);
                 return false;
             }
-            
-            Log.Debug("loaded font with character count:" + bmFont.Chars.Length);
+            if (bmFont.Info?.Size <= 0)
+            {
+                Log.Warning($"Font size is {bmFont.Info?.Size} in font file '{filepath}' - this will cause text rendering issues! Please check the font file's <info size=...> attribute.");
+            }
+            Log.Debug($"Loaded font '{filepath}', {bmFont.Chars?.Length} characters, {bmFont.Kernings?.Length} kernings");
             stream.Close();
         }
         catch (Exception e)

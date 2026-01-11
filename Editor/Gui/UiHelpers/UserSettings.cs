@@ -8,8 +8,6 @@ using T3.Editor.Compilation;
 using T3.Editor.Gui.Windows;
 using T3.Editor.Gui.Windows.TimeLine;
 
-// ReSharper disable MemberCanBeInternal
-
 namespace T3.Editor.Gui.UiHelpers;
 
 /// <summary>
@@ -144,7 +142,8 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         // Rendering (controlled from render windows)
         public string RenderVideoFilePath = "./Render/render-v01.mp4";
         public string RenderSequenceFilePath = "./ImageSequence/";
-        public string RenderSequenceFileName = "Output_";
+        public string RenderSequenceFileName = "v01";
+        public string RenderSequencePrefix = "render";
 
         // Profiling and debugging
         public bool EnableFrameProfiling = true;

@@ -342,4 +342,53 @@ internal static partial class CustomComponents
         var avail = ImGui.GetContentRegionAvail().X;
         ImGui.SetCursorPosX(ImGui.GetCursorPosX() + avail - itemWidth - padding);
     }
+
+    /// <summary>
+    /// A reusable popover/popup component. Draws a trigger button and opens a popup
+    /// where you can draw any custom content via the <paramref name="drawContent"/> action.
+    /// </summary>
+    /// <param name="id">Unique identifier for the popup.</param>
+    /// <param name="triggerLabel">Label displayed on the trigger button.</param>
+    /// <param name="drawContent">Action to draw the popup content. Return true to close the popup.</param>
+    /// <param name="triggerWidth">Width of the trigger button. Use 0 for auto-size.</param>
+    /// <returns>True if the popup was just opened this frame.</returns>
+    public static bool DrawPopover(string id, string triggerLabel, Func<bool> drawContent, float triggerWidth = 0)
+    {
+        var popupId = $"##Popover_{id}";
+        var wasOpened = false;
+
+        if (triggerWidth > 0)
+            ImGui.SetNextItemWidth(triggerWidth);
+
+        if (ImGui.Button(triggerLabel + "##" + id))
+        {
+            ImGui.OpenPopup(popupId);
+            wasOpened = true;
+        }
+
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(8 * T3Ui.UiScaleFactor));
+        ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(6 * T3Ui.UiScaleFactor));
+        if (ImGui.BeginPopup(popupId))
+        {
+            var shouldClose = drawContent();
+            if (shouldClose)
+                ImGui.CloseCurrentPopup();
+            ImGui.EndPopup();
+        }
+        ImGui.PopStyleVar(2);
+
+        return wasOpened;
+    }
+
+    /// <summary>
+    /// Overload that uses an Action instead of Func, for content that doesn't need to close programmatically.
+    /// </summary>
+    public static bool DrawPopover(string id, string triggerLabel, Action drawContent, float triggerWidth = 0)
+    {
+        return DrawPopover(id, triggerLabel, () =>
+        {
+            drawContent();
+            return false;
+        }, triggerWidth);
+    }
 }

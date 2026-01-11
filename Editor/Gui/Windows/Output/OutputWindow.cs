@@ -3,6 +3,7 @@
 using System.Diagnostics.CodeAnalysis;
 using ImGuiNET;
 using T3.Core.DataTypes;
+using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Keyboard;
@@ -407,7 +408,14 @@ internal sealed class OutputWindow : Window
         // Prepare context
         EvaluationContext.Reset();
         EvaluationContext.BypassCameras = _camSelectionHandling.BypassCamera;
-        EvaluationContext.RequestedResolution = _selectedResolution.ComputeResolution();
+        var requestedResolution = _selectedResolution.ComputeResolution();
+        _lastLayoutResolution = requestedResolution;
+
+        if (RenderProcess.IsExporting)
+        {
+            requestedResolution = RenderProcess.MainOutputRenderedSize;
+        }
+        EvaluationContext.RequestedResolution = requestedResolution;
 
         // Set camera
         if (_camSelectionHandling.CameraForRendering != null)
@@ -469,6 +477,12 @@ internal sealed class OutputWindow : Window
             return instance;
         }
     }
+    public Int2 GetResolution()
+    {
+        return _lastLayoutResolution.Width > 0 && _lastLayoutResolution.Height > 0
+                   ? _lastLayoutResolution
+                   : _selectedResolution.ComputeResolution();
+    }
 
     public static readonly List<Window> OutputWindowInstances = [];
     public ViewSelectionPinning Pinning { get; } = new();
@@ -480,4 +494,5 @@ internal sealed class OutputWindow : Window
     private static int _instanceCounter;
     private ResolutionHandling.Resolution _selectedResolution = ResolutionHandling.DefaultResolution;
     private readonly EditResolutionDialog _resolutionDialog = new();
+    private Int2 _lastLayoutResolution;
 }
