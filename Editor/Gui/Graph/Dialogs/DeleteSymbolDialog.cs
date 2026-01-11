@@ -27,8 +27,8 @@ internal sealed partial class DeleteSymbolDialog : ModalDialog
 
         // Show debug mode banner if in debug build
 #if DEBUG
-        ImGui.PushStyleColor(ImGuiCol.ChildBg, ImGui.ColorConvertFloat4ToU32(UiColors.StatusAttention.Fade(0.15f).Rgba));
-        ImGui.PushStyleColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(UiColors.StatusAttention.Rgba));
+        ImGui.PushStyleColor(ImGuiCol.ChildBg, ImGui.ColorConvertFloat4ToU32(UiColors.WindowBackground.Fade(0.15f).Rgba));
+        ImGui.PushStyleColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(UiColors.ColorForGpuData.Rgba));
         ImGui.BeginChild("##debugmodebanner", new System.Numerics.Vector2(0, 32), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 6);
         ImGui.SetCursorPosX(ImGui.GetCursorPosX() + 8);
