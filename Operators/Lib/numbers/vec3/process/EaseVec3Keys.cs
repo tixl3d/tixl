@@ -51,7 +51,7 @@ internal sealed class EaseVec3Keys : Instance<EaseVec3Keys>
             else
             {
                 Result.Value[i] = Value.GetValue(context)[i];
-                return;
+                continue;
             }
 
             // Calculate progress based on elapsed time and duration
