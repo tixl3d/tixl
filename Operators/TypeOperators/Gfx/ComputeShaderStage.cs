@@ -85,7 +85,7 @@ public sealed class ComputeShaderStage : Instance<ComputeShaderStage>, IRenderSt
         // Dispatch the shader
         for (int i = 0; i < callCount; i++)
         {
-            if (i > 0)
+            if (callCount>1)
             {
                 _dispatchParameters.DispatchCallIndex = i;
                 ResourceManager.SetupConstBuffer(_dispatchParameters, ref _dispatchCallParameterBuffer);

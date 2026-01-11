@@ -1,0 +1,23 @@
+{
+  "Id": "0ecb95ca-7db2-4a11-a6e5-214ae91ec268"/*EaseVec3Keys*/,
+  "Inputs": [
+    {
+      "Id": "48d7bfd8-54c3-4c1b-bee4-92aaa735cc85"/*Value*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "fa9c6388-a7eb-4424-956b-dc1b7f2486bc"/*Direction*/,
+      "DefaultValue": 2
+    },
+    {
+      "Id": "4b8c9c9b-37fa-4c50-ac65-4c5a20e56d2f"/*Interpolation*/,
+      "DefaultValue": 6
+    },
+  ],
+  "Children": [],
+  "Connections": []
+}

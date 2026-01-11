@@ -1,0 +1,37 @@
+{
+  "Id": "0ecb95ca-7db2-4a11-a6e5-214ae91ec268"/*EaseVec3Keys*/,
+  "Description": "[EaseKeys] [EaseVec2Keys]",
+  "InputUis": [
+    {
+      "InputId": "48d7bfd8-54c3-4c1b-bee4-92aaa735cc85"/*Value*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "fa9c6388-a7eb-4424-956b-dc1b7f2486bc"/*Direction*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 180.0
+      }
+    },
+    {
+      "InputId": "4b8c9c9b-37fa-4c50-ac65-4c5a20e56d2f"/*Interpolation*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 135.0
+      }
+    },
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "b022aed3-1667-474f-b24e-107b3257e13c"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    }
+  ]
+}

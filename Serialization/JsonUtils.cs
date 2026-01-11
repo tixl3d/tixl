@@ -19,12 +19,53 @@ public static class JsonUtils
                    : default;
     }
 
-    public static T? ReadToken<T>(JToken o, string name, T? defaultValue = default)
+    /// <summary>
+    /// A simple wrapper that prevents most exceptions on nulls on malformed definitions and instead returns a default
+    /// </summary>
+    public static T? ReadValueSafe<T>(this JToken? token, string name, T? defaultValue = default)
     {
-        var jToken = o[name];
-        return jToken == null ? defaultValue : jToken.Value<T>();
+        try
+        {
+            var t = token?[name];
+            return t != null ? t.Value<T>() : defaultValue;
+        }
+        catch
+        {
+            return defaultValue;
+        }
     }
     
+    public static List<T> ReadListSafe<T>(
+        this JToken? token,
+        string name,
+        Func<JToken, T>? elementConverter = null)
+    {
+        if (token is not JObject obj || obj[name] is not JArray arr)
+            return [];
+
+        var list = new List<T>(arr.Count);
+
+        foreach (var e in arr)
+        {
+            if (e == null)
+                continue;
+
+            try
+            {
+                list.Add(
+                         elementConverter != null
+                             ? elementConverter(e)
+                             : e.Value<T>()
+                        );
+            }
+            catch
+            {
+                // skip malformed element
+            }
+        }
+
+        return list;
+    }
 
 
     public static T? TryLoadingJson<T>(string filepath) where T : class
