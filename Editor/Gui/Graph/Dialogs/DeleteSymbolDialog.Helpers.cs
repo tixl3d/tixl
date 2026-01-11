@@ -26,19 +26,44 @@ internal sealed partial class DeleteSymbolDialog
     /// </returns>
     private static bool TryGetRestriction(Symbol symbol, LocalSymbolInfo info, [NotNullWhen(true)] out string? restriction)
     {
+#if DEBUG
+        // In debug mode, always allow deletion but show restriction info and debug mode status
+        var restrictionReason = info.OperatorType switch
+        {
+            SymbolAnalysis.OperatorClassification.Lib     => "part of the Main Library",
+            SymbolAnalysis.OperatorClassification.Type    => "part of the Types Library",
+            SymbolAnalysis.OperatorClassification.Example => "part of the Examples Library",
+            SymbolAnalysis.OperatorClassification.T3      => "part of the T3 Library",
+            SymbolAnalysis.OperatorClassification.Skill   => "part of the Skills Library",
+            _ when IsNamespaceMainSymbol(symbol)          => "the main symbol of this namespace and attached to the project",
+            _ when symbol.SymbolPackage.IsReadOnly        => "Read Only",
+            _                                             => null
+        };
+
+        if (restrictionReason != null)
+        {
+            restriction = $"[DEBUG MODE] Would restrict deletion: {restrictionReason}";
+        }
+        else
+        {
+            restriction = "[DEBUG MODE] No restrictions apply.";
+        }
+        return false; // Never restrict in debug mode
+#else
         restriction = info.OperatorType switch
-                          {
-                              SymbolAnalysis.OperatorClassification.Lib                       => "part of the Main Library",
-                              SymbolAnalysis.OperatorClassification.Type                      => "part of the Types Library",
-                              SymbolAnalysis.OperatorClassification.Example                   => "part of the Examples Library",
-                              SymbolAnalysis.OperatorClassification.T3                        => "part of the T3 Library",
-                              SymbolAnalysis.OperatorClassification.Skill                     => "part of the Skills Library",
-                              _ when IsNamespaceMainSymbol(symbol)   => "the main symbol of this namespace and attached to the project",
-                              _ when symbol.SymbolPackage.IsReadOnly => "Read Only",
-                              _                                      => null
-                          };
+        {
+            SymbolAnalysis.OperatorClassification.Lib     => "part of the Main Library",
+            SymbolAnalysis.OperatorClassification.Type    => "part of the Types Library",
+            SymbolAnalysis.OperatorClassification.Example => "part of the Examples Library",
+            SymbolAnalysis.OperatorClassification.T3      => "part of the T3 Library",
+            SymbolAnalysis.OperatorClassification.Skill   => "part of the Skills Library",
+            _ when IsNamespaceMainSymbol(symbol)          => "the main symbol of this namespace and attached to the project",
+            _ when symbol.SymbolPackage.IsReadOnly        => "Read Only",
+            _                                             => null
+        };
 
         return restriction != null;
+#endif
     }
     
     /// <summary>

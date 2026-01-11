@@ -25,6 +25,18 @@ internal sealed partial class DeleteSymbolDialog : ModalDialog
             return;
         }
 
+        // Show debug mode banner if in debug build
+#if DEBUG
+        ImGui.PushStyleColor(ImGuiCol.ChildBg, ImGui.ColorConvertFloat4ToU32(UiColors.StatusAttention.Fade(0.15f).Rgba));
+        ImGui.PushStyleColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(UiColors.StatusAttention.Rgba));
+        ImGui.BeginChild("##debugmodebanner", new System.Numerics.Vector2(0, 32), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
+        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 6);
+        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + 8);
+        ImGui.Text("DEBUG MODE: Symbol deletion restrictions are disabled");
+        ImGui.EndChild();
+        ImGui.PopStyleColor(2);
+#endif
+
         var dialogJustOpened = _symbol == null;
         var symbolChanged = _symbol != null && (dialogJustOpened || _symbol.Id != symbol.Id);
 
