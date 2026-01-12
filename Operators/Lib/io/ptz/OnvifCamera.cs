@@ -1,31 +1,15 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
+﻿
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using System.Numerics;
 using System.Security.Cryptography;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 using OpenCvSharp;
 using SharpDX;
-using SharpDX.Direct3D11;
-using SharpDX.DXGI;
 using T3.Core.Animation;
-using T3.Core.Logging;
-using T3.Core.Operator;
-using T3.Core.Operator.Attributes;
-using T3.Core.Operator.Slots;
-using T3.Core.Resource;
-using T3.Core.Utils;
 using Utilities = T3.Core.Utils.Utilities;
 
-namespace Lib.io.onvif
+namespace Lib.io.ptz
 {
     [Guid("8b23c93b-3b45-4c9b-9c23-4d5e6f7a8b9c")]
     public class OnvifCamera : Instance<OnvifCamera>, IStatusProvider, ICustomDropdownHolder
@@ -528,7 +512,10 @@ namespace Lib.io.onvif
                         mediaUrl = xdoc.Descendants(ns + "Media").FirstOrDefault()?.Element(ns + "XAddr")?.Value 
                                    ?? xdoc.Descendants(ns + "Media").FirstOrDefault()?.Element("XAddr")?.Value;
                     }
-                    catch { }
+                    catch
+                    {
+                        // ignored
+                    }
                 }
             }
 
@@ -744,7 +731,6 @@ namespace Lib.io.onvif
                 if (!result.IsSuccessStatusCode) 
                 {
                     if (_printToLog) Log.Debug($"OnvifCamera: SOAP request to {url} failed: {result.StatusCode}. Response: {responseBody}", this);
-                    return responseBody;
                 }
                 return responseBody;
             }
@@ -853,7 +839,6 @@ namespace Lib.io.onvif
             {
                 var xdoc = XDocument.Parse(xml);
                 var ns = XNamespace.Get("http://schemas.xmlsoap.org/ws/2005/04/discovery");
-                var wsa = XNamespace.Get("http://schemas.xmlsoap.org/ws/2004/08/addressing");
 
                 var probeMatch = xdoc.Descendants(ns + "ProbeMatch").FirstOrDefault();
                 if (probeMatch == null) return;
@@ -866,7 +851,11 @@ namespace Lib.io.onvif
                 if (!string.IsNullOrEmpty(xAddrs))
                 {
                     var firstAddr = xAddrs.Split(' ')[0];
-                    try { address = new Uri(firstAddr).Authority; } catch { }
+                    try { address = new Uri(firstAddr).Authority; }
+                    catch
+                    {
+                        // ignored
+                    }
                 }
 
                 // Extract Name from Scopes (onvif://www.onvif.org/name/MyCamera)
@@ -915,11 +904,14 @@ namespace Lib.io.onvif
         #endregion
 
         #region Network Interface Logic
-        private static List<NetworkAdapterInfo> _networkInterfaces = GetNetworkInterfaces();
+        private static List<NetworkAdapterInfo> _networkInterfaces = new();
 
         private static List<NetworkAdapterInfo> GetNetworkInterfaces()
         {
-            var list = new List<NetworkAdapterInfo> { new(IPAddress.Loopback, IPAddress.Parse("255.0.0.0"), "Localhost") };
+            var list = new List<NetworkAdapterInfo>();
+            list.Add(new NetworkAdapterInfo(IPAddress.Any, IPAddress.Any, "Any"));
+            list.Add(new NetworkAdapterInfo(IPAddress.Loopback, IPAddress.Parse("255.0.0.0"), "Localhost"));
+            
             try
             {
                 list.AddRange(from ni in NetworkInterface.GetAllNetworkInterfaces()
@@ -937,7 +929,7 @@ namespace Lib.io.onvif
 
         private sealed record NetworkAdapterInfo(IPAddress IpAddress, IPAddress SubnetMask, string Name)
         {
-            public string DisplayName => $"{Name}: {IpAddress}";
+            public string DisplayName => $"{Name} ({IpAddress})";
         }
         #endregion
 

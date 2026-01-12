@@ -8,8 +8,8 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "Usage": "CustomDropdown",
-      "Description": "The IP address or RTSP URL of the camera. If 'Discover' is used, you can select found cameras from the dropdown."
+      "Description": "The IP address or RTSP URL of the camera. If 'Discover' is used, you can select found cameras from the dropdown.",
+      "Usage": "CustomDropdown"
     },
     {
       "InputId": "2f67a37f-7f89-403f-da67-8a9b0c1d2e3f"/*Username*/,
@@ -17,8 +17,8 @@
         "X": -200.0,
         "Y": 75.0
       },
-      "Usage": "Default",
-      "Description": "The username for camera authentication (ONVIF and RTSP)."
+      "Description": "The username for camera authentication (ONVIF and RTSP).",
+      "Usage": "Default"
     },
     {
       "InputId": "3b78b48b-8b90-514b-eb78-9b0c1d2e3f4b"/*Password*/,
@@ -26,8 +26,8 @@
         "X": -200.0,
         "Y": 150.0
       },
-      "Usage": "Default",
-      "Description": "The password for camera authentication."
+      "Description": "The password for camera authentication.",
+      "Usage": "Default"
     },
     {
       "InputId": "4c89c59c-9c01-625c-fc89-0c1d2e3f4c5c"/*Connect*/,
@@ -43,11 +43,11 @@
         "X": -200.0,
         "Y": 375.0
       },
+      "Description": "Target horizontal rotation (normalized -1..1).",
       "Min": -1.0,
       "Max": 1.0,
       "ClampMin": true,
-      "ClampMax": true,
-      "Description": "Target horizontal rotation (normalized -1..1)."
+      "ClampMax": true
     },
     {
       "InputId": "6e01e71e-1e23-847e-be01-2e3f4e5e6e7e"/*Tilt*/,
@@ -55,11 +55,11 @@
         "X": -200.0,
         "Y": 450.0
       },
+      "Description": "Target vertical rotation (normalized -1..1).",
       "Min": -1.0,
       "Max": 1.0,
       "ClampMin": true,
-      "ClampMax": true,
-      "Description": "Target vertical rotation (normalized -1..1)."
+      "ClampMax": true
     },
     {
       "InputId": "74185692-2982-4895-8963-125478963214"/*LocalIpAddress*/,
@@ -67,8 +67,8 @@
         "X": -200.0,
         "Y": 225.0
       },
-      "Usage": "CustomDropdown",
-      "Description": "The local network interface to use for discovery and connection. Select the adapter connected to the camera network."
+      "Description": "The local network interface to use for discovery and connection. Select the adapter connected to the camera network.",
+      "Usage": "CustomDropdown"
     },
     {
       "InputId": "7f12f82f-2f34-958f-cf12-3f4f5f6f7f8f"/*Zoom*/,
@@ -76,11 +76,11 @@
         "X": -200.0,
         "Y": 525.0
       },
+      "Description": "Target zoom level (normalized 0..1).",
       "Min": 0.0,
-      "Max": 0.8,
+      "Max": 1.0,
       "ClampMin": true,
-      "ClampMax": true,
-      "Description": "Target zoom level (normalized 0..1)."
+      "ClampMax": true
     },
     {
       "InputId": "8451268e-3156-4f5c-8932-156842356842"/*Discover*/,

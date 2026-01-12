@@ -3,15 +3,15 @@
   "Inputs": [
     {
       "Id": "1e56f26e-6e78-4f2e-cf56-7f8a8b9c0d2f"/*Address*/,
-      "DefaultValue": ""
+      "DefaultValue": "192.168.1.100"
     },
     {
       "Id": "2f67a37f-7f89-403f-da67-8a9b0c1d2e3f"/*Username*/,
-      "DefaultValue": ""
+      "DefaultValue": "admin"
     },
     {
       "Id": "3b78b48b-8b90-514b-eb78-9b0c1d2e3f4b"/*Password*/,
-      "DefaultValue": ""
+      "DefaultValue": "password"
     },
     {
       "Id": "4c89c59c-9c01-625c-fc89-0c1d2e3f4c5c"/*Connect*/,
