@@ -1,15 +1,4 @@
-// File: PointsToDMXLights.cs
-using System;
-using System.Collections.Generic;
-using System.Numerics;
 using SharpDX;
-using SharpDX.Direct3D11;
-using T3.Core.DataTypes;
-using T3.Core.Logging;
-using T3.Core.Operator;
-using T3.Core.Operator.Attributes;
-using T3.Core.Operator.Slots;
-using T3.Core.Resource;
 using T3.Core.Utils;
 
 namespace Lib.io.dmx
@@ -17,17 +6,17 @@ namespace Lib.io.dmx
     // ------------------------------------------------------------------------
     //  Type aliases – keep System.Numerics types distinct from SharpDX types.
     // ------------------------------------------------------------------------
-    using Vec3 = System.Numerics.Vector3;
-    using Quat = System.Numerics.Quaternion;
+    using Vec3 = Vector3;
+    using Quat = Quaternion;
 
-    [Guid("D86E12A7-C3D1-46E3-A470-3808725C7858")]
-    public sealed class PointsToDMXLights : Instance<PointsToDMXLights>
+    [Guid("c9d7cd19-7fc6-4491-8dfa-3808725c7857")]
+    public sealed class PointsToDmxLights : Instance<PointsToDmxLights>
     {
         #region Output Slots
         [Output(Guid = "8DC2DB32-D7A3-4B3A-A000-93C3107D19E4", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
         public readonly Slot<List<int>> Result = new(new List<int>(20));
 
-        [Output(Guid = "DA7DEB8C-4218-4CAE-9EC5-FD7C2E6F4C35")]
+        [Output(Guid = "da7deb8c-4218-4cae-9ec5-fd7c2e6f4c35")]
         public readonly Slot<BufferWithViews> VisualizeLights = new();
         #endregion
 
@@ -39,12 +28,12 @@ namespace Lib.io.dmx
         public enum TestMode
         {
             Disabled = 0,
-            Z_Positive,
-            Z_Negative,
-            X_Positive,
-            X_Negative,
-            Y_Positive,
-            Y_Negative
+            ZPositive,
+            ZNegative,
+            XPositive,
+            XNegative,
+            YPositive,
+            YNegative
         }
         #endregion
 
@@ -70,7 +59,7 @@ namespace Lib.io.dmx
         #endregion
 
         #region Constructor
-        public PointsToDMXLights()
+        public PointsToDmxLights()
         {
             Result.UpdateAction = Update;
         }
@@ -78,20 +67,20 @@ namespace Lib.io.dmx
 
         #region Input Slots
         // Buffers
-        [Input(Guid = "61B48E46-C3D1-46E3-A470-810D55F30AA6")]
+        [Input(Guid = "61b48e46-c3d1-46e3-a470-810d55f30aa6")]
         public readonly InputSlot<BufferWithViews> EffectedPoints = new();
 
-        [Input(Guid = "2BEA2CCB-89F2-427B-BD9A-95C7038B715E")]
+        [Input(Guid = "2bea2ccb-89f2-427b-bd9a-95c7038b715e")]
         public readonly InputSlot<BufferWithViews> ReferencePoints = new();
 
         // General behaviour
-        [Input(Guid = "1348ED7C-79F8-48C6-AC00-E60FB40050DB")]
+        [Input(Guid = "1348ed7c-79f8-48c6-ac00-e60fb40050db")]
         public readonly InputSlot<int> FixtureChannelSize = new();
 
-        [Input(Guid = "7449CD05-54BE-484B-854A-D2143340F925")]
+        [Input(Guid = "7449cd05-54be-484b-854a-d2143340f925")]
         public readonly InputSlot<bool> FitInUniverse = new();
 
-        [Input(Guid = "850AF6C3-D9EF-492C-9CFB-E2589AE5B9AC")]
+        [Input(Guid = "850af6c3-d9ef-492c-9cfb-e2589ae5b9ac")]
         public readonly InputSlot<bool> FillUniverse = new();
 
         [Input(Guid = "23F23213-68E2-45F5-B452-4A86289004C0")]
@@ -102,74 +91,74 @@ namespace Lib.io.dmx
         public readonly InputSlot<int> TestModeSelect = new();
 
         // POSITION
-        [Input(Guid = "DF04FCE0-C6E5-4039-B03F-E651FC0EC4A9")]
+        [Input(Guid = "df04fce0-c6e5-4039-b03f-e651fc0ec4a9")]
         public readonly InputSlot<bool> GetPosition = new();
 
-        [Input(Guid = "628D96A8-466B-4148-9658-7786833EC989", MappedType = typeof(AxisModes))]
+        [Input(Guid = "628d96a8-466b-4148-9658-7786833ec989", MappedType = typeof(AxisModes))]
         public readonly InputSlot<int> PositionMeasureAxis = new();
 
-        [Input(Guid = "78A7E683-F4E7-4826-8E39-C8DE08E50E5E")]
+        [Input(Guid = "78a7e683-f4e7-4826-8e39-c8de08e50e5e")]
         public readonly InputSlot<bool> InvertPositionDirection = new();
 
-        [Input(Guid = "8880C101-403F-46E0-901E-20EC2DD333E9")]
+        [Input(Guid = "8880c101-403f-46e0-901e-20ec2dd333e9")]
         public readonly InputSlot<Vector2> PositionDistanceRange = new();
 
-        [Input(Guid = "FC3EC0D6-8567-4D5F-9A63-5C69FB5988CB")]
+        [Input(Guid = "fc3ec0d6-8567-4d5f-9a63-5c69fb5988cb")]
         public readonly InputSlot<int> PositionChannel = new();
 
-        [Input(Guid = "658A19DF-E51B-45B4-9F91-CB97A891255B")]
+        [Input(Guid = "658a19df-e51b-45b4-9f91-cb97a891255a")]
         public readonly InputSlot<int> PositionFineChannel = new();
 
         // ROTATION
-        [Input(Guid = "4922ACD8-AB83-4394-8118-C555385C2CE9")]
+        [Input(Guid = "4922acd8-ab83-4394-8118-c555385c2ce9")]
         public readonly InputSlot<bool> GetRotation = new();
 
         [Input(Guid = "032F3617-E1F3-4B41-A3BE-61DD63B9F3BA", MappedType = typeof(ForwardVectorModes))]
         public readonly InputSlot<int> ForwardVector = new();
 
-        [Input(Guid = "9C235473-346B-4861-9844-4B584E09F58A", MappedType = typeof(RotationOrderModes))]
+        [Input(Guid = "9c235473-346b-4861-9844-4b584e09f58a", MappedType = typeof(RotationOrderModes))]
         public readonly InputSlot<int> RotationOrder = new();
 
-        [Input(Guid = "49FEFBDB-2652-43DB-AE52-EBC2DF3E2856")]
+        [Input(Guid = "49fefbdb-2652-43db-ae52-ebc2df3e2856")]
         public readonly InputSlot<bool> InvertX = new();
 
-        [Input(Guid = "6D8FC457-0C80-4736-8C25-CC48F07CBBFD")]
+        [Input(Guid = "6d8fc457-0c80-4736-8c25-cc48f07cbbfd")]
         public readonly InputSlot<bool> InvertY = new();
 
-        [Input(Guid = "0C57CDD5-E450-4425-954F-C9E4256F83E1")]
+        [Input(Guid = "0c57cdd5-e450-4425-954f-c9e4256f83e1")]
         public readonly InputSlot<bool> InvertZ = new();
 
-        [Input(Guid = "1F532994-FB0E-44E4-8A80-7917E1851EAE", MappedType = typeof(AxisModes))]
+        [Input(Guid = "1f532994-fb0e-44e4-8a80-7917e1851eae", MappedType = typeof(AxisModes))]
         public readonly InputSlot<int> PanAxis = new();
 
-        [Input(Guid = "7BF3E057-B9EB-43D2-8E1A-64C1C3857CA1")]
+        [Input(Guid = "7bf3e057-b9eb-43d2-8e1a-64c1c3857ca1")]
         public readonly InputSlot<bool> InvertPan = new();
 
-        [Input(Guid = "1F877CF6-10D9-4D0B-B087-974BD6855E0A", MappedType = typeof(AxisModes))]
+        [Input(Guid = "1f877cf6-10d9-4d0b-b087-974bd6855e0a", MappedType = typeof(AxisModes))]
         public readonly InputSlot<int> TiltAxis = new();
 
-        [Input(Guid = "F85ECF9F-0C3D-4C10-8BA7-480AA2C7A667")]
+        [Input(Guid = "f85ecf9f-0c3d-4c10-8ba7-480aa2c7a667")]
         public readonly InputSlot<bool> InvertTilt = new();
 
-        [Input(Guid = "E96655BE-6BC7-4CA4-BF74-079A07570D74")]
+        [Input(Guid = "e96655be-6bc7-4ca4-bf74-079a07570d74")]
         public readonly InputSlot<bool> ShortestPathPanTilt = new();
 
-        [Input(Guid = "F50DA250-606D-4A15-A25E-5458F540E527")]
+        [Input(Guid = "f50da250-606d-4a15-a25e-5458f540e527")]
         public readonly InputSlot<Vector2> PanRange = new();
 
-        [Input(Guid = "9000C279-73E4-4DE8-A1F8-C3914EAAF533")]
+        [Input(Guid = "9000c279-73e4-4de8-a1f8-c3914eaaf533")]
         public readonly InputSlot<int> PanChannel = new();
 
-        [Input(Guid = "4D4B3425-E6AD-4834-A8A7-06C9F9C2B909")]
+        [Input(Guid = "4d4b3425-e6ad-4834-a8a7-06c9f9c2b909")]
         public readonly InputSlot<int> PanFineChannel = new();
 
-        [Input(Guid = "6E8B4125-0E8C-430B-897D-2231BB4C8F6F")]
+        [Input(Guid = "6e8b4125-0e8c-430b-897d-2231bb4c8f6f")]
         public readonly InputSlot<Vector2> TiltRange = new();
 
-        [Input(Guid = "47D7294F-6F73-4E21-AC9A-0FC0817283FB")]
+        [Input(Guid = "47d7294f-6f73-4e21-ac9a-0fc0817283fb")]
         public readonly InputSlot<int> TiltChannel = new();
 
-        [Input(Guid = "4A40E022-D206-447C-BDA3-D534F231C817")]
+        [Input(Guid = "4a40e022-d206-447c-bda3-d534f231c816")]
         public readonly InputSlot<int> TiltFineChannel = new();
 
         [Input(Guid = "C9D7CD19-7FC6-4491-8DFA-3808725C7859")]
@@ -187,93 +176,93 @@ namespace Lib.io.dmx
         public readonly InputSlot<int> VisTiltAxis = new();
 
         // COLOUR
-        [Input(Guid = "5CDC69F7-45EC-4EEC-BFB6-960D6245DAFB")]
+        [Input(Guid = "5cdc69f7-45ec-4eec-bfb6-960d6245dafb")]
         public readonly InputSlot<bool> GetColor = new();
 
-        [Input(Guid = "CF2C3308-8F3F-442D-A563-B419F12E7AD1")]
-        public readonly InputSlot<bool> RGBToCMY = new();
+        [Input(Guid = "cf2c3308-8f3f-442d-a563-b419f12e7ad1")]
+        public readonly InputSlot<bool> RgbToCmy = new();
 
-        [Input(Guid = "013CC355-91D6-4EA6-B9F7-F1817B89E4A3")]
+        [Input(Guid = "013cc355-91d6-4ea6-b9f7-f1817b89e4a3")]
         public readonly InputSlot<int> RedChannel = new();
 
-        [Input(Guid = "970769F4-116F-418D-87A7-CDA28E44D063")]
+        [Input(Guid = "970769f4-116f-418d-87a7-cda28e44d063")]
         public readonly InputSlot<int> GreenChannel = new();
 
-        [Input(Guid = "D755342B-9A9E-4C78-8376-81579D8C0909")]
+        [Input(Guid = "d755342b-9a9e-4c78-8376-81579d8c0909")]
         public readonly InputSlot<int> BlueChannel = new();
 
-        [Input(Guid = "F13EDEBD-B44F-49E9-985E-7E3FEB886FEA")]
+        [Input(Guid = "f13edebd-b44f-49e9-985e-7e3feb886fea")]
         public readonly InputSlot<int> AlphaChannel = new();
 
-        [Input(Guid = "8CEECE78-9A08-4C7B-8FEA-740E8E5929A6")]
+        [Input(Guid = "8ceece78-9a08-4c7b-8fea-740e8e5929a6")]
         public readonly InputSlot<int> WhiteChannel = new();
 
         [Input(Guid = "5E96A7A3-5340-43F2-96B9-9972A69421E5")]
         public readonly InputSlot<bool> Is16BitColor = new();
 
         // FEATURES (F1 / F2)
-        [Input(Guid = "91C78090-BE10-4203-827E-D2EF1B93317E")]
+        [Input(Guid = "91c78090-be10-4203-827e-d2ef1b93317e")]
         public readonly InputSlot<bool> GetF1 = new();
 
-        [Input(Guid = "BEC9E5A6-40A9-49B2-88BD-01A4EA03D28C")]
+        [Input(Guid = "bec9e5a6-40a9-49b2-88bd-01a4ea03d28c")]
         public readonly InputSlot<bool> GetF1ByPixel = new();
 
-        [Input(Guid = "B7061834-66AA-4F7F-91F9-10EBFE16713F")]
+        [Input(Guid = "b7061834-66aa-4f7f-91f9-10ebfe16713f")]
         public readonly InputSlot<int> F1Channel = new();
 
-        [Input(Guid = "1CB93E97-0161-4A77-BBC7-FF30C1972CF8")]
+        [Input(Guid = "1cb93e97-0161-4a77-bbc7-ff30c1972cf8")]
         public readonly InputSlot<bool> GetF2 = new();
 
-        [Input(Guid = "B8080F4E-4542-4E20-9844-8028BBAF223F")]
+        [Input(Guid = "b8080f4e-4542-4e20-9844-8028bbaf223f")]
         public readonly InputSlot<bool> GetF2ByPixel = new();
 
-        [Input(Guid = "D77BE0D1-5FB9-4D26-9E4A-E16497E4759C")]
+        [Input(Guid = "d77be0d1-5fb9-4d26-9e4a-e16497e4759c")]
         public readonly InputSlot<int> F2Channel = new();
 
         // CUSTOM VARIABLES
-        [Input(Guid = "25E5F0CE-5EC8-4C99-BEB1-317C6911A128")]
+        [Input(Guid = "25e5f0ce-5ec8-4c99-beb1-317c6911a128")]
         public readonly InputSlot<bool> SetCustomVar1 = new();
 
-        [Input(Guid = "B08C920F-0D6B-4820-BC2D-81A47D5F1147")]
+        [Input(Guid = "b08c920f-0d6b-4820-bc2d-81a47d5f1147")]
         public readonly InputSlot<int> CustomVar1Channel = new();
 
-        [Input(Guid = "50E849E8-5582-432E-98F7-D8E036273864")]
+        [Input(Guid = "50e849e8-5582-432e-98f7-d8e036273864")]
         public readonly InputSlot<int> CustomVar1 = new();
 
-        [Input(Guid = "18CC3A73-3A1A-4370-87B7-E54CD44F4A3A")]
+        [Input(Guid = "18cc3a73-3a1a-4370-87b7-e5cd44f4a3ab")]
         public readonly InputSlot<bool> SetCustomVar2 = new();
 
-        [Input(Guid = "098F1662-6F47-4DD0-9A73-4C4814A6EF23")]
+        [Input(Guid = "098f1662-6f47-4dd0-9a73-4c4814aefb23")]
         public readonly InputSlot<int> CustomVar2Channel = new();
 
-        [Input(Guid = "E7A48FE0-D788-4F12-A9D4-52472519DA09")]
+        [Input(Guid = "e7a48fe0-d788-4f12-a9d4-52472519da09")]
         public readonly InputSlot<int> CustomVar2 = new();
 
-        [Input(Guid = "876EF5B5-F2C6-4501-9E55-00B9A553A2E3")]
+        [Input(Guid = "876ef5b5-f2c6-4501-9e55-00b9a553a2e3")]
         public readonly InputSlot<bool> SetCustomVar3 = new();
 
-        [Input(Guid = "AC9A709E-6DC0-40CA-9F70-350E655A2630")]
+        [Input(Guid = "ac9a709e-6dc0-40ca-9f70-350e655a2630")]
         public readonly InputSlot<int> CustomVar3Channel = new();
 
-        [Input(Guid = "D16D7C5C-2795-4FDE-85FD-13B515191FBE")]
+        [Input(Guid = "d16d7c5c-2795-4fde-85fd-13b515191fbe")]
         public readonly InputSlot<int> CustomVar3 = new();
 
-        [Input(Guid = "8DD3FC1C-CD94-4BF0-B948-D6F734916D49")]
+        [Input(Guid = "8dd3fc1c-cd94-4bf0-b948-d6f734916d49")]
         public readonly InputSlot<bool> SetCustomVar4 = new();
 
-        [Input(Guid = "CBAF821C-0305-4C74-A632-864081CC9A34")]
+        [Input(Guid = "cbaf821c-0305-4c74-a632-864081cc9a34")]
         public readonly InputSlot<int> CustomVar4Channel = new();
 
-        [Input(Guid = "B29EBE11-89CB-4F86-AEE0-CF729FA0D62C")]
+        [Input(Guid = "b29ebe11-89cb-4f86-aee0-cf729fa0d62c")]
         public readonly InputSlot<int> CustomVar4 = new();
 
-        [Input(Guid = "A9315F88-6024-42E9-9691-4544627F0BEF")]
+        [Input(Guid = "a9315f88-6024-42e9-9691-4544627f0bef")]
         public readonly InputSlot<bool> SetCustomVar5 = new();
 
-        [Input(Guid = "7C59A5FB-052A-443C-9E10-CF859FE25658")]
+        [Input(Guid = "7c59a5fb-052a-443c-9e10-cf859fe25658")]
         public readonly InputSlot<int> CustomVar5Channel = new();
 
-        [Input(Guid = "58CC3EEE-E81E-4BAB-B12C-E7BC3CF62DD0")]
+        [Input(Guid = "58cc3eee-e81e-4bab-b12c-e7bc3cf62dd0")]
         public readonly InputSlot<int> CustomVar5 = new();
         #endregion
 
@@ -347,22 +336,22 @@ namespace Lib.io.dmx
                 case TestMode.Disabled:
                     _cachedForwardAxis = ResolveForwardFromInput(context);
                     break;
-                case TestMode.Z_Positive:
+                case TestMode.ZPositive:
                     _cachedForwardAxis = Vec3.UnitZ;
                     break;
-                case TestMode.Z_Negative:
+                case TestMode.ZNegative:
                     _cachedForwardAxis = -Vec3.UnitZ;
                     break;
-                case TestMode.X_Positive:
+                case TestMode.XPositive:
                     _cachedForwardAxis = Vec3.UnitX;
                     break;
-                case TestMode.X_Negative:
+                case TestMode.XNegative:
                     _cachedForwardAxis = -Vec3.UnitX;
                     break;
-                case TestMode.Y_Positive:
+                case TestMode.YPositive:
                     _cachedForwardAxis = Vec3.UnitY;
                     break;
-                case TestMode.Y_Negative:
+                case TestMode.YNegative:
                     _cachedForwardAxis = -Vec3.UnitY;
                     break;
             }
@@ -685,15 +674,14 @@ namespace Lib.io.dmx
 
             if (panEnabled)
             {
-                finalPan = ApplyPanRangeAndWrite(context,
-                                                rawPan,
-                                                panChannel,
-                                                panFineChannel,
-                                                PanRange.GetValue(context),
-                                                InvertPan.GetValue(context),
-                                                useShortestPath,
-                                                _lastPanTilt.X,
-                                                shouldLog);
+                finalPan = ApplyPanRangeAndWrite(rawPan,
+                                                 panChannel,
+                                                 panFineChannel,
+                                                 PanRange.GetValue(context),
+                                                 InvertPan.GetValue(context),
+                                                 useShortestPath,
+                                                 _lastPanTilt.X,
+                                                 shouldLog);
             }
             else
             {
@@ -702,15 +690,14 @@ namespace Lib.io.dmx
 
             if (tiltEnabled)
             {
-                finalTilt = ApplyTiltRangeAndWrite(context,
-                                                  rawTilt,
-                                                  tiltChannel,
-                                                  tiltFineChannel,
-                                                  TiltRange.GetValue(context),
-                                                  InvertTilt.GetValue(context),
-                                                  useShortestPath,
-                                                  _lastPanTilt.Y,
-                                                  shouldLog);
+                finalTilt = ApplyTiltRangeAndWrite(rawTilt,
+                                                   tiltChannel,
+                                                   tiltFineChannel,
+                                                   TiltRange.GetValue(context),
+                                                   InvertTilt.GetValue(context),
+                                                   useShortestPath,
+                                                   _lastPanTilt.Y,
+                                                   shouldLog);
             }
             else
             {
@@ -845,7 +832,7 @@ namespace Lib.io.dmx
                 // For tilt-only, we need to find the angle between the direction and the plane perpendicular to tilt axis
                 Vec3 upVec = tiltVec;
                 Vec3 forwardVec = FindOrthogonalVector(tiltVec);
-                Vec3 rightVec = Vec3.Normalize(Vec3.Cross(upVec, forwardVec));
+                Vec3.Normalize(Vec3.Cross(upVec, forwardVec));
 
                 // Project direction onto the plane defined by forward and right vectors
                 float forwardComponent = Vec3.Dot(direction, forwardVec);
@@ -931,8 +918,7 @@ namespace Lib.io.dmx
             return Vec3.Normalize(candidate - vec * Vec3.Dot(candidate, vec));
         }
 
-        private float ApplyPanRangeAndWrite(EvaluationContext context,
-                                            float rawPan,
+        private float ApplyPanRangeAndWrite(float rawPan,
                                             int panChannel,
                                             int panFineChannel,
                                             Vector2 panRangeDegrees,
@@ -995,8 +981,7 @@ namespace Lib.io.dmx
             return finalPan;
         }
 
-        private float ApplyTiltRangeAndWrite(EvaluationContext context,
-                                             float rawTilt,
+        private float ApplyTiltRangeAndWrite(float rawTilt,
                                              int tiltChannel,
                                              int tiltFineChannel,
                                              Vector2 tiltRangeDegrees,
@@ -1026,7 +1011,7 @@ namespace Lib.io.dmx
                 tiltVal -= turnsToCenter * 2 * MathF.PI;
                 if (shouldLog) Log.Debug($"Tilt (shifted to range center): {tiltVal * 180f / MathF.PI:F2} deg", this);
             }
-            else if (useShortestPath)
+            else
             {
                 float turns = MathF.Round((lastTiltValueRad - tiltVal) / (2 * MathF.PI));
                 tiltVal += turns * 2 * MathF.PI;
@@ -1073,7 +1058,7 @@ namespace Lib.io.dmx
             bool f1ByPixel = GetF1ByPixel.GetValue(context);
             bool f2ByPixel = GetF2ByPixel.GetValue(context);
 
-            bool useCMY = RGBToCMY.GetValue(context);
+            bool useCmy = RgbToCmy.GetValue(context);
             bool is16BitColor = Is16BitColor.GetValue(context);
             int redChBase = RedChannel.GetValue(context);
             int greenChBase = GreenChannel.GetValue(context);
@@ -1149,7 +1134,7 @@ namespace Lib.io.dmx
                         float b = float.IsNaN(pt.Color.Z) ? 0f : Math.Clamp(pt.Color.Z, 0f, 1f);
                         float a = float.IsNaN(pt.Color.W) ? 1f : Math.Clamp(pt.Color.W, 0f, 1f);
 
-                        if (useCMY) { r = 1f - r; g = 1f - g; b = 1f - b; }
+                        if (useCmy) { r = 1f - r; g = 1f - g; b = 1f - b; }
 
                         WriteSinglePixelDmxValue(redChBase, r, is16BitColor, "Red");
                         if (greenChBase > 0) WriteSinglePixelDmxValue(greenChBase, g, is16BitColor, "Green");
@@ -1197,33 +1182,33 @@ namespace Lib.io.dmx
         #region Custom Variable Handling
         private void HandleCustomVariables(EvaluationContext ctx)
         {
-            const float CustomVarNormalizedMax = 255f;
+            const float customVarNormalizedMax = 255f;
             bool shouldLog = DebugToLog.GetValue(ctx);
 
             if (SetCustomVar1.GetValue(ctx) && CustomVar1Channel.GetValue(ctx) > 0)
             {
-                float value = Math.Clamp(CustomVar1.GetValue(ctx), 0, (int)CustomVarNormalizedMax);
-                SetDmxValue(value, CustomVar1Channel.GetValue(ctx), 0, 0f, CustomVarNormalizedMax, shouldLog, "CustomVar1");
+                float value = Math.Clamp(CustomVar1.GetValue(ctx), 0, (int)customVarNormalizedMax);
+                SetDmxValue(value, CustomVar1Channel.GetValue(ctx), 0, 0f, customVarNormalizedMax, shouldLog, "CustomVar1");
             }
             if (SetCustomVar2.GetValue(ctx) && CustomVar2Channel.GetValue(ctx) > 0)
             {
-                float value = Math.Clamp(CustomVar2.GetValue(ctx), 0, (int)CustomVarNormalizedMax);
-                SetDmxValue(value, CustomVar2Channel.GetValue(ctx), 0, 0f, CustomVarNormalizedMax, shouldLog, "CustomVar2");
+                float value = Math.Clamp(CustomVar2.GetValue(ctx), 0, (int)customVarNormalizedMax);
+                SetDmxValue(value, CustomVar2Channel.GetValue(ctx), 0, 0f, customVarNormalizedMax, shouldLog, "CustomVar2");
             }
             if (SetCustomVar3.GetValue(ctx) && CustomVar3Channel.GetValue(ctx) > 0)
             {
-                float value = Math.Clamp(CustomVar3.GetValue(ctx), 0, (int)CustomVarNormalizedMax);
-                SetDmxValue(value, CustomVar3Channel.GetValue(ctx), 0, 0f, CustomVarNormalizedMax, shouldLog, "CustomVar3");
+                float value = Math.Clamp(CustomVar3.GetValue(ctx), 0, (int)customVarNormalizedMax);
+                SetDmxValue(value, CustomVar3Channel.GetValue(ctx), 0, 0f, customVarNormalizedMax, shouldLog, "CustomVar3");
             }
             if (SetCustomVar4.GetValue(ctx) && CustomVar4Channel.GetValue(ctx) > 0)
             {
-                float value = Math.Clamp(CustomVar4.GetValue(ctx), 0, (int)CustomVarNormalizedMax);
-                SetDmxValue(value, CustomVar4Channel.GetValue(ctx), 0, 0f, CustomVarNormalizedMax, shouldLog, "CustomVar4");
+                float value = Math.Clamp(CustomVar4.GetValue(ctx), 0, (int)customVarNormalizedMax);
+                SetDmxValue(value, CustomVar4Channel.GetValue(ctx), 0, 0f, customVarNormalizedMax, shouldLog, "CustomVar4");
             }
             if (SetCustomVar5.GetValue(ctx) && CustomVar5Channel.GetValue(ctx) > 0)
             {
-                float value = Math.Clamp(CustomVar5.GetValue(ctx), 0, (int)CustomVarNormalizedMax);
-                SetDmxValue(value, CustomVar5Channel.GetValue(ctx), 0, 0f, CustomVarNormalizedMax, shouldLog, "CustomVar5");
+                float value = Math.Clamp(CustomVar5.GetValue(ctx), 0, (int)customVarNormalizedMax);
+                SetDmxValue(value, CustomVar5Channel.GetValue(ctx), 0, 0f, customVarNormalizedMax, shouldLog, "CustomVar5");
             }
         }
         #endregion
@@ -1273,20 +1258,20 @@ namespace Lib.io.dmx
             float range = inMax - inMin;
             if (Math.Abs(range) < 1e-4f) return 0;
             float normalized = (value - inMin) / range;
-            return (int)Math.Round((double)(Math.Clamp(normalized, 0f, 1f) * 65535f));
+            return (int)Math.Round(Math.Clamp(normalized, 0f, 1f) * 65535f);
         }
 
-        private bool InsertOrSet(int index, int value)
+        private void InsertOrSet(int index, int value)
         {
-            if (index < 0) return false;
+            if (index < 0)
+                return;
             if (index >= _pointChannelValues.Count)
             {
                 Log.Warning($"DMX channel list index {index + 1} out of range (list size {_pointChannelValues.Count}). " +
                             $"Increase 'Fixture Channel Size' if you are using high channel numbers or 16-bit channels for multiple pixels.", this);
-                return false;
+                return;
             }
             _pointChannelValues[index] = value;
-            return true;
         }
         #endregion
 

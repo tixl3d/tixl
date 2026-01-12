@@ -1,5 +1,5 @@
 {
-  "Id": "d86e12a7-c3d1-46e3-a470-3808725c7858"/*PointsToDMXLights*/,
+  "Id": "c9d7cd19-7fc6-4491-8dfa-3808725c7857"/*PointsToDmxLights*/,
   "Inputs": [
     {
       "Id": "013cc355-91d6-4ea6-b9f7-f1817b89e4a3"/*RedChannel*/,
@@ -10,7 +10,7 @@
       "DefaultValue": 5
     },
     {
-      "Id": "098f1662-6f47-4dd0-9a73-4c4814a6ef23"/*CustomVar2Channel*/,
+      "Id": "098f1662-6f47-4dd0-9a73-4c4814aefb23"/*CustomVar2Channel*/,
       "DefaultValue": 0
     },
     {
@@ -22,7 +22,7 @@
       "DefaultValue": 0
     },
     {
-      "Id": "18cc3a73-3a1a-4370-87b7-e54cd44f4a3a"/*SetCustomVar2*/,
+      "Id": "18cc3a73-3a1a-4370-87b7-e5cd44f4a3ab"/*SetCustomVar2*/,
       "DefaultValue": false
     },
     {
@@ -66,7 +66,7 @@
       "DefaultValue": false
     },
     {
-      "Id": "4a40e022-d206-447c-bda3-d534f231c817"/*TiltFineChannel*/,
+      "Id": "4a40e022-d206-447c-bda3-d534f231c816"/*TiltFineChannel*/,
       "DefaultValue": 0
     },
     {
@@ -98,7 +98,7 @@
       "DefaultValue": 0
     },
     {
-      "Id": "658a19df-e51b-45b4-9f91-cb97a891255b"/*PositionFineChannel*/,
+      "Id": "658a19df-e51b-45b4-9f91-cb97a891255a"/*PositionFineChannel*/,
       "DefaultValue": 0
     },
     {
@@ -208,7 +208,7 @@
       "DefaultValue": 0
     },
     {
-      "Id": "cf2c3308-8f3f-442d-a563-b419f12e7ad1"/*RGBToCMY*/,
+      "Id": "cf2c3308-8f3f-442d-a563-b419f12e7ad1"/*RgbToCmy*/,
       "DefaultValue": false
     },
     {

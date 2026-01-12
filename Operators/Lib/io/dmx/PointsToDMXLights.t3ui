@@ -1,6 +1,6 @@
 {
-  "Id": "d86e12a7-c3d1-46e3-a470-3808725c7858"/*PointsToDMXLights*/,
-  "Description": "",
+  "Id": "c9d7cd19-7fc6-4491-8dfa-3808725c7857"/*PointsToDmxLights*/,
+  "Description": "Converts 3D points into DMX channel values for lighting fixtures. Supports position, rotation (pan/tilt), color, and custom features.",
   "InputUis": [
     {
       "InputId": "013cc355-91d6-4ea6-b9f7-f1817b89e4a3"/*RedChannel*/,
@@ -17,7 +17,7 @@
       }
     },
     {
-      "InputId": "098f1662-6f47-4dd0-9a73-4c4814a6ef23"/*CustomVar2Channel*/,
+      "InputId": "098f1662-6f47-4dd0-9a73-4c4814aefb23"/*CustomVar2Channel*/,
       "Position": {
         "X": -200.0,
         "Y": 3900.0
@@ -35,21 +35,24 @@
       "Position": {
         "X": -200.0,
         "Y": 150.0
-      }
+      },
+      "GroupTitle": "Config"
     },
     {
-      "InputId": "18cc3a73-3a1a-4370-87b7-e54cd44f4a3a"/*SetCustomVar2*/,
+      "InputId": "18cc3a73-3a1a-4370-87b7-e5cd44f4a3ab"/*SetCustomVar2*/,
       "Position": {
         "X": -200.0,
         "Y": 3825.0
-      }
+      },
+      "GroupTitle": "CustomVar2"
     },
     {
       "InputId": "1cb93e97-0161-4a77-bbc7-ff30c1972cf8"/*GetF2*/,
       "Position": {
         "X": -200.0,
         "Y": 3375.0
-      }
+      },
+      "GroupTitle": "F2"
     },
     {
       "InputId": "1f532994-fb0e-44e4-8a80-7917e1851eae"/*PanAxis*/,
@@ -77,14 +80,16 @@
       "Position": {
         "X": -200.0,
         "Y": 3600.0
-      }
+      },
+      "GroupTitle": "CustomVar1"
     },
     {
       "InputId": "294b0515-b9f2-446a-8a97-01e3c8b715c0"/*VisPanAxis*/,
       "Position": {
         "X": -200.0,
         "Y": 2400.0
-      }
+      },
+      "GroupTitle": "Visualization"
     },
     {
       "InputId": "2bea2ccb-89f2-427b-bd9a-95c7038b715e"/*ReferencePoints*/,
@@ -105,7 +110,8 @@
       "Position": {
         "X": -200.0,
         "Y": 975.0
-      }
+      },
+      "GroupTitle": "Rotation"
     },
     {
       "InputId": "49fefbdb-2652-43db-ae52-ebc2df3e2856"/*InvertX*/,
@@ -115,7 +121,7 @@
       }
     },
     {
-      "InputId": "4a40e022-d206-447c-bda3-d534f231c817"/*TiltFineChannel*/,
+      "InputId": "4a40e022-d206-447c-bda3-d534f231c816"/*TiltFineChannel*/,
       "Position": {
         "X": -200.0,
         "Y": 2175.0
@@ -147,7 +153,8 @@
       "Position": {
         "X": -200.0,
         "Y": 2550.0
-      }
+      },
+      "GroupTitle": "Color"
     },
     {
       "InputId": "5e96a7a3-5340-43f2-96b9-9972a69421e5"/*Is16BitColor*/,
@@ -161,7 +168,8 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "GroupTitle": "Points"
     },
     {
       "InputId": "628d96a8-466b-4148-9658-7786833ec989"/*PositionMeasureAxis*/,
@@ -171,7 +179,7 @@
       }
     },
     {
-      "InputId": "658a19df-e51b-45b4-9f91-cb97a891255b"/*PositionFineChannel*/,
+      "InputId": "658a19df-e51b-45b4-9f91-cb97a891255a"/*PositionFineChannel*/,
       "Position": {
         "X": -200.0,
         "Y": 900.0
@@ -231,7 +239,8 @@
       "Position": {
         "X": -200.0,
         "Y": 4050.0
-      }
+      },
+      "GroupTitle": "CustomVar3"
     },
     {
       "InputId": "8880c101-403f-46e0-901e-20ec2dd333e9"/*PositionDistanceRange*/,
@@ -252,7 +261,8 @@
       "Position": {
         "X": -200.0,
         "Y": 4275.0
-      }
+      },
+      "GroupTitle": "CustomVar4"
     },
     {
       "InputId": "9000c279-73e4-4de8-a1f8-c3914eaaf533"/*PanChannel*/,
@@ -266,7 +276,8 @@
       "Position": {
         "X": -200.0,
         "Y": 3150.0
-      }
+      },
+      "GroupTitle": "F1"
     },
     {
       "InputId": "970769f4-116f-418d-87a7-cda28e44d063"/*GreenChannel*/,
@@ -287,7 +298,8 @@
       "Position": {
         "X": -200.0,
         "Y": 4500.0
-      }
+      },
+      "GroupTitle": "CustomVar5"
     },
     {
       "InputId": "ac9a709e-6dc0-40ca-9f70-350e655a2630"/*CustomVar3Channel*/,
@@ -353,7 +365,7 @@
       }
     },
     {
-      "InputId": "cf2c3308-8f3f-442d-a563-b419f12e7ad1"/*RGBToCMY*/,
+      "InputId": "cf2c3308-8f3f-442d-a563-b419f12e7ad1"/*RgbToCmy*/,
       "Position": {
         "X": -200.0,
         "Y": 2625.0
@@ -392,7 +404,8 @@
       "Position": {
         "X": -200.0,
         "Y": 525.0
-      }
+      },
+      "GroupTitle": "Position"
     },
     {
       "InputId": "e7a48fe0-d788-4f12-a9d4-52472519da09"/*CustomVar2*/,
