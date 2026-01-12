@@ -1,18 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
+﻿
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using System.Numerics;
 using System.Threading;
-using System.Threading.Tasks;
-using SharpDX.Direct3D11;
 using T3.Core.Animation;
-using T3.Core.Logging;
-using T3.Core.Operator;
-using T3.Core.Operator.Attributes;
-using T3.Core.Operator.Slots;
 
 namespace Lib.io.ptz
 {
@@ -161,8 +151,11 @@ namespace Lib.io.ptz
                 _udpClient?.Close();
                 _udpClient?.Dispose();
             }
-            catch {}
-            
+            catch
+            {
+                // ignored
+            }
+
             _udpClient = null;
             _isConnected = false;
             if (log) Log.Debug("ViscaCamera: Disconnected", this);
@@ -176,7 +169,7 @@ namespace Lib.io.ptz
                 {
                     if (_udpClient == null) break;
                     var result = await _udpClient.ReceiveAsync();
-                    ProcessPacket(result.Buffer, log);
+                    ProcessPacket(result.Buffer);
                 }
                 catch (ObjectDisposedException)
                 {
@@ -191,7 +184,7 @@ namespace Lib.io.ptz
             }
         }
 
-        private void ProcessPacket(byte[] data, bool log)
+        private void ProcessPacket(byte[] data)
         {
             // VISCA over IP packet structure:
             // 00-01: Payload Type (0x0111 for Reply)
