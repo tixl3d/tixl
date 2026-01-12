@@ -35,8 +35,8 @@ internal abstract class MfVideoWriter : IDisposable
         Bitrate = 2000000;
         Framerate = 60; //TODO: is this actually used?
         _frameIndex = -1;
-    }    
-    
+    }
+
     public string FilePath { get; }
 
     // skip a certain number of images at the beginning since the
@@ -54,7 +54,7 @@ internal abstract class MfVideoWriter : IDisposable
     /// <summary>
     /// Returns true if a frame has been written
     /// </summary>
-    public bool ProcessFrames( Texture2D gpuTexture, ref byte[] audioFrame, int channels, int sampleRate)
+    public bool ProcessFrames(Texture2D gpuTexture, ref byte[] audioFrame, int channels, int sampleRate)
     {
         try
         {
@@ -69,9 +69,19 @@ internal abstract class MfVideoWriter : IDisposable
                 throw new InvalidOperationException("Empty image handed over");
             }
 
-            if (currentDesc.Width != _videoPixelSize.Width || currentDesc.Height != _videoPixelSize.Height)
+            // Only log if the frame resolution does not match the expected even resolution or its odd neighbor
+            bool widthMismatch = currentDesc.Width != _videoPixelSize.Width && currentDesc.Width != _videoPixelSize.Width + 1;
+            bool heightMismatch = currentDesc.Height != _videoPixelSize.Height && currentDesc.Height != _videoPixelSize.Height + 1;
+            if (widthMismatch || heightMismatch)
             {
                 Log.Debug($"Skipping frame: resolution mismatch. Expected {_videoPixelSize.Width}x{_videoPixelSize.Height}, got {currentDesc.Width}x{currentDesc.Height}");
+                return false;
+            }
+            // If the incoming frame is odd and off by one, just skip without logging
+            if (currentDesc.Width != _videoPixelSize.Width || currentDesc.Height != _videoPixelSize.Height)
+            {
+                // No need to log, since this is expected while converting to even resolution
+                //Log.Debug($"Skipping frame: resolution mismatch. Expected {_videoPixelSize.Width}x{_videoPixelSize.Height}, got {currentDesc.Width}x{currentDesc.Height}");
                 return false;
             }
 
@@ -181,15 +191,15 @@ internal abstract class MfVideoWriter : IDisposable
     {
         if (_lastSample != null)
         {
-             Log.Warning("Discarding previous video sample...");
-             _lastSample?.Dispose();
-             _lastSample = null;
+            Log.Warning("Discarding previous video sample...");
+            _lastSample?.Dispose();
+            _lastSample = null;
         }
 
         var cpuAccessTexture = readRequestItem.CpuAccessTexture;
         if (cpuAccessTexture == null || cpuAccessTexture.IsDisposed)
             return;
-        
+
         // Map image resource to get a stream we can read from
         var dataBox = ResourceManager.Device.ImmediateContext.MapSubresource(cpuAccessTexture,
                                                                              0,
@@ -249,7 +259,7 @@ internal abstract class MfVideoWriter : IDisposable
         // Create the sample (includes image and timing information)
         _lastSample = MediaFactory.CreateSample();
         _lastSample.AddBuffer(mediaBuffer);
-        
+
         mediaBuffer.Dispose();
     }
 
@@ -361,7 +371,7 @@ internal abstract class MfVideoWriter : IDisposable
     #endregion
 
 
-    
+
     #region Resources for MediaFoundation video rendering
     private Sample _lastSample;
     // private MF.ByteStream outStream;
