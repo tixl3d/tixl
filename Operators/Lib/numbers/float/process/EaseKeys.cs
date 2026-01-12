@@ -38,9 +38,12 @@ internal sealed class EaseKeys : Instance<EaseKeys>
 
         _lastEvalTime = currentTime;
 
-        var duration = 0.0001f;
+        float duration;
 
-        if (TryFindClosestKeys(currentTime, out var nearestKeys))
+        if (
+            TryFindClosestKeys(currentTime, out var nearestKeys)
+            && nearestKeys.Item1.OutType != VDefinition.Interpolation.Constant
+        )
         {
             var (previousKey, nextKey) = nearestKeys;
             _startTime = previousKey.U;
@@ -51,6 +54,7 @@ internal sealed class EaseKeys : Instance<EaseKeys>
         else
         {
             Result.Value = Value.GetValue(context);
+            return;
         }
 
         // Calculate progress based on elapsed time and duration

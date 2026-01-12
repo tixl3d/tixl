@@ -39,15 +39,23 @@ internal sealed class EaseVec2Keys : Instance<EaseVec2Keys>
             var curve = curves[i];
             _keyframes = curve.GetVDefinitions().ToList();
             _lastEvalTime = currentTime;
-            var duration = 0.0001f;
+            float duration;
 
-            if (TryFindClosestKeys(currentTime, curve, out var nearestKeys))
+            if (
+                TryFindClosestKeys(currentTime, curve, out var nearestKeys)
+                && nearestKeys.Item1.OutType != VDefinition.Interpolation.Constant
+            )
             {
                 var (previousKey, nextKey) = nearestKeys;
                 _startTime[i] = (float)previousKey.U;
                 _initialValue[i] = (float)previousKey.Value;
                 _targetValue[i] = (float)nextKey.Value;
                 duration = Math.Max((float)(nextKey.U - previousKey.U), 0.0001f);
+            }
+            else
+            {
+                Result.Value[i] = Value.GetValue(context)[i];
+                continue;
             }
 
             // Calculate progress based on elapsed time and duration

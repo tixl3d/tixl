@@ -1,5 +1,5 @@
-using System.Diagnostics;
 using ImGuiNET;
+using System.Diagnostics;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Model;
 using T3.Core.Operator;
@@ -7,13 +7,14 @@ using T3.Core.Operator.Interfaces;
 using T3.Core.Operator.Slots;
 using T3.Core.Resource;
 using T3.Core.Utils;
-using T3.Editor.Gui.OpUis;
 using T3.Editor.Gui;
 using T3.Editor.Gui.MagGraph.Interaction;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.MagGraph.States;
+using T3.Editor.Gui.OpUis;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.UiModel.Helpers;
 using T3.Editor.UiModel.InputsAndTypes;
 using Texture2D = T3.Core.DataTypes.Texture2D;
 
@@ -544,20 +545,20 @@ internal sealed partial class MagGraphView
             var indicatorCount = 0;
             if (item.Instance.Parent.Symbol.Animator.IsInstanceAnimated(item.Instance))
             {
-                DrawIndicator(drawList, UiColors.StatusAnimated, idleFadeFactor, pMin, pMax, CanvasScale, ref indicatorCount);
+                DrawIndicator(drawList, UiColors.StatusAnimated, idleFadeFactor, pMin, pMax, CanvasScale, ref indicatorCount, "is animated");
             }
 
             // Pinned indicator
             if (context.Selector.PinnedIds.Contains(item.Instance.SymbolChildId))
             {
-                DrawIndicator(drawList, UiColors.Selection, idleFadeFactor, pMin, pMax, CanvasScale, ref indicatorCount);
+                DrawIndicator(drawList, UiColors.Selection, idleFadeFactor, pMin, pMax, CanvasScale, ref indicatorCount, "is pinned");
             }
 
             // Snapshot indicator
             {
                 if (item.ChildUi.EnabledForSnapshots)
                 {
-                    DrawIndicator(drawList, UiColors.StatusAutomated, idleFadeFactor, pMin, pMax, CanvasScale, ref indicatorCount);
+                    DrawIndicator(drawList, UiColors.StatusAutomated, idleFadeFactor, pMin, pMax, CanvasScale, ref indicatorCount, "enabled for snapshot");
                 }
             }
 
@@ -590,6 +591,15 @@ internal sealed partial class MagGraphView
                 Icons.DrawIconOnLastItem(Icon.Comment, UiColors.ForegroundFull);
                 CustomComponents.TooltipForLastItem(UiColors.Text, item.ChildUi.Comment, null, false);
             }
+
+            // Non-Lib indicator 
+            var isNonLib = !SymbolAnalysis.TryGetOperatorType(item.Instance.Symbol, out var operatorType);
+
+            if (isNonLib)
+            {
+                  DrawIndicator(drawList, UiColors.StatusControlled, idleFadeFactor, pMin, pMax, CanvasScale, ref indicatorCount, "is a custom symbol");
+            }
+
         }
 
         // Hide additional UI elements when custom ui-op is hovered with control
@@ -1143,7 +1153,7 @@ internal sealed partial class MagGraphView
     }
 
     private static void DrawIndicator(ImDrawListPtr drawList, Color color, float opacity, Vector2 areaMin, Vector2 areaMax, float canvasScale,
-                                      ref int indicatorCount)
+                                      ref int indicatorCount, string tooltip=null)
     {
         const int s = 4;
         var dx = (s + 1) * indicatorCount;
@@ -1158,7 +1168,18 @@ internal sealed partial class MagGraphView
         drawList.AddRect(pMin - Vector2.One,
                          pMax + Vector2.One,
                          UiColors.WindowBackground.Fade(0.4f * opacity));
-        indicatorCount++;
+        if (!string.IsNullOrEmpty(tooltip)&&canvasScale>2.0f)
+        {
+            var mousePos = ImGui.GetMousePos();
+            var area= new ImRect(pMin, pMax);
+            if (area.Contains(mousePos))
+            {
+                ImGui.BeginTooltip();
+                ImGui.TextUnformatted(tooltip);
+                ImGui.EndTooltip();
+            }
+        }
+            indicatorCount++;
     }
     
 

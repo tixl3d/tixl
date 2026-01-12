@@ -70,6 +70,9 @@ public static class T3Style
         style.Colors[(int)ImGuiCol.HeaderHovered] = UiColors.BackgroundActive;
         style.Colors[(int)ImGuiCol.HeaderActive] = UiColors.BackgroundActive.Fade(0.8f);
 
+        // others...
+        style.Colors[(int)ImGuiCol.DragDropTarget] = Color.Transparent;
+        
         style.WindowPadding = Vector2.Zero;
         style.FramePadding = new Vector2(7, 4);
         style.ItemSpacing = new Vector2(1, 1.49f);

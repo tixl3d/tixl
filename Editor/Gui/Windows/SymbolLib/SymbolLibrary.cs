@@ -56,6 +56,8 @@ internal sealed class SymbolLibrary : Window
         ImGui.PopStyleVar(1);
     }
 
+    private static bool _refreshTriggered;
+
     /// <summary>
     /// Draws the main symbol library view including search, filters and result tree.
     /// </summary>
@@ -71,12 +73,10 @@ internal sealed class SymbolLibrary : Window
             -ImGui.GetFrameHeight() * iconCount + 16);
 
         ImGui.SameLine();
-        if (CustomComponents.IconButton(Icon.Refresh, Vector2.Zero, CustomComponents.ButtonStates.Dimmed))
+        if (CustomComponents.IconButton(Icon.Refresh, Vector2.Zero, CustomComponents.ButtonStates.Dimmed) || _refreshTriggered)
         {
-            _treeNode.PopulateCompleteTree();
-            ExampleSymbolLinking.UpdateExampleLinks();
-            SymbolAnalysis.UpdateDetails();
-            _wasScanned = true;
+            UpdateSymbolLibraryState();
+            _refreshTriggered = false;
         }
 
         CustomComponents.TooltipForLastItem(
@@ -108,6 +108,14 @@ internal sealed class SymbolLibrary : Window
             }
         }
         ImGui.EndChild();
+    }
+
+    private void UpdateSymbolLibraryState()
+    {
+        _treeNode.PopulateCompleteTree();
+        ExampleSymbolLinking.UpdateExampleLinks();
+        SymbolAnalysis.UpdateDetails();
+        _wasScanned = true;
     }
 
     /// <summary>
@@ -240,7 +248,9 @@ internal sealed class SymbolLibrary : Window
     /// </summary>
     private static void HandleDropTarget(NamespaceTreeNode subtree)
     {
-        if (!DragAndDropHandling.TryHandleItemDrop(DragAndDropHandling.DragTypes.Symbol, out var data))
+        DragAndDropHandling.TryHandleItemDrop(DragAndDropHandling.DragTypes.Symbol, out var data, out var result);
+        
+        if(result != DragAndDropHandling.DragInteractionResult.Dropped)
             return;
 
         if (!Guid.TryParse(data, out var symbolId))
@@ -248,6 +258,8 @@ internal sealed class SymbolLibrary : Window
 
         if (!MoveSymbolToNamespace(symbolId, subtree.GetAsString(), out var reason))
             BlockingWindow.Instance.ShowMessageBox(reason, "Could not move symbol's namespace");
+
+        _refreshTriggered = true;
     }
 
     /// <summary>

@@ -244,28 +244,36 @@ internal sealed class RenderWindow : Window
         UserSettings.Config.RenderVideoFilePath = Path.Combine(directory, filename);
 
         FormInputs.AddCheckBox(RenderWindowStrings.AutoIncrementLabel, ref ActiveSettings.AutoIncrementVersionNumber);
-        if (ActiveSettings.AutoIncrementVersionNumber && !RenderPaths.IsFilenameIncrementable())
+        if (ActiveSettings.AutoIncrementVersionNumber)
         {
-            FormInputs.AddHint(RenderWindowStrings.HintWillAppendVersion);
+            var nextTargetPath = GetCachedTargetFilePath(RenderSettings.RenderModes.Video);
+            var nextVersion = RenderPaths.GetVersionString(nextTargetPath);
+            
+            if (RenderPaths.IsFilenameIncrementable(UserSettings.Config.RenderVideoFilePath))
+            {
+                FormInputs.AddHint($"Next version will be '{nextVersion}'");
+            }
+            else
+            {
+                FormInputs.AddHint($"Suffix '_{nextVersion}' will be added after render");
+            }
         }
 
         FormInputs.AddCheckBox(RenderWindowStrings.ExportAudioLabel, ref ActiveSettings.ExportAudio);
     }
 
-    private static void DrawImageSequenceSettings()
+    private void DrawImageSequenceSettings()
     {
         FormInputs.AddFilePicker(RenderWindowStrings.MainFolderLabel, ref UserSettings.Config.RenderSequenceFilePath!, ".\\ImageSequence ", null, RenderWindowStrings.SaveFolderLabel, FileOperations.FilePickerTypes.Folder);
 
         if (FormInputs.AddStringInput(RenderWindowStrings.SubfolderLabel, ref UserSettings.Config.RenderSequenceFileName))
         {
             UserSettings.Config.RenderSequenceFileName = (UserSettings.Config.RenderSequenceFileName ?? string.Empty).Trim();
-            if (string.IsNullOrEmpty(UserSettings.Config.RenderSequenceFileName)) UserSettings.Config.RenderSequenceFileName = "v01";
         }
 
         if (FormInputs.AddStringInput(RenderWindowStrings.PrefixLabel, ref UserSettings.Config.RenderSequencePrefix))
         {
             UserSettings.Config.RenderSequencePrefix = (UserSettings.Config.RenderSequencePrefix ?? string.Empty).Trim();
-            if (string.IsNullOrEmpty(UserSettings.Config.RenderSequencePrefix)) UserSettings.Config.RenderSequencePrefix = "render";
         }
 
         FormInputs.AddEnumDropdown(ref ActiveSettings.FileFormat, RenderWindowStrings.FormatLabel);
@@ -275,11 +283,25 @@ internal sealed class RenderWindow : Window
         
         if (ActiveSettings.AutoIncrementSubFolder)
         {
-            var targetToIncrement = ActiveSettings.CreateSubFolder ? UserSettings.Config.RenderSequenceFileName : UserSettings.Config.RenderSequencePrefix;
-            var hasVersion = RenderPaths.IsFilenameIncrementable(targetToIncrement);
-            if (!hasVersion)
+            var nextTargetPath = GetCachedTargetFilePath(RenderSettings.RenderModes.ImageSequence);
+            
+            // If we are creating subfolders, the 'prefix' part of the path (the last component) 
+            // is NOT the versioned part. The version is in the directory name.
+            if (ActiveSettings.CreateSubFolder)
             {
-                FormInputs.AddHint(RenderWindowStrings.HintWillAppendVersion);
+                nextTargetPath = Path.GetDirectoryName(nextTargetPath) ?? nextTargetPath;
+            }
+            
+            var nextVersion = RenderPaths.GetVersionString(nextTargetPath);
+            var targetToIncrement = ActiveSettings.CreateSubFolder ? UserSettings.Config.RenderSequenceFileName : UserSettings.Config.RenderSequencePrefix;
+            
+            if (RenderPaths.IsFilenameIncrementable(targetToIncrement))
+            {
+                FormInputs.AddHint($"Next version will be '{nextVersion}'");
+            }
+            else
+            {
+                FormInputs.AddHint($"Suffix '_{nextVersion}' will be added after render");
             }
         }
     }
@@ -308,13 +330,17 @@ internal sealed class RenderWindow : Window
         ImGui.TextUnformatted($"{duration / 60:0}:{duration % 60:00.0}s ({ActiveSettings.FrameCount} frames)");
         
         ImGui.PushFont(Fonts.FontSmall);
-        ImGui.TextWrapped($"-> {outputPath}");
+        ImGui.TextUnformatted("Export to:");
+        ImGui.SameLine();
+        ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Fade(1.2f).Rgba);
+        ImGui.TextWrapped(outputPath);
+        ImGui.PopStyleColor();
         ImGui.PopFont();
         
         ImGui.PopStyleColor();
     }
     
-    private string GetCachedTargetFilePath(RenderSettings.RenderModes mode)
+    public string GetCachedTargetFilePath(RenderSettings.RenderModes mode)
     {
         var now = Playback.RunTimeInSecs;
         if (now - _uiState.LastPathUpdateTime < 0.2 && !string.IsNullOrEmpty(_uiState.CachedTargetPath))
@@ -333,6 +359,12 @@ internal sealed class RenderWindow : Window
             ImGui.PushStyleColor(ImGuiCol.ButtonHovered, UiColors.BackgroundActive.Rgba);
             ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 4f);
             
+            var isValid = ValidateSettings(out var errorMessage);
+            if (!isValid)
+            {
+                ImGui.BeginDisabled();
+            }
+
             if (ImGui.Button(RenderWindowStrings.StartRenderButton, new Vector2(-1, 36 * T3Ui.UiScaleFactor)))
             {
                 var targetPath = GetCachedTargetFilePath(ActiveSettings.RenderMode);
@@ -344,6 +376,13 @@ internal sealed class RenderWindow : Window
                 {
                     RenderProcess.TryStart(ActiveSettings);
                 }
+            }
+
+            if (!isValid)
+            {
+                ImGui.EndDisabled();
+                CustomComponents.TooltipForLastItem(errorMessage);
+                _uiState.LastHelpString = errorMessage;
             }
             ImGui.PopStyleVar();
             ImGui.PopStyleColor(2);
@@ -378,6 +417,38 @@ internal sealed class RenderWindow : Window
             RenderProcess.Cancel(RenderWindowStrings.RenderCancelled + StringUtils.HumanReadableDurationFromSeconds(elapsed));
             }
         }
+    }
+
+    private static bool ValidateSettings(out string errorMessage)
+    {
+        errorMessage = string.Empty;
+
+        if (ActiveSettings.RenderMode == RenderSettings.RenderModes.Video)
+        {
+            var currentPath = UserSettings.Config.RenderVideoFilePath ?? string.Empty;
+            var filename = Path.GetFileNameWithoutExtension(currentPath);
+            if (string.IsNullOrWhiteSpace(filename) || filename == ".")
+            {
+                errorMessage = "Filename cannot be empty.";
+                return false;
+            }
+        }
+        else
+        {
+            if (ActiveSettings.CreateSubFolder && string.IsNullOrWhiteSpace(UserSettings.Config.RenderSequenceFileName))
+            {
+                errorMessage = "Subfolder name cannot be empty.";
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(UserSettings.Config.RenderSequencePrefix))
+            {
+                errorMessage = "Filename prefix cannot be empty.";
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private void DrawOverwriteDialog()
@@ -522,7 +593,6 @@ internal sealed class RenderWindow : Window
         public const string PrefixLabel = "Filename Prefix";
         public const string AutoIncrementLabel = "Auto-increment version";
         public const string CreateSubFolderLabel = "Create subfolder";
-        public const string HintWillAppendVersion = "Suffix '_v01' will be added after render";
         public const string ExportAudioLabel = "Export Audio (experimental)";
         
         public const string Calculating = "Calculating...";

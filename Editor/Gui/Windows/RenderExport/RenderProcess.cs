@@ -322,7 +322,7 @@ internal static class RenderProcess
 
     private static string GetSequenceFilePath()
     {
-        var prefix = RenderPaths.SanitizeFilename(UserSettings.Config.RenderSequenceFileName);
+        var prefix = RenderPaths.SanitizeFilename(UserSettings.Config.RenderSequencePrefix);
         return Path.Combine(_activeSession!.TargetFolder, $"{prefix}_{_activeSession.FrameIndex:0000}.{_activeSession.Settings.FileFormat.ToString().ToLower()}");
     }
 
