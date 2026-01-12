@@ -1,6 +1,11 @@
 #nullable enable
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Numerics;
 using ImGuiNET;
+using T3.Core.Logging;
 using T3.Core.Operator;
 using T3.Core.SystemUi;
 using T3.Editor.Gui.Dialogs;
@@ -31,8 +36,11 @@ internal sealed class SymbolLibrary : Window
 
     protected override void DrawContent()
     {
-        if(_subtreeNodeToRename != null)
+        if (_subtreeNodeToRename != null)
             _renameNamespaceDialog.Draw(_subtreeNodeToRename);
+
+        if (_symbolToDelete != null)
+            _deleteSymbolDialog.Draw(_symbolToDelete);
 
         ImGui.PushStyleVar(ImGuiStyleVar.IndentSpacing, 10);
 
@@ -48,60 +56,76 @@ internal sealed class SymbolLibrary : Window
         ImGui.PopStyleVar(1);
     }
 
+    private static bool _refreshTriggered;
 
+    /// <summary>
+    /// Draws the main symbol library view including search, filters and result tree.
+    /// </summary>
     private void DrawView()
     {
         var iconCount = 1;
         if (_wasScanned)
             iconCount++;
 
-        CustomComponents.DrawInputFieldWithPlaceholder("Search symbols...", ref _filter.SearchString, -ImGui.GetFrameHeight() * iconCount + 16);
+        CustomComponents.DrawInputFieldWithPlaceholder(
+            "Search symbols...",
+            ref _filter.SearchString,
+            -ImGui.GetFrameHeight() * iconCount + 16);
 
         ImGui.SameLine();
-        if (CustomComponents.IconButton(Icon.Refresh, Vector2.Zero, CustomComponents.ButtonStates.Dimmed))
+        if (CustomComponents.IconButton(Icon.Refresh, Vector2.Zero, CustomComponents.ButtonStates.Dimmed) || _refreshTriggered)
         {
-            _treeNode.PopulateCompleteTree();
-            ExampleSymbolLinking.UpdateExampleLinks();
-            SymbolAnalysis.UpdateDetails();
-            _wasScanned = true;
+            UpdateSymbolLibraryState();
+            _refreshTriggered = false;
         }
 
-        CustomComponents.TooltipForLastItem("Scan usage dependencies for symbols", 
-                                            "This can be useful for cleaning up operator name spaces.");
+        CustomComponents.TooltipForLastItem(
+            "Scan usage dependencies for symbols",
+            "This can be useful for cleaning up operator name spaces.");
 
         if (_wasScanned)
         {
             _libraryFiltering.DrawSymbolFilters();
         }
-        
 
         ImGui.BeginChild("scrolling", Vector2.Zero, false, ImGuiWindowFlags.NoBackground);
         {
-             if (_libraryFiltering.AnyFilterActive)
-             {
-                 DrawNode(FilteredTree);
-             }
-             else if (string.IsNullOrEmpty(_filter.SearchString))
-             {
-                 DrawNode(_treeNode);
-             }
-             else if (_filter.SearchString.Contains('?'))
-             {
-                 _randomPromptGenerator.DrawRandomPromptList();
-             }
-             else
-             {
-                 DrawFilteredList();
-             }
+            if (_libraryFiltering.AnyFilterActive)
+            {
+                DrawNode(FilteredTree);
+            }
+            else if (string.IsNullOrEmpty(_filter.SearchString))
+            {
+                DrawNode(_treeNode);
+            }
+            else if (_filter.SearchString.Contains('?'))
+            {
+                _randomPromptGenerator.DrawRandomPromptList();
+            }
+            else
+            {
+                DrawFilteredList();
+            }
         }
         ImGui.EndChild();
     }
-    
+
+    private void UpdateSymbolLibraryState()
+    {
+        _treeNode.PopulateCompleteTree();
+        ExampleSymbolLinking.UpdateExampleLinks();
+        SymbolAnalysis.UpdateDetails();
+        _wasScanned = true;
+    }
+
+    /// <summary>
+    /// Shows usage list if a “used by” indicator was clicked for a symbol.
+    /// </summary>
     private static void DrawUsagesAReferencedSymbol()
     {
         if (_symbolUsageReferenceFilter == null)
             return;
-        
+
         ImGui.Text("Usages of " + _symbolUsageReferenceFilter.Name + ":");
         if (ImGui.Button("Clear"))
         {
@@ -113,16 +137,17 @@ internal sealed class SymbolLibrary : Window
 
             ImGui.BeginChild("scrolling");
             {
-                if (SymbolAnalysis.DetailsInitialized && SymbolAnalysis.InformationForSymbolIds.TryGetValue(_symbolUsageReferenceFilter.Id, out var info))
+                if (SymbolAnalysis.DetailsInitialized &&
+                    SymbolAnalysis.InformationForSymbolIds.TryGetValue(_symbolUsageReferenceFilter.Id, out var info))
                 {
                     // TODO: this should be cached...
                     var allSymbols = EditorSymbolPackage.AllSymbols.ToDictionary(s => s.Id);
 
                     foreach (var id in info.DependingSymbols)
                     {
-                        if (allSymbols.TryGetValue(id, out var symbolUi))
+                        if (allSymbols.TryGetValue(id, out var symbol))
                         {
-                            DrawSymbolItem(symbolUi);
+                            DrawSymbolItem(symbol);
                         }
                     }
                 }
@@ -131,7 +156,9 @@ internal sealed class SymbolLibrary : Window
         }
     }
 
-
+    /// <summary>
+    /// Draws flat list results when search is active.
+    /// </summary>
     private void DrawFilteredList()
     {
         _filter.UpdateIfNecessary(null);
@@ -141,6 +168,9 @@ internal sealed class SymbolLibrary : Window
         }
     }
 
+    /// <summary>
+    /// Recursively draws namespace nodes and their symbols.
+    /// </summary>
     private void DrawNode(NamespaceTreeNode subtree)
     {
         if (subtree.Name == NamespaceTreeNode.RootNodeId)
@@ -158,14 +188,15 @@ internal sealed class SymbolLibrary : Window
             }
 
             var isOpen = ImGui.TreeNode(subtree.Name);
+
             CustomComponents.ContextMenuForItem(() =>
-                                                {
-                                                    if (ImGui.MenuItem("Rename Namespace"))
-                                                    {
-                                                        _subtreeNodeToRename = subtree;
-                                                        _renameNamespaceDialog.ShowNextFrame();
-                                                    }
-                                                });
+            {
+                if (ImGui.MenuItem("Rename Namespace"))
+                {
+                    _subtreeNodeToRename = subtree;
+                    _renameNamespaceDialog.ShowNextFrame();
+                }
+            });
 
             if (isOpen)
             {
@@ -177,6 +208,7 @@ internal sealed class SymbolLibrary : Window
             }
             else
             {
+                // Small helper button for quickly dropping dragged symbols into unopened namespaces.
                 if (DragAndDropHandling.IsDragging)
                 {
                     ImGui.SameLine();
@@ -191,6 +223,9 @@ internal sealed class SymbolLibrary : Window
         }
     }
 
+    /// <summary>
+    /// Draws child namespaces and symbols of a subtree.
+    /// </summary>
     private void DrawNodeItems(NamespaceTreeNode subtree)
     {
         // Using a for loop to prevent modification during iteration exception
@@ -200,6 +235,7 @@ internal sealed class SymbolLibrary : Window
             DrawNode(subspace);
         }
 
+        // Use a copy of the list to avoid modification issues when symbols are moved/deleted.
         for (var index = 0; index < subtree.Symbols.ToList().Count; index++)
         {
             var symbol = subtree.Symbols.ToList()[index];
@@ -207,9 +243,14 @@ internal sealed class SymbolLibrary : Window
         }
     }
 
+    /// <summary>
+    /// Handles drag&drop onto a namespace node to move symbols between namespaces.
+    /// </summary>
     private static void HandleDropTarget(NamespaceTreeNode subtree)
     {
-        if (!DragAndDropHandling.TryGetDataDroppedLastItem(DragAndDropHandling.SymbolDraggingId, out var data))
+        DragAndDropHandling.TryHandleItemDrop(DragAndDropHandling.DragTypes.Symbol, out var data, out var result);
+        
+        if(result != DragAndDropHandling.DragInteractionResult.Dropped)
             return;
 
         if (!Guid.TryParse(data, out var symbolId))
@@ -217,8 +258,13 @@ internal sealed class SymbolLibrary : Window
 
         if (!MoveSymbolToNamespace(symbolId, subtree.GetAsString(), out var reason))
             BlockingWindow.Instance.ShowMessageBox(reason, "Could not move symbol's namespace");
+
+        _refreshTriggered = true;
     }
 
+    /// <summary>
+    /// Moves a symbol to a new namespace, respecting read-only packages.
+    /// </summary>
     private static bool MoveSymbolToNamespace(Guid symbolId, string nameSpace, out string reason)
     {
         if (!SymbolUiRegistry.TryGetSymbolUi(symbolId, out var symbolUi))
@@ -261,29 +307,28 @@ internal sealed class SymbolLibrary : Window
     private readonly RandomPromptGenerator _randomPromptGenerator;
     private readonly LibraryFiltering _libraryFiltering;
 
+    private static readonly DeleteSymbolDialog _deleteSymbolDialog = new();
+    private static bool _showDeleteDialog = true;
+    private static Symbol? _symbolToDelete;
+
+    // Static back-reference so DrawSymbolItem can set _symbolToDelete
     internal static void DrawSymbolItem(Symbol symbol)
     {
         if (!symbol.TryGetSymbolUi(out var symbolUi))
             return;
-        
+
         ImGui.PushID(symbol.Id.GetHashCode());
         {
             var color = symbol.OutputDefinitions.Count > 0
                             ? TypeUiRegistry.GetPropertiesForType(symbol.OutputDefinitions[0]?.ValueType).Color
                             : UiColors.Gray;
-            
-            //var symbolUi = symbol.GetSymbolUi();
 
-            // var state = ParameterWindow.GetButtonStatesForSymbolTags(symbolUi.Tags);
-            // if (CustomComponents.IconButton(Icon.Bookmark, Vector2.Zero, state))
-            // {
-            //     
-            // }
-            if(ParameterWindow.DrawSymbolTagsButton(symbolUi)) 
+            // Tag “bookmark” button in front of symbol button.
+            if (ParameterWindow.DrawSymbolTagsButton(symbolUi))
                 symbolUi.FlagAsModified();
-            
+
             ImGui.SameLine();
-            
+
             ImGui.PushStyleColor(ImGuiCol.Button, ColorVariations.OperatorBackground.Apply(color).Rgba);
             ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ColorVariations.OperatorBackgroundHover.Apply(color).Rgba);
             ImGui.PushStyleColor(ImGuiCol.ButtonActive, ColorVariations.OperatorBackgroundHover.Apply(color).Rgba);
@@ -291,50 +336,83 @@ internal sealed class SymbolLibrary : Window
 
             if (ImGui.Button(symbol.Name.AddSpacesForImGuiOutput()))
             {
-                //_selectedSymbol = symbol;
+                // (selection is handled elsewhere)
             }
 
             if (ImGui.IsItemHovered())
             {
                 ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeAll);
-                
+
                 if (!string.IsNullOrEmpty(symbolUi.Description))
                 {
-                    ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(4,4));
+                    ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(4, 4));
                     ImGui.BeginTooltip();
                     ImGui.PushTextWrapPos(ImGui.GetFontSize() * 25.0f);
                     ImGui.TextUnformatted(symbolUi.Description);
                     ImGui.PopTextWrapPos();
                     ImGui.PopStyleVar();
                     ImGui.EndTooltip();
-                }                
+                }
             }
 
             ImGui.PopStyleColor(4);
             HandleDragAndDropForSymbolItem(symbol);
 
-            CustomComponents.ContextMenuForItem(drawMenuItems: () => CustomComponents.DrawSymbolCodeContextMenuItem(symbol), 
-                                                title: symbol.Name,
-                                                id: "##symbolTreeSymbolContextMenu");
+            // Styled context menu with symbol name as header and proper popup padding.
+            CustomComponents.ContextMenuForItem(
+                drawMenuItems: () =>
+                {
+                    // Existing symbol-specific menu
+                    CustomComponents.DrawSymbolCodeContextMenuItem(symbol);
 
-            if (SymbolAnalysis.DetailsInitialized && SymbolAnalysis.InformationForSymbolIds.TryGetValue(symbol.Id, out var info))
+                    ImGui.Separator();
+
+                    // Delete symbol menu entry
+                    if (ImGui.MenuItem("Delete Symbol"))
+                    {
+                        _symbolToDelete = symbol;
+                        _deleteSymbolDialog.ShowNextFrame();
+                    }
+                },
+                title: symbol.Name,
+                id: "##symbolTreeSymbolContextMenu");
+
+            if (SymbolAnalysis.DetailsInitialized &&
+                SymbolAnalysis.InformationForSymbolIds.TryGetValue(symbol.Id, out var info))
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-                
-                
-                ListSymbolSetWithTooltip(250,Icon.Dependencies,"{0}", string.Empty, "requires...", info.RequiredSymbolIds.ToList());
+
+                ListSymbolSetWithTooltip(
+                    250,
+                    Icon.Dependencies,
+                    "{0}",
+                    string.Empty,
+                    "requires...",
+                    info.RequiredSymbolIds.ToList());
+
                 ImGui.PushStyleColor(ImGuiCol.Text, UiColors.StatusAttention.Rgba);
-                ListSymbolSetWithTooltip(300,Icon.None,"{0}", string.Empty, "has invalid references...", info.InvalidRequiredIds);
+                ListSymbolSetWithTooltip(
+                    300,
+                    Icon.None,
+                    "{0}",
+                    string.Empty,
+                    "has invalid references...",
+                    info.InvalidRequiredIds);
                 ImGui.PopStyleColor();
-                
-                if (ListSymbolSetWithTooltip(340, Icon.Referenced, "{0}", " NOT USED",  "used by...", info.DependingSymbols.ToList()))
+
+                if (ListSymbolSetWithTooltip(
+                        340,
+                        Icon.Referenced,
+                        "{0}",
+                        " NOT USED",
+                        "used by...",
+                        info.DependingSymbols.ToList()))
                 {
                     _symbolUsageReferenceFilter = symbol;
                 }
 
                 ImGui.PopStyleColor();
             }
-
 
             if (ExampleSymbolLinking.TryGetExamples(symbol.Id, out var examples))
             {
@@ -344,23 +422,42 @@ internal sealed class SymbolLibrary : Window
                 {
                     var exampleSymbolUi = examples[index];
                     ImGui.SameLine();
-                    ImGui.Button($"EXAMPLE");
+                    ImGui.Button("EXAMPLE");
                     HandleDragAndDropForSymbolItem(exampleSymbolUi.Symbol);
                 }
 
                 ImGui.PopStyleVar();
                 ImGui.PopFont();
             }
-                
         }
         ImGui.PopID();
+
+        // Modal delete confirmation dialog for the symbol selected via context menu.
+        if (_symbolToDelete != null && ImGui.BeginPopupModal("DeleteSymbol", ref _showDeleteDialog))
+        {
+            _deleteSymbolDialog.Draw(_symbolToDelete);
+            if (!_showDeleteDialog)  // Dialog closed
+            {
+                _symbolToDelete = null;
+            }
+            ImGui.EndPopup();
+        }
     }
 
-    private static bool ListSymbolSetWithTooltip(float x, Icon icon, string setTitleFormat, string emptySetTitle, string toolTopTitle, List<Guid> symbolSet)
+    /// <summary>
+    /// Draws small “requires / invalid / used by” badges with tooltips.
+    /// </summary>
+    private static bool ListSymbolSetWithTooltip(
+        float x,
+        Icon icon,
+        string setTitleFormat,
+        string emptySetTitle,
+        string toolTopTitle,
+        List<Guid> symbolSet)
     {
         var activated = false;
         ImGui.PushID(icon.ToString());
-        ImGui.SameLine(x,10);
+        ImGui.SameLine(x, 10);
         if (symbolSet.Count > 0)
         {
             icon.DrawAtCursor();
@@ -384,13 +481,11 @@ internal sealed class SymbolLibrary : Window
         }
 
         ImGui.PopID();
-        //ImGui.SameLine();
         return activated;
 
         void DrawTooltip()
         {
-            var allSymbolUis = EditorSymbolPackage
-               .AllSymbolUis;
+            var allSymbolUis = EditorSymbolPackage.AllSymbolUis;
 
             var matches = allSymbolUis
                          .Where(s => symbolSet.Contains(s.Symbol.Id))
@@ -406,6 +501,9 @@ internal sealed class SymbolLibrary : Window
         }
     }
 
+    /// <summary>
+    /// Helper to render grouped symbol lists inside dependency tooltips.
+    /// </summary>
     private static void ListSymbols(IOrderedEnumerable<SymbolUi> symbolUis)
     {
         var lastGroupName = string.Empty;
@@ -421,8 +519,9 @@ internal sealed class SymbolLibrary : Window
                 ImGui.TextUnformatted(projectName);
                 ImGui.PopFont();
             }
-            
-            var hasIssues = required.Tags.HasFlag(SymbolUi.SymbolTags.Obsolete) | required.Tags.HasFlag(SymbolUi.SymbolTags.NeedsFix);
+
+            var hasIssues = required.Tags.HasFlag(SymbolUi.SymbolTags.Obsolete)
+                            | required.Tags.HasFlag(SymbolUi.SymbolTags.NeedsFix);
             var color = hasIssues ? UiColors.StatusAttention : UiColors.Text;
             ImGui.PushStyleColor(ImGuiCol.Text, color.Rgba);
             ColumnLayout.StartGroupAndWrapIfRequired(1);
@@ -432,16 +531,22 @@ internal sealed class SymbolLibrary : Window
         }
     }
 
+    /// <summary>
+    /// Handles drag&drop source for symbol items and click-to-insert behavior.
+    /// </summary>
     internal static void HandleDragAndDropForSymbolItem(Symbol symbol)
     {
         if (IsSymbolCurrentCompositionOrAParent(symbol))
             return;
 
-        DragAndDropHandling.HandleDragSourceForLastItem(DragAndDropHandling.SymbolDraggingId, symbol.Id.ToString(), "Create instance");
+        DragAndDropHandling.HandleDragSourceForLastItem(
+            DragAndDropHandling.DragTypes.Symbol,
+            symbol.Id.ToString(),
+            "Create instance");
 
         if (!ImGui.IsItemDeactivated())
             return;
-        
+
         var wasClick = ImGui.GetMouseDragDelta().Length() < 4;
         if (wasClick)
         {
@@ -457,6 +562,9 @@ internal sealed class SymbolLibrary : Window
         }
     }
 
+    /// <summary>
+    /// Prevents dragging the current composition or any of its parents into itself.
+    /// </summary>
     private static bool IsSymbolCurrentCompositionOrAParent(Symbol symbol)
     {
         var components = ProjectView.Focused;

@@ -1,6 +1,6 @@
 {
   "Id": "99435f7a-4969-4a0e-83f5-404ee6a0cfa2"/*Warp2dMesh*/,
-  "Description": "Uses a set of reference points to warp a mesh geometry. This can be useful for adjusting project mapping.",
+  "Description": "Uses a set of reference points to warp a mesh geometry. This can be useful for adjusting projection mapping.\nIt's working with [QuadMesh]",
   "SymbolTags": "8",
   "InputUis": [
     {

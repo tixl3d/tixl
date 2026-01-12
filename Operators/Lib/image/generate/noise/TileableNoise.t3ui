@@ -1,0 +1,199 @@
+{
+  "Id": "5cbb8f47-5093-495d-bfb6-fbc5b00b7036"/*TileableNoise*/,
+  "Description": "Generates a procedural fractal noise image effect also known as pink noise or fractional noise that can be used to create visual patterns that look like cloud, smoke, dust and scratches on film and similar\n\nAvailable Noise Ops [WorleyNoise] [FractalNoise] [ShardNoise]",
+  "InputUis": [
+    {
+      "InputId": "048d3e2b-7d9b-4250-a69a-12f9ee22f6ca"/*OutputFormat*/,
+      "Position": {
+        "X": 1154.6647,
+        "Y": 185.21265
+      }
+    },
+    {
+      "InputId": "1d6d9bba-dddb-4130-bb92-a55d92c43b48"/*Gain*/,
+      "Position": {
+        "X": 1154.6647,
+        "Y": 45.212646
+      },
+      "Description": "The gain factor for each iteration step.",
+      "Min": 0.0,
+      "Max": 5.0,
+      "Format": "{0:0.000} ×"
+    },
+    {
+      "InputId": "1e245b3d-2aba-4f12-a235-3a5b5b7f0812"/*Scale*/,
+      "Position": {
+        "X": 1154.6647,
+        "Y": -94.78735
+      },
+      "Description": "An additional scale factor that WILL ADD SEAMS.",
+      "Min": 0.0,
+      "Max": 5.0,
+      "Scale": 0.05
+    },
+    {
+      "InputId": "1f30596d-467d-4b28-a1d8-40ce61a14741"/*GenerateMips*/,
+      "Position": {
+        "X": 1154.6647,
+        "Y": 220.21265
+      }
+    },
+    {
+      "InputId": "211aa522-d028-4873-8571-47021776543a"/*Offset*/,
+      "Position": {
+        "X": 1014.66473,
+        "Y": -164.78735
+      },
+      "Min": -0.5,
+      "Max": 0.5,
+      "Scale": 0.01,
+      "UseVec2Control": "Position"
+    },
+    {
+      "InputId": "43a48eb1-6cc4-44fa-8717-6d3687bb6efd"/*ColorB*/,
+      "Position": {
+        "X": 1014.66473,
+        "Y": -304.78735
+      },
+      "Scale": 0.01
+    },
+    {
+      "InputId": "46741a9b-c45c-4f82-8a4f-551d826ac0ae"/*Contrast*/,
+      "Position": {
+        "X": 1154.6648,
+        "Y": 115.21265
+      },
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "6c463d39-13a2-41c0-b015-cdfb1971f3ca"/*Resolution*/,
+      "Position": {
+        "X": 1154.6647,
+        "Y": 150.21265
+      },
+      "GroupTitle": "Texture Options"
+    },
+    {
+      "InputId": "7806875d-bfc9-47ce-9b14-163d0d4c7d59"/*ColorA*/,
+      "Position": {
+        "X": 1014.66473,
+        "Y": -444.78735
+      },
+      "Scale": 0.01
+    },
+    {
+      "InputId": "80acacd1-9b12-4564-b6b4-06ab4c8ba1f6"/*Detail*/,
+      "Position": {
+        "X": 1154.6647,
+        "Y": 290.21265
+      },
+      "GroupTitle": "Complexity",
+      "Description": "The base period of the repeated noise"
+    },
+    {
+      "InputId": "91186518-2b7e-4def-92bc-ff56519c4883"/*RandomPhase*/,
+      "Position": {
+        "X": 1154.6647,
+        "Y": -59.787354
+      },
+      "GroupTitle": "Options",
+      "Description": "The 3rd coordinate of the 3d noise. Can be usedf for animations.",
+      "Scale": 0.01
+    },
+    {
+      "InputId": "c1a6aad2-75a7-4c15-9bea-a8f8f5c69d73"/*Octaves*/,
+      "Position": {
+        "X": 1014.66473,
+        "Y": 255.21265
+      },
+      "Description": "The complexity of the perline noise.\nI.e. the number of iterations the noise is computed.",
+      "AddPadding": "True",
+      "Min": 1,
+      "Max": 10,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "c926feba-e2f9-4189-9cbc-b0f52d6a484f"/*GainAndBias*/,
+      "Position": {
+        "X": 1014.66473,
+        "Y": -24.787354
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "Scale": 0.01,
+      "ClampMin": true,
+      "ClampMax": true,
+      "UseVec2Control": "BiasAndGain"
+    },
+    {
+      "InputId": "f1ed5a42-7366-4b6f-b286-f7195c6ae213"/*Lacunarity*/,
+      "Position": {
+        "X": 1154.6647,
+        "Y": 80.21265
+      },
+      "Description": "The scale factor for each iteration step.",
+      "Min": 0.0,
+      "Max": 5.0,
+      "Format": "{0:0.000} ×"
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "51787ce1-a558-49e2-b67a-4be070e0ddde"/*Vector2Components*/,
+      "Position": {
+        "X": 1154.6647,
+        "Y": -24.787354
+      }
+    },
+    {
+      "ChildId": "61513542-b8e3-425b-8c76-1ba28d17021e"/*ClampInt*/,
+      "Position": {
+        "X": 1154.6647,
+        "Y": 255.21265
+      }
+    },
+    {
+      "ChildId": "8d7e0df4-3a3c-4d0c-a77b-37116e09741c"/*Vector4Components*/,
+      "Position": {
+        "X": 1154.6647,
+        "Y": -444.78735
+      }
+    },
+    {
+      "ChildId": "ae64122d-d7e3-4a92-a88f-c2a9024039a4"/*_ImageFxShaderSetupStatic*/,
+      "Style": "Resizable",
+      "Size": {
+        "X": 110.47982,
+        "Y": 1030.8274
+      },
+      "Position": {
+        "X": 1294.6648,
+        "Y": -479.78735
+      }
+    },
+    {
+      "ChildId": "d553568e-86e6-410c-9ddb-b3b65660c71d"/*Vector2Components*/,
+      "Position": {
+        "X": 1154.6647,
+        "Y": -164.78735
+      }
+    },
+    {
+      "ChildId": "f201aeef-fc8c-449e-862a-846df304beab"/*Vector4Components*/,
+      "Position": {
+        "X": 1154.6647,
+        "Y": -304.78735
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "a49707f3-5574-4db9-ba60-864e044a3ff2"/*TextureOutput*/,
+      "Position": {
+        "X": 516.53796,
+        "Y": 690.77167
+      }
+    }
+  ]
+}

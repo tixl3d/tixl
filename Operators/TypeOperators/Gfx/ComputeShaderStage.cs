@@ -18,6 +18,7 @@ public sealed class ComputeShaderStage : Instance<ComputeShaderStage>, IRenderSt
         }
     }
 
+
     private void Update(EvaluationContext context)
     {
         var device = ResourceManager.Device;
@@ -27,10 +28,12 @@ public sealed class ComputeShaderStage : Instance<ComputeShaderStage>, IRenderSt
         _cs = ComputeShader.GetValue(context);
             
         Int3 dispatchCount = Dispatch.GetValue(context);
-        int count = DispatchCallCount.GetValue(context).Clamp(1, 100);
-
+        var callCount = DispatchCallCount.GetValue(context).Clamp(1, 256);
+        
         GetAdditionalResources(context);
-        ConstantBuffers.GetValues(ref _constantBuffers, context);
+        
+        var needAdditionalConstantBuffer = callCount > 1; 
+        GetValuesWithAdditionalSlot(ref _constantBuffers, ConstantBuffers, context, additionalSlot:needAdditionalConstantBuffer);
         ShaderResources.GetValues(ref _shaderResourceViews, context);
         SamplerStates.GetValues(ref _samplerStates, context);
         Uavs.GetValues(ref _uavs, context);
@@ -38,10 +41,16 @@ public sealed class ComputeShaderStage : Instance<ComputeShaderStage>, IRenderSt
 
         if (_uavs.Length == 0 || _cs == null)
             return;
-
         
         _prevRenderTargetViews = device.ImmediateContext.OutputMerger.GetRenderTargets(2);
         device.ImmediateContext.OutputMerger.GetRenderTargets(out _prevDepthStencilView);
+        
+        if (needAdditionalConstantBuffer && _constantBuffers.Length > 0)
+        {
+            // Set buffer to additional slot at the end of the array
+            ResourceManager.SetupConstBuffer(_dispatchParameters, ref _dispatchCallParameterBuffer);
+            _constantBuffers[^1] = _dispatchCallParameterBuffer;
+        }
         
         csStage.Set(_cs);
         csStage.SetConstantBuffers(0, _constantBuffers.Length, _constantBuffers);
@@ -74,8 +83,15 @@ public sealed class ComputeShaderStage : Instance<ComputeShaderStage>, IRenderSt
         }
 
         // Dispatch the shader
-        for (int i = 0; i < count; i++)
+        for (int i = 0; i < callCount; i++)
         {
+            if (callCount>1)
+            {
+                _dispatchParameters.DispatchCallIndex = i;
+                ResourceManager.SetupConstBuffer(_dispatchParameters, ref _dispatchCallParameterBuffer);
+                csStage.SetConstantBuffers(0, _constantBuffers.Length, _constantBuffers);
+            }
+            
             deviceContext.Dispatch(dispatchCount.X, dispatchCount.Y, dispatchCount.Z);
         }
         
@@ -91,6 +107,10 @@ public sealed class ComputeShaderStage : Instance<ComputeShaderStage>, IRenderSt
         }
             
         Utilities.Dispose(ref _prevDepthStencilView);
+        if (needAdditionalConstantBuffer)
+        {
+            Utilities.Dispose(ref _dispatchCallParameterBuffer);
+        }
 
         
         // unbind resources
@@ -113,8 +133,7 @@ public sealed class ComputeShaderStage : Instance<ComputeShaderStage>, IRenderSt
         {
             csStage.SetConstantBuffer(i, null);
         }
-            
-            
+        
         _statsUpdateCount++;
         _statsDispatchCount += dispatchCount.X * dispatchCount.Y * dispatchCount.Z;
     }
@@ -149,7 +168,7 @@ public sealed class ComputeShaderStage : Instance<ComputeShaderStage>, IRenderSt
     
 
     private SharpDX.Direct3D11.ComputeShader? _cs;
-    private Buffer[] _constantBuffers = [];
+    private Buffer?[] _constantBuffers = [];
     private ShaderResourceView[] _shaderResourceViews = [];
     private ShaderResourceView[] _additionalSrvs = [];
     private SharpDX.Direct3D11.SamplerState[] _samplerStates = [];
@@ -167,11 +186,45 @@ public sealed class ComputeShaderStage : Instance<ComputeShaderStage>, IRenderSt
         _statsUpdateCount = 0;
         _statsDispatchCount = 0;
     }
-        
+    
+    public static void GetValuesWithAdditionalSlot(ref Buffer?[] resources, MultiInputSlot<Buffer> input, EvaluationContext context, bool clearDirty= true, bool additionalSlot = false)
+    {
+        var connectedInputs = input.GetCollectedTypedInputs();
+
+
+        var requiredLength = connectedInputs.Count + (additionalSlot ? 1 : 0);
+        if (requiredLength != resources.Length)
+        {
+            resources = new Buffer[requiredLength];
+        }
+
+        for (var i = 0; i < connectedInputs.Count; i++)
+        {
+            resources[i] = connectedInputs[i].GetValue(context);
+        }
+            
+        if(clearDirty)
+            input.DirtyFlag.Clear();
+    }
+    
+    
     private static int _statsUpdateCount;
     private static int _statsDispatchCount;
     private static bool _statsRegistered;        
 
+    [StructLayout(LayoutKind.Explicit, Size = Stride)]
+    public struct DispatchCallParameters
+    {
+        [FieldOffset(0)]
+        public int DispatchCallIndex;
+        
+        private const int Stride = 4*4;
+    }
+
+    private DispatchCallParameters _dispatchParameters;
+    private Buffer? _dispatchCallParameterBuffer;
+
+    
     [Input(Guid = "5c0e9c96-9aba-4757-ae1f-cc50fb6173f1")]
     public readonly InputSlot<T3.Core.DataTypes.ComputeShader> ComputeShader = new();
 
@@ -201,4 +254,7 @@ public sealed class ComputeShaderStage : Instance<ComputeShaderStage>, IRenderSt
 
     private RenderTargetView?[]? _prevRenderTargetViews;
     private DepthStencilView? _prevDepthStencilView;
+    
+    
+    
 }

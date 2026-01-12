@@ -68,7 +68,8 @@ internal sealed class DuplicateSymbolDialog : ModalDialog
             }
         
             var s = selectedChildUis[0].SymbolChild.Symbol;
-            if (_selectedSymbolId != s.Id)
+            var selectionChanged = _selectedSymbolId != s.Id;
+            if (selectionChanged)
             {
                 _projectToCopyTo = s.SymbolPackage as EditableSymbolProject;
                 _selectedSymbolId = s.Id;

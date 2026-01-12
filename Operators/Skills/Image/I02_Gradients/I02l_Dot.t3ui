@@ -1,0 +1,82 @@
+{
+  "Id": "ed153af2-a673-426c-83f6-31352ab3f6f3"/*I02l_Dot*/,
+  "Description": "RadialGradient: Dot",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "6b2a4679-ea23-4771-a6b6-37fc622e016d"/*RadialGradient*/,
+      "Position": {
+        "X": 1286.6545,
+        "Y": 1928.8424
+      }
+    },
+    {
+      "ChildId": "78cac19b-0b1b-4d77-abf0-600f1ec89a38"/*RadialGradient*/,
+      "AnnotationId": "cc1b31eb-65d6-42c3-b384-beb93a8f3824",
+      "Position": {
+        "X": 1317.6292,
+        "Y": 2129.9172
+      }
+    },
+    {
+      "ChildId": "e0593b87-c91c-4265-b433-b2d76fb43238"/*ImageQuiz*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2018.4391
+      }
+    },
+    {
+      "ChildId": "ef5a045a-d409-43a0-97f3-5fcee5306ee6"/*LinearGradient*/,
+      "AnnotationId": "606c89c3-3cd5-4883-8da9-101ee8d767f0",
+      "Position": {
+        "X": 1441.7301,
+        "Y": 2334.827
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "6e1c4c33-4996-440d-a1d5-a5149387d5a4"/*ColorBuffer*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2088.439
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "cc1b31eb-65d6-42c3-b384-beb93a8f3824",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1271.4644,
+        "Y": 2075.9497
+      },
+      "Size": {
+        "X": 268.53564,
+        "Y": 129.0503
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "be66e4f5-5c45-48d7-b720-099d36e33888",
+      "Description": "[RadialGradient] is similar to [LinearGradient], but it is based on distance from a center point."
+    },
+    {
+      "Id": "f988a436-cc96-4281-b476-3197d1c1475d",
+      "Description": "Width and Offset shape the result.\nA width of one aligns to the image height, which helps keep the result circular across aspect ratios."
+    },
+    {
+      "Id": "19a383c9-27a2-4e13-b40a-83484bce62ae",
+      "Description": "Adjust Width and Offset to create the circle.",
+      "Style": "CallToAction"
+    }
+  ]
+}

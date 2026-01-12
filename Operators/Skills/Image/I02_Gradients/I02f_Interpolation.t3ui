@@ -1,0 +1,105 @@
+{
+  "Id": "88adf4e5-64af-4a86-b8f6-2b236fa7e4f3"/*I02f_Interpolation*/,
+  "Description": "LinearGradient: Interpolation",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0693aa98-5596-4149-8eec-1a2e5bc202ce"/*LinearGradient*/,
+      "AnnotationId": "af4084ba-8ee4-4a15-822a-9a942c414030",
+      "Position": {
+        "X": 1143.9642,
+        "Y": 2112.8691
+      }
+    },
+    {
+      "ChildId": "1ca7b7e2-8fec-4805-b570-a8e5febc7d1a"/*ImageLevels*/,
+      "AnnotationId": "af4084ba-8ee4-4a15-822a-9a942c414030",
+      "Position": {
+        "X": 1283.9642,
+        "Y": 2112.8691
+      }
+    },
+    {
+      "ChildId": "2ec73c6e-89ae-41d8-a537-b06003d4482d"/*ImageQuiz*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2018.4391
+      }
+    },
+    {
+      "ChildId": "4569870d-6caf-4535-ae35-168de711b2ea"/*LinearGradient*/,
+      "Position": {
+        "X": 1139.5903,
+        "Y": 1908.7638
+      }
+    },
+    {
+      "ChildId": "cf6f1aa3-22fd-4f37-9125-04c346e9c043"/*LinearGradient*/,
+      "AnnotationId": "606c89c3-3cd5-4883-8da9-101ee8d767f0",
+      "Position": {
+        "X": 1441.7301,
+        "Y": 2334.827
+      }
+    },
+    {
+      "ChildId": "fe3373b2-e8d4-4240-8572-fbb0d249dd05"/*ImageLevels*/,
+      "Position": {
+        "X": 1139.5903,
+        "Y": 1973.7705
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "ebc6faf3-a36c-4a14-9598-b37ada4b4b69"/*ColorBuffer*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2123.439
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "af4084ba-8ee4-4a15-822a-9a942c414030",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1120.0,
+        "Y": 2054.7593
+      },
+      "Size": {
+        "X": 350.0,
+        "Y": 150.24072
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "af585724-84dd-4658-a594-5cb468ae03ce",
+      "ChildId": "4569870d-6caf-4535-ae35-168de711b2ea",
+      "InputId": "e47e9e63-9c94-4c29-9555-2452fa498d57",
+      "Description": "To get a smoother result for this challenge, change the gradient interpolation type from \"linear\".\nSelect [LinearGradient], then right-click the color gradient in the parameter window to open its context menu and change the interpolation type.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "4cc1e2bc-5da4-4c63-9cf1-905147e5c725",
+      "ChildId": "4569870d-6caf-4535-ae35-168de711b2ea",
+      "InputId": "e47e9e63-9c94-4c29-9555-2452fa498d57",
+      "Description": "Adjust the interpolation and any needed parameters until the output matches the goal.",
+      "Style": "CallToAction"
+    },
+    {
+      "Id": "b9e1c2c5-150c-4e4a-a728-6a7ae75bcd42",
+      "ChildId": "4569870d-6caf-4535-ae35-168de711b2ea",
+      "InputId": "10d59d0f-a5a3-42e6-b874-345ab028978e",
+      "Description": "Most SkillQuest challenges use simple values like 1/2 or 1/10.\nYou can also use the Infinity Slider. It appears when dragging numeric values and often marks the target value with a small dot.",
+      "Style": "Tip"
+    }
+  ]
+}

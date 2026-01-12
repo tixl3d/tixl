@@ -11,22 +11,24 @@ internal static class SymbolNaming
 {
     private sealed class ConstructorRewriter : CSharpSyntaxRewriter
     {
+        private readonly string _oldSymbolName;
         private readonly string _newSymbolName;
 
-        public ConstructorRewriter(string newSymbolName)
+        public ConstructorRewriter(string oldSymbolName, string newSymbolName)
         {
+            _oldSymbolName = oldSymbolName;
             _newSymbolName = newSymbolName;
         }
 
         public override SyntaxNode VisitConstructorDeclaration(ConstructorDeclarationSyntax node)
         {
-            return SyntaxFactory.ConstructorDeclaration(_newSymbolName)
-                                .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
-                                .NormalizeWhitespace()
-                                .WithTrailingTrivia(SyntaxFactory.SyntaxTrivia(SyntaxKind.EndOfLineTrivia, "\r\n"))
-                                .WithBody(node.Body)
-                                .WithLeadingTrivia(node.GetLeadingTrivia())
-                                .WithTrailingTrivia(node.GetTrailingTrivia());
+            // Only rename constructors that belonged to the original top-level class
+            if (node.Identifier.Text != _oldSymbolName)
+                return node;
+
+            return node.WithIdentifier(
+                                       SyntaxFactory.Identifier(_newSymbolName)
+                                                    .WithTriviaFrom(node.Identifier));
         }
     }
 
@@ -48,8 +50,8 @@ internal static class SymbolNaming
         var classRenamer = new ClassRenameRewriter(newName);
         root = classRenamer.Visit(root);
 
-        var memberRewriter = new ConstructorRewriter(newName);
-        root = memberRewriter.Visit(root);
+        var constructorRewriter = new ConstructorRewriter(symbol.Name, newName);
+        root = constructorRewriter.Visit(root);
 
         var newSource = root.GetText().ToString();
 
@@ -60,6 +62,7 @@ internal static class SymbolNaming
 internal sealed class ClassRenameRewriter : CSharpSyntaxRewriter
 {
     private readonly string _newSymbolName;
+    private bool _hasRenamed;
 
     public ClassRenameRewriter(string newSymbolName)
     {
@@ -68,24 +71,38 @@ internal sealed class ClassRenameRewriter : CSharpSyntaxRewriter
 
     public override SyntaxNode VisitClassDeclaration(ClassDeclarationSyntax node)
     {
-        var identifier = SyntaxFactory.ParseToken(_newSymbolName).WithTrailingTrivia(SyntaxFactory.SyntaxTrivia(SyntaxKind.WhitespaceTrivia, " "));
-        var classDeclaration = SyntaxFactory.ClassDeclaration(node.AttributeLists, node.Modifiers, node.Keyword, identifier, node.TypeParameterList,
-                                                              null, node.ConstraintClauses, node.OpenBraceToken, node.Members, node.CloseBraceToken,
-                                                              node.SemicolonToken);
-        var genericName = SyntaxFactory.GenericName(SyntaxFactory.Identifier("Instance"))
-                                       .WithTypeArgumentList(SyntaxFactory
-                                                            .TypeArgumentList(SyntaxFactory
-                                                                                 .SingletonSeparatedList<
-                                                                                      TypeSyntax>(SyntaxFactory.IdentifierName(_newSymbolName)))
-                                                            .WithGreaterThanToken(SyntaxFactory.Token(SyntaxFactory.TriviaList(), SyntaxKind.GreaterThanToken,
-                                                                                                      SyntaxFactory.TriviaList(SyntaxFactory.LineFeed))));
+        // Only rename the first (outermost) class
+        if (_hasRenamed)
+            return base.VisitClassDeclaration(node);
 
-        var baseInterfaces = node.BaseList?.Types.RemoveAt(0).Select((e) => e).ToArray();
-        var baseList = SyntaxFactory.BaseList(SyntaxFactory.SingletonSeparatedList<BaseTypeSyntax>(SyntaxFactory.SimpleBaseType(genericName)));
-        baseList = baseList.AddTypes(baseInterfaces);
-        baseList =
-            baseList.WithColonToken(SyntaxFactory.Token(SyntaxFactory.TriviaList(), SyntaxKind.ColonToken, SyntaxFactory.TriviaList(SyntaxFactory.Space)));
+        _hasRenamed = true;
+
+        var identifier =
+            SyntaxFactory.Identifier(_newSymbolName)
+                         .WithTriviaFrom(node.Identifier);
+
+        var classDeclaration =
+            node.WithIdentifier(identifier);
+
+        var genericName =
+            SyntaxFactory.GenericName(
+                                      SyntaxFactory.Identifier("Instance"),
+                                      SyntaxFactory.TypeArgumentList(
+                                                                     SyntaxFactory.SingletonSeparatedList<TypeSyntax>(
+                                                                      SyntaxFactory.IdentifierName(_newSymbolName))));
+
+        var baseInterfaces = node.BaseList?.Types.Skip(1);
+
+        var baseList =
+            SyntaxFactory.BaseList(
+                                   SyntaxFactory.SingletonSeparatedList<BaseTypeSyntax>(
+                                                                                        SyntaxFactory.SimpleBaseType(genericName)));
+
+        if (baseInterfaces != null)
+            baseList = baseList.AddTypes(baseInterfaces.ToArray());
+
         classDeclaration = classDeclaration.WithBaseList(baseList);
-        return classDeclaration;
+
+        return base.VisitClassDeclaration(classDeclaration);
     }
 }

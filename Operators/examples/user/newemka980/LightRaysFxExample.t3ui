@@ -5,153 +5,246 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
+      "ChildId": "06020116-60db-4a87-a60b-b313294cfa6e"/*StringList*/,
+      "Position": {
+        "X": 923.093,
+        "Y": -50.806335
+      }
+    },
+    {
+      "ChildId": "0e7d8486-4126-43a2-bfea-9d5557a3c5d9"/*RenderTarget*/,
+      "Position": {
+        "X": 1322.1465,
+        "Y": 241.4578
+      }
+    },
+    {
+      "ChildId": "135adb6f-a4f8-4ee8-9440-34c268426781"/*TextOutlines2*/,
+      "Position": {
+        "X": 1322.1465,
+        "Y": 171.45781
+      }
+    },
+    {
       "ChildId": "1aaadbda-a710-4d23-b7f6-3a2645bec89e"/*RenderTarget*/,
       "Position": {
-        "X": 407.11487,
-        "Y": 112.923584
+        "X": 1322.1465,
+        "Y": 3.4207
+      }
+    },
+    {
+      "ChildId": "1bf1d32b-9510-4443-b8b5-79bf78d68f7e"/*AnimValue*/,
+      "Position": {
+        "X": 171.83191,
+        "Y": -33.802673
+      }
+    },
+    {
+      "ChildId": "22e4f2a2-be00-429d-bf42-0f7d51636a2c"/*PickStringFromList*/,
+      "Position": {
+        "X": 1063.093,
+        "Y": -50.806335
       }
     },
     {
       "ChildId": "24e5da99-da28-4e86-acf7-73108e2a7de3"/*Vector2*/,
       "Position": {
-        "X": 207.04773,
-        "Y": 0.0
+        "X": 712.65466,
+        "Y": 185.8024
       }
     },
     {
       "ChildId": "26e78530-eba9-49e3-9dc3-89501c2695b5"/*PerlinNoise2*/,
       "Position": {
-        "X": 521.8098,
-        "Y": 608.7844
+        "X": 508.9004,
+        "Y": 925.2688
       }
     },
     {
       "ChildId": "27d1ed79-2593-4234-b7d5-32b8ce620019"/*RandomizePoints*/,
       "Position": {
-        "X": 162.52795,
-        "Y": 608.50977
+        "X": 149.61853,
+        "Y": 924.99414
       }
     },
     {
       "ChildId": "29c32594-da63-4721-b0f2-57bdfb631e54"/*ScaleVector2*/,
       "Position": {
-        "X": 407.11487,
-        "Y": 168.92358
+        "X": 962.57153,
+        "Y": 431.88348
+      }
+    },
+    {
+      "ChildId": "2ada531a-66db-4cc9-9884-2e019a63282b"/*AnimValue*/,
+      "Position": {
+        "X": 954.7827,
+        "Y": 371.20776
+      }
+    },
+    {
+      "ChildId": "31a433d0-0b40-4825-a7fe-922e5841404c"/*RadialGradient*/,
+      "Position": {
+        "X": 1322.1465,
+        "Y": 276.45782
+      }
+    },
+    {
+      "ChildId": "44022ef5-93f8-4dc4-a2df-3d99e3bf1813"/*Size*/,
+      "Position": {
+        "X": 1026.9603,
+        "Y": 64.25304
       }
     },
     {
       "ChildId": "4d3a9308-de5b-49f6-a885-370bf7081835"/*LinearGradient*/,
-      "Comment": "Don't listen to ShardNoise, he's boring, connect me instead! ",
       "Position": {
-        "X": 606.67175,
-        "Y": 280.77527
+        "X": 1094.7827,
+        "Y": 336.2077
+      }
+    },
+    {
+      "ChildId": "51148019-0a5f-422d-a36b-0ff8c3ace182"/*Time*/,
+      "Position": {
+        "X": 954.7827,
+        "Y": 301.20776
       }
     },
     {
       "ChildId": "5c1bb000-8c2f-4bb3-8744-af0f1e986b75"/*RadialGradient*/,
       "Position": {
-        "X": 402.41675,
-        "Y": 4.416992
+        "X": 1322.1465,
+        "Y": 38.4207
       }
     },
     {
       "ChildId": "638f5dad-4595-46f8-b170-441597392aa2"/*AnimValue*/,
       "Position": {
-        "X": 57.04773,
-        "Y": 0.0
+        "X": 712.65466,
+        "Y": 80.8024
       }
     },
     {
       "ChildId": "6f43c00d-89d2-4584-ac01-11e28b9eeb61"/*DrawPoints*/,
       "Position": {
-        "X": 359.03317,
-        "Y": 595.3115
+        "X": 346.12375,
+        "Y": 911.7959
       }
     },
     {
       "ChildId": "740d3677-c570-442a-b74a-ebf61a195dbf"/*ShardNoise*/,
-      "Comment": "Connect me to the TextureFx input of LightRaysFx",
       "Position": {
-        "X": 410.52417,
-        "Y": 281.09644
+        "X": 1094.7827,
+        "Y": 266.20773
       }
     },
     {
       "ChildId": "799dd223-98b4-4575-a3d1-6781025e2d98"/*LightRaysFx*/,
       "Position": {
-        "X": 671.8098,
-        "Y": 552.7844
+        "X": 658.9004,
+        "Y": 869.2688
       }
     },
     {
-      "ChildId": "7dffe485-5c12-4bf6-a161-579c44891c40"/*AnimValue*/,
+      "ChildId": "7c32e0af-4989-461a-8ed1-3f81e7e75e9a"/*InputText*/,
+      "Style": "Resizable",
+      "Size": {
+        "X": 120.0,
+        "Y": 80.0
+      },
       "Position": {
-        "X": 410.52417,
-        "Y": 337.09644
-      }
-    },
-    {
-      "ChildId": "8918b1a2-4a43-4f5f-9b56-d120ca489fa6"/*ImageLevels*/,
-      "Position": {
-        "X": 1169.7175,
-        "Y": -140.8288
+        "X": 1063.093,
+        "Y": 19.193665
       }
     },
     {
       "ChildId": "8c3282d8-406e-42e5-af3e-79b5f242177a"/*_GridPoints_Old*/,
       "Position": {
-        "X": 7.083618,
-        "Y": 598.2446
+        "X": -5.8258057,
+        "Y": 914.729
+      }
+    },
+    {
+      "ChildId": "931320da-40c5-43b2-8546-54d5d37b5d78"/*Layer2d*/,
+      "Position": {
+        "X": 1322.1465,
+        "Y": 451.45776
       }
     },
     {
       "ChildId": "9c53c6c9-e1e9-4c75-a637-7552171da708"/*_Time_old*/,
       "Position": {
-        "X": 12.527954,
-        "Y": 670.47705
+        "X": -0.38146973,
+        "Y": 986.9614
       }
     },
     {
-      "ChildId": "b2dff4f2-cf03-4370-9a62-d1c9a6d940c0"/*ToneMapping*/,
+      "ChildId": "9c6c95cd-5bb9-4404-ad30-247b001d1ed3"/*Rate*/,
       "Position": {
-        "X": 1019.7175,
-        "Y": -140.8288
+        "X": -37.06311,
+        "Y": 113.050385
       }
     },
     {
-      "ChildId": "ba71d8a4-c6ac-4dec-901d-f49e1a79b377"/*Blend*/,
+      "ChildId": "a3e057df-aa77-40d3-9b17-4f196eb316f0"/*Layer2d*/,
       "Position": {
-        "X": 552.41675,
-        "Y": 4.416992
+        "X": 1322.1465,
+        "Y": 108.4207
+      }
+    },
+    {
+      "ChildId": "ab8ded0b-3478-41dd-a5c5-559b483ab786"/*Group*/,
+      "Position": {
+        "X": 1520.7572,
+        "Y": 86.83675
+      }
+    },
+    {
+      "ChildId": "bf2224a0-fd9d-478d-a568-fb219385c9d3"/*RenderTarget*/,
+      "Position": {
+        "X": 1520.7572,
+        "Y": 156.83675
+      }
+    },
+    {
+      "ChildId": "c3bef3ee-0c96-4451-ab74-b42232b50ed4"/*Div*/,
+      "Position": {
+        "X": 299.67413,
+        "Y": 112.56697
+      }
+    },
+    {
+      "ChildId": "c7eff914-136c-403a-a18d-cfdd2859af31"/*PickFloatFromList*/,
+      "Position": {
+        "X": 532.4663,
+        "Y": 154.71458
       }
     },
     {
       "ChildId": "e23139eb-0f0f-4063-8188-c8229b62cdf0"/*LightRaysFx*/,
-      "Comment": "Check the presets",
       "Position": {
-        "X": 743.27136,
-        "Y": 6.8459473
+        "X": 1322.1465,
+        "Y": 346.45776
       }
     },
     {
-      "ChildId": "eb46e6f4-4836-427d-8c38-029f0f2ce890"/*_Time_old*/,
+      "ChildId": "e8bd9232-be80-47bf-996f-7da608f558e3"/*CountInt*/,
       "Position": {
-        "X": 236.36475,
-        "Y": 281.9912
+        "X": 311.83203,
+        "Y": 36.197327
       }
     },
     {
       "ChildId": "f6664ed8-ec67-4f25-b28f-2604eb25404e"/*RenderTarget*/,
       "Position": {
-        "X": 521.8098,
-        "Y": 552.7844
+        "X": 508.9004,
+        "Y": 869.2688
       }
     },
     {
       "ChildId": "ffda0a46-747b-41c8-ad23-0c6a6a45dc6f"/*Text*/,
       "Position": {
-        "X": 56.192017,
-        "Y": 147.6521
+        "X": 1322.1465,
+        "Y": -66.5793
       }
     }
   ],
@@ -159,15 +252,15 @@
     {
       "OutputId": "a91be719-68e5-439a-93f6-3c66aa00e14e"/*Output*/,
       "Position": {
-        "X": 1448.4244,
-        "Y": 315.74756
+        "X": 1865.7705,
+        "Y": 87.876434
       }
     }
   ],
   "Annotations": [
     {
       "Id": "9c4fcc41-3219-4866-a910-8b829a65aa21",
-      "Title": "# Laser Party!!!",
+      "Label": "Laser Party!!!",
       "Color": {
         "X": 0.0,
         "Y": 1.0,
@@ -175,8 +268,8 @@
         "W": 1.0
       },
       "Position": {
-        "X": -23.866821,
-        "Y": 458.77075
+        "X": -36.776245,
+        "Y": 775.2551
       },
       "Size": {
         "X": 948.3356,
@@ -185,7 +278,7 @@
     },
     {
       "Id": "dbb4467f-a6bf-40ba-8418-9653c9d5caba",
-      "Title": "# Logo Animation",
+      "Label": "Title Animation",
       "Color": {
         "X": 1.0,
         "Y": 1.0,
@@ -193,12 +286,12 @@
         "W": 1.0
       },
       "Position": {
-        "X": -36.776245,
-        "Y": -144.28516
+        "X": -45.245422,
+        "Y": -119.9169
       },
       "Size": {
-        "X": 964.9342,
-        "Y": 577.0777
+        "X": 1721.3367,
+        "Y": 637.2062
       }
     }
   ]

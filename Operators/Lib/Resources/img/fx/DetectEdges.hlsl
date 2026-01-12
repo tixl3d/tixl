@@ -1,17 +1,25 @@
 cbuffer ParamConstants : register(b0)
 {
     float4 Color;
+
     float SampleRadius;
     float Strength;
     float Contrast;
-    float MixOriginal;
     float OutputAsTransparent;
+
+    float MixOriginal;
 }
+
 
 cbuffer Resolution : register(b1)
 {
     float TargetWidth;
     float TargetHeight;
+}
+
+cbuffer ParamConstants : register(b2)
+{
+    int Invert;
 }
 
 struct vsOutput
@@ -51,5 +59,9 @@ float4 psMain(vsOutput input) : SV_TARGET
     float4 edgeColor = OutputAsTransparent < 0.5
                            ? clamp(float4(average, average, average, 1), 0, 10000) * Color
                            : float4(Color.rgb, clamp(average, 0, 1));
-    return lerp(edgeColor, m, MixOriginal);
+    
+    float4 color2= lerp(edgeColor, m, MixOriginal);
+
+
+    return Invert ? float4(1-color2.rgb, color2.a) : color2;
 }

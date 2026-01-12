@@ -56,6 +56,7 @@
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.9.0-2.final" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.9.0-2.final" />
         <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="4.9.0-2.final" />
+        <PackageReference Include="MSDF-Sharp" Version="1.0.2" />
         <PackageReference Include="Rug.Osc" Version="1.2.5">
             <NoWarn>NU1701</NoWarn>
         </PackageReference>

@@ -557,6 +557,7 @@ internal sealed class ParameterWindow : Window
 
         ImGui.PushStyleColor(ImGuiCol.FrameBg, UiColors.BackgroundButton.Rgba);
         ImGui.PushStyleColor(ImGuiCol.FrameBgHovered, UiColors.BackgroundHover.Rgba);
+        ImGui.PushID(instance.GetHashCode());
         foreach (var inputSlot in instance.Inputs)
         {
             if (!symbolUi.InputUis.TryGetValue(inputSlot.Id, out var inputUi))
@@ -617,6 +618,7 @@ internal sealed class ParameterWindow : Window
 
             ImGui.PopID();
         }
+        ImGui.PopID(); // Instance
 
         ImGui.PopStyleColor(2);
 

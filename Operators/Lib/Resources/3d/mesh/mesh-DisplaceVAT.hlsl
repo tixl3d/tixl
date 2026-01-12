@@ -50,8 +50,6 @@ void main(uint3 i : SV_DispatchThreadID)
     PbrVertex v = SourceVertices[gi];
     ResultVertices[gi] = SourceVertices[gi];
 
-    float weight = 1;
-
     float3 posInWorld = v.Position;
  
     float2 uv = SourceVertices[gi].TexCoord2;
@@ -61,20 +59,15 @@ void main(uint3 i : SV_DispatchThreadID)
     float4 normals = NormalMap.SampleLevel(texSampler, uv, 0);
     float3x3 TBN = float3x3(v.Tangent, v.Bitangent, v.Normal);
 
-    
-    float3 offset = 0;
-    
-    offset= texColor.rbg ;
+    float3 offset = texColor.rbg ;
 
     ResultVertices[gi].Position = v.Position + offset;
     ResultVertices[gi].TexCoord = SourceVertices[gi].TexCoord;
 
-
-
     float3 bitangent = SourceVertices[gi].Bitangent;
     float3 tangent = SourceVertices[gi].Tangent;
     float3 orgNormal = SourceVertices[gi].Normal;
-    float3 newNormal = normalize(normals.rgb * 2.0 - 1.0);
+    float3 newNormal = normalize(normals.rbg * 2.0 - 1.0);
 
     float3 newTangent = cross(bitangent, newNormal);
     float3 newBitangent = cross(newNormal, newTangent);

@@ -51,10 +51,18 @@ internal static partial class TourDataMarkdownExport
     {
         // Type with reference to child and input
         sb.Append($"## {tourPoint.Style}");
-        if (tourPoint.ChildId != Guid.Empty && TryGetChildNameIndex(symbolUi, tourPoint.ChildId, out var childName))
+        if (tourPoint.ChildId != Guid.Empty 
+            && TryGetChildNameIndex(symbolUi, tourPoint.ChildId, out var childName) )
         {
+            TryGetInputName(symbolUi, tourPoint, out var inputName);
+            
             sb.Append("(");
             sb.Append(childName);
+            if (!string.IsNullOrEmpty(inputName))
+            {
+                sb.Append('.');
+                sb.Append(inputName);
+            }
             sb.Append(") ");
         }
         
@@ -66,7 +74,7 @@ internal static partial class TourDataMarkdownExport
         sb.AppendLine();
     }
 
-    private static bool TryGetChildNameIndex(SymbolUi symbolUi, Guid id, [NotNullWhen(true)] out string name)
+    private static bool TryGetChildNameIndex(SymbolUi symbolUi, Guid id, out string name)
     {
         name = "FAIL?";
 
@@ -91,12 +99,33 @@ internal static partial class TourDataMarkdownExport
         if (index == 0)
         {
             name = child.SymbolChild.Symbol.Name;
-            return true;
         }
-
-        name = $"{child.SymbolChild.Symbol.Name}:{index + 1}";
+        else
+        {
+            name = $"{child.SymbolChild.Symbol.Name}:{index + 1}";
+        }
+        
         return true;
     }
+
+    private static bool TryGetInputName(SymbolUi symbolUi, TourPoint tourPoint, out string inputName)
+    {
+        inputName = string.Empty;
+
+        if (tourPoint.InputId == Guid.Empty || tourPoint.ChildId == Guid.Empty)
+            return false;
+
+        if (!symbolUi.Symbol.Children.TryGetValue(tourPoint.ChildId, out var child))
+            return false;
+
+        var input = child.Symbol.InputDefinitions.FirstOrDefault(i => i.Id == tourPoint.InputId);
+        if (input == null)
+            return false;
+
+        inputName = input.Name;
+        return true;
+    }
+
     #endregion
 
     #region pasting from mark down
@@ -106,7 +135,7 @@ internal static partial class TourDataMarkdownExport
     /// <remarks>
     /// Copy sample markdown from existing symbols with tours.
     ///
-    /// There are two methods how this could be a applied:
+    /// There are two methods how this could be applied:
     /// - If some ops are selected, their SymbolUis will be the target
     /// - Otherwise the current compositionUi will be the target, if...
     ///     1. _one_ of the Tours has a matching SymbolId
@@ -154,28 +183,51 @@ internal static partial class TourDataMarkdownExport
         }
         else
         {
-            foreach (var tour in tours)
+            var selectedChildUis = projectView.NodeSelection.GetSelectedChildUis().ToArray();
+
+            if (tours.Count == 1 && selectedChildUis.Length == 1)
             {
-                var idStringMissing = string.IsNullOrEmpty(tour.IdString);
-                if (idStringMissing)
+                var tour = tours[0];
+                var targetChildUi = selectedChildUis[0];
+                if (!string.IsNullOrEmpty(tour.IdString) && tour.IdString != targetChildUi.SymbolChild.Symbol.Id.ShortenGuid())
                 {
-                    Log.Warning($"Can't paste data of {tour.Title} to selection with without tourIds.");
-                    continue;
+                    Log.Warning("TourId doesn't match current composition.");
+                    return false;
                 }
-
-                var targetChildUi = projectView.NodeSelection.GetSelectedChildUis()
-                                               .Where(c => c.CollapsedIntoAnnotationFrameId == Guid.Empty)
-                                               .OrderByDescending(c => c.PosOnCanvas.Y + c.PosOnCanvas.X * 0.1f)
-                                               .FirstOrDefault(c => string.Equals(tour.IdString, c.SymbolChild.Symbol.Id.ShortenGuid(),
-                                                                                  StringComparison.InvariantCulture));
-
-                if (targetChildUi == null || !targetChildUi.SymbolChild.Symbol.TryGetSymbolUi(out var targetSymbolUi))
+                
+                if (!targetChildUi.SymbolChild.Symbol.TryGetSymbolUi(out var targetSymbolUi))
                 {
                     Log.Warning($"Can't find target for {tour.IdString} to paste data.");
-                    continue;
+                    return false;
                 }
-
+                
                 ApplyTourDataToSymbolUi(tour, targetSymbolUi);
+            }
+            else
+            {
+                foreach (var tour in tours)
+                {
+                    var idStringMissing = string.IsNullOrEmpty(tour.IdString);
+                    if (idStringMissing)
+                    {
+                        Log.Warning($"Can't paste data of {tour.Title} to selection with without tourIds.");
+                        continue;
+                    }
+
+                    var targetChildUi = selectedChildUis
+                                       .Where(c => c.CollapsedIntoAnnotationFrameId == Guid.Empty)
+                                       .OrderByDescending(c => c.PosOnCanvas.Y + c.PosOnCanvas.X * 0.1f)
+                                       .FirstOrDefault(c => string.Equals(tour.IdString, c.SymbolChild.Symbol.Id.ShortenGuid(),
+                                                                          StringComparison.InvariantCulture));
+
+                    if (targetChildUi == null || !targetChildUi.SymbolChild.Symbol.TryGetSymbolUi(out var targetSymbolUi))
+                    {
+                        Log.Warning($"Can't find target for {tour.IdString} to paste data.");
+                        continue;
+                    }
+
+                    ApplyTourDataToSymbolUi(tour, targetSymbolUi);
+                }
             }
         }
 
@@ -342,14 +394,22 @@ internal static partial class TourDataMarkdownExport
 
         // e.g.  Info(Symbol:1)
         var symbolName = string.Empty;
+        var inputName = string.Empty;
         var index = 1;
 
         var m = MatchSymbolNameAndIndex().Match(tourPoint.StyleAndTargetString);
         if (m.Success)
         {
-            symbolName = m.Groups["title"].Value;
-            if (m.Groups["index"].Success && int.TryParse(m.Groups["index"].Value, out var i))
+            int titleGroup = 1;
+            int indexGroup = 2;
+            int inputNameGroup = 3;
+            
+            symbolName = m.Groups[titleGroup].Value;
+            if (m.Groups[indexGroup].Success && int.TryParse(m.Groups[indexGroup].Value, out var i))
                 index = i;
+            
+            if (m.Groups[inputNameGroup].Success)
+                inputName = m.Groups[inputNameGroup].Value;
         }
 
         if (!string.IsNullOrEmpty(symbolName))
@@ -370,6 +430,19 @@ internal static partial class TourDataMarkdownExport
                     continue;
 
                 tourPoint.ChildId = childUi.Id;
+
+                if (!string.IsNullOrEmpty(inputName))
+                {
+                    foreach (var input in childUi.SymbolChild.Symbol.InputDefinitions)
+                    {
+                        if (input.Name != inputName) 
+                            continue;
+                        
+                        tourPoint.InputId = input.Id;
+                        break;
+                    }
+                }
+                
                 break;
             }
         }
@@ -410,8 +483,9 @@ internal static partial class TourDataMarkdownExport
 
     private static TourPoint? _activeTourPoint;
     private static int _lineIndex;
-
-    [GeneratedRegex(@"\((?<title>[^):]+)(?::(?<index>\d+))?\)", RegexOptions.Compiled | RegexOptions.CultureInvariant)]
+    
+    //[GeneratedRegex(@"\((?<title>[^):]+)(?::(?<index>\d+))?\)", RegexOptions.Compiled | RegexOptions.CultureInvariant)]
+    [GeneratedRegex(@"\(([^):.]+)(?::(\d+))?(?:\.([^)]+))?\)", RegexOptions.Compiled | RegexOptions.CultureInvariant)]
     private static partial Regex MatchSymbolNameAndIndex();
     #endregion
 }

@@ -1,6 +1,6 @@
 {
   "Id": "8bef116d-7d1c-4c1b-b902-25c1d5e925a9"/*ComputeShaderStage*/,
-  "Description": "",
+  "Description": "Setup all necessary structures to dispatch a compute shader.\n\nThis can be dispatched for multiple iterations (e.g. to speed up processing).\n\nIf multiple iterations are required an additional ConstantBuffer is automatically bound with the current execution index.",
   "InputUis": [
     {
       "InputId": "0105aca4-5fd5-40c8-82a5-e919bb7dd507"/*UavBufferCounter*/,
@@ -14,7 +14,8 @@
       "Position": {
         "X": 106.01553,
         "Y": 397.0835
-      }
+      },
+      "Description": "This can be used to dispatch the compute shader multiple times.\n\nIf larger than 1 an additional constant buffer will be bound with the current execution index."
     },
     {
       "InputId": "180cae35-10e3-47f3-8191-f6ecea7d321c"/*Dispatch*/,

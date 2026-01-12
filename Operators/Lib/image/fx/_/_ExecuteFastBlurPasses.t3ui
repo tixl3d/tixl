@@ -1,0 +1,120 @@
+{
+  "Id": "46ce6fad-87fe-4d1f-b236-ae644dd1f76c"/*_ExecuteFastBlurPasses*/,
+  "Description": "An internal operator that performs the necessary steps of the bloom effect.",
+  "InputUis": [
+    {
+      "InputId": "08c47369-295b-4638-0ae8-4967e54cf638"/*DownsamplePS*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 675.0
+      }
+    },
+    {
+      "InputId": "2ae6958b-4b7d-485a-2c0a-6b89076e185a"/*UpsampleAccumulatePS*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 825.0
+      }
+    },
+    {
+      "InputId": "5d19c8be-7ea0-4b8d-5f3d-9ebb3a914b8d"/*LinearSampler*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 900.0
+      }
+    },
+    {
+      "InputId": "692bc2f0-68f2-45ca-a0fb-cd1c5d08e982"/*SourceTexture*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "7e7a95c8-8e2b-48e3-9e3d-eb1b9f0c40d4"/*Intensity*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      }
+    },
+    {
+      "InputId": "7f79b69a-5dd8-4c49-9b60-2a2d4c2b5a0f"/*Steps*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 300.0
+      }
+    },
+    {
+      "InputId": "98e88d02-3b78-403c-b9c9-b5ecf8565acd"/*SourceTextureSrv*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      }
+    },
+    {
+      "InputId": "ac1a30d9-0d79-4e7e-9b1d-84f4f129a8c1"/*Spread*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 375.0
+      }
+    },
+    {
+      "InputId": "b2c6b5b7-36a3-4d0e-9a05-1e1d0c0e7a11"/*BlurPS*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 750.0
+      }
+    },
+    {
+      "InputId": "d20d7e44-db1b-48a2-8a14-1d02c6a0a0f7"/*BlurRadiusPx*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      }
+    },
+    {
+      "InputId": "d5914036-f628-4305-d7b5-1634b219c305"/*Clamp*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 525.0
+      }
+    },
+    {
+      "InputId": "e5548715-1cae-4792-9e6e-8f9d8daa9edf"/*TintGradient*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 450.0
+      }
+    },
+    {
+      "InputId": "e6a25147-0739-4416-e8c6-2745c32ad416"/*FullscreenVS*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 600.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "7d2b0e58-9a1c-4e5a-9f85-7bde3d9b33e7"/*OutputTexture*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    }
+  ]
+}

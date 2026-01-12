@@ -37,7 +37,7 @@ internal sealed partial class MagGraphView
         }
         else
         {
-            HandleSymbolDropping(_context);
+            HandleDropping(_context);
 
             // Update view scope if required
             if (FitViewToSelectionHandling.FitViewToSelectionRequested)

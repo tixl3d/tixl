@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using T3.Core.Animation;
 using T3.Core.Operator;
 using T3.Editor.Gui.UiHelpers;
@@ -21,11 +21,11 @@ internal static class UiConfig
 
         var shouldBeFocusMode = !UserSettings.Config.FocusMode;
 
-        if (!OutputWindow.TryGetPrimaryOutputWindow(out var oldOutputWindow))
-            return;
-
         if (shouldBeFocusMode)
         {
+            if (!OutputWindow.TryGetPrimaryOutputWindow(out var oldOutputWindow))
+                return;
+
             oldOutputWindow.Pinning.TryGetPinnedOrSelectedInstance(out var instance, out _);
             activeComponents.GraphImageBackground.OutputInstance = instance;
         }
@@ -34,7 +34,7 @@ internal static class UiConfig
         UserSettings.Config.ShowToolbar = shouldBeFocusMode;
         
         ToggleAllUiElements();
-        
+
         LayoutHandling.LoadAndApplyLayoutOrFocusMode(shouldBeFocusMode
                                                          ? LayoutHandling.Layouts.FocusMode
                                                          : (LayoutHandling.Layouts)UserSettings.Config.WindowLayoutIndex);

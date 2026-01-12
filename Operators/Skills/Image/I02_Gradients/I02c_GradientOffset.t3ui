@@ -66,11 +66,11 @@
   ],
   "TourPoints": [
     {
-      "Id": "9778cc17-d64b-4f17-97d6-7ee83ca32588",
+      "Id": "10cf5854-1ed3-4f87-89bf-982bf8f5aabf",
       "Description": "Use Offset to shift the gradient along its axis.\nAn offset of one equals the current width of the gradient."
     },
     {
-      "Id": "a173ee2c-589c-40d2-bd34-22648138ccc0",
+      "Id": "b516f873-f8cb-4320-8c43-1a8846ac886e",
       "ChildId": "26d5a7fa-56bc-4399-9d00-907f3988a05a",
       "Description": "Move the gradient so it only appears at the bottom of the screen without changing its color ramp.",
       "Style": "CallToAction"

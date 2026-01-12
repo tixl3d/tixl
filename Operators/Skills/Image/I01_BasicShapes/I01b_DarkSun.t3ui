@@ -1,0 +1,109 @@
+{
+  "Id": "40f7a388-3125-458c-9b57-e2daeea60b9f"/*I01b_DarkSun*/,
+  "Description": "Stacking",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0d0c414c-70ba-4374-a0a2-d4a594425f62"/*Blob*/,
+      "AnnotationId": "656d4f29-3202-45a8-9bf1-957ceba30c00",
+      "Position": {
+        "X": 1352.2639,
+        "Y": 2141.9663
+      }
+    },
+    {
+      "ChildId": "0f40b82e-f22d-4119-9f9a-58f74e7ed42a"/*ImageQuiz*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2018.4391
+      }
+    },
+    {
+      "ChildId": "20873546-a48b-496b-8dc7-3313e66e2559"/*Blob*/,
+      "AnnotationId": "656d4f29-3202-45a8-9bf1-957ceba30c00",
+      "Position": {
+        "X": 1352.2639,
+        "Y": 2176.9663
+      }
+    },
+    {
+      "ChildId": "4c01a5ef-6f2e-4413-9cd9-c84cfd8c8d35"/*Blob*/,
+      "AnnotationId": "656d4f29-3202-45a8-9bf1-957ceba30c00",
+      "Position": {
+        "X": 1352.2639,
+        "Y": 2106.9663
+      }
+    },
+    {
+      "ChildId": "662d9d74-3352-4afd-b1bc-8be790716b5c"/*Blob*/,
+      "Position": {
+        "X": 1329.1313,
+        "Y": 1847.9598
+      }
+    },
+    {
+      "ChildId": "69e01607-0a9d-4cee-b7fe-ca9015a18cb4"/*Blob*/,
+      "Position": {
+        "X": 1329.1313,
+        "Y": 1778.8348
+      }
+    },
+    {
+      "ChildId": "a87f1a1a-2023-4380-9f45-5a699e6487f8"/*Blob*/,
+      "Position": {
+        "X": 1329.1312,
+        "Y": 1911.3973
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "986bb070-7100-497d-a6be-d1f174d3c7f1"/*ColorBuffer*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2088.439
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "656d4f29-3202-45a8-9bf1-957ceba30c00",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1330.0,
+        "Y": 2060.1309
+      },
+      "Size": {
+        "X": 193.07947,
+        "Y": 180.2854
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "bec805ac-a242-42ee-b876-de6682c30e5f",
+      "Description": "Many image operators also have an image input.\nThis is indicated by the dark purple triangles on the left and on the top."
+    },
+    {
+      "Id": "9b4fc4f3-c59a-47bc-922f-ec87d24db52e",
+      "Description": "These operators can be connected or \"stacked\", so that the second operator is rendered onto the connected on."
+    },
+    {
+      "Id": "eb80e170-5efc-4981-af75-61be7c689dea",
+      "Description": "Stack these ops in the right order to reproduce the example below.",
+      "Style": "CallToAction"
+    },
+    {
+      "Id": "e10afd03-f039-4bb7-af03-743ccbf4d958",
+      "Description": "You can rearrange the ops in a snapped stack to change the order.",
+      "Style": "Tip"
+    }
+  ]
+}

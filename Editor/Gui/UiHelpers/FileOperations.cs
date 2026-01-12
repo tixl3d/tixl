@@ -83,7 +83,7 @@ public static class FileOperations
         if (type == FilePickerTypes.File)
         {
             ImGui.SameLine();
-            if (ImGui.Button("Edit", new Vector2(40, 0)))
+            if (ImGui.Button("Edit", new Vector2(40, 0) * T3Ui.UiScaleFactor))
             {
                 if (!File.Exists(value))
                 {

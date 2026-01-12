@@ -1,0 +1,89 @@
+{
+  "Id": "468cafa2-d5ef-46f3-b0b7-626cdb0322cf"/*B01c_DragFromStack*/,
+  "Description": "Get outta there!",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "43213093-756d-4b0e-964d-e34731ad677d"/*Raster*/,
+      "Position": {
+        "X": 1263.5664,
+        "Y": 1879.0808
+      }
+    },
+    {
+      "ChildId": "57071ed1-8f84-40b9-b0a2-5673323d77d0"/*RoundedRect*/,
+      "Position": {
+        "X": 1263.5664,
+        "Y": 1809.0808
+      }
+    },
+    {
+      "ChildId": "a61f5dbe-fcf5-4f2f-980d-8d580d5806bd"/*ImageQuiz*/,
+      "Position": {
+        "X": 1548.4866,
+        "Y": 1941.9801
+      }
+    },
+    {
+      "ChildId": "adaa629e-78b0-42a5-b618-fbfcad511e66"/*RoundedRect*/,
+      "AnnotationId": "e62796c7-c4ac-4081-ab3f-420fe05a2a0a",
+      "Position": {
+        "X": 1238.9639,
+        "Y": 2105.6155
+      }
+    },
+    {
+      "ChildId": "b58f1da3-be7a-440f-9fc4-0fce8131e2e7"/*Raster*/,
+      "AnnotationId": "e62796c7-c4ac-4081-ab3f-420fe05a2a0a",
+      "Position": {
+        "X": 1238.9639,
+        "Y": 2140.615
+      }
+    },
+    {
+      "ChildId": "c3bb7cb9-ceef-43dd-b533-464b1f27201e"/*Blob*/,
+      "Position": {
+        "X": 1263.5664,
+        "Y": 1844.0808
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "1fd4183f-2c57-430c-8c06-9c001b635e02"/*ColorBuffer*/,
+      "Position": {
+        "X": 1548.4866,
+        "Y": 2011.98
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "e62796c7-c4ac-4081-ab3f-420fe05a2a0a",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1213.5498,
+        "Y": 2004.678
+      },
+      "Size": {
+        "X": 227.05371,
+        "Y": 175.0
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "97092ce7-e7fd-4776-b8b6-898e9e762f4f",
+      "ChildId": "c3bb7cb9-ceef-43dd-b533-464b1f27201e",
+      "Description": "Sometimes an operator needs to leave a stack.\nThat bright orange [Blob] is a bit much.\nRemove it by long-pressing and dragging it out of the stack.",
+      "Style": "CallToAction"
+    }
+  ]
+}

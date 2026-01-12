@@ -11,6 +11,7 @@ internal sealed class _RenderFontBuffer : Instance<_RenderFontBuffer>
 
     [Output(Guid = "A0ECA9CE-35AA-497D-B5C9-CDE52A7C8D58")]
     public readonly Slot<int> VertexCount = new();
+    
     public _RenderFontBuffer()
     {
         _fontResource = new Resource<BmFontDescription>(Filepath, OnFileChanged);
@@ -317,10 +318,7 @@ internal sealed class _RenderFontBuffer : Instance<_RenderFontBuffer>
 
     [Input(Guid = "C4F03392-FF7E-4B4A-8740-F93A581B2B6B")]
     public readonly InputSlot<Vector2> Position = new();
-
-    [Input(Guid = "FFD2233A-8F3E-426B-815B-8071E4C779AB")]
-    public readonly InputSlot<float> Slant = new();
-
+    
     [Input(Guid = "14829EAC-BA59-4D31-90DC-53C7FC56CC30")]
     public readonly InputSlot<int> VerticalAlign = new();
 

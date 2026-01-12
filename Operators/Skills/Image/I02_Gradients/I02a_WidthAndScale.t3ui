@@ -1,6 +1,6 @@
 {
   "Id": "3208070c-794e-4400-b996-608cb200aec8"/*I02a_WidthAndScale*/,
-  "Description": "",
+  "Description": "LinearGradient: Width and Scale Mode",
   "InputUis": [],
   "SymbolChildUis": [
     {
@@ -12,7 +12,7 @@
     },
     {
       "ChildId": "7cd66891-a750-4c93-9e33-707d22432c1c"/*LinearGradient*/,
-      "AnnotationId": "60609464-eb73-4bdd-a9b2-9228a99094c9",
+      "AnnotationId": "53d5c7f3-ff9b-4f07-b07a-f545043ba7c8",
       "Position": {
         "X": 1256.9438,
         "Y": 2101.325
@@ -37,7 +37,7 @@
   ],
   "Annotations": [
     {
-      "Id": "1151a989-4635-4160-bb40-cc9096bf0f34",
+      "Id": "53d5c7f3-ff9b-4f07-b07a-f545043ba7c8",
       "Label": "Solution",
       "Collapsed": "True",
       "Color": {
@@ -47,448 +47,29 @@
         "W": 1.0
       },
       "Position": {
-        "X": "NaN",
-        "Y": "NaN"
+        "X": 1225.0,
+        "Y": 2052.9775
       },
       "Size": {
-        "X": 231.36255,
-        "Y": 159.46973
-      }
-    },
-    {
-      "Id": "1253939b-376b-4eea-840b-7f23a4c6b751",
-      "Label": "Solution",
-      "Collapsed": "True",
-      "Color": {
-        "X": 0.6,
-        "Y": 0.6,
-        "Z": 0.6,
-        "W": 1.0
-      },
-      "Position": {
-        "X": "NaN",
-        "Y": "NaN"
-      },
-      "Size": {
-        "X": 231.36255,
-        "Y": 159.46973
-      }
-    },
-    {
-      "Id": "222d6a5c-c537-4ad6-9f5b-1266628b92dd",
-      "Label": "Solution",
-      "Collapsed": "True",
-      "Color": {
-        "X": 0.6,
-        "Y": 0.6,
-        "Z": 0.6,
-        "W": 1.0
-      },
-      "Position": {
-        "X": "-Infinity",
-        "Y": "-Infinity"
-      },
-      "Size": {
-        "X": 231.36255,
-        "Y": 159.46973
-      }
-    },
-    {
-      "Id": "2aa82565-a307-42ad-9b88-63c04f88b825",
-      "Label": "Solution",
-      "Collapsed": "True",
-      "Color": {
-        "X": 0.6,
-        "Y": 0.6,
-        "Z": 0.6,
-        "W": 1.0
-      },
-      "Position": {
-        "X": "NaN",
-        "Y": "NaN"
-      },
-      "Size": {
-        "X": 231.36255,
-        "Y": 159.46973
-      }
-    },
-    {
-      "Id": "3a96d085-3fa5-48e3-be3d-2e57678a2628",
-      "Label": "Solution",
-      "Collapsed": "True",
-      "Color": {
-        "X": 0.6,
-        "Y": 0.6,
-        "Z": 0.6,
-        "W": 1.0
-      },
-      "Position": {
-        "X": "-Infinity",
-        "Y": "-Infinity"
-      },
-      "Size": {
-        "X": 231.36255,
-        "Y": 159.46973
-      }
-    },
-    {
-      "Id": "3d7d5d3a-14c4-42cd-9acc-dcb9436779db",
-      "Label": "Solution",
-      "Collapsed": "True",
-      "Color": {
-        "X": 0.6,
-        "Y": 0.6,
-        "Z": 0.6,
-        "W": 1.0
-      },
-      "Position": {
-        "X": "NaN",
-        "Y": "NaN"
-      },
-      "Size": {
-        "X": 231.36255,
-        "Y": 159.46973
-      }
-    },
-    {
-      "Id": "3fa4468e-d32a-4a0b-ab67-9a5e8cd01f46",
-      "Label": "Solution",
-      "Collapsed": "True",
-      "Color": {
-        "X": 0.6,
-        "Y": 0.6,
-        "Z": 0.6,
-        "W": 1.0
-      },
-      "Position": {
-        "X": "NaN",
-        "Y": "NaN"
-      },
-      "Size": {
-        "X": 231.36255,
-        "Y": 159.46973
-      }
-    },
-    {
-      "Id": "487c9d04-e6a9-4449-aa17-1e27a16a932a",
-      "Label": "Solution",
-      "Collapsed": "True",
-      "Color": {
-        "X": 0.6,
-        "Y": 0.6,
-        "Z": 0.6,
-        "W": 1.0
-      },
-      "Position": {
-        "X": "-Infinity",
-        "Y": "-Infinity"
-      },
-      "Size": {
-        "X": 231.36255,
-        "Y": 159.46973
-      }
-    },
-    {
-      "Id": "490f7653-8a93-4469-893c-ff7e5253cbd5",
-      "Label": "Solution",
-      "Collapsed": "True",
-      "Color": {
-        "X": 0.6,
-        "Y": 0.6,
-        "Z": 0.6,
-        "W": 1.0
-      },
-      "Position": {
-        "X": "-Infinity",
-        "Y": "-Infinity"
-      },
-      "Size": {
-        "X": 231.36255,
-        "Y": 159.46973
-      }
-    },
-    {
-      "Id": "5b6cdbc8-1242-41fe-8d01-fcbaadd88dea",
-      "Label": "Solution",
-      "Collapsed": "True",
-      "Color": {
-        "X": 0.6,
-        "Y": 0.6,
-        "Z": 0.6,
-        "W": 1.0
-      },
-      "Position": {
-        "X": "NaN",
-        "Y": "NaN"
-      },
-      "Size": {
-        "X": 231.36255,
-        "Y": 159.46973
-      }
-    },
-    {
-      "Id": "5d17fbea-df01-40f3-8188-c3aaf1c6a5a5",
-      "Label": "Solution",
-      "Collapsed": "True",
-      "Color": {
-        "X": 0.6,
-        "Y": 0.6,
-        "Z": 0.6,
-        "W": 1.0
-      },
-      "Position": {
-        "X": "NaN",
-        "Y": "NaN"
-      },
-      "Size": {
-        "X": 231.36255,
-        "Y": 159.46973
-      }
-    },
-    {
-      "Id": "60609464-eb73-4bdd-a9b2-9228a99094c9",
-      "Label": "Solution",
-      "Collapsed": "True",
-      "Color": {
-        "X": 0.6,
-        "Y": 0.6,
-        "Z": 0.6,
-        "W": 1.0
-      },
-      "Position": {
-        "X": 1247.4417,
-        "Y": 2065.0
-      },
-      "Size": {
-        "X": 231.36255,
-        "Y": 159.46973
-      }
-    },
-    {
-      "Id": "67319b7e-81a1-4102-abd6-9f0e6756dd23",
-      "Label": "Solution",
-      "Collapsed": "True",
-      "Color": {
-        "X": 0.6,
-        "Y": 0.6,
-        "Z": 0.6,
-        "W": 1.0
-      },
-      "Position": {
-        "X": "NaN",
-        "Y": "NaN"
-      },
-      "Size": {
-        "X": 231.36255,
-        "Y": 159.46973
-      }
-    },
-    {
-      "Id": "6c5228a8-f0f0-4d72-8bee-2d73b926e416",
-      "Label": "Solution",
-      "Collapsed": "True",
-      "Color": {
-        "X": 0.6,
-        "Y": 0.6,
-        "Z": 0.6,
-        "W": 1.0
-      },
-      "Position": {
-        "X": "NaN",
-        "Y": "NaN"
-      },
-      "Size": {
-        "X": 231.36255,
-        "Y": 159.46973
-      }
-    },
-    {
-      "Id": "6eb806ff-1110-4c43-9731-7ea06a81ce60",
-      "Label": "Solution",
-      "Collapsed": "True",
-      "Color": {
-        "X": 0.6,
-        "Y": 0.6,
-        "Z": 0.6,
-        "W": 1.0
-      },
-      "Position": {
-        "X": "NaN",
-        "Y": "NaN"
-      },
-      "Size": {
-        "X": 231.36255,
-        "Y": 159.46973
-      }
-    },
-    {
-      "Id": "74fd0891-96d0-4cb6-8711-1707418cfc46",
-      "Label": "Solution",
-      "Collapsed": "True",
-      "Color": {
-        "X": 0.6,
-        "Y": 0.6,
-        "Z": 0.6,
-        "W": 1.0
-      },
-      "Position": {
-        "X": "NaN",
-        "Y": "NaN"
-      },
-      "Size": {
-        "X": 231.36255,
-        "Y": 159.46973
-      }
-    },
-    {
-      "Id": "7f9502cf-d0ab-4ede-8364-fb15642803a0",
-      "Label": "Solution",
-      "Collapsed": "True",
-      "Color": {
-        "X": 0.6,
-        "Y": 0.6,
-        "Z": 0.6,
-        "W": 1.0
-      },
-      "Position": {
-        "X": "NaN",
-        "Y": "NaN"
-      },
-      "Size": {
-        "X": 231.36255,
-        "Y": 159.46973
-      }
-    },
-    {
-      "Id": "7ff6835a-823f-4bf0-b760-6a79584a00f5",
-      "Label": "Solution",
-      "Collapsed": "True",
-      "Color": {
-        "X": 0.6,
-        "Y": 0.6,
-        "Z": 0.6,
-        "W": 1.0
-      },
-      "Position": {
-        "X": "NaN",
-        "Y": "NaN"
-      },
-      "Size": {
-        "X": 231.36255,
-        "Y": 159.46973
-      }
-    },
-    {
-      "Id": "94cfcd73-1c4b-4833-afb4-b32cdc3136a1",
-      "Label": "Solution",
-      "Collapsed": "True",
-      "Color": {
-        "X": 0.6,
-        "Y": 0.6,
-        "Z": 0.6,
-        "W": 1.0
-      },
-      "Position": {
-        "X": "NaN",
-        "Y": "NaN"
-      },
-      "Size": {
-        "X": 231.36255,
-        "Y": 159.46973
-      }
-    },
-    {
-      "Id": "a967c3a9-2f36-4e85-a4a9-0fc6ab811c79",
-      "Label": "Solution",
-      "Collapsed": "True",
-      "Color": {
-        "X": 0.6,
-        "Y": 0.6,
-        "Z": 0.6,
-        "W": 1.0
-      },
-      "Position": {
-        "X": "-Infinity",
-        "Y": "-Infinity"
-      },
-      "Size": {
-        "X": 231.36255,
-        "Y": 159.46973
-      }
-    },
-    {
-      "Id": "c1ea1d53-a837-4b0e-a4b1-4543ea829e4c",
-      "Label": "Solution",
-      "Collapsed": "True",
-      "Color": {
-        "X": 0.6,
-        "Y": 0.6,
-        "Z": 0.6,
-        "W": 1.0
-      },
-      "Position": {
-        "X": "NaN",
-        "Y": "NaN"
-      },
-      "Size": {
-        "X": 231.36255,
-        "Y": 159.46973
-      }
-    },
-    {
-      "Id": "c9badd98-ff21-42c5-a72a-bd016a253101",
-      "Label": "Solution",
-      "Collapsed": "True",
-      "Color": {
-        "X": 0.6,
-        "Y": 0.6,
-        "Z": 0.6,
-        "W": 1.0
-      },
-      "Position": {
-        "X": "NaN",
-        "Y": "NaN"
-      },
-      "Size": {
-        "X": 231.36255,
-        "Y": 159.46973
-      }
-    },
-    {
-      "Id": "d4ce0749-63d2-4589-a646-25fce2563e19",
-      "Label": "Solution",
-      "Collapsed": "True",
-      "Color": {
-        "X": 0.6,
-        "Y": 0.6,
-        "Z": 0.6,
-        "W": 1.0
-      },
-      "Position": {
-        "X": "NaN",
-        "Y": "NaN"
-      },
-      "Size": {
-        "X": 231.36255,
-        "Y": 159.46973
+        "X": 210.0,
+        "Y": 117.02246
       }
     }
   ],
   "TourPoints": [
     {
-      "Id": "d5c32c64-779c-4e88-9ddf-68fef5ab8ceb",
+      "Id": "62da30af-e883-4c17-8d4c-0bca3b2cdc46",
       "Description": "Gradients are a core building block in TiXL. They are used in many operators and effects.\nThis is the [LinearGradient]. It draws a gradient along a line."
     },
     {
-      "Id": "5459de84-8f42-4bb5-bdcc-e8a01e78ca0b",
+      "Id": "54a0a877-ccc7-4df0-a8a0-7904df248d1f",
       "ChildId": "2385e6e5-8fd9-4edc-b4c9-29af4ffcd4e8",
       "Description": "Notice that the gradient does not cover the full width of the image.\nThis is because the default scale mode is AlignToHeight. When the output aspect ratio changes, TiXL adjusts the left and right edges.\nAligning to the height helps avoid unexpected layout changes and keeps the result consistent across aspect ratios.",
       "Style": "InfoFor"
     },
     {
-      "Id": "766324fa-72d2-47df-9138-a8f6a0516cf3",
+      "Id": "1df787ed-09fe-4c59-b63d-79be5ad5d4ae",
       "ChildId": "2385e6e5-8fd9-4edc-b4c9-29af4ffcd4e8",
-      "InputId": "e4739314-4075-4d14-a80d-79e149081dac",
       "Description": "Adjust the parameters so the gradient covers the full width.",
       "Style": "CallToAction"
     }

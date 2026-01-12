@@ -103,16 +103,18 @@ internal sealed class PlayVideoClip : Instance<PlayVideoClip>
         videoEnd = Math.Clamp(videoEnd, 0.0, _engine.Duration);
 
         // shall we seek?
+        var isExporting = context.Playback.IsRenderingToFile;
         var clampedTime = Math.Clamp(shouldBeTimeInSecs, videoStart, videoEnd);
         var videoTime = Math.Clamp(_engine.CurrentTime, videoStart, videoEnd);
         var deltaTime = clampedTime - videoTime;
+        var threshold = isExporting ? 0.01f : ResyncThreshold.GetValue(context);
         var shouldSeek = reloadedPath || (!_engine.IsSeeking
-                                          && Math.Abs(deltaTime) > ResyncThreshold.GetValue(context));
+                                          && Math.Abs(deltaTime) > threshold);
 
         // Play when we are in the center portion of the video
         // and we are playing the video forward
-        _play = reloadedPath ||
-                (shouldBeTimeInSecs == clampedTime && clampedTime - _lastUpdateTime > 0.0);
+        _play = !isExporting && (reloadedPath ||
+                (shouldBeTimeInSecs == clampedTime && clampedTime - _lastUpdateTime > 0.0));
         _lastUpdateTime = clampedTime;
 
         // initiate seeking if necessary

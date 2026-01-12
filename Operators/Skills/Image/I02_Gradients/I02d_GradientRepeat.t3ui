@@ -12,6 +12,7 @@
     },
     {
       "ChildId": "19ae4415-ef55-4f65-98cb-60981b0ab4e7"/*LinearGradient*/,
+      "AnnotationId": "06217683-7dc4-4bfd-bff4-6b1effc0bd5b",
       "Position": {
         "X": 1293.53,
         "Y": 2104.1514
@@ -19,6 +20,7 @@
     },
     {
       "ChildId": "25692173-6d3e-4bef-9464-318c65f10280"/*Time*/,
+      "AnnotationId": "06217683-7dc4-4bfd-bff4-6b1effc0bd5b",
       "Position": {
         "X": 1153.53,
         "Y": 2139.1514
@@ -60,6 +62,7 @@
     {
       "Id": "06217683-7dc4-4bfd-bff4-6b1effc0bd5b",
       "Label": "Solution",
+      "Collapsed": "True",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -78,16 +81,17 @@
   ],
   "TourPoints": [
     {
-      "Id": "1181131e-6f54-4570-ae96-71a4a910649a",
+      "Id": "5a106d6d-8afa-4389-8273-58b566b8dc9f",
       "Description": "Repeating a gradient can create strong patterns with very little setup."
     },
     {
-      "Id": "b1e3fd17-d8bf-4da2-b640-205bb9512ced",
+      "Id": "28934c64-d789-42f3-b435-b6eaec0b7764",
       "Description": "Enabling PingPong mirrors the gradient in the middle."
     },
     {
-      "Id": "158fe19b-0801-46ea-9c9b-e04d6174ff0a",
+      "Id": "66fb912b-8e94-427c-99b7-1279e19adcbf",
       "ChildId": "aa9e5f28-5a93-4475-b25f-9b8297578951",
+      "InputId": "5774969c-ef4d-482e-ab37-b3a84b09debb",
       "Description": "Use Repeat and PingPong to recreate the goal.",
       "Style": "CallToAction"
     }

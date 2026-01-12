@@ -1,0 +1,99 @@
+{
+  "Id": "a91e8394-db72-4fcb-8cd6-0676ada49848"/*I01d_RasterDots*/,
+  "Description": "",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "7388d24b-81e2-4d95-9a55-ebb9214dcafb"/*Time*/,
+      "Position": {
+        "X": 1173.3724,
+        "Y": 1792.5165
+      }
+    },
+    {
+      "ChildId": "8f50174d-5bba-46e1-b6a3-cd9a2dec0a20"/*ImageQuiz*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2018.4391
+      }
+    },
+    {
+      "ChildId": "9dccdba3-f7e9-41a2-94e7-520f9d4d431c"/*LinearGradient*/,
+      "Position": {
+        "X": 1173.3723,
+        "Y": 1856.4858
+      }
+    },
+    {
+      "ChildId": "9fec925d-a19a-4643-bcd4-6443a859032a"/*LinearGradient*/,
+      "AnnotationId": "5ae93470-9edb-4b13-842a-93e60ccf2c74",
+      "Position": {
+        "X": 1300.6509,
+        "Y": 2105.737
+      }
+    },
+    {
+      "ChildId": "b80eb708-9052-4370-ae04-8c41f5f32692"/*Raster*/,
+      "AnnotationId": "5ae93470-9edb-4b13-842a-93e60ccf2c74",
+      "Position": {
+        "X": 1300.6509,
+        "Y": 2175.7368
+      }
+    },
+    {
+      "ChildId": "c0d8d4a7-68a4-4590-806d-34b42d6795f4"/*Time*/,
+      "AnnotationId": "5ae93470-9edb-4b13-842a-93e60ccf2c74",
+      "Position": {
+        "X": 1160.6509,
+        "Y": 2140.7368
+      }
+    },
+    {
+      "ChildId": "e403b241-a2c5-471b-a2ff-2f8f597f15a7"/*Raster*/,
+      "Position": {
+        "X": 1173.3723,
+        "Y": 1911.0906
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "9a01e522-0bbd-4190-89ac-b9dba2519026"/*ColorBuffer*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2088.439
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "5ae93470-9edb-4b13-842a-93e60ccf2c74",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1121.7985,
+        "Y": 2055.4656
+      },
+      "Size": {
+        "X": 377.40295,
+        "Y": 184.74292
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "247d0bee-fd07-40f8-860c-571a6d37d3d2",
+      "Description": "TBD"
+    },
+    {
+      "Id": "fa6c11b6-42b0-4877-88cf-feb4584096ad",
+      "Description": "TBD"
+    }
+  ]
+}

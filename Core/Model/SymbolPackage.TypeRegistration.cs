@@ -70,20 +70,20 @@ public partial class SymbolPackage
         RegisterType(typeof(int), "int",
                      InputDefaultValueCreator<int>,
                      (writer, obj) => writer.WriteValue((int)obj),
-                     jsonToken => jsonToken.Value<int>());
+                     jsonToken => jsonToken?.Value<int>()??0);
         RegisterType(typeof(bool), "bool",
                      InputDefaultValueCreator<bool>,
                      (writer, obj) => writer.WriteValue((bool)obj),
-                     jsonToken => jsonToken.Value<bool>());
+                     jsonToken => jsonToken?.Value<bool>()??false);
         RegisterType(typeof(double), "double",
                      InputDefaultValueCreator<double>,
                      (writer, obj) => writer.WriteValue((double)obj),
-                     jsonToken => jsonToken.Value<double>());
+                     jsonToken => jsonToken?.Value<double>()??0);
 
         RegisterType(typeof(string), "string",
                      () => new InputValue<string>(string.Empty),
                      (writer, value) => writer.WriteValue((string)value),
-                     jsonToken => jsonToken.Value<string>());
+                     jsonToken => jsonToken?.Value<string>()??string.Empty);
 
         // system types
         RegisterType(typeof(System.Numerics.Vector2), "Vector2",
@@ -98,8 +98,8 @@ public partial class SymbolPackage
                      },
                      jsonToken =>
                      {
-                         float x = jsonToken.Value<float>("X");
-                         float y = jsonToken.Value<float>("Y");
+                         float x = jsonToken.ReadValueSafe<float>("X");
+                         float y = jsonToken.ReadValueSafe<float>("Y");
                          return new System.Numerics.Vector2(x, y);
                      });
         RegisterType(typeof(System.Numerics.Vector3), "Vector3",
@@ -115,9 +115,9 @@ public partial class SymbolPackage
                      },
                      jsonToken =>
                      {
-                         float x = jsonToken.Value<float>("X");
-                         float y = jsonToken.Value<float>("Y");
-                         float z = jsonToken.Value<float>("Z");
+                         float x = jsonToken.ReadValueSafe<float>("X");
+                         float y = jsonToken.ReadValueSafe<float>("Y");
+                         float z = jsonToken.ReadValueSafe<float>("Z");
                          return new System.Numerics.Vector3(x, y, z);
                      });
         RegisterType(typeof(System.Numerics.Vector4), "Vector4",
@@ -134,10 +134,10 @@ public partial class SymbolPackage
                      },
                      jsonToken =>
                      {
-                         float x = jsonToken.Value<float>("X");
-                         float y = jsonToken.Value<float>("Y");
-                         float z = jsonToken.Value<float>("Z");
-                         float w = jsonToken.Value<float>("W");
+                         float x = jsonToken.ReadValueSafe<float>("X");
+                         float y = jsonToken.ReadValueSafe<float>("Y");
+                         float z = jsonToken.ReadValueSafe<float>("Z");
+                         float w = jsonToken.ReadValueSafe<float>("W");
                          return new Vector4(x, y, z, w);
                      });
         RegisterType(typeof(System.Numerics.Quaternion), "Quaternion",
@@ -154,10 +154,10 @@ public partial class SymbolPackage
                      },
                      jsonToken =>
                      {
-                         float x = jsonToken.Value<float>("X");
-                         float y = jsonToken.Value<float>("Y");
-                         float z = jsonToken.Value<float>("Z");
-                         float w = jsonToken.Value<float>("W");
+                         float x = jsonToken.ReadValueSafe<float>("X");
+                         float y = jsonToken.ReadValueSafe<float>("Y");
+                         float z = jsonToken.ReadValueSafe<float>("Z");
+                         float w = jsonToken.ReadValueSafe<float>("W");
                          return new System.Numerics.Quaternion(x, y, z, w);
                      });
 
@@ -214,14 +214,7 @@ public partial class SymbolPackage
                          writer.WriteEndArray();
                          writer.WriteEndObject();
                      },
-                     jsonToken =>
-                     {
-                         var entries = jsonToken["Values"];
-                         var list = new List<float>(entries.Count());
-                         list.AddRange(entries.Select(entry => entry.Value<float>()));
-
-                         return list;
-                     });
+                     jsonToken => jsonToken.ReadListSafe<float>("Values"));
         RegisterType(typeof(System.Collections.Generic.List<int>), "List<int>",
                      () => new InputValue<List<int>>([]),
                      (writer, obj) =>
@@ -234,13 +227,7 @@ public partial class SymbolPackage
                          writer.WriteEndArray();
                          writer.WriteEndObject();
                      },
-                     jsonToken =>
-                     {
-                         var entries = jsonToken["Values"];
-                         var list = new List<int>(entries.Count());
-                         list.AddRange(entries.Select(entry => entry.Value<int>()));
-                         return list;
-                     });
+                     jsonToken => jsonToken.ReadListSafe<int>("Values"));
 
         RegisterType(typeof(System.Collections.Generic.List<string>), "List<string>",
                      () => new InputValue<List<string>>([]),
@@ -254,13 +241,7 @@ public partial class SymbolPackage
                          writer.WriteEndArray();
                          writer.WriteEndObject();
                      },
-                     jsonToken =>
-                     {
-                         var entries = jsonToken["Values"];
-                         var list = new List<string>(entries.Count());
-                         list.AddRange(entries.Select(entry => entry.Value<string>()));
-                         return list;
-                     });
+                     jsonToken => jsonToken.ReadListSafe<string>("Values"));
 
         RegisterType(typeof(Int2), nameof(Int2),
                      InputDefaultValueCreator<Int2>,
@@ -294,18 +275,15 @@ public partial class SymbolPackage
                      },
                      jsonToken =>
                      {
-                         int x = jsonToken.Value<int>("X");
-                         int y = jsonToken.Value<int>("Y");
-                         int z = jsonToken.Value<int>("Z");
+                         int x = jsonToken.ReadValueSafe<int>("X");
+                         int y = jsonToken.ReadValueSafe<int>("Y");
+                         int z = jsonToken.ReadValueSafe<int>("Z");
                          return new Int3(x, y, z);
                      });
 
         // TODO: this is an unfortunate overlap with List<Vector4> and should be resolved.
         RegisterType(typeof(Vector4[]), "Vector4[]",
                      () => new InputValue<Vector4[]>([]));
-
-        // RegisterType(typeof(List<Vector4>), "List<Vector4>",
-        //              () => new InputValue<List<Vector4>>([]));
 
         RegisterType(typeof(List<Vector4>), "List<Vector4>",
                      () => new InputValue<List<Vector4>>([]),
@@ -330,7 +308,7 @@ public partial class SymbolPackage
                      },
                      jsonToken =>
                      {
-                         if (jsonToken == null || !jsonToken.HasValues)
+                         if (jsonToken is not { HasValues: true })
                          {
                              return new List<Vector4>();
                          }
@@ -342,10 +320,10 @@ public partial class SymbolPackage
                              if (vec4Token == null)
                                  continue;
 
-                             float x = vec4Token.Value<float>("X");
-                             float y = vec4Token.Value<float>("Y");
-                             float z = vec4Token.Value<float>("Z");
-                             float w = vec4Token.Value<float>("W");
+                             float x = vec4Token.ReadValueSafe<float>("X");
+                             float y = vec4Token.ReadValueSafe<float>("Y");
+                             float z = vec4Token.ReadValueSafe<float>("Z");
+                             float w = vec4Token.ReadValueSafe<float>("W");
                              list.Add(new Vector4(x, y, z, w));
                          }
 

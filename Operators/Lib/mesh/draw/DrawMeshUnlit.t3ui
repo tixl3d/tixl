@@ -104,8 +104,8 @@
     {
       "ChildId": "08a6f1a1-8fb2-4f41-9f57-e856caa980d1"/*GetForegroundColor*/,
       "Position": {
-        "X": 695.1195,
-        "Y": 3942.1948
+        "X": 906.06055,
+        "Y": 3996.7544
       }
     },
     {
@@ -177,7 +177,7 @@
     {
       "ChildId": "67937f52-c521-4fad-9007-fd28d6814c8b"/*_MeshBufferComponents*/,
       "Position": {
-        "X": 695.7166,
+        "X": 685.7166,
         "Y": 4113.189
       }
     },
@@ -233,8 +233,8 @@
     {
       "ChildId": "abeee841-af57-467e-a1e3-8d4684dd3606"/*BlendColors*/,
       "Position": {
-        "X": 872.82056,
-        "Y": 3990.1543
+        "X": 1046.0605,
+        "Y": 3961.7544
       }
     },
     {

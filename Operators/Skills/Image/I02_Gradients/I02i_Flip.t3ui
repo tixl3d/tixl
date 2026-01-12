@@ -1,0 +1,78 @@
+{
+  "Id": "680bb1ae-d906-48cc-adbd-240e0df0497d"/*I02i_Flip*/,
+  "Description": "LinearGradient: Flip with Negative Width",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "11db15df-98fd-4b58-b6d4-7b0d3de9d223"/*ImageQuiz*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2018.4391
+      }
+    },
+    {
+      "ChildId": "8c09cc9f-ed7b-4cd2-a3de-176d84b0c5b5"/*LinearGradient*/,
+      "AnnotationId": "606c89c3-3cd5-4883-8da9-101ee8d767f0",
+      "Position": {
+        "X": 1441.7301,
+        "Y": 2334.827
+      }
+    },
+    {
+      "ChildId": "90d3cc1c-7a99-4c15-8edb-1eaf50331a20"/*LinearGradient*/,
+      "Position": {
+        "X": 1306.5621,
+        "Y": 1987.0873
+      }
+    },
+    {
+      "ChildId": "c64506bf-8350-4f42-b06b-20d7eb4568e4"/*LinearGradient*/,
+      "AnnotationId": "076a333f-5467-47a0-89ed-ca4030edd244",
+      "Position": {
+        "X": 1306.5621,
+        "Y": 2097.3557
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "e4ccc1b5-e160-43e9-84c3-990ae64c4fa1"/*ColorBuffer*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2088.439
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "076a333f-5467-47a0-89ed-ca4030edd244",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1120.0,
+        "Y": 2054.7593
+      },
+      "Size": {
+        "X": 350.0,
+        "Y": 150.24072
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "51d95472-df44-414f-a223-9969b2cd5a6f",
+      "Description": "You can flip a gradient without touching any color steps by using a negative Width value."
+    },
+    {
+      "Id": "00c6c80f-9df6-4ee9-aa78-d380ee08a0ca",
+      "Description": "Solve the challenge without changing any of the gradient's color steps.",
+      "Style": "CallToAction"
+    }
+  ]
+}

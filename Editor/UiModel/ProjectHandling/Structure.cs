@@ -184,12 +184,12 @@ internal sealed class Structure
         }
     }
 
-    internal static HashSet<Guid> CollectConnectedChildren(Symbol.Child child, Instance composition, HashSet<Guid>? set = null)
+    internal static HashSet<Guid> CollectConnectedChildren(Symbol.Child child, Symbol compositionSymbol, HashSet<Guid>? set = null)
     {
         set ??= [];
 
         set.Add(child.Id);
-        var compositionSymbol = composition.Symbol;
+        //var compositionSymbol = composition.Symbol;
         var connectedChildren = (from con in compositionSymbol.Connections
                                  where !con.IsConnectedToSymbolInput && !con.IsConnectedToSymbolOutput
                                  from sourceChild in compositionSymbol.Children.Values
@@ -200,12 +200,70 @@ internal sealed class Structure
         foreach (var connectedChild in connectedChildren)
         {
             set.Add(connectedChild.Id);
-            CollectConnectedChildren(connectedChild, composition, set);
+            CollectConnectedChildren(connectedChild, compositionSymbol, set);
         }
 
         return set;
     }
+    
+    internal static HashSet<Guid> CollectConnectedChildrenOut(Symbol.Child child, Symbol compositionSymbol, HashSet<Guid>? set = null)
+    {
+        set ??= [];
+        
+        set.Add(child.Id);
+        var connectedChildren = (from con in compositionSymbol.Connections
+                                 where !con.IsConnectedToSymbolInput && !con.IsConnectedToSymbolOutput
+                                 from targetChild in compositionSymbol.Children.Values
+                                 where (con.SourceParentOrChildId == child.Id
+                                       && con.TargetParentOrChildId ==targetChild.Id ) 
+                                 select targetChild).Distinct();
 
+        foreach (var connectedChild in connectedChildren)
+        {
+            set.Add(connectedChild.Id);
+            CollectConnectedChildrenOut(connectedChild, compositionSymbol, set);
+        }
+
+        return set;
+    }
+    
+    internal static void CollectConnectedChildIds(Symbol compositionSymbol, List<Symbol.Child> selectedChildren, HashSet<Guid>? connectedIds)
+    {
+        connectedIds ??= [];
+
+        var selection = new HashSet<Symbol.Child>(selectedChildren);
+        
+        foreach (var selected in selectedChildren)
+        {
+            connectedIds.Add(selected.Id);
+        }
+        
+        var lastCount = connectedIds.Count;
+        
+        while(true)
+        {
+            foreach (var item in selection)
+            {
+                CollectConnectedChildren(item, compositionSymbol,  connectedIds);
+                CollectConnectedChildrenOut(item, compositionSymbol,  connectedIds);
+            }
+
+            if (connectedIds.Count == lastCount)
+                break;
+
+            foreach (var newId in connectedIds)
+            {
+                if(compositionSymbol.Children.TryGetValue(newId, out var item))
+                {
+                    selection.Add(item);
+                }
+            }
+            
+            lastCount = connectedIds.Count;
+        } 
+    }
+    
+    
     /// <summary>
     /// Scan all slots required for updating a Slot.
     /// This can be used for invalidation and cycle checking. 

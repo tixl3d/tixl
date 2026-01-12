@@ -1,5 +1,6 @@
 ﻿#nullable enable
 
+using System.Diagnostics.CodeAnalysis;
 using ImGuiNET;
 using T3.Core.SystemUi;
 using T3.Editor.Gui.Window;
@@ -16,7 +17,7 @@ internal static class ProjectsPanel
     public static void Draw(GraphWindow window)
     {
         var heightForSkillQuest = UserSettings.Config.ShowSkillQuestInHub ? SkillQuestPanel.Height + 10 : 0;
-        
+
         ContentPanel.Begin("Projects", null, DrawProjectTools, -heightForSkillQuest);
 
         FormInputs.AddVerticalSpace(20);
@@ -40,11 +41,11 @@ internal static class ProjectsPanel
     {
         var addProject = "Add Project...";
         var size = CustomComponents.GetCtaButtonSize(addProject);
-        var state = EditableSymbolProject.AllProjects.Any() 
-                        ? CustomComponents.ButtonStates.Dimmed : 
-                        CustomComponents.ButtonStates.Activated;
+        var state = EditableSymbolProject.AllProjects.Any()
+                        ? CustomComponents.ButtonStates.Dimmed
+                        : CustomComponents.ButtonStates.Activated;
         CustomComponents.RightAlign(size.X + 10 * T3Ui.UiScaleFactor);
-        if(CustomComponents.DrawCtaButton(addProject, Icon.None, state))
+        if (CustomComponents.DrawCtaButton(addProject, Icon.None, state))
         {
             T3Ui.NewProjectDialog.ShowNextFrame();
         }

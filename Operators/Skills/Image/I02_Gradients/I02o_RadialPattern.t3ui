@@ -1,0 +1,108 @@
+{
+  "Id": "58c70018-0764-43c3-8bc5-c7257c6dc5ba"/*I02o_RadialPattern*/,
+  "Description": "RadialGradient: Invert Pattern",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "2d3a8c46-47e0-4894-8571-d81772268262"/*RadialGradient*/,
+      "Position": {
+        "X": 1391.3212,
+        "Y": 1853.3733
+      }
+    },
+    {
+      "ChildId": "3384e813-39d4-4e0d-90ee-1950d3052c9c"/*LinearGradient*/,
+      "AnnotationId": "606c89c3-3cd5-4883-8da9-101ee8d767f0",
+      "Position": {
+        "X": 1441.7301,
+        "Y": 2334.827
+      }
+    },
+    {
+      "ChildId": "49f7b21b-4bc2-443e-b655-6eefe2b81cb5"/*RadialGradient*/,
+      "AnnotationId": "fe704489-0653-47fc-a168-df57af376b90",
+      "Position": {
+        "X": 1403.9335,
+        "Y": 2147.1628
+      }
+    },
+    {
+      "ChildId": "5fab7495-e9d1-4c08-ae70-b21943391798"/*Time*/,
+      "AnnotationId": "fe704489-0653-47fc-a168-df57af376b90",
+      "Position": {
+        "X": 1263.9335,
+        "Y": 2182.1628
+      }
+    },
+    {
+      "ChildId": "a3d65f7c-8e2b-4a22-8c03-6b0aecfd7327"/*ImageQuiz*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2018.4391
+      }
+    },
+    {
+      "ChildId": "a42ff9c4-5a40-4b3f-b07d-a9b077670b38"/*RadialGradient*/,
+      "AnnotationId": "fe704489-0653-47fc-a168-df57af376b90",
+      "Position": {
+        "X": 1403.9335,
+        "Y": 2112.1628
+      }
+    },
+    {
+      "ChildId": "b2b2a6b3-c38b-474a-b71a-9fa73677a229"/*RadialGradient*/,
+      "Position": {
+        "X": 1391.3212,
+        "Y": 1924.3414
+      }
+    },
+    {
+      "ChildId": "c71ae37b-d01b-4555-a332-09fd0b6e943f"/*Time*/,
+      "Position": {
+        "X": 1391.3212,
+        "Y": 1983.5812
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "f6862db7-525f-4b2d-82f8-ae558605ab76"/*ColorBuffer*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2088.439
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "fe704489-0653-47fc-a168-df57af376b90",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1225.0,
+        "Y": 2074.6978
+      },
+      "Size": {
+        "X": 334.7268,
+        "Y": 165.30225
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "79e3c997-0544-4aa6-8909-8f126cf17656",
+      "Description": "The Different blend mode can also combine multiple [RadialGradient] operators into patterns."
+    },
+    {
+      "Id": "b95b101c-244b-4f5f-a82a-02bad37c9dc1",
+      "Description": "Connect and adjust the parameters of the two gradients to recreate the pattern.",
+      "Style": "CallToAction"
+    }
+  ]
+}

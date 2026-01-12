@@ -1,0 +1,177 @@
+{
+  "Id": "2be3d25a-777f-4464-a8c7-351d9e38c30d"/*TimeDisplace*/,
+  "Description": "Uses a texture array history buffer to displace in time.",
+  "InputUis": [
+    {
+      "InputId": "10927384-3f0f-4411-ac00-08e15f047a97"/*Displacement*/,
+      "Position": {
+        "X": 24.449814,
+        "Y": 506.89072
+      },
+      "GroupTitle": "Amount",
+      "Scale": 0.01
+    },
+    {
+      "InputId": "2172181c-64cb-4fa7-be4e-b4c40e2b1fad"/*DisplaceMapOffset*/,
+      "Position": {
+        "X": -115.55017,
+        "Y": 646.89075
+      },
+      "AddPadding": "True",
+      "Min": -2.0,
+      "Max": 2.0,
+      "Scale": 0.04
+    },
+    {
+      "InputId": "222e760e-4f44-4abf-bd4f-6a8510ddf82d"/*DisplacementOffset*/,
+      "Position": {
+        "X": 24.449814,
+        "Y": 541.8907
+      },
+      "Scale": 0.01
+    },
+    {
+      "InputId": "24228c12-5be7-48a6-8989-e76b4bce6594"/*Twist*/,
+      "Position": {
+        "X": 24.449814,
+        "Y": 576.89075
+      },
+      "Min": -180.0,
+      "Max": 180.0,
+      "Scale": 3.6,
+      "Format": "{0:0.0}°"
+    },
+    {
+      "InputId": "43259a11-5da7-402d-a5cf-1fcac3ce5d36"/*GenerateMips*/,
+      "Position": {
+        "X": 24.44983,
+        "Y": 786.89075
+      },
+      "GroupTitle": "Quality"
+    },
+    {
+      "InputId": "67ff9326-ea4a-4cd1-80eb-8bd490cf8938"/*DisplaceMode*/,
+      "Position": {
+        "X": 24.44983,
+        "Y": 821.89075
+      },
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "6bd85d4b-62ef-4f62-95ac-2d5136997e7e"/*Image*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -403.44543,
+        "Y": 206.18222
+      }
+    },
+    {
+      "InputId": "700a8d59-3efd-4a60-980e-be68c9702d96"/*RGSS_4xAA*/,
+      "Position": {
+        "X": -115.55017,
+        "Y": 856.89075
+      }
+    },
+    {
+      "InputId": "8e656ce6-3eb0-4dc4-bfdf-b278b9e27ff3"/*TextureFiltering*/,
+      "Position": {
+        "X": 336.81305,
+        "Y": 991.10223
+      }
+    },
+    {
+      "InputId": "bba49085-dc3b-482e-8e34-07ce49184235"/*SampleRadius*/,
+      "Position": {
+        "X": 24.44983,
+        "Y": 716.89075
+      },
+      "GroupTitle": "Sampling",
+      "Scale": 0.01
+    },
+    {
+      "InputId": "d0a62af1-75b9-4cc6-8ed7-69169c74c183"/*DisplaceMap*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 24.449814,
+        "Y": 471.89072
+      }
+    },
+    {
+      "InputId": "de5a6566-d625-4315-bda6-498ba14110a1"/*Shade*/,
+      "Position": {
+        "X": 24.449814,
+        "Y": 611.8907
+      },
+      "Description": "Darkens the effect",
+      "Scale": 0.01
+    },
+    {
+      "InputId": "e65f6f8e-293a-403d-8824-75d9040265ef"/*WrapMode*/,
+      "Position": {
+        "X": 336.81305,
+        "Y": 781.10223
+      },
+      "Description": "Defines if and how the image is repeated at its edge"
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "05deb986-9457-4955-a38a-fa3c5499ae5d"/*AddInts*/,
+      "Position": {
+        "X": -33.69113,
+        "Y": 5.4014893
+      }
+    },
+    {
+      "ChildId": "4e7a3c24-1213-46f9-81b3-9ac6468a0557"/*CountInt*/,
+      "Position": {
+        "X": -278.2097,
+        "Y": -112.86218
+      }
+    },
+    {
+      "ChildId": "5958d05e-ebd2-427f-ad13-8ee8c3ad6dcf"/*ArrayLength*/,
+      "Position": {
+        "X": -168.64362,
+        "Y": 81.37433
+      }
+    },
+    {
+      "ChildId": "62a94a5f-ecd7-4e1f-a41f-c1dbbaf3b6bd"/*Vector2Components*/,
+      "Position": {
+        "X": 24.44983,
+        "Y": 646.89075
+      }
+    },
+    {
+      "ChildId": "a24955de-83e4-4812-8d91-442735fa20df"/*KeepInTextureArray*/,
+      "Position": {
+        "X": 170.2991,
+        "Y": -141.48132
+      }
+    },
+    {
+      "ChildId": "c4b6cf1a-a590-4a56-b4f5-11b9a9a37c04"/*BoolToInt*/,
+      "Position": {
+        "X": 24.44983,
+        "Y": 856.89075
+      }
+    },
+    {
+      "ChildId": "c764db7a-b751-4825-8731-19ae5346092d"/*_multiImageFxSetupStatic*/,
+      "Position": {
+        "X": 476.81305,
+        "Y": 396.10223
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "60e4f8cd-08a1-40af-b98d-a6edfe3b63d7"/*Output*/,
+      "Position": {
+        "X": 476.81305,
+        "Y": 1026.1023
+      }
+    }
+  ]
+}

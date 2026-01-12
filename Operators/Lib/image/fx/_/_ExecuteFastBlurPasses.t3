@@ -1,0 +1,64 @@
+{
+  "Id": "46ce6fad-87fe-4d1f-b236-ae644dd1f76c"/*_ExecuteFastBlurPasses*/,
+  "Inputs": [
+    {
+      "Id": "08c47369-295b-4638-0ae8-4967e54cf638"/*DownsamplePS*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "2ae6958b-4b7d-485a-2c0a-6b89076e185a"/*UpsampleAccumulatePS*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "5d19c8be-7ea0-4b8d-5f3d-9ebb3a914b8d"/*LinearSampler*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "692bc2f0-68f2-45ca-a0fb-cd1c5d08e982"/*SourceTexture*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "7e7a95c8-8e2b-48e3-9e3d-eb1b9f0c40d4"/*Intensity*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "7f79b69a-5dd8-4c49-9b60-2a2d4c2b5a0f"/*Steps*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "98e88d02-3b78-403c-b9c9-b5ecf8565acd"/*SourceTextureSrv*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "ac1a30d9-0d79-4e7e-9b1d-84f4f129a8c1"/*Spread*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "b2c6b5b7-36a3-4d0e-9a05-1e1d0c0e7a11"/*BlurPS*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "d20d7e44-db1b-48a2-8a14-1d02c6a0a0f7"/*BlurRadiusPx*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "d5914036-f628-4305-d7b5-1634b219c305"/*Clamp*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "e5548715-1cae-4792-9e6e-8f9d8daa9edf"/*TintGradient*/,
+      "DefaultValue": {
+        "Gradient": {
+          "Interpolation": "Linear",
+          "Steps": []
+        }
+      }
+    },
+    {
+      "Id": "e6a25147-0739-4416-e8c6-2745c32ad416"/*FullscreenVS*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}
