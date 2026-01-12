@@ -25,7 +25,7 @@ internal sealed class UdpInput : Instance<UdpInput>, IStatusProvider, ICustomDro
     public readonly InputSlot<int> ListLength = new(10);
 
     [Input(Guid = "9E23335A-D63A-4286-930E-C63E86D0E6F0")]
-    public readonly InputSlot<string> LocalIpAddress = new("0.0.0.0 (Any)");
+    public readonly InputSlot<string> LocalIpAddress = new("0.0.0.0");
 
     [Input(Guid = "2EBE418D-407E-46D8-B274-13B41C52ACCF")]
     public readonly InputSlot<int> Port = new(7000);
@@ -44,7 +44,7 @@ internal sealed class UdpInput : Instance<UdpInput>, IStatusProvider, ICustomDro
 
     private string? _lastLocalIp;
     private int _lastPort;
-    private bool _printToLog; // ONLY ONE DECLARATION OF _printToLog
+    private bool _printToLog;
 
     private bool _wasListening;
 
@@ -218,7 +218,6 @@ internal sealed class UdpInput : Instance<UdpInput>, IStatusProvider, ICustomDro
 
     private volatile bool _runListener;
 
-    // REMOVED DUPLICATE: private bool _printToLog; 
     private readonly ConcurrentQueue<ReceivedMessage> _receivedQueue = new();
     private readonly List<string> _messageHistory = new();
 
@@ -245,31 +244,53 @@ internal sealed class UdpInput : Instance<UdpInput>, IStatusProvider, ICustomDro
 
     public IStatusProvider.StatusLevel GetStatusLevel() => _lastStatusLevel;
     public string? GetStatusMessage() => _lastErrorMessage;
+    
+    #region Network Interface Logic
+    private static List<NetworkAdapterInfo> _networkInterfaces = new();
+
+    private static List<NetworkAdapterInfo> GetNetworkInterfaces()
+    {
+        var list = new List<NetworkAdapterInfo>();
+        list.Add(new NetworkAdapterInfo(IPAddress.Any, IPAddress.Any, "Any"));
+        list.Add(new NetworkAdapterInfo(IPAddress.Loopback, IPAddress.Parse("255.0.0.0"), "Localhost"));
+        
+        try
+        {
+            list.AddRange(from ni in NetworkInterface.GetAllNetworkInterfaces()
+                          where ni.OperationalStatus == OperationalStatus.Up && ni.NetworkInterfaceType != NetworkInterfaceType.Loopback
+                          from ip in ni.GetIPProperties().UnicastAddresses
+                          where ip.Address.AddressFamily == AddressFamily.InterNetwork
+                          select new NetworkAdapterInfo(ip.Address, ip.IPv4Mask, ni.Name));
+        }
+        catch (Exception e)
+        {
+            Log.Warning("Could not enumerate network interfaces: " + e.Message);
+        }
+        return list;
+    }
+
+    private sealed record NetworkAdapterInfo(IPAddress IpAddress, IPAddress SubnetMask, string Name)
+    {
+        public string DisplayName => $"{Name}: {IpAddress}";
+    }
+    #endregion
+
     string ICustomDropdownHolder.GetValueForInput(Guid id) => id == LocalIpAddress.Id ? LocalIpAddress.Value : string.Empty;
 
     IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid id)
     {
-        return id == LocalIpAddress.Id ? GetLocalIPv4Addresses() : Empty<string>();
+        if (id == LocalIpAddress.Id)
+        {
+            _networkInterfaces = GetNetworkInterfaces();
+            foreach (var adapter in _networkInterfaces) yield return adapter.DisplayName;
+        }
     }
 
     void ICustomDropdownHolder.HandleResultForInput(Guid id, string? s, bool i)
     {
         if (string.IsNullOrEmpty(s) || !i || id != LocalIpAddress.Id) return;
-        LocalIpAddress.SetTypedInputValue(s.Split(' ')[0]);
-    }
-
-    private static IEnumerable<string> GetLocalIPv4Addresses()
-    {
-        yield return "0.0.0.0 (Any)";
-        yield return "127.0.0.1";
-        if (!NetworkInterface.GetIsNetworkAvailable()) yield break;
-        foreach (var ni in NetworkInterface.GetAllNetworkInterfaces())
-        {
-            if (ni.OperationalStatus != OperationalStatus.Up || ni.NetworkInterfaceType == NetworkInterfaceType.Loopback) continue;
-            foreach (var ipInfo in ni.GetIPProperties().UnicastAddresses)
-                if (ipInfo.Address.AddressFamily == AddressFamily.InterNetwork)
-                    yield return ipInfo.Address.ToString();
-        }
+        var foundAdapter = _networkInterfaces.FirstOrDefault(adapter => adapter.DisplayName == s);
+        if (foundAdapter != null) LocalIpAddress.SetTypedInputValue(foundAdapter.IpAddress.ToString());
     }
     #endregion
 }

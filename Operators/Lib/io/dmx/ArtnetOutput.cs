@@ -32,7 +32,7 @@ internal sealed class ArtnetOutput : Instance<ArtnetOutput>, IStatusProvider, IC
 
     // --- Discovery (ArtPoll) Resources ---
     private Timer? _artPollTimer;
-    private bool _connected;
+    private volatile bool _connected;
     private List<(int universe, byte[] data)>? _dmxDataToSend;
     private volatile bool _isPolling;
     private string? _lastErrorMessage;
@@ -251,28 +251,31 @@ internal sealed class ArtnetOutput : Instance<ArtnetOutput>, IStatusProvider, IC
                 nextFrameTimeTicks += (long)(Stopwatch.Frequency / (double)maxFpsCopy);
             }
 
-            // --- Send Data (Lock socket access to prevent race conditions with reconnection) ---
+            // --- Send Data ---
+            Socket? currentSocket;
+            IPEndPoint? targetEndPoint;
+
             lock (_connectionSettings)
             {
-                var currentSocket = _socket;
-                var targetEndPoint = _connectionSettings.TargetEndPoint;
+                currentSocket = _socket;
+                targetEndPoint = _connectionSettings.TargetEndPoint;
+            }
 
-                if (currentSocket == null || !_connected || targetEndPoint == null)
+            if (currentSocket == null || !_connected || targetEndPoint == null)
+            {
+                // Sleep briefly to prevent a tight busy-loop if disconnected
+                Thread.Sleep(100);
+                continue;
+            }
+
+            if (syncCopy) SendArtSync(currentSocket, targetEndPoint);
+
+            if (dataCopy != null)
+            {
+                foreach (var (universe, data) in dataCopy)
                 {
-                    // Sleep briefly to prevent a tight busy-loop if disconnected
-                    Thread.Sleep(100);
-                    continue;
-                }
-
-                if (syncCopy) SendArtSync(currentSocket, targetEndPoint);
-
-                if (dataCopy != null)
-                {
-                    foreach (var (universe, data) in dataCopy)
-                    {
-                        if (token.IsCancellationRequested) break;
-                        SendDmxPacket(currentSocket, targetEndPoint, universe, data, sequenceNumber);
-                    }
+                    if (token.IsCancellationRequested) break;
+                    SendDmxPacket(currentSocket, targetEndPoint, universe, data, sequenceNumber);
                 }
             }
 
@@ -478,6 +481,15 @@ internal sealed class ArtnetOutput : Instance<ArtnetOutput>, IStatusProvider, IC
                               };
                 _socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Broadcast, true);
                 _socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                
+                try
+                {
+                    // Disable SIO_UDP_CONNRESET (WSAECONNRESET) to prevent socket death on ICMP Port Unreachable
+                    const int SIO_UDP_CONNRESET = -1744830452;
+                    _socket.IOControl(SIO_UDP_CONNRESET, new byte[] { 0 }, null);
+                }
+                catch { /* Ignore on platforms where not supported */ }
+
                 _socket.Bind(new IPEndPoint(localIp, ArtNetPort));
                 _lastErrorMessage = null;
                 if (_printToLog) Log.Debug($"Artnet Output: Socket bound to {localIp}:{ArtNetPort}.", this);

@@ -62,13 +62,19 @@ internal sealed class UdpOutput : Instance<UdpOutput>, IStatusProvider, ICustomD
 
     IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid id)
     {
-        return id == LocalIpAddress.Id ? GetLocalIPv4Addresses() : Empty<string>();
+        if (id == LocalIpAddress.Id)
+        {
+            _networkInterfaces = GetNetworkInterfaces();
+            foreach (var adapter in _networkInterfaces) yield return adapter.DisplayName;
+        }
+        Enumerable.Empty<string>();
     }
 
     void ICustomDropdownHolder.HandleResultForInput(Guid id, string? s, bool i)
     {
         if (string.IsNullOrEmpty(s) || !i || id != LocalIpAddress.Id) return;
-        LocalIpAddress.SetTypedInputValue(s.Split(' ')[0]);
+        var foundAdapter = _networkInterfaces.FirstOrDefault(adapter => adapter.DisplayName == s);
+        if (foundAdapter != null) LocalIpAddress.SetTypedInputValue(foundAdapter.IpAddress.ToString());
     }
 
     public void Dispose()
@@ -201,16 +207,33 @@ internal sealed class UdpOutput : Instance<UdpOutput>, IStatusProvider, ICustomD
         _lastStatusLevel = l;
     }
 
-    private static IEnumerable<string> GetLocalIPv4Addresses()
+    #region Network Interface Logic
+    private static List<NetworkAdapterInfo> _networkInterfaces = new();
+
+    private static List<NetworkAdapterInfo> GetNetworkInterfaces()
     {
-        yield return "127.0.0.1";
-        if (!NetworkInterface.GetIsNetworkAvailable()) yield break;
-        foreach (var ni in NetworkInterface.GetAllNetworkInterfaces())
+        var list = new List<NetworkAdapterInfo>();
+        list.Add(new NetworkAdapterInfo(IPAddress.Any, IPAddress.Any, "Any"));
+        list.Add(new NetworkAdapterInfo(IPAddress.Loopback, IPAddress.Parse("255.0.0.0"), "Localhost"));
+        
+        try
         {
-            if (ni.OperationalStatus != OperationalStatus.Up || ni.NetworkInterfaceType == NetworkInterfaceType.Loopback) continue;
-            foreach (var ipInfo in ni.GetIPProperties().UnicastAddresses)
-                if (ipInfo.Address.AddressFamily == AddressFamily.InterNetwork)
-                    yield return ipInfo.Address.ToString();
+            list.AddRange(from ni in NetworkInterface.GetAllNetworkInterfaces()
+                          where ni.OperationalStatus == OperationalStatus.Up && ni.NetworkInterfaceType != NetworkInterfaceType.Loopback
+                          from ip in ni.GetIPProperties().UnicastAddresses
+                          where ip.Address.AddressFamily == AddressFamily.InterNetwork
+                          select new NetworkAdapterInfo(ip.Address, ip.IPv4Mask, ni.Name));
         }
+        catch (Exception e)
+        {
+            Log.Warning("Could not enumerate network interfaces: " + e.Message);
+        }
+        return list;
     }
+
+    private sealed record NetworkAdapterInfo(IPAddress IpAddress, IPAddress SubnetMask, string Name)
+    {
+        public string DisplayName => $"{Name}: {IpAddress}";
+    }
+    #endregion
 }
