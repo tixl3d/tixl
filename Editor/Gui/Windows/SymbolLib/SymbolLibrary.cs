@@ -26,15 +26,13 @@ namespace T3.Editor.Gui.Windows.SymbolLib;
 /// </remarks>
 internal sealed class SymbolLibrary : Window
 {
-    // Static field to hold the main instance for static method access
-    private static SymbolLibrary? _staticInstance;
-
     /// <summary>
-    /// Initializes a new instance of the <see cref="SymbolLibrary"/> window, setting up filtering, prompts, and populating the tree.
+    /// Initializes a new instance of the <see cref="SymbolLibrary"/> window.
+    /// Sets up symbol filtering, random prompt generation, and filtering UI logic.
+    /// Also populates the symbol tree with all available symbols.
     /// </summary>
     internal SymbolLibrary()
     {
-        _staticInstance = this;
         _filter.SearchString = "";
         _randomPromptGenerator = new RandomPromptGenerator(_filter);
         _libraryFiltering = new LibraryFiltering(this);
@@ -146,7 +144,7 @@ internal sealed class SymbolLibrary : Window
     /// <summary>
     /// Shows a list of usages for a referenced symbol if the "used by" indicator was clicked.
     /// </summary>
-    private static void DrawUsagesAReferencedSymbol()
+    private void DrawUsagesAReferencedSymbol()
     {
         if (_symbolUsageReferenceFilter == null)
             return;
@@ -172,10 +170,8 @@ internal sealed class SymbolLibrary : Window
                     {
                         if (allSymbols.TryGetValue(id, out var symbol))
                         {
-                            // Use instance if available
-                            var instance = _staticInstance;
-                            if (instance != null)
-                                instance.DrawSymbolItemInternal(symbol);
+                            // Use instance method
+                            this.DrawSymbolItemInstance(symbol);
                         }
                     }
                 }
@@ -192,7 +188,7 @@ internal sealed class SymbolLibrary : Window
         _filter.UpdateIfNecessary(null);
         foreach (var symbolUi in _filter.MatchingSymbolUis)
         {
-            this.DrawSymbolItemInternal(symbolUi.Symbol);
+            this.DrawSymbolItemInstance(symbolUi.Symbol);
         }
     }
 
@@ -378,7 +374,7 @@ internal sealed class SymbolLibrary : Window
         for (var index = 0; index < subtree.Symbols.ToList().Count; index++)
         {
             var symbol = subtree.Symbols.ToList()[index];
-            this.DrawSymbolItemInternal(symbol);
+            this.DrawSymbolItemInstance(symbol);
         }
     }
 
@@ -505,10 +501,28 @@ internal sealed class SymbolLibrary : Window
     private static float Clamp01(double v) => v < 0 ? 0 : v > 1 ? 1 : (float)v;
 
     /// <summary>
-    /// Draws a symbol item in the tree, including highlight, context menu, and dependency badges.
+    /// Static wrapper for drawing a symbol item, used for external static calls.
+    /// </summary>
+    internal static void DrawSymbolItemStatic(Symbol symbol)
+    {
+        // Use WindowManager to get all windows and find the first SymbolLibrary instance
+        var symbolLibraryInstance = T3.Editor.Gui.Windows.Layouts.WindowManager.GetAllWindows().OfType<SymbolLibrary>().FirstOrDefault();
+        symbolLibraryInstance?.DrawSymbolItemInstance(symbol);
+    }
+
+    /// <summary>
+    /// Static method for legacy external calls.
+    /// </summary>
+    internal static void DrawSymbolItem(Symbol symbol)
+    {
+        DrawSymbolItemStatic(symbol);
+    }
+
+    /// <summary>
+    /// Instance method for drawing a symbol item in the tree, including highlight, context menu, and dependency badges.
     /// </summary>
     /// <param name="symbol">The symbol to draw.</param>
-    internal void DrawSymbolItemInternal(Symbol symbol)
+    internal void DrawSymbolItemInstance(Symbol symbol)
     {
         if (!symbol.TryGetSymbolUi(out var symbolUi))
             return;
@@ -808,17 +822,4 @@ internal sealed class SymbolLibrary : Window
 
         return false;
     }
-
-    /// <summary>
-    /// Static wrapper for drawing a symbol item, used for external static calls.
-    /// </summary>
-    internal static void DrawSymbolItem(Symbol symbol)
-    {
-        // Try to get the main SymbolLibrary instance (assume only one is open)
-        // Use a static field to hold the instance
-        if (_staticInstance != null)
-        {
-            _staticInstance.DrawSymbolItemInternal(symbol);
-        }
-    }
-} // End of SymbolLibrary class
+}
