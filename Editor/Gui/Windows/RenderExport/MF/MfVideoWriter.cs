@@ -48,9 +48,9 @@ internal abstract class MfVideoWriter : IDisposable
         if (originalPixelSize.Width != videoPixelSize.Width || originalPixelSize.Height != videoPixelSize.Height)
         {
             // Determine if this is codec rounding (difference of at most 1 pixel per dimension) or user scaling
-            bool isCodecRounding = Math.Abs(originalPixelSize.Width - videoPixelSize.Width) <= 1 && 
+            bool isCodecRounding = Math.Abs(originalPixelSize.Width - videoPixelSize.Width) <= 1 &&
                                    Math.Abs(originalPixelSize.Height - videoPixelSize.Height) <= 1;
-            
+
             if (isCodecRounding)
             {
                 Log.Debug($"Video resolution adjusted for codec compatibility: {originalPixelSize.Width}x{originalPixelSize.Height} -> {videoPixelSize.Width}x{videoPixelSize.Height}");
@@ -122,6 +122,13 @@ internal abstract class MfVideoWriter : IDisposable
                 {
                     Log.Warning($"Skipping frame: resolution mismatch. Expected {_videoPixelSize.Width}x{_videoPixelSize.Height}, got {currentDesc.Width}x{currentDesc.Height}");
                 }
+                return false;
+            }
+            // If the incoming frame is odd and off by one, just skip without logging
+            if (currentDesc.Width != _videoPixelSize.Width || currentDesc.Height != _videoPixelSize.Height)
+            {
+                // No need to log, since this is expected while converting to even resolution
+                //Log.Debug($"Skipping frame: resolution mismatch. Expected {_videoPixelSize.Width}x{_videoPixelSize.Height}, got {currentDesc.Width}x{currentDesc.Height}");
                 return false;
             }
 
@@ -426,7 +433,6 @@ internal abstract class MfVideoWriter : IDisposable
             }
         }
     }
-
 
     #region Resources for MediaFoundation video rendering
     private Sample _lastSample;
