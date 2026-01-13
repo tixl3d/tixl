@@ -16,15 +16,15 @@ namespace Lib.io.video
 
         [Input(Guid = "9A240243-71B5-4235-86A9-D5369A3311A9")]
         public readonly InputSlot<bool> Reconnect = new();
+        
+        [Output(Guid = "2E7E2404-5881-4327-9653-CA9533B856A9", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
+        public readonly Slot<Texture2D?> Texture = new();
 
         [Output(Guid = "3F6A960C-906A-4073-A338-ABB785869062", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
         public readonly Slot<Int2> Resolution = new();
 
         [Output(Guid = "B0E4313B-A746-4444-934E-14285D42DADB", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
         public new readonly Slot<string> Status = new();
-
-        [Output(Guid = "2E7E2404-5881-4327-9653-CA9533B856A9", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
-        public readonly Slot<Texture2D?> Texture = new();
 
         [Input(Guid = "A8B0971B-94CB-4C3D-932D-337581B8D83A")]
         public readonly InputSlot<string> Url = new("rtsp://your_stream_url");
