@@ -1,0 +1,169 @@
+{
+  "Id": "a1b2c3d4-e5f6-4798-89ab-cdef12345683"/*GestureRecognition*/,
+  "Description": "Recognizes hand gestures in an image using MediaPipe Gesture Recognition.\n\nThis operator uses MediaPipe Gesture Recognition task to detect hands and recognize gestures (e.g., \"Thumb_Up\", \"Victory\", \"Closed_Fist\") in the input image. It outputs the recognized gesture name and confidence score.\n\nInputs:\n- InputTexture: The image to process.\n- Enabled: Enables or disables gesture recognition.\n- MaxHands: Maximum number of hands to detect.\n- MinHandDetectionConfidence: Minimum confidence score for hand detection to be considered successful.\n- MinHandPresenceConfidence: Minimum confidence score for hand presence to be considered successful.\n- UseCombinedAIOutput: Whether to generate unified AI texture outputs.\n- Debug: Enables debug visualization with debug texture output.\n- CategoryAllowlist: Comma-separated list of category names to allow (e.g. \"Thumb_Up\").\n- CategoryDenylist: Comma-separated list of category names to deny (e.g. \"Thumb_Up\").\n- CorrectAspectRatio: Whether to correct aspect ratio for non-square inputs.\n- ZScale: Scale factor for Z coordinate of points.\n\nOutputs:\n- OutputTexture: The input texture (passed through).\n- DebugTexture: Debug visualization texture showing hand landmarks and connections when Debug is enabled.\n- RecognizedGestures: A list of recognized gesture names (e.g., \"Thumb_Up\").\n- PrimaryGesture: The name of the primary recognized gesture.\n- Confidence: The confidence score of the recognized gesture.\n- HandCount: The number of hands detected.\n- UpdateCount: Increments each time a new frame is processed.\n- Handedness: A list of handedness (Left/Right) for detected hands.\n- WorldLandmarksBuffer: A structured buffer containing points for detected hand landmarks in world coordinates.\n- PointBuffer: A structured buffer containing points for visualization.",
+  "InputUis": [
+    {
+      "InputId": "04b5c6d7-e8f9-70a1-23b4-567890123456"/*CategoryDenylist*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 600.0
+      },
+      "Description": "Comma-separated list of category names to deny (e.g. \"Thumb_Up\").",
+      "Usage": "Default"
+    },
+    {
+      "InputId": "15c6d7e8-f9a0-81b2-34d5-678901234567"/*CorrectAspectRatio*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 675.0
+      },
+      "Description": "Whether to correct aspect ratio for non-square inputs."
+    },
+    {
+      "InputId": "a1b2c3d4-e5f6-4798-89ab-cdef12345693"/*Debug*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 450.0
+      },
+      "Description": "Enables debug visualization with debug texture output showing hand landmarks and connections."
+    },
+    {
+      "InputId": "a7b8c9d0-e1f2-4d23-e05b-345678901240"/*InputTexture*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "The image to process."
+    },
+    {
+      "InputId": "b6d7e8f9-0ab1-92c3-45e6-789012345678"/*ZScale*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 750.0
+      },
+      "Description": "Scale factor for Z coordinate of points."
+    },
+    {
+      "InputId": "b8c9d0e1-f2a3-4e34-f16c-456789012341"/*Enabled*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      },
+      "Description": "Enables or disables gesture recognition."
+    },
+    {
+      "InputId": "c9d0e1f2-a3b4-4f45-a27d-567890123452"/*MaxHands*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      },
+      "Description": "Maximum number of hands to detect."
+    },
+    {
+      "InputId": "d0e1f2a3-b4c5-4056-b38e-678901234562"/*MinHandDetectionConfidence*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      },
+      "Description": "Minimum confidence score for hand detection to be considered successful."
+    },
+    {
+      "InputId": "e1f2a3b4-c5d6-4167-c49f-789012345673"/*MinHandPresenceConfidence*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 300.0
+      },
+      "Description": "Minimum confidence score for hand presence to be considered successful."
+    },
+    {
+      "InputId": "e2f3a4b5-c6d7-58e9-f0a1-234567890bd2"/*UseCombinedAIOutput*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 375.0
+      },
+      "Description": "Whether to generate unified AI texture outputs."
+    },
+    {
+      "InputId": "f3a4b5c6-d7e8-69f0-12a3-456789012345"/*CategoryAllowlist*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 525.0
+      },
+      "Description": "Comma-separated list of category names to allow (e.g. \"Thumb_Up\").",
+      "Usage": "Default"
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "b2c3d4e5-f6a7-489a-9b0c-def123456784"/*OutputTexture*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    },
+    {
+      "OutputId": "b2c3d4e5-f6a7-489a-9b0c-def123456794"/*DebugTexture*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 300.0
+      }
+    },
+    {
+      "OutputId": "c3d4e5f6-a7b8-49ab-ac1d-ef1234567895"/*RecognizedGestures*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 400.0
+      }
+    },
+    {
+      "OutputId": "4b1c2d3e-5f6a-7b8c-9d0e-1f2a3b4c5d6e"/*PrimaryGesture*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 500.0
+      }
+    },
+    {
+      "OutputId": "d4e5f6a7-b8c9-4ab0-bd2e-f12345678906"/*Confidence*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 600.0
+      }
+    },
+    {
+      "OutputId": "e5f6a7b8-c9d0-4b01-ce3f-1234a5678907"/*HandCount*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 700.0
+      }
+    },
+    {
+      "OutputId": "f6a7b8c9-d0e1-4c12-df4a-234567a89008"/*UpdateCount*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 800.0
+      }
+    },
+    {
+      "OutputId": "07b8c9d0-e1f2-4d23-e05b-345678901239"/*Handedness*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 900.0
+      }
+    },
+    {
+      "OutputId": "29d0e1f2-a3b4-4f45-a27d-567890123451"/*WorldLandmarksBuffer*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 1000.0
+      }
+    },
+    {
+      "OutputId": "3a0e1f2a-3b4c-5d6e-7f89-012345678902"/*PointBuffer*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 1100.0
+      }
+    }
+  ]
+}

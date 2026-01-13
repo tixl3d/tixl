@@ -1,0 +1,171 @@
+{
+  "Id": "9b2c3d4e-5f6a-4798-89ab-cdef12345678"/*FaceLandmarkDetection*/,
+  "Description": "Detects face landmarks in an image using MediaPipe Face Mesh.\n\nThis operator uses the MediaPipe Face Mesh task to detect faces and their landmarks (468 or 478 points per face) in the input image. It outputs the detected landmarks as a buffer of points and a dictionary of face data.\n\nInputs:\n- InputTexture: The image to process.\n- EnableDetection: Enables or disables face detection.\n- MaxFaces: Maximum number of faces to detect.\n- ShowLandmarks: Whether to include landmark points in the output buffer.\n- LandmarkSize: Size of the landmark points in the output buffer.\n- LandmarkColor: Color of the landmark points.\n- LandmarkScale: Scale factor for the landmark positions (useful for 3D visualization).\n- NormalizeLandmarks: Whether to normalize landmark coordinates to [0, 1] range.\n- MinFaceDetectionConfidence: Minimum confidence score for face detection to be considered successful.\n- MinFacePresenceConfidence: Minimum confidence score for face presence.\n- MinTrackingConfidence: Minimum confidence score for face tracking.\n- Debug: Enables debug logging.\n\nOutputs:\n- OutputTexture: The input texture (passed through).\n- PointBuffer: A structured buffer containing points for detected face landmarks.\n- FaceData: A dictionary containing detailed data for each detected face (landmark positions, blendshapes, transformation matrices).\n- FaceCount: The number of faces detected.",
+  "InputUis": [
+    {
+      "InputId": "01234567-890a-bcde-f012-34567890abcd"/*ZScale*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1050.0
+      },
+      "Description": "Z Scale."
+    },
+    {
+      "InputId": "0abcdef1-2345-6789-0abc-def123456789"/*MinTrackingConfidence*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 750.0
+      },
+      "Description": "Minimum confidence score for face tracking."
+    },
+    {
+      "InputId": "23456789-0abc-def1-2345-67890abcdef1"/*MinFaceDetectionConfidence*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 600.0
+      },
+      "Description": "Minimum confidence score for face detection to be considered successful."
+    },
+    {
+      "InputId": "34567890-abcd-ef12-3456-7890abcdef12"/*LandmarkSize*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 300.0
+      },
+      "Description": "Size of the landmark points in the output buffer."
+    },
+    {
+      "InputId": "4567890a-bcde-f123-4567-890abcdef123"/*Debug*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 825.0
+      },
+      "Description": "Enables debug logging."
+    },
+    {
+      "InputId": "567890ab-cdef-1234-5678-90abcdef1234"/*MaxFaces*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      },
+      "Description": "Maximum number of faces to detect."
+    },
+    {
+      "InputId": "67890abc-def1-2345-6789-0abcdef12345"/*MinFacePresenceConfidence*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 675.0
+      },
+      "Description": "Minimum confidence score for face presence."
+    },
+    {
+      "InputId": "7890abcd-ef12-3456-7890-abcdef123456"/*LandmarkColor*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 375.0
+      },
+      "Description": "Color of the landmark points."
+    },
+    {
+      "InputId": "890abcde-f123-4567-890a-bcdef1234567"/*UseCombinedAIOutput*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 900.0
+      },
+      "Description": "Use combined AI output."
+    },
+    {
+      "InputId": "90abcdef-1234-5678-90ab-cdef12345678"/*InputTexture*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "The image to process."
+    },
+    {
+      "InputId": "abcdef12-3456-7890-abcd-ef1234567890"/*Enabled*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      },
+      "Description": "Enables or disables face detection."
+    },
+    {
+      "InputId": "bcdef123-4567-890a-bcde-f1234567890a"/*LandmarkScale*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 450.0
+      },
+      "Description": "Scale factor for the landmark positions (useful for 3D visualization)."
+    },
+    {
+      "InputId": "cdef0123-4567-890a-bcde-f01234567890"/*CorrectAspectRatio*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 975.0
+      },
+      "Description": "Correct aspect ratio."
+    },
+    {
+      "InputId": "cdef1234-5678-90ab-cdef-1234567890ab"/*ShowLandmarks*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      },
+      "Description": "Whether to include landmark points in the output buffer."
+    },
+    {
+      "InputId": "f1234567-890a-bcde-f123-4567890abcde"/*NormalizeLandmarks*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 525.0
+      },
+      "Description": "Whether to normalize landmark coordinates to [0, 1] range."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "a1b2c3d4-e5f6-4798-89ab-cdef12345679"/*OutputTexture*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    },
+    {
+      "OutputId": "b2c3d4e5-f6a7-489a-9b0c-def123456780"/*FaceData*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 300.0
+      }
+    },
+    {
+      "OutputId": "c3d4e5f6-a7b8-49ab-ac1d-ef1234567891"/*FaceCount*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 400.0
+      }
+    },
+    {
+      "OutputId": "d4e5f6a7-b8c9-4ab0-bd2e-f12345678902"/*DebugTexture*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 500.0
+      }
+    },
+    {
+      "OutputId": "e5f6a7b8-c9d0-4b01-ce3f-123456789013"/*PointBuffer*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 600.0
+      }
+    },
+    {
+      "OutputId": "f6a7b8c9-d0e1-4c12-df4a-234567a89014"/*Blendshapes*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 700.0
+      }
+    }
+  ]
+}

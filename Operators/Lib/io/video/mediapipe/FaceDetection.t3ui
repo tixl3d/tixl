@@ -1,0 +1,161 @@
+{
+  "Id": "a1b2c3d4-e5f6-4798-89ab-cdef12345679"/*FaceDetection*/,
+  "Description": "Detects faces in an image using MediaPipe Face Detection.\n\nThis operator uses MediaPipe Face Detection task to detect faces in input image. It outputs detected faces as a buffer of points (bounding box corners and keypoints) and a dictionary of face data.\n\nInputs:\n- InputTexture: The image to process.\n- EnableDetection: Enables or disables face detection.\n- ConfidenceThreshold: Minimum confidence score for a face to be detected.\n- MaxFaces: Maximum number of faces to detect.\n- ShowDetections: Whether to include bounding box points in the output buffer.\n- ShowKeypoints: Whether to include keypoints (eyes, nose, mouth, ears) in the output buffer.\n- DetectionSize: Size of points in the output buffer.\n- DetectionColor: Color of bounding box points.\n- KeypointColor: Color of keypoint points.\n- UseCombinedAIOutput: Whether to generate unified AI texture outputs.\n- Debug: Enables debug logging and debug texture output.\n- CorrectAspectRatio: Whether to correct aspect ratio for non-square inputs.\n- ZScale: Scale factor for Z coordinate of points.\n\nOutputs:\n- OutputTexture: The input texture (passed through).\n- DetectionsBuffer: A structured buffer containing points for detected faces.\n- FaceData: A dictionary containing detailed data for each detected face (bounding box coordinates, keypoint positions, confidence scores).\n- FaceCount: The number of faces detected.\n- UpdateCount: Increments each time a new frame is processed.\n- DebugTexture: A debug visualization texture showing detected faces with bounding boxes and keypoints (only when Debug is enabled).",
+  "InputUis": [
+    {
+      "InputId": "a3b4c5d6-e7f8-4389-e6b1-901234567681"/*DetectionSize*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 450.0
+      },
+      "Description": "Size of points in the output buffer."
+    },
+    {
+      "InputId": "a4b5c6d7-e8f9-60a1-12b3-456789012de5"/*ZScale*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 900.0
+      },
+      "Description": "Scale factor for Z coordinate of points."
+    },
+    {
+      "InputId": "a7b8c9d0-e1f2-4d23-e05b-345678901235"/*InputTexture*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "The image to process."
+    },
+    {
+      "InputId": "b4c5d6e7-f8a9-4490-f7c2-012345678682"/*DetectionColor*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 525.0
+      },
+      "Description": "Color of bounding box points.",
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true
+    },
+    {
+      "InputId": "b8c9d0e1-f2a3-4e34-f16c-456789012346"/*Enabled*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      },
+      "Description": "Enables or disables face detection."
+    },
+    {
+      "InputId": "c5d6e7f8-a9b0-45a1-a8d3-123456789683"/*KeypointColor*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 600.0
+      },
+      "Description": "Color of keypoint points.",
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true
+    },
+    {
+      "InputId": "c9d0e1f2-a3b4-4f45-a27d-567890123457"/*ConfidenceThreshold*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      },
+      "Description": "Minimum confidence score for a face to be detected."
+    },
+    {
+      "InputId": "d0e1f2a3-b4c5-4056-b38e-678901234568"/*MaxFaces*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      },
+      "Description": "Maximum number of faces to detect."
+    },
+    {
+      "InputId": "d6e7f8a9-b0c1-45a2-b9e4-234567890684"/*UseCombinedAiOutput*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 675.0
+      },
+      "Description": "Whether to generate unified AI texture outputs."
+    },
+    {
+      "InputId": "e1f2a3b4-c6d7-4167-c49f-789012345679"/*ShowDetections*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 300.0
+      },
+      "Description": "Whether to include bounding box points in the output buffer."
+    },
+    {
+      "InputId": "e2f3a4b5-c6d7-58e9-f0a1-234567890bd3"/*Debug*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 750.0
+      },
+      "Description": "Enables debug logging and debug texture output."
+    },
+    {
+      "InputId": "f2a3b4c5-d6e7-4278-d5a0-890123456680"/*ShowKeypoints*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 375.0
+      },
+      "Description": "Whether to include keypoints (eyes, nose, mouth, ears) in the output buffer."
+    },
+    {
+      "InputId": "f3a4b5c6-d7e8-59f0-01a2-345678901cd4"/*CorrectAspectRatio*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 825.0
+      },
+      "Description": "Whether to correct aspect ratio for non-square inputs."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "b2c3d4e5-f6a7-489a-9b0c-def123456790"/*OutputTexture*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    },
+    {
+      "OutputId": "c3d4e5f6-a7b8-49ab-ac1d-ef1234567891"/*PointBuffer*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 300.0
+      }
+    },
+    {
+      "OutputId": "d4e5f6a7-b8c9-4ab0-bd2e-f12345678902"/*FaceData*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 400.0
+      }
+    },
+    {
+      "OutputId": "e5f6a7b8-c9d0-4b01-ce3f-12345678a903"/*FaceCount*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 500.0
+      }
+    },
+    {
+      "OutputId": "f6a7b8c9-d0e1-4c12-df4a-234567a89004"/*UpdateCount*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 600.0
+      }
+    },
+    {
+      "OutputId": "b2c3d4e5-f6a7-489a-9b0c-def123456758"/*DebugTexture*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 700.0
+      }
+    }
+  ]
+}

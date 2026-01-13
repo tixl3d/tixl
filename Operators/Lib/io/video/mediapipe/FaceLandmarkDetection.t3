@@ -1,0 +1,72 @@
+{
+  "Id": "9b2c3d4e-5f6a-4798-89ab-cdef12345678"/*FaceLandmarkDetection*/,
+  "Inputs": [
+    {
+      "Id": "01234567-890a-bcde-f012-34567890abcd"/*ZScale*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "0abcdef1-2345-6789-0abc-def123456789"/*MinTrackingConfidence*/,
+      "DefaultValue": 0.5
+    },
+    {
+      "Id": "23456789-0abc-def1-2345-67890abcdef1"/*MinFaceDetectionConfidence*/,
+      "DefaultValue": 0.5
+    },
+    {
+      "Id": "34567890-abcd-ef12-3456-7890abcdef12"/*LandmarkSize*/,
+      "DefaultValue": 3.0
+    },
+    {
+      "Id": "4567890a-bcde-f123-4567-890abcdef123"/*Debug*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "567890ab-cdef-1234-5678-90abcdef1234"/*MaxFaces*/,
+      "DefaultValue": 1
+    },
+    {
+      "Id": "67890abc-def1-2345-6789-0abcdef12345"/*MinFacePresenceConfidence*/,
+      "DefaultValue": 0.5
+    },
+    {
+      "Id": "7890abcd-ef12-3456-7890-abcdef123456"/*LandmarkColor*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 1.0,
+        "Z": 1.0,
+        "W": 1.0
+      }
+    },
+    {
+      "Id": "890abcde-f123-4567-890a-bcdef1234567"/*UseCombinedAIOutput*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "90abcdef-1234-5678-90ab-cdef12345678"/*InputTexture*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "abcdef12-3456-7890-abcd-ef1234567890"/*Enabled*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "bcdef123-4567-890a-bcde-f1234567890a"/*LandmarkScale*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "cdef0123-4567-890a-bcde-f01234567890"/*CorrectAspectRatio*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "cdef1234-5678-90ab-cdef-1234567890ab"/*ShowLandmarks*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "f1234567-890a-bcde-f123-4567890abcde"/*NormalizeLandmarks*/,
+      "DefaultValue": false
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}
