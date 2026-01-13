@@ -1,13 +1,11 @@
 cbuffer ParamConstants : register(b0)
 {
     float4 Color;
-
     float SampleRadius;
     float Strength;
     float Contrast;
-    float OutputAsTransparent;
-
     float MixOriginal;
+    float OutputAsTransparent;
 }
 
 
