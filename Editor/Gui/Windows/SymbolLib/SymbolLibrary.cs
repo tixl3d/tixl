@@ -284,9 +284,9 @@ internal sealed class SymbolLibrary : Window
                 Icons.DrawIconOnLastItem(Icon.Aim, color);
 
                 // Optionally, scroll to item if just selected
-                if (fadeProgress < 0.2f)
+                if (_expandToSymbolTriggered && selectedSymbolId.HasValue)
                 {
-                    ImGui.SetScrollHereY(0.5f);
+                    ImGui.SetScrollHereY();
                 }
 
                 // Set expand trigger if clicked
