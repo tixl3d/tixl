@@ -1,16 +1,20 @@
 #nullable enable
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using ImGuiNET;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
+using T3.Core.Resource;
 using T3.Editor.Gui.MagGraph.Interaction;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.MagGraph.States;
+using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.AssetLib;
 using T3.Editor.UiModel;
+using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.Modification;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
@@ -23,7 +27,7 @@ namespace T3.Editor.Gui.MagGraph.Ui;
 internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
 {
     public ScalableCanvas Canvas => this;
-    
+
     public static ProjectView CreateWithComponents(OpenedProject openedProject)
     {
         ProjectView.CreateIndependentComponents(openedProject,
@@ -32,7 +36,7 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
                                                 out var graphImageBackground);
 
         var projectView = new ProjectView(openedProject, navigationHistory, nodeSelection, graphImageBackground);
-        
+
         if (projectView.CompositionInstance == null)
         {
             Log.Error("Can't create graph without defined composition op");
@@ -74,7 +78,7 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
         var selectionBounds = NodeSelection.GetSelectionBounds(_projectView.NodeSelection, _projectView.CompositionInstance);
         FitAreaOnCanvas(selectionBounds);
     }
-    
+
     public void FocusViewToSelection(GraphUiContext context)
     {
         var areaOnCanvas = NodeSelection.GetSelectionBounds(context.Selector, context.CompositionInstance);
@@ -105,14 +109,13 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
             {
                 _context.StateMachine.SetState(GraphStates.BackgroundContentIsInteractive, _context);
             }
-            
+
             _previousInstance = _projectView.CompositionInstance;
             _context = new GraphUiContext(_projectView, this);
         }
     }
 
     public bool HasActiveInteraction => _context.StateMachine.CurrentState != GraphStates.Default;
-
 
     void IGraphView.Close()
     {
@@ -229,6 +232,19 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
     //     var scope = GetScopeForCanvasArea(newViewArea);
     //     context.Canvas.SetScopeWithTransition(scope, ICanvas.Transition.Instant);
     // }
+    
+    public static bool IsPathInside(string filePath, string directoryPath)
+    {
+        var normalizedFile = Path.GetFullPath(filePath);
+        var normalizedDir = Path.GetFullPath(directoryPath);
+
+        if (!normalizedDir.EndsWith(Path.DirectorySeparatorChar.ToString()))
+        {
+            normalizedDir += Path.DirectorySeparatorChar;
+        }
+        return normalizedFile.StartsWith(normalizedDir, StringComparison.OrdinalIgnoreCase);
+    }
+    
     private void HandleDropping(GraphUiContext context)
     {
         if (!DragAndDropHandling.IsDragging)
@@ -236,59 +252,175 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
 
         ImGui.SetCursorPos(Vector2.Zero);
         ImGui.InvisibleButton("## drop", ImGui.GetWindowSize());
-        
-        if (DragAndDropHandling.IsDraggingWith(DragAndDropHandling.DragTypes.Symbol))
+
         {
-            if (!DragAndDropHandling.TryHandleItemDrop(DragAndDropHandling.DragTypes.Symbol, out var data))
-                return;
-
-            if (!Guid.TryParse(data, out var symbolId))
+            DragAndDropHandling.TryHandleItemDrop(DragAndDropHandling.DragTypes.Symbol, out var data, out var symbolResult);
+            if (symbolResult == DragAndDropHandling.DragInteractionResult.Dropped)
             {
-                Log.Warning("Invalid data format for drop? " + data);
-                return;
-            }
-
-            TryCreateSymbolInstanceOnGraph(context, symbolId, out _);
-        }
-        else if (DragAndDropHandling.IsDraggingWith(DragAndDropHandling.DragTypes.FileAsset))
-        {
-            if (!DragAndDropHandling.TryHandleItemDrop(DragAndDropHandling.DragTypes.FileAsset, out var aliasPath))
-                return;
-
-            if (!AssetLibrary.GetAssetFromAliasPath(aliasPath, out var asset))
-            {
-                Log.Warning($"Can't get asset for {aliasPath}");
-                return;
-            }
-
-            if (asset.AssetType == null)
-            {
-                Log.Warning($"{aliasPath} has no asset type");
-                return;
-            }
-            
-            if (asset.AssetType.PrimaryOperators.Count == 0)
-            {
-                Log.Warning($"{aliasPath} of type {asset.AssetType} has no matching operator symbols");
-                return;
-            }
-
-            if (TryCreateSymbolInstanceOnGraph(context, asset.AssetType.PrimaryOperators[0], out var newInstance))
-            {
-                if (!AssetLibrary.TryGetFileInputFromInstance(newInstance, out var stringInput, out _))
+                if (!Guid.TryParse(data, out var symbolId))
                 {
-                    Log.Warning("Failed to get file path parameter from op");
+                    Log.Warning("Invalid data format for drop? " + data);
                     return;
                 }
-                
-                Log.Debug($"Created {newInstance} with {aliasPath}", newInstance);
-                
-                stringInput.TypedInputValue.Assign(new InputValue<string>(aliasPath));
-                stringInput.DirtyFlag.ForceInvalidate();
-                stringInput.Parent.Parent?.Symbol.InvalidateInputInAllChildInstances(stringInput);
-                stringInput.Input.IsDefault = false;
+
+                TryCreateSymbolInstanceOnGraph(context, symbolId, out _);
             }
         }
+
+        {
+            DragAndDropHandling.TryHandleItemDrop(DragAndDropHandling.DragTypes.ExternalFile, out var data, out var result);
+            
+            var packageResourcesFolder = ProjectView.Focused?.OpenedProject.Package.ResourcesFolder;
+            
+            if (result == DragAndDropHandling.DragInteractionResult.Hovering)
+            {
+                var dl = ImGui.GetForegroundDrawList();
+                ReadOnlySpan<char> label = $"""
+                                            Import files to...
+                                            {packageResourcesFolder}
+                                            """;
+                var labelSize = ImGui.CalcTextSize(label);
+                var mousePos = ImGui.GetMousePos() + new Vector2(-30, -40);
+                var area = ImRect.RectWithSize(mousePos, labelSize);
+                area.Expand(10);
+                dl.AddRectFilled(area.Min, area.Max, UiColors.BackgroundFull.Fade(0.7f), 5);
+
+                dl.AddText(mousePos, UiColors.ForegroundFull, label);
+            }
+            else if (result == DragAndDropHandling.DragInteractionResult.Dropped 
+                     && data != null
+                     && packageResourcesFolder != null)
+            {
+                foreach (var filepath in data.Split("|"))
+                {
+                    if (!Path.Exists(filepath))
+                        continue;
+
+                    var fileName = Path.GetFileName(filepath);
+                    var destFilepath = Path.Combine(packageResourcesFolder, fileName);
+                    
+                    if (File.Exists(destFilepath))
+                    {
+                        Log.Debug("Already project asset: " + filepath);
+                        
+                        ResourceManager.TryResolvePath(destFilepath, ProjectView.Focused.CompositionInstance, out var absolutePath, out _);
+                        
+                        if (!AssetLibrary.GetAssetFromAliasPath(fileName, out var asset))
+                        {
+                            Log.Warning($"Can't get asset for {filepath}");
+                            return;
+                        }
+
+                        if (asset.AssetType == null)
+                        {
+                            Log.Warning($"{filepath} has no asset type");
+                            return;
+                        }   
+                    }
+                    else
+                    {
+                        //var fileName = Path.GetFileName(filepath);
+                        //var destFileName = Path.Combine(packageResourcesFolder, fileName);
+                        try
+                        {
+                            File.Copy(filepath, destFilepath);
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Warning($"Failed to copy to {destFilepath}");
+                            continue;
+                        }
+                        Log.Debug($"Copied {fileName} to {packageResourcesFolder}");
+                        
+                        if (!AssetLibrary.GetAssetFromAliasPath(destFilepath, out var asset))
+                        {
+                            Log.Warning($"Can't get asset for {destFilepath}");
+                            return;
+                        }
+
+                        if (asset.AssetType == null)
+                        {
+                            Log.Warning($"{destFilepath} has no asset type");
+                            return;
+                        }                    
+                    }
+                    
+                    
+                }
+            }
+        }
+        
+        {
+            DragAndDropHandling.TryHandleItemDrop(DragAndDropHandling.DragTypes.FileAsset, out var aliasPath, out var assetResult);
+
+            if ((assetResult == DragAndDropHandling.DragInteractionResult.Hovering
+                 || assetResult == DragAndDropHandling.DragInteractionResult.Dropped)
+                && aliasPath != null)
+            {
+                if (!AssetLibrary.GetAssetFromAliasPath(aliasPath, out var asset))
+                {
+                    Log.Warning($"Can't get asset for {aliasPath}");
+                    return;
+                }
+
+                if (asset.AssetType == null)
+                {
+                    Log.Warning($"{aliasPath} has no asset type");
+                    return;
+                }
+
+                if (assetResult == DragAndDropHandling.DragInteractionResult.Hovering)
+                {
+                    DrawDropPreviewItem(asset);
+                }
+                else
+                {
+                    if (asset.AssetType.PrimaryOperators.Count == 0)
+                    {
+                        Log.Warning($"{aliasPath} of type {asset.AssetType} has no matching operator symbols");
+                        return;
+                    }
+
+                    if (TryCreateSymbolInstanceOnGraph(context, asset.AssetType.PrimaryOperators[0], out var newInstance))
+                    {
+                        if (!AssetLibrary.TryGetFileInputFromInstance(newInstance, out var stringInput, out _))
+                        {
+                            Log.Warning("Failed to get file path parameter from op");
+                            return;
+                        }
+
+                        Log.Debug($"Created {newInstance} with {aliasPath}", newInstance);
+
+                        stringInput.TypedInputValue.Assign(new InputValue<string>(aliasPath));
+                        stringInput.DirtyFlag.ForceInvalidate();
+                        stringInput.Parent.Parent?.Symbol.InvalidateInputInAllChildInstances(stringInput);
+                        stringInput.Input.IsDefault = false;
+                    }
+                }
+            }
+        }
+    }
+
+    private static void DrawDropPreviewItem(AssetItem asset)
+    {
+        if (asset.AssetType == null)
+            return;
+
+        if (asset.AssetType.PrimaryOperators.Count == 0)
+            return;
+        
+        if(!SymbolUiRegistry.TryGetSymbolUi(asset.AssetType.PrimaryOperators[0], out var mainSymbolUi))
+        {
+            return;
+        }
+        
+        var color = mainSymbolUi.Symbol.OutputDefinitions.Count > 0
+                        ? TypeUiRegistry.GetPropertiesForType(mainSymbolUi.Symbol.OutputDefinitions[0]?.ValueType).Color
+                        : UiColors.Gray;
+        
+        var dl = ImGui.GetWindowDrawList();
+        var pos = ImGui.GetMousePos();
+        dl.AddRectFilled(pos, pos + MagGraphItem.GridSize, color, 4 );
     }
 
     private bool TryCreateSymbolInstanceOnGraph(GraphUiContext context, Guid guid, [NotNullWhen(true)] out Instance? newInstance)
@@ -383,7 +515,7 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
             {
                 if (item.IsCollapsedAway)
                     continue;
-                
+
                 if (item.Variant == MagGraphItem.Variants.Operator)
                 {
                     _context.Selector.AddSelection(item.Selectable, item.Instance);
@@ -398,9 +530,10 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
         foreach (var magAnnotation in _context.Layout.Annotations.Values)
         {
             var annotationArea = magAnnotation.Annotation.Collapsed
-                                     ? new ImRect(magAnnotation.PosOnCanvas, magAnnotation.PosOnCanvas + new Vector2(magAnnotation.Size.X, MagGraphItem.GridSize.Y))
+                                     ? new ImRect(magAnnotation.PosOnCanvas,
+                                                  magAnnotation.PosOnCanvas + new Vector2(magAnnotation.Size.X, MagGraphItem.GridSize.Y))
                                      : new ImRect(magAnnotation.PosOnCanvas, magAnnotation.PosOnCanvas + magAnnotation.Size);
-                
+
             if (!boundsInCanvas.Contains(annotationArea))
                 continue;
 
@@ -457,6 +590,4 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
     private bool _destroyed;
 
     protected override ScalableCanvas? Parent => null;
-
-
 }

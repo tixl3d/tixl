@@ -1,6 +1,6 @@
 {
   "Id": "02aed181-4bf1-48f8-ac2a-93d66c170c0c"/*EaseKeys*/,
-  "Description": "This operator creates smooth, ease-in-out transitions by overriding the easing of keyframes. Customize the transition style with options like cubic, exponential, or back easing, or choose a linear fallback for a simple interpolation. \n[EaseVec2Keys] [EaseVec3Keys]",
+  "Description": "This operator creates smooth, ease-in-out transitions by overriding the easing of keyframes. Customize the transition style with options like cubic, exponential, or back easing, or choose a linear fallback for a simple interpolation. \nConstant interpolation can be achieved by setting the keyframe type to Constant.[EaseVec2Keys] [EaseVec3Keys]",
   "InputUis": [
     {
       "InputId": "73c822ca-560c-4e86-b4ff-0ae722d7a371"/*Value*/,

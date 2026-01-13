@@ -97,7 +97,9 @@ internal static partial class RenderPaths
         }
 
         // Image sequence path
-        return $"{targetPath}_####.{settings.FileFormat.ToString().ToLower()}";
+        var frameCount = RenderTiming.ComputeFrameCount(settings);
+        var frameRange = frameCount <= 1 ? "0000" : $"0000..{(frameCount - 1):D4}";
+        return $"{targetPath}_{frameRange}.{settings.FileFormat.ToString().ToLower()}";
     }
 
     public static bool FileExists(string targetPath)
@@ -176,6 +178,44 @@ internal static partial class RenderPaths
         UserSettings.Save();
     }
 
+    public static string GetVersionString(string? path)
+    {
+        if (string.IsNullOrEmpty(path))
+            return string.Empty;
+
+        var name = Path.GetFileName(path);
+        if (string.IsNullOrEmpty(name)) 
+            return string.Empty;
+        
+        var match = FileVersionPatternRegex().Match(name);
+        if (match.Success)
+        {
+            return "v" + match.Groups[1].Value;
+        }
+
+        return string.Empty;
+    }
+
+    public static string GetNextVersionString(string? path)
+    {
+        if (string.IsNullOrEmpty(path))
+            return "v01";
+
+        var filename = Path.GetFileName(path);
+        var match = FileVersionPatternRegex().Match(filename);
+        if (match.Success)
+        {
+            var versionGroup = match.Groups[1];
+            if (int.TryParse(versionGroup.Value, out var versionNumber))
+            {
+                var digits = Math.Clamp(versionGroup.Value.Length, 2, 4);
+                return "v" + (versionNumber + 1).ToString("D" + digits);
+            }
+        }
+
+        return "v01";
+    }
+
     public static string GetNextIncrementedPath(string path)
     {
         if (string.IsNullOrEmpty(path))
@@ -217,6 +257,6 @@ internal static partial class RenderPaths
         return directory == null ? newFilename : Path.Combine(directory, newFilename);
     }
 
-    [GeneratedRegex(@"(?:^|[\s_\-.])v(\d{2,4})(?:\b|$)")]
+    [GeneratedRegex(@"(?:^|[\s_\-.])v(\d{2,4})(?=$|[\s_\-.])", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
     private static partial Regex FileVersionPatternRegex();
 }

@@ -1,6 +1,7 @@
 using System.Windows.Forms;
 using ImGuiNET;
 using SharpDX.Windows;
+using T3.Editor.Gui.UiHelpers;
 using T3.SystemUi;
 
 // ReSharper disable InconsistentNaming
@@ -21,6 +22,8 @@ public class ImGuiDx11RenderForm : RenderForm
 
         DragEnter += OnDragEnter;
         DragDrop += OnDragDrop;
+        DragOver += OnDragOver;
+        DragLeave += OnDragLeave;
 
         MouseMove += (o, e) =>
                      {
@@ -62,7 +65,7 @@ public class ImGuiDx11RenderForm : RenderForm
     #endregion
 
     public static event Action<string[], Vector2> FilesDropped;
-
+    
     private void OnDragEnter(object s, DragEventArgs e)
     {
         if (this == ProgramWindows.Viewer?.Form)
@@ -80,28 +83,50 @@ public class ImGuiDx11RenderForm : RenderForm
                    e.Data.GetDataPresent(DataFormats.UnicodeText)
                        ? DragDropEffects.Copy
                        : DragDropEffects.None;
+        
+        DragAndDropHandling.StartExternalDrag(DragAndDropHandling.DragTypes.ExternalFile, 
+                                              "External Files");        
+    }
+    
+    private static void OnDragLeave(object s, EventArgs eventArgs)
+    {
+        DragAndDropHandling.CancelExternalDrag();
     }
 
     private void OnDragDrop(object s, DragEventArgs e)
     {
-        if (this == ProgramWindows.Viewer?.Form) return; // optional
+        if (this == ProgramWindows.Viewer?.Form || e.Data == null) 
+            return; // optional
 
         var p = PointToClient(new System.Drawing.Point(e.X, e.Y));
         var pos = new Vector2(p.X, p.Y);
 
         if (e.Data.GetDataPresent(DataFormats.FileDrop))
         {
-            var strings = (string[])e.Data.GetData(DataFormats.FileDrop)!;
-            FilesDropped?.Invoke(strings, pos);
+            var files = (string[])e.Data.GetData(DataFormats.FileDrop)!;
+            FilesDropped?.Invoke(files, pos);
+            DragAndDropHandling.CompleteExternalDrop(DragAndDropHandling.DragTypes.ExternalFile, 
+                                                  string.Join("|", files));
         }
         else if (e.Data.GetDataPresent(DataFormats.UnicodeText))
         {
             var t = ((string)e.Data.GetData(DataFormats.UnicodeText)!).Trim('"');
             if (System.IO.Path.IsPathRooted(t))
+            {
+                DragAndDropHandling.CompleteExternalDrop(DragAndDropHandling.DragTypes.ExternalFile, t);                
                 FilesDropped?.Invoke(new[] { t }, pos);
+            }
         }
     }
 
+    private void OnDragOver(object s, DragEventArgs e)
+    {
+        var p = PointToClient(new System.Drawing.Point(e.X, e.Y));
+        ImGui.GetIO().MousePos = new System.Numerics.Vector2(p.X, p.Y);
+    
+        e.Effect = DragDropEffects.Copy;
+    }
+    
     protected override void WndProc(ref System.Windows.Forms.Message m)
     {
         try
