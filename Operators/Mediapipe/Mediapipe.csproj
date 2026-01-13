@@ -1,22 +1,20 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="$(SolutionDir)/Tixl.props" />
   <PropertyGroup>
     <TargetFramework>net9.0-windows</TargetFramework>
-    <ImplicitUsings>disable</ImplicitUsings>
-    <Nullable>disable</Nullable>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <RootNamespace>Lib</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UserSecretsId>4ddcedc9-2c55-476d-9aeb-8e069ecd278a</UserSecretsId>
+    <RootNamespace>t3.mediapipe</RootNamespace>
     <AssemblyName>$(RootNamespace)</AssemblyName>
     <Configurations>Debug;Release</Configurations>
     <Platforms>AnyCPU</Platforms>
-    <VersionPrefix>1.666.999</VersionPrefix>
+    <VersionPrefix>1.0.5</VersionPrefix>
     <HomeGuid>00000000-0000-0000-0000-000000000000</HomeGuid>
-    <EditorVersion>$(TixlVersion)</EditorVersion>
+    <EditorVersion>4.0.3</EditorVersion>
     <IsEditorOnly>false</IsEditorOnly>
     <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
-    <Deterministic>true</Deterministic>
-    <NoWarn>NU1900</NoWarn>
-    <!-- Set the output path based on the version and release mode -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <NoWarn>0108;9084;NU1900</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Using Include="System" />
@@ -92,26 +90,25 @@
     <Using Alias="SampleDescription" Include="SharpDX.DXGI.SampleDescription" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Mediapipe\Mediapipe.csproj" Private="false" PrivateAssets="all" />
-    <ProjectReference Include="..\..\Core\Core.csproj" Private="false" PrivateAssets="all" />
-    <ProjectReference Include="..\..\Serialization\Serialization.csproj" Private="false" PrivateAssets="all" />
-    <ProjectReference Include="..\..\SystemUi\SystemUi.csproj" Private="false" PrivateAssets="all" />
-    <ProjectReference Include="..\..\Logging\Logging.csproj" Private="false" PrivateAssets="all" />
+    <ProjectReference Include="../../Core/Core.csproj" Private="false" PrivateAssets="all" />
+    <ProjectReference Include="../../Logging/Logging.csproj" Private="false" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DirectShowLib.Standard" Version="2.1.0" />
-    <PackageReference Include="OpenCvSharp4" Version="4.11.0.20250507" />
-    <PackageReference Include="OpenCvSharp4.Extensions" Version="4.11.0.20250507" />
-    <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.11.0.20250507" />
-    <PackageReference Include="OpenCvSharp4.Windows" Version="4.11.0.20250507" />
-    <PackageReference Include="Palink.ArtNet" Version="1.0.0" />
-    <PackageReference Include="Rug.Osc" Version="1.2.5">
+    <PackageReference Include="CppSharp.Runtime" Version="1.1.5.3168" />
+    <PackageReference Include="OpenGL.Net" Version="0.8.4">
       <NoWarn>NU1701</NoWarn>
     </PackageReference>
-    <PackageReference Include="SharpGLTF.Core" Version="1.0.4" />
-    <PackageReference Include="Svg" Version="3.3.0" />
-    <PackageReference Include="System.IO.Ports" Version="8.0.0" />
-    <PackageReference Include="System.Management" Version="8.0.0" />
+    <PackageReference Include="Google.Protobuf" Version="3.31.1" />
+  </ItemGroup>
+  <!-- Native dependencies -->
+  <ItemGroup>
+    <Content Include="./dependencies/**/*" CopyToOutputDirectory="PreserveNewest">
+      <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Content>
+    <None Update="Libs\mediapipe_c.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Remove="Examples\**" />
   </ItemGroup>
   <!-- Include Resources/** into output/Resources -->
   <ItemGroup Condition="'$(Configuration)' == 'Release'">
@@ -132,35 +129,56 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)' == 'Debug'">
+    <Content Include="Resources/**/*" Exclude="bin/**">
+      <Link>Resources/%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="**/*.t3" Exclude="bin/**">
+      <Link>Symbols/%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="**/*.t3ui" Exclude="bin/**">
+      <Link>SymbolUis/%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="**/*.cs" Exclude="bin/**;obj/**">
+      <Link>SourceCode/%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <ItemGroup>
-    <Folder Include="io\video\" />
+    <Compile Remove="Examples\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Remove="Examples\**" />
   </ItemGroup>
   <Target Name="CreatePackageInfo" AfterTargets="AfterBuild">
     <ItemGroup Label="Define json structure of referenced operator packages">
       <OpPacks Include="@(Operators)">
         <OpPackageInfoJson>
-          {
-          "Identity": "%(Identity)",
-          "Version": "%(Version)",
-          "ResourcesOnly": "%(ResourcesOnly)"
-          }
-        </OpPackageInfoJson>
+                    {
+                    "Identity": "%(Identity)",
+                    "Version": "%(Version)",
+                    "ResourcesOnly": "%(ResourcesOnly)"
+                    }
+                </OpPackageInfoJson>
       </OpPacks>
     </ItemGroup>
     <PropertyGroup>
       <OperatorReferenceArray>@(OpPacks -> '%(OpPackageInfoJson)', ',')</OperatorReferenceArray>
       <OperatorPackageInfoJson>{
-        "AssemblyFileName": "$(AssemblyName)",
-        "HomeGuid": "$(HomeGuid)",
-        "RootNamespace": "$(RootNamespace)",
-        "Version": "$(VersionPrefix)",
-        "EditorVersion": "$(EditorVersion)",
-        "IsEditorOnly": "$(IsEditorOnly)",
-        "OperatorPackages":
-        [$(OperatorReferenceArray)
-        ]
-        }
-      </OperatorPackageInfoJson>
+                "AssemblyFileName": "$(AssemblyName)",
+                "HomeGuid": "$(HomeGuid)",
+                "RootNamespace": "$(RootNamespace)",
+                "Version": "$(VersionPrefix)",
+                "EditorVersion": "$(EditorVersion)",
+          "IsEditorOnly": "$(IsEditorOnly)",
+                "OperatorPackages":
+                [$(OperatorReferenceArray)
+                ]
+                }
+            </OperatorPackageInfoJson>
     </PropertyGroup>
     <WriteLinesToFile File="$(OutputPath)/OperatorPackage.json" Lines="$(OperatorPackageInfoJson)" Overwrite="True" Encoding="UTF-8" />
   </Target>
