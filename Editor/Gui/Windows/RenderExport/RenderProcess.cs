@@ -412,7 +412,7 @@ internal static class RenderProcess
 
         var filename = Path.Join(folder, $"{DateTime.Now:yyyy_MM_dd-HH_mm_ss_fff}.png");
         ScreenshotWriter.StartSavingToFile(RenderProcess.MainOutputTexture, filename, ScreenshotWriter.FileFormats.Png);
-        Log.Debug("Screenshot saved in: " + folder);
+        Log.Debug($"Screenshot saved at: {filename}");
     }
 
     /// <summary>
