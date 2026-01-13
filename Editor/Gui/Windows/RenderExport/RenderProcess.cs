@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System.IO;
 using T3.Core.Animation;
 using T3.Core.Audio;
@@ -14,6 +14,11 @@ using T3.Editor.UiModel.ProjectHandling;
 
 namespace T3.Editor.Gui.Windows.RenderExport;
 
+/// <summary>
+/// Provides static methods and state for managing the rendering and export process in the editor.
+/// Handles starting, updating, and cancelling render sessions for video and image sequence exports,
+/// as well as managing output textures, resolutions, and export progress.
+/// </summary>
 internal static class RenderProcess
 {
     public static string LastHelpString { get; private set; } = string.Empty;
@@ -34,18 +39,26 @@ internal static class RenderProcess
     
 
     
+    /// <summary>
+    /// Represents the current state of the render process.
+    /// </summary>
     public enum States
     {
+        /// <summary>No output window is available.</summary>
         NoOutputWindow,
+        /// <summary>The output type is not valid for rendering.</summary>
         NoValidOutputType,
+        /// <summary>The output texture is not valid or missing.</summary>
         NoValidOutputTexture,
+        /// <summary>Ready and waiting for export to start.</summary>
         WaitingForExport,
+        /// <summary>Currently exporting frames.</summary>
         Exporting,
     }
 
-    /// <remarks>
-    /// needs to be called once per frame
-    /// </remarks>
+    /// <summary>
+    /// Updates the render process state. Should be called once per frame.
+    /// </summary>
     public static void Update()
     {
         if (!OutputWindow.TryGetPrimaryOutputWindow(out var outputWindow))
@@ -140,6 +153,9 @@ internal static class RenderProcess
         IsToollRenderingSomething = false;
     }
     
+    /// <summary>
+    /// Handles keyboard shortcuts for rendering actions such as starting, cancelling, or taking a screenshot.
+    /// </summary>
     private static void HandleRenderShortCuts()
     {
         if (MainOutputTexture == null)
@@ -163,7 +179,10 @@ internal static class RenderProcess
         }
     }
 
-    
+    /// <summary>
+    /// Starts a new render export session with the specified settings, if not already exporting.
+    /// </summary>
+    /// <param name="renderSettings">The settings to use for the render export session.</param>
     public static void TryStart(RenderSettings renderSettings)
     {
         if (IsExporting)
@@ -208,7 +227,7 @@ internal static class RenderProcess
 
         if (_activeSession.Settings.RenderMode == RenderSettings.RenderModes.Video)
         {
-            _activeSession.VideoWriter = new Mp4VideoWriter(targetFilePath, MainOutputRenderedSize, _activeSession.Settings.ExportAudio)
+            _activeSession.VideoWriter = new Mp4VideoWriter(targetFilePath, MainOutputOriginalSize, MainOutputRenderedSize, _activeSession.Settings.ExportAudio)
                                {
                                    Bitrate = _activeSession.Settings.Bitrate,
                                    Framerate = (int)_activeSession.Settings.Fps
@@ -234,12 +253,10 @@ internal static class RenderProcess
         LastHelpString = "Rendering...";
     }
 
-
-    private static int GetRealFrame() => _activeSession!.FrameIndex - MfVideoWriter.SkipImages;
-    
-    
-    private static string GetTargetFilePath(RenderSettings.RenderModes renderMode) => RenderPaths.GetTargetFilePath(renderMode);
-
+    /// <summary>
+    /// Cancels the current render export session, if any, and updates the help string with an optional reason.
+    /// </summary>
+    /// <param name="reason">Optional reason for cancellation.</param>
     public static void Cancel(string? reason = null)
     {
         if (_activeSession == null) return;
@@ -249,6 +266,9 @@ internal static class RenderProcess
         IsToollRenderingSomething = false;
     }
 
+    /// <summary>
+    /// Cleans up the current export session and releases resources.
+    /// </summary>
     private static void Cleanup()
     {
         IsExporting = false;
@@ -265,7 +285,14 @@ internal static class RenderProcess
         }
     }
 
-    private static bool SaveVideoFrameAndAdvance( ref byte[] audioFrame, int channels, int sampleRate)
+    /// <summary>
+    /// Saves the current video frame and advances the export session, handling audio and resolution mismatches.
+    /// </summary>
+    /// <param name="audioFrame">Reference to the audio frame buffer.</param>
+    /// <param name="channels">Number of audio channels.</param>
+    /// <param name="sampleRate">Audio sample rate.</param>
+    /// <returns>True if the frame was processed successfully; otherwise, false.</returns>
+    private static bool SaveVideoFrameAndAdvance(ref byte[] audioFrame, int channels, int sampleRate)
     {
         if (Playback.OpNotReady)
         {
@@ -320,12 +347,20 @@ internal static class RenderProcess
         }
     }
 
+    /// <summary>
+    /// Returns the file path for the current image sequence frame.
+    /// </summary>
+    /// <returns>The file path for the image sequence frame.</returns>
     private static string GetSequenceFilePath()
     {
         var prefix = RenderPaths.SanitizeFilename(UserSettings.Config.RenderSequenceFileName);
         return Path.Combine(_activeSession!.TargetFolder, $"{prefix}_{_activeSession.FrameIndex:0000}.{_activeSession.Settings.FileFormat.ToString().ToLower()}");
     }
 
+    /// <summary>
+    /// Saves the current image frame and advances the export session.
+    /// </summary>
+    /// <returns>True if the frame was saved successfully; otherwise, false.</returns>
     private static bool SaveImageFrameAndAdvance()
     {
         if (MainOutputTexture == null)
@@ -346,25 +381,22 @@ internal static class RenderProcess
         }
     }
 
-    private class ExportSession
-    {
-        public Mp4VideoWriter? VideoWriter;
-        public string TargetFolder = string.Empty;
-        public double ExportStartedTime;
-        public int FrameIndex;
-        public int FrameCount;
-        public RenderSettings Settings = null!;
-        public RenderTiming.Runtime Runtime;
-        public int ResolutionMismatchCount;
-        public double ExportStartTimeLocal;
-    }
+    /// <summary>
+    /// Returns the real frame index, accounting for skipped images in video export.
+    /// </summary>
+    /// <returns>The real frame index.</returns>
+    private static int GetRealFrame() => _activeSession!.FrameIndex - MfVideoWriter.SkipImages;
 
-    private static ExportSession? _activeSession;
-    private const int MaxResolutionMismatchRetries = 10;
-    
-    public static double ExportStartedTimeLocal => _activeSession?.ExportStartTimeLocal ?? 0;
-    public static double Progress => _activeSession == null || _activeSession.FrameCount <= 1 ? 0.0 : (_activeSession.FrameIndex / (double)(_activeSession.FrameCount - 1));
+    /// <summary>
+    /// Returns the target file path for the specified render mode.
+    /// </summary>
+    /// <param name="renderMode">The render mode (video or image sequence).</param>
+    /// <returns>The target file path.</returns>
+    private static string GetTargetFilePath(RenderSettings.RenderModes renderMode) => RenderPaths.GetTargetFilePath(renderMode);
 
+    /// <summary>
+    /// Attempts to render a screenshot of the current main output texture and saves it to the project folder.
+    /// </summary>
     public static void TryRenderScreenShot()
     {
         if (MainOutputTexture == null) return;
@@ -382,4 +414,33 @@ internal static class RenderProcess
         ScreenshotWriter.StartSavingToFile(RenderProcess.MainOutputTexture, filename, ScreenshotWriter.FileFormats.Png);
         Log.Debug("Screenshot saved in: " + folder);
     }
+
+    /// <summary>
+    /// Represents an active export session, holding state and settings for the current render/export process.
+    /// </summary>
+    private class ExportSession
+    {
+        public Mp4VideoWriter? VideoWriter;
+        public string TargetFolder = string.Empty;
+        public double ExportStartedTime;
+        public int FrameIndex;
+        public int FrameCount;
+        public RenderSettings Settings = null!;
+        public RenderTiming.Runtime Runtime;
+        public int ResolutionMismatchCount;
+        public double ExportStartTimeLocal;
+    }
+
+    private static ExportSession? _activeSession;
+    private const int MaxResolutionMismatchRetries = 10;
+
+    /// <summary>
+    /// Gets the local time when the export started, or 0 if no session is active.
+    /// </summary>
+    public static double ExportStartedTimeLocal => _activeSession?.ExportStartTimeLocal ?? 0;
+
+    /// <summary>
+    /// Gets the progress of the current export session as a value between 0.0 and 1.0.
+    /// </summary>
+    public static double Progress => _activeSession == null || _activeSession.FrameCount <= 1 ? 0.0 : (_activeSession.FrameIndex / (double)(_activeSession.FrameCount - 1));
 }
