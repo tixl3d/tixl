@@ -35,7 +35,18 @@ internal sealed class AboutDialog : ModalDialog
                 ImGui.ColorConvertFloat4ToU32(rectColor)
             );
             
+            var logoPos = ImGui.GetCursorScreenPos();
             ImGui.Image((IntPtr)SharedResources.t3logoAlphaTextureImageSrv, new Vector2(64, 64));
+            
+            // SNiXL Easter Egg: Shift+LeftClick on logo
+            var logoMin = logoPos;
+            var logoMax = logoPos + new Vector2(64, 64);
+            if (ImGui.IsMouseHoveringRect(logoMin, logoMax) && 
+                ImGui.GetIO().KeyShift && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+            {
+                Windows.Layouts.WindowManager.SnixlWindow.Config.Visible = true;
+                ImGui.CloseCurrentPopup(); // Close the About dialog
+            }
 
             FormInputs.AddSectionHeader("TiXL");
             ImGui.SameLine();

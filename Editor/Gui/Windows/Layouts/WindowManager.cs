@@ -35,6 +35,9 @@ internal static partial class WindowManager
             windowType.Draw();
         }
 
+        // Draw SNiXL window separately (easter egg - not in main windows list)
+        SnixlWindow.Draw();
+
         if (DemoWindowVisible)
             ImGui.ShowDemoWindow(ref DemoWindowVisible);
 
@@ -45,6 +48,7 @@ internal static partial class WindowManager
     internal static readonly SettingsWindow SettingsWindow = new();
     internal static readonly UtilitiesWindow UtilitiesWindow = new();
     internal static readonly ScreenManagerWindow ScreenManagerWindow = new();
+    internal static readonly SnixlWindow SnixlWindow = new();
 
 
     private static void TryToInitialize()
