@@ -7,7 +7,7 @@
     },
     {
       "Id": "032f3617-e1f3-4b41-a3be-61dd63b9f3ba"/*ForwardVector*/,
-      "DefaultValue": 0
+      "DefaultValue": 5
     },
     {
       "Id": "098f1662-6f47-4dd0-9a73-4c4814aefb23"/*CustomVar2Channel*/,
@@ -31,11 +31,11 @@
     },
     {
       "Id": "1f532994-fb0e-44e4-8a80-7917e1851eae"/*PanAxis*/,
-      "DefaultValue": 0
+      "DefaultValue": 2
     },
     {
       "Id": "1f877cf6-10d9-4d0b-b087-974bd6855e0a"/*TiltAxis*/,
-      "DefaultValue": 0
+      "DefaultValue": 1
     },
     {
       "Id": "23f23213-68e2-45f5-b452-4a86289004c0"/*DebugToLog*/,
@@ -44,6 +44,10 @@
     {
       "Id": "25e5f0ce-5ec8-4c99-beb1-317c6911a128"/*SetCustomVar1*/,
       "DefaultValue": false
+    },
+    {
+      "Id": "294b0515-b9f2-446a-8a97-01e3c8b715c0"/*VisPanAxis*/,
+      "DefaultValue": 0
     },
     {
       "Id": "2bea2ccb-89f2-427b-bd9a-95c7038b715e"/*ReferencePoints*/,
@@ -79,6 +83,10 @@
     },
     {
       "Id": "5cdc69f7-45ec-4eec-bfb6-960d6245dafb"/*GetColor*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "5e96a7a3-5340-43f2-96b9-9972a69421e5"/*Is16BitColor*/,
       "DefaultValue": false
     },
     {
@@ -188,6 +196,14 @@
       "DefaultValue": false
     },
     {
+      "Id": "c9d7cd19-7fc6-4491-8dfa-3808725c7859"/*PanOffset*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "c9d7cd19-7fc6-4491-8dfa-3808725c7860"/*TiltOffset*/,
+      "DefaultValue": 0.0
+    },
+    {
       "Id": "cbaf821c-0305-4c74-a632-864081cc9a34"/*CustomVar4Channel*/,
       "DefaultValue": 0
     },
@@ -208,6 +224,10 @@
       "DefaultValue": 0
     },
     {
+      "Id": "d8a90c30-4e5b-4f0b-bfa7-09daf3a4c71f"/*TestModeSelect*/,
+      "DefaultValue": 0
+    },
+    {
       "Id": "df04fce0-c6e5-4039-b03f-e651fc0ec4a9"/*GetPosition*/,
       "DefaultValue": false
     },
@@ -217,7 +237,7 @@
     },
     {
       "Id": "e96655be-6bc7-4ca4-bf74-079a07570d74"/*ShortestPathPanTilt*/,
-      "DefaultValue": false
+      "DefaultValue": true
     },
     {
       "Id": "f13edebd-b44f-49e9-985e-7e3feb886fea"/*AlphaChannel*/,
@@ -233,6 +253,10 @@
     {
       "Id": "f85ecf9f-0c3d-4c10-8ba7-480aa2c7a667"/*InvertTilt*/,
       "DefaultValue": false
+    },
+    {
+      "Id": "f98e8f19-c234-453d-9492-369f6b08035d"/*VisTiltAxis*/,
+      "DefaultValue": 0
     },
     {
       "Id": "fc3ec0d6-8567-4d5f-9a63-5c69fb5988cb"/*PositionChannel*/,

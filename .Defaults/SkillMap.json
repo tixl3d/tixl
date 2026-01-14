@@ -20,7 +20,7 @@
         "ed9927b5-fae3-4e6f-a4eb-df68e09bf0db",
         "7f093d8e-9d75-46a0-ac61-4a829b70358d"
       ],
-      "Namespace": "Skills.Basics_B01_Welcome",
+      "Namespace": "Skills.Basics.B01_Welcome",
       "TopicType": "Image",
       "Requirement": "None"
     },
@@ -29,8 +29,8 @@
       "Title": "New topic1",
       "Description": "",
       "MapCoordinate": {
-        "X": 28.0,
-        "Y": -17.0
+        "X": 22.0,
+        "Y": -14.0
       },
       "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
       "UnlocksTopics": [],
@@ -57,8 +57,8 @@
       "Title": "New topic3",
       "Description": "",
       "MapCoordinate": {
-        "X": 26.0,
-        "Y": -17.0
+        "X": 20.0,
+        "Y": -14.0
       },
       "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
       "UnlocksTopics": [],
@@ -71,8 +71,8 @@
       "Title": "New topic3",
       "Description": "",
       "MapCoordinate": {
-        "X": 27.0,
-        "Y": -17.0
+        "X": 21.0,
+        "Y": -14.0
       },
       "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
       "UnlocksTopics": [],
@@ -610,8 +610,8 @@
       "Title": "Testing Conditions",
       "Description": "",
       "MapCoordinate": {
-        "X": 15.0,
-        "Y": -22.0
+        "X": 20.0,
+        "Y": -13.0
       },
       "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
       "UnlocksTopics": [],
@@ -878,8 +878,8 @@
       "Title": "New topic55",
       "Description": "",
       "MapCoordinate": {
-        "X": 27.0,
-        "Y": -16.0
+        "X": 21.0,
+        "Y": -13.0
       },
       "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
       "UnlocksTopics": [],
@@ -1729,8 +1729,8 @@
       "Title": "New topic111",
       "Description": "",
       "MapCoordinate": {
-        "X": 25.0,
-        "Y": -17.0
+        "X": 19.0,
+        "Y": -14.0
       },
       "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
       "UnlocksTopics": [],
@@ -1790,8 +1790,8 @@
       "Title": "New topic115",
       "Description": "",
       "MapCoordinate": {
-        "X": 25.0,
-        "Y": -16.0
+        "X": 19.0,
+        "Y": -13.0
       },
       "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
       "UnlocksTopics": [],
@@ -1801,15 +1801,15 @@
     },
     {
       "Id": "10d851f2-770f-4cce-a707-8dae8f0e0d6b",
-      "Title": "???",
+      "Title": "Image Puzzles",
       "Description": "",
       "MapCoordinate": {
-        "X": 12.0,
-        "Y": -1.0
+        "X": 14.0,
+        "Y": -14.0
       },
       "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
       "UnlocksTopics": [],
-      "Namespace": "",
+      "Namespace": "Skills.Image.I20_Puzzles",
       "TopicType": "Image",
       "Requirement": "None"
     },
@@ -1818,13 +1818,43 @@
       "Title": "???",
       "Description": "",
       "MapCoordinate": {
-        "X": 11.0,
-        "Y": 0.0
+        "X": 19.0,
+        "Y": -12.0
       },
       "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
       "UnlocksTopics": [],
       "Namespace": "Skills.Math.M01.BasicMath",
       "TopicType": "Numbers",
+      "Requirement": "None"
+    },
+    {
+      "Id": "b6da8847-315a-4e98-b067-e56ed25eac97",
+      "Title": "Welcome",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": "Skills.Basics.B01_Welcome",
+      "TopicType": "Image",
+      "Requirement": "None"
+    },
+    {
+      "Id": "ef377d93-a847-4c2c-86dd-5d5ede136598",
+      "Title": "Puzzles",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "10d851f2-770f-4cce-a707-8dae8f0e0d6b"
+      ],
+      "Namespace": "Skills.Image.Skills.Image.I20_Puzzles",
+      "TopicType": "Image",
       "Requirement": "None"
     }
   ]

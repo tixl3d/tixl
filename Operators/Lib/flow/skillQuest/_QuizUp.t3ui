@@ -99,6 +99,13 @@
       }
     },
     {
+      "ChildId": "56d18d6d-b40e-4b54-881e-9758c77357d0"/*Text*/,
+      "Position": {
+        "X": 461.81268,
+        "Y": 1582.6168
+      }
+    },
+    {
       "ChildId": "6b69f783-7d10-4c3f-bde4-4b2eb42e400d"/*SliceViewPort*/,
       "Position": {
         "X": 1216.2104,
@@ -196,6 +203,20 @@
       "Position": {
         "X": 905.58765,
         "Y": 519.05963
+      }
+    },
+    {
+      "ChildId": "c69d4175-04b9-421c-81dc-f0ff137a71a3"/*Remap*/,
+      "Position": {
+        "X": 461.81268,
+        "Y": 1512.6168
+      }
+    },
+    {
+      "ChildId": "c9324341-6607-4c70-a8dc-517b34314d60"/*FloatToString*/,
+      "Position": {
+        "X": 461.81268,
+        "Y": 1547.6168
       }
     },
     {

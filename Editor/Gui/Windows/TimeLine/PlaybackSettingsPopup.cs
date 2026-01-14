@@ -257,13 +257,13 @@ internal static class PlaybackSettingsPopup
                         modified = true;
                     }
 
-                    modified |= FormInputs.AddFloat("AudioDecay", ref settings.AudioDecayFactor,
-                                        0.001f,
-                                        1f,
-                                        0.01f,
-                                        true, true,
-                                        "The decay factors controls the impact of [AudioReaction] when AttackMode. Good values strongly depend on style, loudness and variation of input signal.",
-                                        0.9f);
+                    modified |= FormInputs.AddFloat("Audio Decay", ref settings.AudioDecayFactor,
+                                                    0.001f,
+                                                    1f,
+                                                    0.01f,
+                                                    true, true,
+                                                    "The decay factors controls the impact of [AudioReaction] when AttackMode. Good values strongly depend on style, loudness and variation of input signal.",
+                                                    0.9f);
                     
                     if (filepathModified)
                     {
@@ -296,30 +296,30 @@ internal static class PlaybackSettingsPopup
 
 
                     modified |= FormInputs.AddCheckBox("Enable audio beat lock",
-                                           ref settings.EnableAudioBeatLocking,
-                                           """
-                                           If enabled, the editor will look for transient bass, hihats and snares and attempt to look the playback onto the incoming audio signal.
-                                           To use this, start by tapping the base beat (e.g. with X) then tap the beginning of the bar with (e.g. with X).
-                                           From now on, you will see the BPM be constantly sliding to look onto the beat).
-                                           """,
-                                           true
-                                          );
+                                                       ref settings.EnableAudioBeatLocking,
+                                                       """
+                                                       If enabled, the editor will look for transient bass, hihats and snares and attempt to look the playback onto the incoming audio signal.
+                                                       To use this, start by tapping the base beat (e.g. with X) then tap the beginning of the bar with (e.g. with X).
+                                                       From now on, you will see the BPM be constantly sliding to look onto the beat).
+                                                       """,
+                                                       true
+                                                      );
                     FormInputs.AddVerticalSpace();
                 }
 
                 if (!settings.EnableAudioBeatLocking)
                 {
                     modified |= FormInputs.AddFloat("BPM",
-                                                  ref settings.Bpm,
-                                                  0,
-                                                  1000,
-                                                  0.02f,
-                                                  true, true,
-                                                  """
-                                                  In T3 animation units are in bars.
-                                                  The BPM rate controls the animation speed of your project.
-                                                  """,
-                                                  120);
+                                                    ref settings.Bpm,
+                                                    0,
+                                                    1000,
+                                                    0.02f,
+                                                    true, true,
+                                                    """
+                                                    In T3 animation units are in bars.
+                                                    The BPM rate controls the animation speed of your project.
+                                                    """,
+                                                    120);
                 }
 
                 FormInputs.SetIndentToParameters();
@@ -337,39 +337,54 @@ internal static class PlaybackSettingsPopup
                 
                 FormInputs.AddVerticalSpace();
 
-                
                 // var isInitialized = playback is BeatTimingPlayback;
                 // if (!isInitialized)
                 // {
                 //     playback = new BeatTimingPlayback();
                 // }
 
-                modified |= FormInputs.AddFloat("AudioGain", ref settings.AudioGainFactor , 0.01f, 100, 0.01f, true, true,
-                                    """Can be used to adjust the input signal (e.g. in live situation where the input level might vary.""",
-                                    1);
+                modified |= FormInputs.AddFloat("Audio Gain", ref settings.AudioGainFactor , 0.01f, 100, 0.01f, true, true,
+                                                "Can be used to adjust the input signal (e.g. in live situation where the input level might vary.",
+                                                1);
 
-                modified |= FormInputs.AddFloat("AudioDecay", ref settings.AudioDecayFactor,
-                                    0.001f,
-                                    1f,
-                                    0.01f,
-                                    true, true,
-                                    "The decay factors controls the impact of [AudioReaction] when AttackMode. Good values strongly depend on style, loudness and variation of input signal.",
-                                    0.9f);
-                
+                modified |= FormInputs.AddFloat("Audio Decay", ref settings.AudioDecayFactor,
+                                                0.001f,
+                                                1f,
+                                                0.01f,
+                                                true, true,
+                                                "The decay factors controls the impact of [AudioReaction] when AttackMode. Good values strongly depend on style, loudness and variation of input signal.",
+                                                0.9f);
 
                 // Input meter
-                ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 0.5f * ImGui.GetStyle().Alpha);
+                var level = settings.AudioGainFactor * WasapiAudioInput.DecayingAudioLevel * 0.03f;
+                var dl = ImGui.GetWindowDrawList();
                 FormInputs.DrawInputLabel("Input Level");
-                ImGui.PopStyleVar();
                 ImGui.InvisibleButton("##gainMeter", new Vector2(-1, ImGui.GetFrameHeight()));
+
+                var normalizedLevel =  level / 644f;
+                _smoothedLevel = normalizedLevel > _smoothedLevel ? normalizedLevel : Math.Max(normalizedLevel, _smoothedLevel - 2f * ImGui.GetIO().DeltaTime);
+
                 var min = ImGui.GetItemRectMin();
                 var max = ImGui.GetItemRectMax();
-                var dl = ImGui.GetWindowDrawList();
+                var paddedWidth = (max.X - min.X) * .80f;
+                var paddedHeight = (max.Y - min.Y) / 3f;
+                max.X = min.X + paddedWidth;
 
-                var level = settings.AudioGainFactor * WasapiAudioInput.DecayingAudioLevel * 0.03f;
+                // A full gradient with green-ish at bottom, and orange-ish at the top
+                dl.AddRectFilledMultiColor(new Vector2(min.X, min.Y + paddedHeight),
+                                           new Vector2(min.X + paddedWidth, max.Y - paddedHeight),
+                                           UiColors.StatusControlled, UiColors.StatusWarning,
+                                           UiColors.StatusWarning, UiColors.StatusControlled);
 
-                dl.AddRectFilled(min, new Vector2(min.X + level, max.Y), UiColors.BackgroundHover);
+                // We cover it according to smoothed level (the gain range is inverted)
+                dl.AddRectFilled(new Vector2(max.X, min.Y + paddedHeight),
+                                 new Vector2(Math.Min(min.X + paddedWidth * _smoothedLevel, min.X + paddedWidth), max.Y - paddedHeight),
+                                 UiColors.BackgroundHover);
 
+                // Peak LED
+                dl.AddRectFilled(new Vector2(max.X + 5f * T3Ui.UiScaleFactor, min.Y + paddedHeight),
+                                 new Vector2(max.X + 25f * T3Ui.UiScaleFactor, max.Y - paddedHeight),
+                                 normalizedLevel < 1f ? UiColors.BackgroundHover : UiColors.StatusError);
                 FormInputs.DrawInputLabel("Input Device");
                 ImGui.BeginGroup();
 
@@ -496,6 +511,7 @@ internal static class PlaybackSettingsPopup
     /** We use this for modification inside the input field and checking if path is valid before actually assigning it to the soundtrack */
     private static string? _tempSoundtrackFilepathForEdit = string.Empty;
 
+    private static float _smoothedLevel = 0f;
     private static string _warningMessage = string.Empty;
     public const string PlaybackSettingsPopupId = "##PlaybackSettings";
     private const string AllFilesAudioFilesMp3WavOggMp3WavOgg = "Audio files (mp3,wav,ogg)|*.mp3;*.wav;*.ogg";

@@ -19,6 +19,14 @@
       "Description": "If enabled, prints status information, sent/received data, and errors to the T3 log. Useful for debugging."
     },
     {
+      "InputId": "759368a6-5123-4e6b-9087-123456789abc"/*LocalIpAddress*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 450.0
+      },
+      "Usage": "Default"
+    },
+    {
       "InputId": "a3b4c5d6-e7f8-4901-2345-67890abcdef1"/*Port*/,
       "Position": {
         "X": -200.0,

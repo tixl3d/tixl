@@ -1,0 +1,108 @@
+{
+  "Id": "7741bee3-17cf-4185-a92a-53efeba3da65"/*I02l_InvertBlend*/,
+  "Description": "LinearGradient: Invert Blend Mode",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0d7395b1-1bc0-41f3-b3ab-9b51642b5062"/*LinearGradient*/,
+      "Position": {
+        "X": 1298.5903,
+        "Y": 1817.5378
+      }
+    },
+    {
+      "ChildId": "35110282-1b14-4e4f-8621-bc74dc437e3d"/*LinearGradient*/,
+      "AnnotationId": "a7152566-789a-4602-a528-51419131503d",
+      "Position": {
+        "X": 1298.4766,
+        "Y": 2082.3213
+      }
+    },
+    {
+      "ChildId": "61300505-90de-41e4-ba03-1f4887202ffe"/*Time*/,
+      "AnnotationId": "a7152566-789a-4602-a528-51419131503d",
+      "Position": {
+        "X": 1158.4766,
+        "Y": 2152.3213
+      }
+    },
+    {
+      "ChildId": "72df8843-517e-48f0-96b8-f1c7109e9269"/*Time*/,
+      "Position": {
+        "X": 1298.5902,
+        "Y": 1938.7958
+      }
+    },
+    {
+      "ChildId": "7609cc9a-7521-4366-8493-e3b1cb6c5fa3"/*LinearGradient*/,
+      "AnnotationId": "606c89c3-3cd5-4883-8da9-101ee8d767f0",
+      "Position": {
+        "X": 1441.7301,
+        "Y": 2334.827
+      }
+    },
+    {
+      "ChildId": "9a9c27e6-5aa8-4138-9dee-f0f466a3b21d"/*LinearGradient*/,
+      "AnnotationId": "a7152566-789a-4602-a528-51419131503d",
+      "Position": {
+        "X": 1298.4766,
+        "Y": 2117.3213
+      }
+    },
+    {
+      "ChildId": "be3ce1e8-b3e4-44d3-b9ab-86c811e63daf"/*ImageQuiz*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2018.4391
+      }
+    },
+    {
+      "ChildId": "f45a5925-d315-4f1b-9fda-b216af6adf5c"/*LinearGradient*/,
+      "Position": {
+        "X": 1298.4764,
+        "Y": 1879.6852
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "d04a29e6-8247-4e88-8428-16c1f060ec0f"/*ColorBuffer*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2088.439
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "a7152566-789a-4602-a528-51419131503d",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1144.405,
+        "Y": 2050.6006
+      },
+      "Size": {
+        "X": 325.59497,
+        "Y": 154.39941
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "1029ba95-f76c-45f0-92a2-5d9972b4de96",
+      "Description": "Chaining operators with the Difference blend mode can lead to complex results.\nWhite inverts the original color. Black leaves it unchanged."
+    },
+    {
+      "Id": "540ffe93-a3c6-4d61-9cb9-75b54f569694",
+      "Description": "Use the Difference blend mode to to solve the puzzle.",
+      "Style": "CallToAction"
+    }
+  ]
+}

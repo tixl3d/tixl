@@ -1,0 +1,55 @@
+{
+  "Id": "7c90d60d-0d12-736d-ad90-1d2e3f4d5d6d"/*ViscaCamera*/,
+  "Inputs": [
+    {
+      "Id": "0723a93a-3a45-069a-da23-4a5a6a7a8a9a"/*PanRange*/,
+      "DefaultValue": 2448
+    },
+    {
+      "Id": "1823a93a-3a45-069a-da23-4a5a6a7a8a9a"/*TiltRange*/,
+      "DefaultValue": 1296
+    },
+    {
+      "Id": "2923a93a-3a45-069a-da23-4a5a6a7a8a9a"/*PrintToLog*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "34185692-2982-4895-8963-125478963214"/*LocalIpAddress*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "9a23a93a-3a45-069a-da23-4a5a6a7a8a9a"/*Address*/,
+      "DefaultValue": "192.168.1.100"
+    },
+    {
+      "Id": "a123a93a-3a45-069a-da23-4a5a6a7a8a9a"/*Port*/,
+      "DefaultValue": 52381
+    },
+    {
+      "Id": "b223a93a-3a45-069a-da23-4a5a6a7a8a9a"/*Connect*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "b2c3d4e5-f6a7-4890-1234-567890abcdef"/*TextureInput*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "c323a93a-3a45-069a-da23-4a5a6a7a8a9a"/*Pan*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "d423a93a-3a45-069a-da23-4a5a6a7a8a9a"/*Tilt*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "e523a93a-3a45-069a-da23-4a5a6a7a8a9a"/*Zoom*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "f623a93a-3a45-069a-da23-4a5a6a7a8a9a"/*Move*/,
+      "DefaultValue": false
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

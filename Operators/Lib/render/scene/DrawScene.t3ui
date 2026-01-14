@@ -30,6 +30,18 @@
       "Description": "Scene Input from [LoadGltfScene]-Op"
     },
     {
+      "InputId": "2fc29a7b-84ca-4780-8305-ff08da69d405"/*SpecularAA*/,
+      "Position": {
+        "X": 1061.4344,
+        "Y": 4747.4697
+      },
+      "Description": "This reduces specular aliasing on silhouettes and high-frequency normalmap regions.",
+      "Min": 0.0,
+      "Max": 2.0,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
       "InputId": "35d67171-b2e3-45af-9adc-5c6539319ce9"/*AlphaCutOff*/,
       "Position": {
         "X": 1053.3339,

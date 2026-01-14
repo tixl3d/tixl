@@ -249,6 +249,8 @@ internal static class SkillProgressionUi
         ImGui.PopStyleColor();
         if (clicked)
         {
+            SkillTraining.SaveNewResult(SkillProgress.LevelResult.States.Completed);
+            SkillTraining.ExitPlayMode();
             SkillTraining.StartTopic(topic);
         }
     }

@@ -1,4 +1,4 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator.Slots;
@@ -45,21 +45,35 @@ internal static class WidgetElements
     {
         if (string.IsNullOrEmpty(title))
             return;
-            
+
         var canvasScaleY = canvasScale.Y / T3Ui.UiScaleFactor;
-        var font = canvasScaleY > ScaleFactors.LargerScale
-                       ? Fonts.FontNormal
-                       : Fonts.FontSmall;
+       
+        ImFontPtr font;
+        if (canvasScaleY > ScaleFactors.BigScale)
+        {
+            font = Fonts.FontLarge; 
+        }
+            
+        else if (canvasScaleY > ScaleFactors.LargerScale)
+        {
+            font = Fonts.FontNormal;   
+        }
 
+        else
+        {
+            font = Fonts.FontSmall;
+        }
+
+    
         ImGui.PushFont(font);
-
+       
         var fadingColor = UiColors.WidgetTitle
                                   .Fade(MathUtils.NormalizeAndClamp
                                             (
                                              canvasScaleY,
                                              ScaleFactors.NormalScale,
                                              ScaleFactors.BigScale));
-        drawList.AddText(widgetRect.Min + new Vector2(5, 2),
+        drawList.AddText(widgetRect.Min+new Vector2(4,7)*canvasScale,
                          fadingColor,
                          title);
 
@@ -93,14 +107,14 @@ internal static class WidgetElements
         if (string.IsNullOrEmpty(formattedValue))
             return;
             
-        var canvasScaleY = canvasScale.Y;
+        var canvasScaleY = canvasScale.Y / T3Ui.UiScaleFactor;
             
         ImGui.PushFont(GetPrimaryLabelFont(canvasScaleY));
         var labelSize = ImGui.CalcTextSize(formattedValue);
             
         drawList.AddText(new Vector2
-                             (widgetRect.Min.X + 5,
-                              widgetRect.Max.Y - labelSize.Y - 2),
+                             (widgetRect.Min.X + 4* canvasScaleY,
+                              widgetRect.Max.Y - labelSize.Y - 2 * canvasScaleY),
                          GetPrimaryLabelColor(canvasScaleY), 
                          formattedValue);
         ImGui.PopFont();

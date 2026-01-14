@@ -38,6 +38,8 @@ internal sealed class SacnOutput : Instance<SacnOutput>, IStatusProvider, ICusto
     private SacnPacketOptions _packetOptions;
     private volatile bool _printToLog;
     private CancellationTokenSource? _senderCts;
+    private double _lastRetryTime;
+    private double _lastNetworkRefreshTime;
 
     // --- High-Performance Sending Resources ---
     private Thread? _senderThread;
@@ -55,8 +57,19 @@ internal sealed class SacnOutput : Instance<SacnOutput>, IStatusProvider, ICusto
     {
         _printToLog = PrintToLog.GetValue(context);
 
+        var localIpString = LocalIpAddress.GetValue(context);
+        
+        if (string.IsNullOrEmpty(localIpString))
+        {
+            if (context.LocalTime - _lastNetworkRefreshTime > 5.0)
+            {
+                _lastNetworkRefreshTime = context.LocalTime;
+                _networkInterfaces = GetNetworkInterfaces();
+            }
+        }
+
         var settingsChanged = _connectionSettings.Update(
-                                                         LocalIpAddress.GetValue(context),
+                                                         localIpString,
                                                          TargetIpAddress.GetValue(context),
                                                          SendUnicast.GetValue(context)
                                                         );
@@ -67,6 +80,14 @@ internal sealed class SacnOutput : Instance<SacnOutput>, IStatusProvider, ICusto
             if (_printToLog) Log.Debug("sACN Output: Reconnecting sACN socket...", this);
             CloseSocket();
             _connected = TryConnectSacn(_connectionSettings.LocalIp);
+        }
+        else if (!_connected && _connectionSettings.LocalIp != null)
+        {
+            if (context.LocalTime - _lastRetryTime > 2.0)
+            {
+                _lastRetryTime = context.LocalTime;
+                _connected = TryConnectSacn(_connectionSettings.LocalIp);
+            }
         }
 
         var discoverSources = DiscoverSources.GetValue(context);
@@ -496,17 +517,30 @@ internal sealed class SacnOutput : Instance<SacnOutput>, IStatusProvider, ICusto
         return new IPAddress(new byte[] { 239, 255, (byte)(u >> 8), (byte)(u & 0xFF) });
     }
 
-    private static IEnumerable<string> GetLocalIPv4Addresses()
+    private static List<NetworkAdapterInfo> _networkInterfaces = GetNetworkInterfaces();
+
+    private static List<NetworkAdapterInfo> GetNetworkInterfaces()
     {
-        yield return "127.0.0.1";
-        if (!NetworkInterface.GetIsNetworkAvailable()) yield break;
-        foreach (var ni in NetworkInterface.GetAllNetworkInterfaces())
+        var list = new List<NetworkAdapterInfo> { new(IPAddress.Loopback, IPAddress.Parse("255.0.0.0"), "Localhost") };
+        try
         {
-            if (ni.OperationalStatus != OperationalStatus.Up || ni.NetworkInterfaceType == NetworkInterfaceType.Loopback) continue;
-            foreach (var ipInfo in ni.GetIPProperties().UnicastAddresses)
-                if (ipInfo.Address.AddressFamily == AddressFamily.InterNetwork)
-                    yield return ipInfo.Address.ToString();
+            list.AddRange(from ni in NetworkInterface.GetAllNetworkInterfaces()
+                          where ni.OperationalStatus == OperationalStatus.Up && ni.NetworkInterfaceType != NetworkInterfaceType.Loopback
+                          from ip in ni.GetIPProperties().UnicastAddresses
+                          where ip.Address.AddressFamily == AddressFamily.InterNetwork
+                          select new NetworkAdapterInfo(ip.Address, ip.IPv4Mask, ni.Name));
         }
+        catch (Exception e)
+        {
+            Log.Warning("Could not enumerate network interfaces: " + e.Message);
+        }
+
+        return list;
+    }
+
+    private sealed record NetworkAdapterInfo(IPAddress IpAddress, IPAddress SubnetMask, string Name)
+    {
+        public string DisplayName => $"{Name}: {IpAddress}";
     }
 
     private struct SacnPacketOptions
@@ -558,8 +592,8 @@ internal sealed class SacnOutput : Instance<SacnOutput>, IStatusProvider, ICusto
 
     string ICustomDropdownHolder.GetValueForInput(Guid inputId)
     {
-        if (inputId == LocalIpAddress.Id) return LocalIpAddress.Value;
-        if (inputId == TargetIpAddress.Id) return TargetIpAddress.Value;
+        if (inputId == LocalIpAddress.Id) return LocalIpAddress.Value ?? string.Empty;
+        if (inputId == TargetIpAddress.Id) return TargetIpAddress.Value ?? string.Empty;
         return string.Empty;
     }
 
@@ -567,10 +601,8 @@ internal sealed class SacnOutput : Instance<SacnOutput>, IStatusProvider, ICusto
     {
         if (inputId == LocalIpAddress.Id)
         {
-            foreach (var address in GetLocalIPv4Addresses())
-            {
-                yield return address;
-            }
+            _networkInterfaces = GetNetworkInterfaces();
+            foreach (var adapter in _networkInterfaces) yield return adapter.DisplayName;
         }
         else if (inputId == TargetIpAddress.Id)
         {
@@ -602,7 +634,9 @@ internal sealed class SacnOutput : Instance<SacnOutput>, IStatusProvider, ICusto
 
         if (inputId == LocalIpAddress.Id)
         {
-            LocalIpAddress.SetTypedInputValue(selected);
+            var foundAdapter = _networkInterfaces.FirstOrDefault(i => i.DisplayName == selected);
+            if (foundAdapter == null) return;
+            LocalIpAddress.SetTypedInputValue(foundAdapter.IpAddress.ToString());
         }
         else if (inputId == TargetIpAddress.Id)
         {

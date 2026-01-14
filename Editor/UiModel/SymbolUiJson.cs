@@ -76,56 +76,72 @@ internal static class SymbolUiJson
 
         foreach (var childUi in symbolUi.ChildUis.Values.OrderBy(x => x.Id))
         {
+            // Skip orphaned or invalid child UIs
+            if (childUi == null ||
+                childUi.SymbolChild == null ||
+                !symbolUi.Symbol.Children.TryGetValue(childUi.Id, out var symbolChild))
+            {
+                Log.Warning($"Skipping UI child {childUi?.Id} in '{symbolUi.Symbol.Name}' because corresponding symbol child is missing or invalid");
+                continue;
+            }
+
             writer.WriteStartObject(); // child entry
             writer.WriteObject(JsonKeys.ChildId, childUi.Id);
+
+            writer.WriteComment(symbolChild.ReadableName);
+
+            if (childUi.CollapsedIntoAnnotationFrameId != Guid.Empty)
+                writer.WriteObject(JsonKeys.AnnotationId, childUi.CollapsedIntoAnnotationFrameId);
+
+            if (childUi.Style != SymbolUi.Child.Styles.Default)
             {
-                writer.WriteComment(childUi.SymbolChild.ReadableName);
-                if (childUi.CollapsedIntoAnnotationFrameId != Guid.Empty)
+                writer.WriteObject(JsonKeys.Style, childUi.Style);
+
+                if (childUi.Size != SymbolUi.Child.DefaultOpSize)
                 {
-                    writer.WriteObject(JsonKeys.AnnotationId, childUi.CollapsedIntoAnnotationFrameId);
-                }
-
-                if (childUi.Style != SymbolUi.Child.Styles.Default)
-                {
-                    writer.WriteObject(JsonKeys.Style, childUi.Style);
-                    if (childUi.Size != SymbolUi.Child.DefaultOpSize)
-                    {
-                        writer.WritePropertyName(JsonKeys.Size);
-                        _vector2ToJson(writer, childUi.Size);
-                    }
-                }
-
-                if (!string.IsNullOrEmpty(childUi.Comment))
-                {
-                    writer.WriteObject(JsonKeys.Comment, childUi.Comment);
-                }
-
-                writer.WritePropertyName(JsonKeys.Position);
-                _vector2ToJson(writer, childUi.PosOnCanvas);
-
-                if (childUi.SnapshotGroupIndex != 0)
-                    writer.WriteObject(nameof(SymbolUi.Child.SnapshotGroupIndex), childUi.SnapshotGroupIndex);
-
-                if (childUi.ConnectionStyleOverrides.Count > 0)
-                {
-                    writer.WritePropertyName(JsonKeys.ConnectionStyleOverrides);
-                    writer.WriteStartArray();
-                    foreach (var (key, value) in childUi.ConnectionStyleOverrides)
-                    {
-                        writer.WriteStartObject();
-                        writer.WriteObject(JsonKeys.Id, key);
-                        writer.WriteObject(JsonKeys.Style, value);
-                        writer.WriteEndObject();
-                    }
-
-                    writer.WriteEndArray();
+                    writer.WritePropertyName(JsonKeys.Size);
+                    _vector2ToJson(writer, childUi.Size);
                 }
             }
+
+            if (!string.IsNullOrEmpty(childUi.Comment))
+                writer.WriteObject(JsonKeys.Comment, childUi.Comment);
+
+            writer.WritePropertyName(JsonKeys.Position);
+            _vector2ToJson(writer, childUi.PosOnCanvas);
+
+            if (childUi.SnapshotGroupIndex != 0)
+                writer.WriteObject(nameof(SymbolUi.Child.SnapshotGroupIndex), childUi.SnapshotGroupIndex);
+
+            // Safely handle connection style overrides
+            if (childUi.ConnectionStyleOverrides != null &&
+                childUi.ConnectionStyleOverrides.Count > 0)
+            {
+                writer.WritePropertyName(JsonKeys.ConnectionStyleOverrides);
+                writer.WriteStartArray();
+
+                foreach (var kv in childUi.ConnectionStyleOverrides)
+                {
+                    // Skip any malformed entries
+                    if (kv.Key == Guid.Empty)
+                        continue;
+
+                    writer.WriteStartObject();
+                    writer.WriteObject(JsonKeys.Id, kv.Key);
+                    writer.WriteObject(JsonKeys.Style, kv.Value);
+                    writer.WriteEndObject();
+                }
+
+                writer.WriteEndArray();
+            }
+
             writer.WriteEndObject();
         }
 
         writer.WriteEndArray();
     }
+
+
 
     private static void WriteOutputUis(SymbolUi symbolUi, JsonTextWriter writer)
     {

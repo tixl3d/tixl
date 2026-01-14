@@ -1,0 +1,51 @@
+{
+  "Id": "8b23c93b-3b45-4c9b-9c23-4d5e6f7a8b9c"/*OnvifCamera*/,
+  "Inputs": [
+    {
+      "Id": "1e56f26e-6e78-4f2e-cf56-7f8a8b9c0d2f"/*Address*/,
+      "DefaultValue": "192.168.1.100"
+    },
+    {
+      "Id": "2f67a37f-7f89-403f-da67-8a9b0c1d2e3f"/*Username*/,
+      "DefaultValue": "admin"
+    },
+    {
+      "Id": "3b78b48b-8b90-514b-eb78-9b0c1d2e3f4b"/*Password*/,
+      "DefaultValue": "password"
+    },
+    {
+      "Id": "4c89c59c-9c01-625c-fc89-0c1d2e3f4c5c"/*Connect*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "5d90d60d-0d12-736d-ad90-1d2e3f4d5d6d"/*Pan*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "6e01e71e-1e23-847e-be01-2e3f4e5e6e7e"/*Tilt*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "74185692-2982-4895-8963-125478963214"/*LocalIpAddress*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "7f12f82f-2f34-958f-cf12-3f4f5f6f7f8f"/*Zoom*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "8451268e-3156-4f5c-8932-156842356842"/*Discover*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "8a23a93a-3a45-069a-da23-4a5a6a7a8a9a"/*Move*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "9b8c7d6e-5f4a-3b2c-1d0e-9f8e7d6c5b4a"/*PrintToLog*/,
+      "DefaultValue": false
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

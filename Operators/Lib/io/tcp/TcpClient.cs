@@ -1,55 +1,60 @@
 #nullable enable
+using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Threading;
 using T3.Core.Utils;
 
 namespace Lib.io.tcp
 {
-    [Guid("A2B3C4D5-E6F7-4890-1234-567890ABCDEF")] // Updated GUID
+    [Guid("A2B3C4D5-E6F7-4890-1234-567890ABCDEF")]
     internal sealed class TcpClient : Instance<TcpClient>
-                                    , IStatusProvider, IDisposable
+                                    , IStatusProvider, ICustomDropdownHolder, IDisposable
     {
         private readonly List<string> _messageHistory = new();
         private readonly ConcurrentQueue<string> _receivedQueue = new();
         private readonly object _socketLock = new();
 
-        [Input(Guid = "C2D3E4F5-A6B7-4890-1234-567890ABCDEF")] // Updated GUID
+        [Input(Guid = "C2D3E4F5-A6B7-4890-1234-567890ABCDEF")]
         public readonly InputSlot<bool> Connect = new();
 
-        [Input(Guid = "F1E2D3C4-B5A6-4789-0123-456789ABCDEF")] // Updated GUID
+        [Input(Guid = "F1E2D3C4-B5A6-4789-0123-456789ABCDEF")]
         public readonly InputSlot<string> Host = new("localhost");
 
-        [Output(Guid = "3B4C5D6E-7F8A-4901-2345-67890ABCDEF1")] // Updated GUID
+        [Output(Guid = "3B4C5D6E-7F8A-4901-2345-67890ABCDEF1")]
         public readonly Slot<bool> IsConnected = new();
 
-        [Input(Guid = "D4E5F6A7-B8C9-4012-3456-7890ABCDEF12")] // Updated GUID
+        [Input(Guid = "D4E5F6A7-B8C9-4012-3456-7890ABCDEF12")]
         public readonly InputSlot<int> ListLength = new(10);
 
-        [Input(Guid = "B5C6D7E8-F9A0-4123-4567-890ABCDEF123")] // Updated GUID
+        [Input(Guid = "B5C6D7E8-F9A0-4123-4567-890ABCDEF123")]
         public readonly MultiInputSlot<string> MessageParts = new();
 
-        [Input(Guid = "A3B4C5D6-E7F8-4901-2345-67890ABCDEF1")] // Updated GUID
+        [Input(Guid = "A3B4C5D6-E7F8-4901-2345-67890ABCDEF1")]
         public readonly InputSlot<int> Port = new(8080);
 
-        [Input(Guid = "3C4D5E6F-7A8B-4901-2345-67890ABCDEF1")] // Updated GUID
+        [Input(Guid = "3C4D5E6F-7A8B-4901-2345-67890ABCDEF1")]
         public readonly InputSlot<bool> PrintToLog = new();
 
-        [Output(Guid = "D5C4B3A2-E1F0-4987-6543-210FEDCBA987", DirtyFlagTrigger = DirtyFlagTrigger.Animated)] // Updated GUID
+        [Output(Guid = "D5C4B3A2-E1F0-4987-6543-210FEDCBA987", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
         public readonly Slot<List<string>> ReceivedLines = new();
 
-        [Output(Guid = "F1E0D9C8-7B6A-4543-210F-EDCBA9876543", DirtyFlagTrigger = DirtyFlagTrigger.Animated)] // Updated GUID
+        [Output(Guid = "F1E0D9C8-7B6A-4543-210F-EDCBA9876543", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
         public readonly Slot<string> ReceivedString = new();
 
-        [Input(Guid = "F7A8B9C0-D1E2-4345-6789-0ABCDEF12345")] // Updated GUID
+        [Input(Guid = "F7A8B9C0-D1E2-4345-6789-0ABCDEF12345")]
         public readonly InputSlot<bool> SendOnChange = new(true);
 
-        [Input(Guid = "1B2C3D4E-5F6A-4789-0123-456789ABCDEF")] // Updated GUID
+        [Input(Guid = "1B2C3D4E-5F6A-4789-0123-456789ABCDEF")]
         public readonly InputSlot<bool> SendTrigger = new();
 
-        [Input(Guid = "E6F7A8B9-C0D1-4234-5678-90ABCDEF1234")] // Updated GUID
+        [Input(Guid = "E6F7A8B9-C0D1-4234-5678-90ABCDEF1234")]
         public readonly InputSlot<string> Separator = new(" ");
 
-        [Output(Guid = "1A2B3C4D-5E6F-4789-A0B1-C2D3E4F5A6B7", DirtyFlagTrigger = DirtyFlagTrigger.Animated)] // Updated GUID
+        [Input(Guid = "759368A6-5123-4E6B-9087-123456789ABC")]
+        public readonly InputSlot<string> LocalIpAddress = new("0.0.0.0 (Any)");
+
+        [Output(Guid = "1A2B3C4D-5E6F-4789-A0B1-C2D3E4F5A6B7", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
         public readonly Slot<bool> WasTrigger = new();
 
         private CancellationTokenSource? _cts;
@@ -57,6 +62,7 @@ namespace Lib.io.tcp
         private bool _lastConnectState;
         private string? _lastHost;
         private int _lastPort;
+        private string? _lastLocalIp;
         private string? _lastSentMessage;
         private bool _printToLog;
 
@@ -75,8 +81,6 @@ namespace Lib.io.tcp
             if (_disposed) return;
             _disposed = true;
 
-            // Do not await StopAsync directly in Dispose as Dispose should not block.
-            // Run it as a fire-and-forget task. The internal StopAsync handles its own exceptions.
             Task.Run(StopAsync);
             _receivedQueue.Clear();
             _messageHistory.Clear();
@@ -87,15 +91,16 @@ namespace Lib.io.tcp
             if (_disposed)
                 return;
 
-            _printToLog = PrintToLog.GetValue(context); // Get value for PrintToLog
+            _printToLog = PrintToLog.GetValue(context);
             var shouldConnect = Connect.GetValue(context);
             var host = Host.GetValue(context);
             var port = Port.GetValue(context);
+            var localIp = LocalIpAddress.GetValue(context);
 
-            var settingsChanged = shouldConnect != _lastConnectState || host != _lastHost || port != _lastPort;
+            var settingsChanged = shouldConnect != _lastConnectState || host != _lastHost || port != _lastPort || localIp != _lastLocalIp;
             if (settingsChanged)
             {
-                _ = HandleConnectionChange(shouldConnect, host, port);
+                _ = HandleConnectionChange(shouldConnect, host, port, localIp);
             }
 
             HandleMessageSending(context);
@@ -103,16 +108,17 @@ namespace Lib.io.tcp
             UpdateStatusMessage();
         }
 
-        private async Task HandleConnectionChange(bool shouldConnect, string? host, int port)
+        private async Task HandleConnectionChange(bool shouldConnect, string? host, int port, string? localIp)
         {
             await StopAsync();
             _lastConnectState = shouldConnect;
             _lastHost = host;
             _lastPort = port;
+            _lastLocalIp = localIp;
 
             if (shouldConnect && !string.IsNullOrWhiteSpace(host))
             {
-                await StartAsync(host, port);
+                await StartAsync(host, port, localIp);
             }
         }
 
@@ -156,7 +162,7 @@ namespace Lib.io.tcp
             IsConnected.Value = _socket?.IsConnected ?? false;
         }
 
-        private async Task StartAsync(string host, int port)
+        private async Task StartAsync(string host, int port, string? localIp)
         {
             lock (_socketLock)
             {
@@ -174,7 +180,7 @@ namespace Lib.io.tcp
                     Log.Debug($"TCP Client: Attempting to connect to {host}:{port}...", this);
                 }
 
-                await _socket!.ConnectAsync(host, port);
+                await _socket!.ConnectAsync(host, port, localIp);
                 SetStatus($"Connected to {host}:{port}", IStatusProvider.StatusLevel.Success);
                 if (_printToLog)
                 {
@@ -208,25 +214,23 @@ namespace Lib.io.tcp
             TcpClientSocket? socketToDispose = null;
             CancellationTokenSource? ctsToDispose = null;
 
-            // Use a lock to safely capture the current socket and CTS
             lock (_socketLock)
             {
                 if (_socket != null)
                 {
                     socketToDispose = _socket;
-                    _socket = null; // Clear it within the lock to prevent further use
+                    _socket = null;
                 }
 
                 if (_cts != null)
                 {
                     ctsToDispose = _cts;
-                    _cts = null; // Clear it within the lock
+                    _cts = null;
                 }
             }
 
             try
             {
-                // Cancel the token source outside the lock
                 ctsToDispose?.Cancel();
 
                 if (_printToLog)
@@ -234,9 +238,8 @@ namespace Lib.io.tcp
                     Log.Debug($"TCP Client: Stopping connection.", this);
                 }
 
-                // Dispose resources outside the lock (they are synchronous here)
                 socketToDispose?.Dispose();
-                ctsToDispose?.Dispose(); // Dispose CTS after cancelling
+                ctsToDispose?.Dispose();
 
                 SetStatus("Disconnected", IStatusProvider.StatusLevel.Notice);
                 if (_printToLog)
@@ -248,11 +251,10 @@ namespace Lib.io.tcp
             }
             catch (Exception e)
             {
-                // Catch any other unexpected errors during the stop process
                 Log.Warning($"TCP Client: Stop error: {e.Message}", this);
             }
 
-            await Task.Yield(); // Add an await to satisfy CS1998 warning
+            await Task.Yield();
         }
 
         private async Task ReceiveLoop()
@@ -268,13 +270,13 @@ namespace Lib.io.tcp
                     lock (_socketLock)
                     {
                         currentSocket = _socket;
-                        cancellationToken = _cts?.Token ?? CancellationToken.None; // Capture token safely
+                        cancellationToken = _cts?.Token ?? CancellationToken.None;
                         if (currentSocket == null || !currentSocket.IsConnected)
                             break;
                     }
 
                     var bytesRead = await currentSocket.ReceiveAsync(buffer, cancellationToken);
-                    if (bytesRead == 0) // Connection closed
+                    if (bytesRead == 0)
                     {
                         if (_printToLog)
                         {
@@ -297,11 +299,9 @@ namespace Lib.io.tcp
             }
             catch (OperationCanceledException)
             {
-                /* Expected during cancellation */
             }
             catch (Exception ex)
             {
-                // Catch socket exceptions, network errors, etc.
                 SetStatus($"Receive error: {ex.Message}", IStatusProvider.StatusLevel.Warning);
                 if (_printToLog)
                 {
@@ -310,7 +310,6 @@ namespace Lib.io.tcp
             }
             finally
             {
-                // Ensure StopAsync is called regardless of how the loop exits
                 await StopAsync();
             }
         }
@@ -365,7 +364,7 @@ namespace Lib.io.tcp
 
         private sealed class TcpClientSocket : IDisposable
         {
-            private readonly object _streamLock = new(); // Used for stream access synchronization
+            private readonly object _streamLock = new();
             private System.Net.Sockets.TcpClient? _client;
             private NetworkStream? _stream;
 
@@ -373,16 +372,24 @@ namespace Lib.io.tcp
 
             public void Dispose()
             {
-                // Synchronous disposal of underlying resources.
-                // It's generally safe to dispose of NetworkStream and TcpClient synchronously.
                 _stream?.Dispose();
                 _client?.Dispose();
             }
 
-            public async Task ConnectAsync(string host, int port)
+            public async Task ConnectAsync(string host, int port, string? localIpAddress)
             {
-                _client = new System.Net.Sockets.TcpClient();
-                await _client.ConnectAsync(host, port); // This is an awaitable call
+                IPAddress? localIp = null;
+                if (!string.IsNullOrEmpty(localIpAddress) && localIpAddress != "0.0.0.0 (Any)")
+                {
+                    IPAddress.TryParse(localIpAddress, out localIp);
+                }
+
+                if (localIp != null)
+                    _client = new System.Net.Sockets.TcpClient(new IPEndPoint(localIp, 0));
+                else
+                    _client = new System.Net.Sockets.TcpClient();
+
+                await _client.ConnectAsync(host, port);
                 lock (_streamLock)
                 {
                     _stream = _client.GetStream();
@@ -392,25 +399,25 @@ namespace Lib.io.tcp
             public async Task<int> ReceiveAsync(byte[] buffer, CancellationToken ct)
             {
                 NetworkStream? currentStream;
-                lock (_streamLock) // Lock for safe access to _stream
+                lock (_streamLock)
                 {
                     currentStream = _stream;
                     if (currentStream == null) return 0;
                 }
 
-                return await currentStream.ReadAsync(buffer, 0, buffer.Length, ct); // This is an awaitable call
+                return await currentStream.ReadAsync(buffer, 0, buffer.Length, ct);
             }
 
             public async Task SendAsync(byte[] data, CancellationToken ct)
             {
                 NetworkStream? currentStream;
-                lock (_streamLock) // Lock for safe access to _stream
+                lock (_streamLock)
                 {
                     currentStream = _stream;
                     if (currentStream == null) return;
                 }
 
-                await currentStream.WriteAsync(data, 0, data.Length, ct); // This is an awaitable call
+                await currentStream.WriteAsync(data, 0, data.Length, ct);
             }
         }
 
@@ -426,6 +433,56 @@ namespace Lib.io.tcp
 
         public IStatusProvider.StatusLevel GetStatusLevel() => _statusLevel;
         public string GetStatusMessage() => _statusMessage;
+        #endregion
+
+        #region Network Interface Logic
+        private static List<NetworkAdapterInfo> _networkInterfaces = new();
+
+        private static List<NetworkAdapterInfo> GetNetworkInterfaces()
+        {
+            var list = new List<NetworkAdapterInfo>();
+            list.Add(new NetworkAdapterInfo(IPAddress.Any, IPAddress.Any, "Any"));
+            list.Add(new NetworkAdapterInfo(IPAddress.Loopback, IPAddress.Parse("255.0.0.0"), "Localhost"));
+            
+            try
+            {
+                list.AddRange(from ni in NetworkInterface.GetAllNetworkInterfaces()
+                              where ni.OperationalStatus == OperationalStatus.Up && ni.NetworkInterfaceType != NetworkInterfaceType.Loopback
+                              from ip in ni.GetIPProperties().UnicastAddresses
+                              where ip.Address.AddressFamily == AddressFamily.InterNetwork
+                              select new NetworkAdapterInfo(ip.Address, ip.IPv4Mask, ni.Name));
+            }
+            catch (Exception e)
+            {
+                Log.Warning("Could not enumerate network interfaces: " + e.Message);
+            }
+            return list;
+        }
+
+        private sealed record NetworkAdapterInfo(IPAddress IpAddress, IPAddress SubnetMask, string Name)
+        {
+            public string DisplayName => $"{Name}: {IpAddress}";
+        }
+        #endregion
+
+        #region ICustomDropdownHolder
+        string ICustomDropdownHolder.GetValueForInput(Guid id) => id == LocalIpAddress.Id ? LocalIpAddress.Value ?? string.Empty : string.Empty;
+
+        IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid id)
+        {
+            if (id == LocalIpAddress.Id)
+            {
+                _networkInterfaces = GetNetworkInterfaces();
+                foreach (var adapter in _networkInterfaces) yield return adapter.DisplayName;
+            }
+        }
+
+        void ICustomDropdownHolder.HandleResultForInput(Guid id, string? s, bool i)
+        {
+            if (string.IsNullOrEmpty(s) || !i || id != LocalIpAddress.Id) return;
+            var foundAdapter = _networkInterfaces.FirstOrDefault(adapter => adapter.DisplayName == s);
+            if (foundAdapter != null) LocalIpAddress.SetTypedInputValue(foundAdapter.IpAddress.ToString());
+        }
         #endregion
     }
 }

@@ -1,0 +1,127 @@
+{
+  "Id": "bd3f2fa7-48f7-4ca3-8c32-92fe0d9e3fff"/*B01b_RearrangeStacks*/,
+  "Description": "Stack Attack",
+  "SymbolTags": "16",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "00d45d58-e13b-4d34-b2f1-b1d3f9ab1556"/*Raster*/,
+      "AnnotationId": "7fa7fdbc-6e64-4f13-bb08-e4df6b0f8023",
+      "Position": {
+        "X": 1056.6931,
+        "Y": 2185.0276
+      }
+    },
+    {
+      "ChildId": "43d35c42-9c4b-400b-be28-e714421383b2"/*Blob*/,
+      "AnnotationId": "7fa7fdbc-6e64-4f13-bb08-e4df6b0f8023",
+      "Position": {
+        "X": 1056.6931,
+        "Y": 2150.0276
+      }
+    },
+    {
+      "ChildId": "6184d203-c5eb-4683-b339-efbd6ab994c2"/*Raster*/,
+      "Position": {
+        "X": 1317.4214,
+        "Y": 1842.4305
+      }
+    },
+    {
+      "ChildId": "8a190a1c-779e-4fe4-841a-77f2a4b8a602"/*RoundedRect*/,
+      "AnnotationId": "7fa7fdbc-6e64-4f13-bb08-e4df6b0f8023",
+      "Position": {
+        "X": 1056.6931,
+        "Y": 2115.0286
+      }
+    },
+    {
+      "ChildId": "ce2b8e28-76f5-4ff6-b793-2ac09fc69062"/*ImageQuiz*/,
+      "Position": {
+        "X": 1548.4866,
+        "Y": 1941.9801
+      }
+    },
+    {
+      "ChildId": "e1ced027-06a0-4a71-8f0c-3cb6b6658b52"/*Blob*/,
+      "Position": {
+        "X": 1142.3529,
+        "Y": 1841.2993
+      }
+    },
+    {
+      "ChildId": "e70d3ff1-c036-4c38-9d89-277f03b747e7"/*RoundedRect*/,
+      "Position": {
+        "X": 952.01245,
+        "Y": 1837.34
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "e4c0801a-99f8-442c-888d-d207fc36dace"/*ColorBuffer*/,
+      "Position": {
+        "X": 1548.4866,
+        "Y": 2011.9801
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "7fa7fdbc-6e64-4f13-bb08-e4df6b0f8023",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1025.2124,
+        "Y": 2071.0398
+      },
+      "Size": {
+        "X": 248.70142,
+        "Y": 179.17786
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "572abd1b-5229-4ebd-aa93-70dc1fd44669",
+      "Description": "TiXL can snap operators into horizontal or vertical stacks.\nThis reduces clutter and makes graphs easier to read."
+    },
+    {
+      "Id": "c6ae3252-568a-4069-baa6-93ac94122f81",
+      "ChildId": "e70d3ff1-c036-4c38-9d89-277f03b747e7",
+      "Description": "When operators get close, they snap and connect automatically.\nTry dragging [RoundedRect] toward [Blob].",
+      "Style": "CallToAction"
+    },
+    {
+      "Id": "0e9869fc-6bcd-4ae1-ace6-dd5a9d41b534",
+      "ChildId": "e70d3ff1-c036-4c38-9d89-277f03b747e7",
+      "Description": "Dragging a non-selected operator moves the entire stack.\nLong-press to separate a single operator.",
+      "Style": "CallToAction"
+    },
+    {
+      "Id": "5fbb27f3-b1d9-40f4-bcde-d910642cb8e6",
+      "Description": "Shake an operator to remove its connections."
+    },
+    {
+      "Id": "e85e893a-8864-4f6b-8424-85b98680ddb8",
+      "Description": "Use Ctrl+Z to undo movements or disconnects."
+    },
+    {
+      "Id": "c2746888-618a-43c5-84c9-9981e4bd8771",
+      "ChildId": "6184d203-c5eb-4683-b339-efbd6ab994c2",
+      "Description": "Tip: Operators can also snap into vertical stacks."
+    },
+    {
+      "Id": "75e0ace6-18c8-4d3e-9bd1-9285f1cb5155",
+      "ChildId": "e70d3ff1-c036-4c38-9d89-277f03b747e7",
+      "Description": "To finish the level, stack [RoundedRect], [Blob], and [Raster] onto [ImageQuiz].",
+      "Style": "CallToAction"
+    }
+  ]
+}

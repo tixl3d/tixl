@@ -145,7 +145,7 @@ internal sealed partial class AssetLibrary
                     }
                 }
 
-                if (DragAndDropHandling.IsDraggingWith(DragAndDropHandling.AssetDraggingId))
+                if (DragAndDropHandling.IsDraggingWith(DragAndDropHandling.DragTypes.FileAsset))
                 {
                     ImGui.SameLine();
                     ImGui.PushID("DropButton");
@@ -244,7 +244,7 @@ internal sealed partial class AssetLibrary
                                                 title: asset.FileInfo.Name,
                                                 id: "##symbolTreeSymbolContextMenu");
 
-            DragAndDropHandling.HandleDragSourceForLastItem(DragAndDropHandling.AssetDraggingId, asset.FileAliasPath, "Move or use asset");
+            DragAndDropHandling.HandleDragSourceForLastItem(DragAndDropHandling.DragTypes.FileAsset, asset.FileAliasPath, "Move or use asset");
 
             if (ImGui.IsItemHovered())
             {

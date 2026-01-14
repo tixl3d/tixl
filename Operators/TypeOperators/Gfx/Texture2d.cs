@@ -24,7 +24,7 @@ public sealed class Texture2d : Instance<Texture2d>
 
         var requestedMipLevels = MipLevels.GetValue(context);
         var maxMapLevels = (int)Math.Log2(Math.Max(size.Width, size.Height));
-        var mipLevels = Math.Min(requestedMipLevels, maxMapLevels) + 1;
+        var mipLevels = Math.Min(requestedMipLevels, maxMapLevels) + 1; // Adding 1 because 0 means -> max out levels. 1 means "only original resolution".
 
         try
         {

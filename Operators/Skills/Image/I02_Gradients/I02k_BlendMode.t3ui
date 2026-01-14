@@ -1,0 +1,93 @@
+{
+  "Id": "cf84bdd7-14aa-4b4c-b461-cda2f525c696"/*I02k_BlendMode*/,
+  "Description": "LinearGradient: Blend Modes",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "08509453-40ca-48f7-bcbc-e7c96fc356d7"/*ImageQuiz*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2018.4391
+      }
+    },
+    {
+      "ChildId": "1bc15b45-8d18-447a-b465-4ae8563cd5c0"/*LinearGradient*/,
+      "AnnotationId": "e53854d8-7f2a-4e6c-9324-d32eb7e42e1f",
+      "Position": {
+        "X": 1298.4766,
+        "Y": 2117.3213
+      }
+    },
+    {
+      "ChildId": "2d122187-19b3-4daa-b9c6-c53e7ed503f2"/*LinearGradient*/,
+      "Position": {
+        "X": 1306.5621,
+        "Y": 1919.9529
+      }
+    },
+    {
+      "ChildId": "65eea8e4-9a9b-44eb-9599-4563875bae5a"/*LoadImage*/,
+      "Position": {
+        "X": 1306.5621,
+        "Y": 1859.3586
+      }
+    },
+    {
+      "ChildId": "7dea3257-770a-4f28-8759-1ce1a7124625"/*LoadImage*/,
+      "AnnotationId": "e53854d8-7f2a-4e6c-9324-d32eb7e42e1f",
+      "Position": {
+        "X": 1298.4766,
+        "Y": 2082.3213
+      }
+    },
+    {
+      "ChildId": "fea4e891-8195-430a-b068-9c5ef24233f8"/*LinearGradient*/,
+      "AnnotationId": "606c89c3-3cd5-4883-8da9-101ee8d767f0",
+      "Position": {
+        "X": 1441.7301,
+        "Y": 2334.827
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "2d1c3890-e9f3-4656-b178-6bfb0672c2b3"/*ColorBuffer*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2088.439
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "e53854d8-7f2a-4e6c-9324-d32eb7e42e1f",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1271.0979,
+        "Y": 2048.5063
+      },
+      "Size": {
+        "X": 210.0,
+        "Y": 129.20923
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "6a241ca9-93f4-415e-b23f-872598bf3607",
+      "Description": "Many image operators include a Blend Mode parameter.\nExploring blend modes can lead to strong stylistic effects."
+    },
+    {
+      "Id": "471b10a2-311d-4698-9219-e9820b438c99",
+      "Description": "Recreate the image without changing any color steps.",
+      "Style": "CallToAction"
+    }
+  ]
+}

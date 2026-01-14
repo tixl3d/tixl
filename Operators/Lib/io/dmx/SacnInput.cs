@@ -47,6 +47,7 @@ internal sealed class SacnInput : Instance<SacnInput>, IStatusProvider, ICustomD
     private bool _printToLog; // Added for PrintToLog functionality
     private volatile bool _runListener;
     private UdpClient? _udpClient;
+    private double _lastRetryTime;
 
     public SacnInput()
     {
@@ -73,6 +74,14 @@ internal sealed class SacnInput : Instance<SacnInput>, IStatusProvider, ICustomD
             StopListening();
             if (active) StartListening();
             _lastLocalIp = localIp;
+        }
+        else if (active && (_listenerThread == null || !_listenerThread.IsAlive))
+        {
+            if (context.LocalTime - _lastRetryTime > 2.0)
+            {
+                _lastRetryTime = context.LocalTime;
+                StartListening();
+            }
         }
 
         if (_isListening)

@@ -1,0 +1,76 @@
+{
+  "Id": "1112d3ea-fef0-4d7c-a265-a067030256a1"/*FastBlur*/,
+  "Description": "Provides better quality and much faster speed that the [Blur] but does only allow radius control.\n\nThis effect uses the Marius Bjørge / Masaki Kawase dual-filtering method. It provides a cinematic, high-quality light scatter by recursively downsampling and then upsampling the image using a 9-tap tent kernel. It is optimized for mobile and VR-level performance while providing 'Gaussian-level' smoothness.",
+  "InputUis": [
+    {
+      "InputId": "01d8a4a8-56ca-4e6d-a6c9-8092e4153963"/*MaxLevels*/,
+      "Position": {
+        "X": 2295.046,
+        "Y": 1466.5889
+      },
+      "Description": "The number of blur levels applied. The maximum is 12 (which should be enough for most resolutions).\n\nIn most scenarios you wouldn't adjust this, but in edge scenarios, it might help to optimize performance or craft special looks.",
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "c1a630e8-2d0b-412d-b2c2-c26e79befae2"/*Image*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 2295.046,
+        "Y": 1396.5889
+      }
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "007934b7-db18-4806-87af-9ed171d2b399"/*_ExecuteFastBlurPasses*/,
+      "Position": {
+        "X": 2435.046,
+        "Y": 1396.5889
+      }
+    },
+    {
+      "ChildId": "59e50af9-bfc1-47c2-8de4-10a6158cfd66"/*SrvFromTexture2d*/,
+      "Position": {
+        "X": 2295.046,
+        "Y": 1431.5889
+      }
+    },
+    {
+      "ChildId": "ad9a0924-046d-4aa0-8269-3e48f4cb9c74"/*LinearSampler*/,
+      "Position": {
+        "X": 2295.046,
+        "Y": 1606.5889
+      }
+    },
+    {
+      "ChildId": "c5d073f7-22ac-4062-a2d3-f31eb8de3d17"/*PixelShader*/,
+      "Position": {
+        "X": 2295.046,
+        "Y": 1571.5889
+      }
+    },
+    {
+      "ChildId": "cbb2a266-df41-451c-a027-5d5dabb2053c"/*VertexShader*/,
+      "Position": {
+        "X": 2295.046,
+        "Y": 1501.5889
+      }
+    },
+    {
+      "ChildId": "f1bbb1bb-70a1-490a-8df2-950b3a14834e"/*PixelShader*/,
+      "Position": {
+        "X": 2295.046,
+        "Y": 1536.5889
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "e0a77e1e-d60f-4e37-987d-80fba2468497"/*Result*/,
+      "Position": {
+        "X": 2435.046,
+        "Y": 1641.5889
+      }
+    }
+  ]
+}

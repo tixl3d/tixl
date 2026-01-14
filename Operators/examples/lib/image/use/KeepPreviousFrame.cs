@@ -5,16 +5,17 @@ namespace Examples.Lib.image.use;
 [Guid("57c1fe66-d8bc-4ea5-ad25-6986d4c2bba4")]
  internal sealed class KeepPreviousFrame : Instance<KeepPreviousFrame>
 {
-    [Output(Guid = "7ba708e0-1cbb-411a-aa2c-bc78d248d761")]
-    public readonly Slot<Texture2D> TextureA = new();
-
     [Output(Guid = "B8C943B7-A402-4AE1-A489-EEFF900889CD")]
-    public readonly Slot<Texture2D> TextureB = new();
+    public readonly Slot<Texture2D> PreviousFrame = new();
+    
+    [Output(Guid = "7ba708e0-1cbb-411a-aa2c-bc78d248d761")]
+    public readonly Slot<Texture2D> CurrentFrame = new();
+
 
     public KeepPreviousFrame()
     {
-        TextureA.UpdateAction += UpdateTexture;
-        TextureB.UpdateAction += UpdateTexture;
+        CurrentFrame.UpdateAction += UpdateTexture;
+        PreviousFrame.UpdateAction += UpdateTexture;
     }
 
     private void UpdateTexture(EvaluationContext context)
@@ -59,10 +60,10 @@ namespace Examples.Lib.image.use;
             Log.Error($"Failed to create Texture2d: {e.Message}", this);
         }
 
-        TextureA.Value = _bufferToggle ? _prevTextureA : _prevTextureB;
-        TextureB.Value = _bufferToggle ? _prevTextureB : _prevTextureA;
-        TextureA.DirtyFlag.Clear();
-        TextureB.DirtyFlag.Clear();
+        CurrentFrame.Value = _bufferToggle ? _prevTextureA : _prevTextureB;
+        PreviousFrame.Value = _bufferToggle ? _prevTextureB : _prevTextureA;
+        CurrentFrame.DirtyFlag.Clear();
+        PreviousFrame.DirtyFlag.Clear();
 
         _bufferToggle = !_bufferToggle;
     }

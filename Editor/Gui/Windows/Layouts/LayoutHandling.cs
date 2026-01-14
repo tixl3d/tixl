@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 
 using System.IO;
 using ImGuiNET;
@@ -83,7 +83,6 @@ internal static class LayoutHandling
     public static void LoadAndApplyLayoutOrFocusMode(Layouts layoutId)
     {
         var index = (int)layoutId;
-        //var isFocusMode = index == 11;
 
         var relativePath = Path.Combine(LayoutSubfolder, GetLayoutFilename(index));
         if (!UserData.TryLoadingOrWriteDefaults(relativePath, out var jsonBlob))
@@ -103,8 +102,10 @@ internal static class LayoutHandling
             graphWindow.SetWindowToNormal();
         }
 
-        UserSettings.Config.FocusMode = layoutId == Layouts.FocusMode;
-        UserSettings.Config.WindowLayoutIndex = index;
+        var isFocusMode = layoutId == Layouts.FocusMode;
+        UserSettings.Config.FocusMode = isFocusMode;
+        if (!isFocusMode)
+            UserSettings.Config.WindowLayoutIndex = index;
     }
 
     public static string GraphPrefix => "Graph View##";

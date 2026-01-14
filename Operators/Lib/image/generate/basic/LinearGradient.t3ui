@@ -55,14 +55,16 @@
       "Position": {
         "X": 199.732,
         "Y": 302.6935
-      }
+      },
+      "GroupTitle": "Texture Options"
     },
     {
       "InputId": "5774969c-ef4d-482e-ab37-b3a84b09debb"/*PingPong*/,
       "Position": {
         "X": 59.731995,
         "Y": 57.693512
-      }
+      },
+      "AddPadding": "True"
     },
     {
       "InputId": "7f3fe86d-f259-458a-908a-0a71d39ca678"/*Repeat*/,
@@ -72,7 +74,7 @@
       }
     },
     {
-      "InputId": "8169be8f-cb35-4900-b462-f2139b412d59"/*Rotation*/,
+      "InputId": "8169be8f-cb35-4900-b462-f2139b412d59"/*Rotate*/,
       "Position": {
         "X": 199.732,
         "Y": 22.693512

@@ -1,5 +1,6 @@
 using ImGuiNET;
 using T3.Core.DataTypes;
+using T3.Core.Operator;
 using T3.Core.SystemUi;
 using T3.Editor.Gui.Graph.Dialogs;
 using T3.Editor.Gui.Interaction;
@@ -12,6 +13,7 @@ using T3.Editor.Gui.Styling;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Exporting;
+using T3.Editor.UiModel.Helpers;
 using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.Modification;
 using T3.Editor.UiModel.ProjectHandling;
@@ -37,11 +39,111 @@ internal static class GraphContextMenu
             UndoRedoStack.Undo();
         }
 
-        ImGui.Separator();
-
         // ------ for selection -----------------------
         var oneOpSelected = selectedChildUis.Count == 1;
         var someOpsSelected = selectedChildUis.Count > 0;
+        
+        if (ImGui.BeginMenu("Select..."))
+        {
+            if (ImGui.MenuItem("Custom Operators"))
+            {
+                var foundAny = false;
+                var childUis = selectedChildUis.Count > 0 
+                                   ? selectedChildUis.ToList() 
+                                   : context.CompositionInstance.Children.Values.Select(c => c.GetChildUi());
+                
+                if(selectedChildUis.Count > 0)
+                    nodeSelection.Clear();
+                
+                foreach (var item in childUis)
+                {
+                    if (item == null)
+                        continue;
+                    
+                    if (SymbolAnalysis.TryGetOperatorType(item.SymbolChild.Symbol, out var type) 
+                         && type != SymbolAnalysis.OperatorClassification.Unknown)
+                    {
+                        continue;
+                    }
+
+                    if (context.CompositionInstance.Children.TryGetChildInstance(item.Id, out var instance))
+                    {
+                        nodeSelection.AddSelection(item, instance);
+                    }
+
+                    foundAny = true;
+                }
+                if (foundAny)
+                {
+                    context.ProjectView.FocusViewToSelection();
+                }
+            }
+
+            if (ImGui.MenuItem("Select connected", enabled:someOpsSelected))
+            {
+                var connectedIds = new HashSet<Guid>();
+
+                var selectedChildren = new List<Symbol.Child>();
+                foreach (var child in selectedChildUis)
+                {
+                    selectedChildren.Add(child.SymbolChild);
+                }
+                
+                Structure.CollectConnectedChildIds(context.CompositionInstance.Symbol, selectedChildren, connectedIds);
+
+                if (connectedIds.Count > 0)
+                {
+                    context.Selector.Clear();
+                    foreach (var id in connectedIds)
+                    {
+                        if (context.CompositionInstance.Children.TryGetChildInstance(id, out var instance) )
+                        {
+                            var node = instance.GetChildUi();
+                            if (node != null)
+                            {
+                                context.Selector.AddSelection(node, instance);
+                            }
+                        }
+                    }
+                }
+            }
+            
+            if (ImGui.MenuItem("Select connected inputs", enabled:someOpsSelected))
+            {
+                var connectedIds = new HashSet<Guid>();
+                foreach (var child in selectedChildUis)
+                {
+                    Structure.CollectConnectedChildren(child.SymbolChild, 
+                                                       context.CompositionInstance.Symbol, 
+                                                       connectedIds);
+                }
+                
+                
+                if (connectedIds.Count > 0)
+                {
+                    context.Selector.Clear();
+                    foreach (var id in connectedIds)
+                    {
+                        if (context.CompositionInstance.Children.TryGetChildInstance(id, out var instance) )
+                        {
+                            var node = instance.GetChildUi();
+                            if (node != null)
+                            {
+                                context.Selector.AddSelection(node, instance);
+                            }
+                        }
+                    }
+                }
+            }
+            
+            
+            ImGui.EndMenu();   
+        }
+        
+        
+        ImGui.Separator();
+
+
         var snapShotsEnabledFromSomeOps
             = selectedChildUis
                .Any(selectedChildUi => selectedChildUi.EnabledForSnapshots);
@@ -284,7 +386,7 @@ internal static class GraphContextMenu
                 {
                     context.SymbolNameForDialogEdits = selectedChildUis[0].SymbolChild.Symbol.Name ?? string.Empty;
                     context.NameSpaceForDialogEdits = selectedChildUis[0].SymbolChild.Symbol.Namespace ?? string.Empty;
-                    context.SymbolDescriptionForDialog = "";
+                    context.SymbolDescriptionForDialog = selectedChildUis[0].SymbolChild.Symbol.GetSymbolUi().Description;
                     context.DuplicateSymbolDialog.ShowNextFrame();
                 }
 
@@ -408,4 +510,6 @@ internal static class GraphContextMenu
         // }
         //ImGui.EndMenu();
     }
+
+
 }

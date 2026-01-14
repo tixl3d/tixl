@@ -156,11 +156,12 @@ internal static class KeyActionHandling
         RegisterActionsFlags(UserActions.CameraBackward, Flags.NeedsWindowHover | Flags.KeyHoldOnly | Flags.RemainActiveWhenItemActive);
         RegisterActionsFlags(UserActions.CameraUp, Flags.NeedsWindowHover | Flags.KeyHoldOnly | Flags.RemainActiveWhenItemActive);
         RegisterActionsFlags(UserActions.CameraDown, Flags.NeedsWindowHover | Flags.KeyHoldOnly | Flags.RemainActiveWhenItemActive);
+        
         // Camera reset and focus
         RegisterActionsFlags(UserActions.CameraReset, Flags.NeedsWindowHover);
         RegisterActionsFlags(UserActions.CameraFocusSelection, Flags.NeedsWindowHover);
+        RegisterActionsFlags(UserActions.RenderAnimation, Flags.KeyPressOnly);
         
-
         return;
 
         void RegisterActionsFlags(UserActions action, Flags flags)

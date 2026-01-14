@@ -87,7 +87,7 @@
           "Value": true
         },
         {
-          "Id": "8169be8f-cb35-4900-b462-f2139b412d59"/*Rotation*/,
+          "Id": "8169be8f-cb35-4900-b462-f2139b412d59"/*Rotate*/,
           "Type": "System.Single",
           "Value": 0.0
         },
@@ -3957,7 +3957,7 @@
           }
         },
         {
-          "Id": "8169be8f-cb35-4900-b462-f2139b412d59"/*Rotation*/,
+          "Id": "8169be8f-cb35-4900-b462-f2139b412d59"/*Rotate*/,
           "Type": "System.Single",
           "Value": -45.0
         },
@@ -6182,7 +6182,7 @@
           "Value": true
         },
         {
-          "Id": "8169be8f-cb35-4900-b462-f2139b412d59"/*Rotation*/,
+          "Id": "8169be8f-cb35-4900-b462-f2139b412d59"/*Rotate*/,
           "Type": "System.Single",
           "Value": 0.0
         },
@@ -9202,7 +9202,7 @@
           "Value": true
         },
         {
-          "Id": "8169be8f-cb35-4900-b462-f2139b412d59"/*Rotation*/,
+          "Id": "8169be8f-cb35-4900-b462-f2139b412d59"/*Rotate*/,
           "Type": "System.Single",
           "Value": 45.0
         },
@@ -9454,7 +9454,7 @@
           "Value": true
         },
         {
-          "Id": "8169be8f-cb35-4900-b462-f2139b412d59"/*Rotation*/,
+          "Id": "8169be8f-cb35-4900-b462-f2139b412d59"/*Rotate*/,
           "Type": "System.Single",
           "Value": -45.0
         },

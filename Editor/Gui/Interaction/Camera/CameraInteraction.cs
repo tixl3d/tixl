@@ -1,6 +1,8 @@
 #nullable enable
 using ImGuiNET;
+using T3.Core.Animation;
 using T3.Core.Operator.Interfaces;
+using T3.Core.Utils;
 using T3.Core.Utils.Geometry;
 using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.Interaction.TransformGizmos;
@@ -21,7 +23,15 @@ internal sealed class CameraInteraction
     {
         if (camera == null)
             return;
-
+        
+        if (!camera.CameraTarget._IsFinite() || !camera.CameraPosition._IsFinite() ||  !_intendedSetup.Position._IsFinite() || !_smoothedSetup.Position._IsFinite() || !_intendedSetup.Target._IsFinite() || !_smoothedSetup.Target._IsFinite())
+        {
+            _intendedSetup.Reset();
+            _smoothedSetup.Reset();
+            camera.CameraTarget = _intendedSetup.Target;
+            camera.CameraPosition = _intendedSetup.Position;
+        }
+        
         var cameraNodeModified = !_smoothedSetup.Matches(camera) && !_intendedSetup.Matches(camera);
         if (cameraNodeModified)
         {
@@ -31,7 +41,8 @@ internal sealed class CameraInteraction
         }
 
         _viewAxis.ComputeForCamera(camera);
-        _deltaTime = ImGui.GetIO().DeltaTime;
+        //_deltaTime = ImGui.GetIO().DeltaTime;
+        _deltaTime = (float)(Playback.LastFrameDuration).ClampMax(4/60f);
 
         var cameraSwitched = camera != _lastCameraNode;
         if (cameraSwitched)
@@ -94,7 +105,7 @@ internal sealed class CameraInteraction
         if (_orbitVelocity.Length() > 0.0002f)
         {
             ApplyOrbitVelocity(_orbitVelocity);
-            _orbitVelocity = Vector2.Lerp(_orbitVelocity, Vector2.Zero, _deltaTime * CameraInteractionParameters.OrbitHorizontalDamping * 60);
+            _orbitVelocity = Vector2.Lerp(_orbitVelocity, Vector2.Zero, (_deltaTime * CameraInteractionParameters.OrbitHorizontalDamping * 60).ClampMax(1f));
         }
 
         var maxVelocityForScale = _viewAxis.ViewDistance.Length() * CameraInteractionParameters.MaxMoveVelocity * UserSettings.Config.CameraSpeed;
@@ -105,13 +116,13 @@ internal sealed class CameraInteraction
 
         if (!_manipulatedByKeyboard)
         {
-            _moveVelocity = Vector3.Lerp(_moveVelocity, Vector3.Zero, _deltaTime * CameraInteractionParameters.CameraMoveDamping * 60);
+            _moveVelocity = Vector3.Lerp(_moveVelocity, Vector3.Zero, (_deltaTime * CameraInteractionParameters.CameraMoveDamping * 60f).ClampMax(1f));
         }
 
         _intendedSetup.Position += _moveVelocity * _deltaTime;
         _intendedSetup.Target += _moveVelocity * _deltaTime;
 
-        _smoothedSetup.BlendTo(_intendedSetup, CameraInteractionParameters.CameraDamping, _deltaTime);
+        _smoothedSetup.BlendTo(_intendedSetup, (CameraInteractionParameters.CameraDamping * _deltaTime * 60f).Clamp(0,1));
 
         _manipulatedByMouseWheel = false;
         _manipulatedByKeyboard = false;

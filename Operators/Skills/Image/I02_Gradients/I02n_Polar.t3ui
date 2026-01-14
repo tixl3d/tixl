@@ -1,0 +1,108 @@
+{
+  "Id": "0a591e7e-5631-4f32-9ea2-5fddbdb6566f"/*I02n_Polar*/,
+  "Description": "RadialGradient: Polar Direction",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0a7ad03e-79c1-416c-92ad-929375156f29"/*ImageQuiz*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2018.4391
+      }
+    },
+    {
+      "ChildId": "485a3c27-1bd7-4e12-b61e-3cd18ec88983"/*LinearGradient*/,
+      "AnnotationId": "606c89c3-3cd5-4883-8da9-101ee8d767f0",
+      "Position": {
+        "X": 1441.7301,
+        "Y": 2334.827
+      }
+    },
+    {
+      "ChildId": "5de9d2cd-0bc8-4974-8002-900d4af7d042"/*LoadImage*/,
+      "AnnotationId": "649cd331-21d3-4916-967b-0b6a26572d7f",
+      "Position": {
+        "X": 1408.625,
+        "Y": 2113.3176
+      }
+    },
+    {
+      "ChildId": "80d9b3e4-1da1-4800-b62b-814a5987a7ca"/*RadialGradient*/,
+      "AnnotationId": "649cd331-21d3-4916-967b-0b6a26572d7f",
+      "Position": {
+        "X": 1408.625,
+        "Y": 2148.3176
+      }
+    },
+    {
+      "ChildId": "86d14fac-8bd5-448f-8293-5668d57afd82"/*Time*/,
+      "AnnotationId": "649cd331-21d3-4916-967b-0b6a26572d7f",
+      "Position": {
+        "X": 1268.625,
+        "Y": 2183.3176
+      }
+    },
+    {
+      "ChildId": "dbbf0f36-5ca3-4455-82be-42ff7d8ccb38"/*RadialGradient*/,
+      "Position": {
+        "X": 1393.4087,
+        "Y": 1859.5094
+      }
+    },
+    {
+      "ChildId": "f51c1a53-826e-4f81-8bbb-3624491b8f9d"/*Time*/,
+      "Position": {
+        "X": 1253.4087,
+        "Y": 1894.5094
+      }
+    },
+    {
+      "ChildId": "fb5bed1f-3f26-4ef1-a85c-b7d364cd6e21"/*LoadImage*/,
+      "Position": {
+        "X": 1393.4087,
+        "Y": 1824.5094
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "d883f10f-a80d-490b-bf77-2de9f3a54e7d"/*ColorBuffer*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2088.439
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "649cd331-21d3-4916-967b-0b6a26572d7f",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1225.0,
+        "Y": 2074.6978
+      },
+      "Size": {
+        "X": 334.7268,
+        "Y": 165.30225
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "1c4482df-aa4f-4add-927b-9b24e941ef38",
+      "Description": "The radial gradient can also work in a polar, circular direction."
+    },
+    {
+      "Id": "6ed248ca-9884-4282-9a65-539b52f139a7",
+      "Description": "Recreate the goal.",
+      "Style": "CallToAction"
+    }
+  ]
+}

@@ -24,14 +24,14 @@ internal static class EditTourPointsPopup
     {
         _isOpen = true;
     }
-    
+
     private static string GetSelectionMarkdown()
     {
         if (_compositionUi == null)
             return string.Empty;
-        
+
         var sb = new StringBuilder();
-        
+
         var hasCurrentCompositionTour = _compositionUi.TourPoints.Count > 0;
         if (hasCurrentCompositionTour)
         {
@@ -39,15 +39,21 @@ internal static class EditTourPointsPopup
         }
         else
         {
-            foreach (var id in _selectedChildIds)
+            var orderedChildUis = _selectedChildIds
+                                 .Select(id => _compositionUi.ChildUis.TryGetValue(id, out var childUi) ? childUi : null)
+                                 .Where(childUi => childUi != null)
+                                 .OrderBy(childUi => childUi!.PosOnCanvas.Y);
+
+            foreach (var childUi in orderedChildUis)
             {
-                if (!_compositionUi.ChildUis.TryGetValue(id, out var childUi))
+                if (childUi == null)
                     continue;
-                
+
                 TourDataMarkdownExport.WriteSymbolTourMarkdown(childUi.SymbolChild.Symbol.GetSymbolUi(), sb);
                 sb.AppendLine();
             }
-        } 
+        }
+
         return sb.ToString();
     }
 
@@ -67,7 +73,7 @@ internal static class EditTourPointsPopup
             ImGui.BeginChild("Inner", Vector2.Zero, false, ImGuiWindowFlags.NoMove);
             {
                 _compositionUi = operatorSymbol.GetSymbolUi();
-                
+
                 if (CustomComponents.IconButton(Icon.CopyToClipboard, Vector2.Zero))
                 {
                     ImGui.SetClipboardText(GetSelectionMarkdown());
@@ -85,13 +91,13 @@ internal static class EditTourPointsPopup
                     }
                     ImGui.EndTooltip();
                 }
-                
+
                 ImGui.SameLine();
                 if (CustomComponents.IconButton(Icon.PasteFromClipboard, Vector2.Zero))
                 {
                     TourDataMarkdownExport.TryPasteTourData(_compositionUi, projectView);
                 }
-                
+
                 // Handle selection
                 _selectedChildIds.Clear();
                 _firstSelectedChildId = Guid.Empty;
@@ -254,7 +260,6 @@ internal static class EditTourPointsPopup
                 ImGui.SetNextItemWidth(120);
                 modified |= FormInputs.DrawEnumDropdown(ref tourPoint.Style, "style");
 
-
                 // Highlight child
                 if (_compositionUi.ChildUis.TryGetValue(tourPoint.ChildId, out var childUi))
                 {
@@ -299,32 +304,33 @@ internal static class EditTourPointsPopup
                         tourPoint.InputId = Guid.Empty;
                         modified = true;
                     }
-                } 
-                
-                if(tourPoint.ChildId != Guid.Empty)
+                }
+
+                if (tourPoint.ChildId != Guid.Empty)
                 {
                     ImGui.SameLine(0, 10);
                     ImGui.SetNextItemWidth(100);
                     ImGui.PushStyleColor(ImGuiCol.FrameBg, UiColors.BackgroundButton.Rgba);
                     ImGui.PushStyleColor(ImGuiCol.FrameBgHovered, UiColors.BackgroundButton.Rgba);
                     ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(4));
-
-                    var label = tourPoint.InputId == Guid.Empty 
-                                    ? "select input" 
-                                    : tourPoint.InputId.ShortenGuid();
-                    
-                    if (ImGui.BeginCombo("##test", label))
+                    if (_compositionUi.ChildUis.TryGetValue(tourPoint.ChildId, out var symbolUi))
                     {
-                        if (_compositionUi.ChildUis.TryGetValue(tourPoint.ChildId, out var symbolUi))
+                        var label = "select input";
+                        if (tourPoint.InputId != Guid.Empty)
+                        {
+                            var inputDefinition = symbolUi.SymbolChild.Symbol.InputDefinitions.FirstOrDefault(i => i.Id == tourPoint.InputId);
+                            if (inputDefinition != null)
+                                label = inputDefinition.Name;
+                        }
+
+                        if (ImGui.BeginCombo("##test", label))
                         {
                             if (ImGui.Selectable("--none--", tourPoint.InputId == Guid.Empty))
                             {
-                                tourPoint.InputId= Guid.Empty;
+                                tourPoint.InputId = Guid.Empty;
                                 modified = true;
                             }
 
-                            
-                            
                             foreach (var i in symbolUi.SymbolChild.Symbol.InputDefinitions)
                             {
                                 if (ImGui.Selectable(i.Name, i.Id == tourPoint.InputId))
@@ -333,16 +339,17 @@ internal static class EditTourPointsPopup
                                     modified = true;
                                 }
                             }
+                            ImGui.EndCombo();
                         }
-                        ImGui.EndCombo();
+
                     }
-                    
+
                     ImGui.PopStyleColor(2);
                     ImGui.PopStyleVar();
                 }
             }
             ImGui.PopFont();
-            
+
             var x = ImGui.GetContentRegionAvail().X - ImGui.GetFrameHeight();
             ImGui.SameLine(x);
 
@@ -400,17 +407,16 @@ internal static class EditTourPointsPopup
 
         return modified;
     }
-    
 
     private static void InsertNewTourPoint(int index)
     {
         _compositionUi?.TourPoints.Insert(index, new TourPoint
-                                                    {
-                                                        Description = string.Empty,
-                                                        Id = Guid.NewGuid(),
-                                                        ChildId = _firstSelectedChildId,
-                                                        Style = TourPoint.Styles.Info
-                                                    });
+                                                     {
+                                                         Description = string.Empty,
+                                                         Id = Guid.NewGuid(),
+                                                         ChildId = _firstSelectedChildId,
+                                                         Style = TourPoint.Styles.Info
+                                                     });
     }
 
     private static bool CanAdd => _selectedChildIds.Count == 1;

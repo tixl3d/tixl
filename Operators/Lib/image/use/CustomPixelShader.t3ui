@@ -3,6 +3,14 @@
   "Description": "Creates a custom shader from a source parameter. This can be useful for prototyping.\n\nUse \"Ignore Template\" to bring in your entire shader.\n",
   "InputUis": [
     {
+      "InputId": "2dc4d202-2ee5-4d4d-b1b2-234a0b21ab94"/*ConstantBuffers*/,
+      "Position": {
+        "X": 1911.3387,
+        "Y": 785.5515
+      },
+      "Description": "Use FloatsToBuffer or Ints to buffer to pass additional input params, define in AdditionalCode for example:\n\ncbuffer AdditionalIntParams : register(b2)\n{\n    int Index;\n}\ncbuffer AdditionalFloatParams : register(b3)\n{\n    float4 Color;\n}"
+    },
+    {
       "InputId": "3d84725a-594b-46d8-aa21-eec99026115d"/*A*/,
       "Position": {
         "X": -161.39105,
@@ -50,6 +58,29 @@
       "Usage": "Multiline"
     },
     {
+      "InputId": "8ea35e89-137a-4cb3-b26d-ba6bd9e5ce12"/*CustomSampler*/,
+      "Position": {
+        "X": 1838.4208,
+        "Y": 1364.0939
+      },
+      "Description": "Use SamplerState node to add custom sampler(s); first sampler input is defined in template as CustomSampler.\nsamplers coming after that will need to be defined in AdditionalCode, for example:\n\nsampler Sampler2 : register(s2);"
+    },
+    {
+      "InputId": "92fdfa08-e7da-4a71-9145-277b74c93729"/*GenerateMips*/,
+      "Position": {
+        "X": 2401.5288,
+        "Y": 1016.59656
+      }
+    },
+    {
+      "InputId": "a965b7d3-c78f-4da7-ae70-c461cc9b173c"/*Clear*/,
+      "Position": {
+        "X": 2353.0198,
+        "Y": 1145.4948
+      },
+      "Description": "Clearing RenderTarget\nsetting it to false also enables blending mode, so that result is blended on top of backbuffer"
+    },
+    {
       "InputId": "b4895a95-5ff4-4583-9ec3-befcf0f7b18b"/*B*/,
       "Position": {
         "X": -161.39105,
@@ -57,12 +88,20 @@
       }
     },
     {
+      "InputId": "b898c5a9-1c4b-4958-a7c1-01c27da10f6a"/*ShaderResources*/,
+      "Position": {
+        "X": 1911.3387,
+        "Y": 710.5515
+      },
+      "Description": "Use SrvFromTexutre2d for additional texture inputs. They will need to be defined in AdditionalCode, for example:\n\nTexture2D<float4> Image3 : register(t2);"
+    },
+    {
       "InputId": "c9a801ec-13fb-4ad4-b0cd-d125b5db500a"/*AdditionalCode*/,
       "Position": {
         "X": 99.026855,
         "Y": 715.67053
       },
-      "Usage": "Default"
+      "Usage": "Multiline"
     },
     {
       "InputId": "db522fd4-5cfc-49f6-9983-02ec0dd6090a"/*D*/,
@@ -72,10 +111,24 @@
       }
     },
     {
-      "InputId": "fb8d51fe-b4c2-452a-9e53-b649aed92bd7"/*IgnoreTemplate*/,
+      "InputId": "e0d05b9c-d433-4b9d-8e70-db2f7993d628"/*TextureFormat*/,
+      "Position": {
+        "X": 2505.2117,
+        "Y": 806.4501
+      }
+    },
+    {
+      "InputId": "e63cf24c-0e01-47d4-9532-18261310315e"/*FxTexture2*/,
       "Position": {
         "X": -178.71051,
-        "Y": 1528.4381
+        "Y": 1551.6797
+      }
+    },
+    {
+      "InputId": "fb8d51fe-b4c2-452a-9e53-b649aed92bd7"/*IgnoreTemplate*/,
+      "Position": {
+        "X": -168.46124,
+        "Y": 1784.67
       }
     }
   ],
@@ -95,6 +148,13 @@
       }
     },
     {
+      "ChildId": "0bcbfeed-5bab-4a31-9508-e34091b247ae"/*CombineStrings*/,
+      "Position": {
+        "X": 253.51385,
+        "Y": 334.1512
+      }
+    },
+    {
       "ChildId": "10f6db46-38e3-460f-90a2-21c434534c84"/*PixelShader*/,
       "Position": {
         "X": 1911.3387,
@@ -104,8 +164,8 @@
     {
       "ChildId": "13e787b4-db91-4e45-8013-5c34250bc731"/*CombineStrings*/,
       "Position": {
-        "X": 1101.3688,
-        "Y": 418.37335
+        "X": 688.29767,
+        "Y": 449.28333
       }
     },
     {
@@ -113,6 +173,13 @@
       "Position": {
         "X": -161.39105,
         "Y": 909.246
+      }
+    },
+    {
+      "ChildId": "237490cb-db7b-4154-a672-35ab594b3e93"/*SrvFromTexture2d*/,
+      "Position": {
+        "X": 1656.0803,
+        "Y": 1083.2499
       }
     },
     {
@@ -125,15 +192,15 @@
     {
       "ChildId": "26d9f768-118f-4cfe-bec6-ffd2596d8877"/*Draw*/,
       "Position": {
-        "X": 2231.1826,
-        "Y": 780.1195
+        "X": 2231.1824,
+        "Y": 1052.0929
       }
     },
     {
       "ChildId": "293647dd-9810-42e7-85da-d55736d464ed"/*OutputMergerStage*/,
       "Position": {
-        "X": 2231.1826,
-        "Y": 724.1195
+        "X": 2231.1824,
+        "Y": 941.96967
       }
     },
     {
@@ -158,8 +225,36 @@
         "Y": 366.04495
       },
       "Position": {
-        "X": 54.5506,
-        "Y": 164.08167
+        "X": 173.58493,
+        "Y": 229.05048
+      }
+    },
+    {
+      "ChildId": "3b71d7ec-4c5b-4243-8d78-057e7268191b"/*BlendEnabled*/,
+      "Position": {
+        "X": 1775.2687,
+        "Y": 1203.8466
+      }
+    },
+    {
+      "ChildId": "3b7326be-7663-474e-b1fa-5246557cfc32"/*BoolToInt*/,
+      "Position": {
+        "X": 2549.7866,
+        "Y": 1155.0316
+      }
+    },
+    {
+      "ChildId": "4c7fe29c-09f1-496b-8ca1-a18d44e13c0f"/*SearchAndReplace*/,
+      "Position": {
+        "X": 435.60443,
+        "Y": 229.16037
+      }
+    },
+    {
+      "ChildId": "594b32cf-aaad-4785-90ad-6bfe9425f8ab"/*BlendState*/,
+      "Position": {
+        "X": 2033.0226,
+        "Y": 1048.2683
       }
     },
     {
@@ -205,6 +300,13 @@
       }
     },
     {
+      "ChildId": "82c2bf9e-d9b7-46b4-bb81-5a08f73a400c"/*CombineStrings*/,
+      "Position": {
+        "X": 428.9552,
+        "Y": 438.82837
+      }
+    },
+    {
       "ChildId": "8435d04a-724f-4886-97ee-480691ce219d"/*RenderTarget*/,
       "Position": {
         "X": 2645.2117,
@@ -240,6 +342,27 @@
       }
     },
     {
+      "ChildId": "a434f627-446f-4fc5-8eec-5027da717681"/*String*/,
+      "Position": {
+        "X": 113.513855,
+        "Y": 334.1512
+      }
+    },
+    {
+      "ChildId": "ad890372-987f-46bc-bc2b-62a1f6c2cba2"/*String*/,
+      "Position": {
+        "X": 288.9552,
+        "Y": 438.82837
+      }
+    },
+    {
+      "ChildId": "bb40096e-696c-43e9-af55-40ba0451bfb4"/*Clear*/,
+      "Position": {
+        "X": 2505.2117,
+        "Y": 771.4501
+      }
+    },
+    {
       "ChildId": "c4ab0bb6-bc1a-405a-9730-f89fa9618962"/*FloatsToBuffer*/,
       "Style": "Resizable",
       "Size": {
@@ -264,10 +387,38 @@
       }
     },
     {
+      "ChildId": "c7bcc51b-7a42-43eb-9391-4c25a26b9478"/*RenderTargetBlendDescription*/,
+      "Position": {
+        "X": 1878.809,
+        "Y": 1053.4583
+      }
+    },
+    {
+      "ChildId": "c7f79a6d-f308-4368-9319-f58bb24b379e"/*UseFallbackTexture*/,
+      "Position": {
+        "X": 1516.0803,
+        "Y": 1083.2499
+      }
+    },
+    {
+      "ChildId": "cda97bdc-de01-4701-90f9-64bbd19108cb"/*Switch*/,
+      "Position": {
+        "X": 2570.546,
+        "Y": 942.98785
+      }
+    },
+    {
       "ChildId": "dc1ea202-785f-4a4b-84ae-d89792b9448b"/*PixelShaderStage*/,
       "Position": {
         "X": 2231.1826,
-        "Y": 577.119
+        "Y": 608.9917
+      }
+    },
+    {
+      "ChildId": "dfaabd73-b111-4eb6-a273-3a2db3cd3833"/*OutputMergerStage*/,
+      "Position": {
+        "X": 2231.1824,
+        "Y": 997.11096
       }
     },
     {
@@ -278,10 +429,17 @@
       }
     },
     {
+      "ChildId": "e45d926c-4208-4305-91da-2fe427be6dc1"/*Not*/,
+      "Position": {
+        "X": 2394.8315,
+        "Y": 1294.417
+      }
+    },
+    {
       "ChildId": "ece44113-bc25-4b4a-b8f4-23f6037d1ad0"/*SearchAndReplace*/,
       "Position": {
-        "X": 274.03662,
-        "Y": 169.15643
+        "X": 605.9165,
+        "Y": 229.44186
       }
     },
     {
@@ -296,6 +454,13 @@
       "Position": {
         "X": 1911.3387,
         "Y": 578.1874
+      }
+    },
+    {
+      "ChildId": "f8db1d5e-bf8f-4d55-89ea-ded2def3e1d7"/*GenerateMips*/,
+      "Position": {
+        "X": 2505.2117,
+        "Y": 841.4501
       }
     }
   ],

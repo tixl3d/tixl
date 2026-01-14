@@ -1,6 +1,6 @@
 {
   "Id": "3442c4dd-fb4d-406c-b696-4a2830398395"/*I02b_GradientRotate*/,
-  "Description": "",
+  "Description": "LinearGradient: Rotate",
   "InputUis": [],
   "SymbolChildUis": [
     {
@@ -56,21 +56,21 @@
   ],
   "TourPoints": [
     {
-      "Id": "51a2209b-4b49-4c85-a757-f1783590dd4e",
+      "Id": "88a7a839-d662-4a76-89f8-13cf380108a1",
       "ChildId": "25d53d5e-d143-4687-9fdf-7a314b46775d",
       "Description": "This gradient is already connected to the solution, but its rotation does not match.",
       "Style": "InfoFor"
     },
     {
-      "Id": "1f6de00d-e771-4b2e-9533-ad9115e5a34b",
+      "Id": "59b09a02-ecbe-4f85-87e2-3bcaffedf926",
       "ChildId": "25d53d5e-d143-4687-9fdf-7a314b46775d",
+      "InputId": "8169be8f-cb35-4900-b462-f2139b412d59",
       "Description": "Select the gradient. Use the rotate icons on the right side of the parameter to rotate by 45 degrees.\nHold Ctrl or Alt for finer control.",
       "Style": "InfoFor"
     },
     {
-      "Id": "2e4f9fa8-c72f-4b2a-985e-dac79c5dc147",
+      "Id": "b6886ba9-2393-470f-8a99-0065e5a2531a",
       "ChildId": "25d53d5e-d143-4687-9fdf-7a314b46775d",
-      "InputId": "8169be8f-cb35-4900-b462-f2139b412d59",
       "Description": "Rotate the gradient until it matches the goal.",
       "Style": "CallToAction"
     }

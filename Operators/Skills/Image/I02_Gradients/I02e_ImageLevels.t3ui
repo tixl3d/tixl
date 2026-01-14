@@ -1,0 +1,108 @@
+{
+  "Id": "face6050-9e32-4f6e-8095-280e2ccf70e5"/*I02e_ImageLevels*/,
+  "Description": "Analyze: ImageLevels",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "7a9e24fd-e76f-4dfc-b3f9-05ba589fb58d"/*LinearGradient*/,
+      "Position": {
+        "X": 1212.9983,
+        "Y": 1831.984
+      }
+    },
+    {
+      "ChildId": "9557cb56-b6bf-4fe5-b20c-d8b081aa96b1"/*LinearGradient*/,
+      "AnnotationId": "606c89c3-3cd5-4883-8da9-101ee8d767f0",
+      "Position": {
+        "X": 1441.7301,
+        "Y": 2334.827
+      }
+    },
+    {
+      "ChildId": "abb14834-2d8c-4f1d-ba67-82bd24f26349"/*LinearGradient*/,
+      "AnnotationId": "52144bbb-0581-4f49-bc4a-bee46d64b0bd",
+      "Position": {
+        "X": 1148.7217,
+        "Y": 2128.621
+      }
+    },
+    {
+      "ChildId": "b4f60768-5b54-44ff-ad26-3b1e9186b7da"/*ImageLevels*/,
+      "AnnotationId": "52144bbb-0581-4f49-bc4a-bee46d64b0bd",
+      "Position": {
+        "X": 1288.7217,
+        "Y": 2128.621
+      }
+    },
+    {
+      "ChildId": "e705615e-36b8-4ba2-a4c9-9437e3db740a"/*ImageQuiz*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2018.4391
+      }
+    },
+    {
+      "ChildId": "f324551e-150d-436d-b85a-df54f102e9d1"/*ImageLevels*/,
+      "Position": {
+        "X": 1212.9982,
+        "Y": 1899.2506
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "3585d604-7df9-4496-88c4-6587676945b5"/*ColorBuffer*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2088.439
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "52144bbb-0581-4f49-bc4a-bee46d64b0bd",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1120.0,
+        "Y": 2054.7593
+      },
+      "Size": {
+        "X": 350.0,
+        "Y": 150.24072
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "4622cdf8-fda2-47b4-b410-34bd69804aba",
+      "Description": "Sometimes it is hard to see the actual numeric values behind an image."
+    },
+    {
+      "Id": "de59dae4-288e-4b22-ae6f-9a8af944e051",
+      "Description": "To help with this, TiXL offers operators for analyzing images.\nIn this example, [ImageLevels] slices an image and visualizes the color values along an intersection line."
+    },
+    {
+      "Id": "309d07b1-5ab7-49d7-aaba-1befe0468fa4",
+      "Description": "Connect [LinearGradient] to [ImageLevels].",
+      "Style": "CallToAction"
+    },
+    {
+      "Id": "afdaeb36-eabc-44db-bc19-a14e9c730917",
+      "Description": "Now a few things become clear:\n- The default gradient is linear, with sharp ends. \n- It does not cover the full width of the image. \n- It starts at pure black and ends at pure white."
+    },
+    {
+      "Id": "eb2fffe9-d0c8-41f6-bcaa-d67f46ae7c48",
+      "ChildId": "f324551e-150d-436d-b85a-df54f102e9d1",
+      "InputId": "48e80f45-9685-4ded-aa1c-d05e16658c5a",
+      "Description": "Increase the width to better see the curve and to match the example.",
+      "Style": "CallToAction"
+    }
+  ]
+}

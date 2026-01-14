@@ -1,6 +1,6 @@
 {
   "Id": "82ad8911-c930-4851-803d-3f24422445bc"/*RadialGradient*/,
-  "Description": "Generates an image with a radial gradient.\n\n\nSimilar Ops: [NGon] [RoundedRect] [Rings] [RadialGradient] [LinearGradient] [Blob]",
+  "Description": "Generates an image with a radial gradient.\n\n\nSimilar Ops: [LinearGradient] [NGon] [RoundedRect] [Rings]  [Blob]",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -9,7 +9,8 @@
         "X": 401.19388,
         "Y": 224.2572
       },
-      "AddPadding": "True",
+      "GroupTitle": "Position",
+      "Description": "Center of the gradient",
       "Min": -0.5,
       "Max": 0.5,
       "UseVec2Control": "Position"
@@ -17,8 +18,8 @@
     {
       "InputId": "3f5a284b-e2f0-47e2-bf79-2a7fe8949519"/*Gradient*/,
       "Position": {
-        "X": 401.1939,
-        "Y": 189.25722
+        "X": 100.80896,
+        "Y": 158.34691
       },
       "GroupTitle": "Gradient"
     },
@@ -32,9 +33,11 @@
     {
       "InputId": "5e93ba7d-a33d-4574-a438-a13c03361c29"/*BiasAndGain*/,
       "Position": {
-        "X": 380.39526,
-        "Y": 505.1615
+        "X": 401.1939,
+        "Y": 504.2572
       },
+      "Description": "Applies Gain and Bias before sampling the gradiant.",
+      "AddPadding": "True",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -47,20 +50,33 @@
       "Position": {
         "X": 401.1939,
         "Y": 364.2572
-      }
+      },
+      "Description": "Repeats the gradient once.\nThis can be useful for rings."
     },
     {
       "InputId": "7270a7df-744e-4b66-8f85-71fbdf0848d6"/*BlendMode*/,
       "Position": {
         "X": 401.1939,
         "Y": 469.2572
-      }
+      },
+      "Description": "Blendmode when applied onto a connected input image."
+    },
+    {
+      "InputId": "8dbba1ce-eb54-4f52-86dc-6dc94dd3900f"/*Stretch*/,
+      "Position": {
+        "X": 401.1939,
+        "Y": 574.2572
+      },
+      "Description": "An additional stretch factor\n",
+      "Min": 0.0,
+      "Max": 1.0,
+      "Format": "{0:0.000}"
     },
     {
       "InputId": "93dd184b-8809-4746-8544-41abde6635a3"/*TextureFormat*/,
       "Position": {
         "X": 541.1939,
-        "Y": 609.2572
+        "Y": 749.2572
       }
     },
     {
@@ -69,8 +85,17 @@
         "X": 541.1939,
         "Y": 329.2572
       },
+      "Description": "Offsets the gradient. ",
+      "AddPadding": "True",
       "Min": -0.5,
       "Max": 0.5
+    },
+    {
+      "InputId": "9c89bace-879f-40c1-9ee6-6924860f9424"/*GenerateMipMaps*/,
+      "Position": {
+        "X": 541.1939,
+        "Y": 714.2572
+      }
     },
     {
       "InputId": "bfdcfed4-263f-4115-a1a8-291088e34c0a"/*Width*/,
@@ -78,6 +103,7 @@
         "X": 541.1939,
         "Y": 294.2572
       },
+      "Description": "The size of the gradient.\nFlips the gradient if smaller than 0.",
       "AddPadding": "True",
       "Min": 0.0,
       "Max": 1.0
@@ -86,9 +112,10 @@
       "InputId": "cf2e1698-f996-4b83-8b59-3150e75d59c6"/*Resolution*/,
       "Position": {
         "X": 541.1939,
-        "Y": 574.2572
+        "Y": 679.2572
       },
-      "GroupTitle": "Texture Options"
+      "GroupTitle": "Texture Options",
+      "Description": "The resolution. \n\nIf 0,0 will use requested resuition of the input resolution if connected."
     },
     {
       "InputId": "dc383dbd-9dab-4bb2-8c6e-7f094e28d8a9"/*PolarOrientation*/,
@@ -96,14 +123,28 @@
         "X": 401.1939,
         "Y": 434.2572
       },
-      "GroupTitle": "Options"
+      "GroupTitle": "Options",
+      "Description": "If enabled switches to a \"star like\" polar coordiante orienation."
     },
     {
       "InputId": "eab31c38-0e6f-432a-9f15-04bfb0aae28c"/*Repeat*/,
       "Position": {
         "X": 401.1939,
         "Y": 399.2572
-      }
+      },
+      "Description": "Repeats the gradient."
+    },
+    {
+      "InputId": "f22859b1-044b-44c7-8953-ea0f9cee36e8"/*Noise*/,
+      "Position": {
+        "X": 541.1939,
+        "Y": 644.2572
+      },
+      "Description": "Adding slight noise can improve color banding.",
+      "Min": 0.0,
+      "Max": 0.1,
+      "Scale": 0.001,
+      "ClampMin": true
     }
   ],
   "SymbolChildUis": [
@@ -131,8 +172,8 @@
     {
       "ChildId": "3aa09f38-f3c9-4fee-9a54-3f135ec354f7"/*Vector2Components*/,
       "Position": {
-        "X": 520.39526,
-        "Y": 505.1615
+        "X": 541.1939,
+        "Y": 504.2572
       }
     },
     {
@@ -161,6 +202,13 @@
       "Position": {
         "X": 541.1939,
         "Y": 189.25722
+      }
+    },
+    {
+      "ChildId": "d1844700-2e81-4b41-bc53-d0fc9a432778"/*Vector2Components*/,
+      "Position": {
+        "X": 541.1939,
+        "Y": 574.2572
       }
     }
   ],

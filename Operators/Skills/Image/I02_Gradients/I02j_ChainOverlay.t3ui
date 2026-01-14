@@ -1,0 +1,95 @@
+{
+  "Id": "e207e194-3f2d-48b6-b195-d1e147b09cca"/*I02j_ChainOverlay*/,
+  "Description": "LinearGradient: Chain Overlay",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "2fd29ba5-810b-4b07-a952-8bb39c957b65"/*LinearGradient*/,
+      "Position": {
+        "X": 1310.8925,
+        "Y": 1977.4424
+      }
+    },
+    {
+      "ChildId": "581e6942-6f1a-4de0-a306-ece698d5ab49"/*ImageQuiz*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2018.4391
+      }
+    },
+    {
+      "ChildId": "79bb1a75-d4a3-4b2a-9c5e-5a35f0a83238"/*LoadImage*/,
+      "Position": {
+        "X": 1310.8925,
+        "Y": 1942.4424
+      }
+    },
+    {
+      "ChildId": "8e0ca329-24de-4719-ad61-ddfb3e5f1322"/*LinearGradient*/,
+      "AnnotationId": "606c89c3-3cd5-4883-8da9-101ee8d767f0",
+      "Position": {
+        "X": 1441.7301,
+        "Y": 2334.827
+      }
+    },
+    {
+      "ChildId": "c1df97b1-7d37-4cb0-a246-90c0fc976274"/*LinearGradient*/,
+      "AnnotationId": "2215066d-6eae-4cb6-aeb2-e0f96980d57f",
+      "Position": {
+        "X": 1306.5621,
+        "Y": 2097.3557
+      }
+    },
+    {
+      "ChildId": "ce154adb-d96b-4f04-9939-d9421bfae52e"/*LoadImage*/,
+      "AnnotationId": "2215066d-6eae-4cb6-aeb2-e0f96980d57f",
+      "Position": {
+        "X": 1306.5621,
+        "Y": 2062.3557
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "d8a6033e-b69c-482c-b637-e9cde4a013a5"/*ColorBuffer*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2088.439
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "2215066d-6eae-4cb6-aeb2-e0f96980d57f",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1120.0,
+        "Y": 2054.7593
+      },
+      "Size": {
+        "X": 350.0,
+        "Y": 150.24072
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "c8b276d3-59b9-46fd-9be4-8e588481fda1",
+      "Description": "Like most image operators, [LinearGradient] can be chained to overlay an existing image.\nWith Normal blend mode, the original image is fully covered.\nUse opacity in the gradient's color steps to let the image show through."
+    },
+    {
+      "Id": "056a87da-273f-4b32-9ed5-56aa749bda2f",
+      "ChildId": "2fd29ba5-810b-4b07-a952-8bb39c957b65",
+      "InputId": "e47e9e63-9c94-4c29-9555-2452fa498d57",
+      "Description": "Select a gradient step to open the Color picker. \nThen use the opacity slider at the bottom. \nAdjust the opacity of the gradient's color steps to complete the challenge.\n",
+      "Style": "CallToAction"
+    }
+  ]
+}

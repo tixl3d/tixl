@@ -1,0 +1,108 @@
+{
+  "Id": "cdcd9df3-e941-428a-9dd4-7b05266a4bec"/*I02g_CleanupGradient*/,
+  "Description": "LinearGradient: Cleanup Tools",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0caf83c8-e311-4d36-9105-324e1f9fc077"/*ImageQuiz*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2018.4391
+      }
+    },
+    {
+      "ChildId": "1c51a945-eb82-4225-9545-7cfb524ec74f"/*LinearGradient*/,
+      "AnnotationId": "2ff99a70-2bc3-4bcd-b434-8c1fc6a09348",
+      "Position": {
+        "X": 1307.5101,
+        "Y": 2086.0547
+      }
+    },
+    {
+      "ChildId": "45c8e3a0-41ac-4494-a25c-7c0fdcc48d3e"/*Time*/,
+      "Position": {
+        "X": 1153.5648,
+        "Y": 1970.7007
+      }
+    },
+    {
+      "ChildId": "485595eb-8afa-4076-af28-7078930fab98"/*ImageLevels*/,
+      "Position": {
+        "X": 1293.5648,
+        "Y": 2005.7007
+      }
+    },
+    {
+      "ChildId": "8559c44a-d917-49ae-a929-e5e5b9be98cf"/*LinearGradient*/,
+      "AnnotationId": "606c89c3-3cd5-4883-8da9-101ee8d767f0",
+      "Position": {
+        "X": 1441.7301,
+        "Y": 2334.827
+      }
+    },
+    {
+      "ChildId": "95b95651-20d5-4140-9de4-d8d67ff51c55"/*ImageLevels*/,
+      "AnnotationId": "2ff99a70-2bc3-4bcd-b434-8c1fc6a09348",
+      "Position": {
+        "X": 1307.5101,
+        "Y": 2156.0547
+      }
+    },
+    {
+      "ChildId": "987672c1-096a-419e-84cf-cc4c54d72084"/*Time*/,
+      "AnnotationId": "2ff99a70-2bc3-4bcd-b434-8c1fc6a09348",
+      "Position": {
+        "X": 1167.5101,
+        "Y": 2121.0547
+      }
+    },
+    {
+      "ChildId": "d2f615c5-4575-4ccf-bb6c-77aa85738505"/*LinearGradient*/,
+      "Position": {
+        "X": 1293.5648,
+        "Y": 1935.7007
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "c9157ef7-156c-48b2-af3a-e3392d87679f"/*ColorBuffer*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2123.439
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "2ff99a70-2bc3-4bcd-b434-8c1fc6a09348",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1120.0,
+        "Y": 2054.7593
+      },
+      "Size": {
+        "X": 350.0,
+        "Y": 150.24072
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "a3b51a81-0174-4a20-8749-d8594efb996e",
+      "Description": "Sometimes gradients need cleanup.\nThe color gradient context menu includes tools to reverse a gradient and evenly distribute its color steps."
+    },
+    {
+      "Id": "62cebf74-37a8-41b6-b22f-1cd01ca508c8",
+      "Description": "Recreate the goal without dragging or changing any color steps.",
+      "Style": "CallToAction"
+    }
+  ]
+}

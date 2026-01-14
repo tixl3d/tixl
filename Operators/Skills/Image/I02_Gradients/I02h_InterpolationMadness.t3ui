@@ -1,0 +1,98 @@
+{
+  "Id": "bf67074b-b2a2-4231-b1fc-6abd38e159aa"/*I02h_InterpolationMadness*/,
+  "Description": "",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0a724784-1092-42f5-962f-e4eafbd49454"/*ImageQuiz*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2018.4391
+      }
+    },
+    {
+      "ChildId": "17170e81-62f2-455f-8e78-34543cfa364d"/*ImageLevels*/,
+      "Position": {
+        "X": 1293.5648,
+        "Y": 2005.7007
+      }
+    },
+    {
+      "ChildId": "6561177b-012f-47dc-b2e5-22508649110b"/*ImageLevels*/,
+      "AnnotationId": "7a0e4cf4-7fa2-4373-9371-b80b97d01f09",
+      "Position": {
+        "X": 1306.5621,
+        "Y": 2132.3557
+      }
+    },
+    {
+      "ChildId": "77576ab9-7784-45f3-be45-259e2b58605f"/*LinearGradient*/,
+      "AnnotationId": "606c89c3-3cd5-4883-8da9-101ee8d767f0",
+      "Position": {
+        "X": 1441.7301,
+        "Y": 2334.827
+      }
+    },
+    {
+      "ChildId": "b6f65cd0-62d2-4921-8107-d7001e9a1092"/*LinearGradient*/,
+      "AnnotationId": "7a0e4cf4-7fa2-4373-9371-b80b97d01f09",
+      "Position": {
+        "X": 1306.5621,
+        "Y": 2097.3557
+      }
+    },
+    {
+      "ChildId": "caa36c77-ac62-4cb3-8b47-9689a1d2319f"/*LinearGradient*/,
+      "Position": {
+        "X": 1293.5648,
+        "Y": 1970.7007
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "60a2cf6f-72c9-4e76-abcd-97c754cbcd58"/*ColorBuffer*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2123.439
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "7a0e4cf4-7fa2-4373-9371-b80b97d01f09",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1120.0,
+        "Y": 2054.7593
+      },
+      "Size": {
+        "X": 350.0,
+        "Y": 150.24072
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "6e71ecba-5b97-4b86-aefa-17330eab596d",
+      "Description": "Some interpolation modes like Spline and OKLab might have unexpected results."
+    },
+    {
+      "Id": "c403283c-412a-49ae-a881-b931d057d4fe",
+      "Description": "In this example the Spline Interpolation leads to color clamping of the red channel."
+    },
+    {
+      "Id": "eccbdf32-bf52-4ded-b869-58eea05d9cb0",
+      "ChildId": "caa36c77-ac62-4cb3-8b47-9689a1d2319f",
+      "Description": "Select the [LinearGradient] operator.\n\nThen adjust the position of the middle gradient step to resolve the clamping.",
+      "Style": "CallToAction"
+    }
+  ]
+}

@@ -242,6 +242,16 @@ internal abstract class FloatVectorInputValueUi<T> : InputValueUi<T>
         // ReSharper enable CompareOfFloatsByEqualityOperator
     }
 
+    public void CopyTo(FloatVectorInputValueUi<T> target)
+    {
+        target.Min = Min;
+        target.Max = Max;
+        target.Scale = Scale;
+        target.ClampMin = ClampMin;
+        target.ClampMax = ClampMax;
+        target.Format = Format;
+    }
+
     public override void Read(JToken inputToken)
     {
         base.Read(inputToken);
@@ -278,7 +288,11 @@ internal abstract class FloatVectorInputValueUi<T> : InputValueUi<T>
     public float Min = DefaultMin;
     public float Max = DefaultMax;
     private float _scale = DefaultScale;
-    public float Scale => FloatInputUi.GetScaleFromRange(_scale, Min, Max);
+    public float Scale { 
+        get => FloatInputUi.GetScaleFromRange(_scale, Min, Max);
+        set => _scale = value;
+    }
+
     //private bool Clamp;
     public bool ClampMin;
     public bool ClampMax;

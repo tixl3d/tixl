@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using T3.Core.Operator;
 using T3.Editor.Compilation;
+using T3.Editor.Gui.InputUi.VectorInputs;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Graph;
 using GraphUtils = T3.Editor.UiModel.Helpers.GraphUtils;
@@ -37,7 +38,8 @@ internal static class Duplicate
         var classRenamer = new ClassRenameRewriter(newTypeName);
         root = classRenamer.Visit(root);
 
-        var memberRewriter = new Duplicate.MemberDuplicateRewriter(newTypeName);
+        var memberRewriter = new Duplicate.MemberDuplicateRewriter(sourceSymbol.Name, newTypeName);
+        
         root = memberRewriter.Visit(root);
         var oldToNewIdMap = memberRewriter.OldToNewGuidDict;
         var newSource = root.GetText().ToString();
@@ -109,6 +111,45 @@ internal static class Duplicate
             var correspondingInputDef = newSymbol.InputDefinitions.Find(newInputDef => newInputDef.Id == newInputId);
             correspondingInputDef.DefaultValue = sourceInputDef.DefaultValue.Clone();
         }
+        
+        // Copy the values of the input of the duplicated type: default values of symbol and the ones in composition context
+        foreach (var (sourceInputId, sourceInputUi) in sourceSymbolUi.InputUis)
+        {
+            var newInputId = oldToNewIdMap[sourceInputId];
+            if (newSymbolUi.InputUis.TryGetValue(newInputId, out var newInputUi))
+            {
+                newInputUi.AddPadding = sourceInputUi.AddPadding;
+                newInputUi.GroupTitle = sourceInputUi.GroupTitle;
+                newInputUi.Description = sourceInputUi.Description;
+                newInputUi.ExcludedFromPresets = sourceInputUi.ExcludedFromPresets;
+                newInputUi.Relevancy = sourceInputUi.Relevancy;
+
+                // This is a very unfortunate code, indeed. 
+                // But implementing this as a generic turned out to be rather tricky
+                // because you can't cast to a generic or infer the specific type without
+                // adding a non-generic abstract base type.
+                switch (sourceInputUi)
+                {
+                    case FloatInputUi srcFloatInput when 
+                        newInputUi is FloatInputUi newFloatInput:
+                        srcFloatInput.CopyTo(newFloatInput);
+                        break;
+                    case Vector2InputUi srcVec2Input when 
+                        newInputUi is Vector2InputUi newVec2Input:
+                        srcVec2Input.CopyTo(newVec2Input);
+                        newVec2Input.UseVec2Control = srcVec2Input.UseVec2Control;
+                        break;
+                    case Vector3InputUi srcVec3Input when 
+                        newInputUi is Vector3InputUi newVec3Input:
+                        srcVec3Input.CopyTo(newVec3Input);
+                        break;
+                    case Vector4InputUi srcVec4Input when 
+                        newInputUi is Vector4InputUi newVec4Input:
+                        srcVec4Input.CopyTo(newVec4Input);
+                        break;
+                }
+            }
+        }
 
         // Create instance
         var addCommand = new AddSymbolChildCommand(compositionUi.Symbol, newSymbol.Id) { PosOnCanvas = posOnCanvas };
@@ -157,24 +198,26 @@ internal static class Duplicate
 
     private sealed class MemberDuplicateRewriter : CSharpSyntaxRewriter
     {
+        private readonly string _oldSymbolName;
         private readonly string _newSymbolName;
 
-        public MemberDuplicateRewriter(string newSymbolName)
+        public MemberDuplicateRewriter(string oldSymbolName, string newSymbolName)
         {
+            _oldSymbolName = oldSymbolName;
             _newSymbolName = newSymbolName;
         }
 
         public override SyntaxNode VisitConstructorDeclaration(ConstructorDeclarationSyntax node)
         {
-            return SyntaxFactory.ConstructorDeclaration(_newSymbolName)
-                                .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
-                                .NormalizeWhitespace()
-                                .WithTrailingTrivia(SyntaxFactory.SyntaxTrivia(SyntaxKind.EndOfLineTrivia, "\r\n"))
-                                .WithBody(node.Body)
-                                .WithLeadingTrivia(node.GetLeadingTrivia())
-                                .WithTrailingTrivia(node.GetTrailingTrivia());
-        }
+            // Only rewrite constructors of the original top-level class
+            if (node.Identifier.Text != _oldSymbolName)
+                return node;
 
+            return node.WithIdentifier(
+                                       SyntaxFactory.Identifier(_newSymbolName)
+                                                    .WithTriviaFrom(node.Identifier));
+        }
+        
         public override SyntaxNode VisitFieldDeclaration(FieldDeclarationSyntax node)
         {
             if (node.Declaration.Type is not GenericNameSyntax nameSyntax)

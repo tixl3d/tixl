@@ -11,6 +11,19 @@ namespace Lib.io.video;
 [Guid("cd5a182e-254b-4e65-820b-ff754122614c")]
 public class VideoDeviceInput : Instance<VideoDeviceInput>, ICustomDropdownHolder
 {
+    // Output slots
+    [Output(Guid = "1d0159cc-33d2-46b1-9c0c-7054aa560df5", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
+    public readonly Slot<Texture2D> Texture = new();
+    
+    [Output(Guid = "9C2E4C11-09B6-4F4D-8F99-4A7372D5F2B5", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
+    public readonly Slot<Int2> Resolution = new();
+    
+    [Output(Guid = "A1B2C3D4-5678-90EF-1234-567890ABCDEF", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
+    public new readonly Slot<string> Status = new();
+    
+    [Output(Guid = "868D5FFE-032C-4522-B56B-D96B30841DB7", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
+    public readonly Slot<int> UpdateCount = new();    
+    
     private const float Epsilon = 1e-4f;
 
     // Static device information
@@ -62,18 +75,7 @@ public class VideoDeviceInput : Instance<VideoDeviceInput>, ICustomDropdownHolde
     [Input(Guid = "805602D5-52B2-4A73-A337-12E00C3C91F2")]
     public readonly InputSlot<Vector2> Scale = new();
 
-    // Output slots
-    [Output(Guid = "1d0159cc-33d2-46b1-9c0c-7054aa560df5", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
-    public readonly Slot<Texture2D> Texture = new();
-    
-    [Output(Guid = "9C2E4C11-09B6-4F4D-8F99-4A7372D5F2B5", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
-    public readonly Slot<Int2> Resolution = new();
-    
-    [Output(Guid = "A1B2C3D4-5678-90EF-1234-567890ABCDEF", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
-    public new readonly Slot<string> Status = new();
-    
-    [Output(Guid = "868D5FFE-032C-4522-B56B-D96B30841DB7", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
-    public readonly Slot<int> UpdateCount = new();
+
 
     private CancellationTokenSource _cancellationTokenSource;
 

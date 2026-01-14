@@ -8,9 +8,25 @@ namespace T3.Editor.Gui.Interaction.Midi;
 /// <summary>
 /// Handles the initialization and update of <see cref="CompatibleMidiDevice"/>s.
 /// </summary>
-public static class CompatibleMidiDeviceHandling
+internal static class CompatibleMidiDeviceHandling
 {
-    public static void InitializeConnectedDevices()
+    static CompatibleMidiDeviceHandling()
+    {
+        _compatibleControllerTypes = ScanForCompatibleDevices();
+    }
+
+    private static List<Type> ScanForCompatibleDevices()
+    {
+        var baseType = typeof(CompatibleMidiDevice);
+        return Assembly.GetExecutingAssembly()
+                       .GetTypes()
+                       .Where(t => baseType.IsAssignableFrom(t) && 
+                                   !t.IsAbstract && 
+                                   t.GetCustomAttribute<MidiDeviceProductAttribute>() != null)
+                       .ToList();
+    }    
+    
+    internal static void InitializeConnectedDevices()
     {
         if (!MidiConnectionManager.Initialized)
         {
@@ -29,7 +45,7 @@ public static class CompatibleMidiDeviceHandling
         CreateConnectedCompatibleDevices();
     }
 
-    public static void UpdateConnectedDevices()
+    internal static void UpdateConnectedDevices()
     {
         foreach (var compatibleMidiDevice in _connectedMidiDevices)
         {
@@ -78,16 +94,6 @@ public static class CompatibleMidiDeviceHandling
         }
     }
 
-    // TODO: This list could be inferred by reflection checking for MidiDeviceProductAttribute 
-    private static readonly List<Type> _compatibleControllerTypes
-        = new()
-              {
-                  typeof(Apc40Mk1),
-                  typeof(Apc40Mk2),
-                  typeof(ApcMini),
-                  typeof(ApcMiniMk2),
-                  typeof(NanoControl8)
-              };
-
+    private static readonly List<Type> _compatibleControllerTypes;
     private static readonly List<CompatibleMidiDevice> _connectedMidiDevices = new();
 }

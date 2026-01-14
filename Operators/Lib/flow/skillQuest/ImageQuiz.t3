@@ -13,7 +13,7 @@
       "Id": "cf267a38-5504-4d0c-b149-17bbe62c70cf"/*DifferenceRange*/,
       "DefaultValue": {
         "X": 0.0,
-        "Y": 0.03
+        "Y": 0.1
       }
     }
   ],
@@ -31,7 +31,7 @@
         {
           "Id": "2713907a-425e-44d2-ab38-33570f52296c"/*PrecisionScale*/,
           "Type": "System.Single",
-          "Value": 1000.0
+          "Value": 400.0
         }
       ],
       "Outputs": []

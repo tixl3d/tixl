@@ -14,6 +14,7 @@ cbuffer ParamConstants : register(b1)
     float Rotate;
     float2 GainAndBias;
     float2 Range;
+    float SliceDepth;
 }
 
 // int paramet const buffer
@@ -24,28 +25,12 @@ cbuffer ParamConstants : register(b2)
     int Mode;
 }
 
-// TODO: Clarify if required.
-
 // resolution const buffer? -> YES for aspect ratio
 cbuffer ResolutionConstBuffer : register(b3)
 {
     float TargetWidth;
     float TargetHeight;
 }
-
-// cbuffer Transforms : register(b2)
-// {
-//     float4x4 CameraToClipSpace;
-//     float4x4 ClipSpaceToCamera;
-//     float4x4 WorldToCamera;
-//     float4x4 CameraToWorld;
-//     float4x4 WorldToClipSpace;
-//     float4x4 ClipSpaceToWorld;
-//     float4x4 ObjectToWorld;
-//     float4x4 WorldToObject;
-//     float4x4 ObjectToCamera;
-//     float4x4 ObjectToClipSpace;
-// }
 
 struct vsOutput
 {
@@ -138,9 +123,6 @@ float4 psMain(vsOutput input) : SV_TARGET
     float2 uv = input.texCoord;
     float aspectRatio = TargetWidth / TargetHeight;
 
-    // Test...
-    // return float4(aspectRatio.xxx, 1);
-
     uv -= 0.5;
     uv -= Center * float2(1, -1);
     uv.x *= aspectRatio;
@@ -149,13 +131,14 @@ float4 psMain(vsOutput input) : SV_TARGET
 
     uv /= Scale;
 
-    // float4 fxTexture = FxTexture.Sample(ClampedSampler, input.texCoord);
-    float4 samplePos = float4(uv, 0, 0);
+    float4 samplePos = float4(uv, SliceDepth, 0);
     float4 f = GetField(samplePos);
 
     float d = f.w;
 
-    // return float4(d.xxx, 1);
+    if (Mode == 1)
+        return float4(f.rgb, 1);
+
     d = (d - Range.x) / (Range.y - Range.x);
 
     d = PingPongRepeat(d, PingPong, Repeat);
