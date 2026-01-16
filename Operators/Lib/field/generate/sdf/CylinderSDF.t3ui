@@ -1,6 +1,7 @@
 {
   "Id": "67f21840-dc9a-4390-aa45-234ce81c8717"/*CylinderSDF*/,
   "Description": "Generates a procedural cylinder field with rounded edges which can be rendered with [RaymarchField] and visualized with [VisualizeFieldDistance].\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToRaymarchField].\n\nIt can be modified with [BendField], [TransformField], [PolarRepeat] and more.\n\nSimilar nodes: [BoxSDF], [ChainLinkSDF], [FractalSDF].\n\nTo use a Mesh made of polygons refer to [CylinderMesh].",
+  "SymbolTags": "1",
   "InputUis": [
     {
       "InputId": "04ce1364-f421-4bd1-8f45-60921c8605df"/*Radius*/,

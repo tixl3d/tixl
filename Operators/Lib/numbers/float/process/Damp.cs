@@ -32,19 +32,29 @@ internal sealed class Damp : Instance<Damp>
                 //Log.Debug($"Skip motion blur pass {motionBlurPass}");
                 return;
             }                
-        } 
+        }
 
+        
         _lastEvalTime = currentTime;
 
-        var method = (DampFunctions.Methods)Method.GetValue(context).Clamp(0, 1);
-        _dampedValue = DampFunctions.DampenFloat(inputValue, _dampedValue, damping, ref _velocity, method);
+        if (_isFirstEval)
+        {
+            _dampedValue = inputValue;
+            _isFirstEval = false;
+        }
+        else
+        {
+            var method = (DampFunctions.Methods)Method.GetValue(context).Clamp(0, 1);
+            _dampedValue = DampFunctions.DampenFloat(inputValue, _dampedValue, damping, ref _velocity, method);
 
-        MathUtils.ApplyDefaultIfInvalid(ref _dampedValue, 0);
-        MathUtils.ApplyDefaultIfInvalid(ref _velocity, 0);
-
+            MathUtils.ApplyDefaultIfInvalid(ref _dampedValue, 0);
+            MathUtils.ApplyDefaultIfInvalid(ref _velocity, 0);
+        }
+        
         Result.Value = _dampedValue;
     }
 
+    private bool _isFirstEval = true;
     private float _dampedValue;
     private float _velocity;
     private double _lastEvalTime;

@@ -1,6 +1,7 @@
 {
   "Id": "ef440c7d-9cbd-49b7-81b6-e1a42c6eda83"/*SampleFieldPoints*/,
   "Description": "",
+  "SymbolTags": "8",
   "InputUis": [
     {
       "InputId": "309b0110-2724-4904-8545-8ab91b58212e"/*WriteTo*/,

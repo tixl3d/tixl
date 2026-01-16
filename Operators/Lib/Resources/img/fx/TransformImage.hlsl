@@ -9,11 +9,17 @@ cbuffer ParamConstants : register(b0)
     float RepeatMode; // 6
 }
 
-cbuffer Resolution : register(b1)
+cbuffer IntParams : register(b2)
 {
-    float TargetWidth;
-    float TargetHeight;
+    int2 OrgResolution;
+    int2 TargetResolution;
 }
+
+// cbuffer Resolution : register(b1)
+// {
+//     float TargetWidth;
+//     float TargetHeight;
+// }
 
 struct vsOutput
 {
@@ -42,11 +48,11 @@ float4 psMain(vsOutput psInput) : SV_TARGET
 
     float2 uv = psInput.texCoord;
 
-    float sourceAspectRatio = TargetWidth / TargetHeight;
+    float sourceAspectRatio = (float)OrgResolution.x / (float)OrgResolution.y;
 
     float2 divisions = float2(sourceAspectRatio / Stretch.x, 1 / Stretch.y) / Scale;
     float2 p = psInput.texCoord;
-    float2 offset = Offset * float2(-1,1); //translation on X will match the user's movement 
+    float2 offset = Offset * float2(-1, 1); // translation on X will match the user's movement
     p += offset;
     p -= 0.5;
 
@@ -65,10 +71,13 @@ float4 psMain(vsOutput psInput) : SV_TARGET
     p.x *= aspect2 / sourceAspectRatio;
     p *= divisions;
 
-   // float2 samplePos = (RepeatMode > 3.5) ? p
-   //                                       : p + 0.5;
-    float2 samplePos = p + 0.5;
-    
+    // float2 samplePos = (RepeatMode > 3.5) ? p
+    //                                       : p + 0.5;
+
+    // float2 rescale = float2((float)OrgResolution.x / (float)TargetResolution.x, //
+    //                         (float)OrgResolution.y / (float)TargetResolution.y);
+
+    float2 samplePos = (p + 0.5);
 
     float4 imgColorForCel = ImageA.Sample(texSampler, samplePos);
     return imgColorForCel;

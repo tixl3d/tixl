@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System.Diagnostics.CodeAnalysis;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
@@ -34,6 +34,8 @@ internal sealed class MagGraphItem : ISelectableCanvasObject, IValueSnapAttracto
     public Vector2 PosOnCanvas { get => Selectable.PosOnCanvas; set => Selectable.PosOnCanvas = value; }
     public Vector2 DampedPosOnCanvas;
     public Vector2 Size { get; set; }
+
+    public bool IsCollapsedAway => ChildUi != null && ChildUi.CollapsedIntoAnnotationFrameId != Guid.Empty;
 
     public OpUiBinding? OpUiBinding;
     

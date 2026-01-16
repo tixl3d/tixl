@@ -1,6 +1,7 @@
 {
   "Id": "0f1bf849-949e-4462-a7af-ecb2ff3cd109"/*DirectionalForce*/,
   "Description": "Generates a force acting on particles in a defined direction in space.\n\nUseful for simulating gravity, wind or attractive forces.",
+  "SymbolTags": "1",
   "InputUis": [
     {
       "InputId": "56b551e9-47aa-4d19-954b-367c4d96e5d8"/*Direction*/,
@@ -14,8 +15,8 @@
     {
       "InputId": "bcfe965f-27bd-4568-b25b-6987a26b5d6e"/*Amount*/,
       "Position": {
-        "X": -80.76926,
-        "Y": 614.66284
+        "X": 45.557922,
+        "Y": 690.84485
       },
       "Description": "Strength of the force",
       "AddPadding": "True",
@@ -33,8 +34,8 @@
     {
       "InputId": "fc7131da-a2d1-49c2-bcf7-ebc409347cb6"/*RandomAmount*/,
       "Position": {
-        "X": -80.76926,
-        "Y": 659.66296
+        "X": 659.83594,
+        "Y": 745.4883
       },
       "Description": "Adds or subtracts a random value per particle"
     }
@@ -71,8 +72,8 @@
     {
       "ChildId": "3d5a9d1c-0aa7-45e4-8a2f-3d6c3c90446e"/*Vector3Components*/,
       "Position": {
-        "X": 807.9282,
-        "Y": 535.553
+        "X": 817.9282,
+        "Y": 570.553
       }
     },
     {

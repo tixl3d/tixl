@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Utils;
+using T3.Editor.App;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.TimeLine;
@@ -19,9 +20,9 @@ namespace T3.Editor.Gui.Interaction;
 /// Other canvas should not inherit from this but use composition.
 /// IScalableCanvas should be removed
 /// </todo>
-public abstract partial class ScalableCanvas
+public partial class ScalableCanvas
 {
-    protected ScalableCanvas(Vector2? initialScale = null)
+    public ScalableCanvas(Vector2? initialScale = null)
     {
         if (initialScale == null)
             return;
@@ -51,9 +52,9 @@ public abstract partial class ScalableCanvas
         if (FillMode == FillModes.FillWindow)
         {
             var paddingForFocusBorder = UserSettings.Config.FocusMode ? 0 : 1;
-            
+
             WindowPos = ImGui.GetWindowContentRegionMin() + ImGui.GetWindowPos() + paddingForFocusBorder * Vector2.One;
-            WindowSize = ImGui.GetWindowContentRegionMax() - ImGui.GetWindowContentRegionMin() - paddingForFocusBorder * 2  * Vector2.One;
+            WindowSize = ImGui.GetWindowContentRegionMax() - ImGui.GetWindowContentRegionMin() - paddingForFocusBorder * 2 * Vector2.One;
         }
         else
         {
@@ -165,7 +166,7 @@ public abstract partial class ScalableCanvas
         return new ImRect(InverseTransformPositionFloat(screenRect.Min),
                           InverseTransformPositionFloat(screenRect.Max));
     }
-    
+
     /// <summary>
     /// Transform a canvas position to relative position within ImGui-window (e.g. to set ImGui context) 
     /// </summary>
@@ -184,7 +185,6 @@ public abstract partial class ScalableCanvas
 
     public Vector2 Scroll { get; protected set; } = new(0.0f, 0.0f);
     protected Vector2 ScrollTarget = new(0.0f, 0.0f);
-
 
     private void DampScaling(float deltaTime)
     {
@@ -236,7 +236,7 @@ public abstract partial class ScalableCanvas
     {
         zoomed = false;
         panned = false;
-        
+
         if (_draggedCanvas == this && !ImGui.IsMouseDragging(ImGuiMouseButton.Right))
             _draggedCanvas = null;
 
@@ -247,16 +247,16 @@ public abstract partial class ScalableCanvas
                                      || CustomComponents.IsAnotherWindowDragScrolling(this);
 
         //DrawCanvasDebugInfos(mouseState.Position, isDirectlyHovered, isInteractable, isPanning);
-            
+
         if ((flags & T3Ui.EditingFlags.PreventMouseInteractions) != 0)
             return;
 
-        var isAnotherItemActive = FrameStats.Last.OpenedPopupCapturedMouse;//ImGui.IsAnyItemActive();
-        
+        var isAnotherItemActive = FrameStats.Last.OpenedPopupCapturedMouse; //ImGui.IsAnyItemActive();
+
         if (
             !(isAnotherWindowPanning || isAnotherItemActive)
             && (isInteractable || isPanning)
-            && (flags&T3Ui.EditingFlags.PreventPanningWithMouse) == 0
+            && (flags & T3Ui.EditingFlags.PreventPanningWithMouse) == 0
             && ((
                     ImGui.IsMouseDragging(ImGuiMouseButton.Left) && ImGui.GetIO().KeyAlt && this is not TimeLineCanvas)
                 || (!UserSettings.Config.MiddleMouseButtonZooms && ImGui.IsMouseDragging(ImGuiMouseButton.Middle) && !ImGui.GetIO().KeyAlt)
@@ -270,13 +270,27 @@ public abstract partial class ScalableCanvas
         }
 
         var preventZoom = (flags & T3Ui.EditingFlags.PreventZoomWithMouseWheel) != 0;
-
         if (isInteractable && !preventZoom)
         {
-            ZoomWithMouseWheel(mouseState, out zoomed);
-            ZoomWithDrag();
-            ScaleTarget = ClampScaleToValidRange(ScaleTarget);
+            if (UserSettings.Config.UseTouchPadPanning)
+            {
+                if (isDirectlyHovered)
+                {
+                    ScrollTarget += new Vector2(ImGui.GetIO().MouseWheelH * 220,
+                                                -ImGui.GetIO().MouseWheel * 220) / ScaleTarget;
+                    //MouseWheelPanning.Delta * new Vector2(-1,1) / ScaleTarget;
+                    var zoomFactor= ComputeZoomDeltaFromMouseWheel(MouseWheelPanning.PinchZoomDelta);
+                    ApplyZoomDelta(mouseState.Position, zoomFactor, out zoomed);
+                }
+            }
+            else
+            {
+                ZoomWithMouseWheel(mouseState, out zoomed);
+            }
         }
+
+        ZoomWithDrag();
+        ScaleTarget = ClampScaleToValidRange(ScaleTarget);
     }
 
     private static ScalableCanvas? _draggedCanvas;
@@ -294,14 +308,25 @@ public abstract partial class ScalableCanvas
 
     public void ZoomWithMouseWheel(MouseState mouseState, out bool zoomed)
     {
-        var zoomDelta = ComputeZoomDeltaFromMouseWheel(mouseState);
+        
+        var ioMouseWheel = mouseState.ScrollWheel;
+        if (ioMouseWheel == 0)
+        {
+            zoomed = false;
+            return;
+        }
+            //return 1;
+        var zoomDelta = ComputeZoomDeltaFromMouseWheel(ioMouseWheel);
         ApplyZoomDelta(mouseState.Position, zoomDelta, out zoomed);
     }
 
     protected void ApplyZoomDelta(Vector2 position, float zoomDelta, out bool zoomed)
     {
-        var clamped = ClampScaleToValidRange(ScaleTarget * zoomDelta);
         zoomed = false;
+        if (Math.Abs(zoomDelta - 1) < 0.001f)
+            return;
+            
+        var clamped = ClampScaleToValidRange(ScaleTarget * zoomDelta);
         if (clamped == ScaleTarget)
             return;
 
@@ -343,9 +368,9 @@ public abstract partial class ScalableCanvas
             dl.AddText(focusOnScreen + new Vector2(10, -10), Color.Green, $"{focusCenterOnCanvas.X:0.0} {focusCenterOnCanvas.Y:0.0} ");
             dl.AddRect(wp, wp + ImGui.GetWindowSize(), Color.Green.Fade(0.4f));
         }
-            
+
         dl.AddRectFilled(wp, wp + new Vector2(200, 100), UiColors.WindowBackground.Fade(0.4f));
-        dl.AddText(wp + new Vector2(160,0), Color.Green,$"hovered:{directlyHovered}\ninteractable:{isInteractable}\nactive:{isAlreadyActive}");
+        dl.AddText(wp + new Vector2(160, 0), Color.Green, $"hovered:{directlyHovered}\ninteractable:{isInteractable}\nactive:{isAlreadyActive}");
 
         dl.AddText(wp + new Vector2(0, 0), Color.Green, $"Scale: {ScaleTarget.X:0.0} {ScaleTarget.Y:0.0} ");
         dl.AddText(wp + new Vector2(0, 16), Color.Green, $"Scroll: {ScrollTarget.X:0.0} {ScrollTarget.Y:0.0} ");
@@ -353,28 +378,22 @@ public abstract partial class ScalableCanvas
         var hovered = ImGui.IsWindowHovered() ? "hovered" : "";
         var hoveredChild = ImGui.IsWindowHovered(ImGuiHoveredFlags.ChildWindows) ? "hoveredChildWindows" : "";
         dl.AddText(wp + new Vector2(0, 48), Color.Green, $"{hovered} {hoveredChild}");
-            
+
         var focused = ImGui.IsWindowFocused() ? "focused" : "";
         var focusedChild = ImGui.IsWindowFocused(ImGuiFocusedFlags.ChildWindows) ? "focusedChildWindows" : "";
         dl.AddText(wp + new Vector2(0, 64), Color.Green, $"{focused} {focusedChild}");
-        
+
         // // Test window content region:
         // var paddingForFocusBorder = 1;
         // var pos = ImGui.GetWindowContentRegionMin() + ImGui.GetWindowPos() + paddingForFocusBorder * Vector2.One;
         // var size = ImGui.GetWindowContentRegionMax() - ImGui.GetWindowContentRegionMin() - paddingForFocusBorder * 2  * Vector2.One;
         // dl.AddRect(pos, pos + size, Color.Red);
-        
-        
     }
 
     private bool IsCurveCanvas => Scale.Y < 0;
 
-    private static float ComputeZoomDeltaFromMouseWheel(in MouseState mouseState)
+    private static float ComputeZoomDeltaFromMouseWheel(float ioMouseWheel)
     {
-        var ioMouseWheel = mouseState.ScrollWheel;
-        if (ioMouseWheel == 0)
-            return 1;
-
         const float zoomSpeed = 1.2f;
         var zoomSum = 1f;
 
@@ -447,7 +466,7 @@ public abstract partial class ScalableCanvas
 
     public bool EnableParentZoom { get; set; } = true;
 
-    protected abstract ScalableCanvas? Parent { get; }
+    protected virtual ScalableCanvas? Parent { get; }
 
     public readonly record struct InteractionState(bool UserPannedCanvas, bool UserZoomedCanvas, MouseState MouseState);
 
@@ -464,8 +483,6 @@ public abstract partial class ScalableCanvas
     //     Log.Debug(str);
     //     return str;
     // }
-
 }
-
 
 public readonly record struct MouseState(Vector2 Position, Vector2 Delta, float ScrollWheel);

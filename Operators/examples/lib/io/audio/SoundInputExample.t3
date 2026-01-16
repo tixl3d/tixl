@@ -307,11 +307,6 @@
           "Id": "cc812393-f080-4e17-a525-15b09f8acdd0"/*Gain*/,
           "Type": "System.Single",
           "Value": 0.02
-        },
-        {
-          "Id": "db868176-d51c-41aa-bafe-68c3e50e725e"/*RangeEnd*/,
-          "Type": "System.Int32",
-          "Value": 159
         }
       ],
       "Outputs": []

@@ -47,7 +47,7 @@ internal static class GetBoolVarUi
         }
         else
         {
-            WidgetElements.DrawPrimaryTitle(drawList, area, "Get " + data.VariableName.TypedInputValue.Value, canvas.Scale);
+            WidgetElements.DrawPrimaryTitle(drawList, area, "Get bool: " + data.VariableName.TypedInputValue.Value, canvas.Scale);
         }
 
         WidgetElements.DrawSmallValue(drawList, area, $"{value}", canvas.Scale);

@@ -10,6 +10,10 @@
       "DefaultValue": 0.5
     },
     {
+      "Id": "2d258b34-d45a-475e-987f-ea16cd4d5292"/*StepFactor*/,
+      "DefaultValue": 0.5
+    },
+    {
       "Id": "6cd7b3ca-323c-4a69-989b-1b10009b8a90"/*Offset*/,
       "DefaultValue": {
         "X": 0.0,
@@ -20,6 +24,10 @@
     {
       "Id": "b7a2e12b-9e55-43a5-be79-510f4a28a1f4"/*Scale*/,
       "DefaultValue": 1.0
+    },
+    {
+      "Id": "ee1c1993-3968-45a6-bbfc-9e4e6032ae7b"/*UseLocalSpace*/,
+      "DefaultValue": false
     }
   ],
   "Children": [],

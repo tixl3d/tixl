@@ -1,6 +1,6 @@
 using ImGuiNET;
 
-namespace T3.Editor.Gui.Graph.Interaction;
+namespace T3.Editor.Gui.Interaction;
 
 internal sealed class ShakeDetector
 {

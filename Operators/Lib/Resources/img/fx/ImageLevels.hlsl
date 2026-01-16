@@ -77,6 +77,7 @@ float4 psMain(vsOutput psInput) : SV_TARGET
     // {
     //     return float4(0., 0., 0., 1);
     // }
+    float2 pixelposition = uv * float2(width, height);
 
     float2 pOnLine = p;
     pOnLine += (-distanceFromCenter) * angle;
@@ -88,11 +89,17 @@ float4 psMain(vsOutput psInput) : SV_TARGET
     // Curves...
     float4 curveColor = 0;
     float4 curveShape2 = smoothstep(normalizedDistance, normalizedDistance + lineThickness, colorOnLine.rgba);
-    float channelAlpha = 0.03;
-    float n = -0.2;
-    float4 curveShape = curveShape2.r * float4(1, n, n, channelAlpha) + curveShape2.g * float4(n, 1, n, channelAlpha) + curveShape2.b * float4(n, n, 1, channelAlpha) + curveShape2.a * float4(0, 0, 0, channelAlpha);
 
-    float4 curveLines = smoothstep(normalizedDistance + lineThickness, normalizedDistance, colorOnLine.rgba) * smoothstep(normalizedDistance - lineThickness, normalizedDistance, colorOnLine.rgba) * float4(2, 2, 2, 0);
+    float channelAlpha = 0.1;
+    float n = -0.2;
+    float4 curveShape = curveShape2.r * float4(1, n, n, channelAlpha)   //
+                        + curveShape2.g * float4(n, 1, n, channelAlpha) //
+                        + curveShape2.b * float4(n, n, 1, channelAlpha) //
+                        + curveShape2.a * float4(1, 1, 1, channelAlpha);
+
+    float4 curveLines = smoothstep(normalizedDistance + lineThickness * float4(1, 1, 1, 1.5), normalizedDistance, colorOnLine.rgba)   //
+                        * smoothstep(normalizedDistance - lineThickness * float4(1, 1, 1, 1.5), normalizedDistance, colorOnLine.rgba) //
+                        * float4(2, 2, 2, 1.5 * ((pixelposition.x + pixelposition.y) % 10 > 5 ? 1 : 0));
 
     curveLines.a += length(curveLines.rgb) * 0.3;
     if (normalizedDistance < 0)
@@ -108,7 +115,7 @@ float4 psMain(vsOutput psInput) : SV_TARGET
 
     // Zebra pattern for highlight clamping
     float3 clamping = (colorOnLine.rgb > 1 || colorOnLine.rgb < 0) ? float3(1, 1, 1) : float3(0, 0, 0);
-    float2 pixelposition = uv * float2(width, height);
+
     float pattern = (pixelposition.x + pixelposition.y + 0.5 + beatTime * 100) % 8 < 2 ? 1 : -1;
 
     float3 clampedAreaRGB = clamping * curveShape.rgb * ((normalizedDistance > 1 || normalizedDistance < 0) ? 1 : 0);

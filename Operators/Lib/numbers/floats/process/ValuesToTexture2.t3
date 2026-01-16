@@ -1,0 +1,42 @@
+{
+  "Id": "78aee2e7-9fe6-44c4-bde3-57618007480f"/*ValuesToTexture2*/,
+  "Inputs": [
+    {
+      "Id": "2d1517aa-d22d-4588-b208-774ffecbfa9d"/*OutputRange*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 1.0
+      }
+    },
+    {
+      "Id": "8d5cd7bb-e349-4e22-8402-6dca63728b35"/*Direction*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "a80458c5-685a-434e-989b-9212324d0e14"/*Values*/,
+      "DefaultValue": {
+        "Values": []
+      }
+    },
+    {
+      "Id": "b07eab3e-c16d-461f-ba5e-a3f34fe6f0ba"/*Clamp*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "d533f4e8-f0a9-4535-b843-107c19bd3cd5"/*InputRange*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 1.0
+      }
+    },
+    {
+      "Id": "dbfd49e3-c357-4d07-963d-6df985a2f66e"/*GainAndBias*/,
+      "DefaultValue": {
+        "X": 0.5,
+        "Y": 0.5
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

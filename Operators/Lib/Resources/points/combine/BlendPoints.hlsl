@@ -11,12 +11,11 @@ cbuffer Params : register(b0)
     float Scatter;
 }
 
-StructuredBuffer<LegacyPoint> PointsA : t0;        // input
-StructuredBuffer<LegacyPoint> PointsB : t1;        // input
-RWStructuredBuffer<LegacyPoint> ResultPoints : u0; // output
+StructuredBuffer<Point> PointsA : t0;        // input
+StructuredBuffer<Point> PointsB : t1;        // input
+RWStructuredBuffer<Point> ResultPoints : u0; // output
 
-[numthreads(64, 1, 1)] void main(uint3 i
-                                 : SV_DispatchThreadID)
+[numthreads(64, 1, 1)] void main(uint3 i : SV_DispatchThreadID)
 {
     uint resultCount, countA, countB, stride;
     ResultPoints.GetDimensions(resultCount, stride);
@@ -37,8 +36,8 @@ RWStructuredBuffer<LegacyPoint> ResultPoints : u0; // output
         bIndex = (int)(countB * t);
     }
 
-    LegacyPoint A = PointsA[aIndex];
-    LegacyPoint B = PointsB[bIndex];
+    Point A = PointsA[aIndex];
+    Point B = PointsB[bIndex];
 
     float f = 0;
 
@@ -48,11 +47,11 @@ RWStructuredBuffer<LegacyPoint> ResultPoints : u0; // output
     }
     else if (BlendMode < 1.5)
     {
-        f = A.W;
+        f = A.FX1;
     }
     else if (BlendMode < 2.5)
     {
-        f = (1 - B.W);
+        f = (1 - B.FX1);
     }
 
     // Ranged
@@ -77,8 +76,9 @@ RWStructuredBuffer<LegacyPoint> ResultPoints : u0; // output
 
     ResultPoints[i.x].Rotation = qSlerp(A.Rotation, B.Rotation, f);
     ResultPoints[i.x].Position = lerp(A.Position, B.Position, f);
-    ResultPoints[i.x].W = lerp(A.W, B.W, f);
+    ResultPoints[i.x].FX1 = lerp(A.FX1, B.FX1, f);
+    ResultPoints[i.x].FX2 = lerp(A.FX2, B.FX2, f);
+
     ResultPoints[i.x].Color = lerp(A.Color, B.Color, f);
-    ResultPoints[i.x].Stretch = lerp(A.Stretch, B.Stretch, f);
-    ResultPoints[i.x].Selected = lerp(A.Selected, B.Selected, f);
+    ResultPoints[i.x].Scale = lerp(A.Scale, B.Scale, f);
 }

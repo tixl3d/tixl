@@ -1,0 +1,77 @@
+{
+  "Id": "b1cb8864-0d51-4b7f-96eb-4c6267d4b216"/*ImageQuiz*/,
+  "Description": "Stacking",
+  "InputUis": [
+    {
+      "InputId": "629ec47f-64d7-4c05-a5b1-29fe9303c8eb"/*DoNotChange*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -435.44763,
+        "Y": -294.30038
+      },
+      "Description": "This is the reference input. \nDo not disconnect."
+    },
+    {
+      "InputId": "a8d44123-99b4-4285-82f5-84531f0e27d3"/*YourSolution*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -575.44763,
+        "Y": -403.0063
+      }
+    },
+    {
+      "InputId": "cf267a38-5504-4d0c-b149-17bbe62c70cf"/*DifferenceRange*/,
+      "Position": {
+        "X": -248.53421,
+        "Y": -105.86792
+      },
+      "GroupTitle": "Internal..."
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "12657696-4068-4183-abd1-77eb94d86de4"/*FirstValidTexture*/,
+      "Position": {
+        "X": -435.44763,
+        "Y": -403.0063
+      }
+    },
+    {
+      "ChildId": "423a3fb9-2353-463e-b473-017cb26f68b7"/*ComputeImageDifference*/,
+      "Position": {
+        "X": -242.29596,
+        "Y": -198.40918
+      }
+    },
+    {
+      "ChildId": "5a551dbb-7b41-4b7f-86d1-284174bbbfc4"/*CTA*/,
+      "Position": {
+        "X": -715.4474,
+        "Y": -368.00632
+      }
+    },
+    {
+      "ChildId": "76529b0e-1633-4c2b-99c1-ead2a7934737"/*RenderTarget*/,
+      "Position": {
+        "X": -575.4474,
+        "Y": -368.00632
+      }
+    },
+    {
+      "ChildId": "c104d60f-10ab-4f2c-bfdf-36325c2b5c04"/*_QuizUp*/,
+      "Position": {
+        "X": 74.65137,
+        "Y": -410.32974
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "25709fa8-cbd8-4e54-9f9e-f92a4b3e2f65"/*Output*/,
+      "Position": {
+        "X": 324.6157,
+        "Y": -161.3143
+      }
+    }
+  ]
+}

@@ -41,6 +41,9 @@ internal sealed class Displace : Instance<Displace>
 
         [Input(Guid = "ea2b9f80-49b9-4c90-ba34-f0274169ece3")]
         public readonly InputSlot<bool> RGSS_4xAA = new InputSlot<bool>();
+
+        [Input(Guid = "0c0dd89a-e9ff-4746-b12c-dd4799a0b500")]
+        public readonly InputSlot<SharpDX.Direct3D11.Filter> TextureFiltering = new InputSlot<SharpDX.Direct3D11.Filter>();
         
     private enum DisplaceModes {
         IntensityGradient,

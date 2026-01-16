@@ -15,7 +15,7 @@
     },
     {
       "Id": "82464caa-a407-4f6d-a062-cef322d131f0"/*Twist*/,
-      "DefaultValue": 0.0
+      "DefaultValue": 180.0
     },
     {
       "Id": "ab21289c-f91c-4991-a7e5-ecb0c0954f02"/*Impact*/,
@@ -47,7 +47,12 @@
         {
           "Id": "1e4e274b-60b2-4fe8-b275-ebef80d520a7"/*Source*/,
           "Type": "System.String",
-          "Value": "Resources\\lib\\img\\fx\\NormalMap.hlsl"
+          "Value": "Resources/lib/img/fx/NormalMap.hlsl"
+        },
+        {
+          "Id": "3fe1b650-ce34-4155-9b61-0425e39f7690"/*Wrap*/,
+          "Type": "SharpDX.Direct3D11.TextureAddressMode",
+          "Value": "MirrorOnce"
         },
         {
           "Id": "480d6c19-a33c-48b3-b9fa-aaf8bd31e6d9"/*GenerateMips*/,

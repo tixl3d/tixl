@@ -1,0 +1,55 @@
+{
+  "Id": "7953f704-ebee-498b-8bdd-a2c201dfe278"/*SetIntVar*/,
+  "Description": "Sets or overwrites an int variable that can be retrieved by [GetIntVar] further down (left in) the graph.",
+  "SymbolTags": "8",
+  "InputUis": [
+    {
+      "InputId": "4ab2a742-7f3f-4d96-b67e-73e14b4a8f47"/*LogLevel*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      },
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "662b8a63-58db-4c9e-b53a-7ece1f118e12"/*SubGraph*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "72dd0c80-8e95-474b-9aa5-d8292d0ff0dd"/*Value*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      }
+    },
+    {
+      "InputId": "bfd87742-aaf5-4fa8-b714-fd275de1c60d"/*VariableName*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "GroupTitle": "Settings",
+      "Usage": "Default"
+    },
+    {
+      "InputId": "da431996-4c4c-4cdc-9723-9116bbb5440c"/*ClearAfterExecution*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 135.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "7d806685-4678-4dfc-9dbc-36fdfa0c7a59"/*Output*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

@@ -147,14 +147,14 @@
       }
     },
     {
-      "ChildId": "4dc73458-f9c5-45a3-af3b-bfee74772a06"/*KeepPreviousFrame2*/,
+      "ChildId": "4dc73458-f9c5-45a3-af3b-bfee74772a06"/*KeepPreviousFrame*/,
       "Position": {
         "X": 450.0,
         "Y": 382.0
       }
     },
     {
-      "ChildId": "566c5a9b-555c-4274-baf6-25d3e55704cd"/*KeepPreviousFrame2*/,
+      "ChildId": "566c5a9b-555c-4274-baf6-25d3e55704cd"/*KeepPreviousFrame*/,
       "Comment": "The last version of [KeepPreviousFrame] didn't work correctly with non-60fps footage.",
       "Position": {
         "X": 393.7776,

@@ -97,7 +97,7 @@
       "Outputs": []
     },
     {
-      "Id": "3603695e-3094-4803-a869-d03ede8b8b99"/*SetIntVariable*/,
+      "Id": "3603695e-3094-4803-a869-d03ede8b8b99"/*SetIntVar*/,
       "SymbolId": "7953f704-ebee-498b-8bdd-a2c201dfe278",
       "InputValues": [
         {
@@ -266,7 +266,7 @@
       "SymbolId": "954af16f-b37b-4e64-a965-4bec02b9179e",
       "InputValues": [
         {
-          "Id": "8042eb60-ca86-42b3-a338-d733c3cbb1fb"/*Size*/,
+          "Id": "8042eb60-ca86-42b3-a338-d733c3cbb1fb"/*Stretch*/,
           "Type": "System.Numerics.Vector2",
           "Value": {
             "X": 2.0,
@@ -342,7 +342,7 @@
       "Outputs": []
     },
     {
-      "Id": "f59e3a68-eaf8-44e2-bb4a-a009c82d1fcf"/*SetIntVariable*/,
+      "Id": "f59e3a68-eaf8-44e2-bb4a-a009c82d1fcf"/*SetIntVar*/,
       "SymbolId": "7953f704-ebee-498b-8bdd-a2c201dfe278",
       "InputValues": [
         {

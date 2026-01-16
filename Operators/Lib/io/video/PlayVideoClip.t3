@@ -11,7 +11,7 @@
     },
     {
       "Id": "31721e18-556b-452b-a8aa-18dbd44af74d"/*Path*/,
-      "DefaultValue": "Resources\\images\\frog3.jpg"
+      "DefaultValue": "/t3/videos/spray-1080p.mp4"
     },
     {
       "Id": "5eb10090-ae6a-4ae7-9fbd-5bd9ffd13b1b"/*ResyncThreshold*/,

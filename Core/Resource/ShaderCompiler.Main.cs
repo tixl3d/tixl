@@ -22,7 +22,7 @@ public abstract partial class ShaderCompiler
 
         foreach (var include in includes)
         {
-            if (!ResourceManager.TryResolvePath(include, includeDirectories, out _, out _))
+            if (!ResourceManager.TryResolveRelativePath(include, includeDirectories, out _, out _))
             {
                 reason = $"Can't find include file: {include}";
                 shader = null;

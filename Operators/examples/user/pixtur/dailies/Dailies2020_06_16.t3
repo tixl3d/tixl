@@ -1020,7 +1020,7 @@
       "Outputs": []
     },
     {
-      "Id": "93b13142-b5b5-49aa-adb5-3668feab4998"/*PickFromStringList*/,
+      "Id": "93b13142-b5b5-49aa-adb5-3668feab4998"/*PickStringFromList*/,
       "SymbolId": "ef357e66-24e9-4f54-8d86-869db74602f4",
       "InputValues": [],
       "Outputs": []

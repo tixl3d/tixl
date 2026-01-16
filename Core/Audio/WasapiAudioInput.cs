@@ -187,14 +187,21 @@ public static class WasapiAudioInput
             return length;
         }
         
+        // level is an int32 carrying per-channel level, such as: "0xRRRRLLLL"
+        // convert to M/S, and scale it.
+        // more info : https://documentation.help/BASSWASAPI/BASS_WASAPI_GetLevel.html
         var level = BassWasapi.GetLevel();
-        _lastAudioLevel = (float)(level * 0.00001);
+        if (level != -1) // exactly -1 is a capture error, do not measure it
+        {
+            var left = level & 0xffff;
+            var right = (level >> 16) & 0xffff;
+            _lastAudioLevel = (left + right + Math.Abs(left-right)) * short.MaxValue * 0.00001f;
+        }
 
         var playbackSettings = Playback.Current?.Settings;
         if (playbackSettings == null) 
             return length;
-        
-        
+
         AudioAnalysis.ProcessUpdate(playbackSettings?.AudioGainFactor?? 1,
                                     playbackSettings?.AudioDecayFactor?? 0.9f);
 

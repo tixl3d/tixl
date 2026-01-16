@@ -1,0 +1,191 @@
+{
+  "Id": "d8feac82-1a5d-4c6f-bd1f-67ed7fc28193"/*CustomPointShaderExample*/,
+  "Description": "",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "01a1da5f-fda7-40f1-ab96-2d213b04cf4e"/*CustomPointShader*/,
+      "Comment": "Check the parameters",
+      "Position": {
+        "X": 227.04745,
+        "Y": 164.53217
+      }
+    },
+    {
+      "ChildId": "214937db-e735-4e33-8466-15f3d795cc72"/*AnimValue*/,
+      "Position": {
+        "X": -139.09966,
+        "Y": 380.6306
+      }
+    },
+    {
+      "ChildId": "214e3e3c-7cb7-491e-837c-ec7b0b01408d"/*CountInt*/,
+      "Position": {
+        "X": -534.1709,
+        "Y": 184.0822
+      }
+    },
+    {
+      "ChildId": "2752b196-eb56-4ef7-9f8b-c449e87eb68b"/*DrawPoints*/,
+      "Position": {
+        "X": 380.64877,
+        "Y": 177.31006
+      }
+    },
+    {
+      "ChildId": "350648d7-3a1e-4d49-9d9c-f269bf7562d6"/*AnimValue*/,
+      "Position": {
+        "X": -699.7987,
+        "Y": 194.78937
+      }
+    },
+    {
+      "ChildId": "37e349ce-2fd8-4bde-a1bb-5cfb769862c9"/*RadialPoints*/,
+      "Position": {
+        "X": -603.92126,
+        "Y": 107.407715
+      }
+    },
+    {
+      "ChildId": "4e1582e6-6268-4039-b7e2-05feabebed04"/*Color*/,
+      "Position": {
+        "X": 59.061203,
+        "Y": -212.33643
+      }
+    },
+    {
+      "ChildId": "64d50f6f-9c11-42f6-9277-0ab1c0d75c84"/*PickBuffer*/,
+      "Position": {
+        "X": -379.14352,
+        "Y": 98.00931
+      }
+    },
+    {
+      "ChildId": "6966b227-4b7c-4203-ae64-aaaa3254f1e2"/*RenderTarget*/,
+      "Position": {
+        "X": 976.2391,
+        "Y": 106.83972
+      }
+    },
+    {
+      "ChildId": "862e5854-e7f3-4243-80c9-eb154e256097"/*Execute*/,
+      "Position": {
+        "X": 598.6369,
+        "Y": 93.01361
+      }
+    },
+    {
+      "ChildId": "91ec24d3-b615-447b-b7ad-01a48c9b94c7"/*Original points*/,
+      "Position": {
+        "X": 351.4098,
+        "Y": -136.9002
+      }
+    },
+    {
+      "ChildId": "9d21119d-1c65-4282-a16c-7db3f4c97a1f"/*Value*/,
+      "Position": {
+        "X": 24.84523,
+        "Y": 215.31299
+      }
+    },
+    {
+      "ChildId": "9d6fb6f9-04a5-475d-af40-d0ad10c86bde"/*Text*/,
+      "Position": {
+        "X": 351.4098,
+        "Y": -233.5467
+      }
+    },
+    {
+      "ChildId": "a6b5f117-37c1-4cb3-a1a4-b96319173025"/*IntValue*/,
+      "Position": {
+        "X": -1061.2412,
+        "Y": 44.348877
+      }
+    },
+    {
+      "ChildId": "a6e2875c-d822-4fe5-8b43-05fbc99a804e"/*Ease*/,
+      "Position": {
+        "X": 24.84523,
+        "Y": 378.21887
+      }
+    },
+    {
+      "ChildId": "a9f13906-1134-4de7-8af3-4f87d4c5f6d2"/*TAU*/,
+      "Position": {
+        "X": -139.54916,
+        "Y": 306.74768
+      }
+    },
+    {
+      "ChildId": "b8f1aff3-9b41-487d-badc-ca0e4485dbac"/*IntToFloat*/,
+      "Position": {
+        "X": -825.8261,
+        "Y": 480.5492
+      }
+    },
+    {
+      "ChildId": "c32c6c4c-3b01-4257-afd4-b1dffe469a59"/*Camera*/,
+      "Position": {
+        "X": 791.24036,
+        "Y": 102.400024
+      }
+    },
+    {
+      "ChildId": "ce10d83b-1e41-43c8-b79c-980bab4059af"/*AnimValue*/,
+      "Position": {
+        "X": 24.84523,
+        "Y": 270.42902
+      }
+    },
+    {
+      "ChildId": "d1f55c98-092d-42ef-a779-3cdb7b88a3eb"/*LinePoints*/,
+      "Position": {
+        "X": -595.3088,
+        "Y": 41.669983
+      }
+    },
+    {
+      "ChildId": "e1153027-55a1-48c5-9345-b652d2299943"/*PerlinNoise3*/,
+      "Position": {
+        "X": 24.84523,
+        "Y": 153.9798
+      }
+    },
+    {
+      "ChildId": "e5640641-59c9-4e09-92c6-3069d811359b"/*AnimValue*/,
+      "Position": {
+        "X": 32.755127,
+        "Y": 444.21637
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "964f01d9-769d-4a96-a566-7f7c6cbb4ad2"/*ColorBuffer*/,
+      "Position": {
+        "X": 1155.2329,
+        "Y": 90.27734
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "b7cbede8-3dd7-43e3-8c0e-fefbc1026c24",
+      "Label": "Core of this example",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -199.54916,
+        "Y": 33.979797
+      },
+      "Size": {
+        "X": 750.19794,
+        "Y": 491.65082
+      }
+    }
+  ]
+}

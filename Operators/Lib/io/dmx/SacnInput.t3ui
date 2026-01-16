@@ -1,6 +1,6 @@
 {
   "Id": "e3207424-deaf-4462-acd5-21f2c6f16d1b"/*SacnInput*/,
-  "Description": "",
+  "Description": "Receives DMX data over the network using the sACN (Streaming ACN) protocol.\n\nThis operator listens for sACN packets on the local network, allowing you to receive DMX data from lighting consoles, media servers, or other sACN-enabled devices. It can listen to multiple DMX universes simultaneously.\n\nTips:\n- Select the correct `LocalIpAddress` for your network interface.\n- `StartUniverse` and `NumUniverses` define the range of DMX universes to listen to.\n- The output is a list of lists. The outer list corresponds to the universes, and each inner list contains the 512 channel values for that universe.\n\nAKA: sacn, streaming acn, dmx, artnet, lighting",
   "InputUis": [
     {
       "InputId": "0c348760-474e-4e30-a8c1-55e59cb1a908"/*StartUniverse*/,
@@ -8,6 +8,7 @@
         "X": -505.05722,
         "Y": -259.4615
       },
+      "Description": "The first DMX universe to listen for. Must be 1 or greater.",
       "Min": 1,
       "Scale": 1.0,
       "ClampMin": true,
@@ -19,6 +20,7 @@
         "X": -200.0,
         "Y": 0.0
       },
+      "Description": "The IP address of the network interface to listen on. A dropdown shows available addresses. If you have multiple network cards, make sure to select the one connected to your lighting network.",
       "Usage": "CustomDropdown"
     },
     {
@@ -26,28 +28,32 @@
       "Position": {
         "X": -505.05722,
         "Y": -184.46149
-      }
+      },
+      "Description": "The number of consecutive DMX universes to listen for, starting from `StartUniverse`."
     },
     {
       "InputId": "bed01653-6cd0-4578-81a9-3eda144ab279"/*Timeout*/,
       "Position": {
         "X": -505.05722,
         "Y": -109.46149
-      }
+      },
+      "Description": "The time in seconds after which a universe is considered offline if no new data is received."
     },
     {
       "InputId": "c3d4e5f6-a7b8-4901-2345-67890abcdef1"/*PrintToLog*/,
       "Position": {
         "X": -505.05722,
         "Y": -34.461487
-      }
+      },
+      "Description": "If enabled, prints status information and errors to the T3 log. Useful for debugging."
     },
     {
       "InputId": "ca55c1b3-0669-46f1-bcc4-ee2e7f5a6028"/*Active*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Enables or disables listening for sACN packets."
     }
   ],
   "SymbolChildUis": [],

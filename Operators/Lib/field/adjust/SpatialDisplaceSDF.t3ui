@@ -1,0 +1,61 @@
+{
+  "Id": "8b4c95a8-d598-45a5-baa7-157120585695"/*SpatialDisplaceSDF*/,
+  "Description": "3D spatial distortion of an SDF \nSamples simplex noise at 3 positions to apply spatial warping",
+  "InputUis": [
+    {
+      "InputId": "11bd8a7c-1fa4-4b7b-b38e-93c92be20116"/*Offset*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 285.0
+      }
+    },
+    {
+      "InputId": "15a6c491-16af-4351-b7c3-2541b0aee4cd"/*InputField*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 135.0
+      }
+    },
+    {
+      "InputId": "55be4ca7-d7e4-4b8d-8107-39489c03b5d8"/*Amount*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 135.0
+      }
+    },
+    {
+      "InputId": "62f081b3-98a5-4614-8d62-911ce1397b60"/*vScale*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 285.0
+      }
+    },
+    {
+      "InputId": "6710f3db-1d2e-49fd-b8d3-3a72275c30bc"/*Scale*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 210.0
+      },
+      "GroupTitle": "Noise Adjust"
+    },
+    {
+      "InputId": "6b999a7f-4702-4939-92d9-5388403e3671"/*SamplePos*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 360.0
+      },
+      "GroupTitle": "Sampling"
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "12642fe0-0db4-4756-a6e6-2ede090f5974"/*Result*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

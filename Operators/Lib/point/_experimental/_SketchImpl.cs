@@ -64,7 +64,7 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
         
         if (isFilePathDirty)
         {
-            var filepath = FilePath.GetValue(context);
+            var filepath = FilePath.GetValue(context) ?? string.Empty;
             _absolutePath = GetAbsolutePath(filepath);
             //Log.Debug($"Absolute path: {_absolutePath}", this);
             _paging.LoadPages(_absolutePath);

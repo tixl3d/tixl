@@ -47,7 +47,7 @@ internal static class GetIntVarUi
         }
         else
         {
-            WidgetElements.DrawPrimaryTitle(drawList, area, "Get " + data.VariableName.TypedInputValue.Value, canvas.Scale);
+            WidgetElements.DrawPrimaryTitle(drawList, area, "Get int: " + data.VariableName.TypedInputValue.Value, canvas.Scale);
         }
 
         WidgetElements.DrawSmallValue(drawList, area, $"{value:0}", canvas.Scale);

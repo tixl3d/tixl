@@ -41,8 +41,9 @@ internal sealed class TimelineCurveEditArea : AnimationParameterEditing, ITimeOb
 
         if (fitCurvesVertically)
         {
-            TryGetBoundsOnCanvas(GetSelectedOrAllPoints(), out var bounds);
-            TimeLineCanvas.Current.SetVerticalScopeToCanvasArea(bounds, flipY: true);
+            ViewAllOrSelectedKeys(alsoChangeTimeRange: false);
+            //TryGetBoundsOnCanvas(GetSelectedOrAllPoints(), out var bounds);
+            //TimeLineCanvas.Current.SetVerticalScopeToCanvasArea(bounds, flipY: true);
         }
 
         ImGui.BeginGroup();
@@ -217,8 +218,8 @@ internal sealed class TimelineCurveEditArea : AnimationParameterEditing, ITimeOb
             var sampledValue = (float)curve.GetSampledValue(hoverTime);
             var posOnCanvas = new Vector2(hoverTime, sampledValue);
             var posOnScreen = TimeLineCanvas.TransformPosition(posOnCanvas)
-                              - new Vector2(KeyframeIconWidth / 2 + 1, KeyframeIconWidth / 2 + 1);
-            Icons.Draw(Icon.CurveKeyframe, posOnScreen);
+                              - new Vector2((int)(KeyframeIconWidth / 2f -1 ),(int)(KeyframeIconWidth / 2f-1 )  );
+            Icons.DrawIconAtScreenPosition(Icon.CurveKeyframe, posOnScreen);
         }
 
         ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);

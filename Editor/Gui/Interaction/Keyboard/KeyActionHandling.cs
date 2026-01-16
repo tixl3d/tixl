@@ -74,7 +74,10 @@ internal static class KeyActionHandling
 
     internal static string ListKeyboardShortcutsForActionWithLabel(this UserActions action)
     {
-        var shortCuts = action.ListShortcuts(); 
+        var shortCuts = action.ListShortcuts();
+        if (string.IsNullOrEmpty(shortCuts))
+            return shortCuts;
+        
         var prefix = shortCuts.Contains(" and ") ? "Shortcuts: " : "Shortcut: ";
         return prefix + shortCuts;
     }
@@ -131,7 +134,7 @@ internal static class KeyActionHandling
         // Graph window actions
         RegisterActionsFlags(UserActions.ToggleDisabled, Flags.NeedsWindowFocus);
         RegisterActionsFlags(UserActions.ToggleBypassed, Flags.NeedsWindowFocus);
-        RegisterActionsFlags(UserActions.PinToOutputWindow, Flags.KeyHoldOnly);
+        RegisterActionsFlags(UserActions.PinToOutputWindow, Flags.KeyPressOnly);
         RegisterActionsFlags(UserActions.ClearBackgroundImage, Flags.NeedsWindowFocus);
 
         RegisterActionsFlags(UserActions.AddAnnotation, Flags.NeedsWindowFocus | Flags.KeyPressOnly);
@@ -153,10 +156,12 @@ internal static class KeyActionHandling
         RegisterActionsFlags(UserActions.CameraBackward, Flags.NeedsWindowHover | Flags.KeyHoldOnly | Flags.RemainActiveWhenItemActive);
         RegisterActionsFlags(UserActions.CameraUp, Flags.NeedsWindowHover | Flags.KeyHoldOnly | Flags.RemainActiveWhenItemActive);
         RegisterActionsFlags(UserActions.CameraDown, Flags.NeedsWindowHover | Flags.KeyHoldOnly | Flags.RemainActiveWhenItemActive);
+        
         // Camera reset and focus
         RegisterActionsFlags(UserActions.CameraReset, Flags.NeedsWindowHover);
         RegisterActionsFlags(UserActions.CameraFocusSelection, Flags.NeedsWindowHover);
-
+        RegisterActionsFlags(UserActions.RenderAnimation, Flags.KeyPressOnly);
+        
         return;
 
         void RegisterActionsFlags(UserActions action, Flags flags)

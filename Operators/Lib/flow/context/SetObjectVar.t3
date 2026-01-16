@@ -1,0 +1,23 @@
+{
+  "Id": "a0e2c6dd-8728-4128-ab4d-dc277919e280"/*SetObjectVar*/,
+  "Inputs": [
+    {
+      "Id": "3b950a80-aa0d-47e4-af3a-2696786b02e2"/*ObjectValue*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "538bf20c-45df-436e-9611-d6ccbdf05000"/*ClearAfterExecution*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "5ccbefac-d908-477c-8f42-1af325a6eed6"/*SubGraph*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "ba66d126-8faa-43df-9ade-78d346e8e3a2"/*VariableName*/,
+      "DefaultValue": "myObj"
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

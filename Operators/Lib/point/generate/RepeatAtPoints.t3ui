@@ -1,6 +1,6 @@
 {
   "Id": "780edb20-f83f-494c-ab17-7015e2311250"/*RepeatAtPoints*/,
-  "Description": "Repeats a list of GPU points at positions provided by another list of points. The orientation of the target points can be applied, so this operator can be used to create point instantiation.\n\nIf the ApplyTargetScaleW parameter is activated, the W attribute of the target points is used as a scale factor.\n\nUseful combinations: [CommonPointSets] [DrawLines] [DrawPoints]",
+  "Description": "Repeats a list of GPU points at positions provided by another list of points. The orientation of the target points can be applied, so this operator can be used to create point instantiation.\n\nIf the ApplyTargetScaleW parameter is activated, the W attribute of the target points is used as a scale factor.\n\nAlso known as: Copy, Replicate, Instance\n\nUseful combinations: [CommonPointSets] [DrawLines] [DrawPoints]",
   "SymbolTags": "1",
   "InputUis": [
     {

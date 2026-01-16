@@ -115,8 +115,8 @@
     {
       "ChildId": "17810a38-da4c-43a5-a475-6f8d12f130cb"/*MidiInput*/,
       "Position": {
-        "X": 218.24622,
-        "Y": 1180.2695
+        "X": -110.77911,
+        "Y": 1256.4707
       }
     },
     {
@@ -143,8 +143,8 @@
     {
       "ChildId": "32eb5ddd-0b0c-40a2-8d8d-eb772531c5aa"/*MidiInput*/,
       "Position": {
-        "X": 118.70299,
-        "Y": 1407.5651
+        "X": 72.086105,
+        "Y": 1364.585
       }
     },
     {
@@ -255,10 +255,24 @@
       }
     },
     {
+      "ChildId": "64e275be-dca3-47c6-b33e-b3a84341daea"/*GetBoolVar*/,
+      "Position": {
+        "X": 120.87599,
+        "Y": 1555.8127
+      }
+    },
+    {
       "ChildId": "67d048a0-4a72-4c0c-873f-f6aac718b36b"/*SampleCurve*/,
       "Position": {
         "X": 1472.3993,
         "Y": -155.03976
+      }
+    },
+    {
+      "ChildId": "6a4e125d-0f67-4369-9321-fc052b1337e1"/*Remap*/,
+      "Position": {
+        "X": 29.220886,
+        "Y": 1256.4707
       }
     },
     {
@@ -523,6 +537,27 @@
       "Position": {
         "X": 2509.1985,
         "Y": 1795.4413
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "06824659-5a0f-491d-a4af-1d5b24cfbeea",
+      "Title": "1 - Spin (start up)\n2 - Pull (start centered)\n3 - ",
+      "Label": "MIDI Sliders",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 2533.0332,
+        "Y": -184.81104
+      },
+      "Size": {
+        "X": 393.93286,
+        "Y": 191.72629
       }
     }
   ]

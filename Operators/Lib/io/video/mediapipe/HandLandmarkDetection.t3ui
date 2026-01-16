@@ -1,0 +1,123 @@
+{
+  "Id": "4567890a-bcde-f123-4567-890abcdef123"/*HandLandmarkDetection*/,
+  "Description": "Detects hand landmarks in an image using MediaPipe Hand Landmark Detection.\n\nThis operator uses MediaPipe Hand Landmark Detection task to detect hands and their landmarks (21 points per hand) in the input image. It outputs detected landmarks as a buffer of points and a dictionary of hand data.\n\nInputs:\n- InputTexture: The image to process.\n- Enabled: Enables or disables hand detection.\n- MaxHands: Maximum number of hands to detect.\n- MinHandDetectionConfidence: Minimum confidence score for hand detection to be considered successful.\n- MinHandPresenceConfidence: Minimum confidence score for hand presence to be considered successful.\n- MinTrackingConfidence: Minimum confidence score for hand tracking.\n- Debug: Enables debug visualization with debug texture output.\n- CorrectAspectRatio: Whether to correct aspect ratio for non-square inputs.\n- ZScale: Scale factor for Z coordinate of points.\n\nOutputs:\n- OutputTexture: The input texture (passed through).\n- DebugTexture: Debug visualization texture showing hand landmarks and connections when Debug is enabled.\n- HandCount: The number of hands detected.\n- UpdateCount: Increments each time a new frame is processed.\n- WorldLandmarksBuffer: A structured buffer containing world landmarks.\n- PointBuffer: A structured buffer containing points for detected hand landmarks.",
+  "InputUis": [
+    {
+      "InputId": "0abcdef1-2345-6789-0abc-def123456789"/*MinTrackingConfidence*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 375.0
+      },
+      "Description": "Minimum confidence score for hand tracking."
+    },
+    {
+      "InputId": "567890ab-cdef-1234-5678-90abcdef1234"/*InputTexture*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "The image to process."
+    },
+    {
+      "InputId": "67890abc-def1-2345-6789-0abcdef12345"/*Enabled*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      },
+      "Description": "Enables or disables hand detection."
+    },
+    {
+      "InputId": "7890abcd-ef12-3456-7890-abcdef123456"/*MaxHands*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      },
+      "Description": "Maximum number of hands to detect."
+    },
+    {
+      "InputId": "890abcde-f123-4567-890a-bcdef1234567"/*MinHandDetectionConfidence*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      },
+      "Description": "Minimum confidence score for hand detection to be considered successful."
+    },
+    {
+      "InputId": "90abcdef-1234-5678-90ab-cdef12345678"/*MinHandPresenceConfidence*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 300.0
+      },
+      "Description": "Minimum confidence score for hand presence to be considered successful."
+    },
+    {
+      "InputId": "abcdef12-3456-7890-abcd-ef1234567890"/*Debug*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 450.0
+      },
+      "Description": "Enables debug visualization with debug texture output showing hand landmarks and connections."
+    },
+    {
+      "InputId": "bcdef123-4567-890a-bcde-f1234567890a"/*CorrectAspectRatio*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 525.0
+      },
+      "Description": "Whether to correct aspect ratio for non-square inputs."
+    },
+    {
+      "InputId": "cdef1234-5678-90ab-cdef-1234567890ab"/*ZScale*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 600.0
+      },
+      "Description": "Scale factor for Z coordinate of points."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "def01234-5678-90ab-cdef-1234567890ab"/*OutputTexture*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    },
+    {
+      "OutputId": "ef012345-6789-0abc-def1-234567890abc"/*DebugTexture*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 300.0
+      }
+    },
+    {
+      "OutputId": "f0123456-7890-abcd-ef12-34567890abcd"/*HandCount*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 400.0
+      }
+    },
+    {
+      "OutputId": "01234567-890a-bcde-f012-34567890abcd"/*UpdateCount*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 500.0
+      }
+    },
+    {
+      "OutputId": "12345678-90ab-cdef-0123-4567890abcde"/*WorldLandmarksBuffer*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 600.0
+      }
+    },
+    {
+      "OutputId": "23456789-0abc-def1-2345-67890abcdef1"/*PointBuffer*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 700.0
+      }
+    }
+  ]
+}

@@ -194,18 +194,6 @@
       "Outputs": []
     },
     {
-      "Id": "b573f4c6-1a39-4f30-8e87-33a64c4ebda9"/*ReadFile*/,
-      "SymbolId": "5f71d2f8-98c8-4502-8f40-2ea4a1e18cca",
-      "InputValues": [
-        {
-          "Id": "24b7e7e1-fe0b-46be-807e-0afacd4800f9"/*FilePath*/,
-          "Type": "System.String",
-          "Value": "/Lib/points/modify/MovePointsForwardToSDF.hlsl"
-        }
-      ],
-      "Outputs": []
-    },
-    {
       "Id": "d3e02a60-a6de-4669-93c2-8c0be6c127b3"/*ComputeShaderFromSource*/,
       "SymbolId": "4e5bc624-9cda-46a8-9681-7fd412ea3893",
       "InputValues": [

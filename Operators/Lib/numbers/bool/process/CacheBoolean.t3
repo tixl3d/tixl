@@ -1,0 +1,11 @@
+{
+  "Id": "6502c40f-a38e-4bd9-8dbf-90e35079572d"/*CacheBoolean*/,
+  "Inputs": [
+    {
+      "Id": "37e95081-96fb-4374-840f-3ecfee430181"/*Value*/,
+      "DefaultValue": false
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

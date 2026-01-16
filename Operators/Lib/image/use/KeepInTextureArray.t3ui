@@ -1,0 +1,51 @@
+{
+  "Id": "a783908a-63c2-4961-94ca-b97d17ed0788"/*PickFromTextureArray*/,
+  "Description": "Pick a single \"slice\" from a TextureArray",
+  "InputUis": [
+    {
+      "InputId": "0227dbe2-797b-465d-bc48-fd47f42b6cd9"/*ReadIndex*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      }
+    },
+    {
+      "InputId": "4cac523c-27bf-4f57-b13f-8d41038c5587"/*SourceTexture*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      }
+    },
+    {
+      "InputId": "6e12ecdb-9b4c-40a4-87d8-5279e2d855d6"/*ArraySize*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "c829e9d6-a00f-4a80-8f9a-7c6152aaac01"/*WriteIndex*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      }
+    },
+    {
+      "InputId": "ff4701fe-16b8-48aa-9842-91d811d05306"/*TriggerWrite*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "bc99ae41-3f32-481f-b88a-277e71468f0e"/*Selected*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

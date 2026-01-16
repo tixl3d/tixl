@@ -25,10 +25,24 @@
       }
     },
     {
+      "ChildId": "1e456b87-7d8c-4f8b-ab29-fdecb8defc3c"/*ExecuteTests*/,
+      "Position": {
+        "X": 296.762,
+        "Y": 716.0258
+      }
+    },
+    {
       "ChildId": "33977f8e-023b-4b37-8b93-41fc742c956e"/*ExecuteTests*/,
       "Position": {
         "X": 296.762,
         "Y": 541.0258
+      }
+    },
+    {
+      "ChildId": "36284a42-864f-4028-97f5-1133530a9c97"/*MathTests*/,
+      "Position": {
+        "X": 156.762,
+        "Y": 716.0258
       }
     },
     {

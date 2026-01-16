@@ -1,10 +1,11 @@
 ﻿using ImGuiNET;
 using T3.Core.Operator;
+using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel.ProjectHandling;
 
-namespace T3.Editor.Gui.Graph.Dialogs;
+namespace T3.Editor.Gui.Dialogs;
 
 internal sealed class LibWarningDialog : ModalDialog
 {

@@ -1,0 +1,13 @@
+{
+  "Id": "dcd44623-3cbc-4cf4-b5b9-00ea0f884a22"/*RGBToSysEx*/,
+  "Inputs": [
+    {
+      "Id": "0bc553ea-f217-4cc8-8ca9-68d0e8db3f94"/*Value*/,
+      "DefaultValue": {
+        "Values": []
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

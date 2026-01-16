@@ -56,6 +56,7 @@ internal sealed class SplashScreen : ISplashScreen
                                               UseMnemonic = false,
                                               Font = new Font("Arial", 8),
                                               Anchor = AnchorStyles.Bottom | AnchorStyles.Left,
+                                              Size = new Size(400, 16)
                                           }, 0, 0);
 
         _logMessageLabel = new Label
@@ -69,7 +70,7 @@ internal sealed class SplashScreen : ISplashScreen
                                    UseMnemonic = false,
                                    Font = new Font("Arial", 8),
                                    Anchor = AnchorStyles.Bottom | AnchorStyles.Right,
-                                   Size = new Size(400, 20)
+                                   Size = new Size(400, 16)
                                };
 
         tableLayoutPanel.Controls.Add(_logMessageLabel, 1, 0);

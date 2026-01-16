@@ -1,0 +1,78 @@
+{
+  "Id": "3442c4dd-fb4d-406c-b696-4a2830398395"/*I02b_GradientRotate*/,
+  "Description": "LinearGradient: Rotate",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "25d53d5e-d143-4687-9fdf-7a314b46775d"/*LinearGradient*/,
+      "Position": {
+        "X": 1238.5605,
+        "Y": 1882.29
+      }
+    },
+    {
+      "ChildId": "b2f938b1-07c7-4d0a-808c-36a43fa68be8"/*LinearGradient*/,
+      "Position": {
+        "X": 1248.7583,
+        "Y": 2104.3533
+      }
+    },
+    {
+      "ChildId": "fcda1e93-96ec-407a-9730-2c037b8a8109"/*ImageQuiz*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2018.4391
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "c97be600-8507-41bc-a65c-fc7e315d0894"/*ColorBuffer*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2088.439
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "fbe00eee-7fe1-499b-807a-2e500e898408",
+      "Label": "Solution",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1206.2205,
+        "Y": 2060.6824
+      },
+      "Size": {
+        "X": 231.36255,
+        "Y": 159.46973
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "88a7a839-d662-4a76-89f8-13cf380108a1",
+      "ChildId": "25d53d5e-d143-4687-9fdf-7a314b46775d",
+      "Description": "This gradient is already connected to the solution, but its rotation does not match.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "59b09a02-ecbe-4f85-87e2-3bcaffedf926",
+      "ChildId": "25d53d5e-d143-4687-9fdf-7a314b46775d",
+      "InputId": "8169be8f-cb35-4900-b462-f2139b412d59",
+      "Description": "Select the gradient. Use the rotate icons on the right side of the parameter to rotate by 45 degrees.\nHold Ctrl or Alt for finer control.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "b6886ba9-2393-470f-8a99-0065e5a2531a",
+      "ChildId": "25d53d5e-d143-4687-9fdf-7a314b46775d",
+      "Description": "Rotate the gradient until it matches the goal.",
+      "Style": "CallToAction"
+    }
+  ]
+}

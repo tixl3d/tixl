@@ -1,0 +1,71 @@
+{
+  "Id": "2470272f-5e56-448f-803d-15c5231353ff"/*Video2DPointScanner*/,
+  "Inputs": [
+    {
+      "Id": "1d11b92d-bf80-4f4f-9061-17fda30fb895"/*PixelCount*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "3cfd6232-1506-4ba1-bcc1-1c0839a7de64"/*ResetScan*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "4a0c8d1e-1b2c-4f5a-8b9c-0d1e2f3a4b5c"/*ApplyCorrection*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "562a7e98-ba58-4f6b-93d7-2729030bf0e3"/*Threshold*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "572bfd98-9746-4d34-b0cd-e22a4c6d75fd"/*Load*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "58d8e589-1536-4728-8d46-de2311ce61d4"/*TestFullMode*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "5b168a97-851b-4928-93f9-6a8a729fed3b"/*LoadCalibration*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "696e9554-2f01-4d15-8ac7-4fab32e96711"/*VideoIn*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "701299ed-9cfc-4eb1-8320-16c39634a5df"/*ScanTrigger*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "7c7b7528-ca61-40ea-b5a3-ff587cffeac5"/*Save*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "89d26124-b476-443d-bdd0-82c76c0f3789"/*DebugMode*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "91472e9f-5168-432b-92cd-ec826b72ffd4"/*CalibrationPath*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "9ac8647b-0305-4bd3-a1fc-b47fdc46c297"/*TestPixelMode*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "b123fade-921a-46c2-98bd-b4e78a8d4c30"/*ScanIntervallum*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "bcfd87c4-6706-4447-8bbd-c069b6ebae70"/*PixelBrightness*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "f53b09bb-3b16-46d4-a45d-f9a9b16b636e"/*FilePath*/,
+      "DefaultValue": ""
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

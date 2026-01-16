@@ -476,7 +476,7 @@
         {
           "Id": "7a331539-33ea-48b9-8930-daf93dd33d7c"/*Distance*/,
           "Type": "System.Single",
-          "Value": 3.0
+          "Value": 3.9
         }
       ],
       "Outputs": []
@@ -717,7 +717,7 @@
           "Value": 2.0
         },
         {
-          "Id": "a7350ba8-08be-4afc-92f1-d223ee9bcbeb"/*SetFx1To*/,
+          "Id": "a7350ba8-08be-4afc-92f1-d223ee9bcbeb"/*SetF1To*/,
           "Type": "System.Int32",
           "Value": 1
         }
@@ -825,7 +825,7 @@
           }
         },
         {
-          "Id": "542832d1-fc70-4eaa-a003-7fdd9062dc05"/*UseExtend*/,
+          "Id": "542832d1-fc70-4eaa-a003-7fdd9062dc05"/*UsePointScale*/,
           "Type": "System.Boolean",
           "Value": false
         },
@@ -921,25 +921,35 @@
         {
           "Id": "16231de9-2e85-4a9a-a2d1-99dfac18a0f6"/*PreSaturate*/,
           "Type": "System.Single",
-          "Value": 0.1
+          "Value": 0.6173228
         },
         {
-          "Id": "4dc44a7b-fe7c-4807-aaaa-53fb553de017"/*Gain*/,
+          "Id": "423eb712-f7e3-4402-b841-324a9fc91c54"/*VignetteColor*/,
           "Type": "System.Numerics.Vector4",
           "Value": {
-            "X": 0.76,
-            "Y": 0.76,
-            "Z": 0.76,
-            "W": 1.0
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0,
+            "W": 0.0
+          }
+        },
+        {
+          "Id": "be4dc864-a5f9-4356-91f9-58de8056a3a8"/*Gamma*/,
+          "Type": "System.Numerics.Vector4",
+          "Value": {
+            "X": 0.83000004,
+            "Y": 0.83000004,
+            "Z": 0.83000004,
+            "W": 0.506
           }
         },
         {
           "Id": "e8cc8a26-313e-4399-b800-901019bbaa78"/*Lift*/,
           "Type": "System.Numerics.Vector4",
           "Value": {
-            "X": 0.41,
-            "Y": 0.25410306,
-            "Z": 0.17645225,
+            "X": 0.41247562,
+            "Y": 0.4304635,
+            "Z": 0.46173227,
             "W": 0.25
           }
         }
@@ -1033,7 +1043,7 @@
           "Value": false
         },
         {
-          "Id": "a7350ba8-08be-4afc-92f1-d223ee9bcbeb"/*SetFx1To*/,
+          "Id": "a7350ba8-08be-4afc-92f1-d223ee9bcbeb"/*SetF1To*/,
           "Type": "System.Int32",
           "Value": 1
         }
@@ -1123,7 +1133,7 @@
         {
           "Id": "195da7e0-5279-4900-80cd-5635e96ab454"/*Amount*/,
           "Type": "System.Single",
-          "Value": 0.15
+          "Value": 0.05
         }
       ],
       "Outputs": []

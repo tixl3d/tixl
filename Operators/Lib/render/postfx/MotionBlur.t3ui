@@ -6,8 +6,8 @@
     {
       "InputId": "2ac4c1a2-c53e-4b78-90fc-15c0b69c8b28"/*VelocityOffset*/,
       "Position": {
-        "X": -553.8882,
-        "Y": 649.13184
+        "X": -487.00583,
+        "Y": 920.5512
       },
       "Description": "An additional offset that can be used to fake motion blur for static cameras.",
       "Min": -0.01,
@@ -17,23 +17,23 @@
       "InputId": "3d99ccde-2bc3-4a25-962d-dab4fc6c554a"/*DepthMap*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -553.8882,
-        "Y": 424.13184
+        "X": 84.384766,
+        "Y": 958.59155
       }
     },
     {
       "InputId": "619c2684-8495-4c19-a5b2-673728feaa00"/*Image*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -553.8882,
-        "Y": 379.13184
+        "X": -135.89685,
+        "Y": 1055.9735
       }
     },
     {
       "InputId": "77ed2341-48f2-4e0f-913d-b2f368449088"/*ClampEffect*/,
       "Position": {
-        "X": -553.8882,
-        "Y": 604.13184
+        "X": -347.00583,
+        "Y": 820.52246
       },
       "Description": "Controls how much the intensity of the motion blur of very fast image elements differs from slower ones. ",
       "AddPadding": "True"
@@ -42,23 +42,23 @@
       "InputId": "d757058a-a31e-487f-b002-cc06bc478535"/*CameraReference*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -553.8882,
-        "Y": 469.13184
+        "X": 84.384766,
+        "Y": 818.59155
       }
     },
     {
       "InputId": "db0d11c8-f4c0-4762-8821-4dd75c71fb9e"/*Strength*/,
       "Position": {
-        "X": -553.8882,
-        "Y": 559.13184
+        "X": -347.00583,
+        "Y": 785.52234
       },
       "Description": "Controls the strength of the blur.\n\nProTip: For precise adjustment, it can be helpful to reduce the passes to very low settings making the strength clearly visible."
     },
     {
       "InputId": "df8bf08c-e576-4310-95b5-e34c6a001959"/*SampleCount*/,
       "Position": {
-        "X": -553.8882,
-        "Y": 514.13184
+        "X": -487.0058,
+        "Y": 750.52234
       },
       "Description": "Controls the fidelity of the effect.\nHigher numbers create smoother results at the cost of rendering speed.",
       "AddPadding": "True",
@@ -73,50 +73,50 @@
     {
       "ChildId": "041d0140-1821-420b-b517-c073d8f7103b"/*PixelShader*/,
       "Position": {
-        "X": -88.85836,
-        "Y": 442.67188
+        "X": 224.38477,
+        "Y": 643.59155
       }
     },
     {
       "ChildId": "0ac3a5df-0849-4370-82a7-aeb2521eb407"/*Rasterizer*/,
       "Position": {
-        "X": 167.53365,
-        "Y": 425.4082
+        "X": 412.48584,
+        "Y": 384.34088
       }
     },
     {
       "ChildId": "1636cf95-fe4e-4d3b-a483-49cf9dc40787"/*FloatsToBuffer*/,
       "Position": {
-        "X": -88.85836,
-        "Y": 485.67188
+        "X": -207.00583,
+        "Y": 715.52234
       }
     },
     {
       "ChildId": "18d512d1-6971-4c84-9c32-36cf52fe78b9"/*GetTextureSize*/,
       "Position": {
-        "X": -302.31888,
-        "Y": 283.1851
+        "X": -135.89685,
+        "Y": 1090.9735
       }
     },
     {
       "ChildId": "19c35c6b-0320-4d71-bd42-8ec46f456a8e"/*Vector3*/,
       "Position": {
-        "X": -113.42282,
-        "Y": 1059.7219
+        "X": -721.1661,
+        "Y": 965.204
       }
     },
     {
       "ChildId": "1eddc569-27cf-41fa-ac66-7bdf0dfa9842"/*IntToFloat*/,
       "Position": {
-        "X": -403.88837,
-        "Y": 514.13184
+        "X": -347.00583,
+        "Y": 750.52234
       }
     },
     {
       "ChildId": "20de1fab-5cc6-401d-b7f4-7b9d944648bb"/*SetPixelAndVertexShaderStage*/,
       "Position": {
-        "X": 167.53365,
-        "Y": 481.4082
+        "X": 364.38477,
+        "Y": 608.59155
       }
     },
     {
@@ -129,120 +129,120 @@
     {
       "ChildId": "2e4c5ed0-459d-4ea5-acec-255c8860c5a4"/*GetCamTransformBuffer*/,
       "Position": {
-        "X": -88.85836,
-        "Y": 681.6719
+        "X": 224.38477,
+        "Y": 818.59155
       }
     },
     {
       "ChildId": "530a577e-b602-4847-a145-dd3472971533"/*OutputMergerStage*/,
       "Position": {
-        "X": 164.11235,
-        "Y": 708.4933
+        "X": 412.4858,
+        "Y": 419.34088
       }
     },
     {
       "ChildId": "56705a1f-00e2-4530-ac53-07d06d9bd775"/*Vector3Components*/,
       "Position": {
-        "X": 36.57718,
-        "Y": 1059.7219
+        "X": -347.00583,
+        "Y": 920.5512
       }
     },
     {
       "ChildId": "7325f706-08ea-48cd-905e-04648eaa1644"/*BlendState*/,
       "Position": {
-        "X": -88.85836,
-        "Y": 892.67194
+        "X": 272.4858,
+        "Y": 419.34088
       }
     },
     {
       "ChildId": "829a1b5a-e771-464b-851c-065e9a5439ac"/*RasterizerState*/,
       "Position": {
-        "X": -88.85836,
-        "Y": 399.67206
+        "X": 272.48584,
+        "Y": 384.34088
       }
     },
     {
       "ChildId": "8a712dad-80c9-450c-971b-646e9ca2b27b"/*SrvFromTexture2d*/,
       "Position": {
-        "X": -88.85836,
-        "Y": 737.6719
+        "X": 224.38477,
+        "Y": 923.59155
       }
     },
     {
       "ChildId": "a137f4f0-0f02-4be0-a989-0e766c86321f"/*FloatsToBuffer*/,
       "Position": {
-        "X": 186.57718,
-        "Y": 1059.7219
+        "X": -207.00583,
+        "Y": 885.5512
       }
     },
     {
       "ChildId": "afd91956-b872-482c-a84e-e27ffba32118"/*InputAssemblerStage*/,
       "Position": {
-        "X": 167.53365,
-        "Y": 382.4082
+        "X": 412.48584,
+        "Y": 349.34088
       }
     },
     {
       "ChildId": "c353e0e5-8069-47a0-ad4f-5d010b588454"/*TimeConstBuffer*/,
       "Position": {
-        "X": -88.85836,
-        "Y": 582.6719
+        "X": 224.38477,
+        "Y": 748.59155
       }
     },
     {
       "ChildId": "c8d720df-8614-4697-8c6e-2c7687e58b54"/*ResolutionConstBuffer*/,
       "Position": {
-        "X": -88.85836,
-        "Y": 625.6719
+        "X": 224.38477,
+        "Y": 783.59155
       }
     },
     {
       "ChildId": "d46d1848-4733-411d-8beb-621817449140"/*SrvFromTexture2d*/,
       "Position": {
-        "X": -88.85836,
-        "Y": 793.67194
+        "X": 224.38477,
+        "Y": 958.59155
       }
     },
     {
       "ChildId": "d76872fd-82e1-4cd6-b96c-d4f320eb7071"/*VertexShader*/,
       "Position": {
-        "X": -88.85836,
-        "Y": 313.67206
+        "X": 224.38477,
+        "Y": 608.59155
       }
     },
     {
       "ChildId": "e31c88bd-7863-426b-b7fd-b0186cab562c"/*Execute*/,
       "Position": {
-        "X": 317.53357,
-        "Y": 382.4082
+        "X": 552.48584,
+        "Y": 349.34088
       }
     },
     {
       "ChildId": "e382ae3f-b375-40c8-af48-64c97aae7320"/*RenderTargetBlendDescription*/,
       "Position": {
-        "X": -238.85837,
-        "Y": 879.67194
+        "X": 132.48581,
+        "Y": 419.34088
       }
     },
     {
       "ChildId": "e4d23e85-5814-4f21-9cde-c2cdedb56ec9"/*Draw*/,
       "Position": {
-        "X": 164.11235,
-        "Y": 764.4933
+        "X": 412.48584,
+        "Y": 489.34088
       }
     },
     {
       "ChildId": "e9d38708-7476-401f-a06e-ee3b1318a4fe"/*SamplerState*/,
       "Position": {
-        "X": -88.85836,
-        "Y": 849.67194
+        "X": 224.38477,
+        "Y": 993.59155
       }
     },
     {
       "ChildId": "ff7ffaa3-906c-4e63-a874-4f7e3327f7fc"/*TransformsConstBuffer*/,
       "Position": {
-        "X": -88.85836,
-        "Y": 356.67206
+        "X": 224.38477,
+        "Y": 678.59155
       }
     }
   ],

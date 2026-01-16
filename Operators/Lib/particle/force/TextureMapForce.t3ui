@@ -6,8 +6,8 @@
     {
       "InputId": "0de3d1e6-63d4-4dbf-a426-cbd4e6019c45"/*ViewConfinement*/,
       "Position": {
-        "X": -53.12256,
-        "Y": 1118.3694
+        "X": 219.55301,
+        "Y": 1028.7299
       },
       "GroupTitle": "Push into view",
       "Description": "Applies a force to push particles back into view."
@@ -15,8 +15,8 @@
     {
       "InputId": "331843a6-f634-45ef-b9ad-21baf8612642"/*Twist*/,
       "Position": {
-        "X": -30.741852,
-        "Y": 737.6557
+        "X": 219.55301,
+        "Y": 1308.7299
       },
       "Min": -180.0,
       "Max": 180.0,
@@ -25,8 +25,8 @@
     {
       "InputId": "41491794-082d-4394-b6c2-efb4780623ea"/*VariationGainAndBias*/,
       "Position": {
-        "X": -50.516357,
-        "Y": 954.0927
+        "X": 79.55301,
+        "Y": 1238.7299
       },
       "Description": "Controls the random distribution. Please check [BiasAndGainExample] and read the documentation on Wiki -> Rendering for Artists.",
       "AddPadding": "True",
@@ -40,8 +40,8 @@
     {
       "InputId": "87264af4-0939-4aad-9a15-b79d067b9fcb"/*DepthConcentration*/,
       "Position": {
-        "X": -53.12256,
-        "Y": 1163.3694
+        "X": 219.55301,
+        "Y": 1063.7299
       },
       "Description": "Applies force to push particles towards distance from the camera that is defined by CenterDepth.",
       "Min": 0.0,
@@ -50,8 +50,8 @@
     {
       "InputId": "a63a10bb-b0c5-46bc-8f9d-8b0b3f4cd037"/*Spin*/,
       "Position": {
-        "X": -50.516357,
-        "Y": 864.0927
+        "X": 219.55301,
+        "Y": 1133.7299
       },
       "GroupTitle": "Spin",
       "Description": "Applies a rotation along the view direction.",
@@ -62,8 +62,8 @@
     {
       "InputId": "b04d0d69-f322-4481-9166-ca812eb35d99"/*AmountXY*/,
       "Position": {
-        "X": -58.33496,
-        "Y": 603.21466
+        "X": 79.55301,
+        "Y": 923.72986
       },
       "Min": -5.0,
       "Max": 5.0,
@@ -73,8 +73,8 @@
     {
       "InputId": "b4ffa587-f6f0-47c2-af60-f8660ad1882e"/*TwistVariation*/,
       "Position": {
-        "X": -30.741852,
-        "Y": 782.6557
+        "X": 219.55301,
+        "Y": 1343.7299
       },
       "Min": -180.0,
       "Max": 180.0,
@@ -83,8 +83,8 @@
     {
       "InputId": "b61b695e-593d-4d7a-bb76-b15cbc0913d9"/*SpinVariation*/,
       "Position": {
-        "X": -50.516357,
-        "Y": 909.0927
+        "X": 219.55301,
+        "Y": 1168.7299
       },
       "Description": "Add a random offset to the twist rotation. Use BiasAndGain to control the amount of random distribution",
       "Min": -180.0,
@@ -94,24 +94,24 @@
     {
       "InputId": "b79534be-d4ab-4a9b-93ac-3652f3ccf19d"/*ShowGizmo*/,
       "Position": {
-        "X": -49.213257,
-        "Y": 1344.5865
+        "X": 754.8252,
+        "Y": 1882.6652
       },
       "GroupTitle": "Options"
     },
     {
       "InputId": "d5038c16-3920-48fc-8cd8-9346b63dad7a"/*CenterDepth*/,
       "Position": {
-        "X": -53.12256,
-        "Y": 1208.3694
+        "X": 219.55301,
+        "Y": 1098.7299
       },
       "Description": "Target distance from the camera plane when applying DepthConcentration."
     },
     {
       "InputId": "eddf467a-d96e-4639-aa09-b49dc1775c1b"/*Amount*/,
       "Position": {
-        "X": -58.33496,
-        "Y": 558.21466
+        "X": -119.803406,
+        "Y": 985.93256
       },
       "GroupTitle": "Amount",
       "Description": "How much are the particles accelerated by the signed normal map.\nYou can use negative values to invert the direction.",
@@ -122,8 +122,8 @@
     {
       "InputId": "faad9c30-9500-49bd-9b62-3f00ab536f35"/*AmountVariation*/,
       "Position": {
-        "X": -58.33496,
-        "Y": 648.21466
+        "X": 219.55301,
+        "Y": 1203.7299
       },
       "Description": "Add random variation to the amount of the effect. \nYou can use the BiasAndGain parameter to control the variation distribution."
     },
@@ -131,8 +131,8 @@
       "InputId": "fcb4c9ff-b8b7-4fa3-b1ab-d8af6dbedc96"/*SignedNormalMap*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -58.33496,
-        "Y": 513.21466
+        "X": 788.8622,
+        "Y": 1484.7836
       }
     }
   ],
@@ -147,127 +147,127 @@
     {
       "ChildId": "3ec98dc2-3ab7-4042-ae97-3ff1634d2cc4"/*ComputeShaderStage*/,
       "Position": {
-        "X": 921.73364,
-        "Y": 384.88043
+        "X": 1340.4359,
+        "Y": 1275.1409
       }
     },
     {
       "ChildId": "45b8156d-f863-4ba1-9d39-dafeef57a9f8"/*HasTimeChanged*/,
       "Position": {
-        "X": 1106.6965,
-        "Y": 514.78735
+        "X": 1200.4359,
+        "Y": 1590.141
       }
     },
     {
       "ChildId": "52cc0aa2-45ed-4fc6-a0dd-0f45b116f21f"/*Execute*/,
       "Position": {
-        "X": 1106.6965,
-        "Y": 432.78735
+        "X": 1340.4359,
+        "Y": 1485.1409
       }
     },
     {
       "ChildId": "588c11fa-81e5-4f8d-9dfa-f92a4b7205e6"/*_ExecuteParticleUpdate*/,
       "Position": {
-        "X": 1256.6965,
-        "Y": 432.78735
+        "X": 1340.4359,
+        "Y": 1555.141
       }
     },
     {
       "ChildId": "73f20e66-9144-4268-9e72-ee0c1147ea71"/*VisibleGizmos*/,
       "Position": {
-        "X": 978.25745,
-        "Y": 1502.0735
+        "X": 894.8252,
+        "Y": 1847.6652
       }
     },
     {
       "ChildId": "8cd63694-9e67-4758-81e1-41554a934dc8"/*TransformsConstBuffer*/,
       "Position": {
-        "X": 602.3083,
-        "Y": 538.1063
+        "X": 1200.4359,
+        "Y": 1380.1409
       }
     },
     {
       "ChildId": "9054203a-1fe9-4ce3-b1fd-d81d5c0dca30"/*Camera*/,
       "Position": {
-        "X": 819.2699,
-        "Y": 1672.5488
+        "X": 894.8252,
+        "Y": 1812.6652
       }
     },
     {
       "ChildId": "95552486-1a94-4ad5-be83-2a6dff0be04e"/*Group*/,
       "Position": {
-        "X": 669.2699,
-        "Y": 1689.9133
+        "X": 894.8252,
+        "Y": 1777.6652
       }
     },
     {
       "ChildId": "959d8343-cdc1-4030-b61c-95ccb40345cd"/*CalcDispatchCount*/,
       "Position": {
-        "X": 754.7556,
-        "Y": 441.36816
+        "X": 1054.6705,
+        "Y": 1308.5428
       }
     },
     {
       "ChildId": "ac85cf99-4b73-4f00-aa21-2cb50449e649"/*Layer2d*/,
       "Position": {
-        "X": 519.27,
-        "Y": 1689.9133
+        "X": 894.8252,
+        "Y": 1742.6652
       }
     },
     {
       "ChildId": "b9cfe6eb-d521-48ec-acbe-e78404ea7ffa"/*SrvFromTexture2d*/,
       "Position": {
-        "X": 602.3083,
-        "Y": 806.10626
+        "X": 1200.4359,
+        "Y": 1415.141
       }
     },
     {
       "ChildId": "c95137eb-31d1-47bb-a8be-32b1993347bc"/*Displace*/,
       "Position": {
-        "X": 369.26996,
-        "Y": 1689.9133
+        "X": 894.8252,
+        "Y": 1637.6652
       }
     },
     {
       "ChildId": "cc4d654e-8b0c-4474-ba6c-ac0f5bb4cbd7"/*Multiply*/,
       "Position": {
-        "X": 219.26996,
-        "Y": 1732.9133
+        "X": 754.8252,
+        "Y": 1707.6652
       }
     },
     {
       "ChildId": "d2cdb2b9-f2f6-4fb2-a7d9-78dd5c4f4f9a"/*Raster*/,
       "Position": {
-        "X": 219.26996,
-        "Y": 1689.9133
+        "X": 894.8252,
+        "Y": 1602.6652
       }
     },
     {
       "ChildId": "d56e3780-f670-4398-b47b-6600a3bfcef2"/*Vector2Components*/,
       "Position": {
-        "X": 91.66504,
-        "Y": 603.21466
+        "X": 219.55301,
+        "Y": 923.72986
       }
     },
     {
       "ChildId": "ef86cc7b-e9a8-4fb9-b8e8-237d6fb381cd"/*GetParticleComponents*/,
       "Position": {
-        "X": 602.3083,
-        "Y": 495.10632
+        "X": 784.41565,
+        "Y": 1402.1929
       }
     },
     {
       "ChildId": "efb4b5cc-7ff3-4786-b5cd-ba247c45a98a"/*FloatsToBuffer*/,
       "Position": {
-        "X": 602.3083,
-        "Y": 581.1063
+        "X": 359.553,
+        "Y": 888.72986
       }
     },
     {
       "ChildId": "fbe7c1c0-1ad5-45f8-bdd4-24988b2a0ba2"/*ComputeShader*/,
       "Position": {
-        "X": 602.3083,
-        "Y": 404.65753
+        "X": 914.67053,
+        "Y": 1273.5427
       }
     }
   ],
@@ -275,8 +275,8 @@
     {
       "OutputId": "5142beac-9e32-47d3-a29b-e0e8dd189269"/*Particles*/,
       "Position": {
-        "X": 1406.6965,
-        "Y": 432.78735
+        "X": 1340.4359,
+        "Y": 1625.141
       }
     }
   ],
@@ -291,12 +291,12 @@
         "W": 1.0
       },
       "Position": {
-        "X": 159.26996,
-        "Y": 1442.0735
+        "X": 719.72424,
+        "Y": 1562.5786
       },
       "Size": {
-        "X": 988.9877,
-        "Y": 399.83984
+        "X": 370.34735,
+        "Y": 379.56763
       }
     }
   ]

@@ -15,7 +15,7 @@
     <IsEditorOnly>false</IsEditorOnly>
     <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
     <Deterministic>true</Deterministic>
-      <NoWarn>NU1900</NoWarn>
+    <NoWarn>NU1900</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Using Include="System" />
@@ -52,11 +52,9 @@
     <Using Alias="Format" Include="SharpDX.DXGI.Format" />
     <Using Alias="Texture2DDescription" Include="SharpDX.Direct3D11.Texture2DDescription" />
     <Using Alias="Texture3DDescription" Include="SharpDX.Direct3D11.Texture3DDescription" />
-    <Using Alias="RenderTargetBlendDescription"
-      Include="SharpDX.Direct3D11.RenderTargetBlendDescription" />
+    <Using Alias="RenderTargetBlendDescription" Include="SharpDX.Direct3D11.RenderTargetBlendDescription" />
     <Using Alias="SamplerState" Include="SharpDX.Direct3D11.SamplerState" />
-    <Using Alias="UnorderedAccessViewBufferFlags"
-      Include="SharpDX.Direct3D11.UnorderedAccessViewBufferFlags" />
+    <Using Alias="UnorderedAccessViewBufferFlags" Include="SharpDX.Direct3D11.UnorderedAccessViewBufferFlags" />
     <Using Alias="RawRectangle" Include="SharpDX.Mathematics.Interop.RawRectangle" />
     <Using Alias="RawViewportF" Include="SharpDX.Mathematics.Interop.RawViewportF" />
     <Using Alias="ResourceUsage" Include="SharpDX.Direct3D11.ResourceUsage" />
@@ -144,12 +142,10 @@
         }
       </OperatorPackageInfoJson>
     </PropertyGroup>
-    <WriteLinesToFile File="$(OutputPath)/OperatorPackage.json" Lines="$(OperatorPackageInfoJson)"
-      Overwrite="True" Encoding="UTF-8" />
+    <WriteLinesToFile File="$(OutputPath)/OperatorPackage.json" Lines="$(OperatorPackageInfoJson)" Overwrite="True" Encoding="UTF-8" />
   </Target>
-
-    <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild">
-        <!-- Clear previous files in the export folder -->
-        <RemoveDir Directories="bin/$(Configuration)"/>
-    </Target>
+  <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild">
+    <!-- Clear previous files in the export folder -->
+    <RemoveDir Directories="bin/$(Configuration)" />
+  </Target>
 </Project>

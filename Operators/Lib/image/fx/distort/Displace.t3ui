@@ -4,6 +4,13 @@
   "SymbolTags": "1",
   "InputUis": [
     {
+      "InputId": "0c0dd89a-e9ff-4746-b12c-dd4799a0b500"/*TextureFiltering*/,
+      "Position": {
+        "X": -115.55017,
+        "Y": 931.89075
+      }
+    },
+    {
       "InputId": "0eff3a75-eafc-4a5e-8a2c-10577c12e776"/*DisplacementOffset*/,
       "Position": {
         "X": 24.449814,
@@ -56,8 +63,8 @@
     {
       "InputId": "6e772174-813d-4baa-b6b5-27e197b547ac"/*WrapMode*/,
       "Position": {
-        "X": 24.44983,
-        "Y": 926.89075
+        "X": -73.624374,
+        "Y": 1045.0623
       },
       "Description": "Defines if and how the image is repeated at its edge"
     },
@@ -129,14 +136,21 @@
         "X": 24.44983,
         "Y": 856.89075
       }
+    },
+    {
+      "ChildId": "fb73be5e-fcb2-43d4-ae9e-211b9a41be50"/*_multiImageFxSetupStatic*/,
+      "Position": {
+        "X": 420.61484,
+        "Y": 397.0882
+      }
     }
   ],
   "OutputUis": [
     {
       "OutputId": "0faa056c-b1d6-4e1f-a9be-b0791f3bae84"/*Output*/,
       "Position": {
-        "X": 304.44983,
-        "Y": 401.89072
+        "X": 597.1986,
+        "Y": 261.88043
       }
     }
   ]

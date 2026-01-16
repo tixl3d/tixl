@@ -1,0 +1,34 @@
+{
+  "Id": "15012739-97b0-49e6-8bdc-cd45cd262560"/*GetStringVar*/,
+  "Description": "Fetches a float variable from the context.\n\nUse [SetStringVar] to set the variable further up the graph.\n\nImportant:\nIf you're using this together with [Loop], don't forget to use 's' as the normalized progress variable.\n\nExample: [SetContextVariableExample]",
+  "InputUis": [
+    {
+      "InputId": "d19b0483-cdd4-4684-852d-ef5ee8393dfc"/*VariableName*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "The name of the variable we want to get the string value from. This is set using [SetString]",
+      "Usage": "CustomDropdown"
+    },
+    {
+      "InputId": "fafdbd5d-ec66-4210-beab-6b9ac010191c"/*FallbackDefault*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Description": "The String value that will used if there is no input",
+      "Usage": "Default"
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "1a3ed40a-655b-4604-868d-1f037f7306c7"/*Result*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

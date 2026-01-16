@@ -173,13 +173,6 @@
       }
     },
     {
-      "ChildId": "83232cfd-2f2f-4d6d-82ff-d1e98529f28e"/*ReadFile*/,
-      "Position": {
-        "X": 330.71344,
-        "Y": 556.2993
-      }
-    },
-    {
       "ChildId": "94a95ead-483b-4aad-9050-682571b94605"/*Vec2ToVec3*/,
       "Position": {
         "X": 401.026,

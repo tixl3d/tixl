@@ -73,7 +73,12 @@
         {
           "Id": "16dce9bc-02d9-48f8-b07e-94a9af48d27b"/*Source*/,
           "Type": "System.String",
-          "Value": "Resources\\lib\\img\\fx\\EdgeRepeat.hlsl"
+          "Value": "Resources/lib/img/fx/EdgeRepeat.hlsl"
+        },
+        {
+          "Id": "9911dc7e-cd3b-4c58-a5d0-2e9abc8e528a"/*BlendMode*/,
+          "Type": "System.Int32",
+          "Value": 4
         },
         {
           "Id": "c80d3700-ceb6-43d0-9ffd-f4854e67a41d"/*Wrap*/,

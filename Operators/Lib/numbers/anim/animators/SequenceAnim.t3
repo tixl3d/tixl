@@ -14,6 +14,10 @@
       "DefaultValue": 0.0
     },
     {
+      "Id": "3bc4beec-a11f-4f89-a38f-16fd59f5f605"/*Phase*/,
+      "DefaultValue": 0.0
+    },
+    {
       "Id": "3ce54ca0-cd50-4dc2-bd3d-51e26ebf05ce"/*RecordValue*/,
       "DefaultValue": 0.0
     },

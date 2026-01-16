@@ -3,8 +3,7 @@
   "Description": "",
   "InputUis": [
     {
-      "InputId": "f8c4bab9-1f10-40f8-849e-4a6e6fd23972"/*InputLists*/,
-      "Relevancy": "Required",
+      "InputId": "05f25c43-c2f3-4cc1-8ef5-bbd93deb9bc2"/*InputLists*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
@@ -14,10 +13,10 @@
   "SymbolChildUis": [],
   "OutputUis": [
     {
-      "OutputId": "84c02b38-0871-4092-a5d6-2ffb1d072971"/*Selected*/,
+      "OutputId": "068501d2-df29-4672-9492-bd4911e707f6"/*Selected*/,
       "Position": {
-        "X": 0.0,
-        "Y": 100.0
+        "X": 300.0,
+        "Y": 200.0
       }
     }
   ]

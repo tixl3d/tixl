@@ -13,7 +13,7 @@ namespace T3.Core.Operator.Interfaces;
 /// </summary>
 public interface ICustomDropdownHolder
 {
-    string GetValueForInput(Guid inputId);
+    string? GetValueForInput(Guid inputId);
     IEnumerable<string> GetOptionsForInput(Guid inputId);
     void HandleResultForInput(Guid inputId, string? selected, bool isAListItem);
 }

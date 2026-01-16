@@ -1,15 +1,5 @@
 namespace Lib.image.transform;
 
-
-enum WrapModes
-{
-    Wrap,
-    Mirror,
-    Clamp,
-    Border,
-    MirrorOnce,
-}
-
 [Guid("32e18957-3812-4f64-8663-18454518d005")]
 internal sealed class TransformImage : Instance<TransformImage>
 {
@@ -45,4 +35,13 @@ internal sealed class TransformImage : Instance<TransformImage>
 
     [Input(Guid = "43eb4d4e-2bb5-4c97-a5dd-91539b8258cd", MappedType = typeof(WrapModes))]
     public readonly InputSlot<int> WrapMode = new InputSlot<int>();
+
+    private enum WrapModes
+    {
+        Wrap,
+        Mirror,
+        Clamp,
+        Border,
+        MirrorOnce,
+    }
 }

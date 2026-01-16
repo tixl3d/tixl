@@ -56,7 +56,7 @@
           }
         },
         {
-          "Id": "8169be8f-cb35-4900-b462-f2139b412d59"/*Rotation*/,
+          "Id": "8169be8f-cb35-4900-b462-f2139b412d59"/*Rotate*/,
           "Type": "System.Single",
           "Value": 0.0
         },
@@ -196,7 +196,7 @@
         {
           "Id": "895dab2c-e3be-4e73-9c96-0f6101cea113"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/common/test-footage/pointcloud-desk-corner-100k.obj"
+          "Value": "/t3/test-footage/pointcloud-desk-corner-100k.obj"
         },
         {
           "Id": "dcacd412-1885-4a10-b073-54192f074ae8"/*Mode*/,
@@ -1802,7 +1802,7 @@
           }
         },
         {
-          "Id": "8169be8f-cb35-4900-b462-f2139b412d59"/*Rotation*/,
+          "Id": "8169be8f-cb35-4900-b462-f2139b412d59"/*Rotate*/,
           "Type": "System.Single",
           "Value": 180.0
         },

@@ -1,5 +1,6 @@
 #nullable enable
 using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using System.Threading;
 
 namespace Lib.io.http;
@@ -10,14 +11,6 @@ namespace Lib.io.http;
 [Guid("1D2E3F4A-5B6C-4789-0123-456789ABCDEF")] // Updated GUID
 internal sealed class WebServer : Instance<WebServer>, IStatusProvider, ICustomDropdownHolder, IDisposable // Added ICustomDropdownHolder
 {
-    #region Outputs
-    [Output(Guid = "2A3B4C5D-6E7F-4890-1234-567890ABCDEF")] // Updated GUID
-    public readonly Slot<bool> IsRunning = new();
-
-    [Output(Guid = "3B4C5D6E-7F8A-4901-2345-67890ABCDEF1")] // Updated GUID
-    public readonly Slot<int> PortOutput = new();
-    #endregion
-
     #region Constructor
     public WebServer()
     {
@@ -26,18 +19,15 @@ internal sealed class WebServer : Instance<WebServer>, IStatusProvider, ICustomD
     }
     #endregion
 
-    #region State and Fields
-    private HttpListener? _listener;
-    private CancellationTokenSource? _cancellationTokenSource;
-    private bool _lastListenState;
-    private string? _lastLocalIp; // Added for LocalIpAddress input
-    private int _lastPort;
-    private string? _lastHtmlContent; // Store last HTML content
-    private bool _disposed = false;
-    private bool _printToLog; // Added for PrintToLog functionality
+    #region IDisposable Implementation
+    public void Dispose()
+    {
+        if (_disposed) return;
+        _disposed = true;
 
-    private string _statusMessage = "Not running";
-    private IStatusProvider.StatusLevel _statusLevel = IStatusProvider.StatusLevel.Notice;
+        StopServer(); // Stop server and cleanup listener
+        _cancellationTokenSource?.Dispose(); // Dispose CancellationTokenSource
+    }
     #endregion
 
     #region Main Update Loop
@@ -58,9 +48,8 @@ internal sealed class WebServer : Instance<WebServer>, IStatusProvider, ICustomD
         {
             StopServer();
             if (shouldListen)
-            {
                 StartServer(localIp, port); // Pass localIp to StartServer
-            }
+
             _lastListenState = shouldListen;
             _lastLocalIp = localIp; // Store last local IP
             _lastPort = port;
@@ -73,6 +62,27 @@ internal sealed class WebServer : Instance<WebServer>, IStatusProvider, ICustomD
         IsRunning.Value = _listener?.IsListening == true;
         PortOutput.Value = _lastPort;
     }
+    #endregion
+    #region Outputs
+    [Output(Guid = "2A3B4C5D-6E7F-4890-1234-567890ABCDEF")] // Updated GUID
+    public readonly Slot<bool> IsRunning = new();
+
+    [Output(Guid = "3B4C5D6E-7F8A-4901-2345-67890ABCDEF1")] // Updated GUID
+    public readonly Slot<int> PortOutput = new();
+    #endregion
+
+    #region State and Fields
+    private HttpListener? _listener;
+    private CancellationTokenSource? _cancellationTokenSource;
+    private bool _lastListenState;
+    private string? _lastLocalIp; // Added for LocalIpAddress input
+    private int _lastPort;
+    private string? _lastHtmlContent; // Store last HTML content
+    private bool _disposed;
+    private bool _printToLog; // Added for PrintToLog functionality
+
+    private string _statusMessage = "Not running";
+    private IStatusProvider.StatusLevel _statusLevel = IStatusProvider.StatusLevel.Notice;
     #endregion
 
     #region Server Control Logic
@@ -125,6 +135,7 @@ internal sealed class WebServer : Instance<WebServer>, IStatusProvider, ICustomD
             {
                 Log.Error($"WebServer: Access Denied starting WebServer on {prefix}: {hlex.Message}", this);
             }
+
             CleanupListener();
         }
         catch (Exception e)
@@ -134,6 +145,7 @@ internal sealed class WebServer : Instance<WebServer>, IStatusProvider, ICustomD
             {
                 Log.Error($"WebServer: Error starting WebServer: {e.Message}", this);
             }
+
             CleanupListener();
         }
     }
@@ -152,9 +164,10 @@ internal sealed class WebServer : Instance<WebServer>, IStatusProvider, ICustomD
                 catch (ObjectDisposedException)
                 {
                     if (_printToLog) Log.Debug("WebServer: Listener disposed, exiting ListenLoop.", this);
-                    break; // Listener was disposed, exiting loop gracefully
+                    break; // Listener was disposed, exiting the loop gracefully
                 }
-                catch (HttpListenerException hex) when (hex.ErrorCode == 995) // The I/O operation has been aborted because of either a thread exit or an application request.
+                catch (HttpListenerException hex) when
+                    (hex.ErrorCode == 995) // The I/O operation has been aborted because of either a thread exit or an application request.
                 {
                     if (_printToLog) Log.Debug("WebServer: HttpListenerException 995 (Operation Aborted), likely during shutdown. Exiting ListenLoop.", this);
                     break;
@@ -299,6 +312,7 @@ internal sealed class WebServer : Instance<WebServer>, IStatusProvider, ICustomD
                     _listener.Stop();
                     if (_printToLog) Log.Debug("WebServer: HttpListener stopped.", this);
                 }
+
                 _listener.Close();
                 if (_printToLog) Log.Debug("WebServer: HttpListener closed.", this);
                 _listener = null;
@@ -324,7 +338,12 @@ internal sealed class WebServer : Instance<WebServer>, IStatusProvider, ICustomD
 
     #region ICustomDropdownHolder Implementation
     string ICustomDropdownHolder.GetValueForInput(Guid id) => id == LocalIpAddress.Id ? LocalIpAddress.Value : string.Empty;
-    IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid id) => id == LocalIpAddress.Id ? GetLocalIPv4Addresses() : Enumerable.Empty<string>();
+
+    IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid id)
+    {
+        return id == LocalIpAddress.Id ? GetLocalIPv4Addresses() : Empty<string>();
+    }
+
     void ICustomDropdownHolder.HandleResultForInput(Guid id, string? s, bool i)
     {
         if (string.IsNullOrEmpty(s) || !i || id != LocalIpAddress.Id) return;
@@ -346,23 +365,12 @@ internal sealed class WebServer : Instance<WebServer>, IStatusProvider, ICustomD
             foreach (var ipInfo in ni.GetIPProperties().UnicastAddresses)
             {
                 // Only consider IPv4 addresses
-                if (ipInfo.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                if (ipInfo.Address.AddressFamily == AddressFamily.InterNetwork)
                 {
                     yield return ipInfo.Address.ToString();
                 }
             }
         }
-    }
-    #endregion
-
-    #region IDisposable Implementation
-    public void Dispose()
-    {
-        if (_disposed) return;
-        _disposed = true;
-
-        StopServer(); // Stop server and cleanup listener
-        _cancellationTokenSource?.Dispose(); // Dispose CancellationTokenSource
     }
     #endregion
 

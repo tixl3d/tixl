@@ -24,4 +24,15 @@ internal sealed class SnapToAnglesForce : Instance<SnapToAnglesForce>
 
     [Input(Guid = "8dabcbb3-2aa6-4213-82c9-e92c774c13f7")]
     public readonly InputSlot<float> Twist = new InputSlot<float>();
+
+    [Input(Guid = "d3c58957-611e-46aa-87b5-08f4aecc5da2", MappedType = typeof(Modes))]
+    public readonly InputSlot<int> Mode = new InputSlot<int>();
+
+    private enum Modes
+    {
+        CameraSpace,
+        WorldSpaceXY,
+        WorldSpaceXZ,
+        WorldSpaceYZ,
+    }
 }

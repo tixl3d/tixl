@@ -5,7 +5,7 @@ using T3.Core.Operator;
 using T3.Editor.Gui.Styling;
 using T3.Editor.UiModel.ProjectHandling;
 
-namespace T3.Editor.Gui.Graph.Interaction;
+namespace T3.Editor.Gui.Interaction;
 
 internal static class GraphTitleAndBreadCrumbs
 {
@@ -18,9 +18,9 @@ internal static class GraphTitleAndBreadCrumbs
         DrawNameAndDescription(window.InstView);
     }
 
-    private static void DrawBreadcrumbs(ProjectView components)
+    private static void DrawBreadcrumbs(ProjectView projectView)
     {
-        var composition = components.InstView;
+        var composition = projectView.InstView;
         Debug.Assert(composition != null);
         ImGui.SetCursorScreenPos(ImGui.GetWindowPos() + new Vector2(1, 1));
         var frameHeight = ImGui.GetFrameHeight();
@@ -28,7 +28,7 @@ internal static class GraphTitleAndBreadCrumbs
         
         if(CustomComponents.IconButton(Icon.Hub, Vector2.One * frameHeight))
         {
-            components.Close();
+            projectView.Close();
         }
         ImGui.PopStyleColor();
         CustomComponents.TooltipForLastItem("Project Hub");
@@ -73,7 +73,7 @@ internal static class GraphTitleAndBreadCrumbs
 
                 if (clicked)
                 {
-                    components.TrySetCompositionOpToParent();
+                    projectView.TrySetCompositionOpToParent();
                     break;
                 }
 

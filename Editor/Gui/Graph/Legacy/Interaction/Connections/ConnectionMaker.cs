@@ -11,7 +11,7 @@ using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
 using Vector2 = System.Numerics.Vector2;
 
-namespace T3.Editor.Gui.Graph.Legacy.Interaction.Connections;
+namespace T3.Editor.Gui.Legacy.Interaction.Connections;
 
 /// <summary>
 /// Handles the creation of new  <see cref="Symbol.Connection"/>s. 

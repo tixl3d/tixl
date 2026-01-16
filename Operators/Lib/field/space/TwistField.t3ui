@@ -1,6 +1,7 @@
 {
   "Id": "d7c6e980-6766-4f83-a32c-677e3713e8a6"/*TwistField*/,
   "Description": "Twists the input field along the given axis.\nThis works best for small source volumes within unit range.\n\nIt can be rendered with [RaymarchField] and visualized with [VisualizeFieldDistance].\n\nOther nodes: [RepeatWithMirror], [PolarRepeat], [ReflectField].\n\nIt needs an incoming field like [BoxSDF], [SphereSDF], [TorusSDF] as an input.\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToRaymarchField].\n\n\n",
+  "SymbolTags": "8",
   "InputUis": [
     {
       "InputId": "195f4642-52f7-4c95-9127-07f6175549f5"/*Axis*/,
@@ -29,6 +30,19 @@
         "X": -200.0,
         "Y": 0.0
       }
+    },
+    {
+      "InputId": "ad43a4c4-3439-46c5-986d-c654a56d296a"/*StepFactor*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      },
+      "GroupTitle": "Raymarching",
+      "Description": "Decrease step size to avoid raymarching artifacts.",
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true
     }
   ],
   "SymbolChildUis": [],

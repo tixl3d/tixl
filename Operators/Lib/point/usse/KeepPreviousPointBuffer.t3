@@ -1,0 +1,15 @@
+{
+  "Id": "c7752832-7155-4082-acd5-276c1abe7eb4"/*KeepPreviousPointBuffer*/,
+  "Inputs": [
+    {
+      "Id": "07ca7e81-02b8-4cb4-92f4-7afaaa07b751"/*InputBuffer*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "513d0146-e0c0-4e27-a3dc-862c1f56e219"/*Keep*/,
+      "DefaultValue": true
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

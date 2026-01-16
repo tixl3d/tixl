@@ -6,37 +6,37 @@
     {
       "ChildId": "0777184c-9732-4477-b523-010d9b111f9b"/*Execute*/,
       "Position": {
-        "X": 105.310486,
-        "Y": -84.156906
+        "X": 26.74588,
+        "Y": -395.9958
       }
     },
     {
       "ChildId": "159c4e5e-5a0d-4168-96c6-abc3f07acd2c"/*AnimValue*/,
       "Position": {
-        "X": 102.65106,
-        "Y": 34.83435
+        "X": -78.50597,
+        "Y": -96.514984
       }
     },
     {
       "ChildId": "2d64302b-3f82-43d9-a437-8f7a8ede0bf3"/*LinearGradient*/,
       "Position": {
-        "X": 257.7151,
-        "Y": 163.28381
+        "X": 251.97827,
+        "Y": -173.42163
       }
     },
     {
       "ChildId": "4e3b0c70-d407-4f3c-a206-1a699b9350d6"/*CutOut*/,
       "Comment": "Not directly related to this example but notice how the blend mode allows cutting out the first layer2D\n",
       "Position": {
-        "X": -42.758606,
-        "Y": -72.26404
+        "X": -220.83475,
+        "Y": -327.64243
       }
     },
     {
       "ChildId": "532a2fbc-b86e-4eae-88b5-1383225d40f5"/*Counter*/,
       "Position": {
-        "X": 439.8303,
-        "Y": 136.39247
+        "X": 282.38495,
+        "Y": 141.13484
       }
     },
     {
@@ -48,92 +48,92 @@
       },
       "Comment": "With a scale value below 1, pay attention to how the different wrapping modes are behaving.",
       "Position": {
-        "X": 593.8805,
-        "Y": -48.914032
+        "X": 646.04614,
+        "Y": -89.69809
       }
     },
     {
       "ChildId": "8c66c73e-542f-40b3-8a76-6407b06096c7"/*Text*/,
       "Position": {
-        "X": -47.348938,
-        "Y": 77.83435
+        "X": -220.83475,
+        "Y": -206.20914
       }
     },
     {
       "ChildId": "ab54a3ff-f820-4dba-a624-55fd0c91634a"/*Image*/,
       "Position": {
         "X": 443.81128,
-        "Y": -96.18002
+        "Y": -169.21191
       }
     },
     {
       "ChildId": "ac462d6c-1cf5-4811-9c64-db770f2dec4f"/*Position*/,
       "Position": {
-        "X": 443.81128,
-        "Y": -14.180023
+        "X": 506.04614,
+        "Y": -54.69809
       }
     },
     {
       "ChildId": "be2c4f34-1609-4b81-a1ef-8e19034b0969"/*RenderTarget*/,
       "Position": {
         "X": 251.97827,
-        "Y": -55.11908
+        "Y": -97.80005
       }
     },
     {
       "ChildId": "c23c06f9-f8df-489c-a8e7-2a53539bd88e"/*AnimValue*/,
       "Position": {
-        "X": 443.81128,
-        "Y": 28.819977
+        "X": 506.04614,
+        "Y": -19.69809
       }
     },
     {
       "ChildId": "cf410ce7-ab60-4f59-b9af-ad1931a42b4c"/*RgbaToColor*/,
       "Position": {
-        "X": 251.97827,
-        "Y": 0.8809204
+        "X": 70.82124,
+        "Y": -130.46841
       }
     },
     {
       "ChildId": "d636003d-9b9b-4c11-b39d-c28fcb38b878"/*LinearGradient*/,
       "Position": {
-        "X": -197.34894,
-        "Y": 120.83435
+        "X": -332.36472,
+        "Y": -137.9914
       }
     },
     {
       "ChildId": "e0fedf9d-5479-474a-9a28-6493aa6853fd"/*Text Shadow*/,
       "Position": {
-        "X": -46.858643,
-        "Y": 47.9776
+        "X": -220.83475,
+        "Y": -247.20932
       }
     },
     {
       "ChildId": "e945ad01-6810-4314-a2ca-c186837bdfbc"/*Layer2d*/,
       "Position": {
-        "X": -42.758606,
-        "Y": -16.264038
+        "X": -220.83475,
+        "Y": -292.6424
       }
     },
     {
       "ChildId": "e9943752-6e05-4d83-90a9-cf894e9ceaa4"/*Layer2d*/,
       "Position": {
-        "X": -42.758606,
-        "Y": -128.26404
+        "X": -220.83475,
+        "Y": -362.6424
       }
     },
     {
       "ChildId": "f825b7c4-bd23-4b38-b63f-d44f1318ec77"/*Layer2d*/,
       "Position": {
-        "X": -47.348938,
-        "Y": 120.83435
+        "X": -182.36484,
+        "Y": -137.9914
       }
     },
     {
       "ChildId": "fa527a1e-6d93-4661-9535-9d12a39fc5ae"/*CountInt*/,
       "Position": {
-        "X": 460.60773,
-        "Y": 67.094925
+        "X": 506.04614,
+        "Y": 15.30191
       }
     }
   ],
@@ -141,8 +141,8 @@
     {
       "OutputId": "d7ba385e-4168-4c1e-bde2-18343e0a9d1e"/*Output*/,
       "Position": {
-        "X": 741.5072,
-        "Y": -8.864532
+        "X": 1019.40765,
+        "Y": -99.91733
       }
     }
   ],
@@ -161,8 +161,8 @@
         "Y": -271.429
       },
       "Size": {
-        "X": 310.8383,
-        "Y": 445.82025
+        "X": 572.22516,
+        "Y": 446.429
       }
     }
   ]

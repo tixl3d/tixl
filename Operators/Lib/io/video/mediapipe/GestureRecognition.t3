@@ -1,0 +1,51 @@
+{
+  "Id": "a1b2c3d4-e5f6-4798-89ab-cdef12345683"/*GestureRecognition*/,
+  "Inputs": [
+    {
+      "Id": "04b5c6d7-e8f9-70a1-23b4-567890123456"/*CategoryDenylist*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "15c6d7e8-f9a0-81b2-34d5-678901234567"/*CorrectAspectRatio*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "a1b2c3d4-e5f6-4798-89ab-cdef12345693"/*Debug*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "a7b8c9d0-e1f2-4d23-e05b-345678901240"/*InputTexture*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "b6d7e8f9-0ab1-92c3-45e6-789012345678"/*ZScale*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "b8c9d0e1-f2a3-4e34-f16c-456789012341"/*Enabled*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "c9d0e1f2-a3b4-4f45-a27d-567890123452"/*MaxHands*/,
+      "DefaultValue": 2
+    },
+    {
+      "Id": "d0e1f2a3-b4c5-4056-b38e-678901234562"/*MinHandDetectionConfidence*/,
+      "DefaultValue": 0.5
+    },
+    {
+      "Id": "e1f2a3b4-c5d6-4167-c49f-789012345673"/*MinHandPresenceConfidence*/,
+      "DefaultValue": 0.5
+    },
+    {
+      "Id": "e2f3a4b5-c6d7-58e9-f0a1-234567890bd2"/*UseCombinedAIOutput*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "f3a4b5c6-d7e8-69f0-12a3-456789012345"/*CategoryAllowlist*/,
+      "DefaultValue": ""
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

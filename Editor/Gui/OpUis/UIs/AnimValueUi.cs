@@ -83,7 +83,7 @@ internal static class AnimValueUi
 
         var highlightEditable = ImGui.GetIO().KeyCtrl;
 
-        if (h > 14 * T3Ui.UiScaleFactor)
+        if (h > 30 * T3Ui.UiScaleFactor)
         {
             isNodeActivated |= ValueLabel.Draw(drawList, graphRect, new Vector2(1, 0), data.Amplitude);
             isNodeActivated |= ValueLabel.Draw(drawList, graphRect, new Vector2(1, 1), data.Offset);

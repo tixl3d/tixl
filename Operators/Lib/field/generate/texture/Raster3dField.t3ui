@@ -1,6 +1,7 @@
 {
   "Id": "edfc71fc-2d54-4226-b819-0340bb1fdd65"/*Raster3dField*/,
   "Description": "Uses TiXL's Raymarching integration to generate a procedural raster 3D Texture that can be mapped onto meshes via [DrawMesh].\nConnects into the 'FragmentField' input of [DrawMesh].",
+  "SymbolTags": "8",
   "InputUis": [
     {
       "InputId": "1108ec25-8d77-4c0b-8f17-5308ea017df4"/*Feather*/,

@@ -1,0 +1,77 @@
+{
+  "Id": "3208070c-794e-4400-b996-608cb200aec8"/*I02a_WidthAndScale*/,
+  "Description": "LinearGradient: Width and Scale Mode",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "2385e6e5-8fd9-4edc-b4c9-29af4ffcd4e8"/*LinearGradient*/,
+      "Position": {
+        "X": 1238.5605,
+        "Y": 1882.29
+      }
+    },
+    {
+      "ChildId": "7cd66891-a750-4c93-9e33-707d22432c1c"/*LinearGradient*/,
+      "AnnotationId": "53d5c7f3-ff9b-4f07-b07a-f545043ba7c8",
+      "Position": {
+        "X": 1256.9438,
+        "Y": 2101.325
+      }
+    },
+    {
+      "ChildId": "c9c310ce-9573-49aa-8fc7-e325e98fc2bf"/*ImageQuiz*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2018.4391
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "8308348b-7b4e-493b-8da3-d22b965ff749"/*ColorBuffer*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2088.439
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "53d5c7f3-ff9b-4f07-b07a-f545043ba7c8",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1225.0,
+        "Y": 2052.9775
+      },
+      "Size": {
+        "X": 210.0,
+        "Y": 117.02246
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "62da30af-e883-4c17-8d4c-0bca3b2cdc46",
+      "Description": "Gradients are a core building block in TiXL. They are used in many operators and effects.\nThis is the [LinearGradient]. It draws a gradient along a line."
+    },
+    {
+      "Id": "54a0a877-ccc7-4df0-a8a0-7904df248d1f",
+      "ChildId": "2385e6e5-8fd9-4edc-b4c9-29af4ffcd4e8",
+      "Description": "Notice that the gradient does not cover the full width of the image.\nThis is because the default scale mode is AlignToHeight. When the output aspect ratio changes, TiXL adjusts the left and right edges.\nAligning to the height helps avoid unexpected layout changes and keeps the result consistent across aspect ratios.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "1df787ed-09fe-4c59-b63d-79be5ad5d4ae",
+      "ChildId": "2385e6e5-8fd9-4edc-b4c9-29af4ffcd4e8",
+      "Description": "Adjust the parameters so the gradient covers the full width.",
+      "Style": "CallToAction"
+    }
+  ]
+}

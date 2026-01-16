@@ -1,0 +1,152 @@
+{
+  "Id": "2a128e01-c2b2-4ef8-8af5-01b698c9c2db"/*M01b_MultiplyValues*/,
+  "Inputs": [],
+  "Children": [
+    {
+      "Id": "17eb7487-9b33-4239-aafd-5b8a3b3085c2"/*Weeks*/,
+      "SymbolId": "5d7d61ae-0a41-4ffa-a51d-93bab665e7fe",
+      "Name": "Weeks",
+      "InputValues": [
+        {
+          "Id": "7773837e-104a-4b3d-a41f-cadbd9249af2"/*Float*/,
+          "Type": "System.Single",
+          "Value": 52.0
+        }
+      ],
+      "Outputs": []
+    },
+    {
+      "Id": "58f60eca-b21b-4f16-89c8-9ba4e4e6ca8d"/*Weeks*/,
+      "SymbolId": "5d7d61ae-0a41-4ffa-a51d-93bab665e7fe",
+      "Name": "Weeks",
+      "InputValues": [
+        {
+          "Id": "7773837e-104a-4b3d-a41f-cadbd9249af2"/*Float*/,
+          "Type": "System.Single",
+          "Value": 52.0
+        }
+      ],
+      "Outputs": []
+    },
+    {
+      "Id": "6ce44690-d702-4e83-bcef-28d783676bba"/*Days Per Week*/,
+      "SymbolId": "5d7d61ae-0a41-4ffa-a51d-93bab665e7fe",
+      "Name": "Days Per Week",
+      "InputValues": [
+        {
+          "Id": "7773837e-104a-4b3d-a41f-cadbd9249af2"/*Float*/,
+          "Type": "System.Single",
+          "Value": 7.0
+        }
+      ],
+      "Outputs": []
+    },
+    {
+      "Id": "7375c614-6464-4cd7-a594-73ffa68a8ebe"/*ValueQuiz*/,
+      "SymbolId": "702f1f75-df90-44ca-b567-78ba9d1613b5",
+      "InputValues": [],
+      "Outputs": []
+    },
+    {
+      "Id": "7fb42eef-0789-470f-b63e-ed1750b50e4b"/*Hours Per Day*/,
+      "SymbolId": "5d7d61ae-0a41-4ffa-a51d-93bab665e7fe",
+      "Name": "Hours Per Day",
+      "InputValues": [
+        {
+          "Id": "7773837e-104a-4b3d-a41f-cadbd9249af2"/*Float*/,
+          "Type": "System.Single",
+          "Value": 24.0
+        }
+      ],
+      "Outputs": []
+    },
+    {
+      "Id": "b3209a3b-6176-46be-9a5e-477aaedb088e"/*Multiply*/,
+      "SymbolId": "17b60044-9125-4961-8a79-ca94697b3726",
+      "InputValues": [],
+      "Outputs": []
+    },
+    {
+      "Id": "b45b89e7-0b20-43f4-92c7-8c41fba57257"/*Hours Per Day*/,
+      "SymbolId": "5d7d61ae-0a41-4ffa-a51d-93bab665e7fe",
+      "Name": "Hours Per Day",
+      "InputValues": [
+        {
+          "Id": "7773837e-104a-4b3d-a41f-cadbd9249af2"/*Float*/,
+          "Type": "System.Single",
+          "Value": 24.0
+        }
+      ],
+      "Outputs": []
+    },
+    {
+      "Id": "d2def649-2838-4aef-b077-ac1837fdbb03"/*Multiply*/,
+      "SymbolId": "17b60044-9125-4961-8a79-ca94697b3726",
+      "InputValues": [],
+      "Outputs": []
+    },
+    {
+      "Id": "e0200cd2-07c9-42e5-b334-2585193dc913"/*Multiply*/,
+      "SymbolId": "17b60044-9125-4961-8a79-ca94697b3726",
+      "InputValues": [],
+      "Outputs": []
+    },
+    {
+      "Id": "e789ba55-b205-4151-a21b-7392cf4a372e"/*Multiply*/,
+      "SymbolId": "17b60044-9125-4961-8a79-ca94697b3726",
+      "InputValues": [],
+      "Outputs": []
+    },
+    {
+      "Id": "f6e0fdf3-12d7-4921-a351-fd4bdc5c073f"/*Days Per Week*/,
+      "SymbolId": "5d7d61ae-0a41-4ffa-a51d-93bab665e7fe",
+      "Name": "Days Per Week",
+      "InputValues": [
+        {
+          "Id": "7773837e-104a-4b3d-a41f-cadbd9249af2"/*Float*/,
+          "Type": "System.Single",
+          "Value": 7.0
+        }
+      ],
+      "Outputs": []
+    }
+  ],
+  "Connections": [
+    {
+      "SourceParentOrChildId": "7375c614-6464-4cd7-a594-73ffa68a8ebe",
+      "SourceSlotId": "6fbc9fd1-58c2-4b0b-accb-9850a8835120",
+      "TargetParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "TargetSlotId": "6e58b222-831d-4b51-bd59-bd872fb3590e"
+    },
+    {
+      "SourceParentOrChildId": "e0200cd2-07c9-42e5-b334-2585193dc913",
+      "SourceSlotId": "e011dd8c-1b9c-458f-8960-e6c38e83ca74",
+      "TargetParentOrChildId": "7375c614-6464-4cd7-a594-73ffa68a8ebe",
+      "TargetSlotId": "c09a529a-dfe2-4bf8-86ce-369aeadbee4a"
+    },
+    {
+      "SourceParentOrChildId": "e789ba55-b205-4151-a21b-7392cf4a372e",
+      "SourceSlotId": "e011dd8c-1b9c-458f-8960-e6c38e83ca74",
+      "TargetParentOrChildId": "e0200cd2-07c9-42e5-b334-2585193dc913",
+      "TargetSlotId": "372288fa-3794-47ba-9f91-59240513217a"
+    },
+    {
+      "SourceParentOrChildId": "58f60eca-b21b-4f16-89c8-9ba4e4e6ca8d",
+      "SourceSlotId": "f83f1835-477e-4bb6-93f0-14bf273b8e94",
+      "TargetParentOrChildId": "e0200cd2-07c9-42e5-b334-2585193dc913",
+      "TargetSlotId": "5ae4bb07-4214-4ec3-a499-24d9f6d404a5"
+    },
+    {
+      "SourceParentOrChildId": "b45b89e7-0b20-43f4-92c7-8c41fba57257",
+      "SourceSlotId": "f83f1835-477e-4bb6-93f0-14bf273b8e94",
+      "TargetParentOrChildId": "e789ba55-b205-4151-a21b-7392cf4a372e",
+      "TargetSlotId": "372288fa-3794-47ba-9f91-59240513217a"
+    },
+    {
+      "SourceParentOrChildId": "f6e0fdf3-12d7-4921-a351-fd4bdc5c073f",
+      "SourceSlotId": "f83f1835-477e-4bb6-93f0-14bf273b8e94",
+      "TargetParentOrChildId": "e789ba55-b205-4151-a21b-7392cf4a372e",
+      "TargetSlotId": "5ae4bb07-4214-4ec3-a499-24d9f6d404a5"
+    }
+  ]
+}

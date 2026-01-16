@@ -1,0 +1,19 @@
+{
+  "Id": "f21de2e1-6af8-4651-90a0-6c662bbb23af"/*GetVec3Var*/,
+  "Inputs": [
+    {
+      "Id": "5cce784c-020a-4e51-881b-edd48846b0fc"/*FallbackDefault*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "d8a9d923-232f-4cd4-9e24-fadbf40fe1d1"/*VariableName*/,
+      "DefaultValue": "pos"
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

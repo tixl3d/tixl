@@ -1,6 +1,7 @@
 {
   "Id": "637d00e4-ab63-4fe3-8e63-1e206c728841"/*CustomSDF*/,
   "Description": "Creates a custom SDF with optional parameters.\nThe default code generates a procedural sphere field which can be rendered with [RaymarchField] and visualized with [VisualizeFieldDistance].\nFor more Fractals check the different variations.\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToRaymarchField].\n\nThe result can be modified with [BendField], [TransformField], [PolarRepeat] and more.\n\nSimilar nodes: [BoxSDF], [CapsuleLineSDF], [FractalSDF].",
+  "SymbolTags": "1",
   "InputUis": [
     {
       "InputId": "3c366d34-c398-410e-972b-d8cc2baffddb"/*A*/,

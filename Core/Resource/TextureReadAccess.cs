@@ -27,7 +27,7 @@ public sealed class TextureReadAccess : IDisposable
 
     /// <summary>
     /// Saving a screenshot will take several frames because it takes a while until the frames are
-    /// downloaded from the gpu. The method need to be called once a frame.
+    /// downloaded from the gpu. <see cref="Update"/> needs to be called once a frame.
     /// </summary>
     public void Update()
     {
@@ -67,8 +67,8 @@ public sealed class TextureReadAccess : IDisposable
     public delegate void OnReadComplete(ReadRequestItem cpuAccessTexture);
     
     /// <summary>
-    /// Convert into BRGA and initiate the readback process.
-    /// It will take several frames, until the texture is accessible and the callback is called.
+    /// Convert into BGRA and initiate the readback process.
+    /// It will take several frames until the texture is accessible and the callback is called.
     /// </summary>
     public bool InitiateReadAndConvert(Texture2D originalTexture, OnReadComplete onSuccess, string? filepath=null)
     {

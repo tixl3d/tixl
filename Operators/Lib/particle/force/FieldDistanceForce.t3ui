@@ -1,7 +1,7 @@
 {
   "Id": "42394232-51fa-4e75-851b-c2bca39de71a"/*FieldDistanceForce*/,
   "Description": "Tries to keep particles within an SDF distance range.",
-  "SymbolTags": "1152",
+  "SymbolTags": "4224",
   "InputUis": [
     {
       "InputId": "3fd1169e-1640-4d67-b859-70815cb3d28f"/*Attraction*/,

@@ -55,7 +55,7 @@ internal sealed class ViewSelectionPinning
             }
         }
 
-        CustomComponents.TooltipForLastItem("Pin output to active operator.", 
+        CustomComponents.TooltipForLastItem("Pin output to active operator.",
                                             UserActions.PinToOutputWindow.ListShortcuts());
 
         if (_isPinned)
@@ -78,7 +78,7 @@ internal sealed class ViewSelectionPinning
         }
 
         ImGui.SameLine();
-        ImGui.SetNextItemWidth(200*T3Ui.UiScaleFactor);
+        ImGui.SetNextItemWidth(200 * T3Ui.UiScaleFactor);
         var suffix = _isPinned ? " (pinned)" : " (selected)";
 
         if (TryGetPinnedEvaluationInstance(canvas.Structure, out var pinnedEvaluationInstance))
@@ -86,16 +86,18 @@ internal sealed class ViewSelectionPinning
             suffix += " -> " + pinnedEvaluationInstance.Symbol.Name + " (Final)";
         }
 
-        ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-
         var symbolName = pinnedOrSelectedInstance.Symbol.Name;
         var symbolChildName = pinnedOrSelectedInstance.SymbolChild?.Name;
         if (!string.IsNullOrEmpty(symbolChildName))
         {
             symbolName = $"\"{symbolChildName}\" {symbolName}";
         }
-        
-        if (ImGui.BeginCombo("##pinning", symbolName + suffix))
+
+        ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
+        var open = ImGui.BeginCombo("##pinning", symbolName + suffix);
+        ImGui.PopStyleColor();
+
+        if (open)
         {
             ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(6, 6));
             if (_isPinned)
@@ -160,13 +162,17 @@ internal sealed class ViewSelectionPinning
                 if (ImGui.BeginMenu("Show Output..."))
                 {
                     var isDefaultOutput = _selectedOutputId == Guid.Empty;
-                    
+
                     for (var outputIndex = 0; outputIndex < pinnedOrSelectedInstance.Outputs.Count; outputIndex++)
                     {
                         var output = pinnedOrSelectedInstance.Outputs[outputIndex];
                         var isSelected = outputIndex == 0 && isDefaultOutput
                                          || output.Id == _selectedOutputId;
-                        if (ImGui.MenuItem(output.ToString(), null, isSelected))
+                        
+                        if(CustomComponents.DrawMenuItem(outputIndex+10, 
+                                                       output.ToString(),
+                                                       isChecked:isSelected
+                                                       ))
                         {
                             _selectedOutputId = outputIndex == 0 ? Guid.Empty : output.Id;
                         }
@@ -182,11 +188,9 @@ internal sealed class ViewSelectionPinning
             ImGui.EndCombo();
         }
 
-        ImGui.PopStyleColor();
         ImGui.SameLine();
     }
 
-    
     private void PinSelectionToView(ProjectView canvas)
     {
         var firstSelectedInstance = canvas.NodeSelection.GetFirstSelectedInstance();
@@ -239,10 +243,19 @@ internal sealed class ViewSelectionPinning
         return false;
     }
 
-    public void PinInstance(Instance? instance, ProjectView canvas)
+    public void PinInstance(Instance? instance, ProjectView? projectView=null, bool unpinIfAlreadyPinned = false)
     {
+        projectView??= ProjectView.Focused;
+        var path = instance != null ? instance.InstancePath : [];
+        var alreadyPinned = path.SequenceEqual(_pinnedInstancePath);
+        if (alreadyPinned && unpinIfAlreadyPinned)
+        {
+            Unpin();
+            return;
+        }
+
         _pinnedInstancePath = instance != null ? instance.InstancePath : [];
-        _pinnedProjectView = canvas;
+        _pinnedProjectView = projectView;
         _isPinned = true;
     }
 
@@ -278,7 +291,7 @@ internal sealed class ViewSelectionPinning
             if (o.Id == _selectedOutputId)
                 return o;
         }
-        
+
         return outputs[0];
     }
 }

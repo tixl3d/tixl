@@ -4006,7 +4006,7 @@
       "SymbolId": "954af16f-b37b-4e64-a965-4bec02b9179e",
       "InputValues": [
         {
-          "Id": "8042eb60-ca86-42b3-a338-d733c3cbb1fb"/*Size*/,
+          "Id": "8042eb60-ca86-42b3-a338-d733c3cbb1fb"/*Stretch*/,
           "Type": "System.Numerics.Vector2",
           "Value": {
             "X": 3.0,

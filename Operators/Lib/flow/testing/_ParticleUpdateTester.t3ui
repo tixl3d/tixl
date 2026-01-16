@@ -1,0 +1,184 @@
+{
+  "Id": "9b550333-1caa-43d4-9e6f-245c55c2d24a"/*_ParticleUpdateTester*/,
+  "Description": "A helper to test frame independent update.",
+  "InputUis": [
+    {
+      "InputId": "4b21554e-a551-43aa-8fb1-b3b2794977e4"/*PointSize*/,
+      "Position": {
+        "X": 846.8981,
+        "Y": 63.537872
+      }
+    },
+    {
+      "InputId": "5ec058e5-e6cb-492c-8ab3-58fd2948feee"/*FrameDropRate*/,
+      "Position": {
+        "X": -35.397568,
+        "Y": 64.48816
+      },
+      "Min": 1,
+      "Max": 30,
+      "ClampMin": true
+    },
+    {
+      "InputId": "d4e3dafa-3595-489e-a7db-cf0cb9cd258d"/*PointColor*/,
+      "Position": {
+        "X": 781.22546,
+        "Y": 111.173904
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0d414887-09b3-4522-a396-97536ad0d806"/*ParticleSystem*/,
+      "Position": {
+        "X": 595.794,
+        "Y": -29.811462
+      }
+    },
+    {
+      "ChildId": "1ca3c233-bf21-4c4d-8100-b61ae5acc6ba"/*Group*/,
+      "Position": {
+        "X": 1248.4117,
+        "Y": 104.96625
+      }
+    },
+    {
+      "ChildId": "1e5d2fca-a5c5-459c-97da-3559e6d752f0"/*IntToFloat*/,
+      "Position": {
+        "X": 194.79613,
+        "Y": 163.20091
+      }
+    },
+    {
+      "ChildId": "21e1ae95-285e-4248-bc65-17082b430bf2"/*Once*/,
+      "Position": {
+        "X": 133.22662,
+        "Y": -217.89944
+      }
+    },
+    {
+      "ChildId": "240d2d9b-9a34-4ede-966b-e563fe514d26"/*SphereSDF*/,
+      "Position": {
+        "X": -72.57321,
+        "Y": 367.3767
+      }
+    },
+    {
+      "ChildId": "2726ea3c-dd64-4b0e-9505-c776d8718015"/*BlendColors*/,
+      "Position": {
+        "X": 781.22546,
+        "Y": 146.17389
+      }
+    },
+    {
+      "ChildId": "5f64ff10-f8b2-4dc6-a25c-720809db4e92"/*DrawPoints*/,
+      "Position": {
+        "X": 986.8981,
+        "Y": 28.537872
+      }
+    },
+    {
+      "ChildId": "6f681bee-05a2-435f-b962-0cb3aa5e3959"/*TurbulenceForce*/,
+      "Position": {
+        "X": 67.42679,
+        "Y": 292.56604
+      }
+    },
+    {
+      "ChildId": "736dcc02-5219-4072-82f6-7b5b2e99ba35"/*FieldVolumeForce*/,
+      "Position": {
+        "X": 67.42679,
+        "Y": 367.3767
+      }
+    },
+    {
+      "ChildId": "77d08446-366e-44b1-accd-f8c726381b82"/*TransformPoints*/,
+      "Position": {
+        "X": -184.77226,
+        "Y": 142.33472
+      }
+    },
+    {
+      "ChildId": "8714f977-44d5-4b78-b7fe-961ecf8b7632"/*Point*/,
+      "Position": {
+        "X": -72.57321,
+        "Y": 519.71387
+      }
+    },
+    {
+      "ChildId": "8ef66954-227c-4719-83f6-e55f87a4540a"/*CountInt*/,
+      "Position": {
+        "X": 315.794,
+        "Y": 40.188538
+      }
+    },
+    {
+      "ChildId": "94d62918-dffa-45bd-8e00-c1dc4fe8f038"/*CollisionForce*/,
+      "Position": {
+        "X": 67.42679,
+        "Y": 597.2528
+      }
+    },
+    {
+      "ChildId": "996b7d9b-d05a-4f04-b4cd-048be36ef40e"/*CompareInt*/,
+      "Position": {
+        "X": 455.794,
+        "Y": 40.188538
+      }
+    },
+    {
+      "ChildId": "9d7c8f9e-ed54-4fd1-99e0-3b586b820fe3"/*DrawLines*/,
+      "Position": {
+        "X": 986.8981,
+        "Y": 183.66414
+      }
+    },
+    {
+      "ChildId": "c9e66b6f-5883-428f-9b42-2c40650d1c83"/*DirectionalForce*/,
+      "Position": {
+        "X": 67.42679,
+        "Y": 437.60162
+      }
+    },
+    {
+      "ChildId": "cc05c47b-7351-4c16-9f1d-43d90e890ac4"/*VolumeForce*/,
+      "Position": {
+        "X": 67.42679,
+        "Y": 668.0689
+      }
+    },
+    {
+      "ChildId": "ce6ae4b8-11e8-4821-b091-cd725b8a24cf"/*Boolean*/,
+      "Position": {
+        "X": 200.79718,
+        "Y": -109.32391
+      }
+    },
+    {
+      "ChildId": "cf4f2fa1-945a-4ed2-a322-00c113156672"/*ReconstructiveForce*/,
+      "Position": {
+        "X": 67.42679,
+        "Y": 519.71387
+      }
+    },
+    {
+      "ChildId": "f2ac3823-2ccf-4061-a629-55b1a5e88bc8"/*LinePoints*/,
+      "Position": {
+        "X": -210.39087,
+        "Y": -29.811462
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "b0e73991-3f04-401d-b909-ab29ed6f4c13"/*Output*/,
+      "Position": {
+        "X": 1248.4117,
+        "Y": 174.96625
+      }
+    }
+  ]
+}

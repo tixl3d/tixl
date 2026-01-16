@@ -1,11 +1,12 @@
-﻿#nullable enable
+#nullable enable
 
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
-using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.MagGraph.Interaction;
+using T3.Editor.Gui.MagGraph.Model;
+using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.OutputUi;
 using T3.Editor.Gui.UiHelpers;
@@ -48,6 +49,11 @@ internal sealed class MagGraphLayout
 
         if (!SymbolUiRegistry.TryGetSymbolUi(compositionOp.Symbol.Id, out var parentSymbolUi))
             return;
+
+        if (StructureFlaggedAsChanged)
+        {
+            context.CompositionInstance.GetSymbolUi().FlagAsModified();
+        }
 
         if (forceUpdate || FrameStats.Last.UndoRedoTriggered || StructureFlaggedAsChanged ||
             HasCompositionDataChanged(compositionOp.Symbol, ref _compositionModelHash))
@@ -287,9 +293,13 @@ internal sealed class MagGraphLayout
 
         foreach (var item in Items.Values)
         {
+            
             inputLines.Clear();
             outputLines.Clear();
 
+            // if (item.IsCollapsedAway)
+            //     continue;
+            
             var visibleIndex = 0;
 
             switch (item.Variant)
@@ -610,12 +620,14 @@ internal sealed class MagGraphLayout
 
                 Debug.Assert(sourceOutput != null);
                 var outputIndex2 = 0;
+                var visibleOutputIndex = 0;
                 foreach (var outLine in sourceItem2.OutputLines)
                 {
                     if (outLine.Output != sourceOutput)
                         continue;
 
                     outputIndex2 = outLine.OutputIndex;
+                    visibleOutputIndex = outLine.VisibleIndex;
                     break;
                 }
 
@@ -625,7 +637,7 @@ internal sealed class MagGraphLayout
                     outputIndex2 = sourceItem2.OutputLines.Length - 1;
                 }
 
-                var connectionFromSymbolInput = new MagGraphConnection
+                var connectionToSymbolOutput = new MagGraphConnection
                                                     {
                                                         Style = MagGraphConnection.ConnectionStyles.Unknown,
                                                         SourceItem = sourceItem2,
@@ -633,15 +645,15 @@ internal sealed class MagGraphLayout
                                                         TargetItem = symbolOutputItem,
                                                         //TargetInput = targetInput,
                                                         InputLineIndex = 0,
-                                                        OutputLineIndex = 0,
+                                                        OutputLineIndex = outputIndex2,
                                                         ConnectionHash = c.GetHashCode(),
                                                         MultiInputIndex = 0,
-                                                        VisibleOutputIndex = 0,
+                                                        VisibleOutputIndex = visibleOutputIndex,
                                                     };
 
-                sourceItem2.OutputLines[outputIndex2].ConnectionsOut.Add(connectionFromSymbolInput);
-                symbolOutputItem.InputLines[0].ConnectionIn = connectionFromSymbolInput;
-                MagConnections.Add(connectionFromSymbolInput);
+                sourceItem2.OutputLines[outputIndex2].ConnectionsOut.Add(connectionToSymbolOutput);
+                symbolOutputItem.InputLines[0].ConnectionIn = connectionToSymbolOutput;
+                MagConnections.Add(connectionToSymbolOutput);
                 continue;
             }
 
@@ -655,6 +667,9 @@ internal sealed class MagGraphLayout
                 continue;
             }
 
+            if (sourceItem.IsCollapsedAway && targetItem.IsCollapsedAway)
+                continue;
+            
             // Connections between nodes
             if (sourceItem.Instance == null || targetItem.Instance == null)
                 continue;
@@ -699,6 +714,15 @@ internal sealed class MagGraphLayout
                                               VisibleOutputIndex = sourceItem.OutputLines[outputLineIndex].VisibleIndex,
                                           };
 
+            var valid = inputLineIndex < targetItem.InputLines.Length
+                        && outputLineIndex < sourceItem.OutputLines.Length;
+
+            if (!valid)
+            {
+                Log.Warning($"Input line index {inputLineIndex} ouf of range?");
+                continue;
+            }
+                
             targetItem.InputLines[inputLineIndex].ConnectionIn = snapGraphConnection;
             sourceItem.OutputLines[outputLineIndex].ConnectionsOut.Add(snapGraphConnection);
             MagConnections.Add(snapGraphConnection);

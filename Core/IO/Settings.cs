@@ -34,7 +34,7 @@ public class Settings<T> where T  : class, new()
 
     public static void Save()
     {
-        if (_instance == null)
+        if (_instance == null || SaveDisabled)
             return;
         
         JsonUtils.TrySaveJson(Config, _instance._filePath);
@@ -43,4 +43,7 @@ public class Settings<T> where T  : class, new()
     private static Settings<T>? _instance;
     private readonly string _filePath;
     private static string ConfigDirectory => UserData.FileLocations.SettingsDirectory;
+
+    // ReSharper disable once StaticMemberInGenericType
+    public static bool SaveDisabled { get; set; }
 }

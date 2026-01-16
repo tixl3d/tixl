@@ -12,6 +12,9 @@ public sealed class FieldToImage : Instance<FieldToImage>
         [Input(Guid = "e2e65236-62c0-49b3-ad51-992e3953554f")]
         public readonly InputSlot<System.Numerics.Vector2> Center = new InputSlot<System.Numerics.Vector2>();
 
+        [Input(Guid = "5439b7d1-263d-44e6-8eb5-cc9d0df4a61a")]
+        public readonly InputSlot<float> SliceDepth = new InputSlot<float>();
+
         [Input(Guid = "2e07eea5-a7c1-4385-bfcb-da9e6c713e61")]
         public readonly InputSlot<float> Scale = new InputSlot<float>();
 

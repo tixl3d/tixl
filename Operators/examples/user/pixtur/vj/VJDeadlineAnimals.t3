@@ -854,11 +854,6 @@
       "SymbolId": "55cc0f79-96c9-482e-9794-934dc0f87708",
       "InputValues": [
         {
-          "Id": "165f7e0e-6ef0-4be1-8ed3-61ed0db752ed"/*UseFullList*/,
-          "Type": "System.Boolean",
-          "Value": false
-        },
-        {
           "Id": "63e90d86-5ad5-4333-8b99-7f8d285c4913"/*Direction*/,
           "Type": "System.Int32",
           "Value": 1
@@ -867,11 +862,6 @@
           "Id": "cc812393-f080-4e17-a525-15b09f8acdd0"/*Gain*/,
           "Type": "System.Single",
           "Value": 5.0
-        },
-        {
-          "Id": "db868176-d51c-41aa-bafe-68c3e50e725e"/*RangeEnd*/,
-          "Type": "System.Int32",
-          "Value": 37
         }
       ],
       "Outputs": []
@@ -1532,11 +1522,6 @@
       "SymbolId": "55cc0f79-96c9-482e-9794-934dc0f87708",
       "InputValues": [
         {
-          "Id": "165f7e0e-6ef0-4be1-8ed3-61ed0db752ed"/*UseFullList*/,
-          "Type": "System.Boolean",
-          "Value": false
-        },
-        {
           "Id": "51545316-69fc-441f-b59f-44979e32972c"/*Pow*/,
           "Type": "System.Single",
           "Value": 3.0
@@ -1550,11 +1535,6 @@
           "Id": "cc812393-f080-4e17-a525-15b09f8acdd0"/*Gain*/,
           "Type": "System.Single",
           "Value": 0.83
-        },
-        {
-          "Id": "db868176-d51c-41aa-bafe-68c3e50e725e"/*RangeEnd*/,
-          "Type": "System.Int32",
-          "Value": 37
         }
       ],
       "Outputs": []
@@ -2305,7 +2285,7 @@
       "Outputs": []
     },
     {
-      "Id": "75fd2f0e-346f-4fde-8bfc-f93f22163d7e"/*PickFromStringList*/,
+      "Id": "75fd2f0e-346f-4fde-8bfc-f93f22163d7e"/*PickStringFromList*/,
       "SymbolId": "ef357e66-24e9-4f54-8d86-869db74602f4",
       "InputValues": [],
       "Outputs": []
@@ -4573,11 +4553,6 @@
       "SymbolId": "55cc0f79-96c9-482e-9794-934dc0f87708",
       "InputValues": [
         {
-          "Id": "165f7e0e-6ef0-4be1-8ed3-61ed0db752ed"/*UseFullList*/,
-          "Type": "System.Boolean",
-          "Value": false
-        },
-        {
           "Id": "63e90d86-5ad5-4333-8b99-7f8d285c4913"/*Direction*/,
           "Type": "System.Int32",
           "Value": 1
@@ -4586,11 +4561,6 @@
           "Id": "cc812393-f080-4e17-a525-15b09f8acdd0"/*Gain*/,
           "Type": "System.Single",
           "Value": 5.0
-        },
-        {
-          "Id": "db868176-d51c-41aa-bafe-68c3e50e725e"/*RangeEnd*/,
-          "Type": "System.Int32",
-          "Value": 37
         }
       ],
       "Outputs": []

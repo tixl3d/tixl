@@ -58,7 +58,7 @@ public static class DrawUtils
     /// </summary>
     public static void DebugItemRect(string label = "", uint color = 0xff20ff80)
     {
-        if (T3Ui.ItemRegionsVisible)
+        if (ItemRegionsVisible)
             DebugRect(ImGui.GetItemRectMin(), ImGui.GetItemRectMax(), new Color(color), label);
     }
 
@@ -136,4 +136,6 @@ public static class DrawUtils
                                    Color.Black
                                   );
     }
+
+    public static bool ItemRegionsVisible;
 }

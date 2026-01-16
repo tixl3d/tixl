@@ -1,0 +1,39 @@
+{
+  "Id": "136aef9b-373d-487d-9863-a8691d1b909f"/*CompareFloatLists*/,
+  "Description": "Compares two float lists and returns the difference as normalized value.",
+  "InputUis": [
+    {
+      "InputId": "08ba3ae7-18b7-493e-8387-65735be2dd54"/*ListB*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      }
+    },
+    {
+      "InputId": "0e331c5e-d8a4-4ee8-b552-b6374702649f"/*Threshold*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      }
+    },
+    {
+      "InputId": "3e8c62c0-d981-4b48-96fc-cb7a50ab2a75"/*ListA*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "0ec6d73a-098d-426c-8236-abed8b34d0de"/*Difference*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 200.0
+      }
+    }
+  ]
+}

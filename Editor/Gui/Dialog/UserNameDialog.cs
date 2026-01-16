@@ -1,5 +1,6 @@
 #nullable enable
 using ImGuiNET;
+using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using GraphUtils = T3.Editor.UiModel.Helpers.GraphUtils;
@@ -34,7 +35,7 @@ internal sealed class UserNameDialog : ModalDialog
                                       warning,
                                       "Your nickname should be short and not contain spaces or special characters.",
                                       UserSettings.UndefinedUserName,
-                                      true);
+                                      ImGui.IsWindowAppearing());
 
             FormInputs.AddVerticalSpace();
             FormInputs.ApplyIndent();

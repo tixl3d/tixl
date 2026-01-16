@@ -1,0 +1,140 @@
+{
+  "Id": "3f955def-cf86-4bd4-be98-ff1adea8c495"/*ValueRaster*/,
+  "Description": "",
+  "InputUis": [
+    {
+      "InputId": "00915862-77b3-4205-8c6a-3a51f4e9cc41"/*MinorLineWidth*/,
+      "Position": {
+        "X": 556.8036,
+        "Y": 313.85886
+      }
+    },
+    {
+      "InputId": "03fa6f20-7bdc-4af2-8ad7-d95cd58d4e69"/*Image*/,
+      "Position": {
+        "X": 240.76993,
+        "Y": -368.8126
+      }
+    },
+    {
+      "InputId": "057bd1b7-c4ef-44da-b180-172810265569"/*Background*/,
+      "Position": {
+        "X": 416.8036,
+        "Y": -1.1411438
+      }
+    },
+    {
+      "InputId": "245070c1-af95-47c9-b697-2876c1097ccb"/*Density*/,
+      "Position": {
+        "X": 416.8036,
+        "Y": 348.85886
+      }
+    },
+    {
+      "InputId": "3037801b-e7c8-4aa1-9c23-5c815d5eb02e"/*RangeY*/,
+      "Position": {
+        "X": 416.80356,
+        "Y": 208.85886
+      }
+    },
+    {
+      "InputId": "317deea3-2d0d-4493-9008-6c0102a9a7e3"/*RangeX*/,
+      "Position": {
+        "X": 416.80356,
+        "Y": 138.85886
+      }
+    },
+    {
+      "InputId": "8c5601d2-a39a-4a02-9fef-0ebe0dc8330e"/*MixOriginal*/,
+      "Position": {
+        "X": 556.8036,
+        "Y": 418.85886
+      },
+      "Min": 0.0,
+      "Max": 1.0
+    },
+    {
+      "InputId": "97e4103b-72ba-4d54-a41a-ac6c34d85878"/*Color*/,
+      "Position": {
+        "X": 416.80362,
+        "Y": -141.14114
+      }
+    },
+    {
+      "InputId": "d2168776-0cbb-4ede-85e6-731d50b14d28"/*MajorLineWidth*/,
+      "Position": {
+        "X": 556.8036,
+        "Y": 278.85886
+      }
+    },
+    {
+      "InputId": "e8f46ada-11da-4212-8751-5793b95cbb8d"/*Resolution*/,
+      "Position": {
+        "X": 556.8036,
+        "Y": 453.85886
+      }
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "484e2ed3-6895-4117-b0c8-c361f8036214"/*Vector4Components*/,
+      "Position": {
+        "X": 556.8036,
+        "Y": -141.14114
+      }
+    },
+    {
+      "ChildId": "921cdbbc-b642-47ff-8356-50f836e424bf"/*Vector2Components*/,
+      "Position": {
+        "X": 556.8036,
+        "Y": 138.85886
+      }
+    },
+    {
+      "ChildId": "aa5f803d-8c37-42c7-89cf-1edd03dbf8e6"/*_ImageFxShaderSetupStatic*/,
+      "Position": {
+        "X": 696.8036,
+        "Y": -176.14114
+      }
+    },
+    {
+      "ChildId": "b66d6ae8-cd9f-4e49-ac59-d035d14e8f63"/*Vector2Components*/,
+      "Position": {
+        "X": 556.8036,
+        "Y": 208.85886
+      }
+    },
+    {
+      "ChildId": "eac3f83d-09d6-4e40-b068-945a74509e77"/*Vector4Components*/,
+      "Position": {
+        "X": 556.8036,
+        "Y": -1.1411438
+      }
+    },
+    {
+      "ChildId": "f4816f3b-6a2d-43f6-9c1f-9554f3741be5"/*Vector2Components*/,
+      "Position": {
+        "X": 556.8036,
+        "Y": 348.85886
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "1f33eae1-7e0f-44ee-8a63-df7502443acb"/*TextureOutput*/,
+      "Position": {
+        "X": 900.4969,
+        "Y": -100.80272
+      }
+    }
+  ],
+  "Links": [
+    {
+      "Id": "3b372ce6-b0f7-415d-86ed-d0bd345bf72f",
+      "Title": "Video Tutorial",
+      "Description": "Quick overview video for this effect.",
+      "LinkUrl": "https://youtu.be/Jpvyg-LR3f0",
+      "LinkType": "TutorialVideo"
+    }
+  ]
+}

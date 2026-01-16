@@ -1,0 +1,44 @@
+{
+  "Id": "5454ce3e-8dc4-4058-9a17-6300d51c142f"/*PadVec2Range*/,
+  "Description": "Pad (aka extend) a value range (x=min and y=max).\nThis can be useful for adding \"space\" for value outputs.\n",
+  "InputUis": [
+    {
+      "InputId": "5b56faab-7a94-4026-8089-a80db8ff2d9e"/*UniformScale*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      }
+    },
+    {
+      "InputId": "ae2368fa-e36c-40b2-b6f2-94d5cc95d3e2"/*A*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "d7dcbc7a-146d-42f0-84b1-a7d42f662487"/*ClampMinExtend*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 240.0
+      }
+    },
+    {
+      "InputId": "e7307b14-2702-4222-9dd6-7c39dc6dab8e"/*GuaranteedRange*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 165.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "fada5053-8424-4b18-ae65-9f12416bd65f"/*Result*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

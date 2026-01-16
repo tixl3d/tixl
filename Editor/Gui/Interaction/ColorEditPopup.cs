@@ -7,6 +7,7 @@ using T3.Core.Operator.Slots;
 using T3.Core.Resource;
 using T3.Core.SystemUi;
 using T3.Core.Utils;
+using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
@@ -31,7 +32,10 @@ internal static class ColorEditPopup
         var dontCloseIfColorPicking = ImGui.GetIO().KeyAlt ? ImGuiWindowFlags.Modal : ImGuiWindowFlags.None;
 
         var id = ImGui.GetID("colorPicker");
-        
+
+        // Track if popup was open in the previous frame
+        _ = ImGui.IsPopupOpen(PopupId);
+
         if (ImGui.BeginPopup(PopupId, dontCloseIfColorPicking))
         {
             if (_openedId != id)
@@ -59,6 +63,13 @@ internal static class ColorEditPopup
         {
             if (_openedId == id)
             {
+                // Check if brightness is at minimum threshold and snap to true black
+                if (Math.Abs(cColor.V - float.Epsilon) < 0.0001f)
+                {
+                    cColor = new Color(0, 0, 0, cColor.A);
+                    edited = InputEditStateFlags.ModifiedAndFinished;
+                }
+
                 _openedId = 0;
             }
         }
@@ -70,7 +81,7 @@ internal static class ColorEditPopup
 
     private static InputEditStateFlags PickColor(ref Color cColor)
     {
-        InputEditStateFlags edited = InputEditStateFlags.Nothing;
+        var edited = InputEditStateFlags.Nothing;
 
         // Pick colors
         var altKeyPressed = ImGui.GetIO().KeyAlt;
@@ -109,8 +120,8 @@ internal static class ColorEditPopup
     private static Vector4 _dampedCompareColor;
 
     private static InputEditStateFlags DrawCircleAndSliders(ref Color cColor, Vector4 compareColor, ref float hNormalized, ref float linearSaturation,
-                                                            float v,
-                                                            ImDrawListPtr drawList)
+                                                        float v,
+                                                        ImDrawListPtr drawList)
     {
         const float saturationWarp = 1.5f;
 
@@ -252,15 +263,10 @@ internal static class ColorEditPopup
             if (ImGui.IsItemActive())
             {
                 var clampUpperValue = hrdEditEnabled ? 100 : 1;
-                var normalizedValue = (1 - (ImGui.GetMousePos() - pMin).Y / barHeight).Clamp(0, clampUpperValue);
+                var normalizedValue = (1 - (ImGui.GetMousePos() - pMin).Y / barHeight).Clamp(float.Epsilon, clampUpperValue); 
                 normalizedValue = GetHdrYValue(normalizedValue);
-                // if (normalizedValue > 1)
-                // {
-                //     normalizedValue = MathF.Pow(normalizedValue, 3);
-                // }
 
-                cColor.V = normalizedValue;
-
+                cColor.V = normalizedValue.Clamp(float.Epsilon, 1000); 
                 edited |= InputEditStateFlags.Modified;
             }
 
@@ -344,7 +350,7 @@ internal static class ColorEditPopup
 
     private enum ColorInputModes
     {
-        Hsl,
+        Hsb,
         Rgba,
         // ReSharper disable once InconsistentNaming
         iRgba,
@@ -370,7 +376,7 @@ internal static class ColorEditPopup
             {
                 _inputMode = (ColorInputModes)((int)(_inputMode + 1) % Enum.GetNames(typeof(ColorInputModes)).Length);
             }
-            CustomComponents.TooltipForLastItem("Click to toggle between HSL, RGBA, integers and Hex input");
+            CustomComponents.TooltipForLastItem("Click to toggle between HSB, RGBA, integers and Hex input");
 
             ImGui.PopStyleColor();
         }
@@ -379,49 +385,49 @@ internal static class ColorEditPopup
 
         switch (_inputMode)
         {
-            case ColorInputModes.Hsl:
-            {
-                var hueDegrees = hNormalized * 360f;
-
-                ImGui.PushID("h");
-                if (SingleValueEdit.Draw(ref hueDegrees, inputSize, min: 0, max: 360, clampMin: false, clampMax: false, scale: 1, format: "{0:0.0}") is InputEditStateFlags.Modified)
+            case ColorInputModes.Hsb:
                 {
-                    if (hueDegrees < 360)
+                    var hueDegrees = hNormalized * 360f;
+
+                    ImGui.PushID("h");
+                    if (SingleValueEdit.Draw(ref hueDegrees, inputSize, min: 0, max: 360, clampMin: false, clampMax: false, scale: 1, format: "{0:0.0}") is InputEditStateFlags.Modified)
                     {
-                        hueDegrees += 360;
+                        if (hueDegrees < 360)
+                        {
+                            hueDegrees += 360;
+                        }
+                        else if (hueDegrees > 360)
+                        {
+                            hueDegrees -= 360;
+                        }
+
+                        cColor.Hue = hueDegrees / 360;
+                        edited |= InputEditStateFlags.Modified;
                     }
-                    else if (hueDegrees > 360)
+
+                    ImGui.PopID();
+
+                    ImGui.SameLine();
+                    ImGui.PushID("s");
+                    if (SingleValueEdit.Draw(ref linearSaturation, inputSize, min: float.Epsilon, max: 1, clampMin: true, clampMax: true,
+                                             scale: 0.005f,
+                                             format: "{0:0.00}") is InputEditStateFlags.Modified)
                     {
-                        hueDegrees -= 360;
+                        cColor.Saturation = linearSaturation.Clamp(float.Epsilon, 1);
+                        edited |= InputEditStateFlags.Modified;
                     }
 
-                    cColor.Hue = hueDegrees / 360;
-                    edited |= InputEditStateFlags.Modified;
-                }
+                    ImGui.PopID();
 
-                ImGui.PopID();
+                    ImGui.SameLine();
+                    ImGui.PushID("v");
+                if (SingleValueEdit.Draw(ref v, inputSize, min: float.Epsilon, max: 20f, clampMin: true, clampMax: false, scale: 0.005f, format: "{0:0.00}") is InputEditStateFlags.Modified)
+                        {
+                        cColor.V = v.Clamp(float.Epsilon, 20f);
+                        edited |= InputEditStateFlags.Modified;
+                    }
 
-                ImGui.SameLine();
-                ImGui.PushID("s");
-                if (SingleValueEdit.Draw(ref linearSaturation, inputSize, min: 0, max: 1, clampMin: true, clampMax: true,
-                                         scale: 0.005f,
-                                         format: "{0:0.00}") is InputEditStateFlags.Modified)
-                {
-                    cColor.Saturation = linearSaturation.Clamp(0, 1);
-                    edited |= InputEditStateFlags.Modified;
-                }
-
-                ImGui.PopID();
-
-                ImGui.SameLine();
-                ImGui.PushID("v");
-                if (SingleValueEdit.Draw(ref v, inputSize, min: 0, max: 20, clampMin: true, clampMax: false, scale: 0.005f, format: "{0:0.00}") is InputEditStateFlags.Modified)
-                {
-                    cColor.V = v.Clamp(0, 1000);
-                    edited |= InputEditStateFlags.Modified;
-                }
-
-                ImGui.PopID();
+                    ImGui.PopID();
 
                 ImGui.SameLine();
                 ImGui.Dummy(Vector2.One * 5);
@@ -718,8 +724,6 @@ internal static class ColorEditPopup
             FitViewToSelectionHandling.FitViewToSelection();
     }
 
-    private static uint _openedId;
-
     private static Color GetColorAtMousePosition()
     {
         var pos = CoreUi.Instance.Cursor.PositionVec;
@@ -747,6 +751,7 @@ internal static class ColorEditPopup
     private static bool _isHoveringColor;
     private static readonly Bitmap _bmp = new(1, 1);
     public  const string PopupId =  "##colorEdit";
+    private static uint _openedId;
 }
 
 internal static class ColorUsage

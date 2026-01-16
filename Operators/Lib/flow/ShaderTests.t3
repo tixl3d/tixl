@@ -341,7 +341,7 @@
       "Outputs": []
     },
     {
-      "Id": "598fbcc6-7b6e-4e59-9c27-363b5e20f856"/*SDFToColor*/,
+      "Id": "598fbcc6-7b6e-4e59-9c27-363b5e20f856"/*_SDFToColor_Old*/,
       "SymbolId": "eff96322-0e4e-42d6-93de-18451b56ae31",
       "InputValues": [
         {

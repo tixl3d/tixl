@@ -139,7 +139,7 @@
       "Outputs": []
     },
     {
-      "Id": "dc3bb931-af50-4af6-aa72-4d9d9409bc0f"/*SetIntVariable*/,
+      "Id": "dc3bb931-af50-4af6-aa72-4d9d9409bc0f"/*SetIntVar*/,
       "SymbolId": "7953f704-ebee-498b-8bdd-a2c201dfe278",
       "InputValues": [
         {

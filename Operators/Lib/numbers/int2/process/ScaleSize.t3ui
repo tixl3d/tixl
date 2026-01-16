@@ -4,13 +4,20 @@
   "SymbolTags": "1",
   "InputUis": [
     {
-      "InputId": "133bbc5a-bdbf-4993-bd1a-878ec93ee04f"/*Factor*/,
+      "InputId": "133bbc5a-bdbf-4993-bd1a-878ec93ee04f"/*Scale*/,
       "Position": {
         "X": -200.0,
         "Y": 45.0
       },
       "Description": "Scale factor that is used to multiply the resolution",
       "AddPadding": "True"
+    },
+    {
+      "InputId": "39e610b2-7c0a-4208-94ad-4fcaff3032d2"/*Stretch*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      }
     },
     {
       "InputId": "ddceb7df-1c6f-4545-9669-b1b4a80e75e8"/*InputSize*/,

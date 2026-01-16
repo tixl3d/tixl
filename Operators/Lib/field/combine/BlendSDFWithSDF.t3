@@ -1,0 +1,27 @@
+{
+  "Id": "dbef3c50-ada6-437d-adac-62824daa9b6b"/*BlendSDFWithSDF*/,
+  "Inputs": [
+    {
+      "Id": "3301f9bb-8938-40e4-b3fc-501bcfa140a3"/*Offset*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "78ec0731-e155-4c09-83b8-9b8e98a1f0ab"/*FieldB*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "9ae430e4-a09d-46d2-8aa4-fcb6a2d6fcdd"/*WeightField*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "eb8e21ff-6ca3-406c-b88a-f9caec9272d0"/*FieldA*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "f245899e-aa95-4540-9600-6e761ad430ef"/*Range*/,
+      "DefaultValue": 1.0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

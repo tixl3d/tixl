@@ -28,7 +28,8 @@ internal abstract class CurveEditCanvas : ScalableCanvas, ITimeObjectManipulatio
         ImGui.BeginChild(ImGuiTitle, new Vector2(0, height), true,
                          ImGuiWindowFlags.NoScrollbar | 
                          ImGuiWindowFlags.NoMove | 
-                         ImGuiWindowFlags.NoScrollWithMouse);
+                         ImGuiWindowFlags.NoScrollWithMouse |
+                         ImGuiWindowFlags.NoBackground);
         {
             Drawlist = ImGui.GetWindowDrawList();
             UpdateCanvas(out var interactionState, flags);
@@ -87,9 +88,12 @@ internal abstract class CurveEditCanvas : ScalableCanvas, ITimeObjectManipulatio
         {
             var sampledValue = (float)curve.GetSampledValue(hoverTime);
             var posOnCanvas = new Vector2(hoverTime, sampledValue);
+            var iconSize = Icons.FontSize;
             var posOnScreen = TransformPosition(posOnCanvas)
-                              - new Vector2(KeyframeIconWidth / 2 -2 , KeyframeIconWidth / 2 -1);
-            Icons.Draw(Icon.CurveKeyframe, posOnScreen);
+                              - new Vector2(iconSize/2  );
+            
+            Icons.DrawIconAtScreenPosition(Icon.CurveKeyframe, posOnScreen);
+            //Icons.DrawIconOnLastItem(Icon.Cu);
             var drawlist = ImGui.GetWindowDrawList();
             drawlist.AddText(posOnScreen + Vector2.One*20, UiColors.Gray, $"Insert at\n{hoverTime:0.00}  {sampledValue:0.00}");
         }

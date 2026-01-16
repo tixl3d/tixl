@@ -89,8 +89,8 @@ psInput vsMain(uint id : SV_VertexID)
     float3 pointBPos = pointB.Position;
 
     float len = length(pointAPos - pointBPos);
-    float fade =  smoothstep(2*FadeTooLong,  FadeTooLong, len);
-    if(fade < 0.001)
+    float fade = smoothstep(2 * FadeTooLong, FadeTooLong, len);
+    if (fade < 0.001)
         discardFactor = 0;
 
     float f = cornerFactors.x;
@@ -170,7 +170,7 @@ psInput vsMain(uint id : SV_VertexID)
                                //: lerp(1, widthAtPoint, UseWForWidth) ;
 
     float miter = dot(-meterNormal, normal);
-    pos += cornerFactors.y * 0.1f * thickness * float4(meterNormal, 0) / clamp(miter, -1, -0.16);
+    pos += cornerFactors.y * 0.1 * thickness * float4(meterNormal, 0) / clamp(miter, -1, -0.01);
 
     output.position = pos / aspect;
 
@@ -183,9 +183,8 @@ psInput vsMain(uint id : SV_VertexID)
 
     output.color = Color * lerp(pointA.Color, pointB.Color, cornerFactors.x);
 
-
     output.color.a *= fade;
-    
+
     return output;
 }
 

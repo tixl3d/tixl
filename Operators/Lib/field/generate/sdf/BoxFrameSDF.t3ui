@@ -1,0 +1,53 @@
+{
+  "Id": "f393bb49-bea5-42f7-a437-c6896bdfd7d8"/*BoxFrameSDF*/,
+  "Description": "Generates a procedural Box Frame field which can be rendered with [RaymarchField] and visualized with [VisualizeFieldDistance].\nCan be used with [RepeatFieldLimit] to generate a chain.\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToRaymarchField].\n\nIt can be modified with [BendField], [TransformField], [PolarRepeat] and more.\n\nSimilar nodes: [BoxSDF], [OctahedronSDF], [PyramidSDF].",
+  "InputUis": [
+    {
+      "InputId": "26389c32-410e-4240-9cf7-9ed0908b9cf8"/*Thickness*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Description": "Defines how thick is the frame",
+      "AddPadding": "True",
+      "Min": -0.002,
+      "Max": 0.5,
+      "ClampMin": true
+    },
+    {
+      "InputId": "993a74e6-87fc-4193-9dc1-8cd9447a1c49"/*Size*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Description": "Defines the size of the box\nx = width\ny = height\nz = depth",
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "a53ab420-7bcf-4d98-8440-abcf00d7db19"/*UniformScale*/,
+      "Position": {
+        "X": -200.0,
+        "Y": -45.0
+      },
+      "Description": "Scales uniformly in all directions"
+    },
+    {
+      "InputId": "c811ef83-e183-4b14-a1e6-3ea2fd840596"/*Center*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "Position in space"
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "10bd32e8-f7a1-4efa-9659-83313c2bf5a6"/*Result*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

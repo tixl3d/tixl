@@ -11,7 +11,7 @@ using T3.Editor.App;
 using System.Windows.Forms;
 using T3.Core.Resource;
 using System.Reflection;
-
+using T3.Editor.Gui.Input;
 
 namespace T3.Editor.Gui.Dialog;
 

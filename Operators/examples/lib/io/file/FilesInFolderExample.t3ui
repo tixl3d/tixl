@@ -11,7 +11,7 @@
       }
     },
     {
-      "ChildId": "51d34f0d-5fee-434a-8bdd-e70a9d3586f0"/*PickFromStringList*/,
+      "ChildId": "51d34f0d-5fee-434a-8bdd-e70a9d3586f0"/*PickStringFromList*/,
       "Position": {
         "X": 258.71094,
         "Y": 0.0

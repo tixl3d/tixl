@@ -1,0 +1,80 @@
+{
+  "Id": "702f1f75-df90-44ca-b567-78ba9d1613b5"/*ValueQuiz*/,
+  "Description": "Computes a visual comparison between a \"solution\" and a \"goal\" value animation.\n\nConnect your solution to the upper input.",
+  "InputUis": [
+    {
+      "InputId": "270bda80-7f81-4f31-adb4-9cd5e8aea693"/*Yours*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 473.88983,
+        "Y": -1128.3794
+      }
+    },
+    {
+      "InputId": "ba4714ca-594a-4fab-aa01-bf02d1164eb2"/*DifferenceRange*/,
+      "Position": {
+        "X": 943.6841,
+        "Y": -846.57996
+      },
+      "GroupTitle": "Additional Parameters...",
+      "Min": 0.003,
+      "Max": 1.0,
+      "Scale": 0.001
+    },
+    {
+      "InputId": "c09a529a-dfe2-4bf8-86ce-369aeadbee4a"/*Goal*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 473.88983,
+        "Y": -1008.99146
+      },
+      "Description": "The reference goal for to current challenge.\nNeeds to be connected to the (hidden) solution."
+    },
+    {
+      "InputId": "fe12fa62-9207-4a6a-bbb3-4d57218094bf"/*DisplayValueRange*/,
+      "Position": {
+        "X": 344.79425,
+        "Y": -1071.6667
+      }
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "176abda2-2366-44ed-9c16-8b342187ccd0"/*_ValueQuizGraph*/,
+      "Position": {
+        "X": 613.88983,
+        "Y": -1128.3794
+      }
+    },
+    {
+      "ChildId": "34eb4f91-fa37-4638-8657-b1484ddf56d7"/*CompareFloatLists*/,
+      "Position": {
+        "X": 943.6841,
+        "Y": -942.27374
+      }
+    },
+    {
+      "ChildId": "663fff5b-6a9f-41e0-9884-bc6595328279"/*_QuizUp*/,
+      "Position": {
+        "X": 1283.061,
+        "Y": -1111.5164
+      }
+    },
+    {
+      "ChildId": "a58041c7-1de9-4bf5-99a0-7e738a29af34"/*_ValueQuizGraph*/,
+      "Position": {
+        "X": 613.88983,
+        "Y": -1008.99146
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "6fbc9fd1-58c2-4b0b-accb-9850a8835120"/*Output*/,
+      "Position": {
+        "X": 1477.9943,
+        "Y": -1100.1996
+      }
+    }
+  ]
+}

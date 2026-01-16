@@ -2,6 +2,7 @@
 using System.Text;
 using ImGuiNET;
 using T3.Core.DataTypes;
+using T3.Editor.Gui.Input;
 using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
@@ -18,7 +19,7 @@ internal static class SymbolBrowsing
     {
         if (ProjectView.Focused == null)
             return PlaceHolderUi.UiResults.None;
-        
+
         var uiResult = PlaceHolderUi.UiResults.None;
 
         _libTree = UpdateLibPage(); // only required for hot code reloading
@@ -26,14 +27,6 @@ internal static class SymbolBrowsing
         if (_path.Count == 0)
             return PlaceHolderUi.UiResults.Cancel;
 
-        // ImGui.TextUnformatted(GetNamespaceString(_path));
-        //
-        // if (ImGui.IsItemClicked())
-        // {
-        //     Reset();
-        // }
-        //
-        // WindowContentExtend.ExtendToLastItem();
         FormInputs.AddVerticalSpace(5);
 
         ImGui.GetCursorPosY();
@@ -59,14 +52,14 @@ internal static class SymbolBrowsing
         else
         {
             var matchingSymbolUis = new List<SymbolUi>();
-            
-            var activeNamespace = ActiveNamespaceString;    // Outside of loop to away recomputing
+
+            var activeNamespace = ActiveNamespaceString; // Outside of loop to away recomputing
             foreach (var symbolUi in EditorSymbolPackage.AllSymbolUis)
             {
                 if (symbolUi.Symbol.Namespace == activeNamespace)
                     matchingSymbolUis.Add(symbolUi);
             }
-            
+
             var orderedEnumerable = matchingSymbolUis
                                    .OrderByDescending(sui => SymbolFilter.ComputeRelevancy(sui,
                                                                                            string.Empty,
@@ -168,6 +161,7 @@ internal static class SymbolBrowsing
                         _path.AddRange([..groupPath, group]);
                         ImGui.SetScrollY(0);
                     }
+
                     break;
                 }
 
@@ -195,10 +189,11 @@ internal static class SymbolBrowsing
     }
 
     public static bool IsFilterActive => _path.Count > 1;
-    public static string FilterString => _path.Count <= 1 
-                                             ? string.Empty 
+
+    public static string FilterString => _path.Count <= 1
+                                             ? string.Empty
                                              : string.Join(".", _path[1..].Select(t => t.Name));
-    
+
     private static string GetNamespaceString(List<Group> groupPath)
     {
         _stringBuilder.Clear();
@@ -277,9 +272,15 @@ internal static class SymbolBrowsing
                         new Group(Variants.Namespace, "generate", type: typeof(BufferWithViews)),
                         new Group(Variants.Namespace, "transform", type: typeof(BufferWithViews)),
                         new Group(Variants.Namespace, "modify", type: typeof(BufferWithViews)),
-                        new Group(Variants.Namespace, "particle", type: typeof(BufferWithViews)),
                         new Group(Variants.Namespace, "draw", type: typeof(Texture2D)),
-                    ]),                
+                    ]),
+
+                new Group(Variants.Grouping, "particles", [
+                        new Group(Variants.Namespace, "particle", type: typeof(BufferWithViews)),
+                        new Group(Variants.Page, "particle", [
+                                new Group(Variants.Namespace, "force", type: typeof(BufferWithViews)),
+                            ], type: typeof(BufferWithViews)),
+                    ]),
                 new Group(Variants.NamespaceCategory, "render", [
                         new Group(Variants.Namespace, "basic", type: typeof(Command)),
                         new Group(Variants.Namespace, "camera", type: typeof(Command)),
@@ -291,6 +292,7 @@ internal static class SymbolBrowsing
                     ]),
 
                 new Group(Variants.Grouping, "misc", [
+                        new Group(Variants.Namespace, "field", type: typeof(ShaderGraphNode)),
                         new Group(Variants.Page, "mesh", [
                                 new Group(Variants.Namespace, "generate", type: typeof(MeshBuffers)),
                                 new Group(Variants.Namespace, "modify", type: typeof(MeshBuffers)),
@@ -317,7 +319,6 @@ internal static class SymbolBrowsing
                     ]),
             ]);
     }
-
 
     private sealed class Group
     {
@@ -349,12 +350,9 @@ internal static class SymbolBrowsing
         Grouping,
     }
 
-
-        
     private static Group _libTree = UpdateLibPage();
     private static Group? _activePage;
     private static string ActiveNamespaceString => GetNamespaceString(_path);
     private static readonly StringBuilder _stringBuilder = new();
     private static List<Group> _path = [];
-
 }

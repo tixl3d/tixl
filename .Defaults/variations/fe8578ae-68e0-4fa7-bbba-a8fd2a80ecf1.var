@@ -1,0 +1,403 @@
+{
+  "Id": "fe8578ae-68e0-4fa7-bbba-a8fd2a80ecf1",
+  "Variations": [
+    {
+      "Id": "62fb71a4-3f04-4750-a5da-98d58a0cbca0",
+      "IsPreset": false,
+      "ActivationIndex": 1,
+      "Title": "Default",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "8b2b8646-26f3-4466-8396-5beb6a121eb6": {
+          "64f1812f-7ebd-4231-8a6a-0bbc302bfaff": {
+            "X": 1.25,
+            "Y": 0.52,
+            "Z": -0.13
+          },
+          "3c366d34-c398-410e-972b-d8cc2baffddb": 1.696,
+          "874ae9c8-5835-4d0c-9bef-253ac75d19b2": 0.289,
+          "56e5d5ec-ec59-4ea0-85c1-1eca3dcb5790": -0.03,
+          "bde89b93-224c-4a3f-85ab-d85b0401c02a": "// by gaziya5 aka gaz on https://jbaker.graphics/writings/DEC.html\np = p.xzy;\n\n// A: 2.2    // B: 0.8   // C: 0.3\nfloat scale = A, off0 = B, off1 = C, off2 = 0.82;\n//float3 off =float3(2, .2, .1);\nfloat3 off = Offset;\nfloat s=1.0;\nfor(int i = 0; ++i < 10; ) {\n  p.xy = abs(p.xy);\n  p.xy = fold45(p.xy);\n  p.y -= off0;\n  p.y = -abs(p.y);\n  p.y += off0;\n  p.x += off1;\n  p.xz = fold45(p.xz);\n  p.x -= off2;\n  p.xz = fold45(p.xz);\n  p.x += off1;\n  p -= off;\n  p *= scale;\n  p += off;\n  s *= scale;\n}\nreturn length(p)/s;",
+          "48a0699d-1207-4e18-ab9b-4da7f77cc7aa": "#define fold45(p)(p.y>p.x)?p.yx:p"
+        },
+        "a6082811-2171-4697-b3d9-935846ec1f71": {
+          "f6d96a01-dc90-49c7-9152-a6a42bb05218": {
+            "X": 0.0,
+            "Y": 0.59,
+            "Z": 0.85
+          },
+          "98155900-1bb9-427a-9c4e-0988fec806cd": 10.0,
+          "ff3442c5-95c8-4bd6-a492-cb4a9a597ea1": {
+            "X": 4.4643292,
+            "Y": 5.1532683,
+            "Z": 4.516718,
+            "W": 1.0
+          },
+          "7d6e2f4b-cd5b-446d-b63e-1fd8780bf0fd": 1.004
+        },
+        "2fd7a169-a129-4c84-a24f-9f2cfd310ea3": {
+          "4cf5d20b-7335-4584-b246-c260ac5cdf4f": 3,
+          "48005727-0158-4795-ad70-8410c27fd01d": 1.0,
+          "8327e7ec-4370-4a3e-bd69-db3f4aa4b1d7": 0.32999998,
+          "79917ef7-64ca-4825-9c6a-c9b2a7f6ff86": 4.0,
+          "ddd93b06-118e-43e0-85f6-c150faf91d04": 5.1,
+          "f12fee9a-dd91-40c2-9aa5-ea34804a858d": 0.14000002
+        },
+        "1f3ae4f6-82e1-4cc0-a37f-f61d35ddf24a": {
+          "7a331539-33ea-48b9-8930-daf93dd33d7c": 5.6,
+          "53479387-1c04-4fbc-b093-043075495e10": 2.7,
+          "ef8c86ee-16c0-446e-9ce0-c6342adbf32a": {
+            "X": 0.08828009,
+            "Y": 0.10139264,
+            "Z": 0.11344813,
+            "W": 1.0
+          }
+        }
+      }
+    },
+    {
+      "Id": "a2817aed-2537-42a1-a640-0c66cb5a6907",
+      "IsPreset": false,
+      "ActivationIndex": 2,
+      "Title": "untitled",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "8b2b8646-26f3-4466-8396-5beb6a121eb6": {
+          "64f1812f-7ebd-4231-8a6a-0bbc302bfaff": {
+            "X": 1.25,
+            "Y": 0.52,
+            "Z": -0.13
+          },
+          "3c366d34-c398-410e-972b-d8cc2baffddb": 2.13,
+          "874ae9c8-5835-4d0c-9bef-253ac75d19b2": 0.9,
+          "56e5d5ec-ec59-4ea0-85c1-1eca3dcb5790": -0.45,
+          "bde89b93-224c-4a3f-85ab-d85b0401c02a": "// by gaziya5 aka gaz on https://jbaker.graphics/writings/DEC.html\np = p.xzy;\n\n// A: 2.2    // B: 0.8   // C: 0.3\nfloat scale = A, off0 = B, off1 = C, off2 = 0.82;\n//float3 off =float3(2, .2, .1);\nfloat3 off = Offset;\nfloat s=1.0;\nfor(int i = 0; ++i < 10; ) {\n  p.xy = abs(p.xy);\n  p.xy = fold45(p.xy);\n  p.y -= off0;\n  p.y = -abs(p.y);\n  p.y += off0;\n  p.x += off1;\n  p.xz = fold45(p.xz);\n  p.x -= off2;\n  p.xz = fold45(p.xz);\n  p.x += off1;\n  p -= off;\n  p *= scale;\n  p += off;\n  s *= scale;\n}\nreturn length(p)/s;",
+          "48a0699d-1207-4e18-ab9b-4da7f77cc7aa": "#define fold45(p)(p.y>p.x)?p.yx:p"
+        },
+        "a6082811-2171-4697-b3d9-935846ec1f71": {
+          "f6d96a01-dc90-49c7-9152-a6a42bb05218": {
+            "X": 0.0,
+            "Y": 0.59,
+            "Z": 0.85
+          },
+          "98155900-1bb9-427a-9c4e-0988fec806cd": 10.0,
+          "ff3442c5-95c8-4bd6-a492-cb4a9a597ea1": {
+            "X": 4.4643292,
+            "Y": 5.1532683,
+            "Z": 4.516718,
+            "W": 1.0
+          },
+          "7d6e2f4b-cd5b-446d-b63e-1fd8780bf0fd": 1.004
+        },
+        "2fd7a169-a129-4c84-a24f-9f2cfd310ea3": {
+          "4cf5d20b-7335-4584-b246-c260ac5cdf4f": 3,
+          "48005727-0158-4795-ad70-8410c27fd01d": 1.0,
+          "8327e7ec-4370-4a3e-bd69-db3f4aa4b1d7": 0.32999998,
+          "79917ef7-64ca-4825-9c6a-c9b2a7f6ff86": 4.0,
+          "ddd93b06-118e-43e0-85f6-c150faf91d04": 5.1,
+          "f12fee9a-dd91-40c2-9aa5-ea34804a858d": 0.14000002
+        },
+        "1f3ae4f6-82e1-4cc0-a37f-f61d35ddf24a": {
+          "7a331539-33ea-48b9-8930-daf93dd33d7c": 5.6,
+          "53479387-1c04-4fbc-b093-043075495e10": 2.7,
+          "ef8c86ee-16c0-446e-9ce0-c6342adbf32a": {
+            "X": 0.08828009,
+            "Y": 0.10139264,
+            "Z": 0.11344813,
+            "W": 1.0
+          }
+        }
+      }
+    },
+    {
+      "Id": "71948d8b-dfc9-4222-b3b7-9f1e79d6e9d5",
+      "IsPreset": false,
+      "ActivationIndex": 3,
+      "Title": "untitled",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "8b2b8646-26f3-4466-8396-5beb6a121eb6": {
+          "64f1812f-7ebd-4231-8a6a-0bbc302bfaff": {
+            "X": 1.25,
+            "Y": 0.52,
+            "Z": -0.13
+          },
+          "3c366d34-c398-410e-972b-d8cc2baffddb": 1.24,
+          "874ae9c8-5835-4d0c-9bef-253ac75d19b2": 1.168,
+          "56e5d5ec-ec59-4ea0-85c1-1eca3dcb5790": 0.2,
+          "bde89b93-224c-4a3f-85ab-d85b0401c02a": "// by gaziya5 aka gaz on https://jbaker.graphics/writings/DEC.html\np = p.xzy;\n\n// A: 2.2    // B: 0.8   // C: 0.3\nfloat scale = A, off0 = B, off1 = C, off2 = 0.82;\n//float3 off =float3(2, .2, .1);\nfloat3 off = Offset;\nfloat s=1.0;\nfor(int i = 0; ++i < 10; ) {\n  p.xy = abs(p.xy);\n  p.xy = fold45(p.xy);\n  p.y -= off0;\n  p.y = -abs(p.y);\n  p.y += off0;\n  p.x += off1;\n  p.xz = fold45(p.xz);\n  p.x -= off2;\n  p.xz = fold45(p.xz);\n  p.x += off1;\n  p -= off;\n  p *= scale;\n  p += off;\n  s *= scale;\n}\nreturn length(p)/s;",
+          "48a0699d-1207-4e18-ab9b-4da7f77cc7aa": "#define fold45(p)(p.y>p.x)?p.yx:p"
+        },
+        "a6082811-2171-4697-b3d9-935846ec1f71": {
+          "f6d96a01-dc90-49c7-9152-a6a42bb05218": {
+            "X": 0.0,
+            "Y": 0.59,
+            "Z": 0.85
+          },
+          "98155900-1bb9-427a-9c4e-0988fec806cd": 9.0,
+          "ff3442c5-95c8-4bd6-a492-cb4a9a597ea1": {
+            "X": 4.269497,
+            "Y": 5.1532683,
+            "Z": 4.873457,
+            "W": 1.0
+          },
+          "7d6e2f4b-cd5b-446d-b63e-1fd8780bf0fd": 1.004
+        },
+        "2fd7a169-a129-4c84-a24f-9f2cfd310ea3": {
+          "4cf5d20b-7335-4584-b246-c260ac5cdf4f": 3,
+          "48005727-0158-4795-ad70-8410c27fd01d": 1.0,
+          "8327e7ec-4370-4a3e-bd69-db3f4aa4b1d7": 0.06999999,
+          "79917ef7-64ca-4825-9c6a-c9b2a7f6ff86": 4.0,
+          "ddd93b06-118e-43e0-85f6-c150faf91d04": 2.5,
+          "f12fee9a-dd91-40c2-9aa5-ea34804a858d": 0.76
+        },
+        "1f3ae4f6-82e1-4cc0-a37f-f61d35ddf24a": {
+          "7a331539-33ea-48b9-8930-daf93dd33d7c": 5.6,
+          "53479387-1c04-4fbc-b093-043075495e10": 2.7,
+          "ef8c86ee-16c0-446e-9ce0-c6342adbf32a": {
+            "X": 0.08828009,
+            "Y": 0.10139264,
+            "Z": 0.11344813,
+            "W": 1.0
+          }
+        }
+      }
+    },
+    {
+      "Id": "bed50ea9-03d3-46e1-b9ff-03d758e2ea2b",
+      "IsPreset": false,
+      "ActivationIndex": 4,
+      "Title": "untitled",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "8b2b8646-26f3-4466-8396-5beb6a121eb6": {
+          "64f1812f-7ebd-4231-8a6a-0bbc302bfaff": {
+            "X": 1.25,
+            "Y": 0.52,
+            "Z": -0.13
+          },
+          "3c366d34-c398-410e-972b-d8cc2baffddb": 1.968819,
+          "874ae9c8-5835-4d0c-9bef-253ac75d19b2": 0.9485354,
+          "56e5d5ec-ec59-4ea0-85c1-1eca3dcb5790": -0.3322835,
+          "bde89b93-224c-4a3f-85ab-d85b0401c02a": "// by gaziya5 aka gaz on https://jbaker.graphics/writings/DEC.html\np = p.xzy;\n\n// A: 2.2    // B: 0.8   // C: 0.3\nfloat scale = A, off0 = B, off1 = C, off2 = 0.82;\n//float3 off =float3(2, .2, .1);\nfloat3 off = Offset;\nfloat s=1.0;\nfor(int i = 0; ++i < 10; ) {\n  p.xy = abs(p.xy);\n  p.xy = fold45(p.xy);\n  p.y -= off0;\n  p.y = -abs(p.y);\n  p.y += off0;\n  p.x += off1;\n  p.xz = fold45(p.xz);\n  p.x -= off2;\n  p.xz = fold45(p.xz);\n  p.x += off1;\n  p -= off;\n  p *= scale;\n  p += off;\n  s *= scale;\n}\nreturn length(p)/s;",
+          "48a0699d-1207-4e18-ab9b-4da7f77cc7aa": "#define fold45(p)(p.y>p.x)?p.yx:p"
+        },
+        "a6082811-2171-4697-b3d9-935846ec1f71": {
+          "f6d96a01-dc90-49c7-9152-a6a42bb05218": {
+            "X": 0.0,
+            "Y": 0.59,
+            "Z": 0.85
+          },
+          "98155900-1bb9-427a-9c4e-0988fec806cd": 9.818897,
+          "ff3442c5-95c8-4bd6-a492-cb4a9a597ea1": {
+            "X": 4.4290447,
+            "Y": 5.1532683,
+            "Z": 4.581324,
+            "W": 1.0
+          },
+          "7d6e2f4b-cd5b-446d-b63e-1fd8780bf0fd": 1.004
+        },
+        "2fd7a169-a129-4c84-a24f-9f2cfd310ea3": {
+          "4cf5d20b-7335-4584-b246-c260ac5cdf4f": 3,
+          "48005727-0158-4795-ad70-8410c27fd01d": 1.0,
+          "8327e7ec-4370-4a3e-bd69-db3f4aa4b1d7": 0.2829134,
+          "79917ef7-64ca-4825-9c6a-c9b2a7f6ff86": 4.0,
+          "ddd93b06-118e-43e0-85f6-c150faf91d04": 4.629134,
+          "f12fee9a-dd91-40c2-9aa5-ea34804a858d": 0.25228345
+        },
+        "1f3ae4f6-82e1-4cc0-a37f-f61d35ddf24a": {
+          "7a331539-33ea-48b9-8930-daf93dd33d7c": 5.6,
+          "53479387-1c04-4fbc-b093-043075495e10": 2.7,
+          "ef8c86ee-16c0-446e-9ce0-c6342adbf32a": {
+            "X": 0.08828009,
+            "Y": 0.10139264,
+            "Z": 0.11344813,
+            "W": 1.0
+          }
+        }
+      }
+    },
+    {
+      "Id": "1f9212e6-09da-426d-819e-f79b64c25a6e",
+      "IsPreset": false,
+      "ActivationIndex": 5,
+      "Title": "untitled",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "8b2b8646-26f3-4466-8396-5beb6a121eb6": {
+          "64f1812f-7ebd-4231-8a6a-0bbc302bfaff": {
+            "X": 1.25,
+            "Y": 0.52,
+            "Z": -0.13
+          },
+          "3c366d34-c398-410e-972b-d8cc2baffddb": 1.968819,
+          "874ae9c8-5835-4d0c-9bef-253ac75d19b2": 0.9485354,
+          "56e5d5ec-ec59-4ea0-85c1-1eca3dcb5790": -0.3322835,
+          "bde89b93-224c-4a3f-85ab-d85b0401c02a": "// by gaziya5 aka gaz on https://jbaker.graphics/writings/DEC.html\np = p.xzy;\n\n// A: 2.2    // B: 0.8   // C: 0.3\nfloat scale = A, off0 = B, off1 = C, off2 = 0.82;\n//float3 off =float3(2, .2, .1);\nfloat3 off = Offset;\nfloat s=1.0;\nfor(int i = 0; ++i < 10; ) {\n  p.xy = abs(p.xy);\n  p.xy = fold45(p.xy);\n  p.y -= off0;\n  p.y = -abs(p.y);\n  p.y += off0;\n  p.x += off1;\n  p.xz = fold45(p.xz);\n  p.x -= off2;\n  p.xz = fold45(p.xz);\n  p.x += off1;\n  p -= off;\n  p *= scale;\n  p += off;\n  s *= scale;\n}\nreturn length(p)/s;",
+          "48a0699d-1207-4e18-ab9b-4da7f77cc7aa": "#define fold45(p)(p.y>p.x)?p.yx:p"
+        },
+        "a6082811-2171-4697-b3d9-935846ec1f71": {
+          "f6d96a01-dc90-49c7-9152-a6a42bb05218": {
+            "X": 0.0,
+            "Y": 0.59,
+            "Z": 0.85
+          },
+          "98155900-1bb9-427a-9c4e-0988fec806cd": 9.818897,
+          "ff3442c5-95c8-4bd6-a492-cb4a9a597ea1": {
+            "X": 5.9009256,
+            "Y": 11.156086,
+            "Z": 9.416013,
+            "W": 1.0
+          },
+          "7d6e2f4b-cd5b-446d-b63e-1fd8780bf0fd": 1.004
+        },
+        "2fd7a169-a129-4c84-a24f-9f2cfd310ea3": {
+          "4cf5d20b-7335-4584-b246-c260ac5cdf4f": 3,
+          "48005727-0158-4795-ad70-8410c27fd01d": 1.0,
+          "8327e7ec-4370-4a3e-bd69-db3f4aa4b1d7": 0.2829134,
+          "79917ef7-64ca-4825-9c6a-c9b2a7f6ff86": 4.0,
+          "ddd93b06-118e-43e0-85f6-c150faf91d04": 4.629134,
+          "f12fee9a-dd91-40c2-9aa5-ea34804a858d": 0.25228345
+        },
+        "1f3ae4f6-82e1-4cc0-a37f-f61d35ddf24a": {
+          "7a331539-33ea-48b9-8930-daf93dd33d7c": 5.6,
+          "53479387-1c04-4fbc-b093-043075495e10": 2.7,
+          "ef8c86ee-16c0-446e-9ce0-c6342adbf32a": {
+            "X": 0.08828009,
+            "Y": 0.10139264,
+            "Z": 0.11344813,
+            "W": 1.0
+          }
+        }
+      }
+    },
+    {
+      "Id": "c05ca78c-3eb7-4466-9620-1c7be6616bf9",
+      "IsPreset": false,
+      "ActivationIndex": 6,
+      "Title": "untitled",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 186.0
+      },
+      "ParameterSetsForChildIds": {
+        "8b2b8646-26f3-4466-8396-5beb6a121eb6": {
+          "64f1812f-7ebd-4231-8a6a-0bbc302bfaff": {
+            "X": 1.25,
+            "Y": 0.52,
+            "Z": -0.13
+          },
+          "3c366d34-c398-410e-972b-d8cc2baffddb": 1.968819,
+          "874ae9c8-5835-4d0c-9bef-253ac75d19b2": 0.9485354,
+          "56e5d5ec-ec59-4ea0-85c1-1eca3dcb5790": -0.3322835,
+          "bde89b93-224c-4a3f-85ab-d85b0401c02a": "// by gaziya5 aka gaz on https://jbaker.graphics/writings/DEC.html\np = p.xzy;\n\n// A: 2.2    // B: 0.8   // C: 0.3\nfloat scale = A, off0 = B, off1 = C, off2 = 0.82;\n//float3 off =float3(2, .2, .1);\nfloat3 off = Offset;\nfloat s=1.0;\nfor(int i = 0; ++i < 10; ) {\n  p.xy = abs(p.xy);\n  p.xy = fold45(p.xy);\n  p.y -= off0;\n  p.y = -abs(p.y);\n  p.y += off0;\n  p.x += off1;\n  p.xz = fold45(p.xz);\n  p.x -= off2;\n  p.xz = fold45(p.xz);\n  p.x += off1;\n  p -= off;\n  p *= scale;\n  p += off;\n  s *= scale;\n}\nreturn length(p)/s;",
+          "48a0699d-1207-4e18-ab9b-4da7f77cc7aa": "#define fold45(p)(p.y>p.x)?p.yx:p"
+        },
+        "a6082811-2171-4697-b3d9-935846ec1f71": {
+          "f6d96a01-dc90-49c7-9152-a6a42bb05218": {
+            "X": 0.0,
+            "Y": 0.59,
+            "Z": 0.85
+          },
+          "98155900-1bb9-427a-9c4e-0988fec806cd": 9.818897,
+          "ff3442c5-95c8-4bd6-a492-cb4a9a597ea1": {
+            "X": 6.9731636,
+            "Y": 11.156086,
+            "Z": 10.454118,
+            "W": 1.0
+          },
+          "7d6e2f4b-cd5b-446d-b63e-1fd8780bf0fd": 1.004
+        },
+        "2fd7a169-a129-4c84-a24f-9f2cfd310ea3": {
+          "4cf5d20b-7335-4584-b246-c260ac5cdf4f": 3,
+          "48005727-0158-4795-ad70-8410c27fd01d": 1.0,
+          "8327e7ec-4370-4a3e-bd69-db3f4aa4b1d7": 0.2829134,
+          "79917ef7-64ca-4825-9c6a-c9b2a7f6ff86": 4.0,
+          "ddd93b06-118e-43e0-85f6-c150faf91d04": 4.629134,
+          "f12fee9a-dd91-40c2-9aa5-ea34804a858d": 0.25228345
+        },
+        "1f3ae4f6-82e1-4cc0-a37f-f61d35ddf24a": {
+          "7a331539-33ea-48b9-8930-daf93dd33d7c": 2.4,
+          "53479387-1c04-4fbc-b093-043075495e10": 2.7,
+          "ef8c86ee-16c0-446e-9ce0-c6342adbf32a": {
+            "X": 0.11344813,
+            "Y": 0.05664332,
+            "Z": 0.03684869,
+            "W": 1.0
+          }
+        }
+      }
+    },
+    {
+      "Id": "0d07494f-263f-4d9e-b50a-0e1941971519",
+      "IsPreset": false,
+      "ActivationIndex": 14,
+      "Title": "untitled",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 186.0
+      },
+      "ParameterSetsForChildIds": {
+        "8b2b8646-26f3-4466-8396-5beb6a121eb6": {
+          "64f1812f-7ebd-4231-8a6a-0bbc302bfaff": {
+            "X": 1.25,
+            "Y": 0.52,
+            "Z": -0.13
+          },
+          "3c366d34-c398-410e-972b-d8cc2baffddb": 1.37,
+          "874ae9c8-5835-4d0c-9bef-253ac75d19b2": 0.37,
+          "56e5d5ec-ec59-4ea0-85c1-1eca3dcb5790": -1.4,
+          "bde89b93-224c-4a3f-85ab-d85b0401c02a": "// by gaziya5 aka gaz on https://jbaker.graphics/writings/DEC.html\np = p.xzy;\n\n// A: 2.2    // B: 0.8   // C: 0.3\nfloat scale = A, off0 = B, off1 = C, off2 = 0.82;\n//float3 off =float3(2, .2, .1);\nfloat3 off = Offset;\nfloat s=1.0;\nfor(int i = 0; ++i < 10; ) {\n  p.xy = abs(p.xy);\n  p.xy = fold45(p.xy);\n  p.y -= off0;\n  p.y = -abs(p.y);\n  p.y += off0;\n  p.x += off1;\n  p.xz = fold45(p.xz);\n  p.x -= off2;\n  p.xz = fold45(p.xz);\n  p.x += off1;\n  p -= off;\n  p *= scale;\n  p += off;\n  s *= scale;\n}\nreturn length(p)/s;",
+          "48a0699d-1207-4e18-ab9b-4da7f77cc7aa": "#define fold45(p)(p.y>p.x)?p.yx:p"
+        },
+        "a6082811-2171-4697-b3d9-935846ec1f71": {
+          "f6d96a01-dc90-49c7-9152-a6a42bb05218": {
+            "X": 0.0,
+            "Y": 0.59,
+            "Z": 0.85
+          },
+          "98155900-1bb9-427a-9c4e-0988fec806cd": 9.818897,
+          "ff3442c5-95c8-4bd6-a492-cb4a9a597ea1": {
+            "X": 6.9731636,
+            "Y": 11.156086,
+            "Z": 10.454118,
+            "W": 1.0
+          },
+          "7d6e2f4b-cd5b-446d-b63e-1fd8780bf0fd": 1.004
+        },
+        "2fd7a169-a129-4c84-a24f-9f2cfd310ea3": {
+          "4cf5d20b-7335-4584-b246-c260ac5cdf4f": 3,
+          "48005727-0158-4795-ad70-8410c27fd01d": 1.0,
+          "8327e7ec-4370-4a3e-bd69-db3f4aa4b1d7": 0.2829134,
+          "79917ef7-64ca-4825-9c6a-c9b2a7f6ff86": 4.0,
+          "ddd93b06-118e-43e0-85f6-c150faf91d04": 0.8,
+          "f12fee9a-dd91-40c2-9aa5-ea34804a858d": 0.25228345
+        },
+        "1f3ae4f6-82e1-4cc0-a37f-f61d35ddf24a": {
+          "7a331539-33ea-48b9-8930-daf93dd33d7c": 17.3,
+          "ef8c86ee-16c0-446e-9ce0-c6342adbf32a": {
+            "X": 0.23249944,
+            "Y": 0.2324669,
+            "Z": 0.23237008,
+            "W": 1.0
+          }
+        }
+      }
+    }
+  ]
+}

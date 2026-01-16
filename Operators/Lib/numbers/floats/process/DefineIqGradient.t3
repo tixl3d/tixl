@@ -1,0 +1,55 @@
+{
+  "Id": "44cee07e-2a71-4dd5-9ded-8274e8e19332"/*DefineIqGradient*/,
+  "Inputs": [
+    {
+      "Id": "12d9b558-c83c-4d7b-b366-481d09e54501"/*C_Frequency*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 1.0,
+        "Z": 1.0,
+        "W": 1.0
+      }
+    },
+    {
+      "Id": "133f0d11-9de9-49f6-9c76-bbaf6bed82f4"/*B_Contrast*/,
+      "DefaultValue": {
+        "X": 0.5,
+        "Y": 0.5,
+        "Z": 0.5,
+        "W": 0.0
+      }
+    },
+    {
+      "Id": "750e53f0-5ddb-4be1-bef0-da2e48231553"/*A_Brightness*/,
+      "DefaultValue": {
+        "X": 0.5,
+        "Y": 0.5,
+        "Z": 0.5,
+        "W": 1.0
+      }
+    },
+    {
+      "Id": "85f98834-7921-46e6-9f63-9da18b2a7bf8"/*Phase*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "887c0b40-c71f-4e0e-bff2-0fdff64f8c82"/*D_Phase*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.333,
+        "Z": 0.6666,
+        "W": 1.0
+      }
+    },
+    {
+      "Id": "918c99f2-2197-467d-a991-2f69ef81440c"/*Interpolation*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "96961db2-d597-4658-b0c0-fa1301a2fcdc"/*NumOfSteps*/,
+      "DefaultValue": 64
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

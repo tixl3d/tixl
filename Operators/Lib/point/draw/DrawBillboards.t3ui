@@ -6,24 +6,24 @@
     {
       "InputId": "00331030-624f-47e4-b6ce-d24388bf8fb6"/*SpreadPingPong*/,
       "Position": {
-        "X": -741.99115,
-        "Y": 1510.8385
+        "X": 310.13693,
+        "Y": 2400.4705
       },
       "Description": "If enabled, the gradients and curves are mirrored when spread mode is active."
     },
     {
       "InputId": "0544aca0-8110-40dc-a6bf-b35d8e7bd57a"/*SpreadPhase*/,
       "Position": {
-        "X": -741.99115,
-        "Y": 1465.8385
+        "X": 450.13693,
+        "Y": 2365.4705
       },
       "Description": "Can offset the spreading range. This can be useful for \"sliding\" through a gradient of colors or sizes."
     },
     {
       "InputId": "14e0d722-9441-4bc0-b164-e0b8cae990e3"/*RotateZ*/,
       "Position": {
-        "X": -784.04156,
-        "Y": 615.03925
+        "X": 450.13693,
+        "Y": 1700.4705
       },
       "Description": "Rotates a billboard around its own axis without affecting the Orientation.",
       "Min": -90.0,
@@ -32,8 +32,8 @@
     {
       "InputId": "19e10456-76bd-43a2-9c03-5f6dd93601cc"/*SpreadLength*/,
       "Position": {
-        "X": -794.082,
-        "Y": 1420.8385
+        "X": 450.13693,
+        "Y": 2330.4705
       },
       "GroupTitle": "Spreading...",
       "Description": "If using the Spread mode in one of the parameters above, this will change the width of the slice that settings (e.g. Colors) are applied to. ",
@@ -43,8 +43,8 @@
     {
       "InputId": "211c4e91-e667-4cb7-a7b2-81081cd780cb"/*Color*/,
       "Position": {
-        "X": -782.7925,
-        "Y": 1047.1528
+        "X": 170.13693,
+        "Y": 2120.4705
       },
       "GroupTitle": "Color Variation...",
       "Description": "Defines the color of the Billboards.\nIf a Texture is used this color will be multiplied."
@@ -52,16 +52,16 @@
     {
       "InputId": "261faf50-c63e-4d4a-a496-648bbb3ea2c5"/*AtlasSize*/,
       "Position": {
-        "X": -742.93713,
-        "Y": 1733.2015
+        "X": 170.13693,
+        "Y": 2470.4705
       },
       "Description": "Defines the number of cells in the connect texture atlas. This can be useful for distributing different random sprites with a single draw call."
     },
     {
       "InputId": "2e116e07-ee18-4b2a-a708-b0dca510a8dd"/*FxTextureAmount*/,
       "Position": {
-        "X": -753.23395,
-        "Y": 2005.5771
+        "X": 310.13693,
+        "Y": 2680.4705
       },
       "Min": -1.0,
       "Max": 1.0
@@ -69,16 +69,16 @@
     {
       "InputId": "3247ff54-e470-466a-a70c-cdba1e264f6b"/*UseWForScale*/,
       "Position": {
-        "X": -816.74774,
-        "Y": 355.61105
+        "X": 310.13693,
+        "Y": 2855.4705
       },
       "Description": "Defines whether the \"W\"-attribute of the Points used has an influence on the size of the rendered Billboards"
     },
     {
       "InputId": "4763d03c-7fae-4466-870c-693bb1acb9a0"/*Offset*/,
       "Position": {
-        "X": -784.04156,
-        "Y": 525.03925
+        "X": 310.13693,
+        "Y": 1560.4705
       },
       "Description": "Moves the Billboards' local point space.",
       "AddPadding": "True"
@@ -86,48 +86,48 @@
     {
       "InputId": "48440453-8b59-4e84-beec-8766713c5775"/*Scales*/,
       "Position": {
-        "X": -768.06366,
-        "Y": 1359.6821
+        "X": 1409.2076,
+        "Y": 1592.3828
       },
       "Description": "Scaling of the curve. Use the icon in the top right corner to edit this curve in a popup window.\n"
     },
     {
-      "InputId": "542832d1-fc70-4eaa-a003-7fdd9062dc05"/*UseExtend*/,
+      "InputId": "542832d1-fc70-4eaa-a003-7fdd9062dc05"/*UsePointScale*/,
       "Position": {
-        "X": -816.74774,
-        "Y": 400.61105
+        "X": 310.13693,
+        "Y": 2890.4705
       },
       "Description": "If enabled, the points' stretch attribute will be applied to the drawn billboards."
     },
     {
       "InputId": "62c511b9-ca36-48db-a9cf-13c929f81db6"/*EnableDepthWrite*/,
       "Position": {
-        "X": -759.1295,
-        "Y": 2128.3306
+        "X": 1126.2112,
+        "Y": 1850.8822
       },
       "Description": "Defines whether Billboards cover themselves or are covered by or cover other 3D elements."
     },
     {
       "InputId": "640e0f51-e636-406b-ba64-8746096fee36"/*RandomScale*/,
       "Position": {
-        "X": -783.96234,
-        "Y": 926.94696
+        "X": 450.13693,
+        "Y": 2085.4705
       },
       "Description": "Multiplier for random uniform scaling"
     },
     {
       "InputId": "6ac9265b-c6ae-47dc-a605-993d685edf90"/*ColorVariationMode*/,
       "Position": {
-        "X": -782.7926,
-        "Y": 1127.0579
+        "X": 310.13693,
+        "Y": 2260.4705
       },
       "Description": "Defines how colors from the gradient will be sampled: \n\n- RandomWithPhase will pick a random color. This will smoothly animate when changing RandomPhase.\n- Scatter will pick a random color. Each point gets a random position that will NOT change.\n- Spread will use the point's ordering in the buffer. 0 for the first point and 1 for the last. This spreading can be adjusted with the Spread options below.\n- W uses the \"w\" attribute of the points. This can be useful when combined with a [ParticleSystem] that returns particle age in the W attribute.\n- FogDistance can be combined with a [SetFog] operator to colorize points depending on their distance to the camera."
     },
     {
       "InputId": "76c52e1f-1767-4635-86a1-93e44cc2a487"/*RandomPosition*/,
       "Position": {
-        "X": -783.96234,
-        "Y": 836.94696
+        "X": 310.13693,
+        "Y": 1980.4705
       },
       "Description": "Amount of random offset along X, Y and Z axis.",
       "AddPadding": "True"
@@ -135,8 +135,8 @@
     {
       "InputId": "789900fa-6d0e-406f-936e-162834155c83"/*FxTexture*/,
       "Position": {
-        "X": -799.742,
-        "Y": 1914.0698
+        "X": -157.90399,
+        "Y": 2970.6133
       },
       "Description": "The FX texture is an additional method of styling the sprites. It's applied in screen space. \nAs an example: You could connect a [Blob] image to fade out the sprites at the edges of the screen.",
       "AddPadding": "True"
@@ -144,8 +144,8 @@
     {
       "InputId": "7df44a8d-af20-400f-b8a7-4b2200f55ec1"/*Stretch*/,
       "Position": {
-        "X": -781.3351,
-        "Y": 291.5584
+        "X": 310.13693,
+        "Y": 1455.4705
       },
       "GroupTitle": "Shapes",
       "Description": "Non-uniformly scales the billboards\nX = Width\nY = Length"
@@ -153,8 +153,8 @@
     {
       "InputId": "80edea41-7f4e-492e-bf73-270df9b225be"/*RandomRotate*/,
       "Position": {
-        "X": -783.96234,
-        "Y": 881.94696
+        "X": 450.13693,
+        "Y": 1910.4705
       },
       "Description": "Multiplier for random rotation",
       "Min": -90.0,
@@ -163,8 +163,8 @@
     {
       "InputId": "860b2023-9c77-47aa-9a9b-8fbc735835d4"/*BlendMode*/,
       "Position": {
-        "X": -779.42163,
-        "Y": 2082.4014
+        "X": 1126.2113,
+        "Y": 1780.8822
       },
       "GroupTitle": "Draw Settings...",
       "Description": "Selects the Blendmode"
@@ -172,16 +172,16 @@
     {
       "InputId": "8cd25011-5305-4bdf-9307-a46e52b5c503"/*RandomPhase*/,
       "Position": {
-        "X": -786.8831,
-        "Y": 785.66797
+        "X": 450.13693,
+        "Y": 1875.4705
       },
       "Description": "Phase value for changing the randomness. Can be animated with [Time], for example.\nNote that this random seed is continuous and can be used for animations."
     },
     {
       "InputId": "8f203c5f-6eb8-42a1-bfea-9ca52a49e132"/*Scale*/,
       "Position": {
-        "X": -820.6758,
-        "Y": 242.09961
+        "X": 450.13693,
+        "Y": 1420.4705
       },
       "Description": "The overall scale of the drawn sprites.",
       "Min": 0.0,
@@ -191,8 +191,8 @@
     {
       "InputId": "909bdbcd-620c-479e-b150-cb7adfbfffe8"/*Orientation*/,
       "Position": {
-        "X": -784.04156,
-        "Y": 570.03925
+        "X": 310.13693,
+        "Y": 1665.4705
       },
       "Description": "Defines how a billboard is aligned towards the camera:\n\nIf using point rotation, the orientation to the camera will be ignored.",
       "AddPadding": "True"
@@ -200,8 +200,8 @@
     {
       "InputId": "9c25f805-ae1c-42a5-a4e4-390bb7ea33bb"/*TooCloseFadeOut*/,
       "Position": {
-        "X": -768.101,
-        "Y": 2247.3384
+        "X": 310.13693,
+        "Y": 2925.4705
       },
       "Description": "Points too close to the camera will fade out"
     },
@@ -209,16 +209,16 @@
       "InputId": "a129bf5c-e549-4f7c-b30b-5199ffd38f8c"/*GPoints*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -757.86597,
-        "Y": 2319.6323
+        "X": 823.52856,
+        "Y": 1463.1864
       },
       "Description": "Input for GPoints"
     },
     {
       "InputId": "a9e64a2e-6a88-4c36-9e02-95ca710ea86e"/*Randomize*/,
       "Position": {
-        "X": -824.86597,
-        "Y": 740.66797
+        "X": 450.13693,
+        "Y": 1840.4705
       },
       "GroupTitle": "Randomize...",
       "Description": "Multiplier for controlling the following random values"
@@ -226,32 +226,32 @@
     {
       "InputId": "aff03303-8f28-4efb-a035-d0784790ee42"/*Texture_*/,
       "Position": {
-        "X": -793.17444,
-        "Y": 1624.0233
+        "X": 1078.9318,
+        "Y": 1511.1809
       },
       "GroupTitle": "Texture and Cells..."
     },
     {
       "InputId": "b32f7932-68a6-4a12-931b-a49d24951f27"/*SpreadRepeat*/,
       "Position": {
-        "X": -741.99115,
-        "Y": 1566.8385
+        "X": 310.13693,
+        "Y": 2435.4705
       },
       "Description": "If enabled, will repeat the spreading slice. This can be especially useful when combined with smaller Spread length and Spread Offset."
     },
     {
       "InputId": "b5477de9-4c59-47e8-89d6-93c9e2246dcd"/*FxTextureMode*/,
       "Position": {
-        "X": -753.23395,
-        "Y": 1960.5771
+        "X": 310.13693,
+        "Y": 2575.4705
       },
       "Description": "Switches how the FX-Texture is used."
     },
     {
       "InputId": "c676823b-97d0-4e3e-a59e-e2297816ec69"/*AlphaCut*/,
       "Position": {
-        "X": -759.1295,
-        "Y": 2173.3306
+        "X": 450.13693,
+        "Y": 2610.4705
       },
       "Description": "Bias value that can be used to influence how partially transparent pixels behave. It can be used to fine-tune the boundary to full transparency if an alpha mask is used",
       "Min": 0.0,
@@ -260,8 +260,8 @@
     {
       "InputId": "d9dd77b2-cfa6-429c-b87d-f6e3c602be23"/*ScaleDistribution*/,
       "Position": {
-        "X": -782.55634,
-        "Y": 1307.1677
+        "X": 310.13693,
+        "Y": 2295.4707
       },
       "GroupTitle": "Scale Variation...",
       "Description": "Defines how the scale curve below will be sampled in the range between 0 .. 1. \n\n- RandomWithPhase will pick a random scale position. This will smoothly animate when changing RandomPhase.\n- Scatter will pick a random scale from the curve. Each point gets a random scale that will NOT change.\n- Spread will use the point's ordering in the buffer. 0 for the first point and 1 for the last. This spreading can be adjusted with the Spread options below.\n- W uses the \"w\" attribute of the points.\n- FogDistance can be combined with a [SetFog] operator to scale points depending on their distance to the camera."
@@ -269,23 +269,23 @@
     {
       "InputId": "dd345d58-09e4-4353-93e7-c20e576f0e82"/*ColorVariations*/,
       "Position": {
-        "X": -782.7926,
-        "Y": 1172.0579
+        "X": 1409.2076,
+        "Y": 1557.3828
       }
     },
     {
       "InputId": "f9c698ae-3b59-4f1d-8497-c668f5037795"/*RotationAxis*/,
       "Position": {
-        "X": -784.04156,
-        "Y": 660.03925
+        "X": 310.13693,
+        "Y": 1735.4705
       },
       "Description": "Defines how strongly the rotation influences the individual axis."
     },
     {
       "InputId": "face85cc-2405-4486-80ee-b1323118cce7"/*AtlasMode*/,
       "Position": {
-        "X": -742.93713,
-        "Y": 1677.2015
+        "X": 310.13693,
+        "Y": 2540.4705
       }
     }
   ],
@@ -293,8 +293,8 @@
     {
       "ChildId": "01540dab-bcc3-48b1-a3c0-ab4d88987767"/*DepthStencilState*/,
       "Position": {
-        "X": 835.4289,
-        "Y": 1855.3656
+        "X": 1266.2112,
+        "Y": 1815.8822
       }
     },
     {
@@ -305,309 +305,302 @@
         "Y": 59.905018
       },
       "Position": {
-        "X": -408.18176,
-        "Y": 1051.3206
+        "X": 450.13693,
+        "Y": 2120.4705
       }
     },
     {
       "ChildId": "0be1e734-eb58-42f5-b766-db06f946edff"/*__padding*/,
       "Position": {
-        "X": -395.3756,
-        "Y": 345.83673
+        "X": 450.13693,
+        "Y": 1525.4705
       }
     },
     {
       "ChildId": "126d013b-4d8e-4956-a1ab-6d337c0d3c59"/*ClampedSampler*/,
       "Position": {
-        "X": 840.88025,
-        "Y": 1670.5773
+        "X": 1354.8683,
+        "Y": 917.7752
       }
     },
     {
       "ChildId": "1520aea4-5125-4885-b3a3-bd8b1703700b"/*OutputMergerStage*/,
       "Position": {
-        "X": 1119.5537,
-        "Y": 1938.1818
+        "X": 1406.2113,
+        "Y": 1780.8822
       }
     },
     {
       "ChildId": "17d724c4-f082-41e2-be10-4908a99525ea"/*SrvFromTexture2d*/,
       "Position": {
-        "X": 633.38794,
-        "Y": 1430.3638
+        "X": 1218.9318,
+        "Y": 1581.1809
       }
     },
     {
       "ChildId": "1d60e4d1-95a0-4911-a2b5-451714b22d36"/*Vector2Components*/,
       "Position": {
-        "X": -439.6283,
-        "Y": 1669.2312
+        "X": 450.13693,
+        "Y": 2470.4705
       }
     },
     {
       "ChildId": "1eb8fe8b-6e84-4733-a6b3-1546d17db38f"/*Vector3Components*/,
       "Position": {
-        "X": -605.6665,
-        "Y": 672.8714
+        "X": 450.13693,
+        "Y": 1735.4705
       }
     },
     {
       "ChildId": "260a6df1-4a56-4864-b90b-546658c70ba3"/*TransformsConstBuffer*/,
       "Position": {
-        "X": 838.89233,
-        "Y": 1566.5758
+        "X": 1689.2078,
+        "Y": 1347.3828
       }
     },
     {
       "ChildId": "28343a47-416e-4e44-bc4e-919966dc058e"/*VertexShader*/,
       "Position": {
-        "X": 838.89233,
-        "Y": 1480.5758
+        "X": 1689.2078,
+        "Y": 1277.3828
       }
     },
     {
       "ChildId": "2875d4f5-44a7-45e9-9d93-8db740b5f489"/*IntToFloat*/,
       "Position": {
-        "X": -632.7926,
-        "Y": 1127.0579
+        "X": 450.13693,
+        "Y": 2260.4705
       }
     },
     {
       "ChildId": "29a420d9-d86b-4003-991d-603d56cf098c"/*CurvesToTexture*/,
       "Position": {
-        "X": 506.75507,
-        "Y": 1784.2258
+        "X": 1549.2076,
+        "Y": 1592.3828
       }
     },
     {
       "ChildId": "29dac292-ab3a-4d01-82f0-3ba963463a42"/*GetTextureSize*/,
       "Position": {
-        "X": -483.76385,
-        "Y": 2464.821
+        "X": -12.221527,
+        "Y": 2609.4453
       }
     },
     {
       "ChildId": "2c74421b-eaa5-49c7-8dc5-981b3958cada"/*SamplerState*/,
       "Position": {
-        "X": 561.72095,
-        "Y": 1884.9236
+        "X": 1689.2078,
+        "Y": 1627.3828
       }
     },
     {
       "ChildId": "32109674-b163-4495-8117-fd279084b3cb"/*BlendColors*/,
       "Position": {
-        "X": -632.7925,
-        "Y": 1047.1528
+        "X": 310.13693,
+        "Y": 2120.4705
       }
     },
     {
       "ChildId": "35dabf96-f94c-4ab2-b8cf-f4943cfa055b"/*PixelShader*/,
       "Position": {
-        "X": 838.89233,
-        "Y": 1523.5758
+        "X": 1689.2078,
+        "Y": 1312.3828
       }
     },
     {
       "ChildId": "3d18d212-8343-4a34-a9a0-6f221fced06f"/*IntToFloat*/,
       "Position": {
-        "X": -632.55634,
-        "Y": 1307.1677
-      }
-    },
-    {
-      "ChildId": "418029ef-d913-4c1a-b3ab-09b3248dc3e4"/*__padding*/,
-      "Position": {
-        "X": -661.02234,
-        "Y": 1845.496
+        "X": 450.13693,
+        "Y": 2295.4707
       }
     },
     {
       "ChildId": "44c9b9eb-a198-4f62-9b68-020003ef4aab"/*Vector3Components*/,
       "Position": {
-        "X": -638.6879,
-        "Y": 835.67725
+        "X": 450.13693,
+        "Y": 1980.4705
       }
     },
     {
       "ChildId": "482c5e80-5dcb-467b-9035-c9ba33353fe1"/*BoolToFloat*/,
       "Position": {
-        "X": -535.162,
-        "Y": 430.28204
+        "X": 450.13693,
+        "Y": 2890.4705
       }
     },
     {
       "ChildId": "5a6d6e07-b77c-4a3d-a7b2-8ebad1f2b62c"/*Rasterizer*/,
       "Position": {
-        "X": 1119.5537,
-        "Y": 1882.1818
+        "X": 1689.2078,
+        "Y": 1732.3828
       }
     },
     {
       "ChildId": "6179c76d-7c43-44e7-bc49-a6c010b65466"/*IntToFloat*/,
       "Position": {
-        "X": -634.04156,
-        "Y": 570.03925
+        "X": 450.13693,
+        "Y": 1665.4705
       }
     },
     {
       "ChildId": "652cb652-403e-4bf5-88fb-baae7817f465"/*ContextCBuffers*/,
       "Position": {
-        "X": 840.88025,
-        "Y": 1713.5773
+        "X": 1689.2078,
+        "Y": 1417.3828
       }
     },
     {
       "ChildId": "6c4ef8ab-8259-4622-93d0-f777b034b6e9"/*BoolToFloat*/,
       "Position": {
-        "X": -333.76385,
-        "Y": 2464.821
+        "X": 450.13693,
+        "Y": 2645.4705
       }
     },
     {
       "ChildId": "6dcc3e96-5e5d-47a3-bc1b-1594815b2dcc"/*LoadImage*/,
       "Position": {
-        "X": 210.18724,
-        "Y": 1454.547
+        "X": 1078.9318,
+        "Y": 1546.1809
       }
     },
     {
       "ChildId": "6fd9fc67-11df-45df-b566-4945c81824d6"/*GradientsToTexture*/,
       "Position": {
-        "X": 506.75507,
-        "Y": 1715.2261
+        "X": 1549.2076,
+        "Y": 1557.3828
       }
     },
     {
       "ChildId": "700914cc-28c5-4bb8-9a40-013bb3f3e74b"/*RasterizerState*/,
       "Position": {
-        "X": 835.4289,
-        "Y": 1799.3656
+        "X": 1549.2078,
+        "Y": 1732.3828
       }
     },
     {
       "ChildId": "70ff724c-37de-4b71-8c23-dcc793ee561a"/*UseFallbackTexture*/,
       "Position": {
-        "X": 483.38794,
-        "Y": 1430.3638
+        "X": 1218.9318,
+        "Y": 1511.1809
       }
     },
     {
       "ChildId": "72173a73-b26a-4121-b57f-c8e9505c42d1"/*BoolToFloat*/,
       "Position": {
-        "X": -619.6018,
-        "Y": 1251.2158
+        "X": 450.13693,
+        "Y": 2820.4705
       }
     },
     {
       "ChildId": "740efcdf-0060-4d1e-8cad-8a51c06c6668"/*GetForegroundColor*/,
       "Position": {
-        "X": -959.0635,
-        "Y": 1095.5645
+        "X": 170.13693,
+        "Y": 2155.4705
       }
     },
     {
       "ChildId": "744b42ae-d54c-4967-af73-aff82c5698f2"/*InputAssemblerStage*/,
       "Position": {
-        "X": 1116.068,
-        "Y": 1386.5374
+        "X": 1689.2078,
+        "Y": 1697.3828
       }
     },
     {
       "ChildId": "74773152-0ec7-4925-a49b-33816473d2dc"/*Int2ToVector2*/,
       "Position": {
-        "X": -592.93713,
-        "Y": 1733.2015
+        "X": 310.13693,
+        "Y": 2470.4705
       }
     },
     {
       "ChildId": "8f8f63ab-0270-48a9-bbdb-2b15e5bb3a32"/*Vector3Components*/,
       "Position": {
-        "X": -625.75745,
-        "Y": 513.55725
+        "X": 450.13693,
+        "Y": 1560.4705
       }
     },
     {
       "ChildId": "944ba8ed-f34f-47c3-8330-23a873cc7298"/*BoolToFloat*/,
       "Position": {
-        "X": -593.702,
-        "Y": 2322.0808
+        "X": 450.13693,
+        "Y": 2925.4705
       }
     },
     {
       "ChildId": "a0af53d1-d0a8-479f-b9d9-7878afa53301"/*SrvFromTexture2d*/,
       "Position": {
-        "X": 656.7551,
-        "Y": 1715.2261
+        "X": 1689.2078,
+        "Y": 1557.3828
       }
     },
     {
       "ChildId": "a1b50992-b318-467a-bfce-eeae6c707225"/*IntToFloat*/,
       "Position": {
-        "X": -582.9687,
-        "Y": 1954.269
+        "X": 450.13693,
+        "Y": 2575.4705
       }
     },
     {
       "ChildId": "a3a2c4e1-f2a1-4a03-957c-f19c8b6f4709"/*GetSRVProperties*/,
       "Position": {
-        "X": 714.1563,
-        "Y": 2146.0742
+        "X": 986.2114,
+        "Y": 1922.5435
       }
     },
     {
       "ChildId": "a5b3e932-785e-4d2e-bafc-1a12a7b52e8d"/*Vector2Components*/,
       "Position": {
-        "X": -636.17914,
-        "Y": 284.23444
+        "X": 450.13693,
+        "Y": 1455.4705
       }
     },
     {
       "ChildId": "af7d0d57-fd97-4414-8f33-30e526752cf4"/*IntToFloat*/,
       "Position": {
-        "X": -592.93713,
-        "Y": 1677.2015
+        "X": 450.13693,
+        "Y": 2540.4705
       }
     },
     {
       "ChildId": "b1542d80-0c13-49d2-8b88-8fc9ede324df"/*PickBlendMode*/,
       "Position": {
-        "X": 835.4289,
-        "Y": 1911.3656
+        "X": 1266.2113,
+        "Y": 1780.8822
       }
     },
     {
       "ChildId": "b4a8e552-00fd-4fe9-9f04-fb095a7f7d05"/*SrvFromTexture2d*/,
       "Position": {
-        "X": 636.7553,
-        "Y": 1646.2261
+        "X": 1689.2078,
+        "Y": 1522.3828
       }
     },
     {
       "ChildId": "b9476ab8-83bc-479f-b59d-fc1cf26875f1"/*LoadImage*/,
       "Position": {
-        "X": 205.77759,
-        "Y": 1717.9369
+        "X": 1269.8438,
+        "Y": 979.868
       }
     },
     {
       "ChildId": "bc700f2d-f1ca-41b6-9216-ec96fabe34d2"/*SrvFromTexture2d*/,
       "Position": {
-        "X": 656.7551,
-        "Y": 1795.2258
+        "X": 1689.2078,
+        "Y": 1592.3828
       }
     },
     {
       "ChildId": "be1ffb03-0efc-44f1-b126-f9c61d2aafb4"/*BoolToFloat*/,
       "Position": {
-        "X": -636.17914,
-        "Y": 340.23444
+        "X": 450.13693,
+        "Y": 2855.4705
       }
     },
     {
       "ChildId": "ce2887d8-f8bc-4e65-a340-20378f547257"/*Draw*/,
       "Position": {
-        "X": 1104.1567,
-        "Y": 2146.0742
+        "X": 1406.2113,
+        "Y": 1922.5435
       }
     },
     {
@@ -618,64 +611,57 @@
         "Y": 2260.418
       },
       "Position": {
-        "X": 48.930145,
-        "Y": 107.39868
+        "X": 590.13696,
+        "Y": 1385.4705
       }
     },
     {
       "ChildId": "d7fa26e1-e3f8-464e-9739-cc1eef0074b7"/*ClampInt*/,
       "Position": {
-        "X": 844.1563,
-        "Y": 2146.0742
+        "X": 1126.2114,
+        "Y": 1922.5435
       }
     },
     {
       "ChildId": "d91761b2-119c-46a5-9ee3-376c825d4901"/*BoolToFloat*/,
       "Position": {
-        "X": -591.99115,
-        "Y": 1510.8385
+        "X": 450.13693,
+        "Y": 2400.4705
       }
     },
     {
       "ChildId": "df48aaf1-e513-442c-a418-fcba2b4a1e5c"/*_padding*/,
       "Position": {
-        "X": -632.7926,
-        "Y": 967.2478
+        "X": 450.13693,
+        "Y": 1945.4705
       }
     },
     {
       "ChildId": "e367724a-96e1-42fe-a61a-03b976880401"/*MultiplyInt*/,
       "Position": {
-        "X": 974.15643,
-        "Y": 2146.0742
+        "X": 1266.2113,
+        "Y": 1922.5435
       }
     },
     {
       "ChildId": "e3e031e4-ed28-47d7-afbf-c38808f306c7"/*GetBufferComponents*/,
       "Position": {
-        "X": -586.5587,
-        "Y": 2230.601
+        "X": 963.52844,
+        "Y": 1463.1864
       }
     },
     {
       "ChildId": "e6fa4f39-b15e-4629-9712-c32b1afaf58c"/*Vector4Components*/,
       "Position": {
-        "X": -582.9687,
-        "Y": 2010.269
+        "X": 450.13693,
+        "Y": 2680.4705
       }
     },
     {
       "ChildId": "e7fdab45-4b31-4da3-bb2f-afb273277a75"/*SetPixelAndVertexShaderStage*/,
       "Position": {
-        "X": 1315.9885,
-        "Y": 1484.8701
-      }
-    },
-    {
-      "ChildId": "ed4188de-f346-48ee-8e16-1af4409d0bd6"/*UseFallbackTexture*/,
-      "Position": {
-        "X": 509.98346,
-        "Y": 1568.7451
+        "X": 1829.2078,
+        "Y": 1277.3828
       }
     },
     {
@@ -686,15 +672,15 @@
         "Y": 833.34656
       },
       "Position": {
-        "X": 1505.2952,
-        "Y": 1381.9343
+        "X": 1829.2078,
+        "Y": 1662.3828
       }
     },
     {
       "ChildId": "ffd5be9b-c8c0-4385-ba4e-c8bd179302cb"/*BoolToFloat*/,
       "Position": {
-        "X": -591.99115,
-        "Y": 1566.8385
+        "X": 450.13693,
+        "Y": 2435.4705
       }
     }
   ],
@@ -702,8 +688,8 @@
     {
       "OutputId": "363d4ef2-c8c9-4785-8848-2ea930457959"/*Output*/,
       "Position": {
-        "X": 1627.9448,
-        "Y": 1808.8842
+        "X": 1829.2078,
+        "Y": 1837.3828
       }
     }
   ]

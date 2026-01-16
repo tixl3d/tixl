@@ -1,4 +1,6 @@
-#define FORCE_D3D_DEBUG
+// NOTE: Enabling this will require Windows Graphics Tools feature to be enabled
+// This will prevent the player from running on most Windows systems.
+//#define FORCE_D3D_DEBUG
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -152,7 +154,7 @@ internal static partial class Program
 #if DEBUG || FORCE_D3D_DEBUG
             var deviceCreationFlags = DeviceCreationFlags.Debug | DeviceCreationFlags.BgraSupport;
 #else
-                var deviceCreationFlags = DeviceCreationFlags.None | DeviceCreationFlags.BgraSupport;
+                var deviceCreationFlags = DeviceCreationFlags.None;
 #endif
             Device.CreateWithSwapChain(DriverType.Hardware, deviceCreationFlags, desc, out _device, out _swapChain);
             ResourceManager.Init(_device);

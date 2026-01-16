@@ -3,6 +3,7 @@ using System.Reflection;
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.UserData;
+using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel.InputsAndTypes;
@@ -165,7 +166,7 @@ internal static class ColorThemeEditor
             if (isChanged)
             {
                 ImGui.SameLine();
-                if (CustomComponents.FloatingIconButton(Icon.Revert, Vector2.Zero))
+                if (FloatingIconButton(Icon.Revert, Vector2.Zero))
                 {
                     SetColor(f, defaultColor);
                     T3Style.Apply();
@@ -246,7 +247,7 @@ internal static class ColorThemeEditor
             if (isChanged)
             {
                 ImGui.SameLine();
-                if (CustomComponents.FloatingIconButton(Icon.Revert, Vector2.Zero))
+                if (FloatingIconButton(Icon.Revert, Vector2.Zero))
                 {
                     SetVariation(f, defaultVariation.Clone());
                 }
@@ -326,4 +327,27 @@ internal static class ColorThemeEditor
     private static ThemeHandling.ColorTheme _currentTheme= new();
     private static ThemeHandling.ColorTheme _currentThemeWithoutChanges = new();
     public static readonly object Dummy = new();
+
+    public static bool FloatingIconButton(Icon icon, Vector2 size)
+    {
+        if (size == Vector2.Zero)
+        {
+            var h = ImGui.GetFrameHeight();
+            size = new Vector2(h, h);
+        }
+
+        ImGui.PushFont(Icons.IconFont);
+        ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, new Vector2(0.5f, 0.5f));
+        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Vector2.Zero);
+        ImGui.PushStyleColor(ImGuiCol.Button, Color.Transparent.Rgba);
+        ImGui.PushStyleColor(ImGuiCol.ButtonActive, Color.Transparent.Rgba);
+        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, Color.Transparent.Rgba);
+
+        var clicked = ImGui.Button(((char)icon).ToString(), size);
+
+        ImGui.PopStyleColor(3);
+        ImGui.PopStyleVar(2);
+        ImGui.PopFont();
+        return clicked;
+    }
 }

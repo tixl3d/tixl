@@ -12,18 +12,25 @@ internal sealed partial class MagGraphView
     private void DrawAnnotation(MagGraphAnnotation magAnnotation, ImDrawListPtr drawList, GraphUiContext context)
     {
         var canvas = context.View;
-        var area = ImRect.RectWithSize(magAnnotation.Annotation.PosOnCanvas,
-                                       magAnnotation.Annotation.Size);
 
+        var annotation = magAnnotation.Annotation;
+        var area = annotation.Collapsed 
+                       ? ImRect.RectWithSize(annotation.PosOnCanvas, new Vector2(annotation.Size.X, MagGraphItem.LineHeight))
+                       :ImRect.RectWithSize(annotation.PosOnCanvas, annotation.Size) ;
+
+        
         if (!IsRectVisible(area))
             return;
 
         var pMin = TransformPosition(magAnnotation.DampedPosOnCanvas);
-        var pMax = TransformPosition(magAnnotation.DampedPosOnCanvas + magAnnotation.DampedSize);
+        var dampedSize = annotation.Collapsed 
+                             ? new Vector2( magAnnotation.DampedSize.X,MagGraphItem.LineHeight)
+                             : magAnnotation.DampedSize;
+        var pMax = TransformPosition(magAnnotation.DampedPosOnCanvas + dampedSize);
 
         drawList.PushClipRect(pMin, pMax, true); // Start with a simple rectangular clip 
         // Background
-        var backgroundColor = ColorVariations.AnnotationBackground.Apply(magAnnotation.Annotation.Color).Fade(0.8f);
+        var backgroundColor = ColorVariations.AnnotationBackground.Apply(annotation.Color).Fade(0.8f);
 
         var rounding = 8;// * canvas.Scale.X; 
         var flags = ImDrawFlags.RoundCornersTop | ImDrawFlags.RoundCornersBottomLeft;
@@ -34,12 +41,12 @@ internal sealed partial class MagGraphView
                                backgroundColor,
                                rounding, flags);
 
-        var isNodeSelected = context.Selector.IsNodeSelected(magAnnotation.Annotation);
+        var isNodeSelected = context.Selector.IsNodeSelected(annotation);
 
         
         // Outline
         var borderColor = isNodeSelected ? UiColors.ForegroundFull 
-                                 : ColorVariations.AnnotationOutline.Apply(magAnnotation.Annotation.Color);
+                                 : ColorVariations.AnnotationOutline.Apply(annotation.Color);
         drawList.AddRect(pMin,
                          pMax,
                          borderColor.Fade(_context.GraphOpacity),
@@ -53,28 +60,86 @@ internal sealed partial class MagGraphView
         clickableArea.Max.Y = clickableArea.Min.Y + MathF.Min(16 * T3Ui.UiScaleFactor, screenArea.GetHeight());
 
         // Header
-        ImGui.SetCursorScreenPos(clickableArea.Min);
-        ImGui.InvisibleButton("##annotationHeader", clickableArea.GetSize());
-
-        DrawUtils.DebugItemRect();
-        var isHeaderHovered = ImGui.IsItemHovered() && context.StateMachine.CurrentState == GraphStates.Default;
-        if (isHeaderHovered)
+        
         {
-            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+            var positionInScreen = screenArea.Min  + new Vector2(-5,6) * T3Ui.UiScaleFactor;
+            var labelPos = positionInScreen; // - new Vector2(2, Fonts.FontNormal.FontSize + 8);
+            ImGui.SetCursorScreenPos(labelPos);
+            bool isCollapsed = annotation.Collapsed;
+            ImGui.PushID(annotation.Id.GetHashCode());
+            if (CustomComponents.ToggleTwoIconsButton(ref isCollapsed, 
+                                                      Icon.ChevronDown,
+                                                      Icon.ChevronRight,
+                                                      CustomComponents.ButtonStates.Normal,
+                                                      CustomComponents.ButtonStates.Normal,
+                                                      true, 
+                                                      true))
+            {
+                if (isCollapsed)
+                {
+                    // Flag children as collapsed...
+                    foreach (var item in context.Layout.Items.Values)
+                    {
+                        if (item.Variant != MagGraphItem.Variants.Operator || item.ChildUi == null)
+                            continue;
+
+                        
+                        if(area.Contains(item.Area))
+                            item.ChildUi.CollapsedIntoAnnotationFrameId = magAnnotation.Id;
+                    }
+                }
+                else
+                {
+                    // Reveal all children...
+                    foreach (var item in context.Layout.Items.Values)
+                    {
+                        if (item.Variant != MagGraphItem.Variants.Operator || item.ChildUi == null)
+                            continue;
+
+                        if (item.ChildUi.CollapsedIntoAnnotationFrameId == magAnnotation.Id)
+                        {
+                            item.ChildUi.CollapsedIntoAnnotationFrameId = Guid.Empty;
+                        }
+                            
+                    }
+
+                }
+                context.Layout.FlagStructureAsChanged();
+                annotation.Collapsed = !annotation.Collapsed;
+            }
+            ImGui.PopID();
         }
 
-        //const float backgroundAlpha = 0.2f;
-        const float headerHoverAlpha = 0.1f;
-        drawList.AddRectFilled(clickableArea.Min, clickableArea.Max,
-                               UiColors.ForegroundFull.Fade(isHeaderHovered
-                                                                ? headerHoverAlpha
-                                                                : 0), rounding, ImDrawFlags.RoundCornersTop);
+        
+        ImGui.SetCursorScreenPos(clickableArea.Min );
+        
+        
+        var isRenaming = context.ActiveAnnotationId == magAnnotation.Id &&
+                         context.StateMachine.CurrentState == GraphStates.RenameAnnotation;
+        if (!isRenaming)
+        {        
+            ImGui.InvisibleButton("##annotationHeader", clickableArea.GetSize());
 
-        // Clicked -> Drag
-        if (ImGui.IsItemClicked(ImGuiMouseButton.Left) && !ImGui.GetIO().KeyAlt)
-        {
-            context.ActiveAnnotationId = magAnnotation.Id;
-            context.StateMachine.SetState(GraphStates.DragAnnotation, context);
+            DrawUtils.DebugItemRect();
+            var isHeaderHovered = ImGui.IsItemHovered() && context.StateMachine.CurrentState == GraphStates.Default;
+            if (isHeaderHovered)
+            {
+                ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+            }
+            
+            //const float backgroundAlpha = 0.2f;
+            const float headerHoverAlpha = 0.1f;
+            drawList.AddRectFilled(clickableArea.Min, clickableArea.Max,
+                                   UiColors.ForegroundFull.Fade(isHeaderHovered
+                                                                    ? headerHoverAlpha
+                                                                    : 0), rounding, ImDrawFlags.RoundCornersTop);
+
+            // Clicked -> Drag
+            if (ImGui.IsItemClicked(ImGuiMouseButton.Left) && !ImGui.GetIO().KeyAlt)
+            {
+                context.ActiveAnnotationId = magAnnotation.Id;
+                context.StateMachine.SetState(GraphStates.DragAnnotation, context);
+            }
         }
 
         // Double-Click -> Rename
@@ -91,7 +156,7 @@ internal sealed partial class MagGraphView
             var labelHeight = 0f;
             var canvasScale = canvas.Scale.X;
             {
-                if (!string.IsNullOrEmpty(magAnnotation.Annotation.Label))
+                if (!string.IsNullOrEmpty(annotation.Label))
                 {
                     var fade = MathUtils.SmootherStep(0.1f, 0.2f, canvasScale) * 0.8f * _context.GraphOpacity;
                     var fontSize = canvasScale > 1
@@ -102,16 +167,16 @@ internal sealed partial class MagGraphView
 
                     drawList.AddText(Fonts.FontLarge,
                                      fontSize,
-                                     pMin + new Vector2(8, 3),
-                                     ColorVariations.OperatorLabel.Apply(magAnnotation.Annotation.Color.Fade(fade)),
-                                     magAnnotation.Annotation.Label);
+                                     pMin + new Vector2(8 + 10, 3) * T3Ui.UiScaleFactor,
+                                     ColorVariations.OperatorLabel.Apply(annotation.Color.Fade(fade)),
+                                     annotation.Label);
                     labelHeight = Fonts.FontLarge.FontSize;
                 }
             }
 
-            if (!string.IsNullOrEmpty(magAnnotation.Annotation.Title))
+            if (!string.IsNullOrEmpty(annotation.Title))
             {
-                var font = magAnnotation.Annotation.Title.StartsWith("# ") ? Fonts.FontLarge : Fonts.FontNormal;
+                var font = annotation.Title.StartsWith("# ") ? Fonts.FontLarge : Fonts.FontNormal;
                 drawList.PushClipRect(pMin, pMax, true);
                 var labelPos = pMin + new Vector2(8, 8 + labelHeight) * T3Ui.DisplayScaleFactor;
 
@@ -124,8 +189,8 @@ internal sealed partial class MagGraphView
                 drawList.AddText(font,
                                  fontSize,
                                  labelPos,
-                                 ColorVariations.OperatorLabel.Apply(magAnnotation.Annotation.Color.Fade(fade)),
-                                 magAnnotation.Annotation.Title);
+                                 ColorVariations.OperatorLabel.Apply(annotation.Color.Fade(fade)),
+                                 annotation.Title);
                 drawList.PopClipRect();
             }
         }

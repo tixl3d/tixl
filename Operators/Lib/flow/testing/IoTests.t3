@@ -137,12 +137,6 @@
       "Outputs": []
     },
     {
-      "Id": "7dd18060-618e-4ec0-ab69-3cf9341661e5"/*VideoDeviceInput*/,
-      "SymbolId": "cd5a182e-254b-4e65-820b-ff754112614c",
-      "InputValues": [],
-      "Outputs": []
-    },
-    {
       "Id": "7f8e0a4b-5424-46ab-bf4d-372a4ceb95c2"/*Layer2d*/,
       "SymbolId": "d8c5330f-59b5-4907-b845-a02def3042fa",
       "InputValues": [],

@@ -19,6 +19,13 @@
       }
     },
     {
+      "InputId": "6fc4f861-9d65-4af1-aafc-d90851f61d7f"/*Scale*/,
+      "Position": {
+        "X": -75.613106,
+        "Y": 145.74394
+      }
+    },
+    {
       "InputId": "7b181495-ebd6-48c1-a866-b7b8337ef10d"/*Up*/,
       "Position": {
         "X": -75.613106,
@@ -26,7 +33,7 @@
       }
     },
     {
-      "InputId": "8042eb60-ca86-42b3-a338-d733c3cbb1fb"/*Size*/,
+      "InputId": "8042eb60-ca86-42b3-a338-d733c3cbb1fb"/*Stretch*/,
       "Position": {
         "X": -75.613106,
         "Y": 115.74394
@@ -37,6 +44,13 @@
       "Position": {
         "X": -75.613106,
         "Y": 70.74394
+      }
+    },
+    {
+      "InputId": "9ea6ea91-69bb-49d4-8a01-da75484ba207"/*AspectRatio*/,
+      "Position": {
+        "X": -75.613106,
+        "Y": 220.74394
       }
     },
     {

@@ -1,10 +1,11 @@
 ﻿#nullable enable
 using ImGuiNET;
 using T3.Core.Animation;
-using T3.Editor.Gui.Graph.Dialogs;
-using T3.Editor.Gui.Graph.Interaction;
+using T3.Editor.Gui.Dialogs;
+using T3.Editor.Gui.Hub;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.TransformGizmos;
+using T3.Editor.Gui.MagGraph.Interaction;
 using T3.Editor.Gui.MagGraph.Ui;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
@@ -13,9 +14,10 @@ using T3.Editor.Gui.Windows.Layouts;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
+using MagGraphView = T3.Editor.Gui.MagGraph.Ui.MagGraphView;
 using Vector2 = System.Numerics.Vector2;
 
-namespace T3.Editor.Gui.Graph.Window;
+namespace T3.Editor.Gui.Window;
 
 internal sealed class GraphWindow : Windows.Window
 {
@@ -44,29 +46,21 @@ internal sealed class GraphWindow : Windows.Window
         WindowFlags &= ~(ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBringToFrontOnFocus | ImGuiWindowFlags.NoMove |
                          ImGuiWindowFlags.NoResize);
     }
-    
+
     protected override void AddAnotherInstance()
     {
         // ReSharper disable once ObjectCreationAsStatement
         new GraphWindow();
     }
-    
     #endregion
 
     #region Handling project view ----------------------
     public ProjectView? ProjectView { get; private set; }
 
-    // [Obsolete("Please use TrySetToProject()")]
-    // public static bool TryOpenPackage(EditorSymbolPackage package, bool replaceFocused, Instance? startingComposition = null, WindowConfig? config = null,
-    //                                   int instanceNumber = 0)
-    // {
-    //     return false;
-    // }
-
     /// <summary>
-    /// Initialize <see cref="ProjectView"/> to for a loaded project 
+    /// Initialize <see cref="ProjectView"/> for loading a project 
     /// </summary>
-    internal bool TrySetToProject(OpenedProject project)
+    internal bool TrySetToProject(OpenedProject project, bool tryRestoreViewArea = true)
     {
         if (!project.Package.HasHome)
         {
@@ -77,7 +71,8 @@ internal sealed class GraphWindow : Windows.Window
         ProjectView = UserSettings.Config.GraphStyle == UserSettings.GraphStyles.Magnetic
                           ? MagGraphView.CreateWithComponents(project)
                           : Legacy.GraphView.CreateWithComponents(project);
-        
+
+        ProjectView.SetAsFocused();
         // ProjectView = MagGraphCanvas.CreateWithComponents(project);
         // ProjectView = Legacy.GraphCanvas.CreateWithComponents(project);
         ProjectView.OnCompositionChanged += CompositionChangedHandler;
@@ -86,18 +81,21 @@ internal sealed class GraphWindow : Windows.Window
         var rootSymbolChildId = rootInstance.SymbolChildId;
         var rootPath = rootInstance.InstancePath;
         var startPath = rootPath;
-        var opId = UserSettings.GetLastOpenOpForWindow(Config.Title);
-        if (opId != Guid.Empty && opId != rootSymbolChildId)
+        if (project.Package.OverrideHomeGuid == Guid.Empty)
         {
-            if (rootInstance.SymbolChild.SearchForChild(opId, out _, out var path))
+            var opId = UserSettings.GetLastOpenOpForWindow(Config.Title);
+            if (opId != Guid.Empty && opId != rootSymbolChildId)
             {
-                startPath = path;
+                if (rootInstance.SymbolChild.SearchForChild(opId, out _, out var path))
+                {
+                    startPath = path;
+                }
             }
         }
 
         const ScalableCanvas.Transition transition = ScalableCanvas.Transition.JumpIn;
-        if (!ProjectView.TrySetCompositionOp(startPath, transition)
-            && !ProjectView.TrySetCompositionOp(rootPath, transition))
+        if (!ProjectView.TrySetCompositionOp(startPath, transition, tryRestoreViewArea: tryRestoreViewArea)
+            && !ProjectView.TrySetCompositionOp(rootPath, transition, tryRestoreViewArea: tryRestoreViewArea))
         {
             Log.Warning("Can't set composition op");
             return false;
@@ -110,10 +108,10 @@ internal sealed class GraphWindow : Windows.Window
     /** Called when view is closed (e.g. when jumping to hub) or changed */
     public void CloseView()
     {
-
         if (ProjectView != null)
             ProjectView.OnCompositionChanged -= CompositionChangedHandler;
 
+        _reinitHubView = true;
         ProjectView = null;
     }
 
@@ -128,8 +126,8 @@ internal sealed class GraphWindow : Windows.Window
         ProjectView.Close();
         GraphWindowInstances.Remove(this);
     }
-    
 
+    private bool _reinitHubView = true;
     private bool _focusOnNextFrame;
 
     // private void FocusRequested()
@@ -149,7 +147,8 @@ internal sealed class GraphWindow : Windows.Window
     {
         if (ProjectView == null)
         {
-            UiElements.DrawProjectList(this);
+            ProjectHub.Draw(this, _reinitHubView);
+            _reinitHubView = false;
             return;
         }
 
@@ -159,15 +158,13 @@ internal sealed class GraphWindow : Windows.Window
         if (ProjectView.InstView == null)
             return;
 
-
-        
         var windowContentHeight = (int)ImGui.GetWindowHeight();
 
         if (UserSettings.Config.ShowTimeline)
         {
             ProjectView.TimeLineCanvas.FoldingHeight.DrawSplit(out windowContentHeight);
         }
-        
+
         //ImageBackgroundFading.HandleImageBackgroundFading(ProjectView.GraphImageBackground, out var backgroundImageOpacity);
         var backgroundImageOpacity = 1f;
         ImGui.BeginChild("##graphbackground", new Vector2(0, windowContentHeight), false,
@@ -179,8 +176,6 @@ internal sealed class GraphWindow : Windows.Window
                          | ImGuiWindowFlags.NoBackground
                          | ImGuiWindowFlags.ChildWindow);
         {
-
-            
         }
         ImGui.EndChild();
         ImGui.SetCursorPos(Vector2.Zero);
@@ -195,25 +190,22 @@ internal sealed class GraphWindow : Windows.Window
                          | ImGuiWindowFlags.ChildWindow);
         {
             // ImageBackground
+            ProjectView.GraphImageBackground.Draw(backgroundImageOpacity);
+
+            var graphHiddenWhileInteractiveWithBackground = ProjectView.GraphImageBackground.IsActive && TransformGizmoHandling.IsDragging;
+            if (!graphHiddenWhileInteractiveWithBackground)
             {
-                ProjectView.GraphImageBackground.Draw(backgroundImageOpacity);
-                
-                var graphHiddenWhileInteractiveWithBackground = ProjectView.GraphImageBackground.IsActive && TransformGizmoHandling.IsDragging;
-                if (!graphHiddenWhileInteractiveWithBackground)
-                {
-                    var drawList = ImGui.GetWindowDrawList();
-                    DrawGraphContent(drawList);
-                }
+                var drawList = ImGui.GetWindowDrawList();
+                DrawGraphContent(drawList);
             }
-            
         }
         ImGui.EndChild();
 
         if (ProjectView == null)
             return;
 
-        ProjectView.CheckDisposal(); 
-        
+        ProjectView.CheckDisposal();
+
         if (UserSettings.Config.ShowTimeline)
         {
             const int splitterWidth = 3;
@@ -232,7 +224,7 @@ internal sealed class GraphWindow : Windows.Window
                                  | ImGuiWindowFlags.NoBackground
                                 );
                 {
-                    if(ProjectView.CompositionInstance != null)
+                    if (ProjectView.CompositionInstance != null)
                         ProjectView.TimeLineCanvas.Draw(ProjectView.CompositionInstance, Playback.Current);
                 }
                 ImGui.EndChild();
@@ -262,6 +254,8 @@ internal sealed class GraphWindow : Windows.Window
             if (UserSettings.Config.ShowTitleAndDescription)
                 GraphTitleAndBreadCrumbs.Draw(ProjectView);
 
+            TourInteraction.Draw(ProjectView);
+
             // Breadcrumbs may have requested close...
             if (ProjectView == null)
                 return;
@@ -284,8 +278,8 @@ internal sealed class GraphWindow : Windows.Window
 
                 ImGui.BeginGroup();
                 ImGui.SetScrollY(0);
-                
-                if(!UserSettings.Config.FocusMode)
+
+                if (!UserSettings.Config.FocusMode)
                     CustomComponents.DrawWindowFocusFrame();
 
                 if (ImGui.IsWindowFocused())
@@ -297,17 +291,19 @@ internal sealed class GraphWindow : Windows.Window
 
                 ImGui.EndGroup();
 
-                if(ProjectView != null)
+                if (ProjectView != null)
                     ParameterPopUp.DrawParameterPopUp(ProjectView);
             }
         }
         drawList.ChannelsMerge();
 
-        if (ProjectView?.InstView != null)
-            _editDescriptionDialog.Draw(ProjectView.InstView.Symbol);
+        // if (ProjectView?.InstView != null)
+        //     _editDescriptionDialog.Draw(ProjectView.InstView.Symbol);
+        //
     }
     #endregion
 
     private IGraphView? GraphCanvas => ProjectView?.GraphView;
-    private static readonly EditSymbolDescriptionDialog _editDescriptionDialog = new();
+    // private static readonly EditSymbolDescriptionDialog _editDescriptionDialog = new();
+    // private static readonly EditTourPointsDialog _editTourPointsDialog = new();
 }

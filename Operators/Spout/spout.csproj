@@ -99,14 +99,12 @@
       <NoWarn>NU1701</NoWarn>
     </PackageReference>
   </ItemGroup>
-
   <!-- Native dependencies -->
   <ItemGroup>
     <Content Include="./dependencies/**/*" CopyToOutputDirectory="PreserveNewest">
       <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
     </Content>
   </ItemGroup>
-
   <!-- Include Resources/** into output/Resources -->
   <ItemGroup Condition="'$(Configuration)' == 'Release'">
     <Content Include="Resources/**/*" Exclude="bin/**">
@@ -159,9 +157,8 @@
     </PropertyGroup>
     <WriteLinesToFile File="$(OutputPath)/OperatorPackage.json" Lines="$(OperatorPackageInfoJson)" Overwrite="True" Encoding="UTF-8" />
   </Target>
-
-<Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild">
-<!-- Clear previous files in the export folder -->
-<RemoveDir Directories="bin/$(Configuration)"/>
-</Target> 
+  <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild">
+    <!-- Clear previous files in the export folder -->
+    <RemoveDir Directories="bin/$(Configuration)" />
+  </Target>
 </Project>

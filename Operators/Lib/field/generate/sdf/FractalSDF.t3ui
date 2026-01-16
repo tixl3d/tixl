@@ -1,6 +1,7 @@
 {
   "Id": "933aec2c-e7dd-44b4-a094-14d0195f9f7a"/*FractalSDF*/,
   "Description": "Generates a procedural MandelBox field which can be rendered with [RaymarchField] and visualized with [VisualizeFieldDistance].\nFor more Fractals check [CustomSDF] with it's different Variations.\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToRaymarchField].\n\nIt can be modified with [BendField], [TransformField], [PolarRepeat] and more.\n\nSimilar nodes: [BoxSDF], [CapsuleLineSDF], [CustomSDF].",
+  "SymbolTags": "8",
   "InputUis": [
     {
       "InputId": "094637cf-9526-49d5-bb9f-19991cdcc516"/*Iterations*/,

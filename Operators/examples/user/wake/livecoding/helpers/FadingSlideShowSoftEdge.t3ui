@@ -128,14 +128,14 @@
       }
     },
     {
-      "ChildId": "1f62f8cc-aa9a-45cc-b6eb-f74b4710a704"/*PickFromStringList*/,
+      "ChildId": "1f62f8cc-aa9a-45cc-b6eb-f74b4710a704"/*PickStringFromList*/,
       "Position": {
         "X": 538.9064,
         "Y": 323.59665
       }
     },
     {
-      "ChildId": "237aff95-22ad-40d2-9402-257984d2d917"/*PickFromStringList*/,
+      "ChildId": "237aff95-22ad-40d2-9402-257984d2d917"/*PickStringFromList*/,
       "Position": {
         "X": 515.03937,
         "Y": -361.5947

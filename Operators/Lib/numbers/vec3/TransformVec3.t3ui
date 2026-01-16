@@ -1,0 +1,30 @@
+{
+  "Id": "20ad2907-524d-4160-802b-ad4a359b3d0d"/*TransformVec3*/,
+  "Description": "Transform Vector3 with the given transform matrix.",
+  "InputUis": [
+    {
+      "InputId": "5b124d01-ce79-4055-88ea-66394f7831d8"/*Matrix*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      }
+    },
+    {
+      "InputId": "b8e06842-f8e9-4aa1-b291-48dd077cfab5"/*A*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "8ae5ca74-f39e-4b2e-881f-6c80d2b274ef"/*Result*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

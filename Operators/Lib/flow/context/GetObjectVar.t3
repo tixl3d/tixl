@@ -1,0 +1,15 @@
+{
+  "Id": "5204430b-6c56-4854-b59b-11467658d30b"/*GetObjectVar*/,
+  "Inputs": [
+    {
+      "Id": "565e80b8-74b9-4081-9cc8-1d39c7c2eef1"/*VariableName*/,
+      "DefaultValue": "i"
+    },
+    {
+      "Id": "b25a15c9-9e51-492c-b563-2cfdf81df4a4"/*FallbackDefault*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

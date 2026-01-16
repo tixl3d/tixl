@@ -1,0 +1,64 @@
+{
+  "Id": "78aee2e7-9fe6-44c4-bde3-57618007480f"/*ValuesToTexture2*/,
+  "Description": "An upgrade version to convert a list of float value lists to a texture.",
+  "InputUis": [
+    {
+      "InputId": "2d1517aa-d22d-4588-b208-774ffecbfa9d"/*OutputRange*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      }
+    },
+    {
+      "InputId": "8d5cd7bb-e349-4e22-8402-6dca63728b35"/*Direction*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      }
+    },
+    {
+      "InputId": "a80458c5-685a-434e-989b-9212324d0e14"/*Values*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "b07eab3e-c16d-461f-ba5e-a3f34fe6f0ba"/*Clamp*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      }
+    },
+    {
+      "InputId": "d533f4e8-f0a9-4535-b843-107c19bd3cd5"/*InputRange*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      }
+    },
+    {
+      "InputId": "dbfd49e3-c357-4d07-963d-6df985a2f66e"/*GainAndBias*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true,
+      "Format": "{0:0.000}",
+      "UseVec2Control": "BiasAndGain"
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "f136acfa-4429-4121-8d36-57c6b1d26dde"/*ValuesTexture*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

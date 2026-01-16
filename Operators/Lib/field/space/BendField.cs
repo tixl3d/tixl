@@ -28,6 +28,7 @@ internal sealed class BendField : Instance<BendField>
 
         _axis = axis;
         ShaderNode.FlagCodeChanged();
+        Log.Debug("Shader changed", this);
     }
 
     public ShaderGraphNode ShaderNode { get; }
@@ -40,7 +41,7 @@ internal sealed class BendField : Instance<BendField>
                                 float c = cos(k * p.x);
                                 float s = sin(k * p.x);
                                 float2x2  m = float2x2(c, -s, s, c);
-                                p = float3(mul(m,p.xz), p.y);
+                                p = float3(mul(m,p.xy), p.z);
                             }
                             """;
     }
@@ -52,13 +53,14 @@ internal sealed class BendField : Instance<BendField>
 
     public void GetPostShaderCode(CodeAssembleContext c, int inputIndex)
     {
+        c.AppendCall($"f{c}.w *= {ShaderNode}StepFactor; ");
     }
     
     private readonly string[] _axisCodes0 =
         [
-            "zyx",
-            "zxy",
-            "yxz",
+            "yzx",
+            "xzy",
+            "xyz",
         ];
 
     private AxisTypes _axis;
@@ -73,10 +75,14 @@ internal sealed class BendField : Instance<BendField>
     [Input(Guid = "adaf8efd-47b3-4d4b-9102-d8a3c6a7e34a")]
     public readonly InputSlot<ShaderGraphNode> InputField = new();
 
+    [GraphParam]
+    [Input(Guid = "c0490245-8f7c-4972-8ded-736883b4e650")]
+    public readonly InputSlot<float> Amount = new();
+    
     [Input(Guid = "4930DE03-6A81-4403-BB79-5B0A14591F05", MappedType = typeof(AxisTypes))]
     public readonly InputSlot<int> Axis = new();
     
     [GraphParam]
-    [Input(Guid = "c0490245-8f7c-4972-8ded-736883b4e650")]
-    public readonly InputSlot<float> Amount = new();
+    [Input(Guid = "B9F38594-CE84-41D7-B57B-4BB1DE81AF13")]
+    public readonly InputSlot<float> StepFactor = new();
 }

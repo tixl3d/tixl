@@ -1,0 +1,86 @@
+{
+  "Id": "44cee07e-2a71-4dd5-9ded-8274e8e19332"/*DefineIqGradient*/,
+  "Description": "A simple procedural method to define a gradient established by Inigo Quelez.\n\nIt's fun for playing around but takes some experimentation to get it under control. It can be very useful to find ABCD combinations for shaders.\n\nWatch the linked video for iq's excellent explanation.",
+  "InputUis": [
+    {
+      "InputId": "12d9b558-c83c-4d7b-b366-481d09e54501"/*C_Frequency*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true
+    },
+    {
+      "InputId": "133f0d11-9de9-49f6-9c76-bbaf6bed82f4"/*B_Contrast*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true
+    },
+    {
+      "InputId": "750e53f0-5ddb-4be1-bef0-da2e48231553"/*A_Brightness*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true
+    },
+    {
+      "InputId": "85f98834-7921-46e6-9f63-9da18b2a7bf8"/*Phase*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 300.0
+      }
+    },
+    {
+      "InputId": "887c0b40-c71f-4e0e-bff2-0fdff64f8c82"/*D_Phase*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true
+    },
+    {
+      "InputId": "918c99f2-2197-467d-a991-2f69ef81440c"/*Interpolation*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 255.0
+      }
+    },
+    {
+      "InputId": "96961db2-d597-4658-b0c0-fa1301a2fcdc"/*NumOfSteps*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 180.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "0dbde53c-92d3-4a21-80f0-62df913460cf"/*Gradient*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    }
+  ],
+  "Links": [
+    {
+      "Id": "eff809cb-2946-46fa-b3b4-1b4374c7316c",
+      "Title": "Tutorial",
+      "Description": "IQ's explanation of the algorithm",
+      "LinkUrl": "https://www.youtube.com/shorts/TH3OTy5fTog",
+      "LinkType": "TutorialVideo"
+    }
+  ]
+}

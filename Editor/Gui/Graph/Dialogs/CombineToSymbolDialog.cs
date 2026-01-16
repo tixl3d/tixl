@@ -5,7 +5,7 @@ using T3.Editor.UiModel;
 using T3.Editor.UiModel.Modification;
 using T3.Editor.UiModel.ProjectHandling;
 
-namespace T3.Editor.Gui.Graph.Dialogs;
+namespace T3.Editor.Gui.Dialogs;
 
 internal sealed class CombineToSymbolDialog : ModalDialog
 {
@@ -19,6 +19,11 @@ internal sealed class CombineToSymbolDialog : ModalDialog
         {
             var selectedChildUis = projectView.NodeSelection.GetSelectedChildUis().ToList();
             var selectedAnnotations = projectView.NodeSelection.GetSelectedNodes<Annotation>().ToList();
+
+            if (_projectToCopyTo == null)
+            {
+                EditableSymbolProject.TryGetEditableProjectOfNamespace(nameSpace, out _projectToCopyTo);
+            }
             
             _ = SymbolModificationInputs.DrawProjectDropdown(ref nameSpace, ref _projectToCopyTo);
 

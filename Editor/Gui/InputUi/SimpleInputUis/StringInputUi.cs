@@ -8,6 +8,7 @@ using T3.Core.Operator.Interfaces;
 using T3.Core.Resource;
 using T3.Core.SystemUi;
 using T3.Core.Utils;
+using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel.InputsAndTypes;
@@ -67,7 +68,7 @@ public sealed class StringInputUi : InputValueUi<string>
                 {
                     if (value != null)
                     {
-                        ResourceManager.TryResolvePath(value, FilePickingUi.SearchResourceConsumer, out var absolutePath, out _);
+                        ResourceManager.TryResolveRelativePath(value, FilePickingUi.SearchResourceConsumer, out var absolutePath, out _);
                         if (!File.Exists(absolutePath))
                         {
                             Log.Error("Can't open non-existing file " + absolutePath);
@@ -150,7 +151,7 @@ public sealed class StringInputUi : InputValueUi<string>
         {
             var changed = false;
 
-            var currentValue = customValueHolder.GetValueForInput(input.InputDefinition.Id);
+            var currentValue = customValueHolder.GetValueForInput(input.InputDefinition.Id) ?? string.Empty;
                 
             if (InputWithTypeAheadSearch.Draw("##customDropdown", 
                                               customValueHolder.GetOptionsForInput(input.InputDefinition.Id),

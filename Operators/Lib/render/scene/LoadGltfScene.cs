@@ -44,7 +44,7 @@ public class LoadGltfScene : Instance<LoadGltfScene>
         // if (BmFontDescription.TryInitializeFromFile(file.AbsolutePath, out newValue))
         // {
         failureReason = null;
-        newValue = ResultSetup.Value;
+        newValue = ResultSetup.Value!;
         //     return true;
         // }
         return true;
@@ -87,8 +87,11 @@ public class LoadGltfScene : Instance<LoadGltfScene>
         LoadFile(filePath, meshChildIndex, materialNeedsUpdate);
     }
 
-    private void LoadFile(string filePath, int meshChildIndex, bool materialNeedsUpdate)
+    private void LoadFile(string? filePath, int meshChildIndex, bool materialNeedsUpdate)
     {
+        if (filePath == null)
+            return;
+        
         if (LoadFileIfRequired(filePath, out var newSetup))
         {
             ResultSetup.Value?.Dispose();

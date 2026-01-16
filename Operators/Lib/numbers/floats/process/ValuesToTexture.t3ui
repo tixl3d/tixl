@@ -11,13 +11,6 @@
       "GroupTitle": "Values"
     },
     {
-      "InputId": "165f7e0e-6ef0-4be1-8ed3-61ed0db752ed"/*UseFullList*/,
-      "Position": {
-        "X": -200.0,
-        "Y": 45.0
-      }
-    },
-    {
       "InputId": "51545316-69fc-441f-b59f-44979e32972c"/*Pow*/,
       "Position": {
         "X": -200.0,
@@ -33,12 +26,11 @@
       "AddPadding": "True"
     },
     {
-      "InputId": "ca67bfaf-ede7-43ba-b279-fc1ddfbe2ffa"/*RangeStart*/,
+      "InputId": "748fe756-c7ee-4cc1-929e-078f99bea628"/*Offset*/,
       "Position": {
         "X": -200.0,
-        "Y": 45.0
-      },
-      "GroupTitle": "Settings"
+        "Y": 75.0
+      }
     },
     {
       "InputId": "cc812393-f080-4e17-a525-15b09f8acdd0"/*Gain*/,
@@ -47,19 +39,12 @@
         "Y": 135.0
       },
       "AddPadding": "True"
-    },
-    {
-      "InputId": "db868176-d51c-41aa-bafe-68c3e50e725e"/*RangeEnd*/,
-      "Position": {
-        "X": -200.0,
-        "Y": 90.0
-      }
     }
   ],
   "SymbolChildUis": [],
   "OutputUis": [
     {
-      "OutputId": "f01099a0-a196-4689-9900-edac07908714"/*CurveTexture*/,
+      "OutputId": "f01099a0-a196-4689-9900-edac07908714"/*ValuesTexture*/,
       "Position": {
         "X": 0.0,
         "Y": 0.0

@@ -6,7 +6,7 @@ namespace T3.Editor.Gui.Interaction;
 /// UserAction represents single atomic commands that can be mapped to keyboard shortcuts
 /// This enum list order will be the same as displayed in the shortcut editor. 
 /// </summary>
-public enum UserActions
+internal enum UserActions
 {
     None,
     TapBeatSync,
@@ -104,6 +104,10 @@ public enum UserActions
     LoadBookmark5, LoadBookmark6, LoadBookmark7, LoadBookmark8, LoadBookmark9,
     SaveBookmark0, SaveBookmark1, SaveBookmark2, SaveBookmark3, SaveBookmark4,
     SaveBookmark5, SaveBookmark6, SaveBookmark7, SaveBookmark8, SaveBookmark9,
+    
+    // Misc
+    RenderScreenshot,
+    RenderAnimation,
     
     // ReSharper disable once InconsistentNaming
     __Count,     

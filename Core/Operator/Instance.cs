@@ -235,7 +235,7 @@ public abstract partial class Instance :  IGuidPathContainer, IResourceConsumer
         #pragma warning restore CA1816
     }
 
-    private static void GatherResourcePackages(Instance? instance, ref List<SymbolPackage> resourceFolders)
+    private static void GatherResourcePackages(Instance? instance, ref List<SymbolPackage> resourcePackages)
     {
         if((instance!._status & InstanceStatus.ResourceFoldersDirty) == 0) 
             return;
@@ -243,21 +243,21 @@ public abstract partial class Instance :  IGuidPathContainer, IResourceConsumer
         instance._status &= ~InstanceStatus.ResourceFoldersDirty;
 
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-        if (resourceFolders != null)
+        if (resourcePackages != null)
         {
-            resourceFolders.Clear();
+            resourcePackages.Clear();
         }
         else
         {
-            resourceFolders = [];
+            resourcePackages = [];
         }
 
         while (instance != null)
         {
             var package = instance.Symbol.SymbolPackage;
-            if (!resourceFolders.Contains(package))
+            if (!resourcePackages.Contains(package))
             {
-                resourceFolders.Add(package);
+                resourcePackages.Add(package);
             }
 
             instance = instance.Parent;

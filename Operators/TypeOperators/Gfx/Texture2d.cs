@@ -15,24 +15,26 @@ public sealed class Texture2d : Instance<Texture2d>
     private void UpdateTexture(EvaluationContext context)
     {
         var size = Size.GetValue(context);
-        if (size.Height <= 0 || size.Width <= 0)
+        var arraySize = ArraySize.GetValue(context);
+        if (size.Height <= 0 || size.Width <= 0 || arraySize <=0 )
         {
-            Log.Warning($"Requested invalid texture resolution: {size}", this);
+            Log.Warning($"Requested invalid texture resolution: {size}  arraySize: {arraySize}", this);
             return;
         }
 
         var requestedMipLevels = MipLevels.GetValue(context);
         var maxMapLevels = (int)Math.Log2(Math.Max(size.Width, size.Height));
-        var mipLevels = Math.Min(requestedMipLevels, maxMapLevels) + 1;
+        var mipLevels = Math.Min(requestedMipLevels, maxMapLevels) + 1; // Adding 1 because 0 means -> max out levels. 1 means "only original resolution".
 
         try
         {
+
             var texDesc = new Texture2DDescription
                               {
                                   Width = size.Width,
                                   Height = size.Height,
                                   MipLevels = mipLevels,
-                                  ArraySize = ArraySize.GetValue(context),
+                                  ArraySize = arraySize,
                                   Format = Format.GetValue(context),
                                   //SampleDescription = SampleDescription.GetValue(context),
                                   SampleDescription = new SampleDescription(1, 0),

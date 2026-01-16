@@ -10,6 +10,10 @@
       "DefaultValue": null
     },
     {
+      "Id": "b9f38594-ce84-41d7-b57b-4bb1de81af13"/*StepFactor*/,
+      "DefaultValue": 0.9
+    },
+    {
       "Id": "c0490245-8f7c-4972-8ded-736883b4e650"/*Amount*/,
       "DefaultValue": 0.5
     }

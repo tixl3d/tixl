@@ -1,0 +1,24 @@
+{
+  "Id": "6502c40f-a38e-4bd9-8dbf-90e35079572d"/*CacheBoolean*/,
+  "Description": "Prevents multiple updates by forwarding a boolean value that was computed earlier.",
+  "InputUis": [
+    {
+      "InputId": "37e95081-96fb-4374-840f-3ecfee430181"/*Value*/,
+      "Relevancy": "Relevant",
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "b0fa6fed-3478-493a-98b8-f4e680dc936e"/*Result*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 300.0
+      }
+    }
+  ]
+}

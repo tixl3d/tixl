@@ -12,13 +12,6 @@
     {
       "Id": "99fca01a-e0a6-49dc-9535-ebde0f5f8744"/*Axis*/,
       "DefaultValue": 1
-    },
-    {
-      "Id": "deb91db5-cefb-4e0d-9244-d44bc6a21985"/*Size*/,
-      "DefaultValue": {
-        "X": 0.0,
-        "Y": 0.0
-      }
     }
   ],
   "Children": [],

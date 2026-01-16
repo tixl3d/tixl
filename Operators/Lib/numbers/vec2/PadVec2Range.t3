@@ -1,0 +1,29 @@
+{
+  "Id": "5454ce3e-8dc4-4058-9a17-6300d51c142f"/*PadVec2Range*/,
+  "Inputs": [
+    {
+      "Id": "5b56faab-7a94-4026-8089-a80db8ff2d9e"/*UniformScale*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "ae2368fa-e36c-40b2-b6f2-94d5cc95d3e2"/*A*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "Id": "d7dcbc7a-146d-42f0-84b1-a7d42f662487"/*ClampMinExtend*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "e7307b14-2702-4222-9dd6-7c39dc6dab8e"/*GuaranteedRange*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

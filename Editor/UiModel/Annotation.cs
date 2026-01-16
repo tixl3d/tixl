@@ -12,6 +12,7 @@ public sealed class Annotation : ISelectableCanvasObject
     public Guid Id { get; internal init; }
     public Vector2 PosOnCanvas { get; set; }
     public Vector2 Size { get; set; }
+    public bool Collapsed = false;
 
     internal Annotation Clone()
     {
@@ -22,7 +23,8 @@ public sealed class Annotation : ISelectableCanvasObject
                        Title = Title,
                        Color = Color,
                        PosOnCanvas = PosOnCanvas,
-                       Size = Size
+                       Size = Size,
+                       Collapsed = Collapsed,
                    };
     }
 }

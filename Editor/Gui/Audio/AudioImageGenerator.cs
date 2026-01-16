@@ -22,8 +22,8 @@ internal static class AudioImageGenerator
             imagePathAbsolute = null;
             return false;
         }
-
-        if (!ResourceManager.TryResolvePath(relativePath, instance, out var soundFilePathAbsolute, out _))
+            
+        if (!ResourceManager.TryResolveRelativePath(relativePath, instance, out var soundFilePathAbsolute, out _))
         {
             Log.Error($"Could not get absolute path for audio clip: {relativePath}");
             imagePathAbsolute = null;

@@ -110,7 +110,7 @@ internal sealed class TextSprites : Instance<TextSprites>
 
     private void UpdateMesh(EvaluationContext context)
     {
-        var text = Text.GetValue(context);
+        var text = Text.GetValue(context) ?? string.Empty;
 
         var bmFont = _bmFont.GetValue(context);
         if (bmFont == null)
@@ -229,7 +229,7 @@ internal sealed class TextSprites : Instance<TextSprites>
                                 Orientation = Quaternion.Identity,
                                 F2 = 1,
                                 Scale = Vector3.One,
-                                Color = Vector4.One,
+                                Color = color,
                             });
             outputIndex++;
             currentLineCharacterCount++;

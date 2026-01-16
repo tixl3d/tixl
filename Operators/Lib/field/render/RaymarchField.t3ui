@@ -6,8 +6,8 @@
     {
       "InputId": "0700d5cb-6a1e-43ad-b7fb-b9b7b1415584"/*WriteDepth*/,
       "Position": {
-        "X": 797.65765,
-        "Y": 326.41797
+        "X": 889.58496,
+        "Y": 342.71463
       }
     },
     {
@@ -38,7 +38,8 @@
       "GroupTitle": "Quality",
       "Description": "The number of raymarching steps. This has a major impact on the quality and performance. Normal values are between 50 and 150.\n",
       "Min": 0.0,
-      "Max": 150.0
+      "Max": 150.0,
+      "ClampMin": true
     },
     {
       "InputId": "340ca675-9356-4548-ba64-732181bebeef"/*SdfField*/,

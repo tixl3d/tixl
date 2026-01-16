@@ -1,0 +1,116 @@
+{
+  "Id": "e6d13d72-1c00-4cd1-8911-4fc0526fe4d6"/*MidiSysexOutputExample*/,
+  "Inputs": [],
+  "Children": [
+    {
+      "Id": "4b01ddc7-37e3-493b-b7c4-60ef033449df"/*String*/,
+      "SymbolId": "5880cbc3-a541-4484-a06a-0e6f77cdbe8e",
+      "InputValues": [
+        {
+          "Id": "ceeae47b-d792-471d-a825-49e22749b7b9"/*InputString*/,
+          "Type": "System.String",
+          "Value": "F0 47 00 73 60 00 04 42 08 01 01 F7"
+        }
+      ],
+      "Outputs": []
+    },
+    {
+      "Id": "4faca885-dc92-4641-8a50-97d45958885a"/*Trigger*/,
+      "SymbolId": "0bec016a-5e1b-467a-8273-368d4d6b9935",
+      "InputValues": [
+        {
+          "Id": "e7c1f0af-da6d-4e33-ac86-7dc96bfe7eb3"/*BoolValue*/,
+          "Type": "System.Boolean",
+          "Value": false
+        }
+      ],
+      "Outputs": []
+    },
+    {
+      "Id": "56ed772a-2690-4d45-a4a1-f3d20f1626d8"/*String*/,
+      "SymbolId": "5880cbc3-a541-4484-a06a-0e6f77cdbe8e",
+      "InputValues": [
+        {
+          "Id": "ceeae47b-d792-471d-a825-49e22749b7b9"/*InputString*/,
+          "Type": "System.String",
+          "Value": "F0 47 00 73 60 00 04 41 08 01 01 F7"
+        }
+      ],
+      "Outputs": []
+    },
+    {
+      "Id": "8fa34ee9-4d2d-4e58-9a0d-3792f1aacc8f"/*String*/,
+      "SymbolId": "5880cbc3-a541-4484-a06a-0e6f77cdbe8e",
+      "InputValues": [
+        {
+          "Id": "ceeae47b-d792-471d-a825-49e22749b7b9"/*InputString*/,
+          "Type": "System.String",
+          "Value": "F0 47 01 29 60 00 04 40 01 01 01 F7"
+        }
+      ],
+      "Outputs": []
+    },
+    {
+      "Id": "a6624e36-f2fc-468a-b2d0-05e565d61216"/*String*/,
+      "SymbolId": "5880cbc3-a541-4484-a06a-0e6f77cdbe8e",
+      "InputValues": [
+        {
+          "Id": "ceeae47b-d792-471d-a825-49e22749b7b9"/*InputString*/,
+          "Type": "System.String",
+          "Value": "F0 47 00 73 60 00 04 40 08 01 01 F7"
+        }
+      ],
+      "Outputs": []
+    },
+    {
+      "Id": "b89c6929-abc5-43ff-8fd2-7c77fba1cb2b"/*String*/,
+      "SymbolId": "5880cbc3-a541-4484-a06a-0e6f77cdbe8e",
+      "InputValues": [
+        {
+          "Id": "ceeae47b-d792-471d-a825-49e22749b7b9"/*InputString*/,
+          "Type": "System.String",
+          "Value": "F0 47 00 73 60 00 04 42 08 01 01 F7"
+        }
+      ],
+      "Outputs": []
+    },
+    {
+      "Id": "e3f8adc1-7b93-499c-a16b-01d57e595c37"/*MidiSysexOutput*/,
+      "SymbolId": "78cadb24-5a77-41e2-908f-01d61140c769",
+      "InputValues": [
+        {
+          "Id": "d7189d4a-b6c7-4d4f-9cee-1c37ed55b4e5"/*Device*/,
+          "Type": "System.String",
+          "Value": "Akai APC40"
+        }
+      ],
+      "Outputs": []
+    },
+    {
+      "Id": "ebd5435f-c1c4-407b-a281-2e879bc714fe"/*String*/,
+      "SymbolId": "5880cbc3-a541-4484-a06a-0e6f77cdbe8e",
+      "InputValues": [
+        {
+          "Id": "ceeae47b-d792-471d-a825-49e22749b7b9"/*InputString*/,
+          "Type": "System.String",
+          "Value": "F0 47 01 29 60 00 04 41 01 01 01 F7"
+        }
+      ],
+      "Outputs": []
+    }
+  ],
+  "Connections": [
+    {
+      "SourceParentOrChildId": "4faca885-dc92-4641-8a50-97d45958885a",
+      "SourceSlotId": "2451ea62-9915-4ec1-a65e-4d44a3758fa8",
+      "TargetParentOrChildId": "e3f8adc1-7b93-499c-a16b-01d57e595c37",
+      "TargetSlotId": "611e8c42-9954-421c-8071-1e959478c8fe"
+    },
+    {
+      "SourceParentOrChildId": "a6624e36-f2fc-468a-b2d0-05e565d61216",
+      "SourceSlotId": "dd9d8718-addc-49b1-bd33-aac22b366f94",
+      "TargetParentOrChildId": "e3f8adc1-7b93-499c-a16b-01d57e595c37",
+      "TargetSlotId": "e054dece-d5ce-4675-9e24-d29e616ce7de"
+    }
+  ]
+}

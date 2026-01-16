@@ -1,0 +1,195 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UserSecretsId>4ddcedc9-2c55-476d-9aeb-8e069ecd278a</UserSecretsId>
+    <RootNamespace>t3.mediapipe</RootNamespace>
+    <AssemblyName>$(RootNamespace)</AssemblyName>
+    <Configurations>Debug;Release</Configurations>
+    <Platforms>AnyCPU</Platforms>
+    <VersionPrefix>1.0.5</VersionPrefix>
+    <HomeGuid>00000000-0000-0000-0000-000000000000</HomeGuid>
+    <EditorVersion>4.0.3</EditorVersion>
+    <IsEditorOnly>false</IsEditorOnly>
+    <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <NoWarn>0108;9084;NU1900</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <NoWarn>0108;9084;NU1900;CS8981</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <NoWarn>0108;9084;NU1900;CS8981</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <Using Include="System" />
+    <Using Include="System.Numerics" />
+    <Using Include="System.Linq" />
+    <Using Include="System.Linq.Enumerable" Static="True" />
+    <Using Include="System.Collections" />
+    <Using Include="System.Linq.Expressions" />
+    <Using Include="System.Collections.Generic" />
+    <Using Include="System.Collections.Concurrent" />
+    <Using Include="System.Collections.ObjectModel" />
+    <Using Include="System.Diagnostics.CodeAnalysis" />
+    <Using Include="System.Runtime.CompilerServices" />
+    <Using Include="System.Text" />
+    <Using Include="System.Net" />
+    <Using Include="System.Net.Http" />
+    <Using Include="System.Threading.Tasks" />
+    <Using Include="System.IO" />
+    <Using Include="T3.Core.Logging" />
+    <Using Include="System.Runtime.InteropServices" />
+    <Using Include="T3.Core.Operator" />
+    <Using Include="T3.Core.Operator.Attributes" />
+    <Using Include="T3.Core.Operator.Slots" />
+    <Using Include="T3.Core.DataTypes" />
+    <Using Include="T3.Core.Operator.Interfaces" />
+    <Using Include="T3.Core.Resource" />
+    <Using Alias="Buffer" Include="SharpDX.Direct3D11.Buffer" />
+    <Using Alias="ShaderResourceView" Include="SharpDX.Direct3D11.ShaderResourceView" />
+    <Using Alias="UnorderedAccessView" Include="SharpDX.Direct3D11.UnorderedAccessView" />
+    <Using Alias="CullMode" Include="SharpDX.Direct3D11.CullMode" />
+    <Using Alias="FillMode" Include="SharpDX.Direct3D11.FillMode" />
+    <Using Alias="TextureAddressMode" Include="SharpDX.Direct3D11.TextureAddressMode" />
+    <Using Alias="Filter" Include="SharpDX.Direct3D11.Filter" />
+    <Using Alias="Format" Include="SharpDX.DXGI.Format" />
+    <Using Alias="Texture2DDescription" Include="SharpDX.Direct3D11.Texture2DDescription" />
+    <Using Alias="Texture3DDescription" Include="SharpDX.Direct3D11.Texture3DDescription" />
+    <Using Alias="RenderTargetBlendDescription" Include="SharpDX.Direct3D11.RenderTargetBlendDescription" />
+    <Using Alias="SamplerState" Include="SharpDX.Direct3D11.SamplerState" />
+    <Using Alias="UnorderedAccessViewBufferFlags" Include="SharpDX.Direct3D11.UnorderedAccessViewBufferFlags" />
+    <Using Alias="RawRectangle" Include="SharpDX.Mathematics.Interop.RawRectangle" />
+    <Using Alias="RawViewportF" Include="SharpDX.Mathematics.Interop.RawViewportF" />
+    <Using Alias="ResourceUsage" Include="SharpDX.Direct3D11.ResourceUsage" />
+    <Using Alias="ResourceOptionFlags" Include="SharpDX.Direct3D11.ResourceOptionFlags" />
+    <Using Alias="InputLayout" Include="SharpDX.Direct3D11.InputLayout" />
+    <using Alias="PrimitiveTopology" Include="SharpDX.Direct3D.PrimitiveTopology" />
+    <Using Alias="BlendState" Include="SharpDX.Direct3D11.BlendState" />
+    <Using Alias="Comparison" Include="SharpDX.Direct3D11.Comparison" />
+    <Using Alias="BlendOption" Include="SharpDX.Direct3D11.BlendOption" />
+    <Using Alias="BlendOperation" Include="SharpDX.Direct3D11.BlendOperation" />
+    <Using Alias="BindFlags" Include="SharpDX.Direct3D11.BindFlags" />
+    <Using Alias="ColorWriteMaskFlags" Include="SharpDX.Direct3D11.ColorWriteMaskFlags" />
+    <Using Alias="CpuAccessFlags" Include="SharpDX.Direct3D11.CpuAccessFlags" />
+    <Using Alias="DepthStencilView" Include="SharpDX.Direct3D11.DepthStencilView" />
+    <Using Alias="DepthStencilState" Include="SharpDX.Direct3D11.DepthStencilState" />
+    <Using Alias="RenderTargetView" Include="SharpDX.Direct3D11.RenderTargetView" />
+    <Using Alias="RasterizerState" Include="SharpDX.Direct3D11.RasterizerState" />
+    <Using Alias="Point" Include="T3.Core.DataTypes.Point" />
+    <Using Alias="Texture2D" Include="T3.Core.DataTypes.Texture2D" />
+    <Using Alias="Texture3D" Include="T3.Core.DataTypes.Texture3D" />
+    <Using Alias="Vector2" Include="System.Numerics.Vector2" />
+    <Using Alias="Vector3" Include="System.Numerics.Vector3" />
+    <Using Alias="Vector4" Include="System.Numerics.Vector4" />
+    <Using Alias="Matrix4x4" Include="System.Numerics.Matrix4x4" />
+    <Using Alias="Quaternion" Include="System.Numerics.Quaternion" />
+    <Using Alias="Int2" Include="T3.Core.DataTypes.Vector.Int2" />
+    <Using Alias="Int3" Include="T3.Core.DataTypes.Vector.Int3" />
+    <Using Alias="Int4" Include="T3.Core.DataTypes.Vector.Int4" />
+    <Using Alias="ResourceManager" Include="T3.Core.Resource.ResourceManager" />
+    <Using Alias="ComputeShader" Include="T3.Core.DataTypes.ComputeShader" />
+    <Using Alias="PixelShader" Include="T3.Core.DataTypes.PixelShader" />
+    <Using Alias="VertexShader" Include="T3.Core.DataTypes.VertexShader" />
+    <Using Alias="GeometryShader" Include="T3.Core.DataTypes.GeometryShader" />
+    <Using Alias="SampleDescription" Include="SharpDX.DXGI.SampleDescription" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../Core/Core.csproj" Private="false" PrivateAssets="all" />
+    <ProjectReference Include="../../Logging/Logging.csproj" Private="false" PrivateAssets="all" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="CppSharp.Runtime" Version="1.1.5.3168" />
+    <PackageReference Include="OpenGL.Net" Version="0.8.4">
+      <NoWarn>NU1701</NoWarn>
+    </PackageReference>
+    <PackageReference Include="Google.Protobuf" Version="3.31.1" />
+  </ItemGroup>
+  <!-- Native dependencies -->
+  <ItemGroup>
+    <Content Include="./dependencies/**/*" CopyToOutputDirectory="PreserveNewest">
+      <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Content>
+    <None Update="Libs\mediapipe_c.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Remove="Examples\**" />
+  </ItemGroup>
+  <!-- Include Resources/** into output/Resources -->
+  <ItemGroup Condition="'$(Configuration)' == 'Release'">
+    <Content Include="Resources/**/*" Exclude="bin/**">
+      <Link>Resources/%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="**/*.t3" Exclude="bin/**">
+      <Link>Symbols/%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="**/*.t3ui" Exclude="bin/**">
+      <Link>SymbolUis/%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="**/*.cs" Exclude="bin/**;obj/**">
+      <Link>SourceCode/%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup Condition="'$(Configuration)' == 'Debug'">
+    <Content Include="Resources/**/*" Exclude="bin/**">
+      <Link>Resources/%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="**/*.t3" Exclude="bin/**">
+      <Link>Symbols/%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="**/*.t3ui" Exclude="bin/**">
+      <Link>SymbolUis/%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="**/*.cs" Exclude="bin/**;obj/**">
+      <Link>SourceCode/%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Examples\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Remove="Examples\**" />
+  </ItemGroup>
+  <Target Name="CreatePackageInfo" AfterTargets="AfterBuild">
+    <ItemGroup Label="Define json structure of referenced operator packages">
+      <OpPacks Include="@(Operators)">
+        <OpPackageInfoJson>
+                    {
+                    "Identity": "%(Identity)",
+                    "Version": "%(Version)",
+                    "ResourcesOnly": "%(ResourcesOnly)"
+                    }
+                </OpPackageInfoJson>
+      </OpPacks>
+    </ItemGroup>
+    <PropertyGroup>
+      <OperatorReferenceArray>@(OpPacks -> '%(OpPackageInfoJson)', ',')</OperatorReferenceArray>
+      <OperatorPackageInfoJson>{
+                "AssemblyFileName": "$(AssemblyName)",
+                "HomeGuid": "$(HomeGuid)",
+                "RootNamespace": "$(RootNamespace)",
+                "Version": "$(VersionPrefix)",
+                "EditorVersion": "$(EditorVersion)",
+          "IsEditorOnly": "$(IsEditorOnly)",
+                "OperatorPackages":
+                [$(OperatorReferenceArray)
+                ]
+                }
+            </OperatorPackageInfoJson>
+    </PropertyGroup>
+    <WriteLinesToFile File="$(OutputPath)/OperatorPackage.json" Lines="$(OperatorPackageInfoJson)" Overwrite="True" Encoding="UTF-8" />
+  </Target>
+  <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild">
+    <!-- Clear previous files in the export folder -->
+    <RemoveDir Directories="bin/$(Configuration)" />
+  </Target>
+</Project>

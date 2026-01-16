@@ -6,8 +6,8 @@
     {
       "InputId": "1168094f-1eee-4ed7-95e2-9459e6171e08"/*Rotation*/,
       "Position": {
-        "X": -557.6606,
-        "Y": 912.47046
+        "X": 165.54813,
+        "Y": 965.0075
       },
       "Description": "Rotates the incoming mesh around the following axes:\n\nX: Horizontal axis\nY: Vertical axis\nZ: Forward axis\n",
       "Min": -180.0,
@@ -17,8 +17,8 @@
     {
       "InputId": "71531810-78ab-449e-bb13-bfe5fe3d2a69"/*UseVertexSelection*/,
       "Position": {
-        "X": -557.6606,
-        "Y": 1047.4706
+        "X": 25.548126,
+        "Y": 1140.0073
       },
       "Description": "Defines whether only selected vertices should be affected by the manipulation",
       "AddPadding": "True"
@@ -26,8 +26,8 @@
     {
       "InputId": "86791d0a-97c3-413a-89d9-aa2ddd40ce4a"/*UniformScale*/,
       "Position": {
-        "X": -557.6606,
-        "Y": 1002.4706
+        "X": 165.54813,
+        "Y": 1035.0076
       },
       "Description": "Uniformly scales the incoming mesh",
       "AddPadding": "True"
@@ -36,15 +36,15 @@
       "InputId": "c2c9afc7-3474-40c3-be82-b9f48c92a2c5"/*Mesh*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -557.8594,
-        "Y": 773.0897
+        "X": -621.14307,
+        "Y": 789.89764
       }
     },
     {
       "InputId": "ccd89dd2-1baa-4a0c-8ec3-5a0e77551379"/*Pivot*/,
       "Position": {
-        "X": -557.6606,
-        "Y": 1092.4706
+        "X": 165.54813,
+        "Y": 1070.0076
       },
       "GroupTitle": "Transform Pivot",
       "Description": "Moves the pivot (center point) of the incoming subgraph:\n\nX (-left / +right) \nY (-down / +up) \nZ (-forward / +backwards)\n\nThe pivot point determines the location of the incoming subgraph gizmo. Transforming its location can make it easier to perform transformations around the position you want.\n"
@@ -52,8 +52,8 @@
     {
       "InputId": "da607ebd-6fec-4ae8-bf91-b70dcb794557"/*Translation*/,
       "Position": {
-        "X": -557.6606,
-        "Y": 867.47046
+        "X": 165.54813,
+        "Y": 930.0075
       },
       "GroupTitle": "Transform Mesh",
       "Description": "Moves the incoming mesh\n\nX (-left / +right), \nY (-down / +up), \nZ (-forward / +backwards)\n"
@@ -61,8 +61,8 @@
     {
       "InputId": "f37c11a5-b210-4e83-8ebd-64ea49ee9b96"/*Scale*/,
       "Position": {
-        "X": -557.6606,
-        "Y": 957.47064
+        "X": 165.54813,
+        "Y": 1000.0075
       },
       "Description": "Scales the incoming subgraph in the following directions:\n\nX: Width\nY: Height\nZ: Depth\n"
     }
@@ -71,8 +71,8 @@
     {
       "ChildId": "020d3da9-7ca7-4709-8869-a3e0d075a2d5"/*CalcDispatchCount*/,
       "Position": {
-        "X": 250.26355,
-        "Y": 575.8797
+        "X": 1.9657593,
+        "Y": 551.6556
       }
     },
     {
@@ -85,50 +85,50 @@
     {
       "ChildId": "1c233d4c-fb3c-47ac-9461-55b7ee4dc323"/*ComputeShader*/,
       "Position": {
-        "X": 106.335434,
-        "Y": 516.8489
+        "X": -138.03424,
+        "Y": 516.6556
       }
     },
     {
       "ChildId": "331e7588-3b1d-4f76-8021-b22147cd7972"/*BoolToFloat*/,
       "Position": {
-        "X": 129.3053,
-        "Y": 979.00183
+        "X": 165.54813,
+        "Y": 1140.0073
       }
     },
     {
       "ChildId": "3f67b99a-f4c7-4b45-ba29-0e4f7c00444f"/*GetBufferComponents*/,
       "Position": {
-        "X": 279.3053,
-        "Y": 1021.7268
+        "X": 25.548124,
+        "Y": 1348.3009
       }
     },
     {
       "ChildId": "52ea84e0-0daa-4c24-b50f-848a492d4df4"/*ExecuteBufferUpdate*/,
       "Position": {
-        "X": 625.1089,
-        "Y": 524.0607
+        "X": 475.1089,
+        "Y": 699.0607
       }
     },
     {
       "ChildId": "55f0a2a3-093b-426a-8955-f225413a96c7"/*GetSRVProperties*/,
       "Position": {
-        "X": -73.12926,
-        "Y": 695.17487
+        "X": -138.03426,
+        "Y": 586.6556
       }
     },
     {
       "ChildId": "58f46406-99ac-4552-ab39-5100ea0242e2"/*GetBufferComponents*/,
       "Position": {
-        "X": -253.23386,
-        "Y": 700.543
+        "X": -481.14288,
+        "Y": 859.89764
       }
     },
     {
       "ChildId": "7d9f0525-6ecc-4a74-9ae1-8f697b5b8aa0"/*_MeshBufferComponents*/,
       "Position": {
-        "X": -407.85938,
-        "Y": 773.0897
+        "X": -481.14288,
+        "Y": 789.89764
       }
     },
     {
@@ -139,36 +139,36 @@
         "Y": 130.72499
       },
       "Position": {
-        "X": 279.3053,
-        "Y": 871.00183
+        "X": 305.54813,
+        "Y": 1105.0074
       }
     },
     {
       "ChildId": "a616e533-23fa-424a-8eb4-d0d1b43b9482"/*PBRVertex.Stride*/,
       "Position": {
-        "X": -43.079346,
-        "Y": 1073.6066
+        "X": -114.45187,
+        "Y": 1313.3009
       }
     },
     {
       "ChildId": "b3de1c6c-3781-4512-b80e-c7e9f21a95bd"/*TransformMatrix*/,
       "Position": {
-        "X": 129.3053,
-        "Y": 871.00183
+        "X": 305.54813,
+        "Y": 930.0075
       }
     },
     {
       "ChildId": "d44f886a-f752-48f5-b2a1-1eb20858e81d"/*_AssembleMeshBuffers*/,
       "Position": {
-        "X": 775.1089,
-        "Y": 524.0607
+        "X": 698.07605,
+        "Y": 771.1472
       }
     },
     {
       "ChildId": "fb5aa285-2f39-4fdb-b00b-5114d61223ff"/*StructuredBufferWithViews*/,
       "Position": {
-        "X": 106.920654,
-        "Y": 1073.6066
+        "X": 25.548124,
+        "Y": 1278.3009
       }
     }
   ],
@@ -176,8 +176,8 @@
     {
       "OutputId": "9ff1bfed-4554-4c55-9557-8b318ac47afe"/*Result*/,
       "Position": {
-        "X": 925.1089,
-        "Y": 524.0607
+        "X": 875.69165,
+        "Y": 954.2819
       }
     }
   ]

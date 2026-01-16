@@ -1,0 +1,99 @@
+{
+  "Id": "7cdd542a-39ab-4aec-bfdb-dffa86c0c18d"/*I02d_GradientRepeat*/,
+  "Description": "LinearGradient: Repeat and PingPong",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "02306182-bac3-42d0-8d5f-6fb3c540aed1"/*Time*/,
+      "Position": {
+        "X": 1241.7266,
+        "Y": 1861.0908
+      }
+    },
+    {
+      "ChildId": "19ae4415-ef55-4f65-98cb-60981b0ab4e7"/*LinearGradient*/,
+      "AnnotationId": "06217683-7dc4-4bfd-bff4-6b1effc0bd5b",
+      "Position": {
+        "X": 1293.53,
+        "Y": 2104.1514
+      }
+    },
+    {
+      "ChildId": "25692173-6d3e-4bef-9464-318c65f10280"/*Time*/,
+      "AnnotationId": "06217683-7dc4-4bfd-bff4-6b1effc0bd5b",
+      "Position": {
+        "X": 1153.53,
+        "Y": 2139.1514
+      }
+    },
+    {
+      "ChildId": "aa9e5f28-5a93-4475-b25f-9b8297578951"/*LinearGradient*/,
+      "Position": {
+        "X": 1241.7267,
+        "Y": 1938.4894
+      }
+    },
+    {
+      "ChildId": "b0bd57f2-e5b8-4be0-a5a3-72402a5770c3"/*LinearGradient*/,
+      "AnnotationId": "606c89c3-3cd5-4883-8da9-101ee8d767f0",
+      "Position": {
+        "X": 1441.7301,
+        "Y": 2334.827
+      }
+    },
+    {
+      "ChildId": "de9596c5-e296-458b-b22f-d85d2b89f31f"/*ImageQuiz*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2018.4391
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "5ac5edc2-9aca-4d5b-9382-84eb98a2c225"/*ColorBuffer*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2088.439
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "06217683-7dc4-4bfd-bff4-6b1effc0bd5b",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1120.0,
+        "Y": 2054.7593
+      },
+      "Size": {
+        "X": 350.0,
+        "Y": 150.24072
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "5a106d6d-8afa-4389-8273-58b566b8dc9f",
+      "Description": "Repeating a gradient can create strong patterns with very little setup."
+    },
+    {
+      "Id": "28934c64-d789-42f3-b435-b6eaec0b7764",
+      "Description": "Enabling PingPong mirrors the gradient in the middle."
+    },
+    {
+      "Id": "66fb912b-8e94-427c-99b7-1279e19adcbf",
+      "ChildId": "aa9e5f28-5a93-4475-b25f-9b8297578951",
+      "InputId": "5774969c-ef4d-482e-ab37-b3a84b09debb",
+      "Description": "Use Repeat and PingPong to recreate the goal.",
+      "Style": "CallToAction"
+    }
+  ]
+}

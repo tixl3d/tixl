@@ -8,16 +8,15 @@ using T3.Core.Operator.Interfaces;
 using T3.Core.Operator.Slots;
 using T3.Core.Resource;
 using T3.Core.Utils;
+using T3.Editor.Gui.Dialogs;
 using T3.Editor.Gui.OpUis;
-using T3.Editor.Gui.Graph.Dialogs;
-using T3.Editor.Gui.Graph.Legacy.Interaction;
-using T3.Editor.Gui.Graph.Legacy.Interaction.Connections;
+using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Interaction.TransformGizmos;
-using T3.Editor.Gui.MagGraph.Interaction;
 using T3.Editor.Gui.OutputUi;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows;
+using T3.Editor.Gui.Interaction;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.ProjectHandling;
@@ -25,9 +24,12 @@ using T3.Editor.UiModel.Selection;
 using Color = T3.Core.DataTypes.Vector.Color;
 using Texture2D = T3.Core.DataTypes.Texture2D;
 using Vector2 = System.Numerics.Vector2;
+using T3.Editor.Gui.Interaction.Keyboard;
+using T3.Editor.Gui.Legacy.Interaction;
+using T3.Editor.Gui.Legacy.Interaction.Connections;
+using T3.Editor.Gui.MagGraph.Interaction;
 
-
-namespace T3.Editor.Gui.Graph.Legacy;
+namespace T3.Editor.Gui.Legacy;
 
 /// <summary>
 /// Renders a graphic representation of a SymbolChild within the current GraphWindow.
@@ -288,7 +290,7 @@ internal sealed class GraphNode
                 // A horrible work around to prevent exception because CompositionOp changed during drawing.
                 // A better solution would defer setting the compositionOp to the beginning of next frame.
                 var justOpenedChild = false;
-                if (hovered && ImGui.IsMouseDoubleClicked(0)
+                if (hovered && (ImGui.IsMouseDoubleClicked(0) || UserActions.OpenOperator.Triggered())
                             && !RenamingOperator.IsOpen
                             && (customUiResult & OpUi.CustomUiResult.PreventOpenSubGraph) == 0)
                 {
@@ -985,7 +987,7 @@ internal sealed class GraphNode
                     ImGui.BeginTooltip();
                     ImGui.TextUnformatted($".{outputDef.Name}");
                     ImGui.PushFont(Fonts.FontSmall);
-                    ImGui.TextColored(UiColors.Gray, $"<{TypeNameRegistry.Entries[outputDef.ValueType]}>\n{output.DirtyFlag.NumUpdatesWithinFrame} Updates\n({output.DirtyFlag.Trigger})");
+                    ImGui.TextColored(UiColors.Gray.Rgba, $"<{TypeNameRegistry.Entries[outputDef.ValueType]}>\n{output.DirtyFlag.NumUpdatesWithinFrame} Updates\n({output.DirtyFlag.Trigger})");
                     ImGui.PopFont();
                     ImGui.EndTooltip();
 
@@ -1114,13 +1116,11 @@ internal sealed class GraphNode
                     }
 
                     ImGui.TextUnformatted($".{inputDef.Name}");
-                    ImGui.PushFont(Fonts.FontSmall);
-                    ImGui.TextColored(UiColors.Gray, $"<{TypeNameRegistry.Entries[inputDef.DefaultValue.ValueType]}>");
-                    ImGui.PopFont();
+                    CustomComponents.StylizedText($"<{TypeNameRegistry.Entries[inputDef.DefaultValue.ValueType]}>", Fonts.FontSmall, UiColors.Gray);
                     if (isMissing)
                     {
                         FormInputs.AddVerticalSpace(5);
-                        ImGui.TextColored(UiColors.StatusAttention, $"Requires input");   
+                        ImGui.TextColored(UiColors.StatusAttention.Rgba, $"Requires input");   
                     }
                 }
                 ImGui.EndTooltip();

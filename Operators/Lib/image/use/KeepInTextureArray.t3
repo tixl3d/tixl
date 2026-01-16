@@ -1,0 +1,27 @@
+{
+  "Id": "a783908a-63c2-4961-94ca-b97d17ed0788"/*PickFromTextureArray*/,
+  "Inputs": [
+    {
+      "Id": "0227dbe2-797b-465d-bc48-fd47f42b6cd9"/*ReadIndex*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "4cac523c-27bf-4f57-b13f-8d41038c5587"/*SourceTexture*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "6e12ecdb-9b4c-40a4-87d8-5279e2d855d6"/*ArraySize*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "c829e9d6-a00f-4a80-8f9a-7c6152aaac01"/*WriteIndex*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "ff4701fe-16b8-48aa-9842-91d811d05306"/*TriggerWrite*/,
+      "DefaultValue": false
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

@@ -16,7 +16,7 @@
     },
     {
       "Id": "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3"/*FontPath*/,
-      "DefaultValue": "Resources/fonts/Roboto-Black.fnt"
+      "DefaultValue": "/t3/fonts/Roboto-Black.fnt"
     },
     {
       "Id": "7a76d5aa-1f44-4238-9333-7c2951becc31"/*EnableZTest*/,
@@ -165,11 +165,6 @@
           "Id": "f2dd87b1-7f37-4b02-871b-b2e35972f246"/*Text*/,
           "Type": "System.String",
           "Value": "This is test \njust perfect\nI don't like it. \nI'm not sure..."
-        },
-        {
-          "Id": "ffd2233a-8f3e-426b-815b-8071e4c779ab"/*Slant*/,
-          "Type": "System.Single",
-          "Value": 0.95666665
         }
       ],
       "Outputs": []

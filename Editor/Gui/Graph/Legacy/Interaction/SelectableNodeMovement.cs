@@ -1,8 +1,8 @@
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
-using T3.Editor.Gui.Graph.Interaction;
-using T3.Editor.Gui.Graph.Legacy.Interaction.Connections;
+using T3.Editor.Gui.Interaction;
+using T3.Editor.Gui.Legacy.Interaction.Connections;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
@@ -12,7 +12,7 @@ using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
 using Vector2 = System.Numerics.Vector2;
 
-namespace T3.Editor.Gui.Graph.Legacy.Interaction;
+namespace T3.Editor.Gui.Legacy.Interaction;
 
 /// <summary>
 /// Handles selection and dragging (with snapping) of node canvas elements

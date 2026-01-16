@@ -7,12 +7,13 @@ using SharpDX.DXGI;
 using T3.Core.IO;
 using T3.Core.Resource;
 using T3.Core.SystemUi;
-using T3.Editor.Gui;
+using T3.Editor.Gui; // for ReleaseMode
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
 using Device = SharpDX.Direct3D11.Device;
 using PixelShader = T3.Core.DataTypes.PixelShader;
 using VertexShader = T3.Core.DataTypes.VertexShader;
+using Vector2 = System.Numerics.Vector2;
 
 namespace T3.Editor.App;
 
@@ -45,16 +46,56 @@ internal static class ProgramWindows
         if (Main.IsFullScreen == UserSettings.Config.FullScreen)
             return;
 
+        var screenCount = Screen.AllScreens.Length;
         if (UserSettings.Config.FullScreen)
         {
-            var screenCount = Screen.AllScreens.Length;
             Main.SetFullScreen(UserSettings.Config.FullScreenIndexMain < screenCount ? UserSettings.Config.FullScreenIndexMain : 0);
-            Viewer.SetFullScreen(UserSettings.Config.FullScreenIndexViewer < screenCount ? UserSettings.Config.FullScreenIndexViewer : 0);
         }
         else
         {
             Main.SetSizeable();
-            Viewer.SetSizeable();
+        }
+    }
+
+    /// <summary>
+    /// Updates the viewer window spanning bounds dynamically
+    /// Called whenever the spanning area selection changes in the Screen Manager
+    /// </summary>
+    internal static void UpdateViewerSpanning(ImRect spanningBounds)
+    {
+        if (Viewer == null)
+            return;
+
+        // Check if there's a valid spanning area defined
+        if (spanningBounds.Max.X > 0 && spanningBounds.Max.Y > 0)
+        {
+            // Update the viewer window to the spanning bounds
+            Viewer.UpdateSpanningBounds(
+                (int)spanningBounds.Min.X,
+                (int)spanningBounds.Min.Y,
+                (int)spanningBounds.Max.X,
+                (int)spanningBounds.Max.Y
+            );
+        }
+    
+    }
+
+    /// <summary>
+    /// Call this when the secondary render window is enabled/disabled
+    /// to ensure the viewer window is properly configured
+    /// </summary>
+    internal static void UpdateViewerWindowState()
+    {
+        if (Viewer == null)
+            return;
+
+        var spanning = UserSettings.Config.OutputArea;
+        var spanningBounds = new ImRect(new Vector2(spanning.X, spanning.Y), new Vector2(spanning.Z, spanning.W));
+
+        var isSpanningValid = spanningBounds.Max.X > 0 && spanningBounds.Max.Y > 0;
+        if (isSpanningValid)
+        {
+            UpdateViewerSpanning(spanningBounds);
         }
     }
 
@@ -144,10 +185,10 @@ internal static class ProgramWindows
 
             //Try to load 11.1 if possible, revert to 11.0 auto
             FeatureLevel[] levels =
-{
+            [
                 FeatureLevel.Level_11_1,
                 FeatureLevel.Level_11_0,
-            };
+            ];
 
             
             

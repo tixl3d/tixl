@@ -83,7 +83,7 @@ public sealed class SequenceAnim : Instance<SequenceAnim>
         _bias = Bias.GetValue(context);
         _rate = Rate.GetValue(context);
             
-        var outputMode = (OutputModes)OutputMode.GetValue(context).Clamp(0, Enum.GetValues(typeof(OutputModes)).Length - 1);
+        var outputMode = (OutputModes)OutputMode.GetValue(context).Clamp(0, Enum.GetValues<OutputModes>().Length - 1);
             
             
         var hasIndexChanged = SequenceIndex.DirtyFlag.IsDirty;
@@ -103,7 +103,10 @@ public sealed class SequenceAnim : Instance<SequenceAnim>
             return;
         }
 
-        var time = context.LocalFxTime * _rate;
+        var phase = Phase.GetValue(context);
+        //var phaseShift = MathF.Abs(_rate) < 0.0001 ? 0 : phase / _rate;  
+        
+        var time = context.LocalFxTime * _rate + phase;
         if (OverrideTime.HasInputConnections)
         {
             var overrideTime = OverrideTime.GetValue(context);
@@ -193,12 +196,12 @@ public sealed class SequenceAnim : Instance<SequenceAnim>
             
             
             
-        var updateMode = (UpdateModes)UpdateMode.GetValue(context).Clamp(0, Enum.GetNames(typeof(UpdateModes)).Length - 1);
+        var updateMode = (UpdateModes)UpdateMode.GetValue(context).Clamp(0, Enum.GetNames<UpdateModes>().Length - 1);
         switch (updateMode)
         {
             case UpdateModes.Random:
             {
-                var seedValue = (uint)(time *CurrentSequence.Count);
+                var seedValue = (uint)(time * CurrentSequence.Count);
                 var randomValue = MathUtils.XxHash(seedValue);
                 var fraction = ((NormalizedBarTime * CurrentSequence.Count) % 1 / CurrentSequence.Count).Clamp(0, 0.999999f); 
                 NormalizedBarTime = ((float)(randomValue % CurrentSequence.Count)/CurrentSequence.Count + fraction ).Clamp(0, 0.999999f);
@@ -279,15 +282,15 @@ public sealed class SequenceAnim : Instance<SequenceAnim>
     }
         
 
-    private float SchlickBias(float x, float bias)
+    private static float SchlickBias(float x, float bias)
     {
         return x / ((1 / bias - 2) * (1 - x) + 1);
     }
 
-    private List<List<float>> _sequences = new(16);
-    private static readonly List<float> _emptySequence = new();
+    private readonly List<List<float>> _sequences = new(16);
+    private static readonly List<float> _emptySequence = [];
     private string _sequencesDefinition = string.Empty;
-    private const float MaxCharacterValue = 8;
+    private const float MaxCharacterValue = 9;
     private bool _recordingValueIncreased;
         
     private double _recordingStartTime = double.NegativeInfinity;
@@ -334,6 +337,9 @@ public sealed class SequenceAnim : Instance<SequenceAnim>
     [Input(Guid = "F0AE47AE-5849-4D81-BAE0-9B6EC44949EF")]
     public readonly InputSlot<float> Rate = new();
 
+    [Input(Guid = "3BC4BEEC-A11F-4F89-A38F-16FD59F5F605")]
+    public readonly InputSlot<float> Phase = new();
+    
     [Input(Guid = "5B86B2EC-1043-4A90-9A45-F629CFB7F713", MappedType = typeof(OutputModes))]
     public readonly InputSlot<int> OutputMode = new();
 

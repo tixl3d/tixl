@@ -11,6 +11,8 @@ cbuffer Params : register(b0)
     float Frequency;
     float Phase;
     float Variation;
+
+    float SpeedFactor;
 }
 
 cbuffer Params : register(b1)
@@ -18,7 +20,7 @@ cbuffer Params : register(b1)
     /*{FLOAT_PARAMS}*/
 }
 
-RWStructuredBuffer<Particle> Particles : u0; 
+RWStructuredBuffer<Particle> Particles : u0;
 
 sampler ClampedSampler : register(s0);
 
@@ -46,26 +48,24 @@ inline float GetDistance(float3 p3)
 
 //===================================================================
 
-
-[numthreads(64,1,1)]
-void main(uint3 i : SV_DispatchThreadID)
+[numthreads(64, 1, 1)] void main(uint3 i : SV_DispatchThreadID)
 {
     uint maxParticleCount, _;
     Particles.GetDimensions(maxParticleCount, _);
-    if(i.x >= maxParticleCount) {
+    if (i.x >= maxParticleCount)
+    {
         return;
     }
 
-    float3 variationOffset = hash41u(i.x).xyz * Variation;    
-    float3 pos = Particles[i.x].Position*0.9; // avoid simplex noice glitch at -1,0,0 
-    float3 noiseLookup = (pos + variationOffset + Phase* float3(1,-1,0)  ) * Frequency;
+    float3 variationOffset = hash41u(i.x).xyz * Variation;
+    float3 pos = Particles[i.x].Position * 0.9; // avoid simplex noice glitch at -1,0,0
+    float3 noiseLookup = (pos + variationOffset + Phase * float3(1, -1, 0)) * Frequency;
     float3 velocity = Particles[i.x].Velocity;
-    float speed = length(velocity);
+    // float speed = length(velocity);
 
     float4 field = GetField(float4(pos, 0));
-    float fieldAmount = (field.r + field.g + field.b)/3;
+    float fieldAmount = (field.r + field.g + field.b) / 3;
 
-    float amount =  Amount/100 * fieldAmount;
+    float amount = Amount / 100 * fieldAmount * (SpeedFactor);
     Particles[i.x].Velocity = velocity + curlNoise(noiseLookup) * amount;
 }
-

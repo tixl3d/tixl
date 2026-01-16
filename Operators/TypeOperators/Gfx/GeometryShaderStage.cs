@@ -9,7 +9,7 @@ public sealed class GeometryShaderStage : Instance<GeometryShaderStage>
     public GeometryShaderStage()
     {
         Output.UpdateAction += Update;
-        Output.Value.RestoreAction = Restore;
+        Output.Value!.RestoreAction = Restore;
     }
 
     private void Update(EvaluationContext context)

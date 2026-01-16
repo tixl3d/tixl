@@ -86,11 +86,7 @@ internal sealed class PlaneSDF : Instance<PlaneSDF>
     [GraphParam]
     [Input(Guid = "76D4C422-399A-4B68-B0EA-5D2D2F54A667")]
     public readonly InputSlot<Vector3> Center = new();
-
-    [GraphParam]
-    [Input(Guid = "DEB91DB5-CEFB-4E0D-9244-D44BC6A21985")]
-    public readonly InputSlot<Vector2> Size = new();
-
+    
     [Input(Guid = "99FCA01A-E0A6-49DC-9535-EBDE0F5F8744", MappedType = typeof(AxisTypes))]
     public readonly InputSlot<int> Axis = new();
 }

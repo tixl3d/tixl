@@ -1,6 +1,7 @@
 {
   "Id": "883e01f5-44ee-4724-9e6e-f885255c17e5"/*PlaneSDF*/,
   "Description": "Creates a flat surface as an SDF field.\nGenerates a procedural flat surface field which can be rendered with [RaymarchField] and visualized with [VisualizeFieldDistance].\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline for signed distance fields, see [HowToRaymarchField].\n\nIt can be modified with [BendField], [TransformField], [PolarRepeat] and more.\n\nSimilar nodes: [BoxSDF], [ChainLinkSDF], [FractalSDF].\n\nTo use a Mesh made of polygons refer to [QuadMesh].",
+  "SymbolTags": "1",
   "InputUis": [
     {
       "InputId": "76d4c422-399a-4b68-b0ea-5d2d2f54a667"/*Center*/,
@@ -14,13 +15,6 @@
       "Position": {
         "X": -200.0,
         "Y": 150.0
-      }
-    },
-    {
-      "InputId": "deb91db5-cefb-4e0d-9244-d44bc6a21985"/*Size*/,
-      "Position": {
-        "X": -200.0,
-        "Y": 75.0
       }
     }
   ],

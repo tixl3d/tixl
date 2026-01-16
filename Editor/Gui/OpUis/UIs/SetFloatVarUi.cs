@@ -55,7 +55,7 @@ internal static class SetFloatVarUi
         }
         else
         {
-            WidgetElements.DrawPrimaryTitle(drawList, area, "Set " + data.VariableName.TypedInputValue.Value, canvas.Scale);
+            WidgetElements.DrawPrimaryTitle(drawList, area, "Set float: " + data.VariableName.TypedInputValue.Value, canvas.Scale);
         }
 
         WidgetElements.DrawSmallValue(drawList, area, $"{value:0.000}", canvas.Scale);

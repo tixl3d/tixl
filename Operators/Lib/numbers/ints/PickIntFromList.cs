@@ -17,14 +17,13 @@ internal sealed class PickIntFromList : Instance<PickIntFromList>
     {
         var list = Input.GetValue(context);
         if (list == null || list.Count == 0)
-            return;
-
-        if (list.Count == 0)
         {
-            Selected.Value = list[0];
+            Selected.Value = default; 
+            return;
         }
-        
-        var index = Index.GetValue(context).Mod(list.Count-1);
+
+        var index = Index.GetValue(context).Mod(list.Count);
+
         Selected.Value = list[index];
     }
 

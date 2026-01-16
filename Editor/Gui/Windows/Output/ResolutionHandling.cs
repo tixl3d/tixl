@@ -19,10 +19,12 @@ internal static class ResolutionHandling
         ImGui.SetNextItemWidth(100*T3Ui.UiScaleFactor);
         if (ImGui.BeginCombo("##ResolutionSelection", selectedResolution.Title, ImGuiComboFlags.HeightLargest))
         {
-            foreach (var resolution in Resolutions.ToArray())
+            CustomComponents.MenuGroupHeader("Output Resolution");
+            for (var index = 0; index < Resolutions.ToArray().Length; index++)
             {
+                var resolution = Resolutions[index];
                 ImGui.PushID(resolution.Title);
-                if (ImGui.Selectable(resolution.Title, resolution == selectedResolution))
+                if (CustomComponents.DrawMenuItem(index, resolution.Title, isChecked:resolution == selectedResolution))
                 {
                     selectedResolution = resolution;
                 }
@@ -39,7 +41,8 @@ internal static class ResolutionHandling
                 ImGui.PopID();
             }
 
-            if (ImGui.Selectable("+ Add"))
+            CustomComponents.SeparatorLine();
+            if(CustomComponents.DrawMenuItem(666, "Add"))
             {
                 _resolutionForEdit = new Resolution("untitled", 256, 256);
                 _resolutions.Add(_resolutionForEdit);

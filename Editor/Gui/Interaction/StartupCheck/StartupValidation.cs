@@ -28,7 +28,7 @@ internal static class StartupValidation
                                                                  @"Resources\fonts\editor\Roboto-Regular.ttf",
                                                              },
                                      Message = @"Please make sure to set the correct start up directory.\n ",
-                                     URL = "https://github.com/tixl3d/tixl/wiki/installation#setting-the-startup-directory-in-visual-studio",
+                                     URL = "https://github.com/tixl3d/tixl/wiki/help.InstallDev",
                                  },
                              new()
                                  {
@@ -39,7 +39,7 @@ internal static class StartupValidation
                                                                  @"Editor\bin\Debug\net8.0-windows\bass.dll",
                                                              },
                                      Message = "Please run Install/install.bat.",
-                                     URL = "https://github.com/tixl3d/tixl/wiki/installation#setup-and-installation",
+                                     URL = "https://github.com/tixl3d/tixl/wiki/help.Installation",
                                  },
                              new()
                                  {
@@ -47,8 +47,8 @@ internal static class StartupValidation
                                                              {
                                                                  @"Player\bin\Release\net8.0-windows\Player.exe",
                                                              },
-                                     Message = "This will prevent you from exporting as executable.\nPlease rebuild your solution.",
-                                     URL = "https://github.com/tixl3d/tixl/wiki/installation#setup-and-installation",
+                                     Message = "This will prevent you from exporting as executable.\nPlease rebuild/reinstall your solution.",
+                                     URL = "https://github.com/tixl3d/tixl/wiki/help.Installation",
                                  }
                          };
         var _ = checks.Any(check => !check.Do());
@@ -134,7 +134,7 @@ internal static class StartupValidation
             if (currentDir.IndexOf(folderPath, StringComparison.OrdinalIgnoreCase) < 0)
                 continue;
 
-            BlockingWindow.Instance.ShowMessageBox("Tooll cannot be started from {folderPath}", @"Error", "Ok");
+            BlockingWindow.Instance.ShowMessageBox("TiXL cannot be started from {folderPath}", @"Error", "Ok");
             EditorUi.Instance.ExitApplication();
         }
             
@@ -157,7 +157,7 @@ internal static class StartupValidation
         if (File.Exists(operatorFilePath) && (DateTime.Now - File.GetLastWriteTime(operatorFilePath)) <= fiveMinutes)
             return;
             
-        BlockingWindow.Instance.ShowMessageBox($"Operators.dll is outdated.\nPlease use StartT3.exe to run Tooll.",
+        BlockingWindow.Instance.ShowMessageBox($"Operators.dll is outdated.\nPlease use StartT3.exe to run TiXL.",
                                                @"Error", "Ok");
         EditorUi.Instance.ExitApplication();
     }
@@ -222,4 +222,5 @@ internal static class StartupValidation
         }
     }    
     
+
 }

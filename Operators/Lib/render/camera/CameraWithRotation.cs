@@ -126,7 +126,6 @@ internal sealed class CameraWithRotation : Instance<CameraWithRotation>, ICamera
     private Vector3 _target;
 
     public float CameraRoll { get; set; }
-    public CameraDefinition CamDef => _camDef;
     private CameraDefinition _camDef;
 
     public Matrix4x4 CameraToClipSpace { get; set; }

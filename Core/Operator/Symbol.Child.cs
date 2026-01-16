@@ -832,16 +832,21 @@ public partial class Symbol
             created = false;
             return false;
 
-            Child GetParentAsChild(IReadOnlyList<Guid> readOnlyList)
+            bool GetParentAsChild(IReadOnlyList<Guid> readOnlyList, [NotNullWhen(true)] out Child? child)
             {
                 var parentSymbolChildId = readOnlyList[^2];
-                var parentSymbolChild = Parent.ChildrenCreatedFromMe[parentSymbolChildId];
-                return parentSymbolChild;
+                return Parent.ChildrenCreatedFromMe.TryGetValue(parentSymbolChildId, out child);
             }
 
             bool TryGetParentInstance(IReadOnlyList<Guid> guids, out bool wasCreated, [NotNullWhen(true)] out Instance? parentInstance)
             {
-                var parentSymbolChild = GetParentAsChild(guids);
+                if (!GetParentAsChild(guids, out var parentSymbolChild))
+                {
+                    parentInstance = null;
+                    wasCreated = false;
+                    return false;
+                }
+                //var parentSymbolChild = GetParentAsChild(guids);
                 var parentPath = guids.SkipLast(1).ToArray();
                 var gotParent = parentSymbolChild.TryGetOrCreateInstance(parentPath, out parentInstance, out wasCreated);
                 return gotParent;

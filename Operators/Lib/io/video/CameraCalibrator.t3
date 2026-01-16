@@ -1,0 +1,69 @@
+{
+  "Id": "7b4d3c2a-5b16-4b2a-8f3a-7e8c9d0b1a2b"/*CameraCalibrator*/,
+  "Inputs": [
+    {
+      "Id": "1a2b3c4d-5e6f-4a1b-8c9d-0e1f2a3b4c5d"/*UndistortMethod*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "2a3b4c5d-6e7f-4b2c-9dae-1f2a3b4c5d6e"/*Alpha*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "a3f7d2b1-9c8e-4a6d-8f1c-2b9e3d7a5c2e"/*TextureIn*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "a9f3f8e7-5f2f-4f0f-4f7f-8f5f9f3f1f8f"/*CaptureImage*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "b0f4f9f8-6f3f-4f1f-5f8f-9f6f0f4f2f9f"/*Calibrate*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "b4c8e3f2-0d7f-4b5e-9c2d-3c0f4e8b6a3d"/*Mode*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "c1f5f0f9-7f4f-4f2f-6f9f-0f7f1f5f3f0f"/*Reset*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "c5d9f4a3-1e8c-4c6f-0d3e-4d1f5f9c7b4e"/*ChessboardSize*/,
+      "DefaultValue": {
+        "X": 16,
+        "Y": 9
+      }
+    },
+    {
+      "Id": "d2f6f1f0-8f5f-4f3f-7f0f-1f8f2f6f4f1f"/*FilePath*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "d6e0f5b4-2f9d-4d7f-1e4f-5e2f6f0d8c5f"/*DisplayResolution*/,
+      "DefaultValue": {
+        "X": 1920,
+        "Y": 1080
+      }
+    },
+    {
+      "Id": "e3f7f2f1-9f6f-4f4f-8f1f-2f9f3f7f5f2f"/*Save*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "e7f1f6c5-3f0e-4e8f-2f5f-6f3f7f1e9d6f"/*BorderInSquares*/,
+      "DefaultValue": 1
+    },
+    {
+      "Id": "f4f8f3f2-0f7f-4f5f-9f2f-3f0f4f8f6f3f"/*Load*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "f8f2f7d6-4f1f-4f9f-3f6f-7f4f8f2f0e7f"/*SquareInMm*/,
+      "DefaultValue": 32.0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

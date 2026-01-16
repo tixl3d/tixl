@@ -1,7 +1,9 @@
 #nullable enable
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
@@ -190,6 +192,69 @@ public static class StringUtils
         return message[..length];
     }
 
+    /// <summary>
+    /// Returns a list of keys to retrieve Vector components from a dictionary.
+    ///
+    /// This can ne useful to extract the x,y,z components from OSC addresses with successive names like "Position.X", "Position.Y", ""Position.Z".
+    /// Giving the key "Position.X" it will return all three keys. This also works for "Position1Key", "Position2Key",... 
+    /// The keys are ordered before search.
+    /// If the keys differ in more than one character it will return false.
+    /// </summary>
+    public static bool TryUpdateVectorKeysRelatedToX(Dictionary<string,float>? dict, string? xKey, ref List<string> vectorKeys, int count)
+    {
+        if (dict == null || dict.Count < count || string.IsNullOrEmpty(xKey))
+            return false;
+
+        vectorKeys.Clear();
+
+        var justFoundX = false;
+        var keyCount = dict.Count;
+        var pool = ArrayPool<string>.Shared;
+        var keys = pool.Rent(keyCount);
+
+        int i = 0;
+        foreach (var key in dict.Keys)
+            keys[i++] = key;
+
+        Array.Sort(keys, 0, keyCount, StringComparer.Ordinal);
+
+        for (i = 0; i < keyCount; i++)
+        {
+            var key = keys[i];
+
+            if (key == xKey)
+                justFoundX = true;
+
+            if (!justFoundX)
+                continue;
+
+            if (--count >= 0 && CountDifferentChars(key, xKey) <= 1)
+            {
+                vectorKeys.Add(key);
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        pool.Return(keys, clearArray: false);
+        return count < 0;
+
+        static int CountDifferentChars(string a, string b)
+        {
+            if (a.Length != b.Length)
+                return int.MaxValue;
+
+            int diffCount = 0;
+            for (int i = 0; i < a.Length; i++)
+                if (a[i] != b[i])
+                    diffCount++;
+
+            return diffCount;
+        }
+    }
+    
     public static int IndexOfNot(this ReadOnlySpan<char> span, char c, bool ignoreCase, out char nextChar)
     {
         if (ignoreCase)
@@ -542,5 +607,21 @@ public static class StringUtils
             cleaned = "_" + cleaned;
         
         return string.IsNullOrEmpty(cleaned) ? "ClassName" : cleaned;
+    }
+    
+    public static ReadOnlySpan<char> SliceToProgress(string text, float progress)
+    {
+        if (string.IsNullOrEmpty(text))
+            return ReadOnlySpan<char>.Empty;
+
+        progress = Math.Clamp(progress, 0f, 1f);
+
+        // floor is usually what you want for a typewriter reveal
+        var len = (int)(text.Length * progress);
+
+        if ((uint)len > (uint)text.Length)
+            len = text.Length;
+
+        return text.AsSpan(0, len);
     }
 }

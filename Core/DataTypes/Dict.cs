@@ -8,7 +8,7 @@ using T3.Serialization;
 
 namespace T3.Core.DataTypes;
 
-public class Dict<T> : Dictionary<string, T>, ICloneable, IOutputData
+public sealed class Dict<T> : Dictionary<string, T>, ICloneable, IOutputData
 {
     public Guid Id { get; set; }
 

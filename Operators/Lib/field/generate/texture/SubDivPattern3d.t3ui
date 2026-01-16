@@ -1,6 +1,7 @@
 {
   "Id": "f17aba3c-dafc-4cab-9513-ea6bc19bcb15"/*SubDivPattern3d*/,
   "Description": "Generates a 3D pattern similar to [SubDivisionStretch].",
+  "SymbolTags": "8",
   "InputUis": [
     {
       "InputId": "26aae979-60c6-4386-a33d-df24d223ecb9"/*Padding*/,

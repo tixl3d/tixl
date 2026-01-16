@@ -69,7 +69,7 @@ cbuffer Params : register(b1)
     float UseRotationAsRgba;
 
     float UseWFoScale;
-    float UseStretch;
+    float UseScale;
     float TooCloseFadeOut;
 };
 
@@ -90,7 +90,7 @@ struct psInput
 
 sampler texSampler : register(s0);
 
-StructuredBuffer<LegacyPoint> Points : t0;
+StructuredBuffer<Point> Points : t0;
 Texture2D<float4> SpriteTexture : register(t1);
 Texture2D<float4> FxTexture : register(t2);
 Texture2D<float4> ColorOverW : register(t3);
@@ -127,8 +127,7 @@ inline float GetUFromMode(float mode, int id, float f, float4 scatter, float w, 
     }
 }
 
-psInput vsMain(uint id
-               : SV_VertexID)
+psInput vsMain(uint id : SV_VertexID)
 {
     uint particleCount, stride;
     Points.GetDimensions(particleCount, stride);
@@ -144,13 +143,13 @@ psInput vsMain(uint id
     uint pointId = id / 6;
     float3 cornerFactors = Corners[quadIndex];
 
-    LegacyPoint p = Points[pointId]; 
+    Point p = Points[pointId];
 
-    float4 pRotation = normalize(p.Rotation); 
+    float4 pRotation = normalize(p.Rotation);
     float f = pointId / (float)particleCount;
 
     float phase = RandomPhase + 133.1123 * f;
-    int phaseId = (int)phase; 
+    int phaseId = (int)phase;
 
     float4 normalizedScatter = lerp(hash41u(pointId * 12341 + phaseId),
                                     hash41u(pointId * 12341 + phaseId + 1),
@@ -160,16 +159,16 @@ psInput vsMain(uint id
 
     output.fog = 0;
 
-    int2 altasSize = (int2)AtlasSize;
+    int2 atlasSize = (int2)AtlasSize;
 
-    float textureUx = GetUFromMode(TextureAtlasMode, pointId, (f * altasSize.x) % 1, normalizedScatter, p.W, output.fog) % altasSize.x;
-    float textureUy = GetUFromMode(TextureAtlasMode, pointId, f, normalizedScatter.wxyz, p.W, output.fog); 
-    
-    int textureCelX =  textureUx * altasSize.x;
-    int textureCelY =  textureUy * altasSize.y;
+    float textureUx = GetUFromMode(TextureAtlasMode, (pointId * atlasSize.x), (f * atlasSize.x) % 1, normalizedScatter, (p.FX1 * atlasSize.x) % 1, output.fog) % atlasSize.x;
+    float textureUy = GetUFromMode(TextureAtlasMode, pointId, f, normalizedScatter.wxyz, p.FX1, output.fog);
+
+    int textureCelX = textureUx * atlasSize.x;
+    int textureCelY = textureUy * atlasSize.y;
     output.texCoord = (cornerFactors.xy * float2(-1, 1) * 0.5 + 0.5);
-    output.texCoord /= altasSize;
-    output.texCoord += float2(textureCelX, textureCelY) / altasSize;
+    output.texCoord /= atlasSize;
+    output.texCoord += float2(textureCelX, textureCelY) / atlasSize;
 
     float4 posInObject = float4(p.Position, 1);
 
@@ -178,7 +177,7 @@ psInput vsMain(uint id
 
     if (OrientationMode <= 1.5)
     {
-            posInObject.xyz += qRotateVec3(float3(0,0,Offset.z), pRotation);
+        posInObject.xyz += qRotateVec3(float3(0, 0, Offset.z), pRotation);
     }
 
     float4 quadPosInCamera = mul(posInObject, ObjectToCamera);
@@ -186,16 +185,17 @@ psInput vsMain(uint id
     // Shrink too close particles
     float4 posInCamera = mul(posInObject, ObjectToCamera);
     float tooCloseFactor = saturate(-posInCamera.z / 0.1 - 1);
-    
+
     output.fog = pow(saturate(-posInCamera.z / FogDistance), FogBias);
 
     float4 colorFromPoint = (UseRotationAsRgba > 0.5) ? pRotation : 1;
 
-    float colorFxU = GetUFromMode(ColorVariationMode, pointId, f, normalizedScatter, p.W, output.fog);
-    if (TooCloseFadeOut > 0.5){
+    float colorFxU = GetUFromMode(ColorVariationMode, pointId, f, normalizedScatter, p.FX1, output.fog);
+    if (TooCloseFadeOut > 0.5)
+    {
         p.Color.a *= tooCloseFactor; // fade out the points too close to the camera
     }
-    
+
     output.color = p.Color * Color * ColorOverW.SampleLevel(texSampler, float2(colorFxU, 0), 0) * colorFromPoint;
 
     float adjustedRotate = Rotate;
@@ -209,11 +209,12 @@ psInput vsMain(uint id
 
         float4 fxColor = FxTexture.SampleLevel(texSampler, (centerPos.xy * float2(1, -1) + 1) / 2, 0);
 
-        if(FxTextureMode < 0.5) 
+        if (FxTextureMode < 0.5)
         {
             output.color *= fxColor;
         }
-        else {
+        else
+        {
             adjustedRotate += FxTextureAmount.r * fxColor.r * fxColor.a * 360;
             adjustedScale += FxTextureAmount.g * fxColor.g * fxColor.a;
             adjustedRandomize += FxTextureAmount.b * fxColor.b * fxColor.a;
@@ -221,17 +222,16 @@ psInput vsMain(uint id
     }
 
     // Scale and stretch
-    float scaleFxU = GetUFromMode(ScaleDistribution, pointId, f, normalizedScatter, p.W, output.fog);
+    float scaleFxU = GetUFromMode(ScaleDistribution, pointId, f, normalizedScatter, p.FX1, output.fog);
     float scaleFromCurve = SizeOverW.SampleLevel(texSampler, float2(scaleFxU, 0), 0).r;
-    float hideUndefinedPoints = isnan(p.W) ? 0 : (UseWFoScale > 0.5 ? p.W : 1 ) ;
-    //float computedScale = adjustedScale * (RandomScale * scatterForScale.y *adjustedRandomize + 1) * tooCloseFactor * scaleFromCurve * hideUndefinedPoints; 
-    float computedScale = adjustedScale * (RandomScale * scatterForScale.y *adjustedRandomize + 1) * scaleFromCurve * hideUndefinedPoints;
+    float hideUndefinedPoints = isnan(p.FX1) ? 0 : (UseWFoScale > 0.5 ? p.FX1 : 1);
+    // float computedScale = adjustedScale * (RandomScale * scatterForScale.y *adjustedRandomize + 1) * tooCloseFactor * scaleFromCurve * hideUndefinedPoints;
+    float computedScale = adjustedScale * (RandomScale * scatterForScale.y * adjustedRandomize + 1) * scaleFromCurve * hideUndefinedPoints;
     output.position = 0;
 
     if (OrientationMode <= 1.5)
     {
-        float2 corner = float2((cornerFactors.xy + Offset.xy) * 0.010 * Stretch * (UseStretch > 0.5 ? p.Stretch.xy : 1) * textureAspect) * float2(-1, -1);
-
+        float2 corner = float2((cornerFactors.xy + Offset.xy) * 0.010 * Stretch * (UseScale > 0.5 ? p.Scale.xy : 1) * textureAspect) * float2(-1, -1);
         float4 rot = qFromAngleAxis((adjustedRotate + RandomRotate * scatterForScale.x * adjustedRandomize) * 3.141578 / 180, RotationAxis);
 
         if ((int)OrientationMode == 1)
@@ -248,7 +248,7 @@ psInput vsMain(uint id
     }
     else
     {
-        float3 axis = ( cornerFactors + Offset) * 0.010 * float3(Stretch * textureAspect,1);
+        float3 axis = (cornerFactors + Offset) * 0.010 * float3(Stretch * (UseScale > 0.5 ? p.Scale.xy : 1) * textureAspect, 1);
         float4 rotation = qMul(normalize(pRotation), qFromAngleAxis((adjustedRotate + 180 + RandomRotate * scatterForScale.x * Randomize) / 180 * PI, RotationAxis));
         axis = qRotateVec3(axis, rotation) * computedScale;
         output.position = mul(posInObject + float4(axis, 0), ObjectToClipSpace);
@@ -260,7 +260,7 @@ float4 psMain(psInput input) : SV_TARGET
 {
     float4 imgColor = SpriteTexture.Sample(texSampler, input.texCoord);
     float4 color = input.color * imgColor;
-    
+
     if (color.a < AlphaCutOff)
         discard;
 

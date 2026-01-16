@@ -1,6 +1,7 @@
 {
   "Id": "fdb85ece-201b-49dc-899b-f044a98ac414"/*OctahedronSDF*/,
   "Description": "Generates a octahedron distande field.\n[BoxSDF] [PlaneSDF] [CombineSDF] [RaymarchField] \n",
+  "SymbolTags": "8",
   "InputUis": [
     {
       "InputId": "23012866-4820-4072-8cd8-82d6bdedf13d"/*Size*/,

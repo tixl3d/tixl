@@ -114,7 +114,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/common/meshes/monkey.obj"
+          "Value": "/t3/meshes/monkey.obj"
         },
         {
           "Id": "c39a61b3-fb6b-4611-8f13-273f13c9c491"/*ScaleFactor*/,
@@ -1567,7 +1567,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/common/meshes/cylinder_bevelled.obj"
+          "Value": "/t3/meshes/cylinder_bevelled.obj"
         }
       ],
       "Outputs": []

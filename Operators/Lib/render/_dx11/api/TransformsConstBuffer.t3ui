@@ -11,6 +11,13 @@
         "X": 0.0,
         "Y": 0.0
       }
+    },
+    {
+      "OutputId": "a200cc39-8fa3-4467-bc8f-eb03731a1ece"/*PrevBuffer*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 100.0
+      }
     }
   ]
 }

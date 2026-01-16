@@ -19,7 +19,18 @@ internal sealed class NoiseDisplaceSDF : Instance<NoiseDisplaceSDF>
     private void Update(EvaluationContext context)
     {
         ShaderNode.Update(context);
+        
+        var useLocalSpace = UseLocalSpace.GetValue(context);
+
+        var templateChanged =  useLocalSpace != _useLocalSpace;
+        if (!templateChanged)
+            return;
+
+        _useLocalSpace = useLocalSpace;
+        ShaderNode.FlagCodeChanged();
     }
+
+    private bool _useLocalSpace;
 
     public ShaderGraphNode ShaderNode { get; }
 
@@ -117,10 +128,38 @@ internal sealed class NoiseDisplaceSDF : Instance<NoiseDisplaceSDF>
               """;
     }
 
+    void IGraphNodeOp.GetPreShaderCode(CodeAssembleContext cac, int inputIndex)
+    {
+        if (_useLocalSpace)
+            return;
+        
+        var c = cac;
+        var n = ShaderNode;
+        cac.AppendCall($"""
+                        float3 {ShaderNode}_t = p{c}.xyz;
+                        """);
+    }
+
+    
     void IGraphNodeOp.GetPostShaderCode(CodeAssembleContext cac, int inputIndex)
     {
-        var c = cac.ContextIdStack[^1];
-        cac.AppendCall($"f{c}.w += fSimplexNoiseDisplace(p{c}.xyz, {ShaderNode}Amount, {ShaderNode}Scale, -{ShaderNode}Offset);");
+        var c = cac;//.ContextIdStack[^1];
+        if (_useLocalSpace)
+        {
+            cac.AppendCall($"""
+                            f{c}.w += fSimplexNoiseDisplace(p{c}.xyz, {ShaderNode}Amount, {ShaderNode}Scale, -{ShaderNode}Offset);
+                            f{c}.w *= {ShaderNode}StepFactor; 
+                            """);
+        }
+        else
+        {
+            var n = ShaderNode;
+            cac.AppendCall($"""
+                            f{c}.w += fSimplexNoiseDisplace({ShaderNode}_t.xyz, {ShaderNode}Amount, {ShaderNode}Scale, -{ShaderNode}Offset);
+                            f{c}.w *= {ShaderNode}StepFactor; 
+                            """);
+        }
+        
     }
 
     [Input(Guid = "1799f18f-92c5-4885-b6c1-6a196eee805f")]
@@ -137,4 +176,11 @@ internal sealed class NoiseDisplaceSDF : Instance<NoiseDisplaceSDF>
     [GraphParam]
     [Input(Guid = "6CD7B3CA-323C-4A69-989B-1B10009B8A90")]
     public readonly InputSlot<Vector3> Offset = new();
+    
+    [GraphParam]
+    [Input(Guid = "2D258B34-D45A-475E-987F-EA16CD4D5292")]
+    public readonly InputSlot<float> StepFactor = new();
+    
+    [Input(Guid = "EE1C1993-3968-45A6-BBFC-9E4E6032AE7B")]
+    public readonly InputSlot<bool> UseLocalSpace = new();
 }

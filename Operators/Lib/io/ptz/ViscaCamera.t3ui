@@ -1,0 +1,139 @@
+{
+  "Id": "7c90d60d-0d12-736d-ad90-1d2e3f4d5d6d"/*ViscaCamera*/,
+  "Description": "Controls a PTZ camera using the VISCA over IP protocol.\n\nThis operator sends UDP packets to control Pan, Tilt, and Zoom. It supports absolute positioning.\n\nAKA: PTZ, Sony VISCA, Network Camera Control\n\nTips:\n* Ensure the camera is configured to accept VISCA over IP (often port 52381).\n* Pan and Tilt inputs are normalized (-1..1). Adjust 'Pan Range' and 'Tilt Range' to match your specific camera model's max steps (e.g., Sony SRG series often use 0x1800 for Pan).\n* Zoom is normalized (0..1).",
+  "InputUis": [
+    {
+      "InputId": "0723a93a-3a45-069a-da23-4a5a6a7a8a9a"/*PanRange*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 525.0
+      },
+      "Description": "The maximum pan step value defined by the camera's VISCA implementation (e.g., 2448 for +/- 170 degrees)."
+    },
+    {
+      "InputId": "1823a93a-3a45-069a-da23-4a5a6a7a8a9a"/*TiltRange*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 600.0
+      },
+      "Description": "The maximum tilt step value defined by the camera's VISCA implementation (e.g., 1296 for +/- 90 degrees)."
+    },
+    {
+      "InputId": "2923a93a-3a45-069a-da23-4a5a6a7a8a9a"/*PrintToLog*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 675.0
+      },
+      "Description": "If enabled, logs connection status and errors to the application console."
+    },
+    {
+      "InputId": "34185692-2982-4895-8963-125478963214"/*LocalIpAddress*/,
+      "Position": {
+        "X": -200.0,
+        "Y": -75.0
+      },
+      "Description": "The local network interface to use for sending VISCA commands. Useful if you have multiple network adapters.",
+      "Usage": "CustomDropdown"
+    },
+    {
+      "InputId": "9a23a93a-3a45-069a-da23-4a5a6a7a8a9a"/*Address*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "The IP address of the camera (e.g., 192.168.1.100).",
+      "Usage": "Default"
+    },
+    {
+      "InputId": "a123a93a-3a45-069a-da23-4a5a6a7a8a9a"/*Port*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      },
+      "Description": "The UDP port used for VISCA over IP communication. Default is usually 52381."
+    },
+    {
+      "InputId": "b223a93a-3a45-069a-da23-4a5a6a7a8a9a"/*Connect*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      },
+      "Description": "Toggles the connection state. When enabled, it resets the sequence number and prepares for communication."
+    },
+    {
+      "InputId": "b2c3d4e5-f6a7-4890-1234-567890abcdef"/*TextureInput*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "c323a93a-3a45-069a-da23-4a5a6a7a8a9a"/*Pan*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      },
+      "Description": "Target horizontal rotation, normalized between -1 (left) and 1 (right).",
+      "Min": -1.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "d423a93a-3a45-069a-da23-4a5a6a7a8a9a"/*Tilt*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 300.0
+      },
+      "Description": "Target vertical rotation, normalized between -1 (down) and 1 (up).",
+      "Min": -1.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "e523a93a-3a45-069a-da23-4a5a6a7a8a9a"/*Zoom*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 375.0
+      },
+      "Description": "Target zoom level, normalized between 0 (wide) and 1 (tele).",
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "f623a93a-3a45-069a-da23-4a5a6a7a8a9a"/*Move*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 450.0
+      },
+      "Description": "When enabled, sends the absolute move commands to the camera based on the Pan, Tilt, and Zoom inputs."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "8d01e71e-1e23-847e-be01-2e3f4e5e6e7e"/*IsConnected*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    },
+    {
+      "OutputId": "a1b2c3d4-e5f6-4789-0123-456789abcdef"/*TextureOutput*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 300.0
+      }
+    },
+    {
+      "OutputId": "e1f2a3b4-c5d6-e7f8-9012-3456789abcde"/*CurrentPtz*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 400.0
+      }
+    }
+  ]
+}

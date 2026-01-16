@@ -1,0 +1,62 @@
+{
+  "Id": "e3375df2-3475-4d76-970c-4c8fa3dcc941"/*M01c_Sine*/,
+  "Inputs": [],
+  "Children": [
+    {
+      "Id": "3f18bcb0-0929-44f7-b948-a8413b0deec6"/*Time*/,
+      "SymbolId": "b0d75f21-df33-460b-beab-d8c5e1f23e5e",
+      "InputValues": [],
+      "Outputs": []
+    },
+    {
+      "Id": "a9311fcc-24dd-450a-9df9-e2fc108e3072"/*ValueQuiz*/,
+      "SymbolId": "702f1f75-df90-44ca-b567-78ba9d1613b5",
+      "InputValues": [],
+      "Outputs": []
+    },
+    {
+      "Id": "b4a245fc-4a34-495e-8d52-3c1827490d52"/*Sin*/,
+      "SymbolId": "6ab63114-6477-4ab2-a071-a66a64a6d2b9",
+      "InputValues": [],
+      "Outputs": []
+    },
+    {
+      "Id": "b8770fb9-8f97-4928-aebf-430cdaf0705b"/*Time*/,
+      "SymbolId": "b0d75f21-df33-460b-beab-d8c5e1f23e5e",
+      "InputValues": [
+        {
+          "Id": "e0f765f3-ac71-45c9-87a4-e9be3fa9a9a0"/*SpeedFactor*/,
+          "Type": "System.Single",
+          "Value": 10.0
+        }
+      ],
+      "Outputs": []
+    },
+    {
+      "Id": "dc535372-0ade-45a9-bf95-d327ce62f6bd"/*Sin*/,
+      "SymbolId": "6ab63114-6477-4ab2-a071-a66a64a6d2b9",
+      "InputValues": [],
+      "Outputs": []
+    }
+  ],
+  "Connections": [
+    {
+      "SourceParentOrChildId": "a9311fcc-24dd-450a-9df9-e2fc108e3072",
+      "SourceSlotId": "6fbc9fd1-58c2-4b0b-accb-9850a8835120",
+      "TargetParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "TargetSlotId": "608d1972-b533-43ca-93fe-b1747f0ec231"
+    },
+    {
+      "SourceParentOrChildId": "dc535372-0ade-45a9-bf95-d327ce62f6bd",
+      "SourceSlotId": "55d5c012-0026-4390-9b40-38bd1bbfdad4",
+      "TargetParentOrChildId": "a9311fcc-24dd-450a-9df9-e2fc108e3072",
+      "TargetSlotId": "c09a529a-dfe2-4bf8-86ce-369aeadbee4a"
+    },
+    {
+      "SourceParentOrChildId": "b8770fb9-8f97-4928-aebf-430cdaf0705b",
+      "SourceSlotId": "fd3049aa-4c22-405b-b9b4-0a2474d0e377",
+      "TargetParentOrChildId": "dc535372-0ade-45a9-bf95-d327ce62f6bd",
+      "TargetSlotId": "9c66d915-af91-4ecd-955a-d9c15ef3edda"
+    }
+  ]
+}

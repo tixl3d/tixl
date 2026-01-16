@@ -32,29 +32,30 @@ internal sealed class ExecuteImage2dSdf : Instance<ExecuteImage2dSdf>
 
     void IGraphNodeOp.AddDefinitions(CodeAssembleContext c)
     {
-        c.Definitions.Append($$"""
-                                   float sdf2DColumn{{ShaderNode}}(float2 pos, float2 imageSize, float sdfScale)
-                                   {
-                                       float2 uv = pos / imageSize; // image projected onto XY plane
-                                       uv.y *= -1;
-                                       uv += 0.5;
-                                       float2 clampedUV = clamp(uv, 0.0, 1.0);
-                                       float2 delta = uv - clampedUV;
-                                   
-                                       float texDist = 1-saturate({{ShaderNode}}SdfImage.SampleLevel(ClampedSampler, clampedUV, 0.0));
-                                       texDist *= sdfScale;
-                                   
-                                       float2 worldDelta = delta * imageSize;
-                                       float outsideDist = length(worldDelta);
-                                   
-                                       // If inside bounds, return texture value
-                                       if (all(uv >= 0.0) && all(uv <= 1.0))
-                                           return texDist;
-                                   
-                                       // Outside bounds: approximate distance to closest edge or corner
-                                       return sqrt( outsideDist*outsideDist + texDist*texDist);
-                                   }
-                                   """);
+        c.Globals[$"sdf2DColumn{ShaderNode}"] =
+            $$"""
+              float sdf2DColumn{{ShaderNode}}(float2 pos, float2 imageSize, float sdfScale)
+              {
+                  float2 uv = pos / imageSize; // image projected onto XY plane
+                  uv.y *= -1;
+                  uv += 0.5;
+                  float2 clampedUV = clamp(uv, 0.0, 1.0);
+                  float2 delta = uv - clampedUV;
+
+                  float texDist = 1-saturate({{ShaderNode}}SdfImage.SampleLevel(ClampedSampler, clampedUV, 0.0));
+                  texDist *= sdfScale;
+
+                  float2 worldDelta = delta * imageSize;
+                  float outsideDist = length(worldDelta);
+
+                  // If inside bounds, return texture value
+                  if (all(uv >= 0.0) && all(uv <= 1.0))
+                      return texDist;
+
+                  // Outside bounds: approximate distance to closest edge or corner
+                  return sqrt( outsideDist*outsideDist + texDist*texDist);
+              }
+              """;
     }
 
     bool IGraphNodeOp.TryBuildCustomCode(CodeAssembleContext c)

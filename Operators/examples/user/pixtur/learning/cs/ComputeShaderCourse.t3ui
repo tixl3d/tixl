@@ -337,6 +337,18 @@
       }
     },
     {
+      "ChildId": "d4bf5788-8778-473e-9812-55c0bd5d0ef1"/*_MovingAgents02*/,
+      "Style": "Resizable",
+      "Size": {
+        "X": 171.854,
+        "Y": 71.24774
+      },
+      "Position": {
+        "X": -2280.4272,
+        "Y": -13.433044
+      }
+    },
+    {
       "ChildId": "d7ab5a06-2582-49cc-94ec-449e6a74d5d5"/*Modulo*/,
       "Position": {
         "X": 3581.946,
@@ -344,10 +356,24 @@
       }
     },
     {
+      "ChildId": "dbf9c80e-7a2e-4b52-ac26-d97165241e5f"/*LinearGradient*/,
+      "Position": {
+        "X": -2442.377,
+        "Y": -131.95508
+      }
+    },
+    {
       "ChildId": "e24f3e86-e2d0-4952-bce8-afe7c4fe7b90"/*Int2*/,
       "Position": {
         "X": 3614.524,
         "Y": -914.5762
+      }
+    },
+    {
+      "ChildId": "e3626358-2622-4eb8-a4d6-ab1b874e1fff"/*ColorPhysarum*/,
+      "Position": {
+        "X": -2302.377,
+        "Y": -166.95508
       }
     },
     {
@@ -442,8 +468,8 @@
         "Y": 125.81076
       },
       "Position": {
-        "X": -2437.9915,
-        "Y": -285.1405
+        "X": -2427.7024,
+        "Y": -303.8132
       }
     }
   ],

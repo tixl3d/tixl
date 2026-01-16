@@ -1,0 +1,113 @@
+{
+  "Id": "3ff59cf2-33c3-4dd3-bcf8-83b88f8282e1"/*ExampleCustomPixelShader*/,
+  "Description": "Some example for the custom Pixel Shaders",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "21bb7f77-b970-43df-80f9-c07c282ecc3a"/*BoolToInt*/,
+      "Position": {
+        "X": 140.0,
+        "Y": 427.00586
+      }
+    },
+    {
+      "ChildId": "2dbf24d3-b7d2-4a10-87c0-6e00c4978cb5"/*PickString*/,
+      "Position": {
+        "X": 372.09506,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "32fdf8a8-54da-42c1-ba29-b5a3a3053812"/*String*/,
+      "Position": {
+        "X": 103.36771,
+        "Y": 230.82706
+      }
+    },
+    {
+      "ChildId": "3481f05e-9e40-4e10-9812-043738cc5150"/*String*/,
+      "Position": {
+        "X": 98.072296,
+        "Y": 329.066
+      }
+    },
+    {
+      "ChildId": "46d4eb94-b1d7-4a24-bf6a-49fd299cab78"/*String*/,
+      "Position": {
+        "X": 100.02646,
+        "Y": 266.22824
+      }
+    },
+    {
+      "ChildId": "85c9fe80-3aa1-4a56-b74c-eb13805b1933"/*CombineStrings*/,
+      "Position": {
+        "X": 423.27292,
+        "Y": 226.37914
+      }
+    },
+    {
+      "ChildId": "95b5736c-eca9-4406-9498-282035bc3f68"/*String*/,
+      "Position": {
+        "X": 42.197914,
+        "Y": 23.090912
+      }
+    },
+    {
+      "ChildId": "c0b6cb99-7799-466c-bd1f-e4c36614dd10"/*String*/,
+      "Position": {
+        "X": 99.09097,
+        "Y": 159.85211
+      }
+    },
+    {
+      "ChildId": "d2fd6315-30b6-48c6-90bd-c58ef0843c15"/*Boolean*/,
+      "Position": {
+        "X": -133.59726,
+        "Y": 453.58545
+      }
+    },
+    {
+      "ChildId": "d34889a1-59ed-4481-8265-9038698f3568"/*CustomPixelShader*/,
+      "Position": {
+        "X": 628.2712,
+        "Y": 37.490936
+      }
+    },
+    {
+      "ChildId": "e04df980-65ee-476d-8b9c-ffa15243e4b6"/*Time*/,
+      "Position": {
+        "X": -1.0578613,
+        "Y": 501.23962
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "f6705c92-2d04-4e94-93f5-f0c26d0d4cdc"/*Output*/,
+      "Position": {
+        "X": 805.7455,
+        "Y": 196.1471
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "f6e0a255-4914-4abd-9eed-e38a9d4e935e",
+      "Title": "ported from https://www.shadertoy.com/view/tsXBzS",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 70.0,
+        "Y": 125.93573
+      },
+      "Size": {
+        "X": 215.64868,
+        "Y": 262.69647
+      }
+    }
+  ]
+}

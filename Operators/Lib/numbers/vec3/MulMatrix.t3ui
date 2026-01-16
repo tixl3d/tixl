@@ -1,0 +1,32 @@
+{
+  "Id": "b4c5519e-26fb-49f6-b932-7fcd076c458a"/*MulMatrix*/,
+  "Description": "Multiplies two 4x4 matrices",
+  "InputUis": [
+    {
+      "InputId": "297a2b5b-6c04-464c-93e9-9721908e33c2"/*MatrixA*/,
+      "Relevancy": "Relevant",
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      }
+    },
+    {
+      "InputId": "d20c6ec1-d611-4fae-8e0b-7bec8eb68af0"/*MatrixB*/,
+      "Relevancy": "Relevant",
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "d2c5641d-844a-4d90-87f0-c0ad34b4e344"/*Result*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 100.0
+      }
+    }
+  ]
+}

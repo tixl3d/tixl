@@ -132,8 +132,9 @@
         "X": -273.44965,
         "Y": 635.3127
       },
-      "Min": 0,
-      "Max": 1000000
+      "Min": 1,
+      "Max": 1000000,
+      "ClampMin": true
     },
     {
       "InputId": "a8dfe0e7-ad33-47cf-ab78-726385e38434"/*OrientationAxis*/,

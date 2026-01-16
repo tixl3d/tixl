@@ -2,7 +2,7 @@
 
 [![Discord](https://img.shields.io/discord/823853172619083816.svg?style=for-the-badge)](https://discord.gg/YmSyQdeH3S)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge)](https://github.com/alelievr/Mixture/blob/master/LICENSE)
-[![Download](https://img.shields.io/badge/Download_Tooll3_v3.9.2-FF3A9E?style=for-the-badge&logoColor=white&logo=DocuSign)](https://github.com/tixl3d/tixl/releases/download/v3.9.2/Tooll-v3.9.2.zip)
+[![Download](https://img.shields.io/badge/Download_Tooll3_v4.0.6-FF3A9E?style=for-the-badge&logoColor=white&logo=DocuSign)](https://github.com/tixl3d/tixl/releases/download/v4.0.6.1/Tixl-v4.0.6.3.exe)
 
 [![tooll-screenshot](https://user-images.githubusercontent.com/1732545/173256422-a4ef9894-d954-4bc3-8c24-000bfbe1c3ad.png)](https://www.youtube.com/watch?v=PrxhwOC9hLw "Tooll3 - A quick overview")
 

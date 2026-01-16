@@ -203,7 +203,13 @@ internal sealed class OscInput : Instance<OscInput>, OscConnectionManager.IOscCo
         }
 
         var ipAddress = GetLocalIpAddress();
-        SetStatus($"Listening on port {_port} at...\n{ipAddress}\n\nNo messages received, yet.", IStatusProvider.StatusLevel.Notice);
+        SetStatus($"""
+                   Listening on port {_port} at...
+                   {ipAddress}
+
+                   No messages received, yet.
+                   Tip: Make sure app is not blocked for Local Network on your mobile phone. 
+                   """, IStatusProvider.StatusLevel.Notice);
     }
 
     # region handling async messages from other thread

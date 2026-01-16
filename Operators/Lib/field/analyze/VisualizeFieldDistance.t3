@@ -216,23 +216,6 @@
       "Outputs": []
     },
     {
-      "Id": "83232cfd-2f2f-4d6d-82ff-d1e98529f28e"/*ReadFile*/,
-      "SymbolId": "5f71d2f8-98c8-4502-8f40-2ea4a1e18cca",
-      "InputValues": [
-        {
-          "Id": "24b7e7e1-fe0b-46be-807e-0afacd4800f9"/*FilePath*/,
-          "Type": "System.String",
-          "Value": "Lib/img/generate/VisualizeSDFFieldTemplate.hlsl"
-        },
-        {
-          "Id": "5c6241f7-6a4f-4972-a314-98fd070f91dd"/*TriggerUpdate*/,
-          "Type": "System.Boolean",
-          "Value": false
-        }
-      ],
-      "Outputs": []
-    },
-    {
       "Id": "94a95ead-483b-4aad-9050-682571b94605"/*Vec2ToVec3*/,
       "SymbolId": "b732a668-8994-4f34-ab96-5245d355e33f",
       "InputValues": [

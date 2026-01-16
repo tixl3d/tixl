@@ -2,8 +2,15 @@
   "Id": "c6d50423-54ea-4c9d-b547-eb78cc2c950c"/*ScaleSize*/,
   "Inputs": [
     {
-      "Id": "133bbc5a-bdbf-4993-bd1a-878ec93ee04f"/*Factor*/,
-      "DefaultValue": 0.0
+      "Id": "133bbc5a-bdbf-4993-bd1a-878ec93ee04f"/*Scale*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "39e610b2-7c0a-4208-94ad-4fcaff3032d2"/*Stretch*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 1.0
+      }
     },
     {
       "Id": "ddceb7df-1c6f-4545-9669-b1b4a80e75e8"/*InputSize*/,

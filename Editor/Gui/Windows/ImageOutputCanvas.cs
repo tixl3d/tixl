@@ -111,7 +111,7 @@ internal sealed class ImageOutputCanvas : ScalableCanvas
             var descriptionWidth = ImGui.CalcTextSize(description).X;
 
             var textPos = new Vector2(WindowPos.X + (WindowSize.X - descriptionWidth) / 2,
-                                      WindowPos.Y + WindowSize.Y - 16);
+                                      WindowPos.Y + WindowSize.Y - 14 * T3Ui.UiScaleFactor);
 
             var drawList = ImGui.GetWindowDrawList();
             var shadowColor = UiColors.BackgroundFull.Fade(0.5f);

@@ -40,8 +40,9 @@ internal static partial class PlayerExporter
         // traverse starting at output and collect everything
         var exportData = new ExportData();
         exportData.TryAddSymbol(symbol);
-
-        exportDir = Path.Combine(UserSettings.Config.ProjectsFolder, FileLocations.ExportFolderName, childUi.SymbolChild.ReadableName);
+        
+        // TODO: Make project directory selection smarter
+        exportDir = Path.Combine(UserSettings.Config.ProjectDirectories[0], FileLocations.ExportFolderName, childUi.SymbolChild.ReadableName);
 
         try
         {
@@ -106,7 +107,7 @@ internal static partial class PlayerExporter
         // Update project settings
         var exportSettings = new ExportSettings(OperatorId: symbol.Id,
                                                 ApplicationTitle: symbol.Name,
-                                                WindowMode: WindowMode.Fullscreen,
+                                                WindowMode: ProjectSettings.Config.DefaultWindowMode,
                                                 ConfigData: ProjectSettings.Config,
                                                 Author: symbol.SymbolPackage.AssemblyInformation?.Name ?? string.Empty, // todo - actual author name
                                                 BuildId: Guid.NewGuid(),
@@ -431,7 +432,7 @@ internal static partial class PlayerExporter
                 var relativeDirectory = stringValue.Value;
                 var isFolder = relativeDirectory.EndsWith('/');
 
-                if (!ResourceManager.TryResolvePath(relativeDirectory, parent, out var absoluteDirectory, out var package, isFolder))
+                if (!ResourceManager.TryResolveRelativePath(relativeDirectory, parent, out var absoluteDirectory, out var package, isFolder))
                 {
                     Log.Warning($"Directory '{relativeDirectory}' was not found in any resource folder");
                     break;

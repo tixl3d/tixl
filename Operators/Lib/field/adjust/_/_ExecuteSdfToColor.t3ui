@@ -1,0 +1,60 @@
+{
+  "Id": "5b8daf99-7a4d-4491-a50f-403cb598bca4"/*_ExecuteSdfToColor*/,
+  "Description": "",
+  "InputUis": [
+    {
+      "InputId": "6c5a8f58-e0a7-4f6f-b061-4a0a5cf1b1a8"/*GradientSrv*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 210.0
+      }
+    },
+    {
+      "InputId": "82a13817-aa0f-43c5-b165-0a6a936a69b1"/*InputField*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 135.0
+      }
+    },
+    {
+      "InputId": "98722b10-e72f-4440-b1f4-02d3f9740d0f"/*GainAndBias*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 435.0
+      }
+    },
+    {
+      "InputId": "9ec874c0-468b-4953-b256-326d217debd0"/*Range*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 285.0
+      }
+    },
+    {
+      "InputId": "bbf50909-089b-4146-9d1a-98f0c5a417fe"/*Offset*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 360.0
+      }
+    },
+    {
+      "InputId": "cc38a4f4-db1e-4e93-a37b-1c1202b06b0b"/*Mapping*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 285.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "d127f876-6f4f-4a44-a547-1bba00693d12"/*Result*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

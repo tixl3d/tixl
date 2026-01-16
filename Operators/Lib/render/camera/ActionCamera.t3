@@ -1,0 +1,51 @@
+{
+  "Id": "dfd4c912-4c4f-44b1-88aa-f27aa66b57af"/*ActionCamera*/,
+  "Inputs": [
+    {
+      "Id": "37bbaf47-5985-42d7-801e-0bf099036d5f"/*UpDown*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "3857258a-ca2d-4dad-b926-28530e8a25b0"/*BlendToReferenceCamera*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "44ed03fc-3551-4519-8b4c-dfdc1ddd1713"/*Speed*/,
+      "DefaultValue": 0.01
+    },
+    {
+      "Id": "773f0b8f-16d4-4302-b26d-43cf4d4adce8"/*Yaw*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "832cd0d8-66be-4f45-9aea-6e439be5a285"/*Pitch*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "8ac6c739-3741-4816-8bad-57bd2a226e02"/*TriggerReset*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "a93aa4ac-487c-4441-b501-742cd38a5f5e"/*Forward*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "b117d2dc-eb4c-408e-9ab7-909d17ac3069"/*RotationSpeed*/,
+      "DefaultValue": 0.2
+    },
+    {
+      "Id": "c529af20-2e52-4a29-b558-cd518bdc539d"/*Roll*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "c5daddd7-a832-40d1-aec3-3886803a3899"/*Sideways*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "d46ee53d-887b-4e37-b5ba-4ee0ba50c711"/*ReferenceCamera*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

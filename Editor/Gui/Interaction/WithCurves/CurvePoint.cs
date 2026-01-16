@@ -16,8 +16,7 @@ internal static class CurvePoint
 
         var pCenter = _curveEditCanvas.TransformPosition(new Vector2((float)vDef.U, (float)vDef.Value));
         var pTopLeft = pCenter - _controlSizeHalf;
-            
-
+        
         if (isSelected)
         {
             UpdateTangentVectors();
@@ -26,21 +25,18 @@ internal static class CurvePoint
         }
 
         // Interaction
-
-        ImGui.SetCursorPos(pTopLeft - _curveEditCanvas.WindowPos + _fixOffset);
+        ImGui.SetCursorScreenPos(pTopLeft );
         ImGui.InvisibleButton("key" + vDef.GetHashCode(), _controlSize);
+
+        // Debug Visualization
+        // _drawList.AddRect(ImGui.GetItemRectMin(), ImGui.GetItemRectMax(), Color.Green);
+        // _drawList.AddCircle(pCenter, 3, Color.Red);
         DrawUtils.DebugItemRect();
 
-        if (ImGui.IsItemHovered())
-        {
-            //ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
-        }
-            
-        ImGui.PushFont(Icons.IconFont);
-        var fadeFactor = ImGui.IsItemHovered() ? 1f : 0.9f;
-        var color = Color.White.Fade(fadeFactor);
-        _drawList.AddText(pTopLeft + new Vector2(5,4) , color, isSelected ? _keyframeIconSelected : _keyframeIcon);
-        ImGui.PopFont();
+        Icons.DrawIconOnLastItem(isSelected 
+                                     ? Icon.CurveKeyframeSelected 
+                                     : Icon.CurveKeyframe, Color.White);
+        
 
         curveEditing?.HandleCurvePointDragging(compositionSymbolId, _vDef, isSelected);
     }
@@ -49,7 +45,7 @@ internal static class CurvePoint
     {
         var leftTangentCenter = pCenter + _leftTangentInScreen;
             
-        ImGui.SetCursorPos(leftTangentCenter - _tangentHandleSizeHalf - _curveEditCanvas.WindowPos + _fixOffset);
+        ImGui.SetCursorPos(leftTangentCenter - _tangentHandleSizeHalf - _curveEditCanvas.WindowPos);
         ImGui.InvisibleButton("keyLT" + _vDef.GetHashCode(), _tangentHandleSize);
         DrawUtils.DebugItemRect();
         var isHovered = ImGui.IsItemHovered();
@@ -147,7 +143,7 @@ internal static class CurvePoint
 
     private static Vector2 NormalizeTangentLength(Vector2 tangent)
     {
-        var s = (1f / tangent.Length() * NonWeightTangentLength);
+        var s = (1.4f / tangent.Length() * NonWeightTangentLength) * T3Ui.UiScaleFactor;
         return tangent * s;
     }
 
@@ -162,14 +158,14 @@ internal static class CurvePoint
     private static readonly Vector2 _controlSize = new(21, 21);
     private static readonly Vector2 _controlSizeHalf = _controlSize * 0.5f;
 
-    private static readonly Vector2 _fixOffset = new(1, 7);  // Sadly their is a magic vertical offset probably caused by border or padding
+    private static readonly Vector2 _fixOffset = new(1, 7);  // Sadly there is a magic vertical offset probably caused by border or padding
         
     private const float NonWeightTangentLength = 50;
     private static readonly Color _tangentHandleColor = new(0.1f);
 
     private static readonly Vector2 _tangentHandleSize = new(21, 21);
     private static readonly Vector2 _tangentHandleSizeHalf = _tangentHandleSize * 0.5f;
-    private static readonly Vector2 _tangentSize = new(2, 2);
+    private static Vector2 _tangentSize => new(3* T3Ui.UiScaleFactor) ;
     private static readonly Vector2 _tangentSizeHalf = _tangentSize * 0.5f;
 
     private static readonly string _keyframeIcon = "" + (char)(int)Icon.CurveKeyframe;

@@ -4,7 +4,7 @@ namespace Types.Collections;
 public sealed class DataList : Instance<DataList>
 {
     [Output(Guid = "d117b613-c41b-42ce-889d-502a8c779fff")]
-    public readonly Slot<StructuredList> Result = new();
+    public readonly Slot<StructuredList?> Result = new();
 
         
     public DataList()

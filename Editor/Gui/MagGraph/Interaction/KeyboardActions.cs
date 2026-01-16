@@ -1,9 +1,10 @@
-﻿#nullable enable
+#nullable enable
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.UiModel;
 using T3.Editor.UiModel.Modification;
 using T3.Editor.UiModel.ProjectHandling;
 
@@ -14,15 +15,13 @@ internal static class KeyboardActions
     internal static ChangeSymbol.SymbolModificationResults HandleKeyboardActions(GraphUiContext context)
     {
         var result = ChangeSymbol.SymbolModificationResults.Nothing;
-        
+
         var compositionOp = context.CompositionInstance;
         //var compositionUi = compositionOp.GetSymbolUi();
 
         if (UserActions.FocusSelection.Triggered())
         {
-            // TODO: Implement
-            Log.Debug("Not implemented yet");
-            context.View.FocusViewToSelection(context);
+            context.ProjectView.FocusViewToSelection();
         }
 
         if (!T3Ui.IsCurrentlySaving && UserActions.Duplicate.Triggered())
@@ -30,7 +29,7 @@ internal static class KeyboardActions
             NodeActions.CopySelectedNodesToClipboard(context.Selector, compositionOp);
             NodeActions.PasteClipboard(context.Selector, context.View, compositionOp);
             context.Layout.FlagStructureAsChanged();
-            
+
             result |= ChangeSymbol.SymbolModificationResults.StructureChanged;
         }
 
@@ -41,14 +40,14 @@ internal static class KeyboardActions
             result |= Modifications.DeleteSelection(context);
         }
 
-        if (!T3Ui.IsCurrentlySaving 
+        if (!T3Ui.IsCurrentlySaving
             && UserActions.AlignSelectionLeft.Triggered()
             && context.Selector.Selection.Count > 1
             && context.StateMachine.CurrentState == GraphStates.Default)
         {
             result |= Modifications.AlignSelectionToLeft(context);
         }
-        
+
         if (UserActions.ToggleDisabled.Triggered())
         {
             NodeActions.ToggleDisabledForSelectedElements(context.Selector);
@@ -57,6 +56,20 @@ internal static class KeyboardActions
         if (UserActions.ToggleBypassed.Triggered())
         {
             NodeActions.ToggleBypassedForSelectedElements(context.Selector);
+        }
+
+        // Navigation backwards / forward
+        {
+            IReadOnlyList<Guid>? navigationPath = null;
+
+            if (UserActions.NavigateBackwards.Triggered())
+                navigationPath = context.Selector.NavigationHistory.NavigateBackwards();
+
+            if (UserActions.NavigateForward.Triggered())
+                navigationPath = context.Selector.NavigationHistory.NavigateForward();
+
+            if (navigationPath != null && context.View is IGraphView view)
+                view.OpenAndFocusInstance(navigationPath);
         }
 
         if (UserActions.PinToOutputWindow.Triggered())
@@ -71,12 +84,14 @@ internal static class KeyboardActions
             }
             else
             {
-                // FIXME: This is a work around that needs a legacy graph window to be active
                 if (ProjectView.Focused != null)
-                    NodeActions.PinSelectedToOutputWindow(ProjectView.Focused, context.Selector, compositionOp);
+                    NodeActions.PinSelectedToOutputWindow(ProjectView.Focused, 
+                                                          context.Selector, 
+                                                          compositionOp, 
+                                                          true);
             }
         }
-        
+
         if (UserActions.DisplayImageAsBackground.Triggered())
         {
             var selectedImage = context.Selector.GetFirstSelectedInstance();
@@ -88,15 +103,23 @@ internal static class KeyboardActions
 
         if (UserActions.CopyToClipboard.Triggered())
         {
-            NodeActions.CopySelectedNodesToClipboard(context.Selector, compositionOp);
+            // Prevent node graph copy if a text input is active (e.g., annotation description)
+            if (!ImGuiNET.ImGui.IsAnyItemActive())
+            {
+                NodeActions.CopySelectedNodesToClipboard(context.Selector, compositionOp);
+            }
         }
 
         if (!T3Ui.IsCurrentlySaving && UserActions.PasteFromClipboard.Triggered())
         {
-            NodeActions.PasteClipboard(context.Selector, context.View, compositionOp);
-            context.Layout.FlagStructureAsChanged();
+            // Prevent node graph paste if a text input is active (e.g., annotation description)
+            if (!ImGuiNET.ImGui.IsAnyItemActive())
+            {
+                NodeActions.PasteClipboard(context.Selector, context.View, compositionOp);
+                context.Layout.FlagStructureAsChanged();
+            }
         }
-        
+
         if (!T3Ui.IsCurrentlySaving && UserActions.PasteValues.Triggered())
         {
             NodeActions.PasteValues(context.Selector, context.View, context.CompositionInstance);
@@ -164,7 +187,7 @@ internal static class KeyboardActions
             if (oneSelected && UserActions.RenameChild.Triggered())
             {
                 if (context.Layout.Items.TryGetValue(context.Selector.Selection[0].Id, out var item)
-                                                     && item.Variant == MagGraphItem.Variants.Operator)
+                    && item.Variant == MagGraphItem.Variants.Operator)
                 {
                     RenamingOperator.OpenForChildUi(item.ChildUi!);
                     context.StateMachine.SetState(GraphStates.RenameChild, context);

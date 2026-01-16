@@ -9,6 +9,15 @@ internal static class SymbolUiRegistry
 {
     public static SymbolUi GetSymbolUi(this Instance instance) => instance.Symbol.GetSymbolUi();
 
+
+    public static bool TryGetSymbolUi(this Symbol symbol, [NotNullWhen(true)] out SymbolUi? symbolUi)
+    {
+        var id = symbol.Id;
+        var package = (EditorSymbolPackage)symbol.SymbolPackage;
+        return package.TryGetSymbolUi(id, out symbolUi);
+    }
+
+
     public static SymbolUi GetSymbolUi(this Symbol symbol)
     {
         var id = symbol.Id;

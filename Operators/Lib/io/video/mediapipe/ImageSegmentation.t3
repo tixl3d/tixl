@@ -1,0 +1,31 @@
+{
+  "Id": "23456789-0abc-def1-2345-67890abcdef1"/*ImageSegmentation*/,
+  "Inputs": [
+    {
+      "Id": "34567890-abcd-ef12-3456-7890abcdef12"/*InputTexture*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "4567890a-bcde-f123-4567-890abcdef123"/*Enabled*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "567890ab-cdef-1234-5678-90abcdef1234"/*Model*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "67890abc-def1-2345-6789-0abcdef12345"/*SelectedCategories*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "7890abcd-ef12-3456-7890-abcdef123456"/*Debug*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "890abcde-f123-4567-890a-bcdef1234567"/*CategoryAllowlist*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

@@ -43,7 +43,7 @@ internal sealed class SerialInput : Instance<SerialInput>, IStatusProvider, ICus
         WasTrigger.Value = wasTriggered;
 
         var shouldConnect = Connect.GetValue(context);
-        var portName = PortName.GetValue(context);
+        var portName = PortName.GetValue(context) ?? string.Empty;
         var baudRate = BaudRate.GetValue(context);
 
         var settingsChanged = portName != _lastPortName || baudRate != _lastBaudRate || shouldConnect != _lastConnectState;
@@ -73,7 +73,7 @@ internal sealed class SerialInput : Instance<SerialInput>, IStatusProvider, ICus
     public void SetStatus(string m, IStatusProvider.StatusLevel l) { _lastErrorMessage = m; _statusLevel = l; }
     public IStatusProvider.StatusLevel GetStatusLevel() => _statusLevel;
     public string? GetStatusMessage() => _lastErrorMessage;
-    string ICustomDropdownHolder.GetValueForInput(Guid id) => id == PortName.Id ? PortName.Value : string.Empty;
+    string ICustomDropdownHolder.GetValueForInput(Guid id) => id == PortName.Id ? PortName.Value ?? string.Empty : string.Empty;
     IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid id) => id == PortName.Id ? SerialConnectionManager.GetAvailableSerialPortsWithDescriptions() : Enumerable.Empty<string>();
     void ICustomDropdownHolder.HandleResultForInput(Guid id, string? s, bool i)
     {

@@ -10,8 +10,8 @@ cbuffer Params : register(b0)
     float StepSize;
 }
 
-StructuredBuffer<LegacyPoint> SourcePoints : t0;
-RWStructuredBuffer<LegacyPoint> ResultPoints : u0;
+StructuredBuffer<Point> SourcePoints : t0;
+RWStructuredBuffer<Point> ResultPoints : u0;
 
 int imod(int x, int y)
 {
@@ -19,8 +19,7 @@ int imod(int x, int y)
                   : y + ((x + 1) % y) - 1; // there are probably easier ways to do this
 }
 
-[numthreads(64, 1, 1)] void main(uint3 i
-                                 : SV_DispatchThreadID)
+[numthreads(64, 1, 1)] void main(uint3 i : SV_DispatchThreadID)
 {
     uint sourceCount, stride;
     SourcePoints.GetDimensions(sourceCount, stride);
@@ -39,5 +38,5 @@ int imod(int x, int y)
 
     // uint index = imod((int)StartIndex + (i.x * StepSize) + scatterOffset + 0.1,  sourceCount);
     int index = imod(int(StartIndex + 0.5) + (i.x * StepSize) + scatterOffset, sourceCount);
-    ResultPoints[i.x] = SourcePoints[index]; 
+    ResultPoints[i.x] = SourcePoints[index];
 }

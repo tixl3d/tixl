@@ -14,16 +14,22 @@ internal sealed class ScaleSize : Instance<ScaleSize>
 
     private void Update(EvaluationContext context)
     {
+        var stretch = Stretch.GetValue(context);
         var source = InputSize.GetValue(context);
-        var factor = Factor.GetValue(context);
+        var factor = Scale.GetValue(context);
             
-        Result.Value = new Int2((int)(source.Width * factor), (int)(source.Height * factor));
+        Result.Value = new Int2((int)(source.Width * factor * stretch.X), 
+                                (int)(source.Height * factor * stretch.Y));
     }
         
     [Input(Guid = "DDCEB7DF-1C6F-4545-9669-B1B4A80E75E8")]
     public readonly InputSlot<Int2> InputSize = new();
-        
+
+    [Input(Guid = "39E610B2-7C0A-4208-94AD-4FCAFF3032D2")]
+    public readonly InputSlot<Vector2> Stretch = new();
+
+    
     [Input(Guid = "133BBC5A-BDBF-4993-BD1A-878EC93EE04F")]
-    public readonly InputSlot<float> Factor = new();
+    public readonly InputSlot<float> Scale = new();
         
 }

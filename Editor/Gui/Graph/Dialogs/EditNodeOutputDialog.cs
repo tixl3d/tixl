@@ -4,7 +4,7 @@ using T3.Core.Operator.Slots;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
 
-namespace T3.Editor.Gui.Graph.Dialogs;
+namespace T3.Editor.Gui.Dialogs;
 
 public sealed class EditNodeOutputDialog : ModalDialog
 {

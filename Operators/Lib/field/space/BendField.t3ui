@@ -1,6 +1,7 @@
 {
   "Id": "c7ef5f64-2654-47a8-a2ab-30b28446b934"/*BendField*/,
   "Description": "Bends / curves the incoming field along the given axis.\nThis works best for small source volumes within a limited unit range.\nIt can be rendered with [RaymarchField] and visualized with [VisualizeFieldDistance].\n\nSimilar nodes: [ReflectField], [RepeatWithMirror], [TwistField].\n\nIt needs an incoming field like [BoxSDF], [ChainLinkSDF], [FractalSDF] as an input.\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToRaymarchField].\n",
+  "SymbolTags": "8",
   "InputUis": [
     {
       "InputId": "4930de03-6a81-4403-bb79-5b0a14591f05"/*Axis*/,
@@ -8,6 +9,7 @@
         "X": -200.0,
         "Y": 75.0
       },
+      "GroupTitle": "Shader Variation",
       "Description": "Defines the axis along which the field is bent\n(If changing this value has no effect, any other value must be changed to bring the change into effect)"
     },
     {
@@ -18,13 +20,28 @@
       }
     },
     {
+      "InputId": "b9f38594-ce84-41d7-b57b-4bb1de81af13"/*StepFactor*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 120.0
+      },
+      "GroupTitle": "Raymarching",
+      "Description": "Reduce this factor to avoid ray marching artifacts.",
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
       "InputId": "c0490245-8f7c-4972-8ded-736883b4e650"/*Amount*/,
       "Position": {
         "X": -200.0,
         "Y": 45.0
       },
-      "Min": -0.5,
-      "Max": 0.5
+      "Min": -90.0,
+      "Max": 90.0,
+      "Scale": 0.1,
+      "Format": "{0:0.0}°"
     }
   ],
   "SymbolChildUis": [],

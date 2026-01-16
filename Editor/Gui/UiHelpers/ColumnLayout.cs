@@ -1,4 +1,5 @@
-﻿using ImGuiNET;
+﻿using System.Globalization;
+using ImGuiNET;
 
 namespace T3.Editor.Gui.UiHelpers;
 
@@ -59,6 +60,11 @@ internal static class WindowContentExtend
     internal static void ExtendToLastItem()
     {
         _currentExtend = Vector2.Max(_currentExtend, ImGui.GetItemRectMax() - ImGui.GetWindowPos()) + new Vector2(ImGui.GetScrollX(), ImGui.GetScrollY());
+    }
+    
+    internal static void ExtendToLastItem(int width)
+    {
+        _currentExtend = Vector2.Max(_currentExtend, new Vector2(width, ImGui.GetItemRectMax().Y - ImGui.GetWindowPos().Y + ImGui.GetScrollY()));
     }
 
     internal static Vector2 GetLastAndReset()

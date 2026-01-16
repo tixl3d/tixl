@@ -1,0 +1,91 @@
+{
+  "Id": "e3375df2-3475-4d76-970c-4c8fa3dcc941"/*M01c_Sine*/,
+  "Description": "Riding the wave",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "3f18bcb0-0929-44f7-b948-a8413b0deec6"/*Time*/,
+      "Position": {
+        "X": 1322.5985,
+        "Y": 1800.5574
+      }
+    },
+    {
+      "ChildId": "a9311fcc-24dd-450a-9df9-e2fc108e3072"/*ValueQuiz*/,
+      "Position": {
+        "X": 1580.2582,
+        "Y": 1895.0925
+      }
+    },
+    {
+      "ChildId": "b4a245fc-4a34-495e-8d52-3c1827490d52"/*Sin*/,
+      "Position": {
+        "X": 1322.5985,
+        "Y": 1869.631
+      }
+    },
+    {
+      "ChildId": "b8770fb9-8f97-4928-aebf-430cdaf0705b"/*Time*/,
+      "AnnotationId": "aac7d66b-9522-46ba-835d-fee499a83356",
+      "Position": {
+        "X": 1322.5986,
+        "Y": 2021.9336
+      }
+    },
+    {
+      "ChildId": "dc535372-0ade-45a9-bf95-d327ce62f6bd"/*Sin*/,
+      "AnnotationId": "aac7d66b-9522-46ba-835d-fee499a83356",
+      "Position": {
+        "X": 1322.5986,
+        "Y": 2056.934
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "608d1972-b533-43ca-93fe-b1747f0ec231"/*ColorBuffer*/,
+      "Position": {
+        "X": 1580.2582,
+        "Y": 1965.0925
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "aac7d66b-9522-46ba-835d-fee499a83356",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1260.0,
+        "Y": 1960.0
+      },
+      "Size": {
+        "X": 256.4984,
+        "Y": 182.6687
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "59c89de4-dff6-4f73-ac06-4ed9d9c5d1db",
+      "ChildId": "b4a245fc-4a34-495e-8d52-3c1827490d52",
+      "Description": "The [Sin] operator creates a smooth wave shape.\nYes, \"Sine\" would be the proper name."
+    },
+    {
+      "Id": "c0bb0832-5284-4ea0-a8d3-07e06bc74bc5",
+      "ChildId": "3f18bcb0-0929-44f7-b948-a8413b0deec6",
+      "Description": "To animate the wave, connect an animated value like [Time]."
+    },
+    {
+      "Id": "569f9e62-0620-46e4-b6c0-97264fa72338",
+      "ChildId": "3f18bcb0-0929-44f7-b948-a8413b0deec6",
+      "Description": "Adjust the Speed Factor until it matches the goal."
+    }
+  ]
+}

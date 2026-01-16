@@ -94,7 +94,7 @@ public sealed class SilkWindowProvider : IImguiWindowProvider, IMessageBoxProvid
     private static readonly WindowOptions DefaultOptions = new()
                                                                {
                                                                    API = GraphicsAPI.Default,
-                                                                   IsEventDriven = true,
+                                                                   IsEventDriven = false,
                                                                    ShouldSwapAutomatically = true,
                                                                    IsVisible = true,
                                                                    Position = new Vector2D<int>(600, 600),

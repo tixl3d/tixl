@@ -1,6 +1,6 @@
 {
   "Id": "1677fd74-6e54-479a-b478-c2ac77288f9c"/*HSLToColor*/,
-  "Description": "Creates an RGBA color from HSB settings",
+  "Description": "Creates an RGBA color from HSL settings",
   "SymbolTags": "1",
   "InputUis": [
     {

@@ -710,7 +710,7 @@
       }
     },
     {
-      "ChildId": "4e28c487-4fc4-462a-bc02-b2d8f96fdef2"/*PickFromStringList*/,
+      "ChildId": "4e28c487-4fc4-462a-bc02-b2d8f96fdef2"/*PickStringFromList*/,
       "Position": {
         "X": -8203.775,
         "Y": 6521.3003
@@ -738,7 +738,7 @@
       }
     },
     {
-      "ChildId": "50ac81f3-8d34-45cb-9841-9d212e73492b"/*PickFromStringList*/,
+      "ChildId": "50ac81f3-8d34-45cb-9841-9d212e73492b"/*PickStringFromList*/,
       "Position": {
         "X": -8653.775,
         "Y": 6249.3003
@@ -962,7 +962,7 @@
       }
     },
     {
-      "ChildId": "69e0450d-7ef6-4960-8a01-446f43a5c7d2"/*PickFromStringList*/,
+      "ChildId": "69e0450d-7ef6-4960-8a01-446f43a5c7d2"/*PickStringFromList*/,
       "Position": {
         "X": -8053.775,
         "Y": 6209.3003
@@ -1116,7 +1116,7 @@
       }
     },
     {
-      "ChildId": "7505bc53-77fe-4ba8-b94b-7df32b3414d8"/*PickFromStringList*/,
+      "ChildId": "7505bc53-77fe-4ba8-b94b-7df32b3414d8"/*PickStringFromList*/,
       "Position": {
         "X": -8053.775,
         "Y": 6664.3003
@@ -1221,7 +1221,7 @@
       }
     },
     {
-      "ChildId": "7ecb38c5-472b-42db-9d36-822208764674"/*PickFromStringList*/,
+      "ChildId": "7ecb38c5-472b-42db-9d36-822208764674"/*PickStringFromList*/,
       "Position": {
         "X": 482.1709,
         "Y": 4419.6475
@@ -1515,7 +1515,7 @@
       }
     },
     {
-      "ChildId": "9b119b90-a5ef-46df-8429-83a0a38dfc4d"/*PickFromStringList*/,
+      "ChildId": "9b119b90-a5ef-46df-8429-83a0a38dfc4d"/*PickStringFromList*/,
       "Position": {
         "X": -8353.775,
         "Y": 6664.3003
@@ -1585,7 +1585,7 @@
       }
     },
     {
-      "ChildId": "a39edccc-178d-4aa5-90f3-edadda59850c"/*PickFromStringList*/,
+      "ChildId": "a39edccc-178d-4aa5-90f3-edadda59850c"/*PickStringFromList*/,
       "Position": {
         "X": -207.51294,
         "Y": 2817.985
@@ -1942,7 +1942,7 @@
       }
     },
     {
-      "ChildId": "c537ba15-7aa1-4e38-993c-aca9f24f6398"/*PickFromStringList*/,
+      "ChildId": "c537ba15-7aa1-4e38-993c-aca9f24f6398"/*PickStringFromList*/,
       "Position": {
         "X": -8503.775,
         "Y": 6521.3003

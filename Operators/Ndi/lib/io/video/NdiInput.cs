@@ -41,7 +41,9 @@ public sealed class NdiInput : Instance<NdiInput>, IStatusProvider, ICustomDropd
             var sourceName = SourceName.GetValue(context);
             _textureMutex.WaitOne(Timeout.Infinite);
             DisposeTextures();
-            Connect(sourceName);
+            if(sourceName != null)
+                Connect(sourceName);
+            
             _textureMutex.ReleaseMutex();
         }
 
@@ -510,7 +512,7 @@ public sealed class NdiInput : Instance<NdiInput>, IStatusProvider, ICustomDropd
     #region device dropdown
     string ICustomDropdownHolder.GetValueForInput(Guid inputId)
     {
-        return SourceName.Value;
+        return SourceName.Value ?? string.Empty;
     }
 
     IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid inputId)

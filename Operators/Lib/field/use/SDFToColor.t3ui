@@ -1,0 +1,101 @@
+{
+  "Id": "15a1da54-2869-4d98-a61c-aa9fe89b0125"/*SDFToColor*/,
+  "Description": "",
+  "InputUis": [
+    {
+      "InputId": "8b5f65ba-4b18-49eb-803d-28e028cf67f7"/*GainAndBias*/,
+      "Position": {
+        "X": 1043.1895,
+        "Y": 689.105
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true,
+      "Format": "{0:0.000}",
+      "UseVec2Control": "BiasAndGain"
+    },
+    {
+      "InputId": "a83e4d64-6194-4cfc-b740-55875de56b2f"/*InputField*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 1043.1895,
+        "Y": 514.105
+      }
+    },
+    {
+      "InputId": "b03a6bb2-fb06-4a77-94d9-9924c77e6270"/*Mapping*/,
+      "Position": {
+        "X": 1043.1895,
+        "Y": 584.105
+      }
+    },
+    {
+      "InputId": "be783e46-ca50-4e9d-9e81-12029c5a3265"/*Range*/,
+      "Position": {
+        "X": 1043.1895,
+        "Y": 619.105
+      }
+    },
+    {
+      "InputId": "da4a52ab-8bdd-48f8-b530-ff9e6e303b5d"/*Offset*/,
+      "Position": {
+        "X": 1043.1895,
+        "Y": 654.105
+      }
+    },
+    {
+      "InputId": "f3bc8b96-37b8-4be9-9a7c-61acb3e151f9"/*Gradient*/,
+      "Position": {
+        "X": 763.1894,
+        "Y": 549.105
+      }
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "29361a0f-84fb-431a-bfc3-37dcec47305d"/*RandomizePoints*/,
+      "Position": {
+        "X": 1012.1476,
+        "Y": 1073.3391
+      }
+    },
+    {
+      "ChildId": "3e8eb0b3-d7fb-4859-9b8a-70d28c26ca02"/*GradientsToTexture*/,
+      "Position": {
+        "X": 903.1894,
+        "Y": 549.105
+      }
+    },
+    {
+      "ChildId": "908d7793-e1a6-4d1d-a886-5119f9d90bce"/*SelectPointsWithSDF*/,
+      "Position": {
+        "X": 1202.7743,
+        "Y": 942.4254
+      }
+    },
+    {
+      "ChildId": "f1cb187c-4f5e-4aa1-bacd-af99d4283034"/*_ExecuteSdfToColor*/,
+      "Position": {
+        "X": 1183.1895,
+        "Y": 514.105
+      }
+    },
+    {
+      "ChildId": "f5d210df-78dd-4e25-b9e0-5eabac98116e"/*SrvFromTexture2d*/,
+      "Position": {
+        "X": 1043.1895,
+        "Y": 549.105
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "af7718e9-470c-4294-b44b-2dff008abbdc"/*Result*/,
+      "Position": {
+        "X": 1356.9453,
+        "Y": 514.7193
+      }
+    }
+  ]
+}

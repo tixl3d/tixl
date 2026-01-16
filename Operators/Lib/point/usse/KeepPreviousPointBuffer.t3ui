@@ -1,0 +1,38 @@
+{
+  "Id": "c7752832-7155-4082-acd5-276c1abe7eb4"/*KeepPreviousPointBuffer*/,
+  "Description": "Can be used to implement double buffering of points.",
+  "InputUis": [
+    {
+      "InputId": "07ca7e81-02b8-4cb4-92f4-7afaaa07b751"/*InputBuffer*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "513d0146-e0c0-4e27-a3dc-862c1f56e219"/*Keep*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "8c301f66-a743-4c1e-9f2b-fa9cb5904c98"/*BufferA*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "74a47202-3c66-476d-a850-fbb2b37dffe5"/*BufferB*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 100.0
+      }
+    }
+  ]
+}

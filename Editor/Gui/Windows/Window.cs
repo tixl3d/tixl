@@ -151,7 +151,7 @@ internal abstract class Window
     {
     }
 
-    List<Window> _instancesToDraw = new List<Window>();
+    readonly List<Window> _instancesToDraw = [];
 
     private void DrawAllInstances()
     {
@@ -180,7 +180,7 @@ internal abstract class Window
     internal sealed class WindowConfig
     {
         // Public for json-serialization
-        public string Title = "";
+        public string Title = "";   // This property name is unfortunate because it's used for serialization
         public bool Visible;
     }
 

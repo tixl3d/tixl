@@ -10,32 +10,28 @@ cbuffer ParamConstants : register(b0)
     float Shade;
 
     float2 DisplaceMapOffset;
-    float SampleRadius;    
+    float SampleRadius;
 }
 
-cbuffer TimeConstants : register(b1)
-{
-    float globalTime;
-    float time;
-    float runTime;
-    float beatTime;
-}
+// cbuffer TimeConstants : register(b1)
+// {
+//     float globalTime;
+//     float time;
+//     float runTime;
+//     float beatTime;
+// }
 
-cbuffer Resolution : register(b2)
+cbuffer Resolution : register(b1)
 {
     float TargetWidth;
     float TargetHeight;
-
 }
 
-cbuffer IntParameters : register(b4)
-{    
+cbuffer IntParameters : register(b2)
+{
     int DisplaceMode;
     int UseRGSSMultiSampling;
 }
-
-
-
 
 struct vsOutput
 {
@@ -62,10 +58,10 @@ float4 DoDisplace(float2 uv)
     float radius2 = 2;
     float sx = SampleRadius / displaceMapWidth;
     float sy = SampleRadius / displaceMapHeight;
-    //int sampleIndex = 1;
+    // int sampleIndex = 1;
 
-    //float padding = 1;
-    //float paddingSum;
+    // float padding = 1;
+    // float paddingSum;
     float2 d = 0;
     float len = 0;
 
@@ -74,22 +70,22 @@ float4 DoDisplace(float2 uv)
     {
         if (DisplaceMode < 0.5)
         {
-            float4 cx1 = DisplaceMap.SampleLevel(texSampler, float2(uv.x + sx, uv.y) + DisplaceMapOffset,0);
+            float4 cx1 = DisplaceMap.SampleLevel(texSampler, float2(uv.x + sx, uv.y) + DisplaceMapOffset, 0);
             float x1 = (cx1.r + cx1.g + cx1.b) / 3;
-            float4 cx2 = DisplaceMap.SampleLevel(texSampler, float2(uv.x - sx, uv.y) + DisplaceMapOffset,0);
+            float4 cx2 = DisplaceMap.SampleLevel(texSampler, float2(uv.x - sx, uv.y) + DisplaceMapOffset, 0);
             float x2 = (cx2.r + cx2.g + cx2.b) / 3;
-            float4 cy1 = DisplaceMap.SampleLevel(texSampler, float2(uv.x, uv.y + sy) + DisplaceMapOffset,0);
+            float4 cy1 = DisplaceMap.SampleLevel(texSampler, float2(uv.x, uv.y + sy) + DisplaceMapOffset, 0);
             float y1 = (cy1.r + cy1.g + cy1.b) / 3;
-            float4 cy2 = DisplaceMap.SampleLevel(texSampler, float2(uv.x, uv.y - sy) + DisplaceMapOffset,0);
+            float4 cy2 = DisplaceMap.SampleLevel(texSampler, float2(uv.x, uv.y - sy) + DisplaceMapOffset, 0);
             float y2 = (cy2.r + cy2.g + cy2.b) / 3;
             d += float2((x1 - x2), (y1 - y2));
 
-            //paddingSum += padding;
-            //padding /= 1.5;
+            // paddingSum += padding;
+            // padding /= 1.5;
         }
         else
         {
-            float4 rgba = DisplaceMap.SampleLevel(texSampler, uv + DisplaceMapOffset,0);
+            float4 rgba = DisplaceMap.SampleLevel(texSampler, uv + DisplaceMapOffset, 0);
             d = float2(0.0, (rgba.r + rgba.g + rgba.b) / 3.0) / 10;
         }
         float a = (d.x == 0 && d.y == 0)
@@ -101,7 +97,7 @@ float4 DoDisplace(float2 uv)
     }
     else
     {
-        float4 rgba = DisplaceMap.SampleLevel(texSampler, uv + DisplaceMapOffset,0);
+        float4 rgba = DisplaceMap.SampleLevel(texSampler, uv + DisplaceMapOffset, 0);
         d = DisplaceMode < 0.5 ? (rgba.rg - 0.5) * 0.01
                                : rgba.rg * 0.01;
         len = length(d) + 0.000001;
@@ -116,13 +112,13 @@ float4 DoDisplace(float2 uv)
         direction = d / len;
     }
 
-    float2 p2 = direction * (-DisplaceAmount * len * 10 + DisplaceOffset); 
+    float2 p2 = direction * (-DisplaceAmount * len * 10 + DisplaceOffset);
     float imgAspect = TargetWidth / TargetHeight;
     p2.x /= imgAspect;
 
-    float4 c = Image.SampleLevel(texSampler, uv + p2,0);
-    
-    c.rgb *= (1 - len * Shade * 100);    
+    float4 c = Image.SampleLevel(texSampler, uv + p2, 0);
+
+    c.rgb *= (1 - len * Shade * 100);
     return c;
 }
 
@@ -132,7 +128,7 @@ float4 psMain(vsOutput psInput) : SV_TARGET
 
     float2 uv = psInput.texCoord;
 
-    float4 c=0;
+    float4 c = 0;
 
     if (UseRGSSMultiSampling > 0.5)
     {
@@ -143,16 +139,16 @@ float4 psMain(vsOutput psInput) : SV_TARGET
 
         float2 sxy = float2(TargetWidth, TargetHeight);
 
-        c= (DoDisplace(uv + offsets[0].xy / sxy) +
-                DoDisplace(uv + offsets[0].zw / sxy) +
-                DoDisplace(uv + offsets[1].xy / sxy) +
-                DoDisplace(uv + offsets[1].zw / sxy)) /
-               4;
+        c = (DoDisplace(uv + offsets[0].xy / sxy) +
+             DoDisplace(uv + offsets[0].zw / sxy) +
+             DoDisplace(uv + offsets[1].xy / sxy) +
+             DoDisplace(uv + offsets[1].zw / sxy)) /
+            4;
     }
     else
     {
-        c= DoDisplace(uv);
+        c = DoDisplace(uv);
     }
 
-    return clamp(c, 0, float4(999,999,999,1)) ;
+    return clamp(c, 0, float4(999, 999, 999, 1));
 }

@@ -22,9 +22,10 @@ internal sealed class CalcInt2DispatchCount : Instance<CalcInt2DispatchCount>
                                        size.Height / threadGroups.Y + 1, 1);
     }
 
+    [Input(Guid = "71fe6847-b8e3-4cc7-895c-b10db0136e1c")]
+    public readonly InputSlot<Int3> ThreadGroups = new();
+    
     [Input(Guid = "714e7c0d-0137-4bc6-9e5b-93386b2efe13")]
     public readonly InputSlot<Int2> Size = new();
 
-    [Input(Guid = "71fe6847-b8e3-4cc7-895c-b10db0136e1c")]
-    public readonly InputSlot<Int3> ThreadGroups = new();
 }

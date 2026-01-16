@@ -2,6 +2,7 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
+using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 

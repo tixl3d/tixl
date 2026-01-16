@@ -1,0 +1,37 @@
+{
+  "Id": "6f65e325-21cc-4bc5-9aea-4a691476e3bf"/*SampleCpuPoints*/,
+  "Description": "Samples a list of line points with cubic bezier spline interpolation. \nThis can useful to animate cameras and other objects.",
+  "InputUis": [
+    {
+      "InputId": "1bd99405-7fe5-4712-9ef2-6e66b8d41aeb"/*TangentScale*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      }
+    },
+    {
+      "InputId": "6412d80e-d6fd-4c47-a8a4-6b88b5da95a5"/*SamplePos*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      }
+    },
+    {
+      "InputId": "8cf06759-9c93-438f-ae5f-12a55a29b347"/*PointList*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "4ec76fd1-a89e-4fe4-af6d-e0f2d2daaa1c"/*ResultPoint*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    }
+  ]
+}

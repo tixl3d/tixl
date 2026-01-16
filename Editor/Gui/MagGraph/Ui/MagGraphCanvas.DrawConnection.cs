@@ -1,4 +1,4 @@
-﻿using ImGuiNET;
+using ImGuiNET;
 using T3.Core.Utils;
 using T3.Editor.Gui.MagGraph.Interaction;
 using T3.Editor.Gui.MagGraph.Model;
@@ -18,6 +18,9 @@ internal sealed partial class MagGraphView
         if (connection.Style == MagGraphConnection.ConnectionStyles.Unknown)
             return;
 
+        if (connection.SourceItem.IsCollapsedAway && connection.TargetItem.IsCollapsedAway)
+            return;
+
         var type = connection.Type;
 
         // if (!TypeUiRegistry.TryGetPropertiesForType(type, out var typeUiProperties))
@@ -25,23 +28,53 @@ internal sealed partial class MagGraphView
 
         var isSelected = context.Selector.IsSelected(connection.SourceItem) ||
                          context.Selector.IsSelected(connection.TargetItem);
-        
+
         var typeUiProperties = TypeUiRegistry.GetPropertiesForType(type);
 
         var anchorSize = 4 * CanvasScale;
         var idleFadeProgress = MathUtils.RemapAndClamp(connection.SourceOutput.DirtyFlag.FramesSinceLastUpdate, 0, 100, 1, 0f);
-        
-        var color =  typeUiProperties.Color.Fade(_context.GraphOpacity);
-        
-        var wasHoveredLastFrame = !_context.PreventInteraction && ConnectionHovering.IsHovered(connection); 
-        var selectedColor = isSelected || wasHoveredLastFrame ?  ColorVariations.OperatorLabel.Apply(color)
+
+        var color = typeUiProperties.Color.Fade(_context.GraphOpacity);
+
+        var wasHoveredLastFrame = !_context.PreventInteraction && ConnectionHovering.IsHovered(connection);
+        var selectedColor = isSelected || wasHoveredLastFrame
+                                ? ColorVariations.OperatorLabel.Apply(color)
                                 : ColorVariations.ConnectionLines.Apply(color);
-        
+
         var typeColor = ColorVariations.ConnectionLines.Apply(selectedColor).Fade(MathUtils.Lerp(0.6f, 1, idleFadeProgress));
         var connectionTypeColor = ColorVariations.OperatorLabel.Apply(selectedColor).Fade(MathUtils.Lerp(0.6f, 1, idleFadeProgress));
-        
-        var sourcePosOnScreen = TransformPosition(connection.SourcePos);
-        var targetPosOnScreen = TransformPosition(connection.TargetPos);
+
+        Vector2 sourceOnCanvas;
+        if (connection.SourceItem.IsCollapsedAway)
+        {
+            if (!context.Layout.Annotations.TryGetValue(connection.SourceItem.ChildUi!.CollapsedIntoAnnotationFrameId, out var annotation))
+                return;
+
+            sourceOnCanvas = annotation.PosOnCanvas + new Vector2(annotation.Size.X - 5, MagGraphItem.LineHeight/2);
+        }
+        else
+        {
+            sourceOnCanvas = connection.DampedSourcePos;
+        }
+
+        var sourcePosOnScreen = TransformPosition(sourceOnCanvas);
+
+        Vector2 targetOnCanvas;
+        if (connection.TargetItem.IsCollapsedAway)
+        {
+            if (!context.Layout.Annotations.TryGetValue(connection.TargetItem.ChildUi!.CollapsedIntoAnnotationFrameId, out var annotation))
+                return;
+
+            targetOnCanvas = annotation.PosOnCanvas + new Vector2(2, MagGraphItem.LineHeight/2);
+        }
+        else
+        {
+            targetOnCanvas = connection.DampedTargetPos;
+        }
+
+        var targetPosOnScreen = TransformPosition(targetOnCanvas);
+
+        //var targetPosOnScreen = TransformPosition(connection.DampedTargetPos);
 
         var anchorWidth = 1.5f * 2;
         var anchorHeight = 2f * 2;
@@ -54,7 +87,7 @@ internal sealed partial class MagGraphView
                 case MagGraphConnection.ConnectionStyles.MainOutToInputSnappedHorizontal:
                 {
                     var isPotentialSplitTarget = _context.ItemMovement.SpliceSets.Count > 0
-                                                 && !_context.ItemMovement.DraggedItems.Contains( connection.SourceItem)
+                                                 && !_context.ItemMovement.DraggedItems.Contains(connection.SourceItem)
                                                  && _context.ItemMovement.SpliceSets
                                                             .Any(sp
                                                                      => sp.Direction == MagGraphItem.Directions.Horizontal
@@ -72,18 +105,17 @@ internal sealed partial class MagGraphView
 
                     //drawList.AddCircleFilled(sourcePosOnScreen, anchorSize * 1.6f, typeColor, 3);
                     drawList.AddTriangleFilled(
-                                               sourcePosOnScreen + new Vector2(-anchorHeight/2, -anchorWidth ) * CanvasScale * 2,
-                                               sourcePosOnScreen + new Vector2(anchorHeight/2,0 ) * CanvasScale * 2,
-                                               sourcePosOnScreen + new Vector2(-anchorHeight/2, anchorWidth) * CanvasScale * 2,
+                                               sourcePosOnScreen + new Vector2(-anchorHeight / 2, -anchorWidth) * CanvasScale * 2,
+                                               sourcePosOnScreen + new Vector2(anchorHeight / 2, 0) * CanvasScale * 2,
+                                               sourcePosOnScreen + new Vector2(-anchorHeight / 2, anchorWidth) * CanvasScale * 2,
                                                connectionTypeColor);
                     break;
                 }
-                
-                    
+
                 case MagGraphConnection.ConnectionStyles.MainOutToMainInSnappedVertical:
                 {
                     var isPotentialSplitTarget = _context.ItemMovement.SpliceSets.Count > 0
-                                                 && !_context.ItemMovement.DraggedItems.Contains( connection.SourceItem)
+                                                 && !_context.ItemMovement.DraggedItems.Contains(connection.SourceItem)
                                                  && _context.ItemMovement.SpliceSets
                                                             .Any(x
                                                                      => x.Direction == MagGraphItem.Directions.Vertical
@@ -100,14 +132,13 @@ internal sealed partial class MagGraphView
                     }
 
                     drawList.AddTriangleFilled(
-                                               sourcePosOnScreen + new Vector2(-anchorWidth, -anchorHeight/2) * CanvasScale * 2,
-                                               sourcePosOnScreen + new Vector2(anchorWidth, -anchorHeight/2) * CanvasScale * 2,
-                                               sourcePosOnScreen + new Vector2(0, anchorHeight/2) * CanvasScale * 2,
+                                               sourcePosOnScreen + new Vector2(-anchorWidth, -anchorHeight / 2) * CanvasScale * 2,
+                                               sourcePosOnScreen + new Vector2(anchorWidth, -anchorHeight / 2) * CanvasScale * 2,
+                                               sourcePosOnScreen + new Vector2(0, anchorHeight / 2) * CanvasScale * 2,
                                                connectionTypeColor);
                     break;
                 }
 
-                
                 case MagGraphConnection.ConnectionStyles.AdditionalOutToMainInputSnappedVertical:
                     drawList.AddCircleFilled(sourcePosOnScreen, anchorSize * 1.6f, Color.Red, 3);
                     break;
@@ -117,10 +148,11 @@ internal sealed partial class MagGraphView
         {
             var d = Vector2.Distance(sourcePosOnScreen, targetPosOnScreen) / 2;
 
-            if (InputSnapper.BestInputMatch.Item == connection.TargetItem 
+            if (InputSnapper.BestInputMatch.Item == connection.TargetItem
                 && InputSnapper.BestInputMatch.SlotId == connection.TargetInput.Id
-                &&  InputSnapper.BestInputMatch.MultiInputIndex == connection.MultiInputIndex
-                && (InputSnapper.BestInputMatch.InputSnapType == InputSnapper.InputSnapTypes.Normal || InputSnapper.BestInputMatch.InputSnapType == InputSnapper.InputSnapTypes.ReplaceMultiInput))
+                && InputSnapper.BestInputMatch.MultiInputIndex == connection.MultiInputIndex
+                && (InputSnapper.BestInputMatch.InputSnapType == InputSnapper.InputSnapTypes.Normal ||
+                    InputSnapper.BestInputMatch.InputSnapType == InputSnapper.InputSnapTypes.ReplaceMultiInput))
             {
                 typeColor = UiColors.StatusAttention.Fade(0.3f + 0.1f * Blink);
             }
@@ -135,21 +167,19 @@ internal sealed partial class MagGraphView
                                                                 TransformRect(connection.TargetItem.VerticalStackArea),
                                                                 targetPosOnScreen,
                                                                 typeColor,
-                                                                MathUtils.Lerp(0.25f, 2f, idleFadeProgress) + (isSelected|wasHoveredLastFrame ? 2 : 0),
+                                                                MathUtils.Lerp(0.25f, 2f, idleFadeProgress) + (isSelected | wasHoveredLastFrame ? 2 : 0),
                                                                 out var hoverPositionOnLine,
                                                                 out var normalizedHoverPos))
                     {
-                        if(context.StateMachine.CurrentState == GraphStates.Default)
-                            ConnectionHovering.RegisterHoverPoint(connection, typeColor, hoverPositionOnLine, normalizedHoverPos, sourcePosOnScreen);                        
+                        if (context.StateMachine.CurrentState == GraphStates.Default)
+                            ConnectionHovering.RegisterHoverPoint(connection, typeColor, hoverPositionOnLine, normalizedHoverPos, sourcePosOnScreen);
                     }
 
-                    
-                    
                     drawList.AddTriangleFilled(
                                                targetPosOnScreen + new Vector2(-1, -1 + 1) * CanvasScale * 3,
                                                targetPosOnScreen + new Vector2(1, -1 + 1) * CanvasScale * 3,
                                                targetPosOnScreen + new Vector2(0, 1 + 1) * CanvasScale * 3,
-                                               typeColor);                    
+                                               typeColor);
                     break;
                 }
                 case MagGraphConnection.ConnectionStyles.BottomToLeft:
@@ -159,7 +189,7 @@ internal sealed partial class MagGraphView
                                             targetPosOnScreen,
                                             typeColor.Fade(0.6f),
                                             2);
-                    
+
                     break;
                 case MagGraphConnection.ConnectionStyles.RightToTop:
                     drawList.AddBezierCubic(sourcePosOnScreen,
@@ -168,14 +198,13 @@ internal sealed partial class MagGraphView
                                             targetPosOnScreen,
                                             typeColor.Fade(0.6f),
                                             2);
-                    
+
                     drawList.AddTriangleFilled(
                                                sourcePosOnScreen + new Vector2(-1, -1) * CanvasScale * 5,
                                                sourcePosOnScreen + new Vector2(1, -1) * CanvasScale * 5,
                                                sourcePosOnScreen + new Vector2(0, 1) * CanvasScale * 5,
                                                typeColor);
                     break;
-
 
                 case MagGraphConnection.ConnectionStyles.RightToLeft:
 

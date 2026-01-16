@@ -6,16 +6,16 @@
     {
       "InputId": "1dfb45ae-b376-41ea-a1d2-97b170645b50"/*Variation*/,
       "Position": {
-        "X": -354.29822,
-        "Y": 1076.619
+        "X": 70.217224,
+        "Y": 1088.1663
       },
       "Description": "Adds more variance and detail to the noise."
     },
     {
       "InputId": "2d229dc7-a7ec-4fae-b84c-5eea6b91e18a"/*NoiseOffset*/,
       "Position": {
-        "X": -351.6601,
-        "Y": 1304.9845
+        "X": -69.782776,
+        "Y": 1263.1663
       },
       "Description": "Shifts the noise per axis."
     },
@@ -23,33 +23,26 @@
       "InputId": "3f5abde2-66e1-4b04-9bff-5a19a58aab86"/*Points*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -348.14264,
-        "Y": 755.7676
+        "X": -129.59567,
+        "Y": 720.00745
       }
     },
     {
       "InputId": "5894156a-cc31-4236-908c-de0e5385fd84"/*Strength*/,
       "Position": {
-        "X": -354.29822,
-        "Y": 941.61896
+        "X": 70.217224,
+        "Y": 983.1664
       },
       "Description": "Defines the total intensity of the random movements.",
-      "AddPadding": "True"
-    },
-    {
-      "InputId": "6c2ab161-da81-47c2-8008-222cf994179c"/*UseWAsWeight*/,
-      "Position": {
-        "X": -370.19815,
-        "Y": 1625.1031
-      },
-      "GroupTitle": "Obsolete Parameters",
-      "Description": "Defines whether particles are more or less affected by noise depending on the W value."
+      "AddPadding": "True",
+      "Min": 0.0,
+      "Max": 2.0
     },
     {
       "InputId": "929db7b2-f19c-4a28-b4c2-187365b99760"/*Frequency*/,
       "Position": {
-        "X": -354.29822,
-        "Y": 986.61896
+        "X": 70.217224,
+        "Y": 1018.1664
       },
       "GroupTitle": "Settings",
       "Description": "Defines the frequency, i.e., how fast the points move."
@@ -57,32 +50,35 @@
     {
       "InputId": "96b296e9-f15a-4543-a850-8078c583ee94"/*StrengthFactor*/,
       "Position": {
-        "X": -351.6601,
-        "Y": 1394.9845
+        "X": 70.217224,
+        "Y": 1386.7686
       }
     },
     {
       "InputId": "97c25ec6-ef71-42f8-9352-52baf2ce41a4"/*RotationLookupDistance*/,
       "Position": {
-        "X": -351.6601,
-        "Y": 1214.9845
+        "X": 70.217224,
+        "Y": 1228.1663
       },
       "GroupTitle": "Additional Options",
-      "Description": "Defines the rotation lookup distance"
+      "Description": "Defines the rotation lookup distance",
+      "Min": 0.001,
+      "Scale": 0.01,
+      "ClampMin": true
     },
     {
       "InputId": "aaba1602-e7a1-4b48-81d4-9d7b2b3aa8b1"/*Phase*/,
       "Position": {
-        "X": -354.29822,
-        "Y": 1031.619
+        "X": 70.217224,
+        "Y": 1053.1663
       },
       "Description": "Defines the phase of the noise and can be animated with a [Value], e.g., using [Time]."
     },
     {
       "InputId": "c2df1fa3-88e1-4be2-954e-8c44edd9d421"/*AmountDistribution*/,
       "Position": {
-        "X": -351.6601,
-        "Y": 1169.9845
+        "X": -69.782776,
+        "Y": 1123.1663
       },
       "Description": "Multiplier for the individual axes to amplify/attenuate the noise in certain directions.",
       "AddPadding": "True"
@@ -97,22 +93,22 @@
         "Y": 459.8296
       },
       "Position": {
-        "X": 286.774,
-        "Y": 891.8368
+        "X": 210.21722,
+        "Y": 948.1664
       }
     },
     {
       "ChildId": "2adcb282-869e-4a3a-a7bf-df2224f34af5"/*Vector3Components*/,
       "Position": {
-        "X": 37.279877,
-        "Y": 1114.8107
+        "X": 70.217224,
+        "Y": 1123.1663
       }
     },
     {
       "ChildId": "4387cbcf-50d8-462d-892e-7e03f8971bd8"/*IntsToBuffer*/,
       "Position": {
-        "X": 311.03137,
-        "Y": 1392.1216
+        "X": 210.21722,
+        "Y": 1386.7686
       }
     },
     {
@@ -125,50 +121,50 @@
     {
       "ChildId": "84aa3cb4-d236-46e3-b224-5019e90317c7"/*Vector3Components*/,
       "Position": {
-        "X": 46.52594,
-        "Y": 1238.5292
+        "X": 70.217224,
+        "Y": 1263.1663
       }
     },
     {
       "ChildId": "a95da113-989c-413e-b5f5-4a5f2393735a"/*GetBufferComponents*/,
       "Position": {
-        "X": -197.48755,
-        "Y": 751.8842
+        "X": 10.404327,
+        "Y": 720.00745
       }
     },
     {
       "ChildId": "c82e0965-feee-4224-865e-bb64953cb480"/*ComputeShader*/,
       "Position": {
-        "X": 124.37167,
-        "Y": 590.1552
+        "X": 70.217224,
+        "Y": 582.29816
       }
     },
     {
       "ChildId": "caf7bcc5-d4ce-4b71-ba5f-9658c35db481"/*StructuredBufferWithViews*/,
       "Position": {
-        "X": 112.39713,
-        "Y": 849.66064
+        "X": 210.21722,
+        "Y": 819.16986
       }
     },
     {
       "ChildId": "e0bc3ff4-54c9-4b6d-b103-cc0aa9feb81e"/*CalcDispatchCount*/,
       "Position": {
-        "X": 274.37167,
-        "Y": 611.75433
+        "X": 210.21722,
+        "Y": 617.29816
       }
     },
     {
       "ChildId": "f0cb85f5-9224-4160-a6f3-dca6b7453fb2"/*ExecuteBufferUpdate*/,
       "Position": {
-        "X": 641.2465,
-        "Y": 646.7957
+        "X": 473.44153,
+        "Y": 788.99976
       }
     },
     {
       "ChildId": "f4e13729-7010-4660-b8bc-f37f3ed073ee"/*GetBufferComponents*/,
       "Position": {
-        "X": 283.17133,
-        "Y": 782.2316
+        "X": 210.21722,
+        "Y": 854.16986
       }
     }
   ],
@@ -176,8 +172,8 @@
     {
       "OutputId": "bea6aa18-e751-4ce7-b7d7-b7a026c8e019"/*Output*/,
       "Position": {
-        "X": 771.2465,
-        "Y": 646.7957
+        "X": 473.44156,
+        "Y": 858.99976
       }
     }
   ]

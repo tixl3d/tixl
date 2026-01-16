@@ -5,7 +5,9 @@ using T3.Core.Resource;
 using T3.Core.Stats;
 using T3.Core.SystemUi;
 using T3.Core.Utils;
-using T3.Editor.Gui.Graph.Window;
+using T3.Editor.Gui.Graph.Dialogs;
+using T3.Editor.Gui.Window;
+using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.Styling;
@@ -13,7 +15,8 @@ using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.UiHelpers.Wiki;
 using T3.Editor.Gui.Windows;
 using T3.Editor.Gui.Windows.Layouts;
-using T3.Editor.SystemUi;
+using T3.Editor.Skills.Data;
+using T3.Editor.Skills.Ui;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.ProjectHandling;
@@ -83,14 +86,14 @@ internal static class AppMenuBar
             if (!hasErrors)
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-                Icon.Checkmark.Draw();
+                Icon.Checkmark.DrawAtCursor();
                 ImGui.PopStyleColor();
             }
             else
             {
                 var timeSinceChange = (float)(ImGui.GetTime() - OperatorDiagnostics.LastChangeTime).Clamp(0, 1);
                 ImGui.PushStyleVar(ImGuiStyleVar.Alpha, MathUtils.Lerp(1, 0.4f, timeSinceChange));
-                Icon.Warning.Draw();
+                Icon.Warning.DrawAtCursor();
                 isHovered = ImGui.IsItemHovered();
 
                 ImGui.SameLine(0, 0);
@@ -280,6 +283,14 @@ internal static class AppMenuBar
 
             if (ImGui.BeginMenu("Development Tools"))
             {
+                if (ImGui.MenuItem("Skill Map Editor"))
+                    SkillMapEditor.ShowNextFrame();
+                
+                if (ImGui.MenuItem("Tour Point Editor"))
+                    EditTourPointsPopup.ShowNextFrame();
+                
+                ImGui.Separator();
+                
                 if (ImGui.BeginMenu("Clear shader cache"))
                 {
                     if (ImGui.MenuItem("Editor only"))
@@ -307,6 +318,8 @@ internal static class AppMenuBar
 
                 if (ImGui.BeginMenu("Debug"))
                 {
+
+                    
                     if (ImGui.MenuItem("ImGUI Demo", "", WindowManager.DemoWindowVisible))
                         WindowManager.DemoWindowVisible = !WindowManager.DemoWindowVisible;
 
@@ -377,37 +390,19 @@ internal static class AppMenuBar
             if (ImGui.MenuItem("Toggle All", UserActions.ToggleAllUiElements.ListShortcuts(), false,
                                !T3Ui.IsCurrentlySaving))
             {
-                T3Ui.ToggleAllUiElements();
+                UiConfig.ToggleAllUiElements();
             }
 
             ImGui.Separator();
 
             ImGui.MenuItem("Interactions Overlay", "", ref UserSettings.Config.ShowInteractionOverlay);
             ImGui.Separator();
-            ImGui.MenuItem("Fullscreen", UserActions.ToggleFullscreen.ListShortcuts(), ref UserSettings.Config.FullScreen);
-
-            var screens = EditorUi.Instance.AllScreens;
-            if (ImGui.BeginMenu("Fullscreen Display"))
-            {
-                for (var index = 0; index < screens.Count; index++)
-                {
-                    var screen = screens.ElementAt(index);
-                    var label = $"{screen.DeviceName.Trim(new char[] { '\\', '.' })}" +
-                                $" ({screen.Bounds.Width}x{screen.Bounds.Height})";
-                    if (ImGui.MenuItem(label, "", index == UserSettings.Config.FullScreenIndexMain))
-                    {
-                        UserSettings.Config.FullScreenIndexMain = index;
-                    }
-                }
-
-                ImGui.EndMenu();
-            }
-
+            ImGui.MenuItem("Fullscreen UI", UserActions.ToggleFullscreen.ListShortcuts(), ref UserSettings.Config.FullScreen);
             ImGui.Separator();
 
             if (ImGui.MenuItem("Focus Mode", UserActions.ToggleFocusMode.ListShortcuts(), UserSettings.Config.FocusMode))
             {
-                T3Ui.ToggleFocusMode();
+                UiConfig.ToggleFocusMode();
             }
 
             ImGui.EndMenu();
@@ -514,7 +509,7 @@ internal static class AppMenuBar
             new("TiXL Web-Site", "https://tixl.app"),
             new("Latest Releases", "https://github.com/tixl3d/tixl/releases"),
 
-            new("Discord Community", "https://discord.gg/uC4hRRdp",
+            new("Discord Community", "https://discord.com/invite/YmSyQdeH3S",
                 "Join a friendly and welcoming community of enthusiasts. Ask questions, Learn from each other, share or just hang out."),
             new("Meet Up (every 2nd week)", "https://discord.com/invite/WX94pzKj?event=1359348185914544312",
                 "We meet every 2nd week to share our screens answer questions and hang out."),

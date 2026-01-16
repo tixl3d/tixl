@@ -1,0 +1,130 @@
+{
+  "Id": "b5b6c046-3c8e-478a-b423-899872c2e1c4"/*_KeepPreviousFrame_Old1*/,
+  "Description": "Implements a double buffer to keep the previous image. This can be useful for effects that rely on image change comparison, like motion estimation.",
+  "SymbolTags": "8",
+  "InputUis": [
+    {
+      "InputId": "216dca25-9ba2-4cbb-b05a-e74befafaf37"/*Image*/,
+      "Position": {
+        "X": -14.452103,
+        "Y": 35.973602
+      }
+    },
+    {
+      "InputId": "7f255460-3a71-42e7-a372-629d39433ae8"/*HasFrameChanged*/,
+      "Position": {
+        "X": -120.39961,
+        "Y": 308.01462
+      }
+    },
+    {
+      "InputId": "b25d483f-1fdf-4d76-974c-8e781a405914"/*Enable*/,
+      "Position": {
+        "X": -114.64729,
+        "Y": 160.29471
+      }
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "13868df6-23fa-48b3-baff-b875a272a770"/*CompareImages*/,
+      "Position": {
+        "X": 788.1769,
+        "Y": 273.14218
+      }
+    },
+    {
+      "ChildId": "1dcdb1af-deaf-4054-b086-1cded8169084"/*CompareInt*/,
+      "Position": {
+        "X": 222.32837,
+        "Y": 191.57965
+      }
+    },
+    {
+      "ChildId": "296b01f0-d957-4b89-a306-153db7689cf9"/*ConvertFormat*/,
+      "Position": {
+        "X": 165.49355,
+        "Y": -40.284134
+      }
+    },
+    {
+      "ChildId": "3e77b2db-62e9-4c38-b58b-ea8d2d65a78c"/*DelayTriggerChange*/,
+      "Position": {
+        "X": 84.61395,
+        "Y": 460.91412
+      }
+    },
+    {
+      "ChildId": "52a67f36-0c14-49be-80ee-f741484f1a47"/*SwapTextures*/,
+      "Position": {
+        "X": 904.95166,
+        "Y": 2.2167053
+      }
+    },
+    {
+      "ChildId": "561b5bdf-b288-490b-a518-592ccc610415"/*CountInt*/,
+      "Position": {
+        "X": 35.352707,
+        "Y": 160.29471
+      }
+    },
+    {
+      "ChildId": "5a270e2c-8dfc-40e4-b967-5dd787424592"/*ConvertFormat*/,
+      "Position": {
+        "X": 520.06555,
+        "Y": 20.021484
+      }
+    },
+    {
+      "ChildId": "5bf7014b-4351-4754-b670-48a32669d905"/*CompareInt*/,
+      "Position": {
+        "X": 222.32837,
+        "Y": 109.57965
+      }
+    },
+    {
+      "ChildId": "8ba05263-5311-4aaf-8d7b-bb01badc1935"/*ConvertFormat*/,
+      "Position": {
+        "X": 522.32837,
+        "Y": 162.81787
+      }
+    },
+    {
+      "ChildId": "8f38eb6c-d619-4a10-a777-89ca8f511917"/*All*/,
+      "Position": {
+        "X": 372.32837,
+        "Y": 191.57965
+      }
+    },
+    {
+      "ChildId": "af6e6ff0-c9ba-439a-8e33-6e50cd2d57d0"/*All*/,
+      "Position": {
+        "X": 372.32837,
+        "Y": 109.57965
+      }
+    },
+    {
+      "ChildId": "ee5c7fc2-1f66-4332-9435-bab700083e68"/*Not*/,
+      "Position": {
+        "X": 532.86945,
+        "Y": 344.98282
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "4cf4e43b-0f1f-41f7-9ba3-acab3b1160cb"/*TextureA*/,
+      "Position": {
+        "X": 1054.9517,
+        "Y": 2.2167053
+      }
+    },
+    {
+      "OutputId": "edc79491-f0c1-47c6-bc70-8014ebdb1a7a"/*TextureB*/,
+      "Position": {
+        "X": 1054.9517,
+        "Y": 52.216705
+      }
+    }
+  ]
+}

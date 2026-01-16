@@ -9,7 +9,7 @@ public abstract partial class Instance
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected bool TryGetFilePath(string relativePath, out string absolutePath, bool isFolder = false)
     {
-        return ResourceManager.TryResolvePath(relativePath, this, out absolutePath, out _, isFolder);
+        return ResourceManager.TryResolveRelativePath(relativePath, this, out absolutePath, out _, isFolder);
     }
 
     // note: it could be nice to make this an abstract method, but that would require all existing user ops to

@@ -1,14 +1,14 @@
 ﻿using ImGuiNET;
 using T3.Core.Operator;
 using T3.Core.Utils;
-using T3.Editor.Gui.Graph.Legacy.Interaction.Connections;
+using T3.Editor.Gui.Legacy.Interaction.Connections;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.ProjectHandling;
 
-namespace T3.Editor.Gui.Graph.Legacy;
+namespace T3.Editor.Gui.Legacy;
 
 /// <summary>
 /// Draws published input parameters of a <see cref="Symbol"/> and uses <see cref="ConnectionMaker"/> 

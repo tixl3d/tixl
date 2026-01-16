@@ -1,6 +1,7 @@
 {
   "Id": "7b81d100-b5a6-4a0e-8900-0d6418146b41"/*Translate*/,
   "Description": "Transforms the position of the field in 3D space.\nSimilar node with more options: [TransformField]\n\nIt can be rendered with [RaymarchField] and visualized with [VisualizeFieldDistance].\n\nOther nodes: [RepeatWithMirror], [PolarRepeat], [TwistField].\n\nIt needs an incoming field like [BoxSDF], [ChainLinkSDF], [FractalSDF] as an input.\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToRaymarchField].\n",
+  "SymbolTags": "1",
   "InputUis": [
     {
       "InputId": "9aa6a5cd-4c0b-45c1-9a82-0f40f8aa43c2"/*InputField*/,

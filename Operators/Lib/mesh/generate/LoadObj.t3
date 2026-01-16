@@ -3,7 +3,7 @@
   "Inputs": [
     {
       "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
-      "DefaultValue": "Resources/common/meshes/marblePlayer.obj"
+      "DefaultValue": "/t3/meshes/marblePlayer.obj"
     },
     {
       "Id": "aa19e71d-329c-448b-901c-565bf8c0da4f"/*SortVertices*/,

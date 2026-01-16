@@ -314,7 +314,7 @@
       "SymbolId": "c6d50423-54ea-4c9d-b547-eb78cc2c950c",
       "InputValues": [
         {
-          "Id": "133bbc5a-bdbf-4993-bd1a-878ec93ee04f"/*Factor*/,
+          "Id": "133bbc5a-bdbf-4993-bd1a-878ec93ee04f"/*Scale*/,
           "Type": "System.Single",
           "Value": 0.5
         }

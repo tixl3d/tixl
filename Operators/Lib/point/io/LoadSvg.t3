@@ -23,7 +23,7 @@
     },
     {
       "Id": "ef2a461d-c66d-44d8-8b0e-e48a57ec991f"/*FilePath*/,
-      "DefaultValue": "Resources\\common\\test-footage\\svg-line-sample-01.svg"
+      "DefaultValue": "/t3/test-footage/svg-line-sample-01.svg"
     }
   ],
   "Children": [],

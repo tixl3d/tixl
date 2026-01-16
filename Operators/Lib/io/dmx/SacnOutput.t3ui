@@ -1,6 +1,6 @@
 {
   "Id": "e5a8d9e6-3c5a-4bbb-9da3-737b6330b9c3"/*SacnOutput*/,
-  "Description": "",
+  "Description": "Sends DMX data over the network using the sACN (Streaming ACN) protocol.\n\nThis operator multicasts or unicasts DMX data to sACN-enabled devices like lighting fixtures, nodes, or media servers. It can send multiple DMX universes simultaneously.\n\nTips:\n- For multicast, leave `TargetIpAddress` empty. For unicast, specify the IP address of the destination device.\n- The `InputsValues` should be a list of lists. The outer list corresponds to the universes, and each inner list contains the 512 channel values for that universe.\n- Use `SendTrigger` for manual control or connect a value to `InputsValues` to send automatically on change.\n\nAKA: sacn, streaming acn, dmx, artnet, lighting",
   "InputUis": [
     {
       "InputId": "1b26f5d5-8141-4b13-b88d-6859ed5a4af8"/*StartUniverse*/,
@@ -8,6 +8,7 @@
         "X": -200.0,
         "Y": 75.0
       },
+      "Description": "The first DMX universe to send. Must be 1 or greater.",
       "Min": 1,
       "Scale": 1.0,
       "ClampMin": true,
@@ -18,21 +19,24 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "A list of lists containing the DMX channel data. The outer list represents universes, and each inner list contains up to 512 float values (0-1)."
     },
     {
       "InputId": "3f25c04c-0a88-42fb-93d3-05992b861e61"/*DiscoverSources*/,
       "Position": {
         "X": -200.0,
         "Y": 525.0
-      }
+      },
+      "Description": "If enabled, the operator will listen for sACN sources on the network and print their information to the T3 log."
     },
     {
       "InputId": "4a9e2d3b-8c6f-4b1d-8d7e-9f3a5b2c1d0e"/*Priority*/,
       "Position": {
         "X": -200.0,
         "Y": 600.0
-      }
+      },
+      "Description": "The priority of the sent DMX data (0-200). Higher priority data will override lower priority data on the receiving node. Default is 100."
     },
     {
       "InputId": "5b1d9c8a-7e3f-4a2b-9c8d-1e0f3a5b2c1d"/*SourceName*/,
@@ -40,6 +44,7 @@
         "X": -200.0,
         "Y": 675.0
       },
+      "Description": "A user-defined name for this sACN source, which can help identify it on the network.",
       "Usage": "Default"
     },
     {
@@ -47,35 +52,40 @@
       "Position": {
         "X": -200.0,
         "Y": 750.0
-      }
+      },
+      "Description": "Limits the maximum update rate in frames per second. A value of 0 means no limit."
     },
     {
       "InputId": "7a8b9c0d-1e2f-3a4b-5c6d-7e8f9a0b1c2d"/*EnableSync*/,
       "Position": {
         "X": -200.0,
         "Y": 825.0
-      }
+      },
+      "Description": "If enabled, an sACN Synchronization packet is sent to the `SyncUniverse`. This can be used to synchronize updates across multiple sACN receivers."
     },
     {
       "InputId": "8b9c0d1e-2f3a-4b5c-6d7e-8f9a0b1c2d3e"/*SyncUniverse*/,
       "Position": {
         "X": -200.0,
         "Y": 900.0
-      }
+      },
+      "Description": "The universe to which the sACN Synchronization packet is sent."
     },
     {
       "InputId": "8c6c9a8d-29c5-489e-8c6b-9e4a3c1e2b6a"/*SendUnicast*/,
       "Position": {
         "X": -200.0,
         "Y": 375.0
-      }
+      },
+      "Description": "If enabled, sends sACN packets as unicast to the `TargetIpAddress`. Otherwise, packets are multicast."
     },
     {
       "InputId": "9b8a7c6d-5e4f-4012-3456-7890abcdef12"/*SendTrigger*/,
       "Position": {
         "X": -200.0,
         "Y": 300.0
-      }
+      },
+      "Description": "A trigger to manually send the sACN data. The data is sent when this value changes from 0 to 1."
     },
     {
       "InputId": "9c233633-959f-4447-b248-4d431c1b18e7"/*LocalIpAddress*/,
@@ -83,6 +93,7 @@
         "X": -200.0,
         "Y": 225.0
       },
+      "Description": "The IP address of the network interface to send from. A dropdown shows available addresses. If you have multiple network cards, make sure to select the one connected to your lighting network.",
       "Usage": "CustomDropdown"
     },
     {
@@ -90,14 +101,16 @@
       "Position": {
         "X": -200.0,
         "Y": 375.0
-      }
+      },
+      "Description": "Forces a reconnection of the network socket."
     },
     {
       "InputId": "d0e1f2a3-b4c5-4678-9012-3456789abcde"/*PrintToLog*/,
       "Position": {
         "X": -200.0,
         "Y": 975.0
-      }
+      },
+      "Description": "If enabled, prints status information and errors to the T3 log. Useful for debugging."
     },
     {
       "InputId": "d9e8d7c6-b5a4-434a-9e3a-4e2b1d0c9a7b"/*TargetIpAddress*/,
@@ -105,6 +118,7 @@
         "X": -200.0,
         "Y": 450.0
       },
+      "Description": "The destination IP address for unicast sACN packets. If empty, packets are multicast to the standard sACN multicast address.",
       "Usage": "CustomDropdown"
     }
   ],

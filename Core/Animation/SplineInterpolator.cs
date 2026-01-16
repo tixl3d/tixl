@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace T3.Core.Animation;
 
-public class SplineInterpolator
+internal static class SplineInterpolator
 {
-    public static void UpdateTangents(List<KeyValuePair<double, VDefinition>> curveElements)
+    internal static void UpdateTangents(List<KeyValuePair<double, VDefinition>> curveElements)
     {
         if (curveElements.Count <= 1)
         {

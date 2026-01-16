@@ -1,0 +1,11 @@
+{
+  "Id": "53a8a318-81dc-4c76-96a1-f86d0e2fb1d7"/*_ReadBackImageDifference*/,
+  "Inputs": [
+    {
+      "Id": "18306295-6ea8-48f9-87bb-fc36fa1ab10c"/*Differences*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

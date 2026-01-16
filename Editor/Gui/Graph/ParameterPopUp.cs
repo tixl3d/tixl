@@ -1,7 +1,9 @@
 ﻿#nullable enable
 using ImGuiNET;
+using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
 using T3.Core.Utils;
+using T3.Editor.Gui.Input;
 using T3.Editor.Gui.OpUis;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
@@ -13,7 +15,7 @@ using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.ProjectHandling;
 
-namespace T3.Editor.Gui.Graph;
+namespace T3.Editor.Gui;
 
 internal static class ParameterPopUp
 {
@@ -93,7 +95,7 @@ internal static class ParameterPopUp
                              true,
                              preventTabbingIntoUnfocusedStringInputs
                              | ImGuiWindowFlags.NoScrollWithMouse
-                             | ImGuiWindowFlags.NoScrollbar ))
+                             | ImGuiWindowFlags.NoScrollbar))
         {
             if (ImGui.IsKeyDown(ImGuiKey.Escape))
             {
@@ -121,28 +123,35 @@ internal static class ParameterPopUp
 
             // Toolbar
             {
-                ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(6,4) * T3Ui.UiScaleFactor);
+                ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(2,4) * T3Ui.UiScaleFactor);
+                ImGui.PushStyleColor(ImGuiCol.Button, Color.Transparent.Rgba);
                 ImGui.SetCursorPos( new Vector2(5,5));
                 CustomComponents.AddSegmentedIconButton(ref _viewMode, _modeIcons);
+                ImGui.SameLine();
                 
-                var spaceBetweenViewIconsAndActions = ImGui.GetContentRegionAvail().X- (17+5) *3 - 82  - ImGui.GetCursorPosX();
+                ImGui.GetWindowDrawList().AddCircle(ImGui.GetCursorScreenPos(), 30, UiColors.BackgroundActive);
+                
+                var spaceBetweenViewIconsAndActions = ImGui.GetContentRegionAvail().X 
+                                                      - 3 * (ImGui.GetFrameHeight() + ImGui.GetStyle().ItemSpacing.X);
                 
                 // Bypass
                 {
-                    ImGui.SameLine(0, spaceBetweenViewIconsAndActions);
-                    var isBypassed = symbolChildUi.SymbolChild.IsBypassed;
                     if (symbolChildUi.SymbolChild.IsBypassable())
                     {
-                        if (CustomComponents.DrawIconToggle("bypassed", Icon.OperatorBypassOff, Icon.OperatorBypassOn, ref isBypassed, true))
+                        ImGui.SameLine(0, spaceBetweenViewIconsAndActions);
+                        var isBypassed = symbolChildUi.SymbolChild.IsBypassed;
+                        
+                        if (CustomComponents.ToggleTwoIconsButton(ref isBypassed, 
+                                                                  Icon.OperatorBypassOff,
+                                                                  Icon.OperatorBypassOn, 
+                                                                  CustomComponents.ButtonStates.NeedsAttention, 
+                                                                  CustomComponents.ButtonStates.Dimmed))
                         {
                             UndoRedoStack.AddAndExecute(isBypassed
                                                             ? new ChangeInstanceBypassedCommand(symbolChildUi.SymbolChild, true)
                                                             : new ChangeInstanceBypassedCommand(symbolChildUi.SymbolChild, false));
                         }
-                    }
-                    else
-                    {
-                        CustomComponents.DrawIconToggle("bypassed", Icon.OperatorBypassOff, Icon.OperatorBypassOn, ref isBypassed, true, false);
+                        ImGui.SameLine();
                     }
                 }
                 
@@ -150,7 +159,10 @@ internal static class ParameterPopUp
                 {
                     ImGui.SameLine();
                     var isDisabled = symbolChildUi.SymbolChild.IsDisabled;
-                    if (CustomComponents.DrawIconToggle("disabled", Icon.OperatorDisabled, ref isDisabled, true))
+                    if (CustomComponents.ToggleIconButton(ref isDisabled, 
+                                                          Icon.OperatorDisabled, 
+                                                          Vector2.Zero, 
+                                                          CustomComponents.ButtonStates.NeedsAttention))
                     {
                         UndoRedoStack.AddAndExecute(isDisabled
                                                         ? new ChangeInstanceIsDisabledCommand(symbolChildUi, true)
@@ -160,9 +172,9 @@ internal static class ParameterPopUp
                 
                 // Pin to background
                 {
-                    ImGui.SameLine(0, 20);
+                    ImGui.SameLine();
                     var isPinned = _selectedInstance == graphWindow.GraphImageBackground.OutputInstance;
-                    if (CustomComponents.DrawIconToggle("enabled", Icon.PlayOutput, ref isPinned))
+                    if (CustomComponents.ToggleIconButton(ref isPinned, Icon.PlayOutput, Vector2.Zero))
                     {
                         if (isPinned)
                             graphWindow.SetBackgroundOutput(_selectedInstance);
@@ -170,6 +182,7 @@ internal static class ParameterPopUp
                 }
                 
                 ImGui.PopStyleVar();
+                ImGui.PopStyleColor();
             }
 
             // Content
@@ -219,7 +232,7 @@ internal static class ParameterPopUp
                     OperatorHelp.DrawHelp(symbolUi);
                     FormInputs.AddVerticalSpace();
                     _lastRequiredHeight = ImGui.GetCursorPosY() + ImGui.GetFrameHeight();
-                    // Draw small border to separate from graph
+                    // Draw a small border to separate from graph
                     ImGui.GetWindowDrawList().AddRect(ImGui.GetWindowPos()+ Vector2.One, ImGui.GetWindowPos() + ImGui.GetWindowSize() - new Vector2(2,2), UiColors.WindowBackground);
                     ImGui.EndChild();
                     break;
@@ -246,7 +259,7 @@ internal static class ParameterPopUp
 
     private static readonly List<Icon> _modeIcons = new()
                                                         {
-                                                            Icon.List,
+                                                            Icon.ViewList,
                                                             Icon.Presets,
                                                             Icon.HelpOutline
                                                         };

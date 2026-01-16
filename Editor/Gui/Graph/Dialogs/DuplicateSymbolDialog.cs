@@ -1,11 +1,12 @@
 ﻿#nullable enable
 using ImGuiNET;
+using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Modification;
 
-namespace T3.Editor.Gui.Graph.Dialogs;
+namespace T3.Editor.Gui.Dialogs;
 
 internal sealed class DuplicateSymbolDialog : ModalDialog
 {
@@ -18,13 +19,11 @@ internal sealed class DuplicateSymbolDialog : ModalDialog
     public event Action? Closed;
         
     /** returns true if modified */
-    public ChangeSymbol.SymbolModificationResults Draw(Guid symbolGuid, List<SymbolUi.Child> selectedChildUis, ref string nameSpace, ref string newTypeName, ref string description, bool isReload = false)
+    public ChangeSymbol.SymbolModificationResults Draw(Guid symbolGuid, IEnumerable<SymbolUi.Child> selectedChildUis2, ref string nameSpace, ref string newTypeName, ref string description, bool isReload = false)
     {
         //DialogSize = new Vector2(500, 450) * T3Ui.UiScaleFactor;
         var result = ChangeSymbol.SymbolModificationResults.Nothing;
         
-        if(selectedChildUis.Count != 1)
-            return result;
 
         
         if(isReload && !_completedReloadPrompt)
@@ -58,6 +57,24 @@ internal sealed class DuplicateSymbolDialog : ModalDialog
 
         if (BeginDialog("Duplicate as new symbol"))
         {
+            var selectedChildUis = selectedChildUis2.ToList();
+            
+            if(selectedChildUis.Count != 1)
+                return result;
+
+            if (selectedChildUis[0]?.SymbolChild?.Symbol == null)
+            {
+                return result;
+            }
+        
+            var s = selectedChildUis[0].SymbolChild.Symbol;
+            var selectionChanged = _selectedSymbolId != s.Id;
+            if (selectionChanged)
+            {
+                _projectToCopyTo = s.SymbolPackage as EditableSymbolProject;
+                _selectedSymbolId = s.Id;
+            }
+            
             _ = SymbolModificationInputs.DrawProjectDropdown(ref nameSpace, ref _projectToCopyTo);
 
             if (_projectToCopyTo != null)
@@ -75,7 +92,8 @@ internal sealed class DuplicateSymbolDialog : ModalDialog
                     
                     var position = selectedChildUis.First().PosOnCanvas + new Vector2(0, 100);
 
-                    Duplicate.DuplicateAsNewType(compositionSymbolUi, _projectToCopyTo, selectedChildUis.First().SymbolChild.Symbol.Id, newTypeName, nameSpace, description,
+                    Duplicate.DuplicateAsNewType(compositionSymbolUi, _projectToCopyTo, 
+                                                 selectedChildUis.First().SymbolChild.Symbol.Id, newTypeName, nameSpace, description,
                                                  position);
                     
                     result = ChangeSymbol.SymbolModificationResults.StructureChanged;
@@ -109,4 +127,5 @@ internal sealed class DuplicateSymbolDialog : ModalDialog
 
     private EditableSymbolProject? _projectToCopyTo;
     private bool _completedReloadPrompt;
+    private Guid _selectedSymbolId;
 }

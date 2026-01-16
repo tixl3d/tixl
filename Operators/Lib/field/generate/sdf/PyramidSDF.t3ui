@@ -1,6 +1,7 @@
 {
   "Id": "5b8604d0-65f4-45c9-9e85-4a044005a778"/*PyramidSDF*/,
   "Description": "Generates a pyramid distande field.\n[BoxSDF] [PlaneSDF] [CombineSDF] [RaymarchField] ",
+  "SymbolTags": "8",
   "InputUis": [
     {
       "InputId": "09320506-1e5c-4da8-b522-9f89c143277f"/*Axis*/,

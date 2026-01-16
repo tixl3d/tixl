@@ -1,0 +1,43 @@
+{
+  "Id": "4567890a-bcde-f123-4567-890abcdef123"/*HandLandmarkDetection*/,
+  "Inputs": [
+    {
+      "Id": "0abcdef1-2345-6789-0abc-def123456789"/*MinTrackingConfidence*/,
+      "DefaultValue": 0.5
+    },
+    {
+      "Id": "567890ab-cdef-1234-5678-90abcdef1234"/*InputTexture*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "67890abc-def1-2345-6789-0abcdef12345"/*Enabled*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "7890abcd-ef12-3456-7890-abcdef123456"/*MaxHands*/,
+      "DefaultValue": 2
+    },
+    {
+      "Id": "890abcde-f123-4567-890a-bcdef1234567"/*MinHandDetectionConfidence*/,
+      "DefaultValue": 0.5
+    },
+    {
+      "Id": "90abcdef-1234-5678-90ab-cdef12345678"/*MinHandPresenceConfidence*/,
+      "DefaultValue": 0.5
+    },
+    {
+      "Id": "abcdef12-3456-7890-abcd-ef1234567890"/*Debug*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "bcdef123-4567-890a-bcde-f1234567890a"/*CorrectAspectRatio*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "cdef1234-5678-90ab-cdef-1234567890ab"/*ZScale*/,
+      "DefaultValue": 1.0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

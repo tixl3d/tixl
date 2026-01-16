@@ -1,6 +1,7 @@
 {
   "Id": "860da1cd-b341-4bc5-965a-4a9c295831f4"/*BoxSDF*/,
   "Description": "Generates a procedural box field with rounded edges which can be rendered with [RaymarchField] and visualized with [VisualizeFieldDistance].\nAlso known as Cube SDF.\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToRaymarchField].\n\nIt can be modified with [BendField], [TransformField], [PolarRepeat] and more.\n\nSimilar nodes: [CylinderSDF], [ChainLinkSDF], [FractalSDF], [OctahedronSDF].\n\nTo use a Mesh made of polygons refer to [CubeMesh].",
+  "SymbolTags": "1",
   "InputUis": [
     {
       "InputId": "734179fa-aaf8-46d0-b827-e71555dad6a0"/*UniformScale*/,

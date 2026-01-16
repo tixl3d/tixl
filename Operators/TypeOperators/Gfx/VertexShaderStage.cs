@@ -9,7 +9,9 @@ public sealed class VertexShaderStage : Instance<VertexShaderStage>
     public VertexShaderStage()
     {
         Output.UpdateAction += Update;
-        Output.Value.RestoreAction = Restore;
+        
+        if(Output.Value != null)  
+            Output.Value.RestoreAction = Restore;
     }
 
     private void Update(EvaluationContext context)

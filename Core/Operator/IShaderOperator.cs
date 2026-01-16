@@ -43,7 +43,7 @@ public interface IShaderCodeOperator<T> where T : AbstractShader
         var shaderSlot = ShaderSlot;
         var currentShader = shaderSlot.Value;
         if (currentShader != null)
-            currentShader.Name = debugName;
+            currentShader.Name = debugName ?? string.Empty;
 
         if (!sourceSlot.DirtyFlag.IsDirty && !entryPointSlot.DirtyFlag.IsDirty)
         {
@@ -138,7 +138,7 @@ public interface IShaderOperator<T> : IDescriptiveFilename where T : AbstractSha
                                           resource.MarkFileAsChanged();
                                       }
                                       
-                                      CachedEntryPoint = EntryPoint.GetValue(context);
+                                      CachedEntryPoint = EntryPoint.GetValue(context) ?? string.Empty;
                                       
                                       // This is a hack to invalidate the input so that the op doesn't stay dirtly
                                       _ = DebugName.GetValue(context);

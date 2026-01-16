@@ -12,6 +12,10 @@
     {
       "Id": "84dd59ce-4726-4604-afee-92ffdec0e3f5"/*InputField*/,
       "DefaultValue": null
+    },
+    {
+      "Id": "ad43a4c4-3439-46c5-986d-c654a56d296a"/*StepFactor*/,
+      "DefaultValue": 0.9
     }
   ],
   "Children": [],

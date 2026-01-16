@@ -1,0 +1,19 @@
+{
+  "Id": "6ca6420a-4c05-4c33-81a3-1a9c4872e29d"/*RotateField*/,
+  "Inputs": [
+    {
+      "Id": "2e930b97-159d-4e29-ac28-1ff5c796820f"/*InputField*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "b9bc095a-084a-4616-a3aa-9616e82ba03b"/*Rotation*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

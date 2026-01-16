@@ -72,7 +72,8 @@ internal abstract class AnimationParameterEditing : CurveEditing
             }
         }
         
-        TimeLineCanvas.Current.SetScopeToCanvasArea(bounds, flipY:true, 300, 100);
+        
+        TimeLineCanvas.Current.SetScopeToCanvasArea(bounds, flipY:true, 300, 50);
     }
 
     protected List<TimeLineCanvas.AnimationParameter> AnimationParameters;

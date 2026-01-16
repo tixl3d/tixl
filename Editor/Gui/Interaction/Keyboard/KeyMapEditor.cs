@@ -1,6 +1,7 @@
 #nullable enable
 using ImGuiNET;
 using T3.Core.UserData;
+using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.SystemUi;
@@ -276,7 +277,7 @@ internal static class KeyMapEditor
 
     private static bool DrawToggle(string label, bool enabled)
     {
-        return CustomComponents.ToggleButton(label, ref enabled, new Vector2(40, 0));
+        return CustomComponents.ToggleButton(ref enabled, label, new Vector2(40, 0));
     }
 
     private static bool _somethingChanged;

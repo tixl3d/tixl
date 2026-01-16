@@ -1,0 +1,649 @@
+{
+  "Id": "f1333224-e1e3-44b4-a84b-e9b13cacf320"/*RemoveStaticBackground*/,
+  "Description": "Uses statistical filtering to remove static background from an image.\n\nThis is basically a keyer that tries to detect movement in front of a static background.",
+  "InputUis": [
+    {
+      "InputId": "007aec66-e8f2-493e-8035-cea3adfc1a2e"/*ChromaWeight*/,
+      "Position": {
+        "X": 394.8411,
+        "Y": 677.0314
+      },
+      "Description": "How strongly color changes influence the key compared to brightness changes. Increase it to react more to hue shifts; decrease it if you only care about silhouettes from light/dark changes.",
+      "Min": 0.0,
+      "Max": 1.0,
+      "Scale": 0.001,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "118496fa-914e-4e50-bb7d-fa496f77eeab"/*TrainingMeanRate*/,
+      "Position": {
+        "X": -378.44986,
+        "Y": 143.60892
+      },
+      "GroupTitle": "Training Parameters...",
+      "Min": 0.0,
+      "Max": 1.0,
+      "Scale": 0.001,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "20c56912-81dc-44f2-b44a-91febe627f75"/*MinSpread*/,
+      "Position": {
+        "X": 394.841,
+        "Y": 467.03152
+      },
+      "Description": "A minimum \"noise cushion\" so perfectly flat areas don’t become hypersensitive. Increase it if you see sparkly false positives in quiet regions.",
+      "Min": 0.0,
+      "Max": 1.0,
+      "Scale": 0.001,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "2d542736-c84a-4aa5-bce9-326aa0591885"/*DensityRange*/,
+      "Position": {
+        "X": 359.3943,
+        "Y": 1359.6096
+      },
+      "Description": "x: The minimum amount of nearby agreement needed before the mask starts strengthening a pixel. Raise it to require bigger, more solid shapes; lower it to keep thinner details.\n\ny: The density where the neighborhood consensus is treated as fully confident. Lower it to fill gaps more aggressively; raise it to stay stricter and preserve fine edges.\n",
+      "Min": 0.0,
+      "Max": 1.0,
+      "Scale": 0.001
+    },
+    {
+      "InputId": "455ecd34-8228-4f70-b59a-fe6493234856"/*TrainingSpreadUpRate*/,
+      "Position": {
+        "X": -378.44983,
+        "Y": 256.438
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "Scale": 0.001,
+      "ClampMin": true
+    },
+    {
+      "InputId": "57c8515d-f281-4644-a945-5590ea108542"/*TrainingSpreadDownRate*/,
+      "Position": {
+        "X": -378.44983,
+        "Y": 375.58176
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "Scale": 0.001,
+      "ClampMin": true
+    },
+    {
+      "InputId": "5cbdeb7e-1f9d-4905-8037-4cde42235898"/*Update*/,
+      "Position": {
+        "X": -862.5189,
+        "Y": 2459.7742
+      }
+    },
+    {
+      "InputId": "5edbbfe4-99d8-4722-a922-68df4a669d54"/*BackgroundGateHi*/,
+      "Position": {
+        "X": 394.8411,
+        "Y": 607.0314
+      },
+      "Description": "The point where the system stops learning from a pixel because it’s likely foreground. Lower it to prevent “burn-in” of people; raise it if the background needs to adapt under stronger changes.",
+      "Min": 0.0,
+      "Max": 1.0,
+      "Scale": 0.001,
+      "ClampMin": true
+    },
+    {
+      "InputId": "6c2093b8-eec1-4d5d-b8de-5c6e8cc1ac86"/*BackgroundGateLo*/,
+      "Position": {
+        "X": 394.8411,
+        "Y": 572.0314
+      },
+      "Description": "The point where the system starts to distrust changes and begins to slow down background learning. Raise it if you want the background to keep adapting even with mild motion.",
+      "Min": 0.0,
+      "Max": 1.0,
+      "Scale": 0.001,
+      "ClampMin": true
+    },
+    {
+      "InputId": "6fbe1ea6-2195-442e-a82e-2cecd27dbc11"/*SpreadUpRate*/,
+      "Position": {
+        "X": -378.44983,
+        "Y": 221.43797
+      },
+      "Description": "How fast the system becomes more tolerant when a pixel suddenly gets noisy or unstable. Higher values reduce flicker, but can make the key less sensitive.",
+      "Min": 0.0,
+      "Max": 1.0,
+      "Scale": 0.001,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "74e69989-160e-4db8-8b31-940ebbb4c506"/*TemporalStability*/,
+      "Position": {
+        "X": 499.39432,
+        "Y": 1464.6096
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "Scale": 0.001,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "76e07b3f-c411-4e23-be98-e15f994c81d8"/*MeanRate*/,
+      "Position": {
+        "X": -378.44986,
+        "Y": 108.60892
+      },
+      "GroupTitle": "Learning",
+      "Description": "How quickly the background “memory” adapts to slow changes like lighting drift. Higher values settle faster, but risk absorbing slow-moving people into the background.",
+      "Min": 0.0,
+      "Max": 0.1,
+      "Scale": 0.001,
+      "ClampMin": true
+    },
+    {
+      "InputId": "79e41a79-79a2-4ccb-97c5-f80b8d03c58f"/*Texture2d*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -716.1821,
+        "Y": 875.53564
+      }
+    },
+    {
+      "InputId": "7d43f6f7-a2e5-4203-891e-0dcc7b7a0be5"/*ZScale*/,
+      "Position": {
+        "X": 394.8411,
+        "Y": 502.0315
+      },
+      "GroupTitle": "Keying",
+      "Description": "Overall sensitivity knob for what counts as \"different from the background\". \nHigher values key more aggressively; lower values are more forgiving.",
+      "Min": 0.0,
+      "Max": 1.0,
+      "Scale": 0.001,
+      "ClampMin": true
+    },
+    {
+      "InputId": "852434c4-56e3-4e73-9a39-3d5e61bb8570"/*VoteThreshold*/,
+      "Position": {
+        "X": 499.3943,
+        "Y": 1324.6096
+      },
+      "GroupTitle": "Refine Mask",
+      "Description": "How “foreground” a pixel must look before it really counts as a vote in the neighborhood check. Raise it to ignore weak, noisy changes; lower it to pick up faint motion.",
+      "Min": 0.0,
+      "Max": 1.0,
+      "Scale": 0.001,
+      "ClampMin": true
+    },
+    {
+      "InputId": "8b792db9-797b-426b-9602-4e508e599ce0"/*SpreadDownRate*/,
+      "Position": {
+        "X": -378.4499,
+        "Y": 340.58176
+      },
+      "Description": "How slowly the tolerance tightens again when things become stable. Lower values keep the key steady over time and avoid nervous, popping edges",
+      "Min": 0.0,
+      "Max": 1.0,
+      "Scale": 0.001,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "96b4debf-237c-465b-ae73-3c5e7036f43a"/*TrainingBrightSuppression*/,
+      "Position": {
+        "X": -378.44983,
+        "Y": 497.29507
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "Scale": 0.001,
+      "ClampMin": true
+    },
+    {
+      "InputId": "9b666162-80e0-43f5-8a5d-083729da0ff2"/*OutputMode*/,
+      "Position": {
+        "X": 483.5389,
+        "Y": 1871.1793
+      }
+    },
+    {
+      "InputId": "a54b96a9-8579-4b70-b82c-cbea74aa3e60"/*EnableChroma*/,
+      "Position": {
+        "X": 254.841,
+        "Y": 642.0315
+      },
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "b26fb554-2d75-48cd-90cf-f1187ad18930"/*IsTraining*/,
+      "Position": {
+        "X": -869.78973,
+        "Y": 498.65186
+      },
+      "GroupTitle": "Training"
+    },
+    {
+      "InputId": "b27194af-c253-49e3-a215-1004d004ce3a"/*BrightSuppression*/,
+      "Position": {
+        "X": -378.44983,
+        "Y": 462.29504
+      },
+      "Description": "How much to ignore pixels that get brighter than the background (useful for projectors adding light). Lower values ignore bright projection changes more strongly, focusing on dark occlusions like people.",
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "e714a3a6-65bd-4cdf-b3b8-bdf8b24f872a"/*KeepOriginal*/,
+      "Position": {
+        "X": 499.3943,
+        "Y": 1429.6096
+      },
+      "Description": "How much of the raw mask is kept versus the neighborhood-refined result. Higher values preserve delicate details but keep more noise; lower values look cleaner and more \"chunky\".",
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "13b1e9f7-c412-4054-a40a-b444409d0df6"/*SrvFromTexture2d*/,
+      "Position": {
+        "X": -101.26947,
+        "Y": 871.8156
+      }
+    },
+    {
+      "ChildId": "15d8bb35-dc6f-4bb3-bb95-740784704530"/*Layer2d*/,
+      "Position": {
+        "X": 1350.3208,
+        "Y": 251.15765
+      }
+    },
+    {
+      "ChildId": "26234633-1b8d-4065-832a-aeacd425a68e"/*UavFromTexture2d*/,
+      "Position": {
+        "X": 38.73053,
+        "Y": 836.8156
+      }
+    },
+    {
+      "ChildId": "28ca3b2a-f97f-4387-bea1-28a2bde5df4c"/*Vector2Components*/,
+      "Position": {
+        "X": 499.3943,
+        "Y": 1359.6096
+      }
+    },
+    {
+      "ChildId": "2b643b3a-b64b-4596-b16e-dd35c8c559b2"/*GetTextureSize*/,
+      "Position": {
+        "X": -716.1821,
+        "Y": 910.53564
+      }
+    },
+    {
+      "ChildId": "335d0e56-fab2-48ed-a9ff-c8dc7fd62a18"/*HasIntChanged*/,
+      "Position": {
+        "X": -551.0261,
+        "Y": 610.13544
+      }
+    },
+    {
+      "ChildId": "381b7ae6-20fa-4e7a-b0d4-15cea01b5b4e"/*Output*/,
+      "Position": {
+        "X": -101.26947,
+        "Y": 1374.4586
+      }
+    },
+    {
+      "ChildId": "38753f02-90c7-4548-a8eb-c12d19ac20b0"/*HasBooleanChanged*/,
+      "Position": {
+        "X": -650.2599,
+        "Y": 729.0126
+      }
+    },
+    {
+      "ChildId": "3fd673cd-90d8-492e-adee-df77904c2146"/*PickFloat*/,
+      "Position": {
+        "X": -238.44984,
+        "Y": 221.43797
+      }
+    },
+    {
+      "ChildId": "3fe9ea47-477e-4594-b465-5933b35d0fac"/*UavFromTexture2d*/,
+      "Position": {
+        "X": 38.730537,
+        "Y": 1181.2744
+      }
+    },
+    {
+      "ChildId": "42ce7768-8495-41fd-8dc5-a1a924cf53e1"/*UavFromTexture2d*/,
+      "Position": {
+        "X": -101.26946,
+        "Y": 1409.4586
+      }
+    },
+    {
+      "ChildId": "4cc41536-1f8b-4a9c-add6-f4f5e09d2028"/*IntsToBuffer*/,
+      "Position": {
+        "X": 623.5389,
+        "Y": 1871.1793
+      }
+    },
+    {
+      "ChildId": "4fb06c89-7678-40af-8785-57a14c5a9594"/*PickFloat*/,
+      "Position": {
+        "X": -238.44984,
+        "Y": 462.29504
+      }
+    },
+    {
+      "ChildId": "5142142d-899a-4b3b-9ae0-08e00bdf483e"/*FloatsToBuffer*/,
+      "Position": {
+        "X": 623.5389,
+        "Y": 1747.3048
+      }
+    },
+    {
+      "ChildId": "52286dec-958e-445e-b46e-239521d5f94e"/*CalcInt2DispatchCount*/,
+      "Position": {
+        "X": 639.3943,
+        "Y": 1186.4581
+      }
+    },
+    {
+      "ChildId": "5cdf7fed-73a1-4094-b5fd-51f1f209cccc"/*KeepPreviousFrame*/,
+      "Position": {
+        "X": -101.26947,
+        "Y": 1043.6654
+      }
+    },
+    {
+      "ChildId": "6b9f8cfd-6c8c-4bad-9ded-9644eb7473a2"/*BgModel*/,
+      "Position": {
+        "X": -101.26947,
+        "Y": 836.8156
+      }
+    },
+    {
+      "ChildId": "6c69936d-a2dc-46c3-8ec2-f05652a8bcd0"/*UavFromTexture2d*/,
+      "Position": {
+        "X": 38.73053,
+        "Y": 959.30096
+      }
+    },
+    {
+      "ChildId": "6e142833-c5b8-4e4e-b5bd-b1b617b9b4a8"/*BoolToFloat*/,
+      "Position": {
+        "X": -861.24457,
+        "Y": 636.19354
+      }
+    },
+    {
+      "ChildId": "71c8b419-502e-4e7f-9b74-581db7ced3e0"/*ExecuteTextureUpdate*/,
+      "Position": {
+        "X": 1754.1339,
+        "Y": 962.08026
+      }
+    },
+    {
+      "ChildId": "72a54828-076f-4ab5-a5af-ef94cb421ea6"/*BoolToInt*/,
+      "Position": {
+        "X": -627.58484,
+        "Y": 795.9922
+      }
+    },
+    {
+      "ChildId": "791b1a0f-4555-404f-8d33-dcf04630cb92"/*Execute*/,
+      "Position": {
+        "X": 1754.1339,
+        "Y": 787.08026
+      }
+    },
+    {
+      "ChildId": "7e365a31-5145-41f1-900b-d2855701705f"/*SpreadScale*/,
+      "Position": {
+        "X": 483.53888,
+        "Y": 1782.3048
+      }
+    },
+    {
+      "ChildId": "82a07456-e6f7-4ddc-85d8-0d6950b18135"/*MaskRefined*/,
+      "Position": {
+        "X": -101.269455,
+        "Y": 1181.2744
+      }
+    },
+    {
+      "ChildId": "97f8eaf8-4529-415b-8022-0713596eb568"/*ComputeShaderStage*/,
+      "Style": "Resizable",
+      "Size": {
+        "X": 113.85364,
+        "Y": 270.69095
+      },
+      "Position": {
+        "X": 1082.4615,
+        "Y": 511.70618
+      }
+    },
+    {
+      "ChildId": "98fcee7b-28ce-4d97-8ea3-4ec233265df5"/*CalcInt2DispatchCount*/,
+      "Position": {
+        "X": 534.841,
+        "Y": 223.88004
+      }
+    },
+    {
+      "ChildId": "9b1f49fb-86b5-4f22-aa04-ad35db8bfcf2"/*ComputeShaderStage*/,
+      "Style": "Resizable",
+      "Size": {
+        "X": 113.85364,
+        "Y": 270.69095
+      },
+      "Position": {
+        "X": 1084.7334,
+        "Y": 1258.6213
+      }
+    },
+    {
+      "ChildId": "a166be4b-c4ca-4a2c-baed-cdd708bf85d7"/*PickFloat*/,
+      "Position": {
+        "X": -238.44986,
+        "Y": 108.60892
+      }
+    },
+    {
+      "ChildId": "a3b59f6e-63d3-4469-b9f8-18f91eb31382"/*ComputeShader*/,
+      "Position": {
+        "X": 483.53897,
+        "Y": 1613.742
+      }
+    },
+    {
+      "ChildId": "af402dca-9193-4d15-8e9d-f3b4101daa5e"/*BoolToInt*/,
+      "Position": {
+        "X": -559.74133,
+        "Y": 553.34076
+      }
+    },
+    {
+      "ChildId": "b192683b-ea3c-4faf-b81b-6613f05a3c49"/*Reset*/,
+      "Position": {
+        "X": -443.46747,
+        "Y": 721.28687
+      }
+    },
+    {
+      "ChildId": "bde44930-689d-41df-8c2f-5245605864e7"/*ComputeShader*/,
+      "Position": {
+        "X": 394.8411,
+        "Y": 1128.1708
+      }
+    },
+    {
+      "ChildId": "cb75afe8-16e3-4d85-b0ee-ea6260e7cb28"/*ZVizScale*/,
+      "Position": {
+        "X": 483.53888,
+        "Y": 1817.3048
+      }
+    },
+    {
+      "ChildId": "d51ea91c-fa3f-48ff-ab9b-220ed2839ef3"/*SrvFromTexture2d*/,
+      "Position": {
+        "X": -519.1594,
+        "Y": 846.4967
+      }
+    },
+    {
+      "ChildId": "d684bcc6-2b84-40ff-b7c7-38960e001817"/*SrvFromTexture2d*/,
+      "Position": {
+        "X": -101.26947,
+        "Y": 994.30096
+      }
+    },
+    {
+      "ChildId": "dd5fe4f9-3623-4f93-8446-e9b0b2a641a9"/*FloatsToBuffer*/,
+      "Position": {
+        "X": 534.841,
+        "Y": 327.03152
+      }
+    },
+    {
+      "ChildId": "e18feee0-ca37-47af-b064-f2267d05c83b"/*SrvFromTexture2d*/,
+      "Position": {
+        "X": -101.269455,
+        "Y": 1216.2744
+      }
+    },
+    {
+      "ChildId": "e77ff7e6-4411-4012-80ae-001ecab60f34"/*CalcInt2DispatchCount*/,
+      "Position": {
+        "X": 623.53894,
+        "Y": 1648.742
+      }
+    },
+    {
+      "ChildId": "ec61d45c-f425-4457-9d08-9be2f644dfee"/*ComputeShader*/,
+      "Position": {
+        "X": 394.84113,
+        "Y": 188.88004
+      }
+    },
+    {
+      "ChildId": "ee1ff437-1bc1-4fb7-bc7d-6fe1f073449e"/*FloatsToBuffer*/,
+      "Position": {
+        "X": 639.3943,
+        "Y": 1289.6096
+      }
+    },
+    {
+      "ChildId": "eef226a7-9569-47ee-9c54-a1a66d1c8d17"/*SrvFromTexture2d*/,
+      "Position": {
+        "X": 106.98246,
+        "Y": 1088.0006
+      }
+    },
+    {
+      "ChildId": "f10e8320-e933-4e1e-b46a-262d9f5c0c50"/*PickFloat*/,
+      "Position": {
+        "X": -238.44984,
+        "Y": 340.58176
+      }
+    },
+    {
+      "ChildId": "f66d69c4-5c0a-47fb-a2d4-1582428ca230"/*BoolToFloat*/,
+      "Position": {
+        "X": 394.841,
+        "Y": 642.0315
+      }
+    },
+    {
+      "ChildId": "fc0401a9-ecba-466b-bd4e-378b8f796f02"/*MaskRaw*/,
+      "Position": {
+        "X": -101.26947,
+        "Y": 959.30096
+      }
+    },
+    {
+      "ChildId": "fdfabfb3-aa59-4420-9188-ad40595d3cd8"/*ComputeShaderStage*/,
+      "Style": "Resizable",
+      "Size": {
+        "X": 113.85364,
+        "Y": 270.69095
+      },
+      "Position": {
+        "X": 1084.7334,
+        "Y": 1615.0482
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "1f83c6cd-10b8-4293-8757-10cc75d2270a"/*Output*/,
+      "Position": {
+        "X": 1754.1339,
+        "Y": 1032.0803
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "63b5b088-fab5-4ca9-b4a0-7eb0ff695cd3",
+      "Label": "3. Output",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 334.8411,
+        "Y": 1579.9061
+      },
+      "Size": {
+        "X": 923.746,
+        "Y": 527.322
+      }
+    },
+    {
+      "Id": "d6231f13-baff-46c5-b4a0-1ca4ea4021a2",
+      "Label": "2. Refine Mask",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 334.8411,
+        "Y": 1008.1708
+      },
+      "Size": {
+        "X": 923.746,
+        "Y": 514.54834
+      }
+    },
+    {
+      "Id": "fb03321c-0a11-4184-a487-65e992451d15",
+      "Label": "1. Update model",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 334.8411,
+        "Y": 68.880035
+      },
+      "Size": {
+        "X": 923.746,
+        "Y": 731.28015
+      }
+    }
+  ]
+}

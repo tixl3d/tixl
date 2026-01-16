@@ -9,7 +9,7 @@ public sealed class PixelShaderStage : Instance<PixelShaderStage>
     public PixelShaderStage()
     {
         Output.UpdateAction += Update;
-        Output.Value.RestoreAction = Restore;
+        Output.Value!.RestoreAction = Restore;
     }
 
     private void Update(EvaluationContext context)

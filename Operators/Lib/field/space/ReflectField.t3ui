@@ -1,6 +1,7 @@
 {
   "Id": "1a933eb2-a89b-4694-ae04-60d86779cf28"/*ReflectField*/,
   "Description": "Folds / kinks / reflects the incoming field through a plane.\nIt can be rendered with [RaymarchField] and visualized with [VisualizeFieldDistance].\n\nSimilar nodes: [BendField], [PolarRepeat], [TwistField].\n\nIt needs an incoming field like [BoxSDF], [ChainLinkSDF], [FractalSDF] as an input.\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToRaymarchField].\n",
+  "SymbolTags": "1",
   "InputUis": [
     {
       "InputId": "afd3834b-9ef0-4d7a-b0a3-a93cb4193d40"/*PlaneNormal*/,

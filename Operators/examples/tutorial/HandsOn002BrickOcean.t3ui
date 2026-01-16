@@ -241,6 +241,13 @@
       }
     },
     {
+      "ChildId": "6edc9631-eb30-4950-bca6-1f4aec6599b5"/*PointLight*/,
+      "Position": {
+        "X": 2333.9958,
+        "Y": -1176.258
+      }
+    },
+    {
       "ChildId": "708e8444-8747-48d6-87a4-2f57c9239c90"/*DepthOfField*/,
       "Position": {
         "X": 3582.896,

@@ -39,7 +39,7 @@ internal sealed class LineTextPoints : Instance<LineTextPoints>
             return;
         }
             
-        var lineFontKey = new LineFontDefinition(Key: FilePath.GetValue(context),
+        var lineFontKey = new LineFontDefinition(Key: FilePath.GetValue(context) ?? string.Empty,
                                                  ReduceCurveThreshold: ReduceCurveThreshold.GetValue(context),
                                                  CornerBalance: CornerWeightBalance.GetValue(context));
         var fontNeedsUpdate = _lineFontKey != lineFontKey;

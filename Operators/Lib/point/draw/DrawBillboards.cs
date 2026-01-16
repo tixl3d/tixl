@@ -21,7 +21,7 @@ internal sealed class DrawBillboards : Instance<DrawBillboards>
         public readonly InputSlot<bool> UseWForScale = new InputSlot<bool>();
 
         [Input(Guid = "542832d1-fc70-4eaa-a003-7fdd9062dc05")]
-        public readonly InputSlot<bool> UseExtend = new InputSlot<bool>();
+        public readonly InputSlot<bool> UsePointScale = new InputSlot<bool>();
 
         [Input(Guid = "4763d03c-7fae-4466-870c-693bb1acb9a0")]
         public readonly InputSlot<System.Numerics.Vector3> Offset = new InputSlot<System.Numerics.Vector3>();

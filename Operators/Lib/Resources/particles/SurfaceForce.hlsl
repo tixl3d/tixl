@@ -150,7 +150,7 @@ static const int VolumeNoise = 4;
         {
             force = -surfaceInWorld * Attraction / (1 + distance * AttractionDecay);
         }
-        velocity += force;
+        velocity += force * SpeedFactor;
     }
 
     if (!isnan(velocity.x) && !isnan(velocity.y) && !isnan(velocity.z))

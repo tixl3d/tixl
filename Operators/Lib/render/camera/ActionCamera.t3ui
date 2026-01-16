@@ -1,0 +1,120 @@
+{
+  "Id": "dfd4c912-4c4f-44b1-88aa-f27aa66b57af"/*ActionCamera*/,
+  "Description": "Allows to interactive control a camera starting from a giving reference camera.\n\nAlso know as: FlyThrough, GameControlled camera, walk through, POV, Point of View.\n\nAlso see [BlendCameras].\n\n",
+  "InputUis": [
+    {
+      "InputId": "37bbaf47-5985-42d7-801e-0bf099036d5f"/*UpDown*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 225.0
+      },
+      "Description": "Move along the world space up vector.",
+      "Min": -1.0,
+      "Max": 1.0
+    },
+    {
+      "InputId": "3857258a-ca2d-4dad-b926-28530e8a25b0"/*BlendToReferenceCamera*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 300.0
+      },
+      "Description": "Allow to smoothly transition back to the reference camera."
+    },
+    {
+      "InputId": "44ed03fc-3551-4519-8b4c-dfdc1ddd1713"/*Speed*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "GroupTitle": "Move",
+      "Description": "Allows to adjust the movement speed."
+    },
+    {
+      "InputId": "773f0b8f-16d4-4302-b26d-43cf4d4adce8"/*Yaw*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 300.0
+      },
+      "Description": "Rotate around y-axis",
+      "AddPadding": "True",
+      "Min": -1.0,
+      "Max": 1.0
+    },
+    {
+      "InputId": "832cd0d8-66be-4f45-9aea-6e439be5a285"/*Pitch*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 375.0
+      },
+      "Description": "Rotate around side vector (Forward cross World up)",
+      "Min": -1.0,
+      "Max": 1.0
+    },
+    {
+      "InputId": "8ac6c739-3741-4816-8bad-57bd2a226e02"/*TriggerReset*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 375.0
+      },
+      "Description": "Jump back to the reference camera. Same as Blending with 1."
+    },
+    {
+      "InputId": "a93aa4ac-487c-4441-b501-742cd38a5f5e"/*Forward*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 75.0
+      },
+      "AddPadding": "True",
+      "Min": -1.0,
+      "Max": 1.0
+    },
+    {
+      "InputId": "b117d2dc-eb4c-408e-9ab7-909d17ac3069"/*RotationSpeed*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      },
+      "GroupTitle": "Rotation",
+      "Description": "Allows to adjust speed of rotation."
+    },
+    {
+      "InputId": "c529af20-2e52-4a29-b558-cd518bdc539d"/*Roll*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 450.0
+      },
+      "Description": "Additional roll parameter applied after movement. Does not have an affecto to movement.",
+      "Min": -1.0,
+      "Max": 1.0
+    },
+    {
+      "InputId": "c5daddd7-a832-40d1-aec3-3886803a3899"/*Sideways*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 150.0
+      },
+      "Description": "Currently computed by forward and world space up.",
+      "Min": -1.0,
+      "Max": 1.0
+    },
+    {
+      "InputId": "d46ee53d-887b-4e37-b5ba-4ee0ba50c711"/*ReferenceCamera*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 0.0,
+        "Y": 450.0
+      },
+      "Description": "A link to a camera that defines the original starting point."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "66784a52-d003-4c7d-b3cf-bdca4acb041e"/*Reference*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 100.0
+      }
+    }
+  ]
+}

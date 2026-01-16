@@ -1,6 +1,7 @@
 {
   "Id": "1d9f133d-eba6-4b28-9dfd-08f6c5417ed6"/*RepeatPolar*/,
   "Description": "Mirrors and rotates the incoming field in the desired number around a central axis.\n\nIt can be rendered with [RaymarchField] and visualized with [VisualizeFieldDistance].\n\nSimilar nodes: [ReflectField], [RepeatWithMirror], [TwistField].\n\nIt needs an incoming field like [BoxSDF], [ChainLinkSDF], [FractalSDF] as an input.\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToRaymarchField].",
+  "SymbolTags": "1",
   "InputUis": [
     {
       "InputId": "02e4130f-8a0c-4efb-b75f-f7da29cc95eb"/*Axis*/,

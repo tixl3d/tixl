@@ -1,0 +1,130 @@
+{
+  "Id": "34567890-abcd-ef12-3456-7890abcdef12"/*PoseLandmarkDetection*/,
+  "Description": "Detects pose landmarks in an image using MediaPipe Pose Landmark Detection.\n\nThis operator uses MediaPipe Pose Landmark Detection task to detect human poses and their landmarks (33 points per pose) in the input image. It outputs detected landmarks as a buffer of points and a dictionary of pose data.\n\nInputs:\n- InputTexture: The image to process.\n- Enabled: Enables or disables pose detection.\n- MaxPoses: Maximum number of poses to detect.\n- MinPoseDetectionConfidence: Minimum confidence score for pose detection to be considered successful.\n- MinPosePresenceConfidence: Minimum confidence score for pose presence to be considered successful.\n- MinTrackingConfidence: Minimum confidence score for pose tracking.\n- Debug: Enables debug visualization with debug texture output.\n- CorrectAspectRatio: Whether to correct aspect ratio for non-square inputs.\n- ZScale: Scale factor for Z coordinate of points.\n\nOutputs:\n- OutputTexture: The input texture (passed through).\n- DebugTexture: Debug visualization texture showing pose landmarks and connections when Debug is enabled.\n- PoseCount: The number of poses detected.\n- UpdateCount: Increments each time a new frame is processed.\n- WorldLandmarksBuffer: A structured buffer containing world landmarks.\n- PointBuffer: A structured buffer containing points for detected pose landmarks.\n- SegmentationMask: A texture containing the segmentation mask.",
+  "InputUis": [
+    {
+      "InputId": "0abcdef1-2345-6789-0abc-def123456789"/*Debug*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 450.0
+      },
+      "Description": "Enables debug visualization with debug texture output showing pose landmarks and connections."
+    },
+    {
+      "InputId": "4567890a-bcde-f123-4567-890abcdef123"/*InputTexture*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "The image to process."
+    },
+    {
+      "InputId": "567890ab-cdef-1234-5678-90abcdef1234"/*Enabled*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      },
+      "Description": "Enables or disables pose detection."
+    },
+    {
+      "InputId": "67890abc-def1-2345-6789-0abcdef12345"/*MaxPoses*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      },
+      "Description": "Maximum number of poses to detect."
+    },
+    {
+      "InputId": "7890abcd-ef12-3456-7890-abcdef123456"/*MinPoseDetectionConfidence*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      },
+      "Description": "Minimum confidence score for pose detection to be considered successful."
+    },
+    {
+      "InputId": "890abcde-f123-4567-890a-bcdef1234567"/*MinPosePresenceConfidence*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 300.0
+      },
+      "Description": "Minimum confidence score for pose presence to be considered successful."
+    },
+    {
+      "InputId": "90abcdef-1234-5678-90ab-cdef12345678"/*MinTrackingConfidence*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 375.0
+      },
+      "Description": "Minimum confidence score for pose tracking."
+    },
+    {
+      "InputId": "abcdef12-3456-7890-abcd-ef1234567890"/*CorrectAspectRatio*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 525.0
+      },
+      "Description": "Whether to correct aspect ratio for non-square inputs."
+    },
+    {
+      "InputId": "bcdef123-4567-890a-bcde-f1234567890a"/*ZScale*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 600.0
+      },
+      "Description": "Scale factor for Z coordinate of points."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "cdef1234-5678-90ab-cdef-1234567890ab"/*OutputTexture*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    },
+    {
+      "OutputId": "def01234-5678-90ab-cdef-1234567890ab"/*DebugTexture*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 300.0
+      }
+    },
+    {
+      "OutputId": "ef012345-6789-0abc-def1-234567890abc"/*PoseCount*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 400.0
+      }
+    },
+    {
+      "OutputId": "f0123456-7890-abcd-ef12-34567890abcd"/*UpdateCount*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 500.0
+      }
+    },
+    {
+      "OutputId": "01234567-890a-bcde-f012-34567890abcd"/*WorldLandmarksBuffer*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 600.0
+      }
+    },
+    {
+      "OutputId": "12345678-90ab-cdef-0123-4567890abcde"/*PointBuffer*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 700.0
+      }
+    },
+    {
+      "OutputId": "23456789-0abc-def1-2345-67890abcdef1"/*SegmentationMask*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 800.0
+      }
+    }
+  ]
+}

@@ -2,6 +2,11 @@
 
 public static class ShaderGraphIncludes
 {
+    public const string IncludeBiasFunctions
+        = """
+          #include "shared/bias-functions.hlsl"
+          """;
+    
     public const string Common
         = """
           #ifndef PI

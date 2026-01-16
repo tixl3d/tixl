@@ -47,7 +47,7 @@ internal static class GetFloatVarUi
         }
         else
         {
-            WidgetElements.DrawPrimaryTitle(drawList, area, "Get " + data.VariableName.TypedInputValue.Value, canvas.Scale);
+            WidgetElements.DrawPrimaryTitle(drawList, area, "Get float: " + data.VariableName.TypedInputValue.Value, canvas.Scale);
         }
 
         WidgetElements.DrawSmallValue(drawList, area, $"{value:0.000}", canvas.Scale);

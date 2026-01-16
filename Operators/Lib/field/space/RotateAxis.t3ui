@@ -1,6 +1,7 @@
 {
   "Id": "7d9e1b37-5b44-40a3-bd81-281397e76e1a"/*RotateAxis*/,
   "Description": "Rotates the incoming field in 3D space.\nSimilar node with more options: [TransformField]\n\nIt can be rendered with [RaymarchField] and visualized with [VisualizeFieldDistance].\n\nOther nodes: [RepeatWithMirror], [PolarRepeat], [TwistField].\n\nIt needs an incoming field like [BoxSDF], [ChainLinkSDF], [FractalSDF] as an input.\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToRaymarchField].",
+  "SymbolTags": "1",
   "InputUis": [
     {
       "InputId": "5e037357-1a5c-4011-98ed-df061ea890ac"/*Rotation*/,

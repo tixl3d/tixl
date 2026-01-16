@@ -3,17 +3,27 @@
 #include "shared/point.hlsl"
 #include "shared/quat-functions.hlsl"
 
-cbuffer Params : register(b0)
+cbuffer FloatParams : register(b0)
 {
     float3 Center;
     float Amount;
     float3 UpVector;
-    float UseWAsWeight;
-    float Flip;
 }
 
-StructuredBuffer<LegacyPoint> SourcePoints : t0;
-RWStructuredBuffer<LegacyPoint> ResultPoints : u0;
+cbuffer IntParams : register(b1)
+{
+    int UseWAsWeight;
+    int Flip;
+    int AmountFactor;
+    // float3 Center;
+    // float Amount;
+    // float3 UpVector;
+    // float UseWAsWeight;
+    // float Flip;
+}
+
+StructuredBuffer<Point> SourcePoints : t0;
+RWStructuredBuffer<Point> ResultPoints : u0;
 
 static const float PointSpace = 0;
 static const float ObjectSpace = 1;
@@ -28,15 +38,20 @@ static const float WorldSpace = 2;
         return;
     }
 
-    LegacyPoint p = SourcePoints[i.x];
+    Point p = SourcePoints[i.x];
 
     p.Position = p.Position;
 
-    float weight = UseWAsWeight > 0.5
-                       ? p.W
-                       : 1;
+    float strength = Amount * (AmountFactor == 0
+                                   ? 1
+                               : (AmountFactor == 1) ? p.FX1
+                                                     : p.FX2);
 
-    weight *= Amount;
+    // float weight = UseWAsWeight > 0.5
+    //                    ? p.FX1
+    //                    : 1;
+
+    // weight *= Amount;
 
     float sign = Flip > 0.5 ? -1 : 1;
     float4 newRot = qLookAt(normalize(Center - p.Position) * sign, normalize(UpVector));
@@ -44,6 +59,6 @@ static const float WorldSpace = 2;
     float3 forward = qRotateVec3(float3(0, 0, 1), newRot);
     float4 alignment = qFromAngleAxis(3.141578, forward);
     newRot = qMul(alignment, newRot);
-    p.Rotation = normalize(qSlerp(normalize(p.Rotation), normalize(newRot), weight));
+    p.Rotation = normalize(qSlerp(normalize(p.Rotation), normalize(newRot), strength));
     ResultPoints[i.x] = p;
 }

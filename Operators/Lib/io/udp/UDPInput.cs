@@ -7,22 +7,48 @@ using T3.Core.Utils;
 namespace Lib.io.udp;
 
 [Guid("C029B846-B442-458B-933B-653609827B75")]
-internal sealed class UDPInput : Instance<UDPInput>, IStatusProvider, ICustomDropdownHolder, IDisposable
+internal sealed class UdpInput : Instance<UdpInput>, IStatusProvider, ICustomDropdownHolder, IDisposable
 {
-    [Output(Guid = "21E92723-E786-4556-91F6-31804301509D", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
-    public readonly Slot<string> ReceivedString = new();
-    [Output(Guid = "444498A6-972F-4375-A152-A103AC537A1D", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
-    public readonly Slot<List<string>> ReceivedLines = new();
-    [Output(Guid = "8056024D-4581-4328-8547-19B44EA58742", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
-    public readonly Slot<string> LastSenderAddress = new();
-    [Output(Guid = "D938634B-3736-444F-942F-C2D046D06D4D", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
-    public readonly Slot<int> LastSenderPort = new();
-    [Output(Guid = "E4162B57-5586-4513-A551-7C64B95B8A1D", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
-    public readonly Slot<bool> WasTrigger = new();
     [Output(Guid = "9C4D3558-1584-422E-A59B-D08D23E45242")]
     public readonly Slot<bool> IsListening = new();
 
-    public UDPInput()
+    [Output(Guid = "8056024D-4581-4328-8547-19B44EA58742", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
+    public readonly Slot<string> LastSenderAddress = new();
+
+    [Output(Guid = "D938634B-3736-444F-942F-C2D046D06D4D", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
+    public readonly Slot<int> LastSenderPort = new();
+
+    [Input(Guid = "0944714D-693D-4251-93A6-E22A2DB64F20")]
+    public readonly InputSlot<bool> Listen = new();
+
+    [Input(Guid = "E6589335-4E51-41B0-8777-6A5D54C4F0EE")]
+    public readonly InputSlot<int> ListLength = new(10);
+
+    [Input(Guid = "9E23335A-D63A-4286-930E-C63E86D0E6F0")]
+    public readonly InputSlot<string> LocalIpAddress = new("0.0.0.0");
+
+    [Input(Guid = "2EBE418D-407E-46D8-B274-13B41C52ACCF")]
+    public readonly InputSlot<int> Port = new(7000);
+
+    [Input(Guid = "5E725916-4143-4759-8651-E12185C658D3")]
+    public readonly InputSlot<bool> PrintToLog = new();
+
+    [Output(Guid = "444498A6-972F-4375-A152-A103AC537A1D", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
+    public readonly Slot<List<string>> ReceivedLines = new();
+
+    [Output(Guid = "21E92723-E786-4556-91F6-31804301509D", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
+    public readonly Slot<string> ReceivedString = new();
+
+    [Output(Guid = "E4162B57-5586-4513-A551-7C64B95B8A1D", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
+    public readonly Slot<bool> WasTrigger = new();
+
+    private string? _lastLocalIp;
+    private int _lastPort;
+    private bool _printToLog;
+
+    private bool _wasListening;
+
+    public UdpInput()
     {
         ReceivedString.UpdateAction = Update;
         ReceivedLines.UpdateAction = Update;
@@ -32,10 +58,10 @@ internal sealed class UDPInput : Instance<UDPInput>, IStatusProvider, ICustomDro
         IsListening.UpdateAction = Update;
     }
 
-    private bool _wasListening;
-    private string? _lastLocalIp;
-    private int _lastPort;
-    private bool _printToLog; // ONLY ONE DECLARATION OF _printToLog
+    public void Dispose()
+    {
+        StopListening();
+    }
 
     private void Update(EvaluationContext context)
     {
@@ -64,7 +90,10 @@ internal sealed class UDPInput : Instance<UDPInput>, IStatusProvider, ICustomDro
             _messageHistory.Add(msg.DecodedString);
             wasTriggered = true;
         }
-        while (_messageHistory.Count > listLength) { _messageHistory.RemoveAt(0); }
+
+        while (_messageHistory.Count > listLength)
+            _messageHistory.RemoveAt(0);
+
         ReceivedLines.Value = _messageHistory;
         WasTrigger.Value = wasTriggered;
         IsListening.Value = _runListener;
@@ -92,6 +121,7 @@ internal sealed class UDPInput : Instance<UDPInput>, IStatusProvider, ICustomDro
         {
             Log.Debug("UDP Input: Stopping listener.", this);
         }
+
         _udpClient?.Close();
         _listenerThread?.Join(200); // Give the thread a moment to shut down
         _listenerThread = null;
@@ -125,19 +155,20 @@ internal sealed class UDPInput : Instance<UDPInput>, IStatusProvider, ICustomDro
                 Log.Debug($"UDP Input: Bound to {localEp.Address}:{localEp.Port}. Ready to receive.", this);
             }
 
-            var remoteEP = new IPEndPoint(IPAddress.Any, 0);
+            var remoteEp = new IPEndPoint(IPAddress.Any, 0);
             while (_runListener)
             {
                 try
                 {
                     if (_udpClient == null) break;
-                    var data = _udpClient.Receive(ref remoteEP);
+                    var data = _udpClient.Receive(ref remoteEp);
                     if (_printToLog)
                     {
                         var message = Encoding.UTF8.GetString(data);
-                        Log.Debug($"UDP Input received from {remoteEP.Address}:{remoteEP.Port}: \"{message}\"", this);
+                        Log.Debug($"UDP Input received from {remoteEp.Address}:{remoteEp.Port}: \"{message}\"", this);
                     }
-                    _receivedQueue.Enqueue(new ReceivedMessage(data, remoteEP));
+
+                    _receivedQueue.Enqueue(new ReceivedMessage(data, remoteEp));
                     ReceivedString.DirtyFlag.Invalidate();
                 }
                 catch (SocketException ex)
@@ -146,6 +177,7 @@ internal sealed class UDPInput : Instance<UDPInput>, IStatusProvider, ICustomDro
                     {
                         Log.Warning($"UDP Input receive socket error: {ex.Message} (Error Code: {ex.ErrorCode})", this);
                     }
+
                     break;
                 }
                 catch (Exception e)
@@ -174,57 +206,91 @@ internal sealed class UDPInput : Instance<UDPInput>, IStatusProvider, ICustomDro
 
     private void UpdateStatusMessage()
     {
-        var localIpDisplay = LocalIpAddress.Value;
+        var localIpDisplay = LocalIpAddress.Value ?? string.Empty;
         if (!_runListener) SetStatus("Not listening. Enable 'Listen'.", IStatusProvider.StatusLevel.Notice);
         else if (_lastStatusLevel != IStatusProvider.StatusLevel.Error)
             SetStatus($"Listening on {localIpDisplay.Split(' ')[0]}:{Port.Value}", IStatusProvider.StatusLevel.Success);
     }
 
-    public void Dispose() { StopListening(); }
-
     #region internal types, state, and providers
     private UdpClient? _udpClient;
     private Thread? _listenerThread;
+
     private volatile bool _runListener;
-    // REMOVED DUPLICATE: private bool _printToLog; 
+
     private readonly ConcurrentQueue<ReceivedMessage> _receivedQueue = new();
     private readonly List<string> _messageHistory = new();
+
     private readonly struct ReceivedMessage
     {
         public readonly IPEndPoint Source;
         public readonly string DecodedString;
-        public ReceivedMessage(byte[] data, IPEndPoint source) { Source = source; DecodedString = Encoding.UTF8.GetString(data); }
+
+        public ReceivedMessage(byte[] data, IPEndPoint source)
+        {
+            Source = source;
+            DecodedString = Encoding.UTF8.GetString(data);
+        }
     }
+
     private string? _lastErrorMessage = "Not listening.";
     private IStatusProvider.StatusLevel _lastStatusLevel = IStatusProvider.StatusLevel.Notice;
-    public void SetStatus(string m, IStatusProvider.StatusLevel l) { _lastErrorMessage = m; _lastStatusLevel = l; }
+
+    public void SetStatus(string m, IStatusProvider.StatusLevel l)
+    {
+        _lastErrorMessage = m;
+        _lastStatusLevel = l;
+    }
+
     public IStatusProvider.StatusLevel GetStatusLevel() => _lastStatusLevel;
     public string? GetStatusMessage() => _lastErrorMessage;
-    string ICustomDropdownHolder.GetValueForInput(Guid id) => id == LocalIpAddress.Id ? LocalIpAddress.Value : string.Empty;
-    IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid id) => id == LocalIpAddress.Id ? GetLocalIPv4Addresses() : Enumerable.Empty<string>();
-    void ICustomDropdownHolder.HandleResultForInput(Guid id, string? s, bool i)
+    
+    #region Network Interface Logic
+    private static List<NetworkAdapterInfo> _networkInterfaces = new();
+
+    private static List<NetworkAdapterInfo> GetNetworkInterfaces()
     {
-        if (string.IsNullOrEmpty(s) || !i || id != LocalIpAddress.Id) return;
-        LocalIpAddress.SetTypedInputValue(s.Split(' ')[0]);
-    }
-    private static IEnumerable<string> GetLocalIPv4Addresses()
-    {
-        yield return "0.0.0.0 (Any)";
-        yield return "127.0.0.1";
-        if (!NetworkInterface.GetIsNetworkAvailable()) yield break;
-        foreach (var ni in NetworkInterface.GetAllNetworkInterfaces())
+        var list = new List<NetworkAdapterInfo>();
+        list.Add(new NetworkAdapterInfo(IPAddress.Any, IPAddress.Any, "Any"));
+        list.Add(new NetworkAdapterInfo(IPAddress.Loopback, IPAddress.Parse("255.0.0.0"), "Localhost"));
+        
+        try
         {
-            if (ni.OperationalStatus != OperationalStatus.Up || ni.NetworkInterfaceType == NetworkInterfaceType.Loopback) continue;
-            foreach (var ipInfo in ni.GetIPProperties().UnicastAddresses)
-                if (ipInfo.Address.AddressFamily == AddressFamily.InterNetwork)
-                    yield return ipInfo.Address.ToString();
+            list.AddRange(from ni in NetworkInterface.GetAllNetworkInterfaces()
+                          where ni.OperationalStatus == OperationalStatus.Up && ni.NetworkInterfaceType != NetworkInterfaceType.Loopback
+                          from ip in ni.GetIPProperties().UnicastAddresses
+                          where ip.Address.AddressFamily == AddressFamily.InterNetwork
+                          select new NetworkAdapterInfo(ip.Address, ip.IPv4Mask, ni.Name));
         }
+        catch (Exception e)
+        {
+            Log.Warning("Could not enumerate network interfaces: " + e.Message);
+        }
+        return list;
+    }
+
+    private sealed record NetworkAdapterInfo(IPAddress IpAddress, IPAddress SubnetMask, string Name)
+    {
+        public string DisplayName => $"{Name}: {IpAddress}";
     }
     #endregion
 
-    [Input(Guid = "2EBE418D-407E-46D8-B274-13B41C52ACCF")] public readonly InputSlot<int> Port = new(7000);
-    [Input(Guid = "9E23335A-D63A-4286-930E-C63E86D0E6F0")] public readonly InputSlot<string> LocalIpAddress = new("0.0.0.0 (Any)");
-    [Input(Guid = "E6589335-4E51-41B0-8777-6A5D54C4F0EE")] public readonly InputSlot<int> ListLength = new(10);
-    [Input(Guid = "0944714D-693D-4251-93A6-E22A2DB64F20")] public readonly InputSlot<bool> Listen = new();
-    [Input(Guid = "5E725916-4143-4759-8651-E12185C658D3")] public readonly InputSlot<bool> PrintToLog = new();
+    string ICustomDropdownHolder.GetValueForInput(Guid id) => id == LocalIpAddress.Id ? LocalIpAddress.Value : string.Empty;
+
+    IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid id)
+    {
+        if (id == LocalIpAddress.Id)
+        {
+            _networkInterfaces = GetNetworkInterfaces();
+            foreach (var adapter in _networkInterfaces) yield return adapter.DisplayName;
+        }
+    }
+
+    void ICustomDropdownHolder.HandleResultForInput(Guid id, string? s, bool i)
+    {
+        if (string.IsNullOrEmpty(s) || !i || id != LocalIpAddress.Id) return;
+        var foundAdapter = _networkInterfaces.FirstOrDefault(adapter => adapter.DisplayName == s);
+        if (foundAdapter != null) LocalIpAddress.SetTypedInputValue(foundAdapter.IpAddress.ToString());
+    }
+    #endregion
 }

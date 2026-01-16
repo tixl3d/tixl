@@ -99,7 +99,7 @@
         {
           "Id": "1e4e274b-60b2-4fe8-b275-ebef80d520a7"/*Source*/,
           "Type": "System.String",
-          "Value": "Resources\\user\\newemka980\\img\\generate\\ShardNoise.hlsl"
+          "Value": "/Lib/img/generate/ShardNoise.hlsl"
         },
         {
           "Id": "480d6c19-a33c-48b3-b9fa-aaf8bd31e6d9"/*GenerateMips*/,

@@ -39,7 +39,7 @@
     },
     {
       "InputId": "b77088a9-2676-4caa-809a-5e0f120d25d7"/*Size*/,
-      "Relevancy": "Required",
+      "Relevancy": "Relevant",
       "Position": {
         "X": 0.0,
         "Y": 0.0

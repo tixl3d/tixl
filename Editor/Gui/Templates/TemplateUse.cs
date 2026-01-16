@@ -1,4 +1,5 @@
 ﻿using T3.Core.SystemUi;
+using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Modification;
@@ -35,7 +36,7 @@ public static class TemplateUse
             return;
         }
         
-        T3Ui.SelectAndCenterChildIdInView(newChildUi.SymbolChild.Id);
+        GraphCanvasUtils.SelectAndCenterChildIdInView(newChildUi.SymbolChild.Id);
         var newInstance = components.NodeSelection.GetSelectedInstanceWithoutComposition(); 
         template.AfterSetupAction?.Invoke(newInstance,
                                           symbolName,

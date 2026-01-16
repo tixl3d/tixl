@@ -1,13 +1,14 @@
 {
   "Id": "8e9f0a1b-2c3d-4e5f-6a7b-8c9d0e1f2a3b"/*WebSocketClient*/,
-  "Description": "",
+  "Description": "Connects to a WebSocket server to enable real-time, two-way communication.\n\nThis operator establishes a client connection to a WebSocket server, allowing you to send and receive messages. It's useful for interacting with web-based applications, APIs, or other systems that use the WebSocket protocol.\n\nTips:\n- The `Url` should start with 'ws://' or 'wss://' (for secure connections).\n- Use `SendOnChange` or `SendTrigger` to control when messages are sent.\n- Received messages can be accessed as a raw string, a list of lines, or parsed into a dictionary or list of parts, depending on the `ParsingMode`.\n\nAKA: websocket, socket, web, real-time, client",
   "InputUis": [
     {
       "InputId": "0f1e2d3c-4b5a-4968-7012-3456789abcde"/*ParsingMode*/,
       "Position": {
         "X": -200.0,
         "Y": 600.0
-      }
+      },
+      "Description": "Defines how incoming messages are parsed. Options include treating the message as a single string, splitting it into lines, parsing it as a JSON dictionary, or splitting it by a custom delimiter."
     },
     {
       "InputId": "1e2d3c4b-5a6f-4879-0123-456789abcdef"/*Delimiter*/,
@@ -15,6 +16,7 @@
         "X": -200.0,
         "Y": 675.0
       },
+      "Description": "The character or string to use as a delimiter when `ParsingMode` is set to 'Split by Delimiter'.",
       "Usage": "Default"
     },
     {
@@ -22,7 +24,8 @@
       "Position": {
         "X": -200.0,
         "Y": 375.0
-      }
+      },
+      "Description": "If enabled, a message is sent automatically whenever the content of `MessageParts` changes."
     },
     {
       "InputId": "59074d76-1f4f-406a-b512-5813f4e3420e"/*MessageParts*/,
@@ -30,6 +33,7 @@
         "X": -200.0,
         "Y": 225.0
       },
+      "Description": "A list of strings or values that will be joined together to form the message to be sent.",
       "Usage": "Default"
     },
     {
@@ -37,7 +41,8 @@
       "Position": {
         "X": -200.0,
         "Y": 525.0
-      }
+      },
+      "Description": "If enabled, prints connection status, sent/received messages, and errors to the T3 log. Useful for debugging."
     },
     {
       "InputId": "82933c40-da9e-4340-a227-e9bacf6e2063"/*Separator*/,
@@ -45,6 +50,7 @@
         "X": -200.0,
         "Y": 300.0
       },
+      "Description": "A string used to join the `MessageParts` together before sending.",
       "Usage": "Default"
     },
     {
@@ -52,7 +58,8 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
+      },
+      "Description": "Initiates or closes the connection to the WebSocket server."
     },
     {
       "InputId": "b1c2d3e4-f5a6-4789-0123-456789abcdef"/*Url*/,
@@ -60,6 +67,7 @@
         "X": -200.0,
         "Y": 75.0
       },
+      "Description": "The URL of the WebSocket server (e.g., 'ws://localhost:8080').",
       "Usage": "Default"
     },
     {
@@ -67,14 +75,16 @@
       "Position": {
         "X": -200.0,
         "Y": 450.0
-      }
+      },
+      "Description": "A trigger to manually send the message. The message is sent when this value changes from 0 to 1."
     },
     {
       "InputId": "d1e2f3a4-b5c6-4789-0123-456789abcdef"/*ListLength*/,
       "Position": {
         "X": -200.0,
         "Y": 150.0
-      }
+      },
+      "Description": "The maximum number of received lines to store in the `ReceivedLines` output list."
     }
   ],
   "SymbolChildUis": [],

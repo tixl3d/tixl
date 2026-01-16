@@ -130,27 +130,6 @@
       }
     },
     {
-      "ChildId": "39daac98-5656-417e-ad9c-f06937a72778"/*AnimValue*/,
-      "Position": {
-        "X": -520.5372,
-        "Y": -179.56567
-      }
-    },
-    {
-      "ChildId": "46497a22-e176-451a-bf1c-3e70b8b15efe"/*DelayBoolean*/,
-      "Position": {
-        "X": -128.6947,
-        "Y": -296.0349
-      }
-    },
-    {
-      "ChildId": "5002eaa8-9624-460f-b83b-f901d39ce322"/*Compare*/,
-      "Position": {
-        "X": -331.565,
-        "Y": -248.4165
-      }
-    },
-    {
       "ChildId": "53a8f5f8-9c84-4a46-ba45-c3e01748f896"/*Group*/,
       "Position": {
         "X": 1309.2739,
@@ -225,20 +204,6 @@
       "Position": {
         "X": 889.27386,
         "Y": 337.87317
-      }
-    },
-    {
-      "ChildId": "c89f8c48-4e06-40d3-82dd-6a5dbb88bcaa"/*BoolToFloat*/,
-      "Position": {
-        "X": 53.569275,
-        "Y": -237.16827
-      }
-    },
-    {
-      "ChildId": "d184ba94-78b1-4780-a33e-39ed1b90f1a3"/*Vector2*/,
-      "Position": {
-        "X": 203.56927,
-        "Y": -237.16827
       }
     },
     {

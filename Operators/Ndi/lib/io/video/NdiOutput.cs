@@ -9,7 +9,7 @@ namespace Lib.io.video;
 public sealed class NdiOutput : Instance<NdiOutput>, IStatusProvider
 {
     [Output(Guid = "3c0ae0e5-a2af-4437-b7fa-8ad300cb8b8b", DirtyFlagTrigger = DirtyFlagTrigger.Always)]
-    public readonly Slot<Texture2D> TextureOutput = new();
+    public readonly Slot<Texture2D?> TextureOutput = new();
 
     public NdiOutput()
     {
@@ -19,7 +19,7 @@ public sealed class NdiOutput : Instance<NdiOutput>, IStatusProvider
     private void Update(EvaluationContext context)
     {
         var texture = Texture.GetValue(context);
-        var senderName = SenderName.GetValue(context);
+        var senderName = SenderName.GetValue(context) ?? "unknown";
         var fps = FrameRate.GetValue(context);
         var alpha = EnableAlpha.GetValue(context);
 

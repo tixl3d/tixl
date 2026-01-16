@@ -196,7 +196,7 @@
       "Outputs": []
     },
     {
-      "Id": "5b5d2cb3-e05e-44dd-94a2-4cbe26f8551c"/*PickFromStringList*/,
+      "Id": "5b5d2cb3-e05e-44dd-94a2-4cbe26f8551c"/*PickStringFromList*/,
       "SymbolId": "ef357e66-24e9-4f54-8d86-869db74602f4",
       "InputValues": [],
       "Outputs": []

@@ -1,0 +1,155 @@
+{
+  "Id": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d"/*DataPointConverter*/,
+  "Description": "Converts point data from CSV or JSON files into a GPU structured buffer of Point objects. It supports custom column mapping for CSV files and can export the converted points back to CSV or JSON.",
+  "InputUis": [
+    {
+      "InputId": "1a2b3c4d-5e6f-4a1b-8c9d-1e2f3a4b5c6d"/*FilePath*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "GroupTitle": "File Settings",
+      "Description": "The path to the input CSV or JSON file containing the point data.",
+      "Usage": "FilePath"
+    },
+    {
+      "InputId": "2b3c4d5e-6f7a-4b1c-9d8e-2f3a4b5c6d7e"/*ExportFilePath*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 975.0
+      },
+      "GroupTitle": "Export Settings",
+      "Description": "The path where the converted point data will be saved when you trigger the export. Supports .csv and .json.",
+      "Usage": "FilePath"
+    },
+    {
+      "InputId": "3c4d5e6f-7a8b-4c1d-8e9f-3a4b5c6d7e8f"/*Convert*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      },
+      "Description": "A trigger to start the conversion process. This reads the input file and generates the point buffer based on the column mappings below."
+    },
+    {
+      "InputId": "4c7e6d5a-8f9b-4c1d-9e2a-3b4c5d6e7f8a"/*CsvPosXMapping*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      },
+      "GroupTitle": "Column Mapping: Position",
+      "Description": "The name of the column/property for the point's X position.",
+      "Usage": "Default"
+    },
+    {
+      "InputId": "4d5e6f7a-8b9c-4d1e-9f8a-4b5c6d7e8f9a"/*Export*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1050.0
+      },
+      "Description": "A trigger to save the generated point buffer to the specified ExportFilePath."
+    },
+    {
+      "InputId": "5d6f7a8b-9c1d-4e2f-8a3b-5c4d6e7f8a9b"/*CsvPosYMapping*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      },
+      "Description": "The name of the column/property for the point's Y position.",
+      "Usage": "Default"
+    },
+    {
+      "InputId": "6e5a4b3c-9d2e-4f3a-8b4c-5d6e7f8a9b1c"/*CsvPosZMapping*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 300.0
+      },
+      "Description": "The name of the column/property for the point's Z position.",
+      "Usage": "Default"
+    },
+    {
+      "InputId": "7f4b5c6d-8e3f-4a1b-9c2d-3e4f5a6b7c8d"/*CsvRotXMapping*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 375.0
+      },
+      "GroupTitle": "Column Mapping: Rotation",
+      "Description": "The name of the column/property for the point's X rotation (Euler angle or Quaternion component).",
+      "Usage": "Default"
+    },
+    {
+      "InputId": "8a3c2d1e-9f4a-4b5c-d6e7-f8a9b0c1d2e3"/*CsvRotYMapping*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 450.0
+      },
+      "Description": "The name of the column/property for the point's Y rotation (Euler angle or Quaternion component).",
+      "Usage": "Default"
+    },
+    {
+      "InputId": "9b2d3e4f-5a6b-4c7d-8e9f-0a1b2c3d4e5f"/*CsvRotZMapping*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 525.0
+      },
+      "Description": "The name of the column/property for the point's Z rotation (Euler angle or Quaternion component).",
+      "Usage": "Default"
+    },
+    {
+      "InputId": "a2c1e3d4-f5a6-4b7c-8d9e-0f1a2b3c4d5e"/*CsvScaleXMapping*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 675.0
+      },
+      "GroupTitle": "Column Mapping: Scale",
+      "Description": "The name of the column/property for the point's X scale.",
+      "Usage": "Default"
+    },
+    {
+      "InputId": "b3d4e5f6-a7b8-4c9d-2e1f-0a9b8c7d6e5f"/*CsvScaleYMapping*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 750.0
+      },
+      "Description": "The name of the column/property for the point's Y scale.",
+      "Usage": "Default"
+    },
+    {
+      "InputId": "c4e5f6a7-b8c9-4d0e-8f2a-9b8c7d6e5f4c"/*CsvScaleZMapping*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 825.0
+      },
+      "Description": "The name of the column/property for the point's Z scale.",
+      "Usage": "Default"
+    },
+    {
+      "InputId": "c4e5f6a7-b8c9-4d0e-8f2a-9b8c7d6e5f4d"/*CsvRotWMapping*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 600.0
+      },
+      "Description": "The name of the column/property for the point's W rotation (Quaternion component). If not provided, rotation is treated as Euler angles (Yaw, Pitch, Roll).",
+      "Usage": "Default"
+    },
+    {
+      "InputId": "d5f6a7b8-c9d0-4e1f-2a3b-8c7d6e5f4a3b"/*CsvF1Mapping*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 900.0
+      },
+      "GroupTitle": "Column Mapping: Custom",
+      "Description": "The name of the column/property for a custom floating-point attribute (F1).",
+      "Usage": "Default"
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "5e6f7a8b-9c1d-4e2f-8a3b-5c4d6e7f8a9b"/*PointBuffer*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    }
+  ]
+}

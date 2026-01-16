@@ -1,5 +1,6 @@
 using T3.Core.Utils;
 using T3.Core.Utils.Geometry;
+// ReSharper disable InconsistentNaming
 
 namespace Lib.render.@_;
 
@@ -9,36 +10,49 @@ internal sealed class TransformMatrix : Instance<TransformMatrix>
     [Output(Guid = "751E97DE-C418-48C7-823E-D4660073A559")]
     public readonly Slot<Vector4[]> Result = new();
         
-
     [Output(Guid = "ECA8121B-2A7F-4ECC-9143-556DCF78BA33")]
     public readonly Slot<Vector4[]> ResultInverted = new();
         
+    [Output(Guid = "6ED9317B-69B7-4041-9938-AEF2A68CA91F")]
+    public readonly Slot<Matrix4x4> Matrix = new();
+    
     public TransformMatrix()
     {
         Result.UpdateAction += Update;
         ResultInverted.UpdateAction += Update;
+        Matrix.UpdateAction += Update;
     }
 
     private void Update(EvaluationContext context)
     {
         var s = Scale.GetValue(context) * UniformScale.GetValue(context);
-        var r = Rotation.GetValue(context);
+        var r = Rotation_PitchYawRoll.GetValue(context);
         float yaw = r.Y.ToRadians();
         float pitch =r.X.ToRadians();
         float roll = r.Z.ToRadians();
+
+        var vec4 = Rotation_Quaternion.GetValue(context);
+        var rotationMode = RotationMode.GetEnumValue<RotationModes>(context);
+        
+        var rotation = rotationMode switch
+                           {
+                               RotationModes.PitchYawRoll => Quaternion.CreateFromYawPitchRoll(yaw, pitch, roll),
+                               RotationModes.Quaternion   => new Quaternion(vec4.X,vec4.Y,vec4.Z,vec4.W),
+                               _                          => throw new ArgumentOutOfRangeException()
+                           };
+        
+        
         var pivot = Pivot.GetValue(context);
         var t = Translation.GetValue(context);
         var objectToParentObject = GraphicsMath.CreateTransformationMatrix(scalingCenter: pivot, 
                                                                            scalingRotation: Quaternion.Identity, 
                                                                            scaling: new Vector3(s.X, s.Y, s.Z), 
                                                                            rotationCenter: pivot,
-                                                                           rotation: Quaternion.CreateFromYawPitchRoll(yaw, pitch, roll), 
+                                                                           rotation: rotation, 
                                                                            translation: new Vector3(t.X, t.Y, t.Z));
 
         var shearing = Shear.GetValue(context);
-            
-              
-            
+        
         Matrix4x4 m = Matrix4x4.Identity;
         m.M12=shearing.Y; 
         m.M21=shearing.X; 
@@ -66,20 +80,33 @@ internal sealed class TransformMatrix : Instance<TransformMatrix>
         _invertedMatrix[2] = invertedMatrix.Row3();
         _invertedMatrix[3] = invertedMatrix.Row4();
         ResultInverted.Value = _invertedMatrix;
-            
+
+        Matrix.Value = objectToParentObject;
     }
 
     private Vector4[] _matrix = new Vector4[4];
     private Vector4[] _invertedMatrix = new Vector4[4];
-        
-        
+
+    private enum RotationModes
+    {
+        PitchYawRoll,
+        Quaternion,
+    }    
         
     [Input(Guid = "3B817E6C-F532-4A8C-A2FF-A00DC926EEB2")]
     public readonly InputSlot<Vector3> Translation = new();
-        
+
+    [Input(Guid = "96841452-D384-49A5-977E-F16B57DE9118", MappedType = typeof(RotationModes))]
+    public readonly InputSlot<int> RotationMode = new();
+    
     [Input(Guid = "5339862D-5A18-4D0C-B908-9277F5997563")]
-    public readonly InputSlot<Vector3> Rotation = new();
-        
+    public readonly InputSlot<Vector3> Rotation_PitchYawRoll = new();
+
+    [Input(Guid = "E15B0CAB-696F-44FD-B270-99F6FD26634F")]
+    public readonly InputSlot<Vector4> Rotation_Quaternion = new();
+
+
+    
     [Input(Guid = "58B9DFB6-0596-4F0D-BAF6-7FB3AE426C94")]
     public readonly InputSlot<Vector3> Scale = new();
 

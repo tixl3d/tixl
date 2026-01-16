@@ -13,6 +13,9 @@ internal sealed class SubdivideLinePoints : Instance<SubdivideLinePoints>
     [Input(Guid = "835cf0fb-9958-4c60-9cf6-afc2f846b68a")]
     public readonly InputSlot<int> Count = new();
 
+        [Input(Guid = "4c717acb-05d1-4fcb-84b5-a8fd8ad03cfc")]
+        public readonly InputSlot<bool> ClosedShape = new InputSlot<bool>();
+
 
     private enum SampleModes
     {

@@ -18,7 +18,7 @@
       }
     },
     {
-      "Id": "5339862d-5a18-4d0c-b908-9277f5997563"/*Rotation*/,
+      "Id": "5339862d-5a18-4d0c-b908-9277f5997563"/*Rotation_PitchYawRoll*/,
       "DefaultValue": {
         "X": 0.0,
         "Y": 0.0,
@@ -35,6 +35,19 @@
         "X": 1.0,
         "Y": 1.0,
         "Z": 1.0
+      }
+    },
+    {
+      "Id": "96841452-d384-49a5-977e-f16b57de9118"/*RotationMode*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "e15b0cab-696f-44fd-b270-99f6fd26634f"/*Rotation_Quaternion*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0,
+        "W": 1.0
       }
     },
     {

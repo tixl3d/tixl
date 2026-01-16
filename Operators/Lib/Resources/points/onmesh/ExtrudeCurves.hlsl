@@ -6,14 +6,15 @@
 
 cbuffer Params : register(b0)
 {
-    float UseWAsWidth;
+    // float UseWAsWidth;
+    float ScaleFactor;
     float UseStretch;
     float Width;
     float UVsDirection;
 }
 
-StructuredBuffer<LegacyPoint> RailPoints : t0;
-StructuredBuffer<LegacyPoint> ShapePoints : t1;
+StructuredBuffer<Point> RailPoints : t0;
+StructuredBuffer<Point> ShapePoints : t1;
 
 RWStructuredBuffer<PbrVertex> Vertices : u0;
 RWStructuredBuffer<int3> TriangleIndices : u1;
@@ -42,10 +43,12 @@ RWStructuredBuffer<int3> TriangleIndices : u1;
     uint columnIndex = vertexIndex / rows;
 
     PbrVertex v;
-    LegacyPoint railPoint = RailPoints[columnIndex];
-    LegacyPoint shapePoint = ShapePoints[rowIndex];
+    Point railPoint = RailPoints[columnIndex];
+    Point shapePoint = ShapePoints[rowIndex];
 
-    float3 scaleFactor = (UseStretch ? railPoint.Stretch : 1) * (UseWAsWidth ? railPoint.W : 1) * Width;
+    // float3 scaleFactor = (UseStretch ? railPoint.Scale : 1) * (UseWAsWidth ? railPoint.FX1 : 1) * Width;
+    float3 scaleFactor = (UseStretch ? railPoint.Scale : 1) * Width * (ScaleFactor == 0 ? 1 : (ScaleFactor == 1) ? railPoint.FX1
+                                                                                                                 : railPoint.FX2);
 
     float4 rotation = normalize(qMul(railPoint.Rotation, shapePoint.Rotation));
     float3 position = qRotateVec3(shapePoint.Position * scaleFactor, railPoint.Rotation) + railPoint.Position;
@@ -61,20 +64,22 @@ RWStructuredBuffer<int3> TriangleIndices : u1;
     float U = (float)columnIndex / max(1, columns - 1);
     float V = (float)rowIndex / max(1, rows - 1);
 
-    if (swapUVs) {
+    if (swapUVs)
+    {
         v.TexCoord = float2(V, U);
-        v.TexCoord2 = float2(1.0 - U, V);  
-    } 
-    else {
-        v.TexCoord = float2(1.0 - U, V);   
-        v.TexCoord2 = float2(V, U);       
+        v.TexCoord2 = float2(1.0 - U, V);
+    }
+    else
+    {
+        v.TexCoord = float2(1.0 - U, V);
+        v.TexCoord2 = float2(V, U);
     }
 
     v.Selected = 1;
     v.__padding = 0;
 
     Vertices[vertexIndex] = v;
-    if (isnan(railPoint.W) || isnan(shapePoint.W))
+    if (isnan(railPoint.Scale.x) || isnan(shapePoint.Scale.x))
         Vertices[vertexIndex].Position = float3(0, 0, 0);
 
     // Write face indices
@@ -83,7 +88,10 @@ RWStructuredBuffer<int3> TriangleIndices : u1;
         int faceIndex = 2 * (rowIndex + columnIndex * (rows - 1));
 
         if (
-            isnan(railPoint.W) || isnan(RailPoints[columnIndex + 1].W) || isnan(shapePoint.W) || isnan(ShapePoints[rowIndex + 1].W))
+            isnan(railPoint.Scale.x) ||                   //
+            isnan(RailPoints[columnIndex + 1].Scale.x) || //
+            isnan(shapePoint.Scale.x) ||                  //
+            isnan(ShapePoints[rowIndex + 1].Scale.x))
         {
             if (columnIndex < columns - 1 && rowIndex < rows - 1)
             {
@@ -91,10 +99,11 @@ RWStructuredBuffer<int3> TriangleIndices : u1;
                 TriangleIndices[faceIndex + 1] = int3(0, 0, 0);
                 TriangleIndices[faceIndex + 1] = int3(0, 0, 0);
             }
-            if (isnan(railPoint.W) || isnan(shapePoint.W))
+            if (isnan(railPoint.Scale.x) || isnan(shapePoint.Scale.x))
                 Vertices[vertexIndex].Position = float3(0, 0, 0);
             return;
         }
+
         TriangleIndices[faceIndex + 0] = int3(vertexIndex + 1, vertexIndex + rows, vertexIndex);
         TriangleIndices[faceIndex + 1] = int3(vertexIndex + 1, vertexIndex + rows + 1, vertexIndex + rows);
     }

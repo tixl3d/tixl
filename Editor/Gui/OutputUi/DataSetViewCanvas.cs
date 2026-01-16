@@ -40,9 +40,9 @@ internal sealed class DataSetViewCanvas
 
             if (ShowInteraction)
             {
-                CustomComponents.ToggleButton("Only Recent", ref _onlyRecentEvents, Vector2.Zero);
+                CustomComponents.ToggleButton(ref _onlyRecentEvents, "Only Recent", Vector2.Zero);
                 ImGui.SameLine();
-                CustomComponents.ToggleButton("Scroll", ref _scroll, Vector2.Zero);
+                CustomComponents.ToggleButton(ref _scroll, "Scroll", Vector2.Zero);
 
                 //ImGui.Checkbox("Filter Recent ", ref _onlyRecentEvents);
                 // ImGui.Checkbox("Scroll ", ref _scroll);

@@ -44,7 +44,7 @@ internal static class GraphOperations
         }
             
         var cmd = new CopySymbolChildrenCommand(composition.GetSymbolUi(),
-                                                selectedChildren,
+                                                selectedChildren.ToList(),
                                                 selectedAnnotations,
                                                 newContainerUi,
                                                 Vector2.Zero,

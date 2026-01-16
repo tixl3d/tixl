@@ -10,6 +10,10 @@
       "DefaultValue": "R16G16B16A16_Float"
     },
     {
+      "Id": "5439b7d1-263d-44e6-8eb5-cc9d0df4a61a"/*SliceDepth*/,
+      "DefaultValue": 0.0
+    },
+    {
       "Id": "5573ae7b-b699-42c5-84ac-2485040e9a55"/*GenerateMips*/,
       "DefaultValue": false
     },
@@ -373,23 +377,6 @@
       "SymbolId": "fbd7f0f0-36a3-4fbb-91e1-cb33d4666d09",
       "InputValues": [],
       "Outputs": []
-    },
-    {
-      "Id": "f94045f5-e21a-40cd-915a-807f2295e37e"/*ReadFile*/,
-      "SymbolId": "5f71d2f8-98c8-4502-8f40-2ea4a1e18cca",
-      "InputValues": [
-        {
-          "Id": "24b7e7e1-fe0b-46be-807e-0afacd4800f9"/*FilePath*/,
-          "Type": "System.String",
-          "Value": "lib/img/generate/FieldToImageTemplate.hlsl"
-        },
-        {
-          "Id": "5c6241f7-6a4f-4972-a314-98fd070f91dd"/*TriggerUpdate*/,
-          "Type": "System.Boolean",
-          "Value": false
-        }
-      ],
-      "Outputs": []
     }
   ],
   "Connections": [
@@ -606,6 +593,12 @@
     {
       "SourceParentOrChildId": "c68a9c6a-8635-46d2-b1e3-cd3b70a051e6",
       "SourceSlotId": "305d321d-3334-476a-9fa3-4847912a4c58",
+      "TargetParentOrChildId": "c8bb6b2d-bb10-4a36-9a2d-28013a6728e6",
+      "TargetSlotId": "49556d12-4cd1-4341-b9d8-c356668d296c"
+    },
+    {
+      "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "SourceSlotId": "5439b7d1-263d-44e6-8eb5-cc9d0df4a61a",
       "TargetParentOrChildId": "c8bb6b2d-bb10-4a36-9a2d-28013a6728e6",
       "TargetSlotId": "49556d12-4cd1-4341-b9d8-c356668d296c"
     },

@@ -1,6 +1,7 @@
 {
   "Id": "8342d554-6e83-49b1-91b5-2d4b5b63e726"/*RandomJumpForce*/,
   "Description": "",
+  "SymbolTags": "128",
   "InputUis": [
     {
       "InputId": "17758594-7c61-4524-a83f-7489daeb5005"/*Phase*/,

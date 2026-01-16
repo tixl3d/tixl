@@ -50,6 +50,7 @@ RWStructuredBuffer<Point> ResultPoints : u1;
     {
         Particles[gi].BirthTime = NAN;
         Particles[gi].Position = NAN;
+        ResultPoints[gi].Scale = NAN;
     }
 
     // Insert emit points
@@ -86,31 +87,32 @@ RWStructuredBuffer<Point> ResultPoints : u1;
         float emitVelocity = InitialVelocity * (EmitVelocityFactor == 0 ? 1 : (EmitVelocityFactor == 1 ? emitPoint.FX1 : emitPoint.FX2));
 
         Particles[gi].Velocity = qRotateVec3(float3(0, 0, 1), normalize(Particles[gi].Rotation)) * emitVelocity;
-        // Particles[gi].Radius = emitPoint.W * RadiusFromW;
 
         // These will not change over lifetime...
         Particles[gi].Color = emitPoint.Color;
-        // Particles[gi].Color = emitPoint.Color;
         ResultPoints[gi].Scale = emitPoint.Scale;
         ResultPoints[gi].FX1 = emitPoint.FX1;
         ResultPoints[gi].FX2 = emitPoint.FX2;
         ResultPoints[gi].Color = emitPoint.Color;
-
-        // Particles[gi].Selected = emitPoint.Selected;
     }
 
     if (Particles[gi].BirthTime == NAN)
         return;
 
     float3 velocity = Particles[gi].Velocity;
-    velocity *= (1 - Drag);
-    Particles[gi].Velocity = velocity;
-    float speed = length(velocity);
 
+    // drag step (frame-rate independent)
+    // velocity *= (1 - Drag);
+    velocity *= pow(1.0f - Drag, Speed); // improved version that better aligns
+    Particles[gi].Velocity = velocity;
+
+    // position step
     float3 pos = Particles[gi].Position;
     pos += velocity * Speed * 0.01;
+
     Particles[gi].Position = pos;
 
+    float speed = length(velocity);
     if (speed > 0.0001)
     {
         float f = saturate(speed * OrientTowardsVelocity);

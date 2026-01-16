@@ -1,0 +1,30 @@
+{
+  "Id": "cc6100a4-73ed-45e4-87ab-601e7956fb36"/*RotatedPlaneSDF*/,
+  "Description": "A plane defined by center and normal vector.\nThis is similar to [PlaneSDF] but allows finer control.",
+  "InputUis": [
+    {
+      "InputId": "1a154ff5-6fa7-4ee1-9b1e-99c5d47e9493"/*Center*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "bfed14a7-7a97-4379-9419-222bb7a2ba57"/*Normal*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "b42a945e-9842-4f76-8f1f-bb73cfd14be4"/*Result*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

@@ -16,7 +16,7 @@ namespace Examples.user._1x;
     public readonly InputSlot<float> MacroLandscapeScaling = new InputSlot<float>();
 
     [Input(Guid = "d8a1d61b-b32d-43bb-a74d-6da5efb3e2a8")]
-    public readonly InputSlot<float> DetailLandscapeScaling = new InputSlot<float>();
+    public readonly InputSlot<float> MountainScaling = new InputSlot<float>();
 
 
 }

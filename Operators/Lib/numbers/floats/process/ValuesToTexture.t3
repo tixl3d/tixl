@@ -8,10 +8,6 @@
       }
     },
     {
-      "Id": "165f7e0e-6ef0-4be1-8ed3-61ed0db752ed"/*UseFullList*/,
-      "DefaultValue": true
-    },
-    {
       "Id": "51545316-69fc-441f-b59f-44979e32972c"/*Pow*/,
       "DefaultValue": 1.0
     },
@@ -20,16 +16,12 @@
       "DefaultValue": 0
     },
     {
-      "Id": "ca67bfaf-ede7-43ba-b279-fc1ddfbe2ffa"/*RangeStart*/,
-      "DefaultValue": 0
+      "Id": "748fe756-c7ee-4cc1-929e-078f99bea628"/*Offset*/,
+      "DefaultValue": 0.0
     },
     {
       "Id": "cc812393-f080-4e17-a525-15b09f8acdd0"/*Gain*/,
       "DefaultValue": 1.0
-    },
-    {
-      "Id": "db868176-d51c-41aa-bafe-68c3e50e725e"/*RangeEnd*/,
-      "DefaultValue": 100
     }
   ],
   "Children": [],

@@ -15,7 +15,7 @@
     <IsEditorOnly>false</IsEditorOnly>
     <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
     <Deterministic>true</Deterministic>
-      <NoWarn>NU1900</NoWarn>
+    <NoWarn>NU1900</NoWarn>
     <!-- Set the output path based on the version and release mode -->
   </PropertyGroup>
   <ItemGroup>
@@ -92,6 +92,7 @@
     <Using Alias="SampleDescription" Include="SharpDX.DXGI.SampleDescription" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Mediapipe\Mediapipe.csproj" Private="false" PrivateAssets="all" />
     <ProjectReference Include="..\..\Core\Core.csproj" Private="false" PrivateAssets="all" />
     <ProjectReference Include="..\..\Serialization\Serialization.csproj" Private="false" PrivateAssets="all" />
     <ProjectReference Include="..\..\SystemUi\SystemUi.csproj" Private="false" PrivateAssets="all" />
@@ -99,8 +100,13 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="DirectShowLib.Standard" Version="2.1.0" />
-    <PackageReference Include="Emgu.CV" Version="4.11.0.5746" />
-    <PackageReference Include="Emgu.CV.runtime.windows" Version="4.11.0.5746" />
+    <PackageReference Include="System.ServiceModel.Primitives" Version="8.1.1" />
+    <PackageReference Include="System.ServiceModel.Http" Version="8.1.1" />
+    <PackageReference Include="System.ServiceModel.Security" Version="6.0.0" />
+    <PackageReference Include="OpenCvSharp4" Version="4.11.0.20250507" />
+    <PackageReference Include="OpenCvSharp4.Extensions" Version="4.11.0.20250507" />
+    <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.11.0.20250507" />
+    <PackageReference Include="OpenCvSharp4.Windows" Version="4.11.0.20250507" />
     <PackageReference Include="Palink.ArtNet" Version="1.0.0" />
     <PackageReference Include="Rug.Osc" Version="1.2.5">
       <NoWarn>NU1701</NoWarn>
@@ -161,9 +167,8 @@
     </PropertyGroup>
     <WriteLinesToFile File="$(OutputPath)/OperatorPackage.json" Lines="$(OperatorPackageInfoJson)" Overwrite="True" Encoding="UTF-8" />
   </Target>
-
-    <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild">
-        <!-- Clear previous files in the export folder -->
-        <RemoveDir Directories="bin/$(Configuration)" />
-    </Target>
+  <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild">
+    <!-- Clear previous files in the export folder -->
+    <RemoveDir Directories="bin/$(Configuration)" />
+  </Target>
 </Project>

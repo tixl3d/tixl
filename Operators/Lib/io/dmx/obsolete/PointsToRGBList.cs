@@ -6,8 +6,13 @@ namespace Lib.io.dmx.obsolete;
 [Guid("0e881c4d-c4ed-42c1-a2c9-d076b0489395")]
 public sealed class PointsToRGBList : Instance<PointsToRGBList>
 {
+    [Input(Guid = "b98449e7-b7ef-4b15-883c-28bf7662c987")]
+    public readonly InputSlot<BufferWithViews> Points = new();
+
     [Output(Guid = "74a3f459-f0d6-411c-9dc8-d3748f019fad")]
     public readonly Slot<List<float>> Result = new(new List<float>(20));
+
+    private BufferWithViews _bufferWithViewsCpuAccess = new();
 
     public PointsToRGBList()
     {
@@ -17,17 +22,15 @@ public sealed class PointsToRGBList : Instance<PointsToRGBList>
     private void Update(EvaluationContext context)
     {
         var updateContinuously = true;
-            
+
         try
         {
-
             var pointBuffer = Points.GetValue(context);
 
             if (pointBuffer == null)
             {
                 return;
             }
-
 
             var d3DDevice = ResourceManager.Device;
             var immediateContext = d3DDevice.ImmediateContext;
@@ -82,9 +85,9 @@ public sealed class PointsToRGBList : Instance<PointsToRGBList>
             {
                 var elementCount = _bufferWithViewsCpuAccess.Buffer.Description.SizeInBytes /
                                    _bufferWithViewsCpuAccess.Buffer.Description.StructureByteStride;
-                    
+
                 var points = sourceStream.ReadRange<Point>(elementCount);
-                    
+
                 //Log.Debug($"Read {points.Length} elements", this);
                 //Output.Value = new StructuredList<Point>(points);
                 var items = new List<float>();
@@ -107,19 +110,20 @@ public sealed class PointsToRGBList : Instance<PointsToRGBList>
             }
 
             immediateContext.UnmapSubresource(_bufferWithViewsCpuAccess.Buffer, 0);
-                
+
             Result.DirtyFlag.Trigger = updateContinuously ? DirtyFlagTrigger.Animated : DirtyFlagTrigger.None;
         }
         catch (Exception e)
         {
-            Log.Error("Failed to fetch GPU resource " + e.Message);
+            Log.Error("Failed to fetch GPU resource " + e.Message, this);
         }
     }
 
+    protected override void Dispose(bool isDisposing)
+    {
+        if (isDisposing)
+            _bufferWithViewsCpuAccess?.Dispose();
 
-
-    private BufferWithViews _bufferWithViewsCpuAccess = new();
-
-    [Input(Guid = "b98449e7-b7ef-4b15-883c-28bf7662c987")]
-    public readonly InputSlot<BufferWithViews> Points = new InputSlot<BufferWithViews>();
+        base.Dispose(isDisposing);
+    }
 }

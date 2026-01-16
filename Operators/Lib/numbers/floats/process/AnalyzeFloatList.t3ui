@@ -1,0 +1,44 @@
+{
+  "Id": "9a46ab17-a523-4378-b118-54ab904e184a"/*AnalyzeFloatList*/,
+  "Description": "",
+  "InputUis": [
+    {
+      "InputId": "54fa9e73-6669-4b98-b12e-8f6f06ac936f"/*Input*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "cab7bd9d-c6cb-4b81-872c-d99b91905c41"/*Max*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "3e2aa291-0810-4f9b-9fee-28088ef05c7f"/*Min*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 100.0
+      }
+    },
+    {
+      "OutputId": "71d700a8-17bc-40f5-9e72-f78c4e306660"/*AverageMean*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 200.0
+      }
+    },
+    {
+      "OutputId": "6407243b-4614-4297-b3b7-12dd6a9630af"/*AllValid*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 300.0
+      }
+    }
+  ]
+}

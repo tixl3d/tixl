@@ -1,0 +1,20 @@
+{
+  "Id": "11958088-6358-4df1-b80f-c45fa6889a2e"/*PickGradient*/,
+  "Inputs": [
+    {
+      "Id": "b8326dd4-9224-4d37-a490-7686184d8658"/*Index*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "f68298dc-f8d0-4d08-aff5-7d35200f18b3"/*Gradients*/,
+      "DefaultValue": {
+        "Gradient": {
+          "Interpolation": "Linear",
+          "Steps": []
+        }
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

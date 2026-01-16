@@ -1,0 +1,1861 @@
+{
+  "Zones": [
+    {
+      "Id": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "Title": "_undefined"
+    }
+  ],
+  "Topics": [
+    {
+      "Id": "6493fa07-2741-4712-b02f-e3f9e795b658",
+      "Title": "TiXL Essentials",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 3.0,
+        "Y": -8.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "7b4db61f-e122-4831-953e-9c18084fb9dd",
+        "ed9927b5-fae3-4e6f-a4eb-df68e09bf0db",
+        "7f093d8e-9d75-46a0-ac61-4a829b70358d"
+      ],
+      "Namespace": "Skills.Basics.B01_Welcome",
+      "TopicType": "Image",
+      "Requirement": "None"
+    },
+    {
+      "Id": "c6ac02a0-1f33-401a-a9c4-d02ffa511300",
+      "Title": "New topic1",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 22.0,
+        "Y": -14.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Image",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "67b8faed-1e62-4518-8f71-bb9000a97c5d",
+      "Title": "Combining Images",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 9.0,
+        "Y": -12.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Image",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "2195b88c-bbe2-4adf-9862-c54c9ae53d37",
+      "Title": "New topic3",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 20.0,
+        "Y": -14.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Image",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "66c465a3-33cf-4336-9209-4861c14d27f2",
+      "Title": "New topic3",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 21.0,
+        "Y": -14.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Image",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "c6784323-b93b-4702-9a96-9bbd3f279218",
+      "Title": "Working with strings",
+      "Description": "",
+      "MapCoordinate": {
+        "X": -4.0,
+        "Y": -3.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "59419077-5868-421b-bcb0-39361ba2ecc9"
+      ],
+      "Namespace": null,
+      "TopicType": "String",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "59419077-5868-421b-bcb0-39361ba2ecc9",
+      "Title": "Scrambling String",
+      "Description": "",
+      "MapCoordinate": {
+        "X": -4.0,
+        "Y": -4.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "f6000b6e-27a2-4c78-a34e-d4ad11f09f18"
+      ],
+      "Namespace": null,
+      "TopicType": "String",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "9f4b6aa3-6af6-40a1-b44a-0a1908155364",
+      "Title": "Flow Graph",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 5.0,
+        "Y": -2.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Command",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "7b4db61f-e122-4831-953e-9c18084fb9dd",
+      "Title": "I hate math, but...",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 1.0,
+        "Y": -10.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "021537e6-f292-44e4-93d9-803487e6da8b",
+        "6e4d1aee-2cdd-431c-ae5e-028c483ec267",
+        "2dec2fcf-3466-4b3b-aee7-07127354d9cd",
+        "4d512889-dbed-4b50-97c9-47f077cbf34f",
+        "f15f35fe-a482-45b2-a909-4e88f529e71e",
+        "71d6f1eb-7b02-4635-b840-45082fb9b102"
+      ],
+      "Namespace": "Skills.Math.M01_BasicMath",
+      "TopicType": "Numbers",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "021537e6-f292-44e4-93d9-803487e6da8b",
+      "Title": "Anim Value",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 2.0,
+        "Y": -11.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "af90c1db-760d-4373-a9b8-4526c57f67fc",
+        "5316a366-0390-4987-873b-be4235b32325",
+        "d92192de-a78f-4b08-bad0-77eb171d1bcc"
+      ],
+      "Namespace": null,
+      "TopicType": "Numbers",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "6e4d1aee-2cdd-431c-ae5e-028c483ec267",
+      "Title": "Trigonometry",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 1.0,
+        "Y": -11.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "42bc1ea6-b0c3-47d4-b427-cd9e09389f71"
+      ],
+      "Namespace": null,
+      "TopicType": "Numbers",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "2dec2fcf-3466-4b3b-aee7-07127354d9cd",
+      "Title": "Ints vs Floats",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 0.0,
+        "Y": -10.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Numbers",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "4d512889-dbed-4b50-97c9-47f077cbf34f",
+      "Title": "Computing Colors",
+      "Description": "",
+      "MapCoordinate": {
+        "X": -2.0,
+        "Y": -7.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "a7c48f91-ec65-4de6-9cad-c6ead24e10e6",
+        "6c3dff36-9aee-4849-bf0b-0d2a13d57956"
+      ],
+      "Namespace": null,
+      "TopicType": "Numbers",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "ed9927b5-fae3-4e6f-a4eb-df68e09bf0db",
+      "Title": "Basic Shapes",
+      "Description": "A short introduction to the basic concepts of images in TiXL.",
+      "MapCoordinate": {
+        "X": 7.0,
+        "Y": -11.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "67b8faed-1e62-4518-8f71-bb9000a97c5d",
+        "516a848e-a526-4e52-8342-f4c5fef3f057",
+        "8a27a6a7-c8c7-4012-916f-f7ecdfebae8e",
+        "d400abe2-0113-4793-a289-da3515646082"
+      ],
+      "Namespace": "Skills.Image.I01_BasicShapes",
+      "TopicType": "Image",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "516a848e-a526-4e52-8342-f4c5fef3f057",
+      "Title": "Resolution Magic",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 9.0,
+        "Y": -11.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "7251fa2d-3c95-4a25-95f5-8687c5a60e28",
+        "2024f276-6c13-4a72-bf7c-70c64e006c6d"
+      ],
+      "Namespace": null,
+      "TopicType": "Image",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "5316a366-0390-4987-873b-be4235b32325",
+      "Title": "Damping Values",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 3.0,
+        "Y": -12.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "1e754305-9bdd-4eb8-a5ea-4bf32103f4d2"
+      ],
+      "Namespace": null,
+      "TopicType": "Numbers",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "1e754305-9bdd-4eb8-a5ea-4bf32103f4d2",
+      "Title": "Basic IO",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 4.0,
+        "Y": -12.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Numbers",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "af90c1db-760d-4373-a9b8-4526c57f67fc",
+      "Title": "Remap",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 3.0,
+        "Y": -11.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "1e754305-9bdd-4eb8-a5ea-4bf32103f4d2",
+        "61925b47-4bc3-4fb4-ac94-dd1dedea8159"
+      ],
+      "Namespace": null,
+      "TopicType": "Numbers",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "d92192de-a78f-4b08-bad0-77eb171d1bcc",
+      "Title": "AnimSequence",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 2.0,
+        "Y": -12.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Numbers",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "71d6f1eb-7b02-4635-b840-45082fb9b102",
+      "Title": "Random and Noise",
+      "Description": "",
+      "MapCoordinate": {
+        "X": -1.0,
+        "Y": -9.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "ad5ea28a-834a-423f-bf39-0f882c34791c",
+        "c8e74ea9-e0a0-4fb7-a20e-6da6316a12e5"
+      ],
+      "Namespace": null,
+      "TopicType": "Numbers",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "42bc1ea6-b0c3-47d4-b427-cd9e09389f71",
+      "Title": "Vectors!",
+      "Description": "",
+      "MapCoordinate": {
+        "X": -1.0,
+        "Y": -11.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "10164bc9-919d-4e8c-9674-2efaa7cebb7f",
+        "22ca2fc1-417e-49fe-88c1-a5eb4b7711ae",
+        "320cb1e3-5713-45aa-92d0-cf4031a3fef3"
+      ],
+      "Namespace": null,
+      "TopicType": "Numbers",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "22ca2fc1-417e-49fe-88c1-a5eb4b7711ae",
+      "Title": "Driving Positions",
+      "Description": "",
+      "MapCoordinate": {
+        "X": -1.0,
+        "Y": -12.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Command",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "320cb1e3-5713-45aa-92d0-cf4031a3fef3",
+      "Title": "Quaternions",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 0.0,
+        "Y": -12.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Numbers",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "10164bc9-919d-4e8c-9674-2efaa7cebb7f",
+      "Title": "Matrices",
+      "Description": "",
+      "MapCoordinate": {
+        "X": -2.0,
+        "Y": -11.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "b6b8c4c4-abfe-4071-8465-b9cdb784bc45"
+      ],
+      "Namespace": null,
+      "TopicType": "Numbers",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "a7c48f91-ec65-4de6-9cad-c6ead24e10e6",
+      "Title": "Blending Colors",
+      "Description": "",
+      "MapCoordinate": {
+        "X": -3.0,
+        "Y": -7.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Numbers",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "6c3dff36-9aee-4849-bf0b-0d2a13d57956",
+      "Title": "Colors from Gradients",
+      "Description": "",
+      "MapCoordinate": {
+        "X": -3.0,
+        "Y": -6.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "a7c48f91-ec65-4de6-9cad-c6ead24e10e6"
+      ],
+      "Namespace": null,
+      "TopicType": "Numbers",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "8a27a6a7-c8c7-4012-916f-f7ecdfebae8e",
+      "Title": "Gradients",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 7.0,
+        "Y": -12.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "6c3dff36-9aee-4849-bf0b-0d2a13d57956",
+        "a096e1b9-3a73-4271-8f4e-96ed5855b112"
+      ],
+      "Namespace": "Skills.Image.I02_Gradients",
+      "TopicType": "Image",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "c232db07-fb7c-483f-896d-34f6084a3ed5",
+      "Title": "Drawing Text",
+      "Description": "",
+      "MapCoordinate": {
+        "X": -3.0,
+        "Y": -4.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "c6784323-b93b-4702-9a96-9bbd3f279218"
+      ],
+      "Namespace": null,
+      "TopicType": "Command",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "1e669c74-59d2-4ca3-a753-f4b98310425e",
+      "Title": "Making Strings",
+      "Description": "",
+      "MapCoordinate": {
+        "X": -3.0,
+        "Y": -3.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "String",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "bf3851da-604a-4a12-b202-f15ae75cc52a",
+      "Title": "The Context",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 4.0,
+        "Y": -3.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "e8c7c302-ebc2-4f3a-845d-63005af71297",
+        "8635b190-8ef5-4245-b663-a37023437997",
+        "3eeaa587-a4f8-406a-bff6-62590126e9e7",
+        "9f4b6aa3-6af6-40a1-b44a-0a1908155364"
+      ],
+      "Namespace": null,
+      "TopicType": "Command",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "7f093d8e-9d75-46a0-ac61-4a829b70358d",
+      "Title": "Basic Drawing",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 5.0,
+        "Y": -7.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "c232db07-fb7c-483f-896d-34f6084a3ed5",
+        "425c882e-80cc-4d38-b4a0-16ba9e7cc0f1",
+        "47fa588a-67ff-4972-b42f-7fccc4505793"
+      ],
+      "Namespace": null,
+      "TopicType": "Command",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "8635b190-8ef5-4245-b663-a37023437997",
+      "Title": "Material Overrides",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 3.0,
+        "Y": -2.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Command",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "3eeaa587-a4f8-406a-bff6-62590126e9e7",
+      "Title": "Time Control",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 4.0,
+        "Y": -2.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Command",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "e8c7c302-ebc2-4f3a-845d-63005af71297",
+      "Title": "Variables",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 5.0,
+        "Y": -3.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "659aa498-27cd-4aeb-a271-8aaccba9bf44"
+      ],
+      "Namespace": null,
+      "TopicType": "Command",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "659aa498-27cd-4aeb-a271-8aaccba9bf44",
+      "Title": "Loops",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 6.0,
+        "Y": -3.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Command",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "f15f35fe-a482-45b2-a909-4e88f529e71e",
+      "Title": "Boolean & Triggers",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 0.0,
+        "Y": -8.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "4efe0a8d-4d49-426c-b762-73e730a76e20",
+        "50f09b3a-39f0-48a6-bc83-6bc0c1aff185"
+      ],
+      "Namespace": null,
+      "TopicType": "Numbers",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "4efe0a8d-4d49-426c-b762-73e730a76e20",
+      "Title": "Trigger Anim",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 1.0,
+        "Y": -8.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Numbers",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "50f09b3a-39f0-48a6-bc83-6bc0c1aff185",
+      "Title": "Logic",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 0.0,
+        "Y": -7.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Numbers",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "7683fc9b-8716-448b-ac41-0d0b2ba3f144",
+      "Title": "Testing Conditions",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 20.0,
+        "Y": -13.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Numbers",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "b6b8c4c4-abfe-4071-8465-b9cdb784bc45",
+      "Title": "Tranforms",
+      "Description": "",
+      "MapCoordinate": {
+        "X": -3.0,
+        "Y": -11.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Numbers",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "1ad7270b-f246-4e05-ac92-02169a9a8fb5",
+      "Title": "Camera Control",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 1.0,
+        "Y": -3.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "4c2be92b-b340-4122-a010-14c0bdfa941c",
+        "82d5a04b-d556-4bde-a583-596b29142691"
+      ],
+      "Namespace": null,
+      "TopicType": "Command",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "47fa588a-67ff-4972-b42f-7fccc4505793",
+      "Title": "Mesh Primitives",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 1.0,
+        "Y": -4.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "fc7498f0-9df4-49ca-943a-cf2c94ebf356",
+        "29896f38-0385-4691-8f0e-14a75e3b26f0",
+        "8afe4ac1-7881-453c-a07d-b146b68a5c20",
+        "1ad7270b-f246-4e05-ac92-02169a9a8fb5",
+        "af08df40-a878-408f-a5b2-e1be361e50e5"
+      ],
+      "Namespace": null,
+      "TopicType": "Command",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "8afe4ac1-7881-453c-a07d-b146b68a5c20",
+      "Title": "Materials",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 2.0,
+        "Y": -4.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "de167c62-85e3-4397-a7c1-66bcc3cf54b5",
+        "e1025d52-5cd7-4c1e-af78-c7cf4ea335ab",
+        "6bd3c94c-f01f-4fc4-94e4-8f28442decc6"
+      ],
+      "Namespace": null,
+      "TopicType": "Command",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "29896f38-0385-4691-8f0e-14a75e3b26f0",
+      "Title": "Mesh Manipulation",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 0.0,
+        "Y": -3.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Gpu",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "fc7498f0-9df4-49ca-943a-cf2c94ebf356",
+      "Title": "Combining Meshes",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 0.0,
+        "Y": -4.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Gpu",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "425c882e-80cc-4d38-b4a0-16ba9e7cc0f1",
+      "Title": "Points",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 9.0,
+        "Y": -9.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "c33af1c7-35c4-4ff0-80d2-79b739567c18",
+        "6533e291-b61b-4155-a0c4-62584de02283",
+        "f419956e-7e68-47d9-a38d-3ab9a6649587",
+        "10611e2a-3051-4586-8562-f216cf1869cb"
+      ],
+      "Namespace": null,
+      "TopicType": "Gpu",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "a3ec7723-c516-489c-8ee2-5518d679c026",
+      "Title": "Repeating Points",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 12.0,
+        "Y": -9.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "77aa1875-1e24-45ce-bc7d-6069ac118cca"
+      ],
+      "Namespace": null,
+      "TopicType": "Gpu",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "3ceafa06-e63b-4bf0-bf82-887d2e885a81",
+      "Title": "Analyzing Points",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 14.0,
+        "Y": -11.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Gpu",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "3ce1d58c-dd6d-458e-ac2f-c0e8687a5500",
+      "Title": "Drawing Billboards",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 14.0,
+        "Y": -10.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Command",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "77aa1875-1e24-45ce-bc7d-6069ac118cca",
+      "Title": "Point Manipulation",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 13.0,
+        "Y": -9.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "3ceafa06-e63b-4bf0-bf82-887d2e885a81",
+        "54bc1906-9c55-4b54-b66d-888c4e0039c0"
+      ],
+      "Namespace": null,
+      "TopicType": "Gpu",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "af08df40-a878-408f-a5b2-e1be361e50e5",
+      "Title": "Mesh at points",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 14.0,
+        "Y": -9.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Command",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "a2a1d3a1-4cb1-4a2e-937b-8eaff34a369b",
+      "Title": "Mesh Fields FX",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 10.0,
+        "Y": -4.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "ShaderGraph",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "e1025d52-5cd7-4c1e-af78-c7cf4ea335ab",
+      "Title": "Fields",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 8.0,
+        "Y": -4.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "fcbb987c-39e8-4a17-a586-ec013fc50899"
+      ],
+      "Namespace": null,
+      "TopicType": "Command",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "10611e2a-3051-4586-8562-f216cf1869cb",
+      "Title": "Particles",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 8.0,
+        "Y": -7.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "42dfd850-f882-4081-8990-41e8be1b02fb"
+      ],
+      "Namespace": null,
+      "TopicType": "Gpu",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "54bc1906-9c55-4b54-b66d-888c4e0039c0",
+      "Title": "Selecting Points",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 13.0,
+        "Y": -8.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "f6ebd88c-ed05-4869-ba77-1b5227eed470",
+        "af08df40-a878-408f-a5b2-e1be361e50e5"
+      ],
+      "Namespace": null,
+      "TopicType": "Gpu",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "b651a237-b046-4e5b-876b-26c11a86a2a9",
+      "Title": "New topic55",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 21.0,
+        "Y": -13.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Command",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "f6ebd88c-ed05-4869-ba77-1b5227eed470",
+      "Title": "Advanced Point Effects",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 13.0,
+        "Y": -7.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "2024f276-6c13-4a72-bf7c-70c64e006c6d"
+      ],
+      "Namespace": null,
+      "TopicType": "Gpu",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "260eeb3d-28d3-49a4-af45-51a401760102",
+      "Title": "Post Effects",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 0.0,
+        "Y": -1.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "8a158eb4-f7b0-48e7-bc96-9c7d3a086b47"
+      ],
+      "Namespace": null,
+      "TopicType": "Image",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "d400abe2-0113-4793-a289-da3515646082",
+      "Title": "Patterns",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 8.0,
+        "Y": -12.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "a096e1b9-3a73-4271-8f4e-96ed5855b112"
+      ],
+      "Namespace": null,
+      "TopicType": "Image",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "a096e1b9-3a73-4271-8f4e-96ed5855b112",
+      "Title": "Image Effects",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 8.0,
+        "Y": -13.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "38ad23d7-8779-43ce-8b96-522c13e877f8",
+        "a049ebe0-3fbf-47bd-a9f9-bcef2ddd3d46",
+        "a30932d5-f1df-4076-b742-a0db1973a39a",
+        "37dea8a1-ec67-47dd-bed2-938812aef4c2",
+        "42dc539d-8c5b-4325-b07c-46ababa5bdd2"
+      ],
+      "Namespace": null,
+      "TopicType": "Image",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "38ad23d7-8779-43ce-8b96-522c13e877f8",
+      "Title": "Glitch",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 7.0,
+        "Y": -14.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Image",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "6bd3c94c-f01f-4fc4-94e4-8f28442decc6",
+      "Title": "Group vs Execute",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 3.0,
+        "Y": -3.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "cbce309b-d935-411a-9391-68102b1da2fc",
+        "bf3851da-604a-4a12-b202-f15ae75cc52a"
+      ],
+      "Namespace": null,
+      "TopicType": "Command",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "cbce309b-d935-411a-9391-68102b1da2fc",
+      "Title": "Switch",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 2.0,
+        "Y": -2.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "ad5ea28a-834a-423f-bf39-0f882c34791c"
+      ],
+      "Namespace": null,
+      "TopicType": "Command",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "a049ebe0-3fbf-47bd-a9f9-bcef2ddd3d46",
+      "Title": "Displace",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 8.0,
+        "Y": -14.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Image",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "4e4e1319-c33a-44d3-8839-e1f8f3458a1a",
+      "Title": "Replicating Fields",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 9.0,
+        "Y": -4.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "a2a1d3a1-4cb1-4a2e-937b-8eaff34a369b",
+        "701cc4bf-2c43-46b4-970b-801713e8cbd3",
+        "54bc1906-9c55-4b54-b66d-888c4e0039c0"
+      ],
+      "Namespace": null,
+      "TopicType": "ShaderGraph",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "fcbb987c-39e8-4a17-a586-ec013fc50899",
+      "Title": "Combining SDF",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 8.0,
+        "Y": -3.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "4e4e1319-c33a-44d3-8839-e1f8f3458a1a"
+      ],
+      "Namespace": null,
+      "TopicType": "ShaderGraph",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "2024f276-6c13-4a72-bf7c-70c64e006c6d",
+      "Title": "Manipulate Points With Images",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 14.0,
+        "Y": -8.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "7a2539b1-0ffb-452d-be3f-0b537e21db82",
+        "2823b5ff-185f-4a3d-b965-2865ca27f29e"
+      ],
+      "Namespace": null,
+      "TopicType": "Gpu",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "7a2539b1-0ffb-452d-be3f-0b537e21db82",
+      "Title": "Damping Points",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 15.0,
+        "Y": -9.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Gpu",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "95b48443-841c-44c1-8c1f-38e8e040775a",
+      "Title": "Particle Fields FX",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 7.0,
+        "Y": -5.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "ShaderGraph",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "42dfd850-f882-4081-8990-41e8be1b02fb",
+      "Title": "Forces I",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 7.0,
+        "Y": -7.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "ba469861-722e-43bb-b19d-2796b8fa98a6"
+      ],
+      "Namespace": null,
+      "TopicType": "Gpu",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "ba469861-722e-43bb-b19d-2796b8fa98a6",
+      "Title": "Foces II",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 7.0,
+        "Y": -6.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "d6b6d4d4-b263-43b7-9dd3-e248d4d3142f"
+      ],
+      "Namespace": null,
+      "TopicType": "Gpu",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "d6b6d4d4-b263-43b7-9dd3-e248d4d3142f",
+      "Title": "Forces III",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 8.0,
+        "Y": -6.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "95b48443-841c-44c1-8c1f-38e8e040775a"
+      ],
+      "Namespace": null,
+      "TopicType": "Gpu",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "e81bac72-c60e-49ca-8880-0be823b60ce8",
+      "Title": "Color Correction",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 11.0,
+        "Y": -14.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "f37f0fa5-2b34-4b82-a379-a32748f77725"
+      ],
+      "Namespace": null,
+      "TopicType": "Image",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "a30932d5-f1df-4076-b742-a0db1973a39a",
+      "Title": "Color Effects",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 9.0,
+        "Y": -13.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "f5fbbfab-3bd9-4c05-be32-f4af0ec21f35"
+      ],
+      "Namespace": null,
+      "TopicType": "Image",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "37dea8a1-ec67-47dd-bed2-938812aef4c2",
+      "Title": "Basic Feedback",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 7.0,
+        "Y": -13.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "09228c4c-70cf-48f0-a1db-54e53865e8cf"
+      ],
+      "Namespace": null,
+      "TopicType": "Image",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "09228c4c-70cf-48f0-a1db-54e53865e8cf",
+      "Title": "Understand Feedback",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 6.0,
+        "Y": -13.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Image",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "7251fa2d-3c95-4a25-95f5-8687c5a60e28",
+      "Title": "Image Formats",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 11.0,
+        "Y": -13.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "f37f0fa5-2b34-4b82-a379-a32748f77725"
+      ],
+      "Namespace": null,
+      "TopicType": "Image",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "b4f17d07-59ab-45c2-87cf-ba63324c686b",
+      "Title": "Drawing Lines",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 13.0,
+        "Y": -10.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Command",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "701cc4bf-2c43-46b4-970b-801713e8cbd3",
+      "Title": "Understanding SDF",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 9.0,
+        "Y": -3.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "6598e00e-e262-47a4-9743-12e08ba1f683"
+      ],
+      "Namespace": null,
+      "TopicType": "ShaderGraph",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "6598e00e-e262-47a4-9743-12e08ba1f683",
+      "Title": "Custom SDF",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 8.0,
+        "Y": -2.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "ac6e4399-10e5-43ba-8e60-e7149e282803"
+      ],
+      "Namespace": null,
+      "TopicType": "ShaderGraph",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "ac6e4399-10e5-43ba-8e60-e7149e282803",
+      "Title": "Writing SDF Shaders",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 9.0,
+        "Y": -2.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "ShaderGraph",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "2823b5ff-185f-4a3d-b965-2865ca27f29e",
+      "Title": "Basic Point Shaders",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 15.0,
+        "Y": -8.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Gpu",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "c33af1c7-35c4-4ff0-80d2-79b739567c18",
+      "Title": "Radial Points",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 11.0,
+        "Y": -10.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "a3ec7723-c516-489c-8ee2-5518d679c026"
+      ],
+      "Namespace": null,
+      "TopicType": "Gpu",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "6533e291-b61b-4155-a0c4-62584de02283",
+      "Title": "Grid Points",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 11.0,
+        "Y": -9.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "a3ec7723-c516-489c-8ee2-5518d679c026"
+      ],
+      "Namespace": null,
+      "TopicType": "Gpu",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "a9c619f4-850c-4bd3-82c4-1aae58ec58d4",
+      "Title": "SVG",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 10.0,
+        "Y": -7.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Gpu",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "ad5ea28a-834a-423f-bf39-0f882c34791c",
+      "Title": "Shuffling Scenes",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 1.0,
+        "Y": -1.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Command",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "42dc539d-8c5b-4325-b07c-46ababa5bdd2",
+      "Title": "Noise",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 9.0,
+        "Y": -14.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Image",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "90f757f9-1ca7-461f-87d7-df1c39e51375",
+      "Title": "Points From Meshes",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 11.0,
+        "Y": -8.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Gpu",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "c7dffc2c-1f5c-44c7-8eba-974170c15b6a",
+      "Title": "Adanced Rendering",
+      "Description": "",
+      "MapCoordinate": {
+        "X": -2.0,
+        "Y": -1.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "d0b5bf6a-93b1-49bb-8930-2be362e08082"
+      ],
+      "Namespace": null,
+      "TopicType": "Command",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "b05772ee-cd9b-4317-8ca3-aa65a943c1c7",
+      "Title": "Depth Sorting",
+      "Description": "",
+      "MapCoordinate": {
+        "X": -2.0,
+        "Y": 0.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "a9ee9be3-b939-4279-bc02-c997a04460b5"
+      ],
+      "Namespace": null,
+      "TopicType": "Command",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "d0b5bf6a-93b1-49bb-8930-2be362e08082",
+      "Title": "Blend Modes",
+      "Description": "",
+      "MapCoordinate": {
+        "X": -3.0,
+        "Y": 0.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "a9ee9be3-b939-4279-bc02-c997a04460b5"
+      ],
+      "Namespace": null,
+      "TopicType": "Command",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "a9ee9be3-b939-4279-bc02-c997a04460b5",
+      "Title": "Samplers",
+      "Description": "",
+      "MapCoordinate": {
+        "X": -3.0,
+        "Y": 1.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "2b59770b-2037-47c5-a868-9b18dc1843b5"
+      ],
+      "Namespace": null,
+      "TopicType": "Command",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "2b59770b-2037-47c5-a868-9b18dc1843b5",
+      "Title": "Adanced Shader Development",
+      "Description": "",
+      "MapCoordinate": {
+        "X": -2.0,
+        "Y": 1.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Command",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "de167c62-85e3-4397-a7c1-66bcc3cf54b5",
+      "Title": "Point Lights",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 2.0,
+        "Y": -3.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "4c2be92b-b340-4122-a010-14c0bdfa941c"
+      ],
+      "Namespace": null,
+      "TopicType": "Command",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "4c2be92b-b340-4122-a010-14c0bdfa941c",
+      "Title": "Set Environment",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 1.0,
+        "Y": -2.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Command",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "f6000b6e-27a2-4c78-a34e-d4ad11f09f18",
+      "Title": "String Lists",
+      "Description": "",
+      "MapCoordinate": {
+        "X": -5.0,
+        "Y": -3.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "String",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "b95dd7af-d0df-463b-8e7a-784a28b948da",
+      "Title": "Float Lists",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 3.0,
+        "Y": -13.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Numbers",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "f0fda484-50e3-4bcf-ab30-f4d92b2c9300",
+      "Title": "Working with Data",
+      "Description": "",
+      "MapCoordinate": {
+        "X": -4.0,
+        "Y": -8.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Numbers",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "61925b47-4bc3-4fb4-ac94-dd1dedea8159",
+      "Title": "Gain and Bias",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 4.0,
+        "Y": -11.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Numbers",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "29774194-1e37-4458-9622-8c388619b8aa",
+      "Title": "Keep Values",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 4.0,
+        "Y": -13.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Numbers",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "f23cf1a7-e580-41ba-a096-334397b5a7ca",
+      "Title": "Controlling states",
+      "Description": "",
+      "MapCoordinate": {
+        "X": -4.0,
+        "Y": -9.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Numbers",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "c8e74ea9-e0a0-4fb7-a20e-6da6316a12e5",
+      "Title": "Blending Values",
+      "Description": "",
+      "MapCoordinate": {
+        "X": -2.0,
+        "Y": -9.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Numbers",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "90385d76-5594-4837-986f-aedddc80f03b",
+      "Title": "Math Puzzles I",
+      "Description": "",
+      "MapCoordinate": {
+        "X": -9.0,
+        "Y": -1.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "45bcf72c-7d55-4daf-b0ce-aeed78495226"
+      ],
+      "Namespace": null,
+      "TopicType": "Numbers",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "45bcf72c-7d55-4daf-b0ce-aeed78495226",
+      "Title": "Math Puzzles II",
+      "Description": "",
+      "MapCoordinate": {
+        "X": -8.0,
+        "Y": -1.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Numbers",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "34ff6c94-6148-47e0-a926-92b3b3c6d984",
+      "Title": "Brain Teasers I",
+      "Description": "",
+      "MapCoordinate": {
+        "X": -6.0,
+        "Y": -1.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "7c6a884e-e09a-4263-816e-c8c3800d47a9"
+      ],
+      "Namespace": null,
+      "TopicType": "Image",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "7c6a884e-e09a-4263-816e-c8c3800d47a9",
+      "Title": "Brain Teasers II",
+      "Description": "",
+      "MapCoordinate": {
+        "X": -5.0,
+        "Y": -1.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Image",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "8a01c601-d34b-45a4-935d-1a62c86fbe8f",
+      "Title": "Daily Creative Challenges",
+      "Description": "",
+      "MapCoordinate": {
+        "X": -6.0,
+        "Y": 1.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Image",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "f37f0fa5-2b34-4b82-a379-a32748f77725",
+      "Title": "Color Spaces",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 12.0,
+        "Y": -14.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Image",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "aae0bdfa-b86f-4368-8160-7be3d0a8b5ec",
+      "Title": "Draw Order",
+      "Description": "",
+      "MapCoordinate": {
+        "X": -1.0,
+        "Y": -1.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "c7dffc2c-1f5c-44c7-8eba-974170c15b6a",
+        "b05772ee-cd9b-4317-8ca3-aa65a943c1c7"
+      ],
+      "Namespace": null,
+      "TopicType": "Command",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "8a158eb4-f7b0-48e7-bc96-9c7d3a086b47",
+      "Title": "Post and Glow",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 3.0,
+        "Y": 0.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Image",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "f5fbbfab-3bd9-4c05-be32-f4af0ec21f35",
+      "Title": "Analyzing Images",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 10.0,
+        "Y": -14.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "e81bac72-c60e-49ca-8880-0be823b60ce8"
+      ],
+      "Namespace": null,
+      "TopicType": "Image",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "99024a08-0954-4113-9868-e6b9f8fc3638",
+      "Title": "New topic111",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 19.0,
+        "Y": -14.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Image",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "f419956e-7e68-47d9-a38d-3ab9a6649587",
+      "Title": "Line Points",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 10.0,
+        "Y": -8.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "a3ec7723-c516-489c-8ee2-5518d679c026"
+      ],
+      "Namespace": null,
+      "TopicType": "Gpu",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "82d5a04b-d556-4bde-a583-596b29142691",
+      "Title": "Render To Images",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 0.0,
+        "Y": -2.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "260eeb3d-28d3-49a4-af45-51a401760102",
+        "aae0bdfa-b86f-4368-8160-7be3d0a8b5ec"
+      ],
+      "Namespace": null,
+      "TopicType": "Image",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "21279126-f8da-4a5d-966d-8b8c1ef79828",
+      "Title": "Basic SDF",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 9.0,
+        "Y": -5.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "ShaderGraph",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "16902ab1-3c74-4143-ab2d-34f7867b39e4",
+      "Title": "New topic115",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 19.0,
+        "Y": -13.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": null,
+      "TopicType": "Command",
+      "Requirement": "AllInputPaths"
+    },
+    {
+      "Id": "10d851f2-770f-4cce-a707-8dae8f0e0d6b",
+      "Title": "Image Puzzles",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 14.0,
+        "Y": -14.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": "Skills.Image.I20_Puzzles",
+      "TopicType": "Image",
+      "Requirement": "None"
+    },
+    {
+      "Id": "1bbfc1bc-ea24-40f8-8f6f-1b9ff3be5c3f",
+      "Title": "???",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 19.0,
+        "Y": -12.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": "Skills.Math.M01.BasicMath",
+      "TopicType": "Numbers",
+      "Requirement": "None"
+    },
+    {
+      "Id": "b6da8847-315a-4e98-b067-e56ed25eac97",
+      "Title": "Welcome",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [],
+      "Namespace": "Skills.Basics.B01_Welcome",
+      "TopicType": "Image",
+      "Requirement": "None"
+    },
+    {
+      "Id": "ef377d93-a847-4c2c-86dd-5d5ede136598",
+      "Title": "Puzzles",
+      "Description": "",
+      "MapCoordinate": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
+      "UnlocksTopics": [
+        "10d851f2-770f-4cce-a707-8dae8f0e0d6b"
+      ],
+      "Namespace": "Skills.Image.Skills.Image.I20_Puzzles",
+      "TopicType": "Image",
+      "Requirement": "None"
+    }
+  ]
+}

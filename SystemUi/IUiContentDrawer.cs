@@ -7,7 +7,7 @@ public interface IUiContentDrawer<in TRenderDevice> : IUiContentDrawer
 
 public interface IUiContentDrawer : IDisposable
 {
-    public bool CreateDeviceObjects();
+    public bool CreateDeviceObjectsAndFonts();
     void InitializeScaling();
     void RenderCallback();
 }

@@ -2,10 +2,10 @@ using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Model;
 using T3.Core.Operator;
-using T3.Editor.Gui.Graph.Interaction;
-using T3.Editor.Gui.Graph.Legacy.Interaction.Connections;
+using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Variations;
 using T3.Editor.Gui.Interaction.Variations.Model;
+using T3.Editor.Gui.Legacy.Interaction.Connections;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
@@ -16,7 +16,7 @@ using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.SystemUi;
 
-namespace T3.Editor.Gui.Graph.Legacy.Interaction;
+namespace T3.Editor.Gui.Legacy.Interaction;
 
 /// <summary>
 /// Represents a placeholder for a new <see cref="GraphNode"/> on the <see cref="GraphView"/>. 
@@ -652,7 +652,7 @@ internal sealed class SymbolBrowser
     private ImDrawListPtr _drawList;
     private bool _selectedItemChanged;
 
-    private static Vector2 ResultListSize => new Vector2(250, 300) * T3Ui.UiScaleFactor;
+    private static Vector2 ResultListSize => new Vector2(250, 300) * new Vector2(2,1) * T3Ui.UiScaleFactor;
     private readonly Vector4 _namespaceColor = new Color(1, 1, 1, 0.4f);
 
     private SymbolUi _selectedSymbolUi;

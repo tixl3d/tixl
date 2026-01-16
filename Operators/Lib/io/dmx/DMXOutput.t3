@@ -1,5 +1,5 @@
 {
-  "Id": "7a610996-913a-443b-921a-12e6b05f4110"/*DMXOutput*/,
+  "Id": "7a610996-913a-443b-921a-12e6b05f4110"/*DmxOutput*/,
   "Inputs": [
     {
       "Id": "0e2f7f23-99a1-428a-9343-263b29831bc3"/*Connect*/,

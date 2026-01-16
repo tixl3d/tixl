@@ -1,33 +1,60 @@
 #nullable enable
 using System.Diagnostics;
+using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Threading;
+using System.Linq;
 using T3.Core.Utils;
+using T3.Core.Logging;
 
 namespace Lib.io.dmx;
 
 [Guid("fc03dcd0-6f2f-4507-be06-1ed105607489")]
-internal sealed class ArtnetInput : Instance<ArtnetInput>, IStatusProvider, ICustomDropdownHolder, IDisposable
+internal sealed class ArtnetInput : Instance<ArtnetInput>, IStatusProvider, ICustomDropdownHolder
 {
     private const int ArtNetPort = 6454;
-    private static readonly byte[] ArtnetId = "Art-Net\0"u8.ToArray();
+    private static readonly byte[] _artnetId = "Art-Net\0"u8.ToArray();
+    private readonly ConcurrentDictionary<int, UniverseData> _receivedUniverses = new();
+
+    [Input(Guid = "3d085f6f-6f4a-4876-805f-22f25497a731")]
+    public readonly InputSlot<bool> Active = new();
+
+    [Input(Guid = "24B5D450-4E83-49DB-88B1-7D688E64585D")]
+    public readonly InputSlot<string> LocalIpAddress = new("0.0.0.0 (Any)");
+
+    [Input(Guid = "c18a9359-3ef8-4e0d-85d8-51f725357388")]
+    public readonly InputSlot<int> NumUniverses = new(1);
+
+    [Input(Guid = "A5B6C7D8-E9F0-4123-4567-890ABCDEF123")]
+    public readonly InputSlot<bool> PrintToLog = new();
 
     [Output(Guid = "d3c09c87-c508-4621-a54d-f14d85c3f75f", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
     public readonly Slot<List<int>> Result = new();
+
+    [Input(Guid = "19bde769-3992-4cf0-a0b4-e3ae25c03c79")]
+    public readonly InputSlot<int> StartUniverse = new(1);
+
+    [Input(Guid = "a38c29b6-057d-4883-9366-139366113b63")]
+    public readonly InputSlot<float> Timeout = new(1.2f);
+
+    private string? _lastLocalIp;
+
+    private Thread? _listenerThread;
+    private bool _printToLog;
+    private volatile bool _runListener;
+    private UdpClient? _udpClient;
+    private bool _wasActive;
+    private double _lastRetryTime;
 
     public ArtnetInput()
     {
         Result.UpdateAction = Update;
     }
 
-    private string? _lastLocalIp;
-    private bool _wasActive;
-    private bool _printToLog; // Added for PrintToLog functionality
-
     private void Update(EvaluationContext context)
     {
-        _printToLog = PrintToLog.GetValue(context); // Update printToLog flag
+        _printToLog = PrintToLog.GetValue(context);
         var active = Active.GetValue(context);
         var localIp = LocalIpAddress.GetValue(context);
 
@@ -38,6 +65,14 @@ internal sealed class ArtnetInput : Instance<ArtnetInput>, IStatusProvider, ICus
             if (active) StartListening();
             _wasActive = active;
             _lastLocalIp = localIp;
+        }
+        else if (active && (_listenerThread == null || !_listenerThread.IsAlive))
+        {
+            if (context.LocalTime - _lastRetryTime > 2.0)
+            {
+                _lastRetryTime = context.LocalTime;
+                StartListening();
+            }
         }
 
         CleanupStaleUniverses(Timeout.GetValue(context));
@@ -56,13 +91,15 @@ internal sealed class ArtnetInput : Instance<ArtnetInput>, IStatusProvider, ICus
                 {
                     for (var j = 0; j < 512; ++j) dmxSnapshot[j] = universeData.DmxData[j];
                 }
+
                 combinedDmxData.AddRange(dmxSnapshot);
             }
             else
             {
-                combinedDmxData.AddRange(Enumerable.Repeat(0, 512));
+                combinedDmxData.AddRange(Repeat(0, 512));
             }
         }
+
         Result.Value = combinedDmxData;
         UpdateStatusMessage(numUniverses, startUniverse);
     }
@@ -87,8 +124,9 @@ internal sealed class ArtnetInput : Instance<ArtnetInput>, IStatusProvider, ICus
         {
             Log.Debug("Artnet Input: Stopping listener.", this);
         }
-        _udpClient?.Close(); // This will unblock the Receive call in ListenLoop
-        _listenerThread?.Join(200); // Give the thread a moment to shut down
+
+        _udpClient?.Close();
+        _listenerThread?.Join(200);
         _listenerThread = null;
         if (_printToLog)
         {
@@ -98,7 +136,7 @@ internal sealed class ArtnetInput : Instance<ArtnetInput>, IStatusProvider, ICus
 
     private void ListenLoop()
     {
-        UdpClient? currentUdpClient = null; // Declare locally for safer cleanup
+        UdpClient? currentUdpClient = null;
         try
         {
             var localIpStr = LocalIpAddress.Value;
@@ -110,7 +148,7 @@ internal sealed class ArtnetInput : Instance<ArtnetInput>, IStatusProvider, ICus
             currentUdpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
             currentUdpClient.Client.Bind(new IPEndPoint(listenIp, ArtNetPort));
 
-            _udpClient = currentUdpClient; // Assign to member field after successful bind
+            _udpClient = currentUdpClient;
 
             if (_printToLog)
             {
@@ -122,10 +160,10 @@ internal sealed class ArtnetInput : Instance<ArtnetInput>, IStatusProvider, ICus
             {
                 try
                 {
-                    if (_udpClient == null) break; // Check if client was disposed externally
+                    if (_udpClient == null) break;
                     var data = _udpClient.Receive(ref remoteEndPoint);
 
-                    if (data.Length < 18 || !data.AsSpan(0, 8).SequenceEqual(ArtnetId) || data[8] != 0x00 || data[9] != 0x50) continue;
+                    if (data.Length < 18 || !data.AsSpan(0, 8).SequenceEqual(_artnetId) || data[8] != 0x00 || data[9] != 0x50) continue;
 
                     var universe = data[14] | (data[15] << 8);
                     var length = (data[16] << 8) | data[17];
@@ -137,6 +175,7 @@ internal sealed class ArtnetInput : Instance<ArtnetInput>, IStatusProvider, ICus
                         System.Buffer.BlockCopy(data, 18, universeData.DmxData, 0, length);
                         if (length < 512) Array.Clear(universeData.DmxData, length, 512 - length);
                     }
+
                     universeData.LastReceivedTicks = Stopwatch.GetTimestamp();
                     Result.DirtyFlag.Invalidate();
 
@@ -147,10 +186,11 @@ internal sealed class ArtnetInput : Instance<ArtnetInput>, IStatusProvider, ICus
                 }
                 catch (SocketException ex)
                 {
-                    if (_runListener) // Only log if not intentionally stopping
+                    if (_runListener)
                     {
                         Log.Warning($"Artnet Input receive socket error: {ex.Message} (Error Code: {ex.ErrorCode})", this);
                     }
+
                     break;
                 }
                 catch (Exception e)
@@ -173,7 +213,7 @@ internal sealed class ArtnetInput : Instance<ArtnetInput>, IStatusProvider, ICus
         finally
         {
             currentUdpClient?.Close();
-            if (_udpClient == currentUdpClient) _udpClient = null; // Clear if it's the one we set
+            if (_udpClient == currentUdpClient) _udpClient = null;
         }
     }
 
@@ -198,7 +238,7 @@ internal sealed class ArtnetInput : Instance<ArtnetInput>, IStatusProvider, ICus
 
     private void UpdateStatusMessage(int numUniverses, int startUniverse)
     {
-        var localIpDisplay = LocalIpAddress.Value;
+        var localIpDisplay = LocalIpAddress.Value ?? string.Empty;
         if (!_wasActive)
         {
             SetStatus("Inactive. Enable 'Active'.", IStatusProvider.StatusLevel.Notice);
@@ -208,7 +248,8 @@ internal sealed class ArtnetInput : Instance<ArtnetInput>, IStatusProvider, ICus
             var receivedCount = _receivedUniverses.Count;
             if (receivedCount == 0)
             {
-                SetStatus($"Listening on {localIpDisplay.Split(' ')[0]}:{ArtNetPort} for {numUniverses} universes (from {startUniverse})... No packets received.", IStatusProvider.StatusLevel.Warning);
+                SetStatus($"Listening on {localIpDisplay.Split(' ')[0]}:{ArtNetPort} for {numUniverses} universes (from {startUniverse})... No packets received.",
+                          IStatusProvider.StatusLevel.Warning);
             }
             else
             {
@@ -217,50 +258,79 @@ internal sealed class ArtnetInput : Instance<ArtnetInput>, IStatusProvider, ICus
         }
     }
 
-    public void Dispose() { StopListening(); }
+    protected override void Dispose(bool isDisposing)
+    {
+        if (!isDisposing)
+            return;
 
-    private sealed class UniverseData { public readonly byte[] DmxData = new byte[512]; public long LastReceivedTicks; }
-    private Thread? _listenerThread;
-    private volatile bool _runListener;
-    private UdpClient? _udpClient;
-    private readonly ConcurrentDictionary<int, UniverseData> _receivedUniverses = new();
+        StopListening();
+    }
+
+    private sealed class UniverseData
+    {
+        public readonly byte[] DmxData = new byte[512];
+        public long LastReceivedTicks;
+    }
 
     #region IStatusProvider & ICustomDropdownHolder
     private string _lastStatusMessage = "Inactive";
     private IStatusProvider.StatusLevel _lastStatusLevel = IStatusProvider.StatusLevel.Notice;
-    public void SetStatus(string m, IStatusProvider.StatusLevel l) { _lastStatusMessage = m; _lastStatusLevel = l; }
+
+    public void SetStatus(string m, IStatusProvider.StatusLevel l)
+    {
+        _lastStatusMessage = m;
+        _lastStatusLevel = l;
+    }
+
     public IStatusProvider.StatusLevel GetStatusLevel() => _lastStatusLevel;
     public string GetStatusMessage() => _lastStatusMessage;
 
-    string ICustomDropdownHolder.GetValueForInput(Guid id) => id == LocalIpAddress.Id ? LocalIpAddress.Value : string.Empty;
-    IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid id) => id == LocalIpAddress.Id ? GetLocalIPv4Addresses() : Enumerable.Empty<string>();
-    void ICustomDropdownHolder.HandleResultForInput(Guid id, string? s, bool i)
+    #region Network Interface Logic
+    private static List<NetworkAdapterInfo> _networkInterfaces = new();
+
+    private static List<NetworkAdapterInfo> GetNetworkInterfaces()
     {
-        if (string.IsNullOrEmpty(s) || !i || id != LocalIpAddress.Id) return;
-        LocalIpAddress.SetTypedInputValue(s.Split(' ')[0]);
-    }
-    private static IEnumerable<string> GetLocalIPv4Addresses()
-    {
-        yield return "0.0.0.0 (Any)";
-        yield return "127.0.0.1";
-        if (!NetworkInterface.GetIsNetworkAvailable()) yield break;
-        foreach (var ni in NetworkInterface.GetAllNetworkInterfaces())
+        var list = new List<NetworkAdapterInfo>();
+        list.Add(new NetworkAdapterInfo(IPAddress.Any, IPAddress.Any, "Any"));
+        list.Add(new NetworkAdapterInfo(IPAddress.Loopback, IPAddress.Parse("255.0.0.0"), "Localhost"));
+        
+        try
         {
-            if (ni.OperationalStatus != OperationalStatus.Up || ni.NetworkInterfaceType == NetworkInterfaceType.Loopback) continue;
-            foreach (var ipInfo in ni.GetIPProperties().UnicastAddresses)
-                if (ipInfo.Address.AddressFamily == AddressFamily.InterNetwork)
-                    yield return ipInfo.Address.ToString();
+            list.AddRange(from ni in NetworkInterface.GetAllNetworkInterfaces()
+                          where ni.OperationalStatus == OperationalStatus.Up && ni.NetworkInterfaceType != NetworkInterfaceType.Loopback
+                          from ip in ni.GetIPProperties().UnicastAddresses
+                          where ip.Address.AddressFamily == AddressFamily.InterNetwork
+                          select new NetworkAdapterInfo(ip.Address, ip.IPv4Mask, ni.Name));
         }
+        catch (Exception e)
+        {
+            Log.Warning("Could not enumerate network interfaces: " + e.Message);
+        }
+        return list;
+    }
+
+    private sealed record NetworkAdapterInfo(IPAddress IpAddress, IPAddress SubnetMask, string Name)
+    {
+        public string DisplayName => $"{Name} ({IpAddress})";
     }
     #endregion
 
-    // Unique GUID for LocalIpAddress in ArtnetInput
-    [Input(Guid = "24B5D450-4E83-49DB-88B1-7D688E64585D")] public readonly InputSlot<string> LocalIpAddress = new("0.0.0.0 (Any)");
-    [Input(Guid = "3d085f6f-6f4a-4876-805f-22f25497a731")] public readonly InputSlot<bool> Active = new();
-    [Input(Guid = "19bde769-3992-4cf0-a0b4-e3ae25c03c79")] public readonly InputSlot<int> StartUniverse = new(1);
-    [Input(Guid = "c18a9359-3ef8-4e0d-85d8-51f725357388")] public readonly InputSlot<int> NumUniverses = new(1);
-    [Input(Guid = "a38c29b6-057d-4883-9366-139366113b63")] public readonly InputSlot<float> Timeout = new(1.2f);
-    // New InputSlot for PrintToLog
-    [Input(Guid = "A5B6C7D8-E9F0-4123-4567-890ABCDEF123")] // New GUID
-    public readonly InputSlot<bool> PrintToLog = new();
+    string ICustomDropdownHolder.GetValueForInput(Guid id) => id == LocalIpAddress.Id ? LocalIpAddress.Value : string.Empty;
+
+    IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid id)
+    {
+        if (id == LocalIpAddress.Id)
+        {
+            _networkInterfaces = GetNetworkInterfaces();
+            foreach (var adapter in _networkInterfaces) yield return adapter.DisplayName;
+        }
+    }
+
+    void ICustomDropdownHolder.HandleResultForInput(Guid id, string? s, bool i)
+    {
+        if (string.IsNullOrEmpty(s) || !i || id != LocalIpAddress.Id) return;
+        var foundAdapter = _networkInterfaces.FirstOrDefault(adapter => adapter.DisplayName == s);
+        if (foundAdapter != null) LocalIpAddress.SetTypedInputValue(foundAdapter.IpAddress.ToString());
+    }
+    #endregion
 }

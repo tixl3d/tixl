@@ -1,0 +1,60 @@
+{
+  "Id": "d4e5f6a7-b8c9-4d0e-1f2a-9b8c7d6e5f4a"/*DataPointImportExport*/,
+  "Description": "Imports a JSON point list into a GPU structured buffer and optionally exports it again. The node keeps the imported data in an internal buffer, so the points remain visible even when the import trigger is released. It also features an autoload capability that re-imports the file when the ImportFilePath is modified.",
+  "InputUis": [
+    {
+      "InputId": "27320742-221f-4383-8241-995083c87b8b"/*PointBufferIn*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "GroupTitle": "Point Data",
+      "Description": "An optional incoming point buffer. If a buffer is connected, the Export trigger will use this data. If not connected, Export will use the last successfully imported data."
+    },
+    {
+      "InputId": "3e5b7c7d-8a9f-4b1e-9c2d-3e4f5a6b7c8d"/*ExportFilePath*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      },
+      "Description": "The path where the JSON file will be saved when Export is triggered.",
+      "Usage": "FilePath"
+    },
+    {
+      "InputId": "a6b7c8d9-e0f1-4a2b-8c3d-4e5f6a7b8c9d"/*Import*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      },
+      "Description": "A trigger to load point data from the specified ImportFilePath. The loaded data is stored internally and exposed via PointBufferOut."
+    },
+    {
+      "InputId": "b7c8d9e0-f1a2-4b3c-9d4e-5f6a7b8c9d0e"/*Export*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 300.0
+      },
+      "Description": "A trigger to save point data to the ExportFilePath. It exports from PointBufferIn if connected; otherwise, it exports the last imported data."
+    },
+    {
+      "InputId": "f8d41a2a-4c27-4a52-a0a2-1304cb04b80f"/*ImportFilePath*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      },
+      "GroupTitle": "File Operations",
+      "Description": "The path to the JSON file to import. The operator will automatically try to load the file if this path changes.",
+      "Usage": "FilePath"
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "c8d9e0f1-a2b3-4c4d-8e5f-6a7b8c9d0e1f"/*PointBufferOut*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    }
+  ]
+}

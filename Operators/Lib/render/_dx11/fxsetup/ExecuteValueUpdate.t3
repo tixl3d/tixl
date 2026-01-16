@@ -1,0 +1,19 @@
+{
+  "Id": "4c93c6e6-da4d-4255-a2e1-eca388eb775f"/*ExecuteValueUpdate*/,
+  "Inputs": [
+    {
+      "Id": "c0631cfa-c130-4821-af83-20c2945d2fe5"/*InputValue*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "cb6c5ef9-6262-4962-a6b9-cbd8e787a02b"/*UpdateCommands*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "d1d1d97f-fdb6-4b68-8f6b-b1cacf71a7be"/*IsEnabled*/,
+      "DefaultValue": true
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

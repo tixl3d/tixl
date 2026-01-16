@@ -1,0 +1,69 @@
+{
+  "Id": "a1b2c3d4-e5f6-4798-89ab-cdef12345679"/*FaceDetection*/,
+  "Inputs": [
+    {
+      "Id": "a3b4c5d6-e7f8-4389-e6b1-901234567681"/*DetectionSize*/,
+      "DefaultValue": 3.0
+    },
+    {
+      "Id": "a4b5c6d7-e8f9-60a1-12b3-456789012de5"/*ZScale*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "a7b8c9d0-e1f2-4d23-e05b-345678901235"/*InputTexture*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "b4c5d6e7-f8a9-4490-f7c2-012345678682"/*DetectionColor*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 1.0,
+        "Z": 1.0,
+        "W": 1.0
+      }
+    },
+    {
+      "Id": "b8c9d0e1-f2a3-4e34-f16c-456789012346"/*Enabled*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "c5d6e7f8-a9b0-45a1-a8d3-123456789683"/*KeypointColor*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 1.0,
+        "Z": 1.0,
+        "W": 1.0
+      }
+    },
+    {
+      "Id": "c9d0e1f2-a3b4-4f45-a27d-567890123457"/*ConfidenceThreshold*/,
+      "DefaultValue": 0.5
+    },
+    {
+      "Id": "d0e1f2a3-b4c5-4056-b38e-678901234568"/*MaxFaces*/,
+      "DefaultValue": 5
+    },
+    {
+      "Id": "d6e7f8a9-b0c1-45a2-b9e4-234567890684"/*UseCombinedAiOutput*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "e1f2a3b4-c6d7-4167-c49f-789012345679"/*ShowDetections*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "e2f3a4b5-c6d7-58e9-f0a1-234567890bd3"/*Debug*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "f2a3b4c5-d6e7-4278-d5a0-890123456680"/*ShowKeypoints*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "f3a4b5c6-d7e8-59f0-01a2-345678901cd4"/*CorrectAspectRatio*/,
+      "DefaultValue": false
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

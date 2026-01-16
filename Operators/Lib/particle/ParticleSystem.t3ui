@@ -101,12 +101,12 @@
       "Description": "Can be used for customizing the rendering of the particles.\n\nNote that many operators like [DrawPoints] use the W attribute to control the size of the points.\nWith other operators like [DrawBillboards] you can use the W parameter to colorize particles over their lifetime.\n\nKeep Original W -> no change\nParticle Age -> Normalized age between 0 ... 1\nVelocity -> A representation of the particle's velocity."
     },
     {
-      "InputId": "b2c8f7cf-fdf5-4819-98ec-2c70ee9e8bc6"/*RadiusFromW*/,
+      "InputId": "b2c8f7cf-fdf5-4819-98ec-2c70ee9e8bc6"/*RadiusFactor*/,
       "Position": {
         "X": 202.45206,
         "Y": -179.3761
       },
-      "Description": "Some of the forces use the particle radius for collision calculation. The radius is set on emit time by the emit point W attribute and the RadiusFromW factor.\nFor consistency we aligned that factor with the default point size for [DrawPoints] which renders points with a radius of 1/100 units."
+      "Description": "Some of the forces use the particle radius for collision calculation. The radius is set on emit time by the emit point Scale and this factor.\nFor consistency we aligned that factor with the default point size for [DrawPoints] which renders points with a radius of 1/100 units."
     },
     {
       "InputId": "ba08e719-a1d1-4ac6-9c8c-076478a65a81"/*EmitPoints*/,
@@ -130,8 +130,8 @@
     {
       "InputId": "c6bdbb07-6996-4e5b-a058-37c9cbeca6fe"/*Reset*/,
       "Position": {
-        "X": -345.84326,
-        "Y": -510.23334
+        "X": -614.3496,
+        "Y": -355.09625
       },
       "Description": "Clears all emitted points.\n\nTip: You can connect [HasTimeChanged] to clean up on rewind or looping. "
     },

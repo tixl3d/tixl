@@ -7,8 +7,8 @@
       "InputId": "91b903a2-5127-431b-ab66-d5a38ce1693c"/*PointsB_*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -551.6894,
-        "Y": 571.0946
+        "X": 148.47668,
+        "Y": 1052.1796
       },
       "Description": "Input for Point Setup B"
     },
@@ -16,16 +16,16 @@
       "InputId": "97904d2e-ae67-4ab4-9201-7902a85d12f3"/*PointsA_*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -551.6894,
-        "Y": 515.0946
+        "X": -539.26337,
+        "Y": 958.8297
       },
       "Description": "Input for Point Setup A"
     },
     {
       "InputId": "acef877d-214d-4ca0-ac11-95fa59d1f6fc"/*Pairing*/,
       "Position": {
-        "X": -554.49023,
-        "Y": 942.3042
+        "X": -415.56927,
+        "Y": 1432.6199
       },
       "Description": "Selects the mode with which points are paired for blending",
       "AddPadding": "True"
@@ -33,8 +33,8 @@
     {
       "InputId": "ba7ffda2-f9f6-440d-a174-7339844835fa"/*BlendFactor*/,
       "Position": {
-        "X": -551.6894,
-        "Y": 616.0946
+        "X": -275.56927,
+        "Y": 1362.6199
       },
       "Description": "Defines the transition between the two point setups\n0 = PointsA is displayed without changes\n1 = PointsB is displayed without changes\nIf the 'BlendMode' is set to 'Blend', the points overshoot at values lower than 0 and higher than 1.\nIf the 'BlendMode' is set to 'RangeBlendSmooth', the transition loops.",
       "AddPadding": "True",
@@ -44,16 +44,16 @@
     {
       "InputId": "bdb712a8-3dbc-458a-887a-5add51813196"/*RangeWidth*/,
       "Position": {
-        "X": -549.20703,
-        "Y": 797.9427
+        "X": -275.56927,
+        "Y": 1467.6199
       },
       "Description": "Defines the range width when the 'BlendMode' is set to 'RangeBlend' or 'RangeBlendSmooth'"
     },
     {
       "InputId": "c5480ce5-a8ba-4a26-8cee-c28e442020b7"/*BlendMode*/,
       "Position": {
-        "X": -549.20703,
-        "Y": 752.9427
+        "X": -415.56927,
+        "Y": 1397.6199
       },
       "GroupTitle": "Options",
       "Description": "Defines how to blend between the point setups"
@@ -61,8 +61,8 @@
     {
       "InputId": "ee8e9e15-ce18-4034-abc6-dd56108c8a02"/*Scatter*/,
       "Position": {
-        "X": -551.6894,
-        "Y": 661.0946
+        "X": -275.56927,
+        "Y": 1502.6199
       },
       "Description": "Adds random noise to the points' position during the transition"
     }
@@ -71,36 +71,36 @@
     {
       "ChildId": "0bc3f50e-f47c-44bd-9f19-5a144f745b14"/*GetSRVProperties*/,
       "Position": {
-        "X": -74.3291,
-        "Y": 856.58276
+        "X": -135.56927,
+        "Y": 1155.4034
       }
     },
     {
       "ChildId": "0da93e22-c63d-4efe-96db-ff346c79a706"/*GetBufferComponents*/,
       "Position": {
-        "X": -322.71265,
-        "Y": 962.453
+        "X": 288.47668,
+        "Y": 1052.1796
       }
     },
     {
       "ChildId": "2eb9e20b-521f-4630-8085-2c32bda1bbdb"/*IntToFloat*/,
       "Position": {
-        "X": -318.6706,
-        "Y": 707.0187
+        "X": -275.56927,
+        "Y": 1397.6199
       }
     },
     {
       "ChildId": "4c7d82ca-42ed-4968-8150-7c6378a7a6ca"/*ExecuteBufferUpdate*/,
       "Position": {
-        "X": 641.2465,
-        "Y": 646.7957
+        "X": 428.47668,
+        "Y": 1122.1796
       }
     },
     {
       "ChildId": "4fee13a9-9e54-48a9-b6a4-fbf73d710aad"/*CalcDispatchCount*/,
       "Position": {
-        "X": 278.34528,
-        "Y": 664.34546
+        "X": 4.430725,
+        "Y": 1120.4036
       }
     },
     {
@@ -111,50 +111,50 @@
         "Y": 44.69636
       },
       "Position": {
-        "X": 278.34528,
-        "Y": 733.34546
+        "X": -135.56927,
+        "Y": 1327.6199
       }
     },
     {
       "ChildId": "951f2698-ceac-42de-9401-5f58672fcc2e"/*GetBufferComponents*/,
       "Position": {
-        "X": 273.32104,
-        "Y": 1152.4597
+        "X": -135.56927,
+        "Y": 1225.4036
       }
     },
     {
       "ChildId": "a9afe19d-306c-428c-be18-683304d63951"/*ComputeShaderStage*/,
       "Position": {
-        "X": 466.752,
-        "Y": 622.0931
+        "X": 428.47668,
+        "Y": 912.17957
       }
     },
     {
       "ChildId": "be16bd14-c623-47e2-8944-ce90f98e2728"/*GetBufferComponents*/,
       "Position": {
-        "X": -322.71265,
-        "Y": 906.453
+        "X": -399.26328,
+        "Y": 958.8297
       }
     },
     {
       "ChildId": "c8193c86-0696-49c7-a3a3-7f676ebdef0c"/*ComputeShader*/,
       "Position": {
-        "X": 134.41718,
-        "Y": 634.2819
+        "X": -135.56927,
+        "Y": 1085.4034
       }
     },
     {
       "ChildId": "e7032fa8-ae95-4a18-ad2e-5a5524d8d936"/*StructuredBufferWithViews*/,
       "Position": {
-        "X": 135.72653,
-        "Y": 1199.925
+        "X": -135.56927,
+        "Y": 1190.4036
       }
     },
     {
       "ChildId": "ec56cf28-5896-4dfb-a701-b3b33e659935"/*IntToFloat*/,
       "Position": {
-        "X": -318.6706,
-        "Y": 763.0187
+        "X": -275.56927,
+        "Y": 1432.6199
       }
     }
   ],

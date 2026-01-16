@@ -5,9 +5,11 @@ using T3.Core.Animation;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.Utils;
+using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.Interaction.Snapping;
+using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
@@ -299,9 +301,9 @@ internal sealed class LayersArea : ITimeObjectManipulation, IValueSnapAttractor
 
             var originalName = symbolChildUi.SymbolChild.ReadableName;
             var newPos = symbolChildUi.PosOnCanvas;
-            newPos.Y += symbolChildUi.Size.Y + 15.0f;
+            newPos.Y += MagGraphItem.GridSize.Y;
             var cmd = new CopySymbolChildrenCommand(compositionSymbolUi,
-                                                    new[] { symbolChildUi },
+                                                    [symbolChildUi],
                                                     null,
                                                     compositionSymbolUi,
                                                     newPos);
@@ -314,7 +316,7 @@ internal sealed class LayersArea : ITimeObjectManipulation, IValueSnapAttractor
             var normalizedCutPosition = ((float)_playback.TimeInBars - clip.TimeRange.Start) / clip.TimeRange.Duration;
 
             // Apply new time range to newly added instance
-            var newChildId = cmd.OldToNewIdDict[clip.Id];
+            var newChildId = cmd.OldToNewChildIds[clip.Id];
             var newInstance = compositionOp.Children[newChildId];
             var newTimeClip = newInstance.Outputs.OfType<ITimeClipProvider>().Single().TimeClip;
 

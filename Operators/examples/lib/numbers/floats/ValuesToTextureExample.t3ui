@@ -1,6 +1,6 @@
 {
   "Id": "805d5196-f253-4fb6-9c5e-d69915b56328"/*ValuesToTextureExample*/,
-  "Description": "How to create a tiny sound reactive setup based on ValuesToTexture",
+  "Description": "How to create a tiny sound reactive setup based on ValuesToTexture\nAudio visualizer",
   "InputUis": [],
   "SymbolChildUis": [
     {

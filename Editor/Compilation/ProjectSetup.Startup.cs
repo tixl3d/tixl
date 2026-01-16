@@ -163,7 +163,30 @@ internal static partial class ProjectSetup
         static IEnumerable<string> GetProjectDirectories(bool includeBuiltInAsProjects)
         {
             // ReSharper disable once JoinDeclarationAndInitializer
-            string[] topDirectories = [UserSettings.Config.ProjectsFolder];
+            string[] topDirectories = [];
+
+            if (UserSettings.Config.EnableUsbProjectDetection)
+            {
+                var usbs = DriveInfo.GetDrives()
+                                    .Where(drive => drive is { DriveType: DriveType.Removable, IsReady: true });
+                foreach (var usb in usbs)
+                {
+                    var usbT3ProjectsPath = Path.Combine(usb.RootDirectory!.FullName, "TiXLProjects");
+                    if (Directory.Exists(usbT3ProjectsPath))
+                    {
+                        topDirectories = topDirectories.Append(usbT3ProjectsPath).ToArray();
+                    }
+                }
+
+            }
+            
+            foreach (var projectPath in UserSettings.Config.ProjectDirectories)
+            {
+                if (!string.IsNullOrWhiteSpace(projectPath) && Directory.Exists(projectPath))
+                {
+                    topDirectories = topDirectories.Append(projectPath).ToArray();
+                }
+            }
 
             var projectSearchDirectories = topDirectories
                                           .Where(Directory.Exists)

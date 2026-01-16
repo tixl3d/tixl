@@ -20,7 +20,7 @@ internal sealed class ExecuteTextureUpdate : Instance<ExecuteTextureUpdate>
             Texture.DirtyFlag.Clear();
             if (Texture.HasInputConnections)
             {
-                Texture.FirstConnection.DirtyFlag.Clear();
+                Texture.FirstConnection?.DirtyFlag.Clear();
             }
             UpdateCommands.DirtyFlag.Clear();
             return;

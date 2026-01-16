@@ -1,0 +1,23 @@
+{
+  "Id": "cc6100a4-73ed-45e4-87ab-601e7956fb36"/*RotatedPlaneSDF*/,
+  "Inputs": [
+    {
+      "Id": "1a154ff5-6fa7-4ee1-9b1e-99c5d47e9493"/*Center*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "bfed14a7-7a97-4379-9419-222bb7a2ba57"/*Normal*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

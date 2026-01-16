@@ -44,7 +44,7 @@ internal static partial class ProjectSetup
     public static bool TryCreateProject(string nameSpace, bool shareResources, [NotNullWhen(true)] out EditableSymbolProject? newProject, [NotNullWhen(false)] out string? failureLog)
     {
         var name = nameSpace.Split('.').Last();
-        var newCsProj = CsProjectFile.CreateNewProject(name, nameSpace, shareResources, UserSettings.Config.ProjectsFolder);
+        var newCsProj = CsProjectFile.CreateNewProject(name, nameSpace, shareResources, UserSettings.Config.ProjectDirectories[0]);
 
         if (!newCsProj.TryRecompile(true, out failureLog))
         {

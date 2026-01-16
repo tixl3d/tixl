@@ -5,7 +5,7 @@ using T3.Core.Resource;
 using T3.Editor.Gui.InputUi.SimpleInputUis;
 using T3.Editor.UiModel;
 
-namespace T3.Editor.Gui.Graph.Legacy.Interaction;
+namespace T3.Editor.Gui.Legacy.Interaction;
 
 /// <summary>
 /// Now defunct helper to fix missing file path references

@@ -1,5 +1,5 @@
+#nullable enable
 using SharpDX;
-using T3.Core.Utils;
 using Utilities = T3.Core.Utils.Utilities;
 
 namespace Lib.numbers.floats.process;
@@ -8,104 +8,145 @@ namespace Lib.numbers.floats.process;
 internal sealed class ValuesToTexture : Instance<ValuesToTexture>
 {
     [Output(Guid = "f01099a0-a196-4689-9900-edac07908714")]
-    public readonly Slot<Texture2D> CurveTexture = new();
+    public readonly Slot<Texture2D> ValuesTexture = new();
 
     public ValuesToTexture()
     {
-        CurveTexture.UpdateAction += Update;
+        ValuesTexture.UpdateAction += Update;
     }
-
-    private float[] _floatBuffer = new float[0];
 
     private void Update(EvaluationContext context)
     {
-        if (!Values.HasInputConnections)
-            return;
+        _valueListsTmp.Clear();
 
         var useHorizontal = Direction.GetValue(context) == 0;
-        var values = Values.GetValue(context);
-        if (values == null || values.Count == 0)
-            return;
 
-        var rangeStart = RangeStart.GetValue(context).Clamp(0, values.Count - 1);
-        var rangeEnd = RangeEnd.GetValue(context).Clamp(0, values.Count - 1);
-
-        if (UseFullList.GetValue(context))
+        int listCount;
+        if (Values.HasInputConnections)
         {
-            rangeStart = 0;
-            rangeEnd = values.Count - 1;
+            listCount = Values.CollectedInputs.Count;
+            if (listCount == 0)
+                return;
+
+            foreach (var vi in Values.CollectedInputs)
+            {
+                var v = vi.GetValue(context);
+                if (v != null && v.Count > 0)
+                    _valueListsTmp.Add(v);
+            }
+
+            listCount = _valueListsTmp.Count;
+            if (listCount == 0)
+                return;
         }
+        else
+        {
+            var v = Values.GetValue(context);
+            if (v == null || v.Count == 0)
+                return;
+            listCount = 1;
+            _valueListsTmp.Add(v);
+        }
+
+        // Use the longest list as sampleCount
+        var sampleCount = 0;
+        foreach (var list in _valueListsTmp)
+            sampleCount = Math.Max(sampleCount, list.Count);
+
+        if (sampleCount == 0)
+            return;
 
         var gain = Gain.GetValue(context);
+        var offset = Offset.GetValue(context);
         var pow = Pow.GetValue(context);
-
         if (Math.Abs(pow) < 0.001f)
-        {
             return;
-        }
 
-        if (rangeEnd < rangeStart)
+        var requiredFloats = listCount * sampleCount;
+        if (_uploadBuffer.Length < requiredFloats)
         {
-            (rangeEnd, rangeStart) = (rangeStart, rangeEnd);
+            if (_uploadHandle.IsAllocated)
+                _uploadHandle.Free();
+
+            _uploadBuffer = new float[requiredFloats];
+            _uploadHandle = GCHandle.Alloc(_uploadBuffer, GCHandleType.Pinned);
+            _uploadPtr = _uploadHandle.AddrOfPinnedObject();
         }
 
-        var sampleCount = (rangeEnd - rangeStart) + 1;
-        var entrySizeInBytes = sizeof(float);
-        var listSizeInBytes = sampleCount * entrySizeInBytes;
-        var bufferSizeInBytes = 1 * listSizeInBytes;
-
-        using (var dataStream = new DataStream(bufferSizeInBytes, true, true))
+        // Fill buffer: write row by row (each input list = one row if horizontal)
+        int o = 0;
+        if (useHorizontal)
         {
-            var texDesc = new Texture2DDescription()
-                              {
-                                  Width = useHorizontal ? sampleCount : 1,
-                                  Height = useHorizontal ? 1 : sampleCount,
-                                  ArraySize = 1,
-                                  BindFlags = BindFlags.ShaderResource,
-                                  Usage = ResourceUsage.Default,
-                                  MipLevels = 1,
-                                  CpuAccessFlags = CpuAccessFlags.None,
-                                  Format = Format.R32_Float,
-                                  SampleDescription = new SampleDescription(1, 0),
-                              };
-
-            for (var sampleIndex = rangeStart; sampleIndex <= rangeEnd; sampleIndex++)
+            foreach (var list in _valueListsTmp)
             {
-                float v = (float)Math.Pow(values[sampleIndex] * gain, pow);
-                dataStream.Write(v);
-            }
-
-            try
-            {
-                dataStream.Position = 0;
-                var dataRectangles = new DataRectangle[]
-                                         {
-                                             new(
-                                                 dataPointer: dataStream.DataPointer, 
-                                                 pitch: useHorizontal ? listSizeInBytes : 1 * entrySizeInBytes)
-                                         };
-                Utilities.Dispose(ref CurveTexture.Value);
-                CurveTexture.Value = Texture2D.CreateTexture2D(texDesc, dataRectangles);
-            }
-            catch (Exception e)
-            {
-                Log.Warning("Can't create texture from values :" + e.Message, this);
+                for (int i = 0; i < sampleCount; i++)
+                {
+                    float v = i < list.Count ? (float)Math.Pow((list[i] + offset) * gain, pow) : 0f;
+                    _uploadBuffer[o++] = v;
+                }
             }
         }
+        else
+        {
+            for (int i = 0; i < sampleCount; i++)
+            {
+                foreach (var list in _valueListsTmp)
+                {
+                    float v = i < list.Count ? (float)Math.Pow((list[i] + offset) * gain, pow) : 0f;
+                    _uploadBuffer[o++] = v;
+                }
+            }
+        }
+
+        var width  = useHorizontal ? sampleCount : listCount;
+        var height = useHorizontal ? listCount   : sampleCount;
+
+        if (ValuesTexture.Value == null ||
+            ValuesTexture.Value.Description.Width  != width ||
+            ValuesTexture.Value.Description.Height != height)
+        {
+            if (ValuesTexture.Value != null)
+                Utilities.Dispose(ref ValuesTexture.Value);
+
+            var desc = new Texture2DDescription
+            {
+                Width = width,
+                Height = height,
+                ArraySize = 1,
+                BindFlags = BindFlags.ShaderResource,
+                Usage = ResourceUsage.Default,
+                MipLevels = 1,
+                CpuAccessFlags = CpuAccessFlags.None,
+                Format = Format.R32_Float,
+                SampleDescription = new SampleDescription(1, 0),
+            };
+            ValuesTexture.Value = Texture2D.CreateTexture2D(desc);
+        }
+
+        
+        const int bytesPerTexel = sizeof(float);
+        var rowPitch   = width * bytesPerTexel;
+        
+        var slicePitch = rowPitch * height;
+        var dataBox = new DataBox(_uploadPtr, rowPitch, slicePitch);
+        ResourceManager.Device.ImmediateContext.UpdateSubresource(dataBox, ValuesTexture.Value, 0);
+
+        Values.DirtyFlag.Clear();
     }
+    
+    // Reused, pinned upload buffer (avoid per-frame allocations)
+    private float[] _uploadBuffer = [];
+    private GCHandle _uploadHandle;
+    private IntPtr _uploadPtr = IntPtr.Zero;
+
+    private readonly List<List<float>> _valueListsTmp = new();
 
     [Input(Guid = "092C8D1F-A70E-4298-B5DF-52C9D62F8E04")]
-    public readonly InputSlot<List<float>> Values = new();
+    public readonly MultiInputSlot<List<float>> Values = new();
 
-    [Input(Guid = "165F7E0E-6EF0-4BE1-8ED3-61ED0DB752ED")]
-    public readonly InputSlot<bool> UseFullList = new();
-
-    [Input(Guid = "CA67BFAF-EDE7-43BA-B279-FC1DDFBE2FFA")]
-    public readonly InputSlot<int> RangeStart = new();
-
-    [Input(Guid = "DB868176-D51C-41AA-BAFE-68C3E50E725E")]
-    public readonly InputSlot<int> RangeEnd = new();
-
+    [Input(Guid = "748FE756-C7EE-4CC1-929E-078F99BEA628")]
+    public readonly InputSlot<float> Offset = new();
+    
     [Input(Guid = "CC812393-F080-4E17-A525-15B09F8ACDD0")]
     public readonly InputSlot<float> Gain = new();
 

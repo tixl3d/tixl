@@ -1,6 +1,6 @@
 {
   "Id": "5af2405c-35f4-46bf-90db-bb99b0c4a43e"/*LastFrameDuration*/,
-  "Description": "Measures how long it took to render the last frame in milliseconds\n\nInfo: Since Vertical Synchronization is activated by default in Tooll, this value is usually limited by the refresh rate of the monitor.\nThe same value is also displayed at the top of the UI and visualized by a small bar.\nAdditional information is displayed by hovering.\nA left click switches between VSync on / off",
+  "Description": "Measures how long it took to render the last frame in seconds\n\nInfo: Since Vertical Synchronization is activated by default in Tooll, this value is usually limited by the refresh rate of the monitor.\nThe same value is also displayed at the top of the UI and visualized by a small bar.\nAdditional information is displayed by hovering.\nA left click switches between VSync on / off",
   "SymbolTags": "8",
   "InputUis": [],
   "SymbolChildUis": [],

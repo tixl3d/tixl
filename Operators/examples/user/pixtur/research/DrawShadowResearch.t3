@@ -98,7 +98,7 @@
       "SymbolId": "954af16f-b37b-4e64-a965-4bec02b9179e",
       "InputValues": [
         {
-          "Id": "8042eb60-ca86-42b3-a338-d733c3cbb1fb"/*Size*/,
+          "Id": "8042eb60-ca86-42b3-a338-d733c3cbb1fb"/*Stretch*/,
           "Type": "System.Numerics.Vector2",
           "Value": {
             "X": 2.0,
@@ -134,7 +134,7 @@
       "Outputs": []
     },
     {
-      "Id": "97a8955d-f816-4b48-9f64-6d9abd0a6a21"/*SetIntVariable*/,
+      "Id": "97a8955d-f816-4b48-9f64-6d9abd0a6a21"/*SetIntVar*/,
       "SymbolId": "7953f704-ebee-498b-8bdd-a2c201dfe278",
       "InputValues": [
         {

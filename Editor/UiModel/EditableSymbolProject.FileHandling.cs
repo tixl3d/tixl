@@ -159,9 +159,15 @@ internal sealed partial class EditableSymbolProject
 
         var sourceCodePath = pathHandler.SourceCodePath;
         if (sourceCodePath != null)
+        {
             WriteSymbolSourceToFile(id, sourceCodePath);
+        }
         else
-            throw new Exception($"{CsProjectFile.Name}: No source code path found for symbol {id}");
+        {
+            // This can happen when "saving all operators" and user project containing
+            // no longer defined operators 
+            Log.Error($"{CsProjectFile.Name}: No source code path found for symbol {id}");
+        }
 
         var symbolPath = pathHandler.SymbolFilePath ??= SymbolPathHandler.GetCorrectPath(symbol, this);
         SaveSymbolDefinition(symbol, symbolPath);

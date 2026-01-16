@@ -1,0 +1,165 @@
+{
+  "Id": "4369c0d2-2722-453d-a47a-aa9cc4f86d4b"/*LaunchpadXDisplay*/,
+  "Description": "Convert a texture to a sysex frame for Launchpad X\nThe input texture should be stretch to a square.\n(LaunchPad should be set to Programmer Mode)\n",
+  "InputUis": [
+    {
+      "InputId": "26b29682-bcb1-47ff-a487-3db0b56c3274"/*MidiDevice*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      },
+      "Usage": "Default"
+    },
+    {
+      "InputId": "6147621b-9224-46da-8cf1-d7956da53b5e"/*Texture*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "00861351-d0f7-472b-bf5b-758f1c780710"/*SplitString*/,
+      "Position": {
+        "X": 699.9998,
+        "Y": 162.69629
+      }
+    },
+    {
+      "ChildId": "20fbad0f-78aa-4d23-b95f-045f108685e5"/*SplitString*/,
+      "Position": {
+        "X": 810.5763,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "2e4fc125-c978-4021-80c9-9f5ec7f1a67c"/*JoinStringList*/,
+      "Position": {
+        "X": 559.9998,
+        "Y": 162.69629
+      }
+    },
+    {
+      "ChildId": "51c0afc1-bdf9-4a8e-86b8-f07bca81db5f"/*JoinStringList*/,
+      "Position": {
+        "X": 1173.7349,
+        "Y": 188.33594
+      }
+    },
+    {
+      "ChildId": "54fd08e0-1d90-4f5c-be25-aeda9f7c7357"/*String*/,
+      "Position": {
+        "X": 670.5763,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "592d3edd-abd8-419d-8804-c031d8a0cc4e"/*CombineStrings*/,
+      "Position": {
+        "X": 1313.7349,
+        "Y": 153.33594
+      }
+    },
+    {
+      "ChildId": "5cf3533a-b93d-48b9-ad30-fa2c94623457"/*SplitString*/,
+      "Position": {
+        "X": 979.9998,
+        "Y": 162.69629
+      }
+    },
+    {
+      "ChildId": "64a0d070-922a-4ee2-b100-48b94bea0c21"/*PointsToRGBList*/,
+      "Position": {
+        "X": 279.99982,
+        "Y": 127.69629
+      }
+    },
+    {
+      "ChildId": "66598d56-38ed-4272-872e-9e9ff3e839e9"/*GridPoints*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 92.69629
+      }
+    },
+    {
+      "ChildId": "695d17a7-1086-49ee-b8af-c6ee4d2f247b"/*SearchAndReplace*/,
+      "Position": {
+        "X": 1487.2563,
+        "Y": 169.20215
+      }
+    },
+    {
+      "ChildId": "6d3bbae6-2613-44cb-ad15-2f460993360a"/*String*/,
+      "Position": {
+        "X": 1094.1316,
+        "Y": 332.3872
+      }
+    },
+    {
+      "ChildId": "863f222f-269c-479d-9897-d717976511e6"/*MidiSysexOutput*/,
+      "Position": {
+        "X": 1709.8792,
+        "Y": 241.05518
+      }
+    },
+    {
+      "ChildId": "90aa1eae-b157-4fb4-b6dc-f7007dd756f7"/*RGBToSysEx*/,
+      "Position": {
+        "X": 419.99982,
+        "Y": 162.69629
+      }
+    },
+    {
+      "ChildId": "9432d07e-a08a-4540-a39f-5a3873ee15d1"/*PickPointList*/,
+      "Position": {
+        "X": 279.99982,
+        "Y": 92.69629
+      }
+    },
+    {
+      "ChildId": "a596ed77-6296-4555-af77-dc1164aba098"/*JoinStringList*/,
+      "Position": {
+        "X": 979.9998,
+        "Y": 127.69629
+      }
+    },
+    {
+      "ChildId": "a968ccef-2921-4bf5-88f4-28cc65153bfa"/*String*/,
+      "Position": {
+        "X": 1173.7349,
+        "Y": 153.33594
+      }
+    },
+    {
+      "ChildId": "b1532b18-1d00-4d6b-8d4c-b46b31282796"/*ZipStringList*/,
+      "Position": {
+        "X": 839.9998,
+        "Y": 127.69629
+      }
+    },
+    {
+      "ChildId": "c2271ee1-e3af-498c-9693-ea5f61ee6517"/*SamplePointColorAttributes*/,
+      "Position": {
+        "X": 139.99982,
+        "Y": 92.69629
+      }
+    },
+    {
+      "ChildId": "f649593b-518f-428a-a73a-0153e09459f2"/*RemapFloatList*/,
+      "Position": {
+        "X": 419.99982,
+        "Y": 92.69629
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "45d94643-0028-4b4e-9354-60481fa5ac37"/*OutputCmd*/,
+      "Position": {
+        "X": 1894.5347,
+        "Y": 579.15247
+      }
+    }
+  ]
+}

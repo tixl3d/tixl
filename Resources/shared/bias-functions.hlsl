@@ -1,5 +1,6 @@
 // A collection of various distribution functions
-
+#ifndef BIAS_FUNCTIONS_H
+#define BIAS_FUNCTIONS_H
 //---- Scalar -------------------------------------
 
 inline float GetBias(float bias, float x)
@@ -115,3 +116,5 @@ float4 ApplyBiasAndGain(float4 x, float s, float t)
                ? ((t * x) / (x + s * (t - x) + eps))
                : (((1 - t) * (x - 1)) / (1 - x - s * (t - x) + eps) + 1);
 }
+
+#endif

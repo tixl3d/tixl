@@ -1,0 +1,15 @@
+{
+  "Id": "e623b242-98e8-4ac1-9b9a-5e0b98acf088"/*SelectVec3FromDict*/,
+  "Inputs": [
+    {
+      "Id": "428006e1-4188-4cc0-81f8-b27867f623a5"/*DictionaryInput*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "bd4f9dae-3df8-4777-ae75-8d0b7d6a57d5"/*SelectX*/,
+      "DefaultValue": ""
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

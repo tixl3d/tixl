@@ -1,5 +1,5 @@
-#ifndef HASH_H
-#define HASH_H
+#ifndef HASH_FUNCTIONS_H
+#define HASH_FUNCTIONS_H
 
 #define _PRIME0 13331U
 #define _PRIME1 1345777U

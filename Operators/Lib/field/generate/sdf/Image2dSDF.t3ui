@@ -1,6 +1,7 @@
 {
   "Id": "2446df39-b455-428a-807d-73c0e6cbab79"/*Image2dSDF*/,
   "Description": "Uses the grayscale information of a texture as (signed) distance data.\nThis works nicely with [JumpFloodFill]",
+  "SymbolTags": "72",
   "InputUis": [
     {
       "InputId": "1bcd6582-0e81-4980-bebe-ccf0d856299c"/*ImageSize*/,

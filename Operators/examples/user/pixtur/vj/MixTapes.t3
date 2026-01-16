@@ -404,7 +404,7 @@
       "Outputs": []
     },
     {
-      "Id": "e3da3494-309b-46b8-a0d1-dc3231444894"/*PickFromStringList*/,
+      "Id": "e3da3494-309b-46b8-a0d1-dc3231444894"/*PickStringFromList*/,
       "SymbolId": "ef357e66-24e9-4f54-8d86-869db74602f4",
       "InputValues": [],
       "Outputs": []

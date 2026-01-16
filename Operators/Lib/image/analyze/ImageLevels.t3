@@ -10,7 +10,7 @@
     },
     {
       "Id": "48e80f45-9685-4ded-aa1c-d05e16658c5a"/*Width*/,
-      "DefaultValue": 0.1
+      "DefaultValue": 0.2
     },
     {
       "Id": "8910ac23-551b-446a-b833-98f4efce1022"/*Range*/,

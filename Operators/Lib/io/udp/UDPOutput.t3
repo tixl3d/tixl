@@ -1,5 +1,5 @@
 {
-  "Id": "34e4e63b-2708-4673-b682-1d07d0245e1e"/*UDPOutput*/,
+  "Id": "34e4e63b-2708-4673-b682-1d07d0245e1e"/*UdpOutput*/,
   "Inputs": [
     {
       "Id": "216a0356-ef4a-413a-a656-7497127e31d4"/*SendOnChange*/,

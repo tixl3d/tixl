@@ -19,7 +19,7 @@ internal sealed class SerialOutput : Instance<SerialOutput>, IStatusProvider, IC
     private void Update(EvaluationContext context)
     {
         var shouldConnect = Connect.GetValue(context);
-        var portName = PortName.GetValue(context);
+        var portName = PortName.GetValue(context) ?? string.Empty;
         var baudRate = BaudRate.GetValue(context);
 
         var settingsChanged = portName != _lastPortName || baudRate != _lastBaudRate || shouldConnect != _lastConnectState;
@@ -55,10 +55,16 @@ internal sealed class SerialOutput : Instance<SerialOutput>, IStatusProvider, IC
         if (isConnected && shouldSend)
         {
             if (manualTrigger) SendTrigger.SetTypedInputValue(false);
-            if (!string.IsNullOrEmpty(currentMessage))
+            if (!string.IsNullOrEmpty(currentMessage) && !string.IsNullOrEmpty(portName))
             {
-                if (AddLineEnding.GetValue(context)) { SerialConnectionManager.WriteLine(portName, currentMessage); }
-                else { SerialConnectionManager.Write(portName, currentMessage); }
+                if (AddLineEnding.GetValue(context))
+                {
+                    SerialConnectionManager.WriteLine(portName, currentMessage);
+                }
+                else
+                {
+                    SerialConnectionManager.Write(portName, currentMessage);
+                }
                 _lastSentMessage = currentMessage;
             }
         }
@@ -71,7 +77,7 @@ internal sealed class SerialOutput : Instance<SerialOutput>, IStatusProvider, IC
     public void SetStatus(string m, IStatusProvider.StatusLevel l) { _lastErrorMessage = m; _statusLevel = l; }
     public IStatusProvider.StatusLevel GetStatusLevel() => _statusLevel;
     public string? GetStatusMessage() => _lastErrorMessage;
-    string ICustomDropdownHolder.GetValueForInput(Guid id) => id == PortName.Id ? PortName.Value : string.Empty;
+    string ICustomDropdownHolder.GetValueForInput(Guid id) => id == PortName.Id ? PortName.Value ?? string.Empty : string.Empty;
     IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid id) => id == PortName.Id ? SerialConnectionManager.GetAvailableSerialPortsWithDescriptions() : Enumerable.Empty<string>();
     void ICustomDropdownHolder.HandleResultForInput(Guid id, string? s, bool i)
     {

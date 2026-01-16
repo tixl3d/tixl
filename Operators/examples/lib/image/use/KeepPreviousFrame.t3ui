@@ -1,0 +1,38 @@
+{
+  "Id": "57c1fe66-d8bc-4ea5-ad25-6986d4c2bba4"/*KeepPreviousFrame*/,
+  "Description": "",
+  "InputUis": [
+    {
+      "InputId": "9bae6e82-3691-4f1a-82e0-77b3953b7019"/*Keep*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      }
+    },
+    {
+      "InputId": "b304efd5-a8e4-4213-9c85-8f482c55c880"/*ImageA*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "7ba708e0-1cbb-411a-aa2c-bc78d248d761"/*TextureA*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "b8c943b7-a402-4ae1-a489-eeff900889cd"/*TextureB*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 100.0
+      }
+    }
+  ]
+}

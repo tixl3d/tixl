@@ -5,7 +5,8 @@ using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.SystemUi;
-using T3.Editor.Gui.Graph.Dialogs;
+using T3.Editor.Gui.Dialogs;
+using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.Layouts;
@@ -47,6 +48,7 @@ internal sealed class ParameterWindow : Window
         new ParameterWindow(); // Required to call constructor
     }
 
+
     protected override void DrawContent()
     {
         // Insert invisible spill over input to catch accidental imgui focus attempts
@@ -59,49 +61,36 @@ internal sealed class ParameterWindow : Window
             ImGui.SameLine();
         }
 
-        var components = ProjectView.Focused;
-        if (components == null)
-            return;
-
-        var nodeSelection = components.NodeSelection;
-        if (DrawSettingsForSelectedAnnotations(nodeSelection))
-            return;
-
-        var instance = nodeSelection.GetSelectedInstanceWithoutComposition()
-                       ?? nodeSelection.GetSelectedComposition();
-
-        var id = instance?.SymbolChildId ?? Guid.Empty;
-
-        _selectionChanged = id != _lastSelectedInstanceId;
-        if (_selectionChanged)
+        if (!NodeSelection.TryGetSelectedInstanceOrInput(out var instance, out var inputUi, out _selectionChanged))
         {
-            _lastSelectedInstanceId = id;
-            _viewMode = ViewModes.Parameters;
-        }
-
-        if (instance == null)
-        {
-            var selectedInputs = nodeSelection.GetSelectedNodes<IInputUi>().ToList();
-            if (selectedInputs.Count > 0)
-            {
-                instance = components.CompositionInstance;
-                var inputUi = selectedInputs.First();
-                _viewMode = ViewModes.Settings;
-                _parameterSettings.SelectInput(inputUi.Id);
-            }
-        }
-
-        if (instance == null)
+            if (ProjectView.Focused?.NodeSelection != null)
+                DrawSettingsForSelectedAnnotations(ProjectView.Focused.NodeSelection);
+            
+            _lastSelectedInstanceId = Guid.Empty;
             return;
-
+        }
+        
+        if (inputUi != null)
+        {
+            _viewMode = ViewModes.Settings;
+            _parameterSettings.SelectInput(inputUi.Id);
+        }
+        else if (_selectionChanged)
+        {
+            _viewMode = ViewModes.Parameters; // Switch back from documentation
+        }
+        
         var symbol = instance.Symbol;
         var parentSymbol = instance.Parent?.Symbol;
         var path = instance.InstancePath;
+        
         // ReSharper disable once RedundantAssignment
         instance = null; //allow to unload of instance type in case a recompilation occurs
         
         // Draw dialogs
-        OperatorHelp.EditDescriptionDialog.Draw(symbol); // TODO: This is probably not required...
+        OperatorHelp.EditDescriptionDialog.Draw(symbol); 
+        
+        
         RenameInputDialog.Draw();
 
         if (!symbol.TryGetOrCreateInstance(path, parentSymbol, out instance))
@@ -129,7 +118,7 @@ internal sealed class ParameterWindow : Window
                 DrawParametersArea(instance, symbolChildUi, symbolUi);
                 break;
             case ViewModes.Settings:
-                modified |= _parameterSettings.DrawContent(symbolUi, nodeSelection);
+                modified |= _parameterSettings.DrawContent(symbolUi, ProjectView.Focused!.NodeSelection);
                 break;
             case ViewModes.Help:
                 using (new ChildWindowScope("help", Vector2.Zero, ImGuiWindowFlags.None, Color.Transparent))
@@ -393,7 +382,7 @@ internal sealed class ParameterWindow : Window
         }
         
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(5, 5));
-        ImGui.BeginChild("parameters", Vector2.Zero, false, ImGuiWindowFlags.AlwaysUseWindowPadding);
+        ImGui.BeginChild("parameters", Vector2.Zero, false, ImGuiWindowFlags.AlwaysUseWindowPadding| ImGuiWindowFlags.NoBackground);
 
         // Scroll back up on operator change
         if (_selectionChanged)
@@ -568,6 +557,7 @@ internal sealed class ParameterWindow : Window
 
         ImGui.PushStyleColor(ImGuiCol.FrameBg, UiColors.BackgroundButton.Rgba);
         ImGui.PushStyleColor(ImGuiCol.FrameBgHovered, UiColors.BackgroundHover.Rgba);
+        ImGui.PushID(instance.GetHashCode());
         foreach (var inputSlot in instance.Inputs)
         {
             if (!symbolUi.InputUis.TryGetValue(inputSlot.Id, out var inputUi))
@@ -628,6 +618,7 @@ internal sealed class ParameterWindow : Window
 
             ImGui.PopID();
         }
+        ImGui.PopID(); // Instance
 
         ImGui.PopStyleColor(2);
 
@@ -712,14 +703,14 @@ internal sealed class ParameterWindow : Window
             ImGui.Separator();
             FormInputs.AddVerticalSpace();
             ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-            CustomComponents.IconButton(Icon.Hint,new Vector2(20,20)* T3Ui.UiScaleFactor);
+            CustomComponents.IconButton(Icon.Tip,new Vector2(20,20)* T3Ui.UiScaleFactor);
             ImGui.SameLine();
             ImGui.TextWrapped("How to create an Annotation:\n" +
                 "1.Select the operators you want to include in the annotation.\n" +
                 "2.Shift + A to add the annotation." );
 
             FormInputs.AddVerticalSpace();
-            CustomComponents.IconButton(Icon.Hint, new Vector2(20, 20) * T3Ui.UiScaleFactor);
+            CustomComponents.IconButton(Icon.Tip, new Vector2(20, 20) * T3Ui.UiScaleFactor);
             ImGui.SameLine();
             ImGui.TextWrapped("How to edit an Annotation:\n" +
                 "1.Double click on the header.\n" +

@@ -1,13 +1,21 @@
 {
-  "Id": "c9d7cd19-7fc6-4491-8dfa-3808725c7857"/*PointsToDMXLights*/,
+  "Id": "c9d7cd19-7fc6-4491-8dfa-3808725c7857"/*PointsToDmxLights*/,
   "Inputs": [
     {
       "Id": "013cc355-91d6-4ea6-b9f7-f1817b89e4a3"/*RedChannel*/,
       "DefaultValue": 0
     },
     {
+      "Id": "032f3617-e1f3-4b41-a3be-61dd63b9f3ba"/*ForwardVector*/,
+      "DefaultValue": 5
+    },
+    {
       "Id": "098f1662-6f47-4dd0-9a73-4c4814aefb23"/*CustomVar2Channel*/,
       "DefaultValue": 0
+    },
+    {
+      "Id": "0c57cdd5-e450-4425-954f-c9e4256f83e1"/*InvertZ*/,
+      "DefaultValue": false
     },
     {
       "Id": "1348ed7c-79f8-48c6-ac00-e60fb40050db"/*FixtureChannelSize*/,
@@ -22,8 +30,24 @@
       "DefaultValue": false
     },
     {
+      "Id": "1f532994-fb0e-44e4-8a80-7917e1851eae"/*PanAxis*/,
+      "DefaultValue": 2
+    },
+    {
+      "Id": "1f877cf6-10d9-4d0b-b087-974bd6855e0a"/*TiltAxis*/,
+      "DefaultValue": 1
+    },
+    {
+      "Id": "23f23213-68e2-45f5-b452-4a86289004c0"/*DebugToLog*/,
+      "DefaultValue": false
+    },
+    {
       "Id": "25e5f0ce-5ec8-4c99-beb1-317c6911a128"/*SetCustomVar1*/,
       "DefaultValue": false
+    },
+    {
+      "Id": "294b0515-b9f2-446a-8a97-01e3c8b715c0"/*VisPanAxis*/,
+      "DefaultValue": 0
     },
     {
       "Id": "2bea2ccb-89f2-427b-bd9a-95c7038b715e"/*ReferencePoints*/,
@@ -35,6 +59,10 @@
     },
     {
       "Id": "4922acd8-ab83-4394-8118-c555385c2ce9"/*GetRotation*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "49fefbdb-2652-43db-ae52-ebc2df3e2856"/*InvertX*/,
       "DefaultValue": false
     },
     {
@@ -58,6 +86,10 @@
       "DefaultValue": false
     },
     {
+      "Id": "5e96a7a3-5340-43f2-96b9-9972a69421e5"/*Is16BitColor*/,
+      "DefaultValue": false
+    },
+    {
       "Id": "61b48e46-c3d1-46e3-a470-810d55f30aa6"/*EffectedPoints*/,
       "DefaultValue": null
     },
@@ -68,6 +100,10 @@
     {
       "Id": "658a19df-e51b-45b4-9f91-cb97a891255a"/*PositionFineChannel*/,
       "DefaultValue": 0
+    },
+    {
+      "Id": "6d8fc457-0c80-4736-8c25-cc48f07cbbfd"/*InvertY*/,
+      "DefaultValue": false
     },
     {
       "Id": "6e8b4125-0e8c-430b-897d-2231bb4c8f6f"/*TiltRange*/,
@@ -128,6 +164,10 @@
       "DefaultValue": 0
     },
     {
+      "Id": "9c235473-346b-4861-9844-4b584e09f58a"/*RotationOrder*/,
+      "DefaultValue": 0
+    },
+    {
       "Id": "a9315f88-6024-42e9-9691-4544627f0bef"/*SetCustomVar5*/,
       "DefaultValue": false
     },
@@ -148,15 +188,27 @@
       "DefaultValue": 0
     },
     {
-      "Id": "ba8d8f32-792c-4675-a5f5-415c16db8c66"/*AxisOrder*/,
-      "DefaultValue": 0
+      "Id": "b8080f4e-4542-4e20-9844-8028bbaf223f"/*GetF2ByPixel*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "bec9e5a6-40a9-49b2-88bd-01a4ea03d28c"/*GetF1ByPixel*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "c9d7cd19-7fc6-4491-8dfa-3808725c7859"/*PanOffset*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "c9d7cd19-7fc6-4491-8dfa-3808725c7860"/*TiltOffset*/,
+      "DefaultValue": 0.0
     },
     {
       "Id": "cbaf821c-0305-4c74-a632-864081cc9a34"/*CustomVar4Channel*/,
       "DefaultValue": 0
     },
     {
-      "Id": "cf2c3308-8f3f-442d-a563-b419f12e7ad1"/*RGBToCMY*/,
+      "Id": "cf2c3308-8f3f-442d-a563-b419f12e7ad1"/*RgbToCmy*/,
       "DefaultValue": false
     },
     {
@@ -172,6 +224,10 @@
       "DefaultValue": 0
     },
     {
+      "Id": "d8a90c30-4e5b-4f0b-bfa7-09daf3a4c71f"/*TestModeSelect*/,
+      "DefaultValue": 0
+    },
+    {
       "Id": "df04fce0-c6e5-4039-b03f-e651fc0ec4a9"/*GetPosition*/,
       "DefaultValue": false
     },
@@ -181,7 +237,7 @@
     },
     {
       "Id": "e96655be-6bc7-4ca4-bf74-079a07570d74"/*ShortestPathPanTilt*/,
-      "DefaultValue": false
+      "DefaultValue": true
     },
     {
       "Id": "f13edebd-b44f-49e9-985e-7e3feb886fea"/*AlphaChannel*/,
@@ -197,6 +253,10 @@
     {
       "Id": "f85ecf9f-0c3d-4c10-8ba7-480aa2c7a667"/*InvertTilt*/,
       "DefaultValue": false
+    },
+    {
+      "Id": "f98e8f19-c234-453d-9492-369f6b08035d"/*VisTiltAxis*/,
+      "DefaultValue": 0
     },
     {
       "Id": "fc3ec0d6-8567-4d5f-9a63-5c69fb5988cb"/*PositionChannel*/,

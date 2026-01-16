@@ -26,7 +26,7 @@
       }
     },
     {
-      "InputId": "d8a1d61b-b32d-43bb-a74d-6da5efb3e2a8"/*DetailLandscapeScaling*/,
+      "InputId": "d8a1d61b-b32d-43bb-a74d-6da5efb3e2a8"/*MountainScaling*/,
       "Position": {
         "X": -1655.8314,
         "Y": -517.483
@@ -39,13 +39,6 @@
       "Position": {
         "X": 1900.2258,
         "Y": 82.59491
-      }
-    },
-    {
-      "ChildId": "09159b69-6984-43e8-85b2-45de005c59fc"/*FractalNoise*/,
-      "Position": {
-        "X": -875.4017,
-        "Y": -351.44482
       }
     },
     {
@@ -63,24 +56,10 @@
       }
     },
     {
-      "ChildId": "1d9f58d0-339f-42d1-861c-687198c9b82e"/*Blend*/,
-      "Position": {
-        "X": -4.220825,
-        "Y": -687.784
-      }
-    },
-    {
       "ChildId": "1f56bb14-af79-4160-851f-b67565419b1b"/*Grain*/,
       "Position": {
         "X": 2200.2258,
         "Y": 82.59491
-      }
-    },
-    {
-      "ChildId": "2460c459-354d-43a3-b0fd-d842de7ec297"/*ChannelMixer*/,
-      "Position": {
-        "X": -669.12775,
-        "Y": -774.414
       }
     },
     {
@@ -91,13 +70,6 @@
       }
     },
     {
-      "ChildId": "2b364482-175f-40f5-96ee-aab74855d178"/*Blend*/,
-      "Position": {
-        "X": -875.4017,
-        "Y": -786.4448
-      }
-    },
-    {
       "ChildId": "36482626-fd60-45e7-b7f9-a483a963fafc"/*Blob*/,
       "Position": {
         "X": 1451.554,
@@ -105,33 +77,17 @@
       }
     },
     {
-      "ChildId": "444c369e-c991-4ff8-958a-209e66053df0"/*LinearGradient*/,
-      "Position": {
-        "X": 405.28946,
-        "Y": -1892.5044
-      }
-    },
-    {
-      "ChildId": "50d319bf-b6d1-4975-a3be-4db63a3cdcb3"/*TransformImage*/,
-      "Comment": "Now you can spot the vertical seam.\nIt's because we're shifting the texture on the X axis. And the texture wrapping mode is set to Wrap. \n",
-      "Position": {
-        "X": 282.22852,
-        "Y": -2070.4407
-      }
-    },
-    {
       "ChildId": "518e01d8-747c-4419-aa4f-44dff4bfc64e"/*PointLight*/,
       "Position": {
-        "X": 850.2258,
-        "Y": 82.59491
+        "X": 861.5547,
+        "Y": 49.63806
       }
     },
     {
-      "ChildId": "52453f9a-b00f-436f-8867-d2e576fcb132"/*TransformImage*/,
-      "Comment": "It's time to take care of the horizontal seam",
+      "ChildId": "5828d4f5-2471-452f-8891-8b5a4811d347"/*WorleyNoise*/,
       "Position": {
-        "X": 793.06726,
-        "Y": -1464.6051
+        "X": -931.5602,
+        "Y": -206.83063
       }
     },
     {
@@ -144,8 +100,8 @@
     {
       "ChildId": "5e0d93c0-e275-4b20-bcd7-54dfe1e1aedc"/*MakeResolution*/,
       "Position": {
-        "X": -1175.4016,
-        "Y": -703.4448
+        "X": -1181.4094,
+        "Y": -642.5087
       }
     },
     {
@@ -160,6 +116,13 @@
       "Position": {
         "X": -1406.7487,
         "Y": -377.87512
+      }
+    },
+    {
+      "ChildId": "6a4eee63-577c-4f72-9d5c-724f7f24c588"/*Blend*/,
+      "Position": {
+        "X": -409.2403,
+        "Y": -52.735687
       }
     },
     {
@@ -184,17 +147,17 @@
       }
     },
     {
-      "ChildId": "7366dc27-e6ef-484b-9298-7c4c321c2414"/*Blend*/,
+      "ChildId": "7fe520f6-78fc-4658-b8b6-d00750d9c362"/*FractalNoise*/,
       "Position": {
-        "X": -277.67267,
-        "Y": -753.1373
+        "X": -953.1268,
+        "Y": -20.228241
       }
     },
     {
-      "ChildId": "74bb1790-7ead-442f-a5fb-8086b3fc2239"/*LinearGradient*/,
+      "ChildId": "8163e180-25a1-4dfe-97d6-f796727974b2"/*Blend*/,
       "Position": {
-        "X": 735.0138,
-        "Y": -1271.924
+        "X": -189.62914,
+        "Y": 57.287903
       }
     },
     {
@@ -212,13 +175,6 @@
       }
     },
     {
-      "ChildId": "87188cb6-939e-4210-b290-31964cf176a4"/*WorleyNoise*/,
-      "Position": {
-        "X": -1025.4016,
-        "Y": -537.4448
-      }
-    },
-    {
       "ChildId": "898ea129-74e7-4256-ad5f-30bae3386025"/*ColorGrade*/,
       "Position": {
         "X": 1750.2258,
@@ -226,17 +182,24 @@
       }
     },
     {
-      "ChildId": "8b2a1bbc-b83f-4098-b224-6e8bdf3e28eb"/*WorleyNoise*/,
-      "Position": {
-        "X": -1025.4016,
-        "Y": -786.4448
-      }
-    },
-    {
       "ChildId": "8ca7e0a8-f175-42be-a117-875318b5530b"/*Crater Scale*/,
       "Position": {
         "X": -1406.7487,
         "Y": -489.87512
+      }
+    },
+    {
+      "ChildId": "936f271b-beff-4758-9963-9561175083ea"/*Blend*/,
+      "Position": {
+        "X": -617.3768,
+        "Y": -119.56448
+      }
+    },
+    {
+      "ChildId": "97686f9b-4398-4c84-b2d9-60debeaa2330"/*PointLight*/,
+      "Position": {
+        "X": 698.2188,
+        "Y": 27.362793
       }
     },
     {
@@ -251,13 +214,6 @@
       "Position": {
         "X": 2818.5203,
         "Y": 1007.79346
-      }
-    },
-    {
-      "ChildId": "a4d1c55c-2cde-4151-89e5-8d479ed45281"/*FractalNoise*/,
-      "Position": {
-        "X": -154.10455,
-        "Y": -456.55334
       }
     },
     {
@@ -289,24 +245,31 @@
       }
     },
     {
+      "ChildId": "b86ba899-667b-4880-bb15-e372f09ec7c5"/*FractalNoise*/,
+      "Position": {
+        "X": -946.7138,
+        "Y": 177.18777
+      }
+    },
+    {
       "ChildId": "c8c990c8-b72d-43e4-a30e-701d6a73cc7a"/*NormalMap*/,
       "Position": {
-        "X": 330.20618,
-        "Y": -662.27515
+        "X": 321.55505,
+        "Y": -443.52417
       }
     },
     {
       "ChildId": "cd5e8635-de8d-43de-b2d7-eddf270d203c"/*MakeTileableImageAdvanced*/,
       "Position": {
-        "X": -209.26733,
-        "Y": -1295.551
+        "X": 33.44754,
+        "Y": -29.675201
       }
     },
     {
       "ChildId": "d0727ca8-7391-445a-aecc-d8fe0db84ffb"/*SetEnvironment*/,
       "Position": {
-        "X": 1000.2258,
-        "Y": 82.59491
+        "X": 992.5016,
+        "Y": 142.69489
       }
     },
     {
@@ -314,22 +277,6 @@
       "Position": {
         "X": 1300.2258,
         "Y": 82.59491
-      }
-    },
-    {
-      "ChildId": "eb3d7edd-103f-4155-b4cc-81b582d1b842"/*BlendWithMask*/,
-      "Comment": "We're blending in the first texture with the mask to hide the seam.",
-      "Position": {
-        "X": 556.0292,
-        "Y": -2131.2014
-      }
-    },
-    {
-      "ChildId": "eef48261-a1e5-4178-baab-547c36d1e276"/*BlendWithMask*/,
-      "Comment": "Now this texture can be repeated to infinity",
-      "Position": {
-        "X": 974.77905,
-        "Y": -1407.0104
       }
     }
   ],
@@ -339,26 +286,6 @@
       "Position": {
         "X": 2760.2258,
         "Y": 310.36426
-      }
-    }
-  ],
-  "Annotations": [
-    {
-      "Id": "c26b33e4-8689-434a-809e-1b76881e13ff",
-      "Title": "Only Vertical",
-      "Color": {
-        "X": 0.6,
-        "Y": 0.6,
-        "Z": 0.6,
-        "W": 1.0
-      },
-      "Position": {
-        "X": 210.14801,
-        "Y": -2319.2546
-      },
-      "Size": {
-        "X": 547.2903,
-        "Y": 581.94617
       }
     }
   ]

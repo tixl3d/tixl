@@ -6,15 +6,17 @@ using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
 
-namespace T3.Editor.Gui.Graph.Dialogs;
+namespace T3.Editor.Gui.Dialogs;
 
 
 internal sealed class RenameSymbolDialog : ModalDialog
 {
-    internal void Draw(List<SymbolUi.Child> selectedChildUis, ref string name)
+    internal void Draw(IEnumerable<SymbolUi.Child> selectedChildUis2, ref string name)
     {
         if (BeginDialog("Rename symbol"))
         {
+            var selectedChildUis = selectedChildUis2.ToList();
+            
             if (selectedChildUis.Count != 1)
             {
                 Log.Warning("Can't use RenameSymbolDialog without selected operator");
@@ -38,7 +40,11 @@ internal sealed class RenameSymbolDialog : ModalDialog
 
             
             var symbol = symbolUi.SymbolChild.Symbol;
-            _ = SymbolModificationInputs.DrawSymbolNameInput(ref name, symbol.Namespace, symbol.SymbolPackage, true, out var isNameValid);
+            _ = SymbolModificationInputs.DrawSymbolNameInput(ref name, 
+                                                             symbol.Namespace, 
+                                                             symbol.SymbolPackage, 
+                                                             ImGui.IsWindowAppearing(), 
+                                                             out var isNameValid);
 
             ImGui.Spacing();
                 

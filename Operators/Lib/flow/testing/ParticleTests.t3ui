@@ -4,10 +4,31 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
+      "ChildId": "03dd906f-9a24-44f5-95be-0fd4e086df26"/*4*/,
+      "Position": {
+        "X": -280.98636,
+        "Y": 366.18854
+      }
+    },
+    {
       "ChildId": "10189b0c-6d7b-40e6-b414-9a939133a128"/*ParticleSystem*/,
       "Position": {
         "X": 140.00006,
         "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "3266f682-840d-4c9f-9250-2888775d9c45"/*Framerate Speed*/,
+      "Position": {
+        "X": 179.87537,
+        "Y": 453.60602
+      }
+    },
+    {
+      "ChildId": "33174fac-dd49-4b42-90ed-9419a66a75f8"/*_ParticleUpdateTester*/,
+      "Position": {
+        "X": -280.98636,
+        "Y": 296.18857
       }
     },
     {
@@ -25,6 +46,27 @@
       }
     },
     {
+      "ChildId": "5410e163-3c84-4187-8e5f-ce2187cf5af7"/*2*/,
+      "Position": {
+        "X": -280.98636,
+        "Y": 331.18857
+      }
+    },
+    {
+      "ChildId": "62d9b60d-9b76-4483-bba4-90c78b825ad4"/*Group*/,
+      "Position": {
+        "X": -140.98636,
+        "Y": 296.18857
+      }
+    },
+    {
+      "ChildId": "63f9c403-6ce5-471b-8b41-eaa9eb5e4e16"/*Camera*/,
+      "Position": {
+        "X": 179.87537,
+        "Y": 383.60602
+      }
+    },
+    {
       "ChildId": "7303470b-920f-4a78-a188-2fa555e9cf8d"/*TurbulenceForce*/,
       "Position": {
         "X": 0.0,
@@ -36,6 +78,13 @@
       "Position": {
         "X": 0.0,
         "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "9094b343-8ff8-47d1-b907-624961d18d8d"/*RenderTarget*/,
+      "Position": {
+        "X": 179.87537,
+        "Y": 418.60602
       }
     },
     {
@@ -57,6 +106,13 @@
       "Position": {
         "X": 140.00006,
         "Y": 174.99997
+      }
+    },
+    {
+      "ChildId": "f83d4008-7b52-449d-80c8-c6f20f610125"/*8*/,
+      "Position": {
+        "X": -280.98636,
+        "Y": 401.18854
       }
     }
   ],

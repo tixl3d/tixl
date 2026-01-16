@@ -51,6 +51,11 @@ internal sealed class TwistField : Instance<TwistField>
         c.AppendCall($"opTwist(p{c}.{axi}, {ShaderNode}Amount);");
     }
 
+    public void GetPostShaderCode(CodeAssembleContext c, int inputIndex)
+    {
+        c.AppendCall($"f{c}.w *= {ShaderNode}StepFactor; ");
+    }
+    
     private AxisTypes _axis;
 
     private readonly string[] _axisCodes =
@@ -76,5 +81,8 @@ internal sealed class TwistField : Instance<TwistField>
 
     [Input(Guid = "195F4642-52F7-4C95-9127-07F6175549F5", MappedType = typeof(AxisTypes))]
     public readonly InputSlot<int> Axis = new();
-
+    
+    [GraphParam]
+    [Input(Guid = "AD43A4C4-3439-46C5-986D-C654A56D296A")]
+    public readonly InputSlot<float> StepFactor = new();
 }

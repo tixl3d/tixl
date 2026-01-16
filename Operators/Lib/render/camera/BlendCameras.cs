@@ -3,14 +3,21 @@ using T3.Core.Utils;
 namespace Lib.render.camera;
 
 [Guid("e3ff58e2-847a-4c97-947c-cfbcf8f9c79d")]
-internal sealed class BlendCameras : Instance<BlendCameras>, IStatusProvider
+internal sealed class BlendCameras : Instance<BlendCameras>, IStatusProvider, ICamera
 {
     [Output(Guid = "d0a6f926-c4ed-4cc9-917d-942f8c34fd65")]
     public readonly Slot<Command> Output = new();
 
+    [Output(Guid = "2DD98046-F80C-4CFB-8A90-AE46515EE07F")]
+    public readonly Slot<object> CameraReference = new();
+
     public BlendCameras()
     {
         Output.UpdateAction += Update;
+        CameraReference.UpdateAction += Update;
+        
+        CameraReference.Value = this;
+
     }
 
     private void Update(EvaluationContext context)
@@ -69,11 +76,14 @@ internal sealed class BlendCameras : Instance<BlendCameras>, IStatusProvider
             }
 
             var blend = floatIndex - index;
-            var blendedCamDef = CameraDefinition.Blend(camA.CameraDefinition, camB.CameraDefinition, blend);
+            _blendedCamDef = CameraDefinition.Blend(camA.CameraDefinition, camB.CameraDefinition, blend);
 
-            blendedCamDef.BuildProjectionMatrices(out var camToClipSpace, out var worldToCamera);
+            _blendedCamDef.BuildProjectionMatrices(out var camToClipSpace, out var worldToCamera);
 
-            // Set properties and evaluate sub tree
+            WorldToCamera = worldToCamera;
+            CameraToClipSpace = camToClipSpace;
+            
+            // Set properties and evaluate sub-tree
             var prevWorldToCamera = context.WorldToCamera;
             var prevCameraToClipSpace = context.CameraToClipSpace;
 
@@ -84,6 +94,7 @@ internal sealed class BlendCameras : Instance<BlendCameras>, IStatusProvider
 
             context.CameraToClipSpace = prevCameraToClipSpace;
             context.WorldToCamera = prevWorldToCamera;
+
         }
         catch (Exception e)
         {
@@ -92,14 +103,6 @@ internal sealed class BlendCameras : Instance<BlendCameras>, IStatusProvider
     }
 
 
-    [Input(Guid = "C7EE5D97-86C1-442F-91D0-B60E6CFE24C7")]
-    public readonly InputSlot<Command> Command = new();
-
-    [Input(Guid = "FF2ED90B-38BD-4BA8-AF07-23BE87EABCC3")]
-    public readonly MultiInputSlot<Object> CameraReferences = new();
-
-    [Input(Guid = "3B71FDBF-CB2D-45F1-84DD-7AC66763E6AE")]
-    public readonly InputSlot<float> Index = new();
 
     public IStatusProvider.StatusLevel GetStatusLevel()
     {
@@ -111,5 +114,26 @@ internal sealed class BlendCameras : Instance<BlendCameras>, IStatusProvider
         return _lastErrorMessage;
     }
 
+    #region Implement ICamera
+    
+    public Vector3 CameraPosition { get => _blendedCamDef.Position; set {} }
+    public Vector3 CameraTarget { get=> _blendedCamDef.Target; set { } }
+    public float CameraRoll { get => _blendedCamDef.Roll; set { } }
+    public CameraDefinition CameraDefinition => _blendedCamDef;
+    public Matrix4x4 WorldToCamera { get; set; }
+    public Matrix4x4 CameraToClipSpace { get; set; }
+    #endregion
+    
     private string _lastErrorMessage;
+    private CameraDefinition _blendedCamDef;
+
+
+    [Input(Guid = "C7EE5D97-86C1-442F-91D0-B60E6CFE24C7")]
+    public readonly InputSlot<Command> Command = new();
+
+    [Input(Guid = "FF2ED90B-38BD-4BA8-AF07-23BE87EABCC3")]
+    public readonly MultiInputSlot<Object> CameraReferences = new();
+
+    [Input(Guid = "3B71FDBF-CB2D-45F1-84DD-7AC66763E6AE")]
+    public readonly InputSlot<float> Index = new();
 }

@@ -154,7 +154,7 @@ internal sealed class _SpecularPrefilter : Instance<_SpecularPrefilter>
         device.ImmediateContext.OutputMerger.BlendState = DefaultRenderingStates.DisabledBlendState;
         device.ImmediateContext.OutputMerger.DepthStencilState = DefaultRenderingStates.DisabledDepthStencilState;
             
-        _prevRenderTargetViews = device.ImmediateContext.OutputMerger.GetRenderTargets(1);
+        _prevRenderTargetViews = device.ImmediateContext.OutputMerger.GetRenderTargets(2);
         device.ImmediateContext.OutputMerger.GetRenderTargets(out _prevDepthStencilView);
                 
         var rtvDesc = new RenderTargetViewDescription()
@@ -280,10 +280,12 @@ internal sealed class _SpecularPrefilter : Instance<_SpecularPrefilter>
             
         if (_prevRenderTargetViews.Length > 0)
             deviceContext.OutputMerger.SetRenderTargets(_prevDepthStencilView, _prevRenderTargetViews);
-            
+
         foreach (var rtv in _prevRenderTargetViews)
-            rtv.Dispose();            
-            
+        {
+            rtv?.Dispose();
+        }
+
         Utilities.Dispose(ref _prevDepthStencilView);
     }        
 

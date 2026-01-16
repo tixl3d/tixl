@@ -5,18 +5,92 @@ using System.Net.Sockets;
 namespace Lib.io.udp;
 
 [Guid("34E4E63B-2708-4673-B682-1D07D0245E1E")]
-internal sealed class UDPOutput : Instance<UDPOutput>, IStatusProvider, ICustomDropdownHolder, IDisposable
+internal sealed class UdpOutput : Instance<UdpOutput>, IStatusProvider, ICustomDropdownHolder, IDisposable
 {
-    [Output(Guid = "0E2B808F-63A5-4927-9610-410E5F5227B1")] public readonly Slot<Command> Result = new();
-    [Output(Guid = "07B57F3A-8993-4B9F-8349-D0A4762E4447")] public readonly Slot<bool> IsConnected = new();
+    [Input(Guid = "7AB8F2A6-4874-4235-85A5-D0E1F30C0446")]
+    public readonly InputSlot<bool> Connect = new();
 
-    public UDPOutput() { Result.UpdateAction = Update; }
+    [Output(Guid = "07B57F3A-8993-4B9F-8349-D0A4762E4447")]
+    public readonly Slot<bool> IsConnected = new();
+
+    [Input(Guid = "9E23335A-D63A-4286-930E-C63E86D0E6F0")]
+    public readonly InputSlot<string> LocalIpAddress = new("127.0.0.1"); // Default updated
+
+    [Input(Guid = "59074D76-1F4F-406A-B512-5813F4E3420E")]
+    public readonly MultiInputSlot<string> MessageParts = new();
+
+    [Input(Guid = "A1B2C3D4-E5F6-4789-89AB-CDEF01234567")]
+    public readonly InputSlot<bool> PrintToLog = new(); // New GUID for PrintToLog
+
+    [Output(Guid = "0E2B808F-63A5-4927-9610-410E5F5227B1")]
+    public readonly Slot<Command> Result = new();
+
+    [Input(Guid = "216A0356-EF4A-413A-A656-7497127E31D4")]
+    public readonly InputSlot<bool> SendOnChange = new(true);
+
+    [Input(Guid = "C7AC22C0-A31E-41F6-B29D-D40956E6688B")]
+    public readonly InputSlot<bool> SendTrigger = new();
+
+    [Input(Guid = "82933C40-DA9E-4340-A227-E9BACF6E2063")]
+    public readonly InputSlot<string> Separator = new(" ");
+
+    [Input(Guid = "24B5D450-4E83-49DB-88B1-7D688E64585D")]
+    public readonly InputSlot<string> TargetIpAddress = new("127.0.0.1");
+
+    [Input(Guid = "36C2BF8B-3E0C-4856-AA4A-32943A4B0223")]
+    public readonly InputSlot<int> TargetPort = new(7001);
+
+    private bool _lastConnectState;
+
+    private string? _lastErrorMessage = "Not connected.";
+    private string? _lastLocalIp;
+    private string? _lastSentMessage;
+    private IStatusProvider.StatusLevel _lastStatusLevel = IStatusProvider.StatusLevel.Notice;
+    private bool _printToLog; // Added for PrintToLog functionality
 
     private UdpClient? _udpClient;
-    private string? _lastLocalIp;
-    private bool _lastConnectState;
-    private string? _lastSentMessage;
-    private bool _printToLog; // Added for PrintToLog functionality
+
+    public UdpOutput()
+    {
+        Result.UpdateAction = Update;
+    }
+
+    string ICustomDropdownHolder.GetValueForInput(Guid id)
+    {
+        return id == LocalIpAddress.Id ? LocalIpAddress.Value  ?? string.Empty: string.Empty;
+    }
+
+    IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid id)
+    {
+        if (id == LocalIpAddress.Id)
+        {
+            _networkInterfaces = GetNetworkInterfaces();
+            foreach (var adapter in _networkInterfaces) yield return adapter.DisplayName;
+        }
+        Enumerable.Empty<string>();
+    }
+
+    void ICustomDropdownHolder.HandleResultForInput(Guid id, string? s, bool i)
+    {
+        if (string.IsNullOrEmpty(s) || !i || id != LocalIpAddress.Id) return;
+        var foundAdapter = _networkInterfaces.FirstOrDefault(adapter => adapter.DisplayName == s);
+        if (foundAdapter != null) LocalIpAddress.SetTypedInputValue(foundAdapter.IpAddress.ToString());
+    }
+
+    public void Dispose()
+    {
+        CloseSocket();
+    }
+
+    public IStatusProvider.StatusLevel GetStatusLevel()
+    {
+        return _lastStatusLevel;
+    }
+
+    public string? GetStatusMessage()
+    {
+        return _lastErrorMessage;
+    }
 
     private void Update(EvaluationContext context)
     {
@@ -70,6 +144,7 @@ internal sealed class UDPOutput : Instance<UDPOutput>, IStatusProvider, ICustomD
                         Log.Warning($"UDP Output: Send error to {targetIp}:{targetPort}: {e.Message}", this);
                     }
                 }
+
                 _lastSentMessage = currentMessage;
             }
         }
@@ -77,8 +152,17 @@ internal sealed class UDPOutput : Instance<UDPOutput>, IStatusProvider, ICustomD
 
     private void OpenSocket(string? localIpAddress)
     {
-        if (string.IsNullOrEmpty(localIpAddress)) { SetStatus("Local IP not selected.", IStatusProvider.StatusLevel.Warning); return; }
-        if (!IPAddress.TryParse(localIpAddress, out var ip)) { SetStatus($"Invalid Local IP.", IStatusProvider.StatusLevel.Warning); return; }
+        if (string.IsNullOrEmpty(localIpAddress))
+        {
+            SetStatus("Local IP not selected.", IStatusProvider.StatusLevel.Warning);
+            return;
+        }
+
+        if (!IPAddress.TryParse(localIpAddress, out var ip))
+        {
+            SetStatus("Invalid Local IP.", IStatusProvider.StatusLevel.Warning);
+            return;
+        }
 
         try
         {
@@ -97,6 +181,7 @@ internal sealed class UDPOutput : Instance<UDPOutput>, IStatusProvider, ICustomD
             {
                 Log.Error($"UDP Output: Failed to open socket on {localIpAddress}: {e.Message}", this);
             }
+
             _udpClient?.Dispose();
             _udpClient = null;
         }
@@ -116,41 +201,39 @@ internal sealed class UDPOutput : Instance<UDPOutput>, IStatusProvider, ICustomD
         }
     }
 
-    public void Dispose() { CloseSocket(); }
-
-    private string? _lastErrorMessage = "Not connected.";
-    private IStatusProvider.StatusLevel _lastStatusLevel = IStatusProvider.StatusLevel.Notice;
-    public void SetStatus(string m, IStatusProvider.StatusLevel l) { _lastErrorMessage = m; _lastStatusLevel = l; }
-    public IStatusProvider.StatusLevel GetStatusLevel() => _lastStatusLevel;
-    public string? GetStatusMessage() => _lastErrorMessage;
-
-    string ICustomDropdownHolder.GetValueForInput(Guid id) => id == LocalIpAddress.Id ? LocalIpAddress.Value : string.Empty;
-    IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid id) => id == LocalIpAddress.Id ? GetLocalIPv4Addresses() : Enumerable.Empty<string>();
-    void ICustomDropdownHolder.HandleResultForInput(Guid id, string? s, bool i)
+    public void SetStatus(string m, IStatusProvider.StatusLevel l)
     {
-        if (string.IsNullOrEmpty(s) || !i || id != LocalIpAddress.Id) return;
-        LocalIpAddress.SetTypedInputValue(s.Split(' ')[0]);
+        _lastErrorMessage = m;
+        _lastStatusLevel = l;
     }
-    private static IEnumerable<string> GetLocalIPv4Addresses()
+
+    #region Network Interface Logic
+    private static List<NetworkAdapterInfo> _networkInterfaces = new();
+
+    private static List<NetworkAdapterInfo> GetNetworkInterfaces()
     {
-        yield return "127.0.0.1";
-        if (!NetworkInterface.GetIsNetworkAvailable()) yield break;
-        foreach (var ni in NetworkInterface.GetAllNetworkInterfaces())
+        var list = new List<NetworkAdapterInfo>();
+        list.Add(new NetworkAdapterInfo(IPAddress.Any, IPAddress.Any, "Any"));
+        list.Add(new NetworkAdapterInfo(IPAddress.Loopback, IPAddress.Parse("255.0.0.0"), "Localhost"));
+        
+        try
         {
-            if (ni.OperationalStatus != OperationalStatus.Up || ni.NetworkInterfaceType == NetworkInterfaceType.Loopback) continue;
-            foreach (var ipInfo in ni.GetIPProperties().UnicastAddresses)
-                if (ipInfo.Address.AddressFamily == AddressFamily.InterNetwork)
-                    yield return ipInfo.Address.ToString();
+            list.AddRange(from ni in NetworkInterface.GetAllNetworkInterfaces()
+                          where ni.OperationalStatus == OperationalStatus.Up && ni.NetworkInterfaceType != NetworkInterfaceType.Loopback
+                          from ip in ni.GetIPProperties().UnicastAddresses
+                          where ip.Address.AddressFamily == AddressFamily.InterNetwork
+                          select new NetworkAdapterInfo(ip.Address, ip.IPv4Mask, ni.Name));
         }
+        catch (Exception e)
+        {
+            Log.Warning("Could not enumerate network interfaces: " + e.Message);
+        }
+        return list;
     }
 
-    [Input(Guid = "9E23335A-D63A-4286-930E-C63E86D0E6F0")] public readonly InputSlot<string> LocalIpAddress = new("127.0.0.1"); // Default updated
-    [Input(Guid = "24B5D450-4E83-49DB-88B1-7D688E64585D")] public readonly InputSlot<string> TargetIpAddress = new("127.0.0.1");
-    [Input(Guid = "36C2BF8B-3E0C-4856-AA4A-32943A4B0223")] public readonly InputSlot<int> TargetPort = new(7001);
-    [Input(Guid = "59074D76-1F4F-406A-B512-5813F4E3420E")] public readonly MultiInputSlot<string> MessageParts = new();
-    [Input(Guid = "82933C40-DA9E-4340-A227-E9BACF6E2063")] public readonly InputSlot<string> Separator = new(" ");
-    [Input(Guid = "216A0356-EF4A-413A-A656-7497127E31D4")] public readonly InputSlot<bool> SendOnChange = new(true);
-    [Input(Guid = "C7AC22C0-A31E-41F6-B29D-D40956E6688B")] public readonly InputSlot<bool> SendTrigger = new();
-    [Input(Guid = "7AB8F2A6-4874-4235-85A5-D0E1F30C0446")] public readonly InputSlot<bool> Connect = new();
-    [Input(Guid = "A1B2C3D4-E5F6-4789-89AB-CDEF01234567")] public readonly InputSlot<bool> PrintToLog = new(); // New GUID for PrintToLog
+    private sealed record NetworkAdapterInfo(IPAddress IpAddress, IPAddress SubnetMask, string Name)
+    {
+        public string DisplayName => $"{Name}: {IpAddress}";
+    }
+    #endregion
 }

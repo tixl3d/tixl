@@ -85,7 +85,7 @@ namespace Lib.io.websocket
 
             // New inputs for client message parsing
             var clientParsingMode = (MessageParsingMode)ClientMessageParsingMode.GetValue(context);
-            var clientDelimiter = ClientMessageDelimiter.GetValue(context);
+            var clientDelimiter = ClientMessageDelimiter.GetValue(context) ?? string.Empty;
             // var keyToExtract = KeyToExtract.GetValue(context); // Removed
 
             var settingsChanged = shouldListen != _lastListenState || port != _lastPort || path != _lastPath || localIp != _lastLocalIp;
@@ -150,6 +150,7 @@ namespace Lib.io.websocket
                 {
                     case MessageParsingMode.Raw:
                         break;
+                    
                     case MessageParsingMode.SpaceSeparated:
                         var stringParts = clientMsg.Split(new[] { clientDelimiter }, StringSplitOptions.RemoveEmptyEntries);
                         foreach (var part in stringParts)
@@ -164,6 +165,7 @@ namespace Lib.io.websocket
                             }
                         }
                         break;
+                    
                     case MessageParsingMode.JsonKeyValue:
                         try
                         {

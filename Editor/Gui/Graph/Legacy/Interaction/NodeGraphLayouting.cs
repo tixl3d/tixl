@@ -7,7 +7,7 @@ using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
 
-namespace T3.Editor.Gui.Graph.Legacy.Interaction;
+namespace T3.Editor.Gui.Legacy.Interaction;
 
 internal sealed class NodeGraphLayouting
 {
@@ -27,7 +27,7 @@ internal sealed class NodeGraphLayouting
         foreach (var n in _nodeSelection.GetSelectedChildUis().ToList())
         {
             //var xxx = NodeOperations.CollectSlotDependencies(n)
-            var connectedChildren = Structure.CollectConnectedChildren(n.SymbolChild, composition);
+            var connectedChildren = Structure.CollectConnectedChildren(n.SymbolChild, composition.Symbol);
 
             // First pass is rough layout
             var nodesForSecondPass = new Dictionary<ISelectableCanvasObject, int>();

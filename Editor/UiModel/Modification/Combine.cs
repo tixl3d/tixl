@@ -165,7 +165,7 @@ internal static class Combine
             }
         }
 
-        copyCmd.OldToNewIdDict.ToList().ForEach(x => oldToNewIdMap.Add(x.Key, x.Value));
+        copyCmd.OldToNewChildIds.ToList().ForEach(x => oldToNewIdMap.Add(x.Key, x.Value));
 
         var selectedChildrenIds = (from child in selectedChildUis select child.Id).ToList();
         parentCompositionSymbol.Animator.RemoveAnimationsFromInstances(selectedChildrenIds);

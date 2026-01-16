@@ -84,7 +84,7 @@
       }
     },
     {
-      "ChildId": "c6e83411-b934-430f-bf45-ff139141ae2f"/*PickFromStringList*/,
+      "ChildId": "c6e83411-b934-430f-bf45-ff139141ae2f"/*PickStringFromList*/,
       "Position": {
         "X": 600.0,
         "Y": 277.11035

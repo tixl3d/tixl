@@ -188,13 +188,6 @@
       }
     },
     {
-      "ChildId": "b573f4c6-1a39-4f30-8e87-33a64c4ebda9"/*ReadFile*/,
-      "Position": {
-        "X": 346.2502,
-        "Y": 1029.8579
-      }
-    },
-    {
       "ChildId": "d3e02a60-a6de-4669-93c2-8c0be6c127b3"/*ComputeShaderFromSource*/,
       "Position": {
         "X": 940.0497,

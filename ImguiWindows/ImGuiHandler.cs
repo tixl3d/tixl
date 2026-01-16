@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 using ImGuiNET;
 using SilkWindows;
 
-namespace ImguiWindows;
+namespace SilkWindows;
 
 internal sealed class ImGuiHandler
 {

@@ -1,0 +1,116 @@
+{
+  "Id": "6681a029-e23f-4c6b-aa95-df30906ea58c"/*I02k_GainAndBiasControl*/,
+  "Description": "LinearGradient: GainAndBias",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0bd5039f-31b2-448c-821a-6c65db49696d"/*LinearGradient*/,
+      "AnnotationId": "606c89c3-3cd5-4883-8da9-101ee8d767f0",
+      "Position": {
+        "X": 1441.7301,
+        "Y": 2334.827
+      }
+    },
+    {
+      "ChildId": "2a3a936e-7b08-47ac-948f-3934e44d5682"/*LinearGradient*/,
+      "AnnotationId": "0c81af0c-ef55-4297-8c41-5c0874118ba0",
+      "Position": {
+        "X": 1298.4766,
+        "Y": 2082.3213
+      }
+    },
+    {
+      "ChildId": "4452e901-def0-407e-a523-e37d6028c5e6"/*ImageLevels*/,
+      "AnnotationId": "0c81af0c-ef55-4297-8c41-5c0874118ba0",
+      "Position": {
+        "X": 1298.4766,
+        "Y": 2117.3213
+      }
+    },
+    {
+      "ChildId": "747f0c78-ff82-4a14-ab3f-1bd54a9e6e1f"/*ImageQuiz*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2018.4391
+      }
+    },
+    {
+      "ChildId": "8549ef0c-fdeb-481a-b900-046a13ca97f8"/*ImageLevels*/,
+      "Position": {
+        "X": 1286.6545,
+        "Y": 1896.9941
+      }
+    },
+    {
+      "ChildId": "ec926b1c-befe-4c1f-a208-2fc9a4147268"/*LinearGradient*/,
+      "Position": {
+        "X": 1286.6545,
+        "Y": 1861.9941
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "c32ad1b1-dfce-4ad3-a505-dc253363501c"/*ColorBuffer*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2088.439
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "0c81af0c-ef55-4297-8c41-5c0874118ba0",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1144.405,
+        "Y": 2050.6006
+      },
+      "Size": {
+        "X": 325.59497,
+        "Y": 154.39941
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "572f4de7-1a04-46a2-b968-ced71d3e7172",
+      "Description": "Many operators include a GainAndBias parameter.\nIt is a powerful tool for fine-tuning effects in TiXL."
+    },
+    {
+      "Id": "d8166de5-0ee0-4806-b52a-7296b2612e2d",
+      "ChildId": "ec926b1c-befe-4c1f-a208-2fc9a4147268",
+      "InputId": "1c70e502-90cc-4285-92ca-ec3d200967eb",
+      "Description": "Everything is already connected. \nSelect the LinearGradient operator and focus only on GainAndBias.\nNext to the parameter is a small graph showing a straight diagonal line.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "efb4e974-8d00-403c-8ad4-22330c4197c6",
+      "ChildId": "ec926b1c-befe-4c1f-a208-2fc9a4147268",
+      "InputId": "1c70e502-90cc-4285-92ca-ec3d200967eb",
+      "Description": "Drag the graph vertically to shift the bias toward the left or right side of the gradient.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "da2a7e4b-81bf-4065-aa38-4b0a4689f04a",
+      "ChildId": "ec926b1c-befe-4c1f-a208-2fc9a4147268",
+      "InputId": "1c70e502-90cc-4285-92ca-ec3d200967eb",
+      "Description": "Drag the graph horizontally to adjust contrast: lower on the left, higher on the right.",
+      "Style": "CallToAction"
+    },
+    {
+      "Id": "cc0cbb0a-29b3-4133-abe8-f6b56cfb5a54",
+      "ChildId": "ec926b1c-befe-4c1f-a208-2fc9a4147268",
+      "InputId": "1c70e502-90cc-4285-92ca-ec3d200967eb",
+      "Description": "Combine both directions and find the setting that matches the goal.",
+      "Style": "CallToAction"
+    }
+  ]
+}

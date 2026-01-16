@@ -13,7 +13,7 @@ using T3.Editor.UiModel.ProjectHandling;
 using Color = T3.Core.DataTypes.Vector.Color;
 using Vector2 = System.Numerics.Vector2;
 
-namespace T3.Editor.Gui.Graph.Legacy.Interaction.Connections;
+namespace T3.Editor.Gui.Legacy.Interaction.Connections;
 
 internal static class ConnectionSplitHelper
 {

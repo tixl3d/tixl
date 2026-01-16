@@ -1,7 +1,7 @@
 {
   "Id": "1f73d45d-fdbf-4429-8e17-741285a050f5"/*SetShadowExample*/,
   "Description": "A simple illustration of how SetShadow can be applied.",
-  "SymbolTags": "1026",
+  "SymbolTags": "2",
   "InputUis": [],
   "SymbolChildUis": [
     {
@@ -62,9 +62,17 @@
     },
     {
       "ChildId": "8a91cba0-75b1-4f6f-ab03-1e403321a115"/*SetShadow*/,
+      "Comment": "Disable debug",
       "Position": {
         "X": 905.2754,
         "Y": 46.904297
+      }
+    },
+    {
+      "ChildId": "8bad9799-bae8-4db7-b1d5-e1dda8c00d36"/*CombineMeshes*/,
+      "Position": {
+        "X": 19.965622,
+        "Y": 441.089
       }
     },
     {
@@ -96,6 +104,13 @@
       }
     },
     {
+      "ChildId": "a82f071d-c708-4a95-906f-ee988b16b384"/*QuadMesh*/,
+      "Position": {
+        "X": -155.2749,
+        "Y": 494.30426
+      }
+    },
+    {
       "ChildId": "b85ceab1-5558-4d40-9164-813821bc4585"/*Once*/,
       "Position": {
         "X": -315.44064,
@@ -112,15 +127,15 @@
     {
       "ChildId": "d57f6543-f4f5-4d3d-9d9e-885024bde37d"/*DrawMeshWithShadow*/,
       "Position": {
-        "X": 67.04248,
-        "Y": 402.14032
+        "X": 141.04497,
+        "Y": 397.15137
       }
     },
     {
       "ChildId": "e6ce0ea4-bdf5-4cdf-89c7-f312da3811bd"/*QuadMesh*/,
       "Position": {
-        "X": -72.95752,
-        "Y": 437.14032
+        "X": -155.2749,
+        "Y": 395.56592
       }
     },
     {

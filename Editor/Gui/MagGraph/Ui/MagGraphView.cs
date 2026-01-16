@@ -1,16 +1,15 @@
-﻿#nullable enable
+#nullable enable
 using System.Diagnostics;
+using System.IO;
 using ImGuiNET;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
-using T3.Editor.Gui.Graph.Interaction;
-using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.MagGraph.Interaction;
+using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
-using T3.Editor.UiModel.Modification;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
 
@@ -22,7 +21,7 @@ namespace T3.Editor.Gui.MagGraph.Ui;
 internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
 {
     public ScalableCanvas Canvas => this;
-    
+
     public static ProjectView CreateWithComponents(OpenedProject openedProject)
     {
         ProjectView.CreateIndependentComponents(openedProject,
@@ -31,14 +30,14 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
                                                 out var graphImageBackground);
 
         var projectView = new ProjectView(openedProject, navigationHistory, nodeSelection, graphImageBackground);
-        
+
         if (projectView.CompositionInstance == null)
         {
             Log.Error("Can't create graph without defined composition op");
             return projectView; // TODO: handle this properly
         }
 
-        var canvas = new MagGraphView(projectView);
+        var canvas = new Gui.MagGraph.Ui.MagGraphView(projectView);
         projectView.OnCompositionChanged += canvas.CompositionChangedHandler;
         projectView.OnCompositionContentChanged += canvas.CompositionContentChangedHandler;
 
@@ -63,7 +62,7 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
     private readonly ProjectView _projectView;
 
     #region implement IGraph canvas
-    bool IGraphView.Destroyed { get => _destroyed; set => _destroyed = value; }
+    public bool Destroyed { get => _destroyed; set => _destroyed = value; }
 
     void IGraphView.FocusViewToSelection()
     {
@@ -72,6 +71,13 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
 
         var selectionBounds = NodeSelection.GetSelectionBounds(_projectView.NodeSelection, _projectView.CompositionInstance);
         FitAreaOnCanvas(selectionBounds);
+    }
+
+    public void FocusViewToSelection(GraphUiContext context)
+    {
+        var areaOnCanvas = NodeSelection.GetSelectionBounds(context.Selector, context.CompositionInstance);
+        areaOnCanvas.Expand(200);
+        FitAreaOnCanvas(areaOnCanvas);
     }
 
     void IGraphView.OpenAndFocusInstance(IReadOnlyList<Guid> path)
@@ -97,14 +103,13 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
             {
                 _context.StateMachine.SetState(GraphStates.BackgroundContentIsInteractive, _context);
             }
-            
+
             _previousInstance = _projectView.CompositionInstance;
             _context = new GraphUiContext(_projectView, this);
         }
     }
 
     public bool HasActiveInteraction => _context.StateMachine.CurrentState != GraphStates.Default;
-
 
     void IGraphView.Close()
     {
@@ -124,6 +129,18 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
         if (_context.Layout.Items.TryGetValue(symbolChildUi.Id, out var item))
         {
             _context.Placeholder.OpenForItemInput(_context, item, inputInputDefinition.Id, MagGraphItem.Directions.Horizontal);
+
+            // Calculate where the placeholder will be (to the left of the item)
+            var placeholderPos = item.PosOnCanvas.X - MagGraphItem.Width;
+            var currentVisibleArea = GetVisibleCanvasArea();
+
+            // If placeholder position is outside the left edge of visible area, scroll to make it visible
+            if (placeholderPos < currentVisibleArea.Min.X)
+            {
+                var scrollOffset = currentVisibleArea.Min.X - placeholderPos;
+                scrollOffset += 10; // Add some padding
+                ScrollTarget.X -= scrollOffset;
+            }
         }
     }
 
@@ -209,44 +226,7 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
     //     var scope = GetScopeForCanvasArea(newViewArea);
     //     context.Canvas.SetScopeWithTransition(scope, ICanvas.Transition.Instant);
     // }
-    private void HandleSymbolDropping(GraphUiContext context)
-    {
-        if (!DragAndDropHandling.IsDragging)
-            return;
-
-        ImGui.SetCursorPos(Vector2.Zero);
-        ImGui.InvisibleButton("## drop", ImGui.GetWindowSize());
-
-        if (!DragAndDropHandling.TryGetDataDroppedLastItem(DragAndDropHandling.SymbolDraggingId, out var data))
-            return;
-
-        if (!Guid.TryParse(data, out var guid))
-        {
-            Log.Warning("Invalid data format for drop? " + data);
-            return;
-        }
-
-        if (SymbolUiRegistry.TryGetSymbolUi(guid, out var symbolUi))
-        {
-            var symbol = symbolUi.Symbol;
-            var posOnCanvas = InverseTransformPositionFloat(ImGui.GetMousePos());
-            if (!SymbolUiRegistry.TryGetSymbolUi(context.CompositionInstance.Symbol.Id, out var compositionOpSymbolUi))
-            {
-                Log.Warning("Failed to get symbol id for " + context.CompositionInstance.SymbolChildId);
-                return;
-            }
-
-            var childUi = GraphOperations.AddSymbolChild(symbol, compositionOpSymbolUi, posOnCanvas);
-            var instance = context.CompositionInstance.Children[childUi.Id];
-            context.Selector.SetSelection(childUi, instance);
-            context.Layout.FlagStructureAsChanged();
-        }
-        else
-        {
-            Log.Warning($"Symbol {guid} not found in registry");
-        }
-    }
-
+    
     private void HandleFenceSelection(GraphUiContext context, SelectionFence selectionFence)
     {
         var shouldBeActive =
@@ -290,7 +270,6 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
         }
     }
 
-    // TODO: Support non graph items like annotations.
     private void HandleSelectionFenceUpdate(ImRect bounds, SelectionFence.SelectModes selectMode)
     {
         var boundsInCanvas = InverseTransformRect(bounds);
@@ -313,6 +292,9 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
             }
             else
             {
+                if (item.IsCollapsedAway)
+                    continue;
+
                 if (item.Variant == MagGraphItem.Variants.Operator)
                 {
                     _context.Selector.AddSelection(item.Selectable, item.Instance);
@@ -326,7 +308,11 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
 
         foreach (var magAnnotation in _context.Layout.Annotations.Values)
         {
-            var annotationArea = new ImRect(magAnnotation.PosOnCanvas, magAnnotation.PosOnCanvas + magAnnotation.Size);
+            var annotationArea = magAnnotation.Annotation.Collapsed
+                                     ? new ImRect(magAnnotation.PosOnCanvas,
+                                                  magAnnotation.PosOnCanvas + new Vector2(magAnnotation.Size.X, MagGraphItem.GridSize.Y))
+                                     : new ImRect(magAnnotation.PosOnCanvas, magAnnotation.PosOnCanvas + magAnnotation.Size);
+
             if (!boundsInCanvas.Contains(annotationArea))
                 continue;
 
@@ -339,7 +325,22 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
                 _context.Selector.AddSelection(magAnnotation.Annotation);
             }
         }
+    }    
+    
+    
+    public static bool IsPathInside(string filePath, string directoryPath)
+    {
+        var normalizedFile = Path.GetFullPath(filePath);
+        var normalizedDir = Path.GetFullPath(directoryPath);
+
+        if (!normalizedDir.EndsWith(Path.DirectorySeparatorChar.ToString()))
+        {
+            normalizedDir += Path.DirectorySeparatorChar;
+        }
+        return normalizedFile.StartsWith(normalizedDir, StringComparison.OrdinalIgnoreCase);
     }
+
+    // TODO: Support non graph items like annotations.
 
     // private void CenterView()
     // {
@@ -381,13 +382,5 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
     private float HoverTime => (float)(ImGui.GetTime() - _hoverStartTime);
     private GraphUiContext _context;
     private bool _destroyed;
-
     protected override ScalableCanvas? Parent => null;
-
-    public void FocusViewToSelection(GraphUiContext context)
-    {
-        var areaOnCanvas = NodeSelection.GetSelectionBounds(context.Selector, context.CompositionInstance);
-        areaOnCanvas.Expand(200);
-        FitAreaOnCanvas(areaOnCanvas);
-    }
 }

@@ -44,7 +44,7 @@
     },
     {
       "Id": "cce4048d-85b7-4d82-aec1-4379d1f0de61"/*AlphaCutOff*/,
-      "DefaultValue": 0.39
+      "DefaultValue": 0.01
     },
     {
       "Id": "e40aeedd-49fe-467c-b886-064a1024cef3"/*ScaleFactor*/,

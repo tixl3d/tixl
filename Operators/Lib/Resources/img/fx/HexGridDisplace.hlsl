@@ -11,14 +11,6 @@ cbuffer ParamConstants : register(b0)
 
 cbuffer TimeConstants : register(b1)
 {
-    float globalTime;
-    float time;
-    float runTime;
-    float beatTime;
-}
-
-cbuffer TimeConstants : register(b2)
-{
     float TargetWidth;
     float TargetHeight;
 }

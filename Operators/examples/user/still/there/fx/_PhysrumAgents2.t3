@@ -3,7 +3,7 @@
   "Inputs": [
     {
       "Id": "1aff9d51-48d0-4d36-93f3-be97c8533201"/*ComputeSteps*/,
-      "DefaultValue": 0
+      "DefaultValue": 1
     },
     {
       "Id": "5100f7d8-a5e0-4630-b646-2db20e0cc4be"/*BlockCount*/,
@@ -73,7 +73,7 @@
         {
           "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
           "Type": "System.String",
-          "Value": "Resources/user/pixtur/research/ComputeShaderCourse/03-MovingAgents1/shaders/ca-update-grid.hlsl"
+          "Value": "/Examples/user/pixtur/research/ComputeShaderCourse/03-MovingAgents1/shaders/ca-update-grid.hlsl"
         }
       ],
       "Outputs": []
@@ -99,12 +99,6 @@
     {
       "Id": "20e96379-d49a-4325-8c9a-0221a518a4bc"/*ExecuteBufferUpdate*/,
       "SymbolId": "58351c8f-4a73-448e-b7bb-69412e71bd76",
-      "InputValues": [],
-      "Outputs": []
-    },
-    {
-      "Id": "24fd70aa-c416-49c0-a7c5-87272f99d92a"/*Glow*/,
-      "SymbolId": "d392d4af-4c78-4f4a-bc3f-4c54c8c73538",
       "InputValues": [],
       "Outputs": []
     },
@@ -152,12 +146,6 @@
       "Outputs": []
     },
     {
-      "Id": "3bce9d75-9424-42f9-a48d-16df49bad6ef"/*ExecuteRawBufferUpdate*/,
-      "SymbolId": "010aca02-263a-471c-b407-025b023f7f60",
-      "InputValues": [],
-      "Outputs": []
-    },
-    {
       "Id": "3dadf8b9-2f51-41d6-8ddb-6b1964bcbf4b"/*ResolutionConstBuffer*/,
       "SymbolId": "38e88910-6063-41d1-840b-8aeeb0eeccc0",
       "InputValues": [],
@@ -170,7 +158,7 @@
         {
           "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
           "Type": "System.String",
-          "Value": "Resources/user/still/proj-there/physarumfx/partial-physarum-fx-cs.hlsl"
+          "Value": "/Examples/user/still/proj-there/physarumfx/partial-physarum-fx-cs.hlsl"
         }
       ],
       "Outputs": []
@@ -263,28 +251,6 @@
           "Id": "fdeb503f-09c6-48d1-8853-7426f68cdec3"/*AddressV*/,
           "Type": "SharpDX.Direct3D11.TextureAddressMode",
           "Value": "Mirror"
-        }
-      ],
-      "Outputs": []
-    },
-    {
-      "Id": "5d2cb3d2-bc20-4980-957c-b0091fefda1b"/*Layer2d*/,
-      "SymbolId": "d8c5330f-59b5-4907-b845-a02def3042fa",
-      "InputValues": [
-        {
-          "Id": "c8d0e44e-acd1-4045-b565-e1ce0b722e70"/*BlendMode*/,
-          "Type": "System.Int32",
-          "Value": 0
-        },
-        {
-          "Id": "ed4f8c30-7b71-4649-97e6-710a718039b0"/*Color*/,
-          "Type": "System.Numerics.Vector4",
-          "Value": {
-            "X": 0.7312606,
-            "Y": 0.836478,
-            "Z": 0.7312606,
-            "W": 0.0
-          }
         }
       ],
       "Outputs": []
@@ -393,6 +359,18 @@
       "Id": "8cc1ddcb-f8e5-4b27-91b5-10ece3a835f0"/*GetBufferComponents*/,
       "SymbolId": "80dff680-5abf-484a-b9e0-81d72f3b7aa4",
       "InputValues": [],
+      "Outputs": []
+    },
+    {
+      "Id": "90cb1d15-b55e-4fe4-b702-8ebaf688bae6"/*ComputeShader*/,
+      "SymbolId": "a256d70f-adb3-481d-a926-caf35bd3e64c",
+      "InputValues": [
+        {
+          "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
+          "Type": "System.String",
+          "Value": "Resources/user/still/proj-there/physarumfx/partial-physarum-fx-cs.hlsl"
+        }
+      ],
       "Outputs": []
     },
     {
@@ -734,6 +712,12 @@
       "Outputs": []
     },
     {
+      "Id": "f3f7a626-9b60-4f9d-aada-9c90cdbde56e"/*_SpeciesDefinition*/,
+      "SymbolId": "924b8cc0-5b4b-41d0-a71b-b26465683910",
+      "InputValues": [],
+      "Outputs": []
+    },
+    {
       "Id": "f4751125-3b8c-4ba6-9473-fd4a024b6f6d"/*Camera*/,
       "SymbolId": "746d886c-5ab6-44b1-bb15-f3ce2fadf7e6",
       "InputValues": [
@@ -749,6 +733,18 @@
       "Id": "fe36bf80-a58d-4769-b9ef-1e4f51d04fed"/*CalcDispatchCount*/,
       "SymbolId": "eb68addb-ec59-416f-8608-ff9d2319f3a3",
       "InputValues": [],
+      "Outputs": []
+    },
+    {
+      "Id": "ff3ce682-8988-49e7-8a6e-d5a4e21d1f85"/*ComputeShader*/,
+      "SymbolId": "a256d70f-adb3-481d-a926-caf35bd3e64c",
+      "InputValues": [
+        {
+          "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
+          "Type": "System.String",
+          "Value": "Resources/user/pixtur/research/ComputeShaderCourse/03-MovingAgents1/shaders/ca-update-grid.hlsl"
+        }
+      ],
       "Outputs": []
     }
   ],
@@ -926,12 +922,6 @@
       "SourceSlotId": "dc71f39f-3fba-4fc6-b8ef-ce57c82bf78e",
       "TargetParentOrChildId": "50c62042-7b6c-47ba-99fb-dcad9c88d20b",
       "TargetSlotId": "88938b09-d5a7-437c-b6e1-48a5b375d756"
-    },
-    {
-      "SourceParentOrChildId": "cea7bf6a-4272-43d4-b008-cf99b03bedb7",
-      "SourceSlotId": "007129e4-0eae-4cb9-a142-90c1c171a5fb",
-      "TargetParentOrChildId": "5d2cb3d2-bc20-4980-957c-b0091fefda1b",
-      "TargetSlotId": "2a95ac54-5ef7-4d3c-a90b-ecd5b422bddc"
     },
     {
       "SourceParentOrChildId": "f10f4d0f-a82e-4a3d-973f-f09e1027ea95",

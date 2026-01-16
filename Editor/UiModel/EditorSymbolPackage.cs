@@ -298,17 +298,16 @@ internal class EditorSymbolPackage : SymbolPackage
     public bool HasHomeSymbol(out string? error)
     {
         error = null;
-        
+
         try
         {
-            var releaseInfo = ReleaseInfo;
-            if (releaseInfo.HomeGuid == Guid.Empty)
+            if (HomeSymbolId == Guid.Empty)
                 return false;
 
-            if (Symbols.ContainsKey(releaseInfo.HomeGuid)) 
+            if (Symbols.ContainsKey(HomeSymbolId)) 
                 return true;
             
-            error = $"Home symbol {releaseInfo.HomeGuid} not found";
+            error = $"Home symbol {HomeSymbolId} not found";
             return false;
         }
         catch (Exception e)
@@ -352,7 +351,11 @@ internal class EditorSymbolPackage : SymbolPackage
 
     private readonly ConcurrentDictionary<Guid, SymbolPathHandler> _filePathHandlers = new();
     protected IDictionary<Guid, SymbolPathHandler> FilePathHandlers => _filePathHandlers;
-    public Guid HomeSymbolId => ReleaseInfo.HomeGuid;
+    public Guid HomeSymbolId => OverrideHomeGuid != Guid.Empty 
+                                    ? OverrideHomeGuid 
+                                    : ReleaseInfo.HomeGuid;
+
+    public Guid OverrideHomeGuid = Guid.Empty;
 
     internal const string SourceCodeExtension = ".cs";
     public const string SymbolUiExtension = ".t3ui";

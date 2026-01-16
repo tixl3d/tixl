@@ -1,6 +1,7 @@
 {
   "Id": "409a150a-83c7-4efd-80a0-67bf0345a398"/*RepeatFieldLimit*/,
   "Description": "Repeats the incoming field in the defined direction.\nSimilar nodes: [RepeatField3], [RepeatWithMirror]\n\nIt can be rendered with [RaymarchField] and visualized with [VisualizeFieldDistance].\n\nOther nodes: [PolarRepeat], [TwistField].\n\nIt needs an incoming field like [BoxSDF], [ChainLinkSDF], [FractalSDF] as an input.\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToRaymarchField].\n",
+  "SymbolTags": "8",
   "InputUis": [
     {
       "InputId": "06ea2b77-5c65-40b9-b9e8-6788786bd7db"/*Axis*/,

@@ -1,10 +1,12 @@
-﻿#nullable enable
+#nullable enable
 using System.Diagnostics;
 using T3.Core.Operator;
+using T3.Editor.Gui.Dialogs;
 using T3.Editor.Gui.Graph.Dialogs;
 using T3.Editor.Gui.MagGraph.Interaction;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.MagGraph.Ui;
+using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.Modification;
@@ -13,7 +15,6 @@ using T3.Editor.UiModel.Selection;
 using MagItemMovement = T3.Editor.Gui.MagGraph.Interaction.MagItemMovement;
 
 namespace T3.Editor.Gui.MagGraph.States;
-
 
 /// <summary>
 /// Holds the current interaction state of the graph. It is passed as a parameter
@@ -71,7 +72,7 @@ internal sealed class GraphUiContext
         ItemMovement = new MagItemMovement(this, view, Layout, projectView.NodeSelection);
         Placeholder = new PlaceholderCreation();
         //EditCommentDialog = new EditCommentDialog();
-        StateMachine = new StateMachine(this);// needs to be initialized last
+        StateMachine = new StateMachine<GraphUiContext>(typeof(GraphStates), GraphStates.Default);// needs to be initialized last
     }
 
     internal readonly ProjectView ProjectView;
@@ -89,7 +90,7 @@ internal sealed class GraphUiContext
     internal readonly ConnectionHovering ConnectionHovering = new();
     internal readonly MagGraphLayout Layout = new();
     
-    internal readonly StateMachine StateMachine;
+    internal readonly StateMachine<GraphUiContext> StateMachine;
     internal  MacroCommand? MacroCommand { get; private set; }
     
     /** Keep for continuous update of dragged items */
@@ -112,6 +113,9 @@ internal sealed class GraphUiContext
     internal MagGraphItem? ActiveTargetItem;
     internal Guid ActiveTargetInputId { get; set; }
     internal MagGraphItem.Directions ActiveInputDirection { get; set; }
+
+    /** The item that is currently hovered by the mouse */
+    internal MagGraphItem? HoveredItem { get; set; }
 
     /** Only relevant while picking inputs or hovering an op while dragging connecting end. */
     internal MagGraphItem? ItemForInputSelection;
@@ -222,27 +226,29 @@ internal sealed class GraphUiContext
         
         if (projectView.CompositionInstance != null)
         {
-            var symbol = projectView.InstView!.Symbol;
+            var compositionSymbol = projectView.InstView!.Symbol;
             if (projectView.CompositionInstance != projectView.RootInstance 
-                && !symbol.SymbolPackage.IsReadOnly)
+                && !compositionSymbol.SymbolPackage.IsReadOnly)
             {
-                results |= AddInputDialog.Draw(symbol);
-                results |= AddOutputDialog.Draw(symbol);
+                results |= AddInputDialog.Draw(compositionSymbol);
+                results |= AddOutputDialog.Draw(compositionSymbol);
             }
             
-            results |= DuplicateSymbolDialog.Draw(symbol.Id, 
-                                                  projectView.NodeSelection.GetSelectedChildUis().ToList(), 
+            results |= DuplicateSymbolDialog.Draw(compositionSymbol.Id, 
+                                                  projectView.NodeSelection.GetSelectedChildUis(), 
                                                   ref NameSpaceForDialogEdits,
                                                   ref SymbolNameForDialogEdits,
                                                   ref SymbolDescriptionForDialog);
             
             
-            results |= CombineToSymbolDialog.Draw(symbol.Id, projectView,
+            results |= CombineToSymbolDialog.Draw(compositionSymbol.Id, projectView,
                                                   ref NameSpaceForDialogEdits,
                                                   ref SymbolNameForDialogEdits,
                                                   ref SymbolDescriptionForDialog);
             
-            RenameSymbolDialog.Draw(projectView.NodeSelection.GetSelectedChildUis().ToList(), 
+            results |= EditTourPointsPopup.Draw(compositionSymbol, projectView);
+            
+            RenameSymbolDialog.Draw(projectView.NodeSelection.GetSelectedChildUis(), 
                                              ref SymbolNameForDialogEdits);
             
             if(results != ChangeSymbol.SymbolModificationResults.Nothing)

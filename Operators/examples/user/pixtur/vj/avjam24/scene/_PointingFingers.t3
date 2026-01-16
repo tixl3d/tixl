@@ -420,7 +420,7 @@
       "Outputs": []
     },
     {
-      "Id": "4d1d8550-1d87-4749-8856-fd940b4fae49"/*PickFromStringList*/,
+      "Id": "4d1d8550-1d87-4749-8856-fd940b4fae49"/*PickStringFromList*/,
       "SymbolId": "ef357e66-24e9-4f54-8d86-869db74602f4",
       "InputValues": [],
       "Outputs": []

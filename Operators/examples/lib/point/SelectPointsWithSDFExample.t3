@@ -146,7 +146,7 @@
           "Value": -0.0
         },
         {
-          "Id": "c9fbe013-7050-4714-a43d-68960d6afbea"/*BiasAndGain*/,
+          "Id": "c9fbe013-7050-4714-a43d-68960d6afbea"/*GainAndBias*/,
           "Type": "System.Numerics.Vector2",
           "Value": {
             "X": 0.515,
@@ -371,7 +371,7 @@
       "SymbolId": "695d20dc-d1fe-4648-80fb-e1159b8aead4",
       "InputValues": [
         {
-          "Id": "c9fbe013-7050-4714-a43d-68960d6afbea"/*BiasAndGain*/,
+          "Id": "c9fbe013-7050-4714-a43d-68960d6afbea"/*GainAndBias*/,
           "Type": "System.Numerics.Vector2",
           "Value": {
             "X": 0.01000002,
@@ -900,7 +900,7 @@
           "Value": 2.36
         },
         {
-          "Id": "c9fbe013-7050-4714-a43d-68960d6afbea"/*BiasAndGain*/,
+          "Id": "c9fbe013-7050-4714-a43d-68960d6afbea"/*GainAndBias*/,
           "Type": "System.Numerics.Vector2",
           "Value": {
             "X": 0.19,

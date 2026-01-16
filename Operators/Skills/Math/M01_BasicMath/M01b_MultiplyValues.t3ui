@@ -1,0 +1,141 @@
+{
+  "Id": "2a128e01-c2b2-4ef8-8af5-01b698c9c2db"/*M01b_MultiplyValues*/,
+  "Description": "So much time...",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "17eb7487-9b33-4239-aafd-5b8a3b3085c2"/*Weeks*/,
+      "Position": {
+        "X": 1090.8175,
+        "Y": 1788.3484
+      }
+    },
+    {
+      "ChildId": "58f60eca-b21b-4f16-89c8-9ba4e4e6ca8d"/*Weeks*/,
+      "AnnotationId": "2f87abd2-2372-4260-8c30-0368b426a9ca",
+      "Position": {
+        "X": 1124.7405,
+        "Y": 2230.94
+      }
+    },
+    {
+      "ChildId": "6ce44690-d702-4e83-bcef-28d783676bba"/*Days Per Week*/,
+      "Position": {
+        "X": 1090.8175,
+        "Y": 1734.5225
+      }
+    },
+    {
+      "ChildId": "7375c614-6464-4cd7-a594-73ffa68a8ebe"/*ValueQuiz*/,
+      "Position": {
+        "X": 1580.2582,
+        "Y": 1895.0925
+      }
+    },
+    {
+      "ChildId": "7fb42eef-0789-470f-b63e-ed1750b50e4b"/*Hours Per Day*/,
+      "Position": {
+        "X": 1092.1251,
+        "Y": 1666.9069
+      }
+    },
+    {
+      "ChildId": "b3209a3b-6176-46be-9a5e-477aaedb088e"/*Multiply*/,
+      "Position": {
+        "X": 1092.1251,
+        "Y": 1894.8025
+      }
+    },
+    {
+      "ChildId": "b45b89e7-0b20-43f4-92c7-8c41fba57257"/*Hours Per Day*/,
+      "AnnotationId": "2f87abd2-2372-4260-8c30-0368b426a9ca",
+      "Position": {
+        "X": 1124.7405,
+        "Y": 2125.94
+      }
+    },
+    {
+      "ChildId": "d2def649-2838-4aef-b077-ac1837fdbb03"/*Multiply*/,
+      "Position": {
+        "X": 1090.8175,
+        "Y": 1961.456
+      }
+    },
+    {
+      "ChildId": "e0200cd2-07c9-42e5-b334-2585193dc913"/*Multiply*/,
+      "AnnotationId": "2f87abd2-2372-4260-8c30-0368b426a9ca",
+      "Position": {
+        "X": 1264.7405,
+        "Y": 2195.94
+      }
+    },
+    {
+      "ChildId": "e789ba55-b205-4151-a21b-7392cf4a372e"/*Multiply*/,
+      "AnnotationId": "2f87abd2-2372-4260-8c30-0368b426a9ca",
+      "Position": {
+        "X": 1264.7405,
+        "Y": 2125.94
+      }
+    },
+    {
+      "ChildId": "f6e0fdf3-12d7-4921-a351-fd4bdc5c073f"/*Days Per Week*/,
+      "AnnotationId": "2f87abd2-2372-4260-8c30-0368b426a9ca",
+      "Position": {
+        "X": 1124.7405,
+        "Y": 2160.94
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "6e58b222-831d-4b51-bd59-bd872fb3590e"/*ColorBuffer*/,
+      "Position": {
+        "X": 1580.2582,
+        "Y": 1965.0925
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "2f87abd2-2372-4260-8c30-0368b426a9ca",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1069.3873,
+        "Y": 2064.1172
+      },
+      "Size": {
+        "X": 392.33228,
+        "Y": 245.0
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "ecf54e4e-d71a-4261-b1cd-8fd72ae8909a",
+      "ChildId": "7fb42eef-0789-470f-b63e-ed1750b50e4b",
+      "Description": "Handling many numbers at once can be tricky.\nLet TiXL do the heavy lifting."
+    },
+    {
+      "Id": "b1c8874f-6751-4def-ad03-7d9e3df7f70e",
+      "ChildId": "7fb42eef-0789-470f-b63e-ed1750b50e4b",
+      "Description": "These [Value] operators were renamed using the Return key."
+    },
+    {
+      "Id": "8111160f-5061-4995-857c-3fc31f37d484",
+      "ChildId": "7fb42eef-0789-470f-b63e-ed1750b50e4b",
+      "Description": "Zoom into the graph to see live values."
+    },
+    {
+      "Id": "6af48546-4d4b-47ac-9d7e-cfb2ff68859b",
+      "ChildId": "b3209a3b-6176-46be-9a5e-477aaedb088e",
+      "Description": "Multiply all three values.\nTo connect additional inputs, drag outputs onto [Multiply] and watch for the blinking dot."
+    }
+  ]
+}

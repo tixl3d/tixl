@@ -1,6 +1,6 @@
 {
   "Id": "4ce0b357-d71e-4d99-a7f4-3c5b00e6e67c"/*EaseExample*/,
-  "Description": "Demonstrates some use cases of easing with the Ease operator",
+  "Description": "Demonstrates some use cases of easing with the Ease operator. \nIt's also a nice [SetShadow] example.",
   "InputUis": [],
   "SymbolChildUis": [
     {

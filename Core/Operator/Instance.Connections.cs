@@ -415,7 +415,7 @@ public abstract partial class Instance
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             void InvalidateParentInputs(ISlot connection)
             {
-                if (connection.ValueType == typeof(string))
+                if (connection.ValueType == typeof(string)) // TODO: clarify and comment why whe need this check
                     return;
 
                 connection.DirtyFlag.Invalidate();

@@ -138,7 +138,8 @@ internal static class InputPicking
 
             if (isSlotVisible)
             {
-                isMultiInput = visibleInputLines[insertionLineIndex].InputUi.InputDefinition.IsMultiInput;
+                var visibleInputLine = visibleInputLines[insertionLineIndex];
+                isMultiInput = visibleInputLine.InputUi.InputDefinition.IsMultiInput;
                 
                 // Go through end of visible input group (could be multiple lines for multiInputs)
                 while (insertionLineIndex < visibleInputLines.Length && visibleInputLines[insertionLineIndex].Input.Id == slotId)
@@ -157,7 +158,7 @@ internal static class InputPicking
                 break;
         }
 
-        shouldPushDown = !isSlotVisible || isMultiInput;
+        shouldPushDown = !isSlotVisible || (isMultiInput && isConnected);
 
         if (isSlotVisible && !isConnected)
             insertionLineIndex--;
@@ -206,6 +207,8 @@ internal static class InputPicking
                              | ImGuiWindowFlags.AlwaysUseWindowPadding
                              ))
         {
+            var visibleInputCount = 0;
+            
             var childUi = context.ItemForInputSelection.SymbolUi;
             if (childUi != null)
             {
@@ -216,13 +219,11 @@ internal static class InputPicking
 
                 ImGui.PushFont(Fonts.FontSmall);
                 ImGui.TextColored(UiColors.TextMuted, typeName + " inputs");
-                ImGui.PopFont();                
-                
+                ImGui.PopFont();
+
                 var inputIndex = 0;
                 foreach (var inputUi in childUi.InputUis.Values)
                 {
-
-                    
                     var input = context.ItemForInputSelection.Instance!.Inputs[inputIndex];
                     if (inputUi.Type == context.DraggedPrimaryOutputType)
                     {
@@ -232,6 +233,8 @@ internal static class InputPicking
                         var labelSize = ImGui.CalcTextSize(inputDefinitionName);
                         var width = MathF.Max(lastSize.X  -4, labelSize.X +30);
                         var buttonSize = new Vector2(width, ImGui.GetFrameHeight());
+
+                        visibleInputCount++;
                         
                         if (ImGui.Button(inputDefinitionName, buttonSize))
                         {
@@ -252,13 +255,15 @@ internal static class InputPicking
                     
                     inputIndex++;
                 }
+                
+                    
             }
             
             // Cancel by clicking outside
             var isPopupHovered = ImRect.RectWithSize(ImGui.GetWindowPos(), ImGui.GetWindowSize())
                                        .Contains(ImGui.GetMousePos());
             
-            if (!isPopupHovered && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+            if (visibleInputCount ==0 || !isPopupHovered && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
             {
                 context.StateMachine.SetState(GraphStates.Default, context);
             }

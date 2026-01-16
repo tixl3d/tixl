@@ -21,11 +21,9 @@ public sealed class ComputeShaderFromSource : Instance<ComputeShaderFromSource>,
     {
         var shader = Shader.Value;
         if (shader == null)
-        {
             return;
-        }
             
-        if (Shader.Value.TryGetThreadGroups(out var threadCount))
+        if (shader.TryGetThreadGroups(out var threadCount))
             ThreadCount.Value = threadCount;
 
         ThreadCount.DirtyFlag.Clear();

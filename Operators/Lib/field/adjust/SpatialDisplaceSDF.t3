@@ -1,0 +1,43 @@
+{
+  "Id": "8b4c95a8-d598-45a5-baa7-157120585695"/*SpatialDisplaceSDF*/,
+  "Inputs": [
+    {
+      "Id": "11bd8a7c-1fa4-4b7b-b38e-93c92be20116"/*Offset*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "15a6c491-16af-4351-b7c3-2541b0aee4cd"/*InputField*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "55be4ca7-d7e4-4b8d-8107-39489c03b5d8"/*Amount*/,
+      "DefaultValue": 0.5
+    },
+    {
+      "Id": "62f081b3-98a5-4614-8d62-911ce1397b60"/*vScale*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 1.0,
+        "Z": 1.0
+      }
+    },
+    {
+      "Id": "6710f3db-1d2e-49fd-b8d3-3a72275c30bc"/*Scale*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "6b999a7f-4702-4939-92d9-5388403e3671"/*SamplePos*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

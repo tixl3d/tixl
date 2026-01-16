@@ -61,7 +61,7 @@
       }
     },
     {
-      "ChildId": "12fc6c31-02d0-4580-8b8a-d3d8b90d1220"/*PickFromStringList*/,
+      "ChildId": "12fc6c31-02d0-4580-8b8a-d3d8b90d1220"/*PickStringFromList*/,
       "Position": {
         "X": 2686.7852,
         "Y": -651.2235
@@ -112,8 +112,8 @@
     {
       "ChildId": "35185965-85e0-4370-b8c9-8cf01db33d6a"/*AnimValue*/,
       "Position": {
-        "X": 2546.7852,
-        "Y": -721.22363
+        "X": 2365.1587,
+        "Y": -682.6481
       }
     },
     {
@@ -157,6 +157,13 @@
       "Position": {
         "X": 2686.7852,
         "Y": 118.77649
+      }
+    },
+    {
+      "ChildId": "494150c3-d676-4a73-be57-5969249640c9"/*FilesInFolder*/,
+      "Position": {
+        "X": 2548.6575,
+        "Y": -825.8855
       }
     },
     {
@@ -259,6 +266,13 @@
       }
     },
     {
+      "ChildId": "98a17bbf-fce1-4c0b-bef3-9a54305d248b"/*MidiInput*/,
+      "Position": {
+        "X": 2092.8408,
+        "Y": 238.67175
+      }
+    },
+    {
       "ChildId": "98a7a8da-809a-4e36-9d87-06c36bc11808"/*RenderTarget*/,
       "Position": {
         "X": 2686.7852,
@@ -308,10 +322,25 @@
       }
     },
     {
+      "ChildId": "ce15a781-5fc8-4e4a-980a-0095b0817ea0"/*SampleGradient*/,
+      "Position": {
+        "X": 2232.8408,
+        "Y": 238.67175
+      }
+    },
+    {
       "ChildId": "ce898201-e684-44c7-b640-983099e07bb3"/*FilesInFolder*/,
       "Position": {
         "X": 2686.7852,
         "Y": -721.22363
+      }
+    },
+    {
+      "ChildId": "cfc328b9-6192-40c1-97f5-8e588792235f"/*Layer2d*/,
+      "Comment": "Align center for letter box",
+      "Position": {
+        "X": 2917.8174,
+        "Y": -452.11578
       }
     },
     {

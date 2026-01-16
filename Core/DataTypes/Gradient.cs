@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using T3.Core.Logging;
 using T3.Core.Utils;
-using T3.Core.Utils.CubicSplines;
+using T3.Core.Utils.Splines;
 using T3.Serialization;
 
 namespace T3.Core.DataTypes;

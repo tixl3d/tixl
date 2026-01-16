@@ -1,0 +1,118 @@
+{
+  "Id": "0cdb1267-438e-4647-a848-6233d6caa383"/*I01a_WelcomeImage*/,
+  "Description": "Welcome to Images",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "1b73c7ee-8d52-4306-93db-5be606ddbcb7"/*LoadImage*/,
+      "Position": {
+        "X": 1113.2612,
+        "Y": 1956.1282
+      }
+    },
+    {
+      "ChildId": "63771ffe-5239-4826-825a-d6111c210994"/*Not an image*/,
+      "Position": {
+        "X": 1113.2611,
+        "Y": 2023.8574
+      }
+    },
+    {
+      "ChildId": "83428556-0aa4-4a03-bc72-85bb90862447"/*Raster*/,
+      "Position": {
+        "X": 1113.2614,
+        "Y": 1704.6328
+      }
+    },
+    {
+      "ChildId": "862f3e4d-f527-447f-9b04-e1a9e375338e"/*FractalNoise*/,
+      "Position": {
+        "X": 1113.2614,
+        "Y": 1890.425
+      }
+    },
+    {
+      "ChildId": "b80e728f-29a6-4e5b-bbd3-1dfa4130bfb8"/*LoadImage*/,
+      "Position": {
+        "X": 1348.5419,
+        "Y": 2113.3752
+      }
+    },
+    {
+      "ChildId": "cd8950c8-89cc-4ad7-b2c1-d0ec5c862e39"/*Blob*/,
+      "Position": {
+        "X": 1113.2614,
+        "Y": 1640.4501
+      }
+    },
+    {
+      "ChildId": "d24e4339-8d63-41d5-8fe6-03dc51fb8ce3"/*SinForm*/,
+      "Position": {
+        "X": 1113.2612,
+        "Y": 1823.7087
+      }
+    },
+    {
+      "ChildId": "e73eeeeb-8b02-47e2-a6f3-8030a051937b"/*ImageQuiz*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2018.4391
+      }
+    },
+    {
+      "ChildId": "f01824c7-05b2-4c29-ac16-4fc0fa273e58"/*LinearGradient*/,
+      "Position": {
+        "X": 1113.2612,
+        "Y": 1758.6814
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "679f1466-bfe5-40d3-8ed0-2ace00e5c793"/*ColorBuffer*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2088.439
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "7c76e86e-fe52-4d25-ae74-943be3eeb681",
+      "Label": "Solution",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1330.0,
+        "Y": 2060.1309
+      },
+      "Size": {
+        "X": 175.0,
+        "Y": 109.86914
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "e63641aa-68a4-44ba-bcee-62be14daa048",
+      "Description": "Welcome to the world of Images!\nIn TiXL creating and combining images is a lot of fun is a powerful foundation for many other areas."
+    },
+    {
+      "Id": "6eed3485-b938-4f0b-916d-08f8b3226067",
+      "Description": "There are so many things you can do with images, that we broke down the Skill Quest into a lot of different topics.\nThey will start with simple but quickly progress to very complex examples.\nLet's start with be basics... "
+    },
+    {
+      "Id": "70361f5a-f584-4e76-909a-e80d660cf234",
+      "Description": "All image operators return an image (I.e. a 2D texture). \nIn the graph these operators have a magenta color."
+    },
+    {
+      "Id": "c0f6c672-baf8-424e-a0e3-4652893582a7",
+      "Description": "Connect the correct operator to solve the image quiz.",
+      "Style": "CallToAction"
+    }
+  ]
+}

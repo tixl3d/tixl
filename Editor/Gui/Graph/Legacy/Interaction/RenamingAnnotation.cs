@@ -6,7 +6,7 @@ using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Annotations;
 using T3.SystemUi;
 
-namespace T3.Editor.Gui.Graph.Legacy.Interaction;
+namespace T3.Editor.Gui.Legacy.Interaction;
 
 internal static class RenamingAnnotation
 {

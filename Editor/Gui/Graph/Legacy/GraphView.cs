@@ -7,13 +7,12 @@ using T3.Core.Resource;
 using T3.Core.SystemUi;
 using T3.Core.UserData;
 using T3.Editor.External;
-using T3.Editor.Gui.Graph.Dialogs;
-using T3.Editor.Gui.Graph.Interaction;
-using T3.Editor.Gui.Graph.Legacy.Interaction;
-using T3.Editor.Gui.Graph.Legacy.Interaction.Connections;
+using T3.Editor.Gui.Dialogs;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.Interaction.Variations;
+using T3.Editor.Gui.Legacy.Interaction;
+using T3.Editor.Gui.Legacy.Interaction.Connections;
 using T3.Editor.Gui.MagGraph.Interaction;
 using T3.Editor.Gui.OutputUi;
 using T3.Editor.Gui.Styling;
@@ -28,7 +27,7 @@ using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
 using T3.SystemUi;
 
-namespace T3.Editor.Gui.Graph.Legacy;
+namespace T3.Editor.Gui.Legacy;
 
 /// <summary>
 /// A <see cref="IGraphView"/> that displays the graph of an Operator.
@@ -257,21 +256,23 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
                 _graph.RenameAnnotation(newAnnotation);
             }
 
-            IReadOnlyList<Guid> navigationPath = null;
-
-            // Navigation
-            if (UserActions.NavigateBackwards.Triggered())
             {
-                navigationPath = _navigationHistory.NavigateBackwards();
-            }
+                IReadOnlyList<Guid> navigationPath = null;
 
-            if (UserActions.NavigateForward.Triggered())
-            {
-                navigationPath = _navigationHistory.NavigateForward();
-            }
+                // Navigation
+                if (UserActions.NavigateBackwards.Triggered())
+                {
+                    navigationPath = _navigationHistory.NavigateBackwards();
+                }
 
-            if (navigationPath != null)
-                _projectView.TrySetCompositionOp(navigationPath);
+                if (UserActions.NavigateForward.Triggered())
+                {
+                    navigationPath = _navigationHistory.NavigateForward();
+                }
+
+                if (navigationPath != null)
+                    _projectView.TrySetCompositionOp(navigationPath);
+            }
 
             if (UserActions.SelectToAbove.Triggered())
             {
@@ -315,33 +316,33 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
 
             if (!io.KeyCtrl && !io.KeyShift && !io.KeyAlt && !editingSomething)
             {
-                if (ImGui.IsKeyDown((ImGuiKey)Key.W))
+                if (UserActions.CameraForward.Triggered())
                 {
                     _dampedScrollVelocity.Y -= InverseTransformDirection(Vector2.One * UserSettings.Config.KeyboardScrollAcceleration).Y;
                 }
 
-                if (ImGui.IsKeyDown((ImGuiKey)Key.S))
+                if (UserActions.CameraBackward.Triggered())
                 {
                     _dampedScrollVelocity.Y += InverseTransformDirection(Vector2.One * UserSettings.Config.KeyboardScrollAcceleration).Y;
                 }
 
-                if (ImGui.IsKeyDown((ImGuiKey)Key.A))
+                if (UserActions.CameraLeft.Triggered())
                 {
                     _dampedScrollVelocity.X -= InverseTransformDirection(Vector2.One * UserSettings.Config.KeyboardScrollAcceleration).X;
                 }
 
-                if (ImGui.IsKeyDown((ImGuiKey)Key.D))
+                if (UserActions.CameraRight.Triggered())
                 {
                     _dampedScrollVelocity.X += InverseTransformDirection(Vector2.One * UserSettings.Config.KeyboardScrollAcceleration).X;
                 }
 
-                if (ImGui.IsKeyDown((ImGuiKey)Key.Q))
+                if (UserActions.CameraDown.Triggered())
                 {
                     var center = WindowPos + WindowSize / 2;
                     ApplyZoomDelta(center, 1.05f, out _);
                 }
 
-                if (ImGui.IsKeyDown((ImGuiKey)Key.E))
+                if (UserActions.CameraUp.Triggered())
                 {
                     var center = WindowPos + WindowSize / 2;
                     ApplyZoomDelta(center, 1 / 1.05f, out _);
@@ -386,7 +387,7 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
         if (shouldHandleFenceSelection)
             HandleFenceSelection(_projectView.CompositionInstance, _selectionFence);
 
-        if (isOnBackground && doubleClicked)
+        if (isOnBackground && (doubleClicked || UserActions.CloseOperator.Triggered()) )
             _projectView.TrySetCompositionOpToParent();
 
         if (tempConnections.Count > 0 && ImGui.IsMouseReleased(0))
@@ -544,7 +545,7 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
         ImGui.SetCursorPos(Vector2.Zero);
         ImGui.InvisibleButton("## drop", ImGui.GetWindowSize());
 
-        if (!DragAndDropHandling.TryGetDataDroppedLastItem(DragAndDropHandling.SymbolDraggingId, out var payload))
+        if (!DragAndDropHandling.TryHandleItemDrop(DragAndDropHandling.DragTypes.Symbol, out var payload, out var result))
             return;
         
         if (!Guid.TryParse(payload, out var guid))

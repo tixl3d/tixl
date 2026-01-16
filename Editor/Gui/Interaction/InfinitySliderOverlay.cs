@@ -1,4 +1,4 @@
-﻿#nullable  enable
+﻿#nullable enable
 using System.Runtime.CompilerServices;
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
@@ -24,8 +24,8 @@ internal static class InfinitySliderOverlay
                               double min = double.NegativeInfinity,
                               double max = double.PositiveInfinity,
                               float scale = 0.1f,
-                              bool clampMin = false, 
-                              bool clampMax=false)
+                              bool clampMin = false,
+                              bool clampMax = false)
     {
         var drawList = ImGui.GetForegroundDrawList();
         _io = ImGui.GetIO();
@@ -43,14 +43,14 @@ internal static class InfinitySliderOverlay
         }
 
         // Update value...
-        var mousePosX = (int)(_io.MousePos.X * 2)/2;
+        var mousePosX = (int)(_io.MousePos.X * 2) / 2;
         var xOffset = mousePosX - _center.X;
         var deltaX = xOffset - _lastXOffset;
-        if(MathF.Abs(xOffset) > UserSettings.Config.ClickThreshold)
+        if (MathF.Abs(xOffset) > UserSettings.Config.ClickThreshold)
         {
             _isManipulating = true;
         }
-            
+
         _lastXOffset = xOffset;
         if (ImGui.IsMouseClicked(ImGuiMouseButton.Right))
         {
@@ -67,7 +67,7 @@ internal static class InfinitySliderOverlay
         {
             _verticalDistance = _center.Y - _io.MousePos.Y;
         }
-            
+
         //_dampedAngleVelocity = MathUtils.Lerp(_dampedAngleVelocity, (float)deltaX, 0.06f);
 
         // Update radius and value range
@@ -76,17 +76,20 @@ internal static class InfinitySliderOverlay
         // Value range and tick interval 
         _dampedModifierScaleFactor = MathUtils.Lerp(_dampedModifierScaleFactor, GetKeyboardScaleFactor(), 0.1f);
 
-        var valueRange = (Math.Pow(10, normalizedLogDistanceForLog10)) * scale *0.25f * _dampedModifierScaleFactor * 600;
+        var valueRange = (Math.Pow(10, normalizedLogDistanceForLog10)) * scale * 0.25f * _dampedModifierScaleFactor * 600;
 
         // Update value...
         if (!isDraggingWidgetPosition)
         {
             _value += deltaX / Width / T3Ui.UiScaleFactor * valueRange;
         }
+
         _value = MathUtils.OptionalClamp(_value, min, clampMin, max, clampMax);
-        
+
         DrawUi(out roundedValue, min, max, valueRange, mousePosX, drawList);
-        
+
+        roundedValue = MathUtils.OptionalClamp(roundedValue, min, clampMin, max, clampMax);
+
         if (!_isManipulating)
             roundedValue = _originalValue;
     }
@@ -97,10 +100,16 @@ internal static class InfinitySliderOverlay
         var log10 = Math.Log10(valueRange);
         var iLog10 = Math.Floor(log10);
         var logRemainder = log10 - iLog10;
-        var tickValueInterval = Math.Pow(10, iLog10 - 1) * T3Ui.UiScaleFactor;
-        roundedValue = _io.KeyCtrl ? _value : Math.Round(_value / (tickValueInterval / 10)) * (tickValueInterval / 10);
+        var tickValueInterval = Math.Pow(10, iLog10 - 1) ;
+        var roundInterval = logRemainder switch
+                                {
+                                    > 0.8 => tickValueInterval / 1,
+                                    _     => tickValueInterval / 10
+                                };
 
-        var rSize = new Vector2(Width, 40)  * T3Ui.UiScaleFactor;
+        roundedValue = _io.KeyCtrl ? _value : Math.Round(_value / roundInterval) * roundInterval;
+
+        var rSize = new Vector2(Width, 40) * T3Ui.UiScaleFactor;
         var rCenter = new Vector2(mousePosX, _io.MousePos.Y - rSize.Y);
         var rect = new ImRect(rCenter - rSize / 2, rCenter + rSize / 2);
 
@@ -137,10 +146,12 @@ internal static class InfinitySliderOverlay
             var negF = 1 - f;
             var valueAtTick = tickIndex * tickValueInterval + _value - valueTickRemainder;
             GetXForValueIfVisible(valueAtTick, valueRange, mousePosX, Width, out var tickX);
-            var isPrimary = Math.Abs(MathUtils.Fmod(valueAtTick + tickValueInterval * 5, tickValueInterval * 10) - tickValueInterval * 5) <
+            var xFactor = 5;
+            var isPrimary = Math.Abs(MathUtils.Fmod(valueAtTick + tickValueInterval * xFactor, tickValueInterval * 10) - tickValueInterval * xFactor) <
                             tickValueInterval / 10;
-            var isPrimary2 = Math.Abs(MathUtils.Fmod(valueAtTick + tickValueInterval * 50, tickValueInterval * 100) - tickValueInterval * 50) <
-                             tickValueInterval / 100;
+            var isPrimary2 =
+                Math.Abs(MathUtils.Fmod(valueAtTick + tickValueInterval * xFactor * 10, tickValueInterval * 100) - tickValueInterval * xFactor * 10) <
+                tickValueInterval / 100;
 
             var fff = MathUtils.SmootherStep(1, 0.8f, (float)logRemainder);
             drawList.AddLine(
@@ -150,27 +161,26 @@ internal static class InfinitySliderOverlay
                              1
                             );
 
-            var font = isPrimary2 ? Fonts.FontBold : Fonts.FontNormal;
-            var v = Math.Abs(valueAtTick) < 0.0001 ? 0 : valueAtTick;
-            var label = $"{v:G5}";
-
             var ff = (1 - (float)logRemainder * 2);
             if (isPrimary2 || ff < 1)
             {
+                var font = isPrimary2 ? Fonts.FontBold : Fonts.FontNormal;
+                var v = Math.Abs(valueAtTick) < 0.0001 ? 0 : valueAtTick;
+                var label = $"{v:G5}";
                 ImGui.PushFont(font);
                 var size = ImGui.CalcTextSize(label);
                 ImGui.PopFont();
 
                 drawList.AddText(font,
                                  font.FontSize,
-                                 new Vector2(tickX - 1 - size.X / 2, 
+                                 new Vector2(tickX - 1 - size.X / 2,
                                              rect.Max.Y - 30 * T3Ui.UiScaleFactor),
                                  UiColors.BackgroundFull.Fade(negF * ff),
                                  label);
 
                 drawList.AddText(font,
                                  font.FontSize,
-                                 new Vector2(tickX - size.X / 2 + 1, 
+                                 new Vector2(tickX - size.X / 2 + 1,
                                              rect.Max.Y - 30 * T3Ui.UiScaleFactor),
                                  UiColors.BackgroundFull.Fade(negF * ff),
                                  label);
@@ -178,14 +188,12 @@ internal static class InfinitySliderOverlay
                 var fadeOut = (isPrimary ? 1 : ff) * 0.7f;
                 drawList.AddText(font,
                                  font.FontSize,
-                                 new Vector2(tickX - size.X / 2, 
+                                 new Vector2(tickX - size.X / 2,
                                              rect.Max.Y - 30 * T3Ui.UiScaleFactor),
                                  UiColors.ForegroundFull.Fade(negF * (isPrimary2 ? 1 : fadeOut)),
                                  label);
             }
         }
-
-
 
         // Draw Value range
         {
@@ -231,16 +239,16 @@ internal static class InfinitySliderOverlay
                             );
             ImGui.PopFont();
         }
-            
+
         // Draw previous value
         {
             if (GetXForValueIfVisible(_originalValue, valueRange, mousePosX, Width, out var visibleMinX))
             {
                 var y = rect.Min.Y;
-                    
-                drawList.AddTriangleFilled(new Vector2(visibleMinX, y+4),
-                                           new Vector2(visibleMinX+4, y),
-                                           new Vector2(visibleMinX-4, y),
+
+                drawList.AddTriangleFilled(new Vector2(visibleMinX, y + 4),
+                                           new Vector2(visibleMinX + 4, y),
+                                           new Vector2(visibleMinX - 4, y),
                                            UiColors.ForegroundFull);
             }
         }
@@ -285,7 +293,6 @@ internal static class InfinitySliderOverlay
     private static float _verticalDistance;
     private static Vector2 _center = Vector2.Zero;
     private static Vector2 _dragCenterStart = Vector2.Zero;
-    //private static float _dampedAngleVelocity;
     private static double _lastXOffset;
     private static double _dampedModifierScaleFactor;
 

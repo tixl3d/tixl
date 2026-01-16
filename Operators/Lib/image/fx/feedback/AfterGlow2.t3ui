@@ -9,7 +9,10 @@
         "X": -463.38632,
         "Y": 154.52512
       },
-      "Description": "Controls how much the images created by the afterglow effect are blurred"
+      "Description": "Controls how much the images created by the afterglow effect are blurred",
+      "Min": 0.0,
+      "Max": 10.0,
+      "ClampMin": true
     },
     {
       "InputId": "47ec468d-b984-4653-879d-a08875a90d19"/*Color*/,
@@ -39,7 +42,12 @@
         "Y": 64.52513
       },
       "GroupTitle": "Settings",
-      "Description": "Defines how quickly the afterglow fades"
+      "Description": "Defines how quickly the afterglow fades",
+      "Min": 0.0,
+      "Max": 1.0,
+      "Scale": 0.001,
+      "ClampMin": true,
+      "ClampMax": true
     },
     {
       "InputId": "edc5e4e1-b4fc-4f1a-a080-ddbe2ca18a55"/*GlowImpact*/,
@@ -47,7 +55,11 @@
         "X": -463.38632,
         "Y": 109.52513
       },
-      "Description": "Controls the intensity of a glow effect"
+      "Description": "Controls the intensity of a glow effect",
+      "Min": 0.0,
+      "Max": 1.0,
+      "Scale": 0.01,
+      "ClampMin": true
     },
     {
       "InputId": "f06e5ede-f7ff-48ed-b2cf-9a87ef5932ec"/*Image*/,

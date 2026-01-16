@@ -1,0 +1,371 @@
+{
+  "Id": "8937e098-e136-475b-82ec-17c3e65a379f"/*LaunchPadXFader4*/,
+  "Description": "",
+  "InputUis": [
+    {
+      "InputId": "2672c0fd-5db5-451a-a02c-3af27b0262ab"/*X*/,
+      "Position": {
+        "X": -270.0943,
+        "Y": 228.24847
+      }
+    },
+    {
+      "InputId": "37705008-bf6b-4f80-991c-a742ef9a2bff"/*Color*/,
+      "Position": {
+        "X": -219.82831,
+        "Y": 414.58517
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true
+    },
+    {
+      "InputId": "5bdee277-3ea4-4d17-9465-c59f6d50c0e6"/*MidiDevice*/,
+      "Position": {
+        "X": -119.40463,
+        "Y": -71.28778
+      },
+      "Usage": "Default"
+    },
+    {
+      "InputId": "6fc44168-1dd7-4632-a0aa-7d18fd71172f"/*Y*/,
+      "Position": {
+        "X": -219.82831,
+        "Y": 339.58517
+      }
+    },
+    {
+      "InputId": "7d395428-6562-4c76-a252-395bcb170d50"/*Init*/,
+      "Position": {
+        "X": -219.82831,
+        "Y": 489.58517
+      }
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "030af915-69a3-4ae1-98b4-41111f6786dd"/*CombineStrings*/,
+      "Position": {
+        "X": 262.65747,
+        "Y": 3124.0725
+      }
+    },
+    {
+      "ChildId": "04ab7a20-dc56-454c-8fed-e939c5578d81"/*BoolToInt*/,
+      "Position": {
+        "X": 1384.9309,
+        "Y": 2230.2336
+      }
+    },
+    {
+      "ChildId": "091bda6b-ae18-48a6-a00a-e3279725dd16"/*LaunchPadXButton*/,
+      "Position": {
+        "X": 619.126,
+        "Y": 498.49115
+      }
+    },
+    {
+      "ChildId": "19d39344-2297-42fb-a087-e766746e72bf"/*BoolToInt*/,
+      "Position": {
+        "X": 1363.0684,
+        "Y": 2663.4368
+      }
+    },
+    {
+      "ChildId": "20b94053-3804-4d5d-9280-50917daca177"/*FlipFlop*/,
+      "Position": {
+        "X": 991.89355,
+        "Y": 2675.4138
+      }
+    },
+    {
+      "ChildId": "2988b7e8-eb9e-42a2-aeb9-aa0475be15b7"/*IntToFloat*/,
+      "Position": {
+        "X": 2266.7473,
+        "Y": 2153.5237
+      }
+    },
+    {
+      "ChildId": "303a6034-e915-4a12-8dd4-5b8649f206d7"/*MidiInput*/,
+      "Position": {
+        "X": 626.32477,
+        "Y": 2256.0732
+      }
+    },
+    {
+      "ChildId": "347219a7-39be-4cad-b5e1-2c3a211e93e5"/*Div*/,
+      "Position": {
+        "X": 2406.7473,
+        "Y": 2153.5237
+      }
+    },
+    {
+      "ChildId": "34992c31-5600-4762-a0ed-f2d488d594db"/*FlipFlop*/,
+      "Position": {
+        "X": 1013.7562,
+        "Y": 2242.2107
+      }
+    },
+    {
+      "ChildId": "3c6d3b45-ee61-45ec-991f-64c693f12da2"/*CombineStrings*/,
+      "Position": {
+        "X": 257.11926,
+        "Y": 2686.5554
+      }
+    },
+    {
+      "ChildId": "3e45a5a0-2923-48b3-a4f5-2f3e4a9d15e5"/*TryParseInt*/,
+      "Position": {
+        "X": 410.47186,
+        "Y": 1939.9071
+      }
+    },
+    {
+      "ChildId": "3e4ac5cb-30bf-48bb-a410-f4a74ab6da0c"/*FlipFlop*/,
+      "Position": {
+        "X": 947.56445,
+        "Y": 1928.8949
+      }
+    },
+    {
+      "ChildId": "428154e7-4259-4254-a98b-a137d01c2990"/*LaunchPadXButton*/,
+      "Position": {
+        "X": 373.47876,
+        "Y": 1436.7267
+      }
+    },
+    {
+      "ChildId": "4a3ddb31-14c6-4d4d-b6a4-552e95e4b487"/*TryParseInt*/,
+      "Position": {
+        "X": 418.98187,
+        "Y": 2253.3525
+      }
+    },
+    {
+      "ChildId": "4df475c7-799e-4835-9a9a-92716b54ea67"/*CombineStrings*/,
+      "Position": {
+        "X": 270.47186,
+        "Y": 1939.9071
+      }
+    },
+    {
+      "ChildId": "4ec38b13-f2d7-447c-bf37-b6ad1b7c5a11"/*IntToString*/,
+      "Position": {
+        "X": -70.53168,
+        "Y": 2809.9534
+      }
+    },
+    {
+      "ChildId": "508c8e9d-d6ec-488d-a368-2143a35a595d"/*MidiInput*/,
+      "Position": {
+        "X": 604.46216,
+        "Y": 2689.2764
+      }
+    },
+    {
+      "ChildId": "5676e850-90ae-484f-b70d-0fab397df327"/*MidiInput*/,
+      "Position": {
+        "X": 610.00037,
+        "Y": 3126.7935
+      }
+    },
+    {
+      "ChildId": "5b3d6258-f1c6-4fba-8d49-1a623b04e406"/*BoolToInt*/,
+      "Position": {
+        "X": 1368.6064,
+        "Y": 3100.9539
+      }
+    },
+    {
+      "ChildId": "6206d5cf-3538-4b5f-94a3-d0713bf719fa"/*FlipFlop*/,
+      "Position": {
+        "X": 997.4319,
+        "Y": 3112.931
+      }
+    },
+    {
+      "ChildId": "694dc1b9-979a-42e8-81b5-d5b2789ac30f"/*IntToString*/,
+      "Position": {
+        "X": 46.71411,
+        "Y": 1971.5187
+      }
+    },
+    {
+      "ChildId": "757fd768-c964-43f1-8963-31fcb245cacd"/*IntToString*/,
+      "Position": {
+        "X": -34.771606,
+        "Y": 2283.5796
+      }
+    },
+    {
+      "ChildId": "771e8ce4-1f1e-4bad-aa03-e3d2d7dfa660"/*Any*/,
+      "Position": {
+        "X": 822.95807,
+        "Y": 2491.0833
+      }
+    },
+    {
+      "ChildId": "781e4714-6c2b-4ac3-9648-838f4a436a49"/*IntAdd*/,
+      "Position": {
+        "X": 298.5526,
+        "Y": 1126.9739
+      }
+    },
+    {
+      "ChildId": "7d9da2dd-b882-435c-a1f4-6f0aea9faaa2"/*IntToString*/,
+      "Position": {
+        "X": -48.669067,
+        "Y": 2376.7502
+      }
+    },
+    {
+      "ChildId": "893fd7cb-4e49-4b7d-b798-802dde4b814d"/*Any*/,
+      "Position": {
+        "X": 828.7629,
+        "Y": 2154.2297
+      }
+    },
+    {
+      "ChildId": "8f8a9b73-ee91-4c0c-92f4-59c8bc7e37fd"/*IntToString*/,
+      "Position": {
+        "X": 33.36151,
+        "Y": 2718.1672
+      }
+    },
+    {
+      "ChildId": "9c106bab-57d1-488c-8b7d-5a076f2acd35"/*BoolToInt*/,
+      "Position": {
+        "X": 1370.5085,
+        "Y": 2124.4695
+      }
+    },
+    {
+      "ChildId": "9c46d874-519e-4eba-8020-76f065b88bf8"/*Any*/,
+      "Position": {
+        "X": 801.09546,
+        "Y": 2924.2864
+      }
+    },
+    {
+      "ChildId": "a04f0537-0efe-4121-aa5c-be0f8926b0a8"/*IntAdd*/,
+      "Position": {
+        "X": 371.88287,
+        "Y": 813.64636
+      }
+    },
+    {
+      "ChildId": "b9e55b66-4355-4144-891e-715abdf38776"/*CombineStrings*/,
+      "Position": {
+        "X": 278.98187,
+        "Y": 2253.3525
+      }
+    },
+    {
+      "ChildId": "c1ad2b96-a551-4ee0-9ce4-0a312316aeb2"/*Any*/,
+      "Position": {
+        "X": 806.63367,
+        "Y": 3361.8035
+      }
+    },
+    {
+      "ChildId": "cff5f870-7f9b-4569-9bb2-f3b1ae61efcd"/*MidiInput*/,
+      "Position": {
+        "X": 600.27716,
+        "Y": 1981.395
+      }
+    },
+    {
+      "ChildId": "d2d4f498-9991-4e5c-9737-9fe7dac060f9"/*IntAdd*/,
+      "Position": {
+        "X": 233.47876,
+        "Y": 1471.7267
+      }
+    },
+    {
+      "ChildId": "dd1533b7-4c86-4e21-ba21-281117caf365"/*LaunchPadXButton*/,
+      "Position": {
+        "X": 511.88287,
+        "Y": 778.64636
+      }
+    },
+    {
+      "ChildId": "e0d1b4de-4f5a-4187-9cb2-ea82a1bafa07"/*IntToString*/,
+      "Position": {
+        "X": 38.89972,
+        "Y": 3155.6843
+      }
+    },
+    {
+      "ChildId": "e1218b40-6eaf-4bcd-ab39-eb69f5bba7ce"/*IntToString*/,
+      "Position": {
+        "X": 30.470581,
+        "Y": 2113.6099
+      }
+    },
+    {
+      "ChildId": "e59ae7ae-9088-4d5c-b43b-58702230144f"/*TryParseInt*/,
+      "Position": {
+        "X": 397.11926,
+        "Y": 2686.5554
+      }
+    },
+    {
+      "ChildId": "e8bb25ae-3da8-4b86-a3e7-05a297790730"/*Group*/,
+      "Position": {
+        "X": 1285.9479,
+        "Y": 705.2655
+      }
+    },
+    {
+      "ChildId": "ec42593c-bce4-4c31-84f7-a169ac683fe5"/*IntToString*/,
+      "Position": {
+        "X": -64.99347,
+        "Y": 3247.4705
+      }
+    },
+    {
+      "ChildId": "f284e356-8b7b-4f0f-97e9-4e50d8d6e3ef"/*SumInts*/,
+      "Position": {
+        "X": 1677.3098,
+        "Y": 1880.7346
+      }
+    },
+    {
+      "ChildId": "f2dcbc44-fb19-4c4a-aaba-8ed3d3a935b9"/*TryParseInt*/,
+      "Position": {
+        "X": 402.65747,
+        "Y": 3124.0725
+      }
+    },
+    {
+      "ChildId": "f73f3650-4b17-48c4-b9d0-7cf9778a4ea0"/*LaunchPadXButton*/,
+      "Position": {
+        "X": 438.5526,
+        "Y": 1091.9739
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "c7316411-707a-4769-8d3e-77ad3628d126"/*OutputCmd*/,
+      "Position": {
+        "X": 1681.0515,
+        "Y": 733.27106
+      }
+    },
+    {
+      "OutputId": "7d6d7c11-cadb-4d7e-91e2-5ebe7dd19ea6"/*IntOut*/,
+      "Position": {
+        "X": 2545.2495,
+        "Y": 2057.8342
+      }
+    },
+    {
+      "OutputId": "7326a5a9-7584-401b-9520-5453e9a3b911"/*FloatOut*/,
+      "Position": {
+        "X": 2546.7473,
+        "Y": 2153.5237
+      }
+    }
+  ]
+}

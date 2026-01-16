@@ -1,0 +1,23 @@
+{
+  "Id": "04d557f8-3cc7-471f-8f2f-39090fec63bb"/*ZipStringList*/,
+  "Description": "Zip two lists of strings, if the list sizes are differents, additional values of the longest are ignored",
+  "InputUis": [
+    {
+      "InputId": "be829559-ab5b-41ee-b104-dc5b0c1a1b2e"/*Value*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "0fc84451-81a3-4fb1-bacf-ea22a4a341c7"/*Output*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

@@ -25,8 +25,8 @@
     {
       "InputId": "671a04f9-0f40-45ea-a2df-4f06c08d9647"/*AmountFromVelocity*/,
       "Position": {
-        "X": 349.7188,
-        "Y": 210.57773
+        "X": 159.11227,
+        "Y": 217.83896
       },
       "Description": "Defines whether the particles with more momentum should be more affected by the noise.",
       "AddPadding": "True"
@@ -77,8 +77,8 @@
     {
       "ChildId": "45ae00a3-5f83-4424-84d2-05a8284ebcff"/*_ExecuteParticleUpdate*/,
       "Position": {
-        "X": 839.1881,
-        "Y": 71.77539
+        "X": 858.663,
+        "Y": 92.506714
       }
     },
     {
@@ -96,8 +96,8 @@
     {
       "ChildId": "a4c4627d-93fd-4f5c-a5f7-b14a2b8b027f"/*ComputeShaderStage*/,
       "Position": {
-        "X": 839.1881,
-        "Y": -138.22461
+        "X": 858.663,
+        "Y": -117.493286
       }
     },
     {
@@ -110,8 +110,8 @@
     {
       "ChildId": "dd25aa58-36f9-4f59-823f-7fc284473a72"/*HasTimeChanged*/,
       "Position": {
-        "X": 699.1881,
-        "Y": 106.77539
+        "X": 718.663,
+        "Y": 127.506714
       }
     },
     {
@@ -126,8 +126,8 @@
     {
       "OutputId": "e5bbe22e-e3f6-4f1f-9db0-fc7632c10639"/*Particles*/,
       "Position": {
-        "X": 839.1881,
-        "Y": 141.77539
+        "X": 1133.2668,
+        "Y": 170.82019
       }
     }
   ]

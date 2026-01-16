@@ -84,7 +84,7 @@ public static class BlendActions
 
         public static void UpdateBlend()
         {
-            if (_targetVariation == null)
+            if (_targetVariation == null || VariationHandling.ActiveInstanceForSnapshots == null)
                 return;
 
             if (float.IsNaN(_dampedWeight) || float.IsInfinity(_dampedWeight))
@@ -101,12 +101,15 @@ public static class BlendActions
             _dampedWeight = MathUtils.SpringDamp(_targetWeight,
                                                  _dampedWeight,
                                                  ref _dampingVelocity,
-                                                 200f, frameDuration);
+                                                 20f, frameDuration);
 
-            if (!(MathF.Abs(_dampingVelocity) > 0.0005f))
+            if (MathF.Abs(_dampingVelocity) < 0.0005f)
                 return;
 
-            VariationHandling.ActivePoolForSnapshots.BeginBlendTowardsSnapshot(VariationHandling.ActiveInstanceForSnapshots, _targetVariation, _targetWeight);
+            VariationHandling.ActivePoolForSnapshots?.
+                              BeginBlendTowardsSnapshot(VariationHandling.ActiveInstanceForSnapshots, 
+                                                        _targetVariation, 
+                                                        _dampedWeight);
         }
 
         public static void Stop()

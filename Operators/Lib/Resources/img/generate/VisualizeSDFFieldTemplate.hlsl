@@ -58,7 +58,6 @@ vsOutput vsMain4(uint vertexId : SV_VertexID)
 sampler ClampedSampler : register(s0);
 sampler WrappedSampler : register(s1);
 
-
 //=== Resources =====================================================
 /*{RESOURCES(t0)}*/
 
@@ -71,6 +70,7 @@ sampler WrappedSampler : register(s1);
 //-------------------------------------------------------------------
 float4 GetField(float4 p)
 {
+    p.xyz = mul(float4(p.xyz, 1), WorldToObject).xyz;
     float4 f = 1;
     /*{FIELD_CALL}*/
     return f;

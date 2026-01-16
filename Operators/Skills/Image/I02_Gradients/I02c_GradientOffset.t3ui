@@ -1,0 +1,79 @@
+{
+  "Id": "0534ef90-6c31-4c9c-bf3a-f0f558fa61c9"/*I02c_GradientOffset*/,
+  "Description": "LinearGradient: Offset",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "26d5a7fa-56bc-4399-9d00-907f3988a05a"/*LinearGradient*/,
+      "Position": {
+        "X": 1238.5605,
+        "Y": 1882.29
+      }
+    },
+    {
+      "ChildId": "5115acfd-f376-4b5f-98c8-086ca4d2d0d6"/*LinearGradient*/,
+      "AnnotationId": "de748c10-0fdd-4287-ac18-8d1c11c36b55",
+      "Position": {
+        "X": 1243.0592,
+        "Y": 2132.8486
+      }
+    },
+    {
+      "ChildId": "a4bcd5f8-0e08-4a04-b020-366ff0f3e0f4"/*ImageQuiz*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2018.4391
+      }
+    },
+    {
+      "ChildId": "acab22e1-1286-4b80-b97e-03d725c220dd"/*LinearGradient*/,
+      "AnnotationId": "606c89c3-3cd5-4883-8da9-101ee8d767f0",
+      "Position": {
+        "X": 1441.7301,
+        "Y": 2334.827
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "e0d084f0-65f5-4d20-8862-498a0ca199c2"/*ColorBuffer*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2088.439
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "de748c10-0fdd-4287-ac18-8d1c11c36b55",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1206.2205,
+        "Y": 2060.6824
+      },
+      "Size": {
+        "X": 231.36255,
+        "Y": 159.46973
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "10cf5854-1ed3-4f87-89bf-982bf8f5aabf",
+      "Description": "Use Offset to shift the gradient along its axis.\nAn offset of one equals the current width of the gradient."
+    },
+    {
+      "Id": "b516f873-f8cb-4320-8c43-1a8846ac886e",
+      "ChildId": "26d5a7fa-56bc-4399-9d00-907f3988a05a",
+      "Description": "Move the gradient so it only appears at the bottom of the screen without changing its color ramp.",
+      "Style": "CallToAction"
+    }
+  ]
+}

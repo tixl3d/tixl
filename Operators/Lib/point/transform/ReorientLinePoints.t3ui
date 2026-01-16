@@ -1,0 +1,153 @@
+{
+  "Id": "5dbe204c-ded0-4f23-bf6a-1de5cca21db6"/*ReorientLinePoints*/,
+  "Description": "Align the orientation of points so that z- poitns forward.\nTry to use the current point orientation to avoid relying on up-vector discontinuities.",
+  "InputUis": [
+    {
+      "InputId": "088a9588-551d-4166-8d9d-a313e6dca44e"/*Center*/,
+      "Position": {
+        "X": -86.804,
+        "Y": 749.5584
+      }
+    },
+    {
+      "InputId": "70c1746a-3cf1-4a20-829e-18fd846b9133"/*Amount*/,
+      "Position": {
+        "X": 53.196,
+        "Y": 854.5584
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "7e790989-90fd-44a6-b937-4665dad0d06f"/*Flip*/,
+      "Position": {
+        "X": -86.804,
+        "Y": 1029.5585
+      }
+    },
+    {
+      "InputId": "c5cbca87-0f5e-4c0b-87b6-00e6404a180e"/*UpVector*/,
+      "Position": {
+        "X": -86.804,
+        "Y": 889.5584
+      }
+    },
+    {
+      "InputId": "d0c4731f-d84d-492c-ad62-7b635ef83407"/*Points*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -650.41815,
+        "Y": 592.5717
+      }
+    },
+    {
+      "InputId": "d90ad85c-2cdf-4eea-8499-63f2f9c91812"/*WIsWeight*/,
+      "Position": {
+        "X": -86.804,
+        "Y": 994.5585
+      }
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0e066838-6fe6-421c-b91e-7df0aa749330"/*ExecuteBufferUpdate*/,
+      "Position": {
+        "X": 648.0739,
+        "Y": 523.0598
+      }
+    },
+    {
+      "ChildId": "39416583-fee3-4fd0-b049-950b13a1d589"/*CalcDispatchCount*/,
+      "Position": {
+        "X": 253.58789,
+        "Y": 552.60925
+      }
+    },
+    {
+      "ChildId": "3b23e84e-b38b-461c-8708-bb4c8fb77c4b"/*FloatsToBuffer*/,
+      "Style": "Resizable",
+      "Size": {
+        "X": 104.165405,
+        "Y": 302.01947
+      },
+      "Position": {
+        "X": 193.196,
+        "Y": 714.5584
+      }
+    },
+    {
+      "ChildId": "63c3e338-16b4-4ec2-b97b-5e8949680c5f"/*BoolToFloat*/,
+      "Position": {
+        "X": 53.196,
+        "Y": 994.5585
+      }
+    },
+    {
+      "ChildId": "77bc306d-ee99-4883-b358-458f7983565a"/*StructuredBufferWithViews*/,
+      "Position": {
+        "X": -207.65173,
+        "Y": 1307.709
+      }
+    },
+    {
+      "ChildId": "90569e7b-4a28-4882-9708-1565a6a70c34"/*GetBufferComponents*/,
+      "Position": {
+        "X": -510.4181,
+        "Y": 592.5717
+      }
+    },
+    {
+      "ChildId": "99c91e4b-abd3-4106-beba-e006f76f9ba1"/*ComputeShader*/,
+      "Position": {
+        "X": 113.58789,
+        "Y": 517.60925
+      }
+    },
+    {
+      "ChildId": "a42fb862-1f2f-470c-9942-70373cc8bd2e"/*ComputeShaderStage*/,
+      "Position": {
+        "X": 475.10886,
+        "Y": 524.0607
+      }
+    },
+    {
+      "ChildId": "b1c96234-030a-4808-87b6-c5ebde39b14f"/*Vector3Components*/,
+      "Position": {
+        "X": 53.196,
+        "Y": 889.5584
+      }
+    },
+    {
+      "ChildId": "cb206647-23de-4bd9-9b3f-8aa8f457b3ed"/*Vector3Components*/,
+      "Position": {
+        "X": 53.196,
+        "Y": 749.5584
+      }
+    },
+    {
+      "ChildId": "f77052da-dd75-4fa5-91be-4fd6e13b1d5f"/*GetBufferComponents*/,
+      "Position": {
+        "X": 293.35922,
+        "Y": 1152.7119
+      }
+    },
+    {
+      "ChildId": "fdbc32e1-3383-4cdd-a2e0-8756fd7927b9"/*BoolToFloat*/,
+      "Position": {
+        "X": 53.196,
+        "Y": 1029.5585
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "3c051df4-1edc-49dd-88f1-8db923bf0e3e"/*Output*/,
+      "Position": {
+        "X": 812.7836,
+        "Y": 534.6297
+      }
+    }
+  ]
+}

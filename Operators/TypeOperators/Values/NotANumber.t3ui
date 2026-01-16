@@ -1,0 +1,15 @@
+{
+  "Id": "b0042ec2-dbfd-40b9-b8dc-6a4b3630d3ab"/*NotANumber*/,
+  "Description": "A special operator that returns not a number.\n\nThis might be useful for testing operations.",
+  "InputUis": [],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "caed8758-f20f-4be7-9861-b6ec90e816d2"/*Result*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 38.0
+      }
+    }
+  ]
+}

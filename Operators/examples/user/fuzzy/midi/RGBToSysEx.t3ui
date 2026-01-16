@@ -1,0 +1,23 @@
+{
+  "Id": "dcd44623-3cbc-4cf4-b5b9-00ea0f884a22"/*RGBToSysEx*/,
+  "Description": "",
+  "InputUis": [
+    {
+      "InputId": "0bc553ea-f217-4cc8-8ca9-68d0e8db3f94"/*Value*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "0680af36-2947-48e3-9bfe-2c8479ce174c"/*Output*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

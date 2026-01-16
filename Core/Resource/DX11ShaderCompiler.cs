@@ -142,7 +142,7 @@ public sealed partial class DX11ShaderCompiler : ShaderCompiler
 
         public Stream Open(IncludeType type, string fileName, Stream parentStream)
         {
-            if (ResourceManager.TryResolvePath(fileName, _owner, out var path, out _))
+            if (ResourceManager.TryResolveRelativePath(fileName, _owner, out var path, out _))
             {
                 _streamReader = new StreamReader(path);
                 return _streamReader.BaseStream;

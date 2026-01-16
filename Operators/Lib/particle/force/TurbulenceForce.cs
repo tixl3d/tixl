@@ -4,7 +4,7 @@ namespace Lib.particle.force;
 internal sealed class TurbulenceForce : Instance<TurbulenceForce>
 {
 
-    [Output(Guid = "e5bbe22e-e3f6-4f1f-9db0-fc7632c10639")]
+    [Output(Guid = "e5bbe22e-e3f6-4f1f-9db0-fc7632c10639", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
     public readonly Slot<T3.Core.DataTypes.ParticleSystem> Particles = new();
 
     [Input(Guid = "e27a97ce-3d0f-41a9-93c3-a1691f4029aa")]

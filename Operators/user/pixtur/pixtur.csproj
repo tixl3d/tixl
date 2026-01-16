@@ -14,7 +14,7 @@
     <IsEditorOnly>false</IsEditorOnly>
     <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
     <Deterministic>true</Deterministic>
-      <NoWarn>NU1900</NoWarn>
+    <NoWarn>NU1900</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Using Include="System" />
@@ -144,9 +144,8 @@
     </PropertyGroup>
     <WriteLinesToFile File="$(OutputPath)/OperatorPackage.json" Lines="$(OperatorPackageInfoJson)" Overwrite="True" Encoding="UTF-8" />
   </Target>
-
-    <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild">
-        <!-- Clear previous files in the export folder -->
-        <RemoveDir Directories="bin/$(Configuration)"/>
-    </Target>
+  <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild">
+    <!-- Clear previous files in the export folder -->
+    <RemoveDir Directories="bin/$(Configuration)" />
+  </Target>
 </Project>

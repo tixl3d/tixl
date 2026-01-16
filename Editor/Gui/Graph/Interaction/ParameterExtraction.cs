@@ -7,7 +7,7 @@ using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.ProjectHandling;
 
-namespace T3.Editor.Gui.Graph.Interaction;
+namespace T3.Editor.Gui.Interaction;
 
 /// <summary>
 /// Breaking out parameters into connected value operators with original value and renamed to parameter named.

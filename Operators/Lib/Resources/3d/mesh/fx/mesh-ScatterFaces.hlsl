@@ -62,11 +62,10 @@ void tranformVertex(int vertexIndex, float influence, float3 pCenter, float3 nor
     pos.xyz += normalizedDirection * influence * pushStrength;
 
     ResultVertices[vertexIndex].Position = pos;
-    ResultVertices[vertexIndex].Normal = normalize(mul(float4(ResultVertices[vertexIndex].Normal.xyz, 0), transform));
+    ResultVertices[vertexIndex].Normal = normalize(mul(float4(ResultVertices[vertexIndex].Normal.xyz, 0), transform)).xyz;
 }
 
-[numthreads(64, 1, 1)] void main(uint3 i
-                                 : SV_DispatchThreadID)
+[numthreads(64, 1, 1)] void main(uint3 i : SV_DispatchThreadID)
 {
     uint numFaces, stride;
     Faces.GetDimensions(numFaces, stride);
@@ -76,7 +75,7 @@ void tranformVertex(int vertexIndex, float influence, float3 pCenter, float3 nor
     }
 
     int faceIndex = i.x;
-    float3 random = hash31(faceIndex);
+    float3 random = hash41u(faceIndex).xyz;
     int3 faceVertices = Faces[faceIndex];
 
     float3 pos0 = SourceVertices[faceVertices.x].Position;
@@ -91,7 +90,7 @@ void tranformVertex(int vertexIndex, float influence, float3 pCenter, float3 nor
     float3 pCenter = (pos0 + pos1 + pos2) / 3;
     float3 posInWorld = pCenter;
 
-    float3 variationOffset = hash31((float)(faceIndex % 1234) / 0.123) * NoiseVariation;
+    float3 variationOffset = hash41u((float)(faceIndex % 1234) / 0.123).xyz * NoiseVariation;
     float3 noiseOffset = GetNoise(posInWorld, variationOffset);
     float3 direction = 0;
 
@@ -115,9 +114,14 @@ void tranformVertex(int vertexIndex, float influence, float3 pCenter, float3 nor
     float weight = UseVertexSelection > 0.5 ? avgSelection : 1;
 
     // DANGER! This will cause multiple access problems with shared vertices!
-    ResultVertices[faceVertices.x] = SourceVertices[faceVertices.x];
-    ResultVertices[faceVertices.y] = SourceVertices[faceVertices.y];
-    ResultVertices[faceVertices.z] = SourceVertices[faceVertices.z];
+
+        PbrVertex v1 = SourceVertices[faceVertices.x];
+    PbrVertex v2 = SourceVertices[faceVertices.y];
+    PbrVertex v3 = SourceVertices[faceVertices.z];
+
+    ResultVertices[faceVertices.x] = v1;
+    ResultVertices[faceVertices.y] = v2;
+    ResultVertices[faceVertices.z] = v3;
 
     int seed = faceIndex;
 

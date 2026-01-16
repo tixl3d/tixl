@@ -68,7 +68,7 @@ float4 psMain(vsOutput psInput) : SV_TARGET
     float dBiased = ApplyGainAndBias(grayScale, GainAndBias);
 
     // float cellId =
-    float randomOffset = hash11u((uint)(cellIds.x * TargetWidth + 0.0001) + (uint)(cellIds.y * TargetHeight + 0.0001) * 73939133);
+    float randomOffset = hash11u((uint)(cellIds.x * TargetWidth + 0.5) + (uint)(cellIds.y * TargetHeight + 0.5) * 73939133);
     // return float4(cellIds,randomOffset,1);
     dBiased += randomOffset * Scatter;
     dBiased = clamp(dBiased, 0.0001, 0.999); // Prevent spilling from white to black

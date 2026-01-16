@@ -11,20 +11,24 @@ public sealed class CopySymbolChildrenCommand : ICommand
 
     public bool IsUndoable => true;
 
-    public Dictionary<Guid, Guid> OldToNewIdDict { get; } = new();
+    internal Dictionary<Guid, Guid> OldToNewChildIds { get; } = new();
+    internal Dictionary<Guid, Guid> OldToAnnotationIds { get; } = new();
 
-        
-    public enum CopyMode {Normal, ClipboardSource, ClipboardTarget}
-        
+    public enum CopyMode
+    {
+        Normal,
+        ClipboardSource,
+        ClipboardTarget
+    }
 
     public CopySymbolChildrenCommand(SymbolUi sourceCompositionUi,
-                                     IEnumerable<SymbolUi.Child>? symbolChildrenToCopy,
+                                     List<SymbolUi.Child>? symbolChildrenToCopy,
                                      List<Annotation>? selectedAnnotations,
                                      SymbolUi targetCompositionUi,
                                      Vector2 targetPosition, CopyMode copyMode = CopyMode.Normal, Symbol? sourceSymbol = null)
     {
         _copyMode = copyMode;
-            
+
         if (copyMode == CopyMode.ClipboardSource)
         {
             _clipboardSymbolUi = sourceCompositionUi;
@@ -36,55 +40,85 @@ public sealed class CopySymbolChildrenCommand : ICommand
             _sourceSymbolId = sourceCompositionUi.Symbol.Id;
             sourceSymbol = sourceCompositionUi.Symbol;
         }
-            
+
         _targetSymbolId = targetCompositionUi.Symbol.Id;
-            
+
         if (copyMode == CopyMode.ClipboardTarget)
         {
             _clipboardSymbolUi = targetCompositionUi;
             //_destructorAction = () => ((EditorSymbolPackage)targetCompositionUi.Symbol.SymbolPackage).RemoveSymbolUi(targetCompositionUi);
         }
-            
+
         _targetPosition = targetPosition;
 
-        symbolChildrenToCopy ??= sourceCompositionUi.ChildUis.Values.ToArray();
+        symbolChildrenToCopy ??= sourceCompositionUi.ChildUis.Values.ToList();
 
+        // Add collapsed children
+        if (selectedAnnotations != null && selectedAnnotations.Count > 0)
+        {
+            foreach (var a in selectedAnnotations)
+            {
+                if (!a.Collapsed)
+                    continue;
+
+                foreach (var childUi in sourceCompositionUi.ChildUis.Values)
+                {
+                    if (childUi.CollapsedIntoAnnotationFrameId == a.Id && !symbolChildrenToCopy.Contains(childUi))
+                    {
+                        symbolChildrenToCopy.Add(childUi);
+                    }
+                }
+            }
+        }
+        
+        
+        selectedAnnotations ??=  sourceCompositionUi.Annotations.Values.ToList();
+        
         var upperLeftCorner = new Vector2(float.MaxValue, float.MaxValue);
         foreach (var childToCopy in symbolChildrenToCopy)
         {
             upperLeftCorner = Vector2.Min(upperLeftCorner, childToCopy.PosOnCanvas);
+        }
+        
+        foreach(var annotationToCopy in selectedAnnotations) 
+        {
+            upperLeftCorner = Vector2.Min(upperLeftCorner, annotationToCopy.PosOnCanvas);
         }
 
         PositionOffset = targetPosition - upperLeftCorner;
 
         foreach (var childToCopy in symbolChildrenToCopy)
         {
-            var entry = new Entry(childToCopy.Id, Guid.NewGuid(), childToCopy.PosOnCanvas - upperLeftCorner, childToCopy.Size);
+            var entry = new ChildCopy(childToCopy.Id, 
+                                      Guid.NewGuid(), 
+                                      childToCopy.PosOnCanvas - upperLeftCorner, 
+                                      childToCopy.Size);
             _childrenToCopy.Add(entry);
-            OldToNewIdDict.Add(entry.ChildId, entry.AddedId);
+            OldToNewChildIds.Add(entry.OrgChildId, entry.NewChildId);
         }
 
         foreach (var entry in _childrenToCopy)
         {
             _connectionsToCopy.AddRange(from con in sourceSymbol.Connections
-                                        where con.TargetParentOrChildId == entry.ChildId
-                                        let newTargetId = OldToNewIdDict[entry.ChildId]
+                                        where con.TargetParentOrChildId == entry.OrgChildId
+                                        let newTargetId = OldToNewChildIds[entry.OrgChildId]
                                         from connectionSource in symbolChildrenToCopy
                                         where con.SourceParentOrChildId == connectionSource.Id
-                                        let newSourceId = OldToNewIdDict[connectionSource.Id]
+                                        let newSourceId = OldToNewChildIds[connectionSource.Id]
                                         select new Symbol.Connection(newSourceId, con.SourceSlotId, newTargetId, con.TargetSlotId));
         }
-
         _connectionsToCopy.Reverse(); // to keep multi input order
-        if (selectedAnnotations != null && selectedAnnotations.Count > 0)
+        
+        _annotationsToCopy = [];
+        foreach (var orgAnnotation in selectedAnnotations)
         {
-            _annotationsToCopy = selectedAnnotations
-                                .Select(a => a.Clone())
-                                .ToList();
-            //_annotationsToCopy.AddRange(selectedAnnotations);
+            var newAnnotation = orgAnnotation.Clone();
+            newAnnotation.PosOnCanvas += PositionOffset;
+            _annotationsToCopy.Add(newAnnotation);
+            OldToAnnotationIds[orgAnnotation.Id] = newAnnotation.Id;
         }
     }
-        
+
     // ~CopySymbolChildrenCommand()
     // {
     //     _destructorAction?.Invoke();
@@ -92,15 +126,15 @@ public sealed class CopySymbolChildrenCommand : ICommand
 
     public void Undo()
     {
-        if(!SymbolUiRegistry.TryGetSymbolUi(_targetSymbolId, out var parentSymbolUi))
+        if (!SymbolUiRegistry.TryGetSymbolUi(_targetSymbolId, out var parentSymbolUi))
         {
             this.LogError(true, $"Failed to find target symbol with id: {_targetSymbolId} - was it removed?");
             return;
         }
-            
+
         foreach (var child in _childrenToCopy)
         {
-            parentSymbolUi.RemoveChild(child.AddedId);
+            parentSymbolUi.RemoveChild(child.NewChildId);
         }
 
         foreach (var annotation in _annotationsToCopy)
@@ -109,6 +143,7 @@ public sealed class CopySymbolChildrenCommand : ICommand
         }
 
         NewSymbolChildIds.Clear();
+        NewSymbolAnnotationIds.Clear();
         parentSymbolUi.FlagAsModified();
     }
 
@@ -117,7 +152,7 @@ public sealed class CopySymbolChildrenCommand : ICommand
         SymbolUi? targetCompositionSymbolUi;
         SymbolUi? sourceCompositionSymbolUi;
         Symbol sourceCompositionSymbol;
-            
+
         if (_copyMode == CopyMode.ClipboardTarget)
         {
             targetCompositionSymbolUi = _clipboardSymbolUi;
@@ -127,13 +162,13 @@ public sealed class CopySymbolChildrenCommand : ICommand
             this.LogError(false, $"Failed to find target symbol with id: {_targetSymbolId} - was it removed?");
             return;
         }
-        
-        if(targetCompositionSymbolUi == null)
+
+        if (targetCompositionSymbolUi == null)
         {
             this.LogError(false, $"Undefined targetCompositionSymbolUi?");
             return;
         }
-        
+
         if (_copyMode == CopyMode.ClipboardSource)
         {
             if (_clipboardSymbolUi == null)
@@ -141,6 +176,7 @@ public sealed class CopySymbolChildrenCommand : ICommand
                 this.LogError(false, $"Undefined symbolUi?");
                 return;
             }
+
             sourceCompositionSymbolUi = _clipboardSymbolUi;
             sourceCompositionSymbol = _sourcePastedSymbol!;
         }
@@ -151,34 +187,39 @@ public sealed class CopySymbolChildrenCommand : ICommand
                 this.LogError(false, $"Failed to find source symbol with id: {_sourceSymbolId} - was it removed?");
                 return;
             }
-                
+
             sourceCompositionSymbol = sourceCompositionSymbolUi.Symbol;
         }
-            
+
         var targetSymbol = targetCompositionSymbolUi.Symbol;
 
         // copy animations first, so when creating the new child instances can automatically create animations actions for the existing curves
-        var childIdsToCopyAnimations = _childrenToCopy.Select(entry => entry.ChildId).ToList();
-        var oldToNewIdDict = _childrenToCopy.ToDictionary(entry => entry.ChildId, entry => entry.AddedId);
+        var childIdsToCopyAnimations = _childrenToCopy.Select(entry => entry.OrgChildId).ToList();
+        var oldToNewIdDict = _childrenToCopy.ToDictionary(entry => entry.OrgChildId, entry => entry.NewChildId);
         sourceCompositionSymbol.Animator.CopyAnimationsTo(targetSymbol.Animator, childIdsToCopyAnimations, oldToNewIdDict);
 
+
+        
         foreach (var childEntryToCopy in _childrenToCopy)
         {
-            if (!sourceCompositionSymbol.Children.TryGetValue(childEntryToCopy.ChildId, out var symbolChildToCopy))
+            if (!sourceCompositionSymbol.Children.TryGetValue(childEntryToCopy.OrgChildId, out var symbolChildToCopy))
             {
                 Log.Warning("Skipping attempt to copy undefined operator. This can be related to undo/redo operations. Please try to reproduce and tell pixtur");
                 continue;
             }
 
             var symbolToAdd = symbolChildToCopy.Symbol;
-            var newSymbolChild = targetCompositionSymbolUi.AddChildAsCopyFromSource(symbolToAdd, 
-                                                                                    symbolChildToCopy, 
-                                                                                    sourceCompositionSymbolUi,
-                                                                                    _targetPosition + childEntryToCopy.RelativePosition,
-                                                                                    childEntryToCopy.AddedId);
+            targetCompositionSymbolUi.AddChildAsCopyFromSource(symbolToAdd,
+                                                               symbolChildToCopy,
+                                                               sourceCompositionSymbolUi,
+                                                               _targetPosition + childEntryToCopy.RelativePosition,
+                                                               childEntryToCopy.NewChildId,
+                                                               out var newSymbolChild,
+                                                               out var newChildUi);
 
             //Symbol.Child newSymbolChild = targetSymbol.Children.Find(child => child.Id == childToCopy.AddedId);
             NewSymbolChildIds.Add(newSymbolChild.Id);
+            
             var newSymbolInputs = newSymbolChild.Inputs;
             foreach (var (id, input) in symbolChildToCopy.Inputs)
             {
@@ -186,7 +227,7 @@ public sealed class CopySymbolChildrenCommand : ICommand
                 newInput.Value.Assign(input.Value.Clone());
                 newInput.IsDefault = input.IsDefault;
             }
-
+            
             var newSymbolOutputs = newSymbolChild.Outputs;
             foreach (var (id, output) in symbolChildToCopy.Outputs)
             {
@@ -199,12 +240,21 @@ public sealed class CopySymbolChildrenCommand : ICommand
 
                 newOutput.DirtyFlagTrigger = output.DirtyFlagTrigger;
                 newOutput.IsDisabled = output.IsDisabled;
-                    
             }
-            if(symbolChildToCopy.IsBypassed)
+
+            if (symbolChildToCopy.IsBypassed)
             {
                 newSymbolChild.IsBypassed = true;
             }
+            
+            // Update annotation id
+            if (newChildUi.CollapsedIntoAnnotationFrameId != Guid.Empty)
+            {
+                if (OldToAnnotationIds.TryGetValue(newChildUi.CollapsedIntoAnnotationFrameId, out var newAnnotationId))
+                {
+                    newChildUi.CollapsedIntoAnnotationFrameId = newAnnotationId;
+                }
+            }            
         }
 
         // add connections between copied children
@@ -212,36 +262,35 @@ public sealed class CopySymbolChildrenCommand : ICommand
         {
             targetCompositionSymbolUi.Symbol.AddConnection(connection);
         }
-
-        foreach (var annotation in _annotationsToCopy)
+        
+        foreach (var newAnnotation in _annotationsToCopy)
         {
-            targetCompositionSymbolUi.Annotations[annotation.Id] = annotation;
-            targetCompositionSymbolUi.Annotations[annotation.Id].PosOnCanvas += PositionOffset;
-            NewSymbolAnnotationIds.Add(annotation.Id);
+            targetCompositionSymbolUi.Annotations[newAnnotation.Id] = newAnnotation;
+            NewSymbolAnnotationIds.Add(newAnnotation.Id);
         }
-            
+        
         targetCompositionSymbolUi.FlagAsModified();
     }
 
-    public readonly List<Guid> NewSymbolChildIds = []; //This primarily used for selecting the new children
-    public List<Guid> NewSymbolAnnotationIds = []; //This primarily used for selecting the new children
+    internal readonly List<Guid> NewSymbolChildIds = []; //This primarily used for selecting the new children
+    internal readonly List<Guid> NewSymbolAnnotationIds = []; //This primarily used for selecting the new children
 
-    private struct Entry
+    private struct ChildCopy
     {
-        public Entry(Guid childId, Guid addedId, Vector2 relativePosition, Vector2 size)
+        public ChildCopy(Guid orgChildId, Guid newChildId, Vector2 relativePosition, Vector2 size)
         {
-            ChildId = childId;
-            AddedId = addedId;
+            OrgChildId = orgChildId;
+            NewChildId = newChildId;
             RelativePosition = relativePosition;
             Size = size;
         }
 
-        public readonly Guid ChildId;
-        public readonly Guid AddedId;
+        public readonly Guid OrgChildId;
+        public readonly Guid NewChildId;
         public readonly Vector2 RelativePosition;
         public readonly Vector2 Size;
     }
-    
+
     private readonly CopyMode _copyMode;
     //private readonly Action? _destructorAction;
 
@@ -250,7 +299,7 @@ public sealed class CopySymbolChildrenCommand : ICommand
     private readonly Symbol? _sourcePastedSymbol;
     private readonly SymbolUi? _clipboardSymbolUi;
     private readonly Guid _targetSymbolId;
-    private readonly List<Entry> _childrenToCopy = [];
+    private readonly List<ChildCopy> _childrenToCopy = [];
     private readonly List<Annotation> _annotationsToCopy = [];
     private readonly List<Symbol.Connection> _connectionsToCopy = [];
     public Vector2 PositionOffset;

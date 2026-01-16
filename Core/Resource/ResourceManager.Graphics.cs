@@ -258,6 +258,15 @@ public static partial class ResourceManager
             Device.ImmediateContext.UpdateSubresource(new DataBox(data.DataPointer, 0, 0), buffer);
         }
     }
+    
+    public static void UpdateConstBuffer<T>(T value, Buffer buffer) where T : struct
+    {
+        using var ds = new SharpDX.DataStream(System.Runtime.InteropServices.Marshal.SizeOf(typeof(T)), true, true);
+        
+        ds.Write(value);
+        ds.Position = 0;
+        Device.ImmediateContext.UpdateSubresource(new SharpDX.DataBox(ds.DataPointer, 0, 0), buffer);
+    }
 
     public static SamplerState DefaultSamplerState { get; private set; } = null!;
 }

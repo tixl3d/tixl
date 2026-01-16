@@ -1,5 +1,5 @@
 ﻿using T3.Core.Operator;
-using T3.Editor.Gui.Graph;
+using T3.Editor.Gui;
 using T3.Editor.Gui.Windows;
 
 namespace T3.Editor.UiModel.ProjectHandling;

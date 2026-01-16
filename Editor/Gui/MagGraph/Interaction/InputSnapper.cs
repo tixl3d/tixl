@@ -34,8 +34,9 @@ internal static class InputSnapper
     public static void RegisterAsPotentialTargetInput(MagGraphItem item, Vector2 posOnScreen, Guid slotId,
                                                       InputSnapTypes inputSnapType = InputSnapTypes.Normal, int multiInputIndex = 0)
     {
-        var distance = Vector2.Distance(posOnScreen, ImGui.GetMousePos());
-        if (distance < _bestInputMatchForCurrentFrame.Distance)
+        var mousePos = ImGui.GetMousePos();
+        var distance = Vector2.Distance(posOnScreen, mousePos);
+        if ( distance < _bestInputMatchForCurrentFrame.Distance)
         {
             _bestInputMatchForCurrentFrame = new InputMatch(item, slotId, posOnScreen, inputSnapType, multiInputIndex, distance);
         }

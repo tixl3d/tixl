@@ -1,5 +1,5 @@
-using System.Diagnostics;
 using ImGuiNET;
+using System.Diagnostics;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Model;
 using T3.Core.Operator;
@@ -7,13 +7,14 @@ using T3.Core.Operator.Interfaces;
 using T3.Core.Operator.Slots;
 using T3.Core.Resource;
 using T3.Core.Utils;
-using T3.Editor.Gui.OpUis;
-using T3.Editor.Gui.Graph;
+using T3.Editor.Gui;
 using T3.Editor.Gui.MagGraph.Interaction;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.MagGraph.States;
+using T3.Editor.Gui.OpUis;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.UiModel.Helpers;
 using T3.Editor.UiModel.InputsAndTypes;
 using Texture2D = T3.Core.DataTypes.Texture2D;
 
@@ -27,6 +28,9 @@ internal sealed partial class MagGraphView
             return;
 
         if (!IsRectVisible(item.Area))
+            return;
+
+        if (item.ChildUi != null && item.ChildUi.CollapsedIntoAnnotationFrameId != Guid.Empty)
             return;
 
         var idleFadeFactor = 1f;
@@ -248,7 +252,7 @@ internal sealed partial class MagGraphView
                 }
 
                 ImGui.PushFont(Fonts.FontNormal);
-                var labelSize = ImGui.CalcTextSize(name);
+                var labelSize = ImGui.CalcTextSize(name.AddSpacesForImGuiOutput());
                 ImGui.PopFont();
 
                 var paddingForPreview = hasPreview ? MagGraphItem.LineHeight + 15 : 0;
@@ -265,9 +269,11 @@ internal sealed partial class MagGraphView
                                  fontSize,
                                  labelPos,
                                  labelColor.Fade(CanvasScale.RemapAndClamp(0.3f, 0.7f, 0, 1)),
-                                 name);
+                                 name.AddSpacesForImGuiOutput());
             }
         }
+
+        var hasHiddenMatchingTypes = false;
 
         // Indicate hidden matching inputs...
         if (_context.DraggedPrimaryOutputType != null
@@ -278,7 +284,7 @@ internal sealed partial class MagGraphView
         {
             Debug.Assert(item.Instance != null); // should be true to operator variant
 
-            var hasMatchingTypes = false;
+            //hasHiddenMatchingTypes = true;
             for (var inputIndex = 0; inputIndex < item.Instance.Inputs.Count; inputIndex++)
             {
                 var inputSlot = item.Instance.Inputs[inputIndex];
@@ -286,12 +292,12 @@ internal sealed partial class MagGraphView
                 if (inputSlot.ValueType == _context.DraggedPrimaryOutputType
                     && !inputSlot.HasInputConnections)
                 {
-                    hasMatchingTypes = true;
+                    hasHiddenMatchingTypes = true;
                     break;
                 }
             }
 
-            if (hasMatchingTypes && item != _context.ActiveItem)
+            if (hasHiddenMatchingTypes && item != _context.ActiveItem)
             {
                 var indicatorPos = new Vector2(pMinVisible.X + 5 * CanvasScale, pMaxVisible.Y - 5 * CanvasScale);
 
@@ -387,7 +393,7 @@ internal sealed partial class MagGraphView
             {
                 int inputIndex;
                 var itemWidth = pMax.X - pMin.X;
-
+                var labelFontSize = Fonts.FontSmall.FontSize / T3Ui.UiScaleFactor * Fonts.FontSmall.Scale * smallFontScaleFactor;
                 for (inputIndex = 0; inputIndex < item.InputLines.Length; inputIndex++)
                 {
                     var inputLine = item.InputLines[inputIndex];
@@ -437,8 +443,8 @@ internal sealed partial class MagGraphView
                         DrawMissingInputIndicator(drawList, pMin + new Vector2(0, GridSizeOnScreen.Y * inputIndex), inputLine);
                     }
 
-                    var inputLabelFontSize = Fonts.FontSmall.FontSize / T3Ui.UiScaleFactor * Fonts.FontSmall.Scale * smallFontScaleFactor;
-                    var yCenter = pMin.Y + GridSizeOnScreen.Y * (inputIndex + 0.5f) - inputLabelFontSize / 2 - 2;
+                    
+                    var yCenter = pMin.Y + GridSizeOnScreen.Y * (inputIndex + 0.5f) - labelFontSize / 2 - 2;
                     var labelPos = new Vector2(pMin.X + 8 * CanvasScale, yCenter);
                     var label = inputLine.InputUi.InputDefinition.Name ?? "?";
                     if (inputLine.MultiInputIndex > 0)
@@ -458,7 +464,7 @@ internal sealed partial class MagGraphView
                     }
 
                     drawList.AddText(Fonts.FontSmall,
-                                     inputLabelFontSize,
+                                     labelFontSize,
                                      labelPos,
                                      labelColor.Fade(0.7f * CanvasScale.RemapAndClamp(0.3f,0.7f, 0,1) ),
                                      label
@@ -493,7 +499,7 @@ internal sealed partial class MagGraphView
                             if (!string.IsNullOrEmpty(valueAsString))
                             {
                                 drawList.AddText(Fonts.FontSmall,
-                                                 inputLabelFontSize,
+                                                 labelFontSize,
                                                  valuePos,
                                                  labelColor.Fade(0.5f),
                                                  valueAsString
@@ -504,8 +510,9 @@ internal sealed partial class MagGraphView
                         }
                     }
                 }
-                
+
                 // Draw output labels...
+               
                 for (var outputIndex = 1; outputIndex < item.OutputLines.Length; outputIndex++)
                 {
                     var outputLine = item.OutputLines[outputIndex];
@@ -513,17 +520,20 @@ internal sealed partial class MagGraphView
                         continue;
 
                     ImGui.PushFont(Fonts.FontSmall);
-                    var outputDefinitionName = outputLine.OutputUi.OutputDefinition.Name;
-                    var outputLabelSize = ImGui.CalcTextSize(outputDefinitionName) * smallFontScaleFactor;
+                    var outputDefinitionName = outputLine.OutputUi.OutputDefinition.Name.AddSpacesForImGuiOutput();
+                    var outputLabelSize = ImGui.CalcTextSize(outputDefinitionName);
                     ImGui.PopFont();
 
+                    var fontSizeRatio = labelFontSize / Fonts.FontSmall.FontSize;
+                    var scaledLabelWidth = outputLabelSize.X * fontSizeRatio;
+
+                    var visibleLineHeight = GridSizeOnScreen.Y;
+                    var yCenter = pMin.Y + visibleLineHeight * outputLine.VisibleIndex + visibleLineHeight / 2 - labelFontSize / 2;
+
                     drawList.AddText(Fonts.FontSmall,
-                                     Fonts.FontSmall.FontSize * smallFontScaleFactor,
-                                     pMin
-                                     + new Vector2(-8, 9) * CanvasScale.Clamp(0.1f, 2f)
-                                     + new Vector2(0, GridSizeOnScreen.Y * outputLine.VisibleIndex)
-                                     + new Vector2(MagGraphItem.Width * CanvasScale - outputLabelSize.X, 0),
-                                     labelColor.Fade(0.7f),
+                                     labelFontSize,
+                                     new Vector2(pMin.X + MagGraphItem.Width * CanvasScale - scaledLabelWidth - 8 * CanvasScale, yCenter),
+                                     labelColor.Fade(0.7f * CanvasScale.RemapAndClamp(0.3f, 0.7f, 0, 1)),
                                      outputDefinitionName);
                 }
             }
@@ -535,20 +545,20 @@ internal sealed partial class MagGraphView
             var indicatorCount = 0;
             if (item.Instance.Parent.Symbol.Animator.IsInstanceAnimated(item.Instance))
             {
-                DrawIndicator(drawList, UiColors.StatusAnimated, idleFadeFactor, pMin, pMax, CanvasScale, ref indicatorCount);
+                DrawIndicator(drawList, UiColors.StatusAnimated, idleFadeFactor, pMin, pMax, CanvasScale, ref indicatorCount, "is animated");
             }
 
             // Pinned indicator
             if (context.Selector.PinnedIds.Contains(item.Instance.SymbolChildId))
             {
-                DrawIndicator(drawList, UiColors.Selection, idleFadeFactor, pMin, pMax, CanvasScale, ref indicatorCount);
+                DrawIndicator(drawList, UiColors.Selection, idleFadeFactor, pMin, pMax, CanvasScale, ref indicatorCount, "is pinned");
             }
 
             // Snapshot indicator
             {
                 if (item.ChildUi.EnabledForSnapshots)
                 {
-                    DrawIndicator(drawList, UiColors.StatusAutomated, idleFadeFactor, pMin, pMax, CanvasScale, ref indicatorCount);
+                    DrawIndicator(drawList, UiColors.StatusAutomated, idleFadeFactor, pMin, pMax, CanvasScale, ref indicatorCount, "enabled for snapshot");
                 }
             }
 
@@ -581,6 +591,15 @@ internal sealed partial class MagGraphView
                 Icons.DrawIconOnLastItem(Icon.Comment, UiColors.ForegroundFull);
                 CustomComponents.TooltipForLastItem(UiColors.Text, item.ChildUi.Comment, null, false);
             }
+
+            // Non-Lib indicator 
+            var isNonLib = !SymbolAnalysis.TryGetOperatorType(item.Instance.Symbol, out var operatorType);
+
+            if (isNonLib)
+            {
+                  DrawIndicator(drawList, UiColors.StatusControlled, idleFadeFactor, pMin, pMax, CanvasScale, ref indicatorCount, "is a custom symbol");
+            }
+
         }
 
         // Hide additional UI elements when custom ui-op is hovered with control
@@ -769,7 +788,19 @@ internal sealed partial class MagGraphView
                     if (isPotentialConnectionEndDropTarget && item != _context.ActiveItem)
                     {
                         fillColor = ColorVariations.Highlight.Apply(type2UiProperties.Color).Fade(Blink);
-                        InputSnapper.RegisterAsPotentialTargetInput(item, center, inputAnchor.SlotId);
+                        var mousePos = ImGui.GetMousePos();
+                        var isHovered = new ImRect(pMin + new Vector2(4 * CanvasScale,0), pMax).Contains(mousePos);
+                        var preventInsideSnapping = isHovered && hasHiddenMatchingTypes;
+                        
+                        if (!preventInsideSnapping)
+                        {
+                            InputSnapper.RegisterAsPotentialTargetInput(item, center, inputAnchor.SlotId);
+                        } 
+                        
+                    }
+                    else if (inputAnchor.InputLine.ConnectionIn != null)
+                    {
+                        fillColor = fillColor = ColorVariations.OperatorLabel.Apply(type2UiProperties.Color).Fade(0.1f);
                     }
                 }
 
@@ -796,7 +827,7 @@ internal sealed partial class MagGraphView
             var posOnCanvas = TransformPosition(outputAnchor.PositionOnCanvas);
 
             Vector2 center;
-            bool isPotentialConnectionStartDropTarget = false;
+            var isPotentialConnectionStartDropTarget = false;
             // ...below
             if (outputAnchor.Direction == MagGraphItem.Directions.Vertical)
             {
@@ -1122,7 +1153,7 @@ internal sealed partial class MagGraphView
     }
 
     private static void DrawIndicator(ImDrawListPtr drawList, Color color, float opacity, Vector2 areaMin, Vector2 areaMax, float canvasScale,
-                                      ref int indicatorCount)
+                                      ref int indicatorCount, string tooltip=null)
     {
         const int s = 4;
         var dx = (s + 1) * indicatorCount;
@@ -1137,7 +1168,18 @@ internal sealed partial class MagGraphView
         drawList.AddRect(pMin - Vector2.One,
                          pMax + Vector2.One,
                          UiColors.WindowBackground.Fade(0.4f * opacity));
-        indicatorCount++;
+        if (!string.IsNullOrEmpty(tooltip)&&canvasScale>2.0f)
+        {
+            var mousePos = ImGui.GetMousePos();
+            var area= new ImRect(pMin, pMax);
+            if (area.Contains(mousePos))
+            {
+                ImGui.BeginTooltip();
+                ImGui.TextUnformatted(tooltip);
+                ImGui.EndTooltip();
+            }
+        }
+            indicatorCount++;
     }
     
 

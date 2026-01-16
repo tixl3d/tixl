@@ -28,24 +28,26 @@ public abstract class CurveEditing
     /// <summary>
     /// Helper function to extract vDefs from all or selected UI controls across all curves in CurveEditor
     /// </summary>
-    /// <returns>a list curves with a list of vDefs</returns>
+    /// <returns>a list of curves with a list of vDefs</returns>
     protected IEnumerable<VDefinition> GetSelectedOrAllPoints()
     {
-        var result = new List<VDefinition>();
-
         if (SelectedKeyframes.Count > 0)
         {
-            result.AddRange(SelectedKeyframes);
+            foreach (var x in SelectedKeyframes)
+            {
+                yield return x;
+            }
         }
         else
         {
             foreach (var curve in GetAllCurves())
             {
-                result.AddRange(curve.GetVDefinitions());
+                foreach (var x in curve.GetVDefinitions())
+                {
+                    yield return x;
+                }
             }
         }
-
-        return result;
     }
 
     internal bool TrySelectKeyFrame(Curve curve, VDefinition vDef)

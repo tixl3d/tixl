@@ -6,6 +6,7 @@ using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.Utils;
+using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Interaction.TransformGizmos;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.MagGraph.States;
@@ -38,9 +39,9 @@ internal sealed class ConnectionHovering
         (_lastConnectionHovers, _connectionHoversForCurrentFrame) = (_connectionHoversForCurrentFrame, _lastConnectionHovers);
         _connectionHoversForCurrentFrame.Clear();
 
-        if(!context.View.IsHovered)
+        if (!context.View.IsHovered)
             _lastConnectionHovers.Clear();
-        
+
         if (_lastConnectionHovers.Count == 0)
         {
             StopHover();
@@ -89,7 +90,7 @@ internal sealed class ConnectionHovering
         {
             // We only draw first indicator, because hover points fall together closely...
             drawList.AddCircleFilled(firstHover.PositionOnScreen, hoverIndicatorRadius, firstHover.Color, 12);
-            
+
             // Prepare disconnecting from input slot...
             if (region == LineRegions.End)
             {
@@ -101,10 +102,10 @@ internal sealed class ConnectionHovering
                         ConnectionHoversWhenClicked.AddRange(_lastConnectionHovers);
                         context.StateMachine.SetState(GraphStates.HoldingConnectionEnd, context);
                     }
-                    
+
                     // Show indicator at end...
                     var inputPosInScreen = context.View.TransformPosition(firstHover.Connection.TargetPos);
-                    drawList.AddCircle(inputPosInScreen, hoverIndicatorRadius, firstHover.Color, 24,2);
+                    drawList.AddCircle(inputPosInScreen, hoverIndicatorRadius, firstHover.Color, 24, 2);
                 }
             }
             else if (region == LineRegions.Beginning)
@@ -115,11 +116,10 @@ internal sealed class ConnectionHovering
                     ConnectionHoversWhenClicked.AddRange(_lastConnectionHovers);
                     context.StateMachine.SetState(GraphStates.HoldingConnectionBeginning, context);
                 }
-                
+
                 var outputPosInScreen = context.View.TransformPosition(firstHover.Connection.SourcePos);
-                drawList.AddCircle(outputPosInScreen, hoverIndicatorRadius, firstHover.Color, 24,2); 
+                drawList.AddCircle(outputPosInScreen, hoverIndicatorRadius, firstHover.Color, 24, 2);
             }
-           
 
             if (!disabled)
             {
@@ -133,16 +133,15 @@ internal sealed class ConnectionHovering
                 ImGui.EndTooltip();
                 ImGui.PopStyleVar();
             }
-                
-
         }
+
         //else if (firstOutput != null)
         //{
         if (!disabled)
         {
             DrawTooltipForSingleOutput(firstHover);
         }
-            // Inconsistent connection types...
+        // Inconsistent connection types...
         //}
 
         // TODO: Implement splitting
@@ -185,29 +184,31 @@ internal sealed class ConnectionHovering
                 //var width = 160f;
                 ImGui.SetNextWindowSizeConstraints(new Vector2(200, 200 * 9 / 16f), new Vector2(200, 200 * 9 / 16f));
 
-                var sourceOpUi = ToolTipContentDrawer.DrawForOutput( outputSlot, out var sourceOutputUi);
-                ImGui.PushFont(Fonts.FontSmall);
-                var connectionSource = sourceOpUi.Symbol.Name + "." + sourceOutputUi.OutputDefinition.Name;
-                
-                ImGui.TextColored(UiColors.TextMuted, connectionSource);
-                var symbolChildInput = connection.TargetItem.SymbolUi.InputUis[connection.TargetInput.Id];
+                var sourceOpUi = ToolTipContentDrawer.DrawForOutput(outputSlot, out var sourceOutputUi);
+                if (sourceOutputUi != null)
+                {
+                    ImGui.PushFont(Fonts.FontSmall);
+                    var connectionSource = sourceOpUi.Symbol.Name + "." + sourceOutputUi.OutputDefinition.Name;
 
-                ImGui.SameLine();
-                var typeName = TypeNameRegistry.Entries.GetValueOrDefault(connection.Type, connection.Type.Name);
-                ImGui.TextUnformatted("<" +  typeName + ">");
-                var inputIndex = connection.MultiInputIndex > 0 ? "[" + connection.MultiInputIndex + "]" : String.Empty;
-                var connectionTarget = "--> " + targetOp.Symbol.Name + "." + symbolChildInput.InputDefinition.Name + inputIndex;
-                ImGui.TextColored(UiColors.TextMuted, connectionTarget);
-                ImGui.PopFont();
+                    ImGui.TextColored(UiColors.TextMuted, connectionSource);
+                    var symbolChildInput = connection.TargetItem.SymbolUi.InputUis[connection.TargetInput.Id];
 
-                //var nodeSelection = context.Selector;
-                FrameStats.AddHoveredId(targetOp.SymbolChildId);
-                FrameStats.AddHoveredId(connection.SourceItem.Id);
+                    ImGui.SameLine();
+                    var typeName = TypeNameRegistry.Entries.GetValueOrDefault(connection.Type, connection.Type.Name);
+                    ImGui.TextUnformatted("<" + typeName + ">");
+                    var inputIndex = connection.MultiInputIndex > 0 ? "[" + connection.MultiInputIndex + "]" : String.Empty;
+                    var connectionTarget = "--> " + targetOp.Symbol.Name + "." + symbolChildInput.InputDefinition.Name + inputIndex;
+                    ImGui.TextColored(UiColors.TextMuted, connectionTarget);
+                    ImGui.PopFont();
+                    
+                    //var nodeSelection = context.Selector;
+                    FrameStats.AddHoveredId(targetOp.SymbolChildId);
+                    FrameStats.AddHoveredId(connection.SourceItem.Id);
+                }
             }
         }
         ImGui.EndTooltip();
     }
-
 
     private void StopHover()
     {
@@ -222,7 +223,6 @@ internal sealed class ConnectionHovering
         Center,
         End,
     }
-    
 
     internal static bool IsHovered(MagGraphConnection connection)
     {
@@ -236,12 +236,12 @@ internal sealed class ConnectionHovering
     }
 
     public static void RegisterHoverPoint(MagGraphConnection mcConnection, Color color, Vector2 positionOnScreen, float normalizedPosition,
-                                                Vector2 sourcePosOnScreen)
+                                          Vector2 sourcePosOnScreen)
     {
         var overlapWithOutputThreshold = 10;
         if (Vector2.Distance(positionOnScreen, sourcePosOnScreen) < overlapWithOutputThreshold)
             return;
-        
+
         const float threshold = 0.5f;
         var region = normalizedPosition switch
                          {
@@ -254,8 +254,6 @@ internal sealed class ConnectionHovering
     }
 
     //internal MagGraphConnection? HoveredInputConnection;
-    
-
 
     internal readonly List<HoverPoint> ConnectionHoversWhenClicked = [];
     private static List<HoverPoint> _lastConnectionHovers = [];
@@ -276,41 +274,42 @@ internal sealed class ConnectionHovering
 
 internal static class ToolTipContentDrawer
 {
-    internal static SymbolUi DrawForOutput(ISlot outputSlot, out IOutputUi sourceOutputUi)
+    internal static SymbolUi DrawForOutput(ISlot outputSlot, out IOutputUi? sourceOutputUi)
     {
         var width = (int)(170 * T3Ui.UiScaleFactor);
         var drawList = ImGui.GetWindowDrawList();
         var sourceOpInstance = outputSlot.Parent;
         var sourceOpUi = sourceOpInstance.GetSymbolUi();
-        sourceOutputUi = sourceOpUi.OutputUis[outputSlot.Id];
+
+        if (!sourceOpUi.OutputUis.TryGetValue(outputSlot.Id, out sourceOutputUi))
+            return sourceOpUi;
 
         // Check if we should skip thumbnail rendering for LastValue mode with Texture2D
         bool skipTexture2D = UserSettings.Config.HoverMode == UserSettings.GraphHoverModes.LastValue &&
                              outputSlot.ValueType == typeof(Texture2D);
 
         if (UserSettings.Config.HoverMode == UserSettings.GraphHoverModes.Disabled)
-        {
             return sourceOpUi;
-        }
-        else if (!skipTexture2D)
-        {
-            ImGui.BeginChild("thumbnail", new Vector2(width, width * 9 / 16f));
-            {
-                TransformGizmoHandling.SetDrawList(drawList);
-                _imageCanvasForTooltips.Update();
-                _imageCanvasForTooltips.SetAsCurrent();
-                _evaluationContext.Reset();
-                _evaluationContext.RequestedResolution = new Int2(1280 / 2, 720 / 2);
-                sourceOutputUi.DrawValue(outputSlot,
-                                         _evaluationContext,
-                                         "connectionLineThumbnail",
-                                         recompute: UserSettings.Config.HoverMode == UserSettings.GraphHoverModes.Live);
 
-                ImageOutputCanvas.Deactivate();
-                TransformGizmoHandling.RestoreDrawList();
-            }
-            ImGui.EndChild();
+        if (skipTexture2D)
+            return sourceOpUi;
+
+        ImGui.BeginChild("thumbnail", new Vector2(width, width * 9 / 16f));
+        {
+            TransformGizmoHandling.SetDrawList(drawList);
+            _imageCanvasForTooltips.Update();
+            _imageCanvasForTooltips.SetAsCurrent();
+            _evaluationContext.Reset();
+            _evaluationContext.RequestedResolution = new Int2(1280 / 2, 720 / 2);
+            sourceOutputUi.DrawValue(outputSlot,
+                                     _evaluationContext,
+                                     "connectionLineThumbnail",
+                                     recompute: UserSettings.Config.HoverMode == UserSettings.GraphHoverModes.Live);
+
+            ImageOutputCanvas.Deactivate();
+            TransformGizmoHandling.RestoreDrawList();
         }
+        ImGui.EndChild();
         return sourceOpUi;
     }
 

@@ -1,6 +1,7 @@
 {
   "Id": "1e1e65cd-3564-45e1-88f8-6cb4b4b18c5a"/*PrismSDF*/,
   "Description": "Generates a prism SDF (i.e. an n-sided cylinder).\n\nNOTE: the triangular prism does not support rounding.",
+  "SymbolTags": "8",
   "InputUis": [
     {
       "InputId": "356e85dd-bf81-4a1c-96a4-1d2983916a4b"/*EdgeRadius*/,

@@ -1,0 +1,93 @@
+{
+  "Id": "0cfc80fc-7b98-4cf7-982f-1aa42697bb76"/*CpuPointToCamera*/,
+  "Description": "",
+  "InputUis": [
+    {
+      "InputId": "123396f0-62c4-43cd-8be0-a661553d4783"/*AlsoOffsetTarget*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 375.0
+      }
+    },
+    {
+      "InputId": "199d4ce0-aab1-403a-ad42-216ef1061a0e"/*ClipPlanes*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 600.0
+      }
+    },
+    {
+      "InputId": "764ca304-fc86-48a9-9c82-a04fac7eadb2"/*Roll*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      }
+    },
+    {
+      "InputId": "7b957556-29dc-451e-91bd-c859c19c7ca0"/*SamplePos*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      }
+    },
+    {
+      "InputId": "7bde5a5a-ce82-4903-92ff-14e540a605f0"/*FieldOfView*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      }
+    },
+    {
+      "InputId": "ae275370-a684-42fb-ab7a-50e16d24082d"/*LensShift*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 525.0
+      }
+    },
+    {
+      "InputId": "b8dce7d9-8316-493f-b7fb-3bdcf08c9ff8"/*CamPointBuffer*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "d4d0f046-297b-440a-aef8-c2f0426ef4f5"/*RotationOffset*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 450.0
+      }
+    },
+    {
+      "InputId": "e6dfbfb9-efed-4c17-8860-9c1a1ca2fa38"/*Up*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 750.0
+      }
+    },
+    {
+      "InputId": "f66e91a1-b991-48c3-a8c9-33bcad0c2f6f"/*AspectRatio*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 675.0
+      }
+    },
+    {
+      "InputId": "fee19916-846f-491a-a2ee-1e7b1ac8e533"/*PositionOffset*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 300.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "a94fd64d-14d7-479f-ba9f-2bfd161cc80a"/*CamReference*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    }
+  ]
+}

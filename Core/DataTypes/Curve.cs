@@ -88,7 +88,52 @@ public sealed class Curve : IEditableInputType
         key = null;
         return false;
     }
+    
+    /// <remarks>
+    /// Return key-value-pairs here is very unfortunate. This should be refactored with the rest of curve calculations
+    /// </remarks>
+    public bool TryGetKeysForInterpolation(double u,
+                                           out KeyValuePair<double, VDefinition> a,
+                                           out KeyValuePair<double, VDefinition> b)
+    {
+        // Return first keys
+        var smallestTime = _state.Table.Keys[0];
+        if (u < smallestTime || _state.Table.Count == 1)
+        {
+            var ka = _state.Table.Values[0];
+            a = new KeyValuePair<double, VDefinition>(ka.U,ka);
+            b = a;
+            return false;
+        }
+        
+        // Return last keys
+        var lastIndex = _state.Table.Count - 1;
+        var largestTime = _state.Table.Keys[lastIndex];
+        if (u > largestTime)
+        {
+            var ka = _state.Table.Values[lastIndex];
+            a = new KeyValuePair<double, VDefinition>(ka.U,ka);
+            b = a;
+            return false;
+        }
 
+        // This should never happen...
+        var index = FindIndexBefore(u);
+        if (index >= _state.Table.Count - 1)
+        {
+            var ka = _state.Table.Values[index];
+            a = new KeyValuePair<double, VDefinition>(ka.U,ka);
+            b = a;
+            return false;
+        }
+
+        var kA = _state.Table.Values[index];
+        var kB = _state.Table.Values[index+1];
+        a =new KeyValuePair<double, VDefinition>(kA.U,kA);
+        b =new KeyValuePair<double, VDefinition>(kB.U,kB);
+        return true;
+    }
+    
     public int FindIndexBefore(double u)
     {
         u = Math.Round(u, TimePrecision);
@@ -179,36 +224,34 @@ public sealed class Curve : IEditableInputType
         if (_state.Table.Count < 1 || double.IsNaN(u) || double.IsInfinity(u))
             return 0.0;
 
-        u = Math.Round(u, TimePrecision);
+        var uRounded = Math.Round(u, TimePrecision);
         double offset = 0.0;
-        double mappedU = u;
-        var first = _state.Table.First();
-        var last = _state.Table.Last();
+        double mappedU = uRounded;
+        var smalledTime = _state.Table.Keys[0];
+        var largestTime = _state.Table.Keys[_state.Table.Count-1];
 
-        if (u <= first.Key)
+        if (uRounded <= smalledTime)
         {
-            _state.PreCurveMapper?.Calc(u, _state.Table, out mappedU, out offset);
+            _state.PreCurveMapper?.Calc(uRounded, _state.Table, out mappedU, out offset);
         }
-        else if (u >= last.Key)
+        else if (uRounded >= largestTime)
         {
-            _state.PostCurveMapper?.Calc(u, _state.Table, out mappedU, out offset);
+            _state.PostCurveMapper?.Calc(uRounded, _state.Table, out mappedU, out offset);
         }
 
         double resultValue;
-        if (mappedU <= first.Key)
+        if (mappedU <= smalledTime)
         {
-            resultValue = offset + first.Value.Value;
+            resultValue = offset + _state.Table.Values[0].Value;
         }
-        else if (mappedU >= last.Key)
+        else if (mappedU >= largestTime)
         {
-            resultValue = offset + last.Value.Value;
+            resultValue = offset + _state.Table.Values[_state.Table.Count -1].Value;
         }
         else
         {
-            //interpolate
-            var a = _state.Table.Last(e => e.Key <= mappedU);
-            var b = _state.Table.First(e => e.Key > mappedU);
-
+            TryGetKeysForInterpolation(mappedU, out var a, out var b);
+            
             if (a.Value.OutType == VDefinition.Interpolation.Constant)
             {
                 resultValue = offset + ConstInterpolator.Interpolate(a, b, mappedU);

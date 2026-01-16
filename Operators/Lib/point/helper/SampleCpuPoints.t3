@@ -1,0 +1,19 @@
+{
+  "Id": "6f65e325-21cc-4bc5-9aea-4a691476e3bf"/*SampleCpuPoints*/,
+  "Inputs": [
+    {
+      "Id": "1bd99405-7fe5-4712-9ef2-6e66b8d41aeb"/*TangentScale*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "6412d80e-d6fd-4c47-a8a4-6b88b5da95a5"/*SamplePos*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "8cf06759-9c93-438f-ae5f-12a55a29b347"/*PointList*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

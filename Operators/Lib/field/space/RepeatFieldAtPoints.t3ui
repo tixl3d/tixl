@@ -1,6 +1,7 @@
 {
   "Id": "e77ac861-5003-4899-a5e0-83059cdde88d"/*RepeatFieldAtPoints*/,
   "Description": "Repeats the incoming field at the connected points.\nWarning: This operator is extremely slow especially when used with [RayMarchField].\nTherefore the maximum point count is currently clamped at 50 to avoid GPU stalls.\n\nIt can be rendered with [RaymarchField] and visualized with [VisualizeFieldDistance].\n\nSimilar nodes: [RepeatWithMirror], [PolarRepeat].\n\nIt needs an incoming field like [BoxSDF], [ChainLinkSDF], [FractalSDF] as an input for the field.\nAnd it needs a [Point], [Radialpoints], [SpherePoints] or similar to define where the field is to be repeated.\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToRaymarchField].",
+  "SymbolTags": "8",
   "InputUis": [
     {
       "InputId": "08ad7bce-1161-4a43-997e-fea2e792ae36"/*K*/,

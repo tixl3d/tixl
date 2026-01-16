@@ -27,7 +27,7 @@
       "Outputs": []
     },
     {
-      "Id": "6fcdcfdc-53c5-4ea1-a305-0b6fa9ee028a"/*PickFromStringList*/,
+      "Id": "6fcdcfdc-53c5-4ea1-a305-0b6fa9ee028a"/*PickStringFromList*/,
       "SymbolId": "ef357e66-24e9-4f54-8d86-869db74602f4",
       "InputValues": [],
       "Outputs": []

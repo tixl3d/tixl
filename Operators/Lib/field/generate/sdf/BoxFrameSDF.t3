@@ -1,0 +1,31 @@
+{
+  "Id": "f393bb49-bea5-42f7-a437-c6896bdfd7d8"/*BoxFrameSDF*/,
+  "Inputs": [
+    {
+      "Id": "26389c32-410e-4240-9cf7-9ed0908b9cf8"/*Thickness*/,
+      "DefaultValue": 0.05
+    },
+    {
+      "Id": "993a74e6-87fc-4193-9dc1-8cd9447a1c49"/*Size*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 1.0,
+        "Z": 1.0
+      }
+    },
+    {
+      "Id": "a53ab420-7bcf-4d98-8440-abcf00d7db19"/*UniformScale*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "c811ef83-e183-4b14-a1e6-3ea2fd840596"/*Center*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

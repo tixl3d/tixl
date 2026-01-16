@@ -1,7 +1,7 @@
 using ImGuiNET;
 using T3.Core.Utils;
-using T3.Editor.Gui.Graph.Legacy.Interaction;
 using T3.Editor.Gui.Interaction;
+using T3.Editor.Gui.Legacy.Interaction;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
@@ -10,7 +10,7 @@ using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
 
-namespace T3.Editor.Gui.Graph.Legacy;
+namespace T3.Editor.Gui.Legacy;
 
 /// <summary>
 /// Draws an AnnotationElement and handles its interaction

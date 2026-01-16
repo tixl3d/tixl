@@ -293,7 +293,7 @@
       "Outputs": []
     },
     {
-      "Id": "31ada4d5-5b7d-4f42-b7c9-b6c5690189ec"/*PickFromStringList*/,
+      "Id": "31ada4d5-5b7d-4f42-b7c9-b6c5690189ec"/*PickStringFromList*/,
       "SymbolId": "ef357e66-24e9-4f54-8d86-869db74602f4",
       "InputValues": [],
       "Outputs": []
@@ -644,7 +644,7 @@
       "Outputs": []
     },
     {
-      "Id": "5a086811-67be-4682-b1d7-6ed120960718"/*PickFromStringList*/,
+      "Id": "5a086811-67be-4682-b1d7-6ed120960718"/*PickStringFromList*/,
       "SymbolId": "ef357e66-24e9-4f54-8d86-869db74602f4",
       "InputValues": [],
       "Outputs": []

@@ -1,0 +1,47 @@
+{
+  "Id": "12345678-90ab-cdef-1234-567890abcdef"/*ObjectDetection*/,
+  "Inputs": [
+    {
+      "Id": "0abcdef1-2345-6789-0abc-def123456789"/*CorrectAspectRatio*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "23456789-0abc-def1-2345-67890abcdef1"/*InputTexture*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "34567890-abcd-ef12-3456-7890abcdef12"/*Enabled*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "4567890a-bcde-f123-4567-890abcdef123"/*MaxObjects*/,
+      "DefaultValue": 10
+    },
+    {
+      "Id": "567890ab-cdef-1234-5678-90abcdef1234"/*MinDetectionConfidence*/,
+      "DefaultValue": 0.5
+    },
+    {
+      "Id": "67890abc-def1-2345-6789-0abcdef12345"/*Model*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "7890abcd-ef12-3456-7890-abcdef123456"/*Debug*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "890abcde-f123-4567-890a-bcdef1234567"/*CategoryAllowlist*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "90abcdef-1234-5678-90ab-cdef12345678"/*CategoryDenylist*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "abcdef12-3456-7890-abcd-ef1234567890"/*ZScale*/,
+      "DefaultValue": 1.0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

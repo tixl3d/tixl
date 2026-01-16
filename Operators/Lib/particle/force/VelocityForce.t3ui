@@ -1,6 +1,7 @@
 {
   "Id": "1c9e27e9-7df0-4cda-ac4e-408f4516cf09"/*VelocityForce*/,
   "Description": "Controls particle speeds by increasing, damping or limiting the particle velocit.y\nThis can be useful for \"pumping\" and syncing effects.",
+  "SymbolTags": "8",
   "InputUis": [
     {
       "InputId": "20a0b124-321e-450c-a064-3659eead0b45"/*MinSpeed*/,

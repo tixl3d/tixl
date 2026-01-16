@@ -177,6 +177,7 @@ public sealed class ResourceFileWatcher : IDisposable
         lock (_eventLock)
         {
             _newFileEvents[fileKey] = new FileWatchDetails(DateTime.UtcNow.Ticks, e);
+            FileStateChangeCounter++;
         }
     }
 
@@ -221,6 +222,11 @@ public sealed class ResourceFileWatcher : IDisposable
     private readonly ConcurrentDictionary<string, List<FileWatcherAction>> _fileChangeActions = new();
     private readonly Queue<FileWatchQueuedAction> _queuedActions = new();
     public event EventHandler<string>? FileCreated;
+    
+    /// <summary>
+    /// This is incremented on every file change event and can be used for cache invalidation (e.g. for complex FileLists)
+    /// </summary>
+    public static int FileStateChangeCounter { get; private set; }
 }
 
 internal delegate void FileWatcherAction(WatcherChangeTypes changeTypes, string absolutePath);

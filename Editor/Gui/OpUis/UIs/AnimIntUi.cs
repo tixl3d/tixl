@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System.Reflection;
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
@@ -105,6 +105,10 @@ internal static class AnimIntUi
         if (fade > 0)
         {
             var label = $"{(int)data.NormalizedTime}";
+            if (usingModulo)
+            {
+                label = $"{((int)data.NormalizedTime).Mod(modulo)}";
+            }
             ImGui.PushFont(Fonts.FontLarge);
             var size = ImGui.CalcTextSize(label);
 

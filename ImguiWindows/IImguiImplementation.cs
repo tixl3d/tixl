@@ -4,7 +4,7 @@ using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.Windowing;
 
-namespace ImguiWindows;
+namespace SilkWindows;
 
 public interface IWindowImplementation
 {

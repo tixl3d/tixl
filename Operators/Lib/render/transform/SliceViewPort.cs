@@ -1,4 +1,6 @@
+using Lib.render.utils;
 using T3.Core.Utils;
+using T3.Core.Utils.Geometry;
 
 namespace Lib.render.transform;
 
@@ -26,58 +28,80 @@ internal sealed class SliceViewPort : Instance<SliceViewPort>
 
         var repeatView = Mode.GetValue(context) == 0;
             
-        var resolution = context.RequestedResolution;
+        _prevResolution = context.RequestedResolution;
         var cells = CellCounts.GetValue(context);
         cells.Width = Math.Max(cells.Width, 1);
         cells.Height = Math.Max(cells.Height, 1);
-            
+        
+        
         var cellCount = cells.Width * cells.Height;
         Count.Value = Math.Min(cellCount , MaxCells);
             
-        var cellSize = new Vector2(resolution.Width / (float)cells.Width,
-                                   resolution.Height / (float)cells.Height);
+        var cellSize = new Vector2(_prevResolution.Width / (float)cells.Width,
+                                   _prevResolution.Height / (float)cells.Height);
 
         var cellIndex = CellIndex.GetValue(context).Clamp(0,int.MaxValue);
         var modCellIndex = cellIndex % cellCount;
         var columnIndex = modCellIndex % cells.Width;
         var rowIndex = modCellIndex / cells.Width;
 
+        var cellSizeX = cellSize.X * stretch.X;
+        var cellSizeY = cellSize.Y * stretch.Y;
+        
         var newViewPort = new RawViewportF
                               {
                                   X = (columnIndex + (1 - stretch.X) / 2) * cellSize.X,
                                   Y = (rowIndex + (1 - stretch.Y) / 2) * cellSize.Y,
-                                  Width = cellSize.X * stretch.X,
-                                  Height = cellSize.Y * stretch.Y,
+                                  Width = cellSizeX,
+                                  Height = cellSizeY,
                                   MinDepth = 0,
                                   MaxDepth = 1
                               };
 
         var m = context.CameraToClipSpace;
-        _prevCameraToClipSpace= m;
+        _prevCameraToClipSpace = m;
 
-        if (repeatView)
+        var mode = (ViewModes)Mode.GetValue(context);
+        const float Eps = 1e-6f;
+
+        if (mode == ViewModes.RepeatView)
         {
-            var viewPortStretch = new Vector2(cells.Width/(float)cells.Height,1);
-            m.M31 += Vector2.Zero.X;
-            m.M32 += Vector2.Zero.Y;
-            m.M11 *= viewPortStretch.X / stretch.X;
-            m.M22 *= viewPortStretch.Y / stretch.Y;
+            var viewPortStretch = new Vector2(cells.Width / (float)cells.Height, 1);
+            m.M31 += 0;
+            m.M32 += 0;
+            m.M11 *= viewPortStretch.X / Math.Max(stretch.X, Eps);
+            m.M22 *= viewPortStretch.Y / Math.Max(stretch.Y, Eps);
         }
-        else
+        else if (mode == ViewModes.SliceView)
         {
-            m.M31 += MathUtils.Remap(columnIndex + 0.5f, 0,(float)cells.Width, -cells.Width  , cells.Width );
-            m.M32 += MathUtils.Remap(rowIndex + 0.5f, 0,(float)cells.Height, cells.Height  , -cells.Height );
-            m.M11 *= 1/ stretch.X * cells.Width;
-            m.M22 *= 1 /stretch.Y * cells.Height;
+            // crop/zoom into the slice (existing behavior)
+            m.M31 += (columnIndex + 0.5f).Remap(0, cells.Width, -cells.Width,  cells.Width);
+            m.M32 += (rowIndex    + 0.5f).Remap(0, cells.Height,  cells.Height, -cells.Height);
+            m.M11 *= (cells.Width)  / Math.Max(stretch.X, Eps);
+            m.M22 *= (cells.Height) / Math.Max(stretch.Y, Eps);
         }
+        else // FitProjection
+        {
+            // Center on the selected cell, but **fit** instead of crop.
+            // Keep vertical coverage (top→bottom) identical to full view of that row grid: scale Y by cells.Height (no /stretch.Y).
+            // Adjust the horizontal scale to match the new viewport aspect: multiply X by cells.Width * (stretch.Y / stretch.X).
+            m.M31 += (columnIndex + 0.5f).Remap(0, cells.Width, -cells.Width,  cells.Width);
+            m.M32 += (rowIndex    + 0.5f).Remap(0, cells.Height,  cells.Height, -cells.Height);
+
+            m.M22 *= cells.Height;                                            // preserve vertical field
+            m.M11 *= cells.Width * (stretch.Y / Math.Max(stretch.X, Eps));    // widen/narrow horizontally to fit
+        }
+
         context.CameraToClipSpace = m;
             
         var deviceContext = ResourceManager.Device.ImmediateContext;
         var rasterizer = deviceContext.Rasterizer;            
             
         _prevViewports = rasterizer.GetViewports<RawViewportF>();
-        _prevRasterizerState = rasterizer.State; 
-            
+        _prevRasterizerState = rasterizer.State;
+        
+        context.RequestedResolution = new Int2((int)cellSizeX.Clamp(1,16384),
+                                               (int)cellSizeY.Clamp(1,16384));
         rasterizer.SetViewport(newViewPort);
 
         // Execute subgraph
@@ -85,10 +109,12 @@ internal sealed class SliceViewPort : Instance<SliceViewPort>
 
         rasterizer.SetViewports(_prevViewports, _prevViewports.Length);
         rasterizer.State = _prevRasterizerState;
+        context.RequestedResolution = _prevResolution;
         context.CameraToClipSpace = _prevCameraToClipSpace;
     }
         
     private RawViewportF[] _prevViewports;
+    private Int2 _prevResolution;
 
     [Input(Guid = "21532B24-FED2-403B-ABB1-6FAA19311366")]
     public readonly InputSlot<Command> SubGraph = new ();
@@ -105,7 +131,8 @@ internal sealed class SliceViewPort : Instance<SliceViewPort>
 
     [Input(Guid = "354EB18C-ABA0-43E6-B534-C119176547FF", MappedType = typeof(ViewModes))]
     public readonly InputSlot<int> Mode = new ();
-        
+
+    
     private RasterizerState _prevRasterizerState;
     private Matrix4x4 _prevCameraToClipSpace;
 
@@ -113,5 +140,6 @@ internal sealed class SliceViewPort : Instance<SliceViewPort>
     {
         RepeatView,
         SliceView,
+        FitProjection,   
     }
 }

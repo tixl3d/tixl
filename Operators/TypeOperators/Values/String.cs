@@ -4,7 +4,7 @@ namespace Types.Values;
 public sealed class String : Instance<String>, IExtractedInput<string>
 {
     [Output(Guid = "dd9d8718-addc-49b1-bd33-aac22b366f94")]
-    public readonly Slot<string> Result = new();
+    public readonly Slot<string?> Result = new();
 
     public String()
     {
@@ -19,7 +19,7 @@ public sealed class String : Instance<String>, IExtractedInput<string>
     [Input(Guid = "ceeae47b-d792-471d-a825-49e22749b7b9")]
     public readonly InputSlot<string> InputString = new();
         
-    public Slot<string> OutputSlot => Result;
+    public Slot<string> OutputSlot => Result!;  // Bypassing nullable is not ideal
 
     public void SetTypedInputValuesTo(string value, out IEnumerable<IInputSlot> changedInputs)
     {

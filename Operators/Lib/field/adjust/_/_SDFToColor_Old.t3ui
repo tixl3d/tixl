@@ -1,0 +1,61 @@
+{
+  "Id": "eff96322-0e4e-42d6-93de-18451b56ae31"/*_SDFToColor_Old*/,
+  "Description": "Remaps an SDF function distance to colors or values.\n\nThis can be useful to convert a Signed Distance Function with a potentially very large distance to a value range that can be used for colors for effects.",
+  "InputUis": [
+    {
+      "InputId": "422ff7d0-b5b8-441b-baea-03744dc320ad"/*InputField*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 988.06616,
+        "Y": 545.512
+      }
+    },
+    {
+      "InputId": "8b8950bc-0b94-4db5-869b-51759e1b492e"/*Range*/,
+      "Position": {
+        "X": 988.06616,
+        "Y": 615.512
+      },
+      "UseVec2Control": "Range"
+    },
+    {
+      "InputId": "9ddd3ea5-dc29-4430-9c99-746d63c1fb7a"/*Gradient*/,
+      "Position": {
+        "X": 708.06616,
+        "Y": 580.512
+      }
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "092f4670-a3ed-4bfa-84bf-364e1652fde8"/*_ExecuteSdfToColor_Old*/,
+      "Position": {
+        "X": 1128.0662,
+        "Y": 545.512
+      }
+    },
+    {
+      "ChildId": "22389c00-7664-4a8e-9a14-489ef7a80ec1"/*SrvFromTexture2d*/,
+      "Position": {
+        "X": 988.06616,
+        "Y": 580.512
+      }
+    },
+    {
+      "ChildId": "8daf367d-a9ff-4388-846b-758ff3e0e7ce"/*GradientsToTexture*/,
+      "Position": {
+        "X": 848.06616,
+        "Y": 580.512
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "5dbdab08-7014-4eda-9000-be7412dfb2eb"/*Result*/,
+      "Position": {
+        "X": 1268.0662,
+        "Y": 545.512
+      }
+    }
+  ]
+}

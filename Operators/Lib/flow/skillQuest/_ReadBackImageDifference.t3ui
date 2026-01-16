@@ -1,0 +1,23 @@
+{
+  "Id": "53a8a318-81dc-4c76-96a1-f86d0e2fb1d7"/*_ReadBackImageDifference*/,
+  "Description": "An internal operator the reads back the resulte of an image comparison to CPUI.",
+  "InputUis": [
+    {
+      "InputId": "18306295-6ea8-48f9-87bb-fc36fa1ab10c"/*Differences*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "ac586ad2-075c-4365-95c3-9e8c97cb3af4"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    }
+  ]
+}

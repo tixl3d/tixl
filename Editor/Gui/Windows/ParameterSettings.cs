@@ -1,5 +1,6 @@
-﻿using ImGuiNET;
+using ImGuiNET;
 using T3.Core.DataTypes.Vector;
+using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
@@ -21,7 +22,7 @@ public sealed class ParameterSettings
         ImGui.SetCursorPosX(ImGui.GetCursorPosX() + 2);
         ImGui.PushStyleColor(ImGuiCol.Button, Color.Transparent.Rgba);
         if (CustomComponents.IconButton(
-                                        Icon.List,
+                                        Icon.ViewList,
                                         new Vector2(w, w),
                                         IsActive
                                             ? CustomComponents.ButtonStates.Activated
@@ -155,7 +156,7 @@ public sealed class ParameterSettings
                            itemMin
                            + new Vector2(8, padding + 2),
                            textColor,
-                           inputUi.InputDefinition.Name);
+                           inputUi.InputDefinition.Name.AddSpacesForImGuiOutput());
 
                 // Drag handle
                 if (ImGui.IsItemActive() || (!ImGui.IsAnyItemActive() && ImGui.IsItemHovered()))
@@ -228,7 +229,7 @@ public sealed class ParameterSettings
         {
             if (selectedInputUi != null)
             {
-                FormInputs.AddSectionHeader(selectedInputUi.InputDefinition.Name);
+                FormInputs.AddSectionHeaderParam(selectedInputUi.InputDefinition.Name);
                 ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
                 ImGui.TextUnformatted(selectedInputUi.Type.Name);
                 ImGui.PopStyleColor();
@@ -269,8 +270,14 @@ public sealed class ParameterSettings
                 if (style == ParameterListStyles.WithGroup)
                 {
                     var groupTitle = selectedInputUi.GroupTitle;
-                    if (FormInputs.AddStringInput("##groupTitle", ref groupTitle, "Group Title", null,
-                                                  "Group title shown above parameter\n\nGroup will be collapsed by default if name ends with '...' (three dots)."))
+                    if (FormInputs.AddStringInput("##groupTitle", ref groupTitle, 
+                                                  "Group Title", 
+                                                  null,
+                                                  """
+                                                  Group title shown above parameter
+
+                                                  Group will be collapsed by default if name ends with '...' (three dots).
+                                                  """))
                     {
                         selectedInputUi.GroupTitle = groupTitle;
                         modified = true;

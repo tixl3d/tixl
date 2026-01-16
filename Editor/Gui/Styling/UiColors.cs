@@ -23,7 +23,7 @@ public static class UiColors
     public static Color CheckMark = new(1,1,1,0.8f);
 
     [T3Style.Hint(GroupTitle = "Backgrounds" ,Description = "This is the primary background used for canvases and windows. Don't use transparency for this!")]
-    public static Color WindowBackground = new(0.12f, 0.12f, 0.12f, 0.98f);
+    public static Color WindowBackground = new(0.23f, 0.23f, 0.23f, 0.5f);
     
     [T3Style.Hint(Description = "Background color for dialogs, popup windows and context menus.")]
     public static Color BackgroundPopup = new(0.18f, 0.18f, 0.18f, 0.98f);
@@ -32,7 +32,7 @@ public static class UiColors
     [T3Style.Hint(Description = "Buttons and form inputs.")]
     public static Color BackgroundButton = new(0.3f,0.3f,0.3f,0.5f);
     public static Color BackgroundButtonActivated = new(0.10f,0.10f,0.10f,0.8f);
-    public static Color BackgroundHover = new(0.26f,0.26f,0.26f,0.8f);
+    public static Color BackgroundHover = new(0.32f,0.32f,0.32f,0.8f);
     
     [T3Style.Hint(Description = "Highlight color for pressed for activated ui elements.")]
     public static Color BackgroundActive = Color.FromString("#4592FF");

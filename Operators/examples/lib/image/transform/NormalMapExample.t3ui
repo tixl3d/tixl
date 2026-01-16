@@ -1,0 +1,382 @@
+{
+  "Id": "0c7a44a2-93ef-4e7e-8a82-a2ff4d73ac2a"/*NormalMapExample*/,
+  "Description": "Normal mapping enhances visual detail by altering how light interacts with a surface, simulating depth and texture without adding extra geometry.\nHere, a low-poly cube uses a normal map to appear more complex. Two point lights illuminate the cube, showcasing how the surface normals affect shading and reflections, giving the illusion of a rich, non-flat surface.",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "01addecc-2901-4af9-ae7d-9a150b692c2f"/*AnimValue*/,
+      "Position": {
+        "X": 160.17575,
+        "Y": 679.83386
+      }
+    },
+    {
+      "ChildId": "091ed877-eca1-4925-bd5e-5a83a868d860"/*CubeMesh*/,
+      "Position": {
+        "X": 890.80835,
+        "Y": 298.87317
+      }
+    },
+    {
+      "ChildId": "0ed9408d-6381-4d28-a5ac-51cae86c7966"/*Layer2d*/,
+      "Position": {
+        "X": 365.93472,
+        "Y": 204.18481
+      }
+    },
+    {
+      "ChildId": "1309a2ba-fd3d-4549-bf45-a87ad914291d"/*SpreadLayout*/,
+      "Position": {
+        "X": 504.92603,
+        "Y": 366.06625
+      }
+    },
+    {
+      "ChildId": "1d3a3d66-48bf-4bad-966b-c99d0232d2b6"/*DrawPoints*/,
+      "Position": {
+        "X": 447.73856,
+        "Y": 743.67395
+      }
+    },
+    {
+      "ChildId": "29201a34-15ae-41e4-b34a-62ed54486e83"/*SetMaterial*/,
+      "Position": {
+        "X": 890.80835,
+        "Y": 368.87317
+      }
+    },
+    {
+      "ChildId": "31fc7887-38dd-4344-b984-2c5a586f7ef7"/*Vector3*/,
+      "Position": {
+        "X": 300.17575,
+        "Y": 644.83386
+      }
+    },
+    {
+      "ChildId": "35b653ba-2681-4011-9756-02596d7a9d4a"/*Text*/,
+      "Position": {
+        "X": 224.92603,
+        "Y": 296.06607
+      }
+    },
+    {
+      "ChildId": "35f8d364-2ca5-46ad-809b-6b56c8055c66"/*PointLight*/,
+      "Position": {
+        "X": 850.4181,
+        "Y": 813.26416
+      }
+    },
+    {
+      "ChildId": "43b7923f-895d-47d1-a8cc-74894cd0f4b5"/*PointLight*/,
+      "Position": {
+        "X": 850.4181,
+        "Y": 708.26416
+      }
+    },
+    {
+      "ChildId": "552fe135-3de8-46db-91cc-3f2369ac0b31"/*AnimValue*/,
+      "Position": {
+        "X": 131.47354,
+        "Y": 858.24817
+      }
+    },
+    {
+      "ChildId": "6292578b-bbe8-417e-9f3f-c66109722a59"/*SetEnvironment*/,
+      "Position": {
+        "X": 850.4181,
+        "Y": 638.26416
+      }
+    },
+    {
+      "ChildId": "6a131c10-1166-4330-aa28-d098e2c33d6a"/*Transform*/,
+      "Position": {
+        "X": 440.17575,
+        "Y": 609.83386
+      }
+    },
+    {
+      "ChildId": "6c2ae978-1c53-4cfa-95ed-151cbfb25c66"/*ToneMapping*/,
+      "Position": {
+        "X": 848.8291,
+        "Y": 1042.302
+      }
+    },
+    {
+      "ChildId": "7807fa21-9b45-406d-9913-fabc28131eb4"/*RenderTarget*/,
+      "Position": {
+        "X": 848.8291,
+        "Y": 972.3024
+      }
+    },
+    {
+      "ChildId": "8c9a1f67-a304-42fb-97da-32c38ca26daa"/*LinearGradient*/,
+      "Position": {
+        "X": 224.92603,
+        "Y": 401.06625
+      }
+    },
+    {
+      "ChildId": "8dfab133-2a37-4a1c-904d-a6fcde203fb2"/*Bloom*/,
+      "Position": {
+        "X": 848.8291,
+        "Y": 1007.3025
+      }
+    },
+    {
+      "ChildId": "8ed028f2-fe05-4d69-ae65-d40aa56f4be2"/*Layer2d*/,
+      "Position": {
+        "X": 364.92606,
+        "Y": 366.06628
+      }
+    },
+    {
+      "ChildId": "93feee04-ca18-4384-9732-8b40d26b0af5"/*RadialGradient*/,
+      "Position": {
+        "X": 225.93468,
+        "Y": 204.18481
+      }
+    },
+    {
+      "ChildId": "9452fd61-aa0d-42e7-8be4-a9125f2df7d9"/*Execute*/,
+      "Position": {
+        "X": 643.00903,
+        "Y": 634.62836
+      }
+    },
+    {
+      "ChildId": "945b2cb4-0086-47d5-b6d1-7aee934cc0b1"/*Layer2d*/,
+      "Position": {
+        "X": 364.92606,
+        "Y": 436.06625
+      }
+    },
+    {
+      "ChildId": "9abccee2-d2d0-4d99-b6bc-6d729cc1fbab"/*Point*/,
+      "Position": {
+        "X": 279.30008,
+        "Y": 766.19666
+      }
+    },
+    {
+      "ChildId": "a27fcf23-44c8-4199-b4e8-e2ea95925602"/*Layer2d*/,
+      "Position": {
+        "X": 364.92606,
+        "Y": 401.06625
+      }
+    },
+    {
+      "ChildId": "a32b9f62-20ca-4411-b6a7-71fad4062473"/*NGonGradient*/,
+      "Position": {
+        "X": 225.93468,
+        "Y": 134.18481
+      }
+    },
+    {
+      "ChildId": "a4ae8487-e9cb-4a6c-842c-4d0702cad9aa"/*AnimValue*/,
+      "Position": {
+        "X": 85.93468,
+        "Y": 239.18481
+      }
+    },
+    {
+      "ChildId": "a57c86f9-a8ff-4219-9666-aa6219a271f4"/*HSBToColor*/,
+      "Position": {
+        "X": 271.03714,
+        "Y": 1040.4478
+      }
+    },
+    {
+      "ChildId": "a6bf4606-3d35-490f-9edc-497d2f29b122"/*DrawPoints*/,
+      "Position": {
+        "X": 426.76724,
+        "Y": 929.27515
+      }
+    },
+    {
+      "ChildId": "aaedb730-963d-4e3f-9079-abe53a096138"/*VisualizeUvMap*/,
+      "Position": {
+        "X": 1079.7434,
+        "Y": 371.25714
+      }
+    },
+    {
+      "ChildId": "afd5bc1b-d286-498f-9e29-d6c470f59af3"/*SpreadLayout*/,
+      "Position": {
+        "X": 505.93472,
+        "Y": 134.18481
+      }
+    },
+    {
+      "ChildId": "b2ec5c86-e129-4c9c-8027-531b9d805d61"/*Layer2d*/,
+      "Position": {
+        "X": 365.93472,
+        "Y": 169.18481
+      }
+    },
+    {
+      "ChildId": "b7128668-f590-46db-980d-7c6218daaca9"/*BoxGradient*/,
+      "Position": {
+        "X": 224.92603,
+        "Y": 366.06628
+      }
+    },
+    {
+      "ChildId": "bdbe4a89-a760-46c4-85c2-627db2405a5d"/*Add*/,
+      "Position": {
+        "X": 131.03716,
+        "Y": 1040.4478
+      }
+    },
+    {
+      "ChildId": "c3faaf5c-b68c-4e47-bf89-3132b4b99c1d"/*DrawMesh*/,
+      "Position": {
+        "X": 890.80835,
+        "Y": 333.87317
+      }
+    },
+    {
+      "ChildId": "d4170c52-2e7b-4373-8a4c-db41743b976e"/*Layer2d*/,
+      "Position": {
+        "X": 365.93472,
+        "Y": 134.18481
+      }
+    },
+    {
+      "ChildId": "d941878c-48dd-4383-b3d5-5cab909f5f6e"/*RenderTarget*/,
+      "Position": {
+        "X": 224.92603,
+        "Y": 331.0663
+      }
+    },
+    {
+      "ChildId": "da58b5d8-81f3-4520-bc7e-11de56d8805f"/*Execute*/,
+      "Position": {
+        "X": 695.45605,
+        "Y": 250.07103
+      }
+    },
+    {
+      "ChildId": "e26792b4-b647-401c-8a82-c9790eee137f"/*WorleyNoise*/,
+      "Position": {
+        "X": 224.92603,
+        "Y": 436.06625
+      }
+    },
+    {
+      "ChildId": "e5248fce-69b7-45d7-97be-529e55d5fb51"/*Point*/,
+      "Position": {
+        "X": 262.95316,
+        "Y": 952.1886
+      }
+    },
+    {
+      "ChildId": "ede89155-e66b-49b4-9c42-463c977cea38"/*WorleyNoise*/,
+      "Position": {
+        "X": 225.93468,
+        "Y": 169.18481
+      }
+    },
+    {
+      "ChildId": "eecf9564-e375-40bf-acd1-ae35529cb02f"/*RenderTarget*/,
+      "Position": {
+        "X": 695.45605,
+        "Y": 320.07098
+      }
+    },
+    {
+      "ChildId": "f98965af-f046-4ce6-a6d8-5385edbda5d7"/*HSBToColor*/,
+      "Position": {
+        "X": 271.47354,
+        "Y": 858.24817
+      }
+    },
+    {
+      "ChildId": "fef9d037-c479-4c83-a8ba-7ac7a1c65d9b"/*Camera*/,
+      "Position": {
+        "X": 848.8291,
+        "Y": 937.3024
+      }
+    },
+    {
+      "ChildId": "ff7653ba-69c3-408b-9dba-c2643f838f3e"/*NormalMap*/,
+      "Position": {
+        "X": 693.16187,
+        "Y": 454.5987
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "99558a50-6acd-4078-a12d-1df643a80696"/*Output*/,
+      "Position": {
+        "X": 850.5182,
+        "Y": 1098.6265
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "32c962de-5df2-48cb-9eb0-51db2110f68d",
+      "Title": "Take a look at the normal map\nand cube UV map",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1060.5435,
+        "Y": 287.2558
+      },
+      "Size": {
+        "X": 240.14636,
+        "Y": 185.8435
+      }
+    },
+    {
+      "Id": "8fb67a7c-466b-400d-8b14-88bacd96186f",
+      "Label": "Let's generate a Normal Map for the Cube",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 71.037155,
+        "Y": 63.582764
+      },
+      "Size": {
+        "X": 775.34534,
+        "Y": 456.24207
+      }
+    },
+    {
+      "Id": "c27e27ab-4a40-469a-8893-4dfa496659e7",
+      "Label": "Lighting and rendering",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 71.037155,
+        "Y": 537.9171
+      },
+      "Size": {
+        "X": 948.6498,
+        "Y": 602.931
+      }
+    }
+  ],
+  "Links": [
+    {
+      "Id": "d95045e7-d8d7-42c6-b7e5-b681e18be2c6",
+      "Title": "Normal Mapping",
+      "Description": "Wikipedia",
+      "LinkUrl": "https://en.wikipedia.org/wiki/Normal_mapping",
+      "LinkType": "Documentation"
+    }
+  ]
+}

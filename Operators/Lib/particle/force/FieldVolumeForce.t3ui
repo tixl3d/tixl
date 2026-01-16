@@ -1,6 +1,7 @@
 {
   "Id": "599ada75-b2ac-4f6c-ac98-f7b4bb6cf47d"/*FieldVolumeForce*/,
   "Description": "Allows the use of a signed distance field as a force to manipulate a particle system.\n\nWorks as an input for [ParticleSystem].\nNeeds an SDF like [CylinderSDF], [SphereSDF] in order to work.\n",
+  "SymbolTags": "1",
   "InputUis": [
     {
       "InputId": "02eb5c6b-3995-409b-bd18-9e5c3d58364a"/*Attraction*/,

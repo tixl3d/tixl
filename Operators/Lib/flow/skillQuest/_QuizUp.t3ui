@@ -1,0 +1,308 @@
+{
+  "Id": "b9460cd7-c363-4a6e-8c3e-5c2f84a4aae3"/*_QuizUp*/,
+  "Description": "Internal op that renders the skill quest tasks and sends completion messages.",
+  "InputUis": [
+    {
+      "InputId": "088ca109-0959-4e1d-a926-722e51ab8062"/*DifferenceRange*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      }
+    },
+    {
+      "InputId": "3e038d4b-6bbc-4ca2-85ac-0401cc750f4a"/*Difference*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      }
+    },
+    {
+      "InputId": "94b5aa62-3dc4-4edb-a257-55326eb25dfb"/*GoalTexture*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "a0fe04f8-9b1c-4097-a6f9-2c9d30828706"/*UserAttempt*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      }
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "01145d68-0339-4885-ac2f-2e004494f290"/*Compare*/,
+      "Position": {
+        "X": 391.84152,
+        "Y": 775.2452
+      }
+    },
+    {
+      "ChildId": "14c55cff-423d-4717-a811-4191d400a83e"/*Filled Bar*/,
+      "Position": {
+        "X": 905.58765,
+        "Y": 724.20215
+      }
+    },
+    {
+      "ChildId": "28a14864-02bf-4d94-8388-3a463fd7cab6"/*RenderTarget*/,
+      "Position": {
+        "X": 1757.147,
+        "Y": 308.4112
+      }
+    },
+    {
+      "ChildId": "2e8a0c8f-3d5c-4912-8906-f6a59bf42c84"/*DelayTriggerChange*/,
+      "Position": {
+        "X": 905.58765,
+        "Y": 554.05963
+      }
+    },
+    {
+      "ChildId": "2ef2baa3-db97-443d-be0a-d6526a857ec2"/*SliceViewPort*/,
+      "Position": {
+        "X": 1216.2104,
+        "Y": 113.40738
+      }
+    },
+    {
+      "ChildId": "34737c01-9356-4f0b-9942-e4e95a0ad05c"/*All*/,
+      "Position": {
+        "X": 581.11,
+        "Y": 1084.7197
+      }
+    },
+    {
+      "ChildId": "37f5baf3-c1ea-4be5-b888-df7f16a949ed"/*Group*/,
+      "Position": {
+        "X": 1539.708,
+        "Y": 721.60144
+      }
+    },
+    {
+      "ChildId": "391411b7-9ad3-4838-91cb-ce06460cebab"/*Multiply*/,
+      "Position": {
+        "X": 765.58765,
+        "Y": 519.05963
+      }
+    },
+    {
+      "ChildId": "4b027f50-e412-4a28-b0f6-6c72c7972e77"/*Bar Background*/,
+      "Position": {
+        "X": 905.58765,
+        "Y": 689.20215
+      }
+    },
+    {
+      "ChildId": "56d18d6d-b40e-4b54-881e-9758c77357d0"/*Text*/,
+      "Position": {
+        "X": 461.81268,
+        "Y": 1582.6168
+      }
+    },
+    {
+      "ChildId": "6b69f783-7d10-4c3f-bde4-4b2eb42e400d"/*SliceViewPort*/,
+      "Position": {
+        "X": 1216.2104,
+        "Y": 12.146332
+      }
+    },
+    {
+      "ChildId": "70762678-3f83-443c-8a7a-c11cf57b9978"/*SetFloatVar*/,
+      "Position": {
+        "X": 905.58765,
+        "Y": 624.05963
+      }
+    },
+    {
+      "ChildId": "736117d1-911d-4bb6-b79d-5b178befc075"/*Damp*/,
+      "Position": {
+        "X": 140.0,
+        "Y": 705.69037
+      }
+    },
+    {
+      "ChildId": "805c54f9-a93e-48f4-afd7-0efae9adddb6"/*Vector2Components*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 635.69037
+      }
+    },
+    {
+      "ChildId": "9c19425b-e5c6-4343-87dd-d878f77da80a"/*Layer2d*/,
+      "Comment": "A terrible hack to update bool.",
+      "Position": {
+        "X": 905.58765,
+        "Y": 965.1
+      }
+    },
+    {
+      "ChildId": "9ef58ad0-2945-496d-afb9-e4f4fedc809b"/*Remap*/,
+      "Position": {
+        "X": 625.58765,
+        "Y": 759.20215
+      }
+    },
+    {
+      "ChildId": "a396a8ef-299e-44b0-88c9-75d5ae291489"/*ProgressBar*/,
+      "Position": {
+        "X": 1156.0189,
+        "Y": 617.32947
+      }
+    },
+    {
+      "ChildId": "a40ce279-8d36-4e00-93ce-cc5fedfeb753"/*Group*/,
+      "Position": {
+        "X": 1502.0898,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "b51a152e-02d0-49a8-9623-b8e7057af7c8"/*Remap*/,
+      "Position": {
+        "X": 391.84152,
+        "Y": 933.79785
+      }
+    },
+    {
+      "ChildId": "b7b08b7b-aff7-4a13-b184-f42cfd502052"/*Yours*/,
+      "Position": {
+        "X": 1330.4087,
+        "Y": 773.6125
+      }
+    },
+    {
+      "ChildId": "bbb8bb7d-be06-4b37-8e4b-e3aae8cac327"/*TriggerAnim*/,
+      "Position": {
+        "X": 391.84152,
+        "Y": 845.24524
+      }
+    },
+    {
+      "ChildId": "bc767979-96f4-42cc-a487-c71163475912"/*Remap*/,
+      "Position": {
+        "X": 140.0,
+        "Y": 600.69037
+      }
+    },
+    {
+      "ChildId": "be2a38e7-f042-473b-86d8-a07affc857c2"/*BoolToFloat*/,
+      "Position": {
+        "X": 905.58765,
+        "Y": 589.05963
+      }
+    },
+    {
+      "ChildId": "c177cf39-d79a-4faf-a9b8-323089ebee74"/*Compare*/,
+      "Comment": "If Difference too large...",
+      "Position": {
+        "X": 905.58765,
+        "Y": 519.05963
+      }
+    },
+    {
+      "ChildId": "c69d4175-04b9-421c-81dc-f0ff137a71a3"/*Remap*/,
+      "Position": {
+        "X": 461.81268,
+        "Y": 1512.6168
+      }
+    },
+    {
+      "ChildId": "c9324341-6607-4c70-a8dc-517b34314d60"/*FloatToString*/,
+      "Position": {
+        "X": 461.81268,
+        "Y": 1547.6168
+      }
+    },
+    {
+      "ChildId": "cea91999-ea74-4a0e-832a-90b1afbc8fde"/*DelayTriggerChange*/,
+      "Position": {
+        "X": 391.84152,
+        "Y": 810.2452
+      }
+    },
+    {
+      "ChildId": "cefc889e-272c-4eb7-a294-ea7fcab03411"/*Goal*/,
+      "Position": {
+        "X": 1330.4087,
+        "Y": 844.192
+      }
+    },
+    {
+      "ChildId": "d9a7ce9d-b7a9-415d-a69f-64d4e762fd04"/*Layer2d*/,
+      "Position": {
+        "X": 682.166,
+        "Y": 129.90854
+      }
+    },
+    {
+      "ChildId": "f6381442-f1f2-48d6-a0fe-b0b254d1f182"/*Vector2*/,
+      "Position": {
+        "X": 765.58765,
+        "Y": 759.20215
+      }
+    },
+    {
+      "ChildId": "f669a09e-271a-4f26-8aba-0c47e26b645e"/*Layer2d*/,
+      "Position": {
+        "X": 682.166,
+        "Y": 0.71655273
+      }
+    },
+    {
+      "ChildId": "f69ba56b-061a-41c7-993d-c157207a4395"/*BoolToFloat*/,
+      "Position": {
+        "X": 765.58765,
+        "Y": 1000.1
+      }
+    },
+    {
+      "ChildId": "fc8480e0-a733-4c87-8e63-c31f5900a5d8"/*COMPLETED*/,
+      "Position": {
+        "X": 905.58765,
+        "Y": 816.0481
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "09e96462-2b6c-4884-9dd5-1812f7112eca"/*Output*/,
+      "Position": {
+        "X": 1969.1278,
+        "Y": -30.165588
+      }
+    },
+    {
+      "OutputId": "7b47a1bb-d523-455c-b3dd-69ad3dcaa3ca"/*ImageOutput*/,
+      "Position": {
+        "X": 1881.7382,
+        "Y": 145.08673
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "a03923b3-d38e-4b26-ab6b-3c9fdffce8e7",
+      "Label": "Progress Bar",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -169.14728,
+        "Y": 456.2378
+      },
+      "Size": {
+        "X": 1903.6974,
+        "Y": 882.2012
+      }
+    }
+  ]
+}

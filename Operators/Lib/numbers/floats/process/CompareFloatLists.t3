@@ -1,0 +1,23 @@
+{
+  "Id": "136aef9b-373d-487d-9863-a8691d1b909f"/*CompareFloatLists*/,
+  "Inputs": [
+    {
+      "Id": "08ba3ae7-18b7-493e-8387-65735be2dd54"/*ListB*/,
+      "DefaultValue": {
+        "Values": []
+      }
+    },
+    {
+      "Id": "0e331c5e-d8a4-4ee8-b552-b6374702649f"/*Threshold*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "3e8c62c0-d981-4b48-96fc-cb7a50ab2a75"/*ListA*/,
+      "DefaultValue": {
+        "Values": []
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

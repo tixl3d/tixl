@@ -1,6 +1,63 @@
 {
-  "Id": "cd5a182e-254b-4e65-820b-ff754112614c"/*VideoDeviceInput*/,
+  "Id": "cd5a182e-254b-4e65-820b-ff754122614c"/*VideoDeviceInput*/,
   "Inputs": [
+    {
+      "Id": "11f7432d-31f1-44b9-8f75-b1569b314b13"/*CustomFps*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "22513b82-e77a-417a-8a46-24e677f072d4"/*DeactivateWhenNotShowing*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "236d4c5c-0022-4416-a22c-d6df73c306e2"/*Active*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "3022de8a-5d88-4a37-9799-780f2a838a5f"/*FlipVertically*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "3022de8a-5d88-4a37-9799-780f2a838a6e"/*ApplyRotationData*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "49019d29-873e-4b7c-a897-c575a384a650"/*ResolutionFpsType*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "67e149a5-f7b6-47bc-b147-3b9b11c19c29"/*Reconnect*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "805602d5-52b2-4a73-a337-12e00c3c91f2"/*Scale*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 1.0
+      }
+    },
+    {
+      "Id": "8d2c28c7-1234-40e2-9388-75574519543d"/*OpenSettings*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "a57e815d-70c9-4d3b-998c-d13506b8f56e"/*FlipHorizontally*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "c9e1c1f6-3a18-4a1c-8a5e-4b4119965b6e"/*CustomResolution*/,
+      "DefaultValue": {
+        "X": 0,
+        "Y": 0
+      }
+    },
+    {
+      "Id": "f187a997-7e4a-48c6-81f9-2a27f150a68a"/*Reposition*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
     {
       "Id": "f5b900ec-ee17-123e-9972-cdd0580c104e"/*InputDeviceName*/,
       "DefaultValue": ""

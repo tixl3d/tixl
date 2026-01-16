@@ -1,0 +1,47 @@
+{
+  "Id": "f1b2a3c4-d5e6-4f7a-8b9c-0d1e2f3a4b5c"/*PosiStageOutput*/,
+  "Inputs": [
+    {
+      "Id": "24b5d450-4e83-49db-88b1-7d688e64585d"/*TargetIpAddress*/,
+      "DefaultValue": "236.10.10.10"
+    },
+    {
+      "Id": "36c2bf8b-3e0c-4856-aa4a-32943a4b0223"/*TargetPort*/,
+      "DefaultValue": 56565
+    },
+    {
+      "Id": "4a9e2d3b-8c6f-4b1d-8d7e-9f3a5b2c1d0e"/*ServerName*/,
+      "DefaultValue": "TiXL-PSN"
+    },
+    {
+      "Id": "5e725916-4143-4759-8651-e12185c658d3"/*PrintToLog*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "7ab8f2a6-4874-4235-85a5-d0e1f30c0446"/*Connect*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "9e23335a-d63a-4286-930e-c63e86d0e6f0"/*LocalIpAddress*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "b16a0356-ef4a-413a-a656-7497127e31d4"/*SendOnChange*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "b2b8c4f1-6d0e-4b3a-9c8e-7f1a0d9e6b5b"/*Names*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "c8c4d0f7-c06e-4b1a-9d6c-6f5e4d3c2b1b"/*TrackerData*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "d7ac22c0-a31e-41f6-b29d-d40956e6688b"/*SendTrigger*/,
+      "DefaultValue": false
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

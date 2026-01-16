@@ -1,0 +1,30 @@
+{
+  "Id": "11958088-6358-4df1-b80f-c45fa6889a2e"/*PickGradient*/,
+  "Description": "Picks one of the connected gradients",
+  "InputUis": [
+    {
+      "InputId": "b8326dd4-9224-4d37-a490-7686184d8658"/*Index*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      }
+    },
+    {
+      "InputId": "f68298dc-f8d0-4d08-aff5-7d35200f18b3"/*Gradients*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "64ae82b9-fc16-4747-b7ac-cd5983226f64"/*Selected*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 200.0
+      }
+    }
+  ]
+}

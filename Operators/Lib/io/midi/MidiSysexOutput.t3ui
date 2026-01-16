@@ -1,0 +1,42 @@
+{
+  "Id": "78cadb24-5a77-41e2-908f-01d61140c769"/*MidiSysexOutput*/,
+  "Description": "Allow sending midi sysex string to a selected midi device. \n\nExample: This is useful in the case of the APC40 to change device modes.",
+  "InputUis": [
+    {
+      "InputId": "611e8c42-9954-421c-8071-1e959478c8fe"/*TriggerSend*/,
+      "Position": {
+        "X": 197.0,
+        "Y": 598.0
+      },
+      "Description": "Triggers sending the sysex command out to Result"
+    },
+    {
+      "InputId": "d7189d4a-b6c7-4d4f-9cee-1c37ed55b4e5"/*Device*/,
+      "Position": {
+        "X": 197.0,
+        "Y": 508.0
+      },
+      "Description": "The device used to send the midi sysex",
+      "Usage": "CustomDropdown"
+    },
+    {
+      "InputId": "e054dece-d5ce-4675-9e24-d29e616ce7de"/*SysexString*/,
+      "Position": {
+        "X": 197.0,
+        "Y": 583.0
+      },
+      "Description": "The sysex string to be sent to the midi device",
+      "Usage": "Default"
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "b996a54f-0fe7-4eb3-8f29-66938eeb113e"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    }
+  ]
+}

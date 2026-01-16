@@ -1,6 +1,7 @@
 {
   "Id": "f8593fe5-e845-4a81-a951-ceb7cd6d097c"/*HeightMapSdf*/,
   "Description": "Generates an SDF from a texture",
+  "SymbolTags": "1",
   "InputUis": [
     {
       "InputId": "3045d688-05d6-4421-84be-a12bba5e30cb"/*UvStretch*/,

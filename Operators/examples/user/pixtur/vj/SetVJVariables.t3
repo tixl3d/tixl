@@ -669,7 +669,7 @@
       "Outputs": []
     },
     {
-      "Id": "ac317f6d-2666-4b58-8ee2-28b48a21cea7"/*SetIntVariable*/,
+      "Id": "ac317f6d-2666-4b58-8ee2-28b48a21cea7"/*SetIntVar*/,
       "SymbolId": "7953f704-ebee-498b-8bdd-a2c201dfe278",
       "InputValues": [
         {
@@ -790,7 +790,7 @@
       "Outputs": []
     },
     {
-      "Id": "d46094aa-5ed5-4f35-a8f0-744c4b9e9270"/*SetIntVariable*/,
+      "Id": "d46094aa-5ed5-4f35-a8f0-744c4b9e9270"/*SetIntVar*/,
       "SymbolId": "7953f704-ebee-498b-8bdd-a2c201dfe278",
       "InputValues": [
         {
@@ -891,7 +891,7 @@
       "Outputs": []
     },
     {
-      "Id": "dd6fc729-c3ec-4bf4-9bd1-c4731925dd36"/*SetIntVariable*/,
+      "Id": "dd6fc729-c3ec-4bf4-9bd1-c4731925dd36"/*SetIntVar*/,
       "SymbolId": "7953f704-ebee-498b-8bdd-a2c201dfe278",
       "InputValues": [
         {
@@ -928,7 +928,7 @@
       "Outputs": []
     },
     {
-      "Id": "e42b7a20-2d31-4a5c-a951-6db11851c065"/*SetIntVariable*/,
+      "Id": "e42b7a20-2d31-4a5c-a951-6db11851c065"/*SetIntVar*/,
       "SymbolId": "7953f704-ebee-498b-8bdd-a2c201dfe278",
       "InputValues": [
         {

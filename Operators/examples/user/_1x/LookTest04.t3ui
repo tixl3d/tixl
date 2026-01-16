@@ -5,13 +5,6 @@
   "InputUis": [],
   "SymbolChildUis": [
     {
-      "ChildId": "066a4859-4f7d-4ad3-9650-a536b3674b76"/*TextureToCubeMap*/,
-      "Position": {
-        "X": 1050.0007,
-        "Y": 573.0752
-      }
-    },
-    {
       "ChildId": "082ee9cc-a4fc-4b71-af11-35b6efc3c6e3"/*RenderTarget*/,
       "Position": {
         "X": 1899.6007,
@@ -28,8 +21,8 @@
     {
       "ChildId": "1b53854e-c93a-4c05-94f1-259a72d07cf6"/*_Time_old*/,
       "Position": {
-        "X": 150.00049,
-        "Y": 231.0752
+        "X": 157.24313,
+        "Y": 187.29028
       }
     },
     {
@@ -37,13 +30,6 @@
       "Position": {
         "X": 2093.1514,
         "Y": 10.449219
-      }
-    },
-    {
-      "ChildId": "4c25bd8e-1c00-451a-9cee-1751b1dd583d"/*WorleyNoise*/,
-      "Position": {
-        "X": 300.0005,
-        "Y": 168.0752
       }
     },
     {
@@ -56,15 +42,15 @@
     {
       "ChildId": "51b8564c-626b-461e-96d4-92d38f61820b"/*SetEnvironment*/,
       "Position": {
-        "X": 1599.6007,
-        "Y": 15.075195
+        "X": 1469.5144,
+        "Y": 32.191833
       }
     },
     {
       "ChildId": "55bb4407-0ea1-40c4-881d-201cf1b6f928"/*Vector2*/,
       "Position": {
-        "X": 150.00049,
-        "Y": 168.0752
+        "X": 5.6979218,
+        "Y": 135.66458
       }
     },
     {
@@ -75,10 +61,10 @@
       }
     },
     {
-      "ChildId": "90342dae-e264-4022-a83f-70535bfd780f"/*LoadImage*/,
+      "ChildId": "5abef798-6975-4251-8e64-76923acc5d97"/*FractalNoise*/,
       "Position": {
-        "X": 900.00024,
-        "Y": 573.0752
+        "X": 297.24313,
+        "Y": 117.29028
       }
     },
     {
@@ -140,14 +126,14 @@
     {
       "ChildId": "ed94ff04-a86e-4a02-887d-57b907a830da"/*_Time_old*/,
       "Position": {
-        "X": 0.0,
-        "Y": 168.0752
+        "X": -134.30208,
+        "Y": 170.66458
       }
     },
     {
       "ChildId": "f549ab73-da15-4b1a-bb45-1956a60a3284"/*DrawMeshUnlit*/,
       "Position": {
-        "X": 897.593,
+        "X": 887.593,
         "Y": 183.88965
       }
     },

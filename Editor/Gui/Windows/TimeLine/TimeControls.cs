@@ -231,7 +231,7 @@ internal static class TimeControls
         }
 
         ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-        if (CustomComponents.JogDial(formattedTime, ref delta, new Vector2(StandardWidth, ControlSize.Y)))
+        if (JogDial(formattedTime, ref delta, new Vector2(StandardWidth, ControlSize.Y)))
         {
             playback.PlaybackSpeed = 0;
             playback.TimeInBars += delta;
@@ -421,24 +421,6 @@ internal static class TimeControls
                                                 + $"Resync: {UserActions.TapBeatSyncMeasure.ListShortcuts()}");
 
             ImGui.SameLine();
-
-            // ImGui.PushButtonRepeat(true);
-            // {
-            //     if (CustomComponents.IconButton(Icon.ChevronLeft, ControlSize))
-            //     {
-            //         BeatTiming.TriggerDelaySync();
-            //     }
-            //
-            //     ImGui.SameLine();
-            //
-            //     if (CustomComponents.IconButton(Icon.ChevronRight, ControlSize))
-            //     {
-            //         BeatTiming.TriggerAdvanceSync();
-            //     }
-            //
-            //     ImGui.SameLine();
-            // }
-            // ImGui.PopButtonRepeat();
         }
         else
         {
@@ -656,7 +638,8 @@ internal static class TimeControls
                             ? CustomComponents.ButtonStates.Activated
                             : CustomComponents.ButtonStates.Dimmed;
 
-            if (CustomComponents.IconButton(Icon.PinParams, ControlSize, state, UserActions.ToggleAnimationPinning.Triggered()))
+            if (CustomComponents.IconButton(Icon.PinParams, ControlSize, state) 
+                ||  UserActions.ToggleAnimationPinning.Triggered())
             {
                 UserSettings.Config.AutoPinAllAnimations = !UserSettings.Config.AutoPinAllAnimations;
 
@@ -716,4 +699,35 @@ internal static class TimeControls
                                                                      ShowInteraction = false,
                                                                      MaxTreeLevel = 0,
                                                                  };
+
+    public static bool JogDial(string label, ref double delta, Vector2 size)
+    {
+        ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, new Vector2(1, 0.5f));
+        var isActive = ImGui.Button(label + "###dummy", size);
+        ImGui.PopStyleVar();
+        var io = ImGui.GetIO();
+        if (ImGui.IsItemActive())
+        {
+            var center = (ImGui.GetItemRectMin() + ImGui.GetItemRectMax()) * 0.5f;
+            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+            ImGui.GetForegroundDrawList().AddCircle(center, 100, UiColors.Gray, 50);
+            isActive = true;
+
+            var pLast = io.MousePos - io.MouseDelta - center;
+            var pNow = io.MousePos - center;
+            var aLast = Math.Atan2(pLast.X, pLast.Y);
+            var aNow = Math.Atan2(pNow.X, pNow.Y);
+            delta = aLast - aNow;
+            if (delta > 1.5)
+            {
+                delta -= 2 * Math.PI;
+            }
+            else if (delta < -1.5)
+            {
+                delta += 2 * Math.PI;
+            }
+        }
+
+        return isActive;
+    }
 }

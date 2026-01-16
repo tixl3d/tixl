@@ -34,7 +34,7 @@ internal sealed class SelectPointsWithSDF : Instance<SelectPointsWithSDF>
         public readonly InputSlot<float> Offset = new InputSlot<float>();
 
         [Input(Guid = "c9fbe013-7050-4714-a43d-68960d6afbea")]
-        public readonly InputSlot<System.Numerics.Vector2> BiasAndGain = new InputSlot<System.Numerics.Vector2>();
+        public readonly InputSlot<System.Numerics.Vector2> GainAndBias = new InputSlot<System.Numerics.Vector2>();
 
         [Input(Guid = "61acc5cc-f084-4c88-8d54-207645dc841f")]
         public readonly InputSlot<float> Scatter = new InputSlot<float>();

@@ -261,7 +261,7 @@
       }
     },
     {
-      "ChildId": "b8296b8a-4ac8-4974-9d82-642dc33ada5f"/*PickFromStringList*/,
+      "ChildId": "b8296b8a-4ac8-4974-9d82-642dc33ada5f"/*PickStringFromList*/,
       "Position": {
         "X": 515.03937,
         "Y": -361.5947
@@ -308,7 +308,7 @@
       }
     },
     {
-      "ChildId": "f9d98cbe-6228-4ff1-baab-e5106fe95c04"/*PickFromStringList*/,
+      "ChildId": "f9d98cbe-6228-4ff1-baab-e5106fe95c04"/*PickStringFromList*/,
       "Position": {
         "X": 538.9064,
         "Y": 323.59665

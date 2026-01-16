@@ -1,0 +1,19 @@
+{
+  "Id": "d9a7233d-5d03-4268-a58b-465972852a5b"/*VideoStreamInput*/,
+  "Inputs": [
+    {
+      "Id": "2e26e552-68d7-4e2f-8208-831f2a75c96b"/*Connect*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "9a240243-71b5-4235-86a9-d5369a3311a9"/*Reconnect*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "a8b0971b-94cb-4c3d-932d-337581b8d83a"/*Url*/,
+      "DefaultValue": "https://webcam.rhein-taunus-krematorium.de:8081/mjpg/video.mjpg"
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

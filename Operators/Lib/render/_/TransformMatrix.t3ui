@@ -12,23 +12,23 @@
     },
     {
       "InputId": "3b817e6c-f532-4a8c-a2ff-a00dc926eeb2"/*Translation*/,
-      "Relevancy": "Required",
       "Position": {
         "X": -200.0,
         "Y": 0.0
       }
     },
     {
-      "InputId": "5339862d-5a18-4d0c-b908-9277f5997563"/*Rotation*/,
-      "Relevancy": "Required",
+      "InputId": "5339862d-5a18-4d0c-b908-9277f5997563"/*Rotation_PitchYawRoll*/,
       "Position": {
         "X": -200.0,
         "Y": 45.0
-      }
+      },
+      "Min": -180.0,
+      "Max": 180.0,
+      "Format": "{0:0.0}°"
     },
     {
       "InputId": "566f1619-1de0-4b41-b167-7fc261730d62"/*UniformScale*/,
-      "Relevancy": "Relevant",
       "Position": {
         "X": -200.0,
         "Y": 135.0
@@ -36,11 +36,27 @@
     },
     {
       "InputId": "58b9dfb6-0596-4f0d-baf6-7fb3ae426c94"/*Scale*/,
-      "Relevancy": "Required",
       "Position": {
         "X": -200.0,
         "Y": 90.0
       }
+    },
+    {
+      "InputId": "96841452-d384-49a5-977e-f16b57de9118"/*RotationMode*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      }
+    },
+    {
+      "InputId": "e15b0cab-696f-44fd-b270-99f6fd26634f"/*Rotation_Quaternion*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 120.0
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true
     },
     {
       "InputId": "e19808d8-6d73-4638-b5f2-ddddc49ad815"/*Invert*/,
@@ -71,6 +87,13 @@
       "Position": {
         "X": 0.0,
         "Y": 100.0
+      }
+    },
+    {
+      "OutputId": "6ed9317b-69b7-4041-9938-aef2a68ca91f"/*Matrix*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 200.0
       }
     }
   ]

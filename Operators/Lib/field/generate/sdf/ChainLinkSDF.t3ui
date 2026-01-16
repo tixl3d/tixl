@@ -1,6 +1,7 @@
 {
   "Id": "27c6aa52-7b3e-4a9a-b6e5-0359f7155cee"/*ChainLinkSDF*/,
   "Description": "Generates a procedural chain link field which can be rendered with [RaymarchField] and visualized with [VisualizeFieldDistance].\nCan be used with [RepeatFieldLimit] to generate a chain.\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToRaymarchField].\n\nIt can be modified with [BendField], [TransformField], [PolarRepeat] and more.\n\nSimilar nodes: [BoxSDF], [CapsuleLineSDF], [FractalSDF].",
+  "SymbolTags": "8",
   "InputUis": [
     {
       "InputId": "02d27492-30c1-46b0-abc6-e0cd5af163d8"/*Center*/,

@@ -402,7 +402,7 @@ public static class MathUtils
         return new Vector2(lhs.X < rhs.X ? lhs.X : rhs.X, lhs.Y < rhs.Y ? lhs.Y : rhs.Y);
     }
 
-    public static Vector2 Floor(Vector2 v)
+    public static Vector2 Floor(this Vector2 v)
     {
         return new Vector2((float)Math.Floor(v.X), (float)Math.Floor(v.Y));
     }
@@ -604,7 +604,65 @@ public static class MathUtils
         intensity = 0;
         return false;
     }
-    
+
+    public static Quaternion LookAt(Vector3 forward, Vector3 up)
+    {
+        var right = Vector3.Normalize(Vector3.Cross(forward, up));
+        up = Vector3.Normalize(Vector3.Cross(forward, right));
+
+        float m00 = right.X;
+        float m01 = right.Y;
+        float m02 = right.Z;
+        float m10 = up.X;
+        float m11 = up.Y;
+        float m12 = up.Z;
+        float m20 = forward.X;
+        float m21 = forward.Y;
+        float m22 = forward.Z;
+
+        float num8 = (m00 + m11) + m22;
+        Quaternion q = Quaternion.Identity;
+        if (num8 > 0.0)
+        {
+            float num = MathF.Sqrt(num8 + 1.0f);
+            q.W = num * 0.5f;
+            num = 0.5f / num;
+            q.X = (m12 - m21) * num;
+            q.Y = (m20 - m02) * num;
+            q.Z = (m01 - m10) * num;
+            return q;
+        }
+
+        if ((m00 >= m11) && (m00 >= m22))
+        {
+            float num7 = MathF.Sqrt(((1.0f + m00) - m11) - m22);
+            float num4 = 0.5f / num7;
+            q.X = 0.5f * num7;
+            q.Y = (m01 + m10) * num4;
+            q.Z = (m02 + m20) * num4;
+            q.W = (m12 - m21) * num4;
+            return q;
+        }
+
+        if (m11 > m22)
+        {
+            float num6 = MathF.Sqrt(((1.0f + m11) - m00) - m22);
+            float num3 = 0.5f / num6;
+            q.X = (m10 + m01) * num3;
+            q.Y = 0.5f * num6;
+            q.Z = (m21 + m12) * num3;
+            q.W = (m20 - m02) * num3;
+            return q;
+        }
+
+        float num5 = MathF.Sqrt(((1.0f + m22) - m00) - m11);
+        float num2 = 0.5f / num5;
+        q.X = (m20 + m02) * num2;
+        q.Y = (m21 + m12) * num2;
+        q.Z = 0.5f * num5;
+        q.W = (m01 - m10) * num2;
+        return q;
+    }
 }
 
 public static class EaseFunctions

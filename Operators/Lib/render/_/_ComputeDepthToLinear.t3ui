@@ -7,51 +7,51 @@
       "InputId": "50dbf432-ea4d-4d49-8cf4-e946a950b998"/*OutputTexture*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -368.7926,
-        "Y": 224.08264
+        "X": 22.425201,
+        "Y": 39.75821
       }
     },
     {
       "InputId": "63ce243b-48f4-482e-9ddf-a43cf1e4fc5f"/*Mode*/,
       "Position": {
-        "X": -407.22168,
-        "Y": 417.0459
+        "X": -453.04602,
+        "Y": 320.88635
       }
     },
     {
       "InputId": "7e1e99e1-3e2a-4960-bcc3-5b7e8e6ae95c"/*OutRange*/,
       "Position": {
-        "X": -407.2216,
-        "Y": 305.0459
+        "X": -453.04565,
+        "Y": 215.88635
       }
     },
     {
       "InputId": "831c97ad-40c1-4687-b536-f549bbbccf6f"/*ClampOutput*/,
       "Position": {
-        "X": -407.22162,
-        "Y": 361.0459
+        "X": -453.04578,
+        "Y": 285.88635
       }
     },
     {
       "InputId": "9f42b73c-d6f1-4907-ba55-9fb56514aa23"/*Far*/,
       "Position": {
-        "X": -368.7926,
-        "Y": 179.08264
+        "X": -313.04578,
+        "Y": 180.88635
       }
     },
     {
       "InputId": "a5f6347a-9c57-46f2-be39-80499b35cdf7"/*Near*/,
       "Position": {
-        "X": -368.7926,
-        "Y": 134.08264
+        "X": -313.04578,
+        "Y": 145.88635
       }
     },
     {
       "InputId": "de65c36d-10a7-446f-a4dd-e55ce42f4203"/*DepthBuffer*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -368.7926,
-        "Y": 89.08264
+        "X": 243.55765,
+        "Y": 136.87231
       }
     }
   ],
@@ -59,36 +59,36 @@
     {
       "ChildId": "1119d2a2-694b-4c9d-b7d6-75577e31ec4d"/*IntToFloat*/,
       "Position": {
-        "X": -257.2216,
-        "Y": 417.0459
+        "X": -313.04578,
+        "Y": 320.88635
       }
     },
     {
       "ChildId": "41c823cf-0a82-40af-960a-e0e097d243f7"/*UavFromTexture2d*/,
       "Position": {
-        "X": 1.130043,
-        "Y": 268.43692
+        "X": 22.425201,
+        "Y": 74.75821
       }
     },
     {
       "ChildId": "4280a58b-9ca9-4fc6-a198-d26b468c15c7"/*SamplerState*/,
       "Position": {
-        "X": 1.130043,
-        "Y": 225.43694
+        "X": 383.55768,
+        "Y": 206.87231
       }
     },
     {
       "ChildId": "6cfb9e6e-ef16-4d45-a48b-e979df594ca9"/*Vector2Components*/,
       "Position": {
-        "X": -257.2216,
-        "Y": 305.0459
+        "X": -313.04578,
+        "Y": 215.88635
       }
     },
     {
       "ChildId": "9dc627b1-70b3-4f98-8117-9dde92094b03"/*GetTextureSize*/,
       "Position": {
-        "X": 1.8944778,
-        "Y": -32.993034
+        "X": 162.4252,
+        "Y": 39.75821
       }
     },
     {
@@ -99,43 +99,43 @@
         "Y": 270.69095
       },
       "Position": {
-        "X": 418.41003,
-        "Y": -25.91871
+        "X": 523.5577,
+        "Y": 31.872314
       }
     },
     {
       "ChildId": "c5c5a6cd-9141-42fd-998e-1cff844d14ad"/*CalcInt2DispatchCount*/,
       "Position": {
-        "X": 151.89449,
-        "Y": -19.993034
+        "X": 302.42517,
+        "Y": 4.758209
       }
     },
     {
       "ChildId": "c611fe55-596b-46e1-9578-e2b55526689d"/*SrvFromTexture2d*/,
       "Position": {
-        "X": 1.130043,
-        "Y": 169.43698
+        "X": 383.55768,
+        "Y": 136.87231
       }
     },
     {
       "ChildId": "d205fb7a-172c-419a-9967-909bdbce1137"/*FloatsToBuffer*/,
       "Position": {
-        "X": 1.130043,
-        "Y": 35.43699
+        "X": -173.04582,
+        "Y": 110.88637
       }
     },
     {
       "ChildId": "d5396c53-1937-4505-9a8d-e32bdffffcce"/*BoolToFloat*/,
       "Position": {
-        "X": -257.2216,
-        "Y": 361.0459
+        "X": -313.04578,
+        "Y": 285.88635
       }
     },
     {
       "ChildId": "d7390be7-385d-4ae4-bf39-f5b6514cdbb2"/*ComputeShader*/,
       "Position": {
-        "X": 1.8944778,
-        "Y": -75.99304
+        "X": 162.4252,
+        "Y": -30.24179
       }
     }
   ],
@@ -143,8 +143,8 @@
     {
       "OutputId": "eff29dae-87c5-43a4-856b-51ac3abf567a"/*Output*/,
       "Position": {
-        "X": 605.4166,
-        "Y": 98.72254
+        "X": 523.5577,
+        "Y": 241.87231
       }
     }
   ]

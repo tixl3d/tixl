@@ -1,0 +1,49 @@
+{
+  "Id": "9c9274c1-3f85-4f57-9eb5-1e0a0b1cce00"/*SetStringVar*/,
+  "Description": "Writes a string value to the context's float variable dictionary.\nUse [GetStringVar] to read this value further down the graph.\n\nExample: [SetContextVariableExample]",
+  "InputUis": [
+    {
+      "InputId": "41b7154b-20b4-4cb2-9bcb-507a3ecb6807"/*ClearAfterExecution*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      }
+    },
+    {
+      "InputId": "5be2939b-27f5-4af8-b78e-3ae220d6b1a4"/*VariableName*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "The name to set for the variable. So it can be referenced to later in the graph.",
+      "Usage": "Default"
+    },
+    {
+      "InputId": "64453e52-84eb-487a-b69c-6c5c793dc057"/*StringValue*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Description": "String value of this variable",
+      "Usage": "Default"
+    },
+    {
+      "InputId": "77d3ebbd-9a07-445d-8990-6b9d91d0e79d"/*SubGraph*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "Optional sub-graph so this can be used between different command operators (Execute, etc.)."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "d45a4915-fdd4-4adc-8083-fcd3d7466215"/*Output*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

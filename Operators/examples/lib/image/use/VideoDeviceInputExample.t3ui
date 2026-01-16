@@ -11,6 +11,20 @@
       }
     },
     {
+      "ChildId": "04f93ee5-f5de-42f7-bb74-3738b7e4f716"/*GridPoints*/,
+      "Position": {
+        "X": 319.19043,
+        "Y": 102.670654
+      }
+    },
+    {
+      "ChildId": "23b9e613-1ebf-4174-9578-a3050169537a"/*Any*/,
+      "Position": {
+        "X": 265.8126,
+        "Y": 29.128326
+      }
+    },
+    {
       "ChildId": "2a1c42f9-ed61-4067-a7e6-79f8ccd07dc1"/*SphereSDF*/,
       "Position": {
         "X": 179.19043,
@@ -27,22 +41,22 @@
     {
       "ChildId": "3ac3be4e-901f-4a0c-83d7-cf5b6bec21f9"/*Group*/,
       "Position": {
-        "X": 706.4834,
-        "Y": 305.5918
+        "X": 635.2837,
+        "Y": 319.55255
       }
     },
     {
       "ChildId": "401fa94d-13a4-4056-b0f4-25c55f012ded"/*RenderTarget*/,
       "Position": {
-        "X": 706.4834,
-        "Y": 375.5918
+        "X": 635.2837,
+        "Y": 389.55255
       }
     },
     {
       "ChildId": "52e6b5ea-6ad0-4231-81ea-2ff4b7a1e479"/*Trigger*/,
       "Position": {
-        "X": 319.19043,
-        "Y": 137.67065
+        "X": 125.81259,
+        "Y": 29.128326
       }
     },
     {
@@ -74,24 +88,17 @@
       }
     },
     {
-      "ChildId": "7931928d-9412-4bac-a7f5-4f06d035ded8"/*_GridPoints_Old*/,
-      "Position": {
-        "X": 319.19043,
-        "Y": 102.670654
-      }
-    },
-    {
       "ChildId": "899889ac-2839-42db-a638-b79d701ebe53"/*Layer2d*/,
       "Position": {
-        "X": 0.0,
-        "Y": 70.0
+        "X": 308.2458,
+        "Y": -87.25046
       }
     },
     {
       "ChildId": "8d1c1d27-029e-4533-9368-7d75561600ac"/*DetectMotion*/,
       "Position": {
-        "X": 140.0,
-        "Y": 0.0
+        "X": 115.28235,
+        "Y": 129.56073
       }
     },
     {
@@ -102,17 +109,17 @@
       }
     },
     {
-      "ChildId": "a19c52dc-b78d-4dc7-be90-5c97e8a6dfba"/*VideoDeviceInput*/,
+      "ChildId": "a38308de-db06-4064-900a-b993155d45ab"/*SSAO*/,
       "Position": {
-        "X": 0.0,
-        "Y": 0.0
+        "X": 775.2837,
+        "Y": 389.55255
       }
     },
     {
-      "ChildId": "a38308de-db06-4064-900a-b993155d45ab"/*SSAO*/,
+      "ChildId": "bec0078a-7910-45e5-adb7-51bb8b10b0e3"/*Once*/,
       "Position": {
-        "X": 846.4834,
-        "Y": 375.5918
+        "X": 125.81259,
+        "Y": 64.12833
       }
     },
     {
@@ -123,17 +130,17 @@
       }
     },
     {
+      "ChildId": "e1606537-1e46-4f2e-ae56-ff96a7f00e49"/*VideoDeviceInput*/,
+      "Position": {
+        "X": -55.026825,
+        "Y": -98.74515
+      }
+    },
+    {
       "ChildId": "ee1df71d-0855-4c7f-b2ab-45b1981de195"/*FieldDistanceForce*/,
       "Position": {
         "X": 319.19043,
         "Y": 207.67065
-      }
-    },
-    {
-      "ChildId": "f35425a4-c2ba-49bf-9174-b7c400e51ebd"/*DetectMotion*/,
-      "Position": {
-        "X": -11.197937,
-        "Y": -175.71179
       }
     }
   ],
@@ -141,8 +148,29 @@
     {
       "OutputId": "e435738b-84fa-4f32-822d-0315d8a8455d"/*Output*/,
       "Position": {
-        "X": 1256.4834,
-        "Y": 203.83533
+        "X": 775.2837,
+        "Y": 459.55255
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "8e83c4fa-110f-40e0-9745-2fd7c6fcdf02",
+      "Title": "1. Select [VideoDeviceinput]\nIn the parameters window\n1. Click in the input device name field \n2. Select your webcam\n3. Tick activate\n4. Shake your body\n5. Click Trigger to add more particles",
+      "Label": "Setup your camera",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -142.04376,
+        "Y": -324.0389
+      },
+      "Size": {
+        "X": 419.06787,
+        "Y": 341.56137
       }
     }
   ]

@@ -1,27 +1,30 @@
 {
   "Id": "f4e26a76-f8c4-4889-b1dc-c690cd078296"/*RemapFloatList*/,
-  "Description": "",
+  "Description": "Remaps a list of float values from an input range to an output range.\n\nThis operator is useful for scaling or normalizing lists of numbers. For example, you can use it to map sensor readings from their raw range to a 0-1 range for use in animations.\n\nTips:\n- Use the `Mode` to control how the remapping is applied (e.g., clamping, looping).\n- `BiasAndGain` provides an alternative way to adjust the mapping curve.\n\nAKA: scale, normalize, range, map",
   "InputUis": [
     {
       "InputId": "023147fa-fae5-446c-b24a-88b0cb6bc27b"/*Mode*/,
       "Position": {
         "X": -54.609924,
         "Y": 101.02835
-      }
+      },
+      "Description": "Specifies how values outside the input range are handled. Options include clamping, looping, and mirroring."
     },
     {
       "InputId": "1bcb6cd5-bd78-4d9a-8944-c34d33126a7b"/*RangeInMin*/,
       "Position": {
         "X": 202.38272,
         "Y": 336.01346
-      }
+      },
+      "Description": "The minimum value of the input range."
     },
     {
       "InputId": "7a1029cc-d0cb-4e77-88e6-485b6994c620"/*RangeOutMin*/,
       "Position": {
         "X": -58.156036,
         "Y": -78.723404
-      }
+      },
+      "Description": "The minimum value of the output range."
     },
     {
       "InputId": "80eed18c-5453-4088-9e96-e5d42f9776c3"/*BiasAndGain*/,
@@ -29,6 +32,7 @@
         "X": -34.751785,
         "Y": 170.53192
       },
+      "Description": "An alternative control for remapping. Bias shifts the center of the range, while Gain controls the steepness of the mapping curve.",
       "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
@@ -39,21 +43,24 @@
       "Position": {
         "X": 330.49646,
         "Y": -89.3617
-      }
+      },
+      "Description": "The maximum value of the output range."
     },
     {
       "InputId": "fb98e84f-7fcf-4228-b440-665d622cb2a6"/*RangeInMax*/,
       "Position": {
         "X": -117.021286,
         "Y": 56.737595
-      }
+      },
+      "Description": "The maximum value of the input range."
     },
     {
       "InputId": "fdc8c3ea-30cb-4f31-9469-435a87b34028"/*FloatList*/,
       "Position": {
         "X": -20.907806,
         "Y": 415.00708
-      }
+      },
+      "Description": "The list of float values to be remapped."
     }
   ],
   "SymbolChildUis": [],

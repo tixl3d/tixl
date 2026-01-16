@@ -1,6 +1,7 @@
 {
   "Id": "cea24093-69f0-4905-a695-a0da2e47abc9"/*JonBakerSDFLoader*/,
   "Description": "SDF code loader\nhttps://jbaker.graphics/writings/DEC.html",
+  "SymbolTags": "128",
   "InputUis": [
     {
       "InputId": "033447bc-93c2-4014-a614-579613ca3386"/*A*/,

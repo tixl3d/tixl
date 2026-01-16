@@ -23,6 +23,7 @@ cbuffer Params : register(b1)
 
     float AlphaCutOff;
     float UseFlatShading;
+    float SpecularAA;
 };
 
 cbuffer FogParams : register(b2)
@@ -59,6 +60,12 @@ struct psInput
     float3 worldPosition : POSITION;
     float3x3 tbnToWorld : TBASIS;
     float fog : VPOS;
+};
+
+struct psOutput
+{
+    float4 Color : SV_Target0;
+    float4 Normal : SV_Target1;
 };
 
 sampler WrappedSampler : register(s0);
@@ -152,12 +159,12 @@ float3 ComputeNormal(psInput pin, float3x3 tbnToWorld)
     if (UseFlatShading > 0.5)
     {
         // Flat shading: calculate geometric normal from world position derivatives
-        float3 dpdx = ddx(frag.worldPosition);
-        float3 dpdy = ddy(frag.worldPosition);
+        float3 dpdx = ddx(pin.worldPosition);
+        float3 dpdy = ddy(pin.worldPosition);
         float3 geometricNormal = normalize(cross(dpdy, dpdx));
 
         // Apply normal map details on top of flat normal
-        float4 normalMap = NormalMap.Sample(WrappedSampler, frag.uv);
+        float4 normalMap = NormalMap.Sample(WrappedSampler, pin.texCoord);
         float3 normalDetail = normalize(2.0 * normalMap.rgb - 1.0);
 
         // Create TBN basis using geometric normal and derivatives
@@ -172,23 +179,43 @@ float3 ComputeNormal(psInput pin, float3x3 tbnToWorld)
     else
     {
         // Standard shading: use interpolated normals with normal mapping
-        float4 normalMap = NormalMap.Sample(WrappedSampler, frag.uv);
+        float4 normalMap = NormalMap.Sample(WrappedSampler, pin.texCoord);
         N = normalize(2.0 * normalMap.rgb - 1.0);
         N = normalize(mul(N, tbnToWorld));
     }
     return N;
 }
 
-float4 psMain(psInput pin) : SV_TARGET
+inline float3 AdjustRoughnessForSpecularAA(float baseRoughness)
 {
+ // --- Specular anti-aliasing ---
+    // Compute normal variance using screen-space derivatives and increase roughness accordingly.
+    // This reduces specular aliasing on silhouettes and high-frequency normalmap regions.
+    float3 Nx = ddx(frag.N);
+    float3 Ny = ddy(frag.N);
+    float normalVar = max(0.0, max(dot(Nx, Nx), dot(Ny, Ny)));
+    normalVar *= SpecularAA;
+    // convert roughness -> alpha (energy-preserving), combine variance, then convert back
+    float baseR = saturate(baseRoughness);
+    float baseR2 = baseR * baseR;
+    float adjustedR = sqrt(baseR2 + normalVar);    
+    return saturate(adjustedR);
+}
+
+psOutput psMain(psInput pin) : SV_TARGET
+{
+    psOutput output;
+    
     float4 roughnessMetallicOcclusion = RSMOMap.Sample(WrappedSampler, pin.texCoord);
 
-    frag.Roughness = saturate(roughnessMetallicOcclusion.x + Roughness);
+    
     frag.Metalness = saturate(roughnessMetallicOcclusion.y + Metal);
     frag.Occlusion = roughnessMetallicOcclusion.z;
     frag.albedo = BaseColorMap.Sample(WrappedSampler, pin.texCoord);
     frag.uv = pin.texCoord;
     frag.N = ComputeNormal(pin, pin.tbnToWorld);
+
+    frag.Roughness = AdjustRoughnessForSpecularAA(roughnessMetallicOcclusion.x + Roughness);
     frag.fog = pin.fog;
     frag.worldPosition = pin.worldPosition;
 
@@ -198,9 +225,18 @@ float4 psMain(psInput pin) : SV_TARGET
     float4 litColor = ComputePbr();
 
     litColor.rgba *= GetField(float4(pin.worldPosition.xyz, 0)).rgba;
+    
+    // Alpha testing
     if (AlphaCutOff > 0 && litColor.a < AlphaCutOff)
     {
         discard;
     }
-    return litColor;
+    
+    float3 worldNormal = frag.N;
+    // Output to color buffer (SV_Target0)
+    output.Color = litColor;
+    // Output to normal buffer (SV_Target1)
+    output.Normal = float4(worldNormal, 1.0);
+    
+    return output;
 }

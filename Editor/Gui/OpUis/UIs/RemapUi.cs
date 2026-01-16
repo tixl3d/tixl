@@ -78,6 +78,7 @@ internal static class RemapUi
 
         var canvasFade = canvas.Scale.X.RemapAndClamp(0.7f, 1.5f, 0, 1);
 
+        ImGui.PushID(instance.SymbolChildId.GetHashCode());
         var isGraphActive = false;
         if (ImGui.GetIO().KeyCtrl)
         {
@@ -170,6 +171,8 @@ internal static class RemapUi
         isActive |= ValueLabel.Draw(drawList, screenRect, new Vector2(1 - GraphRangePadding / 2, 0), data.RangeOutMax);
         isActive |= ValueLabel.Draw(drawList, screenRect, new Vector2(1 - GraphRangePadding / 2, 1), data.RangeOutMin);
 
+        ImGui.PopID();
+        
         return OpUi.CustomUiResult.Rendered
                | OpUi.CustomUiResult.PreventInputLabels
                | OpUi.CustomUiResult.PreventOpenSubGraph

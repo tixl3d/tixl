@@ -38,7 +38,7 @@ public sealed class Texture3d : Instance<Texture3d>
         if (CreateTexture3d(texDesc, ref _texture3d))
         {
             var tex = _texture3d;
-            OutputTexture.Value.Texture = tex;
+            OutputTexture.Value!.Texture = tex;
                 
             if ((BindFlags.Value & SharpDX.Direct3D11.BindFlags.ShaderResource) > 0)
                 tex.CreateShaderResourceView(ref OutputTexture.Value.Srv, "");

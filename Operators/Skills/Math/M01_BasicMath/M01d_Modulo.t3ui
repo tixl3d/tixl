@@ -1,0 +1,96 @@
+{
+  "Id": "a12f59a4-d074-4c52-a396-22221d69a588"/*M01d_Modulo*/,
+  "Description": "Saw!",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "1f57fa8d-8d12-414f-b3fa-7ac4287ae56a"/*Time*/,
+      "AnnotationId": "8fb25bb2-3a78-4df0-b83b-d92f8d4a5ecb",
+      "Position": {
+        "X": 1320.434,
+        "Y": 2011.0651
+      }
+    },
+    {
+      "ChildId": "82720834-df78-49a5-8649-e08c57532e22"/*Modulo*/,
+      "Position": {
+        "X": 1272.0806,
+        "Y": 1825.6362
+      }
+    },
+    {
+      "ChildId": "ad949ad1-814c-4c17-a597-117d86fdb768"/*Modulo*/,
+      "AnnotationId": "8fb25bb2-3a78-4df0-b83b-d92f8d4a5ecb",
+      "Position": {
+        "X": 1320.434,
+        "Y": 2046.0651
+      }
+    },
+    {
+      "ChildId": "d52258cf-1cb9-4351-ab28-b86bdbcf3a08"/*Time*/,
+      "Position": {
+        "X": 1272.0806,
+        "Y": 1763.7557
+      }
+    },
+    {
+      "ChildId": "da60ce9e-7d7d-48de-9552-d1f787dcc4d3"/*ValueQuiz*/,
+      "Position": {
+        "X": 1580.2582,
+        "Y": 1895.0925
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "a62728af-6ee1-4e31-a545-76c73a3b2269"/*ColorBuffer*/,
+      "Position": {
+        "X": 1580.2582,
+        "Y": 1965.0925
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "8fb25bb2-3a78-4df0-b83b-d92f8d4a5ecb",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1260.0,
+        "Y": 1960.0
+      },
+      "Size": {
+        "X": 256.4984,
+        "Y": 182.6687
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "ca4bd474-4215-477d-ab43-502f03a99e3d",
+      "ChildId": "82720834-df78-49a5-8649-e08c57532e22",
+      "Description": "If the [Sin] wave is too smooth, [Modulo] can help.\nModulo keeps a value looping. When it reaches a limit, it jumps back to the start.\nThis creates a sharp saw shape."
+    },
+    {
+      "Id": "1b552302-2b05-424f-ae16-483644d4f3ce",
+      "ChildId": "d52258cf-1cb9-4351-ab28-b86bdbcf3a08",
+      "Description": "Snap [Time] into [Modulo]."
+    },
+    {
+      "Id": "5a6e9afd-1937-4fb4-8596-271bb54bbc8c",
+      "ChildId": "82720834-df78-49a5-8649-e08c57532e22",
+      "Description": "Connect [Modulo] to the [ValueQuiz]."
+    },
+    {
+      "Id": "1c95d07d-c34e-4478-81cb-85bbebda7835",
+      "ChildId": "82720834-df78-49a5-8649-e08c57532e22",
+      "Description": "Adjust the parameter to match the target."
+    }
+  ]
+}

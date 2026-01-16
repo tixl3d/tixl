@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 namespace T3.Editor.Gui.UiHelpers;
 
 public static class ParameterNameSpacer
@@ -23,31 +23,35 @@ public static class ParameterNameSpacer
 
         var writeIdx = 0;
 
-        var previousCharForLogic = s[0];
+        // Handle first character
+        _processingBuffer[writeIdx++] = s[0];
 
-        for (var readIdx = 0; readIdx < s.Length && writeIdx < MaxOutputLength - 1; readIdx++)
+        for (var readIdx = 1; readIdx < s.Length && writeIdx < MaxOutputLength - 1; readIdx++)
         {
             var currentChar = s[readIdx];
-            var needsSpace = false;
+            var previousChar = s[readIdx - 1];
 
-            // Determine if a space is needed based on character types or casing.
-            if ((char.IsNumber(previousCharForLogic) && !char.IsNumber(currentChar)) ||
-                (char.IsNumber(currentChar) && !char.IsNumber(previousCharForLogic)))
-            {
-                needsSpace = true;
-            }
-            else if (char.IsUpper(currentChar))
-            {
-                needsSpace = true;
-            }
+            // Check if next character exists for lookahead
+            var hasNext = readIdx + 1 < s.Length;
+            var nextChar = hasNext ? s[readIdx + 1] : '\0';
 
-            if (needsSpace)
+            // Add space only for these specific transitions:
+            // - lowercase → uppercase (e.g., "Box" + "SDF" = "Box SDF")
+            // - letter → digit (e.g., "Layer" + "2" = "Layer 2")
+            // - digit → letter, BUT NOT if current letter is uppercase and next is also uppercase or digit
+            //   (to preserve acronyms like "2D", "3D")
+            var needsSpace =
+                (char.IsLower(previousChar) && char.IsUpper(currentChar)) ||
+                (char.IsLetter(previousChar) && char.IsDigit(currentChar)) ||
+                (char.IsDigit(previousChar) && char.IsLetter(currentChar) &&
+                !(char.IsUpper(currentChar) && (!hasNext || char.IsUpper(nextChar))));
+
+            if (needsSpace && writeIdx < MaxOutputLength - 1)
             {
                 _processingBuffer[writeIdx++] = ' ';
             }
 
             _processingBuffer[writeIdx++] = currentChar;
-            previousCharForLogic = currentChar;
         }
 
         // Return a span covering the written part of the reusable buffer.

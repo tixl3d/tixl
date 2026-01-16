@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using System.Text;
 using ImGuiNET;
+using Microsoft.VisualBasic.ApplicationServices;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Utils;
 using T3.Editor.Gui.Styling;
@@ -28,11 +29,13 @@ internal sealed class ConsoleLogWindow : Window, ILogWriter
         if (FrameStats.Last.UiColorsChanged)
             _colorForLogLevel = UpdateLogLevelColors();
 
-        CustomComponents.ToggleButton("Scroll", ref _shouldScrollToBottom, Vector2.Zero);
+        CustomComponents.ToggleIconButton(ref _shouldScrollToBottom, Icon.ScrollLog, Vector2.Zero);
+        //CustomComponents.ToggleButton("Scroll", ref _shouldScrollToBottom, Vector2.Zero);
         ImGui.SameLine();
 
         //ImGui.SetNextWindowSize(new Vector2(500, 400), ImGuiCond.FirstUseEver);
-        if (ImGui.Button("Clear"))
+        if(CustomComponents.IconButton(Icon.ClearLog, Vector2.Zero))
+        //if (ImGui.Button("Clear"))
         {
             lock (_logEntries)
             {
@@ -49,7 +52,8 @@ internal sealed class ConsoleLogWindow : Window, ILogWriter
         {
             var highlightFactor = (float)(ImGui.GetTime() - _lastCopyTime).Clamp(0, 1);
             ImGui.PushStyleColor(ImGuiCol.Button, Color.Mix( UiColors.StatusActivated, UiColors.BackgroundButton, highlightFactor).Rgba  );
-            if (ImGui.Button("Copy"))
+            if(CustomComponents.IconButton(Icon.CopyToClipboard, Vector2.Zero))
+            //if (ImGui.Button("Copy"))
             {
                 lock (_logEntries)
                 {
@@ -130,6 +134,15 @@ internal sealed class ConsoleLogWindow : Window, ILogWriter
             }
             else
             {
+                var mouse = ImGui.GetIO().MouseWheel;
+                if (MathF.Abs(mouse) > 0)
+                {
+                    if ( ImGui.IsRectVisible(ImGui.GetItemRectMin(), ImGui.GetItemRectMax()))
+                    {
+                        _shouldScrollToBottom = true;
+                    }
+                }
+                
                 _isAtBottom = ImGui.GetScrollY() >= ImGui.GetScrollMaxY() - ImGui.GetWindowHeight();
             }
 
@@ -151,6 +164,8 @@ internal sealed class ConsoleLogWindow : Window, ILogWriter
                 dl.AddText(bottomCenter - new Vector2(labelSize.X * 0.5f, ImGui.GetFrameHeight()), UiColors.Text, label);
             }
         }
+
+        ImGui.Dummy(Vector2.One);
 
         ImGui.EndChild();
     }

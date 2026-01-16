@@ -6,6 +6,10 @@
       "DefaultValue": 2.0
     },
     {
+      "Id": "01dec852-5b80-4705-8648-c6fd68199e83"/*Axis*/,
+      "DefaultValue": 0
+    },
+    {
       "Id": "d37914dd-7bbd-47fa-ad90-9921621afb9e"/*Fill*/,
       "DefaultValue": 2.0
     },

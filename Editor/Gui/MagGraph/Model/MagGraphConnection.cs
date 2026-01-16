@@ -1,4 +1,4 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 
@@ -9,7 +9,9 @@ internal sealed class MagGraphConnection
     public ConnectionStyles Style;
     public Vector2 SourcePos;
     public Vector2 TargetPos;
-    
+    public Vector2 DampedSourcePos;
+    public Vector2 DampedTargetPos;
+
     public MagGraphItem SourceItem;
     public MagGraphItem TargetItem;
     public ISlot SourceOutput;

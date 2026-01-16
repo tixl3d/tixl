@@ -1,0 +1,93 @@
+{
+  "Id": "eea03dc7-ae6c-4a0c-9449-303008643fa9"/*I02m_Vignette*/,
+  "Description": "RadialGradient: Vignette",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "11ecfa33-6a07-4217-8a7a-d23e4a5e3da2"/*LinearGradient*/,
+      "AnnotationId": "606c89c3-3cd5-4883-8da9-101ee8d767f0",
+      "Position": {
+        "X": 1441.7301,
+        "Y": 2334.827
+      }
+    },
+    {
+      "ChildId": "1dbf846b-2fdd-4d2f-ab55-20bc9bdfe295"/*RadialGradient*/,
+      "AnnotationId": "68a05369-fe16-4437-9ffa-396003ff45fc",
+      "Position": {
+        "X": 1318.8982,
+        "Y": 2148.3176
+      }
+    },
+    {
+      "ChildId": "45d80e84-a16f-4fd9-a306-2f33e05fc6f3"/*ImageQuiz*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2018.4391
+      }
+    },
+    {
+      "ChildId": "9803d123-2c30-4977-b154-4bcd2b692518"/*RadialGradient*/,
+      "Position": {
+        "X": 1314.62,
+        "Y": 2017.7666
+      }
+    },
+    {
+      "ChildId": "acf8d666-b514-42a4-afe8-c8a023d99b76"/*LoadImage*/,
+      "Position": {
+        "X": 1314.62,
+        "Y": 1982.7666
+      }
+    },
+    {
+      "ChildId": "c17a6100-e016-4f90-93cc-0c8055cddea5"/*LoadImage*/,
+      "AnnotationId": "68a05369-fe16-4437-9ffa-396003ff45fc",
+      "Position": {
+        "X": 1318.8982,
+        "Y": 2113.3176
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "5ee55212-0fe7-48eb-8d22-494274876be0"/*ColorBuffer*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2088.439
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "68a05369-fe16-4437-9ffa-396003ff45fc",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1271.4644,
+        "Y": 2075.9497
+      },
+      "Size": {
+        "X": 268.53564,
+        "Y": 129.0503
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "8a39538c-b091-42d9-bac0-de1005ed8892",
+      "Description": "A transparent radial overlay is useful for a vignette that dims the corners."
+    },
+    {
+      "Id": "81206511-13dc-485a-803f-4e9f58b5c909",
+      "Description": "Adjust width and blend mode to recreate the goal.",
+      "Style": "CallToAction"
+    }
+  ]
+}

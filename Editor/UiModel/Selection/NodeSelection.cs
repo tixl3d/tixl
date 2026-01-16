@@ -1,9 +1,14 @@
 ﻿#nullable enable
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using ImGuiNET;
 using T3.Core.Operator;
 using T3.Core.Operator.Interfaces;
 using T3.Editor.Gui.Interaction.TransformGizmos;
+using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Gui.Windows;
+using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.ProjectHandling;
 
 namespace T3.Editor.UiModel.Selection;
@@ -19,9 +24,9 @@ namespace T3.Editor.UiModel.Selection;
 /// </summary>
 internal sealed class NodeSelection : ISelection
 {
-    public NodeSelection(NavigationHistory history, Structure structure)
+    public NodeSelection(NavigationHistory navigationHistory, Structure structure)
     {
-        _history = history;
+        NavigationHistory = navigationHistory;
         _structure = structure;
     }
 
@@ -39,7 +44,7 @@ internal sealed class NodeSelection : ISelection
     /// </summary>
     public void SetSelectionToComposition(Instance instance)
     {
-        _history.UpdateSelectedInstance(instance);
+        NavigationHistory.UpdateSelectedInstance(instance);
         Clear();
         _childUiInstanceIdPaths.Clear();
         _selectedCompositionPath = instance.InstancePath;
@@ -58,7 +63,7 @@ internal sealed class NodeSelection : ISelection
         if (node is SymbolUi.Child)
         {
             Debug.Assert(instance != null);
-            _history.UpdateSelectedInstance(instance);
+            NavigationHistory.UpdateSelectedInstance(instance);
         }
     }
 
@@ -247,6 +252,17 @@ internal sealed class NodeSelection : ISelection
         {
             if (element == null)
                 continue;
+
+            if (element is SymbolUi.Child item && item.CollapsedIntoAnnotationFrameId != Guid.Empty)
+                continue;
+
+            if (element is Annotation annotation && annotation.Collapsed)
+            {
+                bounds.Add(element.PosOnCanvas);
+                bounds.Add(element.PosOnCanvas + new Vector2(element.Size.X,10));
+                continue;
+            } 
+                
             
             if (float.IsInfinity(element.PosOnCanvas.X) || float.IsInfinity(element.PosOnCanvas.Y))
                 element.PosOnCanvas = Vector2.Zero;
@@ -259,12 +275,83 @@ internal sealed class NodeSelection : ISelection
         return bounds;
     }
     
+    public static bool TryGetSelectedInstanceOrInput([NotNullWhen(true)] out Instance? instance, out IInputUi? inputUi, out bool selectionChanged)
+    {
+        selectionChanged = false;
+        inputUi = null;
+        instance = null;
+        Guid id;
+        
+        var projectView = ProjectView.Focused;
+        var nodeSelection = projectView?.NodeSelection;
+
+        if (nodeSelection == null)
+            return false;
+        
+        instance = nodeSelection.GetSelectedInstanceWithoutComposition()
+                   ?? nodeSelection.GetSelectedComposition();
+
+        if (instance == null)
+        {
+            var selectedInputs = nodeSelection.GetSelectedNodes<IInputUi>().ToList();
+            if (selectedInputs.Count == 0)
+                return false;
+
+            instance = projectView?.CompositionInstance;
+            if (instance == null)
+                return false;
+            
+            inputUi = selectedInputs[0];
+            id = inputUi.Id;
+        }
+        else
+        {
+            id = instance.SymbolChildId;
+        }
+
+        selectionChanged = id != _lastSelectionId;
+
+        if (ImGui.GetFrameCount() == _lastFrameCount) 
+            return true;
+        
+        _lastFrameCount = ImGui.GetFrameCount();
+        _lastSelectionId = id;
+        return true;
+    }
     
-    private readonly NavigationHistory _history;
+    public readonly NavigationHistory NavigationHistory;
     private readonly Structure _structure;
 
     //TODO: This should be a dict because selecting many (> 500) ops will lead to framedrops
-    public readonly List<ISelectableCanvasObject> Selection = new();
+    public readonly List<ISelectableCanvasObject> Selection = [];
     private IReadOnlyList<Guid>? _selectedCompositionPath;
     private readonly Dictionary<SymbolUi.Child, IReadOnlyList<Guid>> _childUiInstanceIdPaths = new();
+
+    
+
+    
+    private static int _lastFrameCount;
+    private static Guid _lastSelectionId = Guid.Empty;
+
+    public static void InvalidateSelectedOpsForTransformGizmo(NodeSelection nodeSelection)
+    {
+        // Keep invalidating the selected op to enforce rendering of Transform gizmo  
+        foreach (var si in nodeSelection.GetSelectedInstances().ToList())
+        {
+            if (si is not ITransformable)
+                continue;
+
+            foreach (var i in si.Inputs)
+            {
+                // Skip string inputs to prevent potential interference with resource file paths hooks
+                // I.e. Invalidating these every frame breaks shader recompiling if Shader-op is selected
+                if (i.ValueType != typeof(Vector3))
+                {
+                    continue;
+                }
+
+                i.DirtyFlag.ForceInvalidate();
+            }
+        }
+    }
 }

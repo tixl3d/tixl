@@ -53,11 +53,10 @@ struct psInput
 
 sampler texSampler : register(s0);
 
-StructuredBuffer<LegacyPoint> Points : t0;
+StructuredBuffer<Point> Points : t0;
 Texture2D<float4> texture2 : register(t1);
 
-psInput vsMain(uint id
-               : SV_VertexID)
+psInput vsMain(uint id : SV_VertexID)
 {
     psInput output;
     float discardFactor = 1;
@@ -65,7 +64,7 @@ psInput vsMain(uint id
     int particleId = id / 6;
     float3 cornerFactors = Corners[quadIndex];
 
-    LegacyPoint p = Points[particleId];
+    Point p = Points[particleId];
 
     float2 atlasResolution = 1. / float2(TextureCellsX, TextureCellsY);
     float atlasRatio = (float)TextureCellsX / TextureCellsY;
@@ -73,10 +72,12 @@ psInput vsMain(uint id
     // axis.xy = (axis.xy + Offset) * Stretch;
     // axis.z = 0;
 
-    float4 rotation = qMul(normalize(p.Rotation), qFromAngleAxis((Rotate + 180) / 180 * PI, RotateAxis));
+    // float4 rotation = qMul(normalize(p.Rotation), qFromAngleAxis((Rotate + 180) / 180 * PI, RotateAxis));
 
+    float4 rotation = p.Rotation;
     float3 axis = float3((cornerFactors.xy + Offset) * Stretch, 0);
-    axis = qRotateVec3(axis, rotation) * Size * lerp(1, p.W, UseWForSize);
+    axis = qRotateVec3(axis, rotation) * Size * lerp(1, p.FX1, UseWForSize);
+
     float3 pInObject = p.Position + axis;
     output.position = mul(float4(pInObject, 1), ObjectToClipSpace);
 
@@ -92,7 +93,7 @@ psInput vsMain(uint id
     output.texCoord *= atlasResolution;
     output.texCoord += atlasResolution * float2(textureCelX, textureCelY);
 
-    output.color = Color;
+    output.color = Color * p.Color;
     return output;
 }
 

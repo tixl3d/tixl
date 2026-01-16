@@ -101,13 +101,13 @@
       "Outputs": []
     },
     {
-      "Id": "1f62f8cc-aa9a-45cc-b6eb-f74b4710a704"/*PickFromStringList*/,
+      "Id": "1f62f8cc-aa9a-45cc-b6eb-f74b4710a704"/*PickStringFromList*/,
       "SymbolId": "ef357e66-24e9-4f54-8d86-869db74602f4",
       "InputValues": [],
       "Outputs": []
     },
     {
-      "Id": "237aff95-22ad-40d2-9402-257984d2d917"/*PickFromStringList*/,
+      "Id": "237aff95-22ad-40d2-9402-257984d2d917"/*PickStringFromList*/,
       "SymbolId": "ef357e66-24e9-4f54-8d86-869db74602f4",
       "InputValues": [],
       "Outputs": []

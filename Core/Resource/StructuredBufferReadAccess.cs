@@ -27,8 +27,12 @@ public sealed class StructuredBufferReadAccess : IDisposable
         internal bool IsObsolete => RequestIndex < BufferReadAccess._frameCounter - (BufferCount - 2);
     }
 
-    public delegate void OnReadComplete(ReadRequestItem readItem, IntPtr dataPointer, DataStream? dataStream);
+    public delegate void OnReadComplete(ReadRequestItem readItem, IntPtr dataPointer, DataStream dataStream);
 
+    /// <summary>
+    /// Readback will take several frames because it takes a while until the frames are
+    /// downloaded from the gpu. <see cref="Update"/> needs to be called once a frame.
+    /// </summary>
     public void Update()
     {
         _frameCounter++;
@@ -65,7 +69,7 @@ public sealed class StructuredBufferReadAccess : IDisposable
 
     public bool InitiateRead(Buffer sourceBuffer, int elementCount, int structureByteStride, OnReadComplete onSuccess)
     {
-        if (sourceBuffer == null || sourceBuffer.IsDisposed)
+        if (sourceBuffer == null! || sourceBuffer.IsDisposed)
             return false;
 
         var sizeInBytes = elementCount * structureByteStride;

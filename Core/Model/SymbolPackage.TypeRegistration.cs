@@ -25,6 +25,7 @@ using PixelShader = T3.Core.DataTypes.PixelShader;
 using Texture2D = T3.Core.DataTypes.Texture2D;
 using Texture3D = T3.Core.DataTypes.Texture3D;
 using VertexShader = T3.Core.DataTypes.VertexShader;
+
 // todo - Default Value Creators should be removed for types that are using their "default" values, i.e. "null" or zero
 
 namespace T3.Core.Model;
@@ -43,7 +44,7 @@ public static class InputValueCreators
 {
     public static Dictionary<Type, Func<InputValue>> Entries { get; } = new();
 }
-    
+
 public static class TypeNameRegistry
 {
     public static Dictionary<Type, string> Entries { get; } = new(20);
@@ -69,20 +70,20 @@ public partial class SymbolPackage
         RegisterType(typeof(int), "int",
                      InputDefaultValueCreator<int>,
                      (writer, obj) => writer.WriteValue((int)obj),
-                     jsonToken => jsonToken.Value<int>());
+                     jsonToken => jsonToken?.Value<int>()??0);
         RegisterType(typeof(bool), "bool",
                      InputDefaultValueCreator<bool>,
                      (writer, obj) => writer.WriteValue((bool)obj),
-                     jsonToken => jsonToken.Value<bool>());
+                     jsonToken => jsonToken?.Value<bool>()??false);
         RegisterType(typeof(double), "double",
                      InputDefaultValueCreator<double>,
                      (writer, obj) => writer.WriteValue((double)obj),
-                     jsonToken => jsonToken.Value<double>());
-        
+                     jsonToken => jsonToken?.Value<double>()??0);
+
         RegisterType(typeof(string), "string",
                      () => new InputValue<string>(string.Empty),
                      (writer, value) => writer.WriteValue((string)value),
-                     jsonToken => jsonToken.Value<string>());
+                     jsonToken => jsonToken?.Value<string>()??string.Empty);
 
         // system types
         RegisterType(typeof(System.Numerics.Vector2), "Vector2",
@@ -97,8 +98,8 @@ public partial class SymbolPackage
                      },
                      jsonToken =>
                      {
-                         float x = jsonToken.Value<float>("X");
-                         float y = jsonToken.Value<float>("Y");
+                         float x = jsonToken.ReadValueSafe<float>("X");
+                         float y = jsonToken.ReadValueSafe<float>("Y");
                          return new System.Numerics.Vector2(x, y);
                      });
         RegisterType(typeof(System.Numerics.Vector3), "Vector3",
@@ -114,9 +115,9 @@ public partial class SymbolPackage
                      },
                      jsonToken =>
                      {
-                         float x = jsonToken.Value<float>("X");
-                         float y = jsonToken.Value<float>("Y");
-                         float z = jsonToken.Value<float>("Z");
+                         float x = jsonToken.ReadValueSafe<float>("X");
+                         float y = jsonToken.ReadValueSafe<float>("Y");
+                         float z = jsonToken.ReadValueSafe<float>("Z");
                          return new System.Numerics.Vector3(x, y, z);
                      });
         RegisterType(typeof(System.Numerics.Vector4), "Vector4",
@@ -133,10 +134,10 @@ public partial class SymbolPackage
                      },
                      jsonToken =>
                      {
-                         float x = jsonToken.Value<float>("X");
-                         float y = jsonToken.Value<float>("Y");
-                         float z = jsonToken.Value<float>("Z");
-                         float w = jsonToken.Value<float>("W");
+                         float x = jsonToken.ReadValueSafe<float>("X");
+                         float y = jsonToken.ReadValueSafe<float>("Y");
+                         float z = jsonToken.ReadValueSafe<float>("Z");
+                         float w = jsonToken.ReadValueSafe<float>("W");
                          return new Vector4(x, y, z, w);
                      });
         RegisterType(typeof(System.Numerics.Quaternion), "Quaternion",
@@ -153,13 +154,54 @@ public partial class SymbolPackage
                      },
                      jsonToken =>
                      {
-                         float x = jsonToken.Value<float>("X");
-                         float y = jsonToken.Value<float>("Y");
-                         float z = jsonToken.Value<float>("Z");
-                         float w = jsonToken.Value<float>("W");
+                         float x = jsonToken.ReadValueSafe<float>("X");
+                         float y = jsonToken.ReadValueSafe<float>("Y");
+                         float z = jsonToken.ReadValueSafe<float>("Z");
+                         float w = jsonToken.ReadValueSafe<float>("W");
                          return new System.Numerics.Quaternion(x, y, z, w);
-                     });        
-        
+                     });
+
+        RegisterType(typeof(System.Numerics.Matrix4x4), "Matrix4x4",
+                     () => new InputValue<System.Numerics.Matrix4x4>(System.Numerics.Matrix4x4.Identity),
+                     (writer, obj) =>
+                     {
+                         var matrix = (System.Numerics.Matrix4x4)obj;
+                         //writer.WriteStartObject();
+                         writer.WriteStartArray();
+                         writer.WriteValue(matrix.M11);
+                         writer.WriteValue(matrix.M12);
+                         writer.WriteValue(matrix.M13);
+                         writer.WriteValue(matrix.M14);
+
+                         writer.WriteValue(matrix.M21);
+                         writer.WriteValue(matrix.M22);
+                         writer.WriteValue(matrix.M23);
+                         writer.WriteValue(matrix.M24);
+
+                         writer.WriteValue(matrix.M31);
+                         writer.WriteValue(matrix.M32);
+                         writer.WriteValue(matrix.M33);
+                         writer.WriteValue(matrix.M34);
+
+                         writer.WriteValue(matrix.M41);
+                         writer.WriteValue(matrix.M42);
+                         writer.WriteValue(matrix.M43);
+                         writer.WriteValue(matrix.M44);
+                         writer.WriteEndArray();
+                     },
+                     jsonToken =>
+                     {
+                         if (jsonToken is not JArray arr || arr.Count != 16)
+                             return System.Numerics.Matrix4x4.Identity;
+
+                         return new Matrix4x4(
+                                              JsonUtils.SafeFloatFromArray(arr,0),  JsonUtils.SafeFloatFromArray(arr,1),  JsonUtils.SafeFloatFromArray(arr,2),  JsonUtils.SafeFloatFromArray(arr,3),
+                                              JsonUtils.SafeFloatFromArray(arr,4),  JsonUtils.SafeFloatFromArray(arr,5),  JsonUtils.SafeFloatFromArray(arr,6),  JsonUtils.SafeFloatFromArray(arr,7),
+                                              JsonUtils.SafeFloatFromArray(arr,8),  JsonUtils.SafeFloatFromArray(arr,9),  JsonUtils.SafeFloatFromArray(arr,10), JsonUtils.SafeFloatFromArray(arr,11),
+                                              JsonUtils.SafeFloatFromArray(arr,12), JsonUtils.SafeFloatFromArray(arr,13), JsonUtils.SafeFloatFromArray(arr,14), JsonUtils.SafeFloatFromArray(arr,15)
+                                             );     
+                     });
+
         RegisterType(typeof(System.Collections.Generic.List<float>), "List<float>",
                      () => new InputValue<List<float>>([]),
                      (writer, obj) =>
@@ -172,14 +214,7 @@ public partial class SymbolPackage
                          writer.WriteEndArray();
                          writer.WriteEndObject();
                      },
-                     jsonToken =>
-                     {
-                         var entries = jsonToken["Values"];
-                         var list = new List<float>(entries.Count());
-                         list.AddRange(entries.Select(entry => entry.Value<float>()));
-
-                         return list;
-                     });
+                     jsonToken => jsonToken.ReadListSafe<float>("Values"));
         RegisterType(typeof(System.Collections.Generic.List<int>), "List<int>",
                      () => new InputValue<List<int>>([]),
                      (writer, obj) =>
@@ -192,14 +227,8 @@ public partial class SymbolPackage
                          writer.WriteEndArray();
                          writer.WriteEndObject();
                      },
-                     jsonToken =>
-                     {
-                         var entries = jsonToken["Values"];
-                         var list = new List<int>(entries.Count());
-                         list.AddRange(entries.Select(entry => entry.Value<int>()));
-                         return list;
-                     });        
-        
+                     jsonToken => jsonToken.ReadListSafe<int>("Values"));
+
         RegisterType(typeof(System.Collections.Generic.List<string>), "List<string>",
                      () => new InputValue<List<string>>([]),
                      (writer, obj) =>
@@ -212,14 +241,8 @@ public partial class SymbolPackage
                          writer.WriteEndArray();
                          writer.WriteEndObject();
                      },
-                     jsonToken =>
-                     {
-                         var entries = jsonToken["Values"];
-                         var list = new List<string>(entries.Count());
-                         list.AddRange(entries.Select(entry => entry.Value<string>()));
-                         return list;
-                     });
-        
+                     jsonToken => jsonToken.ReadListSafe<string>("Values"));
+
         RegisterType(typeof(Int2), nameof(Int2),
                      InputDefaultValueCreator<Int2>,
                      (writer, obj) =>
@@ -238,7 +261,7 @@ public partial class SymbolPackage
                          int height = heightJson.Value<int>();
                          return new Int2(width, height);
                      });
-        
+
         RegisterType(typeof(Int3), "Int3",
                      InputDefaultValueCreator<Int3>,
                      (writer, obj) =>
@@ -252,20 +275,16 @@ public partial class SymbolPackage
                      },
                      jsonToken =>
                      {
-                         int x = jsonToken.Value<int>("X");
-                         int y = jsonToken.Value<int>("Y");
-                         int z = jsonToken.Value<int>("Z");
+                         int x = jsonToken.ReadValueSafe<int>("X");
+                         int y = jsonToken.ReadValueSafe<int>("Y");
+                         int z = jsonToken.ReadValueSafe<int>("Z");
                          return new Int3(x, y, z);
                      });
-        
+
         // TODO: this is an unfortunate overlap with List<Vector4> and should be resolved.
         RegisterType(typeof(Vector4[]), "Vector4[]",
                      () => new InputValue<Vector4[]>([]));
-        
-        // RegisterType(typeof(List<Vector4>), "List<Vector4>",
-        //              () => new InputValue<List<Vector4>>([]));
-        
-        
+
         RegisterType(typeof(List<Vector4>), "List<Vector4>",
                      () => new InputValue<List<Vector4>>([]),
                      (writer, obj) =>
@@ -283,37 +302,37 @@ public partial class SymbolPackage
                              writer.WriteValue("W", vec.W);
                              writer.WriteEndObject();
                          }
+
                          writer.WriteEndArray();
                          writer.WriteEndObject();
                      },
                      jsonToken =>
                      {
-                         if (jsonToken == null || !jsonToken.HasValues)
+                         if (jsonToken is not { HasValues: true })
                          {
                              return new List<Vector4>();
                          }
-                         
+
                          var entries = jsonToken["Values"];
                          var list = new List<Vector4>(entries.Count());
                          foreach (var vec4Token in entries)
                          {
                              if (vec4Token == null)
                                  continue;
-                             
-                             float x = vec4Token.Value<float>("X");
-                             float y = vec4Token.Value<float>("Y");
-                             float z = vec4Token.Value<float>("Z");
-                             float w = vec4Token.Value<float>("W");
+
+                             float x = vec4Token.ReadValueSafe<float>("X");
+                             float y = vec4Token.ReadValueSafe<float>("Y");
+                             float z = vec4Token.ReadValueSafe<float>("Z");
+                             float w = vec4Token.ReadValueSafe<float>("W");
                              list.Add(new Vector4(x, y, z, w));
                          }
+
                          //list.AddRange(entries.Select(entry => entry.Value<Vector4>()));
                          return list;
                      });
 
-        
         RegisterType(typeof(Dict<float>), "Dict<float>",
                      () => new InputValue<Dict<float>>());
-
 
         RegisterType(typeof(System.Text.StringBuilder), "StringBuilder",
                      () => new InputValue<StringBuilder>(new StringBuilder()));
@@ -327,7 +346,7 @@ public partial class SymbolPackage
 
         RegisterType(typeof(Command), "Command",
                      () => new InputValue<Command>(null));
-        
+
         RegisterType(typeof(Curve), "Curve",
                      InputDefaultValueCreator<Curve>,
                      (writer, obj) =>
@@ -353,7 +372,6 @@ public partial class SymbolPackage
                          return curve;
                      });
 
-        
         RegisterType(typeof(DataTypes.Gradient), "Gradient",
                      InputDefaultValueCreator<Gradient>,
                      (writer, obj) =>
@@ -382,7 +400,7 @@ public partial class SymbolPackage
 
         RegisterType(typeof(ParticleSystem), "ParticleSystem",
                      () => new InputValue<ParticleSystem>(null));
-        
+
         RegisterType(typeof(T3.Core.Operator.GizmoVisibility), "GizmoVisibility",
                      InputDefaultValueCreator<T3.Core.Operator.GizmoVisibility>,
                      (writer, obj) => writer.WriteValue(obj.ToString()),
@@ -392,19 +410,19 @@ public partial class SymbolPackage
                      () => new InputValue<Point[]>());
         RegisterType(typeof(RenderTargetReference), "RenderTargetRef",
                      () => new InputValue<RenderTargetReference>());
-        
+
         // An untyped object that can be used as hack to connect data of unknown type.
         // This can be useful to avoid creating one-off ConnectionTypes for very narrow usecases. 
         RegisterType(typeof(Object), "Object",
                      () => new InputValue<Object>());
-        
+
         RegisterType(typeof(StructuredList), "StructuredList",
                      () => new InputValue<StructuredList>(),
                      (writer, obj) =>
                      {
                          if (obj is StructuredList l)
                          {
-                            l.Write(writer);    
+                             l.Write(writer);
                          }
                      },
                      token =>
@@ -415,31 +433,30 @@ public partial class SymbolPackage
                          {
                              return new StructuredList<Point>().Read(token);
                          }
-                         catch(Exception)
+                         catch (Exception)
                          {
-                             
                              //Log.Warning("Failed to load structured list:" + e.Message);
                              return null;
                          }
                      }
-                     );
-        
+                    );
+
         // Rendering
         RegisterType(typeof(Texture3dWithViews), "Texture3dWithViews",
                      () => new InputValue<Texture3dWithViews>(new Texture3dWithViews()));
-        
+
         RegisterType(typeof(MeshBuffers), "MeshBuffers",
                      () => new InputValue<MeshBuffers>(null));
-        
+
         RegisterType(typeof(DataSet), "DataSet",
                      () => new InputValue<DataSet>());
-        
+
         RegisterType(typeof(PbrMaterial), "Material",
                      () => new InputValue<PbrMaterial>());
 
         RegisterType(typeof(ShaderGraphNode), "ShaderGraphNode",
                      () => new InputValue<ShaderGraphNode>());
-        
+
         RegisterType(typeof(SceneSetup), nameof(SceneSetup),
                      InputDefaultValueCreator<SceneSetup>,
                      (writer, obj) =>
@@ -464,11 +481,9 @@ public partial class SymbolPackage
                          return sceneSetup;
                      });
 
-
         #region sharpdx types
-        
         // todo - add these to CsProject as DefaultUsings dynamically
-        
+
         // sharpdx types
         RegisterType(typeof(SharpDX.Direct3D.PrimitiveTopology), "PrimitiveTopology",
                      InputDefaultValueCreator<PrimitiveTopology>,
@@ -569,7 +584,6 @@ public partial class SymbolPackage
         RegisterType(typeof(SharpDX.Mathematics.Interop.RawViewportF), "RawViewportF",
                      () => new InputValue<RawViewportF>(new RawViewportF
                                                             { X = 0.0f, Y = 0.0f, Width = 100.0f, Height = 100.0f, MinDepth = 0.0f, MaxDepth = 10000.0f }));
-
         #endregion
 
         return;
@@ -609,7 +623,7 @@ public partial class SymbolPackage
     /// Dependencies to other packages based on resources
     /// </summary>
     public IEnumerable<SymbolPackage> ResourceDependencies => Array.Empty<SymbolPackage>();
-    
+
     /// <summary>
     /// Dependencies to other packages based on symbols
     /// </summary>

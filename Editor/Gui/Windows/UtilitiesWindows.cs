@@ -1,4 +1,5 @@
-﻿using ImGuiNET;
+using ImGuiNET;
+using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.Windows.Utilities;
 using T3.Editor.UiModel.Commands;
@@ -27,6 +28,7 @@ internal sealed class UtilitiesWindow : Window
         Assets,
         CrashReporting,
         SvgConversion,
+        MsdfGeneration,
         OperatorMigration,
     }
 
@@ -135,6 +137,10 @@ internal sealed class UtilitiesWindow : Window
 
                 case Categories.SvgConversion:
                     SvgFontConversion.Draw();
+                    break;
+
+                case Categories.MsdfGeneration:
+                    MsdfGeneration.Draw();
                     break;
 
                 case Categories.OperatorMigration:

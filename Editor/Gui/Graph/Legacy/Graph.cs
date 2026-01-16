@@ -2,8 +2,8 @@
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
 using T3.Core.Utils;
-using T3.Editor.Gui.Graph.Legacy.Interaction;
-using T3.Editor.Gui.Graph.Legacy.Interaction.Connections;
+using T3.Editor.Gui.Legacy.Interaction;
+using T3.Editor.Gui.Legacy.Interaction.Connections;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
@@ -11,7 +11,7 @@ using T3.Editor.UiModel.ProjectHandling;
 
 // ReSharper disable LoopCanBeConvertedToQuery
 
-namespace T3.Editor.Gui.Graph.Legacy;
+namespace T3.Editor.Gui.Legacy;
 
 /// <summary>Rendering a node graph</summary>
 /// <remarks>

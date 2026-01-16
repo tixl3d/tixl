@@ -46,7 +46,7 @@ public sealed class ExternalLink
         = new()
               {
                   { ExternalLink.LinkTypes.TutorialVideo, Icon.PlayOutput },
-                  { ExternalLink.LinkTypes.Example, Icon.Hint },
+                  { ExternalLink.LinkTypes.Example, Icon.Tip },
                   { ExternalLink.LinkTypes.Reference, Icon.Help },
                   { ExternalLink.LinkTypes.Documentation, Icon.Help },
               };

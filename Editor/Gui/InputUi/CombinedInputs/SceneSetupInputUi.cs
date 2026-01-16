@@ -143,7 +143,7 @@ public static class SceneSetupPopup
             // Mesh Label
             var meshLabel = string.IsNullOrEmpty(node.MeshName) ? "-" : $"  {node.MeshName.Truncate(25)} ({node.MeshBuffers.FaceCount.FormatCount()})";
             ImGui.SameLine(300);
-            ImGui.TextColored(UiColors.TextMuted, meshLabel);
+            ImGui.TextColored(UiColors.TextMuted.Rgba, meshLabel);
             if (ImGui.IsItemHovered())
             {
                 var meshInfo = node.MeshBuffers != null?  node.MeshBuffers.ToString() : "no mesh";
@@ -158,7 +158,7 @@ public static class SceneSetupPopup
             if (node.Material != null)
             {
                 ImGui.SameLine(630);
-                ImGui.TextColored(UiColors.TextMuted, node.Material.Name);
+                ImGui.TextColored(UiColors.TextMuted.Rgba, node.Material.Name);
                 
                 var h = ImGui.GetFrameHeight();
                 var p = ImGui.GetItemRectMin() + new Vector2(-h *0.5f,0.4f *h);

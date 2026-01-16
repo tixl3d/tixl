@@ -1,13 +1,14 @@
 {
   "Id": "b469d554-a69f-44a0-a03f-331853b82199"/*SerialOutput*/,
-  "Description": "",
+  "Description": "Sends data to a serial port.\n\nThis operator can be used to send data to hardware devices like Arduino, DMX interfaces, or other custom electronics using the serial protocol.\n\nMultiple values can be combined into a single message using the `MessageParts` input. \n\nTips:\n- Use `SendOnChange` to automatically send data when `MessageParts` changes.\n- Use `SendTrigger` for manual control over when messages are sent.\n- `AddLineEnding` is often required for text-based communication protocols.\n\nAKA: arduino, rs232, uart, com",
   "InputUis": [
     {
       "InputId": "262d4a18-354a-4835-9b22-458db18579e7"/*BaudRate*/,
       "Position": {
         "X": -200.0,
         "Y": 75.0
-      }
+      },
+      "Description": "The communication speed for the serial port. This has to match the setting on the connected device. Common values are 9600, 19200, 38400, 57600, 115200."
     },
     {
       "InputId": "3f9e404b-993a-427e-8367-9a9772f76426"/*PortName*/,
@@ -15,6 +16,7 @@
         "X": -200.0,
         "Y": 0.0
       },
+      "Description": "The name of the serial port, e.g., 'COM3'. A dropdown shows available ports.",
       "Usage": "CustomDropdown"
     },
     {
@@ -22,14 +24,16 @@
       "Position": {
         "X": -200.0,
         "Y": 375.0
-      }
+      },
+      "Description": "Connects or disconnects from the serial port. This is useful to free the port for other applications without deleting the operator."
     },
     {
       "InputId": "a0e35517-337a-4770-985a-34cac95b5b5f"/*SendOnChange*/,
       "Position": {
         "X": -200.0,
         "Y": 300.0
-      }
+      },
+      "Description": "If enabled, a message is sent automatically whenever the content of `MessageParts` changes."
     },
     {
       "InputId": "aa199834-537d-4c67-9ecb-88358252d263"/*MessageParts*/,
@@ -37,6 +41,7 @@
         "X": -200.0,
         "Y": 150.0
       },
+      "Description": "A list of strings or values that will be joined together to form the message. Non-string values will be converted.",
       "Usage": "Default"
     },
     {
@@ -45,6 +50,7 @@
         "X": -200.0,
         "Y": 225.0
       },
+      "Description": "A string used to join the `MessageParts` together.",
       "Usage": "Default"
     },
     {
@@ -52,14 +58,16 @@
       "Position": {
         "X": -200.0,
         "Y": 225.0
-      }
+      },
+      "Description": "A trigger to manually send the message. The message is sent when this value changes from 0 to 1."
     },
     {
       "InputId": "daf8e832-6d55-4424-aef9-a92543b1a796"/*AddLineEnding*/,
       "Position": {
         "X": -200.0,
         "Y": 300.0
-      }
+      },
+      "Description": "If enabled, a carriage return and newline character (\r\n) is appended to the message. This is required by many devices."
     }
   ],
   "SymbolChildUis": [],

@@ -1,0 +1,101 @@
+{
+  "Id": "e2f54c8c-2507-4b55-bc94-22a242ddf0ff"/*I01b_Swimming*/,
+  "Description": "Swimming upwards...",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "55e78d83-4594-4383-9732-324c63a081b0"/*ImageQuiz*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2018.439
+      }
+    },
+    {
+      "ChildId": "86fba173-6ca3-46c8-bc07-4cf36f21eab7"/*RoundedRect*/,
+      "AnnotationId": "e721438d-4362-4b32-a0f7-e654b4cddc4a",
+      "Position": {
+        "X": 1285.9601,
+        "Y": 2118.6863
+      }
+    },
+    {
+      "ChildId": "8ed19911-dace-4057-beef-0f225faf2b66"/*RoundedRect*/,
+      "Position": {
+        "X": 1285.9601,
+        "Y": 1916.2874
+      }
+    },
+    {
+      "ChildId": "9b49ce28-2811-4472-8fb7-510116070391"/*Time*/,
+      "AnnotationId": "e721438d-4362-4b32-a0f7-e654b4cddc4a",
+      "Position": {
+        "X": 1145.9601,
+        "Y": 2153.6863
+      }
+    },
+    {
+      "ChildId": "b3a217e5-e264-4f90-8758-f2a503d6dfcb"/*MirrorRepeat*/,
+      "Position": {
+        "X": 1285.9601,
+        "Y": 1976.4393
+      }
+    },
+    {
+      "ChildId": "b7afbfe2-5a1c-49ba-80b7-bae2c6e1754e"/*MirrorRepeat*/,
+      "AnnotationId": "e721438d-4362-4b32-a0f7-e654b4cddc4a",
+      "Position": {
+        "X": 1285.9601,
+        "Y": 2188.6863
+      }
+    },
+    {
+      "ChildId": "d8eb0294-3162-4cb7-b58c-8b0f99482715"/*Time*/,
+      "Position": {
+        "X": 1285.9601,
+        "Y": 1858.818
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "4948c028-db5e-4e38-8f8d-a3b114bfeaa1"/*ColorBuffer*/,
+      "Position": {
+        "X": 1609.7146,
+        "Y": 2088.439
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "e721438d-4362-4b32-a0f7-e654b4cddc4a",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1042.6677,
+        "Y": 2065.0
+      },
+      "Size": {
+        "X": 468.55768,
+        "Y": 181.79468
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "d07754a2-4162-4edc-a859-5a5d3fddef08",
+      "ChildId": "8ed19911-dace-4057-beef-0f225faf2b66",
+      "Description": "The [RoundedRect] is already set up.\nLeave its parameters unchanged."
+    },
+    {
+      "Id": "da1a107f-3def-4003-a6f0-1342c9c84a32",
+      "ChildId": "b3a217e5-e264-4f90-8758-f2a503d6dfcb",
+      "Description": "Focus on the [MirrorRepeat] operator.\nIt reflects images along an axis and is extremely flexible.\nOnly two parameters need adjustment to solve this challenge."
+    }
+  ]
+}

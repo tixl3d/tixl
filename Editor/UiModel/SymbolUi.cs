@@ -24,6 +24,7 @@ public sealed partial class SymbolUi : ISelectionContainer
         OutputUis = new OrderedDictionary<Guid, IOutputUi>();
         Annotations = new OrderedDictionary<Guid, Annotation>();
         Links = new OrderedDictionary<Guid, ExternalLink>();
+        TourPoints = new List<TourPoint>();
 
         if (updateConsistency)
             UpdateConsistencyWithSymbol();
@@ -37,6 +38,7 @@ public sealed partial class SymbolUi : ISelectionContainer
                       OrderedDictionary<Guid, IOutputUi> outputs,
                       OrderedDictionary<Guid, Annotation> annotations,
                       OrderedDictionary<Guid, ExternalLink> links,
+                      List<TourPoint> tourPoints,
                       bool updateConsistency) : this(symbol, false)
     {
         _childUis = childUis(symbol).ToDictionary(x => x.Id, x => x);
@@ -45,6 +47,7 @@ public sealed partial class SymbolUi : ISelectionContainer
         OutputUis = outputs;
         Annotations = annotations;
         Links = links;
+        TourPoints = tourPoints;
         ReadOnly = true;
 
         if (updateConsistency)
@@ -270,6 +273,8 @@ public sealed partial class SymbolUi : ISelectionContainer
     private Dictionary<Guid, Child> _childUis = new();
     internal IReadOnlyDictionary<Guid, Child> ChildUis => _childUis;
     internal OrderedDictionary<Guid, ExternalLink> Links { get; private set; }
+    internal List<TourPoint> TourPoints { get; private set; }
+    
     internal OrderedDictionary<Guid, IInputUi> InputUis { get; private set; }
     internal OrderedDictionary<Guid, IOutputUi> OutputUis { get; private set; }
     internal OrderedDictionary<Guid, Annotation> Annotations { get; private set; }

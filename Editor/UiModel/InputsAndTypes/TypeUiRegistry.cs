@@ -1,4 +1,6 @@
-﻿namespace T3.Editor.UiModel.InputsAndTypes;
+﻿using T3.Core.DataTypes.Vector;
+
+namespace T3.Editor.UiModel.InputsAndTypes;
 
 public static class TypeUiRegistry
 {
@@ -11,11 +13,30 @@ public static class TypeUiRegistry
 
     internal static bool TryGetPropertiesForType(Type type, out UiProperties properties)
     {
-        return _entries.TryGetValue(type, out properties);
+        properties = UiProperties.Default;
+        if (type == null)
+            return false;
+
+        if (_entries.TryGetValue(type, out properties))
+        {
+            return true;
+        }
+        properties = UiProperties.Default;
+        return false;
     }
         
     internal static void SetProperties(Type type, UiProperties properties)
     {
         _entries[type] = properties;
+    }
+
+    internal static Color GetTypeOrDefaultColor(Type type)
+    {
+        if (type == null)
+            return UiProperties.Default.Color;
+
+        return _entries.TryGetValue(type, out var props) 
+                   ? props.Color 
+                   : UiProperties.Default.Color;
     }
 }

@@ -52,4 +52,11 @@ public sealed class CameraSetup
         Position = Vector3.Lerp(Position, intended.Position, f);
         Target = Vector3.Lerp(Target, intended.Target, f);
     }
+    
+    public void BlendTo(CameraSetup intended, float factor)
+    {
+        //var f = deltaTime * cameraMoveFriction * 60;
+        Position = Vector3.Lerp(Position, intended.Position, factor);
+        Target = Vector3.Lerp(Target, intended.Target, factor);
+    }
 }

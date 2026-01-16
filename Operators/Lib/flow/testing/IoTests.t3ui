@@ -102,13 +102,6 @@
       }
     },
     {
-      "ChildId": "7dd18060-618e-4ec0-ab69-3cf9341661e5"/*VideoDeviceInput*/,
-      "Position": {
-        "X": -446.90842,
-        "Y": 1141.3344
-      }
-    },
-    {
       "ChildId": "7f8e0a4b-5424-46ab-bf4d-372a4ceb95c2"/*Layer2d*/,
       "Position": {
         "X": -446.90842,

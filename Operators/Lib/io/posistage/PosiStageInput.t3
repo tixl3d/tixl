@@ -1,0 +1,27 @@
+{
+  "Id": "a9e8d7c6-b5a4-4e1a-8d0f-3c5a7b9e2d1f"/*PosiStageInput*/,
+  "Inputs": [
+    {
+      "Id": "0944714d-693d-4251-93a6-e22a2db64f20"/*Listen*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "2ebe418d-407e-46d8-b274-13b41c52accf"/*Port*/,
+      "DefaultValue": 56565
+    },
+    {
+      "Id": "46c2bf8b-3e0c-4856-aa4a-32943a4b0223"/*MulticastIpAddress*/,
+      "DefaultValue": "236.10.10.10"
+    },
+    {
+      "Id": "5e725916-4143-4759-8651-e12185c658d3"/*PrintToLog*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "9e23335a-d63a-4286-930e-c63e86d0e6f0"/*LocalIpAddress*/,
+      "DefaultValue": "0.0.0.0"
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

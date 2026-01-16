@@ -13,6 +13,10 @@
       "DefaultValue": null
     },
     {
+      "Id": "3782e42e-6a36-4ba2-aaa2-3ee401a3cdf1"/*WithNormalBuffer*/,
+      "DefaultValue": false
+    },
+    {
       "Id": "4da253b7-4953-439a-b03f-1d515a78bddf"/*Command*/,
       "DefaultValue": null
     },

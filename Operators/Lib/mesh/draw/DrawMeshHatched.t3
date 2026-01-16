@@ -33,7 +33,7 @@
     },
     {
       "Id": "61eb78f5-d36e-479e-938f-a4fa4b31a1b6"/*LineWidth*/,
-      "DefaultValue": 4.0
+      "DefaultValue": 10.0
     },
     {
       "Id": "a9021b39-f236-4e29-98d7-e7805ceaa82f"/*Culling*/,

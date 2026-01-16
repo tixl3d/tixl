@@ -29,13 +29,6 @@
       }
     },
     {
-      "ChildId": "0ce659d0-dee1-4afc-b87c-a36b493cd6b8"/*DrawPoints*/,
-      "Position": {
-        "X": -1061.0188,
-        "Y": -1052.0078
-      }
-    },
-    {
       "ChildId": "114f1697-de7a-4479-afef-4f0e75473c55"/*RenderTarget*/,
       "Comment": "... into an image buffer ...",
       "Position": {
@@ -230,6 +223,13 @@
       }
     },
     {
+      "ChildId": "6ccb2f5c-8eac-4b9a-8543-ff661ef5e92b"/*ToneMapping*/,
+      "Position": {
+        "X": -1178.7814,
+        "Y": -434.00348
+      }
+    },
+    {
       "ChildId": "7042bd32-e3a9-4ee2-bf34-5214f8ee0515"/*Execute*/,
       "Position": {
         "X": -672.9573,
@@ -317,6 +317,13 @@
       "Position": {
         "X": -1811.902,
         "Y": -354.08942
+      }
+    },
+    {
+      "ChildId": "999801fd-e4b2-4a36-822a-2881ecd204b3"/*DrawPointsShaded*/,
+      "Position": {
+        "X": -1061.0188,
+        "Y": -1052.0078
       }
     },
     {
@@ -558,12 +565,12 @@
         "W": 1.0
       },
       "Position": {
-        "X": -875.0,
-        "Y": -843.5881
+        "X": -1339.5642,
+        "Y": -783.72943
       },
       "Size": {
-        "X": 315.0,
-        "Y": 490.0
+        "X": 366.34705,
+        "Y": 470.77313
       }
     },
     {
@@ -761,9 +768,9 @@
       "Title": "The implementation of drop shadows in TiXL is still somewhat experimental at this time, but it is functional and performs well on a small scale.",
       "Label": "Drawing things with shadows",
       "Color": {
-        "X": 0.0,
-        "Y": 0.0,
-        "Z": 0.0,
+        "X": 1.0,
+        "Y": 1.0,
+        "Z": 1.0,
         "W": 1.0
       },
       "Position": {

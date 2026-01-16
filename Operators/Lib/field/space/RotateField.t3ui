@@ -1,0 +1,33 @@
+{
+  "Id": "6ca6420a-4c05-4c33-81a3-1a9c4872e29d"/*RotateField*/,
+  "Description": "",
+  "InputUis": [
+    {
+      "InputId": "2e930b97-159d-4e29-ac28-1ff5c796820f"/*InputField*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "b9bc095a-084a-4616-a3aa-9616e82ba03b"/*Rotation*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      },
+      "Min": -180.0,
+      "Max": 180.0,
+      "Format": "{0:0.0}°"
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "7c83325a-5aca-4bb0-865f-5de4d4908f26"/*Result*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

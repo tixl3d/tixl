@@ -68,6 +68,11 @@
       "SymbolId": "9989f539-f86c-4508-83d7-3fc0e559f502",
       "InputValues": [
         {
+          "Id": "53cde701-435f-42e4-b598-db0e607a238c"/*AddSeparator*/,
+          "Type": "System.Boolean",
+          "Value": true
+        },
+        {
           "Id": "a0a453db-d8f1-415a-9a98-3c88a25b15e7"/*Position*/,
           "Type": "System.Numerics.Vector3",
           "Value": {
