@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
@@ -43,9 +43,9 @@ internal sealed class AssetFolder
         FolderType = type;
 
         AliasPath = GetAliasPath();
-        if (!ResourceManager.TryResolveRelativePath(AliasPath, selectedInstance, out AbsolutePath, out _, isFolder: true))
+        if (!string.IsNullOrEmpty(AliasPath))
         {
-            Log.Warning($"Can't resolve folder path ? {AliasPath}");
+            ResourceManager.TryResolveRelativePath(AliasPath, selectedInstance, out AbsolutePath, out _, isFolder: true);
         }
         
         HashCode = AliasPath.GetHashCode();
