@@ -1,0 +1,200 @@
+{
+  "Id": "88c63a7f-7dc7-4e9d-8122-7c0a0dc29faa"/*LoadSvgAsTexture2DExample*/,
+  "Description": "",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "039b0f5c-acb3-45fd-bea4-5b444ea10ec5"/*IntToString*/,
+      "Position": {
+        "X": 329.17175,
+        "Y": 352.75916
+      }
+    },
+    {
+      "ChildId": "0605c9df-1587-43ca-95a0-d234ac1b1ce4"/*Value*/,
+      "Position": {
+        "X": -118.40192,
+        "Y": -41.084473
+      }
+    },
+    {
+      "ChildId": "0772c3f2-9f57-4abd-8612-08ce9b46d20b"/*IntToString*/,
+      "Position": {
+        "X": 329.17175,
+        "Y": 317.75916
+      }
+    },
+    {
+      "ChildId": "07a8000a-9bf1-43d3-ac4f-bfbc2f6a0715"/*GetTextureSize*/,
+      "Position": {
+        "X": 49.172775,
+        "Y": 317.75916
+      }
+    },
+    {
+      "ChildId": "0d064b3b-2710-4461-9118-ad16fcd52ad1"/*Scale*/,
+      "Position": {
+        "X": -119.58188,
+        "Y": 254.58858
+      }
+    },
+    {
+      "ChildId": "13cf87c5-f8c3-429d-90f5-965a468a84bb"/*Group*/,
+      "Position": {
+        "X": 161.59807,
+        "Y": -111.08438
+      }
+    },
+    {
+      "ChildId": "14e03711-0dbb-42ae-bd3e-a77bfceb8780"/*Layer2d*/,
+      "Position": {
+        "X": 21.598083,
+        "Y": -76.08447
+      }
+    },
+    {
+      "ChildId": "15469dfb-bb11-4a7c-b630-503bd9adbc2f"/*LoadSvgAsTexture2D*/,
+      "Position": {
+        "X": -160.28998,
+        "Y": -109.516174
+      }
+    },
+    {
+      "ChildId": "180de18a-7d1c-4a50-970a-924c2c77a9e9"/*LoadSvgAsTexture2D*/,
+      "Position": {
+        "X": 49.17276,
+        "Y": 221.72452
+      }
+    },
+    {
+      "ChildId": "22acee76-4cfe-470b-b5db-90510a238674"/*Int2Components*/,
+      "Position": {
+        "X": 189.17278,
+        "Y": 317.75916
+      }
+    },
+    {
+      "ChildId": "2734529f-0332-48e2-b494-bf01dc5d8f32"/*Group*/,
+      "Position": {
+        "X": 650.5781,
+        "Y": 182.99359
+      }
+    },
+    {
+      "ChildId": "3cc7302e-89ce-4b7a-a3e2-253567759a10"/*CombineStrings*/,
+      "Position": {
+        "X": 469.17224,
+        "Y": 317.75916
+      }
+    },
+    {
+      "ChildId": "59ffccd0-69bd-4ba2-a9bf-a45571d6c9ca"/*Layer2d*/,
+      "Position": {
+        "X": 510.57812,
+        "Y": 217.99359
+      }
+    },
+    {
+      "ChildId": "6d098a74-e868-4ca9-8bd0-47725e02cdd5"/*Text*/,
+      "Position": {
+        "X": 510.57812,
+        "Y": 182.99359
+      }
+    },
+    {
+      "ChildId": "71b90226-4334-4c6a-9d74-921d30c53e62"/*RenderTarget*/,
+      "Position": {
+        "X": 857.59094,
+        "Y": 136.5336
+      }
+    },
+    {
+      "ChildId": "9dbf3fc0-312f-4ca4-974b-95de66864313"/*Text*/,
+      "Position": {
+        "X": 469.17224,
+        "Y": 387.75916
+      }
+    },
+    {
+      "ChildId": "aefe5d4c-1b81-499c-8487-d9d10724b64f"/*Text*/,
+      "Position": {
+        "X": 21.598083,
+        "Y": -111.08438
+      }
+    },
+    {
+      "ChildId": "c77bc14e-54ea-4c2a-9ade-ca9f8f6d9632"/*SpreadLayout*/,
+      "Position": {
+        "X": 857.59094,
+        "Y": 66.5336
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "f7176f9f-9bb7-4833-b373-ea2122280fb1"/*ColorBuffer*/,
+      "Position": {
+        "X": 997.59094,
+        "Y": 136.5336
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "6bbd6451-e6a7-436c-9189-8e2acf9487d2",
+      "Title": "[Load Svg As Texture 2D] allows to change the scale of the original vector design and generate a bitmap texture that will look sharp.\nNote that we intentionally made this SVG tiny in order to demonstrate the advantage of this load symbol. ",
+      "Label": "Scaled up ",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -179.58188,
+        "Y": 62.99359
+      },
+      "Size": {
+        "X": 1000.16003,
+        "Y": 469.76556
+      }
+    },
+    {
+      "Id": "9b609457-945a-4222-a925-316bb31779d2",
+      "Title": "Try to increase the scale of the layer2D to see how bad it will look\nPay attention to the Layer 2D scale mode set to: \nMatch Pixel Resolution",
+      "Label": "Original scale embedded in the svg file",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -179.58188,
+        "Y": -237.38245
+      },
+      "Size": {
+        "X": 1000.16003,
+        "Y": 262.54282
+      }
+    },
+    {
+      "Id": "a410df19-6bb8-4428-b706-6fde66bec2b9",
+      "Label": "SVG (Scalable Vector Graphics)",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -239.58188,
+        "Y": -357.38245
+      },
+      "Size": {
+        "X": 1407.1729,
+        "Y": 1010.1416
+      }
+    }
+  ]
+}

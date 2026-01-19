@@ -1,0 +1,41 @@
+{
+  "Id": "d05739d3-f89d-488d-85d0-c0d115265b75"/*LoadSvgAsTexture2D*/,
+  "Description": "Loads a SVG file as a Texture2D.\nNote: This rasterization of a SVG (Scalable Vector Graphics) is pretty slow, you shall not animate the scale parameter.\n",
+  "InputUis": [
+    {
+      "InputId": "89cd0433-8646-47f3-a22e-afe1344c6f07"/*Scale*/,
+      "Position": {
+        "X": 51.512096,
+        "Y": 121.99597
+      }
+    },
+    {
+      "InputId": "f4860e75-eff7-4e6e-a144-016ff5bb054e"/*Path*/,
+      "Position": {
+        "X": 51.512096,
+        "Y": 46.995968
+      },
+      "Usage": "FilePath",
+      "FileFilter": "Image files (svg)|*.svg"
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "ab1e6a50-4ac1-43ba-8323-81fc8af29814"/*Texture*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "Links": [
+    {
+      "Id": "c73da8fe-936e-46d2-a08c-57754136b4a8",
+      "Title": "Wikipedia",
+      "Description": "",
+      "LinkUrl": "https://en.wikipedia.org/wiki/SVG",
+      "LinkType": "Documentation"
+    }
+  ]
+}
