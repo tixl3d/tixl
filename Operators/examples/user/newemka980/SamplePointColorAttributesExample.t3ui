@@ -41,7 +41,7 @@
     },
     {
       "ChildId": "1961f04e-769f-4ebd-bf09-1c704d2c26ab"/*AddNoise*/,
-      "Comment": "We use the W as weight to control the noise",
+      "Comment": "We use the F1 as weight to control the noise",
       "Position": {
         "X": 1108.7439,
         "Y": -355.3278
@@ -64,8 +64,8 @@
     {
       "ChildId": "38c43f06-b2d4-4055-9e0e-f95eadb621ef"/*LinearGradient*/,
       "Position": {
-        "X": 495.5074,
-        "Y": -698.95026
+        "X": 506.09015,
+        "Y": -770.14325
       }
     },
     {
@@ -99,8 +99,8 @@
     {
       "ChildId": "4e33a297-a247-4126-89b9-fe5f802d9d6c"/*Text*/,
       "Position": {
-        "X": 495.5074,
-        "Y": -497.15192
+        "X": 506.09012,
+        "Y": -551.0277
       }
     },
     {
@@ -126,15 +126,15 @@
       },
       "Comment": "We need to adjust the scale a little",
       "Position": {
-        "X": 940.1102,
-        "Y": -538.57806
+        "X": 939.39856,
+        "Y": -553.77295
       }
     },
     {
       "ChildId": "6eaa025c-0458-4224-8b2e-4f7f36b485cd"/*Transform*/,
       "Position": {
-        "X": 495.5074,
-        "Y": -462.15186
+        "X": 506.09012,
+        "Y": -516.0277
       }
     },
     {
@@ -147,8 +147,8 @@
     {
       "ChildId": "82fa5cfb-2599-49d4-a4b9-341d59b1bda5"/*Transform*/,
       "Position": {
-        "X": 495.5074,
-        "Y": -547.8204
+        "X": 506.09012,
+        "Y": -619.01337
       }
     },
     {
@@ -161,30 +161,22 @@
     {
       "ChildId": "a884584f-8216-4ee7-8d63-20e35a9380a1"/*Layer2d*/,
       "Position": {
-        "X": 495.5074,
-        "Y": -628.95026
+        "X": 506.09015,
+        "Y": -700.14325
       }
     },
     {
       "ChildId": "aa3005be-56c9-49a8-abb9-0c60979220eb"/*SamplePointColorAttributes*/,
       "Position": {
-        "X": 1099.5195,
-        "Y": -628.59595
+        "X": 1108.7439,
+        "Y": -633.33624
       }
     },
     {
       "ChildId": "b3516c47-c239-4331-8656-650b74c1febd"/*AnimValue*/,
       "Position": {
-        "X": 326.68155,
-        "Y": -662.0285
-      }
-    },
-    {
-      "ChildId": "bf5d0b67-8338-4f08-b4a8-943d2775d559"/*Multiply*/,
-      "Comment": "For some reason I need to divide by 2 the scale",
-      "Position": {
-        "X": 933.6761,
-        "Y": -391.79767
+        "X": 337.2643,
+        "Y": -733.2215
       }
     },
     {
@@ -197,8 +189,8 @@
     {
       "ChildId": "cd0f456a-6389-458f-9d5c-6996be3e7b3f"/*Blast it!*/,
       "Position": {
-        "X": 393.8303,
-        "Y": -321.74686
+        "X": 375.37372,
+        "Y": -249.55432
       }
     },
     {
@@ -211,15 +203,15 @@
     {
       "ChildId": "cfe22768-fae6-4427-9807-11cc6b587ea4"/*Text*/,
       "Position": {
-        "X": 495.5074,
-        "Y": -582.8205
+        "X": 506.09012,
+        "Y": -654.0135
       }
     },
     {
       "ChildId": "eaee2573-b3f4-4eaf-9843-28d0373b53a2"/*GridPoints*/,
       "Position": {
-        "X": 1099.9982,
-        "Y": -749.57855
+        "X": 1108.7438,
+        "Y": -756.31305
       }
     }
   ],
@@ -235,7 +227,7 @@
   "Annotations": [
     {
       "Id": "4c5673b2-ee55-417a-9fe8-ffde739faf7b",
-      "Title": "We sample a texture\nto set Fx1 in order to\ncontrol AddNoise",
+      "Title": "We sample a texture\nto set F1 in order to\ncontrol AddNoise",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
@@ -247,13 +239,14 @@
         "Y": -486.9318
       },
       "Size": {
-        "X": 330.92175,
-        "Y": 272.72873
+        "X": 400.69788,
+        "Y": 272.72876
       }
     },
     {
       "Id": "6236b75c-515c-4857-8e32-9dbe69c095fc",
       "Title": "We sample a texture\nto color the points",
+      "Label": "Core of this example",
       "Color": {
         "X": 0.042553186,
         "Y": 1.0,
@@ -262,11 +255,11 @@
       },
       "Position": {
         "X": 928.2876,
-        "Y": -655.2754
+        "Y": -694.6501
       },
       "Size": {
-        "X": 330.92175,
-        "Y": 168.3436
+        "X": 400.69788,
+        "Y": 207.71829
       }
     },
     {
@@ -283,8 +276,26 @@
         "Y": -214.20306
       },
       "Size": {
-        "X": 330.92175,
-        "Y": 109.203064
+        "X": 400.69788,
+        "Y": 110.713806
+      }
+    },
+    {
+      "Id": "9739d087-c13b-4218-a3d6-467f0a831b77",
+      "Label": "Trigger it:",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 317.59705,
+        "Y": -303.46906
+      },
+      "Size": {
+        "X": 275.6114,
+        "Y": 111.99863
       }
     }
   ]
