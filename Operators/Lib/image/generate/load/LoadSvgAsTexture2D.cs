@@ -15,81 +15,89 @@ internal sealed class LoadSvgAsTexture2D : Instance<LoadSvgAsTexture2D>, IDescri
     {
         _svgResource = new Resource<SvgDocument>(Path, SvgLoader.TryLoad);
 
+        _svgResource.AddDependentSlots(Texture);
+
         Texture.UpdateAction = UpdateTexture;
     }
 
     private void UpdateTexture(EvaluationContext context)
     {
-        var svgDocument = _svgResource.GetValue(context);
-        
-        var scale = Scale.GetValue(context);
-
-        if (svgDocument == null)
+        if (_svgResource.TryGetValue(context, out var svgDocument))
         {
-            _lastErrorMessage = "Failed to load SVG document: " + Path.Value;
-            Log.Warning(_lastErrorMessage, this);
-            Texture.Value = null;
-            Texture.DirtyFlag.Clear();
-            return;
-        }
+            // Process the SVG document...
+            var scale = Scale.GetValue(context);
 
-        try
-        {
-            // Rasterize the SVG to a bitmap
-            System.Drawing.Bitmap rasterizedBitmap;
-
-            // Check if a specific resolution is provided
-            if (scale==0.0 || scale == 1.0)
+            if (svgDocument == null)
             {
-                rasterizedBitmap = svgDocument.Draw();
-            }
-            else
-            {
-                var width = (int)(svgDocument.ViewBox.Width * scale);
-                var height = (int)(svgDocument.ViewBox.Height * scale);
-                rasterizedBitmap = svgDocument.Draw(width, height);
-            }
-
-            if (rasterizedBitmap == null)
-            {
-                _lastErrorMessage = "Failed to rasterize SVG: " + Path.Value;
-                Log.Warning(_lastErrorMessage, this);
-                Texture.Value = null;
-                Texture.DirtyFlag.Clear();
                 return;
             }
-
-            // Convert System.Drawing.Bitmap to Texture2D using SharpDX
-            Texture.Value = ConvertBitmapToTexture2D(rasterizedBitmap);
-            Texture.DirtyFlag.Clear();
-
-            // Dispose the bitmap after conversion
-            rasterizedBitmap.Dispose();
-
-            if (Texture.Value == null)
-            {
-                _lastErrorMessage = "Failed to convert bitmap to texture: " + Path.Value;
-                Log.Warning(_lastErrorMessage, this);
-                return;
-            }
-
-            var currentSrv = SrvManager.GetSrvForTexture(Texture.Value);
 
             try
             {
-                ResourceManager.Device.ImmediateContext.GenerateMips(currentSrv);
-            }
-            catch (Exception exception)
-            {
-                Log.Error($"Failed to generate mipmaps for texture {Path.Value}: " + exception);
-            }
+                // Rasterize the SVG to a bitmap
+                System.Drawing.Bitmap rasterizedBitmap;
 
-            _lastErrorMessage = string.Empty;
+                // Check if a specific resolution is provided
+                if (scale == 0.0 || scale == 1.0)
+                {
+                    rasterizedBitmap = svgDocument.Draw();
+                }
+                else
+                {
+                    var width = (int)(svgDocument.ViewBox.Width * scale);
+                    var height = (int)(svgDocument.ViewBox.Height * scale);
+                    rasterizedBitmap = svgDocument.Draw(width, height);
+                }
+
+                if (rasterizedBitmap == null)
+                {
+                    _lastErrorMessage = "Failed to rasterize SVG: " + Path.Value;
+                    Log.Warning(_lastErrorMessage, this);
+                    Texture.Value = null;
+                    Texture.DirtyFlag.Clear();
+                    return;
+                }
+
+                // Convert System.Drawing.Bitmap to Texture2D using SharpDX
+                Texture.Value = ConvertBitmapToTexture2D(rasterizedBitmap);
+                Texture.DirtyFlag.Clear();
+
+                // Dispose the bitmap after conversion
+                rasterizedBitmap.Dispose();
+
+                if (Texture.Value == null)
+                {
+                    _lastErrorMessage = "Failed to convert bitmap to texture: " + Path.Value;
+                    Log.Warning(_lastErrorMessage, this);
+                    return;
+                }
+
+                var currentSrv = SrvManager.GetSrvForTexture(Texture.Value);
+
+                try
+                {
+                    ResourceManager.Device.ImmediateContext.GenerateMips(currentSrv);
+                }
+                catch (Exception exception)
+                {
+                    Log.Error($"Failed to generate mipmaps for texture {Path.Value}: " + exception);
+                }
+
+                _lastErrorMessage = string.Empty;
+            }
+            catch (Exception ex)
+            {
+                _lastErrorMessage = $"Error processing SVG: {ex.Message}";
+                Log.Error(_lastErrorMessage, this);
+                Texture.Value = null;
+                Texture.DirtyFlag.Clear();
+            }
         }
-        catch (Exception ex)
+        else
         {
-            _lastErrorMessage = $"Error processing SVG: {ex.Message}";
-            Log.Error(_lastErrorMessage, this);
+            // Handle loading failure
+            _lastErrorMessage = "Failed to load SVG document: " + Path.Value;
+            Log.Warning(_lastErrorMessage, this);
             Texture.Value = null;
             Texture.DirtyFlag.Clear();
         }
