@@ -4,6 +4,13 @@
   "SymbolTags": "1",
   "InputUis": [
     {
+      "InputId": "126f1902-147b-4276-8c13-550976e78973"/*FillMode*/,
+      "Position": {
+        "X": 551.0433,
+        "Y": 4467.349
+      }
+    },
+    {
       "InputId": "2c88e7c4-04f8-4e45-94d8-214775c5609c"/*EnableZWrite*/,
       "Position": {
         "X": 551.0433,
@@ -50,8 +57,8 @@
     {
       "InputId": "8d223463-edff-45fb-9ead-6650a911cebd"/*Culling*/,
       "Position": {
-        "X": 551.0433,
-        "Y": 4470.6885
+        "X": 550.2577,
+        "Y": 4422.7627
       },
       "GroupTitle": "Z-Buffer",
       "Description": "Defines the transparency of the surfaces.\nNone: All surfaces are \"bothsided\" or always visible from all sides\nFront: The normals are flipped (frontside is transparent / backside visible)\nBack: Default (Frontside is visible / backside is invisible)"
@@ -60,7 +67,7 @@
       "InputId": "922cf855-2676-4a96-9d90-622791a6a423"/*BlendMode*/,
       "Position": {
         "X": 551.0433,
-        "Y": 4425.6885
+        "Y": 4371.5117
       },
       "Description": "Selects the Blendmode."
     },
