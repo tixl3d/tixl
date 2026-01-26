@@ -14,6 +14,13 @@
       "Description": "The displacement texture. Depending on the color channels, it will be applied as average or individually.\nThe alpha is always applied as a factor."
     },
     {
+      "InputId": "157b08ed-361e-426f-9242-100b1a73dbac"/*WrapMode*/,
+      "Position": {
+        "X": 812.9591,
+        "Y": 1856.3958
+      }
+    },
+    {
       "InputId": "7c6fa9b0-1c70-4865-8f01-d22c41ff9b6b"/*UseVertexSelection*/,
       "Position": {
         "X": 273.30417,
@@ -129,6 +136,18 @@
       }
     },
     {
+      "ChildId": "30bca7bd-1996-4c81-ae1b-a56fcea84010"/*IntToWrapmode*/,
+      "Style": "Expanded",
+      "Size": {
+        "X": 110.0,
+        "Y": 36.0
+      },
+      "Position": {
+        "X": 1092.9591,
+        "Y": 1856.3958
+      }
+    },
+    {
       "ChildId": "3914f194-be6a-45a0-a21a-756ae945b0a5"/*StructuredBufferWithViews*/,
       "Position": {
         "X": 821.746,
@@ -153,7 +172,7 @@
       "ChildId": "61bc4af3-a00c-4f35-93e1-3cc618c30851"/*ExecuteBufferUpdate*/,
       "Position": {
         "X": 1254.6215,
-        "Y": 1509.9718
+        "Y": 1544.9718
       }
     },
     {
@@ -180,6 +199,13 @@
       "Position": {
         "X": 541.746,
         "Y": 1394.8281
+      }
+    },
+    {
+      "ChildId": "96af98f9-424e-4526-9077-ec32fedeacb9"/*AddInts*/,
+      "Position": {
+        "X": 952.9591,
+        "Y": 1856.3958
       }
     },
     {

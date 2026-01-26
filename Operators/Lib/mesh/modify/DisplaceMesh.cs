@@ -28,6 +28,9 @@ internal sealed class DisplaceMesh : Instance<DisplaceMesh>
         [Input(Guid = "9ad4555a-33c4-4853-b4f9-e885cfb6ef81", MappedType = typeof(UvSets))]
         public readonly InputSlot<int> UvSelection = new InputSlot<int>();
 
+        [Input(Guid = "157b08ed-361e-426f-9242-100b1a73dbac", MappedType = typeof(WrapModes))]
+        public readonly InputSlot<int> WrapMode = new InputSlot<int>();
+
         [Input(Guid = "c7e1c790-8e52-4064-9ffb-c0b8c2a50320")]
         public readonly InputSlot<System.Numerics.Vector2> ScaleUV = new InputSlot<System.Numerics.Vector2>();
 
@@ -45,5 +48,14 @@ internal sealed class DisplaceMesh : Instance<DisplaceMesh>
     {
         TexCoord = 0,
         TexCoord2 = 1,
+    }
+
+    private enum WrapModes
+    {
+        Wrap,
+        Mirror,
+        Clamp,
+        Border,
+        MirrorOnce,
     }
 }
