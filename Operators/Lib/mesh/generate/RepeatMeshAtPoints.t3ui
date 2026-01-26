@@ -46,6 +46,15 @@
       "Description": "Defines the size of the meshes that are distributed at the points."
     },
     {
+      "InputId": "c981484b-1cef-4b53-abeb-f9f3ba4466e6"/*TexCoord2Factor*/,
+      "Position": {
+        "X": 1067.6344,
+        "Y": 1749.1138
+      },
+      "GroupTitle": "VAT Fx",
+      "Description": "Shift TexCoord2 vertically, useful to unsync VAT animations"
+    },
+    {
       "InputId": "f8fb6e15-00dd-485e-a7fe-fa75c77182c2"/*InputMesh*/,
       "Relevancy": "Required",
       "Position": {
