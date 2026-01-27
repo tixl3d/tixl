@@ -207,18 +207,23 @@ internal static class AssetInputWithTypeAheadSearch
                 var lastSlash = localPath.LastIndexOf('/');
 
                 ImGui.SetCursorPos(lastPos);
-                var hasPath = lastSlash != 1;
+                
+                var hasPath = lastSlash != -1;
                 if (hasPath)
                 {
                     var pathInProject = localPath[..(lastSlash + 1)];
                     ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
                     ImGui.TextUnformatted(pathInProject);
                     ImGui.PopStyleColor();
+    
+                    ImGui.SameLine(0, 0); // Use 0 spacing to keep text glued together
+                    ImGui.TextUnformatted(localPath[(lastSlash + 1)..]);
                 }
-
-                ImGui.SameLine();
-                ImGui.TextUnformatted(hasPath ? localPath[lastSlash..] : localPath);
-                ImGui.PopFont();
+                else
+                {
+                    // No slash? Just draw the whole thing normally
+                    ImGui.TextUnformatted(localPath);
+                }                
 
                 ImGui.SetCursorPos(keepNextPos);
 

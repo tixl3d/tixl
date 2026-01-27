@@ -22,9 +22,9 @@ internal sealed partial class AssetLibrary
         var iconCount = 2;
         _state.TreeHandler.Update();
 
-        CustomComponents.DrawInputFieldWithPlaceholder("Search Assets...",
-                                                       ref _state.Filter.SearchString,
-                                                       -ImGui.GetFrameHeight() * iconCount + 18 * T3Ui.UiScaleFactor);
+        _state.SearchStringChanged |= CustomComponents.DrawInputFieldWithPlaceholder("Search Assets...",
+                                                                                     ref _state.SearchString,
+                                                                                     -ImGui.GetFrameHeight() * iconCount + 18 * T3Ui.UiScaleFactor);
 
         // Collapse icon
         {
@@ -70,39 +70,44 @@ internal sealed partial class AssetLibrary
 
     private void DrawFolder(AssetFolder folder)
     {
-        if (folder.Name == AssetFolder.RootNodeId)
+        var strId = folder.Name.AsSpan();
+        if (strId == AssetFolder.RootNodeId)
         {
             DrawFolderContent(folder);
         }
         else
         {
+            var hasMatches = folder.MatchingAssetCount > 0;
+            var isSearching = !string.IsNullOrEmpty(_state.SearchString);
+            var isFiltering = _state.CompatibleExtensionIds.Count > 0 || isSearching;
+            var isCurrentCompositionPackage = _state.Composition?.Symbol.SymbolPackage.Name == strId;
+
+            if (isSearching && !hasMatches)
+                return;
+
             // Open main folders automatically
             if (!_state.OpenedExamplesFolderOnce
-                && folder.Name == FileLocations.ExamplesPackageName)
+                && strId == FileLocations.ExamplesPackageName)
             {
                 ImGui.SetNextItemOpen(true);
                 _state.OpenedExamplesFolderOnce = true;
             }
 
             if (!_state.OpenedProjectsFolderOnce
-                && folder.Name == ProjectView.Focused?.RootInstance.Symbol.SymbolPackage.Name)
+                && strId == ProjectView.Focused?.RootInstance.Symbol.SymbolPackage.Name)
             {
                 ImGui.SetNextItemOpen(true);
                 _state.OpenedProjectsFolderOnce = true;
             }
-            
+
             // Draw 
             ImGui.SetNextItemWidth(10);
-            
-            var hasMatches = folder.MatchingAssetCount > 0;
-            var isFiltering = _state.CompatibleExtensionIds.Count > 0;
-            var isCurrentCompositionPackage = _state.Composition?.Symbol.SymbolPackage.Name == folder.Name;
-            
-            var textMutedRgba = (isFiltering && !hasMatches) ? UiColors.TextMuted: UiColors.Text;
+
+            var textMutedRgba = (isFiltering && !hasMatches) ? UiColors.TextMuted : UiColors.Text;
             textMutedRgba = textMutedRgba.Fade(isCurrentCompositionPackage ? 1 : 0.8f);
 
             ImGui.PushStyleColor(ImGuiCol.Text, textMutedRgba.Rgba);
-            
+
             _state.TreeHandler.UpdateForNode(folder.HashCode);
 
             var containsTargetFile = ContainsTargetFile(folder);
@@ -111,11 +116,13 @@ internal sealed partial class AssetLibrary
                 ImGui.SetNextItemOpen(true);
             }
 
-            
+            // Draw the actual folder item
             ImGui.PushFont(isCurrentCompositionPackage ? Fonts.FontBold : Fonts.FontNormal);
-            var isOpen = ImGui.TreeNodeEx(folder.Name);
+            var isOpen = ImGui.TreeNodeEx(strId);
             ImGui.PopFont();
 
+            DrawSearchMatchUnderline(_state.SearchString, strId, Vector2.Zero);
+            
             // Show filter count
             if (isFiltering && hasMatches)
             {
@@ -192,6 +199,29 @@ internal sealed partial class AssetLibrary
         }
     }
 
+    private static void DrawSearchMatchUnderline(string searchString, ReadOnlySpan<char> strId, Vector2 offset)
+    {
+        if (string.IsNullOrEmpty(searchString)) 
+            return;
+        
+        var start = strId.IndexOf(searchString, StringComparison.OrdinalIgnoreCase);
+        if (start == -1) 
+            return;
+        
+        var span = strId.Slice(start, searchString.Length);
+        var sizeMatch = ImGui.CalcTextSize(span);
+
+        var sizeBefore = start > 0 ? ImGui.CalcTextSize(strId[..start])
+                             : Vector2.Zero;
+                    
+        var fontSize = ImGui.GetFontSize();
+        var min = ImGui.GetItemRectMin() 
+                  + offset
+                  + new Vector2(fontSize + sizeBefore.X, fontSize) ;
+                    
+        ImGui.GetWindowDrawList().AddLine(min, min + new Vector2(sizeMatch.X,0), UiColors.StatusAttention);
+    }
+
     /** Extracted to separate method to limit hot code reloading block from stack alloc **/
     private static void ShowMatchCount(AssetFolder folder, bool containsTargetFile, bool isOpen)
     {
@@ -225,7 +255,11 @@ internal sealed partial class AssetLibrary
 
         for (var index = 0; index < folder.FolderAssets.Count; index++)
         {
-            DrawAssetItem(folder.FolderAssets[index]);
+            var asset = folder.FolderAssets[index];
+            if (asset.IsDirectory)
+                continue;
+
+            DrawAssetItem(asset);
         }
     }
 
@@ -254,6 +288,7 @@ internal sealed partial class AssetLibrary
                            ? (Icon)asset.AssetType.IconId
                            : Icon.FileImage;
 
+            // Draw Item
             ImGui.SetCursorPosX(ImGui.GetCursorPosX() - 6);
             if (ButtonWithIcon(string.Empty,
                                asset.FileSystemInfo?.Name ?? string.Empty,
@@ -271,6 +306,8 @@ internal sealed partial class AssetLibrary
                     ApplyResourcePath(asset, stringInput);
                 }
             }
+            
+            DrawSearchMatchUnderline(_state.SearchString, asset.FileSystemInfo?.Name, new Vector2(4,3));
 
             if (isSelected && !ImGui.IsItemVisible() && _state.HasActiveInstanceChanged)
             {

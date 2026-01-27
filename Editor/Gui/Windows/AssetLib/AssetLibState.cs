@@ -58,7 +58,10 @@ internal sealed class AssetLibState
     
     public readonly AssetFolder RootFolder = new(AssetFolder.RootNodeId, null);
     
-    public readonly SymbolFilter Filter = new();
+    //public readonly SymbolFilter Filter = new();
+    public string SearchString = string.Empty;
+    public bool SearchStringChanged = false;
+    
     
     public readonly HashSet<AssetType> ActiveTypeFilters = [];
 

@@ -1,0 +1,178 @@
+[
+  {
+    "Title": "Fill",
+    "Size": {
+      "X": 0,
+      "Y": 0,
+      "Width": 0,
+      "Height": 0
+    },
+    "UseAsAspectRatio": true,
+    "IsValid": false
+  },
+  {
+    "Title": "1:1",
+    "Size": {
+      "X": 1,
+      "Y": 1,
+      "Width": 1,
+      "Height": 1
+    },
+    "UseAsAspectRatio": true,
+    "IsValid": true
+  },
+  {
+    "Title": "16:9",
+    "Size": {
+      "X": 16,
+      "Y": 9,
+      "Width": 16,
+      "Height": 9
+    },
+    "UseAsAspectRatio": true,
+    "IsValid": true
+  },
+  {
+    "Title": "4:3",
+    "Size": {
+      "X": 4,
+      "Y": 3,
+      "Width": 4,
+      "Height": 3
+    },
+    "UseAsAspectRatio": true,
+    "IsValid": true
+  },
+  {
+    "Title": "480p",
+    "Size": {
+      "X": 850,
+      "Y": 480,
+      "Width": 850,
+      "Height": 480
+    },
+    "UseAsAspectRatio": false,
+    "IsValid": true
+  },
+  {
+    "Title": "720p",
+    "Size": {
+      "X": 1280,
+      "Y": 720,
+      "Width": 1280,
+      "Height": 720
+    },
+    "UseAsAspectRatio": false,
+    "IsValid": true
+  },
+  {
+    "Title": "1080p",
+    "Size": {
+      "X": 1920,
+      "Y": 1080,
+      "Width": 1920,
+      "Height": 1080
+    },
+    "UseAsAspectRatio": false,
+    "IsValid": true
+  },
+  {
+    "Title": "4k",
+    "Size": {
+      "X": 3840,
+      "Y": 2160,
+      "Width": 3840,
+      "Height": 2160
+    },
+    "UseAsAspectRatio": false,
+    "IsValid": true
+  },
+  {
+    "Title": "8k",
+    "Size": {
+      "X": 7680,
+      "Y": 4320,
+      "Width": 7680,
+      "Height": 4320
+    },
+    "UseAsAspectRatio": false,
+    "IsValid": true
+  },
+  {
+    "Title": "4k Portrait",
+    "Size": {
+      "X": 2160,
+      "Y": 3840,
+      "Width": 2160,
+      "Height": 3840
+    },
+    "UseAsAspectRatio": false,
+    "IsValid": true
+  },
+  {
+    "Title": "1:3",
+    "Size": {
+      "X": 1,
+      "Y": 3,
+      "Width": 1,
+      "Height": 3
+    },
+    "UseAsAspectRatio": true,
+    "IsValid": true
+  },
+  {
+    "Title": "LowRes",
+    "Size": {
+      "X": 64,
+      "Y": 64,
+      "Width": 64,
+      "Height": 64
+    },
+    "UseAsAspectRatio": false,
+    "IsValid": true
+  },
+  {
+    "Title": "Katsumaki",
+    "Size": {
+      "X": 997,
+      "Y": 272,
+      "Width": 997,
+      "Height": 272
+    },
+    "UseAsAspectRatio": true,
+    "IsValid": true
+  },
+  {
+    "Title": "1920x68px",
+    "Size": {
+      "X": 1920,
+      "Y": 768,
+      "Width": 1920,
+      "Height": 768
+    },
+    "UseAsAspectRatio": false,
+    "IsValid": true
+  },
+  {
+    "Title": "2560x1440",
+    "Size": {
+      "X": 2560,
+      "Y": 1440,
+      "Width": 2560,
+      "Height": 1440
+    },
+    "UseAsAspectRatio": false,
+    "IsValid": true
+  },
+  {
+    "Title": "1080p portrait",
+    "Size": {
+      "X": 1080,
+      "Y": 1920,
+      "Width": 1080,
+      "Height": 1920
+    },
+    "UseAsAspectRatio": false,
+    "IsValid": true
+  }
+]

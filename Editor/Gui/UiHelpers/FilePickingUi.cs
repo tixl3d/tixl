@@ -35,8 +35,8 @@ internal static class FilePickingUi
         var hasWarning = !AssetRegistry.TryResolveAddress(filterAndSelectedPath, SearchResourceConsumer, out _, out _, pickFolder);
         var warningLabel = pickMode switch
                                {
-                                   FileOperations.FilePickerTypes.File when !hasWarning   => "File doesn't exist:\n",
-                                   FileOperations.FilePickerTypes.Folder when !hasWarning => "Directory doesn't exist:\n",
+                                   FileOperations.FilePickerTypes.File when hasWarning   => "File doesn't exist:\n",
+                                   FileOperations.FilePickerTypes.Folder when hasWarning => "Directory doesn't exist:\n",
                                    _                                                      => string.Empty
                                };
 

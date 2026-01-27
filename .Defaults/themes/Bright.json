@@ -1,0 +1,403 @@
+{
+  "Name": "Bright",
+  "Author": "TiXL Community",
+  "Colors": {
+    "ForegroundFull": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Z": 0.0,
+      "W": 1.0
+    },
+    "Text": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Z": 0.0,
+      "W": 1.0
+    },
+    "TextMuted": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Z": 0.0,
+      "W": 0.64
+    },
+    "TextDisabled": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Z": 0.0,
+      "W": 0.6
+    },
+    "CheckMark": {
+      "X": 0.25,
+      "Y": 0.25,
+      "Z": 0.25,
+      "W": 0.8
+    },
+    "Background": {
+      "X": 0.81,
+      "Y": 0.81,
+      "Z": 0.81,
+      "W": 1.0
+    },
+    "BackgroundFull": {
+      "X": 1.0,
+      "Y": 1.0,
+      "Z": 1.0,
+      "W": 1.0
+    },
+    "BackgroundButton": {
+      "X": 1.0,
+      "Y": 1.0,
+      "Z": 1.0,
+      "W": 0.46411484
+    },
+    "BackgroundHover": {
+      "X": 0.6922985,
+      "Y": 0.9783882,
+      "Z": 1.0,
+      "W": 0.45
+    },
+    "BackgroundActive": {
+      "X": 0.0,
+      "Y": 0.6173904,
+      "Z": 1.0,
+      "W": 1.0
+    },
+    "CanvasGrid": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Z": 0.0,
+      "W": 0.29
+    },
+    "BackgroundTabActive": {
+      "X": 1.0,
+      "Y": 1.0,
+      "Z": 1.0,
+      "W": 1.0
+    },
+    "BackgroundTabInActive": {
+      "X": 0.15686275,
+      "Y": 0.15686275,
+      "Z": 0.15686275,
+      "W": 0.8000001
+    },
+    "BackgroundInputField": {
+      "X": 1.0,
+      "Y": 1.0,
+      "Z": 1.0,
+      "W": 0.41148326
+    },
+    "BackgroundInputFieldHover": {
+      "X": 0.9186603,
+      "Y": 0.9158194,
+      "Z": 0.9151594,
+      "W": 1.0
+    },
+    "BackgroundInputFieldActive": {
+      "X": 0.75,
+      "Y": 0.75,
+      "Z": 0.75,
+      "W": 1.0
+    },
+    "Gray": {
+      "X": 0.6,
+      "Y": 0.6,
+      "Z": 0.6,
+      "W": 1.0
+    },
+    "WindowResizeHandle": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Z": 0.0,
+      "W": 0.25
+    },
+    "StatusAutomated": {
+      "X": 0.30362266,
+      "Y": 0.56964743,
+      "Z": 1.0,
+      "W": 1.0
+    },
+    "StatusAttention": {
+      "X": 0.6555024,
+      "Y": 0.06135262,
+      "Z": 0.3648859,
+      "W": 1.0
+    },
+    "StatusWarning": {
+      "X": 0.49282295,
+      "Y": 0.07114815,
+      "Z": 0.29902545,
+      "W": 1.0
+    },
+    "StatusError": {
+      "X": 0.6602871,
+      "Y": 0.0,
+      "Z": 0.132488,
+      "W": 1.0
+    },
+    "StatusAnimated": {
+      "X": 1.0,
+      "Y": 0.41322637,
+      "Z": 0.0,
+      "W": 1.0
+    },
+    "Selection": {
+      "X": 0.0,
+      "Y": 0.75685143,
+      "Z": 1.0,
+      "W": 1.0
+    },
+    "WidgetValueText": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Z": 0.0,
+      "W": 0.5
+    },
+    "WidgetTitle": {
+      "X": 0.25,
+      "Y": 0.25,
+      "Z": 0.25,
+      "W": 0.98
+    },
+    "WidgetValueTextHover": {
+      "X": 1.0,
+      "Y": 1.0,
+      "Z": 1.0,
+      "W": 1.2
+    },
+    "WidgetLine": {
+      "X": 0.029999971,
+      "Y": 0.029999971,
+      "Z": 0.029999971,
+      "W": 0.6650718
+    },
+    "WidgetLineHover": {
+      "X": 1.0,
+      "Y": 1.0,
+      "Z": 1.0,
+      "W": 0.7
+    },
+    "WidgetAxis": {
+      "X": 1.0,
+      "Y": 1.0,
+      "Z": 1.0,
+      "W": 0.4
+    },
+    "WidgetActiveLine": {
+      "X": 0.8,
+      "Y": 0.36800003,
+      "Z": 0.0,
+      "W": 1.0
+    },
+    "WidgetBackgroundStrong": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Z": 0.0,
+      "W": 1.0
+    },
+    "WidgetHighlight": {
+      "X": 1.0,
+      "Y": 1.0,
+      "Z": 1.0,
+      "W": 1.0
+    },
+    "WidgetSlider": {
+      "X": 1.0,
+      "Y": 1.0,
+      "Z": 1.0,
+      "W": 0.15
+    },
+    "MiniMapItems": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Z": 0.0,
+      "W": 1.0
+    },
+    "ColorForValues": {
+      "X": 0.4216827,
+      "Y": 0.44176298,
+      "Z": 0.4449761,
+      "W": 1.0
+    },
+    "ColorForString": {
+      "X": 0.468,
+      "Y": 0.586,
+      "Z": 0.32,
+      "W": 1.0
+    },
+    "ColorForTextures": {
+      "X": 0.625,
+      "Y": 0.0,
+      "Z": 0.43,
+      "W": 1.0
+    },
+    "ColorForDX11": {
+      "X": 0.855,
+      "Y": 0.5018432,
+      "Z": 0.38894585,
+      "W": 1.0
+    },
+    "ColorForCommands": {
+      "X": 0.132,
+      "Y": 0.722,
+      "Z": 0.762,
+      "W": 1.0
+    },
+    "ColorForGpuData": {
+      "X": 0.681,
+      "Y": 0.21843217,
+      "Z": 0.15247802,
+      "W": 1.0
+    },
+    "WindowBackground": {
+      "X": 0.8803828,
+      "Y": 0.8803828,
+      "Z": 0.8803828,
+      "W": 1.0
+    },
+    "ModalWindowDimBg": {
+      "X": 1.0,
+      "Y": 1.0,
+      "Z": 1.0,
+      "W": 0.0
+    },
+    "ScrollbarBackground": {
+      "X": 0.8133971,
+      "Y": 0.8133971,
+      "Z": 0.8133971,
+      "W": 0.53
+    },
+    "BackgroundPopup": {
+      "X": 0.87081337,
+      "Y": 0.87081337,
+      "Z": 0.87081337,
+      "W": 1.0
+    },
+    "ScrollbarHandle": {
+      "X": 0.13397127,
+      "Y": 0.13397127,
+      "Z": 0.13397127,
+      "W": 0.33
+    },
+    "ChildBackground": {
+      "X": 0.74552536,
+      "Y": 0.7435671,
+      "Z": 0.74641144,
+      "W": 0.9952153
+    },
+    "BackgroundGaps": {
+      "X": 0.430382,
+      "Y": 0.43044227,
+      "Z": 0.43062198,
+      "W": 1.0
+    },
+    "WindowBorder": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Z": 0.0,
+      "W": 1.0
+    },
+    "PopupBorder": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Z": 0.0,
+      "W": 1.0
+    },
+    "GridLines": {
+      "X": 0.0,
+      "Y": 0.0,
+      "Z": 0.0,
+      "W": 0.32057416
+    },
+    "BackgroundButtonActivated": {
+      "X": 0.9617225,
+      "Y": 0.9617225,
+      "Z": 0.9617225,
+      "W": 0.8564593
+    },
+    "StatusActivated": {
+      "X": 0.0,
+      "Y": 0.7193315,
+      "Z": 1.0,
+      "W": 1.0
+    },
+    "ColorForShaderGraph": {
+      "X": 0.74641144,
+      "Y": 0.28067955,
+      "Z": 0.46993595,
+      "W": 1.0
+    },
+    "StatusControlled": {
+      "X": 0.08,
+      "Y": 0.7,
+      "Z": 0.48,
+      "W": 1.0
+    }
+  },
+  "Variations": {
+    "OperatorLabel": {
+      "Brightness": 0.42,
+      "Saturation": 1.28,
+      "Opacity": 1.0
+    },
+    "Operator": {
+      "Brightness": 0.97,
+      "Saturation": 0.7,
+      "Opacity": 1.0
+    },
+    "OperatorIdle": {
+      "Brightness": 1.0,
+      "Saturation": 1.0,
+      "Opacity": 0.59
+    },
+    "OperatorOutline": {
+      "Brightness": 0.95,
+      "Saturation": 0.36,
+      "Opacity": 1.23
+    },
+    "OperatorBackground": {
+      "Brightness": 1.71,
+      "Saturation": 0.68,
+      "Opacity": 1.0
+    },
+    "Highlight": {
+      "Brightness": 0.95,
+      "Saturation": 1.06,
+      "Opacity": 1.0
+    },
+    "ConnectionLines": {
+      "Brightness": 0.5,
+      "Saturation": 1.0,
+      "Opacity": 0.8
+    },
+    "OperatorBackgroundIdle": {
+      "Brightness": 1.25,
+      "Saturation": 0.86,
+      "Opacity": 0.4
+    },
+    "OutputNodes": {
+      "Brightness": 0.44,
+      "Saturation": 0.7,
+      "Opacity": 0.47
+    },
+    "OperatorInputZone": {
+      "Brightness": -0.7,
+      "Saturation": 0.68,
+      "Opacity": 0.75
+    },
+    "OperatorBackgroundHover": {
+      "Brightness": 0.92,
+      "Saturation": 1.0,
+      "Opacity": 1.0
+    },
+    "AnnotationBackground": {
+      "Brightness": 2.0,
+      "Saturation": 2.0,
+      "Opacity": 0.55
+    },
+    "AnnotationOutline": {
+      "Brightness": 0.41,
+      "Saturation": 0.0,
+      "Opacity": 0.47
+    }
+  }
+}

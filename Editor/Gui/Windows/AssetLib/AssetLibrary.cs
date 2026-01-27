@@ -18,7 +18,7 @@ internal sealed partial class AssetLibrary : Window
 {
     internal AssetLibrary()
     {
-        _state.Filter.SearchString = "";
+        _state.SearchString = "";
         Config.Title = "Assets";
     }
 
@@ -51,12 +51,16 @@ internal sealed partial class AssetLibrary : Window
         if (_state.Composition == null)
             return;
 
-        if (_state.LastFileWatcherState == ResourceFileWatcher.FileStateChangeCounter
-            && !Core.Utils.Utilities.HasObjectChanged(_state.Composition, ref _lastCompositionObjId)
-            && !_state.FilteringNeedsUpdate)
+        var needsUpdate = _state.LastFileWatcherState != ResourceFileWatcher.FileStateChangeCounter
+                || Core.Utils.Utilities.HasObjectChanged(_state.Composition, ref _lastCompositionObjId)
+                || _state.FilteringNeedsUpdate
+                || _state.SearchStringChanged;
+        
+        if (!needsUpdate)
             return;
 
         _state.TreeHandler.Reset();
+        _state.SearchStringChanged = false;
         _state.LastFileWatcherState = ResourceFileWatcher.FileStateChangeCounter;
 
         _state.AllAssets.Clear();
@@ -80,15 +84,19 @@ internal sealed partial class AssetLibrary : Window
     private static bool MatchFilters(Asset asset)
     {
         // Apply filters (Search, Compatibility, etc.)
-        return !asset.IsDirectory &&
-               (string.IsNullOrEmpty(_state.Filter.SearchString) ||
-               asset.Address.Contains(_state.Filter.SearchString, StringComparison.OrdinalIgnoreCase));
+        if (asset.IsDirectory)
+            return true;
+        
+        return 
+               string.IsNullOrEmpty(_state.SearchString) ||
+               asset.Address.Contains(_state.SearchString, StringComparison.OrdinalIgnoreCase);
     }
 
     private static void UpdateActiveSelection(Instance selectedInstance)
     {
         _state.HasActiveInstanceChanged = selectedInstance != _state.ActiveInstance;
-        if (!_state.HasActiveInstanceChanged)
+        var needsUpdate = _state.HasActiveInstanceChanged || _state.SearchStringChanged;
+        if (!needsUpdate)
             return;
 
         _state.TimeActiveInstanceChanged = ImGui.GetTime();
@@ -96,6 +104,7 @@ internal sealed partial class AssetLibrary : Window
         _state.ActiveInstance = selectedInstance;
         _state.ActivePathInput = null;
         _state.ActiveAssetAddress = null;
+        _state.SearchStringChanged = false;
         _state.CompatibleExtensionIds.Clear();
 
         // Check if active instance has asset reference...
@@ -129,7 +138,7 @@ internal sealed partial class AssetLibrary : Window
             _state.ActivePathInput = null;
             _state.ActiveTypeFilters.Clear();
         }
-        _state.RootFolder.UpdateMatchingAssetCounts(_state.CompatibleExtensionIds);
+        _state.RootFolder.UpdateMatchingAssetCounts(_state.CompatibleExtensionIds, _state.SearchString);
     }
 
     private int? _lastCompositionObjId = 0;
