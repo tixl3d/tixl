@@ -58,6 +58,13 @@ internal static class CompatibleMidiDeviceHandling
     /// </summary>
     private static void CreateConnectedCompatibleDevices()
     {
+        // Log all detected MIDI input devices for debugging
+        Log.Debug("Scanning for compatible MIDI devices...");
+        foreach (var (midiIn, midiInCapabilities) in MidiConnectionManager.MidiIns)
+        {
+            Log.Debug($"  Found MIDI input device: '{midiInCapabilities.ProductName}'");
+        }
+        
         foreach (var controllerType in _compatibleControllerTypes)
         {
             var attr = controllerType.GetCustomAttribute<MidiDeviceProductAttribute>(false);
@@ -68,12 +75,15 @@ internal static class CompatibleMidiDeviceHandling
             }
 
             var productNames = attr.ProductNames;
+            Log.Debug($"  Looking for controller type {controllerType.Name} with product names: {string.Join(", ", productNames.Select(n => $"'{n}'"))}");
 
             foreach (var (midiIn, midiInCapabilities) in MidiConnectionManager.MidiIns)
             {
                 var productName = midiInCapabilities.ProductName;
                 if (!productNames.Contains(productName))
                     continue;
+                
+                Log.Debug($"  Matched device '{productName}' to {controllerType.Name}");
                 
                 if (!MidiConnectionManager.TryGetMidiOut(productName, out var midiOut))
                 {

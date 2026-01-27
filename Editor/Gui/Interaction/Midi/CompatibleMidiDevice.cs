@@ -65,6 +65,7 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
 
         if (controlChangeSignals.Length != 0)
         {
+            Log.Debug($"Processing {controlChangeSignals.Length} control change signal(s)");
             foreach (var ctc in CommandTriggerCombinations)
             {
                 ctc.InvokeMatchingControlCommands(controlChangeSignals, ActiveMode);
@@ -75,6 +76,8 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
         if (_combinedButtonSignals.Count == 0)
             return;
 
+        Log.Debug($"Processing {_combinedButtonSignals.Count} button signal(s), ActiveMode={ActiveMode}");
+        
         var releasedMode = InputModes.None;
 
         // Update modes
@@ -90,11 +93,13 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
                 {
                     if (ActiveMode == InputModes.Default)
                     {
+                        Log.Debug($"Mode changed to {modeButton.Mode} (button {matchingSignal.ButtonId})");
                         ActiveMode = modeButton.Mode;
                     }
                 }
                 else if (matchingSignal.State == ButtonSignal.States.Released && ActiveMode == modeButton.Mode)
                 {
+                    Log.Debug($"Mode released from {modeButton.Mode} back to Default");
                     releasedMode = modeButton.Mode;
                     ActiveMode = InputModes.Default;
                 }
@@ -140,6 +145,11 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
         
         lock (_buttonSignalsSinceLastUpdate)
         {
+            if (_buttonSignalsSinceLastUpdate.Count > 0)
+            {
+                Log.Debug($"CombineButtonSignals: {_buttonSignalsSinceLastUpdate.Count} new signal(s) to process");
+            }
+            
             foreach (var earlierSignal in _combinedButtonSignals.Values)
             {
                 if (earlierSignal.State == ButtonSignal.States.JustPressed)
@@ -148,6 +158,7 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
 
             foreach (var newSignal in _buttonSignalsSinceLastUpdate)
             {
+                Log.Debug($"CombineButtonSignals: Processing signal ButtonId={newSignal.ButtonId}, State={newSignal.State}");
                 if (_combinedButtonSignals.TryGetValue(newSignal.ButtonId, out var earlierSignal))
                 {
                     earlierSignal.State = newSignal.State;
@@ -183,16 +194,23 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
             case MidiCommandCode.NoteOn:
                 if (msg.MidiEvent is NoteEvent noteEvent)
                 {
+                    var state = msg.MidiEvent.CommandCode == MidiCommandCode.NoteOn
+                        ? ButtonSignal.States.JustPressed
+                        : ButtonSignal.States.Released;
+                    
+                    // Allow device-specific mapping from channel/note to button ID
+                    var buttonId = ConvertNoteToButtonId(noteEvent.Channel, noteEvent.NoteNumber);
+                    
+                    Log.Debug($"MIDI Button: Note={noteEvent.NoteNumber}, Channel={noteEvent.Channel}, ButtonId={buttonId}, Velocity={noteEvent.Velocity}, State={state}");
+                    
                     lock (_buttonSignalsSinceLastUpdate)
                     {
                         _buttonSignalsSinceLastUpdate.Add(new ButtonSignal()
                                                               {
                                                                   Channel = noteEvent.Channel,
-                                                                  ButtonId = noteEvent.NoteNumber,
+                                                                  ButtonId = buttonId,
                                                                   ControllerValue = noteEvent.Velocity,
-                                                                  State = msg.MidiEvent.CommandCode == MidiCommandCode.NoteOn
-                                                                              ? ButtonSignal.States.JustPressed
-                                                                              : ButtonSignal.States.Released,
+                                                                  State = state,
                                                               });
                     }
                     _hasNewMessages = true;
@@ -202,6 +220,8 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
             case MidiCommandCode.ControlChange:
                 if (msg.MidiEvent is not ControlChangeEvent controlChangeEvent)
                     return;
+
+                Log.Debug($"MIDI CC: Controller={controlChangeEvent.Controller}, Value={controlChangeEvent.ControllerValue}, Channel={controlChangeEvent.Channel}");
 
                 lock (_controlSignalsSinceLastUpdate)
                 {
@@ -215,6 +235,16 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
                 _hasNewMessages = true;
                 return;
         }
+    }
+
+    /// <summary>
+    /// Converts a MIDI channel and note number to a button ID.
+    /// Override this in derived classes for devices that use channel-based button mapping.
+    /// </summary>
+    protected virtual int ConvertNoteToButtonId(int channel, int noteNumber)
+    {
+        // Default: just use the note number
+        return noteNumber;
     }
 
     void MidiConnectionManager.IMidiConsumer.ErrorReceivedHandler(object sender, MidiInMessageEventArgs msg)

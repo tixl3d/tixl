@@ -83,7 +83,8 @@ public sealed class CommandTriggerCombination
 
             if (_activatedIndices.Count <= 0)
                 return;
-                
+            
+            Log.Debug($"Invoking {this} with index {_activatedIndices[0]} (ModeButtonReleased)");
             _indexAction?.Invoke(_activatedIndices[0]);
             _indicesAction?.Invoke(_activatedIndices.ToArray());
             return;
@@ -98,7 +99,8 @@ public sealed class CommandTriggerCombination
             {
                 if (_holdIndices.Count != 0 || _justPressedIndices.Count <= 0)
                     return;
-                    
+                
+                Log.Debug($"Invoking {this} with index {_justPressedIndices[0]} (SingleRangeButtonPressed)");
                 _indexAction?.Invoke(_justPressedIndices[0]);
                 _indicesAction?.Invoke(_activatedIndices.ToArray());
                 return;
@@ -111,6 +113,7 @@ public sealed class CommandTriggerCombination
                     && buttonSignals[0].State == ButtonSignal.States.JustPressed
                    )
                 {
+                    Log.Debug($"Invoking {this} (SingleActionButtonPressed)");
                     _actionWithoutParameters?.Invoke();
                 }
 
@@ -121,6 +124,7 @@ public sealed class CommandTriggerCombination
             {
                 if (_releasedIndices.Count > 1 && _justPressedIndices.Count == 0 && _holdIndices.Count == 0)
                 {
+                    Log.Debug($"Invoking {this} with {_activatedIndices.Count} indices (AllCombinedButtonsReleased)");
                     _indicesAction?.Invoke(_activatedIndices.ToArray());
                 }
 
@@ -144,8 +148,8 @@ public sealed class CommandTriggerCombination
                 if (!range.IncludesButtonIndex(signal.ControllerId))
                     continue;
 
-
                 var mappedIndex = range.GetMappedIndex(signal.ControllerId);
+                Log.Debug($"Invoking {this} with index={mappedIndex}, value={signal.ControllerValue} (ControllerChange)");
                 _controllerValueUpdateAction.Invoke(mappedIndex, signal.ControllerValue);
             }
 
@@ -174,10 +178,12 @@ public sealed class CommandTriggerCombination
 
             foreach (var s in buttonSignals)
             {
-                if (!range.IncludesButtonIndex(s.ButtonId))
+                var includes = range.IncludesButtonIndex(s.ButtonId);
+                if (!includes)
                     continue;
                     
                 var mappedIndex = range.GetMappedIndex(s.ButtonId);
+                Log.Debug($"UpdateMatchingRangeIndices: ButtonId={s.ButtonId} matches range {range}, mappedIndex={mappedIndex}, state={s.State}");
 
                 switch (s.State)
                 {
@@ -193,6 +199,18 @@ public sealed class CommandTriggerCombination
                 }
 
                 _activatedIndices.Add(mappedIndex);
+            }
+        }
+        
+        if (buttonSignals.Count > 0 && _activatedIndices.Count == 0)
+        {
+            // Log when buttons don't match any range
+            foreach (var s in buttonSignals)
+            {
+                foreach (var range in _keyRanges)
+                {
+                    Log.Debug($"UpdateMatchingRangeIndices: ButtonId={s.ButtonId} vs range {range}, IsRange={range.IsRange}, Includes={range.IncludesButtonIndex(s.ButtonId)}");
+                }
             }
         }
     }
