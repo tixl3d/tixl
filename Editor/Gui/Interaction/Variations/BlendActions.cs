@@ -111,10 +111,8 @@ public static class BlendActions
     /// </summary>
     private static void FinishAtRight()
     {
-        VariationHandling.ActivePoolForSnapshots?.ApplyCurrentBlend();
-        VariationHandling.ActivePoolForSnapshots?.UpdateActiveStateForVariation(_snapshotRight);
-        _activeIsLeft = false;
-        SmoothVariationBlending.Stop();
+        // Request completion - actual completion happens when damping finishes
+        _pendingCompletion = CompletionSide.Right;
     }
     
     /// <summary>
@@ -122,11 +120,39 @@ public static class BlendActions
     /// </summary>
     private static void FinishAtLeft()
     {
+        // Request completion - actual completion happens when damping finishes
+        _pendingCompletion = CompletionSide.Left;
+    }
+    
+    /// <summary>
+    /// Actually completes the blend after damping has finished.
+    /// </summary>
+    internal static void CompleteBlendWhenDampingFinished()
+    {
+        if (_pendingCompletion == CompletionSide.None)
+            return;
+            
+        var completingSide = _pendingCompletion;
+        _pendingCompletion = CompletionSide.None;
+        
         VariationHandling.ActivePoolForSnapshots?.ApplyCurrentBlend();
-        VariationHandling.ActivePoolForSnapshots?.UpdateActiveStateForVariation(_snapshotLeft);
-        _activeIsLeft = true;
+        
+        if (completingSide == CompletionSide.Right)
+        {
+            VariationHandling.ActivePoolForSnapshots?.UpdateActiveStateForVariation(_snapshotRight);
+            _activeIsLeft = false;
+        }
+        else
+        {
+            VariationHandling.ActivePoolForSnapshots?.UpdateActiveStateForVariation(_snapshotLeft);
+            _activeIsLeft = true;
+        }
+        
         SmoothVariationBlending.Stop();
     }
+    
+    private enum CompletionSide { None, Left, Right }
+    private static CompletionSide _pendingCompletion = CompletionSide.None;
     
     public static void StopBlendingTowards()
     {
@@ -221,8 +247,13 @@ public static class BlendActions
                                                  ref _dampingVelocity,
                                                  20f, frameDuration);
 
+            // Check if damping has settled
             if (MathF.Abs(_dampingVelocity) < 0.0005f)
+            {
+                // Damping finished - complete any pending blend completion
+                CompleteBlendWhenDampingFinished();
                 return;
+            }
 
             VariationHandling.ActivePoolForSnapshots?.
                               BeginBlendTowardsSnapshot(VariationHandling.ActiveInstanceForSnapshots, 

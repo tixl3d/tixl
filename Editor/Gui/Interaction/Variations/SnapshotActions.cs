@@ -6,7 +6,7 @@ internal static class SnapshotActions
 {
     public static void ActivateOrCreateSnapshotAtIndex(int activationIndex)
     {
-        Log.Debug($"SnapshotActions.ActivateOrCreateSnapshotAtIndex called with index {activationIndex}");
+        // Log.Debug($"SnapshotActions.ActivateOrCreateSnapshotAtIndex called with index {activationIndex}");
         
         if (VariationHandling.ActivePoolForSnapshots == null)
         {
@@ -16,13 +16,13 @@ internal static class SnapshotActions
 
         if (SymbolVariationPool.TryGetSnapshot(activationIndex, out var existingVariation))
         {
-            Log.Debug($"Activating existing snapshot at index {activationIndex}");
+            // Log.Debug($"Activating existing snapshot at index {activationIndex}");
             VariationHandling.ActivePoolForSnapshots.Apply(VariationHandling.ActiveInstanceForSnapshots, existingVariation);
             BlendActions.SetActiveSnapshot(activationIndex);
             return;
         }
 
-        Log.Debug($"Creating new snapshot at index {activationIndex}");
+        // Log.Debug($"Creating new snapshot at index {activationIndex}");
         VariationHandling.CreateOrUpdateSnapshotVariation(activationIndex);
         VariationHandling.ActivePoolForSnapshots.UpdateActiveStateForVariation(activationIndex);
         BlendActions.SetActiveSnapshot(activationIndex);
@@ -30,7 +30,7 @@ internal static class SnapshotActions
 
     public static void SaveSnapshotAtIndex(int activationIndex)
     {
-        Log.Debug($"SnapshotActions.SaveSnapshotAtIndex called with index {activationIndex}");
+        // Log.Debug($"SnapshotActions.SaveSnapshotAtIndex called with index {activationIndex}");
         
         if (VariationHandling.ActivePoolForSnapshots == null)
         {
@@ -45,7 +45,7 @@ internal static class SnapshotActions
 
     public static void RemoveSnapshotAtIndex(int activationIndex)
     {
-        Log.Debug($"SnapshotActions.RemoveSnapshotAtIndex called with index {activationIndex}");
+        // Log.Debug($"SnapshotActions.RemoveSnapshotAtIndex called with index {activationIndex}");
         
         if (VariationHandling.ActivePoolForSnapshots == null)
             return;

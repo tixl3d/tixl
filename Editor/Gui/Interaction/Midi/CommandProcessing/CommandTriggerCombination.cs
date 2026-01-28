@@ -149,7 +149,7 @@ public sealed class CommandTriggerCombination
                     continue;
 
                 var mappedIndex = range.GetMappedIndex(signal.ControllerId);
-                Log.Debug($"Invoking {this} with index={mappedIndex}, value={signal.ControllerValue} (ControllerChange)");
+                // Note: Debug log removed - too verbose for continuous controllers
                 _controllerValueUpdateAction.Invoke(mappedIndex, signal.ControllerValue);
             }
 
@@ -180,7 +180,6 @@ public sealed class CommandTriggerCombination
                     continue;
                     
                 var mappedIndex = range.GetMappedIndex(s.ButtonId);
-                Log.Debug($"UpdateMatchingRangeIndices: ButtonId={s.ButtonId} matches range {range}, mappedIndex={mappedIndex}, state={s.State}");
 
                 switch (s.State)
                 {
@@ -196,18 +195,6 @@ public sealed class CommandTriggerCombination
                 }
 
                 _activatedIndices.Add(mappedIndex);
-            }
-        }
-        
-        if (buttonSignals.Count > 0 && _activatedIndices.Count == 0)
-        {
-            // Log when buttons don't match any range
-            foreach (var s in buttonSignals)
-            {
-                foreach (var range in _keyRanges)
-                {
-                    Log.Debug($"UpdateMatchingRangeIndices: ButtonId={s.ButtonId} vs range {range}, IsRange={range.IsRange}, Includes={range.IncludesButtonIndex(s.ButtonId)}");
-                }
             }
         }
     }

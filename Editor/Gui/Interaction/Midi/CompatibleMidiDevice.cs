@@ -141,7 +141,6 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
         // Only process control changes (faders/knobs) in control mode
         if (_isInControlMode && controlChangeSignals.Length != 0)
         {
-            Log.Debug($"Processing {controlChangeSignals.Length} control change signal(s)");
             foreach (var ctc in CommandTriggerCombinations)
             {
                 ctc.InvokeMatchingControlCommands(controlChangeSignals, ActiveMode);
@@ -152,7 +151,7 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
         if (_combinedButtonSignals.Count == 0)
             return;
 
-        Log.Debug($"Processing {_combinedButtonSignals.Count} button signal(s), ActiveMode={ActiveMode}, ControlMode={_isInControlMode}");
+        // Log.Debug($"Processing {_combinedButtonSignals.Count} button signal(s), ActiveMode={ActiveMode}, ControlMode={_isInControlMode}");
         
         var releasedMode = InputModes.None;
 
@@ -169,13 +168,13 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
                 {
                     if (ActiveMode == InputModes.Default)
                     {
-                        Log.Debug($"Mode changed to {modeButton.Mode} (button {matchingSignal.ButtonId})");
+                        // Log.Debug($"Mode changed to {modeButton.Mode} (button {matchingSignal.ButtonId})");
                         ActiveMode = modeButton.Mode;
                     }
                 }
                 else if (matchingSignal.State == ButtonSignal.States.Released && ActiveMode == modeButton.Mode)
                 {
-                    Log.Debug($"Mode released from {modeButton.Mode} back to Default");
+                    // Log.Debug($"Mode released from {modeButton.Mode} back to Default");
                     releasedMode = modeButton.Mode;
                     ActiveMode = InputModes.Default;
                 }
@@ -230,7 +229,7 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
         {
             if (_buttonSignalsSinceLastUpdate.Count > 0)
             {
-                Log.Debug($"CombineButtonSignals: {_buttonSignalsSinceLastUpdate.Count} new signal(s) to process");
+                // Log.Debug($"CombineButtonSignals: {_buttonSignalsSinceLastUpdate.Count} new signal(s) to process");
             }
             
             foreach (var earlierSignal in _combinedButtonSignals.Values)
@@ -241,7 +240,7 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
 
             foreach (var newSignal in _buttonSignalsSinceLastUpdate)
             {
-                Log.Debug($"CombineButtonSignals: Processing signal ButtonId={newSignal.ButtonId}, State={newSignal.State}");
+                // Log.Debug($"CombineButtonSignals: Processing signal ButtonId={newSignal.ButtonId}, State={newSignal.State}");
                 if (_combinedButtonSignals.TryGetValue(newSignal.ButtonId, out var earlierSignal))
                 {
                     earlierSignal.State = newSignal.State;
@@ -284,7 +283,7 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
                     // Allow device-specific mapping from channel/note to button ID
                     var buttonId = ConvertNoteToButtonId(noteEvent.Channel, noteEvent.NoteNumber);
                     
-                    Log.Debug($"MIDI Button: Note={noteEvent.NoteNumber}, Channel={noteEvent.Channel}, ButtonId={buttonId}, Velocity={noteEvent.Velocity}, State={state}");
+                    // Log.Debug($"MIDI Button: Note={noteEvent.NoteNumber}, Channel={noteEvent.Channel}, ButtonId={buttonId}, Velocity={noteEvent.Velocity}, State={state}");
                     
                     lock (_buttonSignalsSinceLastUpdate)
                     {
@@ -304,7 +303,7 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
                 if (msg.MidiEvent is not ControlChangeEvent controlChangeEvent)
                     return;
 
-                Log.Debug($"MIDI CC: Controller={controlChangeEvent.Controller}, Value={controlChangeEvent.ControllerValue}, Channel={controlChangeEvent.Channel}");
+                // Note: Debug log removed - too verbose for continuous controllers like crossfaders
 
                 lock (_controlSignalsSinceLastUpdate)
                 {
