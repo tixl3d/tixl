@@ -18,12 +18,14 @@ internal static class SnapshotActions
         {
             Log.Debug($"Activating existing snapshot at index {activationIndex}");
             VariationHandling.ActivePoolForSnapshots.Apply(VariationHandling.ActiveInstanceForSnapshots, existingVariation);
+            BlendActions.SetActiveSnapshot(activationIndex);
             return;
         }
 
         Log.Debug($"Creating new snapshot at index {activationIndex}");
         VariationHandling.CreateOrUpdateSnapshotVariation(activationIndex);
         VariationHandling.ActivePoolForSnapshots.UpdateActiveStateForVariation(activationIndex);
+        BlendActions.SetActiveSnapshot(activationIndex);
     }
 
     public static void SaveSnapshotAtIndex(int activationIndex)
@@ -38,6 +40,7 @@ internal static class SnapshotActions
 
         VariationHandling.CreateOrUpdateSnapshotVariation(activationIndex);
         VariationHandling.ActivePoolForSnapshots.UpdateActiveStateForVariation(activationIndex);
+        BlendActions.SetActiveSnapshot(activationIndex);
     }
 
     public static void RemoveSnapshotAtIndex(int activationIndex)

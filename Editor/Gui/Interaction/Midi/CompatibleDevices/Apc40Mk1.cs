@@ -194,17 +194,23 @@ public sealed class Apc40Mk1 : CompatibleMidiDevice
                         mappedIndex =>
                         {
                             var color = Apc40Mk1Colors.Off;
+                            
                             if (SymbolVariationPool.TryGetSnapshot(mappedIndex, out var v))
                             {
+                                // Check if this is the current blend target
+                                var isBlendTarget = BlendActions.BlendTowardsIndex == mappedIndex;
+                                
+                                // Determine color based on state, with blend target shown as orange
+                                // Priority: Active (red) > BlendTarget (orange) > other states
                                 color = v.State switch
-                                            {
-                                                Variation.States.Undefined => Apc40Mk1Colors.Off,
-                                                Variation.States.InActive  => Apc40Mk1Colors.Green,
-                                                Variation.States.Active    => Apc40Mk1Colors.Red,
-                                                Variation.States.Modified  => Apc40Mk1Colors.Orange,
-                                                Variation.States.IsBlended => Apc40Mk1Colors.OrangeBlinking,
-                                                _                          => color
-                                            };
+                                {
+                                    Variation.States.Active    => Apc40Mk1Colors.Red,
+                                    Variation.States.Modified  => Apc40Mk1Colors.Orange,
+                                    Variation.States.IsBlended => Apc40Mk1Colors.OrangeBlinking,
+                                    Variation.States.InActive  => isBlendTarget ? Apc40Mk1Colors.OrangeBlinking : Apc40Mk1Colors.Green,
+                                    Variation.States.Undefined => Apc40Mk1Colors.Off,
+                                    _                          => color
+                                };
                             }
 
                             return AddModeHighlight(mappedIndex, (int)color);
