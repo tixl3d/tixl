@@ -20,8 +20,68 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
         _midiInputConnection = midiIn;
         MidiOutConnection = midiOut;
         
+        // Store the device name for control mode management
+        var deviceInfo = MidiConnectionManager.GetDescriptionForMidiIn(midiIn);
+        _deviceProductName = deviceInfo.ProductName;
+        
+        // Default to control mode (blocking passthrough to graph operators)
+        SetControlMode(true);
+        
         MidiConnectionManager.RegisterConsumer(this);
     }
+
+    /// <summary>
+    /// Sets whether this device should be in control mode (blocking passthrough) or passthrough mode.
+    /// In control mode: MIDI messages are consumed by the compatible device and not passed to graph operators.
+    /// In passthrough mode: MIDI messages are passed through to graph operators, editor controls are disabled.
+    /// </summary>
+    public void SetControlMode(bool controlMode)
+    {
+        var wasInControlMode = _isInControlMode;
+        _isInControlMode = controlMode;
+        
+        if (!string.IsNullOrEmpty(_deviceProductName))
+        {
+            MidiConnectionManager.SetDeviceControlMode(_deviceProductName, controlMode);
+        }
+        
+        // Notify derived classes when mode changes
+        if (wasInControlMode != controlMode)
+        {
+            OnControlModeChanged(controlMode);
+        }
+    }
+
+    /// <summary>
+    /// Called when control mode changes. Override to reset LEDs or reinitialize device.
+    /// </summary>
+    protected virtual void OnControlModeChanged(bool isNowInControlMode)
+    {
+        if (!isNowInControlMode)
+        {
+            // Switching to passthrough mode - clear all cached LED colors so they get reset
+            ClearLedCache();
+        }
+    }
+
+    /// <summary>
+    /// Clears the cached LED colors. Called when switching to passthrough mode.
+    /// </summary>
+    protected void ClearLedCache()
+    {
+        for (int i = 0; i < CacheControllerColors.Length; i++)
+        {
+            CacheControllerColors[i] = -1;
+        }
+    }
+
+    /// <summary>
+    /// Gets whether this device is in control mode (blocking passthrough).
+    /// </summary>
+    public bool IsInControlMode => _isInControlMode;
+
+    private bool _isInControlMode = true;
+    private string _deviceProductName;
 
     /// <summary>
     /// Depending on various hotkeys a device can be in different input modes.
@@ -40,10 +100,25 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
     protected InputModes ActiveMode = InputModes.Default;
 
     protected abstract void UpdateVariationVisualization();
+    
+    /// <summary>
+    /// Called when in passthrough mode to clear/reset device LEDs.
+    /// Override in derived classes to send device-specific reset commands.
+    /// </summary>
+    protected virtual void ClearDeviceLeds() { }
 
     public void Update()
     {
-        UpdateVariationVisualization();
+        if (_isInControlMode)
+        {
+            // Control mode: normal operation - update LEDs and process all signals
+            UpdateVariationVisualization();
+        }
+        else
+        {
+            // Passthrough mode: clear LEDs and only process mode-switching signals
+            ClearDeviceLeds();
+        }
         
         CombineButtonSignals();
         ProcessLastSignals();
@@ -55,7 +130,7 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
         if (!_hasNewMessages)
             return;
 
-        // Handle sliders and knobs...
+        // Handle sliders and knobs - only in control mode
         ControlChangeSignal[] controlChangeSignals;
         lock (_controlSignalsSinceLastUpdate)
         {
@@ -63,7 +138,8 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
             _controlSignalsSinceLastUpdate.Clear();
         }
 
-        if (controlChangeSignals.Length != 0)
+        // Only process control changes (faders/knobs) in control mode
+        if (_isInControlMode && controlChangeSignals.Length != 0)
         {
             Log.Debug($"Processing {controlChangeSignals.Length} control change signal(s)");
             foreach (var ctc in CommandTriggerCombinations)
@@ -76,11 +152,11 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
         if (_combinedButtonSignals.Count == 0)
             return;
 
-        Log.Debug($"Processing {_combinedButtonSignals.Count} button signal(s), ActiveMode={ActiveMode}");
+        Log.Debug($"Processing {_combinedButtonSignals.Count} button signal(s), ActiveMode={ActiveMode}, ControlMode={_isInControlMode}");
         
         var releasedMode = InputModes.None;
 
-        // Update modes
+        // Mode buttons should ALWAYS be processed (even in passthrough mode) so user can switch back
         if (ModeButtons != null)
         {
             foreach (var modeButton in ModeButtons)
@@ -114,6 +190,11 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
 
         foreach (var ctc in CommandTriggerCombinations)
         {
+            // In passthrough mode, only process control/passthrough mode switching commands
+            // These are identified by being in InputModes.Save mode (Shift held)
+            if (!_isInControlMode && ctc.RequiredInputMode != InputModes.Save)
+                continue;
+                
             ctc.InvokeMatchingButtonCommands(_combinedButtonSignals.Values.ToList(), ActiveMode, releasedMode);
         }
 
@@ -125,6 +206,8 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
 
     public void Dispose()
     {
+        // Clear control mode when device is disposed so messages pass through again
+        SetControlMode(false);
         MidiConnectionManager.UnregisterConsumer(this);
     }
 

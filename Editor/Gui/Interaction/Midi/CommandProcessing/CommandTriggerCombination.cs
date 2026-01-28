@@ -173,9 +173,6 @@ public sealed class CommandTriggerCombination
 
         foreach (var range in _keyRanges)
         {
-            if (!range.IsRange)
-                continue;
-
             foreach (var s in buttonSignals)
             {
                 var includes = range.IncludesButtonIndex(s.ButtonId);
@@ -237,5 +234,10 @@ public sealed class CommandTriggerCombination
     private readonly Action<int> _indexAction;
     private readonly Action<int[]> _indicesAction;
     private readonly Action<int, float> _controllerValueUpdateAction;
+    
+    /// <summary>
+    /// Gets the required input mode for this command trigger combination.
+    /// </summary>
+    public CompatibleMidiDevice.InputModes RequiredInputMode => _requiredInputMode;
 
 }

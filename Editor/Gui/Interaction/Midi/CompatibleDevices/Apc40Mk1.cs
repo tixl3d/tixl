@@ -52,6 +52,14 @@ public sealed class Apc40Mk1 : CompatibleMidiDevice
                       // Update blend values with channel faders
                       new(BlendActions.UpdateBlendValues, InputModes.Default, new[] { Fader1To8 },
                           CommandTriggerCombination.ExecutesAt.ControllerChange),
+                      
+                      // Control mode toggle - Shift + Track Select 1 to enable controller takeover (block passthrough)
+                      new(EnableControlModeAction, InputModes.Save, new[] { TrackSelect1 },
+                          CommandTriggerCombination.ExecutesAt.SingleRangeButtonPressed),
+                      
+                      // Passthrough mode - Shift + Track Select 2 to enable passthrough to graph operators
+                      new(EnablePassthroughModeAction, InputModes.Save, new[] { TrackSelect2 },
+                          CommandTriggerCombination.ExecutesAt.SingleRangeButtonPressed),
                   };
 
         ModeButtons = new List<ModeButton>
@@ -60,6 +68,88 @@ public sealed class Apc40Mk1 : CompatibleMidiDevice
                               new(SceneLaunch1, InputModes.Delete),
                               new(Shift, InputModes.Save),
                           };
+    }
+
+    /// <summary>
+    /// Action wrapper for enabling control mode (accepts index parameter for SingleRangeButtonPressed).
+    /// </summary>
+    private void EnableControlModeAction(int index)
+    {
+        Log.Debug($"APC40 Mk1: Setting CONTROL mode (blocking passthrough to graph), index={index}");
+        SetControlMode(true);
+    }
+
+    /// <summary>
+    /// Action wrapper for enabling passthrough mode (accepts index parameter for SingleRangeButtonPressed).
+    /// </summary>
+    private void EnablePassthroughModeAction(int index)
+    {
+        Log.Debug($"APC40 Mk1: Setting PASSTHROUGH mode (allowing messages to graph), index={index}");
+        SetControlMode(false);
+    }
+
+    /// <summary>
+    /// Called when control mode changes. Reinitialize device when entering control mode.
+    /// </summary>
+    protected override void OnControlModeChanged(bool isNowInControlMode)
+    {
+        base.OnControlModeChanged(isNowInControlMode);
+        
+        if (isNowInControlMode)
+        {
+            // Re-entering control mode - reinitialize the device
+            _initialized = false;
+        }
+        
+        // Update track select LEDs to show current mode
+        UpdateTrackSelectModeLeds();
+    }
+
+    /// <summary>
+    /// Updates Track Select 1 and 2 LEDs to show current control/passthrough mode.
+    /// Green = active mode, Off = inactive
+    /// </summary>
+    private void UpdateTrackSelectModeLeds()
+    {
+        if (MidiOutConnection == null)
+            return;
+
+        // Track Select buttons use Note 51 on different channels
+        // Track Select 1 = Channel 1, Track Select 2 = Channel 2
+        
+        // Track Select 1 - Green when in Control mode
+        var ts1Color = IsInControlMode ? Apc40Mk1Colors.Green : Apc40Mk1Colors.Off;
+        var ts1Event = new NoteOnEvent(0, 1, 51, (int)ts1Color, 0);
+        try { MidiOutConnection.Send(ts1Event.GetAsShortMessage()); } catch { }
+        
+        // Track Select 2 - Green when in Passthrough mode  
+        var ts2Color = IsInControlMode ? Apc40Mk1Colors.Off : Apc40Mk1Colors.Green;
+        var ts2Event = new NoteOnEvent(0, 2, 51, (int)ts2Color, 0);
+        try { MidiOutConnection.Send(ts2Event.GetAsShortMessage()); } catch { }
+    }
+
+    /// <summary>
+    /// Clears all LEDs on the device when in passthrough mode.
+    /// </summary>
+    protected override void ClearDeviceLeds()
+    {
+        if (MidiOutConnection == null)
+            return;
+
+        // Turn off all clip launch grid LEDs (0-39)
+        for (int i = 0; i < 40; i++)
+        {
+            SendColor(MidiOutConnection, i, (int)Apc40Mk1Colors.Off);
+        }
+        
+        // Turn off scene launch LEDs (82-86)
+        for (int i = 82; i <= 86; i++)
+        {
+            SendColor(MidiOutConnection, i, (int)Apc40Mk1Colors.Off);
+        }
+        
+        // Update track select LEDs to show passthrough mode is active
+        UpdateTrackSelectModeLeds();
     }
 
     protected override void UpdateVariationVisualization()
@@ -88,6 +178,9 @@ public sealed class Apc40Mk1 : CompatibleMidiDevice
             MidiOutConnection?.SendBuffer(buffer);
             _initialized = true;
             Log.Debug("APC40 Mk1: Initialization complete");
+            
+            // Set initial track select LED state
+            UpdateTrackSelectModeLeds();
         }
 
         // Log update cycle periodically
@@ -119,6 +212,9 @@ public sealed class Apc40Mk1 : CompatibleMidiDevice
 
         // Update scene launch button LEDs to show current mode
         UpdateSceneLaunchLeds();
+        
+        // Update track select LEDs to show control/passthrough mode
+        UpdateTrackSelectModeLeds();
 
     }
 
@@ -218,6 +314,7 @@ public sealed class Apc40Mk1 : CompatibleMidiDevice
     /// According to APC40 Communications Protocol:
     /// - Clip Launch grid: Notes 53-57 (rows 1-5) on Channels 1-8 (tracks/columns)
     ///   We convert to linear index 0-39: index = ((note - 53) * 8) + (channel - 1)
+    /// - Track Select buttons: Note 51 on Channels 1-8, mapped to 1000-1007
     /// - Other buttons use Channel 1 with their specific note numbers
     /// </summary>
     protected override int ConvertNoteToButtonId(int channel, int noteNumber)
@@ -237,9 +334,21 @@ public sealed class Apc40Mk1 : CompatibleMidiDevice
             return index;
         }
         
+        // Track Select buttons: Note 51 on channels 1-8
+        // Map to button IDs 1000-1007 so they can be uniquely identified
+        if (noteNumber == 51 && channel >= 1 && channel <= 8)
+        {
+            int buttonId = TrackSelectBaseId + (channel - 1);
+            Log.Debug($"ConvertNoteToButtonId: Track Select Note={noteNumber}, Channel={channel} -> ButtonId={buttonId}");
+            return buttonId;
+        }
+        
         // All other buttons use note number directly
         return noteNumber;
     }
+    
+    // Base ID for track select buttons to avoid collision with other button IDs
+    private const int TrackSelectBaseId = 1000;
 
     private int _updateCount;
 
@@ -267,6 +376,12 @@ public sealed class Apc40Mk1 : CompatibleMidiDevice
     private static readonly ButtonRange ClipSoloButtons1To8 = new(50, 50);   // Note 50 with different channels  
     private static readonly ButtonRange ClipRecArmButtons1To8 = new(48, 48); // Note 48 with different channels
     private static readonly ButtonRange ClipABButtons1To8 = new(66, 73);
+    
+    // Track Select buttons (mapped to button IDs 1000-1007 via ConvertNoteToButtonId)
+    // Track Select 1 (channel 1) = button ID 1000
+    // Track Select 2 (channel 2) = button ID 1001
+    private static readonly ButtonRange TrackSelect1 = new(TrackSelectBaseId);
+    private static readonly ButtonRange TrackSelect2 = new(TrackSelectBaseId + 1);
     
     // Navigation buttons
     private static readonly ButtonRange BankSelectUp = new(94);
