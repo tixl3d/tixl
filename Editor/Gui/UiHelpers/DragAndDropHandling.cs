@@ -78,8 +78,14 @@ internal static class DragAndDropHandling
         data = string.Empty;
         result = DragInteractionResult.None;
 
-        if (_activeDragType != dragType || (!IsDragging && !_externalDropJustHappened))
+        if (_activeDragType != dragType)
             return false;
+
+        if (!IsDragging && !_externalDropJustHappened)
+        {
+            _activeDragType = DragTypes.None;
+            return false;
+        }
 
         var isHovered = ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenBlockedByActiveItem);
 

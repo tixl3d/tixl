@@ -363,12 +363,12 @@ internal sealed partial class MagGraphView
             }
             else
             {
-                center.X += sp.DragPositionWithinBlock.X * CanvasScale;
-                var offset = MagGraphItem.GridSize.Y * 0.25f * CanvasScale;
-                drawList.AddRectFilled(center + new Vector2(0, -offset),
-                                       center + new Vector2(2, offset),
-                                       ColorVariations.ConnectionLines.Apply(typeColor).Fade(Blink)
-                                      );
+                // center.X += sp.DragPositionWithinBlock.X * CanvasScale;
+                // var offset = MagGraphItem.GridSize.Y * 0.25f * CanvasScale;
+                // drawList.AddRectFilled(center + new Vector2(0, -offset),
+                //                        center + new Vector2(2, offset),
+                //                        ColorVariations.ConnectionLines.Apply(typeColor).Fade(Blink)
+                //                       );
             }
         }
     }

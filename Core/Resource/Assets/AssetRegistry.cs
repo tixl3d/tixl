@@ -200,9 +200,8 @@ public static class AssetRegistry
 
         AssetType.TryGetForFilePath(info.Name, out var assetType, out var extensionId);
 
-        var asset = new Asset
+        var asset = new Asset(address)
                         {
-                            Address = address,
                             PackageId = packageId,
                             FileSystemInfo = info,
                             AssetType = assetType,

@@ -76,15 +76,15 @@ internal sealed class AssetFolder
             state.RootFolder.SortInAssets(file, state.Composition);
         }
         
-        state.RootFolder.UpdateMatchingAssetCounts(state.CompatibleExtensionIds);
+        state.RootFolder.UpdateMatchingAssetCounts(state.CompatibleExtensionIds, state.SearchString);
     }
 
-    internal int UpdateMatchingAssetCounts(List<int> compatibleExtensionIds)
+    internal int UpdateMatchingAssetCounts(List<int> compatibleExtensionIds, string searchString)
     {
         var count = 0;
 
         // No filter: count everything
-        if (compatibleExtensionIds.Count == 0)
+        if (compatibleExtensionIds.Count == 0 && string.IsNullOrEmpty(searchString))
         {
             count += FolderAssets.Count;
         }
@@ -92,7 +92,11 @@ internal sealed class AssetFolder
         {
             foreach (var asset in FolderAssets)
             {
-                if (compatibleExtensionIds.Contains(asset.ExtensionId))
+                if (asset.IsDirectory)
+                    continue;
+                
+                if(!string.IsNullOrEmpty(searchString) ||
+                    compatibleExtensionIds.Contains(asset.ExtensionId) )
                 {
                     count++;
                 }
@@ -102,7 +106,7 @@ internal sealed class AssetFolder
         // Recursively aggregate counts from subfolders
         foreach (var subFolder in SubFolders)
         {
-            count += subFolder.UpdateMatchingAssetCounts(compatibleExtensionIds);
+            count += subFolder.UpdateMatchingAssetCounts(compatibleExtensionIds, searchString);
         }
 
         MatchingAssetCount = count;
@@ -170,6 +174,11 @@ internal sealed class AssetFolder
     {
         SubFolders.Clear();
         FolderAssets.Clear();
+    }
+
+    public override string ToString()
+    {
+        return $"[{Name}/]";
     }
 
     internal readonly List<Asset> FolderAssets = [];

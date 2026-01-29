@@ -660,7 +660,7 @@ public static class StringUtils
     /// <summary>
     
     /// </summary>
-    public static Guid GenerateGuidFromString(string name)
+    public static Guid GenerateGuidFromString(this string name)
     {
         if (string.IsNullOrEmpty(name))
             return Guid.Empty;

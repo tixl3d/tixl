@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="$(SolutionDir)/Tixl.props" />
   <PropertyGroup>
     <TargetFramework>net9.0-windows</TargetFramework>
@@ -96,8 +96,8 @@
   </ItemGroup>
   <!-- Include Resources/** into output/Resources -->
   <ItemGroup Condition="'$(Configuration)' == 'Release'">
-    <Content Include="Resources/**/*" Exclude="bin/**">
-      <Link>Resources/%(RecursiveDir)%(Filename)%(Extension)</Link>
+    <Content Include="Assets/**/*" Exclude="bin/**">
+      <Link>Assets/%(RecursiveDir)%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="**/*.t3" Exclude="bin/**">

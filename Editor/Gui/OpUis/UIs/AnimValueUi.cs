@@ -121,16 +121,12 @@ internal static class AnimValueUi
 
             if (Math.Abs(dragDelta.X) > 0.5f)
             {
-                data.Ratio.TypedInputValue.Value = (_dragStartRatio + dragDelta.X / 100f).Clamp(0.001f, 1f);
-                data.Ratio.DirtyFlag.Invalidate();
-                data.Ratio.Input.IsDefault = false;
+                data.Ratio.SetTypedInputValue((_dragStartRatio + dragDelta.X / 100f).Clamp(0.001f, 1f));
             }
 
             if (Math.Abs(dragDelta.Y) > 0.5f)
             {
-                data.Bias.TypedInputValue.Value = (_dragStartBias - dragDelta.Y / 100f).Clamp(0.01f, 0.99f);
-                data.Bias.DirtyFlag.Invalidate();
-                data.Bias.Input.IsDefault = false;
+                data.Bias.SetTypedInputValue((_dragStartBias - dragDelta.Y / 100f).Clamp(0.01f, 0.99f));
             }
         }
 

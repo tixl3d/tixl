@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "t3": {
+      "commandName": "Project",
+      "nativeDebugging": false
+    }
+  }
+}
