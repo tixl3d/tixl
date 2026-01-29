@@ -484,7 +484,11 @@ internal sealed class SymbolLibrary : Window
         var selectedChildUis = projectView.NodeSelection.GetSelectedChildUis().ToList();
         if (selectedChildUis.Count == 1)
         {
-            var selectedSymbolId = selectedChildUis[0].SymbolChild.Symbol.Id;
+            var symbolChild = selectedChildUis[0].SymbolChild;
+            if (symbolChild == null)
+                return;
+
+            var selectedSymbolId = symbolChild.Symbol.Id;
             if (_lastSelectedSymbolId != selectedSymbolId)
             {
                 _lastSelectedSymbolId = selectedSymbolId;
