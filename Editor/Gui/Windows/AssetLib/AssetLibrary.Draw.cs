@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System.Runtime.CompilerServices;
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
@@ -261,7 +261,7 @@ internal sealed partial class AssetLibrary
         ImGui.PushID(asset.Id.GetHashCode());
         {
             var fade = !fileConsumerOpSelected
-                           ? 0.7f
+                           ? 1.0f
                            : fileConsumerOpIsCompatible
                                ? 1f
                                : 0.2f;
@@ -360,12 +360,18 @@ internal sealed partial class AssetLibrary
                 // Tooltip
                 {
                     var absolutePath = asset.FileSystemInfo?.FullName;
-                    ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(4, 4));
+                    var fileName = asset.FileSystemInfo?.Name ?? "Unknown";
+                    var path = absolutePath != null && fileName != null && absolutePath.EndsWith(fileName)
+                    ? absolutePath.Substring(0, absolutePath.Length - fileName.Length)
+                    : absolutePath;
+
+                    ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(4, 4)*T3Ui.UiScaleFactor);
+                    
                     ImGui.BeginTooltip();
-                    ImGui.PushTextWrapPos(ImGui.GetFontSize() * 25.0f);
+                    ImGui.PushTextWrapPos(ImGui.GetFontSize() * 50.0f);
                     ImGui.TextUnformatted($"""
-                                           Filesize: {asset.FileSize}
-                                           Path: {absolutePath}
+                                           File: {fileName} | {asset.FileSize} bytes
+                                           Path: {path}
                                            Time: {asset.FileSystemInfo?.LastWriteTime}
                                            """);
                     ImGui.PopTextWrapPos();
@@ -414,6 +420,10 @@ internal sealed partial class AssetLibrary
         var drawList = ImGui.GetWindowDrawList();
         var buttonMin = ImGui.GetItemRectMin();
         var buttonMax = ImGui.GetItemRectMax();
+        if (ImGui.IsItemHovered())
+        {
+            drawList.AddRectFilled(buttonMin, buttonMax, UiColors.BackgroundActive.Fade(0.5f), 5);
+        }
         if (isActive)
         {
             drawList.AddRect(buttonMin, buttonMax, UiColors.StatusActivated, 5);

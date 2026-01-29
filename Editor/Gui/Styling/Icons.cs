@@ -261,6 +261,7 @@ internal static class Icons
             new(Icon.FileGeometry, slotIndex: 113),
             new(Icon.FileShader, slotIndex: 114),
             new(Icon.FileT3Font, slotIndex: 115),
+            new(Icon.FileVector, slotIndex: 116),
             // Intentionally left black
             new(Icon.FileDocument, slotIndex: 117),
             new(Icon.ScrollLog, slotIndex: 118),
@@ -411,6 +412,7 @@ public enum Icon
     FileGeometry,
     FileShader,
     FileT3Font,
+    FileVector,
     ScrollLog,
     ClearLog,
     CopyToClipboard,

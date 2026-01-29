@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 
 using T3.Core.Resource.Assets;
 using T3.Editor.Gui.Styling;
@@ -119,12 +119,12 @@ internal static class AssetHandling
                                    ])
                                    {
                                        PrimaryOperators =
-                                           [
-                                               new
-                                                   Guid("e8d94dd7-eb54-42fe-a7b1-b43543dd457e"), // LoadSvg
+                                           [    
+                                               new Guid("d05739d3-f89d-488d-85d0-c0d115265b75"), // LoadSvgAsTexture2D
+                                               new Guid("e8d94dd7-eb54-42fe-a7b1-b43543dd457e"), // LoadSvg
                                            ],
                                        Color = UiColors.ColorForValues,
-                                       IconId = (uint)Icon.FileDocument,
+                                       IconId = (uint)Icon.FileVector,
                                    });
         AssetType.RegisterType(new AssetType("Text",
                                    [
