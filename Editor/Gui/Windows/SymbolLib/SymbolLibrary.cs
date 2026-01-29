@@ -3,6 +3,7 @@
 using ImGuiNET;
 using T3.Core.Operator;
 using T3.Core.SystemUi;
+using T3.Core.Utils;
 using T3.Editor.Gui.Dialogs;
 using T3.Editor.Gui.Legacy.Interaction.Connections;
 using T3.Editor.Gui.Input;
@@ -483,7 +484,11 @@ internal sealed class SymbolLibrary : Window
         var selectedChildUis = projectView.NodeSelection.GetSelectedChildUis().ToList();
         if (selectedChildUis.Count == 1)
         {
-            var selectedSymbolId = selectedChildUis[0].SymbolChild.Symbol.Id;
+            var symbolChild = selectedChildUis[0].SymbolChild;
+            if (symbolChild == null)
+                return;
+
+            var selectedSymbolId = symbolChild.Symbol.Id;
             if (_lastSelectedSymbolId != selectedSymbolId)
             {
                 _lastSelectedSymbolId = selectedSymbolId;
@@ -535,11 +540,11 @@ internal sealed class SymbolLibrary : Window
 
             // --- Highlight and Aim Icon for selected symbol ---
             var isSelected = false;
-            double timeSinceSelection = 0;
+            var timeSinceSelection = 0f;
             if (_lastSelectedSymbolId.HasValue && symbol.Id == _lastSelectedSymbolId.Value)
             {
                 isSelected = true;
-                timeSinceSelection = ImGui.GetTime() - _lastSelectionTime;
+                timeSinceSelection = (float)(ImGui.GetTime() - _lastSelectionTime);
             }
 
             // Tag “bookmark” button in front of symbol button.
@@ -562,8 +567,9 @@ internal sealed class SymbolLibrary : Window
             // Draw highlight border if selected (drawn last, on top)
             if (isSelected)
             {
-                var fadeProgress = Clamp01(timeSinceSelection / 0.5f);
-                var blinkFade = -MathF.Cos((float)timeSinceSelection * 15f) * (1f - fadeProgress) * 0.7f + 0.75f;
+                var fadeProgress = Clamp01(timeSinceSelection / 0.3f);
+                var blinkFade = MathUtils.Lerp( -MathF.Cos(timeSinceSelection * 15f)  * 0.8f +0.2f, 1, fadeProgress);
+
                 var highlightColor = UiColors.StatusActivated.Fade(blinkFade);
                 ImGui.GetWindowDrawList().AddRect(buttonMin, buttonMax, highlightColor, 5);
             }

@@ -89,7 +89,8 @@ internal static class SkillMapPopup
     private static bool IsPlayable(this QuestTopic  topic)
     {
         return topic.ProgressionState 
-                   is QuestTopic.ProgressStates.Unlocked 
+                   is QuestTopic.ProgressStates.Unlocked
+                   or QuestTopic.ProgressStates.Locked
                    or QuestTopic.ProgressStates.Active 
                    or QuestTopic.ProgressStates.Passed 
                    or QuestTopic.ProgressStates.Completed 

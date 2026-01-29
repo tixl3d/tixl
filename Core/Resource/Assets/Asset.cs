@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using T3.Core.Utils;
 
 namespace T3.Core.Resource.Assets;
 
@@ -11,7 +12,14 @@ namespace T3.Core.Resource.Assets;
 /// </summary>
 public sealed class Asset
 {
-    public required string Address;
+    public Asset(string address)
+    {
+        Address = address;
+        Id = address.GenerateGuidFromString();
+    }
+    
+    public readonly string Address;
+    public readonly Guid Id; 
     public required Guid PackageId;
     public FileSystemInfo? FileSystemInfo;
 

@@ -1,0 +1,317 @@
+[
+  {
+    "Steps": [
+      {
+        "NormalizedPosition": 0.0,
+        "Color": {
+          "X": 0.99999,
+          "Y": 0.99999684,
+          "Z": 1.0,
+          "W": 0.0
+        },
+        "Id": "a4af2ceb-acb3-479c-b589-1ed508a3ba51"
+      },
+      {
+        "NormalizedPosition": 1.0,
+        "Color": {
+          "X": 1.0,
+          "Y": 0.99999,
+          "Z": 1.0,
+          "W": 1.0
+        },
+        "Id": "118ac7f5-1e97-4798-a496-088b4736a099"
+      }
+    ],
+    "Interpolation": 0
+  },
+  {
+    "Steps": [
+      {
+        "NormalizedPosition": 0.0,
+        "Color": {
+          "X": 0.0,
+          "Y": 0.0,
+          "Z": 0.0,
+          "W": 0.0
+        },
+        "Id": "cdeddae7-5460-481c-a457-0aee310c9aef"
+      },
+      {
+        "NormalizedPosition": 1.0,
+        "Color": {
+          "X": 0.0,
+          "Y": 0.0,
+          "Z": 0.0,
+          "W": 1.0
+        },
+        "Id": "105bd0b8-ad52-4be4-85f6-1b7da3f18526"
+      }
+    ],
+    "Interpolation": 0
+  },
+  {
+    "Steps": [
+      {
+        "NormalizedPosition": 0.0,
+        "Color": {
+          "X": 1.0,
+          "Y": 0.04149252,
+          "Z": 0.0,
+          "W": 1.0
+        },
+        "Id": "2312966a-56bf-49c9-8b48-4b38c7a69935"
+      },
+      {
+        "NormalizedPosition": 0.16666667,
+        "Color": {
+          "X": 1.0,
+          "Y": 0.9500792,
+          "Z": 0.0,
+          "W": 1.0
+        },
+        "Id": "52771613-654f-42c2-8a6d-14f694da7dee"
+      },
+      {
+        "NormalizedPosition": 0.33333334,
+        "Color": {
+          "X": 0.0,
+          "Y": 1.0,
+          "Z": 0.13341331,
+          "W": 1.0
+        },
+        "Id": "c51d8d67-daaa-41b9-b308-9cc51b62cb52"
+      },
+      {
+        "NormalizedPosition": 0.5,
+        "Color": {
+          "X": 0.10326699,
+          "Y": 0.7896903,
+          "Z": 0.83732057,
+          "W": 1.0
+        },
+        "Id": "0efd4e81-f785-4312-93fe-6a6d05400812"
+      },
+      {
+        "NormalizedPosition": 0.6666667,
+        "Color": {
+          "X": 0.0,
+          "Y": 0.6253992,
+          "Z": 0.98564595,
+          "W": 1.0
+        },
+        "Id": "09da7611-584f-49db-afa7-27b51485833a"
+      },
+      {
+        "NormalizedPosition": 0.8333333,
+        "Color": {
+          "X": 0.9081521,
+          "Y": 0.0,
+          "Z": 1.0,
+          "W": 1.0
+        },
+        "Id": "fa8d5526-bfe8-42d9-a6e2-43e506bf5e79"
+      },
+      {
+        "NormalizedPosition": 1.0,
+        "Color": {
+          "X": 1.0,
+          "Y": 0.0,
+          "Z": 0.010892391,
+          "W": 1.0
+        },
+        "Id": "efd142ce-58a5-440d-ab92-4a432e62de54"
+      }
+    ],
+    "Interpolation": 3
+  },
+  {
+    "Steps": [
+      {
+        "NormalizedPosition": 0.0,
+        "Color": {
+          "X": 1.0,
+          "Y": 0.026838362,
+          "Z": 0.0,
+          "W": 1.0
+        },
+        "Id": "fa2aa928-4f75-4bdc-9493-32e7ec4e83fe"
+      },
+      {
+        "NormalizedPosition": 0.16666667,
+        "Color": {
+          "X": 1.0,
+          "Y": 0.68462133,
+          "Z": 0.0,
+          "W": 1.0
+        },
+        "Id": "646618d0-519b-4b51-bd1f-e5acc8abaf3a"
+      },
+      {
+        "NormalizedPosition": 0.33333334,
+        "Color": {
+          "X": 0.90872467,
+          "Y": 1.0,
+          "Z": 0.0,
+          "W": 1.0
+        },
+        "Id": "652ea3c8-43d0-4f72-9d2f-7db3fe98c2fe"
+      },
+      {
+        "NormalizedPosition": 0.5,
+        "Color": {
+          "X": 0.0,
+          "Y": 0.8660287,
+          "Z": 0.25858644,
+          "W": 1.0
+        },
+        "Id": "de99b3d5-d7f0-40df-8f4d-21b93fcdf041"
+      },
+      {
+        "NormalizedPosition": 0.6666667,
+        "Color": {
+          "X": 0.0,
+          "Y": 0.5007764,
+          "Z": 0.98564595,
+          "W": 1.0
+        },
+        "Id": "d2aecd5a-ca45-481d-ba2f-6604bbde7be5"
+      },
+      {
+        "NormalizedPosition": 0.8333333,
+        "Color": {
+          "X": 0.50655985,
+          "Y": 0.13850856,
+          "Z": 0.6650717,
+          "W": 1.0
+        },
+        "Id": "8ddc916a-b284-4f02-8da0-f8620b51d42c"
+      },
+      {
+        "NormalizedPosition": 1.0,
+        "Color": {
+          "X": 0.50655985,
+          "Y": 0.13850856,
+          "Z": 0.6650717,
+          "W": 1.0
+        },
+        "Id": "441b8ea1-4442-44c3-bd5b-c923fa6a06e5"
+      }
+    ],
+    "Interpolation": 1
+  },
+  {
+    "Steps": [
+      {
+        "NormalizedPosition": 0.0,
+        "Color": {
+          "X": 0.99999,
+          "Y": 0.99999684,
+          "Z": 1.0,
+          "W": 0.0
+        },
+        "Id": "92601eba-4ef9-4a91-8686-abd19c0c1e26"
+      },
+      {
+        "NormalizedPosition": 0.5,
+        "Color": {
+          "X": 1.0,
+          "Y": 0.99999,
+          "Z": 1.0,
+          "W": 1.0
+        },
+        "Id": "a9f92638-2a06-492d-8fb1-0c4b682478d9"
+      },
+      {
+        "NormalizedPosition": 1.0,
+        "Color": {
+          "X": 0.99999,
+          "Y": 0.99999684,
+          "Z": 1.0,
+          "W": 0.0
+        },
+        "Id": "096d389e-8d62-43e5-ab93-17fd61bff285"
+      }
+    ],
+    "Interpolation": 2
+  },
+  {
+    "Steps": [
+      {
+        "NormalizedPosition": 0.0,
+        "Color": {
+          "X": 0.99999,
+          "Y": 0.99999684,
+          "Z": 1.0,
+          "W": 0.0
+        },
+        "Id": "60858657-64b6-4db7-b07b-df1393296493"
+      },
+      {
+        "NormalizedPosition": 0.5,
+        "Color": {
+          "X": 1.0,
+          "Y": 0.99999,
+          "Z": 1.0,
+          "W": 1.0
+        },
+        "Id": "10ffb44b-8b32-4b26-a4b6-a17f7c6ac828"
+      },
+      {
+        "NormalizedPosition": 1.0,
+        "Color": {
+          "X": 0.99999,
+          "Y": 0.99999684,
+          "Z": 1.0,
+          "W": 0.0
+        },
+        "Id": "eb22d1ae-a51f-4d67-ad96-92ca7fff4840"
+      }
+    ],
+    "Interpolation": 1
+  },
+  {
+    "Steps": [
+      {
+        "NormalizedPosition": 0.0,
+        "Color": {
+          "X": 1.0,
+          "Y": 0.72460896,
+          "Z": 0.0,
+          "W": 1.0
+        },
+        "Id": "a912fdb0-fef4-42a2-adc5-079f5a8b3390"
+      },
+      {
+        "NormalizedPosition": 0.33333334,
+        "Color": {
+          "X": 1.0,
+          "Y": 0.48703903,
+          "Z": 0.13195556,
+          "W": 1.0
+        },
+        "Id": "97a7f809-d335-4bc2-9a4f-06024db2cca2"
+      },
+      {
+        "NormalizedPosition": 0.6666667,
+        "Color": {
+          "X": 0.49247694,
+          "Y": 0.08999183,
+          "Z": 0.6582595,
+          "W": 1.0
+        },
+        "Id": "77491d18-91f6-4fed-857c-896bef05fe49"
+      },
+      {
+        "NormalizedPosition": 1.0,
+        "Color": {
+          "X": 0.09676862,
+          "Y": 0.29133904,
+          "Z": 1.0,
+          "W": 1.0
+        },
+        "Id": "315b3a11-2726-4371-b150-41a03810715d"
+      }
+    ],
+    "Interpolation": 3
+  }
+]
