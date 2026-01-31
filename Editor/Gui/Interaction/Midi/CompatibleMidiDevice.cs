@@ -372,6 +372,19 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
     protected static readonly int[] CacheControllerColors = Enumerable.Repeat(-1, 256).ToArray();
     #endregion
 
+    /// <summary>
+    /// Clears all pending button signals. Call this when a mode switch changes button mappings
+    /// to prevent stale signals from blocking subsequent mode switches.
+    /// </summary>
+    protected void ClearButtonSignals()
+    {
+        _combinedButtonSignals.Clear();
+        lock (_buttonSignalsSinceLastUpdate)
+        {
+            _buttonSignalsSinceLastUpdate.Clear();
+        }
+    }
+
     private readonly Dictionary<int, ButtonSignal> _combinedButtonSignals = new();
     private readonly List<ButtonSignal> _buttonSignalsSinceLastUpdate = new();
     private readonly List<ControlChangeSignal> _controlSignalsSinceLastUpdate = new();

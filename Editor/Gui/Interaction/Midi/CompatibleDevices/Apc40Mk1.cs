@@ -53,39 +53,161 @@ public sealed class Apc40Mk1 : CompatibleMidiDevice
                       new(BlendActions.UpdateBlendValues, InputModes.Default, new[] { Fader1To8 },
                           CommandTriggerCombination.ExecutesAt.ControllerChange),
                       
-                      // Control mode toggle - Shift + Track Select 1 to enable controller takeover (block passthrough)
-                      new(EnableControlModeAction, InputModes.Save, new[] { TrackSelect1 },
-                          CommandTriggerCombination.ExecutesAt.SingleRangeButtonPressed),
-                      
-                      // Passthrough mode - Shift + Track Select 2 to enable passthrough to graph operators
-                      new(EnablePassthroughModeAction, InputModes.Save, new[] { TrackSelect2 },
+                      // Mode switching - Shift + Record/Arm 1/2/3 to switch between modes
+                      // Record/Arm 1 = Generic passthrough (0x40), Record/Arm 2 = Ableton passthrough (0x41), Record/Arm 3 = Ableton control (0x41)
+                      new(HandleModeSwitch, InputModes.Save, new[] { RecordArmButtons },
                           CommandTriggerCombination.ExecutesAt.SingleRangeButtonPressed),
                   };
 
         ModeButtons = new List<ModeButton>
                           {
-                              new(SceneLaunch2, InputModes.BlendTo),
+                              // Scene launch single-button ranges
                               new(SceneLaunch1, InputModes.Delete),
+                              new(SceneLaunch2, InputModes.BlendTo),
                               new(Shift, InputModes.Save),
                           };
     }
 
     /// <summary>
-    /// Action wrapper for enabling control mode (accepts index parameter for SingleRangeButtonPressed).
+    /// Handles mode switching based on which Record/Arm button was pressed (with Shift held).
+    /// Index 0 = Generic passthrough (0x40), Index 1 = Ableton passthrough (0x41), Index 2 = Ableton control (0x41)
     /// </summary>
-    private void EnableControlModeAction(int index)
+    private void HandleModeSwitch(int index)
     {
-        Log.Debug($"APC40 Mk1: Setting CONTROL mode (blocking passthrough to graph), index={index}");
-        SetControlMode(true);
+        switch (index)
+        {
+            case 0: // Record/Arm 1 - Generic passthrough mode (0x40)
+                Log.Debug("APC40 Mk1: Setting GENERIC PASSTHROUGH mode (0x40)");
+                _useGenericMode = true;
+                SendModeInitSysEx();
+                SetControlMode(false);
+                break;
+                
+            case 1: // Record/Arm 2 - Ableton passthrough mode (0x41)
+                Log.Debug("APC40 Mk1: Setting ABLETON PASSTHROUGH mode (0x41)");
+                _useGenericMode = false;
+                SendModeInitSysEx();
+                SetControlMode(false);
+                break;
+                
+            case 2: // Record/Arm 3 - Ableton control mode (0x41)
+                Log.Debug("APC40 Mk1: Setting ABLETON CONTROL mode (0x41)");
+                _useGenericMode = false;
+                SendModeInitSysEx();
+                SetControlMode(true);
+                break;
+                
+            default:
+                Log.Debug($"APC40 Mk1: Ignoring mode switch for index {index}");
+                return; // Don't clear signals for invalid index
+        }
+        
+        // Clear button signals after mode switch to prevent stale signals from
+        // blocking subsequent mode switches. The button mapping changes between
+        // Generic and Ableton modes, so old signals may not match new button IDs.
+        ClearButtonSignals();
     }
 
     /// <summary>
-    /// Action wrapper for enabling passthrough mode (accepts index parameter for SingleRangeButtonPressed).
+    /// Sends the SysEx initialization message to set the APC40 mode.
+    /// Uses 0x40 (Generic) or 0x41 (Ableton Live) based on _useGenericMode flag.
     /// </summary>
-    private void EnablePassthroughModeAction(int index)
+    private void SendModeInitSysEx()
     {
-        Log.Debug($"APC40 Mk1: Setting PASSTHROUGH mode (allowing messages to graph), index={index}");
-        SetControlMode(false);
+        if (MidiOutConnection == null)
+            return;
+        
+        // Clear all LEDs BEFORE mode switch
+        // This clears using BOTH mode mappings to ensure all LEDs are off
+        ClearAllLedsRaw();
+            
+        byte modeIdentifier = _useGenericMode ? (byte)0x40 : (byte)0x41;
+        Log.Debug($"APC40 Mk1: Sending mode SysEx (0x{modeIdentifier:X2})...");
+        
+        var buffer = new byte[]
+                         {
+                             0xF0, // MIDI exclusive start
+                             0x47, // Manufacturers ID Byte (Akai)
+                             0x00, // System Exclusive Device ID
+                             0x73, // Product model ID (APC40)
+                             0x60, // Message type identifier (Introduction message)
+                             0x00, // Number of data bytes to follow (most significant)
+                             0x04, // Number of data bytes to follow (least significant) = 4 bytes
+                             modeIdentifier, // Application/Configuration Identifier (0x40=Generic, 0x41=Ableton Live mode)
+                             0x08, // PC application Software version major
+                             0x01, // PC application Software version minor
+                             0x01, // PC application Software bug-fix level
+                             0xF7  // MIDI exclusive end
+                         };
+        
+        try
+        {
+            MidiOutConnection.SendBuffer(buffer);
+            _initialized = true;
+            Log.Debug($"APC40 Mk1: Mode switch complete (0x{modeIdentifier:X2})");
+        }
+        catch (Exception e)
+        {
+            Log.Warning($"APC40 Mk1: Failed to send mode SysEx: {e.Message}");
+        }
+        
+        // Only update the mode indicator LED (Record/Arm 1, 2, or 3)
+        // Don't update any other LEDs - let the normal update cycle handle that
+        UpdateRecordArmModeLeds();
+    }
+    
+    /// <summary>
+    /// Clears all LEDs on the device by sending direct MIDI messages.
+    /// Bypasses cache and clears using BOTH Generic and Ableton mode mappings.
+    /// </summary>
+    private void ClearAllLedsRaw()
+    {
+        if (MidiOutConnection == null)
+            return;
+        
+        // Reset all cache entries
+        for (int i = 0; i < CacheControllerColors.Length; i++)
+        {
+            CacheControllerColors[i] = -1;
+        }
+        
+        // Clear clip grid using Generic mode mapping (Notes 0-39 on Channel 1)
+        for (int note = 0; note < 40; note++)
+        {
+            var evt = new NoteOnEvent(0, 1, note, 0, 0);
+            try { MidiOutConnection.Send(evt.GetAsShortMessage()); } catch { }
+        }
+        
+        // Clear clip grid using Ableton mode mapping (Notes 53-57 on Channels 1-8)
+        for (int note = 53; note <= 57; note++)
+        {
+            for (int ch = 1; ch <= 8; ch++)
+            {
+                var evt = new NoteOnEvent(0, ch, note, 0, 0);
+                try { MidiOutConnection.Send(evt.GetAsShortMessage()); } catch { }
+            }
+        }
+        
+        // Clear scene launch LEDs (82-86 on Channel 1)
+        for (int note = 82; note <= 86; note++)
+        {
+            var evt = new NoteOnEvent(0, 1, note, 0, 0);
+            try { MidiOutConnection.Send(evt.GetAsShortMessage()); } catch { }
+        }
+        
+        // Clear Record/Arm row LEDs for BOTH modes
+        // Generic mode: Notes 48-55 on Channel 1
+        for (int note = 48; note <= 55; note++)
+        {
+            var evt = new NoteOnEvent(0, 1, note, 0, 0);
+            try { MidiOutConnection.Send(evt.GetAsShortMessage()); } catch { }
+        }
+        // Ableton mode: Note 48 on Channels 1-8
+        for (int ch = 1; ch <= 8; ch++)
+        {
+            var evt = new NoteOnEvent(0, ch, 48, 0, 0);
+            try { MidiOutConnection.Send(evt.GetAsShortMessage()); } catch { }
+        }
     }
 
     /// <summary>
@@ -101,55 +223,93 @@ public sealed class Apc40Mk1 : CompatibleMidiDevice
             _initialized = false;
         }
         
-        // Update track select LEDs to show current mode
-        UpdateTrackSelectModeLeds();
+        // Update Record/Arm LEDs to show current mode
+        UpdateRecordArmModeLeds();
     }
 
     /// <summary>
-    /// Updates Track Select 1 and 2 LEDs to show current control/passthrough mode.
+    /// Updates Record/Arm 1, 2, and 3 LEDs to show current mode.
     /// Green = active mode, Off = inactive
+    /// 
+    /// Mode 1 (Record/Arm 1): Generic passthrough (0x40) - DEFAULT
+    /// Mode 2 (Record/Arm 2): Ableton passthrough (0x41)
+    /// Mode 3 (Record/Arm 3): Ableton control (0x41)
+    /// 
+    /// LED display is on the Record/Arm row (bottom row) to be consistent across modes:
+    /// - Generic mode (0x40): Notes 48-55 on Channel 1 (Record Arm row)
+    /// - Ableton mode (0x41): Note 48 on Channels 1-8 (Record Arm row)
     /// </summary>
-    private void UpdateTrackSelectModeLeds()
+    private void UpdateRecordArmModeLeds()
     {
         if (MidiOutConnection == null)
             return;
 
-        // Track Select buttons use Note 51 on different channels
-        // Track Select 1 = Channel 1, Track Select 2 = Channel 2
+        // Record/Arm 1 - Green when in Generic passthrough mode (0x40)
+        var led1Color = _useGenericMode ? Apc40Mk1Colors.Green : Apc40Mk1Colors.Off;
         
-        // Track Select 1 - Green when in Control mode
-        var ts1Color = IsInControlMode ? Apc40Mk1Colors.Green : Apc40Mk1Colors.Off;
-        var ts1Event = new NoteOnEvent(0, 1, 51, (int)ts1Color, 0);
-        try { MidiOutConnection.Send(ts1Event.GetAsShortMessage()); } catch { }
+        // Record/Arm 2 - Green when in Ableton passthrough mode (0x41, not control mode)
+        var led2Color = !_useGenericMode && !IsInControlMode ? Apc40Mk1Colors.Green : Apc40Mk1Colors.Off;
         
-        // Track Select 2 - Green when in Passthrough mode  
-        var ts2Color = IsInControlMode ? Apc40Mk1Colors.Off : Apc40Mk1Colors.Green;
-        var ts2Event = new NoteOnEvent(0, 2, 51, (int)ts2Color, 0);
-        try { MidiOutConnection.Send(ts2Event.GetAsShortMessage()); } catch { }
+        // Record/Arm 3 - Green when in Ableton control mode (0x41, control mode)
+        var led3Color = !_useGenericMode && IsInControlMode ? Apc40Mk1Colors.Green : Apc40Mk1Colors.Off;
+
+        if (_useGenericMode)
+        {
+            // Generic mode: Record Arm uses Notes 48-55 on Channel 1
+            // Record/Arm 1 = Note 48, Record/Arm 2 = Note 49, Record/Arm 3 = Note 50
+            var led1Event = new NoteOnEvent(0, 1, 48, (int)led1Color, 0);
+            try { MidiOutConnection.Send(led1Event.GetAsShortMessage()); } catch { }
+            
+            var led2Event = new NoteOnEvent(0, 1, 49, (int)led2Color, 0);
+            try { MidiOutConnection.Send(led2Event.GetAsShortMessage()); } catch { }
+            
+            var led3Event = new NoteOnEvent(0, 1, 50, (int)led3Color, 0);
+            try { MidiOutConnection.Send(led3Event.GetAsShortMessage()); } catch { }
+        }
+        else
+        {
+            // Ableton mode: Record Arm uses Note 48 on Channels 1-8
+            // Record/Arm 1 = Note 48 Ch1, Record/Arm 2 = Note 48 Ch2, Record/Arm 3 = Note 48 Ch3
+            var led1Event = new NoteOnEvent(0, 1, 48, (int)led1Color, 0);
+            try { MidiOutConnection.Send(led1Event.GetAsShortMessage()); } catch { }
+            
+            var led2Event = new NoteOnEvent(0, 2, 48, (int)led2Color, 0);
+            try { MidiOutConnection.Send(led2Event.GetAsShortMessage()); } catch { }
+            
+            var led3Event = new NoteOnEvent(0, 3, 48, (int)led3Color, 0);
+            try { MidiOutConnection.Send(led3Event.GetAsShortMessage()); } catch { }
+        }
     }
 
     /// <summary>
     /// Clears all LEDs on the device when in passthrough mode.
+    /// Still shows mode highlighting when Shift is held.
     /// </summary>
     protected override void ClearDeviceLeds()
     {
         if (MidiOutConnection == null)
             return;
 
-        // Turn off all clip launch grid LEDs (0-39)
+        _updateCount++;
+        
+        // Turn off all clip launch grid LEDs (0-39) or show mode highlight if Shift is held
         for (int i = 0; i < 40; i++)
         {
-            SendColor(MidiOutConnection, i, (int)Apc40Mk1Colors.Off);
+            // Reset cache to force update when flashing
+            if (ActiveMode != InputModes.Default)
+                CacheControllerColors[i] = -1;
+            
+            var color = AddModeHighlight(i, (int)Apc40Mk1Colors.Off);
+            SendColor(MidiOutConnection, i, color);
         }
         
-        // Turn off scene launch LEDs (82-86)
+        // Turn off scene launch LEDs (82-86) - always off in passthrough mode
         for (int i = 82; i <= 86; i++)
         {
+            CacheControllerColors[i] = -1;
             SendColor(MidiOutConnection, i, (int)Apc40Mk1Colors.Off);
         }
         
-        // Update track select LEDs to show passthrough mode is active
-        UpdateTrackSelectModeLeds();
     }
 
     protected override void UpdateVariationVisualization()
@@ -157,30 +317,7 @@ public sealed class Apc40Mk1 : CompatibleMidiDevice
         _updateCount++;
         if (!_initialized)
         {
-            // Initialize APC40 Mk1 in Ableton Live mode (0x41) for LED control
-            // SysEx format: F0 47 00 73 60 00 04 <mode> <ver_major> <ver_minor> <ver_bugfix> F7
-            Log.Debug("APC40 Mk1: Sending init SysEx message...");
-            var buffer = new byte[]
-                             {
-                                 0xF0, // MIDI exclusive start
-                                 0x47, // Manufacturers ID Byte (Akai)
-                                 0x00, // System Exclusive Device ID
-                                 0x73, // Product model ID (APC40)
-                                 0x60, // Message type identifier (Introduction message)
-                                 0x00, // Number of data bytes to follow (most significant)
-                                 0x04, // Number of data bytes to follow (least significant) = 4 bytes
-                                 0x41, // Application/Configuration Identifier (0x41=Ableton Live mode)
-                                 0x08, // PC application Software version major
-                                 0x01, // PC application Software version minor
-                                 0x01, // PC application Software bug-fix level
-                                 0xF7  // MIDI exclusive end
-                             };
-            MidiOutConnection?.SendBuffer(buffer);
-            _initialized = true;
-            Log.Debug("APC40 Mk1: Initialization complete");
-            
-            // Set initial track select LED state
-            UpdateTrackSelectModeLeds();
+            SendModeInitSysEx();
         }
 
         // Log update cycle periodically
@@ -216,12 +353,14 @@ public sealed class Apc40Mk1 : CompatibleMidiDevice
                             return AddModeHighlight(mappedIndex, (int)color);
                         });
 
-        // Update scene launch button LEDs to show current mode
-        UpdateSceneLaunchLeds();
+        // Update scene launch button LEDs to show current mode - only in Ableton control mode (mode 3)
+        // Not in Generic passthrough (mode 1) or Ableton passthrough (mode 2)
+        if (IsInControlMode && !_useGenericMode)
+        {
+            UpdateSceneLaunchLeds();
+        }
         
-        // Update track select LEDs to show control/passthrough mode
-        UpdateTrackSelectModeLeds();
-
+        // Mode indicator LED (Record/Arm) is already set during mode switch, don't update every frame
     }
 
     /// <summary>
@@ -252,6 +391,7 @@ public sealed class Apc40Mk1 : CompatibleMidiDevice
 
     private int AddModeHighlight(int index, int orgColor)
     {
+        // Software-based flashing using solid colors
         var indicatedStatus = (_updateCount + index / 8) % 30 < 4;
         if (!indicatedStatus)
         {
@@ -260,9 +400,9 @@ public sealed class Apc40Mk1 : CompatibleMidiDevice
 
         return ActiveMode switch
                {
-                   InputModes.Save    => (int)Apc40Mk1Colors.GreenBlinking,
-                   InputModes.BlendTo => (int)Apc40Mk1Colors.OrangeBlinking,
-                   InputModes.Delete  => (int)Apc40Mk1Colors.RedBlinking,
+                   InputModes.Save    => (int)Apc40Mk1Colors.Green,
+                   InputModes.BlendTo => (int)Apc40Mk1Colors.Orange,
+                   InputModes.Delete  => (int)Apc40Mk1Colors.Red,
                    _                  => orgColor
                };
     }
@@ -270,7 +410,13 @@ public sealed class Apc40Mk1 : CompatibleMidiDevice
     /// <summary>
     /// Override SendColor to use the APC40 Mk1 specific channel mapping for LED control.
     /// 
-    /// According to APC40 Communications Protocol:
+    /// The mapping differs between Generic Mode (0x40) and Ableton Live Mode (0x41):
+    /// 
+    /// GENERIC MODE (0x40):
+    /// - Clip Launch grid (indices 0-39): Notes 0-39 on Channel 1
+    /// - Other buttons: Channel 1 with note = button index
+    /// 
+    /// ABLETON LIVE MODE (0x41):
     /// - Clip Launch grid (indices 0-39): Uses Notes 53-57 on Channels 1-8
     ///   index = ((note - 53) * 8) + (channel - 1), so:
     ///   note = (index / 8) + 53, channel = (index % 8) + 1
@@ -278,29 +424,41 @@ public sealed class Apc40Mk1 : CompatibleMidiDevice
     /// </summary>
     protected override void SendColor(MidiOut midiOut, int apcControlIndex, int colorCode)
     {
+        // Quick guard: ensure index is within cache bounds
+        if (apcControlIndex < 0 || apcControlIndex >= CacheControllerColors.Length)
+            return;
+
         if (CacheControllerColors[apcControlIndex] == colorCode)
             return;
 
         int channel;
         int noteNumber;
-        
-        // Clip launch grid buttons (0-39) need special channel/note mapping
+
+        // Clip launch grid buttons (0-39) need mode-specific mapping
         if (apcControlIndex >= 0 && apcControlIndex < 40)
         {
-            // Reverse the mapping: index = ((note - 53) * 8) + (channel - 1)
-            // So: note = (index / 8) + 53, channel = (index % 8) + 1
-            int row = apcControlIndex / 8;       // 0-4
-            int col = apcControlIndex % 8;       // 0-7
-            noteNumber = row + 53;               // 53-57
-            channel = col + 1;                   // 1-8
+            if (_useGenericMode)
+            {
+                // Generic mode: Notes 0-39 on Channel 1
+                channel = 1;
+                noteNumber = apcControlIndex;
+            }
+            else
+            {
+                // Ableton mode: index -> (note,channel): note = (index / 8) + 53, channel = (index % 8) + 1
+                int row = apcControlIndex / 8;   // 0-4
+                int col = apcControlIndex % 8;   // 0-7
+                noteNumber = row + 53;           // 53-57
+                channel = col + 1;               // 1-8
+            }
         }
         else
         {
-            // Scene launch and other buttons use channel 1 with note = index
+            // Scene launch and other non-grid buttons use channel 1 and note = index
             channel = 1;
             noteNumber = apcControlIndex;
         }
-        
+
         var noteOnEvent = new NoteOnEvent(0, channel, noteNumber, colorCode, 0);
         try
         {
@@ -317,40 +475,134 @@ public sealed class Apc40Mk1 : CompatibleMidiDevice
     /// <summary>
     /// Converts APC40 Mk1 MIDI channel/note to button index.
     /// 
-    /// According to APC40 Communications Protocol:
+    /// The mapping differs between Generic Mode (0x40) and Ableton Live Mode (0x41):
+    /// 
+    /// GENERIC MODE (0x40):
+    /// - Clip Launch grid: Notes 0-39 on Channel 1
+    /// - Track Select buttons: Notes 58-65 on Channel 1
+    /// - Shift button: Note 98 on Channel 1
+    /// 
+    /// ABLETON LIVE MODE (0x41):
     /// - Clip Launch grid: Notes 53-57 (rows 1-5) on Channels 1-8 (tracks/columns)
-    ///   We convert to linear index 0-39: index = ((note - 53) * 8) + (channel - 1)
-    /// - Track Select buttons: Note 51 on Channels 1-8, mapped to 1000-1007
-    /// - Other buttons use Channel 1 with their specific note numbers
+    /// - Track Select buttons: Note 51 on Channels 1-8
+    /// - Shift button: Note 98 on Channel 1
     /// </summary>
     protected override int ConvertNoteToButtonId(int channel, int noteNumber)
     {
-        // Clip launch grid: notes 53-57 on channels 1-8
-        // This creates a 5 row x 8 column grid (40 buttons)
-        if (noteNumber >= 53 && noteNumber <= 57 && channel >= 1 && channel <= 8)
+        // Shift button (note 98) is the same in both modes - handle it first
+        // This ensures Shift + button combinations work in any mode
+        if (noteNumber == 98 && channel == 1)
         {
-            // Convert to linear index 0-39
-            // Note 53 on Ch1 = index 0, Note 53 on Ch2 = index 1, ..., Note 53 on Ch8 = index 7
-            // Note 54 on Ch1 = index 8, Note 54 on Ch2 = index 9, ..., Note 54 on Ch8 = index 15
-            // etc.
-            int row = noteNumber - 53;  // 0-4
-            int col = channel - 1;       // 0-7
-            int index = (row * 8) + col;
-            Log.Debug($"ConvertNoteToButtonId: Clip grid Note={noteNumber}, Channel={channel} -> row={row}, col={col}, ButtonId={index}");
-            return index;
+            Log.Debug($"ConvertNoteToButtonId: Shift button Note={noteNumber}, Channel={channel} -> ButtonId=98");
+            return 98;
         }
         
-        // Track Select buttons: Note 51 on channels 1-8
-        // Map to button IDs 1000-1007 so they can be uniquely identified
-        if (noteNumber == 51 && channel >= 1 && channel <= 8)
+        // Record/Arm buttons need to work in BOTH modes so we can switch between them
+        // In Ableton mode: Note 48 on Channels 1-8
+        // In Generic mode: Notes 48-55 (or older firmwares 50-57) on Channel 1
+        
+        // Ableton mode Record/Arm: Note 48 on Channels 1-8 (always check this)
+        if (noteNumber == 48 && channel >= 1 && channel <= 8)
         {
-            int buttonId = TrackSelectBaseId + (channel - 1);
-            Log.Debug($"ConvertNoteToButtonId: Track Select Note={noteNumber}, Channel={channel} -> ButtonId={buttonId}");
+            // Ableton-style per-column mapping
+            int buttonId = RecordArmBaseId + (channel - 1);
+            Log.Debug($"ConvertNoteToButtonId: Record/Arm (Ableton mapping) Note={noteNumber}, Channel={channel} -> ButtonId={buttonId}");
             return buttonId;
         }
         
-        // All other buttons use note number directly
-        return noteNumber;
+        // Prefer Generic mapping: Notes 48..55 on Channel 1
+        if (_useGenericMode && channel == 1 && noteNumber >= 48 && noteNumber <= 55)
+        {
+            int buttonId = RecordArmBaseId + (noteNumber - 48);
+            Log.Debug($"ConvertNoteToButtonId: Record/Arm (Generic mapping 48-55) Note={noteNumber}, Channel={channel} -> ButtonId={buttonId}");
+            return buttonId;
+        }
+        
+        // Legacy firmwares may use 50..57; accept that as a fallback in Generic mode
+        if (_useGenericMode && channel == 1 && noteNumber >= 50 && noteNumber <= 57)
+        {
+            int buttonId = RecordArmBaseId + (noteNumber - 50);
+            Log.Debug($"ConvertNoteToButtonId: Record/Arm (Legacy Generic mapping 50-57) Note={noteNumber}, Channel={channel} -> ButtonId={buttonId}");
+            return buttonId;
+        }
+        
+        // Broad fallback: if we see any note in 48..57 on any channel, try sensible mapping
+        if (noteNumber >= 48 && noteNumber <= 57 && channel >= 1 && channel <= 8)
+        {
+            if (noteNumber == 48)
+            {
+                int buttonId = RecordArmBaseId + (channel - 1);
+                Log.Debug($"ConvertNoteToButtonId: Record/Arm (Fallback Ableton-like) Note={noteNumber}, Channel={channel} -> ButtonId={buttonId}");
+                return buttonId;
+            }
+
+            if (channel == 1 && noteNumber >= 48 && noteNumber <= 55)
+            {
+                int buttonId = RecordArmBaseId + (noteNumber - 48);
+                Log.Debug($"ConvertNoteToButtonId: Record/Arm (Fallback Generic-like) Note={noteNumber}, Channel={channel} -> ButtonId={buttonId}");
+                return buttonId;
+            }
+
+            int fallbackId = RecordArmBaseId + (channel - 1);
+            Log.Debug($"ConvertNoteToButtonId: Record/Arm (Fallback channel) Note={noteNumber}, Channel={channel} -> ButtonId={fallbackId}");
+            return fallbackId;
+        }
+        
+        // Track Select buttons - only needed for reference, not used for mode switching anymore
+        // In Generic mode: Notes 58-65 on Channel 1
+        // In Ableton mode: Note 51 on Channels 1-8
+        
+        if (_useGenericMode && noteNumber >= 58 && noteNumber <= 65 && channel == 1)
+        {
+            int buttonId = TrackSelectBaseId + (noteNumber - 58);
+            Log.Debug($"ConvertNoteToButtonId: Track Select (Generic mapping) Note={noteNumber}, Channel={channel} -> ButtonId={buttonId}");
+            return buttonId;
+        }
+        
+        if (!_useGenericMode && noteNumber == 51 && channel >= 1 && channel <= 8)
+        {
+            int buttonId = TrackSelectBaseId + (channel - 1);
+            Log.Debug($"ConvertNoteToButtonId: Track Select (Ableton mapping) Note={noteNumber}, Channel={channel} -> ButtonId={buttonId}");
+            return buttonId;
+        }
+        
+        if (_useGenericMode)
+        {
+            // GENERIC MODE (0x40) mappings
+            
+            // Clip launch grid: notes 0-39 on channel 1
+            if (noteNumber >= 0 && noteNumber <= 39 && channel == 1)
+            {
+                Log.Debug($"ConvertNoteToButtonId [Generic]: Clip grid Note={noteNumber}, Channel={channel} -> ButtonId={noteNumber}");
+                return noteNumber;
+            }
+            
+            // All other buttons use note number directly
+            return noteNumber;
+        }
+        else
+        {
+            // ABLETON LIVE MODE (0x41) mappings
+            
+            // Clip launch grid: notes 53-57 on channels 1-8
+            // This creates a 5 row x 8 column grid (40 buttons)
+            if (noteNumber >= 53 && noteNumber <= 57 && channel >= 1 && channel <= 8)
+            {
+                // Convert to linear index 0-39
+                // Note 53 on Ch1 = index 0, Note 53 on Ch2 = index 1, ..., Note 53 on Ch8 = index 7
+                // Note 54 on Ch1 = index 8, Note 54 on Ch2 = index 9, ..., Note 54 on Ch8 = index 15
+                // etc.
+                int row = noteNumber - 53;  // 0-4
+                int col = channel - 1;       // 0-7
+                int index = (row * 8) + col;
+                Log.Debug($"ConvertNoteToButtonId [Ableton]: Clip grid Note={noteNumber}, Channel={channel} -> row={row}, col={col}, ButtonId={index}");
+                return index;
+            }
+            
+
+            // All other buttons use note number directly
+            return noteNumber;
+        }
     }
     
     // Base ID for track select buttons to avoid collision with other button IDs
@@ -369,7 +621,6 @@ public sealed class Apc40Mk1 : CompatibleMidiDevice
     private static readonly ButtonRange SceneTrigger1To40 = new(0, 39);
     
     // Scene Launch buttons (right side of the grid)
-    private static readonly ButtonRange SceneLaunch1To5 = new(82, 86);
     private static readonly ButtonRange SceneLaunch1 = new(82);
     private static readonly ButtonRange SceneLaunch2 = new(83);
     private static readonly ButtonRange SceneLaunch3 = new(84);
@@ -383,11 +634,15 @@ public sealed class Apc40Mk1 : CompatibleMidiDevice
     private static readonly ButtonRange ClipRecArmButtons1To8 = new(48, 48); // Note 48 with different channels
     private static readonly ButtonRange ClipABButtons1To8 = new(66, 73);
     
+    // Record/Arm buttons (bottom row - used for mode switching with Shift)
+    // In Ableton mode: Note 48 on Channels 1-8
+    // In Generic mode: Notes 50-57 on Channel 1
+    // Mapped to button IDs 2000-2007 via ConvertNoteToButtonId
+    private const int RecordArmBaseId = 2000;
+    private static readonly ButtonRange RecordArmButtons = new(RecordArmBaseId, RecordArmBaseId + 7);
+    
     // Track Select buttons (mapped to button IDs 1000-1007 via ConvertNoteToButtonId)
-    // Track Select 1 (channel 1) = button ID 1000
-    // Track Select 2 (channel 2) = button ID 1001
-    private static readonly ButtonRange TrackSelect1 = new(TrackSelectBaseId);
-    private static readonly ButtonRange TrackSelect2 = new(TrackSelectBaseId + 1);
+    private static readonly ButtonRange TrackSelectButtons = new(TrackSelectBaseId, TrackSelectBaseId + 7);
     
     // Navigation buttons
     private static readonly ButtonRange BankSelectUp = new(94);
@@ -450,4 +705,5 @@ public sealed class Apc40Mk1 : CompatibleMidiDevice
     };
 
     private bool _initialized;
+    private bool _useGenericMode = true; // Default to Generic passthrough mode (0x40)
 }
