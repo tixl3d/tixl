@@ -121,8 +121,15 @@ internal sealed class SymbolFilter
 
             if (_inputType != null)
             {
-                 if (symbolUiSymbol.InputDefinitions.Count == 0 || symbolUiSymbol.InputDefinitions[0].ValueType != _inputType)
+                 if (symbolUiSymbol.InputDefinitions.Count == 0)
                      continue;
+
+                 if (symbolUiSymbol.InputDefinitions[0].ValueType != _inputType)
+                 {
+                     var matchingInput = symbolUiSymbol.InputDefinitions.FirstOrDefault(i => i.ValueType == _inputType);
+                     if (matchingInput == null)
+                         continue;
+                 }
 
                  var matchingInputDef = symbolUiSymbol.GetInputMatchingType(FilterInputType);
                 

@@ -125,9 +125,12 @@ internal sealed partial class EditableSymbolProject : EditorSymbolPackage
         base.InitializeAssets();
         _resourceFileWatcher = new ResourceFileWatcher(AssetsFolder);
         
-        _resourceFileWatcher.FileCreated += (_, path) => 
+        _resourceFileWatcher.FileCreated += (_, path) =>
                                             {
-                                                AssetRegistry.RegisterPackageEntry(new FileInfo(path), this, false);
+                                                var isDirectory = Directory.Exists(path);
+                                                
+                                                AssetRegistry.RegisterPackageEntry(new FileInfo(path), this, isDirectory);
+                                                ResourceFileWatcher.FileStateChangeCounter++;
                                             };
 
         _resourceFileWatcher.FileRenamed += (oldPath, newPath) => 

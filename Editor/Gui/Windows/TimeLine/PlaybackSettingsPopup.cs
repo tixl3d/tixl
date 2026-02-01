@@ -176,7 +176,8 @@ internal static class PlaybackSettingsPopup
 
                     var editResult = FilePickingUi.DrawTypeAheadSearch(FileOperations.FilePickerTypes.File, 
                                                                        AllFilesAudioFilesMp3WavOggMp3WavOgg,
-                                                                       ref _tempSoundtrackFilepathForEdit);
+                                                                       ref _tempSoundtrackFilepathForEdit,
+                                                                       showAssetFolderToggle:false);
                 
                 
                     var filepathModified = (editResult & InputEditStateFlags.Modified) != 0;
@@ -514,5 +515,5 @@ internal static class PlaybackSettingsPopup
     private static float _smoothedLevel = 0f;
     private static string _warningMessage = string.Empty;
     public const string PlaybackSettingsPopupId = "##PlaybackSettings";
-    private const string AllFilesAudioFilesMp3WavOggMp3WavOgg = "Audio files (mp3,wav,ogg)|*.mp3;*.wav;*.ogg";
+    private const string AllFilesAudioFilesMp3WavOggMp3WavOgg = "mp3,wav,ogg";
 }

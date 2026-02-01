@@ -1,5 +1,6 @@
 #nullable enable
 
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using T3.Core.Operator;
@@ -35,9 +36,9 @@ internal sealed class AssetFolder
 
     internal readonly string AbsolutePath;
     internal readonly string Address;
+    internal readonly Asset? Asset;
     
-
-    internal AssetFolder(string name, Instance? selectedInstance, AssetFolder? parent = null, FolderTypes type = FolderTypes.Directory)
+    internal AssetFolder(string name, AssetFolder? parent = null, FolderTypes type = FolderTypes.Directory)
     {
         Name = name;
         Parent = parent;
@@ -51,12 +52,18 @@ internal sealed class AssetFolder
         }
 
         Address = GetAliasPath();
-        if (!AssetRegistry.TryResolveAddress(Address, selectedInstance, out AbsolutePath, out _, isFolder: true))
+        HashCode = Address.GetHashCode();
+        
+        if(!AssetRegistry.TryGetAsset(Address, out Asset!))
         {
             Log.Warning($"Can't resolve folder path '{Address}'? ");
+            AbsolutePath = string.Empty;
+            return;
         }
-        
-        HashCode = Address.GetHashCode();
+
+        Debug.Assert(Asset.FileSystemInfo != null);
+
+        AbsolutePath = Asset.FileSystemInfo.FullName;
     }
     
     internal static void PopulateCompleteTree(AssetLibState state, Predicate<Asset>? filterAction)
@@ -126,7 +133,7 @@ internal sealed class AssetFolder
                 currentFolder = folder;
             else
             {
-                var newFolder = new AssetFolder(pathPart, composition, currentFolder);
+                var newFolder = new AssetFolder(pathPart, currentFolder);
                 currentFolder.SubFolders.Add(newFolder);
                 currentFolder = newFolder;
             }
@@ -151,7 +158,7 @@ internal sealed class AssetFolder
             stack.Push(t.Name);
             t = t.Parent;
         }
-
+        
         var first = true;
         while (stack.Count > 0)
         {

@@ -57,7 +57,7 @@ public sealed class ResourceFileWatcher : IDisposable
                              EnableRaisingEvents = true,
                              NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName
                          };
-
+        
         _fsWatcher.Changed += OnFileChanged;
         _fsWatcher.Renamed += OnFileChanged;
         _fsWatcher.Created += OnFileCreated;
@@ -246,7 +246,7 @@ public sealed class ResourceFileWatcher : IDisposable
     /// <summary>
     /// This is incremented on every file change event and can be used for cache invalidation (e.g. for complex FileLists)
     /// </summary>
-    public static int FileStateChangeCounter { get; private set; }
+    public static int FileStateChangeCounter { get; set; }
 }
 
 internal delegate void FileWatcherAction(WatcherChangeTypes changeTypes, string absolutePath);

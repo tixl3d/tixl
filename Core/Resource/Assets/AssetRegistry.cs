@@ -120,14 +120,14 @@ public static class AssetRegistry
         return false;
     }
 
-    public static bool TryToGetAssetFromFilepath(string absolutePath, [NotNullWhen(true)] out Asset? asset)
+    public static bool TryToGetAssetFromFilepath(string absolutePath, bool isFolder, [NotNullWhen(true)] out Asset? asset)
     {
         asset = null;
-        return TryConvertFilepathToAddress(absolutePath, out var address)
+        return TryConvertFilepathToAddress(absolutePath, isFolder, out var address)
                && _assetsByAddress.TryGetValue(address, out asset);
     }
 
-    internal static bool TryConvertFilepathToAddress(string absolutePath, [NotNullWhen(true)] out string? relativeAddress)
+    internal static bool TryConvertFilepathToAddress(string absolutePath, bool isFolder, [NotNullWhen(true)] out string? relativeAddress)
     {
         absolutePath.ToForwardSlashesUnsafe();
         foreach (var package in SymbolPackage.AllPackages)
@@ -135,9 +135,11 @@ public static class AssetRegistry
             var folder = package.AssetsFolder;
             if (absolutePath.StartsWith(folder, StringComparison.OrdinalIgnoreCase))
             {
+                var dirSuffix = isFolder ? "/" : string.Empty;
+                    
                 // Trim the folder length AND the following slash if it exists
                 var relativePart = absolutePath[folder.Length..].TrimStart('/');
-                relativeAddress = $"{package.Name}{PackageSeparator}{relativePart}";
+                relativeAddress = $"{package.Name}{PackageSeparator}{relativePart}{dirSuffix}";
                 return true;
             }
         }
@@ -189,9 +191,14 @@ public static class AssetRegistry
 
         // If the info is the root itself, relative path is empty string
         var relativePath = Path.GetRelativePath(package.AssetsFolder, info.FullName).Replace("\\", "/");
-        if (relativePath == ".") relativePath = string.Empty;
 
-        var address = $"{package.Name}{PackageSeparator}{relativePath}";
+        var isPackageFolder = relativePath == "."; 
+        if (isPackageFolder) 
+            relativePath = string.Empty;
+
+        var dirSuffix = (isDirectory && !isPackageFolder) ? "/" : string.Empty; 
+        
+        var address = $"{package.Name}{PackageSeparator}{relativePath}{dirSuffix}";
 
         // Pre-calculate path parts
         var parts = relativePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
@@ -287,7 +294,7 @@ public static class AssetRegistry
         var isDir = Directory.Exists(newPath);
 
         // Remove old address
-        if (!TryConvertFilepathToAddress(oldPath, out var oldAddress))
+        if (!TryConvertFilepathToAddress(oldPath, isDir,out var oldAddress))
         {
             Log.Warning("Can't resolve old path");
             return null;
@@ -310,6 +317,8 @@ public static class AssetRegistry
         FileSystemInfo info = isDir ? new DirectoryInfo(newPath) : new FileInfo(newPath);
         var newAsset = RegisterPackageEntry(info, package, isDir);
 
+        ResourceFileWatcher.FileStateChangeCounter++;    
+        
         // Update references...
         if (!ReferencesForAssetId.Remove(oldAsset.Id, out var references))
             return newAsset;
@@ -320,6 +329,7 @@ public static class AssetRegistry
                 Log.Warning("Failed to update asset reference: " + r);
         }
 
+        
         return newAsset;
     }
 
@@ -375,19 +385,28 @@ public static class AssetRegistry
 
         var address = $"{package.Name}{PackageSeparator}{relativePath}";
 
+        var wasDirectory = false;
         if (_assetsByAddress.TryRemove(address, out var asset))
         {
             Log.Debug($"Removed {address} from registry.");
         }
-
-        var lastSlash = relativePath.LastIndexOf('/');
-        var filename = lastSlash == -1
-                           ? relativePath
-                           : relativePath[lastSlash..];
-
-        if (_assetsMatchingFilenames.TryRemove(filename, out _))
+        else if (_assetsByAddress.TryRemove(address + "/", out asset))
         {
-            Log.Debug($"Removed {address} from file matches.");
+            Log.Debug($"Removed {address}/ from registry.");
+            wasDirectory = true;
+        }
+
+        if (!wasDirectory)
+        {
+            var lastSlash = relativePath.LastIndexOf('/');
+            var filename = lastSlash == -1
+                               ? relativePath
+                               : relativePath[lastSlash..];
+
+            if (_assetsMatchingFilenames.TryRemove(filename, out _))
+            {
+                Log.Debug($"Removed {address} from file matches.");
+            }
         }
 
         if (asset != null && ReferencesForAssetId.Remove(asset.Id))
@@ -395,6 +414,24 @@ public static class AssetRegistry
             Log.Debug($"Removed {address} from file matches.");
         }
     }
+
+    public static void RemoveObsoleteAsset(Asset? asset)
+    {
+        if (asset == null)
+            return;
+        
+        Log.Debug("Remove obsolete asset definition " + asset);
+        
+        _assetsByAddress.Remove(asset.Address, out _);
+        if (!asset.IsDirectory && asset.TryGetFileName(out var filename))
+        {
+            _assetsMatchingFilenames.TryRemove(filename.ToString(), out _);
+        }
+
+        ReferencesForAssetId.Remove(asset.Id);
+        ResourceFileWatcher.FileStateChangeCounter++;
+    }
+    
 
     public static void AddAssetReference(Asset asset, Guid symbolId, Guid symbolChildId, Guid stringUiId)
     {

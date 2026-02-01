@@ -48,7 +48,7 @@ internal static class FileImport
 
         if (existsInSubFolder || existsInPackageRootFolder)
         {
-            if (AssetRegistry.TryToGetAssetFromFilepath(destFilepath, out asset))
+            if (AssetRegistry.TryToGetAssetFromFilepath(destFilepath, isFolder:false, out asset))
                 return true;
 
             Log.Warning($"Existing file not registered as asset? {destFilepath}");

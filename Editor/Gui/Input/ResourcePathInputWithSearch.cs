@@ -196,7 +196,6 @@ internal static class AssetInputWithTypeAheadSearch
                 }
 
                 var lastPos = ImGui.GetCursorPos();
-                var lastMin2 = ImGui.GetCursorScreenPos();
                 ImGui.Selectable($"##{asset}", isSelected, ImGuiSelectableFlags.None);
                 
                 var lastMin = ImGui.GetItemRectMin();

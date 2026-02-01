@@ -195,10 +195,10 @@ public sealed class Resource<T> : IDisposable, IResource
         // change type-in value to the new path
         if (changeTypes.WasMoved())
         {
-            // we know the fileResource is not null because this is only called by the file resource
+            // We know the fileResource is not null because this is only called by the file resource
             var newPath = _fileResource!.AbsolutePath;
 
-            if (AssetRegistry.TryConvertFilepathToAddress(newPath, out var relativePath))
+            if (AssetRegistry.TryConvertFilepathToAddress(newPath, false, out var relativePath))
             {
                 newPath = relativePath;
             }

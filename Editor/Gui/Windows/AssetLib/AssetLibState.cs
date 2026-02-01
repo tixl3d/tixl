@@ -56,7 +56,7 @@ internal sealed class AssetLibState
     /// </summary>
     internal List<int> CompatibleExtensionIds = [];
     
-    public readonly AssetFolder RootFolder = new(AssetFolder.RootNodeId, null);
+    public readonly AssetFolder RootFolder = new(AssetFolder.RootNodeId);
     
     //public readonly SymbolFilter Filter = new();
     public string SearchString = string.Empty;
@@ -67,6 +67,9 @@ internal sealed class AssetLibState
 
     internal readonly SelectionHandler<Guid> Selection = new();
     internal Guid AnchorSelectionKey;
+
+    internal Guid RenamingInProcessId;
+    internal string RenameBuffer = string.Empty; 
 
     /// <summary>
     /// An internal list that is updated on every draw call.
