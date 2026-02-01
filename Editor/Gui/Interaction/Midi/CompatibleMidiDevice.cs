@@ -24,9 +24,6 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
         var deviceInfo = MidiConnectionManager.GetDescriptionForMidiIn(midiIn);
         _deviceProductName = deviceInfo.ProductName;
         
-        // Default to control mode (blocking passthrough to graph operators)
-        SetControlMode(true);
-        
         MidiConnectionManager.RegisterConsumer(this);
     }
 
@@ -35,10 +32,10 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
     /// In control mode: MIDI messages are consumed by the compatible device and not passed to graph operators.
     /// In passthrough mode: MIDI messages are passed through to graph operators, editor controls are disabled.
     /// </summary>
-    public void SetControlMode(bool controlMode)
+    protected void SetControlMode(bool controlMode)
     {
-        var wasInControlMode = _isInControlMode;
-        _isInControlMode = controlMode;
+        var wasInControlMode = IsInControlMode;
+        IsInControlMode = controlMode;
         
         if (!string.IsNullOrEmpty(_deviceProductName))
         {
@@ -67,9 +64,9 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
     /// <summary>
     /// Clears the cached LED colors. Called when switching to passthrough mode.
     /// </summary>
-    protected void ClearLedCache()
+    private static void ClearLedCache()
     {
-        for (int i = 0; i < CacheControllerColors.Length; i++)
+        for (var i = 0; i < CacheControllerColors.Length; i++)
         {
             CacheControllerColors[i] = -1;
         }
@@ -78,9 +75,8 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
     /// <summary>
     /// Gets whether this device is in control mode (blocking passthrough).
     /// </summary>
-    public bool IsInControlMode => _isInControlMode;
+    protected bool IsInControlMode { get; private set; } = true;
 
-    private bool _isInControlMode = true;
     private string _deviceProductName;
 
     /// <summary>
@@ -109,7 +105,7 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
 
     public void Update()
     {
-        if (_isInControlMode)
+        if (IsInControlMode)
         {
             // Control mode: normal operation - update LEDs and process all signals
             UpdateVariationVisualization();
@@ -129,8 +125,7 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
     {
         if (!_hasNewMessages)
             return;
-
-        // Handle sliders and knobs - only in control mode
+        
         ControlChangeSignal[] controlChangeSignals;
         lock (_controlSignalsSinceLastUpdate)
         {
@@ -138,8 +133,8 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
             _controlSignalsSinceLastUpdate.Clear();
         }
 
-        // Only process control changes (faders/knobs) in control mode
-        if (_isInControlMode && controlChangeSignals.Length != 0)
+        // Only process control changes in control mode
+        if (IsInControlMode && controlChangeSignals.Length != 0)
         {
             foreach (var ctc in CommandTriggerCombinations)
             {
@@ -189,9 +184,8 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
 
         foreach (var ctc in CommandTriggerCombinations)
         {
-            // In passthrough mode, only process control/passthrough mode switching commands
-            // These are identified by being in InputModes.Save mode (Shift held)
-            if (!_isInControlMode && ctc.RequiredInputMode != InputModes.Save)
+            // In passthrough, ignore all buttons except mode-switches (InputModes.Save / Shift).
+            if (!IsInControlMode && ctc.RequiredInputMode != InputModes.Save)
                 continue;
                 
             ctc.InvokeMatchingButtonCommands(_combinedButtonSignals.Values.ToList(), ActiveMode, releasedMode);
@@ -392,12 +386,13 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
     protected MidiOut MidiOutConnection;
 }
 
-public sealed class MidiDeviceProductAttribute : Attribute
+[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
+internal sealed class MidiDeviceProductAttribute : Attribute
 {
-    public MidiDeviceProductAttribute(string productName)
+    internal MidiDeviceProductAttribute(string productName)
     {
         ProductNames =  productName.Split(';');
     }
 
-    public string[] ProductNames { get; }
+    internal string[] ProductNames { get; }
 }
