@@ -261,6 +261,7 @@ internal static class Icons
             new(Icon.FileGeometry, slotIndex: 113),
             new(Icon.FileShader, slotIndex: 114),
             new(Icon.FileT3Font, slotIndex: 115),
+            new(Icon.FileVector, slotIndex: 116),
             // Intentionally left black
             new(Icon.FileDocument, slotIndex: 117),
             new(Icon.ScrollLog, slotIndex: 118),
@@ -285,6 +286,8 @@ internal static class Icons
             new(Icon.ApplySelection, slotIndex: 137),
             new(Icon.PasteFromClipboard, slotIndex: 138),
             new(Icon.Cross, slotIndex: 139),
+            new(Icon.BackUp, slotIndex: 140),
+            new(Icon.Sleeping, slotIndex: 141),
         };
 
     public static readonly string IconAtlasPath = Path.Combine(SharedResources.EditorResourcesDirectory, @"images/t3-icons.png");
@@ -411,6 +414,7 @@ public enum Icon
     FileGeometry,
     FileShader,
     FileT3Font,
+    FileVector,
     ScrollLog,
     ClearLog,
     CopyToClipboard,
@@ -438,5 +442,7 @@ public enum Icon
     ArrowDown,
     ApplySelection,
     PasteFromClipboard,
-    Cross
+    Cross,
+    BackUp,
+    Sleeping
 }

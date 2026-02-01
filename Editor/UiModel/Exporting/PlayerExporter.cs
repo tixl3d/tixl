@@ -160,7 +160,7 @@ internal static partial class PlayerExporter
         // 
         // Target folder path should be 
         // c:\Users\pixtur\Documents\TiXL\T3Exports\_TestExport2\Operators\pixtur.Playground\Resources\soundtrack\bayolea.mp3 
-        var relativePathInPackageResources = Path.GetRelativePath(symbol.SymbolPackage.ResourcesFolder, absolutePath);
+        var relativePathInPackageResources = Path.GetRelativePath(symbol.SymbolPackage.AssetsFolder, absolutePath);
         targetPath = Path.Combine(exportDir, "Operators",
                                   symbol.SymbolPackage.RootNamespace,
                                   FileLocations.AssetsSubfolder,
@@ -448,7 +448,7 @@ internal static partial class PlayerExporter
                 Log.Debug($"Export all entries folder {absoluteDirectory}...");
                 foreach (var absolutePath in Directory.EnumerateFiles(absoluteDirectory, "*", SearchOption.AllDirectories))
                 {
-                    var relativePathInResourceFolder = Path.GetRelativePath(package.ResourcesFolder, absolutePath); 
+                    var relativePathInResourceFolder = Path.GetRelativePath(package.AssetsFolder, absolutePath); 
                     
                     exportData.TryAddResourcePath(new ExportDataFile(package.RootNamespace,
                                                                      relativePathInResourceFolder, 

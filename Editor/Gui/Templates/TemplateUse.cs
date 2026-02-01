@@ -42,7 +42,7 @@ public static class TemplateUse
                                           symbolName,
                                           nameSpace, 
                                           description, 
-                                          project.ResourcesFolder);
+                                          project.AssetsFolder);
         T3Ui.Save(false);
     }
 

@@ -188,13 +188,19 @@ internal static class AssetInputWithTypeAheadSearch
                     ImGui.PushFont(Fonts.FontSmall);
                     ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
                     ImGui.TextUnformatted(packageName);
+                    CustomComponents.DrawSearchMatchUnderline(searchString, packageName, ImGui.GetItemRectMin());
                     ImGui.PopStyleColor();
                     ImGui.PopFont();
+                    
                     lastPackageId = asset.PackageId;
                 }
 
                 var lastPos = ImGui.GetCursorPos();
+                var lastMin2 = ImGui.GetCursorScreenPos();
                 ImGui.Selectable($"##{asset}", isSelected, ImGuiSelectableFlags.None);
+                
+                var lastMin = ImGui.GetItemRectMin();
+                
                 var isItemHovered = new ImRect(ImGui.GetItemRectMin(), ImGui.GetItemRectMax()).Contains(ImGui.GetMousePos())
                     && ImRect.RectWithSize(ImGui.GetWindowPos(), ImGui.GetWindowSize() ).Contains(ImGui.GetMousePos());
                 
@@ -223,7 +229,9 @@ internal static class AssetInputWithTypeAheadSearch
                 {
                     // No slash? Just draw the whole thing normally
                     ImGui.TextUnformatted(localPath);
-                }                
+                }
+                
+                CustomComponents.DrawSearchMatchUnderline(searchString, localPath, lastMin);
 
                 ImGui.SetCursorPos(keepNextPos);
 

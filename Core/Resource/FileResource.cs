@@ -42,7 +42,7 @@ public sealed partial class FileResource: IResource
         }
         else if (changeTypes.WasDeleted())
         {
-            Log.Warning($"Resource {GetType()} \"{AbsolutePath}\" was deleted.");
+            Log.Debug($"Resource {GetType().BaseType} deleted: \"{AbsolutePath}\"");
             FileDeleted?.Invoke(this, EventArgs.Empty);
         }
         

@@ -187,8 +187,9 @@ internal static partial class SkillTraining
 
         if (!outputWindow.EvaluationContext.FloatVariables.TryGetValue(PlayModeProgressVariableId, out var progress))
         {
-            Log.Warning($"Can't find progress variable '{PlayModeProgressVariableId}' after evaluation?");
-            return;
+            //Log.Warning($"Can't find progress variable '{PlayModeProgressVariableId}' after evaluation?");
+            progress = 1;
+            //return;
         }
 
         if (_context.StateMachine.StateTime > 0.2f && progress >= 1.0f)

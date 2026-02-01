@@ -146,6 +146,7 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         public string RenderSequencePrefix = "render";
 
         // Profiling and debugging
+        public bool LoadMultiThreaded = true;
         public bool EnableFrameProfiling = true;
         public bool KeepTraceForLogMessages = false;
         public bool EnableGCProfiling = false;

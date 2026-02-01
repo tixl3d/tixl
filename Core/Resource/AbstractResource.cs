@@ -198,7 +198,7 @@ public sealed class Resource<T> : IDisposable, IResource
             // we know the fileResource is not null because this is only called by the file resource
             var newPath = _fileResource!.AbsolutePath;
 
-            if (AssetRegistry.TryConvertToRelativePath(newPath, out var relativePath))
+            if (AssetRegistry.TryConvertFilepathToAddress(newPath, out var relativePath))
             {
                 newPath = relativePath;
             }

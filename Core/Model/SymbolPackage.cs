@@ -40,6 +40,8 @@ public abstract partial class SymbolPackage : IResourcePackage
     public virtual bool IsReadOnly => true;
 
     public readonly AssemblyInformation AssemblyInformation;
+    
+    /** Primary directory of the package that contains the csproj, home and other other data */
     public string Folder { get; }
 
     public virtual string DisplayName => AssemblyInformation.Name;
@@ -62,7 +64,7 @@ public abstract partial class SymbolPackage : IResourcePackage
     private static ConcurrentBag<SymbolPackage> _allPackages = [];
     public static IEnumerable<SymbolPackage> AllPackages => _allPackages;
 
-    public string ResourcesFolder { get; private set; } = null!;
+    public string AssetsFolder { get; private set; } = null!;
 
     public IReadOnlyCollection<DependencyCounter> Dependencies => (ReadOnlyCollection<DependencyCounter>)DependencyDict.Values;
     protected readonly ConcurrentDictionary<SymbolPackage, DependencyCounter> DependencyDict = new();
@@ -125,22 +127,22 @@ public abstract partial class SymbolPackage : IResourcePackage
         if (initializeResources)
         {
             // ReSharper disable once VirtualMemberCallInConstructor
-            InitializeResources();
+            InitializeAssets();
         }
     }
 
-    protected virtual void InitializeResources()
+    protected virtual void InitializeAssets()
     {
-        ResourcesFolder = Path.Combine(Folder, FileLocations.AssetsSubfolder);
+        AssetsFolder = Path.Combine(Folder, FileLocations.AssetsSubfolder);
 
-        // FIX: Force the assembly information to load the JSON metadata now
+        // Force the assembly information to load the JSON metadata now
         // This ensures Name and Id are valid before registration starts.
         _ = ReleaseInfo;
         
         // Avoid creating resource folder in protected program folder
         if (!IsReadOnly)
         {
-            Directory.CreateDirectory(ResourcesFolder);
+            Directory.CreateDirectory(AssetsFolder);
         }
 
         ResourceManager.AddSharedResourceFolder(this, AssemblyInformation.ShouldShareResources);
@@ -185,7 +187,7 @@ public abstract partial class SymbolPackage : IResourcePackage
     /// <param name="allNewSymbols">All new symbols, including those for which a json file was not found</param>
     public void LoadSymbols(bool parallel, out List<SymbolJson.SymbolReadResult> newlyRead, out List<Symbol> allNewSymbols)
     {
-        Log.Info($"Loading symbols for {AssemblyInformation.Name}...");
+        Log.Debug($" Loading {AssemblyInformation.Name}...");
 
         if (!AssemblyInformation.TryLoadTypes())
         {
@@ -226,6 +228,7 @@ public abstract partial class SymbolPackage : IResourcePackage
         // update symbol instances 
         foreach (var symbol in updatedSymbols)
         {
+            Log.Debug("Update symbol instances");
             UpdateSymbolInstances(symbol);
             SymbolUpdated?.Invoke(symbol);
         }

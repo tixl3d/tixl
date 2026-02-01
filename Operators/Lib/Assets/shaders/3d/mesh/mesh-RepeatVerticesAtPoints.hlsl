@@ -14,6 +14,7 @@ cbuffer Params : register(b1)
 {
     int PointCount;
     int ScaleFX;
+    int TexCoord2Factor;
 }
 
 StructuredBuffer<PbrVertex> SourceVertices : t0;
@@ -40,6 +41,13 @@ RWStructuredBuffer<PbrVertex> ResultVertices : u0;
     PbrVertex v = SourceVertices[vertexIndex];
 
     Point p = Points[pointIndex];
+
+    // Apply TexCoord2 FX factor useful to unsync VAT animations
+    float texCoord2Factor = TexCoord2Factor == 0
+                             ? 1
+                         : (TexCoord2Factor == 1) ? p.FX1
+                                          : p.FX2;
+    v.TexCoord2.y *= texCoord2Factor;
 
     // Apply point transform
     float4 posInObject = float4(v.Position, 1);

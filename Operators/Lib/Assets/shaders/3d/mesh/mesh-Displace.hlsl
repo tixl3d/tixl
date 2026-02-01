@@ -40,13 +40,15 @@ void main(uint3 i : SV_DispatchThreadID)
     float weight = 1;
 
     float3 posInWorld = v.Position;
-    float2 scaleuv = ScaleUV * float2(1, -1);
+    float2 scaleuv = ScaleUV * float2(1, 1);
     float2 uv =SourceVertices[gi].TexCoord * scaleuv;
 
     if(UvSelection > 0.5) 
     {
         uv =SourceVertices[gi].TexCoord2 * scaleuv;
     }
+
+    uv.y = 1.0 - uv.y;
     
     float4 texColor = DisplaceMap.SampleLevel(texSampler, uv, 0); 
     float3x3 TBN = float3x3(v.Tangent, v.Bitangent, v.Normal);

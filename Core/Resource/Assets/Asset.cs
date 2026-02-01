@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using T3.Core.Utils;
 
 namespace T3.Core.Resource.Assets;
 
@@ -11,7 +12,14 @@ namespace T3.Core.Resource.Assets;
 /// </summary>
 public sealed class Asset
 {
-    public required string Address;
+    public Asset(string address)
+    {
+        Address = address;
+        Id = address.GenerateGuidFromString();
+    }
+    
+    public readonly string Address;
+    public readonly Guid Id; 
     public required Guid PackageId;
     public FileSystemInfo? FileSystemInfo;
 
@@ -33,6 +41,31 @@ public sealed class Asset
         }
     }
 
+    public bool TryGetFileName(out ReadOnlySpan<char> filename)
+    {
+        filename = ReadOnlySpan<char>.Empty;
+        if (IsDirectory)
+            return false;
+
+        var packageSep = Address.IndexOf(AssetRegistry.PackageSeparator);
+        if (packageSep == -1)
+            return false;
+        
+        var localPath = Address.AsSpan()[(packageSep+1)..];
+        if (localPath.Length == 0)
+            return false;
+        
+        var lastSlash = localPath.LastIndexOf(AssetRegistry.PathSeparator);
+        if (lastSlash == -1)
+        {
+            filename = localPath;
+            return true;
+        }
+
+        filename = localPath[(lastSlash+1)..];
+        return true;
+    }
+
     public override string ToString()
     {
         return Address + (IsDirectory ? " (Dir)" : AssetType);
@@ -51,4 +84,6 @@ public sealed class AssetReference
     public Guid SymbolId;
     public Guid SymbolChildId;
     public Guid InputId;
+
+    public bool IsDefaultValueReference => SymbolChildId == Guid.Empty;
 }

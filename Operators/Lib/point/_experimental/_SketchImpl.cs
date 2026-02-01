@@ -43,7 +43,7 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
         if (sketchInstance == null || compositionWithSketchOp == null)
             return relativePath;
         
-        return Path.Combine(compositionWithSketchOp.Symbol.SymbolPackage.ResourcesFolder, relativePath.Replace("{id}", sketchInstance.SymbolChildId.ShortenGuid()));
+        return Path.Combine(compositionWithSketchOp.Symbol.SymbolPackage.AssetsFolder, relativePath.Replace("{id}", sketchInstance.SymbolChildId.ShortenGuid()));
     }
 
     private string _absolutePath = string.Empty;

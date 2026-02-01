@@ -240,7 +240,7 @@ internal static class AppMenuBar
 
                     if (ImGui.MenuItem("Resource Folder"))
                     {
-                        CoreUi.Instance.OpenWithDefaultApplication(project.ResourcesFolder);
+                        CoreUi.Instance.OpenWithDefaultApplication(project.AssetsFolder);
                     }
 
                     if (ImGui.MenuItem("Development IDE"))

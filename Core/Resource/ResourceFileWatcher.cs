@@ -175,7 +175,7 @@ public sealed class ResourceFileWatcher : IDisposable
 
     private void OnFileCreated(object sender, FileSystemEventArgs e)
     {
-        Log.Info($"File created: {e.FullPath}");
+        Log.Debug($"FileEvent(create): {e.FullPath}");
         FileCreated?.Invoke(this, e.FullPath);
         OnFileChanged(this, e);
     }
@@ -201,7 +201,7 @@ public sealed class ResourceFileWatcher : IDisposable
 
     private void OnError(object sender, ErrorEventArgs e)
     {
-        Log.Error($"File watcher error: {e.GetException()}");
+        Log.Error($"FileEvent(error): {e.GetException()}");
         _fsWatcher?.Dispose();
         _fsWatcher = new FileSystemWatcher(_watchedDirectory)
                          {
@@ -213,7 +213,7 @@ public sealed class ResourceFileWatcher : IDisposable
     private void OnFileDeleted(object sender, FileSystemEventArgs e)
     {
         OnFileChanged(sender, e);
-        Log.Warning($"File deleted: {e.FullPath}");
+        Log.Debug($"FileEvent(delete): {e.FullPath}");
     }
 
     private static void DisposeFileWatcher(ref FileSystemWatcher? watcher)

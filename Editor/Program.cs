@@ -185,7 +185,7 @@ internal static class Program
         forceRecompileProjects = args is {Length: > 0} && args.Any(arg => arg == "--force-recompile");
         #endif
 
-        Log.Debug("Loading projects...");
+        Log.Info("Start loading...");
         // Initialize UI and load complete symbol model
         if (!ProjectSetup.TryLoadAll(forceRecompileProjects, out var uiException))
         {
@@ -222,7 +222,7 @@ internal static class Program
         StartUp.FlagStartupSequenceComplete();
 
         startupStopWatch.Stop();
-        Log.Info($"Startup took {startupStopWatch.ElapsedMilliseconds}ms.");
+        Log.Info($"Startup took {startupStopWatch.ElapsedMilliseconds/1000:0.0}s.");
 
         UiContentUpdate.StartMeasureFrame();
 

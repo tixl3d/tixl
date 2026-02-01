@@ -323,4 +323,31 @@ internal static partial class CustomComponents
         Activated,
         NeedsAttention,
     }
+
+    /// <summary>
+    /// Draws an search match underline under the last search item
+    /// </summary>
+    public static void DrawSearchMatchUnderline(string searchString, ReadOnlySpan<char> strId, Vector2 offset)
+    {
+        if (string.IsNullOrEmpty(searchString)) 
+            return;
+        
+        var start = strId.IndexOf(searchString, StringComparison.OrdinalIgnoreCase);
+        if (start == -1) 
+            return;
+        
+        var span = strId.Slice(start, searchString.Length);
+        var sizeMatch = ImGui.CalcTextSize(span);
+
+        var sizeBefore = start > 0 ? ImGui.CalcTextSize(strId[..start])
+                             : Vector2.Zero;
+                    
+        var fontSize = ImGui.GetFontSize();
+        var min = 
+            //ImGui.GetItemRectMin() 
+                  offset
+                  + new Vector2( sizeBefore.X, fontSize) ;
+                    
+        ImGui.GetWindowDrawList().AddLine(min, min + new Vector2(sizeMatch.X,0), UiColors.BackgroundActive);
+    }
 }

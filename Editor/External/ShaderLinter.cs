@@ -16,26 +16,26 @@ internal static class ShaderLinter
     public static void AddPackage(IResourcePackage package, IEnumerable<IResourcePackage>? additionalPackages, bool replaceExisting = false)
     {
         // package.ResourcesFolder now points to ".../Assets"
-        var filePath = Path.Combine(package.ResourcesFolder, FileName);
+        var filePath = Path.Combine(package.AssetsFolder, FileName);
         var jsonObject = new HlslToolsJson(filePath);
         var resourceFolderList = jsonObject.IncludeDirectories;
         var virtualIncludeDirectories = jsonObject.VirtualDirectoryMappings;
 
-        resourceFolderList.Add(package.ResourcesFolder);
+        resourceFolderList.Add(package.AssetsFolder);
         if (package.Name != null)
         {
             // Maps "/ProjectName" to ".../ProjectName/Assets"
-            virtualIncludeDirectories.Add('/' + package.Name, package.ResourcesFolder);
+            virtualIncludeDirectories.Add('/' + package.Name, package.AssetsFolder);
         }
 
         if (additionalPackages is not null)
         {
             foreach (var p in additionalPackages)
             {
-                resourceFolderList.Add(p.ResourcesFolder);
+                resourceFolderList.Add(p.AssetsFolder);
                 if (p.Name != null)
                 {
-                    virtualIncludeDirectories.TryAdd('/' + p.Name, p.ResourcesFolder);
+                    virtualIncludeDirectories.TryAdd('/' + p.Name, p.AssetsFolder);
                 }
             }
         }
@@ -55,7 +55,7 @@ internal static class ShaderLinter
         }
         else
         {
-            var existing = _hlslToolsJsons.SingleOrDefault(x => x.Key.ResourcesFolder == package.ResourcesFolder);
+            var existing = _hlslToolsJsons.SingleOrDefault(x => x.Key.AssetsFolder == package.AssetsFolder);
             if (existing.Key != null)
             {
                 _hlslToolsJsons.Remove(existing.Key);
@@ -98,7 +98,7 @@ internal static class ShaderLinter
     {
         if (!_hlslToolsJsons.TryGetValue(resourcePackage, out var json))
         {
-            Log.Error($"{nameof(ShaderLinter)}: failed to remove {resourcePackage.ResourcesFolder}");
+            Log.Error($"{nameof(ShaderLinter)}: failed to remove {resourcePackage.AssetsFolder}");
             return;
         }
 
@@ -110,7 +110,7 @@ internal static class ShaderLinter
         if (Program.IsShuttingDown)
             return;
 
-        var resourceFolder = resourcePackage.ResourcesFolder;
+        var resourceFolder = resourcePackage.AssetsFolder;
         foreach (var dependent in _hlslToolsJsons.Values)
         {
             if (dependent.IncludeDirectories.Remove(resourceFolder))

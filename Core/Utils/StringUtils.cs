@@ -487,6 +487,26 @@ public static class StringUtils
         return GetReadableRelativeTime(TimeSpan.FromSeconds(time));
     }
 
+    public static string GetReadableFileSize(long size)
+    {
+        var gb = 1024 * 1024 * 1024;
+        var mb = 1024 * 1024;
+        
+        if (size > gb)
+        {
+            // ReSharper disable once PossibleLossOfFraction
+            return $"{size * 100 / gb * 0.01f:0.00} Gb";
+        }
+
+        if (size > mb)
+        {
+            // ReSharper disable once PossibleLossOfFraction
+            return $"{size * 100 / mb * 0.01f:0.00} Mb";
+        }
+
+        return $"{size} bytes";
+    }
+
     private static string GetReadableRelativeTime([DisallowNull] TimeSpan? timeSpan)
     {
         var seconds = timeSpan.Value.TotalSeconds;
@@ -660,7 +680,7 @@ public static class StringUtils
     /// <summary>
     
     /// </summary>
-    public static Guid GenerateGuidFromString(string name)
+    public static Guid GenerateGuidFromString(this string name)
     {
         if (string.IsNullOrEmpty(name))
             return Guid.Empty;

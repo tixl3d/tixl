@@ -210,6 +210,7 @@ internal sealed partial class MagItemMovement
         }
 
         var overlappingItems = new List<MagGraphItem>();
+        
         foreach (var otherItem in _layout.Items.Values)
         {
             if (DraggedItems.Contains(otherItem) || !dragExtend.Overlaps(otherItem.Area))
@@ -224,6 +225,19 @@ internal sealed partial class MagItemMovement
             n.PosOnCanvas -= _lastAppliedOffset; // Move to position
             n.PosOnCanvas += requestedDeltaOnCanvas; // Move to request position
         }
+
+        if (DraggedItems.Count != _context.Selector.Selection.Count)
+        {
+            foreach (var a in _context.Selector.Selection)
+            {
+                if (a is not Annotation)
+                    continue;
+                
+                a.PosOnCanvas -= _lastAppliedOffset; // Move to position
+                a.PosOnCanvas += requestedDeltaOnCanvas; // Move to request position
+            }
+        }
+        
 
         _lastAppliedOffset = requestedDeltaOnCanvas;
         _snapping.Reset();

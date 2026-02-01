@@ -82,7 +82,7 @@ internal static partial class PlayerExporter
                 return false;
             }
             
-            var relativePathInResourceFolder = Path.GetRelativePath(package.ResourcesFolder, absolutePath);
+            var relativePathInResourceFolder = Path.GetRelativePath(package.AssetsFolder, absolutePath);
             TryAddResourcePath(new ExportDataFile(package.RootNamespace, relativePathInResourceFolder, absolutePath));
 
             // Copy related font textures

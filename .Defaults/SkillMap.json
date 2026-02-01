@@ -489,7 +489,7 @@
     {
       "Id": "7f093d8e-9d75-46a0-ac61-4a829b70358d",
       "Title": "Basic Drawing",
-      "Description": "",
+      "Description": "The essentials of drawing with TiXL",
       "MapCoordinate": {
         "X": 5.0,
         "Y": -7.0
@@ -500,7 +500,7 @@
         "425c882e-80cc-4d38-b4a0-16ba9e7cc0f1",
         "47fa588a-67ff-4972-b42f-7fccc4505793"
       ],
-      "Namespace": null,
+      "Namespace": "Skills.Render.R01_MovingThings",
       "TopicType": "Command",
       "Requirement": "AllInputPaths"
     },

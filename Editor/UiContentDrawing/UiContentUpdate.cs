@@ -18,6 +18,7 @@ internal static class UiContentUpdate
         if (_hasSetScaling && Math.Abs(UserSettings.Config.UiScaleFactor - _lastUiScale) <= 0.005f)
             return;
 
+        Log.Debug("Setup editor resources...");
         // Prevent scale factor from being "actually" 0.0
         if (UserSettings.Config.UiScaleFactor < 0.1f)
             UserSettings.Config.UiScaleFactor = 0.1f;

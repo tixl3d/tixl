@@ -181,10 +181,10 @@ public abstract partial class ShaderCompiler
     
     public sealed class ShaderResourcePackage : IResourcePackage
     {
-        public string DisplayName => ResourcesFolder;
-        public Guid Id => StringUtils.GenerateGuidFromString(ResourcesFolder); 
+        public string DisplayName => AssetsFolder;
+        public Guid Id => StringUtils.GenerateGuidFromString(AssetsFolder); 
         public string? Name => null;
-        public string ResourcesFolder { get; }
+        public string AssetsFolder { get; }
         public ResourceFileWatcher? FileWatcher => _resourceConsumer?.Package?.FileWatcher;
         public string? RootNamespace => _resourceConsumer?.Package?.RootNamespace;
         public bool IsReadOnly => true;
@@ -194,13 +194,13 @@ public abstract partial class ShaderCompiler
 
         public ShaderResourcePackage(FileInfo shaderFile)
         {
-            ResourcesFolder = shaderFile.DirectoryName!;
+            AssetsFolder = shaderFile.DirectoryName!;
             AvailableResourcePackages = new List<IResourcePackage> { this };
         }
 
         public ShaderResourcePackage(DirectoryInfo directoryInfo)
         {
-            ResourcesFolder = directoryInfo.FullName;
+            AssetsFolder = directoryInfo.FullName;
             AvailableResourcePackages = new List<IResourcePackage> { this };
         }
 

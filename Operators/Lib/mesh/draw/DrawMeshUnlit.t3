@@ -2,6 +2,10 @@
   "Id": "4499dcb1-c936-49ed-861b-2ad8ae58cb28"/*DrawMeshUnlit*/,
   "Inputs": [
     {
+      "Id": "126f1902-147b-4276-8c13-550976e78973"/*FillMode*/,
+      "DefaultValue": 3
+    },
+    {
       "Id": "2c88e7c4-04f8-4e45-94d8-214775c5609c"/*EnableZWrite*/,
       "DefaultValue": true
     },
@@ -453,6 +457,12 @@
       "SourceSlotId": "8d223463-edff-45fb-9ead-6650a911cebd",
       "TargetParentOrChildId": "6e672779-c8b7-41e5-9ec1-017438d582ce",
       "TargetSlotId": "03f3bc7f-3949-4a97-88cf-04e162cfa2f7"
+    },
+    {
+      "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "SourceSlotId": "126f1902-147b-4276-8c13-550976e78973",
+      "TargetParentOrChildId": "6e672779-c8b7-41e5-9ec1-017438d582ce",
+      "TargetSlotId": "78c9b432-a2b8-4aea-81e4-0cd5086b3b94"
     },
     {
       "SourceParentOrChildId": "d2dd80f9-ff44-414c-8dd7-97c66366aafb",

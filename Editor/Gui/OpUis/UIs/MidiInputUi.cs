@@ -1,12 +1,13 @@
 #nullable enable
-using System.Reflection;
 using ImGuiNET;
+using System.Reflection;
 using T3.Core.Animation;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.Utils;
 using T3.Editor.Gui.Interaction;
+using T3.Editor.Gui.OpUis.WidgetUi;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 
@@ -58,6 +59,8 @@ internal static class MidiInputUi
         if (!data.IsValid)
             return OpUi.CustomUiResult.None;
 
+        var dragWidth = WidgetElements.DrawOperatorDragHandle(screenRect, drawList, canvas.Scale);
+        screenRect.Min.X += dragWidth;
         // Draw label and current value
         ImGui.SetCursorScreenPos(screenRect.Min);
         ImGui.BeginGroup();
@@ -75,7 +78,8 @@ internal static class MidiInputUi
         }
 
         ImGui.PushFont(Fonts.FontSmall);
-
+        var h = screenRect.GetHeight();
+        var renamedTitle = instance.SymbolChild.Name;
         var deviceAndChannel = "Midi Device?";
         if (!string.IsNullOrEmpty(data.Device.TypedInputValue.Value))
         {
@@ -88,21 +92,17 @@ internal static class MidiInputUi
                 _displayChannelValue = data.Channel.DirtyFlag.IsDirty ? "??" : data.Channel.Value.ToString();
             if (data.Device.HasInputConnections)
                 _displayDeviceValue = data.Device.DirtyFlag.IsDirty ? "??" : data.Device.Value;
-            deviceAndChannel = $"{_displayDeviceValue} CH{_displayChannelValue}:{_displayControlValue}";
+            if (!string.IsNullOrEmpty(renamedTitle))
+            {
+                _displayDeviceValue = renamedTitle;
+            }
+            if(h > 35 * T3Ui.UiScaleFactor)
+                deviceAndChannel = $"{_displayDeviceValue} CH{_displayChannelValue}:{_displayControlValue}\n{data.Result.Value:0.00}";
+            else
+                deviceAndChannel = $"{_displayDeviceValue} CH{_displayChannelValue}:{_displayControlValue}|{data.Result.Value:0.00}";
         }
 
-        ImGui.TextUnformatted(deviceAndChannel);
-
-        var renamedTitle = instance.SymbolChild.Name;
-        if (!string.IsNullOrEmpty(renamedTitle))
-        {
-            ImGui.TextUnformatted($"\"{renamedTitle}\"");
-        }
-
-        var normalizedFadeOut = ((Playback.RunTimeInSecs - data.LastMessageTime) / 5).Clamp(0, 1);
-        var fadeOut = (float)MathUtils.RemapAndClamp(normalizedFadeOut, 0, 1, 1, 0.5f);
-        var fadeColor = UiColors.ForegroundFull.Fade(fadeOut);
-        ImGui.TextColored(fadeColor, $"{data.Result.Value:0.00}");
+        WidgetElements.DrawPrimaryTitle(drawList, screenRect, deviceAndChannel, canvas.Scale);
 
         ImGui.PopClipRect();
         ImGui.EndGroup();
@@ -120,7 +120,9 @@ internal static class MidiInputUi
 
             var xPos = MathUtils.RemapAndClamp((double)currentValue, minRange, maxRange, graphRect.Min.X, graphRect.Max.X);
             var topLeftPos = new Vector2((float)xPos, graphRect.Min.Y);
-            drawList.AddRectFilled(topLeftPos, topLeftPos + new Vector2(1, graphRect.GetHeight()), UiColors.StatusAnimated);
+            drawList.AddRectFilled(topLeftPos, topLeftPos + new Vector2(1, graphRect.GetHeight()), Color.Mix(UiColors.BackgroundFull,
+                                             UiColors.StatusAnimated,
+                                             MathF.Pow(flashProgress * flashProgress, 0.5f)));
         }
 
         ImGui.PopFont();

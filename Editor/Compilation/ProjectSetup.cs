@@ -118,10 +118,10 @@ internal static partial class ProjectSetup
 
     public static void UpdateSymbolPackages(params EditorSymbolPackage[] packages)
     {
+        var parallel = UserSettings.Config.LoadMultiThreaded;
+        
         var stopWatch = Stopwatch.StartNew();
-
-        // actually update the symbol packages
-
+        // Actually update the symbol packages
         // this switch statement exists to avoid the overhead of parallelization for a single package, e.g. when compiling changes to a single project
         switch (packages.Length)
         {
@@ -130,8 +130,9 @@ internal static partial class ProjectSetup
                 return;
             case 1:
             {
+                
+                Log.Debug("Updating symbol packages " + (parallel ? "(parallel)":""));
                 var package = packages[0];
-                const bool parallel = false;
                 package.LoadSymbols(parallel, out var newlyRead, out var allNewSymbols);
                 SymbolPackage.ApplySymbolChildren(newlyRead);
                 package.LoadUiFiles(parallel, allNewSymbols, out var newlyLoadedUis, out var preExistingUis);
@@ -143,6 +144,7 @@ internal static partial class ProjectSetup
                 return;
             }
         }
+        
 
         // do the same as above, just in several steps so we can do them in parallel
         ConcurrentDictionary<EditorSymbolPackage, List<SymbolJson.SymbolReadResult>> loadedSymbols = new();
@@ -154,19 +156,35 @@ internal static partial class ProjectSetup
             package.AssemblyInformation.GenerateLoadContext();
         }
 
-        packages
-           .AsParallel()
-           .ForAll(package => //pull out for non-editable ones too
-                   {
-                       package.LoadSymbols(false, out var newlyRead, out var allNewSymbols);
-                       loadedSymbols.TryAdd(package, newlyRead);
-                       loadedOrCreatedSymbols.TryAdd(package, allNewSymbols);
-                   });
+        Log.Info("Loading symbols...");
+        if (parallel)
+        {
+            packages
+               .AsParallel()
+               .ForAll(package => //pull out for non-editable ones too
+                       {
+                           package.LoadSymbols(parallel, out var newlyRead, out var allNewSymbols);
+                           loadedSymbols.TryAdd(package, newlyRead);
+                           loadedOrCreatedSymbols.TryAdd(package, allNewSymbols);
+                       });
+        }
+        else
+        {
+            for (var index = packages.Length - 1; index >= 0; index--)
+            {
+                var package = packages[index];
+                package.LoadSymbols(parallel, out var newlyRead, out var allNewSymbols);
+                loadedSymbols.TryAdd(package, newlyRead);
+                loadedOrCreatedSymbols.TryAdd(package, allNewSymbols);
+            }
+        }
 
+        Log.Info("Applying children...");
         loadedSymbols
            .AsParallel()
            .ForAll(pair => SymbolPackage.ApplySymbolChildren(pair.Value));
 
+        Log.Info("Loading symbol UIs...");
         ConcurrentDictionary<EditorSymbolPackage, SymbolUiLoadInfo> loadedSymbolUis = new();
         packages
            .AsParallel()
@@ -177,6 +195,7 @@ internal static partial class ProjectSetup
                        loadedSymbolUis.TryAdd(package, new SymbolUiLoadInfo(newlyReadUis, preExisting));
                    });
 
+        Log.Info("Locating Source code files...");
         loadedSymbolUis
            .AsParallel()
            .ForAll(pair => { pair.Key.LocateSourceCodeFiles(); });
@@ -186,7 +205,7 @@ internal static partial class ProjectSetup
             symbolPackage.RegisterUiSymbols(symbolUis.NewlyLoaded, symbolUis.PreExisting);
         }
         
-        Log.Info($"Updated {packages.Length} symbol packages in {stopWatch.ElapsedMilliseconds}ms");
+        Log.Debug($">> Updated {packages.Length} symbol packages in {stopWatch.ElapsedMilliseconds/1000:0.0}s");
 
         var needingReload = ActivePackages.Where(x => x.NeedsAssemblyLoad).ToArray();
         if (needingReload.Length > 0)

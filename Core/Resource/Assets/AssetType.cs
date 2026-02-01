@@ -14,6 +14,7 @@ public sealed class AssetType
     public required Color Color;
     public required uint IconId;
     public int Index;
+    public string[] Subfolders = [];
     
     public AssetType(string name, List<int> extensionIds)
     {

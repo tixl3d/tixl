@@ -39,6 +39,7 @@ internal static class SymbolAnalysis
     /// </summary>
     internal static void UpdateSymbolUsageCounts()
     {
+        Log.Debug("Updating symbol counts...");
         var usages = CollectSymbolUsageCounts();
         ConnectionHashCounts = new Dictionary<int, int>();
 

@@ -20,7 +20,7 @@ public static partial class ResourceManager
         _sharedResourcePackages.Add(resourcePackage);
 
         //ShaderPackages.Add(resourcePackage);
-        resourcePackage.ResourcesFolder.ToForwardSlashesUnsafe();
+        resourcePackage.AssetsFolder.ToForwardSlashesUnsafe();
     }
 
     internal static void RemoveSharedResourceFolder(IResourcePackage resourcePackage)

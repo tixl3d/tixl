@@ -1,4 +1,5 @@
 #nullable enable
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using T3.Core.Compilation;
@@ -80,6 +81,7 @@ internal static partial class ProjectSetup
         UpdateSymbolPackages(allPackages);
         
         // Initialize resources and shader linting
+        Log.Info("Initializing package resources...");
         foreach (var package in allPackages)
         {
             InitializePackageResources(package);
@@ -100,7 +102,7 @@ internal static partial class ProjectSetup
 
         #if DEBUG
         totalStopwatch.Stop();
-        //Log.Info($"Total load time: {totalStopwatch.ElapsedMilliseconds}ms");
+        Log.Debug($">> Total load time: {totalStopwatch.ElapsedMilliseconds/1000:0.0}s");
         #endif
     }
 
@@ -126,6 +128,7 @@ internal static partial class ProjectSetup
     [SuppressMessage("ReSharper", "OutParameterValueIsAlwaysDiscarded.Local")]
     private static void LoadProjects(FileInfo[] csProjFiles, bool forceRecompile, out List<ProjectLoadInfo> failedProjects)
     {
+        Log.Info("Loading projects...");
         // Load each project file and its associated assembly
         var projectResults = csProjFiles
                       .AsParallel()
