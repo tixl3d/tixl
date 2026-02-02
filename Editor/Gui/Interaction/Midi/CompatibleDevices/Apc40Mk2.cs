@@ -81,26 +81,29 @@ public sealed class Apc40Mk2 : CompatibleMidiDevice
                 SendModeInitSysEx();
                 SetControlMode(false);
                 break;
-
+                
             case 1: // Record/Arm 2 - Ableton passthrough mode (0x41)
                 Log.Debug("APC40 Mk2: Setting ABLETON PASSTHROUGH mode (0x41)");
                 _useGenericMode = false;
                 SendModeInitSysEx();
                 SetControlMode(false);
                 break;
-
-            case 2: // Record/Arm 3 - Ableton control mode (0x42)
-                Log.Debug("APC40 Mk2: Setting ABLETON CONTROL mode (0x42)");
+                
+            case 2: // Record/Arm 3 - Ableton control mode (0x41)
+                Log.Debug("APC40 Mk2: Setting ABLETON CONTROL mode (0x41)");
                 _useGenericMode = false;
                 SendModeInitSysEx();
                 SetControlMode(true);
                 break;
-
+                
             default:
                 Log.Debug($"APC40 Mk2: Ignoring mode switch for index {index}");
-                return;
+                return; // Don't clear signals for invalid index
         }
-
+        
+        // Clear button signals after mode switch to prevent stale signals from
+        // blocking subsequent mode switches. The button mapping changes between
+        // Generic and Ableton modes, so old signals may not match new button IDs.
         ClearButtonSignals();
     }
 
@@ -112,25 +115,14 @@ public sealed class Apc40Mk2 : CompatibleMidiDevice
     {
         if (MidiOutConnection == null)
             return;
-
+        
+        // Clear all LEDs BEFORE mode switch
+        // This clears using BOTH mode mappings to ensure all LEDs are off
         ClearAllLedsRaw();
-
-        byte modeIdentifier;
-        if (_useGenericMode)
-        {
-            modeIdentifier = 0x40; // Generic mode
-        }
-        else if (IsInControlMode)
-        {
-            modeIdentifier = 0x42; // Ableton with full control
-        }
-        else
-        {
-            modeIdentifier = 0x41; // Ableton Live mode
-        }
-
-        Log.Debug($"APC40 Mk2: Sending mode SysEx (0x{modeIdentifier:X2})...");
-
+            
+        var modeIdentifier = _useGenericMode ? (byte)0x40 : (byte)0x41;
+        Log.Debug($"APC40 Mk1: Sending mode SysEx (0x{modeIdentifier:X2})...");
+        
         var buffer = new byte[]
                          {
                              0xF0, // MIDI exclusive start
@@ -157,7 +149,9 @@ public sealed class Apc40Mk2 : CompatibleMidiDevice
         {
             Log.Warning($"APC40 Mk2: Failed to send mode SysEx: {e.Message}");
         }
-
+        
+        // Only update the mode indicator LED (Record/Arm 1, 2, or 3)
+        // Don't update any other LEDs - let the normal update cycle handle that
         UpdateRecordArmModeLeds();
     }
 
@@ -310,40 +304,41 @@ public sealed class Apc40Mk2 : CompatibleMidiDevice
         }
 
         // Update clip launch button LEDs (5x8 grid)
-        for (var i = 0; i < ClipGridSize; i++)
-        {
-            var state = GetVariationLedState(i);
-            state = AddModeHighlight(i, state);
-            SendLedState(MidiOutConnection, i, state);
-        }
+        UpdateRangeLeds(SceneTrigger1To40,
+                        mappedIndex =>
+                        {
+                            var state = LedState.Off;
 
-        // Update scene launch button LEDs to show current mode
+                            // Get variation snapshot for this index
+                            if (!SymbolVariationPool.TryGetSnapshot(mappedIndex, out var v))
+                                return AddModeHighlight(mappedIndex, state).ToCacheKey();
+                            
+                            // Check if this is the current blend target
+                            var isBlendTarget = BlendActions.BlendTowardsIndex == mappedIndex;
+                                
+                            // Determine LED state based on variation state
+                            // Priority: Active (red) > BlendTarget (orange pulsing) > other states
+                            state = v.State switch
+                                        {
+                                            Variation.States.Active    => new LedState(Apc40Mk2Colors.Red),
+                                            Variation.States.Modified  => new LedState(Apc40Mk2Colors.Yellow),
+                                            Variation.States.IsBlended => new LedState(Apc40Mk2Colors.Orange, LedBehavior.Pulse1_16),
+                                            Variation.States.InActive  => isBlendTarget 
+                                                                            ? new LedState(Apc40Mk2Colors.Orange, LedBehavior.Pulse1_16)
+                                                                            : new LedState(Apc40Mk2Colors.Green),
+                                            Variation.States.Undefined => LedState.Off,
+                                            _                          => state
+                                        };
+
+                            return AddModeHighlight(mappedIndex, state).ToCacheKey();
+                        });
+
+        // Update scene launch button LEDs to show current mode - only in Ableton control mode (mode 3)
+        // Not in Generic passthrough (mode 1) or Ableton passthrough (mode 2)
         if (IsInControlMode && !_useGenericMode)
         {
             UpdateSceneLaunchLeds();
         }
-    }
-
-    /// <summary>
-    /// Gets the LED state for a variation at the given index.
-    /// </summary>
-    private LedState GetVariationLedState(int index)
-    {
-        if (!SymbolVariationPool.TryGetSnapshot(index, out var v))
-            return LedState.Off;
-
-        var isBlendTarget = BlendActions.BlendTowardsIndex == index;
-
-        return v.State switch
-        {
-            Variation.States.Active    => new LedState(Apc40Mk2Colors.Red),
-            Variation.States.Modified  => new LedState(Apc40Mk2Colors.Yellow),
-            Variation.States.IsBlended => new LedState(Apc40Mk2Colors.Orange, LedBehavior.Pulse1_16),
-            Variation.States.InActive  => isBlendTarget 
-                                            ? new LedState(Apc40Mk2Colors.Orange, LedBehavior.Pulse1_16)
-                                            : new LedState(Apc40Mk2Colors.Green),
-            _                          => LedState.Off
-        };
     }
 
     /// <summary>
