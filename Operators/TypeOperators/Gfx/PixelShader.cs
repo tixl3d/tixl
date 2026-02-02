@@ -31,8 +31,6 @@ public sealed class PixelShader : Instance<PixelShader>, IDescriptiveFilename, I
     [Input(Guid = "BE9B3DC1-7122-4B3D-B936-CCCF2581B69E")]
     public readonly InputSlot<string> DebugName = new();
 
-    public IEnumerable<string> FileFilter => _fileFilters;
-    private static readonly string[] _fileFilters = ["*.frag", "*.frag.hlsl", ResourceManager.DefaultShaderFilter];
 
     #region IShaderOperator implementation
     private IShaderOperator<PixelShaderT3> ShaderOperatorImpl => this;

@@ -3,7 +3,7 @@
   "Inputs": [
     {
       "Id": "2418e72c-b15f-42a8-9689-a53fe59aa9ad"/*Folder*/,
-      "DefaultValue": "Examples:images/sequences/agingFacesMale"
+      "DefaultValue": "Examples:images/sequences/agingFacesFemale/"
     }
   ],
   "Children": [
@@ -374,23 +374,6 @@
       "Outputs": []
     },
     {
-      "Id": "8250ba39-30b1-4b5e-b141-431b35eefa39"/*DrawScreenQuad*/,
-      "SymbolId": "5a2752e8-95ae-4d76-b903-1f52ef43bcdc",
-      "InputValues": [
-        {
-          "Id": "4e8fecd0-00ca-404e-a9d4-1cb0d3e044f1"/*Color*/,
-          "Type": "System.Numerics.Vector4",
-          "Value": {
-            "X": 0.98086125,
-            "Y": 0.98086125,
-            "Z": 0.98086125,
-            "W": 1.0
-          }
-        }
-      ],
-      "Outputs": []
-    },
-    {
       "Id": "83094bad-e531-4a6d-9984-4fc3722bb92b"/*DrawBillboards*/,
       "SymbolId": "18d3d929-e530-45fa-9131-658368060ae2",
       "InputValues": [
@@ -405,12 +388,6 @@
           "Value": 3
         }
       ],
-      "Outputs": []
-    },
-    {
-      "Id": "84529309-366f-4a46-bc12-3eff59be6163"/*ChangeCase*/,
-      "SymbolId": "acdd78b1-4e66-4fd0-a36b-5318670fefd4",
-      "InputValues": [],
       "Outputs": []
     },
     {

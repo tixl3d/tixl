@@ -14,6 +14,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>0108;9084;NU1900</NoWarn>
     <PackageId>fe98a538-31e2-47dc-82a4-62c2e1c29649</PackageId>
+    <RootNamespace>Mediapipe</RootNamespace>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <NoWarn>0108;9084;NU1900;CS8981</NoWarn>

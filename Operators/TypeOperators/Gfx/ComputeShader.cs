@@ -49,8 +49,6 @@ public sealed class ComputeShader : Instance<ComputeShader>, IDescriptiveFilenam
     [Input(Guid = "{C0701D0B-D37F-4570-9E9A-EC2E88B919D1}")]
     public readonly InputSlot<string> DebugName = new();
         
-    public IEnumerable<string> FileFilter => _fileFilters;
-    private static readonly string[] _fileFilters = ["*.compute", "*.compute.hlsl", ResourceManager.DefaultShaderFilter];
         
     #region IShaderOperator implementation
     private IShaderOperator<ComputeShaderT3> ShaderOperatorImpl => this;

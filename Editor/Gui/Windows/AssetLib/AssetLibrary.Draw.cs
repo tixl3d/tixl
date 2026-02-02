@@ -73,6 +73,9 @@ internal sealed partial class AssetLibrary
 
     private void DrawFolder(AssetFolder folder)
     {
+        if (folder.IsHidden)
+            return;
+        
         var folderName = folder.Name.AsSpan();
         if (folderName == AssetFolder.RootNodeId)
         {

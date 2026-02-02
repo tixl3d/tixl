@@ -1,7 +1,6 @@
 ﻿#nullable enable
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using T3.Core.Utils;
 
@@ -29,7 +28,7 @@ public sealed class Asset
     public bool IsDirectory;
 
     // Added to support folder structure in UI without re-parsing
-    public IReadOnlyList<string> PathParts { get; internal init; } = [];
+    public string[] PathParts { get; internal init; } = [];
 
     public long FileSize
     {

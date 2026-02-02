@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using T3.Core.Operator.Slots;
+﻿using T3.Core.Operator.Slots;
 
 namespace T3.Core.Operator.Interfaces;
 
@@ -8,6 +7,5 @@ namespace T3.Core.Operator.Interfaces;
 /// </summary>
 public interface IDescriptiveFilename
 {
-    public IEnumerable<string> FileFilter { get; }
     InputSlot<string> SourcePathSlot { get; }
 }

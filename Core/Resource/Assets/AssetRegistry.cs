@@ -16,9 +16,13 @@ namespace T3.Core.Resource.Assets;
 
 public static class AssetRegistry
 {
-    public static bool TryGetAsset(string address, [NotNullWhen(true)] out Asset? asset)
+    public static bool TryGetAsset(string? address, [NotNullWhen(true)] out Asset? asset)
     {
-        return _assetsByAddress.TryGetValue(address, out asset);
+        if (address != null) 
+            return _assetsByAddress.TryGetValue(address, out asset);
+        
+        asset = null;
+        return false;
     }
 
     public static bool TryResolveAddress(string? address,
@@ -219,7 +223,7 @@ public static class AssetRegistry
                             FileSystemInfo = info,
                             AssetType = assetType,
                             IsDirectory = isDirectory,
-                            PathParts = pathParts,
+                            PathParts = pathParts.ToArray(),
                             ExtensionId = extensionId,
                         };
 

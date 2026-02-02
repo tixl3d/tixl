@@ -613,7 +613,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Examples:3d/arpnettest-bullenkuhlen-v01.obj"
+          "Value": "pixtur.ArtNet:3d/arpnettest-bullenkuhlen-v01.obj"
         }
       ],
       "Outputs": []

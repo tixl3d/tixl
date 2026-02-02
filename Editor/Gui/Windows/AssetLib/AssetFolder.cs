@@ -3,7 +3,6 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
-using T3.Core.Operator;
 using T3.Core.Resource.Assets;
 using T3.Editor.Gui.Windows.SymbolLib;
 
@@ -19,6 +18,7 @@ internal sealed class AssetFolder
     internal List<AssetFolder> SubFolders { get; } = [];
     private AssetFolder? Parent { get; }
     internal int MatchingAssetCount;
+    internal bool IsHidden; 
     
     public readonly int HashCode;
 
@@ -51,6 +51,9 @@ internal sealed class AssetFolder
             return;
         }
 
+        if (AssetLibrary.HiddenPackages.Contains(name))
+            IsHidden = true;
+
         Address = GetAliasPath();
         HashCode = Address.GetHashCode();
         
@@ -80,7 +83,7 @@ internal sealed class AssetFolder
             if (!keep)
                 continue;
 
-            state.RootFolder.SortInAssets(file, state.Composition);
+            state.RootFolder.SortInAsset(file);
         }
         
         state.RootFolder.UpdateMatchingAssetCounts(state.CompatibleExtensionIds, state.SearchString);
@@ -124,7 +127,7 @@ internal sealed class AssetFolder
     /// Build up folder structure by sorting in one asset at a time
     /// creating required sub folders on the way.
     /// </summary>
-    private void SortInAssets(Asset asset, Instance composition)
+    private void SortInAsset(Asset asset)
     {
         var currentFolder = this;
         foreach (var pathPart in asset.PathParts) // Using core pre-calculated parts
@@ -143,7 +146,16 @@ internal sealed class AssetFolder
 
     private bool TryGetSubFolder(string folderName, [NotNullWhen(true)] out AssetFolder? subFolder)
     {
-        subFolder = SubFolders.FirstOrDefault(n => n.Name == folderName);
+        subFolder = null;
+        foreach (var n in SubFolders)
+        {
+            if (n.Name != folderName) 
+                continue;
+            
+            subFolder = n;
+            break;
+        }
+
         return subFolder != null;
     }
 

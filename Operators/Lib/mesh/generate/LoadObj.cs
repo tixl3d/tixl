@@ -217,6 +217,4 @@ internal sealed class LoadObj : Instance<LoadObj>, IDescriptiveFilename, IStatus
     public readonly InputSlot<float> ScaleFactor = new();
 
     private readonly Resource<MeshDataSet> _resource;
-    public IEnumerable<string> FileFilter => _fileFilters;
-    private static readonly string[] _fileFilters = ["*.obj"];
 }

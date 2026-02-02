@@ -98,8 +98,6 @@ internal sealed class LoadObjEdges : Instance<LoadObjEdges>, IDescriptiveFilenam
 
     public InputSlot<string> SourcePathSlot => Path;
         
-    public IEnumerable<string> FileFilter => FileFilters;
-    private static readonly string[] FileFilters = ["*.obj"];
 
     private readonly StructuredList<Point> _pointList = new(10);
 

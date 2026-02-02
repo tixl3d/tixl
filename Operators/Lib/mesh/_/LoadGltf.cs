@@ -210,8 +210,6 @@ internal sealed class LoadGltf : Instance<LoadGltf>, IDescriptiveFilename, IStat
     [Input(Guid = "38232F5A-71A6-4213-BF04-AB80A0E448DB")]
     public readonly InputSlot<int> ChildIndex = new();
     
-    public IEnumerable<string> FileFilter => FileFilters;
-    private readonly string[] FileFilters = { "*.gltf", "*.glb" };
 
     public IStatusProvider.StatusLevel GetStatusLevel()
     {

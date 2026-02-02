@@ -304,7 +304,13 @@
     {
       "Id": "49ff0e41-3337-41b8-a64f-da9bbd971cd8"/*LoadImage*/,
       "SymbolId": "0b3436db-e283-436e-ba85-2f3a1de76a9d",
-      "InputValues": [],
+      "InputValues": [
+        {
+          "Id": "96044c6c-d005-4d61-b605-7a6896e98cb6"/*CacheResources*/,
+          "Type": "System.Boolean",
+          "Value": true
+        }
+      ],
       "Outputs": []
     },
     {
@@ -1109,7 +1115,7 @@
         {
           "Id": "ca9778e7-072c-4304-9043-eeb2dc4ca5d7"/*Folder*/,
           "Type": "System.String",
-          "Value": "c:/Users/pixtur/Documents/TiXL/VJCasual/Resources/images/churches"
+          "Value": "Examples:images/sequences/CatMadness/"
         },
         {
           "Id": "e14a4aae-e253-4d14-80ef-a90271cd306a"/*TriggerUpdate*/,

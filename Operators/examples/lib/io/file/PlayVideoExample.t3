@@ -96,13 +96,7 @@
     {
       "Id": "261928a8-b6dc-435e-baf8-4525087821ac"/*PlayVideo*/,
       "SymbolId": "914fb032-d7eb-414b-9e09-2bdd7049e049",
-      "InputValues": [
-        {
-          "Id": "0e255347-08bc-4363-9ffa-ab863a1cea8e"/*Path*/,
-          "Type": "System.String",
-          "Value": "C:\\Users\\pixtur\\Downloads\\insta\\polyhop-moonguidances.mp4"
-        }
-      ],
+      "InputValues": [],
       "Outputs": []
     },
     {

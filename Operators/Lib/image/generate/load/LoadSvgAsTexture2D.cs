@@ -129,8 +129,6 @@ internal sealed class LoadSvgAsTexture2D : Instance<LoadSvgAsTexture2D>, IDescri
         return Texture2D.CreateFromBitmap(ResourceManager.Device, formatConverter);
     }
 
-    public IEnumerable<string> FileFilter => FileFilters;
-    private static readonly string[] FileFilters = ["*.svg"];
     public InputSlot<string> SourcePathSlot => Path;
 
     private readonly Resource<SvgDocument> _svgResource;

@@ -515,8 +515,6 @@ public class LoadGltfScene : Instance<LoadGltfScene>
         }
     }
     
-    public IEnumerable<string> FileFilter => _fileFilters;
-    private static readonly string[] _fileFilters = ["*.gltf"];
     private readonly Resource<SceneSetup> _resource;
 
 

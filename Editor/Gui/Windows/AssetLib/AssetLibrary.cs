@@ -148,7 +148,7 @@ internal sealed partial class AssetLibrary : Window
     }
 
     private int? _lastCompositionObjId = 0;
-
+    public static readonly HashSet<string> HiddenPackages = ["Skills", "t3.ndi", "t3.spout", "t3.unsplash", "Types", "Mediapipe"];
     private static readonly AssetLibState _state = new();
     
     

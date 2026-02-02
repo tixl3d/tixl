@@ -10,51 +10,105 @@ internal sealed class LoadImage : Instance<LoadImage>, IDescriptiveFilename, ISt
     {
         _textureResource = ResourceManager.CreateTextureResource(Path);
         _textureResource.AddDependentSlots(Texture);
-
         
-        Texture.UpdateAction = UpdateTexture;
+        Texture.UpdateAction = Update;
     }
 
-    private void UpdateTexture(EvaluationContext context)
+    private void Update(EvaluationContext context)
     {
-        Texture.Value = _textureResource.GetValue(context);
-        Texture.DirtyFlag.Clear();
-
-        if (Texture.Value == null)
+        var useCache = CacheResources.GetValue(context);
+        if (!useCache)
         {
-            _lastErrorMessage = "Failed to load texture: " + Path.Value;
+            DisposeCache();            
             
-            if(!string.IsNullOrEmpty(Path.Value))
-                Log.Warning(_lastErrorMessage, this);
-            
-            return;
-        }
+            Texture.Value = _textureResource.GetValue(context);
+            Texture.DirtyFlag.Clear();
 
-        var currentSrv = SrvManager.GetSrvForTexture(Texture.Value);
+            if (Texture.Value == null)
+            {
+                _lastErrorMessage = "Failed to load texture: " + Path.Value;
+            
+                if(!string.IsNullOrEmpty(Path.Value))
+                    Log.Warning(_lastErrorMessage, this);
+            
+                return;
+            }
+
+            var currentSrv = SrvManager.GetSrvForTexture(Texture.Value);
+            if (currentSrv == null || currentSrv.IsDisposed)
+                return;
         
-        try
-        {
-            ResourceManager.Device.ImmediateContext.GenerateMips(currentSrv);
+            try
+            {
+                ResourceManager.Device.ImmediateContext.GenerateMips(currentSrv);
+            }
+            catch (Exception exception)
+            {
+                Log.Error($"Failed to generate mipmaps for texture {Path.Value}:" + exception);
+            }
         }
-        catch (Exception exception)
+        else
         {
-            Log.Error($"Failed to generate mipmaps for texture {Path.Value}:" + exception);
-        }
+            var filePath = Path.GetValue(context);
+            if (_resourcesCache.TryGetValue(filePath, out var resource))
+            {
+                Texture.Value = resource.Value;
+                return;
+            }
 
+            var newResource = ResourceManager.CreateTextureResource(filePath, this);
+            if (newResource.Value != null)
+            {
+                _resourcesCache[filePath] = newResource;
+                
+                var currentSrv = SrvManager.GetSrvForTexture(newResource.Value);
+                if (currentSrv == null || currentSrv.IsDisposed)
+                    return;
+        
+                try
+                {
+                    ResourceManager.Device.ImmediateContext.GenerateMips(currentSrv);
+                }
+                catch (Exception exception)
+                {
+                    Log.Error($"Failed to generate mipmaps for texture {Path.Value}:" + exception);
+                }
+            }
+        }
+        
         _lastErrorMessage = string.Empty;
     }
 
-    [Input(Guid = "{76CC3811-4AE0-48B2-A119-890DB5A4EEB2}")]
+    private void DisposeCache()
+    {
+        if (_resourcesCache.Count == 0)
+            return;
+
+        foreach (var r in _resourcesCache.Values)
+        {
+            r.Dispose();
+        }
+        _resourcesCache.Clear();
+    }
+
+    [Input(Guid = "76CC3811-4AE0-48B2-A119-890DB5A4EEB2")]
     public readonly InputSlot<string> Path = new();
 
-    public IEnumerable<string> FileFilter => FileFilters;
-    private static readonly string[] FileFilters = ["*.png", "*.jpg", "*.jpeg", "*.bmp", "*.tga", "*.dds", "*.gif"];
+
+    [Input(Guid = "96044C6C-D005-4D61-B605-7A6896E98CB6")]
+    public readonly InputSlot<bool> CacheResources = new();
+    
+    
+    private readonly Dictionary<string,  Resource<Texture2D> > _resourcesCache = new();
+    
     public InputSlot<string> SourcePathSlot => Path;
 
     private readonly Resource<Texture2D> _textureResource;
 
     IStatusProvider.StatusLevel IStatusProvider.GetStatusLevel() =>
-        string.IsNullOrEmpty(_lastErrorMessage) ? IStatusProvider.StatusLevel.Success : IStatusProvider.StatusLevel.Warning;
+        string.IsNullOrEmpty(_lastErrorMessage) 
+            ? IStatusProvider.StatusLevel.Success 
+            : IStatusProvider.StatusLevel.Warning;
 
     string IStatusProvider.GetStatusMessage() => _lastErrorMessage;
 
