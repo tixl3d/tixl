@@ -39,18 +39,30 @@ public sealed class Apc40Mk2 : CompatibleMidiDevice
                 new CommandTriggerCombination(SnapshotActions.RemoveSnapshotAtIndex, InputModes.Delete, [SceneTrigger1To40],
                                               CommandTriggerCombination.ExecutesAt.SingleRangeButtonPressed),
 
+                // Blend between two snapshots - press two clip buttons simultaneously
+                new CommandTriggerCombination(BlendActions.StartBlendingSnapshots, InputModes.Default, [SceneTrigger1To40],
+                                              CommandTriggerCombination.ExecutesAt.AllCombinedButtonsReleased),
+
+                // Start blend towards - hold Scene Launch 2 + press clip button to start blend
+                new CommandTriggerCombination(BlendActions.StartBlendingTowardsSnapshot, InputModes.BlendTo, [SceneTrigger1To40],
+                                              CommandTriggerCombination.ExecutesAt.SingleRangeButtonPressed),
+
                 // Stop blending - press Scene Launch 2 to stop blend operation
                 new CommandTriggerCombination(BlendActions.StopBlendingTowards, InputModes.Default, [SceneLaunch2],
                                               CommandTriggerCombination.ExecutesAt.SingleActionButtonPressed),
-
-                // Start blend towards - hold Scene Launch 2 + press clip button to start blend
-                new CommandTriggerCombination(BlendActions.StartBlendingTowardsSnapshot, requiredInputMode: InputModes.BlendTo, [SceneTrigger1To40],
-                                              CommandTriggerCombination.ExecutesAt.SingleRangeButtonPressed),
-
+                
+                // Stop blending - press Stop All Clips to stop blend operation
+                new CommandTriggerCombination(BlendActions.StopBlendingTowards, InputModes.Default, [ClipStopAll],
+                                              CommandTriggerCombination.ExecutesAt.SingleActionButtonPressed),
+                
                 // Update blend progress with crossfader
                 new CommandTriggerCombination(BlendActions.UpdateBlendingTowardsProgress, InputModes.Default, [AbFader],
                                               CommandTriggerCombination.ExecutesAt.ControllerChange),
 
+                // Update blend progress with Master Fader
+                new CommandTriggerCombination(BlendActions.UpdateBlendingTowardsProgress, InputModes.Default, [MasterFader],
+                                              CommandTriggerCombination.ExecutesAt.ControllerChange),
+                
                 // Update blend values with channel faders
                 new CommandTriggerCombination(BlendActions.UpdateBlendValues, InputModes.Default, [Fader1To8],
                                               CommandTriggerCombination.ExecutesAt.ControllerChange),
@@ -225,18 +237,18 @@ public sealed class Apc40Mk2 : CompatibleMidiDevice
         if (MidiOutConnection == null)
             return;
 
-        var colors = new[]
+        var modeLedColors = new[]
         {
-            _useGenericMode ? Apc40Mk2Colors.Green : Apc40Mk2Colors.Off,                    // Generic passthrough
-            !_useGenericMode && !IsInControlMode ? Apc40Mk2Colors.Green : Apc40Mk2Colors.Off, // Ableton passthrough
-            !_useGenericMode && IsInControlMode ? Apc40Mk2Colors.Green : Apc40Mk2Colors.Off   // Ableton control
+            _useGenericMode ? Apc40Mk2Colors.Green : Apc40Mk2Colors.Off,                        // Generic passthrough
+            !_useGenericMode && !IsInControlMode ? Apc40Mk2Colors.Green : Apc40Mk2Colors.Off,   // Ableton passthrough
+            !_useGenericMode && IsInControlMode ? Apc40Mk2Colors.Green : Apc40Mk2Colors.Off     // Ableton control
         };
 
-        for (var i = 0; i < 3; i++)
+        for (var i = 0; i < modeLedColors.Length; i++)
         {
             var channel = _useGenericMode ? MidiChannels1To8.StartIndex : MidiChannels1To8.StartIndex + i;
             var note = _useGenericMode ? i : AbletonRecordArmNote;
-            SendNoteRaw(channel, note, (int)colors[i]);
+            SendNoteRaw(channel, note, (int)modeLedColors[i]);
         }
     }
 
@@ -554,7 +566,7 @@ public sealed class Apc40Mk2 : CompatibleMidiDevice
 
     // Clip Launch Button Grid
     private static readonly ButtonRange SceneTrigger1To40 = new(0, 39);
-
+    
     // Scene Launch buttons
     private static readonly ButtonRange SceneLaunch1To5 = new(82, 86);
     private static readonly ButtonRange SceneLaunch1 = new(82);
@@ -571,6 +583,9 @@ public sealed class Apc40Mk2 : CompatibleMidiDevice
     private const int RecordArmBaseId = 2000;
     private static readonly ButtonRange RecordArmButtons = new(RecordArmBaseId, RecordArmBaseId + 7);
 
+    // Stop all clips button
+    private static readonly ButtonRange ClipStopAll = new(81);
+    
     // Navigation buttons
     private static readonly ButtonRange BankSelectTop = new(94);
     private static readonly ButtonRange BankSelectRight = new(96);

@@ -25,29 +25,37 @@ public sealed class Apc40Mk1 : CompatibleMidiDevice
         CommandTriggerCombinations = 
             [
                     // Snapshot activate/create - press clip button to activate or create snapshot
-                    new CommandTriggerCombination(SnapshotActions.ActivateOrCreateSnapshotAtIndex, InputModes.Default, [SceneTrigger1To40],
+                    new CommandTriggerCombination(SnapshotActions.ActivateOrCreateSnapshotAtIndex, InputModes.Default, [SceneTrigger1To40], 
                                                   CommandTriggerCombination.ExecutesAt.SingleRangeButtonPressed),
 
                     // Snapshot save - hold Shift + press clip button to save
-                    new CommandTriggerCombination(SnapshotActions.SaveSnapshotAtIndex, InputModes.Save, [SceneTrigger1To40],
+                    new CommandTriggerCombination(SnapshotActions.SaveSnapshotAtIndex, InputModes.Save, [SceneTrigger1To40], 
                                                   CommandTriggerCombination.ExecutesAt.SingleRangeButtonPressed),
 
                     // Snapshot delete - hold Scene Launch 1 + press clip button to delete
-                    new CommandTriggerCombination(SnapshotActions.RemoveSnapshotAtIndex, InputModes.Delete, [SceneTrigger1To40],
+                    new CommandTriggerCombination(SnapshotActions.RemoveSnapshotAtIndex, InputModes.Delete, [SceneTrigger1To40], 
                                                   CommandTriggerCombination.ExecutesAt.SingleRangeButtonPressed),
 
-                    // Stop blending - press Scene Launch 2 to stop blend operation
-                    new CommandTriggerCombination(BlendActions.StopBlendingTowards, InputModes.Default, [SceneLaunch2],
-                                                  CommandTriggerCombination.ExecutesAt.SingleActionButtonPressed),
+                    // Blend between two snapshots - press two clip buttons simultaneously
+                    new CommandTriggerCombination(BlendActions.StartBlendingSnapshots, InputModes.Default, [SceneTrigger1To40], 
+                                                  CommandTriggerCombination.ExecutesAt.AllCombinedButtonsReleased),
 
                     // Start blend towards - hold Scene Launch 2 + press clip button to start blend
-                    new CommandTriggerCombination(BlendActions.StartBlendingTowardsSnapshot, requiredInputMode: InputModes.BlendTo, [SceneTrigger1To40],
+                    new CommandTriggerCombination(BlendActions.StartBlendingTowardsSnapshot, InputModes.BlendTo, [SceneTrigger1To40], 
                                                   CommandTriggerCombination.ExecutesAt.SingleRangeButtonPressed),
 
+                    // Stop blending - press Stop All Clips to stop blend operation
+                    new CommandTriggerCombination(BlendActions.StopBlendingTowards, InputModes.Default, [ClipStopAll],
+                                                 CommandTriggerCombination.ExecutesAt.SingleActionButtonPressed),
+
                     // Update blend progress with crossfader
-                    new CommandTriggerCombination(BlendActions.UpdateBlendingTowardsProgress, InputModes.Default, [AbFader],
+                    new CommandTriggerCombination(BlendActions.UpdateBlendingTowardsProgress, InputModes.Default, [AbFader], 
                                                   CommandTriggerCombination.ExecutesAt.ControllerChange),
 
+                    // Update blend progress with Master Fader
+                    new CommandTriggerCombination(BlendActions.UpdateBlendingTowardsProgress, InputModes.Default, [MasterFader],
+                                                  CommandTriggerCombination.ExecutesAt.ControllerChange),
+                    
                     // Update blend values with channel faders
                     new CommandTriggerCombination(BlendActions.UpdateBlendValues, InputModes.Default, [Fader1To8],
                                                   CommandTriggerCombination.ExecutesAt.ControllerChange),
@@ -230,18 +238,18 @@ public sealed class Apc40Mk1 : CompatibleMidiDevice
         if (MidiOutConnection == null)
             return;
 
-        var colors = new[]
+        var modeLedColors = new[]
         {
-            _useGenericMode ? Apc40Mk1Colors.Green : Apc40Mk1Colors.Off,                    // Generic passthrough
-            !_useGenericMode && !IsInControlMode ? Apc40Mk1Colors.Green : Apc40Mk1Colors.Off, // Ableton passthrough
-            !_useGenericMode && IsInControlMode ? Apc40Mk1Colors.Green : Apc40Mk1Colors.Off   // Ableton control
+            _useGenericMode ? Apc40Mk1Colors.Green : Apc40Mk1Colors.Off,                        // Generic passthrough
+            !_useGenericMode && !IsInControlMode ? Apc40Mk1Colors.Green : Apc40Mk1Colors.Off,   // Ableton passthrough
+            !_useGenericMode && IsInControlMode ? Apc40Mk1Colors.Green : Apc40Mk1Colors.Off     // Ableton control
         };
-
-        for (var i = 0; i < 3; i++)
+        
+        for (var i = 0; i < modeLedColors.Length; i++)
         {
             var channel = _useGenericMode ? MidiChannels1To8.StartIndex : MidiChannels1To8.StartIndex + i;
             var note = _useGenericMode ? GenericRecordArmNotes.StartIndex + i : AbletonRecordArmNote;
-            SendNoteRaw(channel, note, (int)colors[i]);
+            SendNoteRaw(channel, note, (int)modeLedColors[i]);
         }
     }
 
@@ -432,31 +440,35 @@ public sealed class Apc40Mk1 : CompatibleMidiDevice
             return buttonId;
         }
 
-        if (_useGenericMode && channel == MidiChannels1To8.StartIndex)
+        switch (_useGenericMode)
         {
-            // Generic Record/Arm: Notes 49-55 on Channel 1 (48 handled above)
-            if (GenericRecordArmNotes.IncludesButtonIndex(noteNumber) && noteNumber != AbletonRecordArmNote)
+            case true when channel == MidiChannels1To8.StartIndex:
             {
-                var buttonId = RecordArmBaseId + GenericRecordArmNotes.GetMappedIndex(noteNumber);
-                LogMidiDebug($"ConvertNoteToButtonId: Record/Arm (Generic mapping) Note={noteNumber}, Channel={channel} -> ButtonId={buttonId}");
-                return buttonId;
-            }
+                // Generic Record/Arm: Notes 49-55 on Channel 1 (48 handled above)
+                if (GenericRecordArmNotes.IncludesButtonIndex(noteNumber) && noteNumber != AbletonRecordArmNote)
+                {
+                    var buttonId = RecordArmBaseId + GenericRecordArmNotes.GetMappedIndex(noteNumber);
+                    LogMidiDebug($"ConvertNoteToButtonId: Record/Arm (Generic mapping) Note={noteNumber}, Channel={channel} -> ButtonId={buttonId}");
+                    return buttonId;
+                }
             
-            // Generic Track Select: Notes 58-65 on Channel 1
-            if (GenericTrackSelectNotes.IncludesButtonIndex(noteNumber))
+                // Generic Track Select: Notes 58-65 on Channel 1
+                if (GenericTrackSelectNotes.IncludesButtonIndex(noteNumber))
+                {
+                    var buttonId = TrackSelectBaseId + GenericTrackSelectNotes.GetMappedIndex(noteNumber);
+                    LogMidiDebug($"ConvertNoteToButtonId: Track Select (Generic mapping) Note={noteNumber}, Channel={channel} -> ButtonId={buttonId}");
+                    return buttonId;
+                }
+
+                break;
+            }
+            // Ableton Track Select: Note 51 on Channels 1-8
+            case false when noteNumber == AbletonTrackSelectNote && MidiChannels1To8.IncludesButtonIndex(channel):
             {
-                var buttonId = TrackSelectBaseId + GenericTrackSelectNotes.GetMappedIndex(noteNumber);
-                LogMidiDebug($"ConvertNoteToButtonId: Track Select (Generic mapping) Note={noteNumber}, Channel={channel} -> ButtonId={buttonId}");
+                var buttonId = TrackSelectBaseId + MidiChannels1To8.GetMappedIndex(channel);
+                LogMidiDebug($"ConvertNoteToButtonId: Track Select (Ableton mapping) Note={noteNumber}, Channel={channel} -> ButtonId={buttonId}");
                 return buttonId;
             }
-        }
-        
-        // Ableton Track Select: Note 51 on Channels 1-8
-        if (!_useGenericMode && noteNumber == AbletonTrackSelectNote && MidiChannels1To8.IncludesButtonIndex(channel))
-        {
-            var buttonId = TrackSelectBaseId + MidiChannels1To8.GetMappedIndex(channel);
-            LogMidiDebug($"ConvertNoteToButtonId: Track Select (Ableton mapping) Note={noteNumber}, Channel={channel} -> ButtonId={buttonId}");
-            return buttonId;
         }
 
         // Default fallback - use note number directly
@@ -536,6 +548,9 @@ public sealed class Apc40Mk1 : CompatibleMidiDevice
     
     // Track Select buttons (mapped to button IDs 1000-1007 via ConvertNoteToButtonId)
     private static readonly ButtonRange TrackSelectButtons = new(TrackSelectBaseId, TrackSelectBaseId + 7);
+    
+    // Stop all clips button
+    private static readonly ButtonRange ClipStopAll = new(81);
     
     // Navigation buttons
     private static readonly ButtonRange BankSelectUp = new(94);
