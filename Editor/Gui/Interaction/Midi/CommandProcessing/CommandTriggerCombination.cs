@@ -1,4 +1,6 @@
-﻿namespace T3.Editor.Gui.Interaction.Midi.CommandProcessing;
+﻿using T3.Editor.Gui.UiHelpers;
+
+namespace T3.Editor.Gui.Interaction.Midi.CommandProcessing;
 
 /// <summary>
 /// Defines and invokes matching commands if input signals are matching. 
@@ -84,7 +86,7 @@ public sealed class CommandTriggerCombination
             if (_activatedIndices.Count <= 0)
                 return;
             
-            Log.Debug($"Invoking {this} with index {_activatedIndices[0]} (ModeButtonReleased)");
+            LogMidiDebug($"Invoking {this} with index {_activatedIndices[0]} (ModeButtonReleased)");
             _indexAction?.Invoke(_activatedIndices[0]);
             _indicesAction?.Invoke(_activatedIndices.ToArray());
             return;
@@ -100,7 +102,7 @@ public sealed class CommandTriggerCombination
                 if (_holdIndices.Count != 0 || _justPressedIndices.Count <= 0)
                     return;
                 
-                Log.Debug($"Invoking {this} with index {_justPressedIndices[0]} (SingleRangeButtonPressed)");
+                LogMidiDebug($"Invoking {this} with index {_justPressedIndices[0]} (SingleRangeButtonPressed)");
                 _indexAction?.Invoke(_justPressedIndices[0]);
                 _indicesAction?.Invoke(_activatedIndices.ToArray());
                 return;
@@ -113,7 +115,7 @@ public sealed class CommandTriggerCombination
                     && buttonSignals[0].State == ButtonSignal.States.JustPressed
                    )
                 {
-                    Log.Debug($"Invoking {this} (SingleActionButtonPressed)");
+                    LogMidiDebug($"Invoking {this} (SingleActionButtonPressed)");
                     _actionWithoutParameters?.Invoke();
                 }
 
@@ -124,7 +126,7 @@ public sealed class CommandTriggerCombination
             {
                 if (_releasedIndices.Count > 1 && _justPressedIndices.Count == 0 && _holdIndices.Count == 0)
                 {
-                    Log.Debug($"Invoking {this} with {_activatedIndices.Count} indices (AllCombinedButtonsReleased)");
+                    LogMidiDebug($"Invoking {this} with {_activatedIndices.Count} indices (AllCombinedButtonsReleased)");
                     _indicesAction?.Invoke(_activatedIndices.ToArray());
                 }
 
@@ -227,4 +229,12 @@ public sealed class CommandTriggerCombination
     /// </summary>
     public CompatibleMidiDevice.InputModes RequiredInputMode => _requiredInputMode;
 
+    /// <summary>
+    /// Logs a debug message if MIDI debug logging is enabled in settings.
+    /// </summary>
+    private static void LogMidiDebug(string message)
+    {
+        if (UserSettings.Config.EnableMidiDebugLogging)
+            Log.Debug(message);
+    }
 }
