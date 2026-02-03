@@ -72,9 +72,16 @@ internal sealed class DelaunayMesh : Instance<DelaunayMesh>
             var verticesCount = pointArray.Length;
             var triangleCount = delaunay.Triangles.Length / 3;
 
-            // Get max edge length parameter for alpha shape filtering
+            // Get filtering parameters
             var maxEdgeLength = MaxEdgeLength.GetValue(context);
-            var useAlphaShape = maxEdgeLength > 0.0001f; // Only filter if max edge length is set
+            var useAlphaShape = maxEdgeLength > 0.0001f;
+
+            // Use all points as boundary polygon
+            var boundaryPolygon = new Vector2[pointArray.Length];
+            for (int i = 0; i < pointArray.Length; i++)
+            {
+                boundaryPolygon[i] = new Vector2(pointArray[i].Position.X, pointArray[i].Position.Y);
+            }
 
             // Calculate normals, tangent, bitangent for the mesh
             var normal = Vector3.TransformNormal(VectorT3.ForwardLH, rotationMatrix);
@@ -93,7 +100,7 @@ internal sealed class DelaunayMesh : Instance<DelaunayMesh>
             if (rangeX < 0.0001f) rangeX = 1.0f;
             if (rangeY < 0.0001f) rangeY = 1.0f;
 
-            // Filter triangles if alpha shape is enabled
+            // Filter triangles
             var validTriangles = new List<Int3>();
 
             for (int i = 0; i < triangleCount; i++)
@@ -102,24 +109,40 @@ internal sealed class DelaunayMesh : Instance<DelaunayMesh>
                 var idx1 = delaunay.Triangles[i * 3 + 1];
                 var idx2 = delaunay.Triangles[i * 3 + 2];
 
+                var p0 = pointArray[idx0].Position;
+                var p1 = pointArray[idx1].Position;
+                var p2 = pointArray[idx2].Position;
+
+                bool keepTriangle = true;
+
+                // Alpha shape filtering
                 if (useAlphaShape)
                 {
-                    // Calculate edge lengths in original point space
-                    var p0 = pointArray[idx0].Position;
-                    var p1 = pointArray[idx1].Position;
-                    var p2 = pointArray[idx2].Position;
-
                     var edge01Length = Vector2.Distance(new Vector2(p0.X, p0.Y), new Vector2(p1.X, p1.Y));
                     var edge12Length = Vector2.Distance(new Vector2(p1.X, p1.Y), new Vector2(p2.X, p2.Y));
                     var edge20Length = Vector2.Distance(new Vector2(p2.X, p2.Y), new Vector2(p0.X, p0.Y));
 
-                    // Only keep triangle if all edges are within max length
-                    if (edge01Length <= maxEdgeLength && edge12Length <= maxEdgeLength && edge20Length <= maxEdgeLength)
+                    if (edge01Length > maxEdgeLength || edge12Length > maxEdgeLength || edge20Length > maxEdgeLength)
                     {
-                        validTriangles.Add(new Int3(idx0, idx2, idx1)); // Reversed winding order
+                        keepTriangle = false;
                     }
                 }
-                else
+
+                // Boundary filtering - check if triangle centroid is inside boundary polygon
+                if (keepTriangle)
+                {
+                    var centroid = new Vector2(
+                        (p0.X + p1.X + p2.X) / 3f,
+                        (p0.Y + p1.Y + p2.Y) / 3f
+                    );
+
+                    if (!IsPointInPolygon(centroid, boundaryPolygon))
+                    {
+                        keepTriangle = false;
+                    }
+                }
+
+                if (keepTriangle)
                 {
                     validTriangles.Add(new Int3(idx0, idx2, idx1)); // Reversed winding order
                 }
@@ -128,13 +151,6 @@ internal sealed class DelaunayMesh : Instance<DelaunayMesh>
             var faceCount = validTriangles.Count;
 
             // Create buffers with correct sizes
-            if (_vertexBufferData.Length != verticesCount)
-                _vertexBufferData = new PbrVertex[verticesCount];
-
-            if (_indexBufferData.Length != faceCount)
-                _indexBufferData = new Int3[faceCount];
-
-            // Create buffers
             if (_vertexBufferData.Length != verticesCount)
                 _vertexBufferData = new PbrVertex[verticesCount];
 
@@ -206,6 +222,24 @@ internal sealed class DelaunayMesh : Instance<DelaunayMesh>
         }
     }
 
+    // Point-in-polygon test using ray casting algorithm
+    private static bool IsPointInPolygon(Vector2 point, Vector2[] polygon)
+    {
+        var inside = false;
+        var n = polygon.Length;
+
+        for (int i = 0, j = n - 1; i < n; j = i++)
+        {
+            if ((polygon[i].Y > point.Y) != (polygon[j].Y > point.Y) &&
+                point.X < (polygon[j].X - polygon[i].X) * (point.Y - polygon[i].Y) / (polygon[j].Y - polygon[i].Y) + polygon[i].X)
+            {
+                inside = !inside;
+            }
+        }
+
+        return inside;
+    }
+
     private Buffer _vertexBuffer;
     private PbrVertex[] _vertexBufferData = new PbrVertex[0];
     private readonly BufferWithViews _vertexBufferWithViews = new();
@@ -215,6 +249,12 @@ internal sealed class DelaunayMesh : Instance<DelaunayMesh>
     private readonly BufferWithViews _indexBufferWithViews = new();
 
     private readonly MeshBuffers _data = new();
+
+    [Input(Guid = "18FDDD63-DB79-4EE6-9A32-B90A5CEFF582")]
+    public readonly InputSlot<StructuredList> List = new();
+
+    [Input(Guid = "e00e4b12-8576-4a78-b773-17630b102a70")]
+    public readonly InputSlot<float> FillDensity = new();
 
     [Input(Guid = "4784908f-ac12-47a0-9542-d65242acace3")]
     public readonly InputSlot<Vector2> Stretch = new();
@@ -233,8 +273,5 @@ internal sealed class DelaunayMesh : Instance<DelaunayMesh>
 
     [Input(Guid = "a5c4c31e-7b3c-4f3e-9d1f-8e2b4d5c6a7b")]
     public readonly InputSlot<float> MaxEdgeLength = new();
-
-    [Input(Guid = "18FDDD63-DB79-4EE6-9A32-B90A5CEFF582")]
-    public readonly InputSlot<StructuredList> List = new();
 
 }
