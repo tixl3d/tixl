@@ -502,6 +502,11 @@ internal sealed class SettingsWindow : Window
                                                       "Log garbage collection information. This can be useful to see correlation between frame drops and GC activity.",
                                                       UserSettings.Defaults.EnableGCProfiling);
 
+                    changed |= FormInputs.AddCheckBox("MIDI Controller Debug Logging",
+                                                      ref UserSettings.Config.EnableMidiDebugLogging,
+                                                      "Log detailed MIDI controller messages including button mappings and mode switches. Useful for debugging custom controller implementations.",
+                                                      UserSettings.Defaults.EnableMidiDebugLogging);
+
                     changed |= FormInputs.AddCheckBox("Profile Beat Syncing",
                                                       ref ProjectSettings.Config.EnableBeatSyncProfiling,
                                                       "Logs beat sync timing to IO Window",

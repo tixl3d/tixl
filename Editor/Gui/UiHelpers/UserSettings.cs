@@ -150,6 +150,7 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         public bool EnableFrameProfiling = true;
         public bool KeepTraceForLogMessages = false;
         public bool EnableGCProfiling = false;
+        public bool EnableMidiDebugLogging = false;
         public bool ShowOperatorStats = false;
 
         public CompilerOptions.Verbosity CompileCsVerbosity = CompilerOptions.Verbosity.Normal;
