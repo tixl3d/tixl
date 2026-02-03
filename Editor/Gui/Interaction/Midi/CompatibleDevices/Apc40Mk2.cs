@@ -579,14 +579,14 @@ public sealed class Apc40Mk2 : CompatibleMidiDevice
 
     // Generic Mode (0x40) MIDI Mappings
     private static readonly ButtonRange GenericClipGridNotes = new(0, 39);
-    private static readonly ButtonRange GenericRecordArmNotes = new(0, 7);
+    private static readonly ButtonRange GenericRecordArmNotes = new(48, 55);
     private static readonly ButtonRange GenericTrackSelectNotes = new(58, 65);
 
     // Ableton Live Mode (0x41/0x42) MIDI Mappings
     // Clip Launch Grid: Notes 0-4 on Channels 1-8 (5 rows x 8 columns)
     private static readonly ButtonRange AbletonClipGridNotes = new(0, 4);
     private const int AbletonClipGridColumns = 8;
-    private const int AbletonRecordArmNote = 0;
+    private const int AbletonRecordArmNote = 48;
     private const int AbletonTrackSelectNote = 51;
 
     private static readonly ButtonRange SceneLaunchNotes = new(82, 86);
