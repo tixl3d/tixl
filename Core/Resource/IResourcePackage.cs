@@ -11,6 +11,7 @@ public interface IResourcePackage
     string Name { get; }
     Guid Id { get; }
     string AssetsFolder { get; }
+    string Folder { get; }
     string? RootNamespace { get; }
     ResourceFileWatcher? FileWatcher { get; }
     bool IsReadOnly { get; }

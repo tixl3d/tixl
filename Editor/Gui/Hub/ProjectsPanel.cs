@@ -7,6 +7,7 @@ using T3.Editor.Gui.Window;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Gui.UiHelpers.Thumbnails;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.ProjectHandling;
 
@@ -104,6 +105,20 @@ internal static class ProjectsPanel
                    min + new Vector2(x, y),
                    UiColors.TextMuted, package.Folder);
 
+
+        var thumbnail = ThumbnailManager.GetThumbnail(package.Id, package);
+        if (thumbnail.IsReady && ThumbnailManager.AtlasSrv != null)
+        {
+            var height = ProjectItemSize.Y - padding * 2;
+            var size = new Vector2(height * 4/3f, height);
+            var pos = new Vector2(max.X - size.X - padding, min.Y + padding);
+            dl.AddImage(ThumbnailManager.AtlasSrv.NativePointer, 
+                        pos,
+                        pos + size,
+                          thumbnail.Min, thumbnail.Max);
+        }
+        
+        
         if (clicked)
         {
             if (!isOpened)

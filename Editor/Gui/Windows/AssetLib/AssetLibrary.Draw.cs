@@ -5,6 +5,7 @@ using T3.Core.DataTypes.Vector;
 using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
+using T3.Core.Resource;
 using T3.Core.Resource.Assets;
 using T3.Core.SystemUi;
 using T3.Core.UserData;
@@ -12,6 +13,7 @@ using T3.Core.Utils;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Gui.UiHelpers.Thumbnails;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.ProjectHandling;
@@ -75,7 +77,7 @@ internal sealed partial class AssetLibrary
     {
         if (folder.IsHidden)
             return;
-        
+
         var folderName = folder.Name.AsSpan();
         if (folderName == AssetFolder.RootNodeId)
         {
@@ -93,7 +95,7 @@ internal sealed partial class AssetLibrary
 
             // Open main folders automatically
             if (!_state.OpenedExamplesFolderOnce
-                && folderName.Equals(FileLocations.ExamplesPackageName, StringComparison.OrdinalIgnoreCase) )
+                && folderName.Equals(FileLocations.ExamplesPackageName, StringComparison.OrdinalIgnoreCase))
             {
                 ImGui.SetNextItemOpen(true);
                 _state.OpenedExamplesFolderOnce = true;
@@ -105,7 +107,7 @@ internal sealed partial class AssetLibrary
                 ImGui.SetNextItemOpen(true);
                 _state.OpenedProjectsFolderOnce = true;
             }
-            
+
             ImGui.PushID(folder.HashCode);
 
             // Prepare drawing
@@ -390,7 +392,7 @@ internal sealed partial class AssetLibrary
                                                                    if (ImGui.MenuItem("Reveal in Explorer"))
                                                                    {
                                                                        var absolutePath = asset.FileSystemInfo?.FullName;
-                                                                       
+
                                                                        var folder = Path.GetDirectoryName(absolutePath);
                                                                        if (!string.IsNullOrEmpty(folder))
                                                                        {
@@ -423,54 +425,64 @@ internal sealed partial class AssetLibrary
                 Icons.DrawIconAtScreenPosition(Icon.Sleeping, pos, ImGui.GetWindowDrawList(), UiColors.Text.Fade(0.4f));
             }
 
-            if (ImGui.IsItemHovered())
-            {
-                ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeAll); // Indicator for drag
-
-                // Tooltip
-                {
-                    var absolutePath = asset.FileSystemInfo?.FullName;
-                    var fileName = asset.FileSystemInfo?.Name ?? "Unknown";
-                    var path = absolutePath != null && absolutePath.EndsWith(fileName)
-                                   ? absolutePath[..^fileName.Length]
-                                   : absolutePath;
-
-                    ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(4, 4) * T3Ui.UiScaleFactor);
-
-                    if (ImGui.BeginTooltip())
-                    {
-                        CustomComponents.StylizedText($"{StringUtils.GetReadableFileSize(asset.FileSize)}  / {asset.FileSystemInfo?.LastWriteTime}",
-                                                      Fonts.FontSmall, UiColors.TextMuted);
-                        FormInputs.AddVerticalSpace(2);
-                        CustomComponents.StylizedText($"in {path}", Fonts.FontSmall, UiColors.TextMuted);
-
-                        FormInputs.AddVerticalSpace();
-                        if (hasUses && uses != null)
-                        {
-                            CustomComponents.StylizedText("Used in...", Fonts.FontSmall, UiColors.TextMuted);
-                            foreach (var reference in uses)
-                            {
-                                DrawAssetReference(reference);
-                            }
-                        }
-                        else
-                        {
-                            ImGui.TextUnformatted("""
-                                                  Not directly used in any parameter. 
-                                                  (Other users are possible...)
-                                                  """);
-                        }
-
-                        //ImGui.PopTextWrapPos();
-                        ImGui.EndTooltip();
-                    }
-
-                    ImGui.PopStyleVar();
-                }
-            }
+            DrawAssetTooltip(asset, hasUses, uses);
         }
 
         ImGui.PopID();
+    }
+
+    private static void DrawAssetTooltip(Asset asset, bool hasUses, List<AssetReference>? uses)
+    {
+        if (!ImGui.IsItemHovered())
+            return;
+
+        ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeAll); // Indicator for drag (actually not part of tooltip)
+
+        if (CustomComponents.BeginTooltip(600))
+        {
+            ImGui.BeginGroup();
+            {
+                var absolutePath = asset.FileSystemInfo?.FullName;
+                var fileName = asset.FileSystemInfo?.Name ?? "Unknown";
+                var path = absolutePath != null && absolutePath.EndsWith(fileName)
+                               ? absolutePath[..^fileName.Length]
+                               : absolutePath;
+
+                CustomComponents.StylizedText($"{StringUtils.GetReadableFileSize(asset.FileSize)}  / {asset.FileSystemInfo?.LastWriteTime}",
+                                              Fonts.FontSmall, UiColors.TextMuted);
+                FormInputs.AddVerticalSpace(2);
+                CustomComponents.StylizedText($"in {path}", Fonts.FontSmall, UiColors.TextMuted);
+
+                FormInputs.AddVerticalSpace();
+                if (hasUses && uses != null)
+                {
+                    CustomComponents.StylizedText("Used in...", Fonts.FontSmall, UiColors.TextMuted);
+                    foreach (var reference in uses)
+                    {
+                        DrawAssetReference(reference);
+                    }
+                }
+                else
+                {
+                    ImGui.TextUnformatted("""
+                                          Not directly used in any parameter. 
+                                          (Other users are possible...)
+                                          """);
+                }
+            }
+            ImGui.EndGroup();
+            ImGui.SameLine();
+            
+            ImGui.BeginGroup();
+            {
+                var package = ResourceManager.SharedResourcePackages.FirstOrDefault(p => p.Id == asset.PackageId);
+                ThumbnailManager.GetThumbnail(asset, package).AsImguiImage();
+            }
+            ImGui.EndGroup();
+
+        }
+
+        CustomComponents.EndTooltip();
     }
 
     private static void DrawAssetReference(AssetReference reference)

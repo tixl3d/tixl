@@ -13,10 +13,11 @@ using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.Interaction.StartupCheck;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Gui.UiHelpers.Thumbnails;
 using T3.Editor.Gui.UiHelpers.Wiki;
 using T3.Editor.Gui.Windows;
 using T3.Editor.Gui.Windows.Layouts;
-using T3.Editor.Skills.Data;
+using T3.Editor.Gui.Windows.RenderExport;
 using T3.Editor.Skills.Ui;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
@@ -34,6 +35,8 @@ internal static class AppMenuBar
 
         if (ImGui.BeginMainMenuBar())
         {
+            
+            
             // Enable app menu after click if only visible during hover
             if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
             {
@@ -185,13 +188,14 @@ internal static class AppMenuBar
         ImGui.PopStyleColor();
     }
 
+    
     private static void DrawMainMenu()
     {
         if (ImGui.BeginMenu("TiXL"))
         {
+            var currentProject = ProjectView.Focused?.OpenedProject.Package;
             UserSettings.Config.ShowMainMenu = true;
 
-            var currentProject = ProjectView.Focused?.OpenedProject.Package;
             var showNewTemplateOption = !T3Ui.IsCurrentlySaving && currentProject != null;
             
             if (ImGui.MenuItem("New Project..."))
@@ -280,6 +284,14 @@ internal static class AppMenuBar
                 Task.Run(() => { T3Ui.Save(true); });
             }
 
+            if (ImGui.MenuItem("Set Project Thumbnail", null, false, RenderProcess.MainOutputTexture != null))
+            {
+                if (currentProject != null)
+                {
+                    ThumbnailManager.SaveThumbnail(currentProject.Id, currentProject, RenderProcess.MainOutputTexture);
+                }
+            }
+            
             ImGui.Separator();
 
             if (ImGui.BeginMenu("Development Tools"))
