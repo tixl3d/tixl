@@ -1,8 +1,15 @@
 {
-  "Id": "e6d19a14-54b7-4554-8e92-9001b2530937"/*BiasAndGainExample*/,
+  "Id": "e6d19a14-54b7-4554-8e92-9001b2530937"/*GainAndBiasExample*/,
   "Description": "Illustrates how the BiasAndGain parameters can be applied in various situations.",
   "InputUis": [],
   "SymbolChildUis": [
+    {
+      "ChildId": "05e7e804-dbd0-4e51-8970-c8f780f02f78"/*DrawLinesAlt*/,
+      "Position": {
+        "X": 1116.7126,
+        "Y": 1674.4927
+      }
+    },
     {
       "ChildId": "07166e15-fdae-44b0-a941-27a5522f8b71"/*Text*/,
       "Position": {
@@ -179,6 +186,13 @@
       }
     },
     {
+      "ChildId": "4ed585ea-0f46-4739-bb5a-49bc759e8b02"/*SpreadLayout*/,
+      "Position": {
+        "X": 1370.6034,
+        "Y": 1556.6724
+      }
+    },
+    {
       "ChildId": "52c82300-946d-4f40-b6c0-46fe9ec163e2"/*_Time_old*/,
       "Position": {
         "X": 1024.0012,
@@ -256,6 +270,13 @@
       }
     },
     {
+      "ChildId": "76a25bb9-8820-4ce0-b5c3-1b3e41a89b13"/*RadialPoints*/,
+      "Position": {
+        "X": 976.7126,
+        "Y": 1674.4927
+      }
+    },
+    {
       "ChildId": "7a939fc8-b8e3-4638-b78a-2f7b57ee368c"/*LoadImage*/,
       "Position": {
         "X": 1071.235,
@@ -267,6 +288,13 @@
       "Position": {
         "X": 681.4901,
         "Y": 1365.4006
+      }
+    },
+    {
+      "ChildId": "80209837-3905-488f-b12b-80f83c919f80"/*Boolean*/,
+      "Position": {
+        "X": 1230.6034,
+        "Y": 1766.6724
       }
     },
     {
@@ -540,8 +568,62 @@
   ],
   "Annotations": [
     {
+      "Id": "27b94973-0e0a-4c6e-b05e-954a7e709a92",
+      "Label": "debug bottom frames",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 916.7126,
+        "Y": 1533.6716
+      },
+      "Size": {
+        "X": 635.26263,
+        "Y": 285.82104
+      }
+    },
+    {
+      "Id": "34665dce-c9f1-4869-b162-e7414f86eacd",
+      "Label": "Top Row",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 624.0822,
+        "Y": -1210.2852
+      },
+      "Size": {
+        "X": 1276.6562,
+        "Y": 1415.2347
+      }
+    },
+    {
+      "Id": "ae79daa2-87b4-4d8a-9cfc-ad4e39238a06",
+      "Label": "Bottom row ",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 341.4901,
+        "Y": 496.55792
+      },
+      "Size": {
+        "X": 1210.4851,
+        "Y": 1322.9348
+      }
+    },
+    {
       "Id": "d6a18a18-5a2d-48d5-aa86-fb09c277749e",
-      "Title": "Pick mouse or random movement",
+      "Label": "Pick mouse or random movement",
       "Color": {
         "X": 0.6,
         "Y": 0.6,

@@ -165,6 +165,26 @@ internal sealed class CsProjectFile
                             Log.Warning(warning);
                         }
                     }
+                    
+                    // Migration: Update Resources inclusion to Assets
+                    if (item.ItemType == "Content" && item.Include.Contains("Resources/"))
+                    {
+                        // 1. Update the inclusion path
+                        item.Include = item.Include.Replace("Resources/", "Assets/");
+
+                        // 2. Update the Link metadata if it exists
+                        foreach (var metadata in item.Metadata)
+                        {
+                            if (metadata.Name == "Link" && metadata.Value.Contains("Resources/"))
+                            {
+                                metadata.Value = metadata.Value.Replace("Resources/", "Assets/");
+                            }
+                        }
+
+                        Warnings.Add($"Automated migration of content paths from Resources/ to Assets/ in {file.Name}");
+                        // This triggers csProjContents.HasUnsavedChanges, which causes the file to be saved automatically below
+                    }                    
+                    
                     #endregion
                 }
             }

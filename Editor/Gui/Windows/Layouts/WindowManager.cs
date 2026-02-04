@@ -54,7 +54,8 @@ internal static partial class WindowManager
     private static void TryToInitialize()
     {
         // Wait first frame for ImGUI to initialize
-        if (ImGui.GetTime() > 0.2f || _hasBeenInitialized)
+        var frameCount = ImGui.GetFrameCount();
+        if (frameCount < 2 || _hasBeenInitialized)
             return;
         
         _windows =

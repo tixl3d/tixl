@@ -185,6 +185,7 @@ public abstract partial class ShaderCompiler
         public Guid Id => StringUtils.GenerateGuidFromString(AssetsFolder); 
         public string? Name => null;
         public string AssetsFolder { get; }
+        public string Folder => ".";
         public ResourceFileWatcher? FileWatcher => _resourceConsumer?.Package?.FileWatcher;
         public string? RootNamespace => _resourceConsumer?.Package?.RootNamespace;
         public bool IsReadOnly => true;

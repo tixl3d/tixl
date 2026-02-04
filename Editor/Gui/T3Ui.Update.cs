@@ -12,6 +12,7 @@ using T3.Editor.Gui.Interaction.Timing;
 using T3.Editor.Gui.Interaction.Variations;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Gui.UiHelpers.Thumbnails;
 using T3.Editor.Gui.Windows.Layouts;
 using T3.Editor.Gui.Windows.RenderExport;
 using T3.Editor.Skills.Training;
@@ -99,6 +100,7 @@ public static partial class T3Ui
             AppMenuBar.DrawAppMenuBar();
         }
 
+        ThumbnailManager.Update();
         _searchDialog.Draw();
         NewProjectDialog.Draw();
         CreateFromTemplateDialog.Draw();

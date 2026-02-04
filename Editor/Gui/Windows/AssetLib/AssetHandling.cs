@@ -10,6 +10,22 @@ namespace T3.Editor.Gui.Windows.AssetLib;
 /// </summary>
 internal static class AssetHandling
 {
+    public static AssetType Images = new AssetType("Image", [
+                                             FileExtensionRegistry.GetUniqueId("png"),
+                                             FileExtensionRegistry.GetUniqueId("jpg"),
+                                             FileExtensionRegistry.GetUniqueId("jpeg"),
+                                             FileExtensionRegistry.GetUniqueId("bmp"),
+                                             FileExtensionRegistry.GetUniqueId("tga"),
+                                             FileExtensionRegistry.GetUniqueId("gif"),
+                                             FileExtensionRegistry.GetUniqueId("dds"),
+                                         ])
+                                         {
+                                             PrimaryOperators = [new Guid("0b3436db-e283-436e-ba85-2f3a1de76a9d")], // Load Image
+                                             Color = UiColors.ColorForTextures,
+                                             IconId = (uint)Icon.FileImage,
+                                             Subfolders = ["images", "image"],
+                                         };
+    
     public static void InitAssetTypes()
     {
         AssetType.RegisterType(new AssetType("Obj", [
@@ -38,21 +54,7 @@ internal static class AssetHandling
                                        Subfolders = ["geometry","mesh","meshes","gltf"],
                                    });
 
-        AssetType.RegisterType(new AssetType("Image", [
-                                       FileExtensionRegistry.GetUniqueId("png"),
-                                       FileExtensionRegistry.GetUniqueId("jpg"),
-                                       FileExtensionRegistry.GetUniqueId("jpeg"),
-                                       FileExtensionRegistry.GetUniqueId("bmp"),
-                                       FileExtensionRegistry.GetUniqueId("tga"),
-                                       FileExtensionRegistry.GetUniqueId("gif"),
-                                       FileExtensionRegistry.GetUniqueId("dds"),
-                                   ])
-                                   {
-                                       PrimaryOperators = [new Guid("0b3436db-e283-436e-ba85-2f3a1de76a9d")], // Load Image
-                                       Color = UiColors.ColorForTextures,
-                                       IconId = (uint)Icon.FileImage,
-                                       Subfolders = ["images", "image"],
-                                   });
+        AssetType.RegisterType(Images);
         AssetType.RegisterType(new AssetType("Video", [
                                        FileExtensionRegistry.GetUniqueId("mp4"),
                                        FileExtensionRegistry.GetUniqueId("mov"),

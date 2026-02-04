@@ -29,12 +29,20 @@
       }
     },
     {
+      "InputId": "2f25a35f-51a6-4e7f-bb53-a91cf4f64505"/*DisplayLabel*/,
+      "Position": {
+        "X": -376.877,
+        "Y": 355.22757
+      }
+    },
+    {
       "InputId": "491bba32-90df-477c-b9d6-0b22bad8b94e"/*Value*/,
       "Relevancy": "Required",
       "Position": {
         "X": -376.877,
         "Y": 10.22757
-      }
+      },
+      "GroupTitle": "Curve"
     },
     {
       "InputId": "622420b3-d5d5-4514-962e-6eaa04f34484"/*Label*/,
@@ -42,6 +50,7 @@
         "X": -376.877,
         "Y": 100.22757
       },
+      "GroupTitle": "Text",
       "Usage": "Default"
     },
     {
@@ -93,6 +102,13 @@
       "Position": {
         "X": 450.0,
         "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "b8c82d0f-72aa-4f89-8b29-7b32e6c1fee4"/*Execute*/,
+      "Position": {
+        "X": 497.84668,
+        "Y": 244.03596
       }
     },
     {
