@@ -44,7 +44,10 @@
       "Position": {
         "X": -200.0,
         "Y": 210.0
-      }
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true
     },
     {
       "InputId": "df51a336-a11e-466b-a312-0cecb9db08f1"/*Center*/,
@@ -54,6 +57,16 @@
       },
       "Description": "Transforms the position of the pivot",
       "Scale": 0.01
+    },
+    {
+      "InputId": "e00e4b12-8576-4a78-b773-17630b102a70"/*FillDensity*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true
     },
     {
       "InputId": "f3c23e04-240c-46b0-8581-db682f49c898"/*Scale*/,

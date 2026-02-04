@@ -29,7 +29,7 @@
     },
     {
       "Id": "a5c4c31e-7b3c-4f3e-9d1f-8e2b4d5c6a7b"/*MaxEdgeLength*/,
-      "DefaultValue": 1.0
+      "DefaultValue": 0.0
     },
     {
       "Id": "df51a336-a11e-466b-a312-0cecb9db08f1"/*Center*/,
@@ -38,6 +38,10 @@
         "Y": 0.0,
         "Z": 0.0
       }
+    },
+    {
+      "Id": "e00e4b12-8576-4a78-b773-17630b102a70"/*FillDensity*/,
+      "DefaultValue": 0.0
     },
     {
       "Id": "f3c23e04-240c-46b0-8581-db682f49c898"/*Scale*/,

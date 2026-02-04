@@ -5,6 +5,7 @@ using DelaunatorSharp;
 using T3.Core.DataTypes;
 using System.Linq;
 using System.Collections.Generic;
+using System;
 
 
 namespace Lib.mesh.generate;
@@ -40,13 +41,115 @@ internal sealed class DelaunayMesh : Instance<DelaunayMesh>
                 return;
             }
 
-            var pointArray = typedPointList.TypedElements;
+            var originalPointArray = typedPointList.TypedElements;
+
+            // Filter out points with NaN values
+            var validPoints = new List<Point>();
+            int invalidCount = 0;
+
+            for (int i = 0; i < originalPointArray.Length; i++)
+            {
+                var point = originalPointArray[i];
+                var scaleNaN = point.Scale;
+
+                // Check for NaN in Scale
+                if (float.IsNaN(scaleNaN.X) || float.IsNaN(scaleNaN.Y) || float.IsNaN(scaleNaN.Z))
+                {
+                    invalidCount++;
+                    continue;
+                }
+
+                validPoints.Add(point);
+            }
+
+            if (invalidCount > 0)
+            {
+                Log.Debug($"DelaunayMesh: Filtered out {invalidCount} points with NaN Scale values");
+            }
+
+            var pointArray = validPoints.ToArray();
 
             if (pointArray.Length < 3)
             {
-                Log.Warning("DelaunayMesh: Need at least 3 points for triangulation");
+                Log.Warning("DelaunayMesh: Need at least 3 valid points for triangulation");
                 return;
             }
+
+            // Get fill density parameter
+            var fillDensity = FillDensity.GetValue(context);
+            var tweak = Tweak.GetValue(context);
+
+            // Store original boundary points before adding fill points
+            var originalBoundaryCount = pointArray.Length;
+            var boundaryPolygon = new Vector2[originalBoundaryCount];
+            for (int i = 0; i < originalBoundaryCount; i++)
+            {
+                boundaryPolygon[i] = new Vector2(pointArray[i].Position.X, pointArray[i].Position.Y);
+            }
+
+            // Generate additional points inside the boundary using Poisson disc sampling
+            var allPoints = new List<Point>(pointArray);
+
+            if (fillDensity > 0.0001f)
+            {
+                // Calculate bounds for the boundary
+                var minXb = pointArray.Min(p => p.Position.X);
+                var maxXb = pointArray.Max(p => p.Position.X);
+                var minYb = pointArray.Min(p => p.Position.Y);
+                var maxYb = pointArray.Max(p => p.Position.Y);
+
+                // Generate Poisson disc samples
+                var fillPoints = GeneratePoissonDiscSamples(minXb, maxXb, minYb, maxYb, fillDensity);
+
+                // Filter out points that are:
+                // 1. Not inside the boundary polygon
+                // 2. Too close to boundary points (to avoid edge artifacts)
+                var minDistanceFromBoundary = fillDensity * tweak; // Keep some margin from boundary
+                var validFillPoints = new List<Vector2>();
+
+                foreach (var fillPoint in fillPoints)
+                {
+                    // Check if inside boundary
+                    if (!IsPointInPolygon(fillPoint, boundaryPolygon))
+                        continue;
+
+                    // Check distance from all boundary points
+                    bool tooCloseToEdge = false;
+                    for (int i = 0; i < originalBoundaryCount; i++)
+                    {
+                        var boundaryPoint = new Vector2(pointArray[i].Position.X, pointArray[i].Position.Y);
+                        var distance = Vector2.Distance(fillPoint, boundaryPoint);
+
+                        if (distance < minDistanceFromBoundary)
+                        {
+                            tooCloseToEdge = true;
+                            break;
+                        }
+                    }
+
+                    if (!tooCloseToEdge)
+                    {
+                        validFillPoints.Add(fillPoint);
+                    }
+                }
+
+                // Add valid fill points to the point array
+                foreach (var fillPoint in validFillPoints)
+                {
+                    allPoints.Add(new Point
+                    {
+                        Position = new Vector3(fillPoint.X, fillPoint.Y, 0),
+                        F1 = 1,
+                        Orientation = Quaternion.Identity,
+                        Color = Vector4.One,
+                        Scale = Vector3.One,
+                        F2 = 1
+                    });
+                }
+            }
+
+            // Use the combined point array for triangulation
+            pointArray = allPoints.ToArray();
 
             // Get transformation parameters
             var scale = Scale.GetValue(context);
@@ -75,13 +178,6 @@ internal sealed class DelaunayMesh : Instance<DelaunayMesh>
             // Get filtering parameters
             var maxEdgeLength = MaxEdgeLength.GetValue(context);
             var useAlphaShape = maxEdgeLength > 0.0001f;
-
-            // Use all points as boundary polygon
-            var boundaryPolygon = new Vector2[pointArray.Length];
-            for (int i = 0; i < pointArray.Length; i++)
-            {
-                boundaryPolygon[i] = new Vector2(pointArray[i].Position.X, pointArray[i].Position.Y);
-            }
 
             // Calculate normals, tangent, bitangent for the mesh
             var normal = Vector3.TransformNormal(VectorT3.ForwardLH, rotationMatrix);
@@ -225,8 +321,8 @@ internal sealed class DelaunayMesh : Instance<DelaunayMesh>
     // Point-in-polygon test using ray casting algorithm
     private static bool IsPointInPolygon(Vector2 point, Vector2[] polygon)
     {
-        var inside = false;
-        var n = polygon.Length;
+        bool inside = false;
+        int n = polygon.Length;
 
         for (int i = 0, j = n - 1; i < n; j = i++)
         {
@@ -238,6 +334,139 @@ internal sealed class DelaunayMesh : Instance<DelaunayMesh>
         }
 
         return inside;
+    }
+
+    // Generate Poisson disc samples inside the boundary polygon
+    private List<Vector2> GeneratePoissonDiscSamples(float minX, float maxX, float minY, float maxY, float radius)
+    {
+        var samples = new List<Vector2>();
+        var activeList = new List<Vector2>();
+        var random = new System.Random();
+
+        // Grid cell size
+        float cellSize = radius / MathF.Sqrt(2);
+        int gridWidth = (int)MathF.Ceiling((maxX - minX) / cellSize);
+        int gridHeight = (int)MathF.Ceiling((maxY - minY) / cellSize);
+
+        // Grid to track occupied cells (-1 = empty, >= 0 = index in samples list)
+        var grid = new int[gridWidth * gridHeight];
+        for (int i = 0; i < grid.Length; i++)
+            grid[i] = -1;
+
+        // Helper function to get grid index
+        int GetGridIndex(float x, float y)
+        {
+            int gridX = (int)((x - minX) / cellSize);
+            int gridY = (int)((y - minY) / cellSize);
+            if (gridX < 0 || gridX >= gridWidth || gridY < 0 || gridY >= gridHeight)
+                return -1;
+            return gridX + gridY * gridWidth;
+        }
+
+        // Start with a random point inside the boundary
+        Vector2 firstPoint = Vector2.Zero;
+        bool foundFirst = false;
+        for (int attempt = 0; attempt < 1000 && !foundFirst; attempt++)
+        {
+            float x = minX + (float)random.NextDouble() * (maxX - minX);
+            float y = minY + (float)random.NextDouble() * (maxY - minY);
+            var testPoint = new Vector2(x, y);
+
+           
+                firstPoint = testPoint;
+                foundFirst = true;
+            
+        }
+
+        if (!foundFirst)
+            return samples; // Could not find starting point
+
+        samples.Add(firstPoint);
+        activeList.Add(firstPoint);
+
+        int gridIdx = GetGridIndex(firstPoint.X, firstPoint.Y);
+        if (gridIdx >= 0)
+            grid[gridIdx] = 0;
+
+        // Process active list
+        int maxAttempts = 30; // Standard Poisson disc parameter
+
+        while (activeList.Count > 0)
+        {
+            int randomIndex = random.Next(activeList.Count);
+            Vector2 point = activeList[randomIndex];
+            bool foundCandidate = false;
+
+            for (int i = 0; i < maxAttempts; i++)
+            {
+                // Generate random point around the active point
+                float angle = (float)(random.NextDouble() * 2 * MathF.PI);
+                float distance = radius + (float)(random.NextDouble() * radius);
+
+                float newX = point.X + distance * MathF.Cos(angle);
+                float newY = point.Y + distance * MathF.Sin(angle);
+                var newPoint = new Vector2(newX, newY);
+
+                // Check if point is within bounds and inside boundary
+                if (newX < minX || newX >= maxX || newY < minY || newY >= maxY)
+                    continue;
+
+                
+
+                // Check if point is far enough from all other points
+                int newGridIdx = GetGridIndex(newX, newY);
+                if (newGridIdx < 0)
+                    continue;
+
+                bool tooClose = false;
+
+                // Check neighboring grid cells
+                int gridX = (int)((newX - minX) / cellSize);
+                int gridY = (int)((newY - minY) / cellSize);
+
+                for (int dy = -2; dy <= 2; dy++)
+                {
+                    for (int dx = -2; dx <= 2; dx++)
+                    {
+                        int checkX = gridX + dx;
+                        int checkY = gridY + dy;
+
+                        if (checkX < 0 || checkX >= gridWidth || checkY < 0 || checkY >= gridHeight)
+                            continue;
+
+                        int checkIdx = checkX + checkY * gridWidth;
+                        int sampleIdx = grid[checkIdx];
+
+                        if (sampleIdx >= 0)
+                        {
+                            float dist = Vector2.Distance(newPoint, samples[sampleIdx]);
+                            if (dist < radius)
+                            {
+                                tooClose = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (tooClose) break;
+                }
+
+                if (!tooClose)
+                {
+                    samples.Add(newPoint);
+                    activeList.Add(newPoint);
+                    grid[newGridIdx] = samples.Count - 1;
+                    foundCandidate = true;
+                    break;
+                }
+            }
+
+            if (!foundCandidate)
+            {
+                activeList.RemoveAt(randomIndex);
+            }
+        }
+
+        return samples;
     }
 
     private Buffer _vertexBuffer;
@@ -255,6 +484,9 @@ internal sealed class DelaunayMesh : Instance<DelaunayMesh>
 
     [Input(Guid = "e00e4b12-8576-4a78-b773-17630b102a70")]
     public readonly InputSlot<float> FillDensity = new();
+    
+    [Input(Guid = "0B30E8F2-44D7-41DB-B38B-E6A053B1AEBA")]
+    public readonly InputSlot<float> Tweak = new();
 
     [Input(Guid = "4784908f-ac12-47a0-9542-d65242acace3")]
     public readonly InputSlot<Vector2> Stretch = new();
