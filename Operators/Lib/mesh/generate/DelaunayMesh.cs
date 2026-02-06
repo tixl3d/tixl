@@ -147,6 +147,36 @@ internal sealed class DelaunayMesh : Instance<DelaunayMesh>
                     });
                 }
             }
+            else
+            {
+                // Use ExtraPoints list when fillDensity is 0
+                var extraPointList = ExtraPoints.GetValue(context);
+                if (extraPointList != null && extraPointList.NumElements > 0)
+                {
+                    // Cast to StructuredList<Point> to access TypedElements
+                    var typedExtraPointList = extraPointList as StructuredList<Point>;
+                    if (typedExtraPointList != null)
+                    {
+                        var extraPointArray = typedExtraPointList.TypedElements;
+
+                        // Add extra points to the allPoints list
+                        for (int i = 0; i < extraPointArray.Length; i++)
+                        {
+                            var point = extraPointArray[i];
+
+                            // Skip points with NaN values
+                            if (float.IsNaN(point.Scale.X) || float.IsNaN(point.Scale.Y) || float.IsNaN(point.Scale.Z))
+                                continue;
+
+                            allPoints.Add(point);
+                        }
+                    }
+                    else
+                    {
+                        Log.Warning("DelaunayMesh: ExtraPoints list is not of type StructuredList<Point>");
+                    }
+                }
+            }
 
             // Use the combined point array for triangulation
             pointArray = allPoints.ToArray();
@@ -372,10 +402,10 @@ internal sealed class DelaunayMesh : Instance<DelaunayMesh>
             float y = minY + (float)random.NextDouble() * (maxY - minY);
             var testPoint = new Vector2(x, y);
 
-           
-                firstPoint = testPoint;
-                foundFirst = true;
-            
+
+            firstPoint = testPoint;
+            foundFirst = true;
+
         }
 
         if (!foundFirst)
@@ -411,7 +441,7 @@ internal sealed class DelaunayMesh : Instance<DelaunayMesh>
                 if (newX < minX || newX >= maxX || newY < minY || newY >= maxY)
                     continue;
 
-                
+
 
                 // Check if point is far enough from all other points
                 int newGridIdx = GetGridIndex(newX, newY);
@@ -482,9 +512,12 @@ internal sealed class DelaunayMesh : Instance<DelaunayMesh>
     [Input(Guid = "18FDDD63-DB79-4EE6-9A32-B90A5CEFF582")]
     public readonly InputSlot<StructuredList> List = new();
 
+    [Input(Guid = "E6F73027-AFE5-4A95-A4DC-CA65079F9127")]
+    public readonly InputSlot<StructuredList> ExtraPoints = new();
+
     [Input(Guid = "e00e4b12-8576-4a78-b773-17630b102a70")]
     public readonly InputSlot<float> FillDensity = new();
-    
+
     [Input(Guid = "0B30E8F2-44D7-41DB-B38B-E6A053B1AEBA")]
     public readonly InputSlot<float> Tweak = new();
 
