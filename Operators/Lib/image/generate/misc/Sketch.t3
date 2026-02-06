@@ -15,7 +15,7 @@
     },
     {
       "Id": "2ded8235-157d-486b-a997-87d09d18f998"/*Filename*/,
-      "DefaultValue": "Lib:Sketches/sketch_{id}.json"
+      "DefaultValue": "{package}:Sketches/sketch_{id}.json"
     },
     {
       "Id": "31f3942e-bac5-407f-ad44-6d09920754d9"/*StrokeColor*/,
@@ -38,6 +38,10 @@
         "Z": 0.0,
         "W": 0.25
       }
+    },
+    {
+      "Id": "5b41e5e9-1cc5-4c26-9b94-433750ef86fc"/*ColorMode*/,
+      "DefaultValue": 0
     },
     {
       "Id": "5cdb04d5-9bef-4789-8082-ea04e56b3ca7"/*Resolution*/,
@@ -225,7 +229,7 @@
       "SymbolId": "b238b288-6e9b-4b91-bac9-3d7566416028",
       "InputValues": [
         {
-          "Id": "1057313c-006a-4f12-8828-07447337898b"/*BrushSize*/,
+          "Id": "1057313c-006a-4f12-8828-07447337898b"/*StrokeSize*/,
           "Type": "System.Single",
           "Value": 0.55
         },
@@ -789,6 +793,12 @@
       "SourceSlotId": "1c5d0d86-c000-449e-903a-3212d19d8e1d",
       "TargetParentOrChildId": "85c39d79-f072-474d-b8ef-5ae8b963343b",
       "TargetSlotId": "1057313c-006a-4f12-8828-07447337898b"
+    },
+    {
+      "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "SourceSlotId": "5b41e5e9-1cc5-4c26-9b94-433750ef86fc",
+      "TargetParentOrChildId": "85c39d79-f072-474d-b8ef-5ae8b963343b",
+      "TargetSlotId": "37558056-88d8-4d2e-89e2-9f3460565bc8"
     },
     {
       "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",

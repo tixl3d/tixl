@@ -2,7 +2,7 @@
 using T3.Core.DataTypes;
 using T3.Core.Logging;
 
-namespace T3.Core.Resource;
+namespace T3.Core.Resource.ShaderCompiling;
 
 public abstract partial class ShaderCompiler
 {

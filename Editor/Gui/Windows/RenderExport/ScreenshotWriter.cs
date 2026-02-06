@@ -46,24 +46,29 @@ internal static class ScreenshotWriter
         return _textureBgraReadAccess.InitiateConvertAndReadBack(gpuTexture, saveSampleAfterReadback);        
     }
 
-    internal static bool StartSavingToFile(Texture2D gpuTexture, string filepath, FileFormats format)
+    internal static bool StartSavingToFile(Texture2D gpuTexture, string filepath, FileFormats format, Action<string?>? onComplete = null, bool logErrors=true)
     {
-        if (_textureBgraReadAccess == null)
-            _textureBgraReadAccess = new TextureBgraReadAccess();
-        
+        _textureBgraReadAccess ??= new TextureBgraReadAccess();
         _useFormats = format;
-        return _textureBgraReadAccess.InitiateConvertAndReadBack(gpuTexture, OnReadComplete, filepath);
+        
+        return _textureBgraReadAccess.InitiateConvertAndReadBack(gpuTexture, request => 
+                                                                             {
+                                                                                 OnReadComplete(request, logErrors);
+                                                                                 onComplete?.Invoke(request.Filepath);
+                                                                             }, filepath);        
     }
     
     
-    private static void OnReadComplete(TextureBgraReadAccess.ReadRequestItem request)
+    private static void OnReadComplete(TextureBgraReadAccess.ReadRequestItem request, bool logErrors)
     {
         var immediateContext = ResourceManager.Device.ImmediateContext;
         if (request.CpuAccessTexture.IsDisposed)
         {
-            Log.Debug("ScreenshotWriter: Texture was disposed before readback was complete");
+            if(logErrors)
+                Log.Debug("ScreenshotWriter: Texture was disposed before readback was complete");
             return;
         }
+        
         var dataBox = immediateContext.MapSubresource(request.CpuAccessTexture,
                                                       0,
                                                       0,
@@ -83,7 +88,9 @@ internal static class ScreenshotWriter
         }
         catch (Exception e)
         {
-            Log.Warning("Failed to export image: " + e.Message);
+            if(logErrors)
+                Log.Warning("Failed to export image: " + e.Message);
+            
             return;
         }
 

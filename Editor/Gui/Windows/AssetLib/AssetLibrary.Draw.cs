@@ -382,7 +382,7 @@ internal sealed partial class AssetLibrary
                                                                {
                                                                    if (ImGui.MenuItem("Edit externally"))
                                                                    {
-                                                                       var absolutePath = asset.FileSystemInfo?.FullName;
+                                                                       var absolutePath = asset.FullPath;
                                                                        if (!string.IsNullOrEmpty(absolutePath))
                                                                        {
                                                                            CoreUi.Instance.OpenWithDefaultApplication(absolutePath);
@@ -391,7 +391,7 @@ internal sealed partial class AssetLibrary
 
                                                                    if (ImGui.MenuItem("Reveal in Explorer"))
                                                                    {
-                                                                       var absolutePath = asset.FileSystemInfo?.FullName;
+                                                                       var absolutePath = asset.FullPath;
 
                                                                        var folder = Path.GetDirectoryName(absolutePath);
                                                                        if (!string.IsNullOrEmpty(folder))
@@ -442,7 +442,7 @@ internal sealed partial class AssetLibrary
         {
             ImGui.BeginGroup();
             {
-                var absolutePath = asset.FileSystemInfo?.FullName;
+                var absolutePath = asset.FullPath;
                 var fileName = asset.FileSystemInfo?.Name ?? "Unknown";
                 var path = absolutePath != null && absolutePath.EndsWith(fileName)
                                ? absolutePath[..^fileName.Length]
@@ -475,7 +475,7 @@ internal sealed partial class AssetLibrary
             
             ImGui.BeginGroup();
             {
-                var package = ResourceManager.SharedResourcePackages.FirstOrDefault(p => p.Id == asset.PackageId);
+                var package = ResourcePackageManager.SharedResourcePackages.FirstOrDefault(p => p.Id == asset.PackageId);
                 ThumbnailManager.GetThumbnail(asset, package).AsImguiImage();
             }
             ImGui.EndGroup();

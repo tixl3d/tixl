@@ -11,6 +11,13 @@
       },
       "Usage": "FilePath",
       "FileFilter": "png, jpg, jpeg, tga, gif, dds, bmp"
+    },
+    {
+      "InputId": "96044c6c-d005-4d61-b605-7a6896e98cb6"/*CacheResources*/,
+      "Position": {
+        "X": 51.512096,
+        "Y": 121.99597
+      }
     }
   ],
   "SymbolChildUis": [],

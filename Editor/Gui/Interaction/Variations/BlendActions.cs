@@ -4,10 +4,22 @@ using T3.Editor.Gui.Interaction.Variations.Model;
 namespace T3.Editor.Gui.Interaction.Variations;
 
 /// <summary>
-/// Forwards abstract actions triggered by midi-inputs to ac
+/// Forwards abstract actions triggered by midi-inputs to actions on variations/snapshots.
+/// 
+/// Crossfader model:
+/// - _snapshotLeft: snapshot at crossfader position 0
+/// - _snapshotRight: snapshot at crossfader position 127
+/// - _activeIsLeft: true if the "active" snapshot is on the left side
+/// 
+/// The blend target is always the opposite side from active.
+/// When we reach an endpoint, that side becomes active.
 /// </summary>
 public static class BlendActions
 {
+    /// <summary>
+    /// Sets a new blend target. The current active snapshot stays where it is,
+    /// and the new target is placed on the opposite side.
+    /// </summary>
     public static void StartBlendingTowardsSnapshot(int index)
     {
         if (VariationHandling.ActiveInstanceForSnapshots == null || VariationHandling.ActivePoolForSnapshots == null)
@@ -16,12 +28,36 @@ public static class BlendActions
             return;
         }
 
-        if (SymbolVariationPool.TryGetSnapshot(index, out var variation))
+        if (!SymbolVariationPool.TryGetSnapshot(index, out var variation))
+            return;
+
+        // Get the current active snapshot
+        var currentActive = _activeIsLeft ? _snapshotLeft : _snapshotRight;
+        
+        // If no active snapshot yet, use the target as both (edge case)
+        if (currentActive == -1)
         {
-            // Log.Debug($"Start blending towards: {index}");
-            _blendTowardsIndex = index;
-            VariationHandling.ActivePoolForSnapshots.BeginBlendTowardsSnapshot(VariationHandling.ActiveInstanceForSnapshots, variation, 0);
+            _snapshotLeft = index;
+            _snapshotRight = index;
+            _activeIsLeft = true;
         }
+        else
+        {
+            // Keep the current active where it is, place target on opposite side
+            if (_activeIsLeft)
+            {
+                // Active is on left, put new target on right
+                _snapshotRight = index;
+            }
+            else
+            {
+                // Active is on right, put new target on left
+                _snapshotLeft = index;
+            }
+        }
+        
+        VariationHandling.ActivePoolForSnapshots.BeginBlendTowardsSnapshot(
+            VariationHandling.ActiveInstanceForSnapshots, variation, 0);
     }
 
     public static void UpdateBlendingTowardsProgress(int index, float midiValue)
@@ -32,15 +68,37 @@ public static class BlendActions
             return;
         }
 
-        if (_blendTowardsIndex == -1)
+        // Need both endpoints defined for blending
+        if (_snapshotLeft == -1 || _snapshotRight == -1)
         {
             return;
         }
 
-        if (SymbolVariationPool.TryGetSnapshot(_blendTowardsIndex, out var variation))
+        // Crossfader position: 0 = left, 127 = right
+        var normalizedPosition = midiValue / 127.0f;
+        
+        // Check if we've reached the right endpoint
+        if (normalizedPosition >= 0.99f)
         {
-            var normalizedValue = midiValue / 127.0f;
-            SmoothVariationBlending.StartBlendTo(variation, normalizedValue);
+            FinishAtRight();
+            return;
+        }
+        
+        // Check if we've reached the left endpoint  
+        if (normalizedPosition <= 0.01f)
+        {
+            FinishAtLeft();
+            return;
+        }
+
+        // We're somewhere in the middle - perform the blend
+        // Blend toward the target (opposite of active side)
+        var targetSnapshot = _activeIsLeft ? _snapshotRight : _snapshotLeft;
+        var blendAmount = _activeIsLeft ? normalizedPosition : (1.0f - normalizedPosition);
+        
+        if (SymbolVariationPool.TryGetSnapshot(targetSnapshot, out var targetVariation))
+        {
+            SmoothVariationBlending.StartBlendTo(targetVariation, blendAmount);
         }
         else
         {
@@ -48,11 +106,97 @@ public static class BlendActions
         }
     }
     
+    /// <summary>
+    /// Called when crossfader reaches the right side (position 127).
+    /// </summary>
+    private static void FinishAtRight()
+    {
+        // Request completion - actual completion happens when damping finishes
+        _pendingCompletion = CompletionSide.Right;
+    }
+    
+    /// <summary>
+    /// Called when crossfader reaches the left side (position 0).
+    /// </summary>
+    private static void FinishAtLeft()
+    {
+        // Request completion - actual completion happens when damping finishes
+        _pendingCompletion = CompletionSide.Left;
+    }
+    
+    /// <summary>
+    /// Actually completes the blend after damping has finished.
+    /// </summary>
+    internal static void CompleteBlendWhenDampingFinished()
+    {
+        if (_pendingCompletion == CompletionSide.None)
+            return;
+            
+        var completingSide = _pendingCompletion;
+        _pendingCompletion = CompletionSide.None;
+        
+        VariationHandling.ActivePoolForSnapshots?.ApplyCurrentBlend();
+        
+        if (completingSide == CompletionSide.Right)
+        {
+            VariationHandling.ActivePoolForSnapshots?.UpdateActiveStateForVariation(_snapshotRight);
+            _activeIsLeft = false;
+        }
+        else
+        {
+            VariationHandling.ActivePoolForSnapshots?.UpdateActiveStateForVariation(_snapshotLeft);
+            _activeIsLeft = true;
+        }
+        
+        SmoothVariationBlending.Stop();
+    }
+    
+    private enum CompletionSide { None, Left, Right }
+    private static CompletionSide _pendingCompletion = CompletionSide.None;
+    
     public static void StopBlendingTowards()
     {
-        _blendTowardsIndex = -1;
-        VariationHandling.ActivePoolForSnapshots.ApplyCurrentBlend();
-        BlendActions.SmoothVariationBlending.Stop();
+        _snapshotRight = -1;
+        VariationHandling.ActivePoolForSnapshots?.ApplyCurrentBlend();
+        SmoothVariationBlending.Stop();
+    }
+    
+    /// <summary>
+    /// Sets the active snapshot index (called when a snapshot is directly activated, not blended).
+    /// </summary>
+    public static void SetActiveSnapshot(int index)
+    {
+        _snapshotLeft = index;
+        _activeIsLeft = true;
+        // Clear right side - user needs to set a new blend target
+        _snapshotRight = -1;
+    }
+    
+    /// <summary>
+    /// Gets the current blend target index, or -1 if none.
+    /// The target is always the opposite side from active.
+    /// </summary>
+    public static int BlendTowardsIndex
+    {
+        get
+        {
+            if (_snapshotLeft == -1 || _snapshotRight == -1)
+                return -1;
+            return _activeIsLeft ? _snapshotRight : _snapshotLeft;
+        }
+    }
+    
+    /// <summary>
+    /// Gets the currently active snapshot index, or -1 if none.
+    /// </summary>
+    public static int ActiveSnapshotIndex
+    {
+        get
+        {
+            if (_snapshotLeft == -1 && _snapshotRight == -1)
+                return -1;
+            return _activeIsLeft ? _snapshotLeft : _snapshotRight;
+        }
     }
     
     public static void UpdateBlendValues(int obj, float value)
@@ -103,8 +247,13 @@ public static class BlendActions
                                                  ref _dampingVelocity,
                                                  20f, frameDuration);
 
+            // Check if damping has settled
             if (MathF.Abs(_dampingVelocity) < 0.0005f)
+            {
+                // Damping finished - complete any pending blend completion
+                CompleteBlendWhenDampingFinished();
                 return;
+            }
 
             VariationHandling.ActivePoolForSnapshots?.
                               BeginBlendTowardsSnapshot(VariationHandling.ActiveInstanceForSnapshots, 
@@ -123,8 +272,8 @@ public static class BlendActions
         private static Variation _targetVariation;
     }
 
-    
-    private static int _blendTowardsIndex = -1;
-
-
+    // Crossfader endpoints
+    private static int _snapshotLeft = -1;   // Snapshot at position 0
+    private static int _snapshotRight = -1;  // Snapshot at position 127
+    private static bool _activeIsLeft = true; // Which side is currently "active"
 }

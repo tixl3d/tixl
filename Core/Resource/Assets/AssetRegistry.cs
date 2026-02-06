@@ -9,6 +9,7 @@ using T3.Core.Logging;
 using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
+using T3.Core.Resource.ShaderCompiling;
 using T3.Core.UserData;
 using T3.Core.Utils;
 
@@ -28,11 +29,11 @@ public static class AssetRegistry
     public static bool TryResolveAddress(string? address,
                                          IResourceConsumer? consumer,
                                          out string absolutePath,
-                                         [NotNullWhen(true)] out IResourcePackage? resourceContainer,
+                                         [NotNullWhen(true)] out IResourcePackage? resourcePackage,
                                          bool isFolder = false,
                                          bool logWarnings = false)
     {
-        resourceContainer = null;
+        resourcePackage = null;
         absolutePath = string.Empty;
 
         if (string.IsNullOrWhiteSpace(address))
@@ -43,17 +44,17 @@ public static class AssetRegistry
         {
             if (asset.FileSystemInfo != null && asset.IsDirectory == isFolder)
             {
-                absolutePath = asset.FileSystemInfo.FullName;
-                resourceContainer = null;
+                absolutePath = asset.FullPath;
+                resourcePackage = null;
 
-                foreach (var c in ResourceManager.SharedResourcePackages)
+                foreach (var c in ResourcePackageManager.SharedResourcePackages)
                 {
                     if (c.Id != asset.PackageId) continue;
-                    resourceContainer = c;
+                    resourcePackage = c;
                     break;
                 }
 
-                return resourceContainer != null;
+                return resourcePackage != null;
             }
         }
 
@@ -100,7 +101,7 @@ public static class AssetRegistry
         var packageName = span[..projectSeparator];
         var localPath = span[(projectSeparator + 1)..];
 
-        var packages = consumer?.AvailableResourcePackages ?? ResourceManager.SharedResourcePackages;
+        var packages = consumer?.AvailableResourcePackages ?? ResourcePackageManager.SharedResourcePackages;
         if (packages.Count == 0)
         {
             if (logWarnings)
@@ -114,7 +115,7 @@ public static class AssetRegistry
             if (!package.Name.AsSpan().Equals(packageName, StringComparison.Ordinal))
                 continue;
 
-            resourceContainer = package;
+            resourcePackage = package;
             absolutePath = $"{package.AssetsFolder}/{localPath}";
             return isFolder
                        ? Directory.Exists(absolutePath)
@@ -127,11 +128,17 @@ public static class AssetRegistry
     public static bool TryToGetAssetFromFilepath(string absolutePath, bool isFolder, [NotNullWhen(true)] out Asset? asset)
     {
         asset = null;
-        return TryConvertFilepathToAddress(absolutePath, isFolder, out var address)
+        return TryConvertFilepathToAddress(absolutePath, isFolder, out var address, out var package)
                && _assetsByAddress.TryGetValue(address, out asset);
     }
 
-    internal static bool TryConvertFilepathToAddress(string absolutePath, bool isFolder, [NotNullWhen(true)] out string? relativeAddress)
+    /// <summary>
+    /// Tries to convert an absolute filepath into a relative package address.
+    /// </summary>
+    /// <returns>true if path could be matched to a package. </returns>
+    internal static bool TryConvertFilepathToAddress(string absolutePath, bool isFolder, 
+                                                     [NotNullWhen(true)] out string? relativeAddress, 
+                                                     [NotNullWhen(true)] out IResourcePackage? matchingPackage)
     {
         absolutePath.ToForwardSlashesUnsafe();
         foreach (var package in SymbolPackage.AllPackages)
@@ -144,11 +151,13 @@ public static class AssetRegistry
                 // Trim the folder length AND the following slash if it exists
                 var relativePart = absolutePath[folder.Length..].TrimStart('/');
                 relativeAddress = $"{package.Name}{PackageSeparator}{relativePart}{dirSuffix}";
+                matchingPackage = package;
                 return true;
             }
         }
 
         relativeAddress = null;
+        matchingPackage = null;
         return false;
     }
 
@@ -223,14 +232,56 @@ public static class AssetRegistry
                             FileSystemInfo = info,
                             AssetType = assetType,
                             IsDirectory = isDirectory,
+                            FullPath = info.FullName.ToForwardSlashes(),
                             PathParts = pathParts.ToArray(),
                             ExtensionId = extensionId,
+                            Package = package,
                         };
 
         _assetsByAddress[address] = asset;
         return asset;
     }
 
+    public static Asset GetOrRegisterExternalFileAsset(string absolutePath)
+    {
+        // 1. Normalize the path to ensure consistent IDs
+        absolutePath.ToForwardSlashesUnsafe();
+    
+        // 2. If it's already registered (e.g. by another address), return the existing one
+        if (TryToGetAssetFromFilepath(absolutePath, false, out var existingAsset))
+        {
+            return existingAsset;
+        }
+        
+        // 3. Create a new Ad-hoc Asset
+        // For external files, the Address IS the absolute path
+        var asset = new Asset(absolutePath)
+                        {
+                            PackageId = ExternalAssetsPackage.Id, // Use Empty if no package owns it
+                            FileSystemInfo = new FileInfo(absolutePath),
+                            FullPath = absolutePath,
+                            IsDirectory = false,
+                            Package = ExternalAssetsPackage,
+                        };
+
+        // 4. Determine AssetType for the UI/Compiler
+        AssetType.TryGetForFilePath(asset.FileSystemInfo.Name, out asset.AssetType, out asset.ExtensionId);
+
+        // 5. Register in the lookup dictionary
+        _assetsByAddress[absolutePath] = asset;
+    
+        // Also add to filename lookup for quick searches
+        var list = _assetsMatchingFilenames.GetOrAdd(asset.FileSystemInfo.Name, _ => []);
+        lock (list)
+        {
+            if (!list.Contains(asset)) list.Add(asset);
+        }
+
+        return asset;
+    }
+
+    
+    
     internal static void UnregisterPackage(Guid packageId)
     {
         var addressesToRemove = _assetsByAddress.Values
@@ -298,7 +349,7 @@ public static class AssetRegistry
         var isDir = Directory.Exists(newPath);
 
         // Remove old address
-        if (!TryConvertFilepathToAddress(oldPath, isDir,out var oldAddress))
+        if (!TryConvertFilepathToAddress(oldPath, isDir, out var oldAddress, out _))
         {
             Log.Warning("Can't resolve old path");
             return null;
@@ -310,7 +361,7 @@ public static class AssetRegistry
             return null;
         }
         
-        var package = ResourceManager.SharedResourcePackages.FirstOrDefault(p => p.Id == oldAsset.PackageId);
+        var package = ResourcePackageManager.SharedResourcePackages.FirstOrDefault(p => p.Id == oldAsset.PackageId);
         if (package == null)
         {
             Log.Warning("Can't resolve old path package");
@@ -475,4 +526,19 @@ public static class AssetRegistry
 
     private static readonly ConcurrentDictionary<string, Asset> _assetsByAddress = new(StringComparer.OrdinalIgnoreCase);
     private static readonly ConcurrentDictionary<string, List<Asset>> _assetsMatchingFilenames = new(StringComparer.OrdinalIgnoreCase);
+
+    internal static ExternalAssetsPackage ExternalAssetsPackage = new();
+}
+
+internal sealed class ExternalAssetsPackage : IResourcePackage
+{
+    public string DisplayName => "ExternalFiles";
+    public string Name => "ExternalFiles";
+    public Guid Id { get; } = new Guid("00000000-e283-436e-ba85-2f3a1de76a9d");
+    public string AssetsFolder => ".";
+    public string Folder => ".";
+    public string? RootNamespace => string.Empty;
+    public ResourceFileWatcher? FileWatcher => null;
+    public bool IsReadOnly => true;
+    public IReadOnlyCollection<DependencyCounter> Dependencies  => [];
 }

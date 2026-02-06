@@ -1,6 +1,7 @@
 #nullable enable
 using Newtonsoft.Json;
 using T3.Core.Animation;
+using T3.Core.Resource.Assets;
 using T3.Core.Utils;
 using T3.Serialization;
 using T3.SystemUi;
@@ -42,12 +43,22 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
         
         if (sketchInstance == null || compositionWithSketchOp == null)
             return relativePath;
+
+        var localPathForSketch =  relativePath
+                                 .Replace("{package}", compositionWithSketchOp.Symbol.SymbolPackage.Name)
+                                 .Replace("{id}", sketchInstance.SymbolChildId.ShortenGuid());
         
-        return Path.Combine(compositionWithSketchOp.Symbol.SymbolPackage.AssetsFolder, relativePath.Replace("{id}", sketchInstance.SymbolChildId.ShortenGuid()));
+        AssetRegistry.TryResolveAddress(localPathForSketch, compositionWithSketchOp, out var path2, out _, isFolder: false, logWarnings: true);
+
+        //Log.Debug("Composition with Sketch: " + compositionWithSketchOp);
+        //Log.Debug($"sketch path:  {localPathForSketch} -> {path2}", this);
+        return path2;
     }
 
     private string _absolutePath = string.Empty;
     private int _overridePageIndex;
+
+    private ColorModes _colorMode = ColorModes.Page;
 
     private void Update(EvaluationContext context)
     {
@@ -69,7 +80,7 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
             //Log.Debug($"Absolute path: {_absolutePath}", this);
             _paging.LoadPages(_absolutePath);
         }
-
+        
         var pageIndexNeedsUpdate = Math.Abs(_lastUpdateContextTime - context.LocalTime) > 0.001;
         if (pageIndexNeedsUpdate || isFilePathDirty || overrideIndexWasDirty)
         {
@@ -79,9 +90,9 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
 
         // Switch Brush size
         {
-            if (BrushSize.DirtyFlag.IsDirty)
+            if (StrokeSize.DirtyFlag.IsDirty)
             {
-                _brushSize = BrushSize.GetValue(context);
+                _brushSize = StrokeSize.GetValue(context);
             }
 
             for (var index = 0; index < _numberKeys.Length; index++)
@@ -93,6 +104,20 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
             }
         }
 
+        // Switch colors
+        var colorMode = ColorMode.GetEnumValue<ColorModes>(context);
+        var isColorDirty = StrokeColor.IsDirty;
+        var color = StrokeColor.GetValue(context);
+        var colorNeedsUpdate = colorMode != _colorMode || isColorDirty;
+        if (colorNeedsUpdate)
+        {
+            _colorMode = colorMode;
+            if (colorMode == ColorModes.Page)
+            {
+                ColorizePage(color);
+            }
+        }
+        
         // Switch modes
         if(IsOpSelected && !KeyHandler.PressedKeys[(int)Key.CtrlKey]) {
             // if (Mode.DirtyFlag.IsDirty)
@@ -126,9 +151,10 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
             {
                 _drawMode = DrawModes.Select;
             }
-
         }
 
+
+        
         var wasModified = DoSketch(context, out CursorPosInWorld.Value, out CurrentBrushSize.Value);
 
         OutPages.Value = _paging.Pages;
@@ -197,6 +223,19 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
             {
                 CurrentPointList.TypedElements[index].Scale = Vector3.One * float.NaN;
             }
+        }
+    }
+
+    private void ColorizePage(Vector4 fillColor)
+    {
+        if (_paging.ActivePage == null  || CurrentPointList==null)
+            return;
+        
+        //Log.Debug("Colorize page " + fillColor, this);
+        
+        for (var index = 0; index < CurrentPointList.TypedElements.Length; index++)
+        {
+            CurrentPointList.TypedElements[index].Color = fillColor;
         }
     }
 
@@ -275,7 +314,7 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
                     _currentStrokeLength = 1;
                 }
 
-                var color = BrushColor.GetValue(context);
+                var color = StrokeColor.GetValue(context);
 
                 AppendPoint(new Point
                                 {
@@ -578,6 +617,12 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
         Select,
     }
 
+    public enum ColorModes
+    {
+        Stroke,
+        Page,
+    }
+
     [Input(Guid = "C427F009-7E04-4168-82E6-5EBE2640204D")]
     public readonly InputSlot<Vector2> MousePos = new();
 
@@ -585,11 +630,14 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
     public readonly InputSlot<bool> IsMouseButtonDown = new();
 
     [Input(Guid = "1057313C-006A-4F12-8828-07447337898B")]
-    public readonly InputSlot<float> BrushSize = new();
+    public readonly InputSlot<float> StrokeSize = new();
 
     [Input(Guid = "AE7FB135-C216-4F34-B73F-5115417E916B")]
-    public readonly InputSlot<Vector4> BrushColor = new();
+    public readonly InputSlot<Vector4> StrokeColor = new();
 
+    [Input(Guid = "37558056-88D8-4D2E-89E2-9F3460565BC8", MappedType = typeof(ColorModes))]
+    public readonly InputSlot<int> ColorMode = new();
+    
     [Input(Guid = "51641425-A2C6-4480-AC8F-2E6D2CBC300A")]
     public readonly InputSlot<string> FilePath = new();
 

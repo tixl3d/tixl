@@ -30,8 +30,10 @@ public class ProjectSettings : Settings<ProjectSettings.ConfigData>
         public WindowMode DefaultWindowMode = WindowMode.Fullscreen;
         public int DefaultOscPort = 8000;
         
+        // Logging
         public bool LogCompilationDetails = false;
         public bool LogAssemblyLoadingDetails = false;
+        public bool LogFileEvents = false;
         
         // Profiling
         public bool EnableBeatSyncProfiling = false;

@@ -9,6 +9,7 @@ using SharpDX.Mathematics.Interop;
 using SharpDX.WIC;
 using T3.Core.Resource;
 using T3.Core.Resource.Assets;
+using T3.Core.UserData;
 using T3.Editor.Gui.Windows.AssetLib;
 using T3.Editor.Gui.Windows.RenderExport;
 using Vector2 = System.Numerics.Vector2;
@@ -17,40 +18,7 @@ namespace T3.Editor.Gui.UiHelpers.Thumbnails;
 
 internal static class ThumbnailManager
 {
-    // --- Configuration ---
-    private const int AtlasSize = 4096;
-    private const int SlotWidth = 178; // Results in ~23 columns
-    private const int SlotHeight = 133; // 4:3 ratio
-    private const int Padding = 2; // 2px gap to avoid bleeding
-    private const int MaxSlots = 500; //
-
-    // --- State ---
-    private static SharpDX.Direct3D11.Texture2D? _atlas;
-    internal static ShaderResourceView? AtlasSrv { get; private set; }
-
-    private static readonly Dictionary<Guid, ThumbnailSlot> _slots = new();
-    private static readonly Queue<PendingUpload> _uploadQueue = new();
-    private static readonly ThumbnailRect _waiting = new(Vector2.Zero, Vector2.Zero, false);
-    private static bool _initialized;
-
-    // --- Internal Structures ---
-    internal readonly record struct ThumbnailRect(Vector2 Min, Vector2 Max, bool IsReady);
-
-    private record struct PendingUpload(Guid Guid, SharpDX.Direct3D11.Texture2D Texture, ThumbnailSlot Slot);
-
-    private static readonly HashSet<Guid> _lockedForWriting = new();
-
-    private sealed class ThumbnailSlot
-    {
-        public Guid Guid = Guid.Empty;
-        public int X;
-        public int Y;
-        public DateTime LastUsed;
-        public bool IsLoading;
-    }
-
-    // --- Main Thread Methods ---
-
+    #region Main Thread Methods
     internal static void Update()
     {
         if (!_initialized)
@@ -91,10 +59,10 @@ internal static class ThumbnailManager
         // Ensure 4:3 aspect ratio
         ImGui.Image(AtlasSrv.NativePointer, new Vector2(height * 4 / 3, height), thumbnail.Min, thumbnail.Max);
     }
+    #endregion
 
-    // --- Data Request Methods ---
-
-    internal static ThumbnailRect GetThumbnail(Asset asset, IResourcePackage? package)
+    #region data request
+    internal static ThumbnailRect GetThumbnail(Asset asset, IResourcePackage? package, Categories category = Categories.Temp)
     {
         if (asset.AssetType != AssetHandling.Images || package == null || asset.FileSystemInfo == null)
             return _waiting;
@@ -107,7 +75,7 @@ internal static class ThumbnailManager
         }
 
         // 2. Check for cache file
-        var thumbPath = Path.Combine(package.Folder, ".temp", "thumbnails", $"{asset.Id}.png");
+        var thumbPath = Path.Combine(GetPath(package, category), $"{asset.Id}.png");
 
         if (File.Exists(thumbPath))
         {
@@ -122,7 +90,7 @@ internal static class ThumbnailManager
         return _waiting;
     }
 
-    internal static ThumbnailRect GetThumbnail(Guid guid, IResourcePackage? package)
+    internal static ThumbnailRect GetThumbnail(Guid guid, IResourcePackage? package, Categories category = Categories.Temp)
     {
         if (package == null)
             return _waiting;
@@ -133,7 +101,7 @@ internal static class ThumbnailManager
             return GetRectFromSlot(slot);
         }
 
-        var path = Path.Combine(package.Folder, ".temp", "thumbnails", $"{guid}.png");
+        var path = Path.Combine(GetPath(package, category), $"{guid}.png");
         if (File.Exists(path))
         {
             RequestAsyncLoad(guid, path);
@@ -141,9 +109,9 @@ internal static class ThumbnailManager
 
         return _waiting;
     }
+    #endregion
 
-    // --- Background Operations ---
-
+    #region Background Operations
     private static async void RequestAsyncLoad(Guid guid, string path)
     {
         try
@@ -176,7 +144,7 @@ internal static class ThumbnailManager
         }
     }
 
-    private static async void GenerateThumbnailFromAsset(Asset asset, IResourcePackage package)
+    private static async void GenerateThumbnailFromAsset(Asset asset, IResourcePackage package, Categories category = Categories.Temp)
     {
         try
         {
@@ -186,7 +154,7 @@ internal static class ThumbnailManager
 
             // GPU scaling/saving back on main thread implicitly via ScreenshotWriter readback
             var t3Texture = new T3.Core.DataTypes.Texture2D(sourceTexture);
-            SaveThumbnail(asset.Id, package, t3Texture);
+            SaveThumbnail(asset.Id, package, t3Texture, category);
 
             sourceTexture.Dispose();
         }
@@ -244,15 +212,28 @@ internal static class ThumbnailManager
                                   return null;
                               });
     }
+    #endregion
 
-    // --- GPU / Saving Methods ---
 
-    internal static void SaveThumbnail(Guid guid, IResourcePackage package, T3.Core.DataTypes.Texture2D sourceTexture)
+    
+    private static string GetPath(IResourcePackage package, Categories category)
+    {
+        return category switch
+                   {
+                       Categories.PackageMeta => Path.Combine(package.Folder, MetaSubFolder, ThumbnailsSubFolder),
+                       Categories.User        => Path.Combine(FileLocations.TempFolder, ThumbnailsSubFolder, package.Name),
+                       _                      => Path.Combine(FileLocations.TempFolder, ThumbnailsSubFolder)
+                   };
+    }
+
+    #region GPU / Saving Methods
+    internal static void SaveThumbnail(Guid guid, IResourcePackage package, T3.Core.DataTypes.Texture2D sourceTexture, Categories category)
     {
         var device = ResourceManager.Device;
         var context = device.ImmediateContext;
 
-        var thumbDir = Path.Combine(package.Folder, ".temp", "thumbnails");
+        var thumbDir = GetPath(package, category);
+
         try
         {
             Directory.CreateDirectory(thumbDir);
@@ -264,6 +245,19 @@ internal static class ThumbnailManager
 
         var filePath = Path.Combine(thumbDir, $"{guid}.png");
 
+        lock (_lockedPath)
+        {
+            if (!_lockedPath.Add(filePath))
+                return;
+        }
+
+        _slots.Remove(guid);
+        // if (_slots.TryGetValue(guid, out var existingSlot))
+        // {
+        //     existingSlot.IsLoading = true;
+        //     existingSlot.LastUsed = DateTime.Now;
+        // }
+        
         const int targetWidth = SlotWidth;
         const int targetHeight = SlotHeight;
 
@@ -321,11 +315,19 @@ internal static class ThumbnailManager
         context.OutputMerger.SetTargets((RenderTargetView?)null);
 
         var newTexture = new T3.Core.DataTypes.Texture2D(tempTarget);
-        ScreenshotWriter.StartSavingToFile(newTexture, filePath, ScreenshotWriter.FileFormats.Png);
+        ScreenshotWriter.StartSavingToFile(newTexture, filePath, ScreenshotWriter.FileFormats.Png,
+                                           path =>
+                                           {
+                                               if (string.IsNullOrEmpty(path)) return;
+                                               lock (_lockedPath)
+                                               {
+                                                   _lockedPath.Remove(path);
+                                               }
+                                           }, logErrors:false);
     }
+    #endregion
 
-    // --- Helpers ---
-
+    #region helpers
     private static void Initialize()
     {
         var device = ResourceManager.Device;
@@ -381,4 +383,47 @@ internal static class ThumbnailManager
 
         return new ThumbnailRect(new Vector2(x, y), new Vector2(x + w, y + h), !slot.IsLoading);
     }
+    #endregion
+
+    // --- Configuration ---
+    private const int AtlasSize = 4096;
+    private const int SlotWidth = 178; // Results in ~23 columns
+    private const int SlotHeight = 133; // 4:3 ratio
+    private const int Padding = 2; // 2px gap to avoid bleeding
+    private const int MaxSlots = 500; //
+
+    // --- State ---
+    private static SharpDX.Direct3D11.Texture2D? _atlas;
+    internal static ShaderResourceView? AtlasSrv { get; private set; }
+
+    private static readonly Dictionary<Guid, ThumbnailSlot> _slots = new();
+    private static readonly Queue<PendingUpload> _uploadQueue = new();
+    private static readonly ThumbnailRect _waiting = new(Vector2.Zero, Vector2.Zero, false);
+    private static bool _initialized;
+
+    // --- Internal Structures ---
+    internal readonly record struct ThumbnailRect(Vector2 Min, Vector2 Max, bool IsReady);
+
+    private record struct PendingUpload(Guid Guid, SharpDX.Direct3D11.Texture2D Texture, ThumbnailSlot Slot);
+
+    private sealed class ThumbnailSlot
+    {
+        public Guid Guid = Guid.Empty;
+        public int X;
+        public int Y;
+        public DateTime LastUsed;
+        public bool IsLoading;
+    }
+
+    private static readonly HashSet<string> _lockedPath = [];
+
+    public enum Categories
+    {
+        Temp,
+        User,
+        PackageMeta,
+    }
+    
+    private const string ThumbnailsSubFolder = "Thumbnails";
+    private const string MetaSubFolder = ".meta";
 }

@@ -80,7 +80,6 @@ public sealed class TextureBgraReadAccess : IDisposable
         // Clear obsolete items
         while (_readRequests.Count > 0 && _readRequests[0].IsObsolete)
         {
-            Log.Debug("Remove obsolete");
             _readRequests.RemoveAt(0);
         }
         

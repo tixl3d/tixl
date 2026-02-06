@@ -126,6 +126,7 @@ internal static class InputSnapper
                                     BestInputMatch.InputSnapType == InputSnapTypes.InsertBeforeMultiInput)
                                    || (BestInputMatch.InputSnapType == InputSnapTypes.Normal 
                                        && !wasInputLineWasConnected 
+                                       && BestInputMatch.Item.Variant == MagGraphItem.Variants.Operator 
                                        && lines[inputLineIndex].InputUi.Relevancy == Relevancy.Optional
                                        && inputLineIndex > 0);
             

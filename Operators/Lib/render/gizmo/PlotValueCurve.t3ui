@@ -29,7 +29,7 @@
       }
     },
     {
-      "InputId": "2f25a35f-51a6-4e7f-bb53-a91cf4f64505"/*Display*/,
+      "InputId": "2f25a35f-51a6-4e7f-bb53-a91cf4f64505"/*DisplayLabel*/,
       "Position": {
         "X": -376.877,
         "Y": 355.22757

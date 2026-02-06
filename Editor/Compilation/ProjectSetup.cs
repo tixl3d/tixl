@@ -101,7 +101,7 @@ internal static partial class ProjectSetup
             return;
         #endif
         
-        package.InitializeShaderLinting(ResourceManager.SharedResourcePackages);
+        package.InitializeShaderLinting(ResourcePackageManager.SharedResourcePackages);
     }
 
     public static void DisposePackages()

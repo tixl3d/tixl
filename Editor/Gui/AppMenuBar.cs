@@ -22,6 +22,7 @@ using T3.Editor.Skills.Ui;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.ProjectHandling;
+using ShaderCompiler = T3.Core.Resource.ShaderCompiling.ShaderCompiler;
 
 namespace T3.Editor.Gui;
 
@@ -286,9 +287,9 @@ internal static class AppMenuBar
 
             if (ImGui.MenuItem("Set Project Thumbnail", null, false, RenderProcess.MainOutputTexture != null))
             {
-                if (currentProject != null)
+                if (currentProject != null && RenderProcess.MainOutputTexture != null)
                 {
-                    ThumbnailManager.SaveThumbnail(currentProject.Id, currentProject, RenderProcess.MainOutputTexture);
+                    ThumbnailManager.SaveThumbnail(currentProject.Id, currentProject, RenderProcess.MainOutputTexture, ThumbnailManager.Categories.PackageMeta);
                 }
             }
             

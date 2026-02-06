@@ -29,6 +29,7 @@ using Device = SharpDX.Direct3D11.Device;
 using Resource = SharpDX.Direct3D11.Resource;
 using SharpDX.Windows;
 using SilkWindows;
+using T3.Core.Resource.ShaderCompiling;
 using T3.Core.UserData;
 using T3.Core.Utils;
 using T3.Serialization;
@@ -38,6 +39,7 @@ using FillMode = SharpDX.Direct3D11.FillMode;
 using ResourceManager = T3.Core.Resource.ResourceManager;
 using VertexShader = T3.Core.DataTypes.VertexShader;
 using PixelShader = T3.Core.DataTypes.PixelShader;
+using ShaderCompiler = T3.Core.Resource.ShaderCompiling.ShaderCompiler;
 using Texture2D = T3.Core.DataTypes.Texture2D;
 
 namespace T3.Player;

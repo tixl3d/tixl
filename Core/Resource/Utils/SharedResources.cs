@@ -1,11 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using SharpDX.Direct3D11;
-using T3.Core.Compilation;
 using T3.Core.DataTypes;
 using T3.Core.Logging;
-using T3.Core.Model;
 using T3.Core.UserData;
 using PixelShader = T3.Core.DataTypes.PixelShader;
 using Texture2D = T3.Core.DataTypes.Texture2D;
@@ -18,19 +15,14 @@ namespace T3.Core.Resource;
 /// </summary>
 public static class SharedResources
 {
-    // static SharedResources()
-    // {
-    //     ResourceManager.AddSharedResourceFolder(ResourcePackage, true);
-    // }
-
     public static readonly string EditorResourcesDirectory = Path.Combine(FileLocations.StartFolder,
                                                                           FileLocations.EditorResourcesSubfolder);
 
     public static void Initialize()
     {
-        if (ShaderCompiler.Instance == null)
+        if (ShaderCompiling.ShaderCompiler.Instance == null)
         {
-            throw new Exception($"{nameof(ShaderCompiler)}.{nameof(ShaderCompiler.Instance)} not initialized");
+            throw new Exception($"{nameof(ShaderCompiling.ShaderCompiler)}.{nameof(ShaderCompiling.ShaderCompiler.Instance)} not initialized");
         }
 
         _fullScreenVertexShaderResource = ResourceManager.CreateShaderResource<VertexShader>(Path.Combine(EditorResourcesDirectory,
@@ -64,11 +56,10 @@ public static class SharedResources
                                                                                     });
 
         _viewWindowDefaultTexture = ResourceManager.CreateTextureResource(Path.Combine(EditorResourcesDirectory, "images/t3-background.png"), null);
-        //_t3logoAlphaTexture = ResourceManager.CreateTextureResource(@"images/t3-logo-alpha.png", null); //add t3logo to resources for use in about dialog
         _t3LogoAlphaTexture =
             ResourceManager.CreateTextureResource(Path.Combine(EditorResourcesDirectory, "images/t3-logo-alpha.png"),
                                                   null); //add t3logo to resources for use in about dialog
-        //_colorPickerTexture = ResourceManager.CreateTextureResource(@"images/editor/t3-colorpicker.png", null);
+
         _colorPickerTexture = ResourceManager.CreateTextureResource(Path.Combine(EditorResourcesDirectory, "images/t3-colorpicker.png"), null);
 
         if (_viewWindowDefaultTexture.Value == null)
@@ -111,16 +102,4 @@ public static class SharedResources
     public static Resource<VertexShader> FullScreenVertexShaderResource => _fullScreenVertexShaderResource;
 
     public static Resource<PixelShader> FullScreenPixelShaderResource => _fullScreenPixelShaderResource;
-
-    // private sealed class SharedResourceObject : IResourcePackage
-    // {
-    //     public string DisplayName => "Shared Resources";
-    //     public string Name => "t3";
-    //     // ReSharper disable once ReplaceAutoPropertyWithComputedProperty
-    //     public string ResourcesFolder { get; } = Directory;
-    //     public string RootNamespace => null;
-    //     public ResourceFileWatcher FileWatcher => null;
-    //     public bool IsReadOnly => true;
-    //     public IReadOnlyCollection<DependencyCounter> Dependencies { get; } = Array.Empty<DependencyCounter>();
-    // }
 }

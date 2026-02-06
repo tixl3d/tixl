@@ -16,7 +16,7 @@ using GeometryShader = SharpDX.Direct3D11.GeometryShader;
 using PixelShader = SharpDX.Direct3D11.PixelShader;
 using VertexShader = SharpDX.Direct3D11.VertexShader;
 
-namespace T3.Core.Resource;
+namespace T3.Core.Resource.ShaderCompiling;
 
 /// <summary>
 /// An implementation of the <see cref="ShaderCompiler"/> class that uses the DirectX 11 shader compiler from SharpDX

@@ -19,7 +19,7 @@
       "DefaultValue": false
     },
     {
-      "Id": "2f25a35f-51a6-4e7f-bb53-a91cf4f64505"/*Display*/,
+      "Id": "2f25a35f-51a6-4e7f-bb53-a91cf4f64505"/*DisplayLabel*/,
       "DefaultValue": true
     },
     {

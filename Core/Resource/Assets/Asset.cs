@@ -7,10 +7,12 @@ using T3.Core.Utils;
 namespace T3.Core.Resource.Assets;
 
 /// <summary>
-/// Defines a potential file resource in a SymbolProject.
+/// Defines a potential file resource in a SymbolPackage. All files in a Packages' Assets/ folder will
+/// be collected on startup and registered on startup.
 /// </summary>
 public sealed class Asset
 {
+    // ReSharper disable once MemberCanBeInternal
     public Asset(string address)
     {
         Address = address;
@@ -18,9 +20,12 @@ public sealed class Asset
     }
     
     public readonly string Address;
-    public readonly Guid Id; 
+    public readonly Guid Id;
+    public required IResourcePackage Package;
     public required Guid PackageId;
     public FileSystemInfo? FileSystemInfo;
+    
+    public required string FullPath; // We don't rely on FileSystemInfo full path because if may contain backward slashes...
 
     public AssetType AssetType = AssetType.Unknown;
     public int ExtensionId;

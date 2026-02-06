@@ -8,40 +8,33 @@ namespace T3.Core.Resource;
 /// File handler and GPU resource generator. 
 /// </summary>
 /// Todo: Should probably be split into multiple classes
-public static partial class ResourceManager
+public static class ResourcePackageManager
 {
-    static ResourceManager()
+    static ResourcePackageManager()
     {
     }
 
     internal static void AddSharedResourceFolder(IResourcePackage resourcePackage, bool allowSharedNonCodeFiles)
     {
-        //if (allowSharedNonCodeFiles)
         _sharedResourcePackages.Add(resourcePackage);
-
-        //ShaderPackages.Add(resourcePackage);
         resourcePackage.AssetsFolder.ToForwardSlashesUnsafe();
     }
 
     internal static void RemoveSharedResourceFolder(IResourcePackage resourcePackage)
     {
-        //ShaderPackages.Remove(resourcePackage);
         _sharedResourcePackages.Remove(resourcePackage);
     }
 
     public static IReadOnlyList<IResourcePackage> SharedResourcePackages => _sharedResourcePackages;
     private static readonly List<IResourcePackage> _sharedResourcePackages = new(4);
-    //public static readonly List<IResourcePackage> ShaderPackages = new(4);
 
-    public enum PathMode
-    {
-        PackageUri, // Always prepend packageName
-        Absolute, // Absolute but conformed to forward slashes
-    }
-
+    
+    /// <summary>
+    /// Called at the beginning of each frame.
+    /// </summary>
     public static void RaiseFileWatchingEvents()
     {
-        // dispatched to main thread
+        // Dispatched to main thread
         lock (_fileWatchers)
         {
             foreach (var fileWatcher in _fileWatchers)
@@ -64,5 +57,4 @@ public static partial class ResourceManager
     }
 
     private static readonly List<ResourceFileWatcher> _fileWatchers = [];
-    public const string DefaultShaderFilter = "*.hlsl";
 }

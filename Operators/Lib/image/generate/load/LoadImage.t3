@@ -4,6 +4,10 @@
     {
       "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
       "DefaultValue": "Examples:images/frog3.jpg"
+    },
+    {
+      "Id": "96044c6c-d005-4d61-b605-7a6896e98cb6"/*CacheResources*/,
+      "DefaultValue": false
     }
   ],
   "Children": [],

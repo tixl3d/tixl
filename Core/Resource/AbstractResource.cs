@@ -13,7 +13,7 @@ using T3.Core.Utils;
 
 namespace T3.Core.Resource;
 
-public interface IResource
+internal interface IResource
 {
     public IResourcePackage? OwningPackage { get; }
 }
@@ -32,8 +32,8 @@ public sealed class Resource<T> : IDisposable, IResource
         _slot = slot;
     }
 
-    public Resource(string? relativePath, IResourceConsumer? owner, TryGenerate<T> tryGenerate, 
-                    bool allowDisposal = true, EqualityComparer<T?>? equalityComparer = null)
+    internal Resource(string? address, IResourceConsumer? owner, TryGenerate<T> tryGenerate, 
+                      bool allowDisposal = true, EqualityComparer<T?>? equalityComparer = null)
     {
         ArgumentNullException.ThrowIfNull(tryGenerate, nameof(tryGenerate));
 
@@ -49,7 +49,7 @@ public sealed class Resource<T> : IDisposable, IResource
         if (owner != null)
             owner.Disposing += _onDispose;
 
-        ReplaceFilePath(relativePath);
+        SetAddress(address);
         _lazyValue = new Lazy<T?>(_valueFactory, ThreadSafetyMode);
     }
     #endregion
@@ -82,27 +82,27 @@ public sealed class Resource<T> : IDisposable, IResource
         if (_slot is not { IsDirty: true })
             return _lazyValue.Value;
 
-        var oldPath = _slot.Value;
+        var oldValue = _slot.Value;
         
-        var newPath = _slot.GetValue(context);
-        var hasChanged = oldPath != newPath;
+        var newAddress = _slot.GetValue(context);
+        var hasChanged = oldValue != newAddress;
         
         if(!hasChanged)
             return _lazyValue.Value;
         
-        if (!string.IsNullOrWhiteSpace(newPath))
+        if (!string.IsNullOrWhiteSpace(newAddress))
         {
-            if (!_slot.HasInputConnections)
+            if (_slot.HasInputConnections)
             {
-                newPath.ToForwardSlashesUnsafe();
+                newAddress = newAddress.ToForwardSlashes();
             }
             else
             {
-                newPath = newPath.ToForwardSlashes();
+                newAddress.ToForwardSlashesUnsafe();
             }
         }
 
-        ReplaceFilePath(newPath);
+        SetAddress(newAddress);
         MarkFileAsChanged();
 
         return _lazyValue.Value;
@@ -159,25 +159,40 @@ public sealed class Resource<T> : IDisposable, IResource
     /// <summary>
     /// Replaces the current file path with a new one and ensures we have a FileResource if possible
     /// </summary>
-    /// <param name="newUserPath">Path to replace the current value of <see cref="_userPath"/></param>
+    /// <param name="newAddress">Path to replace the current value of <see cref="_userPath"/></param>
     /// <returns>True if we have a file resource</returns>
-    private bool ReplaceFilePath(string? newUserPath)
+    private bool SetAddress(string? newAddress)
     {
-        // if the file resource is already set and the path is the same, return true
-        if (_fileResource != null && _userPath == newUserPath)
+        // 1. Check if the address actually changed
+        if (_asset != null && _userPath == newAddress)
             return true;
 
         ReleaseFileResource();
+        _userPath = newAddress;
 
-        _userPath = newUserPath;
+        // 2. Use AssetRegistry as the primary lookup
+        if (!AssetRegistry.TryGetAsset(newAddress, out var asset))
+        {
+            // Fallback: If it's not in the registry, it might be an absolute path
+            // or a new file not yet indexed.
+            if (!FileResource.TryGetFileResource(newAddress, _owner, out var fileResource))
+                return false;
+            
+            _fileResource = fileResource;
+        }
+        else
+        {
+            _asset = asset;
+            // 3. Map the Asset to a FileResource for change tracking
+            if (!FileResource.TryGetFileResource(asset.Address, _owner, out var fileResource))
+                return false;
+                
+            _fileResource = fileResource;
+        }
 
-        if (!FileResource.TryGetFileResource(newUserPath, _owner, out var fileResource))
-            return false;
-
-        fileResource.Claim(this);
-        _fileResource = fileResource;
-        fileResource.FileChanged += _onFileChanged;
-        return true;
+        _fileResource.Claim(this);
+        _fileResource.FileChanged += _onFileChanged;
+        return true;        
     }
 
     private void ReleaseFileResource()
@@ -198,7 +213,7 @@ public sealed class Resource<T> : IDisposable, IResource
             // We know the fileResource is not null because this is only called by the file resource
             var newPath = _fileResource!.AbsolutePath;
 
-            if (AssetRegistry.TryConvertFilepathToAddress(newPath, false, out var relativePath))
+            if (AssetRegistry.TryConvertFilepathToAddress(newPath, false, out var relativePath, out _))
             {
                 newPath = relativePath;
             }
@@ -219,7 +234,7 @@ public sealed class Resource<T> : IDisposable, IResource
         string? failureReason;
         bool success;
         T? newValue;
-        var hasFileResource = _fileResource != null || ReplaceFilePath(_userPath);
+        var hasFileResource = _fileResource != null || SetAddress(_userPath);
 
         if (hasFileResource && _fileResource!.FileInfo is { Exists : true })
         {
@@ -334,10 +349,11 @@ public sealed class Resource<T> : IDisposable, IResource
     private readonly EqualityComparer<T?> _equalityComparer;
 
     // file handling
-    private FileResource? _fileResource;
+    private Asset? _asset; // New: Reference the Asset directly
+    private FileResource? _fileResource; // We keep this for now to handle live hooks
     private readonly EventHandler<WatcherChangeTypes> _onFileChanged;
     private readonly IResourceConsumer? _owner;
-    private string? _userPath;
+    private string? _userPath; // The address (e.g., "lib:shaders/test.hlsl")
     private readonly InputSlot<string>? _slot;
 
     // Value handling
@@ -349,7 +365,8 @@ public sealed class Resource<T> : IDisposable, IResource
     private readonly bool _allowDisposal;
     private const LazyThreadSafetyMode ThreadSafetyMode = LazyThreadSafetyMode.None;
     public event Action? Changed;
-
+    
+    
     private readonly List<ISlot> _dependentSlots = new();
 
     #if DEBUG

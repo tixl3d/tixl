@@ -9,7 +9,7 @@ using System.Threading;
 using T3.Core.Logging;
 using T3.Core.SystemUi;
 
-namespace T3.Core.Resource;
+namespace T3.Core.Resource.ShaderCompiling;
 
 public abstract partial class ShaderCompiler
 {

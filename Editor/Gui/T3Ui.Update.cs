@@ -55,7 +55,7 @@ public static partial class T3Ui
         SkillTraining.Update();
         SkillMapEditor.Draw();
 
-        ResourceManager.RaiseFileWatchingEvents();
+        ResourcePackageManager.RaiseFileWatchingEvents();
 
         VariationHandling.Update();
         MouseWheelFieldWasHoveredLastFrame = MouseWheelFieldHovered;

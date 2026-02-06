@@ -39,7 +39,8 @@ internal sealed class SettingsWindow : Window
     protected override void DrawContent()
     {
         var changed = false;
-
+        var projectSettingsChanged = false;
+        
         ImGui.BeginChild("categories", new Vector2(120 * T3Ui.UiScaleFactor, -1),
                          true,
                          ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoBackground);
@@ -288,7 +289,7 @@ internal sealed class SettingsWindow : Window
 
                 case Categories.Project:
                 {
-                    var projectSettingsChanged = false;
+                    
                     FormInputs.AddSectionHeader("Project specific settings");
                     FormInputs.AddVerticalSpace();
 
@@ -388,8 +389,7 @@ internal sealed class SettingsWindow : Window
                                                                      "Users can use cursor left/right to skip through time\nand space key to pause playback\nof exported executable.",
                                                                      ProjectSettings.Defaults.EnablePlaybackControlWithKeyboard);
 
-                    if (projectSettingsChanged)
-                        ProjectSettings.Save();
+
 
                     FormInputs.SetIndentToParameters();
 
@@ -502,11 +502,24 @@ internal sealed class SettingsWindow : Window
                                                       "Log garbage collection information. This can be useful to see correlation between frame drops and GC activity.",
                                                       UserSettings.Defaults.EnableGCProfiling);
 
-                    changed |= FormInputs.AddCheckBox("Profile Beat Syncing",
+                    changed |= FormInputs.AddCheckBox("MIDI Controller Debug Logging",
+                                                      ref UserSettings.Config.EnableMidiDebugLogging,
+                                                      "Log detailed MIDI controller messages including button mappings and mode switches. Useful for debugging custom controller implementations.",
+                                                      UserSettings.Defaults.EnableMidiDebugLogging);
+
+                    projectSettingsChanged |= FormInputs.AddCheckBox("Profile Beat Syncing",
                                                       ref ProjectSettings.Config.EnableBeatSyncProfiling,
                                                       "Logs beat sync timing to IO Window",
                                                       ProjectSettings.Defaults.EnableBeatSyncProfiling);
 
+                    FormInputs.AddVerticalSpace();
+                    
+                    projectSettingsChanged |= FormInputs.AddCheckBox("Log Asset File Events",
+                                                                     ref ProjectSettings.Config.LogFileEvents,
+                                                                     "Logs events related to changing and updating assets files.",
+                                                                     ProjectSettings.Defaults.LogFileEvents);
+
+                    
                     FormInputs.AddSectionSubHeader("Compilation");
 
                     // Compilation details
@@ -560,6 +573,9 @@ internal sealed class SettingsWindow : Window
 
             if (changed)
                 UserSettings.Save();
+            
+            if (projectSettingsChanged)
+                ProjectSettings.Save();
         }
         ImGui.EndChild();
         ImGui.PopStyleVar();

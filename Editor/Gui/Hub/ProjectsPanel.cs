@@ -106,7 +106,7 @@ internal static class ProjectsPanel
                    UiColors.TextMuted, package.Folder);
 
 
-        var thumbnail = ThumbnailManager.GetThumbnail(package.Id, package);
+        var thumbnail = ThumbnailManager.GetThumbnail(package.Id, package, ThumbnailManager.Categories.PackageMeta);
         if (thumbnail.IsReady && ThumbnailManager.AtlasSrv != null)
         {
             var height = ProjectItemSize.Y - padding * 2;

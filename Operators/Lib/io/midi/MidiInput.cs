@@ -227,6 +227,11 @@ public sealed class MidiInput : Instance<MidiInput>, MidiConnectionManager.IMidi
             if (sender is not MidiIn midiIn || msg.MidiEvent == null)
                 return;
 
+            // Skip messages from devices that are being controlled by compatible MIDI devices
+            // (when in control mode, not passthrough mode)
+            if (MidiConnectionManager.IsDeviceInControlMode(midiIn))
+                return;
+
             MidiSignal newSignal = null;
 
             var device = MidiConnectionManager.GetDescriptionForMidiIn(midiIn);

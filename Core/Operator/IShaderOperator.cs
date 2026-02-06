@@ -6,6 +6,7 @@ using T3.Core.Operator.Slots;
 using T3.Core.Resource;
 using T3.Core.Stats;
 using T3.Core.Utils;
+using ShaderCompiler = T3.Core.Resource.ShaderCompiling.ShaderCompiler;
 
 namespace T3.Core.Operator;
 

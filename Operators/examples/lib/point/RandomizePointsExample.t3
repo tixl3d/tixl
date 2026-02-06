@@ -433,7 +433,7 @@
       "Outputs": []
     },
     {
-      "Id": "4e4d978e-220d-46c6-9e39-bfdd747f5c31"/*BiasAndGainExample*/,
+      "Id": "4e4d978e-220d-46c6-9e39-bfdd747f5c31"/*GainAndBiasExample*/,
       "SymbolId": "e6d19a14-54b7-4554-8e92-9001b2530937",
       "InputValues": [],
       "Outputs": []

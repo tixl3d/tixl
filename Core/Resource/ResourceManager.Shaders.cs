@@ -24,7 +24,7 @@ public static partial class ResourceManager
                                      [NotNullWhen(true)]out TShader? newShader, 
                                      [NotNullWhen(false)]out string? reason) =>
                                     {
-                                        var success = ShaderCompiler.TryGetShaderFromFile(fileResource, ref currentValue, instance, out reason, getEntryPoint());
+                                        var success = ShaderCompiling.ShaderCompiler.TryGetShaderFromFile(fileResource, ref currentValue, instance, out reason, getEntryPoint());
                                         newShader = currentValue;
                                         onShaderCompiled?.Invoke(currentValue);
                                         return success;
@@ -43,7 +43,7 @@ public static partial class ResourceManager
                                      [NotNullWhen(true)]out TShader? newShader, 
                                      [NotNullWhen(false)]out string? reason) =>
                                     {
-                                        var success = ShaderCompiler.TryGetShaderFromFile(fileResource, ref currentValue, instance, out reason, getEntryPoint());
+                                        var success = ShaderCompiling.ShaderCompiler.TryGetShaderFromFile(fileResource, ref currentValue, instance, out reason, getEntryPoint());
                                         newShader = currentValue;
                                         return success;
                                     };
