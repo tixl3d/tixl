@@ -26,7 +26,7 @@ internal sealed class DelaunayMesh : Instance<DelaunayMesh>
         try
         {
             // Get the point list from input
-            var pointList = List.GetValue(context);
+            var pointList = BoundaryPoints.GetValue(context);
             if (pointList == null || pointList.NumElements == 0)
             {
                 Log.Warning("DelaunayMesh: No points in list");
@@ -510,9 +510,9 @@ internal sealed class DelaunayMesh : Instance<DelaunayMesh>
     private readonly MeshBuffers _data = new();
 
     [Input(Guid = "18FDDD63-DB79-4EE6-9A32-B90A5CEFF582")]
-    public readonly InputSlot<StructuredList> List = new();
-
-    [Input(Guid = "E6F73027-AFE5-4A95-A4DC-CA65079F9127")]
+    public readonly InputSlot<StructuredList> BoundaryPoints = new();
+  
+    [Input(Guid = "DB3C69B1-403B-485B-94E8-FC7E8B566947")]
     public readonly InputSlot<StructuredList> ExtraPoints = new();
 
     [Input(Guid = "e00e4b12-8576-4a78-b773-17630b102a70")]
