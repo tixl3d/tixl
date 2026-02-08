@@ -51,7 +51,7 @@ public static class AudioEngine
             {
                 clip.TargetTime = time;
             }
-            else if(!string.IsNullOrEmpty(handle.Clip.FilePath))
+            else if(!string.IsNullOrEmpty(handle.Clip.Address))
             {
                 if (AudioClipStream.TryLoadClip(handle, out var audioClipStream))
                 {

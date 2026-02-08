@@ -250,7 +250,7 @@ internal static partial class Program
                 }
                 else
                 {
-                    Log.Warning($"Can't find soundtrack {_soundtrackHandle.Clip.FilePath}");
+                    Log.Warning($"Can't find soundtrack {_soundtrackHandle.Clip.Address}");
                     _soundtrackHandle = null;
                 }
             }
