@@ -2,8 +2,19 @@
   "Id": "d05739d3-f89d-488d-85d0-c0d115265b75"/*LoadSvgAsTexture2D*/,
   "Inputs": [
     {
+      "Id": "2063a2a5-305d-4022-a1af-0840cdaa8be4"/*Resolution*/,
+      "DefaultValue": {
+        "X": 0,
+        "Y": 0
+      }
+    },
+    {
       "Id": "89cd0433-8646-47f3-a22e-afe1344c6f07"/*Scale*/,
       "DefaultValue": 1.0
+    },
+    {
+      "Id": "a01425ad-e38f-4a80-b8cf-a2ea03895fe2"/*UseViewBox*/,
+      "DefaultValue": false
     },
     {
       "Id": "f4860e75-eff7-4e6e-a144-016ff5bb054e"/*Path*/,

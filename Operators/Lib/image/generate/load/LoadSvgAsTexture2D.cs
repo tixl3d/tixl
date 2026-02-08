@@ -24,7 +24,8 @@ internal sealed class LoadSvgAsTexture2D : Instance<LoadSvgAsTexture2D>, IDescri
     {
         if (_svgResource.TryGetValue(context, out var svgDocument))
         {
-            // Process the SVG document...
+            var resolution = Resolution.GetValue(context);
+            var useViewBox = UseViewBox.GetValue(context);
             var scale = Scale.GetValue(context);
 
             if (svgDocument == null)
@@ -36,18 +37,25 @@ internal sealed class LoadSvgAsTexture2D : Instance<LoadSvgAsTexture2D>, IDescri
             {
                 // Rasterize the SVG to a bitmap
                 System.Drawing.Bitmap rasterizedBitmap;
+                var width = 0;
+                var height = 0;
 
-                // Check if a specific resolution is provided
-                if (scale == 0.0 || scale == 1.0)
+                if (resolution.X ==0 && resolution.Y == 0 && !useViewBox)
                 {
-                    rasterizedBitmap = svgDocument.Draw();
+                    height = context.RequestedResolution.Height;              
+                }
+                else if(!useViewBox)
+                {
+                    width = resolution.X;
+                    height = resolution.Y;   
                 }
                 else
                 {
-                    var width = (int)(svgDocument.ViewBox.Width * scale);
-                    var height = (int)(svgDocument.ViewBox.Height * scale);
-                    rasterizedBitmap = svgDocument.Draw(width, height);
+                    width = (int)(svgDocument.ViewBox.Width*scale);
+                    height = (int)( svgDocument.ViewBox.Height*scale); 
                 }
+
+                rasterizedBitmap = svgDocument.Draw(width, height);
 
                 if (rasterizedBitmap == null)
                 {
@@ -143,6 +151,12 @@ internal sealed class LoadSvgAsTexture2D : Instance<LoadSvgAsTexture2D>, IDescri
     [Input(Guid = "f4860e75-eff7-4e6e-a144-016ff5bb054e")]
     public readonly InputSlot<string> Path = new();
     
+    [Input(Guid = "2063A2A5-305D-4022-A1AF-0840CDAA8BE4")]
+    public readonly InputSlot<Int2> Resolution = new();
+    
+    [Input(Guid = "A01425AD-E38F-4A80-B8CF-A2EA03895FE2")]
+    public readonly InputSlot<bool> UseViewBox = new();
+
     [Input(Guid = "89CD0433-8646-47F3-A22E-AFE1344C6F07")]
     public readonly InputSlot<float> Scale = new();
 }
