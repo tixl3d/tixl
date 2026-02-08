@@ -245,7 +245,7 @@
   "Annotations": [
     {
       "Id": "072c765e-f242-4d1d-98d5-e1e15e7796ef",
-      "Title": "it's just math to place the text above the image",
+      "Title": "it's just math to place the text above the image no matter its resolution",
       "Label": "Not revelant for this example",
       "Color": {
         "X": 0.6,
@@ -264,7 +264,7 @@
     },
     {
       "Id": "6bbd6451-e6a7-436c-9189-8e2acf9487d2",
-      "Title": "[Load Svg As Texture 2D] allows to change the scale of the original vector design and generate a bitmap texture that will look sharp.\nNote that we intentionally made this SVG tiny in order to demonstrate the advantage of this load symbol. ",
+      "Title": "[LoadSvgAsTexture 2D] allows to change the scale of the original vector design and generate a bitmap texture that will look sharp.\nNote that we intentionally made this SVG tiny in order to demonstrate the advantage of this load symbol. ",
       "Label": "Scaled up ",
       "Color": {
         "X": 0.6,
@@ -283,7 +283,7 @@
     },
     {
       "Id": "9b609457-945a-4222-a925-316bb31779d2",
-      "Title": "Try to increase the scale of [layer2d] to see how bad it will look\nPay attention to the Layer 2D scale mode set to: \nMatch Pixel Resolution",
+      "Title": "Try to increase the scale of [layer2d] to see how bad it will look\nPay attention to the Layer 2D scale mode is set to: \nMatch Pixel Resolution",
       "Label": "Original ViewBox size embedded in the svg file",
       "Color": {
         "X": 0.6,

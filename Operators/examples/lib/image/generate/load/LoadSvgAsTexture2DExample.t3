@@ -76,13 +76,8 @@
           "Type": "T3.Core.DataTypes.Vector.Int2",
           "Value": {
             "X": 0,
-            "Y": 333
+            "Y": 256
           }
-        },
-        {
-          "Id": "a01425ad-e38f-4a80-b8cf-a2ea03895fe2"/*UseViewBox*/,
-          "Type": "System.Boolean",
-          "Value": false
         },
         {
           "Id": "f4860e75-eff7-4e6e-a144-016ff5bb054e"/*Path*/,
