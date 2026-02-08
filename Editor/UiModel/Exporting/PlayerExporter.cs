@@ -172,7 +172,7 @@ internal static partial class PlayerExporter
                 continue;
 
             var sourcePath = Path.Combine(assetPackage.Folder, ReleaseInfo.FileName);
-            var targetPath = Path.Combine(operatorDir, ReleaseInfo.FileName);
+            var targetPath = Path.Combine(operatorDir, assetPackage.Name, ReleaseInfo.FileName);
 
             if (!TryCopyFile(sourcePath, targetPath))
             {
