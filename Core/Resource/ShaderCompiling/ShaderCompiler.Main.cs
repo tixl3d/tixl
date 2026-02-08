@@ -21,15 +21,14 @@ public abstract partial class ShaderCompiler
         where TShader : AbstractShader
     {
         var includes = GetIncludesFrom(args.SourceCode);
-        var includeDirectories = args.Owner;
+        var consumer = args.Owner;
 
         foreach (var include in includes)
         {
-            //TODO: This is an ugly work around to get it running.
-            var includeInLib = "Lib:shaders/" + include;
-            if (!AssetRegistry.TryResolveAddress(includeInLib, includeDirectories, out _, out _))
+            var includeAddress = "Lib:shaders/" + include;
+            if (!AssetRegistry.TryResolveAddress(includeAddress, consumer, out _, out _))
             {
-                reason = $"Can't find include file: {includeInLib}";
+                reason = $"Can't find include file: {includeAddress}";
                 shader = null;
                 return false;
             }
@@ -82,7 +81,8 @@ public abstract partial class ShaderCompiler
         {
             Instance.CreateShaderInstance(name, compiledBlob, out TShader s);
             shader = s; // make nullable happy
-            Log.Debug($"{name} - {args.EntryPoint} {reason}");
+            if(ProjectSettings.Config.LogFileEvents)
+                Log.Debug($"{name} - {args.EntryPoint} {reason}");
             return true;
         }
 

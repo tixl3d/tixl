@@ -20,14 +20,14 @@ public sealed record AudioClipResourceHandle(AudioClipDefinition Clip, IResource
 {
     public bool TryGetFileResource([NotNullWhen(true)] out FileResource? file)
     {
-        if (string.IsNullOrEmpty(Clip.FilePath))
+        if (string.IsNullOrEmpty(Clip.Address))
         {
             file = null;
             LoadingAttemptFailed = false;
             return false;
         }
 
-        if (FileResource.TryGetFileResource(Clip.FilePath, Owner, out file))
+        if (FileResource.TryGetFileResource(Clip.Address, Owner, out file))
         {
             LoadingAttemptFailed = false;
             return true;
@@ -46,12 +46,12 @@ public sealed record AudioClipResourceHandle(AudioClipDefinition Clip, IResource
     {
         if (!AssetRegistry.TryResolveAddress(newFilePath, composition, out var absolutePath, out var resourceContainer))
         {
-            Clip.FilePath = string.Empty;
+            Clip.Address = string.Empty;
             return false;
         }
         
         LoadingAttemptFailed = false;
-        Clip.FilePath = newFilePath;
+        Clip.Address = newFilePath;
         return true;
     }
 
@@ -68,7 +68,7 @@ public sealed class AudioClipDefinition
 {
     #region serialized attributes
     public Guid Id;
-    public string? FilePath;
+    public string? Address;
     public double StartTime;
     public double EndTime;
     public float Bpm = 120;
@@ -95,7 +95,7 @@ public sealed class AudioClipDefinition
         newAudioClip = new AudioClipDefinition
                                {
                                    Id = clipId,
-                                   FilePath = jToken[nameof(FilePath)]?.Value<string>(),
+                                   Address = jToken[nameof(Address)]?.Value<string>(),
                                    StartTime = jToken[nameof(StartTime)]?.Value<double>() ?? 0,
                                    EndTime = jToken[nameof(EndTime)]?.Value<double>() ?? 0,
                                    Bpm = jToken[nameof(Bpm)]?.Value<float>() ?? 0,
@@ -109,7 +109,7 @@ public sealed class AudioClipDefinition
 
     internal void ToJson(JsonTextWriter writer)
     {
-        if (string.IsNullOrEmpty(FilePath))
+        if (string.IsNullOrEmpty(Address))
             return;
         
         //writer.WritePropertyName(Id.ToString());
@@ -121,13 +121,13 @@ public sealed class AudioClipDefinition
             writer.WriteValue(nameof(Bpm), Bpm);
             writer.WriteValue(nameof(DiscardAfterUse), DiscardAfterUse);
             writer.WriteValue(nameof(IsSoundtrack), IsSoundtrack);
-            if (string.IsNullOrEmpty(FilePath))
+            if (string.IsNullOrEmpty(Address))
             {
                 Log.Warning("Empty file path in AudioClip.");
             }
             else
             {
-                writer.WriteObject(nameof(FilePath), FilePath);
+                writer.WriteObject(nameof(Address), Address);
             }
             if (Math.Abs(Volume - 1.0f) > 0.001f)
                 writer.WriteObject(nameof(Volume), Volume);

@@ -46,13 +46,15 @@ public abstract partial class SymbolPackage : IResourcePackage
 
     public virtual string DisplayName => AssemblyInformation.Name;
 
+    /** For readonly packages we search for .t3 files in the Symbols folder */
     protected virtual IEnumerable<string> SymbolSearchFiles
     {
         get
         {
-            var dir = Path.Combine(Folder, FileLocations.SymbolsSubfolder);
+            var dir = Path.Combine(Folder, FileLocations.ReleaseSymbolsSubfolder);
             if (!Directory.Exists(dir))
                 return [];
+            
             return Directory.EnumerateFiles(dir, $"*{SymbolExtension}", SearchOption.AllDirectories);
         }
     }

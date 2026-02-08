@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -46,26 +47,35 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
 
     private static List<AssemblyTreeNode> CoreNodes => _coreNodes;
     public readonly string MainDirectory;
-    private static readonly string _rootShadowCopyDir = Path.Combine(FileLocations.TempFolder, "ShadowCopy");
+
+    private static string RootShadowCopyDir
+    {
+        get
+        {
+            var processId = Environment.ProcessId;
+            return Path.Combine(FileLocations.TempFolder, "ShadowCopy", $"{processId}");
+        }
+    }
+
     private readonly string _shadowCopyDirectory;
     private readonly bool _shouldCopyBinaries;
-    
+
     static TixlAssemblyLoadContext()
     {
         try
         {
-            if (Directory.Exists(_rootShadowCopyDir))
+            if (Directory.Exists(RootShadowCopyDir))
             {
-                Directory.Delete(_rootShadowCopyDir, true);
+                Directory.Delete(RootShadowCopyDir, true);
             }
         }
         catch (Exception e)
         {
             // This warning happens quite frequently
-            Log.Debug($"Failed to delete shadow copy directory {_rootShadowCopyDir}: {e.Message}");
+            Log.Debug($"Failed to delete shadow copy directory {RootShadowCopyDir}: {e.Message}");
         }
-        
-        Directory.CreateDirectory(_rootShadowCopyDir);
+
+        Directory.CreateDirectory(RootShadowCopyDir);
 
         (AssemblyLoadContext Context, (Assembly Assembly, AssemblyName name)[] assemblies)[]? allAssemblies = All
            .Select(ctx => (
@@ -137,7 +147,7 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
     internal TixlAssemblyLoadContext(string assemblyName, string directory, bool isReadOnly) :
         base(assemblyName, true)
     {
-        if(ProjectSettings.Config.LogCompilationDetails)
+        if (ProjectSettings.Config.LogCompilationDetails)
             Log.Debug($"{Name}: Creating new assembly load context for {assemblyName}");
 
         if (ProjectSettings.Config.LogAssemblyLoadingDetails)
@@ -151,7 +161,7 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
         }
 
         MainDirectory = directory;
-        _shadowCopyDirectory = Path.Combine(_rootShadowCopyDir, Name!, DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss"));
+        _shadowCopyDirectory = Path.Combine(RootShadowCopyDir, Name!, DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss"));
         _shouldCopyBinaries = !isReadOnly;
         _dllImportResolver = NativeDllResolver;
 
@@ -161,10 +171,10 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
         {
             var asm = LoadAssembly(path, this);
             Root = new AssemblyTreeNode(asm, this, true, true, _dllImportResolver);
-            
-            if(ProjectSettings.Config.LogAssemblyLoadingDetails)
+
+            if (ProjectSettings.Config.LogAssemblyLoadingDetails)
                 Log.Debug($"{Name} : Loaded root assembly {asm.FullName} from '{path}'");
-            
+
             _dependencyContext = Microsoft.Extensions.DependencyModel.DependencyContext.Load(Root!.Assembly);
         }
         catch (Exception e)
@@ -187,20 +197,20 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
         // try a shadow copy first
         if (ctx is not TixlAssemblyLoadContext { _shouldCopyBinaries: true } tixlCtx)
         {
-            if(ProjectSettings.Config.LogAssemblyLoadingDetails)
+            if (ProjectSettings.Config.LogAssemblyLoadingDetails)
                 Log.Debug($"{ctx.Name}: Loading assembly from '{path}'...");
-            
+
             return ctx.LoadFromAssemblyPath(path);
         }
-        
+
         var shadowCopyDirectory = tixlCtx._shadowCopyDirectory;
         if (tixlCtx._shouldCopyBinaries && !Directory.Exists(shadowCopyDirectory))
         {
             Directory.CreateDirectory(shadowCopyDirectory);
-            
-            if(ProjectSettings.Config.LogAssemblyLoadingDetails)
+
+            if (ProjectSettings.Config.LogAssemblyLoadingDetails)
                 Log.Debug($"{tixlCtx.Name!}: Created shadow copy directory at {shadowCopyDirectory}");
-            
+
             // copy all dlls recursively in the main directory to the shadow copy directory
             // being sure to ignore symbol and resource folders
             CopyFilesInDirectory(tixlCtx.MainDirectory, tixlCtx.MainDirectory, shadowCopyDirectory, false);
@@ -212,7 +222,7 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
                 if (directoryName.StartsWith('.') ||
                     directoryName.Equals("bin", StringComparison.Ordinal) ||
                     directoryName.Equals("obj", StringComparison.Ordinal) ||
-                    directoryName.Equals(FileLocations.SymbolsSubfolder, StringComparison.Ordinal) ||
+                    directoryName.Equals(FileLocations.ReleaseSymbolsSubfolder, StringComparison.Ordinal) ||
                     directoryName.Equals(FileLocations.SymbolUiSubFolder, StringComparison.Ordinal) ||
                     directoryName.Equals(FileLocations.AssetsSubfolder, StringComparison.Ordinal) ||
                     directoryName.Equals(FileLocations.SourceCodeSubFolder, StringComparison.Ordinal))
@@ -228,15 +238,15 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
         var relativePath = Path.GetRelativePath(tixlCtx.MainDirectory, path);
         path = Path.Combine(shadowCopyDirectory, relativePath);
 
-        if(ProjectSettings.Config.LogAssemblyLoadingDetails)
+        if (ProjectSettings.Config.LogAssemblyLoadingDetails)
             Log.Debug($"{ctx.Name}: Loading assembly from '{path}'...");
-        
+
         return ctx.LoadFromAssemblyPath(path);
-        
+
         static void CopyFilesInDirectory(string rootDirectory, string directory, string shadowCopyDirectory, bool recursive)
         {
-            var newDirectory = directory != rootDirectory 
-                                   ? Path.Combine(shadowCopyDirectory, Path.GetRelativePath(rootDirectory, directory)) 
+            var newDirectory = directory != rootDirectory
+                                   ? Path.Combine(shadowCopyDirectory, Path.GetRelativePath(rootDirectory, directory))
                                    : shadowCopyDirectory;
             Directory.CreateDirectory(newDirectory);
             foreach (var file in Directory.EnumerateFiles(directory, "*", SearchOption.TopDirectoryOnly))
@@ -250,13 +260,14 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
                 {
                     continue;
                 }
-                    
+
                 var newPath = Path.Combine(newDirectory, Path.GetFileName(file));
                 File.Copy(file, newPath, true);
             }
+
             if (!recursive)
                 return;
-                
+
             foreach (var subDir in Directory.EnumerateDirectories(directory, "*", SearchOption.TopDirectoryOnly))
             {
                 CopyFilesInDirectory(rootDirectory, subDir, shadowCopyDirectory, true);
@@ -323,7 +334,7 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
         }
 
         // check nuget packages
-        var result =  SearchNugetForAssemblies(asmName, name);
+        var result = SearchNugetForAssemblies(asmName, name);
         LogResolution(result, asmName);
         return result;
 
@@ -331,7 +342,7 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
         {
             if (!ProjectSettings.Config.LogAssemblyLoadingDetails)
                 return;
-            
+
             if (resultAsm != null)
             {
                 // check versions of the assembly - if different, log a warning.
@@ -345,7 +356,7 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
                         Log.Warning($"Assembly {searchName.Name} loaded with different version: {assemblyNameOfResult.Version} vs {searchName.Version}");
                     }
                 }
-                
+
                 if (resultAsm.GetName().Name != searchName.Name)
                 {
                     Log.Error($"{Name!}: Resolved assembly name mismatch: {resultAsm.GetName().Name} != {searchName.Name}");
@@ -427,7 +438,7 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
         Log.Error($"{assembly.FullName!}: Failed to resolve native dll {libraryName} relative to assembly '{assembly.Location}'");
         return IntPtr.Zero;
     }
-    
+
     private IntPtr NativeDllResolver(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
     {
         //Log.Debug($"{assembly.FullName}: Resolving native dll {libraryName} for assembly {assembly.FullName}");
@@ -450,7 +461,7 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
         Log.Error($"{assembly.FullName!}: Failed to resolve native dll {libraryName} relative to assembly '{assembly.Location}'");
         return IntPtr.Zero;
     }
-    
+
     protected override IntPtr LoadUnmanagedDll(string unmanagedDllName)
     {
         // manual dll resolution with the potential of having nothing but the name of the dll sans the extension
@@ -531,7 +542,7 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
                 }
 
                 _dependencyContexts.Add(ctx);
-                if(ProjectSettings.Config.LogAssemblyLoadingDetails)
+                if (ProjectSettings.Config.LogAssemblyLoadingDetails)
                     Log.Debug($"{Name!}: Added dependency {node.Name} from {ctx.Name}");
             }
         }
@@ -566,16 +577,17 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
             var stackTrace = new System.Diagnostics.StackTrace();
             var frames = stackTrace.GetFrames();
 
-            if (frames is {Length: > 0} && frames.Any(f =>
-                                                 f.GetMethod()?.DeclaringType?.FullName == "System.Runtime.Loader.AssemblyLoadContext"
-                                                 && f.GetMethod()?.Name == "OnProcessExit"))
+            if (frames is { Length: > 0 } && frames.Any(f =>
+                                                            f.GetMethod()?.DeclaringType?.FullName == "System.Runtime.Loader.AssemblyLoadContext"
+                                                            && f.GetMethod()?.Name == "OnProcessExit"))
             {
                 Log.Debug($"{Name}: BeginUnload called during shutdown but was already unloaded.");
                 return; // Suppress exception during shutdown
             }
-            
+
             throw new InvalidOperationException($"Assembly context {Name} already unloaded");
         }
+
         _unloaded = true;
 
         lock (_dependencyLock)

@@ -36,9 +36,9 @@ public sealed record ReleaseInfo(
     public const string FileName = "OperatorPackage.json";
 }
 
-public static class ReleaseInfoExtensions
+internal static class ReleaseInfoExtensions
 {
-    public static ReleaseInfo ToReleaseInfo(this ReleaseInfoSerialized serialized)
+    internal static ReleaseInfo ToReleaseInfo(this ReleaseInfoSerialized serialized)
     {
         if (!Version.TryParse(serialized.EditorVersion, out var editorVersion))
         {

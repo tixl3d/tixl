@@ -152,7 +152,7 @@ internal static class PlaybackSettingsPopup
                 }
                 else
                 {
-                    if (string.IsNullOrEmpty(soundtrackHandle.Clip.FilePath))
+                    if (string.IsNullOrEmpty(soundtrackHandle.Clip.Address))
                     {
                         _tempSoundtrackFilepathForEdit = string.Empty;
                     }
@@ -163,13 +163,13 @@ internal static class PlaybackSettingsPopup
                         {
                             if (ImGui.IsWindowAppearing())
                             {
-                                _tempSoundtrackFilepathForEdit = soundtrackHandle.Clip.FilePath;
+                                _tempSoundtrackFilepathForEdit = soundtrackHandle.Clip.Address;
                             }
                         }
                         else
                         {
-                            Log.Warning($"Removing invalid soundtrack file: {soundtrackHandle.Clip.FilePath}");
-                            soundtrackHandle.Clip.FilePath = string.Empty;
+                            Log.Warning($"Removing invalid soundtrack file: {soundtrackHandle.Clip.Address}");
+                            soundtrackHandle.Clip.Address = string.Empty;
                             modified = true;
                         }
                     }
@@ -186,9 +186,15 @@ internal static class PlaybackSettingsPopup
                         modified = true;
                         if (!string.IsNullOrEmpty(_tempSoundtrackFilepathForEdit))
                         {
-                            _warningMessage = soundtrackHandle.TryToApplyFilePath(_tempSoundtrackFilepathForEdit, composition)
-                                                  ? string.Empty
-                                                  : "File not found?";
+                            var success = soundtrackHandle.TryToApplyFilePath(_tempSoundtrackFilepathForEdit, composition);
+                            _warningMessage = success ? string.Empty : "File not found?";
+                            if (success)
+                            {
+                                AudioEngine.ReloadClip(soundtrackHandle);
+                                AudioImageFactory.ResetImageCache();
+                                modified = true;
+                                filepathModified = true;
+                            }
                         }
                         else
                         {
@@ -491,14 +497,14 @@ internal static class PlaybackSettingsPopup
 
     private static void UpdateBpmFromSoundtrackConfig(AudioClipDefinition? audioClip)
     {
-        if (audioClip == null || string.IsNullOrEmpty(audioClip.FilePath))
+        if (audioClip == null || string.IsNullOrEmpty(audioClip.Address))
         {
             Log.Error("Can't detected BPM-rate from empty undefined audio-clip filename");
             return;
         }
             
         var matchBpmPattern = new Regex(@"(\d+\.?\d*)bpm");
-        var result = matchBpmPattern.Match(audioClip.FilePath);
+        var result = matchBpmPattern.Match(audioClip.Address);
         if (!result.Success)
             return;
 

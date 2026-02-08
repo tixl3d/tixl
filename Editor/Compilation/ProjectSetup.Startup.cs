@@ -112,7 +112,7 @@ internal static partial class ProjectSetup
 
         directory
            .EnumerateDirectories("*", SearchOption.TopDirectoryOnly)
-           .Where(folder => !folder.Name.EndsWith(FileLocations.ExportFolderName, StringComparison.OrdinalIgnoreCase)) // ignore "player" project directory
+           .Where(folder => !folder.Name.EndsWith(FileLocations.ExportSubFolder, StringComparison.OrdinalIgnoreCase)) // ignore "player" project directory
            .ToList()
            .ForEach(directoryInfo =>
                     {
@@ -208,12 +208,12 @@ internal static partial class ProjectSetup
             var projectSearchDirectories = topDirectories
                                           .Where(Directory.Exists)
                                           .SelectMany(Directory.EnumerateDirectories)
-                                              .Where(dirName => !dirName.Contains(FileLocations.ExportFolderName, StringComparison.OrdinalIgnoreCase));
+                                              .Where(dirName => !dirName.Contains(FileLocations.ExportSubFolder, StringComparison.OrdinalIgnoreCase));
 
             // Add Built-in packages as projects
             if (includeBuiltInAsProjects)
             {
-                projectSearchDirectories = projectSearchDirectories.Concat(Directory.EnumerateDirectories(Path.Combine(T3ParentDirectory, "Operators"))
+                projectSearchDirectories = projectSearchDirectories.Concat(Directory.EnumerateDirectories(Path.Combine(T3ParentDirectory, FileLocations.OperatorsSubFolder))
                                                                                     .Where(path =>
                                                                                            {
                                                                                                var subDir = Path.GetFileName(path);
@@ -227,6 +227,6 @@ internal static partial class ProjectSetup
     }
 
 
-    private static readonly string CoreOperatorDirectory = Path.Combine(FileLocations.StartFolder, "Operators");
+    private static readonly string CoreOperatorDirectory = Path.Combine(FileLocations.StartFolder, FileLocations.OperatorsSubFolder);
     private static readonly string T3ParentDirectory = Path.Combine(FileLocations.StartFolder, "..", "..", "..", "..");
 }

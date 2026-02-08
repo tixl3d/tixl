@@ -114,7 +114,7 @@ internal static partial class Program
             Icon icon;
             if (!gotIcon)
             {
-                Log.Warning("Failed to load icon");
+                Log.Warning("Failed to load icon from " + iconPath);
                 icon = null;
             }
             else
@@ -250,7 +250,7 @@ internal static partial class Program
                 }
                 else
                 {
-                    Log.Warning($"Can't find soundtrack {_soundtrackHandle.Clip.FilePath}");
+                    Log.Warning($"Can't find soundtrack {_soundtrackHandle.Clip.Address}");
                     _soundtrackHandle = null;
                 }
             }

@@ -6,6 +6,7 @@ using T3.Core.Operator;
 using T3.Core.Resource;
 using T3.Core.Resource.Assets;
 using T3.Core.SystemUi;
+using T3.Core.UserData;
 using T3.Editor.Compilation;
 
 namespace T3.Editor.UiModel;
@@ -103,7 +104,7 @@ internal sealed partial class EditableSymbolProject : EditorSymbolPackage
     }
 
 
-    private static readonly string[] _folderExclusions = ["bin", "obj", "dependencies"];
+    private static readonly string[] _folderExclusions = ["bin", "obj", "dependencies", FileLocations.ExportSubFolder];
 
     protected override IEnumerable<string> SymbolUiSearchFiles => FindFilesOfType(SymbolUiExtension);
 
@@ -111,6 +112,8 @@ internal sealed partial class EditableSymbolProject : EditorSymbolPackage
     
     protected override IEnumerable<string> SourceCodeSearchFiles => FindFilesOfType(SourceCodeExtension);
 
+    
+    
     private IEnumerable<string> FindFilesOfType(string fileExtension)
     {
         var directoryInfo = new DirectoryInfo(Folder);

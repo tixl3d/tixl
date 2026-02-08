@@ -14,18 +14,30 @@ internal static partial class PlayerExporter
 {
     private sealed class ExportData
     {
-        public IReadOnlyCollection<ExportDataFile> ExportDataFiles => _exportDataFiles;
+        public IReadOnlyCollection<AssetExportItem> ExportItems => _exportItems;
+        
+        private readonly HashSet<Symbol> _symbols = [];
+        private readonly HashSet<Instance> _collectedInstances = [];
+        
+        /** Packages with code */
         public IEnumerable<SymbolPackage> SymbolPackages => _symbolPackages.Keys;
-
-        private readonly HashSet<Symbol> _symbols = new();
         private readonly Dictionary<SymbolPackage, List<Symbol>> _symbolPackages = new();
-        private readonly HashSet<ExportDataFile> _exportDataFiles = new();
-        private readonly HashSet<Instance> _collectedInstances = new();
+
+        /** Packages including used assets */
+        public readonly HashSet<IResourcePackage> AssetPackages = [];
+        
+        private readonly HashSet<AssetExportItem> _exportItems = [];
 
         public bool TryAddInstance(Instance instance) => _collectedInstances.Add(instance);
 
-        public void TryAddResourcePath(in ExportDataFile path) => _exportDataFiles.Add(path);
+        public void TryAddExportAsset(in AssetExportItem exportItem)
+        {
+            _exportItems.Add(exportItem);
+        }
 
+        /// <summary>
+        /// Collect <see cref="Symbol"/> and its <see cref="SymbolPackage"/>. 
+        /// </summary>
         public bool TryAddSymbol(Symbol symbol)
         {
             Console.WriteLine("Including symbol: " + symbol.Name);
@@ -35,7 +47,7 @@ internal static partial class PlayerExporter
             var package = symbol.SymbolPackage;
             if (!_symbolPackages.TryGetValue(package, out var symbols))
             {
-                symbols = new List<Symbol>();
+                symbols = [];
                 _symbolPackages.Add(package, symbols);
             }
             
@@ -52,90 +64,76 @@ internal static partial class PlayerExporter
         public void PrintInfo()
         {
             Log.Info($"Collected {_collectedInstances.Count} instances for export in {_symbols.Count} different symbols:");
-            foreach (var resourcePath in ExportDataFiles)
+            foreach (var resourcePath in ExportItems)
             {
-                Log.Info($"  {resourcePath}");
+                Log.Debug($"  {resourcePath}");
             }
         }
 
-        public bool TryAddSharedResource(string resourcePath, IReadOnlyList<IResourcePackage>? otherDirs = null, FileResource? fileResource= null)
+        /// <summary>
+        /// Collect <see cref="Asset"/> and its <see cref="SymbolPackage"/>
+        /// </summary>
+        public bool TryAddSharedAsset(Asset asset)
         {
-            IResourcePackage[] resources  = fileResource?.ResourcePackage != null 
-                                                 ? [fileResource.ResourcePackage] 
-                                                 : [];
-            
-            var searchDirs = otherDirs ?? resources;
-            
-            var tempResourceConsumer = new TempResourceConsumer(searchDirs);
-            if (!AssetRegistry.TryResolveAddress(resourcePath, tempResourceConsumer, out var absolutePath, out var package))
-            {
-                Log.Error($"Can't find file: {resourcePath}");
-                return false;
-            }
-            
-            resourcePath = resourcePath.Replace("\\", "/");
-            absolutePath = absolutePath.Replace("\\", "/");
-            
-            
-            if (package == null)
-            {
-                Log.Error($"Can't add resource file without package: {resourcePath}");
-                return false;
-            }
-            
-            var relativePathInResourceFolder = Path.GetRelativePath(package.AssetsFolder, absolutePath);
-            TryAddResourcePath(new ExportDataFile(package.RootNamespace, relativePathInResourceFolder, absolutePath));
+            var relativePathInResourceFolder = Path.GetRelativePath(asset.Package.AssetsFolder, asset.FullPath);
+            TryAddExportAsset(new AssetExportItem(asset.Package.RootNamespace, relativePathInResourceFolder, asset.FullPath));
 
-            // Copy related font textures
-            if (resourcePath.EndsWith(".fnt", StringComparison.OrdinalIgnoreCase))
+            // Include related font textures
+            if (asset.Address.EndsWith(".fnt", StringComparison.OrdinalIgnoreCase))
             {
-                var resourcePathPng = resourcePath.Replace(".fnt", ".png");
-                var absolutePathPng = absolutePath.Replace(".fnt", ".png");
+                var absolutePathPng = asset.FullPath.Replace(".fnt", ".png");
                 var relativePathInResourceFolderPng = relativePathInResourceFolder.Replace(".fnt", ".png");
                 
-                TryAddResourcePath(new ExportDataFile(package.RootNamespace,relativePathInResourceFolderPng, absolutePathPng));
+                TryAddExportAsset(new AssetExportItem(asset.Package.RootNamespace,
+                                                      relativePathInResourceFolderPng, 
+                                                      absolutePathPng));
             }
 
-            // search for shader includes
-            if (absolutePath.EndsWith(".hlsl", StringComparison.OrdinalIgnoreCase))
+            // Search and include for shader includes
+            if (asset.Address.EndsWith(".hlsl", StringComparison.OrdinalIgnoreCase))
             {
-                var fileInfo = new FileInfo(absolutePath);
-                ShaderCompiler.ShaderResourcePackage shaderResourcePackage = new(fileInfo);
-                var shaderDirs = searchDirs.Append(shaderResourcePackage).Distinct().ToArray();
-                var shaderText = File.ReadAllText(absolutePath);
+                var shaderText = File.ReadAllText(asset.FullPath);
                 foreach (var includePath in ShaderCompiler.GetIncludesFrom(shaderText))
                 {
-                    TryAddSharedResource(includePath, shaderDirs);
+                    if (!ShaderCompiler.TryResolveSharedIncludeAsset(includePath, out var includeAsset))
+                        continue;
+                    
+                    var relativePathInResourceFolder2 = Path.GetRelativePath(includeAsset.Package.AssetsFolder, includeAsset.FullPath);
+                    TryAddExportAsset(new AssetExportItem(includeAsset.Package.RootNamespace, 
+                                                          relativePathInResourceFolder2, 
+                                                          includeAsset.FullPath));
                 }
             }
+
+            AssetPackages.Add(asset.Package);
 
             return true;
         }
     }
     
     
-    private sealed class ExportDataFile(string? packageRootNamespace, string relativePathInResourcesFolder, string absolutePath)
+    private sealed class AssetExportItem(string? packageRootNamespace, string relativePathInResourcesFolder, string absolutePath)
     {
         private readonly string? _packageRootNamespace = packageRootNamespace;
         private readonly string _relativePathInResourcesFolder = relativePathInResourcesFolder;
         private readonly string _absolutePath = absolutePath;
 
         // equality operators
-        public static bool operator ==(ExportDataFile left, ExportDataFile right) => left._absolutePath == right._absolutePath;
-        public static bool operator !=(ExportDataFile left, ExportDataFile right) => left._absolutePath != right._absolutePath;
+        public static bool operator ==(AssetExportItem left, AssetExportItem right) => left._absolutePath == right._absolutePath;
+        public static bool operator !=(AssetExportItem left, AssetExportItem right) => left._absolutePath != right._absolutePath;
         public override int GetHashCode() => _absolutePath.GetHashCode();
-        public override bool Equals(object? obj) => obj is ExportDataFile other && other == this;
+        public override bool Equals(object? obj) => obj is AssetExportItem other && other == this;
 
         public override string ToString() => $"\"{_relativePathInResourcesFolder}\" (\"{_absolutePath}\")";
 
-        private bool TryCopy(ref int successInt, string exportDir)
+        private bool TryCopyTo(string exportDir, ref int successCount)
         {
             //var targetPath = Path.Combine(exportDir, resourcePath.RelativePath);
-            var targetPath = GetTargetPathFolder(exportDir);
+            var targetPath = GetTargetPathDir(exportDir);
             var success = TryCopyFile(_absolutePath, targetPath);
 
             // Use bit operations to et successInt to 0 on failure
-            Interlocked.And(ref successInt, Convert.ToInt32(success));
+            Interlocked.And(ref successCount, Convert.ToInt32(success));
             if (!success)
             {
                 Log.Error($"Failed to copy resource file for export: {_absolutePath}");
@@ -145,11 +143,11 @@ internal static partial class PlayerExporter
             return true;
         }
 
-        private string GetTargetPathFolder(string exportDir)
+        private string GetTargetPathDir(string exportDir)
         {
             if (_packageRootNamespace != null)
             {
-                return Path.Combine(exportDir, "Operators",
+                return Path.Combine(exportDir, FileLocations.OperatorsSubFolder,
                                     _packageRootNamespace,
                                     FileLocations.AssetsSubfolder,
                                     _relativePathInResourcesFolder);
@@ -158,12 +156,12 @@ internal static partial class PlayerExporter
             return Path.Combine(exportDir, _relativePathInResourcesFolder);
         }
 
-        public static bool TryCopyToExportDir(IEnumerable<ExportDataFile> resourcePaths, string exportDir)
+        public static bool TryCopyItems(IEnumerable<AssetExportItem> exportItems, string exportDir)
         {
             var successInt = Convert.ToInt32(true);
-            resourcePaths
+            exportItems
                .AsParallel()
-               .ForAll(resourcePath => resourcePath.TryCopy(ref successInt ,exportDir));
+               .ForAll(item => item.TryCopyTo(exportDir, ref successInt));
 
             return Convert.ToBoolean(successInt);
         }

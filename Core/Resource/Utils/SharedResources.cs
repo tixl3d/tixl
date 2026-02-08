@@ -25,20 +25,20 @@ public static class SharedResources
             throw new Exception($"{nameof(ShaderCompiling.ShaderCompiler)}.{nameof(ShaderCompiling.ShaderCompiler.Instance)} not initialized");
         }
 
-        _fullScreenVertexShaderResource = ResourceManager.CreateShaderResource<VertexShader>(Path.Combine(EditorResourcesDirectory,
-                                                                                                              "shaders/fullscreen-texture.hlsl"), null,
+        var fullscreenTexturePath = Path.Combine(EditorResourcesDirectory, "shaders/fullscreen-texture.hlsl");
+        _fullScreenVertexShaderResource = ResourceManager.CreateShaderResource<VertexShader>(fullscreenTexturePath, null,
                                                                                              () => "vsMain");
         _fullScreenPixelShaderResource =
-            ResourceManager.CreateShaderResource<PixelShader>(Path.Combine(EditorResourcesDirectory, "shaders/fullscreen-texture.hlsl"), null, () => "psMain");
+            ResourceManager.CreateShaderResource<PixelShader>(fullscreenTexturePath, null, () => "psMain");
 
         if (_fullScreenVertexShaderResource.Value == null)
         {
-            throw new Exception($"{nameof(SharedResources)} Failed to load fullscreen vertex shader");
+            throw new Exception($"{nameof(SharedResources)} Failed to load fullscreen vertex shader from {fullscreenTexturePath}");
         }
 
         if (_fullScreenPixelShaderResource.Value == null)
         {
-            throw new Exception($"{nameof(SharedResources)} Failed to load fullscreen pixel shader");
+            throw new Exception($"{nameof(SharedResources)} Failed to load fullscreen pixel shader from {fullscreenTexturePath}");
         }
 
         ViewWindowRasterizerState = new RasterizerState(ResourceManager.Device, new RasterizerStateDescription

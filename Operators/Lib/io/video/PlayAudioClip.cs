@@ -25,7 +25,7 @@ internal sealed class PlayAudioClip : Instance<PlayAudioClip>, IStatusProvider
         {
             newClip = new AudioClipDefinition
                            {
-                               FilePath = Path.GetCurrentValue(),
+                               Address = Path.GetCurrentValue(),
                                StartTime = 0,
                                EndTime = 0,
                                IsSoundtrack = true,

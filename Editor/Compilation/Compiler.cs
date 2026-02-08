@@ -82,35 +82,73 @@ internal static class Compiler
 
     private static (string Output, int ExitCode) RunCommand(string commandLine, string workingDirectory)
     {
+        // Split the 'dotnet' command from its arguments
+        var firstSpace = commandLine.IndexOf(' ');
+        var fileName = firstSpace == -1 ? commandLine : commandLine.Substring(0, firstSpace);
+        var args = firstSpace == -1 ? "" : commandLine.Substring(firstSpace + 1);
+
         var psi = new ProcessStartInfo
                       {
-                          FileName = "cmd.exe",
-                          Arguments = $"/C {commandLine}",
+                          FileName = fileName, // Call "dotnet" directly
+                          Arguments = args,
                           RedirectStandardOutput = true,
                           RedirectStandardError = true,
                           UseShellExecute = false,
                           CreateNoWindow = true,
                           WorkingDirectory = workingDirectory
-                      };
-
+                      };        
+        psi.EnvironmentVariables["MSBUILDDISABLENODEREUSE"] = "1";
+        psi.EnvironmentVariables["DOTNET_CLI_TELEMETRY_OPTOUT"] = "1";
+        psi.EnvironmentVariables["DOTNET_MULTILEVEL_LOOKUP"] = "0";
+        
         var process = new Process { StartInfo = psi };
         var outputBuilder = new StringBuilder();
 
         process.OutputDataReceived += (_, e) =>
                                       {
-                                          if (e.Data != null) outputBuilder.AppendLine(e.Data);
+                                          if (e.Data != null)
+                                          {
+                                              outputBuilder.AppendLine(e.Data);
+                                          }
+                                          
                                       };
         process.ErrorDataReceived += (_, e) =>
                                      {
-                                         if (e.Data != null) outputBuilder.AppendLine(e.Data);
+                                         if (e.Data != null)
+                                         {
+                                             outputBuilder.AppendLine(e.Data);
+                                         }
                                      };
 
+        var startTime = Stopwatch.StartNew();
         process.Start();
         process.BeginOutputReadLine();
         process.BeginErrorReadLine();
-        process.WaitForExit();
+        
+        
+        // 1. Wait for the process to exit via the timeout
+        if (!process.WaitForExit(3*60*1000)) 
+        {
+            Log.Error("Compilation timed out. Force killing process tree...");
+            process.Kill(true);
+    
+            // 2. IMPORTANT: Even after killing, the pipes might be stuck. 
+            // We cancel the async reads to unblock the internal stream drains.
+            process.CancelOutputRead();
+            process.CancelErrorRead();
+        }
+        else
+        {
+            // 3. Process exited normally, but we must call the parameterless WaitForExit
+            // to ensure the async event buffers are fully drained into your StringBuilder.
+            process.WaitForExit(); 
+        }
+
+        var time = startTime.Elapsed.Milliseconds * 0.001;
+        Log.Debug($" Compiled in {time:0.0}s");
 
         return (outputBuilder.ToString(), process.ExitCode);
+        
     }
 
     /// <summary>
@@ -123,7 +161,7 @@ internal static class Compiler
     /// <returns></returns>
     internal static bool TryCompile(CsProjectFile projectFile, BuildMode buildMode, bool nugetRestore, [NotNullWhen(false)] out string? output)
     {
-        var verbosity = UserSettings.Config?.CompileCsVerbosity ?? CompilerOptions.Verbosity.Normal;
+        var verbosity = UserSettings.Config?.CompileCsVerbosity ?? CompilerOptions.Verbosity.Minimal;
         output = null;
         
         if (nugetRestore)
@@ -145,7 +183,10 @@ internal static class Compiler
                  .Append(buildMode)
                  .Append(" --verbosity ")
                  .Append(verbosity.ToString().ToLower())
-                 .Append(" --nologo");
+
+                 .Append(" --nologo ")
+                 .Append(" --no-restore"); // Optimization: Skip restore if you already did it
+            
 
         var stopwatch = Stopwatch.StartNew();
         var (logOutput, exitCode) = RunCommand(arguments.ToString(), projectFile.Directory);

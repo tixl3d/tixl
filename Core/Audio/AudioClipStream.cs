@@ -67,21 +67,21 @@ public sealed class AudioClipStream
         if (handle.LoadingAttemptFailed)
             return false;
         
-        if (string.IsNullOrEmpty(handle.Clip.FilePath))
+        if (string.IsNullOrEmpty(handle.Clip.Address))
             return false;
 
         handle.LoadingAttemptFailed = true;
         
         if (!handle.TryGetFileResource(out var file))
         {
-            Log.Error($"AudioClip file '{handle.Clip.FilePath}' does not exist.");
+            Log.Error($"AudioClip file '{handle.Clip.Address}' does not exist.");
             return false;
         }
 
         var fileInfo = file.FileInfo;
         if (fileInfo is not { Exists: true })
         {
-            Log.Error($"AudioClip file '{handle.Clip.FilePath}' does not exist.");
+            Log.Error($"AudioClip file '{handle.Clip.Address}' does not exist.");
             return false;
         }
 

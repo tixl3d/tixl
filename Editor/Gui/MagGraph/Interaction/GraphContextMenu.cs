@@ -1,5 +1,6 @@
 using ImGuiNET;
 using T3.Core.DataTypes;
+using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Core.SystemUi;
 using T3.Editor.Gui.Graph.Dialogs;
@@ -10,6 +11,8 @@ using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.MagGraph.Ui;
 using T3.Editor.Gui.OutputUi;
 using T3.Editor.Gui.Styling;
+using T3.Editor.Gui.UiHelpers.Thumbnails;
+using T3.Editor.Gui.Windows.RenderExport;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Exporting;
@@ -42,26 +45,26 @@ internal static class GraphContextMenu
         // ------ for selection -----------------------
         var oneOpSelected = selectedChildUis.Count == 1;
         var someOpsSelected = selectedChildUis.Count > 0;
-        
+
         if (ImGui.BeginMenu("Select..."))
         {
             if (ImGui.MenuItem("Custom Operators"))
             {
                 var foundAny = false;
-                var childUis = selectedChildUis.Count > 0 
-                                   ? selectedChildUis.ToList() 
+                var childUis = selectedChildUis.Count > 0
+                                   ? selectedChildUis.ToList()
                                    : context.CompositionInstance.Children.Values.Select(c => c.GetChildUi());
-                
-                if(selectedChildUis.Count > 0)
+
+                if (selectedChildUis.Count > 0)
                     nodeSelection.Clear();
-                
+
                 foreach (var item in childUis)
                 {
                     if (item == null)
                         continue;
-                    
-                    if (SymbolAnalysis.TryGetOperatorType(item.SymbolChild.Symbol, out var type) 
-                         && type != SymbolAnalysis.OperatorClassification.Unknown)
+
+                    if (SymbolAnalysis.TryGetOperatorType(item.SymbolChild.Symbol, out var type)
+                        && type != SymbolAnalysis.OperatorClassification.Unknown)
                     {
                         continue;
                     }
@@ -73,13 +76,14 @@ internal static class GraphContextMenu
 
                     foundAny = true;
                 }
+
                 if (foundAny)
                 {
                     context.ProjectView.FocusViewToSelection();
                 }
             }
 
-            if (ImGui.MenuItem("Select connected", enabled:someOpsSelected))
+            if (ImGui.MenuItem("Select connected", enabled: someOpsSelected))
             {
                 var connectedIds = new HashSet<Guid>();
 
@@ -88,7 +92,7 @@ internal static class GraphContextMenu
                 {
                     selectedChildren.Add(child.SymbolChild);
                 }
-                
+
                 Structure.CollectConnectedChildIds(context.CompositionInstance.Symbol, selectedChildren, connectedIds);
 
                 if (connectedIds.Count > 0)
@@ -96,7 +100,7 @@ internal static class GraphContextMenu
                     context.Selector.Clear();
                     foreach (var id in connectedIds)
                     {
-                        if (context.CompositionInstance.Children.TryGetChildInstance(id, out var instance) )
+                        if (context.CompositionInstance.Children.TryGetChildInstance(id, out var instance))
                         {
                             var node = instance.GetChildUi();
                             if (node != null)
@@ -107,24 +111,23 @@ internal static class GraphContextMenu
                     }
                 }
             }
-            
-            if (ImGui.MenuItem("Select connected inputs", enabled:someOpsSelected))
+
+            if (ImGui.MenuItem("Select connected inputs", enabled: someOpsSelected))
             {
                 var connectedIds = new HashSet<Guid>();
                 foreach (var child in selectedChildUis)
                 {
-                    Structure.CollectConnectedChildren(child.SymbolChild, 
-                                                       context.CompositionInstance.Symbol, 
+                    Structure.CollectConnectedChildren(child.SymbolChild,
+                                                       context.CompositionInstance.Symbol,
                                                        connectedIds);
                 }
-                
-                
+
                 if (connectedIds.Count > 0)
                 {
                     context.Selector.Clear();
                     foreach (var id in connectedIds)
                     {
-                        if (context.CompositionInstance.Children.TryGetChildInstance(id, out var instance) )
+                        if (context.CompositionInstance.Children.TryGetChildInstance(id, out var instance))
                         {
                             var node = instance.GetChildUi();
                             if (node != null)
@@ -135,14 +138,11 @@ internal static class GraphContextMenu
                     }
                 }
             }
-            
-            
-            ImGui.EndMenu();   
-        }
-        
-        
-        ImGui.Separator();
 
+            ImGui.EndMenu();
+        }
+
+        ImGui.Separator();
 
         var snapShotsEnabledFromSomeOps
             = selectedChildUis
@@ -195,7 +195,6 @@ internal static class GraphContextMenu
             EditTourPointsPopup.ShowNextFrame();
         }
 
-        
         if (ImGui.MenuItem("Align select left",
                            UserActions.AlignSelectionLeft.ListShortcuts(),
                            selected: false,
@@ -203,7 +202,6 @@ internal static class GraphContextMenu
         {
             Modifications.AlignSelectionToLeft(context);
         }
-        
 
         // if (ImGui.MenuItem("Arrange sub graph",
         //                    KeyboardBinding.ListKeyboardShortcuts(UserActions.LayoutSelection, false),
@@ -220,7 +218,7 @@ internal static class GraphContextMenu
                                UserActions.ToggleSnapshotControl.ListShortcuts(),
                                selected: snapShotsEnabledFromSomeOps,
                                enabled: someOpsSelected))
-            {            
+            {
                 // Disable if already enabled for all
                 var disableBecauseAllEnabled
                     = selectedChildUis
@@ -301,7 +299,6 @@ internal static class GraphContextMenu
             {
                 var instance = context.CompositionInstance.Children[selectedChildUis[0].Id];
                 ProjectView.Focused.SetBackgroundOutput(instance);
-
             }
 
             // TODO: Implement
@@ -329,7 +326,7 @@ internal static class GraphContextMenu
             NodeActions.PasteClipboard(nodeSelection, context.View, context.CompositionInstance);
             context.Layout.FlagStructureAsChanged();
         }
-        
+
         if (ImGui.MenuItem("Paste Values", UserActions.PasteValues.ListShortcuts()))
         {
             NodeActions.PasteValues(nodeSelection, context.View, context.CompositionInstance);
@@ -381,7 +378,6 @@ internal static class GraphContextMenu
                 }
                 //NodeOperations.RenameSymbol(selectedChildUis[0].SymbolChild.Symbol, "NewName");
 
-
                 if (ImGui.MenuItem("Duplicate as new type...", oneOpSelected))
                 {
                     context.SymbolNameForDialogEdits = selectedChildUis[0].SymbolChild.Symbol.Name ?? string.Empty;
@@ -395,6 +391,17 @@ internal static class GraphContextMenu
                     context.NameSpaceForDialogEdits = projectView.CompositionInstance.Symbol.Namespace ?? string.Empty;
                     context.SymbolDescriptionForDialog = "";
                     context.CombineToSymbolDialog.ShowNextFrame();
+                }
+
+                ImGui.Separator();
+                if (ImGui.MenuItem("Set Thumbnail", null, false,
+                                   oneOpSelected && !selectedChildUis[0].SymbolChild.Symbol.SymbolPackage.IsReadOnly &&
+                                   RenderProcess.MainOutputTexture != null))
+                {
+                    ThumbnailManager.SaveThumbnail(selectedChildUis[0].SymbolChild.Symbol.Id,
+                                                   selectedChildUis[0].SymbolChild.Symbol.SymbolPackage,
+                                                   RenderProcess.MainOutputTexture,
+                                                   ThumbnailManager.Categories.PackageMeta);
                 }
 
                 ImGui.EndMenu();
@@ -427,14 +434,14 @@ internal static class GraphContextMenu
                 var posOnCanvas = context.View.InverseTransformPositionFloat(ImGui.GetMousePos());
                 context.Placeholder.OpenOnCanvas(context, posOnCanvas);
             }
-        
+
             if (canModify)
             {
                 if (ImGui.MenuItem("Add input parameter..."))
                 {
                     context.AddInputDialog.ShowNextFrame();
                 }
-        
+
                 if (ImGui.MenuItem("Add output..."))
                 {
                     context.AddOutputDialog.ShowNextFrame();
@@ -450,7 +457,7 @@ internal static class GraphContextMenu
                 context.ActiveAnnotationId = newAnnotation.Id;
                 context.StateMachine.SetState(GraphStates.RenameAnnotation, context);
             }
-        
+
             ImGui.EndMenu();
         }
 
@@ -474,7 +481,7 @@ internal static class GraphContextMenu
         }
 
         ImGui.Separator();
- 
+
         if (ImGui.MenuItem("Copy Symbol Name to Clipboard", oneOpSelected))
         {
             ImGui.SetClipboardText("[" + $"{selectedChildUis[0].SymbolChild.ReadableName}" + "]");
@@ -510,6 +517,4 @@ internal static class GraphContextMenu
         // }
         //ImGui.EndMenu();
     }
-
-
 }

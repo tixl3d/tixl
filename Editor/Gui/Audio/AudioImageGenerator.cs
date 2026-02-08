@@ -15,7 +15,7 @@ internal static class AudioImageGenerator
 {
     public static bool TryGenerateSoundSpectrumAndVolume(AudioClipDefinition clip, IResourceConsumer? instance, [NotNullWhen(true)] out string? imagePathAbsolute)
     {
-        var relativePath = clip.FilePath;
+        var relativePath = clip.Address;
         if (relativePath == null)
         {
             Log.Error("Audio clip has no file path");
@@ -31,7 +31,7 @@ internal static class AudioImageGenerator
         }
 
         string imageExtension = UserSettings.Config.ExpandSpectrumVisualizerVertically ? ".10.waveform.png" : ".waveform.png";
-        var imageFilePath = clip.FilePath! + imageExtension;
+        var imageFilePath = clip.Address! + imageExtension;
         imagePathAbsolute = soundFilePathAbsolute + imageExtension;
             
         if (File.Exists(imagePathAbsolute))

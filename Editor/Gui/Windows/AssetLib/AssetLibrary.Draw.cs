@@ -426,6 +426,7 @@ internal sealed partial class AssetLibrary
             }
 
             DrawAssetTooltip(asset, hasUses, uses);
+            
         }
 
         ImGui.PopID();
@@ -471,7 +472,7 @@ internal sealed partial class AssetLibrary
                 }
             }
             ImGui.EndGroup();
-            ImGui.SameLine();
+            ImGui.SameLine(0,10);
             
             ImGui.BeginGroup();
             {

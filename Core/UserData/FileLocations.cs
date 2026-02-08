@@ -13,7 +13,7 @@ public static class FileLocations
     public const string AppSubFolder = "TiXL";
     public const string ThemeSubFolder = "Themes";
     public const string RenderSubFolder = "RenderOutput";
-    public const string ExportFolderName = "T3Exports";
+    public const string ExportSubFolder = "Export";
     public const string KeyBindingSubFolder = "KeyBindings";
     private const string TestsSubFolder = "Tests";
 
@@ -56,7 +56,13 @@ public static string TestReferencesFolder => Path.Combine(".tixl", TestsSubFolde
     public const string AssetsSubfolder = "Assets";
     public const string EditorResourcesSubfolder = "EditorResources";
     public const string DependenciesFolder = "dependencies";
-    public const string SymbolsSubfolder = "Symbols";
+    
+    /** This is only used in release builds */
+    public const string ReleaseSymbolsSubfolder = "Symbols";
+    
     public const string SymbolUiSubFolder = "SymbolUis";
     public const string SourceCodeSubFolder = "SourceCode";
+    
+    /** Folder with the packages both in editor and in exported projects */
+    public const string OperatorsSubFolder = "Operators";
 }

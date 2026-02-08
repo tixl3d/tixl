@@ -9,6 +9,7 @@ using T3.Editor.Gui.Legacy.Interaction.Connections;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Gui.UiHelpers.Thumbnails;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Helpers;
 using T3.Editor.UiModel.InputsAndTypes;
@@ -355,8 +356,12 @@ internal sealed class SymbolLibrary : Window
     /// </summary>
     private static bool ContainsSymbolRecursive(NamespaceTreeNode node, Guid symbolId)
     {
-        if (node.Symbols.Any(s => s.Id == symbolId))
-            return true;
+        foreach (var s in node.Symbols)
+        {
+            if (s.Id == symbolId)
+                return true;
+        }
+
         foreach (var child in node.Children)
         {
             if (ContainsSymbolRecursive(child, symbolId))
@@ -596,13 +601,26 @@ internal sealed class SymbolLibrary : Window
 
                 if (!string.IsNullOrEmpty(symbolUi.Description))
                 {
-                    ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(4, 4));
-                    ImGui.BeginTooltip();
-                    ImGui.PushTextWrapPos(ImGui.GetFontSize() * 25.0f);
-                    ImGui.TextUnformatted(symbolUi.Description);
-                    ImGui.PopTextWrapPos();
-                    ImGui.PopStyleVar();
-                    ImGui.EndTooltip();
+                    CustomComponents.BeginTooltip(600);
+                    {
+                        ImGui.BeginGroup();
+                        {
+                            ImGui.PushTextWrapPos(ImGui.GetFontSize() * 25.0f);
+                            ImGui.TextUnformatted(symbolUi.Description);
+                            ImGui.PopTextWrapPos();
+                        }
+                        ImGui.EndGroup();
+                        
+                        ImGui.SameLine(0,10);
+            
+                        ImGui.BeginGroup();
+                        {
+                            var package = symbol.SymbolPackage;
+                            ThumbnailManager.GetThumbnail(symbol.Id, package, ThumbnailManager.Categories.PackageMeta).AsImguiImage();
+                        }
+                        ImGui.EndGroup();
+                    }
+                    CustomComponents.EndTooltip();
                 }
             }
 
@@ -628,6 +646,17 @@ internal sealed class SymbolLibrary : Window
                                                 title: symbol.Name,
                                                 id: "##symbolTreeSymbolContextMenu");
 
+
+            // Experimental Thumbnails
+            // var keepCursor = ImGui.GetCursorPos();
+            // CustomComponents.RightAlign(50);
+            // if (!ThumbnailManager.GetThumbnail(symbol.Id, symbol.SymbolPackage).AsImguiImage(30))
+            // {
+            //     ImGui.Dummy(new Vector2(10));
+            // }
+            // ImGui.SetCursorPos(keepCursor);
+
+            
             // Draw dependency badges if analysis is available
             if (SymbolAnalysis.DetailsInitialized &&
                 SymbolAnalysis.InformationForSymbolIds.TryGetValue(symbol.Id, out var info))

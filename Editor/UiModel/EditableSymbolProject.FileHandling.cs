@@ -241,6 +241,9 @@ internal sealed partial class EditableSymbolProject
         if (name.EndsWith("AssemblyInfo.cs"))
             return;
 
+        if (name.StartsWith(@"bin\", StringComparison.Ordinal) || name.StartsWith("bin/", StringComparison.Ordinal))
+            return;
+        
         Log.Info($"{DisplayName}: Code file changed: {name}");
         CodeExternallyModified = true;
         ResourceFileWatcher.FileStateChangeCounter++;
@@ -276,6 +279,7 @@ internal sealed partial class EditableSymbolProject
             NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.CreationTime | NotifyFilters.FileName | NotifyFilters.DirectoryName;
 
             IncludeSubdirectories = true;
+            
             Changed += onChange;
             Created += onChange;
             Renamed += onRename;

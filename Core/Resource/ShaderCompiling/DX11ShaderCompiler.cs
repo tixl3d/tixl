@@ -141,16 +141,15 @@ public sealed partial class DX11ShaderCompiler : ShaderCompiler
 
         public IDisposable Shadow { get; set; }
 
-        public Stream Open(IncludeType type, string fileName, Stream parentStream)
+        public Stream Open(IncludeType type, string sharedIncludeFileName, Stream parentStream)
         {
-            var fileNameInLib = "Lib:shaders/" + fileName; 
-            if (AssetRegistry.TryResolveAddress(fileNameInLib, _owner, out var path, out _))
+            if(TryResolveSharedIncludeAsset(sharedIncludeFileName,  out var asset))
             {
-                _streamReader = new StreamReader(path);
+                _streamReader = new StreamReader(asset.FullPath);
                 return _streamReader.BaseStream;
             }
 
-            Log.Error($"Could not locate include file '{fileName}'");
+            Log.Error($"Could not locate include file '{sharedIncludeFileName}'");
             _streamReader = null;
             return null;
         }
@@ -159,6 +158,7 @@ public sealed partial class DX11ShaderCompiler : ShaderCompiler
         {
             _streamReader.Close();
         }
+
 
         public IReadOnlyList<IResourcePackage> AvailableResourcePackages { get; }
         public SymbolPackage Package { get; }

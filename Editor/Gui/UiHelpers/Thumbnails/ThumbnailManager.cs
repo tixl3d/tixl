@@ -16,9 +16,27 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace T3.Editor.Gui.UiHelpers.Thumbnails;
 
+/// <summary>
+/// Manages the generation, caching, and rendering of preview thumbnails for symbols, presets, and assets.
+/// 
+/// For optimal performance, thumbnails are packed into a single 4K GPU atlas. This minimizes draw calls 
+/// and texture swaps during UI rendering. If the atlas is full, a Least Recently Used (LRU) policy 
+/// evicts the oldest entries to make room for new requests.
+/// 
+/// Caching Strategy:
+/// - Temporary: Regeneratable thumbnails (e.g., asset files) are cached in the user's AppData Tmp folder.
+/// - Persistent: Curated content (e.g., symbol examples) is stored in the project's .meta folder.
+/// - Runtime-only: Previews can be pushed directly to the atlas without disk serialization.
+/// 
+/// To prevent excessive I/O, the manager maintains a persistent 'negative cache' of missing files,
+/// ensuring that non-existent thumbnails are only checked once per session.
+/// </summary>
 internal static class ThumbnailManager
 {
     #region Main Thread Methods
+    /// <summary>
+    /// Processes the upload queue to copy textures into the atlas and updates slot states.
+    /// </summary>
     internal static void Update()
     {
         if (!_initialized)
@@ -44,70 +62,80 @@ internal static class ThumbnailManager
                 deviceContext.CopySubresourceRegion(upload.Texture, 0, null, _atlas!, 0, destRegion.Left, destRegion.Top);
 
                 if (_slots.TryGetValue(upload.Guid, out var slot))
-                    slot.IsLoading = false;
+                {
+                    slot.State = LoadingState.Ready;
+                }
 
                 upload.Texture.Dispose();
             }
         }
     }
 
-    internal static void AsImguiImage(this ThumbnailRect thumbnail, float height = SlotHeight)
+    internal static bool AsImguiImage(this ThumbnailRect thumbnail, float height = SlotHeight)
     {
         if (!thumbnail.IsReady || AtlasSrv == null)
-            return;
+            return false;
 
-        // Ensure 4:3 aspect ratio
         ImGui.Image(AtlasSrv.NativePointer, new Vector2(height * 4 / 3, height), thumbnail.Min, thumbnail.Max);
+        return true;
     }
     #endregion
 
-    #region data request
+    #region Data Request
+    /// <summary>
+    /// Hot-path for assets. Uses Guid keys to avoid allocations and checks the negative cache to prevent I/O spam.
+    /// </summary>
     internal static ThumbnailRect GetThumbnail(Asset asset, IResourcePackage? package, Categories category = Categories.Temp)
     {
         if (asset.AssetType != AssetHandling.Images || package == null || asset.FileSystemInfo == null)
-            return _waiting;
+            return _fallback;
 
-        // 1. Check atlas cache via Guid (Zero allocation hot-path)
-        if (_slots.TryGetValue(asset.Id, out var slot))
-        {
-            slot.LastUsed = DateTime.Now;
-            return GetRectFromSlot(slot);
-        }
-
-        // 2. Check for cache file
-        var thumbPath = Path.Combine(GetPath(package, category), $"{asset.Id}.png");
-
-        if (File.Exists(thumbPath))
-        {
-            RequestAsyncLoad(asset.Id, thumbPath);
-        }
-        else if (asset.FileSystemInfo.Exists)
-        {
-            // 3. Generate if source exists but cache doesn't
-            GenerateThumbnailFromAsset(asset, package);
-        }
-
-        return _waiting;
+        return GetThumbnail(asset.Id, package, category, asset.FileSystemInfo);
     }
 
-    internal static ThumbnailRect GetThumbnail(Guid guid, IResourcePackage? package, Categories category = Categories.Temp)
+    internal static ThumbnailRect GetThumbnail(Guid guid, IResourcePackage? package, Categories category = Categories.Temp, FileSystemInfo? sourceInfo = null)
     {
-        if (package == null)
-            return _waiting;
+        if (package == null) return _fallback;
 
-        if (_slots.TryGetValue(guid, out var slot))
+        // 1. Get or Create the persistent state entry
+        if (!_slots.TryGetValue(guid, out var slot))
+        {
+            slot = new ThumbnailSlot { Guid = guid };
+            _slots[guid] = slot;
+        }
+
+        // 2. Prevent repeated disk checks for non-existent files
+        if (slot.State == LoadingState.DoesntExist)
+            return _fallback;
+
+        // 3. Return from atlas if ready and assigned a coordinate
+        if (slot.State == LoadingState.Ready && slot.X != -1)
         {
             slot.LastUsed = DateTime.Now;
             return GetRectFromSlot(slot);
         }
 
+        // 4. Already in queue
+        if (slot.State == LoadingState.Loading)
+            return _fallback;
+
+        // 5. Trigger Load or Generate
         var path = Path.Combine(GetPath(package, category), $"{guid}.png");
         if (File.Exists(path))
         {
             RequestAsyncLoad(guid, path);
         }
+        else if (sourceInfo != null && sourceInfo.Exists)
+        {
+            GenerateThumbnailFromAsset(guid, sourceInfo.FullName, package, category);
+        }
+        else
+        {
+            // Mark as non-existent to protect against further I/O
+            slot.State = LoadingState.DoesntExist;
+        }
 
-        return _waiting;
+        return _fallback;
     }
     #endregion
 
@@ -116,162 +144,163 @@ internal static class ThumbnailManager
     {
         try
         {
-            var targetSlot = GetLruSlot(guid);
-            var tex = await LoadTextureViaWic(path);
-
-            if (tex == null)
+            if (!_slots.TryGetValue(guid, out var slot)) return;
+        
+            slot.State = LoadingState.Loading;
+            try
             {
-                lock (_slots)
+                var targetSlot = AssignAtlasSlot(guid);
+                var tex = await LoadTextureViaWic(path);
+
+                if (tex == null)
                 {
-                    _slots.Remove(guid);
+                    slot.State = LoadingState.DoesntExist;
+                    return;
                 }
 
-                return;
+                lock (_uploadQueue)
+                {
+                    _uploadQueue.Enqueue(new PendingUpload(guid, tex, targetSlot));
+                }
             }
-
-            lock (_uploadQueue)
+            catch (Exception e)
             {
-                _uploadQueue.Enqueue(new PendingUpload(guid, tex, targetSlot));
+                T3.Core.Logging.Log.Error($"Thumbnail load failed for {guid}: {e.Message}");
+                slot.State = LoadingState.DoesntExist;
             }
         }
         catch (Exception e)
         {
-            T3.Core.Logging.Log.Error($"Thumbnail load failed for {guid}: {e.Message}");
-            lock (_slots)
-            {
-                _slots.Remove(guid);
-            }
+            Log.Warning("Failed to load thumbnail " + e.Message);
         }
     }
 
-    private static async void GenerateThumbnailFromAsset(Asset asset, IResourcePackage package, Categories category = Categories.Temp)
+    private static async void GenerateThumbnailFromAsset(Guid guid, string sourcePath, IResourcePackage package, Categories category)
     {
         try
         {
-            // Decode large source on background thread
-            var sourceTexture = await LoadTextureViaWic(asset.FileSystemInfo!.FullName);
+            var sourceTexture = await LoadTextureViaWic(sourcePath);
             if (sourceTexture == null) return;
 
-            // GPU scaling/saving back on main thread implicitly via ScreenshotWriter readback
             var t3Texture = new T3.Core.DataTypes.Texture2D(sourceTexture);
-            SaveThumbnail(asset.Id, package, t3Texture, category);
+            SaveThumbnail(guid, package, t3Texture, category);
 
             sourceTexture.Dispose();
         }
         catch (Exception e)
         {
-            T3.Core.Logging.Log.Error($"Failed generating thumbnail for {asset.Address}: {e.Message}");
+            T3.Core.Logging.Log.Error($"Failed generating thumbnail for {guid}: {e.Message}");
         }
     }
 
     private static async Task<SharpDX.Direct3D11.Texture2D?> LoadTextureViaWic(string path)
     {
         return await Task.Run(async () =>
-                              {
-                                  int retries = 3;
-                                  while (retries > 0)
-                                  {
-                                      try
-                                      {
-                                          using var factory = new ImagingFactory();
-                                          // Attempt to open with Shared Read access
-                                          using var decoder = new BitmapDecoder(factory, path, DecodeOptions.CacheOnDemand);
-                                          using var frame = decoder.GetFrame(0);
-                                          using var converter = new FormatConverter(factory);
+        {
+            int retries = 3;
+            while (retries > 0)
+            {
+                try
+                {
+                    using var factory = new ImagingFactory();
+                    using var decoder = new BitmapDecoder(factory, path, DecodeOptions.CacheOnDemand);
+                    using var frame = decoder.GetFrame(0);
+                    using var converter = new FormatConverter(factory);
 
-                                          converter.Initialize(frame, PixelFormat.Format32bppRGBA);
+                    converter.Initialize(frame, PixelFormat.Format32bppRGBA);
 
-                                          var stride = converter.Size.Width * 4;
-                                          using var buffer = new SharpDX.DataStream(converter.Size.Height * stride, true, true);
-                                          converter.CopyPixels(stride, buffer);
+                    var stride = converter.Size.Width * 4;
+                    using var buffer = new SharpDX.DataStream(converter.Size.Height * stride, true, true);
+                    converter.CopyPixels(stride, buffer);
 
-                                          return new SharpDX.Direct3D11.Texture2D(ResourceManager.Device, new Texture2DDescription()
-                                                                                          {
-                                                                                              Width = converter.Size.Width,
-                                                                                              Height = converter.Size.Height,
-                                                                                              ArraySize = 1,
-                                                                                              BindFlags = BindFlags.ShaderResource,
-                                                                                              Usage = ResourceUsage.Immutable,
-                                                                                              Format = SharpDX.DXGI.Format.R8G8B8A8_UNorm,
-                                                                                              MipLevels = 1,
-                                                                                              SampleDescription = new SharpDX.DXGI.SampleDescription(1, 0),
-                                                                                          }, new SharpDX.DataRectangle(buffer.DataPointer, stride));
-                                      }
-                                      catch (SharpDXException ex) when ((uint)ex.HResult == 0x80070020)
-                                      {
-                                          // File is locked by ScreenshotWriter, wait and retry
-                                          retries--;
-                                          await Task.Delay(50);
-                                      }
-                                      catch
-                                      {
-                                          return null; // Other decoding errors
-                                      }
-                                  }
-
-                                  return null;
-                              });
+                    return new SharpDX.Direct3D11.Texture2D(ResourceManager.Device, new Texture2DDescription()
+                    {
+                        Width = converter.Size.Width,
+                        Height = converter.Size.Height,
+                        ArraySize = 1,
+                        BindFlags = BindFlags.ShaderResource,
+                        Usage = ResourceUsage.Immutable,
+                        Format = SharpDX.DXGI.Format.R8G8B8A8_UNorm,
+                        MipLevels = 1,
+                        SampleDescription = new SharpDX.DXGI.SampleDescription(1, 0),
+                    }, new SharpDX.DataRectangle(buffer.DataPointer, stride));
+                }
+                catch (SharpDXException ex) when ((uint)ex.HResult == 0x80070020)
+                {
+                    retries--;
+                    await Task.Delay(50); // Sharing violation retry
+                }
+                catch { return null; }
+            }
+            return null;
+        });
     }
     #endregion
 
-
-    
-    private static string GetPath(IResourcePackage package, Categories category)
+    #region Atlas Management (LRU)
+    /// <summary>
+    /// Manages the physical atlas coordinates. If the atlas is full, it evicts the oldest entry back to NotLoaded status.
+    /// </summary>
+    private static ThumbnailSlot AssignAtlasSlot(Guid guid)
     {
-        return category switch
-                   {
-                       Categories.PackageMeta => Path.Combine(package.Folder, MetaSubFolder, ThumbnailsSubFolder),
-                       Categories.User        => Path.Combine(FileLocations.TempFolder, ThumbnailsSubFolder, package.Name),
-                       _                      => Path.Combine(FileLocations.TempFolder, ThumbnailsSubFolder)
-                   };
+        var slot = _slots[guid];
+        if (slot.X != -1) return slot;
+
+        // Evict volatile GPU slot if at capacity
+        if (_atlasLru.Count >= MaxSlots)
+        {
+            var oldest = _atlasLru.OrderBy(s => s.LastUsed).First();
+            oldest.X = -1;
+            oldest.Y = -1;
+            oldest.State = LoadingState.NotLoaded;
+            _atlasLru.Remove(oldest);
+        }
+
+        // Find visual index
+        int index = _atlasLru.Count;
+        slot.X = index % 23;
+        slot.Y = index / 23;
+        
+        slot.LastUsed = DateTime.Now;
+        _atlasLru.Add(slot);
+        return slot;
     }
+    #endregion
 
     #region GPU / Saving Methods
-    internal static void SaveThumbnail(Guid guid, IResourcePackage package, T3.Core.DataTypes.Texture2D sourceTexture, Categories category)
+    internal static void SaveThumbnail(Guid guid, IResourcePackage package, T3.Core.DataTypes.Texture2D sourceTexture, Categories category, bool saveToFile = true)
     {
+        if (!_slots.TryGetValue(guid, out var slot))
+        {
+            slot = new ThumbnailSlot { Guid = guid };
+            _slots[guid] = slot;
+        }
+
+        slot.State = LoadingState.Loading;
+        var targetSlot = AssignAtlasSlot(guid);
+        
         var device = ResourceManager.Device;
         var context = device.ImmediateContext;
 
         var thumbDir = GetPath(package, category);
-
-        try
-        {
-            Directory.CreateDirectory(thumbDir);
-        }
-        catch
-        {
-            return;
-        }
-
+        try { Directory.CreateDirectory(thumbDir); } catch { return; }
         var filePath = Path.Combine(thumbDir, $"{guid}.png");
 
-        lock (_lockedPath)
+        if (saveToFile)
         {
-            if (!_lockedPath.Add(filePath))
-                return;
+            lock (_lockedPath) { if (!_lockedPath.Add(filePath)) return; }
         }
 
-        _slots.Remove(guid);
-        // if (_slots.TryGetValue(guid, out var existingSlot))
-        // {
-        //     existingSlot.IsLoading = true;
-        //     existingSlot.LastUsed = DateTime.Now;
-        // }
-        
         const int targetWidth = SlotWidth;
         const int targetHeight = SlotHeight;
 
         var desc = new Texture2DDescription()
-                       {
-                           Width = targetWidth,
-                           Height = targetHeight,
-                           ArraySize = 1,
-                           BindFlags = BindFlags.RenderTarget | BindFlags.ShaderResource,
-                           Format = SharpDX.DXGI.Format.R8G8B8A8_UNorm,
-                           Usage = ResourceUsage.Default,
-                           SampleDescription = new SharpDX.DXGI.SampleDescription(1, 0),
-                           MipLevels = 1
-                       };
+        {
+            Width = targetWidth, Height = targetHeight, ArraySize = 1,
+            BindFlags = BindFlags.RenderTarget | BindFlags.ShaderResource,
+            Format = SharpDX.DXGI.Format.R8G8B8A8_UNorm, Usage = ResourceUsage.Default,
+            SampleDescription = new SharpDX.DXGI.SampleDescription(1, 0), MipLevels = 1
+        };
 
         using var tempTarget = new SharpDX.Direct3D11.Texture2D(device, desc);
         using var rtv = new RenderTargetView(device, tempTarget);
@@ -280,29 +309,18 @@ internal static class ThumbnailManager
         var sourceAspect = (float)sourceTexture.Description.Width / sourceTexture.Description.Height;
         var targetAspect = (float)targetWidth / targetHeight;
 
+        // --- Fit Logic (Letterbox/Pillarbox) ---
         float viewWidth, viewHeight, offsetX, offsetY;
-
-        if (sourceAspect > targetAspect)
-        {
-            // Source is wider than 4:3 (Letterbox top/bottom)
-            viewWidth = targetWidth;
-            viewHeight = targetWidth / sourceAspect;
-            offsetX = 0;
-            offsetY = (targetHeight - viewHeight) / 2f;
-        }
-        else
-        {
-            // Source is taller than 4:3 (Pillarbox sides)
-            viewHeight = targetHeight;
-            viewWidth = targetHeight * sourceAspect;
-            offsetX = (targetWidth - viewWidth) / 2f;
-            offsetY = 0;
+        if (sourceAspect > targetAspect) {
+            viewWidth = targetWidth; viewHeight = targetWidth / sourceAspect;
+            offsetX = 0; offsetY = (targetHeight - viewHeight) / 2f;
+        } else {
+            viewHeight = targetHeight; viewWidth = targetHeight * sourceAspect;
+            offsetX = (targetWidth - viewWidth) / 2f; offsetY = 0;
         }
 
         context.OutputMerger.SetTargets(rtv);
-        // Clear with transparent black to provide the padding
         context.ClearRenderTargetView(rtv, new RawColor4(0, 0, 0, 0));
-
         context.Rasterizer.SetViewport(new ViewportF(offsetX, offsetY, viewWidth, viewHeight));
 
         context.VertexShader.Set(SharedResources.FullScreenVertexShaderResource.Value);
@@ -310,68 +328,40 @@ internal static class ThumbnailManager
         context.PixelShader.SetShaderResource(0, sourceSrv);
 
         context.Draw(3, 0);
-
         context.PixelShader.SetShaderResource(0, null);
         context.OutputMerger.SetTargets((RenderTargetView?)null);
 
-        var newTexture = new T3.Core.DataTypes.Texture2D(tempTarget);
-        ScreenshotWriter.StartSavingToFile(newTexture, filePath, ScreenshotWriter.FileFormats.Png,
-                                           path =>
-                                           {
-                                               if (string.IsNullOrEmpty(path)) return;
-                                               lock (_lockedPath)
-                                               {
-                                                   _lockedPath.Remove(path);
-                                               }
-                                           }, logErrors:false);
+        // Immediate Atlas Queueing
+        var uploadTex = new SharpDX.Direct3D11.Texture2D(device, desc);
+        context.CopyResource(tempTarget, uploadTex);
+        
+        lock (_uploadQueue) {
+            _uploadQueue.Enqueue(new PendingUpload(guid, uploadTex, targetSlot));
+        }
+
+        if (saveToFile) {
+            var saveTexture = new T3.Core.DataTypes.Texture2D(tempTarget);
+            ScreenshotWriter.StartSavingToFile(saveTexture, filePath, ScreenshotWriter.FileFormats.Png,
+                                               path => { if (!string.IsNullOrEmpty(path)) lock (_lockedPath) _lockedPath.Remove(path); }, 
+                                               logErrors: false);
+        }
     }
     #endregion
 
-    #region helpers
+    #region Helpers
     private static void Initialize()
     {
         var device = ResourceManager.Device;
-        var desc = new Texture2DDescription
-                       {
-                           Width = AtlasSize,
-                           Height = AtlasSize,
-                           MipLevels = 1,
-                           ArraySize = 1,
-                           Format = SharpDX.DXGI.Format.R8G8B8A8_UNorm,
-                           SampleDescription = new SharpDX.DXGI.SampleDescription(1, 0),
-                           Usage = ResourceUsage.Default,
-                           BindFlags = BindFlags.ShaderResource,
-                           CpuAccessFlags = CpuAccessFlags.None
-                       };
+        var desc = new Texture2DDescription {
+            Width = AtlasSize, Height = AtlasSize, MipLevels = 1, ArraySize = 1,
+            Format = SharpDX.DXGI.Format.R8G8B8A8_UNorm, Usage = ResourceUsage.Default,
+            BindFlags = BindFlags.ShaderResource, CpuAccessFlags = CpuAccessFlags.None,
+            SampleDescription = new SharpDX.DXGI.SampleDescription(1, 0)
+        };
 
         _atlas = new SharpDX.Direct3D11.Texture2D(device, desc);
         AtlasSrv = new ShaderResourceView(device, _atlas);
         _initialized = true;
-    }
-
-    private static ThumbnailSlot GetLruSlot(Guid guid)
-    {
-        if (_slots.Count >= MaxSlots)
-        {
-            var oldest = _slots.Values.OrderBy(s => s.LastUsed).First();
-            _slots.Remove(oldest.Guid);
-            oldest.Guid = guid;
-            oldest.IsLoading = true;
-            oldest.LastUsed = DateTime.Now;
-            _slots[guid] = oldest;
-            return oldest;
-        }
-
-        var newSlot = new ThumbnailSlot
-                          {
-                              Guid = guid,
-                              X = _slots.Count % 23,
-                              Y = _slots.Count / 23,
-                              IsLoading = true,
-                              LastUsed = DateTime.Now
-                          };
-        _slots[guid] = newSlot;
-        return newSlot;
     }
 
     private static ThumbnailRect GetRectFromSlot(ThumbnailSlot slot)
@@ -380,50 +370,41 @@ internal static class ThumbnailManager
         var y = (float)(slot.Y * SlotHeight + Padding) / AtlasSize;
         var w = (float)(SlotWidth - Padding * 2) / AtlasSize;
         var h = (float)(SlotHeight - Padding * 2) / AtlasSize;
+        return new ThumbnailRect(new Vector2(x, y), new Vector2(x + w, y + h), slot.State == LoadingState.Ready);
+    }
 
-        return new ThumbnailRect(new Vector2(x, y), new Vector2(x + w, y + h), !slot.IsLoading);
+    private static string GetPath(IResourcePackage package, Categories category)
+    {
+        return category switch {
+            Categories.PackageMeta => Path.Combine(package.Folder, MetaSubFolder, ThumbnailsSubFolder),
+            Categories.User        => Path.Combine(FileLocations.TempFolder, ThumbnailsSubFolder, package.Name),
+            _                      => Path.Combine(FileLocations.TempFolder, ThumbnailsSubFolder)
+        };
     }
     #endregion
 
-    // --- Configuration ---
-    private const int AtlasSize = 4096;
-    private const int SlotWidth = 178; // Results in ~23 columns
-    private const int SlotHeight = 133; // 4:3 ratio
-    private const int Padding = 2; // 2px gap to avoid bleeding
-    private const int MaxSlots = 500; //
+    private const int AtlasSize = 4096, SlotWidth = 178, SlotHeight = 133, Padding = 2, MaxSlots = 500;
 
-    // --- State ---
     private static SharpDX.Direct3D11.Texture2D? _atlas;
     internal static ShaderResourceView? AtlasSrv { get; private set; }
-
     private static readonly Dictionary<Guid, ThumbnailSlot> _slots = new();
+    private static readonly List<ThumbnailSlot> _atlasLru = new(); 
     private static readonly Queue<PendingUpload> _uploadQueue = new();
-    private static readonly ThumbnailRect _waiting = new(Vector2.Zero, Vector2.Zero, false);
+    private static readonly ThumbnailRect _fallback = new(Vector2.Zero, Vector2.Zero, false);
     private static bool _initialized;
 
-    // --- Internal Structures ---
     internal readonly record struct ThumbnailRect(Vector2 Min, Vector2 Max, bool IsReady);
-
     private record struct PendingUpload(Guid Guid, SharpDX.Direct3D11.Texture2D Texture, ThumbnailSlot Slot);
+    private enum LoadingState { NotLoaded, Loading, Ready, DoesntExist }
 
-    private sealed class ThumbnailSlot
-    {
-        public Guid Guid = Guid.Empty;
-        public int X;
-        public int Y;
+    private sealed class ThumbnailSlot {
+        public Guid Guid;
+        public LoadingState State = LoadingState.NotLoaded;
+        public int X = -1, Y = -1;
         public DateTime LastUsed;
-        public bool IsLoading;
     }
 
     private static readonly HashSet<string> _lockedPath = [];
-
-    public enum Categories
-    {
-        Temp,
-        User,
-        PackageMeta,
-    }
-    
-    private const string ThumbnailsSubFolder = "Thumbnails";
-    private const string MetaSubFolder = ".meta";
+    public enum Categories { Temp, User, PackageMeta }
+    private const string ThumbnailsSubFolder = "Thumbnails", MetaSubFolder = ".meta";
 }

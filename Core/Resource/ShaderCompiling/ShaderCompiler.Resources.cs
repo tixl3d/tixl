@@ -1,6 +1,8 @@
 #nullable enable
+using System.Diagnostics.CodeAnalysis;
 using T3.Core.DataTypes;
 using T3.Core.Logging;
+using T3.Core.Resource.Assets;
 
 namespace T3.Core.Resource.ShaderCompiling;
 
@@ -23,4 +25,17 @@ public abstract partial class ShaderCompiler
         Log.Error($"{fileResource.AbsolutePath} -> {entryPoint}: {reason}");
         return false;
     }
+    
+    
+    public static bool TryResolveSharedIncludeAsset(string sharedIncludeFileName,  [NotNullWhen(true)] out Asset? asset)
+    {
+        var address = GetAddressForSharedInclude(sharedIncludeFileName);
+        return AssetRegistry.TryGetAsset(address, out asset);
+    }
+
+    public static string GetAddressForSharedInclude(string sharedIncludeFileName)
+    {
+        return "Lib:shaders/" + sharedIncludeFileName;
+    }
+
 }

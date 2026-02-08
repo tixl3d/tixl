@@ -122,6 +122,7 @@ internal static partial class ProjectXml
         propertyGroup.AddProperty(PropertyType.HomeGuid.GetItemName(), homeGuid.ToString());
         propertyGroup.AddProperty(PropertyType.PackageId.GetItemName(), packageId.ToString());
         propertyGroup.AddProperty(PropertyType.AssemblyName.GetItemName(), UnevaluatedVariable(GetItemName(PropertyType.RootNamespace)));
+        propertyGroup.AddProperty("DefaultItemExcludes", @"$(DefaultItemExcludes);Export\**;bin\**;obj\**;.temp\**;.meta\**;Assets\**;Screenshots\**;Render\**");
     }
 
     private static void AddDefaultReferenceGroup(this ProjectRootElement project)
@@ -350,7 +351,15 @@ internal static partial class ProjectXml
     private const string IncludeAllStr = "**/*";
 
     private static readonly string[] _excludeFoldersFromOutput =
-            [CreateIncludePath(args: ["bin", IncludeAllStr]), CreateIncludePath(args: ["obj", IncludeAllStr])];
+            [
+                CreateIncludePath(args: ["bin", IncludeAllStr]), 
+                CreateIncludePath(args: ["obj", IncludeAllStr]),
+                CreateIncludePath("Export", IncludeAllStr),      
+                CreateIncludePath("Screenshots", IncludeAllStr), 
+                CreateIncludePath("Render", IncludeAllStr),
+                CreateIncludePath(".meta", IncludeAllStr),
+                CreateIncludePath(".temp", IncludeAllStr),
+            ];
 
     private const string FileIncludeFmt = IncludeAllStr + @"{0}";
     internal const string DependenciesFolder = FileLocations.DependenciesFolder;
@@ -364,7 +373,7 @@ internal static partial class ProjectXml
                                        linkDirectory: FileLocations.AssetsSubfolder,
                                        exclude: _excludeFoldersFromOutput),
                     new ContentInclude(include: string.Format(format: FileIncludeFmt, arg0: SymbolPackage.SymbolExtension),
-                                       linkDirectory: FileLocations.SymbolsSubfolder,
+                                       linkDirectory: FileLocations.ReleaseSymbolsSubfolder,
                                        exclude: _excludeFoldersFromOutput),
                     new ContentInclude(include: string.Format(format: FileIncludeFmt, arg0: EditorSymbolPackage.SymbolUiExtension),
                                        linkDirectory: FileLocations.SymbolUiSubFolder,
