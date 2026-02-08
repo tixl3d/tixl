@@ -583,6 +583,18 @@ internal static class TimeControls
             AudioEngine.SetMute(ProjectSettings.Config.AudioMuted);
         }
 
+        // Switch Spectrum to Waveform view
+        ImGui.SameLine();
+        if (CustomComponents.IconButton(Icon.Stripe4PxPattern, ControlSize))
+        {
+            // Cycle through the three display modes
+            TimeLineImage.CurrentDisplayMode = (TimeLineImage.DisplayMode)(((int)TimeLineImage.CurrentDisplayMode + 1) % 4);
+        }
+
+        // Add tooltip to show current mode
+        CustomComponents.TooltipForLastItem($"Display: {TimeLineImage.CurrentDisplayMode}",
+                                           "Click to cycle through display modes");
+
         // ToggleHover
         {
             ImGui.SameLine();
