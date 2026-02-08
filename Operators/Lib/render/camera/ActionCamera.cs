@@ -58,6 +58,7 @@ internal sealed class ActionCamera : Instance<ActionCamera>, ICamera, ICameraPro
         var yaw = Yaw.GetValue(context);
         var pitch = Pitch.GetValue(context);
         var roll = Roll.GetValue(context);
+        var fov = FOV.GetValue(context);
 
         var viewVector = _cameraDefinition.Target - _cameraDefinition.Position;
         var viewDirection = Vector3.Normalize(viewVector);
@@ -75,6 +76,7 @@ internal sealed class ActionCamera : Instance<ActionCamera>, ICamera, ICameraPro
 
         _cameraDefinition.Target = _cameraDefinition.Position + newViewDirection;
         _cameraDefinition.Roll += roll * speed * deltaTime;
+        _cameraDefinition.FieldOfView += fov * deltaTime;
 
         _cameraDefinition.BuildProjectionMatrices(out var camToClipSpace, out var worldToCamera);
 
@@ -133,4 +135,7 @@ internal sealed class ActionCamera : Instance<ActionCamera>, ICamera, ICameraPro
 
     [Input(Guid = "C529AF20-2E52-4A29-B558-CD518BDC539D")]
     public readonly InputSlot<float> Roll = new();
+    
+    [Input(Guid = "CB55671F-A20D-42A3-B19C-7C8EE5D7F865")]
+    public readonly InputSlot<float> FOV = new();
 }
