@@ -1,0 +1,114 @@
+{
+  "Id": "f66c3cd9-b648-4e19-a564-d87aa48d6d88"/*AssimpExport*/,
+  "Description": "Export 3D models to 20+ formats including FBX, glTF, OBJ, Collada, STL, and more. Supports mesh data, point clouds, vertex colors, and tangents. Files are automatically named with a counter.",
+  "InputUis": [
+    {
+      "InputId": "47f14471-1d6e-4bad-a3cc-f372dda4872c"/*MeshData*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "Mesh data to export including vertices, normals, tangents, bitangents, and UV coordinates."
+    },
+    {
+      "InputId": "b0e70377-685c-44b1-8069-2f0c2a9dcbb2"/*Points*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      },
+      "Description": "Point cloud data to export. Exports as point primitives with position and color information."
+    },
+    {
+      "InputId": "f784fe22-ba03-499c-bb4e-fe2ded8bf754"/*FolderPath*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      },
+      "Description": "Output folder path for exported files. Files are automatically named as MeshName_001.ext, MeshName_002.ext, etc.",
+      "Usage": "Directory"
+    },
+    {
+      "InputId": "20960269-69a9-4ff1-a3e7-395883521b06"/*ExportMesh*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      },
+      "Description": "Trigger button to export mesh data. Automatically increments the counter and saves to FolderPath/MeshName_XXX.ext."
+    },
+    {
+      "InputId": "5e6f7a8b-9c1d-2e3f-4a5b-6c7d8e9f0a1b"/*ExportPoints*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 300.0
+      },
+      "Description": "Trigger button to export point cloud data. Automatically increments the counter and saves to FolderPath/MeshName_XXX.ext."
+    },
+    {
+      "InputId": "e8c4f2a7-9b3d-4e1f-a5c6-7d8e9f0a1b2c"/*ExportFormat*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 375.0
+      },
+      "Description": "Export format preset. Determines the file extension and export options."
+    },
+    {
+      "InputId": "2b3c4d5e-6f7a-8b9c-1d2e-3f4a5b6c7d8e"/*MeshName*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 450.0
+      },
+      "Description": "Base name for exported files. Counter is appended automatically (e.g., 'mesh' becomes 'mesh_001.fbx')."
+    },
+    {
+      "InputId": "3c4d5e6f-7a8b-9c1d-2e3f-4a5b6c7d8e9f"/*ResetCounter*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 525.0
+      },
+      "Description": "Reset the export counter back to 1. Useful when starting a new export session."
+    },
+    {
+      "InputId": "4d5e6f7a-8b9c-1d2e-3f4a-6c7d8e9f0a1b"/*MaxVertexCount*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 600.0
+      },
+      "Description": "Maximum number of vertices/points to export (0 = no limit). Useful for reducing file size or testing."
+    },
+    {
+      "InputId": "f3d5e8b2-7a4c-4f9e-b2d1-6e7f8a9c0b1d"/*CustomFormat*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 675.0
+      },
+      "Description": "Custom Assimp format ID when ExportFormat is set to Custom. Examples: 'fbx', 'gltf2', 'obj', 'stl'."
+    },
+    {
+      "InputId": "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"/*GltfOptions*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 750.0
+      },
+      "Description": "glTF export options. Default: standard export; PrettyJson: readable JSON output; NoBuffersEmbedded: external buffer files."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "7fde5b8d-b541-43d3-8ec4-67037f47bf31"/*Success*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 0.0
+      },
+      "Description": "True if the last export operation completed successfully."
+    },
+    {
+      "OutputId": "369771fd-4c3f-4877-b44e-d42b28702282"/*StatusMessage*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 75.0
+      },
+      "Description": "Status message from the last export operation. Shows the exported filename or error details."
+    }
+  ]
+}

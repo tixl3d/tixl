@@ -1,0 +1,170 @@
+{
+  "Id": "e0b5b99d-c44f-434d-920d-422e88c75870"/*AssimpImport*/,
+  "Description": "Import 3D models from 40+ formats including FBX, glTF, OBJ, Collada, STL, and more. Supports mesh data, point clouds, skeletal animations, and bone weights.",
+  "InputUis": [
+    {
+      "InputId": "b569d0cc-9f84-419c-a3db-91406df6a3f8"/*FilePath*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "Path to the 3D model file to import. Supports 40+ formats including FBX, glTF, OBJ, Collada, STL, PLY, 3DS, and more.",
+      "Usage": "FilePath"
+    },
+    {
+      "InputId": "6aff02c4-35c8-4875-bb25-d2b10adfc276"/*PostProcessFlags*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      },
+      "Description": "Post-processing preset for the imported model. None: raw import; Basic: triangulation + smooth normals; Full: includes UV generation, tangent calculation, and optimization."
+    },
+    {
+      "InputId": "7a3b8c2d-5e9f-4a7b-8c9d-0e1f2a3b4c5d"/*Scale*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      },
+      "Description": "Uniform scale factor applied to the model after normalization."
+    },
+    {
+      "InputId": "8b4c9d3e-6f0a-4b8c-9d1e-1f2b3c4d5e6f"/*Normalize*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      },
+      "Description": "When enabled, normalizes the model to fit within a unit cube and centers it at the origin."
+    },
+    {
+      "InputId": "9c5d0e4f-7a1b-5c9d-2e3f-3b4c5d6e7f8a"/*AxisConversionMode*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 300.0
+      },
+      "Description": "Axis conversion for models from different coordinate systems. YUpToZUp converts Blender models, ZUpToYUp converts OpenGL/Unity models."
+    },
+    {
+      "InputId": "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"/*FlipNormals*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 375.0
+      },
+      "Description": "When enabled, flips the direction of all vertex normals. Useful for models with inverted winding order."
+    },
+    {
+      "InputId": "2b3c4d5e-6f7a-8b9c-1d2e-3f4a5b6c7d8e"/*SelectedMeshIndex*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 450.0
+      },
+      "Description": "Index of the specific mesh to import from multi-mesh files. Use -1 to import all meshes combined."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "77a21584-b35b-46b6-8056-1feb4196c0b7"/*MeshData*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      },
+      "Description": "Imported mesh data with vertices, normals, tangents, and UVs."
+    },
+    {
+      "OutputId": "9342c958-3d1f-40b0-b5e0-696812704812"/*Points*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 300.0
+      },
+      "Description": "Point cloud representation of the mesh vertices."
+    },
+    {
+      "OutputId": "a1b2c3d4-5e6f-4a7b-8c9d-0e1f2a3b4c5d"/*Metadata*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 400.0
+      },
+      "Description": "Formatted metadata string with vertex count, face count, and bounding box information."
+    },
+    {
+      "OutputId": "b2c3d4e5-6f7a-4b8c-9d1e-1f2b3c4d5e6f"/*VertexCount*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 500.0
+      },
+      "Description": "Total number of vertices in the imported mesh."
+    },
+    {
+      "OutputId": "c3d4e5f6-7a8b-4c9d-1e2f-2b3c4d5e6f7a"/*FaceCount*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 600.0
+      },
+      "Description": "Total number of triangular faces in the imported mesh."
+    },
+    {
+      "OutputId": "d4e5f6a7-8b9c-4d1e-2f3b-3c4d5e6f7a8b"/*MeshCount*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 700.0
+      },
+      "Description": "Number of meshes in the imported file."
+    },
+    {
+      "OutputId": "e5f6a7b8-9c1d-4e2f-3b4c-4d5e6f7a8b9c"/*BoundsMin*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 800.0
+      },
+      "Description": "Minimum bounding box corner of the imported mesh."
+    },
+    {
+      "OutputId": "f6a7b8c9-1d2e-4f3b-4c5d-5e6f7a8b9c1d"/*BoundsMax*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 900.0
+      },
+      "Description": "Maximum bounding box corner of the imported mesh."
+    },
+    {
+      "OutputId": "a7b8c9d1-2e3f-4b4c-5d6e-6f7a8b9c1d2e"/*MeshNames*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 1000.0
+      },
+      "Description": "Pipe-separated list of mesh names in the imported file."
+    },
+    {
+      "OutputId": "b1c2d3e4-5f6a-4b7c-8d9e-0f1a2b3c4d5e"/*SkeletonBuffers*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 1100.0
+      },
+      "Description": "GPU buffers containing bone data (bind poses, offset matrices) and vertex skin weights for skeletal animation."
+    },
+    {
+      "OutputId": "c2d3e4f5-6a7b-5c8d-9e1f-2b3c4d5e6f7a"/*BoneCount*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 1200.0
+      },
+      "Description": "Total number of bones in the skeleton hierarchy."
+    },
+    {
+      "OutputId": "d3e4f5a6-7b8c-6d9e-1f2b-4c5d6e7f8a9b"/*AnimationCount*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 1300.0
+      },
+      "Description": "Number of animation clips found in the imported model."
+    },
+    {
+      "OutputId": "e4f5a6b7-8c9d-7e9f-2c3d-5e6f7a8b9c1d"/*AnimationNames*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 1400.0
+      },
+      "Description": "Pipe-separated list of animation clip names."
+    }
+  ]
+}
