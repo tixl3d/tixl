@@ -16,6 +16,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Delaunator" Version="1.0.11" />
         <PackageReference Include="JeremyAnsel.Media.Dds" Version="2.0.4" />
         <PackageReference Include="ManagedBass" Version="4.0.2" />
         <PackageReference Include="ManagedBass.Flac" Version="4.0.2" />

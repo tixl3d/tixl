@@ -1,0 +1,65 @@
+{
+  "Id": "bf4daa46-ed0f-4a87-9ba1-93631b2ca29a"/*DelaunayMesh*/,
+  "Inputs": [
+    {
+      "Id": "0b30e8f2-44d7-41db-b38b-e6a053b1aeba"/*Tweak*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "18fddd63-db79-4ee6-9a32-b90a5ceff582"/*BoundaryPoints*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "3236e937-9dbe-41e8-aafa-c0c13c56bcdf"/*Seed*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "4784908f-ac12-47a0-9542-d65242acace3"/*Stretch*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 1.0
+      }
+    },
+    {
+      "Id": "50c16e0b-6f5a-408d-b3d1-5f402e4f402e"/*Rotation*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "58164bef-0da2-4d2f-b086-392b48826f6b"/*Pivot*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "Id": "a5c4c31e-7b3c-4f3e-9d1f-8e2b4d5c6a7b"/*MaxEdgeLength*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "db3c69b1-403b-485b-94e8-fc7e8b566947"/*ExtraPoints*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "df51a336-a11e-466b-a312-0cecb9db08f1"/*Center*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "e00e4b12-8576-4a78-b773-17630b102a70"/*FillDensity*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "f3c23e04-240c-46b0-8581-db682f49c898"/*Scale*/,
+      "DefaultValue": 1.0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}
