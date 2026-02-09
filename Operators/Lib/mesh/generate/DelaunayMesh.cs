@@ -78,7 +78,49 @@ internal sealed class DelaunayMesh : Instance<DelaunayMesh>
             // Get fill density parameter
             var fillDensity = 1 - FillDensity.GetValue(context);
             var tweak = Tweak.GetValue(context);
-            var seed = Seed.GetValue(context); // ADDED: Get seed parameter
+            var seed = Seed.GetValue(context);
+
+            // Subdivide long boundary edges for better triangulation
+            var subdividedPoints = new List<Point>();
+            var maxEdgeSubdivisionLength = fillDensity * 2f; // Subdivide edges longer than 2x the fill density
+
+            for (int i = 0; i < pointArray.Length; i++)
+            {
+                var currentPoint = pointArray[i];
+                var nextPoint = pointArray[(i + 1) % pointArray.Length];
+
+                subdividedPoints.Add(currentPoint);
+
+                // Calculate edge length
+                var edgeLength = Vector2.Distance(
+                    new Vector2(currentPoint.Position.X, currentPoint.Position.Y),
+                    new Vector2(nextPoint.Position.X, nextPoint.Position.Y)
+                );
+
+                // Subdivide if edge is too long
+                if (edgeLength > maxEdgeSubdivisionLength && maxEdgeSubdivisionLength > 0.0001f)
+                {
+                    int subdivisions = (int)Math.Ceiling(edgeLength / maxEdgeSubdivisionLength);
+
+                    for (int j = 1; j < subdivisions; j++)
+                    {
+                        float t = (float)j / subdivisions;
+                        var interpolatedPos = Vector3.Lerp(currentPoint.Position, nextPoint.Position, t);
+
+                        subdividedPoints.Add(new Point
+                        {
+                            Position = interpolatedPos,
+                            F1 = 1,
+                            Orientation = Quaternion.Identity,
+                            Color = Vector4.One,
+                            Scale = Vector3.One,
+                            F2 = 1
+                        });
+                    }
+                }
+            }
+
+            pointArray = subdividedPoints.ToArray();
 
             // Store original boundary points before adding fill points
             var originalBoundaryCount = pointArray.Length;
@@ -216,7 +258,17 @@ internal sealed class DelaunayMesh : Instance<DelaunayMesh>
             var tangent = Vector3.TransformNormal(VectorT3.Right, rotationMatrix);
             var binormal = Vector3.TransformNormal(VectorT3.Up, rotationMatrix);
 
-            
+            // Calculate bounds for UV mapping
+            var minX = pointArray.Min(p => p.Position.X);
+            var maxX = pointArray.Max(p => p.Position.X);
+            var minY = pointArray.Min(p => p.Position.Y);
+            var maxY = pointArray.Max(p => p.Position.Y);
+            var rangeX = maxX - minX;
+            var rangeY = maxY - minY;
+
+            // Avoid division by zero for UV calculation
+            if (rangeX < 0.0001f) rangeX = 1.0f;
+            if (rangeY < 0.0001f) rangeY = 1.0f;
 
             // Create vertices with transformations
             if (_vertexBufferData.Length != verticesCount)
@@ -239,14 +291,6 @@ internal sealed class DelaunayMesh : Instance<DelaunayMesh>
                 // Apply rotation and scale
                 var transformedPos = Vector3.Transform(localPos, rotationMatrix) * scale + center2;
 
-
-                // Calculate bounds for UV mapping
-                var minX = pointArray.Min(p => p.Position.X);
-                var maxX = pointArray.Max(p => p.Position.X);
-                var minY = pointArray.Min(p => p.Position.Y);
-                var maxY = pointArray.Max(p => p.Position.Y);
-                var rangeX = maxX - minX;
-                var rangeY = maxY - minY;
 
                 // Calculate UV coordinates (normalized 0-1 based on point positions)
                 var u = (pos.X - minX) / rangeX;
