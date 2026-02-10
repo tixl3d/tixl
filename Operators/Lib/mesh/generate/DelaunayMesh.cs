@@ -79,10 +79,16 @@ internal sealed class DelaunayMesh : Instance<DelaunayMesh>
             var fillDensity = 1 - FillDensity.GetValue(context);
             var tweak = Tweak.GetValue(context);
             var seed = Seed.GetValue(context);
+            var subdivideLongEdges = SubdivideLongEdges.GetValue(context);
 
             // Subdivide long boundary edges for better triangulation
             var subdividedPoints = new List<Point>();
-            var maxEdgeSubdivisionLength = fillDensity * 2f; // Subdivide edges longer than 2x the fill density
+            var maxEdgeSubdivisionLength = 0f;
+            if (subdivideLongEdges)
+            {
+                maxEdgeSubdivisionLength = fillDensity * 1.5f; // Subdivide edges longer than 1.5x the fill density
+            }
+
 
             for (int i = 0; i < pointArray.Length; i++)
             {
@@ -94,8 +100,7 @@ internal sealed class DelaunayMesh : Instance<DelaunayMesh>
                 // Calculate edge length
                 var edgeLength = Vector2.Distance(
                     new Vector2(currentPoint.Position.X, currentPoint.Position.Y),
-                    new Vector2(nextPoint.Position.X, nextPoint.Position.Y)
-                );
+                    new Vector2(nextPoint.Position.X, nextPoint.Position.Y));
 
                 // Subdivide if edge is too long
                 if (edgeLength > maxEdgeSubdivisionLength && maxEdgeSubdivisionLength > 0.0001f)
@@ -466,7 +471,7 @@ internal sealed class DelaunayMesh : Instance<DelaunayMesh>
             grid[gridIdx] = 0;
 
         // Process active list
-        int maxAttempts = 30; // Standard Poisson disc parameter
+        int maxAttempts = 20; // Standard Poisson disc parameter
 
         while (activeList.Count > 0)
         {
@@ -561,6 +566,9 @@ internal sealed class DelaunayMesh : Instance<DelaunayMesh>
 
         [Input(Guid = "DB3C69B1-403B-485B-94E8-FC7E8B566947")]
         public readonly InputSlot<T3.Core.DataTypes.StructuredList> ExtraPoints = new InputSlot<T3.Core.DataTypes.StructuredList>();
+    
+        [Input(Guid = "ABA31520-065F-40C7-A4A6-A4470F1E0CDF")]
+        public readonly InputSlot<bool> SubdivideLongEdges = new();
 
         [Input(Guid = "e00e4b12-8576-4a78-b773-17630b102a70")]
         public readonly InputSlot<float> FillDensity = new InputSlot<float>();
