@@ -17,9 +17,11 @@ internal sealed class EaseVec2Keys : Instance<EaseVec2Keys>
 
     private void Update(EvaluationContext context)
     {
+        var inputValue = Value.GetValue(context);
+
         if (!TryFindCurves(out var curves))
         {
-            Result.Value = Value.GetValue(context);
+            Result.Value = inputValue;
             return;
         }
 
@@ -46,7 +48,7 @@ internal sealed class EaseVec2Keys : Instance<EaseVec2Keys>
             }
             else
             {
-                Result.Value[i] = Value.GetValue(context)[i];
+                Result.Value[i] = inputValue[i];
                 continue;
             }
 

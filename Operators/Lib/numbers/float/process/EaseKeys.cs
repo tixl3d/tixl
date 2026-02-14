@@ -17,9 +17,11 @@ internal sealed class EaseKeys : Instance<EaseKeys>
 
     private void Update(EvaluationContext context)
     {
+        var inputValue = Value.GetValue(context);
+
         if (!TryFindCurveWithIndex(out var curve))
         {
-            Result.Value = Value.GetValue(context);
+            Result.Value = inputValue;
             return;
         }
 
@@ -45,7 +47,7 @@ internal sealed class EaseKeys : Instance<EaseKeys>
         }
         else
         {
-            Result.Value = Value.GetValue(context);
+            Result.Value = inputValue;
             return;
         }
 
