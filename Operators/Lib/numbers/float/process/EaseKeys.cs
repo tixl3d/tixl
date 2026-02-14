@@ -10,8 +10,6 @@ internal sealed class EaseKeys : Instance<EaseKeys>
     [Output(Guid = "3543e169-91ca-45ed-9b17-675f67a03a51", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
     public readonly Slot<float> Result = new();
 
-    private const float MinTimeElapsedBeforeEvaluation = 1 / 1000f;
-
     public EaseKeys()
     {
         Result.UpdateAction = Update;
@@ -19,24 +17,18 @@ internal sealed class EaseKeys : Instance<EaseKeys>
 
     private void Update(EvaluationContext context)
     {
-        var easeMode = Interpolation.GetEnumValue<Interpolations>(context); // Easing function selector
-        var easeDirection = Direction.GetEnumValue<EaseDirection>(context);
-
-        var currentTime = context.LocalTime;
-
-        if (Math.Abs(currentTime - _lastEvalTime) < MinTimeElapsedBeforeEvaluation)
-            return;
-
         if (!TryFindCurveWithIndex(out var curve))
         {
             Result.Value = Value.GetValue(context);
             return;
         }
 
+        var easeMode = Interpolation.GetEnumValue<Interpolations>(context); // Easing function selector
+        var easeDirection = Direction.GetEnumValue<EaseDirection>(context);
+        var currentTime = context.LocalTime;
+
         _curve = curve;
         _keyframes = _curve.GetVDefinitions().ToList();
-
-        _lastEvalTime = currentTime;
 
         float duration;
 
@@ -105,7 +97,6 @@ internal sealed class EaseKeys : Instance<EaseKeys>
     private Curve _curve;
 
     // Ease.cs
-    private double _lastEvalTime;
     private double _startTime;
     private float _initialValue;
     private float _targetValue;
