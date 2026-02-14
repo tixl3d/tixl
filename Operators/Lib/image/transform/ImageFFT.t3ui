@@ -1,0 +1,366 @@
+{
+  "Id": "40fc6dd9-5480-414d-8204-07e8142215a9"/*ImageFFT*/,
+  "Description": "Discrete Fourier Transform on 2d image. \nRG, BA channels of the texture store two complex values\ntexture size is expected to be pow2",
+  "SymbolTags": "72",
+  "InputUis": [
+    {
+      "InputId": "132ab261-66d9-4e1d-98e5-b719d40b4668"/*Inverse*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      },
+      "Description": "Inverse transform"
+    },
+    {
+      "InputId": "21860604-3c19-4265-87d2-425c2f421646"/*Normalization*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 300.0
+      },
+      "Description": "Ortho will scale output by 1/sqrt(N)\nBackward will only scale inverse transform by 1/N\nForward will only scale direct (forward) transform by 1/N"
+    },
+    {
+      "InputId": "421fe2f3-7700-4479-9842-080106c4eb6d"/*Direction*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      }
+    },
+    {
+      "InputId": "4f4727d7-f4f6-430d-968b-bc5afcddb176"/*Image*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "021785a2-958e-4341-942f-39c0b7024429"/*GetTextureSize*/,
+      "Position": {
+        "X": 439.9831,
+        "Y": 78.69879
+      }
+    },
+    {
+      "ChildId": "071426b3-3bd6-416d-9d2c-14bec09ecc72"/*Log*/,
+      "Position": {
+        "X": -112.85527,
+        "Y": 863.1759
+      }
+    },
+    {
+      "ChildId": "0ab271fa-2b91-4cba-a295-7812b6097f8b"/*IntsToBuffer*/,
+      "Position": {
+        "X": 1088.8848,
+        "Y": 539.8701
+      }
+    },
+    {
+      "ChildId": "0ca975af-8fe5-48d6-b0bd-bb3c7e154e8a"/*FloatToInt*/,
+      "Position": {
+        "X": 3.313263,
+        "Y": 1287.7439
+      }
+    },
+    {
+      "ChildId": "143c64ec-3878-4808-a7aa-7540ae09d9b9"/*Int2*/,
+      "Position": {
+        "X": 273.6423,
+        "Y": 1349.4956
+      }
+    },
+    {
+      "ChildId": "1511752f-2f45-4174-bad5-a861e108a788"/*ExecuteBufferUpdate*/,
+      "Position": {
+        "X": 1628.9347,
+        "Y": 345.96347
+      }
+    },
+    {
+      "ChildId": "1bfbf456-38da-4f1f-8dd6-6d523778e7f3"/*Pow*/,
+      "Position": {
+        "X": -144.18353,
+        "Y": 1179.0398
+      }
+    },
+    {
+      "ChildId": "2076d561-9053-464d-9386-43b8f4abeda4"/*GetBufferComponents*/,
+      "Position": {
+        "X": 921.58496,
+        "Y": 901.49365
+      }
+    },
+    {
+      "ChildId": "22d8deed-c581-4e57-81e9-ae5a2689ccf0"/*FloatToInt*/,
+      "Position": {
+        "X": -4.1835327,
+        "Y": 1179.0398
+      }
+    },
+    {
+      "ChildId": "264d540b-3f96-4244-9b4b-1c8a71ac1d6a"/*Floor*/,
+      "Position": {
+        "X": 27.144714,
+        "Y": 898.1759
+      }
+    },
+    {
+      "ChildId": "28a6e75b-5263-4bd7-bcc4-9f10a9ad8817"/*ComputeShaderStage*/,
+      "Position": {
+        "X": 1465.6826,
+        "Y": 348.94336
+      }
+    },
+    {
+      "ChildId": "28ecba94-acec-4179-bc2d-ed63a4fdaabb"/*String*/,
+      "Position": {
+        "X": 1356.4396,
+        "Y": 1090.9701
+      }
+    },
+    {
+      "ChildId": "3598667e-9884-4f3d-b716-d1eb90f33ac6"/*IntValue*/,
+      "Position": {
+        "X": 622.8096,
+        "Y": 728.3696
+      }
+    },
+    {
+      "ChildId": "3964d4c5-434f-455e-8a38-fda61aa1e72d"/*MultiplyInt*/,
+      "Position": {
+        "X": 762.8096,
+        "Y": 693.3696
+      }
+    },
+    {
+      "ChildId": "417fc910-b1a7-406b-a4c5-880502d30f17"/*GetBufferComponents*/,
+      "Position": {
+        "X": 1628.9347,
+        "Y": 415.96347
+      }
+    },
+    {
+      "ChildId": "47dfb24f-ca79-42a2-9e7b-1f21e3e73667"/*numsteps*/,
+      "Position": {
+        "X": 803.64685,
+        "Y": 1056.0233
+      }
+    },
+    {
+      "ChildId": "4c7ea0f6-9479-4fbf-b565-1a7c67beb3f0"/*CalcDispatchCount*/,
+      "Position": {
+        "X": 1139.3545,
+        "Y": 353.48242
+      }
+    },
+    {
+      "ChildId": "4ce5e000-c0da-4967-9db1-0a7ff57ccd4d"/*PickInt*/,
+      "Position": {
+        "X": 519.0494,
+        "Y": 862.54517
+      }
+    },
+    {
+      "ChildId": "545a436e-f849-407d-bbb2-0c67f33dbfaa"/*SrvFromTexture2d*/,
+      "Position": {
+        "X": 1233.8019,
+        "Y": 221.90076
+      }
+    },
+    {
+      "ChildId": "5835c4d8-d046-42ec-9f2e-3d2b28ea2088"/*Texture2d*/,
+      "Position": {
+        "X": 1647.0769,
+        "Y": 1346.2653
+      }
+    },
+    {
+      "ChildId": "5bc84efc-6a9e-41d2-8c80-b2d78b3127b7"/*Log*/,
+      "Position": {
+        "X": -112.855286,
+        "Y": 898.1759
+      }
+    },
+    {
+      "ChildId": "5e41d94a-1582-4551-a0c4-3016bd8f09d4"/*ComputeShader*/,
+      "Position": {
+        "X": 918.1885,
+        "Y": 311.8579
+      }
+    },
+    {
+      "ChildId": "699bb364-698b-446a-a4ef-35291e908d39"/*MultiplyInt*/,
+      "Position": {
+        "X": 762.8096,
+        "Y": 623.3696
+      }
+    },
+    {
+      "ChildId": "7d16d602-4d54-4de6-9872-dd2444c6a413"/*IFFT*/,
+      "Position": {
+        "X": 495.17676,
+        "Y": 1154.935
+      }
+    },
+    {
+      "ChildId": "84fd742f-4079-4345-bbfe-5aab663b0df0"/*Floor*/,
+      "Position": {
+        "X": 27.14473,
+        "Y": 863.1759
+      }
+    },
+    {
+      "ChildId": "934d6143-b404-469e-9933-f204f55d88b7"/*UavFromTexture2d*/,
+      "Position": {
+        "X": 1647.0769,
+        "Y": 1381.2653
+      }
+    },
+    {
+      "ChildId": "96594c32-bf0d-4ab0-abe4-eafe646cbb11"/*FloatToInt*/,
+      "Position": {
+        "X": 167.14471,
+        "Y": 898.1759
+      }
+    },
+    {
+      "ChildId": "a62079d0-3703-4ad5-9cef-bd151bbbfda4"/*IntToFloat*/,
+      "Position": {
+        "X": -252.85529,
+        "Y": 898.1759
+      }
+    },
+    {
+      "ChildId": "a63b3863-436e-4ae3-87e9-5cbc3428e417"/*Pow*/,
+      "Position": {
+        "X": -136.68674,
+        "Y": 1287.7439
+      }
+    },
+    {
+      "ChildId": "a7aa7814-349f-4e14-ad39-a88d9889d336"/*ComputeShaderFromSource*/,
+      "Position": {
+        "X": 1496.4396,
+        "Y": 1090.9701
+      }
+    },
+    {
+      "ChildId": "b8bd8bad-53f9-4cff-b50c-3e6c407f45bd"/*ExecuteTextureUpdate*/,
+      "Position": {
+        "X": 2118.312,
+        "Y": 1092.8295
+      }
+    },
+    {
+      "ChildId": "becd21b8-c8ec-461a-8701-77586d8f6ff5"/*IntToFloat*/,
+      "Position": {
+        "X": -252.85529,
+        "Y": 863.1759
+      }
+    },
+    {
+      "ChildId": "c9a84cf6-b8bf-4a0b-a459-44d763c854fc"/*FloatToInt*/,
+      "Position": {
+        "X": 167.14471,
+        "Y": 863.1759
+      }
+    },
+    {
+      "ChildId": "d68fdcc4-14cb-4a22-8dfb-cf65d392ce43"/*IntValue*/,
+      "Position": {
+        "X": 1172.2347,
+        "Y": 444.04626
+      }
+    },
+    {
+      "ChildId": "d698387c-7f0c-428b-a33a-60233cd6be75"/*CalcInt2DispatchCount*/,
+      "Position": {
+        "X": 1636.4396,
+        "Y": 1125.9701
+      }
+    },
+    {
+      "ChildId": "ebec54cc-bdd4-4f08-873d-904cce08ac56"/*StructuredBufferWithViews*/,
+      "Position": {
+        "X": 921.58496,
+        "Y": 866.49365
+      }
+    },
+    {
+      "ChildId": "ed571f57-7c39-43ab-a12d-8da32ccf8497"/*AddInts*/,
+      "Position": {
+        "X": 307.1447,
+        "Y": 863.1759
+      }
+    },
+    {
+      "ChildId": "ee05d0bb-b467-446c-bb9b-b987ef9a0ef8"/*IntValue*/,
+      "Position": {
+        "X": 967.48535,
+        "Y": 424.4663
+      }
+    },
+    {
+      "ChildId": "f8a4cc02-6ff8-4b51-b082-6e81333e8f7a"/*ComputeShaderStage*/,
+      "Position": {
+        "X": 1861.3613,
+        "Y": 1094.3289
+      }
+    },
+    {
+      "ChildId": "f94d87ba-4cb4-4dde-9f52-360a6ce87288"/*Int2Components*/,
+      "Position": {
+        "X": -392.8553,
+        "Y": 863.1759
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "d007f87a-487d-4d7c-a41e-21ce01bc89b1"/*Output*/,
+      "Position": {
+        "X": 2118.312,
+        "Y": 1162.8295
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "43e853b1-2920-4c87-8da8-5206b59585fe",
+      "Label": "write result from buffer to texture",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1296.4396,
+        "Y": 970.9701
+      },
+      "Size": {
+        "X": 991.87244,
+        "Y": 565.29517
+      }
+    },
+    {
+      "Id": "ed6cde6b-7b67-4d05-8611-d93e02a14f20",
+      "Label": "force pow2 size",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -452.8553,
+        "Y": 743.1759
+      },
+      "Size": {
+        "X": 995.7275,
+        "Y": 822.6448
+      }
+    }
+  ]
+}
