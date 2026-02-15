@@ -51,7 +51,7 @@
       "DefaultValue": 0
     },
     {
-      "Id": "d99d1e27-caba-4a9a-b689-8c965b9af89e"/*Grandient*/,
+      "Id": "d99d1e27-caba-4a9a-b689-8c965b9af89e"/*Gradient*/,
       "DefaultValue": {
         "Gradient": {
           "Interpolation": "Linear",
