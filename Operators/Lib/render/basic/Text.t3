@@ -194,7 +194,7 @@
         {
           "Id": "4fe3f641-1c36-4970-be71-dafb5632fb53"/*SearchPattern*/,
           "Type": "System.String",
-          "Value": "\\.fnt"
+          "Value": ".fnt"
         },
         {
           "Id": "de8297ae-c7d8-414a-8825-d0ff9c2e3d78"/*Replace*/,
