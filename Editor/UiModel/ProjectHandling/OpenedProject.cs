@@ -1,7 +1,7 @@
 #nullable enable
 using System.Diagnostics.CodeAnalysis;
-using T3.Core.Model;
 using T3.Core.Operator;
+using T3.Editor.Gui.Window;
 
 namespace T3.Editor.UiModel.ProjectHandling;
 
@@ -81,5 +81,41 @@ internal sealed class OpenedProject
     {
         Package = project;
         Structure = new Structure(rootAction);
+    }
+
+    /// <summary>
+    /// Unloads a project by closing all views that reference it and disposing resources.
+    /// </summary>
+    /// <returns>True if the project was unloaded successfully, false if it wasn't loaded.</returns>
+    public static bool TryUnload(EditorSymbolPackage package)
+    {
+        if (!OpenedProjects.TryGetValue(package, out var openedProject))
+        {
+            return false;
+        }
+
+        // Close all ProjectViews that reference this opened project
+        var projectViewsToClose = new List<ProjectView>();
+        foreach (var graphWindow in GraphWindow.GraphWindowInstances)
+        {
+            if (graphWindow.ProjectView?.OpenedProject == openedProject)
+            {
+                projectViewsToClose.Add(graphWindow.ProjectView);
+            }
+        }
+
+        foreach (var projectView in projectViewsToClose)
+        {
+            projectView.Close();
+        }
+
+        // Dispose the root instance and all children (releases GPU resources etc.)
+        var rootInstance = openedProject.Structure.GetRootInstance();
+        rootInstance?.SymbolChild.DestroyAllInstances();
+
+        // Remove from opened projects
+        OpenedProjects.Remove(package);
+
+        return true;
     }
 }
