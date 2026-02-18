@@ -1,0 +1,30 @@
+{
+  "Id": "5b911a78-8cad-4dbd-9f74-afccb0cb0787"/*AbsoluteSDF*/,
+  "Description": "Returns the absolute value of the signed distance field\n\nHelpful combination: [CombineSDF] ",
+  "InputUis": [
+    {
+      "InputId": "e60a6857-2be5-4236-b506-43c9e84b8d1e"/*InputField*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "77994b41-61c4-46e9-b790-b51d8275a45a"/*Thickness*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 100.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "386b568b-0818-4d3e-adb7-d3adc41d3240"/*Result*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}
