@@ -393,7 +393,7 @@
         {
           "Id": "ca9778e7-072c-4304-9043-eeb2dc4ca5d7"/*Folder*/,
           "Type": "System.String",
-          "Value": "Resources\\user\\wake\\proj-vj-deadline2021\\image\\mix-tapes-alpha"
+          "Value": "Examples:user/wake/proj-vj-deadline2021/image/mix-tapes-alpha/"
         },
         {
           "Id": "e14a4aae-e253-4d14-80ef-a90271cd306a"/*TriggerUpdate*/,

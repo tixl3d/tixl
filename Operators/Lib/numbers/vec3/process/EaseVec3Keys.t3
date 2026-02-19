@@ -10,13 +10,13 @@
       }
     },
     {
-      "Id": "fa9c6388-a7eb-4424-956b-dc1b7f2486bc"/*Direction*/,
-      "DefaultValue": 2
-    },
-    {
       "Id": "4b8c9c9b-37fa-4c50-ac65-4c5a20e56d2f"/*Interpolation*/,
       "DefaultValue": 6
     },
+    {
+      "Id": "fa9c6388-a7eb-4424-956b-dc1b7f2486bc"/*Direction*/,
+      "DefaultValue": 2
+    }
   ],
   "Children": [],
   "Connections": []

@@ -124,6 +124,7 @@ internal sealed class CubeMesh : Instance<CubeMesh>
                                                                      Texcoord = uv0,
                                                                      Texcoord2 = uv1,
                                                                      Selection = 1,
+                                                                     ColorRgb = Vector3.One,
                                                                  };
 
                         if (columnIndex >= columnCount - 1 || rowIndex >= rowCount - 1)

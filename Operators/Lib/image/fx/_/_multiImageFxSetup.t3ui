@@ -31,7 +31,7 @@
         "Y": -7.1847534
       },
       "Usage": "FilePath",
-      "FileFilter": "HLSL-Files|*.hlsl"
+      "FileFilter": "hlsl"
     },
     {
       "InputId": "a5cb5bda-0fb2-4863-bd8d-9ac09135fc30"/*WrapMode*/,

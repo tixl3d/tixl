@@ -624,7 +624,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\Example\\user\\pixtur\\research\\Overlay\\230620_16_9_BG_prototyp.png"
+          "Value": "Examples:Resources/Example/user/pixtur/research/Overlay/230620_16_9_BG_prototyp.png"
         }
       ],
       "Outputs": []

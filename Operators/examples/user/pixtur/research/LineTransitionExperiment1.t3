@@ -301,7 +301,7 @@
         {
           "Id": "24b7e7e1-fe0b-46be-807e-0afacd4800f9"/*FilePath*/,
           "Type": "System.String",
-          "Value": "Resources\\Example\\user\\pixtur\\research\\SimplePositionNoise\\add-position-noise.hlsl"
+          "Value": "Examples:Resources/Example/user/pixtur/research/SimplePositionNoise/add-position-noise.hlsl"
         }
       ],
       "Outputs": []
@@ -484,7 +484,7 @@
         {
           "Id": "895dab2c-e3be-4e73-9c96-0f6101cea113"/*Path*/,
           "Type": "System.String",
-          "Value": "C:\\Users\\pixtur\\Downloads\\test-lines-v07.obj"
+          "Value": "C:/Users/pixtur/Downloads/test-lines-v07.obj"
         },
         {
           "Id": "dcacd412-1885-4a10-b073-54192f074ae8"/*Mode*/,
@@ -515,11 +515,6 @@
           "Id": "8b746651-16a5-4274-85db-0168d30c86b2"/*Filter*/,
           "Type": "System.String",
           "Value": ".obj"
-        },
-        {
-          "Id": "ca9778e7-072c-4304-9043-eeb2dc4ca5d7"/*Folder*/,
-          "Type": "System.String",
-          "Value": "D:\\Framefield Dropbox\\ff-projects\\raumHoch\\2023-03 SpurLab\\_work\\2023-05-12 3D-Modell\\_export\\outlines"
         },
         {
           "Id": "e14a4aae-e253-4d14-80ef-a90271cd306a"/*TriggerUpdate*/,
@@ -1281,7 +1276,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "D:\\Framefield Dropbox\\ff-projects\\raumHoch\\2023-03 SpurLab\\_work\\2023-05-03 gsg-tracking-research\\_reference_fotos\\IMG_9412.jpg"
+          "Value": "D:/Framefield Dropbox/ff-projects/raumHoch/2023-03 SpurLab/_work/2023-05-03 gsg-tracking-research/_reference_fotos/IMG_9412.jpg"
         }
       ],
       "Outputs": []

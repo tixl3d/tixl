@@ -7,8 +7,8 @@
       "ActivationIndex": 4,
       "Title": "Look into my eye",
       "PosOnCanvas": {
-        "X": 163.0,
-        "Y": 93.0
+        "X": 174.29375,
+        "Y": 29.000847
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -29,8 +29,8 @@
       "ActivationIndex": 6,
       "Title": "Sun",
       "PosOnCanvas": {
-        "X": 0.0,
-        "Y": 186.0
+        "X": 11.293751,
+        "Y": 151.5514
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -50,8 +50,8 @@
       "ActivationIndex": 7,
       "Title": "But Why?",
       "PosOnCanvas": {
-        "X": 163.0,
-        "Y": 186.0
+        "X": 174.29375,
+        "Y": 151.5514
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -72,8 +72,8 @@
       "ActivationIndex": 10,
       "Title": "Sugar",
       "PosOnCanvas": {
-        "X": 163.0,
-        "Y": 279.0
+        "X": 174.29375,
+        "Y": 274.10196
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -90,8 +90,8 @@
       "ActivationIndex": 11,
       "Title": "Rays from above",
       "PosOnCanvas": {
-        "X": 326.0,
-        "Y": 279.0
+        "X": 337.29376,
+        "Y": 274.10196
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -113,8 +113,8 @@
       "ActivationIndex": 12,
       "Title": "Tora Tora Tora",
       "PosOnCanvas": {
-        "X": 0.0,
-        "Y": 279.0
+        "X": 11.293747,
+        "Y": 274.10196
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -140,8 +140,8 @@
       "ActivationIndex": 13,
       "Title": "Low res particle",
       "PosOnCanvas": {
-        "X": 0.0,
-        "Y": 465.0
+        "X": 11.293747,
+        "Y": 519.20306
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -158,8 +158,8 @@
       "ActivationIndex": 14,
       "Title": "I hate date",
       "PosOnCanvas": {
-        "X": 326.0,
-        "Y": 372.0
+        "X": 174.29375,
+        "Y": 396.65253
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -180,8 +180,8 @@
       "ActivationIndex": 14,
       "Title": "Star Light 2",
       "PosOnCanvas": {
-        "X": 0.0,
-        "Y": 372.0
+        "X": 11.293747,
+        "Y": 396.65253
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -203,8 +203,8 @@
       "ActivationIndex": 14,
       "Title": "A circle",
       "PosOnCanvas": {
-        "X": 0.0,
-        "Y": 93.0
+        "X": 11.293751,
+        "Y": 29.000847
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -221,8 +221,8 @@
       "ActivationIndex": 14,
       "Title": "Default",
       "PosOnCanvas": {
-        "X": 0.0,
-        "Y": 0.0
+        "X": 11.293751,
+        "Y": -93.54971
       },
       "ParameterSetsForChildIds": {}
     },
@@ -232,8 +232,8 @@
       "ActivationIndex": 14,
       "Title": "A Dot",
       "PosOnCanvas": {
-        "X": 163.0,
-        "Y": 0.0
+        "X": 174.29375,
+        "Y": -93.54971
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -251,8 +251,8 @@
       "ActivationIndex": 14,
       "Title": "Glow Ring",
       "PosOnCanvas": {
-        "X": 326.0,
-        "Y": 0.0
+        "X": 337.29376,
+        "Y": -93.54971
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -273,8 +273,8 @@
       "ActivationIndex": 14,
       "Title": "Transparent Dot",
       "PosOnCanvas": {
-        "X": 163.0,
-        "Y": 465.0
+        "X": 174.29375,
+        "Y": 519.20306
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -322,8 +322,8 @@
       "ActivationIndex": 15,
       "Title": "Light Sabre",
       "PosOnCanvas": {
-        "X": 326.0,
-        "Y": 93.0
+        "X": 337.29376,
+        "Y": 29.000847
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {

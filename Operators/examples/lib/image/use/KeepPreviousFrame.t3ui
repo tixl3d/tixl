@@ -21,14 +21,14 @@
   "SymbolChildUis": [],
   "OutputUis": [
     {
-      "OutputId": "7ba708e0-1cbb-411a-aa2c-bc78d248d761"/*TextureA*/,
+      "OutputId": "7ba708e0-1cbb-411a-aa2c-bc78d248d761"/*CurrentFrame*/,
       "Position": {
         "X": 0.0,
         "Y": 0.0
       }
     },
     {
-      "OutputId": "b8c943b7-a402-4ae1-a489-eeff900889cd"/*TextureB*/,
+      "OutputId": "b8c943b7-a402-4ae1-a489-eeff900889cd"/*PreviousFrame*/,
       "Position": {
         "X": 0.0,
         "Y": 100.0

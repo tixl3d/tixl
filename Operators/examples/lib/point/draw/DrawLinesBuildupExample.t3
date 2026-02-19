@@ -41,7 +41,7 @@
         {
           "Id": "ef2a461d-c66d-44d8-8b0e-e48a57ec991f"/*FilePath*/,
           "Type": "System.String",
-          "Value": "Resources/common/test-footage/svg-line-sample-01.svg"
+          "Value": "Examples:test-footage/svg/svg-line-sample-01.svg"
         }
       ],
       "Outputs": []

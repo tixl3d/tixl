@@ -13,31 +13,29 @@ namespace T3.Editor.External;
 /// </summary>
 internal static class ShaderLinter
 {
-    private static readonly Dictionary<IResourcePackage, HlslToolsJson> HlslToolsJsons = new();
-
-    private const string FileName = "shadertoolsconfig.json";
-
     public static void AddPackage(IResourcePackage package, IEnumerable<IResourcePackage>? additionalPackages, bool replaceExisting = false)
     {
-        var filePath = Path.Combine(package.ResourcesFolder, FileName);
+        // package.ResourcesFolder now points to ".../Assets"
+        var filePath = Path.Combine(package.AssetsFolder, FileName);
         var jsonObject = new HlslToolsJson(filePath);
         var resourceFolderList = jsonObject.IncludeDirectories;
         var virtualIncludeDirectories = jsonObject.VirtualDirectoryMappings;
 
-        resourceFolderList.Add(package.ResourcesFolder);
-        if (package.Alias != null)
+        resourceFolderList.Add(package.AssetsFolder);
+        if (package.Name != null)
         {
-            virtualIncludeDirectories.Add('/' + package.Alias, package.ResourcesFolder);
+            // Maps "/ProjectName" to ".../ProjectName/Assets"
+            virtualIncludeDirectories.Add('/' + package.Name, package.AssetsFolder);
         }
 
         if (additionalPackages is not null)
         {
             foreach (var p in additionalPackages)
             {
-                resourceFolderList.Add(p.ResourcesFolder);
-                if (p.Alias != null)
+                resourceFolderList.Add(p.AssetsFolder);
+                if (p.Name != null)
                 {
-                    virtualIncludeDirectories.TryAdd('/' + p.Alias, p.ResourcesFolder);
+                    virtualIncludeDirectories.TryAdd('/' + p.Name, p.AssetsFolder);
                 }
             }
         }
@@ -53,14 +51,14 @@ internal static class ShaderLinter
 
         if (!replaceExisting)
         {
-            HlslToolsJsons.Add(package, jsonObject);
+            _hlslToolsJsons.Add(package, jsonObject);
         }
         else
         {
-            var existing = HlslToolsJsons.SingleOrDefault(x => x.Key.ResourcesFolder == package.ResourcesFolder);
+            var existing = _hlslToolsJsons.SingleOrDefault(x => x.Key.AssetsFolder == package.AssetsFolder);
             if (existing.Key != null)
             {
-                HlslToolsJsons.Remove(existing.Key);
+                _hlslToolsJsons.Remove(existing.Key);
             }
         }
     }
@@ -98,25 +96,28 @@ internal static class ShaderLinter
 
     public static void RemovePackage(IResourcePackage resourcePackage)
     {
-        if (!HlslToolsJsons.TryGetValue(resourcePackage, out var json))
+        if (!_hlslToolsJsons.TryGetValue(resourcePackage, out var json))
         {
-            Log.Error($"{nameof(ShaderLinter)}: failed to remove {resourcePackage.ResourcesFolder}");
+            Log.Error($"{nameof(ShaderLinter)}: failed to remove {resourcePackage.AssetsFolder}");
             return;
         }
 
         var filePath = json.FilePath;
 
         TryDelete(filePath);
-        HlslToolsJsons.Remove(resourcePackage);
+        _hlslToolsJsons.Remove(resourcePackage);
 
         if (Program.IsShuttingDown)
             return;
 
-        var resourceFolder = resourcePackage.ResourcesFolder;
-        foreach (var dependent in HlslToolsJsons.Values)
+        var resourceFolder = resourcePackage.AssetsFolder;
+        foreach (var dependent in _hlslToolsJsons.Values)
         {
             if (dependent.IncludeDirectories.Remove(resourceFolder))
                 JsonUtils.TrySaveJson(json, dependent.FilePath);
         }
     }
+    
+    private static readonly Dictionary<IResourcePackage, HlslToolsJson> _hlslToolsJsons = new();
+    private const string FileName = "shadertoolsconfig.json";
 }

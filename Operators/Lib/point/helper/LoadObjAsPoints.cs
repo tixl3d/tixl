@@ -28,9 +28,8 @@ internal sealed class LoadObjAsPoints : Instance<LoadObjAsPoints>
     private bool TryLoadMesh(FileResource file,  ObjMesh? currentValue, [NotNullWhen(true)] out ObjMesh? newValue,[NotNullWhen(false)] out string? failureReason)
     {
         var absolutePath = file.AbsolutePath;
-            
-        var mesh = ObjMesh.LoadFromFile(absolutePath);
-        if (mesh == null)
+        
+        if (!ObjMesh.TryLoadFromFile(absolutePath, out var mesh))
         {
             failureReason = $"Can't read file {absolutePath}";
             Log.Warning(failureReason, this);
@@ -43,14 +42,14 @@ internal sealed class LoadObjAsPoints : Instance<LoadObjAsPoints>
         return true;
     }
 
-    private static int[][] _sortAxisAndDirections =
+    private static readonly int[][] _sortAxisAndDirections =
         {
-            new[] { 0, 1 },
-            new[] { 0, -1 },
-            new[] { 1, 1 },
-            new[] { 1, -1 },
-            new[] { 2, 1 },
-            new[] { 2, -1 },
+                [0, 1],
+                [0, -1],
+                [1, 1],
+                [1, -1],
+                [2, 1],
+                [2, -1],
         };
 
     private void Update(EvaluationContext context)

@@ -5,18 +5,16 @@ namespace T3.Core.IO;
 /// <summary>
 /// Saves view layout and currently open node 
 /// </summary>
-public class ProjectSettings : Settings<ProjectSettings.ConfigData>
+public sealed class ProjectSettings : Settings<ProjectSettings.ConfigData>
 {
     public ProjectSettings(bool saveOnQuit) : base("projectSettings.json", saveOnQuit)
     {
     }
         
-    public class ConfigData
+    public sealed class ConfigData
     {
         public bool TimeClipSuspending = true;
         public float AudioResyncThreshold = 0.04f;
-        public float PlaybackVolume = 1;
-        public bool AudioMuted;
 
         public bool EnablePlaybackControlWithKeyboard = true;
 
@@ -30,11 +28,21 @@ public class ProjectSettings : Settings<ProjectSettings.ConfigData>
         public WindowMode DefaultWindowMode = WindowMode.Fullscreen;
         public int DefaultOscPort = 8000;
         
+        // Logging
         public bool LogCompilationDetails = false;
         public bool LogAssemblyLoadingDetails = false;
+        public bool LogFileEvents = false;
         
         // Profiling
         public bool EnableBeatSyncProfiling = false;
+
+        // Audio
+        public bool GlobalMute = false;
+        public float GlobalPlaybackVolume = 1;
+        public bool SoundtrackMute = false;
+        public float SoundtrackPlaybackVolume = 0.5f;
+        public bool OperatorMute = false;
+        public float OperatorPlaybackVolume = 1;
     }
 }
 

@@ -1,0 +1,302 @@
+{
+  "Id": "b26e6624-4017-46b5-970d-1525d90fafad"/*SpatialAudioPlayerGizmo*/,
+  "Description": "Debug visualization gizmo for spatial audio. Shows source/listener locators with direction indicators, min/max distance spheres, and directional cones",
+  "SymbolTags": "8",
+  "InputUis": [
+    {
+      "InputId": "102ed409-f50c-4769-89e7-24f96993dfbf"/*ContextKey*/,
+      "Position": {
+        "X": -493.17938,
+        "Y": -54.594086
+      },
+      "Usage": "Default"
+    },
+    {
+      "InputId": "1c7f4f37-e109-42f5-bf22-7149a946120d"/*ListenerPosition*/,
+      "Position": {
+        "X": -493.1794,
+        "Y": 95.427925
+      },
+      "Description": "Position of the listener"
+    },
+    {
+      "InputId": "5f6b0e74-e280-487f-8e61-bc3af7787254"/*Color*/,
+      "Position": {
+        "X": -493.1794,
+        "Y": 410.42792
+      },
+      "Description": "Color for the gizmo visualization"
+    },
+    {
+      "InputId": "708c414d-1017-4bc7-b650-265e8ed09613"/*MaxDistance*/,
+      "Position": {
+        "X": -493.1794,
+        "Y": 230.42792
+      },
+      "Description": "Maximum distance for audio falloff"
+    },
+    {
+      "InputId": "73ab9ccd-bcec-4d28-9961-d05db79bd1e6"/*ConeLength*/,
+      "Position": {
+        "X": -493.1794,
+        "Y": 365.42792
+      },
+      "Description": "Length of the cone visualization",
+      "Min": 0.0,
+      "Max": 20.0
+    },
+    {
+      "InputId": "8ec0be50-c509-432d-b2e1-d8822b90000b"/*ListenerRotation*/,
+      "Position": {
+        "X": -493.1794,
+        "Y": 140.42792
+      },
+      "Description": "Rotation/orientation of the listener"
+    },
+    {
+      "InputId": "92de2db7-49a5-49e1-bf7e-803c48ccb62c"/*Visibility*/,
+      "Position": {
+        "X": -493.1794,
+        "Y": 455.42792
+      },
+      "Description": "Controls gizmo visibility"
+    },
+    {
+      "InputId": "a7c899ee-28f4-444e-b111-4ea98a9ee5f8"/*SourceRotation*/,
+      "Position": {
+        "X": -493.1794,
+        "Y": 50.427925
+      },
+      "Description": "Rotation of the audio source (for directional cone)"
+    },
+    {
+      "InputId": "cafd2a8d-ffa1-4441-b66a-001e383343ad"/*OuterConeAngle*/,
+      "Position": {
+        "X": -493.1794,
+        "Y": 320.42792
+      },
+      "Description": "Outer cone angle in degrees (attenuated volume zone)",
+      "Min": 0.0,
+      "Max": 360.0
+    },
+    {
+      "InputId": "d1b4973a-a717-49da-af49-b3359bd6b609"/*InnerConeAngle*/,
+      "Position": {
+        "X": -493.1794,
+        "Y": 275.42792
+      },
+      "Description": "Inner cone angle in degrees (full volume zone)",
+      "Min": 0.0,
+      "Max": 360.0
+    },
+    {
+      "InputId": "d24e8381-df53-4afb-9573-e83c4ded337d"/*MinDistance*/,
+      "Position": {
+        "X": -493.1794,
+        "Y": 185.42792
+      },
+      "Description": "Minimum distance for audio falloff"
+    },
+    {
+      "InputId": "d68cfc97-8bf8-4b03-8b2d-9dba9175f36a"/*SourcePosition*/,
+      "Position": {
+        "X": -493.1794,
+        "Y": 5.427925
+      },
+      "Description": "Position of the audio source"
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "02f32ffe-d8b4-4204-a5d1-93ed24af2f86"/*DrawLines*/,
+      "Position": {
+        "X": -206.26672,
+        "Y": 93.35889
+      }
+    },
+    {
+      "ChildId": "1876fc47-996a-4a56-a098-18dfd2114cf7"/*DrawLines*/,
+      "Position": {
+        "X": -190.61078,
+        "Y": 740.8433
+      }
+    },
+    {
+      "ChildId": "20b037dc-e3a0-48d0-b31e-c9860eba8bb3"/*TransformListenerArrow*/,
+      "Position": {
+        "X": 22.748993,
+        "Y": 886.7302
+      }
+    },
+    {
+      "ChildId": "21198611-c8ed-4055-b865-5709e5a5ec49"/*OuterConeGizmo*/,
+      "Position": {
+        "X": -186.64514,
+        "Y": 243.60214
+      }
+    },
+    {
+      "ChildId": "253f2a19-26ca-4ce4-b817-df5edd33d89d"/*CommonPointSets*/,
+      "Position": {
+        "X": -323.79807,
+        "Y": -417.81754
+      }
+    },
+    {
+      "ChildId": "27829426-1f8b-47a1-9189-225d379c7668"/*CommonPointSets*/,
+      "Position": {
+        "X": -190.61076,
+        "Y": 852.2562
+      }
+    },
+    {
+      "ChildId": "2eca4b92-d3d1-4615-a898-e607cbf0f6b8"/*DrawLines*/,
+      "Position": {
+        "X": -186.64514,
+        "Y": 348.60214
+      }
+    },
+    {
+      "ChildId": "3197205d-cef0-4b33-b168-30459bd3a2be"/*CommonPointSets*/,
+      "Position": {
+        "X": -190.61078,
+        "Y": 705.8433
+      }
+    },
+    {
+      "ChildId": "3aa69ce3-b3c5-4e14-9ab1-8cbe799295f2"/*Execute*/,
+      "Position": {
+        "X": 428.80554,
+        "Y": 196.79996
+      }
+    },
+    {
+      "ChildId": "3ce3db1f-33af-47f6-8671-5b79b00c629c"/*CommonPointSets*/,
+      "Position": {
+        "X": -301.9264,
+        "Y": -203.57983
+      }
+    },
+    {
+      "ChildId": "3d6d1916-cd88-4233-b008-6dbaf1854768"/*ListToBuffer*/,
+      "Position": {
+        "X": -186.64514,
+        "Y": 313.60214
+      }
+    },
+    {
+      "ChildId": "473a91ff-e9cc-4bfb-b5d6-bc94883ea95e"/*AttenuationRadius*/,
+      "Position": {
+        "X": -307.9873,
+        "Y": 514.2922
+      }
+    },
+    {
+      "ChildId": "496518de-7265-49ba-8e5e-e941ba75dd55"/*ListToBuffer*/,
+      "Position": {
+        "X": -206.26672,
+        "Y": 58.358887
+      }
+    },
+    {
+      "ChildId": "4bfacd53-e9fb-4a78-8d17-201806af2b6c"/*DrawLines*/,
+      "Position": {
+        "X": -190.61076,
+        "Y": 887.2562
+      }
+    },
+    {
+      "ChildId": "62fd7ef5-c454-4e10-a12a-99059661a1d1"/*Transform*/,
+      "Position": {
+        "X": -186.64514,
+        "Y": 383.60214
+      }
+    },
+    {
+      "ChildId": "6a7fb1e1-b727-484d-bb0f-a5c4a12f8298"/*DrawLines*/,
+      "Position": {
+        "X": -301.9264,
+        "Y": -168.57983
+      }
+    },
+    {
+      "ChildId": "6a9ec881-ecd8-4793-8e60-bd33d59e6deb"/*Transform*/,
+      "Position": {
+        "X": -307.9873,
+        "Y": 584.2922
+      }
+    },
+    {
+      "ChildId": "7f3e2d1c-8b4a-4592-9d6e-5c7f8a9b0e1d"/*ExecuteLocators*/,
+      "Position": {
+        "X": 199.82391,
+        "Y": 162.50229
+      }
+    },
+    {
+      "ChildId": "a175f223-3319-4771-9f74-23d322da5aa4"/*Transform*/,
+      "Position": {
+        "X": -301.9264,
+        "Y": -133.57983
+      }
+    },
+    {
+      "ChildId": "a70d8c32-4b76-4c7c-a38c-dc5157fb89b0"/*DrawLines*/,
+      "Position": {
+        "X": -323.79807,
+        "Y": -382.81754
+      }
+    },
+    {
+      "ChildId": "aac1d9ee-468f-4d7a-b692-4d4bf0091922"/*Transform*/,
+      "Position": {
+        "X": -323.79807,
+        "Y": -347.81754
+      }
+    },
+    {
+      "ChildId": "b12a1ea7-e9c0-4105-9dee-c0ee90d6b03d"/*ExecuteArrows*/,
+      "Position": {
+        "X": 199.82391,
+        "Y": 345.14566
+      }
+    },
+    {
+      "ChildId": "ce5855f1-c2f9-4920-a27e-68987a8f9d02"/*Transform*/,
+      "Position": {
+        "X": -206.26672,
+        "Y": 128.35889
+      }
+    },
+    {
+      "ChildId": "d2e6e3d0-2c7c-4aa4-9d01-83f99fa30511"/*InnerConeGizmo*/,
+      "Position": {
+        "X": -206.26672,
+        "Y": -11.641113
+      }
+    },
+    {
+      "ChildId": "e2d0fb17-93db-4bfc-b710-52a508137023"/*TransformSourceArrow*/,
+      "Position": {
+        "X": 11.190033,
+        "Y": 744.5332
+      }
+    },
+    {
+      "ChildId": "fd39a1d8-6209-45f4-8300-c181a531d108"/*ExecuteCones*/,
+      "Position": {
+        "X": 199.82391,
+        "Y": 246.60648
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "4075a57f-ed26-46e0-baff-88809ac8f07d"/*Output*/,
+      "Position": {
+        "X": 606.54675,
+        "Y": 201.42355
+      }
+    }
+  ]
+}

@@ -3,7 +3,7 @@
   "Inputs": [
     {
       "Id": "4d3108c8-9b64-41e8-9550-880d59f411f9"/*FolderPath*/,
-      "DefaultValue": "Resources/images"
+      "DefaultValue": "Examples:images/"
     }
   ],
   "Children": [

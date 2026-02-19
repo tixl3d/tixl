@@ -61,7 +61,7 @@
         {
           "Id": "f6269be3-3331-43a6-91ec-138b47199f3e"/*ShaderPath*/,
           "Type": "System.String",
-          "Value": "Resources\\lib\\img\\fx\\Pixelate.hlsl"
+          "Value": "Lib:shaders/img/fx/Pixelate.hlsl"
         }
       ],
       "Outputs": []
@@ -73,7 +73,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/images/basic/white.png"
+          "Value": "Lib:images/basic/white.png"
         }
       ],
       "Outputs": []

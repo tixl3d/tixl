@@ -7,7 +7,7 @@
     },
     {
       "Id": "2b3c4d5e-6f7a-4b1c-9d8e-2f3a4b5c6d7e"/*ExportFilePath*/,
-      "DefaultValue": "pointexport.json"
+      "DefaultValue": "Lib:pointexport.json"
     },
     {
       "Id": "3c4d5e6f-7a8b-4c1d-8e9f-3a4b5c6d7e8f"/*Convert*/,

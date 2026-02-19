@@ -129,8 +129,6 @@ internal static class ParameterPopUp
                 CustomComponents.AddSegmentedIconButton(ref _viewMode, _modeIcons);
                 ImGui.SameLine();
                 
-                ImGui.GetWindowDrawList().AddCircle(ImGui.GetCursorScreenPos(), 30, UiColors.BackgroundActive);
-                
                 var spaceBetweenViewIconsAndActions = ImGui.GetContentRegionAvail().X 
                                                       - 3 * (ImGui.GetFrameHeight() + ImGui.GetStyle().ItemSpacing.X);
                 

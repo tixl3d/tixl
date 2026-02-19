@@ -47,8 +47,8 @@ internal sealed class DisplaceMeshNoise : Instance<DisplaceMeshNoise>
     private enum Spaces
     {
         PointSpace,
-        ObjectSpace,
         WorldSpace,
+        ObjectSpace,
     }
         
     private enum Directions

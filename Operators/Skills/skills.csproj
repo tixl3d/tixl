@@ -16,6 +16,7 @@
     <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
     <Deterministic>true</Deterministic>
     <NoWarn>NU1900</NoWarn>
+    <PackageId>6c8f0560-ab94-4a40-9005-02ccfa9a16c5</PackageId>
   </PropertyGroup>
   <ItemGroup>
     <Using Include="System" />
@@ -96,8 +97,8 @@
   </ItemGroup>
   <!-- Include Resources/** into output/Resources -->
   <ItemGroup Condition="'$(Configuration)' == 'Release'">
-    <Content Include="Resources/**/*" Exclude="bin/**">
-      <Link>Resources/%(RecursiveDir)%(Filename)%(Extension)</Link>
+    <Content Include="Assets/**/*" Exclude="bin/**">
+      <Link>Assets/%(RecursiveDir)%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="**/*.t3" Exclude="bin/**">
@@ -116,36 +117,34 @@
   <ItemGroup Label="OperatorPackages">
     <Operators Include="lib" Version="1.0.0" ResourcesOnly="False" />
   </ItemGroup>
+  <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild">
+    <!-- Clear previous files in the export folder -->
+    <RemoveDir Directories="bin/$(Configuration)" />
+  </Target>
   <Target Name="CreatePackageInfo" AfterTargets="AfterBuild">
     <ItemGroup Label="Define json structure of referenced operator packages">
       <OpPacks Include="@(Operators)">
-        <OpPackageInfoJson>
-          {
-          "Identity": "%(Identity)",
-          "Version": "%(Version)",
-          "ResourcesOnly": "%(ResourcesOnly)"
-          }
-        </OpPackageInfoJson>
+        <OpPackageInfoJson>{
+    "Identity": "%(Identity)",
+    "Version": "%(Version)", 
+    "ResourcesOnly": "%(ResourcesOnly)"
+}</OpPackageInfoJson>
       </OpPacks>
     </ItemGroup>
     <PropertyGroup>
       <OperatorReferenceArray>@(OpPacks -> '%(OpPackageInfoJson)', ',')</OperatorReferenceArray>
       <OperatorPackageInfoJson>{
-        "AssemblyFileName": "$(AssemblyName)",
-        "HomeGuid": "$(HomeGuid)",
-        "RootNamespace": "$(RootNamespace)",
-        "Version": "$(VersionPrefix)",
-        "EditorVersion": "$(EditorVersion)",
-        "OperatorPackages":
-        [$(OperatorReferenceArray)
-        ]
-        }
-      </OperatorPackageInfoJson>
+    "HomeGuid": "$(HomeGuid)", 
+    "PackageId": "$(PackageId)",
+    "RootNamespace": "$(RootNamespace)",
+    "AssemblyFileName": "$(RootNamespace)",
+    "Version": "$(VersionPrefix)",
+    "EditorVersion": "$(EditorVersion)",
+    "IsEditorOnly": "$(IsEditorOnly)",
+    "OperatorPackages": [$(OperatorReferenceArray)
+    ]
+}</OperatorPackageInfoJson>
     </PropertyGroup>
     <WriteLinesToFile File="$(OutputPath)/OperatorPackage.json" Lines="$(OperatorPackageInfoJson)" Overwrite="True" Encoding="UTF-8" />
-  </Target>
-  <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild">
-    <!-- Clear previous files in the export folder -->
-    <RemoveDir Directories="bin/$(Configuration)" />
   </Target>
 </Project>

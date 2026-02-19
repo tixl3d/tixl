@@ -18,7 +18,7 @@
       },
       "GroupTitle": "Font & Size",
       "Usage": "FilePath",
-      "FileFilter": "Fonts (*.fnt)|*.fnt"
+      "FileFilter": "fnt"
     },
     {
       "InputId": "2cb6bb45-a74a-4eba-a2f0-2895e8e38b07"/*EnableZTest*/,

@@ -83,7 +83,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/user/1x/LookTest/Metal046A_1K-JPG_NormalDX.jpg"
+          "Value": "Examples:user/1x/LookTest/Metal046A_1K-JPG_NormalDX.jpg"
         }
       ],
       "Outputs": []
@@ -128,7 +128,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/user/1x/LookTest/Metal046A_1K-JPG_Roughness.jpg"
+          "Value": "Examples:user/1x/LookTest/Metal046A_1K-JPG_Roughness.jpg"
         }
       ],
       "Outputs": []
@@ -234,7 +234,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/user/1x/LookTest/Metal046A_1K-JPG_Color.jpg"
+          "Value": "Examples:user/1x/LookTest/Metal046A_1K-JPG_Color.jpg"
         }
       ],
       "Outputs": []
@@ -246,7 +246,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "/t3/images/hdri/studio_small_08.dds"
+          "Value": "Examples:hdri/studio_small_08.dds"
         }
       ],
       "Outputs": []
@@ -416,7 +416,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "/t3/meshes/ring-bevelled.obj"
+          "Value": "Examples:meshes/ring-bevelled.obj"
         }
       ],
       "Outputs": []

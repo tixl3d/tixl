@@ -93,7 +93,7 @@
         {
           "Id": "7f14d0e3-1159-434d-b038-74644948937c"/*ShaderPath*/,
           "Type": "System.String",
-          "Value": "Resources\\lib\\img\\fx\\TriangleGridTransition.hlsl"
+          "Value": "Lib:shaders/img/fx/TriangleGridTransition.hlsl"
         }
       ],
       "Outputs": []

@@ -83,6 +83,7 @@ internal sealed class SphereMesh : Instance<SphereMesh>
                                                                 Bitangent = binormalPol0,
                                                                 Texcoord = uv0,
                                                                 Selection = 1,
+                                                                ColorRgb = Vector3.One,
                                                             };
 
                             
@@ -108,6 +109,7 @@ internal sealed class SphereMesh : Instance<SphereMesh>
                                                                                            Bitangent = binormalPol1,
                                                                                            Texcoord = uv1,
                                                                                            Selection = 1,
+                                                                                           ColorRgb = Vector3.One,
                                                                                        };
                             
                             
@@ -153,6 +155,7 @@ internal sealed class SphereMesh : Instance<SphereMesh>
                                                                            Bitangent = binormal0,
                                                                            Texcoord = uv0,
                                                                            Selection = 1,
+                                                                           ColorRgb = Vector3.One,
                                                                        };
 
                         if (vIndex >= vSegments - 1 || uIndex >= uSegments - 1)

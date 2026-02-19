@@ -47,7 +47,7 @@ internal sealed class FilePathParts : Instance<FilePathParts>, IStatusProvider
             
         Reset();
         _errorMessageForStatus = "Need path";
-        Log.Debug("Need path", this);
+        //Log.Debug("Need path", this);
     }
 
     private void Reset()

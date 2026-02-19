@@ -231,36 +231,28 @@ internal sealed class Structure
     {
         connectedIds ??= [];
 
-        var selection = new HashSet<Symbol.Child>(selectedChildren);
-        
         foreach (var selected in selectedChildren)
         {
             connectedIds.Add(selected.Id);
         }
         
-        var lastCount = connectedIds.Count;
-        
         while(true)
         {
-            foreach (var item in selection)
+            var foundNew = false;
+            foreach (var c in compositionSymbol.Connections)
             {
-                CollectConnectedChildren(item, compositionSymbol,  connectedIds);
-                CollectConnectedChildrenOut(item, compositionSymbol,  connectedIds);
-            }
+                var connectedInput = !c.IsConnectedToSymbolInput &&  connectedIds.Contains(c.TargetParentOrChildId);
+                var connectedOutput = !c.IsConnectedToSymbolOutput &&  connectedIds.Contains(c.SourceParentOrChildId);
 
-            if (connectedIds.Count == lastCount)
-                break;
-
-            foreach (var newId in connectedIds)
-            {
-                if(compositionSymbol.Children.TryGetValue(newId, out var item))
+                if ((connectedInput || connectedOutput) && (connectedInput != connectedOutput))
                 {
-                    selection.Add(item);
+                    foundNew |= connectedIds.Add(!connectedInput ? c.TargetParentOrChildId : c.SourceParentOrChildId);
                 }
             }
-            
-            lastCount = connectedIds.Count;
-        } 
+
+            if (!foundNew)
+                break;
+        }
     }
     
     

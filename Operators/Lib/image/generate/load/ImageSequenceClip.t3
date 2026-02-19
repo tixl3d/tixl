@@ -20,7 +20,7 @@
     },
     {
       "Id": "a1e08fde-2d9b-4a2d-bf09-a5e54ad8cfa0"/*FilePath*/,
-      "DefaultValue": "/t3/images/sequences/agingFacesMale"
+      "DefaultValue": "Examples:images/sequences/agingFacesFemale"
     }
   ],
   "Children": [
@@ -76,11 +76,6 @@
       "Id": "c9937e67-dc65-4f44-9b3e-fc2a160c704e"/*FilesInFolder*/,
       "SymbolId": "f90fcd0a-eab9-4e2a-b393-e8d3a0380823",
       "InputValues": [
-        {
-          "Id": "ca9778e7-072c-4304-9043-eeb2dc4ca5d7"/*Folder*/,
-          "Type": "System.String",
-          "Value": "C:\\Users\\pixtur\\Desktop\\reference-footage\\TagHeuer\\jpg-high-quality"
-        },
         {
           "Id": "e14a4aae-e253-4d14-80ef-a90271cd306a"/*TriggerUpdate*/,
           "Type": "System.Boolean",

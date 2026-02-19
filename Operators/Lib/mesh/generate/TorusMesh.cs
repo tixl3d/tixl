@@ -104,6 +104,7 @@ internal sealed class TorusMesh : Instance<TorusMesh>
                                                                  Bitangent = binormal0,
                                                                  Texcoord = uv0,
                                                                  Selection =1,
+                                                                 ColorRgb = Vector3.One,
                                                              };
 
                     if (tubeIndex >= tubeSegments - 1 || radiusIndex >= radiusSegments - 1)

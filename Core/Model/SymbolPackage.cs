@@ -12,6 +12,7 @@ using T3.Core.IO;
 using T3.Core.Logging;
 using T3.Core.Operator;
 using T3.Core.Resource;
+using T3.Core.Resource.Assets;
 using T3.Core.Stats;
 using T3.Core.UserData;
 
@@ -30,18 +31,30 @@ namespace T3.Core.Model;
 ///</remarks>
 public abstract partial class SymbolPackage : IResourcePackage
 {
-    public readonly AssemblyInformation AssemblyInformation;
-    public string Folder { get; }
+    public virtual ResourceFileWatcher? FileWatcher => null;
+
     
+    public bool IsSharingResources => AssemblyInformation.ShouldShareResources;
+    public readonly bool DoNotIncludedSharedPackages;
+
+    public virtual bool IsReadOnly => true;
+
+    public readonly AssemblyInformation AssemblyInformation;
+    
+    /** Primary directory of the package that contains the csproj, home and other other data */
+    public string Folder { get; }
+
     public virtual string DisplayName => AssemblyInformation.Name;
 
+    /** For readonly packages we search for .t3 files in the Symbols folder */
     protected virtual IEnumerable<string> SymbolSearchFiles
     {
         get
         {
-            var dir = Path.Combine(Folder, FileLocations.SymbolsSubfolder);
+            var dir = Path.Combine(Folder, FileLocations.ReleaseSymbolsSubfolder);
             if (!Directory.Exists(dir))
                 return [];
+            
             return Directory.EnumerateFiles(dir, $"*{SymbolExtension}", SearchOption.AllDirectories);
         }
     }
@@ -53,7 +66,7 @@ public abstract partial class SymbolPackage : IResourcePackage
     private static ConcurrentBag<SymbolPackage> _allPackages = [];
     public static IEnumerable<SymbolPackage> AllPackages => _allPackages;
 
-    public string ResourcesFolder { get; private set; } = null!;
+    public string AssetsFolder { get; private set; } = null!;
 
     public IReadOnlyCollection<DependencyCounter> Dependencies => (ReadOnlyCollection<DependencyCounter>)DependencyDict.Values;
     protected readonly ConcurrentDictionary<SymbolPackage, DependencyCounter> DependencyDict = new();
@@ -65,60 +78,95 @@ public abstract partial class SymbolPackage : IResourcePackage
         {
             if (AssemblyInformation.TryGetReleaseInfo(out var releaseInfo))
                 return releaseInfo;
-            
+
             throw new InvalidOperationException($"Failed to get release info for package {AssemblyInformation.Name}");
         }
     }
+    
+    public string Name 
+    {
+        get
+        {
+            // 1. If AssemblyInfo already has a name (Debug/Dev), use it.
+            if (!string.IsNullOrWhiteSpace(AssemblyInformation.Name))
+                return AssemblyInformation.Name;
 
+            // 2. Fallback to ReleaseInfo's RootNamespace (Release build).
+            // Accessing ReleaseInfo triggers TryGetReleaseInfo() internally.
+            try
+            {
+                return ReleaseInfo.RootNamespace;
+            }
+            catch (Exception)
+            {
+                // 3. Last resort fallback
+                return AssemblyInformation.Name ?? string.Empty;
+            }
+        }
+    }
+    
+    public Guid Id => AssemblyInformation.Id != Guid.Empty 
+                          ? AssemblyInformation.Id 
+                          : ReleaseInfo.PackageId; // Use a dedicated PackageId field
+
+    
     static SymbolPackage()
     {
         RenderStatsCollector.RegisterProvider(new OpUpdateCounter());
         RegisterTypes();
     }
 
-    protected SymbolPackage(AssemblyInformation assembly, string? mainDirectory, bool initializeResources )
+    protected SymbolPackage(AssemblyInformation assembly, string? mainDirectory, bool initializeResources)
     {
         AssemblyInformation = assembly;
         Folder = mainDirectory ?? assembly.Directory;
-        lock(_allPackages)
+        lock (_allPackages)
             _allPackages.Add(this);
 
+        DoNotIncludedSharedPackages = assembly.Name == FileLocations.LibPackageName;
+
+        // This can be delayed for EditableSymbolPackages and the called directly from there
         if (initializeResources)
         {
             // ReSharper disable once VirtualMemberCallInConstructor
-            InitializeResources();
+            InitializeAssets();
         }
     }
 
-    protected virtual void InitializeResources()
+    protected virtual void InitializeAssets()
     {
-        
-        ResourcesFolder = Path.Combine(Folder, FileLocations.ResourcesSubfolder);
+        AssetsFolder = Path.Combine(Folder, FileLocations.AssetsSubfolder);
+
+        // Force the assembly information to load the JSON metadata now
+        // This ensures Name and Id are valid before registration starts.
+        _ = ReleaseInfo;
         
         // Avoid creating resource folder in protected program folder
         if (!IsReadOnly)
         {
-            Directory.CreateDirectory(ResourcesFolder);
+            Directory.CreateDirectory(AssetsFolder);
         }
-        
-        ResourceManager.AddSharedResourceFolder(this, AssemblyInformation.ShouldShareResources);
+
+        ResourcePackageManager.AddSharedResourceFolder(this, AssemblyInformation.ShouldShareResources);
+        AssetRegistry.RegisterAssetsFromPackage(this);
     }
 
     public virtual void Dispose()
     {
-        ResourceManager.RemoveSharedResourceFolder(this);
+        AssetRegistry.UnregisterPackage(Id);
+        ResourcePackageManager.RemoveSharedResourceFolder(this);
         ClearSymbols();
-        
-        
+
         var currentPackages = _allPackages.ToList();
         currentPackages.Remove(this);
         lock (_allPackages)
             _allPackages = new ConcurrentBag<SymbolPackage>(currentPackages);
-        
+
         AssemblyInformation.Unload();
         // Todo - symbol instance destruction...?
 
         return;
+
         void ClearSymbols()
         {
             if (SymbolDict.Count == 0)
@@ -132,7 +180,7 @@ public abstract partial class SymbolPackage : IResourcePackage
             }
         }
     }
-    
+
     /// <summary>
     /// Loads symbols from the assembly and locates their symbol .t3/json files
     /// </summary>
@@ -141,7 +189,7 @@ public abstract partial class SymbolPackage : IResourcePackage
     /// <param name="allNewSymbols">All new symbols, including those for which a json file was not found</param>
     public void LoadSymbols(bool parallel, out List<SymbolJson.SymbolReadResult> newlyRead, out List<Symbol> allNewSymbols)
     {
-        Log.Info($"{AssemblyInformation.Name}: Loading symbols...");
+        Log.Debug($" Loading {AssemblyInformation.Name}...");
 
         if (!AssemblyInformation.TryLoadTypes())
         {
@@ -177,8 +225,8 @@ public abstract partial class SymbolPackage : IResourcePackage
         foreach (var symbol in updatedSymbols)
         {
             symbol.UpdateInstanceType(true);
-        } 
-        
+        }
+
         // update symbol instances 
         foreach (var symbol in updatedSymbols)
         {
@@ -197,7 +245,7 @@ public abstract partial class SymbolPackage : IResourcePackage
 
         newlyRead = [];
         allNewSymbols = [];
-        
+
         if (newTypes.Count != 0)
         {
             var searchFileEnumerator = parallel ? SymbolSearchFiles.AsParallel() : SymbolSearchFiles;
@@ -213,7 +261,7 @@ public abstract partial class SymbolPackage : IResourcePackage
                              .Where(symbolReadResult => symbolReadResult.Result.Symbol is not null)
                              .ToArray();
 
-            if(ProjectSettings.Config.LogCompilationDetails)
+            if (ProjectSettings.Config.LogCompilationDetails)
                 Log.Debug($"{AssemblyInformation.Name}: Registering loaded symbols...");
 
             foreach (var readSymbolResult in symbolsRead)
@@ -272,7 +320,7 @@ public abstract partial class SymbolPackage : IResourcePackage
                 symbol.UpdateTypeWithoutUpdatingDefinitionsOrInstances(type, this);
                 updated.Add(symbol);
             }
-            else 
+            else
             {
                 // it's a new type!!
                 if (!newTypesDict.TryAdd(guid, type))
@@ -291,14 +339,16 @@ public abstract partial class SymbolPackage : IResourcePackage
                 jsonInfo.Object = result.Symbol;
                 return new SymbolJsonResult(result, jsonInfo.FilePath);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 throw new FileCorruptedException(jsonInfo.FilePath, e.ToString());
             }
         }
     }
-    
-    protected virtual void OnSymbolsLoaded(){}
+
+    protected virtual void OnSymbolsLoaded()
+    {
+    }
 
     protected static void UpdateSymbolInstances(Symbol symbol, bool forceTypeUpdate = false)
     {
@@ -311,7 +361,6 @@ public abstract partial class SymbolPackage : IResourcePackage
         return new Symbol(instanceType, id, this);
     }
 
-
     public static void ApplySymbolChildren(List<SymbolJson.SymbolReadResult> symbolsRead)
     {
         Parallel.ForEach(symbolsRead, result => TryReadAndApplyChildren(result));
@@ -320,16 +369,16 @@ public abstract partial class SymbolPackage : IResourcePackage
     protected static bool TryReadAndApplyChildren(SymbolJson.SymbolReadResult result)
     {
         if (SymbolJson.TryReadAndApplySymbolChildren(result)) return true;
-        
+
         var symbol = result.Symbol;
         if (symbol == null)
         {
             Log.Error($"Problem obtaining children of 'null' with {result.ChildrenJsonArray.Length} children");
             return false;
         }
+
         Log.Error($"Problem obtaining children of {symbol.Name ?? "'null'"} ({symbol.Id})");
         return false;
-
     }
 
     public readonly record struct SymbolJsonResult(in SymbolJson.SymbolReadResult Result, string Path);
@@ -352,10 +401,6 @@ public abstract partial class SymbolPackage : IResourcePackage
         return false;
     }
 
-    public virtual ResourceFileWatcher? FileWatcher => null;
-    public string Alias => AssemblyInformation.Name;
-    public virtual bool IsReadOnly => true;
-
     public void AddResourceDependencyOn(FileResource resource)
     {
         if (!TryGetDependencyCounter(resource, out var dependencyCount))
@@ -368,7 +413,7 @@ public abstract partial class SymbolPackage : IResourcePackage
     {
         if (!TryGetDependencyCounter(fileResource, out var dependency))
             return;
-        
+
         dependency.ResourceCount--;
 
         RemoveIfNoRemainingReferences(dependency);
@@ -376,27 +421,27 @@ public abstract partial class SymbolPackage : IResourcePackage
 
     public void AddDependencyOn(Symbol symbol)
     {
-        if(symbol.SymbolPackage == this)
+        if (symbol.SymbolPackage == this)
             return;
-        
+
         if (!TryGetDependencyCounter(symbol, out var dependency))
             return;
-        
-        if(dependency.SymbolChildCount++ == 0)
+
+        if (dependency.SymbolChildCount++ == 0)
         {
             // this is the first reference to this package
             DependencyDict.TryAdd((SymbolPackage)dependency.Package, dependency);
         }
     }
-    
+
     public void RemoveDependencyOn(Symbol symbol)
     {
         if (symbol.SymbolPackage == this)
             return;
-        
+
         if (!TryGetDependencyCounter(symbol, out var dependency))
             return;
-        
+
         dependency.SymbolChildCount--;
         RemoveIfNoRemainingReferences(dependency);
     }
@@ -418,9 +463,9 @@ public abstract partial class SymbolPackage : IResourcePackage
             return false;
         }
 
-        if (DependencyDict.TryGetValue(symbolPackage, out dependencyCounter)) 
+        if (DependencyDict.TryGetValue(symbolPackage, out dependencyCounter))
             return true;
-        
+
         dependencyCounter = new DependencyCounter
                                 {
                                     Package = symbolPackage
@@ -437,7 +482,7 @@ public abstract partial class SymbolPackage : IResourcePackage
 
     public bool OwnsNamespace(string namespaceName)
     {
-        return namespaceName == RootNamespace 
+        return namespaceName == RootNamespace
                || namespaceName.StartsWith(RootNamespace)
                || AssemblyInformation.Namespaces.Contains(namespaceName)
                || AssemblyInformation.Namespaces.Any(x => namespaceName.StartsWith(x));
@@ -449,7 +494,7 @@ public sealed record DependencyCounter
     public required IResourcePackage Package { get; init; }
     internal int SymbolChildCount { get; set; }
     internal int ResourceCount { get; set; }
-    
+
     public override string ToString()
     {
         return $"{Package.DisplayName}: Symbol References: {SymbolChildCount}, Resource References: {ResourceCount}";

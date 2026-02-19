@@ -912,7 +912,7 @@
         {
           "Id": "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3"/*FontPath*/,
           "Type": "System.String",
-          "Value": "Resources\\fonts\\ShareTechMono.fnt"
+          "Value": "Examples:fonts/ShareTechMono.fnt"
         },
         {
           "Id": "7a76d5aa-1f44-4238-9333-7c2951becc31"/*EnableZTest*/,
@@ -1058,7 +1058,7 @@
         {
           "Id": "31fe831f-c3be-4ae3-884b-d2fc4f1754a4"/*Filename*/,
           "Type": "System.String",
-          "Value": "Resources\\Example\\user\\pixtur\\FC4_Memory\\soundtrack\\glxblt_-_super_blekare.mid"
+          "Value": "Examples:user/pixtur/FC4_Memory/soundtrack/glxblt_-_super_blekare.mid"
         },
         {
           "Id": "8b88c669-7351-4332-9294-9a06a46f45a1"/*PrintLogMessages*/,

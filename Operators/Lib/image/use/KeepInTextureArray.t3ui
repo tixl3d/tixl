@@ -1,5 +1,5 @@
 {
-  "Id": "a783908a-63c2-4961-94ca-b97d17ed0788"/*PickFromTextureArray*/,
+  "Id": "a783908a-63c2-4961-94ca-b97d17ed0788"/*KeepInTextureArray*/,
   "Description": "Pick a single \"slice\" from a TextureArray",
   "InputUis": [
     {
@@ -41,10 +41,17 @@
   "SymbolChildUis": [],
   "OutputUis": [
     {
-      "OutputId": "bc99ae41-3f32-481f-b88a-277e71468f0e"/*Selected*/,
+      "OutputId": "bc99ae41-3f32-481f-b88a-277e71468f0e"/*SelectedSlice*/,
       "Position": {
         "X": 0.0,
         "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "3df525e4-12f1-407e-8c56-35c1578f0e21"/*TextureArray*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 100.0
       }
     }
   ]

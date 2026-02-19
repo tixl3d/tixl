@@ -1,0 +1,70 @@
+{
+  "Id": "c8d9e0f1-a2b3-4c5d-6e7f-8a9b0c1d2e3f"/*AdsrEnvelope*/,
+  "Description": "",
+  "InputUis": [
+    {
+      "InputId": "a2b3c4d5-e6f7-4a8b-9c0d-1e2f3a4b5c6d"/*Envelope*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "UseVec4Control": "AdsrEnvelope"
+    },
+    {
+      "InputId": "b3c4d5e6-f7a8-4b9c-0d1e-2f3a4b5c6d7e"/*Min*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 300.0
+      }
+    },
+    {
+      "InputId": "c4d5e6f7-a8b9-4c0d-1e2f-3a4b5c6d7e8f"/*Max*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 375.0
+      }
+    },
+    {
+      "InputId": "d9e0f1a2-b3c4-4d5e-6f7a-8b9c0d1e2f3a"/*Gate*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "e0f1a2b3-c4d5-4e6f-7a8b-9c0d1e2f3a4b"/*Duration*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      },
+      "Scale": 0.1
+    },
+    {
+      "InputId": "f1a2b3c4-d5e6-4f7a-8b9c-0d1e2f3a4b5c"/*Mode*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "d5e6f7a8-b9c0-4d1e-2f3a-4b5c6d7e8f9a"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    },
+    {
+      "OutputId": "f7a8b9c0-d1e2-4f3a-4b5c-6d7e8f9a0b1c"/*IsActive*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 300.0
+      }
+    }
+  ]
+}

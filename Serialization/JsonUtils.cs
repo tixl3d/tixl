@@ -47,16 +47,16 @@ public static class JsonUtils
 
         foreach (var e in arr)
         {
-            if (e == null)
+            if (e == null!)
                 continue;
 
             try
             {
-                list.Add(
-                         elementConverter != null
-                             ? elementConverter(e)
-                             : e.Value<T>()
-                        );
+                var converter = elementConverter != null
+                                    ? elementConverter(e)
+                                    : e.Value<T>();
+                if(converter != null)
+                    list.Add( converter );
             }
             catch
             {

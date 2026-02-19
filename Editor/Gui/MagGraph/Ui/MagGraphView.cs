@@ -92,6 +92,36 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
         _projectView.TrySetCompositionOp(compositionPath, ScalableCanvas.Transition.JumpIn, path[^1]);
     }
 
+    public void OpenAndFocusAnnotation(IReadOnlyList<Guid> compositionPath, Guid annotationId)
+    {
+        if (compositionPath.Count == 1)
+        {
+            if (!_projectView.TrySetCompositionOp(compositionPath, ScalableCanvas.Transition.JumpOut, compositionPath[0]))
+            {
+                return;
+            }
+        }
+        else
+        {
+            var compositionPath2 = compositionPath.Take(compositionPath.Count - 1).ToList();
+            var compositionId = compositionPath[^1];
+            if (!_projectView.TrySetCompositionOp(compositionPath2, ScalableCanvas.Transition.JumpIn, compositionId))
+                return;
+        }
+        
+        // We assume that composition has been set....
+        if (_projectView.CompositionInstance == null)
+            return;
+
+        var symbolUi = _projectView.CompositionInstance.GetSymbolUi();
+        if (!symbolUi.Annotations.TryGetValue(annotationId, out var annotation))
+            return;
+
+        var area = ImRect.RectWithSize(annotation.PosOnCanvas, annotation.Size);
+        area.Expand(100);
+        RequestTargetViewAreaWithTransition(area, Transition.Smooth);
+    }
+    
     private Instance _previousInstance;
 
     void IGraphView.BeginDraw(bool backgroundActive, bool bgHasInteractionFocus)

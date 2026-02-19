@@ -450,7 +450,7 @@
         {
           "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
           "Type": "System.String",
-          "Value": "/Lib/3d/mesh/mesh-CollapseVertices.hlsl"
+          "Value": "Lib:shaders/3d/mesh/mesh-CollapseVertices.hlsl"
         }
       ],
       "Outputs": []
@@ -476,7 +476,13 @@
     {
       "Id": "d3b27e87-ca1b-4770-974e-2ed1423faf59"/*ExecuteBufferUpdate*/,
       "SymbolId": "58351c8f-4a73-448e-b7bb-69412e71bd76",
-      "InputValues": [],
+      "InputValues": [
+        {
+          "Id": "6887f319-cf3f-4e87-9a8c-a7c912dbf5ad"/*IsEnabled*/,
+          "Type": "System.Boolean",
+          "Value": true
+        }
+      ],
       "Outputs": []
     },
     {

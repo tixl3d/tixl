@@ -1,3 +1,5 @@
+#nullable enable
+
 using ImGuiNET;
 using SharpDX.Direct3D11;
 using T3.Core.DataTypes.Vector;
@@ -7,6 +9,7 @@ using T3.Editor.Gui.Interaction.Variations;
 using T3.Editor.Gui.Interaction.Variations.Model;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Gui.UiHelpers.Thumbnails;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.ProjectHandling;
@@ -16,7 +19,7 @@ namespace T3.Editor.Gui.Windows.Variations;
 
 internal static class VariationThumbnail
 {
-    public static bool Draw(VariationBaseCanvas canvas, Variation variation, Instance instanceForBlending, ImDrawListPtr drawList, ShaderResourceView canvasSrv, ImRect uvRect)
+    public static bool Draw(VariationBaseCanvas canvas, Variation variation, Instance instanceForBlending, ImDrawListPtr drawList, ShaderResourceView? thumbnailAtlasSrv, ThumbnailManager.ThumbnailRect thumbnail)
     {
         var components = ProjectView.Focused;
         if (components == null)
@@ -38,7 +41,7 @@ internal static class VariationThumbnail
                 }
                 else if (VariationHandling.ActiveInstanceForSnapshots != null)
                 {
-                    VariationHandling.ActivePoolForSnapshots.SaveVariationsToFile();
+                    VariationHandling.ActivePoolForSnapshots?.SaveVariationsToFile();
                 }
             }
 
@@ -56,12 +59,15 @@ internal static class VariationThumbnail
         drawList.AddRectFilled(pMin, pMax, UiColors.Gray.Fade(0.1f * focusOpacity));
         CustomComponents.FillWithStripes(drawList, areaOnScreen, canvas.Scale.X);
 
-        drawList.AddImage((IntPtr)canvasSrv,
-                          pMin,
-                          pMax,
-                          uvRect.Min,
-                          uvRect.Max, Color.White.Fade(focusOpacity)
-                         );
+        if (thumbnailAtlasSrv != null && thumbnail.IsReady)
+        {
+            drawList.AddImage(thumbnailAtlasSrv.NativePointer,
+                              pMin,
+                              pMax,
+                              thumbnail.UvMin,
+                              thumbnail.UvMax, Color.White.Fade(focusOpacity)
+                             );
+        }
 
         drawList.AddRect(pMin, pMax, UiColors.Gray.Fade(0.2f * focusOpacity));
 
@@ -72,8 +78,8 @@ internal static class VariationThumbnail
         }
 
         const int bottomPadding = 15;
-        drawList.AddRectFilledMultiColor(pMin + new Vector2(1, sizeOnScreen.Y - bottomPadding - 20),
-                                         pMax - Vector2.One,
+        drawList.AddRectFilledMultiColor(pMin + new Vector2(0, sizeOnScreen.Y - bottomPadding - 20),
+                                         pMax ,
                                          UiColors.BackgroundFull.Fade(0),
                                          UiColors.BackgroundFull.Fade(0),
                                          UiColors.BackgroundFull.Fade(0.6f),
@@ -82,7 +88,7 @@ internal static class VariationThumbnail
         ImGui.PushClipRect(pMin, pMax, true);
         ImGui.PushFont(Fonts.FontSmall);
 
-        var fade = MathUtils.RemapAndClamp(canvas.Scale.X, 0.3f, 0.6f, 0, 1) * focusOpacity;
+        var fade = canvas.Scale.X.RemapAndClamp(0.3f, 0.6f, 0, 1) * focusOpacity;
         drawList.AddText(pMin + new Vector2(4, sizeOnScreen.Y - bottomPadding),
                          UiColors.Text.Fade(1f * fade),
                          string.IsNullOrEmpty(variation.Title) ? "Untitled" : variation.Title);
@@ -106,7 +112,13 @@ internal static class VariationThumbnail
         if (isHovered)
         {
             //Log.Debug("here");
-            drawList.AddRect(pMin + Vector2.One, pMax - Vector2.One, UiColors.ForegroundFull.Fade(0.2f));
+            drawList.AddRect(pMin, 
+                             pMax, 
+                             UiColors.ForegroundFull.Fade(0.3f),
+                             0,
+                             ImDrawFlags.None,
+                             2
+                             );
         }
 
         if (_canvas.IsBlendingActive)
@@ -124,7 +136,7 @@ internal static class VariationThumbnail
                 
                 if (variation.IsSnapshot)
                 {
-                    var nodeSelection = components.NodeSelection;
+                    //var nodeSelection = components.NodeSelection;
                     foreach (var childId in variation.ParameterSetsForChildIds.Keys)
                     {
                         FrameStats.AddHoveredId(childId);
@@ -307,14 +319,15 @@ internal static class VariationThumbnail
         }
     }
 
-    private static Variation _hoveredVariation;
+    private static Variation? _hoveredVariation;
     private static bool _isDragging;
 
-    private static VariationBaseCanvas _canvas;
+    private static VariationBaseCanvas _canvas = null!;
+    
     private static CanvasElementSelection CanvasElementSelection => _canvas.CanvasElementSelection;
     private static Guid _draggedNodeId;
     private static List<ISelectableCanvasObject> _draggedNodes = new();
-    public static readonly Vector2 ThumbnailSize = new(160, (int)(160 / 16f * 9));
+    public static readonly Vector2 ThumbnailSize = new(160, 160 / ThumbnailManager.AspectRatio);
 
     public static readonly Vector2 SnapPadding = new(3, 3);
 
@@ -326,7 +339,7 @@ internal static class VariationThumbnail
             new(0, -ThumbnailSize.Y - SnapPadding.Y)
         };
 
-    private static ModifyCanvasElementsCommand _moveCommand;
+    private static ModifyCanvasElementsCommand? _moveCommand;
     private static Vector2 _dragStartDelta;
-    public static Variation VariationForRenaming;
+    public static Variation? VariationForRenaming;
 }

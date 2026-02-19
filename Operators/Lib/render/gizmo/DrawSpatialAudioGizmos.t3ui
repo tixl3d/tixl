@@ -1,0 +1,67 @@
+{
+  "Id": "b53e6425-f40a-449c-846c-b4e0b8306a43"/*DrawSpatialAudioGizmos*/,
+  "Description": "Draws gizmos for all spatial audio players in the current composition. Visualizes source and listener positions, attenuation ranges, and directional cones.",
+  "SymbolTags": "8",
+  "InputUis": [
+    {
+      "InputId": "9c733ca8-0f77-4664-9680-609f262ee4a8"/*Visibility*/,
+      "Position": {
+        "X": 184.93283,
+        "Y": 372.0692
+      }
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "374777d6-9686-495d-b0e8-8b39e4cb9262"/*GetAllSpatialAudioPlayers*/,
+      "Position": {
+        "X": 351.5141,
+        "Y": 57.39151
+      }
+    },
+    {
+      "ChildId": "610a8da0-b6cd-42d9-a889-a4f5c08cf6c4"/*GetFloatVar*/,
+      "Position": {
+        "X": 51.5141,
+        "Y": 57.39151
+      }
+    },
+    {
+      "ChildId": "6fa114be-e7bf-44df-bd41-9bf776201bdd"/*VisibleGizmos*/,
+      "Position": {
+        "X": 1022.3395,
+        "Y": 25.186798
+      }
+    },
+    {
+      "ChildId": "7acbee3f-7fc6-4290-a23f-c28e86e07a19"/*Loop*/,
+      "Position": {
+        "X": 855.0232,
+        "Y": 21.888428
+      }
+    },
+    {
+      "ChildId": "900c2ddd-ade7-4fe0-aa0f-5301b7a1ff92"/*SpatialAudioPlayerGizmo*/,
+      "Position": {
+        "X": 550.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "bdcdcb92-47d7-4c8d-86ec-dce784a59391"/*FloatToInt*/,
+      "Position": {
+        "X": 201.5141,
+        "Y": 57.39151
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "fef51122-2c71-4b67-9d24-feb02ceb03f7"/*Output*/,
+      "Position": {
+        "X": 1189.6559,
+        "Y": 27.660583
+      }
+    }
+  ]
+}

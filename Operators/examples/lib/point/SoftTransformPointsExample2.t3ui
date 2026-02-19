@@ -1,6 +1,7 @@
 {
   "Id": "a1384530-671b-4a6a-b17c-89480bc2f23a"/*SoftTransformPointsExample2*/,
   "Description": "An illustration of how to cascade multiple SoftTransform Operators to create interesting shapes.",
+  "SymbolTags": "1024",
   "InputUis": [],
   "SymbolChildUis": [
     {

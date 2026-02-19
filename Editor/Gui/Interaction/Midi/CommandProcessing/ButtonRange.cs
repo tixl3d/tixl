@@ -66,6 +66,9 @@ public readonly struct ButtonRange
 
 
     public bool IsRange => _lastIndex > _startIndex;
+    
+    public int StartIndex => _startIndex;
+    public int LastIndex => _lastIndex;
 
     private readonly int _startIndex;
     private readonly int _lastIndex;

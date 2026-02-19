@@ -101,14 +101,13 @@
     {
       "InputId": "cf8fe9a6-f9f7-4485-9ca5-ae96326ae25f"/*SpecularAA*/,
       "Position": {
-        "X": 1647.684,
-        "Y": 3337.1091
+        "X": 1824.9539,
+        "Y": 3655.8855
       },
       "Description": "This reduces specular aliasing on silhouettes and high-frequency normalmap regions.",
       "Min": 0.0,
-      "Max": 2.0,
-      "ClampMin": true,
-      "ClampMax": true
+      "Max": 20.0,
+      "ClampMin": true
     },
     {
       "InputId": "d1db33ea-1739-4323-9105-7b236a0e240f"/*WrapMode*/,
@@ -236,18 +235,6 @@
       }
     },
     {
-      "ChildId": "66154a7b-2798-464b-b39d-4b43e48a0572"/*Source*/,
-      "Style": "Resizable",
-      "Size": {
-        "X": 140.0,
-        "Y": 35.0
-      },
-      "Position": {
-        "X": 2404.7104,
-        "Y": 3321.748
-      }
-    },
-    {
       "ChildId": "66935d7d-2e35-4ebf-b810-0805cd26c1af"/*IntValue*/,
       "Position": {
         "X": 2091.1904,
@@ -301,13 +288,6 @@
       "Position": {
         "X": 1696.4711,
         "Y": 3933.1995
-      }
-    },
-    {
-      "ChildId": "a1e13772-64b7-4a05-847d-6d268516a299"/*Value*/,
-      "Position": {
-        "X": 1778.1173,
-        "Y": 3661.538
       }
     },
     {

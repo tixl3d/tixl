@@ -10,8 +10,6 @@ internal sealed class EaseVec3Keys : Instance<EaseVec3Keys>
     [Output(Guid = "b022aed3-1667-474f-b24e-107b3257e13c", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
     public readonly Slot<Vector3> Result = new();
 
-    private const float MinTimeElapsedBeforeEvaluation = 1 / 1000f;
-
     public EaseVec3Keys()
     {
         Result.UpdateAction = Update;
@@ -19,25 +17,22 @@ internal sealed class EaseVec3Keys : Instance<EaseVec3Keys>
 
     private void Update(EvaluationContext context)
     {
-        var easeMode = Interpolation.GetEnumValue<Interpolations>(context); // Easing function selector
-        var easeDirection = Direction.GetEnumValue<EaseDirection>(context);
-
-        var currentTime = context.LocalTime;
-
-        if (Math.Abs(currentTime - _lastEvalTime) < MinTimeElapsedBeforeEvaluation)
-            return;
+        var inputValue = Value.GetValue(context);
 
         if (!TryFindCurves(out var curves))
         {
-            Result.Value = Value.GetValue(context);
+            Result.Value = inputValue;
             return;
         }
+
+        var easeMode = Interpolation.GetEnumValue<Interpolations>(context); // Easing function selector
+        var easeDirection = Direction.GetEnumValue<EaseDirection>(context);
+        var currentTime = context.LocalTime;
 
         for (var i = 0; i < curves.Length; i++)
         {
             var curve = curves[i];
             _keyframes = curve.GetVDefinitions().ToList();
-            _lastEvalTime = currentTime;
             float duration;
 
             if (
@@ -53,7 +48,7 @@ internal sealed class EaseVec3Keys : Instance<EaseVec3Keys>
             }
             else
             {
-                Result.Value[i] = Value.GetValue(context)[i];
+                Result.Value[i] = inputValue[i];
                 continue;
             }
 
@@ -104,7 +99,6 @@ internal sealed class EaseVec3Keys : Instance<EaseVec3Keys>
     private List<VDefinition> _keyframes = [];
 
     // Ease.cs
-    private double _lastEvalTime;
     private Vector3 _startTime = Vector3.Zero;
     private Vector3 _initialValue = Vector3.Zero;
     private Vector3 _targetValue = Vector3.Zero;

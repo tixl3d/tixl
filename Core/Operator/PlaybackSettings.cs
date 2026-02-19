@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -19,7 +19,7 @@ public sealed class PlaybackSettings
 {
     public bool Enabled { get; set; }
     public float Bpm = 120;
-    public List<AudioClipDefinition> AudioClips { get; private init; } = [];
+    public List<SoundtrackClipDefinition> AudioClips { get; private init; } = [];
     public AudioSources AudioSource;
     public SyncModes Syncing;
 
@@ -143,7 +143,7 @@ public sealed class PlaybackSettings
         return newSettings;
     }
 
-    private static IEnumerable<AudioClipDefinition> GetClips(JToken settingsToken)
+    private static IEnumerable<SoundtrackClipDefinition> GetClips(JToken settingsToken)
     {
         var jClipsToken = settingsToken[nameof(Symbol.PlaybackSettings.AudioClips)];
         if(jClipsToken == null)
@@ -152,7 +152,7 @@ public sealed class PlaybackSettings
         var jAudioClipArray = (JArray)jClipsToken;
         foreach (var c in jAudioClipArray)
         {
-            if (AudioClipDefinition.TryFromJson(c, out var clip))
+            if (SoundtrackClipDefinition.TryFromJson(c, out var clip))
             {
                 yield return clip;
             }

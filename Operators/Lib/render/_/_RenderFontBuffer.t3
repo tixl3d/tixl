@@ -39,15 +39,11 @@
     },
     {
       "Id": "e827fdd1-20ca-473c-99ee-b839563690e9"/*Filepath*/,
-      "DefaultValue": "Resources\\fonts\\Roboto-Black.fnt"
+      "DefaultValue": "Examples:fonts/Roboto-Black.fnt"
     },
     {
       "Id": "f2dd87b1-7f37-4b02-871b-b2e35972f246"/*Text*/,
       "DefaultValue": ""
-    },
-    {
-      "Id": "ffd2233a-8f3e-426b-815b-8071e4c779ab"/*Slant*/,
-      "DefaultValue": 0.0
     }
   ],
   "Children": [],

@@ -146,7 +146,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "/t3/images/VAT/RobVAT.dds"
+          "Value": "Examples:test-footage/VAT/RobVAT.dds"
         }
       ],
       "Outputs": []
@@ -233,7 +233,7 @@
         {
           "Id": "292e80cf-ba31-4a50-9bf4-83712430f811"/*Path*/,
           "Type": "System.String",
-          "Value": "/t3/meshes/RobRunFlat.glb"
+          "Value": "Examples:test-footage/VAT/RobRunFlat.glb"
         },
         {
           "Id": "d02f41a6-1a6b-4a6e-8d6c-a28873c79f2c"/*Setup*/,
@@ -318,7 +318,7 @@
         {
           "Id": "292e80cf-ba31-4a50-9bf4-83712430f811"/*Path*/,
           "Type": "System.String",
-          "Value": "/t3/meshes/CubeVAT.glb"
+          "Value": "Examples:test-footage/VAT/CubeVAT.glb"
         },
         {
           "Id": "57f129ae-0b2e-465d-8c0e-f6259fdd37ce"/*CombineBuffer*/,
@@ -488,7 +488,7 @@
         {
           "Id": "292e80cf-ba31-4a50-9bf4-83712430f811"/*Path*/,
           "Type": "System.String",
-          "Value": "/t3/meshes/RobRunFlat.glb"
+          "Value": "Examples:test-footage/VAT/RobRunFlat.glb"
         },
         {
           "Id": "d02f41a6-1a6b-4a6e-8d6c-a28873c79f2c"/*Setup*/,
@@ -551,7 +551,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "/t3/images/VAT/CubeBreak_VATNormals.dds"
+          "Value": "Examples:test-footage/VAT/CubeBreak_VATNormals.dds"
         }
       ],
       "Outputs": []
@@ -569,7 +569,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "/t3/images/VAT/t3Rob.png"
+          "Value": "Examples:test-footage/VAT/t3Rob.png"
         }
       ],
       "Outputs": []
@@ -725,7 +725,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "/t3/images/VAT/t3Rob.png"
+          "Value": "Examples:test-footage/VAT/t3Rob.png"
         }
       ],
       "Outputs": []
@@ -737,7 +737,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "/t3/images/VAT/RobNormals.dds"
+          "Value": "Examples:test-footage/VAT/RobNormals.dds"
         }
       ],
       "Outputs": []
@@ -766,7 +766,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "/t3/images/VAT/RobNormals.dds"
+          "Value": "Examples:test-footage/VAT/RobNormals.dds"
         }
       ],
       "Outputs": []
@@ -894,7 +894,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "/t3/images/VAT/CubeBreak_VATOffset.dds"
+          "Value": "Examples:test-footage/VAT/CubeBreak_VATOffset.dds"
         }
       ],
       "Outputs": []
@@ -906,7 +906,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "/t3/images/VAT/RobVAT.dds"
+          "Value": "Examples:test-footage/VAT/RobVAT.dds"
         }
       ],
       "Outputs": []

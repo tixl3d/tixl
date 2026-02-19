@@ -173,7 +173,7 @@
         {
           "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
           "Type": "System.String",
-          "Value": "Resources/lib/img/generate/SlidingHistory.hlsl"
+          "Value": "Lib:shaders/img/generate/SlidingHistory.hlsl"
         }
       ],
       "Outputs": []

@@ -249,7 +249,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "/t3/images/frog3.jpg"
+          "Value": "Examples:images/frog3.jpg"
         }
       ],
       "Outputs": []
@@ -462,7 +462,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "/t3/meshes/marblePlayer.obj"
+          "Value": "Examples:meshes/marblePlayer.obj"
         }
       ],
       "Outputs": []
@@ -901,7 +901,7 @@
         {
           "Id": "292e80cf-ba31-4a50-9bf4-83712430f811"/*Path*/,
           "Type": "System.String",
-          "Value": "/t3/meshes/DamagedHelmet.glb"
+          "Value": "Examples:meshes/DamagedHelmet.glb"
         },
         {
           "Id": "57f129ae-0b2e-465d-8c0e-f6259fdd37ce"/*CombineBuffer*/,
@@ -2973,7 +2973,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "/t3/images/hdri/studio_small_08.dds"
+          "Value": "Examples:hdri/studio_small_08.dds"
         }
       ],
       "Outputs": []

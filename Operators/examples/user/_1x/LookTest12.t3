@@ -302,7 +302,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "/t3/images/hdri/sunset.png"
+          "Value": "Examples:hdri/sunset.png"
         }
       ],
       "Outputs": []
@@ -1380,7 +1380,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/common/meshes/studio_backdrop_round_360.obj"
+          "Value": "Examples:meshes/backdrops/studio_backdrop_round_360.obj"
         }
       ],
       "Outputs": []

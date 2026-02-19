@@ -11,7 +11,7 @@
     },
     {
       "Id": "71531810-78ab-449e-bb13-bfe5fe3d2a69"/*UseVertexSelection*/,
-      "DefaultValue": false
+      "DefaultValue": true
     },
     {
       "Id": "86791d0a-97c3-413a-89d9-aa2ddd40ce4a"/*UniformScale*/,
@@ -76,7 +76,7 @@
         {
           "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
           "Type": "System.String",
-          "Value": "Resources/lib/3d/mesh/mesh-TransformVertices.hlsl"
+          "Value": "Lib:shaders/3d/mesh/mesh-TransformVertices.hlsl"
         }
       ],
       "Outputs": []

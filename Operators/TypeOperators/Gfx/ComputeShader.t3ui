@@ -18,7 +18,7 @@
       },
       "Description": "d",
       "Usage": "FilePath",
-      "FileFilter": "Shader files (hlsl) hlsl|*.hlsl;*.fx"
+      "FileFilter": "hlsl, fx"
     },
     {
       "InputId": "c0701d0b-d37f-4570-9e9a-ec2e88b919d1"/*DebugName*/,

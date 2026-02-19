@@ -7,7 +7,7 @@
     },
     {
       "Id": "6e0fa62a-a8e1-4d0b-a5b1-80876ff636c0"/*Path*/,
-      "DefaultValue": "Resources\\common\\test-footage\\gltf-scene-test-01.glb"
+      "DefaultValue": "Examples:test-footage/gltf/gltf-scene-test-01.glb"
     }
   ],
   "Children": [],

@@ -29,7 +29,7 @@
       "GroupTitle": "Font & Size",
       "Description": "Defines which font is used",
       "Usage": "FilePath",
-      "FileFilter": "Fonts (*.fnt)|*.fnt"
+      "FileFilter": "fnt"
     },
     {
       "InputId": "7a76d5aa-1f44-4238-9333-7c2951becc31"/*EnableZTest*/,

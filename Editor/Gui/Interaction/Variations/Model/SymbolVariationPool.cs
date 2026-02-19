@@ -224,7 +224,8 @@ internal sealed class SymbolVariationPool
             _activeBlendCommand.Do();
         }
 
-        UpdateActiveStateForVariation(variation.ActivationIndex);
+        // we dont need this
+        //UpdateActiveStateForVariation(variation.ActivationIndex);
     }
 
     public void BeginWeightedBlend(Instance instance, List<Variation> variations, IEnumerable<float> weights)

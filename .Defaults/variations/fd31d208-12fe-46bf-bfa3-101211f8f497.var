@@ -7,8 +7,8 @@
       "ActivationIndex": 1,
       "Title": "Center",
       "PosOnCanvas": {
-        "X": 100.33089,
-        "Y": 91.79208
+        "X": -0.95936966,
+        "Y": 31.03566
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -25,8 +25,8 @@
       "ActivationIndex": 2,
       "Title": "Top Left",
       "PosOnCanvas": {
-        "X": 263.33093,
-        "Y": 91.79208
+        "X": 162.04063,
+        "Y": 31.03566
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -45,16 +45,15 @@
       "ActivationIndex": 3,
       "Title": "Large",
       "PosOnCanvas": {
-        "X": 269.5467,
-        "Y": 188.25372
+        "X": 162.04063,
+        "Y": 153.58621
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
           "de0fed7d-d2af-4424-baf3-81606e26559f": {
             "X": 0.0031847656,
             "Y": 0.0027872026
-          },
-          "d89c518c-a862-4f46-865b-0380350b7417": 1140.0
+          }
         }
       }
     },
@@ -64,8 +63,8 @@
       "ActivationIndex": 4,
       "Title": "Narrow",
       "PosOnCanvas": {
-        "X": 100.33089,
-        "Y": 184.79208
+        "X": -0.95936966,
+        "Y": 153.58621
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -73,7 +72,6 @@
             "X": 0.0031847656,
             "Y": 0.0027872026
           },
-          "d89c518c-a862-4f46-865b-0380350b7417": 1140.0,
           "835d7f17-9de4-4612-a2f0-01c1346cdf1a": -7.6
         }
       }
@@ -84,14 +82,59 @@
       "ActivationIndex": 5,
       "Title": "SmallFont",
       "PosOnCanvas": {
-        "X": 100.33089,
-        "Y": 281.25372
+        "X": -0.95936966,
+        "Y": 276.13678
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
-          "d89c518c-a862-4f46-865b-0380350b7417": 180.0,
           "835d7f17-9de4-4612-a2f0-01c1346cdf1a": 8.5,
           "7a76d5aa-1f44-4238-9333-7c2951becc31": false
+        }
+      }
+    },
+    {
+      "Id": "dbc1f768-413a-4d28-9bcf-3433f50397ef",
+      "IsPreset": true,
+      "ActivationIndex": 6,
+      "Title": "IceLand",
+      "PosOnCanvas": {
+        "X": 162.04063,
+        "Y": 276.13678
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3": "Examples:fonts/Iceland.fnt",
+          "835d7f17-9de4-4612-a2f0-01c1346cdf1a": -1.4
+        }
+      }
+    },
+    {
+      "Id": "6c0f2116-ab6c-4dde-8929-bc70f420b56f",
+      "IsPreset": true,
+      "ActivationIndex": 7,
+      "Title": "Light",
+      "PosOnCanvas": {
+        "X": -0.95936966,
+        "Y": 398.68735
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3": "Examples:fonts/Roboto-Light.fnt"
+        }
+      }
+    },
+    {
+      "Id": "ea1bfff9-59d0-4f87-b0fc-17663ba6506c",
+      "IsPreset": true,
+      "ActivationIndex": 8,
+      "Title": "Pixel",
+      "PosOnCanvas": {
+        "X": 162.04063,
+        "Y": 398.68735
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3": "Examples:fonts/Symtext.fnt"
         }
       }
     }

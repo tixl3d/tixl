@@ -160,7 +160,7 @@
         {
           "Id": "f6269be3-3331-43a6-91ec-138b47199f3e"/*ShaderPath*/,
           "Type": "System.String",
-          "Value": "Resources/lib/img/generate/RadialGradient.hlsl"
+          "Value": "Lib:shaders/img/generate/RadialGradient.hlsl"
         }
       ],
       "Outputs": []

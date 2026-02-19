@@ -337,7 +337,7 @@
         {
           "Id": "ef2a461d-c66d-44d8-8b0e-e48a57ec991f"/*FilePath*/,
           "Type": "System.String",
-          "Value": "Resources\\Example\\user\\pixtur\\projects\\proj-particleMaps\\svg\\logo-simple.svg"
+          "Value": "Examples:user/pixtur/projects/proj-particleMaps/svg/logo-simple.svg"
         }
       ],
       "Outputs": []
@@ -634,7 +634,7 @@
         {
           "Id": "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3"/*FontPath*/,
           "Type": "System.String",
-          "Value": "Resources\\fonts\\Roboto-Light.fnt"
+          "Value": "Examples:fonts/Roboto-Light.fnt"
         },
         {
           "Id": "7a76d5aa-1f44-4238-9333-7c2951becc31"/*EnableZTest*/,
@@ -841,7 +841,7 @@
         {
           "Id": "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3"/*FontPath*/,
           "Type": "System.String",
-          "Value": "Resources\\fonts\\Roboto-Black.fnt"
+          "Value": "Examples:fonts/Roboto-Black.fnt"
         },
         {
           "Id": "7a76d5aa-1f44-4238-9333-7c2951becc31"/*EnableZTest*/,
@@ -1631,7 +1631,7 @@
         {
           "Id": "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3"/*FontPath*/,
           "Type": "System.String",
-          "Value": "Resources\\fonts\\Roboto-Light.fnt"
+          "Value": "Examples:fonts/Roboto-Light.fnt"
         },
         {
           "Id": "82cc31ff-3307-4b6d-be70-16e471c2ffc9"/*HorizontalAlign*/,
@@ -1894,7 +1894,7 @@
         {
           "Id": "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3"/*FontPath*/,
           "Type": "System.String",
-          "Value": "Resources\\fonts\\Roboto-Light.fnt"
+          "Value": "Examples:fonts/Roboto-Light.fnt"
         },
         {
           "Id": "7a76d5aa-1f44-4238-9333-7c2951becc31"/*EnableZTest*/,
@@ -2065,7 +2065,7 @@
         {
           "Id": "ef2a461d-c66d-44d8-8b0e-e48a57ec991f"/*FilePath*/,
           "Type": "System.String",
-          "Value": "Resources\\Example\\user\\pixtur\\projects\\proj-particleMaps\\images\\map-hamburg2.svg"
+          "Value": "Examples:user/pixtur/projects/proj-particleMaps/images/map-hamburg2.svg"
         }
       ],
       "Outputs": []
@@ -2397,7 +2397,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\Example\\user\\pixtur\\projects\\proj-particleMaps\\meshes\\display-screen.obj"
+          "Value": "Examples:user/pixtur/projects/proj-particleMaps/meshes/display-screen.obj"
         }
       ],
       "Outputs": []
@@ -2439,7 +2439,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\Example\\user\\pixtur\\projects\\proj-particleMaps\\meshes\\display-case.obj"
+          "Value": "Examples:user/pixtur/projects/proj-particleMaps/meshes/display-case.obj"
         }
       ],
       "Outputs": []
@@ -2707,7 +2707,7 @@
         {
           "Id": "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3"/*FontPath*/,
           "Type": "System.String",
-          "Value": "Resources\\fonts\\Roboto-Light.fnt"
+          "Value": "Examples:fonts/Roboto-Light.fnt"
         },
         {
           "Id": "7a76d5aa-1f44-4238-9333-7c2951becc31"/*EnableZTest*/,
@@ -3003,7 +3003,7 @@
         {
           "Id": "ef2a461d-c66d-44d8-8b0e-e48a57ec991f"/*FilePath*/,
           "Type": "System.String",
-          "Value": "Resources\\Example\\user\\pixtur\\projects\\proj-particleMaps\\images\\map-hamburg2.svg"
+          "Value": "Examples:user/pixtur/projects/proj-particleMaps/images/map-hamburg2.svg"
         }
       ],
       "Outputs": []
@@ -3123,7 +3123,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\Example\\user\\pixtur\\projects\\proj-particleMaps\\meshes\\reference-person.obj"
+          "Value": "Examples:user/pixtur/projects/proj-particleMaps/meshes/reference-person.obj"
         }
       ],
       "Outputs": []

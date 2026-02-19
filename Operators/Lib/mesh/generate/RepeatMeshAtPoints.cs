@@ -23,6 +23,9 @@ internal sealed class RepeatMeshAtPoints : Instance<RepeatMeshAtPoints>
 
         [Input(Guid = "13852947-11aa-4f54-b415-6867421f3bc0")]
         public readonly InputSlot<System.Numerics.Vector3> Stretch = new InputSlot<System.Numerics.Vector3>();
+
+        [Input(Guid = "c981484b-1cef-4b53-abeb-f9f3ba4466e6", MappedType = typeof(ScaleFXModes))]
+        public readonly InputSlot<int> TexCoord2Factor = new InputSlot<int>();
         
         private enum ScaleFXModes
         {

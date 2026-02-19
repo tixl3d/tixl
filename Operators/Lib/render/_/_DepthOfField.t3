@@ -57,7 +57,7 @@
         {
           "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
           "Type": "System.String",
-          "Value": "Resources\\user\\still\\proj-there\\post-fx\\dof.hlsl"
+          "Value": "Lib:shaders/img/post-fx/dof.hlsl"
         },
         {
           "Id": "c0701d0b-d37f-4570-9e9a-ec2e88b919d1"/*DebugName*/,

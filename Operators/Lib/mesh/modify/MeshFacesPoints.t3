@@ -112,7 +112,7 @@
         {
           "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
           "Type": "System.String",
-          "Value": "Resources/lib/3d/mesh/fx/mesh-Faces-Points.hlsl"
+          "Value": "Lib:shaders/3d/mesh/fx/mesh-Faces-Points.hlsl"
         }
       ],
       "Outputs": []
@@ -195,7 +195,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "/Lib/images/basic/white.png"
+          "Value": "Lib:images/basic/white.png"
         }
       ],
       "Outputs": []

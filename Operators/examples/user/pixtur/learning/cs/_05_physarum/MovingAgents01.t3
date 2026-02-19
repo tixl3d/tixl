@@ -536,7 +536,7 @@
         {
           "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
           "Type": "System.String",
-          "Value": "Resources\\Example\\user\\pixtur\\research\\ComputeShaderCourse\\03-MovingAgents1\\shaders\\ca-update-grid.hlsl"
+          "Value": "Examples:user/pixtur/research/ComputeShaderCourse/03-MovingAgents1/shaders/ca-update-grid.hlsl"
         }
       ],
       "Outputs": []
@@ -692,7 +692,7 @@
         {
           "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
           "Type": "System.String",
-          "Value": "Resources\\Example\\user\\pixtur\\research\\ComputeShaderCourse\\03-MovingAgents1\\shaders\\ca-sim-point-movement-cs.hlsl"
+          "Value": "Examples:user/pixtur/research/ComputeShaderCourse/03-MovingAgents1/shaders/ca-sim-point-movement-cs.hlsl"
         }
       ],
       "Outputs": []
@@ -753,7 +753,7 @@
         {
           "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
           "Type": "System.String",
-          "Value": "Resources\\Example\\user\\pixtur\\research\\ComputeShaderCourse\\03-MovingAgents1\\shaders\\ca-sim-point-save-trail-cs.hlsl"
+          "Value": "Examples:user/pixtur/research/ComputeShaderCourse/03-MovingAgents1/shaders/ca-sim-point-save-trail-cs.hlsl"
         }
       ],
       "Outputs": []

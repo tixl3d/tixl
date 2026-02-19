@@ -356,7 +356,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\user\\wake\\proj-lpm2024-teaser\\images\\LPM_logo 2.png"
+          "Value": "Examples:user/wake/proj-lpm2024-teaser/images/LPM_logo 2.png"
         }
       ],
       "Outputs": []

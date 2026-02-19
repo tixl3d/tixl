@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using T3.Core.DataTypes.DataSet;
 using T3.Core.IO;
@@ -198,7 +198,7 @@ public static class BeatSynchronizer
     {
         var sum = 0f;
         // Ensure bounds checking for robustness, although usually constant
-        var actualEndBand = Math.Min(endBand, AudioAnalysis.FrequencyBandCount - 1);
+        var actualEndBand = Math.Min(endBand, AudioConfig.FrequencyBandCount - 1);
         for (var i = startBand; i <= actualEndBand; i++)
         {
             sum += AudioAnalysis.FrequencyBandOnSets[i];

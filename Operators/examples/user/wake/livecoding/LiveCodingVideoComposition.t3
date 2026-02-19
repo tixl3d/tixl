@@ -34,13 +34,7 @@
     {
       "Id": "018b4e2a-13c7-480b-b9bb-807a4b56addb"/*FadingSlideShow*/,
       "SymbolId": "cb89ed1d-03ea-4880-bfa0-1dd723e4bdab",
-      "InputValues": [
-        {
-          "Id": "ca8724d8-a362-4af4-bdf8-a80a1b0ef72e"/*FolderWithImages*/,
-          "Type": "System.String",
-          "Value": "Resources\\user\\pixtur\\VJ\\agingFacesFemale"
-        }
-      ],
+      "InputValues": [],
       "Outputs": []
     },
     {
@@ -524,7 +518,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/images/basic/white-pixel.png"
+          "Value": "Lib:images/basic/white-pixel.png"
         }
       ],
       "Outputs": []
@@ -1104,11 +1098,6 @@
           "Id": "c3765d6d-4f45-4425-a86c-1cdd13eff296"/*Scale*/,
           "Type": "System.Single",
           "Value": 1.73
-        },
-        {
-          "Id": "ca8724d8-a362-4af4-bdf8-a80a1b0ef72e"/*FolderWithImages*/,
-          "Type": "System.String",
-          "Value": "Resources\\user\\pixtur\\VJ\\agingFacesMale2"
         }
       ],
       "Outputs": []
@@ -1120,7 +1109,7 @@
         {
           "Id": "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3"/*FontPath*/,
           "Type": "System.String",
-          "Value": "Resources\\fonts\\RobotoSlab-Black.fnt"
+          "Value": "Examples:fonts/RobotoSlab-Black.fnt"
         },
         {
           "Id": "d89c518c-a862-4f46-865b-0380350b7417"/*Size*/,
@@ -1422,11 +1411,6 @@
           "Id": "c3765d6d-4f45-4425-a86c-1cdd13eff296"/*Scale*/,
           "Type": "System.Single",
           "Value": 2.05
-        },
-        {
-          "Id": "ca8724d8-a362-4af4-bdf8-a80a1b0ef72e"/*FolderWithImages*/,
-          "Type": "System.String",
-          "Value": "Resources\\user\\pixtur\\VJ\\agingFacesFemale"
         }
       ],
       "Outputs": []
@@ -1702,13 +1686,7 @@
     {
       "Id": "4c514c8b-fe08-495a-9552-309dbd01b4d1"/*FadingSlideShow*/,
       "SymbolId": "cb89ed1d-03ea-4880-bfa0-1dd723e4bdab",
-      "InputValues": [
-        {
-          "Id": "ca8724d8-a362-4af4-bdf8-a80a1b0ef72e"/*FolderWithImages*/,
-          "Type": "System.String",
-          "Value": "Resources\\user\\pixtur\\VJ\\agingFacesMale2"
-        }
-      ],
+      "InputValues": [],
       "Outputs": []
     },
     {
@@ -2190,7 +2168,7 @@
         {
           "Id": "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3"/*FontPath*/,
           "Type": "System.String",
-          "Value": "Resources\\fonts\\ShareTechMono.fnt"
+          "Value": "Examples:fonts/ShareTechMono.fnt"
         },
         {
           "Id": "82cc31ff-3307-4b6d-be70-16e471c2ffc9"/*HorizontalAlign*/,
@@ -2254,7 +2232,7 @@
         {
           "Id": "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3"/*FontPath*/,
           "Type": "System.String",
-          "Value": "Resources\\fonts\\ShareTechMono.fnt"
+          "Value": "Examples:fonts/ShareTechMono.fnt"
         },
         {
           "Id": "82cc31ff-3307-4b6d-be70-16e471c2ffc9"/*HorizontalAlign*/,
@@ -2494,7 +2472,7 @@
         {
           "Id": "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3"/*FontPath*/,
           "Type": "System.String",
-          "Value": "Resources\\fonts\\ShareTechMono.fnt"
+          "Value": "Examples:fonts/ShareTechMono.fnt"
         },
         {
           "Id": "82cc31ff-3307-4b6d-be70-16e471c2ffc9"/*HorizontalAlign*/,
@@ -5265,13 +5243,7 @@
     {
       "Id": "df682745-dcd6-4d2b-9825-6dbd2de712fe"/*FadingSlideShow*/,
       "SymbolId": "cb89ed1d-03ea-4880-bfa0-1dd723e4bdab",
-      "InputValues": [
-        {
-          "Id": "ca8724d8-a362-4af4-bdf8-a80a1b0ef72e"/*FolderWithImages*/,
-          "Type": "System.String",
-          "Value": "Resources\\user\\pixtur\\VJ\\agingFacesMale2"
-        }
-      ],
+      "InputValues": [],
       "Outputs": []
     },
     {
@@ -5453,7 +5425,7 @@
         {
           "Id": "0e255347-08bc-4363-9ffa-ab863a1cea8e"/*Path*/,
           "Type": "System.String",
-          "Value": "C:\\Users\\pixtur\\Desktop\\algoraveOhm-setRecording_2023-12-06_1920x1080_60fps.mp4"
+          "Value": "C:/Users/pixtur/Desktop/algoraveOhm-setRecording_2023-12-06_1920x1080_60fps.mp4"
         },
         {
           "Id": "21b5671b-862f-4cea-a355-fa019996c936"/*Loop*/,

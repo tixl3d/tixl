@@ -1,5 +1,5 @@
 {
-  "Id": "a783908a-63c2-4961-94ca-b97d17ed0788"/*PickFromTextureArray*/,
+  "Id": "a783908a-63c2-4961-94ca-b97d17ed0788"/*KeepInTextureArray*/,
   "Inputs": [
     {
       "Id": "0227dbe2-797b-465d-bc48-fd47f42b6cd9"/*ReadIndex*/,

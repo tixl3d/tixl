@@ -348,12 +348,12 @@ public partial class Symbol
             var idToDestroy = child.Id;
             lock (_creationLock)
             {
-                foreach (var instanceKvp in _instancesOfSelf)
+                foreach (var instance in _instancesOfSelf.Values)
                 {
-                    var instance = instanceKvp.Value;
+                    //var instance = instanceKvp.Value;
                     if (instance.Children.TryGetChildInstance(idToDestroy, out var childInstance, false))
                     {
-                        childInstance.Dispose(null);
+                        childInstance.DisposePackage(null);
                     }
                 }
             }
@@ -366,7 +366,7 @@ public partial class Symbol
                 var allInstances = _instancesOfSelf.Values.ToArray();
                 for (int i = allInstances.Length - 1; i >= 0; i--)
                 {
-                    allInstances[i].Dispose(onlyDisposeInPackage); // removes self from _instancesOfSelf dict
+                    allInstances[i].DisposePackage(onlyDisposeInPackage); // removes self from _instancesOfSelf dict
                 }
                 
                 Debug.Assert(_instancesOfSelf.Count == 0, $"All instances of {Symbol.Name} should have been disposed, but {_instancesOfSelf.Count} remain.");
@@ -824,7 +824,15 @@ public partial class Symbol
 
                     // if we're here, we already exist in the parent instance
                     // we just need to make sure we add our instance to our own collection
-                    Debug.Assert(_instancesOfSelf.ContainsKey(hash));
+                    if (!_instancesOfSelf.ContainsKey(hash))
+                    {
+                        // Synchronization issue detected: instance exists in parent but not in our tracking
+                        // This can happen during complex initialization or reload scenarios
+                        Log.Warning($"Instance {ReadableName} found in parent but missing from child tracking. Resyncing.");
+                        _instancesOfSelf[hash] = instance;
+                    }
+                    
+                    created = false;
                     return true;
                 }
             }
@@ -959,7 +967,7 @@ public partial class Symbol
                 // toArray as a defensive copy - these instances will be removed from the dictionary as a result of calling this func
                 foreach(var instance in _instancesOfSelf.Values.ToArray())
                 {
-                    instance.Dispose(null);
+                    instance.DisposePackage(null);
                 }
             }
         }

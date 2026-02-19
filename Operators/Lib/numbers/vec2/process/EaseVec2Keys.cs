@@ -10,8 +10,6 @@ internal sealed class EaseVec2Keys : Instance<EaseVec2Keys>
     [Output(Guid = "3288ad72-ade9-4e74-8885-87c1bc3579b8", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
     public readonly Slot<Vector2> Result = new();
 
-    private const float MinTimeElapsedBeforeEvaluation = 1 / 1000f;
-
     public EaseVec2Keys()
     {
         Result.UpdateAction = Update;
@@ -19,26 +17,22 @@ internal sealed class EaseVec2Keys : Instance<EaseVec2Keys>
 
     private void Update(EvaluationContext context)
     {
-        var easeMode = Interpolation.GetEnumValue<Interpolations>(context); // Easing function selector
-        var easeDirection = Direction.GetEnumValue<EaseDirection>(context);
-
-
-        var currentTime = context.LocalTime;
-
-        if (Math.Abs(currentTime - _lastEvalTime) < MinTimeElapsedBeforeEvaluation)
-            return;
+        var inputValue = Value.GetValue(context);
 
         if (!TryFindCurves(out var curves))
         {
-            Result.Value = Value.GetValue(context);
+            Result.Value = inputValue;
             return;
         }
+
+        var easeMode = Interpolation.GetEnumValue<Interpolations>(context); // Easing function selector
+        var easeDirection = Direction.GetEnumValue<EaseDirection>(context);
+        var currentTime = context.LocalTime;
 
         for (var i = 0; i < curves.Length; i++)
         {
             var curve = curves[i];
             _keyframes = curve.GetVDefinitions().ToList();
-            _lastEvalTime = currentTime;
             float duration;
 
             if (
@@ -54,7 +48,7 @@ internal sealed class EaseVec2Keys : Instance<EaseVec2Keys>
             }
             else
             {
-                Result.Value[i] = Value.GetValue(context)[i];
+                Result.Value[i] = inputValue[i];
                 continue;
             }
 
@@ -105,7 +99,6 @@ internal sealed class EaseVec2Keys : Instance<EaseVec2Keys>
     private List<VDefinition> _keyframes = [];
 
     // Ease.cs
-    private double _lastEvalTime;
     private Vector2 _startTime = Vector2.Zero;
     private Vector2 _initialValue = Vector2.Zero;
     private Vector2 _targetValue = Vector2.Zero;

@@ -17,7 +17,7 @@ public class FileReferenceOperations
         AssetFiles.Clear();
 
         // we use the shared shader packages as that includes all packages with no exclusions
-        foreach (var directory in ResourceManager.SharedShaderPackages.Select(x => x.ResourcesFolder))
+        foreach (var directory in ResourcePackageManager.SharedResourcePackages.Select(x => x.AssetsFolder))
         {
             ScanAssetDirectory(directory);
         }

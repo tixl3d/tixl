@@ -21,13 +21,13 @@ public struct PbrVertex
     public Vector2 Texcoord;
 
     [FieldOffset(14 * 4)]
-    public Vector2 Texcoord2; // 2 floats -> 8 bytes (newly added second UV set)
+    public Vector2 Texcoord2; 
 
     [FieldOffset(16 * 4)]
     public float Selection;
 
     [FieldOffset(17 * 4)]
-    private Vector3 __padding;
+    public Vector3 ColorRgb;
 
     public const int Stride = 20 * 4; // Total size: 20 floats -> 80 bytes
 }

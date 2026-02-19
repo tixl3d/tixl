@@ -12,7 +12,7 @@
       "GroupTitle": "Select file",
       "Description": "Use \"...\" to select a Wavefront .obj file to import",
       "Usage": "FilePath",
-      "FileFilter": "OBJ-Files|*.obj"
+      "FileFilter": "obj"
     },
     {
       "InputId": "aa19e71d-329c-448b-901c-565bf8c0da4f"/*SortVertices*/,

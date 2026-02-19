@@ -1,6 +1,8 @@
-﻿#nullable enable
+#nullable enable
 using T3.Core.Animation;
 using T3.Core.Audio;
+using T3.Core.IO;
+using T3.Core.Logging;
 using T3.Core.Utils;
 using T3.Editor.Gui.Interaction.Timing;
 
@@ -134,7 +136,7 @@ internal static class RenderTiming
 
         // audio clip for preview
         if (playbackSettings.TryGetMainSoundtrack(instanceWithSettings, out var soundtrack))
-            AudioEngine.UseAudioClip(soundtrack, Playback.Current.TimeInSecs);
+            AudioEngine.UseSoundtrackClip(soundtrack, Playback.Current.TimeInSecs);
 
         if (!rt.AudioRecording)
         {
@@ -149,9 +151,9 @@ internal static class RenderTiming
             var requestedEndSecs = ReferenceTimeToSeconds(s.EndInBars, s.Reference, s.Fps);
             var actualEndSecs = startSecs + ComputeFrameCount(s) / s.Fps;
 
-            Log.Debug($"Requested recording from {startSecs:0.0000} to {requestedEndSecs:0.0000} seconds");
-            Log.Debug($"Actually recording from {startSecs:0.0000} to {actualEndSecs:0.0000} seconds due to frame raster");
-            Log.Debug($"Using {Playback.Current.Bpm} bpm");
+            Log.Gated.VideoRender($"Requested recording from {startSecs:0.0000} to {requestedEndSecs:0.0000} seconds");
+            Log.Gated.VideoRender($"Actually recording from {startSecs:0.0000} to {actualEndSecs:0.0000} seconds due to frame raster");
+            Log.Gated.VideoRender($"Using {Playback.Current.Bpm} bpm");
 
             rt.AudioRecording = true;
         }

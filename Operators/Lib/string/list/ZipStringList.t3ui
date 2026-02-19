@@ -3,10 +3,17 @@
   "Description": "Zip two lists of strings, if the list sizes are differents, additional values of the longest are ignored",
   "InputUis": [
     {
-      "InputId": "be829559-ab5b-41ee-b104-dc5b0c1a1b2e"/*Value*/,
+      "InputId": "be829559-ab5b-41ee-b104-dc5b0c1a1b2e"/*StringsOne*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
+      }
+    },
+    {
+      "InputId": "d69c10f6-6b3d-4624-a9c4-9ac4796290cf"/*StringsTwo*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
       }
     }
   ],

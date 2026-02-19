@@ -43,7 +43,7 @@
     },
     {
       "Id": "ca8724d8-a362-4af4-bdf8-a80a1b0ef72e"/*FolderWithImages*/,
-      "DefaultValue": "/t3/images/sequences/agingFacesMale"
+      "DefaultValue": "Examples:images/sequences/agingFacesFemale/"
     },
     {
       "Id": "cabb74b7-72c3-4916-8096-5890fc8e7023"/*BackgroundColor*/,

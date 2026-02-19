@@ -15,6 +15,49 @@ public static class Log
         _logWriters.Remove(writer);
     }
 
+    #region Gated Debug Logging
+    
+    /// <summary>
+    /// Gated debug logging - only logs when the category is enabled.
+    /// Usage: Log.Gated.Audio("message"), Log.Gated.VideoRender("message")
+    /// </summary>
+    public static class Gated
+    {
+        public static bool AudioEnabled { get; set; }
+        public static bool AudioRenderEnabled { get; set; }
+        public static bool VideoRenderEnabled { get; set; }
+        
+        public static void Audio(string message)
+        {
+            if (AudioEnabled) Log.Debug(message);
+        }
+        
+        public static void AudioRender(string message)
+        {
+            if (AudioRenderEnabled) Log.Debug(message);
+        }
+        
+        public static void VideoRender(string message)
+        {
+            if (VideoRenderEnabled) Log.Debug(message);
+        }
+        
+        /// <summary>
+        /// Initializes the gated debug logging configuration by enabling or disabling specific logging categories.
+        /// </summary>
+        /// <param name="audio">Enable logging of audio-related debug messages.</param>
+        /// <param name="audioRender">Enable logging of audio rendering debug messages.</param>
+        /// <param name="videoRender">Enable logging of video rendering debug messages.</param>
+        public static void Initialize(bool audio, bool audioRender, bool videoRender)
+        {
+            AudioEnabled = audio;
+            AudioRenderEnabled = audioRender;
+            VideoRenderEnabled = videoRender;
+        }
+    }
+    
+    #endregion
+
     #region API for logging
 
     public static void Debug(string message, params object[] args)

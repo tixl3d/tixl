@@ -709,7 +709,7 @@
         {
           "Id": "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3"/*FontPath*/,
           "Type": "System.String",
-          "Value": "Resources\\fonts\\PirataOne.fnt"
+          "Value": "Examples:fonts/PirataOne.fnt"
         },
         {
           "Id": "7a76d5aa-1f44-4238-9333-7c2951becc31"/*EnableZTest*/,
@@ -1103,11 +1103,6 @@
             "Z": 1.0,
             "W": 1.0
           }
-        },
-        {
-          "Id": "ca8724d8-a362-4af4-bdf8-a80a1b0ef72e"/*FolderWithImages*/,
-          "Type": "System.String",
-          "Value": "Resources\\Example\\user\\pixtur\\VJ\\agingFacesMale2"
         }
       ],
       "Outputs": []
@@ -1454,12 +1449,6 @@
       "SourceSlotId": "f83f1835-477e-4bb6-93f0-14bf273b8e94",
       "TargetParentOrChildId": "ec1d5d5c-f01b-45b0-b14c-133647b75909",
       "TargetSlotId": "61469462-04ef-4f75-bd58-2bd42b8da15a"
-    },
-    {
-      "SourceParentOrChildId": "c2a6f15a-67b5-4ac9-bd3f-3f772e031f59",
-      "SourceSlotId": "74104eb6-dfc2-4ad2-9600-91c5a33855d4",
-      "TargetParentOrChildId": "ec1d5d5c-f01b-45b0-b14c-133647b75909",
-      "TargetSlotId": "ca8724d8-a362-4af4-bdf8-a80a1b0ef72e"
     },
     {
       "SourceParentOrChildId": "918d4c07-f789-4b07-b7ea-bbb4b3beb398",

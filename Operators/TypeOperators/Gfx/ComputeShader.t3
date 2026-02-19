@@ -7,7 +7,7 @@
     },
     {
       "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
-      "DefaultValue": "Resources\\lib\\img\\Default-cs.hlsl"
+      "DefaultValue": "Lib:shaders/img/Default-cs.hlsl"
     },
     {
       "Id": "c0701d0b-d37f-4570-9e9a-ec2e88b919d1"/*DebugName*/,

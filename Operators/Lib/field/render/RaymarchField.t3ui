@@ -45,8 +45,8 @@
       "InputId": "340ca675-9356-4548-ba64-732181bebeef"/*SdfField*/,
       "Relevancy": "Required",
       "Position": {
-        "X": 541.9152,
-        "Y": 351.31775
+        "X": 574.1129,
+        "Y": 382.27707
       }
     },
     {
@@ -74,6 +74,16 @@
         "Y": 1070.8182
       },
       "Description": "Scale texture defined by the [SetMaterial]."
+    },
+    {
+      "InputId": "8fc6f727-1eac-42f4-9c4f-525cba1f4bb1"/*SpecularAA*/,
+      "Position": {
+        "X": 104.66019,
+        "Y": 1210.8185
+      },
+      "Min": 0.0,
+      "Max": 5.0,
+      "ClampMin": true
     },
     {
       "InputId": "9715075b-b02b-4290-9332-9bbfe67933f2"/*Color*/,
@@ -265,8 +275,8 @@
     {
       "ChildId": "b8773240-5218-4217-8475-975199bc0235"/*GenerateShaderGraphCode*/,
       "Position": {
-        "X": 541.9152,
-        "Y": 386.31775
+        "X": 574.1129,
+        "Y": 417.27707
       }
     },
     {

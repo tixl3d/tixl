@@ -15,7 +15,7 @@
       "Relevancy": "Required",
       "Position": {
         "X": 537.42883,
-        "Y": 972.1018
+        "Y": 937.1018
       }
     },
     {
@@ -41,14 +41,7 @@
       "ChildId": "0111295c-74e2-4687-82e2-3f44e747c7aa"/*GenerateShaderGraphCode*/,
       "Position": {
         "X": 677.42883,
-        "Y": 972.1018
-      }
-    },
-    {
-      "ChildId": "09f288bf-0f0e-4878-8822-a0fa6d58b505"/*ReadFile*/,
-      "Position": {
-        "X": 325.99554,
-        "Y": 1036.9863
+        "Y": 937.1018
       }
     },
     {
@@ -90,7 +83,7 @@
       "ChildId": "840ac8b9-322d-4474-9107-2f97e497e28e"/*ExecuteBufferUpdate*/,
       "Position": {
         "X": 1646.6265,
-        "Y": 1232.8611
+        "Y": 1267.8611
       }
     },
     {
@@ -110,8 +103,8 @@
     {
       "ChildId": "d49ab319-b989-40ab-bdd9-d0acffacffa3"/*ComputeShaderFromSource*/,
       "Position": {
-        "X": 817.42883,
-        "Y": 972.1018
+        "X": 677.42883,
+        "Y": 1042.1018
       }
     },
     {
@@ -127,7 +120,7 @@
       "OutputId": "e9df0581-62c5-4d5d-9466-e88871d59dea"/*Result2*/,
       "Position": {
         "X": 1646.6265,
-        "Y": 1302.8613
+        "Y": 1337.8613
       }
     }
   ]

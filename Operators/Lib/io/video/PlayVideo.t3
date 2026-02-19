@@ -3,7 +3,7 @@
   "Inputs": [
     {
       "Id": "0e255347-08bc-4363-9ffa-ab863a1cea8e"/*Path*/,
-      "DefaultValue": "/t3/videos/spray-1080p.mp4"
+      "DefaultValue": "Examples:videos/spray-1080p.mp4"
     },
     {
       "Id": "21b5671b-862f-4cea-a355-fa019996c936"/*Loop*/,

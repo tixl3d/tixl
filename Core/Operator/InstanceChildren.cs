@@ -166,7 +166,7 @@ public sealed class InstanceChildren : IReadOnlyDictionary<Guid, Instance>
         return false;
     }
 
-    internal void Dispose(SymbolPackage? packageToDispose)
+    internal void DisposePackageInChildren(SymbolPackage? packageToDispose)
     {
         lock (_childSearchPath)
         {
@@ -176,7 +176,7 @@ public sealed class InstanceChildren : IReadOnlyDictionary<Guid, Instance>
                 _childSearchPath[^1] = childId;
                 if (child.TryGetOrCreateInstance(_childSearchPath, out var inst, out _, false))
                 {
-                    inst.Dispose(packageToDispose);
+                    inst.DisposePackage(packageToDispose);
                 }
             }
         }

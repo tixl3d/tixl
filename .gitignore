@@ -52,7 +52,6 @@ artifacts/
 *_p.c
 *_i.h
 *.ilk
-*.meta
 *.pch
 *.pdb
 *.pgc
@@ -307,3 +306,6 @@ Resources/user/pixtur/VJ/meshes
 ImageSequence
 Installer/Output
 Installer/dependencies/downloads
+
+shadertoolsconfig.json
+.temp/

@@ -1,0 +1,23 @@
+{
+  "Id": "f7e3c9a4-2b8d-4e6f-a1c5-9d7b3e8f6a2c"/*ConeGizmo*/,
+  "Inputs": [
+    {
+      "Id": "b9d5f3a7-4c8e-2f1b-9a6d-7e3c5b8f1a4d"/*Angle*/,
+      "DefaultValue": 90.0
+    },
+    {
+      "Id": "c1e6a8b4-5d7f-3a9c-8e2b-6f4d1c9a7e5b"/*Length*/,
+      "DefaultValue": 2.0
+    },
+    {
+      "Id": "e3a8c1d6-7f9b-5c2e-a4b8-8d6f3e1a9c7b"/*Segments*/,
+      "DefaultValue": 24
+    },
+    {
+      "Id": "a4b5c6d7-8e9f-0a1b-2c3d-4e5f6a7b8c9d"/*RayCount*/,
+      "DefaultValue": 4
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

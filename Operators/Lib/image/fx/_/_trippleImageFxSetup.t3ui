@@ -49,7 +49,7 @@
         "Y": 329.9937
       },
       "Usage": "FilePath",
-      "FileFilter": "HLSL-Files|*.hlsl"
+      "FileFilter": "hlsl"
     },
     {
       "InputId": "85d0fe6a-145e-4b17-ad00-62ad7afe58e4"/*ImageB*/,

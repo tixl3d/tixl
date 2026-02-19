@@ -67,13 +67,6 @@
         "Y": 0.0
       },
       "Usage": "Multiline"
-    },
-    {
-      "InputId": "ffd2233a-8f3e-426b-815b-8071e4c779ab"/*Slant*/,
-      "Position": {
-        "X": -200.0,
-        "Y": 270.0
-      }
     }
   ],
   "SymbolChildUis": [],

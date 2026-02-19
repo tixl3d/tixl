@@ -1,0 +1,64 @@
+{
+  "Id": "65e95f77-4743-437f-ab31-f34b831d28d7"/*AudioPlayer*/,
+  "Inputs": [
+    {
+      "Id": "1a3f4b7c-12d3-4a5b-9c7d-8e1f2a3b4c5d"/*Mute*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "3dbcbbe6-a8b4-4b83-a2c0-e22b24b91b42"/*Envelope*/,
+      "DefaultValue": {
+        "X": 0.1,
+        "Y": 0.1,
+        "Z": 1.0,
+        "W": 0.1
+      }
+    },
+    {
+      "Id": "505139a0-71ce-4297-8440-5bf84488902e"/*AudioFile*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "53d1622e-b1d5-4b1c-acd0-ebceb7064043"/*Panning*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "59b659c6-ca1f-4c2b-8dff-3a1da9abd352"/*StopAudio*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "726bc4d3-df8b-4abe-a38e-2e09cf44ca10"/*PlayAudio*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "7e42f2a8-3c5d-4f6e-9b8a-1d2e3f4a5b6c"/*PauseAudio*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "905d9e01-b1fb-47c0-801c-fc920ed36884"/*TriggerMode*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "a5de0d72-5924-4f3a-a02f-d5de7c03f07f"/*Seek*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e"/*UseEnvelope*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "c0645e37-db4e-4658-9d65-96478851f6f6"/*Volume*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "d1a11c4c-9526-4f6b-873e-1798b9dd2b48"/*Speed*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "f7a8b9c0-d1e2-4f3a-5b6c-7d8e9f0a1b2c"/*Duration*/,
+      "DefaultValue": 1.0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

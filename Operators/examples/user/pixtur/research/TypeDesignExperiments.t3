@@ -317,7 +317,7 @@
         {
           "Id": "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3"/*FontPath*/,
           "Type": "System.String",
-          "Value": "Resources\\fonts\\RobotoSlab-Black.fnt"
+          "Value": "Examples:fonts/RobotoSlab-Black.fnt"
         },
         {
           "Id": "82cc31ff-3307-4b6d-be70-16e471c2ffc9"/*HorizontalAlign*/,
@@ -923,7 +923,7 @@
         {
           "Id": "e827fdd1-20ca-473c-99ee-b839563690e9"/*Filepath*/,
           "Type": "System.String",
-          "Value": "Resources\\fonts\\PirataOne.fnt"
+          "Value": "Examples:fonts/PirataOne.fnt"
         },
         {
           "Id": "f2dd87b1-7f37-4b02-871b-b2e35972f246"/*Text*/,
@@ -956,7 +956,7 @@
         {
           "Id": "2ded8235-157d-486b-a997-87d09d18f998"/*Filename*/,
           "Type": "System.String",
-          "Value": "Resources\\common\\test-footage\\sketch-tom1.json"
+          "Value": "Examples:Resources/common/test-footage/sketch-tom1.json"
         },
         {
           "Id": "31f3942e-bac5-407f-ad44-6d09920754d9"/*StrokeColor*/,
@@ -1065,7 +1065,7 @@
         {
           "Id": "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3"/*FontPath*/,
           "Type": "System.String",
-          "Value": "Resources\\fonts\\RobotoSlab-Black.fnt"
+          "Value": "Examples:fonts/RobotoSlab-Black.fnt"
         },
         {
           "Id": "82cc31ff-3307-4b6d-be70-16e471c2ffc9"/*HorizontalAlign*/,

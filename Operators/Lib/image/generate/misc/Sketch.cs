@@ -24,6 +24,9 @@ internal sealed class Sketch : Instance<Sketch>
         [Input(Guid = "31f3942e-bac5-407f-ad44-6d09920754d9")]
         public readonly InputSlot<System.Numerics.Vector4> StrokeColor = new InputSlot<System.Numerics.Vector4>();
 
+        [Input(Guid = "5b41e5e9-1cc5-4c26-9b94-433750ef86fc", MappedType = typeof(ColorModes))]
+        public readonly InputSlot<int> ColorMode = new InputSlot<int>();
+        
         [Input(Guid = "44b88a09-6374-4180-9bc9-713ccfbb36f0")]
         public readonly InputSlot<System.Numerics.Vector4> Background = new InputSlot<System.Numerics.Vector4>();
 
@@ -39,10 +42,17 @@ internal sealed class Sketch : Instance<Sketch>
         [Input(Guid = "046a932b-6331-4e97-b289-be88420951cc")]
         public readonly InputSlot<float> OnionSkinRange = new InputSlot<float>();
 
+
     private enum ShowModes
     {
         OnlyAtFrame,
         ShowUntilNextFrame,
         WithOnionSkin,
+    }
+    
+    public enum ColorModes
+    {
+        Stroke,
+        Page,
     }
 }

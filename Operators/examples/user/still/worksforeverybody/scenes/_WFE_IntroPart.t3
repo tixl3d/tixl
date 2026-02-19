@@ -50,7 +50,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\user\\still\\proj-worksforeverybody\\geometry\\tv-screen.obj"
+          "Value": "Examples:user/still/proj-worksforeverybody/geometry/tv-screen.obj"
         }
       ],
       "Outputs": []
@@ -333,7 +333,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\user\\still\\proj-worksforeverybody\\geometry\\tv-case.obj"
+          "Value": "Examples:user/still/proj-worksforeverybody/geometry/tv-case.obj"
         }
       ],
       "Outputs": []
@@ -603,7 +603,7 @@
         {
           "Id": "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3"/*FontPath*/,
           "Type": "System.String",
-          "Value": "Resources\\fonts\\RobotoSlab-Black.fnt"
+          "Value": "Examples:fonts/RobotoSlab-Black.fnt"
         },
         {
           "Id": "d89c518c-a862-4f46-865b-0380350b7417"/*Size*/,
@@ -943,7 +943,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\common\\HDRI\\studio_small_08-prefiltered.dds"
+          "Value": "Lib:pbr/studio_small_08-prefiltered.dds"
         }
       ],
       "Outputs": []
@@ -1012,7 +1012,7 @@
         {
           "Id": "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3"/*FontPath*/,
           "Type": "System.String",
-          "Value": "Resources\\fonts\\Roboto-Regular.fnt"
+          "Value": "Examples:fonts/Roboto-Regular.fnt"
         },
         {
           "Id": "82cc31ff-3307-4b6d-be70-16e471c2ffc9"/*HorizontalAlign*/,
@@ -1726,7 +1726,7 @@
         {
           "Id": "ef2a461d-c66d-44d8-8b0e-e48a57ec991f"/*FilePath*/,
           "Type": "System.String",
-          "Value": "Resources\\user\\still\\proj-worksforeverybody\\svg\\still-logo.svg"
+          "Value": "Examples:user/still/proj-worksforeverybody/svg/still-logo.svg"
         }
       ],
       "Outputs": []

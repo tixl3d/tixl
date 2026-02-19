@@ -7,8 +7,8 @@
       "ActivationIndex": 1,
       "Title": "untitled",
       "PosOnCanvas": {
-        "X": 164.82965,
-        "Y": -244.63971
+        "X": 165.16098,
+        "Y": -197.63695
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -27,8 +27,8 @@
       "ActivationIndex": 2,
       "Title": "Transparent",
       "PosOnCanvas": {
-        "X": 164.82965,
-        "Y": -151.63971
+        "X": 165.16098,
+        "Y": -75.08639
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -47,8 +47,8 @@
       "ActivationIndex": 3,
       "Title": "256",
       "PosOnCanvas": {
-        "X": 327.82965,
-        "Y": -151.63971
+        "X": 328.16098,
+        "Y": -75.08639
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -71,8 +71,8 @@
       "ActivationIndex": 4,
       "Title": "64",
       "PosOnCanvas": {
-        "X": 327.82965,
-        "Y": -244.63971
+        "X": 328.16098,
+        "Y": -320.1875
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -95,8 +95,8 @@
       "ActivationIndex": 5,
       "Title": "512",
       "PosOnCanvas": {
-        "X": 327.82965,
-        "Y": -58.63971
+        "X": 328.16098,
+        "Y": 47.464172
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -119,8 +119,8 @@
       "ActivationIndex": 6,
       "Title": "untitled",
       "PosOnCanvas": {
-        "X": 164.82965,
-        "Y": -58.63971
+        "X": 165.16098,
+        "Y": 47.464172
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -139,8 +139,8 @@
       "ActivationIndex": 7,
       "Title": "1px Black",
       "PosOnCanvas": {
-        "X": 164.82965,
-        "Y": -337.6397
+        "X": 165.16098,
+        "Y": -320.1875
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -159,8 +159,8 @@
       "ActivationIndex": 8,
       "Title": "Fast",
       "PosOnCanvas": {
-        "X": 0.0,
-        "Y": 93.0
+        "X": 2.1609802,
+        "Y": 47.464172
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {

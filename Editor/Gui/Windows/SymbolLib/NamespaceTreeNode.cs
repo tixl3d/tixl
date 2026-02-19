@@ -14,12 +14,14 @@ internal sealed class NamespaceTreeNode
 {
     internal string Name { get; private set; }
     internal List<NamespaceTreeNode> Children { get; } = new();
+    internal readonly int Id;
     private NamespaceTreeNode? Parent { get; }
 
     internal NamespaceTreeNode(string name, NamespaceTreeNode? parent = null)
     {
         Name = name;
         Parent = parent;
+        Id = name.GetHashCode();
     }
 
     internal string GetAsString()

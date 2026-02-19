@@ -42,7 +42,7 @@ public sealed class TimeClipSlot<T> : Slot<T>, ITimeClipProvider, IOutputDataUse
 
     public void SetOutputData(IOutputData data)
     {
-        TimeClip = (TimeClip)data;
+        TimeClip = data as TimeClip ?? new TimeClip();
         TimeClip.Id = Parent.SymbolChildId;
         TimeClip.UsedForRegionMapping = Parent is not IPreventingTimeRemap;
     }

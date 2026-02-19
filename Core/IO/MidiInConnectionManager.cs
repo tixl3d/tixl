@@ -8,6 +8,55 @@ namespace Operators.Utils;
 
 public static class MidiConnectionManager
 {
+    /// <summary>
+    /// Tracks which MIDI devices are currently being controlled by compatible devices.
+    /// When a device is in control mode, its messages should not be passed through to graph operators.
+    /// </summary>
+    private static readonly HashSet<string> _controlledDevices = new();
+    
+    /// <summary>
+    /// Sets whether a MIDI device should block messages from being passed to graph operators.
+    /// When true, the device is in "control mode" - messages are consumed by the compatible device.
+    /// When false, the device is in "passthrough mode" - messages are passed to graph operators.
+    /// </summary>
+    public static void SetDeviceControlMode(string productName, bool controlMode)
+    {
+        if (controlMode)
+        {
+            if (_controlledDevices.Add(productName))
+            {
+                Log.Debug($"MIDI Device '{productName}' set to CONTROL mode (blocking passthrough)");
+            }
+        }
+        else
+        {
+            if (_controlledDevices.Remove(productName))
+            {
+                Log.Debug($"MIDI Device '{productName}' set to PASSTHROUGH mode");
+            }
+        }
+    }
+    
+    /// <summary>
+    /// Checks if a MIDI device is currently being controlled and should block passthrough.
+    /// </summary>
+    public static bool IsDeviceInControlMode(string productName)
+    {
+        return _controlledDevices.Contains(productName);
+    }
+    
+    /// <summary>
+    /// Checks if a MIDI device is currently being controlled and should block passthrough.
+    /// </summary>
+    public static bool IsDeviceInControlMode(MidiIn midiIn)
+    {
+        if (_devicesByMidiIn.TryGetValue(midiIn, out var device))
+        {
+            return _controlledDevices.Contains(device.ProductName);
+        }
+        return false;
+    }
+    
     public static void RegisterConsumer(IMidiConsumer consumer)
     {
         if (!Initialized)

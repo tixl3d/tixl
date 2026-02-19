@@ -97,18 +97,23 @@ internal sealed class SkillMapCanvas : HexCanvas
             if (!SkillMapData.TryGetTopic(unlockTargetId, out var targetTopic))
                 continue;
 
+            
+            
             var targetPos = MapCoordsToScreenPos(targetTopic.MapCoordinate);
+            var isLocked = targetTopic.ProgressionState is QuestTopic.ProgressStates.Locked or QuestTopic.ProgressStates.Upcoming;
+            var lockedFade = isLocked ? 0.5f : 1;
             var delta = posOnScreen - targetPos;
             var direction = Vector2.Normalize(delta);
             var angle = -MathF.Atan2(delta.X, delta.Y) - MathF.PI / 2;
-            var fadeLine = (delta.Length() / Scale.X).RemapAndClamp(0f, 1000f, 1, 0.06f);
+            var fadeLine = (delta.Length() / Scale.X).RemapAndClamp(0f, 2000f, 1, 0.06f) * lockedFade;
 
             dl.AddLine(posOnScreen - direction * radius * 0.83f,
                        targetPos + direction * radius * 0.83f,
                        typeColor.Fade(fadeLine),
                        2);
+            
             dl.AddNgonRotated(targetPos + direction * radius * 0.83f,
-                              10 * Scale.X,
+                              15 * Scale.X,
                               typeColor.Fade(fadeLine),
                               true,
                               3,
@@ -117,10 +122,10 @@ internal sealed class SkillMapCanvas : HexCanvas
 
         if (!string.IsNullOrEmpty(topic.Title))
         {
-            var labelAlpha = Scale.X.RemapAndClamp(0.3f, 0.8f, 0, 1);
+            var labelAlpha = Scale.X.RemapAndClamp(0.25f, 0.6f, 0, 1);
             if (labelAlpha > 0.01f)
             {
-                ImGui.PushFont(Scale.X < 0.6f ? Fonts.FontSmall : Fonts.FontNormal);
+                ImGui.PushFont(Scale.X < 0.55f ? Fonts.FontSmall : Fonts.FontNormal);
                 CustomImguiDraw.AddWrappedCenteredText(dl, 
                                                        topic.Title, 
                                                        posOnScreen - new Vector2(0, 10f * Scale.Y), 
@@ -129,20 +134,20 @@ internal sealed class SkillMapCanvas : HexCanvas
                                                        verticalAlign:0.7f);
                 ImGui.PopFont();
 
-                if (topic.ProgressionState == QuestTopic.ProgressStates.Locked
-                    || topic.ProgressionState == QuestTopic.ProgressStates.Upcoming
+                if (
+                    topic.ProgressionState == QuestTopic.ProgressStates.Upcoming
                    )
                 {
                     Icons.DrawIconAtScreenPosition(Icon.Locked, (posOnScreen + new Vector2(-Icons.FontSize / 2, 25f * Scale.Y)).Floor(),
                                                    dl,
                                                    UiColors.ForegroundFull.Fade(0.4f * labelAlpha));
                 }
-                else if (topic.ProgressionState == QuestTopic.ProgressStates.Locked)
-                {
-                    Icons.DrawIconAtScreenPosition(Icon.Locked, (posOnScreen + new Vector2(-Icons.FontSize / 2, 25f * Scale.Y)).Floor(),
-                                                   dl,
-                                                   UiColors.ForegroundFull.Fade(0.4f * labelAlpha));
-                }
+                // else if (topic.ProgressionState == QuestTopic.ProgressStates.Locked)
+                // {
+                //     Icons.DrawIconAtScreenPosition(Icon.Locked, (posOnScreen + new Vector2(-Icons.FontSize / 2, 25f * Scale.Y)).Floor(),
+                //                                    dl,
+                //                                    UiColors.ForegroundFull.Fade(0.4f * labelAlpha));
+                // }
                 else if (topic.ProgressionState == QuestTopic.ProgressStates.Completed)
                 {
                     Icons.DrawIconAtScreenPosition(Icon.Checkmark, (posOnScreen + new Vector2(-Icons.FontSize / 2, 25f * Scale.Y)).Floor(),

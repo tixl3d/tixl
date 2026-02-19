@@ -1,0 +1,120 @@
+{
+  "Id": "bf4daa46-ed0f-4a87-9ba1-93631b2ca29a"/*DelaunayMesh*/,
+  "Description": "Generate a mesh from point list",
+  "SymbolTags": "192",
+  "InputUis": [
+    {
+      "InputId": "0b30e8f2-44d7-41db-b38b-e6a053b1aeba"/*Tweak*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      },
+      "Description": "remove points around the boundary shape"
+    },
+    {
+      "InputId": "18fddd63-db79-4ee6-9a32-b90a5ceff582"/*BoundaryPoints*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "Defines the mesh boundaries"
+    },
+    {
+      "InputId": "3236e937-9dbe-41e8-aafa-c0c13c56bcdf"/*Seed*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      },
+      "Description": "Point distribution seed"
+    },
+    {
+      "InputId": "4784908f-ac12-47a0-9542-d65242acace3"/*Stretch*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "GroupTitle": "Scaling",
+      "Description": "Controls the scaling:\nX: Width\nY: Height",
+      "Scale": 0.01
+    },
+    {
+      "InputId": "50c16e0b-6f5a-408d-b3d1-5f402e4f402e"/*Rotation*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 135.0
+      },
+      "Description": "Rotates the Mesh",
+      "AddPadding": "True",
+      "Scale": 0.1
+    },
+    {
+      "InputId": "58164bef-0da2-4d2f-b086-392b48826f6b"/*Pivot*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "GroupTitle": "Position and Rotation",
+      "Description": "Offsets the position of the pivot point (center).\n\nThis is helpful to change the point around which the Mesh rotates / along which it is scaled.",
+      "Scale": 0.01
+    },
+    {
+      "InputId": "a5c4c31e-7b3c-4f3e-9d1f-8e2b4d5c6a7b"/*MaxEdgeLength*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 210.0
+      },
+      "Description": "Remove triangles according to edge length",
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true
+    },
+    {
+      "InputId": "db3c69b1-403b-485b-94e8-fc7e8b566947"/*ExtraPoints*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      },
+      "Description": "works only if Fill density is set to 0"
+    },
+    {
+      "InputId": "df51a336-a11e-466b-a312-0cecb9db08f1"/*Center*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      },
+      "Description": "Transforms the position of the pivot",
+      "Scale": 0.01
+    },
+    {
+      "InputId": "e00e4b12-8576-4a78-b773-17630b102a70"/*FillDensity*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      },
+      "GroupTitle": "Inner points distribution",
+      "Description": "distribute points inside the mesh",
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true
+    },
+    {
+      "InputId": "f3c23e04-240c-46b0-8581-db682f49c898"/*Scale*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Scale": 0.01
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "6c85e367-f91c-4f3d-9d3d-e422a521e3a9"/*Data*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

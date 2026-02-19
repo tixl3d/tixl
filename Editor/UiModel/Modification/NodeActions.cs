@@ -10,6 +10,7 @@ using T3.Core.DataTypes;
 using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Core.Resource;
+using T3.Core.Resource.Assets;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.OutputUi;
 using T3.Editor.Gui.Styling;
@@ -491,7 +492,7 @@ internal static class NodeActions
         {
             var relative = op.Path.GetCurrentValue();
             var instance = op.Instance;
-            return ResourceManager.TryResolveRelativePath(relative, instance, out filePath, out package);
+            return AssetRegistry.TryResolveAddress(relative, instance, out filePath, out package);
         }
     }
 

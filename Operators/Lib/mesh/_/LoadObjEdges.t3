@@ -3,7 +3,7 @@
   "Inputs": [
     {
       "Id": "b6932cbd-e6b6-447b-b416-701326227864"/*Path*/,
-      "DefaultValue": "Resources\\common\\meshes\\marblePlayer.obj"
+      "DefaultValue": "Examples:meshes/marblePlayer.obj"
     }
   ],
   "Children": [],

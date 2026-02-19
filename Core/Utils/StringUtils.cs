@@ -372,6 +372,9 @@ public static class StringUtils
         precedingChar = default;
         return -1;
     }
+    
+    
+    
 
     /// <summary>
     /// A naive implementation of a filtering algorithm that supports wildcards ('*').
@@ -381,10 +384,10 @@ public static class StringUtils
     /// so "a*b**c" will match "a/b/anything/c" (expected) and "a/anything/b/c" (possibly unexpected) -
     /// there is no special directory treatment as is standard in most file search implementations.
     /// 
-    /// Technically, the search begins from the end of the filter and the end of the possible match, and works backwards. This is because
+    /// Technically, the search begins from the end of the filter and the end of the possible match, and works backwards.
     /// 
-    /// This is mostly intended for use in file path searches, where the end of the path is the most likely to be the most specific, and the end of the search term
-    /// is most likely to change with consecutive calls.
+    /// This is mostly intended for use in file path searches, where the end of the path is the most likely to be the most specific,
+    /// and the end of the search term is most likely to change with consecutive calls.
     /// </summary>
     /// <param name="possibleMatch">string you want to check for a match</param>
     /// <param name="filter">The filter to match against</param>
@@ -482,6 +485,26 @@ public static class StringUtils
     public static string GetReadableRelativeTime(double time)
     {
         return GetReadableRelativeTime(TimeSpan.FromSeconds(time));
+    }
+
+    public static string GetReadableFileSize(long size)
+    {
+        var gb = 1024 * 1024 * 1024;
+        var mb = 1024 * 1024;
+        
+        if (size > gb)
+        {
+            // ReSharper disable once PossibleLossOfFraction
+            return $"{size * 100 / gb * 0.01f:0.00} Gb";
+        }
+
+        if (size > mb)
+        {
+            // ReSharper disable once PossibleLossOfFraction
+            return $"{size * 100 / mb * 0.01f:0.00} Mb";
+        }
+
+        return $"{size} bytes";
     }
 
     private static string GetReadableRelativeTime([DisallowNull] TimeSpan? timeSpan)
@@ -584,6 +607,35 @@ public static class StringUtils
         return results;
     }
 
+    public static int LevenshteinDistance(ReadOnlySpan<char> s, ReadOnlySpan<char> t)
+    {
+        if (s.Length == 0) return t.Length;
+        if (t.Length == 0) return s.Length;
+
+        // Use two rows to save memory
+        var v0 = new int[t.Length + 1];
+        var v1 = new int[t.Length + 1];
+
+        for (var i = 0; i <= t.Length; i++)
+            v0[i] = i;
+
+        for (var i = 0; i < s.Length; i++)
+        {
+            v1[0] = i + 1;
+
+            for (var j = 0; j < t.Length; j++)
+            {
+                var cost = (s[i] == t[j]) ? 0 : 1;
+                v1[j + 1] = Math.Min(v1[j] + 1, Math.Min(v0[j + 1] + 1, v0[j] + cost));
+            }
+
+            Array.Copy(v1, v0, v0.Length);
+        }
+
+        return v0[t.Length];
+    }
+    
+    
     public static string ShortenGuid(this Guid guid, int length = 7)
     {
         if (length < 1 || length > 22)
@@ -623,5 +675,19 @@ public static class StringUtils
             len = text.Length;
 
         return text.AsSpan(0, len);
+    }
+
+    /// <summary>
+    
+    /// </summary>
+    public static Guid GenerateGuidFromString(this string name)
+    {
+        if (string.IsNullOrEmpty(name))
+            return Guid.Empty;
+
+        // Use MD5 to create a deterministic 16-byte hash from the name
+        using var md5 = System.Security.Cryptography.MD5.Create();
+        byte[] hash = md5.ComputeHash(System.Text.Encoding.UTF8.GetBytes(name));
+        return new Guid(hash);
     }
 }

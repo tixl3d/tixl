@@ -43,5 +43,4 @@ public sealed class GeometryShader : Instance<GeometryShader>, IShaderOperator<G
     IStatusProvider.StatusLevel IStatusProvider.GetStatusLevel() => _statusProviderImplementation.GetStatusLevel();
     string IStatusProvider.GetStatusMessage() => _statusProviderImplementation.GetStatusMessage();
     #endregion
-    public IEnumerable<string> FileFilter { get; } = ["*.geom", "*.geom.hlsl", ResourceManager.DefaultShaderFilter];
 }

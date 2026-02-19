@@ -1,0 +1,175 @@
+{
+  "Id": "c6ae0c1e-b598-4bd2-81f7-97cf2af4f729"/*P01a_PointIntro*/,
+  "Description": "A point is not just a Point",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "03f5e7ee-ba75-4b18-a8cd-1bb2fb91fbeb"/*AnimValue*/,
+      "AnnotationId": "ca2f5eed-a08e-40f0-a610-64b59fa06e32",
+      "Position": {
+        "X": 1216.6234,
+        "Y": 2318.6
+      }
+    },
+    {
+      "ChildId": "0754549e-050c-4951-bcd8-ce0f001ee681"/*RenderTarget*/,
+      "Position": {
+        "X": 1670.4669,
+        "Y": 1902.6832
+      }
+    },
+    {
+      "ChildId": "0e5a5c64-2100-4fef-bbfb-b912ebda2350"/*DrawPoints*/,
+      "Position": {
+        "X": 1670.4669,
+        "Y": 1867.6832
+      }
+    },
+    {
+      "ChildId": "13679bd8-8fa1-446b-96cf-4f571b82ddc0"/*ImageQuiz*/,
+      "Position": {
+        "X": 1814.85,
+        "Y": 2037.3966
+      }
+    },
+    {
+      "ChildId": "217a6caf-b112-48b4-87c9-33265096cd7f"/*Point*/,
+      "Position": {
+        "X": 1670.4669,
+        "Y": 1832.6832
+      }
+    },
+    {
+      "ChildId": "2543a81f-ca63-4642-abb4-0e2111017a33"/*PerlinNoise3*/,
+      "AnnotationId": "ca2f5eed-a08e-40f0-a610-64b59fa06e32",
+      "Position": {
+        "X": 1356.6234,
+        "Y": 2248.6
+      }
+    },
+    {
+      "ChildId": "2d3e7157-7655-4e04-ab7b-84a6137cc6ce"/*AnimValue*/,
+      "Position": {
+        "X": 1285.017,
+        "Y": 1876.1246
+      }
+    },
+    {
+      "ChildId": "6eddf117-09f5-4f12-b1ab-4119c8859b25"/*PerlinNoise3*/,
+      "Position": {
+        "X": 1420.922,
+        "Y": 1768.2473
+      }
+    },
+    {
+      "ChildId": "738f5dc0-e3d0-4491-aa84-2d41d3ac266c"/*PerlinNoise*/,
+      "AnnotationId": "ca2f5eed-a08e-40f0-a610-64b59fa06e32",
+      "Position": {
+        "X": 1356.6234,
+        "Y": 2283.6
+      }
+    },
+    {
+      "ChildId": "b128d131-a6a2-4d6b-9fa3-5196aa4b5b59"/*Point*/,
+      "AnnotationId": "ca2f5eed-a08e-40f0-a610-64b59fa06e32",
+      "Position": {
+        "X": 1496.6234,
+        "Y": 2248.6
+      }
+    },
+    {
+      "ChildId": "b12920d8-0b9b-4ad1-b0bf-2a6c21939964"/*SampleGradient*/,
+      "AnnotationId": "ca2f5eed-a08e-40f0-a610-64b59fa06e32",
+      "Position": {
+        "X": 1356.6234,
+        "Y": 2318.6
+      }
+    },
+    {
+      "ChildId": "cf795ab9-aec3-4bfb-8fca-d0ab6dee0bf4"/*PerlinNoise*/,
+      "Position": {
+        "X": 1420.922,
+        "Y": 1820.6504
+      }
+    },
+    {
+      "ChildId": "e8c44512-734b-44e7-8fb2-54530e1fefc1"/*RenderTarget*/,
+      "AnnotationId": "ca2f5eed-a08e-40f0-a610-64b59fa06e32",
+      "Position": {
+        "X": 1496.6234,
+        "Y": 2388.6
+      }
+    },
+    {
+      "ChildId": "e8fa8a53-341e-4a22-b1ef-e046c98db0e0"/*SampleGradient*/,
+      "Position": {
+        "X": 1425.017,
+        "Y": 1876.1246
+      }
+    },
+    {
+      "ChildId": "ea65aec3-0770-4deb-a80d-a6d6729563ee"/*DrawPoints*/,
+      "AnnotationId": "ca2f5eed-a08e-40f0-a610-64b59fa06e32",
+      "Position": {
+        "X": 1496.6234,
+        "Y": 2353.6
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "aa08e511-c700-41ed-866e-eab616612717"/*ColorBuffer*/,
+      "Position": {
+        "X": 1814.85,
+        "Y": 2107.3965
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "ca2f5eed-a08e-40f0-a610-64b59fa06e32",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1141.2709,
+        "Y": 2071.5068
+      },
+      "Size": {
+        "X": 569.99976,
+        "Y": 406.08594
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "e64ce306-4078-4309-bb9d-df698a4136f7",
+      "ChildId": "217a6caf-b112-48b4-87c9-33265096cd7f",
+      "Description": "You might think that a point only has a position. But in TiXL a point has many more attribtues.",
+      "Style": "InfoFor"
+    },
+    {
+      "Id": "946d6a6d-5001-462a-b7b9-c36d2f31355b",
+      "ChildId": "6eddf117-09f5-4f12-b1ab-4119c8859b25",
+      "Description": "Okay. Let's start with the position.\nConnect the PerlinNoise3 to the point's Position parameter.",
+      "Style": "CallToAction"
+    },
+    {
+      "Id": "f34575b8-a5b3-4012-8cf5-30cd34e81aa1",
+      "ChildId": "e8fa8a53-341e-4a22-b1ef-e046c98db0e0",
+      "Description": "It has a Color.\nConnect the SampleGradient to the point's color.",
+      "Style": "CallToAction"
+    },
+    {
+      "Id": "5adab61a-d4f9-4496-b723-d45d6e5a3a35",
+      "ChildId": "cf795ab9-aec3-4bfb-8fca-d0ab6dee0bf4",
+      "Description": "It has a Size!\nConnect the [PerlinNoise] to the point's Scale parameter.",
+      "Style": "InfoFor"
+    }
+  ]
+}

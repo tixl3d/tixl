@@ -359,7 +359,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/user/still/proj-worksforeverybody/geometry/classroom/bake-04.obj"
+          "Value": "Examples:user/still/proj-worksforeverybody/geometry/classroom/bake-04.obj"
         }
       ],
       "Outputs": []
@@ -562,7 +562,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/user/still/proj-worksforeverybody/geometry/classroom/tv-stand.png"
+          "Value": "Examples:user/still/proj-worksforeverybody/geometry/classroom/tv-stand.png"
         }
       ],
       "Outputs": []
@@ -632,7 +632,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/user/still/proj-worksforeverybody/geometry/classroom/TV_1970_Mat_normal.png"
+          "Value": "Examples:user/still/proj-worksforeverybody/geometry/classroom/TV_1970_Mat_normal.png"
         }
       ],
       "Outputs": []
@@ -681,7 +681,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/user/still/proj-worksforeverybody/geometry/classroom/TV-Stand-01.obj"
+          "Value": "Examples:user/still/proj-worksforeverybody/geometry/classroom/TV-Stand-01.obj"
         }
       ],
       "Outputs": []
@@ -792,7 +792,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/user/still/proj-worksforeverybody/geometry/classroom/classroom-bake.jpg"
+          "Value": "Examples:user/still/proj-worksforeverybody/geometry/classroom/classroom-bake.jpg"
         }
       ],
       "Outputs": []
@@ -804,7 +804,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/user/still/proj-worksforeverybody/geometry/classroom/TV-1970-body-01.obj"
+          "Value": "Examples:user/still/proj-worksforeverybody/geometry/classroom/TV-1970-body-01.obj"
         }
       ],
       "Outputs": []
@@ -1308,7 +1308,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/user/still/proj-worksforeverybody/geometry/classroom/TV-1970-screen-01.obj"
+          "Value": "Examples:user/still/proj-worksforeverybody/geometry/classroom/TV-1970-screen-01.obj"
         }
       ],
       "Outputs": []
@@ -1336,7 +1336,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/user/still/proj-worksforeverybody/geometry/classroom/the_sky_is_on_fire.jpg"
+          "Value": "Examples:user/still/proj-worksforeverybody/geometry/classroom/the_sky_is_on_fire.jpg"
         }
       ],
       "Outputs": []
@@ -1741,7 +1741,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/user/still/proj-worksforeverybody/geometry/classroom/TV_1970_Mat_baseColor.jpeg"
+          "Value": "Examples:user/still/proj-worksforeverybody/geometry/classroom/TV_1970_Mat_baseColor.jpeg"
         }
       ],
       "Outputs": []

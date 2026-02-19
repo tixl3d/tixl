@@ -274,7 +274,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/images/basic/white-dot-256px.png"
+          "Value": "Lib:images/basic/white-dot-256px.png"
         }
       ],
       "Outputs": []
@@ -360,7 +360,7 @@
         {
           "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
           "Type": "System.String",
-          "Value": "/Lib/points/draw-sorted/sort-6-SetupDrawArgs.hlsl"
+          "Value": "Lib:shaders/points/draw-sorted/sort-6-SetupDrawArgs.hlsl"
         },
         {
           "Id": "c0701d0b-d37f-4570-9e9a-ec2e88b919d1"/*DebugName*/,
@@ -377,7 +377,7 @@
         {
           "Id": "0b5cbbdf-afe7-4daf-9f1e-0e79792691f1"/*TemplateFilePath*/,
           "Type": "System.String",
-          "Value": "/Lib/points/draw/DrawPointsDOF-template.hlsl"
+          "Value": "Lib:shaders/points/draw/DrawPointsDOF-template.hlsl"
         },
         {
           "Id": "f6fb3be8-53f2-4d68-bf0f-3f519bc09ff4"/*AdditionalDefines*/,
@@ -399,7 +399,7 @@
         {
           "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
           "Type": "System.String",
-          "Value": "/Lib/points/draw-sorted/sort-2-CountBuckets.hlsl"
+          "Value": "Lib:shaders/points/draw-sorted/sort-2-CountBuckets.hlsl"
         },
         {
           "Id": "c0701d0b-d37f-4570-9e9a-ec2e88b919d1"/*DebugName*/,
@@ -545,7 +545,7 @@
         {
           "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
           "Type": "System.String",
-          "Value": "/Lib/points/draw-sorted/sort-4-CopyPrefixSum.hlsl"
+          "Value": "Lib:shaders/points/draw-sorted/sort-4-CopyPrefixSum.hlsl"
         },
         {
           "Id": "c0701d0b-d37f-4570-9e9a-ec2e88b919d1"/*DebugName*/,
@@ -567,7 +567,7 @@
         {
           "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
           "Type": "System.String",
-          "Value": "/Lib/points/draw-sorted/sort-5-WriteSortIndices.hlsl"
+          "Value": "Lib:shaders/points/draw-sorted/sort-5-WriteSortIndices.hlsl"
         },
         {
           "Id": "c0701d0b-d37f-4570-9e9a-ec2e88b919d1"/*DebugName*/,
@@ -601,7 +601,7 @@
         {
           "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
           "Type": "System.String",
-          "Value": "/Lib/points/draw-sorted/sort-1-CleanBucketCounter.hlsl"
+          "Value": "Lib:shaders/points/draw-sorted/sort-1-CleanBucketCounter.hlsl"
         }
       ],
       "Outputs": []

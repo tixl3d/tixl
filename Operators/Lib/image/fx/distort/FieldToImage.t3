@@ -51,7 +51,7 @@
       "DefaultValue": 0
     },
     {
-      "Id": "d99d1e27-caba-4a9a-b689-8c965b9af89e"/*Grandient*/,
+      "Id": "d99d1e27-caba-4a9a-b689-8c965b9af89e"/*Gradient*/,
       "DefaultValue": {
         "Gradient": {
           "Interpolation": "Linear",
@@ -180,7 +180,7 @@
         {
           "Id": "0b5cbbdf-afe7-4daf-9f1e-0e79792691f1"/*TemplateFilePath*/,
           "Type": "System.String",
-          "Value": "lib/img/generate/FieldToImageTemplate.hlsl"
+          "Value": "Lib:shaders/img/generate/FieldToImageTemplate.hlsl"
         },
         {
           "Id": "f6fb3be8-53f2-4d68-bf0f-3f519bc09ff4"/*AdditionalDefines*/,
@@ -290,7 +290,7 @@
         {
           "Id": "78fb7501-74d9-4a27-8db2-596f25482c87"/*Source*/,
           "Type": "System.String",
-          "Value": "Resources/lib/img/fx/Default2-vs.hlsl"
+          "Value": "Lib:shaders/img/fx/Default2-vs.hlsl"
         },
         {
           "Id": "9a8b500e-c3b1-4be1-8270-202ef3f90793"/*EntryPoint*/,

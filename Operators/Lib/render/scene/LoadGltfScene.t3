@@ -3,7 +3,7 @@
   "Inputs": [
     {
       "Id": "292e80cf-ba31-4a50-9bf4-83712430f811"/*Path*/,
-      "DefaultValue": "/t3/meshes/DamagedHelmet.glb"
+      "DefaultValue": "Examples:meshes/DamagedHelmet.glb"
     },
     {
       "Id": "49237499-9b1e-4371-afac-4e3394868370"/*OffsetMetallic*/,

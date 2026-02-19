@@ -80,7 +80,7 @@
         {
           "Id": "1e4e274b-60b2-4fe8-b275-ebef80d520a7"/*Source*/,
           "Type": "System.String",
-          "Value": "/Lib/img/fx/SinForm.hlsl"
+          "Value": "Lib:shaders/img/fx/SinForm.hlsl"
         },
         {
           "Id": "3fe1b650-ce34-4155-9b61-0425e39f7690"/*Wrap*/,
@@ -102,7 +102,7 @@
         {
           "Id": "16dce9bc-02d9-48f8-b07e-94a9af48d27b"/*Source*/,
           "Type": "System.String",
-          "Value": "Resources/lib/img/fx/SinForm.hlsl"
+          "Value": "Lib:shaders/img/fx/SinForm.hlsl"
         },
         {
           "Id": "432c1a23-bf28-4595-923f-6c5a442fa90a"/*OutputFormat*/,

@@ -1,6 +1,7 @@
 {
   "Id": "0d94d3d9-3023-4763-b80c-2c63415500d4"/*TransformPointsExample*/,
   "Description": "Example on how to combine [SelectPoints] with [TransformPoints] in point space.\n\nTip: Toggle Gizmos in View to see point visualization.",
+  "SymbolTags": "1024",
   "InputUis": [],
   "SymbolChildUis": [
     {

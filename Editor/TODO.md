@@ -4,6 +4,9 @@
 - [ ] Rearranging parameters with additional annotations (e.g. ShaderParameters) breaks operator 
 - [ ] Pre/Post Curve modes are applied to all (not just selected curves)
 - [ ] Indicate Pre/Post curve moves in timeline
+- [ ] Fix Add input disabled before switching type
+- [ ] Reset modifier keys if app regets focus
+- [ ] Publish output from Graph
 
 - [ ] Ask before removing inputs and outputs (can't be undone)
 - [ ] Fix MultiInput connection editing
@@ -28,9 +31,52 @@
 - [ ] Idea: Add option to switch space of SnapToAnglesForce 
 - [ ] Fix: SwitchParticleForce filtering with -1 and -2
 - [ ] Fix: render-Resolution factor is no longer working?
-- 
 - [ ] Complete import T3-project window?
+- [ ] Test create new project
 
+
+# Clean up Asset-Paths
+- [x] Implement auto fix methods
+- [x] Test for Lib and example
+- [x] Sort SharedResources -> Lib/ and Examples/
+- [x] Write new resource-paths to all symbols
+- [x] Test File drop
+- [x] Test Asset Library
+- [.] Fix startup warnings
+- [x] Simplify resource uri resolve method
+- [.] Run tests
+- [x] Introduce ignores files list
+- [x] Extra AssetRegistry
+- [x] Move AssetTypes to Core
+- [x] Extend Asset with isDirectory
+- [x] Return temp Assets?
+- [x] Update conform
+- [x] Check file hook on rename
+- [x] Check file hook on delete
+- [x] Add FolderPaths Assets
+- [x] In AssetLib (only use AssetRegistry)
+- [.] Test Recompile / Symbol Reload
+- [x] Rename "Resource/" -> "Assets/"
+
+## Asset Lib
+- [x] Fix count alignment
+- [x] Fix selection sync
+- [x] Automatically open "Examples" instead of "Lib" on Asset Library
+- [x] Highlight current project in Asset browser (Bold?)
+- [ ] Implement search
+- [ ] Handle File asset Drag and Drop between folders
+- [ ] Implement multi selection
+- [ ] Check .\Lib\Resources\shaders\points\sim\SimSamplePointAttributes.hlsl
+- [ ] Maybe: Fix paths with pasting symbols from (e.g. from Discord)
+- [x] Use AssetTypes and AssetRegistry to draw FilePicking with filters
+- [x] Disabled asset browser popup
+- [ ] Collect AssetReferences on package load
+- [ ] List all uses for an Asset
+- [x] Replace [...] button with "open asset lib" window action
+
+optional:
+- [ ] ~~Add some kind of cache which projects have been "fixed"~~ 
+- [ ] Move obsolete user examples to separate project
 
 # Skill Quest
 

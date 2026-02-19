@@ -76,7 +76,7 @@
       },
       "AddPadding": "True",
       "Usage": "FilePath",
-      "FileFilter": "Fonts (*.fnt)|*.fnt"
+      "FileFilter": "fnt"
     },
     {
       "InputId": "f2dd87b1-7f37-4b02-871b-b2e35972f246"/*Text*/,

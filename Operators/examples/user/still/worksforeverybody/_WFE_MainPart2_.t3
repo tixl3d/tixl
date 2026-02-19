@@ -2619,7 +2619,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\user\\still\\proj-worksforeverybody\\_shared\\storyboard\\v02\\B12.jpg"
+          "Value": "Examples:Resources/user/still/proj-worksforeverybody/_shared/storyboard/v02/B12.jpg"
         }
       ],
       "Outputs": []
@@ -3573,7 +3573,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\user\\still\\proj-worksforeverybody\\_shared\\storyboard\\v02\\B11.jpg"
+          "Value": "Examples:Resources/user/still/proj-worksforeverybody/_shared/storyboard/v02/B11.jpg"
         }
       ],
       "Outputs": []
@@ -4379,7 +4379,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/images/basic/white.png"
+          "Value": "Lib:images/basic/white.png"
         }
       ],
       "Outputs": []
@@ -5660,7 +5660,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\user\\still\\proj-worksforeverybody\\_shared\\storyboard\\v02\\B13.jpg"
+          "Value": "Examples:Resources/user/still/proj-worksforeverybody/_shared/storyboard/v02/B13.jpg"
         }
       ],
       "Outputs": []
@@ -8188,7 +8188,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\user\\still\\proj-worksforeverybody\\_shared\\storyboard\\v02\\B16.jpg"
+          "Value": "Examples:Resources/user/still/proj-worksforeverybody/_shared/storyboard/v02/B16.jpg"
         }
       ],
       "Outputs": []
@@ -9229,7 +9229,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\user\\still\\proj-worksforeverybody\\_shared\\storyboard\\v02\\B06.jpg"
+          "Value": "Examples:Resources/user/still/proj-worksforeverybody/_shared/storyboard/v02/B06.jpg"
         }
       ],
       "Outputs": []

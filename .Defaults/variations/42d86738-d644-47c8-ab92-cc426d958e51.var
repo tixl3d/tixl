@@ -7,8 +7,8 @@
       "ActivationIndex": 1,
       "Title": "untitled",
       "PosOnCanvas": {
-        "X": -21.926254,
-        "Y": 68.288086
+        "X": -20.332428,
+        "Y": 97.39405
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -40,8 +40,8 @@
       "ActivationIndex": 3,
       "Title": "High Contrast",
       "PosOnCanvas": {
-        "X": -184.92625,
-        "Y": 68.288086
+        "X": -183.33243,
+        "Y": 97.39405
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -73,8 +73,8 @@
       "ActivationIndex": 3,
       "Title": "Gray Tonal",
       "PosOnCanvas": {
-        "X": -184.92625,
-        "Y": 254.28809
+        "X": -183.33243,
+        "Y": 342.49518
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -106,8 +106,8 @@
       "ActivationIndex": 4,
       "Title": "Vintage Cold",
       "PosOnCanvas": {
-        "X": -184.92625,
-        "Y": -24.711914
+        "X": -183.33243,
+        "Y": -25.15651
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -139,8 +139,8 @@
       "ActivationIndex": 5,
       "Title": "Darken",
       "PosOnCanvas": {
-        "X": -21.926254,
-        "Y": 161.28809
+        "X": -20.332428,
+        "Y": 219.94461
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -172,8 +172,8 @@
       "ActivationIndex": 6,
       "Title": "untitled",
       "PosOnCanvas": {
-        "X": -184.92625,
-        "Y": 161.28809
+        "X": -183.33243,
+        "Y": 219.94461
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -205,8 +205,8 @@
       "ActivationIndex": 7,
       "Title": "Underwater 1",
       "PosOnCanvas": {
-        "X": 622.15454,
-        "Y": 57.17913
+        "X": 468.66757,
+        "Y": 97.39405
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -238,8 +238,8 @@
       "ActivationIndex": 8,
       "Title": "Underwater 2",
       "PosOnCanvas": {
-        "X": 465.24,
-        "Y": 165.78568
+        "X": 305.66757,
+        "Y": 97.39405
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -271,8 +271,8 @@
       "ActivationIndex": 9,
       "Title": "Underwater 3",
       "PosOnCanvas": {
-        "X": 465.24,
-        "Y": 258.78568
+        "X": 305.66757,
+        "Y": 219.94461
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -304,8 +304,8 @@
       "ActivationIndex": 10,
       "Title": "Underwater 4",
       "PosOnCanvas": {
-        "X": 622.15454,
-        "Y": -35.820866
+        "X": 468.66757,
+        "Y": -25.15651
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -337,8 +337,8 @@
       "ActivationIndex": 11,
       "Title": "Original",
       "PosOnCanvas": {
-        "X": 459.15448,
-        "Y": -35.820866
+        "X": 305.66757,
+        "Y": -25.15651
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -370,8 +370,8 @@
       "ActivationIndex": 12,
       "Title": "Underwarter 5",
       "PosOnCanvas": {
-        "X": 465.24,
-        "Y": 351.78564
+        "X": 305.66757,
+        "Y": 342.49518
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -403,8 +403,8 @@
       "ActivationIndex": 13,
       "Title": "Light leak",
       "PosOnCanvas": {
-        "X": 161.50526,
-        "Y": 286.7373
+        "X": 142.66757,
+        "Y": 342.49518
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -436,8 +436,8 @@
       "ActivationIndex": 14,
       "Title": "The Sun Above",
       "PosOnCanvas": {
-        "X": 271.47784,
-        "Y": 495.99072
+        "X": 142.66757,
+        "Y": 587.5963
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -469,8 +469,8 @@
       "ActivationIndex": 15,
       "Title": "untitled",
       "PosOnCanvas": {
-        "X": 141.07375,
-        "Y": -24.711914
+        "X": 142.66757,
+        "Y": -25.15651
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -546,8 +546,8 @@
       "ActivationIndex": 17,
       "Title": "Red Green Blue",
       "PosOnCanvas": {
-        "X": -190.63321,
-        "Y": 615.7291
+        "X": -183.33243,
+        "Y": 587.5963
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -587,8 +587,8 @@
       "ActivationIndex": 18,
       "Title": "untitled",
       "PosOnCanvas": {
-        "X": 132.71832,
-        "Y": 88.06143
+        "X": 142.66757,
+        "Y": 97.39405
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -626,8 +626,8 @@
       "ActivationIndex": 19,
       "Title": "untitled",
       "PosOnCanvas": {
-        "X": -21.926254,
-        "Y": 254.28809
+        "X": -20.332428,
+        "Y": 342.49518
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -664,8 +664,8 @@
       "ActivationIndex": 20,
       "Title": "test",
       "PosOnCanvas": {
-        "X": -27.63321,
-        "Y": 615.7291
+        "X": -20.332428,
+        "Y": 587.5963
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {

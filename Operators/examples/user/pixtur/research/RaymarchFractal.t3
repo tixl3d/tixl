@@ -307,7 +307,7 @@
         {
           "Id": "24b7e7e1-fe0b-46be-807e-0afacd4800f9"/*FilePath*/,
           "Type": "System.String",
-          "Value": "/Lib/img/generate/RaymarchFractal.hlsl"
+          "Value": "Lib:shaders/img/generate/RaymarchFractal.hlsl"
         },
         {
           "Id": "5c6241f7-6a4f-4972-a314-98fd070f91dd"/*TriggerUpdate*/,
@@ -347,7 +347,7 @@
         {
           "Id": "78fb7501-74d9-4a27-8db2-596f25482c87"/*Source*/,
           "Type": "System.String",
-          "Value": "Resources/lib/img/generate/RaymarchFractal.hlsl"
+          "Value": "Lib:shaders/img/generate/RaymarchFractal.hlsl"
         },
         {
           "Id": "9a8b500e-c3b1-4be1-8270-202ef3f90793"/*EntryPoint*/,

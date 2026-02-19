@@ -129,8 +129,8 @@ public static class TableList
                     }
                     else if (o is Vector2 vector2)
                     {
-                        if (DrawFloatManipulation(ref vector2.X, fieldIndex * 100 + 0)
-                            | DrawFloatManipulation(ref vector2.Y, fieldIndex * 100 + 1))
+                        if (DrawFloatManipulation(ref vector2.X, fieldIndex, 0)
+                            | DrawFloatManipulation(ref vector2.Y, fieldIndex, 1))
                         {
                             fi.SetValue(obj, vector2);
                             objModified = true;
@@ -138,9 +138,9 @@ public static class TableList
                     }
                     else if (o is Vector3 vector3)
                     {
-                        if (DrawFloatManipulation(ref vector3.X, fieldIndex * 200 + 0)
-                            | DrawFloatManipulation(ref vector3.Y, fieldIndex * 200 + 1)
-                            | DrawFloatManipulation(ref vector3.Z, fieldIndex * 200 + 2))
+                        if (DrawFloatManipulation(ref vector3.X, fieldIndex, 0)
+                            | DrawFloatManipulation(ref vector3.Y, fieldIndex, 1)
+                            | DrawFloatManipulation(ref vector3.Z, fieldIndex, 2))
                         {
                             fi.SetValue(obj, vector3);
                             objModified = true;
@@ -148,10 +148,10 @@ public static class TableList
                     }
                     else if (o is Vector4 vector4)
                     {
-                        if (DrawFloatManipulation(ref vector4.X, fieldIndex * 300 + 0)
-                            | DrawFloatManipulation(ref vector4.Y, fieldIndex * 300 + 1)
-                            | DrawFloatManipulation(ref vector4.Z, fieldIndex * 300 + 2)
-                            | DrawFloatManipulation(ref vector4.W, fieldIndex * 300 + 3))
+                        if (DrawFloatManipulation(ref vector4.X, fieldIndex, 0)
+                            | DrawFloatManipulation(ref vector4.Y, fieldIndex, 1)
+                            | DrawFloatManipulation(ref vector4.Z, fieldIndex, 2)
+                            | DrawFloatManipulation(ref vector4.W, fieldIndex, 3))
                         {
                             fi.SetValue(obj, vector4);
                             objModified = true;
@@ -159,10 +159,10 @@ public static class TableList
                     }
                     else if (o is Quaternion q)
                     {
-                        if (DrawFloatManipulation(ref q.X, fieldIndex * 400 + 0)
-                            | DrawFloatManipulation(ref q.Y, fieldIndex * 400 + 1)
-                            | DrawFloatManipulation(ref q.Z, fieldIndex * 400 + 2)
-                            | DrawFloatManipulation(ref q.W, fieldIndex * 400 + 3))
+                        if (DrawFloatManipulation(ref q.X, fieldIndex, 0)
+                            | DrawFloatManipulation(ref q.Y, fieldIndex, 1)
+                            | DrawFloatManipulation(ref q.Z, fieldIndex, 2)
+                            | DrawFloatManipulation(ref q.W, fieldIndex, 3))
                         {
                             fi.SetValue(obj, q);
                             objModified = true;
@@ -204,9 +204,9 @@ public static class TableList
             
         return listModified;
 
-        bool DrawFloatManipulation(ref float f, int index = 0)
+        bool DrawFloatManipulation(ref float f, int fieldIndex, int componentIndex = 0)
         {
-            ImGui.PushID(index);
+            ImGui.PushID(fieldIndex * 1000 + componentIndex);
             ImGui.SetNextItemWidth(valueColumnWidth);
             var grayedOut = (Math.Abs(f) < 0.0001f);
             if (grayedOut)
@@ -220,7 +220,6 @@ public static class TableList
             {
                 ImGui.PopStyleColor();
             }
-                
             ImGui.SameLine();
             ImGui.PopID();
             return fieldModified;

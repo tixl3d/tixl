@@ -32,8 +32,7 @@ internal sealed class LoadObj : Instance<LoadObj>, IDescriptiveFilename, IStatus
             }
         }
 
-        var mesh = ObjMesh.LoadFromFile(absolutePath);
-        if (mesh == null || mesh.DistinctDistinctVertices.Count == 0)
+        if(!ObjMesh.TryLoadFromFile(absolutePath, out var mesh))
         {
             failureReason = $"Can't read file {absolutePath}";
             Log.Warning(failureReason, this);
@@ -124,6 +123,12 @@ internal sealed class LoadObj : Instance<LoadObj>, IDescriptiveFilename, IStatus
                     var sortedVertexIndex = sortedVertexIndices[vertexIndex];
                     var sortedVertex = distinctVertices[sortedVertexIndex];
                     reversedLookup[sortedVertexIndex] = vertexIndex;
+
+                    var colorRgb = mesh.Colors != null && mesh.Colors.Count > sortedVertexIndex 
+                                       ? (new Vector3(mesh.Colors[sortedVertexIndex].X, mesh.Colors[sortedVertexIndex].Y, mesh.Colors[sortedVertexIndex].Z)) 
+                                       : Vector3.One;
+                    
+                    
                     vertexBufferData[vertexIndex] = new PbrVertex
                                                         {
                                                             Position = mesh.Positions[sortedVertex.PositionIndex] * scaleFactor,
@@ -132,6 +137,7 @@ internal sealed class LoadObj : Instance<LoadObj>, IDescriptiveFilename, IStatus
                                                             Bitangent = mesh.VertexBinormals[sortedVertexIndex],
                                                             Texcoord = mesh.TexCoords[sortedVertex.TextureCoordsIndex],
                                                             Selection = 1,
+                                                            ColorRgb = colorRgb,
                                                         };
                 }
 
@@ -217,6 +223,4 @@ internal sealed class LoadObj : Instance<LoadObj>, IDescriptiveFilename, IStatus
     public readonly InputSlot<float> ScaleFactor = new();
 
     private readonly Resource<MeshDataSet> _resource;
-    public IEnumerable<string> FileFilter => _fileFilters;
-    private static readonly string[] _fileFilters = ["*.obj"];
 }

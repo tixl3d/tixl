@@ -11,7 +11,7 @@
       },
       "GroupTitle": "Gltf Scene",
       "Usage": "FilePath",
-      "FileFilter": "Shader files (glb) glb|*.gltf;*.glb"
+      "FileFilter": "gltf, glb"
     },
     {
       "InputId": "49237499-9b1e-4371-afac-4e3394868370"/*OffsetMetallic*/,

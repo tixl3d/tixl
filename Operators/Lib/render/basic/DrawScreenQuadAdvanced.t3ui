@@ -1,0 +1,263 @@
+{
+  "Id": "ff37499b-2550-4795-83fd-626ba6d2f2fb"/*DrawScreenQuadAdvanced*/,
+  "Description": "Just like DrawScreecQuad but with Depth and Normal buffer support for special FX.",
+  "InputUis": [
+    {
+      "InputId": "0a7c5acd-ae50-47a7-98e5-432b658a8bbd"/*Color*/,
+      "Position": {
+        "X": -158.25935,
+        "Y": 219.10832
+      },
+      "Description": "Selects a color which will be multiplied with the incoming image.",
+      "AddPadding": "True",
+      "Scale": 0.01
+    },
+    {
+      "InputId": "0b216554-21b6-433b-88c4-541d7030ba3e"/*Filter*/,
+      "Position": {
+        "X": -158.25935,
+        "Y": 544.10834
+      },
+      "GroupTitle": "Advanced Options",
+      "Description": "Selects which Filter is used for rendering the incoming texture"
+    },
+    {
+      "InputId": "3bc5a88f-1102-4e0d-84d8-da6c206886e6"/*EnableDepthWrite*/,
+      "Position": {
+        "X": -158.25935,
+        "Y": 454.10834
+      },
+      "Description": "This defines whether the Quad covers itself or is covered by or covers other meshes."
+    },
+    {
+      "InputId": "467410b1-5fc8-4448-8eb4-6383f1c98bf4"/*Width*/,
+      "Position": {
+        "X": -158.25935,
+        "Y": 269.10834
+      },
+      "Description": "Multiplier for Width",
+      "AddPadding": "True",
+      "Scale": 0.01
+    },
+    {
+      "InputId": "52ba1d58-ce0d-432c-b131-6db1ff0277d9"/*Height*/,
+      "Position": {
+        "X": -158.25935,
+        "Y": 319.10834
+      },
+      "Description": "Multiplier for Height",
+      "Scale": 0.01
+    },
+    {
+      "InputId": "5a2e54a4-eaab-4ebc-928f-44f0373d5f39"/*Position*/,
+      "Position": {
+        "X": -158.25935,
+        "Y": 499.10834
+      },
+      "Description": "Manipulates the position of the Quad\nX = Right / Left\nY = Up / Down",
+      "AddPadding": "True",
+      "Scale": 0.01
+    },
+    {
+      "InputId": "5dc5ef82-ec67-4d30-acfc-0d05fd1e66b9"/*Texture*/,
+      "Relevancy": "Relevant",
+      "Position": {
+        "X": -158.25935,
+        "Y": 163.10832
+      }
+    },
+    {
+      "InputId": "8de08b8e-8230-4126-8aba-89125ed559c0"/*EnableDepthTest*/,
+      "Position": {
+        "X": -158.25935,
+        "Y": 409.10834
+      },
+      "Description": "This defines whether the Quad covers itself or is covered by or covers other meshes.",
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "b5e29ca1-4431-40b9-9881-aa03d008dee2"/*DepthBuffer*/,
+      "Position": {
+        "X": -158.25935,
+        "Y": 619.10834
+      }
+    },
+    {
+      "InputId": "cb98de8e-8896-4314-a8d3-87580d91d5d4"/*BlendMode*/,
+      "Position": {
+        "X": -158.25935,
+        "Y": 364.10834
+      },
+      "GroupTitle": "Options",
+      "Description": "Selects the Blend mode"
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "186afa26-87bd-4104-815a-a491e9a06148"/*Rasterizer*/,
+      "Position": {
+        "X": 816.2118,
+        "Y": 132.83188
+      }
+    },
+    {
+      "ChildId": "1fd09e91-f04e-4d24-8265-55bf9c3f2001"/*Vector4Components*/,
+      "Position": {
+        "X": 427.89914,
+        "Y": 223.50838
+      }
+    },
+    {
+      "ChildId": "1fee6d3b-958c-48b7-9ff0-5258822feb5e"/*FloatsToBuffer*/,
+      "Style": "Resizable",
+      "Size": {
+        "X": 116.1401,
+        "Y": 128.82043
+      },
+      "Position": {
+        "X": 607.8124,
+        "Y": 216.16548
+      }
+    },
+    {
+      "ChildId": "240cfc23-e18f-4277-ada6-a28a1a887017"/*InputAssemblerStage*/,
+      "Position": {
+        "X": 823.0274,
+        "Y": -53.508522
+      }
+    },
+    {
+      "ChildId": "273c376f-7f4b-45f8-9be8-6c78982aab28"/*VertexShaderStage*/,
+      "Position": {
+        "X": 823.0274,
+        "Y": -10.508526
+      }
+    },
+    {
+      "ChildId": "45a39462-4d20-4d78-900b-9eac69b50e5d"/*UseFallbackTexture*/,
+      "Position": {
+        "X": 237.20413,
+        "Y": -48.019855
+      }
+    },
+    {
+      "ChildId": "4fceaada-adc6-43cc-91b1-75211d1e3a2d"/*OutputMergerStage*/,
+      "Position": {
+        "X": 810.8517,
+        "Y": 373.7809
+      }
+    },
+    {
+      "ChildId": "52e99137-ae19-4952-9e7b-a26d283cde11"/*SamplerState*/,
+      "Position": {
+        "X": 607.8124,
+        "Y": 570.0172
+      }
+    },
+    {
+      "ChildId": "662149ff-26f3-49c1-997a-f062180e5b95"/*LoadImage*/,
+      "Position": {
+        "X": 69.60883,
+        "Y": 87.99952
+      }
+    },
+    {
+      "ChildId": "7012d720-d773-428b-a774-a923aedcda8c"/*SrvFromTexture2d*/,
+      "Position": {
+        "X": 326.3133,
+        "Y": 646.2595
+      }
+    },
+    {
+      "ChildId": "74ac9f5f-baa7-4f21-8f8f-23dbfe1d4ea6"/*Draw*/,
+      "Position": {
+        "X": 810.8517,
+        "Y": 442.7809
+      }
+    },
+    {
+      "ChildId": "83a45caa-f23f-4884-b0df-b1b1c207d3fd"/*PixelShaderStage*/,
+      "Position": {
+        "X": 816.2118,
+        "Y": 188.83188
+      }
+    },
+    {
+      "ChildId": "8fc922fd-d101-4ff8-8435-a267122191fe"/*PixelShader*/,
+      "Position": {
+        "X": 639.2975,
+        "Y": 101.4515
+      }
+    },
+    {
+      "ChildId": "957bed1c-ad73-4f26-a155-a6927897434b"/*Execute*/,
+      "Style": "Resizable",
+      "Size": {
+        "X": 114.093414,
+        "Y": 496.73483
+      },
+      "Position": {
+        "X": 1012.4035,
+        "Y": -61.03902
+      }
+    },
+    {
+      "ChildId": "99278f36-8dff-4511-8acb-0a495e7bb7bb"/*SrvFromTexture2d*/,
+      "Position": {
+        "X": 454.18555,
+        "Y": 170.9402
+      }
+    },
+    {
+      "ChildId": "9f3d40d9-5a2c-41ef-9cc5-715b5a4a6ff9"/*DepthStencilState*/,
+      "Position": {
+        "X": 615.2267,
+        "Y": 427.60944
+      }
+    },
+    {
+      "ChildId": "a6e3c940-8b8a-4db0-9769-c1ec554bfbc3"/*RasterizerState*/,
+      "Position": {
+        "X": 639.2975,
+        "Y": 45.451492
+      }
+    },
+    {
+      "ChildId": "c4b99b0d-3408-442e-918f-b580f92e7320"/*FirstValidTexture*/,
+      "Position": {
+        "X": 117.11191,
+        "Y": 639.94824
+      }
+    },
+    {
+      "ChildId": "cdced849-c62b-454a-98d8-67127a2b75ff"/*VertexShader*/,
+      "Position": {
+        "X": 639.2975,
+        "Y": 2.451492
+      }
+    },
+    {
+      "ChildId": "f8b9a29b-a5ff-4dcd-aa08-6163ebb0952a"/*PickBlendMode*/,
+      "Position": {
+        "X": 615.2267,
+        "Y": 496.60944
+      }
+    },
+    {
+      "ChildId": "fb7c6a4b-c30e-4ff9-bb61-36ccdcd19b9e"/*Vector2Components*/,
+      "Position": {
+        "X": 427.89914,
+        "Y": 279.50836
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "e7d7d91a-2616-4fe7-ba89-02bf4288458c"/*Output*/,
+      "Position": {
+        "X": 1306.0349,
+        "Y": -57.969704
+      }
+    }
+  ]
+}

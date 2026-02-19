@@ -1,9 +1,16 @@
-﻿using ImGuiNET;
+#nullable enable
+
+using ImGuiNET;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using T3.Core.DataTypes;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
+using T3.Editor.Gui.Input;
+using T3.Editor.Gui.InputUi.CombinedInputs;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.UiModel.InputsAndTypes;
+using T3.Serialization;
 
 namespace T3.Editor.Gui.InputUi.VectorInputs;
 
@@ -39,6 +46,11 @@ internal sealed class Vector4InputUi : FloatVectorInputValueUi<Vector4>
 
     protected override InputEditStateFlags DrawEditControl(string name, Symbol.Child.Input input, ref Vector4 float4Value, bool readOnly)
     {
+        if (UseVec4Control == Vec4Controls.AdsrEnvelope)
+        {
+            return AdsrEnvelopeInputUi.DrawAdsrControl(ref float4Value, input.IsDefault);
+        }
+        
         float4Value.CopyTo(FloatComponents);
         var thumbWidth = ImGui.GetFrameHeight();
         var inputEditState = VectorValueEdit.Draw(FloatComponents, Min, Max, Scale, ClampMin, ClampMax, thumbWidth+1);
@@ -101,5 +113,42 @@ internal sealed class Vector4InputUi : FloatVectorInputValueUi<Vector4>
             inputEditState |= result;
         }
         return inputEditState;
+    }
+
+    public override bool DrawSettings()
+    {
+        var modified = base.DrawSettings();
+
+        FormInputs.DrawFieldSetHeader("Show 4D Control");
+        var tmpForRef = UseVec4Control;
+        if (FormInputs.AddEnumDropdown(ref tmpForRef, null))
+        {
+            modified = true;
+            UseVec4Control = tmpForRef;
+        }
+
+        return modified;
+    }
+
+    public override void Write(JsonTextWriter writer)
+    {
+        base.Write(writer);
+
+        if (UseVec4Control != Vec4Controls.None)
+            writer.WriteObject(nameof(UseVec4Control), UseVec4Control.ToString());
+    }
+
+    public override void Read(JToken? inputToken)
+    {
+        base.Read(inputToken);
+        UseVec4Control = JsonUtils.ReadEnum<Vec4Controls>(inputToken, nameof(UseVec4Control));
+    }
+
+    public Vec4Controls UseVec4Control;
+
+    public enum Vec4Controls
+    {
+        None,
+        AdsrEnvelope,
     }
 }

@@ -76,6 +76,7 @@ internal sealed class NGonMesh : Instance<NGonMesh>
                                                Bitangent = binormal,
                                                Texcoord = new Vector2(uCenter, vCenter),
                                                Selection = 1,
+                                               ColorRgb = Vector3.One
                                            };
             }
 
@@ -114,6 +115,7 @@ internal sealed class NGonMesh : Instance<NGonMesh>
                                                               Bitangent = binormal,
                                                               Texcoord = uv0,
                                                               Selection = 1,
+                                                              ColorRgb = Vector3.One
                                                           };
                 _indexBufferData[segmentIndex] = new Int3(0,
                                                           (segmentIndex + 2) > segments ? 1 : segmentIndex + 2,

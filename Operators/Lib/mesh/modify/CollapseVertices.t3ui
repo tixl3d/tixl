@@ -237,8 +237,8 @@
     {
       "ChildId": "5bf7ee38-208f-49bb-b32f-16b7aeafc78f"/*_AssembleMeshBuffers*/,
       "Position": {
-        "X": 2682.332,
-        "Y": 1392.0222
+        "X": 2634.2886,
+        "Y": 1444.6411
       }
     },
     {
@@ -314,8 +314,8 @@
     {
       "ChildId": "8a3f34c1-a1dd-45cd-ace2-e4d70a1ecb0a"/*RecomputeNormals*/,
       "Position": {
-        "X": 2832.332,
-        "Y": 1392.0222
+        "X": 2634.2886,
+        "Y": 1549.6411
       }
     },
     {
@@ -375,8 +375,8 @@
     {
       "ChildId": "d3b27e87-ca1b-4770-974e-2ed1423faf59"/*ExecuteBufferUpdate*/,
       "Position": {
-        "X": 2532.332,
-        "Y": 1392.0222
+        "X": 2382.332,
+        "Y": 1462.0222
       }
     },
     {

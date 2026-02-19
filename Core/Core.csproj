@@ -16,9 +16,12 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Delaunator" Version="1.0.11" />
         <PackageReference Include="JeremyAnsel.Media.Dds" Version="2.0.4" />
-        <PackageReference Include="ManagedBass" Version="3.1.1" />
-        <PackageReference Include="ManagedBass.Wasapi" Version="3.1.1" />
+        <PackageReference Include="ManagedBass" Version="4.0.2" />
+        <PackageReference Include="ManagedBass.Flac" Version="4.0.2" />
+        <PackageReference Include="ManagedBass.Mix" Version="4.0.2" />
+        <PackageReference Include="ManagedBass.Wasapi" Version="4.0.2" />
         <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.7.0-1.final" />
         <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="9.0.1" />
         <PackageReference Include="NAudio.Midi" Version="2.2.1" />

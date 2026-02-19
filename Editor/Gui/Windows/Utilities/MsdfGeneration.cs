@@ -622,7 +622,7 @@ namespace T3.Editor.Gui.Windows.Utilities
 
         private static string PrepareOutputDirectory(SymbolPackage package)
         {
-            var outputDir = Path.Combine(package.ResourcesFolder, "fonts");
+            var outputDir = Path.Combine(package.AssetsFolder, "fonts");
             if (!Directory.Exists(outputDir)) Directory.CreateDirectory(outputDir);
             return outputDir;
         }
@@ -651,7 +651,7 @@ namespace T3.Editor.Gui.Windows.Utilities
             try
             {
                 var full = Path.GetFullPath(fontPath);
-                return SymbolPackage.AllPackages.FirstOrDefault(p => IsPathUnderFolder(full, p.Folder) || IsPathUnderFolder(full, p.ResourcesFolder));
+                return SymbolPackage.AllPackages.FirstOrDefault(p => IsPathUnderFolder(full, p.Folder) || IsPathUnderFolder(full, p.AssetsFolder));
             }
             catch
             {

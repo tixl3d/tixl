@@ -237,10 +237,10 @@ internal sealed class RenderTarget : Instance<RenderTarget>, IRenderStatsProvide
         if (_resolveComputeShaderResource != null && !_resolveComputeShaderResource.IsDisposed)
             return;
             
-        const string sourcePath = @"dx11\resolve-multisampled-depth-buffer-cs.hlsl";
+        const string sourcePath = "Lib:shaders/dx11/resolve-multisampled-depth-buffer-cs.hlsl"; 
         const string entryPoint = "main";
 
-        _resolveComputeShaderResource = ResourceManager.CreateShaderResource<ComputeShader>(sourcePath, this, () => entryPoint);
+        _resolveComputeShaderResource = ResourceManager.CreateShaderResource<ComputeShader>(sourcePath, null, () => entryPoint);
             
         if (_resolveComputeShaderResource.Value == null)
         {

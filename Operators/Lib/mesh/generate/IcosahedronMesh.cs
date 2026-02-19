@@ -105,6 +105,7 @@ internal sealed class IcosahedronMesh : Instance<IcosahedronMesh>
                     Texcoord = uv,
                     Texcoord2 = uv2,
                     Selection = 1,
+                    ColorRgb = Vector3.One,
                 };
             }
 

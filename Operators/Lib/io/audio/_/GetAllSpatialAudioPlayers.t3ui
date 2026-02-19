@@ -1,0 +1,94 @@
+{
+  "Id": "91f249cf-a398-4261-8654-22637a1b9c12"/*GetAllSpatialAudioPlayers*/,
+  "Description": "Retrieves all spatial audio players in the current composition and provides their properties.",
+  "SymbolTags": "8",
+  "InputUis": [
+    {
+      "InputId": "5c07c8a2-b1da-42c1-addf-8ef5877784d7"/*SpatialAudioPlayerIndex*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "38381654-017c-4856-ae28-7dbc9f6b0fc8"/*SourcePosition*/,
+      "Position": {
+        "X": 200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "OutputId": "619b45b5-4749-431b-b6a0-5edce7d263f5"/*SourceRotation*/,
+      "Position": {
+        "X": 200.0,
+        "Y": 30.0
+      }
+    },
+    {
+      "OutputId": "bb6aeccb-bc35-46a1-ade2-0f089ec8c92c"/*ListenerPosition*/,
+      "Position": {
+        "X": 200.0,
+        "Y": 60.0
+      }
+    },
+    {
+      "OutputId": "3d983835-8f8d-4e4b-abfe-7955b01a1581"/*ListenerRotation*/,
+      "Position": {
+        "X": 200.0,
+        "Y": 90.0
+      }
+    },
+    {
+      "OutputId": "859295a6-f928-4443-9eca-2e800f275235"/*MinDistance*/,
+      "Position": {
+        "X": 200.0,
+        "Y": 120.0
+      }
+    },
+    {
+      "OutputId": "16de1964-9ae7-42e1-8ee5-6872b9c529a5"/*MaxDistance*/,
+      "Position": {
+        "X": 200.0,
+        "Y": 150.0
+      }
+    },
+    {
+      "OutputId": "fdde0e02-f7bb-4e7c-a542-0140894c8d0a"/*InnerConeAngle*/,
+      "Position": {
+        "X": 200.0,
+        "Y": 180.0
+      }
+    },
+    {
+      "OutputId": "fab6f132-2d5a-42ff-83cd-e35d64bf19e4"/*OuterConeAngle*/,
+      "Position": {
+        "X": 200.0,
+        "Y": 210.0
+      }
+    },
+    {
+      "OutputId": "b7e0d227-ceb8-4cf6-a3fa-fd956ad86869"/*FramesSinceLastUpdate*/,
+      "Position": {
+        "X": 200.0,
+        "Y": 240.0
+      }
+    },
+    {
+      "OutputId": "45415e90-2a4d-400c-90a3-63426c091b7e"/*SpatialAudioPlayerCount*/,
+      "Position": {
+        "X": 200.0,
+        "Y": 270.0
+      }
+    },
+    {
+      "OutputId": "4c4eb902-9d1e-41a9-9794-7d9a10b3a5a1"/*GizmoVisibility*/,
+      "Position": {
+        "X": 200.0,
+        "Y": 300.0
+      }
+    }
+  ]
+}

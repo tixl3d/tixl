@@ -1,0 +1,130 @@
+{
+  "Id": "2461dc98-f2e0-40be-a3dd-c618cc281d63"/*R01b_Transform*/,
+  "Description": "Transform",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0dd40be5-cd3b-43e6-b728-5003264a9397"/*DrawQuiz*/,
+      "Position": {
+        "X": 1910.476,
+        "Y": 1833.0227
+      }
+    },
+    {
+      "ChildId": "1b33d422-ad71-425f-bda4-acb0f1bc89ba"/*TorusMesh*/,
+      "Position": {
+        "X": 1656.6586,
+        "Y": 1660.4323
+      }
+    },
+    {
+      "ChildId": "617415bc-c4bd-426a-bdfe-07d761c32135"/*AnimValue*/,
+      "AnnotationId": "22a20f5d-f6f0-4260-ab6e-5568d4f68b2a",
+      "Position": {
+        "X": 1411.0847,
+        "Y": 2217.7507
+      }
+    },
+    {
+      "ChildId": "654522fa-3ad0-4231-ac23-040ad05a807c"/*Transform*/,
+      "AnnotationId": "22a20f5d-f6f0-4260-ab6e-5568d4f68b2a",
+      "Position": {
+        "X": 1620.8605,
+        "Y": 2120.3562
+      }
+    },
+    {
+      "ChildId": "860b0eb8-8e23-41ac-a45f-f7bb9a2ca143"/*DrawMesh*/,
+      "AnnotationId": "22a20f5d-f6f0-4260-ab6e-5568d4f68b2a",
+      "Position": {
+        "X": 1620.8605,
+        "Y": 2085.3562
+      }
+    },
+    {
+      "ChildId": "a3fef8b6-1f88-421b-b1e6-c219b90a7459"/*PerlinNoise3*/,
+      "AnnotationId": "22a20f5d-f6f0-4260-ab6e-5568d4f68b2a",
+      "Position": {
+        "X": 1411.0847,
+        "Y": 2109.5676
+      }
+    },
+    {
+      "ChildId": "c03eb567-39e9-4d8f-9c31-831c0c11f065"/*PerlinNoise3*/,
+      "Position": {
+        "X": 1478.938,
+        "Y": 1716.5908
+      }
+    },
+    {
+      "ChildId": "c06a85ef-5619-4dc8-b138-e31783728f3e"/*Transform*/,
+      "Position": {
+        "X": 1656.6586,
+        "Y": 1837.7101
+      }
+    },
+    {
+      "ChildId": "c3de17ec-4610-4000-833a-a9cf36b798d0"/*AnimValue*/,
+      "Position": {
+        "X": 1478.938,
+        "Y": 1780.8125
+      }
+    },
+    {
+      "ChildId": "c759d1ed-8ab4-4704-a9aa-d9737e70c262"/*DrawMesh*/,
+      "Position": {
+        "X": 1656.6586,
+        "Y": 1742.7517
+      }
+    },
+    {
+      "ChildId": "e76f2954-8917-4730-a55e-51d4106b5f37"/*TorusMesh*/,
+      "AnnotationId": "22a20f5d-f6f0-4260-ab6e-5568d4f68b2a",
+      "Position": {
+        "X": 1620.8605,
+        "Y": 2050.3562
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "1351cc9b-05e8-4ed5-963b-e7029a673cc9"/*ColorBuffer*/,
+      "Position": {
+        "X": 1910.476,
+        "Y": 1903.0227
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "22a20f5d-f6f0-4260-ab6e-5568d4f68b2a",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1341.8457,
+        "Y": 1988.8103
+      },
+      "Size": {
+        "X": 479.67932,
+        "Y": 287.2168
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "440a0b7d-a1bf-4598-bbd9-df4b5c119a0c",
+      "Description": "Instead of changing an object's position directly, you can keep it unchanged and define an offset that determines how it is drawn.\nThis offset is called a transformation and can include position, rotation, and scale."
+    },
+    {
+      "Id": "0980f546-370f-45b2-8522-c535f1f4cf9c",
+      "Description": "Recreate the animation by combining the given operators.\nAll parameters are already set correctly. Only the operator order needs to be fixed.",
+      "Style": "CallToAction"
+    }
+  ]
+}

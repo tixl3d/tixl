@@ -1,5 +1,5 @@
 {
-  "Id": "55551bc1-1bf9-47d8-b25b-33c3596d21c4"/*LaunchpadXButtonExample*/,
+  "Id": "55551bc1-1bf9-47d8-b25b-33c3596d21c4"/*LaunchpadXExample*/,
   "Inputs": [
     {
       "Id": "3a7ecd51-eaf2-4eb9-a672-dc3de839f496"/*InitTrigger*/,

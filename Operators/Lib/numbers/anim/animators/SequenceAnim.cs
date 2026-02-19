@@ -70,6 +70,12 @@ public sealed class SequenceAnim : Instance<SequenceAnim>
         
     private void Update(EvaluationContext context)
     {
+        // Detect time jump backwards (export/playback restart) and reset state
+        if (context.LocalFxTime < _lastUpdateTime - 0.1)
+        {
+            _lastStepIndex = -1;  // Reset so first step triggers correctly
+        }
+        
         if (Math.Abs(context.LocalFxTime - _lastUpdateTime) < 0.0001f)
         {
             return;

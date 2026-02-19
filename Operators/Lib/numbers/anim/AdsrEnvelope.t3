@@ -1,0 +1,36 @@
+{
+  "Id": "c8d9e0f1-a2b3-4c5d-6e7f-8a9b0c1d2e3f"/*AdsrEnvelope*/,
+  "Inputs": [
+    {
+      "Id": "a2b3c4d5-e6f7-4a8b-9c0d-1e2f3a4b5c6d"/*Envelope*/,
+      "DefaultValue": {
+        "X": 0.1,
+        "Y": 0.1,
+        "Z": 1.0,
+        "W": 0.1
+      }
+    },
+    {
+      "Id": "b3c4d5e6-f7a8-4b9c-0d1e-2f3a4b5c6d7e"/*Min*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "c4d5e6f7-a8b9-4c0d-1e2f-3a4b5c6d7e8f"/*Max*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "d9e0f1a2-b3c4-4d5e-6f7a-8b9c0d1e2f3a"/*Gate*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "e0f1a2b3-c4d5-4e6f-7a8b-9c0d1e2f3a4b"/*Duration*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "f1a2b3c4-d5e6-4f7a-8b9c-0d1e2f3a4b5c"/*Mode*/,
+      "DefaultValue": 0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

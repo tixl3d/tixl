@@ -39,7 +39,7 @@
         {
           "Id": "1e4e274b-60b2-4fe8-b275-ebef80d520a7"/*Source*/,
           "Type": "System.String",
-          "Value": "Resources\\user\\pixtur\\MandelbrotFractal\\shader\\MandelbrotFractal.hlsl"
+          "Value": "Examples:user/pixtur/research/MandelbrotFractal.hlsl"
         },
         {
           "Id": "3fe1b650-ce34-4155-9b61-0425e39f7690"/*Wrap*/,

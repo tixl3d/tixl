@@ -1,7 +1,9 @@
 ﻿using System.Text;
 using T3.Core.Model;
 using T3.Core.Operator;
+using T3.Core.SystemUi;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.SystemUi;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Annotations;
 using T3.Editor.UiModel.Commands.Graph;
@@ -140,6 +142,26 @@ internal static class Combine
         if (!success)
         {
             Log.Error($"Could not compile new symbol '{newSymbolName}': {failureLog}");
+            
+            const string exit = "Exit";
+            var choice = BlockingWindow.Instance.ShowMessageBox("""
+                                                                Sadly the compilation of the combined operator filed.
+                                                                
+                                                                Potential reasons:
+                                                                - An input name is using a known core type.
+                                                                - Some other protected names or keywords are used 
+
+                                                                """ + failureLog, 
+                                                                "Can't compile", 
+                                                                exit,
+                                                                "Try to continue");
+            
+            if (choice != exit)
+            {
+                //reason = $"Failed to find soundTrack for [{symbol.Name}] - export cancelled, see log for details";
+                return;
+            }
+            EditorUi.Instance.ExitApplication();
             return;
         }
 

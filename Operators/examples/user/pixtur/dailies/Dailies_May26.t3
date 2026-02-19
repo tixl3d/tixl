@@ -402,17 +402,12 @@
         {
           "Id": "e827fdd1-20ca-473c-99ee-b839563690e9"/*Filepath*/,
           "Type": "System.String",
-          "Value": "Resources\\fonts\\Monument_Bold.fnt"
+          "Value": "Examples:Resources/fonts/Monument_Bold.fnt"
         },
         {
           "Id": "f2dd87b1-7f37-4b02-871b-b2e35972f246"/*Text*/,
           "Type": "System.String",
           "Value": "asdfaaaasdfasdfasdffasdfasdf\\nasdfasdf\nasdfsadf\nsdf\n"
-        },
-        {
-          "Id": "ffd2233a-8f3e-426b-815b-8071e4c779ab"/*Slant*/,
-          "Type": "System.Single",
-          "Value": 0.07
         }
       ],
       "Outputs": []

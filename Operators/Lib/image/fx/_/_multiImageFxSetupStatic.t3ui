@@ -77,7 +77,7 @@
         "Y": 363.90527
       },
       "Usage": "FilePath",
-      "FileFilter": "HLSL-Files|*.hlsl"
+      "FileFilter": "hlsl"
     }
   ],
   "SymbolChildUis": [

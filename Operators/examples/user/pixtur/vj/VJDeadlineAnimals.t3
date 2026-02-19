@@ -523,7 +523,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\user\\wake\\proj-vj-deadline2021\\mesh\\lazer-eyes.obj"
+          "Value": "Examples:user/wake/proj-vj-deadline2021/mesh/lazer-eyes.obj"
         },
         {
           "Id": "aa19e71d-329c-448b-901c-565bf8c0da4f"/*SortVertices*/,
@@ -798,7 +798,7 @@
         {
           "Id": "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3"/*FontPath*/,
           "Type": "System.String",
-          "Value": "Resources\\fonts\\ShareTechMono.fnt"
+          "Value": "Examples:fonts/ShareTechMono.fnt"
         },
         {
           "Id": "d89c518c-a862-4f46-865b-0380350b7417"/*Size*/,
@@ -996,7 +996,7 @@
         {
           "Id": "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3"/*FontPath*/,
           "Type": "System.String",
-          "Value": "Resources\\fonts\\ShareTechMono.fnt"
+          "Value": "Examples:fonts/ShareTechMono.fnt"
         },
         {
           "Id": "de0fed7d-d2af-4424-baf3-81606e26559f"/*Position*/,
@@ -1620,7 +1620,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\user\\wake\\proj-vj-deadline2021\\mesh\\rooster.obj"
+          "Value": "Examples:user/wake/proj-vj-deadline2021/mesh/rooster.obj"
         },
         {
           "Id": "aa19e71d-329c-448b-901c-565bf8c0da4f"/*SortVertices*/,
@@ -1647,7 +1647,7 @@
         {
           "Id": "ca9778e7-072c-4304-9043-eeb2dc4ca5d7"/*Folder*/,
           "Type": "System.String",
-          "Value": "Resources\\user\\wake\\proj-vj-deadline2021\\mesh\\animals-2k"
+          "Value": "Examples:user/wake/proj-vj-deadline2021/mesh/animals-2k/"
         },
         {
           "Id": "e14a4aae-e253-4d14-80ef-a90271cd306a"/*TriggerUpdate*/,
@@ -4235,7 +4235,7 @@
         {
           "Id": "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3"/*FontPath*/,
           "Type": "System.String",
-          "Value": "Resources\\fonts\\Roboto-Black.fnt"
+          "Value": "Examples:fonts/Roboto-Black.fnt"
         },
         {
           "Id": "82cc31ff-3307-4b6d-be70-16e471c2ffc9"/*HorizontalAlign*/,

@@ -3,6 +3,13 @@
   "Description": "This operator creates smooth, ease-in-out transitions by overriding the easing of keyframes. Customize the transition style with options like cubic, exponential, or back easing, or choose a linear fallback for a simple interpolation. \nConstant interpolation can be achieved by setting the keyframe type to Constant.[EaseVec2Keys] [EaseVec3Keys]",
   "InputUis": [
     {
+      "InputId": "375b49e7-bc67-46cf-a687-2cad66e6fd76"/*Interpolation*/,
+      "Position": {
+        "X": 36.0,
+        "Y": 514.0
+      }
+    },
+    {
       "InputId": "73c822ca-560c-4e86-b4ff-0ae722d7a371"/*Value*/,
       "Position": {
         "X": 36.0,
@@ -15,14 +22,7 @@
         "X": 36.0,
         "Y": 604.0
       }
-    },
-    {
-      "InputId": "375b49e7-bc67-46cf-a687-2cad66e6fd76"/*Interpolation*/,
-      "Position": {
-        "X": 36.0,
-        "Y": 514.0
-      }
-    },
+    }
   ],
   "SymbolChildUis": [],
   "OutputUis": [

@@ -213,7 +213,8 @@ internal class EditorSymbolPackage : SymbolPackage
         }
         else
         {
-            Log.Debug($"{AssemblyInformation.Name}: Found {sourceCodeCount} operator source code files out of {sourceCodeAttempts} C# files.");
+            if(ProjectSettings.Config.LogCompilationDetails)
+                Log.Debug($"{AssemblyInformation.Name}: Found {sourceCodeCount} operator source code files out of {sourceCodeAttempts} C# files.");
         }
         #endif
 
@@ -306,6 +307,12 @@ internal class EditorSymbolPackage : SymbolPackage
 
             if (Symbols.ContainsKey(HomeSymbolId)) 
                 return true;
+
+            if (Symbols.Count == 0)
+            {
+                error = $"Package {Name} has no Symbols definition.";
+                return false;
+            }
             
             error = $"Home symbol {HomeSymbolId} not found";
             return false;

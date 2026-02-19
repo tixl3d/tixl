@@ -1,0 +1,46 @@
+{
+  "Id": "50cc7ae4-7064-436e-862e-b8f2a709409c"/*SpreadIntoGrid*/,
+  "Description": "Spatially distributes the incoming graph elements into a grid",
+  "InputUis": [
+    {
+      "InputId": "7c3e1be9-0ee5-4762-9abf-8ab908fed1b1"/*SpreadScale*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 120.0
+      }
+    },
+    {
+      "InputId": "8ed3e486-134a-4047-8f8c-7427f1bde6b9"/*Spread*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Scale": 0.01
+    },
+    {
+      "InputId": "bf7c70a5-7b3b-4245-8066-ad17b4eb72cf"/*Commands*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "e7c44d76-44a1-47d7-b31d-7f3a8ed759f7"/*GridSize*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 195.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "24fd79e3-ad3a-4c27-9b97-48226dd990e0"/*Output*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

@@ -15,7 +15,7 @@
     },
     {
       "Id": "c064afe1-0078-48eb-be6a-4616f7c5a383"/*FilePath*/,
-      "DefaultValue": "/t3/videos/spray-1080p.mp4"
+      "DefaultValue": "Examples:videos/spray-1080p.mp4"
     }
   ],
   "Children": [
@@ -44,7 +44,7 @@
         {
           "Id": "0e255347-08bc-4363-9ffa-ab863a1cea8e"/*Path*/,
           "Type": "System.String",
-          "Value": "/t3/videos/spray-1080p.mp4"
+          "Value": "Examples:videos/spray-1080p.mp4"
         }
       ],
       "Outputs": []
@@ -66,7 +66,7 @@
         {
           "Id": "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3"/*FontPath*/,
           "Type": "System.String",
-          "Value": "/t3/fonts/ShareTechMono.fnt"
+          "Value": "Examples:fonts/ShareTechMono.fnt"
         },
         {
           "Id": "82cc31ff-3307-4b6d-be70-16e471c2ffc9"/*HorizontalAlign*/,

@@ -48,6 +48,9 @@ public class RaymarchField : Instance<RaymarchField>
         [Input(Guid = "0700d5cb-6a1e-43ad-b7fb-b9b7b1415584")]
         public readonly InputSlot<bool> WriteDepth = new InputSlot<bool>();
 
+        [Input(Guid = "8fc6f727-1eac-42f4-9c4f-525cba1f4bb1")]
+        public readonly InputSlot<float> SpecularAA = new InputSlot<float>();
+
         private enum MappingModes
         {
             Global_Triplanar,

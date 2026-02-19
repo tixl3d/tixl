@@ -87,7 +87,7 @@
         {
           "Id": "0b5cbbdf-afe7-4daf-9f1e-0e79792691f1"/*TemplateFilePath*/,
           "Type": "System.String",
-          "Value": "/Lib/particles/FieldDistanceForce.hlsl"
+          "Value": "Lib:shaders/particles/FieldDistanceForce.hlsl"
         }
       ],
       "Outputs": []
@@ -99,7 +99,7 @@
         {
           "Id": "24b7e7e1-fe0b-46be-807e-0afacd4800f9"/*FilePath*/,
           "Type": "System.String",
-          "Value": "/Lib/particles/FieldDistanceForce.hlsl"
+          "Value": "Lib:shaders/particles/FieldDistanceForce.hlsl"
         }
       ],
       "Outputs": []
@@ -146,7 +146,7 @@
         {
           "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
           "Type": "System.String",
-          "Value": "/Lib/particles/FieldDistanceForce.hlsl"
+          "Value": "Lib:shaders/particles/FieldDistanceForce.hlsl"
         }
       ],
       "Outputs": []

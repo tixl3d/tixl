@@ -7,8 +7,8 @@
       "ActivationIndex": 1,
       "Title": "Alpha Mask",
       "PosOnCanvas": {
-        "X": 20.905426,
-        "Y": -5.650284
+        "X": 36.626404,
+        "Y": 18.1594
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -17,8 +17,7 @@
             "Y": 0.9999899,
             "Z": 0.9999899,
             "W": 0.0
-          },
-          "9756e240-6527-4cda-accd-e8096682b6bd": 0.18
+          }
         }
       }
     },
@@ -28,8 +27,8 @@
       "ActivationIndex": 2,
       "Title": "Call 1 for Pony",
       "PosOnCanvas": {
-        "X": 183.90549,
-        "Y": -5.650284
+        "X": 199.6264,
+        "Y": 18.1594
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -51,8 +50,7 @@
             "Y": 0.6516619,
             "Z": 0.7871888,
             "W": 1.0
-          },
-          "9756e240-6527-4cda-accd-e8096682b6bd": 0.39999998
+          }
         }
       }
     },
@@ -62,8 +60,8 @@
       "ActivationIndex": 3,
       "Title": "How frogs see",
       "PosOnCanvas": {
-        "X": 346.9055,
-        "Y": -5.650284
+        "X": 362.6264,
+        "Y": 18.1594
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -95,8 +93,8 @@
       "ActivationIndex": 4,
       "Title": "Color boost",
       "PosOnCanvas": {
-        "X": 346.9055,
-        "Y": 87.34972
+        "X": 362.6264,
+        "Y": 140.70996
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -112,8 +110,7 @@
             "Z": 0.6076555,
             "W": 1.0
           },
-          "7307d198-d2d5-41d4-b8b8-d2ece26dade8": -0.5,
-          "9756e240-6527-4cda-accd-e8096682b6bd": 0.08
+          "7307d198-d2d5-41d4-b8b8-d2ece26dade8": -0.5
         }
       }
     },
@@ -123,8 +120,8 @@
       "ActivationIndex": 5,
       "Title": "Negativ",
       "PosOnCanvas": {
-        "X": 20.90538,
-        "Y": 87.34972
+        "X": 36.626404,
+        "Y": 140.70996
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -155,8 +152,8 @@
       "ActivationIndex": 6,
       "Title": "Cancer",
       "PosOnCanvas": {
-        "X": 183.90538,
-        "Y": 87.34972
+        "X": 199.6264,
+        "Y": 140.70996
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -177,8 +174,7 @@
             "Y": 0.4885525,
             "Z": 0.6179481,
             "W": 0.0
-          },
-          "9756e240-6527-4cda-accd-e8096682b6bd": 0.76
+          }
         }
       }
     },
@@ -188,8 +184,8 @@
       "ActivationIndex": 7,
       "Title": "Threshold Mask",
       "PosOnCanvas": {
-        "X": 20.90538,
-        "Y": 180.34972
+        "X": 36.626404,
+        "Y": 263.26053
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -206,8 +202,8 @@
       "ActivationIndex": 8,
       "Title": "Vibrant Reds",
       "PosOnCanvas": {
-        "X": 346.9055,
-        "Y": 180.34972
+        "X": 362.6264,
+        "Y": 263.26053
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -227,8 +223,8 @@
       "ActivationIndex": 9,
       "Title": "Colors!",
       "PosOnCanvas": {
-        "X": 183.90549,
-        "Y": 180.34972
+        "X": 199.6264,
+        "Y": 263.26053
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -242,8 +238,8 @@
       "ActivationIndex": 10,
       "Title": "B&W Portrait",
       "PosOnCanvas": {
-        "X": 346.9055,
-        "Y": 273.34973
+        "X": 362.6264,
+        "Y": 385.8111
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {

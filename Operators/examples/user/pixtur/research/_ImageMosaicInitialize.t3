@@ -3,7 +3,7 @@
   "Inputs": [
     {
       "Id": "6d9eb435-595b-421f-9852-6e923a532aed"/*Folder*/,
-      "DefaultValue": "Resources\\Example\\user\\pixtur\\research\\1000Images\\images"
+      "DefaultValue": "Resources/Example/user/pixtur/research/1000Images/images"
     },
     {
       "Id": "914df0ba-a276-4839-868c-a903b744ec04"/*TriggerUpdate*/,
@@ -182,11 +182,6 @@
           "Value": ""
         },
         {
-          "Id": "ca9778e7-072c-4304-9043-eeb2dc4ca5d7"/*Folder*/,
-          "Type": "System.String",
-          "Value": "Resources\\Example\\user\\pixtur\\research\\1000Images\\images"
-        },
-        {
           "Id": "e14a4aae-e253-4d14-80ef-a90271cd306a"/*TriggerUpdate*/,
           "Type": "System.Boolean",
           "Value": false
@@ -264,7 +259,7 @@
         {
           "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
           "Type": "System.String",
-          "Value": "/Examples/user/pixtur/research/1000Images/PhotoMosaic-SortImages.hlsl"
+          "Value": "Examples:user/pixtur/research/1000Images/PhotoMosaic-SortImages.hlsl"
         }
       ],
       "Outputs": []

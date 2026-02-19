@@ -73,7 +73,7 @@
         {
           "Id": "7f14d0e3-1159-434d-b038-74644948937c"/*ShaderPath*/,
           "Type": "System.String",
-          "Value": "Resources\\lib\\img\\fx\\DirectionalBlur.hlsl"
+          "Value": "Lib:shaders/img/fx/DirectionalBlur.hlsl"
         },
         {
           "Id": "fe1695b3-54db-4b53-8987-3216bcf59da9"/*ClearColor*/,
@@ -107,7 +107,7 @@
         {
           "Id": "7f14d0e3-1159-434d-b038-74644948937c"/*ShaderPath*/,
           "Type": "System.String",
-          "Value": "Resources\\lib\\img\\fx\\DirectionalBlur.hlsl"
+          "Value": "Lib:shaders/img/fx/DirectionalBlur.hlsl"
         },
         {
           "Id": "fe1695b3-54db-4b53-8987-3216bcf59da9"/*ClearColor*/,
@@ -147,7 +147,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/images/basic/black-pixel.png"
+          "Value": "Lib:images/basic/black-pixel.png"
         }
       ],
       "Outputs": []

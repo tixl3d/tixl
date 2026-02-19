@@ -77,7 +77,7 @@
         {
           "Id": "1e4e274b-60b2-4fe8-b275-ebef80d520a7"/*Source*/,
           "Type": "System.String",
-          "Value": "/Lib/img/generate/Grain.hlsl"
+          "Value": "Lib:shaders/img/generate/Grain.hlsl"
         }
       ],
       "Outputs": []

@@ -30,7 +30,7 @@
         {
           "Id": "f6269be3-3331-43a6-91ec-138b47199f3e"/*ShaderPath*/,
           "Type": "System.String",
-          "Value": "/Lib/img/fx/HueShift.hlsl"
+          "Value": "Lib:shaders/img/fx/HueShift.hlsl"
         }
       ],
       "Outputs": []

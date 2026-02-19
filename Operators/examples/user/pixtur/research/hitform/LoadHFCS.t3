@@ -7,7 +7,7 @@
     },
     {
       "Id": "83b7ea0e-2ab6-4b5e-9706-0b702569c847"/*Path*/,
-      "DefaultValue": "Resources\\images\\frog3.jpg"
+      "DefaultValue": "Examples:images/frog3.jpg"
     }
   ],
   "Children": [],

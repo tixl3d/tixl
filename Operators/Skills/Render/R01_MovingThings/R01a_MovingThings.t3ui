@@ -1,0 +1,139 @@
+{
+  "Id": "ed778d74-6c42-4f64-bd0e-bb4953b260bf"/*R01a_MovingThings*/,
+  "Description": "Moving Things",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "03131129-d5b2-417e-a228-3102a60c6d7e"/*Distance*/,
+      "Position": {
+        "X": 1186.4082,
+        "Y": 1816.0571
+      }
+    },
+    {
+      "ChildId": "236b4a8e-93d8-4b44-825a-dab293c785d2"/*AnimValue*/,
+      "AnnotationId": "f8915f02-59b5-44d4-ade7-d1622145d9c7",
+      "Position": {
+        "X": 1133.8973,
+        "Y": 2145.2126
+      }
+    },
+    {
+      "ChildId": "255c3ac5-9429-4039-8295-61cbee8475e7"/*Vector3*/,
+      "Position": {
+        "X": 1423.1135,
+        "Y": 1673.5281
+      }
+    },
+    {
+      "ChildId": "593d21a0-420c-4545-baa0-a44c65831fe2"/*DrawSphere*/,
+      "Position": {
+        "X": 1423.1134,
+        "Y": 1776.7373
+      }
+    },
+    {
+      "ChildId": "71e24ba2-4519-4383-8de6-ca0d49f137ff"/*AnimValue*/,
+      "AnnotationId": "f8915f02-59b5-44d4-ade7-d1622145d9c7",
+      "Position": {
+        "X": 1133.8973,
+        "Y": 2110.2126
+      }
+    },
+    {
+      "ChildId": "773d3afc-fadd-4514-b7ba-19e5a597d145"/*AnimValue*/,
+      "Position": {
+        "X": 1192.6763,
+        "Y": 1749.7174
+      }
+    },
+    {
+      "ChildId": "949b2993-a59d-43cc-a87d-bb7f6d3ac8c5"/*Vector3*/,
+      "AnnotationId": "f8915f02-59b5-44d4-ade7-d1622145d9c7",
+      "Position": {
+        "X": 1273.8973,
+        "Y": 2110.2126
+      }
+    },
+    {
+      "ChildId": "a73d129f-8c58-4ab2-93e8-18f1a63e7a00"/*Distance*/,
+      "AnnotationId": "f8915f02-59b5-44d4-ade7-d1622145d9c7",
+      "Position": {
+        "X": 1133.8973,
+        "Y": 2180.2126
+      }
+    },
+    {
+      "ChildId": "bb74c958-1559-4bbb-bcb2-076495f63059"/*DrawSphere*/,
+      "AnnotationId": "f8915f02-59b5-44d4-ade7-d1622145d9c7",
+      "Position": {
+        "X": 1273.8973,
+        "Y": 2215.2126
+      }
+    },
+    {
+      "ChildId": "c9d812b7-29a8-4408-a446-ea89f2212637"/*AnimValue*/,
+      "Position": {
+        "X": 1192.6763,
+        "Y": 1671.7372
+      }
+    },
+    {
+      "ChildId": "e0a7cf4c-7b35-493a-b681-604d49afcebe"/*DrawQuiz*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1786.6185
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "2af0f74f-c0ee-4dcf-9f0e-9859055ec12a"/*ColorBuffer*/,
+      "Position": {
+        "X": 1693.2708,
+        "Y": 1856.6185
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "f8915f02-59b5-44d4-ade7-d1622145d9c7",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1032.0138,
+        "Y": 2052.5103
+      },
+      "Size": {
+        "X": 479.67932,
+        "Y": 287.2168
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "6e767a67-1e7f-40a7-b5fc-ecfd56d313ec",
+      "Description": "In computer graphics, positions are defined using three values along the x, y, and z axes.\nIn TiXL's coordinate system, x points to the right, y points upward, and z points toward the camera.\nYou can use the thumb, index finger, and middle finger of your right hand to remember their orientation."
+    },
+    {
+      "Id": "817001b7-91a6-4ea7-a3a9-a1a583ba149d",
+      "Description": "Other software may use different coordinate systems.\nFor example, some CAD applications use x and y as the ground plane.\nWith TiXL's default camera, the position (0, 0, 0) is centered on the screen, so an object that is 2 units tall touches both the top and bottom edges of the view."
+    },
+    {
+      "Id": "3d997288-8698-4202-a143-f9b2031f9337",
+      "Description": "We can use [AnimValue] and [Vector3] to build a simple animation.\nBoth operators will be covered in more detail later."
+    },
+    {
+      "Id": "16d971d3-df25-4255-9fd7-bddaed5a0423",
+      "ChildId": "255c3ac5-9429-4039-8295-61cbee8475e7",
+      "Description": "Connect the operator to the [Vector3] to create the reference animation.",
+      "Style": "CallToAction"
+    }
+  ]
+}

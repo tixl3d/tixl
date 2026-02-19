@@ -14,16 +14,16 @@ internal sealed class PlayAudioClip : Instance<PlayAudioClip>, IStatusProvider
     public PlayAudioClip()
     {
         Result.UpdateAction += Update;
-        _audioClipResource = new Resource<AudioClipDefinition>(Path, TryCreateClip);
+        _audioClipResource = new Resource<SoundtrackClipDefinition>(Path, TryCreateClip);
         _audioClipResource.AddDependentSlots(Result);
     }
 
-    private bool TryCreateClip(FileResource file, AudioClipDefinition? currentValue, [NotNullWhen(true)] out AudioClipDefinition? newClip, out string failureReason)
+    private bool TryCreateClip(FileResource file, SoundtrackClipDefinition? currentValue, [NotNullWhen(true)] out SoundtrackClipDefinition? newClip, out string failureReason)
     {
         var fileInfo = file.FileInfo;
         if (fileInfo is { Exists: true })
         {
-            newClip = new AudioClipDefinition
+            newClip = new SoundtrackClipDefinition
                            {
                                FilePath = Path.GetCurrentValue(),
                                StartTime = 0,
@@ -69,13 +69,13 @@ internal sealed class PlayAudioClip : Instance<PlayAudioClip>, IStatusProvider
             }
                 
             //Log.Debug($" Playing at {targetTime:0.0}", this);
-            AudioEngine.UseAudioClip(new(audioClip, this),  targetTime);
+            AudioEngine.UseSoundtrackClip(new(audioClip, this),  targetTime);
             audioClip.Volume =  Volume.GetValue(context);
         }
     }
 
     private double _startRunTimeInSecs;
-    private readonly Resource<AudioClipDefinition> _audioClipResource;
+    private readonly Resource<SoundtrackClipDefinition> _audioClipResource;
 
     IStatusProvider.StatusLevel IStatusProvider.GetStatusLevel()
     {

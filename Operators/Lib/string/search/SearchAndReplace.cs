@@ -15,6 +15,7 @@ internal sealed class SearchAndReplace : Instance<SearchAndReplace>
 
     private void Update(EvaluationContext context)
     {
+        var useRegex = UseRegex.GetValue(context);
         var content = OriginalString.GetValue(context);
         var replacement = Replace.GetValue(context)?.Replace("\\n","\n");
         var pattern = SearchPattern.GetValue(context);
@@ -22,17 +23,24 @@ internal sealed class SearchAndReplace : Instance<SearchAndReplace>
             || string.IsNullOrEmpty(replacement)
             || string.IsNullOrEmpty(pattern))
         {
-            Result.Value = string.Empty;
+            Result.Value = content?? string.Empty;
             return;
         }
-            
-        try
+
+        if (useRegex)
         {
-            Result.Value= Regex.Replace(content, pattern, replacement, RegexOptions.Multiline| RegexOptions.Singleline);
+            try
+            {
+                Result.Value= Regex.Replace(content, pattern, replacement, RegexOptions.Multiline| RegexOptions.Singleline);
+            }
+            catch (Exception)
+            {
+                Log.Error($"'{pattern}' is an incorrect search pattern", this);
+            }
         }
-        catch (Exception)
+        else
         {
-            Log.Error($"'{pattern}' is an incorrect search pattern", this);
+            Result.Value = content.Replace(pattern, replacement, StringComparison.Ordinal);
         }
     }
         
@@ -44,4 +52,7 @@ internal sealed class SearchAndReplace : Instance<SearchAndReplace>
         
     [Input(Guid = "DE8297AE-C7D8-414A-8825-D0FF9C2E3D78")]
     public readonly InputSlot<string> Replace = new();
+    
+    [Input(Guid = "3C65F1D1-D535-4ED8-885D-78A3D1BF26BC")]
+    public readonly InputSlot<bool> UseRegex = new();
 }

@@ -3,10 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using T3.Core.Logging;
 using T3.Core.Model;
 using T3.Core.Operator.Slots;
 using T3.Core.Resource;
+using T3.Core.UserData;
 
 namespace T3.Core.Operator;
 
@@ -28,10 +30,20 @@ public abstract partial class Instance :  IGuidPathContainer, IResourceConsumer
     {
         get
         {
-            GatherResourcePackages(this, ref _availableResourcePackages);
+            GatherAvailableResourcePackages(this, ref _availableResourcePackages);
             return _availableResourcePackages;
         }
     }
+    
+    public IReadOnlyList<IResourcePackage> LocalResourcePackages
+    {
+        get
+        {
+            GatherLocalResourcePackages(this, ref _availableResourcePackages);
+            return _availableResourcePackages;
+        }
+    }
+    
 
     private Guid[]? _parentPath;
     private Symbol.Child? _parentSymbolChild;
@@ -178,7 +190,7 @@ public abstract partial class Instance :  IGuidPathContainer, IResourceConsumer
         }
     }
 
-    internal void Dispose(SymbolPackage? packageToDispose)
+    internal void DisposePackage(SymbolPackage? instancePackage)
     {
         if ((_status & InstanceStatus.Disposed) != 0)
         {
@@ -186,7 +198,7 @@ public abstract partial class Instance :  IGuidPathContainer, IResourceConsumer
         }
         
         _status &= ~InstanceStatus.Active; // remove active status
-        Children.Dispose(packageToDispose);
+        Children.DisposePackageInChildren(instancePackage);
         
         // clear connections - they need to be repopulated with valid connections next time
         // we don't clear outputs as they are solely connected to by internal instances
@@ -199,7 +211,7 @@ public abstract partial class Instance :  IGuidPathContainer, IResourceConsumer
         }
         
         // if a package was specified that is not our own, we can live to see another day
-        if (packageToDispose != null && Symbol.SymbolPackage != packageToDispose)
+        if (instancePackage != null && Symbol.SymbolPackage != instancePackage)
         { 
             return;
         }
@@ -235,13 +247,32 @@ public abstract partial class Instance :  IGuidPathContainer, IResourceConsumer
         #pragma warning restore CA1816
     }
 
-    private static void GatherResourcePackages(Instance? instance, ref List<SymbolPackage> resourcePackages)
+    
+    /// <summary>
+    /// Collect the available resource packages for this instance. This refers to resource paths
+    /// that can be picked (e.g. in asset selectors) without injecting dependencies.
+    ///
+    /// For Resources that could be loaded (e.g.  
+    /// </summary>
+    /// <remarks>
+    /// An instance may use resources from:
+    ///   - all resources it depends on AND its parent
+    /// 
+    /// Some examples for a complex nesting structure:
+    ///
+    ///  [SomeProject.SomeProject] > [SomeProject.SomeScene] > [Examples.SomeDemo] > [Lib.SomeEffect] > [Lib.SomeOp]
+    ///   (proj+examples+lib)           (proj+examples+lib)    (proj+examples+lib)    (examples+lib)        (lib)
+    ///  
+    /// So "lib" should not use Examples.
+    /// So "Examples" should not use "Project".
+    /// </remarks>
+    private static void GatherLocalResourcePackages(Instance instance, ref List<SymbolPackage> resourcePackages)
     {
         if((instance!._status & InstanceStatus.ResourceFoldersDirty) == 0) 
             return;
             
         instance._status &= ~InstanceStatus.ResourceFoldersDirty;
-
+        
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if (resourcePackages != null)
         {
@@ -251,18 +282,87 @@ public abstract partial class Instance :  IGuidPathContainer, IResourceConsumer
         {
             resourcePackages = [];
         }
+        
+        // Add self
+        HashSet<SymbolPackage> packageSet = [ instance.Symbol.SymbolPackage ];
+        
+        // Add parent's resources if different
+        if(instance.Parent?.Symbol.SymbolPackage != null && instance.Parent.Symbol.SymbolPackage != instance.Symbol.SymbolPackage)
+            packageSet.Add(instance.Parent.Symbol.SymbolPackage);
 
-        while (instance != null)
+        var isParentLib = instance.Parent != null && instance.Parent.Symbol.SymbolPackage.DoNotIncludedSharedPackages;
+        
+        // Add shared resources if allowed
+        if (!instance.Symbol.SymbolPackage.DoNotIncludedSharedPackages
+            && !isParentLib)
         {
-            var package = instance.Symbol.SymbolPackage;
-            if (!resourcePackages.Contains(package))
+            foreach (var somePackage in SymbolPackage.AllPackages)
             {
-                resourcePackages.Add(package);
+                if (!somePackage.IsSharingResources)
+                    continue;
+                
+                packageSet.Add(somePackage);
+
             }
-
-            instance = instance.Parent;
         }
+        resourcePackages.AddRange(packageSet);
+        
+        // Walk up parents.
+        // while (instance != null)
+        // {
+        //     var package = instance.Symbol.SymbolPackage;
+        //     if(!resourcePackages.Contains(package))
+        //         resourcePackages.Add(package);
+        //
+        //     instance = instance.Parent;
+        // }
     }
+    
+    /// <summary>
+    /// Collect all resources that could be loaded by the instance.
+    /// (This could include resources through parents.)
+    /// </summary>
+    private static void GatherAvailableResourcePackages(Instance instance, ref List<SymbolPackage> resourcePackages)
+    {
+        if((instance!._status & InstanceStatus.ResourceFoldersDirty) == 0) 
+            return;
+            
+        instance._status &= ~InstanceStatus.ResourceFoldersDirty;
+        
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+        if (resourcePackages != null)
+        {
+            resourcePackages.Clear();
+        }
+        else
+        {
+            resourcePackages = [];
+        }
+        
+        HashSet<SymbolPackage> packageSet = [];
 
+        var structureItem = instance;
+        
+        // Walk up parents.
+        while (structureItem != null)
+        {
+            packageSet.Add(structureItem.Symbol.SymbolPackage);
+            structureItem = structureItem.Parent;
+        }
+        
+        // Add shared resources if allowed
+        {
+            foreach (var somePackage in SymbolPackage.AllPackages)
+            {
+                if (!somePackage.IsSharingResources)
+                    continue;
+                
+                packageSet.Add(somePackage);
+
+            }
+        }
+        resourcePackages.AddRange(packageSet);
+    }
+    
     private string? _asString;
 }

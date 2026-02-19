@@ -36,7 +36,7 @@ internal sealed class AboutDialog : ModalDialog
             );
             
             var logoPos = ImGui.GetCursorScreenPos();
-            ImGui.Image((IntPtr)SharedResources.t3logoAlphaTextureImageSrv, new Vector2(64, 64));
+            ImGui.Image((IntPtr)SharedResources.T3LogoAlphaTextureImageSrv, new Vector2(64, 64));
             
             // SNiXL Easter Egg: Shift+LeftClick on logo
             var logoMin = logoPos;

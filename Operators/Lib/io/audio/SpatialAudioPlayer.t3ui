@@ -1,0 +1,193 @@
+{
+  "Id": "8a3c9f2e-4b7d-4e1a-9c5f-7d2e8b1a6c3f"/*SpatialAudioPlayer*/,
+  "Description": "A 3D positional audio player using BASS audio library's 3D sound system. It simulates real-world audio by positioning sound sources in 3D space relative to a listener (camera). Features include:\n\n- [Distance Attenuation]: Sound volume decreases with distance between MinDistance (full volume) and MaxDistance (silent)\n- [Directional Sound Cones]: Define inner/outer cone angles to create directional audio sources (e.g., speakers, spotlights)\n- [Listener Orientation]: Audio panning based on listener position and rotation for realistic spatial perception\n- [3D Mode]: Normal (absolute positioning), Relative (source attached to listener for footsteps/breathing), or Off (mono playback)",
+  "InputUis": [
+    {
+      "InputId": "159c7342-a8c8-4ffb-8a69-da3ffa0d3b71"/*ListenerPosition*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 900.0
+      },
+      "Description": "The 3D position of the listener (camera) in world space"
+    },
+    {
+      "InputId": "1800cdcb-8863-423e-a2ec-901cf54e014c"/*StopAudio*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      },
+      "Description": "Stops the audio playback and resets the position to the beginning"
+    },
+    {
+      "InputId": "2aa976e3-a63c-4c7e-80a5-a459b3240388"/*AudioFile*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "Path to the audio file to play",
+      "Usage": "FilePath",
+      "FileFilter": "mp3, wav, ogg, flac"
+    },
+    {
+      "InputId": "3cf1b579-a1f2-4e9f-a54a-0e9e3580a6bf"/*SourceRotation*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 675.0
+      },
+      "Description": "The rotation/orientation of the audio source in 3D space (affects directional sound)"
+    },
+    {
+      "InputId": "42d8337a-d419-4038-a132-0e3934d25a2a"/*Audio3DMode*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1275.0
+      },
+      "Description": "The 3D audio processing mode (e.g., normal, head-relative \"footsteps/etc.\", or disabled \"mono\")"
+    },
+    {
+      "InputId": "454a65fa-c0a3-4055-85ec-ac3771b2524c"/*PlayAudio*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      },
+      "Description": "Trigger to start or resume audio playback"
+    },
+    {
+      "InputId": "7110399e-fd85-4053-9a49-cc09760dceb6"/*Volume*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 300.0
+      },
+      "Description": "The master volume level of the audio (0.0 = silent, 1.0 = full volume, >1.0 = amplified)"
+    },
+    {
+      "InputId": "732be517-a58e-4f21-8395-7761a95905ea"/*MinDistance*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 750.0
+      },
+      "Description": "The distance the audio plays at full volume before attenuation begins"
+    },
+    {
+      "InputId": "73971807-98d8-4b8b-b90f-41d673398b2b"/*OuterConeAngle*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1125.0
+      },
+      "Description": "The outer angle of the sound cone (in degrees). Audio will be at OuterConeVolume outside of this"
+    },
+    {
+      "InputId": "77d9309e-0c9d-407f-b9b1-dd4b734fa51e"/*Visibility*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1425.0
+      },
+      "GroupTitle": "Gizmos",
+      "Description": "Controls the visibility of the spatial audio gizmo in the editor"
+    },
+    {
+      "InputId": "785bb240-2020-4937-b132-b46f542e8986"/*InnerConeAngle*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1050.0
+      },
+      "Description": "The inner angle of the sound cone (in degrees). Audio plays at full volume inside of this"
+    },
+    {
+      "InputId": "7eb612cb-1dbf-4336-b91d-1042573bd7ff"/*MaxDistance*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 825.0
+      },
+      "Description": "The maximum distance at which the audio can still be heard (beyond this distance audio is silent)"
+    },
+    {
+      "InputId": "9c0b519b-45b1-4b28-8c0e-2eba7035a999"/*Speed*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 450.0
+      },
+      "Description": "Playback speed multiplier (1.0 = normal speed, affects pitch)"
+    },
+    {
+      "InputId": "ad8822bc-939b-4152-b253-bf01c5aa4d73"/*Mute*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 375.0
+      },
+      "Description": "When enabled, mutes the audio output without stopping playback"
+    },
+    {
+      "InputId": "b4d639d4-d96b-42e1-a250-efe57d7e9c5e"/*OuterConeVolume*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 1200.0
+      },
+      "Description": "The volume level of audio outside the outer cone angle (0.0 = silent, 1.0 = full, >1.0 = amplified)"
+    },
+    {
+      "InputId": "b921cbd4-4803-48e8-9eb9-f05901cc5802"/*Seek*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 525.0
+      },
+      "Description": "Seek to a specific position in the audio file (in seconds)"
+    },
+    {
+      "InputId": "d0c660d7-f90b-4e61-95ff-0ce7c76d9d67"/*PauseAudio*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      },
+      "Description": "Pauses the audio playback at the current position"
+    },
+    {
+      "InputId": "db9a0aa1-95db-4da4-99fc-31c385773ca8"/*ListenerRotation*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 975.0
+      },
+      "Description": "The rotation/orientation of the listener (camera) in world space"
+    },
+    {
+      "InputId": "f3730e3b-a335-4a13-9b2a-87b8e75cddeb"/*SourcePosition*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 600.0
+      },
+      "GroupTitle": "3D Settings",
+      "Description": "The 3D position of the audio source in world space"
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "117c0d2e-c14b-471a-8a6d-a9f983e48908"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    },
+    {
+      "OutputId": "022b0246-73d7-4a99-9c89-3e199171fd6c"/*IsPlaying*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 300.0
+      }
+    },
+    {
+      "OutputId": "52e624ca-508c-44c1-8583-946260e9f660"/*IsPaused*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 400.0
+      }
+    },
+    {
+      "OutputId": "ccbff254-1090-4ba2-8341-08fa3cb1540c"/*GetLevel*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 500.0
+      }
+    }
+  ]
+}

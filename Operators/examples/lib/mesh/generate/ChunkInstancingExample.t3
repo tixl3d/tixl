@@ -227,7 +227,7 @@
         {
           "Id": "292e80cf-ba31-4a50-9bf4-83712430f811"/*Path*/,
           "Type": "System.String",
-          "Value": "/Examples/mesh/instancing-test-v01.glb"
+          "Value": "Examples:test-footage/gltf/instancing-test-v01.glb"
         },
         {
           "Id": "57f129ae-0b2e-465d-8c0e-f6259fdd37ce"/*CombineBuffer*/,

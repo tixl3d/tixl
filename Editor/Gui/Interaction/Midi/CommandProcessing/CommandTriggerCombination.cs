@@ -1,4 +1,6 @@
-﻿namespace T3.Editor.Gui.Interaction.Midi.CommandProcessing;
+﻿using T3.Editor.Gui.UiHelpers;
+
+namespace T3.Editor.Gui.Interaction.Midi.CommandProcessing;
 
 /// <summary>
 /// Defines and invokes matching commands if input signals are matching. 
@@ -83,7 +85,8 @@ public sealed class CommandTriggerCombination
 
             if (_activatedIndices.Count <= 0)
                 return;
-                
+            
+            LogMidiDebug($"Invoking {this} with index {_activatedIndices[0]} (ModeButtonReleased)");
             _indexAction?.Invoke(_activatedIndices[0]);
             _indicesAction?.Invoke(_activatedIndices.ToArray());
             return;
@@ -98,7 +101,8 @@ public sealed class CommandTriggerCombination
             {
                 if (_holdIndices.Count != 0 || _justPressedIndices.Count <= 0)
                     return;
-                    
+                
+                LogMidiDebug($"Invoking {this} with index {_justPressedIndices[0]} (SingleRangeButtonPressed)");
                 _indexAction?.Invoke(_justPressedIndices[0]);
                 _indicesAction?.Invoke(_activatedIndices.ToArray());
                 return;
@@ -111,6 +115,7 @@ public sealed class CommandTriggerCombination
                     && buttonSignals[0].State == ButtonSignal.States.JustPressed
                    )
                 {
+                    LogMidiDebug($"Invoking {this} (SingleActionButtonPressed)");
                     _actionWithoutParameters?.Invoke();
                 }
 
@@ -121,6 +126,7 @@ public sealed class CommandTriggerCombination
             {
                 if (_releasedIndices.Count > 1 && _justPressedIndices.Count == 0 && _holdIndices.Count == 0)
                 {
+                    LogMidiDebug($"Invoking {this} with {_activatedIndices.Count} indices (AllCombinedButtonsReleased)");
                     _indicesAction?.Invoke(_activatedIndices.ToArray());
                 }
 
@@ -144,8 +150,8 @@ public sealed class CommandTriggerCombination
                 if (!range.IncludesButtonIndex(signal.ControllerId))
                     continue;
 
-
                 var mappedIndex = range.GetMappedIndex(signal.ControllerId);
+                // Note: Debug log removed - too verbose for continuous controllers
                 _controllerValueUpdateAction.Invoke(mappedIndex, signal.ControllerValue);
             }
 
@@ -169,12 +175,10 @@ public sealed class CommandTriggerCombination
 
         foreach (var range in _keyRanges)
         {
-            if (!range.IsRange)
-                continue;
-
             foreach (var s in buttonSignals)
             {
-                if (!range.IncludesButtonIndex(s.ButtonId))
+                var includes = range.IncludesButtonIndex(s.ButtonId);
+                if (!includes)
                     continue;
                     
                 var mappedIndex = range.GetMappedIndex(s.ButtonId);
@@ -219,5 +223,18 @@ public sealed class CommandTriggerCombination
     private readonly Action<int> _indexAction;
     private readonly Action<int[]> _indicesAction;
     private readonly Action<int, float> _controllerValueUpdateAction;
+    
+    /// <summary>
+    /// Gets the required input mode for this command trigger combination.
+    /// </summary>
+    public CompatibleMidiDevice.InputModes RequiredInputMode => _requiredInputMode;
 
+    /// <summary>
+    /// Logs a debug message if MIDI debug logging is enabled in settings.
+    /// </summary>
+    private static void LogMidiDebug(string message)
+    {
+        if (UserSettings.Config.EnableMidiDebugLogging)
+            Log.Debug(message);
+    }
 }

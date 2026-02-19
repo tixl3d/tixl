@@ -10,6 +10,7 @@ using System.Runtime.Loader;
 using System.Threading;
 using T3.Core.IO;
 using T3.Core.Logging;
+using T3.Core.Utils;
 using T3.Serialization;
 
 namespace T3.Core.Compilation;
@@ -21,8 +22,30 @@ namespace T3.Core.Compilation;
 /// </summary>
 public sealed partial class AssemblyInformation
 {
-    public string Name { get; private set; }
+    public string Name 
+    { 
+        get => _name ?? RootNamespace; // Fallback to RootNamespace if _name is null
+        private set => _name = value; 
+    }
+    private string? _name;
+    
+    public string RootNamespace 
+    {
+        get
+        {
+            if (TryGetReleaseInfo(out var releaseInfo))
+                return releaseInfo.RootNamespace;
+            
+            return string.Empty;
+        }
+    }
+    
     public string Directory => _directory!;
+
+    internal Guid Id =>
+        TryGetReleaseInfo(out var releaseInfo) 
+            ? releaseInfo.PackageId 
+            : Guid.Empty; 
 
     public bool IsLoaded => _loadContext != null;
 

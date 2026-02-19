@@ -1,5 +1,6 @@
 using ImGuiNET;
 using System.Diagnostics;
+using SharpDX.Direct3D11;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Model;
 using T3.Core.Operator;
@@ -14,6 +15,7 @@ using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.OpUis;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Gui.UiHelpers.Thumbnails;
 using T3.Editor.UiModel.Helpers;
 using T3.Editor.UiModel.InputsAndTypes;
 using Texture2D = T3.Core.DataTypes.Texture2D;
@@ -1196,14 +1198,30 @@ internal sealed partial class MagGraphView
         if (firstOutput is not Slot<Texture2D> textureSlot)
             return false;
 
+        ShaderResourceView previewTextureView;
+        float aspect = 1;
+        
         var texture = textureSlot.Value;
-        if (texture == null || texture.IsDisposed)
-            return false;
+        var uvMin = Vector2.Zero;
+        var uvMax = Vector2.One;
+        
+        if (texture != null && !texture.IsDisposed)
+        {
+            previewTextureView = SrvManager.GetSrvForTexture(texture);
+            aspect = (float)texture.Description.Width / texture.Description.Height;
+        }
+        else
+        {
+            var thumbnail = ThumbnailManager.GetThumbnail(instance.Symbol.Id, instance.Symbol.SymbolPackage, ThumbnailManager.Categories.PackageMeta);
+            if(!thumbnail.IsReady)
+                return false;
 
-        var previewTextureView = SrvManager.GetSrvForTexture(texture);
-
-        var aspect = (float)texture.Description.Width / texture.Description.Height;
-
+            previewTextureView = ThumbnailManager.AtlasSrv;
+            uvMin = thumbnail.UvMin;
+            uvMax = thumbnail.UvMax;
+            aspect = 4 / 3.0f;
+        }
+        
         var unitScreenHeight = (MagGraphItem.GridSize.Y - 5) * CanvasScale;
         var previewSize = new Vector2(unitScreenHeight * aspect, unitScreenHeight);
 
@@ -1223,8 +1241,8 @@ internal sealed partial class MagGraphView
 
         drawList.AddImage((IntPtr)previewTextureView, min,
                           min + previewSize,
-                          Vector2.Zero,
-                          Vector2.One,
+                          uvMin,
+                          uvMax,
                           Color.White);
         if (CanvasScale > 0.5f)
         {

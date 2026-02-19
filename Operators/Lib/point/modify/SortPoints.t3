@@ -337,7 +337,7 @@
         {
           "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
           "Type": "System.String",
-          "Value": "/Lib/points/modify/SortPoints.hlsl"
+          "Value": "Lib:shaders/points/modify/SortPoints.hlsl"
         }
       ],
       "Outputs": []
@@ -507,7 +507,7 @@
         {
           "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
           "Type": "System.String",
-          "Value": "/Lib/points/modify/SortPoints.hlsl"
+          "Value": "Lib:shaders/points/modify/SortPoints.hlsl"
         }
       ],
       "Outputs": []
@@ -519,7 +519,7 @@
         {
           "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
           "Type": "System.String",
-          "Value": "/Lib/points/modify/SortPointsDebug.hlsl"
+          "Value": "Lib:shaders/points/modify/SortPointsDebug.hlsl"
         }
       ],
       "Outputs": []

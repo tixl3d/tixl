@@ -3,7 +3,7 @@
   "Inputs": [
     {
       "Id": "04d5f714-4e38-4a1e-b245-f6f0b582b35a"/*FilePath*/,
-      "DefaultValue": "{0:0.000}"
+      "DefaultValue": ""
     }
   ],
   "Children": [],

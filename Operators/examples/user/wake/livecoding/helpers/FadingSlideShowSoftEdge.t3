@@ -45,7 +45,7 @@
     },
     {
       "Id": "6c52d99d-9361-4d99-b9b0-4397e564ca19"/*FolderWithImages*/,
-      "DefaultValue": "Resources\\images"
+      "DefaultValue": "Examples:images/"
     },
     {
       "Id": "7d9b6e41-e1af-4359-9885-11c4b1d398d2"/*Position*/,

@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System.IO;
 using ImGuiNET;
 using Newtonsoft.Json;
@@ -6,6 +6,7 @@ using Newtonsoft.Json.Linq;
 using T3.Core.Operator;
 using T3.Core.Operator.Interfaces;
 using T3.Core.Resource;
+using T3.Core.Resource.Assets;
 using T3.Core.SystemUi;
 using T3.Core.Utils;
 using T3.Editor.Gui.Input;
@@ -19,7 +20,7 @@ namespace T3.Editor.Gui.InputUi.SimpleInputUis;
 
 public sealed class StringInputUi : InputValueUi<string>
 {
-    private const int MaxStringLength = 4000;
+    private const int MaxStringLength = 32000;
 
     public enum UsageType
     {
@@ -31,7 +32,7 @@ public sealed class StringInputUi : InputValueUi<string>
     }
 
     public UsageType Usage { get; private set; } = UsageType.Default;
-    public string FileFilter { get; private set; } = string.Empty;
+    public string FileFilter { get; set; } = string.Empty;
 
     public override IInputUi Clone()
     {
@@ -68,7 +69,7 @@ public sealed class StringInputUi : InputValueUi<string>
                 {
                     if (value != null)
                     {
-                        ResourceManager.TryResolveRelativePath(value, FilePickingUi.SearchResourceConsumer, out var absolutePath, out _);
+                        AssetRegistry.TryResolveAddress(value, FilePickingUi.SearchResourceConsumer, out var absolutePath, out _);
                         if (!File.Exists(absolutePath))
                         {
                             Log.Error("Can't open non-existing file " + absolutePath);
@@ -213,12 +214,12 @@ public sealed class StringInputUi : InputValueUi<string>
             FormInputs.DrawFieldSetHeader("File Filter");
             
             var tmp = FileFilter;
-            var warning = !string.IsNullOrEmpty(tmp) && !tmp.Contains('|')
+            /*var warning = !string.IsNullOrEmpty(tmp) && !tmp.Contains('|')
                               ? "Filter must include at least one | symbol.\nPlease read tooltip for examples"
-                              : null;
+                              : null;*/
 
-            if (FormInputs.AddStringInput("##File Filter", ref tmp, null, warning,
-                                          "This will only work for file FilePath-Mode.\nThe filter has to be in following format:\n\n Your Description (*.ext)|*.ext"))
+            if (FormInputs.AddStringInput("##File Filter", ref tmp, null, null,
+                                          "This will only work for file FilePath-Mode.\nSeparate multiple extensions by a comma.(example: png, jpg, dds)"))
             {
                 modified = true;
                 FileFilter = tmp;

@@ -76,7 +76,7 @@
         {
           "Id": "7f14d0e3-1159-434d-b038-74644948937c"/*ShaderPath*/,
           "Type": "System.String",
-          "Value": "Resources/lib/img/fx/Displace.hlsl"
+          "Value": "Lib:shaders/img/fx/Displace.hlsl"
         },
         {
           "Id": "a5cb5bda-0fb2-4863-bd8d-9ac09135fc30"/*WrapMode*/,
@@ -109,7 +109,7 @@
         {
           "Id": "f6269be3-3331-43a6-91ec-138b47199f3e"/*ShaderPath*/,
           "Type": "System.String",
-          "Value": "/Lib/img/fx/Displace.hlsl"
+          "Value": "Lib:shaders/img/fx/Displace.hlsl"
         }
       ],
       "Outputs": []

@@ -19,7 +19,7 @@
     },
     {
       "Id": "888017f2-3ac2-464b-ae6f-9f8caf53ba6d"/*UseVertexSelection*/,
-      "DefaultValue": false
+      "DefaultValue": true
     },
     {
       "Id": "b8409f71-d2e3-4fb3-91dc-abf96b55379f"/*Translate*/,
@@ -118,7 +118,7 @@
         {
           "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
           "Type": "System.String",
-          "Value": "Resources/lib/3d/mesh/mesh-TransformUVs.hlsl"
+          "Value": "Lib:shaders/3d/mesh/mesh-TransformUVs.hlsl"
         }
       ],
       "Outputs": []

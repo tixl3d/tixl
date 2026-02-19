@@ -1830,6 +1830,7 @@
     },
     {
       "ChildId": "8abe6513-ea00-4982-a2bf-fdd073e3bdfd"/*FadingSlideShow*/,
+      "Comment": "Storyboard",
       "Position": {
         "X": 3222.4512,
         "Y": 7221.03

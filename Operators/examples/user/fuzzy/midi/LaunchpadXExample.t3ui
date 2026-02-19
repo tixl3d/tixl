@@ -1,5 +1,5 @@
 {
-  "Id": "55551bc1-1bf9-47d8-b25b-33c3596d21c4"/*LaunchpadXButtonExample*/,
+  "Id": "55551bc1-1bf9-47d8-b25b-33c3596d21c4"/*LaunchpadXExample*/,
   "Description": "A few example for LaunchPad X integration\n\nHit \"Shift+X\" to init launchpad display",
   "InputUis": [
     {

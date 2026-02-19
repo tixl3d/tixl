@@ -20,7 +20,7 @@
         {
           "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
           "Type": "System.String",
-          "Value": "Resources/lib/img/analyze/cs-GetImageBrightness.hlsl"
+          "Value": "Lib:shaders/img/analyze/cs-GetImageBrightness.hlsl"
         },
         {
           "Id": "c0701d0b-d37f-4570-9e9a-ec2e88b919d1"/*DebugName*/,
@@ -103,7 +103,7 @@
         {
           "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
           "Type": "System.String",
-          "Value": "Resources/lib/img/analyze/cs-GetImageBrightness.hlsl"
+          "Value": "Lib:shaders/img/analyze/cs-GetImageBrightness.hlsl"
         },
         {
           "Id": "c0701d0b-d37f-4570-9e9a-ec2e88b919d1"/*DebugName*/,

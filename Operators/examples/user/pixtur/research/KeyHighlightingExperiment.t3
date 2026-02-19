@@ -115,7 +115,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\images\\frog2.jpg"
+          "Value": "Examples:images/frog2.jpg"
         }
       ],
       "Outputs": []
@@ -430,7 +430,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\Example\\user\\pixtur\\research\\ConfigurationTest\\interior.JPG"
+          "Value": "Examples:Resources/Example/user/pixtur/research/ConfigurationTest/interior.JPG"
         }
       ],
       "Outputs": []
@@ -742,7 +742,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\Example\\user\\pixtur\\research\\ConfigurationTest\\interior_labels.PNG"
+          "Value": "Examples:Resources/Example/user/pixtur/research/ConfigurationTest/interior_labels.PNG"
         }
       ],
       "Outputs": []

@@ -148,7 +148,7 @@
         {
           "Id": "24b7e7e1-fe0b-46be-807e-0afacd4800f9"/*FilePath*/,
           "Type": "System.String",
-          "Value": "/Lib/sdf/sdffractal.json"
+          "Value": "Lib:shaders/sdf/sdffractal.json"
         }
       ],
       "Outputs": []
@@ -160,7 +160,7 @@
         {
           "Id": "24b7e7e1-fe0b-46be-807e-0afacd4800f9"/*FilePath*/,
           "Type": "System.String",
-          "Value": "/Lib/sdf/sdfcomposed.json"
+          "Value": "Lib:shaders/sdf/sdfcomposed.json"
         }
       ],
       "Outputs": []
@@ -172,7 +172,7 @@
         {
           "Id": "24b7e7e1-fe0b-46be-807e-0afacd4800f9"/*FilePath*/,
           "Type": "System.String",
-          "Value": "/Lib/sdf/sdfprimitives.json"
+          "Value": "Lib:shaders/sdf/sdfprimitives.json"
         }
       ],
       "Outputs": []

@@ -104,7 +104,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/images/basic/perlin-noise-rgb.png"
+          "Value": "Lib:images/basic/perlin-noise-rgb.png"
         }
       ],
       "Outputs": []
@@ -694,7 +694,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\Example\\user\\pixtur\\research\\EarthNavigation\\material\\2k_earth_daymap.jpg"
+          "Value": "Examples:user/pixtur/research/EarthNavigation/material/2k_earth_daymap.jpg"
         }
       ],
       "Outputs": []
@@ -1163,7 +1163,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\Example\\user\\pixtur\\research\\ContextualGraph\\geometry\\bridge.obj"
+          "Value": "Examples:Resources/Example/user/pixtur/research/ContextualGraph/geometry/bridge.obj"
         }
       ],
       "Outputs": []
@@ -1363,7 +1363,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\common\\meshes\\people\\male-wondering.obj"
+          "Value": "Examples:meshes/low-poly-people/male-wondering.obj"
         },
         {
           "Id": "c39a61b3-fb6b-4611-8f13-273f13c9c491"/*ScaleFactor*/,
@@ -1617,7 +1617,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\common\\meshes\\people\\boy-standing.obj"
+          "Value": "Examples:meshes/low-poly-people/boy-standing.obj"
         },
         {
           "Id": "c39a61b3-fb6b-4611-8f13-273f13c9c491"/*ScaleFactor*/,
@@ -2006,7 +2006,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\Example\\user\\pixtur\\research\\EarthNavigation\\material\\2k_earth_daymap.jpg"
+          "Value": "Examples:user/pixtur/research/EarthNavigation/material/2k_earth_daymap.jpg"
         }
       ],
       "Outputs": []
@@ -2140,7 +2140,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\Example\\user\\pixtur\\research\\EarthNavigation\\material\\2k_earth_daymap.jpg"
+          "Value": "Examples:user/pixtur/research/EarthNavigation/material/2k_earth_daymap.jpg"
         }
       ],
       "Outputs": []

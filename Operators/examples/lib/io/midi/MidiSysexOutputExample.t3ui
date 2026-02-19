@@ -109,17 +109,17 @@
     {
       "Id": "2b078b92-234f-4c94-8ce4-c3242636d996",
       "ChildId": "e3f8adc1-7b93-499c-a16b-01d57e595c37",
-      "Title": "MidiSysex Output requires:\n1. A Midi Device to connect to\n2. A proper Midi sysex string\n\nThe below strings in Sysex Command groups are Initialization strings. These can be sent to change the device mode of the APC40 Mk1 and Mk2."
+      "Description": "MidiSysex Output requires:\n1. A Midi Device to connect to\n2. A proper Midi sysex string\n\nThe below strings in Sysex Command groups are Initialization strings. These can be sent to change the device mode of the APC40 Mk1 and Mk2."
     },
     {
       "Id": "21176720-5dfe-4f3d-a046-4a913d29b011",
       "ChildId": "4faca885-dc92-4641-8a50-97d45958885a",
-      "Title": "Trigger will send the Sysex to the midi device."
+      "Description": "Trigger will send the Sysex to the midi device."
     },
     {
       "Id": "472850af-de31-4ea7-a4b2-d2c25eb8fca5",
       "ChildId": "e3f8adc1-7b93-499c-a16b-01d57e595c37",
-      "Title": "The Output \"Result\" can be sent to other Execute nodes"
+      "Description": "The Output \"Result\" can be sent to other Execute nodes"
     }
   ]
 }

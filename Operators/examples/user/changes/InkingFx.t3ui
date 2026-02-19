@@ -182,24 +182,10 @@
       }
     },
     {
-      "ChildId": "8250ba39-30b1-4b5e-b141-431b35eefa39"/*DrawScreenQuad*/,
-      "Position": {
-        "X": 867.8121,
-        "Y": -19.967758
-      }
-    },
-    {
       "ChildId": "83094bad-e531-4a6d-9984-4fc3722bb92b"/*DrawBillboards*/,
       "Position": {
         "X": 860.4005,
         "Y": 1129.2278
-      }
-    },
-    {
-      "ChildId": "84529309-366f-4a46-bc12-3eff59be6163"/*ChangeCase*/,
-      "Position": {
-        "X": -1314.8695,
-        "Y": -21.22963
       }
     },
     {

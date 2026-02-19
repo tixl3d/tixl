@@ -49,7 +49,7 @@
         {
           "Id": "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3"/*FontPath*/,
           "Type": "System.String",
-          "Value": "Resources\\fonts\\Roboto-Light.fnt"
+          "Value": "Examples:fonts/Roboto-Light.fnt"
         },
         {
           "Id": "d89c518c-a862-4f46-865b-0380350b7417"/*Size*/,
@@ -378,7 +378,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\common\\HDRI\\studio_small_08-prefiltered.dds"
+          "Value": "Lib:pbr/studio_small_08-prefiltered.dds"
         }
       ],
       "Outputs": []
@@ -1051,7 +1051,7 @@
         {
           "Id": "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3"/*FontPath*/,
           "Type": "System.String",
-          "Value": "Resources\\fonts\\Roboto-Light.fnt"
+          "Value": "Examples:fonts/Roboto-Light.fnt"
         },
         {
           "Id": "d89c518c-a862-4f46-865b-0380350b7417"/*Size*/,
@@ -1564,7 +1564,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/images/basic/perlin-noise.jpg"
+          "Value": "Lib:images/basic/perlin-noise.jpg"
         }
       ],
       "Outputs": []
@@ -2203,7 +2203,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\user\\wake\\proj-mary\\geometry\\mary-200k-smooth.obj"
+          "Value": "Examples:Resources/user/wake/proj-mary/geometry/mary-200k-smooth.obj"
         },
         {
           "Id": "aa19e71d-329c-448b-901c-565bf8c0da4f"/*SortVertices*/,
@@ -2360,7 +2360,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\user\\wake\\proj-mary\\geometry\\mary_1k.obj"
+          "Value": "Examples:user/wake/proj-mary/geometry/mary_1k.obj"
         },
         {
           "Id": "aa19e71d-329c-448b-901c-565bf8c0da4f"/*SortVertices*/,

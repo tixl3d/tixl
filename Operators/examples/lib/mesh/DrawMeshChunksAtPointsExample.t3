@@ -302,7 +302,7 @@
         {
           "Id": "292e80cf-ba31-4a50-9bf4-83712430f811"/*Path*/,
           "Type": "System.String",
-          "Value": "/t3/meshes/Chunks_torus.glb"
+          "Value": "Examples:meshes/chunks/Chunks_torus.glb"
         },
         {
           "Id": "57f129ae-0b2e-465d-8c0e-f6259fdd37ce"/*CombineBuffer*/,

@@ -3,22 +3,6 @@
   "Description": "An internal operator that performs the necessary steps of the bloom effect.",
   "InputUis": [
     {
-      "InputId": "08c47369-295b-4638-0ae8-4967e54cf638"/*DownsamplePS*/,
-      "Relevancy": "Required",
-      "Position": {
-        "X": -200.0,
-        "Y": 675.0
-      }
-    },
-    {
-      "InputId": "2ae6958b-4b7d-485a-2c0a-6b89076e185a"/*UpsampleAccumulatePS*/,
-      "Relevancy": "Required",
-      "Position": {
-        "X": -200.0,
-        "Y": 825.0
-      }
-    },
-    {
       "InputId": "5d19c8be-7ea0-4b8d-5f3d-9ebb3a914b8d"/*LinearSampler*/,
       "Relevancy": "Required",
       "Position": {
@@ -32,14 +16,6 @@
       "Position": {
         "X": -200.0,
         "Y": 0.0
-      }
-    },
-    {
-      "InputId": "7e7a95c8-8e2b-48e3-9e3d-eb1b9f0c40d4"/*Intensity*/,
-      "Relevancy": "Required",
-      "Position": {
-        "X": -200.0,
-        "Y": 150.0
       }
     },
     {
@@ -59,43 +35,17 @@
       }
     },
     {
-      "InputId": "ac1a30d9-0d79-4e7e-9b1d-84f4f129a8c1"/*Spread*/,
-      "Relevancy": "Required",
-      "Position": {
-        "X": -200.0,
-        "Y": 375.0
-      }
-    },
-    {
-      "InputId": "b2c6b5b7-36a3-4d0e-9a05-1e1d0c0e7a11"/*BlurPS*/,
-      "Relevancy": "Required",
+      "InputId": "b82c9d56-19d6-4d2b-9e6f-1a1b1cbe9a25"/*UpsampleBlurPS*/,
       "Position": {
         "X": -200.0,
         "Y": 750.0
       }
     },
     {
-      "InputId": "d20d7e44-db1b-48a2-8a14-1d02c6a0a0f7"/*BlurRadiusPx*/,
-      "Relevancy": "Required",
+      "InputId": "d0b64c21-46c5-45a3-9f68-2e7b2b2cf3a1"/*DownsampleBlurPS*/,
       "Position": {
         "X": -200.0,
-        "Y": 225.0
-      }
-    },
-    {
-      "InputId": "d5914036-f628-4305-d7b5-1634b219c305"/*Clamp*/,
-      "Relevancy": "Required",
-      "Position": {
-        "X": -200.0,
-        "Y": 525.0
-      }
-    },
-    {
-      "InputId": "e5548715-1cae-4792-9e6e-8f9d8daa9edf"/*TintGradient*/,
-      "Relevancy": "Required",
-      "Position": {
-        "X": -200.0,
-        "Y": 450.0
+        "Y": 675.0
       }
     },
     {
@@ -110,7 +60,7 @@
   "SymbolChildUis": [],
   "OutputUis": [
     {
-      "OutputId": "7d2b0e58-9a1c-4e5a-9f85-7bde3d9b33e7"/*OutputTexture*/,
+      "OutputId": "6d01b25b-0b2f-4e92-9b5e-0f6d69f2cf5b"/*OutputTexture*/,
       "Position": {
         "X": 300.0,
         "Y": 200.0

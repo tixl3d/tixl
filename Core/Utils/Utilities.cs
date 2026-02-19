@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 
@@ -126,6 +127,19 @@ public static class Utilities
         {
             return index % count;
         }
+    }
+
+    /// <summary>
+    /// Useful for checking if a reference has changed without keeping an GC reference. 
+    /// </summary>
+    public static bool HasObjectChanged(object obj, ref int? lastObjectId)
+    {
+        int? id = obj is null ? null : RuntimeHelpers.GetHashCode(obj);
+        if (id == lastObjectId)
+            return false;
+
+        lastObjectId = id;
+        return true;
     }
 }
 

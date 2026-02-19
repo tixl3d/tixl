@@ -56,7 +56,7 @@
         {
           "Id": "24b7e7e1-fe0b-46be-807e-0afacd4800f9"/*FilePath*/,
           "Type": "System.String",
-          "Value": "lib/field/use/SampleFieldPointsTemplate.hlsl"
+          "Value": "Lib:shaders/field/use/SampleFieldPointsTemplate.hlsl"
         }
       ],
       "Outputs": []
@@ -92,7 +92,7 @@
         {
           "Id": "0b5cbbdf-afe7-4daf-9f1e-0e79792691f1"/*TemplateFilePath*/,
           "Type": "System.String",
-          "Value": "lib/field/use/SampleFieldPointsTemplate.hlsl"
+          "Value": "Lib:shaders/field/use/SampleFieldPointsTemplate.hlsl"
         }
       ],
       "Outputs": []

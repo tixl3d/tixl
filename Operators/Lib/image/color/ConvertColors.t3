@@ -26,7 +26,7 @@
         {
           "Id": "1e4e274b-60b2-4fe8-b275-ebef80d520a7"/*Source*/,
           "Type": "System.String",
-          "Value": "Resources\\lib\\img\\adjust\\img-fx-ConvertColors.hlsl"
+          "Value": "Lib:shaders/img/adjust/img-fx-ConvertColors.hlsl"
         },
         {
           "Id": "2624d563-bad7-4fcb-a201-0ee0b9b93afa"/*Filter*/,

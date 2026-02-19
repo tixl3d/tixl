@@ -1,0 +1,349 @@
+{
+  "Id": "b722014e-402f-4089-a876-16aefab3c012"/*CustomVertexShader*/,
+  "Description": "Uses custom shader code to manipulate the vertices of a mesh.",
+  "InputUis": [
+    {
+      "InputId": "0359d61a-4058-43ab-b997-1dadf5c2af35"/*B*/,
+      "Position": {
+        "X": 888.22876,
+        "Y": 347.38416
+      },
+      "Scale": 0.01
+    },
+    {
+      "InputId": "074aed08-271d-4f2b-869f-1e2e869fdba5"/*ShaderCode*/,
+      "Position": {
+        "X": 430.6225,
+        "Y": -64.07384
+      },
+      "Usage": "Multiline"
+    },
+    {
+      "InputId": "3104dab4-8d71-44aa-a582-47416aa977b5"/*A*/,
+      "Position": {
+        "X": 888.22876,
+        "Y": 312.38416
+      },
+      "GroupTitle": "Parameters",
+      "Scale": 0.01
+    },
+    {
+      "InputId": "353f527e-7593-45fd-9daf-eb46b965ee6e"/*C*/,
+      "Position": {
+        "X": 888.22876,
+        "Y": 382.38416
+      },
+      "Scale": 0.01
+    },
+    {
+      "InputId": "946d47f3-9fcf-4f2c-b7c9-26d94ddb4613"/*D*/,
+      "Position": {
+        "X": 888.22876,
+        "Y": 417.38416
+      },
+      "Scale": 0.01
+    },
+    {
+      "InputId": "a76dbb53-092c-4398-9e51-889d4785d60d"/*Image*/,
+      "Position": {
+        "X": 1390.2935,
+        "Y": 742.5802
+      },
+      "GroupTitle": "Additional resources"
+    },
+    {
+      "InputId": "ad6e1865-1e63-4a85-9eee-36172e5f6a19"/*Mesh*/,
+      "Position": {
+        "X": 169.11285,
+        "Y": 832.49243
+      }
+    },
+    {
+      "InputId": "b49f95cf-94c5-46cb-96c0-684f7e6669ed"/*Offset*/,
+      "Position": {
+        "X": 748.22876,
+        "Y": 452.38416
+      },
+      "Scale": 0.01
+    },
+    {
+      "InputId": "b7dfa99a-9e7c-42aa-8706-62ef6c4ebb17"/*RecomputeNormals*/,
+      "Position": {
+        "X": 1530.2935,
+        "Y": 1127.5802
+      }
+    },
+    {
+      "InputId": "c99fa997-9f97-4b5f-a90f-801280662268"/*Gradient*/,
+      "Position": {
+        "X": 1250.2935,
+        "Y": 777.5802
+      }
+    },
+    {
+      "InputId": "db40c298-be64-4710-846e-f7fd75b48bbf"/*ShaderTemplate*/,
+      "Position": {
+        "X": 143.97643,
+        "Y": -273.16144
+      },
+      "Usage": "FilePath",
+      "FileFilter": "hlsl"
+    },
+    {
+      "InputId": "e3cbd904-b9c2-4461-8be3-c097bf7f70f6"/*IgnoreTemplate*/,
+      "Position": {
+        "X": 290.6225,
+        "Y": 110.92615
+      }
+    },
+    {
+      "InputId": "e5930f87-e17b-48d5-9fb2-451da46968b5"/*AdditionalDefines*/,
+      "Position": {
+        "X": 430.6225,
+        "Y": 5.9261475
+      },
+      "GroupTitle": "Additional Options...",
+      "Usage": "Multiline"
+    },
+    {
+      "InputId": "eecf7eeb-fefc-4821-b280-be2abd79a2b0"/*ShaderGraph*/,
+      "Position": {
+        "X": 172.66583,
+        "Y": -431.5283
+      }
+    },
+    {
+      "InputId": "fbd20ff6-1e88-4d1a-9cb2-1767fc351cbc"/*SplitVertices*/,
+      "Position": {
+        "X": 29.112823,
+        "Y": 902.49243
+      }
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "02497f22-cac8-4f4d-8f07-b489643a5952"/*PickString*/,
+      "Position": {
+        "X": 570.6225,
+        "Y": 40.926147
+      }
+    },
+    {
+      "ChildId": "03f260de-d706-40ca-8fa8-76b02938d397"/*SearchAndReplace*/,
+      "Position": {
+        "X": 570.6225,
+        "Y": -99.07385
+      }
+    },
+    {
+      "ChildId": "0cd58725-f998-49ee-8c7d-8a8a20034210"/*GetBufferComponents*/,
+      "Position": {
+        "X": 1013.2238,
+        "Y": 748.0222
+      }
+    },
+    {
+      "ChildId": "106fb869-7bb9-49fd-9144-e9dcbad0f378"/*GetBufferComponents*/,
+      "Position": {
+        "X": 623.5598,
+        "Y": 937.72345
+      }
+    },
+    {
+      "ChildId": "1079fbb9-6bf9-49fc-ac45-3bc504deb885"/*BoolToInt*/,
+      "Position": {
+        "X": 1670.2935,
+        "Y": 1127.5802
+      }
+    },
+    {
+      "ChildId": "1b7aad3f-bd82-4385-8a30-762fc74bcc60"/*ComputeShaderFromSource*/,
+      "Position": {
+        "X": 888.22864,
+        "Y": 88.81981
+      }
+    },
+    {
+      "ChildId": "24c45d78-dbac-4d7d-84db-5dc051e187b2"/*GradientsToTexture*/,
+      "Position": {
+        "X": 1390.2935,
+        "Y": 777.5802
+      }
+    },
+    {
+      "ChildId": "2e982273-495d-4a07-8efb-4c056c2a41c3"/*BoolToInt*/,
+      "Position": {
+        "X": 430.6225,
+        "Y": 110.92615
+      }
+    },
+    {
+      "ChildId": "4cf42030-95dc-4b09-a1bc-bd945030f87a"/*CalcDispatchCount*/,
+      "Position": {
+        "X": 1028.2288,
+        "Y": 123.81981
+      }
+    },
+    {
+      "ChildId": "53458818-2627-4157-8820-0df1e1e36e5e"/*ReadFile*/,
+      "Position": {
+        "X": 334.66458,
+        "Y": -165.6676
+      }
+    },
+    {
+      "ChildId": "65487ea6-5fc0-436b-bbf1-af35d7ef01de"/*Vector3Components*/,
+      "Position": {
+        "X": 888.22876,
+        "Y": 452.38416
+      }
+    },
+    {
+      "ChildId": "73873c3c-d1fd-4c3a-8ee4-46183dec9424"/*_AssembleMeshBuffers*/,
+      "Position": {
+        "X": 1670.2935,
+        "Y": 1022.5802
+      }
+    },
+    {
+      "ChildId": "76bc9a62-a436-4507-8488-e52dcbc0f1d9"/*SrvFromTexture2d*/,
+      "Position": {
+        "X": 1530.2935,
+        "Y": 742.5802
+      }
+    },
+    {
+      "ChildId": "8134a282-cc47-4c05-a5ff-8c7e002d7e6d"/*SearchAndReplace*/,
+      "Position": {
+        "X": 570.6225,
+        "Y": -29.073853
+      }
+    },
+    {
+      "ChildId": "85ddb7ea-1078-49a5-97bf-dcaf4f0eee30"/*GetBufferComponents*/,
+      "Position": {
+        "X": 677.0557,
+        "Y": 632.67456
+      }
+    },
+    {
+      "ChildId": "8689bad1-ad7f-430a-aaef-85f4e0040e14"/*ComputeShaderStage*/,
+      "Position": {
+        "X": 1670.2935,
+        "Y": 532.5802
+      }
+    },
+    {
+      "ChildId": "8ffd2e00-7ecd-4127-aaed-fb454898dd9d"/*LinearSampler*/,
+      "Position": {
+        "X": 1530.2935,
+        "Y": 882.5802
+      }
+    },
+    {
+      "ChildId": "9fd082b0-c31d-4bc8-946a-63424e497034"/*ClampedSampler*/,
+      "Position": {
+        "X": 1530.2935,
+        "Y": 917.5802
+      }
+    },
+    {
+      "ChildId": "a5b98a8c-12ac-40bd-b647-4533076c493d"/*FloatsToBuffer*/,
+      "Style": "Resizable",
+      "Size": {
+        "X": 152.89519,
+        "Y": 118.55484
+      },
+      "Position": {
+        "X": 1028.2288,
+        "Y": 277.38416
+      }
+    },
+    {
+      "ChildId": "a85618ae-8b70-40b9-939a-6c3d9b097e41"/*SplitMeshVertices*/,
+      "Position": {
+        "X": 169.11282,
+        "Y": 867.49243
+      }
+    },
+    {
+      "ChildId": "ad3650b8-f60e-4e8a-a04c-1a9be1803506"/*BoolToInt*/,
+      "Position": {
+        "X": 169.11282,
+        "Y": 902.49243
+      }
+    },
+    {
+      "ChildId": "bbc10ae3-16f9-46de-b46a-e7c085a001c1"/*PickMeshBuffer*/,
+      "Position": {
+        "X": 1810.2935,
+        "Y": 1057.5802
+      }
+    },
+    {
+      "ChildId": "c24537b6-b25a-451c-8b6f-0b36b244faea"/*ExecuteBufferUpdate*/,
+      "Position": {
+        "X": 1670.2935,
+        "Y": 952.5802
+      }
+    },
+    {
+      "ChildId": "c5e6f027-28c5-4640-99d5-6751a5953378"/*SrvFromTexture2d*/,
+      "Position": {
+        "X": 1530.2935,
+        "Y": 777.5802
+      }
+    },
+    {
+      "ChildId": "ca98ccb3-ec45-40f1-a836-edd29100a020"/*NewVertices*/,
+      "Position": {
+        "X": 1013.2238,
+        "Y": 678.0222
+      }
+    },
+    {
+      "ChildId": "cf16aee8-fd14-472a-adbd-7e4471a4dfff"/*GenerateShaderGraphCode*/,
+      "Position": {
+        "X": 570.6225,
+        "Y": -239.07385
+      }
+    },
+    {
+      "ChildId": "d871cc0a-be33-4883-8540-2dc830f1ca6c"/*RecomputeNormals*/,
+      "Position": {
+        "X": 1670.2935,
+        "Y": 1092.5802
+      }
+    },
+    {
+      "ChildId": "ee8c83ea-1d74-4fda-8368-80f8ed5b37a4"/*_MeshBufferComponents*/,
+      "Position": {
+        "X": 309.11285,
+        "Y": 937.4924
+      }
+    },
+    {
+      "ChildId": "f2b0036a-c2c8-43b4-9930-376aeab3a784"/*PickMeshBuffer*/,
+      "Position": {
+        "X": 309.11285,
+        "Y": 832.49243
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "7c7944ab-cb25-4bdc-9359-269836526821"/*MeshBuffers*/,
+      "Position": {
+        "X": 1810.2935,
+        "Y": 1162.5802
+      }
+    },
+    {
+      "OutputId": "97de5979-cc40-49b5-baad-0269eac61b46"/*GeneratedCode*/,
+      "Position": {
+        "X": 1652.9591,
+        "Y": 35.79953
+      }
+    }
+  ]
+}

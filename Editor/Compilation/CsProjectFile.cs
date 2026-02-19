@@ -24,32 +24,32 @@ internal sealed class CsProjectFile
     /// The path to the csproj file.
     /// </summary>
     public string FullPath => _projectRootElement.FullPath;
-    
+
     /// <summary>
     /// The directory containing the csproj file.
     /// </summary>
     public string Directory => _projectRootElement.DirectoryPath;
-    
+
     /// <summary>
     /// The name of the csproj file.
     /// </summary>
     public string Name => Path.GetFileNameWithoutExtension(FullPath);
-    
+
     /// <summary>
     /// The root namespace of the project, as defined in the csproj file.
     /// </summary>
     public string RootNamespace => _projectRootElement.GetOrAddProperty(PropertyType.RootNamespace, Name);
-    
+
     /// <summary>
     /// The version string of the project, as defined in the csproj file.
     /// </summary>
     public string VersionString => _projectRootElement.GetOrAddProperty(PropertyType.VersionPrefix, "1.0.0");
-    
+
     /// <summary>
     /// The version of the project, as defined in the csproj file.
     /// </summary>
     public Version Version => new(VersionString);
-    
+
     /// <summary>
     /// Returns the target dotnet framework for the project, or adds the default framework if none is found and returns that.
     /// </summary>
@@ -58,7 +58,9 @@ internal sealed class CsProjectFile
     public DateTime CreatedAt => _fileInfo.CreationTimeUtc;
     public DateTime ModifiedAt => _fileInfo.LastWriteTimeUtc;
 
-    private CsProjectFile(ProjectRootElement projectRootElement) : this(projectRootElement, new FileInfo(projectRootElement.FullPath)) { }
+    private CsProjectFile(ProjectRootElement projectRootElement) : this(projectRootElement, new FileInfo(projectRootElement.FullPath))
+    {
+    }
 
     private CsProjectFile(ProjectRootElement projectRootElement, FileInfo fileInfo)
     {
@@ -66,7 +68,7 @@ internal sealed class CsProjectFile
         _fileInfo = fileInfo;
 
         var targetFramework = TargetFramework;
-        
+
         // check if the project needs its dotnet version upgraded. If so, update the project file accordingly.
         if (!ProjectXml.FrameworkIsCurrent(targetFramework))
         {
@@ -107,19 +109,48 @@ internal sealed class CsProjectFile
 
             // todo - additional version checks
             var needsUpgrade = !targetFramework.Contains(currentFramework);
-            NeedsUpgrade = needsUpgrade; // is this necessary? :shrugs:
+            NeedsUpgrade = needsUpgrade;
 
             var csProjContents = file._projectRootElement;
-            // check items for correctness
-            foreach(var group in csProjContents.ItemGroups)
+
+            // 1. Migration: Ensure PackageId exists
+            var currentPackageId = csProjContents.GetOrAddProperty(PropertyType.PackageId, string.Empty);
+
+            if (string.IsNullOrWhiteSpace(currentPackageId) || currentPackageId == Guid.Empty.ToString())
             {
-                foreach(var item in group.Items)
+                var newId = Guid.NewGuid().ToString();
+                csProjContents.SetOrAddProperty(PropertyType.PackageId, newId);
+                Warnings.Add($"Assigned new unique PackageId ({newId}) to {file.Name}");
+                Log.Info($"Migrated {file.Name} with stable PackageId: {newId}");
+            }
+
+            // 2. Migration: Repair/Update CreatePackageInfo target
+            var packageTarget = csProjContents.Targets.FirstOrDefault(t => t.Name == "CreatePackageInfo");
+
+            // Check if the target is missing the PackageId field in its JSON template
+            bool isOutdated = packageTarget != null &&
+                              !packageTarget.Children
+                                            .OfType<ProjectPropertyGroupElement>()
+                                            .Any(g => g.Properties.Any(p => p.Value.Contains("PackageId")));
+
+            if (packageTarget == null || isOutdated)
+            {
+                if (packageTarget != null)
+                {
+                    csProjContents.RemoveChild(packageTarget);
+                    Warnings.Add($"Updating outdated CreatePackageInfo target in {file.Name}");
+                }
+
+                // Re-inject the latest target defined in ProjectXml
+                csProjContents.AddPackageInfoTarget();
+            }
+
+            // 3. Hotfixes: check items for correctness
+            foreach (var group in csProjContents.ItemGroups)
+            {
+                foreach (var item in group.Items)
                 {
                     #region Hotfix June-2-2025
-                    // This will correct an issue with earlier project files that had an attribute set that would copy unnecessary dlls to the output directory.
-                    // That would cause issues with custom Uis and whatnot.
-                    // This is just an automated way to revert the issue in pre-existing projects.
-                    // This can be safely removed at some point in the future when we all forget this ever happened :)
                     if (item.ItemType == "Reference" && item.Include.Contains(ProjectSetup.EnvironmentVariableName))
                     {
                         foreach (var metadata in item.Metadata)
@@ -128,17 +159,37 @@ internal sealed class CsProjectFile
                             if (metadata.Value == "false")
                                 continue;
 
-                            metadata.Value = "false"; // ensure that the T3 assemblies are not copied to the output directory
+                            metadata.Value = "false";
                             var warning = $"Modified {item} ({item.Include}) to set {metadata.Name} to {metadata.Value}";
                             Warnings.Add(warning);
                             Log.Warning(warning);
                         }
                     }
+                    
+                    // Migration: Update Resources inclusion to Assets
+                    if (item.ItemType == "Content" && item.Include.Contains("Resources/"))
+                    {
+                        // 1. Update the inclusion path
+                        item.Include = item.Include.Replace("Resources/", "Assets/");
+
+                        // 2. Update the Link metadata if it exists
+                        foreach (var metadata in item.Metadata)
+                        {
+                            if (metadata.Name == "Link" && metadata.Value.Contains("Resources/"))
+                            {
+                                metadata.Value = metadata.Value.Replace("Resources/", "Assets/");
+                            }
+                        }
+
+                        Warnings.Add($"Automated migration of content paths from Resources/ to Assets/ in {file.Name}");
+                        // This triggers csProjContents.HasUnsavedChanges, which causes the file to be saved automatically below
+                    }                    
+                    
                     #endregion
                 }
             }
-            
-            // Check properties for correctness
+
+            // 4. Hotfixes: Check properties for correctness
             var outputPathPropertyName = PropertyType.OutputPath.GetItemName();
             foreach (var group in csProjContents.PropertyGroups)
             {
@@ -146,25 +197,24 @@ internal sealed class CsProjectFile
                 {
                     if (property == null)
                         continue;
-                    
-                    #region Project updates post-June-26-2025 Project file correction - OutputPath
-                    // remove the OutputPath property if it exists, as it is not needed and can cause issues with the build process.
-                    if(property.Name == outputPathPropertyName )
+
+                    #region Project updates post-June-26-2025
+                    if (property.Name == outputPathPropertyName)
                     {
                         Log.Debug($"Removing OutputPath property from {file.FullPath}");
                         group.RemoveChild(property);
                         Warnings.Add($"Removed OutputPath property from {file.FullPath}");
-                        // according to the group.RemoveChild docs, we can continue to enumerate the properties after removing one.
                     }
                     #endregion
                 }
             }
-            
-            if(csProjContents.AddCleanBuildTarget())
+
+            if (csProjContents.AddCleanBuildTarget())
             {
                 Warnings.Add($"Added clean build target to {file.FullPath}");
             }
 
+            // 5. Finalize changes and trigger recompile if necessary
             if (csProjContents.HasUnsavedChanges)
             {
                 Warnings.Add($"Saving corrections to {file.FullPath}");
@@ -183,10 +233,8 @@ internal sealed class CsProjectFile
 
             if (!NeedsRecompile)
             {
-                // check if the project needs to be compiled due to just not being built
-                // we do this by checking the csproj file's version against that of the op package json
                 var versionInfoDirectory = file.GetBuildTargetDirectory();
-                if(!AssemblyInformation.TryLoadReleaseInfo(versionInfoDirectory, out var releaseInfo))
+                if (!AssemblyInformation.TryLoadReleaseInfo(versionInfoDirectory, out var releaseInfo))
                 {
                     NeedsRecompile = true;
                     Warnings.Add($"{file.Name} needs to be compiled because the version info file does not exist.");
@@ -229,7 +277,7 @@ internal sealed class CsProjectFile
             loadInfo = new CsProjectLoadInfo(null, error);
             success = false;
         }
-        
+
         // log any warnings that were generated during the load
         if (loadInfo.Warnings.Count > 0)
         {
@@ -355,7 +403,7 @@ internal sealed class CsProjectFile
         var dependenciesDirectory = Path.Combine(destinationDirectory, ProjectXml.DependenciesFolder);
         System.IO.Directory.CreateDirectory(dependenciesDirectory);
 
-        var resourcesDirectory = Path.Combine(destinationDirectory, FileLocations.ResourcesSubfolder);
+        var resourcesDirectory = Path.Combine(destinationDirectory, FileLocations.AssetsSubfolder);
         System.IO.Directory.CreateDirectory(resourcesDirectory);
 
         string placeholderDependencyPath = Path.Combine(dependenciesDirectory, "PlaceNativeDllDependenciesHere.txt");
@@ -371,10 +419,11 @@ internal sealed class CsProjectFile
         var shouldShareResources = shareResources ? "true" : "false";
         var username = nameSpace.Split('.').First();
 
-        var homeGuid = Guid.NewGuid();
-        var homeGuidString = homeGuid.ToString();
+        var packageId = Guid.NewGuid();
+        var homeId = Guid.NewGuid();
+        var homeGuidString = homeId.ToString();
 
-        var projRoot = ProjectXml.CreateNewProjectRootElement(nameSpace, homeGuid);
+        var projRoot = ProjectXml.CreateNewProjectRootElement(nameSpace, homeId, packageId);
 
         foreach (var file in files)
         {
@@ -404,7 +453,6 @@ internal sealed class CsProjectFile
     private readonly string _debugRootDirectory;
     private readonly ProjectRootElement _projectRootElement;
     private readonly FileInfo _fileInfo;
-
 
     public void IncrementBuildNumber(int amount)
     {

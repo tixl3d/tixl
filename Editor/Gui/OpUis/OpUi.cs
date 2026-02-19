@@ -101,6 +101,7 @@ public static class OpUi
                   { Guid.Parse("0bec016a-5e1b-467a-8273-368d4d6b9935"), TriggerUi.DrawChildUi },
                   //
                   { Guid.Parse("03477b9a-860e-4887-81c3-5fe51621122c"), AudioReactionUi.DrawChildUi },
+                  { Guid.Parse("c8d9e0f1-a2b3-4c5d-6e7f-8a9b0c1d2e3f"), AdsrEnvelopeUi.DrawChildUi },
                   // { Guid.Parse("000e08d0-669f-48df-9083-7aa0a43bbc05"), GpuMeasureUi.DrawChildUi },
                   // { Guid.Parse("bfe540ef-f8ad-45a2-b557-cd419d9c8e44"), DataListUi.DrawChildUi },
                   //

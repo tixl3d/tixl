@@ -173,7 +173,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "/t3/images/chipmunk.jpg"
+          "Value": "Examples:images/chipmunk.jpg"
         }
       ],
       "Outputs": []

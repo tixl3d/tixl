@@ -2810,7 +2810,7 @@
         {
           "Id": "ef2a461d-c66d-44d8-8b0e-e48a57ec991f"/*FilePath*/,
           "Type": "System.String",
-          "Value": "Resources\\user\\wake\\Revision2021-Wake\\svg\\wake-logo.svg"
+          "Value": "Examples:user/wake/Revision2021-Wake/svg/wake-logo.svg"
         }
       ],
       "Outputs": []
@@ -3996,7 +3996,7 @@
         {
           "Id": "ef2a461d-c66d-44d8-8b0e-e48a57ec991f"/*FilePath*/,
           "Type": "System.String",
-          "Value": "Resources\\user\\wake\\Revision2021-Wake\\svg\\wake-logo-fixed.svg"
+          "Value": "Examples:user/wake/Revision2021-Wake/svg/wake-logo-fixed.svg"
         }
       ],
       "Outputs": []
@@ -4104,7 +4104,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\common\\meshes\\sphere.obj"
+          "Value": "Examples:meshes/primitives/sphere.obj"
         },
         {
           "Id": "aa19e71d-329c-448b-901c-565bf8c0da4f"/*SortVertices*/,
@@ -4490,7 +4490,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\common\\meshes\\sphere.obj"
+          "Value": "Examples:meshes/primitives/sphere.obj"
         },
         {
           "Id": "aa19e71d-329c-448b-901c-565bf8c0da4f"/*SortVertices*/,

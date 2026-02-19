@@ -515,8 +515,6 @@ public class LoadGltfScene : Instance<LoadGltfScene>
         }
     }
     
-    public IEnumerable<string> FileFilter => _fileFilters;
-    private static readonly string[] _fileFilters = ["*.gltf"];
     private readonly Resource<SceneSetup> _resource;
 
 
@@ -679,7 +677,7 @@ public class LoadGltfScene : Instance<LoadGltfScene>
     {
         if (_combineChannelsComputeShaderResource == null)
         {
-            const string sourcePath = @"cs\CombineGltfChannels-cs.hlsl";
+            const string sourcePath = "Lib:shaders/cs/CombineGltfChannels-cs.hlsl";
             const string entryPoint = "main";
 
             _combineChannelsComputeShaderResource = ResourceManager.CreateShaderResource<ComputeShader>(sourcePath, instance, () => entryPoint, OnShaderChanged);
@@ -961,6 +959,7 @@ public class LoadGltfScene : Instance<LoadGltfScene>
                                                                        ? Vector2.Zero
                                                                        : new Vector2(texCoords2[vertexIndex].X,
                                                                                      1 - texCoords2[vertexIndex].Y),
+                                                        ColorRgb = Vector3.One,
                     Selection = 1,
                                                     };
             }

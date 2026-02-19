@@ -1,0 +1,11 @@
+{
+  "Id": "91f249cf-a398-4261-8654-22637a1b9c12"/*GetAllSpatialAudioPlayers*/,
+  "Inputs": [
+    {
+      "Id": "5c07c8a2-b1da-42c1-addf-8ef5877784d7"/*SpatialAudioPlayerIndex*/,
+      "DefaultValue": 0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

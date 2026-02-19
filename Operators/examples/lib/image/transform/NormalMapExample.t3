@@ -119,7 +119,7 @@
         {
           "Id": "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3"/*FontPath*/,
           "Type": "System.String",
-          "Value": "/newemka.IamTheVJ/font/RobotoMono-Bold.fnt"
+          "Value": "Examples:newemka.IamTheVJ/font/RobotoMono-Bold.fnt"
         },
         {
           "Id": "f1f1be0e-d5bc-4940-bbc1-88bfa958f0e1"/*InputText*/,

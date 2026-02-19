@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
+using T3.Core.Resource.Assets;
 using T3.Core.SystemUi;
 using T3.Core.Utils;
 using T3.Editor.Gui.Styling;
@@ -19,31 +20,34 @@ internal sealed partial class AssetLibrary
             CustomComponents.DrawMenuItem(_deleteFileButtonId, "Delete file", null, false, false);
             CustomComponents.TooltipForLastItem("Not implemented yet :-(");
 
+            var isValidFile = _state.ActiveAsset is { IsDirectory: false, FileSystemInfo: not null }; 
+            var absolutePath = _state.ActiveAsset?.FileSystemInfo?.FullName;
+            
             if (CustomComponents.DrawMenuItem(_openExternallyId, "Open externally",
                                               null,
                                               false,
-                                              !string.IsNullOrEmpty(_state.ActiveAbsolutePath)))
+                                              isValidFile))
             {
-                if (!string.IsNullOrEmpty(_state.ActiveAbsolutePath))
-                    CoreUi.Instance.OpenWithDefaultApplication(_state.ActiveAbsolutePath);
+                if(!string.IsNullOrEmpty(absolutePath))
+                    CoreUi.Instance.OpenWithDefaultApplication(absolutePath);
             }
 
+            var isValidDir = _state.ActiveAsset is { IsDirectory: true, FileSystemInfo: not null }; 
             if (CustomComponents.DrawMenuItem(_revealInExplorerId, "Reveal in Explorer",
                                               null,
                                               false,
-                                              !string.IsNullOrEmpty(_state.ActiveAbsolutePath)))
+                                              !string.IsNullOrEmpty(absolutePath)))
             {
-                if (!string.IsNullOrEmpty(_state.ActiveAbsolutePath))
+                var folder = isValidDir ? absolutePath :  Path.GetDirectoryName(absolutePath);
+                if (!string.IsNullOrEmpty(folder))
                 {
                     try
                     {
-                        var folder = Path.GetDirectoryName(_state.ActiveAbsolutePath);
-                        if (!string.IsNullOrEmpty(folder))
-                            CoreUi.Instance.OpenWithDefaultApplication(folder);
+                        CoreUi.Instance.OpenWithDefaultApplication(folder);
                     }
                     catch (Exception e)
                     {
-                        Log.Warning($"Failed to get directory for {_state.ActiveAbsolutePath} {e.Message}");
+                        Log.Warning($"Failed to get directory for {folder} {e.Message}");
                     }
                 }
             }
@@ -51,7 +55,7 @@ internal sealed partial class AssetLibrary
             CustomComponents.SeparatorLine();
 
             var showAllTypes = _state.ActiveTypeFilters.Count == 0;
-            if (DrawAssetFilterOption(_allAssetId, Icon.Stack, UiColors.Text, "All", AssetTypeRegistry.TotalAssetCount, ref showAllTypes))
+            if (DrawAssetFilterOption(_allAssetId, Icon.Stack, UiColors.Text, "All", AssetHandling.TotalAssetCount, ref showAllTypes))
             {
                 _state.ActiveTypeFilters.Clear();
                 _state.CompatibleExtensionIds.Clear();
@@ -60,11 +64,11 @@ internal sealed partial class AssetLibrary
 
             Input.FormInputs.AddVerticalSpace();
 
-            for (var index = 0; index < AssetTypeRegistry.AssetTypes.Count; index++)
+            for (var index = 0; index < AssetType.AvailableTypes.Count; index++)
             {
-                var assetType = AssetTypeRegistry.AssetTypes[index];
-                var count = assetType.MatchingFileCount;
-                var xIcon = assetType.Icon;
+                var assetType = AssetType.AvailableTypes[index];
+                var count = AssetTypeUseCounter.GetUseCount(assetType);
+                var xIcon = (Icon)assetType.IconId;
                 var readOnlySpan = assetType.Name;
                 var iconColor = ColorVariations.OperatorLabel.Apply(assetType.Color);
 

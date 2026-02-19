@@ -563,7 +563,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\common\\meshes\\marblePlayer.obj"
+          "Value": "Examples:meshes/marblePlayer.obj"
         }
       ],
       "Outputs": []
@@ -868,7 +868,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "/t3/meshes/cube-bevelled.obj"
+          "Value": "Examples:meshes/primitives/cube-bevelled.obj"
         }
       ],
       "Outputs": []
@@ -1034,7 +1034,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\common\\meshes\\sphere.obj"
+          "Value": "Examples:meshes/primitives/sphere.obj"
         }
       ],
       "Outputs": []
@@ -1352,7 +1352,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/user/alex/sky.dds"
+          "Value": "Examples:Resources/user/alex/sky.dds"
         }
       ],
       "Outputs": []
@@ -1711,7 +1711,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/images/basic/perlin-noise.jpg"
+          "Value": "Lib:images/basic/perlin-noise.jpg"
         }
       ],
       "Outputs": []

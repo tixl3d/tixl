@@ -7,7 +7,9 @@ using System.IO;
 using System.Reflection;
 using T3.Core.Compilation;
 using T3.Core.IO;
+using T3.Core.Logging;
 using T3.Core.Resource;
+using T3.Core.Resource.ShaderCompiling;
 using T3.Core.SystemUi;
 using T3.Core.UserData;
 using T3.Editor.App;
@@ -19,12 +21,15 @@ using T3.Editor.Gui.Interaction.StartupCheck;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows;
+using T3.Editor.Gui.Windows.AssetLib;
 using T3.Editor.Skills.Training;
 using T3.Editor.SystemUi;
 using T3.Editor.UiContentDrawing;
 using T3.Editor.UiModel.Helpers;
 using T3.MsForms;
 using T3.SystemUi;
+using T3.Core.Audio;
+using ShaderCompiler = T3.Core.Resource.ShaderCompiling.ShaderCompiler;
 
 namespace T3.Editor;
 
@@ -108,7 +113,7 @@ internal static class Program
         Console.WriteLine("Creating SplashScreen");
         ISplashScreen splashScreen = new SplashScreen.SplashScreen();
 
-        var path = Path.Combine(SharedResources.Directory, "images", "editor", "t3-SplashScreen.png");
+        var path = Path.Combine(SharedResources.EditorResourcesDirectory,  "images", "t3-SplashScreen.png");
         splashScreen.Show(path);
 
         Console.WriteLine("Initializing logging");
@@ -138,17 +143,21 @@ internal static class Program
         // ReSharper disable once UnusedVariable
         var userSettings = new UserSettings(saveOnQuit: true);
         
+        // Initialize debug logging configuration from user settings
+        UserSettings.InitializeGatedLogging();
+        
+        // ReSharper disable once UnusedVariable
+        var projectSettings = new ProjectSettings(saveOnQuit: true);
+
         if (UserSettings.Config.ProjectDirectories.Count == 0)
         {
             UserSettings.Config.ProjectDirectories.Add(FileLocations.DefaultProjectFolder);
         }
 
-        // ReSharper disable once UnusedVariable
-        var projectSettings = new ProjectSettings(saveOnQuit: true);
-
         Log.Debug("Initializing ProgramWindows...");
         ProgramWindows.InitializeMainWindow(FormattedEditorVersion, out var device);
-
+        AssetHandling.InitAssetTypes();
+        
         Device = device;
 
         if (ShaderCompiler.Instance is not DX11ShaderCompiler shaderCompiler)
@@ -183,7 +192,7 @@ internal static class Program
         forceRecompileProjects = args is {Length: > 0} && args.Any(arg => arg == "--force-recompile");
         #endif
 
-        Log.Debug("Loading projects...");
+        Log.Info("Start loading...");
         // Initialize UI and load complete symbol model
         if (!ProjectSetup.TryLoadAll(forceRecompileProjects, out var uiException))
         {
@@ -197,6 +206,7 @@ internal static class Program
         }
 
         SymbolAnalysis.UpdateSymbolUsageCounts();
+        ConformAssetPaths.ConformAllPaths();
             
         UiContentContentDrawer.InitializeScaling();
         UiContentUpdate.SetupResourcesAndFontsWithScaling();
@@ -219,7 +229,7 @@ internal static class Program
         StartUp.FlagStartupSequenceComplete();
 
         startupStopWatch.Stop();
-        Log.Info($"Startup took {startupStopWatch.ElapsedMilliseconds}ms.");
+        Log.Info($"Startup took {startupStopWatch.ElapsedMilliseconds/1000:0.0}s.");
 
         UiContentUpdate.StartMeasureFrame();
 

@@ -573,6 +573,7 @@
     },
     {
       "ChildId": "33bc33c9-92d3-4309-a9c5-39cd1dfdf56e"/*FadingSlideShow*/,
+      "Comment": "References",
       "Position": {
         "X": 4018.879,
         "Y": 5006.223
@@ -1350,6 +1351,7 @@
     },
     {
       "ChildId": "79a71668-6c3a-4439-a2b2-059051dd3061"/*FadingSlideShow*/,
+      "Comment": "Storyboard V02",
       "Position": {
         "X": 4326.561,
         "Y": 7771.852
@@ -2076,6 +2078,7 @@
     },
     {
       "ChildId": "b4f8b3b0-376e-4142-afa2-fe5ae25ed6de"/*FadingSlideShow*/,
+      "Comment": "Storyboard v2",
       "Position": {
         "X": 626.9651,
         "Y": 5941.8086

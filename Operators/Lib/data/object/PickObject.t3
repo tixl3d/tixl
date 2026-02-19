@@ -1,0 +1,15 @@
+{
+  "Id": "02fe1b32-8819-4c8a-8ab4-d353ebcddfe3"/*PickObject*/,
+  "Inputs": [
+    {
+      "Id": "1fd71ea2-177a-4d2f-9a8f-c620c29d1766"/*Index*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "a4095b7e-2fad-42e5-b518-848f2645aa7d"/*Input*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

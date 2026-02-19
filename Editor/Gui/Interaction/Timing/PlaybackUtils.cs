@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System.Diagnostics.CodeAnalysis;
 using T3.Core.Animation;
 using T3.Core.Audio;
@@ -29,7 +29,7 @@ public static class PlaybackUtils
         {
             if (settings.TryGetMainSoundtrack(audioComposition, out var soundtrack))
             {
-                AudioEngine.UseAudioClip(soundtrack, Playback.Current.TimeInSecs);
+                AudioEngine.UseSoundtrackClip(soundtrack, Playback.Current.TimeInSecs);
             }
         }
 

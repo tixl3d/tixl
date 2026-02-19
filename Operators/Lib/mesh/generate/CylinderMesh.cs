@@ -112,7 +112,9 @@ internal sealed class CylinderMesh : Instance<CylinderMesh>
                                                              Tangent = Vector3.TransformNormal(tangent0,rotationMatrix),
                                                              Bitangent = Vector3.TransformNormal(isFlipped ? binormal0 * -1 : binormal0, rotationMatrix),
                                                              Texcoord = uv0,
-                                                             Selection = 1
+                                                             Texcoord2 = uv0,
+                                                             Selection = 1,
+                                                             ColorRgb = Vector3.One,
                                                          };
 
                     var faceIndex = 2 * (rowIndex * (vertexHullColumns - 1) + columnIndex);
@@ -188,7 +190,8 @@ internal sealed class CylinderMesh : Instance<CylinderMesh>
                                                                      Tangent = tangent0,
                                                                      Bitangent = isFlipped ? binormal0 * -1 : binormal0,
                                                                      Texcoord = new Vector2(-xx * (isLowerCap ? -1 : 1),yy) * capFraction/4 + capUvOffset,
-                                                                     Selection = 1
+                                                                     Selection = 1,
+                                                                     ColorRgb = Vector3.One,
                                                                  };
 
                             if (isCenterSegment) 
@@ -204,7 +207,8 @@ internal sealed class CylinderMesh : Instance<CylinderMesh>
                                                                                    Tangent = tangent0,
                                                                                    Bitangent = (isFlipped ^ isLowerCap) ? binormal0 * -1 : binormal0,
                                                                                    Texcoord =  capUvOffset,
-                                                                                   Selection = 1
+                                                                                   Selection = 1,
+                                                                                   ColorRgb = Vector3.One
                                                                                };
                                 }
                             }

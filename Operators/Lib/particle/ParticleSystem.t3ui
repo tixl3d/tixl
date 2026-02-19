@@ -41,7 +41,7 @@
       "Description": "Rotates the particles in relation to their velocity"
     },
     {
-      "InputId": "4c555ac3-3d62-47a7-9d1a-49e4d5808635"/*SetFx2To*/,
+      "InputId": "4c555ac3-3d62-47a7-9d1a-49e4d5808635"/*SetF2To*/,
       "Position": {
         "X": 226.2659,
         "Y": 92.618164
@@ -93,7 +93,7 @@
       "Description": "The simulation speed. If set to 0 the simulation will be paused.\nNegative simulation speed can shortly look like rewinding but the simulation will quickly become inconsistent."
     },
     {
-      "InputId": "a7350ba8-08be-4afc-92f1-d223ee9bcbeb"/*SetFx1To*/,
+      "InputId": "a7350ba8-08be-4afc-92f1-d223ee9bcbeb"/*SetF1To*/,
       "Position": {
         "X": 226.2659,
         "Y": 57.618164

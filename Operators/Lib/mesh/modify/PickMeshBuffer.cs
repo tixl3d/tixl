@@ -22,7 +22,21 @@ internal sealed class PickMeshBuffer : Instance<PickMeshBuffer>
 
         var index = Index.GetValue(context);
         Output.Value = connections[index.Mod(connections.Count)].GetValue(context);
+        
+        // Clear dirty flag
+        if (_isFirstUpdate)
+        {
+            foreach (var c in connections)
+            {
+                c.GetValue(context);
+            }
+
+            _isFirstUpdate = false;
+        }
+        Input.DirtyFlag.Clear();
     }        
+    
+    private bool _isFirstUpdate = true; 
 
     [Input(Guid = "7BB6F999-214A-448A-A7F7-BE447113785E")]
     public readonly MultiInputSlot<MeshBuffers> Input = new MultiInputSlot<MeshBuffers>();

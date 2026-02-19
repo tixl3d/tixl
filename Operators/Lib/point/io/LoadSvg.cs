@@ -1,6 +1,7 @@
 #nullable enable
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Linq;
 using Lib.Utils;
 using Svg;
 using Svg.Pathing;
@@ -10,7 +11,7 @@ using T3.Core.Utils;
 namespace Lib.point.io;
 
 [Guid("e8d94dd7-eb54-42fe-a7b1-b43543dd457e")]
-internal sealed class LoadSvg : Instance<LoadSvg>
+internal sealed class LoadSvg : Instance<LoadSvg>, IDescriptiveFilename
 {
     [Output(Guid = "e21e3843-7d63-4db2-9234-77664e872a0f")]
     public readonly Slot<StructuredList> ResultList = new();
@@ -31,29 +32,75 @@ internal sealed class LoadSvg : Instance<LoadSvg>
 
     private void Update(EvaluationContext context)
     {
-        var needsUpdate = Scale.IsDirty || CenterToBounds.IsDirty || ScaleToBounds.IsDirty ||  ImportAs.IsDirty || ReduceFactor.IsDirty;
-        if (!needsUpdate)
+        if (!_svgResource.TryGetValue(context, out var svgDoc) && !Scale.IsDirty && !CenterToBounds.IsDirty && !ScaleToBounds.IsDirty && !ImportAs.IsDirty && !ReduceFactor.IsDirty)
+        {
+            // Nothing changed, keep existing data
             return;
-            
-        if(!_svgResource.TryGetValue(context, out var svgDoc))
+        }
+        if (svgDoc == null)
         {
             _pointListWithSeparator.SetLength(0);
             ResultList.Value = _pointListWithSeparator;
             return;
         }
-            
         var centerToBounds = CenterToBounds.GetValue(context);
         var scaleToBounds = ScaleToBounds.GetValue(context);
 
-        var bounds = new Vector3(svgDoc.Bounds.Size.Width, svgDoc.Bounds.Size.Height, 0);
-        var centerOffset = centerToBounds ? new Vector3(-bounds.X / 2, bounds.Y / 2, 0) : Vector3.Zero;
-        var fitBoundsFactor = scaleToBounds ? (2f / bounds.Y) : 1;
+        var bounds = svgDoc.Bounds;
+        var width = bounds.Width;
+        var height = bounds.Height;
+
+        // Calculate center offset to move center of bounds to (0,0)
+        /*var centerOffset = centerToBounds
+            ? new Vector3(-(bounds.Left + width / 2), -(1 - (bounds.Top + height / 2)), 0)
+            : Vector3.Zero;*/
+
+        var fitBoundsFactor = scaleToBounds ? (2f / height) : 1;
         var scale = Scale.GetValue(context) * fitBoundsFactor;
-        var importAsLines = ImportAs.GetValue(context) == 0;
+        var importMode = ImportAs.GetValue(context);
+        var importAsLines = importMode == 0;
+        var importAsShape = importMode == 2; // Shape mode
         var reduceFactor = ReduceFactor.GetValue(context).Clamp(0.001f, 1f);
+        var selectedShapeIndex = SelectSingleShape.GetValue(context); // Get the selected shape index
 
         var svgElements = svgDoc.Descendants();
-        var pathElements = ConvertAllNodesIntoGraphicPaths(svgElements, importAsLines);
+        var pathElements = importAsShape
+            ? GetSelectedShapePathElements(svgElements, selectedShapeIndex)
+            : ConvertAllNodesIntoGraphicPaths(svgElements, importAsLines);
+
+        // Calculate actual bounds and center offset based on import mode
+        Vector3 centerOffset;
+
+        if (importAsShape && pathElements.Count > 0)
+        {
+            // Get actual bounds from the shape path
+            var minX = float.MaxValue;
+            var minY = float.MaxValue;
+            var maxX = float.MinValue;
+            var maxY = float.MinValue;
+
+            foreach (var pathElement in pathElements)
+            {
+                var pathBounds = pathElement.GraphicsPath.GetBounds();
+                minX = Math.Min(minX, pathBounds.Left);
+                minY = Math.Min(minY, pathBounds.Top);
+                maxX = Math.Max(maxX, pathBounds.Right);
+                maxY = Math.Max(maxY, pathBounds.Bottom);
+            }
+
+            var shapeWidth = maxX - minX;
+            var shapeHeight = maxY - minY;
+            
+
+            // Center offset should account for the actual position of the shape
+            centerOffset = centerToBounds
+                ? new Vector3(-(minX + shapeWidth / 2), (minY + shapeHeight / 2), 0)
+                : Vector3.Zero;
+        }
+        else
+        {
+            centerOffset = centerToBounds ? new Vector3(-bounds.X / 2, bounds.Y / 2, 0) : Vector3.Zero;
+        }
 
         // Flatten and sum total point count including separators 
         var totalPointCount = 0;
@@ -130,11 +177,71 @@ internal sealed class LoadSvg : Instance<LoadSvg>
 
 
         ResultList.Value = _pointListWithSeparator;
+
     }
 
     private static Quaternion RotationFromTwoPositions(Vector3 p1, Vector3 p2)
     {
         return Quaternion.CreateFromAxisAngle(new Vector3(0, 0, 1), (float)(Math.Atan2(p1.X - p2.X, -(p1.Y - p2.Y)) + Math.PI / 2));
+    }
+
+    /// <summary>
+    /// Gets a specific path element by index from all SVG paths
+    /// </summary>
+    private static List<GraphicsPathEntry> GetSelectedShapePathElements(IEnumerable<SvgElement> nodes, int selectedIndex)
+    {
+        var paths = new List<GraphicsPathEntry>();
+        _svgRenderer ??= SvgRenderer.FromImage(new Bitmap(1, 1));
+
+        // Collect all SvgPath elements
+        var allSvgPaths = nodes.OfType<SvgPath>().ToList();
+
+        if (allSvgPaths.Count == 0)
+            return paths;
+
+        // Clamp the selected index to valid range
+        var clampedIndex = selectedIndex;
+        if (clampedIndex < 0)
+            clampedIndex = 0;
+        if (clampedIndex >= allSvgPaths.Count)
+            clampedIndex = allSvgPaths.Count - 1;
+
+        var targetPath = allSvgPaths[clampedIndex];
+
+        GraphicsPath? newPath = null;
+
+        foreach (var s in targetPath.PathData)
+        {
+            var segmentIsJump = s is SvgMoveToSegment or SvgClosePathSegment;
+            if (segmentIsJump)
+            {
+                if (newPath == null)
+                    continue;
+
+                paths.Add(new GraphicsPathEntry
+                {
+                    GraphicsPath = newPath,
+                    NeedsClosing = false
+                });
+                newPath = null;
+            }
+            else
+            {
+                newPath ??= new GraphicsPath();
+                s.AddToPath(newPath);
+            }
+        }
+
+        if (newPath != null)
+        {
+            paths.Add(new GraphicsPathEntry
+            {
+                GraphicsPath = newPath,
+                NeedsClosing = false
+            });
+        }
+
+        return paths;
     }
 
     private static List<GraphicsPathEntry> ConvertAllNodesIntoGraphicPaths(IEnumerable<SvgElement> nodes, bool importAsLines)
@@ -149,78 +256,78 @@ internal sealed class LoadSvg : Instance<LoadSvg>
             switch (node)
             {
                 case SvgPath svgPath:
-                {
-                    foreach (var s in svgPath.PathData)
                     {
-                        var segmentIsJump = s is SvgMoveToSegment or SvgClosePathSegment;
-                        if (segmentIsJump)
+                        foreach (var s in svgPath.PathData)
                         {
-                            if (newPath == null)
-                                continue;
+                            var segmentIsJump = s is SvgMoveToSegment or SvgClosePathSegment;
+                            if (segmentIsJump)
+                            {
+                                if (newPath == null)
+                                    continue;
 
+                                paths.Add(new GraphicsPathEntry
+                                {
+                                    GraphicsPath = newPath,
+                                    NeedsClosing = false
+                                });
+                                newPath = null;
+                            }
+                            else
+                            {
+                                newPath ??= new GraphicsPath();
+                                s.AddToPath(newPath);
+                            }
+                        }
+
+                        if (newPath != null)
+                        {
                             paths.Add(new GraphicsPathEntry
-                                          {
-                                              GraphicsPath = newPath,
-                                              NeedsClosing = false
-                                          });
-                            newPath = null;
+                            {
+                                GraphicsPath = newPath,
+                                NeedsClosing = false
+                            });
                         }
-                        else
-                        {
-                            newPath ??= new GraphicsPath();
-                            s.AddToPath(newPath);
-                        }
-                    }
 
-                    if (newPath != null)
-                    {
-                        paths.Add(new GraphicsPathEntry
-                                      {
-                                          GraphicsPath = newPath,
-                                          NeedsClosing = false
-                                      });
+                        break;
                     }
-
-                    break;
-                }
                 case SvgGroup:
                     break;
 
                 case SvgPathBasedElement element:
-                {
-                    if (element is SvgRectangle rect)
                     {
-                        //if(element.Transforms.Contains())
-                        if (rect.Transforms != null)
+                        if (element is SvgRectangle rect)
                         {
-                            foreach (var t in rect.Transforms)
+                            if (rect.Transforms != null)
                             {
-                                if (t is not SvgTranslate tr)
-                                    continue;
+                                foreach (var t in rect.Transforms)
+                                {
+                                    if (t is not SvgTranslate tr)
+                                        continue;
 
-                                rect.X += tr.X;
-                                rect.Y += tr.Y;
+                                    rect.X += tr.X;
+                                    rect.Y += tr.Y;
+                                }
                             }
                         }
+
+                        var needsClosing = element is SvgRectangle or SvgCircle or SvgEllipse;
+
+                        var graphicsPath = element.Path(_svgRenderer);
+
+                        paths.Add(new GraphicsPathEntry
+                        {
+                            GraphicsPath = graphicsPath,
+                            NeedsClosing = needsClosing && importAsLines
+                        });
+                        break;
                     }
-
-                    var needsClosing = element is SvgRectangle or SvgCircle or SvgEllipse;
-
-                    var graphicsPath = element.Path(_svgRenderer);
-
-                    paths.Add(new GraphicsPathEntry
-                                  {
-                                      GraphicsPath = graphicsPath,
-                                      NeedsClosing = needsClosing && importAsLines
-                                  });
-                    break;
-                }
             }
         }
 
         return paths;
     }
 
+    public InputSlot<string> SourcePathSlot => FilePath;
     private readonly Resource<SvgDocument> _svgResource;
     private readonly StructuredList<Point> _pointListWithSeparator = new(101);
 
@@ -242,11 +349,15 @@ internal sealed class LoadSvg : Instance<LoadSvg>
     [Input(Guid = "2BB64740-ED2F-4295-923D-D585D70197E7")]
     public readonly InputSlot<float> ReduceFactor = new();
 
+    [Input(Guid = "05E5AEC4-35A7-48DD-8F79-91EF754D20E8")]
+    public readonly InputSlot<int> SelectSingleShape = new();
+
     [SuppressMessage("ReSharper", "UnusedMember.Local")]
     private enum ImportModes
     {
         Lines,
         Points,
+        Shape // Select a single path by index using SelectSingleShape input
     }
 
     private static ISvgRenderer? _svgRenderer;

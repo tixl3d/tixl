@@ -93,7 +93,7 @@
         {
           "Id": "58dd103d-4172-4cea-9c78-c9f6db9be41e"/*ShaderPath*/,
           "Type": "System.String",
-          "Value": "/Lib/img/use/img-combine-3.hlsl"
+          "Value": "Lib:shaders/img/use/img-combine-3.hlsl"
         }
       ],
       "Outputs": []

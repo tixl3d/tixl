@@ -201,7 +201,7 @@
         {
           "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
           "Type": "System.String",
-          "Value": "/Lib/img/fx/stylize/color-physarum-diffuse-cs.hlsl"
+          "Value": "Lib:shaders/img/fx/stylize/color-physarum-diffuse-cs.hlsl"
         }
       ],
       "Outputs": []
@@ -457,7 +457,7 @@
         {
           "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
           "Type": "System.String",
-          "Value": "/Lib/img/fx/stylize/color-physarum-cs.hlsl"
+          "Value": "Lib:shaders/img/fx/stylize/color-physarum-cs.hlsl"
         }
       ],
       "Outputs": []

@@ -25,8 +25,6 @@ public sealed class VertexShader : Instance<VertexShader>, IDescriptiveFilename,
     [Input(Guid = "C8A59CF8-6612-4D57-BCFD-3AEEA351BA50")]
     public readonly InputSlot<string> DebugName = new();
         
-    public IEnumerable<string> FileFilter => _fileFilters;
-    private static readonly string[] _fileFilters = ["*.vert", "*.vert.hlsl", ResourceManager.DefaultShaderFilter];
 
     #region IShaderOperator implementation
     private IShaderOperator<VertexShaderT3> ShaderOperatorImpl => this;

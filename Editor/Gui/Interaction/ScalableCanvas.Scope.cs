@@ -132,9 +132,6 @@ public partial class ScalableCanvas
     /// </summary>
     internal void RequestTargetViewAreaWithTransition(ImRect targetCanvasArea, Transition transition)
     {
-        if (_requestedTransition != null)
-            Log.Warning("Requesting transition twice?");
-
         _requestedTransition = new TransitionToArea(targetCanvasArea, transition);
     }
 

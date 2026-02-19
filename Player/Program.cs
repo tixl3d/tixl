@@ -29,6 +29,7 @@ using Device = SharpDX.Direct3D11.Device;
 using Resource = SharpDX.Direct3D11.Resource;
 using SharpDX.Windows;
 using SilkWindows;
+using T3.Core.Resource.ShaderCompiling;
 using T3.Core.UserData;
 using T3.Core.Utils;
 using T3.Serialization;
@@ -38,6 +39,7 @@ using FillMode = SharpDX.Direct3D11.FillMode;
 using ResourceManager = T3.Core.Resource.ResourceManager;
 using VertexShader = T3.Core.DataTypes.VertexShader;
 using PixelShader = T3.Core.DataTypes.PixelShader;
+using ShaderCompiler = T3.Core.Resource.ShaderCompiling.ShaderCompiler;
 using Texture2D = T3.Core.DataTypes.Texture2D;
 
 namespace T3.Player;
@@ -106,13 +108,13 @@ internal static partial class Program
             _vsyncInterval = Convert.ToInt16(!_resolvedOptions.NoVsync);
             Log.Debug($": {_vsyncInterval}, windowed: {_resolvedOptions.Windowed}, size: {resolution}, loop: {_resolvedOptions.Loop}, logging: {_resolvedOptions.Logging}");
 
-            var iconPath = Path.Combine(SharedResources.Directory,  "images", "editor","t3.ico");
+            var iconPath = Path.Combine(SharedResources.EditorResourcesDirectory,  SharedResources.EditorResourcesDirectory,"images", "t3.ico");
             var gotIcon = File.Exists(iconPath);
 
             Icon icon;
             if (!gotIcon)
             {
-                Log.Warning("Failed to load icon");
+                Log.Warning("Failed to load icon from " + iconPath);
                 icon = null;
             }
             else
@@ -228,9 +230,6 @@ internal static partial class Program
 
             var prerenderRequired = false;
 
-            Bass.Free();
-            Bass.Init();
-
             _resolution = new Int2(_resolvedOptions.Width, _resolvedOptions.Height);
 
             // Init wasapi input if required
@@ -242,7 +241,7 @@ internal static partial class Program
                 {
                     _playback.Bpm = _soundtrackHandle.Clip.Bpm;
                     // Trigger loading clip
-                    AudioEngine.UseAudioClip(_soundtrackHandle, 0);
+                    AudioEngine.UseSoundtrackClip(_soundtrackHandle, 0);
                     AudioEngine.CompleteFrame(_playback, Playback.LastFrameDuration); // Initialize
                     prerenderRequired = true;
                 }

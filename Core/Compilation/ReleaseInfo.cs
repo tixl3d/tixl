@@ -12,6 +12,7 @@ public readonly record struct OperatorPackageReferenceSerialized(string Identity
 public record ReleaseInfoSerialized(
     string AssemblyFileName,
     Guid HomeGuid,
+    Guid PackageId,
     string RootNamespace,
     string EditorVersion,
     string Version,
@@ -24,6 +25,7 @@ public sealed record OperatorPackageReference(string Identity, Version Version, 
 public sealed record ReleaseInfo(
     string AssemblyFileName,
     Guid HomeGuid,
+    Guid PackageId,
     string RootNamespace,
     Version EditorVersion,
     Version Version,
@@ -34,9 +36,9 @@ public sealed record ReleaseInfo(
     public const string FileName = "OperatorPackage.json";
 }
 
-public static class ReleaseInfoExtensions
+internal static class ReleaseInfoExtensions
 {
-    public static ReleaseInfo ToReleaseInfo(this ReleaseInfoSerialized serialized)
+    internal static ReleaseInfo ToReleaseInfo(this ReleaseInfoSerialized serialized)
     {
         if (!Version.TryParse(serialized.EditorVersion, out var editorVersion))
         {
@@ -53,6 +55,7 @@ public static class ReleaseInfoExtensions
         return new ReleaseInfo(
                                serialized.AssemblyFileName,
                                serialized.HomeGuid,
+                               serialized.PackageId,
                                serialized.RootNamespace,
                                editorVersion,
                                version,

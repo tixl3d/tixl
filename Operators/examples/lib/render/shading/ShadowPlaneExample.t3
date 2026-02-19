@@ -125,7 +125,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/user/1x/LookTest/Metal046A_1K-JPG_Roughness.jpg"
+          "Value": "Examples:user/1x/LookTest/Metal046A_1K-JPG_Roughness.jpg"
         }
       ],
       "Outputs": []
@@ -217,7 +217,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/common/meshes/cube-bevelled.obj"
+          "Value": "Examples:meshes/primitives/cube-bevelled.obj"
         },
         {
           "Id": "c39a61b3-fb6b-4611-8f13-273f13c9c491"/*ScaleFactor*/,
@@ -721,7 +721,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/common/meshes/T3_logo-bevelled.obj"
+          "Value": "Examples:meshes/primitives/T3_logo-bevelled.obj"
         }
       ],
       "Outputs": []
@@ -787,7 +787,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "/t3/images/hdri/sunset.png"
+          "Value": "Examples:hdri/sunset.png"
         }
       ],
       "Outputs": []
@@ -890,7 +890,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/user/1x/LookTest/PaintedBricks004_1K-JPG_NormalDX.jpg"
+          "Value": "Examples:user/1x/LookTest/PaintedBricks004_1K-JPG_NormalDX.jpg"
         }
       ],
       "Outputs": []
@@ -1041,7 +1041,7 @@
           "Value": true
         },
         {
-          "Id": "a7350ba8-08be-4afc-92f1-d223ee9bcbeb"/*SetFx1To*/,
+          "Id": "a7350ba8-08be-4afc-92f1-d223ee9bcbeb"/*SetF1To*/,
           "Type": "System.Int32",
           "Value": 1
         },
@@ -1365,7 +1365,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/user/1x/LookTest/Metal046A_1K-JPG_NormalDX.jpg"
+          "Value": "Examples:user/1x/LookTest/Metal046A_1K-JPG_NormalDX.jpg"
         }
       ],
       "Outputs": []
@@ -1449,7 +1449,7 @@
           "Value": true
         },
         {
-          "Id": "a7350ba8-08be-4afc-92f1-d223ee9bcbeb"/*SetFx1To*/,
+          "Id": "a7350ba8-08be-4afc-92f1-d223ee9bcbeb"/*SetF1To*/,
           "Type": "System.Int32",
           "Value": 1
         },

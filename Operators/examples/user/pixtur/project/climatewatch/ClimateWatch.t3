@@ -435,7 +435,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/user/pixtur/projects/proj-climatewatch/geometry/skull_AO.jpg"
+          "Value": "Examples:user/pixtur/projects/proj-climatewatch/geometry/skull_AO.jpg"
         }
       ],
       "Outputs": []
@@ -447,7 +447,7 @@
         {
           "Id": "b6932cbd-e6b6-447b-b416-701326227864"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/user/pixtur/projects/proj-climatewatch/geometry/earth-water-low-poly.obj"
+          "Value": "Examples:user/pixtur/projects/proj-climatewatch/geometry/earth-water-low-poly.obj"
         }
       ],
       "Outputs": []
@@ -958,7 +958,7 @@
         {
           "Id": "56bc4d62-4938-4173-86d5-1f1bd3ea6a43"/*ImagePath*/,
           "Type": "System.String",
-          "Value": "Resources\\Example\\user\\pixtur\\projects\\proj-climatewatch\\images\\icon\\source-coal-ignite.png"
+          "Value": "Examples:user/pixtur/projects/proj-climatewatch/images/icon/source-coal-ignite.png"
         },
         {
           "Id": "a03886ac-21a6-4c3e-bedd-a3c1a60f17ab"/*Position*/,
@@ -1364,7 +1364,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "/t3/meshes/sphere.obj"
+          "Value": "Examples:meshes/primitives/sphere.obj"
         }
       ],
       "Outputs": []
@@ -1377,7 +1377,7 @@
         {
           "Id": "56bc4d62-4938-4173-86d5-1f1bd3ea6a43"/*ImagePath*/,
           "Type": "System.String",
-          "Value": "Resources\\Example\\user\\pixtur\\projects\\proj-climatewatch\\images\\icon\\source-coal.png"
+          "Value": "Examples:user/pixtur/projects/proj-climatewatch/images/icon/source-coal.png"
         },
         {
           "Id": "a03886ac-21a6-4c3e-bedd-a3c1a60f17ab"/*Position*/,
@@ -1448,7 +1448,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/user/pixtur/projects/proj-climatewatch/geometry/earth_AO.jpg"
+          "Value": "Examples:user/pixtur/projects/proj-climatewatch/geometry/earth_AO.jpg"
         }
       ],
       "Outputs": []
@@ -1526,7 +1526,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\Example\\user\\pixtur\\projects\\proj-climatewatch\\geometry\\earth-land-low-poly.obj"
+          "Value": "Examples:user/pixtur/projects/proj-climatewatch/geometry/earth-land-low-poly.obj"
         },
         {
           "Id": "aa19e71d-329c-448b-901c-565bf8c0da4f"/*SortVertices*/,
@@ -1963,7 +1963,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/user/pixtur/projects/proj-climatewatch/geometry/earth-land-low-poly.obj"
+          "Value": "Examples:user/pixtur/projects/proj-climatewatch/geometry/earth-land-low-poly.obj"
         }
       ],
       "Outputs": []
@@ -1975,7 +1975,7 @@
         {
           "Id": "b6932cbd-e6b6-447b-b416-701326227864"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/user/pixtur/projects/proj-climatewatch/geometry/earth-land-low-poly.obj"
+          "Value": "Examples:user/pixtur/projects/proj-climatewatch/geometry/earth-land-low-poly.obj"
         }
       ],
       "Outputs": []
@@ -2048,7 +2048,7 @@
         {
           "Id": "b6932cbd-e6b6-447b-b416-701326227864"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/user/pixtur/projects/proj-climatewatch/geometry/skull_600f.obj"
+          "Value": "Examples:user/pixtur/projects/proj-climatewatch/geometry/skull_600f.obj"
         }
       ],
       "Outputs": []
@@ -2097,7 +2097,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/user/pixtur/projects/proj-climatewatch/images/HourClassUi.png"
+          "Value": "Examples:user/pixtur/projects/proj-climatewatch/images/HourClassUi.png"
         }
       ],
       "Outputs": []
@@ -2335,7 +2335,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\Example\\user\\pixtur\\projects\\proj-climatewatch\\images\\ClimateWatch-Layout.png"
+          "Value": "Examples:user/pixtur/projects/proj-climatewatch/images/ClimateWatch-Layout.png"
         }
       ],
       "Outputs": []
@@ -2390,7 +2390,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\Example\\user\\pixtur\\projects\\proj-climatewatch\\images\\Skull.png"
+          "Value": "Examples:user/pixtur/projects/proj-climatewatch/images/icon/Skull.png"
         }
       ],
       "Outputs": []
@@ -2403,7 +2403,7 @@
         {
           "Id": "56bc4d62-4938-4173-86d5-1f1bd3ea6a43"/*ImagePath*/,
           "Type": "System.String",
-          "Value": "Resources\\Example\\user\\pixtur\\projects\\proj-climatewatch\\images\\icon\\source-oil.png"
+          "Value": "Examples:user/pixtur/projects/proj-climatewatch/images/icon/source-oil.png"
         },
         {
           "Id": "a03886ac-21a6-4c3e-bedd-a3c1a60f17ab"/*Position*/,
@@ -2527,7 +2527,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/user/pixtur/projects/proj-climatewatch/geometry/earth-water-low-poly.obj"
+          "Value": "Examples:user/pixtur/projects/proj-climatewatch/geometry/earth-water-low-poly.obj"
         }
       ],
       "Outputs": []
@@ -2556,7 +2556,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\Example\\user\\pixtur\\projects\\proj-climatewatch\\geometry\\earth-water-low-poly.obj"
+          "Value": "Examples:user/pixtur/projects/proj-climatewatch/geometry/earth-water-low-poly.obj"
         },
         {
           "Id": "aa19e71d-329c-448b-901c-565bf8c0da4f"/*SortVertices*/,
@@ -2579,7 +2579,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/user/pixtur/projects/proj-climatewatch/geometry/skull_600f.obj"
+          "Value": "Examples:user/pixtur/projects/proj-climatewatch/geometry/skull_600f.obj"
         },
         {
           "Id": "aa19e71d-329c-448b-901c-565bf8c0da4f"/*SortVertices*/,
@@ -2625,7 +2625,7 @@
         {
           "Id": "56bc4d62-4938-4173-86d5-1f1bd3ea6a43"/*ImagePath*/,
           "Type": "System.String",
-          "Value": "Resources\\Example\\user\\pixtur\\projects\\proj-climatewatch\\images\\icon\\source-gas.png"
+          "Value": "Examples:user/pixtur/projects/proj-climatewatch/images/icon/source-gas.png"
         },
         {
           "Id": "a03886ac-21a6-4c3e-bedd-a3c1a60f17ab"/*Position*/,

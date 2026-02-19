@@ -10,11 +10,6 @@
           "Id": "25215a7e-1e38-4370-8845-cbf422a7eb92"/*TriggerUpdate*/,
           "Type": "System.Boolean",
           "Value": false
-        },
-        {
-          "Id": "a1e08fde-2d9b-4a2d-bf09-a5e54ad8cfa0"/*FilePath*/,
-          "Type": "System.String",
-          "Value": "Resources\\user\\1x\\mars-express\\sequence"
         }
       ],
       "Outputs": [
@@ -93,11 +88,6 @@
           "Id": "25215a7e-1e38-4370-8845-cbf422a7eb92"/*TriggerUpdate*/,
           "Type": "System.Boolean",
           "Value": false
-        },
-        {
-          "Id": "a1e08fde-2d9b-4a2d-bf09-a5e54ad8cfa0"/*FilePath*/,
-          "Type": "System.String",
-          "Value": "Resources\\user\\1x\\mars-express\\sequence"
         }
       ],
       "Outputs": [
@@ -183,7 +173,7 @@
         "Bpm": 120.0,
         "DiscardAfterUse": true,
         "IsSoundtrack": true,
-        "FilePath": "Resources\\user\\1x\\mars-express\\soundtrack\\mars-express.mp3"
+        "FilePath": "Resources/user/1x/mars-express/soundtrack/mars-express.mp3"
       }
     ]
   }

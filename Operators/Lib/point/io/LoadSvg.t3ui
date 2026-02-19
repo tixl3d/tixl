@@ -51,7 +51,7 @@
         "Y": 0.0
       },
       "Usage": "FilePath",
-      "FileFilter": "svg files|*.svg"
+      "FileFilter": "svg"
     }
   ],
   "SymbolChildUis": [],

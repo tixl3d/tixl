@@ -77,7 +77,7 @@
         {
           "Id": "05acba8d-1dd1-4d6c-beff-e11e466f7253"/*FilePath*/,
           "Type": "System.String",
-          "Value": "Resources\\Example\\user\\pixtur\\research\\SvgFonts\\MononoCap_font.svg"
+          "Value": "Examples:user/pixtur/research/SvgFonts/MononoCap_font.svg"
         },
         {
           "Id": "77b18d33-a41e-4676-a55c-0df8e0290d05"/*ReduceCurveThreshold*/,

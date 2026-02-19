@@ -641,11 +641,6 @@
           "Value": 16.5
         },
         {
-          "Id": "ca8724d8-a362-4af4-bdf8-a80a1b0ef72e"/*FolderWithImages*/,
-          "Type": "System.String",
-          "Value": "Resources\\user\\wake\\proj-bigeater\\images\\00-cats"
-        },
-        {
           "Id": "cabb74b7-72c3-4916-8096-5890fc8e7023"/*BackgroundColor*/,
           "Type": "System.Numerics.Vector4",
           "Value": {
@@ -839,7 +834,7 @@
         {
           "Id": "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3"/*FontPath*/,
           "Type": "System.String",
-          "Value": "Resources\\fonts\\ShareTechMono.fnt"
+          "Value": "Examples:fonts/ShareTechMono.fnt"
         },
         {
           "Id": "82cc31ff-3307-4b6d-be70-16e471c2ffc9"/*HorizontalAlign*/,
@@ -1306,7 +1301,7 @@
         {
           "Id": "e827fdd1-20ca-473c-99ee-b839563690e9"/*Filepath*/,
           "Type": "System.String",
-          "Value": "Resources\\fonts\\ShareTechMono.fnt"
+          "Value": "Examples:fonts/ShareTechMono.fnt"
         }
       ],
       "Outputs": []
@@ -1381,7 +1376,7 @@
         {
           "Id": "e827fdd1-20ca-473c-99ee-b839563690e9"/*Filepath*/,
           "Type": "System.String",
-          "Value": "Resources\\fonts\\ShareTechMono.fnt"
+          "Value": "Examples:fonts/ShareTechMono.fnt"
         }
       ],
       "Outputs": []
@@ -1405,7 +1400,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\Example\\user\\pixtur\\projects\\proj-vj-barn\\tex\\signal-2023-07-12-200811_002.jpeg"
+          "Value": "Examples:Resources/Example/user/pixtur/projects/proj-vj-barn/tex/signal-2023-07-12-200811_002.jpeg"
         }
       ],
       "Outputs": []
@@ -1990,7 +1985,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\Example\\user\\pixtur\\projects\\proj-vj-barn\\geometry\\_barnWall01.jpg"
+          "Value": "Examples:Resources/Example/user/pixtur/projects/proj-vj-barn/geometry/_barnWall01.jpg"
         }
       ],
       "Outputs": []
@@ -2067,7 +2062,7 @@
         {
           "Id": "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3"/*FontPath*/,
           "Type": "System.String",
-          "Value": "Resources\\fonts\\ShareTechMono.fnt"
+          "Value": "Examples:fonts/ShareTechMono.fnt"
         },
         {
           "Id": "ae7f7e83-fa18-44fd-b639-3bd0dbd3ac06"/*VerticalAlign*/,
@@ -2336,7 +2331,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\Example\\user\\pixtur\\projects\\proj-vj-barn\\geometry\\somerhaus-v01.obj"
+          "Value": "Examples:Resources/Example/user/pixtur/projects/proj-vj-barn/geometry/somerhaus-v01.obj"
         }
       ],
       "Outputs": []
@@ -3131,7 +3126,7 @@
         {
           "Id": "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3"/*FontPath*/,
           "Type": "System.String",
-          "Value": "Resources\\fonts\\PlayfairDisplay-Black.fnt"
+          "Value": "Examples:fonts/PlayfairDisplay-Black.fnt"
         },
         {
           "Id": "d89c518c-a862-4f46-865b-0380350b7417"/*Size*/,
@@ -4390,7 +4385,7 @@
         {
           "Id": "b6932cbd-e6b6-447b-b416-701326227864"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\Example\\user\\pixtur\\projects\\proj-vj-barn\\geometry\\somerhaus-v01.obj"
+          "Value": "Examples:Resources/Example/user/pixtur/projects/proj-vj-barn/geometry/somerhaus-v01.obj"
         }
       ],
       "Outputs": []
@@ -8067,12 +8062,6 @@
       "SourceSlotId": "e011dd8c-1b9c-458f-8960-e6c38e83ca74",
       "TargetParentOrChildId": "e92710ec-6af9-437a-a608-5dab26865da6",
       "TargetSlotId": "98314ae6-b2a9-433b-90e9-931b059ae62e"
-    },
-    {
-      "SourceParentOrChildId": "27260080-c43e-4c24-8d2c-f99668839cb6",
-      "SourceSlotId": "a8127182-4b8d-4be2-8c50-9ce475d2699d",
-      "TargetParentOrChildId": "ea8210ac-934a-4c1a-a939-65c3be0b7e2a",
-      "TargetSlotId": "d4b5c642-9cb9-4f41-8739-edbb9c6c4857"
     },
     {
       "SourceParentOrChildId": "557c9499-bcfd-4485-96bd-2899422ab618",

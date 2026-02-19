@@ -1,19 +1,19 @@
 #nullable enable
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using T3.Core.Compilation;
 using T3.Core.DataTypes;
 using T3.Core.IO;
-using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.Resource;
+using T3.Core.Resource.Assets;
 using T3.Core.SystemUi;
 using T3.Core.UserData;
 using T3.Editor.Compilation;
 using T3.Editor.Gui;
 using T3.Editor.Gui.InputUi.SimpleInputUis;
 using T3.Editor.Gui.Interaction.Timing;
-using T3.Editor.Gui.UiHelpers;
 using T3.Serialization;
 
 namespace T3.Editor.UiModel.Exporting;
@@ -37,44 +37,32 @@ internal static partial class PlayerExporter
             return false;
         }
 
-        // traverse starting at output and collect everything
+        // Traverse starting at output and collect everything
         var exportData = new ExportData();
         exportData.TryAddSymbol(symbol);
-        
-        // TODO: Make project directory selection smarter
-        exportDir = Path.Combine(UserSettings.Config.ProjectDirectories[0], FileLocations.ExportFolderName, childUi.SymbolChild.ReadableName);
 
-        try
-        {
-            if (Directory.Exists(exportDir))
-            {
-                Directory.Move(exportDir, exportDir + '_' + DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss"));
-            }
-        }
-        catch (Exception e)
-        {
-            reason = $"Failed to move export dir: {exportDir} ({e.Message}). Please close all files and File Explorer windows.";
-            return false;
-        }
+        var package = composition.Symbol.SymbolPackage;
+        exportDir = Path.Combine(package.Folder, FileLocations.ExportSubFolder, childUi.SymbolChild.ReadableName);
+
+        // if (!KeepCopyOfExportDir(out reason, exportDir)) 
+        //     return false;
 
         Directory.CreateDirectory(exportDir);
 
-        var operatorDir = Path.Combine(exportDir, "Operators");
+        var operatorDir = Path.Combine(exportDir, FileLocations.OperatorsSubFolder);
         Directory.CreateDirectory(operatorDir);
 
-        // Copy assemblies into export dir
-        // Get symbol packages directly used by the exported symbols
-
-        if (!TryExportPackages(out reason, exportData.SymbolPackages, operatorDir))
+        // Copy assemblies into export dir. Get symbol packages directly used by the exported symbols
+        if (!TryExportSymbolPackages(out reason, exportData, operatorDir))
             return false;
 
-        // Copy referenced resources
-        RecursivelyCollectExportData(output, exportData);
-        exportData.PrintInfo();
-
-        if (TryFindSoundtrack(exportedInstance, symbol, out var fileResource, out var relativePath))
+        // Get soundtrack or show warning message
+        if (TryFindSoundtrack(exportedInstance, symbol, out var address))
         {
-            exportData.TryAddSharedResource(relativePath, null, fileResource);
+            if (AssetRegistry.TryGetAsset(address, out var soundtrackAsset))
+            {
+                exportData.TryAddSharedAsset(soundtrackAsset);
+            }
         }
         else
         {
@@ -89,101 +77,57 @@ internal static partial class PlayerExporter
             }
         }
 
-        var generalResourceTargetDir = Path.Combine(exportDir, FileLocations.ResourcesSubfolder);
-        Directory.CreateDirectory(generalResourceTargetDir);
-        if (!TryCopyDirectory(SharedResources.Directory, generalResourceTargetDir, out reason))
+        // Collect used assets
+        RecursivelyCollectExportData(output, exportData);
+        exportData.PrintInfo();
+
+        if (!AssetExportItem.TryCopyItems(exportData.ExportItems, exportDir))
+        {
+            reason = "Failed to copy resource files - see log for details";
+            return false;
+        }
+
+        if (!TryExportAssetsOnlyPackages(exportData, operatorDir, out reason))
+            return false;
+
+        // Copy shared assets
+        var editorResourcesTargetDir = Path.Combine(exportDir, FileLocations.EditorResourcesSubfolder);
+        Directory.CreateDirectory(editorResourcesTargetDir);
+        if (!TryCopyDirectory(SharedResources.EditorResourcesDirectory, editorResourcesTargetDir, out reason))
             return false;
 
         var playerDirectory = Path.Combine(FileLocations.StartFolder, "Player");
         if (!TryCopyDirectory(playerDirectory, exportDir, out reason))
             return false;
 
-        if (!ExportDataFile.TryCopyToExportDir(exportData.ExportDataFiles, exportDir))
-        {
-            reason = "Failed to copy resource files - see log for details";
+        if (!TryExportSettings(exportDir, symbol, out reason))
             return false;
-        }
-
-        // Update project settings
-        var exportSettings = new ExportSettings(OperatorId: symbol.Id,
-                                                ApplicationTitle: symbol.Name,
-                                                WindowMode: ProjectSettings.Config.DefaultWindowMode,
-                                                ConfigData: ProjectSettings.Config,
-                                                Author: symbol.SymbolPackage.AssemblyInformation?.Name ?? string.Empty, // todo - actual author name
-                                                BuildId: Guid.NewGuid(),
-                                                EditorVersion: Program.VersionText);
-
-        const string exportSettingsFile = "exportSettings.json";
-        if (!JsonUtils.TrySaveJson(exportSettings, Path.Combine(exportDir, exportSettingsFile)))
-        {
-            reason = $"Failed to save export settings to {exportSettingsFile}";
-            return false;
-        }
 
         reason = "Exported successfully to " + exportDir;
         return true;
     }
 
-    private static bool TryCreateResourceExportFilepath(string exportDir,
-                                                        FileResource file,
-                                                        string relativePath,
-                                                        Symbol symbol,
-                                                        [NotNullWhen(true)] out string? targetPath,
-                                                        [NotNullWhen(false)] out string? reason)
+    /// <summary>
+    /// Compile EditableProjects and copy read only projects.  
+    /// </summary>
+    private static bool TryExportSymbolPackages(out string reason, ExportData exportData, string operatorDir)
     {
-        reason = null;
-        targetPath = null;
-        var fileInfo = file.FileInfo;
-        if (fileInfo is null || !fileInfo.Exists)
+        string[] excludeSubdirectories =
+            [
+                ".git",
+                FileLocations.SymbolUiSubFolder,
+                FileLocations.SourceCodeSubFolder,
+                FileLocations.ExportSubFolder,
+                FileLocations.AssetsSubfolder, // Assets are filtered by referencing address and copied separately 
+            ];
+
+        foreach (var package in exportData.SymbolPackages)
         {
-            reason = $"Soundtrack file does not exist: {fileInfo?.FullName}";
-            return false;
-        }
-
-        var absolutePath = fileInfo.FullName;
-
-        // todo - determine if a path is relative or not even if it's "rooted" with an alias (for cross-platform)
-        if (Path.IsPathFullyQualified(relativePath))
-        {
-            reason = $"Soundtrack path is not relative: \"{relativePath}\"";
-            return false;
-        }
-
-        // Relative path is...
-        // /pixtur.Playground/soundtrack/bayolea.mp3
-        //
-        // Absolute path is something like... 
-        // C:\Users\pixtur\Documents\TiXL\Playground\Resources\soundtrack\bayolea.mp3
-        // Export dir is ...
-        // C:\Users\pixtur\Documents\TiXL\T3Exports\_TestExport2
-        // 
-        // Target folder path should be 
-        // c:\Users\pixtur\Documents\TiXL\T3Exports\_TestExport2\Operators\pixtur.Playground\Resources\soundtrack\bayolea.mp3 
-        var relativePathInPackageResources = Path.GetRelativePath(symbol.SymbolPackage.ResourcesFolder, absolutePath);
-        targetPath = Path.Combine(exportDir, "Operators",
-                                  symbol.SymbolPackage.RootNamespace,
-                                  FileLocations.ResourcesSubfolder,
-                                  relativePathInPackageResources);
-        return true;
-    }
-
-    // todo - can we handle resource references here too?
-    private static bool TryExportPackages(out string reason, IEnumerable<SymbolPackage> symbolPackages, string operatorDir)
-    {
-        // note: I think this is only intended to export dll files? if so, this should make use of TixlAssemblyLoadContexts instead to get specific dlls in use
-        string[] excludeSubdirectories = [FileLocations.SymbolUiSubFolder, FileLocations.SourceCodeSubFolder, ".git", FileLocations.ResourcesSubfolder];
-        foreach (var package in symbolPackages)
-        {
-            Log.Debug($"Exporting package {package.AssemblyInformation?.Name}");
-            var packageName = package.AssemblyInformation?.Name;
-            if (packageName == null)
-            {
-                Log.Warning(" Skipping unnamed package " + package);
-                continue;
-            }
-
+            Log.Debug($"Exporting package {package.Name}...");
+            var packageName = package.Name;
             var targetDirectory = Path.Combine(operatorDir, packageName);
-            _ = Directory.CreateDirectory(targetDirectory);
+            Directory.CreateDirectory(targetDirectory);
+
             if (package is EditableSymbolProject project)
             {
                 project.SaveModifiedSymbols();
@@ -193,22 +137,17 @@ internal static partial class PlayerExporter
                     return false;
                 }
 
-                // copy the resulting directory into the target directory
+                // Copy the resulting directory into the target directory
                 var sourceDir = project.CsProjectFile.GetBuildTargetDirectory(CsProjectFile.PlayerBuildMode);
 
-                // copy contents recursively into the target directory
+                // Copy contents recursively into the target directory
                 if (!TryCopyDirectory(sourceDir, targetDirectory, out reason, excludeSubdirectories))
                     return false;
             }
             else
             {
                 // Copy full directory into target directory recursively, maintaining folder layout
-                var directoryToCopy = package?.AssemblyInformation?.Directory;
-                if (directoryToCopy == null)
-                {
-                    reason = "invalid package AssemblyInformation";
-                    return false;
-                }
+                var directoryToCopy = package.AssemblyInformation.Directory;
 
                 if (!TryCopyDirectory(directoryToCopy, targetDirectory, out reason, excludeSubdirectories))
                     return false;
@@ -220,15 +159,34 @@ internal static partial class PlayerExporter
     }
 
     /// <summary>
+    /// If only Assets but no Symbols are used from a package, we still need to copy its OperatorPackage.json file,
+    /// so the player can register these assets on startup. 
+    /// </summary>
+    private static bool TryExportAssetsOnlyPackages(ExportData exportData, string operatorDir, out string reason)
+    {
+        reason = string.Empty;
+        foreach (var assetPackage in exportData.AssetPackages)
+        {
+            var alreadyIncluded = exportData.SymbolPackages.Any(sp => sp.Id == assetPackage.Id);
+            if (alreadyIncluded)
+                continue;
+
+            var sourcePath = Path.Combine(assetPackage.Folder, ReleaseInfo.FileName);
+            var targetPath = Path.Combine(operatorDir, assetPackage.Name, ReleaseInfo.FileName);
+
+            if (!TryCopyFile(sourcePath, targetPath))
+            {
+                reason = $"Failed to copy {sourcePath} for asset package {assetPackage}";
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /// <summary>
     /// Recursively copies a directory to a target directory, excluding specified subfolders, files, and file extensions.
     /// </summary>
-    /// <param name="directoryToCopy"></param>
-    /// <param name="targetDirectory"></param>
-    /// <param name="reason"></param>
-    /// <param name="excludeSubFolders"></param>
-    /// <param name="excludeFiles"></param>
-    /// <param name="excludeFileExtensions"></param>
-    /// <returns></returns>
     private static bool TryCopyDirectory(string directoryToCopy, string targetDirectory, out string reason, string[]? excludeSubFolders = null,
                                          string[]? excludeFiles = null, string[]? excludeFileExtensions = null)
     {
@@ -301,7 +259,6 @@ internal static partial class PlayerExporter
         return true;
     }
 
-
     private static bool TryCopyFile(string sourcePath, string targetPath)
     {
         var directory = Path.GetDirectoryName(targetPath);
@@ -367,19 +324,17 @@ internal static partial class PlayerExporter
         }
     }
 
-    private static bool TryFindSoundtrack(Instance instance, Symbol symbol, 
-                                          [NotNullWhen(true)] out FileResource? file,
-                                          [NotNullWhen(true)] out string? relativePath)
+    private static bool TryFindSoundtrack(Instance instance, Symbol symbol,
+                                          [NotNullWhen(true)] out string? address)
     {
         var playbackSettings = symbol.PlaybackSettings;
         if (playbackSettings == null)
         {
             Log.Warning($"Project {symbol} has no playback settings");
-            file = null;
-            relativePath = null;
+            address = null;
             return false;
         }
-        
+
         if (playbackSettings.TryGetMainSoundtrack(instance, out var soundtrack) is not true)
         {
             if (PlaybackUtils.TryFindingSoundtrack(out soundtrack, out _))
@@ -388,16 +343,15 @@ internal static partial class PlayerExporter
             }
             else
             {
-                file = null;
-                relativePath = null;
+                address = null;
                 return false;
             }
 
             Log.Debug("No soundtrack defined within operator.");
         }
 
-        relativePath = soundtrack.Clip.FilePath;
-        return FileResource.TryGetFileResource(soundtrack.Clip.FilePath, instance, out file);
+        address = soundtrack.Clip.FilePath;
+        return FileResource.TryGetFileResource(soundtrack.Clip.FilePath, instance, out _);
     }
 
     private static void CheckInputForResourcePath(ISlot inputSlot, ExportData exportData)
@@ -419,38 +373,45 @@ internal static partial class PlayerExporter
         if (value is not InputValue<string> stringValue)
             return;
 
+        var address = stringValue.Value;
+
         switch (stringInputUi.Usage)
         {
             case StringInputUi.UsageType.FilePath:
             {
-                var resourcePath = stringValue.Value;
-                exportData.TryAddSharedResource(resourcePath, parent.AvailableResourcePackages);
+                if (!AssetRegistry.TryGetAsset(address, out var asset))
+                {
+                    Log.Warning($" Asset not found '{address}'");
+                    break;
+                }
+
+                exportData.TryAddSharedAsset(asset);
                 break;
             }
             case StringInputUi.UsageType.DirectoryPath:
             {
-                var relativeDirectory = stringValue.Value;
-                var isFolder = relativeDirectory.EndsWith('/');
+                //var relativeDirectory = stringValue.Value;
+                //var isFolder = relativeDirectory.EndsWith('/');
 
-                if (!ResourceManager.TryResolveRelativePath(relativeDirectory, parent, out var absoluteDirectory, out var package, isFolder))
+                if (!AssetRegistry.TryResolveAddress(address, parent, out var absoluteDirectory, out var package, isFolder: true))
                 {
-                    Log.Warning($"Directory '{relativeDirectory}' was not found in any resource folder");
+                    Log.Warning($" Directory '{address}' was not found in any resource folder");
                     break;
                 }
 
-                if (package == null)
-                {
-                    Log.Warning($"Directory '{relativeDirectory}' can't be exported without a package");
-                    break;
-                }
-                
-                Log.Debug($"Export all entries folder {absoluteDirectory}...");
+                // if (package == null)
+                // {
+                //     Log.Warning($"Directory '{address}' can't be exported without a package");
+                //     break;
+                // }
+
+                Log.Debug($"Export all files in folder {absoluteDirectory}...");
                 foreach (var absolutePath in Directory.EnumerateFiles(absoluteDirectory, "*", SearchOption.AllDirectories))
                 {
-                    var relativePathInResourceFolder = Path.GetRelativePath(package.ResourcesFolder, absolutePath); 
-                    
-                    exportData.TryAddResourcePath(new ExportDataFile(package.RootNamespace,
-                                                                     relativePathInResourceFolder, 
+                    var relativePathInResourceFolder = Path.GetRelativePath(package.AssetsFolder, absolutePath);
+
+                    exportData.TryAddExportAsset(new AssetExportItem(package.RootNamespace,
+                                                                     relativePathInResourceFolder,
                                                                      absolutePath));
                 }
 
@@ -462,5 +423,45 @@ internal static partial class PlayerExporter
             default:
                 break;
         }
+    }
+
+    private static bool TryExportSettings(string exportDir, Symbol symbol, out string reason)
+    {
+        reason = string.Empty;
+
+        // Update project settings
+        var exportSettings = new ExportSettings(OperatorId: symbol.Id,
+                                                ApplicationTitle: symbol.Name,
+                                                WindowMode: ProjectSettings.Config.DefaultWindowMode,
+                                                ConfigData: ProjectSettings.Config,
+                                                Author: symbol.SymbolPackage.AssemblyInformation?.Name ?? string.Empty, // todo - actual author name
+                                                BuildId: Guid.NewGuid(),
+                                                EditorVersion: Program.VersionText);
+
+        const string exportSettingsFile = "exportSettings.json";
+        if (JsonUtils.TrySaveJson(exportSettings, Path.Combine(exportDir, exportSettingsFile)))
+            return true;
+
+        reason = $"Failed to save export settings to {exportSettingsFile}";
+        return false;
+    }
+
+    private static bool KeepCopyOfExportDir(out string reason, string exportDir)
+    {
+        try
+        {
+            if (Directory.Exists(exportDir))
+            {
+                Directory.Move(exportDir, exportDir + '_' + DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss"));
+            }
+        }
+        catch (Exception e)
+        {
+            reason = $"Failed to move export dir: {exportDir} ({e.Message}). Please close all files and File Explorer windows.";
+            return false;
+        }
+
+        reason = string.Empty;
+        return true;
     }
 }

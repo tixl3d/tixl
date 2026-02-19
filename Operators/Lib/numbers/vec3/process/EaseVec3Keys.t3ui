@@ -10,19 +10,19 @@
       }
     },
     {
-      "InputId": "fa9c6388-a7eb-4424-956b-dc1b7f2486bc"/*Direction*/,
-      "Position": {
-        "X": -200.0,
-        "Y": 180.0
-      }
-    },
-    {
       "InputId": "4b8c9c9b-37fa-4c50-ac65-4c5a20e56d2f"/*Interpolation*/,
       "Position": {
         "X": -200.0,
         "Y": 135.0
       }
     },
+    {
+      "InputId": "fa9c6388-a7eb-4424-956b-dc1b7f2486bc"/*Direction*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 180.0
+      }
+    }
   ],
   "SymbolChildUis": [],
   "OutputUis": [

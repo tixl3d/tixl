@@ -1,0 +1,91 @@
+{
+  "Id": "16e30ce0-20c9-4677-9837-0200454e05ae"/*DrawQuiz*/,
+  "Description": "Stacking",
+  "InputUis": [
+    {
+      "InputId": "804aba22-3b3d-4121-b754-82c3ed2d4566"/*DifferenceRange*/,
+      "Position": {
+        "X": -248.53421,
+        "Y": -105.86792
+      },
+      "GroupTitle": "Internal...",
+      "Scale": 0.01
+    },
+    {
+      "InputId": "8f4f0caa-b710-47c1-94dd-346f03fac3c8"/*DoNotChange*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -929.536,
+        "Y": -284.95593
+      }
+    },
+    {
+      "InputId": "a6f445ac-1be1-4921-baee-cf2caf5a6a90"/*YourSolution*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -1003.64185,
+        "Y": -517.21515
+      }
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "1dcfd891-6788-4020-b2a3-7d23b6ccd689"/*ComputeImageDifference*/,
+      "Position": {
+        "X": -242.29596,
+        "Y": -198.40918
+      }
+    },
+    {
+      "ChildId": "376eb412-8e28-4955-84f7-c98790b1478a"/*RenderTarget*/,
+      "Position": {
+        "X": -789.536,
+        "Y": -284.95593
+      }
+    },
+    {
+      "ChildId": "4fdfe2b0-2e81-4ea4-a31a-7b79fee2f3e7"/*RenderTarget*/,
+      "Position": {
+        "X": -575.4474,
+        "Y": -368.00632
+      }
+    },
+    {
+      "ChildId": "61e3410c-9347-4ef0-a141-e201e8843c95"/*RenderTarget*/,
+      "Position": {
+        "X": -863.64185,
+        "Y": -517.21515
+      }
+    },
+    {
+      "ChildId": "653c74ef-0425-474d-99c2-c0ef40166ba2"/*_QuizUp*/,
+      "Position": {
+        "X": 74.65137,
+        "Y": -410.32974
+      }
+    },
+    {
+      "ChildId": "86326606-3f9a-436e-91c6-519c03ff73d6"/*FirstValidTexture*/,
+      "Position": {
+        "X": -435.44763,
+        "Y": -403.0063
+      }
+    },
+    {
+      "ChildId": "adc7f7e9-53e5-4891-abc7-2b526e6d4ff3"/*CTA*/,
+      "Position": {
+        "X": -715.4474,
+        "Y": -368.00632
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "63a74fd8-a6e7-4d6f-b63d-179d7ff8ca4f"/*Output*/,
+      "Position": {
+        "X": 324.6157,
+        "Y": -161.3143
+      }
+    }
+  ]
+}

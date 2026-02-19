@@ -29,8 +29,7 @@
         "X": -188.89662,
         "Y": -62.692398
       },
-      "Usage": "FilePath",
-      "FileFilter": "All Files|*.*|Video files (mp4,webm,mpeg,m4v,mkv)|*.mp4;*.webm;*.mpeg;*.m4v;*.mkv"
+      "Usage": "FilePath"
     }
   ],
   "SymbolChildUis": [

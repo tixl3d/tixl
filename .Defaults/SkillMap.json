@@ -11,14 +11,16 @@
       "Title": "TiXL Essentials",
       "Description": "",
       "MapCoordinate": {
-        "X": 3.0,
-        "Y": -8.0
+        "X": 5.0,
+        "Y": -9.0
       },
       "ZoneId": "717505b4-0c6e-4708-85d8-54e202f9bbdf",
       "UnlocksTopics": [
         "7b4db61f-e122-4831-953e-9c18084fb9dd",
         "ed9927b5-fae3-4e6f-a4eb-df68e09bf0db",
-        "7f093d8e-9d75-46a0-ac61-4a829b70358d"
+        "7f093d8e-9d75-46a0-ac61-4a829b70358d",
+        "10d851f2-770f-4cce-a707-8dae8f0e0d6b",
+        "425c882e-80cc-4d38-b4a0-16ba9e7cc0f1"
       ],
       "Namespace": "Skills.Basics.B01_Welcome",
       "TopicType": "Image",
@@ -487,7 +489,7 @@
     {
       "Id": "7f093d8e-9d75-46a0-ac61-4a829b70358d",
       "Title": "Basic Drawing",
-      "Description": "",
+      "Description": "The essentials of drawing with TiXL",
       "MapCoordinate": {
         "X": 5.0,
         "Y": -7.0
@@ -498,7 +500,7 @@
         "425c882e-80cc-4d38-b4a0-16ba9e7cc0f1",
         "47fa588a-67ff-4972-b42f-7fccc4505793"
       ],
-      "Namespace": null,
+      "Namespace": "Skills.Render.R01_MovingThings",
       "TopicType": "Command",
       "Requirement": "AllInputPaths"
     },
@@ -719,7 +721,7 @@
     {
       "Id": "425c882e-80cc-4d38-b4a0-16ba9e7cc0f1",
       "Title": "Points",
-      "Description": "",
+      "Description": "An introduction to Points",
       "MapCoordinate": {
         "X": 9.0,
         "Y": -9.0
@@ -731,9 +733,9 @@
         "f419956e-7e68-47d9-a38d-3ab9a6649587",
         "10611e2a-3051-4586-8562-f216cf1869cb"
       ],
-      "Namespace": null,
+      "Namespace": "Skills.Points.P01_Intro",
       "TopicType": "Gpu",
-      "Requirement": "AllInputPaths"
+      "Requirement": "AnyInputPath"
     },
     {
       "Id": "a3ec7723-c516-489c-8ee2-5518d679c026",
@@ -1811,7 +1813,7 @@
       "UnlocksTopics": [],
       "Namespace": "Skills.Image.I20_Puzzles",
       "TopicType": "Image",
-      "Requirement": "None"
+      "Requirement": "AllInputPaths"
     },
     {
       "Id": "1bbfc1bc-ea24-40f8-8f6f-1b9ff3be5c3f",

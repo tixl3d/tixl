@@ -332,7 +332,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "/t3/images/t3-logo-alpha.png"
+          "Value": "Examples:images/t3-logo-alpha.png"
         }
       ],
       "Outputs": []

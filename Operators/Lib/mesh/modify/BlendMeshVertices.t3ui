@@ -6,24 +6,24 @@
     {
       "InputId": "355ae0a4-893a-4852-a37d-9dd77179c507"/*RangeWidth*/,
       "Position": {
-        "X": -452.91107,
-        "Y": 953.6807
+        "X": 168.51639,
+        "Y": 926.5459
       },
       "Description": "Defines the range width when the 'BlendMode' is set to 'RangeBlend' or 'RangeBlendSmooth'"
     },
     {
       "InputId": "3f4ed7b1-dbb6-4736-b323-31ea8fad870e"/*Scatter*/,
       "Position": {
-        "X": -452.91107,
-        "Y": 998.6807
+        "X": 168.51639,
+        "Y": 961.5459
       },
       "Description": "Adds random noise to the vertices' position during the transition"
     },
     {
       "InputId": "42941c1f-c53e-45ed-876c-f9043753a473"/*Pairing*/,
       "Position": {
-        "X": -453.51883,
-        "Y": 859.64264
+        "X": 28.516388,
+        "Y": 891.5459
       },
       "Description": "Selects the mode with which vertices are paired for blending",
       "AddPadding": "True"
@@ -32,16 +32,16 @@
       "InputId": "44acb67a-a443-4c11-8939-2b76132f8dbf"/*MeshB*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -460.26855,
-        "Y": 1204.6438
+        "X": 168.51636,
+        "Y": 1271.7982
       },
       "Description": "Input for Mesh A"
     },
     {
       "InputId": "5ccbc77e-2180-4c83-aaa6-ed3232de8afb"/*BlendMode*/,
       "Position": {
-        "X": -453.51883,
-        "Y": 814.64264
+        "X": 28.516388,
+        "Y": 856.5459
       },
       "GroupTitle": "Options",
       "Description": "Defines how to blend between the meshes"
@@ -50,16 +50,16 @@
       "InputId": "a7ef92db-87c9-4cf3-bd62-f8cb858d9ed9"/*MeshA*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -458.9133,
-        "Y": 1142.6947
+        "X": -419.36392,
+        "Y": 970.077
       },
       "Description": "Input for Mesh A"
     },
     {
       "InputId": "add0fd7b-fa76-4788-8940-d1949a44b342"/*BlendValue*/,
       "Position": {
-        "X": -453.51883,
-        "Y": 769.64264
+        "X": 168.51639,
+        "Y": 821.5459
       },
       "Description": "Defines the transition between the two meshes\n0 = Mesh A is displayed without changes\n1 = Mesh B is displayed without changes\nIf the 'BlendMode' is set to 'Blend', the vertices overshoot at values lower than 0 and higher than 1.\nIf the 'BlendMode' is set to 'RangeBlendSmooth', the transition loops.",
       "AddPadding": "True",
@@ -69,73 +69,59 @@
   ],
   "SymbolChildUis": [
     {
-      "ChildId": "11a518fd-a33d-4aa2-9f5f-3727ca75a386"/*DisplaceMeshNoise*/,
-      "Position": {
-        "X": 477.4934,
-        "Y": 1354.3801
-      }
-    },
-    {
       "ChildId": "12590637-975d-49b0-af63-d063fb039315"/*GetBufferComponents*/,
       "Position": {
-        "X": -151.26566,
-        "Y": 1100.6326
+        "X": -279.36398,
+        "Y": 1040.077
       }
     },
     {
       "ChildId": "211f13be-bade-42e6-9941-3f0ea2cc0312"/*GetBufferComponents*/,
       "Position": {
-        "X": -160.26855,
-        "Y": 1204.6438
+        "X": 308.51636,
+        "Y": 1306.7982
       }
     },
     {
       "ChildId": "272e0899-657e-4507-890e-ec78c10fb7d1"/*IntToFloat*/,
       "Position": {
-        "X": -323.51883,
-        "Y": 814.64264
+        "X": 168.51639,
+        "Y": 856.5459
       }
     },
     {
       "ChildId": "3e69b70d-6674-44b1-80c2-ce011178ad9a"/*_MeshBufferComponents*/,
       "Position": {
-        "X": -308.9133,
-        "Y": 1142.6947
+        "X": -279.36398,
+        "Y": 970.077
       }
     },
     {
       "ChildId": "41eb6a38-2433-4c72-bf7f-c20bf429ba67"/*StructuredBufferWithViews*/,
       "Position": {
-        "X": 148.73434,
-        "Y": 1057.6326
-      }
-    },
-    {
-      "ChildId": "5b303fe8-ea99-4f62-8fea-cbcc4a14407f"/*GetSRVProperties*/,
-      "Position": {
-        "X": -1.2656555,
-        "Y": 1100.6326
+        "X": 308.5164,
+        "Y": 1106.7369
       }
     },
     {
       "ChildId": "6bb52c0b-c9ff-4b75-8b3e-f7f316f94aa6"/*VertexStride*/,
       "Position": {
-        "X": -1.2656555,
-        "Y": 1057.6326
+        "X": 168.51639,
+        "Y": 1141.7369
       }
     },
     {
       "ChildId": "72a0564c-27cb-48e3-824f-8764b7cdb557"/*ComputeShaderStage*/,
       "Position": {
-        "X": 487.14108,
-        "Y": 868.1397
+        "X": 614.30774,
+        "Y": 787.0883
       }
     },
     {
       "ChildId": "7a4a6664-6da2-476b-8001-989cf417782a"/*ComputeShader*/,
       "Position": {
-        "X": 78.32962,
-        "Y": 853.56177
+        "X": 168.51639,
+        "Y": 627.6429
       }
     },
     {
@@ -146,50 +132,50 @@
         "Y": 44.69636
       },
       "Position": {
-        "X": 298.73434,
-        "Y": 979.3921
+        "X": 308.5164,
+        "Y": 786.5459
       }
     },
     {
       "ChildId": "9c18a852-4e7d-422a-8ecb-bb5f3ad54eca"/*_AssembleMeshBuffers*/,
       "Position": {
-        "X": 797.30347,
-        "Y": 1034.7814
+        "X": 765.86115,
+        "Y": 1109.3113
       }
     },
     {
       "ChildId": "a2147c56-061d-468f-a0ba-b2187475c34d"/*CalcDispatchCount*/,
       "Position": {
-        "X": 298.73434,
-        "Y": 910.3921
+        "X": 308.5164,
+        "Y": 662.6429
       }
     },
     {
       "ChildId": "c8494085-f77c-43e3-9b7b-3b93dee57b3b"/*ExecuteBufferUpdate*/,
       "Position": {
-        "X": 647.30347,
-        "Y": 1034.7814
+        "X": 614.3078,
+        "Y": 997.0883
       }
     },
     {
       "ChildId": "e28c7fc4-2e61-4350-8744-bdedcf758c06"/*IntToFloat*/,
       "Position": {
-        "X": -323.51883,
-        "Y": 870.64264
+        "X": 168.51639,
+        "Y": 891.5459
       }
     },
     {
       "ChildId": "e96d8a6c-f8e0-460b-9517-066961cc7bc1"/*GetBufferComponents*/,
       "Position": {
-        "X": 298.73434,
-        "Y": 1022.3921
+        "X": 308.5164,
+        "Y": 1176.7369
       }
     },
     {
       "ChildId": "f234c6b5-1517-41cc-8f2e-7b3ba78546df"/*_MeshBufferComponents*/,
       "Position": {
-        "X": -310.26855,
-        "Y": 1204.6438
+        "X": 308.51636,
+        "Y": 1271.7982
       }
     }
   ],
@@ -197,8 +183,8 @@
     {
       "OutputId": "27258c56-6421-4800-a057-26c9c2ede324"/*BlendedMesh*/,
       "Position": {
-        "X": 947.30347,
-        "Y": 1034.7814
+        "X": 765.86115,
+        "Y": 1214.3113
       }
     }
   ]

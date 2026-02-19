@@ -69,7 +69,7 @@
         {
           "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
           "Type": "System.String",
-          "Value": "/Lib/points/sim/PointTrail-Copy.hlsl"
+          "Value": "Lib:shaders/points/sim/PointTrail-Copy.hlsl"
         }
       ],
       "Outputs": []
@@ -104,7 +104,7 @@
         {
           "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
           "Type": "System.String",
-          "Value": "/Lib/points/sim/PointTrail-Collect.hlsl"
+          "Value": "Lib:shaders/points/sim/PointTrail-Collect.hlsl"
         }
       ],
       "Outputs": []
@@ -212,7 +212,7 @@
         {
           "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
           "Type": "System.String",
-          "Value": "Resources/lib/points/sim/PointTrail-Clear.hlsl"
+          "Value": "Lib:shaders/points/sim/PointTrail-Clear.hlsl"
         }
       ],
       "Outputs": []

@@ -255,7 +255,7 @@
         {
           "Id": "ceeae47b-d792-471d-a825-49e22749b7b9"/*InputString*/,
           "Type": "System.String",
-          "Value": "#include \"lib/shared/hash-functions.hlsl\"\n#include \"lib/shared/point.hlsl\"\n#include \"lib/shared/quat-functions.hlsl\"\n\ncbuffer Params : register(b1)\n{\n    float3 Center;\n    float A;\n    float B;\n    float C;\n    float D;\n}\n\ncbuffer IntParams : register(b2)\n{\n    uint TotalCount;\n    int2 TexSize;\n}\n\nStructuredBuffer<Point> SourcePoints : t0;        \nRWStructuredBuffer<Point> ResultPoints : u0;   \n\nTexture2D<float4> Image : register(t1);\nsampler Sampler : register(s0);\n\n#include \"defs\"\n\n[numthreads(64,1,1)]\nvoid main(uint3 DTId : SV_DispatchThreadID)\n{\n    uint i = DTId.x;\n    uint numStructs, stride;\n    SourcePoints.GetDimensions(numStructs, stride);\n    if(i >= TotalCount) {    \n        return;\n    }\n\n    float f = (float)i / TotalCount;\n    Point p = (Point)0;\n    if(numStructs>0){\n        p = SourcePoints[(i)%numStructs];\n    }else{\n        p.Position=float3(0,0,0);\n        p.FX1=1.0;\n        p.Rotation=float4(0,0,0,1);\n        p.Color=float4(1,1,1,1);\n        p.Scale=float3(1,1,1);\n        p.FX2=1.0;\n   }\n\n{\n#include \"snippet\"\n}\n\n    ResultPoints[i] = p;\n}\n"
+          "Value": "#include \"shared/hash-functions.hlsl\"\n#include \"shared/point.hlsl\"\n#include \"shared/quat-functions.hlsl\"\n\ncbuffer Params : register(b1)\n{\n    float3 Center;\n    float A;\n    float B;\n    float C;\n    float D;\n}\n\ncbuffer IntParams : register(b2)\n{\n    uint TotalCount;\n    int2 TexSize;\n}\n\nStructuredBuffer<Point> SourcePoints : t0;        \nRWStructuredBuffer<Point> ResultPoints : u0;   \n\nTexture2D<float4> Image : register(t1);\nsampler Sampler : register(s0);\n\n#include \"defs\"\n\n[numthreads(64,1,1)]\nvoid main(uint3 DTId : SV_DispatchThreadID)\n{\n    uint i = DTId.x;\n    uint numStructs, stride;\n    SourcePoints.GetDimensions(numStructs, stride);\n    if(i >= TotalCount) {    \n        return;\n    }\n\n    float f = (float)i / TotalCount;\n    Point p = (Point)0;\n    if(numStructs>0){\n        p = SourcePoints[(i)%numStructs];\n    }else{\n        p.Position=float3(0,0,0);\n        p.FX1=1.0;\n        p.Rotation=float4(0,0,0,1);\n        p.Color=float4(1,1,1,1);\n        p.Scale=float3(1,1,1);\n        p.FX2=1.0;\n   }\n\n{\n#include \"snippet\"\n}\n\n    ResultPoints[i] = p;\n}\n"
         }
       ],
       "Outputs": []
@@ -327,7 +327,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/images/basic/white.png"
+          "Value": "Lib:images/basic/white.png"
         }
       ],
       "Outputs": []

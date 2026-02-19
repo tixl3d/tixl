@@ -1,0 +1,99 @@
+{
+  "Id": "8a3c9f2e-4b7d-4e1a-9c5f-7d2e8b1a6c3f"/*SpatialAudioPlayer*/,
+  "Inputs": [
+    {
+      "Id": "159c7342-a8c8-4ffb-8a69-da3ffa0d3b71"/*ListenerPosition*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "1800cdcb-8863-423e-a2ec-901cf54e014c"/*StopAudio*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "2aa976e3-a63c-4c7e-80a5-a459b3240388"/*AudioFile*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "3cf1b579-a1f2-4e9f-a54a-0e9e3580a6bf"/*SourceRotation*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "42d8337a-d419-4038-a132-0e3934d25a2a"/*Audio3DMode*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "454a65fa-c0a3-4055-85ec-ac3771b2524c"/*PlayAudio*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "7110399e-fd85-4053-9a49-cc09760dceb6"/*Volume*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "732be517-a58e-4f21-8395-7761a95905ea"/*MinDistance*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "73971807-98d8-4b8b-b90f-41d673398b2b"/*OuterConeAngle*/,
+      "DefaultValue": 180.0
+    },
+    {
+      "Id": "77d9309e-0c9d-407f-b9b1-dd4b734fa51e"/*Visibility*/,
+      "DefaultValue": "On"
+    },
+    {
+      "Id": "785bb240-2020-4937-b132-b46f542e8986"/*InnerConeAngle*/,
+      "DefaultValue": 90.0
+    },
+    {
+      "Id": "7eb612cb-1dbf-4336-b91d-1042573bd7ff"/*MaxDistance*/,
+      "DefaultValue": 10.0
+    },
+    {
+      "Id": "9c0b519b-45b1-4b28-8c0e-2eba7035a999"/*Speed*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "ad8822bc-939b-4152-b253-bf01c5aa4d73"/*Mute*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "b4d639d4-d96b-42e1-a250-efe57d7e9c5e"/*OuterConeVolume*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "b921cbd4-4803-48e8-9eb9-f05901cc5802"/*Seek*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "d0c660d7-f90b-4e61-95ff-0ce7c76d9d67"/*PauseAudio*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "db9a0aa1-95db-4da4-99fc-31c385773ca8"/*ListenerRotation*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "f3730e3b-a335-4a13-9b2a-87b8e75cddeb"/*SourcePosition*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

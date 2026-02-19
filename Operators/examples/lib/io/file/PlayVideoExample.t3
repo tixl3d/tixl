@@ -3,7 +3,7 @@
   "Inputs": [
     {
       "Id": "d4d111e2-01f2-4a71-b2f1-927557a13a6f"/*FolderWithVideos*/,
-      "DefaultValue": "Resources\\common\\test-footage"
+      "DefaultValue": ""
     }
   ],
   "Children": [
@@ -96,13 +96,7 @@
     {
       "Id": "261928a8-b6dc-435e-baf8-4525087821ac"/*PlayVideo*/,
       "SymbolId": "914fb032-d7eb-414b-9e09-2bdd7049e049",
-      "InputValues": [
-        {
-          "Id": "0e255347-08bc-4363-9ffa-ab863a1cea8e"/*Path*/,
-          "Type": "System.String",
-          "Value": "C:\\Users\\pixtur\\Downloads\\insta\\polyhop-moonguidances.mp4"
-        }
-      ],
+      "InputValues": [],
       "Outputs": []
     },
     {
@@ -242,7 +236,7 @@
         {
           "Id": "ca9778e7-072c-4304-9043-eeb2dc4ca5d7"/*Folder*/,
           "Type": "System.String",
-          "Value": "C:\\Users\\pixtur\\Downloads\\insta\\"
+          "Value": "C:/Users/pixtur/Downloads/insta/"
         },
         {
           "Id": "e14a4aae-e253-4d14-80ef-a90271cd306a"/*TriggerUpdate*/,
@@ -354,7 +348,7 @@
         {
           "Id": "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3"/*FontPath*/,
           "Type": "System.String",
-          "Value": "Resources\\fonts\\Roboto-Light.fnt"
+          "Value": "Examples:fonts/Roboto-Light.fnt"
         }
       ],
       "Outputs": []

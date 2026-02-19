@@ -93,7 +93,7 @@
         "Y": 225.0
       },
       "Description": "Defines how much reflections and highlights are blurred.",
-      "Min": -1.0,
+      "Min": 0.0,
       "Max": 1.0,
       "ClampMin": true,
       "ClampMax": true

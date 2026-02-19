@@ -1,0 +1,56 @@
+{
+  "Id": "f7e3c9a4-2b8d-4e6f-a1c5-9d7b3e8f6a2c"/*ConeGizmo*/,
+  "Description": "Generates points for drawing a wireframe audio cone visualization matching BASS/ManagedBass 3D audio cone behavior. BASS cones are simple conical shapes defined by full angles (0-360 degrees). The cone extends from the origin in the -Z direction (forward). Generates line segments for: base circle and radial lines from apex to base. No rounded cap is used as BASS implements a hard cone boundary. Output points can be fed into DrawLines for rendering.",
+  "SymbolTags": "8",
+  "InputUis": [
+    {
+      "InputId": "b9d5f3a7-4c8e-2f1b-9a6d-7e3c5b8f1a4d"/*Angle*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "The full cone angle in degrees (0-360). This is the total spread from edge to edge, not half-angle.",
+      "Min": 0.0,
+      "Max": 360.0
+    },
+    {
+      "InputId": "c1e6a8b4-5d7f-3a9c-8e2b-6f4d1c9a7e5b"/*Length*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      },
+      "Description": "The length of the cone from apex to base.",
+      "Min": 0.0
+    },
+    {
+      "InputId": "e3a8c1d6-7f9b-5c2e-a4b8-8d6f3e1a9c7b"/*Segments*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 90.0
+      },
+      "Description": "Number of segments for the base circle.",
+      "Min": 3,
+      "Max": 64
+    },
+    {
+      "InputId": "a4b5c6d7-8e9f-0a1b-2c3d-4e5f6a7b8c9d"/*RayCount*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 135.0
+      },
+      "Description": "Number of radial ray lines from apex to base (set to 0 for circle only).",
+      "Min": 0,
+      "Max": 32
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "a8c4e2f7-3d9b-4a6e-8c1f-5b7d9e3a2c8f"/*Points*/,
+      "Position": {
+        "X": 200.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

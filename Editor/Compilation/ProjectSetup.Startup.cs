@@ -1,12 +1,15 @@
 #nullable enable
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using T3.Core.Compilation;
 using T3.Core.IO;
 using T3.Core.Model;
 using T3.Core.Resource;
+using T3.Core.Resource.Assets;
 using T3.Core.UserData;
 using T3.Editor.External;
+using T3.Editor.Gui.Interaction.StartupCheck;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
 
@@ -58,6 +61,18 @@ internal static partial class ProjectSetup
         // Load projects
         LoadProjects(csProjFiles, forceRecompile, failedProjects: out _);
 
+        // Phase 1: Initial Startup Migration
+        // This happens only once here and not in subsequent UpdateSymbolPackages calls
+        
+        foreach (var package in ActivePackages)
+        {
+            if (ConformAssetPaths.RenameResourcesToAssets(package))
+            {
+                Log.Debug($"Rescanning {package.Name} assets after migration...");
+                AssetRegistry.RegisterAssetsFromPackage(package);
+            }
+        }
+        
         // Register UI types
         UiRegistration.RegisterUiTypes();
 
@@ -66,13 +81,14 @@ internal static partial class ProjectSetup
         UpdateSymbolPackages(allPackages);
         
         // Initialize resources and shader linting
+        Log.Info("Initializing package resources...");
         foreach (var package in allPackages)
         {
             InitializePackageResources(package);
         }
         
-
-        ShaderLinter.AddPackage(SharedResources.ResourcePackage, ResourceManager.SharedShaderPackages);
+        // FIXME: This needs to be properly handled.
+        //ShaderLinter.AddPackage(SharedResources.ResourcePackage, ResourceManager.SharedShaderPackages);
 
         // Initialize custom UIs
 
@@ -86,7 +102,7 @@ internal static partial class ProjectSetup
 
         #if DEBUG
         totalStopwatch.Stop();
-        Log.Info($"Total load time: {totalStopwatch.ElapsedMilliseconds}ms");
+        Log.Debug($">> Total load time: {totalStopwatch.ElapsedMilliseconds/1000:0.0}s");
         #endif
     }
 
@@ -96,7 +112,7 @@ internal static partial class ProjectSetup
 
         directory
            .EnumerateDirectories("*", SearchOption.TopDirectoryOnly)
-           .Where(folder => !folder.Name.EndsWith(FileLocations.ExportFolderName, StringComparison.OrdinalIgnoreCase)) // ignore "player" project directory
+           .Where(folder => !folder.Name.EndsWith(FileLocations.ExportSubFolder, StringComparison.OrdinalIgnoreCase)) // ignore "player" project directory
            .ToList()
            .ForEach(directoryInfo =>
                     {
@@ -112,6 +128,7 @@ internal static partial class ProjectSetup
     [SuppressMessage("ReSharper", "OutParameterValueIsAlwaysDiscarded.Local")]
     private static void LoadProjects(FileInfo[] csProjFiles, bool forceRecompile, out List<ProjectLoadInfo> failedProjects)
     {
+        Log.Info("Loading projects...");
         // Load each project file and its associated assembly
         var projectResults = csProjFiles
                       .AsParallel()
@@ -191,12 +208,12 @@ internal static partial class ProjectSetup
             var projectSearchDirectories = topDirectories
                                           .Where(Directory.Exists)
                                           .SelectMany(Directory.EnumerateDirectories)
-                                              .Where(dirName => !dirName.Contains(FileLocations.ExportFolderName, StringComparison.OrdinalIgnoreCase));
+                                              .Where(dirName => !dirName.Contains(FileLocations.ExportSubFolder, StringComparison.OrdinalIgnoreCase));
 
             // Add Built-in packages as projects
             if (includeBuiltInAsProjects)
             {
-                projectSearchDirectories = projectSearchDirectories.Concat(Directory.EnumerateDirectories(Path.Combine(T3ParentDirectory, "Operators"))
+                projectSearchDirectories = projectSearchDirectories.Concat(Directory.EnumerateDirectories(Path.Combine(T3ParentDirectory, FileLocations.OperatorsSubFolder))
                                                                                     .Where(path =>
                                                                                            {
                                                                                                var subDir = Path.GetFileName(path);
@@ -210,6 +227,6 @@ internal static partial class ProjectSetup
     }
 
 
-    private static readonly string CoreOperatorDirectory = Path.Combine(FileLocations.StartFolder, "Operators");
+    private static readonly string CoreOperatorDirectory = Path.Combine(FileLocations.StartFolder, FileLocations.OperatorsSubFolder);
     private static readonly string T3ParentDirectory = Path.Combine(FileLocations.StartFolder, "..", "..", "..", "..");
 }

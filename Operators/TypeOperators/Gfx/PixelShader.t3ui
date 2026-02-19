@@ -9,7 +9,7 @@
         "Y": -48.509525
       },
       "Usage": "FilePath",
-      "FileFilter": "Shader files (hlsl)hlsl|*.hlsl;*.fx"
+      "FileFilter": "hlsl, fx"
     },
     {
       "InputId": "501338b3-f432-49a5-bdbd-bcf209671305"/*EntryPoint*/,

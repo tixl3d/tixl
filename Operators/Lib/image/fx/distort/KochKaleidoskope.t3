@@ -59,7 +59,7 @@
         {
           "Id": "16dce9bc-02d9-48f8-b07e-94a9af48d27b"/*Source*/,
           "Type": "System.String",
-          "Value": "Resources\\lib\\img\\fx\\KochKaleidoscope.hlsl"
+          "Value": "Lib:shaders/img/fx/KochKaleidoscope.hlsl"
         },
         {
           "Id": "c10f16e8-9e59-4b83-91b1-c2c7ad37d52a"/*Resolution*/,

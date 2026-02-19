@@ -1,19 +1,18 @@
 ﻿#nullable enable
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using ImGuiNET;
+using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
-using T3.Core.Resource;
+using T3.Core.Resource.Assets;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
-using T3.Editor.Gui.Windows.AssetLib;
 using T3.Editor.UiModel;
+using T3.Editor.UiModel.Helpers;
 using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.Modification;
-using T3.Editor.UiModel.ProjectHandling;
 
 namespace T3.Editor.Gui.MagGraph.Ui;
 
@@ -22,7 +21,7 @@ namespace T3.Editor.Gui.MagGraph.Ui;
 /// </summary>
 internal static class DropHandling
 {
-    internal static void HandleDropping(GraphUiContext context)
+    internal static void HandleDropOnWindow(GraphUiContext context)
     {
         if (!DragAndDropHandling.IsDragging)
             return;
@@ -36,27 +35,20 @@ internal static class DropHandling
         if (HandleDropExternalFile(context))
             return;
 
-        HandleDropFileAsset(context);
+        HandleDropAsset(context);
     }
 
-    private static void HandleDropFileAsset(GraphUiContext context)
+    private static void HandleDropAsset(GraphUiContext context)
     {
-        DragAndDropHandling.TryHandleItemDrop(DragAndDropHandling.DragTypes.FileAsset, out var aliasPath, out var assetResult);
+        var assetResult= DragAndDropHandling.TryHandleDropOnItem(DragAndDropHandling.DragTypes.FileAsset, out var address);
 
-        if ((assetResult != DragAndDropHandling.DragInteractionResult.Hovering
-             && assetResult != DragAndDropHandling.DragInteractionResult.Dropped)
-            || aliasPath == null) return;
+        if (assetResult != DragAndDropHandling.DragInteractionResult.Hovering
+            && assetResult != DragAndDropHandling.DragInteractionResult.Dropped
+            || address == null) return;
 
-        if (!AssetLibrary.GetAssetFromAliasPath(aliasPath, out var asset))
+        if (!AssetRegistry.TryGetAsset(address, out var asset))
         {
-            Log.Warning($"Can't get asset for {aliasPath}");
-            return;
-        }
-
-        var assetType = asset.AssetType;
-        if (assetType == null)
-        {
-            Log.Warning($"{aliasPath} has no asset type");
+            Log.Warning($"Can't get asset for {address}");
             return;
         }
 
@@ -66,15 +58,13 @@ internal static class DropHandling
         }
         else
         {
-            CreateAssetOperator(context, assetType, aliasPath, Vector2.Zero);
+            CreateAssetOperatorOnGraph(context, asset, Vector2.Zero);
         }
     }
 
-
-
     private static bool HandleDropSymbol(GraphUiContext context)
     {
-        DragAndDropHandling.TryHandleItemDrop(DragAndDropHandling.DragTypes.Symbol, out var data, out var result);
+        var result=DragAndDropHandling.TryHandleDropOnItem(DragAndDropHandling.DragTypes.Symbol, out var data);
 
         if (result != DragAndDropHandling.DragInteractionResult.Dropped)
             return false;
@@ -91,9 +81,13 @@ internal static class DropHandling
 
     private static bool HandleDropExternalFile(GraphUiContext context)
     {
-        DragAndDropHandling.TryHandleItemDrop(DragAndDropHandling.DragTypes.ExternalFile, out var data, out var result);
+        SymbolPackage? package = context.CompositionInstance.Symbol.SymbolPackage;
+        if (package == null)
+            return false;
 
-        var packageResourcesFolder = ProjectView.Focused?.OpenedProject.Package.ResourcesFolder;
+        var result=DragAndDropHandling.TryHandleDropOnItem(DragAndDropHandling.DragTypes.ExternalFile, out var data);
+
+        var packageResourcesFolder = package.AssetsFolder;
 
         if (result == DragAndDropHandling.DragInteractionResult.Hovering)
         {
@@ -112,97 +106,32 @@ internal static class DropHandling
             return true;
         }
 
-        if (result == DragAndDropHandling.DragInteractionResult.Dropped
-            && data != null
-            && packageResourcesFolder != null)
+        if (result != DragAndDropHandling.DragInteractionResult.Dropped
+            || data == null)
+            return false;
+
+        var filePaths = data.Split("|");
+
+        var dropOffset = Vector2.Zero;
+
+        foreach (var filepath in filePaths)
         {
-            var filePaths = data.Split("|");
-            var fileCount = filePaths.Length;
+            if (!FileImport.TryImportDroppedFile(filepath, package,null, out var asset))
+                continue;
 
-            var dropOffset = Vector2.Zero;
-            
-            foreach (var filepath in filePaths)
-            {
-                if (!Path.Exists(filepath))
-                    continue;
+            if (!CreateAssetOperatorOnGraph(context, asset, dropOffset))
+                return false;
 
-                var fileName = Path.GetFileName(filepath);
-                var destFilepath = Path.Combine(packageResourcesFolder, fileName);
-
-                // 
-                if (!File.Exists(destFilepath))
-                {
-                    // Copy to project first...
-                    //var fileName = Path.GetFileName(filepath);
-                    //var destFileName = Path.Combine(packageResourcesFolder, fileName);
-                    try
-                    {
-                        File.Copy(filepath, destFilepath);
-                    }
-                    catch (Exception e)
-                    {
-                        Log.Warning($"Failed to copy to {destFilepath}");
-                        continue;
-                    }
-
-                    Log.Debug($"Copied {fileName} to {packageResourcesFolder}");
-
-
-                }
-                else
-                {
-                    Log.Debug("Already project asset: " + filepath);
-
-                    // var composition = context.CompositionInstance;
-                    // if (!ResourceManager.TryConstructAssetAddress(filepath, composition, out var address))
-                    // {
-                    //     Log.Warning($"Can't address for {filepath}");
-                    //     return false;
-                    // }
-                    //
-                    // //ResourceManager.TryResolveRelativePath(destFilepath, ProjectView.Focused!.CompositionInstance, out var absolutePath, out _);
-                    //
-                    // if (!AssetLibrary.GetAssetFromAliasPath(address, out var asset))
-                    // {
-                    //     Log.Warning($"Can't get asset for {address}");
-                    //     return false;
-                    // }
-                    //
-                    // if (asset.AssetType == null)
-                    // {
-                    //     Log.Warning($"{filepath} has no asset type");
-                    //     return true;
-                    // }
-                    //
-                    // Log.Debug("! Would create op " + asset);
-                    // return true;
-                }
-                
-                if (!AssetTypeRegistry.TryGetFromFilePath(destFilepath, out var assetType))
-                {
-                    Log.Warning("Can't find this asset type.");
-                    continue;
-                }
-
-                if (!ResourceManager.TryConstructAssetAddress(destFilepath, context.CompositionInstance, out var uri))
-                {
-                    Log.Warning($"Can't construct uri for {destFilepath}");
-                    continue;
-                }
-
-                if (!CreateAssetOperator(context, assetType, uri, dropOffset))
-                    continue;
-                    
-                dropOffset += new Vector2(20, 100);                
-            }
+            dropOffset += new Vector2(20, 100);
         }
+
         return false;
     }
 
-    private static void DrawDropPreviewItem(AssetItem asset)
+    private static void DrawDropPreviewItem(Asset asset)
     {
-        if (asset.AssetType == null)
-            return;
+        // if (asset.AssetType == null)
+        //     return;
 
         if (asset.AssetType.PrimaryOperators.Count == 0)
             return;
@@ -221,37 +150,51 @@ internal static class DropHandling
         dl.AddRectFilled(pos, pos + MagGraphItem.GridSize, color, 4);
     }
 
-        
-    private static bool CreateAssetOperator(GraphUiContext context, AssetTypeRegistry.AssetType assetType, string aliasPath, Vector2 dropOffset)
+    private static bool CreateAssetOperatorOnGraph(GraphUiContext context,
+                                                   Asset asset,
+                                                   Vector2 dropOffset)
     {
-        if (assetType.PrimaryOperators.Count == 0)
+        if (asset.AssetType.PrimaryOperators.Count == 0)
         {
-            Log.Warning($"{aliasPath} of type {assetType} has no matching operator symbols");
+            Log.Warning($"{asset.Address} of type {asset.AssetType} has no matching operator symbols");
             return false;
         }
 
-        if (!TryCreateSymbolInstanceOnGraph(context, assetType.PrimaryOperators[0], dropOffset,  out var newInstance))
+        if (!TryCreateSymbolInstanceOnGraph(context, asset.AssetType.PrimaryOperators[0], dropOffset, out var newInstance))
         {
             Log.Warning("Failed to create operator instance");
             return false;
         }
 
-        if (!AssetLibrary.TryGetFileInputFromInstance(newInstance, out var stringInput, out _))
+        if (!SymbolAnalysis.TryGetFileInputFromInstance(newInstance, out var stringInput, out _))
         {
             Log.Warning("Failed to get file path parameter from op");
             return false;
         }
 
-        Log.Debug($"Created {newInstance} with {aliasPath}", newInstance);
+        Log.Debug($"Created {newInstance} with {asset.Address}", newInstance);
 
-        stringInput.TypedInputValue.Assign(new InputValue<string>(aliasPath));
+        stringInput.TypedInputValue.Assign(new InputValue<string>(asset.Address));
         stringInput.DirtyFlag.ForceInvalidate();
         stringInput.Parent.Parent?.Symbol.InvalidateInputInAllChildInstances(stringInput);
         stringInput.Input.IsDefault = false;
+
+        var parent = stringInput.Parent.Parent;
+        if (parent == null)
+            return false;
+        
+        AssetRegistry.AddAssetReference(asset,
+                                        symbolId: parent.Symbol.Id,
+                                        stringInput.Parent.SymbolChildId,
+                                        stringInput.Id);
+
         return true;
-    }    
-    
-    private static bool TryCreateSymbolInstanceOnGraph(GraphUiContext context, Guid guid, Vector2 offsetInScreen, [NotNullWhen(true)] out Instance? newInstance)
+    }
+
+    private static bool TryCreateSymbolInstanceOnGraph(GraphUiContext context,
+                                                       Guid guid,
+                                                       Vector2 offsetInScreen,
+                                                       [NotNullWhen(true)] out Instance? newInstance)
     {
         newInstance = null;
         if (SymbolUiRegistry.TryGetSymbolUi(guid, out var symbolUi))
@@ -274,6 +217,4 @@ internal static class DropHandling
         Log.Warning($"Symbol {guid} not found in registry");
         return false;
     }
-    
-
 }

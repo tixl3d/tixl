@@ -47,7 +47,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources/images/basic/perlin-noise.jpg"
+          "Value": "Lib:images/basic/perlin-noise.jpg"
         }
       ],
       "Outputs": []
@@ -423,7 +423,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\user\\wake\\proj-mary\\geometry\\mary_30k.obj"
+          "Value": "Examples:user/wake/proj-mary/geometry/mary_30k.obj"
         }
       ],
       "Outputs": []
@@ -1906,7 +1906,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\common\\meshes\\plane.obj"
+          "Value": "Examples:meshes/primitives/plane.obj"
         }
       ],
       "Outputs": []
@@ -1992,7 +1992,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "/t3/meshes/cylinder.obj"
+          "Value": "Examples:meshes/primitives/cylinder.obj"
         }
       ],
       "Outputs": []
@@ -2540,7 +2540,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\common\\meshes\\cube-bevelled.obj"
+          "Value": "Examples:meshes/primitives/cube-bevelled.obj"
         }
       ],
       "Outputs": []
@@ -2800,7 +2800,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\common\\meshes\\marblePlayer.png"
+          "Value": "Examples:meshes/marblePlayer.png"
         }
       ],
       "Outputs": []
@@ -2844,7 +2844,7 @@
         {
           "Id": "ca9778e7-072c-4304-9043-eeb2dc4ca5d7"/*Folder*/,
           "Type": "System.String",
-          "Value": "C:/Users/pixtur/Desktop/reference-footage/TagHeuer/jpg-high-quality"
+          "Value": ""
         },
         {
           "Id": "e14a4aae-e253-4d14-80ef-a90271cd306a"/*TriggerUpdate*/,

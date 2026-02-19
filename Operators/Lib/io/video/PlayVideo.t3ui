@@ -11,7 +11,7 @@
       },
       "Description": "Path to the videofile",
       "Usage": "FilePath",
-      "FileFilter": "All Files|*.*|Video files (mp4,webm,mpeg,m4v,mkv)|*.mp4;*.webm;*.mpeg;*.m4v;*.mkv"
+      "FileFilter": "mp4, webm, mpeg, m4v, mkv"
     },
     {
       "InputId": "21b5671b-862f-4cea-a355-fa019996c936"/*Loop*/,

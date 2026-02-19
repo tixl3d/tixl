@@ -43,8 +43,7 @@
         "X": 51.512096,
         "Y": 46.995968
       },
-      "Usage": "FilePath",
-      "FileFilter": "All Files|*.*|Audio files (mp3,wav,ogg)|*.mp3;*.wav;*.ogg"
+      "Usage": "FilePath"
     }
   ],
   "SymbolChildUis": [],

@@ -176,7 +176,7 @@
         {
           "Id": "ca9778e7-072c-4304-9043-eeb2dc4ca5d7"/*Folder*/,
           "Type": "System.String",
-          "Value": "Resources\\user\\still\\proj-fc2\\images\\slices2"
+          "Value": "Examples:user/still/proj-fc2/images/slices2/"
         }
       ],
       "Outputs": []

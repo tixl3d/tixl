@@ -108,7 +108,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\common\\test-footage\\reprojection-test_displays.obj"
+          "Value": "Examples:test-footage/obj/reprojection-test_displays.obj"
         }
       ],
       "Outputs": []
@@ -338,7 +338,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\common\\test-footage\\reprojection-test.obj"
+          "Value": "Examples:test-footage/obj/reprojection-test.obj"
         }
       ],
       "Outputs": []

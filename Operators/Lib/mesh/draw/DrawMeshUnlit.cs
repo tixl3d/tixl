@@ -16,6 +16,9 @@ internal sealed class DrawMeshUnlit : Instance<DrawMeshUnlit>
 
     [Input(Guid = "922cf855-2676-4a96-9d90-622791a6a423", MappedType = typeof(SharedEnums.BlendModes))]
     public readonly InputSlot<int> BlendMode = new();
+    
+    [Input(Guid = "126F1902-147B-4276-8C13-550976E78973", MappedType = typeof(FillMode))]
+    public readonly InputSlot<int> FillMode = new InputSlot<int>();
 
     [Input(Guid = "8d223463-edff-45fb-9ead-6650a911cebd")]
     public readonly InputSlot<CullMode> Culling = new();

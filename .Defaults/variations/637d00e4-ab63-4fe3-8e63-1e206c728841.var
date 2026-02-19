@@ -7,8 +7,8 @@
       "ActivationIndex": 3,
       "Title": "untitled",
       "PosOnCanvas": {
-        "X": 0.0,
-        "Y": 93.0
+        "X": -6.393753,
+        "Y": -30.848526
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -25,8 +25,8 @@
       "ActivationIndex": 4,
       "Title": "SinBlobs",
       "PosOnCanvas": {
-        "X": 0.0,
-        "Y": 186.0
+        "X": -6.393799,
+        "Y": 91.702034
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -48,8 +48,8 @@
       "ActivationIndex": 5,
       "Title": "SineBlobs/Stretchy",
       "PosOnCanvas": {
-        "X": 163.00005,
-        "Y": 186.0
+        "X": 156.60625,
+        "Y": 91.702034
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -71,8 +71,8 @@
       "ActivationIndex": 5,
       "Title": "BrokenCave",
       "PosOnCanvas": {
-        "X": 163.0,
-        "Y": 93.0
+        "X": 156.60625,
+        "Y": -30.848526
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -89,8 +89,8 @@
       "ActivationIndex": 6,
       "Title": "SphereCave",
       "PosOnCanvas": {
-        "X": 0.0,
-        "Y": 279.0
+        "X": -6.393799,
+        "Y": 214.2526
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -107,8 +107,8 @@
       "ActivationIndex": 7,
       "Title": "SphereCave Broken",
       "PosOnCanvas": {
-        "X": 163.00005,
-        "Y": 279.0
+        "X": 156.60625,
+        "Y": 214.2526
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -125,8 +125,8 @@
       "ActivationIndex": 8,
       "Title": "BoxFold",
       "PosOnCanvas": {
-        "X": 0.0,
-        "Y": 372.0
+        "X": -6.393753,
+        "Y": 336.80316
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -143,8 +143,8 @@
       "ActivationIndex": 9,
       "Title": "BoxFold / 2",
       "PosOnCanvas": {
-        "X": 163.0,
-        "Y": 372.0
+        "X": 156.60625,
+        "Y": 336.80316
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -161,8 +161,8 @@
       "ActivationIndex": 10,
       "Title": "SpiderCave1",
       "PosOnCanvas": {
-        "X": 0.0,
-        "Y": 465.0
+        "X": -6.393753,
+        "Y": 459.35373
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -179,8 +179,8 @@
       "ActivationIndex": 11,
       "Title": "SpiderCave / HexField",
       "PosOnCanvas": {
-        "X": 163.0,
-        "Y": 465.0
+        "X": 156.60625,
+        "Y": 459.35373
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -197,8 +197,8 @@
       "ActivationIndex": 11,
       "Title": "WireCube",
       "PosOnCanvas": {
-        "X": 0.0,
-        "Y": 558.0
+        "X": -6.393749,
+        "Y": 581.9043
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -215,8 +215,8 @@
       "ActivationIndex": 13,
       "Title": "WireCube / Balls",
       "PosOnCanvas": {
-        "X": 163.0,
-        "Y": 558.0
+        "X": 156.60625,
+        "Y": 581.9043
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -233,8 +233,8 @@
       "ActivationIndex": 13,
       "Title": "Pyramid",
       "PosOnCanvas": {
-        "X": 326.0,
-        "Y": 558.0
+        "X": 319.60623,
+        "Y": 581.9043
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -257,8 +257,8 @@
       "ActivationIndex": 14,
       "Title": "PipeMaze",
       "PosOnCanvas": {
-        "X": 0.0,
-        "Y": 651.0
+        "X": -6.393749,
+        "Y": 704.45483
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -278,8 +278,8 @@
       "ActivationIndex": 15,
       "Title": "PipeMaze2",
       "PosOnCanvas": {
-        "X": 163.0,
-        "Y": 651.0
+        "X": 156.60625,
+        "Y": 704.45483
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -301,8 +301,8 @@
       "ActivationIndex": 16,
       "Title": "BrokenFill",
       "PosOnCanvas": {
-        "X": 0.0,
-        "Y": 744.0
+        "X": -6.393749,
+        "Y": 827.0054
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -325,8 +325,8 @@
       "ActivationIndex": 17,
       "Title": "DiamondPearls",
       "PosOnCanvas": {
-        "X": 0.0,
-        "Y": 837.0
+        "X": -6.393749,
+        "Y": 949.5559
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -347,8 +347,8 @@
       "ActivationIndex": 18,
       "Title": "DiamondHive/Caves",
       "PosOnCanvas": {
-        "X": 163.0,
-        "Y": 837.0
+        "X": 156.60625,
+        "Y": 949.5559
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -370,8 +370,8 @@
       "ActivationIndex": 19,
       "Title": "HoleGrid2",
       "PosOnCanvas": {
-        "X": 0.0,
-        "Y": 930.0
+        "X": -6.393749,
+        "Y": 1072.1064
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -389,8 +389,8 @@
       "ActivationIndex": 20,
       "Title": "Lump Of stuff",
       "PosOnCanvas": {
-        "X": 163.0,
-        "Y": 930.0
+        "X": 156.60626,
+        "Y": 1072.1064
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -413,8 +413,8 @@
       "ActivationIndex": 21,
       "Title": "TetraederSprouts",
       "PosOnCanvas": {
-        "X": 326.0,
-        "Y": 930.0
+        "X": 319.6063,
+        "Y": 1072.1064
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -437,8 +437,8 @@
       "ActivationIndex": 22,
       "Title": "City Fractor",
       "PosOnCanvas": {
-        "X": 0.0,
-        "Y": 1023.0
+        "X": -6.393749,
+        "Y": 1194.6567
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {

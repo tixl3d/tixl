@@ -1,0 +1,558 @@
+{
+  "Id": "b5720b2d-262e-4fd5-ae90-06114b092338"/*AudioPlaybackExample*/,
+  "Description": "",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0738d904-a3ef-4337-9bd8-b40f16b61297"/*LinearSamplePointAttributes*/,
+      "Position": {
+        "X": 1279.0597,
+        "Y": 1775.633
+      }
+    },
+    {
+      "ChildId": "073ab06f-2b6f-414d-9eae-7cf54fa510fb"/*SequenceAnim*/,
+      "Position": {
+        "X": 1116.2858,
+        "Y": 1208.9818
+      }
+    },
+    {
+      "ChildId": "0859b576-1cd6-4e45-abd9-047e54d8a397"/*Transform*/,
+      "Position": {
+        "X": 1279.0597,
+        "Y": 1880.6335
+      }
+    },
+    {
+      "ChildId": "08b108bb-7ef9-47b2-9092-f50242d2797b"/*SequenceAnim*/,
+      "Position": {
+        "X": 1118.2426,
+        "Y": 1017.81384
+      }
+    },
+    {
+      "ChildId": "09c61105-619e-4877-a21d-92b132176247"/*AudioToneGenerator*/,
+      "Position": {
+        "X": 1276.0958,
+        "Y": 1336.6272
+      }
+    },
+    {
+      "ChildId": "117a97cb-9b8a-432b-879d-5957c4749ec6"/*LinePoints*/,
+      "Position": {
+        "X": 1279.0597,
+        "Y": 1740.633
+      }
+    },
+    {
+      "ChildId": "1732c27d-296c-4653-aa4c-36330437fd16"/*SpatialAudioPlayer*/,
+      "Position": {
+        "X": 1695.2926,
+        "Y": 1023.38495
+      }
+    },
+    {
+      "ChildId": "27374ba9-2136-4833-8c52-a24a27068def"/*AudioPlayer*/,
+      "Position": {
+        "X": 1276.0958,
+        "Y": 1035.7267
+      }
+    },
+    {
+      "ChildId": "29bc78cd-4353-4fa4-a7b9-33a6e1cfc7c1"/*AudioReaction*/,
+      "Position": {
+        "X": 1116.3788,
+        "Y": 1552.3403
+      }
+    },
+    {
+      "ChildId": "2e0136cb-9711-4396-a981-0ead0dd34c95"/*AnimVec3*/,
+      "Position": {
+        "X": 1555.2931,
+        "Y": 1242.5898
+      }
+    },
+    {
+      "ChildId": "346e8664-9743-484b-8235-4693f8816914"/*Color*/,
+      "Position": {
+        "X": 1718.8091,
+        "Y": 1504.1638
+      }
+    },
+    {
+      "ChildId": "37a72d8b-858e-4d34-9dec-c5f2113622f1"/*Vector4Components*/,
+      "Position": {
+        "X": 1718.8091,
+        "Y": 1539.165
+      }
+    },
+    {
+      "ChildId": "38cfd7ee-c04a-4ee3-8347-bb5853517b4b"/*DrawLines*/,
+      "Position": {
+        "X": 1279.0597,
+        "Y": 1845.633
+      }
+    },
+    {
+      "ChildId": "39e5752c-f15b-409c-b6bd-88ce060c2f5b"/*RenderTarget*/,
+      "Position": {
+        "X": 2341.35,
+        "Y": 1877.1547
+      }
+    },
+    {
+      "ChildId": "3dcaf37b-c4d8-47f1-b708-05df1abc01d0"/*ValuesToTexture*/,
+      "Position": {
+        "X": 1116.3788,
+        "Y": 1996.7147
+      }
+    },
+    {
+      "ChildId": "419ae44b-ca9e-44d9-9248-2d1ccc5061ce"/*SequenceAnim*/,
+      "Position": {
+        "X": 1543.5189,
+        "Y": 1165.1313
+      }
+    },
+    {
+      "ChildId": "479c3b75-c5da-49e6-b7ad-6ebad39f50d8"/*SpatialAudioPlayerGizmo*/,
+      "Position": {
+        "X": 751.1461,
+        "Y": 1962.0068
+      }
+    },
+    {
+      "ChildId": "47df1ca4-012e-4866-8cdd-18660bfed7e7"/*PickFloatFromList*/,
+      "Position": {
+        "X": 996.0957,
+        "Y": 1371.6272
+      }
+    },
+    {
+      "ChildId": "49dd707e-61e9-4e41-8e1c-3f3354eebfaa"/*Transform*/,
+      "Position": {
+        "X": 2061.35,
+        "Y": 1982.1547
+      }
+    },
+    {
+      "ChildId": "4b2b63df-b01d-41cf-aeae-e87d77341c9c"/*SequenceAnim*/,
+      "Position": {
+        "X": 839.9103,
+        "Y": 1359.1003
+      }
+    },
+    {
+      "ChildId": "5087c3ba-17d3-44b1-b72e-2e967bade57a"/*PlaybackFFT*/,
+      "Position": {
+        "X": 1116.3788,
+        "Y": 1961.7148
+      }
+    },
+    {
+      "ChildId": "51bb0390-a670-47c8-9ddf-98b81170a63a"/*LinePoints*/,
+      "Position": {
+        "X": 1279.0597,
+        "Y": 1929.5898
+      }
+    },
+    {
+      "ChildId": "54241077-2833-41c8-81df-f86ac1cd3824"/*DrawSpatialAudioGizmos*/,
+      "Position": {
+        "X": 1695.2926,
+        "Y": 1295.0176
+      }
+    },
+    {
+      "ChildId": "59bb6354-ea28-4f23-b53c-d7d52f640181"/*AnimVec3*/,
+      "Position": {
+        "X": 1555.2924,
+        "Y": 1093.385
+      }
+    },
+    {
+      "ChildId": "5b04c564-2ba6-4a1a-9baf-341db6587cf6"/*FloatToInt*/,
+      "Position": {
+        "X": 856.0957,
+        "Y": 1406.6272
+      }
+    },
+    {
+      "ChildId": "5db4da1e-801f-42e6-85b7-28e71b3a59c0"/*AudioPlayer*/,
+      "Position": {
+        "X": 1276.0958,
+        "Y": 1220.969
+      }
+    },
+    {
+      "ChildId": "63957b0f-6b8a-4b88-bcb5-4248c8b2361e"/*Execute*/,
+      "Position": {
+        "X": 1869.8389,
+        "Y": 1103.4082
+      }
+    },
+    {
+      "ChildId": "64efc84a-0466-4fbc-9a1b-69c77a35e697"/*AudioWaveform*/,
+      "Position": {
+        "X": 1116.3788,
+        "Y": 1773.7346
+      }
+    },
+    {
+      "ChildId": "68830765-f0a5-4781-a6f0-73f5facec7bc"/*LinePoints*/,
+      "Position": {
+        "X": 1279.0597,
+        "Y": 1553.6255
+      }
+    },
+    {
+      "ChildId": "6ad81329-dd42-4e4d-b4e7-c0198e129552"/*Transform*/,
+      "Position": {
+        "X": 1279.0597,
+        "Y": 1693.6255
+      }
+    },
+    {
+      "ChildId": "6baf9beb-c070-41ea-bdc3-943552e27416"/*DrawLines*/,
+      "Position": {
+        "X": 1279.0597,
+        "Y": 2034.5894
+      }
+    },
+    {
+      "ChildId": "6f2d5ad4-80ed-43ef-a5db-b41513d8f044"/*ConeGizmo*/,
+      "Position": {
+        "X": 751.1461,
+        "Y": 2013.5731
+      }
+    },
+    {
+      "ChildId": "7020855f-0f97-4325-83af-50a39cfea7cf"/*AdsrEnvelope*/,
+      "Position": {
+        "X": 1699.4122,
+        "Y": 1653.2052
+      }
+    },
+    {
+      "ChildId": "740788a2-ed22-44b5-8c24-8df5a70e0cec"/*Vector4*/,
+      "Position": {
+        "X": 1858.8088,
+        "Y": 1539.165
+      }
+    },
+    {
+      "ChildId": "7f3191e8-8c6b-4fd2-88d4-cc7bf44e7ab3"/*DrawLines*/,
+      "Position": {
+        "X": 1279.0597,
+        "Y": 1658.625
+      }
+    },
+    {
+      "ChildId": "821f09f0-08d9-4c40-aa39-921228aa3231"/*Damp*/,
+      "Position": {
+        "X": 1136.0958,
+        "Y": 1371.6272
+      }
+    },
+    {
+      "ChildId": "838d3e08-f5f6-4706-a7b3-57056af98c50"/*Camera*/,
+      "Position": {
+        "X": 2264.4958,
+        "Y": 1703.0195
+      }
+    },
+    {
+      "ChildId": "9a384a77-89fc-4dfd-b097-e110f35a00ea"/*SpatialAudioPlayer*/,
+      "Position": {
+        "X": 1695.2925,
+        "Y": 1172.5901
+      }
+    },
+    {
+      "ChildId": "9ac02b48-f504-4851-a3a4-70f0caca4c28"/*BoolToFloat*/,
+      "Position": {
+        "X": 1839.4122,
+        "Y": 1688.2052
+      }
+    },
+    {
+      "ChildId": "9c770b7d-356d-499a-9f0a-bca3f40a0776"/*AudioPlayer*/,
+      "Position": {
+        "X": 1276.0958,
+        "Y": 1146.4683
+      }
+    },
+    {
+      "ChildId": "a551dbde-1567-4cb4-80c5-90cbd167c23a"/*DrawScreenQuad*/,
+      "Position": {
+        "X": 1998.8081,
+        "Y": 1504.1638
+      }
+    },
+    {
+      "ChildId": "a665cd15-3fc1-4839-ad1b-0b04d1298858"/*ValuesToTexture*/,
+      "Position": {
+        "X": 1116.3788,
+        "Y": 1808.7346
+      }
+    },
+    {
+      "ChildId": "ad8b2f6e-3bf7-4110-b3dd-fbc6e7393337"/*SequenceAnim*/,
+      "Position": {
+        "X": 1539.7299,
+        "Y": 1618.2865
+      }
+    },
+    {
+      "ChildId": "b64f0a0b-6d75-4ccc-8c77-ec5d0f17b913"/*SequenceAnim*/,
+      "Position": {
+        "X": 1118.2424,
+        "Y": 1292.4534
+      }
+    },
+    {
+      "ChildId": "bc51a428-091d-4c1d-a2e7-b4318fe784d6"/*ValuesToTexture*/,
+      "Position": {
+        "X": 1116.3788,
+        "Y": 1622.3403
+      }
+    },
+    {
+      "ChildId": "bc88cea6-066e-4086-80ba-ec90a2cb642f"/*SequenceAnim*/,
+      "Position": {
+        "X": 1543.519,
+        "Y": 1011.3591
+      }
+    },
+    {
+      "ChildId": "c24d4cb7-7358-40df-9752-b67fd68b8171"/*Group*/,
+      "Position": {
+        "X": 2201.35,
+        "Y": 1877.1547
+      }
+    },
+    {
+      "ChildId": "c2de6747-6f9a-40c5-a055-a1a6ecb63254"/*Visuals*/,
+      "Position": {
+        "X": 1539.7299,
+        "Y": 1986.9615
+      }
+    },
+    {
+      "ChildId": "c3e5df07-2842-43d4-904d-0d9275ede83d"/*PlotValueCurve*/,
+      "Position": {
+        "X": 1539.7299,
+        "Y": 1916.9622
+      }
+    },
+    {
+      "ChildId": "cd961a19-0025-44c1-98f5-9ee203c30177"/*KeepFloatValues*/,
+      "Position": {
+        "X": 1116.3788,
+        "Y": 1587.3403
+      }
+    },
+    {
+      "ChildId": "ce5c1cec-f682-4b0e-ad96-b54cc1c1ff59"/*SequenceAnim*/,
+      "Position": {
+        "X": 1118.2426,
+        "Y": 1128.3611
+      }
+    },
+    {
+      "ChildId": "ce852ea5-418b-4f2a-86ab-52a225c0e480"/*Transform*/,
+      "Position": {
+        "X": 1279.0597,
+        "Y": 2069.5903
+      }
+    },
+    {
+      "ChildId": "d4c542e3-c1a3-482f-aac8-6d0b0df37db6"/*Execute*/,
+      "Position": {
+        "X": 1539.7299,
+        "Y": 1747.9059
+      }
+    },
+    {
+      "ChildId": "d623f5b2-8df6-4a05-aae1-9e1e651008d8"/*LinearSamplePointAttributes*/,
+      "Position": {
+        "X": 1279.0597,
+        "Y": 1588.6255
+      }
+    },
+    {
+      "ChildId": "efa302c9-f0c2-43c9-abe1-d9e3606efa02"/*LinearSamplePointAttributes*/,
+      "Position": {
+        "X": 1279.0597,
+        "Y": 1964.5897
+      }
+    },
+    {
+      "ChildId": "f7cc7951-60ab-4a71-aa7b-6094483d7e45"/*Transform*/,
+      "Position": {
+        "X": 1539.7299,
+        "Y": 1951.9622
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "1cbd8587-3974-4984-8dfb-d6d39310c604"/*Texture2D*/,
+      "Position": {
+        "X": 2519.6123,
+        "Y": 1878.596
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "041a6c81-da85-483e-9f2d-0ad73e3a9cc9",
+      "Title": "New Gizmos have been created to help with the\nvisualization of the 3d sound",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 660.3224,
+        "Y": 1881.6978
+      },
+      "Size": {
+        "X": 371.02576,
+        "Y": 240.04028
+      }
+    },
+    {
+      "Id": "07d4ade6-c122-4d42-9404-b37fa2685d76",
+      "Title": "This is NOT the intended function of the Audio Engine. But its fun!",
+      "Label": "Simple Sequencer",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 790.0948,
+        "Y": 872.60803
+      },
+      "Size": {
+        "X": 648.44904,
+        "Y": 590.5559
+      }
+    },
+    {
+      "Id": "0e403d24-923c-4b02-b36f-88f6fcbbf782",
+      "Title": "[AudioPlayer] is a fully featured audio player.",
+      "Label": "Overview",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 660.3224,
+        "Y": 1486.282
+      },
+      "Size": {
+        "X": 371.0257,
+        "Y": 134.13239
+      }
+    },
+    {
+      "Id": "1ddc25b2-2224-42b1-8c9a-f0fd196fe972",
+      "Title": "The ADSR Envelope operator is a frame-based version of the envelope\nfrom the AudioPLayer and AudioToneGenerator\n\nIt will cause stepping on audio operators, but perfect for video!",
+      "Label": "ADSR Envelope",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1530.2637,
+        "Y": 1372.3608
+      },
+      "Size": {
+        "X": 621.2645,
+        "Y": 360.19934
+      }
+    },
+    {
+      "Id": "97a8cc4d-d5af-411b-bc50-176fc4f8a8be",
+      "Title": "[AudioToneGenerator] was created for testing and\ndebugging but it can be used in many other ways. ",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 660.3224,
+        "Y": 1756.5525
+      },
+      "Size": {
+        "X": 371.0257,
+        "Y": 125.14526
+      }
+    },
+    {
+      "Id": "bd18fc69-48d9-41bb-8cf1-1e4250d89800",
+      "Title": "Spatial audio is a hardware accelered 3d audio source\n\nThis does not go through the operator mixer, so it can not\nbe monitored by the mixers",
+      "Label": "Spatial Audio Example",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1530.2637,
+        "Y": 872.60803
+      },
+      "Size": {
+        "X": 489.66833,
+        "Y": 459.1582
+      }
+    },
+    {
+      "Id": "d4937a55-6592-41ac-970c-13ff0c74ff66",
+      "Label": "Visualizations",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 1071.7906,
+        "Y": 1486.282
+      },
+      "Size": {
+        "X": 366.75317,
+        "Y": 635.45605
+      }
+    },
+    {
+      "Id": "fec0ae18-fde0-4d2b-bb6f-262b39dc7067",
+      "Title": "[SpatialAudioPlayer] converts samples to Mono to\nenable hardware accelerated spatial/3D audio\npositioning and effects,  (including dopplar!)",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 660.3224,
+        "Y": 1620.4143
+      },
+      "Size": {
+        "X": 371.0257,
+        "Y": 136.13824
+      }
+    }
+  ]
+}

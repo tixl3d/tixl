@@ -20,8 +20,64 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
         _midiInputConnection = midiIn;
         MidiOutConnection = midiOut;
         
+        // Store the device name for control mode management
+        var deviceInfo = MidiConnectionManager.GetDescriptionForMidiIn(midiIn);
+        _deviceProductName = deviceInfo.ProductName;
+        
         MidiConnectionManager.RegisterConsumer(this);
     }
+
+    /// <summary>
+    /// Sets whether this device should be in control mode (blocking passthrough) or passthrough mode.
+    /// In control mode: MIDI messages are consumed by the compatible device and not passed to graph operators.
+    /// In passthrough mode: MIDI messages are passed through to graph operators, editor controls are disabled.
+    /// </summary>
+    protected void SetControlMode(bool controlMode)
+    {
+        var wasInControlMode = IsInControlMode;
+        IsInControlMode = controlMode;
+        
+        if (!string.IsNullOrEmpty(_deviceProductName))
+        {
+            MidiConnectionManager.SetDeviceControlMode(_deviceProductName, controlMode);
+        }
+        
+        // Notify derived classes when mode changes
+        if (wasInControlMode != controlMode)
+        {
+            OnControlModeChanged(controlMode);
+        }
+    }
+
+    /// <summary>
+    /// Called when control mode changes. Override to reset LEDs or reinitialize device.
+    /// </summary>
+    protected virtual void OnControlModeChanged(bool isNowInControlMode)
+    {
+        if (!isNowInControlMode)
+        {
+            // Switching to passthrough mode - clear all cached LED colors so they get reset
+            ClearLedCache();
+        }
+    }
+
+    /// <summary>
+    /// Clears the cached LED colors. Called when switching to passthrough mode.
+    /// </summary>
+    private static void ClearLedCache()
+    {
+        for (var i = 0; i < CacheControllerColors.Length; i++)
+        {
+            CacheControllerColors[i] = -1;
+        }
+    }
+
+    /// <summary>
+    /// Gets whether this device is in control mode (blocking passthrough).
+    /// </summary>
+    protected bool IsInControlMode { get; private set; } = true;
+
+    private string _deviceProductName;
 
     /// <summary>
     /// Depending on various hotkeys a device can be in different input modes.
@@ -40,10 +96,25 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
     protected InputModes ActiveMode = InputModes.Default;
 
     protected abstract void UpdateVariationVisualization();
+    
+    /// <summary>
+    /// Called when in passthrough mode to clear/reset device LEDs.
+    /// Override in derived classes to send device-specific reset commands.
+    /// </summary>
+    protected virtual void ClearDeviceLeds() { }
 
     public void Update()
     {
-        UpdateVariationVisualization();
+        if (IsInControlMode)
+        {
+            // Control mode: normal operation - update LEDs and process all signals
+            UpdateVariationVisualization();
+        }
+        else
+        {
+            // Passthrough mode: clear LEDs and only process mode-switching signals
+            ClearDeviceLeds();
+        }
         
         CombineButtonSignals();
         ProcessLastSignals();
@@ -54,8 +125,7 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
     {
         if (!_hasNewMessages)
             return;
-
-        // Handle sliders and knobs...
+        
         ControlChangeSignal[] controlChangeSignals;
         lock (_controlSignalsSinceLastUpdate)
         {
@@ -63,7 +133,8 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
             _controlSignalsSinceLastUpdate.Clear();
         }
 
-        if (controlChangeSignals.Length != 0)
+        // Only process control changes in control mode
+        if (IsInControlMode && controlChangeSignals.Length != 0)
         {
             foreach (var ctc in CommandTriggerCombinations)
             {
@@ -75,9 +146,11 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
         if (_combinedButtonSignals.Count == 0)
             return;
 
+        // Log.Debug($"Processing {_combinedButtonSignals.Count} button signal(s), ActiveMode={ActiveMode}, ControlMode={_isInControlMode}");
+        
         var releasedMode = InputModes.None;
 
-        // Update modes
+        // Mode buttons should ALWAYS be processed (even in passthrough mode) so user can switch back
         if (ModeButtons != null)
         {
             foreach (var modeButton in ModeButtons)
@@ -90,11 +163,13 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
                 {
                     if (ActiveMode == InputModes.Default)
                     {
+                        // Log.Debug($"Mode changed to {modeButton.Mode} (button {matchingSignal.ButtonId})");
                         ActiveMode = modeButton.Mode;
                     }
                 }
                 else if (matchingSignal.State == ButtonSignal.States.Released && ActiveMode == modeButton.Mode)
                 {
+                    // Log.Debug($"Mode released from {modeButton.Mode} back to Default");
                     releasedMode = modeButton.Mode;
                     ActiveMode = InputModes.Default;
                 }
@@ -109,6 +184,10 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
 
         foreach (var ctc in CommandTriggerCombinations)
         {
+            // In passthrough, ignore all buttons except mode-switches (InputModes.Save / Shift).
+            if (!IsInControlMode && ctc.RequiredInputMode != InputModes.Save)
+                continue;
+                
             ctc.InvokeMatchingButtonCommands(_combinedButtonSignals.Values.ToList(), ActiveMode, releasedMode);
         }
 
@@ -120,6 +199,8 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
 
     public void Dispose()
     {
+        // Clear control mode when device is disposed so messages pass through again
+        SetControlMode(false);
         MidiConnectionManager.UnregisterConsumer(this);
     }
 
@@ -140,6 +221,11 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
         
         lock (_buttonSignalsSinceLastUpdate)
         {
+            if (_buttonSignalsSinceLastUpdate.Count > 0)
+            {
+                // Log.Debug($"CombineButtonSignals: {_buttonSignalsSinceLastUpdate.Count} new signal(s) to process");
+            }
+            
             foreach (var earlierSignal in _combinedButtonSignals.Values)
             {
                 if (earlierSignal.State == ButtonSignal.States.JustPressed)
@@ -148,6 +234,7 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
 
             foreach (var newSignal in _buttonSignalsSinceLastUpdate)
             {
+                // Log.Debug($"CombineButtonSignals: Processing signal ButtonId={newSignal.ButtonId}, State={newSignal.State}");
                 if (_combinedButtonSignals.TryGetValue(newSignal.ButtonId, out var earlierSignal))
                 {
                     earlierSignal.State = newSignal.State;
@@ -183,16 +270,23 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
             case MidiCommandCode.NoteOn:
                 if (msg.MidiEvent is NoteEvent noteEvent)
                 {
+                    var state = msg.MidiEvent.CommandCode == MidiCommandCode.NoteOn
+                        ? ButtonSignal.States.JustPressed
+                        : ButtonSignal.States.Released;
+                    
+                    // Allow device-specific mapping from channel/note to button ID
+                    var buttonId = ConvertNoteToButtonId(noteEvent.Channel, noteEvent.NoteNumber);
+                    
+                    // Log.Debug($"MIDI Button: Note={noteEvent.NoteNumber}, Channel={noteEvent.Channel}, ButtonId={buttonId}, Velocity={noteEvent.Velocity}, State={state}");
+                    
                     lock (_buttonSignalsSinceLastUpdate)
                     {
                         _buttonSignalsSinceLastUpdate.Add(new ButtonSignal()
                                                               {
                                                                   Channel = noteEvent.Channel,
-                                                                  ButtonId = noteEvent.NoteNumber,
+                                                                  ButtonId = buttonId,
                                                                   ControllerValue = noteEvent.Velocity,
-                                                                  State = msg.MidiEvent.CommandCode == MidiCommandCode.NoteOn
-                                                                              ? ButtonSignal.States.JustPressed
-                                                                              : ButtonSignal.States.Released,
+                                                                  State = state,
                                                               });
                     }
                     _hasNewMessages = true;
@@ -202,6 +296,8 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
             case MidiCommandCode.ControlChange:
                 if (msg.MidiEvent is not ControlChangeEvent controlChangeEvent)
                     return;
+
+                // Note: Debug log removed - too verbose for continuous controllers like crossfaders
 
                 lock (_controlSignalsSinceLastUpdate)
                 {
@@ -215,6 +311,16 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
                 _hasNewMessages = true;
                 return;
         }
+    }
+
+    /// <summary>
+    /// Converts a MIDI channel and note number to a button ID.
+    /// Override this in derived classes for devices that use channel-based button mapping.
+    /// </summary>
+    protected virtual int ConvertNoteToButtonId(int channel, int noteNumber)
+    {
+        // Default: just use the note number
+        return noteNumber;
     }
 
     void MidiConnectionManager.IMidiConsumer.ErrorReceivedHandler(object sender, MidiInMessageEventArgs msg)
@@ -260,6 +366,19 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
     protected static readonly int[] CacheControllerColors = Enumerable.Repeat(-1, 256).ToArray();
     #endregion
 
+    /// <summary>
+    /// Clears all pending button signals. Call this when a mode switch changes button mappings
+    /// to prevent stale signals from blocking subsequent mode switches.
+    /// </summary>
+    protected void ClearButtonSignals()
+    {
+        _combinedButtonSignals.Clear();
+        lock (_buttonSignalsSinceLastUpdate)
+        {
+            _buttonSignalsSinceLastUpdate.Clear();
+        }
+    }
+
     private readonly Dictionary<int, ButtonSignal> _combinedButtonSignals = new();
     private readonly List<ButtonSignal> _buttonSignalsSinceLastUpdate = new();
     private readonly List<ControlChangeSignal> _controlSignalsSinceLastUpdate = new();
@@ -267,12 +386,13 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
     protected MidiOut MidiOutConnection;
 }
 
-public sealed class MidiDeviceProductAttribute : Attribute
+[AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
+internal sealed class MidiDeviceProductAttribute : Attribute
 {
-    public MidiDeviceProductAttribute(string productName)
+    internal MidiDeviceProductAttribute(string productName)
     {
         ProductNames =  productName.Split(';');
     }
 
-    public string[] ProductNames { get; }
+    internal string[] ProductNames { get; }
 }

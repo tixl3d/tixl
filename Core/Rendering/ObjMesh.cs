@@ -1,38 +1,42 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using T3.Core.Logging;
+// ReSharper disable InconsistentNaming
 
 // ReSharper disable RedundantNameQualifier
 
 namespace T3.Core.Rendering;
 
-public class ObjMesh
+public sealed class ObjMesh
 {
-    public readonly List<Vector3> Positions = new();
-    public readonly List<Vector4> Colors = new();
+    public readonly List<Vector3> Positions = [];
+    public readonly List<Vector4> Colors = [];
 
-    public readonly List<Vector3> Normals = new();
-    public readonly List<Vector2> TexCoords = new();
-    public readonly List<Face> Faces = new();
-    public readonly List<Line> Lines = new();
+    public readonly List<Vector3> Normals = [];
+    public readonly List<Vector2> TexCoords = [];
+    public readonly List<Face> Faces = [];
+    public readonly List<Line> Lines = [];
 
-    public static ObjMesh LoadFromFile(string objFilePath)
+    public static bool TryLoadFromFile(string? objFilePath, [NotNullWhen(true)]out ObjMesh? mesh)
     {
+        mesh = null;
         try
         {
-            if (string.IsNullOrEmpty(objFilePath) || !(new FileInfo(objFilePath).Exists))
-                return null;
+            if (string.IsNullOrEmpty(objFilePath) || !new FileInfo(objFilePath).Exists)
+                return false;
         }
         catch (Exception e)
         {
             Log.Warning("Failed to load object path:" + objFilePath + "\\n" + e);
-            return null;
+            return false;
         }
 
-        var mesh = new ObjMesh();
+        mesh = new ObjMesh();
             
         var line = "";
         try
@@ -110,7 +114,7 @@ public class ObjMesh
         catch (Exception e)
         {
             Log.Error($"Failed to load obj cloud:{e.Message} '{line}'");
-            return null;
+            return false;
         }
 
         if (mesh.Colors.Count > 0 && mesh.Colors.Count != mesh.Positions.Count)
@@ -118,7 +122,7 @@ public class ObjMesh
             Log.Warning("Optional OBJ color information not defined for all vertices");
         }
 
-        return mesh;
+        return mesh.DistinctDistinctVertices.Count != 0;
     }
 
     private static void SplitFaceIndices(string v0, out int positionIndex, out int textureIndex, out int normalIndex)
@@ -139,7 +143,7 @@ public class ObjMesh
 
     public struct Face
     {
-        public Face(int v0, int v0N, int v0T, int v1, int v1N, int v1T, int v2, int v2N, int v2T)
+        internal Face(int v0, int v0N, int v0T, int v1, int v1N, int v1T, int v2, int v2N, int v2T)
         {
             V0 = v0;
             V0n = v0N;
@@ -154,27 +158,27 @@ public class ObjMesh
             V2t = v2T;
         }
 
-        public int V0;
-        public int V0n;
-        public int V0t;
-        public int V1;
-        public int V1n;
-        public int V1t;
-        public int V2;
-        public int V2n;
-        public int V2t;
+        public readonly int V0;
+        public readonly int V0n;
+        public  int V0t;
+        public readonly int V1;
+        public readonly int V1n;
+        public  int V1t;
+        public readonly int V2;
+        public readonly int V2n;
+        public  int V2t;
     }
 
     public struct Line
     {
-        public Line(int v0, int v2)
+        internal Line(int v0, int v2)
         {
             V0 = v0;
             V2 = v2;
         }
 
-        public int V0;
-        public int V2;
+        public readonly int V0;
+        public readonly int V2;
     }
 
     #region joining vertices
@@ -182,12 +186,8 @@ public class ObjMesh
     {
         get
         {
-            if (_distinctVertices == null)
-            {
-                InitializeVertices();
-            }
-
-            return _distinctVertices;
+            _distinctVertices ??= InitializeVertices();
+            return _distinctVertices;  
         }
     }
 
@@ -209,7 +209,7 @@ public class ObjMesh
         public readonly int NormalIndex;
         public readonly int TextureCoordsIndex;
 
-        public Vertex(int positionIndex, int normalIndex, int textureCoordsIndex)
+        internal Vertex(int positionIndex, int normalIndex, int textureCoordsIndex)
         {
             PositionIndex = positionIndex;
             NormalIndex = normalIndex;
@@ -220,7 +220,7 @@ public class ObjMesh
          * The hash is done by bit-shifting. This results in a maximum
          * vertex count of  64/3 bit =  2^21 = 2,097,152 vertices (!)
          */
-        public static long GetHashForIndices(int pos, int normal, int textureCoords)
+        internal static long GetHashForIndices(int pos, int normal, int textureCoords)
         {
             return (long)pos << 42 | (long)normal << 21 | (long)textureCoords;
         }
@@ -232,7 +232,7 @@ public class ObjMesh
     /// We do this by iterating over all face vertices, and generating a hash for face-, normal- and uv-index.
     /// If the hash already exists, we reuse and thus "merge the vertex" I.e. use it for different faces.
     /// </summary>
-    private void InitializeVertices()
+    private List<Vertex> InitializeVertices()
     {
         if (TexCoords.Count == 0)
         {
@@ -273,7 +273,7 @@ public class ObjMesh
             Faces[index] = face;
         }
 
-        _distinctVertices = new List<Vertex>();
+        _distinctVertices = [];
         for (var faceIndex = 0; faceIndex < Faces.Count; faceIndex++)
         {
             if (faceIndex >= Faces.Count)
@@ -284,14 +284,19 @@ public class ObjMesh
                     
             var face = Faces[faceIndex];
 
-            SortInMergedVertex(0, face.V0, face.V0n, face.V0t, faceIndex);
-            SortInMergedVertex(1, face.V1, face.V1n, face.V1t, faceIndex);
-            SortInMergedVertex(2, face.V2, face.V2n, face.V2t, faceIndex);
+            SortInMergedVertex(face.V0, face.V0n, face.V0t, faceIndex);
+            SortInMergedVertex(face.V1, face.V1n, face.V1t, faceIndex);
+            SortInMergedVertex(face.V2, face.V2n, face.V2t, faceIndex);
         }
+
+        return _distinctVertices;
     }
 
-    private int SortInMergedVertex(int indexInFace, int posIndex, int normalIndex, int texCoordIndex, int faceIndex)
+    private int SortInMergedVertex(int posIndex, int normalIndex, int texCoordIndex, int faceIndex)
     {
+        if(_distinctVertices == null)
+            return 0;
+        
         var face = Faces[faceIndex];
         var vertHash = Vertex.GetHashForIndices(posIndex, normalIndex, texCoordIndex);
 
@@ -338,12 +343,10 @@ public class ObjMesh
                        ? new Vector2(pos.Y, pos.Z)
                        : new Vector2(pos.X, pos.Y);
         }
-        else
-        {
-            return ay > az
-                       ? new Vector2(pos.X, pos.Z)
-                       : new Vector2(pos.X, pos.Y);
-        }
+
+        return ay > az
+                   ? new Vector2(pos.X, pos.Z)
+                   : new Vector2(pos.X, pos.Y);
     }
 
     /// <summary>
@@ -351,7 +354,14 @@ public class ObjMesh
     /// </summary>
     public void UpdateVertexSorting(SortDirections sortDirection)
     {
+        if (_distinctVertices == null || _distinctVertices.Count == 0)
+        {
+            SortedVertexIndices = [];
+            return;
+        }
+            
         SortedVertexIndices = Enumerable.Range(0, _distinctVertices.Count).ToList();
+        
         switch (sortDirection)
         {
             case SortDirections.XForward:
@@ -399,10 +409,10 @@ public class ObjMesh
         Ignore,
     }
 
-    private List<Vertex> _distinctVertices;
-    public readonly List<Vector3> VertexTangents = new();
-    public readonly List<Vector3> VertexBinormals = new();
-    public List<int> SortedVertexIndices;
+    private List<Vertex>? _distinctVertices;
+    public readonly List<Vector3> VertexTangents = [];
+    public readonly List<Vector3> VertexBinormals = [];
+    public List<int> SortedVertexIndices=[];
     private readonly Dictionary<long, int> _vertexIndicesByHash = new();
     #endregion
 }

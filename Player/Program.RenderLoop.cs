@@ -21,7 +21,7 @@ internal static partial class Program
         //Log.Debug($" render at playback time {_playback.TimeInSecs:0.00}s");
         if (_soundtrackHandle != null)
         {
-            AudioEngine.UseAudioClip(_soundtrackHandle, _playback.TimeInSecs);
+            AudioEngine.UseSoundtrackClip(_soundtrackHandle, _playback.TimeInSecs);
             if (_playback.TimeInSecs >= _soundtrackHandle.Clip.LengthInSeconds + _soundtrackHandle.Clip.StartTime)
             {
                 if (_resolvedOptions.Loop)

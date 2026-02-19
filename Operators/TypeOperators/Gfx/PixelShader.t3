@@ -3,7 +3,7 @@
   "Inputs": [
     {
       "Id": "24646f06-1509-43ce-94c6-eeb608ad97cd"/*Source*/,
-      "DefaultValue": "/Examples/user/cynic/particles/Default-ps.hlsl"
+      "DefaultValue": "Examples:user/cynic/particles/Default-ps.hlsl"
     },
     {
       "Id": "501338b3-f432-49a5-bdbd-bcf209671305"/*EntryPoint*/,

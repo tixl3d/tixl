@@ -1,0 +1,240 @@
+{
+  "Id": "058323b6-2e4c-4448-a4c4-ebbc878b3aae"/*SelectVerticesWithSDF*/,
+  "Description": "Allows selecting and adding values to vertices in 3D space via SDF Objects/Fields.\nSimilar to [SelectPoints].\nNeeds any SDF such as [BoxSDF], [ChainLinkSDF], [FractalSDF] as an input to select the points.\nAnd any form of points such as: [GridPoints], [RadialPoints], [SpherePoints], [PointsOnMesh], etc.",
+  "InputUis": [
+    {
+      "InputId": "015d6833-6ffb-431e-b5ec-80483eb2b9b1"/*StrengthFactor*/,
+      "Position": {
+        "X": 945.3048,
+        "Y": 1775.2576
+      }
+    },
+    {
+      "InputId": "1140dc1e-430a-4a29-806e-6fb0b8eccaad"/*Mode*/,
+      "Position": {
+        "X": 945.3048,
+        "Y": 1670.2576
+      }
+    },
+    {
+      "InputId": "2b60f260-d9f8-43ec-a6a5-0d49f44932c0"/*Strength*/,
+      "Position": {
+        "X": 945.30475,
+        "Y": 1424.0172
+      },
+      "GroupTitle": "Settings",
+      "Scale": 0.01
+    },
+    {
+      "InputId": "4ad9bd49-08a3-46ce-99a8-39634eb7e6ee"/*Mesh*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 376.2362,
+        "Y": 1903.7573
+      }
+    },
+    {
+      "InputId": "6a942084-123d-4594-bd18-c856f67c1425"/*Scatter*/,
+      "Position": {
+        "X": 945.3049,
+        "Y": 1529.0172
+      },
+      "AddPadding": "True",
+      "Scale": 0.01
+    },
+    {
+      "InputId": "7ddf82f1-75b5-489f-9ca1-05d3fb05a6b8"/*Offset*/,
+      "Position": {
+        "X": 945.30475,
+        "Y": 1564.0172
+      },
+      "Scale": 0.01
+    },
+    {
+      "InputId": "8097ce0c-140a-4f90-b1ff-9fdf8640d8e1"/*Range*/,
+      "Position": {
+        "X": 945.3048,
+        "Y": 1599.0172
+      },
+      "Scale": 0.01
+    },
+    {
+      "InputId": "92a40391-62af-480d-854f-b69a272d3e8d"/*DiscardNonSelected*/,
+      "Position": {
+        "X": 805.3049,
+        "Y": 1740.2576
+      },
+      "Description": "Converts points with zero or below selection to Separators (Scale = NaN) so they will not be rendered."
+    },
+    {
+      "InputId": "a4c1c8a0-237c-4d96-b196-55af34530ede"/*SdfField*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 677.42883,
+        "Y": 867.1018
+      }
+    },
+    {
+      "InputId": "c4b3ad25-5e0b-4eeb-a9a5-583b33840458"/*WriteTo*/,
+      "Position": {
+        "X": 945.3049,
+        "Y": 1810.2576
+      },
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "e69d5c8f-816d-4aca-b0b1-cde907fa396c"/*GainAndBias*/,
+      "Position": {
+        "X": 805.30475,
+        "Y": 1459.0172
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "Scale": 0.01,
+      "ClampMin": true,
+      "ClampMax": true,
+      "Format": "{0:0.000}",
+      "UseVec2Control": "BiasAndGain"
+    },
+    {
+      "InputId": "f1dd8530-5c97-48f1-839c-711b6a42e222"/*ClampNegative*/,
+      "Position": {
+        "X": 805.3048,
+        "Y": 1705.2576
+      },
+      "GroupTitle": "Options",
+      "Description": "Prevent the result from becoming negative (which could lead to points with inverted scale)."
+    },
+    {
+      "InputId": "fb9e8438-ad0c-47ff-aa74-c6405eca701d"/*Mapping*/,
+      "Position": {
+        "X": 945.30475,
+        "Y": 1845.2576
+      },
+      "GroupTitle": "Selection Range"
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "11bbe4f0-6946-42f2-9abd-9310111c421d"/*StructuredBufferWithViews*/,
+      "Position": {
+        "X": 1085.3048,
+        "Y": 1207.8899
+      }
+    },
+    {
+      "ChildId": "23231405-db84-4111-aa9e-1f18e0cce2c5"/*_MeshBufferComponents*/,
+      "Position": {
+        "X": 516.2362,
+        "Y": 1903.7573
+      }
+    },
+    {
+      "ChildId": "3dcb9bf3-a5e6-4044-9df0-7de4faaaee60"/*Vector2Components*/,
+      "Position": {
+        "X": 945.30475,
+        "Y": 1459.0172
+      }
+    },
+    {
+      "ChildId": "4dd83831-8fcd-49c5-9596-d656b304972c"/*BoolToInt*/,
+      "Position": {
+        "X": 945.3048,
+        "Y": 1705.2576
+      }
+    },
+    {
+      "ChildId": "805b1aeb-214f-4f34-bba2-c9a7af914384"/*ComputeShaderFromSource*/,
+      "Position": {
+        "X": 817.42883,
+        "Y": 972.1018
+      }
+    },
+    {
+      "ChildId": "8d5acf76-cd8b-4410-951f-12912d3cb577"/*CalcDispatchCount*/,
+      "Position": {
+        "X": 1085.3048,
+        "Y": 1056.6112
+      }
+    },
+    {
+      "ChildId": "a2e5e5b6-75c8-487e-9bc2-5ea69db0ee53"/*ComputeShaderStage*/,
+      "Position": {
+        "X": 1501.3378,
+        "Y": 1017.4934
+      }
+    },
+    {
+      "ChildId": "b6adb8e7-4d90-453a-a517-ea7e370cd6a9"/*GetBufferComponents*/,
+      "Position": {
+        "X": 829.0911,
+        "Y": 1136.442
+      }
+    },
+    {
+      "ChildId": "bafa4aad-5357-441e-8765-0448d0ed4f2c"/*FloatsToBuffer*/,
+      "Position": {
+        "X": 1085.3048,
+        "Y": 1389.0172
+      }
+    },
+    {
+      "ChildId": "bbc08a3f-6519-4fef-9e9a-1346acaff8f4"/*BoolToInt*/,
+      "Position": {
+        "X": 945.3049,
+        "Y": 1740.2576
+      }
+    },
+    {
+      "ChildId": "bfeaf3f0-60e8-468c-beac-f21c9eb72148"/*_AssembleMeshBuffers*/,
+      "Position": {
+        "X": 1501.3378,
+        "Y": 1402.4934
+      }
+    },
+    {
+      "ChildId": "d7d8f2cf-47b6-4fcf-926e-11d193faeea9"/*Execute*/,
+      "Position": {
+        "X": 1501.3378,
+        "Y": 1297.4934
+      }
+    },
+    {
+      "ChildId": "d929b71c-2198-4670-8ebb-7bbf8c7a15cf"/*GenerateShaderGraphCode*/,
+      "Position": {
+        "X": 817.42883,
+        "Y": 867.1018
+      }
+    },
+    {
+      "ChildId": "da6a99e9-4d9b-42e4-8f25-9b916770ffe8"/*GetBufferComponents*/,
+      "Position": {
+        "X": 1085.3048,
+        "Y": 1277.8899
+      }
+    },
+    {
+      "ChildId": "f194b682-6871-40df-9e82-5f79747f196d"/*IntsToBuffer*/,
+      "Position": {
+        "X": 1085.3048,
+        "Y": 1670.2576
+      }
+    },
+    {
+      "ChildId": "f699e6ae-9b5b-49be-829a-cecd454f74c5"/*ExecuteBufferUpdate*/,
+      "Position": {
+        "X": 1501.3378,
+        "Y": 1332.4934
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "49e13584-2ff7-4854-82e6-adcb501b7b20"/*ResultMesh*/,
+      "Position": {
+        "X": 1501.3378,
+        "Y": 1507.4932
+      }
+    }
+  ]
+}

@@ -10,7 +10,7 @@
         "Y": 75.0
       },
       "Usage": "FilePath",
-      "FileFilter": "Shaders (*.hlsl)|*.hlsl"
+      "FileFilter": "hlsl"
     },
     {
       "InputId": "f6fb3be8-53f2-4d68-bf0f-3f519bc09ff4"/*AdditionalDefines*/,

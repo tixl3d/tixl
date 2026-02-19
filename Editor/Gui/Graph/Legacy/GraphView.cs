@@ -68,21 +68,20 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
             Log.Error("Failed to access composition op?");
             return;
         }
-        
+
         ConnectionMaker.StartFromInputSlot(this, _projectView.InstView.Symbol, symbolChildUi, inputInputDefinition);
         var freePosition = NodeGraphLayouting.FindPositionForNodeConnectedToInput(_projectView.InstView.SymbolUi, symbolChildUi);
         ConnectionMaker.InitSymbolBrowserAtPosition(this, SymbolBrowser, freePosition);
     }
-    
+
     void IGraphView.ExtractAsConnectedOperator<T>(InputSlot<T> inputSlot, SymbolUi.Child symbolChildUi, Symbol.Child.Input input)
     {
         if (_projectView?.InstView == null)
             return;
-        
+
         var freePosition = NodeGraphLayouting.FindPositionForNodeConnectedToInput(_projectView.InstView.SymbolUi, symbolChildUi);
         ParameterExtraction.ExtractAsConnectedOperator(inputSlot, symbolChildUi, input, freePosition);
     }
-
 
     public void StartDraggingFromInputSlot(SymbolUi.Child symbolChildUi, Symbol.InputDefinition inputInputDefinition)
     {
@@ -91,8 +90,8 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
             Log.Error("Failed to access composition op?");
             return;
         }
-        
-        ConnectionMaker.StartFromInputSlot(this,  _projectView.InstView.Symbol, symbolChildUi, inputInputDefinition);
+
+        ConnectionMaker.StartFromInputSlot(this, _projectView.InstView.Symbol, symbolChildUi, inputInputDefinition);
     }
 
     public static ProjectView CreateWithComponents(OpenedProject openedProject)
@@ -100,13 +99,13 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
         ProjectView.CreateIndependentComponents(openedProject, out var navigationHistory, out var nodeSelection, out var graphImageBackground);
         var projectView = new ProjectView(openedProject, navigationHistory, nodeSelection, graphImageBackground);
         var graphView = new GraphView(nodeSelection,
-                                     openedProject.Structure,
-                                     navigationHistory,
-                                     projectView.NodeNavigation,
-                                     getComposition: () => projectView.CompositionInstance)
-        {
-            ProjectView = projectView
-        };
+                                      openedProject.Structure,
+                                      navigationHistory,
+                                      projectView.NodeNavigation,
+                                      getComposition: () => projectView.CompositionInstance)
+                            {
+                                ProjectView = projectView
+                            };
 
         projectView.GraphView = graphView;
         graphView.SymbolBrowser = new SymbolBrowser(projectView, graphView);
@@ -115,7 +114,7 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
     }
 
     private GraphView(NodeSelection nodeSelection, Structure structure, NavigationHistory navigationHistory, NodeNavigation nodeNavigation,
-                        Func<Instance> getComposition)
+                      Func<Instance> getComposition)
     {
         _nodeNavigation = nodeNavigation;
         _nodeSelection = nodeSelection;
@@ -173,7 +172,7 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
     {
         if (_projectView?.CompositionInstance == null)
             return;
-        
+
         ConnectionSnapEndHelper.PrepareNewFrame();
 
         DrawDropHandler(_projectView.CompositionInstance, _projectView.CompositionInstance.GetSymbolUi());
@@ -352,12 +351,9 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
 
         ScrollTarget += _dampedScrollVelocity;
         _dampedScrollVelocity *= 0.90f;
-        
-        
 
         drawList.PushClipRect(WindowPos, WindowPos + WindowSize);
 
-        
         if (!_drawingFlags.HasFlag(GraphDrawingFlags.HideGrid))
             DrawGrid(drawList);
 
@@ -387,7 +383,7 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
         if (shouldHandleFenceSelection)
             HandleFenceSelection(_projectView.CompositionInstance, _selectionFence);
 
-        if (isOnBackground && (doubleClicked || UserActions.CloseOperator.Triggered()) )
+        if (isOnBackground && (doubleClicked || UserActions.CloseOperator.Triggered()))
             _projectView.TrySetCompositionOpToParent();
 
         if (tempConnections.Count > 0 && ImGui.IsMouseReleased(0))
@@ -410,7 +406,7 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
                 }
             }
         }
-        
+
         drawList.PopClipRect();
 
         var compositionInstance = _projectView.CompositionInstance;
@@ -427,7 +423,7 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
                                     ref _nameSpaceForDialogEdits,
                                     ref _symbolNameForDialogEdits,
                                     ref _symbolDescriptionForDialog);
-        
+
         compositionInstance = _projectView.CompositionInstance;
 
         _renameSymbolDialog.Draw(_nodeSelection.GetSelectedChildUis().ToList(), ref _symbolNameForDialogEdits);
@@ -446,9 +442,6 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
         SelectableNodeMovement.CompleteFrame();
     }
 
-    
-    
-    
     public bool HasActiveInteraction
     {
         get
@@ -489,7 +482,7 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
         var nodesToSelect = NodeSelection.GetSelectableChildren(compositionOp)
                                          .Where(child => child is Annotation
                                                              ? boundsInCanvas.Contains(child.Rect)
-                                                             : child !=null && child.Rect.Overlaps(boundsInCanvas));
+                                                             : child != null && child.Rect.Overlaps(boundsInCanvas));
 
         if (selectMode == SelectionFence.SelectModes.Replace)
         {
@@ -538,22 +531,22 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
 
     private void DrawDropHandler(Instance compositionOp, SymbolUi compositionOpSymbolUi)
     {
-        
         if (!DragAndDropHandling.IsDragging)
             return;
 
         ImGui.SetCursorPos(Vector2.Zero);
         ImGui.InvisibleButton("## drop", ImGui.GetWindowSize());
 
-        if (!DragAndDropHandling.TryHandleItemDrop(DragAndDropHandling.DragTypes.Symbol, out var payload, out var result))
+        var result = DragAndDropHandling.TryHandleDropOnItem(DragAndDropHandling.DragTypes.Symbol, out var payload);
+        if (result == DragAndDropHandling.DragInteractionResult.None)
             return;
-        
+
         if (!Guid.TryParse(payload, out var guid))
         {
             Log.Warning("Invalid data format for drop? " + payload);
             return;
         }
-        
+
         if (SymbolUiRegistry.TryGetSymbolUi(guid, out var newSymbolUi))
         {
             var newSymbol = newSymbolUi.Symbol;
@@ -569,12 +562,12 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
             Log.Warning($"Symbol {guid} not found in registry");
         }
     }
-    
+
     public void FocusViewToSelection()
     {
         if (_projectView?.CompositionInstance == null)
             return;
-        
+
         FitAreaOnCanvas(NodeSelection.GetSelectionBounds(_nodeSelection, _projectView.CompositionInstance));
     }
 
@@ -826,7 +819,7 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
 
                 if (ImGui.MenuItem("Resources"))
                 {
-                    CoreUi.Instance.OpenWithDefaultApplication(symbolPackage.ResourcesFolder);
+                    CoreUi.Instance.OpenWithDefaultApplication(symbolPackage.AssetsFolder);
                 }
 
                 ImGui.EndMenu();
@@ -888,62 +881,61 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
         {
             var symbol = selectedChildUis.Single().SymbolChild.Symbol;
             CustomComponents.DrawSymbolCodeContextMenuItem(symbol);
-            var childUi = selectedChildUis.Single();
-
+            // var childUi = selectedChildUis.Single();
             // get instance that is currently selected
-            var instance = compositionOp.Children[childUi.Id];
+            //var instance = compositionOp.Children[childUi.Id];
 
-            if (NodeActions.TryGetShaderPath(instance, out var filePath, out var owner))
-            {
-                var shaderIsReadOnly = owner.IsReadOnly;
-
-                if (ImGui.MenuItem("Open in Shader Editor", true))
-                {
-                    if (shaderIsReadOnly)
-                    {
-                        CopyToTempShaderPath(filePath, out filePath);
-                        BlockingWindow.Instance.ShowMessageBox("Warning - viewing a read-only shader. Modifications will not be saved.\n" +
-                                                               "Following #include directives outside of the temp folder may lead you to read-only files, " +
-                                                               "and editing those can break operators.\n\nWith great power...", "Warning");
-                    }
-
-                    EditorUi.Instance.OpenWithDefaultApplication(filePath);
-                }
-            }
+            // if (NodeActions.TryGetShaderPath(instance, out var filePath, out var owner))
+            // {
+            //     var shaderIsReadOnly = owner.IsReadOnly;
+            //
+            //     if (ImGui.MenuItem("Open in Shader Editor", true))
+            //     {
+            //         if (shaderIsReadOnly)
+            //         {
+            //             CopyToTempShaderPath(filePath, out filePath);
+            //             BlockingWindow.Instance.ShowMessageBox("Warning - viewing a read-only shader. Modifications will not be saved.\n" +
+            //                                                    "Following #include directives outside of the temp folder may lead you to read-only files, " +
+            //                                                    "and editing those can break operators.\n\nWith great power...", "Warning");
+            //         }
+            //
+            //         EditorUi.Instance.OpenWithDefaultApplication(filePath);
+            //     }
+            // }
         }
     }
 
-    private static void CopyToTempShaderPath(string filePath, out string newFilePath)
-    {
-        var directory = Path.GetDirectoryName(filePath)!;
-        var destinationDirectory = Path.Combine(FileLocations.TempFolder, "ReadOnlyShaders");
-
-        if (Directory.Exists(destinationDirectory))
-        {
-            try
-            {
-                Directory.Delete(destinationDirectory, true);
-            }
-            catch (Exception e)
-            {
-                Log.Warning($"Failed to delete temp directory: {e}");
-            }
-        }
-
-        var directoryInfo = Directory.CreateDirectory(destinationDirectory);
-
-        // copy all files in directory to temp directory for intellisense to work
-        var allFilesInDirectory = Directory.EnumerateFiles(directory);
-        foreach (var file in allFilesInDirectory)
-        {
-            var destinationPath = Path.Combine(destinationDirectory, Path.GetFileName(file));
-            File.Copy(file, destinationPath);
-        }
-
-        ShaderLinter.AddPackage(new ShaderCompiler.ShaderResourcePackage(directoryInfo), ResourceManager.SharedShaderPackages,
-                                replaceExisting: true);
-        newFilePath = Path.Combine(destinationDirectory, Path.GetFileName(filePath));
-    }
+    // private static void CopyToTempShaderPath(string filePath, out string newFilePath)
+    // {
+    //     var directory = Path.GetDirectoryName(filePath)!;
+    //     var destinationDirectory = Path.Combine(FileLocations.TempFolder, "ReadOnlyShaders");
+    //
+    //     if (Directory.Exists(destinationDirectory))
+    //     {
+    //         try
+    //         {
+    //             Directory.Delete(destinationDirectory, true);
+    //         }
+    //         catch (Exception e)
+    //         {
+    //             Log.Warning($"Failed to delete temp directory: {e}");
+    //         }
+    //     }
+    //
+    //     var directoryInfo = Directory.CreateDirectory(destinationDirectory);
+    //
+    //     // copy all files in directory to temp directory for intellisense to work
+    //     var allFilesInDirectory = Directory.EnumerateFiles(directory);
+    //     foreach (var file in allFilesInDirectory)
+    //     {
+    //         var destinationPath = Path.Combine(destinationDirectory, Path.GetFileName(file));
+    //         File.Copy(file, destinationPath);
+    //     }
+    //
+    //     ShaderLinter.AddPackage(new ShaderCompiler.ShaderResourcePackage(directoryInfo), ResourceManager.SharedShaderPackages,
+    //                             replaceExisting: true);
+    //     newFilePath = Path.Combine(destinationDirectory, Path.GetFileName(filePath));
+    // }
 
     private void DrawGrid(ImDrawListPtr drawList)
     {
@@ -962,9 +954,9 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
         }
     }
 
-    private IEnumerable<ISelectableCanvasObject> SelectableChildren => _projectView?.CompositionInstance != null 
+    private IEnumerable<ISelectableCanvasObject> SelectableChildren => _projectView?.CompositionInstance != null
                                                                            ? NodeSelection.GetSelectableChildren(_projectView.CompositionInstance)
-                                                                           : []; 
+                                                                           : [];
 
     //private readonly List<ISelectableCanvasObject> _selectableItems = new();
     #endregion
@@ -982,6 +974,35 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
 
         var compositionPath = path.Take(path.Count - 1).ToList();
         _projectView.TrySetCompositionOp(compositionPath, ScalableCanvas.Transition.JumpIn, path[^1]);
+    }
+
+    public void OpenAndFocusAnnotation(IReadOnlyList<Guid> compositionPath, Guid annotationId)
+    {
+        if (compositionPath.Count == 1)
+        {
+            if (!_projectView.TrySetCompositionOp(compositionPath, ScalableCanvas.Transition.JumpOut, compositionPath[0]))
+            {
+                return;
+            }
+        }
+        else
+        {
+            var compositionPath2 = compositionPath.Take(compositionPath.Count - 1).ToList();
+            var compositionId = compositionPath[^1];
+            if (!_projectView.TrySetCompositionOp(compositionPath2, ScalableCanvas.Transition.JumpIn, compositionId))
+                return;
+        }
+        
+        // We assume that composition has been set....
+        if (_projectView.CompositionInstance == null)
+            return;
+
+        var symbolUi = _projectView.CompositionInstance.GetSymbolUi();
+        if (!symbolUi.Annotations.TryGetValue(annotationId, out var annotation))
+            return;
+
+        var area = ImRect.RectWithSize(annotation.PosOnCanvas, annotation.Size);
+        RequestTargetViewAreaWithTransition(area, Transition.Smooth);
     }
     #endregion
 

@@ -1,0 +1,48 @@
+{
+  "Id": "7c8f3a2e-9d4b-4e1f-8a5c-6b2d9f7e4c3a"/*AudioToneGenerator*/,
+  "Inputs": [
+    {
+      "Id": "1a3f4b7c-12d3-4a5b-9c7d-8e1f2a3b4c5d"/*Mute*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "2c9f4e7a-3d8b-4a1f-9e5c-6b2d7f8c4a3e"/*Duration*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "3e9a7f2c-4d8b-4c1f-9e5a-2b7d6f8c4a5e"/*Trigger*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "53d1622e-b1d5-4b1c-acd0-ebceb7064043"/*Panning*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "5a7e9f2c-8d4b-4c1f-9a5e-3b2d6f7c8a4e"/*WaveformType*/,
+      "DefaultValue": 2
+    },
+    {
+      "Id": "8f4a2e9c-7d3b-4e1f-8c5a-9b2d6f7c3a4e"/*Frequency*/,
+      "DefaultValue": 440.0
+    },
+    {
+      "Id": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d"/*Envelope*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 1.0,
+        "Z": 1.0,
+        "W": 1.0
+      }
+    },
+    {
+      "Id": "c0645e37-db4e-4658-9d65-96478851f6f6"/*Volume*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "d4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f8a"/*TriggerMode*/,
+      "DefaultValue": 0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

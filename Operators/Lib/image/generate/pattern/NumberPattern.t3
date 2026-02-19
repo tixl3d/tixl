@@ -102,7 +102,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "/Lib/images/numbers-4x6px.png"
+          "Value": "Lib:images/numbers-4x6px.png"
         }
       ],
       "Outputs": []
@@ -134,7 +134,7 @@
         {
           "Id": "7f14d0e3-1159-434d-b038-74644948937c"/*ShaderPath*/,
           "Type": "System.String",
-          "Value": "Resources/lib/img/generate/NumberPattern.hlsl"
+          "Value": "Lib:shaders/img/generate/NumberPattern.hlsl"
         }
       ],
       "Outputs": []

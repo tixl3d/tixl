@@ -3,7 +3,7 @@
   "Inputs": [
     {
       "Id": "21b2e219-0b2a-4323-b288-f39ed791e676"/*Url*/,
-      "DefaultValue": "https://cataas.com/cat"
+      "DefaultValue": "Lib:https://cataas.com/cat"
     },
     {
       "Id": "710ba03d-d26e-496a-b6cd-68abb2e9f369"/*TriggerUpdate*/,

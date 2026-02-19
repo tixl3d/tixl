@@ -19,7 +19,7 @@
         {
           "Id": "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3"/*FontPath*/,
           "Type": "System.String",
-          "Value": "Resources\\fonts\\Roboto-Light.fnt"
+          "Value": "Examples:fonts/Roboto-Light.fnt"
         },
         {
           "Id": "835d7f17-9de4-4612-a2f0-01c1346cdf1a"/*Spacing*/,
@@ -145,7 +145,7 @@
         {
           "Id": "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3"/*FontPath*/,
           "Type": "System.String",
-          "Value": "Resources\\fonts\\Roboto-Light.fnt"
+          "Value": "Examples:fonts/Roboto-Light.fnt"
         },
         {
           "Id": "835d7f17-9de4-4612-a2f0-01c1346cdf1a"/*Spacing*/,
@@ -373,12 +373,6 @@
       "Outputs": []
     },
     {
-      "Id": "70d81f21-229d-457a-8522-78a609d10def"/*Group*/,
-      "SymbolId": "a3f64d34-1fab-4230-86b3-1c3deba3f90b",
-      "InputValues": [],
-      "Outputs": []
-    },
-    {
       "Id": "787fd478-ed1f-4971-8315-9db20bdab696"/*Blur*/,
       "SymbolId": "946da16c-f536-4887-b764-af9468f22c0f",
       "InputValues": [
@@ -501,11 +495,6 @@
           "Value": 0.87
         },
         {
-          "Id": "ca8724d8-a362-4af4-bdf8-a80a1b0ef72e"/*FolderWithImages*/,
-          "Type": "System.String",
-          "Value": "Resources\\Example\\user\\pixtur\\VJ\\Faces\\wreckageFaces"
-        },
-        {
           "Id": "cabb74b7-72c3-4916-8096-5890fc8e7023"/*BackgroundColor*/,
           "Type": "System.Numerics.Vector4",
           "Value": {
@@ -583,7 +572,7 @@
         {
           "Id": "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3"/*FontPath*/,
           "Type": "System.String",
-          "Value": "Resources\\fonts\\Roboto-Light.fnt"
+          "Value": "Examples:fonts/Roboto-Light.fnt"
         },
         {
           "Id": "835d7f17-9de4-4612-a2f0-01c1346cdf1a"/*Spacing*/,
@@ -917,18 +906,6 @@
       "Outputs": []
     },
     {
-      "Id": "f838ce41-2f69-456b-812a-88330297ce83"/*_Time_old*/,
-      "SymbolId": "9cb4d49e-135b-400b-a035-2b02c5ea6a72",
-      "InputValues": [
-        {
-          "Id": "2d9c040d-5244-40ac-8090-d8d57323487b"/*SpeedFactor*/,
-          "Type": "System.Single",
-          "Value": 16.0
-        }
-      ],
-      "Outputs": []
-    },
-    {
       "Id": "fc704105-0e33-49ef-b343-47d2f94c23f7"/*Value*/,
       "SymbolId": "5d7d61ae-0a41-4ffa-a51d-93bab665e7fe",
       "InputValues": [
@@ -1067,6 +1044,12 @@
       "SourceSlotId": "451bf2c8-8daf-403b-a064-c7252b03c74d",
       "TargetParentOrChildId": "787fd478-ed1f-4971-8315-9db20bdab696",
       "TargetSlotId": "c115fd60-86c5-425f-975b-0b5e92c0f42b"
+    },
+    {
+      "SourceParentOrChildId": "fc704105-0e33-49ef-b343-47d2f94c23f7",
+      "SourceSlotId": "f83f1835-477e-4bb6-93f0-14bf273b8e94",
+      "TargetParentOrChildId": "7e4b111d-5090-45ca-8162-08ec3df91bc8",
+      "TargetSlotId": "7773837e-104a-4b3d-a41f-cadbd9249af2"
     },
     {
       "SourceParentOrChildId": "8e930ae6-b4cb-4759-839b-d08bf81ed56d",

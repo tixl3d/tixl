@@ -79,11 +79,6 @@ internal sealed class SplashScreen : ISplashScreen
 
         _splashForm.Show();
         _splashForm.Refresh();
-        
-        #if RELEASE
-        // only force topmost in release builds, to not interfere with debugging
-        _splashForm.TopMost = true;
-        #endif
     }
 
     public void Close()

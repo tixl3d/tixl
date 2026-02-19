@@ -3,7 +3,7 @@
   "Inputs": [
     {
       "Id": "78fb7501-74d9-4a27-8db2-596f25482c87"/*Source*/,
-      "DefaultValue": "/Lib/dx11/draw-FullscreenTriangle-vs.hlsl"
+      "DefaultValue": "Lib:shaders/dx11/draw-FullscreenTriangle-vs.hlsl"
     },
     {
       "Id": "9a8b500e-c3b1-4be1-8270-202ef3f90793"/*EntryPoint*/,

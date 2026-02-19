@@ -97,7 +97,7 @@
         {
           "Id": "1e4e274b-60b2-4fe8-b275-ebef80d520a7"/*Source*/,
           "Type": "System.String",
-          "Value": "Resources\\lib\\img\\MixChannels.hlsl"
+          "Value": "Lib:shaders/img/MixChannels.hlsl"
         },
         {
           "Id": "6cf68692-43a5-4a93-873c-99aa0d2dde93"/*BufferColor*/,

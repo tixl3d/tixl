@@ -1,0 +1,31 @@
+{
+  "Id": "50cc7ae4-7064-436e-862e-b8f2a709409c"/*SpreadIntoGrid*/,
+  "Inputs": [
+    {
+      "Id": "7c3e1be9-0ee5-4762-9abf-8ab908fed1b1"/*SpreadScale*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "8ed3e486-134a-4047-8f8c-7427f1bde6b9"/*Spread*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 1.0,
+        "Z": 1.0
+      }
+    },
+    {
+      "Id": "bf7c70a5-7b3b-4245-8066-ad17b4eb72cf"/*Commands*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "e7c44d76-44a1-47d7-b31d-7f3a8ed759f7"/*GridSize*/,
+      "DefaultValue": {
+        "X": 3,
+        "Y": 3,
+        "Z": 1
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

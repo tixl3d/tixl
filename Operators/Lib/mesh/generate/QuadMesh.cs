@@ -97,6 +97,7 @@ internal sealed class QuadMesh : Instance<QuadMesh>
                                                                  Bitangent = binormal,
                                                                  Texcoord = uv0,
                                                                  Selection = 1,
+                                                                 ColorRgb = Vector3.One
                                                              };
 
                     if (columnIndex >= columns - 1 || rowIndex >= rows - 1)

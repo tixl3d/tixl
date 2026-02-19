@@ -1,34 +1,29 @@
-﻿#nullable enable
+#nullable enable
 using T3.Core.Audio;
-using T3.Editor.Gui.Interaction.Timing;
-using T3.Editor.UiModel.ProjectHandling;
 
 namespace T3.Editor.Gui.Windows.RenderExport;
 
 internal static class RenderAudioInfo
 {
+    /// <summary>
+    /// Returns the channel count for audio export.
+    /// This always returns 2 (stereo) since the mixer is configured for stereo output.
+    /// </summary>
     public static int SoundtrackChannels()
     {
-        var composition = ProjectView.Focused?.CompositionInstance;
-        if (composition == null)
-            return AudioEngine.GetClipChannelCount(null);
-
-        PlaybackUtils.FindPlaybackSettingsForInstance(composition, out var instanceWithSettings, out var settings);
-        if (settings.TryGetMainSoundtrack(instanceWithSettings, out var soundtrack))
-            return AudioEngine.GetClipChannelCount(soundtrack);
-
-        return AudioEngine.GetClipChannelCount(null);
+        // The mixer is always stereo (2 channels) - see AudioMixerManager.Initialize()
+        // GetFullMixDownBuffer also uses AudioEngine.GetClipChannelCount(null) which defaults to 2
+        return 2;
     }
 
+    /// <summary>
+    /// Returns the sample rate for audio export.
+    /// This always returns the mixer sample rate since GetFullMixDownBuffer renders audio at the mixer frequency.
+    /// </summary>
     public static int SoundtrackSampleRate()
     {
-        var composition = ProjectView.Focused?.CompositionInstance;
-        if (composition == null)
-            return AudioEngine.GetClipSampleRate(null);
-
-        PlaybackUtils.FindPlaybackSettingsForInstance(composition, out var instanceWithSettings, out var settings);
-        return AudioEngine.GetClipSampleRate(settings.TryGetMainSoundtrack(instanceWithSettings, out var soundtrack)
-                                                 ? soundtrack
-                                                 : null);
+        // Audio is always rendered at the mixer sample rate during export
+        // (GetFullMixDownBuffer uses AudioConfig.MixerFrequency for all mixing)
+        return AudioConfig.MixerFrequency;
     }
 }

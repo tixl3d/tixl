@@ -1,8 +1,11 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using T3.Core.Operator;
+using T3.Core.Operator.Slots;
+using T3.Editor.Gui.InputUi.SimpleInputUis;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.ProjectHandling;
 
@@ -36,6 +39,7 @@ internal static class SymbolAnalysis
     /// </summary>
     internal static void UpdateSymbolUsageCounts()
     {
+        Log.Debug("Updating symbol counts...");
         var usages = CollectSymbolUsageCounts();
         ConnectionHashCounts = new Dictionary<int, int>();
 
@@ -280,6 +284,7 @@ internal static class SymbolAnalysis
         {
             "Types",
             "Lib",
+            "Examples",
             root.SymbolPackage.RootNamespace,
         };
 
@@ -353,4 +358,30 @@ internal static class SymbolAnalysis
         return (usageCounts, reverseDeps);
     }
     #endregion
+
+    public static bool TryGetFileInputFromInstance(Instance instance,
+                                                   [NotNullWhen(true)] out InputSlot<string>? stringInput,
+                                                   [NotNullWhen(true)] out StringInputUi? stringInputUi)
+    {
+        stringInput = null;
+        stringInputUi = null;
+
+        var symbolUi = instance.GetSymbolUi();
+        foreach (var input in instance.Inputs)
+        {
+            if (input is not InputSlot<string> tmpStringInput)
+                continue;
+
+            stringInput = tmpStringInput;
+
+            var inputUi = symbolUi.InputUis[input.Id];
+            if (inputUi is not StringInputUi { Usage: StringInputUi.UsageType.FilePath } tmpStringInputUi)
+                continue;
+
+            stringInputUi = tmpStringInputUi;
+            return true;
+        }
+
+        return false;
+    }
 }

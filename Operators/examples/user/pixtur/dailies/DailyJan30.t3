@@ -131,7 +131,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Resources\\common\\meshes\\marblePlayer.obj"
+          "Value": "Examples:meshes/marblePlayer.obj"
         }
       ],
       "Outputs": []
@@ -702,7 +702,7 @@
         {
           "Id": "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3"/*FontPath*/,
           "Type": "System.String",
-          "Value": "Resources\\fonts\\Roboto-Black.fnt"
+          "Value": "Examples:fonts/Roboto-Black.fnt"
         },
         {
           "Id": "835d7f17-9de4-4612-a2f0-01c1346cdf1a"/*Spacing*/,

@@ -1,0 +1,30 @@
+{
+  "Id": "02fe1b32-8819-4c8a-8ab4-d353ebcddfe3"/*PickObject*/,
+  "Description": "Pick on of the connected objects. This can be useful for switching between camera references.",
+  "InputUis": [
+    {
+      "InputId": "1fd71ea2-177a-4d2f-9a8f-c620c29d1766"/*Index*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      }
+    },
+    {
+      "InputId": "a4095b7e-2fad-42e5-b518-848f2645aa7d"/*Input*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "3af9e7bc-a12c-465d-973d-5d3a8ef76b30"/*Selected*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    }
+  ]
+}

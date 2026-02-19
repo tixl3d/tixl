@@ -3,7 +3,7 @@
   "Inputs": [
     {
       "Id": "05acba8d-1dd1-4d6c-beff-e11e466f7253"/*FilePath*/,
-      "DefaultValue": "/t3/test-footage/Monono_font.svg"
+      "DefaultValue": "Examples:user/pixtur/research/SvgFonts/Monono_font.svg"
     },
     {
       "Id": "1077857c-93fa-403a-bbd1-fd5b2b402ae6"/*Position*/,

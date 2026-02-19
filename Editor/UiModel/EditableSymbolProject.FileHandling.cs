@@ -5,6 +5,7 @@ using System.Threading;
 using Newtonsoft.Json;
 using T3.Core.Model;
 using T3.Core.Operator;
+using T3.Core.Resource;
 
 namespace T3.Editor.UiModel;
 
@@ -240,8 +241,12 @@ internal sealed partial class EditableSymbolProject
         if (name.EndsWith("AssemblyInfo.cs"))
             return;
 
+        if (name.StartsWith(@"bin\", StringComparison.Ordinal) || name.StartsWith("bin/", StringComparison.Ordinal))
+            return;
+        
         Log.Info($"{DisplayName}: Code file changed: {name}");
         CodeExternallyModified = true;
+        ResourceFileWatcher.FileStateChangeCounter++;
         //TryRecompile(true); // don't recompile here - we need to make sure this happens on the main thread
     }
 
@@ -274,6 +279,7 @@ internal sealed partial class EditableSymbolProject
             NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.CreationTime | NotifyFilters.FileName | NotifyFilters.DirectoryName;
 
             IncludeSubdirectories = true;
+            
             Changed += onChange;
             Created += onChange;
             Renamed += onRename;

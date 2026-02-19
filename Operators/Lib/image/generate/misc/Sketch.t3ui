@@ -33,7 +33,7 @@
       "InputId": "2ded8235-157d-486b-a997-87d09d18f998"/*Filename*/,
       "Position": {
         "X": 98.33612,
-        "Y": 261.09412
+        "Y": 296.09412
       },
       "Usage": "FilePath"
     },
@@ -52,7 +52,7 @@
       "InputId": "37093302-053a-47b2-ace6-b9d310d3f4b7"/*OverridePageIndex*/,
       "Position": {
         "X": 98.33612,
-        "Y": 296.09412
+        "Y": 331.09412
       }
     },
     {
@@ -65,6 +65,13 @@
       "Max": 1.0,
       "ClampMin": true,
       "ClampMax": true
+    },
+    {
+      "InputId": "5b41e5e9-1cc5-4c26-9b94-433750ef86fc"/*ColorMode*/,
+      "Position": {
+        "X": 98.33612,
+        "Y": 261.09412
+      }
     },
     {
       "InputId": "5cdb04d5-9bef-4789-8082-ea04e56b3ca7"/*Resolution*/,
@@ -315,8 +322,8 @@
     {
       "ChildId": "f31aa01e-c9de-43fa-a68f-567f9c1cfad1"/*RoundedRect*/,
       "Position": {
-        "X": 650.84973,
-        "Y": 580.59644
+        "X": 679.13983,
+        "Y": 174.09628
       }
     },
     {

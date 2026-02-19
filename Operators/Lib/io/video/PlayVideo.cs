@@ -6,6 +6,8 @@ using SharpDX.MediaFoundation;
 using T3.Core.Animation;
 using T3.Core.Audio;
 using T3.Core.DataTypes.DataSet;
+using T3.Core.IO;
+using T3.Core.Resource.Assets;
 using T3.Core.Utils;
 // ReSharper disable MemberCanBePrivate.Global
 
@@ -45,7 +47,7 @@ internal sealed class PlayVideo : Instance<PlayVideo>, IStatusProvider
                                 : context.Playback.SecondsFromBars(context.LocalTime);
 
         var relativePath = Path.GetValue(context);
-        if (!ResourceManager.TryResolveRelativePath(relativePath, this, out var absolutePath, out _))
+        if (!AssetRegistry.TryResolveAddress(relativePath, this, out var absolutePath, out _))
         {
             _playbackController.ErrorMessageForStatus = "Can't find video " + relativePath;
             return;
@@ -146,14 +148,8 @@ internal sealed class PlayVideo : Instance<PlayVideo>, IStatusProvider
                                    && !Playback.Current.IsRenderingToFile
                                    && !HasPlaybackCompleted;
 
-            /***
-             * Mute video if audio engine is muted
-             * FIXME: does not work when the video is not updating...
-             *
-             * Fixing this will require some thought: To managed audio-levels and playback centrally we probably need
-             * an interfaces to register all audio sources and provides functions like muting, stop, setting audio level, etc.
-             */
-            _engine.Volume = AudioEngine.IsMuted ? 0 : volume.Clamp(0f, 1f);
+            // Set the volume while respecting the global mute/volume settings
+            _engine.Volume = ProjectSettings.Config.GlobalMute ? 0 : volume.Clamp(0f, 1f) * ProjectSettings.Config.GlobalPlaybackVolume;
 
             if ((ReadyStates)_engine.ReadyState <= ReadyStates.HaveNothing)
                 return false;
@@ -459,9 +455,9 @@ internal sealed class PlayVideo : Instance<PlayVideo>, IStatusProvider
             }
             catch (SharpDXException e)
             {
-                var unableToSwitchVideoSourceError = "unable to switch video source..." + e.Message;
-                ErrorMessageForStatus = unableToSwitchVideoSourceError;
-                Log.Debug(unableToSwitchVideoSourceError, this);
+                var errorMessage = "unable to switch video source..." + e.Message;
+                ErrorMessageForStatus = errorMessage;
+                Log.Debug(errorMessage, this);
             }
         }
 

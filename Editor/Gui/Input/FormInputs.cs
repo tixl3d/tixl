@@ -344,7 +344,7 @@ internal static class FormInputs
 
          // Compute box height: account for all items plus the bottom transient add-row; add 1.5 lines total so the add-row is visible
          var lineHeight = ImGui.GetTextLineHeightWithSpacing();
-         var listBoxHeight = MathF.Min(300, (values.Count + 1.5f) * lineHeight);
+         var listBoxHeight = MathF.Min(300, (values.Count + 2.5f) * lineHeight);
          var size = inputSize with { Y = listBoxHeight };
 
          var modified = false;

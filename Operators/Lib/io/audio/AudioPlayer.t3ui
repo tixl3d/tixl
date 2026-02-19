@@ -1,0 +1,162 @@
+{
+  "Id": "65e95f77-4743-437f-ab31-f34b831d28d7"/*AudioPlayer*/,
+  "Description": "An audio player using BASS audio library. Features include:\n\n- [Playback Control]: Independent play, pause, and stop functionality with seek support\n- [Stereo Panning]: Position audio in the stereo field from left to right\n- [ADSR Envelope]: Optional amplitude envelope for dynamic volume shaping\n- [Speed Control]: Playback speed multiplier (affects pitch)",
+  "InputUis": [
+    {
+      "InputId": "1a3f4b7c-12d3-4a5b-9c7d-8e1f2a3b4c5d"/*Mute*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 300.0
+      },
+      "Description": "When enabled, mutes the audio output without stopping playback"
+    },
+    {
+      "InputId": "3dbcbbe6-a8b4-4b83-a2c0-e22b24b91b42"/*Envelope*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 700.0
+      },
+      "Description": "ADSR envelope applied to amplitude when UseEnvelope is enabled",
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "UseVec4Control": "AdsrEnvelope"
+    },
+    {
+      "InputId": "505139a0-71ce-4297-8440-5bf84488902e"/*AudioFile*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "Path to the audio file to play",
+      "Usage": "FilePath",
+      "FileFilter": "mp3, wav, ogg, flac"
+    },
+    {
+      "InputId": "53d1622e-b1d5-4b1c-acd0-ebceb7064043"/*Panning*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 350.0
+      },
+      "Description": "Stereo panning position (-1.0 = left, 0.0 = center, 1.0 = right)",
+      "Min": -1.0,
+      "Max": 1.0,
+      "Scale": 0.001,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "59b659c6-ca1f-4c2b-8dff-3a1da9abd352"/*StopAudio*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 125.0
+      },
+      "Description": "Stops the audio playback and resets the position to the beginning"
+    },
+    {
+      "InputId": "726bc4d3-df8b-4abe-a38e-2e09cf44ca10"/*PlayAudio*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      },
+      "Description": "Trigger to start or resume audio playback"
+    },
+    {
+      "InputId": "7e42f2a8-3c5d-4f6e-9b8a-1d2e3f4a5b6c"/*PauseAudio*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 175.0
+      },
+      "Description": "Pauses the audio playback at the current position"
+    },
+    {
+      "InputId": "905d9e01-b1fb-47c0-801c-fc920ed36884"/*TriggerMode*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 475.0
+      },
+      "GroupTitle": "Envelope",
+      "Description": "The trigger behavior mode (e.g., trigger or gate) for envelope playback"
+    },
+    {
+      "InputId": "a5de0d72-5924-4f3a-a02f-d5de7c03f07f"/*Seek*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 400.0
+      },
+      "Description": "Seek to a normalized position in the audio file (0.0 = start, 1.0 = end)",
+      "Min": 0.0,
+      "Max": 0.99,
+      "Scale": 0.001,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e"/*UseEnvelope*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 625.0
+      },
+      "Description": "When enabled, applies the Envelope input to modulate amplitude"
+    },
+    {
+      "InputId": "c0645e37-db4e-4658-9d65-96478851f6f6"/*Volume*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 250.0
+      },
+      "Description": "The master volume level of the audio (0.0 = silent, 1.0 = full volume, >1.0 = amplified)",
+      "Min": 0.0,
+      "Max": 2.0,
+      "Scale": 0.001,
+      "ClampMin": true
+    },
+    {
+      "InputId": "d1a11c4c-9526-4f6b-873e-1798b9dd2b48"/*Speed*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 425.0
+      },
+      "Description": "Playback speed multiplier (1.0 = normal speed, affects pitch)",
+      "Min": 0.001,
+      "Max": 4.0,
+      "Scale": 1.0,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "f7a8b9c0-d1e2-4f3a-5b6c-7d8e9f0a1b2c"/*Duration*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 550.0
+      },
+      "Description": "Optional duration override for playback (in seconds)",
+      "Min": 0.0,
+      "ClampMin": true
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "2433f838-a8ba-4f3a-809e-2d41c404bb84"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 100.0
+      }
+    },
+    {
+      "OutputId": "960aa0a3-89b4-4eff-8b52-36ff6965cf8f"/*IsPlaying*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    },
+    {
+      "OutputId": "b09d215a-bcf0-479a-a649-56f9c698ecb1"/*GetLevel*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 300.0
+      }
+    }
+  ]
+}

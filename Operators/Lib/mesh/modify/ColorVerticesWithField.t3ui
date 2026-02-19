@@ -1,0 +1,135 @@
+{
+  "Id": "501d75f4-c789-4946-a7ed-cca9245d38ef"/*ColorVerticesWithField*/,
+  "Description": "Uses a color field to set vertex colors from their position in that field.",
+  "InputUis": [
+    {
+      "InputId": "d8c32b3b-8d88-448c-9af5-8e9e1cb9884e"/*Mesh*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 859.8004,
+        "Y": 1460.0486
+      }
+    },
+    {
+      "InputId": "e0537ef5-5d77-48dd-8b53-043fc7ec1338"/*Strength*/,
+      "Position": {
+        "X": 1361.3712,
+        "Y": 1239.936
+      },
+      "AddPadding": "True",
+      "Min": 0.0,
+      "Max": 1.0,
+      "Scale": 0.01
+    },
+    {
+      "InputId": "f6064029-0a27-4598-9766-0bfe0e2e4eb4"/*SdfField*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 1361.3712,
+        "Y": 943.66724
+      }
+    },
+    {
+      "InputId": "f61722bb-11f3-4eb9-bb02-ca6161875492"/*StrengthFactor*/,
+      "Position": {
+        "X": 1361.3712,
+        "Y": 1289.3162
+      }
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "153726f1-7158-4e1f-97cc-8a1567353b10"/*StructuredBufferWithViews*/,
+      "Position": {
+        "X": 1501.3712,
+        "Y": 1382.8868
+      }
+    },
+    {
+      "ChildId": "2f3981a7-fbba-4148-87cc-e4ce02ac1aa2"/*GenerateShaderGraphCode*/,
+      "Position": {
+        "X": 1361.3712,
+        "Y": 978.66724
+      }
+    },
+    {
+      "ChildId": "407904e0-925a-4ac1-8207-0d50439eb391"/*CalcDispatchCount*/,
+      "Position": {
+        "X": 1501.3712,
+        "Y": 1118.6672
+      }
+    },
+    {
+      "ChildId": "4af5527c-8c43-464b-ad3e-e81abc4a7ef5"/*_MeshBufferComponents*/,
+      "Position": {
+        "X": 859.8004,
+        "Y": 1495.0486
+      }
+    },
+    {
+      "ChildId": "814b49e4-c9f8-4457-85d4-ef735fa1238f"/*ExecuteBufferUpdate*/,
+      "Position": {
+        "X": 1837.3279,
+        "Y": 1419.3755
+      }
+    },
+    {
+      "ChildId": "85fc6304-81b0-4e89-ac27-73695f8e0a1f"/*ComputeShaderFromSource*/,
+      "Position": {
+        "X": 1361.3712,
+        "Y": 1083.6672
+      }
+    },
+    {
+      "ChildId": "9053bb41-59cd-4fe3-b8b0-01afbc0c5cef"/*GetBufferComponents*/,
+      "Position": {
+        "X": 1501.3712,
+        "Y": 1452.8868
+      }
+    },
+    {
+      "ChildId": "9336cde8-e576-472a-a237-aca373262867"/*FloatsToBuffer*/,
+      "Position": {
+        "X": 1501.3713,
+        "Y": 1204.936
+      }
+    },
+    {
+      "ChildId": "c62cc40e-f292-4aa8-b9de-d1af548ed9a2"/*ComputeShaderStage*/,
+      "Position": {
+        "X": 1837.3279,
+        "Y": 1139.3755
+      }
+    },
+    {
+      "ChildId": "c9720577-72ad-41e7-b749-9111960ca1f3"/*GetBufferComponents*/,
+      "Position": {
+        "X": 1177.589,
+        "Y": 1333.1266
+      }
+    },
+    {
+      "ChildId": "cdc75cfa-c5ad-475a-8511-6be5ed3ef38f"/*_AssembleMeshBuffers*/,
+      "Position": {
+        "X": 1837.3279,
+        "Y": 1489.3755
+      }
+    },
+    {
+      "ChildId": "e5687b53-e695-435a-82f7-28c7092888f6"/*IntsToBuffer*/,
+      "Position": {
+        "X": 1501.3712,
+        "Y": 1289.3162
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "3837931f-00d5-47d6-84e8-3e9cd3e3d252"/*OutMesh*/,
+      "Position": {
+        "X": 1837.3279,
+        "Y": 1594.3755
+      }
+    }
+  ]
+}

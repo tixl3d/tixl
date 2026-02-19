@@ -45,7 +45,7 @@
         {
           "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
           "Type": "System.String",
-          "Value": "Resources/lib/cs/particle-PointCollisionForce.hlsl"
+          "Value": "Lib:shaders/cs/particle-PointCollisionForce.hlsl"
         }
       ],
       "Outputs": []
@@ -91,7 +91,7 @@
         {
           "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
           "Type": "System.String",
-          "Value": "Resources/lib/particles/ParticleCollisionForce.hlsl"
+          "Value": "Lib:shaders/particles/ParticleCollisionForce.hlsl"
         }
       ],
       "Outputs": []

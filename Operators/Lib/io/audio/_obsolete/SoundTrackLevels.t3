@@ -7,7 +7,7 @@
     },
     {
       "Id": "839bab2b-440f-40e9-a670-723f2a684aa9"/*FilePath*/,
-      "DefaultValue": "Resources\\proj-numbers\\soundtrack\\synthtoad-02.mp3.midlevels.json"
+      "DefaultValue": "Lib:Resources/proj-numbers/soundtrack/synthtoad-02.mp3.midlevels.json"
     },
     {
       "Id": "9b510876-f2a4-49f1-acd2-8cefb5662a2a"/*FlashDecay*/,
