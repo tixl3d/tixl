@@ -150,7 +150,7 @@ internal class FFMpegVideoWriter : IDisposable
                                 break;
                                 // Add others if needed
                         }
-                        
+
                         // Apply scaling for image sequence
                         if (_outputVideoSize != _videoPixelSize)
                         {
@@ -234,10 +234,6 @@ internal class FFMpegVideoWriter : IDisposable
                 FFMpegRenderSettings.SelectedCodec.Vp9 => "libopus",
                 _ => "aac"
             };
-            void volumeFilter(AudioFilterOptions options)
-            {
-                options.Arguments.Add(new VolumeArgument(ProjectSettings.Config.PlaybackVolume));
-            }
             var args = FFMpegArguments
                 .FromFileInput(videoFile)
                 .AddFileInput(audioFile, true, options =>
@@ -250,7 +246,6 @@ internal class FFMpegVideoWriter : IDisposable
                 {
                     options.CopyChannel() // Copy video stream as-is
                            .WithAudioCodec(audioCodec)
-                           .WithAudioFilters(volumeFilter)
                            .WithCustomArgument("-shortest"); // Match shortest stream
                 });
 

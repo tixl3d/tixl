@@ -27,19 +27,19 @@ internal static class FFMpegRenderProcess
     public static int FrameIndex => _frameIndex;
     public static int FrameCount => _frameCount;
     public static double Progress => _frameCount <= 1 ? 0.0 : (_frameIndex / (double)(_frameCount - 1));
-    
+
     public static Type? MainOutputType { get; private set; }
     public static Int2 MainOutputOriginalSize;
     public static Int2 MainOutputRenderedSize;
     public static Texture2D? MainOutputTexture;
-    
+
     public static States State;
 
     public static bool IsExporting { get; private set; }
     public static bool IsToollRenderingSomething { get; private set; }
-    
+
     public static double ExportStartedTimeLocal;
-    
+
     public enum States
     {
         NoOutputWindow,
@@ -49,7 +49,7 @@ internal static class FFMpegRenderProcess
         Exporting,
         Downloading // New state
     }
-    
+
     public static float DownloadProgress { get; private set; }
 
     public static void Update()
@@ -84,13 +84,13 @@ internal static class FFMpegRenderProcess
 
             var width = (int)(desc.Width * FFMpegRenderSettings.Current.ResolutionFactor);
             var height = (int)(desc.Height * FFMpegRenderSettings.Current.ResolutionFactor);
-            
+
             // Ensure even dimensions for video codecs
             width = (width / 2 * 2).Clamp(2, 16384);
             height = (height / 2 * 2).Clamp(2, 16384);
-            
+
             MainOutputRenderedSize = new Int2(width, height);
-            
+
             State = States.WaitingForExport;
             return;
         }
@@ -103,32 +103,45 @@ internal static class FFMpegRenderProcess
         State = States.Exporting;
 
         // Process frame
-        var audioFrame = AudioRendering.GetLastMixDownBuffer(1.0 / _renderSettings.Fps);
-        
+        double localFxTime = _frameIndex / _renderSettings.Fps;
+        var audioFrameFloat = AudioRendering.GetFullMixDownBuffer(1.0 / _renderSettings.Fps);
+        // Safety: ensure audioFrameFloat is valid and sized
+        if (audioFrameFloat == null || audioFrameFloat.Length == 0)
+        {
+            Log.Error($"RenderProcess: AudioRendering.GetFullMixDownBuffer returned null or empty at frame {_frameIndex}", typeof(RenderProcess));
+            int sampleRate = RenderAudioInfo.SoundtrackSampleRate();
+            int channels = RenderAudioInfo.SoundtrackChannels();
+            int floatCount = (int)Math.Max(Math.Round((1.0 / _renderSettings.Fps) * sampleRate), 0.0) * channels;
+            audioFrameFloat = new float[floatCount]; // silence
+        }
+        var audioFrame = new byte[audioFrameFloat.Length * sizeof(float)];
+        Buffer.BlockCopy(audioFrameFloat, 0, audioFrame, 0, audioFrame.Length);
+        AudioRendering.EvaluateAllAudioMeteringOutputs(localFxTime, audioFrameFloat);
+
         bool success = true;
-        try 
+        try
         {
             _videoWriter?.ProcessFrames(MainOutputTexture, ref audioFrame);
             _frameIndex++;
-             // We need to advance time!
+            // We need to advance time!
             RenderTiming.SetPlaybackTimeForFrame(ref _renderSettings, _frameIndex, _frameCount, ref _runtime);
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             LastHelpString = e.Message;
             success = false;
         }
 
         // Update stats
-        var currentFrame =  _frameIndex;
+        var currentFrame = _frameIndex;
         var completed = currentFrame >= _frameCount || !success;
 
-        if (!completed) 
+        if (!completed)
             return;
 
         Finished();
     }
-    
+
     private static void Finished()
     {
         var duration = Playback.RunTimeInSecs - _exportStartedTime;
@@ -137,7 +150,7 @@ internal static class FFMpegRenderProcess
 
         if (_renderSettings.Bitrate > 0 && true) // Check auto-increment?
         {
-             // Maybe implement increment if settings have it
+            // Maybe implement increment if settings have it
         }
 
         Cleanup();
@@ -153,71 +166,71 @@ internal static class FFMpegRenderProcess
         }
 
         var targetFilePath = RenderPaths.GetTargetFilePath(renderSettings.RenderMode);
-        
+
         // Ensure directory exists for Image Sequence (in case it wasn't created by overwrite check or new folder)
         if (renderSettings.RenderMode == RenderSettings.RenderModes.ImageSequence)
         {
-             // Resolve paths
-             var mainFolder = RenderPaths.ResolveProjectRelativePath(UserSettings.Config.RenderSequenceFilePath);
-             var subFolder = UserSettings.Config.RenderSequenceFileName;
-             var prefix = UserSettings.Config.RenderSequencePrefix;
-             
-             // Handle Auto-Increment
-             if (renderSettings.CreateSubFolder && renderSettings.AutoIncrementSubFolder)
-             {
-                 // Find next free folder
-                 var foundPath = RenderPaths.GetNextVersionForFolder(mainFolder, subFolder);
-                 
-                 // Update User Settings to reflect the new state for next time
-                 var newSubFolderName = Path.GetFileName(foundPath);
-                 UserSettings.Config.RenderSequenceFileName = newSubFolderName;
-                 UserSettings.Save();
-                 
-                 subFolder = newSubFolderName;
-             }
-             
-             // Construct final directory
-             var exportDir = renderSettings.CreateSubFolder 
-                             ? Path.Combine(mainFolder, subFolder) 
-                             : mainFolder;
+            // Resolve paths
+            var mainFolder = RenderPaths.ResolveProjectRelativePath(UserSettings.Config.RenderSequenceFilePath);
+            var subFolder = UserSettings.Config.RenderSequenceFileName;
+            var prefix = UserSettings.Config.RenderSequencePrefix;
 
-             if (!Directory.Exists(exportDir))
-             {
-                 try { Directory.CreateDirectory(exportDir); }
-                 catch (Exception e) 
-                 {
-                     Log.Error($"Could not create directory {exportDir}: {e.Message}");
-                     return;
-                 }
-             }
+            // Handle Auto-Increment
+            if (renderSettings.CreateSubFolder && renderSettings.AutoIncrementSubFolder)
+            {
+                // Find next free folder
+                var foundPath = RenderPaths.GetNextVersionForFolder(mainFolder, subFolder);
 
-             var extension = renderSettings.FileFormat.ToString().ToLower();
-             targetFilePath = Path.Combine(exportDir, $"{prefix}_%04d.{extension}");
+                // Update User Settings to reflect the new state for next time
+                var newSubFolderName = Path.GetFileName(foundPath);
+                UserSettings.Config.RenderSequenceFileName = newSubFolderName;
+                UserSettings.Save();
+
+                subFolder = newSubFolderName;
+            }
+
+            // Construct final directory
+            var exportDir = renderSettings.CreateSubFolder
+                            ? Path.Combine(mainFolder, subFolder)
+                            : mainFolder;
+
+            if (!Directory.Exists(exportDir))
+            {
+                try { Directory.CreateDirectory(exportDir); }
+                catch (Exception e)
+                {
+                    Log.Error($"Could not create directory {exportDir}: {e.Message}");
+                    return;
+                }
+            }
+
+            var extension = renderSettings.FileFormat.ToString().ToLower();
+            targetFilePath = Path.Combine(exportDir, $"{prefix}_%04d.{extension}");
         }
         else
         {
-             var correctExtension = FFMpegRenderSettings.GetFileExtension(renderSettings.Codec);
-             targetFilePath = Path.ChangeExtension(targetFilePath, correctExtension);
+            var correctExtension = FFMpegRenderSettings.GetFileExtension(renderSettings.Codec);
+            targetFilePath = Path.ChangeExtension(targetFilePath, correctExtension);
 
-             if (renderSettings.AutoIncrementVideo)
-             {
-                 if (!RenderPaths.IsFilenameIncrementable(targetFilePath))
-                 {
-                     targetFilePath = RenderPaths.GetNextIncrementedPath(targetFilePath);
-                 }
+            if (renderSettings.AutoIncrementVideo)
+            {
+                if (!RenderPaths.IsFilenameIncrementable(targetFilePath))
+                {
+                    targetFilePath = RenderPaths.GetNextIncrementedPath(targetFilePath);
+                }
 
-                 while (File.Exists(targetFilePath))
-                 {
-                     targetFilePath = RenderPaths.GetNextIncrementedPath(targetFilePath);
-                 }
-                 
-                 UserSettings.Config.RenderVideoFilePath = targetFilePath;
-                 UserSettings.Save();
-             }
+                while (File.Exists(targetFilePath))
+                {
+                    targetFilePath = RenderPaths.GetNextIncrementedPath(targetFilePath);
+                }
+
+                UserSettings.Config.RenderVideoFilePath = targetFilePath;
+                UserSettings.Save();
+            }
         }
-        
+
         LastOutputPath = targetFilePath;
-        
+
         var tempSettings = new RenderSettings()
         {
             Reference = (RenderSettings.TimeReference)renderSettings.Reference,
@@ -228,19 +241,19 @@ internal static class FFMpegRenderProcess
             TimeRange = (RenderSettings.TimeRanges)renderSettings.TimeRange
         };
         renderSettings.FrameCount = RenderTiming.ComputeFrameCount(tempSettings);
-        
+
         IsToollRenderingSomething = true;
         ExportStartedTimeLocal = Core.Animation.Playback.RunTimeInSecs;
 
         _renderSettings = tempSettings;
-        
+
         _frameIndex = 0;
         _frameCount = Math.Max(_renderSettings.FrameCount, 0);
         _exportStartedTime = Playback.RunTimeInSecs;
 
         var channels = 2;
         var sampleRate = 48000;
-        
+
         // Only get audio info if exporting audio and NOT image sequence
         var exportAudio = renderSettings.ExportAudio && renderSettings.RenderMode != RenderSettings.RenderModes.ImageSequence;
         if (exportAudio)
@@ -250,18 +263,18 @@ internal static class FFMpegRenderProcess
         }
 
         _videoWriter = new FFMpegVideoWriter(targetFilePath, MainOutputOriginalSize, MainOutputRenderedSize, exportAudio, sampleRate, channels)
-                           {
-                               Bitrate = renderSettings.Bitrate,
-                               Framerate = renderSettings.Fps,
-                               Codec = renderSettings.Codec,
-                               Crf = renderSettings.CrfQuality,
-                               Preset = renderSettings.Preset,
-                               WebpQuality = renderSettings.WebpQuality,
-                               WebpCompressionLevel = renderSettings.WebpCompressionLevel,
-                               IsImageSequence = renderSettings.RenderMode == RenderSettings.RenderModes.ImageSequence,
-                               ImageFormat = renderSettings.FileFormat
-                           };
-                           
+        {
+            Bitrate = renderSettings.Bitrate,
+            Framerate = renderSettings.Fps,
+            Codec = renderSettings.Codec,
+            Crf = renderSettings.CrfQuality,
+            Preset = renderSettings.Preset,
+            WebpQuality = renderSettings.WebpQuality,
+            WebpCompressionLevel = renderSettings.WebpCompressionLevel,
+            IsImageSequence = renderSettings.RenderMode == RenderSettings.RenderModes.ImageSequence,
+            ImageFormat = renderSettings.FileFormat
+        };
+
         _videoWriter.Start();
 
         RenderTiming.SetPlaybackTimeForFrame(ref _renderSettings, _frameIndex, _frameCount, ref _runtime);
@@ -283,11 +296,11 @@ internal static class FFMpegRenderProcess
         _videoWriter = null;
         RenderTiming.ReleasePlaybackTime(ref _renderSettings, ref _runtime);
     }
-    
+
     // FFMpeg install logic
     public static bool IsFFMpegAvailable()
     {
-        try 
+        try
         {
             var folder = GetFFBinariesFolder();
             return File.Exists(Path.Combine(folder, "ffmpeg.exe"));
@@ -297,28 +310,28 @@ internal static class FFMpegRenderProcess
             return false;
         }
     }
-    
+
     public static async void InstallFFMpeg()
     {
         var folder = GetFFBinariesFolder();
         State = States.Downloading;
         DownloadProgress = 0f;
-        
-        try 
+
+        try
         {
             if (!Directory.Exists(folder))
                 Directory.CreateDirectory(folder);
 
             Log.Info($"Downloading FFMpeg to {folder}...");
-            
-            await FFMpegDownloader.DownloadBinaries(FFMpegCore.Extensions.Downloader.Enums.FFMpegVersions.LatestAvailable, 
+
+            await FFMpegDownloader.DownloadBinaries(FFMpegCore.Extensions.Downloader.Enums.FFMpegVersions.LatestAvailable,
                                                     options: new FFOptions { BinaryFolder = folder });
-            
+
             DownloadProgress = 1.0f;
-            
+
             Log.Info("FFMpeg download complete.");
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             Log.Error($"Failed to download FFMpeg: {e.Message}");
         }
@@ -326,17 +339,17 @@ internal static class FFMpegRenderProcess
         {
             State = States.NoOutputWindow; // Reset state or let Update() fix it
         }
-        
+
         // Configure options
         GlobalFFOptions.Configure(new FFOptions { BinaryFolder = folder });
     }
-    
+
     private static string GetFFBinariesFolder()
     {
         // Save in user profile or app data
         return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Tixl", "ffmpeg");
     }
-    
+
     // Initialize
     static FFMpegRenderProcess()
     {
