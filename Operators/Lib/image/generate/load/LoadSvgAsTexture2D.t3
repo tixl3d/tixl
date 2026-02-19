@@ -9,11 +9,22 @@
       }
     },
     {
+      "Id": "3e8f9a1b-2c4d-5e6f-7a8b-9c0d1e2f3a4b"/*SelectLayerRange*/,
+      "DefaultValue": {
+        "X": 0,
+        "Y": 0
+      }
+    },
+    {
       "Id": "89cd0433-8646-47f3-a22e-afe1344c6f07"/*Scale*/,
       "DefaultValue": 1.0
     },
     {
       "Id": "a01425ad-e38f-4a80-b8cf-a2ea03895fe2"/*UseViewBox*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "a13f5039-65a7-45b2-9407-50d718ccb13b"/*SplitToLayers*/,
       "DefaultValue": false
     },
     {

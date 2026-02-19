@@ -2,7 +2,6 @@ using Lib.Utils;
 using SharpDX.WIC;
 using Svg;
 using Svg.Transforms;
-using System.Linq;
 
 namespace Lib.image.generate.load;
 
@@ -39,31 +38,23 @@ internal sealed class LoadSvgAsTexture2D : Instance<LoadSvgAsTexture2D>, IDescri
             try
             {
                 // Work with an SvgDocument to preserve coordinate systems
-                SvgDocument workingDocument;
+                var workingDocument = svgDocument;
 
-                
-                if (!splitToLayers)
-                {
-                    // Use the original document for all elements
-                    workingDocument = svgDocument;
-                }
-                else
+                if (splitToLayers)
                 {
                     // Get actual content layers with their parent attributes
                     var contentLayersWithParents = GetContentLayersWithParentAttributes(svgDocument).ToList();
-
+                    Log.Info($"Found {contentLayersWithParents.Count} layers in {Path.Value}", this);
                     if (contentLayersWithParents.Count > 0)
                     {
                         // Validate and normalize range
-                        int startIndex = Math.Max(0, Math.Min(selectLayerRange.X, contentLayersWithParents.Count - 1));
-                        int endIndex = Math.Max(0, Math.Min(selectLayerRange.Y, contentLayersWithParents.Count - 1));
+                        var startIndex = Math.Max(0, Math.Min(selectLayerRange.X, contentLayersWithParents.Count - 1));
+                        var endIndex = Math.Max(0, Math.Min(selectLayerRange.Y, contentLayersWithParents.Count - 1));
 
                         // Make sure start <= end
                         if (startIndex > endIndex)
                         {
-                            int temp = startIndex;
-                            startIndex = endIndex;
-                            endIndex = temp;
+                            (endIndex, startIndex) = (startIndex, endIndex);
                         }
 
                         // Create a new document with the same properties
@@ -85,7 +76,7 @@ internal sealed class LoadSvgAsTexture2D : Instance<LoadSvgAsTexture2D>, IDescri
                         // Add selected layers to the new document
                         // ElementRange 0,1 means layers at index 0 and 1 (first two layers)
                         // ElementRange 1,5 means layers at indices 1,2,3,4,5
-                        for (int i = startIndex; i <= endIndex; i++)
+                        for (var i = startIndex; i <= endIndex; i++)
                         {
                             var (element, parentGroup) = contentLayersWithParents[i];
 
@@ -108,13 +99,8 @@ internal sealed class LoadSvgAsTexture2D : Instance<LoadSvgAsTexture2D>, IDescri
                                 // No parent attributes, add directly
                                 workingDocument.Children.Add(clonedElement);
                             }
-                        }
-                    }
-                    else
-                    {
-                        // No content layers found, use original
-                        workingDocument = svgDocument;
-                    }
+                        }     
+                    }      
                 }
 
                 // Rasterize the SVG to a bitmap
@@ -137,7 +123,7 @@ internal sealed class LoadSvgAsTexture2D : Instance<LoadSvgAsTexture2D>, IDescri
                     height = (int)(workingDocument.ViewBox.Height * scale);
                 }
 
-                // Render the document
+                // Render to bitmap at the desired resolution
                 rasterizedBitmap = workingDocument.Draw(width, height);
 
                 if (rasterizedBitmap == null)
@@ -173,7 +159,7 @@ internal sealed class LoadSvgAsTexture2D : Instance<LoadSvgAsTexture2D>, IDescri
                 {
                     Log.Error($"Failed to generate mipmaps for texture {Path.Value}: " + exception);
                 }
-
+                
                 _lastErrorMessage = string.Empty;
             }
             catch (Exception ex)
@@ -199,7 +185,7 @@ internal sealed class LoadSvgAsTexture2D : Instance<LoadSvgAsTexture2D>, IDescri
     /// This handles cases where SVG editors wrap everything in unnecessary container groups.
     /// Returns tuples of (element, parent group with all attributes to preserve).
     /// </summary>
-    private IEnumerable<(SvgElement element, SvgGroup parentGroup)> GetContentLayersWithParentAttributes(SvgDocument document)
+    private static IEnumerable<(SvgElement element, SvgGroup parentGroup)> GetContentLayersWithParentAttributes(SvgDocument document)
     {
         // Get top-level children that are visual or groups (exclude defs, metadata, etc.)
         var topLevelChildren = document.Children
@@ -244,12 +230,13 @@ internal sealed class LoadSvgAsTexture2D : Instance<LoadSvgAsTexture2D>, IDescri
     /// Merges attributes from nested parent groups into a single group.
     /// Outer group attributes are applied first, then inner group attributes.
     /// </summary>
-    private SvgGroup MergeParentGroups(SvgGroup outer, SvgGroup inner)
+    private static SvgGroup MergeParentGroups(SvgGroup outer, SvgGroup inner)
     {
-        var merged = new SvgGroup();
-
-        // Combine transforms (outer first, then inner)
-        merged.Transforms = new SvgTransformCollection();
+        var merged = new SvgGroup
+        {
+            // Combine transforms (outer first, then inner)
+            Transforms = []
+        };
         if (outer.Transforms != null)
         {
             foreach (var transform in outer.Transforms)
