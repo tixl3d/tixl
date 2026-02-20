@@ -7,7 +7,7 @@
     },
     {
       "Id": "1b9a9ef5-fe48-4793-b420-7718643035f0"/*Sharpness*/,
-      "DefaultValue": 0
+      "DefaultValue": 16
     },
     {
       "Id": "21a2292d-1969-41ee-a71f-00a1621f9539"/*FontPath*/,

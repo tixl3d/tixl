@@ -16,7 +16,11 @@
         "X": -59.60559,
         "Y": 465.3982
       },
-      "Description": "Adjust the edges, lower this value if the render is aliased."
+      "Description": "Adjust the edges, lower this value if the render is aliased.",
+      "Min": 1,
+      "Max": 16,
+      "ClampMin": true,
+      "ClampMax": true
     },
     {
       "InputId": "21a2292d-1969-41ee-a71f-00a1621f9539"/*FontPath*/,
