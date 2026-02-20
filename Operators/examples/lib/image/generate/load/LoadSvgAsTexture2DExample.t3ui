@@ -67,31 +67,10 @@
       }
     },
     {
-      "ChildId": "1d454d5a-642d-485d-b4a7-546cc3bef236"/*Vector3*/,
-      "Position": {
-        "X": 614.9105,
-        "Y": 1403.0662
-      }
-    },
-    {
       "ChildId": "22acee76-4cfe-470b-b5db-90510a238674"/*Int2Components*/,
       "Position": {
         "X": -148.76164,
         "Y": 305.31757
-      }
-    },
-    {
-      "ChildId": "256d571f-a0f1-48e5-979d-5a5b43e32d35"/*Multiply*/,
-      "Position": {
-        "X": 146.25558,
-        "Y": 1173.79
-      }
-    },
-    {
-      "ChildId": "266281e3-4e47-4e92-84ae-c54fed2ad163"/*Multiply*/,
-      "Position": {
-        "X": -259.67752,
-        "Y": 1204.7195
       }
     },
     {
@@ -102,10 +81,52 @@
       }
     },
     {
+      "ChildId": "2934da05-bece-4c3f-b7e3-05356101083a"/*Group*/,
+      "Position": {
+        "X": 469.15912,
+        "Y": 783.49
+      }
+    },
+    {
+      "ChildId": "29efbe2c-d976-4539-a422-fdbdd1d0f82b"/*Text*/,
+      "Position": {
+        "X": 329.15912,
+        "Y": 783.49
+      }
+    },
+    {
+      "ChildId": "2afd29d3-f878-46da-858f-355caf98b019"/*AnimVec3*/,
+      "Position": {
+        "X": -77.93403,
+        "Y": 893.6613
+      }
+    },
+    {
+      "ChildId": "397cd410-3b8c-4988-a0fa-d32c7c7c81b7"/*LoadSvgAsTexture2D*/,
+      "Position": {
+        "X": -119.25575,
+        "Y": 781.17535
+      }
+    },
+    {
       "ChildId": "3cc7302e-89ce-4b7a-a3e2-253567759a10"/*CombineStrings*/,
       "Position": {
         "X": 277.06152,
         "Y": 330.95078
+      }
+    },
+    {
+      "ChildId": "43088630-e175-4342-88ec-1ef716314444"/*Layer2d*/,
+      "Position": {
+        "X": 20.744232,
+        "Y": 851.17535
+      }
+    },
+    {
+      "ChildId": "47a12500-4ef2-4f0a-8f6c-49b3c75dcf99"/*SpreadLayout*/,
+      "Position": {
+        "X": 160.74423,
+        "Y": 781.17535
       }
     },
     {
@@ -128,24 +149,38 @@
       }
     },
     {
-      "ChildId": "5f84dfb2-ac4b-4c25-8970-61b3cb576cd3"/*Div*/,
+      "ChildId": "5a209cc6-0c5b-4000-9480-3df2395c1223"/*LoadSvgAsTexture2D*/,
       "Position": {
-        "X": -673.1581,
-        "Y": 1120.0354
+        "X": -119.25578,
+        "Y": 851.17535
       }
     },
     {
-      "ChildId": "6964524e-db05-4b2a-a46f-c5b4b1a7b9c4"/*Vector2*/,
+      "ChildId": "5fe1d403-c09f-4b10-9248-b265d5f30947"/*RequestedResolution*/,
       "Position": {
-        "X": 286.25558,
-        "Y": 1138.79
+        "X": 530.3624,
+        "Y": 547.6074
       }
     },
     {
       "ChildId": "71b90226-4334-4c6a-9d74-921d30c53e62"/*RenderTarget*/,
       "Position": {
         "X": 857.59094,
-        "Y": 171.5336
+        "Y": 241.5336
+      }
+    },
+    {
+      "ChildId": "7399489a-cbcb-4594-8ba2-142265213e4f"/*Transform*/,
+      "Position": {
+        "X": 160.74423,
+        "Y": 921.17535
+      }
+    },
+    {
+      "ChildId": "759230b8-a38b-4e54-b737-b7bab88f4543"/*AddVec3*/,
+      "Position": {
+        "X": 670.3624,
+        "Y": 617.6074
       }
     },
     {
@@ -156,13 +191,6 @@
       }
     },
     {
-      "ChildId": "9acd1f05-4af7-4111-99c2-86cd84a9209f"/*Multiply*/,
-      "Position": {
-        "X": -816.6526,
-        "Y": 949.15753
-      }
-    },
-    {
       "ChildId": "9dbf3fc0-312f-4ca4-974b-95de66864313"/*Text*/,
       "Position": {
         "X": 436.3792,
@@ -170,24 +198,17 @@
       }
     },
     {
-      "ChildId": "a254d646-f886-4132-98ba-7f5394d9d74e"/*RequestedResolution*/,
+      "ChildId": "9ed898f3-c310-4da6-88b8-36a305010e3e"/*AnimVec3*/,
       "Position": {
-        "X": -1118.8116,
-        "Y": 1342.8818
+        "X": -12.694534,
+        "Y": 952.83563
       }
     },
     {
-      "ChildId": "a9c8be79-2544-4379-803a-97a8e240eaae"/*Add*/,
+      "ChildId": "9f0f3219-32fc-46f2-85ab-1f8793fd9cfe"/*Layer2d*/,
       "Position": {
-        "X": -435.3794,
-        "Y": 1180.7661
-      }
-    },
-    {
-      "ChildId": "aebe255e-c2c9-45b9-aad9-2703558d0bec"/*Size*/,
-      "Position": {
-        "X": -997.00085,
-        "Y": 867.8383
+        "X": 20.744263,
+        "Y": 781.17535
       }
     },
     {
@@ -198,38 +219,31 @@
       }
     },
     {
-      "ChildId": "b46c180c-3c53-42eb-902d-a4ce12a8eb8f"/*Div*/,
+      "ChildId": "b289faf3-892f-4b0b-aee4-3a170b2f5b81"/*Layer2d*/,
       "Position": {
-        "X": -731.01965,
-        "Y": 1295.0342
+        "X": 20.744263,
+        "Y": 816.17535
+      }
+    },
+    {
+      "ChildId": "c76d4ca4-bf54-4156-b053-2f7a6d15ee68"/*LoadSvgAsTexture2D*/,
+      "Position": {
+        "X": -119.25575,
+        "Y": 816.17535
       }
     },
     {
       "ChildId": "c77bc14e-54ea-4c2a-9ade-ca9f8f6d9632"/*SpreadLayout*/,
       "Position": {
         "X": 857.59094,
-        "Y": 66.5336
+        "Y": 80.08081
       }
     },
     {
-      "ChildId": "e7c5edf3-06b7-460c-ae22-82bb291d73d6"/*IntToFloat*/,
+      "ChildId": "d29c911b-4b99-49b3-982f-6bca34c2182a"/*Vector3*/,
       "Position": {
-        "X": -871.0194,
-        "Y": 1330.0342
-      }
-    },
-    {
-      "ChildId": "f2231a7e-cf62-4f6d-b954-f1d0153452e2"/*Add*/,
-      "Position": {
-        "X": -62.61029,
-        "Y": 1169.6311
-      }
-    },
-    {
-      "ChildId": "f60f11e1-516f-428c-a839-769c2a254cd7"/*Add*/,
-      "Position": {
-        "X": -575.1877,
-        "Y": 941.9549
+        "X": 670.3624,
+        "Y": 582.6074
       }
     }
   ],
@@ -238,30 +252,11 @@
       "OutputId": "f7176f9f-9bb7-4833-b373-ea2122280fb1"/*ColorBuffer*/,
       "Position": {
         "X": 997.59094,
-        "Y": 171.5336
+        "Y": 241.5336
       }
     }
   ],
   "Annotations": [
-    {
-      "Id": "072c765e-f242-4d1d-98d5-e1e15e7796ef",
-      "Title": "it's just math to place the text above the image no matter its resolution",
-      "Label": "Not revelant for this example",
-      "Color": {
-        "X": 0.6,
-        "Y": 0.6,
-        "Z": 0.6,
-        "W": 1.0
-      },
-      "Position": {
-        "X": -1178.8116,
-        "Y": 747.8383
-      },
-      "Size": {
-        "X": 1959.1311,
-        "Y": 740.0436
-      }
-    },
     {
       "Id": "6bbd6451-e6a7-436c-9189-8e2acf9487d2",
       "Title": "[LoadSvgAsTexture 2D] allows to change the scale of the original vector design and generate a bitmap texture that will look sharp.\nNote that we intentionally made this SVG tiny in order to demonstrate the advantage of this load symbol. ",
@@ -314,8 +309,27 @@
         "Y": -357.38245
       },
       "Size": {
-        "X": 1407.1729,
-        "Y": 1010.1416
+        "X": 1413.0745,
+        "Y": 1416.921
+      }
+    },
+    {
+      "Id": "d7a19d4e-a7d5-4972-a619-16f6c1572fc6",
+      "Title": "pay attention to the settings of the second layer, the range contains two layers ",
+      "Label": "Split to layers",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -179.58188,
+        "Y": 672.7606
+      },
+      "Size": {
+        "X": 1000.16003,
+        "Y": 323.27698
       }
     }
   ]

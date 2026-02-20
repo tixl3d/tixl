@@ -12,11 +12,20 @@
       "Description": "If width or height is zero, the image is scaled preserving the aspect ratio, if both are zero it'll use requested resolution height and keep aspect ratio. "
     },
     {
+      "InputId": "3e8f9a1b-2c4d-5e6f-7a8b-9c0d1e2f3a4b"/*SelectLayerRange*/,
+      "Position": {
+        "X": 51.512096,
+        "Y": 421.99597
+      },
+      "Description": "0,1 means layers at index 0 and 1 (first two layers)\n1,5 means layers at indices 1,2,3,4,5"
+    },
+    {
       "InputId": "89cd0433-8646-47f3-a22e-afe1344c6f07"/*Scale*/,
       "Position": {
         "X": 51.512096,
         "Y": 271.99597
-      }
+      },
+      "Description": "Works on viewbox resolution"
     },
     {
       "InputId": "a01425ad-e38f-4a80-b8cf-a2ea03895fe2"/*UseViewBox*/,
@@ -24,7 +33,16 @@
         "X": 51.512096,
         "Y": 196.99597
       },
-      "GroupTitle": "Alternative"
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "a13f5039-65a7-45b2-9407-50d718ccb13b"/*SplitToLayers*/,
+      "Position": {
+        "X": 51.512096,
+        "Y": 346.99597
+      },
+      "Description": "Attempt to access the different layers of your vector design",
+      "AddPadding": "True"
     },
     {
       "InputId": "f4860e75-eff7-4e6e-a144-016ff5bb054e"/*Path*/,

@@ -959,8 +959,14 @@ public partial class Symbol
                 }
             }
         }
-
-        internal void DestroyAllInstances()
+        
+        /// <summary>
+        /// Disposes all live instances of this child (releasing native/GPU resources).
+        /// </summary>
+        /// <remarks>
+        /// Use only when the child is being removed or the parent is reloaded. This is immediate and irreversible; prefer reconnecting to preserve instance state.
+        /// </remarks>
+        public void DestroyAllInstances()
         {
             lock (_creationLock)
             {

@@ -1,7 +1,6 @@
 #nullable enable
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Linq;
 using Lib.Utils;
 using Svg;
 using Svg.Pathing;
@@ -46,20 +45,14 @@ internal sealed class LoadSvg : Instance<LoadSvg>, IDescriptiveFilename
         var centerToBounds = CenterToBounds.GetValue(context);
         var scaleToBounds = ScaleToBounds.GetValue(context);
 
-        var bounds = svgDoc.Bounds;
-        var width = bounds.Width;
-        var height = bounds.Height;
-
-        // Calculate center offset to move center of bounds to (0,0)
-        /*var centerOffset = centerToBounds
-            ? new Vector3(-(bounds.Left + width / 2), -(1 - (bounds.Top + height / 2)), 0)
-            : Vector3.Zero;*/
-
-        var fitBoundsFactor = scaleToBounds ? (2f / height) : 1;
+        var bounds = new Vector3(svgDoc.Bounds.Size.Width, svgDoc.Bounds.Size.Height, 0);
+        var fitBoundsFactor = scaleToBounds ? (2f / bounds.Y) : 1;
         var scale = Scale.GetValue(context) * fitBoundsFactor;
+
         var importMode = ImportAs.GetValue(context);
         var importAsLines = importMode == 0;
-        var importAsShape = importMode == 2; // Shape mode
+        var importAsShape = importMode == 2;
+
         var reduceFactor = ReduceFactor.GetValue(context).Clamp(0.001f, 1f);
         var selectedShapeIndex = SelectSingleShape.GetValue(context); // Get the selected shape index
 
@@ -82,10 +75,10 @@ internal sealed class LoadSvg : Instance<LoadSvg>, IDescriptiveFilename
             foreach (var pathElement in pathElements)
             {
                 var pathBounds = pathElement.GraphicsPath.GetBounds();
-                minX = Math.Min(minX, pathBounds.Left);
-                minY = Math.Min(minY, pathBounds.Top);
-                maxX = Math.Max(maxX, pathBounds.Right);
-                maxY = Math.Max(maxY, pathBounds.Bottom);
+                if (pathBounds.Left < minX) minX = pathBounds.Left;
+                if (pathBounds.Right > maxX) maxX = pathBounds.Right;
+                if (pathBounds.Bottom < minY) minY = pathBounds.Bottom;
+                if (pathBounds.Top > maxY) maxY = pathBounds.Top;
             }
 
             var shapeWidth = maxX - minX;
@@ -357,7 +350,7 @@ internal sealed class LoadSvg : Instance<LoadSvg>, IDescriptiveFilename
     {
         Lines,
         Points,
-        Shape // Select a single path by index using SelectSingleShape input
+        Shape 
     }
 
     private static ISvgRenderer? _svgRenderer;

@@ -76,7 +76,7 @@ RWStructuredBuffer<int3> TriangleIndices : u1;
     }
 
     v.Selected = 1;
-    v.__padding = 0;
+    v.ColorRGB = railPoint.Color.rgb * shapePoint.Color.rgb;
 
     Vertices[vertexIndex] = v;
     if (isnan(railPoint.Scale.x) || isnan(shapePoint.Scale.x))

@@ -144,9 +144,12 @@ internal static class ProjectsPanel
                 CoreUi.Instance.OpenWithDefaultApplication(package.Folder);
             }
 
-            if (ImGui.MenuItem("Unload project", "", isOpened))
+            if (ImGui.MenuItem("Unload project", "", false, isOpened))
             {
-                Log.Warning("Not implemented yet");
+                if (OpenedProject.TryUnload(package))
+                {
+                    Log.Debug($"Project '{package.DisplayName}' unloaded successfully");
+                }
             }
 
             ImGui.EndPopup();
