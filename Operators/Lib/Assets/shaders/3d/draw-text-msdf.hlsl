@@ -40,7 +40,7 @@ cbuffer Params : register(b1)
 {
     float4 Color;
     float4 Shadow;
-    float3 TestParams;
+    float Sharpness;
 };
 
 struct GridEntry
@@ -155,7 +155,7 @@ float4 psMain(PsInput input) : SV_TARGET
     float dy= max(dy2.x, dy2.y);
     float edge = rsqrt( dx * dx + dy * dy );
 
-    float toPixels = 16 * edge ;
+    float toPixels = Sharpness * edge ;
     float sigDist = median( smpl1.r, smpl1.g, smpl1.b ) - 0.5;
     float letterShape = clamp( sigDist * toPixels + 0.5, 0.0, 1.0 );
 

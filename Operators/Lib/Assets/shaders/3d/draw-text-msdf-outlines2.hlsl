@@ -42,6 +42,7 @@ cbuffer Params : register(b1)
    // float4 Shadow;
     float Inset;
     float Outset;
+    float Sharpness;
 };
 
 struct GridEntry
@@ -156,7 +157,7 @@ float4 psMain(PsInput input) : SV_TARGET
     float dy= max(dy2.x, dy2.y);
     float edge = rsqrt( dx * dx + dy * dy ) + Outset;
 
-    float toPixels = 16 * edge ;
+    float toPixels = Sharpness * edge ;
     //float sigDist = median( smpl1.r, smpl1.g, smpl1.b ) - 0.5;
     float sigDist = median( smpl1.r, smpl1.g, smpl1.b ) - 0.5 + Outset;
     float sigDist2 = median( smpl1.r, smpl1.g, smpl1.b ) - 0.5 - Inset;
