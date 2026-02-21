@@ -10,20 +10,12 @@
       "DefaultValue": 5
     },
     {
-      "Id": "098f1662-6f47-4dd0-9a73-4c4814aefb23"/*CustomVar2Channel*/,
-      "DefaultValue": 0
-    },
-    {
       "Id": "0c57cdd5-e450-4425-954f-c9e4256f83e1"/*InvertZ*/,
       "DefaultValue": false
     },
     {
       "Id": "1348ed7c-79f8-48c6-ac00-e60fb40050db"/*FixtureChannelSize*/,
       "DefaultValue": 0
-    },
-    {
-      "Id": "18cc3a73-3a1a-4370-87b7-e5cd44f4a3ab"/*SetCustomVar2*/,
-      "DefaultValue": false
     },
     {
       "Id": "1cb93e97-0161-4a77-bbc7-ff30c1972cf8"/*GetF2*/,
@@ -39,10 +31,6 @@
     },
     {
       "Id": "23f23213-68e2-45f5-b452-4a86289004c0"/*DebugToLog*/,
-      "DefaultValue": false
-    },
-    {
-      "Id": "25e5f0ce-5ec8-4c99-beb1-317c6911a128"/*SetCustomVar1*/,
       "DefaultValue": false
     },
     {
@@ -71,14 +59,6 @@
     },
     {
       "Id": "4d4b3425-e6ad-4834-a8a7-06c9f9c2b909"/*PanFineChannel*/,
-      "DefaultValue": 0
-    },
-    {
-      "Id": "50e849e8-5582-432e-98f7-d8e036273864"/*CustomVar1*/,
-      "DefaultValue": 0
-    },
-    {
-      "Id": "58cc3eee-e81e-4bab-b12c-e7bc3cf62dd0"/*CustomVar5*/,
       "DefaultValue": 0
     },
     {
@@ -125,15 +105,7 @@
       "DefaultValue": false
     },
     {
-      "Id": "7c59a5fb-052a-443c-9e10-cf859fe25658"/*CustomVar5Channel*/,
-      "DefaultValue": 0
-    },
-    {
       "Id": "850af6c3-d9ef-492c-9cfb-e2589ae5b9ac"/*FillUniverse*/,
-      "DefaultValue": false
-    },
-    {
-      "Id": "876ef5b5-f2c6-4501-9e55-00b9a553a2e3"/*SetCustomVar3*/,
       "DefaultValue": false
     },
     {
@@ -146,10 +118,6 @@
     {
       "Id": "8ceece78-9a08-4c7b-8fea-740e8e5929a6"/*WhiteChannel*/,
       "DefaultValue": 0
-    },
-    {
-      "Id": "8dd3fc1c-cd94-4bf0-b948-d6f734916d49"/*SetCustomVar4*/,
-      "DefaultValue": false
     },
     {
       "Id": "9000c279-73e4-4de8-a1f8-c3914eaaf533"/*PanChannel*/,
@@ -168,20 +136,16 @@
       "DefaultValue": 0
     },
     {
-      "Id": "a9315f88-6024-42e9-9691-4544627f0bef"/*SetCustomVar5*/,
-      "DefaultValue": false
+      "Id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"/*CustomVariableValues*/,
+      "DefaultValue": {
+        "Values": []
+      }
     },
     {
-      "Id": "ac9a709e-6dc0-40ca-9f70-350e655a2630"/*CustomVar3Channel*/,
-      "DefaultValue": 0
-    },
-    {
-      "Id": "b08c920f-0d6b-4820-bc2d-81a47d5f1147"/*CustomVar1Channel*/,
-      "DefaultValue": 0
-    },
-    {
-      "Id": "b29ebe11-89cb-4f86-aee0-cf729fa0d62c"/*CustomVar4*/,
-      "DefaultValue": 0
+      "Id": "b2c3d4e5-f6a7-8901-bcde-f23456789012"/*CustomVariableChannels*/,
+      "DefaultValue": {
+        "Values": []
+      }
     },
     {
       "Id": "b7061834-66aa-4f7f-91f9-10ebfe16713f"/*F1Channel*/,
@@ -204,16 +168,8 @@
       "DefaultValue": 0.0
     },
     {
-      "Id": "cbaf821c-0305-4c74-a632-864081cc9a34"/*CustomVar4Channel*/,
-      "DefaultValue": 0
-    },
-    {
       "Id": "cf2c3308-8f3f-442d-a563-b419f12e7ad1"/*RgbToCmy*/,
       "DefaultValue": false
-    },
-    {
-      "Id": "d16d7c5c-2795-4fde-85fd-13b515191fbe"/*CustomVar3*/,
-      "DefaultValue": 0
     },
     {
       "Id": "d755342b-9a9e-4c78-8376-81579d8c0909"/*BlueChannel*/,
@@ -230,10 +186,6 @@
     {
       "Id": "df04fce0-c6e5-4039-b03f-e651fc0ec4a9"/*GetPosition*/,
       "DefaultValue": false
-    },
-    {
-      "Id": "e7a48fe0-d788-4f12-a9d4-52472519da09"/*CustomVar2*/,
-      "DefaultValue": 0
     },
     {
       "Id": "e96655be-6bc7-4ca4-bf74-079a07570d74"/*ShortestPathPanTilt*/,

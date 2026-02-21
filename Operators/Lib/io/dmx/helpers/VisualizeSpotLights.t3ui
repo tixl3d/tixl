@@ -3,6 +3,13 @@
   "Description": "Visualizes the position and orientation of spotlights.",
   "InputUis": [
     {
+      "InputId": "16270194-e065-460b-8fd6-cbd432f331fc"/*ReferencePoints*/,
+      "Position": {
+        "X": -285.8675,
+        "Y": 108.34125
+      }
+    },
+    {
       "InputId": "238dac3a-f24a-4f65-a3ae-6a13d4ffcace"/*ShowBody*/,
       "Position": {
         "X": 274.2862,
@@ -12,8 +19,8 @@
     {
       "InputId": "269f9604-9ded-42cf-a543-bb114fb75420"/*Color*/,
       "Position": {
-        "X": -110.99605,
-        "Y": 479.899
+        "X": -14.074753,
+        "Y": 541.5762
       },
       "Min": 0.0,
       "Max": 1.0,
@@ -31,7 +38,7 @@
       "InputId": "7ae45928-69dc-47a1-8302-77b9a50f57bf"/*Visibility*/,
       "Position": {
         "X": 631.8508,
-        "Y": 582.134
+        "Y": 617.134
       }
     },
     {
@@ -46,8 +53,8 @@
     {
       "ChildId": "128b6ee0-9cd0-4504-b4c5-7986b6e0c8ff"/*RepeatAtPoints*/,
       "Position": {
-        "X": 270.29633,
-        "Y": 268.13144
+        "X": 262.5426,
+        "Y": 335.09525
       }
     },
     {
@@ -55,6 +62,13 @@
       "Position": {
         "X": 505.8981,
         "Y": 158.69919
+      }
+    },
+    {
+      "ChildId": "2027de76-524d-4465-b270-10c28890f3cb"/*DrawMeshAtPoints*/,
+      "Position": {
+        "X": 542.0233,
+        "Y": 248.98868
       }
     },
     {
@@ -88,15 +102,22 @@
     {
       "ChildId": "309c586f-849e-4a21-afcb-288e442e8629"/*RemoveColor*/,
       "Position": {
-        "X": -110.99605,
-        "Y": 394.67212
+        "X": -14.074753,
+        "Y": 456.3493
       }
     },
     {
       "ChildId": "4ac345f2-80ef-49be-9ffc-d4f4ac6d216c"/*DrawLines*/,
       "Position": {
-        "X": 271.16476,
-        "Y": 626.28296
+        "X": 263.41104,
+        "Y": 693.24677
+      }
+    },
+    {
+      "ChildId": "7007dae8-bb7d-4d2a-893f-909449164317"/*CylinderMesh*/,
+      "Position": {
+        "X": 262.02332,
+        "Y": 283.98868
       }
     },
     {
@@ -109,8 +130,8 @@
     {
       "ChildId": "868847cf-34c4-4204-baa7-46cd6bddf887"/*TransformPoints*/,
       "Position": {
-        "X": 271.16476,
-        "Y": 429.91556
+        "X": 263.41104,
+        "Y": 496.87936
       }
     },
     {
@@ -123,15 +144,22 @@
     {
       "ChildId": "9971f81b-e3f4-4d30-9c98-5ad07b242c80"/*RadialPoints*/,
       "Position": {
-        "X": 130.29633,
-        "Y": 303.13144
+        "X": 122.5426,
+        "Y": 370.09525
       }
     },
     {
       "ChildId": "a10b1a50-841c-4d55-8e40-492554dac734"/*VisibleGizmos*/,
       "Position": {
         "X": 771.8508,
-        "Y": 547.134
+        "Y": 582.134
+      }
+    },
+    {
+      "ChildId": "a5af2ebb-52eb-430d-94e1-2f4bdc660e2b"/*TransformMesh*/,
+      "Position": {
+        "X": 402.0233,
+        "Y": 283.98868
       }
     },
     {
@@ -144,22 +172,22 @@
     {
       "ChildId": "b1261f42-dc1d-4542-a144-0f6303ab8592"/*RepeatAtPoints*/,
       "Position": {
-        "X": 271.16476,
-        "Y": 556.28296
+        "X": 263.41104,
+        "Y": 623.24677
       }
     },
     {
       "ChildId": "c1a98591-ce18-49f0-92e6-31e74ae58b83"/*CommonPointSets*/,
       "Position": {
-        "X": 131.16476,
-        "Y": 591.28296
+        "X": 123.41104,
+        "Y": 658.24677
       }
     },
     {
       "ChildId": "db82dec2-2d74-4858-8882-8d020c4c733c"/*DrawLines*/,
       "Position": {
-        "X": 270.29633,
-        "Y": 338.13144
+        "X": 262.5426,
+        "Y": 405.09525
       }
     },
     {
@@ -179,8 +207,8 @@
     {
       "ChildId": "eccc0596-275f-4587-b2c7-eb6f925e85bd"/*DrawPoints*/,
       "Position": {
-        "X": 271.16476,
-        "Y": 464.91556
+        "X": 263.41104,
+        "Y": 531.87933
       }
     },
     {

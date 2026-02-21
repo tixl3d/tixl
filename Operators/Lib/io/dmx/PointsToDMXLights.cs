@@ -44,8 +44,8 @@ namespace Lib.io.dmx
         private BufferWithViews _visualizeBuffer;
         private Point[] _visualizationPoints = Array.Empty<Point>();
 
-        // Stores the previous pan/tilt (radians) – used by shortest‑path logic.
-        private Vector2 _lastPanTilt = new Vector2(float.NaN, float.NaN);
+        // Stores the previous pan/tilt (radians) per fixture – used by shortest‑path logic.
+        private readonly List<Vector2> _lastPanTiltPerFixture = new();
 
         private Point[] _points = Array.Empty<Point>();
         private Point[] _referencePoints = Array.Empty<Point>();
@@ -220,50 +220,12 @@ namespace Lib.io.dmx
         public readonly InputSlot<int> F2Channel = new();
 
         // CUSTOM VARIABLES
-        [Input(Guid = "25e5f0ce-5ec8-4c99-beb1-317c6911a128")]
-        public readonly InputSlot<bool> SetCustomVar1 = new();
+        [Input(Guid = "b2c3d4e5-f6a7-8901-bcde-f23456789012")]
+        public readonly InputSlot<List<int>> CustomVariableChannels = new();
+        
+        [Input(Guid = "a1b2c3d4-e5f6-7890-abcd-ef1234567890")]
+        public readonly InputSlot<List<int>> CustomVariableValues = new();
 
-        [Input(Guid = "b08c920f-0d6b-4820-bc2d-81a47d5f1147")]
-        public readonly InputSlot<int> CustomVar1Channel = new();
-
-        [Input(Guid = "50e849e8-5582-432e-98f7-d8e036273864")]
-        public readonly InputSlot<int> CustomVar1 = new();
-
-        [Input(Guid = "18cc3a73-3a1a-4370-87b7-e5cd44f4a3ab")]
-        public readonly InputSlot<bool> SetCustomVar2 = new();
-
-        [Input(Guid = "098f1662-6f47-4dd0-9a73-4c4814aefb23")]
-        public readonly InputSlot<int> CustomVar2Channel = new();
-
-        [Input(Guid = "e7a48fe0-d788-4f12-a9d4-52472519da09")]
-        public readonly InputSlot<int> CustomVar2 = new();
-
-        [Input(Guid = "876ef5b5-f2c6-4501-9e55-00b9a553a2e3")]
-        public readonly InputSlot<bool> SetCustomVar3 = new();
-
-        [Input(Guid = "ac9a709e-6dc0-40ca-9f70-350e655a2630")]
-        public readonly InputSlot<int> CustomVar3Channel = new();
-
-        [Input(Guid = "d16d7c5c-2795-4fde-85fd-13b515191fbe")]
-        public readonly InputSlot<int> CustomVar3 = new();
-
-        [Input(Guid = "8dd3fc1c-cd94-4bf0-b948-d6f734916d49")]
-        public readonly InputSlot<bool> SetCustomVar4 = new();
-
-        [Input(Guid = "cbaf821c-0305-4c74-a632-864081cc9a34")]
-        public readonly InputSlot<int> CustomVar4Channel = new();
-
-        [Input(Guid = "b29ebe11-89cb-4f86-aee0-cf729fa0d62c")]
-        public readonly InputSlot<int> CustomVar4 = new();
-
-        [Input(Guid = "a9315f88-6024-42e9-9691-4544627f0bef")]
-        public readonly InputSlot<bool> SetCustomVar5 = new();
-
-        [Input(Guid = "7c59a5fb-052a-443c-9e10-cf859fe25658")]
-        public readonly InputSlot<int> CustomVar5Channel = new();
-
-        [Input(Guid = "58cc3eee-e81e-4bab-b12c-e7bc3cf62dd0")]
-        public readonly InputSlot<int> CustomVar5 = new();
         #endregion
 
         #region Main Update Method
@@ -272,12 +234,12 @@ namespace Lib.io.dmx
             var pointBuffer = EffectedPoints.GetValue(context);
             var referencePointBuffer = ReferencePoints.GetValue(context);
 
-            if (pointBuffer == null)
+            if (pointBuffer == null || pointBuffer.Buffer == null || pointBuffer.Srv == null)
             {
-                Log.Warning("EffectedPoints buffer is not connected.", this);
+                Log.Warning("EffectedPoints buffer is not connected or invalid.", this);
                 Result.Value?.Clear();
                 VisualizeLights.Value = null;
-                _lastPanTilt = new Vector2(float.NaN, float.NaN);
+                _lastPanTiltPerFixture.Clear();
                 return;
             }
 
@@ -289,7 +251,7 @@ namespace Lib.io.dmx
                 OnPointsReadComplete);
             _pointsBufferReader.Update();
 
-            if (referencePointBuffer != null)
+            if (referencePointBuffer != null && referencePointBuffer.Buffer != null && referencePointBuffer.Srv != null)
             {
                 _referencePointsBufferReader.InitiateRead(
                     referencePointBuffer.Buffer,
@@ -321,7 +283,7 @@ namespace Lib.io.dmx
             {
                 Result.Value?.Clear();
                 VisualizeLights.Value = null;
-                _lastPanTilt = new Vector2(float.NaN, float.NaN);
+                _lastPanTiltPerFixture.Clear();
             }
         }
         #endregion
@@ -432,6 +394,10 @@ namespace Lib.io.dmx
                 pixelsPerFixture = 1;
             }
 
+            // Ensure state list size matches fixture count
+            while (_lastPanTiltPerFixture.Count < fixtureCount)
+                _lastPanTiltPerFixture.Add(new Vector2(float.NaN, float.NaN));
+
             bool fitInUniverse = FitInUniverse.GetValue(context);
             bool fillUniverse = FillUniverse.GetValue(context);
 
@@ -470,6 +436,7 @@ namespace Lib.io.dmx
                                                                   transformPoint,
                                                                   referencePoint,
                                                                   useReferencePoints,
+                                                                  fixtureIdx,
                                                                   logThisFixture,
                                                                   out finalVisPos);
 
@@ -524,6 +491,7 @@ namespace Lib.io.dmx
                                             Point transformPoint,
                                             Point referencePoint,
                                             bool useReferencePoints,
+                                            int fixtureIdx,
                                             bool shouldLog,
                                             out Vec3 finalVisPosition)
         {
@@ -537,6 +505,7 @@ namespace Lib.io.dmx
                                                    transformPoint,
                                                    referencePoint,
                                                    useReferencePoints,
+                                                   fixtureIdx,
                                                    shouldLog);
 
             // Position
@@ -620,6 +589,7 @@ namespace Lib.io.dmx
                                      Point point,
                                      Point referencePoint,
                                      bool calculateRelativeRotation,
+                                     int fixtureIdx,
                                      bool shouldLog)
         {
             // Axis configuration
@@ -640,19 +610,56 @@ namespace Lib.io.dmx
 
             if (shouldLog) Log.Debug($"Processing Rotation for Fixture. PanEnabled: {panEnabled}, TiltEnabled: {tiltEnabled}, Pan16Bit: {panFineChannel > 0}, Tilt16Bit: {tiltFineChannel > 0}", this);
 
-            // Active quaternion (relative handling)
-            Quat active = ComputeActiveRotation(point.Orientation,
-                                                referencePoint.Orientation,
-                                                calculateRelativeRotation);
-            if (shouldLog) Log.Debug($"Active Quaternion: {active}", this);
+            Vec3 direction;
+            bool useLookAt = false;
 
-            // Direction extraction
-            Vec3 direction = ExtractDirection(active,
+            if (calculateRelativeRotation)
+            {
+                if ((point.Position - referencePoint.Position).LengthSquared() > 0.0001f)
+                {
+                    useLookAt = true;
+                }
+            }
+
+            if (useLookAt)
+            {
+                Vec3 worldDir = point.Position - referencePoint.Position;
+                if (worldDir.LengthSquared() < 1e-6f)
+                    worldDir = Vec3.UnitZ;
+                else
+                    worldDir = Vec3.Normalize(worldDir);
+
+                Quat refRot = referencePoint.Orientation;
+                if (float.IsNaN(refRot.X) || float.IsNaN(refRot.Y) || float.IsNaN(refRot.Z) || float.IsNaN(refRot.W))
+                {
+                    if (shouldLog) Log.Warning("Reference rotation is invalid. Using Identity.", this);
+                    refRot = Quat.Identity;
+                }
+
+                Quat invRef = Quat.Inverse(refRot);
+                direction = Vec3.Transform(worldDir, invRef);
+
+                if (InvertX.GetValue(context)) direction.X = -direction.X;
+                if (InvertY.GetValue(context)) direction.Y = -direction.Y;
+                if (InvertZ.GetValue(context)) direction.Z = -direction.Z;
+
+                direction = Vec3.Normalize(direction);
+                if (shouldLog) Log.Debug($"LookAt Mode. WorldDir: {worldDir}, LocalDir: {direction}", this);
+            }
+            else
+            {
+                Quat active = ComputeActiveRotation(point.Orientation,
+                                                    referencePoint.Orientation,
+                                                    calculateRelativeRotation);
+                if (shouldLog) Log.Debug($"Active Quaternion: {active}", this);
+
+                direction = ExtractDirection(active,
                                               _cachedForwardAxis,
                                               InvertX.GetValue(context),
                                               InvertY.GetValue(context),
                                               InvertZ.GetValue(context));
-            if (shouldLog) Log.Debug($"Extracted Direction Vector: {direction}", this);
+                if (shouldLog) Log.Debug($"Extracted Direction Vector: {direction}", this);
+            }
 
             // Raw pan/tilt from direction - IK LOGIC THAT WORKS FOR DMX
             var (rawPan, rawTilt) = ComputePanTiltAngles(direction,
@@ -662,67 +669,88 @@ namespace Lib.io.dmx
             if (shouldLog) Log.Debug($"Computed raw angles from direction - Pan: {rawPan * 180f / MathF.PI:F2} deg ({rawPan:F4} rad), Tilt: {rawTilt * 180f / MathF.PI:F2} deg ({rawTilt:F4} rad)", this);
 
             // Apply pan and tilt offsets
-            float panOffsetRad = PanOffset.GetValue(context) * MathF.PI / 180f;
-            float tiltOffsetRad = TiltOffset.GetValue(context) * MathF.PI / 180f;
+            float panOffsetRad = (PanOffset.GetValue(context) - 90f) * MathF.PI / 180f;
+            float tiltOffsetRad = (TiltOffset.GetValue(context) - 90f) * MathF.PI / 180f;
             rawPan += panOffsetRad;
             rawTilt += tiltOffsetRad;
             if (shouldLog) Log.Debug($"Angles after applying offsets - Pan: {rawPan * 180f / MathF.PI:F2} deg ({rawPan:F4} rad), Tilt: {rawTilt * 180f / MathF.PI:F2} deg ({rawTilt:F4} rad)", this);
 
             // Apply ranges, inversion, shortest‑path and write DMX
             float finalPan = 0f, finalTilt = 0f;
+            float bestPan = rawPan, bestTilt = rawTilt;
             bool useShortestPath = ShortestPathPanTilt.GetValue(context);
+
+            if (useShortestPath)
+            {
+                Vector2 lastState = _lastPanTiltPerFixture[fixtureIdx];
+                (bestPan, bestTilt) = GetOptimizedPanTilt(rawPan, rawTilt, context, lastState);
+                _lastPanTiltPerFixture[fixtureIdx] = new Vector2(bestPan, bestTilt);
+            }
+            else
+            {
+                bestPan = FitToRange(rawPan, PanRange.GetValue(context), false, float.NaN);
+                bestTilt = FitToRange(rawTilt, TiltRange.GetValue(context), false, float.NaN);
+                _lastPanTiltPerFixture[fixtureIdx] = new Vector2(float.NaN, float.NaN);
+            }
 
             if (panEnabled)
             {
-                finalPan = ApplyPanRangeAndWrite(rawPan,
+                finalPan = ApplyPanRangeAndWrite(bestPan,
                                                  panChannel,
                                                  panFineChannel,
                                                  PanRange.GetValue(context),
                                                  InvertPan.GetValue(context),
-                                                 useShortestPath,
-                                                 _lastPanTilt.X,
                                                  shouldLog);
             }
             else
             {
-                _lastPanTilt.X = float.NaN;
+                var state = _lastPanTiltPerFixture[fixtureIdx];
+                _lastPanTiltPerFixture[fixtureIdx] = new Vector2(float.NaN, state.Y);
             }
 
             if (tiltEnabled)
             {
-                finalTilt = ApplyTiltRangeAndWrite(rawTilt,
+                finalTilt = ApplyTiltRangeAndWrite(bestTilt,
                                                    tiltChannel,
                                                    tiltFineChannel,
                                                    TiltRange.GetValue(context),
                                                    InvertTilt.GetValue(context),
-                                                   useShortestPath,
-                                                   _lastPanTilt.Y,
                                                    shouldLog);
             }
             else
             {
-                _lastPanTilt.Y = float.NaN;
+                var state = _lastPanTiltPerFixture[fixtureIdx];
+                _lastPanTiltPerFixture[fixtureIdx] = new Vector2(state.X, float.NaN);
             }
 
             // --- Visualization Calculation START ---
-            // finalPan/finalTilt: DMX value (Raw Angle + Offset + Clamping)
-            // panAngleForViz/tiltAngleForViz: Physical Angle (Raw Angle + Clamping)
-            float panAngleForViz = finalPan - panOffsetRad;
-            float tiltAngleForViz = finalTilt - tiltOffsetRad;
-
-            // Pan Inversion (to fix visualization mirror/inversion)
-            if (panEnabled)
+            float visPan = finalPan;
+            if (panEnabled && InvertPan.GetValue(context))
             {
-                panAngleForViz = -panAngleForViz; // Invert Pan angle for visualization
+                Vector2 range = PanRange.GetValue(context);
+                float min = range.X * MathF.PI / 180f;
+                float max = range.Y * MathF.PI / 180f;
+                visPan = min + max - finalPan;
             }
 
+            float visTilt = finalTilt;
+            if (tiltEnabled && InvertTilt.GetValue(context))
+            {
+                Vector2 range = TiltRange.GetValue(context);
+                float min = range.X * MathF.PI / 180f;
+                float max = range.Y * MathF.PI / 180f;
+                visTilt = min + max - finalTilt;
+            }
+
+            float panAngleForViz = visPan - panOffsetRad;
+            float tiltAngleForViz = visTilt - tiltOffsetRad;
 
             // Get visualization axes (fall back to DMX axes if Disabled)
-
             AxisModes visPanAxis = (AxisModes)VisPanAxis.GetValue(context);
+            if (visPanAxis == AxisModes.Disabled) visPanAxis = panAxis;
 
             AxisModes visTiltAxis = (AxisModes)VisTiltAxis.GetValue(context);
-
+            if (visTiltAxis == AxisModes.Disabled) visTiltAxis = tiltAxis;
 
             // Create Pan and Tilt Quaternions using the corrected physical angles
             Quat panQuat = panEnabled
@@ -873,7 +901,11 @@ namespace Lib.io.dmx
                 return (rawPan, rawTilt);
             }
 
-            Vec3 localRight = Vec3.Normalize(Vec3.Cross(localForward, panVec));
+            // CORRECTED BASIS CONSTRUCTION
+            // Right vector is Cross(Pan, Forward). For Pan=Y, Forward=Z -> YxZ = X.
+            Vec3 localRight = Vec3.Normalize(Vec3.Cross(panVec, localForward));
+            
+            // Up vector is Cross(Right, Forward). For Right=X, Forward=Z -> XxZ = -Y.
             Vec3 localUp = Vec3.Normalize(Vec3.Cross(localRight, localForward));
 
             // Transform direction into local coordinate system
@@ -918,13 +950,11 @@ namespace Lib.io.dmx
             return Vec3.Normalize(candidate - vec * Vec3.Dot(candidate, vec));
         }
 
-        private float ApplyPanRangeAndWrite(float rawPan,
+        private float ApplyPanRangeAndWrite(float panVal,
                                             int panChannel,
                                             int panFineChannel,
                                             Vector2 panRangeDegrees,
                                             bool invertPan,
-                                            bool useShortestPath,
-                                            float lastPanValueRad,
                                             bool shouldLog)
         {
             if (panRangeDegrees.X >= panRangeDegrees.Y)
@@ -936,24 +966,6 @@ namespace Lib.io.dmx
 
             float panMinRad = panRangeDegrees.X * MathF.PI / 180f;
             float panMaxRad = panRangeDegrees.Y * MathF.PI / 180f;
-            float panVal = rawPan;
-
-            if (!useShortestPath || float.IsNaN(lastPanValueRad))
-            {
-                panVal = MathUtils.Fmod(panVal + MathF.PI, 2 * MathF.PI) - MathF.PI;
-                if (shouldLog) Log.Debug($"Pan (normalized to -180/180): {panVal * 180f / MathF.PI:F2} deg", this);
-
-                float rangeCenterRad = (panMinRad + panMaxRad) / 2f;
-                float turnsToCenter = MathF.Round((panVal - rangeCenterRad) / (2 * MathF.PI));
-                panVal -= turnsToCenter * 2 * MathF.PI;
-                if (shouldLog) Log.Debug($"Pan (shifted to range center): {panVal * 180f / MathF.PI:F2} deg", this);
-            }
-            else
-            {
-                float turns = MathF.Round((lastPanValueRad - panVal) / (2 * MathF.PI));
-                panVal += turns * 2 * MathF.PI;
-                if (shouldLog) Log.Debug($"Pan (shortest path applied from last value {lastPanValueRad * 180f / MathF.PI:F2} deg): {panVal * 180f / MathF.PI:F2} deg", this);
-            }
 
             if (invertPan)
             {
@@ -973,21 +985,14 @@ namespace Lib.io.dmx
                         shouldLog,
                         "Pan");
 
-            if (useShortestPath)
-                _lastPanTilt.X = finalPan;
-            else
-                _lastPanTilt.X = float.NaN;
-
             return finalPan;
         }
 
-        private float ApplyTiltRangeAndWrite(float rawTilt,
+        private float ApplyTiltRangeAndWrite(float tiltVal,
                                              int tiltChannel,
                                              int tiltFineChannel,
                                              Vector2 tiltRangeDegrees,
                                              bool invertTilt,
-                                             bool useShortestPath,
-                                             float lastTiltValueRad,
                                              bool shouldLog)
         {
             if (tiltRangeDegrees.X >= tiltRangeDegrees.Y)
@@ -999,24 +1004,6 @@ namespace Lib.io.dmx
 
             float tiltMinRad = tiltRangeDegrees.X * MathF.PI / 180f;
             float tiltMaxRad = tiltRangeDegrees.Y * MathF.PI / 180f;
-            float tiltVal = rawTilt;
-
-            if (!useShortestPath || float.IsNaN(lastTiltValueRad))
-            {
-                tiltVal = MathUtils.Fmod(tiltVal + MathF.PI, 2 * MathF.PI) - MathF.PI;
-                if (shouldLog) Log.Debug($"Tilt (normalized to -180/180): {tiltVal * 180f / MathF.PI:F2} deg", this);
-
-                float rangeCenterRad = (tiltMinRad + tiltMaxRad) / 2f;
-                float turnsToCenter = MathF.Round((tiltVal - rangeCenterRad) / (2 * MathF.PI));
-                tiltVal -= turnsToCenter * 2 * MathF.PI;
-                if (shouldLog) Log.Debug($"Tilt (shifted to range center): {tiltVal * 180f / MathF.PI:F2} deg", this);
-            }
-            else
-            {
-                float turns = MathF.Round((lastTiltValueRad - tiltVal) / (2 * MathF.PI));
-                tiltVal += turns * 2 * MathF.PI;
-                if (shouldLog) Log.Debug($"Tilt (shortest path applied from last value {lastTiltValueRad * 180f / MathF.PI:F2} deg): {tiltVal * 180f / MathF.PI:F2} deg", this);
-            }
 
             if (invertTilt)
             {
@@ -1035,11 +1022,6 @@ namespace Lib.io.dmx
                         tiltMaxRad,
                         shouldLog,
                         "Tilt");
-
-            if (useShortestPath)
-                _lastPanTilt.Y = finalTilt;
-            else
-                _lastPanTilt.Y = float.NaN;
 
             return finalTilt;
         }
@@ -1180,35 +1162,75 @@ namespace Lib.io.dmx
         #endregion
 
         #region Custom Variable Handling
-        private void HandleCustomVariables(EvaluationContext ctx)
+        private void HandleCustomVariables(EvaluationContext context)
         {
             const float customVarNormalizedMax = 255f;
-            bool shouldLog = DebugToLog.GetValue(ctx);
+            bool shouldLog = DebugToLog.GetValue(context);
 
-            if (SetCustomVar1.GetValue(ctx) && CustomVar1Channel.GetValue(ctx) > 0)
+            // Get the input lists
+            var values = CustomVariableValues.GetValue(context);
+            var channels = CustomVariableChannels.GetValue(context);
+
+            // Validate inputs
+            if (channels == null)
             {
-                float value = Math.Clamp(CustomVar1.GetValue(ctx), 0, (int)customVarNormalizedMax);
-                SetDmxValue(value, CustomVar1Channel.GetValue(ctx), 0, 0f, customVarNormalizedMax, shouldLog, "CustomVar1");
+                if (shouldLog) Log.Debug("CustomVariableChannels list is null, skipping custom variables.", this);
+                return;
             }
-            if (SetCustomVar2.GetValue(ctx) && CustomVar2Channel.GetValue(ctx) > 0)
+
+            if (channels.Count == 0)
             {
-                float value = Math.Clamp(CustomVar2.GetValue(ctx), 0, (int)customVarNormalizedMax);
-                SetDmxValue(value, CustomVar2Channel.GetValue(ctx), 0, 0f, customVarNormalizedMax, shouldLog, "CustomVar2");
+                if (shouldLog) Log.Debug("CustomVariableChannels list is empty, skipping custom variables.", this);
+                return;
             }
-            if (SetCustomVar3.GetValue(ctx) && CustomVar3Channel.GetValue(ctx) > 0)
+
+            // Create working copy of channels to avoid modifying the original
+            var workingChannels = new List<int>(channels);
+            
+            // Auto-resize values list to match channels size
+            var workingValues = new List<int>();
+            if (values != null)
             {
-                float value = Math.Clamp(CustomVar3.GetValue(ctx), 0, (int)customVarNormalizedMax);
-                SetDmxValue(value, CustomVar3Channel.GetValue(ctx), 0, 0f, customVarNormalizedMax, shouldLog, "CustomVar3");
+                workingValues = new List<int>(values);
             }
-            if (SetCustomVar4.GetValue(ctx) && CustomVar4Channel.GetValue(ctx) > 0)
+            
+            // Ensure values list size matches channels size
+            if (workingValues.Count < workingChannels.Count)
             {
-                float value = Math.Clamp(CustomVar4.GetValue(ctx), 0, (int)customVarNormalizedMax);
-                SetDmxValue(value, CustomVar4Channel.GetValue(ctx), 0, 0f, customVarNormalizedMax, shouldLog, "CustomVar4");
+                // Extend values with default DMX value (128)
+                int valuesToAdd = workingChannels.Count - workingValues.Count;
+                for (int i = 0; i < valuesToAdd; i++)
+                {
+                    workingValues.Add(128); // Default DMX value (middle of 0-255 range)
+                }
+                if (shouldLog) Log.Debug($"Auto-resized CustomVariableValues: extended from {values?.Count ?? 0} to {workingValues.Count} elements with default value 128", this);
             }
-            if (SetCustomVar5.GetValue(ctx) && CustomVar5Channel.GetValue(ctx) > 0)
+            else if (workingValues.Count > workingChannels.Count)
             {
-                float value = Math.Clamp(CustomVar5.GetValue(ctx), 0, (int)customVarNormalizedMax);
-                SetDmxValue(value, CustomVar5Channel.GetValue(ctx), 0, 0f, customVarNormalizedMax, shouldLog, "CustomVar5");
+                // Trim excess values to match channels size
+                int excessCount = workingValues.Count - workingChannels.Count;
+                workingValues.RemoveRange(workingChannels.Count, excessCount);
+                if (shouldLog) Log.Debug($"Auto-trimmed CustomVariableValues: reduced from {values.Count} to {workingValues.Count} elements to match channels size", this);
+            }
+
+            // Process each channel-value pair
+            for (int i = 0; i < workingChannels.Count; i++)
+            {
+                int channel = workingChannels[i];
+                int value = workingValues[i];
+
+                // Validate channel number
+                if (channel <= 0)
+                {
+                    if (shouldLog) Log.Debug($"Skipping custom variable at index {i}: invalid channel {channel}", this);
+                    continue;
+                }
+
+                // Clamp value to valid DMX range
+                int clampedValue = Math.Clamp(value, 0, (int)customVarNormalizedMax);
+
+                // Set the DMX value
+                SetDmxValue(clampedValue, channel, 0, 0f, customVarNormalizedMax, shouldLog, $"CustomVar[{i}]");
             }
         }
         #endregion
@@ -1287,6 +1309,9 @@ namespace Lib.io.dmx
             int pointCount = _visualizationPoints.Length;
             int stride = Point.Stride;
 
+            if (stride <= 0)
+                return;
+
             Buffer buffer = null;
             ShaderResourceView srv = null;
             UnorderedAccessView uav = null;
@@ -1313,6 +1338,117 @@ namespace Lib.io.dmx
             _visualizeBuffer.Buffer = buffer;
             _visualizeBuffer.Srv = srv;
             _visualizeBuffer.Uav = uav;
+        }
+        #endregion
+
+        #region Shortest Path Optimization
+        private (float pan, float tilt) GetOptimizedPanTilt(float rawPan, float rawTilt, EvaluationContext context, Vector2 lastState)
+        {
+            if (float.IsNaN(lastState.X) || float.IsNaN(lastState.Y))
+            {
+                // No previous state, just use the normal path centered in range
+                float pan = FitToRange(rawPan, PanRange.GetValue(context), false, float.NaN);
+                float tilt = FitToRange(rawTilt, TiltRange.GetValue(context), false, float.NaN);
+                return (pan, tilt);
+            }
+
+            // Candidate A: Normal path
+            float panA = FitToRange(rawPan, PanRange.GetValue(context), true, lastState.X);
+            float tiltA = FitToRange(rawTilt, TiltRange.GetValue(context), true, lastState.Y);
+
+            // Candidate B: Flipped path (pan + 180, 180 - tilt)
+            float panB = FitToRange(rawPan + MathF.PI, PanRange.GetValue(context), true, lastState.X);
+            float tiltB = FitToRange(MathF.PI - rawTilt, TiltRange.GetValue(context), true, lastState.Y);
+
+            // Calculate costs (weighted angular distance, penalizing out-of-range)
+            float Cost(float p, float t, Vector2 pRange, Vector2 tRange)
+            {
+                float pMin = pRange.X * MathF.PI / 180f;
+                float pMax = pRange.Y * MathF.PI / 180f;
+                float tMin = tRange.X * MathF.PI / 180f;
+                float tMax = tRange.Y * MathF.PI / 180f;
+
+                float pDist = Math.Abs(p - lastState.X);
+                float tDist = Math.Abs(t - lastState.Y);
+
+                // Add heavy penalty if outside the valid range
+                float pPenalty = (p < pMin || p > pMax) ? 1000f : 0f;
+                float tPenalty = (t < tMin || t > tMax) ? 1000f : 0f;
+
+                return pDist + tDist + pPenalty + tPenalty;
+            }
+
+            float costA = Cost(panA, tiltA, PanRange.GetValue(context), TiltRange.GetValue(context));
+            float costB = Cost(panB, tiltB, PanRange.GetValue(context), TiltRange.GetValue(context));
+
+            if (DebugToLog.GetValue(context))
+            {
+                Log.Debug($"Path A: pan={panA*180/MathF.PI:F1}, tilt={tiltA*180/MathF.PI:F1}, cost={costA:F2}", this);
+                Log.Debug($"Path B: pan={panB*180/MathF.PI:F1}, tilt={tiltB*180/MathF.PI:F1}, cost={costB:F2}", this);
+            }
+
+            return costB < costA ? (panB, tiltB) : (panA, tiltA);
+        }
+
+        private float FitToRange(float rawVal, Vector2 rangeDeg, bool useShortestPath, float lastValRad)
+        {
+            float val = rawVal;
+            float minRad = rangeDeg.X * MathF.PI / 180f;
+            float maxRad = rangeDeg.Y * MathF.PI / 180f;
+
+            if (!useShortestPath || float.IsNaN(lastValRad))
+            {
+                // Normalize to [-PI, PI]
+                val = MathUtils.Fmod(val + MathF.PI, 2 * MathF.PI) - MathF.PI;
+
+                // Shift to be close to the center of the allowed range
+                float rangeCenterRad = (minRad + maxRad) / 2f;
+                float turnsToCenter = MathF.Round((val - rangeCenterRad) / (2 * MathF.PI));
+                val -= turnsToCenter * 2 * MathF.PI;
+            }
+            else
+            {
+                // Shortest path logic: find the rotation multiple that gets closest to the last value
+                // AND respects the range if possible.
+                
+                float baseVal = MathUtils.Fmod(val + MathF.PI, 2 * MathF.PI) - MathF.PI;
+                
+                // Calculate the "ideal" number of turns to be closest to lastVal
+                float idealTurns = MathF.Round((lastValRad - baseVal) / (2 * MathF.PI));
+                float candidate = baseVal + idealTurns * 2 * MathF.PI;
+
+                // If the candidate is inside the range, great.
+                if (candidate >= minRad && candidate <= maxRad)
+                {
+                    val = candidate;
+                }
+                else
+                {
+                    // If not, check neighbors (idealTurns - 1, idealTurns + 1) to see if they are in range.
+                    // We prioritize "being in range" over "being closest to lastVal" to avoid penalties.
+                    
+                    float prev = baseVal + (idealTurns - 1) * 2 * MathF.PI;
+                    float next = baseVal + (idealTurns + 1) * 2 * MathF.PI;
+                    
+                    bool prevInRange = prev >= minRad && prev <= maxRad;
+                    bool nextInRange = next >= minRad && next <= maxRad;
+                    
+                    if (prevInRange && !nextInRange) val = prev;
+                    else if (!prevInRange && nextInRange) val = next;
+                    else if (prevInRange && nextInRange)
+                    {
+                        // Both in range? Pick closest.
+                        if (Math.Abs(prev - lastValRad) < Math.Abs(next - lastValRad)) val = prev;
+                        else val = next;
+                    }
+                    else
+                    {
+                        // None are in range. Stick with the closest one (candidate).
+                        val = candidate;
+                    }
+                }
+            }
+            return val;
         }
         #endregion
     }

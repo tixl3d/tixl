@@ -21,6 +21,9 @@ namespace Lib.io.dmx.helpers{
         [Input(Guid = "7ae45928-69dc-47a1-8302-77b9a50f57bf")]
         public readonly InputSlot<T3.Core.Operator.GizmoVisibility> Visibility = new InputSlot<T3.Core.Operator.GizmoVisibility>();
 
+        [Input(Guid = "16270194-e065-460b-8fd6-cbd432f331fc")]
+        public readonly InputSlot<T3.Core.DataTypes.BufferWithViews> ReferencePoints = new InputSlot<T3.Core.DataTypes.BufferWithViews>();
+
     }
 }
 
