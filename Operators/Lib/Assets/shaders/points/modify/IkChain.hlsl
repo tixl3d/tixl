@@ -5,9 +5,10 @@
 
 cbuffer Params : register(b0)
 {
-    float Strength;
+    
     float Tolerance; 
-    float Influence;         
+    float Influence;
+    float MaxBendAngle; // in radians, used if AngleConstraint is enabled         
 }
 
 cbuffer Params : register(b1)
@@ -103,7 +104,7 @@ RWStructuredBuffer<Point> ResultPoints : u0;
             error = distance(pos[pointsPerChain - 1], targetPos);
         }
         if (AngleConstraint == 1){
-            float MaxBendAngle = radians(30.0f); // Example max bend angle in radians
+            float maxBendAngle = radians(MaxBendAngle); // Example max bend angle in radians
                     // After computing the new position in the backward pass,
             // clamp the bend angle relative to the parent direction
             for (uint b = 1; b < pointsPerChain; b++)
@@ -142,7 +143,7 @@ RWStructuredBuffer<Point> ResultPoints : u0;
             Point p = ResultPoints[globalIdx];
 
             float3 solvedPos = (l == 0) ? rootPos : pos[l];
-            p.Position = lerp(originalPos[l], solvedPos, Strength);
+            p.Position = solvedPos;
 
             // Update rotation to face the next joint
             if (l < pointsPerChain - 1)
@@ -161,15 +162,15 @@ RWStructuredBuffer<Point> ResultPoints : u0;
             if (l == pointsPerChain - 1)
             {
                 // For the end effector, optionally copy rotation from target
-                p.Rotation = lerp(p.Rotation, TargetPoints[targetIdx].Rotation, Influence);
                 // or copy the last segment's rotation for a more natural look:
-                //p.Rotation = lerp(p.Rotation, ResultPoints[globalIdx - 1].Rotation, Influence);
+                p.Rotation = lerp(ResultPoints[globalIdx - 1].Rotation,TargetPoints[targetIdx].Rotation, Influence);
+                p.Scale.x = distance(pos[l], pos[l - 1]); // Update scale for end segment as well
             }
             
             ResultPoints[globalIdx].Position = p.Position;
             ResultPoints[globalIdx].Rotation = p.Rotation;
             ResultPoints[globalIdx].Scale    = p.Scale;
-            ResultPoints[globalIdx].Color    = p.Color;
+            ResultPoints[globalIdx].Color    = SourcePoints[globalIdx].Color;
             ResultPoints[globalIdx].FX1    = SourcePoints[globalIdx].FX1;
             ResultPoints[globalIdx].FX2   = p.FX2;
            

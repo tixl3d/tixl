@@ -1,27 +1,35 @@
 {
   "Id": "20eee636-7bd4-44e8-8a86-77fe4be1f50b"/*IkChain*/,
-  "Description": "Attempt to IK",
+  "Description": "FABRIK inverse kinematic on the GPU. While this operator is still experimental, it works pretty good. Suggestions and help needed.\nUse [Once] to initialize.\n",
+  "SymbolTags": "64",
   "InputUis": [
     {
       "InputId": "1edbc9d8-e003-4337-b8f7-179068a11dff"/*PointsPerChain*/,
       "Position": {
-        "X": -156.81451,
-        "Y": 1261.4154
-      }
+        "X": 91.07559,
+        "Y": 1074.2563
+      },
+      "AddPadding": "True"
     },
     {
       "InputId": "6c2c8f16-c874-44f7-bc39-bbf770546479"/*Reset*/,
       "Position": {
-        "X": -156.81451,
-        "Y": 1036.4154
-      }
+        "X": -48.924408,
+        "Y": 1039.2563
+      },
+      "Description": "Initialize the ik chain"
     },
     {
       "InputId": "7b201b0d-8298-4ddd-b534-b8127e4c5581"/*Influence*/,
       "Position": {
-        "X": -156.81451,
-        "Y": 1186.4154
-      }
+        "X": -45.767853,
+        "Y": 876.56714
+      },
+      "Description": "Targets influence",
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true
     },
     {
       "InputId": "824ab47a-93ae-432b-8f5a-e701251b0e36"/*Points*/,
@@ -34,39 +42,45 @@
     {
       "InputId": "83518060-732c-421e-b90a-97c325882fd6"/*AngleConstraint*/,
       "Position": {
-        "X": -156.81451,
-        "Y": 1336.4154
-      }
+        "X": 91.07559,
+        "Y": 1109.2563
+      },
+      "GroupTitle": "Constraints"
     },
     {
-      "InputId": "b280307a-af1f-4236-9478-b66aadc9120d"/*Strength*/,
+      "InputId": "a47682b7-98fe-4461-a328-f9c8c14ef137"/*MaxBendAngle*/,
       "Position": {
-        "X": -145.79132,
-        "Y": 783.36597
-      },
-      "GroupTitle": "Options",
-      "Scale": 0.01
+        "X": -45.767853,
+        "Y": 911.56714
+      }
     },
     {
       "InputId": "b7b18e95-f9a7-4bca-8960-d2b3a535e394"/*Tolerance*/,
       "Position": {
-        "X": -124.75726,
-        "Y": 878.147
-      }
+        "X": -45.767853,
+        "Y": 841.56714
+      },
+      "Min": 0.0,
+      "Max": 0.1
     },
     {
       "InputId": "de07cd9c-11e2-414d-9c5c-9e38cc51d80e"/*Targets*/,
       "Position": {
         "X": -156.81451,
         "Y": 1111.4154
-      }
+      },
+      "AddPadding": "True"
     },
     {
       "InputId": "ee7be099-7dfb-4c4e-98ad-0ae739cf9f5c"/*MaxIterations*/,
       "Position": {
-        "X": -156.81451,
-        "Y": 961.4154
-      }
+        "X": 91.07559,
+        "Y": 1004.25635
+      },
+      "Min": 1,
+      "Max": 50,
+      "ClampMin": true,
+      "ClampMax": true
     }
   ],
   "SymbolChildUis": [

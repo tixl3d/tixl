@@ -13,11 +13,6 @@ internal sealed class IkChain :Instance<IkChain>
 
         [Input(Guid = "824ab47a-93ae-432b-8f5a-e701251b0e36")]
         public readonly InputSlot<T3.Core.DataTypes.BufferWithViews> Points = new InputSlot<T3.Core.DataTypes.BufferWithViews>();
-
-        
-
-        [Input(Guid = "b280307a-af1f-4236-9478-b66aadc9120d")]
-        public readonly InputSlot<float> Strength = new InputSlot<float>();
     
     [Input(Guid = "B7B18E95-F9A7-4BCA-8960-D2B3A535E394")]
     public readonly InputSlot<float> Tolerance = new InputSlot<float>();
@@ -39,6 +34,9 @@ internal sealed class IkChain :Instance<IkChain>
 
         [Input(Guid = "83518060-732c-421e-b90a-97c325882fd6")]
         public readonly InputSlot<int> AngleConstraint = new InputSlot<int>();
+
+        [Input(Guid = "a47682b7-98fe-4461-a328-f9c8c14ef137")]
+        public readonly InputSlot<float> MaxBendAngle = new InputSlot<float>();
 
 
 }
