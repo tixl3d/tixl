@@ -10,7 +10,7 @@ cbuffer Params : register(b0)
 }
 
 StructuredBuffer<PbrVertex> Vertices : t0;   // input
-RWStructuredBuffer<LegacyPoint> ResultPoints : u0; // output
+RWStructuredBuffer<Point> ResultPoints : u0; // output
 
 [numthreads(256, 4, 1)] void main(uint3 i : SV_DispatchThreadID)
 {
@@ -19,13 +19,13 @@ RWStructuredBuffer<LegacyPoint> ResultPoints : u0; // output
 
     ResultPoints[index].Position = v.Position + OffsetByTBN.x * v.Tangent * OffsetScale + OffsetByTBN.y * v.Bitangent * OffsetScale + OffsetByTBN.z * v.Normal * OffsetScale;
 
-    ResultPoints[index].W = v.Selected;
+    ResultPoints[index].FX1 = v.Selected;
 
     float3x3 m = float3x3(v.Tangent, v.Bitangent, v.Normal);
     float4 rot = normalize(qFromMatrix3Precise(transpose(m)));
 
     ResultPoints[index].Rotation = normalize(rot);
-    ResultPoints[index].Color = 1;
-    ResultPoints[index].Selected = v.Selected;
-    ResultPoints[index].Stretch = 1;
+    ResultPoints[index].Color = float4(v.ColorRGB,1);
+    ResultPoints[index].FX2 = v.Selected;
+    ResultPoints[index].Scale = 1;
 }
