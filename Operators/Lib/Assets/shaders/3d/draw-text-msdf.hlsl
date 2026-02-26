@@ -41,27 +41,11 @@ cbuffer Params : register(b1)
     float4 Color;
     float4 Shadow;
     float Sharpness;
+    float BillboardMode;
 };
 
 struct GridEntry
 {
-    // float2 gridPos;
-    // float2 charUv;
-    // float highlight;
-    // float3 __filldummy;
-    //float2 size;
-    //float2 __filldummy;
-
-    // float3 Position;
-    // float Size;
-    // float3 Orientation;
-    // float AspectRatio;
-    // float4 Color;
-    // float4 UvMinMax;
-    // float BirthTime;
-    // float Speed;
-    // uint Id;        
-
     float3 Position;     
     float Size;             // 3
     float AspectRatio;      // 4
@@ -96,31 +80,44 @@ Output vsMain(uint id: SV_VertexID)
 
     GridEntry entry = GridEntries[entryIndex];
 
+    // First, get the letter's position in object space
+    float3 letterPos = entry.Position;
 
-    float3 posInObject = entry.Position;
-    posInObject.xy += quadPos.xy * float2(entry.Size * entry.AspectRatio, entry.Size);
+    // Add the quad offset to create the vertex position in object space
+    float3 vertexPos = letterPos;
+    vertexPos.xy += quadPos.xy * float2(entry.Size * entry.AspectRatio, entry.Size);
 
-    // Experimenting with aligned font scaling (not working)
-    // float2 posInQuad = quadPos.xy * float2(entry.Size * entry.AspectRatio, entry.Size);
-    // posInQuad -= entry.Offset / 1024 * TestParams.x + float2(0.5 * entry.AspectRatio, -0.22) * TestParams.z;
-    // posInQuad *= TestParams.y;
-    // posInQuad += entry.Offset / 1024 * TestParams.x - float2(0.25 * entry.AspectRatio, -1.22) * TestParams.z * TestParams.y;
-    // posInQuad -= 0.08;
-    // float3 posInObject = float3(posInQuad,0) + entry.Position;
+    if (BillboardMode > 0.5)
+    {
+        float4 layoutCenter = float4(0, 0, 0, 1);
+        float4 worldCenter = mul(layoutCenter, ObjectToWorld);
 
+        // Transform the anchor to camera space
+        float4 camCenter = mul(worldCenter, WorldToCamera);
 
-    float4 quadPosInWorld = mul(float4(posInObject.xyz,1), ObjectToWorld);
-    
-    //quadPosInWorld.xy += quadPos.xy * float2(entry.Size * entry.AspectRatio, entry.Size) ; //CellSize *  (1- CellPadding) * (1+overrideScale* OverrideScale) /2;
-    
-    float4 quadPosInCamera = mul(quadPosInWorld, WorldToCamera);
-    output.position = mul(quadPosInCamera, CameraToClipSpace);
-    //output.position.z = 0;
-    //output.color = lerp(Color, HighlightColor, entry.highlight) * overrideBrightness;
-    //output.texCoord = (entry.charUv + quadPos * float2(0.5, -0.5) + 0.5)/16;
+        float3 localOffset = letterPos;
+        localOffset.xy += quadPos.xy * float2(entry.Size * entry.AspectRatio, entry.Size);
+
+        // Apply the offset directly in camera space — axes are already screen-aligned
+        camCenter.xy += localOffset.xy;
+        output.position = mul(camCenter, CameraToClipSpace);
+    }
+    else
+    {
+        // Transform the vertex position to world space
+        float4 worldPos = mul(float4(vertexPos, 1), ObjectToWorld);
+
+        // Then transform to camera space
+        float4 camPos = mul(worldPos, WorldToCamera);
+
+        // Finally, transform to clip space
+        output.position = mul(camPos, CameraToClipSpace);
+    }
+
     float4 uv = entry.UvMinMax * UV[vertexIndex];
-    output.texCoord =  uv.xy + uv.zw;
-    return output;
+        output.texCoord = uv.xy + uv.zw;
+
+        return output;
 }
 
 

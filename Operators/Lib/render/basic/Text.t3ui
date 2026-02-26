@@ -4,6 +4,13 @@
   "SymbolTags": "1",
   "InputUis": [
     {
+      "InputId": "065b6437-64ed-4ebc-bee0-578677421efb"/*BillboardMode*/,
+      "Position": {
+        "X": -126.37311,
+        "Y": 594.7006
+      }
+    },
+    {
       "InputId": "0e5f05b4-5e8a-4f6d-8cac-03b04649eb67"/*Color*/,
       "Position": {
         "X": -266.3731,
@@ -21,17 +28,6 @@
       "Description": "Defines whether / which surface is rendered invisible"
     },
     {
-      "InputId": "356cbd6c-2e6a-4a3e-992f-943dd420a53f"/*Sharpness*/,
-      "Position": {
-        "X": -295.75763,
-        "Y": 687.47797
-      },
-      "Description": "Adjust the edges, lower this value if the render is aliased.",
-      "Min": 1,
-      "Max": 16,
-      "ClampMin": true
-    },
-    {
       "InputId": "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3"/*FontPath*/,
       "Position": {
         "X": 252.9892,
@@ -41,6 +37,13 @@
       "Description": "Defines which font is used",
       "Usage": "FilePath",
       "FileFilter": "fnt"
+    },
+    {
+      "InputId": "62827185-635e-4bf4-b13a-301547b55acc"/*Sharpness*/,
+      "Position": {
+        "X": 13.626892,
+        "Y": 559.7006
+      }
     },
     {
       "InputId": "7a76d5aa-1f44-4238-9333-7c2951becc31"/*EnableZTest*/,
@@ -272,20 +275,6 @@
       }
     },
     {
-      "ChildId": "aa397f89-22c1-49eb-b54a-8a80482f9715"/*magic1*/,
-      "Position": {
-        "X": -83.3327,
-        "Y": 612.0588
-      }
-    },
-    {
-      "ChildId": "ad0e45c3-103c-4b8c-8e3c-6c3c2aca64a8"/*IntToFloat*/,
-      "Position": {
-        "X": 29.910736,
-        "Y": 683.2737
-      }
-    },
-    {
       "ChildId": "c2075c9d-ddb6-4db9-8690-f093ca36fe97"/*Rasterizer*/,
       "Position": {
         "X": 890.4731,
@@ -297,6 +286,13 @@
       "Position": {
         "X": 738.59595,
         "Y": 132.63022
+      }
+    },
+    {
+      "ChildId": "de6553be-c32a-44c2-978f-f39096fffc3d"/*BoolToFloat*/,
+      "Position": {
+        "X": 13.626892,
+        "Y": 594.7006
       }
     },
     {
