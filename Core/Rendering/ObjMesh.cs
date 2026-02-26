@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -169,7 +169,7 @@ public sealed class ObjMesh
         public  int V2t;
     }
 
-    public struct Line
+    public readonly struct Line
     {
         internal Line(int v0, int v2)
         {
@@ -288,6 +288,31 @@ public sealed class ObjMesh
             SortInMergedVertex(face.V1, face.V1n, face.V1t, faceIndex);
             SortInMergedVertex(face.V2, face.V2n, face.V2t, faceIndex);
         }
+
+        // Re-sort distinct vertices by their OBJ position index so that
+        // SortedVertexIndices[i] == i preserves the original "v" line order.
+        var sortedByPosition = Enumerable.Range(0, _distinctVertices.Count)
+                                         .OrderBy(i => _distinctVertices[i].PositionIndex)
+                                         .ToList();
+
+        var reordered = sortedByPosition.Select(i => _distinctVertices[i]).ToList();
+        var reorderedTangents = sortedByPosition.Select(i => VertexTangents[i]).ToList();
+        var reorderedBinormals = sortedByPosition.Select(i => VertexBinormals[i]).ToList();
+
+        // Rebuild the hash→index map with new positions
+        _vertexIndicesByHash.Clear();
+        for (var i = 0; i < reordered.Count; i++)
+        {
+            var v = reordered[i];
+            _vertexIndicesByHash[Vertex.GetHashForIndices(v.PositionIndex, v.NormalIndex, v.TextureCoordsIndex)] = i;
+        }
+
+        _distinctVertices.Clear();
+        _distinctVertices.AddRange(reordered);
+        VertexTangents.Clear();
+        VertexTangents.AddRange(reorderedTangents);
+        VertexBinormals.Clear();
+        VertexBinormals.AddRange(reorderedBinormals);
 
         return _distinctVertices;
     }
