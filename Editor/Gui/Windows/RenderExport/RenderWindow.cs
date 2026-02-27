@@ -78,9 +78,10 @@ internal sealed class RenderWindow : Window
 
         FormInputs.AddVerticalSpace(5);
         DrawRenderingControls();
+        FormInputs.AddVerticalSpace(5);
+        CustomComponents.HelpText(RenderProcess.IsExporting ? RenderProcess.LastHelpString : _uiState.LastHelpString);
         DrawOverwriteDialog();
 
-        CustomComponents.HelpText(RenderProcess.IsExporting ? RenderProcess.LastHelpString : _uiState.LastHelpString);
         
         if (!RenderProcess.IsExporting && !string.IsNullOrEmpty(RenderProcess.LastTargetDirectory) && Directory.Exists(RenderProcess.LastTargetDirectory))
         {
@@ -110,17 +111,41 @@ internal sealed class RenderWindow : Window
 
         FormInputs.AddVerticalSpace(5);
 
-        // Start and End on separate rows (standard style)
-        var changed = FormInputs.AddFloat($"{RenderWindowStrings.StartLabel} ({ActiveSettings.Reference})", ref ActiveSettings.StartInBars, 0, float.MaxValue, 0.1f, true);
-        changed |= FormInputs.AddFloat($"{RenderWindowStrings.EndLabel} ({ActiveSettings.Reference})", ref ActiveSettings.EndInBars, 0, float.MaxValue, 0.1f, true);
-        
+        var changed = false;
+        if (ActiveSettings.Reference == RenderSettings.TimeReference.Frames)
+        {
+
+            var startFrame = (int)ActiveSettings.StartInBars;
+            var endFrame = (int)ActiveSettings.EndInBars;
+            changed = FormInputs.AddInt($"{RenderWindowStrings.StartLabel}",
+                                        ref startFrame, 0, int.MaxValue, 1f, "");
+            changed |= FormInputs.AddInt($"{RenderWindowStrings.EndLabel}",
+                                         ref endFrame, 0, int.MaxValue, 1f, "");
+            ActiveSettings.StartInBars = startFrame;
+            ActiveSettings.EndInBars = endFrame;
+
+        }
+        else
+        {
+            changed = FormInputs.AddFloat($"{RenderWindowStrings.StartLabel} ({ActiveSettings.Reference})",
+                                          ref ActiveSettings.StartInBars, 0, float.MaxValue, 0.1f, true);
+            changed |= FormInputs.AddFloat($"{RenderWindowStrings.EndLabel} ({ActiveSettings.Reference})",
+                                           ref ActiveSettings.EndInBars, 0, float.MaxValue, 0.1f, true);
+            
+        }
+
         if (changed)
+        {
+            if (ActiveSettings.EndInBars < ActiveSettings.StartInBars)
+                ActiveSettings.EndInBars = ActiveSettings.StartInBars;
             ActiveSettings.TimeRange = RenderSettings.TimeRanges.Custom;
+            
+        }
 
         FormInputs.AddVerticalSpace(5);
 
         // FPS row
-        if (FormInputs.AddFloat(RenderWindowStrings.FpsLabel, ref ActiveSettings.Fps, 1, 120, 0.1f, true))
+        if (FormInputs.AddFloat(RenderWindowStrings.FpsLabel, ref ActiveSettings.Fps, 0.1f, 120, 0.1f, true))
         {
             if (ActiveSettings.Reference == RenderSettings.TimeReference.Frames)
             {
@@ -232,7 +257,7 @@ internal sealed class RenderWindow : Window
         var directory = Path.GetDirectoryName(currentPath) ?? "./Render";
         var filename = Path.GetFileName(currentPath) ?? "render-v01.mp4";
 
-        FormInputs.AddFilePicker(RenderWindowStrings.MainFolderLabel, ref directory!, ".\\Render", null, RenderWindowStrings.SaveFolderLabel, FileOperations.FilePickerTypes.Folder);
+        FormInputs.AddFilePicker(RenderWindowStrings.DestinationFolderLabel, ref directory!, ".\\Render", null, RenderWindowStrings.SaveFolderLabel, FileOperations.FilePickerTypes.Folder);
 
         if (FormInputs.AddStringInput(RenderWindowStrings.FilenameLabel, ref filename))
         {
@@ -264,7 +289,7 @@ internal sealed class RenderWindow : Window
 
     private void DrawImageSequenceSettings()
     {
-        FormInputs.AddFilePicker(RenderWindowStrings.MainFolderLabel, ref UserSettings.Config.RenderSequenceFilePath!, ".\\ImageSequence ", null, RenderWindowStrings.SaveFolderLabel, FileOperations.FilePickerTypes.Folder);
+        FormInputs.AddFilePicker(RenderWindowStrings.DestinationFolderLabel, ref UserSettings.Config.RenderSequenceFilePath!, ".\\ImageSequence ", null, RenderWindowStrings.SaveFolderLabel, FileOperations.FilePickerTypes.Folder);
 
         if (FormInputs.AddStringInput(RenderWindowStrings.SubfolderLabel, ref UserSettings.Config.RenderSequenceFileName))
         {
@@ -326,8 +351,8 @@ internal sealed class RenderWindow : Window
                             : $"{ActiveSettings.FileFormat} Sequence";
 
         ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-        ImGui.TextUnformatted($"{format} - {scaledWidth}×{scaledHeight} @ {ActiveSettings.Fps:0}fps");
-        ImGui.TextUnformatted($"{duration / 60:0}:{duration % 60:00.0}s ({ActiveSettings.FrameCount} frames)");
+        ImGui.TextUnformatted($"{format} - {scaledWidth}×{scaledHeight}@{ActiveSettings.Fps:0}fps, " +
+            $"duration: {duration / 60:0}:{duration % 60:00.0}s ({ActiveSettings.FrameCount} frames)");
         
         ImGui.PushFont(Fonts.FontSmall);
         ImGui.TextUnformatted("Export to:");
@@ -353,7 +378,35 @@ internal sealed class RenderWindow : Window
 
     private void DrawRenderingControls()
     {
-        if (!RenderProcess.IsExporting && !RenderProcess.IsToollRenderingSomething)
+        if (RenderProcess.IsExporting)
+        {
+            var progress = (float)RenderProcess.Progress;
+            var elapsed = Playback.RunTimeInSecs - RenderProcess.ExportStartedTimeLocal;
+
+            var timeRemainingStr = RenderWindowStrings.Calculating;
+            if (progress > 0.01)
+            {
+                var estimatedTotal = elapsed / progress;
+                var remaining = estimatedTotal - elapsed;
+                timeRemainingStr = StringUtils.HumanReadableDurationFromSeconds(remaining) + RenderWindowStrings.Remaining;
+            }
+
+            ImGui.PushStyleColor(ImGuiCol.PlotHistogram, UiColors.StatusAutomated.Rgba);
+            ImGui.PushStyleColor(ImGuiCol.FrameBg, UiColors.BackgroundInputField.Rgba);
+            ImGui.ProgressBar(progress, new Vector2(-1, 4 * T3Ui.UiScaleFactor), "");
+            ImGui.PopStyleColor(2);
+
+            ImGui.PushFont(Fonts.FontSmall);
+            ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
+            ImGui.TextUnformatted(timeRemainingStr);
+            ImGui.PopStyleColor();
+            ImGui.PopFont();
+
+            FormInputs.AddVerticalSpace(5);
+            if (ImGui.Button(RenderWindowStrings.CancelRenderButton, new Vector2(-1, 24 * T3Ui.UiScaleFactor)))
+                RenderProcess.Cancel(RenderWindowStrings.RenderCancelled + StringUtils.HumanReadableDurationFromSeconds(elapsed));
+        }
+        else if (!RenderProcess.IsToollRenderingSomething)
         {
             ImGui.PushStyleColor(ImGuiCol.Button, UiColors.BackgroundActive.Fade(0.7f).Rgba);
             ImGui.PushStyleColor(ImGuiCol.ButtonHovered, UiColors.BackgroundActive.Rgba);
@@ -387,68 +440,48 @@ internal sealed class RenderWindow : Window
             ImGui.PopStyleVar();
             ImGui.PopStyleColor(2);
         }
-        else if (RenderProcess.IsExporting)
-        {
-            var progress = (float)RenderProcess.Progress;
-            var elapsed = Playback.RunTimeInSecs - RenderProcess.ExportStartedTimeLocal;
-
-            var timeRemainingStr = RenderWindowStrings.Calculating;
-            if (progress > 0.01)
-            {
-                var estimatedTotal = elapsed / progress;
-                var remaining = estimatedTotal - elapsed;
-                timeRemainingStr = StringUtils.HumanReadableDurationFromSeconds(remaining) + RenderWindowStrings.Remaining;
-            }
-
-            ImGui.PushStyleColor(ImGuiCol.PlotHistogram, UiColors.StatusAutomated.Rgba);
-            ImGui.PushStyleColor(ImGuiCol.FrameBg, UiColors.BackgroundInputField.Rgba);
-            ImGui.ProgressBar(progress, new Vector2(-1, 4 * T3Ui.UiScaleFactor), "");
-            ImGui.PopStyleColor(2);
-
-            ImGui.PushFont(Fonts.FontSmall);
-            ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-            ImGui.TextUnformatted(timeRemainingStr);
-            ImGui.PopStyleColor();
-            ImGui.PopFont();
-
-            FormInputs.AddVerticalSpace(5);
-            if (ImGui.Button(RenderWindowStrings.CancelRenderButton, new Vector2(-1, 24 * T3Ui.UiScaleFactor)))
-            {
-            RenderProcess.Cancel(RenderWindowStrings.RenderCancelled + StringUtils.HumanReadableDurationFromSeconds(elapsed));
-            }
-        }
     }
 
     private static bool ValidateSettings(out string errorMessage)
     {
         errorMessage = string.Empty;
+        var status = true;
 
         if (ActiveSettings.RenderMode == RenderSettings.RenderModes.Video)
         {
-            var currentPath = UserSettings.Config.RenderVideoFilePath ?? string.Empty;
-            var filename = Path.GetFileNameWithoutExtension(currentPath);
-            if (string.IsNullOrWhiteSpace(filename) || filename == ".")
+            var filename = Path.GetFileNameWithoutExtension(UserSettings.Config.RenderVideoFilePath);
+            if (string.IsNullOrWhiteSpace(filename) || filename == ".mp4")
             {
-                errorMessage = "Filename cannot be empty.";
-                return false;
+                status = false;
+                errorMessage += "Filename cannot be empty.\n";
             }
         }
         else
         {
             if (ActiveSettings.CreateSubFolder && string.IsNullOrWhiteSpace(UserSettings.Config.RenderSequenceFileName))
             {
-                errorMessage = "Subfolder name cannot be empty.";
-                return false;
+                status = false;
+                errorMessage += "Subfolder name cannot be empty.\n";
             }
-
             if (string.IsNullOrWhiteSpace(UserSettings.Config.RenderSequencePrefix))
             {
-                errorMessage = "Filename prefix cannot be empty.";
-                return false;
+                status = false;
+                errorMessage += "Filename prefix cannot be empty.\n";
             }
         }
 
-        return true;
+        if (ActiveSettings.Fps <= 0f)
+        {
+            status = false;
+            errorMessage += "FPS must be over 0\n";
+        }
+        if (ActiveSettings.EndInBars <= ActiveSettings.StartInBars)
+        {
+            status = false;
+            errorMessage += "End frame/time/bar must be after the start\n";
+        }
+        
+        return status;
     }
 
     private void DrawOverwriteDialog()
@@ -474,7 +507,7 @@ internal sealed class RenderWindow : Window
         {
             ImGui.BeginGroup();
             var targetPath = GetCachedTargetFilePath(ActiveSettings.RenderMode);
-            bool isFolder = ActiveSettings.RenderMode == RenderSettings.RenderModes.ImageSequence && ActiveSettings.CreateSubFolder;
+            var isFolder = ActiveSettings is { RenderMode: RenderSettings.RenderModes.ImageSequence, CreateSubFolder: true };
 
             var displayPath = isFolder ? Path.GetFileName(Path.GetDirectoryName(targetPath)) : Path.GetFileName(targetPath);
             var message = isFolder ? RenderWindowStrings.OverwriteFolderMessage : RenderWindowStrings.OverwriteMessage;
@@ -487,7 +520,7 @@ internal sealed class RenderWindow : Window
             
             ImGui.Dummy(new Vector2(0,10));
             ImGui.TextUnformatted(RenderWindowStrings.OverwriteConfirm);
-            FormInputs.AddVerticalSpace(20);
+            FormInputs.AddVerticalSpace(10);
 
             if (ImGui.Button(RenderWindowStrings.OverwriteButton, new Vector2(120, 0)))
             {
@@ -536,7 +569,7 @@ internal sealed class RenderWindow : Window
             new(0.01, "Poor", "Very low quality. Consider lower resolution."),
             new(0.02, "Low", "Probable strong artifacts"),
             new(0.05, "Medium", "Will exhibit artifacts in noisy regions"),
-            new(0.08, "Okay", "Compromise between filesize and quality"),
+            new(0.08, "Okay", "Compromise between file size and quality"),
             new(0.12, "Good", "Good quality. Probably sufficient for YouTube."),
             new(0.5, "Very good", "Excellent quality, but large."),
             new(1, "Reference", "Indistinguishable. Very large files."),
@@ -584,7 +617,7 @@ internal sealed class RenderWindow : Window
         
         public const string BitrateLabel = "Bitrate";
         public const string TooltipBitrate = "Video bitrate in megabits per second.";
-        public const string MainFolderLabel = "Main Folder";
+        public const string DestinationFolderLabel = "Destination folder";
         public const string SaveFolderLabel = "Save folder.";
         public const string FilenameLabel = "Filename";
         public const string FormatLabel = "Format";
