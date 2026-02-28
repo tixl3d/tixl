@@ -291,17 +291,28 @@ public sealed class ObjMesh
 
         // Re-sort distinct vertices by their OBJ position index so that
         // SortedVertexIndices[i] == i preserves the original "v" line order.
-        var sortedByPosition = Enumerable.Range(0, _distinctVertices.Count)
-                                         .OrderBy(i => _distinctVertices[i].PositionIndex)
-                                         .ToList();
+        var count = _distinctVertices.Count;
+        var sortedIndices = new int[count];
+        for (var i = 0; i < count; i++)
+            sortedIndices[i] = i;
 
-        var reordered = sortedByPosition.Select(i => _distinctVertices[i]).ToList();
-        var reorderedTangents = sortedByPosition.Select(i => VertexTangents[i]).ToList();
-        var reorderedBinormals = sortedByPosition.Select(i => VertexBinormals[i]).ToList();
+        Array.Sort(sortedIndices, (a, b) => _distinctVertices[a].PositionIndex.CompareTo(_distinctVertices[b].PositionIndex));
+
+        var reordered = new List<Vertex>(count);
+        var reorderedTangents = new List<Vector3>(count);
+        var reorderedBinormals = new List<Vector3>(count);
+
+        for (var i = 0; i < count; i++)
+        {
+            var oldIndex = sortedIndices[i];
+            reordered.Add(_distinctVertices[oldIndex]);
+            reorderedTangents.Add(VertexTangents[oldIndex]);
+            reorderedBinormals.Add(VertexBinormals[oldIndex]);
+        }
 
         // Rebuild the hash→index map with new positions
         _vertexIndicesByHash.Clear();
-        for (var i = 0; i < reordered.Count; i++)
+        for (var i = 0; i < count; i++)
         {
             var v = reordered[i];
             _vertexIndicesByHash[Vertex.GetHashForIndices(v.PositionIndex, v.NormalIndex, v.TextureCoordsIndex)] = i;
