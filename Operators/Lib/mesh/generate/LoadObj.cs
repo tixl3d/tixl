@@ -124,11 +124,14 @@ internal sealed class LoadObj : Instance<LoadObj>, IDescriptiveFilename, IStatus
                     var sortedVertex = distinctVertices[sortedVertexIndex];
                     reversedLookup[sortedVertexIndex] = vertexIndex;
 
-                    var colorRgb = mesh.Colors != null && mesh.Colors.Count > sortedVertexIndex 
-                                       ? (new Vector3(mesh.Colors[sortedVertexIndex].X, mesh.Colors[sortedVertexIndex].Y, mesh.Colors[sortedVertexIndex].Z)) 
-                                       : Vector3.One;
-                    
-                    
+                    var distinctVertex = distinctVertices[sortedVertexIndex];
+                    var colorRgb = mesh.Colors != null && mesh.Colors.Count > distinctVertex.PositionIndex
+                        ? new Vector3(mesh.Colors[distinctVertex.PositionIndex].X,
+                                      mesh.Colors[distinctVertex.PositionIndex].Y,
+                                      mesh.Colors[distinctVertex.PositionIndex].Z)
+                        : Vector3.One;
+
+
                     vertexBufferData[vertexIndex] = new PbrVertex
                                                         {
                                                             Position = mesh.Positions[sortedVertex.PositionIndex] * scaleFactor,
