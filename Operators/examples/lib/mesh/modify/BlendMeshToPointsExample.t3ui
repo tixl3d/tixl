@@ -1,0 +1,276 @@
+{
+  "Id": "bce9bc96-ff9b-443b-97f5-2286ddd30908"/*BlendMeshToPointsExample*/,
+  "Description": "MediaPipe [FaceLandmarkDetection] Example, make sure to select your webcam in [VideoDeviceInput] and activate it.",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "143c1a99-9160-4ce1-88e1-91831d940f89"/*Clamp*/,
+      "Position": {
+        "X": 1110.8682,
+        "Y": -258.31824
+      }
+    },
+    {
+      "ChildId": "2527a7ca-c8b2-4d0e-9425-d59f559d3536"/*AnimValue*/,
+      "Position": {
+        "X": 1110.8682,
+        "Y": -293.3185
+      }
+    },
+    {
+      "ChildId": "290b6c8c-c7a0-4b43-95d7-81fdae66400e"/*Group*/,
+      "Position": {
+        "X": 868.18585,
+        "Y": 108.22247
+      }
+    },
+    {
+      "ChildId": "2c13489c-6224-40db-8b15-a70bc7324441"/*Transform*/,
+      "Position": {
+        "X": 264.53555,
+        "Y": -361.49927
+      }
+    },
+    {
+      "ChildId": "2fcfdde0-555f-4d0e-97d3-7083b6eec9c2"/*DrawMeshUnlit*/,
+      "Position": {
+        "X": 702.70435,
+        "Y": -263.33304
+      }
+    },
+    {
+      "ChildId": "36740353-f70b-4ec8-a39e-e04ec02ed67f"/*SphereSDF*/,
+      "Position": {
+        "X": 175.18689,
+        "Y": -17.903687
+      }
+    },
+    {
+      "ChildId": "43ddf6a1-fcc6-443f-8201-a5d881609b65"/*RenderTarget*/,
+      "Position": {
+        "X": 868.18585,
+        "Y": 178.22247
+      }
+    },
+    {
+      "ChildId": "45dd4985-bcb8-4807-88d2-f8b81519a79a"/*Layer2d*/,
+      "Position": {
+        "X": 264.53555,
+        "Y": -326.49927
+      }
+    },
+    {
+      "ChildId": "6a17c54a-b13c-4533-815c-d9be0187b426"/*Pixelate*/,
+      "Position": {
+        "X": 702.70435,
+        "Y": -319.7967
+      }
+    },
+    {
+      "ChildId": "6bdaad86-94e9-47e2-af3b-1d1591998e44"/*RenderTarget*/,
+      "Position": {
+        "X": 702.70435,
+        "Y": -193.33304
+      }
+    },
+    {
+      "ChildId": "6f4147ac-a076-478b-a76c-3d3c05a65e2d"/*RecomputeNormals*/,
+      "Position": {
+        "X": 458.00574,
+        "Y": 172.35132
+      }
+    },
+    {
+      "ChildId": "711d98e4-9460-4685-bb8f-ff5e067e0fed"/*Remap*/,
+      "Position": {
+        "X": 1110.8682,
+        "Y": -223.3182
+      }
+    },
+    {
+      "ChildId": "777989da-4e2f-45e6-84dc-1e453bb63b61"/*AnimValue*/,
+      "Position": {
+        "X": 175.18689,
+        "Y": 17.096313
+      }
+    },
+    {
+      "ChildId": "78de1d37-a2ad-44db-a7ba-68c969f7aef6"/*BoolToInt*/,
+      "Position": {
+        "X": 264.53555,
+        "Y": -291.49927
+      }
+    },
+    {
+      "ChildId": "809dedf5-78b9-40cc-9294-69fd94d6bc07"/*BlendImages*/,
+      "Position": {
+        "X": 1110.8682,
+        "Y": -188.3182
+      }
+    },
+    {
+      "ChildId": "832a8541-dd8e-4945-bcbf-f496aa3371da"/*LoadObj*/,
+      "Position": {
+        "X": 455.18692,
+        "Y": -87.90369
+      }
+    },
+    {
+      "ChildId": "8c873b2b-fa74-4fed-ae10-37ff1c95d380"/*VideoDeviceInput*/,
+      "Comment": "Select your webcam",
+      "Position": {
+        "X": -23.37996,
+        "Y": -346.64294
+      }
+    },
+    {
+      "ChildId": "93749975-f958-4bce-a6be-64f5bf90507a"/*SDFToColor*/,
+      "Position": {
+        "X": 315.1869,
+        "Y": -17.903687
+      }
+    },
+    {
+      "ChildId": "a413512c-7368-4636-868c-251e0c809413"/*BlendMeshToPoints*/,
+      "Position": {
+        "X": 458.00574,
+        "Y": 67.35132
+      }
+    },
+    {
+      "ChildId": "a679a527-5bdb-4eea-abdb-9a4eae9fa87a"/*DrawMesh*/,
+      "Position": {
+        "X": 458.00574,
+        "Y": 207.35132
+      }
+    },
+    {
+      "ChildId": "b4cbf3b4-06a8-401f-9c56-89b4d02e440d"/*ColorVerticesWithField*/,
+      "Position": {
+        "X": 455.1869,
+        "Y": -52.903687
+      }
+    },
+    {
+      "ChildId": "c50bef83-3211-404c-86ab-ece033bd976c"/*Activate*/,
+      "Position": {
+        "X": -23.37996,
+        "Y": -381.64294
+      }
+    },
+    {
+      "ChildId": "c6119e44-5193-4a9c-bb4f-1c6ec5ecb6d6"/*Text*/,
+      "Position": {
+        "X": 264.53555,
+        "Y": -396.49927
+      }
+    },
+    {
+      "ChildId": "d0e8c90c-51a6-441f-a353-6c2d4a2f4b3e"/*RenderTarget*/,
+      "Position": {
+        "X": 702.70435,
+        "Y": -354.7967
+      }
+    },
+    {
+      "ChildId": "dfbf5851-4e76-466e-bc57-0176fb36d4b1"/*BoolToFloat*/,
+      "Position": {
+        "X": 178.00574,
+        "Y": 137.35132
+      }
+    },
+    {
+      "ChildId": "e1532723-895f-4cb4-8c2a-bafa3520f98a"/*FaceLandmarkDetection*/,
+      "Position": {
+        "X": -21.721802,
+        "Y": 69.65869
+      }
+    },
+    {
+      "ChildId": "ebc8145d-8af3-4e9d-b7bb-c263735f7cd1"/*Ease*/,
+      "Position": {
+        "X": 318.00574,
+        "Y": 137.35132
+      }
+    },
+    {
+      "ChildId": "fa7a589d-3c08-4db9-a393-aefab460c89f"/*BlendWithMask*/,
+      "Position": {
+        "X": 905.0058,
+        "Y": -354.9028
+      }
+    },
+    {
+      "ChildId": "fb119d87-8ac9-4fa5-9bfe-c1f999beda0f"/*Switch*/,
+      "Position": {
+        "X": 404.53555,
+        "Y": -361.49927
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "70f34914-6f2a-4359-9e33-76b172702aeb"/*ColorBuffer*/,
+      "Position": {
+        "X": 1250.8682,
+        "Y": -188.3182
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "14ddf9d0-14d6-41b4-b5bc-341e05596498",
+      "Label": "Anonymity ",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 642.70435,
+        "Y": -509.7967
+      },
+      "Size": {
+        "X": 432.3015,
+        "Y": 461.46365
+      }
+    },
+    {
+      "Id": "69917bcb-3e58-4647-9d2c-cef2d98669ee",
+      "Label": "Fasnacht / Carnival",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 642.70435,
+        "Y": -11.777527
+      },
+      "Size": {
+        "X": 557.48315,
+        "Y": 300.90387
+      }
+    },
+    {
+      "Id": "9bddf185-79d1-4e0a-9602-85c1088075a3",
+      "Label": "1. Select your webcam",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -83.37996,
+        "Y": -501.64294
+      },
+      "Size": {
+        "X": 293.13934,
+        "Y": 289.8636
+      }
+    }
+  ]
+}
