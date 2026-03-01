@@ -1,0 +1,185 @@
+{
+  "Id": "109b1ca2-7b4c-4535-9cc6-8f176c4207dd"/*BlendMeshToPoints*/,
+  "Description": "Allows to deform a mesh with a point buffer, for example you can use [MeshVerticesToPoints] and apply a point modifier. ",
+  "SymbolTags": "64",
+  "InputUis": [
+    {
+      "InputId": "09bd1214-a53c-4632-a64b-85476d74f44c"/*Points*/,
+      "Position": {
+        "X": -144.60248,
+        "Y": 1341.071
+      }
+    },
+    {
+      "InputId": "0e54a6e8-07ac-45e1-9005-819a599e2b8a"/*BlendValue*/,
+      "Position": {
+        "X": 168.51639,
+        "Y": 821.5459
+      },
+      "AddPadding": "True",
+      "Min": 0.0,
+      "Max": 1.0,
+      "Scale": 0.01,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "2d2c8c8b-a197-4834-b8da-7aa8f715b763"/*BlendMode*/,
+      "Position": {
+        "X": 28.516388,
+        "Y": 856.5459
+      },
+      "GroupTitle": "Options"
+    },
+    {
+      "InputId": "4ed67387-8b51-4292-af31-0846b18389f4"/*Mesh*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -419.36392,
+        "Y": 970.077
+      },
+      "Description": "Input for Mesh A"
+    },
+    {
+      "InputId": "937f2e7a-87f8-4f87-87d0-729c3134c4bc"/*Pairing*/,
+      "Position": {
+        "X": 28.516388,
+        "Y": 891.5459
+      },
+      "Description": "Selects the mode with which vertices are paired for blending",
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "c5dba0b7-9911-440c-9945-0e5ab907c456"/*Scatter*/,
+      "Position": {
+        "X": 168.51639,
+        "Y": 961.5459
+      },
+      "Description": "Adds random noise to the vertices' position during the transition",
+      "Scale": 0.01
+    },
+    {
+      "InputId": "c7aa442e-6a67-40d3-92a7-981d59f5176e"/*RangeWidth*/,
+      "Position": {
+        "X": 168.51639,
+        "Y": 926.5459
+      },
+      "Description": "Defines the range width when the 'BlendMode' is set to 'RangeBlend' or 'RangeBlendSmooth'",
+      "Scale": 0.01
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "1618a58c-1676-4b4a-a24e-69dd7b487871"/*_AssembleMeshBuffers*/,
+      "Position": {
+        "X": 765.86115,
+        "Y": 1109.3113
+      }
+    },
+    {
+      "ChildId": "1dabfe2d-eb56-48f2-9cf8-ed4a5aaed743"/*ComputeShader*/,
+      "Position": {
+        "X": 168.51639,
+        "Y": 627.6429
+      }
+    },
+    {
+      "ChildId": "3f589894-3735-45e3-9d74-300baf117140"/*ComputeShaderStage*/,
+      "Position": {
+        "X": 614.30774,
+        "Y": 787.0883
+      }
+    },
+    {
+      "ChildId": "453b9c04-1f39-4f63-a9ca-ec145c3f11a7"/*FloatsToBuffer*/,
+      "Style": "Resizable",
+      "Size": {
+        "X": 110.86372,
+        "Y": 44.69636
+      },
+      "Position": {
+        "X": 308.5164,
+        "Y": 786.5459
+      }
+    },
+    {
+      "ChildId": "632a246d-205b-4e14-bfe6-c9fe5d71fb3c"/*ExecuteBufferUpdate*/,
+      "Position": {
+        "X": 614.3078,
+        "Y": 997.0883
+      }
+    },
+    {
+      "ChildId": "7d34c14d-9b85-4177-8d49-135d4fd93c52"/*IntToFloat*/,
+      "Position": {
+        "X": 168.51639,
+        "Y": 856.5459
+      }
+    },
+    {
+      "ChildId": "8b0fb8aa-875a-45ad-b601-a01955a2804e"/*GetBufferComponents*/,
+      "Position": {
+        "X": -279.36398,
+        "Y": 1040.077
+      }
+    },
+    {
+      "ChildId": "9becac8c-85eb-4066-9144-37ef6ad465d2"/*VertexStride*/,
+      "Position": {
+        "X": 168.51639,
+        "Y": 1141.7369
+      }
+    },
+    {
+      "ChildId": "9e1b55ad-5a41-4f92-93da-1e2fcabba0ea"/*IntToFloat*/,
+      "Position": {
+        "X": 168.51639,
+        "Y": 891.5459
+      }
+    },
+    {
+      "ChildId": "9edb3e36-f4c7-462a-90d8-6d71e2f71d47"/*_MeshBufferComponents*/,
+      "Position": {
+        "X": -279.36398,
+        "Y": 970.077
+      }
+    },
+    {
+      "ChildId": "bc797507-0d42-461d-a867-2cd9f3b28c5a"/*GetBufferComponents*/,
+      "Position": {
+        "X": 308.51636,
+        "Y": 1306.7982
+      }
+    },
+    {
+      "ChildId": "c65dbdcf-ff7e-4c88-9902-4686b38b1f96"/*CalcDispatchCount*/,
+      "Position": {
+        "X": 308.5164,
+        "Y": 662.6429
+      }
+    },
+    {
+      "ChildId": "df451e5a-21a6-414d-84da-3c85e888fc79"/*StructuredBufferWithViews*/,
+      "Position": {
+        "X": 308.5164,
+        "Y": 1106.7369
+      }
+    },
+    {
+      "ChildId": "e001f1f3-0f17-46b9-ad1d-83da66e35569"/*GetBufferComponents*/,
+      "Position": {
+        "X": 308.5164,
+        "Y": 1176.7369
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "572caee7-97c7-4b0e-9625-37c8910f3f5e"/*BlendedMesh*/,
+      "Position": {
+        "X": 765.86115,
+        "Y": 1214.3113
+      }
+    }
+  ]
+}
