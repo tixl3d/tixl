@@ -256,7 +256,7 @@
     },
     {
       "Id": "9bddf185-79d1-4e0a-9602-85c1088075a3",
-      "Label": "1. Select your webcam",
+      "Label": "Select your webcam",
       "Color": {
         "X": 0.6,
         "Y": 0.6,
