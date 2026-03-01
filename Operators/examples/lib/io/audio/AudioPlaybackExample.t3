@@ -203,7 +203,7 @@
         {
           "Id": "2aa976e3-a63c-4c7e-80a5-a459b3240388"/*AudioFile*/,
           "Type": "System.String",
-          "Value": "Examples:user/still/proj-cupid/soundtrack/Virgill-LJ-Box1.ogg"
+          "Value": "Examples:user/still/proj-katsumaki/soundtrack/rp-katsumaki-v3.mp3"
         },
         {
           "Id": "7110399e-fd85-4053-9a49-cc09760dceb6"/*Volume*/,
@@ -914,7 +914,7 @@
         {
           "Id": "2aa976e3-a63c-4c7e-80a5-a459b3240388"/*AudioFile*/,
           "Type": "System.String",
-          "Value": "Examples:user/still/proj-dulcimer/soundtrack/strings-120bpm.mp3"
+          "Value": "Examples:user/wake/proj-synchotron/soundtrack/synthjam.mp3"
         },
         {
           "Id": "7110399e-fd85-4053-9a49-cc09760dceb6"/*Volume*/,
@@ -1690,7 +1690,7 @@
         "Bpm": 120.0,
         "DiscardAfterUse": true,
         "IsSoundtrack": true,
-        "FilePath": "H445.Backgrounds:drumloop.wav"
+        "FilePath": "Examples:user/still/proj-there/soundtrack/partial.mp3"
       }
     ]
   }

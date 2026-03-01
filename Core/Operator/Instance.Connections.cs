@@ -227,7 +227,7 @@ public abstract partial class Instance
             return false;
 
         targetSlot.AddConnection(sourceSlot, multiInputIndex);
-        sourceSlot.DirtyFlag.Invalidate();
+        targetSlot.InvalidateGraph();
         return true;
     }
 

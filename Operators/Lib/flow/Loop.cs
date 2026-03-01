@@ -34,8 +34,8 @@ internal sealed class Loop : Instance<Loop>
                 context.FloatVariables[progressVariableName] = value;
             }
 
-            DirtyFlag.InvalidationRefFrame++;
-            Command.Invalidate();
+            DirtyFlag.GlobalInvalidationTick++;
+            Command.InvalidateGraph();
             Command.GetValue(context);
         }
     }

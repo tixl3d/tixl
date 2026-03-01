@@ -25,11 +25,11 @@ internal sealed class Iterator : Instance<Iterator>
         for (int index = 0; index < list.NumElements; index++)
         {
             context.FloatVariables["iterator"] = index;
-            DirtyFlag.InvalidationRefFrame++;
+            DirtyFlag.GlobalInvalidationTick++;
             foreach (var c in SubTree.CollectedInputs)
             {
                 //Log.Debug($"  {index} {c}", this);
-                c.Invalidate();
+                c.InvalidateGraph();
                 c.GetValue(context);
                     
             }

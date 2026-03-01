@@ -26,6 +26,9 @@ internal sealed class NormalMap : Instance<NormalMap>
 
     [Input(Guid = "4d25b1db-daeb-4b5e-b2bc-8681f332b092")]
     public readonly InputSlot<Format> OutputFormat = new InputSlot<Format>();
+
+        [Input(Guid = "b79b3334-bce6-44a0-aa8c-d2db6a45afff")]
+        public readonly InputSlot<SharpDX.Direct3D11.TextureAddressMode> TextureRepeat = new InputSlot<SharpDX.Direct3D11.TextureAddressMode>();
         
         
     private enum Modes

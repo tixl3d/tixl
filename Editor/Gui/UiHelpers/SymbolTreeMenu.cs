@@ -49,5 +49,5 @@ internal static class SymbolTreeMenu
         }
     }
 
-    private static readonly NamespaceTreeNode _treeNode = new(NamespaceTreeNode.RootNodeId);
+    private static readonly NamespaceTreeNode _treeNode = new(NamespaceTreeNode.RootNodeId) { FolderType = NamespaceTreeNode.SymbolFolderTypes.Root};
 }

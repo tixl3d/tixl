@@ -198,14 +198,15 @@ public class Slot<T> : ISlot
                     //compoundWithUpdate.RegisterOutputUpdateAction(this, ConnectedUpdate);
                     ArrayUtils.InsertAtIndexOrEnd(ref InputConnections, (Slot<T>)sourceSlot, index);
 
-                    _dirtyFlag.Target = sourceSlot.DirtyFlag.Target;
-                    _dirtyFlag.Reference = _dirtyFlag.Target - 1;
+                    _dirtyFlag.SourceVersion = sourceSlot.DirtyFlag.SourceVersion;
+                    _dirtyFlag.ValueVersion = _dirtyFlag.SourceVersion - 1;
                     return;
                 }
             }
             UpdateAction = ConnectedUpdate;
-            _dirtyFlag.Target = sourceSlot.DirtyFlag.Target;
-            _dirtyFlag.Reference = _dirtyFlag.Target - 1;
+            _dirtyFlag.SourceVersion = sourceSlot.DirtyFlag.SourceVersion;
+            //_dirtyFlag.ValueVersion = _dirtyFlag.SourceVersion - 1;
+            _dirtyFlag.ValueVersion = -1;
         }
             
         if (sourceSlot.ValueType != _valueType)
@@ -266,30 +267,30 @@ public class Slot<T> : ISlot
 
     protected Slot<T>[] InputConnections = [];
 
-    public int Invalidate()
+    public int InvalidateGraph()
     {
-        var refFrame = DirtyFlag.InvalidationRefFrame;
-        if (refFrame == _dirtyFlag.InvalidatedWithRefFrame)
+        var globalTick = DirtyFlag.GlobalInvalidationTick;
+        if (globalTick == _dirtyFlag.InvalidationTick)
         {
             // do nothing
-            return _dirtyFlag.Target;
+            return _dirtyFlag.SourceVersion;
         }
 
         // MultiInputSlot, TimeClipSlot, TransformCallbackSlot, etc
         if (HasInvalidationOverride) 
         {
             var target = InvalidationOverride();
-            _dirtyFlag.Target = target;
-            _dirtyFlag.InvalidatedWithRefFrame = refFrame;
+            _dirtyFlag.SourceVersion = target;
+            _dirtyFlag.InvalidationTick = globalTick;
             return target;
         }
 
         // connected
         if (InputConnections.Length > 0)
         {
-            var target = InputConnections[0].Invalidate();
-            _dirtyFlag.Target = target;
-            _dirtyFlag.InvalidatedWithRefFrame = refFrame;
+            var target = InputConnections[0].InvalidateGraph();
+            _dirtyFlag.SourceVersion = target;
+            _dirtyFlag.InvalidationTick = globalTick;
             return target;
         }
  
@@ -300,8 +301,8 @@ public class Slot<T> : ISlot
             {
                 return _dirtyFlag.Invalidate();
             }
-            _dirtyFlag.InvalidatedWithRefFrame = refFrame;
-            return _dirtyFlag.Target;
+            _dirtyFlag.InvalidationTick = globalTick;
+            return _dirtyFlag.SourceVersion;
         }
 
         // unconnected output slots
@@ -312,7 +313,7 @@ public class Slot<T> : ISlot
         for (var i = 0; i < parentInputCount; i++)
         {
             var input = parentInputs[i];
-            input.Invalidate();
+            input.InvalidateGraph();
             outputDirty |= input.IsDirty;
         }
 
@@ -321,11 +322,11 @@ public class Slot<T> : ISlot
             return _dirtyFlag.Invalidate();
         }
 
-        _dirtyFlag.InvalidatedWithRefFrame = refFrame;
-        return _dirtyFlag.Target;
+        _dirtyFlag.InvalidationTick = globalTick;
+        return _dirtyFlag.SourceVersion;
     }
         
-    protected void SetVisited() => _dirtyFlag.InvalidatedWithRefFrame = DirtyFlag.InvalidationRefFrame;
+    protected void SetVisited() => _dirtyFlag.InvalidationTick = DirtyFlag.GlobalInvalidationTick;
         
     protected virtual int InvalidationOverride() => 0;
 

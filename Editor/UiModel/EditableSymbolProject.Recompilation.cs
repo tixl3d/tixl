@@ -178,6 +178,7 @@ internal partial class EditableSymbolProject
 
             var substitutedNamespace = Regex.Replace(symbol.Namespace, sourceNamespace, newNamespace);
 
+            
             if (!ChangeNamespaceOf(symbol, substitutedNamespace, newDestinationProject, sourceNamespace, out var reason))
             {
                 Log.Error(reason);
@@ -185,7 +186,7 @@ internal partial class EditableSymbolProject
         }
     }
 
-    public static bool ChangeSymbolNamespace(Symbol symbol, string newNamespace, out string reason)
+    public static bool ChangeSymbolNamespace(Symbol symbol, string newNamespace, out string reason, bool skipProjectReload=false)
     {
         if (symbol.SymbolPackage is not EditableSymbolProject)
         {
@@ -199,12 +200,14 @@ internal partial class EditableSymbolProject
             return false;
         }
             
-        var command = new ChangeSymbolNamespaceCommand(symbol, targetProject, newNamespace, ChangeNamespace);
+        var command = new ChangeSymbolNamespaceCommand(symbol, targetProject, newNamespace, ChangeNamespace, skipProjectReload);
         UndoRedoStack.AddAndExecute(command);
         reason = string.Empty;
+        NotifySymbolStructureChange();
+        
         return true;
 
-        static string ChangeNamespace(Guid symbolId, string nameSpace, EditableSymbolProject sourceProject, EditableSymbolProject targetProject)
+        static string ChangeNamespace(Guid symbolId, string nameSpace, EditableSymbolProject sourceProject, EditableSymbolProject targetProject, bool skipProjectReload)
         {
             if (!SymbolUiRegistry.TryGetSymbolUi(symbolId, out var symbolUi))
             {
@@ -217,7 +220,7 @@ internal partial class EditableSymbolProject
             if (currentNamespace == nameSpace)
                 return reason;
 
-            sourceProject.ChangeNamespaceOf(symbol, nameSpace, targetProject, null, out reason);
+            sourceProject.ChangeNamespaceOf(symbol, nameSpace, targetProject, null, out reason, skipProjectReload);
             return reason ?? "";
         }
     }
@@ -275,7 +278,12 @@ internal partial class EditableSymbolProject
         return false;
     }
 
-    private bool ChangeNamespaceOf(Symbol symbol, string newNamespace, EditableSymbolProject newDestinationProject, string? sourceNamespace, [NotNullWhen(false)] out string? failureLog)
+    private bool ChangeNamespaceOf(Symbol symbol,
+                                   string newNamespace,
+                                   EditableSymbolProject newDestinationProject,
+                                   string? sourceNamespace,
+                                   [NotNullWhen(false)] out string? failureLog,
+                                   bool skipProjectUpdate = false)
     {
         var id = symbol.Id;
         if (HasHome && ReleaseInfo.HomeGuid == id)
@@ -302,6 +310,13 @@ internal partial class EditableSymbolProject
             }
 
             originalCode = File.ReadAllText(filePathHandler.SourceCodePath);
+            var result = Regex.Match(originalCode, @"namespace +[\w\d.]*@[\w\d.@]*;", RegexOptions.Singleline);
+            if(result.Success)
+            {
+                failureLog = "Can't move ops with @ in namespace";
+                return false;
+            }
+            
             newSourceCode = Regex.Replace(originalCode, sourceCodeNamespace, newCodeNamespace);
         }
         else
@@ -315,10 +330,17 @@ internal partial class EditableSymbolProject
 
         var symbolUi = SymbolUiDict[id];
         symbolUi.FlagAsModified();
+        NotifySymbolStructureChange();
 
         if (newDestinationProject != this)
         {
             GiveSymbolToPackage(id, newDestinationProject);
+        }
+
+        if (skipProjectUpdate)
+        {
+            failureLog = string.Empty;
+            return true;
         }
 
         bool success = true;

@@ -26,10 +26,16 @@ internal static class LayoutHandling
         for (var i = 0; i < _saveLayoutActions.Length; i++)
         {
             if (_saveLayoutActions[i].Triggered())
+            {
                 SaveLayout(i);
+                break;
+            }
 
             if (_loadLayoutActions[i].Triggered())
+            {
                 LoadAndApplyLayoutOrFocusMode((Layouts)i);
+                break;
+            }
         }
     }
 
@@ -96,16 +102,25 @@ internal static class LayoutHandling
             return;
         }
 
+        var switchingBackFromFocusMode = layoutId != Layouts.FocusMode && UserSettings.Config.FocusMode;
+        if (switchingBackFromFocusMode)
+        {
+            UiConfig.RestoreUiVisibilityAfterFocusMode();
+        }
+        
+        if(layoutId != Layouts.FocusMode) 
+        {
+            UserSettings.Config.WindowLayoutIndex = index;
+        }
+
         ApplyLayout(layout);
         foreach (var graphWindow in GraphWindow.GraphWindowInstances)
         {
             graphWindow.SetWindowToNormal();
         }
 
-        var isFocusMode = layoutId == Layouts.FocusMode;
-        UserSettings.Config.FocusMode = isFocusMode;
-        if (!isFocusMode)
-            UserSettings.Config.WindowLayoutIndex = index;
+        // var isFocusMode = layoutId == Layouts.FocusMode;
+        // UserSettings.Config.FocusMode = isFocusMode;
     }
 
     public static string GraphPrefix => "Graph View##";
@@ -166,6 +181,9 @@ internal static class LayoutHandling
         {
             Program.NewImGuiLayoutDefinition = layout.ImGuiSettings;
         }
+
+        ChangeCounter++;
+        //UiConfig.RestoreUiVisibilityAfterFocusMode();
     }
 
     private static void SaveLayout(int index)
@@ -253,4 +271,5 @@ internal static class LayoutHandling
     private const string LayoutFileNameFormat = "layout{0}.json";
     private static string LayoutSubfolder => "Layouts";
     public static string LayoutFolder => Path.Combine(FileLocations.SettingsDirectory, LayoutSubfolder);
+    public static int ChangeCounter { get; private set; }
 }

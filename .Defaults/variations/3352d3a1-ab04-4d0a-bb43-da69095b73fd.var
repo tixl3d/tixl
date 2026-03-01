@@ -26,8 +26,8 @@
       "ActivationIndex": 3,
       "Title": "100 y",
       "PosOnCanvas": {
-        "X": 381.83566,
-        "Y": 202.01732
+        "X": -3.8146973E-06,
+        "Y": 583.2023
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -46,7 +46,7 @@
       "Title": "Ring XY tangential",
       "PosOnCanvas": {
         "X": 163.0,
-        "Y": 0.0
+        "Y": -29.55056
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -93,7 +93,7 @@
       "Title": "Spring",
       "PosOnCanvas": {
         "X": 0.0,
-        "Y": 186.0
+        "Y": 215.55057
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -114,7 +114,7 @@
       "Title": "Tornado",
       "PosOnCanvas": {
         "X": 163.0,
-        "Y": 186.0
+        "Y": 215.55057
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -136,8 +136,7 @@
             "X": 0.0,
             "Y": 1.0,
             "Z": 0.0
-          },
-          "526cf26b-6cf6-4cba-be2a-4819c2a422bf": 1.0
+          }
         }
       }
     },
@@ -147,8 +146,8 @@
       "ActivationIndex": 7,
       "Title": "untitled",
       "PosOnCanvas": {
-        "X": 381.83566,
-        "Y": 295.01733
+        "X": 163.0,
+        "Y": 583.2023
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -186,8 +185,8 @@
       "ActivationIndex": 8,
       "Title": "Letter Spiral",
       "PosOnCanvas": {
-        "X": -2.433628,
-        "Y": 315.81415
+        "X": -3.8146973E-06,
+        "Y": 338.10114
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -206,7 +205,7 @@
       "Title": "untitled",
       "PosOnCanvas": {
         "X": 0.0,
-        "Y": 0.0
+        "Y": -29.55056
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -231,8 +230,8 @@
       "ActivationIndex": 10,
       "Title": "Square",
       "PosOnCanvas": {
-        "X": 160.56638,
-        "Y": 315.81415
+        "X": 163.0,
+        "Y": 338.10114
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -247,8 +246,8 @@
       "ActivationIndex": 11,
       "Title": "Z-To Center",
       "PosOnCanvas": {
-        "X": -2.433628,
-        "Y": 408.81415
+        "X": -3.8146973E-06,
+        "Y": 460.6517
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -267,8 +266,8 @@
       "ActivationIndex": 12,
       "Title": "Z To outside",
       "PosOnCanvas": {
-        "X": 160.56638,
-        "Y": 408.81415
+        "X": 163.0,
+        "Y": 460.6517
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {

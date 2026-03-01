@@ -49,12 +49,36 @@ internal sealed class CsProjectFile
     /// The version of the project, as defined in the csproj file.
     /// </summary>
     public Version Version => new(VersionString);
+    
+    public Guid PackageId
+    {
+        get
+        {
+            var idString = _projectRootElement.GetOrAddProperty(PropertyType.PackageId, string.Empty);
+            return Guid.TryParse(idString, out var id) 
+                       ? id 
+                       : Guid.Empty;
+        }
+    }
 
     /// <summary>
     /// Returns the target dotnet framework for the project, or adds the default framework if none is found and returns that.
     /// </summary>
     private string TargetFramework => _projectRootElement.GetOrAddProperty(PropertyType.TargetFramework, ProjectXml.TargetFramework);
-
+    
+    /// <summary>
+    /// Prevent loading a project
+    /// </summary>
+    public bool IsArchived 
+    {
+        get => _projectRootElement.GetOrAddProperty(PropertyType.IsArchived, "false") == "true";
+        set 
+        {
+            _projectRootElement.SetOrAddProperty(PropertyType.IsArchived, value ? "true" : "false");
+            UpdateLastModifiedDate(); // This saves the file
+        }
+    }
+    
     public DateTime CreatedAt => _fileInfo.CreationTimeUtc;
     public DateTime ModifiedAt => _fileInfo.LastWriteTimeUtc;
 

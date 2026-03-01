@@ -474,12 +474,6 @@
       "Outputs": []
     },
     {
-      "Id": "5bdc3357-ff13-4c98-9573-d78efd836003"/*CollectSpawnPointsExample*/,
-      "SymbolId": "1c99e732-7fd7-4254-8ab2-3a9cf2325982",
-      "InputValues": [],
-      "Outputs": []
-    },
-    {
       "Id": "5daffb62-a330-46a0-8707-d3d3ff800082"/*PointsOnMesh*/,
       "SymbolId": "17188f49-1243-4511-a46c-1804cae10768",
       "InputValues": [

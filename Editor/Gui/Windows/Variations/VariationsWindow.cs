@@ -27,8 +27,8 @@ internal sealed class VariationsWindow : Window
 
     private InteractionModes _interactionMode = InteractionModes.Presets;
 
-    private int _selectedNodeCount = 0;
-
+    private int _selectedNodeCount;
+    
     public void DrawWindowContent(bool hideHeader = false)
     {
         // Delete actions need be deferred to prevent collection modification during iteration
@@ -46,9 +46,8 @@ internal sealed class VariationsWindow : Window
 
         var compositionHasVariations = VariationHandling.ActivePoolForSnapshots != null && VariationHandling.ActivePoolForSnapshots.AllVariations.Count > 0;
         var oneChildSelected = nodeSelection.Selection.Count == 1;
-        var selectionChanged = nodeSelection.Selection.Count != _selectedNodeCount;
-
-        if (selectionChanged)
+        
+        if (FrameStats.SelectionChanged)
         {
             _selectedNodeCount = nodeSelection.Selection.Count;
 
@@ -60,8 +59,16 @@ internal sealed class VariationsWindow : Window
             {
                 _interactionMode = InteractionModes.Snapshots;
             }
+            
         }
 
+        if (FrameStats.SelectionChanged || FrameStats.WindowLayoutChanged)
+        {
+            _presetCanvas.RefreshView();
+            _snapshotCanvas.RefreshView();
+        }
+        
+        
         var drawList = ImGui.GetWindowDrawList();
         var topLeftCorner = ImGui.GetCursorScreenPos();
 
@@ -74,11 +81,7 @@ internal sealed class VariationsWindow : Window
                                  new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetFrameHeight()),
                                  false,
                                  ImGuiWindowFlags.NoScrollbar);
-
-                // var viewModeIndex = (int)_interactionMode;
-
-                //if(CustomComponents.DrawSegmentedToggle())
-
+                
                 if (FormInputs.SegmentedButton(ref _interactionMode))
                 {
                     // _interactionMode = (InteractionModes)viewModeIndex;

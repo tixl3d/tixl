@@ -2,10 +2,13 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using T3.Core.Compilation;
 using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Core.Resource;
+using T3.Core.Resource.Assets;
+using T3.Core.UserData;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
 
@@ -72,7 +75,7 @@ internal static partial class ProjectSetup
             return false;
         }
         
-        ActivePackages.Add(newProject);
+        _activePackages.Add(newProject);
 
         UpdateSymbolPackage(newProject);
         InitializePackageResources(newProject);
@@ -81,16 +84,20 @@ internal static partial class ProjectSetup
 
     internal static void RemoveSymbolPackage(EditorSymbolPackage package, bool needsDispose)
     {
-        if (!ActivePackages.Remove(package))
-            throw new InvalidOperationException($"Failed to remove package {package}: does not exist");
-
-        if (needsDispose)
-            package.Dispose();
+        if (!needsDispose)
+        {
+            if (!_activePackages.Remove(package))
+                throw new InvalidOperationException($"Failed to remove package {package}: does not exist");
+        }
+        else
+        {
+            package.Dispose();  // This will also remove
+        }
     }
 
     private static void AddToLoadedPackages(EditorSymbolPackage package)
     {
-        if (!ActivePackages.Add(package))
+        if (!_activePackages.Add(package))
             throw new InvalidOperationException($"Failed to add package {package.DisplayName} already exists");
     }
 
@@ -133,6 +140,11 @@ internal static partial class ProjectSetup
                 
                 Log.Debug("Updating symbol packages " + (parallel ? "(parallel)":""));
                 var package = packages[0];
+                
+                // ADD THIS: Ensure context is generated and types are scanned
+                // before symbols are loaded and children are instantiated.
+                package.AssemblyInformation.GenerateLoadContext();
+                
                 package.LoadSymbols(parallel, out var newlyRead, out var allNewSymbols);
                 SymbolPackage.ApplySymbolChildren(newlyRead);
                 package.LoadUiFiles(parallel, allNewSymbols, out var newlyLoadedUis, out var preExistingUis);
@@ -207,22 +219,85 @@ internal static partial class ProjectSetup
         
         Log.Debug($">> Updated {packages.Length} symbol packages in {stopWatch.ElapsedMilliseconds/1000:0.0}s");
 
-        var needingReload = ActivePackages.Where(x => x.NeedsAssemblyLoad).ToArray();
+        var needingReload = _activePackages.Where(x => x.NeedsAssemblyLoad).ToArray();
         if (needingReload.Length > 0)
         {
             Log.Info($"Reloading {needingReload.Length} packages that need reloading...");
             UpdateSymbolPackages(needingReload);
         }
+    }
+    
+    public static void SetProjectArchived(CsProjectFile projectFile, bool archive)
+    {
+        projectFile.IsArchived = archive;
 
-      /*  foreach (var symbol in ActivePackages.SelectMany(x => x.Symbols.Values)
-                                             .Where(x => x.NeedsReconnections))
+        if (archive)
         {
-            symbol.ReconnectAll();
-        }*/
+            // 1. Find and Unload the active package if it exists
+            var package = _activePackages.FirstOrDefault(p => p is EditableSymbolProject ep && ep.CsProjectFile == projectFile);
+            if (package != null)
+            {
+                RemoveSymbolPackage(package, needsDispose: true); // Stops watchers and cleans up
+            }
+            
+            if (ArchivedProjects.All(p => p.ProjectFile != projectFile))
+            {
+                ArchivedProjects.Add(new ArchivedProjectInfo(projectFile));
+            }
+        }
+        else
+        {
+            // 1. Remove from archived list
+            ArchivedProjects.RemoveAll(p => p.ProjectFile == projectFile);
+
+            // 2. Initialize the project
+            var newProject = new EditableSymbolProject(projectFile);
+    
+            // 3. Register Assets (Missing from your current implementation)
+            // This mirrors the 'Initial Startup Migration' phase in LoadAll
+            AssetRegistry.RegisterAssetsFromPackage(newProject);
+
+            // 4. Register the package so it's visible globally
+            AddToLoadedPackages(newProject);
+
+            // 5. Critical: Generate the assembly context for type resolution
+            newProject.AssemblyInformation.GenerateLoadContext();
+
+            // 6. Load symbols and UIs
+            UpdateSymbolPackages(newProject);
+
+            // 7. Initialize shader linting and package resources
+            InitializePackageResources(newProject);
+    
+            // 8. Force re-evaluation of instances
+            // This helps fix the "Failed to create child instances" by poking the registry
+            foreach (var symbol in newProject.Symbols.Values)
+            {
+                SymbolPackage.UpdateSymbolInstances(symbol);
+            }            
+
+        }
+        EditorSymbolPackage.NotifySymbolStructureChange();
     }
 
-    private static readonly HashSet<EditorSymbolPackage> ActivePackages = new();
-    internal static readonly IEnumerable<SymbolPackage> AllPackages = ActivePackages;
+    internal sealed record ArchivedProjectInfo(CsProjectFile ProjectFile) : IResourcePackage
+    {
+        public string DisplayName => ProjectFile.Name;
+        public string Name => ProjectFile.Name;
+        public Guid Id  => ProjectFile.PackageId;
+        public string Folder => ProjectFile.Directory;
+        public string AssetsFolder => Path.Combine(Folder, FileLocations.AssetsSubfolder);
+        public string? RootNamespace => ProjectFile.RootNamespace;
+    
+        // Archived projects don't actively watch files or track live dependencies
+        public ResourceFileWatcher? FileWatcher => null;
+        public bool IsReadOnly => true;
+        public IReadOnlyCollection<DependencyCounter> Dependencies => Array.Empty<DependencyCounter>();
+    }
+    
+    private static readonly HashSet<EditorSymbolPackage> _activePackages = [];
+    internal static readonly List<ArchivedProjectInfo> ArchivedProjects = [];
+    internal static readonly IEnumerable<SymbolPackage> AllPackages = _activePackages;
 
     private readonly record struct SymbolUiLoadInfo(SymbolUi[] NewlyLoaded, SymbolUi[] PreExisting);
 }

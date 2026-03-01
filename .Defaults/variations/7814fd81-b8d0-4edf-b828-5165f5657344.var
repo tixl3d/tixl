@@ -8,7 +8,7 @@
       "Title": "Random Angles",
       "PosOnCanvas": {
         "X": -30.32301,
-        "Y": 14.628296
+        "Y": -14.922264
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -92,7 +92,7 @@
       "Title": "ScrollUp",
       "PosOnCanvas": {
         "X": -30.32301,
-        "Y": 200.6283
+        "Y": 230.17886
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {

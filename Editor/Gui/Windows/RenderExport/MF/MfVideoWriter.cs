@@ -22,10 +22,9 @@ namespace T3.Editor.Gui.Windows.RenderExport.MF;
 /// </summary>
 internal abstract class MfVideoWriter : IDisposable
 {
-    private readonly Int2 _originalPixelSize;
     private readonly Int2 _videoPixelSize;
 
-    private MfVideoWriter(string filePath, Int2 originalPixelSize, Int2 videoPixelSize, Guid videoInputFormat, bool supportAudio = false)
+    protected MfVideoWriter(RenderProcess.ExportSession session)
     {
         if (!_mfInitialized)
         {
@@ -35,43 +34,22 @@ internal abstract class MfVideoWriter : IDisposable
         }
 
         // Set initial default values
-        FilePath = filePath;
-        _originalPixelSize = originalPixelSize;
-        _videoPixelSize = videoPixelSize;
-        _videoInputFormat = videoInputFormat;
-        _supportAudio = supportAudio;
+        FilePath = session.TargetFilePath;
+        _videoPixelSize = session.RenderToFileResolution;
+        _videoInputFormat = _videoInputFormatId;
+        _supportAudio = session.Settings.ExportAudio;
         Bitrate = 2000000;
         Framerate = 60; //TODO: is this actually used?
         _frameIndex = -1;
-
-        // Check if resolution changed
-        if (originalPixelSize.Width != videoPixelSize.Width || originalPixelSize.Height != videoPixelSize.Height)
-        {
-            // Determine if this is codec rounding (difference of at most 1 pixel per dimension) or user scaling
-            bool isCodecRounding = Math.Abs(originalPixelSize.Width - videoPixelSize.Width) <= 1 &&
-                                   Math.Abs(originalPixelSize.Height - videoPixelSize.Height) <= 1;
-
-            if (isCodecRounding)
-            {
-                Log.Debug($"Video resolution adjusted for codec compatibility: {originalPixelSize.Width}x{originalPixelSize.Height} -> {videoPixelSize.Width}x{videoPixelSize.Height}");
-            }
-            else
-            {
-                Log.Debug($"Video will be rendered at scaled resolution: {originalPixelSize.Width}x{originalPixelSize.Height} -> {videoPixelSize.Width}x{videoPixelSize.Height}");
-            }
-        }
     }
 
-    public string FilePath { get; }
+    private string FilePath { get; }
 
     // skip a certain number of images at the beginning since the
     // final content will only appear after several buffer flips
     public const int SkipImages = 1;
 
-    protected MfVideoWriter(string filePath, Int2 originalPixelSize, Int2 videoPixelSize, bool supportAudio = false)
-        : this(filePath, originalPixelSize, videoPixelSize, _videoInputFormatId, supportAudio)
-    {
-    }
+
 
     public static readonly List<SharpDX.DXGI.Format> SupportedFormats = new List<SharpDX.DXGI.Format>
         { SharpDX.DXGI.Format.R8G8B8A8_UNorm };
@@ -98,40 +76,7 @@ internal abstract class MfVideoWriter : IDisposable
             {
                 throw new InvalidOperationException("Empty image handed over");
             }
-
-            bool resizingExpected = _originalPixelSize.Width != _videoPixelSize.Width || _originalPixelSize.Height != _videoPixelSize.Height;
-            bool widthMismatch = currentDesc.Width != _videoPixelSize.Width;
-            bool heightMismatch = currentDesc.Height != _videoPixelSize.Height;
-
-            if (widthMismatch || heightMismatch)
-            {
-                if (resizingExpected)
-                {
-                    // If the frame is still at the original size, resizing is in progress
-                    if (currentDesc.Width == _originalPixelSize.Width && currentDesc.Height == _originalPixelSize.Height)
-                    {
-                        Log.Warning($"Skipping frame: waiting for resized frame. Original: {_originalPixelSize.Width}x{_originalPixelSize.Height}, expected: {_videoPixelSize.Width}x{_videoPixelSize.Height}, got: {currentDesc.Width}x{currentDesc.Height}");
-                    }
-                    else
-                    {
-                        // Unexpected size during resizing
-                        Log.Warning($"Skipping frame: unexpected resolution during resizing. Original: {_originalPixelSize.Width}x{_originalPixelSize.Height}, expected: {_videoPixelSize.Width}x{_videoPixelSize.Height}, got: {currentDesc.Width}x{currentDesc.Height}");
-                    }
-                }
-                else
-                {
-                    Log.Warning($"Skipping frame: resolution mismatch. Expected {_videoPixelSize.Width}x{_videoPixelSize.Height}, got {currentDesc.Width}x{currentDesc.Height}");
-                }
-                return false;
-            }
-            // If the incoming frame is odd and off by one, just skip without logging
-            if (currentDesc.Width != _videoPixelSize.Width || currentDesc.Height != _videoPixelSize.Height)
-            {
-                // No need to log, since this is expected while converting to even resolution
-                //Log.Debug($"Skipping frame: resolution mismatch. Expected {_videoPixelSize.Width}x{_videoPixelSize.Height}, got {currentDesc.Width}x{currentDesc.Height}");
-                return false;
-            }
-
+            
             // Setup writer
             if (SinkWriter == null)
             {
@@ -436,7 +381,6 @@ internal abstract class MfVideoWriter : IDisposable
 
     #region Resources for MediaFoundation video rendering
     private Sample _lastSample;
-    // private MF.ByteStream outStream;
     private int _frameIndex;
     private int _streamIndex;
     #endregion
@@ -447,19 +391,19 @@ internal abstract class MfVideoWriter : IDisposable
     private MediaFoundationAudioWriter _audioWriter;
 
     private static readonly Guid _videoInputFormatId = VideoFormatGuids.Rgb32;
-    private bool _supportAudio;
+    private readonly bool _supportAudio;
     private static bool _mfInitialized = false;
     private readonly Guid _videoInputFormat;
 
     /// <summary>
     /// Gets or sets the average video bitrate in bits per second.
     /// </summary>
-    public int Bitrate { get; set; }
+    protected int Bitrate;
 
     /// <summary>
     /// Gets or sets the video framerate (frames per second).
     /// </summary>
-    public int Framerate { get; set; }
+    protected int Framerate;
 }
 
 /// <summary>
@@ -473,11 +417,10 @@ internal sealed class Mp4VideoWriter : MfVideoWriter
     /// Initializes a new instance of the Mp4VideoWriter class.
     /// </summary>
     /// <param name="filePath">The output file path.</param>
-    /// <param name="originalPixelSize">The original pixel size of the video.</param>
     /// <param name="videoPixelSize">The target pixel size of the video.</param>
     /// <param name="supportAudio">Whether to support audio in the output file.</param>
-    public Mp4VideoWriter(string filePath, Int2 originalPixelSize, Int2 videoPixelSize, bool supportAudio = false)
-        : base(filePath, originalPixelSize, videoPixelSize, supportAudio)
+    public Mp4VideoWriter(RenderProcess.ExportSession session)
+        : base(session)
     {
     }
 

@@ -95,7 +95,8 @@ public static partial class T3Ui
         FrameStats.CompleteFrame();
         TriggerGlobalActionsFromKeyBindings();
 
-        if (UserSettings.Config.ShowMainMenu || UserSettings.Config.EnableMainMenuHoverPeek && ImGui.GetMousePos().Y < 3)
+        //if (UserSettings.Config.ShowMainMenu || UserSettings.Config.EnableMainMenuHoverPeek && ImGui.GetMousePos().Y < 3)
+        if (UserSettings.Config.ShowMainMenu || ImGui.GetMousePos().Y < 3)
         {
             AppMenuBar.DrawAppMenuBar();
         }

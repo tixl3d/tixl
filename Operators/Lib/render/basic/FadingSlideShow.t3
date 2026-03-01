@@ -137,7 +137,13 @@
     {
       "Id": "2a5f70a5-fdcd-4d9b-a0ae-5785e2fce277"/*LoadImage*/,
       "SymbolId": "0b3436db-e283-436e-ba85-2f3a1de76a9d",
-      "InputValues": [],
+      "InputValues": [
+        {
+          "Id": "96044c6c-d005-4d61-b605-7a6896e98cb6"/*CacheResources*/,
+          "Type": "System.Boolean",
+          "Value": true
+        }
+      ],
       "Outputs": []
     },
     {
@@ -400,7 +406,13 @@
     {
       "Id": "af025c51-6dd8-4ab6-92bc-faec5391ebd4"/*LoadImage*/,
       "SymbolId": "0b3436db-e283-436e-ba85-2f3a1de76a9d",
-      "InputValues": [],
+      "InputValues": [
+        {
+          "Id": "96044c6c-d005-4d61-b605-7a6896e98cb6"/*CacheResources*/,
+          "Type": "System.Boolean",
+          "Value": true
+        }
+      ],
       "Outputs": []
     },
     {

@@ -6,8 +6,8 @@
     {
       "InputId": "443997b5-3b8d-4925-b534-d794b7aafe35"/*Scale*/,
       "Position": {
-        "X": 361.94125,
-        "Y": -12.4522705
+        "X": 904.29663,
+        "Y": -23.243103
       },
       "Min": 0.0,
       "Max": 5.0,
@@ -16,30 +16,29 @@
     {
       "InputId": "4fe49e0c-3a46-4a79-944e-0cfb8d31ebb2"/*ColorScale*/,
       "Position": {
-        "X": 361.94125,
-        "Y": 77.54773
+        "X": 904.29663,
+        "Y": 46.756897
       }
     },
     {
       "InputId": "67e309ff-e258-45af-b583-2f86f39de0d3"/*Phase*/,
       "Position": {
-        "X": 361.94125,
-        "Y": -57.45227
+        "X": 904.29663,
+        "Y": 81.7569
       }
     },
     {
-      "InputId": "ebae0adf-960c-4cd9-8d2b-532907e51ad3"/*Image*/,
-      "Relevancy": "Required",
+      "InputId": "8ac36378-ff86-4795-8c82-52f4f4c83e70"/*Gradient*/,
       "Position": {
-        "X": 361.94125,
-        "Y": -102.45227
+        "X": 764.29663,
+        "Y": -128.2431
       }
     },
     {
       "InputId": "fa2fd0f7-45eb-44d9-b1de-cc45903fc2d4"/*Offset*/,
       "Position": {
-        "X": 361.94125,
-        "Y": 32.54773
+        "X": 764.29663,
+        "Y": -93.2431
       },
       "Min": -2.0,
       "Max": 2.0,
@@ -49,10 +48,17 @@
   ],
   "SymbolChildUis": [
     {
+      "ChildId": "1fe062eb-636a-4289-8e05-7af91590b036"/*RequestedResolution*/,
+      "Position": {
+        "X": 593.6211,
+        "Y": -24.743286
+      }
+    },
+    {
       "ChildId": "22436272-1ed3-4ecd-bd57-6f4628c62db5"/*Vector2Components*/,
       "Position": {
-        "X": 526.92346,
-        "Y": 45.40631
+        "X": 904.29663,
+        "Y": -93.2431
       }
     },
     {
@@ -63,24 +69,10 @@
       }
     },
     {
-      "ChildId": "8c9194ec-2508-4855-9978-0e6182148499"/*GetTextureSize*/,
+      "ChildId": "9d5d2df0-8570-420e-8846-751d94e52e4f"/*GradientsToTexture*/,
       "Position": {
-        "X": 509.5827,
-        "Y": -190.37115
-      }
-    },
-    {
-      "ChildId": "8f5b5493-41e1-4e8f-86be-a52cb8f07641"/*Div*/,
-      "Position": {
-        "X": 809.5827,
-        "Y": -190.37115
-      }
-    },
-    {
-      "ChildId": "94904d15-78d9-4a57-b005-949fe7c410cf"/*Vector2Components*/,
-      "Position": {
-        "X": 659.5827,
-        "Y": -190.37115
+        "X": 904.29663,
+        "Y": -128.2431
       }
     }
   ],

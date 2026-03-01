@@ -81,8 +81,8 @@ internal sealed class SpreadLayout : Instance<SpreadLayout>
 
                 if (forceColorUpdate)
                 {
-                    DirtyFlag.InvalidationRefFrame++;
-                    t1.Invalidate();
+                    DirtyFlag.GlobalInvalidationTick++;
+                    t1.InvalidateGraph();
                 }
 
                 // Execute commands

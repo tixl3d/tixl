@@ -30,9 +30,9 @@
     {
       "Id": "e10c3708-9696-4d15-81b5-93eb4026937b"/*BackgroundColor*/,
       "DefaultValue": {
-        "X": 1.0,
-        "Y": 1.0,
-        "Z": 1.0,
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0,
         "W": 1.0
       }
     },
@@ -344,7 +344,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "c:/Users/pixtur/dev/tooll/t3/Resources/user/pixtur/testcontent/ReferenceImages/stains-4x4.png"
+          "Value": "Examples:images/sets/stains-4x4.png"
         }
       ],
       "Outputs": []

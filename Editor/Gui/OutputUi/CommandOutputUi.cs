@@ -79,7 +79,7 @@ internal sealed class CommandOutputUi : OutputUi<Command>
             if(_gridOutputs != null && _gridOutputs.Count > 0)
             {
                 var outputSlot = _gridOutputs[0];
-                outputSlot.Invalidate();
+                outputSlot.InvalidateGraph();
                 outputSlot.Update(context);
             }
         }

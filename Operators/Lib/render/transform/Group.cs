@@ -64,8 +64,8 @@ internal sealed class Group : Instance<Group>
 
                 if (forceColorUpdate)
                 {
-                    DirtyFlag.InvalidationRefFrame++;
-                    t1.Invalidate();
+                    DirtyFlag.GlobalInvalidationTick++;
+                    t1.InvalidateGraph();
                 }
                     
                 // Execute commands

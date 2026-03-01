@@ -13,15 +13,32 @@ internal sealed class PickPointList : Instance<PickPointList>
         Selected.UpdateAction += Update;
     }
 
+    
     private void Update(EvaluationContext context)
     {
         var connections = Input.GetCollectedTypedInputs();
-        if (connections == null || connections.Count == 0)
+        var index = Index.GetValue(context).Mod(connections.Count);
+        
+        Input.DirtyFlag.Clear();
+        
+        if (connections.Count == 0)
             return;
 
-        var index = Index.GetValue(context).Mod(connections.Count);
         Selected.Value = connections[index].GetValue(context);
+        
+        // Clear dirty flag
+        if (_isFirstUpdate)
+        {
+            foreach (var c in connections)
+            {
+                c.GetValue(context);
+            }
+
+            _isFirstUpdate = false;
+        }
     }
+
+    private bool _isFirstUpdate = true;
 
     [Input(Guid = "C00F5AF4-EFB6-4A9D-B0AD-D8DBC69EED23")]
     public readonly MultiInputSlot<BufferWithViews> Input = new();

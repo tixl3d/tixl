@@ -959,7 +959,7 @@
         {
           "Id": "76cc3811-4ae0-48b2-a119-890db5a4eeb2"/*Path*/,
           "Type": "System.String",
-          "Value": "Examples:user/still/proj-fc2/3d/revision-logo 1.png"
+          "Value": "Examples:user/still/proj-worksforeverybody/images/revision-logo 1.png"
         }
       ],
       "Outputs": []
@@ -1850,7 +1850,7 @@
         {
           "Id": "7d576017-89bd-4813-bc9b-70214efe6a27"/*Path*/,
           "Type": "System.String",
-          "Value": "Examples:user/still/proj-fc2/3d/coffee-mug.obj"
+          "Value": "Examples:user/still/proj-worksforeverybody/geometry/coffee-mug.obj"
         },
         {
           "Id": "c39a61b3-fb6b-4611-8f13-273f13c9c491"/*ScaleFactor*/,

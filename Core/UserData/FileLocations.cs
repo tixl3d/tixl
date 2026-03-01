@@ -19,6 +19,8 @@ public static class FileLocations
 
     public const string LibPackageName = "Lib";
     public const string ExamplesPackageName = "Examples";
+    public const string TypesPackageName = "Types";
+    public const string SkillsPackageName = "Skills";
     
     public static string TempFolder => Path.Combine(SettingsDirectory, "Tmp");
 
@@ -65,4 +67,6 @@ public static string TestReferencesFolder => Path.Combine(".tixl", TestsSubFolde
     
     /** Folder with the packages both in editor and in exported projects */
     public const string OperatorsSubFolder = "Operators";
+
+    public const string MetaSubFolder = ".meta";
 }

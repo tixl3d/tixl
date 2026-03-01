@@ -32,12 +32,16 @@ struct vsOutput
 float4 psMain(vsOutput psInput) : SV_TARGET
 {
     float2 uv = psInput.texCoord;
-    float4 c = InputTexture.SampleLevel(texSampler, uv, 0.0);
+    //float4 c = InputTexture.SampleLevel(texSampler, uv, 0.0);
+    //return c;
 
     float4 col = InputTexture.Sample(texSampler, psInput.texCoord);
-    float r = dot(col, float4(MultiplyR.r, MultiplyG.r, MultiplyB.r, MultiplyA.r)) + Add.r;
-    float g = dot(col, float4(MultiplyR.g, MultiplyG.g, MultiplyB.g, MultiplyA.g)) + Add.g;
-    float b = dot(col, float4(MultiplyR.b, MultiplyG.b, MultiplyB.b, MultiplyA.b)) + Add.b;
-    float a = dot(col, float4(MultiplyR.a, MultiplyG.a, MultiplyB.a, MultiplyA.a)) + Add.a;
+    //return col;
+
+    float r = dot( clamp( col,0, 99999999 ), float4(MultiplyR.r, MultiplyG.r, MultiplyB.r, MultiplyA.r)) + Add.r;
+    float g = dot( clamp( col,0, 99999999 ), float4(MultiplyR.g, MultiplyG.g, MultiplyB.g, MultiplyA.g)) + Add.g;
+    float b = dot( clamp( col,0, 99999999 ), float4(MultiplyR.b, MultiplyG.b, MultiplyB.b, MultiplyA.b)) + Add.b;
+    float a = dot( clamp( col,0, 99999999 ), float4(MultiplyR.a, MultiplyG.a, MultiplyB.a, MultiplyA.a)) + Add.a;
+    
     return ClampResult > 0.5 ? float4(clamp(float3(r,g,b),0,10000), clamp(a,0.0001,1)) : float4(r,g,b,a);    
 }

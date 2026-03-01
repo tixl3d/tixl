@@ -350,7 +350,7 @@ public abstract partial class SymbolPackage : IResourcePackage
     {
     }
 
-    protected static void UpdateSymbolInstances(Symbol symbol, bool forceTypeUpdate = false)
+    public static void UpdateSymbolInstances(Symbol symbol, bool forceTypeUpdate = false)
     {
         symbol.UpdateInstanceType(forceTypeUpdate);
         symbol.CreateAnimationUpdateActionsForSymbolInstances();

@@ -8,7 +8,7 @@ internal sealed class ChangeSymbolNamespaceCommand : ICommand
     public string Name => "Change Symbol Namespace";
     public bool IsUndoable => true;
 
-    public ChangeSymbolNamespaceCommand(Symbol symbol, EditableSymbolProject targetProject, string newNamespace, ChangeNamespaceAction changeNamespaceAction)
+    public ChangeSymbolNamespaceCommand(Symbol symbol, EditableSymbolProject targetProject, string newNamespace, ChangeNamespaceAction changeNamespaceAction, bool skipProjectReload)
     {
         _newNamespace = newNamespace;
         _symbolId = symbol.Id;
@@ -16,26 +16,28 @@ internal sealed class ChangeSymbolNamespaceCommand : ICommand
         _changeNamespaceAction = changeNamespaceAction;
         _originalProject = (EditableSymbolProject)symbol.SymbolPackage;
         _targetProject = targetProject;
+        _skipProjectReload = skipProjectReload;
     }
 
     public void Do()
     {
-        AssignValue(_newNamespace, _originalProject, _targetProject);
+        AssignValue(_newNamespace, _originalProject, _targetProject, _skipProjectReload);
     }
 
     public void Undo()
     {
-        AssignValue(_originalNamespace, _targetProject, _originalProject);
+        AssignValue(_originalNamespace, _targetProject, _originalProject, _skipProjectReload);
     }
 
-    private void AssignValue(string newNamespace, EditableSymbolProject sourceProject, EditableSymbolProject targetProject)
+    private void AssignValue(string newNamespace, EditableSymbolProject sourceProject, EditableSymbolProject targetProject, bool skipProjectReload)
     {
-        var reason = _changeNamespaceAction(_symbolId, newNamespace, sourceProject, targetProject);
+        var reason = _changeNamespaceAction(_symbolId, newNamespace, sourceProject, targetProject, skipProjectReload);
 
         if (!string.IsNullOrWhiteSpace(reason))
             BlockingWindow.Instance.ShowMessageBox(reason, "Could not rename the namespace");
     }
 
+    private readonly bool _skipProjectReload;
     private readonly Guid _symbolId;
     private readonly string _newNamespace;
     private readonly string _originalNamespace;
@@ -44,4 +46,4 @@ internal sealed class ChangeSymbolNamespaceCommand : ICommand
     private readonly ChangeNamespaceAction _changeNamespaceAction;
 }
     
-internal delegate string ChangeNamespaceAction(Guid symbolId, string newNamespace, EditableSymbolProject sourceProject, EditableSymbolProject targetProject);
+internal delegate string ChangeNamespaceAction(Guid symbolId, string newNamespace, EditableSymbolProject sourceProject, EditableSymbolProject targetProject, bool skipProjectReload);

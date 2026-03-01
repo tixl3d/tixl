@@ -10,7 +10,7 @@ namespace T3.Editor.Skills.Training;
 internal sealed class SkillTrainingContext // can't be generic because it's used for generic state
 {
     internal OpenedProject? OpenedProject;
-    internal UiConfig.UiElementsVisibility? PreviousUiState;
+    internal UiConfig.UiState? PreviousUiState;
     internal ProjectView? ProjectView;
     internal required StateMachine<SkillTrainingContext> StateMachine;
     public QuestLevel? ActiveLevel;

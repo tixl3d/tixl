@@ -8,7 +8,7 @@ public interface ISlot
     Type ValueType { get; }
     Instance Parent { get; set; }
     DirtyFlag DirtyFlag { get; }
-    int Invalidate();
+    int InvalidateGraph();
     void Update(EvaluationContext context);
     bool IsDisabled { set; }
     void AddConnection(ISlot source, int index = 0);

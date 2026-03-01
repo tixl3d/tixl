@@ -14,40 +14,56 @@ internal static class UiConfig
 {
     internal static void ToggleFocusMode()
     {
-            
-        var activeComponents = ProjectView.Focused;
-        if (activeComponents == null)
+        var projectView = ProjectView.Focused;
+        if (projectView == null)
             return;
 
-        var shouldBeFocusMode = !UserSettings.Config.FocusMode;
-
-        if (shouldBeFocusMode)
+        if (!UserSettings.Config.FocusMode)
         {
-            if (!OutputWindow.TryGetPrimaryOutputWindow(out var oldOutputWindow))
-                return;
-
-            oldOutputWindow.Pinning.TryGetPinnedOrSelectedInstance(out var instance, out _);
-            activeComponents.GraphImageBackground.OutputInstance = instance;
+            TrySwitchToFocusMode(projectView);
         }
-
-        UserSettings.Config.FocusMode = shouldBeFocusMode;
-        UserSettings.Config.ShowToolbar = shouldBeFocusMode;
-        
-        ToggleAllUiElements();
-
-        LayoutHandling.LoadAndApplyLayoutOrFocusMode(shouldBeFocusMode
-                                                         ? LayoutHandling.Layouts.FocusMode
-                                                         : (LayoutHandling.Layouts)UserSettings.Config.WindowLayoutIndex);
-
-        if (!OutputWindow.TryGetPrimaryOutputWindow(out var newOutputWindow))
-            return;
-        
-        if (!shouldBeFocusMode)
+        else
         {
-            newOutputWindow.Pinning.PinInstance(activeComponents.GraphImageBackground.OutputInstance, activeComponents);
-            activeComponents.GraphImageBackground.ClearBackground();
+            SwitchBackFromFocusMode(projectView);
         }
     }
+
+    private static bool TrySwitchToFocusMode(ProjectView projectView)
+    {
+        if (!OutputWindow.TryGetPrimaryOutputWindow(out var oldOutputWindow))
+            return false;
+        
+        // We keep this to restore state when switching to a layout from focus mode.
+        _uiStateBeforeFocusMode = KeepUiState(); 
+        
+        oldOutputWindow.Pinning.TryGetPinnedOrSelectedInstance(out var instance, out _);
+        projectView.GraphImageBackground.OutputInstance = instance;
+
+        HideAllUiElements();
+
+        LayoutHandling.LoadAndApplyLayoutOrFocusMode(LayoutHandling.Layouts.FocusMode);
+        
+        UserSettings.Config.FocusMode = true;
+        return true;
+    }
+
+    private static void SwitchBackFromFocusMode(ProjectView projectView)
+    {
+        var layoutIndex = _uiStateBeforeFocusMode?.WindowLayoutIndex ?? UserSettings.Config.WindowLayoutIndex;
+        LayoutHandling.LoadAndApplyLayoutOrFocusMode((LayoutHandling.Layouts)layoutIndex);
+        
+        //RestoreUiVisibilityAfterFocusMode();
+        
+        // Update pinning
+        if (!OutputWindow.TryGetPrimaryOutputWindow(out var newOutputWindow))
+            return;
+
+        newOutputWindow.Pinning.PinInstance(projectView.GraphImageBackground.OutputInstance, projectView);
+        projectView.GraphImageBackground.ClearBackground();
+        
+        UserSettings.Config.FocusMode = false;
+    }
+    
 
     internal static void ToggleAllUiElements()
     {
@@ -59,6 +75,15 @@ internal static class UiConfig
         {
             ShowAllUiElements();
         }
+    }
+
+    internal static void RestoreUiVisibilityAfterFocusMode()
+    {
+        if (_uiStateBeforeFocusMode == null)
+            return;
+
+        ApplyUiVisibility(_uiStateBeforeFocusMode.ElementsVisibility);
+        _uiStateBeforeFocusMode = null;
     }
 
     private static void ShowAllUiElements()
@@ -78,52 +103,60 @@ internal static class UiConfig
         UserSettings.Config.ShowTitleAndDescription = false;
         UserSettings.Config.ShowToolbar = false;
         UserSettings.Config.ShowTimeline = false;
-        UserSettings.Config.EnableMainMenuHoverPeek = false;
     }
 
-    internal static UiElementsVisibility KeepUiState()
+    private static UiState? _uiStateBeforeFocusMode;
+
+    internal static UiState KeepUiState()
     {
-        return new UiElementsVisibility(UserSettings.Config.ShowMainMenu,
-                                        UserSettings.Config.EnableMainMenuHoverPeek,
-                                        UserSettings.Config.ShowTitleAndDescription,
-                                        UserSettings.Config.ShowToolbar,
-                                        UserSettings.Config.ShowTimeline,
-                                        UserSettings.Config.WindowLayoutIndex,
-                                        UserSettings.Config.FocusMode,
-                                        UserSettings.Config.ShowInteractionOverlay,
-                                        UserSettings.Config.ShowMiniMap,
-                                        UserSettings.Config.GraphStyle
-                                       );
+        return new UiState(new UiElementsVisibility(
+                                                    MainMenu: UserSettings.Config.ShowMainMenu,
+                                                    TitleAndDescription: UserSettings.Config.ShowTitleAndDescription,
+                                                    GraphToolbar: UserSettings.Config.ShowToolbar,
+                                                    Timeline: UserSettings.Config.ShowTimeline,
+                                                    IsFocusMode: UserSettings.Config.FocusMode,
+                                                    InteractionOverlay: UserSettings.Config.ShowInteractionOverlay,
+                                                    ShowMiniMap: UserSettings.Config.ShowMiniMap
+                                                   ),
+                           UserSettings.Config.WindowLayoutIndex,
+                           UserSettings.Config.GraphStyle
+                          )
+            ;
     }
-    
-    internal static void ApplyUiState(UiElementsVisibility? state)
+
+    internal static void ApplyUiState(UiState state)
     {
-        if (state == null)
-            return;
-        
-        UserSettings.Config.ShowMainMenu= state.MainMenu;
-        UserSettings.Config.EnableMainMenuHoverPeek = state.MainMenu;
-        UserSettings.Config.ShowTitleAndDescription= state.TitleAndDescription;
-        UserSettings.Config.ShowToolbar= state.GraphToolbar;
-        UserSettings.Config.ShowTimeline= state.Timeline;
-        UserSettings.Config.FocusMode= state.IsFocusMode;
-        UserSettings.Config.ShowInteractionOverlay = state.InteractionOverlay;
+        ApplyUiVisibility(state.ElementsVisibility);
         UserSettings.Config.GraphStyle = state.GraphStyle;
-        UserSettings.Config.ShowMiniMap = state.ShowMiniMap;
-        
-        UserSettings.Config.WindowLayoutIndex= state.WindowLayoutIndex;
+        UserSettings.Config.WindowLayoutIndex = state.WindowLayoutIndex;
         LayoutHandling.LoadAndApplyLayoutOrFocusMode((LayoutHandling.Layouts)state.WindowLayoutIndex);
+    }
+
+    internal static void ApplyUiVisibility(UiElementsVisibility? visibility)
+    {
+        if (visibility == null)
+            return;
+
+        UserSettings.Config.ShowMainMenu = visibility.MainMenu;
+        UserSettings.Config.ShowTitleAndDescription = visibility.TitleAndDescription;
+        UserSettings.Config.ShowToolbar = visibility.GraphToolbar;
+        UserSettings.Config.ShowTimeline = visibility.Timeline;
+        UserSettings.Config.FocusMode = visibility.IsFocusMode;
+        UserSettings.Config.ShowInteractionOverlay = visibility.InteractionOverlay;
+        UserSettings.Config.ShowMiniMap = visibility.ShowMiniMap;
     }
 
     internal sealed record UiElementsVisibility(
         bool MainMenu,
-        bool EnableMainMenuPeek,
         bool TitleAndDescription,
         bool GraphToolbar,
         bool Timeline,
-        int WindowLayoutIndex,
         bool IsFocusMode,
         bool InteractionOverlay,
-        bool ShowMiniMap,
+        bool ShowMiniMap);
+
+    internal sealed record UiState(
+        UiElementsVisibility ElementsVisibility,
+        int WindowLayoutIndex,
         UserSettings.GraphStyles GraphStyle);
 }

@@ -37,6 +37,7 @@ internal sealed class NodeSelection : ISelection
     {
         TransformGizmoHandling.ClearSelectedTransformables();
         Selection.Clear();
+        ChangeCounter++;
     }
 
     /// <summary>
@@ -48,6 +49,7 @@ internal sealed class NodeSelection : ISelection
         Clear();
         _childUiInstanceIdPaths.Clear();
         _selectedCompositionPath = instance.InstancePath;
+        ChangeCounter++;
     }
 
     /// <summary>
@@ -65,6 +67,7 @@ internal sealed class NodeSelection : ISelection
             Debug.Assert(instance != null);
             NavigationHistory.UpdateSelectedInstance(instance);
         }
+        ChangeCounter++;
     }
 
     public void AddSelection(ISelectableCanvasObject node, Instance? instance = null)
@@ -83,6 +86,7 @@ internal sealed class NodeSelection : ISelection
         }
 
         Selection.Add(node);
+        ChangeCounter++;
     }
 
     public void SelectCompositionChild(Instance compositionOp, Guid id)
@@ -190,6 +194,8 @@ internal sealed class NodeSelection : ISelection
         {
             TransformGizmoHandling.ClearDeselectedTransformableNode(transformable);
         }
+
+        ChangeCounter++;
     }
 
     public Instance? GetInstanceForChildUi(SymbolUi.Child symbolChildUi)
@@ -327,8 +333,7 @@ internal sealed class NodeSelection : ISelection
     private IReadOnlyList<Guid>? _selectedCompositionPath;
     private readonly Dictionary<SymbolUi.Child, IReadOnlyList<Guid>> _childUiInstanceIdPaths = new();
 
-    
-
+    public int ChangeCounter { get; private set; }
     
     private static int _lastFrameCount;
     private static Guid _lastSelectionId = Guid.Empty;

@@ -45,6 +45,63 @@
           "074aed08-271d-4f2b-869f-1e2e869fdba5": "float4 noise = hash41u(vertexIndex);\n\nfloat3 pos = v.Position;\nfloat4 field = GetField( float4(pos,1));\n\nv.Position +=  v.Normal * field.x * A;  // * (noise.xyz- 0.5) * Offset * A;"
         }
       }
+    },
+    {
+      "Id": "0af01e51-f4ac-4cb8-aca1-5252b90abd88",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "Field -> Weird Offset",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "fbd20ff6-1e88-4d1a-9cb2-1767fc351cbc": true,
+          "b7dfa99a-9e7c-42aa-8706-62ef6c4ebb17": true,
+          "3104dab4-8d71-44aa-a582-47416aa977b5": 5.5,
+          "0359d61a-4058-43ab-b997-1dadf5c2af35": -3.4,
+          "353f527e-7593-45fd-9daf-eb46b965ee6e": -1.0,
+          "c99fa997-9f97-4b5f-a90f-801280662268": {
+            "Gradient": {
+              "Interpolation": "Linear",
+              "Steps": [
+                {
+                  "Id": "daea5817-164a-4bf1-bb2f-adbdddcda579",
+                  "NormalizedPosition": 0.0,
+                  "Color": {
+                    "R": 0.2248804,
+                    "G": 0.22487819,
+                    "B": 0.22487819,
+                    "A": 0.0
+                  }
+                },
+                {
+                  "Id": "f4f3893c-e54f-452d-b479-c2fb68c6b22d",
+                  "NormalizedPosition": 0.9130932,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.47149473,
+                    "B": 0.19833368,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "3b41a0c9-2994-4222-a5e8-7af0ec1d43ff",
+                  "NormalizedPosition": 1.0,
+                  "Color": {
+                    "R": 2.4304135,
+                    "G": 1.1459274,
+                    "B": 0.48203358,
+                    "A": 1.0
+                  }
+                }
+              ]
+            }
+          },
+          "074aed08-271d-4f2b-869f-1e2e869fdba5": "float4 noise = hash41u(vertexIndex);\nfloat3 pos = v.Position;\nfloat4 f = GetField( float4(pos, 0));\nfloat4 fColor = GetField( float4(pos, 1));\n\nv.Position +=  A * (noise - 0.5) * f.w;\n\nfloat4 c= Gradient.SampleLevel(Sampler, float2(f.w * C, 0.5), 0);\nv.ColorRGB= c.rgb;\n"
+        }
+      }
     }
   ]
 }

@@ -300,12 +300,6 @@
       "Outputs": []
     },
     {
-      "Id": "c26d2858-8628-46cc-ae96-f36c314beff4"/*GetSRVProperties*/,
-      "SymbolId": "bc489196-9a30-4580-af6f-dc059f226da1",
-      "InputValues": [],
-      "Outputs": []
-    },
-    {
       "Id": "c460434c-a261-44c3-acb7-5bcaea440ca7"/*ComputeShaderStage*/,
       "SymbolId": "8bef116d-7d1c-4c1b-b902-25c1d5e925a9",
       "InputValues": [
@@ -351,7 +345,7 @@
         {
           "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
           "Type": "System.String",
-          "Value": "Lib:shaders/points/modify/SamplePointAttributes.hlsl"
+          "Value": "Lib:shaders/points/sim/SimSamplePointAttributes.hlsl"
         }
       ],
       "Outputs": []
@@ -663,12 +657,6 @@
       "TargetSlotId": "36f14238-5bb8-4521-9533-f4d1e8fb802b"
     },
     {
-      "SourceParentOrChildId": "a7610c00-94a0-42bc-bcb5-0197ceaf9b18",
-      "SourceSlotId": "1368ab8e-d75e-429f-8ecd-0944f3ede9ab",
-      "TargetParentOrChildId": "c26d2858-8628-46cc-ae96-f36c314beff4",
-      "TargetSlotId": "e79473f4-3fd2-467e-acda-b27ef7dae6a9"
-    },
-    {
       "SourceParentOrChildId": "d936a1d3-b1cc-4f8c-b342-09c9c85a6f26",
       "SourceSlotId": "35c0e513-812f-49e2-96fa-17541751c19b",
       "TargetParentOrChildId": "c460434c-a261-44c3-acb7-5bcaea440ca7",
@@ -717,8 +705,8 @@
       "TargetSlotId": "7a13b834-21e5-4cef-ad5b-23c3770ea763"
     },
     {
-      "SourceParentOrChildId": "c26d2858-8628-46cc-ae96-f36c314beff4",
-      "SourceSlotId": "431b39fd-4b62-478b-bbfa-4346102c3f61",
+      "SourceParentOrChildId": "a7610c00-94a0-42bc-bcb5-0197ceaf9b18",
+      "SourceSlotId": "d7918fd8-906e-424d-8c5c-9631941cfc9d",
       "TargetParentOrChildId": "d03b8c26-0f9a-4631-b1b1-b99d0e06aa63",
       "TargetSlotId": "75a09454-6cde-458b-9314-05a99b2e5919"
     },

@@ -21,7 +21,7 @@
       "InputId": "4d25b1db-daeb-4b5e-b2bc-8681f332b092"/*OutputFormat*/,
       "Position": {
         "X": 204.9021,
-        "Y": 493.4281
+        "Y": 528.4281
       }
     },
     {
@@ -51,6 +51,13 @@
         "Y": 458.4281
       },
       "AddPadding": "True"
+    },
+    {
+      "InputId": "b79b3334-bce6-44a0-aa8c-d2db6a45afff"/*TextureRepeat*/,
+      "Position": {
+        "X": 204.9021,
+        "Y": 493.42813
+      }
     },
     {
       "InputId": "cf7e6f41-cc6e-46dd-8779-1273326a5a53"/*Mode*/,

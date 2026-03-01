@@ -269,11 +269,6 @@
       "SymbolId": "914fb032-d7eb-414b-9e09-2bdd7049e049",
       "InputValues": [
         {
-          "Id": "0e255347-08bc-4363-9ffa-ab863a1cea8e"/*Path*/,
-          "Type": "System.String",
-          "Value": "C:\\Users\\pixtur\\Downloads\\dance_-_32938 (1080p).mp4"
-        },
-        {
           "Id": "21b5671b-862f-4cea-a355-fa019996c936"/*Loop*/,
           "Type": "System.Boolean",
           "Value": true

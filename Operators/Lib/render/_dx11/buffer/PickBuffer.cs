@@ -17,11 +17,13 @@ internal sealed class PickBuffer : Instance<PickBuffer>
         Output.UpdateAction += Update;
         Count.UpdateAction += Update;
     }
-
+    
     private void Update(EvaluationContext context)
     {
         var connections = Input.GetCollectedTypedInputs();
-        if (connections == null || connections.Count == 0)
+        var index = Index.GetValue(context);
+        
+        if (connections.Count == 0)
         {
             Count.Value = 0;
             Output.DirtyFlag.Clear();
@@ -29,9 +31,6 @@ internal sealed class PickBuffer : Instance<PickBuffer>
         }
 
         Count.Value = connections.Count;
-
-        var index = Index.GetValue(context);
-            
         Output.Value = connections[index.Mod(connections.Count)].GetValue(context);
             
         Output.DirtyFlag.Clear();

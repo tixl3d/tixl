@@ -4,10 +4,6 @@
     {
       "Id": "e60a6857-2be5-4236-b506-43c9e84b8d1e"/*InputField*/,
       "DefaultValue": null
-    },
-    {
-      "Id": "77994b41-61c4-46e9-b790-b51d8275a45a"/*Thickness*/,
-      "DefaultValue": 0.1,
     }
   ],
   "Children": [],

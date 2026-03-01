@@ -16,6 +16,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>0108;9084;NU1900</NoWarn>
     <PackageId>b93365ef-52a5-4e64-96e9-bb073f2c05db</PackageId>
+    <IsArchived>false</IsArchived>
   </PropertyGroup>
   <ItemGroup>
     <Using Include="System" />

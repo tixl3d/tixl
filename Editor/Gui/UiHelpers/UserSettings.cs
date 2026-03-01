@@ -57,7 +57,6 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         // UI-Elements
         public bool ShowThumbnails = true;
         public bool ShowMainMenu = true;
-        public bool EnableMainMenuHoverPeek = true;
         public bool ShowTitleAndDescription = true;
         public bool ShowToolbar = true;
         public bool ShowTimeline = true;

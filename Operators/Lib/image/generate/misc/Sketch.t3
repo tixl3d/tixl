@@ -11,7 +11,7 @@
     },
     {
       "Id": "1c5d0d86-c000-449e-903a-3212d19d8e1d"/*StrokeSize*/,
-      "DefaultValue": 0.05
+      "DefaultValue": 0.2
     },
     {
       "Id": "2ded8235-157d-486b-a997-87d09d18f998"/*Filename*/,
@@ -508,18 +508,6 @@
             "Z": 0.0,
             "W": 0.0
           }
-        }
-      ],
-      "Outputs": []
-    },
-    {
-      "Id": "c317a352-871b-4c53-8f68-aa8ab23f83d6"/*Time*/,
-      "SymbolId": "b0d75f21-df33-460b-beab-d8c5e1f23e5e",
-      "InputValues": [
-        {
-          "Id": "6d2f783a-23b7-425c-a4e3-cfcdcd61cf3a"/*Mode*/,
-          "Type": "System.Int32",
-          "Value": 3
         }
       ],
       "Outputs": []

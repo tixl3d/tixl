@@ -1,4 +1,7 @@
-﻿namespace T3.Editor.Gui;
+﻿using T3.Editor.Gui.Windows.Layouts;
+using T3.Editor.UiModel.ProjectHandling;
+
+namespace T3.Editor.Gui;
 
 /// <summary>
 /// A helper class that collects information duration the processing of a frame,
@@ -10,6 +13,22 @@ internal static class FrameStats
     {
         (Current, Last) = (Last, Current);
         Current.Clear();
+
+        WindowLayoutChanged = HasChanged(ref _lastWindowLayoutCounter, LayoutHandling.ChangeCounter);
+        SelectionChanged = ProjectView.Focused != null && 
+                           HasChanged(ref _lastSelectionCounter, ProjectView.Focused.NodeSelection.ChangeCounter);
+    }
+
+    public static bool WindowLayoutChanged;
+    public static bool SelectionChanged;
+
+    private static bool HasChanged(ref int counter, int newCounter)
+    {
+        if (counter == newCounter)
+            return false;
+
+        counter = newCounter;
+        return true;
     }
 
     internal static void AddHoveredId(Guid id)
@@ -58,4 +77,7 @@ internal static class FrameStats
 
     internal static Stats Current = new();
     internal static Stats Last = new();
+    
+    private static int _lastSelectionCounter;
+    private static int _lastWindowLayoutCounter;
 }

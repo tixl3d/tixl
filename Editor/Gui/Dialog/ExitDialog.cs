@@ -75,7 +75,7 @@ internal sealed class ExitDialog : ModalDialog
             FormInputs.AddVerticalSpace(2);
             if (changeCount > 0)
             {
-                ImGui.Text($"Your have {changeCount} unsaved changes.");
+                ImGui.Text($"You have {changeCount} unsaved changes.");
             }
 
             ImGui.PopFont();

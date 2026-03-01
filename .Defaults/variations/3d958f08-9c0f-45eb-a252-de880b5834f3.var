@@ -1,0 +1,125 @@
+{
+  "Id": "3d958f08-9c0f-45eb-a252-de880b5834f3",
+  "Variations": [
+    {
+      "Id": "f1e4c879-4ecd-41c7-b4ae-23cce7a5f492",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Fish",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "e9712b03-e7aa-4fe5-b5cf-f2c5d0c0b0df": "// Author: @yuruyurau\n/* original p5.js code: \na=(y,d=mag(k=(y<11?6+sin(y^8)*6:y/5+cos(y/2))*cos(i-t/4),e=y/7-13)+sin(e/4+t)/2)=>point((q=y*k/d*(3+sin(d*2+y/2-t*4)))+60*cos(c=d/2+1-t/2)+200,q*sin(c)+d*29-170) t=0,draw=$=>{t||createCanvas(w=400,w);background(9).stroke(w,96);for(t+=PI/120,i=1e4;i--;)a(i/345)}\n*/\n\nfloat t = A;          // time\nfloat idx = i;        // point index\nfloat y = idx / 345.0;\n\n// k\nfloat kBase = (y < 11.0) \n    ? 6.0 + sin((float)((int)y ^ 8)) * 6.0\n    : y / 5.0 + cos(y / 2.0);\n\nfloat k = kBase * cos(idx - t / 4.0);\n\n// e and d\nfloat e = y / 7.0 - 13.0;\nfloat d = mag(k, e) + sin(e / 4.0 + t) / 2.0;\n\n// q\nfloat q = y * k / d * (3.0 + sin(d * 2.0 + y / 2.0 - t * 4.0));\n\n// c\nfloat c = d / 2.0 + 1.0 - t / 4.0;\n\n// final position\nfloat xPos = q + C * cos(c) ;\nfloat yPos = q * sin(c) + d * 29 -340;\nfloat r = sqrt(xPos*xPos + yPos*yPos);\nfloat angle =k* atan2(yPos, xPos)*20\n;\n\nfloat zPos =  sin(angle);\n// assign\n\np.Position = float3(xPos, -yPos, zPos); // original has zPos = 0.0\np.Position *= 0.01;\n\n//Colors: comment for original \nfloat hue = (y / 30.0 +A * 0.1) % 1.0;\np.Color = float4(\n    0.5 + 0.5 * sin(hue * 6.283 + 0.0), // Red\n    0.5 + 0.5 * sin(hue * 6.283 + 2.094), // Green (120° phase shift)\n    0.5 + 0.5 * sin(hue * 6.283 + 4.189), // Blue (240° phase shift)\n    0.8 // Alpha\n);\n",
+          "e5a7649f-684e-4938-8ae3-7289f5b9ff45": 60.0,
+          "b909844f-cff7-4907-9bc8-e9c2281582bf": 60.0,
+          "864dfe5a-14f2-490f-be9c-ee13ad58605c": "float mag(float x, float y)\n{\n    return sqrt(x * x + y * y);\n}\n\nfloat3 hsv2rgb(float3 c) {\n    float4 K = float4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);\n    float3 p = abs(frac(c.xxx + K.xyz) * 6.0 - K.www);\n    return c.z * lerp(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);\n}",
+          "2a0cf45c-bcf5-4802-b32b-84cef0f1c129": 10000
+        }
+      }
+    },
+    {
+      "Id": "b1c26ee7-a46d-49a0-bdba-a6d81f117ec3",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Knot",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "e9712b03-e7aa-4fe5-b5cf-f2c5d0c0b0df": "float3 pos=float3(0,0,1);\npos=Generator(f);\np.Position = pos;\nfloat3 up=float3(0,-1,0);\nfloat3 fwd=normalize(Generator(f-.01)-Generator(f+.01));\np.Rotation=qLookAt(fwd,up);\n",
+          "a5c7863e-9c26-4109-9851-3244086b0ccc": 1.0,
+          "e5a7649f-684e-4938-8ae3-7289f5b9ff45": 2.52,
+          "b909844f-cff7-4907-9bc8-e9c2281582bf": 7.0,
+          "20226539-a481-4df6-8dc7-cc65de915ea9": 2.0,
+          "864dfe5a-14f2-490f-be9c-ee13ad58605c": "float3 Generator(float f){\n\nfloat3 v=(f*A+B)*float3(C,D,1);\n    float3 p=float3(0,0,0.2);\n    p=qRotateVec3(p,qFromAngleAxis(PI*2*v.x,float3(1,0,0)));\n    p.z+=1;\n    p=qRotateVec3(p,qFromAngleAxis(PI*2*v.y,float3(0,1,0)));\n    //p*=0.25;p.x+=1;\n    //p=qRotateVec3(p,qFromAngleAxis(PI*2*v.z,float3(0,0,1)));\n//p*=exp2(.15*sin(f*23.2));\n    return p;\n}",
+          "2a0cf45c-bcf5-4802-b32b-84cef0f1c129": 1000
+        }
+      }
+    },
+    {
+      "Id": "96fa3568-525b-4a3f-8e28-0ea8e4008534",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "Wave",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "e9712b03-e7aa-4fe5-b5cf-f2c5d0c0b0df": "int gs=sqrt(TotalCount);\nfloat2 gpos=float2(i%gs,i/gs)/gs-0.5;\np.Position = float3(gpos.x,0,gpos.y);\nfloat h=length(sin(gpos*8+Center.xz)*0.1);\np.Position.y=h;\np.Color.xyz=h*float3(1,2,3)*3;\n//p.Position += Center;\n\n",
+          "01898885-4140-4435-bb44-a7a6f6f32657": {
+            "X": 1.7,
+            "Y": 0.0,
+            "Z": -5.1
+          },
+          "2a0cf45c-bcf5-4802-b32b-84cef0f1c129": 540
+        }
+      }
+    },
+    {
+      "Id": "0d2fbfe5-dc58-4516-8b74-f7f0af5e8eca",
+      "IsPreset": true,
+      "ActivationIndex": 4,
+      "Title": "Another Knot",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 122.55056
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "e9712b03-e7aa-4fe5-b5cf-f2c5d0c0b0df": "float3 pos=float3(0,0,1);\npos=Generator(f);\np.Position = pos;\nfloat3 up=float3(0,-1,0);\nfloat3 fwd=normalize(Generator(f-.01)-Generator(f+.01));\np.Rotation=qLookAt(fwd,up);\n",
+          "a5c7863e-9c26-4109-9851-3244086b0ccc": 0.84,
+          "e5a7649f-684e-4938-8ae3-7289f5b9ff45": 2.52,
+          "864dfe5a-14f2-490f-be9c-ee13ad58605c": "float3 Generator(float f){\n\nfloat3 v=(f*A+B)*float3(3,5,7);\n    float3 p=float3(0,0,1);\n    p=qRotateVec3(p,qFromAngleAxis(PI*2*v.x,float3(1,0,0)));\n    p=qRotateVec3(p,qFromAngleAxis(PI*2*v.y,float3(0,1,0)));\n    p=qRotateVec3(p,qFromAngleAxis(PI*2*v.z,float3(0,0,1)));\np*=exp2(.15*sin(f*23.2));\n    return p;\n}",
+          "2a0cf45c-bcf5-4802-b32b-84cef0f1c129": 1000
+        }
+      }
+    },
+    {
+      "Id": "87922cd3-78ac-4c63-98e0-e99d08995779",
+      "IsPreset": true,
+      "ActivationIndex": 5,
+      "Title": "Visualize Image Colors",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 122.55056
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "e9712b03-e7aa-4fe5-b5cf-f2c5d0c0b0df": "int2 ip=int2(i.x%TexSize.x,i.x/TexSize.x);\nfloat4 smp=Image.Load(int3(ip.xy,0));\np.Position = smp.xyz;\np.Color=smp;",
+          "2a0cf45c-bcf5-4802-b32b-84cef0f1c129": 65536
+        }
+      }
+    },
+    {
+      "Id": "3dfceae2-33a1-43ed-8a2c-98d71d54ccf0",
+      "IsPreset": true,
+      "ActivationIndex": 6,
+      "Title": "ControlExample",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 122.55056
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "e9712b03-e7aa-4fe5-b5cf-f2c5d0c0b0df": "//move points position\np.Position += Center;\n\n//move points on Y for sine wave\np.Position.y += sin(6*f * A+B)*C;\n\n// color every point\np.Color = float4(1,1,0,1); \n\n// control a specific point\nif(i == (int)D){\np.FX1 = 5.0;\np.Color = float4(1,0,1,1);\n}",
+          "01898885-4140-4435-bb44-a7a6f6f32657": {
+            "X": 0.77,
+            "Y": -0.11,
+            "Z": -0.45
+          },
+          "a5c7863e-9c26-4109-9851-3244086b0ccc": 1.0,
+          "e5a7649f-684e-4938-8ae3-7289f5b9ff45": -3.1,
+          "b909844f-cff7-4907-9bc8-e9c2281582bf": 0.45,
+          "20226539-a481-4df6-8dc7-cc65de915ea9": 50.0
+        }
+      }
+    }
+  ]
+}

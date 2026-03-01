@@ -356,7 +356,7 @@ internal sealed class OutputWindow : Window
                 }
                 else
                 {
-                    RenderProcess.TryStart(RenderSettings.Current);
+                    RenderProcess.TryStartVideoExport();
                 }
             }
 
@@ -408,14 +408,14 @@ internal sealed class OutputWindow : Window
         // Prepare context
         EvaluationContext.Reset();
         EvaluationContext.BypassCameras = _camSelectionHandling.BypassCamera;
-        var requestedResolution = _selectedResolution.ComputeResolution();
-        _lastLayoutResolution = requestedResolution;
-
-        if (RenderProcess.IsExporting)
+        if (RenderProcess.TryGetActiveExportResolution(out var overrideResolution))
         {
-            requestedResolution = RenderProcess.MainOutputRenderedSize;
+            EvaluationContext.RequestedResolution = overrideResolution;
         }
-        EvaluationContext.RequestedResolution = requestedResolution;
+        else
+        {
+            EvaluationContext.RequestedResolution = _selectedResolution.ComputeResolution();
+        }
 
         // Set camera
         if (_camSelectionHandling.CameraForRendering != null)
@@ -427,10 +427,9 @@ internal sealed class OutputWindow : Window
 
         const string overrideSampleVariableName = "OverrideMotionBlurSamples";
 
-        if (RenderProcess.IsToollRenderingSomething)
+        if (RenderProcess.IsExporting)
         {
-            // FIXME: Implement
-            var samples = RenderSettings.Current.OverrideMotionBlurSamples;
+            var samples = RenderSettings.ForNextExport.OverrideMotionBlurSamples;
             if (samples >= 0)
             {
                 EvaluationContext.IntVariables[overrideSampleVariableName] = samples;
@@ -477,12 +476,6 @@ internal sealed class OutputWindow : Window
             return instance;
         }
     }
-    public Int2 GetResolution()
-    {
-        return _lastLayoutResolution.Width > 0 && _lastLayoutResolution.Height > 0
-                   ? _lastLayoutResolution
-                   : _selectedResolution.ComputeResolution();
-    }
 
     public static readonly List<Window> OutputWindowInstances = [];
     public ViewSelectionPinning Pinning { get; } = new();
@@ -494,5 +487,4 @@ internal sealed class OutputWindow : Window
     private static int _instanceCounter;
     private ResolutionHandling.Resolution _selectedResolution = ResolutionHandling.DefaultResolution;
     private readonly EditResolutionDialog _resolutionDialog = new();
-    private Int2 _lastLayoutResolution;
 }

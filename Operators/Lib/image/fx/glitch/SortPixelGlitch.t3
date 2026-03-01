@@ -265,7 +265,7 @@
         {
           "Id": "24646f06-1509-43ce-94c6-eeb608ad97cd"/*Source*/,
           "Type": "System.String",
-          "Value": "Examples:user/pixtur/convert-buffer-to-texture2d-ps.hlsl"
+          "Value": "Lib:shaders/img/fx/PixelSortGlitch-convert-buffer-to-texture2d-ps.hlsl"
         },
         {
           "Id": "501338b3-f432-49a5-bdbd-bcf209671305"/*EntryPoint*/,
@@ -470,12 +470,6 @@
     {
       "Id": "f0faff5a-9bb6-47cd-88ee-9c7132523d0e"/*FloatToInt*/,
       "SymbolId": "06b4728e-852c-491a-a89d-647f7e0b5415",
-      "InputValues": [],
-      "Outputs": []
-    },
-    {
-      "Id": "f450ec82-9726-4efc-be68-b3e95da5da77"/*TransformsConstBuffer*/,
-      "SymbolId": "a60adc26-d7c6-4615-af78-8d2d6da46b79",
       "InputValues": [],
       "Outputs": []
     }

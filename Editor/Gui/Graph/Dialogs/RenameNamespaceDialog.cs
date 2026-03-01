@@ -3,7 +3,6 @@ using ImGuiNET;
 using T3.Core.SystemUi;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
-using T3.Editor.Gui.Windows;
 using T3.Editor.Gui.Windows.SymbolLib;
 using T3.Editor.UiModel;
 
@@ -15,14 +14,10 @@ internal sealed class RenameNamespaceDialog : ModalDialog
     {
         if (BeginDialog("Move or rename namespace"))
         {
-            var dialogJustOpened = _node == null;
-            var nodeName = _node == null ? "undefined" : _node.GetAsString();
-            
-            if (dialogJustOpened)
+            if (ImGui.IsWindowAppearing())
             {
                 _node = subtreeNodeToRename;
-                _nameSpace = nodeName;
-
+                _nameSpace = _node.Namespace;
                 EditableSymbolProject.TryGetEditableProjectOfNamespace(_nameSpace, out _projectToCopyFrom);
                 _projectToCopyTo = _projectToCopyFrom;
             }
@@ -40,7 +35,7 @@ internal sealed class RenameNamespaceDialog : ModalDialog
             }
             else
             {
-                ImGui.TextColored(UiColors.StatusError.Rgba, $"No source project found for namespace {nodeName}");
+                ImGui.TextColored(UiColors.StatusError.Rgba, $"No source project found for namespace {_nameSpace}");
             }
                 
             if (ImGui.Button("Cancel"))

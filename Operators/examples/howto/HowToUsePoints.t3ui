@@ -286,13 +286,6 @@
       }
     },
     {
-      "ChildId": "5bdc3357-ff13-4c98-9573-d78efd836003"/*CollectSpawnPointsExample*/,
-      "Position": {
-        "X": -1384.8346,
-        "Y": 2496.1975
-      }
-    },
-    {
       "ChildId": "5daffb62-a330-46a0-8707-d3d3ff800082"/*PointsOnMesh*/,
       "Position": {
         "X": -2398.9954,
@@ -702,8 +695,8 @@
     {
       "OutputId": "e4d2b739-0a14-4e52-a275-256b78b12b0f"/*Output2*/,
       "Position": {
-        "X": -1811.3385,
-        "Y": 1581.8535
+        "X": -1805.2479,
+        "Y": 1686.7075
       }
     }
   ],

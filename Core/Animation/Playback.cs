@@ -55,7 +55,7 @@ public class Playback
     /// Controls if the playback is controlled by rendering output.
     /// </summary>
     /// <remarks>
-    /// During rendering of videos or image sequence this setting is set to false
+    /// During rendering of videos or image sequence this setting is set to true
     /// to prevent time updates that interfere with rendered controlled audio output. 
     /// </remarks>
     public bool IsRenderingToFile

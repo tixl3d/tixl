@@ -56,8 +56,8 @@
       "InputId": "a92f43c8-2d17-4664-b9ed-17872ec68498"/*BreedsBuffer*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -2839.0198,
-        "Y": -344.0329
+        "X": -2837.5916,
+        "Y": -327.60608
       }
     },
     {
@@ -263,15 +263,8 @@
     {
       "ChildId": "8cc1ddcb-f8e5-4b27-91b5-10ece3a835f0"/*GetBufferComponents*/,
       "Position": {
-        "X": -2839.0198,
-        "Y": -309.0329
-      }
-    },
-    {
-      "ChildId": "90cb1d15-b55e-4fe4-b702-8ebaf688bae6"/*ComputeShader*/,
-      "Position": {
-        "X": -2769.2034,
-        "Y": -654.56177
+        "X": -2837.5916,
+        "Y": -292.60608
       }
     },
     {
@@ -393,13 +386,6 @@
       }
     },
     {
-      "ChildId": "f3f7a626-9b60-4f9d-aada-9c90cdbde56e"/*_SpeciesDefinition*/,
-      "Position": {
-        "X": -2765.17,
-        "Y": -841.4995
-      }
-    },
-    {
       "ChildId": "f4751125-3b8c-4ba6-9473-fd4a024b6f6d"/*Camera*/,
       "Position": {
         "X": -612.19293,
@@ -411,13 +397,6 @@
       "Position": {
         "X": -2689.4944,
         "Y": -534.71704
-      }
-    },
-    {
-      "ChildId": "ff3ce682-8988-49e7-8a6e-d5a4e21d1f85"/*ComputeShader*/,
-      "Position": {
-        "X": -2854.761,
-        "Y": 215.98416
       }
     }
   ],

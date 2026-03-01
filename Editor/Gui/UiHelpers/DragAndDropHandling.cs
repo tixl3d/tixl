@@ -220,5 +220,6 @@ internal static class DragAndDropHandling
         Symbol,
         FileAsset,
         ExternalFile,
+        SymbolNameSpace,
     }
 }

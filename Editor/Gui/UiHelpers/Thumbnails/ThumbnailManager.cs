@@ -404,7 +404,7 @@ internal static class ThumbnailManager
     private static string GetPath(IResourcePackage package, Categories category)
     {
         return category switch {
-            Categories.PackageMeta => Path.Combine(package.Folder, MetaSubFolder, ThumbnailsSubFolder),
+            Categories.PackageMeta => Path.Combine(package.Folder, FileLocations.MetaSubFolder, ThumbnailsSubFolder),
             Categories.User        => Path.Combine(FileLocations.TempFolder, ThumbnailsSubFolder, package.Name),
             _                      => Path.Combine(FileLocations.TempFolder, ThumbnailsSubFolder)
         };
@@ -453,6 +453,7 @@ internal static class ThumbnailManager
 
     private static readonly HashSet<string> _lockedPath = [];
     public enum Categories { Temp, User, PackageMeta }
-    private const string ThumbnailsSubFolder = "Thumbnails", MetaSubFolder = ".meta";
+
+    public const string ThumbnailsSubFolder = "Thumbnails";
     public static bool EnableLogging;
 }

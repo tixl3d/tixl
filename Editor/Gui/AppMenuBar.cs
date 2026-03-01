@@ -21,6 +21,7 @@ using T3.Editor.Gui.Windows.RenderExport;
 using T3.Editor.Skills.Ui;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
+using T3.Editor.UiModel.Helpers;
 using T3.Editor.UiModel.ProjectHandling;
 using ShaderCompiler = T3.Core.Resource.ShaderCompiling.ShaderCompiler;
 
@@ -307,6 +308,12 @@ internal static class AppMenuBar
 
                 if (ImGui.MenuItem("Fix asset paths"))
                     ConformAssetPaths.ConformAllPaths();
+
+                if (ImGui.MenuItem("Check symbol dependencies"))
+                {
+                    SymbolAnalysis.LogInvalidSymbolDependencies();
+                    SymbolAnalysis.LogInvalidAssetReference();
+                }
                 
                 if (ImGui.BeginMenu("Clear shader cache"))
                 {

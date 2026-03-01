@@ -16,6 +16,7 @@
     <Deterministic>true</Deterministic>
     <NoWarn>NU1900</NoWarn>
     <PackageId>c8a53b12-ded3-4327-86d2-bd731b25de22</PackageId>
+    <IsArchived>false</IsArchived>
   </PropertyGroup>
   <ItemGroup>
     <Using Include="System" />

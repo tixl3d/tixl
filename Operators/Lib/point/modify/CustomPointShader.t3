@@ -177,12 +177,6 @@
       "Outputs": []
     },
     {
-      "Id": "39438d7f-efd6-4508-8daf-6c1476ebcd33"/*TimeConstBuffer*/,
-      "SymbolId": "de8bc97a-8ef0-4d4a-9ffa-88046a2daf40",
-      "InputValues": [],
-      "Outputs": []
-    },
-    {
       "Id": "434dc073-61f8-4ac7-b3a3-1a878844e6cf"/*PickString*/,
       "SymbolId": "a9784e5e-7696-49a0-bb77-2302587ede59",
       "InputValues": [],

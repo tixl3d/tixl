@@ -26,13 +26,6 @@
       }
     },
     {
-      "ChildId": "29ab7c0a-162c-411b-94a7-f94e051ddf13"/*Genuary2403_DrosteEffect*/,
-      "Position": {
-        "X": 621.077,
-        "Y": 289.52057
-      }
-    },
-    {
       "ChildId": "2f48b776-7f75-4371-9118-3083fad5c3dd"/*LookTest02*/,
       "Position": {
         "X": 153.25806,

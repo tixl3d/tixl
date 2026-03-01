@@ -8,6 +8,7 @@ using T3.Core.Resource.Assets;
 using T3.Core.SystemUi;
 using T3.Core.UserData;
 using T3.Editor.Compilation;
+using T3.Editor.Gui.UiHelpers.Thumbnails;
 
 namespace T3.Editor.UiModel;
 
@@ -94,6 +95,26 @@ internal sealed partial class EditableSymbolProject : EditorSymbolPackage
         newDestinationProject.SymbolDict.TryAdd(id, symbol);
         newDestinationProject.SymbolUiDict.TryAdd(id, symbolUi);
         newDestinationProject.FilePathHandlers.TryAdd(id, symbolPathHandler);
+        
+        // Copy thumbnails...
+        {
+            var sourceFilePath = Path.Combine(Folder, FileLocations.MetaSubFolder, ThumbnailManager.ThumbnailsSubFolder, id + ".png");
+            if (File.Exists(sourceFilePath))
+            {
+                var targetFolder = Path.Combine(newDestinationProject.Folder, FileLocations.MetaSubFolder, ThumbnailManager.ThumbnailsSubFolder);
+                var targetFilePath = Path.Combine(targetFolder, id + ".png");
+                Directory.CreateDirectory(targetFolder);
+                try
+                {
+                    File.Move(sourceFilePath, targetFilePath);
+                }
+                catch (Exception e)
+                {
+                    Log.Warning("Can't move thumbnail " + e.Message);
+                }
+            }
+        }
+        
         
         // move files to new project - incorrect paths will be corrected by the loading process
         symbolPathHandler.UpdateFromSymbol();

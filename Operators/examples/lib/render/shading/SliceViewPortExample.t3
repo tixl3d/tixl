@@ -160,7 +160,13 @@
     {
       "Id": "c08660cd-6546-47ed-a176-330f4064cb0b"/*LoadImage*/,
       "SymbolId": "0b3436db-e283-436e-ba85-2f3a1de76a9d",
-      "InputValues": [],
+      "InputValues": [
+        {
+          "Id": "96044c6c-d005-4d61-b605-7a6896e98cb6"/*CacheResources*/,
+          "Type": "System.Boolean",
+          "Value": true
+        }
+      ],
       "Outputs": []
     },
     {
@@ -176,7 +182,12 @@
         {
           "Id": "ca9778e7-072c-4304-9043-eeb2dc4ca5d7"/*Folder*/,
           "Type": "System.String",
-          "Value": "Examples:user/still/proj-fc2/images/slices2/"
+          "Value": "Examples:images/sequences/MixTapesAlpha/"
+        },
+        {
+          "Id": "e14a4aae-e253-4d14-80ef-a90271cd306a"/*TriggerUpdate*/,
+          "Type": "System.Boolean",
+          "Value": false
         }
       ],
       "Outputs": []
@@ -222,12 +233,12 @@
         {
           "Id": "79917ef7-64ca-4825-9c6a-c9b2a7f6ff86"/*Amplitude*/,
           "Type": "System.Single",
-          "Value": 0.79999995
+          "Value": 0.2
         },
         {
           "Id": "ddd93b06-118e-43e0-85f6-c150faf91d04"/*Offset*/,
           "Type": "System.Single",
-          "Value": 2.7
+          "Value": 0.66
         }
       ],
       "Outputs": []
@@ -240,11 +251,6 @@
           "Id": "38f34034-b36f-4351-84e1-1a4f96e03fc6"/*Scale*/,
           "Type": "System.Single",
           "Value": 2.8233333
-        },
-        {
-          "Id": "da0941c9-c700-4552-9d8a-799bf7a08826"/*Rotate*/,
-          "Type": "System.Single",
-          "Value": 90.0
         }
       ],
       "Outputs": []

@@ -1,6 +1,7 @@
 #nullable enable
 using System.Diagnostics.CodeAnalysis;
 using T3.Core.Operator;
+using T3.Core.Resource;
 using T3.Editor.Gui.Window;
 
 namespace T3.Editor.UiModel.ProjectHandling;
@@ -10,7 +11,7 @@ internal sealed class OpenedProject
     public readonly EditorSymbolPackage Package;
     public readonly Structure Structure;
 
-    public static readonly Dictionary<EditorSymbolPackage, OpenedProject> OpenedProjects = new();
+    public static readonly Dictionary<IResourcePackage, OpenedProject> OpenedProjects = new();
 
     public static bool TryCreate(EditorSymbolPackage project,
                                  [NotNullWhen(true)] out OpenedProject? openedProject,
@@ -93,7 +94,7 @@ internal sealed class OpenedProject
         {
             return false;
         }
-
+        
         // Close all ProjectViews that reference this opened project
         var projectViewsToClose = new List<ProjectView>();
         foreach (var graphWindow in GraphWindow.GraphWindowInstances)
@@ -116,6 +117,7 @@ internal sealed class OpenedProject
         // Remove from opened projects
         OpenedProjects.Remove(package);
 
+        EditorSymbolPackage.NotifySymbolStructureChange();
         return true;
     }
 }

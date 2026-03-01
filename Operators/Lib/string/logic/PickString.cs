@@ -16,11 +16,12 @@ internal sealed class PickString : Instance<PickString>
     private void Update(EvaluationContext context)
     {
         var connections = Input.GetCollectedTypedInputs();
+        var index = Index.GetValue(context).Mod(connections.Count);
+        
         Input.DirtyFlag.Clear();
-        if (connections == null || connections.Count == 0)
+        if (connections.Count == 0)
             return;
 
-        var index = Index.GetValue(context).Mod(connections.Count);
         Selected.Value = connections[index].GetValue(context);
             
         // Clear dirty flag

@@ -330,7 +330,8 @@ internal static partial class ProjectXml
                     (Type: PropertyType.EditorVersion, Value: Program.Version.ToBasicVersionString()),
                     (Type: PropertyType.IsEditorOnly, Value: "false"),
                     (Type: PropertyType.ImplicitUsings, Value: "disabled"),
-                    (Type: PropertyType.Deterministic, Value: "true")
+                    (Type: PropertyType.Deterministic, Value: "true"),
+                    (Type: PropertyType.IsArchived, Value: "false"),
                 }
            .ToFrozenDictionary(keySelector: x => x.Type, elementSelector: x => x.Value);
 
@@ -482,7 +483,8 @@ internal enum PropertyType
     IsEditorOnly,
     ImplicitUsings,
     Deterministic, 
-    OutputPath
+    OutputPath,
+    IsArchived,
 }
 
 internal enum ItemType

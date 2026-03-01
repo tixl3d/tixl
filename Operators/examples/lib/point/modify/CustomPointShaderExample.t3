@@ -1327,6 +1327,11 @@
           }
         },
         {
+          "Id": "76124db6-4b89-4d7c-bd25-2ebf95b1c141"/*CloseCircleLine*/,
+          "Type": "System.Boolean",
+          "Value": false
+        },
+        {
           "Id": "94b2a118-f760-4043-933c-31283e6e7006"/*Rotations*/,
           "Type": "System.Single",
           "Value": 1.0
@@ -1744,7 +1749,23 @@
     {
       "Id": "779bbbf8-e49f-4fa8-a66d-64cc88cb7904"/*VisualizePoints*/,
       "SymbolId": "37bdbafc-d14c-4b81-91c3-8f63c3b63812",
-      "InputValues": [],
+      "InputValues": [
+        {
+          "Id": "8f72275d-d903-4372-852c-51c3db35fe90"/*ShowCenterPoints*/,
+          "Type": "System.Boolean",
+          "Value": true
+        },
+        {
+          "Id": "d0ac63c5-639b-4b3c-b40b-348b76fa0fd2"/*ShowAxis*/,
+          "Type": "System.Boolean",
+          "Value": true
+        },
+        {
+          "Id": "d2472768-dd40-436f-af1b-7359289b5118"/*ShowIndices*/,
+          "Type": "System.Boolean",
+          "Value": false
+        }
+      ],
       "Outputs": []
     },
     {

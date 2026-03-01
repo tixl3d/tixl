@@ -21,12 +21,6 @@
       "Outputs": []
     },
     {
-      "Id": "29ab7c0a-162c-411b-94a7-f94e051ddf13"/*Genuary2403_DrosteEffect*/,
-      "SymbolId": "c9464818-294a-44d9-bcba-ec447d43ba52",
-      "InputValues": [],
-      "Outputs": []
-    },
-    {
       "Id": "2f48b776-7f75-4371-9118-3083fad5c3dd"/*LookTest02*/,
       "SymbolId": "701f78b9-5b1a-4332-ab5e-89bcb1f520ce",
       "InputValues": [],

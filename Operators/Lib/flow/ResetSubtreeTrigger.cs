@@ -15,7 +15,7 @@ internal sealed class ResetSubtreeTrigger : Instance<ResetSubtreeTrigger>
     {
         if (Trigger.GetValue(context))
         {
-            DirtyFlag.InvalidationRefFrame++;
+            DirtyFlag.GlobalInvalidationTick++;
             Invalidate(Command);
             Trigger.TypedInputValue.Value = false;
             Trigger.Value = false;
@@ -29,7 +29,7 @@ internal sealed class ResetSubtreeTrigger : Instance<ResetSubtreeTrigger>
         if (slot.TryGetFirstConnection(out var firstConnection))
         {
             // slot is an output of an composition op
-            slotFlag.Target = Invalidate(firstConnection);
+            slotFlag.SourceVersion = Invalidate(firstConnection);
         }
         else
         {
@@ -49,11 +49,11 @@ internal sealed class ResetSubtreeTrigger : Instance<ResetSubtreeTrigger>
                             dirtySum += Invalidate(entry);
                         }
 
-                        inputFlag.Target = dirtySum;
+                        inputFlag.SourceVersion = dirtySum;
                     }
                     else
                     {
-                        inputFlag.Target = Invalidate(inputConnection);
+                        inputFlag.SourceVersion = Invalidate(inputConnection);
                     }
                 }
                 else
@@ -65,7 +65,7 @@ internal sealed class ResetSubtreeTrigger : Instance<ResetSubtreeTrigger>
             slotFlag.Invalidate();
         }
 
-        return slotFlag.Target;
+        return slotFlag.SourceVersion;
     }
 
     [Input(Guid = "7CC4E43B-18A2-4564-A511-05EB0D8EC7D2")]

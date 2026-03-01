@@ -1,6 +1,8 @@
 #nullable enable
 
+using System.Text;
 using ImGuiNET;
+using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Core.SystemUi;
 using T3.Core.Utils;
@@ -75,8 +77,8 @@ internal sealed class SymbolLibrary : Window
     }
 
     // Indicates if a refresh of the symbol library is needed
-    private static bool _refreshTriggered;
-    
+    //private static bool _refreshTriggered;
+
     private static readonly TreeHandler _treeHandler = new();
 
     /// <summary>
@@ -84,8 +86,8 @@ internal sealed class SymbolLibrary : Window
     /// </summary>
     private void DrawView()
     {
-        _treeHandler.Update();        
-        
+        _treeHandler.Update();
+
         var iconCount = 2;
         if (_wasScanned)
             iconCount++;
@@ -94,9 +96,8 @@ internal sealed class SymbolLibrary : Window
         CustomComponents.DrawInputFieldWithPlaceholder(
                                                        "Search symbols...",
                                                        ref _filter.SearchString,
-                                                       - ImGui.GetFrameHeight() * iconCount + 16);
+                                                       -ImGui.GetFrameHeight() * iconCount + 16);
 
-        
         // Collapse icon
         {
             ImGui.SameLine();
@@ -109,14 +110,12 @@ internal sealed class SymbolLibrary : Window
                 _treeHandler.CollapseAll();
             }
         }
-        
-        
+
         ImGui.SameLine();
         // Draw refresh button and handle refresh logic
-        if (CustomComponents.IconButton(Icon.Refresh, Vector2.Zero, CustomComponents.ButtonStates.Dimmed) || _refreshTriggered)
+        if (CustomComponents.IconButton(Icon.Refresh, Vector2.Zero, CustomComponents.ButtonStates.Dimmed) || NeedsRebuild)
         {
             UpdateSymbolLibraryState();
-            _refreshTriggered = false;
         }
 
         CustomComponents.TooltipForLastItem(
@@ -165,7 +164,13 @@ internal sealed class SymbolLibrary : Window
         ExampleSymbolLinking.UpdateExampleLinks();
         SymbolAnalysis.UpdateDetails();
         _wasScanned = true;
+        _lastUpdateVersion = EditorSymbolPackage.SymbolStructureVersionCounter;
+        
     }
+
+    private bool NeedsRebuild => _lastUpdateVersion < EditorSymbolPackage.SymbolStructureVersionCounter;
+
+    private int _lastUpdateVersion;
 
     /// <summary>
     /// Shows a list of usages for a referenced symbol if the "used by" indicator was clicked.
@@ -257,6 +262,8 @@ internal sealed class SymbolLibrary : Window
         return false;
     }
 
+    private static string _draggedNamespace = string.Empty;
+
     /// <summary>
     /// Recursively draws namespace nodes and their symbols in the tree view.
     /// </summary>
@@ -291,8 +298,33 @@ internal sealed class SymbolLibrary : Window
             }
 
             _treeHandler.UpdateForNode(subtree.Id);
+            var isProject = subtree.FolderType == NamespaceTreeNode.SymbolFolderTypes.Project;
+            if (isProject)
+            {
+                ImGui.PushFont(Fonts.FontBold);
+            }
+            else
+            {
+                ImGui.PushStyleColor(ImGuiCol.Text, UiColors.Text.Fade(0.7f).Rgba);
+            }
             
             var isOpen = ImGui.TreeNode(subtree.Name);
+
+            if (isProject)
+            {
+                ImGui.PopFont();
+            }
+            else
+            {
+                ImGui.PopStyleColor();
+            }
+
+            if (DragAndDropHandling.HandleDragSourceForLastItem(
+                                                                DragAndDropHandling.DragTypes.SymbolNameSpace,
+                                                                subtree.Namespace))
+            {
+                _draggedNamespace = subtree.Namespace;
+            }
 
             // Draw aim icon if this node contains the selected symbol and is not open
             if (!isOpen && containsSelected)
@@ -338,14 +370,12 @@ internal sealed class SymbolLibrary : Window
                                                     }
                                                 });
 
-            
-            
+            HandleDroppingNamespace(subtree);
+
             if (isOpen)
             {
                 _treeHandler.NoFolderOpen = false;
-                
-                
-                
+
                 // Reset expand trigger after expanding and target is visible
                 if (_expandToSymbolTriggered && _expandToSymbolTargetId.HasValue && ContainsSymbolRecursive(subtree, _expandToSymbolTargetId.Value))
                 {
@@ -357,24 +387,24 @@ internal sealed class SymbolLibrary : Window
                     }
                 }
 
-                HandleDropTarget(subtree);
+                HandleDroppingSymbol(subtree);
 
                 DrawNodeItems(subtree);
 
                 ImGui.TreePop();
             }
-            else
-            {
-                // Small helper button for quickly dropping dragged symbols into unopened namespaces.
-                if (DragAndDropHandling.IsDragging)
-                {
-                    ImGui.SameLine();
-                    ImGui.PushID("DropButton");
-                    ImGui.Button("  <-", new Vector2(50, 15));
-                    HandleDropTarget(subtree);
-                    ImGui.PopID();
-                }
-            }
+            // else
+            // {
+            //     // Small helper button for quickly dropping dragged symbols into unopened namespaces.
+            //     if (DragAndDropHandling.IsDragging)
+            //     {
+            //         ImGui.SameLine();
+            //         ImGui.PushID("DropButton");
+            //         ImGui.Button("  <-", new Vector2(50, 15));
+            //         HandleDropTarget(subtree);
+            //         ImGui.PopID();
+            //     }
+            // }
 
             ImGui.PopID();
         }
@@ -423,11 +453,11 @@ internal sealed class SymbolLibrary : Window
     /// <summary>
     /// Handles drag-and-drop onto a namespace node to move symbols between namespaces.
     /// </summary>
-    private static void HandleDropTarget(NamespaceTreeNode subtree)
+    private static void HandleDroppingSymbol(NamespaceTreeNode subtree)
     {
-        var result = DragAndDropHandling.TryHandleDropOnItem(DragAndDropHandling.DragTypes.Symbol, out var data);
+        var resultSymbol = DragAndDropHandling.TryHandleDropOnItem(DragAndDropHandling.DragTypes.Symbol, out var data);
 
-        if (result != DragAndDropHandling.DragInteractionResult.Dropped)
+        if (resultSymbol != DragAndDropHandling.DragInteractionResult.Dropped)
             return;
 
         if (!Guid.TryParse(data, out var symbolId))
@@ -436,13 +466,80 @@ internal sealed class SymbolLibrary : Window
         if (!MoveSymbolToNamespace(symbolId, subtree.GetAsString(), out var reason))
             BlockingWindow.Instance.ShowMessageBox(reason, "Could not move symbol's namespace");
 
-        _refreshTriggered = true;
+        EditorSymbolPackage.NotifySymbolStructureChange();
+    }
+
+    /// <summary>
+    /// Handles drag-and-drop onto a namespace node to move symbols between namespaces.
+    /// </summary>
+    private static void HandleDroppingNamespace(NamespaceTreeNode subtree)
+    {
+        if (subtree.Namespace.StartsWith(_draggedNamespace))
+            return;
+
+        var targetNamespace = subtree.Namespace;
+
+        var resultSymbol = DragAndDropHandling.TryHandleDropOnItem(DragAndDropHandling.DragTypes.SymbolNameSpace, out var data);
+
+        if (resultSymbol != DragAndDropHandling.DragInteractionResult.Dropped)
+            return;
+
+        if (!EditableSymbolProject.TryGetEditableProjectOfNamespace(_draggedNamespace, out var sourceProject))
+        {
+            Log.Warning($"Can't find editable project for {_draggedNamespace}");
+            return;
+        }
+
+        if (!EditableSymbolProject.TryGetEditableProjectOfNamespace(targetNamespace, out var targetProject))
+        {
+            Log.Warning($"Can't find editable project for {_draggedNamespace}");
+            return;
+        }
+
+        List<Symbol> draggedSymbols = [];
+
+        foreach (var symbol in sourceProject.Symbols.Values)
+        {
+            if (!symbol.Namespace.StartsWith(_draggedNamespace, StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            draggedSymbols.Add(symbol);
+        }
+
+        var lastNamespacePartIndex = _draggedNamespace.LastIndexOf('.');
+        var lastNamespacePart = lastNamespacePartIndex > 0
+                                    ? _draggedNamespace[(lastNamespacePartIndex + 1)..]
+                                    : _draggedNamespace;
+
+        for (var index = 0; index < draggedSymbols.Count; index++)
+        {
+            var symbol = draggedSymbols[index];
+            var target = targetNamespace;
+
+            if (symbol.Namespace.StartsWith(_draggedNamespace, StringComparison.OrdinalIgnoreCase)
+                && symbol.Namespace.Length > _draggedNamespace.Length)
+            {
+                target += (symbol.Namespace[_draggedNamespace.Length..]);
+            }
+            else
+            {
+                target = targetNamespace + "." + lastNamespacePart;
+            }
+
+            var skipProjectReload = index < draggedSymbols.Count - 1;
+            if (!MoveSymbolToNamespace(symbol.Id, target, out var reason, skipProjectReload))
+            {
+                Log.Warning($"Failed to move {symbol} to {target}: {reason}");
+            }
+        }
+
+        EditorSymbolPackage.NotifySymbolStructureChange();
     }
 
     /// <summary>
     /// Moves a symbol to a new namespace, respecting read-only package restrictions.
     /// </summary>
-    private static bool MoveSymbolToNamespace(Guid symbolId, string nameSpace, out string reason)
+    private static bool MoveSymbolToNamespace(Guid symbolId, string nameSpace, out string reason, bool skipProjectReload = false)
     {
         if (!SymbolUiRegistry.TryGetSymbolUi(symbolId, out var symbolUi))
         {
@@ -462,7 +559,7 @@ internal sealed class SymbolLibrary : Window
             return false;
         }
 
-        return EditableSymbolProject.ChangeSymbolNamespace(symbolUi.Symbol, nameSpace, out reason);
+        return EditableSymbolProject.ChangeSymbolNamespace(symbolUi.Symbol, nameSpace, out reason, skipProjectReload);
     }
 
     /// <summary>
@@ -583,8 +680,6 @@ internal sealed class SymbolLibrary : Window
 
         ImGui.PushID(symbol.Id.GetHashCode());
         {
-            
-            
             var color = symbol.OutputDefinitions.Count > 0
                             ? TypeUiRegistry.GetPropertiesForType(symbol.OutputDefinitions[0]?.ValueType).Color
                             : UiColors.Gray;
@@ -628,28 +723,34 @@ internal sealed class SymbolLibrary : Window
             // Show tooltip with description if hovered
             if (ImGui.IsItemHovered())
             {
+                var thumbnailRect = ThumbnailManager.GetThumbnail(symbol.Id, symbol.SymbolPackage, ThumbnailManager.Categories.PackageMeta);
                 ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeAll);
 
-                if (!string.IsNullOrEmpty(symbolUi.Description))
+                if (!string.IsNullOrEmpty(symbolUi.Description) || thumbnailRect.IsReady)
                 {
                     CustomComponents.BeginTooltip(600);
                     {
-                        ImGui.BeginGroup();
+                        if (!string.IsNullOrEmpty(symbolUi.Description))
                         {
-                            ImGui.PushTextWrapPos(ImGui.GetFontSize() * 25.0f);
-                            ImGui.TextUnformatted(symbolUi.Description);
-                            ImGui.PopTextWrapPos();
+                            ImGui.BeginGroup();
+                            {
+                                ImGui.PushTextWrapPos(ImGui.GetFontSize() * 25.0f);
+                                ImGui.TextUnformatted(symbolUi.Description);
+                                ImGui.PopTextWrapPos();
+                            }
+                            ImGui.EndGroup();
                         }
-                        ImGui.EndGroup();
-                        
-                        ImGui.SameLine(0,10);
-            
-                        ImGui.BeginGroup();
+
+                        if (thumbnailRect.IsReady)
                         {
-                            var package = symbol.SymbolPackage;
-                            ThumbnailManager.GetThumbnail(symbol.Id, package, ThumbnailManager.Categories.PackageMeta).AsImguiImage();
+                            ImGui.SameLine(0, 10);
+
+                            ImGui.BeginGroup();
+                            {
+                                thumbnailRect.AsImguiImage();
+                            }
+                            ImGui.EndGroup();
                         }
-                        ImGui.EndGroup();
                     }
                     CustomComponents.EndTooltip();
                 }
@@ -677,7 +778,6 @@ internal sealed class SymbolLibrary : Window
                                                 title: symbol.Name,
                                                 id: "##symbolTreeSymbolContextMenu");
 
-
             // Experimental Thumbnails
             // var keepCursor = ImGui.GetCursorPos();
             // CustomComponents.RightAlign(50);
@@ -687,7 +787,6 @@ internal sealed class SymbolLibrary : Window
             // }
             // ImGui.SetCursorPos(keepCursor);
 
-            
             // Draw dependency badges if analysis is available
             if (SymbolAnalysis.DetailsInitialized &&
                 SymbolAnalysis.InformationForSymbolIds.TryGetValue(symbol.Id, out var info))

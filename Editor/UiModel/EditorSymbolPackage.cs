@@ -563,10 +563,16 @@ internal class EditorSymbolPackage : SymbolPackage
         
         NeedsAssemblyLoad = true;
     }
+    
 
     protected bool UnloadInProgress { get; private set; }
     public event Action? AssemblyUnloading;
     private readonly List<Type> _descriptiveUiTypes = [];
+
+    public static void NotifySymbolStructureChange()
+    {
+        SymbolStructureVersionCounter++;
+    }
     
-    //private readonly List<IEditorUiExtension> _extensions = [];
+    public static int SymbolStructureVersionCounter { get; private set; }
 }

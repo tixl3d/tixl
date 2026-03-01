@@ -27,7 +27,7 @@ internal sealed class IterateList : Instance<IterateList>
 
         foreach (var initCommand in SetupCommands.CollectedInputs)
         {
-            initCommand.Invalidate();
+            initCommand.InvalidateGraph();
             initCommand.GetValue(context);
         }
             
@@ -35,10 +35,10 @@ internal sealed class IterateList : Instance<IterateList>
         {
             context.IteratedListIndex = index;
             context.FloatVariables["iterator"] = index;
-            DirtyFlag.InvalidationRefFrame++;
+            DirtyFlag.GlobalInvalidationTick++;
             foreach (var c in IterateCommands.CollectedInputs)
             {
-                c.Invalidate();
+                c.InvalidateGraph();
                 c.GetValue(context);
                     
             }

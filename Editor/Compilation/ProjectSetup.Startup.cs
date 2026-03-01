@@ -1,14 +1,11 @@
 #nullable enable
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using T3.Core.Compilation;
 using T3.Core.IO;
 using T3.Core.Model;
-using T3.Core.Resource;
 using T3.Core.Resource.Assets;
 using T3.Core.UserData;
-using T3.Editor.External;
 using T3.Editor.Gui.Interaction.StartupCheck;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
@@ -64,7 +61,7 @@ internal static partial class ProjectSetup
         // Phase 1: Initial Startup Migration
         // This happens only once here and not in subsequent UpdateSymbolPackages calls
         
-        foreach (var package in ActivePackages)
+        foreach (var package in _activePackages)
         {
             if (ConformAssetPaths.RenameResourcesToAssets(package))
             {
@@ -76,7 +73,7 @@ internal static partial class ProjectSetup
         // Register UI types
         UiRegistration.RegisterUiTypes();
 
-        var allPackages = ActivePackages.ToArray();
+        var allPackages = _activePackages.ToArray();
         // Update all symbol packages
         UpdateSymbolPackages(allPackages);
         
@@ -108,7 +105,7 @@ internal static partial class ProjectSetup
 
     private static void LoadBuiltInPackages()
     {
-        var directory = Directory.CreateDirectory(CoreOperatorDirectory);
+        var directory = Directory.CreateDirectory(_coreOperatorDirectory);
 
         directory
            .EnumerateDirectories("*", SearchOption.TopDirectoryOnly)
@@ -142,6 +139,16 @@ internal static partial class ProjectSetup
                                   
                                   var csProjFile = loadInfo.CsProjectFile!;
 
+                                  // Check if archived before doing anything else
+                                  if (csProjFile.IsArchived)
+                                  {
+                                      lock (ArchivedProjects)
+                                      {
+                                          ArchivedProjects.Add(new ArchivedProjectInfo(csProjFile));
+                                      }
+                                      return new ProjectLoadInfo(fileInfo, csProjFile, true); // Mark as success but don't process further
+                                  }
+                                  
                                   var needsCompile = forceRecompile || loadInfo.NeedsRecompile || !Directory.Exists(csProjFile.GetBuildTargetDirectory());
 
                                   if (needsCompile && !csProjFile.TryRecompile(true, out var failureLog))
@@ -157,7 +164,7 @@ internal static partial class ProjectSetup
         failedProjects = [];
         foreach (var projectInfo in projectResults)
         {
-            if (projectInfo is { csProjFile: not null, success: true })
+            if (projectInfo is { csProjFile: not null, success: true }&& !projectInfo.csProjFile.IsArchived)
             {
                 var project = new EditableSymbolProject(projectInfo.csProjFile);
                 AddToLoadedPackages(project);
@@ -213,7 +220,7 @@ internal static partial class ProjectSetup
             // Add Built-in packages as projects
             if (includeBuiltInAsProjects)
             {
-                projectSearchDirectories = projectSearchDirectories.Concat(Directory.EnumerateDirectories(Path.Combine(T3ParentDirectory, FileLocations.OperatorsSubFolder))
+                projectSearchDirectories = projectSearchDirectories.Concat(Directory.EnumerateDirectories(Path.Combine(_t3ParentDirectory, FileLocations.OperatorsSubFolder))
                                                                                     .Where(path =>
                                                                                            {
                                                                                                var subDir = Path.GetFileName(path);
@@ -227,6 +234,6 @@ internal static partial class ProjectSetup
     }
 
 
-    private static readonly string CoreOperatorDirectory = Path.Combine(FileLocations.StartFolder, FileLocations.OperatorsSubFolder);
-    private static readonly string T3ParentDirectory = Path.Combine(FileLocations.StartFolder, "..", "..", "..", "..");
+    private static readonly string _coreOperatorDirectory = Path.Combine(FileLocations.StartFolder, FileLocations.OperatorsSubFolder);
+    private static readonly string _t3ParentDirectory = Path.Combine(FileLocations.StartFolder, "..", "..", "..", "..");
 }

@@ -64,18 +64,18 @@ public sealed class MultiInputSlot<T> : InputSlot<T>, IMultiInputSlot
                 if (index >= collectedCount)
                     continue;
 
-                target += collectedInputs[index].Invalidate();
+                target += collectedInputs[index].InvalidateGraph();
             }
         }
         else if (collectedCount == 0)
         {
-            target += _dirtyFlag.Target;
+            target += _dirtyFlag.SourceVersion;
         }
         else
         {
             for (int i = 0; i < collectedCount; i++)
             {
-                target += collectedInputs[i].Invalidate();
+                target += collectedInputs[i].InvalidateGraph();
             }
         }
 

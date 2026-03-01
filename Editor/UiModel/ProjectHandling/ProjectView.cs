@@ -7,6 +7,7 @@ using T3.Editor.Gui.Dialogs;
 using T3.Editor.Gui.Window;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Gui.Windows.Output;
 using T3.Editor.Gui.Windows.TimeLine;
 using T3.Editor.UiModel.Selection;
 
@@ -367,10 +368,22 @@ internal sealed partial class ProjectView
         {
             if (graphWindow.ProjectView == this)
                 graphWindow.CloseView();
-            
-            if (graphWindow.Config.Visible && graphWindow.ProjectView != null)
-                Focused = graphWindow.ProjectView;
+
+            // if (graphWindow.Config.Visible && graphWindow.ProjectView != null)
+            // {
+            //     Focused = graphWindow.ProjectView;
+            // }
         }
+
+        foreach (var window in OutputWindow.OutputWindowInstances)
+        {
+            if (window is OutputWindow outputWindow)
+            {
+                outputWindow.Pinning.Unpin();
+            }
+        }
+
+        Focused = null;
     }
     
     public void SetAsFocused()

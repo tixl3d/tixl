@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using T3.Core.Model;
 
@@ -17,5 +18,16 @@ public static class SymbolRegistry //: IDisposable
         }
         symbol = null;
         return false;
+    }
+    
+    public static IEnumerable<Symbol> SymbolsFromAllPackages()
+    {
+        foreach (var package in SymbolPackage.AllPackages)
+        {
+            foreach (var s in package.Symbols.Values)
+            {
+                yield return s;
+            }
+        }
     }
 }

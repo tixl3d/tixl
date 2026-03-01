@@ -1,13 +1,10 @@
 #nullable enable
-using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
+using System.Text;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
+using T3.Core.UserData;
 using T3.Editor.Gui.InputUi.SimpleInputUis;
-using T3.Editor.UiModel;
-using T3.Editor.UiModel.ProjectHandling;
 
 namespace T3.Editor.UiModel.Helpers;
 
@@ -21,6 +18,7 @@ internal static class SymbolAnalysis
     /// Detailed info per symbol id, filled by UpdateDetails().
     /// </summary>
     internal static readonly Dictionary<Guid, SymbolInformation> InformationForSymbolIds = new(1000);
+
     internal static int TotalUsageCount;
 
     /// <summary>
@@ -33,6 +31,107 @@ internal static class SymbolAnalysis
 
     // Cache for usage counts (used by both bulk and single-symbol queries)
     private static readonly Dictionary<Guid, int> _latestUsageCounts = new();
+
+    internal static void LogInvalidSymbolDependencies()
+    {
+        if (!DetailsInitialized)
+            UpdateDetails();
+        
+        foreach (var symbol in SymbolRegistry.SymbolsFromAllPackages()
+                                             .OrderBy(s => s.Namespace)
+                                             .ThenBy(s => s.Name))
+        {
+            if (!InformationForSymbolIds.TryGetValue(symbol.Id, out var infos))
+                continue;
+
+            if (!_packageDependencies.TryGetValue(symbol.SymbolPackage.Name, out var deps))
+                continue;
+
+            foreach (var requiredSymbolId in infos.RequiredSymbolIds)
+            {
+                if (!SymbolRegistry.TryGetSymbol(requiredSymbolId, out var depSymbol))
+                    continue;
+
+                if (!deps.Contains(depSymbol.SymbolPackage.Name))
+                {
+                    Log.Warning($"{symbol.Namespace}.{symbol.Name}  depends on {depSymbol.Namespace}.{depSymbol.Name}");
+                }
+            }
+        }
+    }
+
+    internal static void LogInvalidAssetReference()
+    {
+        foreach (var symbol in SymbolRegistry.SymbolsFromAllPackages()
+                                             .OrderBy(s => s.Namespace)
+                                             .ThenBy(s => s.Name))
+        {
+            if (!_packageDependencies.TryGetValue(symbol.SymbolPackage.Name, out var deps))
+                continue;            
+            
+        
+            
+            // Symbol children
+            foreach (var child in symbol.Children.Values)
+            {
+                foreach (var input in child.Inputs.Values)
+                {
+                    if (input.IsDefault)
+                        continue;
+
+                    if (input.InputDefinition.ValueType != typeof(string))
+                        continue;
+
+                    if (input.Value is not InputValue<string> stringValue)
+                        continue;
+
+                    var pathValue = stringValue.Value;
+                    if (string.IsNullOrEmpty(pathValue))
+                        continue;
+
+                    if (!SymbolUiRegistry.TryGetSymbolUi(child.Symbol.Id, out var childSymbolUi))
+                        continue;
+
+                    if (!childSymbolUi.InputUis.TryGetValue(input.Id, out var inputUi))
+                        continue;
+
+                    if (inputUi is not StringInputUi stringUi)
+                        continue;
+
+                    
+                    switch (stringUi.Usage)
+                    {
+                        case StringInputUi.UsageType.FilePath:
+                        case StringInputUi.UsageType.DirectoryPath:
+                        {
+                            var assetPackageNameIndex = pathValue.IndexOf(':');
+                            if (assetPackageNameIndex < 1)
+                                break;
+
+                            var assetPackageName = pathValue[..(assetPackageNameIndex)];
+                            
+                            if (!deps.Contains(assetPackageName))
+                            {
+                                Log.Warning($"{symbol.Namespace}.[{symbol.Name}].{childSymbolUi.Symbol.Name} references {pathValue}");
+                            }    
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+    private static readonly string[] _libPackages = [FileLocations.LibPackageName, FileLocations.TypesPackageName, "Mediapipe", "t3.ndi", "t3.spout", "t3.unsplash"];
+
+    private static readonly Dictionary<string, string[]> _packageDependencies
+        = new()
+              {
+                  { FileLocations.LibPackageName, [.._libPackages] },
+                  { FileLocations.ExamplesPackageName, [.._libPackages, FileLocations.ExamplesPackageName] },
+                  { FileLocations.SkillsPackageName, [.._libPackages, FileLocations.SkillsPackageName] }
+              };
 
     /// <summary>
     /// Basic usage info used by symbol browser and relevancy search.
@@ -92,12 +191,12 @@ internal static class SymbolAnalysis
             var dependingSymbols = deps ?? new HashSet<Guid>();
 
             InformationForSymbolIds[symbol.Id] = BuildSymbolInformation(
-                symbol,
-                symbolUi,
-                requiredSymbols,
-                invalidRequirements,
-                dependingSymbols,
-                usageCount);
+                                                                        symbol,
+                                                                        symbolUi,
+                                                                        requiredSymbols,
+                                                                        invalidRequirements,
+                                                                        dependingSymbols,
+                                                                        usageCount);
         }
 
         DetailsInitialized = true;
@@ -143,12 +242,12 @@ internal static class SymbolAnalysis
         var dependingSymbols = deps ?? new HashSet<Guid>();
 
         info = BuildSymbolInformation(
-            symbol,
-            symbolUi,
-            requiredSymbols,
-            invalidRequirements,
-            dependingSymbols,
-            usageCount);
+                                      symbol,
+                                      symbolUi,
+                                      requiredSymbols,
+                                      invalidRequirements,
+                                      dependingSymbols,
+                                      usageCount);
 
         // Optionally refresh the cached entry if details are already initialized
         // so that subsequent calls without forceUpdate can benefit.
@@ -178,8 +277,8 @@ internal static class SymbolAnalysis
         internal bool DependsOnObsoleteOps;
         internal SymbolUi.SymbolTags Tags; // Copy to avoid reference to symbolUi
         internal OperatorClassification OperatorType;
-   
     }
+
     public enum OperatorClassification
     {
         Unknown = 0,
@@ -189,10 +288,9 @@ internal static class SymbolAnalysis
         T3,
         Skill,
     }
-    
+
     // Shared helpers (used by both bulk and single analysis)
     #region Shared Helpers
-
     internal static bool TryGetOperatorType(Symbol symbol, out OperatorClassification opType)
     {
         var ns = symbol.Namespace ?? string.Empty;
@@ -200,25 +298,23 @@ internal static class SymbolAnalysis
 
         opType = rootSegment switch
                      {
-                         "Lib"      => OperatorClassification.Lib,
-                         "Types"    => OperatorClassification.Type,
-                         "Examples" => OperatorClassification.Example,
-                         "t3"       => OperatorClassification.T3,
-                         "Skills"   => OperatorClassification.Skill,
-                         _          => OperatorClassification.Unknown
+                         FileLocations.LibPackageName      => OperatorClassification.Lib,
+                         FileLocations.TypesPackageName    => OperatorClassification.Type,
+                         FileLocations.ExamplesPackageName => OperatorClassification.Example,
+                         "t3"                              => OperatorClassification.T3,
+                         FileLocations.SkillsPackageName   => OperatorClassification.Skill,
+                         _                                 => OperatorClassification.Unknown
                      };
         return opType != OperatorClassification.Unknown;
     }
 
-    private static SymbolInformation BuildSymbolInformation(
-        Symbol symbol,
-        SymbolUi symbolUi,
-        HashSet<Symbol> requiredSymbols,
-        List<Guid> invalidRequirements,
-        HashSet<Guid> dependingSymbols,
-        int usageCount)
+    private static SymbolInformation BuildSymbolInformation(Symbol symbol,
+                                                            SymbolUi symbolUi,
+                                                            HashSet<Symbol> requiredSymbols,
+                                                            List<Guid> invalidRequirements,
+                                                            HashSet<Guid> dependingSymbols,
+                                                            int usageCount)
     {
-
         var inputUis = symbolUi.InputUis.Values;
 
         var lacksDescription = string.IsNullOrWhiteSpace(symbolUi.Description);
@@ -232,27 +328,27 @@ internal static class SymbolAnalysis
                                      !inputUis.Any(i => i.AddPadding || !string.IsNullOrEmpty(i.GroupTitle));
 
         var dependsOnObsolete = requiredSymbols
-            .Select(s => s.GetSymbolUi())
-            .Any(ui => ui != null && ui.Tags.HasFlag(SymbolUi.SymbolTags.Obsolete));
-        
+                               .Select(s => s.GetSymbolUi())
+                               .Any(ui => ui != null && ui.Tags.HasFlag(SymbolUi.SymbolTags.Obsolete));
+
         TryGetOperatorType(symbol, out var opType);
 
         return new SymbolInformation
-        {
-            Warnings = new List<string>(),
-            RequiredSymbolIds = requiredSymbols.Select(s => s.Id).ToHashSet(),
-            DependingSymbols = dependingSymbols,
-            InvalidRequiredIds = invalidRequirements,
-            ExampleSymbolsIds = ExampleSymbolLinking.GetExampleIds(symbol.Id),
-            UsageCount = usageCount,
-            LacksDescription = lacksDescription,
-            LacksAllParameterDescription = lacksAllParamDesc,
-            LacksSomeParameterDescription = lacksSomeParamDesc,
-            LacksParameterGrouping = lacksParameterGrouping,
-            DependsOnObsoleteOps = dependsOnObsolete,
-            Tags = symbolUi.Tags,
-            OperatorType = opType
-        };
+                   {
+                       Warnings = new List<string>(),
+                       RequiredSymbolIds = requiredSymbols.Select(s => s.Id).ToHashSet(),
+                       DependingSymbols = dependingSymbols,
+                       InvalidRequiredIds = invalidRequirements,
+                       ExampleSymbolsIds = ExampleSymbolLinking.GetExampleIds(symbol.Id),
+                       UsageCount = usageCount,
+                       LacksDescription = lacksDescription,
+                       LacksAllParameterDescription = lacksAllParamDesc,
+                       LacksSomeParameterDescription = lacksSomeParamDesc,
+                       LacksParameterGrouping = lacksParameterGrouping,
+                       DependsOnObsoleteOps = dependsOnObsolete,
+                       Tags = symbolUi.Tags,
+                       OperatorType = opType
+                   };
     }
 
     private static HashSet<Symbol> CollectRequiredSymbols(Symbol root)
@@ -281,12 +377,12 @@ internal static class SymbolAnalysis
 
         // Todo: implement this correctly?
         HashSet<string> validPackagesNames = new()
-        {
-            "Types",
-            "Lib",
-            "Examples",
-            root.SymbolPackage.RootNamespace,
-        };
+                                                 {
+                                                     FileLocations.TypesPackageName,
+                                                     FileLocations.LibPackageName,
+                                                     FileLocations.ExamplesPackageName,
+                                                     root.SymbolPackage.RootNamespace,
+                                                 };
 
         foreach (var r in requiredSymbols)
         {
@@ -298,9 +394,9 @@ internal static class SymbolAnalysis
         }
 
         return result
-            .OrderBy(s => s.Namespace)
-            .ThenBy(s => s.Name)
-            .Select(s => s.Id);
+              .OrderBy(s => s.Namespace)
+              .ThenBy(s => s.Name)
+              .Select(s => s.Id);
     }
 
     private static Dictionary<Guid, int> CollectSymbolUsageCounts()

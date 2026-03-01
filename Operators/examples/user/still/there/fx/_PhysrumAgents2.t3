@@ -73,7 +73,7 @@
         {
           "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
           "Type": "System.String",
-          "Value": "Examples:user/pixtur/research/ComputeShaderCourse/03-MovingAgents1/shaders/ca-update-grid.hlsl"
+          "Value": "Examples:user/still/proj-there/shaders/physarum-update-grid-cs.hlsl"
         }
       ],
       "Outputs": []
@@ -158,7 +158,7 @@
         {
           "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
           "Type": "System.String",
-          "Value": "Examples:user/still/proj-there/physarumfx/partial-physarum-fx-cs.hlsl"
+          "Value": "Examples:user/still/proj-there/shaders/physarum-update-grid-cs.hlsl"
         }
       ],
       "Outputs": []
@@ -359,18 +359,6 @@
       "Id": "8cc1ddcb-f8e5-4b27-91b5-10ece3a835f0"/*GetBufferComponents*/,
       "SymbolId": "80dff680-5abf-484a-b9e0-81d72f3b7aa4",
       "InputValues": [],
-      "Outputs": []
-    },
-    {
-      "Id": "90cb1d15-b55e-4fe4-b702-8ebaf688bae6"/*ComputeShader*/,
-      "SymbolId": "a256d70f-adb3-481d-a926-caf35bd3e64c",
-      "InputValues": [
-        {
-          "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
-          "Type": "System.String",
-          "Value": "Examples:user/still/proj-there/physarumfx/partial-physarum-fx-cs.hlsl"
-        }
-      ],
       "Outputs": []
     },
     {
@@ -712,12 +700,6 @@
       "Outputs": []
     },
     {
-      "Id": "f3f7a626-9b60-4f9d-aada-9c90cdbde56e"/*_SpeciesDefinition*/,
-      "SymbolId": "924b8cc0-5b4b-41d0-a71b-b26465683910",
-      "InputValues": [],
-      "Outputs": []
-    },
-    {
       "Id": "f4751125-3b8c-4ba6-9473-fd4a024b6f6d"/*Camera*/,
       "SymbolId": "746d886c-5ab6-44b1-bb15-f3ce2fadf7e6",
       "InputValues": [
@@ -733,18 +715,6 @@
       "Id": "fe36bf80-a58d-4769-b9ef-1e4f51d04fed"/*CalcDispatchCount*/,
       "SymbolId": "eb68addb-ec59-416f-8608-ff9d2319f3a3",
       "InputValues": [],
-      "Outputs": []
-    },
-    {
-      "Id": "ff3ce682-8988-49e7-8a6e-d5a4e21d1f85"/*ComputeShader*/,
-      "SymbolId": "a256d70f-adb3-481d-a926-caf35bd3e64c",
-      "InputValues": [
-        {
-          "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
-          "Type": "System.String",
-          "Value": "Examples:user/pixtur/research/ComputeShaderCourse/03-MovingAgents1/shaders/ca-update-grid.hlsl"
-        }
-      ],
       "Outputs": []
     }
   ],

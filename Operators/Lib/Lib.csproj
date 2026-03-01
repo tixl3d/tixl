@@ -9,14 +9,15 @@
     <AssemblyName>$(RootNamespace)</AssemblyName>
     <Configurations>Debug;Release</Configurations>
     <Platforms>AnyCPU</Platforms>
-    <VersionPrefix>1.666.999</VersionPrefix>
+    <VersionPrefix>1.668.999</VersionPrefix>
     <HomeGuid>00000000-0000-0000-0000-000000000000</HomeGuid>
-    <EditorVersion>$(TixlVersion)</EditorVersion>
+    <EditorVersion>4.1.0</EditorVersion>
     <IsEditorOnly>false</IsEditorOnly>
     <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
     <Deterministic>true</Deterministic>
     <NoWarn>NU1900</NoWarn>
     <PackageId>55612b33-e330-4730-a981-c2227b4cc904</PackageId>
+    <IsArchived>false</IsArchived>
     <!-- Set the output path based on the version and release mode -->
   </PropertyGroup>
   <ItemGroup>

@@ -11,6 +11,18 @@
       }
     },
     {
+      "InputId": "1b9a9ef5-fe48-4793-b420-7718643035f0"/*Sharpness*/,
+      "Position": {
+        "X": -59.60559,
+        "Y": 465.3982
+      },
+      "Description": "Adjust the edges, lower this value if the render is aliased.",
+      "Min": 1,
+      "Max": 16,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
       "InputId": "21a2292d-1969-41ee-a71f-00a1621f9539"/*FontPath*/,
       "Position": {
         "X": -484.92914,
@@ -200,6 +212,13 @@
       "Position": {
         "X": 411.8406,
         "Y": 503.1332
+      }
+    },
+    {
+      "ChildId": "7b93d07f-c08e-42c1-8d1d-78ceb74d5e91"/*IntToFloat*/,
+      "Position": {
+        "X": 80.39441,
+        "Y": 465.3982
       }
     },
     {

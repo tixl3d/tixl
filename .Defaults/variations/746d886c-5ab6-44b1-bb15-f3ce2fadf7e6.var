@@ -27,7 +27,7 @@
       "Title": "+Y Top",
       "PosOnCanvas": {
         "X": 163.0,
-        "Y": -93.0
+        "Y": -122.55056
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -46,7 +46,7 @@
       "Title": "-Y Bottom",
       "PosOnCanvas": {
         "X": 163.0,
-        "Y": 93.0
+        "Y": 122.55056
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -103,7 +103,7 @@
       "Title": "-Z Back",
       "PosOnCanvas": {
         "X": 163.0,
-        "Y": -186.0
+        "Y": -245.10112
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {

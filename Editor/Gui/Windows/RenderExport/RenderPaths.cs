@@ -27,7 +27,7 @@ internal static partial class RenderPaths
 
     public static string GetTargetFilePath(RenderSettings.RenderModes mode)
     {
-        var settings = RenderSettings.Current;
+        var settings = RenderSettings.ForNextExport;
         if (mode == RenderSettings.RenderModes.Video)
         {
             var targetPath = ResolveProjectRelativePath(UserSettings.Config.RenderVideoFilePath ?? string.Empty);
@@ -89,7 +89,7 @@ internal static partial class RenderPaths
     public static string GetExpectedTargetDisplayPath(RenderSettings.RenderModes mode)
     {
         var targetPath = GetTargetFilePath(mode);
-        var settings = RenderSettings.Current;
+        var settings = RenderSettings.ForNextExport;
 
         if (mode == RenderSettings.RenderModes.Video)
         {
@@ -104,13 +104,13 @@ internal static partial class RenderPaths
 
     public static bool FileExists(string targetPath)
     {
-        if (RenderSettings.Current.RenderMode == RenderSettings.RenderModes.Video)
+        if (RenderSettings.ForNextExport.RenderMode == RenderSettings.RenderModes.Video)
         {
             return File.Exists(targetPath);
         }
 
         // For image sequences, check if the first frame or the folder exists
-        if (RenderSettings.Current.CreateSubFolder)
+        if (RenderSettings.ForNextExport.CreateSubFolder)
         {
             var directory = Path.GetDirectoryName(targetPath);
             if (directory != null && Directory.Exists(directory))
@@ -127,7 +127,7 @@ internal static partial class RenderPaths
             }
         }
 
-        var firstFrame = $"{targetPath}_0000.{RenderSettings.Current.FileFormat.ToString().ToLower()}";
+        var firstFrame = $"{targetPath}_0000.{RenderSettings.ForNextExport.FileFormat.ToString().ToLower()}";
         return File.Exists(firstFrame);
     }
 

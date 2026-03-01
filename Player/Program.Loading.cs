@@ -77,7 +77,7 @@ internal static partial class Program
             Log.Info($"Pre-evaluate at: {timeInSecs:0.00}s / {playback.TimeInBars:0.00} bars");
 
             DirtyFlag.IncrementGlobalTicks();
-            DirtyFlag.InvalidationRefFrame++;
+            DirtyFlag.GlobalInvalidationTick++;
 
             rasterizer.SetViewport(new Viewport(0, 0, resolution.Width, resolution.Height, 0.0f, 1.0f));
             merger.SetTargets(renderView);
@@ -87,7 +87,7 @@ internal static partial class Program
 
             if (hasTextureOutput)
             {
-                textureOutput.Invalidate();
+                textureOutput.InvalidateGraph();
                 textureOutput.GetValue(context); // why is this done twice?
 
                 if (textureOutput.GetValue(context) == null)

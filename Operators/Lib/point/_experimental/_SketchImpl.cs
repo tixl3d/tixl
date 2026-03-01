@@ -43,15 +43,8 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
         
         if (sketchInstance == null || compositionWithSketchOp == null)
             return relativePath;
-
-        var localPathForSketch =  relativePath
-                                 .Replace("{package}", compositionWithSketchOp.Symbol.SymbolPackage.Name)
-                                 .Replace("{id}", sketchInstance.SymbolChildId.ShortenGuid());
         
-        AssetRegistry.TryResolveAddress(localPathForSketch, compositionWithSketchOp, out var path2, out _, isFolder: false, logWarnings: true);
-
-        //Log.Debug("Composition with Sketch: " + compositionWithSketchOp);
-        //Log.Debug($"sketch path:  {localPathForSketch} -> {path2}", this);
+        AssetRegistry.TryResolveAddress(relativePath, compositionWithSketchOp, out var path2, out _, isFolder: false, logWarnings: true);
         return path2;
     }
 
@@ -72,6 +65,8 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
             Log.Warning("Implementation needs a wrapper op", this);
             return;
         }
+        
+        AssignUniqueFilePath();
         
         if (isFilePathDirty)
         {
@@ -198,6 +193,34 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
             JsonUtils.TrySaveJson(_paging.Pages, _absolutePath);
             _needsSave = false;
         }
+    }
+
+    private void AssignUniqueFilePath()
+    {
+        if (Parent == null)
+            return;
+
+        var composition = Parent.Parent;
+        if (composition == null)
+            return;
+        
+        var pathInput = Parent.Inputs.FirstOrDefault(i => i.Id == _pathPathInputId);
+        if (pathInput == null)
+            return;
+
+        if (!pathInput.Input.IsDefault)
+            return;
+        
+        if (pathInput is not InputSlot<string> stringInput)
+            return;
+
+        var symbolPackageName = Parent.Parent?.Symbol.SymbolPackage.Name;
+        if (string.IsNullOrEmpty(symbolPackageName))
+            return;
+
+        var path = $"{symbolPackageName}:sketches/{Parent.SymbolChildId.ShortenGuid()}.json";
+        
+        stringInput.SetTypedInputValue(path);
     }
 
     private void ClearSelection()
@@ -623,6 +646,8 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
         Page,
     }
 
+    private readonly Guid _pathPathInputId = new Guid("2ded8235-157d-486b-a997-87d09d18f998");
+
     [Input(Guid = "C427F009-7E04-4168-82E6-5EBE2640204D")]
     public readonly InputSlot<Vector2> MousePos = new();
 
@@ -643,4 +668,7 @@ internal sealed class _SketchImpl : Instance<_SketchImpl>
 
     [Input(Guid = "0FA40E27-C7CA-4BB9-88C6-CED917DFEC12")]
     public readonly InputSlot<int> OverridePageIndex = new();
+    
+    [Input(Guid = "D156BD8F-F2A7-47F2-BF14-99BE4AAD32D7")]
+    public readonly InputSlot<bool> WriteKeyframes = new();
 }

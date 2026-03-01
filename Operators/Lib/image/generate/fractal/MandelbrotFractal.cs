@@ -5,9 +5,6 @@ internal sealed class MandelbrotFractal : Instance<MandelbrotFractal>
 {
     [Output(Guid = "70703977-c5bb-4e41-9f8b-2e6e8903d434")]
     public readonly Slot<Texture2D> TextureOutput = new();
-        
-    [Input(Guid = "ebae0adf-960c-4cd9-8d2b-532907e51ad3")]
-    public readonly InputSlot<Texture2D> Image = new();
 
     [Input(Guid = "67e309ff-e258-45af-b583-2f86f39de0d3")]
     public readonly InputSlot<float> Phase = new InputSlot<float>();
@@ -20,4 +17,7 @@ internal sealed class MandelbrotFractal : Instance<MandelbrotFractal>
 
     [Input(Guid = "4fe49e0c-3a46-4a79-944e-0cfb8d31ebb2")]
     public readonly InputSlot<float> ColorScale = new InputSlot<float>();
+
+        [Input(Guid = "8ac36378-ff86-4795-8c82-52f4f4c83e70")]
+        public readonly InputSlot<T3.Core.DataTypes.Gradient> Gradient = new InputSlot<T3.Core.DataTypes.Gradient>();
 }

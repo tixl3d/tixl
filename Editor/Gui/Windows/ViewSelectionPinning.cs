@@ -259,7 +259,7 @@ internal sealed class ViewSelectionPinning
         _isPinned = true;
     }
 
-    private void Unpin()
+    public void Unpin()
     {
         _isPinned = false;
         _pinnedProjectView = null;

@@ -21,6 +21,17 @@
       "Description": "Defines whether / which surface is rendered invisible"
     },
     {
+      "InputId": "356cbd6c-2e6a-4a3e-992f-943dd420a53f"/*Sharpness*/,
+      "Position": {
+        "X": -295.75763,
+        "Y": 687.47797
+      },
+      "Description": "Adjust the edges, lower this value if the render is aliased.",
+      "Min": 1,
+      "Max": 16,
+      "ClampMin": true
+    },
+    {
       "InputId": "50c9ab21-39f4-4e92-b5a7-ad9e60ae6ec3"/*FontPath*/,
       "Position": {
         "X": 252.9892,
@@ -42,16 +53,16 @@
     {
       "InputId": "82cc31ff-3307-4b6d-be70-16e471c2ffc9"/*HorizontalAlign*/,
       "Position": {
-        "X": 614.013,
-        "Y": 1029.4491
+        "X": 645.4279,
+        "Y": 1038.7572
       },
       "Description": "Defines where the pivot is located in the horizontal position"
     },
     {
       "InputId": "835d7f17-9de4-4612-a2f0-01c1346cdf1a"/*Spacing*/,
       "Position": {
-        "X": 614.013,
-        "Y": 889.4491
+        "X": 645.4279,
+        "Y": 898.7572
       },
       "Description": "Defines how wide the gaps between the letters and words are",
       "Min": -10.0,
@@ -69,8 +80,8 @@
     {
       "InputId": "ae7f7e83-fa18-44fd-b639-3bd0dbd3ac06"/*VerticalAlign*/,
       "Position": {
-        "X": 614.013,
-        "Y": 994.4491
+        "X": 645.4279,
+        "Y": 1003.7572
       },
       "GroupTitle": "Alignment",
       "Description": "Defines how high the letters are in relation to the pivot.\n\nTop: The pivot point is on the row line\nMiddle: The letters are centered above the pivot\nBottom: The pivot is at the bottom of the letters such as 'y', 'g', etc."
@@ -78,8 +89,8 @@
     {
       "InputId": "d89c518c-a862-4f46-865b-0380350b7417"/*Size*/,
       "Position": {
-        "X": 614.013,
-        "Y": 854.4491
+        "X": 645.4279,
+        "Y": 863.7572
       },
       "ExcludedFromPresets": "True",
       "Description": "Uniformly scales the Text",
@@ -90,8 +101,8 @@
     {
       "InputId": "de0fed7d-d2af-4424-baf3-81606e26559f"/*Position*/,
       "Position": {
-        "X": 614.013,
-        "Y": 959.4491
+        "X": 645.4279,
+        "Y": 968.7572
       },
       "Description": "Offsets the position of the Text element",
       "AddPadding": "True",
@@ -101,16 +112,16 @@
     {
       "InputId": "eaf9dc37-e70f-4197-895c-b5607456b4a2"/*LineHeight*/,
       "Position": {
-        "X": 614.013,
-        "Y": 924.4491
+        "X": 645.4279,
+        "Y": 933.7572
       },
       "Description": "Defines the space between the lines, if there are more than 1"
     },
     {
       "InputId": "f1f1be0e-d5bc-4940-bbc1-88bfa958f0e1"/*InputText*/,
       "Position": {
-        "X": 614.013,
-        "Y": 784.4493
+        "X": 645.4279,
+        "Y": 793.7574
       },
       "Description": "String / Input for the text to be drawn",
       "Usage": "Multiline"
@@ -153,15 +164,15 @@
     {
       "ChildId": "0f61fb31-eab8-401d-83b6-ce5bc54409fe"/*Draw*/,
       "Position": {
-        "X": 894.013,
-        "Y": 1064.4491
+        "X": 925.4279,
+        "Y": 1073.7572
       }
     },
     {
       "ChildId": "143c7600-57f9-4e58-8185-04293704d041"/*_RenderFontBuffer*/,
       "Position": {
-        "X": 754.013,
-        "Y": 784.4493
+        "X": 785.4279,
+        "Y": 793.7574
       }
     },
     {
@@ -188,8 +199,8 @@
     {
       "ChildId": "40b536a8-4a74-4e18-8522-c6a137984463"/*SrvFromStructuredBuffer*/,
       "Position": {
-        "X": 894.013,
-        "Y": 784.4493
+        "X": 925.4279,
+        "Y": 793.7574
       }
     },
     {
@@ -263,8 +274,15 @@
     {
       "ChildId": "aa397f89-22c1-49eb-b54a-8a80482f9715"/*magic1*/,
       "Position": {
-        "X": 13.626892,
-        "Y": 559.70056
+        "X": -83.3327,
+        "Y": 612.0588
+      }
+    },
+    {
+      "ChildId": "ad0e45c3-103c-4b8c-8e3c-6c3c2aca64a8"/*IntToFloat*/,
+      "Position": {
+        "X": 29.910736,
+        "Y": 683.2737
       }
     },
     {

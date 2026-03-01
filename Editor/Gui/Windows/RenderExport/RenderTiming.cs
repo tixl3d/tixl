@@ -1,8 +1,6 @@
 #nullable enable
 using T3.Core.Animation;
 using T3.Core.Audio;
-using T3.Core.IO;
-using T3.Core.Logging;
 using T3.Core.Utils;
 using T3.Editor.Gui.Interaction.Timing;
 
@@ -16,9 +14,9 @@ internal static class RenderTiming
         public bool AudioRecording;
     }
 
-    public static void ApplyTimeRange(RenderSettings.TimeRanges range, RenderSettings renderSettings)
+    public static void ApplyTimeRange( RenderSettings renderSettings)
     {
-        switch (range)
+        switch (renderSettings.TimeRange)
         {
             case RenderSettings.TimeRanges.Custom:
                 break;
@@ -28,8 +26,8 @@ internal static class RenderTiming
                 var playback = Playback.Current;
                 var startInSeconds = playback.SecondsFromBars(playback.LoopRange.Start);
                 var endInSeconds = playback.SecondsFromBars(playback.LoopRange.End);
-                renderSettings.StartInBars = (float)SecondsToReferenceTime(startInSeconds, renderSettings.Reference, renderSettings.Fps);
-                renderSettings.EndInBars = (float)SecondsToReferenceTime(endInSeconds, renderSettings.Reference, renderSettings.Fps);
+                renderSettings.StartInBars = (float)SecondsToReferenceTime(startInSeconds, renderSettings.TimeReference, renderSettings.FrameRate);
+                renderSettings.EndInBars = (float)SecondsToReferenceTime(endInSeconds, renderSettings.TimeReference, renderSettings.FrameRate);
                 break;
             }
 
@@ -39,21 +37,21 @@ internal static class RenderTiming
                 {
                     var playback = Playback.Current;
                     var clip = handle.Clip;
-                    renderSettings.StartInBars = (float)SecondsToReferenceTime(playback.SecondsFromBars(clip.StartTime), renderSettings.Reference, renderSettings.Fps);
+                    renderSettings.StartInBars = (float)SecondsToReferenceTime(playback.SecondsFromBars(clip.StartTime), renderSettings.TimeReference, renderSettings.FrameRate);
                     if (clip.EndTime > 0)
-                        renderSettings.EndInBars = (float)SecondsToReferenceTime(playback.SecondsFromBars(clip.EndTime), renderSettings.Reference, renderSettings.Fps);
+                        renderSettings.EndInBars = (float)SecondsToReferenceTime(playback.SecondsFromBars(clip.EndTime), renderSettings.TimeReference, renderSettings.FrameRate);
                     else
-                        renderSettings.EndInBars = (float)SecondsToReferenceTime(clip.LengthInSeconds, renderSettings.Reference, renderSettings.Fps);
+                        renderSettings.EndInBars = (float)SecondsToReferenceTime(clip.LengthInSeconds, renderSettings.TimeReference, renderSettings.FrameRate);
                 }
                 break;
             }
 
             default:
-                throw new ArgumentOutOfRangeException(nameof(range), range, null);
+                throw new ArgumentOutOfRangeException(nameof(renderSettings.TimeRange), renderSettings.TimeRange, null);
         }
     }
 
-    public static double ConvertReferenceTime(double time, RenderSettings.TimeReference oldRef, RenderSettings.TimeReference newRef, float fps)
+    public static double ConvertReferenceTime(double time, RenderSettings.TimeReferences oldRef, RenderSettings.TimeReferences newRef, float fps)
     {
         if (oldRef == newRef)
             return time;
@@ -68,32 +66,32 @@ internal static class RenderTiming
         return time / oldFps * newFps;
     }
 
-    public static double ReferenceTimeToSeconds(double time, RenderSettings.TimeReference reference, float fps)
+    public static double ReferenceTimeToSeconds(double time, RenderSettings.TimeReferences references, float fps)
     {
         var playback = Playback.Current;
-        switch (reference)
+        switch (references)
         {
-            case RenderSettings.TimeReference.Bars:
+            case RenderSettings.TimeReferences.Bars:
                 return playback.SecondsFromBars(time);
-            case RenderSettings.TimeReference.Seconds:
+            case RenderSettings.TimeReferences.Seconds:
                 return time;
-            case RenderSettings.TimeReference.Frames:
+            case RenderSettings.TimeReferences.Frames:
                 return fps != 0 ? time / fps : time / 60.0;
             default:
                 return time;
         }
     }
 
-    public static double SecondsToReferenceTime(double seconds, RenderSettings.TimeReference reference, float fps)
+    public static double SecondsToReferenceTime(double seconds, RenderSettings.TimeReferences references, float fps)
     {
         var playback = Playback.Current;
-        switch (reference)
+        switch (references)
         {
-            case RenderSettings.TimeReference.Bars:
+            case RenderSettings.TimeReferences.Bars:
                 return playback.BarsFromSeconds(seconds);
-            case RenderSettings.TimeReference.Seconds:
+            case RenderSettings.TimeReferences.Seconds:
                 return seconds;
-            case RenderSettings.TimeReference.Frames:
+            case RenderSettings.TimeReferences.Frames:
                 return fps != 0 ? seconds * fps : seconds * 60.0;
             default:
                 return seconds;
@@ -102,12 +100,12 @@ internal static class RenderTiming
 
     public static int ComputeFrameCount(in RenderSettings s)
     {
-        var start = ReferenceTimeToSeconds(s.StartInBars, s.Reference, s.Fps);
-        var end = ReferenceTimeToSeconds(s.EndInBars, s.Reference, s.Fps);
-        return (int)Math.Round((end - start) * s.Fps);
+        var start = ReferenceTimeToSeconds(s.StartInBars, s.TimeReference, s.FrameRate);
+        var end = ReferenceTimeToSeconds(s.EndInBars, s.TimeReference, s.FrameRate);
+        return (int)Math.Round((end - start) * s.FrameRate);
     }
 
-    public static void SetPlaybackTimeForFrame(ref RenderSettings s, int frameIndex, int frameCount, ref Runtime rt)
+    public static void SetPlaybackTimeForFrame(RenderProcess.ExportSession session)
     {
         // get playback settings
         var composition = T3.Editor.UiModel.ProjectHandling.ProjectView.Focused?.CompositionInstance;
@@ -123,56 +121,57 @@ internal static class RenderTiming
         Playback.Current.Bpm = playbackSettings.Bpm;
         Playback.Current.PlaybackSpeed = 0.0;
         Playback.Current.Settings = playbackSettings;
-        Playback.Current.FrameSpeedFactor = s.Fps / 60.0f;
+        Playback.Current.FrameSpeedFactor = session.Settings.FrameRate / 60.0f;
 
         // time range
-        var startSecs = ReferenceTimeToSeconds(s.StartInBars, s.Reference, s.Fps);
-        var endSecs = startSecs + Math.Max(frameCount - 1, 0) / s.Fps;
+        var startSecs = ReferenceTimeToSeconds(session.Settings.StartInBars, session.Settings.TimeReference, session.Settings.FrameRate);
+        var endSecs = startSecs + Math.Max(session.FrameCount - 1, 0) / session.Settings.FrameRate;
 
         var oldSecs = Playback.Current.TimeInSecs;
-        var progress = frameCount <= 1 ? 0.0 : frameIndex / (double)(frameCount - 1);
+        var progress = session.FrameCount <= 1 ? 0.0 : session.FrameIndex / (double)(session.FrameCount - 1);
+        
         Playback.Current.TimeInSecs = MathUtils.Lerp(startSecs, endSecs, progress);
-        var adaptedDelta = Math.Max(Playback.Current.TimeInSecs - oldSecs + rt.TimingOverhang, 0.0);
+        var adaptedDelta = Math.Max(Playback.Current.TimeInSecs - oldSecs + session.Runtime.TimingOverhang, 0.0);
 
         // audio clip for preview
         if (playbackSettings.TryGetMainSoundtrack(instanceWithSettings, out var soundtrack))
             AudioEngine.UseSoundtrackClip(soundtrack, Playback.Current.TimeInSecs);
 
-        if (!rt.AudioRecording)
+        if (!session.Runtime.AudioRecording)
         {
-            rt.TimingOverhang = 0.0;
-            adaptedDelta = 1.0 / s.Fps;
+            session.Runtime.TimingOverhang = 0.0;
+            adaptedDelta = 1.0 / session.Settings.FrameRate;
 
             Playback.Current.IsRenderingToFile = true;
             Playback.Current.PlaybackSpeed = 1.0;
 
-            AudioRendering.PrepareRecording(Playback.Current, s.Fps);
+            AudioRendering.PrepareRecording(Playback.Current, session.Settings.FrameRate);
 
-            var requestedEndSecs = ReferenceTimeToSeconds(s.EndInBars, s.Reference, s.Fps);
-            var actualEndSecs = startSecs + ComputeFrameCount(s) / s.Fps;
+            var requestedEndSecs = ReferenceTimeToSeconds(session.Settings.EndInBars, session.Settings.TimeReference, session.Settings.FrameRate);
+            var actualEndSecs = startSecs + session.FrameCount / session.Settings.FrameRate;
 
             Log.Gated.VideoRender($"Requested recording from {startSecs:0.0000} to {requestedEndSecs:0.0000} seconds");
             Log.Gated.VideoRender($"Actually recording from {startSecs:0.0000} to {actualEndSecs:0.0000} seconds due to frame raster");
             Log.Gated.VideoRender($"Using {Playback.Current.Bpm} bpm");
 
-            rt.AudioRecording = true;
+            session.Runtime.AudioRecording = true;
         }
 
         // update audio engine (respect looping etc.)
         Playback.Current.Update();
 
         var bufferLengthMs = (int)Math.Floor(1000.0 * adaptedDelta);
-        rt.TimingOverhang = adaptedDelta - bufferLengthMs / 1000.0;
-        rt.TimingOverhang = Math.Max(rt.TimingOverhang, 0.0);
+        session.Runtime.TimingOverhang = adaptedDelta - bufferLengthMs / 1000.0;
+        session.Runtime.TimingOverhang = Math.Max(session.Runtime.TimingOverhang, 0.0);
 
         AudioEngine.CompleteFrame(Playback.Current, bufferLengthMs / 1000.0);
     }
 
     public static void ReleasePlaybackTime(ref RenderSettings s, ref Runtime rt)
     {
-        AudioRendering.EndRecording(Playback.Current, s.Fps);
+        AudioRendering.EndRecording(Playback.Current, s.FrameRate);
 
-        Playback.Current.TimeInSecs = ReferenceTimeToSeconds(s.EndInBars, s.Reference, s.Fps);
+        Playback.Current.TimeInSecs = ReferenceTimeToSeconds(s.EndInBars, s.TimeReference, s.FrameRate);
         Playback.Current.IsRenderingToFile = false;
         Playback.Current.PlaybackSpeed = 0.0;
         Playback.Current.FrameSpeedFactor = 1.0; // could use actual display frame rate

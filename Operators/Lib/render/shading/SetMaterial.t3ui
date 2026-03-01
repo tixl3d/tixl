@@ -17,7 +17,11 @@
         "X": -200.0,
         "Y": 270.0
       },
-      "Description": "Defines how similar to metal the material reacts to light and reflects the environment.\n\nA value of 1 can create a look similar to chrome."
+      "Description": "Defines how similar to metal the material reacts to light and reflects the environment.\n\nA value of 1 can create a look similar to chrome.",
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true
     },
     {
       "InputId": "2a585a23-b60c-4c8b-8cfa-9ab2a8b04c7a"/*SubTree*/,

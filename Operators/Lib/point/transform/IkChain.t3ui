@@ -1,0 +1,190 @@
+{
+  "Id": "20eee636-7bd4-44e8-8a86-77fe4be1f50b"/*IkChain*/,
+  "Description": "FABRIK inverse kinematic on the GPU. While this operator is still experimental, it works pretty good. Suggestions and help needed.\nUse [Once] to initialize.\n",
+  "SymbolTags": "64",
+  "InputUis": [
+    {
+      "InputId": "1edbc9d8-e003-4337-b8f7-179068a11dff"/*PointsPerChain*/,
+      "Position": {
+        "X": 91.07559,
+        "Y": 1074.2563
+      },
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "6c2c8f16-c874-44f7-bc39-bbf770546479"/*Reset*/,
+      "Position": {
+        "X": -48.924408,
+        "Y": 1039.2563
+      },
+      "Description": "Initialize the ik chain"
+    },
+    {
+      "InputId": "7b201b0d-8298-4ddd-b534-b8127e4c5581"/*Influence*/,
+      "Position": {
+        "X": -45.767853,
+        "Y": 876.56714
+      },
+      "Description": "Targets influence",
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "824ab47a-93ae-432b-8f5a-e701251b0e36"/*Points*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -223.23633,
+        "Y": 409.46204
+      }
+    },
+    {
+      "InputId": "83518060-732c-421e-b90a-97c325882fd6"/*AngleConstraint*/,
+      "Position": {
+        "X": 91.07559,
+        "Y": 1109.2563
+      },
+      "GroupTitle": "Constraints"
+    },
+    {
+      "InputId": "a47682b7-98fe-4461-a328-f9c8c14ef137"/*MaxBendAngle*/,
+      "Position": {
+        "X": -45.767853,
+        "Y": 911.56714
+      }
+    },
+    {
+      "InputId": "b7b18e95-f9a7-4bca-8960-d2b3a535e394"/*Tolerance*/,
+      "Position": {
+        "X": -45.767853,
+        "Y": 841.56714
+      },
+      "Min": 0.0,
+      "Max": 0.1
+    },
+    {
+      "InputId": "de07cd9c-11e2-414d-9c5c-9e38cc51d80e"/*Targets*/,
+      "Position": {
+        "X": -156.81451,
+        "Y": 1111.4154
+      },
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "ee7be099-7dfb-4c4e-98ad-0ae739cf9f5c"/*MaxIterations*/,
+      "Position": {
+        "X": 91.07559,
+        "Y": 1004.25635
+      },
+      "Min": 1,
+      "Max": 50,
+      "ClampMin": true,
+      "ClampMax": true
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0a47fa96-b543-4314-9ce4-46339e2ae506"/*StructuredBufferWithViews*/,
+      "Position": {
+        "X": 113.58789,
+        "Y": 622.60925
+      }
+    },
+    {
+      "ChildId": "241338a3-dbb4-491a-a8db-dba5ad76743c"/*IntsToBuffer*/,
+      "Position": {
+        "X": 231.07559,
+        "Y": 1004.25635
+      }
+    },
+    {
+      "ChildId": "281a8a14-5092-4875-b595-0477fd2c2b14"/*BoolToInt*/,
+      "Position": {
+        "X": 91.07559,
+        "Y": 1039.2563
+      }
+    },
+    {
+      "ChildId": "4299d326-da69-4a40-9f95-3e76678c9bbd"/*GetBufferComponents*/,
+      "Position": {
+        "X": 113.58789,
+        "Y": 692.60925
+      }
+    },
+    {
+      "ChildId": "5fa0d94a-c399-42c3-ac39-ddb644ef0d90"/*ExecuteBufferUpdate*/,
+      "Position": {
+        "X": 527.2919,
+        "Y": 733.39514
+      }
+    },
+    {
+      "ChildId": "6efb7c5b-e4d9-49e2-8c3d-5e0f906c7868"/*GetBufferComponents*/,
+      "Position": {
+        "X": -156.81451,
+        "Y": 1146.4154
+      }
+    },
+    {
+      "ChildId": "7cb1bcfd-e713-41ee-bbb6-322019b9cb8e"/*FloatsToBuffer*/,
+      "Position": {
+        "X": 94.23215,
+        "Y": 806.56714
+      }
+    },
+    {
+      "ChildId": "88a07aef-0334-4e98-a09b-c56835c4e3e9"/*CalcDispatchCount*/,
+      "Position": {
+        "X": 253.58789,
+        "Y": 552.60925
+      }
+    },
+    {
+      "ChildId": "93f4b2ec-c457-4867-905b-df507dd994f1"/*GetSRVProperties*/,
+      "Position": {
+        "X": 113.58789,
+        "Y": 587.60925
+      }
+    },
+    {
+      "ChildId": "bd65a76f-03e2-4535-bd59-e0ac33ee055f"/*GetBufferComponents*/,
+      "Position": {
+        "X": -223.23633,
+        "Y": 444.46204
+      }
+    },
+    {
+      "ChildId": "c6a16a24-10ec-4a81-91dd-82ee29104a24"/*ComputeShader*/,
+      "Position": {
+        "X": 113.58789,
+        "Y": 517.60925
+      }
+    },
+    {
+      "ChildId": "ef47ac1d-4ea4-42c3-8343-c636bd194f14"/*ComputeShaderStage*/,
+      "Position": {
+        "X": 527.2919,
+        "Y": 488.39514
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "69c450f9-5f20-422c-a5cd-82647effbdbf"/*OutBuffer*/,
+      "Position": {
+        "X": 527.2919,
+        "Y": 803.39514
+      }
+    }
+  ],
+  "Links": [
+    {
+      "Id": "0cebc5be-d030-4117-93e4-93c4cc6f6150",
+      "Title": " FABRIK ",
+      "Description": "inverse kinematics algorithm by Dr. Andreas Aristidou",
+      "LinkUrl": "https://andreasaristidou.com/FABRIK",
+      "LinkType": "Reference"
+    }
+  ]
+}

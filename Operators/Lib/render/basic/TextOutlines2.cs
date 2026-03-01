@@ -70,4 +70,7 @@ internal sealed class TextOutlines2 : Instance<TextOutlines2>
 
     [Input(Guid = "2cb6bb45-a74a-4eba-a2f0-2895e8e38b07")]
     public readonly InputSlot<bool> EnableZTest = new InputSlot<bool>();
+
+        [Input(Guid = "1b9a9ef5-fe48-4793-b420-7718643035f0")]
+        public readonly InputSlot<int> Sharpness = new InputSlot<int>();
 }

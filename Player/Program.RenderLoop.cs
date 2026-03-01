@@ -39,7 +39,7 @@ internal static partial class Program
         AudioEngine.CompleteFrame(_playback, Playback.LastFrameDuration);
 
         DirtyFlag.IncrementGlobalTicks();
-        DirtyFlag.InvalidationRefFrame++;
+        DirtyFlag.GlobalInvalidationTick++;
 
         _deviceContext.Rasterizer.SetViewport(new Viewport(0, 0, _resolution.Width, _resolution.Height, 0.0f, 1.0f));
         _deviceContext.OutputMerger.SetTargets(_renderView);
@@ -49,7 +49,7 @@ internal static partial class Program
 
         if (_textureOutput != null)
         {
-            _textureOutput.Invalidate();
+            _textureOutput.InvalidateGraph();
             var outputTexture = _textureOutput.GetValue(_evalContext);
             var textureChanged = outputTexture != _outputTexture;
 

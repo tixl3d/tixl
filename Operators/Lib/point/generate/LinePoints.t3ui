@@ -20,7 +20,7 @@
       },
       "Min": -90.0,
       "Max": 90.0,
-      "Format": "{0:0.00º}"
+      "Format": "{0:0.0}°"
     },
     {
       "InputId": "28081e5f-da01-46dc-81ad-699df29a49a4"/*GainAndBias*/,
