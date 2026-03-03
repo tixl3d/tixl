@@ -6,15 +6,15 @@
     {
       "InputId": "0abd9f81-bc91-4775-bf0e-472399b9778e"/*LineHeight*/,
       "Position": {
-        "X": -245.7945,
-        "Y": 669.3257
+        "X": 80.394394,
+        "Y": 816.9115
       }
     },
     {
       "InputId": "1b9a9ef5-fe48-4793-b420-7718643035f0"/*Sharpness*/,
       "Position": {
-        "X": -59.60559,
-        "Y": 465.3982
+        "X": -59.60562,
+        "Y": 581.30255
       },
       "Description": "Adjust the edges, lower this value if the render is aliased.",
       "Min": 1,
@@ -25,8 +25,8 @@
     {
       "InputId": "21a2292d-1969-41ee-a71f-00a1621f9539"/*FontPath*/,
       "Position": {
-        "X": -484.92914,
-        "Y": 898.59204
+        "X": -474.3873,
+        "Y": 710.3448
       },
       "GroupTitle": "Font & Size",
       "Usage": "FilePath",
@@ -35,61 +35,78 @@
     {
       "InputId": "2cb6bb45-a74a-4eba-a2f0-2895e8e38b07"/*EnableZTest*/,
       "Position": {
-        "X": 216.59082,
-        "Y": 974.6477
+        "X": 227.13263,
+        "Y": 1253.2535
       }
     },
     {
-      "InputId": "4da54683-460e-4af6-a729-5c631e22285a"/*Color*/,
+      "InputId": "2e0369a0-febf-46a1-b228-cc70d0ae22c6"/*BillboardMode*/,
       "Position": {
-        "X": -199.60559,
-        "Y": 255.3982
+        "X": -154.48227,
+        "Y": 617.80853
+      }
+    },
+    {
+      "InputId": "4da54683-460e-4af6-a729-5c631e22285a"/*OutlineColor*/,
+      "Position": {
+        "X": -199.60562,
+        "Y": 231.30255
       }
     },
     {
       "InputId": "617108fa-e7a6-478d-852b-cd5baa7d0b1c"/*HorizontalAlign*/,
       "Position": {
-        "X": -245.7945,
-        "Y": 774.3257
+        "X": 80.394394,
+        "Y": 921.9115
       }
     },
     {
       "InputId": "8efc35ee-875b-4181-aa1d-bd705f82bea9"/*InsideLine*/,
       "Position": {
-        "X": 80.39441,
-        "Y": 395.3982
+        "X": 80.39438,
+        "Y": 511.30255
       }
     },
     {
       "InputId": "9c2089a2-266d-4022-b23d-4c67a8a19788"/*Position*/,
       "Position": {
-        "X": -245.7945,
-        "Y": 704.3257
+        "X": 80.394394,
+        "Y": 851.9115
       },
       "AddPadding": "True",
       "Scale": 0.01
     },
     {
+      "InputId": "9e5bfd8d-e3f1-4815-85f3-178be89efcc4"/*FillColor*/,
+      "Position": {
+        "X": -59.60562,
+        "Y": 371.30255
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true
+    },
+    {
       "InputId": "a827c2c6-3286-4488-9a90-ed38c4184e6a"/*CullMode*/,
       "Position": {
-        "X": 219.66818,
-        "Y": 873.8699
+        "X": 230.20999,
+        "Y": 1152.4757
       },
       "GroupTitle": "Draw Options"
     },
     {
       "InputId": "b15018a7-6c61-4cee-88fa-a43684ef5cc4"/*OutsideLine*/,
       "Position": {
-        "X": 80.39441,
-        "Y": 430.3982
+        "X": 80.39438,
+        "Y": 546.30255
       },
       "GroupTitle": "Lines Thickness"
     },
     {
       "InputId": "b8035f87-f293-4da0-8bdc-ec75cc6252e7"/*Size*/,
       "Position": {
-        "X": -245.7945,
-        "Y": 599.3257
+        "X": 80.394394,
+        "Y": 746.9115
       },
       "Min": 0.0,
       "Max": 500.0,
@@ -98,24 +115,24 @@
     {
       "InputId": "c4b53d8f-1357-47d4-aa73-ca6d07543994"/*InputText*/,
       "Position": {
-        "X": -245.7945,
-        "Y": 529.3257
+        "X": 80.394394,
+        "Y": 676.9115
       },
       "Usage": "Multiline"
     },
     {
       "InputId": "e148fac5-d905-4e74-a958-5ed45b152ae1"/*VerticalAlign*/,
       "Position": {
-        "X": -245.7945,
-        "Y": 739.3257
+        "X": 80.394394,
+        "Y": 886.9115
       },
       "GroupTitle": "Alignment"
     },
     {
       "InputId": "e6164880-eae5-468e-8dd8-084d20918bc9"/*Spacing*/,
       "Position": {
-        "X": -245.7945,
-        "Y": 634.3257
+        "X": 80.394394,
+        "Y": 781.9115
       },
       "Min": -10.0,
       "Max": 10.0,
@@ -126,22 +143,22 @@
     {
       "ChildId": "1f3292f3-6891-4f88-a209-146825fe2e27"/*FloatsToBuffer*/,
       "Position": {
-        "X": 220.39441,
-        "Y": 220.39821
+        "X": 220.39438,
+        "Y": 196.30257
       }
     },
     {
       "ChildId": "21e79b92-62f1-4f58-bc21-d0f92ab5a6da"/*LoadImage*/,
       "Position": {
-        "X": 366.6356,
-        "Y": 756.9915
+        "X": 377.1774,
+        "Y": 1035.5973
       }
     },
     {
       "ChildId": "3756f08e-141d-4337-b5fd-93a7234c414c"/*SrvFromTexture2d*/,
       "Position": {
-        "X": 506.6356,
-        "Y": 756.9915
+        "X": 517.17737,
+        "Y": 1035.5973
       }
     },
     {
@@ -168,15 +185,15 @@
     {
       "ChildId": "4821f8dd-0b31-402b-aebb-5dd941b0e9d0"/*GetForegroundColor*/,
       "Position": {
-        "X": -199.60559,
-        "Y": 290.3982
+        "X": -199.60564,
+        "Y": 266.30255
       }
     },
     {
       "ChildId": "4d6b3594-6f04-44a7-95cb-ed18c2e363a3"/*BlendColors*/,
       "Position": {
-        "X": -59.60559,
-        "Y": 255.3982
+        "X": -59.60562,
+        "Y": 231.30255
       }
     },
     {
@@ -194,17 +211,24 @@
       }
     },
     {
+      "ChildId": "589cb593-f902-4957-8b20-d0846613895a"/*BoolToFloat*/,
+      "Position": {
+        "X": 17.14328,
+        "Y": 625.3384
+      }
+    },
+    {
       "ChildId": "59994f7e-dae6-4356-89e4-d5c8d07632b3"/*SearchAndReplace*/,
       "Position": {
-        "X": 216.63559,
-        "Y": 756.9915
+        "X": 80.39439,
+        "Y": 1029.5734
       }
     },
     {
       "ChildId": "6e76ff26-924a-41de-91d7-4b9a8e551a8f"/*_RenderFontBuffer*/,
       "Position": {
-        "X": -105.794495,
-        "Y": 529.3257
+        "X": 220.3944,
+        "Y": 676.9115
       }
     },
     {
@@ -217,22 +241,22 @@
     {
       "ChildId": "7b93d07f-c08e-42c1-8d1d-78ceb74d5e91"/*IntToFloat*/,
       "Position": {
-        "X": 80.39441,
-        "Y": 465.3982
+        "X": 80.39438,
+        "Y": 581.30255
       }
     },
     {
       "ChildId": "952abd5a-de96-425b-a551-9f147d161c62"/*RasterizerState*/,
       "Position": {
-        "X": 359.66818,
-        "Y": 873.8699
+        "X": 370.21,
+        "Y": 1152.4757
       }
     },
     {
       "ChildId": "961e44b2-d654-4e3e-9939-a0d46bbbde40"/*OutputMergerStage*/,
       "Position": {
-        "X": 496.59082,
-        "Y": 939.6477
+        "X": 507.13263,
+        "Y": 1218.2535
       }
     },
     {
@@ -243,10 +267,22 @@
       }
     },
     {
+      "ChildId": "af793c7b-ad9d-4804-abec-6ed71c00e154"/*Vector4Components*/,
+      "Style": "Resizable",
+      "Size": {
+        "X": 111.079544,
+        "Y": 59.905018
+      },
+      "Position": {
+        "X": 80.39438,
+        "Y": 371.30255
+      }
+    },
+    {
       "ChildId": "b7991b17-0b4c-4a32-a30b-aea3b214d10b"/*DepthStencilState*/,
       "Position": {
-        "X": 356.59082,
-        "Y": 974.6477
+        "X": 367.13263,
+        "Y": 1253.2535
       }
     },
     {
@@ -264,15 +300,15 @@
         "Y": 59.905018
       },
       "Position": {
-        "X": 80.39441,
-        "Y": 255.3982
+        "X": 80.39438,
+        "Y": 231.30255
       }
     },
     {
       "ChildId": "dcf3be83-a20e-40d9-9673-ebf4c15fdff6"/*PickBlendMode*/,
       "Position": {
-        "X": 356.59082,
-        "Y": 1009.64777
+        "X": 367.13263,
+        "Y": 1288.2537
       }
     },
     {
@@ -285,8 +321,8 @@
     {
       "ChildId": "e3fe1f65-047f-4f9a-a373-b12e0e014df3"/*Rasterizer*/,
       "Position": {
-        "X": 499.66818,
-        "Y": 873.8699
+        "X": 510.21,
+        "Y": 1152.4757
       }
     }
   ],

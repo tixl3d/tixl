@@ -38,32 +38,16 @@ cbuffer Transforms : register(b0)
 
 cbuffer Params : register(b1)
 {
-    float4 Color;
-   // float4 Shadow;
+    float4 OutlineColor;
+    float4 FillColor;
     float Inset;
     float Outset;
     float Sharpness;
+    float BillboardMode;
 };
 
 struct GridEntry
 {
-    // float2 gridPos;
-    // float2 charUv;
-    // float highlight;
-    // float3 __filldummy;
-    //float2 size;
-    //float2 __filldummy;
-
-    // float3 Position;
-    // float Size;
-    // float3 Orientation;
-    // float AspectRatio;
-    // float4 Color;
-    // float4 UvMinMax;
-    // float BirthTime;
-    // float Speed;
-    // uint Id;        
-
     float3 Position;     
     float Size;             // 3
     float AspectRatio;      // 4
@@ -98,31 +82,44 @@ Output vsMain(uint id: SV_VertexID)
 
     GridEntry entry = GridEntries[entryIndex];
 
+    // First, get the letter's position in object space
+    float3 letterPos = entry.Position;
 
-    float3 posInObject = entry.Position;
-    posInObject.xy += quadPos.xy * float2(entry.Size * entry.AspectRatio, entry.Size);
+    // Add the quad offset to create the vertex position in object space
+    float3 vertexPos = letterPos;
+    vertexPos.xy += quadPos.xy * float2(entry.Size * entry.AspectRatio, entry.Size);
 
-    // Experimenting with aligned font scaling (not working)
-    // float2 posInQuad = quadPos.xy * float2(entry.Size * entry.AspectRatio, entry.Size);
-    // posInQuad -= entry.Offset / 1024 * TestParams.x + float2(0.5 * entry.AspectRatio, -0.22) * TestParams.z;
-    // posInQuad *= TestParams.y;
-    // posInQuad += entry.Offset / 1024 * TestParams.x - float2(0.25 * entry.AspectRatio, -1.22) * TestParams.z * TestParams.y;
-    // posInQuad -= 0.08;
-    // float3 posInObject = float3(posInQuad,0) + entry.Position;
+    if (BillboardMode > 0.5)
+    {
+        float4 layoutCenter = float4(0, 0, 0, 1);
+        float4 worldCenter = mul(layoutCenter, ObjectToWorld);
 
+        // Transform the anchor to camera space
+        float4 camCenter = mul(worldCenter, WorldToCamera);
 
-    float4 quadPosInWorld = mul(float4(posInObject.xyz,1), ObjectToWorld);
-    
-    //quadPosInWorld.xy += quadPos.xy * float2(entry.Size * entry.AspectRatio, entry.Size) ; //CellSize *  (1- CellPadding) * (1+overrideScale* OverrideScale) /2;
-    
-    float4 quadPosInCamera = mul(quadPosInWorld, WorldToCamera);
-    output.position = mul(quadPosInCamera, CameraToClipSpace);
-    //output.position.z = 0;
-    //output.color = lerp(Color, HighlightColor, entry.highlight) * overrideBrightness;
-    //output.texCoord = (entry.charUv + quadPos * float2(0.5, -0.5) + 0.5)/16;
+        float3 localOffset = letterPos;
+        localOffset.xy += quadPos.xy * float2(entry.Size * entry.AspectRatio, entry.Size);
+
+        // Apply the offset directly in camera space — axes are already screen-aligned
+        camCenter.xy += localOffset.xy;
+        output.position = mul(camCenter, CameraToClipSpace);
+    }
+    else
+    {
+        // Transform the vertex position to world space
+        float4 worldPos = mul(float4(vertexPos, 1), ObjectToWorld);
+
+        // Then transform to camera space
+        float4 camPos = mul(worldPos, WorldToCamera);
+
+        // Finally, transform to clip space
+        output.position = mul(camPos, CameraToClipSpace);
+    }
+
     float4 uv = entry.UvMinMax * UV[vertexIndex];
-    output.texCoord =  uv.xy + uv.zw;
-    return output;
+        output.texCoord = uv.xy + uv.zw;
+
+        return output;
 }
 
 
@@ -139,12 +136,9 @@ float median(float r, float g, float b) {
 
 float4 psMain(PsInput input) : SV_TARGET
 {    
-    //float2 msdfUnit = float2(1,1) * 1;// pxRange/float2(textureSize(msdf, 0));
+ 
     float3 smpl1 =  fontTexture.Sample(texSampler, input.texCoord).rgb;
-    //return float4(smpl1,1);
-    // float sigDist1 = median(smpl1.r, smpl1.g, smpl1.b) - 0.0001;
-    // float opacity1 = smoothstep(0.0,0.9,sigDist1*sigDist1);
-    //return float4(opacity1.xxx,1);
+
 
     int height, width;
     fontTexture.GetDimensions(width,height);
@@ -155,27 +149,29 @@ float4 psMain(PsInput input) : SV_TARGET
     float2 dy2 = abs(ddy( input.texCoord.xy ) * height);
     float dx= max(dx2.x, dx2.y);
     float dy= max(dy2.x, dy2.y);
-    float edge = rsqrt( dx * dx + dy * dy ) + Outset;
+    float edge = rsqrt( dx * dx + dy * dy );
 
     float toPixels = Sharpness * edge ;
-    //float sigDist = median( smpl1.r, smpl1.g, smpl1.b ) - 0.5;
-    float sigDist = median( smpl1.r, smpl1.g, smpl1.b ) - 0.5 + Outset;
-    float sigDist2 = median( smpl1.r, smpl1.g, smpl1.b ) - 0.5 - Inset;
-    //sigDist = abs(sigDist) + Outset;
-    sigDist = -max(-sigDist,sigDist2);
-    //sigDist = max(min(sigDist2,sigDist),-max(sigDist2,sigDist));
+    float sigDist = median( smpl1.r, smpl1.g, smpl1.b ) - 0.5;
     float letterShape = clamp( sigDist * toPixels + 0.5, 0.0, 1.0 );
-  
-    float4 Shadow = float4(1,1,1,0);
-     if(Shadow.a < 0.01) {
-        return float4(Color.rgb, letterShape * Color.a);
+    //sigDist = max(min(sigDist2,sigDist),-max(sigDist2,sigDist));
+    
+
+    float outerEdge = sigDist + Outset;
+    float innerEdge = Inset - sigDist;      
+    float outlineSd = min(outerEdge, innerEdge);
+    float outline = clamp(outlineSd * toPixels + 0.5, 0.0, 1.0);
+    float fill = clamp((sigDist + Outset) * toPixels + 0.5, 0.0, 1.0);
+
+    if (FillColor.a < 0.01)
+    {
+        return float4(OutlineColor.rgb, outline);
     }
+  
+   
 
-    float glow = pow( smoothstep(0, 1, sigDist + 0.3), 0.4);
-    //return float4(letterShape,0,0,1);
+    float3 rgb = lerp(OutlineColor.rgb, FillColor.rgb, fill-outline);
+    float a    = max(outline * OutlineColor.a, fill * FillColor.a);
 
-    return float4(
-        lerp(Shadow.rgb, Color.rgb, saturate(pow(letterShape,0.3)) ),
-        max( saturate(letterShape*2),glow * Shadow.a) * Color.a
-    ); 
+    return float4(rgb, a);
 }
