@@ -1,26 +1,14 @@
 {
   "Id": "e5a8d9e6-3c5a-4bbb-9da3-737b6330b9c3"/*SacnOutput*/,
-  "Description": "Sends DMX data over the network using the sACN (Streaming ACN) protocol.\n\nThis operator multicasts or unicasts DMX data to sACN-enabled devices like lighting fixtures, nodes, or media servers. It can send multiple DMX universes simultaneously.\n\nTips:\n- For multicast, leave `TargetIpAddress` empty. For unicast, specify the IP address of the destination device.\n- The `InputsValues` should be a list of lists. The outer list corresponds to the universes, and each inner list contains the 512 channel values for that universe.\n- Use `SendTrigger` for manual control or connect a value to `InputsValues` to send automatically on change.\n\nAKA: sacn, streaming acn, dmx, artnet, lighting",
+  "Description": "Sends DMX data over the network using the sACN (Streaming ACN / E1.31) protocol.\n\nThis operator multicasts or unicasts DMX data to sACN-enabled devices like lighting fixtures, nodes, or media servers. It can send multiple DMX universes simultaneously and uses a dedicated background thread for high-performance transmission.\n\nFeatures:\n- Multi-input support: Connect multiple lists to send different universes\n- Automatic universe expansion: Lists larger than 512 channels span multiple universes\n- Built-in source discovery to find sACN devices on your network\n- Configurable priority for HTP (Highest Takes Precedence) merging\n- Frame rate limiting to prevent network flooding\n- Optional sACN Synchronization packets\n\nTips:\n- For multicast, leave `TargetIpAddress` empty. For unicast, specify the destination IP.\n- Use `UniverseChannels` to define the starting universe for each input (auto-expands as needed)\n- Enable `SendTrigger` to start continuous transmission; disable to stop.\n- Higher `Priority` values (0-200) override lower priority sources on sACN receivers.\n\nAKA: sacn, streaming acn, dmx, artnet, lighting, e1.31",
   "InputUis": [
-    {
-      "InputId": "1b26f5d5-8141-4b13-b88d-6859ed5a4af8"/*StartUniverse*/,
-      "Position": {
-        "X": -200.0,
-        "Y": 75.0
-      },
-      "Description": "The first DMX universe to send. Must be 1 or greater.",
-      "Min": 1,
-      "Scale": 1.0,
-      "ClampMin": true,
-      "ClampMax": true
-    },
     {
       "InputId": "2a8d39a3-5a41-477d-815a-8b8b9d8b1e4a"/*InputsValues*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
       },
-      "Description": "A list of lists containing the DMX channel data. The outer list represents universes, and each inner list contains up to 512 float values (0-1)."
+      "Description": "A multi-input where each connected input provides DMX channel data for a separate universe. Each input should contain a list of float values (0-255) that are clamped to 0-255."
     },
     {
       "InputId": "3f25c04c-0a88-42fb-93d3-05992b861e61"/*DiscoverSources*/,
@@ -28,7 +16,7 @@
         "X": -200.0,
         "Y": 525.0
       },
-      "Description": "If enabled, the operator will listen for sACN sources on the network and print their information to the T3 log."
+      "Description": "If enabled, the operator listens for sACN sources on the network and populates the `TargetIpAddress` dropdown with discovered devices. Useful for finding sACN receivers."
     },
     {
       "InputId": "4a9e2d3b-8c6f-4b1d-8d7e-9f3a5b2c1d0e"/*Priority*/,
@@ -80,37 +68,28 @@
       "Description": "If enabled, sends sACN packets as unicast to the `TargetIpAddress`. Otherwise, packets are multicast."
     },
     {
-      "InputId": "9b8a7c6d-5e4f-4012-3456-7890abcdef12"/*SendTrigger*/,
-      "Position": {
-        "X": -200.0,
-        "Y": 300.0
-      },
-      "Description": "A trigger to manually send the sACN data. The data is sent when this value changes from 0 to 1."
-    },
-    {
-      "InputId": "9c233633-959f-4447-b248-4d431c1b18e7"/*LocalIpAddress*/,
+      "InputId": "9c233633-959f-4447-b248-4d431c1b18e7"/*SendTrigger*/,
       "Position": {
         "X": -200.0,
         "Y": 225.0
       },
-      "Description": "The IP address of the network interface to send from. A dropdown shows available addresses. If you have multiple network cards, make sure to select the one connected to your lighting network.",
-      "Usage": "CustomDropdown"
+      "Description": "Enables continuous transmission of sACN data. When true, the operator sends packets at the rate specified by `MaxFps`."
     },
     {
-      "InputId": "c2d3e4f5-a6b7-4890-1234-567890abcdef"/*Reconnect*/,
+      "InputId": "b2c3d4e5-f6a7-8901-bcde-f234567890ab"/*UniverseChannels*/,
       "Position": {
         "X": -200.0,
-        "Y": 375.0
+        "Y": 75.0
       },
-      "Description": "Forces a reconnection of the network socket."
+      "Description": "Defines the starting universe number for each input. If an input has more than 512 channels, it automatically spans to the next universe."
     },
     {
-      "InputId": "d0e1f2a3-b4c5-4678-9012-3456789abcde"/*PrintToLog*/,
+      "InputId": "c2a9e3e3-a4e9-430b-9c6a-4e1a1e0b8e2e"/*Reconnect*/,
       "Position": {
         "X": -200.0,
-        "Y": 975.0
+        "Y": 300.0
       },
-      "Description": "If enabled, prints status information and errors to the T3 log. Useful for debugging."
+      "Description": "Forces a reconnection of the network socket. Toggle this to reconnect after network changes."
     },
     {
       "InputId": "d9e8d7c6-b5a4-434a-9e3a-4e2b1d0c9a7b"/*TargetIpAddress*/,
@@ -120,6 +99,23 @@
       },
       "Description": "The destination IP address for unicast sACN packets. If empty, packets are multicast to the standard sACN multicast address.",
       "Usage": "CustomDropdown"
+    },
+    {
+      "InputId": "f8a7e0c8-c6c7-4b53-9a3a-3e5f2a4f4e1c"/*LocalIpAddress*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      },
+      "Description": "The IP address of the network interface to send from. A dropdown shows available addresses. If you have multiple network cards, make sure to select the one connected to your lighting network.",
+      "Usage": "CustomDropdown"
+    },
+    {
+      "InputId": "D0E1F2A3-B4C5-4678-9012-3456789ABCDE"/*PrintToLog*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 975.0
+      },
+      "Description": "If enabled, prints status information and errors to the T3 log. Useful for debugging connection issues."
     }
   ],
   "SymbolChildUis": [],

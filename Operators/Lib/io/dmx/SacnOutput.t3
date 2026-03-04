@@ -2,10 +2,6 @@
   "Id": "e5a8d9e6-3c5a-4bbb-9da3-737b6330b9c3"/*SacnOutput*/,
   "Inputs": [
     {
-      "Id": "1b26f5d5-8141-4b13-b88d-6859ed5a4af8"/*StartUniverse*/,
-      "DefaultValue": 1
-    },
-    {
       "Id": "2a8d39a3-5a41-477d-815a-8b8b9d8b1e4a"/*InputsValues*/,
       "DefaultValue": {
         "Values": []
@@ -17,15 +13,15 @@
     },
     {
       "Id": "4a9e2d3b-8c6f-4b1d-8d7e-9f3a5b2c1d0e"/*Priority*/,
-      "DefaultValue": 0
+      "DefaultValue": 100
     },
     {
       "Id": "5b1d9c8a-7e3f-4a2b-9c8d-1e0f3a5b2c1d"/*SourceName*/,
-      "DefaultValue": ""
+      "DefaultValue": "T3 sACN Output"
     },
     {
       "Id": "6f5c4b3a-2e1d-4f9c-8a7b-3d2e1f0c9b8a"/*MaxFps*/,
-      "DefaultValue": 30
+      "DefaultValue": 60
     },
     {
       "Id": "7a8b9c0d-1e2f-3a4b-5c6d-7e8f9a0b1c2d"/*EnableSync*/,
@@ -33,31 +29,37 @@
     },
     {
       "Id": "8b9c0d1e-2f3a-4b5c-6d7e-8f9a0b1c2d3e"/*SyncUniverse*/,
-      "DefaultValue": 0
+      "DefaultValue": 64001
     },
     {
       "Id": "8c6c9a8d-29c5-489e-8c6b-9e4a3c1e2b6a"/*SendUnicast*/,
       "DefaultValue": false
     },
     {
-      "Id": "9b8a7c6d-5e4f-4012-3456-7890abcdef12"/*SendTrigger*/,
+      "Id": "9c233633-959f-4447-b248-4d431c1b18e7"/*SendTrigger*/,
       "DefaultValue": false
     },
     {
-      "Id": "9c233633-959f-4447-b248-4d431c1b18e7"/*LocalIpAddress*/,
-      "DefaultValue": "127.0.0.1"
+      "Id": "b2c3d4e5-f6a7-8901-bcde-f234567890ab"/*UniverseChannels*/,
+      "DefaultValue": {
+        "Values": []
+      }
     },
     {
-      "Id": "c2d3e4f5-a6b7-4890-1234-567890abcdef"/*Reconnect*/,
-      "DefaultValue": false
-    },
-    {
-      "Id": "d0e1f2a3-b4c5-4678-9012-3456789abcde"/*PrintToLog*/,
+      "Id": "c2a9e3e3-a4e9-430b-9c6a-4e1a1e0b8e2e"/*Reconnect*/,
       "DefaultValue": false
     },
     {
       "Id": "d9e8d7c6-b5a4-434a-9e3a-4e2b1d0c9a7b"/*TargetIpAddress*/,
       "DefaultValue": ""
+    },
+    {
+      "Id": "f8a7e0c8-c6c7-4b53-9a3a-3e5f2a4f4e1c"/*LocalIpAddress*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "D0E1F2A3-B4C5-4678-9012-3456789ABCDE"/*PrintToLog*/,
+      "DefaultValue": false
     }
   ],
   "Children": [],

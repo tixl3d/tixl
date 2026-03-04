@@ -1,6 +1,6 @@
 {
   "Id": "98efc7c8-cafd-45ee-8746-14f37e9f59f8"/*ArtnetOutput*/,
-  "Description": "Sends DMX data over the network using the Art-Net protocol.\n\nThis operator broadcasts or unicasts DMX data to Art-Net-enabled devices like lighting fixtures, nodes, or media servers. It can send multiple DMX universes simultaneously.\n\nTips:\n- For broadcast, leave `TargetIpAddress` empty. For unicast, specify the IP address of the destination device.\n- The `InputsValues` should be a list of lists. The outer list corresponds to the universes, and each inner list contains the 512 channel values for that universe.\n- Use `SendTrigger` for manual control or connect a value to `InputsValues` to send automatically on change.\n\nAKA: artnet, dmx, lighting, sacn",
+  "Description": "Sends DMX data over the network using the Art-Net protocol.\n\nThis operator broadcasts or unicasts DMX data to Art-Net-enabled devices like lighting fixtures, nodes, or media servers. It can send multiple DMX universes simultaneously and uses a dedicated background thread for high-performance transmission.\n\nFeatures:\n- Multi-input support: Connect multiple lists to send different universes\n- Automatic universe expansion: Lists larger than 512 channels span multiple universes\n- Built-in ArtPoll discovery to find Art-Net nodes on your network\n- Frame rate limiting to prevent network flooding\n- Optional ArtSync for synchronized updates\n\nTips:\n- For broadcast, leave `TargetIpAddress` empty. For unicast, specify the destination IP.\n- Use `UniverseChannels` to define the starting universe for each input (auto-expands as needed)\n- Enable `SendTrigger` to start continuous transmission; disable to stop.\n\nAKA: artnet, dmx, lighting, sacn",
   "InputUis": [
     {
       "InputId": "0fc76369-788a-4ffe-9dde-8eea5f10cf32"/*TargetIpAddress*/,
@@ -18,14 +18,6 @@
         "Y": 300.0
       },
       "Description": "A trigger to manually send the Art-Net data. The data is sent when this value changes from 0 to 1."
-    },
-    {
-      "InputId": "34aeeda5-72b0-4f13-bfd3-4ad5cf42b24f"/*StartUniverse*/,
-      "Position": {
-        "X": -200.0,
-        "Y": 75.0
-      },
-      "Description": "The first DMX universe to send. Art-Net universes are often specified as Sub-Net and Universe. This operator uses a single integer, where Universe = StartUniverse % 16 and Sub-Net = StartUniverse / 16."
     },
     {
       "InputId": "4a9e2d3b-8c6f-4b1d-8d7e-9f3a5b2c1d0e"/*Priority*/,
@@ -50,7 +42,7 @@
         "X": -200.0,
         "Y": 675.0
       },
-      "Description": "If enabled, prints information about received Art-Net poll packets to the T3 log. This is useful for discovering other Art-Net nodes on the network."
+      "Description": "If enabled, sends ArtPoll packets and listens for replies to discover Art-Net nodes on the network. Discovered nodes populate the `TargetIpAddress` dropdown."
     },
     {
       "InputId": "6f5c4b3a-2e1d-4f9c-8a7b-3d2e1f0c9b8a"/*MaxFps*/,
@@ -98,7 +90,15 @@
         "X": -200.0,
         "Y": 0.0
       },
-      "Description": "A list of lists containing the DMX channel data. The outer list represents universes, and each inner list contains up to 512 float values (0-1)."
+      "Description": "A multi-input where each connected input provides DMX channel data for a separate universe. Each input should contain a list of float values (0-255) that are clamped to 0-255."
+    },
+    {
+      "InputId": "B2C3D4E5-F6A7-8901-BCDE-F234567890AB"/*UniverseChannels*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      },
+      "Description": "Defines the starting universe number for each input. If an input has more than 512 channels, it automatically spans to the next universe. Auto-expands when you add more inputs."
     },
     {
       "InputId": "fcbfe87b-b8aa-461c-a5ac-b22bb29ad36d"/*LocalIpAddress*/,

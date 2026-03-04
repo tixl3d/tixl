@@ -133,17 +133,62 @@ internal sealed class ArtnetOutput : Instance<ArtnetOutput>, IStatusProvider, IC
         SetStatus("Connected and sending.", IStatusProvider.StatusLevel.Success);
 
         // --- Prepare Data for Sending Thread ---
-        var startUniverse = StartUniverse.GetValue(context);
         var inputValueLists = InputsValues.GetCollectedTypedInputs();
 
+        // Get universe channels list (starting universe for each input)
+        var universeChannels = UniverseChannels.GetValue(context);
+
+        // Auto-resize UniverseChannels list to match number of inputs
+        if (universeChannels == null)
+        {
+            universeChannels = new List<int>();
+        }
+
+        // Calculate next available universe for auto-expansion
+        int nextUniverse = 1;
+        if (universeChannels.Count > 0)
+        {
+            // Find the last input's starting universe and add its chunk count
+            var lastInputIndex = universeChannels.Count - 1;
+            if (lastInputIndex < inputValueLists.Count)
+            {
+                var lastBuffer = inputValueLists[lastInputIndex].GetValue(context);
+                if (lastBuffer != null)
+                {
+                    int lastChunkCount = (int)Math.Ceiling(lastBuffer.Count / 512.0);
+                    nextUniverse = universeChannels[lastInputIndex] + lastChunkCount;
+                }
+                else
+                {
+                    nextUniverse = universeChannels[lastInputIndex];
+                }
+            }
+            else
+            {
+                nextUniverse = universeChannels[^1] + 1;
+            }
+        }
+
+        // Ensure list size matches input count
+        while (universeChannels.Count < inputValueLists.Count)
+        {
+            universeChannels.Add(nextUniverse);
+            nextUniverse++;
+        }
+
+        // Update the input with the auto-resized list
+        UniverseChannels.SetTypedInputValue(universeChannels);
+
         const int chunkSize = 512;
-        var universeIndex = startUniverse;
         var preparedData = new List<(int universe, byte[] data)>();
 
-        foreach (var input in inputValueLists)
+        for (int inputIdx = 0; inputIdx < inputValueLists.Count; inputIdx++)
         {
+            var input = inputValueLists[inputIdx];
             var buffer = input.GetValue(context);
             if (buffer == null) continue;
+
+            var universeForInput = inputIdx < universeChannels.Count ? universeChannels[inputIdx] : 1;
 
             for (var i = 0; i < buffer.Count; i += chunkSize)
             {
@@ -160,8 +205,8 @@ internal sealed class ArtnetOutput : Instance<ArtnetOutput>, IStatusProvider, IC
                     dmxData[j] = (byte)buffer[i + j].Clamp(0, 255);
                 }
 
-                preparedData.Add((universeIndex, dmxData));
-                universeIndex++;
+                preparedData.Add((universeForInput, dmxData));
+                universeForInput++;
             }
         }
 
@@ -638,8 +683,9 @@ internal sealed class ArtnetOutput : Instance<ArtnetOutput>, IStatusProvider, IC
     [Input(Guid = "F7520A37-C2D4-41FA-A6BA-A6ED0423A4EC")]
     public readonly MultiInputSlot<List<int>> InputsValues = new();
 
-    [Input(Guid = "34aeeda5-72b0-4f13-bfd3-4ad5cf42b24f")]
-    public readonly InputSlot<int> StartUniverse = new();
+    [Input(Guid = "B2C3D4E5-F6A7-8901-BCDE-F234567890AB")]
+    public readonly InputSlot<List<int>> UniverseChannels = new();
+
 
     [Input(Guid = "fcbfe87b-b8aa-461c-a5ac-b22bb29ad36d")]
     public readonly InputSlot<string> LocalIpAddress = new();

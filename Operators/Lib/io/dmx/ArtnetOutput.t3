@@ -2,51 +2,13 @@
   "Id": "98efc7c8-cafd-45ee-8746-14f37e9f59f8"/*ArtnetOutput*/,
   "Inputs": [
     {
-      "Id": "0fc76369-788a-4ffe-9dde-8eea5f10cf32"/*TargetIpAddress*/,
-      "DefaultValue": ""
+      "Id": "F7520A37-C2D4-41FA-A6BA-A6ED0423A4EC"/*InputsValues*/,
+      "DefaultValue": {
+        "Values": []
+      }
     },
     {
-      "Id": "168d0023-554f-46cd-9e62-8f3d1f564b8d"/*SendTrigger*/,
-      "DefaultValue": false
-    },
-    {
-      "Id": "34aeeda5-72b0-4f13-bfd3-4ad5cf42b24f"/*StartUniverse*/,
-      "DefaultValue": 0
-    },
-    {
-      "Id": "4a9e2d3b-8c6f-4b1d-8d7e-9f3a5b2c1d0e"/*Priority*/,
-      "DefaultValue": 0
-    },
-    {
-      "Id": "5b1d9c8a-7e3f-4a2b-9c8d-1e0f3a5b2c1d"/*SourceName*/,
-      "DefaultValue": ""
-    },
-    {
-      "Id": "65fb88ec-5772-4973-bd8b-bb2cb9f557e7"/*PrintArtnetPoll*/,
-      "DefaultValue": false
-    },
-    {
-      "Id": "6f5c4b3a-2e1d-4f9c-8a7b-3d2e1f0c9b8a"/*MaxFps*/,
-      "DefaultValue": 30
-    },
-    {
-      "Id": "73babdb1-f88f-4e4d-aa3f-0536678b0793"/*Reconnect*/,
-      "DefaultValue": false
-    },
-    {
-      "Id": "7c15da5f-cfa1-4339-aceb-4ed0099ea041"/*SendUnicast*/,
-      "DefaultValue": false
-    },
-    {
-      "Id": "d0e1f2a3-b4c5-4678-9012-3456789abcde"/*PrintToLog*/,
-      "DefaultValue": false
-    },
-    {
-      "Id": "d293bb33-2fba-4048-99b8-86aa15a478f2"/*SendSync*/,
-      "DefaultValue": false
-    },
-    {
-      "Id": "f7520a37-c2d4-41fa-a6ba-a6ed0423a4ec"/*InputsValues*/,
+      "Id": "B2C3D4E5-F6A7-8901-BCDE-F234567890AB"/*UniverseChannels*/,
       "DefaultValue": {
         "Values": []
       }
@@ -54,6 +16,46 @@
     {
       "Id": "fcbfe87b-b8aa-461c-a5ac-b22bb29ad36d"/*LocalIpAddress*/,
       "DefaultValue": ""
+    },
+    {
+      "Id": "168d0023-554f-46cd-9e62-8f3d1f564b8d"/*SendTrigger*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "73babdb1-f88f-4e4d-aa3f-0536678b0793"/*Reconnect*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "d293bb33-2fba-4048-99b8-86aa15a478f2"/*SendSync*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "7c15da5f-cfa1-4339-aceb-4ed0099ea041"/*SendUnicast*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "0fc76369-788a-4ffe-9dde-8eea5f10cf32"/*TargetIpAddress*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "65fb88ec-5772-4973-bd8b-bb2cb9f557e7"/*PrintArtnetPoll*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "4A9E2D3B-8C6F-4B1D-8D7E-9F3A5B2C1D0E"/*Priority*/,
+      "DefaultValue": 100
+    },
+    {
+      "Id": "5B1D9C8A-7E3F-4A2B-9C8D-1E0F3A5B2C1D"/*SourceName*/,
+      "DefaultValue": "T3 Art-Net Output"
+    },
+    {
+      "Id": "6F5C4B3A-2E1D-4F9C-8A7B-3D2E1F0C9B8A"/*MaxFps*/,
+      "DefaultValue": 60
+    },
+    {
+      "Id": "D0E1F2A3-B4C5-4678-9012-3456789ABCDE"/*PrintToLog*/,
+      "DefaultValue": false
     }
   ],
   "Children": [],

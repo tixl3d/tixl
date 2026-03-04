@@ -1,9 +1,19 @@
 #nullable enable
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using T3.Core.Logging;
+using T3.Core.Operator;
+using T3.Core.Operator.Attributes;
+using T3.Core.Operator.Slots;
 using T3.Core.Utils;
 
 // ReSharper disable MemberCanBePrivate.Global
@@ -15,38 +25,36 @@ internal sealed class SacnOutput : Instance<SacnOutput>, IStatusProvider, ICusto
 {
     private const int SacnPort = 5568;
     private const string SacnDiscoveryIp = "239.255.250.214";
-    private readonly byte[] _cid = Guid.NewGuid().ToByteArray();
-
-    // --- State and Configuration ---
-    private readonly ConnectionSettings _connectionSettings = new();
-    private readonly object _dataLock = new();
-    private readonly ConcurrentDictionary<string, string> _discoveredSources = new();
-    private readonly byte[] _packetBuffer = new byte[126 + 512]; // Reusable buffer for zero-allocation packet creation
 
     [Output(Guid = "a3c4a2e8-bc1b-453a-9773-1952a6ea10a3")]
     public readonly Slot<Command> Result = new();
 
-    private bool _connected;
-
-    // --- Discovery Resources ---
-    private Thread? _discoveryListenerThread;
-    private UdpClient? _discoveryUdpClient;
-    private List<(int universe, byte[] data)>? _dmxDataToSend;
-    private volatile bool _isDiscovering;
+    // --- State and Configuration ---
+    private readonly ConnectionSettings _connectionSettings = new();
+    private volatile bool _printToLog;
+    private bool _wasSendingLastFrame;
     private string? _lastErrorMessage;
     private IStatusProvider.StatusLevel _lastStatusLevel = IStatusProvider.StatusLevel.Notice;
-    private SacnPacketOptions _packetOptions;
-    private volatile bool _printToLog;
-    private CancellationTokenSource? _senderCts;
-    private double _lastRetryTime;
+    private readonly byte[] _cid = Guid.NewGuid().ToByteArray();
     private double _lastNetworkRefreshTime;
 
     // --- High-Performance Sending Resources ---
     private Thread? _senderThread;
+    private CancellationTokenSource? _senderCts;
+    private readonly object _dataLock = new();
+    private List<(int universe, byte[] data)>? _dmxDataToSend;
+    private SacnPacketOptions _packetOptions;
+    private readonly byte[] _packetBuffer = new byte[126 + 512]; // Reusable buffer for zero-allocation packet creation
+
+    // --- Discovery Resources ---
+    private Thread? _discoveryListenerThread;
+    private volatile bool _isDiscovering;
+    private UdpClient? _discoveryUdpClient;
+    private readonly ConcurrentDictionary<string, string> _discoveredSources = new();
 
     // --- Network and Connection Management ---
     private Socket? _socket;
-    private bool _wasSendingLastFrame;
+    private bool _connected;
 
     public SacnOutput()
     {
@@ -58,14 +66,12 @@ internal sealed class SacnOutput : Instance<SacnOutput>, IStatusProvider, ICusto
         _printToLog = PrintToLog.GetValue(context);
 
         var localIpString = LocalIpAddress.GetValue(context);
-        
-        if (string.IsNullOrEmpty(localIpString))
+
+        // Refresh network interfaces periodically
+        if (string.IsNullOrEmpty(localIpString) && context.LocalTime - _lastNetworkRefreshTime > 5.0)
         {
-            if (context.LocalTime - _lastNetworkRefreshTime > 5.0)
-            {
-                _lastNetworkRefreshTime = context.LocalTime;
-                _networkInterfaces = GetNetworkInterfaces();
-            }
+            _lastNetworkRefreshTime = context.LocalTime;
+            _networkInterfaces = GetNetworkInterfaces();
         }
 
         var settingsChanged = _connectionSettings.Update(
@@ -80,14 +86,6 @@ internal sealed class SacnOutput : Instance<SacnOutput>, IStatusProvider, ICusto
             if (_printToLog) Log.Debug("sACN Output: Reconnecting sACN socket...", this);
             CloseSocket();
             _connected = TryConnectSacn(_connectionSettings.LocalIp);
-        }
-        else if (!_connected && _connectionSettings.LocalIp != null)
-        {
-            if (context.LocalTime - _lastRetryTime > 2.0)
-            {
-                _lastRetryTime = context.LocalTime;
-                _connected = TryConnectSacn(_connectionSettings.LocalIp);
-            }
         }
 
         var discoverSources = DiscoverSources.GetValue(context);
@@ -117,16 +115,61 @@ internal sealed class SacnOutput : Instance<SacnOutput>, IStatusProvider, ICusto
         SetStatus("Connected and sending.", IStatusProvider.StatusLevel.Success);
 
         // --- Prepare Data for Sending Thread ---
-        var startUniverse = Math.Max(1, StartUniverse.GetValue(context));
         var inputValueLists = InputsValues.GetCollectedTypedInputs();
 
-        var preparedData = new List<(int universe, byte[] data)>();
-        var universeIndex = startUniverse;
+        // Get universe channels list (starting universe for each input)
+        var universeChannels = UniverseChannels.GetValue(context);
 
-        foreach (var input in inputValueLists)
+        // Auto-resize UniverseChannels list to match number of inputs
+        if (universeChannels == null)
         {
+            universeChannels = new List<int>();
+        }
+
+        // Calculate next available universe for auto-expansion
+        int nextUniverse = 1;
+        if (universeChannels.Count > 0)
+        {
+            // Find the last input's starting universe and add its chunk count
+            var lastInputIndex = universeChannels.Count - 1;
+            if (lastInputIndex < inputValueLists.Count)
+            {
+                var lastBuffer = inputValueLists[lastInputIndex].GetValue(context);
+                if (lastBuffer != null)
+                {
+                    int lastChunkCount = (int)Math.Ceiling(lastBuffer.Count / 512.0);
+                    nextUniverse = universeChannels[lastInputIndex] + lastChunkCount;
+                }
+                else
+                {
+                    nextUniverse = universeChannels[lastInputIndex];
+                }
+            }
+            else
+            {
+                nextUniverse = universeChannels[^1] + 1;
+            }
+        }
+
+        // Ensure list size matches input count
+        while (universeChannels.Count < inputValueLists.Count)
+        {
+            universeChannels.Add(nextUniverse);
+            nextUniverse++;
+        }
+
+        // Update the input with the auto-resized list
+        UniverseChannels.SetTypedInputValue(universeChannels);
+
+        var preparedData = new List<(int universe, byte[] data)>();
+
+        for (int inputIdx = 0; inputIdx < inputValueLists.Count; inputIdx++)
+        {
+            var input = inputValueLists[inputIdx];
             var buffer = input.GetValue(context);
             if (buffer == null) continue;
+
+            var universeForInput = inputIdx < universeChannels.Count ? universeChannels[inputIdx] : 1;
 
             for (var i = 0; i < buffer.Count; i += 512)
             {
@@ -138,9 +181,8 @@ internal sealed class SacnOutput : Instance<SacnOutput>, IStatusProvider, ICusto
                 {
                     dmxData[j] = (byte)buffer[i + j].Clamp(0, 255);
                 }
-
-                preparedData.Add((universeIndex, dmxData));
-                universeIndex++;
+                preparedData.Add((universeForInput, dmxData));
+                universeForInput++;
             }
         }
 
@@ -149,13 +191,13 @@ internal sealed class SacnOutput : Instance<SacnOutput>, IStatusProvider, ICusto
         {
             _dmxDataToSend = preparedData;
             _packetOptions = new SacnPacketOptions
-                                 {
-                                     MaxFps = MaxFps.GetValue(context),
-                                     Priority = (byte)Priority.GetValue(context).Clamp(0, 200),
-                                     SourceName = SourceName.GetValue(context) ?? string.Empty,
-                                     EnableSync = EnableSync.GetValue(context),
-                                     SyncUniverse = (ushort)SyncUniverse.GetValue(context).Clamp(1, 63999)
-                                 };
+            {
+                MaxFps = MaxFps.GetValue(context),
+                Priority = (byte)Priority.GetValue(context).Clamp(0, 200),
+                SourceName = SourceName.GetValue(context) ?? string.Empty,
+                EnableSync = EnableSync.GetValue(context),
+                SyncUniverse = (ushort)SyncUniverse.GetValue(context).Clamp(1, 63999)
+            };
         }
     }
 
@@ -169,9 +211,9 @@ internal sealed class SacnOutput : Instance<SacnOutput>, IStatusProvider, ICusto
         var token = _senderCts.Token;
 
         _senderThread = new Thread(() => SenderLoop(token))
-                            {
-                                IsBackground = true, Name = "sACNSender", Priority = ThreadPriority.AboveNormal
-                            };
+        {
+            IsBackground = true, Name = "sACNSender", Priority = ThreadPriority.AboveNormal
+        };
         _senderThread.Start();
     }
 
@@ -185,7 +227,6 @@ internal sealed class SacnOutput : Instance<SacnOutput>, IStatusProvider, ICusto
         {
             _senderCts?.Dispose();
         }
-
         _senderCts = null;
         _senderThread = null;
     }
@@ -218,7 +259,6 @@ internal sealed class SacnOutput : Instance<SacnOutput>, IStatusProvider, ICusto
                     else Thread.SpinWait(100);
                     continue;
                 }
-
                 if (now > nextFrameTimeTicks + Stopwatch.Frequency) nextFrameTimeTicks = now;
                 nextFrameTimeTicks += (long)(Stopwatch.Frequency / (double)optionsCopy.MaxFps);
             }
@@ -260,7 +300,6 @@ internal sealed class SacnOutput : Instance<SacnOutput>, IStatusProvider, ICusto
                     SendSacnSync(currentSocket, optionsCopy.SyncUniverse, sequenceNumber);
                 }
             }
-
             sequenceNumber++;
         }
     }
@@ -285,38 +324,35 @@ internal sealed class SacnOutput : Instance<SacnOutput>, IStatusProvider, ICusto
     private int BuildSacnSyncPacket(ushort syncUniverse, byte sequenceNumber)
     {
         // Root Layer
-        _packetBuffer[0] = 0x00;
-        _packetBuffer[1] = 0x10; // Preamble
-        _packetBuffer[2] = 0x00;
-        _packetBuffer[3] = 0x00; // Post-amble
-        Encoding.ASCII.GetBytes("ASC-E1.17", 0, 10, _packetBuffer, 4); // ID
-        _packetBuffer[14] = 0x00;
-        _packetBuffer[15] = 0x00;
-        short rootFlagsAndLength = IPAddress.HostToNetworkOrder((short)(0x7000 | 33));
-        _packetBuffer[16] = (byte)(rootFlagsAndLength >> 8);
-        _packetBuffer[17] = (byte)(rootFlagsAndLength & 0xFF);
-        int vector = IPAddress.HostToNetworkOrder(0x00000004); // VECTOR_ROOT_E131_EXTENDED
-        _packetBuffer[18] = (byte)(vector >> 24);
-        _packetBuffer[19] = (byte)(vector >> 16);
-        _packetBuffer[20] = (byte)(vector >> 8);
-        _packetBuffer[21] = (byte)(vector & 0xFF);
+        _packetBuffer[0] = 0x00; _packetBuffer[1] = 0x10; // Preamble
+        _packetBuffer[2] = 0x00; _packetBuffer[3] = 0x00; // Post-amble
+        Encoding.ASCII.GetBytes("ASC-E1.17", 0, 9, _packetBuffer, 4);
+        _packetBuffer[13] = 0x00; _packetBuffer[14] = 0x00; _packetBuffer[15] = 0x00;
+
+        // Flags & Length
+        short rootFlagsAndLength = IPAddress.HostToNetworkOrder((short)(0x7000 | 31));
+        Array.Copy(BitConverter.GetBytes(rootFlagsAndLength), 0, _packetBuffer, 16, 2);
+
+        // VECTOR_ROOT_E131
+        int vector = IPAddress.HostToNetworkOrder(0x00000004);
+        Array.Copy(BitConverter.GetBytes(vector), 0, _packetBuffer, 18, 4);
+
+        // CID
         Array.Copy(_cid, 0, _packetBuffer, 22, 16);
 
         // E1.31 Framing Layer
         short frameFlagsAndLength = IPAddress.HostToNetworkOrder((short)(0x7000 | 9));
-        _packetBuffer[38] = (byte)(frameFlagsAndLength >> 8);
-        _packetBuffer[39] = (byte)(frameFlagsAndLength & 0xFF);
+        Array.Copy(BitConverter.GetBytes(frameFlagsAndLength), 0, _packetBuffer, 38, 2);
+
         int frameVector = IPAddress.HostToNetworkOrder(0x00000001); // VECTOR_E131_EXTENDED_SYNCHRONIZATION
-        _packetBuffer[40] = (byte)(frameVector >> 24);
-        _packetBuffer[41] = (byte)(frameVector >> 16);
-        _packetBuffer[42] = (byte)(frameVector >> 8);
-        _packetBuffer[43] = (byte)(frameVector & 0xFF);
+        Array.Copy(BitConverter.GetBytes(frameVector), 0, _packetBuffer, 40, 4);
+        
         _packetBuffer[44] = sequenceNumber;
+        
         short syncUni = IPAddress.HostToNetworkOrder((short)syncUniverse);
-        _packetBuffer[45] = (byte)(syncUni >> 8);
-        _packetBuffer[46] = (byte)(syncUni & 0xFF);
-        _packetBuffer[47] = 0x00;
-        _packetBuffer[48] = 0x00; // Reserved
+        Array.Copy(BitConverter.GetBytes(syncUni), 0, _packetBuffer, 45, 2);
+        
+        _packetBuffer[47] = 0x00; _packetBuffer[48] = 0x00; // Reserved
 
         return 49;
     }
@@ -326,57 +362,65 @@ internal sealed class SacnOutput : Instance<SacnOutput>, IStatusProvider, ICusto
         var dmxLength = (short)dmxData.Length;
 
         // Root Layer (38 bytes)
-        _packetBuffer[0] = 0x00;
-        _packetBuffer[1] = 0x10;
-        _packetBuffer[2] = 0x00;
-        _packetBuffer[3] = 0x00;
-        Encoding.ASCII.GetBytes("ASC-E1.17", 0, 10, _packetBuffer, 4);
-        _packetBuffer[14] = 0x00;
-        _packetBuffer[15] = 0x00;
-        short rootFlagsAndLength = IPAddress.HostToNetworkOrder((short)(0x7000 | (110 + dmxLength)));
-        _packetBuffer[16] = (byte)(rootFlagsAndLength >> 8);
-        _packetBuffer[17] = (byte)(rootFlagsAndLength & 0xFF);
+        _packetBuffer[0] = 0x00; _packetBuffer[1] = 0x10;
+        _packetBuffer[2] = 0x00; _packetBuffer[3] = 0x00;
+        Encoding.ASCII.GetBytes("ASC-E1.17", 0, 9, _packetBuffer, 4);
+        _packetBuffer[13] = 0x00; _packetBuffer[14] = 0x00; _packetBuffer[15] = 0x00;
+
+        // Flags & Length
+        short rootFlagsAndLength = IPAddress.HostToNetworkOrder((short)(0x7000 | (108 + dmxLength)));
+        Array.Copy(BitConverter.GetBytes(rootFlagsAndLength), 0, _packetBuffer, 16, 2);
+
+        // VECTOR_ROOT_E131
         int vector = IPAddress.HostToNetworkOrder(0x00000004);
-        _packetBuffer[18] = (byte)(vector >> 24);
-        _packetBuffer[19] = (byte)(vector >> 16);
-        _packetBuffer[20] = (byte)(vector >> 8);
-        _packetBuffer[21] = (byte)(vector & 0xFF);
+        Array.Copy(BitConverter.GetBytes(vector), 0, _packetBuffer, 18, 4);
+
+        // CID
         Array.Copy(_cid, 0, _packetBuffer, 22, 16);
 
         // E1.31 Framing Layer (88 bytes)
-        short frameFlagsAndLength = IPAddress.HostToNetworkOrder((short)(0x7000 | (88 + dmxLength)));
-        _packetBuffer[38] = (byte)(frameFlagsAndLength >> 8);
-        _packetBuffer[39] = (byte)(frameFlagsAndLength & 0xFF);
+        short frameFlagsAndLength = IPAddress.HostToNetworkOrder((short)(0x7000 | (86 + dmxLength)));
+        Array.Copy(BitConverter.GetBytes(frameFlagsAndLength), 0, _packetBuffer, 38, 2);
+
         int frameVector = IPAddress.HostToNetworkOrder(0x00000002); // VECTOR_E131_DATA_PACKET
-        _packetBuffer[40] = (byte)(frameVector >> 24);
-        _packetBuffer[41] = (byte)(frameVector >> 16);
-        _packetBuffer[42] = (byte)(frameVector >> 8);
-        _packetBuffer[43] = (byte)(frameVector & 0xFF);
-        Array.Clear(_packetBuffer, 44, 64); // Clear source name area
-        Encoding.UTF8.GetBytes(options.SourceName, 0, Math.Min(options.SourceName.Length, 63), _packetBuffer, 44);
+        Array.Copy(BitConverter.GetBytes(frameVector), 0, _packetBuffer, 40, 4);
+
+        // Source name
+        Array.Clear(_packetBuffer, 44, 64);
+        if (!string.IsNullOrEmpty(options.SourceName))
+        {
+            var sourceBytes = Encoding.UTF8.GetBytes(options.SourceName);
+            int copyCount = Math.Min(sourceBytes.Length, 63);
+            Array.Copy(sourceBytes, 0, _packetBuffer, 44, copyCount);
+        }
+
         _packetBuffer[108] = options.Priority;
+
         short syncUni = IPAddress.HostToNetworkOrder((short)(options.EnableSync ? options.SyncUniverse : 0));
-        _packetBuffer[109] = (byte)(syncUni >> 8);
-        _packetBuffer[110] = (byte)(syncUni & 0xFF);
+        Array.Copy(BitConverter.GetBytes(syncUni), 0, _packetBuffer, 109, 2);
+
         _packetBuffer[111] = sequenceNumber;
         _packetBuffer[112] = 0x00; // Options
+
         short netUniverse = IPAddress.HostToNetworkOrder((short)universe);
-        _packetBuffer[113] = (byte)(netUniverse >> 8);
-        _packetBuffer[114] = (byte)(netUniverse & 0xFF);
+        Array.Copy(BitConverter.GetBytes(netUniverse), 0, _packetBuffer, 113, 2);
 
         // DMP Layer
-        short dmpFlagsAndLength = IPAddress.HostToNetworkOrder((short)(0x7000 | (11 + dmxLength)));
-        _packetBuffer[115] = (byte)(dmpFlagsAndLength >> 8);
-        _packetBuffer[116] = (byte)(dmpFlagsAndLength & 0xFF);
+        short dmpFlagsAndLength = IPAddress.HostToNetworkOrder((short)(0x7000 | (9 + dmxLength)));
+        Array.Copy(BitConverter.GetBytes(dmpFlagsAndLength), 0, _packetBuffer, 115, 2);
+
         _packetBuffer[117] = 0x02; // Vector
-        _packetBuffer[118] = 0xa1; // Address Type & Data Type
-        _packetBuffer[119] = 0x00;
-        _packetBuffer[120] = 0x00; // First address
-        _packetBuffer[121] = 0x00;
-        _packetBuffer[122] = 0x01; // Address increment
+        _packetBuffer[118] = (byte)0xa1; // Address Type & Data Type
+        
+        // First address (0)
+        _packetBuffer[119] = 0x00; _packetBuffer[120] = 0x00;
+        
+        // Address increment (1)
+        _packetBuffer[121] = 0x00; _packetBuffer[122] = 0x01; 
+        
         short propValueCount = IPAddress.HostToNetworkOrder((short)(dmxLength + 1));
-        _packetBuffer[123] = (byte)(propValueCount >> 8);
-        _packetBuffer[124] = (byte)(propValueCount & 0xFF);
+        Array.Copy(BitConverter.GetBytes(propValueCount), 0, _packetBuffer, 123, 2);
+        
         _packetBuffer[125] = 0x00; // DMX Start Code
         Array.Copy(dmxData, 0, _packetBuffer, 126, dmxLength);
 
@@ -428,20 +472,11 @@ internal sealed class SacnOutput : Instance<SacnOutput>, IStatusProvider, ICusto
 
                     _discoveredSources[ipString] = $"{displayName} ({ipString})";
                 }
-                catch (SocketException)
-                {
-                    if (_isDiscovering) break;
-                } // Break loop if the socket is closed
-                catch (Exception e)
-                {
-                    if (_isDiscovering) Log.Error($"sACN discovery listener error: {e.Message}", this);
-                }
+                catch (SocketException) { if (_isDiscovering) break; } // Break loop if socket is closed
+                catch (Exception e) { if (_isDiscovering) Log.Error($"sACN discovery listener error: {e.Message}", this); }
             }
         }
-        catch (Exception e)
-        {
-            if (_isDiscovering) Log.Error($"sACN discovery listener failed to bind: {e.Message}", this);
-        }
+        catch (Exception e) { if (_isDiscovering) Log.Error($"sACN discovery listener failed to bind: {e.Message}", this); }
         finally
         {
             _discoveryUdpClient?.Close();
@@ -464,15 +499,7 @@ internal sealed class SacnOutput : Instance<SacnOutput>, IStatusProvider, ICusto
         {
             if (_socket == null) return;
             if (_printToLog) Log.Debug("sACN Output: Closing socket.", this);
-            try
-            {
-                _socket.Close();
-            }
-            catch
-            {
-                /* Ignore */
-            }
-
+            try { _socket.Close(); } catch { /* Ignore */ }
             _socket = null;
             _connected = false;
             _lastErrorMessage = "Socket closed.";
@@ -488,14 +515,13 @@ internal sealed class SacnOutput : Instance<SacnOutput>, IStatusProvider, ICusto
                 _lastErrorMessage = "Local IP Address is not valid.";
                 return false;
             }
-
             try
             {
                 _socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
                 _socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
                 _socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastLoopback, true);
                 _socket.Bind(new IPEndPoint(localIp, 0)); // Bind to a dynamic port for sending
-                _socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastTimeToLive, 10);
+                _socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastTimeToLive, 1);
                 _lastErrorMessage = null;
                 if (_printToLog) Log.Debug($"sACN Output: Socket bound to {localIp}.", this);
                 return _connected = true;
@@ -554,11 +580,11 @@ internal sealed class SacnOutput : Instance<SacnOutput>, IStatusProvider, ICusto
 
     private sealed class ConnectionSettings
     {
-        private string? _lastLocalIpStr, _lastTargetIpStr;
-        private bool _lastSendUnicast;
         public IPAddress? LocalIp { get; private set; }
         public IPAddress? TargetIp { get; private set; }
         public bool SendUnicast { get; private set; }
+        private string? _lastLocalIpStr, _lastTargetIpStr;
+        private bool _lastSendUnicast;
 
         public bool Update(string? localIpStr, string? targetIpStr, bool sendUnicast)
         {
@@ -583,12 +609,7 @@ internal sealed class SacnOutput : Instance<SacnOutput>, IStatusProvider, ICusto
     #region IStatusProvider and ICustomDropdownHolder
     public IStatusProvider.StatusLevel GetStatusLevel() => _lastStatusLevel;
     public string? GetStatusMessage() => _lastErrorMessage;
-
-    public void SetStatus(string m, IStatusProvider.StatusLevel l)
-    {
-        _lastErrorMessage = m;
-        _lastStatusLevel = l;
-    }
+    public void SetStatus(string m, IStatusProvider.StatusLevel l) { _lastErrorMessage = m; _lastStatusLevel = l; }
 
     string ICustomDropdownHolder.GetValueForInput(Guid inputId)
     {
@@ -602,7 +623,10 @@ internal sealed class SacnOutput : Instance<SacnOutput>, IStatusProvider, ICusto
         if (inputId == LocalIpAddress.Id)
         {
             _networkInterfaces = GetNetworkInterfaces();
-            foreach (var adapter in _networkInterfaces) yield return adapter.DisplayName;
+            foreach (var adapter in _networkInterfaces)
+            {
+                yield return adapter.DisplayName;
+            }
         }
         else if (inputId == TargetIpAddress.Id)
         {
@@ -621,10 +645,6 @@ internal sealed class SacnOutput : Instance<SacnOutput>, IStatusProvider, ICusto
                     yield return sourceName;
                 }
             }
-        }
-        // Added an explicit else block to ensure all paths return a value.
-        else
-        {
         }
     }
 
@@ -650,41 +670,41 @@ internal sealed class SacnOutput : Instance<SacnOutput>, IStatusProvider, ICusto
     [Input(Guid = "2a8d39a3-5a41-477d-815a-8b8b9d8b1e4a")]
     public readonly MultiInputSlot<List<int>> InputsValues = new();
 
-    [Input(Guid = "1b26f5d5-8141-4b13-b88d-6859ed5a4af8")]
-    public readonly InputSlot<int> StartUniverse = new(1);
+    [Input(Guid = "B2C3D4E5-F6A7-8901-BCDE-F234567890AB")]
+    public readonly InputSlot<List<int>> UniverseChannels = new();
 
-    [Input(Guid = "9C233633-959F-4447-B248-4D431C1B18E7")]
-    public readonly InputSlot<string> LocalIpAddress = new("127.0.0.1");
+    [Input(Guid = "f8a7e0c8-c6c7-4b53-9a3a-3e5f2a4f4e1c")]
+    public readonly InputSlot<string> LocalIpAddress = new();
 
-    [Input(Guid = "9B8A7C6D-5E4F-4012-3456-7890ABCDEF12")]
+    [Input(Guid = "9c233633-959f-4447-b248-4d431c1b18e7")]
     public readonly InputSlot<bool> SendTrigger = new();
 
-    [Input(Guid = "C2D3E4F5-A6B7-4890-1234-567890ABCDEF")]
+    [Input(Guid = "c2a9e3e3-a4e9-430b-9c6a-4e1a1e0b8e2e")]
     public readonly InputSlot<bool> Reconnect = new();
 
-    [Input(Guid = "8C6C9A8D-29C5-489E-8C6B-9E4A3C1E2B6A")]
+    [Input(Guid = "8c6c9a8d-29c5-489e-8c6b-9e4a3c1e2b6a")]
     public readonly InputSlot<bool> SendUnicast = new();
 
-    [Input(Guid = "D9E8D7C6-B5A4-434A-9E3A-4E2B1D0C9A7B")]
+    [Input(Guid = "d9e8d7c6-b5a4-434a-9e3a-4e2b1d0c9a7b")]
     public readonly InputSlot<string> TargetIpAddress = new();
 
-    [Input(Guid = "3F25C04C-0A88-42FB-93D3-05992B861E61")]
+    [Input(Guid = "3f25c04c-0a88-42fb-93d3-05992b861e61")]
     public readonly InputSlot<bool> DiscoverSources = new();
 
-    [Input(Guid = "4A9E2D3B-8C6F-4B1D-8D7E-9F3A5B2C1D0E")]
+    [Input(Guid = "4a9e2d3b-8c6f-4b1d-8d7e-9f3a5b2c1d0e")]
     public readonly InputSlot<int> Priority = new(100);
 
-    [Input(Guid = "5B1D9C8A-7E3F-4A2B-9C8D-1E0F3A5B2C1D")]
+    [Input(Guid = "5b1d9c8a-7e3f-4a2b-9c8d-1e0f3a5b2c1d")]
     public readonly InputSlot<string> SourceName = new("T3 sACN Output");
 
-    [Input(Guid = "6F5C4B3A-2E1D-4F9C-8A7B-3D2E1F0C9B8A")]
+    [Input(Guid = "6f5c4b3a-2e1d-4f9c-8a7b-3d2e1f0c9b8a")]
     public readonly InputSlot<int> MaxFps = new(60);
 
-    [Input(Guid = "7A8B9C0D-1E2F-3A4B-5C6D-7E8F9A0B1C2D")]
+    [Input(Guid = "7a8b9c0d-1e2f-3a4b-5c6d-7e8f9a0b1c2d")]
     public readonly InputSlot<bool> EnableSync = new();
 
-    [Input(Guid = "8B9C0D1E-2F3A-4B5C-6D7E-8F9A0B1C2D3E")]
-    public readonly InputSlot<int> SyncUniverse = new(64001);
+    [Input(Guid = "8b9c0d1e-2f3a-4b5c-6d7e-8f9a0b1c2d3e")]
+    public readonly InputSlot<int> SyncUniverse = new(1);
 
     [Input(Guid = "D0E1F2A3-B4C5-4678-9012-3456789ABCDE")]
     public readonly InputSlot<bool> PrintToLog = new();
