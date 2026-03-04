@@ -1,7 +1,7 @@
 namespace Lib.render.basic;
 
 [Guid("84e9333f-38d2-422f-abf5-bf3929f01c7e")]
-internal sealed class TextOutlines2 : Instance<TextOutlines2>
+internal sealed class TextOutlines : Instance<TextOutlines>
                             ,ITransformable
 {
     public enum HorizontalAligns
@@ -22,7 +22,7 @@ internal sealed class TextOutlines2 : Instance<TextOutlines2>
     public readonly TransformCallbackSlot<Command> Output = new();
 
         
-    public TextOutlines2()
+    public TextOutlines()
     {
         Output.TransformableOp = this;
     }

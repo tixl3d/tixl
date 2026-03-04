@@ -1,7 +1,7 @@
 {
-  "Id": "84e9333f-38d2-422f-abf5-bf3929f01c7e"/*TextOutlines2*/,
+  "Id": "84e9333f-38d2-422f-abf5-bf3929f01c7e"/*TextOutlines*/,
   "Description": "Creates outlined text to use in combination with [Text] ",
-  "SymbolTags": "8",
+  "SymbolTags": "2056",
   "InputUis": [
     {
       "InputId": "0abd9f81-bc91-4775-bf0e-472399b9778e"/*LineHeight*/,
