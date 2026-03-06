@@ -23,6 +23,7 @@ cbuffer Params : register(b1)
     float AlphaCutOff;
     float BlurLevel;
     float UseCubeMap;
+    float UseVertexColor;
 };
 
 
@@ -31,6 +32,7 @@ struct psInput
     float2 texCoord : TEXCOORD;
     float4 pixelPosition : SV_POSITION;
     float3 normal : POSITION;
+    float3 colorRGB : COLOR;
 };
 
 sampler texSampler : register(s0);
@@ -56,7 +58,7 @@ psInput vsMain(uint id: SV_VertexID)
     output.pixelPosition = posInClipSpace;
 
     output.normal = vertex.Normal;
-
+    output.colorRGB = vertex.ColorRGB;
     float2 uv = vertex.TexCoord;
     output.texCoord = float2(uv.x , 1- uv.y);
     return output;
@@ -100,6 +102,8 @@ float4 psMain(psInput pin) : SV_TARGET
             discard;
         }
 
-        return albedo * Color;
+        float4 vertexColor = UseVertexColor > 0.5 ? float4(pin.colorRGB, 1) : 1;
+
+        return albedo * Color * vertexColor;
     }
 }

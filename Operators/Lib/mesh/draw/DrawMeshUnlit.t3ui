@@ -19,6 +19,13 @@
       "Description": "This defines whether the mesh covers itself or is covered by or covers other meshes."
     },
     {
+      "InputId": "33abccb4-cbf8-448b-95c7-b72d69c69af5"/*UseVertexColor*/,
+      "Position": {
+        "X": 550.2577,
+        "Y": 4915.0693
+      }
+    },
+    {
       "InputId": "44b31261-df87-4289-bc64-db349476e418"/*BlurLevel*/,
       "Position": {
         "X": 550.2577,
@@ -228,6 +235,13 @@
       "Position": {
         "X": 1103.1285,
         "Y": 4688.002
+      }
+    },
+    {
+      "ChildId": "a17463db-683d-4f75-b077-30d249bcdcff"/*BoolToFloat*/,
+      "Position": {
+        "X": 728.0109,
+        "Y": 5144.785
       }
     },
     {
