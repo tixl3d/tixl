@@ -1,0 +1,239 @@
+{
+  "Id": "81d27ec1-2d02-4352-98d2-f2bfb0d726bc"/*PuppetMesh*/,
+  "Description": "Deform a mesh with anchor points",
+  "InputUis": [
+    {
+      "InputId": "039daa17-44bb-456d-9f29-b86abbf308fe"/*AnchorPointsCurrent*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -206.5769,
+        "Y": 1525.9443
+      }
+    },
+    {
+      "InputId": "08468acd-f7c7-493b-973c-5814f1b3516e"/*Scale*/,
+      "Position": {
+        "X": 165.54813,
+        "Y": 1000.0075
+      },
+      "Description": "Scales the incoming subgraph in the following directions:\n\nX: Width\nY: Height\nZ: Depth\n",
+      "Scale": 0.01
+    },
+    {
+      "InputId": "2f4d18c2-2a68-41f0-8e7d-52de359f9d85"/*AnchorPoints*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -206.5769,
+        "Y": 1450.9443
+      }
+    },
+    {
+      "InputId": "34ec39a9-7009-49b1-9ca4-ab26b901c06d"/*Translation*/,
+      "Position": {
+        "X": 165.54813,
+        "Y": 930.0075
+      },
+      "GroupTitle": "Transform Mesh",
+      "Description": "Moves the incoming mesh\n\nX (-left / +right), \nY (-down / +up), \nZ (-forward / +backwards)\n",
+      "Scale": 0.01
+    },
+    {
+      "InputId": "46762c06-6bcc-4fda-8010-73a6881e36be"/*UseVertexSelection*/,
+      "Position": {
+        "X": 25.548126,
+        "Y": 1140.0073
+      },
+      "Description": "Defines whether only selected vertices should be affected by the manipulation",
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "a96c3b81-609a-498a-96e7-ac829ba29c72"/*ShowWeight*/,
+      "Position": {
+        "X": -206.5769,
+        "Y": 1600.9443
+      }
+    },
+    {
+      "InputId": "aa70bc7c-15b6-497b-90d0-6b11de7b8ca0"/*Rotation*/,
+      "Position": {
+        "X": 165.54813,
+        "Y": 965.0075
+      },
+      "Description": "Rotates the incoming mesh around the following axes:\n\nX: Horizontal axis\nY: Vertical axis\nZ: Forward axis\n",
+      "Min": -180.0,
+      "Max": 180.0,
+      "Scale": 3.6,
+      "Format": "{0:0.0}°"
+    },
+    {
+      "InputId": "b26a2a9d-36ea-43fd-9af8-b6b5fd791096"/*UniformScale*/,
+      "Position": {
+        "X": 165.54813,
+        "Y": 1035.0076
+      },
+      "Description": "Uniformly scales the incoming mesh",
+      "AddPadding": "True",
+      "Scale": 0.01
+    },
+    {
+      "InputId": "e0aa5992-1893-4126-b6b5-fc90c010e669"/*Mesh*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -621.14307,
+        "Y": 789.89764
+      }
+    },
+    {
+      "InputId": "f0364e79-ca6a-4a96-85c7-6eb88bf27654"/*Pivot*/,
+      "Position": {
+        "X": 165.54813,
+        "Y": 1070.0076
+      },
+      "GroupTitle": "Transform Pivot",
+      "Description": "Moves the pivot (center point) of the incoming subgraph:\n\nX (-left / +right) \nY (-down / +up) \nZ (-forward / +backwards)\n\nThe pivot point determines the location of the incoming subgraph gizmo. Transforming its location can make it easier to perform transformations around the position you want.\n",
+      "Scale": 0.01
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0ee51985-5d7c-41c9-8e5a-1f26df78cc88"/*GetBufferComponents*/,
+      "Position": {
+        "X": -30.806854,
+        "Y": 1449.165
+      }
+    },
+    {
+      "ChildId": "1cd0b7dd-d883-4e18-93ef-2948b1f6d350"/*ComputeShaderStage*/,
+      "Position": {
+        "X": 475.10886,
+        "Y": 524.0607
+      }
+    },
+    {
+      "ChildId": "1f5e2c7d-bc03-4783-85f8-72ba3340540f"/*GetBufferComponents*/,
+      "Position": {
+        "X": -481.14288,
+        "Y": 859.89764
+      }
+    },
+    {
+      "ChildId": "27c69c9d-0f47-44d9-b874-f3f57f856ec6"/*_AssembleMeshBuffers*/,
+      "Position": {
+        "X": 698.07605,
+        "Y": 771.1472
+      }
+    },
+    {
+      "ChildId": "447c58f8-b382-41b7-ae41-4cdc4686d770"/*BoolToFloat*/,
+      "Position": {
+        "X": 40.827927,
+        "Y": 1603.771
+      }
+    },
+    {
+      "ChildId": "4be80525-8cd9-485d-a080-701bb2d0d6be"/*GetBufferComponents*/,
+      "Position": {
+        "X": 73.47122,
+        "Y": 1520.918
+      }
+    },
+    {
+      "ChildId": "60b5e180-72f4-47d6-80fe-33c7b1443806"/*BoolToFloat*/,
+      "Position": {
+        "X": 165.54813,
+        "Y": 1140.0073
+      }
+    },
+    {
+      "ChildId": "62a427d7-b2db-4832-8637-fbb94533dfa4"/*_MeshBufferComponents*/,
+      "Position": {
+        "X": -481.14288,
+        "Y": 789.89764
+      }
+    },
+    {
+      "ChildId": "6fd77569-6c48-49fe-9d7e-25d4a10feb62"/*GetSRVProperties*/,
+      "Position": {
+        "X": -138.03426,
+        "Y": 586.6556
+      }
+    },
+    {
+      "ChildId": "71de0869-c1ca-48b2-90e2-0fd480490148"/*FloatsToBuffer*/,
+      "Style": "Resizable",
+      "Size": {
+        "X": 108.263535,
+        "Y": 130.72499
+      },
+      "Position": {
+        "X": 305.54813,
+        "Y": 1105.0074
+      }
+    },
+    {
+      "ChildId": "7575e4d1-bc47-4ab2-a709-c176f9572dc7"/*CalcDispatchCount*/,
+      "Position": {
+        "X": 1.9657593,
+        "Y": 551.6556
+      }
+    },
+    {
+      "ChildId": "83de4fc9-cfc4-4a9a-b29b-935aef1b0814"/*GetBufferComponents*/,
+      "Position": {
+        "X": 25.548124,
+        "Y": 1348.3009
+      }
+    },
+    {
+      "ChildId": "84c04b47-eb5a-4217-811f-7fd8fbf897fc"/*Value*/,
+      "Position": {
+        "X": 121.137634,
+        "Y": 1196.6157
+      }
+    },
+    {
+      "ChildId": "90511069-3ab9-4b39-8b66-acf8a036750d"/*TransformMatrix*/,
+      "Position": {
+        "X": 305.54813,
+        "Y": 930.0075
+      }
+    },
+    {
+      "ChildId": "987144cc-5205-494a-a86b-e899e6062f6c"/*StructuredBufferWithViews*/,
+      "Position": {
+        "X": 25.548124,
+        "Y": 1278.3009
+      }
+    },
+    {
+      "ChildId": "bb9cabbf-f102-4b4b-9f16-f9e9140eb33f"/*ComputeShader*/,
+      "Position": {
+        "X": -138.03424,
+        "Y": 516.6556
+      }
+    },
+    {
+      "ChildId": "c05c37a5-ca5f-4dff-ba17-b52214463fc6"/*ExecuteBufferUpdate*/,
+      "Position": {
+        "X": 475.1089,
+        "Y": 769.0607
+      }
+    },
+    {
+      "ChildId": "f234a2e0-985b-4b3d-a5b3-99df35d35f75"/*PBRVertex.Stride*/,
+      "Position": {
+        "X": -114.45187,
+        "Y": 1313.3009
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "35ce06c8-21ff-497f-817c-797a319a89c4"/*Result*/,
+      "Position": {
+        "X": 875.69165,
+        "Y": 954.2819
+      }
+    }
+  ]
+}
