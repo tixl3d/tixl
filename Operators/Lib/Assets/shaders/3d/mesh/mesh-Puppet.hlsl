@@ -8,6 +8,7 @@ cbuffer Params : register(b0)
     float4x4 TransformMatrix;
     float UseVertexSelection;
     float WeigthDebug;  // Enable/disable distance-based weighting
+    float WeightCtrl;
 }
 
 StructuredBuffer<PbrVertex> SourceVerts : t0;
@@ -102,8 +103,8 @@ void main(uint3 i : SV_DispatchThreadID)
                 float4 anchorCurrentRot  = AnchorPointsCurrent[j].Rotation;
                 float3 anchorOriginalScale = AnchorPointsOriginal[j].Scale;
                 float3 anchorCurrentScale  = AnchorPointsCurrent[j].Scale;      
-                float3 anchorDir = anchorOriginalPos - AnchorPointsOriginal[j+1].Position;
-                float weight = CalculateInfluence(originalPos, anchorOriginalPos, AnchorPointsOriginal[j].FX1);
+                //float3 anchorDir = anchorOriginalPos - AnchorPointsOriginal[j+1].Position;
+                float weight = CalculateInfluence(originalPos, anchorOriginalPos, AnchorPointsOriginal[j].FX1*WeightCtrl);
                 //float weight = CalculateLinearInfluence(originalPos, anchorOriginalPos,anchorDir, AnchorPointsOriginal[j].FX1);
                 if (weight > 0.001)
                 {

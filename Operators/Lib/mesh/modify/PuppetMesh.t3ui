@@ -1,6 +1,6 @@
 {
   "Id": "81d27ec1-2d02-4352-98d2-f2bfb0d726bc"/*PuppetMesh*/,
-  "Description": "Deform a mesh with anchor points",
+  "Description": "Deforms a mesh with weigthed points",
   "InputUis": [
     {
       "InputId": "039daa17-44bb-456d-9f29-b86abbf308fe"/*AnchorPointsCurrent*/,
@@ -45,6 +45,13 @@
       },
       "Description": "Defines whether only selected vertices should be affected by the manipulation",
       "AddPadding": "True"
+    },
+    {
+      "InputId": "752ca6e8-e2d6-4439-afa1-7f14d644d3a6"/*WeightStrength*/,
+      "Position": {
+        "X": -206.57689,
+        "Y": 1690.2443
+      }
     },
     {
       "InputId": "a96c3b81-609a-498a-96e7-ac829ba29c72"/*ShowWeight*/,
@@ -135,6 +142,13 @@
       "Position": {
         "X": 73.47122,
         "Y": 1520.918
+      }
+    },
+    {
+      "ChildId": "60917ebd-f0c5-41d5-91c5-21cda37a8bfa"/*Value*/,
+      "Position": {
+        "X": 258.07446,
+        "Y": 1339.7517
       }
     },
     {

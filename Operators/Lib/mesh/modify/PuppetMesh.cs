@@ -45,6 +45,9 @@ internal sealed class PuppetMesh :Instance<PuppetMesh>,ITransformable
 
         [Input(Guid = "a96c3b81-609a-498a-96e7-ac829ba29c72")]
         public readonly InputSlot<bool> ShowWeight = new InputSlot<bool>();
+
+        [Input(Guid = "752ca6e8-e2d6-4439-afa1-7f14d644d3a6")]
+        public readonly InputSlot<float> WeightStrength = new InputSlot<float>();
         
         
         
