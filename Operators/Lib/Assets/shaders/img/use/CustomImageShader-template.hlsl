@@ -14,8 +14,8 @@ cbuffer Params : register(b0)
 
 cbuffer Params : register(b1)
 {
-    float TargetWidth;
-    float TargetHeight;
+    int TargetWidth;
+    int TargetHeight;
 }
 
 
@@ -33,6 +33,10 @@ sampler Sampler : register(s0);
 sampler ClampedSampler : register(s1);
 sampler CustomSampler : register(s2);
 
+static const float2 Center=Offset;
+static const Texture2D<float4> Image=ImageA;
+static const Texture2D<float4> Image2=ImageB;
+
 //- DEFINES ------------------------------------
 /*{defines}*/
 //----------------------------------------------
@@ -42,7 +46,6 @@ float4 SampleGradient(float f){return Gradient.SampleLevel(ClampedSampler, float
 
 float4 psMain(vsOutput input) : SV_TARGET
 {
-    Texture2D<float4> Image = ImageA; // Compromize for  ackwards compatibility
 
     float width, height;
     ImageA.GetDimensions(width, height);

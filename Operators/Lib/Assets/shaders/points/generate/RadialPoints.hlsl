@@ -29,6 +29,7 @@ cbuffer Params : register(b0)
     float2 FX2;
 
     float4 Color;
+    float OrientationMode;
 } 
 
 RWStructuredBuffer<Point> ResultPoints : u0; // output
@@ -94,7 +95,7 @@ float3 GetPosForF(float f, float3 up)
                                      ? NAN
                                      : PointScaleRange.x + PointScaleRange.y * f);
 
-    if(true) 
+    if(OrientationMode < 0.5) 
     {
         float4 orientation = qFromAngleAxis(3.141578 / 2 * 1, normalize(OrientationAxis));
         orientation = qMul(orientation, qFromAngleAxis((OrientationAngle) / 180 * 3.141578, float3(1, 0, 0)));

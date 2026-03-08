@@ -3,6 +3,7 @@ using ImGuiNET;
 using T3.Core.Animation;
 using T3.Core.DataTypes;
 using T3.Core.Operator;
+using T3.Core.Utils;
 using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
@@ -17,12 +18,14 @@ namespace T3.Editor.Gui.Interaction.WithCurves;
 /// Editing of a set of curves and keyframes independent of the actual visualization.
 /// </summary>
 /// <remarks>This provides basic curve editing functionality outside a timeline context, e.g. for CurveParameters</remarks>
-public abstract class CurveEditing
+internal abstract class CurveEditing
 {
-    protected internal readonly HashSet<VDefinition> SelectedKeyframes = new();
+    protected readonly HashSet<VDefinition> SelectedKeyframes = [];
     protected abstract IEnumerable<Curve> GetAllCurves();
+    protected abstract IEnumerable<KeyframeCopyAndPasting.CurveWithDetails> GetAllCurvesWithDetails();
     protected abstract void ViewAllOrSelectedKeys(bool alsoChangeTimeRange = false);
     protected abstract void DeleteSelectedKeyframes(Instance composition);
+    protected abstract void PasteKeyframes();
     protected internal abstract void HandleCurvePointDragging(in Guid compositionSymbolId, VDefinition vDef, bool isSelected);
 
     /// <summary>
@@ -144,32 +147,71 @@ public abstract class CurveEditing
 
                     ImGui.EndMenu();
                 }
-
+                
+                if (ImGui.MenuItem("Copy keyframes", SelectedKeyframes.Count > 0))
+                {
+                    CopySelectedKeyframes();
+                    changed = true;
+                }
+                
                 if (ImGui.MenuItem("Delete keyframes", SelectedKeyframes.Count > 0))
                 {
                     DeleteSelectedKeyframes(composition);
                     changed = true;
                 }
 
-                if (ImGui.MenuItem("Recount values", SelectedKeyframes.Count > 0))
+                if (ImGui.MenuItem("Space Evenly", SelectedKeyframes.Count > 2))
                 {
-                    var value = 0;
-                    ForSelectedOrAllPointsDo((vDef) =>
-                                             {
-                                                 vDef.Value = value;
-                                                 value++;
-                                             });
-
+                    EvenlySpaceKeyframes();
                     changed = true;
                 }
+                
+                if (ImGui.BeginMenu("Set Sequential Values", enabled:SelectedKeyframes.Count>1))
+                {
+                    if (ImGui.MenuItem("Start at 0"))
+                    {
+                        var value = 0;
+                        ForSelectedOrAllPointsDo((vDef) =>
+                                                 {
+                                                     vDef.Value = value;
+                                                     value++;
+                                                 });
+
+                        changed = true;
+                    }
+                    
+                    if (ImGui.MenuItem("Start at First"))
+                    {
+                        var selectedOrAllPoints = GetSelectedOrAllPoints().OrderBy(v => v.U).ToList();
+                        if (selectedOrAllPoints.Count > 0)
+                        {
+                            var value = selectedOrAllPoints[0].Value;
+                            ForSelectedOrAllPointsDo((vDef) =>
+                                                     {
+                                                         vDef.Value = value;
+                                                         value++;
+                                                     });
+                        }
+                        changed = true;
+                    }
+                    
+                    ImGui.EndMenu();
+                }
+                
 
                 if (TimeLineCanvas.Current != null && ImGui.MenuItem("Duplicate keyframes", SelectedKeyframes.Count > 0))
                 {
-                    DuplicateSelectedKeyframes(TimeLineCanvas.Current.Playback.TimeInBars);
+                    DuplicateSelectedKeyframes();
                     changed = true;
                 }
             }
-
+            
+            if (ImGui.MenuItem("Paste keyframes", "", false,KeyframeCopyAndPasting.HasValidClipboard))
+            {
+                PasteKeyframes();
+                changed = true;
+            }
+            
             if (ImGui.MenuItem(SelectedKeyframes.Count > 0 ? "View Selected" : "View All", UserActions.FocusSelection.ListShortcuts()))
                 ViewAllOrSelectedKeys();
 
@@ -192,6 +234,68 @@ public abstract class CurveEditing
 
     private delegate void DoSomethingWithKeyframeDelegate(VDefinition v);
 
+    private void CopySelectedKeyframes()
+    {
+        var newCurves = new List<KeyframeCopyAndPasting.CurveWithDetails>();
+        foreach (var curveWithDetails in GetAllCurvesWithDetails())
+        {
+            Curve? newCurve = null;
+            
+            foreach (var keyframe in curveWithDetails.Curve.GetVDefinitions())
+            {
+                if (!SelectedKeyframes.Contains(keyframe))
+                    continue;
+
+                newCurve ??= new Curve();
+
+                newCurve.AddOrUpdateV(keyframe.U, keyframe.Clone());                
+            }
+
+            if (newCurve == null) 
+                continue;
+            
+            var newCurveWithDetails = curveWithDetails; // Copies struct
+            newCurveWithDetails.Curve = newCurve;
+            newCurves.Add(newCurveWithDetails);
+        }
+
+        KeyframeCopyAndPasting.SetClipboard(newCurves);
+    }
+    
+
+    
+    
+    private void EvenlySpaceKeyframes()
+    {
+        var selectedOrAllPoints = GetSelectedOrAllPoints().OrderBy(v => v.U).ToList();
+        if (selectedOrAllPoints.Count <= 2)
+        {
+            Log.Debug("You need to select 3 or more keyframes to distribute timing");
+            return;
+        }
+        
+        var startTime = selectedOrAllPoints[0].U;
+        var endTime = selectedOrAllPoints[^1].U;
+        var duration = endTime - startTime;
+        if (duration < 0.00001)
+        {
+            Log.Warning("Keyframes overlap");
+            return;
+        }
+        
+        var cmd = new ChangeKeyframesCommand(selectedOrAllPoints, GetAllCurves());
+
+        for (var index = 1; index < selectedOrAllPoints.Count-1; index++)
+        {
+            var f = index / (double)(selectedOrAllPoints.Count - 1);
+            selectedOrAllPoints[index].U = MathUtils.Lerp(startTime, endTime, f);
+        }
+
+        cmd.StoreCurrentValues();
+        UndoRedoStack.Add(cmd);
+    }
+
+    
     private void ForSelectedOrAllPointsDo(DoSomethingWithKeyframeDelegate doFunc)
     {
         var selectedOrAllPoints = GetSelectedOrAllPoints().OrderBy(v => v.U).ToList();
@@ -303,39 +407,10 @@ public abstract class CurveEditing
                select keyframe;
     }
 
-    protected void DuplicateSelectedKeyframes(double targetTime)
+    protected void DuplicateSelectedKeyframes()
     {
-        if (!SelectedKeyframes.Any())
-        {
-            Log.Debug("Select keyframes to duplicate to current time");
-            return;
-        }
-
-        var minTime = float.PositiveInfinity;
-        foreach (var key in SelectedKeyframes)
-        {
-            minTime = Math.Min((float)key.U, minTime);
-        }
-
-        var newSelection = new HashSet<VDefinition>();
-
-        foreach (var curve in GetAllCurves())
-        {
-            foreach (var key in curve.GetVDefinitions().ToList())
-            {
-                if (!SelectedKeyframes.Contains(key))
-                    continue;
-
-                var timeOffset = key.U - minTime;
-                var newKey = key.Clone();
-                curve.AddOrUpdateV(targetTime + timeOffset, newKey);
-                newSelection.Add(newKey);
-            }
-        }
-
-        RebuildCurveTables();
-        SelectedKeyframes.Clear();
-        SelectedKeyframes.UnionWith(newSelection);
+        CopySelectedKeyframes();
+        PasteKeyframes();
     }
 
     /// <summary>

@@ -44,7 +44,7 @@
         {
           "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "float4 smp=Image.Load(int3(PixelCoord.xy,0));\n\nfloat2 fxy=frac(uv+.5)-.5;\nfloat fx=length(fxy*2);\n\nc=smp;\nc*=smoothstep(0,1,log2(fx)+A);\nc*=smoothstep(1,0,log2(fx)+B);\n\n\nc*=pow(.5+fx*20,C)*exp2(D);"
+          "Value": "float4 smp=ImageA.Load(int3(PixelCoord.xy,0));\n\nfloat2 fxy=frac(uv+.5)-.5;\nfloat fx=length(fxy*2);\n\nc=smp;\nc*=smoothstep(0,1,log2(fx)+A);\nc*=smoothstep(1,0,log2(fx)+B);\n\n\nc*=pow(.5+fx*20,C)*exp2(D);"
         },
         {
           "Id": "b4895a95-5ff4-4583-9ec3-befcf0f7b18b"/*B*/,
@@ -129,7 +129,7 @@
         {
           "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "c= Image.Sample(Sampler, uv);\nc.xyz=(c.xyz)*A+B;\n\nc.a=1;"
+          "Value": "c= ImageA.Sample(Sampler, uv);\nc.xyz=(c.xyz)*A+B;\n\nc.a=1;"
         },
         {
           "Id": "b4895a95-5ff4-4583-9ec3-befcf0f7b18b"/*B*/,
@@ -147,7 +147,7 @@
         {
           "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "c= Image.Sample(Sampler, uv);\nc=float4(c.x,0,c.y,0);"
+          "Value": "c= ImageA.Sample(Sampler, uv);\nc=float4(c.x,0,c.y,0);"
         }
       ],
       "Outputs": []
@@ -188,7 +188,7 @@
         {
           "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "c=Image.SampleLevel(CustomSampler, float2(uv.x*2,uv.y),0);\nif(uv.x>.5)c= Image2.SampleLevel(CustomSampler, float2(uv.x*2-1,uv.y),0);\nc.a=1;"
+          "Value": "c=ImageA.SampleLevel(CustomSampler, float2(uv.x*2,uv.y),0);\nif(uv.x>.5)c= ImageB.SampleLevel(CustomSampler, float2(uv.x*2-1,uv.y),0);\nc.a=1;"
         }
       ],
       "Outputs": []
@@ -201,15 +201,9 @@
         {
           "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "uv+=Center;\nc=  float4(uv,0,1);\nc= Image.Sample(Sampler, uv);\nc.xy=c.xy*.5+.5;\nc.z=0;\nc.a=1;\n"
+          "Value": "uv+=Offset;\nc=  float4(uv,0,1);\nc= ImageA.Sample(Sampler, uv);\nc.xy=c.xy*.5+.5;\nc.z=0;\nc.a=1;\n"
         }
       ],
-      "Outputs": []
-    },
-    {
-      "Id": "109e523d-d94e-43d7-bd7a-ff888f93302c"/*LoadImage*/,
-      "SymbolId": "0b3436db-e283-436e-ba85-2f3a1de76a9d",
-      "InputValues": [],
       "Outputs": []
     },
     {
@@ -238,7 +232,7 @@
         {
           "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "uv+=Center;\nc=  float4(uv,0,1);\nc*= Image.Sample(Sampler, uv);\nfloat ns=sqrt(TargetSize.x);\n\nc=(PixelCoord.x==int(A))*ns;\n\nc.zw=float2(0,ns);\nif(PixelCoord.x!=0)c.zw=0;\nc.a=1;\n"
+          "Value": "uv+=Offset;\nc=  float4(uv,0,1);\nc*= ImageA.Sample(Sampler, uv);\nfloat ns=sqrt(TargetSize.x);\n\nc=(PixelCoord.x==int(A))*ns;\n\nc.zw=float2(0,ns);\nif(PixelCoord.x!=0)c.zw=0;\nc.a=1;\n"
         }
       ],
       "Outputs": []
@@ -280,7 +274,7 @@
         {
           "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "c= Image.Sample(Sampler, uv);\nint2 ts=int2(TargetSize);\nfloat4 smp=Image.Load(int3((PixelCoord.xy+ts/2)%ts,0));\nc=length(smp.xy)*3;\nc=c/(1+c);\nc.xy=smp.xy*.1+0.5;\n//if(uv.x<.5)c.xy=c.xy*float2(1,-1);\n//if(length(smp.xy)>0.01)c.xy=frac(atan2(c.x,c.y)/acos(-1)/2+.5);\n\nc=float4(c.xy,0,1);"
+          "Value": "c= ImageA.Sample(Sampler, uv);\nint2 ts=int2(TargetSize);\nfloat4 smp=Image.Load(int3((PixelCoord.xy+ts/2)%ts,0));\nc=length(smp.xy)*3;\nc=c/(1+c);\nc.xy=smp.xy*.1+0.5;\n//if(uv.x<.5)c.xy=c.xy*float2(1,-1);\n//if(length(smp.xy)>0.01)c.xy=frac(atan2(c.x,c.y)/acos(-1)/2+.5);\n\nc=float4(c.xy,0,1);"
         },
         {
           "Id": "c9a801ec-13fb-4ad4-b0cd-d125b5db500a"/*AdditionalCode*/,
@@ -379,18 +373,6 @@
       "Outputs": []
     },
     {
-      "Id": "21b8d654-c097-4141-8f0a-34ba7fb9a758"/*Displace*/,
-      "SymbolId": "1b149f1f-529c-4418-ac9d-3871f24a9e38",
-      "InputValues": [
-        {
-          "Id": "0f2867ab-a65e-4bf3-b1b5-9c241690ba5f"/*Displacement*/,
-          "Type": "System.Single",
-          "Value": 0.25
-        }
-      ],
-      "Outputs": []
-    },
-    {
       "Id": "21f9ee78-0314-4496-8122-8904a6be6525"/*Execute*/,
       "SymbolId": "936e4324-bea2-463a-b196-6064a2d8a6b2",
       "InputValues": [],
@@ -409,7 +391,7 @@
         {
           "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "c= Image.Sample(Sampler, uv);\nc.x=dot(c.xyz,float3(1,0,0))*A;\nc.yz=0;\nc.w=1;"
+          "Value": "c= ImageA.Sample(Sampler, uv);\nc.x=dot(c.xyz,float3(1,0,0))*A;\nc.yz=0;\nc.w=1;"
         }
       ],
       "Outputs": []
@@ -439,7 +421,7 @@
         {
           "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "float4 smp=Image.Load(int3(PixelCoord.xy,0));\n\nfloat lt=0;\nif(length(smp.xy)>0)lt=atan2(smp.x,smp.y)/acos(-1)/2+.5;\n\nfloat2 vx,vy,vz;\nWaveXYZ(uv,lt,vx,vy,vz);\nc=float4(vy,vz)*length(smp.xy);\n\n\nc*=A;"
+          "Value": "float4 smp=ImageA.Load(int3(PixelCoord.xy,0));\n\nfloat lt=0;\nif(length(smp.xy)>0)lt=atan2(smp.x,smp.y)/acos(-1)/2+.5;\n\nfloat2 vx,vy,vz;\nWaveXYZ(uv,lt,vx,vy,vz);\nc=float4(vy,vz)*length(smp.xy);\n\n\nc*=A;"
         },
         {
           "Id": "c9a801ec-13fb-4ad4-b0cd-d125b5db500a"/*AdditionalCode*/,
@@ -467,7 +449,7 @@
         {
           "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "uv+=Center;\nc=  float4(uv,0,1);\nfloat4 smp=Image.Sample(Sampler, frac(uv+0.5));\nc=float4(length(smp.xy),length(smp.zw),length(smp.xy)+length(smp.zw),1);\nc.z*=0.1;\nfloat fx=length(frac(uv+0.5)-0.5);\nc*=pow(fx*10,.5)*exp2(A);\n//c=log2(1+c*10);\nc=c/(1+c);\nc.a=1;\n"
+          "Value": "uv+=Offset;\nc=  float4(uv,0,1);\nfloat4 smp=ImageA.Sample(Sampler, frac(uv+0.5));\nc=float4(length(smp.xy),length(smp.zw),length(smp.xy)+length(smp.zw),1);\nc.z*=0.1;\nfloat fx=length(frac(uv+0.5)-0.5);\nc*=pow(fx*10,.5)*exp2(A);\n//c=log2(1+c*10);\nc=c/(1+c);\nc.a=1;\n"
         }
       ],
       "Outputs": []
@@ -497,7 +479,7 @@
         {
           "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "c= Image.Sample(Sampler, uv);\nc.xyz=c.x*A;\n\nc.w=1;"
+          "Value": "c= ImageA.Sample(Sampler, uv);\nc.xyz=c.x*A;\n\nc.w=1;"
         }
       ],
       "Outputs": []
@@ -577,7 +559,7 @@
         {
           "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "uv+=Center;\nc=  float4(uv,0,1);\nc= Image.Sample(Sampler, uv);\n\nfloat d=length(uv*2-1);\nc=smoothstep(.9,0,d);\nc*=.0001+smoothstep(.009,0,d)*88+.061/(.001+d);\n"
+          "Value": "uv+=Offset;\nc=  float4(uv,0,1);\nc= ImageA.Sample(Sampler, uv);\n\nfloat d=length(uv*2-1);\nc=smoothstep(.9,0,d);\nc*=.0001+smoothstep(.009,0,d)*88+.061/(.001+d);\n"
         }
       ],
       "Outputs": []
@@ -595,7 +577,7 @@
         {
           "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "c= Image.Sample(Sampler, uv);\nc.xyz=c.x*A;\nc.w=1;"
+          "Value": "c= ImageA.Sample(Sampler, uv);\nc.xyz=c.x*A;\nc.w=1;"
         }
       ],
       "Outputs": []
@@ -625,7 +607,7 @@
         {
           "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "float4 smp1= Image.Sample(Sampler, uv);\nfloat4 smp2=Image2.Sample(Sampler, uv);\nc=float4(length(smp1.xy),length(smp1.zw),length(smp2.xy),length(smp2.zw));\nc.rgb*=exp2(0*pow(length(uv*2-1),2));\nc.a=1;"
+          "Value": "float4 smp1= ImageA.Sample(Sampler, uv);\nfloat4 smp2= ImageB.Sample(Sampler, uv);\nc=float4(length(smp1.xy),length(smp1.zw),length(smp2.xy),length(smp2.zw));\nc.rgb*=exp2(0*pow(length(uv*2-1),2));\nc.a=1;"
         }
       ],
       "Outputs": []
@@ -908,7 +890,7 @@
         {
           "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "float4 smp1= Image.Sample(Sampler, uv);\nfloat4 smp2=Image2.Sample(Sampler, uv);\n\nc.xy=cmul(smp1.xy,smp2.xy);\nc.zw=cmul(smp1.zw,smp2.zw);\n\nif(A>0.5){\nfloat4 f0=Image2.Load(int3(0,0,0));\nc.xy/=length(f0.xy);\nc.zw/=length(f0.zw);\n}"
+          "Value": "float4 smp1= ImageA.Sample(Sampler, uv);\nfloat4 smp2= ImageB.Sample(Sampler, uv);\n\nc.xy=cmul(smp1.xy,smp2.xy);\nc.zw=cmul(smp1.zw,smp2.zw);\n\nif(A>0.5){\nfloat4 f0=ImageB.Load(int3(0,0,0));\nc.xy/=length(f0.xy);\nc.zw/=length(f0.zw);\n}"
         },
         {
           "Id": "c9a801ec-13fb-4ad4-b0cd-d125b5db500a"/*AdditionalCode*/,
@@ -967,7 +949,7 @@
         {
           "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "c=Image.SampleLevel(CustomSampler, float2(uv.x*2,uv.y),0);\n//if(uv.x>.5)c= Image2.SampleLevel(CustomSampler, float2(uv.x*2-1,uv.y),0);\nif(uv.x>.5)c= Image2.SampleLevel(Sampler, float2(uv.x*2-1,uv.y),0);\nc.a=1;"
+          "Value": "c=ImageA.SampleLevel(CustomSampler, float2(uv.x*2,uv.y),0);\n//if(uv.x>.5)c= ImageB.SampleLevel(CustomSampler, float2(uv.x*2-1,uv.y),0);\nif(uv.x>.5)c= ImageB.SampleLevel(Sampler, float2(uv.x*2-1,uv.y),0);\nc.a=1;"
         }
       ],
       "Outputs": []
@@ -1165,7 +1147,7 @@
         {
           "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "uv+=Center;\nc=  float4(uv,0,1);\nc= Image.Sample(Sampler, uv);\nfloat2 uvm=frac(uv+0.5);\nfloat4 mask=Image2.Sample(Sampler, uvm);\nc*= mask;"
+          "Value": "uv+= Offset;\nc= float4(uv,0,1);\nc= ImageA.Sample(Sampler, uv);\nfloat2 uvm= frac(uv+0.5);\nfloat4 mask= ImageB.Sample(Sampler, uvm);\nc*= mask;"
         }
       ],
       "Outputs": []
@@ -1186,7 +1168,7 @@
         {
           "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "c=Image.SampleLevel(CustomSampler, float2(uv.x,uv.y*2-0),0);\n\nif(uv.y>.5)c= Image2.SampleLevel(CustomSampler, float2(uv.x,uv.y*2-1),0);\n//if(uv.y>.5)c= Image2.SampleLevel(Sampler, float2(uv.x,uv.y*2-1),0);\nc.a=1;"
+          "Value": "c=ImageA.SampleLevel(CustomSampler, float2(uv.x,uv.y*2-0),0);\n\nif(uv.y>.5)c= ImageB.SampleLevel(CustomSampler, float2(uv.x,uv.y*2-1),0);\n//if(uv.y>.5)c= ImageB.SampleLevel(Sampler, float2(uv.x,uv.y*2-1),0);\nc.a=1;"
         }
       ],
       "Outputs": []
@@ -1266,7 +1248,7 @@
         {
           "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "c= Image.Sample(Sampler, uv);\nfloat2 uvf=frac(uv+0.5);\nfloat fx=length(uvf.xy-.5);\nfloat a=length(c.xy);\n\nfloat4 mask=Image2.SampleLevel(Sampler, frac(uv+0.5),0);\nmask=max(mask,Image2.SampleLevel(Sampler, 1-frac(uv+0.5),0));\nc*=exp(-A*mask.a);\n"
+          "Value": "c= ImageA.Sample(Sampler, uv);\nfloat2 uvf=frac(uv+0.5);\nfloat fx=length(uvf.xy-.5);\nfloat a=length(c.xy);\n\nfloat4 mask=ImageB.SampleLevel(Sampler, frac(uv+0.5),0);\nmask=max(mask,ImageB.SampleLevel(Sampler, 1-frac(uv+0.5),0));\nc*=exp(-A*mask.a);\n"
         },
         {
           "Id": "b4895a95-5ff4-4583-9ec3-befcf0f7b18b"/*B*/,
@@ -1506,7 +1488,7 @@
         {
           "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "c= Image.Sample(Sampler, uv);\nc=float4(c.z,0,c.w,0);"
+          "Value": "c= ImageA.Sample(Sampler, uv);\nc=float4(c.z,0,c.w,0);"
         }
       ],
       "Outputs": []
@@ -1645,29 +1627,6 @@
           "Id": "421fe2f3-7700-4479-9842-080106c4eb6d"/*Direction*/,
           "Type": "System.Int32",
           "Value": 1
-        }
-      ],
-      "Outputs": []
-    },
-    {
-      "Id": "8251a316-ddd4-4b54-bfbf-8c8a9e5c4614"/*TransformImage*/,
-      "SymbolId": "32e18957-3812-4f64-8663-18454518d005",
-      "InputValues": [
-        {
-          "Id": "5c76dc8d-3a28-4b93-b3a0-e008c1ff14e9"/*Resolution*/,
-          "Type": "T3.Core.DataTypes.Vector.Int2",
-          "Value": {
-            "X": 1024,
-            "Y": 512
-          }
-        },
-        {
-          "Id": "6f4184f1-6017-4bcc-ac1f-5ea4862bfb0c"/*Offset*/,
-          "Type": "System.Numerics.Vector2",
-          "Value": {
-            "X": 0.181,
-            "Y": 0.0
-          }
         }
       ],
       "Outputs": []
@@ -1820,7 +1779,7 @@
         {
           "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "float4 smp1= Image.Sample(Sampler, uv);\nfloat4 smp2=Image2.Sample(Sampler, uv);\n\nc.xy=cmul(smp1.xy,smp2.xy);\nc.zw=cmul(smp1.zw,smp2.zw);\n\nif(A>0.5){\nfloat4 f0=Image2.Load(int3(0,0,0));\nc.xy/=length(f0.xy);\nc.zw/=length(f0.zw);\n}\n"
+          "Value": "float4 smp1= ImageA.Sample(Sampler, uv);\nfloat4 smp2= ImageB.Sample(Sampler, uv);\n\nc.xy=cmul(smp1.xy,smp2.xy);\nc.zw=cmul(smp1.zw,smp2.zw);\n\nif(A>0.5){\nfloat4 f0= ImageB.Load(int3(0,0,0));\nc.xy/=length(f0.xy);\nc.zw/=length(f0.zw);\n}\n"
         },
         {
           "Id": "c9a801ec-13fb-4ad4-b0cd-d125b5db500a"/*AdditionalCode*/,
@@ -1862,7 +1821,7 @@
         {
           "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "uv+=Center;\nc=  float4(uv,0,1);\nfloat4 smp=Image.Sample(Sampler, frac(uv+0.5));\nc=float4(length(smp.xy),length(smp.zw),length(smp.xy)+length(smp.zw),1);\n\nfloat fx=length(frac(uv+0.5)-0.5);\nc*=pow(fx*10,.95);\n//c=log2(1+c*10);\nc=c/(1+c);\nc.a=1;\n"
+          "Value": "uv+= Offset;\nc=  float4(uv,0,1);\nfloat4 smp=ImageA.Sample(Sampler, frac(uv+0.5));\nc=float4(length(smp.xy),length(smp.zw),length(smp.xy)+length(smp.zw),1);\n\nfloat fx=length(frac(uv+0.5)-0.5);\nc*=pow(fx*10,.95);\n//c=log2(1+c*10);\nc=c/(1+c);\nc.a=1;\n"
         }
       ],
       "Outputs": []
@@ -1883,7 +1842,7 @@
         {
           "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "c= Image.SampleLevel(Sampler, frac(uv-Center),0);\nc.xyz=length(c.xy)*float3(1,4,8);\nc=c/(1+c);\nc.a=1;"
+          "Value": "c= ImageA.SampleLevel(Sampler, frac(uv-Offset),0);\nc.xyz=length(c.xy)*float3(1,4,8);\nc=c/(1+c);\nc.a=1;"
         }
       ],
       "Outputs": []
@@ -1927,7 +1886,7 @@
         {
           "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "float4 smp1= Image.Sample(Sampler, uv);\nfloat4 smp2= Image2.Sample(Sampler, uv);\n\nc=float4(smp1.x,-smp1.z,smp2.z,1);"
+          "Value": "float4 smp1= ImageA.Sample(Sampler, uv);\nfloat4 smp2= ImageB.Sample(Sampler, uv);\n\nc=float4(smp1.x,-smp1.z,smp2.z,1);"
         },
         {
           "Id": "e0d05b9c-d433-4b9d-8e70-db2f7993d628"/*TextureFormat*/,
@@ -2047,7 +2006,7 @@
         {
           "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "c= Image.SampleLevel(Sampler, frac(uv-Center),0);\nc.xyz=length(c.xy)*float3(1,4,8);\nc=c/(1+c);\nc.a=1;"
+          "Value": "c= ImageA.SampleLevel(Sampler, frac(uv-Offset),0);\nc.xyz=length(c.xy)*float3(1,4,8);\nc=c/(1+c);\nc.a=1;"
         }
       ],
       "Outputs": []
@@ -2075,7 +2034,7 @@
         {
           "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "//uv=abs(uv*2-1);\nc= Image.Sample(Sampler, uv);\nint2 fq=int2(Center);\nc=float4(.5+.5*sin((dot(uv,fq)+D)*acos(-1)*2),0,0,1);"
+          "Value": "//uv=abs(uv*2-1);\nc= ImageA.Sample(Sampler, uv);\nint2 fq=int2(Offset);\nc=float4(.5+.5*sin((dot(uv,fq)+D)*acos(-1)*2),0,0,1);"
         }
       ],
       "Outputs": []
@@ -2113,7 +2072,7 @@
         {
           "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "\n\nfloat2 uvf=frac(uv+0.5);\nfloat fx=length(uvf.xy-.5);\nfloat a=length(c.xy);\n\nfloat4 rnd1=rndz(PixelCoord.xyy+1,16+int(D));\n\n//c=0;\nc.xy=r2d(float2(rnd1.x,0),rnd1.y+B);\nc.zw=r2d(c.xy,.25);\nc*=smoothstep(0,1,log2(fx)+10-Center.x);\nc*=smoothstep(1,0,log2(fx)+10-Center.y);\nif(PixelCoord.x==0&&PixelCoord.y==0)c=0;\nc*=pow(fx*20,A)*exp2(C);\n//c*=.02;\n//c.b=0;\n//c.a=1;"
+          "Value": "\n\nfloat2 uvf=frac(uv+0.5);\nfloat fx=length(uvf.xy-.5);\nfloat a=length(c.xy);\n\nfloat4 rnd1=rndz(PixelCoord.xyy+1,16+int(D));\n\n//c=0;\nc.xy=r2d(float2(rnd1.x,0),rnd1.y+B);\nc.zw=r2d(c.xy,.25);\nc*=smoothstep(0,1,log2(fx)+10-Offset.x);\nc*=smoothstep(1,0,log2(fx)+10-Offset.y);\nif(PixelCoord.x==0&&PixelCoord.y==0)c=0;\nc*=pow(fx*20,A)*exp2(C);\n//c*=.02;\n//c.b=0;\n//c.a=1;"
         },
         {
           "Id": "b4895a95-5ff4-4583-9ec3-befcf0f7b18b"/*B*/,
@@ -2208,9 +2167,9 @@
           "Id": "313596cc-3854-436b-89da-5fd40164ce76"/*Position*/,
           "Type": "System.Numerics.Vector3",
           "Value": {
-            "X": 0.5229834,
-            "Y": 0.45736027,
-            "Z": 0.6525262
+            "X": 0.16342014,
+            "Y": 0.11316937,
+            "Z": -0.12851483
           }
         },
         {
@@ -2379,7 +2338,7 @@
         {
           "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "c= Image.Sample(Sampler, uv);\nc=float4(c.x,0,c.y,0);"
+          "Value": "c= ImageA.Sample(Sampler, uv);\nc=float4(c.x,0,c.y,0);"
         }
       ],
       "Outputs": []
@@ -2482,7 +2441,7 @@
         {
           "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "//uv=abs(uv*2-1);\nc= Image.Sample(Sampler, uv);\nint2 fq=int2(Center);\nc=float4(.5+.5*sin((dot(uv,fq)+D)*acos(-1)*2),0,0,1);"
+          "Value": "//uv=abs(uv*2-1);\nc= ImageA.Sample(Sampler, uv);\nint2 fq=int2(Offset);\nc=float4(.5+.5*sin((dot(uv,fq)+D)*acos(-1)*2),0,0,1);"
         }
       ],
       "Outputs": []
@@ -2512,7 +2471,7 @@
         {
           "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "c= Image.Sample(Sampler, uv);\nc.x=dot(c.xyz,float3(1,0,0))*A;\nc.yz=0;\nc.w=1;"
+          "Value": "c= ImageA.Sample(Sampler, uv);\nc.x=dot(c.xyz,float3(1,0,0))*A;\nc.yz=0;\nc.w=1;"
         }
       ],
       "Outputs": []
@@ -2555,7 +2514,7 @@
         {
           "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "c= Image.Sample(Sampler, uv);\nfloat2 uvf=frac(uv+0.5);\nfloat fx=length(uvf.xy-.5);\nfloat a=length(c.xy);\n\nfloat4 mask=Image2.SampleLevel(Sampler, frac(uv+0.5),0);\n\nc*=exp(A*mask.x);\n"
+          "Value": "c= ImageA.Sample(Sampler, uv);\nfloat2 uvf=frac(uv+0.5);\nfloat fx=length(uvf.xy-.5);\nfloat a=length(c.xy);\n\nfloat4 mask=ImageB.SampleLevel(Sampler, frac(uv+0.5),0);\n\nc*=exp(A*mask.x);\n"
         }
       ],
       "Outputs": []
@@ -2597,7 +2556,7 @@
         {
           "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "c= Image.Sample(Sampler, uv);\nc=c/(1.001-c);\nc*=exp2(A);\nc.rgb*=exp2(-B*pow(length(uv*2-1),2));"
+          "Value": "c= ImageA.Sample(Sampler, uv);\nc=c/(1.001-c);\nc*=exp2(A);\nc.rgb*=exp2(-B*pow(length(uv*2-1),2));"
         },
         {
           "Id": "b4895a95-5ff4-4583-9ec3-befcf0f7b18b"/*B*/,
@@ -2726,7 +2685,7 @@
         {
           "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "uv+=Center;\nc=  float4(uv,0,1);\nc= Image.Sample(Sampler, uv);\n\nc.rg=c.rg/acos(-1)+0.5>uv.y;\nc.a=1;"
+          "Value": "uv+=Offset;\nc=  float4(uv,0,1);\nc= ImageA.Sample(Sampler, uv);\n\nc.rg=c.rg/acos(-1)+0.5>uv.y;\nc.a=1;"
         }
       ],
       "Outputs": []
@@ -2999,7 +2958,7 @@
         {
           "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "float4 smp=Image.Load(int3(PixelCoord.xy,0));\n\nfloat lt=0;\nif(length(smp.xy)>0)lt=atan2(smp.x,smp.y)/acos(-1)/2+.5;\n\nfloat2 vx,vy,vz;\nWaveXYZ(uv,lt,vx,vy,vz);\nc=float4(vx,vy)*length(smp.xy);\n\n\nc*=A;"
+          "Value": "float4 smp=ImageA.Load(int3(PixelCoord.xy,0));\n\nfloat lt=0;\nif(length(smp.xy)>0)lt=atan2(smp.x,smp.y)/acos(-1)/2+.5;\n\nfloat2 vx,vy,vz;\nWaveXYZ(uv,lt,vx,vy,vz);\nc=float4(vx,vy)*length(smp.xy);\n\n\nc*=A;"
         },
         {
           "Id": "c9a801ec-13fb-4ad4-b0cd-d125b5db500a"/*AdditionalCode*/,
@@ -3181,7 +3140,7 @@
         {
           "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "c=Image.SampleLevel(CustomSampler, float2(uv.x,uv.y*2-0),0);\n\nif(uv.y>.5)c= Image2.SampleLevel(CustomSampler, float2(uv.x,uv.y*2-1),0);\n//if(uv.y>.5)c= Image2.SampleLevel(Sampler, float2(uv.x,uv.y*2-1),0);\nc.a=1;"
+          "Value": "c=ImageA.SampleLevel(CustomSampler, float2(uv.x,uv.y*2-0),0);\n\nif(uv.y>.5)c= ImageB.SampleLevel(CustomSampler, float2(uv.x,uv.y*2-1),0);\n//if(uv.y>.5)c= ImageB.SampleLevel(Sampler, float2(uv.x,uv.y*2-1),0);\nc.a=1;"
         }
       ],
       "Outputs": []
@@ -3267,7 +3226,7 @@
         {
           "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "c= Image.Sample(Sampler, uv);\nc=float4(c.z,0,c.w,0);"
+          "Value": "c= ImageA.Sample(Sampler, uv);\nc=float4(c.z,0,c.w,0);"
         }
       ],
       "Outputs": []
@@ -3306,7 +3265,7 @@
         {
           "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
           "Type": "System.String",
-          "Value": "\nfloat2 fxy=frac(uv+.5)-.5;\nuint RandomSeed=13;\nfloat3 rnd1=hash33u(int3(PixelCoord.xy,1+RandomSeed)); \n\nfloat m=1;\nm*=!all(PixelCoord.xy==0);\nm*=1.0/pow(length(fxy)*10,2.0);\n\nm*=A;\nfloat2 dir=r2d(float2(1,0),Center.x);\nfloat wf=dot(dir,normalize(fxy));\n\nwf=pow(abs(wf)*1.04,exp2(Center.y)*length(fxy))*sign(wf);\nwf*=exp2(exp2(Center.y*.5)*(-1+dot(dir,normalize(fxy))));\nwf=pow(abs(frac(atan2(fxy.x,fxy.y)/acos(-1)/2+.5+Center.x)*2-1),exp2(Center.y)*pow(length(fxy),.15));\nwf=exp(-exp2(Center.y)*pow(length(fxy),.15)*pow(abs(frac(atan2(fxy.x,fxy.y)/acos(-1)/2+.5+Center.x)*2-1),2));\nm*=wf;\nm+=B*exp2(-rnd1.y*5)/pow(length(fxy)*10,1.0)*pow(wf,.1);\nm*=exp2(-rnd1.x*3);\n\n//m*=smoothstep(.5,.4,length(fxy));\nfloat fqt=floor(1+250*pow(length(fxy)*50,C));\nfloat lt=D*fqt+rnd1.z*8;\n\nc.xy=r2d(float2(m,0),lt);\n\nc.z=0;\nc.a=1;"
+          "Value": "\nfloat2 fxy=frac(uv+.5)-.5;\nuint RandomSeed=13;\nfloat3 rnd1=hash33u(int3(PixelCoord.xy,1+RandomSeed)); \n\nfloat m=1;\nm*=!all(PixelCoord.xy==0);\nm*=1.0/pow(length(fxy)*10,2.0);\n\nm*=A;\nfloat2 dir=r2d(float2(1,0),Offset.x);\nfloat wf=dot(dir,normalize(fxy));\n\nwf=pow(abs(wf)*1.04,exp2(Offset.y)*length(fxy))*sign(wf);\nwf*=exp2(exp2(Offset.y*.5)*(-1+dot(dir,normalize(fxy))));\nwf=pow(abs(frac(atan2(fxy.x,fxy.y)/acos(-1)/2+.5+Offset.x)*2-1),exp2(Offset.y)*pow(length(fxy),.15));\nwf=exp(-exp2(Offset.y)*pow(length(fxy),.15)*pow(abs(frac(atan2(fxy.x,fxy.y)/acos(-1)/2+.5+Offset.x)*2-1),2));\nm*=wf;\nm+=B*exp2(-rnd1.y*5)/pow(length(fxy)*10,1.0)*pow(wf,.1);\nm*=exp2(-rnd1.x*3);\n\n//m*=smoothstep(.5,.4,length(fxy));\nfloat fqt=floor(1+250*pow(length(fxy)*50,C));\nfloat lt=D*fqt+rnd1.z*8;\n\nc.xy=r2d(float2(m,0),lt);\n\nc.z=0;\nc.a=1;"
         },
         {
           "Id": "b4895a95-5ff4-4583-9ec3-befcf0f7b18b"/*B*/,
@@ -3488,18 +3447,6 @@
       "SourceSlotId": "12fcfd9e-1c2f-46fc-b570-83b93ec7d101",
       "TargetParentOrChildId": "21749ef8-d4a1-4e1e-97b8-36a223f1d7cb",
       "TargetSlotId": "4f4727d7-f4f6-430d-968b-bc5afcddb176"
-    },
-    {
-      "SourceParentOrChildId": "8251a316-ddd4-4b54-bfbf-8c8a9e5c4614",
-      "SourceSlotId": "54831ac3-d747-4cdf-9520-3cfd651158bf",
-      "TargetParentOrChildId": "21b8d654-c097-4141-8f0a-34ba7fb9a758",
-      "TargetSlotId": "3b5b278d-fd4e-4216-9916-5cd7ffd54ab2"
-    },
-    {
-      "SourceParentOrChildId": "8251a316-ddd4-4b54-bfbf-8c8a9e5c4614",
-      "SourceSlotId": "54831ac3-d747-4cdf-9520-3cfd651158bf",
-      "TargetParentOrChildId": "21b8d654-c097-4141-8f0a-34ba7fb9a758",
-      "TargetSlotId": "d0508dfa-89cf-4713-8f5e-893dd5bfc3f4"
     },
     {
       "SourceParentOrChildId": "4d500d0c-f390-487f-868e-3d23d8e912f5",
@@ -3914,12 +3861,6 @@
       "SourceSlotId": "d007f87a-487d-4d7c-a41e-21ce01bc89b1",
       "TargetParentOrChildId": "806ddb6e-5d23-4e0c-b01e-b92f99674fcb",
       "TargetSlotId": "4f4727d7-f4f6-430d-968b-bc5afcddb176"
-    },
-    {
-      "SourceParentOrChildId": "109e523d-d94e-43d7-bd7a-ff888f93302c",
-      "SourceSlotId": "e0c4fedd-5c2f-46c8-b67d-5667435fb037",
-      "TargetParentOrChildId": "8251a316-ddd4-4b54-bfbf-8c8a9e5c4614",
-      "TargetSlotId": "3aab9b12-1e02-4d7a-83b6-da1500a6bcbf"
     },
     {
       "SourceParentOrChildId": "8d14dbf5-e18b-4b16-b572-5ab3ac16dbac",

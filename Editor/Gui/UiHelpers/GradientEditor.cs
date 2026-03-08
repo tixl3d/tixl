@@ -150,7 +150,7 @@ public static class GradientEditor
                                                     }
 
                                                     gradientForEditing.SortHandles();
-                                                    editResult = InputEditStateFlags.Finished;
+                                                    editResult = InputEditStateFlags.ModifiedAndFinished;
                                                 }
 
                                                 if (ImGui.BeginMenu("Gradient presets..."))

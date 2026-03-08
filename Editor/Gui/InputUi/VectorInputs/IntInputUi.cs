@@ -115,7 +115,67 @@ internal sealed class IntInputUi : IntVectorInputValueUi<int>
         {
             int index = Array.IndexOf(enumInfo.ValuesAsInt, value);
             InputEditStateFlags editStateFlags = InputEditStateFlags.Nothing;
-            bool modified = ImGui.Combo("##dropDownParam", ref index, enumInfo.ValueNames, enumInfo.ValueNames.Length, 20);
+            
+            // Draw combo box to modify options on hover
+            var modified = false;
+
+            var preview = index >= 0 && index < enumInfo.ValueNames.Length
+                              ? enumInfo.ValueNames[index]
+                              : string.Empty;
+
+            var isOpen = ImGui.BeginCombo("##dropDownParam", preview);
+            if (isOpen)
+            {
+                var hoveredIndex = -1;
+                if (ImGui.IsWindowAppearing())
+                {
+                    _originalValue = value;
+                }
+                for (var i = 0; i < enumInfo.ValueNames.Length; i++)
+                {
+                    var isSelected = i == index;
+
+                    if (ImGui.Selectable(enumInfo.ValueNames[i], isSelected))
+                    {
+                        index = i;
+                        modified = true;
+                    }
+
+                    if (ImGui.IsItemHovered())
+                    {
+                        hoveredIndex = i;
+                    }
+
+                    if (isSelected)
+                    {
+                        ImGui.SetItemDefaultFocus();
+                    }
+                }
+
+                ImGui.EndCombo();
+                
+                if (hoveredIndex != _lastHoveredComboItem)
+                {
+                    _lastHoveredComboItem = hoveredIndex;
+
+                    if (hoveredIndex >= 0)
+                    {
+                        value = enumInfo.ValuesAsInt[hoveredIndex];
+                        return InputEditStateFlags.Modified;
+                    }
+                    else
+                    {
+                        if (_originalValue >= 0)
+                        {
+                            value = _originalValue;
+                            _lastHoveredComboItem = -1;
+                            return InputEditStateFlags.Modified;
+                        }
+
+                    }
+                }
+            }
+
             if (modified)
             {
                 value = enumInfo.ValuesAsInt[index];
@@ -150,4 +210,7 @@ internal sealed class IntInputUi : IntVectorInputValueUi<int>
             return editStateFlags;
         }
     }
+    
+    private static int _lastHoveredComboItem = -1;
+    private static int _originalValue = -1;
 }

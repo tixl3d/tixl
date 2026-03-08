@@ -22,6 +22,10 @@
       }
     },
     {
+      "Id": "6f38fabe-f2b0-48b1-92fb-ea36b4fa20d8"/*GenerateMips*/,
+      "DefaultValue": false
+    },
+    {
       "Id": "70c4ecc7-72a2-42ee-8546-cbff2c08aa27"/*Stretch*/,
       "DefaultValue": {
         "X": 1.0,
@@ -64,6 +68,11 @@
           "Id": "1e4e274b-60b2-4fe8-b275-ebef80d520a7"/*Source*/,
           "Type": "System.String",
           "Value": "Lib:shaders/img/generate/CheckerBoard.hlsl"
+        },
+        {
+          "Id": "480d6c19-a33c-48b3-b9fa-aaf8bd31e6d9"/*GenerateMips*/,
+          "Type": "System.Boolean",
+          "Value": false
         }
       ],
       "Outputs": []
@@ -105,6 +114,12 @@
       "SourceSlotId": "70c4ecc7-72a2-42ee-8546-cbff2c08aa27",
       "TargetParentOrChildId": "3c4e6443-05e6-4ca6-9a76-7465e517c19b",
       "TargetSlotId": "36f14238-5bb8-4521-9533-f4d1e8fb802b"
+    },
+    {
+      "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "SourceSlotId": "6f38fabe-f2b0-48b1-92fb-ea36b4fa20d8",
+      "TargetParentOrChildId": "3e950950-94d1-432d-994e-f79ddec16168",
+      "TargetSlotId": "480d6c19-a33c-48b3-b9fa-aaf8bd31e6d9"
     },
     {
       "SourceParentOrChildId": "a759187c-e916-4ced-8ce1-7914a6320edf",

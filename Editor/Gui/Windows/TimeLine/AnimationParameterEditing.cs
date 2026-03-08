@@ -1,4 +1,6 @@
-﻿using T3.Core.Animation;
+﻿#nullable enable
+
+using T3.Core.Animation;
 using T3.Core.DataTypes;
 using T3.Core.Operator;
 using T3.Editor.Gui.Interaction.WithCurves;
@@ -14,17 +16,35 @@ internal abstract class AnimationParameterEditing : CurveEditing
     {
         foreach (TimeLineCanvas.AnimationParameter param in AnimationParameters)
         {
-            if (param.Curves == null)
-                continue;
-                
             foreach (var curve in param.Curves)
             {
-                if (curve == null)
-                    continue;
-                    
                 yield return curve;
             }
         }
+    }
+
+    /// <summary>
+    /// For some operations like copy and paste between curves, we need more context.
+    /// </summary>
+    protected override IEnumerable<KeyframeCopyAndPasting.CurveWithDetails> GetAllCurvesWithDetails()
+    {
+        foreach (var param in AnimationParameters)
+        {
+            foreach (var curve in param.Curves)
+            {
+                yield return new KeyframeCopyAndPasting.CurveWithDetails(curve, param.Instance.SymbolChildId,  param.Input.Id, 0);
+            }
+        }
+    }
+
+    protected override void PasteKeyframes()
+    {
+        if (!KeyframeCopyAndPasting.TryPasteTo(AnimationParameters, out var newKeyframes)) 
+            return;
+        
+        RebuildCurveTables();
+        SelectedKeyframes.Clear();
+        SelectedKeyframes.UnionWith(newKeyframes);
     }
 
     protected override void DeleteSelectedKeyframes(Instance composition)
@@ -67,16 +87,15 @@ internal abstract class AnimationParameterEditing : CurveEditing
                 }
                 else
                 {
-                    bounds= clipBounds;
+                    bounds = clipBounds;
                 }
             }
         }
-        
-        
-        TimeLineCanvas.Current.SetScopeToCanvasArea(bounds, flipY:true, 300, 50);
+
+        TimeLineCanvas.Current?.SetScopeToCanvasArea(bounds, flipY: true, 300, 50);
     }
 
-    protected List<TimeLineCanvas.AnimationParameter> AnimationParameters;
-    protected TimeLineCanvas TimeLineCanvas; // This gets initialized in constructor of implementations 
+    protected List<TimeLineCanvas.AnimationParameter> AnimationParameters = [];
+    protected TimeLineCanvas TimeLineCanvas = null!; // This gets initialized in constructor of implementations 
     public static bool CurvesTablesNeedsRefresh;
 }

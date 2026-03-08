@@ -60,7 +60,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
             if (UserActions.Duplicate.Triggered())
             {
                 symbolUi.FlagAsModified();
-                DuplicateSelectedKeyframes(TimeLineCanvas.Playback.TimeInBars);
+                DuplicateSelectedKeyframes();
             }
 
             if (UserActions.InsertKeyframe.Triggered())
@@ -670,6 +670,8 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
     }
 
     private int _clickedKeyframeHash;
+
+
 
     protected internal override void HandleCurvePointDragging(in Guid compositionSymbolId, VDefinition vDef, bool isSelected)
     {

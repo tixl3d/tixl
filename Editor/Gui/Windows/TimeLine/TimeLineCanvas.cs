@@ -521,6 +521,7 @@ internal sealed class TimeLineCanvas : CurveEditCanvas
         public required IInputSlot Input;
         public required Instance Instance;
         public required SymbolUi.Child ChildUi;
+        
         public required int Hash;
         public float DampedMinValue;
         public float DampedMaxValue;

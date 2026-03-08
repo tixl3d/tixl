@@ -25,6 +25,13 @@
       }
     },
     {
+      "InputId": "6f38fabe-f2b0-48b1-92fb-ea36b4fa20d8"/*GenerateMips*/,
+      "Position": {
+        "X": 128.93394,
+        "Y": 463.75458
+      }
+    },
+    {
       "InputId": "70c4ecc7-72a2-42ee-8546-cbff2c08aa27"/*Stretch*/,
       "Position": {
         "X": -11.0660095,

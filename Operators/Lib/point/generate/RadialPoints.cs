@@ -66,4 +66,13 @@ internal sealed class RadialPoints : Instance<RadialPoints>
 
         [Input(Guid = "cd917c3d-489e-4e4d-b5dc-eacc846d82ef")]
         public readonly InputSlot<float> OrientationAngle = new InputSlot<float>();
+
+        [Input(Guid = "acabe2d8-f34c-45cd-b488-2f95e76c23d7", MappedType = typeof(OrientationModes))]
+        public readonly InputSlot<int> OrientationMode = new InputSlot<int>();
+
+        private enum OrientationModes
+        {
+            Classic,
+            AlignedToCurvature,
+        }
 }

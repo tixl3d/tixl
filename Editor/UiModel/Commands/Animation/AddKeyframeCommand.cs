@@ -1,4 +1,6 @@
-﻿using T3.Core.Animation;
+﻿#nullable enable
+
+using T3.Core.Animation;
 using T3.Core.DataTypes;
 
 namespace T3.Editor.UiModel.Commands.Animation;
@@ -9,7 +11,7 @@ public sealed class AddKeyframesCommand : ICommand
     public bool IsUndoable => true;
         
     private readonly Curve _curve;
-    private readonly VDefinition _originalKey;
+    private readonly VDefinition? _originalKey;
     private readonly VDefinition _newKey;
         
 

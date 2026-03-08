@@ -54,7 +54,7 @@ internal sealed class TimelineCurveEditArea : AnimationParameterEditing, ITimeOb
                 ViewAllOrSelectedKeys(alsoChangeTimeRange: true);
 
             if (KeyActionHandling.Triggered(UserActions.Duplicate))
-                DuplicateSelectedKeyframes(TimeLineCanvas.Playback.TimeInBars);
+                DuplicateSelectedKeyframes();
 
             var lineStartPosition = ImGui.GetCursorPos();
             var visibleCurveCount = 0;

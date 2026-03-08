@@ -22,18 +22,16 @@ namespace T3.Editor.Gui.InputUi.CombinedInputs;
 /// Handles editing of Curve-Inputs in parameter windows and Graph CustomUi.
 /// </summary>
 /// <remarks>
-/// The view settings (selection, zoom, scale, etc) for each canvas are stored in a dictionary of <see cref="T3.Editor.Gui.InputUi.CombinedInputs.CurveInputEditing.CurveInteraction"/> instances.  
+/// The view settings (selection, zoom, scale, etc.) for each canvas are stored in a dictionary of <see cref="T3.Editor.Gui.InputUi.CombinedInputs.CurveInputEditing.CurveInteraction"/> instances.  
 /// </remarks>
-public static class CurveInputEditing
+internal static class CurveInputEditing
 {
-
-    public static InputEditStateFlags DrawCanvasForCurve(ref Curve curveRef, Symbol.Child.Input input, bool cloneIfModified, Instance compositionOp,
-                                                         T3Ui.EditingFlags flags = T3Ui.EditingFlags.None)
+    internal static InputEditStateFlags DrawCanvasForCurve(ref Curve curveRef, Symbol.Child.Input input, bool cloneIfModified, Instance compositionOp,
+                                                           T3Ui.EditingFlags flags = T3Ui.EditingFlags.None)
     {
         var keepScale = T3Ui.UiScaleFactor;
         T3Ui.UiScaleFactor = 1;
 
-            
         var imGuiId = ImGui.GetID("");
         var curveForEditing = curveRef;
         if (cloneIfModified)
@@ -46,7 +44,7 @@ public static class CurveInputEditing
 
             curveForEditing = clonedCurve;
         }
-            
+
         _interactionFlags = flags;
         if (!_interactionForCurve.TryGetValue(imGuiId, out var curveInteraction))
         {
@@ -62,7 +60,7 @@ public static class CurveInputEditing
             curveInteraction.Curves.Clear();
             curveInteraction.Curves.Add(curveForEditing);
         }
-            
+
         curveInteraction.EditState = InputEditStateFlags.Nothing;
         curveInteraction.Draw(compositionOp, _selectionFence);
 
@@ -73,8 +71,7 @@ public static class CurveInputEditing
             curveRef = curveForEditing;
             _clonedDefaultCurves.Remove(input.DefaultValue);
         }
-           
-            
+
         T3Ui.UiScaleFactor = keepScale;
         return curveInteraction.EditState;
     }
@@ -96,19 +93,26 @@ public static class CurveInputEditing
             _singleCurveCanvas.Draw(Curves[0], this, compositionOp, selectionFence);
         }
 
-
         #region implement editing ---------------------------------------------------------------
         protected override IEnumerable<Curve> GetAllCurves()
         {
             return Curves;
         }
 
+        protected override IEnumerable<KeyframeCopyAndPasting.CurveWithDetails> GetAllCurvesWithDetails()
+        {
+            for (var index = 0; index < Curves.Count; index++)
+            {
+                var curve = Curves[index];
+                yield return new KeyframeCopyAndPasting.CurveWithDetails(Curve: curve,
+                                                                         ChildId: Guid.Empty,  InputId: Guid.Empty, CurveIndex: index);
+            }
+        }
+
         protected override void ViewAllOrSelectedKeys(bool alsoChangeTimeRange = false)
         {
             _singleCurveCanvas.NeedToAdjustScopeAfterFirstRendering = true;
         }
-
-
 
         protected override void DeleteSelectedKeyframes(Instance compositionOp)
         {
@@ -125,6 +129,11 @@ public static class CurveInputEditing
             }
 
             EditState = InputEditStateFlags.Modified;
+        }
+
+        protected override void PasteKeyframes()
+        {
+            Log.Debug("Pasting to curve inputs is not implemented yet.");
         }
 
         protected internal override void HandleCurvePointDragging(in Guid compositionSymbolId, VDefinition vDef, bool isSelected)
@@ -256,7 +265,6 @@ public static class CurveInputEditing
                     break;
             }
         }
-
         #endregion
 
         /// <summary>
@@ -279,7 +287,7 @@ public static class CurveInputEditing
                 var interactionFlags = T3Ui.EditingFlags.PreventZoomWithMouseWheel
                                        | T3Ui.EditingFlags.PreventMouseInteractions
                                        | T3Ui.EditingFlags.PreventPanningWithMouse;
-                    
+
                 var interactionDisabled = (_interactionFlags & interactionFlags) != T3Ui.EditingFlags.None;
                 if (interactionDisabled)
                 {
@@ -341,7 +349,7 @@ public static class CurveInputEditing
         }
     }
 
-    private static readonly Dictionary<uint, CurveInteraction> _interactionForCurve = new(); 
+    private static readonly Dictionary<uint, CurveInteraction> _interactionForCurve = new();
     private static readonly Dictionary<InputValue, Curve> _clonedDefaultCurves = new();
     private static readonly SelectionFence _selectionFence = new();
 

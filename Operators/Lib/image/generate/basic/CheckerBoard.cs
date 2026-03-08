@@ -26,4 +26,7 @@ internal sealed class CheckerBoard : Instance<CheckerBoard>
 
     [Input(Guid = "63ebb6c9-e8a5-43e4-97a4-3a34ad585474")]
     public readonly InputSlot<Int2> Resolution = new InputSlot<Int2>();
+
+        [Input(Guid = "6f38fabe-f2b0-48b1-92fb-ea36b4fa20d8")]
+        public readonly InputSlot<bool> GenerateMips = new InputSlot<bool>();
 }

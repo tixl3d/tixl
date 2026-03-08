@@ -32,13 +32,16 @@ internal static class MouseWheelPanning
         var delta = (short)((wparam >> 16) & 0xffff); // can be != 120 on precision devices :contentReference[oaicite:1]{index=1}
         var notches = delta / (float)WHEEL_DELTA;
 
-        var isCtrl = (keyFlags & MK_CONTROL) != 0;
+        
+        var isMouseCtrl = (keyFlags & MK_CONTROL) != 0;
+        var isKeyBoardCtrl = imgGuiIo.KeyCtrl;
+        var isImplicitZoomIndicator = isMouseCtrl && !isKeyBoardCtrl;  
 
         // Optional: sticky "zoom mode" for a short time to suppress stray pan events
         var now = Environment.TickCount64;
         var inZoomGesture = (now - _lastZoomTick) < 80;
 
-        if (isCtrl || inZoomGesture)
+        if (isImplicitZoomIndicator || inZoomGesture)
         {
             _zoomNotches += notches;
             _zoomNotches += notches; // use vertical delta as zoom input
