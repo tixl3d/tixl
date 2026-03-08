@@ -11,31 +11,12 @@
       }
     },
     {
-      "InputId": "08468acd-f7c7-493b-973c-5814f1b3516e"/*Scale*/,
-      "Position": {
-        "X": 165.54813,
-        "Y": 1000.0075
-      },
-      "Description": "Scales the incoming subgraph in the following directions:\n\nX: Width\nY: Height\nZ: Depth\n",
-      "Scale": 0.01
-    },
-    {
       "InputId": "2f4d18c2-2a68-41f0-8e7d-52de359f9d85"/*AnchorPoints*/,
       "Relevancy": "Required",
       "Position": {
         "X": -206.5769,
         "Y": 1450.9443
       }
-    },
-    {
-      "InputId": "34ec39a9-7009-49b1-9ca4-ab26b901c06d"/*Translation*/,
-      "Position": {
-        "X": 165.54813,
-        "Y": 930.0075
-      },
-      "GroupTitle": "Transform Mesh",
-      "Description": "Moves the incoming mesh\n\nX (-left / +right), \nY (-down / +up), \nZ (-forward / +backwards)\n",
-      "Scale": 0.01
     },
     {
       "InputId": "46762c06-6bcc-4fda-8010-73a6881e36be"/*UseVertexSelection*/,
@@ -68,44 +49,12 @@
       }
     },
     {
-      "InputId": "aa70bc7c-15b6-497b-90d0-6b11de7b8ca0"/*Rotation*/,
-      "Position": {
-        "X": 165.54813,
-        "Y": 965.0075
-      },
-      "Description": "Rotates the incoming mesh around the following axes:\n\nX: Horizontal axis\nY: Vertical axis\nZ: Forward axis\n",
-      "Min": -180.0,
-      "Max": 180.0,
-      "Scale": 3.6,
-      "Format": "{0:0.0}°"
-    },
-    {
-      "InputId": "b26a2a9d-36ea-43fd-9af8-b6b5fd791096"/*UniformScale*/,
-      "Position": {
-        "X": 165.54813,
-        "Y": 1035.0076
-      },
-      "Description": "Uniformly scales the incoming mesh",
-      "AddPadding": "True",
-      "Scale": 0.01
-    },
-    {
       "InputId": "e0aa5992-1893-4126-b6b5-fc90c010e669"/*Mesh*/,
       "Relevancy": "Required",
       "Position": {
         "X": -621.14307,
         "Y": 789.89764
       }
-    },
-    {
-      "InputId": "f0364e79-ca6a-4a96-85c7-6eb88bf27654"/*Pivot*/,
-      "Position": {
-        "X": 165.54813,
-        "Y": 1070.0076
-      },
-      "GroupTitle": "Transform Pivot",
-      "Description": "Moves the pivot (center point) of the incoming subgraph:\n\nX (-left / +right) \nY (-down / +up) \nZ (-forward / +backwards)\n\nThe pivot point determines the location of the incoming subgraph gizmo. Transforming its location can make it easier to perform transformations around the position you want.\n",
-      "Scale": 0.01
     }
   ],
   "SymbolChildUis": [
@@ -203,13 +152,6 @@
       "Position": {
         "X": 25.548124,
         "Y": 1348.3009
-      }
-    },
-    {
-      "ChildId": "90511069-3ab9-4b39-8b66-acf8a036750d"/*TransformMatrix*/,
-      "Position": {
-        "X": 305.54813,
-        "Y": 930.0075
       }
     },
     {

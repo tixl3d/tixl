@@ -5,7 +5,7 @@
 
 cbuffer Params : register(b0)
 {
-    float4x4 TransformMatrix;
+ 
     float UseVertexSelection;
     
     float WeightCtrl;
@@ -98,7 +98,7 @@ void main(uint3 i : SV_DispatchThreadID)
                 float3 anchorOriginalScale = AnchorPointsOriginal[j].Scale;
                 float3 anchorCurrentScale  = AnchorPointsCurrent[j].Scale;      
                 //float3 anchorDir = anchorOriginalPos - AnchorPointsOriginal[j+1].Position;
-                float weight = CalculateInfluence(originalPos, anchorOriginalPos, AnchorPointsOriginal[j].FX1*WeightCtrl);
+                float weight = CalculateInfluence(originalPos, anchorOriginalPos, AnchorPointsOriginal[j].FX1*WeightCtrl)*AnchorPointsOriginal[j].FX2;
                 //float weight = CalculateLinearInfluence(originalPos, anchorOriginalPos,anchorDir, AnchorPointsOriginal[j].FX1);
                 if (weight > 0.001)
                 {
@@ -137,11 +137,9 @@ void main(uint3 i : SV_DispatchThreadID)
     }
     else
     {
-        // Fall back to simple transform if no anchors
-        deformedPos = mul(float4(originalPos, 1), TransformMatrix).xyz;
-        deformedNormal = normalize(mul(float4(originalNormal, 0), TransformMatrix).xyz);
-        deformedTangent = normalize(mul(float4(originalTangent, 0), TransformMatrix).xyz);
-        deformedBitangent = normalize(mul(float4(originalBitangent, 0), TransformMatrix).xyz);
+        // No anchors: pass through original position
+        ResultVerts[i.x] = SourceVerts[i.x];
+        return;
     }
     
     // Apply final position with selection blending
@@ -158,7 +156,7 @@ void main(uint3 i : SV_DispatchThreadID)
 
     if (WeigthDebug == 1)
     {
-        ResultVerts[i.x].ColorRGB = weightColor / max(totalWeight, 0.001);
+        ResultVerts[i.x].ColorRGB = weightColor / max(totalWeight, Epsilon);
     }
    
 }
