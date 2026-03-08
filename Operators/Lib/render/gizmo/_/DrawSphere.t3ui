@@ -3,10 +3,17 @@
   "Description": "A simple helper to draw a sphere primitive.\n\nConsider using [SphereMesh] [DrawMesh] and [SetMaterial] instead.",
   "InputUis": [
     {
+      "InputId": "347f8abe-dbd9-4939-9e28-4f25c73dddc9"/*WireFrame*/,
+      "Position": {
+        "X": -162.76312,
+        "Y": -107.76315
+      }
+    },
+    {
       "InputId": "408bb779-8007-49c3-9015-b04419981b03"/*Color*/,
       "Position": {
-        "X": -140.0,
-        "Y": 70.0
+        "X": -22.763123,
+        "Y": -142.76315
       },
       "Min": 0.0,
       "Max": 1.0,
@@ -14,17 +21,24 @@
       "ClampMax": true
     },
     {
+      "InputId": "7a1f7dc7-e716-4a07-bc46-bfc8d717a083"/*CullMode*/,
+      "Position": {
+        "X": -22.763123,
+        "Y": -72.76315
+      }
+    },
+    {
       "InputId": "aa1307c2-c955-461b-8d43-b81c7e85a868"/*Radius*/,
       "Position": {
-        "X": -140.0,
-        "Y": 175.0
+        "X": -22.763123,
+        "Y": 32.236847
       }
     },
     {
       "InputId": "c240d9cb-42ac-4ca3-92a6-86012b594e81"/*Position*/,
       "Position": {
-        "X": -140.0,
-        "Y": 140.0
+        "X": -22.763123,
+        "Y": -2.763153
       }
     }
   ],
@@ -32,22 +46,29 @@
     {
       "ChildId": "06f31979-e952-4e9c-898e-15f205ad12f0"/*DrawMesh*/,
       "Position": {
-        "X": 0.0,
-        "Y": 35.0
+        "X": 117.23688,
+        "Y": -177.76315
       }
     },
     {
       "ChildId": "5777d61c-7472-4642-9103-98502abca452"/*Transform*/,
       "Position": {
-        "X": 0.0,
-        "Y": 105.0
+        "X": 117.23688,
+        "Y": -37.763153
       }
     },
     {
       "ChildId": "70287706-2726-481f-be9b-079c592a8adb"/*SphereMesh*/,
       "Position": {
-        "X": 0.0,
-        "Y": 0.0
+        "X": 117.23688,
+        "Y": -212.76315
+      }
+    },
+    {
+      "ChildId": "c5e404fe-1027-4db3-b2bf-44f89e8fd4da"/*BoolToInt*/,
+      "Position": {
+        "X": -22.763123,
+        "Y": -107.76315
       }
     }
   ],
@@ -55,8 +76,8 @@
     {
       "OutputId": "1221649e-bf7f-4f01-aee6-099f7a35469e"/*Output*/,
       "Position": {
-        "X": 410.0,
-        "Y": 47.5
+        "X": 117.23688,
+        "Y": 67.23685
       }
     }
   ]

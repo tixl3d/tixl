@@ -73,7 +73,8 @@
       "Position": {
         "X": -200.0,
         "Y": 90.0
-      }
+      },
+      "Format": "{0:0.0}°"
     }
   ],
   "SymbolChildUis": [],

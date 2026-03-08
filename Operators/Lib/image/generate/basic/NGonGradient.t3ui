@@ -67,7 +67,8 @@
       "Description": "Rotates the object around its center",
       "Min": -180.0,
       "Max": 180.0,
-      "Scale": 2.0
+      "Scale": 2.0,
+      "Format": "{0:0.0}°"
     },
     {
       "InputId": "4bfe03f0-f1c3-47c0-98c3-873087e40c17"/*Resolution*/,

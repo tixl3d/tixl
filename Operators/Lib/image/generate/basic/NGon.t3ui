@@ -68,7 +68,8 @@
       "Description": "Rotates the object around its center",
       "Min": -180.0,
       "Max": 180.0,
-      "Scale": 2.0
+      "Scale": 2.0,
+      "Format": "{0:0.0}°"
     },
     {
       "InputId": "837a9689-d7a8-43db-88a5-2ac3ce8fbd37"/*Image*/,

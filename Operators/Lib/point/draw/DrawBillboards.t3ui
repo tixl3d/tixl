@@ -27,7 +27,8 @@
       },
       "Description": "Rotates a billboard around its own axis without affecting the Orientation.",
       "Min": -90.0,
-      "Max": 90.0
+      "Max": 90.0,
+      "Format": "{0:0.0}°"
     },
     {
       "InputId": "19e10456-76bd-43a2-9c03-5f6dd93601cc"/*SpreadLength*/,
