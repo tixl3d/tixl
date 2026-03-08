@@ -47,6 +47,13 @@
       "AddPadding": "True"
     },
     {
+      "InputId": "49b5c5df-17f1-498b-aa57-dca843fba736"/*InfluenceMode*/,
+      "Position": {
+        "X": -206.57689,
+        "Y": 1762.3026
+      }
+    },
+    {
       "InputId": "752ca6e8-e2d6-4439-afa1-7f14d644d3a6"/*WeightStrength*/,
       "Position": {
         "X": -206.57689,
@@ -124,6 +131,13 @@
       }
     },
     {
+      "ChildId": "24d9b72a-e3c1-425f-b1ba-c5cb721a907e"/*BoolToInt*/,
+      "Position": {
+        "X": -33.718018,
+        "Y": 1648.7749
+      }
+    },
+    {
       "ChildId": "27c69c9d-0f47-44d9-b874-f3f57f856ec6"/*_AssembleMeshBuffers*/,
       "Position": {
         "X": 698.07605,
@@ -131,10 +145,10 @@
       }
     },
     {
-      "ChildId": "447c58f8-b382-41b7-ae41-4cdc4686d770"/*BoolToFloat*/,
+      "ChildId": "4895fffe-fdba-4e1e-99e2-b630b423db48"/*IntsToBuffer*/,
       "Position": {
-        "X": 40.827927,
-        "Y": 1603.771
+        "X": 272.0901,
+        "Y": 1636.0802
       }
     },
     {
@@ -142,13 +156,6 @@
       "Position": {
         "X": 73.47122,
         "Y": 1520.918
-      }
-    },
-    {
-      "ChildId": "60917ebd-f0c5-41d5-91c5-21cda37a8bfa"/*Value*/,
-      "Position": {
-        "X": 258.07446,
-        "Y": 1339.7517
       }
     },
     {
@@ -199,13 +206,6 @@
       }
     },
     {
-      "ChildId": "84c04b47-eb5a-4217-811f-7fd8fbf897fc"/*Value*/,
-      "Position": {
-        "X": 121.137634,
-        "Y": 1196.6157
-      }
-    },
-    {
       "ChildId": "90511069-3ab9-4b39-8b66-acf8a036750d"/*TransformMatrix*/,
       "Position": {
         "X": 305.54813,
@@ -230,7 +230,7 @@
       "ChildId": "c05c37a5-ca5f-4dff-ba17-b52214463fc6"/*ExecuteBufferUpdate*/,
       "Position": {
         "X": 475.1089,
-        "Y": 769.0607
+        "Y": 804.0607
       }
     },
     {

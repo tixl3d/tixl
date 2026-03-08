@@ -7,8 +7,14 @@ cbuffer Params : register(b0)
 {
     float4x4 TransformMatrix;
     float UseVertexSelection;
-    float WeigthDebug;  // Enable/disable distance-based weighting
+    
     float WeightCtrl;
+}
+
+cbuffer IntParams : register(b1)
+{
+    int InfluenceMode;
+    int WeigthDebug;
 }
 
 StructuredBuffer<PbrVertex> SourceVerts : t0;
@@ -20,38 +26,25 @@ RWStructuredBuffer<PbrVertex> ResultVerts : u0;
 float CalculateInfluence(float3 vertexPos, float3 anchorPos, float falloffDist)
 {
     float dist = distance(vertexPos, anchorPos);
-    
-    if (falloffDist <= 0)
-    {
-        // Inverse distance weighting
-        return 1.0 / (dist + 0.001); // Add small epsilon to avoid division by zero
-    }
-    else
-    {
-        // Smooth falloff within radius
-        float t =saturate(dist / falloffDist);
-        return 1.0 - smoothstep(0.0, 1.0, t);
+    // let's use switch case to allow easy switching between different falloff functions
+    switch (InfluenceMode) {
+        case 0: // Smooth mode
+            return exp2(-dist*dist*2/abs(falloffDist)) / (dist + 0.001);            
+        case 1: // Linear falloff mode
+            float t =saturate(dist / falloffDist);
+            return 1.0 - smoothstep(0.0, 1.0, t);      
+        case 2: // Inverse square falloff
+            return 1.0 / (dist*dist /abs(falloffDist) + 0.001);
+        case 3: // Gaussian falloff
+            return exp2(-dist*dist*2/abs(falloffDist));  
+        case 4: // Inverse Cubic falloff
+            return pow(1.0 / (dist/falloffDist + 0.001),3.0);
+        default:
+    return 1.0; // No falloff, full influence
     }
 }
 
-// I need an alternative way to calculate weight in a linear way perpendicular to the line between two points.
-float CalculateLinearInfluence(float3 vertexPos, float3 anchorPos, float3 anchorDir, float falloffDist)
-{
-    float3 toVertex = vertexPos - anchorPos;
-    float projLength = dot(toVertex, anchorDir);
-    float3 closestPoint = anchorPos + projLength * anchorDir;
-    float dist = distance(vertexPos, closestPoint);
-    
-    if (falloffDist <= 0)
-    {
-        return 1.0 / (dist + 0.001);
-    }
-    else
-    {
-        float t = saturate(dist / falloffDist);
-        return 1.0 - smoothstep(0.0, 1.0, t);
-    }
-}
+float3 hsv2rgb(float3 hsv){return lerp(1,saturate(abs(frac((hsv.x-float3(0,2,4)/6))-.5)*6-1),hsv.y)*hsv.z;}
 
 [numthreads(64,1,1)]
 void main(uint3 i : SV_DispatchThreadID)
@@ -84,7 +77,8 @@ void main(uint3 i : SV_DispatchThreadID)
     float3 deformedNormal = originalNormal;
     float3 deformedTangent = originalTangent;
     float3 deformedBitangent = originalBitangent;
-    
+    float totalWeight = 0;
+    float3 weightColor = 0;
     if (numAnchors > 0)
     {
        
@@ -93,7 +87,7 @@ void main(uint3 i : SV_DispatchThreadID)
             float3 totalNormal = 0;
             float3 totalTangent = 0;
             float3 totalBitangent = 0;
-            float totalWeight = 0;
+            
             
             for (uint j = 0; j < numAnchors; j++)
             {
@@ -127,6 +121,8 @@ void main(uint3 i : SV_DispatchThreadID)
                     totalBitangent += qRotateVec3(originalBitangent, rotDelta) * weight;
 
                     totalWeight += weight;
+
+                    weightColor+=weight*hsv2rgb(float3(float(j)/numAnchors,1,1));
                 }
             }
             
@@ -158,13 +154,11 @@ void main(uint3 i : SV_DispatchThreadID)
     ResultVerts[i.x].TexCoord = SourceVerts[i.x].TexCoord;
     ResultVerts[i.x].TexCoord2 = SourceVerts[i.x].TexCoord2;
     ResultVerts[i.x].Selected = SourceVerts[i.x].Selected;
+    ResultVerts[i.x].ColorRGB = SourceVerts[i.x].ColorRGB;
 
-    // I need to debug influence weights, so I'm going to encode them in the color for now
-     float influenceColorR = min(1, CalculateInfluence(originalPos, AnchorPointsOriginal[0].Position, AnchorPointsOriginal[0].FX1));
-     float influenceColorG = min(1, CalculateInfluence(originalPos, AnchorPointsOriginal[1].Position, AnchorPointsOriginal[1].FX1));
-     float influenceColorB = min(1, CalculateInfluence(originalPos, AnchorPointsOriginal[2].Position, AnchorPointsOriginal[2].FX1));
-     float influenceColor4 = min(1, CalculateInfluence(originalPos, AnchorPointsOriginal[3].Position, AnchorPointsOriginal[3].FX1));
-     ResultVerts[i.x].ColorRGB = lerp(SourceVerts[i.x].ColorRGB, float3(influenceColorR, influenceColorG, influenceColorB+influenceColor4), WeigthDebug);
-   // ResultVerts[i.x].ColorRGB = SourceVerts[i.x].ColorRGB;
+    if (WeigthDebug == 1)
+    {
+        ResultVerts[i.x].ColorRGB = weightColor / max(totalWeight, 0.001);
+    }
    
 }

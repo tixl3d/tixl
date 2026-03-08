@@ -48,13 +48,24 @@ internal sealed class PuppetMesh :Instance<PuppetMesh>,ITransformable
 
         [Input(Guid = "752ca6e8-e2d6-4439-afa1-7f14d644d3a6")]
         public readonly InputSlot<float> WeightStrength = new InputSlot<float>();
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+        [Input(Guid = "49b5c5df-17f1-498b-aa57-dca843fba736", MappedType = typeof(InfluenceModes))]
+    public readonly InputSlot<int> InfluenceMode = new InputSlot<int>();
+
+    public enum InfluenceModes
+    {
+        Smooth,
+        Linear,
+        InverseSquare,
+        Gaussian,
+        InverseCubic,
+    }
+
+
+
+
+
+
+
+
 }
