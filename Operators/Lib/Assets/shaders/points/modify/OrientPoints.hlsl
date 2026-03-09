@@ -66,13 +66,13 @@ RWStructuredBuffer<Point> ResultPoints : u0;
         break;
            
         case 1: // Screen
-            p.Rotation=qFromMatrix3((float3x3)WorldToCamera);
+            p.Rotation = normalize(qSlerp(p.Rotation,qFromMatrix3((float3x3)WorldToCamera), strength));
         break;
 
         case 2: // Billboard to camera    
             float3 up=mul(float3(0,-1,0),(float3x3)CameraToWorld);
             float3 dir=normalize(p.Position-CameraToWorld[3].xyz);
-            p.Rotation=qLookAt(-dir,up);
+            p.Rotation = normalize(qSlerp(p.Rotation, qLookAt(-dir,up), strength));
         break;
         
     }
