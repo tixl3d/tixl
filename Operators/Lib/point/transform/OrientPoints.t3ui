@@ -1,8 +1,15 @@
 {
   "Id": "acc71a14-daad-4b36-b0bc-cf0a796cc5d9"/*OrientPoints*/,
-  "Description": "Orients the rotation of points so that Z points towards a center.",
+  "Description": "Orients the rotation of points so that Z points towards a target position. You can also orient the point to the screen or the camera.",
   "SymbolTags": "1",
   "InputUis": [
+    {
+      "InputId": "0130d406-ff9a-419e-9294-fba52983dff5"/*OrientationMode*/,
+      "Position": {
+        "X": 109.65976,
+        "Y": 1124.69
+      }
+    },
     {
       "InputId": "02ae76ba-7be8-4112-a59b-55616343f1dd"/*Flip*/,
       "Position": {
@@ -35,11 +42,12 @@
       "GroupTitle": "Settings"
     },
     {
-      "InputId": "607fd90d-57f3-4a6a-b843-86c7170c854c"/*Center*/,
+      "InputId": "607fd90d-57f3-4a6a-b843-86c7170c854c"/*Target*/,
       "Position": {
         "X": -30.34024,
         "Y": 713.893
       },
+      "Description": "Target Position",
       "AddPadding": "True"
     },
     {
@@ -63,7 +71,7 @@
       "ChildId": "519fa01d-8b43-4bdb-8cdd-499c35f156c0"/*ExecuteBufferUpdate*/,
       "Position": {
         "X": 577.38947,
-        "Y": 692.6048
+        "Y": 727.6048
       }
     },
     {
@@ -130,6 +138,13 @@
       }
     },
     {
+      "ChildId": "e2ffb3b1-9327-4cd8-83af-9f6c0d9e8842"/*TransformsConstBuffer*/,
+      "Position": {
+        "X": 184.57353,
+        "Y": 1248.5173
+      }
+    },
+    {
       "ChildId": "e4fba79b-8ebe-44a8-b0d7-cf6dddc4e015"/*IntsToBuffer*/,
       "Position": {
         "X": 249.65976,
@@ -161,7 +176,7 @@
       "OutputId": "23a08560-9764-42a1-a889-dd8839476747"/*Output*/,
       "Position": {
         "X": 577.3895,
-        "Y": 762.6048
+        "Y": 797.6048
       }
     }
   ]
