@@ -1,6 +1,7 @@
 {
   "Id": "81d27ec1-2d02-4352-98d2-f2bfb0d726bc"/*PuppetMesh*/,
   "Description": "Deforms a mesh with weigthed points",
+  "SymbolTags": "192",
   "InputUis": [
     {
       "InputId": "039daa17-44bb-456d-9f29-b86abbf308fe"/*AnchorPointsCurrent*/,
