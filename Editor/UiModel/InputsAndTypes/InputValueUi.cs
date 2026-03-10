@@ -230,13 +230,13 @@ public abstract class InputValueUi<T> : IInputUi
                 ImGui.PushStyleColor(ImGuiCol.Text, UiColors.ForegroundFull.Rgba);
                 ImGui.Button($"{input.Name.AddSpacesForImGuiOutput()}##ParamName", new Vector2(ParameterNameWidth, 0.0f));
                 ImGui.PopStyleColor();
-                if (ImGui.BeginPopupContextItem("##parameterOptions", 0))
+                /*if (ImGui.BeginPopupContextItem("##parameterOptions", 0))
                 {
                     if (ImGui.MenuItem("Parameters settings"))
                         editState = InputEditStateFlags.ShowOptions;
 
                     ImGui.EndPopup();
-                }
+                }*/
 
                 CustomComponents.ContextMenuForItem(() =>
                                                     {
@@ -280,6 +280,7 @@ public abstract class InputValueUi<T> : IInputUi
                                                         
                                                         if (ImGui.MenuItem("Parameters settings"))
                                                             editState = InputEditStateFlags.ShowOptions;
+                                                     
                                                     });
 
                 ImGui.PopStyleVar();
@@ -288,23 +289,23 @@ public abstract class InputValueUi<T> : IInputUi
                 ImGui.PushItemWidth(200.0f);
                 ImGui.SetNextItemWidth(-1);
 
-                string connectedName;
-                if (typedInputSlot.TryGetFirstConnection(out var connectedSlot))
+                var connectedName = "???";
+                if (typedInputSlot.TryGetFirstConnection(out var connectedSlot) && connectedSlot?.Parent != null)
                 {
-                    connectedName = connectedSlot?.Parent.Symbol.Name ?? "???";
-                }
-                else
-                {
-                    connectedName = "???";
+                    connectedName = !string.IsNullOrWhiteSpace(connectedSlot.Parent.SymbolChild.Name)
+                        ? connectedSlot.Parent.SymbolChild.Name
+                        : (!string.IsNullOrWhiteSpace(connectedSlot.Parent.Symbol.Name)
+                            ? connectedSlot.Parent.Symbol.Name
+                            : "???");
                 }
                 if (ImGui.IsItemHovered())
                 {
-                    var text = "";
+                    var text = "Input: " + connectedName ;
                     if (!string.IsNullOrEmpty(Description))
                     {
-                        text += Description;
+                       text += "\n-----";
                     }
-                    CustomComponents.TooltipForLastItem(text);  
+                    CustomComponents.TooltipForLastItem(text, Description);
                 }
 
                 ImGui.PushStyleColor(ImGuiCol.Text, typeColor.Rgba);
