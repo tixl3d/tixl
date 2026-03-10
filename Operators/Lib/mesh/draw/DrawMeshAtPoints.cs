@@ -52,6 +52,9 @@ internal sealed class DrawMeshAtPoints : Instance<DrawMeshAtPoints>
 
         [Input(Guid = "a7cb95c4-fb81-49c7-9503-a45589713415")]
         public readonly InputSlot<T3.Core.DataTypes.ShaderGraphNode> ColorField = new InputSlot<T3.Core.DataTypes.ShaderGraphNode>();
+
+        [Input(Guid = "c4adbb96-8838-4c7f-be20-bb464f0eea4c")]
+        public readonly InputSlot<T3.Core.DataTypes.Vector.Int2> AtlasSize = new InputSlot<T3.Core.DataTypes.Vector.Int2>();
         
         private enum ScaleFXModes
         {
