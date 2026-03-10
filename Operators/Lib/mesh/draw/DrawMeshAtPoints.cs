@@ -72,7 +72,7 @@ internal sealed class DrawMeshAtPoints : Instance<DrawMeshAtPoints>
         }
         private enum AtlasModes
         {
-            IndexBuffer = 0,
+            BufferOrder = 0,
             F1 = 1,
             F2 = 2,
         }
