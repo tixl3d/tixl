@@ -76,6 +76,14 @@
       "Description": "This defines whether the mesh covers itself or is covered by or covers other meshes."
     },
     {
+      "InputId": "8af68894-0a5f-4fef-b7c9-41badeb1db16"/*AtlasMode*/,
+      "Position": {
+        "X": 1916.3212,
+        "Y": 3644.9988
+      },
+      "Description": "Defines how the atlas textures are spread. "
+    },
+    {
       "InputId": "998e0e5b-fccf-430c-b799-aacc8b0cbb28"/*ScaleFactor*/,
       "Position": {
         "X": 2056.3213,
@@ -132,7 +140,9 @@
       "Position": {
         "X": 1916.3212,
         "Y": 3569.9988
-      }
+      },
+      "GroupTitle": "Texture Coordinates",
+      "Description": "Defines the number of cells in the connect texture atlas. This can be useful for distributing different textures with a single draw call."
     },
     {
       "InputId": "dd511aab-0472-4109-9c10-cc1ab5042499"/*EnableZWrite*/,

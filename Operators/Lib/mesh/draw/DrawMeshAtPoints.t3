@@ -34,6 +34,10 @@
       "DefaultValue": true
     },
     {
+      "Id": "8af68894-0a5f-4fef-b7c9-41badeb1db16"/*AtlasMode*/,
+      "DefaultValue": 0
+    },
+    {
       "Id": "998e0e5b-fccf-430c-b799-aacc8b0cbb28"/*ScaleFactor*/,
       "DefaultValue": 0
     },
@@ -670,6 +674,12 @@
     {
       "SourceParentOrChildId": "3c638d15-9dc5-4c51-a7ba-89b2521dc6fe",
       "SourceSlotId": "dc835127-e03b-4afa-b91a-468781b5b599",
+      "TargetParentOrChildId": "a1a7b823-566c-4596-b83b-cddcd1ed0412",
+      "TargetSlotId": "49556d12-4cd1-4341-b9d8-c356668d296c"
+    },
+    {
+      "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "SourceSlotId": "8af68894-0a5f-4fef-b7c9-41badeb1db16",
       "TargetParentOrChildId": "a1a7b823-566c-4596-b83b-cddcd1ed0412",
       "TargetSlotId": "49556d12-4cd1-4341-b9d8-c356668d296c"
     },

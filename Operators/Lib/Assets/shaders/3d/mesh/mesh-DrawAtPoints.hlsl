@@ -26,11 +26,6 @@ cbuffer Params : register(b1)
     float AlphaCutOff;
     float UseFlatShading;
     float SpecularAA;
-
-    float SpreadLength;
-    float SpreadPhase;
-    float SpreadPingPong;
-    float SpreadRepeat;
 };
 
 cbuffer FogParams : register(b2)
@@ -60,7 +55,7 @@ cbuffer IntParams : register(b5)
     int UsePointScale;
     int ScaleFactorMode;
     int2 AtlasSize;
-    int TextureAtlasMode;
+    int AtlasMode;
 };
 
 cbuffer FieldParams : register(b6)
@@ -97,32 +92,6 @@ Texture2D<float4> RSMOMap : register(t5);
 Texture2D<float4> NormalMap : register(t6);
 TextureCube<float4> PrefilteredSpecular : register(t7);
 Texture2D<float4> BRDFLookup : register(t8);
-
-inline float GetUFromMode(float mode, int id, float f, float4 scatter, float w, float fog)
-{
-    switch ((int)(mode + 0.5))
-    {
-
-    case 0:
-        return scatter.w;
-
-    case 1:
-        return hash11u(id);
-
-    case 2:
-        float f1 = (f + SpreadPhase) / SpreadLength;
-        f1 = SpreadRepeat > 0.5 ? fmod(f1, 1) : f1;
-        return SpreadPingPong > 0.5 ? (1 - abs(f1 * 2 - 1)) : f1;
-
-    case 3:
-        float w1 = (w + SpreadPhase) / SpreadLength;
-        w1 = SpreadRepeat > 0.5 ? fmod(w1, 1) : w1;
-        return SpreadPingPong > 0.5 ? (1 - abs(w1 * 2 - 1)) : w1;
-
-    default:
-        return fog;
-    }
-}
 
 psInput vsMain(uint id
                : SV_VertexID)
@@ -164,18 +133,26 @@ psInput vsMain(uint id
 
     float4 posInClipSpace = mul(posInObject, ObjectToClipSpace);
     output.pixelPosition = posInClipSpace;
-
+    
+    // Texture Coordinates
     float2 uv = vertex.TexCoord;
     if (AtlasSize.x > 1 || AtlasSize.y > 1)
     {
+        int textureCelX = (instanceIndex % AtlasSize.x);
+        int textureCelY = (instanceIndex / AtlasSize.y) % AtlasSize.y;      
         
-        int2 atlasSize = AtlasSize ; 
-        
-        int textureCelX = (instanceIndex % atlasSize.x);
-        int textureCelY = (instanceIndex / atlasSize.y) % atlasSize.y;
-        uv /= atlasSize;
-        uv += float2(textureCelX, textureCelY) / atlasSize;
-       
+        if (AtlasMode == 1) // use FX1
+        {      
+        textureCelX = Points[instanceIndex].FX1;
+        textureCelY = Points[instanceIndex].FX1/ AtlasSize.y;
+        }
+        else if (AtlasMode == 2) // use FX2
+        { 
+        textureCelX = Points[instanceIndex].FX2;
+        textureCelY = Points[instanceIndex].FX2 / AtlasSize.y;
+        }
+        uv /= AtlasSize;
+        uv += float2(textureCelX, textureCelY) / AtlasSize;   
     }
     
     output.texCoord = float2(uv.x, 1 - uv.y);
