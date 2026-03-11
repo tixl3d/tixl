@@ -30,9 +30,10 @@ internal abstract class AnimationParameterEditing : CurveEditing
     {
         foreach (var param in AnimationParameters)
         {
+            var index = 0;
             foreach (var curve in param.Curves)
             {
-                yield return new KeyframeCopyAndPasting.CurveWithDetails(curve, param.Instance.SymbolChildId,  param.Input.Id, 0);
+                yield return new KeyframeCopyAndPasting.CurveWithDetails(curve, param.Instance.SymbolChildId,  param.Input.Id, index++);
             }
         }
     }

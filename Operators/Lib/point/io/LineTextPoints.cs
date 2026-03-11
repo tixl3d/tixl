@@ -477,8 +477,8 @@ internal sealed class LineFont
                 continue;
             
             var points = GetPointsFromSvgGroup(font, svgGlyph);
-            if (points.Length == 0)
-                continue;
+            // if (points.Length == 0)
+            //     continue;
 
             if (string.IsNullOrEmpty(svgGlyph.Unicode) || svgGlyph.Unicode.Length != 1)
             {
