@@ -1,4 +1,4 @@
-﻿#nullable enable
+﻿﻿#nullable enable
 using ManagedBass;
 using T3.Core.Audio;
 // ReSharper disable MemberCanBePrivate.Global
@@ -139,30 +139,41 @@ namespace Lib.io.audio
         public SpatialAudioPlayer()
         {
             Result.TransformableOp = this;
-            Result.UpdateAction += Update;
-            IsPlaying.UpdateAction += Update;
-            IsPaused.UpdateAction += Update;
-            
-            // Do not update on GetLevel - it overrides stale state when result is not evaluating
-            //GetLevel.UpdateAction += Update;
+            Result.UpdateAction += UpdatePlayback;
+            IsPlaying.UpdateAction += UpdateStatus;
+            IsPaused.UpdateAction += UpdateStatus;
+            GetLevel.UpdateAction += UpdateStatus;
+        }
+
+        private void EnsureOperatorId()
+        {
+            if (_operatorId != Guid.Empty)
+                return;
+
+            _operatorId = AudioPlayerUtils.ComputeInstanceGuid(InstancePath);
+            Log.Gated.Audio($"[SpatialAudioPlayer] Initialized: {_operatorId}");
+        }
+
+        private void UpdateStatus(EvaluationContext context)
+        {
+            EnsureOperatorId();
+            IsPlaying.Value = AudioEngine.IsSpatialOperatorStreamPlaying(_operatorId);
+            IsPaused.Value = AudioEngine.IsSpatialOperatorPaused(_operatorId);
+            GetLevel.Value = AudioEngine.GetSpatialOperatorLevel(_operatorId);
         }
 
         /// <summary>
         /// Updates the spatial audio player state and processes playback.
         /// </summary>
         /// <param name="context">The evaluation context for the current frame.</param>
-        private void Update(EvaluationContext context)
+        private void UpdatePlayback(EvaluationContext context)
         {
-            if (_operatorId == Guid.Empty)
-            {
-                _operatorId = AudioPlayerUtils.ComputeInstanceGuid(InstancePath);
-                Log.Gated.Audio($"[SpatialAudioPlayer] Initialized: {_operatorId}");
-            }
+            EnsureOperatorId();
 
             string? filePath = AudioFile.GetValue(context);
             bool shouldPlay = PlayAudio.GetValue(context);
 
-            var shouldStop = StopAudio.GetValue(context);
+            var shouldStop = StopAudio.GetValue(context) || !shouldPlay;
             var shouldPause = PauseAudio.GetValue(context);
             var volume = Volume.GetValue(context);
             var mute = Mute.GetValue(context);

@@ -61,25 +61,35 @@ namespace Lib.io.audio
 
         public AudioPlayer()
         {
-            Result.UpdateAction += Update;
-            IsPlaying.UpdateAction += Update;
-            
-            // Do not update on GetLevel - it overrides stale state when result is not evaluating
-            //GetLevel.UpdateAction += Update;
+            Result.UpdateAction += UpdatePlayback;
+            IsPlaying.UpdateAction += UpdateStatus;
+            GetLevel.UpdateAction += UpdateStatus;
         }
 
-        private void Update(EvaluationContext context)
+        private void EnsureOperatorId()
         {
-            if (_operatorId == Guid.Empty)
-            {
-                _operatorId = AudioPlayerUtils.ComputeInstanceGuid(InstancePath);
-                Log.Gated.Audio($"[AudioPlayer] Initialized: {_operatorId}");
-            }
+            if (_operatorId != Guid.Empty)
+                return;
+
+            _operatorId = AudioPlayerUtils.ComputeInstanceGuid(InstancePath);
+            Log.Gated.Audio($"[AudioPlayer] Initialized: {_operatorId}");
+        }
+
+        private void UpdateStatus(EvaluationContext context)
+        {
+            EnsureOperatorId();
+            IsPlaying.Value = AudioEngine.IsOperatorStreamPlaying(_operatorId);
+            GetLevel.Value = AudioEngine.GetOperatorLevel(_operatorId);
+        }
+
+        private void UpdatePlayback(EvaluationContext context)
+        {
+            EnsureOperatorId();
 
             string filePath = AudioFile.GetValue(context);
             bool shouldPlay = PlayAudio.GetValue(context);
 
-            var shouldStop = StopAudio.GetValue(context);
+            var shouldStop = StopAudio.GetValue(context) || !shouldPlay;
             var shouldPause = PauseAudio.GetValue(context);
             var volume = Volume.GetValue(context);
             var mute = Mute.GetValue(context);

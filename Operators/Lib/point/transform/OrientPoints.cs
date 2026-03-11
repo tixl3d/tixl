@@ -17,15 +17,17 @@ internal sealed class OrientPoints : Instance<OrientPoints>
         public readonly InputSlot<int> AmountFactor = new InputSlot<int>();
 
         [Input(Guid = "607fd90d-57f3-4a6a-b843-86c7170c854c")]
-        public readonly InputSlot<System.Numerics.Vector3> Center = new InputSlot<System.Numerics.Vector3>();
+        public readonly InputSlot<System.Numerics.Vector3> Target = new InputSlot<System.Numerics.Vector3>();
 
         [Input(Guid = "2aa74709-65f3-49fa-9890-f0a0f6e76bbf")]
         public readonly InputSlot<System.Numerics.Vector3> UpVector = new InputSlot<System.Numerics.Vector3>();
 
-    
         [Input(Guid = "02ae76ba-7be8-4112-a59b-55616343f1dd")]
         public readonly InputSlot<bool> Flip = new InputSlot<bool>();
-        
+
+        [Input(Guid = "0130d406-ff9a-419e-9294-fba52983dff5", MappedType = typeof(OModes))]
+    public readonly InputSlot<int> OrientationMode = new InputSlot<int>();
+
         [Input(Guid = "4358e71b-3f33-4868-af4d-97e8e04087a6")]
         public readonly InputSlot<bool> WIsWeight = new InputSlot<bool>();
         
@@ -35,4 +37,10 @@ internal sealed class OrientPoints : Instance<OrientPoints>
             F1,
             F2,
         }
+        private enum OModes
+        {
+            LootAtTarget,
+            Screen,
+            LookAtCamera,
+    }
 }

@@ -6,8 +6,8 @@
     {
       "InputId": "0af05ab4-0d77-4f01-a79b-691f58f702ef"/*Size*/,
       "Position": {
-        "X": 2053.9766,
-        "Y": 3395.3235
+        "X": 2056.3213,
+        "Y": 3335.53
       },
       "Description": "Uniformly scales the meshes using the Points as center of scaling.",
       "Min": 0.0,
@@ -45,16 +45,16 @@
     {
       "InputId": "59420e45-cbe2-48d8-961c-3dea5e55b182"/*Shading*/,
       "Position": {
-        "X": 1913.9767,
-        "Y": 3465.3235
+        "X": 1916.3214,
+        "Y": 3405.53
       },
       "Description": "Select shading mode"
     },
     {
       "InputId": "69e1f021-4db2-43a1-a4e6-837024350dc1"/*UsePointScale*/,
       "Position": {
-        "X": 1907.7228,
-        "Y": 3529.3093
+        "X": 1916.3212,
+        "Y": 3499.9988
       },
       "Description": "Defines whether the meshes are influenced/non-uniformly stretched by their points.",
       "AddPadding": "True"
@@ -76,17 +76,25 @@
       "Description": "This defines whether the mesh covers itself or is covered by or covers other meshes."
     },
     {
+      "InputId": "8af68894-0a5f-4fef-b7c9-41badeb1db16"/*AtlasMode*/,
+      "Position": {
+        "X": 1916.3212,
+        "Y": 3644.9988
+      },
+      "Description": "Defines how the atlas textures are spread. "
+    },
+    {
       "InputId": "998e0e5b-fccf-430c-b799-aacc8b0cbb28"/*ScaleFactor*/,
       "Position": {
-        "X": 2047.7229,
-        "Y": 3564.3093
+        "X": 2056.3213,
+        "Y": 3534.9988
       }
     },
     {
       "InputId": "9ec6c311-22de-411b-9821-0d458f33df7a"/*SpecularAA*/,
       "Position": {
-        "X": 2053.9766,
-        "Y": 3500.3235
+        "X": 2056.3213,
+        "Y": 3440.53
       },
       "Description": "This reduces specular aliasing on silhouettes and high-frequency normalmap regions.",
       "Min": 0.0,
@@ -104,8 +112,8 @@
     {
       "InputId": "a8590e4f-2edf-42c9-8bc2-e7b521f8cafc"/*AlphaCutOff*/,
       "Position": {
-        "X": 2053.9766,
-        "Y": 3430.3235
+        "X": 2056.3213,
+        "Y": 3370.53
       },
       "Description": "This value controls transparency if a texture containing an alpha channel is used.",
       "AddPadding": "True"
@@ -113,8 +121,8 @@
     {
       "InputId": "ba7befdf-270b-4ac0-bfc2-7543e2c3097b"/*Color*/,
       "Position": {
-        "X": 1773.9764,
-        "Y": 3290.3235
+        "X": 1776.3212,
+        "Y": 3230.53
       },
       "GroupTitle": "Appearance",
       "Description": "Defines the shading color of the mesh.\nIf a [SetMaterial] is used, these colors are multiplied with its settings."
@@ -126,6 +134,15 @@
         "Y": 4217.8496
       },
       "Description": "Defines the transparency of the surfaces.\n\nNone: All surfaces are \"bothsided\" or always visible from all sides\n\nFront: The normals are flipped (frontside is transparent / backside visible)\n\nBack: Default (frontside is visible / backside is invisible)"
+    },
+    {
+      "InputId": "c4adbb96-8838-4c7f-be20-bb464f0eea4c"/*AtlasSize*/,
+      "Position": {
+        "X": 1916.3212,
+        "Y": 3569.9988
+      },
+      "GroupTitle": "Texture Coordinates",
+      "Description": "Defines the number of cells in the connect texture atlas. This can be useful for distributing different textures with a single draw call."
     },
     {
       "InputId": "dd511aab-0472-4109-9c10-cc1ab5042499"/*EnableZWrite*/,
@@ -148,8 +165,8 @@
     {
       "ChildId": "0734ae32-1233-4099-87d9-342401004e33"/*SetPixelAndVertexShaderStage*/,
       "Position": {
-        "X": 2569.352,
-        "Y": 3455.5703
+        "X": 2635.2988,
+        "Y": 3457.5688
       }
     },
     {
@@ -157,6 +174,13 @@
       "Position": {
         "X": 2224.1724,
         "Y": 4578.953
+      }
+    },
+    {
+      "ChildId": "310e1679-eda4-45b8-8978-03779295ccb1"/*IntValue*/,
+      "Position": {
+        "X": 1768.3304,
+        "Y": 3719.164
       }
     },
     {
@@ -170,12 +194,19 @@
       "ChildId": "3a9974de-0e28-47e8-8deb-287c784f9da6"/*Execute*/,
       "Style": "Resizable",
       "Size": {
-        "X": 81.28825,
-        "Y": 890.9817
+        "X": 140.0,
+        "Y": 175.0
       },
       "Position": {
-        "X": 2569.352,
-        "Y": 4190.5703
+        "X": 2635.2988,
+        "Y": 4192.569
+      }
+    },
+    {
+      "ChildId": "3c638d15-9dc5-4c51-a7ba-89b2521dc6fe"/*Int2Components*/,
+      "Position": {
+        "X": 2056.321,
+        "Y": 3569.9988
       }
     },
     {
@@ -202,15 +233,15 @@
     {
       "ChildId": "612e45f2-6814-4801-996c-afa62f626df3"/*ContextCBuffers*/,
       "Position": {
-        "X": 2429.352,
-        "Y": 3595.5703
+        "X": 2495.2988,
+        "Y": 3597.5688
       }
     },
     {
       "ChildId": "6291fb66-fa82-43d1-b83d-59edc07ab09f"/*BoolToInt*/,
       "Position": {
-        "X": 2047.7229,
-        "Y": 3529.3093
+        "X": 2056.3213,
+        "Y": 3499.9988
       }
     },
     {
@@ -230,8 +261,8 @@
     {
       "ChildId": "79c8762f-0667-4ddd-8bc5-9cfce2e29dd3"/*GetTextureFromContext*/,
       "Position": {
-        "X": 2289.352,
-        "Y": 4015.5703
+        "X": 2355.2988,
+        "Y": 4017.5688
       }
     },
     {
@@ -245,19 +276,19 @@
       "ChildId": "8cf1cc31-7484-4d8a-9be3-fb818ac6a0ef"/*Vector4Components*/,
       "Style": "Resizable",
       "Size": {
-        "X": 111.079544,
-        "Y": 59.905018
+        "X": 140.0,
+        "Y": 140.0
       },
       "Position": {
-        "X": 2053.9766,
-        "Y": 3255.3235
+        "X": 2056.3213,
+        "Y": 3195.53
       }
     },
     {
       "ChildId": "977451f3-27d6-4d5b-a33a-2fde63cfdc90"/*GetForegroundColor*/,
       "Position": {
-        "X": 1773.9764,
-        "Y": 3255.3235
+        "X": 1776.3212,
+        "Y": 3195.53
       }
     },
     {
@@ -270,8 +301,8 @@
     {
       "ChildId": "a1a7b823-566c-4596-b83b-cddcd1ed0412"/*IntsToBuffer*/,
       "Position": {
-        "X": 2187.7227,
-        "Y": 3529.3093
+        "X": 2196.321,
+        "Y": 3499.9988
       }
     },
     {
@@ -291,36 +322,36 @@
     {
       "ChildId": "b3d403ea-3941-49a6-908e-6b8b945725b5"/*SrvFromTexture2d*/,
       "Position": {
-        "X": 2429.352,
-        "Y": 4015.5703
+        "X": 2495.2988,
+        "Y": 4017.5688
       }
     },
     {
       "ChildId": "b7afcd08-c2ef-4189-b870-fa367661bf1e"/*BlendColors*/,
       "Position": {
-        "X": 1913.9764,
-        "Y": 3255.3235
+        "X": 1916.3212,
+        "Y": 3195.53
       }
     },
     {
       "ChildId": "c22e0965-e177-490e-a2e3-332c88a0538b"/*IntToFloat*/,
       "Position": {
-        "X": 2053.9766,
-        "Y": 3465.3235
+        "X": 2056.3213,
+        "Y": 3405.53
       }
     },
     {
       "ChildId": "c23633cf-8392-4c18-96a8-58228e7d4662"/*InputAssemblerStage*/,
       "Position": {
-        "X": 2429.352,
-        "Y": 4225.5703
+        "X": 2495.2988,
+        "Y": 4227.569
       }
     },
     {
       "ChildId": "c9a5a194-a095-4667-980c-88b84f19d2d2"/*Clamped*/,
       "Position": {
-        "X": 2429.352,
-        "Y": 4155.5703
+        "X": 2495.2988,
+        "Y": 4157.569
       }
     },
     {
@@ -348,26 +379,26 @@
       "ChildId": "e74e8e19-16d9-400d-b20e-f558d9b0e84d"/*TransformsConstBuffer*/,
       "Style": "Expanded",
       "Size": {
-        "X": 110.0,
-        "Y": 23.0
+        "X": 140.0,
+        "Y": 35.0
       },
       "Position": {
-        "X": 2429.352,
-        "Y": 3525.5703
+        "X": 2495.2988,
+        "Y": 3527.5688
       }
     },
     {
       "ChildId": "f11729d6-f457-4eea-80c2-ddc5d4fe9382"/*FloatsToBuffer*/,
       "Position": {
-        "X": 2193.9766,
-        "Y": 3220.3235
+        "X": 2196.3213,
+        "Y": 3160.53
       }
     },
     {
       "ChildId": "f7305fd3-6aa9-4872-9125-db3262870928"/*Wrapped*/,
       "Position": {
-        "X": 2429.352,
-        "Y": 4120.5703
+        "X": 2495.2988,
+        "Y": 4122.569
       }
     },
     {
@@ -380,8 +411,8 @@
     {
       "ChildId": "fd4b3ce7-6a8b-427b-b7ab-05538f3bf18a"/*VertexShader*/,
       "Position": {
-        "X": 2429.352,
-        "Y": 3455.5703
+        "X": 2495.2988,
+        "Y": 3457.5688
       }
     }
   ],
@@ -389,8 +420,8 @@
     {
       "OutputId": "774a96e4-24e2-4e1a-a70d-63794d24dd51"/*Output*/,
       "Position": {
-        "X": 2569.352,
-        "Y": 4365.5703
+        "X": 2635.2988,
+        "Y": 4367.569
       }
     }
   ],

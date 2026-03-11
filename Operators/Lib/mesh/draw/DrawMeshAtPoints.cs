@@ -52,6 +52,12 @@ internal sealed class DrawMeshAtPoints : Instance<DrawMeshAtPoints>
 
         [Input(Guid = "a7cb95c4-fb81-49c7-9503-a45589713415")]
         public readonly InputSlot<T3.Core.DataTypes.ShaderGraphNode> ColorField = new InputSlot<T3.Core.DataTypes.ShaderGraphNode>();
+
+        [Input(Guid = "c4adbb96-8838-4c7f-be20-bb464f0eea4c")]
+        public readonly InputSlot<T3.Core.DataTypes.Vector.Int2> AtlasSize = new();
+
+        [Input(Guid = "8af68894-0a5f-4fef-b7c9-41badeb1db16", MappedType = typeof(AtlasModes))]
+        public readonly InputSlot<int> AtlasMode = new();
         
         private enum ScaleFXModes
         {
@@ -59,9 +65,15 @@ internal sealed class DrawMeshAtPoints : Instance<DrawMeshAtPoints>
             F1 = 1,
             F2 = 2,
         }
-    private enum ShadingModes
-    {
-        Default = 0,
-        Flat = 1,
-    }
+        private enum ShadingModes
+        {
+            Default = 0,
+            Flat = 1,
+        }
+        private enum AtlasModes
+        {
+            BufferOrder = 0,
+            F1 = 1,
+            F2 = 2,
+        }
 }

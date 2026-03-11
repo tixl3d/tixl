@@ -230,13 +230,13 @@ public abstract class InputValueUi<T> : IInputUi
                 ImGui.PushStyleColor(ImGuiCol.Text, UiColors.ForegroundFull.Rgba);
                 ImGui.Button($"{input.Name.AddSpacesForImGuiOutput()}##ParamName", new Vector2(ParameterNameWidth, 0.0f));
                 ImGui.PopStyleColor();
-                if (ImGui.BeginPopupContextItem("##parameterOptions", 0))
+                /*if (ImGui.BeginPopupContextItem("##parameterOptions", 0))
                 {
                     if (ImGui.MenuItem("Parameters settings"))
                         editState = InputEditStateFlags.ShowOptions;
 
                     ImGui.EndPopup();
-                }
+                }*/
 
                 CustomComponents.ContextMenuForItem(() =>
                                                     {
@@ -280,6 +280,7 @@ public abstract class InputValueUi<T> : IInputUi
                                                         
                                                         if (ImGui.MenuItem("Parameters settings"))
                                                             editState = InputEditStateFlags.ShowOptions;
+                                                     
                                                     });
 
                 ImGui.PopStyleVar();
@@ -288,14 +289,23 @@ public abstract class InputValueUi<T> : IInputUi
                 ImGui.PushItemWidth(200.0f);
                 ImGui.SetNextItemWidth(-1);
 
-                string connectedName;
-                if (typedInputSlot.TryGetFirstConnection(out var connectedSlot))
+                var connectedName = "???";
+                if (typedInputSlot.TryGetFirstConnection(out var connectedSlot) && connectedSlot?.Parent != null)
                 {
-                    connectedName = connectedSlot?.Parent.Symbol.Name ?? "???";
+                    connectedName = !string.IsNullOrWhiteSpace(connectedSlot.Parent.SymbolChild.Name)
+                        ? connectedSlot.Parent.SymbolChild.Name
+                        : (!string.IsNullOrWhiteSpace(connectedSlot.Parent.Symbol.Name)
+                            ? connectedSlot.Parent.Symbol.Name
+                            : "???");
                 }
-                else
+                if (ImGui.IsItemHovered())
                 {
-                    connectedName = "???";
+                    var text = "Input: " + connectedName ;
+                    if (!string.IsNullOrEmpty(Description))
+                    {
+                       text += "\n-----";
+                    }
+                    CustomComponents.TooltipForLastItem(text, Description);
                 }
 
                 ImGui.PushStyleColor(ImGuiCol.Text, typeColor.Rgba);
@@ -398,8 +408,7 @@ public abstract class InputValueUi<T> : IInputUi
                  });
             ImGui.PopStyleVar();
 
-            if (ImGui.IsItemHovered())
-                Icons.DrawIconAtScreenPosition(Icon.Revert, ImGui.GetItemRectMin() + new Vector2(6, 4) * T3Ui.UiScaleFactor);
+            DrawInputTooltipAndResetIcon(input);
 
             if (isClicked)
             {
@@ -452,25 +461,7 @@ public abstract class InputValueUi<T> : IInputUi
                 ImGui.PopStyleColor(hasStyleCount);
             }
 
-            if (ImGui.IsItemHovered())
-            {
-                var text = "";
-                if (!string.IsNullOrEmpty(Description))
-                {
-                    text += Description;
-                }
-
-                var additionalNotes = input.IsDefault ? null : "Click to reset to default";
-
-                if (!string.IsNullOrEmpty(text) || !string.IsNullOrEmpty(additionalNotes))
-                {
-                    CustomComponents.TooltipForLastItem(text,
-                                                        additionalNotes);
-                }
-
-                if (!input.IsDefault)
-                    Icons.DrawIconAtScreenPosition(Icon.Revert, ImGui.GetItemRectMin() + new Vector2(6, 4) * T3Ui.UiScaleFactor);
-            }
+            DrawInputTooltipAndResetIcon(input);
 
             if (isClicked)
             {
@@ -606,6 +597,28 @@ public abstract class InputValueUi<T> : IInputUi
     public Type Type { get; } = typeof(T);
 
     private const Relevancy DefaultRelevancy = Relevancy.Optional;
+
+    private void DrawInputTooltipAndResetIcon(Symbol.Child.Input input)
+    {
+        if (!ImGui.IsItemHovered())
+            return;
+
+        var text = Description ?? string.Empty;
+        var additionalNotes = input.IsDefault ? null : "Click to reset to default";
+
+        if (!string.IsNullOrEmpty(text) || !string.IsNullOrEmpty(additionalNotes))
+        {
+            CustomComponents.TooltipForLastItem(text, additionalNotes);
+        }
+
+        if (!input.IsDefault)
+        {
+            Icons.DrawIconAtScreenPosition(
+                Icon.Revert,
+                ImGui.GetItemRectMin() + new Vector2(6, 4) * T3Ui.UiScaleFactor
+            );
+        }
+    }
 }
 
 internal static class InputArea

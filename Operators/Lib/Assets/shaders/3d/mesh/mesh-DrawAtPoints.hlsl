@@ -2,6 +2,7 @@
 #include "shared/quat-functions.hlsl"
 #include "shared/point-light.hlsl"
 #include "shared/pbr.hlsl"
+#include "shared/hash-functions.hlsl"
 
 cbuffer Transforms : register(b0)
 {
@@ -53,6 +54,8 @@ cbuffer IntParams : register(b5)
 {
     int UsePointScale;
     int ScaleFactorMode;
+    int2 AtlasSize;
+    int AtlasMode;
 };
 
 cbuffer FieldParams : register(b6)
@@ -130,8 +133,28 @@ psInput vsMain(uint id
 
     float4 posInClipSpace = mul(posInObject, ObjectToClipSpace);
     output.pixelPosition = posInClipSpace;
-
+    
+    // Texture Coordinates
     float2 uv = vertex.TexCoord;
+    if (AtlasSize.x > 1 || AtlasSize.y > 1)
+    {
+        int textureCelX = (instanceIndex % AtlasSize.x);
+        int textureCelY = (instanceIndex / AtlasSize.y) % AtlasSize.y;      
+        
+        if (AtlasMode == 1) // use FX1
+        {      
+        textureCelX = Points[instanceIndex].FX1;
+        textureCelY = Points[instanceIndex].FX1/ AtlasSize.y;
+        }
+        else if (AtlasMode == 2) // use FX2
+        { 
+        textureCelX = Points[instanceIndex].FX2;
+        textureCelY = Points[instanceIndex].FX2 / AtlasSize.y;
+        }
+        uv /= AtlasSize;
+        uv += float2(textureCelX, textureCelY) / AtlasSize;   
+    }
+    
     output.texCoord = float2(uv.x, 1 - uv.y);
 
     // Pass tangent space basis vectors (for normal mapping).

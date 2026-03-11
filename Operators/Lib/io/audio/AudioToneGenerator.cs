@@ -60,22 +60,40 @@ namespace Lib.io.audio
 
         public AudioToneGenerator()
         {
-            Result.UpdateAction += Update;
-            IsPlaying.UpdateAction += Update;
-            
-            // Do not update on GetLevel - it overrides stale state when result is not evaluating
-            //GetLevel.UpdateAction += Update;
+            Result.UpdateAction += UpdatePlayback;
+            IsPlaying.UpdateAction += UpdateStatus;
+            GetLevel.UpdateAction += UpdateStatus;
         }
 
-        private void Update(EvaluationContext context)
+        private void EnsureOperatorId()
         {
-            if (_operatorId == Guid.Empty)
+            if (_operatorId != Guid.Empty)
+                return;
+
+            _operatorId = AudioPlayerUtils.ComputeInstanceGuid(InstancePath);
+            Log.Gated.Audio($"[TestToneGenerator] Initialized: {_operatorId}");
+        }
+
+        private void UpdateStatus(EvaluationContext context)
+        {
+            EnsureOperatorId();
+
+            if (_toneStream == null)
             {
-                _operatorId = AudioPlayerUtils.ComputeInstanceGuid(InstancePath);
-                Log.Gated.Audio($"[TestToneGenerator] Initialized: {_operatorId}");
+                IsPlaying.Value = false;
+                GetLevel.Value = 0;
+                return;
             }
 
-            var trigger = Trigger.GetValue(context);
+            IsPlaying.Value = _toneStream.Adsr.IsActive;
+            GetLevel.Value = _toneStream.GetLevel();
+        }
+
+        private void UpdatePlayback(EvaluationContext context)
+        {
+            EnsureOperatorId();
+
+            var shouldPlay = Trigger.GetValue(context);
             var frequency = Frequency.GetValue(context);
             var duration = Duration.GetValue(context);
             var volume = Volume.GetValue(context);
@@ -115,19 +133,31 @@ namespace Lib.io.audio
             _toneStream.Adsr.SetDuration(duration);
 
             // Detect edges and send trigger/release signals to audio thread
-            var risingEdge = trigger && !_previousTrigger;
-            var fallingEdge = !trigger && _previousTrigger;
-            _previousTrigger = trigger;
+            var risingEdge = shouldPlay && !_previousTrigger;
+            var fallingEdge = !shouldPlay && _previousTrigger;
+            _previousTrigger = shouldPlay;
 
             if (risingEdge)
             {
                 _toneStream.Adsr.TriggerAttack();
                 Log.Gated.Audio($"[TestToneGenerator] ▶ Triggered @ {frequency}Hz");
             }
-            else if (fallingEdge && triggerMode == AdsrCalculator.TriggerMode.Gate)
+            else if (fallingEdge)
             {
-                _toneStream.Adsr.TriggerRelease();
-                Log.Gated.Audio($"[TestToneGenerator] ~ Release triggered");
+                if (triggerMode == AdsrCalculator.TriggerMode.Gate)
+                {
+                    _toneStream.Adsr.TriggerRelease();
+                    Log.Gated.Audio($"[TestToneGenerator] ~ Release triggered");
+                }
+                else
+                {
+                    // In Trigger mode, falling edge has no effect - ADSR runs its full cycle
+                }
+            }
+            else if (!shouldPlay && !_toneStream.Adsr.IsActive)
+            {
+                // Trigger is off and ADSR has fully completed - ensure clean idle state
+                _toneStream.Adsr.Reset();
             }
 
             bool isActive = _toneStream.Adsr.IsActive;
