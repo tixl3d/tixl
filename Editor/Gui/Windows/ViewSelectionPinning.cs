@@ -71,10 +71,13 @@ internal sealed class ViewSelectionPinning
                 PinSelectionToView(canvas);
             }
 
-            CustomComponents.TooltipForLastItem(selectedOp != null
-                                                    ? $"Pin output to selected {selectedOp.Symbol.Name}."
-                                                    : $"Select an operator and click to update pinning.",
-                                                UserActions.PinToOutputWindow.ListShortcuts());
+            if (ImGui.IsItemHovered())
+            {
+                CustomComponents.TooltipForLastItem(selectedOp != null
+                                                        ? $"Pin output to selected {selectedOp.Symbol.Name}."
+                                                        : $"Select an operator and click to update pinning.",
+                                                    UserActions.PinToOutputWindow.ListShortcuts());
+            }
         }
 
         ImGui.SameLine();
@@ -90,7 +93,7 @@ internal sealed class ViewSelectionPinning
         var symbolChildName = pinnedOrSelectedInstance.SymbolChild?.Name;
         if (!string.IsNullOrEmpty(symbolChildName))
         {
-            symbolName = $"\"{symbolChildName}\" {symbolName}";
+            symbolName = $@"""{symbolChildName}"" {symbolName}";
         }
 
         ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
@@ -275,10 +278,10 @@ internal sealed class ViewSelectionPinning
     private bool _isPinned;
     private Guid _selectedOutputId; // Empty if default
     private ProjectView? _pinnedProjectView;
-    private IReadOnlyList<Guid> _pinnedInstancePath = Array.Empty<Guid>();
-    private IReadOnlyList<Guid> _pinnedEvaluationInstancePath = Array.Empty<Guid>();
+    private IReadOnlyList<Guid> _pinnedInstancePath = [];
+    private IReadOnlyList<Guid> _pinnedEvaluationInstancePath = [];
 
-    public ISlot? GetPinnedOrDefaultOutput(IReadOnlyList<ISlot> outputs)
+    public ISlot? GetPinnedOrDefaultOutput(List<ISlot> outputs)
     {
         if (outputs.Count == 0)
             return null;
@@ -286,8 +289,9 @@ internal sealed class ViewSelectionPinning
         if (_selectedOutputId == Guid.Empty)
             return outputs[0];
 
-        foreach (var o in outputs)
+        for (var index = 0; index < outputs.Count; index++)
         {
+            var o = outputs[index];
             if (o.Id == _selectedOutputId)
                 return o;
         }

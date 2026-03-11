@@ -268,11 +268,12 @@ internal static class RenderProcess
                 break;
             }
             case RenderSettings.RenderModes.ImageSequence:
-                AudioRendering.GetLastMixDownBuffer(Playback.LastFrameDuration);
+                // Process audio for this frame to drive animations
+                var audioFrameFloat = AudioRendering.GetFullMixDownBuffer(1.0 / session.Settings.FrameRate);
 
-                // For image export, also update metering for UI/graph
-                // Use FxTimeInBars as a substitute for LocalFxTime
-                AudioRendering.EvaluateAllAudioMeteringOutputs(Playback.Current.FxTimeInBars);
+                // Update audio metering for UI/graph
+                double localFxTime = session.FrameIndex / session.Settings.FrameRate;
+                AudioRendering.EvaluateAllAudioMeteringOutputs(localFxTime, audioFrameFloat);
                 savingSuccessful = TrySaveImageFrameAndAdvance(mainOutputTexture);
                 break;
         }

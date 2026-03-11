@@ -162,6 +162,142 @@
           "8c3ffefe-8721-4dde-b252-22eb8be02d3f": "// Simple Displacement\n// Connect two images and use Offset Parameter\n\nfloat4 cb= ImageB.Sample(Sampler, uv );\n\nfloat d= ApplyGainAndBias(cb.r, GainAndBias);\nc= ImageA.Sample(Sampler, uv - d * Offset * float2(1,-1));\nc.rgb *= SampleGradient(d);\n"
         }
       }
+    },
+    {
+      "Id": "22ca68ac-0707-42a3-81c9-b6d4e5823827",
+      "IsPreset": true,
+      "ActivationIndex": 5,
+      "Title": "remap value, preserve hue/saturation",
+      "PosOnCanvas": {
+        "X": 161.60846,
+        "Y": 130.18774
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "e1c50230-8821-4109-8119-fd8b66b43e7f": {
+            "Gradient": {
+              "Interpolation": "Linear",
+              "Steps": [
+                {
+                  "Id": "463ac79e-a94f-49c3-9d80-9b255aeb048f",
+                  "NormalizedPosition": 0.0,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.99999,
+                    "B": 1.0,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "4142d75b-28f2-4845-b542-f38eced26624",
+                  "NormalizedPosition": 1.0,
+                  "Color": {
+                    "R": 0.0,
+                    "G": 0.0,
+                    "B": 0.0,
+                    "A": 1.0
+                  }
+                }
+              ]
+            }
+          },
+          "8c3ffefe-8721-4dde-b252-22eb8be02d3f": "c= ImageA.Sample(Sampler, uv);\nc.rgb=max(0,c.rgb);\nfloat3 h=rgb2hsv(c.rgb);\nc.rgb=max(c.rgb,0);\n\nh.z=ApplyGainAndBias(SampleGradient(h.z).x, GainAndBias);\nc.rgb=hsv2rgb(h);\n",
+          "c9a801ec-13fb-4ad4-b0cd-d125b5db500a": "float3 hsv2rgb(float3 hsv){return lerp(1,saturate(abs(frac((hsv.x-float3(0,2,4)/6))-.5)*6-1),hsv.y)*hsv.z;}\nfloat3 rgb2hsv(float3 c){\n     float v=max(c.x,max(c.y,c.z));float m=min(c.x,min(c.y,c.z));float r=v-m;\n     float h=(r!=0)?frac(((v==c.x)?((c.y-c.z)/r):(v==c.y)?(2+(c.z-c.x)/r):(4+(c.x-c.y)/r))/6):0;\n     float s=(v!=0)?(1-m/v):0;\n     return float3(h,s,v);\n}"
+        }
+      }
+    },
+    {
+      "Id": "72c0706d-a463-4d75-8de1-a65c1d5ebd9d",
+      "IsPreset": true,
+      "ActivationIndex": 6,
+      "Title": "remap hue",
+      "PosOnCanvas": {
+        "X": 324.60846,
+        "Y": 130.18774
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "e1c50230-8821-4109-8119-fd8b66b43e7f": {
+            "Gradient": {
+              "Interpolation": "OkLab",
+              "Steps": [
+                {
+                  "Id": "1d52b4c2-f2d6-4e0e-8b0b-77d2e6156155",
+                  "NormalizedPosition": 0.0,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.04149252,
+                    "B": 0.0,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "b4eac5ef-3d43-4f1d-8f3e-11da7a0ba8e8",
+                  "NormalizedPosition": 0.16666667,
+                  "Color": {
+                    "R": 0.16746414,
+                    "G": 0.16746414,
+                    "B": 0.0,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "f4556ff0-40d2-4ba1-a710-37f084d626ea",
+                  "NormalizedPosition": 0.33716154,
+                  "Color": {
+                    "R": 0.9658998,
+                    "G": 0.013474464,
+                    "B": 1.0,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "55b5d5ff-e982-4a19-a1f0-fcd4ee23728c",
+                  "NormalizedPosition": 0.5,
+                  "Color": {
+                    "R": 0.10326699,
+                    "G": 0.7896903,
+                    "B": 0.83732057,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "aee63e22-3631-4751-b062-85d01447469d",
+                  "NormalizedPosition": 0.6666667,
+                  "Color": {
+                    "R": 0.0,
+                    "G": 0.6253992,
+                    "B": 0.98564595,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "4bdaca43-e101-44aa-9f56-6b64bb709482",
+                  "NormalizedPosition": 0.8333333,
+                  "Color": {
+                    "R": 0.9081521,
+                    "G": 0.0,
+                    "B": 1.0,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "e901a49b-c0dc-4907-a2d2-c7b2e56f76f6",
+                  "NormalizedPosition": 1.0,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.0,
+                    "B": 0.010892391,
+                    "A": 1.0
+                  }
+                }
+              ]
+            }
+          },
+          "8c3ffefe-8721-4dde-b252-22eb8be02d3f": "c= ImageA.Sample(Sampler, uv);\nc.rgb=max(0,c.rgb);\nfloat4 c0=c;\nfloat3 h=rgb2hsv(c.rgb);\nc.rgb=max(c.rgb,0);\n\n\nc.rgb=SampleGradient(h.x);\nc.rgb=max(c.rgb,0);\nc.rgb=lerp(dot(c0.rgb,1./3),c.rgb,h.y)*h.z;",
+          "c9a801ec-13fb-4ad4-b0cd-d125b5db500a": "float3 hsv2rgb(float3 hsv){return lerp(1,saturate(abs(frac((hsv.x-float3(0,2,4)/6))-.5)*6-1),hsv.y)*hsv.z;}\nfloat3 rgb2hsv(float3 c){\n     float v=max(c.x,max(c.y,c.z));float m=min(c.x,min(c.y,c.z));float r=v-m;\n     float h=(r!=0)?frac(((v==c.x)?((c.y-c.z)/r):(v==c.y)?(2+(c.z-c.x)/r):(4+(c.x-c.y)/r))/6):0;\n     float s=(v!=0)?(1-m/v):0;\n     return float3(h,s,v);\n}"
+        }
+      }
     }
   ]
 }

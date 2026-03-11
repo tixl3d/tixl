@@ -6,16 +6,16 @@
     {
       "InputId": "1951e2f8-29f5-461f-beca-2535b186956a"/*RandomSpin*/,
       "Position": {
-        "X": 582.98804,
-        "Y": 673.8364
+        "X": 603.72595,
+        "Y": 718.05585
       },
       "Description": "A continuous random offset onto the spin. This can lead to more natural looking effects."
     },
     {
       "InputId": "235158be-dc6f-45ad-81fa-8b1b2ef0e1bd"/*RandomPhase*/,
       "Position": {
-        "X": 582.98804,
-        "Y": 808.8363
+        "X": 603.72595,
+        "Y": 823.05585
       },
       "GroupTitle": "Options",
       "Description": "Can be used to animate the random offsets mentioned above."
@@ -23,8 +23,8 @@
     {
       "InputId": "5052523a-9e7b-4ae3-9d9d-ff16e0241cdc"/*SurfaceDistance*/,
       "Position": {
-        "X": 582.98804,
-        "Y": 718.8363
+        "X": 603.72595,
+        "Y": 753.05585
       },
       "Description": "The distance above the surface the particles will try to maintain.\n\nNote: The effect does not work well with negative distances.",
       "Min": 0.0,
@@ -41,8 +41,8 @@
     {
       "InputId": "a962fea7-b59f-49f4-83f0-a7e8b625e57c"/*Amount*/,
       "Position": {
-        "X": 582.98804,
-        "Y": 538.83636
+        "X": 603.72595,
+        "Y": 613.05585
       },
       "Description": "The acceleration towards and on the surface.",
       "Min": 0.0,
@@ -52,16 +52,16 @@
     {
       "InputId": "ac33e215-86cc-4659-bc87-e0d3c2325aa7"/*RandomizeSpeed*/,
       "Position": {
-        "X": 582.98804,
-        "Y": 583.83636
+        "X": 603.72595,
+        "Y": 648.05585
       },
       "Description": "A random factor on the target speed."
     },
     {
       "InputId": "b19de430-98f0-45c8-87c0-67d563ae5b5a"/*Spin*/,
       "Position": {
-        "X": 582.98804,
-        "Y": 628.8364
+        "X": 603.72595,
+        "Y": 683.05585
       },
       "GroupTitle": "Orientation",
       "Description": "Add a random rotation. This could be useful for wiggling or vein-like motions."
@@ -69,8 +69,8 @@
     {
       "InputId": "bbd372b8-5a0d-4dd6-a2dd-13049722e1a1"/*RandomSurfaceDistance*/,
       "Position": {
-        "X": 582.98804,
-        "Y": 763.8364
+        "X": 603.72595,
+        "Y": 788.05585
       },
       "Description": "A random offset on the target surface distance."
     },
@@ -115,14 +115,14 @@
     {
       "ChildId": "36abc672-593a-49e1-af79-3e1a3c71d874"/*FloatsToBuffer*/,
       "Position": {
-        "X": 732.9881,
-        "Y": 538.83636
+        "X": 743.72595,
+        "Y": 578.05585
       }
     },
     {
       "ChildId": "5801c4a0-f440-4773-b12b-2ee8abd1bda6"/*GetParticleComponents*/,
       "Position": {
-        "X": 732.9881,
+        "X": 743.7259,
         "Y": 495.83636
       }
     },
@@ -157,8 +157,8 @@
     {
       "ChildId": "ddf76754-b657-4bc4-b2bb-1eb085449137"/*ComputeShader*/,
       "Position": {
-        "X": 732.9881,
-        "Y": 452.83636
+        "X": 743.72595,
+        "Y": 391.71445
       }
     },
     {

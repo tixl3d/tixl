@@ -17,15 +17,26 @@ internal sealed class PickInt : Instance<PickInt>
     {
         var connections = InputValues.GetCollectedTypedInputs();
         var index = Index.GetValue(context).Mod(connections.Count);
-        InputValues.DirtyFlag.Clear();
         
+        InputValues.DirtyFlag.Clear();
         if (connections.Count == 0)
+        {
+            InputValues.DirtyFlag.Clear();
             return;
+        }
 
         Selected.Value = connections[index].GetValue(context);
         
         // Clear dirty flag
-        if (_isFirstUpdate)
+        
+        // FIXME: Normally this should clear the dirty flag.
+        // Setting this only on first frame update is normally sufficient,
+        // but in CustomPointShader, this only clears the state later.
+        //
+        // Temporarily enabled.
+        
+        //Log.Debug($"Update {InputValues.DirtyFlag.IsDirty}", this);        
+        //if (_isFirstUpdate)
         {
             foreach (var c in connections)
             {
@@ -34,6 +45,7 @@ internal sealed class PickInt : Instance<PickInt>
 
             _isFirstUpdate = false;
         }
+        InputValues.DirtyFlag.Clear();
     }
     
     private bool _isFirstUpdate = true;

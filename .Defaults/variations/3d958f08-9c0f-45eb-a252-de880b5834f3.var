@@ -158,6 +158,49 @@
           "e9712b03-e7aa-4fe5-b5cf-f2c5d0c0b0df": "//move points position\np.Position += Offset;\n\n//move points on Y for sine wave\np.Position.y += sin(6*f * A+B + Time)*C;\n\n// color every point\np.Color = float4(1,1,0,1); \n\n// control a specific point\nif(idx == (int)D){\n  p.FX1 = 5.0;\n  p.Color = float4(1,0,1,1);\n}"
         }
       }
+    },
+    {
+      "Id": "8b6d4c10-7c60-412b-9f16-1d3e3d657b2c",
+      "IsPreset": true,
+      "ActivationIndex": 7,
+      "Title": "Rotate to SDF.",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 367.65167
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "377151fc-49a7-4407-bf85-74c4a7d5188d": {
+            "Gradient": {
+              "Interpolation": "Linear",
+              "Steps": [
+                {
+                  "Id": "7471fd7d-43da-4393-874d-5b9d37c3bc26",
+                  "NormalizedPosition": 0.006840706,
+                  "Color": {
+                    "R": 0.79425836,
+                    "G": 0.38209665,
+                    "B": 0.0,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "3ac14285-232e-44cb-b406-c191531f2860",
+                  "NormalizedPosition": 1.0,
+                  "Color": {
+                    "R": 0.50547916,
+                    "G": 0.92379344,
+                    "B": 1.0,
+                    "A": 1.0
+                  }
+                }
+              ]
+            }
+          },
+          "e9712b03-e7aa-4fe5-b5cf-f2c5d0c0b0df": "// Orient points to SDF\nfloat3 pos = p.Position;\nfloat3 normal = GetFieldNormal(pos);\n\np.Rotation = qLookAt(normal, normal.zxy);\n\nfloat d=GetDistance(p.Position);\np.Scale = 1/ ( abs(d)+1);\n\np.Color = SampleGradient( d);\n\n\n\n\n",
+          "2a0cf45c-bcf5-4802-b32b-84cef0f1c129": 6120
+        }
+      }
     }
   ]
 }

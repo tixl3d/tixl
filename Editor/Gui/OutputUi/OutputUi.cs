@@ -29,6 +29,7 @@ internal abstract class OutputUi<T> : IOutputUi
                 Recompute(slot, context);
             }
         }
+        
         drawList.ChannelsSetCurrent(0);
         {
             DrawTypedValue(slot, viewId);

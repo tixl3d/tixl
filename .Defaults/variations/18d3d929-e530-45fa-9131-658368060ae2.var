@@ -8,7 +8,7 @@
       "Title": "Default",
       "PosOnCanvas": {
         "X": 163.0,
-        "Y": 0.0
+        "Y": -29.55056
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -23,7 +23,7 @@
       "Title": "StretchedPattern",
       "PosOnCanvas": {
         "X": 326.0,
-        "Y": 0.0
+        "Y": -29.55056
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -44,7 +44,7 @@
       "Title": "RandomColorDots",
       "PosOnCanvas": {
         "X": 489.0,
-        "Y": 0.0
+        "Y": -29.55056
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -85,8 +85,8 @@
         "00000000-0000-0000-0000-000000000000": {
           "8f203c5f-6eb8-42a1-bfea-9ca52a49e132": 5.0,
           "261faf50-c63e-4d4a-a496-648bbb3ea2c5": {
-            "Width": 4,
-            "Height": 4
+            "X": 4,
+            "Y": 4
           }
         }
       }
@@ -140,13 +140,12 @@
       "Title": "Inversions",
       "PosOnCanvas": {
         "X": 0.0,
-        "Y": 186.0
+        "Y": 215.55057
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
           "8f203c5f-6eb8-42a1-bfea-9ca52a49e132": 17.3,
           "909bdbcd-620c-479e-b150-cb7adfbfffe8": 2,
-          "975f7ed8-fc7f-41c7-9d90-d022efdf4b6b": false,
           "860b2023-9c77-47aa-9a9b-8fbc735835d4": 3,
           "62c511b9-ca36-48db-a9cf-13c929f81db6": true,
           "c676823b-97d0-4e3e-a59e-e2297816ec69": 0.32
@@ -160,7 +159,7 @@
       "Title": "RandomFX-pattern",
       "PosOnCanvas": {
         "X": 163.0,
-        "Y": 186.0
+        "Y": 215.55057
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -196,7 +195,7 @@
       "Title": "Particle-Streaks",
       "PosOnCanvas": {
         "X": 326.0,
-        "Y": 186.0
+        "Y": 215.55057
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {

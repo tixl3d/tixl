@@ -1,0 +1,122 @@
+{
+  "Id": "24848671-a827-45f0-84f2-52efccd4fbd5"/*PointInfoLines*/,
+  "Description": "Generates a line point buffer that can visualize numerical point attribute data.\nThe result can be drawn with [DrawLines].",
+  "InputUis": [
+    {
+      "InputId": "012bd45d-ecb4-49f5-970d-0d64d162bb6a"/*ShownInfo*/,
+      "Position": {
+        "X": 68.61679,
+        "Y": 303.44916
+      },
+      "Scale": 0.01
+    },
+    {
+      "InputId": "4e557506-ebf0-4b3f-b70f-2054fe1cf14c"/*AsBillboards*/,
+      "Position": {
+        "X": 68.616776,
+        "Y": 373.44916
+      }
+    },
+    {
+      "InputId": "75585b6b-67b9-43b1-bb6d-14e069ab29df"/*Offset*/,
+      "Position": {
+        "X": 208.61679,
+        "Y": 268.44916
+      },
+      "Min": -1.0,
+      "Max": 1.0,
+      "Scale": 0.01
+    },
+    {
+      "InputId": "88987121-8e52-4515-8d46-f2e7f493a47a"/*Digits*/,
+      "Position": {
+        "X": 208.61678,
+        "Y": 548.44916
+      }
+    },
+    {
+      "InputId": "9054a475-05ba-47c6-a105-84cf55f3fdb8"/*Input*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "abbbfdba-c25d-4c8f-b5cf-9fb52853896a"/*Precision*/,
+      "Position": {
+        "X": 208.61678,
+        "Y": 623.44916
+      }
+    },
+    {
+      "InputId": "d039c1b4-77ca-4264-bf2c-6dddd4aaf831"/*Scale*/,
+      "Position": {
+        "X": -40.747437,
+        "Y": 359.64905
+      },
+      "Min": 0.0,
+      "Max": 2.0,
+      "Scale": 0.01
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "1b3d0719-0ca0-47e6-a72d-67fe643e3afc"/*TransformsConstBuffer*/,
+      "Position": {
+        "X": 208.61678,
+        "Y": 443.44916
+      }
+    },
+    {
+      "ChildId": "7dbeb39a-8075-4766-894a-99bbbe4b5d3f"/*CustomPointShader*/,
+      "Position": {
+        "X": 348.6168,
+        "Y": 233.44916
+      }
+    },
+    {
+      "ChildId": "8cb47de9-b4d6-4bc8-ac92-bd0c8e18ee78"/*MultiplyInt*/,
+      "Position": {
+        "X": 208.61679,
+        "Y": 408.44916
+      }
+    },
+    {
+      "ChildId": "90ced117-508a-42f8-b34d-3789d7cc2710"/*GetBufferComponents*/,
+      "Position": {
+        "X": -29.796265,
+        "Y": 131.7497
+      }
+    },
+    {
+      "ChildId": "baaa2aec-2d8a-40ce-a4b6-feb2cb12bbc8"/*NumberLinePoints*/,
+      "Position": {
+        "X": 348.6168,
+        "Y": 478.44916
+      }
+    },
+    {
+      "ChildId": "efe42849-892c-4c84-a03e-0869e1ee3dc6"/*IntToFloat*/,
+      "Position": {
+        "X": 208.61679,
+        "Y": 303.44916
+      }
+    },
+    {
+      "ChildId": "febaabd4-632c-4442-b77d-7be19522822f"/*BoolToFloat*/,
+      "Position": {
+        "X": 208.61678,
+        "Y": 373.44916
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "eec67714-4eda-4410-afee-2076026191c7"/*OutBuffer*/,
+      "Position": {
+        "X": 734.5469,
+        "Y": 145.33643
+      }
+    }
+  ]
+}

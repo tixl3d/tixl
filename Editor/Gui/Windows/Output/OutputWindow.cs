@@ -185,6 +185,7 @@ internal sealed class OutputWindow : Window
         // Calculate available width
         var availableWidth = ImGui.GetWindowContentRegionMax().X - ImGui.GetWindowContentRegionMin().X;
         var toolbarHeight = ImGui.GetTextLineHeight() + 22;
+        
         // Begin a horizontally scrollable child region
         ImGui.BeginChild("##toolbar_scroll", new Vector2(availableWidth, toolbarHeight), false, ImGuiWindowFlags.HorizontalScrollbar);
 
@@ -408,14 +409,9 @@ internal sealed class OutputWindow : Window
         // Prepare context
         EvaluationContext.Reset();
         EvaluationContext.BypassCameras = _camSelectionHandling.BypassCamera;
-        if (RenderProcess.TryGetActiveExportResolution(out var overrideResolution))
-        {
-            EvaluationContext.RequestedResolution = overrideResolution;
-        }
-        else
-        {
-            EvaluationContext.RequestedResolution = _selectedResolution.ComputeResolution();
-        }
+        EvaluationContext.RequestedResolution = RenderProcess.TryGetActiveExportResolution(out var overrideResolution) 
+                                                    ? overrideResolution 
+                                                    : _selectedResolution.ComputeResolution();
 
         // Set camera
         if (_camSelectionHandling.CameraForRendering != null)

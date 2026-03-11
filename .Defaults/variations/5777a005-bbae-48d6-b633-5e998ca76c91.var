@@ -8,7 +8,7 @@
       "Title": "Spin",
       "PosOnCanvas": {
         "X": 0.0,
-        "Y": 93.0
+        "Y": 63.44944
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -26,7 +26,7 @@
       "Title": "Spin Highres",
       "PosOnCanvas": {
         "X": 163.0,
-        "Y": 93.0
+        "Y": 63.44944
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -44,7 +44,7 @@
       "Title": "5gon XY",
       "PosOnCanvas": {
         "X": 489.0,
-        "Y": 93.0
+        "Y": 63.44944
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -167,7 +167,7 @@
       "Title": "Horizon",
       "PosOnCanvas": {
         "X": 0.0,
-        "Y": 279.0
+        "Y": 308.55057
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -186,7 +186,7 @@
       "Title": "Pyramid",
       "PosOnCanvas": {
         "X": 163.0,
-        "Y": 279.0
+        "Y": 308.55057
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -204,8 +204,8 @@
       "ActivationIndex": 11,
       "Title": "Cone",
       "PosOnCanvas": {
-        "X": 326.0,
-        "Y": 279.0
+        "X": 326.00003,
+        "Y": 308.55057
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -223,8 +223,8 @@
       "ActivationIndex": 12,
       "Title": "Progress  Ring",
       "PosOnCanvas": {
-        "X": 489.0,
-        "Y": 279.0
+        "X": 489.00003,
+        "Y": 308.55057
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -249,7 +249,7 @@
       "Title": "Frame",
       "PosOnCanvas": {
         "X": 0.0,
-        "Y": 372.0
+        "Y": 431.10114
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {

@@ -44,4 +44,7 @@ internal sealed class DrawMeshUnlit : Instance<DrawMeshUnlit>
     [Input(Guid = "48da47d3-8d30-4e85-8ecc-8c07894c54b4")]
     public readonly InputSlot<TextureAddressMode> TextureWrap = new InputSlot<TextureAddressMode>();
 
+        [Input(Guid = "33abccb4-cbf8-448b-95c7-b72d69c69af5")]
+        public readonly InputSlot<bool> UseVertexColor = new InputSlot<bool>();
+
 }

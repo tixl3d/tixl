@@ -147,13 +147,22 @@ internal abstract class CurveEditing
 
                     ImGui.EndMenu();
                 }
-                
+
                 if (ImGui.MenuItem("Copy keyframes", SelectedKeyframes.Count > 0))
                 {
                     CopySelectedKeyframes();
                     changed = true;
                 }
-                
+            }
+            
+            if (ImGui.MenuItem("Paste keyframes", "", false,KeyframeCopyAndPasting.HasValidClipboard))
+            {
+                PasteKeyframes();
+                changed = true;
+            }
+            
+            if (SelectedKeyframes.Count > 0)
+            {
                 if (ImGui.MenuItem("Delete keyframes", SelectedKeyframes.Count > 0))
                 {
                     DeleteSelectedKeyframes(composition);
@@ -206,11 +215,7 @@ internal abstract class CurveEditing
                 }
             }
             
-            if (ImGui.MenuItem("Paste keyframes", "", false,KeyframeCopyAndPasting.HasValidClipboard))
-            {
-                PasteKeyframes();
-                changed = true;
-            }
+
             
             if (ImGui.MenuItem(SelectedKeyframes.Count > 0 ? "View Selected" : "View All", UserActions.FocusSelection.ListShortcuts()))
                 ViewAllOrSelectedKeys();
@@ -284,11 +289,23 @@ internal abstract class CurveEditing
         }
         
         var cmd = new ChangeKeyframesCommand(selectedOrAllPoints, GetAllCurves());
-
-        for (var index = 1; index < selectedOrAllPoints.Count-1; index++)
+        
+        var groups = selectedOrAllPoints
+                    .GroupBy(k => k.U)
+                    .OrderBy(g => g.Key)
+                    .ToList();
+        
+        for (var i = 0; i < groups.Count; i++)
         {
-            var f = index / (double)(selectedOrAllPoints.Count - 1);
-            selectedOrAllPoints[index].U = MathUtils.Lerp(startTime, endTime, f);
+            var g = groups[i];
+            var f = groups.Count > 1
+                        ? i / (double)(groups.Count - 1)
+                        : 0.0;
+            
+            foreach (var key in g)
+            {
+                key.U = MathUtils.Lerp(startTime, endTime, f);
+            } 
         }
 
         cmd.StoreCurrentValues();

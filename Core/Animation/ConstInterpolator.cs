@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace T3.Core.Animation;
@@ -8,6 +9,6 @@ internal static class ConstInterpolator
 
     internal static double Interpolate(KeyValuePair<double, VDefinition> a, KeyValuePair<double, VDefinition> b, double u)
     {
-        return a.Value.Value;
+        return Math.Abs(u- b.Key) < 0.0001 ? b.Value.Value : a.Value.Value;
     }
 };

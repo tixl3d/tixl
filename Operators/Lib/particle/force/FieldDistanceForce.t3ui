@@ -103,13 +103,6 @@
       }
     },
     {
-      "ChildId": "46848bda-c266-4ce4-b905-2d3d2ed7d32d"/*ReadFile*/,
-      "Position": {
-        "X": 436.5757,
-        "Y": 227.91666
-      }
-    },
-    {
       "ChildId": "4e80fb17-3331-41f1-a69a-c7ae1a19f812"/*Clamped*/,
       "Position": {
         "X": 1067.2477,
@@ -128,13 +121,6 @@
       "Position": {
         "X": 883.98566,
         "Y": 253.87631
-      }
-    },
-    {
-      "ChildId": "b02568d5-73c5-4160-b0c4-a1b709ce52f0"/*ComputeShader*/,
-      "Position": {
-        "X": 362.50433,
-        "Y": 306.43665
       }
     },
     {

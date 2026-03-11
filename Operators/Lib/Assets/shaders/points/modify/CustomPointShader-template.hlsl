@@ -3,6 +3,8 @@
 #include "shared/quat-functions.hlsl"
 #include "shared/bias-functions.hlsl"
 
+/*{ADDITIONAL_INCLUDES}*/
+
 cbuffer FloatParams : register(b0)
 {
     float3 Offset;
@@ -15,19 +17,64 @@ cbuffer FloatParams : register(b0)
     float2 GainAndBias;
 }
 
-cbuffer IntParams : register(b1)
+
+cbuffer FloatParams : register(b1)
+{
+    /*{FLOAT_PARAMS}*/
+}
+
+cbuffer IntParams : register(b2)
 {
     uint TotalCount;
     int2 TexSize;
 }
 
-StructuredBuffer<Point> SourcePoints : t0;
+
+StructuredBuffer<Point> SourcePoints : register(t0);
 Texture2D<float4> Image : register(t1);
 Texture2D<float4> Gradient : register(t2);
 
-RWStructuredBuffer<Point> ResultPoints : u0;
+RWStructuredBuffer<Point> ResultPoints : register(u0);
 sampler Sampler : register(s0);
 sampler ClampedSampler : register(s1);
+
+static const float3 Center=Offset;
+
+//=== Additional Resources ==========================================
+/*{RESOURCES(t3)}*/
+
+//=== Global functions ==============================================
+/*{GLOBALS}*/
+
+//=== Field functions ===============================================
+/*{FIELD_FUNCTIONS}*/
+
+//-------------------------------------------------------------------
+float4 GetField(float4 p)
+{
+    float4 f = 1;
+    /*{FIELD_CALL}*/
+    return f;
+}
+
+inline float GetDistance(float3 p3)
+{
+    return GetField(float4(p3.xyz, 0)).w;
+}
+
+float3 GetFieldNormal(float3 p, float d=0.001)
+{
+    return normalize(
+        GetDistance(p + float3(d, -d, -d)) * float3(1, -1, -1) +
+        GetDistance(p + float3(-d, d, -d)) * float3(-1, 1, -1) +
+        GetDistance(p + float3(-d, -d, d)) * float3(-1, -1, 1) +
+        GetDistance(p + float3(d, d, d)) * float3(1, 1, 1));
+}
+
+
+//===================================================================
+
+
 
 //- DEFINES ------------------------------------
 /*{defines}*/
@@ -40,6 +87,7 @@ float4 SampleGradient(float f){return Gradient.SampleLevel(ClampedSampler, float
 void main(uint3 DTId : SV_DispatchThreadID)
 {
     uint idx = DTId.x;
+    uint i=idx;
 
     uint numStructs, stride;
     SourcePoints.GetDimensions(numStructs, stride);

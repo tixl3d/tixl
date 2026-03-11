@@ -22,13 +22,16 @@ internal sealed class LineTextPoints : Instance<LineTextPoints>
 {
     [Output(Guid = "618e9151-cd91-4aa6-9d91-4bb51610cc8b")]
     public readonly Slot<StructuredList?> ResultList = new();
+    
+    [Output(Guid = "15140635-C51D-4674-8FCA-006EBA46496E")]
+    public readonly Slot<StructuredList?> StartIndicesAndCounts = new();
 
     public LineTextPoints()
     {
         _svgResource = new Resource<SvgDocument>(FilePath, SvgLoader.TryLoad);
         _svgResource.AddDependentSlots(ResultList);
         ResultList.UpdateAction += Update;
-        _pointListWithSeparator.TypedElements[_pointListWithSeparator.NumElements - 1] = Point.Separator();
+        _structuredPoints.TypedElements[_structuredPoints.NumElements - 1] = Point.Separator();
     }
 
     private void Update(EvaluationContext context)
@@ -38,6 +41,8 @@ internal sealed class LineTextPoints : Instance<LineTextPoints>
             ResultList.Value = null;
             return;
         }
+
+        
             
         var lineFontKey = new LineFontDefinition(Key: FilePath.GetValue(context) ?? string.Empty,
                                                  ReduceCurveThreshold: ReduceCurveThreshold.GetValue(context),
@@ -119,6 +124,8 @@ internal sealed class LineTextPoints : Instance<LineTextPoints>
         }
 
         _points.Clear();
+        _startIndicesAndCounts.Clear();
+        
 
         var lastCharForKerning = 0;
         var size = Size.GetValue(context) / MathF.Abs(_lineFont.UnitsPerEm) * 2/1080f; // Scaling to match 1080p 72DPI pt font sizes
@@ -179,20 +186,24 @@ internal sealed class LineTextPoints : Instance<LineTextPoints>
                                       Entities.Lines      => lineIndex,
                                       _                   => throw new ArgumentOutOfRangeException()
                                   };
-            
-            for (var pointIndex = 0; pointIndex < numPoints; pointIndex++)
+
+            if (numPoints > 0)
             {
-                var p = glyph.Points[pointIndex];
-                var pointPos = p.Position;
-                p.Position = new Vector3(
-                                         (cursorX - glyph.VertOriginX + pointPos.X + horizontalLineOffset) * size,
-                                         (cursorY - glyph.VertOriginY + pointPos.Y) * size * verticalFlip,
-                                         0) + position;
-                p.Color = color;
-                p.Scale  *= lineWidth;// keep NaN
-                p.F1 = entityFloat;
-                p.F2 = 1;
-                _points.Add(p);
+                _startIndicesAndCounts.Add(new Int2( _points.Count, numPoints));
+                for (var pointIndex = 0; pointIndex < numPoints; pointIndex++)
+                {
+                    var p = glyph.Points[pointIndex];
+                    var pointPos = p.Position;
+                    p.Position = new Vector3(
+                                             (cursorX - glyph.VertOriginX + pointPos.X + horizontalLineOffset) * size,
+                                             (cursorY - glyph.VertOriginY + pointPos.Y) * size * verticalFlip,
+                                             0) + position;
+                    p.Color = color;
+                    p.Scale  *= lineWidth;// keep NaN
+                    p.F1 = entityFloat;
+                    p.F2 = 1;
+                    _points.Add(p);
+                }
             }
 
             cursorPos.X += glyph.AdvanceX;
@@ -209,18 +220,27 @@ internal sealed class LineTextPoints : Instance<LineTextPoints>
             return;
         }
 
-        if (_pointListWithSeparator.TypedElements.Length != pointCount)
-        {
-            _pointListWithSeparator = new StructuredList<Point>(_points.Count);
-        }
+        // Copy to points
+        if (_structuredPoints.TypedElements.Length != pointCount)
+            _structuredPoints = new StructuredList<Point>(_points.Count);
 
         for (int index = pointCount - 1; index >= 0; --index)
         {
-            _pointListWithSeparator.TypedElements[index] = _points[index];
-            _points.RemoveAt(index); // clear while we're here
+            _structuredPoints.TypedElements[index] = _points[index];
         }
 
-        ResultList.Value = _pointListWithSeparator;
+        // Copy indices
+        if (_structuredIndicesAndCounts.TypedElements.Length != _startIndicesAndCounts.Count)
+            _structuredIndicesAndCounts = new StructuredList<Int2>(_startIndicesAndCounts.Count);
+
+        for (int index = _startIndicesAndCounts.Count - 1; index >= 0; --index)
+        {
+            _structuredIndicesAndCounts.TypedElements[index] = _startIndicesAndCounts[index];
+        }
+        
+        
+        ResultList.Value = _structuredPoints;
+        StartIndicesAndCounts.Value = _structuredIndicesAndCounts;
     }
 
     private float GetHorizontalLineOffset(string text, int indexAtLineStart, HorizontalAligns horizontalAligns, float characterSpacing)
@@ -255,7 +275,9 @@ internal sealed class LineTextPoints : Instance<LineTextPoints>
     }
 
     private readonly List<Point> _points = new(1000);
-    private StructuredList<Point> _pointListWithSeparator = new(1);
+    private StructuredList<Point> _structuredPoints = new(1);
+    private readonly List<Int2> _startIndicesAndCounts = new(128);
+    private StructuredList<Int2> _structuredIndicesAndCounts = new(1);
 
     public enum HorizontalAligns
     {
@@ -455,8 +477,8 @@ internal sealed class LineFont
                 continue;
             
             var points = GetPointsFromSvgGroup(font, svgGlyph);
-            if (points.Length == 0)
-                continue;
+            // if (points.Length == 0)
+            //     continue;
 
             if (string.IsNullOrEmpty(svgGlyph.Unicode) || svgGlyph.Unicode.Length != 1)
             {

@@ -44,7 +44,7 @@ internal sealed class CommandOutputUi : OutputUi<Command>
 
         var originalCamMatrix = context.WorldToCamera;
         var originalViewMatrix = context.CameraToClipSpace;
-            
+
         // Invalidate
         StartInvalidation(slot);
 
@@ -55,19 +55,19 @@ internal sealed class CommandOutputUi : OutputUi<Command>
         UpdateTextures(device, size, Format.R16G16B16A16_Float);
         var deviceContext = device.ImmediateContext;
         var prevViewports = deviceContext.Rasterizer.GetViewports<RawViewportF>();
-        
+
         RenderTargetView?[]? prevTargetViews = deviceContext.OutputMerger.GetRenderTargets(2);
         deviceContext.Rasterizer.SetViewport(new SharpDX.Viewport(0, 0, size.Width, size.Height, 0.0f, 1.0f));
-        deviceContext.OutputMerger.SetTargets(_depthBufferDsv, _colorBufferRtv);
+        deviceContext.OutputMerger.SetTargets(_msaaDepthBufferDsv, _msaaColorBufferRtv);
 
         var colorRgba = new RawColor4(context.BackgroundColor.X,
                                       context.BackgroundColor.Y,
                                       context.BackgroundColor.Z,
                                       context.BackgroundColor.W);
-        deviceContext.ClearRenderTargetView(_colorBufferRtv, colorRgba);
-        if(_depthBufferDsv != null)
-            deviceContext.ClearDepthStencilView(_depthBufferDsv, DepthStencilClearFlags.Depth, 1.0f, 0);
-            
+        deviceContext.ClearRenderTargetView(_msaaColorBufferRtv, colorRgba);
+        if (_msaaDepthBufferDsv != null)
+            deviceContext.ClearDepthStencilView(_msaaDepthBufferDsv, DepthStencilClearFlags.Depth, 1.0f, 0);
+
         // Evaluate the operator
         slot.Update(context);
 
@@ -81,6 +81,19 @@ internal sealed class CommandOutputUi : OutputUi<Command>
                 var outputSlot = _gridOutputs[0];
                 outputSlot.InvalidateGraph();
                 outputSlot.Update(context);
+            }
+        }
+
+        if (MsaaSampleCount > 1 && _msaaColorBuffer != null && _resolvedColorBuffer != null)
+        {
+            try
+            {
+                deviceContext.ResolveSubresource(_msaaColorBuffer, 0, _resolvedColorBuffer, 0,
+                                                 _resolvedColorBuffer.Description.Format);
+            }
+            catch (Exception e)
+            {
+                Log.Warning("Failed to resolve MSAA buffer: " + e.Message);
             }
         }
 
@@ -99,7 +112,7 @@ internal sealed class CommandOutputUi : OutputUi<Command>
             {
                 if (t == null || t.IsDisposed)
                     continue;
-                
+
                 t.Dispose();
             }
         }
@@ -141,13 +154,16 @@ internal sealed class CommandOutputUi : OutputUi<Command>
 
     protected override void DrawTypedValue(ISlot slot, string viewId)
     {
-        if (ImageOutputCanvas.Current != null && slot is Slot<Command>)
+        var canvas = ImageOutputCanvas.Current;
+        if (canvas == null)
+            return;
+
+        Debug.Assert(slot is Slot<Command>);
+
+        var outputTexture = _resolvedColorBuffer ?? _msaaColorBuffer;
+        if (outputTexture != null)
         {
-            ImageOutputCanvas.Current.DrawTexture(_colorBuffer);
-        }
-        else
-        {
-            Debug.Assert(false);
+            canvas.DrawTexture(outputTexture);
         }
     }
 
@@ -155,62 +171,73 @@ internal sealed class CommandOutputUi : OutputUi<Command>
     {
         try
         {
-
-            // Initialize color buffer
+            if (_msaaColorBuffer != null)
             {
-                if (_colorBuffer != null)
-                {
-                    var currentColorDesc = _colorBuffer.Description;
-                    if (currentColorDesc.Width == size.Width
-                        && currentColorDesc.Height == size.Height
-                        && currentColorDesc.Format == format)
-                        return;
+                var currentDesc = _msaaColorBuffer.Description;
+                if (currentDesc.Width == size.Width
+                    && currentDesc.Height == size.Height
+                    && currentDesc.Format == format
+                    && currentDesc.SampleDescription.Count == MsaaSampleCount)
+                    return;
 
-                    _colorBuffer.Dispose();
-                }
-
-                _colorBufferSrv?.Dispose();
-                _colorBufferRtv?.Dispose();
-
-                var colorDesc = _defaultColorDescription with 
-                                    {
-                                        Format = format,
-                                        Width = size.Width,
-                                        Height = size.Height,
-                                    };
-                    
-                _colorBuffer = Texture2D.CreateTexture2D(colorDesc);
-                _colorBuffer.CreateShaderResourceView(ref _colorBufferSrv, null);
-                _colorBuffer.CreateRenderTargetView(ref _colorBufferRtv, null);
+                Utilities.Dispose(ref _msaaColorBufferRtv);
+                Utilities.Dispose(ref _msaaColorBuffer);
             }
 
-            // Initialize depth buffer 
-            {
-                Utilities.Dispose(ref _depthBufferDsv);
-                Utilities.Dispose(ref _depthBuffer);
+            Utilities.Dispose(ref _resolvedColorBufferSrv);
+            Utilities.Dispose(ref _resolvedColorBufferRtv);
+            Utilities.Dispose(ref _resolvedColorBuffer);
 
-                var depthDesc = _defaultDepthDescription with
+            var msaaDesc = _defaultColorDescription with
+                               {
+                                   Format = format,
+                                   Width = size.Width,
+                                   Height = size.Height,
+                                   SampleDescription = new SampleDescription(MsaaSampleCount, 0),
+                               };
+
+            _msaaColorBuffer = Texture2D.CreateTexture2D(msaaDesc);
+            _msaaColorBufferRtv = new RenderTargetView(device, _msaaColorBuffer,
+                                                       new RenderTargetViewDescription
+                                                           {
+                                                               Format = format,
+                                                               Dimension = RenderTargetViewDimension.Texture2DMultisampled
+                                                           });
+
+            var resolvedDesc = _defaultColorDescription with
+                                   {
+                                       Format = format,
+                                       Width = size.Width,
+                                       Height = size.Height,
+                                       SampleDescription = new SampleDescription(1, 0),
+                                   };
+
+            _resolvedColorBuffer = Texture2D.CreateTexture2D(resolvedDesc);
+            _resolvedColorBufferSrv = new ShaderResourceView(device, _resolvedColorBuffer);
+            _resolvedColorBufferRtv = new RenderTargetView(device, _resolvedColorBuffer);
+
+            Utilities.Dispose(ref _msaaDepthBufferDsv);
+            Utilities.Dispose(ref _msaaDepthBuffer);
+
+            var depthDesc = _defaultDepthDescription with
+                                {
+                                    Width = size.Width,
+                                    Height = size.Height,
+                                    SampleDescription = new SampleDescription(MsaaSampleCount, 0),
+                                };
+
+            _msaaDepthBuffer = Texture2D.CreateTexture2D(depthDesc);
+            var depthViewDesc = new DepthStencilViewDescription
                                     {
-                                        Width = size.Width,
-                                        Height = size.Height,
+                                        Format = Format.D32_Float,
+                                        Dimension = DepthStencilViewDimension.Texture2DMultisampled
                                     };
 
-                _depthBuffer = Texture2D.CreateTexture2D(depthDesc);
-                var depthViewDesc = new DepthStencilViewDescription
-                                        {
-                                            Format = Format.D32_Float,
-                                            Dimension = DepthStencilViewDimension.Texture2D
-                                        };
-                    
-                _depthBufferDsv?.Dispose();
-                _depthBufferDsv = new DepthStencilView(device, _depthBuffer, depthViewDesc);
-                //Log.Debug("new depth stencil view");
-            }
+            _msaaDepthBufferDsv = new DepthStencilView(device, _msaaDepthBuffer, depthViewDesc);
         }
         catch (Exception e)
         {
             Log.Warning("Failed to generate texture: " + e.Message);
-            return;
         }
     }
 
@@ -228,7 +255,7 @@ internal sealed class CommandOutputUi : OutputUi<Command>
     private static readonly Texture2DDescription _defaultDepthDescription = new()
                                                                                {
                                                                                    ArraySize = 1,
-                                                                                   BindFlags = BindFlags.DepthStencil | BindFlags.ShaderResource,
+                                                                                   BindFlags = BindFlags.DepthStencil,
                                                                                    CpuAccessFlags = CpuAccessFlags.None,
                                                                                    Format = Format.R32_Typeless,
                                                                                    Width = 1,
@@ -238,14 +265,16 @@ internal sealed class CommandOutputUi : OutputUi<Command>
                                                                                    SampleDescription = new SampleDescription(1, 0),
                                                                                    Usage = ResourceUsage.Default
                                                                                };
-    private Texture2D? _colorBuffer;
-    private ShaderResourceView? _colorBufferSrv;
-        
-    private RenderTargetView? _colorBufferRtv;
-    private Texture2D? _depthBuffer;
-        
-    private DepthStencilView? _depthBufferDsv;
-        
+
+    private const int MsaaSampleCount = 4;
+    private Texture2D? _msaaColorBuffer;
+    private RenderTargetView? _msaaColorBufferRtv;
+    private Texture2D? _resolvedColorBuffer;
+    private ShaderResourceView? _resolvedColorBufferSrv;
+    private RenderTargetView? _resolvedColorBufferRtv;
+    private Texture2D? _msaaDepthBuffer;
+    private DepthStencilView? _msaaDepthBufferDsv;
+
     // instance management
     private readonly Symbol? _outputWindowGridSymbol;
     private Instance? _gridInstance;

@@ -93,18 +93,6 @@
       "Outputs": []
     },
     {
-      "Id": "46848bda-c266-4ce4-b905-2d3d2ed7d32d"/*ReadFile*/,
-      "SymbolId": "5f71d2f8-98c8-4502-8f40-2ea4a1e18cca",
-      "InputValues": [
-        {
-          "Id": "24b7e7e1-fe0b-46be-807e-0afacd4800f9"/*FilePath*/,
-          "Type": "System.String",
-          "Value": "Lib:shaders/particles/FieldDistanceForce.hlsl"
-        }
-      ],
-      "Outputs": []
-    },
-    {
       "Id": "4e80fb17-3331-41f1-a69a-c7ae1a19f812"/*Clamped*/,
       "SymbolId": "9515d59d-0bd5-406b-96da-6a5f60215700",
       "Name": "Clamped",
@@ -137,18 +125,6 @@
       "Id": "8a70f9f8-ac44-45b1-b26a-7f6419a3883e"/*CalcDispatchCount*/,
       "SymbolId": "eb68addb-ec59-416f-8608-ff9d2319f3a3",
       "InputValues": [],
-      "Outputs": []
-    },
-    {
-      "Id": "b02568d5-73c5-4160-b0c4-a1b709ce52f0"/*ComputeShader*/,
-      "SymbolId": "a256d70f-adb3-481d-a926-caf35bd3e64c",
-      "InputValues": [
-        {
-          "Id": "afb69c81-5063-4cb9-9d42-841b994b5ec0"/*Source*/,
-          "Type": "System.String",
-          "Value": "Lib:shaders/particles/FieldDistanceForce.hlsl"
-        }
-      ],
       "Outputs": []
     },
     {
