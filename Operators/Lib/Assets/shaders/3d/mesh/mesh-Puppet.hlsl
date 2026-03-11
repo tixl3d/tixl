@@ -5,30 +5,30 @@
 
 cbuffer Params : register(b0)
 {
- 
     float UseVertexSelection;
-    
     float WeightCtrl;
+    float Strength;
 }
 
 cbuffer IntParams : register(b1)
 {
     int InfluenceMode;
     int WeigthDebug;
+    int GlobalInfluence;
 }
 
 StructuredBuffer<PbrVertex> SourceVerts : t0;
-StructuredBuffer<Point> AnchorPointsOriginal : t1;  // Original anchor positions (reference pose)
-StructuredBuffer<Point> AnchorPointsCurrent : t2;   // Current anchor positions (deformed pose)
+StructuredBuffer<Point> AnchorPoints : t1;  // Anchor positions (reference pose)
+StructuredBuffer<Point> ControlPoints : t2;   // Current anchor positions (deformed pose)
 RWStructuredBuffer<PbrVertex> ResultVerts : u0;   
 
 // Helper function to calculate influence weight between vertex and anchor
-float CalculateInfluence(float3 vertexPos, float3 anchorPos, float falloffDist)
+float CalculateInfluence(float3 vertexPos, float3 anchorPos, float falloffDist, int mode)
 {
     float dist = distance(vertexPos, anchorPos);
-    // let's use switch case to allow easy switching between different falloff functions
-    switch (InfluenceMode) {
-        case 0: // Smooth mode
+    
+    switch (mode) {
+        case 0: // Exponential falloff
             return exp2(-dist*dist*2/abs(falloffDist)) / (dist + 0.001);            
         case 1: // Linear falloff mode
             float t =saturate(dist / falloffDist);
@@ -39,6 +39,9 @@ float CalculateInfluence(float3 vertexPos, float3 anchorPos, float falloffDist)
             return exp2(-dist*dist*2/abs(falloffDist));  
         case 4: // Inverse Cubic falloff
             return pow(1.0 / (dist/falloffDist + 0.001),3.0);
+        case 5: // no falloff, full influence within radius
+            return dist < falloffDist ? 1.0 : 0.0;
+
         default:
     return 1.0; // No falloff, full influence
     }
@@ -56,11 +59,11 @@ void main(uint3 i : SV_DispatchThreadID)
     }
     
     uint numAnchors, anchorStride;
-    AnchorPointsOriginal.GetDimensions(numAnchors, anchorStride);
+    AnchorPoints.GetDimensions(numAnchors, anchorStride);
     
     // Make sure both anchor buffers have the same number of elements
     uint numCurrentAnchors;
-    AnchorPointsCurrent.GetDimensions(numCurrentAnchors, anchorStride);
+    ControlPoints.GetDimensions(numCurrentAnchors, anchorStride);
     numAnchors = min(numAnchors, numCurrentAnchors);
     
     // Get vertex selection weight
@@ -91,15 +94,16 @@ void main(uint3 i : SV_DispatchThreadID)
             
             for (uint j = 0; j < numAnchors; j++)
             {
-                float3 anchorOriginalPos = AnchorPointsOriginal[j].Position;
-                float3 anchorCurrentPos  = AnchorPointsCurrent[j].Position;
-                float4 anchorOriginalRot = AnchorPointsOriginal[j].Rotation;
-                float4 anchorCurrentRot  = AnchorPointsCurrent[j].Rotation;
-                float3 anchorOriginalScale = AnchorPointsOriginal[j].Scale;
-                float3 anchorCurrentScale  = AnchorPointsCurrent[j].Scale;      
-                //float3 anchorDir = anchorOriginalPos - AnchorPointsOriginal[j+1].Position;
-                float weight = CalculateInfluence(originalPos, anchorOriginalPos, AnchorPointsOriginal[j].FX1*WeightCtrl)*AnchorPointsOriginal[j].FX2;
-                //float weight = CalculateLinearInfluence(originalPos, anchorOriginalPos,anchorDir, AnchorPointsOriginal[j].FX1);
+                float3 anchorOriginalPos = AnchorPoints[j].Position;
+                float3 anchorCurrentPos  = ControlPoints[j].Position;
+                float4 anchorOriginalRot = AnchorPoints[j].Rotation;
+                float4 anchorCurrentRot  = ControlPoints[j].Rotation;
+                float3 anchorOriginalScale = AnchorPoints[j].Scale;
+                float3 anchorCurrentScale  = ControlPoints[j].Scale;      
+            
+                int mode = GlobalInfluence > 0? InfluenceMode : int(floor(ControlPoints[j].FX2) );
+                float weight = CalculateInfluence(originalPos, anchorOriginalPos, ControlPoints[j].FX1*WeightCtrl, mode);
+           
                 if (weight > 0.001)
                 {
                     // 1. Rotation delta: "how much did this anchor rotate?"
@@ -143,10 +147,11 @@ void main(uint3 i : SV_DispatchThreadID)
     }
     
     // Apply final position with selection blending
-    ResultVerts[i.x].Position = lerp(originalPos, deformedPos, s);
-    ResultVerts[i.x].Normal = lerp(originalNormal, deformedNormal, s);
-    ResultVerts[i.x].Tangent = lerp(originalTangent, deformedTangent, s);
-    ResultVerts[i.x].Bitangent = lerp(originalBitangent, deformedBitangent, s);
+    ResultVerts[i.x].Position = lerp(originalPos, deformedPos, s*Strength);
+    // this is far from ideal - ideally we properly compute the normals based on the deformed geometry. 
+    ResultVerts[i.x].Normal = lerp(originalNormal, deformedNormal, s*Strength);
+    ResultVerts[i.x].Tangent = lerp(originalTangent, deformedTangent, s*Strength);
+    ResultVerts[i.x].Bitangent = lerp(originalBitangent, deformedBitangent, s*Strength);
     
     // Pass through other attributes unchanged
     ResultVerts[i.x].TexCoord = SourceVerts[i.x].TexCoord;
