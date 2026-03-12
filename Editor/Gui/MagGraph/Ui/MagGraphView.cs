@@ -103,7 +103,7 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
         }
         else
         {
-            var compositionPath2 = compositionPath.Take(compositionPath.Count - 1).ToList();
+            var compositionPath2 = compositionPath.Take(compositionPath.Count).ToList();
             var compositionId = compositionPath[^1];
             if (!_projectView.TrySetCompositionOp(compositionPath2, ScalableCanvas.Transition.JumpIn, compositionId))
                 return;

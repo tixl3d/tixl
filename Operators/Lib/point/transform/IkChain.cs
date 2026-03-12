@@ -38,5 +38,8 @@ internal sealed class IkChain :Instance<IkChain>
         [Input(Guid = "a47682b7-98fe-4461-a328-f9c8c14ef137")]
         public readonly InputSlot<float> MaxBendAngle = new InputSlot<float>();
 
+        [Input(Guid = "4f1ff36a-734e-4da9-b897-fd2e19b3877b")]
+        public readonly InputSlot<bool> TargetRotation = new InputSlot<bool>();
+
 
 }

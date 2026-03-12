@@ -243,9 +243,9 @@
           "Id": "75419a73-8a3e-4538-9a1d-e3b0ce7f8561"/*Color*/,
           "Type": "System.Numerics.Vector4",
           "Value": {
-            "X": 0.8899522,
+            "X": 1.1823281,
             "Y": 0.0,
-            "Z": 0.5023906,
+            "Z": 0.66744095,
             "W": 0.62
           }
         },
@@ -253,6 +253,11 @@
           "Id": "d90ff4e6-7d70-441f-a064-b40401025c36"/*BlendMod*/,
           "Type": "System.Int32",
           "Value": 0
+        },
+        {
+          "Id": "df158fcf-3042-48cf-8383-7bf4c1bcb8a6"/*LineWidth*/,
+          "Type": "System.Single",
+          "Value": 0.039
         }
       ],
       "Outputs": []

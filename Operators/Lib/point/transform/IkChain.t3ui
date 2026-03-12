@@ -9,7 +9,16 @@
         "X": 91.07559,
         "Y": 1074.2563
       },
+      "Description": "Set this value for multiple inverse kinematic chains.",
       "AddPadding": "True"
+    },
+    {
+      "InputId": "4f1ff36a-734e-4da9-b897-fd2e19b3877b"/*TargetRotation*/,
+      "Position": {
+        "X": -48.924408,
+        "Y": 1144.2563
+      },
+      "Description": "The last point get the rotation of its target."
     },
     {
       "InputId": "6c2c8f16-c874-44f7-bc39-bbf770546479"/*Reset*/,
@@ -66,8 +75,8 @@
     {
       "InputId": "de07cd9c-11e2-414d-9c5c-9e38cc51d80e"/*Targets*/,
       "Position": {
-        "X": -156.81451,
-        "Y": 1111.4154
+        "X": 245.3364,
+        "Y": 1218.9674
       },
       "AddPadding": "True"
     },
@@ -113,6 +122,13 @@
       }
     },
     {
+      "ChildId": "4ba69f23-4984-409a-b6a4-b13948f57ef7"/*BoolToInt*/,
+      "Position": {
+        "X": 91.07559,
+        "Y": 1144.2563
+      }
+    },
+    {
       "ChildId": "5fa0d94a-c399-42c3-ac39-ddb644ef0d90"/*ExecuteBufferUpdate*/,
       "Position": {
         "X": 527.2919,
@@ -122,8 +138,8 @@
     {
       "ChildId": "6efb7c5b-e4d9-49e2-8c3d-5e0f906c7868"/*GetBufferComponents*/,
       "Position": {
-        "X": -156.81451,
-        "Y": 1146.4154
+        "X": 245.3364,
+        "Y": 1253.9674
       }
     },
     {

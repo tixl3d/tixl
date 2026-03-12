@@ -284,6 +284,8 @@ internal sealed partial class SettingsWindow : Window
                                                              List of top-level directories that are scanned for projects.
                                                              
                                                              This can be useful to manage your projects on multiple external drivers or repositories. 
+                                                             
+                                                             Changes require a restart.
                                                              """
                                                             );
                     

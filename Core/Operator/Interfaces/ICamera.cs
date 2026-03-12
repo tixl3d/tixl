@@ -30,13 +30,23 @@ public struct CameraDefinition
 
     public static CameraDefinition Blend(CameraDefinition a, CameraDefinition b, float f)
     {
+        // Precompute normalized directions
+        var dirA = Vector3.Normalize(a.Target - a.Position);
+        var dirB = Vector3.Normalize(b.Target - b.Position);
+
+        // Interpolate position and compute blended target directly
+        var blendedPosition = MathUtils.Lerp(a.Position, b.Position, f);
+        var blendedTarget = blendedPosition + Vector3.Normalize(Vector3.Lerp(dirA, dirB, f));
+        
         return new CameraDefinition
                    {
                        NearFarClip = MathUtils.Lerp(a.NearFarClip, b.NearFarClip, f),
                        LensShift = MathUtils.Lerp(a.LensShift, b.LensShift, f),
                        PositionOffset = MathUtils.Lerp(a.PositionOffset, b.PositionOffset, f),
                        Position = MathUtils.Lerp(a.Position, b.Position, f),
-                       Target = MathUtils.Lerp(a.Target, b.Target, f),
+                       //Target = MathUtils.Lerp(normalizedTargetA, normalizedTargetB, f),
+                       //Target = MathUtils.Lerp(a.Target, b.Target, f),
+                       Target= blendedTarget,
                        Up = MathUtils.Lerp(a.Up, b.Up, f),
                        AspectRatio = MathUtils.Lerp(a.AspectRatio, b.AspectRatio, f),
                        FieldOfView = MathUtils.Lerp(a.FieldOfView, b.FieldOfView, f),

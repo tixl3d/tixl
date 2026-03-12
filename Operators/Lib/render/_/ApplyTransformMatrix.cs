@@ -15,7 +15,14 @@ internal sealed class ApplyTransformMatrix : Instance<ApplyTransformMatrix>
 
     private void Update(EvaluationContext context)
     {
-        var matrix = TransformRows.GetValue(context).ToMatrixFromRows();
+        var vec4Rows = TransformRows.GetValue(context);
+        if (vec4Rows == null || vec4Rows.Length != 4)
+        {
+            Log.Warning("Invalid matrix format");
+            return;
+        }
+            
+        var matrix = vec4Rows.ToMatrixFromRows();
         matrix.Transpose();
             
         var previousObjectToWorld = context.ObjectToWorld;

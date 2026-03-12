@@ -27,9 +27,7 @@ internal static class ProjectsPanel
         ImGui.BeginChild("content", new Vector2(0, 0), true, ImGuiWindowFlags.NoBackground);
         {
             ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(5, 5));
-
-            FormInputs.AddSectionHeader("Projects");
-
+            
             foreach (var package in EditableSymbolProject.AllProjects)
             {
                 DrawProjectItem(window, package);

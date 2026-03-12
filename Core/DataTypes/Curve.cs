@@ -118,7 +118,7 @@ public sealed class Curve : IEditableInputType
         }
 
         // This should never happen...
-        var index = FindIndexBefore(u);
+            var index = FindIndexBefore(u);
         if (index >= _state.Table.Count - 1)
         {
             var ka = _state.Table.Values[index];

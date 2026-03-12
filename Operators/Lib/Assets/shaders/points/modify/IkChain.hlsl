@@ -17,6 +17,7 @@ cbuffer Params : register(b1)
     int Reset;
     int PointsPerChain;
     int AngleConstraint; // 0 = off, 1 = on
+    int TargetRotation;
 }
 
 // SourcePoints: the rest-pose / original chain (read-only, never changes)
@@ -161,9 +162,19 @@ RWStructuredBuffer<Point> ResultPoints : u0;
             }
             if (l == pointsPerChain - 1)
             {
+
                 // For the end effector, optionally copy rotation from target
                 // or copy the last segment's rotation for a more natural look:
-                p.Rotation = lerp(ResultPoints[globalIdx - 1].Rotation,TargetPoints[targetIdx].Rotation, Influence);
+                if (TargetRotation == 1)
+                {
+                    p.Rotation = lerp(ResultPoints[globalIdx - 1].Rotation, SourcePoints[globalIdx].Rotation, Influence);
+                }
+                else
+                {
+                    // Blend between original rotation and last segment's rotation
+                    p.Rotation = lerp(ResultPoints[globalIdx - 1].Rotation, SourcePoints[globalIdx].Rotation,1 - Influence);
+                }
+                //p.Rotation = lerp(ResultPoints[globalIdx - 1].Rotation,TargetPoints[targetIdx].Rotation,(float)TargetRotation- Influence);
                 p.Scale.x = distance(pos[l], pos[l - 1]); // Update scale for end segment as well
             }
             p.Scale.yz = SourcePoints[globalIdx].Scale.yz;

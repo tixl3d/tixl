@@ -3,7 +3,7 @@
   "Inputs": [
     {
       "Id": "56482ceb-ae0e-4d32-a6a4-2568a166a2d9"/*FloatPrecision*/,
-      "DefaultValue": 3
+      "DefaultValue": 2
     },
     {
       "Id": "65d4a758-fc55-4b8f-9e87-7fa5a1a00cb8"/*NumericValues*/,

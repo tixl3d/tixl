@@ -1,6 +1,7 @@
 {
   "Id": "a2100b4a-be2b-474f-ab53-07198580c995"/*ProjectedLight*/,
-  "Description": "",
+  "Description": "Internal implementation of [ProjectLight].",
+  "SymbolTags": "16",
   "InputUis": [],
   "SymbolChildUis": [],
   "OutputUis": [
