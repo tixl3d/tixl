@@ -6,9 +6,11 @@
 cbuffer Params : register(b0)
 {
     
+    float3 DirectionBias;
     float Tolerance; 
     float Influence;
-    float MaxBendAngle; // in radians, used if AngleConstraint is enabled         
+    float MaxBendAngle; // in radians, used if AngleConstraint is enabled  
+           
 }
 
 cbuffer Params : register(b1)
@@ -84,6 +86,8 @@ RWStructuredBuffer<Point> ResultPoints : u0;
         // --- FABRIK solve ---
         float error = 1e10f;
 
+        //float3 gravity = float3(0, -0.1, 0); // Optional: add gravity effect by offsetting targetPos each iteration
+        float3 directionBias = DirectionBias *.01; // Optional: bias to encourage bending in a particular direction
         for (int iter = 0; iter < MaxIterations && error > Tolerance; iter++)
         {
             // Forward pass: pull from target back toward root
@@ -99,11 +103,13 @@ RWStructuredBuffer<Point> ResultPoints : u0;
             for (uint b = 1; b < pointsPerChain; b++)
             {
                 float3 dir = normalize(pos[b] - pos[b - 1]);
+                dir = normalize(dir + directionBias); // Optional: add a small bias to encourage bending in a particular direction
                 pos[b] = pos[b - 1] + dir * segLen[b - 1];
             }
             
             error = distance(pos[pointsPerChain - 1], targetPos);
         }
+
         if (AngleConstraint == 1){
             float maxBendAngle = radians(MaxBendAngle); // Example max bend angle in radians
                     // After computing the new position in the backward pass,
@@ -137,6 +143,7 @@ RWStructuredBuffer<Point> ResultPoints : u0;
                 }
             }
         }
+        
         // --- Write solved positions back with blending ---
         for (uint l = 0; l < pointsPerChain; l++)
         {
@@ -167,7 +174,7 @@ RWStructuredBuffer<Point> ResultPoints : u0;
                 // or copy the last segment's rotation for a more natural look:
                 if (TargetRotation == 1)
                 {
-                    p.Rotation = lerp(ResultPoints[globalIdx - 1].Rotation, SourcePoints[globalIdx].Rotation, Influence);
+                    p.Rotation = lerp(ResultPoints[globalIdx].Rotation, TargetPoints[targetIdx].Rotation, Influence);
                 }
                 else
                 {

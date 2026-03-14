@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Core.SystemUi;
@@ -224,8 +224,9 @@ internal static class Combine
 
         var newSymbolChildId = addCommand.AddedChildId;
 
-        foreach (var con in inputConnections.Reverse()) // reverse for multi input order preservation
+        for (var i = inputConnections.Length - 1; i >= 0; i--) // reverse for multi input order preservation
         {
+            var con = inputConnections[i];
             var sourceId = con.SourceParentOrChildId;
             var sourceSlotId = con.SourceSlotId;
             var targetId = newSymbolChildId;
@@ -235,8 +236,9 @@ internal static class Combine
             parentCompositionSymbol.AddConnection(newConnection);
         }
 
-        foreach (var con in outputConnections.Reverse()) // reverse for multi input order preservation
+        for (var i = outputConnections.Length - 1; i >= 0; i--) // reverse for multi input order preservation
         {
+            var con = outputConnections[i];
             var sourceId = newSymbolChildId;
             var sourceSlotId = connectionToNewSlotIdMap[con];
             var targetId = con.TargetParentOrChildId;

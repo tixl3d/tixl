@@ -41,5 +41,8 @@ internal sealed class IkChain :Instance<IkChain>
         [Input(Guid = "4f1ff36a-734e-4da9-b897-fd2e19b3877b")]
         public readonly InputSlot<bool> TargetRotation = new InputSlot<bool>();
 
+        [Input(Guid = "4bfd6cb3-b4ac-4be8-b8d5-534463ceb9b8")]
+        public readonly InputSlot<System.Numerics.Vector3> DirectionBias = new InputSlot<System.Numerics.Vector3>();
+
 
 }

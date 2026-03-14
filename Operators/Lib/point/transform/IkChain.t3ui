@@ -13,10 +13,18 @@
       "AddPadding": "True"
     },
     {
+      "InputId": "4bfd6cb3-b4ac-4be8-b8d5-534463ceb9b8"/*DirectionBias*/,
+      "Position": {
+        "X": -297.85767,
+        "Y": 1036.587
+      },
+      "Description": "The chain will bend towards this direction"
+    },
+    {
       "InputId": "4f1ff36a-734e-4da9-b897-fd2e19b3877b"/*TargetRotation*/,
       "Position": {
-        "X": -48.924408,
-        "Y": 1144.2563
+        "X": -129.5154,
+        "Y": 1208.2551
       },
       "Description": "The last point get the rotation of its target."
     },
@@ -32,7 +40,7 @@
       "InputId": "7b201b0d-8298-4ddd-b534-b8127e4c5581"/*Influence*/,
       "Position": {
         "X": -45.767853,
-        "Y": 876.56714
+        "Y": 981.56714
       },
       "Description": "Targets influence",
       "Min": 0.0,
@@ -60,14 +68,14 @@
       "InputId": "a47682b7-98fe-4461-a328-f9c8c14ef137"/*MaxBendAngle*/,
       "Position": {
         "X": -45.767853,
-        "Y": 911.56714
+        "Y": 1016.56714
       }
     },
     {
       "InputId": "b7b18e95-f9a7-4bca-8960-d2b3a535e394"/*Tolerance*/,
       "Position": {
         "X": -45.767853,
-        "Y": 841.56714
+        "Y": 946.56714
       },
       "Min": 0.0,
       "Max": 0.1
@@ -126,6 +134,13 @@
       "Position": {
         "X": 91.07559,
         "Y": 1144.2563
+      }
+    },
+    {
+      "ChildId": "5c3ba491-67d6-41e7-ab46-c84766e21c5a"/*Vector3Components*/,
+      "Position": {
+        "X": -274.91455,
+        "Y": 758.0317
       }
     },
     {
