@@ -1,21 +1,9 @@
 #nullable enable
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using T3.Core.Logging;
-using T3.Core.Operator;
-using T3.Core.Operator.Attributes;
-using T3.Core.Operator.Interfaces;
-using T3.Core.Operator.Slots;
-using T3.Core.Utils;
 
 namespace Lib.io.dmx
 {
@@ -355,11 +343,11 @@ namespace Lib.io.dmx
             {
                 Array.Copy(_artnetId, 0, _packetBuffer, 0, 8);
                 _packetBuffer[8] = 0x00;
-                _packetBuffer[9] = 0x50; 
+                _packetBuffer[9] = 0x50;
                 _packetBuffer[10] = 0x00;
-                _packetBuffer[11] = 14;  
+                _packetBuffer[11] = 14;
                 _packetBuffer[12] = sequenceNumber;
-                _packetBuffer[13] = 0x00; 
+                _packetBuffer[13] = 0x00;
                 _packetBuffer[14] = (byte)(universe & 0xFF);
                 _packetBuffer[15] = (byte)((universe >> 8) & 0x7F);
                 _packetBuffer[16] = (byte)(sendLength >> 8);
@@ -370,8 +358,8 @@ namespace Lib.io.dmx
                     int val = rawData[offset + i];
                     _packetBuffer[18 + i] = (byte)(val < 0 ? 0 : (val > 255 ? 255 : val));
                 }
-                
-                for (int i = chunkCount; i < sendLength; i++) _packetBuffer[18 + i] = 0; 
+
+                for (int i = chunkCount; i < sendLength; i++) _packetBuffer[18 + i] = 0;
 
                 socket.SendTo(_packetBuffer, 18 + sendLength, SocketFlags.None, target);
                 return true;
@@ -390,7 +378,7 @@ namespace Lib.io.dmx
             {
                 Span<byte> syncPacket = stackalloc byte[12];
                 _artnetId.CopyTo(syncPacket);
-                syncPacket[8] = 0x00; syncPacket[9] = 0x52; 
+                syncPacket[8] = 0x00; syncPacket[9] = 0x52;
                 syncPacket[10] = 0x00; syncPacket[11] = 14;
                 socket.SendTo(syncPacket, target);
             }
@@ -563,11 +551,11 @@ namespace Lib.io.dmx
                     _lastLocalIpStr = localIpStr;
                     IPAddress.TryParse(localIpStr, out var parsedLocalIp);
                     LocalIp = parsedLocalIp;
-                    needsSocketRebind = true; 
+                    needsSocketRebind = true;
                 }
 
                 IPAddress? targetIp = null;
-                if (sendUnicast && !string.IsNullOrWhiteSpace(targetIpStr)) 
+                if (sendUnicast && !string.IsNullOrWhiteSpace(targetIpStr))
                 {
                     IPAddress.TryParse(targetIpStr, out targetIp);
                 }

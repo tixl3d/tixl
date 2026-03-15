@@ -1,19 +1,9 @@
 #nullable enable
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using T3.Core.Logging;
-using T3.Core.Operator;
-using T3.Core.Operator.Attributes;
-using T3.Core.Operator.Slots;
 using T3.Core.Utils;
 
 // ReSharper disable MemberCanBePrivate.Global
@@ -33,7 +23,6 @@ internal sealed class SacnOutput : Instance<SacnOutput>, IStatusProvider, ICusto
     private readonly ConnectionSettings _connectionSettings = new();
     private readonly object _dataLock = new();
     private readonly object _connectionLock = new();
-    private volatile bool _printToLog;
     private bool _wasSendingLastFrame;
     private string? _lastErrorMessage;
     private IStatusProvider.StatusLevel _lastStatusLevel = IStatusProvider.StatusLevel.Notice;
@@ -96,7 +85,6 @@ internal sealed class SacnOutput : Instance<SacnOutput>, IStatusProvider, ICusto
 
     private void Update(EvaluationContext context)
     {
-        _printToLog = PrintToLog.GetValue(context);
         var localIpString = LocalIpAddress.GetValue(context);
 
         if (string.IsNullOrEmpty(localIpString) && context.LocalTime - _lastNetworkRefreshTime > 5.0)
@@ -349,7 +337,7 @@ internal sealed class SacnOutput : Instance<SacnOutput>, IStatusProvider, ICusto
                 if (optionsCopy.EnableSync) SendSacnSync(currentSocket, optionsCopy.SyncUniverse, syncSequenceNumber++);
             }
             catch (ThreadAbortException) { break; }
-            catch (Exception e)
+            catch (Exception)
             {
                 consecutiveErrors++;
                 if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) { lock (_connectionLock) _connected = false; consecutiveErrors = 0; }
@@ -593,9 +581,43 @@ internal sealed class SacnOutput : Instance<SacnOutput>, IStatusProvider, ICusto
     public IStatusProvider.StatusLevel GetStatusLevel() => _lastStatusLevel;
     public string? GetStatusMessage() => _lastErrorMessage;
     public void SetStatus(string m, IStatusProvider.StatusLevel l) { _lastErrorMessage = m; _lastStatusLevel = l; }
-    string ICustomDropdownHolder.GetValueForInput(Guid inputId) { if (inputId == LocalIpAddress.Id) return LocalIpAddress.Value ?? string.Empty; if (inputId == TargetIpAddress.Id) return TargetIpAddress.Value ?? string.Empty; return string.Empty; }
-    IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid inputId) { if (inputId == LocalIpAddress.Id) { _networkInterfaces = GetNetworkInterfaces(); foreach (var adapter in _networkInterfaces) yield return adapter.DisplayName; } else if (inputId == TargetIpAddress.Id) { if (!_isDiscovering && _discoveredSources.IsEmpty) yield return "Enable 'Discover Sources' to search..."; else if (_isDiscovering && _discoveredSources.IsEmpty) yield return "Searching for sources..."; else foreach (var sourceName in _discoveredSources.Values.OrderBy(name => name)) yield return sourceName; } }
-    void ICustomDropdownHolder.HandleResultForInput(Guid inputId, string? selected, bool isAListItem) { if (string.IsNullOrEmpty(selected) || !isAListItem) return; if (inputId == LocalIpAddress.Id) { var foundAdapter = _networkInterfaces.FirstOrDefault(i => i.DisplayName == selected); if (foundAdapter == null) return; LocalIpAddress.SetTypedInputValue(foundAdapter.IpAddress.ToString()); } else if (inputId == TargetIpAddress.Id) { var match = Regex.Match(selected, @"\(([^)]*)\)"); TargetIpAddress.SetTypedInputValue(match.Success ? match.Groups[1].Value : selected); } }
+    string ICustomDropdownHolder.GetValueForInput(Guid inputId)
+    {
+        if (inputId == LocalIpAddress.Id) return LocalIpAddress.Value ?? string.Empty;
+        if (inputId == TargetIpAddress.Id) return TargetIpAddress.Value ?? string.Empty;
+        return string.Empty;
+    }
+
+    IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid inputId)
+    {
+        if (inputId == LocalIpAddress.Id)
+        {
+            _networkInterfaces = GetNetworkInterfaces();
+            foreach (var adapter in _networkInterfaces) yield return adapter.DisplayName;
+        }
+        else if (inputId == TargetIpAddress.Id)
+        {
+            if (!_isDiscovering && _discoveredSources.IsEmpty) yield return "Enable 'Discover Sources' to search...";
+            else if (_isDiscovering && _discoveredSources.IsEmpty) yield return "Searching for sources...";
+            else foreach (var sourceName in _discoveredSources.Values.OrderBy(name => name)) yield return sourceName;
+        }
+    }
+
+    void ICustomDropdownHolder.HandleResultForInput(Guid inputId, string? selected, bool isAListItem)
+    {
+        if (string.IsNullOrEmpty(selected) || !isAListItem) return;
+        if (inputId == LocalIpAddress.Id)
+        {
+            var foundAdapter = _networkInterfaces.FirstOrDefault(i => i.DisplayName == selected);
+            if (foundAdapter == null) return;
+            LocalIpAddress.SetTypedInputValue(foundAdapter.IpAddress.ToString());
+        }
+        else if (inputId == TargetIpAddress.Id)
+        {
+            var match = Regex.Match(selected, @"\(([^)]*)\)");
+            TargetIpAddress.SetTypedInputValue(match.Success ? match.Groups[1].Value : selected);
+        }
+    }
     #endregion
 
     #region Inputs
@@ -612,6 +634,5 @@ internal sealed class SacnOutput : Instance<SacnOutput>, IStatusProvider, ICusto
     [Input(Guid = "6f5c4b3a-2e1d-4f9c-8a7b-3d2e1f0c9b8a")] public readonly InputSlot<int> MaxFps = new(60);
     [Input(Guid = "7a8b9c0d-1e2f-3a4b-5c6d-7e8f9a0b1c2d")] public readonly InputSlot<bool> EnableSync = new();
     [Input(Guid = "8b9c0d1e-2f3a-4b5c-6d7e-8f9a0b1c2d3e")] public readonly InputSlot<int> SyncUniverse = new(1);
-    [Input(Guid = "D0E1F2A3-B4C5-4678-9012-3456789ABCDE")] public readonly InputSlot<bool> PrintToLog = new();
     #endregion
 }
