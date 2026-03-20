@@ -27,6 +27,12 @@ internal sealed class NumberLinePoints :Instance<NumberLinePoints>{
         [Input(Guid = "56482ceb-ae0e-4d32-a6a4-2568a166a2d9")]
         public readonly InputSlot<int> FloatPrecision = new InputSlot<int>();
 
+        [Input(Guid = "b5b3ce43-8e27-4839-86ed-a1d80c14a5c5")]
+        public readonly InputSlot<int> Increment = new InputSlot<int>();
+
+        [Input(Guid = "d348dd16-e165-470c-89c2-83c73cb792d1")]
+        public readonly InputSlot<float> LineWidth = new InputSlot<float>();
+
 
     private enum NumberModes
     {

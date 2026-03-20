@@ -1,3 +1,4 @@
+using System;
 using T3.Core.Utils;
 using T3.Core.Utils.Geometry;
 
@@ -28,33 +29,78 @@ public struct CameraDefinition
     public Vector3 RotationOffset;
     public bool OffsetAffectsTarget;
 
+
     public static CameraDefinition Blend(CameraDefinition a, CameraDefinition b, float f)
     {
-        // Precompute normalized directions
-        var dirA = Vector3.Normalize(a.Target - a.Position);
-        var dirB = Vector3.Normalize(b.Target - b.Position);
+        f = Math.Clamp(f, 0f, 1f);
 
-        // Interpolate position and compute blended target directly
         var blendedPosition = MathUtils.Lerp(a.Position, b.Position, f);
-        var blendedTarget = blendedPosition + Vector3.Normalize(Vector3.Lerp(dirA, dirB, f));
-        
+        var blendedTarget = MathUtils.Lerp(a.Target, b.Target, f);
+
+        var qa = ExtractCameraQuaternion(a);
+        var qb = ExtractCameraQuaternion(b);
+
+        // shortest path
+        if (Quaternion.Dot(qa, qb) < 0)
+            qb = Quaternion.Negate(qb);
+
+        var q = Quaternion.Normalize(Quaternion.Slerp(qa, qb, f));
+
+        Vector3 forward = Vector3.Transform(-Vector3.UnitZ, q);
+        Vector3 up = Vector3.Transform(Vector3.UnitY, q);
+
         return new CameraDefinition
                    {
+                       Position = blendedPosition,
+                       Target = blendedPosition + forward, // RH camera
+                       Up = Vector3.Normalize(up),
+                       Roll = 0,
+
                        NearFarClip = MathUtils.Lerp(a.NearFarClip, b.NearFarClip, f),
                        LensShift = MathUtils.Lerp(a.LensShift, b.LensShift, f),
                        PositionOffset = MathUtils.Lerp(a.PositionOffset, b.PositionOffset, f),
-                       Position = MathUtils.Lerp(a.Position, b.Position, f),
-                       //Target = MathUtils.Lerp(normalizedTargetA, normalizedTargetB, f),
-                       //Target = MathUtils.Lerp(a.Target, b.Target, f),
-                       Target= blendedTarget,
-                       Up = MathUtils.Lerp(a.Up, b.Up, f),
                        AspectRatio = MathUtils.Lerp(a.AspectRatio, b.AspectRatio, f),
                        FieldOfView = MathUtils.Lerp(a.FieldOfView, b.FieldOfView, f),
-                       Roll = MathUtils.Lerp(a.Roll, b.Roll, f),
                        RotationOffset = MathUtils.Lerp(a.RotationOffset, b.RotationOffset, f),
-                       OffsetAffectsTarget = f < 0.5 ? a.OffsetAffectsTarget : b.OffsetAffectsTarget,
+
+                       OffsetAffectsTarget = f < 0.5f ? a.OffsetAffectsTarget : b.OffsetAffectsTarget,
                    };
     }
+
+
+    private static Quaternion ExtractCameraQuaternion(CameraDefinition cam)
+    {
+        cam.BuildProjectionMatrices(out _, out var worldToCamera);
+
+        // Convert view -> world transform
+        Matrix4x4.Invert(worldToCamera, out var cameraToWorld);
+
+        // Extract the 3x3 rotation block
+        var rot = new Matrix4x4(
+                                cameraToWorld.M11, cameraToWorld.M12, cameraToWorld.M13, 0,
+                                cameraToWorld.M21, cameraToWorld.M22, cameraToWorld.M23, 0,
+                                cameraToWorld.M31, cameraToWorld.M32, cameraToWorld.M33, 0,
+                                0, 0, 0, 1);
+
+        // Orthonormalize to remove numerical drift
+        var right = Vector3.Normalize(new Vector3(rot.M11, rot.M12, rot.M13));
+        var up = Vector3.Normalize(new Vector3(rot.M21, rot.M22, rot.M23));
+        var forward = Vector3.Normalize(new Vector3(rot.M31, rot.M32, rot.M33));
+
+        // Rebuild orthogonal basis
+        forward = Vector3.Normalize(forward);
+        right = Vector3.Normalize(Vector3.Cross(up, forward));
+        up = Vector3.Cross(forward, right);
+
+        var clean = new Matrix4x4(
+                                  right.X, right.Y, right.Z, 0,
+                                  up.X, up.Y, up.Z, 0,
+                                  forward.X, forward.Y, forward.Z, 0,
+                                  0, 0, 0, 1);
+
+        return Quaternion.CreateFromRotationMatrix(clean);
+    }
+
 
     public void BuildProjectionMatrices(out Matrix4x4 camToClipSpace, out Matrix4x4 worldToCamera)
     {
@@ -68,7 +114,8 @@ public struct CameraDefinition
 
         var worldToCameraRoot = GraphicsMath.LookAtRH(eye, Target, Up);
         var rollRotation = Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, -Roll * MathUtils.ToRad);
-        var additionalTranslation = OffsetAffectsTarget ? Matrix4x4.CreateTranslation(PositionOffset.X, PositionOffset.Y, PositionOffset.Z) : Matrix4x4.Identity;
+        var additionalTranslation =
+            OffsetAffectsTarget ? Matrix4x4.CreateTranslation(PositionOffset.X, PositionOffset.Y, PositionOffset.Z) : Matrix4x4.Identity;
 
         var additionalRotation = Matrix4x4.CreateFromYawPitchRoll(MathUtils.ToRad * RotationOffset.Y,
                                                                   MathUtils.ToRad * RotationOffset.X,
@@ -87,5 +134,5 @@ public class ViewCamera : ICamera
     public float CameraRoll { get; set; }
     public Matrix4x4 WorldToCamera { get; }
     public Matrix4x4 CameraToClipSpace { get; }
-    public CameraDefinition CameraDefinition => new();  // Not implemented
+    public CameraDefinition CameraDefinition => new(); // Not implemented
 }

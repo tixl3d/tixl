@@ -6,8 +6,8 @@
     {
       "InputId": "178c1df1-5326-42d1-9251-8e2c8ad7965b"/*Center*/,
       "Position": {
-        "X": -58.61078,
-        "Y": 784.04254
+        "X": 19.995575,
+        "Y": 794.24084
       },
       "Description": "Starting point.",
       "AddPadding": "True"
@@ -15,8 +15,8 @@
     {
       "InputId": "208b724d-c5d7-4eaa-94a1-e1f045f14969"/*OrientationAngle*/,
       "Position": {
-        "X": 71.38928,
-        "Y": 986.04254
+        "X": 159.99557,
+        "Y": 1074.2408
       },
       "Min": -90.0,
       "Max": 90.0,
@@ -25,8 +25,8 @@
     {
       "InputId": "28081e5f-da01-46dc-81ad-699df29a49a4"/*GainAndBias*/,
       "Position": {
-        "X": -78.61072,
-        "Y": 1199.0425
+        "X": 19.995575,
+        "Y": 1494.2408
       },
       "Min": 0.0,
       "Max": 1.0,
@@ -37,8 +37,8 @@
     {
       "InputId": "41ed1339-c762-4979-9c89-b1a347eb3d06"/*WOffset*/,
       "Position": {
-        "X": 297.56772,
-        "Y": 1876.1355
+        "X": 257.3594,
+        "Y": 2137.5178
       },
       "Description": "Delta added to the start width.",
       "Format": "{0:0.000} ±"
@@ -46,23 +46,23 @@
     {
       "InputId": "442cca8c-9e38-4eeb-a67c-945510218a85"/*F1*/,
       "Position": {
-        "X": -78.61072,
-        "Y": 1255.0425
+        "X": 19.995575,
+        "Y": 1564.2408
       }
     },
     {
       "InputId": "4ab30d37-dec7-4c7a-a44c-25baf18f25ae"/*Scale*/,
       "Position": {
-        "X": -78.61072,
-        "Y": 1367.0425
+        "X": 19.995575,
+        "Y": 1704.2408
       },
       "GroupTitle": "Point Attributes"
     },
     {
       "InputId": "4d45a633-ac00-4cbe-83a3-43c419c3da97"/*ColorB*/,
       "Position": {
-        "X": -78.61072,
-        "Y": 1143.0425
+        "X": 19.995575,
+        "Y": 1354.2408
       },
       "Min": 0.0,
       "Max": 1.0,
@@ -72,8 +72,8 @@
     {
       "InputId": "6f46bd61-422f-4715-9219-3d2e1dff1d90"/*ColorA*/,
       "Position": {
-        "X": -78.61072,
-        "Y": 1098.0425
+        "X": 19.995575,
+        "Y": 1214.2408
       },
       "Description": "Color at the start of the line (i.e. at the Center)",
       "AddPadding": "True",
@@ -85,8 +85,8 @@
     {
       "InputId": "6fa2fddb-3b8d-4fda-9ac4-796618aa88d0"/*Length*/,
       "Position": {
-        "X": 71.38928,
-        "Y": 840.04254
+        "X": 159.99557,
+        "Y": 899.24084
       },
       "Description": "A factor multiplied to the direction of the line. \nDirection of 2, 0, 0  × 1  and 1, 0, 0 × 2 are equivalent.",
       "AddPadding": "True"
@@ -94,8 +94,8 @@
     {
       "InputId": "83986e05-af3e-469f-a656-9956d37d12ba"/*Orientation*/,
       "Position": {
-        "X": 59.725586,
-        "Y": 1581.2628
+        "X": 159.99557,
+        "Y": 1865.4856
       },
       "GroupTitle": "Point Orientation",
       "Description": "Sadly there is no simple method to define the orientation of the points.\n\nSimple: Ignores Line direction and uses the Orientation and Angle\nUp Vector: Orient X towards the direction. This can have unpredictable results when the line is pointing up or when using Orientation Angles."
@@ -103,23 +103,23 @@
     {
       "InputId": "8f3eab23-6e6a-43dc-969e-c5ef3b8e3fe0"/*F2*/,
       "Position": {
-        "X": -78.61072,
-        "Y": 1311.0425
+        "X": 19.995575,
+        "Y": 1634.2408
       }
     },
     {
       "InputId": "8f439130-529c-42ff-a5c0-255476120f03"/*Direction*/,
       "Position": {
-        "X": -58.61075,
-        "Y": 885.04254
+        "X": 19.995575,
+        "Y": 934.24084
       },
       "Description": "The direction the line is being oriented. E.g. 0, 1, 0 would point the line upwards."
     },
     {
       "InputId": "8f7206d1-5f78-4a9c-bba9-1ef8277b6d5f"/*Twist*/,
       "Position": {
-        "X": 71.38928,
-        "Y": 1423.0425
+        "X": 159.99557,
+        "Y": 1774.2408
       },
       "Description": "Twist the point orientations around the direction axis. This can be useful if the line points are used as targets for repeating other elements, e.g., to build a spiral staircase.",
       "Min": -180.0,
@@ -129,8 +129,8 @@
     {
       "InputId": "951a1792-e607-4595-b211-97be7d27694c"/*Count*/,
       "Position": {
-        "X": -273.44965,
-        "Y": 635.3127
+        "X": -323.18683,
+        "Y": 667.1208
       },
       "Min": 1,
       "Max": 1000000,
@@ -139,15 +139,15 @@
     {
       "InputId": "a8dfe0e7-ad33-47cf-ab78-726385e38434"/*OrientationAxis*/,
       "Position": {
-        "X": -78.61072,
-        "Y": 1031.0425
+        "X": 19.995575,
+        "Y": 1109.2408
       }
     },
     {
       "InputId": "af75835a-04c9-4721-8c7a-a31ef8012f06"/*Pivot*/,
       "Position": {
-        "X": 71.38928,
-        "Y": 941.04254
+        "X": 159.99557,
+        "Y": 1039.2408
       },
       "Description": "Defines how the Line is centered.\n\n0 - the line starts at center\n0.5 - the line is centered\n1.0 -  the last point of the line is at the Center.",
       "Min": 0.0,
@@ -156,8 +156,8 @@
     {
       "InputId": "d120d8f7-aff6-4e30-b0d2-c45e3e477fde"/*W*/,
       "Position": {
-        "X": 297.56772,
-        "Y": 1831.1353
+        "X": 257.3594,
+        "Y": 2092.5173
       },
       "GroupTitle": "Obsolete Parameters",
       "Description": "Width at the beginning of the line."
@@ -165,8 +165,8 @@
     {
       "InputId": "ddc2ea6a-d356-46c9-b333-4cce69c02570"/*AddSeparator*/,
       "Position": {
-        "X": -521.00256,
-        "Y": 1462.0514
+        "X": -502.0653,
+        "Y": 1819.5435
       },
       "GroupTitle": "Options",
       "Description": "When combining multiple lines into a single buffer, checking this option will prevent connecting them."
@@ -176,113 +176,113 @@
     {
       "ChildId": "0d9a8206-2bbb-425b-932e-706a680a9b10"/*Vector3Components*/,
       "Position": {
-        "X": 71.38928,
-        "Y": 1031.0425
+        "X": 159.99557,
+        "Y": 1109.2408
       }
     },
     {
       "ChildId": "12108230-6c03-42ba-ad8a-d9b602626de5"/*ComputeShaderStage*/,
       "Position": {
-        "X": 488.80798,
-        "Y": 559.4394
+        "X": 569.2438,
+        "Y": 642.10944
       }
     },
     {
       "ChildId": "34b27f8b-0d5f-4390-be54-4405f3924294"/*BoolToInt*/,
       "Position": {
-        "X": -371.00253,
-        "Y": 1462.0514
+        "X": -362.06528,
+        "Y": 1819.5435
       }
     },
     {
       "ChildId": "4baef9e1-7ed5-4685-9faa-8643c4f1c1e5"/*Vector2Components*/,
       "Position": {
-        "X": 71.38928,
-        "Y": 1199.0425
+        "X": 159.99557,
+        "Y": 1494.2408
       }
     },
     {
       "ChildId": "526f6b08-5553-49a4-aca3-8bb18f36edd7"/*Vector4Components*/,
       "Position": {
-        "X": 71.38928,
-        "Y": 1143.0425
+        "X": 159.99557,
+        "Y": 1354.2408
       }
     },
     {
       "ChildId": "5433be81-6c78-4af5-b622-7e4b32729d9c"/*IntsToBuffer*/,
       "Position": {
-        "X": 253.29846,
-        "Y": 1537.5406
+        "X": 299.99557,
+        "Y": 1830.4856
       }
     },
     {
       "ChildId": "58ec20dd-1291-425c-b8d3-2c7923d43dd8"/*StructuredBufferWithViews*/,
       "Position": {
-        "X": 33.166046,
-        "Y": 672.4626
+        "X": 33.166042,
+        "Y": 643.7577
       }
     },
     {
       "ChildId": "7ac672f5-6e11-4e08-86e0-5b3ed8a25200"/*Vector3Components*/,
       "Position": {
-        "X": 71.38928,
-        "Y": 885.04254
+        "X": 159.99557,
+        "Y": 934.24084
       }
     },
     {
       "ChildId": "82938232-cea6-4607-8227-b6c19f9a6e11"/*ComputeShader*/,
       "Position": {
-        "X": -117.47565,
-        "Y": 588.6219
+        "X": -106.833954,
+        "Y": 526.4397
       }
     },
     {
       "ChildId": "996b5c61-b865-42e9-a096-a4aa126dd678"/*Vector2Components*/,
       "Position": {
-        "X": 71.38928,
-        "Y": 1255.0425
+        "X": 159.99557,
+        "Y": 1564.2408
       }
     },
     {
       "ChildId": "a2277b1e-fe23-436a-9e9e-223db0ede615"/*GetBufferComponents*/,
       "Position": {
-        "X": 314.96234,
-        "Y": 640.77124
+        "X": 33.166042,
+        "Y": 678.7577
       }
     },
     {
       "ChildId": "a7581da6-2cfd-4087-9d6b-877d0f0c1ff9"/*ExecuteBufferUpdate*/,
       "Position": {
-        "X": 645.17676,
-        "Y": 651.7753
+        "X": 569.2438,
+        "Y": 817.10944
       }
     },
     {
       "ChildId": "c898820d-0f41-4c3f-8d6c-bfeb4b42193a"/*CalcDispatchCount*/,
       "Position": {
         "X": 33.166046,
-        "Y": 603.4626
+        "Y": 561.4397
       }
     },
     {
       "ChildId": "ca4a31d2-5ad8-4303-8a27-a96095193d92"/*AddInts*/,
       "Position": {
-        "X": -123.44963,
-        "Y": 635.3127
+        "X": -183.18683,
+        "Y": 667.1208
       }
     },
     {
       "ChildId": "ce0e45cf-7495-4bda-9693-a84d6ea31a5c"/*Vector2Components*/,
       "Position": {
-        "X": 71.38928,
-        "Y": 1311.0425
+        "X": 159.99557,
+        "Y": 1634.2408
       }
     },
     {
       "ChildId": "cfd2581f-f000-444c-bbe0-e302e185cd15"/*Vector3Components*/,
       "Position": {
-        "X": 71.38928,
-        "Y": 784.04254
+        "X": 159.99557,
+        "Y": 794.24084
       }
     },
     {
@@ -300,15 +300,15 @@
     {
       "ChildId": "f98aadae-0bc2-4fcc-b7a3-b61110add6a1"/*Vector2Components*/,
       "Position": {
-        "X": 71.38928,
-        "Y": 1367.0425
+        "X": 159.99557,
+        "Y": 1704.2408
       }
     },
     {
       "ChildId": "fd518aaf-1c64-484d-8168-5c29cb3e2d2d"/*Vector4Components*/,
       "Position": {
-        "X": 71.38928,
-        "Y": 1087.0425
+        "X": 159.99557,
+        "Y": 1214.2408
       }
     }
   ],
@@ -316,8 +316,8 @@
     {
       "OutputId": "68514ced-4368-459a-80e9-463a808bff0b"/*OutBuffer*/,
       "Position": {
-        "X": 779.4594,
-        "Y": 612.3752
+        "X": 569.2438,
+        "Y": 887.10944
       }
     }
   ],
@@ -332,8 +332,8 @@
         "W": 1.0
       },
       "Position": {
-        "X": 278.64758,
-        "Y": 1768.6177
+        "X": 238.43927,
+        "Y": 2030.0
       },
       "Size": {
         "X": 230.0,

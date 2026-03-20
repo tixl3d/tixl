@@ -187,9 +187,9 @@ internal sealed class LineTextPoints : Instance<LineTextPoints>
                                       _                   => throw new ArgumentOutOfRangeException()
                                   };
 
+            _startIndicesAndCounts.Add(new Int2( _points.Count, numPoints));
             if (numPoints > 0)
             {
-                _startIndicesAndCounts.Add(new Int2( _points.Count, numPoints));
                 for (var pointIndex = 0; pointIndex < numPoints; pointIndex++)
                 {
                     var p = glyph.Points[pointIndex];

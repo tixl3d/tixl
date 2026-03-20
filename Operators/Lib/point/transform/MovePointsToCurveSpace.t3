@@ -213,12 +213,6 @@
       "Outputs": []
     },
     {
-      "Id": "be2331cc-815b-4c01-8a03-c3d7fffc7b59"/*VisualizePoints*/,
-      "SymbolId": "37bdbafc-d14c-4b81-91c3-8f63c3b63812",
-      "InputValues": [],
-      "Outputs": []
-    },
-    {
       "Id": "db399b31-e296-4377-904a-aaa71a6faa2c"/*DrawPoints*/,
       "SymbolId": "ffd94e5a-bc98-4e70-84d8-cce831e6925f",
       "InputValues": [
@@ -499,12 +493,6 @@
       "SourceSlotId": "6e5bc8a8-fac6-450c-826e-188bb20ada43",
       "TargetParentOrChildId": "ac6b1e22-9f10-4396-b9a4-69f44fe86c28",
       "TargetSlotId": "7a13b834-21e5-4cef-ad5b-23c3770ea763"
-    },
-    {
-      "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
-      "SourceSlotId": "6e5bc8a8-fac6-450c-826e-188bb20ada43",
-      "TargetParentOrChildId": "be2331cc-815b-4c01-8a03-c3d7fffc7b59",
-      "TargetSlotId": "54fc4cd7-dfc3-4690-9fd1-2b555f7656d4"
     },
     {
       "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",

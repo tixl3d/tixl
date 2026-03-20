@@ -24,7 +24,7 @@ internal sealed class ReuseCamera : Instance<ReuseCamera>
         {
             if (obj is not ICamera camera)
             {
-                Log.Warning("Can't GetCamProperties from invalid reference type", this);
+                Log.Warning($"Can't GetCamProperties from invalid reference type {obj}", this);
                 return;
             }
 

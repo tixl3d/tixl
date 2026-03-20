@@ -5,8 +5,8 @@
     {
       "InputId": "56482ceb-ae0e-4d32-a6a4-2568a166a2d9"/*FloatPrecision*/,
       "Position": {
-        "X": 227.68942,
-        "Y": 1217.4928
+        "X": 291.74838,
+        "Y": 1199.9691
       }
     },
     {
@@ -21,6 +21,13 @@
       "Position": {
         "X": 291.74838,
         "Y": 1355.9779
+      }
+    },
+    {
+      "InputId": "b5b3ce43-8e27-4839-86ed-a1d80c14a5c5"/*Increment*/,
+      "Position": {
+        "X": 291.74838,
+        "Y": 1234.9691
       }
     },
     {
@@ -40,6 +47,13 @@
       "Description": "The incoming points define the position at which other points will be distributed"
     },
     {
+      "InputId": "d348dd16-e165-470c-89c2-83c73cb792d1"/*LineWidth*/,
+      "Position": {
+        "X": 291.74838,
+        "Y": 1390.9779
+      }
+    },
+    {
       "InputId": "d5bb30ae-6368-464b-b7db-ee30b9c3c394"/*Scale*/,
       "Position": {
         "X": 291.74838,
@@ -51,8 +65,8 @@
     {
       "InputId": "eb4007f8-247d-487a-bad7-f136eba821ea"/*NumberMode*/,
       "Position": {
-        "X": 227.68942,
-        "Y": 1182.4928
+        "X": 291.74838,
+        "Y": 1164.9691
       }
     }
   ],
@@ -74,8 +88,8 @@
     {
       "ChildId": "21bb695a-debb-4f41-9bbe-6f8434aa277a"/*IntListLength*/,
       "Position": {
-        "X": 227.68942,
-        "Y": 1147.4928
+        "X": 291.74838,
+        "Y": 1129.9691
       }
     },
     {
@@ -233,8 +247,8 @@
     {
       "ChildId": "c6cb7035-3114-40a9-bd78-2d312cc2c49f"/*IntListToBuffer*/,
       "Position": {
-        "X": 249.35577,
-        "Y": 1451.078
+        "X": 430.33475,
+        "Y": 1470.878
       }
     },
     {
@@ -252,8 +266,8 @@
         "Y": 207.14818
       },
       "Position": {
-        "X": 367.68942,
-        "Y": 1042.4928
+        "X": 431.74838,
+        "Y": 1024.9691
       }
     },
     {

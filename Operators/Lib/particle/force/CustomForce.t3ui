@@ -1,0 +1,288 @@
+{
+  "Id": "2db5e90a-f02a-47ce-b1c0-3c5c4513f8fd"/*CustomForce*/,
+  "Description": "Allows to write small shaders to create custom particle force effects.",
+  "InputUis": [
+    {
+      "InputId": "18b352f3-0863-4ad4-a569-a63000841736"/*Field*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 505.17255,
+        "Y": 29.847992
+      }
+    },
+    {
+      "InputId": "2261a69e-0862-41d2-b3a2-48b77ab8b873"/*A*/,
+      "Position": {
+        "X": 792.96313,
+        "Y": 595.7517
+      }
+    },
+    {
+      "InputId": "38de95a0-1ef5-4bc6-b930-fb16c278c359"/*B*/,
+      "Position": {
+        "X": 792.96313,
+        "Y": 735.7517
+      }
+    },
+    {
+      "InputId": "5de0657c-119a-441c-9876-e47191b5ac46"/*Gradient*/,
+      "Position": {
+        "X": 1139.8612,
+        "Y": 679.3563
+      }
+    },
+    {
+      "InputId": "65f44e17-9aa0-4166-9cab-587ab80f6b4c"/*Amount*/,
+      "Position": {
+        "X": 792.96313,
+        "Y": 490.7517
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "Scale": 0.001
+    },
+    {
+      "InputId": "695907d4-fc4e-4326-9bdc-618784c84173"/*Offset*/,
+      "Position": {
+        "X": 652.96313,
+        "Y": 630.7517
+      }
+    },
+    {
+      "InputId": "74befd45-8f75-4d01-afe9-689f5fd7ad85"/*D*/,
+      "Position": {
+        "X": 792.96313,
+        "Y": 805.7517
+      }
+    },
+    {
+      "InputId": "76299c6d-3add-4f26-a81c-ed628257ed8f"/*ShaderCode*/,
+      "Position": {
+        "X": 505.17255,
+        "Y": 239.84805
+      },
+      "Usage": "Multiline"
+    },
+    {
+      "InputId": "76ecc997-76a8-477c-9d35-643d12994adb"/*Image*/,
+      "Position": {
+        "X": 1139.8612,
+        "Y": 705.58624
+      }
+    },
+    {
+      "InputId": "7e4e6038-7d45-491b-a653-468f50a89f81"/*GainAndBias*/,
+      "Position": {
+        "X": 652.96313,
+        "Y": 840.7517
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true,
+      "Format": "{0:0.000}",
+      "UseVec2Control": "BiasAndGain"
+    },
+    {
+      "InputId": "b70f8651-8a88-45da-87de-e5a5e8bd0163"/*AdditionalDefines*/,
+      "Position": {
+        "X": 505.17255,
+        "Y": 169.84805
+      },
+      "GroupTitle": "Additional Options...",
+      "Usage": "Multiline"
+    },
+    {
+      "InputId": "bf811157-9055-4d8c-94e9-db28893ef207"/*C*/,
+      "Position": {
+        "X": 792.96313,
+        "Y": 770.7517
+      }
+    },
+    {
+      "InputId": "c7e31ead-9bab-441e-af0b-bdaea7a60a79"/*Color*/,
+      "Position": {
+        "X": 652.9632,
+        "Y": 910.7517
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true
+    },
+    {
+      "InputId": "da22402b-decf-4f02-afc4-a0ce984062c1"/*NormalSamplingDistance*/,
+      "Position": {
+        "X": 792.96313,
+        "Y": 525.7517
+      },
+      "Min": -0.1,
+      "Max": 0.1,
+      "Scale": 0.002
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "16322534-6894-4f72-a1fc-b9b29f144ea6"/*IntsToBuffer*/,
+      "Position": {
+        "X": 928.1122,
+        "Y": 1183.9612
+      }
+    },
+    {
+      "ChildId": "172aa4e3-2c2f-4360-bae8-f907a935c826"/*TransformsConstBuffer*/,
+      "Position": {
+        "X": 928.1122,
+        "Y": 1234.8712
+      }
+    },
+    {
+      "ChildId": "1c52da4b-bfda-46d4-ae2d-9ec81c9191e5"/*_ExecuteParticleUpdate*/,
+      "Position": {
+        "X": 1559.8612,
+        "Y": 889.3563
+      }
+    },
+    {
+      "ChildId": "2b500d19-d510-4a8a-ae7d-b716a4c5f83c"/*SrvFromTexture2d*/,
+      "Position": {
+        "X": 1279.8612,
+        "Y": 775.58624
+      }
+    },
+    {
+      "ChildId": "4eb609f8-027a-4111-ad9e-4570e7b75689"/*ComputeShaderStage*/,
+      "Position": {
+        "X": 1559.8612,
+        "Y": 469.35635
+      }
+    },
+    {
+      "ChildId": "5f9e996a-a72b-47d8-b476-59b7526be909"/*SamplerState*/,
+      "Position": {
+        "X": 928.1122,
+        "Y": 1349.9003
+      }
+    },
+    {
+      "ChildId": "8bb263bc-d699-4a55-9a24-1e7a3351c843"/*Vector2Components*/,
+      "Position": {
+        "X": 792.96313,
+        "Y": 840.7517
+      }
+    },
+    {
+      "ChildId": "8ff40a1a-982f-4cd5-90a7-032baf2eeb1b"/*ComputeShaderFromSource*/,
+      "Position": {
+        "X": 645.17255,
+        "Y": 274.84805
+      }
+    },
+    {
+      "ChildId": "ac921d94-9f6b-4be1-91ca-d91964eed113"/*GetParticleComponents*/,
+      "Position": {
+        "X": 377.5174,
+        "Y": 1151.2794
+      }
+    },
+    {
+      "ChildId": "ad8eb2e3-fcee-4d3b-bdcb-edd66c8c8d09"/*SearchAndReplace*/,
+      "Position": {
+        "X": 645.17255,
+        "Y": 204.84805
+      }
+    },
+    {
+      "ChildId": "af67f296-4650-4878-88ac-4c33bec395cb"/*GradientsToTexture*/,
+      "Position": {
+        "X": 1279.8612,
+        "Y": 679.3563
+      }
+    },
+    {
+      "ChildId": "b832c791-f20c-4627-9956-9da992c00be4"/*CalcDispatchCount*/,
+      "Position": {
+        "X": 785.17255,
+        "Y": 309.84805
+      }
+    },
+    {
+      "ChildId": "bd0896cc-2fc8-4417-9e5d-5c453e0fe120"/*GenerateShaderGraphCode*/,
+      "Position": {
+        "X": 645.17255,
+        "Y": 29.847992
+      }
+    },
+    {
+      "ChildId": "bd501127-4760-44bb-8a32-29b217f495bb"/*HasTimeChanged*/,
+      "Position": {
+        "X": 1419.8612,
+        "Y": 924.3563
+      }
+    },
+    {
+      "ChildId": "c107c4e3-7039-4e74-958f-ea0326fde64f"/*SrvFromTexture2d*/,
+      "Position": {
+        "X": 1419.8612,
+        "Y": 679.3563
+      }
+    },
+    {
+      "ChildId": "c97e3157-60a1-47da-ba00-2787b25e31c9"/*LoadImage*/,
+      "Position": {
+        "X": 1139.8612,
+        "Y": 740.58624
+      }
+    },
+    {
+      "ChildId": "cb724495-865d-4ebd-9594-9100a20008e4"/*SearchAndReplace*/,
+      "Position": {
+        "X": 645.17255,
+        "Y": 134.84805
+      }
+    },
+    {
+      "ChildId": "cee1021d-4356-44aa-ac88-14a3d3537a91"/*FloatsToBuffer*/,
+      "Position": {
+        "X": 932.96313,
+        "Y": 455.7517
+      }
+    },
+    {
+      "ChildId": "cf4f24be-66a8-4a89-a21d-de4ad75e273a"/*Vector4Components*/,
+      "Position": {
+        "X": 792.9632,
+        "Y": 910.7517
+      }
+    },
+    {
+      "ChildId": "e2e4b9e6-e571-4f1b-aa20-6f126e740c10"/*FirstValidTexture*/,
+      "Position": {
+        "X": 1279.8612,
+        "Y": 705.58624
+      }
+    },
+    {
+      "ChildId": "ed099dbe-6446-479c-9abd-dbdca3b49251"/*Vector3Components*/,
+      "Position": {
+        "X": 792.96313,
+        "Y": 630.7517
+      }
+    },
+    {
+      "ChildId": "ed18b5d6-7821-4e5f-9998-fcaeb562e196"/*Clamped*/,
+      "Position": {
+        "X": 928.1122,
+        "Y": 1303.0403
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "e2358e9b-9b37-44f7-b4f8-b56ef0eb7d83"/*Particles*/,
+      "Position": {
+        "X": 1559.8612,
+        "Y": 959.3563
+      }
+    }
+  ]
+}

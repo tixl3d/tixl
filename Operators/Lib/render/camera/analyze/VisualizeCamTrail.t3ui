@@ -1,0 +1,101 @@
+{
+  "Id": "d59ee7b2-8beb-470e-b75a-f73cc1916b1a"/*VisualizeCamTrail*/,
+  "Description": "Visualize a  camera movement by looping over a time range and rendering onion skins of the connected camera reference.",
+  "InputUis": [
+    {
+      "InputId": "7fd1c5f7-de89-46ed-b8ba-d14c2352848f"/*CamReference*/,
+      "Position": {
+        "X": -140.0,
+        "Y": 70.0
+      }
+    },
+    {
+      "InputId": "8fceaa45-96e1-446c-9e5d-d1ea23380aa1"/*Steps*/,
+      "Position": {
+        "X": -280.0001,
+        "Y": 210.0
+      }
+    },
+    {
+      "InputId": "9ca00da6-18b7-449e-be38-a42ef20f6c0a"/*TimeRange*/,
+      "Position": {
+        "X": -279.99997,
+        "Y": 175.0
+      }
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "35dda355-a21e-4895-ab33-1b793a31c3af"/*SampleGradient*/,
+      "Position": {
+        "X": -140.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "4b9f46c3-7e0c-4e1e-a349-6e37bb5d861c"/*_CameraGizmo*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "63e34105-b60e-461e-8f30-cb71fd1a9f44"/*Remap*/,
+      "Position": {
+        "X": -280.00003,
+        "Y": 140.0
+      }
+    },
+    {
+      "ChildId": "6a228abc-6675-4c33-8120-f034eb36c244"/*GetFloatVar*/,
+      "Position": {
+        "X": -280.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "75227ac3-ae7b-475e-8613-511814d36434"/*Multiply*/,
+      "Position": {
+        "X": -140.0,
+        "Y": 140.0
+      }
+    },
+    {
+      "ChildId": "8294fb47-0ac2-4349-b322-28862651e91f"/*ClampInt*/,
+      "Position": {
+        "X": -140.0,
+        "Y": 210.0
+      }
+    },
+    {
+      "ChildId": "97d7026b-d0d5-458b-9639-c18789b81838"/*SetTime*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 105.0
+      }
+    },
+    {
+      "ChildId": "cd3ee2b5-7132-473a-a3bb-0f540c0a1761"/*ApplyCamTransform*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 35.0
+      }
+    },
+    {
+      "ChildId": "eeef889f-8574-4b7b-997d-1ca5dcbb417c"/*Loop*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 175.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "612ee50f-5c53-4e04-93fe-bd72c6953a9f"/*Result*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 245.0
+      }
+    }
+  ]
+}

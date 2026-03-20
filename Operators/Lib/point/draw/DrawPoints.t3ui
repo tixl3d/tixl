@@ -21,7 +21,8 @@
       "Description": "Defines the size of the Points",
       "AddPadding": "True",
       "Min": 0.0,
-      "Max": 0.5
+      "Max": 0.5,
+      "ClampMin": true
     },
     {
       "InputId": "5df18658-ef86-4c0f-8bb4-4ac3fbbf9a33"/*GPoints*/,

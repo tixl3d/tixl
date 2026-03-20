@@ -21,10 +21,11 @@ internal sealed class MaxInt : Instance<MaxInt>
             max = Math.Max(max, i.GetValue(context));
         }
 
+        Ints.DirtyFlag.Clear();
         Result.Value = max;
     }
 
-
+    
     [Input(Guid = "286DACDF-A469-4983-A944-D9F34ED1E7DE")]
     public readonly MultiInputSlot<int> Ints = new();
 }

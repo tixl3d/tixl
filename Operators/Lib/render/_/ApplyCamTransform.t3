@@ -1,0 +1,19 @@
+{
+  "Id": "68e2031d-20ac-4a2e-a407-fc2cbd76aad2"/*ApplyCamTransform*/,
+  "Inputs": [
+    {
+      "Id": "088fb8fd-df11-4de1-88a8-73cb8077eb9b"/*Command*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "877c2285-f326-4b5b-a9fd-4a526daa41a4"/*CamToClipSpaceRows*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "e1ec7b13-a200-4733-bb18-b6b3befd7e6c"/*WorldToCamRows*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

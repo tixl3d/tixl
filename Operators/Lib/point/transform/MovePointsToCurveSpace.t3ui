@@ -7,16 +7,16 @@
       "InputId": "000e00d8-4f53-4a39-abd9-d2495ffff11d"/*TargetPoints*/,
       "Relevancy": "Required",
       "Position": {
-        "X": 571.6502,
-        "Y": 1579.0715
+        "X": 1728.8096,
+        "Y": 1790.6404
       },
       "Description": "A point set that defines the target curve. These points MUST be oriented with their Z-axis along the line!"
     },
     {
       "InputId": "51d0366c-fd0a-4385-86e2-729a06ba8430"/*Offset*/,
       "Position": {
-        "X": 562.33167,
-        "Y": 1944.7169
+        "X": 950.1747,
+        "Y": 1928.1097
       },
       "Description": "Slides the points along the curve. This is similar to adjusting the corresponding axis of the Pivot parameter."
     },
@@ -32,8 +32,8 @@
     {
       "InputId": "7169ac45-9863-4557-bf7c-1040f732416d"/*Range*/,
       "Position": {
-        "X": 562.33167,
-        "Y": 1899.7169
+        "X": 950.1747,
+        "Y": 1788.1097
       },
       "GroupTitle": "Target Range",
       "Description": "The range of the curve that will be used for mapping.",
@@ -45,47 +45,47 @@
     {
       "InputId": "7b1cb7b0-110f-4c13-9f85-ab3a205ba633"/*Scale*/,
       "Position": {
-        "X": 562.33167,
-        "Y": 1989.7169
+        "X": 950.1747,
+        "Y": 1963.1097
       },
       "Description": "Scale of the resulting space."
     },
     {
       "InputId": "8cb0597f-1d57-4cc1-8079-0ad73dacf491"/*SourceAlignment*/,
       "Position": {
-        "X": 566.93335,
-        "Y": 1786.03
+        "X": 816.6755,
+        "Y": 2117.4392
       },
       "Description": "The axis that will become the center of the curve."
     },
     {
       "InputId": "921a72d9-9f31-4433-a7b8-b9b4aac365f4"/*AtBoundaries*/,
       "Position": {
-        "X": 562.33167,
-        "Y": 2079.7168
+        "X": 816.6755,
+        "Y": 2152.4392
       },
       "Description": "Defines what happens outside the source space bounds."
     },
     {
       "InputId": "ad797f3a-296d-4170-99ba-a27422f0d909"/*Pivot*/,
       "Position": {
-        "X": 564.63257,
-        "Y": 1712.9921
+        "X": 537.75964,
+        "Y": 2350.264
       },
       "Description": "An optional offset on the source space."
     },
     {
       "InputId": "b5f78276-986e-45ca-b360-c4e40c338157"/*Visibility*/,
       "Position": {
-        "X": 562.33167,
-        "Y": 2214.7168
+        "X": 1566.2141,
+        "Y": 2662.9446
       }
     },
     {
       "InputId": "b7ebf5a0-bd74-412d-a70f-c8c2fe01d108"/*Extent*/,
       "Position": {
-        "X": 564.63257,
-        "Y": 1667.9921
+        "X": 336.0134,
+        "Y": 2035.1947
       },
       "GroupTitle": "Source Space",
       "Description": "The extent of the source volume. Increasing the extent will shrink the resulting geometry.\nEnable gizmo visualization to see it."
@@ -95,176 +95,169 @@
     {
       "ChildId": "02a01682-9032-4858-8276-d92ff903a376"/*VisibleGizmos*/,
       "Position": {
-        "X": 1498.9088,
-        "Y": 2125.3672
+        "X": 1706.2141,
+        "Y": 2557.9446
       }
     },
     {
       "ChildId": "0995bb8f-6831-49c7-b39e-738aa695a26e"/*DrawLines*/,
       "Position": {
-        "X": 1185.805,
-        "Y": 2339.0728
+        "X": 1314.7488,
+        "Y": 2257.0837
       }
     },
     {
       "ChildId": "0cdeea7f-98d2-435e-b74a-6264ca64a642"/*CommonPointSets*/,
       "Position": {
-        "X": 1035.805,
-        "Y": 2339.0728
+        "X": 1314.7488,
+        "Y": 2222.0837
       }
     },
     {
       "ChildId": "474472c4-aca3-4620-840b-4a8a0bc7176d"/*ComputeShader*/,
       "Position": {
-        "X": 920.54974,
-        "Y": 1428.9692
+        "X": 918.6304,
+        "Y": 1206.308
       }
     },
     {
       "ChildId": "4b65ec62-adb6-42da-884a-8e2ba8eb00c6"/*StructuredBufferWithViews*/,
       "Position": {
-        "X": 1086.7867,
-        "Y": 1774.2336
+        "X": 1190.4395,
+        "Y": 1452.7185
       }
     },
     {
       "ChildId": "57693d8f-5080-4821-92ef-6c79197bc2d3"/*GetBufferComponents*/,
       "Position": {
-        "X": 1235.3159,
-        "Y": 1722.354
+        "X": 1190.4395,
+        "Y": 1522.7185
       }
     },
     {
       "ChildId": "59e756f3-db8a-4166-a32f-a63b3171ed0b"/*CommonPointSets*/,
       "Position": {
-        "X": 1019.79956,
-        "Y": 2639.09
+        "X": 1106.8678,
+        "Y": 2550.64
       }
     },
     {
       "ChildId": "5b40ee31-fd27-4497-ae3c-2cf7bedc63e2"/*Execute*/,
       "Position": {
-        "X": 1631.7246,
-        "Y": 1468.1992
+        "X": 2008.8094,
+        "Y": 1860.6404
       }
     },
     {
       "ChildId": "64e3df68-82be-4fe3-be7f-d87b5aac466d"/*Transform*/,
       "Position": {
-        "X": 1335.805,
-        "Y": 2339.0728
+        "X": 1314.7488,
+        "Y": 2292.0837
       }
     },
     {
       "ChildId": "7098e531-e0a1-41c2-bfa0-4713cda05ba1"/*IntValue*/,
       "Position": {
-        "X": 936.0965,
-        "Y": 1923.3306
+        "X": 1050.4395,
+        "Y": 1487.7185
       }
     },
     {
       "ChildId": "837ea9ee-0d6b-4c51-9b73-eb8a81a43725"/*Vector3Components*/,
       "Position": {
-        "X": 714.63257,
-        "Y": 1656.9921
+        "X": 950.17474,
+        "Y": 1683.1097
       }
     },
     {
       "ChildId": "878d9dbd-1c26-4c16-a777-4e0965912cc9"/*Vector3Components*/,
       "Position": {
-        "X": 714.63257,
-        "Y": 1712.9921
+        "X": 950.1746,
+        "Y": 1823.1097
       }
     },
     {
       "ChildId": "89b6ce5d-b6b2-4dff-9138-16bd85391d53"/*PickPointList*/,
       "Position": {
-        "X": 1182.8123,
-        "Y": 2550.1084
+        "X": 1246.8678,
+        "Y": 2480.64
       }
     },
     {
       "ChildId": "906c7887-4db8-4920-988d-389213e095ce"/*FloatsToBuffer*/,
       "Position": {
-        "X": 879.0304,
-        "Y": 1783.4341
+        "X": 1090.1747,
+        "Y": 1648.1097
       }
     },
     {
       "ChildId": "98f1787e-a49f-4d15-8758-ab2fa6cb1cb9"/*CommonPointSets*/,
       "Position": {
-        "X": 1019.79956,
-        "Y": 2596.09
+        "X": 1106.8678,
+        "Y": 2515.64
       }
     },
     {
       "ChildId": "aa57eff1-60db-4277-a2fb-8338c27c2f64"/*CalcDispatchCount*/,
       "Position": {
-        "X": 1130.7373,
-        "Y": 1436.918
+        "X": 1058.6304,
+        "Y": 1241.308
       }
     },
     {
       "ChildId": "ac6b1e22-9f10-4396-b9a4-69f44fe86c28"/*GetBufferComponents*/,
       "Position": {
-        "X": 920.54974,
-        "Y": 1484.9692
+        "X": 798.6619,
+        "Y": 1336.2085
       }
     },
     {
       "ChildId": "b84c486e-bb7b-44a6-9e23-c0ce3693caf8"/*CommonPointSets*/,
       "Position": {
-        "X": 1019.79956,
-        "Y": 2553.09
-      }
-    },
-    {
-      "ChildId": "be2331cc-815b-4c01-8a03-c3d7fffc7b59"/*VisualizePoints*/,
-      "Position": {
-        "X": 896.0399,
-        "Y": 2409.3271
+        "X": 1106.8678,
+        "Y": 2480.64
       }
     },
     {
       "ChildId": "db399b31-e296-4377-904a-aaa71a6faa2c"/*DrawPoints*/,
       "Position": {
-        "X": 1179.8411,
-        "Y": 2239.6748
+        "X": 1566.2141,
+        "Y": 2557.9446
       }
     },
     {
       "ChildId": "e12b00ff-b4cf-4da2-a3a7-b22310a6bf7c"/*DrawLines*/,
       "Position": {
-        "X": 1355.0194,
-        "Y": 2524.8667
+        "X": 1246.8678,
+        "Y": 2620.64
       }
     },
     {
       "ChildId": "eb228835-5c90-4099-8d21-121d8237100e"/*GetBufferComponents*/,
       "Position": {
-        "X": 721.6502,
-        "Y": 1590.0715
+        "X": 1868.8094,
+        "Y": 1790.6404
       }
     },
     {
       "ChildId": "ebfc6227-690d-493e-9788-057a7529c464"/*ExecuteBufferUpdate*/,
       "Position": {
-        "X": 1927.2671,
-        "Y": 1455.5615
+        "X": 2008.8094,
+        "Y": 1930.6404
       }
     },
     {
       "ChildId": "f7e1d7bf-a67f-4c4d-bcde-34a8f5c952f0"/*ComputeShaderStage*/,
       "Position": {
-        "X": 1367.3148,
-        "Y": 1404.3041
+        "X": 2008.8094,
+        "Y": 1615.6404
       }
     },
     {
       "ChildId": "fdfe02ad-c490-4e71-8ef5-2edf3c72ef25"/*IntsToBuffer*/,
       "Position": {
-        "X": 878.936,
-        "Y": 2063.6934
+        "X": 956.6755,
+        "Y": 2117.4392
       }
     }
   ],
@@ -272,8 +265,8 @@
     {
       "OutputId": "d47c5841-f33a-4b4f-b969-4d56c7fb7446"/*ResultPoints*/,
       "Position": {
-        "X": 2219.1294,
-        "Y": 1562.5868
+        "X": 2008.8094,
+        "Y": 2000.6406
       }
     }
   ]

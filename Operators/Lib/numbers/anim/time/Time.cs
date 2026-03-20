@@ -23,12 +23,12 @@ internal sealed class Time : Instance<Time>
         var speedFactor = SpeedFactor.GetValue(context);
 
         // Disable dirty flagging
-        var isFrozen = timeMode != TimeModes.Frozen;
-        if (isFrozen != _isFrozen)
+        var isFrozen = timeMode == TimeModes.Frozen;
+        if (!_isFirstEval && isFrozen != _isFrozen)
         {
-            Timefloat.DirtyFlag.Trigger = timeMode != TimeModes.Frozen 
-                                              ? DirtyFlagTrigger.Animated 
-                                              : DirtyFlagTrigger.None;
+            Timefloat.DirtyFlag.Trigger = isFrozen 
+                                              ? DirtyFlagTrigger.None
+                                              : DirtyFlagTrigger.Animated;
             _isFrozen = isFrozen;
         }
 
@@ -51,6 +51,8 @@ internal sealed class Time : Instance<Time>
         {
             Timefloat.Value = (float)(time * speedFactor);
         }
+
+        _isFirstEval = false;
     }
 
     private bool _isFrozen;
@@ -69,6 +71,8 @@ internal sealed class Time : Instance<Time>
         Bars,
         Secs,
     }
+
+    private bool _isFirstEval = true;
 
     [Input(Guid = "e0f765f3-ac71-45c9-87a4-e9be3fa9a9a0")]
     public readonly InputSlot<float> SpeedFactor = new();

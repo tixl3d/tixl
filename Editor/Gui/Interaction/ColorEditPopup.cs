@@ -652,11 +652,17 @@ internal static class ColorEditPopup
                 var max = ImGui.GetItemRectMax() - Vector2.One * T3Ui.UiScaleFactor;
                 wdl.AddText(Icons.IconFont, 13 * T3Ui.UiScaleFactor, min, new Color(0.1f), "" + (char)T3.Editor.Gui.Styling.Icon.Stripe4PxPattern);
 
-                var opaqueColor = new Color(
-                                            usedColor.X,
-                                            usedColor.Y,
-                                            usedColor.Z
-                                           );
+
+                var isHDR = usedColor.X > 1 || usedColor.Y > 1 || usedColor.Z > 1;
+                var normalized = Vector3.Normalize( new Vector3(usedColor.X, usedColor.Y, usedColor.Z));
+                var shownColor = isHDR ?new Color( normalized.X, normalized.Y,normalized.Z,usedColor.W) 
+                                     : new Color( usedColor.X, usedColor.Y,usedColor.Z,usedColor.W);
+
+
+                var opaqueColor = shownColor;
+                opaqueColor.A = 1;
+
+                
                 wdl.AddTriangleFilled(min,
                                       new Vector2(max.X, min.Y),
                                       new Vector2(min.X, max.Y),
@@ -665,8 +671,10 @@ internal static class ColorEditPopup
                 wdl.AddTriangleFilled(new Vector2(max.X, min.Y),
                                       new Vector2(max.X, max.Y),
                                       new Vector2(min.X, max.Y),
-                                      new Color(usedColor));
+                                      shownColor);
 
+
+                
                 // Fix aliasing glitch
                 wdl.AddLine(new Vector2(max.X - 1, min.Y),
                             new Vector2(min.X, max.Y - 1),
@@ -681,6 +689,16 @@ internal static class ColorEditPopup
                                           UiColors.Gray);
                 }
 
+                if (isHDR)
+                {
+                    if (MathUtils.HasHdrRange(usedColor, out var intensity))
+                    {
+                        wdl.DrawTriangleUp((min+max)/2, 
+                                           Color.Black, 
+                                           intensity *3);
+                    }
+                }
+                
                 if (usedColor == activeRoundedColor)
                 {
                     wdl.AddRect(min - Vector2.One * T3Ui.UiScaleFactor, max + Vector2.One * T3Ui.UiScaleFactor, UiColors.ForegroundFull, 1);

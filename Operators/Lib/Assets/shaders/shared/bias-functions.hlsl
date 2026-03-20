@@ -28,7 +28,7 @@ inline float ApplyGainAndBias(float value, float2 gainBias)
     float g = saturate(gainBias.x);
     float b = saturate(gainBias.y);
 
-    if (value > 0.999)
+    if (value > 0.9999)
         return 1;
 
     if (value < 0.00001)
