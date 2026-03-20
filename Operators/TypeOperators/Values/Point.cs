@@ -46,6 +46,10 @@ public sealed class Point : Instance<Point>, ITransformable
         var pos = Position.GetValue(context);
         _addSeparator = AddSeparator.GetValue(context);
 
+        // If separator state changed, we need to rebuild the buffer
+        var separatorChanged = _addSeparator != _lastAddSeparator;
+        _lastAddSeparator = _addSeparator;
+
         var rot = Quaternion.CreateFromAxisAngle(System.Numerics.Vector3.Normalize( RotationAxis.GetValue(context)), RotationAngle.GetValue(context) * MathUtils.ToRad);
         var array = _addSeparator ? _pointListWithSeparator : _pointList;
         OutPosition.Value = pos;
@@ -56,7 +60,14 @@ public sealed class Point : Instance<Point>, ITransformable
         array.TypedElements[0].F2 = F2.GetValue(context);
         array.TypedElements[0].Orientation = rot;
         ResultList.Value = array;
-            
+
+        // Force buffer update if separator state changed or on first run
+        if (separatorChanged || !_isBufferInitialized)
+        {
+            UpdateBuffer();
+            _isBufferInitialized = true;
+        }
+
         ResultList.DirtyFlag.Clear();
         OutPosition.DirtyFlag.Clear();
     }
@@ -97,7 +108,9 @@ public sealed class Point : Instance<Point>, ITransformable
     private Buffer? _buffer;
     private readonly BufferWithViews _bufferWithViews = new() ;
     private bool _addSeparator;
-        
+    private bool _lastAddSeparator;
+    private bool _isBufferInitialized = false;
+
     [Input(Guid = "a0a453db-d8f1-415a-9a98-3c88a25b15e7")]
     public readonly InputSlot<System.Numerics.Vector3> Position = new();
 
