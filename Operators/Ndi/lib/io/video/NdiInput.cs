@@ -42,8 +42,8 @@ public sealed class NdiInput : Instance<NdiInput>, IStatusProvider, ICustomDropd
             _textureMutex.WaitOne(Timeout.Infinite);
             DisposeTextures();
             if(sourceName != null)
-                Connect(sourceName);
-            
+                    Connect(sourceName);
+
             _textureMutex.ReleaseMutex();
         }
 
@@ -86,6 +86,12 @@ public sealed class NdiInput : Instance<NdiInput>, IStatusProvider, ICustomDropd
         _lastStatusMessage = message;
     }
 
+    private void SetAttentionMessage(string message)
+    {
+        Log.Warning(message, this);
+        _lastStatusMessage = message;
+    }
+
     /// <summary>
     ///  connect to an NDI source in our Dictionary by name
     /// </summary>
@@ -105,7 +111,14 @@ public sealed class NdiInput : Instance<NdiInput>, IStatusProvider, ICustomDropd
         var sourceExists = _ndiInputFinder.Sources.Any(s => s.Name == sourceName);
         if (!sourceExists)
         {
-            SetErrorMessage($"NDI source {sourceName} not found");
+            if (sourceName == "0")
+            {
+                SetAttentionMessage($"{PlaceholderText}");
+            }
+            else
+            {
+                SetErrorMessage($"NDI source {sourceName} not found");
+            }
             return;
         }
 
@@ -510,9 +523,22 @@ public sealed class NdiInput : Instance<NdiInput>, IStatusProvider, ICustomDropd
     #endregion
 
     #region device dropdown
+    private const string PlaceholderText = "Select NDI source...";
+
     string ICustomDropdownHolder.GetValueForInput(Guid inputId)
     {
-        return SourceName.Value ?? string.Empty;
+        var currentValue = SourceName.Value;
+
+        // If no source is selected or it's the default "0", show placeholder
+        if (string.IsNullOrEmpty(currentValue) || currentValue == "0")
+            return PlaceholderText;
+
+        // Check if the current value actually exists in available sources
+        var sourceExists = _ndiInputFinder.Sources.Any(s => s.Name == currentValue);
+        if (!sourceExists)
+            return PlaceholderText;
+
+        return currentValue;
     }
 
     IEnumerable<string> ICustomDropdownHolder.GetOptionsForInput(Guid inputId)
@@ -523,6 +549,10 @@ public sealed class NdiInput : Instance<NdiInput>, IStatusProvider, ICustomDropd
             yield break;
         }
 
+        // Add the placeholder as the first option
+        yield return PlaceholderText;
+
+        // Add all available NDI sources
         foreach (var s in _ndiInputFinder.Sources)
         {
             yield return s.Name;
@@ -531,6 +561,16 @@ public sealed class NdiInput : Instance<NdiInput>, IStatusProvider, ICustomDropd
 
     void ICustomDropdownHolder.HandleResultForInput(Guid inputId, string? selected, bool isAListItem)
     {
+        // If placeholder is selected, treat as no selection
+        if (string.IsNullOrEmpty(selected) || selected == PlaceholderText)
+        {
+            SourceName.SetTypedInputValue(string.Empty);
+            // Force a disconnect
+            DisposeTextures();
+            _lastStatusMessage = null;
+            return;
+        }
+
         SourceName.SetTypedInputValue(selected!);
     }
     #endregion
