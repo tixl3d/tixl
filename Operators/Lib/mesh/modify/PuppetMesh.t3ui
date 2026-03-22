@@ -10,7 +10,7 @@
         "X": -80.35307,
         "Y": 1085.2584
       },
-      "Description": "Deformed positions.\nF1 defines the weight.\nF2 defines the influence mode.\nModes:\n0 - Exponential\n1 - Linear\n2 - Invers Square\n3 - Gaussian\n4 - InverseCubic\n5 - Radius"
+      "Description": "Deformed positions.\nF1 defines the weight.\nF2 defines the influence mode.\nModes:\n0 - Exponential\n1 - Linear\n2 - InverseSquare\n3 - Gaussian\n4 - InverseCubic\n5 - Radius"
     },
     {
       "InputId": "2f4d18c2-2a68-41f0-8e7d-52de359f9d85"/*AnchorPoints*/,
