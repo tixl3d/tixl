@@ -7,7 +7,7 @@
     },
     {
       "Id": "b0821091-68c0-4e34-9f8b-926c0b6ebf94"/*VariableName*/,
-      "DefaultValue": "someEvent"
+      "DefaultValue": ""
     }
   ],
   "Children": [],
