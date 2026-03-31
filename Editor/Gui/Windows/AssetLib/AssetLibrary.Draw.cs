@@ -90,7 +90,12 @@ internal sealed partial class AssetLibrary
             var isFiltering = _state.CompatibleExtensionIds.Count > 0 || isSearching;
             var isCurrentCompositionPackage = _state.Composition?.Symbol.SymbolPackage.Name == folderName;
 
+
+
             if (isSearching && !hasMatches)
+                return;
+
+            if (isFiltering && !hasMatches)
                 return;
 
             // Open main folders automatically
@@ -107,6 +112,7 @@ internal sealed partial class AssetLibrary
                 ImGui.SetNextItemOpen(true);
                 _state.OpenedProjectsFolderOnce = true;
             }
+
 
             ImGui.PushID(folder.HashCode);
 
@@ -150,49 +156,49 @@ internal sealed partial class AssetLibrary
 
             _folderForMenu = folder;
             CustomComponents.ContextMenuForItem(() =>
-                                                {
-                                                    CustomComponents.StylizedText(folder.Name, Fonts.FontSmall, UiColors.TextMuted);
-                                                    if (ImGui.MenuItem("Open in Explorer"))
-                                                    {
-                                                        if (!string.IsNullOrEmpty(_folderForMenu.AbsolutePath))
-                                                        {
-                                                            CoreUi.Instance.OpenWithDefaultApplication(_folderForMenu.AbsolutePath);
-                                                        }
-                                                        else
-                                                        {
-                                                            Log.Warning($"Failed to get path for {_folderForMenu.Address}");
-                                                        }
-                                                    }
+            {
+                CustomComponents.StylizedText(folder.Name, Fonts.FontSmall, UiColors.TextMuted);
+                if (ImGui.MenuItem("Open in Explorer"))
+                {
+                    if (!string.IsNullOrEmpty(_folderForMenu.AbsolutePath))
+                    {
+                        CoreUi.Instance.OpenWithDefaultApplication(_folderForMenu.AbsolutePath);
+                    }
+                    else
+                    {
+                        Log.Warning($"Failed to get path for {_folderForMenu.Address}");
+                    }
+                }
 
-                                                    if (ImGui.MenuItem("Create sub folder"))
-                                                    {
-                                                        CreateSubFolder(folder);
-                                                    }
+                if (ImGui.MenuItem("Create sub folder"))
+                {
+                    CreateSubFolder(folder);
+                }
 
-                                                    if (ImGui.MenuItem("Rename"))
-                                                    {
-                                                        _state.RenamingInProcessId = folder.Asset?.Id ?? Guid.Empty;
-                                                        _state.RenameBuffer = folder.Name;
-                                                    }
+                if (ImGui.MenuItem("Rename"))
+                {
+                    _state.RenamingInProcessId = folder.Asset?.Id ?? Guid.Empty;
+                    _state.RenameBuffer = folder.Name;
+                }
 
-                                                    if (ImGui.MenuItem("Delete folder"))
-                                                    {
-                                                        try
-                                                        {
-                                                            if (Directory.Exists(folder.AbsolutePath))
-                                                            {
-                                                                Log.Debug("Deleting " + folder.Address);
-                                                                Directory.Delete(folder.AbsolutePath);
-                                                            }
+                if (ImGui.MenuItem("Delete folder"))
+                {
+                    try
+                    {
+                        if (Directory.Exists(folder.AbsolutePath))
+                        {
+                            Log.Debug("Deleting " + folder.Address);
+                            Directory.Delete(folder.AbsolutePath);
+                        }
 
-                                                            AssetRegistry.RemoveObsoleteAsset(folder.Asset);
-                                                        }
-                                                        catch (Exception e)
-                                                        {
-                                                            Log.Warning($"Can't remove folder {folder.AbsolutePath} ({e.Message}");
-                                                        }
-                                                    }
-                                                });
+                        AssetRegistry.RemoveObsoleteAsset(folder.Asset);
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Warning($"Can't remove folder {folder.AbsolutePath} ({e.Message}");
+                    }
+                }
+            });
 
             // Show filter count
             if (isFiltering && hasMatches)
@@ -238,7 +244,7 @@ internal sealed partial class AssetLibrary
                     Icons.DrawIconOnLastItem(Icon.Aim, color);
 
                     if (clicked)
-                        //if (CustomComponents.IconButton(Icon.Aim, new Vector2(h)))
+                    //if (CustomComponents.IconButton(Icon.Aim, new Vector2(h)))
                     {
                         _expandToFileTriggered = true;
                     }
@@ -379,34 +385,34 @@ internal sealed partial class AssetLibrary
             }
 
             CustomComponents.ContextMenuForItem(drawMenuItems: () =>
-                                                               {
-                                                                   if (ImGui.MenuItem("Edit externally"))
-                                                                   {
-                                                                       var absolutePath = asset.FullPath;
-                                                                       if (!string.IsNullOrEmpty(absolutePath))
-                                                                       {
-                                                                           CoreUi.Instance.OpenWithDefaultApplication(absolutePath);
-                                                                       }
-                                                                   }
+            {
+                if (ImGui.MenuItem("Edit externally"))
+                {
+                    var absolutePath = asset.FullPath;
+                    if (!string.IsNullOrEmpty(absolutePath))
+                    {
+                        CoreUi.Instance.OpenWithDefaultApplication(absolutePath);
+                    }
+                }
 
-                                                                   if (ImGui.MenuItem("Reveal in Explorer"))
-                                                                   {
-                                                                       var absolutePath = asset.FullPath;
+                if (ImGui.MenuItem("Reveal in Explorer"))
+                {
+                    var absolutePath = asset.FullPath;
 
-                                                                       var folder = Path.GetDirectoryName(absolutePath);
-                                                                       if (!string.IsNullOrEmpty(folder))
-                                                                       {
-                                                                           try
-                                                                           {
-                                                                               CoreUi.Instance.OpenWithDefaultApplication(folder);
-                                                                           }
-                                                                           catch (Exception e)
-                                                                           {
-                                                                               Log.Warning($"Failed to get directory for {folder} {e.Message}");
-                                                                           }
-                                                                       }
-                                                                   }
-                                                               },
+                    var folder = Path.GetDirectoryName(absolutePath);
+                    if (!string.IsNullOrEmpty(folder))
+                    {
+                        try
+                        {
+                            CoreUi.Instance.OpenWithDefaultApplication(folder);
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Warning($"Failed to get directory for {folder} {e.Message}");
+                        }
+                    }
+                }
+            },
                                                 title: asset.FileSystemInfo?.Name,
                                                 id: "##symbolTreeSymbolContextMenu");
 
@@ -426,7 +432,7 @@ internal sealed partial class AssetLibrary
             }
 
             DrawAssetTooltip(asset, hasUses, uses);
-            
+
         }
 
         ImGui.PopID();
@@ -449,12 +455,34 @@ internal sealed partial class AssetLibrary
                                ? absolutePath[..^fileName.Length]
                                : absolutePath;
 
-                CustomComponents.StylizedText($"{StringUtils.GetReadableFileSize(asset.FileSize)}  / {asset.FileSystemInfo?.LastWriteTime}",
-                                              Fonts.FontSmall, UiColors.TextMuted);
                 // FormInputs.AddVerticalSpace(2);
                 // CustomComponents.StylizedText($"in {path}", Fonts.FontSmall, UiColors.TextMuted);
 
                 FormInputs.AddVerticalSpace();
+            }
+            ImGui.EndGroup();
+            //ImGui.SameLine(0,10);
+
+            ImGui.BeginGroup();
+            {
+                var package = ResourcePackageManager.SharedResourcePackages.FirstOrDefault(p => p.Id == asset.PackageId);
+                ThumbnailManager.GetThumbnail(asset, package).AsImguiImage();
+                FormInputs.AddVerticalSpace();
+            }
+
+            CustomComponents.StylizedText($"File size : {StringUtils.GetReadableFileSize(asset.FileSize)}", Fonts.FontSmall, UiColors.TextMuted);
+            CustomComponents.StylizedText($"Last modified :{asset.FileSystemInfo?.LastWriteTime}",
+                              Fonts.FontSmall, UiColors.TextMuted);
+
+            int useCount = uses != null ? uses.Count : 0;
+
+            string usedString = useCount > 0 ? $"Used by : {useCount} operators" : "Not used by any operator";
+
+            CustomComponents.StylizedText(usedString, Fonts.FontSmall, UiColors.TextMuted);
+
+            if (ImGui.GetIO().KeyShift)
+            {
+                ImGui.NewLine();
                 if (hasUses && uses != null)
                 {
                     CustomComponents.StylizedText("Symbols using this...", Fonts.FontSmall, UiColors.TextMuted);
@@ -463,22 +491,8 @@ internal sealed partial class AssetLibrary
                         DrawAssetReference(reference);
                     }
                 }
-                else
-                {
-                    CustomComponents.StylizedText("""
-                                                  Not directly used in any parameter. 
-                                                  (Other users are possible...)
-                                                  """, Fonts.FontSmall, UiColors.TextMuted);
-                }
             }
-            ImGui.EndGroup();
-            ImGui.SameLine(0,10);
-            
-            ImGui.BeginGroup();
-            {
-                var package = ResourcePackageManager.SharedResourcePackages.FirstOrDefault(p => p.Id == asset.PackageId);
-                ThumbnailManager.GetThumbnail(asset, package).AsImguiImage();
-            }
+
             ImGui.EndGroup();
 
         }
