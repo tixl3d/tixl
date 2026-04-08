@@ -63,7 +63,7 @@ internal sealed class TransformWithImage : Instance<TransformWithImage>
         public readonly InputSlot<System.Numerics.Vector3> TextureRotate = new InputSlot<System.Numerics.Vector3>();
 
         [Input(Guid = "1a3cde2d-2d12-475f-ab6b-ea44494c5aa0")]
-        public readonly InputSlot<SharpDX.Direct3D11.TextureAddressMode> TextureMode = new InputSlot<SharpDX.Direct3D11.TextureAddressMode>();
+        public readonly InputSlot<TextureAddressMode> TextureMode = new InputSlot<TextureAddressMode>();
 
         [Input(Guid = "531a30f9-ddf0-4a99-8cba-a9dc66626730")]
         public readonly InputSlot<T3.Core.Operator.GizmoVisibility> Visibility = new InputSlot<T3.Core.Operator.GizmoVisibility>();

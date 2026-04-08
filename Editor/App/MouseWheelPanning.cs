@@ -1,4 +1,5 @@
-﻿using System.Windows.Forms;
+﻿#if PLATFORM_WINDOWS
+using System.Windows.Forms;
 using ImGuiNET;
 // ReSharper disable InconsistentNaming
 
@@ -75,3 +76,4 @@ internal static class MouseWheelPanning
     private static float _wheelY;
     private static float _zoomNotches;
 }
+#endif // PLATFORM_WINDOWS

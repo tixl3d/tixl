@@ -43,7 +43,7 @@ public sealed class FieldToImage : Instance<FieldToImage>
     public readonly InputSlot<T3.Core.DataTypes.Vector.Int2> Resolution = new InputSlot<T3.Core.DataTypes.Vector.Int2>();
 
     [Input(Guid = "498f5af8-458b-45f7-8e70-e957f2bb994e")]
-    public readonly InputSlot<SharpDX.DXGI.Format> OutputFormat = new InputSlot<SharpDX.DXGI.Format>();
+    public readonly InputSlot<Format> OutputFormat = new InputSlot<Format>();
 
     [Input(Guid = "5573ae7b-b699-42c5-84ac-2485040e9a55")]
     public readonly InputSlot<bool> GenerateMips = new InputSlot<bool>();

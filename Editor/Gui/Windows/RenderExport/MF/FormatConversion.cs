@@ -1,3 +1,4 @@
+#if PLATFORM_WINDOWS
 using System.IO;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
@@ -95,3 +96,4 @@ static class FormatConversion
         return (currentDesc.Width * currentDesc.Height * bitsPerPixel + 7) / 8;
     }
 }
+#endif // PLATFORM_WINDOWS

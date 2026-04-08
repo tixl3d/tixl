@@ -136,9 +136,7 @@ public sealed partial class Symbol
                 // create new input definition
                 if (!InputValueCreators.Entries.TryGetValue(valueType, out var creationFunc))
                 {
-                    BlockingWindow.Instance.ShowMessageBox($"[{instanceType}] can't create Input Definition for "
-                                                           + valueType
-                                                           + ". You may want to ensure you are using the correct T3 types in your script.", "Slot type error");
+                    Log.Warning($"[{instanceType}] can't create Input Definition for {valueType}. Slot type error.");
                     inputDef = null;
                     return false;
                 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if PLATFORM_WINDOWS
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -974,3 +975,4 @@ public static class DdsDirectX
         }
     }
 }
+#endif // PLATFORM_WINDOWS

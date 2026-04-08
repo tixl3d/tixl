@@ -36,6 +36,6 @@ internal sealed class _ImageFxShaderSetup2 : Instance<_ImageFxShaderSetup2>
     public readonly InputSlot<int> BlendMode = new();
 
         [Input(Guid = "3aab7e93-2629-4c6a-b647-cfbd9d5089b2")]
-        public readonly InputSlot<SharpDX.Direct3D11.Filter> Filter = new InputSlot<SharpDX.Direct3D11.Filter>();
+        public readonly InputSlot<Filter> Filter = new InputSlot<Filter>();
 
 }

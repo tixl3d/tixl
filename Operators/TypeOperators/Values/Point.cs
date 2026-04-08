@@ -1,3 +1,4 @@
+#if PLATFORM_WINDOWS
 using SharpDX;
 using T3.Core.Utils;
 
@@ -137,5 +138,6 @@ public sealed class Point : Instance<Point>, ITransformable
     
     [Input(Guid = "53CDE701-435F-42E4-B598-DB0E607A238C")]
     public readonly InputSlot<bool> AddSeparator = new();
-        
+
 }
+#endif // PLATFORM_WINDOWS

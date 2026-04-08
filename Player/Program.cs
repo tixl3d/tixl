@@ -3,7 +3,6 @@
 //#define FORCE_D3D_DEBUG
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -11,9 +10,15 @@ using CommandLine;
 using CommandLine.Text;
 using ManagedBass;
 using Newtonsoft.Json;
+#if PLATFORM_WINDOWS
+using System.Drawing;
 using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
+using Device = SharpDX.Direct3D11.Device;
+using Resource = SharpDX.Direct3D11.Resource;
+using SharpDX.Windows;
+#endif
 using T3.Core.Animation;
 using T3.Core.Audio;
 using T3.Core.Compilation;
@@ -25,9 +30,6 @@ using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.Resource;
 using T3.Core.SystemUi;
-using Device = SharpDX.Direct3D11.Device;
-using Resource = SharpDX.Direct3D11.Resource;
-using SharpDX.Windows;
 using SilkWindows;
 using T3.Core.Resource.ShaderCompiling;
 using T3.Core.UserData;
@@ -76,7 +78,11 @@ internal static partial class Program
     [STAThread]
     private static void Main(string[] args)
     {
+#if PLATFORM_WINDOWS
         CoreUi.Instance = new MsForms.MsForms();
+#else
+        CoreUi.Instance = new LinuxUi.LinuxCoreUi();
+#endif
         BlockingWindow.Instance = new SilkWindowProvider();
             
         var settingsPath = Path.Combine(FileLocations.StartFolder, "exportSettings.json");
@@ -114,6 +120,7 @@ internal static partial class Program
             _vsyncInterval = Convert.ToInt16(!_resolvedOptions.NoVsync);
             Log.Debug($": {_vsyncInterval}, windowed: {_resolvedOptions.Windowed}, size: {resolution}, loop: {_resolvedOptions.Loop}, logging: {_resolvedOptions.Logging}");
 
+#if PLATFORM_WINDOWS
             var iconPath = Path.Combine(SharedResources.EditorResourcesDirectory,  SharedResources.EditorResourcesDirectory,"images", "t3.ico");
             var gotIcon = File.Exists(iconPath);
 
@@ -332,6 +339,10 @@ internal static partial class Program
                 fileWriter.Dispose(); // flush and close
                 BlockingWindow.Instance.ShowMessageBox(errorMessage);
             }
+#else
+            // TODO: Linux player - create Silk.NET/Veldrid window and render loop
+            Log.Error("Player rendering not yet implemented on this platform");
+#endif
 
         }
         catch (Exception e)
@@ -369,6 +380,7 @@ internal static partial class Program
             fileWriter.Dispose(); // flush and close
 
             // Release all resources
+#if PLATFORM_WINDOWS
             try
             {
                 _renderView?.Dispose();
@@ -382,6 +394,7 @@ internal static partial class Program
             {
                 Log.Error($"Failed to dispose of resources: {e}");
             }
+#endif
 
             if (openLogs)
             {
@@ -392,6 +405,7 @@ internal static partial class Program
         }
     }
 
+#if PLATFORM_WINDOWS
     private static void RebuildBackBuffer(RenderForm form, Device device, ref RenderTargetView rtv, ref SharpDX.Direct3D11.Texture2D buffer, SwapChain swapChain)
     {
         rtv.Dispose();
@@ -400,6 +414,7 @@ internal static partial class Program
         buffer = Resource.FromSwapChain<SharpDX.Direct3D11.Texture2D>(swapChain, 0);
         rtv = new RenderTargetView(device, buffer);
     }
+#endif
 
     private static bool TryResolveOptions(string[] args, ExportSettings exportSettings, out Options resolvedOptions)
     {
@@ -450,22 +465,26 @@ internal static partial class Program
 
     // Private static bool _inResize;
     private static int _vsyncInterval;
+#if PLATFORM_WINDOWS
     private static SwapChain _swapChain;
     private static RenderTargetView _renderView;
     private static SharpDX.Direct3D11.Texture2D _backBuffer;
+    private static DeviceContext _deviceContext;
+    private static Device _device;
+    private static RenderForm _renderForm;
+#endif
     private static Instance _project;
     private static EvaluationContext _evalContext;
     private static Playback _playback;
     private static AudioClipResourceHandle _soundtrackHandle;
-    private static DeviceContext _deviceContext;
     private static Options _resolvedOptions;
-    private static RenderForm _renderForm;
     private static Texture2D _outputTexture;
+#if PLATFORM_WINDOWS
     private static ShaderResourceView _outputTextureSrv;
     private static RasterizerState _rasterizerState;
     private static Resource<VertexShader> _fullScreenVertexShaderResource;
     private static Resource<PixelShader> _fullScreenPixelShaderResource;
-    private static Device _device;
+#endif
     private static Int2 _resolution;
     private static Slot<Texture2D> _textureOutput;
 }

@@ -1,3 +1,4 @@
+#if PLATFORM_WINDOWS
 namespace Types.Gfx;
 
 [Guid("a8a0e6c4-1f49-4ed8-8d0b-e7aa6cdf8a87")]
@@ -28,3 +29,4 @@ public sealed class StructuredBuffer : Instance<StructuredBuffer>
     [Input(Guid = "B1CEDDFD-D289-41EB-BFC5-F36B789BFD4E")]
     public readonly InputSlot<int> Count = new();
 }
+#endif // PLATFORM_WINDOWS

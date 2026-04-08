@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Rug.Osc;
 using T3.Core.Logging;
@@ -117,6 +118,9 @@ public static class OscConnectionManager
         private async void StartListening()
         {
             var listenTask = ListenForMessagesAsync();
+            var scheduler = SynchronizationContext.Current != null
+                               ? TaskScheduler.FromCurrentSynchronizationContext()
+                               : TaskScheduler.Default;
             await listenTask.ContinueWith(task =>
                                           {
                                               // This block executes when ListenForMessagesAsync completes
@@ -128,7 +132,7 @@ public static class OscConnectionManager
                                               {
                                                   Stop();
                                               }
-                                          }, TaskScheduler.FromCurrentSynchronizationContext()); // 
+                                          }, scheduler);
         }
 
         private async Task ListenForMessagesAsync()

@@ -2,17 +2,23 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using T3.Core.Logging;
+using T3.Core.Resource;
+#if PLATFORM_WINDOWS
 using JeremyAnsel.Media.Dds;
 using SharpDX;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
 using SharpDX.WIC;
-using T3.Core.Logging;
-using T3.Core.Resource;
 using T3.Core.Resource.Dds;
 using Device = SharpDX.Direct3D11.Device;
+#else
+using T3.Core.Gpu;
+#endif
 
 namespace T3.Core.DataTypes;
+
+#if PLATFORM_WINDOWS
 
 public sealed class Texture2D(SharpDX.Direct3D11.Texture2D texture) : Texture<SharpDX.Direct3D11.Texture2D>(texture)
 {
@@ -41,7 +47,7 @@ public sealed class Texture2D(SharpDX.Direct3D11.Texture2D texture) : Texture<Sh
                               OptionFlags = ResourceOptionFlags.GenerateMipMaps,
                               SampleDescription = new SampleDescription(1, 0),
                           };
-        
+
         var dataRectangles = new DataRectangle[mipLevels];
         for (var i = 0; i < mipLevels; i++)
         {
@@ -88,7 +94,7 @@ public sealed class Texture2D(SharpDX.Direct3D11.Texture2D texture) : Texture<Sh
                 return false;
             }
         }
-        
+
         failureReason = null;
         return true;
     }
@@ -103,7 +109,7 @@ public sealed class Texture2D(SharpDX.Direct3D11.Texture2D texture) : Texture<Sh
             using var bitmapFrameDecode = bitmapDecoder.GetFrame(0);
             formatConverter.Initialize(bitmapFrameDecode, PixelFormat.Format32bppRGBA, BitmapDitherType.None, null, 0.0, BitmapPaletteType.Custom);
 
-            
+
             texture = CreateFromBitmap(ResourceManager.Device, formatConverter);
             failureReason = null;
             return true;
@@ -117,6 +123,7 @@ public sealed class Texture2D(SharpDX.Direct3D11.Texture2D texture) : Texture<Sh
         }
     }
 }
+
 public sealed class Texture3D(SharpDX.Direct3D11.Texture3D texture) : Texture<SharpDX.Direct3D11.Texture3D>(texture)
 {
     public override string Name { get => TextureObject.DebugName; set => TextureObject.DebugName = value; }
@@ -145,10 +152,6 @@ public abstract class AbstractTexture(IDisposable disposable) : IDisposable
 
     public static implicit operator SharpDX.Direct3D11.Resource?(AbstractTexture texture)
         => texture._disposable as SharpDX.Direct3D11.Resource;
-    
-    // The original implementation. Not sure, if the above is valid.
-    // public static implicit operator SharpDX.Direct3D11.Resource(AbstractTexture texture) 
-    //     => (SharpDX.Direct3D11.Resource)texture._disposable;
 
     public void Dispose()
     {
@@ -156,7 +159,7 @@ public abstract class AbstractTexture(IDisposable disposable) : IDisposable
         _disposable = null;
         GC.SuppressFinalize(this);
     }
-    
+
     ~AbstractTexture()
     {
         Dispose();
@@ -165,29 +168,27 @@ public abstract class AbstractTexture(IDisposable disposable) : IDisposable
 
 public static class TextureViews
 {
-    
-
     public static void CreateShaderResourceView<T>(this T resource, [NotNullWhen(true)] ref ShaderResourceView? shaderResourceView, string? name)
     where T : AbstractTexture
     {
-        CreateTextureView(resource, ref shaderResourceView, 
+        CreateTextureView(resource, ref shaderResourceView,
                                     constructor: (device, texture) => new ShaderResourceView(device, texture), name: name);
     }
 
     public static void CreateRenderTargetView<T>(this T resource, ref RenderTargetView? renderTargetView, string? name)
         where T : AbstractTexture
     {
-        CreateTextureView(resource, ref renderTargetView, 
+        CreateTextureView(resource, ref renderTargetView,
                              constructor: (device, texture) => new RenderTargetView(device, texture), name: name);
     }
 
     public static void CreateUnorderedAccessView<T>(this T resource, ref UnorderedAccessView? unorderedAccessView, string? name)
         where T : AbstractTexture
     {
-        CreateTextureView(resource, ref unorderedAccessView, 
+        CreateTextureView(resource, ref unorderedAccessView,
                              constructor: (device, texture) => new UnorderedAccessView(device, texture), name: name);
     }
-    
+
     private static void CreateTextureView<T>(AbstractTexture resource, ref T? view, Func<Device, AbstractTexture, T> constructor, string? name) where T : ResourceView
     {
         view?.Dispose();
@@ -195,3 +196,42 @@ public static class TextureViews
         view.DebugName = name;
     }
 }
+
+#else // !PLATFORM_WINDOWS -- Linux stubs
+
+public sealed class Texture2D : AbstractTexture
+{
+    public override string Name { get; set; } = string.Empty;
+    public Texture2DDescription Description;
+
+    internal static bool TryLoadFromStream(FileStream stream, [NotNullWhen(true)] out Texture2D? texture,
+                                           [NotNullWhen(false)] out string? failureReason)
+    {
+        // TODO: implement texture loading via Veldrid/ImageSharp on Linux
+        failureReason = "Texture loading not yet implemented on Linux";
+        texture = null;
+        return false;
+    }
+}
+
+public sealed class Texture3D : AbstractTexture
+{
+    public override string Name { get; set; } = string.Empty;
+    public Texture3DDescription Description;
+}
+
+public abstract class AbstractTexture : IDisposable
+{
+    public abstract string Name { get; set; }
+    public bool IsDisposed { get; private set; }
+
+    public void Dispose()
+    {
+        IsDisposed = true;
+        GC.SuppressFinalize(this);
+    }
+
+    ~AbstractTexture() => Dispose();
+}
+
+#endif

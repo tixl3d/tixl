@@ -1,3 +1,4 @@
+#if PLATFORM_WINDOWS
 using SharpDX;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
@@ -79,3 +80,4 @@ public sealed class DynamicUploadTexture : IDisposable
         Utilities.Dispose(ref readView);
     }
 }
+#endif // PLATFORM_WINDOWS

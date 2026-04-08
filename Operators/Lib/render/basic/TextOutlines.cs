@@ -69,7 +69,7 @@ internal sealed class TextOutlines : Instance<TextOutlines>
         public readonly InputSlot<int> HorizontalAlign = new InputSlot<int>();
 
         [Input(Guid = "a827c2c6-3286-4488-9a90-ed38c4184e6a")]
-        public readonly InputSlot<SharpDX.Direct3D11.CullMode> CullMode = new InputSlot<SharpDX.Direct3D11.CullMode>();
+        public readonly InputSlot<CullMode> CullMode = new InputSlot<CullMode>();
 
         [Input(Guid = "2cb6bb45-a74a-4eba-a2f0-2895e8e38b07")]
         public readonly InputSlot<bool> EnableZTest = new InputSlot<bool>();

@@ -3,7 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+#if PLATFORM_WINDOWS
 using SharpDX.Direct3D11;
+#else
+using T3.Core.Gpu;
+#endif
 using T3.Core.Animation;
 using T3.Core.DataTypes.ShaderGraph;
 using T3.Core.Operator;

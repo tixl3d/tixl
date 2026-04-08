@@ -22,7 +22,7 @@ internal sealed class DrawMeshCelShading : Instance<DrawMeshCelShading>
     public readonly InputSlot<T3.Core.DataTypes.Gradient> Shading = new();
 
     [Input(Guid = "8cda736b-a316-4188-9130-182cfe78b25b")]
-    public readonly InputSlot<SharpDX.Direct3D11.CullMode> Culling = new();
+    public readonly InputSlot<CullMode> Culling = new();
 
     [Input(Guid = "44720f79-d2c5-4da7-98df-334539153eac")]
     public readonly InputSlot<bool> EnableZTest = new();

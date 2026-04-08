@@ -1,5 +1,9 @@
 ﻿using ImGuiNET;
+#if PLATFORM_WINDOWS
 using SharpDX.Direct3D11;
+#else
+using T3.Core.Gpu;
+#endif
 using T3.Core.DataTypes;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
@@ -182,17 +186,18 @@ public static class SceneSetupPopup
                     //var meshInfo = node.MeshBuffers != null?  node.MeshBuffers.ToString() : "no mesh";
                     ImGui.BeginTooltip();
                     ImGui.TextUnformatted("Material!");
+#if PLATFORM_WINDOWS
                     DrawTextureThumbnail(node.Material.PbrMaterial.AlbedoMapSrv);
-                    
+
                     ImGui.SameLine();
                     DrawTextureThumbnail(node.Material.PbrMaterial.NormalSrv);
-                    
+
                     ImGui.SameLine();
                     DrawTextureThumbnail(node.Material.PbrMaterial.EmissiveMapSrv);
 
                     ImGui.SameLine();
                     DrawTextureThumbnail(node.Material.PbrMaterial.RoughnessMetallicOcclusionSrv);
-                    
+#endif
                     ImGui.EndTooltip();
                 }
             }

@@ -1,3 +1,4 @@
+#if PLATFORM_WINDOWS
 namespace Types.Gfx;
 
 [Guid("4abd5f2e-3296-4d71-8462-faa203091b1d")]
@@ -65,5 +66,6 @@ public sealed class GeometryShaderStage : Instance<GeometryShaderStage>
     public readonly MultiInputSlot<ShaderResourceView> ShaderResources = new();
 
     [Input(Guid = "7173630b-d7fd-4aa1-9398-d7e028e5df03")]
-    public readonly MultiInputSlot<SharpDX.Direct3D11.SamplerState> SamplerStates = new();
+    public readonly MultiInputSlot<SamplerState> SamplerStates = new();
 }
+#endif // PLATFORM_WINDOWS

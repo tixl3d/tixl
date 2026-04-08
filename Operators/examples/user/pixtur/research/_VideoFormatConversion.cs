@@ -11,6 +11,6 @@ public class _VideoFormatConversion : Instance<_VideoFormatConversion>
     public readonly InputSlot<Texture2D> Texture = new();
 
     [Input(Guid = "b0c4ceaa-5101-42c6-bf71-230a01918916")]
-    public readonly InputSlot<SharpDX.DXGI.Format> Format = new();
+    public readonly InputSlot<Format> Format = new();
 
 }

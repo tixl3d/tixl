@@ -4,7 +4,7 @@
         <TargetFramework>$(TixlNetFrameworkVersion)</TargetFramework>
 
         <Nullable>enable</Nullable>
-        <UseWindowsForms>true</UseWindowsForms>
+        <UseWindowsForms Condition="$(IsWindows)">true</UseWindowsForms>
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>T3.MsForms</RootNamespace>
         <Configurations>Debug;Release</Configurations>
@@ -13,7 +13,12 @@
         <Deterministic>true</Deterministic>
     </PropertyGroup>
 
-    <ItemGroup>
+    <!-- Exclude all source files on non-Windows (this project is Windows-only) -->
+    <ItemGroup Condition="!$(IsWindows)">
+        <Compile Remove="**/*.cs" />
+    </ItemGroup>
+
+    <ItemGroup Condition="$(IsWindows)">
         <PackageReference Include="System.Windows.Forms" Version="4.0.0">
             <NoWarn>NU1701</NoWarn>
         </PackageReference>

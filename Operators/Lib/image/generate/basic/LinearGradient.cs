@@ -51,7 +51,7 @@ internal sealed class LinearGradient : Instance<LinearGradient>
         public readonly InputSlot<bool> GenerateMips = new InputSlot<bool>();
 
         [Input(Guid = "3a170e98-ba19-4316-a60e-2a8124900172")]
-        public readonly InputSlot<SharpDX.DXGI.Format> TextureFormat = new InputSlot<SharpDX.DXGI.Format>();
+        public readonly InputSlot<Format> TextureFormat = new InputSlot<Format>();
 
     private enum Modes
     {

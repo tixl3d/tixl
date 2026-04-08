@@ -1,5 +1,9 @@
 using Lib.Utils;
+#if PLATFORM_WINDOWS
 using SharpDX.WIC;
+#else
+using T3.Core.Gpu;
+#endif
 using Svg;
 using Svg.Transforms;
 

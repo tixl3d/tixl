@@ -50,6 +50,7 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
         
         
         
+#if PLATFORM_WINDOWS
         if (RenderProcess.OutputWindow != null)
         {
             var instanceForBlending = InstanceForBlendOperations;
@@ -72,6 +73,7 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
                 _currentRenderInstance = instanceForBlending;
             }
         }
+#endif
 
         // Get instance for variations
         if (pinnedOutputChanged)

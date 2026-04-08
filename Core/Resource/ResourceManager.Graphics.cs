@@ -1,3 +1,4 @@
+#if PLATFORM_WINDOWS
 #nullable enable
 using System;
 using System.Diagnostics.CodeAnalysis;
@@ -270,3 +271,4 @@ public static partial class ResourceManager
 
     public static SamplerState DefaultSamplerState { get; private set; } = null!;
 }
+#endif // PLATFORM_WINDOWS

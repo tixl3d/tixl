@@ -390,7 +390,7 @@ public class ImageSegmentation : Instance<ImageSegmentation>
     #endregion
 
     #region Memory Management
-    private SharpDX.Direct3D11.Texture2D GetOrCreateStagingTexture(int width, int height, SharpDX.DXGI.Format format)
+    private SharpDX.Direct3D11.Texture2D GetOrCreateStagingTexture(int width, int height, Format format)
     {
         var key = (width, height);
         
@@ -533,7 +533,7 @@ public class ImageSegmentation : Instance<ImageSegmentation>
         _maskData = result.MaskData;
         Confidence.Value = result.Confidence;
         
-        if (_maskTexture == null || _maskTexture.Description.Width != result.Width || _maskTexture.Description.Height != result.Height || _maskTexture.Description.Format != SharpDX.DXGI.Format.R8G8B8A8_UNorm)
+        if (_maskTexture == null || _maskTexture.Description.Width != result.Width || _maskTexture.Description.Height != result.Height || _maskTexture.Description.Format != Format.R8G8B8A8_UNorm)
         {
             _maskTexture?.Dispose();
             var desc = new Texture2DDescription
@@ -542,7 +542,7 @@ public class ImageSegmentation : Instance<ImageSegmentation>
                 Height = result.Height,
                 MipLevels = 1,
                 ArraySize = 1,
-                Format = SharpDX.DXGI.Format.R8G8B8A8_UNorm,
+                Format = Format.R8G8B8A8_UNorm,
                 SampleDescription = new SampleDescription(1, 0),
                 Usage = ResourceUsage.Default,
                 BindFlags = BindFlags.ShaderResource | BindFlags.RenderTarget,
@@ -756,7 +756,7 @@ public class ImageSegmentation : Instance<ImageSegmentation>
             return;
         }
         
-        if (_categoryMaskTexture == null || _categoryMaskTexture.Description.Width != width || _categoryMaskTexture.Description.Height != height || _categoryMaskTexture.Description.Format != SharpDX.DXGI.Format.R8_UNorm)
+        if (_categoryMaskTexture == null || _categoryMaskTexture.Description.Width != width || _categoryMaskTexture.Description.Height != height || _categoryMaskTexture.Description.Format != Format.R8_UNorm)
         {
             _categoryMaskTexture?.Dispose();
             var desc = new Texture2DDescription
@@ -765,7 +765,7 @@ public class ImageSegmentation : Instance<ImageSegmentation>
                 Height = height,
                 MipLevels = 1,
                 ArraySize = 1,
-                Format = SharpDX.DXGI.Format.R8_UNorm,
+                Format = Format.R8_UNorm,
                 SampleDescription = new SampleDescription(1, 0),
                 Usage = ResourceUsage.Default,
                 BindFlags = BindFlags.ShaderResource | BindFlags.RenderTarget,
@@ -796,7 +796,7 @@ public class ImageSegmentation : Instance<ImageSegmentation>
             return;
         }
         
-        if (_confidenceMaskTexture == null || _confidenceMaskTexture.Description.Width != width || _confidenceMaskTexture.Description.Height != height || _confidenceMaskTexture.Description.Format != SharpDX.DXGI.Format.R32_Float)
+        if (_confidenceMaskTexture == null || _confidenceMaskTexture.Description.Width != width || _confidenceMaskTexture.Description.Height != height || _confidenceMaskTexture.Description.Format != Format.R32_Float)
         {
             _confidenceMaskTexture?.Dispose();
             var desc = new Texture2DDescription
@@ -805,7 +805,7 @@ public class ImageSegmentation : Instance<ImageSegmentation>
                 Height = height,
                 MipLevels = 1,
                 ArraySize = 1,
-                Format = SharpDX.DXGI.Format.R32_Float,
+                Format = Format.R32_Float,
                 SampleDescription = new SampleDescription(1, 0),
                 Usage = ResourceUsage.Default,
                 BindFlags = BindFlags.ShaderResource | BindFlags.RenderTarget,
@@ -913,7 +913,7 @@ public class ImageSegmentation : Instance<ImageSegmentation>
                     Height = mat.Height,
                     MipLevels = 1,
                     ArraySize = 1,
-                    Format = SharpDX.DXGI.Format.B8G8R8A8_UNorm,
+                    Format = Format.B8G8R8A8_UNorm,
                     SampleDescription = new SampleDescription(1, 0),
                     Usage = ResourceUsage.Default,
                     BindFlags = BindFlags.ShaderResource | BindFlags.RenderTarget,

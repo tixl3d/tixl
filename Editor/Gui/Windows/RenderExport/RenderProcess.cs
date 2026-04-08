@@ -1,3 +1,4 @@
+#if PLATFORM_WINDOWS
 #nullable enable
 using System.Diagnostics;
 using System.IO;
@@ -532,3 +533,46 @@ internal static class RenderProcess
 
     private static ExportSession? _activeExportSession;
 }
+#else
+namespace T3.Editor.Gui.Windows.RenderExport;
+
+internal static class RenderProcess
+{
+    public static object? OutputWindow;
+    public static Type? MainOutputType { get; private set; }
+    public static object? MainOutputTexture;
+    public static bool IsExporting => false;
+    public static States State = States.Undefined;
+
+    public enum States
+    {
+        Undefined,
+        NoOutputWindow,
+        NoValidOutputType,
+        NoValidOutputTexture,
+        ReadyForExport,
+        Exporting,
+    }
+
+    public static string LastHelpString { get; private set; } = string.Empty;
+    public static string LastTargetDirectory { get; private set; } = string.Empty;
+    public static double Progress => 0.0;
+    public static double ExportStartedTimeLocal => 0;
+
+    public static void TryRenderScreenShot() { }
+    public static bool TryStartVideoExport() => false;
+    public static void Cancel(string? reason = null) { }
+    public static void Update() { }
+    public static bool TryGetRenderResolution(RenderSettings settings, out T3.Core.DataTypes.Vector.Int2 resolution)
+    {
+        resolution = default;
+        return false;
+    }
+    public static RenderSettings GetActiveOrRequestedSettings() => RenderSettings.ForNextExport;
+    public static bool TryGetActiveExportResolution(out T3.Core.DataTypes.Vector.Int2 resolution)
+    {
+        resolution = default;
+        return false;
+    }
+}
+#endif // PLATFORM_WINDOWS

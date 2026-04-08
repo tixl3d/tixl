@@ -2,8 +2,12 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
+#if PLATFORM_WINDOWS
 using SharpDX;
 using SharpDX.Direct3D11;
+#else
+using T3.Core.Gpu;
+#endif
 using Color = System.Drawing.Color;
 using Rectangle = System.Drawing.Rectangle;
 using Size = OpenCvSharp.Size;

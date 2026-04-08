@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿#if PLATFORM_WINDOWS
+using System.Collections;
 using System.Runtime.InteropServices;
 using T3.Editor.App;
 
@@ -733,3 +734,4 @@ public sealed partial class SpaceMouse
         #endregion ProcessMessage( Message message )
     }
 }
+#endif // PLATFORM_WINDOWS

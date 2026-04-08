@@ -1,7 +1,11 @@
 #nullable enable
 using System.Threading;
 using OpenCvSharp;
+#if PLATFORM_WINDOWS
 using SharpDX;
+#else
+using T3.Core.Gpu;
+#endif
 using Utilities = T3.Core.Utils.Utilities;
 
 namespace Lib.io.video

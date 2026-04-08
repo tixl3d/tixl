@@ -1,5 +1,9 @@
 #nullable enable
+#if PLATFORM_WINDOWS
 using SharpDX;
+#else
+using T3.Core.Gpu;
+#endif
 
 namespace Lib.flow.skillQuest;
 

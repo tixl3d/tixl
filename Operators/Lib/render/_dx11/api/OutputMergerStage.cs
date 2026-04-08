@@ -1,4 +1,8 @@
+#if PLATFORM_WINDOWS
 using SharpDX.Mathematics.Interop;
+#else
+using T3.Core.Gpu;
+#endif
 using T3.Core.Utils;
 
 namespace Lib.render._dx11.api;

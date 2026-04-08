@@ -4,10 +4,14 @@ using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+#if PLATFORM_WINDOWS
 using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
 using SharpDX.Mathematics.Interop;
+#else
+using T3.Core.Gpu;
+#endif
 using T3.Core.Animation;
 using T3.Core.DataTypes;
 using T3.Core.DataTypes.DataSet;
@@ -16,7 +20,11 @@ using T3.Core.DataTypes.Vector;
 using T3.Core.Operator.Slots;
 using T3.Core.Rendering.Material;
 using T3.Serialization;
+#if PLATFORM_WINDOWS
 using Buffer = SharpDX.Direct3D11.Buffer;
+#else
+using Buffer = T3.Core.Gpu.Buffer;
+#endif
 using Int3 = T3.Core.DataTypes.Vector.Int3;
 using Point = T3.Core.DataTypes.Point;
 using GeometryShader = T3.Core.DataTypes.GeometryShader;
@@ -395,8 +403,10 @@ public partial class SymbolPackage
 
                          return gradient;
                      });
+#if PLATFORM_WINDOWS
         RegisterType(typeof(LegacyParticleSystem), "LegacyParticleSystem",
                      () => new InputValue<LegacyParticleSystem>(null));
+#endif
 
         RegisterType(typeof(ParticleSystem), "ParticleSystem",
                      () => new InputValue<ParticleSystem>(null));
@@ -485,103 +495,103 @@ public partial class SymbolPackage
         // todo - add these to CsProject as DefaultUsings dynamically
 
         // sharpdx types
-        RegisterType(typeof(SharpDX.Direct3D.PrimitiveTopology), "PrimitiveTopology",
+        RegisterType(typeof(PrimitiveTopology), "PrimitiveTopology",
                      InputDefaultValueCreator<PrimitiveTopology>,
                      (writer, obj) => writer.WriteValue(obj.ToString()),
                      JsonToEnumValue<PrimitiveTopology>);
-        RegisterType(typeof(SharpDX.Direct3D11.BindFlags), "BindFlags",
+        RegisterType(typeof(BindFlags), "BindFlags",
                      InputDefaultValueCreator<BindFlags>,
                      (writer, obj) => writer.WriteValue(obj.ToString()),
                      JsonToEnumValue<BindFlags>);
-        RegisterType(typeof(SharpDX.Direct3D11.BlendOperation), "BlendOperation",
+        RegisterType(typeof(BlendOperation), "BlendOperation",
                      InputDefaultValueCreator<BlendOperation>,
                      (writer, obj) => writer.WriteValue(obj.ToString()),
                      JsonToEnumValue<BlendOperation>);
-        RegisterType(typeof(SharpDX.Direct3D11.BlendOption), "BlendOption",
+        RegisterType(typeof(BlendOption), "BlendOption",
                      InputDefaultValueCreator<BlendOption>,
                      (writer, obj) => writer.WriteValue(obj.ToString()),
                      JsonToEnumValue<BlendOption>);
-        RegisterType(typeof(SharpDX.Direct3D11.BlendState), "BlendState",
+        RegisterType(typeof(BlendState), "BlendState",
                      () => new InputValue<BlendState>(null));
-        RegisterType(typeof(SharpDX.Direct3D11.Buffer), "Buffer",
+        RegisterType(typeof(Buffer), "Buffer",
                      () => new InputValue<Buffer>(null));
-        RegisterType(typeof(SharpDX.Direct3D11.ColorWriteMaskFlags), "ColorWriteMaskFlags",
+        RegisterType(typeof(ColorWriteMaskFlags), "ColorWriteMaskFlags",
                      InputDefaultValueCreator<ColorWriteMaskFlags>,
                      (writer, obj) => writer.WriteValue(obj.ToString()),
                      JsonToEnumValue<ColorWriteMaskFlags>);
-        RegisterType(typeof(SharpDX.Direct3D11.Comparison), "Comparison",
+        RegisterType(typeof(Comparison), "Comparison",
                      InputDefaultValueCreator<Comparison>,
                      (writer, obj) => writer.WriteValue(obj.ToString()),
                      JsonToEnumValue<Comparison>);
         RegisterType(typeof(ComputeShader), "ComputeShader",
                      () => new InputValue<ComputeShader>(null));
-        RegisterType(typeof(SharpDX.Direct3D11.CpuAccessFlags), "CpuAccessFlags",
+        RegisterType(typeof(CpuAccessFlags), "CpuAccessFlags",
                      InputDefaultValueCreator<CpuAccessFlags>,
                      (writer, obj) => writer.WriteValue(obj.ToString()),
                      JsonToEnumValue<CpuAccessFlags>);
-        RegisterType(typeof(SharpDX.Direct3D11.CullMode), "CullMode",
+        RegisterType(typeof(CullMode), "CullMode",
                      InputDefaultValueCreator<CullMode>,
                      (writer, obj) => writer.WriteValue(obj.ToString()),
                      JsonToEnumValue<CullMode>);
-        RegisterType(typeof(SharpDX.Direct3D11.DepthStencilState), "DepthStencilState",
+        RegisterType(typeof(DepthStencilState), "DepthStencilState",
                      () => new InputValue<DepthStencilState>(null));
-        RegisterType(typeof(SharpDX.Direct3D11.DepthStencilView), "DepthStencilView",
+        RegisterType(typeof(DepthStencilView), "DepthStencilView",
                      () => new InputValue<DepthStencilView>(null));
-        RegisterType(typeof(SharpDX.Direct3D11.FillMode), "FillMode",
+        RegisterType(typeof(FillMode), "FillMode",
                      InputDefaultValueCreator<FillMode>,
                      (writer, obj) => writer.WriteValue(obj.ToString()),
                      JsonToEnumValue<FillMode>);
-        RegisterType(typeof(SharpDX.Direct3D11.Filter), "Filter",
+        RegisterType(typeof(Filter), "Filter",
                      InputDefaultValueCreator<Filter>,
                      (writer, obj) => writer.WriteValue(obj.ToString()),
                      JsonToEnumValue<Filter>);
         RegisterType(typeof(GeometryShader), "GeometryShader",
                      () => new InputValue<GeometryShader>(null));
-        RegisterType(typeof(SharpDX.Direct3D11.InputLayout), "InputLayout",
+        RegisterType(typeof(InputLayout), "InputLayout",
                      () => new InputValue<InputLayout>(null));
         RegisterType(typeof(PixelShader), "PixelShader",
                      () => new InputValue<PixelShader>(null));
-        RegisterType(typeof(SharpDX.Direct3D11.RenderTargetBlendDescription), "RenderTargetBlendDescription",
+        RegisterType(typeof(RenderTargetBlendDescription), "RenderTargetBlendDescription",
                      () => new InputValue<RenderTargetBlendDescription>());
-        RegisterType(typeof(SharpDX.Direct3D11.RasterizerState), "RasterizerState",
+        RegisterType(typeof(RasterizerState), "RasterizerState",
                      () => new InputValue<RasterizerState>(null));
-        RegisterType(typeof(SharpDX.Direct3D11.RenderTargetView), "RenderTargetView",
+        RegisterType(typeof(RenderTargetView), "RenderTargetView",
                      () => new InputValue<RenderTargetView>(null));
-        RegisterType(typeof(SharpDX.Direct3D11.ResourceOptionFlags), "ResourceOptionFlags",
+        RegisterType(typeof(ResourceOptionFlags), "ResourceOptionFlags",
                      InputDefaultValueCreator<ResourceOptionFlags>,
                      (writer, obj) => writer.WriteValue(obj.ToString()),
                      JsonToEnumValue<ResourceOptionFlags>);
-        RegisterType(typeof(SharpDX.Direct3D11.ResourceUsage), "ResourceUsage",
+        RegisterType(typeof(ResourceUsage), "ResourceUsage",
                      InputDefaultValueCreator<ResourceUsage>,
                      (writer, obj) => writer.WriteValue(obj.ToString()),
                      JsonToEnumValue<ResourceUsage>);
-        RegisterType(typeof(SharpDX.Direct3D11.SamplerState), "SamplerState",
+        RegisterType(typeof(SamplerState), "SamplerState",
                      () => new InputValue<SamplerState>(null));
-        RegisterType(typeof(SharpDX.Direct3D11.ShaderResourceView), "ShaderResourceView",
+        RegisterType(typeof(ShaderResourceView), "ShaderResourceView",
                      () => new InputValue<ShaderResourceView>(null));
         RegisterType(typeof(Texture2D), "Texture2D",
                      () => new InputValue<Texture2D>(null));
         RegisterType(typeof(Texture3D), "Texture3D",
                      () => new InputValue<Texture3D>(null));
-        RegisterType(typeof(SharpDX.Direct3D11.TextureAddressMode), "TextureAddressMode",
+        RegisterType(typeof(TextureAddressMode), "TextureAddressMode",
                      InputDefaultValueCreator<TextureAddressMode>,
                      (writer, obj) => writer.WriteValue(obj.ToString()),
                      JsonToEnumValue<TextureAddressMode>);
-        RegisterType(typeof(SharpDX.Direct3D11.UnorderedAccessView), "UnorderedAccessView",
+        RegisterType(typeof(UnorderedAccessView), "UnorderedAccessView",
                      () => new InputValue<UnorderedAccessView>(null));
-        RegisterType(typeof(SharpDX.Direct3D11.UnorderedAccessViewBufferFlags), "UnorderedAccessViewBufferFlags",
+        RegisterType(typeof(UnorderedAccessViewBufferFlags), "UnorderedAccessViewBufferFlags",
                      InputDefaultValueCreator<UnorderedAccessViewBufferFlags>,
                      (writer, obj) => writer.WriteValue(obj.ToString()),
                      JsonToEnumValue<UnorderedAccessViewBufferFlags>);
         RegisterType(typeof(VertexShader), "VertexShader",
                      () => new InputValue<VertexShader>(null));
-        RegisterType(typeof(SharpDX.DXGI.Format), "Format",
+        RegisterType(typeof(Format), "Format",
                      InputDefaultValueCreator<Format>,
                      (writer, obj) => writer.WriteValue(obj.ToString()),
                      JsonToEnumValue<Format>);
-        RegisterType(typeof(SharpDX.Mathematics.Interop.RawRectangle), "RawRectangle",
+        RegisterType(typeof(RawRectangle), "RawRectangle",
                      () => new InputValue<RawRectangle>(new RawRectangle { Left = -100, Right = 100, Bottom = -100, Top = 100 }));
-        RegisterType(typeof(SharpDX.Mathematics.Interop.RawViewportF), "RawViewportF",
+        RegisterType(typeof(RawViewportF), "RawViewportF",
                      () => new InputValue<RawViewportF>(new RawViewportF
                                                             { X = 0.0f, Y = 0.0f, Width = 100.0f, Height = 100.0f, MinDepth = 0.0f, MaxDepth = 10000.0f }));
         #endregion

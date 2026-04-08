@@ -523,7 +523,7 @@ namespace Lib.io.video.mediapipe
     #endregion Worker Thread
 
         #region Memory Management
-        private SharpDX.Direct3D11.Texture2D GetOrCreateStagingTexture(int width, int height, SharpDX.DXGI.Format format)
+        private SharpDX.Direct3D11.Texture2D GetOrCreateStagingTexture(int width, int height, Format format)
         {
             var key = (width, height);
             
@@ -784,7 +784,7 @@ namespace Lib.io.video.mediapipe
                     Height = mat.Height,
                     MipLevels = 1,
                     ArraySize = 1,
-                    Format = SharpDX.DXGI.Format.B8G8R8A8_UNorm,
+                    Format = Format.B8G8R8A8_UNorm,
                     SampleDescription = new SampleDescription(1, 0),
                     Usage = ResourceUsage.Default,
                     BindFlags = BindFlags.ShaderResource | BindFlags.RenderTarget,

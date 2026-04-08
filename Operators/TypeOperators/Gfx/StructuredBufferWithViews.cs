@@ -1,3 +1,4 @@
+#if PLATFORM_WINDOWS
 namespace Types.Gfx;
 
 [Guid("b6c5be1d-b133-45e9-a269-8047ea0d6ad7")]
@@ -88,3 +89,4 @@ public sealed class StructuredBufferWithViews : Instance<StructuredBufferWithVie
     public readonly InputSlot<UnorderedAccessViewBufferFlags> BufferFlags = new();
 
 }
+#endif // PLATFORM_WINDOWS

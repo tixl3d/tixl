@@ -1,3 +1,4 @@
+#if PLATFORM_WINDOWS
 using System;
 using System.Numerics;
 using System.Windows.Forms;
@@ -18,7 +19,7 @@ internal static partial class Program
         windowControl.MouseMove += MouseMoveHandler;
         windowControl.MouseClick += MouseMoveHandler;
     }
-    
+
     private static void OnRenderFormOnKeyUp(object _, KeyEventArgs keyArgs)
     {
         var coreUi = CoreUi.Instance;
@@ -63,3 +64,4 @@ internal static partial class Program
         MouseInput.Set(relativePosition, (e.Button & MouseButtons.Left) != 0);
     }
 }
+#endif

@@ -1,7 +1,9 @@
 ﻿#nullable enable
 using System.Text;
 using ImGuiNET;
+#if PLATFORM_WINDOWS
 using Microsoft.VisualBasic.ApplicationServices;
+#endif
 using T3.Core.DataTypes.Vector;
 using T3.Core.Utils;
 using T3.Editor.Gui.Styling;

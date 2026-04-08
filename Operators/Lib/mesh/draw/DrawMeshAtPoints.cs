@@ -36,7 +36,7 @@ internal sealed class DrawMeshAtPoints : Instance<DrawMeshAtPoints>
         public readonly InputSlot<int> FillMode = new InputSlot<int>();
 
         [Input(Guid = "c0351f55-ad27-4fbd-b3d5-668ff49f0ea0")]
-        public readonly InputSlot<SharpDX.Direct3D11.CullMode> CullMode = new InputSlot<SharpDX.Direct3D11.CullMode>();
+        public readonly InputSlot<CullMode> CullMode = new InputSlot<CullMode>();
 
         [Input(Guid = "59420e45-cbe2-48d8-961c-3dea5e55b182", MappedType = typeof(ShadingModes))]
         public readonly InputSlot<int> Shading = new InputSlot<int>();

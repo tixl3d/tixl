@@ -1,9 +1,11 @@
 #nullable enable
 using System;
 using System.Diagnostics;
+using T3.Core.DataTypes.Vector;
+
+#if PLATFORM_WINDOWS
 using SharpDX.D3DCompiler;
 using SharpDX.Direct3D11;
-using T3.Core.DataTypes.Vector;
 
 namespace T3.Core.DataTypes;
 
@@ -73,3 +75,38 @@ public abstract class AbstractShader : IDisposable
         Dispose();
     }
 }
+
+#else // !PLATFORM_WINDOWS -- Linux stubs
+
+namespace T3.Core.DataTypes;
+
+public sealed class ComputeShader : AbstractShader
+{
+    public bool TryGetThreadGroups(out Int3 threadGroups)
+    {
+        threadGroups = default;
+        return false;
+    }
+}
+
+public sealed class PixelShader : AbstractShader;
+public sealed class VertexShader : AbstractShader;
+public sealed class GeometryShader : AbstractShader;
+
+public abstract class AbstractShader : IDisposable
+{
+    internal byte[] CompiledBytecode = [];
+    public virtual string Name { get; set; } = string.Empty;
+    private bool _disposed;
+
+    public void Dispose()
+    {
+        if (_disposed) return;
+        _disposed = true;
+        GC.SuppressFinalize(this);
+    }
+
+    ~AbstractShader() => Dispose();
+}
+
+#endif

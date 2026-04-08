@@ -3,10 +3,14 @@
 using System.IO;
 using System.Threading.Tasks;
 using ImGuiNET;
+#if PLATFORM_WINDOWS
 using SharpDX;
 using SharpDX.Direct3D11;
 using SharpDX.Mathematics.Interop;
 using SharpDX.WIC;
+#else
+using T3.Core.Gpu;
+#endif
 using T3.Core.Resource;
 using T3.Core.Resource.Assets;
 using T3.Core.UserData;
@@ -41,6 +45,7 @@ internal static class ThumbnailManager
     /// </summary>
     internal static void Update()
     {
+#if PLATFORM_WINDOWS
         if (!_initialized)
             Initialize();
 
@@ -75,15 +80,20 @@ internal static class ThumbnailManager
                 upload.Texture.Dispose();
             }
         }
+#endif
     }
 
     internal static bool AsImguiImage(this ThumbnailRect thumbnail, float height = SlotHeight)
     {
+#if PLATFORM_WINDOWS
         if (!thumbnail.IsReady || AtlasSrv == null)
             return false;
 
         ImGui.Image(AtlasSrv.NativePointer, new Vector2(height * 4 / 3, height), thumbnail.UvMin, thumbnail.UvMax);
         return true;
+#else
+        return false;
+#endif
     }
     #endregion
 
@@ -129,11 +139,15 @@ internal static class ThumbnailManager
         var path = Path.Combine(GetPath(package, category), $"{guid}.png");
         if (File.Exists(path))
         {
+#if PLATFORM_WINDOWS
             RequestAsyncLoad(guid, path);
+#endif
         }
         else if (sourceInfo != null && sourceInfo.Exists)
         {
+#if PLATFORM_WINDOWS
             GenerateThumbnailFromAsset(guid, sourceInfo.FullName, package, category);
+#endif
         }
         else
         {
@@ -146,15 +160,16 @@ internal static class ThumbnailManager
     #endregion
 
     #region Background Operations
+#if PLATFORM_WINDOWS
     private static async void RequestAsyncLoad(Guid guid, string path)
     {
         try
         {
             if(EnableLogging)
                 Log.Debug($"LoadThumb {path}  {guid.ShortenGuid()}...");
-            
+
             if (!_slots.TryGetValue(guid, out var slot)) return;
-        
+
             slot.State = LoadingState.Loading;
             try
             {
@@ -245,6 +260,7 @@ internal static class ThumbnailManager
             return null;
         });
     }
+#endif
     #endregion
 
     #region Atlas Management (LRU)
@@ -280,7 +296,7 @@ internal static class ThumbnailManager
     #region GPU / Saving Methods
     internal static void SaveThumbnail(Guid guid, IResourcePackage package, T3.Core.DataTypes.Texture2D sourceTexture, Categories category, bool saveToFile = true)
     {
-
+#if PLATFORM_WINDOWS
         var isNew = false;
         if (!_slots.TryGetValue(guid, out var slot))
         {
@@ -291,10 +307,10 @@ internal static class ThumbnailManager
 
         if(EnableLogging)
             Log.Debug($"Saving thumbs: {package} {slot}  asFile:{ saveToFile}  new:{isNew}");
-        
+
         slot.State = LoadingState.Loading;
         var targetSlot = AssignAtlasSlot(guid);
-        
+
         var device = ResourceManager.Device;
         var context = device.ImmediateContext;
 
@@ -350,7 +366,7 @@ internal static class ThumbnailManager
         // Immediate Atlas Queueing
         var uploadTex = new SharpDX.Direct3D11.Texture2D(device, desc);
         context.CopyResource(tempTarget, uploadTex);
-        
+
         lock (_uploadQueue) {
             _uploadQueue.Enqueue(new PendingUpload(guid, uploadTex, targetSlot));
         }
@@ -360,22 +376,24 @@ internal static class ThumbnailManager
             ScreenshotWriter.StartSavingToFile(saveTexture, filePath, ScreenshotWriter.FileFormats.Png,
                                                path =>
                                                {
-                                                   if (string.IsNullOrEmpty(path)) 
+                                                   if (string.IsNullOrEmpty(path))
                                                        return;
 
                                                    lock (_lockedPath)
                                                    {
                                                        _lockedPath.Remove(path);
                                                    }
-                                               }, 
+                                               },
                                                logErrors: false);
         }
+#endif
     }
     #endregion
 
     #region Helpers
     private static void Initialize()
     {
+#if PLATFORM_WINDOWS
         var device = ResourceManager.Device;
         var desc = new Texture2DDescription {
             Width = AtlasSize, Height = AtlasSize, MipLevels = 1, ArraySize = 1,
@@ -383,12 +401,13 @@ internal static class ThumbnailManager
             BindFlags = BindFlags.ShaderResource, CpuAccessFlags = CpuAccessFlags.None,
             SampleDescription = new SharpDX.DXGI.SampleDescription(1, 0)
         };
-        
+
         Utilities.Dispose(ref _atlas);
         AtlasSrv?.Dispose();
-        
+
         _atlas = new SharpDX.Direct3D11.Texture2D(device, desc);
         AtlasSrv = new ShaderResourceView(device, _atlas);
+#endif
         _initialized = true;
     }
 
@@ -416,10 +435,12 @@ internal static class ThumbnailManager
         Initialize();
         _slots.Clear();
         _atlasLru.Clear();
+#if PLATFORM_WINDOWS
         lock (_uploadQueue)
         {
             _uploadQueue.Clear();
         }
+#endif
     }
     
     private const int AtlasSize = 4096, Padding = 2, MaxSlots = 500;
@@ -427,16 +448,22 @@ internal static class ThumbnailManager
     public const int  SlotHeight = 133;
     public const float AspectRatio = (float)SlotWidth / SlotHeight; 
     
+#if PLATFORM_WINDOWS
     private static SharpDX.Direct3D11.Texture2D? _atlas;
+#endif
     internal static ShaderResourceView? AtlasSrv { get; private set; }
     private static readonly Dictionary<Guid, ThumbnailSlot> _slots = new();
     private static readonly List<ThumbnailSlot> _atlasLru = new(); 
+#if PLATFORM_WINDOWS
     private static readonly Queue<PendingUpload> _uploadQueue = new();
+#endif
     private static readonly ThumbnailRect _fallback = new(Vector2.Zero, Vector2.Zero, false);
     private static bool _initialized;
 
     internal readonly record struct ThumbnailRect(Vector2 UvMin, Vector2 UvMax, bool IsReady);
+#if PLATFORM_WINDOWS
     private record struct PendingUpload(Guid Guid, SharpDX.Direct3D11.Texture2D Texture, ThumbnailSlot Slot);
+#endif
     private enum LoadingState { NotLoaded, Loading, Ready, DoesntExist }
 
     private sealed class ThumbnailSlot {

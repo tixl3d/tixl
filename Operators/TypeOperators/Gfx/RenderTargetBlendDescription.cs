@@ -1,3 +1,4 @@
+#if PLATFORM_WINDOWS
 namespace Types.Gfx;
 
 [Guid("38ee7546-8d7d-463c-aeea-e482d7ca3f30")]
@@ -43,3 +44,4 @@ public sealed class RenderTargetBlendDescription : Instance<RenderTargetBlendDes
     //        [Input(Guid = "F4A6A615-8558-4FB6-A4A4-142A4C5BD4F3")]
     //        public readonly InputSlot<ColorWriteMaskFlags> RenderTargetWriteMask = new InputSlot<ColorWriteMaskFlags>();
 }
+#endif // PLATFORM_WINDOWS

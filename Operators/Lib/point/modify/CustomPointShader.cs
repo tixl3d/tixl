@@ -57,10 +57,10 @@ internal sealed class CustomPointShader : Instance<CustomPointShader>,ITransform
         public readonly InputSlot<int> Count = new InputSlot<int>();
 
         [Input(Guid = "d669b4e9-8a3e-493c-93d1-da0267b41b1b")]
-        public readonly MultiInputSlot<SharpDX.Direct3D11.ShaderResourceView> ShaderResources = new MultiInputSlot<SharpDX.Direct3D11.ShaderResourceView>();
+        public readonly MultiInputSlot<ShaderResourceView> ShaderResources = new MultiInputSlot<ShaderResourceView>();
 
         [Input(Guid = "aa12212a-f1e4-4efb-b3b5-b6861f09f66b")]
-        public readonly MultiInputSlot<SharpDX.Direct3D11.Buffer> ConstantBuffers = new MultiInputSlot<SharpDX.Direct3D11.Buffer>();
+        public readonly MultiInputSlot<Buffer> ConstantBuffers = new MultiInputSlot<Buffer>();
 
         [Input(Guid = "6e872357-4c12-4c4f-acce-dd7ef3297446")]
         public readonly InputSlot<float> TimeScale = new InputSlot<float>();

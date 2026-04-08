@@ -1,8 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <Import Project="$(SolutionDir)/Tixl.props" />
   <PropertyGroup>
-    <TargetFramework>net9.0-windows</TargetFramework>
+    <TargetFramework>$(TixlNetFrameworkVersion)</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <!-- Exclude all source on non-Windows (this operator is Windows-only) -->
+  <ItemGroup Condition="!$(IsWindows)">
+    <Compile Remove="**/*.cs" />
+  </ItemGroup>
+  <PropertyGroup>
     <Nullable>disable</Nullable>
     <UserSecretsId>4ddcedc9-2c55-476d-9aeb-8e052ecd278a</UserSecretsId>
     <RootNamespace>t3.ndi</RootNamespace>

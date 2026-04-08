@@ -1,3 +1,4 @@
+#if PLATFORM_WINDOWS
 using VertexShaderD3D = T3.Core.DataTypes.VertexShader;
 
 namespace Types.Gfx;
@@ -41,5 +42,6 @@ internal sealed class VertexShaderFromSource :
     public void SetWarning(string message) => _statusProviderImplementation.Warning = message;
     IStatusProvider.StatusLevel IStatusProvider.GetStatusLevel() => _statusProviderImplementation.GetStatusLevel();
     string IStatusProvider.GetStatusMessage() => _statusProviderImplementation.GetStatusMessage();
-    #endregion    
+    #endregion
 }
+#endif // PLATFORM_WINDOWS

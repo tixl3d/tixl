@@ -40,5 +40,5 @@ internal sealed class SinForm : Instance<SinForm>
         public readonly InputSlot<T3.Core.DataTypes.Vector.Int2> Resolution = new InputSlot<T3.Core.DataTypes.Vector.Int2>();
 
         [Input(Guid = "710fd90b-05bd-468f-a50e-0894d4f27265")]
-        public readonly InputSlot<SharpDX.DXGI.Format> TextureFormat = new InputSlot<SharpDX.DXGI.Format>();
+        public readonly InputSlot<Format> TextureFormat = new InputSlot<Format>();
 }

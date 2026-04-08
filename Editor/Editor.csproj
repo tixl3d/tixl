@@ -61,10 +61,11 @@
             <NoWarn>NU1701</NoWarn>
         </PackageReference>
         <PackageReference Include="Sentry" Version="4.1.1" />
-        <PackageReference Include="SharpDX.Desktop" Version="4.2.0">
+        <PackageReference Include="SharpDX.Desktop" Version="4.2.0" Condition="$(IsWindows)">
             <NoWarn>NU1701</NoWarn>
         </PackageReference>
-        <PackageReference Include="System.Management" Version="8.0.0" />
+        <PackageReference Include="System.CodeDom" Version="8.0.0" />
+        <PackageReference Include="System.Management" Version="8.0.0" Condition="$(IsWindows)" />
         <PackageReference Include="System.Runtime.Serialization.Formatters" Version="9.0.4" />
     </ItemGroup>
     <!-- ===============================//======================================= -->
@@ -73,7 +74,8 @@
     <ItemGroup>
         <ProjectReference Include="..\Core\Core.csproj" />
         <ProjectReference Include="..\Logging\Logging.csproj" />
-        <ProjectReference Include="..\MsForms\MsForms.csproj" />
+        <ProjectReference Include="..\MsForms\MsForms.csproj" Condition="$(IsWindows)" />
+        <ProjectReference Include="..\LinuxUi\LinuxUi.csproj" Condition="!$(IsWindows)" />
         <ProjectReference Include="..\SilkWindows\SilkWindows.csproj" />
     </ItemGroup>
     <!-- ===============================//======================================= -->
@@ -152,9 +154,9 @@
         <!-- <PackageNames Include="pixtur"/>-->
         <PackageNames Include="unsplash" />
         <PackageNames Include="skills" />
-        <PackageNames Include="spout" />
-        <PackageNames Include="ndi" />
-        <PackageNames Include="Mediapipe">
+        <PackageNames Include="spout" Condition="$(IsWindows)" />
+        <PackageNames Include="ndi" Condition="$(IsWindows)" />
+        <PackageNames Include="Mediapipe" Condition="$(IsWindows)">
             <Name>t3.mediapipe</Name>
         </PackageNames>
         <!-- Add more as needed -->

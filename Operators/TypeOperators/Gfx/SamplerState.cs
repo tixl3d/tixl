@@ -1,3 +1,4 @@
+#if PLATFORM_WINDOWS
 using SharpDX;
 using SharpDX.Direct3D11;
 
@@ -82,3 +83,4 @@ public sealed class SamplerState : Instance<SamplerState>
     [Input(Guid = "{7D5346DB-DF9C-4BCE-9F39-065983253A7F}")]
     public readonly InputSlot<float> MaximumLod = new();
 }
+#endif // PLATFORM_WINDOWS

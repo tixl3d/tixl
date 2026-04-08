@@ -39,7 +39,7 @@ internal sealed class DrawLinesShaded : Instance<DrawLinesShaded>
         public readonly InputSlot<float> TransitionProgress = new InputSlot<float>();
 
         [Input(Guid = "fd2ffbc0-f250-4327-97c8-1b0c98837c58")]
-        public readonly InputSlot<SharpDX.Direct3D11.TextureAddressMode> WrapMode = new InputSlot<SharpDX.Direct3D11.TextureAddressMode>();
+        public readonly InputSlot<TextureAddressMode> WrapMode = new InputSlot<TextureAddressMode>();
 
         [Input(Guid = "c6c819e9-a876-48ae-8103-8e89f30ff22d")]
         public readonly InputSlot<float> UvScale = new InputSlot<float>();

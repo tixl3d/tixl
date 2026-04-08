@@ -1,7 +1,13 @@
-﻿using System;
+﻿using T3.Core.DataTypes;
+#if PLATFORM_WINDOWS
+using System;
 using System.Collections.Generic;
 using SharpDX.Direct3D11;
 using T3.Core.Logging;
+using Texture2D = T3.Core.DataTypes.Texture2D;
+#else
+using T3.Core.Gpu;
+#endif
 
 namespace T3.Core.Resource;
 
@@ -10,6 +16,7 @@ namespace T3.Core.Resource;
 /// </summary>
 public static class SrvManager
 {
+#if PLATFORM_WINDOWS
     public static ShaderResourceView GetSrvForTexture(Texture2D texture)
     {
         if (_srvForTextures.TryGetValue(texture, out var srv)
@@ -63,4 +70,8 @@ public static class SrvManager
     }
 
     private static readonly Dictionary<Texture2D, ShaderResourceView> _srvForTextures = new();
+#else
+    public static ShaderResourceView? GetSrvForTexture(Texture2D texture) => null;
+    public static void RemoveForDisposedTextures() { }
+#endif
 }

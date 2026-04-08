@@ -1,3 +1,4 @@
+#if PLATFORM_WINDOWS
 using System.ComponentModel;
 using System.Windows.Forms;
 using SharpDX;
@@ -447,3 +448,46 @@ internal static class ProgramWindows
     private static Texture2D _uiCopyTexture;
     public static ShaderResourceView UiCopyTextureSrv { get; private set; }
 }
+#else
+namespace T3.Editor.App;
+
+internal static class ProgramWindows
+{
+    public static ProgramWindowStub Main { get; private set; } = new();
+    public static ProgramWindowStub? Viewer { get; private set; }
+    public static string ActiveGpu { get; private set; } = "N/A (Linux)";
+
+    internal static void SetMainWindowSize(int width, int height) { }
+    internal static void SetInteractionDevices(params object[] objects) { }
+    internal static void HandleFullscreenToggle() { }
+    internal static void UpdateViewerSpanning(object bounds) { }
+    internal static void UpdateViewerWindowState() { }
+    internal static void RefreshViewport() { }
+    internal static void Release() { }
+    internal static void Present(bool vsync, bool showSecondary) { }
+
+    internal static void InitializeMainWindow(string title, out object? device)
+    {
+        device = null;
+    }
+
+    internal static void InitializeSecondaryViewerWindow(string title, int w, int h) { }
+
+    internal class ProgramWindowStub
+    {
+        public int Width { get; set; } = 1920;
+        public int Height { get; set; } = 1080;
+        public System.Numerics.Vector2 Size => new(Width, Height);
+        public bool IsMinimized => false;
+        public IntPtr HwndHandle => IntPtr.Zero;
+        public System.Numerics.Vector2 GetDpi() => new(96f, 96f);
+        public void RunRenderLoop(Action callback) { }
+        public void SetTexture(object? texture) { }
+        public void SetVisible(bool visible) { }
+        public void SetSizeable() { }
+        public void PrepareRenderingFrame() { }
+        public void SetSize(int w, int h) { Width = w; Height = h; }
+        public void SetBorderStyleSizable() { }
+    }
+}
+#endif // PLATFORM_WINDOWS

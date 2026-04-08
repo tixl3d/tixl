@@ -2,7 +2,7 @@
     <Import Project="$(SolutionDir)/Tixl.props" />
     <PropertyGroup>
         <TargetFramework>$(TixlNetFrameworkVersion)</TargetFramework>
-        <UseWindowsForms>true</UseWindowsForms>
+        <UseWindowsForms Condition="$(IsWindows)">true</UseWindowsForms>
         <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
         <RootNamespace>T3.Core</RootNamespace>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -21,7 +21,7 @@
         <PackageReference Include="ManagedBass" Version="4.0.2" />
         <PackageReference Include="ManagedBass.Flac" Version="4.0.2" />
         <PackageReference Include="ManagedBass.Mix" Version="4.0.2" />
-        <PackageReference Include="ManagedBass.Wasapi" Version="4.0.2" />
+        <PackageReference Include="ManagedBass.Wasapi" Version="4.0.2" Condition="$(IsWindows)" />
         <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.7.0-1.final" />
         <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="9.0.1" />
         <PackageReference Include="NAudio.Midi" Version="2.2.1" />
@@ -29,7 +29,7 @@
         <PackageReference Include="NuGet.Configuration" Version="6.13.2" />
         <PackageReference Include="OpenCvSharp4" Version="4.11.0.20250507" />
         <PackageReference Include="OpenCvSharp4.Extensions" Version="4.11.0.20250507" />
-        <PackageReference Include="OpenCvSharp4.Windows" Version="4.11.0.20250507" />
+        <PackageReference Include="OpenCvSharp4.Windows" Version="4.11.0.20250507" Condition="$(IsWindows)" />
         <PackageReference Include="Rug.Osc" Version="1.2.5">
             <NoWarn>NU1701</NoWarn>
         </PackageReference>
@@ -37,11 +37,11 @@
         <PackageReference Include="SharpDX.Direct2D1" Version="4.2.0" />
         <PackageReference Include="SharpDX.Direct3D11" Version="4.2.0" />
         <PackageReference Include="SharpDX.Mathematics" Version="4.2.0" />
-        <PackageReference Include="SharpDX.MediaFoundation" Version="4.2.0" />
-        <PackageReference Include="SharpDX.XInput" Version="4.2.0" />
+        <PackageReference Include="SharpDX.MediaFoundation" Version="4.2.0" Condition="$(IsWindows)" />
+        <PackageReference Include="SharpDX.XInput" Version="4.2.0" Condition="$(IsWindows)" />
         <PackageReference Include="SharpGLTF.Core" Version="1.0.4" />
         <PackageReference Include="System.IO.Ports" Version="8.0.0" />
-        <PackageReference Include="System.Management" Version="8.0.0" />
+        <PackageReference Include="System.Management" Version="8.0.0" Condition="$(IsWindows)" />
         <PackageReference Include="System.ServiceModel.Primitives" Version="4.9.0" />
     </ItemGroup>
 

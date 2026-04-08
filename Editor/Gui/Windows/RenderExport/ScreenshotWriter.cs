@@ -1,3 +1,4 @@
+#if PLATFORM_WINDOWS
 #nullable enable
 
 using SharpDX;
@@ -167,3 +168,4 @@ internal static class ScreenshotWriter
 
 
 }
+#endif // PLATFORM_WINDOWS

@@ -24,7 +24,17 @@ internal sealed class RenderSettings
     public bool CreateSubFolder = true;
     public bool AutoIncrementSubFolder = true;
     public bool ExportAudio = true;
+#if PLATFORM_WINDOWS
     public ScreenshotWriter.FileFormats FileFormat;
+#else
+    public FileFormats FileFormat;
+
+    public enum FileFormats
+    {
+        Png,
+        Jpg
+    }
+#endif
     public RenderSettings.TimeRanges TimeRange = RenderSettings.TimeRanges.Custom;
     public float ResolutionFactor = 1f;
 

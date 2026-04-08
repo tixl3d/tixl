@@ -1,8 +1,12 @@
 #nullable enable
+#if PLATFORM_WINDOWS
 using SharpDX;
 using SharpDX.Direct3D;
 using SharpDX.Mathematics.Interop;
 using SharpDX.MediaFoundation;
+#else
+using T3.Core.Gpu;
+#endif
 using T3.Core.Animation;
 using T3.Core.Audio;
 using T3.Core.DataTypes.DataSet;
@@ -333,7 +337,7 @@ internal sealed class PlayVideo : Instance<PlayVideo>, IStatusProvider
                                  {
                                      DxgiManager = _dxgiDeviceManager,
                                      VideoOutputFormat = (int)Format.B8G8R8A8_UNorm
-                                     //VideoOutputFormat = (int)SharpDX.DXGI.Format.NV12                                     
+                                     //VideoOutputFormat = (int)Format.NV12                                     
                                  };
 
             MediaManager.Startup();
@@ -378,7 +382,7 @@ internal sealed class PlayVideo : Instance<PlayVideo>, IStatusProvider
                 //                          ArraySize = 1,
                 //                          BindFlags = BindFlags.RenderTarget | BindFlags.ShaderResource | BindFlags.UnorderedAccess,
                 //                          CpuAccessFlags = CpuAccessFlags.None,
-                //                          Format = SharpDX.DXGI.Format.B8G8R8A8_UNorm,
+                //                          Format = Format.B8G8R8A8_UNorm,
                 //                          Width = size.Width,
                 //                          Height = size.Height,
                 //                          MipLevels = 0,

@@ -195,6 +195,12 @@ public static class MidiConnectionManager
 
     private static void ScanAndRegisterToMidiDevices(bool logInformation = false)
     {
+        if (!OperatingSystem.IsWindows())
+        {
+            Log.Debug("MIDI device capture not yet supported on this platform.");
+            return;
+        }
+
         Log.Debug("Capturing Midi devices...");
         if (!string.IsNullOrEmpty(ProjectSettings.Config.LimitMidiDeviceCapture))
         {

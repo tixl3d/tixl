@@ -30,7 +30,7 @@ namespace Lib.render.gizmo._{
         public readonly InputSlot<bool> WireFrame = new InputSlot<bool>();
 
         [Input(Guid = "7a1f7dc7-e716-4a07-bc46-bfc8d717a083")]
-        public readonly InputSlot<SharpDX.Direct3D11.CullMode> CullMode = new InputSlot<SharpDX.Direct3D11.CullMode>();
+        public readonly InputSlot<CullMode> CullMode = new InputSlot<CullMode>();
 
         
         

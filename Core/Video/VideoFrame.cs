@@ -1,29 +1,25 @@
 using SharpDX.DXGI;
 using System;
-using System.Drawing;
+using System.Runtime.InteropServices;
 
 namespace T3.Core.Video;
 
 public struct VideoFrame : IDisposable
 {
-    public Size Size;
+    public int Width;
+    public int Height;
     public int StrideInBytes;
     public IntPtr Data;
     public Format Format;
     public bool IsOwned; //tells if data is owned
 
-    public int TotalSize
-    {
-        get
-        {
-            return this.Size.Height * this.StrideInBytes;
-        }
-    }
+    public int TotalSize => Height * StrideInBytes;
 
-    public static VideoFrame Reference(Size size, int stride, IntPtr data, Format format)
+    public static VideoFrame Reference(int width, int height, int stride, IntPtr data, Format format)
     {
         VideoFrame result = new VideoFrame();
-        result.Size = size;
+        result.Width = width;
+        result.Height = height;
         result.StrideInBytes = stride;
         result.Data = data;
         result.Format = format;
@@ -31,12 +27,13 @@ public struct VideoFrame : IDisposable
         return result;
     }
 
-    public static VideoFrame Owned(Size size, int stride, Format format)
+    public static VideoFrame Owned(int width, int height, int stride, Format format)
     {
         VideoFrame result = new VideoFrame();
-        result.Size = size;
+        result.Width = width;
+        result.Height = height;
         result.StrideInBytes = stride;
-        result.Data = SharpDX.Utilities.AllocateMemory(stride * size.Height);
+        result.Data = Marshal.AllocHGlobal(stride * height);
         result.Format = format;
         result.IsOwned = true;
         return result;
@@ -46,7 +43,7 @@ public struct VideoFrame : IDisposable
     {
         if (this.Data != IntPtr.Zero && this.IsOwned)
         {
-            SharpDX.Utilities.FreeMemory(this.Data);
+            Marshal.FreeHGlobal(this.Data);
             this.Data = IntPtr.Zero;
         }
     }

@@ -34,7 +34,7 @@ internal sealed class Displace : Instance<Displace>
         public readonly InputSlot<System.Numerics.Vector2> DisplaceMapOffset = new InputSlot<System.Numerics.Vector2>();
 
         [Input(Guid = "6e772174-813d-4baa-b6b5-27e197b547ac")]
-        public readonly InputSlot<SharpDX.Direct3D11.TextureAddressMode> WrapMode = new InputSlot<SharpDX.Direct3D11.TextureAddressMode>();
+        public readonly InputSlot<TextureAddressMode> WrapMode = new InputSlot<TextureAddressMode>();
 
         [Input(Guid = "b2f58dc7-e5c6-4c57-a704-94aaa0b1e002")]
         public readonly InputSlot<bool> GenerateMips = new InputSlot<bool>();
@@ -43,7 +43,7 @@ internal sealed class Displace : Instance<Displace>
         public readonly InputSlot<bool> RGSS_4xAA = new InputSlot<bool>();
 
         [Input(Guid = "0c0dd89a-e9ff-4746-b12c-dd4799a0b500")]
-        public readonly InputSlot<SharpDX.Direct3D11.Filter> TextureFiltering = new InputSlot<SharpDX.Direct3D11.Filter>();
+        public readonly InputSlot<Filter> TextureFiltering = new InputSlot<Filter>();
         
     private enum DisplaceModes {
         IntensityGradient,

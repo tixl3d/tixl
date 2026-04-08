@@ -5,7 +5,11 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Xml.Linq;
 using OpenCvSharp;
+#if PLATFORM_WINDOWS
 using SharpDX;
+#else
+using T3.Core.Gpu;
+#endif
 using T3.Core.Animation;
 using Utilities = T3.Core.Utils.Utilities;
 

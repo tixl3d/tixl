@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO.Ports;
 using System.Linq;
+#if PLATFORM_WINDOWS
 using System.Management;
+#endif
 using System.Text.RegularExpressions;
 using System.Threading;
 using T3.Core.Logging;
@@ -84,6 +86,7 @@ public static class SerialConnectionManager
     {
         if (_cachedPortList != null && _portListCacheStopwatch.IsRunning && _portListCacheStopwatch.ElapsedMilliseconds < CacheDurationMs) return _cachedPortList;
         var portList = new List<string>();
+#if PLATFORM_WINDOWS
         try
         {
             var searcher = new ManagementObjectSearcher("root\\CIMV2", "SELECT * FROM Win32_PnPEntity WHERE Name LIKE '%(COM%)'");
@@ -94,6 +97,9 @@ public static class SerialConnectionManager
             Log.Warning($"WMI query for serial ports failed, falling back to basic list. Error: {ex.Message}");
             return SerialPort.GetPortNames().ToList();
         }
+#else
+        portList.AddRange(SerialPort.GetPortNames());
+#endif
         _cachedPortList = portList.OrderBy(s => s).ToList();
         _portListCacheStopwatch.Restart();
         return _cachedPortList;

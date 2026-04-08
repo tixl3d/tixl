@@ -1,4 +1,5 @@
-﻿#nullable enable
+﻿#if PLATFORM_WINDOWS
+#nullable enable
 
 using System;
 using System.Collections.Generic;
@@ -160,3 +161,4 @@ public sealed class TextureReadAccess : IDisposable
     private  readonly List<ReadRequestItem> _readRequests = new(3);
     private  int _swapCounter;
 }
+#endif // PLATFORM_WINDOWS

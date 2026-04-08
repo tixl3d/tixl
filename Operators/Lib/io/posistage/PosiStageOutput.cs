@@ -2,8 +2,12 @@
 using System.Diagnostics;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+#if PLATFORM_WINDOWS
 using SharpDX;
 using SharpDX.Direct3D11;
+#else
+using T3.Core.Gpu;
+#endif
 using Exception = System.Exception;
 
 namespace Lib.io.posistage

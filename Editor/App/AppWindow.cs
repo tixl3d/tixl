@@ -1,3 +1,4 @@
+#if PLATFORM_WINDOWS
 using System.ComponentModel;
 using System.Drawing;
 using System.IO;
@@ -253,3 +254,4 @@ internal sealed class AppWindow
         Texture = texture;
     }
 }
+#endif // PLATFORM_WINDOWS

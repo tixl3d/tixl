@@ -1,3 +1,4 @@
+#if PLATFORM_WINDOWS
 using SharpDX.XInput;
 
 
@@ -79,3 +80,4 @@ public sealed class XInputGamepad
         return value < -1.0f ? -1.0f : value > 1.0f ? 1.0f : value;
     }
 }
+#endif // PLATFORM_WINDOWS

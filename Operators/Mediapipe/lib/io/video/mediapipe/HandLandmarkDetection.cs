@@ -391,7 +391,7 @@ public class HandLandmarkDetection : Instance<HandLandmarkDetection>
     #endregion
 
     #region Memory Management
-    private SharpDX.Direct3D11.Texture2D GetOrCreateStagingTexture(int width, int height, SharpDX.DXGI.Format format)
+    private SharpDX.Direct3D11.Texture2D GetOrCreateStagingTexture(int width, int height, Format format)
     {
         var key = (width, height);
         
@@ -634,7 +634,7 @@ public class HandLandmarkDetection : Instance<HandLandmarkDetection>
                  bufferWithViews.Srv = new ShaderResourceView(ResourceManager.Device, bufferWithViews.Buffer, 
                      new ShaderResourceViewDescription
                      {
-                         Format = SharpDX.DXGI.Format.Unknown,
+                         Format = Format.Unknown,
                          Dimension = ShaderResourceViewDimension.Buffer,
                          Buffer = new ShaderResourceViewDescription.BufferResource
                          {
@@ -650,7 +650,7 @@ public class HandLandmarkDetection : Instance<HandLandmarkDetection>
                  bufferWithViews.Uav = new UnorderedAccessView(ResourceManager.Device, bufferWithViews.Buffer,
                      new UnorderedAccessViewDescription
                      {
-                         Format = SharpDX.DXGI.Format.Unknown,
+                         Format = Format.Unknown,
                          Dimension = UnorderedAccessViewDimension.Buffer,
                          Buffer = new UnorderedAccessViewDescription.BufferResource
                          {
@@ -704,7 +704,7 @@ public class HandLandmarkDetection : Instance<HandLandmarkDetection>
                 Height = mat.Height,
                 MipLevels = 1,
                 ArraySize = 1,
-                Format = SharpDX.DXGI.Format.B8G8R8A8_UNorm,
+                Format = Format.B8G8R8A8_UNorm,
                 SampleDescription = new SampleDescription(1, 0),
                 Usage = ResourceUsage.Default,
                 BindFlags = BindFlags.ShaderResource | BindFlags.RenderTarget,

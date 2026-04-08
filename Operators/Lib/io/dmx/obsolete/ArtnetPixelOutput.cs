@@ -1,4 +1,8 @@
+#if PLATFORM_WINDOWS
 using SharpDX.Direct3D11;
+#else
+using T3.Core.Gpu;
+#endif
 using Utilities = T3.Core.Utils.Utilities;
 using ArtNet.Packets;
 using ArtNet.Sockets;

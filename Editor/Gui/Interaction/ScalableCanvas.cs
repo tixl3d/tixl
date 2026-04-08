@@ -278,8 +278,11 @@ public partial class ScalableCanvas
                 {
                     ScrollTarget += new Vector2(ImGui.GetIO().MouseWheelH * 220,
                                                 -ImGui.GetIO().MouseWheel * 220) / ScaleTarget;
-                    //MouseWheelPanning.Delta * new Vector2(-1,1) / ScaleTarget;
+#if PLATFORM_WINDOWS
                     var zoomFactor= ComputeZoomDeltaFromMouseWheel(MouseWheelPanning.PinchZoomDelta);
+#else
+                    var zoomFactor= ComputeZoomDeltaFromMouseWheel(0);
+#endif
                     ApplyZoomDelta(mouseState.Position, zoomFactor, out zoomed);
                 }
             }

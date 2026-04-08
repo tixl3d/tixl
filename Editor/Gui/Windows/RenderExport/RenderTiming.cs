@@ -1,3 +1,4 @@
+#if PLATFORM_WINDOWS
 #nullable enable
 using T3.Core.Animation;
 using T3.Core.Audio;
@@ -181,3 +182,24 @@ internal static class RenderTiming
         rt.TimingOverhang = 0.0;
     }
 }
+#else
+namespace T3.Editor.Gui.Windows.RenderExport;
+
+internal static class RenderTiming
+{
+    public struct Runtime
+    {
+        public double TimingOverhang;
+        public bool AudioRecording;
+    }
+
+    public static void ApplyTimeRange(RenderSettings renderSettings) { }
+    public static double ConvertReferenceTime(double time, RenderSettings.TimeReferences oldRef, RenderSettings.TimeReferences newRef, float fps) => time;
+    public static double ConvertFps(double time, double oldFps, double newFps) => time;
+    public static double ReferenceTimeToSeconds(double time, RenderSettings.TimeReferences timeRef, float fps) => time;
+    public static double SecondsToReferenceTime(double seconds, RenderSettings.TimeReferences timeRef, float fps) => seconds;
+    public static int ComputeFrameCount(RenderSettings s) => 0;
+    public static void SetPlaybackTimeForFrame(RenderSettings s, int frameIndex, ref Runtime rt) { }
+    public static void ReleasePlaybackTime(RenderSettings s, ref Runtime rt) { }
+}
+#endif // PLATFORM_WINDOWS

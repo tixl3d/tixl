@@ -1,3 +1,4 @@
+#if PLATFORM_WINDOWS
 using ImGuiNET;
 using Microsoft.Win32;
 using System.Diagnostics;
@@ -513,3 +514,4 @@ internal sealed class ScreenManagerWindow : Window
     private static readonly Dictionary<(int, int), string> _cachedResolutions = [];
     private static readonly List<Screen> _spanningWorkList = new(8);
 }
+#endif // PLATFORM_WINDOWS

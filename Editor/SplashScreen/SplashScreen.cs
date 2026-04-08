@@ -1,3 +1,4 @@
+#if PLATFORM_WINDOWS
 using System.Drawing;
 using System.Windows.Forms;
 using T3.SystemUi;
@@ -148,3 +149,4 @@ internal sealed class SplashScreen : ISplashScreen
     private SplashForm _splashForm;
     private Label _logMessageLabel;
 }
+#endif // PLATFORM_WINDOWS

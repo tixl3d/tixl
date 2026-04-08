@@ -110,7 +110,7 @@ public class DrawScene : Instance<DrawScene>
         public readonly InputSlot<int> FillMode = new InputSlot<int>();
 
         [Input(Guid = "42e7cc49-5102-4e74-8bea-c7698cb4abca")]
-        public readonly InputSlot<SharpDX.Direct3D11.CullMode> Culling = new InputSlot<SharpDX.Direct3D11.CullMode>();
+        public readonly InputSlot<CullMode> Culling = new InputSlot<CullMode>();
 
         [Input(Guid = "f01f64e6-0344-48cb-8fc5-8b9c12f0b123", MappedType = typeof(ShadingModes))]
         public readonly InputSlot<int> Shading = new InputSlot<int>();
@@ -128,8 +128,8 @@ public class DrawScene : Instance<DrawScene>
         public readonly InputSlot<float> AlphaCutOff = new InputSlot<float>();
 
         [Input(Guid = "a5ba01f8-5176-4f2f-aac3-ba7d8ede4c20")]
-        public readonly InputSlot<SharpDX.Direct3D11.Filter> Filter = new InputSlot<SharpDX.Direct3D11.Filter>();
+        public readonly InputSlot<Filter> Filter = new InputSlot<Filter>();
 
         [Input(Guid = "b17800d2-cdf3-4334-90a0-d10b8cc27445")]
-        public readonly InputSlot<SharpDX.Direct3D11.TextureAddressMode> WrapMode = new InputSlot<SharpDX.Direct3D11.TextureAddressMode>();
+        public readonly InputSlot<TextureAddressMode> WrapMode = new InputSlot<TextureAddressMode>();
 }

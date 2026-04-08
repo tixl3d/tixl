@@ -45,5 +45,5 @@ internal sealed class Blob : Instance<Blob>
         public readonly InputSlot<T3.Core.DataTypes.Vector.Int2> Resolution = new InputSlot<T3.Core.DataTypes.Vector.Int2>();
 
         [Input(Guid = "fb6ff541-7ffe-4d3e-8b23-2f812f54f689")]
-        public readonly InputSlot<SharpDX.DXGI.Format> TextureFormat = new InputSlot<SharpDX.DXGI.Format>();
+        public readonly InputSlot<Format> TextureFormat = new InputSlot<Format>();
 }

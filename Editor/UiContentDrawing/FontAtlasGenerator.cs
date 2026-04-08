@@ -1,4 +1,5 @@
-﻿using ImGuiNET;
+﻿#if PLATFORM_WINDOWS
+using ImGuiNET;
 using SharpDX;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
@@ -156,3 +157,4 @@ internal static class FontAtlasGenerator
             ImGui.SetCurrentContext(previousContext);
     }
 }
+#endif // PLATFORM_WINDOWS

@@ -1,3 +1,4 @@
+#if PLATFORM_WINDOWS
 using ComputeShaderT3 = T3.Core.DataTypes.ComputeShader;
 
 namespace Types.Gfx;
@@ -68,3 +69,4 @@ public sealed class ComputeShader : Instance<ComputeShader>, IDescriptiveFilenam
     string IStatusProvider.GetStatusMessage() => _statusProviderImplementation.GetStatusMessage();
     #endregion
 }
+#endif // PLATFORM_WINDOWS

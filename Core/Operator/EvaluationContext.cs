@@ -54,7 +54,9 @@ public sealed class EvaluationContext
         ObjectVariables.Clear();
         StringVariables.Clear();
             
+#if PLATFORM_WINDOWS
         PbrContextSettings.SetDefaultToContext(this);
+#endif
     }
 
     /// <summary>
@@ -126,7 +128,9 @@ public sealed class EvaluationContext
         
         
     // Render settings
+#if PLATFORM_WINDOWS
     public Buffer FogParameters { get; set; } = FogSettings.DefaultSettingsBuffer;
+#endif
         
     //public PbrMaterialTextures PbrMaterialTextures { get; set; } = new();
     public PbrMaterial PbrMaterial { get; set; }
@@ -173,6 +177,8 @@ public sealed class EvaluationContext
     public int IteratedListIndex { get; set; }
     public bool BypassCameras { get; set; }
 
+#if PLATFORM_WINDOWS
     public LegacyParticleSystem LegacyParticleSystem;
+#endif
     public ParticleSystem ParticleSystem;
 }

@@ -1,5 +1,7 @@
 #nullable enable
+#if PLATFORM_WINDOWS
 using SharpDX.Direct3D11;
+#endif
 using SilkWindows;
 using System.Diagnostics;
 using System.Globalization;
@@ -26,7 +28,9 @@ using T3.Editor.Skills.Training;
 using T3.Editor.SystemUi;
 using T3.Editor.UiContentDrawing;
 using T3.Editor.UiModel.Helpers;
+#if PLATFORM_WINDOWS
 using T3.MsForms;
+#endif
 using T3.SystemUi;
 using T3.Core.Audio;
 using ShaderCompiler = T3.Core.Resource.ShaderCompiling.ShaderCompiler;
@@ -39,7 +43,9 @@ namespace T3.Editor;
 internal static class Program
 {
     public static IUiContentDrawer? UiContentContentDrawer;
+#if PLATFORM_WINDOWS
     public static Device? Device { get; private set; }
+#endif
 
     public static Version Version => RuntimeAssemblies.Version;
     private static string? _versionText;
@@ -87,15 +93,24 @@ internal static class Program
         // Not calling this first will cause exceptions...
         Console.WriteLine("Starting T3 Editor");
         Console.WriteLine("Creating EditorUi");
-        EditorUi.Instance = new MsFormsEditor();
+#if PLATFORM_WINDOWS
+        EditorUi.Instance = new MsForms.MsFormsEditor();
+#else
+        EditorUi.Instance = new LinuxUi.LinuxEditorUi();
+#endif
             
         var windowProvider = new SilkWindowProvider();
         var imguiContextLock = windowProvider.ContextLock;
         ImGuiWindowService.Instance = windowProvider;
         BlockingWindow.Instance = windowProvider;
 
+#if PLATFORM_WINDOWS
         Console.WriteLine("Creating DX11ShaderCompiler");
         ShaderCompiler.Instance = new DX11ShaderCompiler();
+#else
+        Console.WriteLine("Creating SpirVShaderCompiler");
+        ShaderCompiler.Instance = new SpirVShaderCompiler();
+#endif
 
         // Console.WriteLine("Validating startup location");
         // StartupValidation.ValidateNotRunningFromSystemFolder();
@@ -114,7 +129,11 @@ internal static class Program
         #endif
 
         Console.WriteLine("Creating SplashScreen");
+#if PLATFORM_WINDOWS
         ISplashScreen splashScreen = new SplashScreen.SplashScreen();
+#else
+        ISplashScreen splashScreen = new LinuxUi.NoOpSplashScreen();
+#endif
 
         var path = Path.Combine(SharedResources.EditorResourcesDirectory,  "images", "t3-SplashScreen.png");
         splashScreen.Show(path);
@@ -160,26 +179,40 @@ internal static class Program
         Log.Debug("Initializing ProgramWindows...");
         ProgramWindows.InitializeMainWindow(FormattedEditorVersion, out var device);
         AssetHandling.InitAssetTypes();
-        
+
+#if PLATFORM_WINDOWS
         Device = device;
 
         if (ShaderCompiler.Instance is not DX11ShaderCompiler shaderCompiler)
             throw new Exception("ShaderCompiler is not DX11ShaderCompiler");
 
         shaderCompiler.Device = device;
+#endif
 
         Log.Debug("Initializing UiContentContentDrawer...");
+#if PLATFORM_WINDOWS
         var contentDrawer = new WindowsUiContentDrawer();
         UiContentContentDrawer = contentDrawer;
         contentDrawer.Initialize(device, ProgramWindows.Main.Width, ProgramWindows.Main.Height, imguiContextLock, out var context);
+#else
+        var linuxDrawer = new LinuxUiContentDrawer();
+        linuxDrawer.Initialize(FormattedEditorVersion, 1920, 1080, imguiContextLock);
+        UiContentContentDrawer = linuxDrawer;
+#endif
 
         Log.Debug("Initialize Camera Interaction...");
+#if PLATFORM_WINDOWS
         var spaceMouse = new SpaceMouse(ProgramWindows.Main.HwndHandle);
         CameraInteraction.ManipulationDevices = [spaceMouse];
         ProgramWindows.SetInteractionDevices(spaceMouse);
+#endif
 
         Log.Debug("Initialize Resource Manager...");
+#if PLATFORM_WINDOWS
         ResourceManager.Init(device);
+#else
+        ResourceManager.Init(new T3.Core.Resource.GpuDeviceStub());
+#endif
         SharedResources.Initialize();
 
         Log.Debug("Initialize User Interface...");
@@ -239,7 +272,14 @@ internal static class Program
         T3Style.Apply();
             
         // ReSharper disable once AccessToDisposedClosure
+#if PLATFORM_WINDOWS
         ProgramWindows.Main.RunRenderLoop(UiContentContentDrawer.RenderCallback);
+#else
+        if (UiContentContentDrawer is LinuxUiContentDrawer linuxContentDrawer)
+        {
+            linuxContentDrawer.RunMainLoop();
+        }
+#endif
         IsShuttingDown = true;
 
         try

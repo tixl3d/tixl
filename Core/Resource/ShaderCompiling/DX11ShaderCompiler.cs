@@ -1,3 +1,4 @@
+#if PLATFORM_WINDOWS
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -194,3 +195,4 @@ public sealed partial class DX11ShaderCompiler : ShaderCompiler
         public event Action<IResourceConsumer> Disposing;
     }
 }
+#endif // PLATFORM_WINDOWS

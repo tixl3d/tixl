@@ -1,14 +1,18 @@
 #nullable enable
 using System.Diagnostics;
 using System.Globalization;
+#if PLATFORM_WINDOWS
 using System.Management;
+#endif
 using System.Runtime.InteropServices;
 using System.Text;
 using ImGuiNET;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.App;
+#if PLATFORM_WINDOWS
 using System.Windows.Forms;
+#endif
 using T3.Core.Resource;
 using System.Reflection;
 using T3.Editor.Gui.Input;
@@ -205,9 +209,12 @@ internal sealed class AboutDialog : ModalDialog
     {
         try
         {
+#if PLATFORM_WINDOWS
             var currentInputLanguage = InputLanguage.CurrentInputLanguage;
-
             return $"{currentInputLanguage.Culture.Name} {currentInputLanguage.LayoutName} ";
+#else
+            return "Unknown";
+#endif
         }
         catch (Exception)
         {
@@ -263,6 +270,7 @@ internal sealed class AboutDialog : ModalDialog
 
     private static string GetGpuInformation(string infoType = "both")
     {
+#if PLATFORM_WINDOWS
         var gpuList = new List<string>();
         var activeGpu = ProgramWindows.ActiveGpu;
 
@@ -272,11 +280,11 @@ internal sealed class AboutDialog : ModalDialog
             {
                 foreach (ManagementObject obj in searcher.Get())
                 {
-                    
+
                     var name = obj["Name"]?.ToString() ?? "Unknown";
                     if (name == activeGpu)
                         name += " (Active)";
-                    
+
                     var driverVersion = obj["DriverVersion"]?.ToString() ?? "Unknown";
 
                     string gpuDetails = infoType.ToLower() switch
@@ -296,12 +304,14 @@ internal sealed class AboutDialog : ModalDialog
         {
             // Silently fail if we can't get GPU information
         }
+#endif
 
         return "Unknown";
     }
 
     private static string GetIdeName()
     {
+#if PLATFORM_WINDOWS
         try
         {
             // Get the current process
@@ -334,6 +344,7 @@ internal sealed class AboutDialog : ModalDialog
         {
             Log.Warning($"Failed to get IDE name: {e.Message}");
         }
+#endif
 
         return "Unknown";
     }

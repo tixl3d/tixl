@@ -36,7 +36,9 @@ internal static partial class ProjectSetup
     {
         Environment.SetEnvironmentVariable(envVar, envValue, EnvironmentVariableTarget.Process);
 
-        // todo - this will not work on linux
+        if (!OperatingSystem.IsWindows())
+            return;
+
         var existing = Environment.GetEnvironmentVariable(envVar, EnvironmentVariableTarget.User);
         if (existing == envValue)
             return;
@@ -168,7 +170,7 @@ internal static partial class ProjectSetup
         }
 
         Log.Info("Loading symbols...");
-        if (parallel)
+        if (parallel && OperatingSystem.IsWindows())
         {
             packages
                .AsParallel()
@@ -181,10 +183,12 @@ internal static partial class ProjectSetup
         }
         else
         {
+            // Sequential loading on Linux — parallel assembly loading causes race conditions
+            // in the AssemblyLoadContext dependency tracking
             for (var index = packages.Length - 1; index >= 0; index--)
             {
                 var package = packages[index];
-                package.LoadSymbols(parallel, out var newlyRead, out var allNewSymbols);
+                package.LoadSymbols(false, out var newlyRead, out var allNewSymbols);
                 loadedSymbols.TryAdd(package, newlyRead);
                 loadedOrCreatedSymbols.TryAdd(package, allNewSymbols);
             }
