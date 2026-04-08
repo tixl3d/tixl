@@ -64,7 +64,17 @@ internal sealed class CsProjectFile
     /// <summary>
     /// Returns the target dotnet framework for the project, or adds the default framework if none is found and returns that.
     /// </summary>
-    private string TargetFramework => _projectRootElement.GetOrAddProperty(PropertyType.TargetFramework, ProjectXml.TargetFramework);
+    private string TargetFramework
+    {
+        get
+        {
+            var raw = _projectRootElement.GetOrAddProperty(PropertyType.TargetFramework, ProjectXml.TargetFramework);
+            // Resolve the MSBuild variable at runtime — it evaluates per-platform in Tixl.props
+            if (raw == "$(TixlNetFrameworkVersion)")
+                return OperatingSystem.IsWindows() ? ProjectXml.TargetFramework + "-windows" : ProjectXml.TargetFramework;
+            return raw;
+        }
+    }
     
     /// <summary>
     /// Prevent loading a project

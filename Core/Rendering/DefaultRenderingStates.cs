@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if PLATFORM_WINDOWS
+using System;
 using SharpDX;
 using SharpDX.Direct3D11;
 using T3.Core.Resource;
@@ -171,3 +172,4 @@ public static class DefaultRenderingStates
         }
     }
 }
+#endif // PLATFORM_WINDOWS

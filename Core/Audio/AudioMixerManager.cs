@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.Threading;
 using ManagedBass;
 using ManagedBass.Mix;
+#if PLATFORM_WINDOWS
 using ManagedBass.Wasapi;
+#endif
 using T3.Core.Logging;
 
 namespace T3.Core.Audio;
@@ -229,7 +231,9 @@ public static class AudioMixerManager
         }
 
         // Load BASS FLAC plugin for native FLAC support (better than Media Foundation)
-        _flacPluginHandle = Bass.PluginLoad("bassflac.dll");
+        var flacPluginName = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
+            System.Runtime.InteropServices.OSPlatform.Windows) ? "bassflac.dll" : "libbassflac.so";
+        _flacPluginHandle = Bass.PluginLoad(flacPluginName);
         if (_flacPluginHandle == 0)
         {
             Log.Warning($"[AudioMixer] Failed to load BASS FLAC plugin: {Bass.LastError}. FLAC files will use Media Foundation fallback.");
@@ -556,16 +560,17 @@ public static class AudioMixerManager
     /// <returns>The device sample rate in Hz, or 0 if it couldn't be determined.</returns>
     private static int GetDefaultOutputSampleRate()
     {
+#if PLATFORM_WINDOWS
         try
         {
             // Enumerate WASAPI devices to find the default output's loopback
             // Loopback devices represent the output and have the correct MixFrequency
             var deviceCount = BassWasapi.DeviceCount;
-            
+
             for (var i = 0; i < deviceCount; i++)
             {
                 var info = BassWasapi.GetDeviceInfo(i);
-                
+
                 // Look for enabled loopback device (represents system output)
                 if (info.IsEnabled && info.IsLoopback && !info.IsInput)
                 {
@@ -574,7 +579,7 @@ public static class AudioMixerManager
                     return sampleRate;
                 }
             }
-            
+
             // Fallback: try to find any enabled loopback device
             for (var i = 0; i < deviceCount; i++)
             {
@@ -586,14 +591,14 @@ public static class AudioMixerManager
                     return sampleRate;
                 }
             }
-            
+
             Log.Debug("[AudioMixer] Could not find default output device sample rate from WASAPI");
         }
         catch (Exception ex)
         {
             Log.Debug($"[AudioMixer] Failed to query WASAPI device sample rate: {ex.Message}");
         }
-        
+#endif
         return 0; // Couldn't determine
     }
 
@@ -627,14 +632,19 @@ public static class AudioMixerManager
         
         try
         {
-            // Check for bass.dll
-            var bassDllPath = System.IO.Path.Combine(Environment.CurrentDirectory, "bass.dll");
+            // Check for native BASS libraries
+            var isWindows = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
+                System.Runtime.InteropServices.OSPlatform.Windows);
+            var bassLibName = isWindows ? "bass.dll" : "libbass.so";
+            var bassMixLibName = isWindows ? "bassmix.dll" : "libbassmix.so";
+
+            var bassDllPath = System.IO.Path.Combine(Environment.CurrentDirectory, bassLibName);
             var bassDllExists = System.IO.File.Exists(bassDllPath);
-            Log.Error($"  bass.dll exists in current dir: {bassDllExists}");
-            
-            var bassMixDllPath = System.IO.Path.Combine(Environment.CurrentDirectory, "bassmix.dll");
+            Log.Error($"  {bassLibName} exists in current dir: {bassDllExists}");
+
+            var bassMixDllPath = System.IO.Path.Combine(Environment.CurrentDirectory, bassMixLibName);
             var bassMixDllExists = System.IO.File.Exists(bassMixDllPath);
-            Log.Error($"  bassmix.dll exists in current dir: {bassMixDllExists}");
+            Log.Error($"  {bassMixLibName} exists in current dir: {bassMixDllExists}");
         }
         catch (Exception ex)
         {

@@ -1,6 +1,10 @@
 #nullable enable
+#if PLATFORM_WINDOWS
 using SharpDX.Direct3D11;
 using SharpDX.WIC;
+#else
+using T3.Core.Gpu;
+#endif
 using SharpGLTF.Schema2;
 using T3.Core.Rendering;
 using T3.Core.Rendering.Material;
@@ -783,7 +787,7 @@ public class LoadGltfScene : Instance<LoadGltfScene>
         var resultTextureDescription = new Texture2DDescription
                                            {
                                                BindFlags = BindFlags.UnorderedAccess | BindFlags.RenderTarget | BindFlags.ShaderResource,
-                                               Format = SharpDX.DXGI.Format.R8G8B8A8_UNorm,
+                                               Format = Format.R8G8B8A8_UNorm,
                                                Width = width,
                                                Height = height,
                                                MipLevels = 1,

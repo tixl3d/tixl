@@ -1,6 +1,10 @@
 #nullable enable
 using ImGuiNET;
+#if PLATFORM_WINDOWS
 using SharpDX.Direct3D11;
+#else
+using T3.Core.Gpu;
+#endif
 using T3.Core.Audio;
 using T3.Core.DataTypes;
 using T3.Core.Resource;
@@ -49,22 +53,23 @@ internal sealed class TimeLineImage
             _loadedImagePath = null;
             return;
         }
-                
+
         if (imagePath == _loadedImagePath)
             return;
 
         _textureResource?.Dispose();
         var resource = ResourceManager.CreateTextureResource(imagePath, soundtrackHandle.Owner);
         _textureResource = resource;
-            
+
         if (resource.Value != null)
         {
             _loadedImagePath = imagePath;
 
+#if PLATFORM_WINDOWS
             _textureResource.Value?.CreateShaderResourceView(ref _srv, imagePath);
-
+#endif
         }
-            
+
         _loadedImagePath = imagePath;
     }
 

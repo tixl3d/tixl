@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿#if PLATFORM_WINDOWS
+using SharpDX;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
 using T3.Core.Resource;
@@ -31,3 +32,4 @@ internal static class TextureUtils
         return colorBuffer;
     }
 }
+#endif // PLATFORM_WINDOWS

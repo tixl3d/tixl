@@ -1,3 +1,4 @@
+#if PLATFORM_WINDOWS
 using PixelShaderD3D = T3.Core.DataTypes.PixelShader;
 
 namespace Types.Gfx;
@@ -39,3 +40,4 @@ public sealed class PixelShaderFromSource : Instance<PixelShaderFromSource>, ISh
     string IStatusProvider.GetStatusMessage() => _statusProviderImplementation.GetStatusMessage();
     #endregion
 }
+#endif // PLATFORM_WINDOWS

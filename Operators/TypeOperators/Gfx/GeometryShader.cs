@@ -1,3 +1,4 @@
+#if PLATFORM_WINDOWS
 using GeometryShaderT3 = T3.Core.DataTypes.GeometryShader;
 
 namespace Types.Gfx;
@@ -44,3 +45,4 @@ public sealed class GeometryShader : Instance<GeometryShader>, IShaderOperator<G
     string IStatusProvider.GetStatusMessage() => _statusProviderImplementation.GetStatusMessage();
     #endregion
 }
+#endif // PLATFORM_WINDOWS

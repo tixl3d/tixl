@@ -1,3 +1,4 @@
+#if PLATFORM_WINDOWS
 namespace Types.Gfx;
 
 [Guid("fc1ef086-c160-4174-8e60-a4eda931163d")]
@@ -40,11 +41,11 @@ public sealed class Texture3d : Instance<Texture3d>
             var tex = _texture3d;
             OutputTexture.Value!.Texture = tex;
                 
-            if ((BindFlags.Value & SharpDX.Direct3D11.BindFlags.ShaderResource) > 0)
+            if ((BindFlags.Value & BindFlags.ShaderResource) > 0)
                 tex.CreateShaderResourceView(ref OutputTexture.Value.Srv, "");
-            if ((BindFlags.Value & SharpDX.Direct3D11.BindFlags.RenderTarget) > 0)
+            if ((BindFlags.Value & BindFlags.RenderTarget) > 0)
                 tex.CreateRenderTargetView(ref OutputTexture.Value.Rtv, "");
-            if ((BindFlags.Value & SharpDX.Direct3D11.BindFlags.UnorderedAccess) > 0)
+            if ((BindFlags.Value & BindFlags.UnorderedAccess) > 0)
                 tex.CreateUnorderedAccessView(ref OutputTexture.Value.Uav, "");
                 
         }
@@ -101,3 +102,4 @@ public sealed class Texture3d : Instance<Texture3d>
     [Input(Guid = "1884edfa-622b-4b96-a081-95dc361e79f3")]
     public readonly InputSlot<ResourceOptionFlags> ResourceOptionFlags = new();
 }
+#endif // PLATFORM_WINDOWS

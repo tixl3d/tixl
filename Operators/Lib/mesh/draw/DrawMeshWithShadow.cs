@@ -22,7 +22,7 @@ public class DrawMeshWithShadow : Instance<DrawMeshWithShadow>
         public readonly InputSlot<int> FillMode = new InputSlot<int>();
 
         [Input(Guid = "8cea9257-8bde-46ac-9c32-8a63fea405d6")]
-        public readonly InputSlot<SharpDX.Direct3D11.CullMode> Culling = new InputSlot<SharpDX.Direct3D11.CullMode>();
+        public readonly InputSlot<CullMode> Culling = new InputSlot<CullMode>();
 
         [Input(Guid = "f3f574a3-6e2f-45b9-9335-c8fc17111e05")]
         public readonly InputSlot<bool> EnableZTest = new InputSlot<bool>();

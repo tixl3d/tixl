@@ -1,4 +1,5 @@
-﻿#nullable enable
+﻿#if PLATFORM_WINDOWS
+#nullable enable
 
 using System;
 using System.Collections.Generic;
@@ -153,3 +154,4 @@ public sealed class StructuredBufferReadAccess : IDisposable
     private readonly List<ReadRequestItem> _readRequests = new(BufferCount);
     private int _frameCounter;
 }
+#endif // PLATFORM_WINDOWS

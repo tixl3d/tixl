@@ -1,15 +1,19 @@
 ﻿#nullable enable
 using System.Diagnostics;
+#if PLATFORM_WINDOWS
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
 using SharpDX.Mathematics.Interop;
+using Device = SharpDX.Direct3D11.Device;
+#else
+using T3.Core.Gpu;
+#endif
 using T3.Core.DataTypes;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.Resource;
 using T3.Editor.Gui.Windows;
-using Device = SharpDX.Direct3D11.Device;
 using Texture2D = T3.Core.DataTypes.Texture2D;
 using Utilities = T3.Core.Utils.Utilities;
 
@@ -42,15 +46,13 @@ internal sealed class CommandOutputUi : OutputUi<Command>
             return;
         }
 
+        StartInvalidation(slot);
+
+#if PLATFORM_WINDOWS
         var originalCamMatrix = context.WorldToCamera;
         var originalViewMatrix = context.CameraToClipSpace;
 
-        // Invalidate
-        StartInvalidation(slot);
-
-        // Setup render target - TODO: this should not be done for all 'Command' outputs as most of them don't produce image content
         var device = ResourceManager.Device;
-
         var size = context.RequestedResolution;
         UpdateTextures(device, size, Format.R16G16B16A16_Float);
         var deviceContext = device.ImmediateContext;
@@ -67,10 +69,11 @@ internal sealed class CommandOutputUi : OutputUi<Command>
         deviceContext.ClearRenderTargetView(_msaaColorBufferRtv, colorRgba);
         if (_msaaDepthBufferDsv != null)
             deviceContext.ClearDepthStencilView(_msaaDepthBufferDsv, DepthStencilClearFlags.Depth, 1.0f, 0);
+#endif
 
-        // Evaluate the operator
         slot.Update(context);
 
+#if PLATFORM_WINDOWS
         if (context.ShowGizmos != T3.Core.Operator.GizmoVisibility.Off)
         {
             context.WorldToCamera = originalCamMatrix;
@@ -97,25 +100,19 @@ internal sealed class CommandOutputUi : OutputUi<Command>
             }
         }
 
-        // Restore previous setup
         deviceContext.Rasterizer.SetViewports(prevViewports);
         deviceContext.OutputMerger.SetTargets(prevTargetViews);
 
-        if (prevTargetViews == null)
+        if (prevTargetViews != null)
         {
-            Log.Warning("Can't dispose obsolete RenderTargetView after draw. This indicates corrupted a render context.");
-        }
-        else
-        {
-            // Clean up ref counts for RTVs
             foreach (var t in prevTargetViews)
             {
                 if (t == null || t.IsDisposed)
                     continue;
-
                 t.Dispose();
             }
         }
+#endif
     }
 
     private bool EnsureGridOutputsExist()
@@ -160,13 +157,16 @@ internal sealed class CommandOutputUi : OutputUi<Command>
 
         Debug.Assert(slot is Slot<Command>);
 
+#if PLATFORM_WINDOWS
         var outputTexture = _resolvedColorBuffer ?? _msaaColorBuffer;
         if (outputTexture != null)
         {
             canvas.DrawTexture(outputTexture);
         }
+#endif
     }
 
+#if PLATFORM_WINDOWS
     private void UpdateTextures(Device device, Int2 size, Format format)
     {
         try
@@ -274,6 +274,7 @@ internal sealed class CommandOutputUi : OutputUi<Command>
     private RenderTargetView? _resolvedColorBufferRtv;
     private Texture2D? _msaaDepthBuffer;
     private DepthStencilView? _msaaDepthBufferDsv;
+#endif
 
     // instance management
     private readonly Symbol? _outputWindowGridSymbol;

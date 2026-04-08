@@ -1,9 +1,11 @@
 using System.IO;
 using System.Linq;
 using System.Threading;
+#if PLATFORM_WINDOWS
 using SharpDX;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
+#endif
 using T3.Core.Animation;
 using T3.Core.Audio;
 using T3.Core.Compilation;
@@ -56,6 +58,7 @@ internal static partial class Program
            .ForAll(packageInfo => SymbolPackage.ApplySymbolChildren(packageInfo.NewlyLoadedSymbols));
     }
     
+#if PLATFORM_WINDOWS
     private static void PreloadShadersAndResources(double durationSecs,
                                                    Int2 resolution,
                                                    Playback playback,
@@ -157,4 +160,5 @@ internal static partial class Program
             return EvaluateAndDrawOutput(context, resolution, textureOutput, deviceContext, renderView);
         }
     }
+#endif
 }

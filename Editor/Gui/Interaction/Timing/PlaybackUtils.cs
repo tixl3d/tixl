@@ -23,7 +23,9 @@ public static class PlaybackUtils
         // if (settings == null)
         //     return;
 
+#if PLATFORM_WINDOWS
         WasapiAudioInput.StartFrame(settings);
+#endif
             
         if (settings.AudioSource == PlaybackSettings.AudioSources.ProjectSoundTrack)
         {

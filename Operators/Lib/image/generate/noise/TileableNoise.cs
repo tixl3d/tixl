@@ -46,7 +46,7 @@ internal sealed class TileableNoise : Instance<TileableNoise>
         public readonly InputSlot<bool> GenerateMips = new InputSlot<bool>();
 
         [Input(Guid = "048d3e2b-7d9b-4250-a69a-12f9ee22f6ca")]
-        public readonly InputSlot<SharpDX.DXGI.Format> OutputFormat = new InputSlot<SharpDX.DXGI.Format>();
+        public readonly InputSlot<Format> OutputFormat = new InputSlot<Format>();
 
 
     private enum Methods

@@ -257,7 +257,15 @@ public abstract partial class SymbolPackage : IResourcePackage
                                          if (!newTypes.TryGetValue(result.Guid, out var type))
                                              return default;
 
-                                         return ReadSymbolFromJsonFileResult(result, type);
+                                         try
+                                         {
+                                             return ReadSymbolFromJsonFileResult(result, type);
+                                         }
+                                         catch (Exception e)
+                                         {
+                                             Log.Error($"Failed to load symbol from '{result.FilePath}': {e.Message}");
+                                             return default;
+                                         }
                                      })
                              .Where(symbolReadResult => symbolReadResult.Result.Symbol is not null)
                              .ToArray();

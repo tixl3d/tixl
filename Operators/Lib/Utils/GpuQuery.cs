@@ -1,5 +1,9 @@
+#if PLATFORM_WINDOWS
 using SharpDX;
 using SharpDX.Direct3D11;
+#else
+using T3.Core.Gpu;
+#endif
 
 namespace Lib.Utils;
 

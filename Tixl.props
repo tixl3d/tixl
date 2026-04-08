@@ -1,5 +1,5 @@
 
-<!-- 
+<!--
  A set of properties can are included in the various other csproj file.
  Note: These should NOT be used for operator projects, because updating those is handled in
 CsProjectFile and ProjectXML.cs
@@ -8,13 +8,32 @@ CsProjectFile and ProjectXML.cs
   <PropertyGroup>
     <TixlVersion>4.1.1.0</TixlVersion>
     <TixlVersionSuffix>alpha</TixlVersionSuffix>
-    <TixlNetFrameworkVersion>net9.0-windows</TixlNetFrameworkVersion>
     <TixlNetCoreFrameworkVersion>net9.0</TixlNetCoreFrameworkVersion>
     <TixlIsDotNetFramework>false</TixlIsDotNetFramework>
+
+    <!-- Platform detection -->
+    <IsWindows>$([MSBuild]::IsOSPlatform('Windows'))</IsWindows>
+    <IsLinux>$([MSBuild]::IsOSPlatform('Linux'))</IsLinux>
+    <IsMacOS>$([MSBuild]::IsOSPlatform('OSX'))</IsMacOS>
+
+    <!-- On Windows use net9.0-windows (enables WinForms, WPF, etc.); elsewhere use plain net9.0 -->
+    <TixlNetFrameworkVersion Condition="$(IsWindows)">net9.0-windows</TixlNetFrameworkVersion>
+    <TixlNetFrameworkVersion Condition="!$(IsWindows)">net9.0</TixlNetFrameworkVersion>
 
     <TixlEnableUWPInTargets>False</TixlEnableUWPInTargets>
     <TixlEnableAndroidInTargets>False</TixlEnableAndroidInTargets>
 
     <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <!-- Platform-specific compilation constants -->
+  <PropertyGroup Condition="$(IsWindows)">
+    <DefineConstants>$(DefineConstants);PLATFORM_WINDOWS</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(IsLinux)">
+    <DefineConstants>$(DefineConstants);PLATFORM_LINUX</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(IsMacOS)">
+    <DefineConstants>$(DefineConstants);PLATFORM_MACOS</DefineConstants>
   </PropertyGroup>
 </Project>

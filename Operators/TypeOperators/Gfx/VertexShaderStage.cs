@@ -1,3 +1,4 @@
+#if PLATFORM_WINDOWS
 namespace Types.Gfx;
 
 [Guid("a9600440-4203-4315-bdb1-4dfd603b4515")]
@@ -55,7 +56,7 @@ public sealed class VertexShaderStage : Instance<VertexShaderStage>
 
     private Buffer[] _constantBuffers = new Buffer[0];
     private ShaderResourceView[] _shaderResourceViews = new ShaderResourceView[0];
-    private SharpDX.Direct3D11.SamplerState[] _samplerStates = new SharpDX.Direct3D11.SamplerState[0];
+    private SamplerState[] _samplerStates = new SamplerState[0];
 
     private SharpDX.Direct3D11.VertexShader? _prevVertexShader;
     private Buffer[]? _prevConstantBuffers;
@@ -71,5 +72,6 @@ public sealed class VertexShaderStage : Instance<VertexShaderStage>
     public readonly MultiInputSlot<ShaderResourceView> ShaderResources = new();
 
     [Input(Guid = "2BC7584D-A347-4954-9120-C1841AF76650")]
-    public readonly MultiInputSlot<SharpDX.Direct3D11.SamplerState> SamplerStates = new();
+    public readonly MultiInputSlot<SamplerState> SamplerStates = new();
 }
+#endif // PLATFORM_WINDOWS

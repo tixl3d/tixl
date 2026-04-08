@@ -1,7 +1,11 @@
-﻿using SharpDX;
+﻿#if PLATFORM_WINDOWS
+using SharpDX;
 using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
 using SharpDX.Mathematics.Interop;
+#else
+using T3.Core.Gpu;
+#endif
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
@@ -22,7 +26,8 @@ public sealed class ThumbnailCanvasRendering
     {
         if (_initialized)
             return;
-            
+
+#if PLATFORM_WINDOWS
         // if (_canvasTexture != null || _canvasTextureRtv == null)
         //     return;
 
@@ -48,6 +53,7 @@ public sealed class ThumbnailCanvasRendering
         _canvasTexture = Texture2D.CreateTexture2D(description);
         CanvasTextureSrv = SrvManager.GetSrvForTexture(_canvasTexture);
         _canvasTextureRtv = new RenderTargetView(Program.Device, _canvasTexture);
+#endif
         _initialized = true;
     }
 
@@ -55,7 +61,8 @@ public sealed class ThumbnailCanvasRendering
     {
         if (!_initialized)
             return;
-            
+
+#if PLATFORM_WINDOWS
         var previewTextureSrv = SrvManager.GetSrvForTexture(textureSlot.Value);
 
         // Setup graphics pipeline for rendering into the canvas texture
@@ -78,14 +85,17 @@ public sealed class ThumbnailCanvasRendering
         // Render the preview in the canvas texture
         deviceContext.Draw(3, 0);
         deviceContext.PixelShader.SetShaderResource(0, null);
+#endif
     }
 
     public void ClearTexture()
     {
         if (!_initialized)
             return;
-            
+
+#if PLATFORM_WINDOWS
         Program.Device.ImmediateContext.ClearRenderTargetView(_canvasTextureRtv, new RawColor4(0, 0, 0, 0));
+#endif
     }
 
     public Vector2 GetCanvasTextureSize()

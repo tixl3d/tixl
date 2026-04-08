@@ -1,6 +1,6 @@
 using T3.Core.Rendering;
 
-// SharpDX.Direct3D11.Buffer;
+// Buffer;
 //using Utilities = T3.Core.Utils.Utilities;
 
 namespace Lib.numbers.@int.process;

@@ -1,5 +1,9 @@
 #nullable enable
+#if PLATFORM_WINDOWS
 using SharpDX.Direct3D11;
+#else
+using T3.Core.Gpu;
+#endif
 using T3.Core.Utils;
 
 namespace Lib.image.use;

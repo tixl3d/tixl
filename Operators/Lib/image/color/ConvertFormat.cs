@@ -11,7 +11,7 @@ internal sealed class ConvertFormat : Instance<ConvertFormat>
         public readonly InputSlot<T3.Core.DataTypes.Texture2D> Texture2d = new InputSlot<T3.Core.DataTypes.Texture2D>();
 
         [Input(Guid = "3f7b713d-2808-4312-87b4-707cb891b567")]
-        public readonly InputSlot<SharpDX.DXGI.Format> Format = new InputSlot<SharpDX.DXGI.Format>();
+        public readonly InputSlot<Format> Format = new InputSlot<Format>();
 
         [Input(Guid = "88623684-a5e4-4415-8458-648761e834e1")]
         public readonly InputSlot<bool> GenerateMipMaps = new InputSlot<bool>();

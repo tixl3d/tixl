@@ -1,8 +1,12 @@
 using System.Text.RegularExpressions;
+#if PLATFORM_WINDOWS
 using SharpDX;
 using SharpDX.Direct3D11;
 using SharpDX.IO;
 using SharpDX.WIC;
+#else
+using T3.Core.Gpu;
+#endif
 using T3.Core.Animation;
 using T3.Core.UserData;
 using T3.Core.Utils;
@@ -157,13 +161,15 @@ internal sealed class VisualTest : Instance<VisualTest>
             var ready= TryUpdateImage(context, _testIndex, out _, out var image);
             if (!ready)
             {
-                Log.Debug(" waiting for op to be ready...", this);    
+                Log.Debug(" waiting for op to be ready...", this);
                 return;
             }
             var filepath = GetReferenceFilepath(_testIndex);
             Log.Debug("Saving image " + filepath, this);
 
+#if PLATFORM_WINDOWS
             SaveTexture(image, filepath);
+#endif
             testResultBuilder.Add("saved " + filepath);
         }
 
@@ -174,12 +180,13 @@ internal sealed class VisualTest : Instance<VisualTest>
 
     private void ConductTests(EvaluationContext context, List<string> testResult)
     {
+#if PLATFORM_WINDOWS
         SharpDX.Direct3D11.Texture2D diffColorImage = null;
         for (; _testIndex < _stepCount; _testIndex++)
         {
             var referenceFilepath = GetReferenceFilepath(_testIndex);
             var testName = GetTestName(_testIndex);
-            
+
             if (!TryLoadTextureFromFile(ResourceManager.Device, referenceFilepath, out var referenceImage))
             {
                 Log.Warning($"Can't find image... {referenceFilepath}");
@@ -189,20 +196,20 @@ internal sealed class VisualTest : Instance<VisualTest>
             var ready = TryUpdateImage(context, _testIndex, out var time, out var image);
             if (!ready)
             {
-                Log.Debug(" waiting for op to be ready...", this);    
+                Log.Debug(" waiting for op to be ready...", this);
                 return;
             }
 
             if (image == null)
             {
-                Log.Debug(" failed to get image...", this);    
+                Log.Debug(" failed to get image...", this);
                 return;
             }
-            
+
             var currentWithCpuAccess = _textureBgraReadAccess.ConvertToCpuReadableBgra(image);
             var deviation = CompareImage(currentWithCpuAccess, referenceImage);
             var failPath = GetReferenceFilepath(_testIndex, "FAIL");
-            
+
             var timeLabel = time == 0 ? string.Empty : $"@{time:0.00}";
             if (deviation < _threshold)
             {
@@ -218,17 +225,26 @@ internal sealed class VisualTest : Instance<VisualTest>
                 SaveTexture(image, GetReferenceFilepath(_testIndex, "FAIL"));
                 testResult.Add($"{testName} {timeLabel}: FAILED ({deviation:0.00} > {_threshold})");
             }
-            
+
             Utilities.Dispose(ref diffColorImage);
         }
+#else
+        for (; _testIndex < _stepCount; _testIndex++)
+        {
+            var testName = GetTestName(_testIndex);
+            testResult.Add($"{testName}: SKIPPED (visual tests not supported on this platform)");
+        }
+#endif
         _state = States.Completed;
         Playback.Current.IsRenderingToFile = false;
     }
 
+#if PLATFORM_WINDOWS
     private static void SaveTexture(Texture2D texture, string filePath)
     {
         _textureBgraReadAccess.InitiateConvertAndReadBack(texture, WriteTextureToFile, filePath);
     }
+#endif
 
     private string GetTestName(int index)
     {
@@ -280,6 +296,7 @@ internal sealed class VisualTest : Instance<VisualTest>
         return compositionName;
     }
 
+#if PLATFORM_WINDOWS
     private static bool TryLoadTextureFromFile(SharpDX.Direct3D11.Device device, string filePath, out SharpDX.Direct3D11.Texture2D image)
     {
         if (!File.Exists(filePath))
@@ -338,7 +355,7 @@ internal sealed class VisualTest : Instance<VisualTest>
 
     /// <remarks>
     /// Sadly, we have to deal with BRGA vs RGBA because we convert the current image to brga on the GPU
-    /// to speedup writing as PNG.  
+    /// to speedup writing as PNG.
     /// </remarks>
     private float CompareImage(SharpDX.Direct3D11.Texture2D currentBgraWithCpuAccess,
                                SharpDX.Direct3D11.Texture2D reference)
@@ -514,7 +531,8 @@ internal sealed class VisualTest : Instance<VisualTest>
             stream.Dispose();
         }
     }
-    
+#endif
+
     private States _state = States.Waiting;
     private int _testIndex;
 
@@ -542,7 +560,9 @@ internal sealed class VisualTest : Instance<VisualTest>
     private const string TestResultKey = "_TestResult";
     private const string TestActionKey = "_TestAction";
 
+#if PLATFORM_WINDOWS
     private static readonly TextureBgraReadAccess _textureBgraReadAccess = new(true);
+#endif
 
         [Input(Guid = "ed9887ca-5ee4-4fb7-a835-071de255a893")]
         public readonly InputSlot<T3.Core.DataTypes.Texture2D> Image = new InputSlot<T3.Core.DataTypes.Texture2D>();

@@ -98,7 +98,7 @@ internal sealed class DrawMesh : Instance<DrawMesh>, ICustomDropdownHolder, ICom
         public readonly InputSlot<int> FillMode = new InputSlot<int>();
 
         [Input(Guid = "9e957f4a-6502-4905-8d97-331f8b54097c")]
-        public readonly InputSlot<SharpDX.Direct3D11.CullMode> Culling = new InputSlot<SharpDX.Direct3D11.CullMode>();
+        public readonly InputSlot<CullMode> Culling = new InputSlot<CullMode>();
 
         [Input(Guid = "05e0b0e3-6e79-48bd-a356-3dcb65c9040f", MappedType = typeof(ShadingModes))]
         public readonly InputSlot<int> Shading = new InputSlot<int>();
@@ -113,10 +113,10 @@ internal sealed class DrawMesh : Instance<DrawMesh>, ICustomDropdownHolder, ICom
         public readonly InputSlot<bool> EnableZWrite = new InputSlot<bool>();
 
         [Input(Guid = "155c2396-0e05-4437-8171-288048b1158a")]
-        public readonly InputSlot<SharpDX.Direct3D11.Filter> Filter = new InputSlot<SharpDX.Direct3D11.Filter>();
+        public readonly InputSlot<Filter> Filter = new InputSlot<Filter>();
 
         [Input(Guid = "d1db33ea-1739-4323-9105-7b236a0e240f")]
-        public readonly InputSlot<SharpDX.Direct3D11.TextureAddressMode> WrapMode = new InputSlot<SharpDX.Direct3D11.TextureAddressMode>();
+        public readonly InputSlot<TextureAddressMode> WrapMode = new InputSlot<TextureAddressMode>();
 
         [Input(Guid = "D7BD3003-8589-4537-92E8-E95C5EB2BFAB")]
         public readonly InputSlot<string> UseMaterialId = new InputSlot<string>();

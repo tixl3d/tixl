@@ -72,7 +72,7 @@ internal sealed class AttributesFromImageChannels : Instance<AttributesFromImage
         public readonly InputSlot<System.Numerics.Vector3> TextureRotate = new InputSlot<System.Numerics.Vector3>();
 
         [Input(Guid = "82940438-3f90-44a1-b7bd-0b8332c2ace9")]
-        public readonly InputSlot<SharpDX.Direct3D11.TextureAddressMode> TextureMode = new InputSlot<SharpDX.Direct3D11.TextureAddressMode>();
+        public readonly InputSlot<TextureAddressMode> TextureMode = new InputSlot<TextureAddressMode>();
 
         [Input(Guid = "36a6f356-0e8c-4df1-9079-27ff496b4d75")]
         public readonly InputSlot<T3.Core.Operator.GizmoVisibility> Visibility = new InputSlot<T3.Core.Operator.GizmoVisibility>();

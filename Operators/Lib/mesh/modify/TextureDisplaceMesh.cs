@@ -50,7 +50,7 @@ internal sealed class TextureDisplaceMesh : Instance<TextureDisplaceMesh> ,ITran
         public readonly InputSlot<bool> UseVertexSelection = new InputSlot<bool>();
 
         [Input(Guid = "e14d4065-e4d7-4137-8907-a198bba8665f")]
-        public readonly InputSlot<SharpDX.Direct3D11.TextureAddressMode> TextureMode = new InputSlot<SharpDX.Direct3D11.TextureAddressMode>();
+        public readonly InputSlot<TextureAddressMode> TextureMode = new InputSlot<TextureAddressMode>();
 
         [Input(Guid = "a218aab7-c638-4987-a64c-4543b52555ee")]
         public readonly InputSlot<T3.Core.Operator.GizmoVisibility> Visibility = new InputSlot<T3.Core.Operator.GizmoVisibility>();

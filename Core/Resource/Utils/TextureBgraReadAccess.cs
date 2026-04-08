@@ -1,3 +1,4 @@
+#if PLATFORM_WINDOWS
 #nullable enable
 
 using System;
@@ -309,3 +310,4 @@ public sealed class TextureBgraReadAccess : IDisposable
     private  Texture2D? _conversionTexture;
     private  UnorderedAccessView? _conversionUav;    
 }
+#endif // PLATFORM_WINDOWS

@@ -1,8 +1,12 @@
 #nullable enable
 using System.Diagnostics;
+#if PLATFORM_WINDOWS
 using SharpDX;
 using SharpDX.Direct3D11;
 using SharpDX.Mathematics.Interop;
+#else
+using T3.Core.Gpu;
+#endif
 using T3.Core.Rendering;
 using T3.Core.Utils;
 using Utilities = T3.Core.Utils.Utilities;
@@ -804,7 +808,7 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
     public readonly InputSlot<T3.Core.DataTypes.Texture2D> SourceTexture = new();
 
     [Input(Guid = "98E88D02-3B78-403C-B9C9-B5ECF8565ACD")]
-    public readonly InputSlot<SharpDX.Direct3D11.ShaderResourceView> SourceTextureSrv = new();
+    public readonly InputSlot<ShaderResourceView> SourceTextureSrv = new();
 
     [Input(Guid = "AC3B575A-DC62-48BD-955C-F945A18A2246")]
     public readonly InputSlot<Vector4> ColorWeights = new();
@@ -849,8 +853,8 @@ internal sealed class _ExecuteBloomPasses : Instance<_ExecuteBloomPasses>
     public readonly InputSlot<T3.Core.DataTypes.PixelShader> CopyPS = new();
 
     [Input(Guid = "5D19C8BE-7EA0-4B8D-5F3D-9EBB3A914B8D")]
-    public readonly InputSlot<SharpDX.Direct3D11.SamplerState> LinearSampler = new();
+    public readonly InputSlot<SamplerState> LinearSampler = new();
 
     [Input(Guid = "4C08B7AD-6D9F-4A7C-4E2C-8DAA29803A7C")]
-    public readonly InputSlot<SharpDX.Direct3D11.SamplerState> PointSampler = new();
+    public readonly InputSlot<SamplerState> PointSampler = new();
 }

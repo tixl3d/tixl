@@ -1,12 +1,12 @@
-﻿using System.Runtime.InteropServices;
-using SharpDX.Direct3D11;
+using System.Runtime.InteropServices;
 using T3.Core.Resource;
 
 namespace T3.Core.Rendering;
 
 public static class FogSettings
 {
-    public static Buffer DefaultSettingsBuffer
+#if PLATFORM_WINDOWS
+    public static SharpDX.Direct3D11.Buffer DefaultSettingsBuffer
     {
         get
         {
@@ -24,6 +24,9 @@ public static class FogSettings
         }
     }
 
+    private static SharpDX.Direct3D11.Buffer _defaultSettingsBuffer = null;
+#endif
+
     [StructLayout(LayoutKind.Explicit, Size = Stride)]
     public struct FogParameters
     {
@@ -38,6 +41,4 @@ public static class FogSettings
 
         private const int Stride = 8 * 4;
     }
-
-    private static Buffer _defaultSettingsBuffer = null;
 }

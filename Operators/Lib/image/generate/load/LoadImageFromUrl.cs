@@ -1,4 +1,8 @@
+#if PLATFORM_WINDOWS
 using SharpDX.WIC;
+#else
+using T3.Core.Gpu;
+#endif
 using T3.Core.Utils;
 
 namespace Lib.image.generate.load;

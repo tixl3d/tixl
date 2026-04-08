@@ -37,7 +37,7 @@ internal sealed class DirectionalBlur : Instance<DirectionalBlur>
         public readonly InputSlot<float> RefineSizeFactor = new InputSlot<float>();
 
         [Input(Guid = "6c0cca14-6a0e-4a04-a67b-cbb134d90d03")]
-        public readonly InputSlot<SharpDX.Direct3D11.TextureAddressMode> Wrap = new InputSlot<SharpDX.Direct3D11.TextureAddressMode>();
+        public readonly InputSlot<TextureAddressMode> Wrap = new InputSlot<TextureAddressMode>();
 
         [Input(Guid = "94099125-52d7-475d-aff2-bb1bbd0bd30a")]
         public readonly InputSlot<T3.Core.DataTypes.Vector.Int2> Resolution = new InputSlot<T3.Core.DataTypes.Vector.Int2>();

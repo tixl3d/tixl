@@ -36,9 +36,11 @@ public static partial class T3Ui
         FormInputs.BeginFrame();
         InitializeAfterAppWindowReady();
 
+#if PLATFORM_WINDOWS
         MouseWheelPanning.ProcessFrame(120);
-        
-        // Prepare the current frame 
+#endif
+
+        // Prepare the current frame
         RenderStatsCollector.StartNewFrame();
         
         UpdateModifiedProjects();
@@ -49,8 +51,10 @@ public static partial class T3Ui
             AudioEngine.CompleteFrame(Playback.Current, Playback.LastFrameDuration);
         }
 
+#if PLATFORM_WINDOWS
         ScreenshotWriter.Update();
         RenderProcess.Update();
+#endif
         SkillTraining.Update();
         SkillMapEditor.Draw();
 

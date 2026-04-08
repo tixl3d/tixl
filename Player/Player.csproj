@@ -1,4 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
+    <Import Project="$(SolutionDir)/Tixl.props" />
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
@@ -7,7 +8,7 @@
         <RootNamespace>T3.Player</RootNamespace>
         <Configurations>Debug;Release</Configurations>
         <Platforms>AnyCPU</Platforms>
-        <TargetFramework>net9.0-windows</TargetFramework>
+        <TargetFramework>$(TixlNetFrameworkVersion)</TargetFramework>
         <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
         <EnableUnsafeBinaryFormatterSerialization>true</EnableUnsafeBinaryFormatterSerialization>
         <Deterministic>true</Deterministic>
@@ -21,7 +22,7 @@
     <ItemGroup>
         <PackageReference Include="CommandLineParser" Version="2.9.1" />
         <PackageReference Include="ManagedBass.Mix" Version="4.0.2" />
-        <PackageReference Include="SharpDX.Desktop" Version="4.2.0">
+        <PackageReference Include="SharpDX.Desktop" Version="4.2.0" Condition="$(IsWindows)">
             <NoWarn>NU1701</NoWarn>
         </PackageReference>
         <PackageReference Include="System.Runtime.Serialization.Formatters" Version="9.0.4" />
@@ -36,17 +37,15 @@
         </Content>
     </ItemGroup>
 
-    <ItemGroup>
-        <Reference Include="System.Drawing.Common">
-
-        </Reference>
-        <Reference Include="System.Windows.Forms">
-        </Reference>
+    <ItemGroup Condition="$(IsWindows)">
+        <Reference Include="System.Drawing.Common" />
+        <Reference Include="System.Windows.Forms" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\Core\Core.csproj" />
-        <ProjectReference Include="..\MsForms\MsForms.csproj" />
+        <ProjectReference Include="..\MsForms\MsForms.csproj" Condition="$(IsWindows)" />
+        <ProjectReference Include="..\LinuxUi\LinuxUi.csproj" Condition="!$(IsWindows)" />
         <ProjectReference Include="..\SilkWindows\SilkWindows.csproj" />
     </ItemGroup>
 

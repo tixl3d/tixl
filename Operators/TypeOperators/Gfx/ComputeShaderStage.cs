@@ -1,3 +1,4 @@
+#if PLATFORM_WINDOWS
 using T3.Core.Utils;
 
 namespace Types.Gfx;
@@ -171,7 +172,7 @@ public sealed class ComputeShaderStage : Instance<ComputeShaderStage>, IRenderSt
     private Buffer?[] _constantBuffers = [];
     private ShaderResourceView[] _shaderResourceViews = [];
     private ShaderResourceView[] _additionalSrvs = [];
-    private SharpDX.Direct3D11.SamplerState[] _samplerStates = [];
+    private SamplerState[] _samplerStates = [];
     private UnorderedAccessView[] _uavs = [];
         
         
@@ -250,11 +251,12 @@ public sealed class ComputeShaderStage : Instance<ComputeShaderStage>, IRenderSt
     public readonly InputSlot<int> UavBufferCounter = new();
         
     [Input(Guid = "4047c9e7-1edb-4c71-b85c-c1b87058c81c")]
-    public readonly MultiInputSlot<SharpDX.Direct3D11.SamplerState> SamplerStates = new();
+    public readonly MultiInputSlot<SamplerState> SamplerStates = new();
 
     private RenderTargetView?[]? _prevRenderTargetViews;
     private DepthStencilView? _prevDepthStencilView;
-    
-    
-    
+
+
+
 }
+#endif // PLATFORM_WINDOWS

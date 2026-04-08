@@ -386,7 +386,7 @@ namespace Lib.io.video.mediapipe
                     Height = mat.Height,
                     MipLevels = 1,
                     ArraySize = 1,
-                    Format = SharpDX.DXGI.Format.B8G8R8A8_UNorm, // Mat is BGRA
+                    Format = Format.B8G8R8A8_UNorm, // Mat is BGRA
                     SampleDescription = new SampleDescription(1, 0),
                     Usage = ResourceUsage.Default,
                     BindFlags = BindFlags.ShaderResource | BindFlags.RenderTarget,
@@ -656,7 +656,7 @@ namespace Lib.io.video.mediapipe
         #endregion
 
         #region Memory Management
-        private SharpDX.Direct3D11.Texture2D GetOrCreateStagingTexture(int width, int height, SharpDX.DXGI.Format format)
+        private SharpDX.Direct3D11.Texture2D GetOrCreateStagingTexture(int width, int height, Format format)
         {
             var key = (width, height);
             
@@ -890,9 +890,9 @@ namespace Lib.io.video.mediapipe
                             textureHeight *= 2;
                     }
 
-                    CreateOrUpdateTexture(ref _aiDataTexture, textureWidth, textureHeight, SharpDX.DXGI.Format.R32G32B32A32_Float);
-                    CreateOrUpdateTexture(ref _aiDataHighPrecisionTexture, textureWidth, textureHeight, SharpDX.DXGI.Format.R16G16_Float);
-                    CreateOrUpdateTexture(ref _aiDataSegmentationTexture, textureWidth, textureHeight, SharpDX.DXGI.Format.R8_UNorm);
+                    CreateOrUpdateTexture(ref _aiDataTexture, textureWidth, textureHeight, Format.R32G32B32A32_Float);
+                    CreateOrUpdateTexture(ref _aiDataHighPrecisionTexture, textureWidth, textureHeight, Format.R16G16_Float);
+                    CreateOrUpdateTexture(ref _aiDataSegmentationTexture, textureWidth, textureHeight, Format.R8_UNorm);
 
                     FillAITextures(landmarks, faceCount, textureWidth, textureHeight);
                 }
@@ -902,7 +902,7 @@ namespace Lib.io.video.mediapipe
             }
         }
 
-        private void CreateOrUpdateTexture(ref Texture2D? texture, int width, int height, SharpDX.DXGI.Format format)
+        private void CreateOrUpdateTexture(ref Texture2D? texture, int width, int height, Format format)
         {
             if (texture == null || texture.Description.Width != width || texture.Description.Height != height || texture.Description.Format != format)
             {

@@ -1,15 +1,22 @@
 ﻿using System.Diagnostics;
 using System.IO;
 using ImGuiNET;
+#if PLATFORM_WINDOWS
 using SharpDX;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
+#else
+using T3.Core.Gpu;
+using Int4 = T3.Core.DataTypes.Vector.Int4;
+#endif
 using T3.Core.DataTypes;
 using T3.Core.Operator.Slots;
 using T3.Core.Resource;
 using T3.Editor.App;
 using T3.Editor.Gui.Windows;
+#if PLATFORM_WINDOWS
 using Buffer = SharpDX.Direct3D11.Buffer;
+#endif
 using ComputeShader = T3.Core.DataTypes.ComputeShader;
 using Texture2D = T3.Core.DataTypes.Texture2D;
 
@@ -29,7 +36,8 @@ internal sealed class Texture3dOutputUi : OutputUi<Texture3dWithViews>
         {
             shader!.Name = debugName;
         }
-            
+
+#if PLATFORM_WINDOWS
         var texDesc = new Texture2DDescription()
                           {
                               ArraySize = 1,
@@ -46,6 +54,7 @@ internal sealed class Texture3dOutputUi : OutputUi<Texture3dWithViews>
 
         _viewTexture = Texture2D.CreateTexture2D(texDesc);
         _viewTextureUav = new UnorderedAccessView(ResourceManager.Device, _viewTexture);
+#endif
     }
 
     public override IOutputUi Clone()
@@ -85,6 +94,7 @@ internal sealed class Texture3dOutputUi : OutputUi<Texture3dWithViews>
         if (texture3d?.Texture == null)
             return null;
 
+#if PLATFORM_WINDOWS
         var device = ResourceManager.Device;
         var deviceContext = device.ImmediateContext;
         var csStage = deviceContext.ComputeShader;
@@ -98,7 +108,7 @@ internal sealed class Texture3dOutputUi : OutputUi<Texture3dWithViews>
 
         Int4 parameter = new Int4(_zPosIndex, 0, 0, 0);
         ResourceManager.SetupConstBuffer(parameter, ref _paramBuffer);
-            
+
         const int threadNumX = 16, threadNumY = 16;
         csStage.SetShaderResource(0, texture3d.Srv);
         csStage.SetUnorderedAccessView(0, _viewTextureUav, 0);
@@ -112,13 +122,16 @@ internal sealed class Texture3dOutputUi : OutputUi<Texture3dWithViews>
         csStage.SetUnorderedAccessView(0, prevUavs[0]);
         csStage.SetShaderResource(0, prevSrvs[0]);
         csStage.Set(prevShader);
+#endif
 
         return _viewTexture;
     }
 
     private readonly Texture2D _viewTexture = null;
+#if PLATFORM_WINDOWS
     private readonly UnorderedAccessView _viewTextureUav = null;
-    private int _zPosIndex = 0;
     private Buffer _paramBuffer = null;
+#endif
+    private int _zPosIndex = 0;
     private readonly Resource<ComputeShader> _shaderResource;
 }

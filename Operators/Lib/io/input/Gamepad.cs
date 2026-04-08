@@ -20,6 +20,7 @@ internal sealed class Gamepad : Instance<Gamepad>, IStatusProvider
 
     private void Update(EvaluationContext context)
     {
+#if PLATFORM_WINDOWS
         var index = Index.GetValue(context).Clamp(0,3);
         var controllers = new SharpDX.XInput.Controller[4];
         controllers[0] = new SharpDX.XInput.Controller(SharpDX.XInput.UserIndex.One);
@@ -34,42 +35,46 @@ internal sealed class Gamepad : Instance<Gamepad>, IStatusProvider
             IsConnected.Value = false;
             return;
         }
-            
+
         _lastErrorMessage = "";
         IsConnected.Value = true;
-            
+
         var state = XInputGamepad.GetState(currentController);
 
         _floatDict["LeftThumbX"] = state.LeftThumb.X;
         _floatDict["LeftThumbY"] = state.LeftThumb.Y;
         _floatDict["RightThumbX"] = state.RightThumb.X;
         _floatDict["RightThumbY"] = state.RightThumb.Y;
-            
+
         _floatDict["LeftTrigger"] = state.LeftTrigger;
         _floatDict["RightTrigger"] = state.RightTrigger;
-            
+
         _floatDict["Directional/Pad.Left"] = state.DirectionalPad.Left?1:0;
         _floatDict["Directional/Pad.Right"] = state.DirectionalPad.Right?1:0;
-        _floatDict["Directional/Pad.Up"] = state.DirectionalPad.Up?1:0;            
-        _floatDict["Directional/Pad.Down"] = state.DirectionalPad.Down?1:0;             
-            
+        _floatDict["Directional/Pad.Up"] = state.DirectionalPad.Up?1:0;
+        _floatDict["Directional/Pad.Down"] = state.DirectionalPad.Down?1:0;
+
         _floatDict["Buttons/A"] = state.Buttons.A?1:0;
         _floatDict["Buttons/B"] = state.Buttons.B?1:0;
         _floatDict["Buttons/X"] = state.Buttons.X?1:0;
         _floatDict["Buttons/Y"] = state.Buttons.Y?1:0;
-            
+
         _floatDict["LeftTrigger"] = state.LeftTrigger;
         _floatDict["RightTrigger"] = state.RightTrigger;
         _floatDict["LeftShoulder"] = state.LeftShoulder?1:0;
         _floatDict["RightShoulder"] = state.RightShoulder ? 1:0;
 
         _floatDict["LeftStickButton"] = state.LeftStickButton ? 1 : 0;
-        _floatDict["RightStickButton"] = state.RightStickButton ? 1 : 0;    
+        _floatDict["RightStickButton"] = state.RightStickButton ? 1 : 0;
 
         _floatDict["Start"] = state.Start?1:0;
         _floatDict["Back"] = state.Back?1:0;
-            
+
         State.Value = _floatDict;
+#else
+        _lastErrorMessage = "Gamepad input not yet supported on this platform";
+        IsConnected.Value = false;
+#endif
     }
 
     private readonly Dict<float> _floatDict = new(0);

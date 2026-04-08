@@ -1,3 +1,4 @@
+#if PLATFORM_WINDOWS
 using SharpDX.Direct3D11;
 
 namespace Types.Gfx;
@@ -75,3 +76,4 @@ public sealed class RasterizerState : Instance<RasterizerState>
     [Input(Guid = "03C80C25-B0B1-45C2-B67B-60906FE47FBE")]
     public readonly InputSlot<float> SlopeScaledDepthBias = new();
 }
+#endif // PLATFORM_WINDOWS

@@ -1,3 +1,4 @@
+#if PLATFORM_WINDOWS
 /*
 
 Based on the MIT license video writing example at
@@ -444,3 +445,4 @@ internal sealed class Mp4VideoWriter : MfVideoWriter
     /// </summary>
     protected override bool FlipY => true;
 }
+#endif // PLATFORM_WINDOWS

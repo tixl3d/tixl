@@ -1,3 +1,4 @@
+#if PLATFORM_WINDOWS
 using ComputeShaderT3 = T3.Core.DataTypes.ComputeShader;
 
 namespace Types.Gfx;
@@ -56,3 +57,4 @@ public sealed class ComputeShaderFromSource : Instance<ComputeShaderFromSource>,
     #endregion
 
 }
+#endif // PLATFORM_WINDOWS

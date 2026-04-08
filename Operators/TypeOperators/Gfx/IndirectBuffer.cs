@@ -1,3 +1,4 @@
+#if PLATFORM_WINDOWS
 using SharpDX.Direct3D11;
 
 namespace Types.Gfx;
@@ -39,3 +40,4 @@ public sealed class IndirectBuffer : Instance<IndirectBuffer>
     [Input(Guid = "70586A37-4B69-493E-BB47-98D7783DB16D")]
     public readonly InputSlot<int> Count = new();
 }
+#endif // PLATFORM_WINDOWS

@@ -286,6 +286,7 @@ internal static class AppMenuBar
                 Task.Run(() => { T3Ui.Save(true); });
             }
 
+#if PLATFORM_WINDOWS
             if (ImGui.MenuItem("Set Project Thumbnail", null, false, RenderProcess.MainOutputTexture != null))
             {
                 if (currentProject != null && RenderProcess.MainOutputTexture != null)
@@ -293,6 +294,7 @@ internal static class AppMenuBar
                     ThumbnailManager.SaveThumbnail(currentProject.Id, currentProject, RenderProcess.MainOutputTexture, ThumbnailManager.Categories.PackageMeta);
                 }
             }
+#endif
             
             ImGui.Separator();
 

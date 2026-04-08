@@ -1,8 +1,10 @@
 using System;
+#if PLATFORM_WINDOWS
 using SharpDX;
 using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
+#endif
 using T3.Core.Animation;
 using T3.Core.Audio;
 using T3.Core.Logging;
@@ -14,6 +16,7 @@ namespace T3.Player;
 
 internal static partial class Program
 {
+#if PLATFORM_WINDOWS
     // todo - share this function with the editor ? is that possible? it could have delegate arguments
     private static void RenderCallback()
     {
@@ -47,7 +50,8 @@ internal static partial class Program
 
         _swapChain.Present(_vsyncInterval, PresentFlags.None);
     }
-    
+#endif
+
     private class TimelineEndedException : Exception
     {
     }

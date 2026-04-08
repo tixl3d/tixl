@@ -1,3 +1,4 @@
+#if PLATFORM_WINDOWS
 /*
 
 Based on the MIT license video writing code at
@@ -248,4 +249,5 @@ internal sealed class AacAudioWriter : MediaFoundationAudioWriter
 
     public override Guid AudioFormat => AudioFormatGuids.Aac;
 }
+#endif // PLATFORM_WINDOWS
 

@@ -1,3 +1,4 @@
+#if PLATFORM_WINDOWS
 using SharpDX;
 using SharpDX.Direct3D11;
 
@@ -45,5 +46,6 @@ public sealed class DepthStencilState : Instance<DepthStencilState>
          
     [Input(Guid = "27F1F703-7333-49E5-A024-4606E34E8427")]
     public readonly InputSlot<Comparison> Comparison = new(SharpDX.Direct3D11.Comparison.Less);
-        
+
 }
+#endif // PLATFORM_WINDOWS

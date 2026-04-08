@@ -1,3 +1,4 @@
+#if PLATFORM_WINDOWS
 using SharpDX;
 using SharpDX.Direct3D11;
 
@@ -53,3 +54,4 @@ public sealed class BlendState : Instance<BlendState>
     [Input(Guid = "873AD863-DEC6-4B4B-9D81-89D5FA11BEEC")]
     public readonly InputSlot<bool> IndependentBlendEnable = new();
 }
+#endif // PLATFORM_WINDOWS

@@ -1,3 +1,4 @@
+#if PLATFORM_WINDOWS
 using System.Windows.Forms;
 using ImGuiNET;
 using SharpDX.Windows;
@@ -333,3 +334,4 @@ internal class ImGuiDx11RenderForm : RenderForm
         return true;
     }
 }
+#endif // PLATFORM_WINDOWS

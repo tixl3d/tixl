@@ -1,3 +1,4 @@
+#if PLATFORM_WINDOWS
 using T3.Core.Stats;
 using PixelShaderT3 = T3.Core.DataTypes.PixelShader;
 
@@ -60,3 +61,4 @@ public sealed class PixelShader : Instance<PixelShader>, IDescriptiveFilename, I
     string IStatusProvider.GetStatusMessage() => _statusProviderImplementation.GetStatusMessage();
     #endregion
 }
+#endif // PLATFORM_WINDOWS

@@ -1,3 +1,4 @@
+#if PLATFORM_WINDOWS
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -615,3 +616,4 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
 
     private readonly Vector2 _scaleFactor = Vector2.One;
 }
+#endif // PLATFORM_WINDOWS

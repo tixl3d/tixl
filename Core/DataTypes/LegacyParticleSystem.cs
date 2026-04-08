@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿#if PLATFORM_WINDOWS
+using System.Linq;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
 using T3.Core.Logging;
@@ -131,3 +132,4 @@ public class LegacyParticleSystem
 
     private Resource<ComputeShader> _initDeadListShaderResource;
 }
+#endif // PLATFORM_WINDOWS

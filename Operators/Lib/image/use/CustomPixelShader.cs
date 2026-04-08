@@ -44,7 +44,7 @@ internal sealed class CustomPixelShader : Instance<CustomPixelShader>
         public readonly InputSlot<T3.Core.DataTypes.Vector.Int2> Resolution = new InputSlot<T3.Core.DataTypes.Vector.Int2>();
 
         [Input(Guid = "e0d05b9c-d433-4b9d-8e70-db2f7993d628")]
-        public readonly InputSlot<SharpDX.DXGI.Format> TextureFormat = new InputSlot<SharpDX.DXGI.Format>();
+        public readonly InputSlot<Format> TextureFormat = new InputSlot<Format>();
 
         [Input(Guid = "92fdfa08-e7da-4a71-9145-277b74c93729")]
         public readonly InputSlot<bool> GenerateMips = new InputSlot<bool>();
@@ -53,13 +53,13 @@ internal sealed class CustomPixelShader : Instance<CustomPixelShader>
         public readonly InputSlot<bool> Clear = new InputSlot<bool>();
 
         [Input(Guid = "b898c5a9-1c4b-4958-a7c1-01c27da10f6a")]
-        public readonly MultiInputSlot<SharpDX.Direct3D11.ShaderResourceView> ShaderResources = new MultiInputSlot<SharpDX.Direct3D11.ShaderResourceView>();
+        public readonly MultiInputSlot<ShaderResourceView> ShaderResources = new MultiInputSlot<ShaderResourceView>();
 
         [Input(Guid = "2dc4d202-2ee5-4d4d-b1b2-234a0b21ab94")]
-        public readonly MultiInputSlot<SharpDX.Direct3D11.Buffer> ConstantBuffers = new MultiInputSlot<SharpDX.Direct3D11.Buffer>();
+        public readonly MultiInputSlot<Buffer> ConstantBuffers = new MultiInputSlot<Buffer>();
 
         [Input(Guid = "8ea35e89-137a-4cb3-b26d-ba6bd9e5ce12")]
-        public readonly MultiInputSlot<SharpDX.Direct3D11.SamplerState> CustomSampler = new MultiInputSlot<SharpDX.Direct3D11.SamplerState>();
+        public readonly MultiInputSlot<SamplerState> CustomSampler = new MultiInputSlot<SamplerState>();
 
     [Output(Guid = "12fcfd9e-1c2f-46fc-b570-83b93ec7d101")]
     public readonly Slot<Texture2D> TextureOutput = new();

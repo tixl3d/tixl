@@ -92,8 +92,13 @@ public static class BeatSynchronizer
     {
         Initialize();
 
+#if PLATFORM_WINDOWS
         var currentTimeMs = WasapiAudioInput.LastUpdateTime * 1000;
         var deltaTimeMs = WasapiAudioInput.TimeSinceLastUpdate * 1000;
+#else
+        var currentTimeMs = 0.0;
+        var deltaTimeMs = 0.0;
+#endif
 
         // Advance time...
         _barTime += _currentBpm / 60.0 / 1000.0 / 4.0 * deltaTimeMs;

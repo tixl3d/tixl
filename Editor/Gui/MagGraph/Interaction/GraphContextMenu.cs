@@ -393,6 +393,7 @@ internal static class GraphContextMenu
                     context.CombineToSymbolDialog.ShowNextFrame();
                 }
 
+#if PLATFORM_WINDOWS
                 ImGui.Separator();
                 if (ImGui.MenuItem("Set Thumbnail", null, false,
                                    oneOpSelected && !selectedChildUis[0].SymbolChild.Symbol.SymbolPackage.IsReadOnly &&
@@ -403,6 +404,7 @@ internal static class GraphContextMenu
                                                    RenderProcess.MainOutputTexture,
                                                    ThumbnailManager.Categories.PackageMeta);
                 }
+#endif
 
                 ImGui.EndMenu();
             }

@@ -1,7 +1,11 @@
+#if PLATFORM_WINDOWS
 using SharpDX;
 using SharpDX.Direct3D;
 using SharpDX.Mathematics.Interop;
 using SharpDX.MediaFoundation;
+#else
+using T3.Core.Gpu;
+#endif
 using T3.Core.Audio;
 using T3.Core.IO;
 using T3.Core.Utils;
@@ -162,7 +166,7 @@ internal sealed class PlayVideoClip : Instance<PlayVideoClip>
                              {
                                  DxgiManager = _dxgiDeviceManager,
                                  VideoOutputFormat = (int)Format.B8G8R8A8_UNorm
-                                 //VideoOutputFormat = (int)SharpDX.DXGI.Format.NV12                                     
+                                 //VideoOutputFormat = (int)Format.NV12                                     
                              };
 
         MediaManager.Startup();

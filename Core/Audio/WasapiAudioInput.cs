@@ -1,3 +1,4 @@
+#if PLATFORM_WINDOWS
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -371,3 +372,4 @@ public static class WasapiAudioInput
     /// </remarks>
     public static float DecayingAudioLevel => (float)(_lastAudioLevel / Math.Max(1, (Playback.RunTimeInSecs - LastUpdateTime) * 100));
 }
+#endif // PLATFORM_WINDOWS

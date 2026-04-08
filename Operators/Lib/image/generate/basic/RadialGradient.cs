@@ -48,7 +48,7 @@ internal sealed class RadialGradient : Instance<RadialGradient>
         public readonly InputSlot<T3.Core.DataTypes.Vector.Int2> Resolution = new InputSlot<T3.Core.DataTypes.Vector.Int2>();
 
         [Input(Guid = "93dd184b-8809-4746-8544-41abde6635a3")]
-        public readonly InputSlot<SharpDX.DXGI.Format> TextureFormat = new InputSlot<SharpDX.DXGI.Format>();
+        public readonly InputSlot<Format> TextureFormat = new InputSlot<Format>();
 
         [Input(Guid = "9c89bace-879f-40c1-9ee6-6924860f9424")]
         public readonly InputSlot<bool> GenerateMipMaps = new InputSlot<bool>();

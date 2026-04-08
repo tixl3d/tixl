@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if PLATFORM_WINDOWS
+using System;
 using System.Runtime.InteropServices;
 using SharpDX.Direct3D11;
 using T3.Core.Logging;
@@ -110,3 +111,37 @@ public class PbrMaterial: IDisposable
         ParameterBuffer?.Dispose();
     }
 }
+#else // !PLATFORM_WINDOWS -- Linux stub
+using System;
+using System.Numerics;
+using System.Runtime.InteropServices;
+
+namespace T3.Core.Rendering.Material;
+
+public class PbrMaterial : IDisposable
+{
+    public string Name;
+
+    [StructLayout(LayoutKind.Explicit, Size = Stride)]
+    public struct PbrParameters
+    {
+        [FieldOffset(0)]
+        public Vector4 BaseColor;
+        [FieldOffset(4 * 4)]
+        public Vector4 EmissiveColor;
+        [FieldOffset(8 * 4)]
+        public float Roughness;
+        [FieldOffset(9 * 4)]
+        public float Specular;
+        [FieldOffset(10 * 4)]
+        public float Metal;
+        [FieldOffset(11 * 4)]
+        private float __padding;
+        public const int Stride = 12 * 4;
+    }
+
+    public PbrParameters Parameters;
+
+    public void Dispose() { }
+}
+#endif

@@ -3,8 +3,12 @@ using System.Globalization;
 using System.Text.Json;
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
+#if PLATFORM_WINDOWS
 using SharpDX;
 using SharpDX.Direct3D11;
+#else
+using T3.Core.Gpu;
+#endif
 using T3.Core.Utils;
 using Rectangle = System.Drawing.Rectangle;
 

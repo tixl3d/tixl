@@ -3,7 +3,9 @@ using System.Text;
 using System.Text.RegularExpressions;
 using ImGuiNET;
 using ManagedBass;
+#if PLATFORM_WINDOWS
 using ManagedBass.Wasapi;
+#endif
 using T3.Core.Animation;
 using T3.Core.Audio;
 using T3.Core.IO;
@@ -357,7 +359,11 @@ internal static class PlaybackSettingsPopup
                                                 0.9f);
 
                 // Input meter - aligned to match form input fields (with tooltip + reset button space like Audio Gain)
+#if PLATFORM_WINDOWS
                 var level = settings.AudioGainFactor * WasapiAudioInput.DecayingAudioLevel * 0.03f;
+#else
+                var level = 0f;
+#endif
                 var normalizedLevel = level / 644f;
                 FormInputs.DrawInputLabel("Input Level");
                 var inputSize = FormInputs.GetAvailableInputSize(" ", true, true); // Pass tooltip + hasReset to account for 2 icon spaces
@@ -369,6 +375,7 @@ internal static class PlaybackSettingsPopup
 
                 if (ImGui.BeginCombo("##SelectDevice", settings.AudioInputDeviceName, ImGuiComboFlags.HeightLarge))
                 {
+#if PLATFORM_WINDOWS
                     foreach (var d in WasapiAudioInput.InputDevices)
                     {
                         var isSelected = d.DeviceInfo.Name == settings.AudioInputDeviceName;
@@ -403,11 +410,15 @@ internal static class PlaybackSettingsPopup
                             ImGui.EndTooltip();
                         }
                     }
+#endif
                     ImGui.EndCombo();
                 }
-                
+
                 if (!string.IsNullOrEmpty(settings.AudioInputDeviceName)
-                    &&settings.AudioInputDeviceName != WasapiAudioInput.ActiveInputDeviceName)
+#if PLATFORM_WINDOWS
+                    &&settings.AudioInputDeviceName != WasapiAudioInput.ActiveInputDeviceName
+#endif
+                    )
                 {
                     ImGui.PushStyleColor(ImGuiCol.Text, UiColors.StatusWarning.Rgba);
                     ImGui.TextUnformatted(settings.AudioInputDeviceName + " (NOT FOUND)");

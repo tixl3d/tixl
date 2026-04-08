@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿#if PLATFORM_WINDOWS
+using System.Diagnostics.CodeAnalysis;
 using SharpDX.Direct3D11;
 using T3.Core.DataTypes;
 using T3.Core.Logging;
@@ -63,3 +64,4 @@ public static class PbrContextSettings
     private static readonly Resource<Texture2D> _prefilteredBrdfTextureResource;
 
 }
+#endif // PLATFORM_WINDOWS

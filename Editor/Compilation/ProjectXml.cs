@@ -88,18 +88,9 @@ internal static partial class ProjectXml
 
     private static void AddDefaultUsings(this ProjectRootElement project)
     {
-        var itemGroup = project.AddItemGroup();
-        foreach (var use in _defaultUsingStatements)
-        {
-            var item = itemGroup.AddItem("Using", use.Name);
-            if (use.Static)
-                item.AddMetadata("Static", "True");
-
-            if (use.Alias != null)
-            {
-                item.AddMetadata("Alias", use.Alias);
-            }
-        }
+        // Import shared operator usings from OperatorUsings.props instead of inlining them.
+        // This file contains platform-conditional aliases (SharpDX on Windows, T3.Core.Gpu on Linux).
+        project.AddImport("../OperatorUsings.props");
     }
 
     private static void AddDefaultPropertyGroup(this ProjectRootElement project, string projectNamespace, Guid homeGuid, Guid packageId)
@@ -269,11 +260,12 @@ internal static partial class ProjectXml
     public const string TargetFramework = "net" + NetVersion;
     private const string TargetWindowsFramework = TargetFramework + "-windows";
     private const string TargetMacOSFramework = TargetFramework + "-macos";
-    private const string TargetLinuxFramework = TargetFramework + "net9.0-linux";
+    private const string TargetLinuxFramework = TargetFramework; // plain net9.0 is the correct TFM for Linux
 
     public static bool FrameworkIsCurrent(string framework)
     {
-        return framework is TargetFramework or TargetWindowsFramework or TargetMacOSFramework or TargetLinuxFramework;
+        return framework is TargetFramework or TargetWindowsFramework or TargetMacOSFramework or TargetLinuxFramework
+               or "$(TixlNetFrameworkVersion)";
     }
 
     private static readonly Regex _netVersionRegex = GetVersionRegex();
@@ -341,10 +333,12 @@ internal static partial class ProjectXml
         [
             new Reference(type: ItemType.EditorReference, include: "Core.dll", tags: _defaultReferenceTags),
             new Reference(type: ItemType.EditorReference, include: "Logging.dll", tags: _defaultReferenceTags),
+#if PLATFORM_WINDOWS
             new Reference(type: ItemType.EditorReference, include: "SharpDX.dll", tags: _defaultReferenceTags),
             new Reference(type: ItemType.EditorReference, include: "SharpDX.Direct3D11.dll", tags: _defaultReferenceTags),
             new Reference(type: ItemType.EditorReference, include: "SharpDX.DXGI.dll", tags: _defaultReferenceTags),
             new Reference(type: ItemType.EditorReference, include: "SharpDX.Direct2D1.dll", tags: _defaultReferenceTags),
+#endif
         ];
 
     // Note : we are trying to stay platform-agnostic with directories, and so we use unix path separators
@@ -387,85 +381,9 @@ internal static partial class ProjectXml
 
     private static string CreateIncludePath(params string[] args) => string.Join(separator: AssetRegistry.PathSeparator, value: args);
 
-    private readonly record struct Using(string Name, string? Alias = null, bool Static = false);
-
-    // Goal: No operator should need a Using statement for a slot type or operator duplication
-    private static readonly Using[] _defaultUsingStatements =
-        [
-            // default System includes
-            new(Name: "System"),
-            new(Name: "System.Numerics"),
-            new(Name: "System.Linq"),
-            new(Name: "System.Linq.Enumerable", Static: true),
-            new(Name: "System.Collections"),
-            new(Name: "System.Linq.Expressions"),
-            new(Name: "System.Collections.Generic"),
-            new(Name: "System.Text"),
-            new(Name: "System.Net"),
-            new(Name: "System.Net.Http"),
-            new(Name: "System.Threading.Tasks"),
-            new(Name: "System.IO"),
-
-            // T3 convenience includes
-            new(Name: "T3.Core.Logging"),
-            new(Name: "System.Runtime.InteropServices"),
-            new(Name: "T3.Core.Operator"),
-            new(Name: "T3.Core.Operator.Attributes"),
-            new(Name: "T3.Core.Operator.Slots"),
-            new(Name: "T3.Core.DataTypes"),
-            new(Name: "T3.Core.Operator.Interfaces"),
-            new(Name: "T3.Core.Resource"),
-
-            // SharpDX types
-            new(Name: "SharpDX.Direct3D11.Buffer", Alias: "Buffer"),
-            new(Name: "SharpDX.Direct3D11.ShaderResourceView", Alias: "ShaderResourceView"),
-            new(Name: "SharpDX.Direct3D11.UnorderedAccessView", Alias: "UnorderedAccessView"),
-            new(Name: "SharpDX.Direct3D11.CullMode", Alias: "CullMode"),
-            new(Name: "SharpDX.Direct3D11.FillMode", Alias: "FillMode"),
-            new(Name: "SharpDX.Direct3D11.TextureAddressMode", Alias: "TextureAddressMode"),
-            new(Name: "SharpDX.Direct3D11.Filter", Alias: "Filter"),
-            new(Name: "SharpDX.DXGI.Format", Alias: "Format"),
-            new(Name: "SharpDX.Direct3D11.Texture2DDescription", Alias: "Texture2DDescription"),
-            new(Name: "SharpDX.Direct3D11.Texture3DDescription", Alias: "Texture3DDescription"),
-            new(Name: "SharpDX.Direct3D11.RenderTargetBlendDescription", Alias: "RenderTargetBlendDescription"),
-            new(Name: "SharpDX.Direct3D11.SamplerState", Alias: "SamplerState"),
-            new(Name: "SharpDX.Direct3D11.UnorderedAccessViewBufferFlags", Alias: "UnorderedAccessViewBufferFlags"),
-            new(Name: "SharpDX.Mathematics.Interop.RawRectangle", Alias: "RawRectangle"),
-            new(Name: "SharpDX.Mathematics.Interop.RawViewportF", Alias: "RawViewportF"),
-            new(Name: "SharpDX.Direct3D11.ResourceUsage", Alias: "ResourceUsage"),
-            new(Name: "SharpDX.Direct3D11.ResourceOptionFlags", Alias: "ResourceOptionFlags"),
-            new(Name: "SharpDX.Direct3D11.InputLayout", Alias: "InputLayout"),
-            new(Name: "SharpDX.Direct3D.PrimitiveTopology", Alias: "PrimitiveTopology"),
-            new(Name: "SharpDX.Direct3D11.BlendState", Alias: "BlendState"),
-            new(Name: "SharpDX.Direct3D11.Comparison", Alias: "Comparison"),
-            new(Name: "SharpDX.Direct3D11.BlendOption", Alias: "BlendOption"),
-            new(Name: "SharpDX.Direct3D11.BlendOperation", Alias: "BlendOperation"),
-            new(Name: "SharpDX.Direct3D11.BindFlags", Alias: "BindFlags"),
-            new(Name: "SharpDX.Direct3D11.ColorWriteMaskFlags", Alias: "ColorWriteMaskFlags"),
-            new(Name: "SharpDX.Direct3D11.CpuAccessFlags", Alias: "CpuAccessFlags"),
-            new(Name: "SharpDX.Direct3D11.DepthStencilView", Alias: "DepthStencilView"),
-            new(Name: "SharpDX.Direct3D11.DepthStencilState", Alias: "DepthStencilState"),
-            new(Name: "SharpDX.Direct3D11.RenderTargetView", Alias: "RenderTargetView"),
-            new(Name: "SharpDX.Direct3D11.RasterizerState", Alias: "RasterizerState"),
-
-            // T3 types
-            new(Name: "T3.Core.DataTypes.Point", Alias: "Point"),
-            new(Name: "T3.Core.DataTypes.Texture2D", Alias: "Texture2D"),
-            new(Name: "T3.Core.DataTypes.Texture3D", Alias: "Texture3D"),
-            new(Name: "System.Numerics.Vector2", Alias: "Vector2"),
-            new(Name: "System.Numerics.Vector3", Alias: "Vector3"),
-            new(Name: "System.Numerics.Vector4", Alias: "Vector4"),
-            new(Name: "System.Numerics.Matrix4x4", Alias: "Matrix4x4"),
-            new(Name: "System.Numerics.Quaternion", Alias: "Quaternion"),
-            new(Name: "T3.Core.DataTypes.Vector.Int2", Alias: "Int2"),
-            new(Name: "T3.Core.DataTypes.Vector.Int3", Alias: "Int3"),
-            new(Name: "T3.Core.DataTypes.Vector.Int4", Alias: "Int4"),
-            new(Name: "T3.Core.Resource.ResourceManager", Alias: "ResourceManager"),
-            new(Name: "T3.Core.DataTypes.ComputeShader", Alias: "ComputeShader"),
-            new(Name: "T3.Core.DataTypes.PixelShader", Alias: "PixelShader"),
-            new(Name: "T3.Core.DataTypes.VertexShader", Alias: "VertexShader"),
-            new(Name: "T3.Core.DataTypes.GeometryShader", Alias: "GeometryShader")
-        ];
+    // Note: Default using statements are now defined in Operators/OperatorUsings.props
+    // and imported via AddDefaultUsings() above. This avoids duplicating the aliases
+    // and enables platform-conditional type resolution (SharpDX on Windows, T3.Core.Gpu on Linux).
 }
 
 #region CsProjectFile Xml Tag Types

@@ -1,8 +1,12 @@
 // _ExecuteFastBlurPasses.cs
 #nullable enable
+#if PLATFORM_WINDOWS
 using SharpDX;
 using SharpDX.Direct3D11;
 using SharpDX.Mathematics.Interop;
+#else
+using T3.Core.Gpu;
+#endif
 using T3.Core.Rendering;
 using T3.Core.Utils;
 using Utilities = T3.Core.Utils.Utilities;
@@ -80,7 +84,7 @@ internal sealed class _ExecuteFastBlurPasses : Instance<_ExecuteFastBlurPasses>
         deviceContext.OutputMerger.BlendState = DefaultRenderingStates.DisabledBlendState;
         deviceContext.OutputMerger.DepthStencilState = DefaultRenderingStates.DisabledDepthStencilState;
         deviceContext.Rasterizer.State = DefaultRenderingStates.DefaultRasterizerState;
-        deviceContext.InputAssembler.PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology.TriangleList;
+        deviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
 
         // Downsample + blur
         var lastSrv = sourceSrv;
@@ -300,10 +304,10 @@ internal sealed class _ExecuteFastBlurPasses : Instance<_ExecuteFastBlurPasses>
     private Buffer? _upParamsBuffer;
 
     private Size2 _lastResolution = Size2.Zero;
-    private SharpDX.DXGI.Format _lastFormat = SharpDX.DXGI.Format.Unknown;
+    private Format _lastFormat = Format.Unknown;
     private int _lastSteps = -1;
 
-    private bool InitializeOrUpdateResources(Size2 initialResolution, SharpDX.DXGI.Format initialFormat, int steps)
+    private bool InitializeOrUpdateResources(Size2 initialResolution, Format initialFormat, int steps)
     {
         var needsRecreate =
             _fullResOutput?.Texture == null ||
@@ -403,7 +407,7 @@ internal sealed class _ExecuteFastBlurPasses : Instance<_ExecuteFastBlurPasses>
         Utilities.Dispose(ref _upParamsBuffer);
 
         _lastResolution = Size2.Zero;
-        _lastFormat = SharpDX.DXGI.Format.Unknown;
+        _lastFormat = Format.Unknown;
         _lastSteps = -1;
     }
 
@@ -522,7 +526,7 @@ internal sealed class _ExecuteFastBlurPasses : Instance<_ExecuteFastBlurPasses>
             _isSaved = false;
         }
 
-        private SharpDX.Direct3D.PrimitiveTopology _topology;
+        private PrimitiveTopology _topology;
 
         private SharpDX.Direct3D11.VertexShader? _vertexShader;
         private SharpDX.Direct3D11.GeometryShader? _geometryShader;

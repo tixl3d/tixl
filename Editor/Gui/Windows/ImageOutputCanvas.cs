@@ -1,7 +1,11 @@
 #nullable enable
 using System.Diagnostics;
 using ImGuiNET;
+#if PLATFORM_WINDOWS
 using SharpDX.DXGI;
+#else
+using T3.Core.Gpu;
+#endif
 using T3.Core.DataTypes;
 using T3.Core.Resource;
 using T3.Editor.Gui.Interaction;
@@ -81,10 +85,11 @@ internal sealed class ImageOutputCanvas : ScalableCanvas
         if (UserSettings.Config.ShowToolbar)
         {
             string format;
+#if PLATFORM_WINDOWS
             if (srv == null || srv.IsDisposed)
             {
                 format = "null?";
-            } 
+            }
             else if (UserSettings.Config.ShowExplicitTextureFormatInOutputWindow)
             {
                 format = srv.Description.Format.ToString();
@@ -104,6 +109,9 @@ internal sealed class ImageOutputCanvas : ScalableCanvas
                         break;
                 }
             }
+#else
+            format = "N/A";
+#endif
                 
             ImGui.PushFont(Fonts.FontSmall);
             var zoom = Math.Abs(Scale.X) < 0.001f ? "" : $" ×{Scale.X:G2}";

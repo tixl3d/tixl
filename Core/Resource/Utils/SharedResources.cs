@@ -1,12 +1,14 @@
 using System;
 using System.IO;
+using T3.Core.UserData;
+#if PLATFORM_WINDOWS
 using SharpDX.Direct3D11;
 using T3.Core.DataTypes;
 using T3.Core.Logging;
-using T3.Core.UserData;
 using PixelShader = T3.Core.DataTypes.PixelShader;
 using Texture2D = T3.Core.DataTypes.Texture2D;
 using VertexShader = T3.Core.DataTypes.VertexShader;
+#endif
 
 namespace T3.Core.Resource;
 
@@ -18,6 +20,7 @@ public static class SharedResources
     public static readonly string EditorResourcesDirectory = Path.Combine(FileLocations.StartFolder,
                                                                           FileLocations.EditorResourcesSubfolder);
 
+#if PLATFORM_WINDOWS
     public static void Initialize()
     {
         if (ShaderCompiling.ShaderCompiler.Instance == null)
@@ -102,4 +105,10 @@ public static class SharedResources
     public static Resource<VertexShader> FullScreenVertexShaderResource => _fullScreenVertexShaderResource;
 
     public static Resource<PixelShader> FullScreenPixelShaderResource => _fullScreenPixelShaderResource;
+#else
+    public static void Initialize() { }
+    public static IntPtr ViewWindowRasterizerState;
+    public static IntPtr ColorPickerImageSrv;
+    public static IntPtr T3LogoAlphaTextureImageSrv;
+#endif
 }

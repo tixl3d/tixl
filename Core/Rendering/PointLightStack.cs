@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿#if PLATFORM_WINDOWS
+using System.Runtime.InteropServices;
 using SharpDX;
 using SharpDX.Direct3D11;
 using T3.Core.Logging;
@@ -170,3 +171,24 @@ public class PointLightStack
     private static PointLight[] _defaultPointLights = new PointLight[MaxPointLights];
     private static Buffer _defaultConstBuffer;
 }
+#else // !PLATFORM_WINDOWS -- Linux stub
+
+namespace T3.Core.Rendering;
+
+public struct PointLight
+{
+    public System.Numerics.Vector3 Position;
+    public float Intensity;
+    public System.Numerics.Vector4 Color;
+    public float Range;
+    public float Decay;
+}
+
+public class PointLightStack
+{
+    public const int MaxPointLights = 8;
+    public void Push(PointLight light) { }
+    public void Pop() { }
+    public void Clear() { }
+}
+#endif

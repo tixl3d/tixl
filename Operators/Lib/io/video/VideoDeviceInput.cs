@@ -2,8 +2,12 @@ using System.Runtime.InteropServices.ComTypes;
 using System.Threading;
 using DirectShowLib;
 using OpenCvSharp;
+#if PLATFORM_WINDOWS
 using SharpDX;
 using Device = SharpDX.Direct3D11.Device;
+#else
+using T3.Core.Gpu;
+#endif
 using FormatType = DirectShowLib.FormatType;
 
 namespace Lib.io.video;

@@ -1,3 +1,4 @@
+#if PLATFORM_WINDOWS
 namespace Types.Gfx;
 
 [Guid("75306997-4329-44e9-a17a-050dae532182")]
@@ -54,15 +55,15 @@ public sealed class PixelShaderStage : Instance<PixelShaderStage>
 
     private Buffer[] _constantBuffers = new Buffer[0];
     private ShaderResourceView[] _shaderResourceViews = new ShaderResourceView[0];
-    private SharpDX.Direct3D11.SamplerState[] _samplerStates = new SharpDX.Direct3D11.SamplerState[0];
+    private SamplerState[] _samplerStates = new SamplerState[0];
 
     private SharpDX.Direct3D11.PixelShader? _prevPixelShader;
     private Buffer[]? _prevConstantBuffers;
     private ShaderResourceView[]? _prevShaderResourceViews;
-    private SharpDX.Direct3D11.SamplerState[] _prevSamplerStates = new SharpDX.Direct3D11.SamplerState[0];
+    private SamplerState[] _prevSamplerStates = new SamplerState[0];
 
     [Input(Guid = "C4E91BC6-1691-4EB4-AED5-DD4CAE528149")]
-    public readonly MultiInputSlot<SharpDX.Direct3D11.SamplerState> SamplerStates = new();
+    public readonly MultiInputSlot<SamplerState> SamplerStates = new();
 
     [Input(Guid = "BE02A84B-A666-4119-BB6E-FEE1A3DF0981")]
     public readonly MultiInputSlot<Buffer> ConstantBuffers = new();
@@ -73,3 +74,4 @@ public sealed class PixelShaderStage : Instance<PixelShaderStage>
     [Input(Guid = "50052906-4691-4A84-A69D-A109044B5300")]
     public readonly MultiInputSlot<ShaderResourceView> ShaderResources = new();
 }
+#endif // PLATFORM_WINDOWS

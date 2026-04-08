@@ -1,7 +1,13 @@
+#if PLATFORM_WINDOWS
 using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
+#else
+using T3.Core.Gpu;
+#endif
 using T3.Core.Utils;
+#if PLATFORM_WINDOWS
 using Device = SharpDX.Direct3D11.Device;
+#endif
 using Utilities = T3.Core.Utils.Utilities;
 
 namespace Lib.image.generate.basic;

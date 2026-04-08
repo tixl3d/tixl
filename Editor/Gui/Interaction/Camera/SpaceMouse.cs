@@ -1,4 +1,5 @@
-﻿using System.Windows.Forms;
+﻿#if PLATFORM_WINDOWS
+using System.Windows.Forms;
 using T3.Editor.App;
 using T3.Editor.Gui.UiHelpers;
 
@@ -130,3 +131,4 @@ public sealed partial class SpaceMouse : ICameraManipulator, IWindowsFormsMessag
     private bool _initialized;
     public void ProcessMessage(Message message) => _spaceMouseDevice.ProcessMessage(message);
 }
+#endif // PLATFORM_WINDOWS

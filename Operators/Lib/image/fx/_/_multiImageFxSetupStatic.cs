@@ -34,5 +34,5 @@ internal sealed class _multiImageFxSetupStatic : Instance<_multiImageFxSetupStat
         public readonly MultiInputSlot<int> IntParameters = new MultiInputSlot<int>();
 
         [Input(Guid = "9997e726-3951-4822-af7e-ffbf26164723")]
-        public readonly InputSlot<SharpDX.Direct3D11.Filter> TextureFilter = new InputSlot<SharpDX.Direct3D11.Filter>();
+        public readonly InputSlot<Filter> TextureFilter = new InputSlot<Filter>();
 }

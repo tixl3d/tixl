@@ -1,5 +1,9 @@
+#if PLATFORM_WINDOWS
 using SharpDX.Direct3D11;
 using SharpDX.Mathematics.Interop;
+#else
+using T3.Core.Gpu;
+#endif
 
 namespace Lib.render._dx11.api;
 
@@ -40,5 +44,5 @@ internal sealed class ClearRenderTarget : Instance<ClearRenderTarget>
     public readonly InputSlot<RenderTargetView> RenderTarget = new();
     
     [Input(Guid = "65077B57-F9EB-48AA-8195-588F906B0E72")]
-    public readonly InputSlot<SharpDX.Direct3D11.DepthStencilView> DepthStencilView = new();
+    public readonly InputSlot<DepthStencilView> DepthStencilView = new();
 }

@@ -58,8 +58,8 @@ public sealed class ScreenCapture : Instance<ScreenCapture>
                 if (_currentScreen == null)
                 {
                     var desc = newTexture.Description;
-                    desc.OptionFlags = SharpDX.Direct3D11.ResourceOptionFlags.None;
-                    desc.BindFlags = SharpDX.Direct3D11.BindFlags.ShaderResource;
+                    desc.OptionFlags = ResourceOptionFlags.None;
+                    desc.BindFlags = BindFlags.ShaderResource;
                     _currentScreen = Texture2D.CreateTexture2D(desc);
                     //using (var newTex = new SharpDX.Direct3D11.Texture2D((SharpDX.Direct3D11.Device)device, desc))
                     //{

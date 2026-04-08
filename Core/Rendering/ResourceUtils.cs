@@ -1,3 +1,4 @@
+#if PLATFORM_WINDOWS
 using SharpDX.Direct3D11;
 using System;
 using System.Collections.Generic;
@@ -85,3 +86,4 @@ namespace T3.Core.Rendering
         }
     }
 }
+#endif // PLATFORM_WINDOWS

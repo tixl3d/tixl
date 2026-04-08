@@ -93,11 +93,9 @@ public sealed class InputValue<T> : InputValue
     {
         if (JsonToTypeValueConverters.Entries.TryGetValue(ValueType, out var converterFunc))
         {
-            Value = (T)converterFunc(json);
-        }
-        else
-        {
-            //Log.Error($"Trying to read a json value for type '{ValueType}' but no converter registered in JsonToTypeValueConverters. Skipping value reading.");
+            var result = converterFunc(json);
+            if (result != null)
+                Value = (T)result;
         }
     }
 
