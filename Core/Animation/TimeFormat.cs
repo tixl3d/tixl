@@ -19,7 +19,7 @@ public static class TimeFormat
 
     public static string FormatTimeInBars(double timeInBars, int startCountFrom)
     {
-        return $"{GetBeatTimeBar(timeInBars, startCountFrom):0}.{GetBeatTimeBeat(timeInBars, startCountFrom):0}.{GetBeatTimeTick(timeInBars,startCountFrom):0}.";
+        return $"{GetBeatTimeBar(timeInBars, startCountFrom):0}.{GetBeatTimeBeat(timeInBars, startCountFrom):0}.{GetBeatTimeTick(timeInBars,startCountFrom):0}";
     }
 
     public static double ToSeconds(double timeInBars, double bpm)

@@ -44,7 +44,7 @@ internal static class ClipTimingEditor
         var labelWidth = 70 * T3Ui.UiScaleFactor;
         var width = 70 * T3Ui.UiScaleFactor;
         
-        FormInputs.AddSectionSubHeader("Edit clip timing");
+        FormInputs.AddSectionSubHeader("Edit clip timing (in bars)");
 
         ImGui.NewLine();
         ImGui.SameLine(labelWidth);

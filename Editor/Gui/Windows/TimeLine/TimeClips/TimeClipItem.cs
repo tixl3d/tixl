@@ -147,10 +147,27 @@ internal static class TimeClipItem
                 }
 
                 ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-                ImGui.TextUnformatted($"Visible: {timeClip.TimeRange.Start:0.00} ... {timeClip.TimeRange.End:0.00}");
+
+                _timeRangeStart.TimeInBars = timeClip.TimeRange.Start;
+                _timeRangeEnd.TimeInBars = timeClip.TimeRange.End;
+                ImGui.TextUnformatted($"Visible: {TimeControls.FormattedTime(_timeRangeStart)} "+
+                                      $"... {TimeControls.FormattedTime(_timeRangeEnd)}");
+                if (UserSettings.Config.TimeDisplayMode != TimeFormat.TimeDisplayModes.Bars)
+                {
+                    ImGui.TextUnformatted($"Source {{timeClip.SourceRange.Start:0.00}} "+
+                                          $"... {{timeClip.SourceRange.End:0.00}}");
+                }
                 if (timeRemapped)
                 {
-                    ImGui.TextUnformatted($"Source {timeClip.SourceRange.Start:0.00} ... {timeClip.SourceRange.End:0.00}");
+                    _sourceRangeStart.TimeInBars = timeClip.SourceRange.Start;
+                    _sourceRangeEnd.TimeInBars = timeClip.SourceRange.End;
+                    ImGui.TextUnformatted($"Source: {TimeControls.FormattedTime(_sourceRangeStart)} "+
+                                          $"... {TimeControls.FormattedTime(_sourceRangeEnd)}");
+                    if (UserSettings.Config.TimeDisplayMode != TimeFormat.TimeDisplayModes.Bars)
+                    {
+                        ImGui.TextUnformatted($"Source {{timeClip.SourceRange.Start:0.00}} "+
+                                              $"... {{timeClip.SourceRange.End:0.00}}");
+                    }
                 }
 
                 if (timeStretched)
@@ -329,8 +346,8 @@ internal static class TimeClipItem
 
 
                 if (allowSnapping && attr.LayerContext.SnapHandler.TryCheckForSnapping(currentDragTime - _timeWithinDraggedClip, 
-                                                                                   out var snappedClipStartTime,
-                                                                                   attr.LayerContext.TimeCanvas.Scale.X))
+                                                                                       out var snappedClipStartTime,
+                                                                                       attr.LayerContext.TimeCanvas.Scale.X))
                 {
                     currentDragTime = (float)snappedClipStartTime + _timeWithinDraggedClip;
                 }
@@ -383,4 +400,9 @@ internal static class TimeClipItem
     private static readonly Vector2 _handleOffset = new(HandleWidth, 0);
     private static readonly Color _timeRemappingColor = UiColors.StatusAnimated.Fade(0.5f);
     private static float _posPosYOnDragStart;
+
+    private static Playback _timeRangeStart = new();
+    private static Playback _timeRangeEnd = new();
+    private static Playback _sourceRangeStart = new();
+    private static Playback _sourceRangeEnd = new();
 }

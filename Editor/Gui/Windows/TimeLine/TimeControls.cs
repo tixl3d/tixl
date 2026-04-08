@@ -204,31 +204,7 @@ internal static class TimeControls
 
         // Current Time
         var delta = 0.0;
-        string formattedTime = "";
-        switch (UserSettings.Config.TimeDisplayMode)
-        {
-            case TimeFormat.TimeDisplayModes.Bars:
-                formattedTime = TimeFormat.FormatTimeInBars(playback.TimeInBars, 0);
-                break;
-
-            case TimeFormat.TimeDisplayModes.Secs:
-                var ts = TimeSpan.FromSeconds(playback.TimeInSecs);
-
-                formattedTime = ts.Hours > 0
-                                           ? ts.ToString(@"hh\:mm\:ss\:ff")
-                                           : ts.ToString(@"mm\:ss\:ff");
-                break;
-
-            case TimeFormat.TimeDisplayModes.F30:
-                var frames = playback.TimeInSecs * 30;
-                formattedTime = $"{frames:0}f ";
-                break;
-            
-            case TimeFormat.TimeDisplayModes.F60:
-                var frames60 = playback.TimeInSecs * 60;
-                formattedTime = $"{frames60:0}f ";
-                break;
-        }
+        var formattedTime = FormattedTime(playback);
 
         ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
         if (JogDial(formattedTime, ref delta, new Vector2(StandardWidth, ControlSize.Y)))
@@ -644,6 +620,31 @@ internal static class TimeControls
 
        
         ImGui.SameLine();
+    }
+
+    public static string FormattedTime(Playback playback)
+    {
+        switch (UserSettings.Config.TimeDisplayMode)
+        {
+            case TimeFormat.TimeDisplayModes.Bars:
+                return TimeFormat.FormatTimeInBars(playback.TimeInBars, 0);
+
+            case TimeFormat.TimeDisplayModes.Secs:
+                var ts = TimeSpan.FromSeconds(playback.TimeInSecs);
+
+                return ts.Hours > 0
+                                    ? ts.ToString(@"hh\:mm\:ss\:ff")
+                                    : ts.ToString(@"mm\:ss\:ff");
+
+            case TimeFormat.TimeDisplayModes.F30:
+                return $"{playback.TimeInSecs * 30:0}f ";
+
+            case TimeFormat.TimeDisplayModes.F60:
+                return $"{playback.TimeInSecs * 60:0}f ";
+
+            default:
+                return "";
+        }
     }
 
     private static double _lastPlaybackStartTime;

@@ -289,7 +289,7 @@ internal sealed class TimeLineCanvas : CurveEditCanvas
                 var oldScroll = Scroll;
                 Scroll = new Vector2(0, Scroll.Y);
                 var posScreen = TransformX((float)Playback.TimeInBars);
-                // position that playhead in the center of the window
+                // position that play head in the center of the window
                 ScrollTarget.X = InverseTransformX(posScreen - WindowSize.X * 0.5f);
                 // restore old state of scrolling
                 Scroll = oldScroll;
