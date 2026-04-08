@@ -10,6 +10,10 @@
       "DefaultValue": 0.5
     },
     {
+      "Id": "30620c66-31dd-4ff5-b83e-f7c0079c4dfa"/*Direction*/,
+      "DefaultValue": 0
+    },
+    {
       "Id": "3ad1c6ab-c91a-4261-aea5-29394d2926df"/*MinValue*/,
       "DefaultValue": 0.0
     },
@@ -24,6 +28,10 @@
     {
       "Id": "5b86b2ec-1043-4a90-9a45-f629cfb7f713"/*OutputMode*/,
       "DefaultValue": 1
+    },
+    {
+      "Id": "645412ba-5bfb-4176-a18a-fc61d8725c32"/*Interpolation*/,
+      "DefaultValue": 0
     },
     {
       "Id": "7bdfb9a8-87b3-4603-890c-fe755f4c4492"/*Sequence*/,

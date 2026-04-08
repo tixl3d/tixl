@@ -26,6 +26,14 @@
       "ClampMax": true
     },
     {
+      "InputId": "30620c66-31dd-4ff5-b83e-f7c0079c4dfa"/*Direction*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 525.0
+      },
+      "GroupTitle": "Interpolation method"
+    },
+    {
       "InputId": "3ad1c6ab-c91a-4261-aea5-29394d2926df"/*MinValue*/,
       "Position": {
         "X": -200.0,
@@ -57,6 +65,13 @@
         "Y": 495.0
       },
       "Description": "Defines the format in which the values are output"
+    },
+    {
+      "InputId": "645412ba-5bfb-4176-a18a-fc61d8725c32"/*Interpolation*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 600.0
+      }
     },
     {
       "InputId": "7bdfb9a8-87b3-4603-890c-fe755f4c4492"/*Sequence*/,

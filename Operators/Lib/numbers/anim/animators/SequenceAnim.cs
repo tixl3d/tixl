@@ -1,4 +1,5 @@
 using T3.Core.Utils;
+using static T3.Core.Utils.EasingFunctions;
 
 namespace Lib.numbers.anim.animators;
 
@@ -88,7 +89,10 @@ public sealed class SequenceAnim : Instance<SequenceAnim>
         _maxValue = MaxValue.GetValue(context);
         _bias = Bias.GetValue(context);
         _rate = Rate.GetValue(context);
-            
+
+        var easeMode = Interpolation.GetEnumValue<Interpolations>(context);     // Easing function selector
+        var easeDirection = Direction.GetEnumValue<EaseDirection>(context);
+
         var outputMode = (OutputModes)OutputMode.GetValue(context).Clamp(0, Enum.GetValues<OutputModes>().Length - 1);
             
             
@@ -232,6 +236,8 @@ public sealed class SequenceAnim : Instance<SequenceAnim>
 
         var stepTime = (float)(NormalizedBarTime * CurrentSequence.Count - stepIndex).Clamp(0, 1);
         var biasedTime = SchlickBias(stepTime, _bias);
+        //var biasedTime = MathUtils.ApplyGainAndBias(stepTime, _gainAndBias.X, _gainAndBias.Y);
+        var easedProgress = EasingFunctions.ApplyEasing(stepTime, easeDirection, easeMode);
         var stepBeat = (1 - biasedTime) * stepStrength;
 
         float returnValue = 0;
@@ -244,11 +250,21 @@ public sealed class SequenceAnim : Instance<SequenceAnim>
                 
             case OutputModes.NormalizedValue:
                 var normalizedStrength = stepStrength;
-                returnValue = MathUtils.Lerp(_minValue, _maxValue,  SchlickBias( normalizedStrength, _bias) );
+                returnValue = MathUtils.Lerp(_minValue, _maxValue, normalizedStrength) ;
                 break;
                 
             case OutputModes.CharacterValue:
                 returnValue = stepStrength * MaxCharacterValue;
+                break;
+
+            case OutputModes.Interpolation:
+                var currentStepValue = stepStrength;
+                var nextStepIndex = (stepIndex + 1) % CurrentSequence.Count;
+                var nextStepValue = CurrentSequence[nextStepIndex];
+
+                // Apply bias to the interpolation time for easing
+                returnValue = MathUtils.Lerp(currentStepValue, nextStepValue, easedProgress);
+                returnValue = MathUtils.Lerp(_minValue, _maxValue, returnValue);
                 break;
         }
         Result.Value = returnValue;
@@ -314,6 +330,7 @@ public sealed class SequenceAnim : Instance<SequenceAnim>
         Pulse,
         NormalizedValue,
         CharacterValue,
+        Interpolation,
     }
         
     private enum UpdateModes
@@ -367,5 +384,11 @@ public sealed class SequenceAnim : Instance<SequenceAnim>
     [Input(Guid = "0E2FB821-460A-4147-99C0-5F6C696E7847")]
     public readonly InputSlot<float> OverrideTime = new();
 
-        
+    [Input(Guid = "30620c66-31dd-4ff5-b83e-f7c0079c4dfa", MappedType = typeof(EaseDirection))]
+    public readonly InputSlot<int> Direction = new();
+
+    [Input(Guid = "645412ba-5bfb-4176-a18a-fc61d8725c32", MappedType = typeof(Interpolations))]
+    public readonly InputSlot<int> Interpolation = new();
+
+
 }
