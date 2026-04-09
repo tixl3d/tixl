@@ -177,6 +177,7 @@ internal static class FormInputs
     public static bool AddEnumDropdown<T>(ref T selectedValue, string? label, string? tooltip = null, T defaultValue= default) where T : struct, Enum, IConvertible, IFormattable
     {
         DrawInputLabel(label);
+        
 
         var inputSize = GetAvailableInputSize(tooltip, false, true);
         ImGui.SetNextItemWidth(inputSize.X);
@@ -188,32 +189,42 @@ internal static class FormInputs
         return modified;
     }
 
-    public static bool DrawEnumDropdown<T>(ref T selectedValue, string? label, T defaultValue= default) where T : struct, Enum, IConvertible, IFormattable, IComparable
+    public static bool DrawEnumDropdown<T>(ref T selectedValue, string? label, T defaultValue = default) where T : struct, Enum, IConvertible, IFormattable, IComparable
     {
-        var index = 0;
-        var selectedIndex = 0;
-
-        foreach (var n in Enum.GetNames<T>())
-        {
-            if (n == selectedValue.ToString())
-            {
-                selectedIndex = index;
-                break;
-            }
-
-            index++;
-        }
-
         ImGui.PushStyleColor(ImGuiCol.FrameBg, UiColors.BackgroundButton.Rgba);
         ImGui.PushStyleColor(ImGuiCol.Text, selectedValue.Equals(defaultValue) ? UiColors.TextMuted.Rgba : UiColors.ForegroundFull.Rgba);
         ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 5);
-        var modified = ImGui.Combo($"##dropDown{typeof(T)}{label}", ref selectedIndex, Enum.GetNames<T>(), Enum.GetNames<T>().Length, Enum.GetNames<T>().Length);
-        if (modified)
+        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(5, 5));
+
+        if (!ImGui.BeginCombo($"##dropDown{typeof(T)}{label}", selectedValue.ToString()))
         {
-            selectedValue = Enum.GetValues<T>()[selectedIndex];
+            ImGui.PopStyleVar(2);
+            ImGui.PopStyleColor(2);
+            return false;
         }
 
-        ImGui.PopStyleVar();
+        ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(5, 8));
+        ImGui.Dummy(new Vector2(0, 4));
+
+        var modified = false;
+        var names = Enum.GetNames<T>();
+        var values = Enum.GetValues<T>();
+
+        for (var i = 0; i < names.Length; i++)
+        {
+            var isSelected = values[i].Equals(selectedValue);
+            if (ImGui.Selectable(names[i], isSelected))
+            {
+                selectedValue = values[i];
+                modified = true;
+            }
+
+            if (isSelected) ImGui.SetItemDefaultFocus();
+        }
+
+        ImGui.Dummy(new Vector2(0, 4));
+        ImGui.EndCombo();
+        ImGui.PopStyleVar(3);
         ImGui.PopStyleColor(2);
 
         return modified;
@@ -231,11 +242,15 @@ internal static class FormInputs
         var inputSize = GetAvailableInputSize(null, false, true, spaceForTooltip);
         ImGui.SetNextItemWidth(inputSize.X);
 
+        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(5, 5));
         var modified = false;
         if (ImGui.BeginCombo("##SelectTheme",
                              selectedValue, 
                              ImGuiComboFlags.HeightLarge))
         {
+            ImGui.PopStyleVar(); // Pop padding for internal list to avoid double padding if needed, 
+                                 // actually ImGui.Combo needs it for the items.
+            ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(5, 5));
             foreach (var value in values)
             {
                 if (value == null)
@@ -276,11 +291,13 @@ internal static class FormInputs
 
         var previewLabel = selectedValue == null ? "please select" : getDisplayTextFunc(selectedValue);
         
+        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(5, 5));
         var modified = false;
         if (ImGui.BeginCombo(imguiLabel, 
                              previewLabel, 
                              ImGuiComboFlags.HeightLarge))
         {
+            ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(5, 5));
             foreach (var value in values)
             {
                 if (value == null)

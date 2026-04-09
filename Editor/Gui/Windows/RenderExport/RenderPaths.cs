@@ -143,7 +143,7 @@ internal static partial class RenderPaths
         }
         catch (Exception e)
         {
-            Log.Warning($"Failed to create target folder '{directory}': {e.Message}");
+            Log.Error($"Failed to create target folder '{directory}': {e.Message}");
             return false;
         }
 
@@ -255,6 +255,49 @@ internal static partial class RenderPaths
         }
 
         return directory == null ? newFilename : Path.Combine(directory, newFilename);
+    }
+
+    public static string GetNextVersionForFolder(string baseFolder, string subFolder)
+    {
+        var targetToIncrement = subFolder;
+        
+        while (true)
+        {
+            var path = Path.Combine(baseFolder, targetToIncrement);
+            if (!Directory.Exists(path))
+            {
+                 return path;
+            }
+            targetToIncrement = GetNextIncrementedPath(targetToIncrement);
+        }
+    }
+
+    public static bool FileExists(string targetPath, RenderSettings.RenderModes mode)
+    {
+        if (mode == RenderSettings.RenderModes.Video)
+        {
+            return File.Exists(targetPath);
+        }
+
+        // Fallback to ImageSequence logic using RenderSettings.Current for subfolder check
+        if (RenderSettings.Current.CreateSubFolder)
+        {
+            var directory = Path.GetDirectoryName(targetPath);
+            if (directory != null && Directory.Exists(directory))
+            {
+                try
+                {
+                    return Directory.EnumerateFileSystemEntries(directory).Any();
+                }
+                catch
+                {
+                    return true;
+                }
+            }
+        }
+
+        var firstFrame = $"{targetPath}_0000.{RenderSettings.Current.FileFormat.ToString().ToLower()}";
+        return File.Exists(firstFrame);
     }
 
     [GeneratedRegex(@"(?:^|[\s_\-.])v(\d{2,4})(?=$|[\s_\-.])", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]

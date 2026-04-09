@@ -51,6 +51,7 @@ public static partial class T3Ui
 
         ScreenshotWriter.Update();
         RenderProcess.Update();
+        FFMpegRenderProcess.Update();
         SkillTraining.Update();
         SkillMapEditor.Draw();
 
