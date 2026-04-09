@@ -1,0 +1,35 @@
+{
+  "Id": "e0b5b99d-c44f-434d-920d-422e88c75870"/*AssimpImport*/,
+  "Inputs": [
+    {
+      "Id": "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"/*FlipNormals*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "2b3c4d5e-6f7a-8b9c-1d2e-3f4a5b6c7d8e"/*SelectedMeshIndex*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "6aff02c4-35c8-4875-bb25-d2b10adfc276"/*PostProcessFlags*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "7a3b8c2d-5e9f-4a7b-8c9d-0e1f2a3b4c5d"/*Scale*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "8b4c9d3e-6f0a-4b8c-9d1e-1f2b3c4d5e6f"/*Normalize*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "9c5d0e4f-7a1b-5c9d-2e3f-3b4c5d6e7f8a"/*AxisConversionMode*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "b569d0cc-9f84-419c-a3db-91406df6a3f8"/*FilePath*/,
+      "DefaultValue": ""
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

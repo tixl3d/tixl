@@ -101,6 +101,7 @@
     <ProjectReference Include="..\..\Logging\Logging.csproj" Private="false" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="AssimpNetter" Version="6.0.2.1" />
     <PackageReference Include="DirectShowLib.Standard" Version="2.1.0" />
     <PackageReference Include="System.ServiceModel.Primitives" Version="8.1.1" />
     <PackageReference Include="System.ServiceModel.Http" Version="8.1.1" />
