@@ -58,7 +58,7 @@ internal static class AutoBackup
         // Allowed extensions filter for minimal backup 
         var minimalBackupExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
-            ".csproj", ".cs", ".t3", ".t3ui", ".hlsl", ".json", ".txt"
+            ".csproj", ".cs", ".t3", ".t3ui", ".hlsl", ".json", ".txt" //maybe this list should be editable by the user in the future?
         };
 
         try

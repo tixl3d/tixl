@@ -329,7 +329,7 @@ internal sealed partial class SettingsWindow : Window
                             changed |= FormInputs.AddCheckBox("Enable Minimal Backup",
                                                         ref UserSettings.Config.MinimalBackup,
                                                         $""" 
-                                                        Only save the files with these extensions: .cs, .t3, .t3ui, .hlsl, .json, .txt 
+                                                        Only save the files with these extensions: .csproj, .cs, .t3, .t3ui, .hlsl, .json, .txt 
                                                         This will considerably reduce the size of backup archives. 
                                                         """,
                                                         UserSettings.Defaults.MinimalBackup);
