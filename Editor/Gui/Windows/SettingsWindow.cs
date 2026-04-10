@@ -325,8 +325,16 @@ internal sealed partial class SettingsWindow : Window
                                                        They are saved as zip-archives to {AutoBackup.AutoBackup.BackupDirectory}.
                                                        """,
                                                       UserSettings.Defaults.EnableAutoBackup);
+                        if (UserSettings.Config.EnableAutoBackup)
+                            changed |= FormInputs.AddCheckBox("Enable Minimal Backup",
+                                                        ref UserSettings.Config.MinimalBackup,
+                                                        $""" 
+                                                        Only save the files with these extensions: .cs, .t3, .t3ui, .hlsl, .json, .txt\n 
+                                                        This will considerably reduce the size of backup archives. 
+                                                        """,
+                                                        UserSettings.Defaults.MinimalBackup);
 
-                    FormInputs.AddSectionSubHeader("Performance Settings");
+                        FormInputs.AddSectionSubHeader("Performance Settings");
                     FormInputs.SetIndentToLeft();
 
                     projectSettingsChanged |= FormInputs.AddCheckBox("Skip Shader Optimization",

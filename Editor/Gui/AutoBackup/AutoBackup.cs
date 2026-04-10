@@ -55,6 +55,12 @@ internal static class AutoBackup
         var excludedDirs = new[] { "bin", "obj", ".git", "Render", "ImageSequence", "Screenshots" };
         const long maxSizeBytes = 100 * 1024 * 1024; // 100 MB
 
+        // Allowed extensions filter for minimal backup 
+        var minimalBackupExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ".cs", ".t3", ".t3ui", ".hlsl", ".json", ".txt"
+        };
+
         try
         {
             using var archive = ZipFile.Open(zipFilePath, ZipArchiveMode.Create);
@@ -76,6 +82,14 @@ internal static class AutoBackup
                         continue;
 
                     var fileInfo = new FileInfo(filepath);
+
+                    // Apply extension filtering based on MinimalBackup setting 
+                    if (UserSettings.Config.MinimalBackup)
+                    {
+                        if (!minimalBackupExtensions.Contains(fileInfo.Extension))
+                            continue;
+                    }
+
                     if (fileInfo.Length > maxSizeBytes)
                         continue;
 
