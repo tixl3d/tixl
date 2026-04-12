@@ -8,8 +8,8 @@ CsProjectFile and ProjectXML.cs
   <PropertyGroup>
     <TixlVersion>4.2.0.1</TixlVersion>
     <TixlVersionSuffix>alpha</TixlVersionSuffix>
-    <TixlNetFrameworkVersion>net9.0-windows</TixlNetFrameworkVersion>
-    <TixlNetCoreFrameworkVersion>net9.0</TixlNetCoreFrameworkVersion>
+    <TixlNetFrameworkVersion>net10.0-windows</TixlNetFrameworkVersion>
+    <TixlNetCoreFrameworkVersion>net10.0</TixlNetCoreFrameworkVersion>
     <TixlIsDotNetFramework>false</TixlIsDotNetFramework>
 
     <TixlEnableUWPInTargets>False</TixlEnableUWPInTargets>

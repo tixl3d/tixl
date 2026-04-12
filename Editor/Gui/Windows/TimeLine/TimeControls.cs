@@ -5,6 +5,7 @@ using T3.Core.DataTypes.DataSet;
 using T3.Core.DataTypes.Vector;
 using T3.Core.IO;
 using T3.Core.Operator;
+using T3.Core.Settings;
 using T3.Core.Utils;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Keyboard;
@@ -169,35 +170,29 @@ internal static class TimeControls
         var playback = Playback.Current;
 
         // Settings
-        PlaybackUtils.FindPlaybackSettingsForInstance(composition, out var compositionWithSettings, out var settings);
+        PlaybackUtils.FindCompositionSettingsForInstance(composition, out var compositionWithSettings, out var settings);
         var opHasSettings = compositionWithSettings == composition;
 
         
-        // if (CustomComponents.IconButton(ProjectSettings.Config.AudioMuted ? Icon.ToggleAudioOff : Icon.ToggleAudioOn,
+        // if (CustomComponents.IconButton(CoreSettings.Config.AudioMuted ? Icon.ToggleAudioOff : Icon.ToggleAudioOn,
         //                                 ControlSize,
-        //                                 ProjectSettings.Config.AudioMuted
+        //                                 CoreSettings.Config.AudioMuted
         //                                     ? CustomComponents.ButtonStates.NeedsAttention
         //                                     : CustomComponents.ButtonStates.Dimmed
         //                                ))
         // {
-        //     ProjectSettings.Config.AudioMuted = !ProjectSettings.Config.AudioMuted;
-        //     AudioEngine.SetMute(ProjectSettings.Config.AudioMuted);
+        //     CoreSettings.Config.AudioMuted = !CoreSettings.Config.AudioMuted;
+        //     AudioEngine.SetMute(CoreSettings.Config.AudioMuted);
         // }
         
         if (CustomComponents.IconButton(Icon.Settings, ControlSize, opHasSettings
                                                                         ? CustomComponents.ButtonStates.Normal
                                                                         : CustomComponents.ButtonStates.Dimmed))
         {
-            //playback.TimeInBars = playback.LoopRange.Start;
-            ImGui.OpenPopup(PlaybackSettingsPopup.PlaybackSettingsPopupId);
+            WindowManager.ToggleInstanceVisibility<ProjectSettingsWindow>();
         }
 
-        if (PlaybackSettingsPopup.DrawPlaybackSettings(composition))
-        {
-            composition.Symbol.GetSymbolUi().FlagAsModified();
-        }
-
-        CustomComponents.TooltipForLastItem("Timeline Settings",
+        CustomComponents.TooltipForLastItem("Project Settings",
                                             "Switch between soundtrack and VJ modes. Control BPM and other inputs.");
 
         ImGui.SameLine();
@@ -243,7 +238,7 @@ internal static class TimeControls
         ImGui.PopStyleColor();
 
         if(ImGui.IsItemHovered())
-            CustomComponents.TooltipForLastItem($"Current playtime at {settings.Bpm:0.0} BPM.", "Click mode button to toggle between timeline formats.");
+            CustomComponents.TooltipForLastItem($"Current playtime at {settings.Playback.Bpm:0.0} BPM.", "Click mode button to toggle between timeline formats.");
 
         ImGui.SameLine();
 
@@ -382,7 +377,7 @@ internal static class TimeControls
             ImGui.SameLine();
         }
 
-        if (settings.Syncing == PlaybackSettings.SyncModes.Tapping)
+        if (settings.Playback.Syncing == CompositionSettings.SyncModes.Tapping)
         {
             var bpm = BeatTiming.Bpm;
             if (SingleValueEdit.Draw(ref bpm, new Vector2(StandardWidth, ControlSize.Y), min: 1, max: 360, clampMin: true, clampMax: true, scale: 0.01f, format: "{0:0.0 BPM}") ==
@@ -572,15 +567,14 @@ internal static class TimeControls
         }
 
         // ToggleAudio
-        if (CustomComponents.IconButton(ProjectSettings.Config.SoundtrackMute ? Icon.ToggleAudioOff : Icon.ToggleAudioOn,
+        if (CustomComponents.IconButton(CoreSettings.Config.AppMute ? Icon.ToggleAudioOff : Icon.ToggleAudioOn,
                                         ControlSize,
-                                        ProjectSettings.Config.SoundtrackMute
+                                        CoreSettings.Config.AppMute
                                             ? CustomComponents.ButtonStates.NeedsAttention
                                             : CustomComponents.ButtonStates.Dimmed
                                        ))
         {
-            ProjectSettings.Config.SoundtrackMute = !ProjectSettings.Config.SoundtrackMute;
-            AudioEngine.SetSoundtrackMute(ProjectSettings.Config.SoundtrackMute);
+            AudioEngine.SetGlobalMute(!CoreSettings.Config.AppMute);
         }
 
         // ToggleHover

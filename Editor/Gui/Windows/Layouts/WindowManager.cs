@@ -8,6 +8,7 @@ using T3.Editor.Gui.Windows.AssetLib;
 using T3.Editor.Gui.Windows.Exploration;
 using T3.Editor.Gui.Windows.Output;
 using T3.Editor.Gui.Windows.RenderExport;
+using T3.Editor.Gui.Windows.TimeLine;
 using T3.Editor.Gui.Windows.SymbolLib;
 using T3.Editor.Gui.Windows.Variations;
 
@@ -46,6 +47,7 @@ internal static partial class WindowManager
     }
 
     internal static readonly SettingsWindow SettingsWindow = new();
+    internal static readonly ProjectSettingsWindow ProjectSettingsWindow = new();
     internal static readonly UtilitiesWindow UtilitiesWindow = new();
     internal static readonly ScreenManagerWindow ScreenManagerWindow = new();
     internal static readonly SnixlWindow SnixlWindow = new();
@@ -72,6 +74,7 @@ internal static partial class WindowManager
                 Program.ConsoleLogWindow,
                 UtilitiesWindow,    // item shown in TiXL > Development menu
                 SettingsWindow, // item shown in TiXL menu
+                ProjectSettingsWindow, // item shown in TiXL menu
                 ScreenManagerWindow,
             ];
 

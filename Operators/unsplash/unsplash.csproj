@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <Import Project="$(SolutionDir)/Tixl.props" />
   <PropertyGroup>
-    <TargetFramework>net9.0-windows</TargetFramework>
+    <TargetFramework>net10.0-windows</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <UserSecretsId>4ddcedc9-2c55-476d-9aeb-8e052ecd278a</UserSecretsId>
@@ -99,25 +99,21 @@
   <ItemGroup>
     <PackageReference Include="unsplasharp.api" Version="0.7.0" />
   </ItemGroup>
-  <!-- Include Resources/** into output/Resources -->
+  <!-- Copy package content into this project's own output only (not transitively to other projects).
+       Uses a custom Target instead of <Content CopyToOutputDirectory> to prevent MSBuild from
+       propagating these files into every project that builds as part of the same solution. -->
   <ItemGroup Condition="'$(Configuration)' == 'Release'">
-    <Content Include="Assets/**/*" Exclude="bin/**">
-      <Link>Assets/%(RecursiveDir)%(Filename)%(Extension)</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="**/*.t3" Exclude="bin/**">
-      <Link>Symbols/%(RecursiveDir)%(Filename)%(Extension)</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="**/*.t3ui" Exclude="bin/**">
-      <Link>SymbolUis/%(RecursiveDir)%(Filename)%(Extension)</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="**/*.cs" Exclude="bin/**;obj/**">
-      <Link>SourceCode/%(RecursiveDir)%(Filename)%(Extension)</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <PackageAssets Include="Assets/**/*" Exclude="bin/**" />
+    <PackageSymbols Include="**/*.t3" Exclude="bin/**" />
+    <PackageSymbolUis Include="**/*.t3ui" Exclude="bin/**" />
+    <PackageSourceCode Include="**/*.cs" Exclude="bin/**;obj/**" />
   </ItemGroup>
+  <Target Name="CopyPackageContent" AfterTargets="AfterBuild" Condition="'$(Configuration)' == 'Release'">
+    <Copy SourceFiles="@(PackageAssets)" DestinationFiles="@(PackageAssets->'$(OutputPath)/Assets/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PackageSymbols)" DestinationFiles="@(PackageSymbols->'$(OutputPath)/Symbols/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PackageSymbolUis)" DestinationFiles="@(PackageSymbolUis->'$(OutputPath)/SymbolUis/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PackageSourceCode)" DestinationFiles="@(PackageSourceCode->'$(OutputPath)/SourceCode/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+  </Target>
   <ItemGroup Label="OperatorPackages">
     <Operators Include="lib" Version="1.0.0" ResourcesOnly="False" />
     <Operators Include="Types" Version="1.0.0" ResourcesOnly="False" />

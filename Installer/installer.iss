@@ -9,7 +9,7 @@
 #define MyAppPublisher "TiXL Community"
 #define MyAppURL "https://tixl.app//"
 #define MyAppExeName "TiXL.exe"
-#define DotNetSdkInstaller "dotnet-sdk-9.0.203-win-x64.exe"
+#define DotNetSdkInstaller "dotnet-sdk-10.0.201-win-x64.exe"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
@@ -51,7 +51,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "..\Editor\bin\Release\net9.0-windows\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
+Source: "..\Editor\bin\Release\net10.0-windows\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
 ; Operator thumbnails live next to the source projects in .meta\Thumbnails\ and are not copied
 ; into the build output by the csproj content rules. Pull them straight from the source tree so
 ; they ship with the release.
@@ -79,7 +79,7 @@ begin
   begin
     for I := 0 to GetArrayLength(Versions) - 1 do
     begin
-      if CompareStr(Versions[I], '9.0.203') = 0 then
+      if CompareStr(Versions[I], '10.0.201') = 0 then
       begin
         Result := True;
         Exit;

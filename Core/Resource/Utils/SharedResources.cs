@@ -3,7 +3,7 @@ using System.IO;
 using SharpDX.Direct3D11;
 using T3.Core.DataTypes;
 using T3.Core.Logging;
-using T3.Core.UserData;
+using T3.Core.Settings;
 using PixelShader = T3.Core.DataTypes.PixelShader;
 using Texture2D = T3.Core.DataTypes.Texture2D;
 using VertexShader = T3.Core.DataTypes.VertexShader;

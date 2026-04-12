@@ -1,6 +1,5 @@
 using ImGuiNET;
 using T3.Core.DataTypes;
-using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Core.SystemUi;
 using T3.Editor.Gui.Graph.Dialogs;
@@ -8,7 +7,6 @@ using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.Interaction.Variations;
 using T3.Editor.Gui.MagGraph.States;
-using T3.Editor.Gui.MagGraph.Ui;
 using T3.Editor.Gui.OutputUi;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers.Thumbnails;

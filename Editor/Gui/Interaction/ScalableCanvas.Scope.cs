@@ -1,5 +1,4 @@
 ﻿#nullable enable
-using System.Diagnostics;
 using ImGuiNET;
 using T3.Editor.Gui.UiHelpers;
 

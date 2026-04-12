@@ -82,6 +82,7 @@ internal static class TriggerAnimUi
 
         if (h < 10)
         {
+            ImGui.PopID();
             return OpUi.CustomUiResult.None;
         }
 

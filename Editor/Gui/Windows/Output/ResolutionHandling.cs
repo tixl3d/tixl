@@ -1,8 +1,7 @@
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
-using T3.Core.UserData;
+using T3.Core.Settings;
 using T3.Editor.Gui.Styling;
-using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.Layouts;
 using T3.Serialization;
 
@@ -82,6 +81,21 @@ internal static class ResolutionHandling
     private static List<Resolution> _resolutions;
     private static readonly string _filePath = System.IO.Path.Combine(FileLocations.SettingsDirectory, "resolutions.json");
     public static readonly Resolution DefaultResolution = Resolutions[0];
+
+    public static Resolution? FindByTitle(string? title)
+    {
+        if (string.IsNullOrEmpty(title))
+            return null;
+
+        for (var i = 0; i < Resolutions.Count; i++)
+        {
+            if (Resolutions[i].Title == title)
+                return Resolutions[i];
+        }
+
+        return null;
+    }
+
     private static Resolution _resolutionForEdit = new("untitled", 256, 256);
 
     public sealed class Resolution

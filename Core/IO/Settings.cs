@@ -2,6 +2,7 @@
 
 using System;
 using System.IO;
+using T3.Core.Settings;
 using T3.Serialization;
 
 namespace T3.Core.IO;
@@ -42,7 +43,7 @@ public class Settings<T> where T  : class, new()
 
     private static Settings<T>? _instance;
     private readonly string _filePath;
-    private static string ConfigDirectory => UserData.FileLocations.SettingsDirectory;
+    private static string ConfigDirectory => FileLocations.SettingsDirectory;
 
     // ReSharper disable once StaticMemberInGenericType
     public static bool SaveDisabled { get; set; }

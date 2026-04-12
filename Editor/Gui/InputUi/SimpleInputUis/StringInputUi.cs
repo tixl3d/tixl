@@ -5,7 +5,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using T3.Core.Operator;
 using T3.Core.Operator.Interfaces;
-using T3.Core.Resource;
 using T3.Core.Resource.Assets;
 using T3.Core.SystemUi;
 using T3.Core.Utils;

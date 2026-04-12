@@ -4,7 +4,6 @@ using ImGuiNET;
 using T3.Core.Audio;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
-using T3.Core.Utils;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.OpUis.WidgetUi;
 using T3.Editor.Gui.Styling;

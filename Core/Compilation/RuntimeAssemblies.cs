@@ -13,6 +13,6 @@ public static class RuntimeAssemblies
     private static readonly Assembly _coreAssembly = typeof(RuntimeAssemblies).Assembly;
     public static readonly string CoreDirectory = Path.GetDirectoryName(_coreAssembly.Location)!;
     public static readonly Version Version = _coreAssembly.GetName().Version!;
-    public const string NetVersion = "9.0";
+    public const string NetVersion = "10.0";
 }
 

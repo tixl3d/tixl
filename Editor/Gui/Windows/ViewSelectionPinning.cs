@@ -226,14 +226,33 @@ internal sealed class ViewSelectionPinning
             return instance != null;
         }
 
-        if (!_pinnedProjectView!.GraphView.Destroyed)
+        // Try the pinned project view first
+        if (_pinnedProjectView != null && !_pinnedProjectView.GraphView.Destroyed)
         {
             instance = _pinnedProjectView.Structure.GetInstanceFromIdPath(_pinnedInstancePath);
             components = _pinnedProjectView;
-            return instance != null;
+            if (instance != null)
+                return true;
         }
 
-        Unpin();
+        // Pinned project view is stale (e.g. after project close/reopen) — try resolving
+        // the saved instance path against the current focused project view
+        if (focusedComponents != null && _pinnedInstancePath.Count > 0)
+        {
+            instance = focusedComponents.Structure.GetInstanceFromIdPath(_pinnedInstancePath);
+            if (instance != null)
+            {
+                _pinnedProjectView = focusedComponents;
+                components = focusedComponents;
+                return true;
+            }
+
+            // Instance not found yet — might still be loading. Keep the pin data
+            // and fall through to selection for now.
+        }
+
+        // Don't Unpin() here — the instance path may resolve on a later frame
+        // after the project finishes loading. Fall back to selection.
         if (focusedComponents != null)
         {
             components = focusedComponents;
@@ -273,6 +292,22 @@ internal sealed class ViewSelectionPinning
     {
         instance = structure.GetInstanceFromIdPath(_pinnedEvaluationInstancePath);
         return instance != null;
+    }
+
+    internal void SaveStateTo(Output.OutputWindowState state)
+    {
+        state.IsPinned = _isPinned;
+        state.PinnedOutputId = _selectedOutputId;
+        state.PinnedInstancePath = _isPinned ? _pinnedInstancePath.ToArray() : [];
+    }
+
+    internal void LoadStateFrom(Output.OutputWindowState state)
+    {
+        _isPinned = state.IsPinned;
+        _selectedOutputId = state.PinnedOutputId;
+        _pinnedInstancePath = state.PinnedInstancePath;
+        _pinnedProjectView = UiModel.ProjectHandling.ProjectView.Focused;
+        _pinnedEvaluationInstancePath = state.PinnedInstancePath; // Same path for now
     }
 
     private bool _isPinned;

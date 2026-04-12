@@ -7,7 +7,7 @@
         <RootNamespace>T3.Player</RootNamespace>
         <Configurations>Debug;Release</Configurations>
         <Platforms>AnyCPU</Platforms>
-        <TargetFramework>net9.0-windows</TargetFramework>
+        <TargetFramework>net10.0-windows</TargetFramework>
         <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
         <EnableUnsafeBinaryFormatterSerialization>true</EnableUnsafeBinaryFormatterSerialization>
         <Deterministic>true</Deterministic>
@@ -24,7 +24,7 @@
         <PackageReference Include="SharpDX.Desktop" Version="4.2.0">
             <NoWarn>NU1701</NoWarn>
         </PackageReference>
-        <PackageReference Include="System.Runtime.Serialization.Formatters" Version="9.0.4" />
+        <PackageReference Include="System.Runtime.Serialization.Formatters" Version="10.0.5" />
     </ItemGroup>
 
     <!--This

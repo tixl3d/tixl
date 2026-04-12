@@ -17,15 +17,15 @@
 
     <ItemGroup>
         <PackageReference Include="Delaunator" Version="1.0.11" />
-        <PackageReference Include="JeremyAnsel.Media.Dds" Version="2.0.4" />
+        <PackageReference Include="JeremyAnsel.Media.Dds" Version="2.0.7" />
         <PackageReference Include="ManagedBass" Version="4.0.2" />
         <PackageReference Include="ManagedBass.Flac" Version="4.0.2" />
         <PackageReference Include="ManagedBass.Mix" Version="4.0.2" />
         <PackageReference Include="ManagedBass.Wasapi" Version="4.0.2" />
         <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.7.0-1.final" />
-        <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="9.0.1" />
-        <PackageReference Include="NAudio.Midi" Version="2.2.1" />
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+        <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="10.0.5" />
+        <PackageReference Include="NAudio.Midi" Version="2.3.0" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
         <PackageReference Include="NuGet.Configuration" Version="6.13.2" />
         <PackageReference Include="OpenCvSharp4" Version="4.11.0.20250507" />
         <PackageReference Include="OpenCvSharp4.Extensions" Version="4.11.0.20250507" />
@@ -39,10 +39,10 @@
         <PackageReference Include="SharpDX.Mathematics" Version="4.2.0" />
         <PackageReference Include="SharpDX.MediaFoundation" Version="4.2.0" />
         <PackageReference Include="SharpDX.XInput" Version="4.2.0" />
-        <PackageReference Include="SharpGLTF.Core" Version="1.0.4" />
-        <PackageReference Include="System.IO.Ports" Version="8.0.0" />
-        <PackageReference Include="System.Management" Version="8.0.0" />
-        <PackageReference Include="System.ServiceModel.Primitives" Version="4.9.0" />
+        <PackageReference Include="SharpGLTF.Core" Version="1.0.6" />
+        <PackageReference Include="System.IO.Ports" Version="10.0.5" />
+        <PackageReference Include="System.Management" Version="10.0.5" />
+        <PackageReference Include="System.ServiceModel.Primitives" Version="10.0.5" />
     </ItemGroup>
 
     <ItemGroup>

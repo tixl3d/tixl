@@ -6,6 +6,7 @@ using ManagedBass;
 using ManagedBass.Mix;
 using ManagedBass.Wasapi;
 using T3.Core.Logging;
+using T3.Core.Settings;
 
 namespace T3.Core.Audio;
 
@@ -380,11 +381,11 @@ public static class AudioMixerManager
         }
         else
         {
-            // Always restore the current ProjectSettings volume (user may have changed it while muted)
+            // Always restore the current CoreSettings volume (user may have changed it while muted)
             float definedVolume = 1.0f;
             try
             {
-                definedVolume = IO.ProjectSettings.Config.GlobalPlaybackVolume;
+                definedVolume = IO.CoreSettings.Config.AppVolume;
             }
             catch
             {
@@ -412,11 +413,11 @@ public static class AudioMixerManager
         }
         else
         {
-            // Always restore the current ProjectSettings volume (user may have changed it while muted)
+            // Always restore the current project settings volume (user may have changed it while muted)
             float definedVolume = 1.0f;
             try
             {
-                definedVolume = IO.ProjectSettings.Config.OperatorPlaybackVolume;
+                definedVolume = CompositionSettings.Current.Audio.OperatorVolume;
             }
             catch
             {

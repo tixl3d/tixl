@@ -7,7 +7,6 @@ using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Skills.Data;
-using T3.Editor.Skills.Training;
 using T3.Editor.UiModel.Selection;
 
 namespace T3.Editor.Skills.Ui;

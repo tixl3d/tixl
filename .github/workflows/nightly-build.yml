@@ -1,6 +1,7 @@
 name: Nightly Build
 
 on:
+  workflow_dispatch:  # Allow manual trigger from GitHub Actions UI
   schedule:
     - cron: '0 1 * * *'  # Runs at 1:00 AM UTC every day
 

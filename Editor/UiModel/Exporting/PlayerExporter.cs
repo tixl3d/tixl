@@ -6,10 +6,10 @@ using T3.Core.DataTypes;
 using T3.Core.IO;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
+using T3.Core.Settings;
 using T3.Core.Resource;
 using T3.Core.Resource.Assets;
 using T3.Core.SystemUi;
-using T3.Core.UserData;
 using T3.Editor.Compilation;
 using T3.Editor.Gui;
 using T3.Editor.Gui.InputUi.SimpleInputUis;
@@ -349,7 +349,7 @@ internal static partial class PlayerExporter
     private static bool TryFindSoundtrack(Instance instance, Symbol symbol,
                                           [NotNullWhen(true)] out string? address)
     {
-        var playbackSettings = symbol.PlaybackSettings;
+        var playbackSettings = symbol.CompositionSettings;
         if (playbackSettings == null)
         {
             Log.Warning($"Project {symbol} has no playback settings");
@@ -454,8 +454,8 @@ internal static partial class PlayerExporter
         // Update project settings
         var exportSettings = new ExportSettings(OperatorId: symbol.Id,
                                                 ApplicationTitle: symbol.Name,
-                                                WindowMode: ProjectSettings.Config.DefaultWindowMode,
-                                                ConfigData: ProjectSettings.Config,
+                                                WindowMode: CompositionSettings.Current.Export.DefaultWindowMode,
+                                                ConfigData: CoreSettings.Config,
                                                 Author: symbol.SymbolPackage.AssemblyInformation?.Name ?? string.Empty, // todo - actual author name
                                                 BuildId: Guid.NewGuid(),
                                                 EditorVersion: Program.VersionText);

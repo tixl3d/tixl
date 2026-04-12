@@ -5,6 +5,7 @@ using ManagedBass;
 using ManagedBass.Mix;
 using T3.Core.Animation;
 using T3.Core.IO;
+using T3.Core.Settings;
 using T3.Core.Logging;
 
 namespace T3.Core.Audio;
@@ -189,15 +190,16 @@ internal sealed class SoundtrackClipStream
         var soundDelta = (currentPosInSec - localTargetTimeInSecs) * playback.PlaybackSpeed;
 
         // Set volume on the stream
-        Bass.ChannelSetAttribute(StreamHandle, ChannelAttribute.Volume, 
-                                 clip.Volume 
-                                 * ProjectSettings.Config.SoundtrackPlaybackVolume
-                                 * ProjectSettings.Config.GlobalPlaybackVolume
-                                 * (ProjectSettings.Config.SoundtrackMute ? 0f:1f)
-                                 * (ProjectSettings.Config.GlobalMute ? 0f:1f));
-        
+        var audio = CompositionSettings.Current.Audio;
+        Bass.ChannelSetAttribute(StreamHandle, ChannelAttribute.Volume,
+                                 clip.Volume
+                                 * audio.SoundtrackVolume
+                                 * CoreSettings.Config.AppVolume
+                                 * (audio.SoundtrackMute ? 0f:1f)
+                                 * (CoreSettings.Config.AppMute ? 0f:1f));
+
         // We may not fall behind or skip ahead in playback
-        var maxSoundDelta = ProjectSettings.Config.AudioResyncThreshold * Math.Abs(playback.PlaybackSpeed);
+        var maxSoundDelta = audio.AudioResyncThreshold * Math.Abs(playback.PlaybackSpeed);
         if (Math.Abs(soundDelta) <= maxSoundDelta)
             return;
 

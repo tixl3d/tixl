@@ -115,12 +115,12 @@ internal static class RenderTiming
             return;
         }
 
-        PlaybackUtils.FindPlaybackSettingsForInstance(composition, out var instanceWithSettings, out var playbackSettings);
+        PlaybackUtils.FindCompositionSettingsForInstance(composition, out var instanceWithSettings, out var projectSettings);
 
         // change global settings before calculating times
-        Playback.Current.Bpm = playbackSettings.Bpm;
+        Playback.Current.Bpm = projectSettings.Playback.Bpm;
         Playback.Current.PlaybackSpeed = 0.0;
-        Playback.Current.Settings = playbackSettings;
+        Playback.Current.Settings = projectSettings;
         Playback.Current.FrameSpeedFactor = session.Settings.FrameRate / 60.0f;
 
         // time range
@@ -134,7 +134,7 @@ internal static class RenderTiming
         var adaptedDelta = Math.Max(Playback.Current.TimeInSecs - oldSecs + session.Runtime.TimingOverhang, 0.0);
 
         // audio clip for preview
-        if (playbackSettings.TryGetMainSoundtrack(instanceWithSettings, out var soundtrack))
+        if (projectSettings.TryGetMainSoundtrack(instanceWithSettings, out var soundtrack))
             AudioEngine.UseSoundtrackClip(soundtrack, Playback.Current.TimeInSecs);
 
         if (!session.Runtime.AudioRecording)

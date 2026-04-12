@@ -13,7 +13,7 @@ using T3.Core.Logging;
 using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
-using T3.Core.UserData;
+using T3.Core.Settings;
 using Texture2D = T3.Core.DataTypes.Texture2D;
 
 namespace T3.Player;
@@ -68,15 +68,16 @@ internal static partial class Program
         var previousSpeed = playback.PlaybackSpeed;
         var originalTime = playback.TimeInSecs;
         var wasWindowVisible = _renderForm?.Visible ?? true;
-        var previousSoundtrackMute = ProjectSettings.Config.SoundtrackMute;
-        var previousGlobalMute = ProjectSettings.Config.GlobalMute;
+        var audio = CompositionSettings.Current.Audio;
+        var previousSoundtrackMute = audio.SoundtrackMute;
+        var previousGlobalMute = CoreSettings.Config.AppMute;
         var hideDisplayDuringPreload = true;
         var muteAudioDuringPreload = true;
         const double subFrameWarmOffsetInSecs = 1.0 / 60.0;
 
         if (muteAudioDuringPreload)
         {
-            ProjectSettings.Config.SoundtrackMute = true;
+            audio.SoundtrackMute = true;
             AudioEngine.SetSoundtrackMute(true);
             AudioEngine.SetGlobalMute(true);
         }
@@ -129,7 +130,7 @@ internal static partial class Program
             if (muteAudioDuringPreload)
             {
                 AudioEngine.SetGlobalMute(previousGlobalMute);
-                ProjectSettings.Config.SoundtrackMute = previousSoundtrackMute;
+                audio.SoundtrackMute = previousSoundtrackMute;
                 AudioEngine.SetSoundtrackMute(previousSoundtrackMute);
             }
 

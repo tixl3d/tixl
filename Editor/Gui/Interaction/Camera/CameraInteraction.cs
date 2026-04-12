@@ -82,6 +82,13 @@ internal sealed class CameraInteraction
         _intendedSetup.Reset();
     }
 
+    public void SetView(ICamera camera)
+    {
+        _moveVelocity = Vector3.Zero;
+        _intendedSetup.SetTo(camera);
+        _smoothedSetup.SetTo(camera);
+    }
+
     private bool ComputeSmoothMovement(bool isInteracting)
     {
         var stillDamping = !_smoothedSetup.MatchesSetup(_intendedSetup);

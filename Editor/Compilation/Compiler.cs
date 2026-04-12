@@ -13,7 +13,7 @@ namespace T3.Editor.Compilation;
 /// </summary>
 internal static class Compiler
 {
-    private static readonly string _workingDirectory = Path.Combine(T3.Core.UserData.FileLocations.TempFolder, "CompilationWorkingDirectory");
+    private static readonly string _workingDirectory = Path.Combine(T3.Core.Settings.FileLocations.TempFolder, "CompilationWorkingDirectory");
 
     static Compiler()
     {

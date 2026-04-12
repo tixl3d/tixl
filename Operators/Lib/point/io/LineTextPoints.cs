@@ -659,18 +659,19 @@ internal sealed class GraphicsPathEntry
 
         foreach (var node in nodes)
         {
-            GraphicsPath? newPath = null;
             switch (node)
             {
                 case SvgPath svgPath:
                 {
-                    ConvertPathDataElements(svgPath.PathData, newPath, paths);
+                    var fullPath = svgPath.Path(_svgRenderer);
+                    SplitGraphicsPathIntoSubPaths(fullPath, paths);
                     break;
                 }
 
                 case SvgGlyph svgGlyph:
                 {
-                    ConvertPathDataElements(svgGlyph.PathData, newPath, paths);
+                    var fullPath = svgGlyph.Path(_svgRenderer);
+                    SplitGraphicsPathIntoSubPaths(fullPath, paths);
                     break;
                 }
 
@@ -708,38 +709,74 @@ internal sealed class GraphicsPathEntry
         return paths;
     }
 
-    private static void ConvertPathDataElements(SvgPathSegmentList? svgPathSegmentList, GraphicsPath? newPath, List<GraphicsPathEntry> paths)
+    /// <summary>
+    /// Splits a GraphicsPath into sub-paths at each StartPoint marker.
+    /// This avoids manual segment iteration with AddToPath, letting the SVG library
+    /// handle path construction internally via SvgPath.Path(renderer).
+    /// </summary>
+    private static void SplitGraphicsPathIntoSubPaths(GraphicsPath? fullPath, List<GraphicsPathEntry> paths)
     {
-        if (svgPathSegmentList == null)
+        if (fullPath == null || fullPath.PointCount == 0)
             return;
 
-        foreach (var s in svgPathSegmentList)
-        {
-            var segmentIsJump = s is SvgMoveToSegment or SvgClosePathSegment;
-            if (segmentIsJump)
-            {
-                if (newPath == null)
-                    continue;
+        var points = fullPath.PathPoints;
+        var types = fullPath.PathTypes;
 
+        GraphicsPath? currentSubPath = null;
+        var subPathStart = PointF.Empty;
+
+        for (var i = 0; i < points.Length; i++)
+        {
+            var pathType = types[i];
+            var pointType = (PathPointType)(pathType & 0x07);
+            var isStartPoint = pointType == PathPointType.Start;
+            var isCloseSubPath = (pathType & (byte)PathPointType.CloseSubpath) != 0;
+
+            if (isStartPoint)
+            {
+                if (currentSubPath != null && currentSubPath.PointCount > 0)
+                {
+                    paths.Add(new GraphicsPathEntry
+                                  {
+                                      GraphicsPath = currentSubPath,
+                                      NeedsClosing = false
+                                  });
+                }
+                currentSubPath = new GraphicsPath();
+                subPathStart = points[i];
+            }
+
+            currentSubPath ??= new GraphicsPath();
+
+            if (pointType == PathPointType.Line)
+            {
+                var prev = i > 0 ? points[i - 1] : subPathStart;
+                currentSubPath.AddLine(prev, points[i]);
+            }
+            else if (pointType == PathPointType.Bezier3 && i + 2 < points.Length)
+            {
+                var prev = i > 0 ? points[i - 1] : subPathStart;
+                currentSubPath.AddBezier(prev, points[i], points[i + 1], points[i + 2]);
+                i += 2;
+            }
+
+            if (isCloseSubPath && currentSubPath.PointCount > 0)
+            {
+                currentSubPath.CloseFigure();
                 paths.Add(new GraphicsPathEntry
                               {
-                                  GraphicsPath = newPath,
+                                  GraphicsPath = currentSubPath,
                                   NeedsClosing = false
                               });
-                newPath = null;
-            }
-            else
-            {
-                newPath ??= new GraphicsPath();
-                s.AddToPath(newPath);
+                currentSubPath = null;
             }
         }
 
-        if (newPath != null)
+        if (currentSubPath != null && currentSubPath.PointCount > 0)
         {
             paths.Add(new GraphicsPathEntry
                           {
-                              GraphicsPath = newPath,
+                              GraphicsPath = currentSubPath,
                               NeedsClosing = false
                           });
         }

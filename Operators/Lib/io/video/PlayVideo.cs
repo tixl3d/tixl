@@ -149,7 +149,7 @@ internal sealed class PlayVideo : Instance<PlayVideo>, IStatusProvider
                                    && !HasPlaybackCompleted;
 
             // Set the volume while respecting the global mute/volume settings
-            _engine.Volume = ProjectSettings.Config.GlobalMute ? 0 : volume.Clamp(0f, 1f) * ProjectSettings.Config.GlobalPlaybackVolume;
+            _engine.Volume = CoreSettings.Config.AppMute ? 0 : volume.Clamp(0f, 1f) * CoreSettings.Config.AppVolume;
 
             if ((ReadyStates)_engine.ReadyState <= ReadyStates.HaveNothing)
                 return false;

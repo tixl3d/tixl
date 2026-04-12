@@ -1,7 +1,6 @@
 ﻿#nullable enable
 using System.Text;
 using ImGuiNET;
-using Microsoft.VisualBasic.ApplicationServices;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Utils;
 using T3.Editor.Gui.Styling;

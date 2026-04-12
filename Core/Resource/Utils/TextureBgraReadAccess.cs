@@ -7,7 +7,7 @@ using SharpDX.DXGI;
 using T3.Core.DataTypes;
 using T3.Core.Logging;
 using T3.Core.Resource.Assets;
-using T3.Core.UserData;
+using T3.Core.Settings;
 using ComputeShader = T3.Core.DataTypes.ComputeShader;
 using Texture2D = T3.Core.DataTypes.Texture2D;
 

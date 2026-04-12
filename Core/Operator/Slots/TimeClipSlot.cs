@@ -3,6 +3,7 @@ using System.Linq;
 using T3.Core.Animation;
 using T3.Core.IO;
 using T3.Core.Logging;
+using T3.Core.Settings;
 using T3.Core.Utils;
 
 // ReSharper disable ForCanBeConvertedToForeach
@@ -53,7 +54,7 @@ public sealed class TimeClipSlot<T> : Slot<T>, ITimeClipProvider, IOutputDataUse
     {
         if ((context.LocalTime < TimeClip.TimeRange.Start) || (context.LocalTime >= TimeClip.TimeRange.End))
         {
-            LastUpdateStatus = ProjectSettings.Config.TimeClipSuspending ? UpdateStates.Suspended : UpdateStates.Active;
+            LastUpdateStatus = CoreSettings.Config.TimeClipSuspending ? UpdateStates.Suspended : UpdateStates.Active;
             return;
         }
 

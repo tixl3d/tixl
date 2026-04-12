@@ -7,7 +7,6 @@ using T3.Core.Utils;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
-using T3.SystemUi;
 
 namespace T3.Editor.Gui.Styling;
 

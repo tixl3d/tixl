@@ -1,17 +1,11 @@
 #nullable enable
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text;
 using System.Threading.Tasks;
 using ImGuiNET;
 using MsdfAtlasGen;
 using Msdfgen;
 using Msdfgen.Extensions;
-using T3.Core.Logging;
 using T3.Core.Model;
 using T3.Core.SystemUi;
 using T3.Editor.Gui.Input;

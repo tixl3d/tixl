@@ -1,7 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Text;
-using System.Text.Json.Serialization;
-using T3.Core.Utils;
+﻿using System.Text.Json.Serialization;
 using T3.Serialization;
 
 namespace T3.Editor.UiModel.Selection;

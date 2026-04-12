@@ -4,7 +4,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using Microsoft.Build.Construction;
 using T3.Core.Compilation;
-using T3.Core.UserData;
+using T3.Core.Settings;
 using Encoding = System.Text.Encoding;
 
 // ReSharper disable SuggestBaseTypeForParameterInConstructor

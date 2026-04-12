@@ -8,7 +8,7 @@ using T3.Core.IO;
 using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Core.Resource;
-using T3.Core.UserData;
+using T3.Core.Settings;
 using T3.Core.Utils;
 using T3.Editor.External;
 
@@ -31,7 +31,7 @@ internal class EditorSymbolPackage : SymbolPackage
     /// <param name="initializeResources"></param>
     public EditorSymbolPackage(AssemblyInformation assembly, string? directory, bool initializeResources = true) : base(assembly, directory, initializeResources)
     {
-        if(ProjectSettings.Config.LogCompilationDetails)
+        if(CoreSettings.Config.LogCompilationDetails)
             Log.Debug($"Added package {assembly.Name}");
         
         SymbolAdded += OnSymbolAdded;
@@ -87,7 +87,7 @@ internal class EditorSymbolPackage : SymbolPackage
         var newSymbols = newlyReadSymbols.ToDictionary(result => result.Id, symbol => symbol);
         var newSymbolsWithoutUis = new ConcurrentDictionary<Guid, Symbol>(newSymbols);
         preExistingSymbolUis = SymbolUiDict.Values.ToArray();
-        if(ProjectSettings.Config.LogCompilationDetails)
+        if(CoreSettings.Config.LogCompilationDetails)
             Log.Debug($"{AssemblyInformation.Name}: Loading Symbol UIs from \"{Folder}\"");
 
         var enumerator = parallel ? SymbolUiSearchFiles.AsParallel() : SymbolUiSearchFiles;
@@ -143,7 +143,7 @@ internal class EditorSymbolPackage : SymbolPackage
 
     public void RegisterUiSymbols(SymbolUi[] newSymbolUis, SymbolUi[] preExistingSymbolUis)
     {
-        if(ProjectSettings.Config.LogCompilationDetails)
+        if(CoreSettings.Config.LogCompilationDetails)
             Log.Debug($@"{DisplayName}: Registering UI entries...");
         
         foreach (var symbolUi in preExistingSymbolUis)
@@ -213,7 +213,7 @@ internal class EditorSymbolPackage : SymbolPackage
         }
         else
         {
-            if(ProjectSettings.Config.LogCompilationDetails)
+            if(CoreSettings.Config.LogCompilationDetails)
                 Log.Debug($"{AssemblyInformation.Name}: Found {sourceCodeCount} operator source code files out of {sourceCodeAttempts} C# files.");
         }
         #endif

@@ -9,7 +9,7 @@ public static class SvgLoader
     {
         try
         {
-            newValue = SvgDocument.Open<SvgDocument>(file.AbsolutePath, null);
+            newValue = SvgDocument.Open<SvgDocument>(file.AbsolutePath, (Dictionary<string, string>?)null);
             failureReason = null;
             return true;
         }

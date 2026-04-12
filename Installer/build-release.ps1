@@ -29,7 +29,7 @@ $downloadsDir = "$PSScriptRoot/dependencies/downloads"
 New-Item -ItemType Directory -Force -Path $downloadsDir | Out-Null
 
 $deps = @(
-    @{ File = "dotnet-sdk-9.0.203-win-x64.exe"; Url = "https://builds.dotnet.microsoft.com/dotnet/Sdk/9.0.203/dotnet-sdk-9.0.203-win-x64.exe" },
+    @{ File = "dotnet-sdk-10.0.201-win-x64.exe"; Url = "https://builds.dotnet.microsoft.com/dotnet/Sdk/10.0.201/dotnet-sdk-10.0.201-win-x64.exe" },
     @{ File = "VC_redist.x64.exe";              Url = "https://aka.ms/vs/17/release/vc_redist.x64.exe" }
 )
 

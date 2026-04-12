@@ -7,11 +7,10 @@ using System.IO;
 using System.Reflection;
 using T3.Core.Compilation;
 using T3.Core.IO;
-using T3.Core.Logging;
 using T3.Core.Resource;
 using T3.Core.Resource.ShaderCompiling;
 using T3.Core.SystemUi;
-using T3.Core.UserData;
+using T3.Core.Settings;
 using T3.Editor.App;
 using T3.Editor.Compilation;
 using T3.Editor.Gui;
@@ -28,7 +27,6 @@ using T3.Editor.UiContentDrawing;
 using T3.Editor.UiModel.Helpers;
 using T3.MsForms;
 using T3.SystemUi;
-using T3.Core.Audio;
 using ShaderCompiler = T3.Core.Resource.ShaderCompiling.ShaderCompiler;
 
 namespace T3.Editor;
@@ -150,7 +148,7 @@ internal static class Program
         UserSettings.InitializeGatedLogging();
         
         // ReSharper disable once UnusedVariable
-        var projectSettings = new ProjectSettings(saveOnQuit: true);
+        var projectSettings = new CoreSettings(saveOnQuit: true);
 
         if (UserSettings.Config.ProjectDirectories.Count == 0)
         {

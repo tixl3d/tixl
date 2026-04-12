@@ -95,7 +95,7 @@ public abstract partial class ShaderCompiler
             {
                 reason = string.Empty;
                 
-                if(ProjectSettings.Config.LogFileEvents)
+                if(CoreSettings.Config.LogFileEvents)
                     reason = "Shader already compiled.";
                 
                 return true;
@@ -106,7 +106,7 @@ public abstract partial class ShaderCompiler
                 reason = string.Empty;
                 CacheShaderInMemory(compiledBlob, hash, compiledBlob);
                 
-                if(ProjectSettings.Config.LogFileEvents)
+                if(CoreSettings.Config.LogFileEvents)
                     reason = $"Loaded cached shader from disk ({hash}).";
                 
                 return true;

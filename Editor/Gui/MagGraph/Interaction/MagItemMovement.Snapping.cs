@@ -3,7 +3,6 @@ using System.Diagnostics.CodeAnalysis;
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Editor.Gui.MagGraph.Model;
-using T3.Editor.Gui.MagGraph.Ui;
 using T3.Editor.UiModel.InputsAndTypes;
 using MagGraphView = T3.Editor.Gui.MagGraph.Ui.MagGraphView;
 

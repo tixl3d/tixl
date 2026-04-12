@@ -1,6 +1,5 @@
 ﻿using System.Reflection;
 using Operators.Utils;
-using T3.Editor.Gui.Interaction.Midi.CompatibleDevices;
 using T3.Editor.Gui.UiHelpers;
 using Type = System.Type;
 

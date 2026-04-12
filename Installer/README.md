@@ -24,13 +24,13 @@ This runs:
 2. `dotnet publish` for the Player (self-contained, win-x64) to `Player/bin/ReleasePublished/`
 3. `dotnet build -c Release` for the full solution (Editor post-build copies the published Player into its output)
 
-The result is a complete build in `Editor/bin/Release/net9.0-windows/`.
+The result is a complete build in `Editor/bin/Release/net10.0-windows/`.
 
 ## Dependencies
 
 The build script automatically downloads these into `Installer/dependencies/downloads/` if not already present:
 
-* [.NET SDK 9.0.203](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/sdk-9.0.203-windows-x64-installer)
+* [.NET SDK 10.0.201](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
 * [Visual C++ Redistributable](https://aka.ms/vs/17/release/vc_redist.x64.exe)
 
 The installer bundles them and installs them on the user's machine if needed.

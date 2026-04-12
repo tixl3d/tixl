@@ -2,7 +2,7 @@
 using System.Reflection;
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
-using T3.Core.UserData;
+using T3.Core.Settings;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.UiHelpers;

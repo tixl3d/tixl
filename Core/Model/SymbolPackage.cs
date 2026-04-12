@@ -14,7 +14,7 @@ using T3.Core.Operator;
 using T3.Core.Resource;
 using T3.Core.Resource.Assets;
 using T3.Core.Stats;
-using T3.Core.UserData;
+using T3.Core.Settings;
 
 // ReSharper disable RedundantNameQualifier
 
@@ -262,7 +262,7 @@ public abstract partial class SymbolPackage : IResourcePackage
                              .Where(symbolReadResult => symbolReadResult.Result.Symbol is not null)
                              .ToArray();
 
-            if (ProjectSettings.Config.LogCompilationDetails)
+            if (CoreSettings.Config.LogCompilationDetails)
                 Log.Debug($"{AssemblyInformation.Name}: Registering loaded symbols...");
 
             foreach (var readSymbolResult in symbolsRead)

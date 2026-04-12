@@ -9,7 +9,7 @@ using SharpDX.Mathematics.Interop;
 using SharpDX.WIC;
 using T3.Core.Resource;
 using T3.Core.Resource.Assets;
-using T3.Core.UserData;
+using T3.Core.Settings;
 using T3.Core.Utils;
 using T3.Editor.Gui.Windows.AssetLib;
 using T3.Editor.Gui.Windows.RenderExport;

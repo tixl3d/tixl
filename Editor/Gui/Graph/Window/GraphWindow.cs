@@ -1,12 +1,10 @@
 ﻿#nullable enable
 using ImGuiNET;
 using T3.Core.Animation;
-using T3.Editor.Gui.Dialogs;
 using T3.Editor.Gui.Hub;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.TransformGizmos;
 using T3.Editor.Gui.MagGraph.Interaction;
-using T3.Editor.Gui.MagGraph.Ui;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows;

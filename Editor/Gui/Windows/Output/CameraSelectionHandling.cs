@@ -404,6 +404,29 @@ internal sealed class CameraSelectionHandling
         _cameraInteraction.ResetView();
     }
 
+    internal void SaveStateTo(OutputWindowState state)
+    {
+        state.CameraControlMode = (OutputWindowState.CameraControlModes)(int)_controlMode;
+        state.CameraPosition = [_outputWindowViewCamera.CameraPosition.X, _outputWindowViewCamera.CameraPosition.Y, _outputWindowViewCamera.CameraPosition.Z];
+        state.CameraTarget = [_outputWindowViewCamera.CameraTarget.X, _outputWindowViewCamera.CameraTarget.Y, _outputWindowViewCamera.CameraTarget.Z];
+        state.CameraRoll = _outputWindowViewCamera.CameraRoll;
+    }
+
+    internal void LoadStateFrom(OutputWindowState state)
+    {
+        _controlMode = (ControlModes)(int)state.CameraControlMode;
+        if (state.CameraPosition.Length == 3)
+        {
+            _outputWindowViewCamera.CameraPosition = new Vector3(state.CameraPosition[0], state.CameraPosition[1], state.CameraPosition[2]);
+        }
+        if (state.CameraTarget.Length == 3)
+        {
+            _outputWindowViewCamera.CameraTarget = new Vector3(state.CameraTarget[0], state.CameraTarget[1], state.CameraTarget[2]);
+        }
+        _outputWindowViewCamera.CameraRoll = state.CameraRoll;
+        _cameraInteraction.SetView(_outputWindowViewCamera);
+    }
+
     private bool _drawnTypeIsCommand;
     private ControlModes _controlMode = ControlModes.AutoUseFirstCam;
     private readonly ViewCamera _outputWindowViewCamera = new();

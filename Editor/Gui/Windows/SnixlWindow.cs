@@ -1,7 +1,5 @@
 using ImGuiNET;
-using System.Numerics;
 using T3.Editor.Gui.Styling;
-using T3.Editor.Gui.UiHelpers;
 
 namespace T3.Editor.Gui.Windows;
 

@@ -1,19 +1,30 @@
 name: "Build"
-description: "Build complete TiXL release (Player published + Editor)"
+description: "Run common build steps"
 runs:
   using: "composite"
   steps:
     - name: Setup .NET SDK for CI
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '9.0.203'
+        # Instead of reading global.json for the version,
+        # explicitly specify the version for the CI environment.
+        # Remove or comment out 'dotnet-version-file'.
+        # dotnet-version-file: './global.json' 
+        dotnet-version: '10.0.x' # .NET 10 LTS
 
     - name: Display .NET SDK Version used in CI
       shell: pwsh
       run: |
         Write-Host "CI is using .NET SDK Version:"
         dotnet --version
+        Write-Host "Contents of global.json (still present in checkout):"
+        # This confirms global.json is unchanged but was overridden for SDK setup
+        type ./global.json # Or 'cat ./global.json' on Linux runners 
 
-    - name: Build Release
+    - name: Restore dependencies
       shell: pwsh
-      run: pwsh Installer/build-release.ps1
+      run: dotnet restore # Consider adding YourSolution.sln if not at root
+
+    - name: Build Release Version
+      shell: pwsh
+      run: dotnet build --configuration Release --no-restore # Consider adding YourSolution.sln

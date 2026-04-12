@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using T3.Core.DataTypes.DataSet;
 using T3.Core.IO;
+using T3.Core.Settings;
 
 namespace T3.Core.Audio;
 
@@ -23,7 +24,7 @@ namespace T3.Core.Audio;
 /// This is normally out of sync with the display update rate of 60Hz.
 /// 
 /// To avoid jittering, the resulting timing is then smoothed in BeatTiming.
-/// You can enable ProjectSettings.EnableBeatSyncProfiling to get a better understanding of how different musical styles are matched.
+/// You can enable CoreSettings.EnableBeatSyncProfiling to get a better understanding of how different musical styles are matched.
 /// The algorithm uses too many magic numbers to list, but the most relevant ones are:
 /// - proportionalBpmAdjustment
 /// - phaseAdjustmentAmount
@@ -111,7 +112,7 @@ public static class BeatSynchronizer
             if (!TryDetectAndQueueOnsetStrength(band, currentBassOnsetStrength, currentTimeMs, out var onset))
                 continue;
 
-            if (ProjectSettings.Config.EnableBeatSyncProfiling)
+            if (CoreSettings.Config.EnableBeatSyncProfiling)
             {
                 DebugDataRecording.KeepTraceData("BPM/OnSet/" + band.Type, onset.Amplitude);
             }
@@ -176,7 +177,7 @@ public static class BeatSynchronizer
 
         var bpmCorrection = (proportionalBpmAdjustment * currentPhaseErrorNormalized);
 
-        if (ProjectSettings.Config.EnableBeatSyncProfiling)
+        if (CoreSettings.Config.EnableBeatSyncProfiling)
         {
             DebugDataRecording.KeepTraceData("BPM/barProgress", _barTime % 1);
             DebugDataRecording.KeepTraceData("BPM/current", _currentBpm);

@@ -117,7 +117,7 @@ public sealed partial class AssemblyInformation
         _directory = directory;
         _initialized = true;
         
-        if(ProjectSettings.Config.LogCompilationDetails)
+        if(CoreSettings.Config.LogCompilationDetails)
             Log.Debug($"{Name}: Assembly information initialized");
     }
 

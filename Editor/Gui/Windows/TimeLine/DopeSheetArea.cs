@@ -98,6 +98,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
 
             DrawContextMenu(compositionOp);
         }
+        ImGuiUtils.ResetCursorForExtentCheck();
         ImGui.EndGroup();
     }
 

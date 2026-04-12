@@ -157,10 +157,10 @@ internal static class BeatTiming
                 _measureStartTime += MeasureDuration;
             }
             
-            if (playback.Settings.EnableAudioBeatLocking && _resynced)
+            if (playback.Settings.Playback.EnableAudioBeatLocking && _resynced)
             {
-                BeatTime = _barTimeAverage.UpdateAndCompute(BeatSynchronizer.BarProgress) 
-                           + playback.BarsFromSeconds(playbackSettings.BeatLockAudioOffsetSec);
+                BeatTime = _barTimeAverage.UpdateAndCompute(BeatSynchronizer.BarProgress)
+                           + playback.BarsFromSeconds(playbackSettings.Playback.BeatLockAudioOffsetSec);
                 
                 _beatDuration =   (float)(60f / BeatSynchronizer.CurrentBpm);
             }

@@ -148,10 +148,9 @@ internal sealed class SymbolFilter
                     continue;
             }
 
-            if (!(_currentRegex.IsMatch(symbolUiSymbol.Name)
-                  || symbolUiSymbol.Namespace.Contains(_symbolFilterString, StringComparison.InvariantCultureIgnoreCase)
-                  || (!string.IsNullOrEmpty(symbolUi.Description)
-                      && symbolUi.Description.Contains(_symbolFilterString, StringComparison.InvariantCultureIgnoreCase))))
+            if (!((!string.IsNullOrEmpty(symbolUiSymbol.Name) && _currentRegex.IsMatch(symbolUiSymbol.Name))
+                  || (!string.IsNullOrEmpty(symbolUiSymbol.Namespace) && symbolUiSymbol.Namespace.Contains(_symbolFilterString, StringComparison.InvariantCultureIgnoreCase))
+                  || (!string.IsNullOrEmpty(symbolUi.Description) && symbolUi.Description.Contains(_symbolFilterString, StringComparison.InvariantCultureIgnoreCase))))
                 continue;
 
             MatchingSymbolUis.Add(symbolUi);

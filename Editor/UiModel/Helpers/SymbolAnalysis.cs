@@ -1,9 +1,8 @@
 #nullable enable
 using System.Diagnostics.CodeAnalysis;
-using System.Text;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
-using T3.Core.UserData;
+using T3.Core.Settings;
 using T3.Editor.Gui.InputUi.SimpleInputUis;
 
 namespace T3.Editor.UiModel.Helpers;

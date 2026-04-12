@@ -1,6 +1,5 @@
 #nullable enable
 using ImGuiNET;
-using T3.Core.Utils;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
@@ -114,13 +113,14 @@ internal static class FormInputs
         ImGui.PushID(label);
 
         var hasReset = defaultValue != NotADefaultValue;
+        var isDefault = hasReset && value == defaultValue;
 
         var size = GetAvailableInputSize(tooltip, hasReset);
         var result = SingleValueEdit.Draw(ref value, size, min, max, true, true, scale);
         ImGui.PopID();
 
         AppendTooltip(tooltip);
-        if (AppendResetButton(hasReset, label))
+        if (AppendResetButton(hasReset && !isDefault, label))
         {
             value = defaultValue;
             result |= InputEditStateFlags.ModifiedAndFinished;

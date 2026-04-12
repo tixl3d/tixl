@@ -8,7 +8,7 @@ using T3.Core.Logging;
 using T3.Core.Model;
 using T3.Core.Operator.Slots;
 using T3.Core.Resource;
-using T3.Core.UserData;
+using T3.Core.Settings;
 
 namespace T3.Core.Operator;
 

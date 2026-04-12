@@ -5,9 +5,7 @@ using ImGuiNET;
 using T3.Core.Operator;
 using T3.Core.Operator.Interfaces;
 using T3.Editor.Gui.Interaction.TransformGizmos;
-using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.UiHelpers;
-using T3.Editor.Gui.Windows;
 using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.ProjectHandling;
 

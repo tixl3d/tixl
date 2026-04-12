@@ -123,7 +123,10 @@ internal sealed partial class MagGraphView
                          context.StateMachine.CurrentState == GraphStates.RenameAnnotation;
         if (!isRenaming)
         {        
-            ImGui.InvisibleButton("##annotationHeader", clickableArea.GetSize());
+            var headerSize = clickableArea.GetSize();
+            if (headerSize.X < 1f) headerSize.X = 1f;
+            if (headerSize.Y < 1f) headerSize.Y = 1f;
+            ImGui.InvisibleButton("##annotationHeader", headerSize);
 
             DrawUtils.DebugItemRect();
             var isHeaderHovered = ImGui.IsItemHovered() && context.StateMachine.CurrentState == GraphStates.Default;

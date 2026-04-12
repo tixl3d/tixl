@@ -6,7 +6,7 @@ using T3.Core.Operator;
 using T3.Core.Resource;
 using T3.Core.Resource.Assets;
 using T3.Core.SystemUi;
-using T3.Core.UserData;
+using T3.Core.Settings;
 using T3.Editor.Compilation;
 using T3.Editor.Gui.UiHelpers.Thumbnails;
 

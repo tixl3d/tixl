@@ -16,10 +16,10 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Silk.NET.Input.Glfw" Version="2.22.0" />
-        <PackageReference Include="Silk.NET.OpenGL" Version="2.20.0" />
-        <PackageReference Include="Silk.NET.OpenGL.Extensions.ImGui" Version="2.20.0" />
-        <PackageReference Include="Silk.NET.Windowing" Version="2.20.0" />
+        <PackageReference Include="Silk.NET.Input.Glfw" Version="2.23.0" />
+        <PackageReference Include="Silk.NET.OpenGL" Version="2.23.0" />
+        <PackageReference Include="Silk.NET.OpenGL.Extensions.ImGui" Version="2.23.0" />
+        <PackageReference Include="Silk.NET.Windowing" Version="2.23.0" />
     </ItemGroup>
 
 </Project>

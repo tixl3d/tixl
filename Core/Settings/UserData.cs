@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 using T3.Core.Compilation;
 using T3.Core.Logging;
 
-namespace T3.Core.UserData;
+namespace T3.Core.Settings;
 
 /// <summary>
 /// A currently meek attempt at centralizing user data in a folder outside of the application or project folders.

@@ -10,6 +10,7 @@ using T3.Core.Logging;
 using T3.Core.Model;
 using T3.Core.Operator.Slots;
 using T3.Core.Resource;
+using T3.Core.Settings;
 
 namespace T3.Core.Operator;
 
@@ -52,7 +53,7 @@ public sealed partial class Symbol : IDisposable, IResource
     public string Name => InstanceType?.Name;
     public string Namespace => InstanceType.Namespace ?? SymbolPackage.AssemblyInformation.Name;
     public Animator Animator { get; private set; } = new();
-    public PlaybackSettings PlaybackSettings { get; set; } = new();
+    public CompositionSettings CompositionSettings { get; set; } = new();
 
     public SymbolPackage SymbolPackage { get; set; }
     IResourcePackage IResource.OwningPackage => SymbolPackage;

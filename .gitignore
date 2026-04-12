@@ -310,3 +310,4 @@ Installer/dependencies/downloads
 shadertoolsconfig.json
 .temp/
 .claude/worktrees/naughty-meninsky/.claude/settings.local.json
+.claude/settings.local.json

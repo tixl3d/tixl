@@ -3,7 +3,6 @@ using ImGuiNET;
 using T3.Core.Operator;
 using T3.Core.Utils;
 using T3.Editor.Gui.Input;
-using T3.Editor.Gui.Styling;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Helpers;
 

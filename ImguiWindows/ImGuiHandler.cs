@@ -119,9 +119,8 @@ internal sealed class ImGuiHandler
             _drawer.OnRender(_windowTitle, deltaTime, _fontObj!);
             ImGui.EndChild();
             
-            ImGui.PopID();
-            
             ImGui.End();
+            ImGui.PopID();
             
             _imguiController.EndImguiFrame();
             

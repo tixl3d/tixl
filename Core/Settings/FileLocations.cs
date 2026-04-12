@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace T3.Core.UserData;
+namespace T3.Core.Settings;
 
 /// <summary>
 /// A collection of critical files and directors.

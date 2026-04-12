@@ -249,6 +249,40 @@ public sealed partial class SymbolUi : ISelectionContainer
     internal string Description { get; set; } = string.Empty;
     internal SymbolTags Tags { get; set; }
 
+    /// <summary>
+    /// Per-symbol render export configuration. Null if no render settings have been configured.
+    /// Serialized to .t3ui files.
+    /// </summary>
+    internal Gui.Windows.RenderExport.RenderSettings? RenderSettings { get; set; }
+
+    /// <summary>
+    /// Per-symbol output window states (one per OutputWindow instance).
+    /// Serialized to .t3ui files.
+    /// </summary>
+    internal List<Gui.Windows.Output.OutputWindowState>? OutputWindowStates { get; set; }
+
+    /// <summary>
+    /// Per-symbol timeline state (zoom, scroll, loop range, mode).
+    /// Serialized to .t3ui files.
+    /// </summary>
+    internal Gui.Windows.TimeLine.TimelineState? TimelineState { get; set; }
+
+    /// <summary>
+    /// ImGui docking layout string for this project (stored on root op only).
+    /// Serialized to .t3ui files.
+    /// </summary>
+    internal string? WindowLayout { get; set; }
+
+    /// <summary>
+    /// ImGui version that produced the WindowLayout, for compatibility checks.
+    /// </summary>
+    internal string? WindowLayoutImGuiVersion { get; set; }
+
+    /// <summary>
+    /// Window visibility state per window title (stored on root op only).
+    /// </summary>
+    internal Dictionary<string, bool>? WindowVisibility { get; set; }
+
     [Flags]
     internal enum SymbolTags
     {

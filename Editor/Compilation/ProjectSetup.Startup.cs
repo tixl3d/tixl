@@ -5,7 +5,7 @@ using T3.Core.Compilation;
 using T3.Core.IO;
 using T3.Core.Model;
 using T3.Core.Resource.Assets;
-using T3.Core.UserData;
+using T3.Core.Settings;
 using T3.Editor.Gui.Interaction.StartupCheck;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
@@ -89,7 +89,7 @@ internal static partial class ProjectSetup
 
         // Initialize custom UIs
 
-        if (ProjectSettings.Config.LogAssemblyLoadingDetails)
+        if (CoreSettings.Config.LogAssemblyLoadingDetails)
         {
             foreach (var package in SymbolPackage.AllPackages)
             {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using T3.Core.Logging;
 using T3.Core.Model;
+using T3.Core.Settings;
 using T3.Core.SystemUi;
 
 namespace T3.Core.Operator;
@@ -292,7 +293,7 @@ public sealed partial class Symbol
         OutputDefinitions.Clear();
         OutputDefinitions.AddRange(newSymbol.OutputDefinitions);
         Animator = newSymbol.Animator;
-        PlaybackSettings = newSymbol.PlaybackSettings;
+        CompositionSettings = newSymbol.CompositionSettings;
         
         // todo: ugly - the other one replaced this value with itself when it was created
         ApplyInstanceType(InstanceType);

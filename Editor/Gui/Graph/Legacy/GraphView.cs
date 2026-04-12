@@ -1,12 +1,7 @@
-using System.IO;
-using System.Runtime.InteropServices;
 using ImGuiNET;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
-using T3.Core.Resource;
 using T3.Core.SystemUi;
-using T3.Core.UserData;
-using T3.Editor.External;
 using T3.Editor.Gui.Dialogs;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Keyboard;
@@ -18,7 +13,6 @@ using T3.Editor.Gui.OutputUi;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.Layouts;
-using T3.Editor.SystemUi;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Exporting;
@@ -26,7 +20,6 @@ using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.Modification;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
-using T3.SystemUi;
 
 namespace T3.Editor.Gui.Legacy;
 

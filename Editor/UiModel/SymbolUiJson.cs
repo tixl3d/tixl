@@ -6,6 +6,7 @@ using T3.Core.DataTypes.Vector;
 using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Editor.Gui.OutputUi;
+using T3.Editor.Gui.Windows.Output;
 using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.Selection;
 using T3.Serialization;
@@ -22,6 +23,8 @@ internal static class SymbolUiJson
         {
             writer.WriteStartObject();
 
+            writer.WriteValue(JsonKeys.FormatVersion, SymbolFormatVersion.Current);
+            writer.WriteObject(JsonKeys.TixlVersion, SymbolFormatVersion.TixlVersion);
             writer.WriteValue(JsonKeys.Id, symbolUi.Symbol.Id);
             writer.WriteComment(symbolUi.Symbol.Name);
 
@@ -35,6 +38,7 @@ internal static class SymbolUiJson
             WriteAnnotations(symbolUi, writer);
             WriteLinks(symbolUi, writer);
             WriteTourPoints(symbolUi, writer);
+            WriteSettings(symbolUi, writer);
             writer.WriteEndObject();
         }
         catch (Exception e)
@@ -279,6 +283,10 @@ internal static class SymbolUiJson
 
     internal static bool TryReadSymbolUi(JToken mainObject, Symbol symbol, [NotNullWhen(true)] out SymbolUi? symbolUi)
     {
+        var formatVersion = mainObject[JsonKeys.FormatVersion]?.Value<int>() ?? 0;
+        var fileTixlVersion = mainObject[JsonKeys.TixlVersion]?.Value<string>();
+        SymbolFormatVersion.WarnIfNewer(formatVersion, fileTixlVersion, symbol.Name);
+
         var inputDict = new OrderedDictionary<Guid, IInputUi>();
         if (TryGetJArray(JsonKeys.InputUis, mainObject, symbol, out var inputUiArray))
         {
@@ -366,6 +374,8 @@ internal static class SymbolUiJson
         var tagsEntry = mainObject[JsonKeys.SymbolTags];
         if (tagsEntry?.Value<int>() != null)
             symbolUi.Tags = (SymbolUi.SymbolTags)tagsEntry.Value<int>();
+
+        ReadSettings(mainObject, symbolUi);
 
         return true;
     }
@@ -604,31 +614,112 @@ internal static class SymbolUiJson
 
     private readonly struct JsonKeys
     {
+        // Top-level fields (in serialization order)
+        public const string FormatVersion = nameof(FormatVersion);
+        public const string TixlVersion = nameof(TixlVersion);
+        public const string Id = nameof(Id);
+        public const string Description = nameof(Description);
+        public const string SymbolTags = nameof(SymbolTags);
         public const string InputUis = nameof(InputUis);
-        public const string InputId = nameof(InputId);
-        public const string OutputUis = nameof(OutputUis);
-        public const string OutputId = nameof(OutputId);
         public const string SymbolChildUis = nameof(SymbolChildUis);
+        public const string OutputUis = nameof(OutputUis);
+        public const string Annotations = nameof(Annotations);
+        public const string Links = nameof(Links);
+        public const string TourPoints = nameof(TourPoints);
+        // Settings is written by WriteSettings()
+
+        // InputUi fields
+        public const string InputId = nameof(InputId);
+
+        // OutputUi fields
+        public const string OutputId = nameof(OutputId);
+
+        // ChildUi fields
         public const string ChildId = nameof(ChildId);
         public const string Position = nameof(Position);
-        public const string Annotations = nameof(Annotations);
-        public const string AnnotationId = nameof(AnnotationId);
-        public const string Collapsed = nameof(Collapsed);
-        public const string Links = nameof(Links);
+        public const string Size = nameof(Size);
+        public const string Style = nameof(Style);
         public const string Comment = nameof(Comment);
-        public const string Id = nameof(Id);
+        public const string ConnectionStyleOverrides = nameof(ConnectionStyleOverrides);
+
+        // Annotation fields
+        public const string AnnotationId = nameof(AnnotationId);
         public const string Title = nameof(Title);
         public const string Label = nameof(Label);
         public const string Color = nameof(Color);
-        public const string Size = nameof(Size);
-        public const string Description = nameof(Description);
-        public const string Style = nameof(Style);
-        public const string ConnectionStyleOverrides = nameof(ConnectionStyleOverrides);
+        public const string Collapsed = nameof(Collapsed);
+
+        // Link fields
         public const string LinkType = nameof(LinkType);
         public const string LinkUrl = nameof(LinkUrl);
-        public const string SymbolTags = nameof(SymbolTags);
-        public const string TourPoints = nameof(TourPoints);
     }
+
+    #region Settings
+
+    private static void WriteSettings(SymbolUi symbolUi, JsonTextWriter writer)
+    {
+        var hasRenderSettings = symbolUi.RenderSettings != null;
+        var hasOutputWindowStates = symbolUi.OutputWindowStates is { Count: > 0 };
+        var hasTimelineState = symbolUi.TimelineState != null;
+        var hasWindowLayout = !string.IsNullOrEmpty(symbolUi.WindowLayout);
+
+        if (!hasRenderSettings && !hasOutputWindowStates && !hasTimelineState && !hasWindowLayout)
+            return;
+
+        writer.WritePropertyName("Settings");
+        writer.WriteStartObject();
+        {
+            symbolUi.RenderSettings?.WriteToJson(writer);
+            OutputWindowState.WriteAllToJson(writer, symbolUi.OutputWindowStates);
+            symbolUi.TimelineState?.WriteToJson(writer);
+
+            if (hasWindowLayout)
+            {
+                writer.WritePropertyName("WindowLayout");
+                writer.WriteValue(symbolUi.WindowLayout);
+                writer.WritePropertyName("WindowLayoutImGuiVersion");
+                writer.WriteValue(symbolUi.WindowLayoutImGuiVersion);
+            }
+
+            if (symbolUi.WindowVisibility is { Count: > 0 })
+            {
+                writer.WritePropertyName("WindowVisibility");
+                writer.WriteStartObject();
+                foreach (var (title, visible) in symbolUi.WindowVisibility)
+                {
+                    writer.WritePropertyName(title);
+                    writer.WriteValue(visible);
+                }
+                writer.WriteEndObject();
+            }
+        }
+        writer.WriteEndObject();
+    }
+
+    private static void ReadSettings(JToken mainObject, SymbolUi symbolUi)
+    {
+        var settingsToken = mainObject["Settings"];
+        if (settingsToken == null)
+            return;
+
+        symbolUi.RenderSettings = Gui.Windows.RenderExport.RenderSettings.ReadFromJson(settingsToken);
+        symbolUi.OutputWindowStates = OutputWindowState.ReadAllFromJson(settingsToken);
+        symbolUi.TimelineState = Gui.Windows.TimeLine.TimelineState.ReadFromJson(settingsToken);
+        symbolUi.WindowLayout = settingsToken["WindowLayout"]?.Value<string>();
+        symbolUi.WindowLayoutImGuiVersion = settingsToken["WindowLayoutImGuiVersion"]?.Value<string>();
+
+        var visibilityToken = settingsToken["WindowVisibility"] as JObject;
+        if (visibilityToken != null)
+        {
+            symbolUi.WindowVisibility = new Dictionary<string, bool>();
+            foreach (var prop in visibilityToken.Properties())
+            {
+                symbolUi.WindowVisibility[prop.Name] = prop.Value.Value<bool>();
+            }
+        }
+    }
+
+    #endregion
 
     private static readonly Func<JToken, object> _jsonToVector2 = JsonToTypeValueConverters.Entries[typeof(Vector2)];
     private static readonly Func<JToken, object> _jsonToVector4 = JsonToTypeValueConverters.Entries[typeof(Vector4)];

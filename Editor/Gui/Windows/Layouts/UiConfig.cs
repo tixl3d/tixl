@@ -1,6 +1,6 @@
 #nullable enable
 using T3.Core.Animation;
-using T3.Core.Operator;
+using T3.Core.Settings;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.Output;
 using T3.Editor.UiModel.ProjectHandling;
@@ -91,7 +91,7 @@ internal static class UiConfig
         UserSettings.Config.ShowMainMenu = true;
         UserSettings.Config.ShowTitleAndDescription = true;
         UserSettings.Config.ShowToolbar = true;
-        if (Playback.Current.Settings != null && Playback.Current.Settings.Syncing == PlaybackSettings.SyncModes.Timeline)
+        if (Playback.Current.Settings != null && Playback.Current.Settings.Playback.Syncing == CompositionSettings.SyncModes.Timeline)
         {
             UserSettings.Config.ShowTimeline = true;
         }

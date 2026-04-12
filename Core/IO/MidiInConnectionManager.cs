@@ -180,7 +180,7 @@ public static class MidiConnectionManager
     /// </summary>
     private static bool IsMidiDeviceCaptureEnabled(string deviceName)
     {
-        var setting = ProjectSettings.Config.LimitMidiDeviceCapture;
+        var setting = CoreSettings.Config.LimitMidiDeviceCapture;
         if (string.IsNullOrEmpty(setting))
             return true;
 
@@ -196,9 +196,9 @@ public static class MidiConnectionManager
     private static void ScanAndRegisterToMidiDevices(bool logInformation = false)
     {
         Log.Debug("Capturing Midi devices...");
-        if (!string.IsNullOrEmpty(ProjectSettings.Config.LimitMidiDeviceCapture))
+        if (!string.IsNullOrEmpty(CoreSettings.Config.LimitMidiDeviceCapture))
         {
-            var settingsString = ProjectSettings.Config.LimitMidiDeviceCapture.Replace("\n", "; ");
+            var settingsString = CoreSettings.Config.LimitMidiDeviceCapture.Replace("\n", "; ");
             Log.Debug($"NOTE: In settings Midi device capture is limited to '{settingsString}");
         }
 

@@ -5,7 +5,7 @@ using ManagedBass;
 using ManagedBass.Wasapi;
 using T3.Core.Animation;
 using T3.Core.Logging;
-using T3.Core.Operator;
+using T3.Core.Settings;
 
 namespace T3.Core.Audio;
 
@@ -34,12 +34,12 @@ public static class WasapiAudioInput
     /// <item>Initializes capture for the specified input device</item>
     /// </list>
     /// </remarks>
-    public static void StartFrame(PlaybackSettings settings)
+    public static void StartFrame(CompositionSettings settings)
     {
         if (settings == null)
             return;
                     
-        if (settings.AudioSource != PlaybackSettings.AudioSources.ExternalDevice)
+        if (settings.Playback.AudioSource != CompositionSettings.AudioSources.ExternalDevice)
         {
             if (!string.IsNullOrEmpty(ActiveInputDeviceName))
             {
@@ -48,7 +48,7 @@ public static class WasapiAudioInput
             return ;
         }
 
-        var deviceName = settings.AudioInputDeviceName;
+        var deviceName = settings.Playback.AudioInputDeviceName;
         if (ActiveInputDeviceName == deviceName)
         {
             // Try to restart capture
@@ -267,10 +267,10 @@ public static class WasapiAudioInput
         if (playbackSettings == null) 
             return length;
         
-        AudioAnalysis.ProcessUpdate(playbackSettings.AudioGainFactor,
-                                    playbackSettings.AudioDecayFactor);
+        AudioAnalysis.ProcessUpdate(playbackSettings.Playback.AudioGainFactor,
+                                    playbackSettings.Playback.AudioDecayFactor);
 
-        if (playbackSettings.EnableAudioBeatLocking)
+        if (playbackSettings.Playback.EnableAudioBeatLocking)
         {
             BeatSynchronizer.UpdateBeatTimer();
         }

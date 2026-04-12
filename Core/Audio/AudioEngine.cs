@@ -5,7 +5,7 @@ using ManagedBass;
 using T3.Core.Animation;
 using T3.Core.IO;
 using T3.Core.Logging;
-using T3.Core.Operator;
+using T3.Core.Settings;
 using T3.Core.Resource.Assets;
 // ReSharper disable MergeIntoPattern
 
@@ -181,8 +181,8 @@ public static class AudioEngine
         // Skip during export - GetFullMixDownBuffer handles FFT processing during export
         // to ensure consistent behavior between soundtrack and external audio modes
         if (!playback.IsRenderingToFile && 
-            playback.Settings is { Enabled: true, AudioSource: PlaybackSettings.AudioSources.ProjectSoundTrack })
-            AudioAnalysis.ProcessUpdate(playback.Settings.AudioGainFactor, playback.Settings.AudioDecayFactor);
+            playback.Settings is { Enabled: true, Playback.AudioSource: CompositionSettings.AudioSources.ProjectSoundTrack })
+            AudioAnalysis.ProcessUpdate(playback.Settings.Playback.AudioGainFactor, playback.Settings.Playback.AudioDecayFactor);
 
         StopStaleOperators();
         
@@ -292,7 +292,7 @@ public static class AudioEngine
     /// <summary>
     /// Gets a value indicating whether global audio is currently muted.
     /// </summary>
-    public static bool IsGlobalMuted => ProjectSettings.Config.GlobalMute;
+    public static bool IsGlobalMuted => CoreSettings.Config.AppMute;
 
     internal static void UpdateFftBufferFromSoundtrack(Playback playback)
     {
@@ -306,7 +306,7 @@ public static class AudioEngine
     /// <param name="context">The analysis context to write data into</param>
     internal static void UpdateFftBufferFromSoundtrack(Playback playback, AudioAnalysisContext context)
     {
-        if (playback.Settings is not { AudioSource: PlaybackSettings.AudioSources.ProjectSoundTrack })
+        if (playback.Settings is not { Playback.AudioSource: CompositionSettings.AudioSources.ProjectSoundTrack })
             return;
 
         // During export, the GlobalMixer is paused and empty, so FFT/waveform data
@@ -1291,7 +1291,7 @@ public static class AudioEngine
     /// <param name="volume">The volume level (0.0 to 1.0).</param>
     public static void SetGlobalVolume(float volume)
     {
-        ProjectSettings.Config.GlobalPlaybackVolume = volume;
+        CoreSettings.Config.AppVolume = volume;
         AudioMixerManager.SetGlobalVolume(volume);
     }
 
@@ -1300,7 +1300,7 @@ public static class AudioEngine
     /// </summary>
     public static void InitializeGlobalVolumeFromSettings()
     {
-        AudioMixerManager.SetGlobalVolume(ProjectSettings.Config.GlobalPlaybackVolume);
+        AudioMixerManager.SetGlobalVolume(CoreSettings.Config.AppVolume);
     }
 
     /// <summary>
@@ -1310,7 +1310,7 @@ public static class AudioEngine
     public static void SetGlobalMute(bool mute)
     {
         AudioMixerManager.SetGlobalMute(mute);
-        ProjectSettings.Config.GlobalMute = mute;
+        CoreSettings.Config.AppMute = mute;
     }
 
     /// <summary>
@@ -1320,7 +1320,7 @@ public static class AudioEngine
     public static void SetOperatorMute(bool mute)
     {
         AudioMixerManager.SetOperatorMute(mute);
-        ProjectSettings.Config.OperatorMute = mute;
+        CompositionSettings.Current.Audio.OperatorMute = mute;
     }
 
     #endregion

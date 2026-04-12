@@ -2,7 +2,6 @@
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.Resource.Assets;
-using T3.Editor.UiModel.Helpers;
 
 namespace T3.Editor.Gui.Windows.AssetLib;
 

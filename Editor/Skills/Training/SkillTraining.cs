@@ -8,7 +8,6 @@ using T3.Editor.Gui;
 using T3.Editor.Gui.Hub;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.MagGraph.Interaction;
-using T3.Editor.Gui.MagGraph.Ui;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Window;

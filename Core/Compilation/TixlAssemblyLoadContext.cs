@@ -11,7 +11,7 @@ using System.Runtime.Loader;
 using System.Threading;
 using T3.Core.IO;
 using T3.Core.Logging;
-using T3.Core.UserData;
+using T3.Core.Settings;
 
 namespace T3.Core.Compilation;
 
@@ -147,10 +147,10 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
     internal TixlAssemblyLoadContext(string assemblyName, string directory, bool isReadOnly) :
         base(assemblyName, true)
     {
-        if (ProjectSettings.Config.LogCompilationDetails)
+        if (CoreSettings.Config.LogCompilationDetails)
             Log.Debug($"{Name}: Creating new assembly load context for {assemblyName}");
 
-        if (ProjectSettings.Config.LogAssemblyLoadingDetails)
+        if (CoreSettings.Config.LogAssemblyLoadingDetails)
         {
             Unloading += (_) => { Log.Debug($"{Name!}: Unloading assembly context"); };
         }
@@ -172,7 +172,7 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
             var asm = LoadAssembly(path, this);
             Root = new AssemblyTreeNode(asm, this, true, true, _dllImportResolver);
 
-            if (ProjectSettings.Config.LogAssemblyLoadingDetails)
+            if (CoreSettings.Config.LogAssemblyLoadingDetails)
                 Log.Debug($"{Name} : Loaded root assembly {asm.FullName} from '{path}'");
 
             _dependencyContext = Microsoft.Extensions.DependencyModel.DependencyContext.Load(Root!.Assembly);
@@ -197,7 +197,7 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
         // try a shadow copy first
         if (ctx is not TixlAssemblyLoadContext { _shouldCopyBinaries: true } tixlCtx)
         {
-            if (ProjectSettings.Config.LogAssemblyLoadingDetails)
+            if (CoreSettings.Config.LogAssemblyLoadingDetails)
                 Log.Debug($"{ctx.Name}: Loading assembly from '{path}'...");
 
             return ctx.LoadFromAssemblyPath(path);
@@ -208,7 +208,7 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
         {
             Directory.CreateDirectory(shadowCopyDirectory);
 
-            if (ProjectSettings.Config.LogAssemblyLoadingDetails)
+            if (CoreSettings.Config.LogAssemblyLoadingDetails)
                 Log.Debug($"{tixlCtx.Name!}: Created shadow copy directory at {shadowCopyDirectory}");
 
             // copy all dlls recursively in the main directory to the shadow copy directory
@@ -238,7 +238,7 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
         var relativePath = Path.GetRelativePath(tixlCtx.MainDirectory, path);
         path = Path.Combine(shadowCopyDirectory, relativePath);
 
-        if (ProjectSettings.Config.LogAssemblyLoadingDetails)
+        if (CoreSettings.Config.LogAssemblyLoadingDetails)
             Log.Debug($"{ctx.Name}: Loading assembly from '{path}'...");
 
         return ctx.LoadFromAssemblyPath(path);
@@ -340,14 +340,14 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
 
         void LogResolution(Assembly? resultAsm, AssemblyName searchName)
         {
-            if (!ProjectSettings.Config.LogAssemblyLoadingDetails)
+            if (!CoreSettings.Config.LogAssemblyLoadingDetails)
                 return;
 
             if (resultAsm != null)
             {
                 // check versions of the assembly - if different, log a warning.
                 // todo: actually do something with this information later
-                if (ProjectSettings.Config.LogAssemblyVersionMismatches)
+                if (CoreSettings.Config.LogAssemblyVersionMismatches)
                 {
                     var assemblyNameOfResult = resultAsm.GetName();
 
@@ -542,7 +542,7 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
                 }
 
                 _dependencyContexts.Add(ctx);
-                if (ProjectSettings.Config.LogAssemblyLoadingDetails)
+                if (CoreSettings.Config.LogAssemblyLoadingDetails)
                     Log.Debug($"{Name!}: Added dependency {node.Name} from {ctx.Name}");
             }
         }

@@ -1,7 +1,6 @@
 #nullable enable
 using System.Threading.Tasks;
 using ImGuiNET;
-using T3.Core.Resource;
 using T3.Core.Stats;
 using T3.Core.SystemUi;
 using T3.Core.Utils;
@@ -268,11 +267,6 @@ internal static class AppMenuBar
                 //_importDialog.ShowNextFrame();
             }
 
-            ImGui.Separator();
-            if (ImGui.MenuItem("Disable Keyboard ShortCuts", UserActions.Save.ListShortcuts(), !UserSettings.Config.EnableKeyboardShortCuts))
-            {
-                UserSettings.Config.EnableKeyboardShortCuts = !UserSettings.Config.EnableKeyboardShortCuts;
-            }
             
             ImGui.Separator();
 
@@ -361,6 +355,14 @@ internal static class AppMenuBar
             ImGui.Separator();
 
             WindowManager.SettingsWindow.DrawMenuItemToggle();
+            {
+                var hasSettings = ProjectView.Focused?.CompositionInstance?.Symbol.CompositionSettings is { Enabled: true };
+                var window = WindowManager.ProjectSettingsWindow;
+                if (ImGui.MenuItem("Composition Settings", "", hasSettings))
+                {
+                    window.Config.Visible = !window.Config.Visible;
+                }
+            }
 
             ImGui.Separator();
 

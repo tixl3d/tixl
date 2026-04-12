@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <Import Project="$(SolutionDir)/Tixl.props" />
   <PropertyGroup>
-    <TargetFramework>net9.0-windows</TargetFramework>
+    <TargetFramework>net10.0-windows</TargetFramework>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -9,11 +9,12 @@
     <AssemblyName>$(RootNamespace)</AssemblyName>
     <Configurations>Debug;Release</Configurations>
     <Platforms>AnyCPU</Platforms>
-    <VersionPrefix>1.668.999</VersionPrefix>
+    <VersionPrefix>1.670.999</VersionPrefix>
     <HomeGuid>00000000-0000-0000-0000-000000000000</HomeGuid>
-    <EditorVersion>4.1.0</EditorVersion>
+    <EditorVersion>4.2.0</EditorVersion>
     <IsEditorOnly>false</IsEditorOnly>
     <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <Deterministic>true</Deterministic>
     <NoWarn>NU1900</NoWarn>
     <PackageId>55612b33-e330-4730-a981-c2227b4cc904</PackageId>
@@ -102,8 +103,8 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="DirectShowLib.Standard" Version="2.1.0" />
-    <PackageReference Include="System.ServiceModel.Primitives" Version="8.1.1" />
-    <PackageReference Include="System.ServiceModel.Http" Version="8.1.1" />
+    <PackageReference Include="System.ServiceModel.Primitives" Version="10.0.5" />
+    <PackageReference Include="System.ServiceModel.Http" Version="10.0.5" />
     <PackageReference Include="System.ServiceModel.Security" Version="6.0.0" />
     <PackageReference Include="ManagedBass.Mix" Version="4.0.2" />
     <PackageReference Include="OpenCvSharp4" Version="4.11.0.20250507" />
@@ -114,30 +115,26 @@
     <PackageReference Include="Rug.Osc" Version="1.2.5">
       <NoWarn>NU1701</NoWarn>
     </PackageReference>
-    <PackageReference Include="SharpGLTF.Core" Version="1.0.4" />
-    <PackageReference Include="Svg" Version="3.3.0" />
-    <PackageReference Include="System.IO.Ports" Version="8.0.0" />
-    <PackageReference Include="System.Management" Version="8.0.0" />
+    <PackageReference Include="SharpGLTF.Core" Version="1.0.6" />
+    <PackageReference Include="Svg" Version="3.4.7" />
+    <PackageReference Include="System.IO.Ports" Version="10.0.5" />
+    <PackageReference Include="System.Management" Version="10.0.5" />
   </ItemGroup>
-  <!-- Include Resources/** into output/Resources -->
+  <!-- Copy package content into this project's own output only (not transitively to other projects).
+       Uses a custom Target instead of <Content CopyToOutputDirectory> to prevent MSBuild from
+       propagating these files into every project that builds as part of the same solution. -->
   <ItemGroup Condition="'$(Configuration)' == 'Release'">
-    <Content Include="Assets/**/*" Exclude="bin/**">
-      <Link>Assets/%(RecursiveDir)%(Filename)%(Extension)</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="**/*.t3" Exclude="bin/**">
-      <Link>Symbols/%(RecursiveDir)%(Filename)%(Extension)</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="**/*.t3ui" Exclude="bin/**">
-      <Link>SymbolUis/%(RecursiveDir)%(Filename)%(Extension)</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="**/*.cs" Exclude="bin/**;obj/**">
-      <Link>SourceCode/%(RecursiveDir)%(Filename)%(Extension)</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <PackageAssets Include="Assets/**/*" Exclude="bin/**" />
+    <PackageSymbols Include="**/*.t3" Exclude="bin/**" />
+    <PackageSymbolUis Include="**/*.t3ui" Exclude="bin/**" />
+    <PackageSourceCode Include="**/*.cs" Exclude="bin/**;obj/**" />
   </ItemGroup>
+  <Target Name="CopyPackageContent" AfterTargets="AfterBuild" Condition="'$(Configuration)' == 'Release'">
+    <Copy SourceFiles="@(PackageAssets)" DestinationFiles="@(PackageAssets->'$(OutputPath)/Assets/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PackageSymbols)" DestinationFiles="@(PackageSymbols->'$(OutputPath)/Symbols/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PackageSymbolUis)" DestinationFiles="@(PackageSymbolUis->'$(OutputPath)/SymbolUis/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PackageSourceCode)" DestinationFiles="@(PackageSourceCode->'$(OutputPath)/SourceCode/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+  </Target>
   <ItemGroup>
     <Folder Include="io\video\" />
   </ItemGroup>

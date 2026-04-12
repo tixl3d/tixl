@@ -23,6 +23,7 @@ using T3.Core.Logging;
 using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
+using T3.Core.Settings;
 using T3.Core.Resource;
 using T3.Core.SystemUi;
 using Device = SharpDX.Direct3D11.Device;
@@ -30,7 +31,6 @@ using Resource = SharpDX.Direct3D11.Resource;
 using SharpDX.Windows;
 using SilkWindows;
 using T3.Core.Resource.ShaderCompiling;
-using T3.Core.UserData;
 using T3.Core.Utils;
 using T3.Serialization;
 using DeviceContext = SharpDX.Direct3D11.DeviceContext;
@@ -88,9 +88,9 @@ internal static partial class Program
             return;
         }
 
-        ProjectSettings.Config = exportSettings!.ConfigData;
+        CoreSettings.Config = exportSettings!.ConfigData;
             
-        var logDirectory = Path.Combine(Core.UserData.FileLocations.SettingsDirectory, "Player" , exportSettings.Author, exportSettings.ApplicationTitle);
+        var logDirectory = Path.Combine(Core.Settings.FileLocations.SettingsDirectory, "Player" , exportSettings.Author, exportSettings.ApplicationTitle);
         var fileWriter = FileWriter.CreateDefault(logDirectory, out var logPath);
         try
         {
@@ -205,7 +205,7 @@ internal static partial class Program
             }
 
             Log.Debug($"Try to load playback settings for {demoSymbol}");
-            var playbackSettings = demoSymbol.PlaybackSettings;
+            var playbackSettings = demoSymbol.CompositionSettings;
             if (playbackSettings != null)
             {
                 Log.Debug("Playback settings: " + JsonConvert.SerializeObject(
@@ -239,7 +239,7 @@ internal static partial class Program
             _resolution = new Int2(_resolvedOptions.Width, _resolvedOptions.Height);
 
             // Init wasapi input if required
-            if (playbackSettings is { AudioSource: PlaybackSettings.AudioSources.ProjectSoundTrack } 
+            if (playbackSettings is { Playback.AudioSource: CompositionSettings.AudioSources.ProjectSoundTrack }
                 && playbackSettings.TryGetMainSoundtrack(_project, out _soundtrackHandle))
             {
                 //var soundtrack = _soundtrackHandle.Value;

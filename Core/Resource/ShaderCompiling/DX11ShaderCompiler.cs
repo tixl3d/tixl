@@ -8,6 +8,7 @@ using SharpDX.D3DCompiler;
 using SharpDX.Direct3D11;
 using T3.Core.DataTypes;
 using T3.Core.IO;
+using T3.Core.Settings;
 using T3.Core.Logging;
 using T3.Core.Model;
 using T3.Core.Resource.Assets;
@@ -39,7 +40,7 @@ public sealed partial class DX11ShaderCompiler : ShaderCompiler
             flags |= ShaderFlags.Debug;
             #endif
 
-            if (ProjectSettings.Config.SkipOptimization)
+            if (CoreSettings.Config.SkipOptimization)
             {
                 flags |= ShaderFlags.SkipOptimization;
             }

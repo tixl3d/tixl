@@ -3,7 +3,6 @@ using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.MagGraph.States;
-using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.Layouts;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Modification;

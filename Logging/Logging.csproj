@@ -9,5 +9,8 @@
         <Platforms>AnyCPU</Platforms>
         <Deterministic>true</Deterministic>
     </PropertyGroup>
+    <ItemGroup>
+      <PackageReference Include="System.Runtime.Serialization.Formatters" Version="10.0.5" />
+    </ItemGroup>
 
 </Project>

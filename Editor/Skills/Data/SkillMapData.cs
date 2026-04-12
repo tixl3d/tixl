@@ -1,7 +1,7 @@
 ﻿#nullable enable
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using T3.Core.UserData;
+using T3.Core.Settings;
 using T3.Serialization;
 
 // ReSharper disable MemberCanBeInternal

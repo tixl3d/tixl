@@ -3,7 +3,6 @@ using Microsoft.Win32;
 using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
-using T3.Core.Utils;
 using T3.Editor.App;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;

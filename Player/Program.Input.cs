@@ -3,6 +3,7 @@ using System.Numerics;
 using System.Windows.Forms;
 using T3.Core.Animation;
 using T3.Core.IO;
+using T3.Core.Settings;
 using T3.Core.SystemUi;
 using T3.SystemUi;
 using MouseButtons = System.Windows.Forms.MouseButtons;
@@ -30,7 +31,7 @@ internal static partial class Program
         }
 
         var currentPlayback = Playback.Current;
-        if (ProjectSettings.Config.EnablePlaybackControlWithKeyboard)
+        if (CompositionSettings.Current.Export.EnablePlaybackControlWithKeyboard)
         {
             switch (keyArgs.KeyCode)
             {

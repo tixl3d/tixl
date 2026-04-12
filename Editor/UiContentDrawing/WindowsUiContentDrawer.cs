@@ -73,19 +73,21 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
             io.BackendFlags |= ImGuiBackendFlags.HasMouseCursors;
             io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
 
-            // ImGui 1.91 ships an error-recovery system that turns stack imbalances
-            // (Push/Pop, Begin/End, ID stack, etc.) into recoverable, logged warnings
-            // instead of native asserts. Enable it so we can find offending windows
-            // through the log instead of via SEHException stack traces.
+            // ImGui 1.91 error-recovery: stack imbalances (Push/Pop, Begin/End, etc.)
+            // are auto-fixed and logged. Recoverable errors appear as:
+            //   - Red warning bar in the editor (ConfigErrorRecoveryEnableTooltip)
+            //   - [imgui-error] lines in Rider's terminal/stderr (ConfigErrorRecoveryEnableDebugLog)
+            // Hard asserts (zero-size buttons, invalid flags) are caught by our
+            // try/catch(SEHException) around the render loop.
+            //
+            // TODO: To get recoverable errors into the managed Log.Warning, build a tiny
+            // native shim that hooks ImGuiContext.ErrorCallback and forwards messages to
+            // a managed delegate via P/Invoke. See imgui.cpp:10611.
             io.ConfigErrorRecovery = true;
             io.ConfigErrorRecoveryEnableDebugLog = true;
-#if DEBUG
-            // Hard-fail on imgui stack imbalances in debug builds so the offending
-            // call site shows up in the debugger. Release builds keep the recoverable
-            // warning bar instead of crashing on end-user installs.
-            io.ConfigDebugIsDebuggerPresent  = true;
-            io.ConfigErrorRecoveryEnableAssert = true;
-#endif
+            io.ConfigErrorRecoveryEnableTooltip = true;
+            io.ConfigErrorRecoveryEnableAssert = false;   // default is true; suppress native dialog
+            // io.ConfigDebugHighlightIdConflicts = false; // enable this to suppress ID conflict overlay
             
             // restore previous context
             if (previousContext != IntPtr.Zero)
@@ -181,28 +183,26 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
             ProgramWindows.Main.PrepareRenderingFrame();
 
             // Clear the main window buffer for next frame
-#if !DEBUG
             try
             {
-#endif
                 T3Ui.ProcessFrame();
                 ProgramWindows.RefreshViewport();
 
                 ImGui.Render();
                 RenderDrawData(ImGui.GetDrawData());
-#if !DEBUG
             }
             catch (SEHException e)
             {
                 // A native ImGui assertion fired (e.g. SetCursorPos extent check,
-                // invalid BeginChild flags, empty-stack pop). In release builds this
-                // prevents the app from terminating on end-user machines. The frame
-                // is incomplete; call EndFrame so the next NewFrame doesn't assert
-                // on "NewFrame called without Render".
-                Log.Error($"ImGui native assertion failed (frame skipped): {e.Message}");
+                // invalid BeginChild flags, empty-stack pop). Log the full managed
+                // stack trace so the call site is visible in the console/log file
+                // alongside the [imgui-error] line that ImGui prints to stderr.
+                Log.Error($"ImGui native assertion failed (frame skipped):\n{e}");
+
+                // Try to end the frame so the next NewFrame doesn't assert on
+                // "NewFrame called without Render".
                 try { ImGui.EndFrame(); } catch { /* best-effort cleanup */ }
             }
-#endif
         }
 
         T3Metrics.UiRenderingCompleted();

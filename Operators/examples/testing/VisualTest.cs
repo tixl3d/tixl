@@ -4,7 +4,7 @@ using SharpDX.Direct3D11;
 using SharpDX.IO;
 using SharpDX.WIC;
 using T3.Core.Animation;
-using T3.Core.UserData;
+using T3.Core.Settings;
 using T3.Core.Utils;
 using Utilities = T3.Core.Utils.Utilities;
 

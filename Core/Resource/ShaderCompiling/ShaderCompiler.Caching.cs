@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using T3.Core.Logging;
+using T3.Core.Settings;
 using T3.Core.SystemUi;
 
 namespace T3.Core.Resource.ShaderCompiling;
@@ -147,7 +148,7 @@ public abstract partial class ShaderCompiler
     }
     
     private static readonly object _shaderCacheLock = new();
-    private static readonly string _shaderCacheRootPath = Path.Combine(UserData.FileLocations.TempFolder, "Cache");
+    private static readonly string _shaderCacheRootPath = Path.Combine(FileLocations.TempFolder, "Cache");
     private static string _shaderCacheDirectory = string.Empty;
 
     public static string ShaderCacheSubdirectory

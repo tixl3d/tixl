@@ -1,8 +1,6 @@
 #nullable enable
 
-using System.Text;
 using ImGuiNET;
-using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Core.SystemUi;
 using T3.Core.Utils;

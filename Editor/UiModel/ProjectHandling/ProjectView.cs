@@ -2,11 +2,13 @@
 using System.Diagnostics;
 using T3.Core.Operator;
 using T3.Core.Resource;
+using ImGuiNET;
 using T3.Editor.Gui;
 using T3.Editor.Gui.Dialogs;
 using T3.Editor.Gui.Window;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Gui.Windows.Layouts;
 using T3.Editor.Gui.Windows.Output;
 using T3.Editor.Gui.Windows.TimeLine;
 using T3.Editor.UiModel.Selection;
@@ -375,13 +377,18 @@ internal sealed partial class ProjectView
             // }
         }
 
+        // Save output window state before clearing focus — pinning state
+        // is now persisted in OutputWindowState and restored on project reopen
         foreach (var window in OutputWindow.OutputWindowInstances)
         {
             if (window is OutputWindow outputWindow)
             {
-                outputWindow.Pinning.Unpin();
+                outputWindow.SaveStateToProject();
             }
         }
+
+        // Save window layout to the project's root .t3ui
+        SaveWindowLayoutToProject();
 
         Focused = null;
     }
@@ -389,6 +396,68 @@ internal sealed partial class ProjectView
     public void SetAsFocused()
     {
         Focused = this;
+        RestoreWindowLayoutFromProject();
+    }
+
+    private void SaveWindowLayoutToProject()
+    {
+        if (!UserSettings.Config.SaveWindowLayoutsWithProjects)
+            return;
+
+        var symbolUi = RootInstance?.Symbol.GetSymbolUi();
+        if (symbolUi == null)
+            return;
+
+        symbolUi.WindowLayout = ImGui.SaveIniSettingsToMemory();
+        symbolUi.WindowLayoutImGuiVersion = ImGui.GetVersion();
+
+        // Save window visibility
+        symbolUi.WindowVisibility = new Dictionary<string, bool>();
+        foreach (var window in WindowManager.GetAllWindows())
+        {
+            if (!string.IsNullOrEmpty(window.Config.Title))
+                symbolUi.WindowVisibility[window.Config.Title] = window.Config.Visible;
+        }
+
+        symbolUi.FlagAsModified();
+    }
+
+    private void RestoreWindowLayoutFromProject()
+    {
+        if (!UserSettings.Config.SaveWindowLayoutsWithProjects)
+            return;
+
+        var symbolUi = RootInstance?.Symbol.GetSymbolUi();
+        if (symbolUi == null)
+            return;
+
+        // Restore window visibility
+        if (symbolUi.WindowVisibility is { Count: > 0 })
+        {
+            foreach (var window in WindowManager.GetAllWindows())
+            {
+                if (!string.IsNullOrEmpty(window.Config.Title)
+                    && symbolUi.WindowVisibility.TryGetValue(window.Config.Title, out var visible))
+                {
+                    window.Config.Visible = visible;
+                }
+            }
+        }
+
+        // Restore ImGui docking layout
+        if (string.IsNullOrEmpty(symbolUi.WindowLayout))
+            return;
+
+        if (!string.IsNullOrEmpty(symbolUi.WindowLayoutImGuiVersion))
+        {
+            if (Version.TryParse(symbolUi.WindowLayoutImGuiVersion, out var savedVersion)
+                && Version.TryParse(ImGui.GetVersion(), out var currentVersion)
+                && savedVersion.Major == currentVersion.Major
+                && savedVersion.Minor == currentVersion.Minor)
+            {
+                Program.NewImGuiLayoutDefinition = symbolUi.WindowLayout;
+            }
+        }
     }
 
     public void FocusViewToSelection()

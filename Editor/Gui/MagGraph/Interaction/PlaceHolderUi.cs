@@ -1,9 +1,6 @@
 ﻿#nullable enable
 
-using System;
 using System.Diagnostics;
-using System.Linq;
-
 using ImGuiNET;
 
 using T3.Core.DataTypes.Vector;

@@ -1,5 +1,4 @@
 ﻿using ImGuiNET;
-using T3.Editor.Gui.Windows;
 using T3.Editor.Gui.Windows.SymbolLib;
 
 namespace T3.Editor.Gui.UiHelpers;

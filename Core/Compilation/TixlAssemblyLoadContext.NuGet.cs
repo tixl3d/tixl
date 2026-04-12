@@ -20,7 +20,7 @@ internal sealed partial class TixlAssemblyLoadContext
     private static readonly List<AssemblyTreeNode> _loadedNuGetAssemblies = [];
 
     // todo - per-project directory, since this walks up the directory provided to find nuget config files
-    private static readonly string _nugetDirectory = SettingsUtility.GetGlobalPackagesFolder(Settings.LoadDefaultSettings(null, null, null));
+    private static readonly string _nugetDirectory = SettingsUtility.GetGlobalPackagesFolder(NuGet.Configuration.Settings.LoadDefaultSettings(null, null, null));
 
     private readonly record struct NugetFrameworkDirectory(DirectoryInfo Directory, NuGetFramework Framework) : IFrameworkSpecific
     {
@@ -128,7 +128,7 @@ internal sealed partial class TixlAssemblyLoadContext
             }
         }
 
-        if(ProjectSettings.Config.LogAssemblyLoadingDetails)
+        if(CoreSettings.Config.LogAssemblyLoadingDetails)
             Log.Error($"{Name}: Could not find nuget assembly '{asmName}'.");
         
         return null;

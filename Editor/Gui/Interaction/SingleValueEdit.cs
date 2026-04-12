@@ -2,7 +2,6 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
 using ImGuiNET;
-using T3.Core.DataTypes.Vector;
 using T3.Core.Utils;
 using T3.Editor.App;
 using T3.Editor.Gui.Interaction.Timing;

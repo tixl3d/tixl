@@ -201,38 +201,9 @@ internal sealed class LoadSvg : Instance<LoadSvg>, IDescriptiveFilename
 
         var targetPath = allSvgPaths[clampedIndex];
 
-        GraphicsPath? newPath = null;
-
-        foreach (var s in targetPath.PathData)
-        {
-            var segmentIsJump = s is SvgMoveToSegment or SvgClosePathSegment;
-            if (segmentIsJump)
-            {
-                if (newPath == null)
-                    continue;
-
-                paths.Add(new GraphicsPathEntry
-                {
-                    GraphicsPath = newPath,
-                    NeedsClosing = false
-                });
-                newPath = null;
-            }
-            else
-            {
-                newPath ??= new GraphicsPath();
-                s.AddToPath(newPath);
-            }
-        }
-
-        if (newPath != null)
-        {
-            paths.Add(new GraphicsPathEntry
-            {
-                GraphicsPath = newPath,
-                NeedsClosing = false
-            });
-        }
+        // Let the library build the full path (handles the new AddToPath API internally)
+        var fullPath = targetPath.Path(_svgRenderer);
+        SplitGraphicsPathIntoSubPaths(fullPath, paths);
 
         return paths;
     }
@@ -245,42 +216,13 @@ internal sealed class LoadSvg : Instance<LoadSvg>, IDescriptiveFilename
 
         foreach (var node in nodes)
         {
-            GraphicsPath? newPath = null;
             switch (node)
             {
                 case SvgPath svgPath:
                     {
-                        foreach (var s in svgPath.PathData)
-                        {
-                            var segmentIsJump = s is SvgMoveToSegment or SvgClosePathSegment;
-                            if (segmentIsJump)
-                            {
-                                if (newPath == null)
-                                    continue;
-
-                                paths.Add(new GraphicsPathEntry
-                                {
-                                    GraphicsPath = newPath,
-                                    NeedsClosing = false
-                                });
-                                newPath = null;
-                            }
-                            else
-                            {
-                                newPath ??= new GraphicsPath();
-                                s.AddToPath(newPath);
-                            }
-                        }
-
-                        if (newPath != null)
-                        {
-                            paths.Add(new GraphicsPathEntry
-                            {
-                                GraphicsPath = newPath,
-                                NeedsClosing = false
-                            });
-                        }
-
+                        // Let the library build the full path (handles the new AddToPath API internally)
+                        var fullPath = svgPath.Path(_svgRenderer);
+                        SplitGraphicsPathIntoSubPaths(fullPath, paths);
                         break;
                     }
                 case SvgGroup:
@@ -351,6 +293,82 @@ internal sealed class LoadSvg : Instance<LoadSvg>, IDescriptiveFilename
         Lines,
         Points,
         Shape 
+    }
+
+    /// <summary>
+    /// Splits a GraphicsPath into sub-paths at each StartPoint marker.
+    /// This avoids manual segment iteration with AddToPath, letting the SVG library
+    /// handle path construction internally via SvgPath.Path(renderer).
+    /// </summary>
+    private static void SplitGraphicsPathIntoSubPaths(GraphicsPath? fullPath, List<GraphicsPathEntry> paths)
+    {
+        if (fullPath == null || fullPath.PointCount == 0)
+            return;
+
+        var points = fullPath.PathPoints;
+        var types = fullPath.PathTypes;
+
+        GraphicsPath? currentSubPath = null;
+        var subPathStart = PointF.Empty;
+
+        for (var i = 0; i < points.Length; i++)
+        {
+            var pathType = types[i];
+            var pointType = (PathPointType)(pathType & 0x07); // mask off flags
+            var isStartPoint = pointType == PathPointType.Start;
+            var isCloseSubPath = (pathType & (byte)PathPointType.CloseSubpath) != 0;
+
+            if (isStartPoint)
+            {
+                // Flush previous sub-path
+                if (currentSubPath != null && currentSubPath.PointCount > 0)
+                {
+                    paths.Add(new GraphicsPathEntry
+                    {
+                        GraphicsPath = currentSubPath,
+                        NeedsClosing = false
+                    });
+                }
+                currentSubPath = new GraphicsPath();
+                subPathStart = points[i];
+            }
+
+            currentSubPath ??= new GraphicsPath();
+
+            if (pointType == PathPointType.Line)
+            {
+                var prev = i > 0 ? points[i - 1] : subPathStart;
+                currentSubPath.AddLine(prev, points[i]);
+            }
+            else if (pointType == PathPointType.Bezier3 && i + 2 < points.Length)
+            {
+                // Cubic bezier uses 3 consecutive points (control1, control2, endpoint)
+                var prev = i > 0 ? points[i - 1] : subPathStart;
+                currentSubPath.AddBezier(prev, points[i], points[i + 1], points[i + 2]);
+                i += 2; // skip the two extra bezier points
+            }
+
+            if (isCloseSubPath && currentSubPath.PointCount > 0)
+            {
+                currentSubPath.CloseFigure();
+                paths.Add(new GraphicsPathEntry
+                {
+                    GraphicsPath = currentSubPath,
+                    NeedsClosing = false
+                });
+                currentSubPath = null;
+            }
+        }
+
+        // Flush last sub-path
+        if (currentSubPath != null && currentSubPath.PointCount > 0)
+        {
+            paths.Add(new GraphicsPathEntry
+            {
+                GraphicsPath = currentSubPath,
+                NeedsClosing = false
+            });
+        }
     }
 
     private static ISvgRenderer? _svgRenderer;

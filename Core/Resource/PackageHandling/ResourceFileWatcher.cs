@@ -8,7 +8,7 @@ using System.Threading;
 using T3.Core.IO;
 using T3.Core.Logging;
 using T3.Core.Resource.Assets;
-using T3.Core.UserData;
+using T3.Core.Settings;
 using T3.Core.Utils;
 
 namespace T3.Core.Resource;
@@ -197,7 +197,7 @@ public sealed class ResourceFileWatcher : IDisposable
 
     private void OnFileCreated(object sender, FileSystemEventArgs e)
     {
-        if(ProjectSettings.Config.LogFileEvents)
+        if(CoreSettings.Config.LogFileEvents)
             Log.Debug($"FileEvent(create): {e.FullPath}");
         
         FileCreated?.Invoke(this, e.FullPath);
@@ -206,7 +206,7 @@ public sealed class ResourceFileWatcher : IDisposable
 
     private void OnFileChanged(object sender, FileSystemEventArgs e)
     {
-        if(ProjectSettings.Config.LogFileEvents)
+        if(CoreSettings.Config.LogFileEvents)
             Log.Debug($"FileEvent(change) [{e.ChangeType}] {e.FullPath}");
         
         e.FullPath.ToForwardSlashesUnsafe();
@@ -228,7 +228,7 @@ public sealed class ResourceFileWatcher : IDisposable
 
     private void OnError(object sender, ErrorEventArgs e)
     {
-        if(ProjectSettings.Config.LogFileEvents)
+        if(CoreSettings.Config.LogFileEvents)
             Log.Error($"FileEvent(error): {e.GetException()}");
         
         _fsWatcher?.Dispose();
@@ -242,7 +242,7 @@ public sealed class ResourceFileWatcher : IDisposable
     private void OnFileDeleted(object sender, FileSystemEventArgs e)
     {
         OnFileChanged(sender, e);
-        if(ProjectSettings.Config.LogFileEvents)
+        if(CoreSettings.Config.LogFileEvents)
             Log.Debug($"FileEvent(delete): {e.FullPath}");
     }
 

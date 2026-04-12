@@ -1,5 +1,4 @@
 #nullable enable
-using System.Diagnostics;
 using System.IO;
 using T3.Core.Animation;
 using T3.Core.Audio;
@@ -11,6 +10,7 @@ using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.Output;
 using T3.Editor.Gui.Windows.RenderExport.MF;
+using T3.Editor.UiModel;
 using T3.Editor.UiModel.ProjectHandling;
 
 namespace T3.Editor.Gui.Windows.RenderExport;
@@ -67,7 +67,7 @@ internal static class RenderProcess
         if (MainOutputTexture == null || MainOutputTexture.IsDisposed)
             return false;
 
-        var settings = RenderSettings.ForNextExport.Clone();
+        var settings = RenderSettings.Current.Clone();
 
         if (State != States.ReadyForExport)
         {
@@ -298,22 +298,28 @@ internal static class RenderProcess
 
         if (savingSuccessful)
         {
+            var incremented = false;
             if (settings.RenderMode == RenderSettings.RenderModes.Video && settings.AutoIncrementVersionNumber)
             {
-                RenderPaths.TryIncrementVideoFileNameInUserSettings();
+                RenderPaths.TryIncrementVideoFileName();
+                incremented = true;
             }
             else if (settings.RenderMode == RenderSettings.RenderModes.ImageSequence && settings.AutoIncrementSubFolder)
             {
                 if (settings.CreateSubFolder)
                 {
-                    UserSettings.Config.RenderSequenceFileName = RenderPaths.GetNextIncrementedPath(UserSettings.Config.RenderSequenceFileName);
+                    RenderSettings.Current.SequenceFileName = RenderPaths.GetNextIncrementedPath(RenderSettings.Current.SequenceFileName);
                 }
                 else
                 {
-                    UserSettings.Config.RenderSequencePrefix = RenderPaths.GetNextIncrementedPath(UserSettings.Config.RenderSequencePrefix);
+                    RenderSettings.Current.SequencePrefix = RenderPaths.GetNextIncrementedPath(RenderSettings.Current.SequencePrefix);
                 }
+                incremented = true;
+            }
 
-                UserSettings.Save();
+            if (incremented)
+            {
+                ProjectView.Focused?.CompositionInstance?.Symbol.GetSymbolUi()?.FlagAsModified();
             }
         }
 
@@ -346,7 +352,7 @@ internal static class RenderProcess
     {
         return State == States.Exporting && _activeExportSession != null
                    ? _activeExportSession.Settings
-                   : RenderSettings.ForNextExport;
+                   : RenderSettings.Current;
     }
 
     public static bool TryGetActiveExportResolution(out Int2 resolution)
@@ -486,7 +492,7 @@ internal static class RenderProcess
 
     private static string GetSequenceFilePath()
     {
-        var prefix = RenderPaths.SanitizeFilename(UserSettings.Config.RenderSequencePrefix);
+        var prefix = RenderPaths.SanitizeFilename(RenderSettings.Current.SequencePrefix);
         return Path.Combine(_activeExportSession!.TargetDirectory,
                             $"{prefix}_{_activeExportSession.FrameIndex:0000}.{_activeExportSession.Settings.FileFormat.ToString().ToLower()}");
     }

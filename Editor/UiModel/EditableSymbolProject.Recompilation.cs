@@ -6,7 +6,6 @@ using T3.Core.Compilation;
 using T3.Core.Operator;
 using T3.Core.SystemUi;
 using T3.Editor.Compilation;
-using T3.Editor.Gui.Windows;
 using T3.Editor.Gui.Windows.SymbolLib;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Graph;

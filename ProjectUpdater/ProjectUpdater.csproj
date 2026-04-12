@@ -10,11 +10,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.CodeDom" Version="8.0.0" />
+    <PackageReference Include="System.CodeDom" Version="10.0.5" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Core\Core.csproj" Private="false"/>
+    <ProjectReference Include="..\Core\Core.csproj" Private="false" />
   </ItemGroup>
 
 </Project>

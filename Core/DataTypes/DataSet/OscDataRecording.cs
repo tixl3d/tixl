@@ -5,6 +5,7 @@ using Rug.Osc;
 using T3.Core.Animation;
 using T3.Core.DataTypes.DataSet;
 using T3.Core.IO;
+using T3.Core.Settings;
 using T3.Core.Logging;
 
 namespace Operators.Utils.Recording;
@@ -19,7 +20,7 @@ public class OscDataRecording : OscConnectionManager.IOscConsumer, IDisposable
     public OscDataRecording(DataSet dataSet)
     {
         _dataSet = dataSet;
-        _port = ProjectSettings.Config.DefaultOscPort;
+        _port = CoreSettings.Config.DefaultOscPort;
 
         if (_port is < 0 or > 65535)
         {

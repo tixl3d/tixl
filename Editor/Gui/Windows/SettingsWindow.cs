@@ -2,6 +2,7 @@ using System.IO;
 using ImGuiNET;
 using Operators.Utils;
 using T3.Core.IO;
+using T3.Core.Settings;
 using T3.Core.Utils;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Interaction.Keyboard;
@@ -24,10 +25,9 @@ internal sealed partial class SettingsWindow : Window
     {
         Interface,
         Theme,
-        Project,
+        Projects,
         Audio,
         Midi,
-        OSC,
         SpaceMouse,
         Keyboard,
         Profiling,
@@ -244,9 +244,9 @@ internal sealed partial class SettingsWindow : Window
                                                       UserSettings.Defaults.MiddleMouseButtonZooms);
 
                     changed |= FormInputs.AddCheckBox("Suspend invalidation of inactive time clips",
-                                                      ref ProjectSettings.Config.TimeClipSuspending,
+                                                      ref CoreSettings.Config.TimeClipSuspending,
                                                       "An experimental optimization that avoids dirty flag evaluation of graph behind inactive TimeClips. This is only relevant for very complex projects and multiple parts separated by timelines.",
-                                                      ProjectSettings.Defaults.TimeClipSuspending);
+                                                      CoreSettings.Defaults.TimeClipSuspending);
 
                     changed |= FormInputs.AddCheckBox("Warn before Lib modifications",
                                                       ref UserSettings.Config.WarnBeforeLibEdit,
@@ -267,9 +267,11 @@ internal sealed partial class SettingsWindow : Window
                     ColorThemeEditor.DrawEditor();
                     break;
 
-                case Categories.Project:
+                case Categories.Projects:
                 {
                     FormInputs.AddSectionHeader("Project specific settings");
+                    CustomComponents
+                        .HelpText("These are global settings. Also see the Project Settings window.");                    
                     FormInputs.AddVerticalSpace();
 
                     FormInputs.AddSectionSubHeader("Project Settings");
@@ -334,24 +336,15 @@ internal sealed partial class SettingsWindow : Window
                                                         """,
                                                         UserSettings.Defaults.MinimalBackup);
 
-                        FormInputs.AddSectionSubHeader("Performance Settings");
-                    FormInputs.SetIndentToLeft();
+                    changed |= FormInputs.AddCheckBox("Save Layout with Projects",
+                        ref UserSettings.Config.SaveWindowLayoutsWithProjects,
+                        """
+                        When enabled, TiXL will save the window layout for each project.
+                        """,
+                        UserSettings.Defaults.SaveWindowLayoutsWithProjects
+                    );
 
-                    projectSettingsChanged |= FormInputs.AddCheckBox("Skip Shader Optimization",
-                                                                     ref ProjectSettings.Config.SkipOptimization,
-                                                                     "This make working with shader graphs easier.",
-                                                                     ProjectSettings.Config.SkipOptimization);
-
-                    projectSettingsChanged |= FormInputs.AddCheckBox("Enable DirectX Debug Mode",
-                                                                     ref ProjectSettings.Config.EnableDirectXDebug,
-                                                                     """
-                                                                     This will add debug information for to shaders and buffers that can help developing wiht Tools like RenderDoc.
-                                                                     Enabling this can impact rendering performance.
-
-                                                                     Changing this option requires a restart.
-                                                                     """,
-                                                                     ProjectSettings.Config.EnableDirectXDebug);
-
+                    
                     changed |= FormInputs.AddCheckBox("Load multi-threaded",
                                                                      ref UserSettings.Config.LoadMultiThreaded,
                                                                      """
@@ -359,28 +352,30 @@ internal sealed partial class SettingsWindow : Window
                                                                      During development or if loading freezes during startup it might be useful for disable this settings.
                                                                      """,
                                                                      UserSettings.Config.LoadMultiThreaded);
-                    
-                    FormInputs.AddSectionSubHeader("Audio Sync");
 
-                    FormInputs.SetIndentToParameters();
+                    FormInputs.AddSectionSubHeader("Performance");
+                    FormInputs.SetIndentToLeft();
 
-                    FormInputs.AddVerticalSpace();
+                    projectSettingsChanged |= FormInputs.AddCheckBox("Skip Shader Optimization",
+                                                                     ref CoreSettings.Config.SkipOptimization,
+                                                                     "Makes working with shader graphs easier by skipping HLSL optimization.",
+                                                                     CoreSettings.Defaults.SkipOptimization);
 
-                    FormInputs.AddSectionSubHeader("Export Settings");
-                    CustomComponents.HelpText("These settings only when playback as executable");
-                    FormInputs.AddVerticalSpace();
+                    projectSettingsChanged |= FormInputs.AddCheckBox("Enable DirectX Debug Mode",
+                                                                     ref CoreSettings.Config.EnableDirectXDebug,
+                                                                     """
+                                                                     Adds debug information to shaders and buffers for tools like RenderDoc.
+                                                                     Can impact rendering performance. Requires a restart.
+                                                                     """,
+                                                                     CoreSettings.Defaults.EnableDirectXDebug);
 
-                    projectSettingsChanged |= FormInputs.AddEnumDropdown(ref ProjectSettings.Config.DefaultWindowMode,
-                                                                         "Show export as",
-                                                                         "The default window mode when exporting an executable.",
-                                                                         WindowMode.Fullscreen);
+                    FormInputs.AddSectionSubHeader("OSC");
+                    FormInputs.SetIndentToLeft();
 
-                    projectSettingsChanged |= FormInputs.AddCheckBox("Enable Playback Control",
-                                                                     ref ProjectSettings.Config.EnablePlaybackControlWithKeyboard,
-                                                                     "Users can use cursor left/right to skip through time\nand space key to pause playback\nof exported executable.",
-                                                                     ProjectSettings.Defaults.EnablePlaybackControlWithKeyboard);
-
-
+                    projectSettingsChanged |= FormInputs.AddInt("Default Port", ref CoreSettings.Config.DefaultOscPort,
+                                                                0, 65535, 1,
+                                                                "If a valid port is set, Tooll will listen for OSC messages on this port by default.\nChanging the port requires a restart.",
+                                                                CoreSettings.Defaults.DefaultOscPort);
 
                     FormInputs.SetIndentToParameters();
 
@@ -407,14 +402,14 @@ internal sealed partial class SettingsWindow : Window
                         CustomComponents
                            .HelpText("This can be useful it avoid capturing devices required by other applications.\nEnter one search string per line...");
 
-                        var limitMidiDevices = string.IsNullOrEmpty(ProjectSettings.Config.LimitMidiDeviceCapture)
+                        var limitMidiDevices = string.IsNullOrEmpty(CoreSettings.Config.LimitMidiDeviceCapture)
                                                    ? string.Empty
-                                                   : ProjectSettings.Config.LimitMidiDeviceCapture;
+                                                   : CoreSettings.Config.LimitMidiDeviceCapture;
 
                         if (ImGui.InputTextMultiline("##Limit MidiDevices", ref limitMidiDevices, 2000, new Vector2(-1, 100)))
                         {
                             changed = true;
-                            ProjectSettings.Config.LimitMidiDeviceCapture = string.IsNullOrEmpty(limitMidiDevices) ? null : limitMidiDevices;
+                            CoreSettings.Config.LimitMidiDeviceCapture = string.IsNullOrEmpty(limitMidiDevices) ? null : limitMidiDevices;
                             MidiConnectionManager.Rescan();
                         }
 
@@ -424,27 +419,6 @@ internal sealed partial class SettingsWindow : Window
                     FormInputs.AddVerticalSpace();
                     break;
                 }
-                case Categories.OSC:
-                {
-                    FormInputs.AddSectionHeader("OSC");
-
-                    CustomComponents
-                       .HelpText("On startup, Tooll will listen for OSC messages on the default port." +
-                                 "The IO indicator in the timeline will show incoming messages.\n" +
-                                 "You can also use the OscInput operator to receive OSC from other ports.");
-
-                    CustomComponents
-                       .HelpText("Changing the port will require a restart of Tooll.");
-
-                    FormInputs.AddInt("Default Port", ref ProjectSettings.Config.DefaultOscPort,
-                                      0, 65535, 1,
-                                      "If a valid port is set, Tooll will listen for OSC messages on this port by default.",
-                                      -1);
-
-                    FormInputs.AddVerticalSpace();
-                    break;
-                }
-
                 case Categories.SpaceMouse:
                     FormInputs.AddSectionHeader("Space Mouse");
 
@@ -512,15 +486,15 @@ internal sealed partial class SettingsWindow : Window
                         changed = true;
                     }
                     changed |= FormInputs.AddCheckBox("Profile Beat Syncing",
-                        ref ProjectSettings.Config.EnableBeatSyncProfiling,
-                        "Logs beat sync timing to IO Window",
-                        ProjectSettings.Defaults.EnableBeatSyncProfiling);
+                        ref CoreSettings.Config.EnableBeatSyncProfiling,
+                        "Logs beat sync timing to IO Window.",
+                        CoreSettings.Defaults.EnableBeatSyncProfiling);
                     FormInputs.AddVerticalSpace();
 
                     changed |= FormInputs.AddCheckBox("Log Asset File Events",
-                        ref ProjectSettings.Config.LogFileEvents,
+                        ref CoreSettings.Config.LogFileEvents,
                         "Logs events related to changing and updating assets files.",
-                        ProjectSettings.Defaults.LogFileEvents);
+                        CoreSettings.Defaults.LogFileEvents);
                     FormInputs.AddVerticalSpace();
 
                     // Compilation group
@@ -528,18 +502,18 @@ internal sealed partial class SettingsWindow : Window
                     FormInputs.AddSectionSubHeader("Compilation");
                     FormInputs.AddVerticalSpace();
                     changed |= FormInputs.AddCheckBox("Log Assembly Version mismatches",
-                        ref ProjectSettings.Config.LogAssemblyVersionMismatches,
+                        ref CoreSettings.Config.LogAssemblyVersionMismatches,
                         "Version mismatches are frequently caused by slightly outdated 3rd party library that we depend on.\nThese are only relevant in situations where you need to debug or analyse assembly loading problems.",
-                        ProjectSettings.Defaults.LogAssemblyVersionMismatches);
+                        CoreSettings.Defaults.LogAssemblyVersionMismatches);
                     changed |= FormInputs.AddCheckBox("Log Loading Details",
-                        ref ProjectSettings.Config.LogAssemblyLoadingDetails,
+                        ref CoreSettings.Config.LogAssemblyLoadingDetails,
                         "Logs additional details about resolving and identifying assemblies and other resources.\nThis can be useful to debug issues related to loading projects.",
-                        ProjectSettings.Defaults.LogAssemblyLoadingDetails);
+                        CoreSettings.Defaults.LogAssemblyLoadingDetails);
                     changed |= FormInputs.AddCheckBox("Log C# Compilation Details",
-                        ref ProjectSettings.Config.LogCompilationDetails,
+                        ref CoreSettings.Config.LogCompilationDetails,
                         "Logs additional compilation details with the given severity",
-                        ProjectSettings.Defaults.LogCompilationDetails);
-                    if (ProjectSettings.Config.LogCompilationDetails)
+                        CoreSettings.Defaults.LogCompilationDetails);
+                    if (CoreSettings.Config.LogCompilationDetails)
                     {
                         changed |= FormInputs.AddEnumDropdown(ref UserSettings.Config.CompileCsVerbosity,
                             "C# compiler logs",
@@ -588,7 +562,7 @@ internal sealed partial class SettingsWindow : Window
                 UserSettings.Save();
             
             if (projectSettingsChanged)
-                ProjectSettings.Save();
+                CoreSettings.Save();
         }
         ImGui.EndChild();
         ImGui.PopStyleVar();

@@ -55,6 +55,7 @@ internal sealed class TimeLineCanvas : CurveEditCanvas
     {
         Current = this;
         Playback = playback;
+        SyncStateWithComposition(compositionOp);
         _selectedAnimationParameters = GetAnimationParametersForSelectedNodes(compositionOp);
 
         // Very ugly hack to prevent scaling the output above window size
@@ -356,6 +357,60 @@ internal sealed class TimeLineCanvas : CurveEditCanvas
 
     public Modes Mode = Modes.DopeView;
     private Modes _lastMode = Modes.CurveEditor; // Make different to force initial update
+
+    private void SyncStateWithComposition(Instance compositionOp)
+    {
+        var symbolId = compositionOp.Symbol.Id;
+        if (symbolId == _lastSyncedSymbolId)
+        {
+            // Sync copy fields every frame so saves capture current values
+            var currentSymbolUi = compositionOp.Symbol.GetSymbolUi();
+            if (currentSymbolUi != null)
+            {
+                currentSymbolUi.TimelineState ??= new TimelineState();
+                SaveStateTo(currentSymbolUi.TimelineState);
+            }
+            return;
+        }
+
+        // Save to previous composition
+        if (_lastSyncedSymbolUi != null)
+        {
+            _lastSyncedSymbolUi.TimelineState ??= new TimelineState();
+            SaveStateTo(_lastSyncedSymbolUi.TimelineState);
+            _lastSyncedSymbolUi.FlagAsModified();
+        }
+
+        _lastSyncedSymbolId = symbolId;
+        _lastSyncedSymbolUi = compositionOp.Symbol.GetSymbolUi();
+
+        // Load from new composition
+        if (_lastSyncedSymbolUi?.TimelineState is { } state)
+        {
+            LoadStateFrom(state);
+        }
+    }
+
+    private Guid _lastSyncedSymbolId;
+    private SymbolUi? _lastSyncedSymbolUi;
+
+    internal void SaveStateTo(TimelineState state)
+    {
+        state.ScaleX = Scale.X;
+        state.ScrollX = Scroll.X;
+        state.Mode = Mode;
+    }
+
+    internal void LoadStateFrom(TimelineState state)
+    {
+        ScaleTarget = new Vector2(state.ScaleX, ScaleTarget.Y);
+        Scale = new Vector2(state.ScaleX, Scale.Y);
+        ScrollTarget = new Vector2(state.ScrollX, ScrollTarget.Y);
+        Scroll = new Vector2(state.ScrollX, Scroll.Y);
+        Mode = state.Mode;
+        _lastMode = Mode; // Prevent mode-change reset
+    }
+
     #endregion
 
     // TODO: this is horrible and should be refactored

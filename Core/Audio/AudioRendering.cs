@@ -7,6 +7,7 @@ using T3.Core.Animation;
 using T3.Core.IO;
 using T3.Core.Logging;
 using T3.Core.Operator;
+using T3.Core.Settings;
 
 namespace T3.Core.Audio;
 
@@ -190,8 +191,8 @@ public static class AudioRendering
         // Process FFT data to compute frequency bands, peaks, and attacks for AudioReaction
         // Use the same gain/decay factors from playback settings as used during normal playback
         var settings = Playback.Current.Settings;
-        float gainFactor = settings?.AudioGainFactor ?? 1f;
-        float decayFactor = settings?.AudioDecayFactor ?? 0.9f;
+        float gainFactor = settings?.Playback.AudioGainFactor ?? 1f;
+        float decayFactor = settings?.Playback.AudioDecayFactor ?? 0.9f;
         AudioAnalysis.ProcessUpdate(gainFactor, decayFactor);
 
         return mixBuffer;
@@ -218,10 +219,10 @@ public static class AudioRendering
                 long targetBytes = Bass.ChannelSeconds2Bytes(clipStream.StreamHandle, timeInClip);
                 Bass.ChannelSetPosition(clipStream.StreamHandle, targetBytes);
                 
-                // Apply volume: clip.Volume * SoundtrackPlaybackVolume * GlobalPlaybackVolume
-                float effectiveVolume = handle.Clip.Volume 
-                                        * ProjectSettings.Config.SoundtrackPlaybackVolume
-                                        * ProjectSettings.Config.GlobalPlaybackVolume;
+                // Apply volume: clip.Volume * SoundtrackVolume * AppVolume
+                float effectiveVolume = handle.Clip.Volume
+                                        * CompositionSettings.Current.Audio.SoundtrackVolume
+                                        * CoreSettings.Config.AppVolume;
                 Bass.ChannelSetAttribute(clipStream.StreamHandle, ChannelAttribute.Volume, effectiveVolume);
                 
                 // Unpause for this frame
