@@ -205,13 +205,6 @@
       }
     },
     {
-      "ChildId": "3c19f3a1-74e6-45dc-adf6-abe5e907aa1a"/*HasTimeChanged*/,
-      "Position": {
-        "X": 1261.4972,
-        "Y": 3857.7915
-      }
-    },
-    {
       "ChildId": "5601bef4-54f7-461f-a5e0-dd2967241416"/*RasterizerState*/,
       "Position": {
         "X": 2911.8147,

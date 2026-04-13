@@ -2848,13 +2848,6 @@
       }
     },
     {
-      "ChildId": "e376e08c-056b-402a-ae3f-73ce6230d54e"/*HasTimeChanged*/,
-      "Position": {
-        "X": 4401.6504,
-        "Y": 3867.5256
-      }
-    },
-    {
       "ChildId": "e397dfa9-c68a-4736-8641-a4f117fb4643"/*Value*/,
       "Position": {
         "X": 3237.6353,

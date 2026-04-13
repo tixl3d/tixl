@@ -123,6 +123,11 @@
           "Id": "aa73cdba-f295-446d-9693-53055ca4edc6"/*Threshold*/,
           "Type": "System.Single",
           "Value": 0.5
+        },
+        {
+          "Id": "bc112889-77a8-4967-a9b7-683b7c7017fe"/*Mode*/,
+          "Type": "System.Int32",
+          "Value": 0
         }
       ],
       "Outputs": []

@@ -10522,28 +10522,6 @@
       ]
     },
     {
-      "Id": "e376e08c-056b-402a-ae3f-73ce6230d54e"/*HasTimeChanged*/,
-      "SymbolId": "2443b2fd-c397-4ea6-9588-b595f918cf01",
-      "InputValues": [
-        {
-          "Id": "5ac02169-6b75-4176-ae0a-04cab6c4ce13"/*WhichTime*/,
-          "Type": "System.Int32",
-          "Value": 2
-        },
-        {
-          "Id": "aa73cdba-f295-446d-9693-53055ca4edc6"/*Threshold*/,
-          "Type": "System.Single",
-          "Value": 0.014
-        },
-        {
-          "Id": "bc112889-77a8-4967-a9b7-683b7c7017fe"/*Mode*/,
-          "Type": "System.Int32",
-          "Value": 2
-        }
-      ],
-      "Outputs": []
-    },
-    {
       "Id": "e397dfa9-c68a-4736-8641-a4f117fb4643"/*Value*/,
       "SymbolId": "5d7d61ae-0a41-4ffa-a51d-93bab665e7fe",
       "InputValues": [

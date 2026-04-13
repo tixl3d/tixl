@@ -2051,7 +2051,13 @@
     {
       "Id": "78446777-38b3-4ed9-9dbe-98175f895814"/*HasTimeChanged*/,
       "SymbolId": "2443b2fd-c397-4ea6-9588-b595f918cf01",
-      "InputValues": [],
+      "InputValues": [
+        {
+          "Id": "bc112889-77a8-4967-a9b7-683b7c7017fe"/*Mode*/,
+          "Type": "System.Int32",
+          "Value": 0
+        }
+      ],
       "Outputs": []
     },
     {
@@ -6497,7 +6503,7 @@
         "Bpm": 140.0,
         "DiscardAfterUse": true,
         "IsSoundtrack": true,
-        "FilePath": "Resources\\user\\still\\proj-katsumaki\\soundtrack\\rp-katsumaki-v3.mp3"
+        "FilePath": "Resources/user/still/proj-katsumaki/soundtrack/rp-katsumaki-v3.mp3"
       }
     ]
   },
