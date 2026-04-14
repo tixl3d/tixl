@@ -699,7 +699,7 @@ public static class DampFunctions
 
     public static float SpringDampFloat(float inputValue, float previousValue, float damping, ref float velocity)
     {
-        return MathUtils.SpringDamp(inputValue, previousValue, ref velocity, 0.5f / (damping + 0.001f), (float)Playback.LastFrameDuration);
+        return MathUtils.SpringDamp(inputValue, previousValue, ref velocity, 0.5f / (damping + 0.001f), (float)(Playback.LastFrameDuration).Clamp(0, 1 / 60f));
     }
 
     private static float LinearDamp(float targetValue, float currentValue, float damping)
@@ -710,7 +710,7 @@ public static class DampFunctions
         
     public static Vector2 SpringDampVec2(Vector2 targetVec, Vector2 currentValue, float damping, ref Vector2 velocity)
     {
-        var dt = (float)Playback.LastFrameDuration;
+        var dt = (float)(Playback.LastFrameDuration).Clamp(0, 1 / 60f);
         return new Vector2(
                            MathUtils.SpringDamp(targetVec.X, currentValue.X, ref velocity.X, 0.5f / (damping + 0.001f), dt),
                            MathUtils.SpringDamp(targetVec.Y, currentValue.Y, ref velocity.Y, 0.5f / (damping + 0.001f), dt));
@@ -718,7 +718,7 @@ public static class DampFunctions
 
     public static Vector3 SpringDampVec3(Vector3 targetVec, Vector3 currentValue, float damping, ref Vector3 velocity)
     {
-        var dt = (float)Playback.LastFrameDuration;
+        var dt = (float)(Playback.LastFrameDuration).Clamp(0, 1 / 60f);
         return new Vector3(
                            MathUtils.SpringDamp(targetVec.X, currentValue.X, ref velocity.X, 0.5f / (damping + 0.001f), dt),
                            MathUtils.SpringDamp(targetVec.Y, currentValue.Y, ref velocity.Y, 0.5f / (damping + 0.001f), dt),
