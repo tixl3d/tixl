@@ -37,7 +37,7 @@ public sealed class CurveSampleCache
     {
         var revision = curve.ChangeCount;
 
-        if (IsValid(revision, visibleStartU, visibleEndU, screenScaleX))
+        if (IsValid(curve, revision, visibleStartU, visibleEndU, screenScaleX))
             return;
 
         Rebuild(curve, visibleStartU, visibleEndU, screenScaleX, revision);
@@ -99,9 +99,9 @@ public sealed class CurveSampleCache
     /// <summary>Time of the last keyframe. Points after this are the post-region.</summary>
     public double LastKeyU { get; private set; } = double.NaN;
 
-    private bool IsValid(int revision, double visibleStartU, double visibleEndU, double screenScaleX)
+    private bool IsValid(Curve curve, int revision, double visibleStartU, double visibleEndU, double screenScaleX)
     {
-        if (revision != _revision)
+        if (curve != _cachedCurve || revision != _revision)
             return false;
 
         if (_points.Count == 0)
@@ -125,6 +125,7 @@ public sealed class CurveSampleCache
     private void Rebuild(Curve curve, double visibleStartU, double visibleEndU, double screenScaleX, int revision)
     {
         _points.Clear();
+        _cachedCurve = curve;
         _revision = revision;
         _screenScaleX = screenScaleX;
 
@@ -296,6 +297,7 @@ public sealed class CurveSampleCache
     }
 
     private readonly List<Vector2> _points = new(256);
+    private Curve? _cachedCurve;
     private double _cachedStartU;
     private double _cachedEndU;
     private double _visibleStartU;
