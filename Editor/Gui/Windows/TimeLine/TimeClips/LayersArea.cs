@@ -55,7 +55,6 @@ internal sealed class LayersArea : ITimeObjectManipulation, IValueSnapAttractor
         ImGui.BeginGroup();
         {
             _context.ClipSelection.UpdateForComposition(compositionOp);
-            ImGui.Dummy(new Vector2(1, 3)); // top padding (was SetCursorPos+3, but ImGui 1.91 needs an item)
             _minScreenPos = ImGui.GetCursorScreenPos();
 
             DrawAllLayers(compositionOp);
@@ -132,7 +131,7 @@ internal sealed class LayersArea : ITimeObjectManipulation, IValueSnapAttractor
                                     LayerHeight * (_maxLayerIndex - _minLayerIndex + 1) + 1);
         LastHeight = max.Y - min.Y + 5;
         _drawList.AddRectFilled(new Vector2(min.X, max.Y - 2),
-                                new Vector2(max.X, max.Y - 0), UiColors.BackgroundFull.Fade(0.6f));
+                                new Vector2(max.X, max.Y - 0), UiColors.GridLines.Fade(0.6f));
 
         var compositionSymbolUi = compositionOp.GetSymbolUi();
         var drawAttributes = new TimeClipItem.ClipDrawingAttributes(

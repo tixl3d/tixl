@@ -27,7 +27,7 @@ internal sealed class TimeRasterSwitcher:IValueSnapAttractor
                     break;
             }
         }
-        ActiveRaster?.Draw(timelineCanvas, unitsPerSeconds);
+        ActiveRaster?.Draw(timelineCanvas, unitsPerSeconds,0);
     }
     
     void IValueSnapAttractor.CheckForSnap(ref SnapResult snapResult)

@@ -16,6 +16,7 @@ internal sealed class CurrentTimeMarker: IValueSnapAttractor
         var windowHeight = ImGui.GetWindowHeight() +1;
         drawList.AddRectFilled(p + new Vector2(-1,y), p + new Vector2(2, windowHeight), UiColors.BackgroundFull.Fade(0.2f));
         drawList.AddRectFilled(p, p + new Vector2(1, y+ windowHeight), UiColors.StatusAnimated);
+        Icons.DrawIconAtScreenPosition(Icon.CurrentTimeMarkerHandle, p+ new Vector2(-4,y-1));
     }
 
     void IValueSnapAttractor.CheckForSnap(ref SnapResult snapResult)

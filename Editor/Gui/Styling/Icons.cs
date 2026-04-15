@@ -181,7 +181,7 @@ internal static class Icons
             new(Icon.Stripe4PxPattern, 33),
             new(Icon.AddKeyframe, 34),
             new(Icon.PinParams, 35),
-            //new(Icon.CurrentTimeMarkerHandle, 17),
+            new(Icon.CurrentTimeMarkerHandle, new Vector2(2 * 15, 5), new Vector2(9, 19)),
             new(Icon.FollowTime, 36),
             new(Icon.ToggleAudioOn, 37),
             new(Icon.ToggleAudioOff, 38),

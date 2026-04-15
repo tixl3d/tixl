@@ -51,6 +51,9 @@ internal sealed class TimeLineCanvas : AnimationCanvas
 
     public NodeSelection NodeSelection => _nodeSelection;
 
+    private int RulerHeight => (int)(25 * T3Ui.UiScaleFactor);
+    private int SummaryHeight => (int)(9 * T3Ui.UiScaleFactor);
+    
     public void Draw(Instance compositionOp, Playback playback)
     {
         Current = this;
@@ -73,18 +76,39 @@ internal sealed class TimeLineCanvas : AnimationCanvas
 
         void DrawCanvasContent(InteractionState interactionState)
         {
-            ImGui.SetCursorPosY(ImGui.GetCursorPosY() - 6);
+            ImGui.SetCursorPosY(ImGui.GetCursorPosY() );
             if (PlaybackUtils.TryFindingSoundtrack(out var soundtrack, out var composition))
             {
                 TimeLineImage.Draw(Drawlist, soundtrack);
             }
-
             
             _timeRasterSwitcher.Draw(this);
+            
+            // Ruler
+            {
+                //ImGui.PushStyleColor(ImGuiCol.ChildBg, UiColors.BackgroundPopup.fa.Rgba);
+                ImGui.BeginChild("##ruler", new Vector2(0,RulerHeight));
+                DrawDragTimeArea(interactionState.MouseState.Position.X);
+                ImGui.EndChild();
+                //ImGui.PopStyleColor();
+            }
 
+            
+            var drawList = ImGui.GetWindowDrawList();
+            // Summary Range
+            {
+                ImGui.PushStyleColor(ImGuiCol.ChildBg, UiColors.GridLines.Fade(0.15f).Rgba);
+                ImGui.BeginChild("##summary", new Vector2(0,SummaryHeight));
+                var p = ImGui.GetCursorScreenPos();
+                drawList.AddRectFilled(p, p+new Vector2(ImGui.GetWindowWidth(),1), UiColors.GridLines.Fade(0.8f));
+                
+                ImGui.EndChild();
+                ImGui.PopStyleColor();
+            }
+            
             HandleDeferredActions();
 
-            ImGui.BeginChild(ImGuiTitle, new Vector2(0, -30), ImGuiChildFlags.Borders,
+            ImGui.BeginChild(ImGuiTitle, new Vector2(0, 0), ImGuiChildFlags.Borders,
                              ImGuiWindowFlags.NoMove
                              | ImGuiWindowFlags.NoBackground
                              | ImGuiWindowFlags.NoScrollWithMouse);
@@ -133,7 +157,6 @@ internal sealed class TimeLineCanvas : AnimationCanvas
 
             _currentTimeMarker.Draw(Playback.TimeInBars, this);
             _timeSelectionRange.Draw(compositionOp, Drawlist);
-            DrawDragTimeArea(interactionState.MouseState.Position.X);
 
             if (_selectionFence.State == SelectionFence.States.CompletedAsClick)
             {
@@ -253,16 +276,13 @@ internal sealed class TimeLineCanvas : AnimationCanvas
 
     private void DrawDragTimeArea(float mouseX)
     {
-        if (Playback == null)
-            return;
-
         var max = ImGui.GetWindowSize();
         var clampedSize = max;
         clampedSize.Y = Math.Min(TimeLineDragHeight, max.Y - 1);
 
         ImGui.SetCursorPos(new Vector2(0, max.Y - clampedSize.Y));
-        var screenPos = ImGui.GetCursorScreenPos();
-        ImGui.GetWindowDrawList().AddRectFilled(screenPos, screenPos + new Vector2(clampedSize.X, clampedSize.Y), UiColors.BackgroundFull.Fade(0.1f));
+        //var screenPos = ImGui.GetCursorScreenPos();
+        //ImGui.GetWindowDrawList().AddRectFilled(screenPos, screenPos + new Vector2(clampedSize.X, clampedSize.Y), UiColors.BackgroundFull.Fade(0.1f));
 
         ImGui.InvisibleButton("##TimeDrag", clampedSize);
 
