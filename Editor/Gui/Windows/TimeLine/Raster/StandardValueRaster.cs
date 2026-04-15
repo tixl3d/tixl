@@ -1,5 +1,6 @@
+#nullable enable
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using T3.Core.Animation;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Snapping;
 
@@ -8,15 +9,15 @@ namespace T3.Editor.Gui.Windows.TimeLine.Raster;
 /// <summary>
 /// A time raster (vertical lines) that calculate required labels and spacing logarithmically. 
 /// </summary>
-public sealed class StandardValueRaster : AbstractTimeRaster
+internal sealed class StandardValueRaster : AbstractTimeRaster
 {
-    public override void Draw(Playback playback, float unitsPerSeconds)
+    internal override void Draw(TimeLineCanvas timeLineCanvas, float unitsPerSeconds, float verticalLabelAlign = 1)
     {
-        UnitsPerSecond = unitsPerSeconds / playback.Bpm * 60f * 4f;
+        UnitsPerSecond = unitsPerSeconds / timeLineCanvas.Playback.Bpm * 60f * 4f;
 
-        var scale = TimeLineCanvas.Current.Scale.X / UnitsPerSecond;
-        var scroll = TimeLineCanvas.Current.Scroll.X * UnitsPerSecond;
-        DrawTimeTicks(scale, scroll, TimeLineCanvas.Current);
+        var scale = timeLineCanvas.Scale.X / UnitsPerSecond;
+        var scroll = timeLineCanvas.Scroll.X * UnitsPerSecond;
+        DrawTimeTicks(scale, scroll, timeLineCanvas,verticalLabelAlign);
     }
 
     /// <summary>
@@ -24,7 +25,7 @@ public sealed class StandardValueRaster : AbstractTimeRaster
     /// When <see cref="StandardValueRaster"/> is used inside curve editors,
     /// default snapping is enabled.  
     /// </summary>
-    public bool EnableSnapping = false; 
+    public bool EnableSnapping = false;
 
     public void Draw(ScalableCanvas canvas)
     {
@@ -34,8 +35,6 @@ public sealed class StandardValueRaster : AbstractTimeRaster
         var scroll = canvas.Scroll.X * canvas.Scale.X;
         DrawTimeTicks(scale, scroll / scale, canvas);
     }
-
-        
 
     protected override string BuildLabel(Raster raster, double timeInUnits)
     {
@@ -54,63 +53,38 @@ public sealed class StandardValueRaster : AbstractTimeRaster
 
         return output;
     }
+    
+    protected override void InitScaleRanges(float density) { }
 
-    protected override IEnumerable<Raster> GetRastersForScale(double scale, out float fadeFactor)
+    protected override bool TryGetRastersForScale(double scale, [NotNullWhen(true)] out Raster[]? rasters,
+        out float fadeFactor)
     {
         const float density = 1.0f;
-        var uPerPixel = scale;
-        var logScale = (float)Math.Log10(uPerPixel) + density;
+        var logScale = (float) Math.Log10(scale) + density;
         var logScaleMod = (logScale + 1000) % 1.0f;
-        var logScaleFloor = (float)Math.Floor(logScale);
+        var logScaleFloor = (float) Math.Floor(logScale);
 
         if (logScaleMod < 0.5)
         {
             fadeFactor = 1 - logScaleMod * 2;
-            _blendRasters[0] = new Raster()
-                                   {
-                                       Label = "N",
-                                       Spacing = (float)Math.Pow(10, logScaleFloor) * 50,
-                                   };
-            _blendRasters[1] = new Raster()
-                                   {
-                                       Label = "N",
-                                       Spacing = (float)Math.Pow(10, logScaleFloor) * 10,
-                                       FadeLabels = true,
-                                       FadeLines = true,
-                                   };
+            _blendRasters[0] = new Raster(Label: "N", Spacing: (float) Math.Pow(10, logScaleFloor) * 50);
+            _blendRasters[1] = new Raster(Label: "N", Spacing: (float) Math.Pow(10, logScaleFloor) * 10, true, true);
         }
         else
         {
             fadeFactor = 1 - (logScaleMod - 0.5f) * 2;
-            _blendRasters[0] = new Raster()
-                                   {
-                                       Label = "N",
-                                       Spacing = (float)Math.Pow(10, logScaleFloor) * 100,
-                                   };
-            _blendRasters[1] = new Raster()
-                                   {
-                                       Label = "N",
-                                       Spacing = (float)Math.Pow(10, logScaleFloor) * 50,
-                                       FadeLabels = true,
-                                       FadeLines = true,
-                                   };
+            _blendRasters[0] = new Raster(Label: "N", Spacing: (float) Math.Pow(10, logScaleFloor) * 100);
+            _blendRasters[1] = new Raster(Label: "N", Spacing: (float) Math.Pow(10, logScaleFloor) * 50, true, true);
         }
 
-        return _blendRasters;
+        rasters = _blendRasters;
+        return true;
     }
-     
+
     public override void CheckForSnap(ref SnapResult snapResult)
-    //public override  SnapResult CheckForSnap(double time, float canvasScale, SnapResult.Orientations orientation)
     {
         if (EnableSnapping)
             base.CheckForSnap(ref snapResult);
-            //snapResult.TryToImproveWithAnchorValue(time);
-        
-        // return !EnableSnapping 
-        //            ? null 
-        //            : base.CheckForSnap(time, canvasScale, orientation);
-            
-        //return  base.CheckForSnap(time, canvasScale);
     }
 
     private readonly Raster[] _blendRasters = new Raster[2];

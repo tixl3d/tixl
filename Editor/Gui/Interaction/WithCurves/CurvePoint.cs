@@ -76,12 +76,19 @@ internal static class CurvePoint
 
         var buttonId = isIn ? "keyLT" + _vDef.UniqueId : "keyRT" + _vDef.UniqueId;
 
-        // Place invisible button centered on the handle in screen coordinates
-        ImGui.SetCursorScreenPos(handleCenter - _tangentHandleSizeHalf);
-        ImGui.InvisibleButton(buttonId, _tangentHandleSize);
+        // Scale click area based on handle screen length — shrink when small, disable when tiny
+        var handleScreenLength = handleOffset.Length();
+        var clickSize = handleScreenLength < MinClickableHandleLength
+                            ? Vector2.One // Too small to click — 1px dummy button
+                            : Vector2.Lerp(Vector2.One, _tangentHandleSize,
+                                           Math.Clamp((handleScreenLength - MinClickableHandleLength)
+                                                      / (FullClickableHandleLength - MinClickableHandleLength), 0f, 1f));
+
+        ImGui.SetCursorScreenPos(handleCenter - clickSize * 0.5f);
+        ImGui.InvisibleButton(buttonId, clickSize);
         var isHovered = ImGui.IsItemHovered();
-        if (isHovered && !ImGui.IsItemActive())
-            ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeAll);
+        if (isHovered)
+            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
 
         // Capture drag start offset for relative dragging (avoids initial jump)
         if (ImGui.IsItemActivated())
@@ -467,6 +474,8 @@ internal static class CurvePoint
     private static readonly Color _tangentHandleColor = new(0.3f);
     private static readonly Vector2 _tangentHandleSize = new(15, 15);
     private static readonly Vector2 _tangentHandleSizeHalf = _tangentHandleSize * 0.5f;
+    private const float MinClickableHandleLength = 10f;
+    private const float FullClickableHandleLength = 20f;
     private static Vector2 _tangentSize => new(3 * T3Ui.UiScaleFactor);
     private static readonly Vector2 _tangentSizeHalf = _tangentSize * 0.5f;
 

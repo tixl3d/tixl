@@ -11,9 +11,9 @@ using T3.Editor.UiModel.Selection;
 
 namespace T3.Editor.Gui.Interaction.WithCurves;
 
-internal abstract class CurveEditCanvas : ScalableCanvas, ITimeObjectManipulation
+internal abstract class AnimationCanvas : ScalableCanvas, ITimeObjectManipulation
 {
-    protected CurveEditCanvas()
+    protected AnimationCanvas()
     {
         ScrollTarget = new Vector2(-2.5f, 0.0f);
         ScaleTarget = new Vector2(80, -1);
@@ -22,7 +22,7 @@ internal abstract class CurveEditCanvas : ScalableCanvas, ITimeObjectManipulatio
     public string ImGuiTitle = "timeline";
 
         
-    protected void DrawCurveCanvas(Action<InteractionState> drawAdditionalCanvasContent, SelectionFence selectionFence, float height = 0, T3Ui.EditingFlags flags = T3Ui.EditingFlags.None)
+    protected void DrawAnimationCanvas(Action<InteractionState> drawAdditionalCanvasContent, SelectionFence selectionFence, float height = 0, T3Ui.EditingFlags flags = T3Ui.EditingFlags.None)
     {
 
         ImGui.BeginChild(ImGuiTitle, new Vector2(0, height), ImGuiChildFlags.Borders,
@@ -33,7 +33,8 @@ internal abstract class CurveEditCanvas : ScalableCanvas, ITimeObjectManipulatio
         {
             Drawlist = ImGui.GetWindowDrawList();
             UpdateCanvas(out var interactionState, flags);
-            Drawlist = ImGui.GetWindowDrawList();
+            
+            //Drawlist = ImGui.GetWindowDrawList();
 
             if (!T3Ui.IsAnyPopupOpen)
             {
@@ -93,17 +94,14 @@ internal abstract class CurveEditCanvas : ScalableCanvas, ITimeObjectManipulatio
                               - new Vector2(iconSize/2  );
             
             Icons.DrawIconAtScreenPosition(Icon.CurveKeyframe, posOnScreen);
-            //Icons.DrawIconOnLastItem(Icon.Cu);
             var drawlist = ImGui.GetWindowDrawList();
             drawlist.AddText(posOnScreen + Vector2.One*20, UiColors.Gray, $"Insert at\n{hoverTime:0.00}  {sampledValue:0.00}");
         }
 
         ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
     }
-
-    private const float KeyframeIconWidth = 16;
-
-    private void InsertNewKeyframe(Curve curve, float u)
+    
+    private static void InsertNewKeyframe(Curve curve, float u)
     {
         var value = curve.GetSampledValue(u);
 

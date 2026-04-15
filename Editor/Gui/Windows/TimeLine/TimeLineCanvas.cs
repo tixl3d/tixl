@@ -27,7 +27,7 @@ namespace T3.Editor.Gui.Windows.TimeLine;
 /// Combines multiple <see cref="ITimeObjectManipulation"/>s into a single consistent
 /// timeline that allows dragging selected time elements of various types.
 /// </summary>
-internal sealed class TimeLineCanvas : CurveEditCanvas
+internal sealed class TimeLineCanvas : AnimationCanvas
 {
     public TimeLineCanvas(NodeSelection nodeSelection, Func<Instance> getCompositionOp, Func<Guid, bool> requestChildCompositionFunc)
     {
@@ -65,7 +65,7 @@ internal sealed class TimeLineCanvas : CurveEditCanvas
         ScrollToTimeAfterStopped();
 
         var modeChanged = UpdateMode();
-        DrawCurveCanvas(drawAdditionalCanvasContent: DrawCanvasContent, _selectionFence, 0, T3Ui.EditingFlags.AllowHoveredChildWindows);
+        DrawAnimationCanvas(drawAdditionalCanvasContent: DrawCanvasContent, _selectionFence, 0, T3Ui.EditingFlags.AllowHoveredChildWindows);
         Current = null;
 
         T3Ui.UiScaleFactor = keepScale;
@@ -79,7 +79,8 @@ internal sealed class TimeLineCanvas : CurveEditCanvas
                 TimeLineImage.Draw(Drawlist, soundtrack);
             }
 
-            _timeRasterSwitcher.Draw(Playback);
+            
+            _timeRasterSwitcher.Draw(this);
 
             HandleDeferredActions();
 

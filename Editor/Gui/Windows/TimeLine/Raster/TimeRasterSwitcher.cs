@@ -8,9 +8,9 @@ namespace T3.Editor.Gui.Windows.TimeLine.Raster;
 /// A small helper class that switches the drawing of time rasters depending on the
 /// setting in <see cref="Playback"/> 
 /// </summary>
-public sealed class TimeRasterSwitcher:IValueSnapAttractor
+internal sealed class TimeRasterSwitcher:IValueSnapAttractor
 {
-    public void Draw(Playback playback)
+    public void Draw(TimeLineCanvas timelineCanvas)
     {
         var unitsPerSeconds = 1f;
         if(UserSettings.Config.TimeDisplayMode != TimeFormat.TimeDisplayModes.Bars)
@@ -25,11 +25,9 @@ public sealed class TimeRasterSwitcher:IValueSnapAttractor
                     unitsPerSeconds = 60;
                     _standardRaster.EnableSnapping = true;
                     break;
-                default:
-                    break;
             }
         }
-        ActiveRaster?.Draw(playback, unitsPerSeconds);
+        ActiveRaster?.Draw(timelineCanvas, unitsPerSeconds);
     }
     
     void IValueSnapAttractor.CheckForSnap(ref SnapResult snapResult)

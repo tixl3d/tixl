@@ -1,6 +1,7 @@
+#nullable enable
+
 using System.Diagnostics.CodeAnalysis;
 using ImGuiNET;
-using T3.Core.Animation;
 using T3.Editor.Gui.Interaction.Snapping;
 using T3.Editor.Gui.UiHelpers;
 
@@ -10,33 +11,24 @@ namespace T3.Editor.Gui.Windows.TimeLine.Raster;
 /// A <see cref="AbstractTimeRaster"/> that displays Seconds, Minutes, Hours, etc. 
 /// </summary>
 [SuppressMessage("ReSharper", "InconsistentNaming")]
-public sealed class SiTimeRaster : AbstractTimeRaster
+internal sealed class SiTimeRaster : AbstractTimeRaster
 {
-    public override void Draw(Playback playback, float unitsPerSeconds)
+    internal override void Draw(TimeLineCanvas timeLineCanvas, float unitsPerSeconds, float verticalLabelAlign = 1)
     {
-        if (ScaleRanges == null || Math.Abs(UserSettings.Config.TimeRasterDensity - _initializedDensity) > 0.0001f)
-        {
-            ScaleRanges = InitializeTimeScaleDefinitions(UserSettings.Config.TimeRasterDensity * 0.02f);
-            _initializedDensity = UserSettings.Config.TimeRasterDensity;
-        }
-
-        var scale = TimeLineCanvas.Current.Scale.X * playback.Bpm / 120f;
-        var scroll = TimeLineCanvas.Current.Scroll.X / playback.Bpm * 120f;
-
-        DrawTimeTicks(scale, scroll, TimeLineCanvas.Current);
+        var scale = timeLineCanvas.Scale.X * timeLineCanvas.Playback.Bpm / 120f;
+        var scroll = timeLineCanvas.Scroll.X / timeLineCanvas.Playback.Bpm * 120f;
+        DrawTimeTicks(scale, scroll, timeLineCanvas,verticalLabelAlign);
     }
-
-    private const double Epsilon = 0.01f;
 
     private static string Format(double t, double spacing, int modulo)
     {
-        var l = (int)(t / spacing  + 0.0001f) % modulo;
+        var l = (int) (t / spacing + 0.0001f) % modulo;
         if (t < 0)
         {
             l--;
         }
-            
-        return ""+l;
+
+        return "" + l;
     }
 
     protected override string BuildLabel(Raster raster, double beatTime)
@@ -46,16 +38,16 @@ public sealed class SiTimeRaster : AbstractTimeRaster
         foreach (var c in raster.Label)
         {
             output += c switch
-                          {
-                              'Y' => Format(time, everyYear, 9999),
-                              'D' => Format(time, everyDay, 365),
-                              'H' => Format(time, everyHour, 24),
-                              'M' => Format(time, everyMinute, 60),
-                              'S' => Format(time, everySec, 60),
-                              'F' => Format(time, everySec / 60, 60),
-                              'T' => "." + Format(time, every100Ms, 10),
-                              _   => c
-                          };
+            {
+                'Y' => Format(time, everyYear, 9999),
+                'D' => Format(time, everyDay, 365),
+                'H' => Format(time, everyHour, 24),
+                'M' => Format(time, everyMinute, 60),
+                'S' => Format(time, everySec, 60),
+                'F' => Format(time, everySec / 60, 60),
+                'T' => "." + Format(time, every100Ms, 10),
+                _ => c
+            };
         }
 
         return output;
@@ -63,18 +55,16 @@ public sealed class SiTimeRaster : AbstractTimeRaster
 
     public override void CheckForSnap(ref SnapResult snapResult)
     {
-        if(ImGui.GetIO().KeyAlt)
+        if (ImGui.GetIO().KeyAlt)
             base.CheckForSnap(ref snapResult);
     }
-
-        
+    
     private const float BarsToSecs = 0.5f;
-    private float _initializedDensity;
 
     private const float everyYear = 365 * 24 * 60 * 60;
     private const float every10Days = 10 * 24 * 60 * 60;
     private const float everyDay = 24 * 60 * 60;
-    private const float every4Hours = 4* 60 * 60;
+    private const float every4Hours = 4 * 60 * 60;
     private const float everyHour = 60 * 60;
     private const float every5Minute = 5 * 60;
     private const float everyMinute = 1 * 60;
@@ -82,167 +72,98 @@ public sealed class SiTimeRaster : AbstractTimeRaster
     private const float everySec = 1;
     private const float every100Ms = 1 / 10f;
     private const float every10Ms = 1 / 100f;
-        
-    private static List<ScaleRange> InitializeTimeScaleDefinitions(float density)
+
+    
+    
+    protected override void InitScaleRanges(float density)
     {
-        density *= 2f;
+        density *= 2f * 0.02f * 0.75f;
+        const bool FadeLabels = true;
+        const bool FadeLines = true;
 
-        var scales = new List<ScaleRange>
-                         {
-                             new()
-                                 {
-                                     ScaleMax = 0.0002 / density,
-                                     Rasters = new List<Raster>
-                                                   {
-                                                       new() { Label = "Hh", Spacing = everyHour * BarsToSecs, FadeLabels = false, FadeLines = false },
-                                                       new() { Label = "Mm", Spacing = everyMinute * BarsToSecs, FadeLabels = false, FadeLines = false },
-                                                       new() { Label = "Ss", Spacing = everySec * BarsToSecs, FadeLabels = false, FadeLines = false },
-                                                       new() { Label = "T", Spacing = every100Ms * BarsToSecs, FadeLabels = false, FadeLines = false },
-                                                       new() { Label = "", Spacing = every10Ms * BarsToSecs, FadeLabels = true, FadeLines = true },
-                                                   }
-                                 },
+        ScaleRanges =
+        [
+            new ScaleRange(0, 0.0002 / density, [
+                new Raster("Hh", everyHour * BarsToSecs),
+                new Raster("Mm", everyMinute * BarsToSecs),
+                new Raster("Ss", everySec * BarsToSecs),
+                new Raster("T", every100Ms * BarsToSecs),
+                new Raster("", every10Ms * BarsToSecs, FadeLabels, FadeLines)
+            ]),
 
-                             new()
-                                 {
-                                     ScaleMax = 0.0010 / density,
-                                     Rasters = new List<Raster>
-                                                   {
-                                                       new() { Label = "Hh", Spacing = everyHour * BarsToSecs, FadeLabels = false, FadeLines = false },
-                                                       new() { Label = "Mm", Spacing = everyMinute * BarsToSecs, FadeLabels = false, FadeLines = false },
-                                                       new() { Label = "Ss", Spacing = everySec * BarsToSecs, FadeLabels = false, FadeLines = false },
-                                                       new() { Label = "T", Spacing = every100Ms * BarsToSecs, FadeLabels = true, FadeLines = false },
-                                                   }
-                                 },
-                             new()
-                                 {
-                                     ScaleMax = 0.005 / density,
-                                     Rasters = new List<Raster>
-                                                   {
-                                                       new() { Label = "Hh", Spacing = everyHour * BarsToSecs, FadeLabels = false, FadeLines = false },
-                                                       new() { Label = "Mm", Spacing = everyMinute * BarsToSecs, FadeLabels = false, FadeLines = false },
-                                                       new() { Label = "Ss", Spacing = everySec * BarsToSecs, FadeLabels = false, FadeLines = false },
-                                                       new() { Label = "", Spacing = every100Ms * BarsToSecs, FadeLabels = true, FadeLines = true },
-                                                   }
-                                 },
-                             new()
-                                 {
-                                     ScaleMax = 0.01 / density,
-                                     Rasters = new List<Raster>
-                                                   {
-                                                       new() { Label = "Hh", Spacing = everyHour * BarsToSecs, FadeLabels = false, FadeLines = false },
-                                                       new() { Label = "Mm", Spacing = everyMinute * BarsToSecs, FadeLabels = false, FadeLines = false },
-                                                       new() { Label = "Ss", Spacing = every15Sec * BarsToSecs, FadeLabels = false, FadeLines = false },
-                                                       new() { Label = "Ss", Spacing = everySec * BarsToSecs, FadeLabels = true, FadeLines = false },
-                                                   }
-                                 },
-                             new()
-                                 {
-                                     ScaleMax = 0.03 / density,
-                                     Rasters = new List<Raster>
-                                                   {
-                                                       new() { Label = "Hh", Spacing = everyHour * BarsToSecs, FadeLabels = false, FadeLines = false },
-                                                       new() { Label = "Mm", Spacing = everyMinute * BarsToSecs, FadeLabels = false, FadeLines = false },
-                                                       new() { Label = "Ss", Spacing = every15Sec * BarsToSecs, FadeLabels = false, FadeLines = false },
-                                                       new() { Label = "", Spacing = everySec * BarsToSecs, FadeLabels = true, FadeLines = false },
-                                                   }
-                                 },
-                             new()
-                                 {
-                                     ScaleMax = 0.1 / density,
-                                     Rasters = new List<Raster>
-                                                   {
-                                                       new() { Label = "Hh", Spacing = everyHour * BarsToSecs, FadeLabels = false, FadeLines = false },
-                                                       new() { Label = "Mm", Spacing = everyMinute * BarsToSecs, FadeLabels = false, FadeLines = false },
-                                                       new() { Label = "Ss", Spacing = every15Sec * BarsToSecs, FadeLabels = true, FadeLines = false },
-                                                       new() { Label = "", Spacing = everySec * BarsToSecs, FadeLabels = true, FadeLines = true }
-                                                   }
-                                 },
-                             new()
-                                 {
-                                     ScaleMax = 0.5 / density,
-                                     Rasters = new List<Raster>
-                                                   {
-                                                       new() { Label = "Hh", Spacing = everyHour * BarsToSecs, FadeLabels = false, FadeLines = false },
-                                                       new() { Label = "Mm", Spacing = everyMinute * BarsToSecs, FadeLabels = false, FadeLines = false },
-                                                       new() { Label = "", Spacing = every15Sec * BarsToSecs, FadeLabels = true, FadeLines = true },
-                                                   }
-                                 },
-                             new()
-                                 {
-                                     ScaleMax = 1 / density,
-                                     Rasters = new List<Raster>
-                                                   {
-                                                       new() { Label = "Hh", Spacing = everyHour * BarsToSecs, FadeLabels = false, FadeLines = false },
-                                                       new() { Label = "Mm", Spacing = every5Minute * BarsToSecs, FadeLabels = false, FadeLines = true },
-                                                       new() { Label = "Mm", Spacing = everyMinute * BarsToSecs, FadeLabels = true, FadeLines = false },
-                                                   }
-                                 },
-                             new()
-                                 {
-                                     ScaleMax = 5 / density,
-                                     Rasters = new List<Raster>
-                                                   {
-                                                       new() { Label = "Hh", Spacing = everyHour * BarsToSecs, FadeLabels = false, FadeLines = false },
-                                                       new() { Label = "Mm", Spacing = every5Minute * BarsToSecs, FadeLabels = true, FadeLines = false },
-                                                       new() { Label = "", Spacing = everyMinute * BarsToSecs, FadeLabels = true, FadeLines = true },
-                                                   }
-                                 }, 
-                             new()
-                                 {
-                                     ScaleMax = 20 / density,
-                                     Rasters = new List<Raster>
-                                                   {
-                                                       new() { Label = "Hh", Spacing = every4Hours * BarsToSecs, FadeLabels = false, FadeLines = false },
-                                                       new() { Label = "Hh", Spacing = everyHour * BarsToSecs, FadeLabels = true, FadeLines = false },
-                                                   }
-                                 },
-                                 
-                             new()
-                                 {
-                                     ScaleMax = 100 / density,
-                                     Rasters = new List<Raster>
-                                                   {
-                                                       new() { Label = "Dd", Spacing = everyDay * BarsToSecs, FadeLabels = false, FadeLines = false },
-                                                       new() { Label = "Hh", Spacing = every4Hours * BarsToSecs, FadeLabels = true, FadeLines = true },
-                                                   }
-                                 },
+            new ScaleRange(0.0002 / density, 0.0010 / density, [
+                new Raster("Hh", everyHour * BarsToSecs),
+                new Raster("Mm", everyMinute * BarsToSecs),
+                new Raster("Ss", everySec * BarsToSecs),
+                new Raster("T", every100Ms * BarsToSecs, FadeLabels)
+            ]),
+            new ScaleRange(0.0010 / density, 0.005 / density, [
+                new Raster("Hh", everyHour * BarsToSecs),
+                new Raster("Mm", everyMinute * BarsToSecs),
+                new Raster("Ss", everySec * BarsToSecs),
+                new Raster("", every100Ms * BarsToSecs, FadeLabels, FadeLines)
+            ]),
+            new ScaleRange(0.005 / density, 0.01 / density, [
+                new Raster("Hh", everyHour * BarsToSecs),
+                new Raster("Mm", everyMinute * BarsToSecs),
+                new Raster("Ss", every15Sec * BarsToSecs),
+                new Raster("Ss", everySec * BarsToSecs, FadeLabels)
+            ]),
+            new ScaleRange(0.01 / density, 0.03 / density, [
+                new Raster("Hh", everyHour * BarsToSecs),
+                new Raster("Mm", everyMinute * BarsToSecs),
+                new Raster("Ss", every15Sec * BarsToSecs),
+                new Raster("", everySec * BarsToSecs, FadeLabels)
+            ]),
+            new ScaleRange(0.03 / density, 0.1 / density, [
+                new Raster("Hh", everyHour * BarsToSecs),
+                new Raster("Mm", everyMinute * BarsToSecs),
+                new Raster("Ss", every15Sec * BarsToSecs, FadeLabels),
+                new Raster("", everySec * BarsToSecs, FadeLabels, FadeLines)
+            ]),
+            new ScaleRange(0.1 / density, 0.5 / density, [
+                new Raster("Hh", everyHour * BarsToSecs),
+                new Raster("Mm", everyMinute * BarsToSecs),
+                new Raster("", every15Sec * BarsToSecs, FadeLabels, FadeLines)
+            ]),
+            new ScaleRange(0.5 / density, 1 / density, [
+                new Raster("Hh", everyHour * BarsToSecs),
+                new Raster("Mm", every5Minute * BarsToSecs, FadeLabels, FadeLines),
+                new Raster("Mm", everyMinute * BarsToSecs, FadeLabels)
+            ]),
+            new ScaleRange(1 / density, 5 / density, [
+                new Raster("Hh", everyHour * BarsToSecs),
+                new Raster("Mm", every5Minute * BarsToSecs, FadeLabels),
+                new Raster("", everyMinute * BarsToSecs, FadeLabels, FadeLines)
+            ]),
+            new ScaleRange(5 / density, 20 / density, [
+                new Raster("Hh", every4Hours * BarsToSecs),
+                new Raster("Hh", everyHour * BarsToSecs, FadeLabels)
+            ]),
 
-                             new()
-                                 {
-                                     ScaleMax = 500 / density,
-                                     Rasters = new List<Raster>
-                                                   {
-                                                       new() { Label = "Dd", Spacing = every10Days * BarsToSecs, FadeLabels = false, FadeLines = false },
-                                                       new() { Label = "Dd", Spacing = everyDay * BarsToSecs, FadeLabels = true, FadeLines = false },
-                                                   }
-                                 },
+            new ScaleRange(20 / density, 100 / density, [
+                new Raster("Dd", everyDay * BarsToSecs),
+                new Raster("Hh", every4Hours * BarsToSecs, FadeLabels, FadeLines)
+            ]),
 
-                             new()
-                                 {
-                                     ScaleMax = 750 / density,
-                                     Rasters = new List<Raster>
-                                                   {
-                                                       new() { Label = "Dd", Spacing = every10Days * BarsToSecs, FadeLabels = false, FadeLines = false },
-                                                       new() { Label = "", Spacing = everyDay * BarsToSecs, FadeLabels = false, FadeLines = true },
-                                                   }
-                                 },
-                             new()
-                                 {
-                                     ScaleMax = 9999 / density,
-                                     Rasters = new List<Raster>
-                                                   {
-                                                       new() { Label = "Dd", Spacing = every10Days * BarsToSecs, FadeLabels = false, FadeLines = false },
-                                                   }
-                                 },
-                         };
+            new ScaleRange(100 / density, 500 / density, [
+                new Raster("Dd", every10Days * BarsToSecs),
+                new Raster("Dd", everyDay * BarsToSecs, FadeLabels)
+            ]),
 
-        var minScale = 0.0;
-        foreach (var s in scales)
-        {
-            s.ScaleMin = minScale;
-            minScale = s.ScaleMax;
-        }
-
-        return scales;
+            new ScaleRange(500 / density, 750 / density, [
+                new Raster("Dd", every10Days * BarsToSecs),
+                new Raster("", everyDay * BarsToSecs, FadeLabels, FadeLines)
+            ]),
+            new ScaleRange(750 / density, 2000 / density, [
+                new Raster("Dd", every10Days * BarsToSecs)
+            ]),
+            new ScaleRange(2000 / density, 40000 / density, [
+                new Raster("Dd", every10Days * BarsToSecs, true)
+            ]),
+            new ScaleRange(2000 / density, 400000 / density, [
+                new Raster("Dd", every10Days *10 * BarsToSecs )
+            ])
+        ];
     }
 }

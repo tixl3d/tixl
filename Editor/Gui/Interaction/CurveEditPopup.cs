@@ -77,7 +77,7 @@ public static class CurveEditPopup
     }
     
     
-    private static readonly CurveInputEditing.CurveInteraction.SingleCurveEditCanvas _singleCurveCanvas = new() { ImGuiTitle = "canvasPopup"};
+    private static readonly CurveInputEditing.CurveInteraction.SingleAnimationCanvas _singleCurveCanvas = new() { ImGuiTitle = "canvasPopup"};
     private const string CurvePopupId= "##CurvePopup";
     private static readonly Bitmap _bmp = new(1, 1);
 }

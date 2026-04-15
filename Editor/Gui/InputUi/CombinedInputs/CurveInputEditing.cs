@@ -82,7 +82,7 @@ internal static class CurveInputEditing
     internal sealed class CurveInteraction : CurveEditing
     {
         internal List<Curve> Curves = new();
-        private readonly SingleCurveEditCanvas _singleCurveCanvas = new() { ImGuiTitle = "canvas" + _interactionForCurve.Count };
+        private readonly SingleAnimationCanvas _singleCurveCanvas = new() { ImGuiTitle = "canvas" + _interactionForCurve.Count };
 
         //public ScalableCanvas Canvas => _canvas;
 
@@ -270,9 +270,9 @@ internal static class CurveInputEditing
         /// <summary>
         /// Implement canvas for showing and manipulating curve
         /// </summary>
-        internal sealed class SingleCurveEditCanvas : CurveEditCanvas
+        internal sealed class SingleAnimationCanvas : AnimationCanvas
         {
-            public SingleCurveEditCanvas()
+            public SingleAnimationCanvas()
             {
                 SnapHandlerForU.AddSnapAttractor(_standardRaster);
                 SnapHandlerForV.AddSnapAttractor(_horizontalRaster);
@@ -299,7 +299,7 @@ internal static class CurveInputEditing
                 }
 
                 var graphCanvas = ProjectView.Focused?.GraphView;
-                DrawCurveCanvas(DrawCanvasContent, selectionFence, height, _interactionFlags);
+                DrawAnimationCanvas(DrawCanvasContent, selectionFence, height, _interactionFlags);
                 return;
 
                 void DrawCanvasContent(InteractionState interactionState)
