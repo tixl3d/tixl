@@ -61,6 +61,12 @@ internal sealed class TimeLineCanvas : AnimationCanvas
     /// </summary>
     internal IValueSnapAttractor[] SelectionDragSnapExclusions => _selectionDragSnapExclusions;
 
+    /// <summary>
+    /// Invoked when the keyframe selection is explicitly replaced (not merely added to / removed from).
+    /// Lets the SRI drop its TimeWarp handles since they were configured for the previous selection.
+    /// </summary>
+    internal void OnKeyframeSelectionReplaced() => _selectionRangeIndicator.ClearTimeWarpHandles();
+
     public NodeSelection NodeSelection => _nodeSelection;
 
     private int RulerHeight => (int)(25 * T3Ui.UiScaleFactor);

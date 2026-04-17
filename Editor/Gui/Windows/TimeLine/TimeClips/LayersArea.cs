@@ -589,6 +589,9 @@ internal sealed class LayersArea : ITimeObjectManipulation, IValueSnapAttractor
     public bool HasSelectedClips => _context.ClipSelection.Count > 0;
     public bool HasAnyClips => _context.ClipSelection.CompositionTimeClips.Count > 0;
 
+    /// <summary>Enumerate currently selected TimeClips.</summary>
+    public IEnumerable<TimeClip> EnumerateSelectedClips() => _context.ClipSelection.GetSelectedClips();
+
     /// <summary>Select every TimeClip of the current composition.</summary>
     public void SelectAllClips()
     {

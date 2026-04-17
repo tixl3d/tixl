@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using ImGuiNET;
 using T3.Core.Animation;
+using T3.Core.DataTypes;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
 using T3.Core.Utils;
@@ -282,10 +283,44 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
 
     public int SelectionChangeCounter => SelectedKeyframes.ChangeCounter;
 
+    public int SelectedKeyframeCount => SelectedKeyframes.Count;
+
+    /// <summary>Enumerate the currently selected keyframes (for read-only iteration).</summary>
+    public IEnumerable<VDefinition> EnumerateSelectedKeyframes() => SelectedKeyframes;
+
+    /// <summary>Enumerate every visible keyframe across the timeline's animation parameters.</summary>
+    public IEnumerable<VDefinition> EnumerateAllKeyframes() => GetAllKeyframes();
+
+    /// <summary>The curves owning the currently selected keyframes (dedup'd).</summary>
+    public void CopyCurvesOfSelectedKeyframesTo(List<Curve> buffer)
+    {
+        buffer.Clear();
+        foreach (var curve in GetAllCurves())
+        {
+            foreach (var def in curve.GetVDefinitions())
+            {
+                if (SelectedKeyframes.Contains(def))
+                {
+                    buffer.Add(curve);
+                    break;
+                }
+            }
+        }
+    }
+
+    /// <summary>All curves owned by the timeline's animation parameters.</summary>
+    public void CopyAllCurvesTo(List<Curve> buffer)
+    {
+        buffer.Clear();
+        foreach (var curve in GetAllCurves())
+            buffer.Add(curve);
+    }
+
     public void ReplaceKeyframeSelection(IEnumerable<VDefinition> keys)
     {
         SelectedKeyframes.Clear();
         SelectedKeyframes.UnionWith(keys);
+        TimeLineCanvas.Current?.OnKeyframeSelectionReplaced();
     }
 
     public void AddToKeyframeSelection(IReadOnlyList<VDefinition> keys)
