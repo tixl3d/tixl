@@ -20,7 +20,7 @@ namespace T3.Editor.Gui.Interaction.WithCurves;
 /// <remarks>This provides basic curve editing functionality outside a timeline context, e.g. for CurveParameters</remarks>
 internal abstract class CurveEditing
 {
-    protected readonly HashSet<VDefinition> SelectedKeyframes = [];
+    protected readonly VersionedKeyframeSet SelectedKeyframes = new();
     protected abstract IEnumerable<Curve> GetAllCurves();
     protected abstract IEnumerable<KeyframeCopyAndPasting.CurveWithDetails> GetAllCurvesWithDetails();
     protected abstract void ViewAllOrSelectedKeys(bool alsoChangeTimeRange = false);

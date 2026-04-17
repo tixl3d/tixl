@@ -278,6 +278,24 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
 
     public readonly HashSet<int> PinnedParametersHashes = new();
 
+    public bool IsKeyframeSelected(VDefinition v) => SelectedKeyframes.Contains(v);
+
+    public int SelectionChangeCounter => SelectedKeyframes.ChangeCounter;
+
+    public void ReplaceKeyframeSelection(IEnumerable<VDefinition> keys)
+    {
+        SelectedKeyframes.Clear();
+        SelectedKeyframes.UnionWith(keys);
+    }
+
+    /// <summary>Shifts the given keyframes in time and rebuilds curve tables. Caller is responsible for undo-wrapping.</summary>
+    public void ApplyKeyframeTimeOffset(IReadOnlyList<VDefinition> keys, double deltaU)
+    {
+        for (var i = 0; i < keys.Count; i++)
+            keys[i].U += deltaU;
+        RebuildCurveTables();
+    }
+
     private bool HandleCreateNewKeyframes(TimeLineCanvas.AnimationParameter parameter, ImRect layerArea)
     {
         Debug.Assert(TimeLineCanvas.Current != null);

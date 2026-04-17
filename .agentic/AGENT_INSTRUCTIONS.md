@@ -76,9 +76,44 @@ Rules for any bulk-edit script:
    in this repo, but matching nearby files is preferred.
 
 ## UI Implementation Guidelines
-- Use `UiColor`/`UiColors` utilities instead of hard-coded float color vectors
-- Use fonts sparingly; default to `Normal` and `Small`
-- Prefer `CustomComponents` and `FormInputs` helpers for ImGui layout/input tasks before adding custom widget code
+
+TiXL's editor is Dear ImGui plus custom widgets, rendered every frame at the output refresh rate. The same performance rules apply as elsewhere (no allocations in the hot path), with extra guidelines below. The style reference for non-trivial UI is `Editor/Gui/MagGraph/Ui/MagGraphCanvas.DrawNode.cs` — when in doubt, mimic the patterns there. The Legacy Graph code is **not** a reference and can be ignored.
+
+### Before you write UI code
+- Ask clarifying questions about behavior and visuals first. UI iterations are expensive; a quick round-trip on the design beats guessing.
+- Check for an existing helper in `CustomComponents` and `FormInputs` before writing a new widget.
+- Check `Icons` for a baked-in glyph before drawing your own — atlas icons render in a single draw call.
+
+### Theming & colors
+- Never construct `new Color(...)` in draw code. Always use `UiColors.*` (or `ColorVariations.*.Apply(typeColor)` for type-derived colors) so themes work.
+- For alpha/shading, use `color.Fade(alpha)` (1 = fully opaque). Never mutate `.A` directly.
+- For state-based blending (e.g. active vs idle), use `Color.Mix(a, b, t)`.
+
+### Scaling
+- Apply `T3Ui.UiScaleFactor` to every layout constant (sizes, paddings, offsets). Pixel literals break on high-DPI displays.
+- On the MagGraph canvas or any zoomable surface, combine factors in this order: `value / T3Ui.UiScaleFactor * CanvasScale` — UI-scale first, then canvas zoom.
+- Threshold-cull expensive detail at low zoom. MagGraph skips labels below `CanvasScale 0.25f`, thumbnails below `0.2f`, etc.
+
+### Fonts
+- Only use values from the `Fonts` enum (`FontNormal`, `FontSmall`, `FontBold`, `FontLarge`). Target mix: Normal ~70 %, Small ~20 %, Bold ~5 %, Large <2 %.
+- If you change `Fonts.*.Scale` for a local effect, reset it to `1` before returning from the draw method — the scale leaks into sibling draws otherwise.
+
+### Draw lists, z-order, hit-testing
+- Prefer a single draw list. Z-order is controlled by call sequence, not ImGui channels.
+- Only split the draw list (channels) when overlapping elements need independent z-order *and* the top one must receive clicks. Merge immediately after — extra channels cost draw calls.
+- For overlapping clickable elements, emit the topmost `InvisibleButton` last so it wins the hit test. If that is not feasible, split channels.
+- Avoid excessive `PushClipRect` — each clip region adds draw calls. Clip only when drawn content would genuinely overflow.
+
+### Performance in draw methods
+- No allocations in per-frame draw code (see "Realtime Performance Constraints" above). No LINQ, no closures, no `params` arrays.
+- Reuse static buffers for repeated small geometry (`static Vector2[] _points = new Vector2[5]`).
+- Pass hot data by `ref` (anchor points, line rows) rather than by value.
+- Keep tooltips inside `if (isHovered) { ... }` blocks so `BeginTooltip` isn't called every frame for invisible widgets.
+- Drive pulsing/blinking from a single global time source (e.g. a shared `Blink` sine wave) rather than per-element timers.
+
+### Undo/redo
+- Any mutation to symbol/animation/graph data must go through a command (`UndoRedoStack.AddAndExecute(...)`). Direct mutations break undo and often break save state too.
+- For drag interactions: construct the command on drag start, update its target values during the drag, push to the undo stack on drag complete — not on every mouse-move.
 
 ## Review and Quality Expectations
 - Point out obvious problems, misleading code, incorrect implementations, and typos

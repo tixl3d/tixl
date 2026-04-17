@@ -1,6 +1,7 @@
 ﻿using T3.Core.Animation;
 using T3.Core.DataTypes;
 using T3.Core.Operator;
+using T3.Editor.Gui.Interaction.WithCurves;
 using T3.Editor.Gui.Windows.TimeLine;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Animation;
@@ -53,7 +54,7 @@ internal class AnimationOperations
         UndoRedoStack.AddAndExecute(new MacroCommand("Delete keyframes", commands));
     }
 
-    public static void DeleteSelectedKeyframesFromAnimationParameters(HashSet<VDefinition> selectedKeyframes,
+    public static void DeleteSelectedKeyframesFromAnimationParameters(VersionedKeyframeSet selectedKeyframes,
                                                                       IEnumerable<TimeLineCanvas.AnimationParameter> animationParameters,
                                                                       Instance compositionOp)
     {

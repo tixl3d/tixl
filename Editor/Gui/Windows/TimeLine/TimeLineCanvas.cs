@@ -36,6 +36,8 @@ internal sealed class TimeLineCanvas : AnimationCanvas
         DopeSheetArea = new DopeSheetArea(SnapHandlerForU, this);
         _timelineCurveEditArea = new TimelineCurveEditArea(this, SnapHandlerForU, SnapHandlerForV);
         _timeSelectionRange = new TimeSelectionRange(this, SnapHandlerForU);
+        _selectionRangeIndicator = new SelectionRangeIndicator(this, SnapHandlerForU);
+        _timeSelectionArea = new TimeSelectionArea(this);
         LayersArea = new LayersArea(this, getCompositionOp, requestChildCompositionFunc, SnapHandlerForU);
 
         SnapHandlerForV.AddSnapAttractor(_horizontalRaster);
@@ -44,6 +46,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
         SnapHandlerForU.AddSnapAttractor(_timeRasterSwitcher);
         SnapHandlerForU.AddSnapAttractor(_currentTimeMarker);
         SnapHandlerForU.AddSnapAttractor(LayersArea);
+        SnapHandlerForU.AddSnapAttractor(_selectionRangeIndicator);
 
         FoldingHeight = new TimelineHeight(this);
         Playback = null!;
@@ -52,7 +55,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
     public NodeSelection NodeSelection => _nodeSelection;
 
     private int RulerHeight => (int)(25 * T3Ui.UiScaleFactor);
-    private int SummaryHeight => (int)(9 * T3Ui.UiScaleFactor);
+    private int SummaryHeight => (int)(11 * T3Ui.UiScaleFactor);
     
     public void Draw(Instance compositionOp, Playback playback)
     {
@@ -83,25 +86,22 @@ internal sealed class TimeLineCanvas : AnimationCanvas
             }
             
             _timeRasterSwitcher.Draw(this);
-            
+
             // Ruler
             {
-                //ImGui.PushStyleColor(ImGuiCol.ChildBg, UiColors.BackgroundPopup.fa.Rgba);
                 ImGui.BeginChild("##ruler", new Vector2(0,RulerHeight));
                 DrawDragTimeArea(interactionState.MouseState.Position.X);
+                _selectionRangeIndicator.Draw(compositionOp, ImGui.GetWindowDrawList());
                 ImGui.EndChild();
-                //ImGui.PopStyleColor();
             }
 
-            
+
             var drawList = ImGui.GetWindowDrawList();
-            // Summary Range
+            // Selection Area (summary strip below ruler)
             {
                 ImGui.PushStyleColor(ImGuiCol.ChildBg, UiColors.GridLines.Fade(0.15f).Rgba);
-                ImGui.BeginChild("##summary", new Vector2(0,SummaryHeight));
-                var p = ImGui.GetCursorScreenPos();
-                drawList.AddRectFilled(p, p+new Vector2(ImGui.GetWindowWidth(),1), UiColors.GridLines.Fade(0.8f));
-                
+                ImGui.BeginChild("##selectionArea", new Vector2(0,SummaryHeight));
+                _timeSelectionArea.Draw(compositionOp, _selectedAnimationParameters, DopeSheetArea, ImGui.GetWindowDrawList());
                 ImGui.EndChild();
                 ImGui.PopStyleColor();
             }
@@ -604,6 +604,8 @@ internal sealed class TimeLineCanvas : AnimationCanvas
 
     private readonly CurrentTimeMarker _currentTimeMarker = new();
     private readonly TimeSelectionRange _timeSelectionRange;
+    private readonly SelectionRangeIndicator _selectionRangeIndicator;
+    private readonly TimeSelectionArea _timeSelectionArea;
     private readonly NodeSelection _nodeSelection;
 
     private double _lastPlaybackSpeed;

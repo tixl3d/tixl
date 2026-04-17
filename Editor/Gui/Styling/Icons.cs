@@ -151,8 +151,9 @@ internal static class Icons
             new(Icon.DopeSheetKeyframeHorizontal, 9, new Vector2(9, 25)),
             new(Icon.DopeSheetKeyframeHorizontalSelected, 10, new Vector2(9, 25)),
 
-            new(Icon.FirstKeyframe, 11, new Vector2(15, 25)),
-            new(Icon.LastKeyframe, 12, new Vector2(15, 25)),
+            new(Icon.KeyIndicator, new Vector2(11 * 15, 0), new Vector2(7, 7)),
+            new(Icon.KeyIndicatorSelected, new Vector2(11 * 15 + 8, 0), new Vector2(7, 7)),
+            new(Icon.KeyIndicatorSelectedPartially, new Vector2(11 * 15, 8), new Vector2(7, 7)),
 
             new(Icon.CurveKeyframe, new Vector2(13 * 15, 0), new Vector2(15, 15)),
             new(Icon.CurveKeyframeSelected, new Vector2(13 * 15, 15), new Vector2(15, 15)),
@@ -288,6 +289,8 @@ internal static class Icons
             new(Icon.Cross, slotIndex: 139),
             new(Icon.BackUp, slotIndex: 140),
             new(Icon.Sleeping, slotIndex: 141),
+            
+            
         };
 
     public static readonly string IconAtlasPath = Path.Combine(SharedResources.EditorResourcesDirectory, @"images/t3-icons.png");
@@ -319,6 +322,9 @@ public enum Icon
     ConnectedInput,
     Stripe4PxPattern,
     CurveKeyframe,
+    KeyIndicator,
+    KeyIndicatorSelected,
+    KeyIndicatorSelectedPartially,
     CurveKeyframeSelected,
     CurrentTimeMarkerHandle,
     FollowTime,

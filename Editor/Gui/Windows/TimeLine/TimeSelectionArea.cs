@@ -1,0 +1,375 @@
+#nullable enable
+using ImGuiNET;
+using T3.Core.Animation;
+using T3.Core.DataTypes;
+using T3.Core.DataTypes.Vector;
+using T3.Core.Operator;
+using T3.Editor.Gui.Styling;
+using T3.Editor.UiModel.Commands;
+using T3.Editor.UiModel.Commands.Animation;
+
+namespace T3.Editor.Gui.Windows.TimeLine;
+
+/// <summary>
+/// Thin strip below the timeline ruler that shows a baked icon for every keyframe
+/// (or cluster of keyframes within sub-pixel distance) across the visible parameters.
+///
+/// Click: replace the keyframe selection with the clicked cluster's keys.
+/// Drag:  move the cluster's keys through time without touching the selection.
+///        The broader "move whole selection" interaction lives in <see cref="SelectionRangeIndicator"/>.
+///
+/// To make the drag survive bucket merges/splits (e.g. dragging a cluster past another),
+/// hover + press is detected via a single strip-wide InvisibleButton with a stable ID
+/// rather than per-bucket buttons. ImGui's active-item tracking therefore stays valid
+/// for the full duration of the drag, regardless of how clustering changes underneath.
+///
+/// The bucket layout itself is cached and only rebuilt when the view (scale/scroll), the
+/// animation parameters, curve contents, or the keyframe selection change.
+/// </summary>
+internal sealed class TimeSelectionArea
+{
+    public TimeSelectionArea(TimeLineCanvas canvas)
+    {
+        _canvas = canvas;
+    }
+
+    public void Draw(
+        Instance composition,
+        List<TimeLineCanvas.AnimationParameter> animationParameters,
+        DopeSheetArea dopeSheetArea,
+        ImDrawListPtr drawList)
+    {
+        var windowPos = ImGui.GetWindowPos();
+        var windowSize = ImGui.GetWindowSize();
+        var scaleX = _canvas.Scale.X;
+        var scrollX = _canvas.Scroll.X;
+
+        var hash = ComputeStateHash(animationParameters, dopeSheetArea, scaleX, scrollX, windowPos, windowSize);
+        if (hash != _cachedStateHash)
+        {
+            RebuildBuckets(animationParameters, dopeSheetArea, windowPos, windowSize);
+            _cachedStateHash = hash;
+        }
+
+        var scale = T3Ui.UiScaleFactor;
+        var iconSize = 7f * scale;
+        var iconY = windowPos.Y + (windowSize.Y - iconSize) * 0.5f;
+
+        // A single strip-wide InvisibleButton claims the mouse interaction for the whole SA.
+        // Stable ID means ImGui's active-item tracking persists across bucket rebuilds, so a
+        // drag that crosses another cluster's position doesn't get cancelled.
+        ImGui.SetCursorScreenPos(windowPos);
+        ImGui.InvisibleButton("##saStrip", windowSize);
+
+        var isItemHovered = ImGui.IsItemHovered();
+        var isItemActive = ImGui.IsItemActive();
+        var isItemActivated = ImGui.IsItemActivated();
+        var isItemDeactivated = ImGui.IsItemDeactivated();
+
+        // Locate bucket under mouse (for hover + press bucket identification).
+        var hoveredIndex = -1;
+        if ((isItemHovered || isItemActive) && _cachedBuckets.Count > 0)
+        {
+            var mouseX = ImGui.GetMousePos().X;
+            var hitThreshold = iconSize * 0.5f + 1 * scale;
+            var bestDist = float.MaxValue;
+            for (var i = 0; i < _cachedBuckets.Count; i++)
+            {
+                var d = MathF.Abs(_cachedBuckets[i].CenterX - mouseX);
+                if (d < hitThreshold && d < bestDist)
+                {
+                    bestDist = d;
+                    hoveredIndex = i;
+                }
+            }
+        }
+
+        if (isItemHovered || isItemActive)
+            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+
+        if (isItemActivated && hoveredIndex >= 0)
+        {
+            _pressedBucketStableId = _cachedBuckets[hoveredIndex].StableId;
+            _isPressed = true;
+        }
+
+        if (_isPressed && isItemActive && !_isDragging
+            && ImGui.IsMouseDragging(ImGuiMouseButton.Left, 2f * scale))
+        {
+            var pressedIndex = FindBucketByStableId(_pressedBucketStableId);
+            if (pressedIndex >= 0)
+            {
+                CaptureDragSet(pressedIndex);
+                _dragCommand = new ChangeKeyframesCommand(_draggingKeys, _draggingCurves);
+                // The anchor key (first in _draggingKeys) tracks with the mouse using this fixed grab offset.
+                // Snapping targets the anchor's would-be U, matching the dope sheet's behavior.
+                var mouseU = _canvas.InverseTransformX(ImGui.GetMousePos().X);
+                _dragGrabOffset = mouseU - _draggingKeys[0].U;
+                _isDragging = true;
+            }
+        }
+
+        if (_isDragging && isItemActive && _draggingKeys.Count > 0)
+        {
+            FrameStats.Current.OpenedPopupCapturedMouse = true;
+
+            var mouseU = _canvas.InverseTransformX(ImGui.GetMousePos().X);
+            var desiredAnchorU = mouseU - _dragGrabOffset;
+            if (!ImGui.GetIO().KeyShift
+                && _canvas.SnapHandlerForU.TryCheckForSnapping(desiredAnchorU, out var snappedValue, _canvas.Scale.X))
+            {
+                desiredAnchorU = (float)snappedValue;
+            }
+
+            var du = desiredAnchorU - _draggingKeys[0].U;
+            if (du != 0)
+                dopeSheetArea.ApplyKeyframeTimeOffset(_draggingKeys, du);
+        }
+
+        if (isItemDeactivated)
+        {
+            if (_isDragging && _dragCommand != null)
+            {
+                _dragCommand.StoreCurrentValues();
+                UndoRedoStack.AddAndExecute(_dragCommand);
+                _dragCommand = null;
+                _isDragging = false;
+            }
+            else if (_isPressed)
+            {
+                // Click without drag: replace the keyframe selection with this bucket's keys.
+                var pressedIndex = FindBucketByStableId(_pressedBucketStableId);
+                if (pressedIndex >= 0)
+                {
+                    _tempBucketKeys.Clear();
+                    var b = _cachedBuckets[pressedIndex];
+                    for (var i = 0; i < b.KeyCount; i++)
+                        _tempBucketKeys.Add(_rawKeys[b.FirstKeyIndex + i].Def);
+                    dopeSheetArea.ReplaceKeyframeSelection(_tempBucketKeys);
+                }
+            }
+
+            _isPressed = false;
+            _draggingKeys.Clear();
+            _draggingCurves.Clear();
+        }
+
+        // Icon render
+        if (_cachedBuckets.Count == 0)
+            return;
+
+        var highlightedIndex = _isDragging
+                                   ? FindBucketByStableId(_pressedBucketStableId)
+                                   : hoveredIndex;
+
+        var defaultColor = UiColors.ForegroundFull.Fade(0.7f);
+        var hoverColor = UiColors.ForegroundFull;
+
+        for (var i = 0; i < _cachedBuckets.Count; i++)
+        {
+            var b = _cachedBuckets[i];
+            var icon = b.Selected == 0
+                           ? Icon.KeyIndicator
+                           : b.Selected < b.Total
+                               ? Icon.KeyIndicatorSelectedPartially
+                               : Icon.KeyIndicatorSelected;
+
+            var pos = new Vector2(MathF.Floor(b.CenterX - iconSize * 0.5f) +1, MathF.Floor(iconY));
+            var color = i == highlightedIndex ? hoverColor : defaultColor;
+            Icons.DrawIconAtScreenPosition(icon, pos, drawList, color);
+        }
+    }
+
+    private int FindBucketByStableId(int stableId)
+    {
+        for (var i = 0; i < _cachedBuckets.Count; i++)
+            if (_cachedBuckets[i].StableId == stableId)
+                return i;
+
+        // The original "first key" may now live inside a merged bucket — search raw keys instead.
+        for (var i = 0; i < _rawKeys.Count; i++)
+        {
+            if (_rawKeys[i].Def.UniqueId != stableId)
+                continue;
+            for (var b = 0; b < _cachedBuckets.Count; b++)
+            {
+                var bucket = _cachedBuckets[b];
+                if (i >= bucket.FirstKeyIndex && i < bucket.FirstKeyIndex + bucket.KeyCount)
+                    return b;
+            }
+        }
+        return -1;
+    }
+
+    private void CaptureDragSet(int bucketIndex)
+    {
+        _draggingKeys.Clear();
+        _draggingCurves.Clear();
+        var bucket = _cachedBuckets[bucketIndex];
+        for (var i = 0; i < bucket.KeyCount; i++)
+        {
+            var rk = _rawKeys[bucket.FirstKeyIndex + i];
+            _draggingKeys.Add(rk.Def);
+            var already = false;
+            for (var c = 0; c < _draggingCurves.Count; c++)
+            {
+                if (_draggingCurves[c] == rk.Curve) { already = true; break; }
+            }
+            if (!already)
+                _draggingCurves.Add(rk.Curve);
+        }
+    }
+
+    private int ComputeStateHash(
+        List<TimeLineCanvas.AnimationParameter> parameters,
+        DopeSheetArea dope,
+        float scaleX,
+        float scrollX,
+        Vector2 windowPos,
+        Vector2 windowSize)
+    {
+        var hash = 17;
+        hash = hash * 31 + scaleX.GetHashCode();
+        hash = hash * 31 + scrollX.GetHashCode();
+        hash = hash * 31 + windowPos.X.GetHashCode();
+        hash = hash * 31 + windowSize.X.GetHashCode();
+        hash = hash * 31 + parameters.Count;
+        for (var pi = 0; pi < parameters.Count; pi++)
+        {
+            var p = parameters[pi];
+            hash = hash * 31 + p.Hash;
+            for (var ci = 0; ci < p.Curves.Length; ci++)
+                hash = hash * 31 + p.Curves[ci].ChangeCount;
+        }
+        hash = hash * 31 + dope.SelectionChangeCounter;
+        return hash;
+    }
+
+    private void RebuildBuckets(
+        List<TimeLineCanvas.AnimationParameter> animationParameters,
+        DopeSheetArea dopeSheetArea,
+        Vector2 windowPos,
+        Vector2 windowSize)
+    {
+        _cachedBuckets.Clear();
+        _rawKeys.Clear();
+
+        var minScreenX = windowPos.X;
+        var maxScreenX = windowPos.X + windowSize.X;
+        var cullPad = 8 * T3Ui.UiScaleFactor;
+
+        for (var pi = 0; pi < animationParameters.Count; pi++)
+        {
+            var param = animationParameters[pi];
+            for (var ci = 0; ci < param.Curves.Length; ci++)
+            {
+                var curve = param.Curves[ci];
+                var defs = curve.GetVDefinitions();
+                for (var ki = 0; ki < defs.Count; ki++)
+                {
+                    var def = defs[ki];
+                    var x = _canvas.TransformX((float)def.U);
+                    if (x < minScreenX - cullPad || x > maxScreenX + cullPad)
+                        continue;
+
+                    _rawKeys.Add(new RawKey
+                                     {
+                                         ScreenX = x,
+                                         IsSelected = dopeSheetArea.IsKeyframeSelected(def),
+                                         Def = def,
+                                         Curve = curve,
+                                     });
+                }
+            }
+        }
+
+        if (_rawKeys.Count == 0)
+            return;
+
+        _rawKeys.Sort(_compareByX);
+
+        var mergeThreshold = 2f * T3Ui.UiScaleFactor;
+
+        var runStartIndex = 0;
+        var runStartX = _rawKeys[0].ScreenX;
+        var runEndX = runStartX;
+        var runTotal = 0;
+        var runSelected = 0;
+
+        for (var i = 0; i < _rawKeys.Count; i++)
+        {
+            var k = _rawKeys[i];
+            var wouldExtend = k.ScreenX - runStartX <= mergeThreshold;
+
+            if (i == 0 || wouldExtend)
+            {
+                if (i == 0)
+                {
+                    runStartIndex = 0;
+                    runStartX = k.ScreenX;
+                }
+                runEndX = k.ScreenX;
+                runTotal++;
+                if (k.IsSelected) runSelected++;
+                continue;
+            }
+
+            EmitBucket(runStartIndex, runStartX, runEndX, runTotal, runSelected);
+
+            runStartIndex = i;
+            runStartX = k.ScreenX;
+            runEndX = k.ScreenX;
+            runTotal = 1;
+            runSelected = k.IsSelected ? 1 : 0;
+        }
+
+        EmitBucket(runStartIndex, runStartX, runEndX, runTotal, runSelected);
+    }
+
+    private void EmitBucket(int firstIndex, float startX, float endX, int total, int selected)
+    {
+        _cachedBuckets.Add(new Bucket
+                               {
+                                   CenterX = (startX + endX) * 0.5f,
+                                   Total = total,
+                                   Selected = selected,
+                                   FirstKeyIndex = firstIndex,
+                                   KeyCount = total,
+                                   StableId = _rawKeys[firstIndex].Def.UniqueId,
+                               });
+    }
+
+    private struct RawKey
+    {
+        public float ScreenX;
+        public bool IsSelected;
+        public VDefinition Def;
+        public Curve Curve;
+    }
+
+    private struct Bucket
+    {
+        public float CenterX;
+        public int Total;
+        public int Selected;
+        public int FirstKeyIndex;
+        public int KeyCount;
+        public int StableId;
+    }
+
+    private static readonly Comparison<RawKey> _compareByX =
+        static (a, b) => a.ScreenX.CompareTo(b.ScreenX);
+
+    private readonly List<RawKey> _rawKeys = new(256);
+    private readonly List<Bucket> _cachedBuckets = new(256);
+    private readonly List<VDefinition> _tempBucketKeys = new(32);
+    private readonly List<VDefinition> _draggingKeys = new(32);
+    private readonly List<Curve> _draggingCurves = new(8);
+    private int _cachedStateHash;
+    private bool _isPressed;
+    private bool _isDragging;
+    private int _pressedBucketStableId;
+    private double _dragGrabOffset;
+    private ChangeKeyframesCommand? _dragCommand;
+    private readonly TimeLineCanvas _canvas;
+}
