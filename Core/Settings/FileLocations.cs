@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 
 namespace T3.Core.Settings;
 
@@ -44,15 +45,19 @@ public static string TestReferencesFolder => Path.Combine(".tixl", TestsSubFolde
     
     
     public static readonly string SettingsDirectory =
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), 
-                     AppSubFolder
-                     
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                 $"{AppSubFolder}{GetAssemblyVersion()}"
+
                      // Skip process name to avoid double nesting of TiXL
                      // This will lump together logs from player
-                     
+
                      //, Process.GetCurrentProcess().ProcessName
                      );
-    
+    private static string GetAssemblyVersion()
+    {
+        var version = Assembly.GetExecutingAssembly().GetName().Version;
+        return $"{version.Major}.{version.Minor}.{version.Build}.{version.Revision}";
+    }
     public static readonly string DefaultProjectFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), AppSubFolder);
     public const string LegacyResourcesSubfolder = "Resources";
     public const string AssetsSubfolder = "Assets";
