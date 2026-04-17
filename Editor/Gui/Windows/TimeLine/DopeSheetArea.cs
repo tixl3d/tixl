@@ -288,6 +288,22 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
         SelectedKeyframes.UnionWith(keys);
     }
 
+    /// <summary>U-range spanning every keyframe across all currently visible animation parameters.</summary>
+    public TimeRange GetAllKeyframesTimeRange()
+    {
+        var range = TimeRange.Undefined;
+        foreach (var v in GetAllKeyframes())
+            range.Unite((float)v.U);
+        return range;
+    }
+
+    /// <summary>Replace the keyframe selection with every keyframe of the currently visible animation parameters.</summary>
+    public void SelectAllKeyframes()
+    {
+        SelectedKeyframes.Clear();
+        SelectedKeyframes.UnionWith(GetAllKeyframes());
+    }
+
     /// <summary>Shifts the given keyframes in time and rebuilds curve tables. Caller is responsible for undo-wrapping.</summary>
     public void ApplyKeyframeTimeOffset(IReadOnlyList<VDefinition> keys, double deltaU)
     {
@@ -701,8 +717,8 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
 
         if (!ImGui.GetIO().KeyShift)
         {
-            //var ignored= new List<IValueSnapAttractor>() { vDef };
-            if (_snapHandler.TryCheckForSnapping(newDragTime, out var snappedValue, TimeLineCanvas.Current.Scale.X))
+            if (_snapHandler.TryCheckForSnapping(newDragTime, out var snappedValue, TimeLineCanvas.Current.Scale.X,
+                                                 TimeLineCanvas.Current.SelectionDragSnapExclusions))
             {
                 newDragTime = (float)snappedValue;
             }

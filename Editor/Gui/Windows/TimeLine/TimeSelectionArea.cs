@@ -116,7 +116,8 @@ internal sealed class TimeSelectionArea
             var mouseU = _canvas.InverseTransformX(ImGui.GetMousePos().X);
             var desiredAnchorU = mouseU - _dragGrabOffset;
             if (!ImGui.GetIO().KeyShift
-                && _canvas.SnapHandlerForU.TryCheckForSnapping(desiredAnchorU, out var snappedValue, _canvas.Scale.X))
+                && _canvas.SnapHandlerForU.TryCheckForSnapping(desiredAnchorU, out var snappedValue, _canvas.Scale.X,
+                                                               _canvas.SelectionDragSnapExclusions))
             {
                 desiredAnchorU = (float)snappedValue;
             }

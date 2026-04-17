@@ -350,7 +350,8 @@ internal sealed class TimelineCurveEditArea : AnimationParameterEditing, ITimeOb
         double u = allowHorizontal ? newDragPosition.X : vDef.U;
         if (allowHorizontal)
         {
-            if (enableSnapping && _snapHandlerU.TryCheckForSnapping(u, out var snappedValue, TimeLineCanvas.Scale.X))
+            if (enableSnapping && _snapHandlerU.TryCheckForSnapping(u, out var snappedValue, TimeLineCanvas.Scale.X,
+                                                                    TimeLineCanvas.SelectionDragSnapExclusions))
             {
                 u = snappedValue;
             }

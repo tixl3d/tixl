@@ -9,6 +9,7 @@ using T3.Core.Operator.Slots;
 using T3.Core.Utils;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Keyboard;
+using T3.Editor.Gui.Interaction.Snapping;
 using T3.Editor.Gui.Interaction.Timing;
 using T3.Editor.Gui.Interaction.WithCurves;
 using T3.Editor.Gui.Styling;
@@ -47,10 +48,18 @@ internal sealed class TimeLineCanvas : AnimationCanvas
         SnapHandlerForU.AddSnapAttractor(_currentTimeMarker);
         SnapHandlerForU.AddSnapAttractor(LayersArea);
         SnapHandlerForU.AddSnapAttractor(_selectionRangeIndicator);
+        _selectionDragSnapExclusions = [_selectionRangeIndicator];
 
         FoldingHeight = new TimelineHeight(this);
         Playback = null!;
     }
+
+    /// <summary>
+    /// Snap-attractors to skip while dragging selected keyframes or keyset-indicator clusters.
+    /// The <see cref="SelectionRangeIndicator"/> anchors at the first/last selected-keyframe U,
+    /// so snapping to it during such a drag forms a feedback loop that stutters the boundary keys.
+    /// </summary>
+    internal IValueSnapAttractor[] SelectionDragSnapExclusions => _selectionDragSnapExclusions;
 
     public NodeSelection NodeSelection => _nodeSelection;
 
@@ -284,6 +293,8 @@ internal sealed class TimeLineCanvas : AnimationCanvas
         //var screenPos = ImGui.GetCursorScreenPos();
         //ImGui.GetWindowDrawList().AddRectFilled(screenPos, screenPos + new Vector2(clampedSize.X, clampedSize.Y), UiColors.BackgroundFull.Fade(0.1f));
 
+        // Allow the SelectionRangeIndicator (emitted later in the same ruler child) to steal hover/press in its overlapping area.
+        ImGui.SetNextItemAllowOverlap();
         ImGui.InvisibleButton("##TimeDrag", clampedSize);
 
         if (ImGui.IsItemHovered())
@@ -606,6 +617,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
     private readonly TimeSelectionRange _timeSelectionRange;
     private readonly SelectionRangeIndicator _selectionRangeIndicator;
     private readonly TimeSelectionArea _timeSelectionArea;
+    private readonly IValueSnapAttractor[] _selectionDragSnapExclusions;
     private readonly NodeSelection _nodeSelection;
 
     private double _lastPlaybackSpeed;

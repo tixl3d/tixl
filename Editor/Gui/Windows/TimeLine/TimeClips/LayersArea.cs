@@ -574,6 +574,30 @@ internal sealed class LayersArea : ITimeObjectManipulation, IValueSnapAttractor
         return timeRange;
     }
 
+    /// <summary>U-range spanning every TimeClip of the current composition.</summary>
+    public TimeRange GetAllClipsTimeRange()
+    {
+        var timeRange = TimeRange.Undefined;
+        foreach (var clip in _context.ClipSelection.CompositionTimeClips.Values)
+        {
+            timeRange.Unite(clip.TimeRange.Start);
+            timeRange.Unite(clip.TimeRange.End);
+        }
+        return timeRange;
+    }
+
+    public bool HasSelectedClips => _context.ClipSelection.Count > 0;
+    public bool HasAnyClips => _context.ClipSelection.CompositionTimeClips.Count > 0;
+
+    /// <summary>Select every TimeClip of the current composition.</summary>
+    public void SelectAllClips()
+    {
+        foreach (var clip in _context.ClipSelection.CompositionTimeClips.Values)
+        {
+            _context.ClipSelection.AddSelection(clip);
+        }
+    }
+
     void ITimeObjectManipulation.CompleteDragCommand()
     {
         if (_moveClipsCommand == null)

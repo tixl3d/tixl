@@ -11,6 +11,8 @@ namespace T3.Editor.Gui.Windows.TimeLine;
 /// Thin horizontal indicator drawn inside the timeline ruler showing the time range
 /// of currently selected keyframes / clips. Start and end handles stretch the selection;
 /// the middle section translates it.
+/// When nothing is selected, it falls back to the extent of all visible keyframes so the
+/// user can stretch/translate everything without pre-selecting.
 /// </summary>
 internal sealed class SelectionRangeIndicator : IValueSnapAttractor
 {
@@ -23,7 +25,33 @@ internal sealed class SelectionRangeIndicator : IValueSnapAttractor
 
     public void Draw(Instance composition, ImDrawListPtr drawList)
     {
-        _range = _canvas.GetSelectionTimeRange();
+        // Per-kind fallback: for keyframes and for clips independently, use the selection if it covers
+        // a positive range, otherwise fall back to the full extent of that kind. The SRI spans their
+        // union so that, e.g., selecting only clips still shows all keyframes beyond the clip extent.
+        var dopeSheet = _canvas.DopeSheetArea;
+        var layers = _canvas.LayersArea;
+
+        var keyframeRange = dopeSheet.GetSelectionTimeRange();
+        _autoSelectKeyframesOnDrag = !keyframeRange.IsValid || keyframeRange.Duration <= 0;
+        if (_autoSelectKeyframesOnDrag)
+            keyframeRange = dopeSheet.GetAllKeyframesTimeRange();
+
+        var clipRange = layers.GetSelectionTimeRange();
+        _autoSelectClipsOnDrag = (!clipRange.IsValid || clipRange.Duration <= 0) && layers.HasAnyClips;
+        if (_autoSelectClipsOnDrag)
+            clipRange = layers.GetAllClipsTimeRange();
+
+        _range = TimeRange.Undefined;
+        if (keyframeRange.IsValid)
+        {
+            _range.Unite(keyframeRange.Start);
+            _range.Unite(keyframeRange.End);
+        }
+        if (clipRange.IsValid)
+        {
+            _range.Unite(clipRange.Start);
+            _range.Unite(clipRange.End);
+        }
         if (!_range.IsValid || _range.Duration <= 0)
             return;
 
@@ -38,55 +66,67 @@ internal sealed class SelectionRangeIndicator : IValueSnapAttractor
         var leftClamped = MathF.Max(xStart, rulerPos.X);
         var rightClamped = MathF.Min(xEnd, rulerPos.X + rulerSize.X);
 
-        if (rightClamped > leftClamped)
-        {
-            drawList.AddRectFilled(new Vector2(leftClamped, lineY),
-                                   new Vector2(rightClamped, lineY + 1),
-                                   UiColors.ForegroundFull.Fade(0.6f));
-        }
-
         var handleSize = new Vector2(5 * scale, 5 * scale);
-        DrawHandle(drawList, new Vector2(xStart, lineY + 0.5f), handleSize);
-        DrawHandle(drawList, new Vector2(xEnd, lineY + 0.5f), handleSize);
-
         var compositionSymbolId = composition.Symbol.Id;
         var hitY = lineY - 2 * scale;
         var hitHeight = 8 * scale;
 
         // Emit the middle hit-target first so the edge handles (emitted after) win the hit test on overlap.
+        var middleHovered = false;
+        var middleActive = false;
         if (rightClamped - leftClamped > handleSize.X * 2)
         {
             var middleStart = xStart + handleSize.X;
             var middleEnd = xEnd - handleSize.X;
             ImGui.SetCursorScreenPos(new Vector2(middleStart, hitY));
             ImGui.InvisibleButton("##SriMiddle", new Vector2(middleEnd - middleStart, hitHeight));
-            if (ImGui.IsItemHovered())
-                ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeEW);
+            middleHovered = ImGui.IsItemHovered();
+            middleActive = ImGui.IsItemActive();
+            if (middleHovered)
+                ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
             HandleMiddleDrag(compositionSymbolId);
         }
 
         // Start handle
         ImGui.SetCursorScreenPos(new Vector2(xStart - handleSize.X, hitY));
         ImGui.InvisibleButton("##SriStart", new Vector2(handleSize.X * 2, hitHeight));
-        if (ImGui.IsItemHovered())
-            ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeEW);
+        var startHovered = ImGui.IsItemHovered();
+        var startActive = ImGui.IsItemActive();
+        if (startHovered)
+            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
         HandleEdgeDrag(compositionSymbolId, _range.Start, _range.End);
 
         // End handle
         ImGui.SetCursorScreenPos(new Vector2(xEnd - handleSize.X, hitY));
         ImGui.InvisibleButton("##SriEnd", new Vector2(handleSize.X * 2, hitHeight));
-        if (ImGui.IsItemHovered())
-            ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeEW);
+        var endHovered = ImGui.IsItemHovered();
+        var endActive = ImGui.IsItemActive();
+        if (endHovered)
+            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
         HandleEdgeDrag(compositionSymbolId, _range.End, _range.Start);
+
+        var lineOpacity = (middleHovered || middleActive) ? 1.0f : 0.3f;
+        var startOpacity = (startHovered || startActive) ? 1.0f : 0.3f;
+        var endOpacity = (endHovered || endActive) ? 1.0f : 0.3f;
+
+        if (rightClamped > leftClamped)
+        {
+            drawList.AddRectFilled(new Vector2(leftClamped, lineY),
+                                   new Vector2(rightClamped, lineY + 1),
+                                   UiColors.ForegroundFull.Fade(lineOpacity));
+        }
+
+        DrawHandle(drawList, new Vector2(xStart, lineY + 0.5f), handleSize, startOpacity);
+        DrawHandle(drawList, new Vector2(xEnd, lineY + 0.5f), handleSize, endOpacity);
     }
 
-    private static void DrawHandle(ImDrawListPtr drawList, Vector2 center, Vector2 size)
+    private static void DrawHandle(ImDrawListPtr drawList, Vector2 center, Vector2 size, float opacity)
     {
         var hx = size.X * 0.5f;
         var hy = size.Y * 0.5f;
         drawList.AddRectFilled(new Vector2(center.X - hx, center.Y - hy),
                                new Vector2(center.X + hx, center.Y + hy),
-                               UiColors.ForegroundFull.Fade(0.9f));
+                               UiColors.ForegroundFull.Fade(opacity));
     }
 
     private void HandleEdgeDrag(in Guid compositionSymbolId, double originalU, double origin)
@@ -98,6 +138,10 @@ internal sealed class SelectionRangeIndicator : IValueSnapAttractor
 
             if (!_isDragging)
             {
+                if (_autoSelectKeyframesOnDrag)
+                    _canvas.DopeSheetArea.SelectAllKeyframes();
+                if (_autoSelectClipsOnDrag)
+                    _canvas.LayersArea.SelectAllClips();
                 _canvas.StartDragCommand(compositionSymbolId);
                 _lastDragU = originalU;
                 _isDragging = true;
@@ -133,6 +177,10 @@ internal sealed class SelectionRangeIndicator : IValueSnapAttractor
 
             if (!_isDragging)
             {
+                if (_autoSelectKeyframesOnDrag)
+                    _canvas.DopeSheetArea.SelectAllKeyframes();
+                if (_autoSelectClipsOnDrag)
+                    _canvas.LayersArea.SelectAllClips();
                 _canvas.StartDragCommand(compositionSymbolId);
                 _lastDragU = u;
                 _isDragging = true;
@@ -162,6 +210,8 @@ internal sealed class SelectionRangeIndicator : IValueSnapAttractor
     }
 
     private bool _isDragging;
+    private bool _autoSelectKeyframesOnDrag;
+    private bool _autoSelectClipsOnDrag;
     private double _lastDragU;
     private TimeRange _range;
 
