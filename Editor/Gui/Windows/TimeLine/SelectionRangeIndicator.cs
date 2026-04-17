@@ -400,46 +400,30 @@ internal sealed class SelectionRangeIndicator : IValueSnapAttractor
 
             if (_currentDragMode == DragMode.None)
             {
-                if (_handles.Count > 0)
-                {
-                    // Custom path: snapshot handles into the undo macro alongside keys/clips.
-                    if (_autoSelectKeyframesOnDrag)
-                        _canvas.DopeSheetArea.SelectAllKeyframes();
-                    _warpDrag.Begin(_lastComposition!, origHandleU: u,
-                                    prevBoundary: 0, nextBoundary: 0,
-                                    singleSegment: false,
-                                    segmentLeftU: 0, segmentRightU: 0,
-                                    pureTranslation: true,
-                                    trackHandlePositions: true,
-                                    useAllKeyframes: _autoSelectKeyframesOnDrag);
-                    _currentDragMode = DragMode.MiddleCustom;
-                    _lastDragU = u;
-                    return;
-                }
-
-                if (_autoSelectKeyframesOnDrag)
-                    _canvas.DopeSheetArea.SelectAllKeyframes();
-                _canvas.StartDragCommand(compositionSymbolId);
-                _lastDragU = u;
-                _currentDragMode = DragMode.Middle;
+                StartMiddleDrag(compositionSymbolId, u);
                 return;
             }
+
+            if (_currentDragMode != DragMode.Middle && _currentDragMode != DragMode.MiddleCustom)
+                return;
+
+            // Snap the SRI's start or end to nearby anchors — whichever gets a stronger snap wins.
+            var rawDu = u - _middleOrigPressU;
+            var correctedDu = SnapMiddleTranslation(rawDu);
 
             if (_currentDragMode == DragMode.MiddleCustom)
             {
-                _warpDrag.Update(u);
+                _warpDrag.Update(_middleOrigPressU + correctedDu);
+                _middleLastAppliedDu = correctedDu;
                 _lastDragU = u;
                 return;
             }
 
-            if (_currentDragMode != DragMode.Middle)
+            var frameDu = correctedDu - _middleLastAppliedDu;
+            if (frameDu == 0)
                 return;
-
-            var du = u - _lastDragU;
-            if (du == 0)
-                return;
-
-            _canvas.UpdateDragCommand(du, 0);
+            _canvas.UpdateDragCommand(frameDu, 0);
+            _middleLastAppliedDu = correctedDu;
             _lastDragU = u;
         }
         else if (ImGui.IsItemDeactivated())
@@ -455,6 +439,69 @@ internal sealed class SelectionRangeIndicator : IValueSnapAttractor
                 _currentDragMode = DragMode.None;
             }
         }
+    }
+
+    private void StartMiddleDrag(in Guid compositionSymbolId, double pressU)
+    {
+        if (_autoSelectKeyframesOnDrag)
+            _canvas.DopeSheetArea.SelectAllKeyframes();
+
+        _middleOrigPressU = pressU;
+        _middleOrigStart = _range.Start;
+        _middleOrigEnd = _range.End;
+        _middleLastAppliedDu = 0;
+
+        if (_handles.Count > 0)
+        {
+            _warpDrag.Begin(_lastComposition!, origHandleU: pressU,
+                            prevBoundary: 0, nextBoundary: 0,
+                            singleSegment: false,
+                            segmentLeftU: 0, segmentRightU: 0,
+                            pureTranslation: true,
+                            trackHandlePositions: true,
+                            useAllKeyframes: _autoSelectKeyframesOnDrag);
+            _currentDragMode = DragMode.MiddleCustom;
+        }
+        else
+        {
+            _canvas.StartDragCommand(compositionSymbolId);
+            _currentDragMode = DragMode.Middle;
+        }
+        _lastDragU = pressU;
+    }
+
+    /// <summary>
+    /// Adjust the requested translation so that the SRI's start or end snaps to a nearby anchor.
+    /// Whichever edge has the stronger snap (smaller delta) wins; Shift bypasses snapping.
+    /// </summary>
+    private double SnapMiddleTranslation(double rawDu)
+    {
+        if (ImGui.GetIO().KeyShift)
+            return rawDu;
+
+        var candidateStart = _middleOrigStart + rawDu;
+        var candidateEnd = _middleOrigEnd + rawDu;
+
+        var bestDelta = 0.0;
+        var hasSnap = false;
+
+        if (_snapHandler.TryCheckForSnapping(candidateStart, out var snappedStart, _canvas.Scale.X, _snapExclusions))
+        {
+            bestDelta = snappedStart - candidateStart;
+            hasSnap = true;
+        }
+
+        if (_snapHandler.TryCheckForSnapping(candidateEnd, out var snappedEnd, _canvas.Scale.X, _snapExclusions))
+        {
+            var d = snappedEnd - candidateEnd;
+            if (!hasSnap || Math.Abs(d) < Math.Abs(bestDelta))
+            {
+                bestDelta = d;
+                hasSnap = true;
+            }
+        }
+
+        return hasSnap ? rawDu + bestDelta : rawDu;
     }
 
     private void HandleWarpHandleDrag(Instance composition, int handleIdx)
@@ -561,4 +608,10 @@ internal sealed class SelectionRangeIndicator : IValueSnapAttractor
     private int _pendingRemoveHandleIndex = -1;
     private double _pendingAltInsertU;
     private bool _pendingAltInsertActive;
+
+    // Middle-drag snap state (captured once at drag-start).
+    private double _middleOrigPressU;
+    private double _middleOrigStart;
+    private double _middleOrigEnd;
+    private double _middleLastAppliedDu;
 }
