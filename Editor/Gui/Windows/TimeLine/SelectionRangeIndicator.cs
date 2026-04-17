@@ -25,9 +25,9 @@ internal sealed class SelectionRangeIndicator : IValueSnapAttractor
 
     public void Draw(Instance composition, ImDrawListPtr drawList)
     {
-        // Per-kind fallback: for keyframes and for clips independently, use the selection if it covers
-        // a positive range, otherwise fall back to the full extent of that kind. The SRI spans their
-        // union so that, e.g., selecting only clips still shows all keyframes beyond the clip extent.
+        // Keyframes: selection if it covers a positive range, else fall back to all keyframes so the
+        // user can grab the SRI to move/stretch everything without pre-selecting.
+        // Clips: only selected clips contribute — never all clips.
         var dopeSheet = _canvas.DopeSheetArea;
         var layers = _canvas.LayersArea;
 
@@ -37,9 +37,6 @@ internal sealed class SelectionRangeIndicator : IValueSnapAttractor
             keyframeRange = dopeSheet.GetAllKeyframesTimeRange();
 
         var clipRange = layers.GetSelectionTimeRange();
-        _autoSelectClipsOnDrag = (!clipRange.IsValid || clipRange.Duration <= 0) && layers.HasAnyClips;
-        if (_autoSelectClipsOnDrag)
-            clipRange = layers.GetAllClipsTimeRange();
 
         _range = TimeRange.Undefined;
         if (keyframeRange.IsValid)
@@ -105,9 +102,9 @@ internal sealed class SelectionRangeIndicator : IValueSnapAttractor
             ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
         HandleEdgeDrag(compositionSymbolId, _range.End, _range.Start);
 
-        var lineOpacity = (middleHovered || middleActive) ? 1.0f : 0.3f;
-        var startOpacity = (startHovered || startActive) ? 1.0f : 0.3f;
-        var endOpacity = (endHovered || endActive) ? 1.0f : 0.3f;
+        var lineOpacity = (middleHovered || middleActive) ? 1.0f : (_autoSelectKeyframesOnDrag ? 0.3f : 0.75f);
+        var startOpacity = (startHovered || startActive) ? 1.0f : (_autoSelectKeyframesOnDrag ? 0.3f : 0.75f);
+        var endOpacity = (endHovered || endActive) ? 1.0f : (_autoSelectKeyframesOnDrag ? 0.3f : 0.75f);
 
         if (rightClamped > leftClamped)
         {
@@ -140,8 +137,6 @@ internal sealed class SelectionRangeIndicator : IValueSnapAttractor
             {
                 if (_autoSelectKeyframesOnDrag)
                     _canvas.DopeSheetArea.SelectAllKeyframes();
-                if (_autoSelectClipsOnDrag)
-                    _canvas.LayersArea.SelectAllClips();
                 _canvas.StartDragCommand(compositionSymbolId);
                 _lastDragU = originalU;
                 _isDragging = true;
@@ -179,8 +174,6 @@ internal sealed class SelectionRangeIndicator : IValueSnapAttractor
             {
                 if (_autoSelectKeyframesOnDrag)
                     _canvas.DopeSheetArea.SelectAllKeyframes();
-                if (_autoSelectClipsOnDrag)
-                    _canvas.LayersArea.SelectAllClips();
                 _canvas.StartDragCommand(compositionSymbolId);
                 _lastDragU = u;
                 _isDragging = true;
@@ -211,7 +204,6 @@ internal sealed class SelectionRangeIndicator : IValueSnapAttractor
 
     private bool _isDragging;
     private bool _autoSelectKeyframesOnDrag;
-    private bool _autoSelectClipsOnDrag;
     private double _lastDragU;
     private TimeRange _range;
 

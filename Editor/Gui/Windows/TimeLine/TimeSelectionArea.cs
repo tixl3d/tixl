@@ -3,10 +3,12 @@ using ImGuiNET;
 using T3.Core.Animation;
 using T3.Core.DataTypes;
 using T3.Core.DataTypes.Vector;
+using T3.Editor.Gui.UiHelpers;
 using T3.Core.Operator;
 using T3.Editor.Gui.Styling;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Animation;
+using T3.Editor.UiModel.Selection;
 
 namespace T3.Editor.Gui.Windows.TimeLine;
 
@@ -87,10 +89,22 @@ internal sealed class TimeSelectionArea
         if (isItemHovered || isItemActive)
             ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
 
-        if (isItemActivated && hoveredIndex >= 0)
+        if (isItemActivated)
         {
-            _pressedBucketStableId = _cachedBuckets[hoveredIndex].StableId;
-            _isPressed = true;
+            if (hoveredIndex >= 0)
+            {
+                _pressedBucketStableId = _cachedBuckets[hoveredIndex].StableId;
+                _isPressed = true;
+            }
+            else
+            {
+                // Pressed on SA background: click = clear selection; drag = fence-select buckets.
+                _isBackgroundPressed = true;
+                _fenceStartScreen = ImGui.GetMousePos();
+                // Snapshot the pre-fence selection so Add/Remove modes are relative to it every frame,
+                // not accumulated across frames as the fence moves.
+                dopeSheetArea.CopyKeyframeSelectionTo(_preFenceSnapshot);
+            }
         }
 
         if (_isPressed && isItemActive && !_isDragging
@@ -107,6 +121,30 @@ internal sealed class TimeSelectionArea
                 _dragGrabOffset = mouseU - _draggingKeys[0].U;
                 _isDragging = true;
             }
+        }
+
+        // Background fence: activate once the user actually drags past the click threshold.
+        if (_isBackgroundPressed && isItemActive && !_isFencing
+            && ImGui.IsMouseDragging(ImGuiMouseButton.Left, 2f * scale))
+        {
+            _isFencing = true;
+        }
+
+        var liveFenceRect = default(ImRect);
+        var liveFenceMode = SelectionFence.SelectModes.Replace;
+        if (_isFencing && isItemActive)
+        {
+            FrameStats.Current.OpenedPopupCapturedMouse = true;
+            liveFenceRect = BuildFenceRect(ImGui.GetMousePos(), windowPos, windowSize);
+            liveFenceMode = GetSelectMode(ImGui.GetIO());
+            drawList.AddRectFilled(liveFenceRect.Min, liveFenceRect.Max, UiColors.Selection.Fade(0.15f));
+            drawList.AddRect(liveFenceRect.Min, liveFenceRect.Max, UiColors.Selection.Fade(0.5f));
+
+            // Apply the fence live (from the pre-fence snapshot) so the DopeSheet keyframes reflect
+            // the selection while dragging — not just after release. Add/Remove modes stay coherent
+            // because we rebase from the snapshot each frame instead of accumulating.
+            dopeSheetArea.ReplaceKeyframeSelection(_preFenceSnapshot);
+            ApplyFenceSelection(liveFenceRect, liveFenceMode, dopeSheetArea);
         }
 
         if (_isDragging && isItemActive && _draggingKeys.Count > 0)
@@ -149,8 +187,25 @@ internal sealed class TimeSelectionArea
                     dopeSheetArea.ReplaceKeyframeSelection(_tempBucketKeys);
                 }
             }
+            else if (_isFencing)
+            {
+                // Re-apply using final mouse position (the live-apply branch is gated on isItemActive
+                // which is false on the deactivation frame, so the committed state could otherwise lag
+                // the user's last motion by one frame).
+                var fenceRect = BuildFenceRect(ImGui.GetMousePos(), windowPos, windowSize);
+                dopeSheetArea.ReplaceKeyframeSelection(_preFenceSnapshot);
+                ApplyFenceSelection(fenceRect, GetSelectMode(ImGui.GetIO()), dopeSheetArea);
+            }
+            else if (_isBackgroundPressed)
+            {
+                // Click on SA background without drag: clear keyframe selection.
+                _tempBucketKeys.Clear();
+                dopeSheetArea.ReplaceKeyframeSelection(_tempBucketKeys);
+            }
 
             _isPressed = false;
+            _isBackgroundPressed = false;
+            _isFencing = false;
             _draggingKeys.Clear();
             _draggingCurves.Clear();
         }
@@ -169,9 +224,24 @@ internal sealed class TimeSelectionArea
         for (var i = 0; i < _cachedBuckets.Count; i++)
         {
             var b = _cachedBuckets[i];
-            var icon = b.Selected == 0
+
+            // While fencing, preview the effective selection so icons update before release.
+            var effectiveSelected = b.Selected;
+            if (_isFencing)
+            {
+                var inside = b.CenterX >= liveFenceRect.Min.X && b.CenterX <= liveFenceRect.Max.X;
+                effectiveSelected = liveFenceMode switch
+                                    {
+                                        SelectionFence.SelectModes.Replace => inside ? b.Total : 0,
+                                        SelectionFence.SelectModes.Add     => inside ? b.Total : b.Selected,
+                                        SelectionFence.SelectModes.Remove  => inside ? 0 : b.Selected,
+                                        _                                  => b.Selected,
+                                    };
+            }
+
+            var icon = effectiveSelected == 0
                            ? Icon.KeyIndicator
-                           : b.Selected < b.Total
+                           : effectiveSelected < b.Total
                                ? Icon.KeyIndicatorSelectedPartially
                                : Icon.KeyIndicatorSelected;
 
@@ -179,6 +249,50 @@ internal sealed class TimeSelectionArea
             var color = i == highlightedIndex ? hoverColor : defaultColor;
             Icons.DrawIconAtScreenPosition(icon, pos, drawList, color);
         }
+    }
+
+    private ImRect BuildFenceRect(Vector2 mousePos, Vector2 windowPos, Vector2 windowSize)
+    {
+        // Selection-area buckets sit on a single row, so the fence visual extends the full strip height.
+        var minX = MathF.Min(_fenceStartScreen.X, mousePos.X);
+        var maxX = MathF.Max(_fenceStartScreen.X, mousePos.X);
+        return new ImRect(new Vector2(minX, windowPos.Y),
+                          new Vector2(maxX, windowPos.Y + windowSize.Y));
+    }
+
+    private void ApplyFenceSelection(ImRect fenceRect, SelectionFence.SelectModes mode, DopeSheetArea dopeSheetArea)
+    {
+        // Buckets are drawn on a single Y-row; fence selection is effectively a 1D X-range test.
+        _tempBucketKeys.Clear();
+        for (var i = 0; i < _cachedBuckets.Count; i++)
+        {
+            var b = _cachedBuckets[i];
+            if (b.CenterX < fenceRect.Min.X || b.CenterX > fenceRect.Max.X)
+                continue;
+
+            for (var k = 0; k < b.KeyCount; k++)
+                _tempBucketKeys.Add(_rawKeys[b.FirstKeyIndex + k].Def);
+        }
+
+        switch (mode)
+        {
+            case SelectionFence.SelectModes.Replace:
+                dopeSheetArea.ReplaceKeyframeSelection(_tempBucketKeys);
+                break;
+            case SelectionFence.SelectModes.Add:
+                dopeSheetArea.AddToKeyframeSelection(_tempBucketKeys);
+                break;
+            case SelectionFence.SelectModes.Remove:
+                dopeSheetArea.RemoveFromKeyframeSelection(_tempBucketKeys);
+                break;
+        }
+    }
+
+    private static SelectionFence.SelectModes GetSelectMode(in ImGuiIOPtr io)
+    {
+        if (io.KeyShift) return SelectionFence.SelectModes.Add;
+        if (io.KeyCtrl) return SelectionFence.SelectModes.Remove;
+        return SelectionFence.SelectModes.Replace;
     }
 
     private int FindBucketByStableId(int stableId)
@@ -364,11 +478,15 @@ internal sealed class TimeSelectionArea
     private readonly List<RawKey> _rawKeys = new(256);
     private readonly List<Bucket> _cachedBuckets = new(256);
     private readonly List<VDefinition> _tempBucketKeys = new(32);
+    private readonly List<VDefinition> _preFenceSnapshot = new(64);
     private readonly List<VDefinition> _draggingKeys = new(32);
     private readonly List<Curve> _draggingCurves = new(8);
     private int _cachedStateHash;
     private bool _isPressed;
     private bool _isDragging;
+    private bool _isBackgroundPressed;
+    private bool _isFencing;
+    private Vector2 _fenceStartScreen;
     private int _pressedBucketStableId;
     private double _dragGrabOffset;
     private ChangeKeyframesCommand? _dragCommand;

@@ -288,6 +288,26 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
         SelectedKeyframes.UnionWith(keys);
     }
 
+    public void AddToKeyframeSelection(IReadOnlyList<VDefinition> keys)
+    {
+        for (var i = 0; i < keys.Count; i++)
+            SelectedKeyframes.Add(keys[i]);
+    }
+
+    public void RemoveFromKeyframeSelection(IReadOnlyList<VDefinition> keys)
+    {
+        for (var i = 0; i < keys.Count; i++)
+            SelectedKeyframes.Remove(keys[i]);
+    }
+
+    /// <summary>Copy the current keyframe selection into <paramref name="buffer"/> (cleared first).</summary>
+    public void CopyKeyframeSelectionTo(List<VDefinition> buffer)
+    {
+        buffer.Clear();
+        foreach (var v in SelectedKeyframes)
+            buffer.Add(v);
+    }
+
     /// <summary>U-range spanning every keyframe across all currently visible animation parameters.</summary>
     public TimeRange GetAllKeyframesTimeRange()
     {
