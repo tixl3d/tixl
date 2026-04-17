@@ -58,7 +58,7 @@ public static string TestReferencesFolder => Path.Combine(".tixl", TestsSubFolde
         var version = Assembly.GetExecutingAssembly().GetName().Version;
         return $"{version.Major}.{version.Minor}.{version.Build}.{version.Revision}";
     }
-    public static readonly string DefaultProjectFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), AppSubFolder);
+    public static readonly string DefaultProjectFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), $"{AppSubFolder}{GetAssemblyVersion()}");
     public const string LegacyResourcesSubfolder = "Resources";
     public const string AssetsSubfolder = "Assets";
     public const string EditorResourcesSubfolder = "EditorResources";
