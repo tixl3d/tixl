@@ -47,7 +47,7 @@ The [section README](using/README.md) lists topics that still need pages — gra
 
 ## Operator reference
 
-Every operator in the `Lib.*` namespace has a reference page generated from its in-editor description. See **[operator reference](operators/)** once the exporter is live.
+Every operator in the `Lib.*` namespace has a reference page generated from its in-editor description. See **[operator reference](operators/index.md)** once the exporter is live.
 
 ## [Contributing](contributing/README.md)
 

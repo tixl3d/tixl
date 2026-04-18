@@ -18,14 +18,14 @@ TiXL is built with ImGui and .NET, both of which run on Linux and macOS. The ren
 
 In the meantime:
 
-- On Linux, see [Install on Linux](../setup/InstallLinux.md).
-- On macOS, see [Install on macOS](../setup/InstallMacOS.md).
+- On Linux, see [Install on Linux](../install/InstallLinux.md).
+- On macOS, see [Install on macOS](../install/InstallMacOS.md).
 
 If you have a background in .NET and Vulkan and want to help, get in touch.
 
 ## Is there a standalone version?
 
-Yes. Download the latest release from the [GitHub releases page](https://github.com/tixl3d/tixl/releases/). The installer bundles the required dependencies (including the .NET runtime). See [Installation](../setup/Installation.md).
+Yes. Download the latest release from the [GitHub releases page](https://github.com/tixl3d/tixl/releases/). The installer bundles the required dependencies (including the .NET runtime). See [Installation](../install/Installation.md).
 
 ## How do I update TiXL?
 

@@ -1,0 +1,7 @@
+# Dependencies for building the TiXL docs site with MkDocs Material.
+# Installed on Vercel via: `pip install -r requirements-docs.txt`
+# Local preview:           `mkdocs serve`
+
+mkdocs-material>=9.5
+mkdocs-awesome-pages-plugin>=2.9
+pymdown-extensions>=10.0

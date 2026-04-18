@@ -22,33 +22,48 @@ The line: **if a user making motion graphics or live visuals would want to read 
 
 ## Work plan
 
-### 1. MkDocs + mike publishing
+### 1. MkDocs on Vercel (help.tixl.app)
 
-Pick **MkDocs Material** + the **mike** plugin for versioning.
+**MkDocs Material** built and hosted by **Vercel** on its own subdomain. Single-version for v1; `mike`-style versioning is deferred until there's a concrete need.
 
-Site lives at `https://tixl.app/help/`. The `/help/` prefix is set via `site_url`; mike inserts the version segment after it (`/help/v4.2/…`, `/help/latest/…`, `/help/main-dev/…`).
+Site URL: `https://help.tixl.app/`. No `/help/` path prefix — the subdomain is the prefix.
 
-1. Add `mkdocs.yml` at the repo root:
-   - `docs_dir: .help`
-   - `site_name: TiXL Documentation`
-   - `site_url: https://tixl.app/help/`
-   - `use_directory_urls: true`
-   - Theme: `material`, navigation tabs, light/dark toggle, instant navigation, and **`navigation.footer`** (gives every page auto "Previous / Next" links at the bottom, following the nav order).
-   - **No explicit `nav:` tree** — ordering is driven by `mkdocs-awesome-nav` reading `.nav.yml` files. Root-level order lives in `.help/.nav.yml`; each section folder has its own `.nav.yml` overriding the ordering for that section and declaring its display title.
-   - Plugins: `search`, `mike`, `awesome-nav`.
-   - `extra.version.provider: mike` (exposes the version selector in the header).
-   - `hooks:` points at `scripts/docs/op_autolinks.py` (Section 4c).
-2. Add `requirements-docs.txt`: `mkdocs-material`, `mike`, `mkdocs-awesome-nav`, `pymdown-extensions`.
-3. Add `.github/workflows/docs.yml`:
-   - Triggered on push to `main` and on tags matching `v*`.
-   - On `main` push: `mike deploy --push --update-aliases main-dev` (no alias swap with `latest`).
-   - On stable tag (e.g. `v4.2.0`): `mike deploy --push <major>.<minor> --update-aliases latest`.
-   - On pre-release tag (e.g. `v4.3.0-alpha.1`): `mike deploy --push <major>.<minor> --update-aliases alpha`.
-   - Version selector shows `v4.1`, `v4.2 (latest)`, `v4.3 (alpha)`, `main-dev`.
-4. DNS / CNAME: point `tixl.app` at the `gh-pages` branch, or — if the marketing site already owns `tixl.app` — publish docs at `/help/` via the same Pages deploy or a reverse proxy. Decide early so URLs in generated content (Section 4c's `index.json`) match.
-5. Add a top-of-page "Edit on GitHub" link generated from `repo_url` + page path so contributions route to the repo, not the wiki.
+**Committed (2026-04-18):**
 
-Deliverable: a push to `main` rebuilds `main-dev` on the public site within ~60 s; a release tag promotes a new versioned build and optionally updates `latest`.
+- [`.help/mkdocs.yml`](../../.help/mkdocs.yml) — Material theme, edit-on-GitHub action, `navigation.footer` (auto Previous / Next), `awesome-pages` for ordering via `.pages` files. `docs_dir: .` because the config file lives inside the docs dir itself. The `hooks:` line for the operator auto-linker is commented out until Section 4c's exporter retarget lands.
+- [`.help/requirements-docs.txt`](../../.help/requirements-docs.txt) — `mkdocs-material`, `mkdocs-awesome-pages`, `pymdown-extensions`. No `mike`.
+- `.help/site/` added to the project `.gitignore` (MkDocs build output).
+- **No explicit `nav:` tree** — ordering driven by `.pages` files already in place (root + each of the five sections).
+
+**Still to do:**
+
+1. **Local preview** — verify IA and footer-nav render as expected:
+   ```bash
+   pip install -r .help/requirements-docs.txt
+   mkdocs serve -f .help/mkdocs.yml
+   ```
+2. **New Vercel project** pointing at `github.com/tixl3d/tixl`:
+   - Framework preset: **Other**.
+   - Install command: `pip install -r .help/requirements-docs.txt`
+   - Build command: `mkdocs build -f .help/mkdocs.yml` *(re-add `--strict` once the editorial pass is done; see note below)*
+   - Output directory: `.help/site`
+3. **Domain** — Settings → Domains → add `help.tixl.app`. Vercel auto-creates the DNS entry because the apex `tixl.app` already uses Vercel nameservers (per the project dashboard).
+4. **Smoke test** — `git push`; the site should go live within ~90 s. Confirm `.help/index.md` becomes the landing page and `.pages` ordering took effect.
+
+**Versioning — deferred.** `mike` versions docs on a `gh-pages` branch, which Vercel doesn't speak. When versioning actually matters, options are:
+
+- Move docs to GitHub Pages + `mike` natively, or
+- Hand-roll per-version subdirectories (`/v4.1/`, `/v4.2/`, `/latest/`) via a small build script that commits to a `docs-publish` branch Vercel serves.
+
+Until then, `help.tixl.app` serves current `main`. External links wanting immortality can pin to a git commit via "Edit on GitHub".
+
+**Optional follow-up — unify onto `tixl.app/help/...`.** Add a `vercel.json` rewrite on the Figma (`tixl.app`) project:
+
+```json
+{ "rewrites": [{ "source": "/help/:path*", "destination": "https://help.tixl.app/:path*" }] }
+```
+
+Then update `site_url` in `mkdocs.yml` back to `https://tixl.app/help/` and refresh the auto-linker's `index.json` URL field. Cost to switch later: trivial.
 
 ### 2. Prevent drift on migrated pages (wiki stays otherwise)
 
@@ -62,8 +77,8 @@ Only pages that have moved to `.help/` get retired — developer pages (`dev.*`,
    > Once the docs site is live, this banner will be updated to link to the rendered page.
    ```
    The `TIXL_MOVED_BANNER` HTML-comment marker lets the banner-update script (see below) find and rewrite each banner in place.
-2. **Update banners once the docs site is live.** Rewrite each banner's URL from the GitHub source link (`github.com/tixl3d/tixl/blob/main/.help/...`) to the rendered page (`tixl.app/help/latest/<section>/<page>/`). Reuse the same script that created the banners; the mapping table in Section 5 is the single source of truth. The HTML-comment marker makes this idempotent.
-3. **Wiki sidebar update.** Edit `_Sidebar.md` to split the nav into "User docs (on `tixl.app/help/`)" and "Developer docs (here)", with the user-docs links pointing at the rendered site once it's live.
+2. **Update banners once the docs site is live.** Rewrite each banner's URL from the GitHub source link (`github.com/tixl3d/tixl/blob/main/.help/...`) to the rendered page (`help.tixl.app/<section>/<page>/`). Reuse the same script that created the banners; the mapping table in Section 5 is the single source of truth. The HTML-comment marker makes this idempotent.
+3. **Wiki sidebar update.** Edit `_Sidebar.md` to split the nav into "User docs (on `help.tixl.app`)" and "Developer docs (here)", with the user-docs links pointing at the rendered site once it's live.
 4. **No release-time sync from `.help/` back to the wiki.** The docs site replaces the wiki copy entirely — the banner carries anyone landing on an old URL forward. No second source to keep consistent.
 5. **No wiki lockdown.** Developer pages still need to be editable. Restrict nothing; rely on the banner + sidebar to steer edits.
 
@@ -174,9 +189,9 @@ Existing external links into the wiki's `operators/` folder are believed to be m
 
 #### Target URL shape
 
-Site root: `https://tixl.app/help/`.
+Site root: `https://help.tixl.app/`.
 
-Operator pages (via mike): `https://tixl.app/help/latest/ops/lib/field/adjust/PushPullSDF/` — with `latest` resolving to the current stable (`v4.2` or whichever). Per-version URLs (`…/help/v4.2/ops/…`) are the immutable ones that external links should use.
+Operator pages: `https://help.tixl.app/ops/lib/field/adjust/PushPullSDF/`. No version prefix in v1 (mike is deferred per Section 1). When versioning lands, per-version URLs (`help.tixl.app/v4.2/ops/…`) will be the immutable ones for external links.
 
 Rules for forming the path:
 
@@ -199,14 +214,14 @@ Rules for forming the path:
            AdjustColors.md
    ```
    Implementation in the exporter: split `symbol.Namespace` on `.`, lowercase all segments, `mkdir -p` the chain, write `{SymbolName}.md` at the leaf.
-3. Rewrite the "in [Lib.field.adjust](lib)" back-link to a relative link at the enclosing index (e.g. `../` to the namespace's `README.md`, or a MkDocs section index auto-created by the `awesome-nav` plugin).
+3. Rewrite the "in [Lib.field.adjust](lib)" back-link to a relative link at the enclosing index (e.g. `../` to the namespace's `README.md`, or a MkDocs section index auto-created by the `awesome-pages` plugin).
 4. Generate namespace index pages (`.help/operators/lib/README.md`, `.help/operators/lib/field/README.md`, …) listing the operators in that namespace with their short descriptions. Replaces the monolithic `lib.md` TOC that the old exporter wrote.
 5. Emit `.help/operators/index.json` used by the auto-linker:
    ```json
    {
      "by_fullpath": {
        "Lib.field.adjust.PushPullSDF": {
-         "url": "/help/ops/lib/field/adjust/PushPullSDF/",
+         "url": "/ops/lib/field/adjust/PushPullSDF/",
          "summary": "Makes the incoming SDF volumes thicker or thinner..."
        }
      },
@@ -221,7 +236,7 @@ Rules for forming the path:
 #### Wiki cutover
 
 - No release-time mirror of `operators/` back to the wiki.
-- `t3.wiki/operators/` can either stay as a frozen snapshot of its last auto-generated state (with banners pointing at `tixl.app/help/latest/ops/…`) or be deleted wholesale — they're generated artifacts, not authored content.
+- `t3.wiki/operators/` can either stay as a frozen snapshot of its last auto-generated state (with banners pointing at `help.tixl.app/ops/…`) or be deleted wholesale — they're generated artifacts, not authored content.
 - Pick whichever feels safer; I'd lean on deleting once the new site is live and picking any stragglers up via banners on referring pages.
 
 #### Auto-linking operator references in prose
@@ -237,7 +252,7 @@ Help pages already write `[AdjustColors]` or `[AudioReaction]` inline. Today the
      - Short name with exactly one match in `by_shortname` → link to that operator.
      - Short name with >1 match → leave text as-is AND print a build warning `Ambiguous operator reference '[Value]' in .help/.../Foo.md; candidates: Lib.numbers.float.basic.Value, Lib.numbers.int.basic.Value. Qualify with the namespace.`
      - No match → leave text as-is (it's likely a prose reference, not an op).
-   - Replace with a link to the `url` field from `index.json` (e.g. `[AdjustColors](/help/ops/lib/image/color/AdjustColors/)`). The URL is already site-absolute and version-agnostic; mike injects the version prefix at build time, so cross-version links work.
+   - Replace with a link to the `url` field from `index.json` (e.g. `[AdjustColors](/ops/lib/image/color/AdjustColors/)`). The URL is already site-absolute. If versioning is later re-enabled via mike, it injects the version prefix at build time without the hook caring.
 3. Optionally, on hover, show the operator summary via a MkDocs Material tooltip. Supported natively by Material's admonition extension; simplest is just a title attribute via HTML.
 4. **Don't** link every mention — only bracketed ones. That keeps authoring control with the writer while making the common case zero-friction.
 
@@ -269,46 +284,46 @@ For this iteration we keep the menu action; add a note in `.help/STYLE.md` that 
 
 Produce a table that maps each **migrated** wiki filename to its new URL. Dev pages listed in Section 4a are not in this table; they get no banner.
 
-Format below. URL column will point at rendered pages (`/help/latest/<section>/<page>/`) once the docs site is live; for now, banners use the GitHub source link.
+Format below. URL column will point at rendered pages (`/<section>/<page>/`) once the docs site is live; for now, banners use the GitHub source link.
 
 | Legacy wiki page | `.help/` source | Rendered URL (once live) |
 |---|---|---|
-| `help.AddingFonts` | `advanced/AddingFonts.md` | `/help/latest/advanced/AddingFonts/` |
-| `help.ArtnetAndDMX` | `using/ArtnetAndDMX.md` | `/help/latest/using/ArtnetAndDMX/` |
-| `help.Backups` | `using/Backups.md` | `/help/latest/using/Backups/` |
-| `help.Concepts` | `getting-started/Concepts.md` | `/help/latest/getting-started/Concepts/` |
-| `help.ConvertSDFs` | `advanced/ConvertSDFs.md` | `/help/latest/advanced/ConvertSDFs/` |
-| `help.CreatingNewOps` | `advanced/CreatingNewOps.md` | `/help/latest/advanced/CreatingNewOps/` |
-| `help.ExportExecutables` | `using/ExportExecutables.md` | `/help/latest/using/ExportExecutables/` |
-| `help.ExportVideos` | `using/ExportVideos.md` | `/help/latest/using/ExportVideos/` |
-| `help.FAQ` | `using/FAQ.md` | `/help/latest/using/FAQ/` |
-| `help.FaqBuildingContent` | `using/FaqBuildingContent.md` | `/help/latest/using/FaqBuildingContent/` |
-| `help.FaqDevOps` | `advanced/FaqDevOps.md` | `/help/latest/advanced/FaqDevOps/` |
-| `help.HowTixlWorks` | `getting-started/HowTixlWorks.md` | `/help/latest/getting-started/HowTixlWorks/` |
-| `help.Installation` | `install/Installation.md` | `/help/latest/install/Installation/` |
+| `help.AddingFonts` | `advanced/AddingFonts.md` | `/advanced/AddingFonts/` |
+| `help.ArtnetAndDMX` | `using/ArtnetAndDMX.md` | `/using/ArtnetAndDMX/` |
+| `help.Backups` | `using/Backups.md` | `/using/Backups/` |
+| `help.Concepts` | `getting-started/Concepts.md` | `/getting-started/Concepts/` |
+| `help.ConvertSDFs` | `advanced/ConvertSDFs.md` | `/advanced/ConvertSDFs/` |
+| `help.CreatingNewOps` | `advanced/CreatingNewOps.md` | `/advanced/CreatingNewOps/` |
+| `help.ExportExecutables` | `using/ExportExecutables.md` | `/using/ExportExecutables/` |
+| `help.ExportVideos` | `using/ExportVideos.md` | `/using/ExportVideos/` |
+| `help.FAQ` | `using/FAQ.md` | `/using/FAQ/` |
+| `help.FaqBuildingContent` | `using/FaqBuildingContent.md` | `/using/FaqBuildingContent/` |
+| `help.FaqDevOps` | `advanced/FaqDevOps.md` | `/advanced/FaqDevOps/` |
+| `help.HowTixlWorks` | `getting-started/HowTixlWorks.md` | `/getting-started/HowTixlWorks/` |
+| `help.Installation` | `install/Installation.md` | `/install/Installation/` |
 | `help.InstallationT3` | *(not migrated — stays on wiki)* | — |
-| `help.InstallDev` | `install/InstallDev.md` | `/help/latest/install/InstallDev/` |
-| `help.InstallLinux` | `install/InstallLinux.md` | `/help/latest/install/InstallLinux/` |
-| `help.InstallMacOS` | `install/InstallMacOS.md` | `/help/latest/install/InstallMacOS/` |
-| `help.Introduction` | `getting-started/Introduction.md` | `/help/latest/getting-started/Introduction/` |
-| `help.KeyboardShortcuts` | `using/KeyboardShortcuts.md` | `/help/latest/using/KeyboardShortcuts/` |
-| `help.LivePerformances` | `using/LivePerformances.md` | `/help/latest/using/LivePerformances/` |
-| `help.OSC` | `using/OSC.md` | `/help/latest/using/OSC/` |
-| `help.OptimizingRenderingPerformance` | `using/OptimizingRenderingPerformance.md` | `/help/latest/using/OptimizingRenderingPerformance/` |
-| `help.PresetsAndSnapshots` | `using/PresetsAndSnapshots.md` | `/help/latest/using/PresetsAndSnapshots/` |
-| `help.RealtimeRendering` | `using/RealtimeRendering.md` | `/help/latest/using/RealtimeRendering/` |
-| `help.RemoveStaticBackground` | `using/RemoveStaticBackground.md` | `/help/latest/using/RemoveStaticBackground/` |
-| `help.ReportBugs` | `getting-started/ReportBugs.md` | `/help/latest/getting-started/ReportBugs/` |
-| `help.ShaderDevelopmentExample` | `advanced/ShaderDevelopmentExample.md` | `/help/latest/advanced/ShaderDevelopmentExample/` |
-| `help.SharingExampleProjects` | `using/SharingExampleProjects.md` | `/help/latest/using/SharingExampleProjects/` |
-| `help.SkillQuest` | `getting-started/SkillQuest.md` | `/help/latest/getting-started/SkillQuest/` |
-| `help.SvgLineFonts` | `advanced/SvgLineFonts.md` | `/help/latest/advanced/SvgLineFonts/` |
-| `help.TixlChanges` | `getting-started/MigratingFromTooll3.md` | `/help/latest/getting-started/MigratingFromTooll3/` |
-| `help.ui.TimeLine` | `using/Timeline.md` | `/help/latest/using/Timeline/` |
-| `help.UsingCustomShaders` | `advanced/UsingCustomShaders.md` | `/help/latest/advanced/UsingCustomShaders/` |
-| `help.VideoTutorials` | `getting-started/VideoTutorials.md` | `/help/latest/getting-started/VideoTutorials/` |
-| `dev.WritingCodeOps` | `advanced/WritingCodeOps.md` | `/help/latest/advanced/WritingCodeOps/` |
-| `Installation` | `install/Installation.md` | `/help/latest/install/Installation/` |
+| `help.InstallDev` | `install/InstallDev.md` | `/install/InstallDev/` |
+| `help.InstallLinux` | `install/InstallLinux.md` | `/install/InstallLinux/` |
+| `help.InstallMacOS` | `install/InstallMacOS.md` | `/install/InstallMacOS/` |
+| `help.Introduction` | `getting-started/Introduction.md` | `/getting-started/Introduction/` |
+| `help.KeyboardShortcuts` | `using/KeyboardShortcuts.md` | `/using/KeyboardShortcuts/` |
+| `help.LivePerformances` | `using/LivePerformances.md` | `/using/LivePerformances/` |
+| `help.OSC` | `using/OSC.md` | `/using/OSC/` |
+| `help.OptimizingRenderingPerformance` | `using/OptimizingRenderingPerformance.md` | `/using/OptimizingRenderingPerformance/` |
+| `help.PresetsAndSnapshots` | `using/PresetsAndSnapshots.md` | `/using/PresetsAndSnapshots/` |
+| `help.RealtimeRendering` | `using/RealtimeRendering.md` | `/using/RealtimeRendering/` |
+| `help.RemoveStaticBackground` | `using/RemoveStaticBackground.md` | `/using/RemoveStaticBackground/` |
+| `help.ReportBugs` | `getting-started/ReportBugs.md` | `/getting-started/ReportBugs/` |
+| `help.ShaderDevelopmentExample` | `advanced/ShaderDevelopmentExample.md` | `/advanced/ShaderDevelopmentExample/` |
+| `help.SharingExampleProjects` | `using/SharingExampleProjects.md` | `/using/SharingExampleProjects/` |
+| `help.SkillQuest` | `getting-started/SkillQuest.md` | `/getting-started/SkillQuest/` |
+| `help.SvgLineFonts` | `advanced/SvgLineFonts.md` | `/advanced/SvgLineFonts/` |
+| `help.TixlChanges` | `getting-started/MigratingFromTooll3.md` | `/getting-started/MigratingFromTooll3/` |
+| `help.ui.TimeLine` | `using/Timeline.md` | `/using/Timeline/` |
+| `help.UsingCustomShaders` | `advanced/UsingCustomShaders.md` | `/advanced/UsingCustomShaders/` |
+| `help.VideoTutorials` | `getting-started/VideoTutorials.md` | `/getting-started/VideoTutorials/` |
+| `dev.WritingCodeOps` | `advanced/WritingCodeOps.md` | `/advanced/WritingCodeOps/` |
+| `Installation` | `install/Installation.md` | `/install/Installation/` |
 
 The banner-writer script (and a later URL-update script) takes this table as input. Banners already in place use the GitHub-source column; the URL-update pass will rewrite them to the rendered URL column once mike is publishing.
 
@@ -423,10 +438,10 @@ Add a line to `.claude/CLAUDE.md` under "Project Conventions":
 
 1. ✅ **Done.** Transition banners prepended to all 36 migrated wiki pages, pointing at the GitHub source. Section 2.1.
 2. ✅ **Done.** All user-facing `help.*` pages copied into `.help/`. Section 4.
-3. **Next:** update the wiki's `_Sidebar.md` to split into "User docs (on tixl.app/help/)" and "Developer docs". Section 2.3.
+3. **Next:** update the wiki's `_Sidebar.md` to split into "User docs (on help.tixl.app)" and "Developer docs". Section 2.3.
 4. **Next:** set up MkDocs + mike locally and preview `.help/` rendered. Section 1 steps 1–3. Retarget operator exporter (Section 4c); run once to populate `.help/operators/`.
 5. **Then:** fetch and localize images. Section 3.
-6. **Then:** ship the GitHub Action and publish to `tixl.app/help/`. Section 1 step 3.
+6. **Then:** wire up the Vercel project and publish to `help.tixl.app`. Section 1 steps 2–4.
 7. **Then:** **update wiki banners from GitHub-source URLs to rendered URLs** using the mapping table in Section 5. Drive via the banner script (the `TIXL_MOVED_BANNER` HTML-comment marker makes this idempotent). Section 2.2.
 8. **Then:** editorial pass on each migrated page per STYLE.md — voice, structure, relative links, operator-brackets convention, obsolete-content pruning, image localization. Log per-page issues under Section 6.
 9. **Then:** merge `(wip)-Your-first-C#-operator.md` into `WritingCodeOps.md`, delete wiki copy.

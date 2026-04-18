@@ -311,3 +311,6 @@ shadertoolsconfig.json
 .temp/
 .claude/worktrees/naughty-meninsky/.claude/settings.local.json
 .claude/settings.local.json
+
+# MkDocs build output
+.help/site/

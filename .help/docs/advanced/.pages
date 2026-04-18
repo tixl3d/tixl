@@ -1,0 +1,15 @@
+title: Advanced
+nav:
+  - README.md
+  # Writing and creating operators
+  - WritingCodeOps.md
+  - CreatingNewOps.md
+  - FaqDevOps.md
+  # Custom shaders
+  - UsingCustomShaders.md
+  - ShaderDevelopmentExample.md
+  - ConvertSDFs.md
+  # Fonts
+  - AddingFonts.md
+  - SvgLineFonts.md
+  - "..."

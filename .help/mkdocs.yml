@@ -1,0 +1,73 @@
+site_name: TiXL Documentation
+site_url: https://help.tixl.app/
+site_description: Documentation for TiXL — a real-time visual programming environment for motion graphics and live visuals.
+site_author: TiXL contributors
+
+repo_name: tixl3d/tixl
+repo_url: https://github.com/tixl3d/tixl
+edit_uri: edit/main/.help/docs/
+
+# All paths below are resolved relative to this config file (.help/mkdocs.yml).
+# Docs source: .help/docs/   Build output: .help/site/   → everything stays inside .help/.
+docs_dir: docs
+site_dir: site
+use_directory_urls: true
+# strict: true — re-enable once the editorial pass fixes the remaining imported-page link warnings
+# (wiki-style `help.X` links, un-fetched images). See Plan_UpdateHelp.md.
+strict: false
+
+# Section-level README.md files act as section landing pages (via the awesome-pages plugin).
+# The contributor-facing README.md lives one level up at .help/README.md, outside docs_dir,
+# so it isn't published — no conflict with the site's index.md.
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.tabs          # top-level sections as tabs
+    - navigation.sections      # H2-style section groups in the sidebar
+    - navigation.top           # "back to top" button
+    - navigation.footer        # auto Previous / Next links at page bottom
+    - navigation.instant       # client-side nav for speed
+    - navigation.tracking      # update URL with current anchor
+    - search.suggest
+    - search.highlight
+    - content.action.edit      # "edit on GitHub" link per page
+    - content.code.copy        # copy button on code blocks
+
+plugins:
+  - search
+  - awesome-pages              # reads `.pages` files under docs_dir for ordering
+
+markdown_extensions:
+  - admonition                 # > [!NOTE] style blocks
+  - attr_list                  # {: .class } on elements
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details           # collapsible blocks
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.snippets
+
+# hooks:
+#   - scripts/docs/op_autolinks.py   # TODO: enable once the operator exporter writes .help/operators/

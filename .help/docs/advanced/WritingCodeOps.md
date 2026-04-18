@@ -6,7 +6,7 @@ Developing your own operators in C# can be very powerful and a lot of fun.
 
 ### Setup
 
-You probably already did the following steps when [setting up your dev environment](../setup/InstallDev.md).
+You probably already did the following steps when [setting up your dev environment](../install/InstallDev.md).
 
 1. Install Fork
 2. Install Rider or Visual Studio (I'm sure, Visual Studio could work, but I'm not sure how to set it up)

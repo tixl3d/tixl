@@ -1,0 +1,9 @@
+# Root nav — `mkdocs-awesome-nav` reads this for the top-level order.
+nav:
+  - index.md
+  - getting-started
+  - install
+  - using
+  - advanced
+  - contributing
+  - operators
