@@ -103,8 +103,9 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="DirectShowLib.Standard" Version="2.1.0" />
-    <PackageReference Include="System.ServiceModel.Primitives" Version="10.0.5" />
-    <PackageReference Include="System.ServiceModel.Http" Version="10.0.5" />
+    <PackageReference Include="System.ServiceModel.Primitives" Version="10.0.652802" />
+    <PackageReference Include="System.ServiceModel.Http" Version="10.0.652802" />
+    <PackageReference Include="System.Security.Cryptography.Xml" Version="10.0.6" />
     <PackageReference Include="System.ServiceModel.Security" Version="6.0.0" />
     <PackageReference Include="ManagedBass.Mix" Version="4.0.2" />
     <PackageReference Include="OpenCvSharp4" Version="4.11.0.20250507" />
