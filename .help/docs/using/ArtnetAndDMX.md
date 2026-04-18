@@ -32,19 +32,19 @@ Every frame, we send one or more 512-byte blocks (universes) with control signal
 
 The integration uses a modular setup with multiple operators:
 
-![alt text](images/image-3.png)
+![alt text](/images/image-3.png)
 
 You define **Points** with your light information.
 
 **PointsToArtnetLight** converts *Points* (and their `Color`, `Orientation`, `FX1`, `FX2`) into DMX value sequences. Through various parameters, you define which channels correspond to which attributes.
 
-**[ArtnetOutput](lib.io.artnet.ArtnetOutput)** broadcasts these value sequences.
+**[ArtnetOutput]** broadcasts these value sequences.
 
 ### PointsToArtnetLight
 
 We added a new grid display mode to inspect the output values of **PointsToArtnetLight**:
 
-![alt text](images/anim-1.gif)
+![alt text](/images/Animation/anim-1.gif)
 
 In our case, the light fixture uses 15 channels (set via `FixtureChannelSize`). We adjust the grid’s column count accordingly and can verify how point attributes like color and rotation are mapped to 0–255 values.
 
@@ -54,7 +54,7 @@ In our case, the light fixture uses 15 channels (set via `FixtureChannelSize`). 
 
 Use the \[MergeIntLists] operator to merge outputs from multiple fixture definitions into a single universe:
 
-![alt text](images/anim-2.gif)
+![alt text](/images/Animation/anim-2.gif)
 
 The `Length` parameter ensures a 512-byte buffer. The optional `StartIndices` parameter allows manual offset placement for each fixture.
 
@@ -66,7 +66,7 @@ Getting *some* rotation is straight forward: Just activate the  `GetRotation` Pa
 
 To set this up precisely, e.g. so that a group of spotlight will follow a point in space, will require more work:
 
-![alt text](images/anim-3.gif)
+![alt text](/images/Animation/anim-3.gif)
 
 1. You probably want to create an accurate (\~5cm) 3D model of your setup (e.g., in Blender).
 2. Position your light points using the **VisualizeSpotLights** helper.

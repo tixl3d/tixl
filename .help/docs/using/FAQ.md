@@ -46,11 +46,11 @@ Future releases will streamline this migration.
 
 ## How do I export an executable?
 
-See the legacy wiki page "Export Executables" (not yet migrated — tracked in [../.agentic/Plans/Plan_UpdateHelp.md](../../.agentic/Plans/Plan_UpdateHelp.md)).
+See [Exporting executables](ExportExecutables.md).
 
 ## How do I export an image sequence or video?
 
-See the legacy wiki page "Export Videos" (not yet migrated).
+See [Exporting videos](ExportVideos.md).
 
 ## TiXL doesn't start
 

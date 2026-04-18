@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import json
 import logging
+import posixpath
 import re
 from pathlib import Path
 from typing import Any
@@ -82,7 +83,7 @@ def _load_index(config) -> dict[str, Any] | None:
 
 
 def _resolve(name: str, index: dict[str, Any]) -> tuple[str | None, list[str]]:
-    """Return (url, candidates). url is None if unresolved or ambiguous."""
+    """Return (fullpath, candidates). fullpath is None if unresolved or ambiguous."""
     by_fullpath: dict[str, dict[str, str]] = index.get("by_fullpath", {})
     by_shortname: dict[str, list[str]] = index.get("by_shortname", {})
 
@@ -95,13 +96,31 @@ def _resolve(name: str, index: dict[str, Any]) -> tuple[str | None, list[str]]:
             full for full in by_fullpath if full.lower() == name.lower()
         ]
         if len(candidates) == 1:
-            return by_fullpath[candidates[0]]["url"], candidates
+            return candidates[0], candidates
         return None, candidates
 
     matches = by_shortname.get(name, [])
     if len(matches) == 1:
-        return by_fullpath[matches[0]]["url"], matches
+        return matches[0], matches
     return None, matches
+
+
+def _fullpath_to_docs_relpath(fullpath: str) -> str:
+    """`Lib.io.audio.AudioReaction` → `operators/lib/io/audio/AudioReaction.md` (docs_dir-relative)."""
+    ns, _, op = fullpath.rpartition(".")
+    ns_dir = ns.lower().replace(".", "/")
+    return f"operators/{ns_dir}/{op}.md"
+
+
+def _relative_link(page_src: str, target_docs_path: str) -> str:
+    """Compute the markdown link path from `page_src` to `target_docs_path`.
+
+    Both paths are docs_dir-relative (forward slashes). Result is also forward-slash.
+    """
+    page_dir = posixpath.dirname(page_src.replace("\\", "/"))
+    if not page_dir:
+        return target_docs_path
+    return posixpath.relpath(target_docs_path, page_dir)
 
 
 def _rewrite_segment(text: str, index: dict[str, Any], page_src: str) -> str:
@@ -113,8 +132,8 @@ def _rewrite_segment(text: str, index: dict[str, Any], page_src: str) -> str:
         if "." not in name and not name[0].isupper():
             return match.group(0)
 
-        url, candidates = _resolve(name, index)
-        if url is None:
+        fullpath, candidates = _resolve(name, index)
+        if fullpath is None:
             if len(candidates) > 1:
                 log.warning(
                     "op_autolinks: ambiguous [%s] in %s — candidates: %s. "
@@ -125,19 +144,17 @@ def _rewrite_segment(text: str, index: dict[str, Any], page_src: str) -> str:
                 )
             return match.group(0)
 
-        summary = ""
-        if "." in name:
-            entry = index["by_fullpath"].get(name) or index["by_fullpath"].get(candidates[0])
-        else:
-            entry = index["by_fullpath"].get(candidates[0]) if candidates else None
-        if entry:
-            summary = entry.get("summary", "") or ""
+        entry = index["by_fullpath"].get(fullpath, {})
+        summary = entry.get("summary", "") or ""
+
+        target_docs_path = _fullpath_to_docs_relpath(fullpath)
+        link = _relative_link(page_src, target_docs_path)
 
         # Show only the last path segment in the rendered link; nobody wants to read
         # `Lib.field.adjust.PushPullSDF` inline.
         label = name.rsplit(".", 1)[-1]
         title_attr = f' "{summary}"' if summary else ""
-        return f"[{label}]({url}{title_attr})"
+        return f"[{label}]({link}{title_attr})"
 
     return _BRACKET_RE.sub(replace, text)
 

@@ -103,7 +103,7 @@ The dope sheet displays the keyframes of the currently selected operators.
 
 To animate a parameter, click its input in the *Parameter Window* while holding `Alt` to insert the first keyframe:
 
-![Inserting the first keyframe](images/timeline/anim-8.gif)
+![Inserting the first keyframe](/images/Animation/anim-8.gif)
 
 Once animated, you can:
 
@@ -119,7 +119,7 @@ To **remove an animation** either delete all its keyframes or reset the paramete
 
 By default, only the keyframes of selected operators appear in the timeline. Enable **Keep animated parameters visible** in the toolbar to keep parameters pinned even when you select other operators:
 
-![Keep animated parameters visible](images/timeline/image-9.png)
+![Keep animated parameters visible](/images/Animation/image-9.png)
 
 If too many parameters stack up, press `Ctrl + Shift + K` twice to clear the list.
 
@@ -149,7 +149,7 @@ Some operators — notably `[TimeClip]` and `[VideoClip]` — output time clips.
 
 If a composition contains any time clips, the timeline shows a **Time Clip Area** above the dope sheet. Combine clips with a `[Group]` to build a scene timeline:
 
-![Time clips in a group](images/timeline/anim-4.gif)
+![Time clips in a group](/images/Animation/anim-4.gif)
 
 The active clip is highlighted during playback.
 
@@ -158,7 +158,7 @@ The active clip is highlighted during playback.
 > [!NOTE]
 > Clips not connected to a consumer never render unless they're pinned to the output window. TiXL fades unconnected clips and shows a "Not Connected?" warning on their tooltip:
 
-![Inactive clip warning](images/timeline/image-7.png)
+![Inactive clip warning](/images/Animation/image-7.png)
 
 ### Editing time clips
 
@@ -180,13 +180,13 @@ Drag clips vertically to distribute them across layers. Layers **do not** affect
 
 Time remapping lets a clip scale or offset the source time it exposes to its sub-graph — similar to `[SetCommandTime]`, but local to the clip.
 
-![Remapped time clip](images/timeline/anim-6.gif)
+![Remapped time clip](/images/Animation/anim-6.gif)
 
 In the example above, the second clip plays its contents at 500 % speed. The red bar at the bottom of the clip indicates the remap.
 
 Selecting a single clip shows two curves visualizing the mapping from clip time to source time:
 
-![Time remap curves](images/timeline/image-8.png)
+![Time remap curves](/images/Animation/image-8.png)
 
 Ways to edit the remap:
 
@@ -218,6 +218,6 @@ ffmpeg -i input.mp4 -g 1 -c:v libx264 -preset veryfast -crf 18 output.mp4
 
 Open the **Clip Timing Editor** to set precise times for one or more selected clips:
 
-![Clip timing editor](images/timeline/anim-10.gif)
+![Clip timing editor](/images/Animation/anim-10.gif)
 
 When a selection contains multiple values, the editor shows `NaN` for the mismatched field — type a number to set it across all selected clips at once.

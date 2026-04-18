@@ -1,6 +1,6 @@
 # Creating New Operators
 
-Most of the time, creating new [Operators](help.Concepts#working-with-operators) will not be required to build content with TiXL. However, eventually, you might want to create your own operators to build your own effects or structure and reuse your content building blocks.
+Most of the time, creating new [Operators](../getting-started/Concepts.md#working-with-operators) will not be required to build content with TiXL. However, eventually, you might want to create your own operators to build your own effects or structure and reuse your content building blocks.
 
 There are three options to create new operators:
 

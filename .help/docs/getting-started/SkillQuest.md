@@ -73,7 +73,7 @@ One practical workflow:
 3. Open the *Symbol Library* and navigate to the *Skills* project folders.
 4. Find an existing Level and drop it onto the canvas.
 
-![alt text](images/clone-tixl.gif)
+![alt text](/images/clone-tixl.gif)
 
 5. Select the Level and choose *Symbol Definition* → *Duplicate as new Type* from the graph’s context menu.
 6. Pick a new namespace in the `Skills` project. Using an existing one is fine for now.

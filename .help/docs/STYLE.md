@@ -60,9 +60,9 @@ Write operator names in square brackets, e.g. `[AdjustColors]` or `[AudioReactio
 
 ## Staying in sync with code
 
-- **When you ship a user-visible UI or behavior change, update the matching page** in the same PR. The agent instructions in `.claude/CLAUDE.md` enforce this.
+- **When you ship a user-visible UI or behavior change, update the matching page** in the same PR.
 - If a feature is removed, remove the doc section (don't leave it marked "deprecated" indefinitely — git history is the deprecation log).
-- If a page describes behavior that has drifted, **flag it in [../.agentic/Plans/Plan_UpdateHelp.md](../.agentic/Plans/Plan_UpdateHelp.md)** rather than silently leaving it wrong.
+- If a page describes behavior that has drifted, **open a GitHub issue** rather than silently leaving it wrong.
 
 ## Capturing informal knowledge
 
@@ -76,11 +76,11 @@ When you answer a question, demo a feature, or help someone debug something, **a
 
 Ten minutes of writing while the context is fresh beats an hour a week later. Small, frequent additions compound — the goal is a doc set where people can **find** answers instead of asking them for the fifth time.
 
-If the thing you want to add doesn't have an obvious home yet, drop a note in the matching section README's "Still to write" list, or append to [Plan_UpdateHelp.md](../.agentic/Plans/Plan_UpdateHelp.md).
+If the thing you want to add doesn't have an obvious home yet, drop a note in the matching section README's "Still to write" list, or open a GitHub issue so we don't lose it.
 
 ## What not to write
 
-- Internal implementation details (class names, private methods). Those belong in code comments or `.agentic/SOLUTION_OVERVIEW.md`.
+- Internal implementation details (class names, private methods). Those belong in code comments or the developer wiki.
 - Release notes or changelogs — those live elsewhere.
 - Personal opinions, TODO lists, "I'm not sure but…". If you're not sure, don't commit the page.
 

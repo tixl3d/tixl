@@ -57,12 +57,12 @@ When working with TiXL these formats might be relevant:
 - `R16G16B16A16_FLOAT` the default. Good compromise for HDR rendering.
 - `R32G32B32A32_FLOAT` in situations where high quality output is required.
 - `R8G8B8A8_UNorm` the default format when loading 8bit images.
-- `G8G8R8A8_UNorm` Look carefully! The G and R channels are swapped here. Sadly this format is used by many videos and can help to speed up [rendering videos](help.ExportVideos).
+- `G8G8R8A8_UNorm` Look carefully! The G and R channels are swapped here. Sadly this format is used by many videos and can help to speed up [rendering videos](ExportVideos.md).
 
 
 You can see the current texture format in the output window:
 
-![Alt text](images/image.png)
+![Alt text](/images/image.png)
 
 
 ## Cube Maps

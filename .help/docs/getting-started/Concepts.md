@@ -46,7 +46,7 @@ The names of Operators are special, because internally they're full featured C# 
 You will find the definition of all Symbols in the folder `Types/Operators/`. Notice how each definition consists of 3 files:
 - `.cs` - includes the c# code
 - `.t3` - is definition of all children, connections and animations
-- `.t3ui` - contains information that makes a symbol human-readable. Not required when [exporting a project as an executable](help.ExportExecutables).
+- `.t3ui` - contains information that makes a symbol human-readable. Not required when [exporting a project as an executable](../using/ExportExecutables.md).
 
 
 ### Namespaces
@@ -63,7 +63,7 @@ Please follow the following guidelines:
 - levels must not contain spaces or special characters
 - You can use an underscore "_" prefix to flag namespaces as internal (I.e. not relevant to other users.)
 
-We recommend the following naming convention for your projects: `user.johnDoe.project1`. This will make it easy to find your projects and migrate them between TiXL-installations. You can edit the namespace when creating new Operator symbols or in the [Parameter-Window](T3UserInterface#parameter-window)
+We recommend the following naming convention for your projects: `user.johnDoe.project1`. This will make it easy to find your projects and migrate them between TiXL-installations. You can edit the namespace when creating new Operator symbols or in the Parameter window.
 
 <img src= "https://user-images.githubusercontent.com/56783893/176657103-56ba1b2b-d7ce-4663-ad6a-587e57159c46.png" width="50%">
 

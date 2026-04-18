@@ -9,7 +9,7 @@ You can use TiXL to render your project as a video or image sequence:
 - Make sure the file name has the .mp4 extension.
 - Press *Start Export*.
 
-![Alt text](images/01-export-as-video.gif)
+![Alt text](/images/01-export-as-video.gif)
 
 
 ### Settings
@@ -19,7 +19,7 @@ You can use TiXL to render your project as a video or image sequence:
 - **Motion Blur Samples** - is only useful when adding a [RenderWithMotionBlur] operator to your project (see below)
 - When rendering as video **Bitrate** handles the quality of your output. It defines the number of bits used for each second of your video. To make this more readable, TiXL gives an indication of the current setting for your current resolution and framerate: 
 
-![Alt text](images/03-quality-preview.gif)
+![Alt text](/images/03-quality-preview.gif)
 
 
 ## Optimizing Export Performance **(_Since version 3.9.1, TiXL is taking care of this automatically_)** 

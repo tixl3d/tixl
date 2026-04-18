@@ -32,7 +32,7 @@ You probably already did the following steps when [setting up your dev environme
 ### Creating a new c# Operator
 
 1. With your `MyTest` project opened...
-1. Long press on the graph background and create a [Modulo](operators/Lib.numbers.float.basic.Modulo.md) operator.
+1. Long press on the graph background and create a [Modulo] operator.
 2. Select the new Op
 3. Right click -> Symbol Definition -> Duplicate as new Type
 4. In the _Duplicate Symbol_ dialog...

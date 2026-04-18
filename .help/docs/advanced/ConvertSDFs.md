@@ -4,7 +4,7 @@
 
 This page explains how to convert those into a form you can use with the `[CustomSDF]` operator.
 
-![CustomSDF example](images/convert-sdfs/image.png)
+![CustomSDF example](/images/ConvertSDFs/image.png)
 
 
 ```glsl
@@ -83,7 +83,7 @@ return (length(p2.xz/p2.w) * A);          // Let's use A so we can tweak it...
 ```
 
 
-![Tweaking parameter A](images/convert-sdfs/anim.gif)
+![Tweaking parameter A](/images/ConvertSDFs/anim.gif)
 
 
 Keeping the defaults as comments might be a good idea...
@@ -102,7 +102,7 @@ return ( length(p2.xz / p2.w) * A);   // A: 0.25
 Creating presets is even cooler, because it allows you to keep the original code and blend between paramters.
 (BTW. You may need to move your camera further away to see the fractal correctly)
 
-![Blending between presets](images/convert-sdfs/anim-1.gif)
+![Blending between presets](/images/ConvertSDFs/anim-1.gif)
 
 
 ## Add credits and details

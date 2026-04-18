@@ -6,19 +6,19 @@ I thought that this task is a great example of a more complex shader setup in Ti
 
 This tutorial nicely covers the technical details of both ComputeShader and Vertex and PixelShader development with T3 
 
-![Overview](images-mosaic-effect/overview.gif)
+![Overview](/images/MosaicEffect/overview.gif)
 
 ## Initial Thoughts
 
 At first glance, this effect seems very related to the [AsciRender] and the [DrawBillBoards] effect:
-![Alt text](images-mosaic-effect/image-31.png)
+![Alt text](/images/MosaicEffect/image-31.png)
 
 
 For the former, TiXL sorts the characters in a texture atlas by brightness and then maps the brightness of the target image to a position in the sorted index list. This works well for luminosity, but for reconstructing the color of the reference image, we will need another dimension.
 
 The [DrawBillBoards] effect can use an optional reference fx-texture parameter to color its sprites. If we initialize and use an atlas-texture with all our images, we come surprisingly close to "faking it". However, every sprite permanently uses one of the source images, which is definitely not what we want.
 
-![Alt text](images-mosaic-effect/image-32.png)
+![Alt text](/images/MosaicEffect/image-32.png)
 
 
 ## A Simple Algorithm
@@ -51,28 +51,28 @@ Here's what we have to do:
 5. Write a billboard draw effect that uses a reference image, the lookup table, and the texture atlas to draw quads using the best matching texture.
 6. Find a method to initialize the image set and lookup table only once.
 
-We recommend to open the [ImageMosaicExample] in TiXL and follow along. It contains many comments and annotations explaining what's happening. If you want to learn even more, you can try to open TiXL with [RenderDoc](UsingRenderDoc) to explore the state of the graphic card in further detail.
+We recommend to open the [ImageMosaicExample] in TiXL and follow along. It contains many comments and annotations explaining what's happening. If you want to learn even more, you can try to open TiXL with [RenderDoc](https://github.com/tixl3d/tixl/wiki/dev.UsingRenderDoc) to explore the state of the graphic card in further detail.
 
 We've grouped the final effect into 3 operators to separate and clarify the different stages:
 
 ### 1. DrawMosaicExample
 Feeds an animated grid of points and the reference image into the effect.
 
-![DrawMosaicExample](images-mosaic-effect/image.png)
+![DrawMosaicExample](/images/MosaicEffect/image.png)
 
 ### 2. DrawImageMosaic
 Controls the caching and draws the billboards.
-![Alt text](images-mosaic-effect/image-33.png)
+![Alt text](/images/MosaicEffect/image-33.png)
 
 ### 3. _ImageMosaicInitialize
 Loads all images and builds the lookup table and the texture array.
-![Alt text](images-mosaic-effect/image-2.png)
+![Alt text](/images/MosaicEffect/image-2.png)
 
 You might notice that as the internalization level increases, the operators become more intimidating. However, in the rest of the article, I will walk you through all the details and code.
 
 ## Loading Images
 Let's begin with loading the images. For this, we're using the **[FilesInFolder]** operator:
-![Alt text](images-mosaic-effect/image-3.png)
+![Alt text](/images/MosaicEffect/image-3.png)
 
 We pass in the file path from the parent operator. **[FilesInFolder]** has two outputs: *Files*, which is a list of file paths, and **Count**. It also features a *Filter* parameter that we could use to filter only images, which we could set to `.jpg` to skip non-image files.
 
@@ -80,12 +80,12 @@ We clamp the count to 2000 just to be sure things don't get out of hand.
 
 Then, we feed the *Count* into **[Loop]** to iterate over the images:
 
-![Alt text](images-mosaic-effect/image-5.png)
+![Alt text](/images/MosaicEffect/image-5.png)
 
 While **[Loop]** is iterating, it sets two variables to the context: by default, the index-variable is `i`, and the normalized float variable going from 0 to 1 is called `f`. We are going to use both of these.
 
 Using the **[GetIntVariable]**, we can pick a string from the file path list and feed it into the **[LoadImage]** operator:
-![Alt text](images-mosaic-effect/image-7.png)
+![Alt text](/images/MosaicEffect/image-7.png)
 
 You'll notice that its input has changed and requests to load that resource from the ResourceManager and create a new texture resource. By default, we generate mipmaps for all loaded images.
 
@@ -95,7 +95,7 @@ With this texture, we're going to do two things: Add it to our TextureArray and 
 
 A texture array is basically a stack of textures with the same format and resolution. It's different from a 3D-texture because the different slices can't be blended with a sampler. We can use the **[Texture2d]** operator to create a new texture resource and feed the count of images into the *ArraySize* parameter. Note that we also have to enable the *ShaderResource* and *RenderTarget* BindFlags so we can render into our texture:
 
-![Alt text](images-mosaic-effect/image-9.png)
+![Alt text](/images/MosaicEffect/image-9.png)
 
 To actually draw into our texture, we have to do a couple of things. We define the order of those with an **[Execute]** operator.
 
@@ -108,31 +108,31 @@ Once we're done, the **[Execute]** operator will clean up all changes to the ren
 ### Building a List of Average Pixel Colors
 
 The next step is a hack to generate a texture that contains the average colors of our image set. If you zoom in a lot, you can actually see these colors:
-![Alt text](images-mosaic-effect/image-11.png)
+![Alt text](/images/MosaicEffect/image-11.png)
 
 Here's how we do it:
 
-![Alt text](images-mosaic-effect/image-10.png)
+![Alt text](/images/MosaicEffect/image-10.png)
 
 1. We initialize the **[RenderTarget]** *Resolution* with the **[Int2ToSize2]** combining the image count for the width and 1 for the height.
 2. To clear the target for the first image, we use a **[CompareInt]** to test if `i` is 0, and pass it into the *Clear* parameter:
-![Alt text](images-mosaic-effect/image-12.png)
+![Alt text](/images/MosaicEffect/image-12.png)
 3. We create a 1x1 **[RenderTarget]** and render each image into that with a **[Layer2d]**. Then, we use the resulting texture to render a single pixel. To get the draw position, we use **[Remap]**. I'm sure there are smarter and more efficient ways to do this, but it worked, and I moved on.
-![Alt text](images-mosaic-effect/image-13.png)
+![Alt text](/images/MosaicEffect/image-13.png)
 
 
 ### Generating the 3D Lookup Table
 
 Considering the previous steps, the setup for the compute shader looks suspiciously straightforward:
-![Alt text](images-mosaic-effect/image-14.png)
+![Alt text](/images/MosaicEffect/image-14.png)
 
 1. We use a **[ComputeShaderStage]** and connect our shader.
 2. We connect the ShaderResourceView for our pixel texture. **[RenderTarget]** is bound to an SRV by default so we don't have to do anything here.
 3. We connect a sampler with *point mode* to avoid blending between the image colors:
-![Alt text](images-mosaic-effect/image-15.png)
+![Alt text](/images/MosaicEffect/image-15.png)
 4. We set its *DispatchCount* to 256×256×256. This feels like a horrible thing to do, but inside the shader, we have a long loop, so I doubt that there is actually any parallel work possible.
 5. Finally, we create our [Texture3d], set its bind flags to make it accessible as a shader resource and as an "Unordered Access View" (UAV), use the [Texture3dComponents] to access it, and connect it:
-![Alt text](images-mosaic-effect/image-16.png)
+![Alt text](/images/MosaicEffect/image-16.png)
 
 ### Compute Shader Code
 Let's have a look at the actual shader code for our compute shader. You might be intimidated by shader code, but we will walk you through the details.
@@ -149,10 +149,10 @@ sampler texSampler : register(s0);
 ```
 
 You might notice the `: register(t0);` syntax. It uses `t` for SRVs (**T**extures), `u` for **U***nordered Access Views (UAVs)*, and `s` for *Samplers*. If you look closely, you will notice that those indices are listed as multi-input parameters for the **[ComputeShaderStage]** operator:
-![Alt text](images-mosaic-effect/image-18.png)
+![Alt text](/images/MosaicEffect/image-18.png)
 
 The title of the main shader function, `BuildLookupTable`, is defined in the **[ComputeShader]** op:
-![Alt text](images-mosaic-effect/image-19.png)
+![Alt text](/images/MosaicEffect/image-19.png)
 
 Let's walk through it line by line. I will explain the OKLab LCH later.
 
@@ -198,7 +198,7 @@ void BuildLookupTable(uint3 threadID : SV_DispatchThreadID)
 
 I used [RenderDoc](https://renderdoc.org/) to check the results for the RGB color space. If you look closely, you'll see the image indices at the bottom right (381, 561, 556, 516, 387, etc.).
 
-![Alt text](images-mosaic-effect/voronoi.gif)
+![Alt text](/images/MosaicEffect/voronoi.gif)
 
 The internal shape of this lookup texture surprised me. Most images are densely clustered at the center of the space, which makes sense because images on the sides would need to be purely saturated colors. Additionally, the space is nicely tessellated into [Voronoi areas](https://en.wikipedia.org/wiki/Voronoi_diagram) around each image color.
 
@@ -214,7 +214,7 @@ An ideal candidate is the **[Once]** operator, which returns *true* if requested
 ### HasStringChanged
 The second solution is slightly more specific and also works when the user changes the path of the image folder:
 
-![Alt text](images-mosaic-effect/image-20.png)
+![Alt text](/images/MosaicEffect/image-20.png)
 
 As seen here, we connect the output of an **[Any]** operator to the **[_ImageMosaicInitialize]**-**TriggerUpdate** parameter. This operator returns true if any of its connected inputs are true. (Quick side note: unlike modern programming languages, the *Any* Operator evaluates all connected inputs even if the first input is already *true*.)
 
@@ -229,9 +229,9 @@ After all that setup, we're finally ready to draw some mosaic sprites on the scr
 
 What we see here is essentially the complete setup of a "draw call": We instruct the graphics card to set up and render a bunch of triangles with a given vertex and fragment shader. Everything is set behind an **[Execute]** operator to clean up all render stage settings after our draw call.
 
-![Alt text](images-mosaic-effect/image-25.png)
+![Alt text](/images/MosaicEffect/image-25.png)
 
-Using an **[InputAssemblerStage]**, we inform the graphics card about what we want to draw, in our case, triangles: ![Alt text](images-mosaic-effect/image-23.png). We don't connect any vertex or index buffers because we will generate that information on the fly in the vertex shader.
+Using an **[InputAssemblerStage]**, we inform the graphics card about what we want to draw, in our case, triangles: ![Alt text](/images/MosaicEffect/image-23.png). We don't connect any vertex or index buffers because we will generate that information on the fly in the vertex shader.
 
 ### Vertex Pixel Shader Setup
 Note: In earlier screenshots, you might have noticed two different **[VertexShaderStage]** and **[PixelShaderStage]** operators. While writing this, I realized that this setup unnecessarily requires connecting all the resources twice. This is not only cumbersome but also error-prone because an inconsistent order will probably break the shader setup.
@@ -246,7 +246,7 @@ Let's break this down one by one:
   - We use **[GetBufferComponents]** to get the SRV for our point buffer.
   - **[SrvFromTexture2D]** to get SRVs for our TextureArray and the connected reference image.
 - Finally, we connect the two samplers we need for our shader:
-  - "ClampedSampler" and "PointSampler", renamed operators padded with "", define how to read pixels from a texture, especially interpolating between pixels and handling UV coordinates outside the 0..1 range. In our case, it's important that the graphics card never blend between two image indices; we switch to point sampling: ![Alt text](images-mosaic-effect/image-27.png)
+  - "ClampedSampler" and "PointSampler", renamed operators padded with "", define how to read pixels from a texture, especially interpolating between pixels and handling UV coordinates outside the 0..1 range. In our case, it's important that the graphics card never blend between two image indices; we switch to point sampling: ![Alt text](/images/MosaicEffect/image-27.png)
 
 
 ### Rasterizer Setup
@@ -262,22 +262,22 @@ As with all the other DirectX specific operators can find all the details in the
 Finally, the **[OutputMergerStage]** defines how pixels are blended with the existing content of the currently active [RenderTarget].
 
 These settings include depth testing...
-![Depth Testing](images-mosaic-effect/image-28.png)
+![Depth Testing](/images/MosaicEffect/image-28.png)
 
 ...and blending...
-![Alt text](images-mosaic-effect/image-29.png)
+![Alt text](/images/MosaicEffect/image-29.png)
 
 ### Draw
 
 Finally, we're ready to draw something.
-![Alt text](images-mosaic-effect/image-30.png)
+![Alt text](/images/MosaicEffect/image-30.png)
 
 With the following, we compute the number of vertices the graphics card should generate: Since we're drawing quads, we need 6 vertices for each entry in our point buffer.
 
 ## RenderDoc
 
 Let's take a look at our draw call in RenderDoc:
-![RenderDoc](images-mosaic-effect/renderdoc-2.gif)
+![RenderDoc](/images/MosaicEffect/renderdoc-2.gif)
 
 It lists the complete DirectX render *Pipeline* for our draw call (with 1499400 vertices) selected in the *Event browser*:
 
@@ -376,7 +376,7 @@ float4 psMain(psInput input) : SV_TARGET
 
 Although the initial results looked nice, I wasn't satisfied with the distribution of the look-up table and the actual mapping to the reference image. I had a hunch that using different color spaces like Hue Saturation Value (HSV) might yield more promising results and allow for a closer scale to human perception. Humans are much better at distinguishing values than saturation.
 
-![Alt text](images-mosaic-effect/screenshot01.jpg)
+![Alt text](/images/MosaicEffect/screenshot01.jpg)
 
 A while ago, I stumbled across Björn Ottosson's [OKLab](https://bottosson.github.io/posts/oklab/) color space, which addresses such problems. We already added the OKLab interpolation to gradients. You can imagine OK's LAB-Color space as a cubic space with L being the lightness and A and B being two color temperature vectors (for warm/cold and pink/green). This can then be directly translated into the **OKLch** (Lightness, Chroma, Hue) space, closely related to HSV but with a much better distribution. In fact, this space is so incredible that the W3C adopted it as a browser standard, and it's available on [85% of all web browsers](https://caniuse.com/mdn-css_types_color_oklab) only 3 years after its invention. I don't know any other standard that was adopted faster.
 
@@ -409,7 +409,7 @@ You don't really have to understand the math behind this (I sure don't) to use i
 
 When computing the color distance in the OKLch space we get a much better distribution and usage of the available image set:
 
-![Alt text](images-mosaic-effect/screenshot02.jpg)
+![Alt text](/images/MosaicEffect/screenshot02.jpg)
 
 
 

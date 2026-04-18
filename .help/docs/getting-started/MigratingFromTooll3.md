@@ -19,7 +19,7 @@ C:/Users/YourName/Documents/TiXL/
 You can adjust this path in the settings menu:
 **TiXL → Settings → Project Settings**
 
-![alt text](images/change-projects-folder.gif)
+![alt text](/images/MigrateFromT3/change-projects-folder.gif)
 
 ### Structure of a Project Folder
 
@@ -57,7 +57,7 @@ As of v4.0.2, TiXL’s file browser is still a proof-of-concept. A more advanced
 
 When clicking a filepath field in a parameter, TiXL will list all available resources, grouped by project. You can search by filename or path to filter the list:
 
-![alt text](images/file-path-picking.gif)
+![alt text](/images/MigrateFromT3/file-path-picking.gif)
 
 ## Migrating projects
 
@@ -68,7 +68,7 @@ In the meantime you can copy and paste graphs directly from Tooll3 to TiXL. We w
 
 ### Point's "W" attribute
 
-- if you have been building scenes with Tooll you'll have come across the W attribute in points that was used for many magical operations like scaling or affecting effects. This [changed with v3.9.3](update.BetterPoints) were we introduced a new Point structure that not only supports Colors but also a scale attribute. In collaboration with @ScreenDream we further optimized this structure to only use the Scale vector to scaling and leave Fx1 and Fx2 (sometimes referred to F1 / F2) for arbitrary effects.
+- if you have been building scenes with Tooll you'll have come across the W attribute in points that was used for many magical operations like scaling or affecting effects. This [changed with v3.9.3](https://github.com/tixl3d/tixl/wiki/update.BetterPoints) where we introduced a new Point structure that not only supports Colors but also a scale attribute. In collaboration with @ScreenDream we further optimized this structure to only use the Scale vector to scaling and leave Fx1 and Fx2 (sometimes referred to F1 / F2) for arbitrary effects.
 
 This has multiple implications that you will need to adjust when converting your graphs to TiXL:
 - Operators like [DrawPoints], [RepeatPointsAtPoints], [RepeatMeshAtPoints], etc. no longer automatically applies W (now Fx1) as a scale factor. You need to set the `.ScaleFactor` to Fx1 in these cases.

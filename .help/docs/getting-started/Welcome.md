@@ -26,7 +26,7 @@ If you have questions or feedback, the easiest way is to join us on Discord:
 
  [![Discord](https://img.shields.io/discord/823853172619083816.svg?style=for-the-badge)](https://discord.gg/YmSyQdeH3S). 
  
-But the [Community](/getting-started/Community.md) is also active on GitHub, YouTube and in real life :-)
+But the [Community](Community.md) is also active on GitHub, YouTube and in real life :-)
 
 
 ## What TiXL is not

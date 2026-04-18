@@ -27,10 +27,10 @@ Exporting as executable is an automatic process the most of the time works out o
 ## How to export
 To export an executable you first make sure that...
 
-1. You're running t3 in release mode.
+1. You're running TiXL in release mode.
 2. That you correctly rebuild the complete solution (including Player)
 
-If you want to [export as an executable](https://github.com/still-scene/t3/wiki/export-executables), then you first have to create a Symbol as well.
+If you want to export as an executable, then you first have to create a Symbol as well.
 
 Then...
 1. For this your operator needs an Texture2d output.
@@ -69,7 +69,7 @@ You can rename the executable (e.g. to a Demo title). It will also use the `Proj
 
 ## Advanced inputs / customization
 
-For advanced use cases you could use the lib.io.file [__ReadFile__](lib.io.file.ReadFile) operator to read your own settings and parse them within your demo-operator on startup. (e.g. to customize texts).
+For advanced use cases you could use the lib.io.file [ReadFile] operator to read your own settings and parse them within your demo-operator on startup. (e.g. to customize texts).
 
 
 # Some caveats
