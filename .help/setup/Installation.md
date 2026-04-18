@@ -1,0 +1,1 @@
+This page has been moved to [help.Installation](help.Installation) .

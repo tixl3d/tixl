@@ -1,0 +1,63 @@
+# Presets and Snapshots
+
+Working with Presets and Snapshots is one of the best features in TiXL. You can find them in the "Variations" window which should be open in most of the default layouts.
+
+Variations come in two flavours: Presets and Snapshots. Internally they are using the same method jointly called "Variation"
+
+## Working with presets
+
+**Presets** are settings for Operator _symbols_ like [Blob] or [Layer2d].
+
+Presets showcase whats possible with an operator, and highlight options and parameter combinations you might not have discovered.
+
+## Working with snapshots
+
+**Snapshots** are parameter sets stored for a group of operator _instances_ in a composition. E.g. in an project for a live VJ-set you can use the context menu to activate Snapshots for some of the operators in that project. You can then use the + icon to save (I.e. create a snapshot of) the current state of all parameters of these operators into a single Snapshot. 
+
+![snapshots1](https://user-images.githubusercontent.com/1732545/232545725-7d528af0-325e-4b31-9bcc-812ecc595878.gif)
+
+## Using Snapshots with Midi-Controllers
+Snapshots are incredibly powerful in combination with a launch-pad controller like the APC Mini. Each of the highlighted buttons will indicate a snapshot for the current operator. Clicking an empty button will create a new snapshot.
+
+Additional interaction for APC-Mini are:
+- Holding Clip Stop will activate the deletion mode (indicated by a red flashing line). Clicking green buttons will remove those snapshots.
+- Holding the Shift Button with a Scene button will activate smooth blending with the slider below the Shift button. Moving the slider all the way up will fully transition into that snapshot. Moving the slider down will restore the state at the start of the blending. Tapping the shift button will disable blending.
+
+
+## Live previews and hover view
+The Variation window provides some very powerful options to explore presets:
+
+### Live Thumbnails
+By default TiXL will generate live thumbnails for your currently pinned output. This means, that even the presets for the currently selected operator are not the final output, you can see how that preset would affect the final output further down the stream:
+
+![preset-preview](https://user-images.githubusercontent.com/1732545/232548921-d204da36-67af-4f3f-b2ee-ab8af5dc7625.gif)
+
+You can enable or disable live previews with the context menu. 
+
+Note: Rendering of thumbnails will interfere with effects that rely on feedback rendering, eg. [AdvancedFeedback] or [SimpleLiquid]. 
+
+In these cases you should disable live thumbnails and hover preview.
+
+![image](https://user-images.githubusercontent.com/1504019/232598204-70d2be3f-5697-4ed9-9912-e2b2eacee749.png)
+
+
+### Blending between Variations
+
+There are multiple options to preview, mix and apply both presets and snapshots:
+
+1. Click to apply
+2. With hover preview enabled, hover of the thumbnails and then apply.
+3. Hold ALT-Key and hover to blend between variations. 
+
+You can select variation thumbnails (without applying them) by dragging a selection frame on the background. 
+With these variations selected you can...
+
+4. Select only one presets and use ALT to Mix in that variation
+5. Select two to blend between them.
+
+Notice how you can mix with ratio below 0 or above 100%!
+
+
+
+
+
