@@ -1,8 +1,10 @@
 # Writing C# operators
 
-## First steps
+Developing your own operators in C# is powerful and fun. TiXL has no separate SDK or plugin system — TiXL *is* the SDK. Every operator you use is C# source next to the graph, and you edit it the same way you edit any other code.
 
-Developing your own operators in C# can be very powerful and a lot of fun. 
+Some basic C# and TiXL experience is expected before you follow this page.
+
+## First steps
 
 ### Setup
 
@@ -68,7 +70,36 @@ private void Update(EvaluationContext context)
 - Switch to TiXL
 - Open *Windows* -> *Console* or switch to a layout with the *Console Window* enabled.
 - If the Modulo2 operator selected and visible in the *Output window* you should see the `Modulo2: _Hello Op_` log messages.
-  
+
+### Alternative: combine existing operators into a new type
+
+Duplicating a library op is the simplest route, but you can also start from a selection on the canvas:
+
+1. Build a small network on your HomeCanvas using existing operators (for example, a `Text` operator fed by an `AString`).
+2. Select the nodes and choose **Symbol Definition → Combine to new Type** from the context menu. `Ctrl+S` to save.
+3. TiXL creates three files under `Operators/Types/user/<yourname>/<yourtype>/` — open `<yourtype>.cs` in your IDE.
+4. Add your own logic to `Update()`. A minimal example that wraps a string-replace over the input text:
+
+    ```csharp
+    [Output(Guid = "42aab94d-c2d4-4334-8312-8bd74d83f5df")]
+    public readonly Slot<string> Result = new Slot<string>();
+
+    public MyStringOp()
+    {
+        Result.UpdateAction = Update;
+    }
+
+    private void Update(EvaluationContext context)
+    {
+        var input = InputText.GetValue(context);
+        Result.Value = input.Replace("TiXL", "Tooolll");
+    }
+    ```
+
+5. Save. TiXL recompiles and reloads the type; the operator on the canvas picks up the new behaviour on the next frame.
+
+See [Creating new operators](CreatingNewOps.md) for the UI-level overview of all three creation paths (templates, grouping, duplication).
+
 # Pit falls
 
 ## ⚠ Avoid hot code reload from IDE

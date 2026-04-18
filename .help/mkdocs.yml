@@ -12,9 +12,7 @@ edit_uri: edit/main/.help/docs/
 docs_dir: docs
 site_dir: site
 use_directory_urls: true
-# strict: true — re-enable once the editorial pass fixes the remaining imported-page link warnings
-# (wiki-style `help.X` links, un-fetched images). See Plan_UpdateHelp.md.
-strict: false
+strict: true
 
 # Section-level README.md files act as section landing pages (via the awesome-pages plugin).
 # The contributor-facing README.md lives one level up at .help/README.md, outside docs_dir,

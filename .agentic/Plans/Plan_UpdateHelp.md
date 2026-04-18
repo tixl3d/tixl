@@ -1,7 +1,7 @@
 # Migrate documentation to `.help/` and publish via MkDocs
 
 **Date:** 2026-04-18
-**Status:** Site is live at [help.tixl.app](https://help.tixl.app/). Content migrated, IA set, MkDocs + Vercel pipeline shipped. Operator-reference exporter and auto-linker hook are wired up (waiting on a menu-driven run to populate `.help/docs/operators/`). Remaining work is editorial (imported-page clean-up) and the image fetch.
+**Status:** Site is live at [help.tixl.app](https://help.tixl.app/). Content migrated, IA set, MkDocs + Vercel pipeline shipped. Operator-reference exporter populates `.help/docs/operators/`; the MkDocs auto-linker rewrites `[OperatorName]` refs to relative `.md` paths. Most images are local under `.help/docs/images/`. Remaining work is editorial (imported-page clean-up, stray external image URLs, missing image fixes inline) and the wiki-side banner/sidebar cutover.
 
 ## Goal
 
@@ -83,7 +83,7 @@ Then update `site_url` in `mkdocs.yml` back to `https://tixl.app/help/`. Cost to
 **Known surface quirks** (not blockers, future polish):
 
 - MkDocs Material prints a 2.0 announcement banner in terminals; cosmetic only.
-- `strict: false` means Vercel builds never fail on broken links / missing images. Editorial pass (Section 6) clears these; flip to `strict: true` afterward so regressions fail loudly.
+- ✅ `strict: true` flipped 2026-04-18 — broken links / missing images now fail the Vercel build instead of sliding through as warnings.
 
 ### 2. Prevent drift on migrated pages (wiki stays otherwise)
 
@@ -97,37 +97,21 @@ Only pages that have moved to `.help/` get retired — developer pages (`dev.*`,
    > Once the docs site is live, this banner will be updated to link to the rendered page.
    ```
    The `TIXL_MOVED_BANNER` HTML-comment marker lets the banner-update script (see below) find and rewrite each banner in place.
-2. **Update banners once the docs site is live.** Rewrite each banner's URL from the GitHub source link (`github.com/tixl3d/tixl/blob/main/.help/...`) to the rendered page (`help.tixl.app/<section>/<page>/`). Reuse the same script that created the banners; the mapping table in Section 5 is the single source of truth. The HTML-comment marker makes this idempotent.
-3. **Wiki sidebar update.** Edit `_Sidebar.md` to split the nav into "User docs (on `help.tixl.app`)" and "Developer docs (here)", with the user-docs links pointing at the rendered site once it's live.
+2. **Update banners once the docs site is live.** ✅ *Done (2026-04-18).* 35 banners rewritten to `help.tixl.app/<section>/<page>/` by [`.help/scripts/wiki/update_banners.py`](../../.help/scripts/wiki/update_banners.py), which parses Section 5's mapping table as its source of truth. Idempotent — safe to re-run after any table update. Push to the `t3.wiki` remote pending.
+3. **Wiki sidebar update.** ✅ *Done (2026-04-18).* `_Sidebar.md` now splits into a user-docs group (all links → `help.tixl.app`) and a developer-docs group (wiki-relative `dev.*` links). Push to the `t3.wiki` remote pending.
 4. **No release-time sync from `.help/` back to the wiki.** The docs site replaces the wiki copy entirely — the banner carries anyone landing on an old URL forward. No second source to keep consistent.
 5. **No wiki lockdown.** Developer pages still need to be editable. Restrict nothing; rely on the banner + sidebar to steer edits.
 
-### 3. Fetch images
+### 3. Images
 
-Most migrated pages reference images that currently point at `https://github.com/user-attachments/...` or the wiki's `images/` folder. Either path is fragile.
+**Status (2026-04-18):** No longer a dedicated phase. The bulk of local images have been copied into a central `.help/docs/images/` tree (e.g. `images/MosaicEffect/`, `images/MigrateFromT3/`, `images/timeline/`). Any remaining missing-image warnings are folded into the editorial pass (Section 6) — fix them inline on the page you're reviewing rather than batching.
 
-1. Inventory: scan `.help/**/*.md` for image references and produce three buckets:
-   - GitHub `user-attachments` URLs → fetch, commit under `.help/<section>/images/` (or `.help/ui/images/timeline/`, co-located with the page).
-   - `https://user-images.githubusercontent.com/...` — same treatment.
-   - References already like `images/xxx.png` but with no local file yet → search `../t3.wiki/images/` and copy.
-2. Compress: run every fetched PNG through `oxipng` / `pngquant` and every GIF through `gifsicle -O3`.
-3. Rewrite: replace URLs in the markdown with relative paths, add descriptive alt text per STYLE.md.
-4. Target dimensions: ≤1600 px wide; screenshots ≤500 KB, animations ≤2 MB.
+Residual items to handle opportunistically:
 
-**Currently unresolved image references** (local paths that need fetched images):
-
-- `ui/TimeLine.md` — `images/timeline/anim-8.gif`, `image-9.png`, `anim-9.gif`, `anim-4.gif`, `image-7.png`, `anim-6.gif`, `image-8.png`, `anim-10.gif`. Sources in `../t3.wiki/images/`.
-- `advanced/ConvertSDFs.md` — `images/convert-sdfs/image.png`, `anim.gif`, `anim-1.gif`. Likely under `../t3.wiki/help.ConvertSDFs/`.
-- `setup/InstallLinux.md` — keeps several `github.com/user-attachments` URLs (works today, but should be localized).
-- `setup/InstallMacOS.md` — 20+ `github.com/user-attachments` URLs.
-- `setup/InstallDev.md` — one `github.com/user-attachments` URL.
-- `general/LivePerformances.md` — two `user-images.githubusercontent.com` URLs.
-- `general/AddingFonts.md` — two `github.com/user-attachments` URLs.
-- `general/Introduction.md` — YouTube thumbnail (external, fine).
-- `advanced/AddingFonts.md` — same as `general/AddingFonts.md` (see "Duplicates", below).
-- `ui/PresetsAndSnapshots.md` — four `user-images.githubusercontent.com` URLs.
-- `advanced/OSC.md` — several `github.com/tixl3d/tixl/assets/...` URLs.
-- `advanced/SvgLineFonts.md` — one `user-images.githubusercontent.com` URL.
+- **External URLs still in pages** (`github.com/user-attachments/…`, `user-images.githubusercontent.com/…`, `github.com/tixl3d/tixl/assets/…`). These render today; only risk is GitHub rotating them later. Localise if you're editing the page anyway; don't open PRs just for this.
+- **Compression.** Once the image tree stabilises, run `oxipng`/`pngquant` over PNGs and `gifsicle -O3` over GIFs in `.help/docs/images/`. One-shot cleanup, not blocking anything.
+- **Path convention.** Existing pages use site-absolute `/images/...` paths. These work while the site serves from the domain root (`help.tixl.app`), but will break if it's ever rewritten to a sub-path (e.g. `tixl.app/help/*` per Section 1's optional follow-up). If that flip happens, sweep to relative `../images/...` — trivial script pass.
+- **Target dimensions** when adding new images: ≤1600 px wide; screenshots ≤500 KB, animations ≤2 MB.
 
 ### 4. Migrate remaining user-facing pages
 
@@ -151,7 +135,7 @@ Most migrated pages reference images that currently point at `https://github.com
 - ✅ `help.ShaderDevelopmentExample.md` → `advanced/ShaderDevelopmentExample.md`
 - ✅ `help.SkillQuest.md` → `general/SkillQuest.md`
 - ✅ `help.FaqDevOps.md` → `advanced/FaqDevOps.md`. Cross-link from `advanced/WritingCodeOps.md`; fold small duplicates in the latter as part of the editorial pass.
-- `(wip)-Your-first-C#-operator.md` — bannered with "being merged into WritingCodeOps". **Still to do: perform the merge, then delete the wiki copy.**
+- ✅ `(wip)-Your-first-C#-operator.md` — merged into `advanced/WritingCodeOps.md` (2026-04-18). Added the "TiXL *is* the SDK" framing up top and a second "Combine existing operators into a new type" walkthrough alongside the existing Duplicate-based path. Dropped the canned-JSON network snippet and the 2024 screenshot URLs. Wiki copy deleted.
 
 Follow-up for every migrated page:
 
@@ -189,9 +173,11 @@ These stay editable on the wiki. They get **no redirect banners** and **no migra
 
 **Delete from the wiki** (obsolete or superseded):
 
-- `dev.WikiConventions.md` — superseded by `.help/STYLE.md`.
-- `dev.ContributingToTheWiki.md` — superseded by `.help/STYLE.md`.
-- `dev.DocumentationPush.md` — superseded by this plan.
+- ✅ `dev.WikiConventions.md` — superseded by `.help/STYLE.md`. Deleted 2026-04-18.
+- ✅ `dev.ContributingToTheWiki.md` — superseded by `.help/STYLE.md`. Deleted 2026-04-18.
+- ✅ `dev.DocumentationPush.md` — superseded by this plan. Deleted 2026-04-18.
+
+All three are staged in the `t3.wiki` checkout; push pending alongside the banner/sidebar updates.
 
 ### 4b. Do not migrate, do not keep
 
@@ -471,17 +457,19 @@ Add a line to `.claude/CLAUDE.md` under "Project Conventions":
 
 **Next session, in priority order:**
 
-1. **Update wiki banners from GitHub-source URLs to rendered URLs** (`help.tixl.app/<section>/<page>/`). Drive via the banner Python script using the mapping table in Section 5. The `TIXL_MOVED_BANNER` HTML-comment marker makes the rewrite idempotent. Push to `t3.wiki` remote once it looks good. Section 2.2.
-2. **Wiki `_Sidebar.md` split** into "User docs (on help.tixl.app)" and "Developer docs". Section 2.3.
+1. ✅ **Wiki banners updated** — 35 migrated pages now point at `help.tixl.app/<section>/<page>/` via [`.help/scripts/wiki/update_banners.py`](../../.help/scripts/wiki/update_banners.py), driven by the Section 5 mapping table. Idempotent (verified with a second run). Still needs a push to the `t3.wiki` remote. Section 2.2.
+2. ✅ **Wiki `_Sidebar.md` split** — user docs now link to `help.tixl.app`; developer docs stay editable on the wiki. Still needs a push. Section 2.3.
 3. **Editorial pass on migrated pages** per STYLE.md — voice, relative links, `help.X` wiki links → proper paths, operator-brackets convention, obsolete-content pruning. Each cleared page gets one fewer warning; flip `strict: true` in `mkdocs.yml` once the count hits zero. Section 6.
-4. **Image fetch and localization.** Section 3 — scan for external `github.com/user-attachments` and `user-images.githubusercontent.com` URLs, download into `.help/docs/<section>/images/`, compress, rewrite references.
-5. ✅ **Retarget the operator exporter** — [ExportWikiDocumentation.cs](../../Editor/Gui/UiHelpers/Wiki/ExportWikiDocumentation.cs) writes `.help/docs/operators/` with the nested layout plus `index.json`. User runs **Documentation → Export as WIKI** once to populate the folder, then commits.
-6. ✅ **Enable the operator auto-linker hook** — registered in `mkdocs.yml`, sourced from [`scripts/docs/op_autolinks.py`](../../.help/scripts/docs/op_autolinks.py). Section 4c.
-7. **Merge `(wip)-Your-first-C#-operator.md`** into `WritingCodeOps.md`, delete wiki copy. Section 4.
-8. **Prune obsolete wiki pages:** `dev.WikiConventions`, `dev.ContributingToTheWiki`, `dev.DocumentationPush`. Section 4a.
+4. ✅ **Retarget the operator exporter** — [ExportWikiDocumentation.cs](../../Editor/Gui/UiHelpers/Wiki/ExportWikiDocumentation.cs) writes `.help/docs/operators/` with the nested layout plus `index.json`. User runs **Documentation → Export as WIKI** once to populate the folder, then commits.
+5. ✅ **Enable the operator auto-linker hook** — registered in `mkdocs.yml`, sourced from [`scripts/docs/op_autolinks.py`](../../.help/scripts/docs/op_autolinks.py). Section 4c.
+6. ✅ **Merged `(wip)-Your-first-C#-operator.md`** into `advanced/WritingCodeOps.md` (2026-04-18). Wiki copy deleted; push pending with the other wiki changes. Section 4.
+7. ✅ **Pruned obsolete wiki pages** (2026-04-18) — `dev.WikiConventions`, `dev.ContributingToTheWiki`, `dev.DocumentationPush` deleted; push pending. Section 4a.
+
+(Image handling — previously Section 3 as a dedicated phase — is now folded into the editorial pass. See Section 3 for the residual items.)
 
 **Later, when it matters:**
 
 - Versioning via `mike` or hand-rolled per-version subdirs. Section 1 "Versioning — deferred".
 - Optional `vercel.json` rewrite on the Figma `tixl.app` project to expose docs at `tixl.app/help/*` in addition to `help.tixl.app`. Section 1 "Optional follow-up".
+- Batch image compression (`oxipng`/`pngquant`/`gifsicle`) over `.help/docs/images/`. Section 3 residual.
 - Content sources: turn `.help/.src/` scripts (ShaderGraph, Making-of Ashborn, release notes, v3.9 video) into proper pages; extract selected meet-up segments via Whisper. Discussed in chat, not yet in a dedicated section.
