@@ -36,11 +36,6 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
     {
         MouseClickChangedSelection = false;
         var symbolUi = compositionOp.GetSymbolUi();
-        if (CurvesTablesNeedsRefresh)
-        {
-            RebuildCurveTables();
-            CurvesTablesNeedsRefresh = false;
-        }
 
         var drawList = ImGui.GetWindowDrawList();
 
@@ -279,19 +274,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
 
     public readonly HashSet<int> PinnedParametersHashes = new();
 
-    public bool IsKeyframeSelected(VDefinition v) => SelectedKeyframes.Contains(v);
-
-    public int SelectionChangeCounter => SelectedKeyframes.ChangeCounter;
-
-    public int SelectedKeyframeCount => SelectedKeyframes.Count;
-
-    /// <summary>Enumerate the currently selected keyframes (for read-only iteration).</summary>
-    public IEnumerable<VDefinition> EnumerateSelectedKeyframes() => SelectedKeyframes;
-
-    /// <summary>Enumerate every visible keyframe across the timeline's animation parameters.</summary>
-    public IEnumerable<VDefinition> EnumerateAllKeyframes() => GetAllKeyframes();
-
-    /// <summary>The curves owning the currently selected keyframes (dedup'd).</summary>
+    /// <summary>Curves that own currently selected keyframes (dedup'd). DopeSheetArea-specific for paste logic.</summary>
     public void CopyCurvesOfSelectedKeyframesTo(List<Curve> buffer)
     {
         buffer.Clear();
@@ -306,65 +289,6 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
                 }
             }
         }
-    }
-
-    /// <summary>All curves owned by the timeline's animation parameters.</summary>
-    public void CopyAllCurvesTo(List<Curve> buffer)
-    {
-        buffer.Clear();
-        foreach (var curve in GetAllCurves())
-            buffer.Add(curve);
-    }
-
-    public void ReplaceKeyframeSelection(IEnumerable<VDefinition> keys)
-    {
-        SelectedKeyframes.Clear();
-        SelectedKeyframes.UnionWith(keys);
-        TimeLineCanvas.Current?.OnKeyframeSelectionReplaced();
-    }
-
-    public void AddToKeyframeSelection(IReadOnlyList<VDefinition> keys)
-    {
-        for (var i = 0; i < keys.Count; i++)
-            SelectedKeyframes.Add(keys[i]);
-    }
-
-    public void RemoveFromKeyframeSelection(IReadOnlyList<VDefinition> keys)
-    {
-        for (var i = 0; i < keys.Count; i++)
-            SelectedKeyframes.Remove(keys[i]);
-    }
-
-    /// <summary>Copy the current keyframe selection into <paramref name="buffer"/> (cleared first).</summary>
-    public void CopyKeyframeSelectionTo(List<VDefinition> buffer)
-    {
-        buffer.Clear();
-        foreach (var v in SelectedKeyframes)
-            buffer.Add(v);
-    }
-
-    /// <summary>U-range spanning every keyframe across all currently visible animation parameters.</summary>
-    public TimeRange GetAllKeyframesTimeRange()
-    {
-        var range = TimeRange.Undefined;
-        foreach (var v in GetAllKeyframes())
-            range.Unite((float)v.U);
-        return range;
-    }
-
-    /// <summary>Replace the keyframe selection with every keyframe of the currently visible animation parameters.</summary>
-    public void SelectAllKeyframes()
-    {
-        SelectedKeyframes.Clear();
-        SelectedKeyframes.UnionWith(GetAllKeyframes());
-    }
-
-    /// <summary>Shifts the given keyframes in time and rebuilds curve tables. Caller is responsible for undo-wrapping.</summary>
-    public void ApplyKeyframeTimeOffset(IReadOnlyList<VDefinition> keys, double deltaU)
-    {
-        for (var i = 0; i < keys.Count; i++)
-            keys[i].U += deltaU;
-        RebuildCurveTables();
     }
 
     private bool HandleCreateNewKeyframes(TimeLineCanvas.AnimationParameter parameter, ImRect layerArea)

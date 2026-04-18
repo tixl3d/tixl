@@ -55,10 +55,12 @@ internal sealed class TimeWarpDrag
             _handlesCommand = new SetTimeWarpHandlesCommand(_handles, _origHandles);
         }
 
-        // Snapshot keyframes that are in the affected range (or all, for pure translation).
+        // Snapshot keyframes that are in the affected range (or all, for pure translation),
+        // aggregated across every active keyframe editor (DopeSheet + CurveEditor when split).
+        var editors = _canvas.KeyframeEditors;
         var source = useAllKeyframes
-                         ? _canvas.DopeSheetArea.EnumerateAllKeyframes()
-                         : _canvas.DopeSheetArea.EnumerateSelectedKeyframes();
+                         ? editors.EnumerateAllKeyframes()
+                         : editors.EnumerateAllSelectedKeyframes();
         foreach (var def in source)
         {
             if (!pureTranslation && !InsideAffectedRange(def.U))
@@ -69,7 +71,7 @@ internal sealed class TimeWarpDrag
 
         if (_keys.Count > 0)
         {
-            _canvas.DopeSheetArea.CopyAllCurvesTo(_curves);
+            editors.CopyAllCurvesTo(_curves);
             _keyframesCommand = new ChangeKeyframesCommand(_keys, _curves);
         }
 

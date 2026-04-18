@@ -99,15 +99,15 @@ internal sealed class SelectionRangeIndicator : IValueSnapAttractor
         rulerSize = ImGui.GetWindowSize();
         scale = T3Ui.UiScaleFactor;
 
-        var dopeSheet = _canvas.DopeSheetArea;
+        var editors = _canvas.KeyframeEditors;
         var layers = _canvas.LayersArea;
 
-        // Keyframes: selection if it covers a positive range, else fall back to all keyframes.
-        // Clips: only selected clips contribute.
-        var keyframeRange = dopeSheet.GetSelectionTimeRange();
+        // Keyframes: aggregated across all active editors — selection if it covers a positive range,
+        // else fall back to all keyframes. Clips: only selected clips contribute.
+        var keyframeRange = editors.GetSelectionTimeRange();
         _autoSelectKeyframesOnDrag = !keyframeRange.IsValid || keyframeRange.Duration <= 0;
         if (_autoSelectKeyframesOnDrag)
-            keyframeRange = dopeSheet.GetAllKeyframesTimeRange();
+            keyframeRange = editors.GetAllKeyframesTimeRange();
 
         var clipRange = layers.GetSelectionTimeRange();
 
@@ -364,7 +364,7 @@ internal sealed class SelectionRangeIndicator : IValueSnapAttractor
     private void StartEdgeDrag(in Guid compositionSymbolId, bool isStart, double originalU)
     {
         if (_autoSelectKeyframesOnDrag)
-            _canvas.DopeSheetArea.SelectAllKeyframes();
+            _canvas.KeyframeEditors.SelectAllKeyframes();
 
         if (_handles.HasVisible)
         {
@@ -444,7 +444,7 @@ internal sealed class SelectionRangeIndicator : IValueSnapAttractor
     private void StartMiddleDrag(in Guid compositionSymbolId, double pressU)
     {
         if (_autoSelectKeyframesOnDrag)
-            _canvas.DopeSheetArea.SelectAllKeyframes();
+            _canvas.KeyframeEditors.SelectAllKeyframes();
 
         _middleOrigPressU = pressU;
         _middleOrigStart = _range.Start;

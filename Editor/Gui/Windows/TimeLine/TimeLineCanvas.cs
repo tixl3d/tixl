@@ -50,6 +50,8 @@ internal sealed class TimeLineCanvas : AnimationCanvas
         SnapHandlerForU.AddSnapAttractor(_selectionRangeIndicator);
         _selectionDragSnapExclusions = [_selectionRangeIndicator];
 
+        KeyframeEditors = new KeyframeEditorGroup(_activeKeyframeEditors);
+
         FoldingHeight = new TimelineHeight(this);
         Playback = null!;
     }
@@ -60,6 +62,14 @@ internal sealed class TimeLineCanvas : AnimationCanvas
     /// so snapping to it during such a drag forms a feedback loop that stutters the boundary keys.
     /// </summary>
     internal IValueSnapAttractor[] SelectionDragSnapExclusions => _selectionDragSnapExclusions;
+
+    /// <summary>
+    /// Every currently-active animation-parameter editor on the timeline. Today this is always
+    /// a single editor (DopeSheetArea in DopeView mode, TimelineCurveEditArea in CurveEditor mode);
+    /// future split-view will expose both simultaneously. Cross-mode components (SRI, TimeSelectionArea,
+    /// TimeWarpDrag) aggregate through <see cref="KeyframeEditors"/> so they don't need to pick one.
+    /// </summary>
+    public readonly KeyframeEditorGroup KeyframeEditors;
 
     /// <summary>
     /// Invoked when the keyframe selection is explicitly replaced (not merely added to / removed from).
@@ -116,11 +126,15 @@ internal sealed class TimeLineCanvas : AnimationCanvas
             {
                 ImGui.PushStyleColor(ImGuiCol.ChildBg, UiColors.GridLines.Fade(0.15f).Rgba);
                 ImGui.BeginChild("##selectionArea", new Vector2(0,SummaryHeight));
-                _timeSelectionArea.Draw(compositionOp, _selectedAnimationParameters, DopeSheetArea, ImGui.GetWindowDrawList());
+                _timeSelectionArea.Draw(compositionOp, _selectedAnimationParameters, KeyframeEditors, ImGui.GetWindowDrawList());
                 ImGui.EndChild();
                 ImGui.PopStyleColor();
             }
-            
+
+            // SRI and SA may have mutated keyframe U values via TimeWarpDrag / the SA's ApplyKeyframeTimeOffset.
+            // Rebuild each active editor's curve tables once, centrally, so downstream editor draws see sorted curves.
+            KeyframeEditors.ProcessPendingCurveTableRebuild();
+
             HandleDeferredActions();
 
             ImGui.BeginChild(ImGuiTitle, new Vector2(0, 0), ImGuiChildFlags.Borders,
@@ -369,11 +383,13 @@ internal sealed class TimeLineCanvas : AnimationCanvas
                 TimeObjectManipulators.Remove(DopeSheetArea);
                 TimeObjectManipulators.Remove(LayersArea);
                 SnapHandlerForU.RemoveSnapAttractor(DopeSheetArea);
+                _activeKeyframeEditors.Remove(DopeSheetArea);
                 break;
 
             case Modes.CurveEditor:
                 TimeObjectManipulators.Remove(_timelineCurveEditArea);
                 SnapHandlerForU.RemoveSnapAttractor(_timelineCurveEditArea);
+                _activeKeyframeEditors.Remove(_timelineCurveEditArea);
                 break;
         }
 
@@ -383,11 +399,13 @@ internal sealed class TimeLineCanvas : AnimationCanvas
                 TimeObjectManipulators.Add(DopeSheetArea);
                 TimeObjectManipulators.Add(LayersArea);
                 SnapHandlerForU.AddSnapAttractor(DopeSheetArea);
+                _activeKeyframeEditors.Add(DopeSheetArea);
                 break;
 
             case Modes.CurveEditor:
                 TimeObjectManipulators.Add(_timelineCurveEditArea);
                 SnapHandlerForU.AddSnapAttractor(_timelineCurveEditArea);
+                _activeKeyframeEditors.Add(_timelineCurveEditArea);
                 break;
 
             case Modes.Undefined:
@@ -624,6 +642,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
     private readonly SelectionRangeIndicator _selectionRangeIndicator;
     private readonly TimeSelectionArea _timeSelectionArea;
     private readonly IValueSnapAttractor[] _selectionDragSnapExclusions;
+    private readonly List<AnimationParameterEditing> _activeKeyframeEditors = new(2);
     private readonly NodeSelection _nodeSelection;
 
     private double _lastPlaybackSpeed;

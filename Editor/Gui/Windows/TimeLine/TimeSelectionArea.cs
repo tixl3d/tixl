@@ -38,7 +38,7 @@ internal sealed class TimeSelectionArea
     public void Draw(
         Instance composition,
         List<TimeLineCanvas.AnimationParameter> animationParameters,
-        DopeSheetArea dopeSheetArea,
+        KeyframeEditorGroup editors,
         ImDrawListPtr drawList)
     {
         var windowPos = ImGui.GetWindowPos();
@@ -46,10 +46,10 @@ internal sealed class TimeSelectionArea
         var scaleX = _canvas.Scale.X;
         var scrollX = _canvas.Scroll.X;
 
-        var hash = ComputeStateHash(animationParameters, dopeSheetArea, scaleX, scrollX, windowPos, windowSize);
+        var hash = ComputeStateHash(animationParameters, editors, scaleX, scrollX, windowPos, windowSize);
         if (hash != _cachedStateHash)
         {
-            RebuildBuckets(animationParameters, dopeSheetArea, windowPos, windowSize);
+            RebuildBuckets(animationParameters, editors, windowPos, windowSize);
             _cachedStateHash = hash;
         }
 
@@ -103,7 +103,7 @@ internal sealed class TimeSelectionArea
                 _fenceStartScreen = ImGui.GetMousePos();
                 // Snapshot the pre-fence selection so Add/Remove modes are relative to it every frame,
                 // not accumulated across frames as the fence moves.
-                dopeSheetArea.CopyKeyframeSelectionTo(_preFenceSnapshot);
+                editors.CopyAllSelectedKeyframesTo(_preFenceSnapshot);
             }
         }
 
@@ -143,8 +143,8 @@ internal sealed class TimeSelectionArea
             // Apply the fence live (from the pre-fence snapshot) so the DopeSheet keyframes reflect
             // the selection while dragging — not just after release. Add/Remove modes stay coherent
             // because we rebase from the snapshot each frame instead of accumulating.
-            dopeSheetArea.ReplaceKeyframeSelection(_preFenceSnapshot);
-            ApplyFenceSelection(liveFenceRect, liveFenceMode, dopeSheetArea);
+            editors.ReplaceKeyframeSelection(_preFenceSnapshot);
+            ApplyFenceSelection(liveFenceRect, liveFenceMode, editors);
         }
 
         if (_isDragging && isItemActive && _draggingKeys.Count > 0)
@@ -162,7 +162,7 @@ internal sealed class TimeSelectionArea
 
             var du = desiredAnchorU - _draggingKeys[0].U;
             if (du != 0)
-                dopeSheetArea.ApplyKeyframeTimeOffset(_draggingKeys, du);
+                editors.ApplyKeyframeTimeOffset(_draggingKeys, du);
         }
 
         if (isItemDeactivated)
@@ -184,7 +184,7 @@ internal sealed class TimeSelectionArea
                     var b = _cachedBuckets[pressedIndex];
                     for (var i = 0; i < b.KeyCount; i++)
                         _tempBucketKeys.Add(_rawKeys[b.FirstKeyIndex + i].Def);
-                    dopeSheetArea.ReplaceKeyframeSelection(_tempBucketKeys);
+                    editors.ReplaceKeyframeSelection(_tempBucketKeys);
                 }
             }
             else if (_isFencing)
@@ -193,14 +193,14 @@ internal sealed class TimeSelectionArea
                 // which is false on the deactivation frame, so the committed state could otherwise lag
                 // the user's last motion by one frame).
                 var fenceRect = BuildFenceRect(ImGui.GetMousePos(), windowPos, windowSize);
-                dopeSheetArea.ReplaceKeyframeSelection(_preFenceSnapshot);
-                ApplyFenceSelection(fenceRect, GetSelectMode(ImGui.GetIO()), dopeSheetArea);
+                editors.ReplaceKeyframeSelection(_preFenceSnapshot);
+                ApplyFenceSelection(fenceRect, GetSelectMode(ImGui.GetIO()), editors);
             }
             else if (_isBackgroundPressed)
             {
                 // Click on SA background without drag: clear keyframe selection.
                 _tempBucketKeys.Clear();
-                dopeSheetArea.ReplaceKeyframeSelection(_tempBucketKeys);
+                editors.ReplaceKeyframeSelection(_tempBucketKeys);
             }
 
             _isPressed = false;
@@ -260,7 +260,7 @@ internal sealed class TimeSelectionArea
                           new Vector2(maxX, windowPos.Y + windowSize.Y));
     }
 
-    private void ApplyFenceSelection(ImRect fenceRect, SelectionFence.SelectModes mode, DopeSheetArea dopeSheetArea)
+    private void ApplyFenceSelection(ImRect fenceRect, SelectionFence.SelectModes mode, KeyframeEditorGroup editors)
     {
         // Buckets are drawn on a single Y-row; fence selection is effectively a 1D X-range test.
         _tempBucketKeys.Clear();
@@ -277,13 +277,13 @@ internal sealed class TimeSelectionArea
         switch (mode)
         {
             case SelectionFence.SelectModes.Replace:
-                dopeSheetArea.ReplaceKeyframeSelection(_tempBucketKeys);
+                editors.ReplaceKeyframeSelection(_tempBucketKeys);
                 break;
             case SelectionFence.SelectModes.Add:
-                dopeSheetArea.AddToKeyframeSelection(_tempBucketKeys);
+                editors.AddToKeyframeSelection(_tempBucketKeys);
                 break;
             case SelectionFence.SelectModes.Remove:
-                dopeSheetArea.RemoveFromKeyframeSelection(_tempBucketKeys);
+                editors.RemoveFromKeyframeSelection(_tempBucketKeys);
                 break;
         }
     }
@@ -337,7 +337,7 @@ internal sealed class TimeSelectionArea
 
     private int ComputeStateHash(
         List<TimeLineCanvas.AnimationParameter> parameters,
-        DopeSheetArea dope,
+        KeyframeEditorGroup editors,
         float scaleX,
         float scrollX,
         Vector2 windowPos,
@@ -356,13 +356,13 @@ internal sealed class TimeSelectionArea
             for (var ci = 0; ci < p.Curves.Length; ci++)
                 hash = hash * 31 + p.Curves[ci].ChangeCount;
         }
-        hash = hash * 31 + dope.SelectionChangeCounter;
+        hash = hash * 31 + editors.AggregateSelectionChangeCounter;
         return hash;
     }
 
     private void RebuildBuckets(
         List<TimeLineCanvas.AnimationParameter> animationParameters,
-        DopeSheetArea dopeSheetArea,
+        KeyframeEditorGroup editors,
         Vector2 windowPos,
         Vector2 windowSize)
     {
@@ -390,7 +390,7 @@ internal sealed class TimeSelectionArea
                     _rawKeys.Add(new RawKey
                                      {
                                          ScreenX = x,
-                                         IsSelected = dopeSheetArea.IsKeyframeSelected(def),
+                                         IsSelected = editors.IsKeyframeSelectedInAny(def),
                                          Def = def,
                                          Curve = curve,
                                      });
