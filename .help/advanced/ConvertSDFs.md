@@ -1,11 +1,10 @@
-# A Quick guide how to convert shader functions for Raymarching
+# Converting raymarching shader functions
 
+[Jon Baker, Graphics Programming](https://jbaker.graphics/writings/DEC.html) is an excellent resource for shader functions, especially signed distance fields.
 
-[Jon Baker, Graphics Programming](https://jbaker.graphics/writings/DEC.html) is an incredible resources for shader functions, especially for signed distance fields. 
+This page explains how to convert those into a form you can use with the `[CustomSDF]` operator.
 
-This page explains how to convert these to use them with the [CustomSDF] operator.
-
-![alt text](help.ConvertSDFs/image.png)
+![CustomSDF example](images/convert-sdfs/image.png)
 
 
 ```glsl
@@ -84,7 +83,7 @@ return (length(p2.xz/p2.w) * A);          // Let's use A so we can tweak it...
 ```
 
 
-![alt text](help.ConvertSDFs/anim.gif)
+![Tweaking parameter A](images/convert-sdfs/anim.gif)
 
 
 Keeping the defaults as comments might be a good idea...
@@ -103,7 +102,7 @@ return ( length(p2.xz / p2.w) * A);   // A: 0.25
 Creating presets is even cooler, because it allows you to keep the original code and blend between paramters.
 (BTW. You may need to move your camera further away to see the fractal correctly)
 
-![alt text](help.ConvertSDFs/anim-1.gif)
+![Blending between presets](images/convert-sdfs/anim-1.gif)
 
 
 ## Add credits and details

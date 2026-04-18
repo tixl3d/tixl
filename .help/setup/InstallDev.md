@@ -20,8 +20,8 @@ Rider is an excellent IDE for developing .net applications. It's free to use for
 
 ## Additional requirements
 
-- You might also want to download and install a git client, like [git-fork](https://git-fork.com/). Alternatively, you can install the bare bone git scm.
-- You also need to install [Windows Graphics tools](#Installation), although this will also installed by the TiXL releases, so it might already be installed.
+- A git client is useful but optional. [git-fork](https://git-fork.com/) is a good graphical option; plain `git` works too.
+- Windows Graphics Tools. The TiXL installer sets these up for you (see [Installation](Installation.md)), so you may already have them.
 
 ## Cloning the repository.
 
@@ -68,13 +68,6 @@ git clone git@github.com:tixl3d/tixl.git
 2. Press run - On the first start, the IDE will have to fetch all dependencies and packages which can take a minute or so.
 3. The editor should start as expected.
 
-----
+## See also
 
-Read next: 
-
-- [Running TiXL from an IDE](dev.UsingDev)
-- [Writing c# Ops](dev.WritingCodeOps)
-
-
-
-
+- [Writing C# operators](../advanced/WritingCodeOps.md)

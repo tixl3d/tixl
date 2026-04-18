@@ -1,11 +1,10 @@
-# TiXL v4.1
-### (How to install and run TiXL on Linux)
+# Install on Linux
 
-# Installation
+This guide covers running TiXL on Linux under Wine. Native Linux support is not yet available.
 
 ## Prerequisites
 
-Before installing TiXL, install Microsoft's .NET certificate package. This is to make sure your [custom operators](https://github.com/tixl3d/tixl/wiki/help.CreatingNewOps) are able to compile (as this runs `dotnet` in WINE under the hood, which can have certificate-related issues).
+Before installing TiXL, install Microsoft's .NET certificate package. This ensures your custom operators compile (TiXL runs `dotnet` via Wine, which can have certificate issues).
 1. Download both `codesignctl.pem` and `timestampctl.pem` from [.NET's github repository](https://github.com/dotnet/sdk/tree/main/src/Layout/redist/trustedroots).
 2. Install the certificates system-wide [(steps to do that linked here)](https://wiki.archlinux.org/title/User:Grawity/Adding_a_trusted_CA_certificate).
 

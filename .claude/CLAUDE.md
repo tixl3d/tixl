@@ -24,3 +24,9 @@
 - Use `UiColor`/`UiColors` helpers instead of hard-coded color values
 - Store references by `Guid`, not by direct object reference
 - Prefer editing existing files over creating new ones
+
+## Background and Documentation
+
+- **TiXL is the current product** (v4.x). **Tooll3** (v3.x) is the legacy predecessor — a large portion of v4 is a rewrite. Don't write new docs or features targeting Tooll3; treat remaining Tooll3 references in code as historical and prefer removing them over updating them unless there's a concrete migration use case.
+- User-facing documentation lives in `.help/` and publishes to `tixl.app/help/`. Developer / contributor topics stay on the GitHub wiki. Don't mix the two. See [`.help/STYLE.md`](../.help/STYLE.md) for writing conventions and [`.agentic/Plans/Plan_UpdateHelp.md`](../.agentic/Plans/Plan_UpdateHelp.md) for the overall docs plan.
+- When shipping a user-visible UI or behavior change, update the matching page under `.help/` in the same PR. If no suitable page exists, add one under the best-fitting section (`general/`, `setup/`, `ui/`, `advanced/`), or flag it in `Plan_UpdateHelp.md`.
