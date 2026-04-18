@@ -1,8 +1,17 @@
 # Welcome to TiXL
 
-TiXL is a visual programming environment for motion graphics, live visuals, and creative coding. You build a graph of operators — each operator does one thing, and the connections between them describe how the final image comes together. The result renders in real time.
+TiXL is an open-source tool for creating real-time motion graphics. We are targeting the sweet spot between real-time rendering, graph-based procedural content generation and linear keyframe animation and editing. This combination allows…
 
-This page is your crossroads.
+- artists to build audio-reactive VJ content
+- use advanced interfaces for exploring parameters
+- or to combine keyframe animation with automation
+
+Technical artists can also dive deeper and use TiXL for advanced development of fragment or compute shaders or to add input from midi controllers and sensors or sources like OSC or Spout.
+
+We strongly believe in usability and intuitive and beautiful interface design. That's why we experiment with different approaches before striking the right balance between usability and powerful flexibility. Currently TiXL version 4 is an ongoing development. It's stable enough to produce high-end visuals, create motion graphics, use many industry-standard features like color correction, scopes and tone mapping, and export standalone executables.
+
+We hope to bring together a community of artists, developers and creative tinkerers to drive the design and development of the software as a free open source project.
+
 
 ## Pick your path
 
@@ -13,7 +22,12 @@ This page is your crossroads.
 
 ## Where the community lives
 
-> *Still to write — the [Community](Community.md) page will list Discord, YouTube, meet-ups, and how to help.*
+If you have questions or feedback, the easiest way is to join us on Discord:
+
+ [![Discord](https://img.shields.io/discord/823853172619083816.svg?style=for-the-badge)](https://discord.gg/YmSyQdeH3S). 
+ 
+But the [Community](/getting-started/Community.md) is also active on GitHub, YouTube and in real life :-)
+
 
 ## What TiXL is not
 

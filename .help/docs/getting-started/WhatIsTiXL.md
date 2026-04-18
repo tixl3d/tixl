@@ -4,7 +4,7 @@
 
 TiXL is a real-time visual programming environment for Windows. You compose visuals by connecting **operators** in a graph: one operator generates an image, another adds bloom, another wraps it on a torus, another exports to a projector. The whole graph evaluates every frame, at display rate.
 
-It is built with C# and DirectX 11; its UI is ImGui-based; its effects pipeline uses HLSL compute and pixel shaders. Because it targets demo-scene-style small-executable export alongside interactive authoring, it is simultaneously a live tool *and* a production pipeline for standalone pieces.
+It is built with C# and DirectX 11; its UI is ImGui-based; its effects pipeline uses HLSL compute and pixel shaders. Because you can also export interactive applications, it is simultaneously a live tool *and* a production pipeline for standalone pieces.
 
 ## What people use TiXL for
 

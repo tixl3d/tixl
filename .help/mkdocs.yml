@@ -69,5 +69,8 @@ markdown_extensions:
       alternate_style: true
   - pymdownx.snippets
 
-# hooks:
-#   - scripts/docs/op_autolinks.py   # TODO: enable once the operator exporter writes .help/operators/
+hooks:
+  # Turns `[OperatorName]` prose references into links against the auto-generated operator
+  # reference. Reads `docs/operators/index.json` emitted by ExportWikiDocumentation.cs.
+  # No-op (with a one-line info log) if the index hasn't been generated yet.
+  - scripts/docs/op_autolinks.py

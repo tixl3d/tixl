@@ -87,5 +87,5 @@ TiXL uses realtime rendering, and a library called [Dear ImGui](https://github.c
 
 See also:
 
-- [Optimizing Rendering Performance](help.OptimizingRenderingPerformance)
-- [Real-time Rendering for Artists](help.RealtimeRendering)
+- [Optimizing Rendering Performance](/using/OptimizingRenderingPerformance)
+- [Real-time Rendering for Artists](/using/RealtimeRendering)

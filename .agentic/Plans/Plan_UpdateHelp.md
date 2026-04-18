@@ -1,61 +1,76 @@
 # Migrate documentation to `.help/` and publish via MkDocs
 
 **Date:** 2026-04-18
-**Status:** In progress. Seed pages moved from the legacy GitHub wiki (`../t3.wiki/`) into `.help/` and trimmed; site deployment and image migration are still open.
+**Status:** Site is live at [help.tixl.app](https://help.tixl.app/). Content migrated, IA set, MkDocs + Vercel pipeline shipped. Operator-reference exporter and auto-linker hook are wired up (waiting on a menu-driven run to populate `.help/docs/operators/`). Remaining work is editorial (imported-page clean-up) and the image fetch.
 
 ## Goal
 
 Split documentation along a clear line:
 
-- **`.help/` — user-facing.** Installation, UI, how-tos, FAQs, custom-shader / custom-operator authoring, live performance, advanced features. Single source of truth, ships with the code, publishes to `tixl3d.github.io`. Wiki pages that have been migrated here get a redirect banner pointing at the new URL.
+- **`.help/` — user-facing.** Installation, UI, how-tos, FAQs, custom-shader / custom-operator authoring, live performance, advanced features. Single source of truth, ships with the code, publishes to `help.tixl.app`. Wiki pages that have been migrated here get a redirect banner pointing at the new URL.
 - **GitHub wiki — developer-facing.** Building TiXL from source, coding conventions, CI, integration tests, renderdoc, git workflow, release process, ad-hoc design discussions. Stays editable on the wiki; no migration, no redirect banners for these pages.
 
 The line: **if a user making motion graphics or live visuals would want to read it, it goes into `.help/`. If only someone opening `t3.sln` would want to read it, it stays on the wiki.**
 
-## Current state (after this pass)
+## Current state
 
-- `.help/README.md` — index of migrated pages only; links to not-yet-migrated topics removed.
-- `.help/STYLE.md` — writing guide for contributors and agents.
-- 20 pages migrated under `general/`, `setup/`, `ui/`, `advanced/`. Filenames have had the `help.` / `dev.` / `help.ui.` prefixes stripped.
-- Internal cross-links pointing at renamed files have been fixed inline where the target page exists in `.help/`.
-- Per-page issues (typos, outdated instructions, missing images, sections that need rewriting) are catalogued below.
+- **Live site:** `https://help.tixl.app/` on Vercel, building from `main` on every push.
+- **Layout:**
+  ```
+  .help/
+  ├── README.md              contributor orientation (not published)
+  ├── mkdocs.yml             site config
+  ├── requirements-docs.txt  Python deps
+  ├── vercel.json            install / build / output for Vercel
+  ├── docs/                  mkdocs docs_dir — all markdown
+  │   ├── index.md  STYLE.md  .pages
+  │   ├── getting-started/  install/  using/  advanced/  contributing/  operators/
+  ├── site/                  build output (gitignored, inside .help/)
+  ├── .venv/                 build venv (Vercel + local; gitignored)
+  └── .src/                  raw source material for future pages (not published)
+  ```
+- **IA:** five top-level sections (`getting-started`, `install`, `using`, `advanced`, `contributing`) plus `operators` placeholder. Each section has a `README.md` listing pages present *and* topics still to write. Root-level + per-section `.pages` files drive ordering via the `awesome-pages` plugin.
+- **Pages migrated (36 total):** all user-facing `help.*` pages from the wiki — verbatim copies with banners on the wiki originals. Not yet edited for STYLE.md.
+- **Wiki banners:** each migrated wiki page starts with a `<!-- TIXL_MOVED_BANNER -->` block pointing at the GitHub source path. Script is idempotent; the next pass rewrites them to `help.tixl.app/<section>/<page>/` URLs.
+- **Operator reference:** placeholder `docs/operators/index.md` in place; exporter retarget still pending (Section 4c).
 
 ## Work plan
 
-### 1. MkDocs on Vercel (help.tixl.app)
+### 1. MkDocs on Vercel (help.tixl.app) ✅ shipped
 
-**MkDocs Material** built and hosted by **Vercel** on its own subdomain. Single-version for v1; `mike`-style versioning is deferred until there's a concrete need.
+Live at **https://help.tixl.app/** on Vercel, project name `tixl-help`, deploying from `main` on every push.
 
-Site URL: `https://help.tixl.app/`. No `/help/` path prefix — the subdomain is the prefix.
+**What's in the repo:**
 
-**Committed (2026-04-18):**
+- [`.help/mkdocs.yml`](../../.help/mkdocs.yml) — Material theme, edit-on-GitHub action, `navigation.footer` (auto Previous / Next), `awesome-pages` plugin reading `.pages` files for ordering. `docs_dir: docs`, `site_dir: site` (both inside `.help/`). `strict: false` for now; re-enable when editorial pass is clean. The operator auto-linker hook is commented out, waiting on the exporter retarget.
+- [`.help/requirements-docs.txt`](../../.help/requirements-docs.txt) — `mkdocs-material>=9.5`, `mkdocs-awesome-pages-plugin>=2.9`, `pymdown-extensions>=10.0`. No `mike`.
+- [`.help/vercel.json`](../../.help/vercel.json) — venv-based build, required because Vercel's Python is externally-managed (PEP 668) under `uv`:
+  ```json
+  {
+    "installCommand": "python3 -m venv .venv && .venv/bin/pip install -r requirements-docs.txt",
+    "buildCommand": ".venv/bin/mkdocs build",
+    "outputDirectory": "site",
+    "framework": null
+  }
+  ```
+- Vercel project **Root Directory** = `.help`. All paths in `vercel.json` are relative to that.
+- `.gitignore` excludes `.help/site/` and `.help/.venv/`.
 
-- [`.help/mkdocs.yml`](../../.help/mkdocs.yml) — Material theme, edit-on-GitHub action, `navigation.footer` (auto Previous / Next), `awesome-pages` for ordering via `.pages` files. `docs_dir: .` because the config file lives inside the docs dir itself. The `hooks:` line for the operator auto-linker is commented out until Section 4c's exporter retarget lands.
-- [`.help/requirements-docs.txt`](../../.help/requirements-docs.txt) — `mkdocs-material`, `mkdocs-awesome-pages`, `pymdown-extensions`. No `mike`.
-- `.help/site/` added to the project `.gitignore` (MkDocs build output).
-- **No explicit `nav:` tree** — ordering driven by `.pages` files already in place (root + each of the five sections).
+**Local preview:**
 
-**Still to do:**
+```bash
+pip install -r .help/requirements-docs.txt
+mkdocs serve -f .help/mkdocs.yml
+```
 
-1. **Local preview** — verify IA and footer-nav render as expected:
-   ```bash
-   pip install -r .help/requirements-docs.txt
-   mkdocs serve -f .help/mkdocs.yml
-   ```
-2. **New Vercel project** pointing at `github.com/tixl3d/tixl`:
-   - Framework preset: **Other**.
-   - Install command: `pip install -r .help/requirements-docs.txt`
-   - Build command: `mkdocs build -f .help/mkdocs.yml` *(re-add `--strict` once the editorial pass is done; see note below)*
-   - Output directory: `.help/site`
-3. **Domain** — Settings → Domains → add `help.tixl.app`. Vercel auto-creates the DNS entry because the apex `tixl.app` already uses Vercel nameservers (per the project dashboard).
-4. **Smoke test** — `git push`; the site should go live within ~90 s. Confirm `.help/index.md` becomes the landing page and `.pages` ordering took effect.
+Opens at `http://127.0.0.1:8000/`.
 
 **Versioning — deferred.** `mike` versions docs on a `gh-pages` branch, which Vercel doesn't speak. When versioning actually matters, options are:
 
 - Move docs to GitHub Pages + `mike` natively, or
-- Hand-roll per-version subdirectories (`/v4.1/`, `/v4.2/`, `/latest/`) via a small build script that commits to a `docs-publish` branch Vercel serves.
+- Hand-roll per-version subdirectories via a build script that commits to a `docs-publish` branch Vercel serves.
 
-Until then, `help.tixl.app` serves current `main`. External links wanting immortality can pin to a git commit via "Edit on GitHub".
+Until then, `help.tixl.app` serves current `main`. External links that need immortality can pin to a git commit via "Edit on GitHub".
 
 **Optional follow-up — unify onto `tixl.app/help/...`.** Add a `vercel.json` rewrite on the Figma (`tixl.app`) project:
 
@@ -63,7 +78,12 @@ Until then, `help.tixl.app` serves current `main`. External links wanting immort
 { "rewrites": [{ "source": "/help/:path*", "destination": "https://help.tixl.app/:path*" }] }
 ```
 
-Then update `site_url` in `mkdocs.yml` back to `https://tixl.app/help/` and refresh the auto-linker's `index.json` URL field. Cost to switch later: trivial.
+Then update `site_url` in `mkdocs.yml` back to `https://tixl.app/help/`. Cost to switch: trivial.
+
+**Known surface quirks** (not blockers, future polish):
+
+- MkDocs Material prints a 2.0 announcement banner in terminals; cosmetic only.
+- `strict: false` means Vercel builds never fail on broken links / missing images. Editorial pass (Section 6) clears these; flip to `strict: true` afterward so regressions fail loudly.
 
 ### 2. Prevent drift on migrated pages (wiki stays otherwise)
 
@@ -201,10 +221,12 @@ Rules for forming the path:
 
 #### Retarget the exporter
 
-1. `WikiOperatorsFolder` in `ExportWikiDocumentation.cs` changes from `t3.wiki/operators/` to `.help/operators/`.
-2. Switch to a **nested folder layout** matching the URL:
+**Status (2026-04-18):** Done. [`ExportWikiDocumentation.cs`](../../Editor/Gui/UiHelpers/Wiki/ExportWikiDocumentation.cs) now writes `.help/docs/operators/` with the nested layout, per-namespace `README.md` indices, and an `index.json` sidecar. Editor builds green. Still pending: the user runs **Documentation → Export as WIKI** to populate the folder from the live symbol graph, commits the output, and we flip the placeholder `operators/index.md` into final form (already updated to link into the generated tree).
+
+1. ✅ `WikiOperatorsFolder` in `ExportWikiDocumentation.cs` changes from `t3.wiki/operators/` to `.help/docs/operators/` (constant renamed to `HelpOperatorsFolder`).
+2. ✅ Switch to a **nested folder layout** matching the URL:
    ```
-   .help/operators/
+   .help/docs/operators/
      lib/
        field/
          adjust/
@@ -213,10 +235,10 @@ Rules for forming the path:
          adjust/
            AdjustColors.md
    ```
-   Implementation in the exporter: split `symbol.Namespace` on `.`, lowercase all segments, `mkdir -p` the chain, write `{SymbolName}.md` at the leaf.
-3. Rewrite the "in [Lib.field.adjust](lib)" back-link to a relative link at the enclosing index (e.g. `../` to the namespace's `README.md`, or a MkDocs section index auto-created by the `awesome-pages` plugin).
-4. Generate namespace index pages (`.help/operators/lib/README.md`, `.help/operators/lib/field/README.md`, …) listing the operators in that namespace with their short descriptions. Replaces the monolithic `lib.md` TOC that the old exporter wrote.
-5. Emit `.help/operators/index.json` used by the auto-linker:
+   Implemented by `NamespaceToRelDir`: split `symbol.Namespace` on `.`, lowercase all segments, `mkdir -p` the chain, write `{SymbolName}.md` at the leaf.
+3. ✅ Rewrote the back-link to `*in [Lib.field.adjust](README.md)*` — resolves to the namespace index in the same folder.
+4. ✅ Generated namespace index pages (`.help/docs/operators/lib/README.md`, `.help/docs/operators/lib/field/README.md`, …) listing sub-namespaces and the operators at each level with their short descriptions. Replaces the monolithic `lib.md` TOC.
+5. ✅ Emit `.help/docs/operators/index.json` used by the auto-linker:
    ```json
    {
      "by_fullpath": {
@@ -241,9 +263,11 @@ Rules for forming the path:
 
 #### Auto-linking operator references in prose
 
-Help pages already write `[AdjustColors]` or `[AudioReaction]` inline. Today these render as literal text. Make them into links.
+**Status (2026-04-18):** Done. Hook lives at [`.help/scripts/docs/op_autolinks.py`](../../.help/scripts/docs/op_autolinks.py) and is registered in [`mkdocs.yml`](../../.help/mkdocs.yml). Silent no-op until `index.json` exists, so the Vercel build keeps succeeding even before the exporter has been run.
 
-1. Adopt a small MkDocs hook (preferred over a published plugin for deployment simplicity). Hooks live in `scripts/docs/op_autolinks.py`, registered in `mkdocs.yml` as `hooks: [scripts/docs/op_autolinks.py]`.
+Help pages already write `[AdjustColors]` or `[AudioReaction]` inline. Today these render as literal text. The hook turns them into links.
+
+1. ✅ MkDocs hook at `.help/scripts/docs/op_autolinks.py`, registered in `mkdocs.yml` under `hooks:`.
 2. The hook loads `.help/operators/index.json` once at build start and runs in `on_page_markdown`:
    - Pattern: `\[([A-Za-z][A-Za-z0-9]*)\]` (bracketed PascalCase word) — but **only if the bracketed text is not already an explicit link** (not followed by `(`).
    - Resolve:
@@ -436,13 +460,28 @@ Add a line to `.claude/CLAUDE.md` under "Project Conventions":
 
 ### 8. Order of operations
 
-1. ✅ **Done.** Transition banners prepended to all 36 migrated wiki pages, pointing at the GitHub source. Section 2.1.
-2. ✅ **Done.** All user-facing `help.*` pages copied into `.help/`. Section 4.
-3. **Next:** update the wiki's `_Sidebar.md` to split into "User docs (on help.tixl.app)" and "Developer docs". Section 2.3.
-4. **Next:** set up MkDocs + mike locally and preview `.help/` rendered. Section 1 steps 1–3. Retarget operator exporter (Section 4c); run once to populate `.help/operators/`.
-5. **Then:** fetch and localize images. Section 3.
-6. **Then:** wire up the Vercel project and publish to `help.tixl.app`. Section 1 steps 2–4.
-7. **Then:** **update wiki banners from GitHub-source URLs to rendered URLs** using the mapping table in Section 5. Drive via the banner script (the `TIXL_MOVED_BANNER` HTML-comment marker makes this idempotent). Section 2.2.
-8. **Then:** editorial pass on each migrated page per STYLE.md — voice, structure, relative links, operator-brackets convention, obsolete-content pruning, image localization. Log per-page issues under Section 6.
-9. **Then:** merge `(wip)-Your-first-C#-operator.md` into `WritingCodeOps.md`, delete wiki copy.
-10. **Last:** review Section 4a/4b — delete obsolete wiki pages (`dev.WikiConventions`, `dev.ContributingToTheWiki`, `dev.DocumentationPush`), keep the rest editable.
+**Done:**
+
+1. ✅ Transition banners prepended to all 36 migrated wiki pages, pointing at the GitHub source. Section 2.1.
+2. ✅ All user-facing `help.*` pages copied into `.help/docs/`. Section 4.
+3. ✅ IA reorg: `getting-started` / `install` / `using` / `advanced` / `contributing` / `operators`. Section 4 note.
+4. ✅ MkDocs Material + awesome-pages plugin + `.pages` ordering files. Section 1.
+5. ✅ `mkdocs.yml`, `requirements-docs.txt`, `vercel.json` in place; root directory kept clean (all docs infrastructure under `.help/`).
+6. ✅ **Vercel deploy live at `help.tixl.app`.** Section 1 (shipped).
+
+**Next session, in priority order:**
+
+1. **Update wiki banners from GitHub-source URLs to rendered URLs** (`help.tixl.app/<section>/<page>/`). Drive via the banner Python script using the mapping table in Section 5. The `TIXL_MOVED_BANNER` HTML-comment marker makes the rewrite idempotent. Push to `t3.wiki` remote once it looks good. Section 2.2.
+2. **Wiki `_Sidebar.md` split** into "User docs (on help.tixl.app)" and "Developer docs". Section 2.3.
+3. **Editorial pass on migrated pages** per STYLE.md — voice, relative links, `help.X` wiki links → proper paths, operator-brackets convention, obsolete-content pruning. Each cleared page gets one fewer warning; flip `strict: true` in `mkdocs.yml` once the count hits zero. Section 6.
+4. **Image fetch and localization.** Section 3 — scan for external `github.com/user-attachments` and `user-images.githubusercontent.com` URLs, download into `.help/docs/<section>/images/`, compress, rewrite references.
+5. ✅ **Retarget the operator exporter** — [ExportWikiDocumentation.cs](../../Editor/Gui/UiHelpers/Wiki/ExportWikiDocumentation.cs) writes `.help/docs/operators/` with the nested layout plus `index.json`. User runs **Documentation → Export as WIKI** once to populate the folder, then commits.
+6. ✅ **Enable the operator auto-linker hook** — registered in `mkdocs.yml`, sourced from [`scripts/docs/op_autolinks.py`](../../.help/scripts/docs/op_autolinks.py). Section 4c.
+7. **Merge `(wip)-Your-first-C#-operator.md`** into `WritingCodeOps.md`, delete wiki copy. Section 4.
+8. **Prune obsolete wiki pages:** `dev.WikiConventions`, `dev.ContributingToTheWiki`, `dev.DocumentationPush`. Section 4a.
+
+**Later, when it matters:**
+
+- Versioning via `mike` or hand-rolled per-version subdirs. Section 1 "Versioning — deferred".
+- Optional `vercel.json` rewrite on the Figma `tixl.app` project to expose docs at `tixl.app/help/*` in addition to `help.tixl.app`. Section 1 "Optional follow-up".
+- Content sources: turn `.help/.src/` scripts (ShaderGraph, Making-of Ashborn, release notes, v3.9 video) into proper pages; extract selected meet-up segments via Whisper. Discussed in chat, not yet in a dedicated section.
