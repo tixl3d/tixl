@@ -64,6 +64,20 @@ Write operator names in square brackets, e.g. `[AdjustColors]` or `[AudioReactio
 - If a feature is removed, remove the doc section (don't leave it marked "deprecated" indefinitely — git history is the deprecation log).
 - If a page describes behavior that has drifted, **flag it in [../.agentic/Plans/Plan_UpdateHelp.md](../.agentic/Plans/Plan_UpdateHelp.md)** rather than silently leaving it wrong.
 
+## Capturing informal knowledge
+
+Much of TiXL's knowledge lives in verbal form: Discord answers, meet-up demos, one-on-one help sessions. It's high-value and perishable — useful once, then gone.
+
+When you answer a question, demo a feature, or help someone debug something, **ask "is anyone else likely to hit this?"** If yes, add it to the docs while it's fresh:
+
+- A **one-paragraph FAQ entry** is better than nothing. Add it to the most relevant FAQ page or to a section's "Still to write" list with the gist in one sentence.
+- A **three-minute demo on a meet-up** becomes a page (or a sub-section) in the matching area of this directory. Note the meet-up date in the commit so we can cross-reference the video later.
+- A **Discord thread** can often be distilled into a single paragraph with the original question as the heading. Link back to the thread if it has extra detail.
+
+Ten minutes of writing while the context is fresh beats an hour a week later. Small, frequent additions compound — the goal is a doc set where people can **find** answers instead of asking them for the fifth time.
+
+If the thing you want to add doesn't have an obvious home yet, drop a note in the matching section README's "Still to write" list, or append to [Plan_UpdateHelp.md](../.agentic/Plans/Plan_UpdateHelp.md).
+
 ## What not to write
 
 - Internal implementation details (class names, private methods). Those belong in code comments or `.agentic/SOLUTION_OVERVIEW.md`.

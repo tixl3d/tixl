@@ -1,61 +1,54 @@
 # TiXL documentation
 
-TiXL is a visual programming environment for motion graphics, live visuals, and creative coding on Windows. These pages cover installation, the user interface, and the techniques you'll use once you're past "Hello world".
+TiXL is a visual programming environment for motion graphics, live visuals, and creative coding on Windows. These pages are the source of truth for what it does and how to use it — if something is explained in Discord or at a meet-up, it should eventually end up here.
 
-If this is your first time here, start with the **[Introduction](general/Introduction.md)** or watch the **[video tutorials](general/VideoTutorials.md)**. If something isn't working, the **[FAQ](general/FAQ.md)** covers the common pitfalls.
+New? Start with the **[Welcome](getting-started/Welcome.md)** page, which points you at whichever entry fits you best.
 
-## Install TiXL
+## [Getting started](getting-started/README.md)
 
-- [Installation](setup/Installation.md) — Windows (recommended)
-- [Install on Linux](setup/InstallLinux.md) — under Wine
-- [Install on macOS](setup/InstallMacOS.md) — under Sikarugir
-- [Set up a development environment](setup/InstallDev.md) — run TiXL from Visual Studio or Rider
+Understand what TiXL is, whether it fits your project, and how to load your first scene.
 
-Coming from Tooll3? See [Migrating from Tooll3](general/MigratingFromTooll3.md).
+- [Welcome](getting-started/Welcome.md)
+- [What is TiXL](getting-started/WhatIsTiXL.md)
+- [System requirements](getting-started/SystemRequirements.md)
+- [Introduction — a guided tour](getting-started/Introduction.md)
+- [How TiXL works](getting-started/HowTixlWorks.md)
+- [Concepts](getting-started/Concepts.md)
+- [Video tutorials](getting-started/VideoTutorials.md)
+- [Skill Quest (in-app tutorials)](getting-started/SkillQuest.md)
+- [Migrating from Tooll3](getting-started/MigratingFromTooll3.md)
+- [Reporting bugs and suggestions](getting-started/ReportBugs.md)
+- [Community](getting-started/Community.md)
 
-## Learn the basics
+## [Install](install/README.md)
 
-- [Introduction](general/Introduction.md) — a guided tour
-- [How TiXL works](general/HowTixlWorks.md) — the graph, caching, resolution
-- [Concepts](general/Concepts.md) — operators, parameters, connections
-- [Video tutorials](general/VideoTutorials.md)
-- [Migrating from Tooll3](general/MigratingFromTooll3.md) — what changed in v4
+- [Installation](install/Installation.md) — Windows
+- [Install on Linux](install/InstallLinux.md)
+- [Install on macOS](install/InstallMacOS.md)
+- [Set up a development environment](install/InstallDev.md)
 
-## The user interface
+## [Using TiXL](using/README.md)
 
-- [Using the timeline](ui/TimeLine.md) — keyframes, time clips, time warping
-- [Exporting videos and image sequences](ui/ExportVideos.md)
-- [Keyboard shortcuts](ui/KeyboardShortcuts.md)
-- [Presets and snapshots](ui/PresetsAndSnapshots.md)
+Day-to-day reference: UI windows, graphs, connecting data, exporting, and live-use workflows.
 
-## Make content
+- **Timeline and media:** [Timeline](using/Timeline.md) · [Export videos and image sequences](using/ExportVideos.md) · [Export as a standalone executable](using/ExportExecutables.md)
+- **Presets and performance:** [Presets and snapshots](using/PresetsAndSnapshots.md) · [Live performances](using/LivePerformances.md) · [Sharing example projects](using/SharingExampleProjects.md)
+- **Rendering and perf:** [Real-time rendering](using/RealtimeRendering.md) · [Optimizing performance](using/OptimizingRenderingPerformance.md) · [Remove static background](using/RemoveStaticBackground.md)
+- **Connecting data:** [Sending and receiving OSC](using/OSC.md) · [ArtNet / DMX](using/ArtnetAndDMX.md)
+- **General:** [Keyboard shortcuts](using/KeyboardShortcuts.md) · [Backups](using/Backups.md) · [FAQ](using/FAQ.md) · [FAQ: building content](using/FaqBuildingContent.md)
 
-- [FAQ: building content](general/FaqBuildingContent.md)
-- [TiXL for VJ and live performances](general/LivePerformances.md)
-- [Using backups](general/Backups.md)
-- [Sharing example projects](general/SharingExampleProjects.md)
+The [section README](using/README.md) lists topics that still need pages — graph-window reference, essential operators, recipes, MIDI / NDI / Spout, project structuring, and more.
 
-## Advanced features
+## [Advanced](advanced/README.md)
 
-- [Using custom shader operators](advanced/UsingCustomShaders.md)
-- [Writing C# operators](advanced/WritingCodeOps.md)
-- [Creating new operators](advanced/CreatingNewOps.md)
-- [FAQ: writing C# operators](advanced/FaqDevOps.md)
-- [A shader development example](advanced/ShaderDevelopmentExample.md)
-- [Converting raymarching functions](advanced/ConvertSDFs.md)
-- [Real-time rendering for artists](advanced/RealtimeRendering.md)
-- [Optimizing rendering performance](advanced/OptimizingRenderingPerformance.md)
-- [Exporting as a standalone executable](advanced/ExportExecutables.md)
-- [Controlling stage lights via ArtNet / DMX](advanced/ArtnetAndDMX.md)
-- [Sending and receiving OSC](advanced/OSC.md)
-- [Removing static backgrounds in video inputs](advanced/RemoveStaticBackground.md)
-- [Adding new fonts](advanced/AddingFonts.md)
-- [Creating and using single-line SVG fonts](advanced/SvgLineFonts.md)
+- [Writing C# operators](advanced/WritingCodeOps.md) · [Creating new operators](advanced/CreatingNewOps.md) · [FAQ: writing C# operators](advanced/FaqDevOps.md)
+- [Using custom shader operators](advanced/UsingCustomShaders.md) · [Shader development example](advanced/ShaderDevelopmentExample.md) · [Converting raymarching functions](advanced/ConvertSDFs.md)
+- [Adding new fonts](advanced/AddingFonts.md) · [Single-line SVG fonts](advanced/SvgLineFonts.md)
 
 ## Operator reference
 
-Every operator in the `Lib.*` namespace has a reference page generated from its in-editor description — see **[operator reference](operators/)**.
+Every operator in the `Lib.*` namespace has a reference page generated from its in-editor description. See **[operator reference](operators/)** once the exporter is live.
 
-## Found a problem?
+## [Contributing](contributing/README.md)
 
-[Report an issue or suggest an improvement.](general/ReportBugs.md) Docs fixes are especially welcome — every page on this site is edited in [`.help/`](https://github.com/tixl3d/tixl/tree/main/.help) and there's an "Edit on GitHub" link at the top-right of every page.
+Docs, bug reports, and contributing to TiXL itself — entry points and where developer docs live.

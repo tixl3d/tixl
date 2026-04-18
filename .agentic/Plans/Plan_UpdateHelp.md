@@ -33,9 +33,9 @@ Site lives at `https://tixl.app/help/`. The `/help/` prefix is set via `site_url
    - `site_name: TiXL Documentation`
    - `site_url: https://tixl.app/help/`
    - `use_directory_urls: true`
-   - Theme: `material`, navigation tabs, light/dark toggle, instant navigation.
-   - `nav:` tree mirroring `.help/README.md`.
-   - Plugins: `search`, `mike`, `awesome-nav` (auto-generates section indexes — used by the operator reference in Section 4c).
+   - Theme: `material`, navigation tabs, light/dark toggle, instant navigation, and **`navigation.footer`** (gives every page auto "Previous / Next" links at the bottom, following the nav order).
+   - **No explicit `nav:` tree** — ordering is driven by `mkdocs-awesome-nav` reading `.nav.yml` files. Root-level order lives in `.help/.nav.yml`; each section folder has its own `.nav.yml` overriding the ordering for that section and declaring its display title.
+   - Plugins: `search`, `mike`, `awesome-nav`.
    - `extra.version.provider: mike` (exposes the version selector in the header).
    - `hooks:` points at `scripts/docs/op_autolinks.py` (Section 4c).
 2. Add `requirements-docs.txt`: `mkdocs-material`, `mike`, `mkdocs-awesome-nav`, `pymdown-extensions`.
@@ -97,6 +97,8 @@ Most migrated pages reference images that currently point at `https://github.com
 ### 4. Migrate remaining user-facing pages
 
 **Status: done (copies landed verbatim; banners added to wiki originals).** Content still needs a review/editorial pass per STYLE.md — the copy step was mechanical.
+
+**Structural reorg (2026-04-18).** The `general/` / `setup/` / `ui/` split has been replaced with an audience-led hierarchy: `getting-started/`, `install/`, `using/`, `advanced/`, `contributing/`. Each section has a `README.md` that lists its pages plus a "Still to write" list. `.src/` holds raw source material (tutorial scripts, release-note drafts) used as input for future pages; it's excluded from the published site. Wiki banners were re-written to the new paths via the mapping-table script (Section 5). The rendered URLs in the mapping table have been updated accordingly.
 
 - ✅ `help.Concepts.md` → `general/Concepts.md` *(page self-marks "needs work"; editorial pass due)*
 - ✅ `help.VideoTutorials.md` → `general/VideoTutorials.md`
@@ -272,41 +274,41 @@ Format below. URL column will point at rendered pages (`/help/latest/<section>/<
 | Legacy wiki page | `.help/` source | Rendered URL (once live) |
 |---|---|---|
 | `help.AddingFonts` | `advanced/AddingFonts.md` | `/help/latest/advanced/AddingFonts/` |
-| `help.ArtnetAndDMX` | `advanced/ArtnetAndDMX.md` | `/help/latest/advanced/ArtnetAndDMX/` |
-| `help.Backups` | `general/Backups.md` | `/help/latest/general/Backups/` |
-| `help.Concepts` | `general/Concepts.md` | `/help/latest/general/Concepts/` |
+| `help.ArtnetAndDMX` | `using/ArtnetAndDMX.md` | `/help/latest/using/ArtnetAndDMX/` |
+| `help.Backups` | `using/Backups.md` | `/help/latest/using/Backups/` |
+| `help.Concepts` | `getting-started/Concepts.md` | `/help/latest/getting-started/Concepts/` |
 | `help.ConvertSDFs` | `advanced/ConvertSDFs.md` | `/help/latest/advanced/ConvertSDFs/` |
 | `help.CreatingNewOps` | `advanced/CreatingNewOps.md` | `/help/latest/advanced/CreatingNewOps/` |
-| `help.ExportExecutables` | `advanced/ExportExecutables.md` | `/help/latest/advanced/ExportExecutables/` |
-| `help.ExportVideos` | `ui/ExportVideos.md` | `/help/latest/ui/ExportVideos/` |
-| `help.FAQ` | `general/FAQ.md` | `/help/latest/general/FAQ/` |
-| `help.FaqBuildingContent` | `general/FaqBuildingContent.md` | `/help/latest/general/FaqBuildingContent/` |
+| `help.ExportExecutables` | `using/ExportExecutables.md` | `/help/latest/using/ExportExecutables/` |
+| `help.ExportVideos` | `using/ExportVideos.md` | `/help/latest/using/ExportVideos/` |
+| `help.FAQ` | `using/FAQ.md` | `/help/latest/using/FAQ/` |
+| `help.FaqBuildingContent` | `using/FaqBuildingContent.md` | `/help/latest/using/FaqBuildingContent/` |
 | `help.FaqDevOps` | `advanced/FaqDevOps.md` | `/help/latest/advanced/FaqDevOps/` |
-| `help.HowTixlWorks` | `general/HowTixlWorks.md` | `/help/latest/general/HowTixlWorks/` |
-| `help.Installation` | `setup/Installation.md` | `/help/latest/setup/Installation/` |
+| `help.HowTixlWorks` | `getting-started/HowTixlWorks.md` | `/help/latest/getting-started/HowTixlWorks/` |
+| `help.Installation` | `install/Installation.md` | `/help/latest/install/Installation/` |
 | `help.InstallationT3` | *(not migrated — stays on wiki)* | — |
-| `help.InstallDev` | `setup/InstallDev.md` | `/help/latest/setup/InstallDev/` |
-| `help.InstallLinux` | `setup/InstallLinux.md` | `/help/latest/setup/InstallLinux/` |
-| `help.InstallMacOS` | `setup/InstallMacOS.md` | `/help/latest/setup/InstallMacOS/` |
-| `help.Introduction` | `general/Introduction.md` | `/help/latest/general/Introduction/` |
-| `help.KeyboardShortcuts` | `ui/KeyboardShortcuts.md` | `/help/latest/ui/KeyboardShortcuts/` |
-| `help.LivePerformances` | `general/LivePerformances.md` | `/help/latest/general/LivePerformances/` |
-| `help.OSC` | `advanced/OSC.md` | `/help/latest/advanced/OSC/` |
-| `help.OptimizingRenderingPerformance` | `advanced/OptimizingRenderingPerformance.md` | `/help/latest/advanced/OptimizingRenderingPerformance/` |
-| `help.PresetsAndSnapshots` | `ui/PresetsAndSnapshots.md` | `/help/latest/ui/PresetsAndSnapshots/` |
-| `help.RealtimeRendering` | `advanced/RealtimeRendering.md` | `/help/latest/advanced/RealtimeRendering/` |
-| `help.RemoveStaticBackground` | `advanced/RemoveStaticBackground.md` | `/help/latest/advanced/RemoveStaticBackground/` |
-| `help.ReportBugs` | `general/ReportBugs.md` | `/help/latest/general/ReportBugs/` |
+| `help.InstallDev` | `install/InstallDev.md` | `/help/latest/install/InstallDev/` |
+| `help.InstallLinux` | `install/InstallLinux.md` | `/help/latest/install/InstallLinux/` |
+| `help.InstallMacOS` | `install/InstallMacOS.md` | `/help/latest/install/InstallMacOS/` |
+| `help.Introduction` | `getting-started/Introduction.md` | `/help/latest/getting-started/Introduction/` |
+| `help.KeyboardShortcuts` | `using/KeyboardShortcuts.md` | `/help/latest/using/KeyboardShortcuts/` |
+| `help.LivePerformances` | `using/LivePerformances.md` | `/help/latest/using/LivePerformances/` |
+| `help.OSC` | `using/OSC.md` | `/help/latest/using/OSC/` |
+| `help.OptimizingRenderingPerformance` | `using/OptimizingRenderingPerformance.md` | `/help/latest/using/OptimizingRenderingPerformance/` |
+| `help.PresetsAndSnapshots` | `using/PresetsAndSnapshots.md` | `/help/latest/using/PresetsAndSnapshots/` |
+| `help.RealtimeRendering` | `using/RealtimeRendering.md` | `/help/latest/using/RealtimeRendering/` |
+| `help.RemoveStaticBackground` | `using/RemoveStaticBackground.md` | `/help/latest/using/RemoveStaticBackground/` |
+| `help.ReportBugs` | `getting-started/ReportBugs.md` | `/help/latest/getting-started/ReportBugs/` |
 | `help.ShaderDevelopmentExample` | `advanced/ShaderDevelopmentExample.md` | `/help/latest/advanced/ShaderDevelopmentExample/` |
-| `help.SharingExampleProjects` | `general/SharingExampleProjects.md` | `/help/latest/general/SharingExampleProjects/` |
-| `help.SkillQuest` | `general/SkillQuest.md` | `/help/latest/general/SkillQuest/` |
+| `help.SharingExampleProjects` | `using/SharingExampleProjects.md` | `/help/latest/using/SharingExampleProjects/` |
+| `help.SkillQuest` | `getting-started/SkillQuest.md` | `/help/latest/getting-started/SkillQuest/` |
 | `help.SvgLineFonts` | `advanced/SvgLineFonts.md` | `/help/latest/advanced/SvgLineFonts/` |
-| `help.TixlChanges` | `general/MigratingFromTooll3.md` | `/help/latest/general/MigratingFromTooll3/` |
-| `help.ui.TimeLine` | `ui/TimeLine.md` | `/help/latest/ui/TimeLine/` |
+| `help.TixlChanges` | `getting-started/MigratingFromTooll3.md` | `/help/latest/getting-started/MigratingFromTooll3/` |
+| `help.ui.TimeLine` | `using/Timeline.md` | `/help/latest/using/Timeline/` |
 | `help.UsingCustomShaders` | `advanced/UsingCustomShaders.md` | `/help/latest/advanced/UsingCustomShaders/` |
-| `help.VideoTutorials` | `general/VideoTutorials.md` | `/help/latest/general/VideoTutorials/` |
+| `help.VideoTutorials` | `getting-started/VideoTutorials.md` | `/help/latest/getting-started/VideoTutorials/` |
 | `dev.WritingCodeOps` | `advanced/WritingCodeOps.md` | `/help/latest/advanced/WritingCodeOps/` |
-| `Installation` | `setup/Installation.md` | `/help/latest/setup/Installation/` |
+| `Installation` | `install/Installation.md` | `/help/latest/install/Installation/` |
 
 The banner-writer script (and a later URL-update script) takes this table as input. Banners already in place use the GitHub-source column; the URL-update pass will rewrite them to the rendered URL column once mike is publishing.
 
