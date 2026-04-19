@@ -343,7 +343,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
                 if (compositionOp.Children.TryGetChildInstance(parameter.ChildUi.SymbolChild.Id, out _))
                 {
                     ProjectView.Focused?.NodeSelection.Clear();
-                    ProjectView.Focused?.NodeSelection.SelectCompositionChild(compositionOp, parameter.ChildUi.Id);
+                    ProjectView.Focused?.NodeSelection.TrySelectCompositionChild(compositionOp, parameter.ChildUi.Id);
                     FitViewToSelectionHandling.FitViewToSelection();
                 }
             }
@@ -772,6 +772,21 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
                 if (justClicked)
                 {
                     UpdateSelectionOnClickOrDrag(vDef, isSelected);
+                    if (_clickedKeyframeHash == keyHash)
+                    {
+                        _activeKeyframeHash = keyHash;
+
+                        if (ProjectView.Focused?.CompositionInstance != null &&
+                            ProjectView.Focused.NodeSelection.TrySelectCompositionChild(
+                                ProjectView.Focused.CompositionInstance, parameter.ChildUi.Id, false))
+                        {
+                            FitViewToSelectionHandling.FitViewToSelection();
+                        }
+                    }
+                    else
+                    {
+                        _activeKeyframeHash = -1;
+                    }
                     _clickedKeyframeHash = keyHash;
 
                     if (Math.Abs(TimeLineCanvas.Playback.PlaybackSpeed) < 0.001f)
@@ -793,7 +808,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
                 TimeLineCanvas.HoveredComponentBit = 0;
                 TimeLineCanvas.HoveredKeyframeUniqueId = vDef.UniqueId;
             }
-            if (TimeLineCanvas.HoveredKeyframeUniqueId == vDef.UniqueId)
+            else if (TimeLineCanvas.HoveredKeyframeUniqueId == vDef.UniqueId)
             {
                 drawList.AddRect(posOnScreen - Vector2.One,
                                  posOnScreen + keyframeSize + Vector2.One,
@@ -803,7 +818,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
             HandleCurvePointDragging(compositionSymbolId, vDef, isSelected);
 
             // Draw value input
-            var valueInputVisible = isSelected && keyHash == _clickedKeyframeHash;
+            var valueInputVisible = isSelected && keyHash == _activeKeyframeHash;
             if (valueInputVisible)
             {
                 var symbolUi = parameter.ChildUi.SymbolChild.Symbol.GetSymbolUi();
@@ -880,6 +895,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
     }
 
     private int _clickedKeyframeHash;
+    private int _activeKeyframeHash;
 
 
 

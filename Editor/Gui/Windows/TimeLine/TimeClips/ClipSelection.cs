@@ -94,7 +94,7 @@ internal sealed class ClipSelection
             return;
             
         _nodeSelection.Clear();
-        _nodeSelection.SelectCompositionChild(_compositionOp, timeClip.Id);
+        _nodeSelection.TrySelectCompositionChild(_compositionOp, timeClip.Id);
         SelectedClipsIds.Clear();
         SelectedClipsIds.Add(timeClip.Id);
     }
@@ -113,7 +113,7 @@ internal sealed class ClipSelection
         if (_compositionOp == null) 
             return;
 
-        _nodeSelection.SelectCompositionChild(_compositionOp, matchingClip.Id);
+        _nodeSelection.TrySelectCompositionChild(_compositionOp, matchingClip.Id);
         SelectedClipsIds.Add(matchingClip.Id);
     }
             

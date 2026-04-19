@@ -81,11 +81,9 @@ internal sealed class TimeLineCanvas : AnimationCanvas
 
     public NodeSelection NodeSelection => _nodeSelection;
 
-    private int RulerHeight => (int)(25 * T3Ui.UiScaleFactor);
+    private int RulerHeight => (int)(28 * T3Ui.UiScaleFactor);
     private int SummaryHeight => (int)(11 * T3Ui.UiScaleFactor);
 
-    private int _lastSelectionRevision = -1;
-    
     public void Draw(ProjectView projectView, Playback playback)
     {
         Debug.Assert(projectView.CompositionInstance != null);
@@ -95,7 +93,6 @@ internal sealed class TimeLineCanvas : AnimationCanvas
         Playback = playback;
         SyncStateWithComposition(compositionOp);
 
-        //if(MathUtils.HasChanged(ref _lastSelectionRevision, projectView.NodeSelection.ChangeCounter))
         _selectedAnimationParameters = GetAnimationParametersForSelectedNodes(compositionOp);
 
         PruneExpandedForMissingParams();
@@ -163,7 +160,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
 
             // Selection Area (summary strip below ruler)
             {
-                ImGui.PushStyleColor(ImGuiCol.ChildBg, UiColors.GridLines.Fade(0.15f).Rgba);
+                ImGui.PushStyleColor(ImGuiCol.ChildBg, UiColors.GridLines.Fade(0.20f).Rgba);
                 ImGui.BeginChild("##selectionArea", new Vector2(0,SummaryHeight));
                 _timeSelectionArea.Draw(compositionOp, _selectedAnimationParameters, KeyframeEditors, ImGui.GetWindowDrawList());
                 ImGui.EndChild();

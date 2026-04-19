@@ -87,12 +87,16 @@ internal sealed class NodeSelection : ISelection
         ChangeCounter++;
     }
 
-    public void SelectCompositionChild(Instance compositionOp, Guid id)
+    public bool TrySelectCompositionChild(Instance compositionOp, Guid id, bool add=true)
     {
         if (!Structure.TryGetUiAndInstanceInComposition(id, compositionOp, out var childUi, out var instance))
-            return;
+            return false;
 
+        if(!add)
+            Clear();
+        
         AddSelection(childUi, instance);
+        return true;
     }
 
     public IEnumerable<T> GetSelectedNodes<T>() where T : ISelectableCanvasObject

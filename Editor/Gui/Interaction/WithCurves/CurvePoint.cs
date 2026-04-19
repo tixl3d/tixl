@@ -179,8 +179,10 @@ internal static class CurvePoint
         else
             _vDef.OutInterpolation = VDefinition.KeyInterpolation.Tangent;
 
-        // Alt unlocks weight permanently; otherwise keep current weighted state
-        if (ImGui.GetIO().KeyAlt && !wasWeighted)
+        // Shift unlocks weight permanently; otherwise keep current weighted state
+        // We can't use Alt here, because this is already being assigned to panning background. :-(
+        // Very unfortunate overlap with disable snapping.
+        if (ImGui.GetIO().KeyShift && !wasWeighted)
             _vDef.Weighted = true;
 
         // Compute angle from mouse position, adjusted for grab offset to avoid initial jump
@@ -419,8 +421,8 @@ internal static class CurvePoint
             {
                 var dotDir = screenDir * (refLength / guideExtent);
                 var dotColor = UiColors.ForegroundFull.Fade(0.1f);
-                _drawList.AddCircleFilled(pCenter + dotDir, 3f, dotColor);
-                _drawList.AddCircleFilled(pCenter - dotDir, 3f, dotColor);
+                _drawList.AddCircleFilled(pCenter + dotDir, 2f, dotColor, 6);
+                _drawList.AddCircleFilled(pCenter - dotDir, 2f, dotColor,6);
             }
         }
 
