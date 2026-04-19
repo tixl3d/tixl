@@ -15,7 +15,7 @@
     <IsEditorOnly>false</IsEditorOnly>
     <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
     <Deterministic>true</Deterministic>
-    <NoWarn>NU1900;NU1902;NU1903</NoWarn>
+    <NoWarn>$(NoWarn);NU1900;NU1902;NU1903</NoWarn>
     <PackageId>de7fa51a-c573-4f6e-83b5-761cd3142e5a</PackageId>
     <IsArchived>false</IsArchived>
   </PropertyGroup>

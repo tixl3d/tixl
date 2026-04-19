@@ -297,7 +297,7 @@ public sealed class CurveSampleCache
     }
 
     private readonly List<Vector2> _points = new(256);
-    private Curve? _cachedCurve;
+    private Curve _cachedCurve;
     private double _cachedStartU;
     private double _cachedEndU;
     private double _visibleStartU;

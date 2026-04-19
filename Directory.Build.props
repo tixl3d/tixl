@@ -3,6 +3,7 @@
   <PropertyGroup>
     <SolutionDir>$(MSBuildThisFileDirectory)</SolutionDir>
     <!-- NU1603: transitive package version resolved to higher version (harmless) -->
-    <NoWarn>$(NoWarn);NU1603</NoWarn>
+    <!-- NU1901/NU1902/NU1903: vulnerability warnings in transitive System.Security.Cryptography.Xml 10.0.0 (ships with Windows desktop SDK, no fixed version available) -->
+    <NoWarn>$(NoWarn);NU1603;NU1901;NU1902;NU1903</NoWarn>
   </PropertyGroup>
 </Project>

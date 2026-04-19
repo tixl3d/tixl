@@ -13,17 +13,17 @@
     <IsEditorOnly>false</IsEditorOnly>
     <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <NoWarn>0108;9084;NU1900</NoWarn>
+    <NoWarn>$(NoWarn);0108;9084;NU1900</NoWarn>
     <PackageId>fe98a538-31e2-47dc-82a4-62c2e1c29649</PackageId>
     <RootNamespace>Mediapipe</RootNamespace>
     <AssemblyName>$(RootNamespace)</AssemblyName>
     <IsArchived>false</IsArchived>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <NoWarn>0108;9084;NU1900;CS8981</NoWarn>
+    <NoWarn>$(NoWarn);0108;9084;NU1900;CS8981</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <NoWarn>0108;9084;NU1900;CS8981</NoWarn>
+    <NoWarn>$(NoWarn);0108;9084;NU1900;CS8981</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Using Include="System" />

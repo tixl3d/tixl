@@ -27,7 +27,7 @@
         <RepositoryType>Git</RepositoryType>
         <!-- Ensure there's a git commit hash in the version field for the about dialog -->
         <IncludeSourceRevisionInInformationalVersion>true</IncludeSourceRevisionInInformationalVersion>
-        <NoWarn>NU1900;NU1603;NU1701;CS8632</NoWarn>
+        <NoWarn>$(NoWarn);NU1900;NU1701;CS8632</NoWarn>
         <!-- <Authors>TiXL</Authors>
     <Owners>TiXL</Owners>
     <Company>TiXL</Company>
