@@ -126,7 +126,7 @@ internal abstract class AnimationCanvas : ScalableCanvas, ITimeObjectManipulatio
     public void UpdateSelectionForArea(ImRect screenArea, SelectionFence.SelectModes selectMode)
     {
         // When several manipulators share the same keyframe selection set (e.g. DopeSheetArea
-        // and TimelineCurveEditArea in the inline-pane layout), each one's own
+        // and TimelineCurveEditor in the inline-pane layout), each one's own
         // "clear on Replace" wipes out the previous manipulator's additions, so only the last
         // dispatched editor's hits survive. Clear once up front, then dispatch as Add.
         if (selectMode == SelectionFence.SelectModes.Replace)

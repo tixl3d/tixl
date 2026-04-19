@@ -8,7 +8,7 @@ using T3.Editor.Gui.Interaction.WithCurves;
 namespace T3.Editor.Gui.Windows.TimeLine;
 
 /// <summary>
-/// Links to AnimationParameters to editors like DopeSheets or <see cref="TimelineCurveEditArea"/>>
+/// Links to AnimationParameters to editors like DopeSheets or <see cref="TimelineCurveEditor"/>>
 /// </summary>
 internal abstract class AnimationParameterEditing : CurveEditing
 {
@@ -99,7 +99,7 @@ internal abstract class AnimationParameterEditing : CurveEditing
     }
 
     //
-    // Selection helpers — shared by DopeSheetArea and TimelineCurveEditArea so the timeline's
+    // Selection helpers — shared by DopeSheetArea and TimelineCurveEditor so the timeline's
     // SelectionRangeIndicator / TimeSelectionArea can operate in either mode.
     //
 

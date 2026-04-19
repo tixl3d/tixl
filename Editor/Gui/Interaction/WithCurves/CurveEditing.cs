@@ -23,7 +23,7 @@ internal abstract class CurveEditing
     /// <summary>
     /// Selection of keyframes driven by this editor. May be a set private to this instance
     /// (default constructor) or one shared with sibling editors that should see each other's
-    /// selection changes — e.g. DopeSheetArea and TimelineCurveEditArea on the same timeline.
+    /// selection changes — e.g. DopeSheetArea and TimelineCurveEditor on the same timeline.
     /// </summary>
     protected readonly VersionedKeyframeSet SelectedKeyframes;
 

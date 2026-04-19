@@ -308,7 +308,7 @@ internal static class CurveInputEditing
                     _standardRaster.Draw(this);
                     _horizontalRaster.Draw(this);
                     curve.UpdateTangents();
-                    TimelineCurveEditArea.DrawCurveLine(curve, this, UiColors.Gray);
+                    TimelineCurveEditor.DrawCurveLine(curve, this, UiColors.Gray);
 
                     foreach (var keyframe in interaction.GetAllKeyframes().ToArray())
                     {

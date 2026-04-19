@@ -511,11 +511,11 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
                                                 ImDrawListPtr drawList, TimeLineCanvas.AnimationParameter parameter,
                                                 ImRect layerArea, float padding, Color color)
     {
-        var pointCount = Math.Min(points.Length, TimelineCurveEditArea.MaxPolylinePoints);
+        var pointCount = Math.Min(points.Length, TimelineCurveEditor.MaxPolylinePoints);
         if (pointCount < 2)
             return;
 
-        var buf = TimelineCurveEditArea._polylineBuffer;
+        var buf = TimelineCurveEditor._polylineBuffer;
         var valueRange = parameter.DampedMaxValue - parameter.DampedMinValue;
         var centerY = (layerArea.Min.Y + layerArea.Max.Y) * 0.5f;
         var isFlatRange = Math.Abs(valueRange) < 1e-6f;

@@ -36,12 +36,12 @@ internal sealed class TimeLineCanvas : AnimationCanvas
         _nodeSelection = nodeSelection;
 
         DopeSheetArea = new DopeSheetArea(SnapHandlerForU, this);
-        _timelineCurveEditArea = new TimelineCurveEditArea(this, SnapHandlerForU, SnapHandlerForV);
+        _timelineCurveEditArea = new TimelineCurveEditor(this, SnapHandlerForU, SnapHandlerForV);
         _timeSelectionRange = new TimeSelectionRange(this, SnapHandlerForU);
         _selectionRangeIndicator = new SelectionRangeIndicator(this, SnapHandlerForU);
         _timeSelectionArea = new TimeSelectionArea(this);
         LayersArea = new LayersArea(this, getCompositionOp, requestChildCompositionFunc, SnapHandlerForU);
-        _curveEditCanvas = new CurveEditCanvas(this, _timelineCurveEditArea, _horizontalRaster);
+        _curveEditCanvas = new InlineCurveArea(this, _timelineCurveEditArea, _horizontalRaster);
 
         SnapHandlerForV.AddSnapAttractor(_horizontalRaster);
         SnapHandlerForU.AddSnapAttractor(_clipRange);
@@ -67,7 +67,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
 
     /// <summary>
     /// Every currently-active animation-parameter editor on the timeline. Today this is always
-    /// a single editor (DopeSheetArea in DopeView mode, TimelineCurveEditArea in CurveEditor mode);
+    /// a single editor (DopeSheetArea in DopeView mode, TimelineCurveEditor in CurveEditor mode);
     /// future split-view will expose both simultaneously. Cross-mode components (SRI, TimeSelectionArea,
     /// TimeWarpDrag) aggregate through <see cref="KeyframeEditors"/> so they don't need to pick one.
     /// </summary>
@@ -289,7 +289,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
     }
 
     /// <summary>
-    /// Keeps TimelineCurveEditArea registered with the snap handler and keyframe-editor group
+    /// Keeps TimelineCurveEditor registered with the snap handler and keyframe-editor group
     /// while the inline curve pane is visible (DopeView + any expanded parameter). We do NOT
     /// add it to <see cref="AnimationCanvas.TimeObjectManipulators"/>: that list dispatches
     /// drag / selection mutations to every entry, and both editors share the same
@@ -622,12 +622,12 @@ internal sealed class TimeLineCanvas : AnimationCanvas
     internal bool NormalizeCurveView;
     internal float CurvePaneHeightRatio = 0.5f;
 
-    // Published by CurveEditCanvas each frame it draws; null when the pane isn't visible.
+    // Published by InlineCurveArea each frame it draws; null when the pane isn't visible.
     // TimeLineCanvas.Draw reads this at the top of the next frame to cede wheel/pan to the
     // curve-area sub-canvas when the mouse is inside it.
     internal ImRect? CurveEditAreaScreenRect;
 
-    // Shared keyframe selection — DopeSheetArea and TimelineCurveEditArea both receive this
+    // Shared keyframe selection — DopeSheetArea and TimelineCurveEditor both receive this
     // via CurveEditing's shared-selection ctor, so edits in one view reflect in the other
     // (and in the SRI / SelectionArea aggregators).
     internal readonly VersionedKeyframeSet SharedSelectedKeyframes = new();
@@ -838,8 +838,8 @@ internal sealed class TimeLineCanvas : AnimationCanvas
     private readonly ClipRange _clipRange = new();
     private readonly LoopRange _loopRange = new();
 
-    private readonly TimelineCurveEditArea _timelineCurveEditArea;
-    private readonly CurveEditCanvas _curveEditCanvas;
+    private readonly TimelineCurveEditor _timelineCurveEditArea;
+    private readonly InlineCurveArea _curveEditCanvas;
 
     private readonly CurrentTimeMarker _currentTimeMarker = new();
     private readonly TimeSelectionRange _timeSelectionRange;

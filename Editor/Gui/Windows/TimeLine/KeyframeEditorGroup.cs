@@ -6,7 +6,7 @@ namespace T3.Editor.Gui.Windows.TimeLine;
 
 /// <summary>
 /// Aggregates across every currently-active <see cref="AnimationParameterEditing"/> on the timeline
-/// (DopeSheetArea, TimelineCurveEditArea, …). One editor today, potentially several when the
+/// (DopeSheetArea, TimelineCurveEditor, …). One editor today, potentially several when the
 /// dope-sheet and curve editor are shown side by side. The group mirrors the pattern
 /// <see cref="T3.Editor.Gui.Interaction.WithCurves.AnimationCanvas"/> uses for <c>ITimeObjectManipulation</c>:
 /// cross-editor state lives here so callers never need to pick one "active" editor.

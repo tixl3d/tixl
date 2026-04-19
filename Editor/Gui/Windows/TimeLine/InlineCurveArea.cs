@@ -17,9 +17,9 @@ namespace T3.Editor.Gui.Windows.TimeLine;
 /// (Y) scope — X is read-only from <see cref="TimeLineCanvas"/> so interactions in this pane
 /// never touch the timeline's U state (and vice versa).
 /// </summary>
-internal sealed class CurveEditCanvas : ScalableCanvas
+internal sealed class InlineCurveArea : ScalableCanvas
 {
-    public CurveEditCanvas(TimeLineCanvas timeLineCanvas, TimelineCurveEditArea curveRenderer, HorizontalRaster horizontalRaster)
+    public InlineCurveArea(TimeLineCanvas timeLineCanvas, TimelineCurveEditor curveRenderer, HorizontalRaster horizontalRaster)
     {
         _timeLineCanvas = timeLineCanvas;
         _curveRenderer = curveRenderer;
@@ -214,7 +214,7 @@ internal sealed class CurveEditCanvas : ScalableCanvas
     }
 
     private readonly TimeLineCanvas _timeLineCanvas;
-    private readonly TimelineCurveEditArea _curveRenderer;
+    private readonly TimelineCurveEditor _curveRenderer;
     private readonly HorizontalRaster _horizontalRaster;
     private readonly SelectionFence _fence = new();
 

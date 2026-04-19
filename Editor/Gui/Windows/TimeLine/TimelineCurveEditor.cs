@@ -21,9 +21,9 @@ using T3.Editor.UiModel.Selection;
 
 namespace T3.Editor.Gui.Windows.TimeLine;
 
-internal sealed class TimelineCurveEditArea : AnimationParameterEditing, ITimeObjectManipulation, IValueSnapAttractor
+internal sealed class TimelineCurveEditor : AnimationParameterEditing, ITimeObjectManipulation, IValueSnapAttractor
 {
-    public TimelineCurveEditArea(TimeLineCanvas timeLineCanvas, ValueSnapHandler snapHandlerForU, ValueSnapHandler snapHandlerV)
+    public TimelineCurveEditor(TimeLineCanvas timeLineCanvas, ValueSnapHandler snapHandlerForU, ValueSnapHandler snapHandlerV)
         : base(timeLineCanvas.SharedSelectedKeyframes)
     {
         _snapHandlerU = snapHandlerForU;
@@ -224,7 +224,7 @@ internal sealed class TimelineCurveEditArea : AnimationParameterEditing, ITimeOb
     }
 
     /// <summary>
-    /// Compute the canvas-space bounds for an auto-fit. Used by <see cref="CurveEditCanvas"/>
+    /// Compute the canvas-space bounds for an auto-fit. Used by <see cref="InlineCurveArea"/>
     /// so it can apply the fit to its own V scope rather than the outer timeline canvas.
     /// </summary>
     public bool TryGetFitBounds(List<TimeLineCanvas.AnimationParameter> animationParameters,
@@ -445,7 +445,7 @@ internal sealed class TimelineCurveEditArea : AnimationParameterEditing, ITimeOb
 
     /// <summary>
     /// Same as <see cref="UpdateSelectionForArea"/> but takes an already-inverted canvas-space rect.
-    /// Use this from sub-canvases (e.g. <see cref="CurveEditCanvas"/>) that have their own
+    /// Use this from sub-canvases (e.g. <see cref="InlineCurveArea"/>) that have their own
     /// coordinate origin — letting them do the inverse with their own WindowPos rather than the
     /// outer timeline's.
     /// </summary>

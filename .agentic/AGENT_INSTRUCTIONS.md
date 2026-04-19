@@ -126,6 +126,28 @@ TiXL's editor is Dear ImGui plus custom widgets, rendered every frame at the out
 
 TiXL is the current product (v4.x). Tooll3 (v3.x) is the legacy predecessor — a large portion of v4 is a rewrite. Don't write new docs or features targeting Tooll3; treat remaining Tooll3 references in code as historical and prefer removing them over updating them unless there's a concrete migration use case.
 
+## Debugging Runtime Behavior with Log Probes
+
+The editor supports hot reload, so adding temporary `Log.Debug(...)` / `Log.Info(...)` lines to test hypotheses is cheap and **welcome**. For non-trivial runtime bugs — UI timing, layout/frame-order interactions, state flowing through multiple canvases or editors — don't guess fixes from static code reading. Instead:
+
+1. State the hypothesis and the specific value distinction that would confirm vs refute it.
+2. Drop 2–3 targeted `Log.Debug(...)` lines into the suspected code paths.
+3. Ask the user to hot-reload and perform the specific interaction that triggers the bug.
+4. Read the log tail (see below) and let the data confirm or kill the hypothesis before writing the fix.
+5. Fix only after the log settles the question.
+
+**Log location.** Each editor run writes a timestamped log to the user's roaming app data, under a version-specific subfolder — on Windows:
+
+```
+%APPDATA%\TiXL<major>.<minor>\Log\<YYYY_MM_DD_HH_MM_SS_mmm>.log
+```
+
+Concretely that resolves to something like `C:\Users\<user>\AppData\Roaming\TiXL4.2\Log\2026_04_19_18_00_12_560.log`. Username and version (`4.2`, `4.3`, …) vary — list the `Log/` directory first and pick the most recent file (the active log is the newest by modification time; the editor is typically still running and writing to it).
+
+Reading the tail of an active log file is safe: use the standard file-read tooling with an `offset` near the end, or count lines first and read the last N. Don't print the whole file — logs grow fast (hundreds of KB in a single session).
+
+**Cleanup.** Remove temporary `Log.Debug` probes once the bug is understood and fixed, unless they have lasting diagnostic value worth keeping.
+
 ## Review and Quality Expectations
 - Point out obvious problems, misleading code, incorrect implementations, and typos
 - Fix spelling mistakes in touched comments on the fly
