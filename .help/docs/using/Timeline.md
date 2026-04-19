@@ -127,6 +127,20 @@ If too many parameters stack up, press `Ctrl + Shift + K` twice to clear the lis
 
 The keyframe context menu switches between interpolation modes. For fine control of tangents, flip the mode toggle from **Dope Sheet** to **Curve** and edit the curve directly.
 
+### Editing curves next to the dope sheet
+
+You can also open a curve editor for a single parameter **without leaving the dope sheet**. Click the curve-edit icon next to the parameter's pin icon on its dope-sheet row. A curve area appears below the dope sheet showing that parameter's curve; the dope sheet above shrinks to only the space it needs. Click the icon again — or the close chevron in the top-right of the curve area — to hide it.
+
+A few things to know about this view:
+
+- **Vector parameters** (Vector2/3/4, colors) show per-component letters (`X Y Z`, `R G B A`) on the parameter's row once the curve area is open. Clicking a letter the first time **isolates** that component (hides the others); subsequent clicks add and remove components. Clicking the last visible component restores the default "all visible".
+- **Hover feedback is linked** between the two views: hovering a curve line, a keyframe, or a dope-sheet row dims everything else and highlights the matching element in the other view.
+- **Keyframe dragging in the curve area latches** to U or V after a small threshold based on which axis you move more — so a mostly-vertical drag cleanly becomes value-only. Hold `Ctrl` to move freely on both axes.
+- **Tangent edits are undoable** with `Ctrl+Z` like any other keyframe change.
+- **Selecting multiple parameters** for curve editing at once works — toggle the curve-edit icon on each. The curve area draws them all together.
+
+The fullscreen **Curve** mode still exists for cases where you want the entire timeline body dedicated to curves.
+
 ### Inserting animation increments
 
 Press `Shift + C` to insert a keyframe whose value is incremented by 1 relative to the previous one. This is useful for tapping **step markers** while a soundtrack plays:

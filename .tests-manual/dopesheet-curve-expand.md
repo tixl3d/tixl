@@ -51,24 +51,39 @@ Verifies the per-parameter inline curve editor: expand toggle, component visibil
 - The `.x` and `.z` curves fade to reduced opacity in both the dope layer and the curve pane.
 - The `.y` curve remains at full opacity.
 
-## Step: Toggle a component off
+## Step: First click on a component isolates it
 
-**Context:** A Vector3 parameter is expanded, all three components visible.
+**Context:** A Vector3 parameter is expanded, all three components visible (default state).
 **Action:**
-- Click the `.x` component toggle
+- Click the `.y` component toggle
 
 **Expected:**
-- The `.x` curve stops rendering in both the dope layer and the curve pane.
-- The `.x` toggle shows a visibly inactive state.
+- Only the `.y` curve continues to render in both the dope layer and the curve pane.
+- `.x` and `.z` curves disappear; their toggle letters dim.
 
-## Step: Toggle the hidden component back on
+## Step: Subsequent clicks add or remove components
 
-**Context:** Continued from previous step.
+**Context:** Continued — only `.y` is visible.
 **Action:**
-- Click the `.x` component toggle again
+- Click the `.z` component toggle (add)
 
 **Expected:**
-- The `.x` curve reappears in both views.
+- Both `.y` and `.z` are now visible; `.x` still hidden.
+
+**Action:**
+- Click the `.y` component toggle (remove)
+
+**Expected:**
+- Only `.z` is visible.
+
+## Step: Clicking the last visible component restores default
+
+**Context:** Continued — only `.z` visible.
+**Action:**
+- Click the `.z` component toggle
+
+**Expected:**
+- All three components are visible again (mask entry dropped back to default).
 
 ## Step: Hover a dope-sheet layer highlights its curves
 
@@ -152,69 +167,71 @@ Then reverse:
 **Expected:**
 - The corresponding dope-sheet row shows the stacked keyframe at that U as selected.
 
-## Step: Drag splitter
+## Step: Curve area auto-grows when few DSA layers
 
-**Context:** Curve pane is open.
+**Context:** Timeline shows only one or two animated parameters and one is expanded.
 **Action:**
-- Drag the splitter handle between dope sheet and curve pane upward, then downward
+- Observe the pane split
 
 **Expected:**
-- The two panes resize smoothly.
-- The split ratio is clamped (handle cannot pass very close to either edge).
+- Curve area takes the majority of the timeline height; dope sheet is only as tall as it needs (params × layer height). Not stuck at 50/50.
 
-## Step: Splitter ratio persists across restart
+## Step: Tall curve area centers instead of over-stretching
 
-**Context:** Curve pane is open with splitter at a non-default position.
+**Context:** Same as above — curve area is clearly taller than half of the timeline.
 **Action:**
-- Close and reopen the editor
-- Reopen the same project
-- Expand any parameter
+- Observe the curves' vertical fit
 
 **Expected:**
-- The splitter appears at the ratio from before the restart.
+- Curves don't stretch to fill the whole curve-area height; they sit at the "reference" (50%-height) scale with padding above/below. Visual scale remains reasonable.
 
-## Step: Normalize view flattens magnitudes
+## Step: Keyframe drag axis latches (U-only or V-only)
 
-**Context:** At least two expanded parameters with very different value magnitudes (e.g. one in `[0, 1]`, one in `[0, 1000]`).
+**Context:** A parameter is expanded with a selected keyframe in the curve area.
 **Action:**
-- Click the Normalize toggle in the curve pane's floating chrome
+- Press the keyframe and slowly drag — first, drag mostly horizontally
+- Release
+- Press again, drag mostly vertically
 
 **Expected:**
-- Both curves now fit inside a `[-1, 1]` vertical range.
-- Each curve retains its relative shape.
-- Keyframes sit on their respective curves.
+- The first drag only moves the keyframe in time (U); no V change.
+- The second drag only moves the keyframe in value (V); no U change.
+- The cursor changes to a horizontal ↔ / vertical ↕ arrow once the latch engages.
+- On release the latch resets (next drag starts undecided again).
 
-## Step: Vertical drag under Normalize (real-V scaling)
+## Step: Tangent edit is undoable
 
-**Context:** Normalize on. Two curves with very different magnitudes are visible.
+**Context:** Selected keyframe in the curve area.
 **Action:**
-- Drag a keyframe on the large-magnitude curve vertically by a small amount
+- Drag a tangent handle to a clearly different angle
+- Release
+- Press `Ctrl+Z`
 
 **Expected:**
-- The keyframe's real value changes by the scaled amount (not the raw screen-pixel amount).
-- Keyframes on other curves are unaffected.
-- Toggling Normalize off shows the change at the correct real-V magnitude.
+- The tangent returns to its pre-drag angle/tension.
+- `Ctrl+Shift+Z` (redo) restores the edit.
 
-## Step: Tangent edit under Normalize
+## Step: Curve area auto-closes when selection changes
 
-**Context:** Normalize on.
+**Context:** A parameter is expanded; switch the graph selection to a different operator whose animated parameters don't overlap with the current expanded set.
 **Action:**
-- Grab a tangent handle and edit the slope
+- Select an unrelated operator in the graph
 
 **Expected:**
-- The on-screen slope change is intuitive (matches visual drag).
-- Toggling Normalize off shows a correctly-scaled slope change on the underlying curve.
+- The curve area disappears (no longer any valid expanded params).
+- Re-selecting the original operator does NOT re-expand the parameter — user must click the curve-toggle again.
 
-## Step: Flat-curve edit under Normalize
+## Phase 4 / 5 scenarios (not yet implemented — pending follow-up PRs)
 
-**Context:** Normalize on. An expanded curve has a single keyframe (no real value range).
-**Action:**
-- Drag the single keyframe vertically
+The steps below describe planned behavior. Skip until the relevant phase ships — they're documented here so the test set doesn't have to be rewritten later.
 
-**Expected:**
-- The keyframe moves off the zero line during the drag.
-- The real value updates to a non-trivial number.
-- After release, the curve gains a real range and renders normally within Normalize.
+### (deferred) Step: Drag splitter
+
+Drag a 3 px handle between dope sheet and curve area to override the auto-split ratio. Clamped to approximately [0.15, 0.85]. Persisted via `UserSettings`.
+
+### (deferred) Step: Normalize view flattens magnitudes
+
+Toggling the normalize button maps each curve to `[-1, 1]` by its own value range. Curves of very different magnitudes become visually comparable. V-drag and tangent edits continue to work on real values under the hood; the flat-curve edge case (single keyframe) uses an ephemeral range so the key can leave the zero line.
 
 ## Step: Close button collapses all
 

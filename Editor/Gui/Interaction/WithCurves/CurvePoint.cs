@@ -3,6 +3,8 @@ using T3.Core.Animation;
 using T3.Core.DataTypes.Vector;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.UiModel.Commands;
+using T3.Editor.UiModel.Commands.Animation;
 
 namespace T3.Editor.Gui.Interaction.WithCurves;
 
@@ -13,6 +15,7 @@ internal static class CurvePoint
     {
         _drawList = ImGui.GetWindowDrawList();
         _curveEditCanvas = curveEditCanvas;
+        _curveEditing = curveEditing;
         _vDef = vDef;
 
         // Compute neighbor info for snapping and proportional handle length
@@ -59,6 +62,15 @@ internal static class CurvePoint
                                      ? Icon.CurveKeyframeSelected
                                      : Icon.CurveKeyframe, Color.White);
 
+        // Cross-view outline: if this same keyframe (by UniqueId) is hovered in the other
+        // timeline pane, draw a soft outline here so the link reads visually.
+        if (curveEditing?.GetHoveredKeyframeUniqueId() is { } hoveredId && hoveredId == vDef.UniqueId)
+        {
+            _drawList.AddRect(pTopLeft - Vector2.One,
+                              pTopLeft + _controlSize + Vector2.One,
+                              UiColors.ForegroundFull, rounding: 1f, ImDrawFlags.None, 1f);
+        }
+
         curveEditing?.HandleCurvePointDragging(compositionSymbolId, _vDef, isSelected);
     }
 
@@ -90,10 +102,13 @@ internal static class CurvePoint
         if (isHovered)
             ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
 
-        // Capture drag start offset for relative dragging (avoids initial jump)
+        // Capture drag start offset for relative dragging (avoids initial jump) and open an
+        // undo command capturing this keyframe's pre-drag tangent state.
         if (ImGui.IsItemActivated())
         {
             _dragStartOffset = ImGui.GetMousePos() - handleCenter;
+            if (_curveEditing != null)
+                _tangentDragCommand = new ChangeKeyframesCommand(new[] { _vDef }, _curveEditing.GetCurvesForUndo());
         }
 
         // Dragging
@@ -127,6 +142,16 @@ internal static class CurvePoint
             _pendingSnaps = TangentSnaps.None;
             _isDraggingTangent = false;
             _dragStartOffset = Vector2.Zero;
+
+            // Finalize and push the tangent-edit undo command. Values are already applied to
+            // the live VDefinition; StoreCurrentValues captures them as the "Do" state so
+            // redo restores them after an Undo.
+            if (_tangentDragCommand != null)
+            {
+                _tangentDragCommand.StoreCurrentValues();
+                UndoRedoStack.Add(_tangentDragCommand);
+                _tangentDragCommand = null;
+            }
         }
 
         // Draw handle: square for weighted, circle for unweighted
@@ -455,6 +480,11 @@ internal static class CurvePoint
     private static double _lastAngleSnapTime;
 
     private static ScalableCanvas _curveEditCanvas;
+    private static CurveEditing? _curveEditing;
+
+    // Tracks the undo command for an in-progress tangent drag (null outside of a drag).
+    // Static because CurvePoint is a static helper; only one tangent is dragged at any time.
+    private static ChangeKeyframesCommand? _tangentDragCommand;
     private static VDefinition _vDef;
     private static ImDrawListPtr _drawList;
 

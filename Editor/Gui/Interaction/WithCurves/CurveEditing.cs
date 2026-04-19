@@ -66,6 +66,21 @@ internal abstract class CurveEditing
         }
     }
 
+    /// <summary>
+    /// Expose the editor's curves to undo/redo consumers (e.g. tangent-drag command construction
+    /// in <see cref="CurvePoint"/>). The base <see cref="GetAllCurves"/> is protected; this is
+    /// the safe cross-class hook.
+    /// </summary>
+    internal IEnumerable<Curve> GetCurvesForUndo() => GetAllCurves();
+
+    /// <summary>
+    /// UniqueId of the keyframe that is currently hovered across the timeline's views (e.g.
+    /// hovering a CEA keyframe should outline the matching DSA row keyframe, and vice versa).
+    /// Default null for standalone editors; <see cref="TimelineCurveEditor"/> overrides to
+    /// surface the shared TimeLineCanvas state.
+    /// </summary>
+    internal virtual int? GetHoveredKeyframeUniqueId() => null;
+
     internal bool TrySelectKeyFrame(Curve curve, VDefinition vDef)
     {
         foreach (var c in GetAllCurves())
