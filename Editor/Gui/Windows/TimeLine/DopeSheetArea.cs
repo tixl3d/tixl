@@ -128,6 +128,15 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
             drawList.AddRectFilled(new Vector2(min.X, min.Y),
                                    new Vector2(max.X, max.Y), UiColors.ForegroundFull.Fade(fade));
         }
+
+        // Layer-row hover publishes the hovered parameter so CEA curves of other params fade.
+        // Keyframe / component-toggle hovers (rendered later below) overwrite with more-specific
+        // values — more-specific wins because it writes last.
+        if (layerHovered)
+        {
+            TimeLineCanvas.HoveredParameterHash = parameter.Hash;
+            TimeLineCanvas.HoveredComponentBit = 0;
+        }
         
         drawList.ChannelsSplit(2);
         drawList.ChannelsSetCurrent(1);
@@ -474,7 +483,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
             TimeLineCanvas.Current.Playback.TimeInBars = time;
     }
 
-    private static readonly Color _grayCurveColor = new(1f, 1f, 1.0f, 0.3f);
+    internal static readonly Color GrayCurveColor = new(0.8f, 1f, 1.0f, 0.3f);
 
     /// <summary>
     /// Is component <paramref name="bit"/> of the parameter (hash) currently visible?
@@ -531,10 +540,10 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
 
     internal static readonly Color[] CurveColors =
         {
-            new(1f, 0.2f, 0.2f, 0.3f),
-            new(0.1f, 1f, 0.2f, 0.3f),
-            new(0.1f, 0.4f, 1.0f, 0.5f),
-            _grayCurveColor,
+            new(1f, 0.2f, 0.2f, 0.4f),
+            new(0.1f, 1f, 0.2f, 0.4f),
+            new(0.1f, 0.4f, 1.0f, 0.6f),
+            GrayCurveColor,
         };
 
     internal static readonly string[] CurveNames =
@@ -602,7 +611,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
             }
 
             var fade = HoverFadeAlpha(parameter.Hash, bit);
-            var bodyColor = (parameter.Curves.Length > 1 ? CurveColors[curveIndex % 4] : _grayCurveColor).Fade(fade);
+            var bodyColor = (parameter.Curves.Length > 1 ? CurveColors[curveIndex % 4] : GrayCurveColor).Fade(fade);
             var outsideColor = bodyColor.Fade(0.3f);
 
             // Always draw 3 segments: dimmed pre, full body, dimmed post
@@ -773,6 +782,22 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
 
                 if (_changeKeyframesCommand != null)
                     TimeLineCanvas.Current.CompleteDragCommand();
+            }
+
+            // Keyframe hover — set shared hover state so the curve pane can outline the
+            // matching per-component keyframes, and draw an outline here if CEA/another
+            // DSA key just set the hovered UniqueId.
+            if (ImGui.IsItemHovered())
+            {
+                TimeLineCanvas.HoveredParameterHash = parameter.Hash;
+                TimeLineCanvas.HoveredComponentBit = 0;
+                TimeLineCanvas.HoveredKeyframeUniqueId = vDef.UniqueId;
+            }
+            if (TimeLineCanvas.HoveredKeyframeUniqueId == vDef.UniqueId)
+            {
+                drawList.AddRect(posOnScreen - Vector2.One,
+                                 posOnScreen + keyframeSize + Vector2.One,
+                                 UiColors.ForegroundFull, rounding: 1f, ImDrawFlags.None, 1f);
             }
 
             HandleCurvePointDragging(compositionSymbolId, vDef, isSelected);

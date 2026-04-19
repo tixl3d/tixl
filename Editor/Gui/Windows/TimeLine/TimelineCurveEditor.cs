@@ -23,6 +23,8 @@ namespace T3.Editor.Gui.Windows.TimeLine;
 
 internal sealed class TimelineCurveEditor : AnimationParameterEditing, ITimeObjectManipulation, IValueSnapAttractor
 {
+    internal override int? GetHoveredKeyframeUniqueId() => TimeLineCanvas.HoveredKeyframeUniqueId;
+
     public TimelineCurveEditor(TimeLineCanvas timeLineCanvas, ValueSnapHandler snapHandlerForU, ValueSnapHandler snapHandlerV)
         : base(timeLineCanvas.SharedSelectedKeyframes)
     {
@@ -172,12 +174,33 @@ internal sealed class TimelineCurveEditor : AnimationParameterEditing, ITimeObje
                                               : IsComponentVisible(param.Hash, bit);
                     if (shouldDrawCurve)
                     {
-                        var color = DopeSheetArea.CurveColors[curveIndex % DopeSheetArea.CurveColors.Length];
-                        if (!showParameterList)
-                            color = color.Fade(DopeSheetArea.HoverFadeAlpha(param.Hash, bit));
-                        DrawCurveLine(curve, TimeLineCanvas, color, isParamHovered || isParamComponentHovered);
+                        var color = param.Curves.Length == 1 ? DopeSheetArea.GrayCurveColor
+                            : DopeSheetArea.CurveColors[curveIndex % DopeSheetArea.CurveColors.Length];
+
+                        // Cross-view hover: in inline mode, this curve is "emphasized" if the
+                        // shared hover state points at its parameter and either no specific
+                        // component is selected or this curve's bit matches.
+                        var canvas = TimeLineCanvas;
+                        var crossViewHovered = !showParameterList
+                                               && canvas.HoveredParameterHash == param.Hash
+                                               && (canvas.HoveredComponentBit == 0 || canvas.HoveredComponentBit == bit);
+                        DrawCurveLine(curve, canvas, color,
+                                      isParamHovered: isParamHovered || isParamComponentHovered || crossViewHovered);
                         drawList.ChannelsSetCurrent(1);
                         visibleCurveCount++;
+
+                        // Curve-line hit-test (inline mode only): if the mouse hovers this
+                        // polyline and no keyframe-level hover has claimed the state yet,
+                        // mark this param + component as hovered so other-param curves fade.
+                        if (!showParameterList
+                            && TimeLineCanvas.HoveredKeyframeUniqueId == null
+                            && ImGui.IsWindowHovered()
+                            && IsMouseOverCurve(curve, TimeLineCanvas, ImGui.GetMousePos(), CurveHoverToleranceSquared))
+                        {
+                            TimeLineCanvas.HoveredParameterHash = param.Hash;
+                            TimeLineCanvas.HoveredComponentBit = bit;
+                        }
+
                         var keyframes = curve.GetVDefinitions();
                         var keyframeCount = keyframes.Count;
                         for (var ki = 0; ki < keyframeCount; ki++)
@@ -191,6 +214,16 @@ internal sealed class TimelineCurveEditor : AnimationParameterEditing, ITimeObje
                             var nextKey = ki < keyframeCount - 1 ? keyframes[ki + 1] : null;
                             CurvePoint.Draw(compositionSymbolId, keyframe, TimeLineCanvas, isSelected, this, isNeighborOfSelected, prevKey, nextKey);
                             _visibleKeyframes.Add(keyframe);
+
+                            // Keyframe-level hover wins over curve-line hover — it's more
+                            // specific. The "key<UniqueId>" invisible button is the last item
+                            // CurvePoint registers, so IsItemHovered reflects its state.
+                            if (!showParameterList && ImGui.IsItemHovered())
+                            {
+                                TimeLineCanvas.HoveredParameterHash = param.Hash;
+                                TimeLineCanvas.HoveredComponentBit = bit;
+                                TimeLineCanvas.HoveredKeyframeUniqueId = keyframe.UniqueId;
+                            }
                         }
 
                         HandleCreateNewKeyframes(curve);
@@ -555,6 +588,72 @@ internal sealed class TimelineCurveEditor : AnimationParameterEditing, ITimeObje
     private const float SnapDistance = 4;
     #endregion
 
+    // Screen-space tolerance for curve-line hit-testing (≈4 px, squared for cheap compare).
+    private static readonly float CurveHoverToleranceSquared = (4f * T3Ui.UiScaleFactor) * (4f * T3Ui.UiScaleFactor);
+
+    /// <summary>
+    /// True if the mouse is within <paramref name="toleranceSq"/> screen-space-squared of any
+    /// segment of the curve's cached sample polyline. Used for cross-view hover: hovering a
+    /// curve in the inline pane should fade other parameters' curves (in both panes).
+    ///
+    /// Two pruning passes keep this cheap even with many curves per frame:
+    /// 1) Binary-search a narrow U window around the mouse in <c>SampleCache</c>. Curves whose
+    ///    time range doesn't overlap the cursor return zero points here — constant-time skip.
+    /// 2) Per-segment screen AABB pre-check; only segments whose rect contains the mouse (plus
+    ///    tolerance padding) pay for the point-to-segment distance calc.
+    /// </summary>
+    private static bool IsMouseOverCurve(Curve curve, ScalableCanvas canvas, Vector2 mousePos, float toleranceSq)
+    {
+        var scaleXAbs = MathF.Abs(canvas.Scale.X);
+        if (scaleXAbs < 1e-6f)
+            return false;
+
+        var tolerancePx = MathF.Sqrt(toleranceSq);
+        var mouseU = canvas.InverseTransformX(mousePos.X);
+        // Query slightly wider than the tolerance so we still catch the boundary segment that
+        // straddles the tolerance edge (whose anchor point sits just outside).
+        var uQueryRange = 2f * tolerancePx / scaleXAbs;
+
+        var points = curve.SampleCache.GetPointsInRange(mouseU - uQueryRange, mouseU + uQueryRange);
+        if (points.Length < 2)
+            return false;
+
+        var prev = canvas.TransformPositionFloat(points[0]);
+        for (var i = 1; i < points.Length; i++)
+        {
+            var curr = canvas.TransformPositionFloat(points[i]);
+
+            // Per-segment AABB pre-check (cheap). Skip the sqrt-free distance calc when the
+            // mouse is clearly outside this segment's screen rect + tolerance padding.
+            var minX = (prev.X < curr.X ? prev.X : curr.X) - tolerancePx;
+            var maxX = (prev.X > curr.X ? prev.X : curr.X) + tolerancePx;
+            var minY = (prev.Y < curr.Y ? prev.Y : curr.Y) - tolerancePx;
+            var maxY = (prev.Y > curr.Y ? prev.Y : curr.Y) + tolerancePx;
+            if (mousePos.X >= minX && mousePos.X <= maxX && mousePos.Y >= minY && mousePos.Y <= maxY
+                && PointSegmentDistanceSquared(mousePos, prev, curr) <= toleranceSq)
+            {
+                return true;
+            }
+            prev = curr;
+        }
+        return false;
+    }
+
+    private static float PointSegmentDistanceSquared(Vector2 p, Vector2 a, Vector2 b)
+    {
+        var ab = b - a;
+        var lenSq = Vector2.Dot(ab, ab);
+        if (lenSq < 1e-6f)
+        {
+            var d0 = p - a;
+            return Vector2.Dot(d0, d0);
+        }
+        var t = Math.Clamp(Vector2.Dot(p - a, ab) / lenSq, 0f, 1f);
+        var closest = a + t * ab;
+        var diff = p - closest;
+        return Vector2.Dot(diff, diff);
+    }
+
     public static void DrawCurveLine(Curve curve, ScalableCanvas canvas, Color color, bool isParamHovered = false)
     {
         var visibleStartU = canvas.InverseTransformPositionFloat(canvas.WindowPos).X;
@@ -568,9 +667,9 @@ internal sealed class TimelineCurveEditor : AnimationParameterEditing, ITimeObje
         var lastKeyU = cache.LastKeyU;
         if (double.IsNaN(firstKeyU))
             return;
-
+        
         var drawList = ImGui.GetWindowDrawList();
-        var thickness = isParamHovered ? 3f : 1f;
+        var thickness = isParamHovered ? 3f : 1.4f;
         var outsideColor = color.Fade(0.3f);
 
         // Always draw 3 segments: dimmed pre, full body, dimmed post

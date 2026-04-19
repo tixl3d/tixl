@@ -1,7 +1,7 @@
 # DopeSheet Per-Parameter Curve Expand
 
 **Date:** 2026-04-19
-**Status:** Planning — not yet implemented
+**Status:** Phases 1, 2, 3 landed. Phase 4 (splitter) deferred. Phase 5 (Normalize) next — see handoff at bottom.
 
 ## Goal
 
@@ -178,4 +178,60 @@ Each phase is independently shippable and buildable. Phases 1–3 are the core f
 
 - Should the standalone `Modes.CurveEditor` view eventually go away? (User: "decide later".)
 - Should U-drag of one vector component sync to sibling components? (User: "maybe".)
-- Persist `ExpandedParameterHashes` across sessions? First pass: no.
+- Persist `CurveEditingParamHashes` across sessions? First pass: no.
+
+---
+
+## Status & handoff (2026-04-19)
+
+### Landed
+
+**Phase 1 — Layout.** Inline pane split lives in `TimeLineCanvas.Draw`. DSA runs on the outer canvas (no sub-canvas wrapping) inside `##dopeSheetArea`; curve area runs inside `##curveEditArea` via `InlineCurveArea` (file: [Editor/Gui/Windows/TimeLine/InlineCurveArea.cs](../../Editor/Gui/Windows/TimeLine/InlineCurveArea.cs)). Floating close + normalize chrome in the CEA's top-right.
+
+**Phase 2 — 3-segment row.** [`DopeSheetArea.DrawProperty`](../../Editor/Gui/Windows/TimeLine/DopeSheetArea.cs) splits the header into `pin | curve-toggle | name`. Name is replace/add/remove via Shift/Ctrl.
+
+**Phase 3 — Component toggles + cross-view hover.**
+- Component buttons on the DSA row (one per curve on expanded vector params). Click semantics: first click **isolates** to that component; subsequent clicks add/remove; restoring all-on or clearing to zero drops the mask entry (back to default). `DopeSheetArea.ToggleComponentVisibility`.
+- Cross-view hover state (`HoveredParameterHash`, `HoveredComponentBit`, `HoveredKeyframeUniqueId`) reset at the start of `DrawCanvasContent`. Sources (in order of specificity; later writes win): DSA layer row → DSA keyframe → component toggle → CEA curve-line hit-test (binary-searched narrow-U window in `SampleCache` + per-segment AABB pre-check) → CEA keyframe.
+- Cross-view keyframe outline via `CurveEditing.GetHoveredKeyframeUniqueId()` hook, overridden in `TimelineCurveEditor`. DSA and CEA both draw a soft outline when the shared UniqueId matches.
+- CEA curve "emphasis" now signalled via `isParamHovered` bool on `DrawCurveLine` (thicker stroke); no more pre-fading of the color at the call site.
+
+**Interaction iterations (not in original plan, but worth knowing):**
+- Pane split is dynamic: DSA pane auto-sizes to the measured content (`_lastDopeContentHeight`), capped at 50% of available height; CEA gets the rest. V-fit is capped at a reference height (also 50%) so a very tall CEA doesn't over-stretch curves — it centers with padding instead.
+- Selection is shared across DSA and CEA via `CurveEditing(sharedSelection)` ctor overload; `TimeLineCanvas.SharedSelectedKeyframes` is the single set.
+- Dope-local `SelectionFence` inside `##dopeSheetArea`; CEA-local `SelectionFence` inside `##curveEditArea`. Outer `_selectionFence` is suppressed in inline layout.
+- CEA as a dedicated `ScalableCanvas` sub-canvas with its own V scope. Mirrors parent X (one-way `SyncXFrom`), adopts its view into the parent during curve rendering (so `TimeLineCanvas.Current.*` transforms land in the pane), restores after. See `AdoptViewFrom` / `GetCurrentScope` / `SetTargetScope` / `SetWindowRect` on `ScalableCanvas`.
+- Keyframe drag uses `MoveDirection` axis-latch in the CEA — 2D by default, latches to whichever axis has the larger first-drag delta (fixes the old H-preference).
+- Tangent editing is now wrapped in an undo command — see `CurvePoint._tangentDragCommand`.
+- V-snap indicator drawn inside CEA.Draw while the outer canvas is adopted; outer `DrawAnimationCanvas` gets `drawVSnapIndicator: false` in inline layout.
+
+### Deferred
+
+**Phase 4 — Draggable splitter.** See section above; `CurvePaneHeightRatio` is kept but unused for now. When we come back: add a 3 px drag handle between the two child windows, persist the ratio via `UserSettings`, and resolve how dragging interacts with the dynamic auto-split (probably: dragging sets a `_userOverrideSplit` flag, auto-split stops until a "reset" affordance clears it).
+
+### Next session — Phase 5 brief (Normalize view)
+
+The big one. `TimeLineCanvas.NormalizeCurveView` toggle and the floating `Icon.Scale` chrome button both exist but are no-ops — nothing reads the flag for rendering or drag math yet.
+
+**Deliverable:** when `NormalizeCurveView` is on, each curve renders mapped to `[-1, 1]`. V-drag and tangent editing still work: deltas in normalized space are rescaled per-curve back to real V space.
+
+**Key implementation points (all in order of how they should be tackled):**
+
+1. **Per-curve `(vMin, vMax)` capture at drag start** — do NOT recompute mid-drag. Otherwise the range shifts under the cursor as the user drags and you get runaway / oscillation. Cache on `ChangeKeyframesCommand` construction or in a sibling dictionary keyed by `Curve`. Clear on `CompleteDragCommand`.
+2. **Render transform** `V' = 2 * (V - vMin) / (vMax - vMin) - 1` applied to:
+    - Curve polyline points — easiest to patch in `TimelineCurveEditor.DrawCurveLine` (transform each `Vector2(U, V)` before passing to canvas transforms).
+    - Keyframe screen position in `CurvePoint.Draw` — transform `vDef.Value` to `V'` before the `canvas.TransformPosition(...)` call.
+    - Tangent handle endpoints in `ComputeScreenTangent` / `UpdateTangentVectors` — same pre-transform.
+3. **Flat-curve edge case** (`vMax - vMin < 1e-6f`): render at `V' = 0`. During a drag, use an ephemeral `[value - 0.5, value + 0.5]` range so the single key can move off the zero line. On `CompleteDragCommand` recompute the real range.
+4. **V-drag delta rescaling**:
+    - Current path: `TimelineCurveEditor.HandleCurvePointDragging` computes `newDragPosition` via `canvas.InverseTransformPositionFloat(mouse)` (in normalized-space when normalize is on), then `UpdateDragCommand(u - vDef.U, v - vDef.Value)`.
+    - Under normalize, `v` is in normalized space but `vDef.Value` is real. You have two options:
+        - **Do the inverse transform per-keyframe inside `UpdateDragCommand`** — each keyframe's `dv_real = dv_norm * (vMaxCached - vMinCached) / 2`. Requires passing `dv` as normalized and looking up each key's curve range.
+        - **Convert `v` back to real before calling `UpdateDragCommand`** — only works for single-curve drags; breaks when multiple components are selected because one shared `dv` can't be correct for curves with different ranges.
+    - The per-keyframe inverse is the correct path. Probably means branching `UpdateDragCommand(dt, dv)` on normalize mode: `vDef.Value += dv * (cache[curveOf(vDef)].Range) / 2` instead of `vDef.Value += dv`.
+    - "Curve-of-keyframe" lookup: build a `VDefinition → Curve` dict at drag start alongside the range cache.
+5. **Tangent rescaling**: same story in `CurvePoint.HandleTangentDrag`. The angle captured from the mouse is in normalized-canvas space; store in real-curve space by rescaling the "rise" portion. Rough formula: `realAngle = atan2(rise * (vMax - vMin) / 2, run)` where `rise / run` came from the mouse delta in normalized space.
+6. **V snap disable in normalize mode for v1.** Real-V snap values don't map cleanly through per-curve scaling. Gate `_snapHandlerV.TryCheckForSnapping(...)` in `TimelineCurveEditor.HandleCurvePointDragging` on `!NormalizeCurveView`. Revisit if users miss it.
+7. **Canvas scope clamp**: while normalize is on, force the CEA's Y scope to `[-1, 1]` with small padding. Override the V-fit path to short-circuit to that scope instead of computing from bounds. Save pre-enable scope and restore on disable so the user's manual zoom isn't lost across toggles.
+
+**Test set to extend:** new steps in [`.tests-manual/dopesheet-curve-expand.md`](../../.tests-manual/dopesheet-curve-expand.md) for the normalize scenarios — steps 13-16 already drafted there when the plan was written.

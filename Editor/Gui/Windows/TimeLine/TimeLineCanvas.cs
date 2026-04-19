@@ -644,6 +644,10 @@ internal sealed class TimeLineCanvas : AnimationCanvas
     internal int? HoveredKeyframeUniqueId;
 
     internal bool NormalizeCurveView;
+    // Reserved for the Phase 4 draggable splitter. Currently unused — the inline layout
+    // auto-splits based on the measured DSA content height (see _lastDopeContentHeight).
+    // When Phase 4 lands, this stores the manual user ratio [0.15, 0.85] and the layout
+    // branches on whether the user has ever dragged the handle.
     internal float CurvePaneHeightRatio = 0.5f;
 
     // Published by InlineCurveArea each frame it draws; null when the pane isn't visible.
