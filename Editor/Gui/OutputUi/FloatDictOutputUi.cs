@@ -101,6 +101,7 @@ internal sealed class FloatDictOutputUi : OutputUi<Dict<float>>
 
             for (var channelIndex = 0; channelIndex < _previousChannelValues.Count && channelIndex < _valuesForDrawing.Count; channelIndex++)
             {
+                ImGui.PushID(channelIndex);
                 var currentValue = _valuesForDrawing[channelIndex];
                 var currentName = _keysForDrawing[channelIndex];
 
@@ -186,8 +187,8 @@ internal sealed class FloatDictOutputUi : OutputUi<Dict<float>>
 
                 ImGui.PopStyleColor();
                 ImGui.PopStyleColor();
+                ImGui.PopID();
             }
-
             ImGui.EndChild();
         }
         else
