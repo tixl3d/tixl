@@ -173,6 +173,8 @@ internal sealed class TimelineCurveEditor : AnimationParameterEditing, ITimeObje
                     if (shouldDrawCurve)
                     {
                         var color = DopeSheetArea.CurveColors[curveIndex % DopeSheetArea.CurveColors.Length];
+                        if (!showParameterList)
+                            color = color.Fade(DopeSheetArea.HoverFadeAlpha(param.Hash, bit));
                         DrawCurveLine(curve, TimeLineCanvas, color, isParamHovered || isParamComponentHovered);
                         drawList.ChannelsSetCurrent(1);
                         visibleCurveCount++;
@@ -350,8 +352,16 @@ internal sealed class TimelineCurveEditor : AnimationParameterEditing, ITimeObje
 
         if (ImGui.IsItemDeactivated())
         {
-            if (_changeKeyframesCommand != null)
+            // MoveDirection is the authoritative "a drag was in progress" signal —
+            // _changeKeyframesCommand is a static that only gets assigned when this editor
+            // is the dispatcher's drag target (it isn't in inline-curve-edit mode, so it
+            // stays null even while DSA's command is alive). If the latch fired this drag,
+            // finalize the dispatched command and reset the axis latch for next time.
+            if (CurveInputEditing.MoveDirection != CurveInputEditing.MoveDirections.Undecided)
+            {
                 TimeLineCanvas.Current.CompleteDragCommand();
+                CurveInputEditing.MoveDirection = CurveInputEditing.MoveDirections.Undecided;
+            }
         }
 
         if (!ImGui.IsItemActive() || !ImGui.IsMouseDragging(0, 0f))
@@ -375,21 +385,18 @@ internal sealed class TimelineCurveEditor : AnimationParameterEditing, ITimeObje
             SelectedKeyframes.Add(vDef);
         }
 
-        if (_changeKeyframesCommand == null)
+        // Per-drag axis latch. Mouse-down starts Undecided (4-way cursor via the branch
+        // near the top). When total drag exceeds threshold, lock to whichever axis has the
+        // larger delta and dispatch StartDragCommand once. Reset on release (see above).
+        if (CurveInputEditing.MoveDirection == CurveInputEditing.MoveDirections.Undecided)
         {
             var mouseDragDelta = ImGui.GetMouseDragDelta();
-            if (CurveInputEditing.MoveDirection == CurveInputEditing.MoveDirections.Undecided)
+            if (mouseDragDelta.Length() > CurveInputEditing.MoveDirectionThreshold)
             {
-                if (Math.Abs(mouseDragDelta.X) > CurveInputEditing.MoveDirectionThreshold)
-                {
-                    CurveInputEditing.MoveDirection = CurveInputEditing.MoveDirections.Horizontal;
-                    TimeLineCanvas.Current.StartDragCommand(compositionSymbolId);
-                }
-                else if (Math.Abs(mouseDragDelta.Y) > CurveInputEditing.MoveDirectionThreshold)
-                {
-                    CurveInputEditing.MoveDirection = CurveInputEditing.MoveDirections.Vertical;
-                    TimeLineCanvas.Current.StartDragCommand(compositionSymbolId);
-                }
+                CurveInputEditing.MoveDirection = Math.Abs(mouseDragDelta.X) >= Math.Abs(mouseDragDelta.Y)
+                                                      ? CurveInputEditing.MoveDirections.Horizontal
+                                                      : CurveInputEditing.MoveDirections.Vertical;
+                TimeLineCanvas.Current.StartDragCommand(compositionSymbolId);
             }
         }
 

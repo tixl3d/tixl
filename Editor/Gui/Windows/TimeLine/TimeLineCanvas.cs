@@ -95,8 +95,8 @@ internal sealed class TimeLineCanvas : AnimationCanvas
         Playback = playback;
         SyncStateWithComposition(compositionOp);
 
-        if(MathUtils.HasChanged(ref _lastSelectionRevision, projectView.NodeSelection.ChangeCounter))
-            _selectedAnimationParameters = GetAnimationParametersForSelectedNodes(compositionOp);
+        //if(MathUtils.HasChanged(ref _lastSelectionRevision, projectView.NodeSelection.ChangeCounter))
+        _selectedAnimationParameters = GetAnimationParametersForSelectedNodes(compositionOp);
 
         PruneExpandedForMissingParams();
 
@@ -129,7 +129,8 @@ internal sealed class TimeLineCanvas : AnimationCanvas
         DrawAnimationCanvas(drawAdditionalCanvasContent: DrawCanvasContent,
                             inlineLayoutActive ? null : _selectionFence,
                             0,
-                            outerFlags);
+                            outerFlags,
+                            drawVSnapIndicator: !inlineLayoutActive);
         Current = null;
 
         T3Ui.UiScaleFactor = keepScale;
@@ -137,6 +138,12 @@ internal sealed class TimeLineCanvas : AnimationCanvas
 
         void DrawCanvasContent(InteractionState interactionState)
         {
+            // Cross-view hover state is rebuilt each frame by whichever renderer's hit-test
+            // sets it. Stale values would leak hover fade to the next frame on mouse-exit.
+            HoveredParameterHash = null;
+            HoveredComponentBit = 0;
+            HoveredKeyframeUniqueId = null;
+
             ImGui.SetCursorPosY(ImGui.GetCursorPosY() );
             if (PlaybackUtils.TryFindingSoundtrack(out var soundtrack, out var composition))
             {
@@ -184,8 +191,20 @@ internal sealed class TimeLineCanvas : AnimationCanvas
                         if (CurveEditingParamHashes.Count > 0)
                         {
                             var availHeight = ImGui.GetContentRegionAvail().Y;
-                            var topHeight = MathF.Max(40f, availHeight * CurvePaneHeightRatio);
+
+                            // DSA pane sizes to last frame's measured content (LayersArea +
+                            // DSA rows + anything else drawn in that child). Clamped at 50% of
+                            // available height so it never hogs the pane; curve area gets the
+                            // remainder. See _lastDopeContentHeight update after the child draws.
+                            var dopeNeeded = _lastDopeContentHeight + 6 * T3Ui.UiScaleFactor;
+                            var topHeight = MathF.Max(40f, MathF.Min(dopeNeeded, availHeight * 0.5f));
                             var bottomHeight = MathF.Max(40f, availHeight - topHeight);
+
+                            // Reference height used by the curve area's Y-fit: 50% of the
+                            // timeline body. If the curve area ends up taller than this (few DSA
+                            // layers), we still fit as if it were 50%-tall and center the curves
+                            // with padding — prevents a very tall CA from over-stretching curves.
+                            var curveFitReferenceHeight = availHeight * 0.5f;
 
                             // Dope sheet runs on the outer canvas — no sub-canvas wrapping, so U
                             // interactions go directly to TimeLineCanvas and the CEA pane never
@@ -195,6 +214,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
                                              ImGuiChildFlags.None,
                                              ImGuiWindowFlags.NoBackground
                                              | ImGuiWindowFlags.NoScrollWithMouse);
+                            var dopeContentStartY = ImGui.GetCursorScreenPos().Y;
                             LayersArea.Draw(compositionOp, Playback, SnapHandlerForU);
                             DopeSheetArea.Draw(compositionOp, _selectedAnimationParameters);
 
@@ -223,10 +243,14 @@ internal sealed class TimeLineCanvas : AnimationCanvas
                             // outer-scoped call further down scrolls a window with no overflow
                             // and the user's drag does nothing.
                             CustomComponents.HandleDragScrolling(this);
+
+                            // Snapshot this frame's total dope-pane content height for next
+                            // frame's split (LayersArea + DSA + anything else drawn above).
+                            _lastDopeContentHeight = MathF.Max(0f, ImGui.GetCursorScreenPos().Y - dopeContentStartY);
                             ImGui.EndChild();
 
                             ImGui.PushStyleColor(ImGuiCol.ChildBg, UiColors.BackgroundFull.Fade(0.2f).Rgba);
-                            _curveEditCanvas.Draw(compositionOp, _selectedAnimationParameters, bottomHeight, modeChanged);
+                            _curveEditCanvas.Draw(compositionOp, _selectedAnimationParameters, bottomHeight, curveFitReferenceHeight, modeChanged);
                             ImGui.PopStyleColor();
                         }
                         else
@@ -854,6 +878,11 @@ internal sealed class TimeLineCanvas : AnimationCanvas
     private readonly List<AnimationParameter> _curvesForSelection = new(64);
     private readonly SelectionFence _selectionFence = new();
     private readonly SelectionFence _dopeFence = new();
+
+    // Measured dope-pane content height from the previous frame (LayersArea + DSA rows + any
+    // other interactive content drawn in that child). Drives the inline-layout split so the
+    // dope pane takes only what it needs, capped at 50% of available height.
+    private float _lastDopeContentHeight = 120f;
 
     // Styling
     private const float TimeLineDragHeight = 30;

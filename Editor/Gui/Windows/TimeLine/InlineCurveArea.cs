@@ -27,7 +27,7 @@ internal sealed class InlineCurveArea : ScalableCanvas
     }
 
     public void Draw(Instance compositionOp, List<TimeLineCanvas.AnimationParameter> animationParameters,
-                     float height, bool modeChanged)
+                     float height, float fitReferenceHeight, bool modeChanged)
     {
         ImGui.BeginChild("##curveEditArea", new Vector2(0, height),
                          ImGuiChildFlags.None,
@@ -62,7 +62,7 @@ internal sealed class InlineCurveArea : ScalableCanvas
                                                    _timeLineCanvas.CurveEditingParamHashes,
                                                    out var fitBounds))
                 {
-                    SetVerticalScopeToCanvasArea(fitBounds, flipY: true, paddingFraction: 0.15f);
+                    FitVerticalScopeCapped(fitBounds, fitReferenceHeight);
                 }
             }
 
@@ -86,11 +86,48 @@ internal sealed class InlineCurveArea : ScalableCanvas
 
             DrawFloatingChrome();
 
+            // V snap indicator must be drawn while the outer canvas is adopted to this pane's
+            // view — otherwise TransformY uses the wrong Y state and the indicator lands at an
+            // offset with a different scale. The outer DrawAnimationCanvas skips V-snap in
+            // inline layout (drawVSnapIndicator:false) so this is the only V-snap draw.
+            _timeLineCanvas.SnapHandlerForV.DrawSnapIndicator(_timeLineCanvas);
+
             _timeLineCanvas.SetCurrentScope(savedCurrent);
             _timeLineCanvas.SetTargetScope(savedTarget);
             _timeLineCanvas.SetWindowRect(savedPos, savedSize);
         }
         ImGui.EndChild();
+    }
+
+    /// <summary>
+    /// Auto-fit V to the keyframe bounds, but cap the scale at what we'd get if the curve
+    /// area were <paramref name="referenceHeight"/> tall. When the curve area is taller than
+    /// that reference (few DSA layers → CA got extra space), we use the capped scale and
+    /// center the bounds vertically so curves don't stretch to fill the whole pane. When the
+    /// curve area is at or below the reference, this reduces to a normal fit.
+    /// </summary>
+    private void FitVerticalScopeCapped(ImRect bounds, float referenceHeight)
+    {
+        const float paddingFraction = 0.15f;
+        var actualHeight = ImGui.GetWindowHeight();
+        var effectiveHeight = MathF.Min(actualHeight, referenceHeight);
+
+        var sizeY = MathF.Abs(bounds.GetSize().Y);
+        if (sizeY < 1e-6f)
+            sizeY = 1f;
+        var paddedSizeY = sizeY * (1f + 2f * paddingFraction);
+
+        // Y scale magnitude (flipped canvas → negative signed).
+        var scaleMag = effectiveHeight / paddedSizeY;
+        var signedScale = -scaleMag;
+
+        // Center the bounds in the actual pane height. The visible canvas-Y span equals
+        // actualHeight/scaleMag; with flipped Y, Scroll.Y is the canvas value at the pane's top.
+        var boundsCenter = 0.5f * (bounds.Min.Y + bounds.Max.Y);
+        var visibleCanvasHeight = actualHeight / scaleMag;
+
+        ScaleTarget = new Vector2(ScaleTarget.X, signedScale);
+        ScrollTarget = new Vector2(ScrollTarget.X, boundsCenter + 0.5f * visibleCanvasHeight);
     }
 
     /// <summary>

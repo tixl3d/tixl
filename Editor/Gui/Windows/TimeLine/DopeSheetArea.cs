@@ -137,7 +137,8 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
             var hash = parameter.Hash;
             ImGui.PushID(hash);
 
-            ImGui.PushFont(isCurrentSelected ? Fonts.FontBold : Fonts.FontNormal);
+            var isEditedInCurveArea = TimeLineCanvas.CurveEditingParamHashes.Contains(hash);
+            ImGui.PushFont((isCurrentSelected || isEditedInCurveArea)  ? Fonts.FontBold : Fonts.FontNormal);
 
             var label = $"{parameter.ChildUi.SymbolChild.ReadableName}.{parameter.Input.Input.Name}";
             var opLabelSize = ImGui.CalcTextSize(label);
@@ -176,7 +177,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
             // --- Curve-expand toggle ---
             var curveBtnPos = headerMin + new Vector2(iconBlockWidth, 0);
             ImGui.SetCursorScreenPos(curveBtnPos);
-            var isEditedInCurveArea = TimeLineCanvas.CurveEditingParamHashes.Contains(hash);
+
             if (ImGui.InvisibleButton("curve", new Vector2(iconBlockWidth, rowHeight)))
             {
                 if (isEditedInCurveArea)
@@ -248,8 +249,51 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
             if (isRelatedHovered) labelOpacity += 0.15f;
             if (labelOpacity > 1f) labelOpacity = 1f;
 
-            var labelColor = UiColors.ForegroundFull.Fade(labelOpacity);
+            var labelColor =  isEditedInCurveArea ? UiColors.StatusActivated : UiColors.ForegroundFull.Fade(labelOpacity);
+            
             drawList.AddText(namePos + new Vector2(0, 3) * T3Ui.UiScaleFactor, labelColor, label);
+
+            // --- Component visibility toggles (X/Y/Z/W or R/G/B/A) for expanded vector params ---
+            // One small button per curve; click toggles its bit in VisibleComponentMask. Hover
+            // drives the cross-view fade via TimeLineCanvas.Hovered{Parameter,Component}{Bit,Hash}.
+            if (isEditedInCurveArea && parameter.Curves.Length > 1)
+            {
+                var componentNames = parameter.Input.ValueType == typeof(System.Numerics.Vector4)
+                                         ? ColorCurveNames
+                                         : CurveNames;
+                var compSize = new Vector2(14 * T3Ui.UiScaleFactor, rowHeight);
+                var compGap = 1 * T3Ui.UiScaleFactor;
+                var compStart = namePos + new Vector2(opLabelSize.X + 6 * T3Ui.UiScaleFactor, 0);
+
+                for (var i = 0; i < parameter.Curves.Length && i < componentNames.Length; i++)
+                {
+                    var bit = 1 << i;
+                    var isVisible = IsComponentVisible(hash, bit, parameter.Curves.Length);
+                    var pos = compStart + new Vector2(i * (compSize.X + compGap), 0);
+
+                    ImGui.PushID(i);
+                    ImGui.SetCursorScreenPos(pos);
+                    if (ImGui.InvisibleButton("comp", compSize))
+                        ToggleComponentVisibility(hash, bit, parameter.Curves.Length);
+                    var compHovered = ImGui.IsItemHovered();
+                    if (compHovered)
+                    {
+                        TimeLineCanvas.HoveredParameterHash = hash;
+                        TimeLineCanvas.HoveredComponentBit = bit;
+                    }
+                    ImGui.PopID();
+
+                    var baseColor = CurveColors[i % CurveColors.Length];
+                    var alpha = isVisible ? 1f : 0.25f;
+                    if (compHovered) alpha = 1f;
+                    var color = baseColor.Fade(alpha);
+
+                    var letter = componentNames[i];
+                    var textSize = ImGui.CalcTextSize(letter);
+                    var textPos = pos + (compSize - textSize) * 0.5f;
+                    drawList.AddText(textPos, color, letter);
+                }
+            }
 
             ImGui.PopFont();
             ImGui.PopID();
@@ -432,6 +476,59 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
 
     private static readonly Color _grayCurveColor = new(1f, 1f, 1.0f, 0.3f);
 
+    /// <summary>
+    /// Is component <paramref name="bit"/> of the parameter (hash) currently visible?
+    /// Missing entry in the mask means "all components visible" (the default on expand).
+    /// </summary>
+    private bool IsComponentVisible(int hash, int bit, int curveCount)
+    {
+        if (!TimeLineCanvas.VisibleComponentMask.TryGetValue(hash, out var mask))
+            return true;
+        return (mask & bit) != 0;
+    }
+
+    /// <summary>
+    /// Isolate-on-first-click semantics:
+    ///   • No mask entry (all visible) → isolate this component (only it stays visible).
+    ///   • Mask entry already present → toggle this bit; if the result is "all visible" or
+    ///     "none visible", drop the entry so we're back to the default "all visible".
+    /// </summary>
+    private void ToggleComponentVisibility(int hash, int bit, int curveCount)
+    {
+        var allOn = (1 << curveCount) - 1;
+
+        if (!TimeLineCanvas.VisibleComponentMask.TryGetValue(hash, out var mask))
+        {
+            // All currently visible — isolate this component.
+            if (bit == allOn)
+                return; // only one component; nothing to isolate to
+            TimeLineCanvas.VisibleComponentMask[hash] = bit;
+            return;
+        }
+
+        var next = mask ^ bit;
+        if (next == 0 || next == allOn)
+            TimeLineCanvas.VisibleComponentMask.Remove(hash); // restore default (all visible)
+        else
+            TimeLineCanvas.VisibleComponentMask[hash] = next;
+    }
+
+    /// <summary>
+    /// Cross-view alpha: full when no hover is set, dimmed when the hover picks a different
+    /// parameter or (within the same parameter) a different component.
+    /// </summary>
+    internal static float HoverFadeAlpha(int paramHash, int bit)
+    {
+        var canvas = TimeLineCanvas.Current;
+        if (canvas == null || canvas.HoveredParameterHash is not { } hoveredParam)
+            return 1f;
+        if (hoveredParam != paramHash)
+            return 0.4f;
+        if (canvas.HoveredComponentBit != 0 && canvas.HoveredComponentBit != bit)
+            return 0.4f;
+        return 1f;
+    }
+
     internal static readonly Color[] CurveColors =
         {
             new(1f, 0.2f, 0.2f, 0.3f),
@@ -465,8 +562,20 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
         var minValue = float.PositiveInfinity;
         var maxValue = float.NegativeInfinity;
 
+        // Component visibility (expanded vector params can hide individual curves via the
+        // dope-row toggle buttons); missing mask entry means "all visible".
+        TimeLineCanvas.Current.VisibleComponentMask.TryGetValue(parameter.Hash, out var componentMask);
+        var hasComponentMask = componentMask != 0;
+
         foreach (var curve in parameter.Curves)
         {
+            var bit = 1 << curveIndex;
+            if (hasComponentMask && (componentMask & bit) == 0)
+            {
+                curveIndex++;
+                continue;
+            }
+
             if (curve.Table.Count == 0)
                 continue;
 
@@ -492,7 +601,8 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
                     maxValue = value;
             }
 
-            var bodyColor = parameter.Curves.Length > 1 ? CurveColors[curveIndex % 4] : _grayCurveColor;
+            var fade = HoverFadeAlpha(parameter.Hash, bit);
+            var bodyColor = (parameter.Curves.Length > 1 ? CurveColors[curveIndex % 4] : _grayCurveColor).Fade(fade);
             var outsideColor = bodyColor.Fade(0.3f);
 
             // Always draw 3 segments: dimmed pre, full body, dimmed post

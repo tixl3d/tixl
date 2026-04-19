@@ -22,7 +22,7 @@ internal abstract class AnimationCanvas : ScalableCanvas, ITimeObjectManipulatio
     public string ImGuiTitle = "timeline";
 
         
-    protected void DrawAnimationCanvas(Action<InteractionState> drawAdditionalCanvasContent, SelectionFence? selectionFence, float height = 0, T3Ui.EditingFlags flags = T3Ui.EditingFlags.None)
+    protected void DrawAnimationCanvas(Action<InteractionState> drawAdditionalCanvasContent, SelectionFence? selectionFence, float height = 0, T3Ui.EditingFlags flags = T3Ui.EditingFlags.None, bool drawVSnapIndicator = true)
     {
 
         ImGui.BeginChild(ImGuiTitle, new Vector2(0, height), ImGuiChildFlags.Borders,
@@ -43,7 +43,11 @@ internal abstract class AnimationCanvas : ScalableCanvas, ITimeObjectManipulatio
             drawAdditionalCanvasContent(interactionState);
 
             SnapHandlerForU.DrawSnapIndicator(this);
-            SnapHandlerForV.DrawSnapIndicator(this);
+            // V snap is opt-out: in layouts where V is owned by a sub-canvas with different
+            // Y state (e.g. timeline's inline curve pane) the sub-canvas renders it itself,
+            // and drawing here would use the outer canvas's Y → wrong screen position.
+            if (drawVSnapIndicator)
+                SnapHandlerForV.DrawSnapIndicator(this);
         }
         ImGui.EndChild();
     }
