@@ -41,6 +41,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
         _selectionRangeIndicator = new SelectionRangeIndicator(this, SnapHandlerForU);
         _timeSelectionArea = new TimeSelectionArea(this);
         LayersArea = new LayersArea(this, getCompositionOp, requestChildCompositionFunc, SnapHandlerForU);
+        _curveEditCanvas = new CurveEditCanvas(this, _timelineCurveEditArea, _horizontalRaster);
 
         SnapHandlerForV.AddSnapAttractor(_horizontalRaster);
         SnapHandlerForU.AddSnapAttractor(_clipRange);
@@ -97,13 +98,38 @@ internal sealed class TimeLineCanvas : AnimationCanvas
         if(MathUtils.HasChanged(ref _lastSelectionRevision, projectView.NodeSelection.ChangeCounter))
             _selectedAnimationParameters = GetAnimationParametersForSelectedNodes(compositionOp);
 
+        PruneExpandedForMissingParams();
+
         // Very ugly hack to prevent scaling the output above window size
         var keepScale = T3Ui.UiScaleFactor;
 
         ScrollToTimeAfterStopped();
 
         var modeChanged = UpdateMode();
-        DrawAnimationCanvas(drawAdditionalCanvasContent: DrawCanvasContent, _selectionFence, 0, T3Ui.EditingFlags.AllowHoveredChildWindows);
+        SyncInlineCurveEditorRegistration();
+
+        // When the inline curve-edit layout is active, the two sub-canvases own interaction
+        // (zoom, pan, fence) inside their own child windows. Suppress the outer canvas's
+        // zoom/pan/fence so they don't double-fire.
+        var inlineLayoutActive = Mode == Modes.DopeView && CurveEditingParamHashes.Count > 0;
+        var outerFlags = T3Ui.EditingFlags.AllowHoveredChildWindows;
+        if (inlineLayoutActive)
+        {
+            // In the inline layout the outer timeline canvas still owns U state, but when the
+            // mouse is over the curve-edit area, that child's own V-only canvas should be the
+            // one handling wheel/RMB. Cede interaction here to avoid double-processing.
+            if (CurveEditAreaScreenRect.HasValue
+                && CurveEditAreaScreenRect.Value.Contains(ImGui.GetMousePos()))
+            {
+                outerFlags |= T3Ui.EditingFlags.PreventZoomWithMouseWheel
+                              | T3Ui.EditingFlags.PreventPanningWithMouse;
+            }
+        }
+
+        DrawAnimationCanvas(drawAdditionalCanvasContent: DrawCanvasContent,
+                            inlineLayoutActive ? null : _selectionFence,
+                            0,
+                            outerFlags);
         Current = null;
 
         T3Ui.UiScaleFactor = keepScale;
@@ -155,8 +181,59 @@ internal sealed class TimeLineCanvas : AnimationCanvas
                 switch (Mode)
                 {
                     case Modes.DopeView:
-                        LayersArea.Draw(compositionOp, Playback, SnapHandlerForU);
-                        DopeSheetArea.Draw(compositionOp, _selectedAnimationParameters);
+                        if (CurveEditingParamHashes.Count > 0)
+                        {
+                            var availHeight = ImGui.GetContentRegionAvail().Y;
+                            var topHeight = MathF.Max(40f, availHeight * CurvePaneHeightRatio);
+                            var bottomHeight = MathF.Max(40f, availHeight - topHeight);
+
+                            // Dope sheet runs on the outer canvas — no sub-canvas wrapping, so U
+                            // interactions go directly to TimeLineCanvas and the CEA pane never
+                            // touches DSA state. Child window gives us an auto vertical scrollbar
+                            // when the parameter list overflows.
+                            ImGui.BeginChild("##dopeSheetArea", new Vector2(0, topHeight),
+                                             ImGuiChildFlags.None,
+                                             ImGuiWindowFlags.NoBackground
+                                             | ImGuiWindowFlags.NoScrollWithMouse);
+                            LayersArea.Draw(compositionOp, Playback, SnapHandlerForU);
+                            DopeSheetArea.Draw(compositionOp, _selectedAnimationParameters);
+
+                            // Dope-local fence (outer fence is null in inline layout). Dispatches
+                            // only to DSA + LayersArea so a fence drawn in dope never selects keys
+                            // that live only in the curve pane.
+                            if (!T3Ui.IsAnyPopupOpen)
+                            {
+                                switch (_dopeFence.UpdateAndDraw(out var selectMode))
+                                {
+                                    case SelectionFence.States.Updated:
+                                    case SelectionFence.States.CompletedAsClick:
+                                        if (selectMode == SelectionFence.SelectModes.Replace)
+                                        {
+                                            SharedSelectedKeyframes.Clear();
+                                            selectMode = SelectionFence.SelectModes.Add;
+                                        }
+                                        DopeSheetArea.UpdateSelectionForArea(_dopeFence.BoundsInScreen, selectMode);
+                                        LayersArea.UpdateSelectionForArea(_dopeFence.BoundsInScreen, selectMode);
+                                        break;
+                                }
+                            }
+
+                            // RMB-drag-to-scroll applies to the *current* ImGui window — i.e. the
+                            // dope child here, not the outer timeline body. Without this, the
+                            // outer-scoped call further down scrolls a window with no overflow
+                            // and the user's drag does nothing.
+                            CustomComponents.HandleDragScrolling(this);
+                            ImGui.EndChild();
+
+                            ImGui.PushStyleColor(ImGuiCol.ChildBg, UiColors.BackgroundFull.Fade(0.2f).Rgba);
+                            _curveEditCanvas.Draw(compositionOp, _selectedAnimationParameters, bottomHeight, modeChanged);
+                            ImGui.PopStyleColor();
+                        }
+                        else
+                        {
+                            LayersArea.Draw(compositionOp, Playback, SnapHandlerForU);
+                            DopeSheetArea.Draw(compositionOp, _selectedAnimationParameters);
+                        }
                         break;
                     case Modes.CurveEditor:
                     {
@@ -185,7 +262,10 @@ internal sealed class TimeLineCanvas : AnimationCanvas
                     _clipRange.Draw(this, compositionTimeClip, Drawlist, SnapHandlerForU);
                 }
 
-                CustomComponents.HandleDragScrolling(this);
+                // In the inline layout the dope-child handles its own drag-scroll (above); outer
+                // call would act on ImGuiTitle (no overflow) and nothing would scroll.
+                if (!inlineLayoutActive)
+                    CustomComponents.HandleDragScrolling(this);
             }
 
             ImGui.EndChild();
@@ -197,8 +277,109 @@ internal sealed class TimeLineCanvas : AnimationCanvas
             {
                 var newTime = InverseTransformPositionFloat(ImGui.GetMousePos()).X;
                 Playback.TimeInBars = newTime;
+
+                // Background click clears keyframe selection (both panes).
+                if (SharedSelectedKeyframes.Count > 0)
+                {
+                    SharedSelectedKeyframes.Clear();
+                    OnKeyframeSelectionReplaced();
+                }
             }
         }
+    }
+
+    /// <summary>
+    /// Keeps TimelineCurveEditArea registered with the snap handler and keyframe-editor group
+    /// while the inline curve pane is visible (DopeView + any expanded parameter). We do NOT
+    /// add it to <see cref="AnimationCanvas.TimeObjectManipulators"/>: that list dispatches
+    /// drag / selection mutations to every entry, and both editors share the same
+    /// <c>SelectedKeyframes</c> set — so double-registering makes every <c>UpdateDragCommand</c>
+    /// apply U += dt twice per frame (oscillating keyframe jitter). DopeSheetArea is the single
+    /// drag dispatcher; curve-pane visuals pick up changes via the shared selection set.
+    /// </summary>
+    private void SyncInlineCurveEditorRegistration()
+    {
+        var shouldBeActive = Mode == Modes.DopeView && CurveEditingParamHashes.Count > 0;
+        if (shouldBeActive && !_curveEditorRegisteredInline)
+        {
+            SnapHandlerForU.AddSnapAttractor(_timelineCurveEditArea);
+            _activeKeyframeEditors.Add(_timelineCurveEditArea);
+            _curveEditorRegisteredInline = true;
+        }
+        else if (!shouldBeActive && _curveEditorRegisteredInline)
+        {
+            SnapHandlerForU.RemoveSnapAttractor(_timelineCurveEditArea);
+            _activeKeyframeEditors.Remove(_timelineCurveEditArea);
+            _curveEditorRegisteredInline = false;
+        }
+    }
+
+    private bool _curveEditorRegisteredInline;
+
+    /// <summary>
+    /// In the inline curve-edit layout the timeline canvas becomes the U-axis authority and
+    /// the curve-edit sub-canvas owns V. Constrain wheel zoom to U here so DSA wheel-zoom
+    /// doesn't incidentally scale V (which outer canvas doesn't visibly render anyway, but we
+    /// don't want stray ScrollTarget.Y updates either). Outside the inline layout, fall back
+    /// to the base behavior.
+    /// </summary>
+    protected override void ApplyZoomDelta(Vector2 position, float zoomDelta, out bool zoomed)
+    {
+        if (Mode != Modes.DopeView || CurveEditingParamHashes.Count == 0)
+        {
+            base.ApplyZoomDelta(position, zoomDelta, out zoomed);
+            return;
+        }
+
+        zoomed = false;
+        if (Math.Abs(zoomDelta - 1) < 0.001f)
+            return;
+        var clamped = ClampScaleToValidRange(ScaleTarget * zoomDelta);
+        if (clamped == ScaleTarget)
+            return;
+
+        var zoom = new Vector2(zoomDelta, 1f);
+        ScaleTarget *= zoom;
+        if (Math.Abs(zoomDelta) > 0.1f)
+            zoomed = true;
+
+        var focus = InverseTransformPositionFloat(position);
+        ScrollTarget += (focus - ScrollTarget) * (zoom - Vector2.One) / zoom;
+    }
+
+    /// <summary>
+    /// Drops any curve-editing hash whose parameter is no longer among the current
+    /// selection's animated parameters. If the selection no longer includes an expanded
+    /// param (e.g. the user selected a different node in the graph), the inline curve
+    /// area would otherwise linger empty; pruning closes it automatically when the last
+    /// expanded param disappears.
+    /// </summary>
+    private void PruneExpandedForMissingParams()
+    {
+        if (CurveEditingParamHashes.Count == 0)
+            return;
+
+        CurveEditingParamHashes.RemoveWhere(hash => !ContainsHash(_selectedAnimationParameters, hash));
+
+        // Drop orphaned component-mask entries (small alloc only when a hash was actually removed).
+        if (VisibleComponentMask.Count > 0)
+        {
+            foreach (var h in VisibleComponentMask.Keys.ToList())
+            {
+                if (!CurveEditingParamHashes.Contains(h))
+                    VisibleComponentMask.Remove(h);
+            }
+        }
+    }
+
+    private static bool ContainsHash(List<AnimationParameter> list, int hash)
+    {
+        for (var i = 0; i < list.Count; i++)
+        {
+            if (list[i].Hash == hash)
+                return true;
+        }
+        return false;
     }
     //
     // #region handle nested timelines ----------------------------------
@@ -422,6 +603,35 @@ internal sealed class TimeLineCanvas : AnimationCanvas
     private float _lastCurveEditorHeight;
     private int _lastSelectionHash;
 
+    // --- Per-parameter curve-expand state (see Plan_DopeSheetCurveExpand.md) ---
+    // Populated by the curve-toggle icon on each dope-sheet row.
+    // When non-empty in DopeView mode, the timeline body splits into a dope-sheet pane
+    // on top and an inline curve-editor pane below.
+    internal readonly HashSet<int> CurveEditingParamHashes = new();
+
+    // paramHash -> visible-component bitmask; missing entry = "all components visible".
+    // Cleared when a parameter is un-expanded so re-expanding resets to all-on.
+    internal readonly Dictionary<int, int> VisibleComponentMask = new();
+
+    // Cross-view hover link (Phase 3). Written by whichever view the mouse is over;
+    // both views read these to render matching emphasis.
+    internal int? HoveredParameterHash;
+    internal int HoveredComponentBit;
+    internal int? HoveredKeyframeUniqueId;
+
+    internal bool NormalizeCurveView;
+    internal float CurvePaneHeightRatio = 0.5f;
+
+    // Published by CurveEditCanvas each frame it draws; null when the pane isn't visible.
+    // TimeLineCanvas.Draw reads this at the top of the next frame to cede wheel/pan to the
+    // curve-area sub-canvas when the mouse is inside it.
+    internal ImRect? CurveEditAreaScreenRect;
+
+    // Shared keyframe selection — DopeSheetArea and TimelineCurveEditArea both receive this
+    // via CurveEditing's shared-selection ctor, so edits in one view reflect in the other
+    // (and in the SRI / SelectionArea aggregators).
+    internal readonly VersionedKeyframeSet SharedSelectedKeyframes = new();
+
     private int ComputeSelectionHash()
     {
         var hash = _selectedAnimationParameters.Count;
@@ -629,6 +839,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
     private readonly LoopRange _loopRange = new();
 
     private readonly TimelineCurveEditArea _timelineCurveEditArea;
+    private readonly CurveEditCanvas _curveEditCanvas;
 
     private readonly CurrentTimeMarker _currentTimeMarker = new();
     private readonly TimeSelectionRange _timeSelectionRange;
@@ -642,6 +853,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
     private readonly List<AnimationParameter> _pinnedParams = new(20);
     private readonly List<AnimationParameter> _curvesForSelection = new(64);
     private readonly SelectionFence _selectionFence = new();
+    private readonly SelectionFence _dopeFence = new();
 
     // Styling
     private const float TimeLineDragHeight = 30;

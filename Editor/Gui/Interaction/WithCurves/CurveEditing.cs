@@ -20,7 +20,20 @@ namespace T3.Editor.Gui.Interaction.WithCurves;
 /// <remarks>This provides basic curve editing functionality outside a timeline context, e.g. for CurveParameters</remarks>
 internal abstract class CurveEditing
 {
-    protected readonly VersionedKeyframeSet SelectedKeyframes = new();
+    /// <summary>
+    /// Selection of keyframes driven by this editor. May be a set private to this instance
+    /// (default constructor) or one shared with sibling editors that should see each other's
+    /// selection changes — e.g. DopeSheetArea and TimelineCurveEditArea on the same timeline.
+    /// </summary>
+    protected readonly VersionedKeyframeSet SelectedKeyframes;
+
+    protected CurveEditing() : this(null) { }
+
+    protected CurveEditing(VersionedKeyframeSet? sharedSelection)
+    {
+        SelectedKeyframes = sharedSelection ?? new VersionedKeyframeSet();
+    }
+
     protected abstract IEnumerable<Curve> GetAllCurves();
     protected abstract IEnumerable<KeyframeCopyAndPasting.CurveWithDetails> GetAllCurvesWithDetails();
     protected abstract void ViewAllOrSelectedKeys(bool alsoChangeTimeRange = false);

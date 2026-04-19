@@ -269,8 +269,7 @@ public partial class ScalableCanvas
             )
         {
             var parentScaleTarget = Parent?.ScaleTarget ?? Vector2.One;
-
-            ScrollTarget -= mouseState.Delta / (parentScaleTarget * ScaleTarget);
+            ScrollTarget -= TransformPanDelta(mouseState.Delta) / (parentScaleTarget * ScaleTarget);
             _draggedCanvas = this;
         }
 
@@ -301,7 +300,7 @@ public partial class ScalableCanvas
     private static ScalableCanvas? _draggedCanvas;
     internal static bool IsAnyCanvasDragged => _draggedCanvas != null;
 
-    private Vector2 ClampScaleToValidRange(Vector2 scale)
+    internal protected virtual Vector2 ClampScaleToValidRange(Vector2 scale)
     {
         if (IsCurveCanvas)
             return scale;
@@ -325,7 +324,62 @@ public partial class ScalableCanvas
         ApplyZoomDelta(mouseState.Position, zoomDelta, out zoomed);
     }
 
-    protected void ApplyZoomDelta(Vector2 position, float zoomDelta, out bool zoomed)
+    /// <summary>
+    /// Hook that lets subclasses constrain which axes of a mouse pan actually apply.
+    /// Default: identity (both axes pan). Return Vector2(delta.X, 0) to disable Y pan, etc.
+    /// </summary>
+    protected virtual Vector2 TransformPanDelta(Vector2 delta) => delta;
+
+    /// <summary>
+    /// Copy the U (X) components of scale/scroll (and their damping targets) from another
+    /// canvas. Used so timeline panes stay time-aligned when the user zooms/pans U in either.
+    /// </summary>
+    internal void SyncXFrom(ScalableCanvas other)
+    {
+        Scale = new Vector2(other.Scale.X, Scale.Y);
+        Scroll = new Vector2(other.Scroll.X, Scroll.Y);
+        ScaleTarget = new Vector2(other.ScaleTarget.X, ScaleTarget.Y);
+        ScrollTarget = new Vector2(other.ScrollTarget.X, ScrollTarget.Y);
+    }
+
+    /// <summary>Inverse of <see cref="SyncXFrom"/>: push this canvas's U state back to another.</summary>
+    internal void SyncXTo(ScalableCanvas other)
+    {
+        other.Scale = new Vector2(Scale.X, other.Scale.Y);
+        other.Scroll = new Vector2(Scroll.X, other.Scroll.Y);
+        other.ScaleTarget = new Vector2(ScaleTarget.X, other.ScaleTarget.Y);
+        other.ScrollTarget = new Vector2(ScrollTarget.X, other.ScrollTarget.Y);
+    }
+
+    /// <summary>Current (damped) view scope — counterpart to <see cref="GetTargetScope"/>.</summary>
+    internal CanvasScope GetCurrentScope() => new() { Scale = Scale, Scroll = Scroll };
+
+    internal void SetCurrentScope(CanvasScope s)
+    {
+        Scale = s.Scale;
+        Scroll = s.Scroll;
+    }
+
+    internal void SetWindowRect(Vector2 pos, Vector2 size)
+    {
+        WindowPos = pos;
+        WindowSize = size;
+    }
+
+    /// <summary>
+    /// Copies current scope, target scope, and viewport rect from another canvas.
+    /// Used to temporarily redirect the outer canvas's view to a sub-canvas's so downstream
+    /// code that reads <c>TimeLineCanvas.Current.*</c> for transforms lands in the sub's child.
+    /// Caller is responsible for capturing/restoring the previous scope/rect.
+    /// </summary>
+    internal void AdoptViewFrom(ScalableCanvas other)
+    {
+        SetCurrentScope(other.GetCurrentScope());
+        SetTargetScope(other.GetTargetScope());
+        SetWindowRect(other.WindowPos, other.WindowSize);
+    }
+
+    protected virtual void ApplyZoomDelta(Vector2 position, float zoomDelta, out bool zoomed)
     {
         zoomed = false;
         if (Math.Abs(zoomDelta - 1) < 0.001f)

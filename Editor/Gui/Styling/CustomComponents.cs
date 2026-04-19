@@ -283,13 +283,14 @@ internal static partial class CustomComponents
 
             if (ImGui.IsMouseDragging(ImGuiMouseButton.Right))
             {
-                ImGui.SetScrollY(_dragScrollStart.Y - ImGui.GetMouseDragDelta(ImGuiMouseButton.Right).Y);
+                var scrollY = _dragScrollStart.Y - ImGui.GetMouseDragDelta(ImGuiMouseButton.Right).Y;
+                ImGui.SetScrollY(scrollY);
             }
 
             return;
         }
 
-        if (ImGui.IsWindowHovered() && !T3Ui.DragFieldWasHoveredLastFrame && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
+        if (ImGui.IsWindowHovered(  ) && !T3Ui.DragFieldWasHoveredLastFrame && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
         {
             _dragScrollStart = new Vector2(ImGui.GetScrollX(), ImGui.GetScrollY());
             _draggedWindowObject = windowObject;

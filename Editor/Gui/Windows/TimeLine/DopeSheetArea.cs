@@ -25,6 +25,7 @@ namespace T3.Editor.Gui.Windows.TimeLine;
 internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectManipulation, IValueSnapAttractor
 {
     public DopeSheetArea(ValueSnapHandler snapHandler, TimeLineCanvas timeLineCanvas)
+        : base(timeLineCanvas.SharedSelectedKeyframes)
     {
         _snapHandler = snapHandler;
         TimeLineCanvas = timeLineCanvas;
@@ -83,6 +84,14 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
 
             var compositionSymbolChildId = compositionOp.SymbolChildId;
 
+            // Draw Top boundary
+            {
+                var min = ImGui.GetCursorScreenPos();
+                var max = min + new Vector2(ImGui.GetContentRegionAvail().X, LayerHeight);
+                drawList.AddRectFilled(new Vector2(min.X, max.Y),
+                    new Vector2(max.X, max.Y + 1), UiColors.BackgroundFull.Fade(0.3f));
+            }
+            
             for (var index = 0; index < animationParameters.Count; index++)
             {
                 var parameter = animationParameters[index];
@@ -105,7 +114,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
         var min = ImGui.GetCursorScreenPos();
         var max = min + new Vector2(ImGui.GetContentRegionAvail().X, LayerHeight);
         drawList.AddRectFilled(new Vector2(min.X, max.Y),
-                               new Vector2(max.X, max.Y + 1), UiColors.BackgroundFull);
+                               new Vector2(max.X, max.Y + 1), UiColors.BackgroundFull.Fade(0.3f));
 
         var mousePos = ImGui.GetMousePos();
         var mouseTime = TimeLineCanvas.InverseTransformX(mousePos.X);
@@ -123,50 +132,125 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
         drawList.ChannelsSplit(2);
         drawList.ChannelsSetCurrent(1);
 
-        // Draw label and pinning
+        // Three-segment parameter header: pin | curve-expand | name
         {
             var hash = parameter.Hash;
             ImGui.PushID(hash);
 
             ImGui.PushFont(isCurrentSelected ? Fonts.FontBold : Fonts.FontNormal);
-            
+
             var label = $"{parameter.ChildUi.SymbolChild.ReadableName}.{parameter.Input.Input.Name}";
             var opLabelSize = ImGui.CalcTextSize(label);
-            var buttonSize = opLabelSize + new Vector2(16 + 2 + 15 + 2 , 0) * T3Ui.UiScaleFactor;
-            buttonSize.Y = LayerHeight;
-            var isPinned = PinnedParametersHashes.Contains(hash);
 
+            var iconSize = 15 * T3Ui.UiScaleFactor;
+            var iconSpacing = 2 * T3Ui.UiScaleFactor;
+            var iconBlockWidth = iconSize + iconSpacing;
+            var rowHeight = LayerHeight;
+            var headerMin = ImGui.GetCursorScreenPos();
+            var reservedWidth = iconBlockWidth * 2 + opLabelSize.X + 8 * T3Ui.UiScaleFactor;
+
+            var isPinned = PinnedParametersHashes.Contains(hash);
             if (UserSettings.Config.AutoPinAllAnimations)
             {
                 PinnedParametersHashes.Add(hash);
+                isPinned = true;
             }
 
-            if (ImGui.InvisibleButton("label", buttonSize) && !UserSettings.Config.AutoPinAllAnimations)
+            // Backdrop so keyframes drawn on channel 0 don't bleed through the header
+            drawList.AddRectFilled(headerMin, headerMin + new Vector2(reservedWidth, rowHeight), UiColors.CanvasBackground.Fade(0.8f));
+
+            // --- Pin toggle ---
+            ImGui.SetCursorScreenPos(headerMin);
+            if (ImGui.InvisibleButton("pin", new Vector2(iconBlockWidth, rowHeight)) && !UserSettings.Config.AutoPinAllAnimations)
             {
-                if (!isPinned)
-                {
+                if (isPinned)
+                    PinnedParametersHashes.Remove(hash);
+                else
                     PinnedParametersHashes.Add(hash);
+            }
+            var pinIconColor = isPinned ? UiColors.StatusActivated : UiColors.ForegroundFull.Fade(0.3f);
+            pinIconColor = pinIconColor.Fade(ImGui.IsItemHovered() ? 1 : 0.8f);
+            Icons.DrawIconAtScreenPosition(isPinned ? Icon.Pin : Icon.PinOutline,
+                                           headerMin + new Vector2(2, 5) * T3Ui.UiScaleFactor, drawList, pinIconColor);
+
+            // --- Curve-expand toggle ---
+            var curveBtnPos = headerMin + new Vector2(iconBlockWidth, 0);
+            ImGui.SetCursorScreenPos(curveBtnPos);
+            var isEditedInCurveArea = TimeLineCanvas.CurveEditingParamHashes.Contains(hash);
+            if (ImGui.InvisibleButton("curve", new Vector2(iconBlockWidth, rowHeight)))
+            {
+                if (isEditedInCurveArea)
+                {
+                    TimeLineCanvas.CurveEditingParamHashes.Remove(hash);
+                    TimeLineCanvas.VisibleComponentMask.Remove(hash);
+                    isEditedInCurveArea = false;
                 }
                 else
                 {
-                    PinnedParametersHashes.Remove(hash);
+                    TimeLineCanvas.CurveEditingParamHashes.Add(hash);
+                    isEditedInCurveArea = true;
                 }
             }
-            
-            var lastPos = ImGui.GetItemRectMin();
-            
-            drawList.AddRectFilled(lastPos, lastPos +buttonSize, UiColors.CanvasBackground.Fade(0.8f));
-            
-            var iconColor = isPinned ? UiColors.StatusActivated : UiColors.ForegroundFull.Fade(0.3f);
-            iconColor = iconColor.Fade(ImGui.IsItemHovered() ? 1 : 0.8f);
+            var curveIconColor = isEditedInCurveArea ? UiColors.StatusActivated : UiColors.ForegroundFull.Fade(0.3f);
+            curveIconColor = curveIconColor.Fade(ImGui.IsItemHovered() ? 1 : 0.8f);
+            Icons.DrawIconAtScreenPosition(Icon.InterpolateBrokenTangents,
+                                           curveBtnPos + new Vector2(0, 5) * T3Ui.UiScaleFactor, drawList, curveIconColor);
 
-            Icons.DrawIconAtScreenPosition(isPinned ? Icon.Pin : Icon.PinOutline, lastPos + new Vector2(2, 5) * T3Ui.UiScaleFactor, drawList, iconColor);
+            // --- Name button: replace / shift-add / ctrl-remove on parameter's keyframes ---
+            var namePos = curveBtnPos + new Vector2(iconBlockWidth + 4 * T3Ui.UiScaleFactor, 0);
+            ImGui.SetCursorScreenPos(namePos);
+            var nameSize = new Vector2(opLabelSize.X + 4 * T3Ui.UiScaleFactor, rowHeight);
+            if (ImGui.InvisibleButton("name", nameSize))
+            {
+                var io = ImGui.GetIO();
+                if (io.KeyCtrl)
+                {
+                    foreach (var curve in parameter.Curves)
+                        SelectedKeyframes.ExceptWith(curve.GetVDefinitions());
+                }
+                else if (io.KeyShift)
+                {
+                    foreach (var curve in parameter.Curves)
+                        SelectedKeyframes.UnionWith(curve.GetVDefinitions());
+                }
+                else
+                {
+                    SelectedKeyframes.Clear();
+                    foreach (var curve in parameter.Curves)
+                        SelectedKeyframes.UnionWith(curve.GetVDefinitions());
+                }
+                MouseClickChangedSelection = true;
+            }
+            var nameHovered = ImGui.IsItemHovered();
 
-            Icons.DrawIconAtScreenPosition(Icon.InterpolateBrokenTangents, lastPos + new Vector2(2+ 15 + 2, 5) * T3Ui.UiScaleFactor, drawList, iconColor);
-            
-            var fade = layerHovered ? 1 : 0.75f;
-            var labelColor = UiColors.ForegroundFull.Fade(fade) ;
-            drawList.AddText(lastPos + new Vector2(20 + 2 + 15, 3) * T3Ui.UiScaleFactor, labelColor, label);
+            // Opacity rule: 60% default, +20% when any of this parameter's keyframes is selected,
+            // +15% on hover (layer / operator in graph / cross-view curve-line hover).
+            var anyKeySelected = false;
+            foreach (var c in parameter.Curves)
+            {
+                foreach (var v in c.GetVDefinitions())
+                {
+                    if (!SelectedKeyframes.Contains(v))
+                        continue;
+                    anyKeySelected = true;
+                    break;
+                }
+                if (anyKeySelected) break;
+            }
+
+            var isRelatedHovered = layerHovered
+                                   || nameHovered
+                                   || FrameStats.IsIdHovered(parameter.Input.Parent.SymbolChildId)
+                                   || TimeLineCanvas.HoveredParameterHash == hash;
+
+            var labelOpacity = 0.60f;
+            if (anyKeySelected) labelOpacity += 0.20f;
+            if (isRelatedHovered) labelOpacity += 0.15f;
+            if (labelOpacity > 1f) labelOpacity = 1f;
+
+            var labelColor = UiColors.ForegroundFull.Fade(labelOpacity);
+            drawList.AddText(namePos + new Vector2(0, 3) * T3Ui.UiScaleFactor, labelColor, label);
+
             ImGui.PopFont();
             ImGui.PopID();
         }
@@ -286,23 +370,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
     }
 
     public readonly HashSet<int> PinnedParametersHashes = new();
-
-    /// <summary>Curves that own currently selected keyframes (dedup'd). DopeSheetArea-specific for paste logic.</summary>
-    public void CopyCurvesOfSelectedKeyframesTo(List<Curve> buffer)
-    {
-        buffer.Clear();
-        foreach (var curve in GetAllCurves())
-        {
-            foreach (var def in curve.GetVDefinitions())
-            {
-                if (SelectedKeyframes.Contains(def))
-                {
-                    buffer.Add(curve);
-                    break;
-                }
-            }
-        }
-    }
+    
 
     private bool HandleCreateNewKeyframes(TimeLineCanvas.AnimationParameter parameter, ImRect layerArea)
     {

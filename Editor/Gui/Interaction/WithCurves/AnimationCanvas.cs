@@ -22,21 +22,21 @@ internal abstract class AnimationCanvas : ScalableCanvas, ITimeObjectManipulatio
     public string ImGuiTitle = "timeline";
 
         
-    protected void DrawAnimationCanvas(Action<InteractionState> drawAdditionalCanvasContent, SelectionFence selectionFence, float height = 0, T3Ui.EditingFlags flags = T3Ui.EditingFlags.None)
+    protected void DrawAnimationCanvas(Action<InteractionState> drawAdditionalCanvasContent, SelectionFence? selectionFence, float height = 0, T3Ui.EditingFlags flags = T3Ui.EditingFlags.None)
     {
 
         ImGui.BeginChild(ImGuiTitle, new Vector2(0, height), ImGuiChildFlags.Borders,
-                         ImGuiWindowFlags.NoScrollbar | 
-                         ImGuiWindowFlags.NoMove | 
+                         ImGuiWindowFlags.NoScrollbar |
+                         ImGuiWindowFlags.NoMove |
                          ImGuiWindowFlags.NoScrollWithMouse |
                          ImGuiWindowFlags.NoBackground);
         {
             Drawlist = ImGui.GetWindowDrawList();
             UpdateCanvas(out var interactionState, flags);
-            
-            //Drawlist = ImGui.GetWindowDrawList();
 
-            if (!T3Ui.IsAnyPopupOpen)
+            // Outer fence is optional — subclasses that handle fence selection per-pane
+            // (e.g. timeline in inline-curve-edit mode) pass null to suppress it here.
+            if (selectionFence != null && !T3Ui.IsAnyPopupOpen)
             {
                 HandleFenceUpdate(selectionFence, out _);
             }
@@ -125,6 +125,16 @@ internal abstract class AnimationCanvas : ScalableCanvas, ITimeObjectManipulatio
 
     public void UpdateSelectionForArea(ImRect screenArea, SelectionFence.SelectModes selectMode)
     {
+        // When several manipulators share the same keyframe selection set (e.g. DopeSheetArea
+        // and TimelineCurveEditArea in the inline-pane layout), each one's own
+        // "clear on Replace" wipes out the previous manipulator's additions, so only the last
+        // dispatched editor's hits survive. Clear once up front, then dispatch as Add.
+        if (selectMode == SelectionFence.SelectModes.Replace)
+        {
+            ClearSelection();
+            selectMode = SelectionFence.SelectModes.Add;
+        }
+
         foreach (var sh in TimeObjectManipulators)
         {
             sh.UpdateSelectionForArea(screenArea, selectMode);

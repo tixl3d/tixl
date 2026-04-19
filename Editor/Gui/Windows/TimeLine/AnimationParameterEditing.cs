@@ -12,6 +12,8 @@ namespace T3.Editor.Gui.Windows.TimeLine;
 /// </summary>
 internal abstract class AnimationParameterEditing : CurveEditing
 {
+    protected AnimationParameterEditing(VersionedKeyframeSet sharedSelection) : base(sharedSelection) { }
+
     protected override IEnumerable<Curve> GetAllCurves()
     {
         foreach (TimeLineCanvas.AnimationParameter param in AnimationParameters)

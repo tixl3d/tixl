@@ -24,25 +24,32 @@ namespace T3.Editor.Gui.Windows.TimeLine;
 internal sealed class TimelineCurveEditArea : AnimationParameterEditing, ITimeObjectManipulation, IValueSnapAttractor
 {
     public TimelineCurveEditArea(TimeLineCanvas timeLineCanvas, ValueSnapHandler snapHandlerForU, ValueSnapHandler snapHandlerV)
+        : base(timeLineCanvas.SharedSelectedKeyframes)
     {
         _snapHandlerU = snapHandlerForU;
         _snapHandlerV = snapHandlerV;
         TimeLineCanvas = timeLineCanvas;
-        // _curveEditBox = new CurveEditBox(timeLineCanvas, snapHandlerForU);
     }
 
     private readonly StringBuilder _stringBuilder = new(100);
     private readonly List<VDefinition> _visibleKeyframes = new(1000);
 
     public void Draw(Instance compositionOp, List<TimeLineCanvas.AnimationParameter> animationParameters,
-                     bool fitCurvesVertically = false, bool fitVerticalOnly = false)
+                     bool fitCurvesVertically = false, bool fitVerticalOnly = false,
+                     HashSet<int>? parameterHashFilter = null,
+                     bool showParameterList = true)
     {
         _visibleKeyframes.Clear();
         AnimationParameters = animationParameters;
 
         if (fitVerticalOnly)
         {
-            if (TryGetBoundsOnCanvas(GetSelectedOrAllPoints(), out var bounds))
+            // In inline mode, fit only the expanded parameters' keyframes — otherwise the
+            // pane scales to include curves of non-expanded params that aren't even visible.
+            var pointsForFit = parameterHashFilter != null
+                                   ? EnumerateKeyframesInFilter(animationParameters, parameterHashFilter)
+                                   : GetSelectedOrAllPoints();
+            if (TryGetBoundsOnCanvas(pointsForFit, out var bounds))
                 TimeLineCanvas.Current?.SetVerticalScopeToCanvasArea(bounds, flipY: true, paddingFraction: 0.15f);
         }
         else if (fitCurvesVertically)
@@ -54,10 +61,10 @@ internal sealed class TimelineCurveEditArea : AnimationParameterEditing, ITimeOb
         {
             var drawList = ImGui.GetWindowDrawList();
             drawList.ChannelsSplit(3);
-            if (KeyActionHandling.Triggered(UserActions.FocusSelection))
+            if (UserActions.FocusSelection.Triggered())
                 ViewAllOrSelectedKeys(alsoChangeTimeRange: true);
 
-            if (KeyActionHandling.Triggered(UserActions.Duplicate))
+            if (UserActions.Duplicate.Triggered())
                 DuplicateSelectedKeyframes();
 
             var lineStartPosition = ImGui.GetCursorPos();
@@ -67,37 +74,43 @@ internal sealed class TimelineCurveEditArea : AnimationParameterEditing, ITimeOb
             var compositionSymbolId = compositionOp.GetSymbolUi().Symbol.Id;
             foreach (var param in animationParameters)
             {
+                if (parameterHashFilter != null && !parameterHashFilter.Contains(param.Hash))
+                    continue;
+
                 ImGui.PushID(param.Input.GetHashCode());
                 drawList.ChannelsSetCurrent(1);
                 var hash = param.Input.GetHashCode();
                 var isParamPinned = _pinnedParameterComponents.ContainsKey(hash);
-
-                _stringBuilder.Clear();
-                _stringBuilder.Append(param.Instance.Symbol.Name);
-                _stringBuilder.Append('.');
-                _stringBuilder.Append(param.Input.Input.Name);
-                var paramName = _stringBuilder.ToString(); // param.Instance.Symbol.Name + "." + param.Input.Input.Name;
+                var isParamHovered = false;
 
                 var cursorPosition = lineStartPosition;
-                ImGui.SetCursorPos(cursorPosition);
 
-                if (DrawPinButton(isParamPinned, paramName))
+                if (showParameterList)
                 {
-                    if (isParamPinned)
+                    _stringBuilder.Clear();
+                    _stringBuilder.Append(param.Instance.Symbol.Name);
+                    _stringBuilder.Append('.');
+                    _stringBuilder.Append(param.Input.Input.Name);
+                    var paramName = _stringBuilder.ToString();
+
+                    ImGui.SetCursorPos(cursorPosition);
+                    if (DrawPinButton(isParamPinned, paramName))
                     {
-                        _pinnedParameterComponents.Remove(hash);
-                        isParamPinned = false;
+                        if (isParamPinned)
+                        {
+                            _pinnedParameterComponents.Remove(hash);
+                            isParamPinned = false;
+                        }
+                        else
+                        {
+                            _pinnedParameterComponents[hash] = 0xffff;
+                            isParamPinned = true;
+                        }
                     }
-                    else
-                    {
-                        _pinnedParameterComponents[hash] = 0xffff;
-                        isParamPinned = true;
-                    }
+
+                    cursorPosition += new Vector2(ImGui.GetItemRectSize().X, 0);
+                    isParamHovered = ImGui.IsItemHovered();
                 }
-
-                cursorPosition += new Vector2(ImGui.GetItemRectSize().X, 0);
-
-                var isParamHovered = ImGui.IsItemHovered();
 
                 var curveNames = param.Input.ValueType == typeof(Vector4)
                                      ? DopeSheetArea.ColorCurveNames
@@ -106,51 +119,57 @@ internal sealed class TimelineCurveEditArea : AnimationParameterEditing, ITimeOb
                 var curveIndex = 0;
                 foreach (var curve in param.Curves)
                 {
-                    //ImGui.SameLine();
-                    ImGui.SetCursorPos(cursorPosition);
-
-                    var componentName = curveNames[curveIndex % curveNames.Length];
                     var bit = 1 << curveIndex;
+                    bool isParamComponentPinned;
+                    var isParamComponentHovered = false;
 
-                    var isParamComponentPinned = isParamPinned && (_pinnedParameterComponents[hash] & bit) != 0;
-                    if (DrawPinButton(isParamComponentPinned, componentName))
+                    if (showParameterList)
                     {
-                        if (isParamComponentPinned)
+                        ImGui.SetCursorPos(cursorPosition);
+                        var componentName = curveNames[curveIndex % curveNames.Length];
+                        isParamComponentPinned = isParamPinned && (_pinnedParameterComponents[hash] & bit) != 0;
+                        if (DrawPinButton(isParamComponentPinned, componentName))
                         {
-                            var flags = _pinnedParameterComponents[hash] ^ bit;
-                            if (flags == 0)
+                            if (isParamComponentPinned)
                             {
-                                _pinnedParameterComponents.Remove(hash);
-                                isParamPinned = false;
+                                var flags = _pinnedParameterComponents[hash] ^ bit;
+                                if (flags == 0)
+                                {
+                                    _pinnedParameterComponents.Remove(hash);
+                                    isParamPinned = false;
+                                }
+                                else
+                                {
+                                    _pinnedParameterComponents[hash] = flags;
+                                }
                             }
                             else
                             {
-                                _pinnedParameterComponents[hash] = flags;
+                                if (isParamPinned)
+                                    _pinnedParameterComponents[hash] |= bit;
+                                else
+                                    _pinnedParameterComponents[hash] = bit;
                             }
-                        }
-                        else
-                        {
-                            if (isParamPinned)
-                            {
-                                _pinnedParameterComponents[hash] |= bit;
-                            }
-                            else
-                            {
-                                _pinnedParameterComponents[hash] = bit;
-                            }
+
+                            isParamComponentPinned = !isParamComponentPinned;
                         }
 
-                        isParamComponentPinned = !isParamComponentPinned;
+                        cursorPosition += new Vector2(ImGui.GetItemRectSize().X, 0);
+                        ImGui.SetCursorPos(cursorPosition);
+                        isParamComponentHovered = ImGui.IsItemHovered();
                     }
-
-                    cursorPosition += new Vector2(ImGui.GetItemRectSize().X, 0);
-                    ImGui.SetCursorPos(cursorPosition);
-
-                    var isParamComponentHovered = ImGui.IsItemHovered();
+                    else
+                    {
+                        // Inline mode: no param-list pinning; component visibility comes from TimeLineCanvas.VisibleComponentMask.
+                        // Empty/missing entry means "all components visible".
+                        isParamComponentPinned = true;
+                    }
 
                     drawList.ChannelsSetCurrent(0);
 
-                    var shouldDrawCurve = _pinnedParameterComponents.Count == 0 || isParamComponentPinned;
+                    var shouldDrawCurve = showParameterList
+                                              ? (_pinnedParameterComponents.Count == 0 || isParamComponentPinned)
+                                              : IsComponentVisible(param.Hash, bit);
                     if (shouldDrawCurve)
                     {
                         var color = DopeSheetArea.CurveColors[curveIndex % DopeSheetArea.CurveColors.Length];
@@ -179,7 +198,8 @@ internal sealed class TimelineCurveEditArea : AnimationParameterEditing, ITimeOb
                 }
 
                 ImGui.PopID();
-                lineStartPosition += new Vector2(0, 24);
+                if (showParameterList)
+                    lineStartPosition += new Vector2(0, 24);
             }
 
             drawList.ChannelsMerge();
@@ -201,6 +221,43 @@ internal sealed class TimelineCurveEditArea : AnimationParameterEditing, ITimeOb
         ImGui.EndGroup();
 
         RebuildCurveTables();
+    }
+
+    /// <summary>
+    /// Compute the canvas-space bounds for an auto-fit. Used by <see cref="CurveEditCanvas"/>
+    /// so it can apply the fit to its own V scope rather than the outer timeline canvas.
+    /// </summary>
+    public bool TryGetFitBounds(List<TimeLineCanvas.AnimationParameter> animationParameters,
+                                HashSet<int>? parameterHashFilter,
+                                out ImRect bounds)
+    {
+        var points = parameterHashFilter != null
+                         ? EnumerateKeyframesInFilter(animationParameters, parameterHashFilter)
+                         : GetSelectedOrAllPoints();
+        return TryGetBoundsOnCanvas(points, out bounds);
+    }
+
+    private static IEnumerable<VDefinition> EnumerateKeyframesInFilter(
+        List<TimeLineCanvas.AnimationParameter> animationParameters,
+        HashSet<int> parameterHashFilter)
+    {
+        for (var i = 0; i < animationParameters.Count; i++)
+        {
+            var p = animationParameters[i];
+            if (!parameterHashFilter.Contains(p.Hash))
+                continue;
+            foreach (var curve in p.Curves)
+                foreach (var v in curve.GetVDefinitions())
+                    yield return v;
+        }
+    }
+
+    private bool IsComponentVisible(int paramHash, int bit)
+    {
+        // Missing entry in the shared mask = "all components visible" (default on first expand).
+        if (!TimeLineCanvas.VisibleComponentMask.TryGetValue(paramHash, out var mask))
+            return true;
+        return (mask & bit) != 0;
     }
 
     private void HandleCreateNewKeyframes(Curve curve)
@@ -382,19 +439,26 @@ internal sealed class TimelineCurveEditArea : AnimationParameterEditing, ITimeOb
 
     public void UpdateSelectionForArea(ImRect screenArea, SelectionFence.SelectModes selectMode)
     {
+        var canvasArea = TimeLineCanvas.Current!.InverseTransformRect(screenArea).MakePositive();
+        UpdateSelectionForCanvasArea(canvasArea, selectMode);
+    }
+
+    /// <summary>
+    /// Same as <see cref="UpdateSelectionForArea"/> but takes an already-inverted canvas-space rect.
+    /// Use this from sub-canvases (e.g. <see cref="CurveEditCanvas"/>) that have their own
+    /// coordinate origin — letting them do the inverse with their own WindowPos rather than the
+    /// outer timeline's.
+    /// </summary>
+    public void UpdateSelectionForCanvasArea(ImRect canvasArea, SelectionFence.SelectModes selectMode)
+    {
         if (selectMode == SelectionFence.SelectModes.Replace)
             SelectedKeyframes.Clear();
 
-        //THelpers.DebugRect(screenArea.Min, screenArea.Max);
-        var canvasArea = TimeLineCanvas.Current.InverseTransformRect(screenArea).MakePositive();
         var matchingItems = new List<VDefinition>();
-
         foreach (var keyframe in _visibleKeyframes)
         {
             if (canvasArea.Contains(new Vector2((float)keyframe.U, (float)keyframe.Value)))
-            {
                 matchingItems.Add(keyframe);
-            }
         }
 
         switch (selectMode)
