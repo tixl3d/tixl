@@ -289,8 +289,11 @@ internal static class Icons
             new(Icon.Cross, slotIndex: 139),
             new(Icon.BackUp, slotIndex: 140),
             new(Icon.Sleeping, slotIndex: 141),
-            
-            
+            new(Icon.InterpolateConstant, slotIndex: 142),
+            new(Icon.InterpolateLinear, slotIndex: 143),
+            new(Icon.InterpolateSmoothSafe, slotIndex: 144),
+            new(Icon.InterpolateSmooth, slotIndex: 145),
+            new(Icon.InterpolateBrokenTangents, slotIndex: 146),
         };
 
     public static readonly string IconAtlasPath = Path.Combine(SharedResources.EditorResourcesDirectory, @"images/t3-icons.png");
@@ -450,5 +453,10 @@ public enum Icon
     PasteFromClipboard,
     Cross,
     BackUp,
-    Sleeping
+    Sleeping,
+    InterpolateConstant,
+    InterpolateLinear,
+    InterpolateSmoothSafe,
+    InterpolateSmooth,
+    InterpolateBrokenTangents
 }

@@ -22,8 +22,12 @@ public static class UiColors
     public static Color TextDisabled = new(0.2f);
     public static Color CheckMark = new(1,1,1,0.8f);
 
-    [T3Style.Hint(GroupTitle = "Backgrounds" ,Description = "This is the primary background used for canvases and windows. Don't use transparency for this!")]
+    [T3Style.Hint(GroupTitle = "Backgrounds" ,Description = "This is the primary background used for canvases and windows. This should use some transparency")]
     public static Color WindowBackground = new(0.23f, 0.23f, 0.23f, 0.5f);
+    
+    [T3Style.Hint(Description = "Used for some elements to shade in the tone of the window background.")]
+    public static Color CanvasBackground = new(0.12f, 0.12f, 0.12f, 0.98f);
+
     
     [T3Style.Hint(Description = "Background color for dialogs, popup windows and context menus.")]
     public static Color BackgroundPopup = new(0.18f, 0.18f, 0.18f, 0.98f);

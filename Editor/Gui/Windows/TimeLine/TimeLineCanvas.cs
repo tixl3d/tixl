@@ -1,5 +1,6 @@
 #nullable enable
 
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using ImGuiNET;
 using T3.Core.Animation;
@@ -81,17 +82,23 @@ internal sealed class TimeLineCanvas : AnimationCanvas
 
     private int RulerHeight => (int)(25 * T3Ui.UiScaleFactor);
     private int SummaryHeight => (int)(11 * T3Ui.UiScaleFactor);
+
+    private int _lastSelectionRevision = -1;
     
-    public void Draw(Instance compositionOp, Playback playback)
+    public void Draw(ProjectView projectView, Playback playback)
     {
+        Debug.Assert(projectView.CompositionInstance != null);
+        
+        var compositionOp = projectView.CompositionInstance;
         Current = this;
         Playback = playback;
         SyncStateWithComposition(compositionOp);
-        _selectedAnimationParameters = GetAnimationParametersForSelectedNodes(compositionOp);
+
+        if(MathUtils.HasChanged(ref _lastSelectionRevision, projectView.NodeSelection.ChangeCounter))
+            _selectedAnimationParameters = GetAnimationParametersForSelectedNodes(compositionOp);
 
         // Very ugly hack to prevent scaling the output above window size
         var keepScale = T3Ui.UiScaleFactor;
-        //T3Ui.UiScaleFactor = 1;
 
         ScrollToTimeAfterStopped();
 
@@ -114,14 +121,13 @@ internal sealed class TimeLineCanvas : AnimationCanvas
 
             // Ruler
             {
-                ImGui.BeginChild("##ruler", new Vector2(0,RulerHeight));
-                DrawDragTimeArea(interactionState.MouseState.Position.X);
+                ImGui.BeginChild("##ruler", new Vector2(0,RulerHeight), ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollbar);
+                DrawTimeRuler(interactionState.MouseState.Position.X);
                 _selectionRangeIndicator.Draw(compositionOp, ImGui.GetWindowDrawList());
                 ImGui.EndChild();
             }
 
 
-            var drawList = ImGui.GetWindowDrawList();
             // Selection Area (summary strip below ruler)
             {
                 ImGui.PushStyleColor(ImGuiCol.ChildBg, UiColors.GridLines.Fade(0.15f).Rgba);
@@ -190,18 +196,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
             if (_selectionFence.State == SelectionFence.States.CompletedAsClick)
             {
                 var newTime = InverseTransformPositionFloat(ImGui.GetMousePos()).X;
-                if (Playback.IsLooping)
-                {
-                    Playback.TimeInBars = newTime;
-                    // var newStartTime = newTime - newTime % 4;
-                    // var duration = Playback.LoopRange.Duration;
-                    // Playback.LoopRange.Start = newStartTime;
-                    // Playback.LoopRange.Duration = duration;
-                }
-                else
-                {
-                    Playback.TimeInBars = newTime;
-                }
+                Playback.TimeInBars = newTime;
             }
         }
     }
@@ -303,15 +298,13 @@ internal sealed class TimeLineCanvas : AnimationCanvas
         }
     }
 
-    private void DrawDragTimeArea(float mouseX)
+    private void DrawTimeRuler(float mouseX)
     {
         var max = ImGui.GetWindowSize();
         var clampedSize = max;
         clampedSize.Y = Math.Min(TimeLineDragHeight, max.Y - 1);
 
         ImGui.SetCursorPos(new Vector2(0, max.Y - clampedSize.Y));
-        //var screenPos = ImGui.GetCursorScreenPos();
-        //ImGui.GetWindowDrawList().AddRectFilled(screenPos, screenPos + new Vector2(clampedSize.X, clampedSize.Y), UiColors.BackgroundFull.Fade(0.1f));
 
         // Allow the SelectionRangeIndicator (emitted later in the same ruler child) to steal hover/press in its overlapping area.
         ImGui.SetNextItemAllowOverlap();

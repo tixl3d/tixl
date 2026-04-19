@@ -223,7 +223,7 @@ internal sealed class GraphWindow : Windows.Window
                                 );
                 {
                     if (ProjectView.CompositionInstance != null)
-                        ProjectView.TimeLineCanvas.Draw(ProjectView.CompositionInstance, Playback.Current);
+                        ProjectView.TimeLineCanvas.Draw(ProjectView, Playback.Current);
                 }
                 ImGui.EndChild();
                 ImGui.PopStyleVar(1);

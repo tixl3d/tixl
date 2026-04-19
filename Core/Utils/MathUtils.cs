@@ -516,6 +516,15 @@ public static class MathUtils
         return true;
     }
         
+    public static bool HasChanged(ref int counter, int newCounter)
+    {
+        if (counter == newCounter)
+            return false;
+
+        counter = newCounter;
+        return true;
+    }    
+    
     /// <summary>
     /// Return true if a boolean changed from false to true
     /// </summary>

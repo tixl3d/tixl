@@ -115,19 +115,25 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
         var isCurrentSelected = TimeLineCanvas.NodeSelection.GetSelectedInstanceWithoutComposition()?.SymbolChildId == parameter.Input.Parent.SymbolChildId;
         if (FrameStats.IsIdHovered(parameter.Input.Parent.SymbolChildId) || isCurrentSelected || layerHovered)
         {
+            var fade = isCurrentSelected ? 0.05f : 0.02f;
             drawList.AddRectFilled(new Vector2(min.X, min.Y),
-                                   new Vector2(max.X, max.Y), UiColors.ForegroundFull.Fade(0.04f));
+                                   new Vector2(max.X, max.Y), UiColors.ForegroundFull.Fade(fade));
         }
+        
+        drawList.ChannelsSplit(2);
+        drawList.ChannelsSetCurrent(1);
 
         // Draw label and pinning
         {
-            //var hash = parameter.Input.GetHashCode();
             var hash = parameter.Hash;
             ImGui.PushID(hash);
 
+            ImGui.PushFont(isCurrentSelected ? Fonts.FontBold : Fonts.FontNormal);
+            
             var label = $"{parameter.ChildUi.SymbolChild.ReadableName}.{parameter.Input.Input.Name}";
             var opLabelSize = ImGui.CalcTextSize(label);
-            var buttonSize = opLabelSize + new Vector2(16, 0);
+            var buttonSize = opLabelSize + new Vector2(16 + 2 + 15 + 2 , 0) * T3Ui.UiScaleFactor;
+            buttonSize.Y = LayerHeight;
             var isPinned = PinnedParametersHashes.Contains(hash);
 
             if (UserSettings.Config.AutoPinAllAnimations)
@@ -146,21 +152,27 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
                     PinnedParametersHashes.Remove(hash);
                 }
             }
-
+            
             var lastPos = ImGui.GetItemRectMin();
-            var iconColor = isPinned ? UiColors.StatusAnimated : UiColors.Gray;
+            
+            drawList.AddRectFilled(lastPos, lastPos +buttonSize, UiColors.CanvasBackground.Fade(0.8f));
+            
+            var iconColor = isPinned ? UiColors.StatusActivated : UiColors.ForegroundFull.Fade(0.3f);
             iconColor = iconColor.Fade(ImGui.IsItemHovered() ? 1 : 0.8f);
 
-            Icons.DrawIconAtScreenPosition(Icon.Pin, lastPos + new Vector2(2, 5) * T3Ui.UiScaleFactor, drawList, iconColor);
-            var labelColor = layerHovered
-                                 ? UiColors.ForegroundFull
-                                 : isPinned
-                                     ? UiColors.StatusAnimated
-                                     : UiColors.TextMuted;
-            drawList.AddText(lastPos + new Vector2(20, 3) * T3Ui.UiScaleFactor, labelColor, label);
+            Icons.DrawIconAtScreenPosition(isPinned ? Icon.Pin : Icon.PinOutline, lastPos + new Vector2(2, 5) * T3Ui.UiScaleFactor, drawList, iconColor);
+
+            Icons.DrawIconAtScreenPosition(Icon.InterpolateBrokenTangents, lastPos + new Vector2(2+ 15 + 2, 5) * T3Ui.UiScaleFactor, drawList, iconColor);
+            
+            var fade = layerHovered ? 1 : 0.75f;
+            var labelColor = UiColors.ForegroundFull.Fade(fade) ;
+            drawList.AddText(lastPos + new Vector2(20 + 2 + 15, 3) * T3Ui.UiScaleFactor, labelColor, label);
+            ImGui.PopFont();
             ImGui.PopID();
         }
+        drawList.ChannelsSetCurrent(0);
 
+        //if (layerHovered && mousePos.X > ImGui.GetItemRectMax().X)
         if (layerHovered)
         {
             drawList.AddRectFilled(new Vector2(mousePos.X, min.Y),
@@ -253,7 +265,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
         }
         else
         {
-            DrawCurveLines(parameter, layerArea, drawList);
+            DrawCurveLines(parameter, layerArea, drawList); 
         }
 
         HandleCreateNewKeyframes(parameter, layerArea);
@@ -270,6 +282,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
         }
 
         ImGui.SetCursorScreenPos(min + new Vector2(0, LayerHeight)); // Next Line
+        drawList.ChannelsMerge();
     }
 
     public readonly HashSet<int> PinnedParametersHashes = new();
