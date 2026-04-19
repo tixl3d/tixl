@@ -70,7 +70,7 @@ internal static class SkillQuestPanel
     private static void DrawPanelActions()
     {
         CustomComponents.RightAlign(ImGui.GetFrameHeight());
-        if (CustomComponents.TransparentIconButton(Icon.Cross, Vector2.Zero))
+        if (CustomComponents.TransparentIconButton(Icon.Close, Vector2.Zero))
         {
             UserSettings.Config.ShowSkillQuestInHub = false;
             UserSettings.Save();

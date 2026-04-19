@@ -203,11 +203,11 @@ internal sealed class InlineCurveArea : ScalableCanvas
         var normalizePos = closePos - new Vector2(hitSize.X + padding, 0);
 
         DrawChromeButton("##curvePaneNormalize", normalizePos, hitSize, iconSize,
-                         Icon.Scale, _timeLineCanvas.NormalizeCurveView, drawList,
+                         Icon.NormalizeCurves, _timeLineCanvas.NormalizeCurveView, drawList,
                          () => _timeLineCanvas.NormalizeCurveView = !_timeLineCanvas.NormalizeCurveView);
 
         DrawChromeButton("##curvePaneClose", closePos, hitSize, iconSize,
-                         Icon.ChevronDown, false, drawList,
+                         Icon.Close, false, drawList,
                          () =>
                          {
                              _timeLineCanvas.CurveEditingParamHashes.Clear();

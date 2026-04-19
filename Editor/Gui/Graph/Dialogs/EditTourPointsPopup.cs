@@ -284,7 +284,7 @@ internal static class EditTourPointsPopup
                 if (!CanAdd && tourPoint.ChildId != _firstSelectedChildId)
                 {
                     ImGui.SameLine();
-                    if (CustomComponents.IconButton(Icon.Cross, Vector2.Zero))
+                    if (CustomComponents.IconButton(Icon.Close, Vector2.Zero))
                     {
                         tourPoint.ChildId = Guid.Empty;
                         tourPoint.InputId = Guid.Empty;

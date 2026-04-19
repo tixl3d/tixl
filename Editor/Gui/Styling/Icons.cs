@@ -286,7 +286,7 @@ internal static class Icons
             new(Icon.ArrowDown, slotIndex: 136),
             new(Icon.ApplySelection, slotIndex: 137),
             new(Icon.PasteFromClipboard, slotIndex: 138),
-            new(Icon.Cross, slotIndex: 139),
+            new(Icon.Close, slotIndex: 139),
             new(Icon.BackUp, slotIndex: 140),
             new(Icon.Sleeping, slotIndex: 141),
             new(Icon.InterpolateConstant, slotIndex: 142),
@@ -294,6 +294,7 @@ internal static class Icons
             new(Icon.InterpolateSmoothSafe, slotIndex: 144),
             new(Icon.InterpolateSmooth, slotIndex: 145),
             new(Icon.InterpolateBrokenTangents, slotIndex: 146),
+            new(Icon.NormalizeCurves, slotIndex: 147),
         };
 
     public static readonly string IconAtlasPath = Path.Combine(SharedResources.EditorResourcesDirectory, @"images/t3-icons.png");
@@ -451,12 +452,13 @@ public enum Icon
     ArrowDown,
     ApplySelection,
     PasteFromClipboard,
-    Cross,
+    Close,
     BackUp,
     Sleeping,
     InterpolateConstant,
     InterpolateLinear,
     InterpolateSmoothSafe,
     InterpolateSmooth,
-    InterpolateBrokenTangents
+    InterpolateBrokenTangents,
+    NormalizeCurves
 }
