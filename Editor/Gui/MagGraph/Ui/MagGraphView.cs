@@ -188,7 +188,7 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
 
         var focusedItemPosOnCanvas = sourceItem.PosOnCanvas + new Vector2(-sourceItem.Size.X, MagGraphItem.GridSize.Y * insertionLineIndex);
 
-        _context.StartMacroCommand("Extract parameters");
+        var macro = _context.StartMacroCommand("Extract parameters");
         if (shouldPushDown)
         {
             MagItemMovement
@@ -198,8 +198,7 @@ internal sealed partial class MagGraphView : ScalableCanvas, IGraphView
                                            MagGraphItem.GridSize.Y);
         }
 
-        // Todo: This should use undo/redo
-        ParameterExtraction.ExtractAsConnectedOperator(inputSlot, symbolChildUi, input, focusedItemPosOnCanvas);
+        ParameterExtraction.ExtractAsConnectedOperator(inputSlot, symbolChildUi, input, focusedItemPosOnCanvas, collectInto: macro);
         _context.Layout.FlagStructureAsChanged();
         _context.CompleteMacroCommand();
     }

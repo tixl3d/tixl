@@ -242,13 +242,7 @@ public abstract class InputValueUi<T> : IInputUi
                                                     {
                                                         if (ImGui.MenuItem("Set as default", !input.IsDefault))
                                                         {
-                                                            // Todo: Implement Undo/Redo Command
-                                                            input.SetCurrentValueAsDefault();
-                                                            if (SymbolUiRegistry.TryGetSymbolUi(symbolChildUi.SymbolChild.Symbol.Id, out var symbolUi))
-                                                            {
-                                                                symbolUi.Symbol.InvalidateInputDefaultInInstances(inputSlot);
-                                                                symbolUi.FlagAsModified();
-                                                            }
+                                                            UndoRedoStack.AddAndExecute(new SetInputDefaultCommand(compositionSymbol, symbolChildUi.Id, input));
                                                         }
 
                                                         if (ImGui.MenuItem("Reset to default", !input.IsDefault))
@@ -473,13 +467,7 @@ public abstract class InputValueUi<T> : IInputUi
                  {
                      if (ImGui.MenuItem("Set as default", !input.IsDefault))
                      {
-                         // Todo: Implement Undo/Redo Command
-                         input.SetCurrentValueAsDefault();
-                         if (SymbolUiRegistry.TryGetSymbolUi(symbolChildUi.SymbolChild.Symbol.Id, out var symbolUi))
-                         {
-                             symbolUi.Symbol.InvalidateInputDefaultInInstances(inputSlot);
-                             symbolUi.FlagAsModified();
-                         }
+                         UndoRedoStack.AddAndExecute(new SetInputDefaultCommand(compositionSymbol, symbolChildUi.Id, input));
                      }
 
                      if (ImGui.MenuItem("Reset to default", !input.IsDefault))

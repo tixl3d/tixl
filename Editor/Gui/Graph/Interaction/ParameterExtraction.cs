@@ -19,7 +19,8 @@ internal static class ParameterExtraction
         return SymbolsExtractableFromInputs.ContainsKey(inputSlot.ValueType);
     }
     
-    public static void ExtractAsConnectedOperator<T>(InputSlot<T> inputSlot, SymbolUi.Child symbolChildUi, Symbol.Child.Input input, Vector2 freePosition)
+    public static void ExtractAsConnectedOperator<T>(InputSlot<T> inputSlot, SymbolUi.Child symbolChildUi, Symbol.Child.Input input, Vector2 freePosition,
+                                                     MacroCommand? collectInto = null)
     {
         var view = ProjectView.Focused;
         if (view?.InstView == null)
@@ -27,14 +28,10 @@ internal static class ParameterExtraction
             Log.Warning("Unable to access current view for extractions?");
             return;
         }
-        
-        var nodeSelection = view.NodeSelection;
+
         var compositionUi = view.InstView.SymbolUi;
         var compositionInstance = view.InstView.Instance;
-        
-        var commands = new List<ICommand>();
 
-        // cast input slot to constructedInputSlotType
         // Find matching symbol
         if (!SymbolsExtractableFromInputs.TryGetValue(input.DefaultValue.ValueType, out var symbolId))
         {
@@ -42,21 +39,22 @@ internal static class ParameterExtraction
             return;
         }
 
+        var ownedMacro = collectInto ?? new MacroCommand("Extract as operator");
+
         // Add Child
         var addSymbolChildCommand = new AddSymbolChildCommand(compositionUi.Symbol, symbolId)
                                         {
                                             PosOnCanvas = freePosition,
                                             ChildName = input.Name
                                         };
-        
+
         if (_sizesForTypes.TryGetValue(input.DefaultValue.ValueType, out var sizeOverride))
         {
             addSymbolChildCommand.Size = sizeOverride;  // FIXME: doesn't seem to have an effect
         }
 
-        commands.Add(addSymbolChildCommand);
-        addSymbolChildCommand.Do();
-        
+        ownedMacro.AddAndExecCommand(addSymbolChildCommand);
+
         var newChildUi = compositionUi.ChildUis[addSymbolChildCommand.AddedChildId];
         var newSymbolChild = newChildUi.SymbolChild;
 
@@ -66,32 +64,33 @@ internal static class ParameterExtraction
             newChildUi.Style = SymbolUi.Child.Styles.Resizable;
         }
 
-        // Set type
-        // Todo - make this undoable - currently not implemented with the new extraction system
         var newInstance = compositionInstance.Children[newChildUi.Id];
-        ExtractInputValues(inputSlot, newInstance, out var outputSlot);
+        var extractableInput = (IExtractedInput<T>)newInstance;
+        var outputSlot = extractableInput.OutputSlot;
+        extractableInput.SetTypedInputValuesTo(inputSlot.TypedInputValue.Value, out var changedSlots);
+
+        // Record the extracted values so they are reapplied on redo.
+        var newValues = new Dictionary<Guid, InputValue>();
+        foreach (var changedSlot in changedSlots)
+        {
+            changedSlot.Input.IsDefault = false;
+            newValues[changedSlot.Id] = changedSlot.Input.Value.Clone();
+        }
+        if (newValues.Count > 0)
+        {
+            ownedMacro.AddExecutedCommandForUndo(
+                new SetExtractedInputValuesCommand(compositionUi.Symbol.Id, newChildUi.Id, newValues));
+        }
 
         // Create connection
         var newConnection = new Symbol.Connection(sourceParentOrChildId: newSymbolChild.Id,
                                                   sourceSlotId: outputSlot.Id,
                                                   targetParentOrChildId: symbolChildUi.SymbolChild.Id,
                                                   targetSlotId: input.Id);
-        var addConnectionCommand = new AddConnectionCommand(compositionUi.Symbol, newConnection, 0);
-        addConnectionCommand.Do();
-        commands.Add(addConnectionCommand);
-        UndoRedoStack.Add(new MacroCommand("Extract as operator", commands));
-        return;
+        ownedMacro.AddAndExecCommand(new AddConnectionCommand(compositionUi.Symbol, newConnection, 0));
 
-        static void ExtractInputValues(InputSlot<T> slot, Instance newInstance, out Slot<T> outputSlot)
-        {
-            var extractableInput = (IExtractedInput<T>)newInstance;
-            outputSlot = extractableInput.OutputSlot;
-            extractableInput.SetTypedInputValuesTo(slot.TypedInputValue.Value, out var changedSlots);
-            foreach (var changedSlot in changedSlots)
-            {
-                changedSlot.Input.IsDefault = false;
-            }
-        }
+        if (collectInto == null)
+            UndoRedoStack.Add(ownedMacro);
     }
 
     private static readonly Dictionary<Type, System.Numerics.Vector2> _sizesForTypes = new()

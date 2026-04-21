@@ -6,6 +6,8 @@ This document inventories all user-facing model mutations that bypass the `IComm
 
 **2026-04-22** -- Batch 1 pass: gaps #1-4 were already covered by `AnimationOperations` / `KeyframeCopyAndPasting` (they push `MacroCommand`s to `UndoRedoStack`); stale `// TODO: this should use Undo/Redo commands` comment removed in [InputValueUi.cs:343](Editor/UiModel/InputsAndTypes/InputValueUi.cs:343). Gap #10 closed via new `ChangeCommentCommand` and rework of `EditCommentDialog` to commit edits on dialog close. Gap #16 closed by replacing `cmd.Do()` with `UndoRedoStack.AddAndExecute(cmd)` in [NodeActions.cs:236](Editor/UiModel/Modification/NodeActions.cs:236). Automated regression tests deferred -- see note in [Plan_AutomaticTests.md](.agentic/Plans/Plan_AutomaticTests.md).
 
+**2026-04-22** -- Batch 2 pass: gap #7 was already closed by recent commit `d890a482c` (in-flight `ChangeKeyframesCommand` on tangent drag). Gap #5 closed via new `SetInputDefaultCommand` covering both `InputValueUi` call sites. Gap #9 closed via new `ChangeSymbolDescriptionCommand`; dialog now buffers and commits on close. Gap #8 closed: `SetExtractedInputValuesCommand` added to the extraction macro so the extracted values are restored on redo; `ExtractAsConnectedOperator` now accepts an optional `collectInto` MacroCommand so the MagGraph path no longer produces a nested/duplicate undo entry. Added a `Guid` overload for `Symbol.InvalidateInputDefaultInInstances` in Core to avoid needing an `IInputSlot` handle from a pure command.
+
 ## Gap Inventory
 
 ### CRITICAL -- Users definitely expect Ctrl+Z to work here
@@ -49,18 +51,14 @@ This document inventories all user-facing model mutations that bypass the `IComm
 
 ---
 
-#### 5. Set Current Value as Default (no undo)
+#### 5. Set Current Value as Default -- **DONE (2026-04-22)**
 
-**Files:**
-- `Editor/UiModel/InputsAndTypes/InputValueUi.cs:245-250` -- explicit TODO: `// Todo: Implement Undo/Redo Command`
-- `Editor/UiModel/InputsAndTypes/InputValueUi.cs:477-482` -- same
-- `Editor/Gui/InputUi/CombinedInputs/GradientInputUi.cs:35`
+**Files touched:**
+- New [SetInputDefaultCommand.cs](Editor/UiModel/Commands/Graph/SetInputDefaultCommand.cs)
+- [InputValueUi.cs:245](Editor/UiModel/InputsAndTypes/InputValueUi.cs:245), [InputValueUi.cs:470](Editor/UiModel/InputsAndTypes/InputValueUi.cs:470) -- both context menus now push the command
+- [Symbol.cs](Core/Operator/Symbol.cs) -- added `InvalidateInputDefaultInInstances(in Guid)` overload so the command can operate without an `IInputSlot`
 
-**What happens:** Context menu "Set as Default" directly calls `input.SetCurrentValueAsDefault()` + `InvalidateInputDefaultInInstances()`. Irreversible.
-
-**Fix:** Create `SetInputDefaultCommand` that stores original default value and restores it on undo.
-
-**Effort:** MEDIUM (new command class, ~half day)
+**Note:** `GradientInputUi.cs:35` calls `SetCurrentValueAsDefault()` only in a defensive path that reconstructs a null gradient — not a user-initiated action. Left untouched.
 
 ---
 
@@ -81,42 +79,28 @@ This document inventories all user-facing model mutations that bypass the `IComm
 
 ---
 
-#### 7. Curve Tangent Handle Editing (no undo)
+#### 7. Curve Tangent Handle Editing -- **DONE (verified 2026-04-22)**
 
-**File:** `Editor/Gui/Interaction/WithCurves/CurvePoint.cs:62-113`
+**File:** `Editor/Gui/Interaction/WithCurves/CurvePoint.cs`
 
-**What happens:** Dragging tangent handles directly mutates `VDefinition` properties (`InType`, `InEditMode`, `InTangentAngle`, `BrokenTangents`, `OutType`, etc.) without creating a command.
-
-**Fix:** Use the in-flight command pattern (like `ChangeKeyframesCommand` already does for keyframe position dragging). Capture VDefinition state on mouse-down, apply on mouse-up via command.
-
-**Effort:** MEDIUM (half day -- pattern already exists, just not applied here)
+**Status:** Closed by commit `d890a482c` ("ui: modifying curve tangents can be undone"). In-flight `ChangeKeyframesCommand` is created on `ImGui.IsItemActivated` ([CurvePoint.cs:107-112](Editor/Gui/Interaction/WithCurves/CurvePoint.cs:107)) and committed via `StoreCurrentValues()` + `UndoRedoStack.Add` on `IsItemDeactivated` ([CurvePoint.cs:149-154](Editor/Gui/Interaction/WithCurves/CurvePoint.cs:149)). Menu-driven interpolation changes (Smooth/Cubic/Horizontal/Constant/Linear/MirrorTangents) route through `ForSelectedOrAllPointsDo` which wraps mutations in a `ChangeKeyframesCommand` ([CurveEditing.cs:383-395](Editor/Gui/Interaction/WithCurves/CurveEditing.cs:383)).
 
 ---
 
-#### 8. Parameter Extraction (no undo)
+#### 8. Parameter Extraction -- **DONE (2026-04-22)**
 
-**Files:**
-- `Editor/Gui/Graph/Interaction/ParameterExtraction.cs:70` -- explicit TODO: `// Todo - make this undoable - currently not implemented with the new extraction system`
-- `Editor/Gui/MagGraph/Ui/MagGraphView.cs:201` -- `// Todo: This should use undo/redo`
-
-**What happens:** "Extract as connected operator" (right-click an input, extract it as a separate node with connection) executes multiple sub-operations (add child, add connection, set value) without wrapping them in a `MacroCommand`.
-
-**Fix:** Wrap the sequence in a `MacroCommand`. Individual operations already use commands internally -- they just need to be grouped.
-
-**Effort:** MEDIUM (half day)
+**Files touched:**
+- New [SetExtractedInputValuesCommand.cs](Editor/UiModel/Commands/Graph/SetExtractedInputValuesCommand.cs) -- restores extracted input values on redo, resets them on undo
+- [ParameterExtraction.cs](Editor/Gui/Graph/Interaction/ParameterExtraction.cs) -- accepts an optional `collectInto: MacroCommand` so it can merge into an outer macro; the previous `ExtractInputValues` step is now part of the macro
+- [MagGraphView.cs:201](Editor/Gui/MagGraph/Ui/MagGraphView.cs:201) -- passes the context's macro in via `collectInto`, so "Extract parameters" is one undo entry instead of two nested ones
 
 ---
 
-#### 9. Edit Symbol Description / Links (no undo)
+#### 9. Edit Symbol Description / Links -- **DONE (2026-04-22)**
 
-**Files:**
-- `Editor/Gui/Graph/Dialogs/EditSymbolDescriptionDialog.cs:30,54,64,69`
-
-**What happens:** Editing a symbol's description text, adding/removing documentation links directly mutates `symbolUi.Description` and `symbolUi.Links` dictionary.
-
-**Fix:** Create `ChangeSymbolDescriptionCommand` that stores old description + links snapshot.
-
-**Effort:** LOW-MEDIUM (half day, new command)
+**Files touched:**
+- New [ChangeSymbolDescriptionCommand.cs](Editor/UiModel/Commands/Graph/ChangeSymbolDescriptionCommand.cs) -- stores before/after description and deep-cloned link list; Do/Undo clears and repopulates `Links`
+- [EditSymbolDescriptionDialog.cs](Editor/Gui/Graph/Dialogs/EditSymbolDescriptionDialog.cs) -- snapshots on dialog open, commits one command on close (including ESC / click-outside), uses `UndoRedoStack.Add` (not `AddAndExecute`) because the live model is already at the new state
 
 ---
 
@@ -262,11 +246,11 @@ This document inventories all user-facing model mutations that bypass the `IComm
 | 2 | Duplicate Keyframes | CRITICAL | LOW-MED | DONE |
 | 3 | Delete Keyframes in Timeline | CRITICAL | LOW | DONE |
 | 4 | Insert Keyframe with Increment | CRITICAL | LOW | DONE |
-| 5 | Set Value as Default | CRITICAL | MEDIUM | open |
+| 5 | Set Value as Default | CRITICAL | MEDIUM | DONE |
 | 6 | Variation CRUD | CRITICAL | MED-HIGH | open |
-| 7 | Curve Tangent Editing | CRITICAL | MEDIUM | open |
-| 8 | Parameter Extraction | CRITICAL | MEDIUM | open |
-| 9 | Edit Symbol Description/Links | MEDIUM | LOW-MED | open |
+| 7 | Curve Tangent Editing | CRITICAL | MEDIUM | DONE |
+| 8 | Parameter Extraction | CRITICAL | MEDIUM | DONE |
+| 9 | Edit Symbol Description/Links | MEDIUM | LOW-MED | DONE |
 | 10 | Edit Node Comment | MEDIUM | LOW | DONE |
 | 11 | Snapshot Enable Toggle | MEDIUM | MEDIUM | depends on #6 |
 | 12 | Playback Settings | LOW-MED | LOW-MED | open |
@@ -286,11 +270,11 @@ This document inventories all user-facing model mutations that bypass the `IComm
 - #10 -- new `ChangeCommentCommand`, dialog reworked to commit on close
 - #16 -- `cmd.Do()` replaced with `UndoRedoStack.AddAndExecute(cmd)`
 
-**Batch 2 -- Important gaps (2-3 days):**
-- #5 (set as default -- new command)
-- #7 (curve tangent editing -- use existing in-flight pattern)
-- #8 (parameter extraction -- wrap in MacroCommand)
-- #9 (symbol description -- new command)
+**Batch 2 -- Important gaps (2-3 days): DONE (2026-04-22)**
+- #5 -- new `SetInputDefaultCommand`
+- #7 -- verified already covered by commit `d890a482c`
+- #8 -- new `SetExtractedInputValuesCommand` + `collectInto` macro plumbing
+- #9 -- new `ChangeSymbolDescriptionCommand`
 
 **Batch 3 -- Complex features (3-5 days):**
 - #6 (variation system -- needs careful design around persistence)

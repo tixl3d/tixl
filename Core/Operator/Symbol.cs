@@ -365,9 +365,10 @@ public sealed partial class Symbol : IDisposable, IResource
     /// <summary>
     /// Invalidates all instances of a symbol input (e.g. if that input's default was modified)
     /// </summary>
-    public void InvalidateInputDefaultInInstances(IInputSlot inputSlot)
+    public void InvalidateInputDefaultInInstances(IInputSlot inputSlot) => InvalidateInputDefaultInInstances(inputSlot.Id);
+
+    public void InvalidateInputDefaultInInstances(in Guid inputId)
     {
-        var inputId = inputSlot.Id;
         lock (_creationLock)
         {
             foreach (var child in _childrenCreatedFromMe.Values)
