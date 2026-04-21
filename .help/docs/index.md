@@ -1,14 +1,50 @@
 # TiXL documentation
 
-TiXL is a visual programming environment for motion graphics, live visuals, and creative coding on Windows. These pages are the source of truth for what it does and how to use it — if something is explained in Discord or at a meet-up, it should eventually end up here.
+# Introduction
 
-New? Start with the **[Welcome](getting-started/Welcome.md)** page, which points you at whichever entry fits you best.
+Welcome to TiXL—your real-time visual playground. Whether you're crafting motion design or building interactive installations, what you create is what you see. There is no offline rendering, no preview modes, and no waiting for a final result. Instead, you work directly with the final output, shaping visuals as if you were sculpting them in real time.
 
-## [Getting started](getting-started/README.md)
+TiXL combines procedural animation techniques—such as LFOs, sequencers, and event-based systems—with traditional keyframe animation. This allows you to move seamlessly between structured motion design workflows and fully interactive, real-time experiences. It bridges the gap between tools like After Effects and real-time environments used for installations and live visuals.
 
-Understand what TiXL is, whether it fits your project, and how to load your first scene.
+The system is built around a flexible operator-based workflow. You can create complex setups by combining and reusing components, organizing them into reusable structures, and building your own tools. While TiXL is powered by C#, you don’t need to write code to use it. Artists can work visually and intuitively, while developers can extend and customize the system deeply when needed.
 
-- [Welcome](getting-started/Welcome.md)
+TiXL is designed for real-time performance and runs primarily on the GPU. A modern graphics card will give you the best experience, enabling smooth playback and immediate feedback for even complex scenes. If in doubt, TiXL prioritizes usability first, then flexibility, and finally performance—ensuring that it remains approachable without sacrificing power.
+
+Learning TiXL is designed to be straightforward. Interactive tutorials guide you step by step, supported by in-editor documentation, example setups, and a growing library of video tutorials. Whether you're just starting out or exploring advanced techniques, there are multiple paths to get you up to speed quickly.
+
+## Getting Started
+
+### Requirements
+
+TiXL currently runs on Windows and performs best on systems with a dedicated graphics card. While it is possible to run it on [Linux](/install/InstallLinux.md) and [macOS](/install/InstallMacOS.md) through emulation, native versions for these platforms are in development.
+
+[Installation on Windows](/install/Installation.md) is simple: download the installer, run it, and launch TiXL.
+
+## First Steps
+
+After installation, the most effective way to begin is to start the interactive *SkillQuest* tutorials from the main screen. These guided sessions walk you through the core concepts in a hands-on way, helping you understand how TiXL works by creating visuals directly.
+
+From there, you can explore operators, modify existing setups, and gradually build your own projects.
+
+
+## Pick your path
+
+- Watch the [video tutorials](VideoTutorials.md). Start with the short intro, then follow the full playlist when you have 15 minutes.
+
+- To understand the concepts and technology behind read [What is TiXL](WhatIsTiXL.md), then [How TiXL works](HowTixlWorks.md). The terms in [Concepts](Concepts.md) will appear everywhere.
+
+## Community
+
+If you have questions or feedback, the easiest way is to join us on Discord:
+
+ [![Discord](https://img.shields.io/discord/823853172619083816.svg?style=for-the-badge)](https://discord.gg/YmSyQdeH3S). 
+ 
+But the [Community](Community.md) is also active on GitHub, YouTube and in real life :-)
+
+___
+
+## Getting Started
+
 - [What is TiXL](getting-started/WhatIsTiXL.md)
 - [System requirements](getting-started/SystemRequirements.md)
 - [Introduction — a guided tour](getting-started/Introduction.md)

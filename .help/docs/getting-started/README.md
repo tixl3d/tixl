@@ -16,12 +16,4 @@ If you're new to TiXL, start here. This section answers "what is it", "is it for
 - [Reporting bugs and suggestions](ReportBugs.md) — how to help us improve TiXL.
 - [Community](Community.md) — Discord, meet-ups, YouTube, GitHub.
 
-## Still to write
 
-- **Welcome** — short landing with a hero video, "pick your path" (install / watch / read).
-- **What is TiXL** — condensed from the pitch deck and live-performance page; usage examples with screenshots.
-- **System requirements** — can be extracted from the [Installation](../install/Installation.md) page.
-- **Examples / gallery** — a page (or dedicated site section) showcasing projects built with TiXL. Sources: meet-ups, Dropbox scripts, YouTube channel.
-- **Is TiXL for you?** — honest audience-fit guide. Covers the trade-offs vs TouchDesigner, vvvv, Notch, After Effects, custom engines.
-- **Roadmap** — link to GitHub milestones + a short narrative of where the project is heading.
-- **Community** — Discord, YouTube, meet-up schedule, GitHub discussions, how to contribute docs/code.
