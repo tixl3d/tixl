@@ -54,6 +54,11 @@ Also:
 - Prefix private fields with `_`
 - Prefer slightly longer, descriptive names when clarity improves (e.g. `faceIndex` over `i`)
 
+## Encapsulation and Visibility
+- **Default to `private`.** Raise visibility (`internal`, `public`) only when a member is actually read or written from outside the declaring type. "Mirroring a nearby class" or "might be useful later" is not a reason — unnecessary public surface area is a long-term review tax.
+- **Prefer constructor parameters over public setters** for values needed at construction time. `new Foo(x, y)` is always better than `new Foo { X = x, Y = y }` unless the setter is also used later. Command classes in `Editor/UiModel/Commands/` are a common place this goes wrong — initialize `_newValue` / `_originalValue` in the constructor and keep them `private readonly`.
+- Don't copy an existing class's visibility blindly; if the nearby class exposes something as `public` without a caller, that's a bug to not propagate, not a pattern to match.
+
 ## Line Endings (Important for Bulk Edits)
 The repo has **mixed line endings**: most `.cs` files use CRLF, but some are LF.
 There is no `.gitattributes` enforcing a single convention, and `core.autocrlf` is `false`.

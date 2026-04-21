@@ -2,62 +2,50 @@
 
 This document inventories all user-facing model mutations that bypass the `ICommand`/`UndoRedoStack` system. Each gap is categorized by severity and estimated effort. The intent is to drive follow-up work to close these gaps -- ideally test-driven with the command-level integration test framework.
 
+## Progress
+
+**2026-04-22** -- Batch 1 pass: gaps #1-4 were already covered by `AnimationOperations` / `KeyframeCopyAndPasting` (they push `MacroCommand`s to `UndoRedoStack`); stale `// TODO: this should use Undo/Redo commands` comment removed in [InputValueUi.cs:343](Editor/UiModel/InputsAndTypes/InputValueUi.cs:343). Gap #10 closed via new `ChangeCommentCommand` and rework of `EditCommentDialog` to commit edits on dialog close. Gap #16 closed by replacing `cmd.Do()` with `UndoRedoStack.AddAndExecute(cmd)` in [NodeActions.cs:236](Editor/UiModel/Modification/NodeActions.cs:236). Automated regression tests deferred -- see note in [Plan_AutomaticTests.md](.agentic/Plans/Plan_AutomaticTests.md).
+
 ## Gap Inventory
 
 ### CRITICAL -- Users definitely expect Ctrl+Z to work here
 
-#### 1. Insert/Remove Keyframe via UI buttons (no undo)
+#### 1. Insert/Remove Keyframe via UI buttons (no undo) -- **DONE (verified 2026-04-22)**
 
 **Files:**
-- `Editor/UiModel/InputsAndTypes/InputValueUi.cs:343-350` -- explicit TODO: `// TODO: this should use Undo/Redo commands`
+- `Editor/UiModel/InputsAndTypes/InputValueUi.cs:343-350` -- stale TODO removed
 - `Editor/UiModel/InputsAndTypes/InputValueUi.cs:380,389` -- same pattern
-- `Editor/Gui/Windows/TimeLine/DopeSheetArea.cs:322-327` -- `InsertNewKeyframe()` calls `AnimationOperations` directly
+- `Editor/Gui/Windows/TimeLine/DopeSheetArea.cs` -- `InsertNewKeyframe()` routes through `AnimationOperations`
 
-**What happens:** Clicking the keyframe toggle button in the parameter UI or pressing the Insert Keyframe shortcut in the timeline directly calls `AnimationOperations.InsertKeyframeToCurves()` / `RemoveKeyframeFromCurves()` without wrapping in a command.
-
-**Fix:** Wrap in existing `AddKeyframesCommand` / `DeleteKeyframeCommand`. These commands already exist for curve editor drag operations -- they just aren't used in these code paths.
-
-**Effort:** LOW (1-2 hours per call site, ~4 call sites)
+**Status:** `AnimationOperations.InsertKeyframeToCurves` / `RemoveKeyframeFromCurves` already wrap each operation in `AddKeyframesCommand` / `DeleteKeyframeCommand` and push a `MacroCommand` to `UndoRedoStack` ([AnimationOperations.cs:36-37](Editor/Gui/Interaction/Animation/AnimationOperations.cs:36), [AnimationOperations.cs:54](Editor/Gui/Interaction/Animation/AnimationOperations.cs:54)). All call sites listed above (parameter-row keyframe toggle, context menu insert/remove, dope-sheet shortcut) flow through these helpers. Ctrl+Z works.
 
 ---
 
-#### 2. Duplicate Keyframes in Timeline (no undo)
+#### 2. Duplicate Keyframes in Timeline (no undo) -- **DONE (verified 2026-04-22)**
 
 **Files:**
-- `Editor/Gui/Windows/TimeLine/DopeSheetArea.cs:62-63` -- `DuplicateSelectedKeyframes()`
-- `Editor/Gui/Windows/TimeLine/TimelineCurveEditArea.cs:57` -- same
+- `Editor/Gui/Windows/TimeLine/DopeSheetArea.cs:57-60`
+- `Editor/Gui/Windows/TimeLine/TimelineCurveEditor.cs:69-70`
 
-**What happens:** Ctrl+D in dope sheet or curve editor duplicates keyframes. Calls `FlagAsModified()` but never creates a command.
-
-**Fix:** Create a `DuplicateKeyframesCommand` or use `MacroCommand` wrapping individual `AddKeyframesCommand` calls.
-
-**Effort:** LOW-MEDIUM (half day)
+**Status:** `DuplicateSelectedKeyframes()` → `CopySelectedKeyframes()` (clipboard only) + `PasteKeyframes()`, and `KeyframeCopyAndPasting.TryPasteTo` wraps all inserts in a `MacroCommand("Paste keyframes", ...)` pushed via `UndoRedoStack.AddAndExecute` ([KeyframeCopyAndPasting.cs:130](Editor/Gui/Windows/TimeLine/KeyframeCopyAndPasting.cs:130)). Ctrl+D is undoable.
 
 ---
 
-#### 3. Delete Keyframes in Timeline (no undo)
+#### 3. Delete Keyframes in Timeline (no undo) -- **DONE (verified 2026-04-22)**
 
 **Files:**
-- `Editor/Gui/Windows/TimeLine/DopeSheetArea.cs:859-864` -- `DeleteSelectedElements()`
-- `Editor/Gui/Windows/TimeLine/TimelineCurveEditArea.cs:350-354` -- same
+- `Editor/Gui/Windows/TimeLine/DopeSheetArea.cs:1085-1092` -- `DeleteSelectedElements()`
+- `Editor/Gui/Windows/TimeLine/TimelineCurveEditor.cs:469-473` -- same
 
-**What happens:** Delete key in timeline directly calls `AnimationOperations.DeleteSelectedKeyframesFromAnimationParameters()`.
-
-**Fix:** Wrap in `DeleteKeyframeCommand` calls within a `MacroCommand`.
-
-**Effort:** LOW (half day)
+**Status:** Both call sites route through `AnimationOperations.DeleteSelectedKeyframesFromAnimationParameters`, which builds a list of `DeleteKeyframeCommand` / `RemoveAnimationsCommand` and pushes via `UndoRedoStack.AddAndExecute(new MacroCommand("Delete keyframes", commands))` ([AnimationOperations.cs:97](Editor/Gui/Interaction/Animation/AnimationOperations.cs:97)). Delete key is undoable.
 
 ---
 
-#### 4. Insert Keyframe with Increment (no undo)
+#### 4. Insert Keyframe with Increment (no undo) -- **DONE (verified 2026-04-22)**
 
-**File:** `Editor/Gui/Windows/TimeLine/DopeSheetArea.cs:75-83`
+**File:** `Editor/Gui/Windows/TimeLine/DopeSheetArea.cs:72-80`
 
-**What happens:** The "Insert Keyframe with Increment" action directly inserts keyframes with a value offset of +1. No command.
-
-**Fix:** Same as #1 -- wrap in `AddKeyframesCommand`.
-
-**Effort:** LOW (1 hour)
+**Status:** Calls `InsertNewKeyframe(p, time, false, 1)` → `AnimationOperations.InsertKeyframeToCurves(curves, time, increment: 1)`, same command-wrapped path as #1.
 
 ---
 
@@ -132,15 +120,11 @@ This document inventories all user-facing model mutations that bypass the `IComm
 
 ---
 
-#### 10. Edit Node Comment (no undo)
+#### 10. Edit Node Comment (no undo) -- **DONE (2026-04-22)**
 
-**File:** `Editor/Gui/Graph/Dialogs/EditCommentDialog.cs:44`
+**File:** `Editor/Gui/Graph/Dialogs/EditCommentDialog.cs`
 
-**What happens:** Editing a node's comment directly sets `symbolChildUi.Comment = comment`.
-
-**Fix:** Create `ChangeCommentCommand` (trivial -- store old comment, set new, reverse on undo).
-
-**Effort:** LOW (1-2 hours)
+**Resolution:** Added [ChangeCommentCommand.cs](Editor/UiModel/Commands/Graph/ChangeCommentCommand.cs) (stores original+new comment, looks up child by Guid via `SymbolUiRegistry`). Dialog now buffers edits locally and commits a single `ChangeCommentCommand` via `UndoRedoStack.AddAndExecute` when closed (button, ESC, or click-outside).
 
 ---
 
@@ -214,16 +198,11 @@ This document inventories all user-facing model mutations that bypass the `IComm
 
 ### LOWER PRIORITY -- Internal or edge-case mutations
 
-#### 16. NodeActions.cs -- Command executed without UndoRedoStack
+#### 16. NodeActions.cs -- Command executed without UndoRedoStack -- **DONE (2026-04-22)**
 
 **File:** `Editor/UiModel/Modification/NodeActions.cs:236`
-- FIXME comment: `cmd.Do(); // FIXME: Shouldn't this be UndoRedoQueue.AddAndExecute() ?`
 
-**What happens:** A command is created and executed via `.Do()` directly instead of going through `UndoRedoStack.AddAndExecute()`, meaning it won't appear in the undo history.
-
-**Fix:** Change `cmd.Do()` to `UndoRedoStack.AddAndExecute(cmd)`.
-
-**Effort:** TRIVIAL (1 line change, but need to verify context)
+**Resolution:** Replaced `cmd.Do();` with `UndoRedoStack.AddAndExecute(cmd);`. The subsequent reads of `cmd.NewSymbolChildIds` / `NewSymbolAnnotationIds` still work because `AddAndExecute` runs `Do()` synchronously before returning.
 
 ---
 
@@ -277,35 +256,35 @@ This document inventories all user-facing model mutations that bypass the `IComm
 
 ## Summary Table
 
-| # | Gap | Severity | Effort | Depends On |
-|---|-----|----------|--------|------------|
-| 1 | Insert/Remove Keyframe via UI | CRITICAL | LOW | -- |
-| 2 | Duplicate Keyframes | CRITICAL | LOW-MED | -- |
-| 3 | Delete Keyframes in Timeline | CRITICAL | LOW | -- |
-| 4 | Insert Keyframe with Increment | CRITICAL | LOW | -- |
-| 5 | Set Value as Default | CRITICAL | MEDIUM | -- |
-| 6 | Variation CRUD | CRITICAL | MED-HIGH | -- |
-| 7 | Curve Tangent Editing | CRITICAL | MEDIUM | -- |
-| 8 | Parameter Extraction | CRITICAL | MEDIUM | -- |
-| 9 | Edit Symbol Description/Links | MEDIUM | LOW-MED | -- |
-| 10 | Edit Node Comment | MEDIUM | LOW | -- |
-| 11 | Snapshot Enable Toggle | MEDIUM | MEDIUM | #6 |
-| 12 | Playback Settings | LOW-MED | LOW-MED | -- |
-| 13 | StructuredList Editing | MEDIUM | MEDIUM | -- |
-| 14 | Split Clip at Time | MEDIUM | MEDIUM | -- |
-| 15 | Tour Point Editing | LOW | LOW | -- |
-| 16 | NodeActions cmd.Do() bypass | LOW | TRIVIAL | -- |
-| 17 | Auto-Layout positions | LOW | MEDIUM | -- |
-| 18 | MagGraphLayout internal | N/A | N/A | -- |
-| 19 | FloatVectorInput (investigate) | ? | INVESTIGATE | -- |
-| 20 | SymbolLibrary (investigate) | ? | INVESTIGATE | -- |
+| # | Gap | Severity | Effort | Status |
+|---|-----|----------|--------|--------|
+| 1 | Insert/Remove Keyframe via UI | CRITICAL | LOW | DONE |
+| 2 | Duplicate Keyframes | CRITICAL | LOW-MED | DONE |
+| 3 | Delete Keyframes in Timeline | CRITICAL | LOW | DONE |
+| 4 | Insert Keyframe with Increment | CRITICAL | LOW | DONE |
+| 5 | Set Value as Default | CRITICAL | MEDIUM | open |
+| 6 | Variation CRUD | CRITICAL | MED-HIGH | open |
+| 7 | Curve Tangent Editing | CRITICAL | MEDIUM | open |
+| 8 | Parameter Extraction | CRITICAL | MEDIUM | open |
+| 9 | Edit Symbol Description/Links | MEDIUM | LOW-MED | open |
+| 10 | Edit Node Comment | MEDIUM | LOW | DONE |
+| 11 | Snapshot Enable Toggle | MEDIUM | MEDIUM | depends on #6 |
+| 12 | Playback Settings | LOW-MED | LOW-MED | open |
+| 13 | StructuredList Editing | MEDIUM | MEDIUM | open |
+| 14 | Split Clip at Time | MEDIUM | MEDIUM | open |
+| 15 | Tour Point Editing | LOW | LOW | open |
+| 16 | NodeActions cmd.Do() bypass | LOW | TRIVIAL | DONE |
+| 17 | Auto-Layout positions | LOW | MEDIUM | open |
+| 18 | MagGraphLayout internal | N/A | N/A | not a gap |
+| 19 | FloatVectorInput (investigate) | ? | INVESTIGATE | open |
+| 20 | SymbolLibrary (investigate) | ? | INVESTIGATE | open |
 
 ## Recommended Implementation Order
 
-**Batch 1 -- Quick wins, highest user impact (2-3 days):**
-- #1, #2, #3, #4 (all keyframe operations -- same pattern, commands already exist)
-- #10 (edit comment -- trivial new command)
-- #16 (NodeActions bypass -- one-line fix)
+**Batch 1 -- Quick wins, highest user impact (2-3 days): DONE (2026-04-22)**
+- #1, #2, #3, #4 -- verified already covered by `AnimationOperations` / `KeyframeCopyAndPasting`
+- #10 -- new `ChangeCommentCommand`, dialog reworked to commit on close
+- #16 -- `cmd.Do()` replaced with `UndoRedoStack.AddAndExecute(cmd)`
 
 **Batch 2 -- Important gaps (2-3 days):**
 - #5 (set as default -- new command)

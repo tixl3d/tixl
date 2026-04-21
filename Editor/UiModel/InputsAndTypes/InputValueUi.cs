@@ -340,7 +340,6 @@ public abstract class InputValueUi<T> : IInputUi
             {
                 if (animator.TryGetCurvesForInputSlot(inputSlot, out var curves))
                 {
-                    // TODO: this should use Undo/Redo commands
                     if (hasKeyframeAtCurrentTime)
                     {
                         AnimationOperations.RemoveKeyframeFromCurves(curves, Playback.Current.TimeInBars);

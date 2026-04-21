@@ -233,7 +233,7 @@ internal static class NodeActions
                                                     copyMode: CopySymbolChildrenCommand.CopyMode.ClipboardSource,
                                                     sourceSymbol: containerSymbol);
 
-            cmd.Do(); // FIXME: Shouldn't this be UndoRedoQueue.AddAndExecute() ? 
+            UndoRedoStack.AddAndExecute(cmd);
 
             // Select new operators
             nodeSelection.Clear();

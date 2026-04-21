@@ -63,6 +63,8 @@ The highest-value, lowest-effort path is **command-level integration tests** tha
 
 **Risks:** Some commands may have hidden dependencies on static registries (`SymbolUiRegistry`). May need to initialize a minimal registry in test setup.
 
+> **Note (2026-04-22):** Considered spinning up `Editor.Tests.csproj` while working on `Plan_UndoRedoCoverage.md` Batch 1 so each closed gap could ship with a regression test. Deferred because the infra setup (xUnit project referencing `Editor.csproj` which is `OutputType=Exe`, wiring CI, building `TestSymbolFactory`) is a sizable yak relative to the one-liner command fixes it would guard. Undo/redo gaps are being closed without automated tests for now; revisit when Phase 1 of this plan is actually prioritized.
+
 ---
 
 ### Phase 2: Symbol Serialization Round-Trip Tests (HIGH impact, LOW effort)
