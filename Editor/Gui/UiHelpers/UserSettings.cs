@@ -70,6 +70,7 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         public bool SaveWindowLayoutsWithProjects = true;
         public bool EnableIdleMotion = true;
         public bool SuspendRenderingWhenHidden = true;
+        public bool UseVSync = true;
 
         /** Windows' implementation of mirroring a display is extremely slow and can
         * take up to 50% of the GPU time. Enabling this work around will copy the Main window

@@ -131,5 +131,9 @@ public static partial class T3Ui
         AllowHoveredChildWindows = 1 << 5,
     }
 
-    internal static bool UseVSync = true;
+    internal static bool UseVSync
+    {
+        get => UserSettings.Config.UseVSync;
+        set => UserSettings.Config.UseVSync = value;
+    }
 }

@@ -259,6 +259,11 @@ internal sealed partial class SettingsWindow : Window
                                                       "Suspend rendering and update when Tooll's editor window is minimized. This will reduce energy consumption significantly.",
                                                       UserSettings.Defaults.SuspendRenderingWhenHidden);
 
+                    changed |= FormInputs.AddCheckBox("Use VSync",
+                                                      ref UserSettings.Config.UseVSync,
+                                                      "Synchronise frame presentation to the display refresh rate. Turn off to uncap the frame rate (useful for benchmarking; can cause tearing).",
+                                                      UserSettings.Defaults.UseVSync);
+
                     break;
                 case Categories.Theme:
                     FormInputs.AddSectionHeader("Color Theme");
