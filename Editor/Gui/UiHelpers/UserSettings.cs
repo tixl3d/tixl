@@ -117,7 +117,7 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
 
         public readonly float KeyboardScrollAcceleration = 2.5f;
 
-        public bool VariationLiveThumbnails = true;
+        public bool VariationLiveThumbnails = false;
         public bool VariationHoverPreview = true;
 
         public bool EditorHoverPreview = true;
