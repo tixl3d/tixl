@@ -15,6 +15,7 @@ using T3.Editor.App;
 using T3.Editor.Gui;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows;
+using T3.Editor.Gui.Windows.Analyze;
 using T3.Editor.SystemUi;
 using T3.SystemUi;
 using Buffer = SharpDX.Direct3D11.Buffer;

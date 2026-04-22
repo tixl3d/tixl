@@ -8,6 +8,7 @@ using T3.Core.Audio;
 using T3.Core.Logging;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
+using T3.Core.Stats;
 using Texture2D = T3.Core.DataTypes.Texture2D;
 
 namespace T3.Player;
@@ -46,6 +47,8 @@ internal static partial class Program
         EvaluateAndDrawOutput(_evalContext, _resolution, _textureOutput, _deviceContext, _renderView);
 
         _swapChain.Present(_vsyncInterval, PresentFlags.None);
+
+        PerformanceMetrics.RecordFrame((float)(Playback.LastFrameDuration * 1000.0));
     }
     
     private class TimelineEndedException : Exception

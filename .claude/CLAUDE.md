@@ -2,7 +2,9 @@
 
 ## Key References
 
-- `.agentic/AGENT_INSTRUCTIONS.md` -- coding conventions, performance rules, operator guidelines, style and formatting. **Read this before making any code changes.**
+**First action on any code task:** `Read .agentic/AGENT_INSTRUCTIONS.md`. Do this before planning, exploring, or editing — not after. The file is short (~200 lines) and it's the canonical source for performance rules, naming, ordering, and style. Skipping this step has produced repeated preventable corrections. If you've already read it in a recent turn of the current conversation, you may skip; across sessions, always re-read.
+
+- `.agentic/AGENT_INSTRUCTIONS.md` -- coding conventions, performance rules, operator guidelines, style and formatting.
 - `.agentic/SOLUTION_OVERVIEW.md` -- architecture map, dependency flow, task-oriented navigation
 - `.agentic/Plans/` -- implementation plans for upcoming work (automatic tests, undo/redo coverage, timeline refactoring)
 - `.tests-manual/` -- manual test sets (step-by-step walkthroughs for humans). See [`.tests-manual/README.md`](../.tests-manual/README.md) for format and process.
