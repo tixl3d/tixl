@@ -34,6 +34,8 @@ For methods called once per frame (e.g. operator update, Editor draw methods):
 
 Allocations are acceptable for explicit user-triggered actions.
 
+Apply these rules where they matter — code that actually runs every frame and shows up in a profile. **Don't speculatively micro-optimise** cold paths: precomputed reciprocals (`inv = 1f / x`), hand-unrolled loops, or hoisting obvious divisions out of a small loop often hurt readability for a perf delta nobody will ever notice. Write the division the way you'd describe the math; reach for the optimised form only when a measurement says to.
+
 ## State and Resource Handling
 - Avoid storing long-lived direct references to instances/resources.
 - Prefer storing and resolving by `Guid`.
@@ -50,9 +52,10 @@ Also:
 
 ## Code Formatting and Style
 - Put `return` statements on their own line (not inline after `if`)
-- Place private fields and private enums at the end of classes
+- Order class members public-first → private, with private fields at the very end. Nest helper types (structs, enums) used only by the owning class inside it, at the top.
 - Prefix private fields with `_`
 - Prefer slightly longer, descriptive names when clarity improves (e.g. `faceIndex` over `i`)
+- When separating concerns, consider splitting pure data/state from drawing/IO into distinct classes (`RollingMetric` + `MetricGraphView` is a reference example). Useful when the data class has non-editor consumers, but don't force it when there's only one caller.
 
 ## Encapsulation and Visibility
 - **Default to `private`.** Raise visibility (`internal`, `public`) only when a member is actually read or written from outside the declaring type. "Mirroring a nearby class" or "might be useful later" is not a reason — unnecessary public surface area is a long-term review tax.
