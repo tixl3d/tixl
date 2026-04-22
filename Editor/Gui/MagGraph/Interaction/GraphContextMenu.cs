@@ -13,6 +13,7 @@ using T3.Editor.Gui.UiHelpers.Thumbnails;
 using T3.Editor.Gui.Windows.RenderExport;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
+using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.Exporting;
 using T3.Editor.UiModel.Helpers;
 using T3.Editor.UiModel.InputsAndTypes;
@@ -222,20 +223,18 @@ internal static class GraphContextMenu
                     = selectedChildUis
                        .TrueForAll(c2 => c2.EnabledForSnapshots);
 
-                foreach (var c in selectedChildUis)
-                {
-                    c.EnabledForSnapshots = !disableBecauseAllEnabled;
-                }
+                var macro = new MacroCommand("Toggle snapshot enabled");
+                macro.AddAndExecCommand(new ChangeSnapshotEnabledCommand(compositionSymbolUi.Symbol.Id,
+                                                                         selectedChildUis,
+                                                                         newEnabled: !disableBecauseAllEnabled));
 
-                // Add to add snapshots
                 var allSnapshots = VariationHandling.ActivePoolForSnapshots?.AllVariations;
                 if (allSnapshots != null && allSnapshots.Count > 0)
                 {
                     if (disableBecauseAllEnabled)
                     {
-                        VariationHandling.RemoveInstancesFromVariations(selectedChildUis.Select(ui => ui.Id), allSnapshots);
+                        VariationHandling.RemoveInstancesFromVariations(selectedChildUis.Select(ui => ui.Id), allSnapshots, collectInto: macro);
                     }
-                    // Remove from snapshots
                     else
                     {
                         var selectedInstances = selectedChildUis
@@ -243,12 +242,12 @@ internal static class GraphContextMenu
                                                .ToList();
                         foreach (var snapshot in allSnapshots)
                         {
-                            VariationHandling.ActivePoolForSnapshots.UpdateVariationPropertiesForInstances(snapshot, selectedInstances);
+                            VariationHandling.ActivePoolForSnapshots.UpdateVariationPropertiesForInstances(snapshot, selectedInstances, collectInto: macro);
                         }
                     }
                 }
 
-                compositionSymbolUi.FlagAsModified();
+                UndoRedoStack.Add(macro);
             }
         }
 

@@ -269,9 +269,6 @@ internal sealed class LayersArea : ITimeObjectManipulation, IValueSnapAttractor
         ProjectView.Focused?.FlagChanges(ProjectView.ChangeTypes.Children);
     }
 
-    /// <remarks>
-    /// This command is incomplete and likely to lead to inconsistent data
-    /// </remarks>
     private void SplitClipsAtTime(Instance compositionOp)
     {
         Debug.Assert(_playback != null);
@@ -328,11 +325,16 @@ internal sealed class LayersArea : ITimeObjectManipulation, IValueSnapAttractor
             renameCommand.Do();
             commands.Add(renameCommand);
 
+            // Capture the new clip's just-copied TimeRange/SourceRange as the undo state, then mutate to
+            // the "second half" ranges and store those as the redo state.
+            var adjustNewClipCommand = new MoveTimeClipsCommand(compositionOp, [newTimeClip]);
             newTimeClip.TimeRange = new TimeRange((float)_playback.TimeInBars, orgTimeRangeEnd);
             newTimeClip.SourceRange.Start = newTimeClip.SourceRange.Start + originalSourceDuration * normalizedCutPosition;
             newTimeClip.SourceRange.End = clip.SourceRange.End;
+            adjustNewClipCommand.StoreCurrentValues();
+            commands.Add(adjustNewClipCommand);
             newClips.Add(newTimeClip);
-            
+
             // Adjust first clip end time
             var adjustFirstClipCommand = new MoveTimeClipsCommand(compositionOp, [clip]);
             clip.TimeRange.End = (float)_playback.TimeInBars;

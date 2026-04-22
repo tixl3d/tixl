@@ -408,13 +408,15 @@ internal sealed class SymbolVariationPool
         return true;
     }
 
-    public void UpdateVariationPropertiesForInstances(Variation variation, List<Instance> instances)
+    public void UpdateVariationPropertiesForInstances(Variation variation, List<Instance> instances, MacroCommand? collectInto = null)
     {
         if (instances == null! || instances.Count == 0)
         {
             Log.Warning("No instances to create variation for");
             return;
         }
+
+        var newParameterSets = new Dictionary<Guid, Dictionary<Guid, InputValue>>(variation.ParameterSetsForChildIds);
 
         foreach (var instance in instances)
         {
@@ -450,11 +452,14 @@ internal sealed class SymbolVariationPool
             if (!hasAnimatableParameters)
                 continue;
 
-            // Write new changeset
-            variation.ParameterSetsForChildIds[instance.SymbolChildId] = changeSet;
+            newParameterSets[instance.SymbolChildId] = changeSet;
         }
 
-        SaveVariationsToFile();
+        var command = new UpdateVariationParametersCommand(this, variation, newParameterSets);
+        if (collectInto != null)
+            collectInto.AddAndExecCommand(command);
+        else
+            UndoRedoStack.AddAndExecute(command);
     }
 
     public void DeleteVariation(Variation variation)

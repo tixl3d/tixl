@@ -8,6 +8,8 @@ This document inventories all user-facing model mutations that bypass the `IComm
 
 **2026-04-22** -- Batch 2 pass: gap #7 was already closed by recent commit `d890a482c` (in-flight `ChangeKeyframesCommand` on tangent drag). Gap #5 closed via new `SetInputDefaultCommand` covering both `InputValueUi` call sites. Gap #9 closed via new `ChangeSymbolDescriptionCommand`; dialog now buffers and commits on close. Gap #8 closed: `SetExtractedInputValuesCommand` added to the extraction macro so the extracted values are restored on redo; `ExtractAsConnectedOperator` now accepts an optional `collectInto` MacroCommand so the MagGraph path no longer produces a nested/duplicate undo entry. Added a `Guid` overload for `Symbol.InvalidateInputDefaultInInstances` in Core to avoid needing an `IInputSlot` handle from a pure command.
 
+**2026-04-22** -- Batch 3 pass: gaps #6, #11, #14 closed. Gap #13 deferred pending deeper design. New `UpdateVariationParametersCommand` and `RemoveInstancesFromVariationsCommand` cover the previously-direct mutations in `VariationHandling.RemoveInstancesFromVariations` and `SymbolVariationPool.UpdateVariationPropertiesForInstances`; both accept a `collectInto: MacroCommand?` parameter. New `ChangeSnapshotEnabledCommand` plus the `collectInto` plumbing lets both context menus ("Enable for snapshots") combine the enable toggle and variation mutations into a single undo entry (legacy `GraphView` and `MagGraph/GraphContextMenu`). Gap #14 closed by wrapping the new-clip TimeRange mutation in its own `MoveTimeClipsCommand`; the "incomplete and likely to lead to inconsistent data" remark was removed.
+
 ## Gap Inventory
 
 ### CRITICAL -- Users definitely expect Ctrl+Z to work here
@@ -62,20 +64,16 @@ This document inventories all user-facing model mutations that bypass the `IComm
 
 ---
 
-#### 6. Variation Create/Update/Remove (no undo)
+#### 6. Variation Create/Update/Remove -- **MOSTLY DONE (2026-04-22)**
 
-**Files:**
-- `Editor/Gui/Interaction/Variations/VariationHandling.cs:104-134` -- `CreateOrUpdateSnapshotVariation()` -- explicit TODO at line 136: `// TODO: Implement undo/redo!`
-- `Editor/Gui/Interaction/Variations/VariationHandling.cs:136-156` -- `RemoveInstancesFromVariations()`
-- `Editor/Gui/Interaction/Variations/Model/SymbolVariationPool.cs:454,163` -- direct dict mutations
+**Files touched:**
+- New [UpdateVariationParametersCommand.cs](Editor/UiModel/Commands/Variations/UpdateVariationParametersCommand.cs) -- deep-clones the ParameterSetsForChildIds dict before/after; used by `UpdateVariationPropertiesForInstances`
+- New [RemoveInstancesFromVariationsCommand.cs](Editor/UiModel/Commands/Variations/RemoveInstancesFromVariationsCommand.cs) -- captures removed entries so they can be restored on undo; used by `VariationHandling.RemoveInstancesFromVariations`
+- Both callers now accept a `collectInto: MacroCommand?` parameter so they can be grouped with a `ChangeSnapshotEnabledCommand` (#11) instead of producing separate undo entries.
 
-**What happens:** Creating snapshots, updating presets, and removing instances from variations all mutate the `VariationPool` directly and save to disk. No undo.
+**Residual:** `CreateOrUpdateSnapshotVariation` still produces two undo entries when replacing an existing snapshot (one for `DeleteVariation`, one for `TryCreateVariationForCompositionInstances`). Non-critical — the user just hits Ctrl+Z twice. Fixing needs either a MacroCommand wrapper or non-pushing helper variants; left as follow-up.
 
-**Fix:** Extend variation commands. `AddPresetOrVariationCommand` and `DeleteVariationCommand` exist but don't cover all mutation paths. Need:
-- `UpdateVariationCommand` (for snapshot updates)
-- Wrap `RemoveInstancesFromVariations` in a command that stores removed entries
-
-**Effort:** MEDIUM-HIGH (1-2 days, variation pool persistence adds complexity)
+**Persistence note:** The new commands call `pool.SaveVariationsToFile()` on both Do and Undo so the file matches the in-memory state. The pre-existing `AddPresetOrVariationCommand` / `DeleteVariationCommand` do *not* save on Do/Undo — that's a pre-existing inconsistency worth cleaning up but out of scope here.
 
 ---
 
@@ -112,17 +110,11 @@ This document inventories all user-facing model mutations that bypass the `IComm
 
 ---
 
-#### 11. Snapshot Enable/Disable Toggle (no undo)
+#### 11. Snapshot Enable/Disable Toggle -- **DONE (2026-04-22)**
 
-**Files:**
-- `Editor/Gui/MagGraph/Interaction/GraphContextMenu.cs:229-253`
-- `Editor/Gui/Graph/Legacy/GraphView.cs:655-679`
-
-**What happens:** "Enable/Disable for Snapshots" in context menu directly sets `child.EnabledForSnapshots` and then calls `VariationHandling.RemoveInstancesFromVariations()` (which also has no undo -- see #6).
-
-**Fix:** Create `ChangeSnapshotEnabledCommand`. The variation removal part depends on fixing #6 first.
-
-**Effort:** MEDIUM (depends on #6)
+**Files touched:**
+- New [ChangeSnapshotEnabledCommand.cs](Editor/UiModel/Commands/Graph/ChangeSnapshotEnabledCommand.cs) -- stores each child's pre-change `SnapshotGroupIndex` so undo restores the exact previous state
+- Both context menus (MagGraph `GraphContextMenu.cs` and legacy `GraphView.cs`) now build a `MacroCommand("Toggle snapshot enabled")` containing the toggle command plus any `RemoveInstancesFromVariations` / `UpdateVariationPropertiesForInstances` calls via the new `collectInto` plumbing from #6. One undo entry, not three.
 
 ---
 
@@ -140,29 +132,25 @@ This document inventories all user-facing model mutations that bypass the `IComm
 
 ---
 
-#### 13. StructuredList Input Editing (no undo)
+#### 13. StructuredList Input Editing -- **DEFERRED (notes 2026-04-22)**
 
-**File:** `Editor/Gui/InputUi/CombinedInputs/StructuredListInputUi.cs:35` -- explicit TODO: `// TODO: Implement proper edit flags and Undo`
+**File:** [StructuredListInputUi.cs:35](Editor/Gui/InputUi/CombinedInputs/StructuredListInputUi.cs:35)
 
-**What happens:** Editing structured list inputs (add/remove/reorder items) directly mutates the list without commands.
+**Why not done:** The generic `ChangeInputValueCommand` pipeline in [ParameterWindow.cs:579-607](Editor/Gui/Windows/ParameterWindow.cs:579) handles most parameter types for free — it constructs a command on `InputEditStateFlags.Started`, accumulates on `Modified`, and pushes on `Finished`. Making StructuredList ride that pipeline requires two non-trivial changes:
 
-**Fix:** Create `ChangeStructuredListCommand` that snapshots the list state.
+1. **`StructuredList` must implement `IEditableInputType`** (trivial code change — `Clone()` already exists and deep-copies the backing array) so that `InputValue<StructuredList>.Clone()` actually snapshots state. Currently the non-`IEditableInputType` path does a shallow clone and the "original" captured by `ChangeInputValueCommand` aliases the live list.
 
-**Effort:** MEDIUM (new command, list serialization)
+2. **`StructuredListInputUi.DrawEditor` must emit `Started` before any mutation** and `Finished` when editing ends. `TableList.Draw` both renders *and* mutates in one call, so a naive "check `ImGui.IsAnyItemActive()` after" captures state after mutation. Needs either (a) split TableList into check-before + apply, or (b) snapshot the list into a thread-local buffer before `TableList.Draw` and expose it to the pipeline.
+
+Tractable but a separate session. Low user-impact in practice — structured list inputs are rare.
 
 ---
 
-#### 14. Split Clip at Time (partial undo)
+#### 14. Split Clip at Time -- **DONE (2026-04-22)**
 
-**File:** `Editor/Gui/Windows/TimeLine/TimeClips/LayersArea.cs:276-370`
+**File:** [LayersArea.cs](Editor/Gui/Windows/TimeLine/TimeClips/LayersArea.cs)
 
-**What happens:** "Cut at time" creates a copy of the clip and adjusts time ranges. Individual sub-operations use commands (CopySymbolChildrenCommand, ChangeSymbolChildNameCommand, MoveTimeClipsCommand) but some mutations happen outside commands (lines 332-334: direct TimeRange/SourceRange assignment on the NEW clip).
-
-**Also:** Comment at line 273: `/// This command is incomplete and likely to lead to inconsistent data`
-
-**Fix:** Wrap the entire operation in a `MacroCommand` and ensure all TimeRange mutations go through `MoveTimeClipsCommand`.
-
-**Effort:** MEDIUM (1 day -- complex multi-step operation)
+**Resolution:** The new clip's TimeRange/SourceRange mutation (previously direct) is now wrapped in its own `MoveTimeClipsCommand` — constructed before mutation, `StoreCurrentValues()` called after. On undo the macro reverses in order: remove connections → revert old-clip time → revert new-clip time → rename back → delete new child. On redo it reapplies. The "incomplete and likely to lead to inconsistent data" remark was removed since the macro is now complete.
 
 ---
 
@@ -247,15 +235,15 @@ This document inventories all user-facing model mutations that bypass the `IComm
 | 3 | Delete Keyframes in Timeline | CRITICAL | LOW | DONE |
 | 4 | Insert Keyframe with Increment | CRITICAL | LOW | DONE |
 | 5 | Set Value as Default | CRITICAL | MEDIUM | DONE |
-| 6 | Variation CRUD | CRITICAL | MED-HIGH | open |
+| 6 | Variation CRUD | CRITICAL | MED-HIGH | mostly DONE (CreateOrUpdate remains 2-step) |
 | 7 | Curve Tangent Editing | CRITICAL | MEDIUM | DONE |
 | 8 | Parameter Extraction | CRITICAL | MEDIUM | DONE |
 | 9 | Edit Symbol Description/Links | MEDIUM | LOW-MED | DONE |
 | 10 | Edit Node Comment | MEDIUM | LOW | DONE |
-| 11 | Snapshot Enable Toggle | MEDIUM | MEDIUM | depends on #6 |
+| 11 | Snapshot Enable Toggle | MEDIUM | MEDIUM | DONE |
 | 12 | Playback Settings | LOW-MED | LOW-MED | open |
-| 13 | StructuredList Editing | MEDIUM | MEDIUM | open |
-| 14 | Split Clip at Time | MEDIUM | MEDIUM | open |
+| 13 | StructuredList Editing | MEDIUM | MEDIUM | deferred (see notes) |
+| 14 | Split Clip at Time | MEDIUM | MEDIUM | DONE |
 | 15 | Tour Point Editing | LOW | LOW | open |
 | 16 | NodeActions cmd.Do() bypass | LOW | TRIVIAL | DONE |
 | 17 | Auto-Layout positions | LOW | MEDIUM | open |
@@ -276,11 +264,11 @@ This document inventories all user-facing model mutations that bypass the `IComm
 - #8 -- new `SetExtractedInputValuesCommand` + `collectInto` macro plumbing
 - #9 -- new `ChangeSymbolDescriptionCommand`
 
-**Batch 3 -- Complex features (3-5 days):**
-- #6 (variation system -- needs careful design around persistence)
-- #11 (snapshot toggle -- depends on #6)
-- #13 (structured list -- new command with list snapshot)
-- #14 (split clip -- fix existing partial implementation)
+**Batch 3 -- Complex features (3-5 days): MOSTLY DONE (2026-04-22)**
+- #6 -- new `UpdateVariationParametersCommand`, `RemoveInstancesFromVariationsCommand`, `collectInto` plumbing; CreateOrUpdateSnapshotVariation 2-step issue remains
+- #11 -- new `ChangeSnapshotEnabledCommand`, single undo entry for toggle + variation mutations
+- #13 -- deferred, see notes
+- #14 -- new-clip TimeRange mutation now wrapped in its own `MoveTimeClipsCommand`
 
 **Batch 4 -- Lower priority (as needed):**
 - #12, #15, #17, #19, #20

@@ -4,6 +4,8 @@ using T3.Core.Operator;
 using T3.Editor.Gui.Interaction.Variations.Model;
 using T3.Editor.Gui.Windows.Variations;
 using T3.Editor.UiModel;
+using T3.Editor.UiModel.Commands;
+using T3.Editor.UiModel.Commands.Variations;
 using T3.Editor.UiModel.ProjectHandling;
 
 namespace T3.Editor.Gui.Interaction.Variations;
@@ -133,26 +135,18 @@ internal static class VariationHandling
         return newVariation;
     }
 
-    // TODO: Implement undo/redo!
-    public static void RemoveInstancesFromVariations(IEnumerable<Guid> symbolChildIds, IReadOnlyList<Variation> variations)
+    public static void RemoveInstancesFromVariations(IEnumerable<Guid> symbolChildIds, IReadOnlyList<Variation> variations, MacroCommand? collectInto = null)
     {
         if (ActivePoolForSnapshots == null || ActiveInstanceForSnapshots == null)
         {
             return;
         }
 
-        foreach (var id in symbolChildIds)
-        {
-            foreach (var variation in variations)
-            {
-                if (!variation.ParameterSetsForChildIds.ContainsKey(id))
-                    continue;
-
-                variation.ParameterSetsForChildIds.Remove(id);
-            }
-        }
-
-        ActivePoolForSnapshots.SaveVariationsToFile();
+        var command = new RemoveInstancesFromVariationsCommand(ActivePoolForSnapshots, symbolChildIds, variations);
+        if (collectInto != null)
+            collectInto.AddAndExecCommand(command);
+        else
+            UndoRedoStack.AddAndExecute(command);
     }
 
     private static void AddSnapshotEnabledChildrenToList(Instance instance, List<Instance> list)

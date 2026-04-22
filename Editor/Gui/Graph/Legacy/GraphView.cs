@@ -15,6 +15,7 @@ using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.Layouts;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
+using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.Exporting;
 using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.Modification;
@@ -675,10 +676,10 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
                 = selectedChildUis
                    .TrueForAll(c2 => c2.EnabledForSnapshots);
 
-            foreach (var c in selectedChildUis)
-            {
-                c.EnabledForSnapshots = !disableBecauseAllEnabled;
-            }
+            var macro = new MacroCommand("Toggle snapshot enabled");
+            macro.AddAndExecCommand(new ChangeSnapshotEnabledCommand(compositionSymbolUi.Symbol.Id,
+                                                                     selectedChildUis,
+                                                                     newEnabled: !disableBecauseAllEnabled));
 
             // Add to add snapshots
             var allSnapshots = VariationHandling.ActivePoolForSnapshots?.AllVariations;
@@ -686,7 +687,7 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
             {
                 if (disableBecauseAllEnabled)
                 {
-                    VariationHandling.RemoveInstancesFromVariations(selectedChildUis.Select(ui => ui.Id), allSnapshots);
+                    VariationHandling.RemoveInstancesFromVariations(selectedChildUis.Select(ui => ui.Id), allSnapshots, collectInto: macro);
                 }
                 // Remove from snapshots
                 else
@@ -696,12 +697,12 @@ internal sealed class GraphView : ScalableCanvas, IGraphView
                                            .ToList();
                     foreach (var snapshot in allSnapshots)
                     {
-                        VariationHandling.ActivePoolForSnapshots.UpdateVariationPropertiesForInstances(snapshot, selectedInstances);
+                        VariationHandling.ActivePoolForSnapshots.UpdateVariationPropertiesForInstances(snapshot, selectedInstances, collectInto: macro);
                     }
                 }
             }
 
-            compositionSymbolUi.FlagAsModified();
+            UndoRedoStack.Add(macro);
         }
 
         if (ImGui.BeginMenu("Display as..."))
