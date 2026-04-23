@@ -13,6 +13,9 @@ internal abstract class Window
     protected bool MayNotCloseLastInstance = false;
 
     protected ImGuiWindowFlags WindowFlags;
+    protected Vector2 WindowPaddingOverride = new Vector2(-1);
+    protected string? MenuTitle;
+
 
     internal abstract IReadOnlyList<Window> GetInstances();
 
@@ -43,20 +46,24 @@ internal abstract class Window
             _wasVisible = true;
         }
 
-        var borderWithForFloatingWindows = _wasDockedLastFrame ? 0 : 2;
+        var borderWidthForFloatingWindows = _wasDockedLastFrame ? 0 : 2;
 
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, borderWithForFloatingWindows);
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, borderWidthForFloatingWindows);
 
         var mayNotClose = MayNotCloseLastInstance && GetVisibleInstanceCount() == 1;
 
         // Draw output window
         var isVisible = mayNotClose
-                            ? ImGui.Begin(WindowDisplayTitle, WindowFlags)
-                            : ImGui.Begin(WindowDisplayTitle, ref Config.Visible, WindowFlags);
+            ? ImGui.Begin(WindowDisplayTitle, WindowFlags)
+            : ImGui.Begin(WindowDisplayTitle, ref Config.Visible, WindowFlags);
 
         if (isVisible)
         {
-            ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, T3Style.WindowPaddingForWindows);
+            ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding,
+                WindowPaddingOverride.X > -1
+                    ? WindowPaddingOverride
+                    : T3Style.WindowPaddingForWindows
+            );
 
             _wasDockedLastFrame = ImGui.IsWindowDocked();
 
@@ -67,14 +74,14 @@ internal abstract class Window
             ImGui.SetWindowPos(windowPos);
 
             var preventMouseScrolling = T3Ui.MouseWheelFieldWasHoveredLastFrame
-                                            ? ImGuiWindowFlags.NoScrollWithMouse
-                                            : ImGuiWindowFlags.None;
+                ? ImGuiWindowFlags.NoScrollWithMouse
+                : ImGuiWindowFlags.None;
 
             // Draw child to prevent imgui window dragging
             {
                 ImGui.BeginChild("inner", ImGui.GetContentRegionAvail(),
-                                 ImGuiChildFlags.Borders,
-                                 ImGuiWindowFlags.NoMove | preventMouseScrolling | WindowFlags);
+                    ImGuiChildFlags.Borders | ImGuiChildFlags.AlwaysUseWindowPadding,
+                    ImGuiWindowFlags.NoMove | preventMouseScrolling | WindowFlags);
 
                 var idBefore = ImGui.GetID(0);
 
@@ -124,8 +131,8 @@ internal abstract class Window
         if (AllowMultipleInstances)
         {
             var menuTitle = string.IsNullOrEmpty(MenuTitle)
-                                ? $"New {Config.Title}"
-                                : MenuTitle;
+                ? $"New {Config.Title}"
+                : MenuTitle;
             if (ImGui.MenuItem(menuTitle))
             {
                 AddAnotherInstance();
@@ -134,8 +141,8 @@ internal abstract class Window
         else
         {
             var menuTitle = string.IsNullOrEmpty(MenuTitle)
-                                ? Config.Title
-                                : MenuTitle;
+                ? Config.Title
+                : MenuTitle;
 
             if (ImGui.MenuItem(menuTitle, "", Config.Visible))
             {
@@ -159,12 +166,13 @@ internal abstract class Window
     {
         _instancesToDraw.Clear();
         IReadOnlyList<Window> instances = GetInstances();
-        
+
         //This replaces the ToArray but is GC free, replace foreach as in eventually adds an enumerator allocation
         for (int i = 0; i < instances.Count; i++)
         {
             _instancesToDraw.Add(instances[i]);
         }
+
         for (int i = 0; i < _instancesToDraw.Count; i++)
         {
             _instancesToDraw[i].DrawOneInstance();
@@ -182,13 +190,12 @@ internal abstract class Window
     internal sealed class WindowConfig
     {
         // Public for json-serialization
-        public string Title = "";   // This property name is unfortunate because it's used for serialization
+        public string Title = ""; // This property name is unfortunate because it's used for serialization
         public bool Visible;
     }
 
     internal WindowConfig Config = new();
 
-    protected string? MenuTitle;
 
     /** We need to set border width before drawing, but only know if docked after :/ */
     private bool _wasDockedLastFrame;
