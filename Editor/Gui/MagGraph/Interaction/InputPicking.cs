@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using ImGuiNET;
 using T3.Core.Model;
 using T3.Core.Operator;
@@ -267,7 +267,6 @@ internal static class InputPicking
                 context.StateMachine.SetState(GraphStates.Default, context);
             }
             
-            ImGui.PopStyleVar(1);
         }
         
         ImGui.EndChild();
