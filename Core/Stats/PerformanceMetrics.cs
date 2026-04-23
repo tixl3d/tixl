@@ -17,6 +17,9 @@ public static class PerformanceMetrics
     public const int WindowSize = 200;
     public const int BucketCount = 16;
 
+    /// <summary>Total frames recorded since process start. Grows monotonically.</summary>
+    public static long TotalFrameCount { get; private set; }
+
     /// <summary>Frame duration in milliseconds. Bucket anchored at 16.66 ms (60 Hz).</summary>
     public static readonly RollingMetric FrameDuration =
         RollingMetric.CreateLinear(WindowSize, BucketCount, 0, 32f);
@@ -41,6 +44,7 @@ public static class PerformanceMetrics
     public static void RecordFrame(float frameDurationMs)
     {
         var now = Now;
+        TotalFrameCount++;
         FrameDuration.Update(frameDurationMs, now);
         SampleGc(now);
     }

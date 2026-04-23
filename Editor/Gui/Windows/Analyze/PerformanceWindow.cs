@@ -12,6 +12,7 @@ internal sealed class PerformanceWindow : Window
     {
         Config.Title = "Performance";
         MenuTitle = "Performance";
+        WindowPaddingOverride = new Vector2(7);
     }
 
     protected override void DrawContent()

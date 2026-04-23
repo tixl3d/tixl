@@ -21,7 +21,11 @@ internal static class MetricGraphView
     /// <param name="scratch">Reusable array of at least <c>metric.Capacity</c> floats, owned by the caller.</param>
     /// <param name="plotMaxY">Upper bound of the plot-line Y axis. Samples above this clamp to the top.</param>
     /// <param name="flashDurationSec">Histogram bars flash toward <paramref name="flashColor"/> for this long after being incremented.</param>
-    public static void DrawGraph(ImDrawListPtr drawList, ImRect rect,
+    /// <summary>
+    /// Draws plot line + histogram. Returns the hovered histogram bucket index, or -1 when the
+    /// mouse is not over any bucket. Caller uses the return value to render a per-bucket tooltip.
+    /// </summary>
+    public static int DrawGraph(ImDrawListPtr drawList, ImRect rect,
         RollingMetric metric, float[] scratch,
         Color barColor, Color flashColor, Color lineColor,
         double now, float plotMaxY,
@@ -29,11 +33,11 @@ internal static class MetricGraphView
         float flashDurationSec = 0.25f)
     {
         if (metric.Count == 0)
-            return;
+            return -1;
 
         var size = rect.GetSize();
         if (size.X <= 0 || size.Y <= 0)
-            return;
+            return -1;
 
         // Layout: plot line (top), histogram (middle), mean-indicator triangle, optional axis labels (bottom).
         const float meanIndicatorHeight = 5f;
@@ -48,15 +52,32 @@ internal static class MetricGraphView
 
         var workingHeight = size.Y - meanIndicatorHeight - axisLabelHeight;
         if (workingHeight < 6f)
-            return;
+            return -1;
 
         var midY = rect.Min.Y + workingHeight * 0.5f;
         var bottomY = rect.Min.Y + workingHeight;
         var plotRect = new ImRect(rect.Min, new Vector2(rect.Max.X, midY));
         var histoRect = new ImRect(new Vector2(rect.Min.X, midY), new Vector2(rect.Max.X, bottomY));
 
+        // Hover detection runs before the draw so the histogram can highlight the selected range.
+        var hoverRect = new ImRect(histoRect.Min, new Vector2(histoRect.Max.X, rect.Max.Y));
+        var hoveredBucket = -1;
+        if (ImGui.IsMouseHoveringRect(hoverRect.Min, hoverRect.Max))
+        {
+            var histoBarWidth = histoRect.GetWidth() / metric.BucketCount;
+            if (histoBarWidth > 0)
+            {
+                var idx = (int)((ImGui.GetMousePos().X - histoRect.Min.X) / histoBarWidth);
+                if (idx >= 0 && idx < metric.BucketCount)
+                    hoveredBucket = idx;
+            }
+        }
+
+        // Holding Shift while hovering enables cumulative selection (this bucket and everything right of it).
+        var highlightFromBucket = hoveredBucket >= 0 && ImGui.GetIO().KeyShift ? hoveredBucket : -1;
+
         DrawPlotLine(drawList, plotRect, metric, scratch, lineColor, plotMaxY);
-        DrawHistogram(drawList, histoRect, metric, now, barColor, flashColor, lineColor, flashDurationSec);
+        DrawHistogram(drawList, histoRect, metric, now, barColor, flashColor, lineColor, flashDurationSec, highlightFromBucket);
 
         if (hasAxisLabels)
         {
@@ -80,14 +101,19 @@ internal static class MetricGraphView
             }
             ImGui.PopFont();
         }
+
+        return hoveredBucket;
     }
 
     /// <summary>
     /// Histogram bars + mean-indicator triangle just below the baseline. Bar heights use a log curve
     /// so tall bars don't dominate; empty buckets render as a single transparent line.
+    /// When <paramref name="highlightFromBucket"/> is non-negative, buckets at or right of that index
+    /// are tinted toward <see cref="UiColors.StatusActivated"/> — used for the Shift-cumulative selection.
     /// </summary>
     private static void DrawHistogram(ImDrawListPtr drawList, ImRect rect, RollingMetric metric, double now,
-        Color barColor, Color flashColor, Color meanColor, float flashDurationSec = 1)
+        Color barColor, Color flashColor, Color meanColor, float flashDurationSec = 1,
+        int highlightFromBucket = -1)
     {
         var slots = metric.Slots;
         var bucketCount = slots.Length;
@@ -103,22 +129,25 @@ internal static class MetricGraphView
         var y1 = rect.Max.Y;
 
         // Baseline
-        drawList.AddLine(new Vector2(rect.Min.X, y1 - 0.5f), 
-            new Vector2(rect.Max.X, y1 +1), 
+        drawList.AddLine(new Vector2(rect.Min.X, y1 - 0.5f),
+            new Vector2(rect.Max.X, y1 +1),
             UiColors.BackgroundFull.Fade(0.5f));
 
-        
+
         for (var i = 0; i < bucketCount; i++)
         {
             var slot = slots[i];
             if (slot.CountRecent == 0)
                 continue;
-            
+
             var x0 = rect.Min.X + i * barWidth;
             var x1 = rect.Min.X + (i + 1) * barWidth - 2f;
             var h = (LogHeight(slot.CountRecent) * heightScale).ClampMin(1);
             var fadeFactor = (float)((now - slot.LastIncrementTime) / flashDurationSec).Clamp(0, 1);
             var color = Color.Mix(flashColor, barColor, fadeFactor);
+
+            if (highlightFromBucket >= 0 && i >= highlightFromBucket)
+                color = Color.Mix(color, UiColors.StatusActivated, 0.6f);
 
             drawList.AddRectFilled(new Vector2(x0, y1 - h), new Vector2(x1, y1), color);
         }

@@ -39,7 +39,24 @@ internal static class T3Metrics
         {
             WindowManager.ToggleInstanceVisibility<PerformanceWindow>();
         }
-        CustomComponents.TooltipForLastItem("Click to open the Performance window.");
+
+        // Glance tooltip — only when the full Performance window isn't already visible,
+        // so you don't get a redundant overlay on top of the window.
+        if (ImGui.IsItemHovered() && !WindowManager.IsAnyInstanceVisible<PerformanceWindow>())
+        {
+            CustomComponents.BeginTooltip(450 * T3Ui.UiScaleFactor);
+            {
+                ImGui.Dummy(new Vector2(250 * T3Ui.UiScaleFactor, 1));
+                DrawDetailedView();
+                ImGui.Spacing();
+                ImGui.PushFont(Fonts.FontSmall);
+                ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
+                ImGui.TextUnformatted("Click to open Performance window");
+                ImGui.PopStyleColor();
+                ImGui.PopFont();
+            }
+            CustomComponents.EndTooltip();
+        }
 
         float normalFramerateLevelAt = 0.5f;
         float frameTimingScaleFactor = barWidth / normalFramerateLevelAt / ExpectedFramerate;
@@ -151,19 +168,162 @@ internal static class T3Metrics
         var rect = new ImRect(cursor, cursor + size);
         var slots = metric.Slots;
 
-        // Axis ticks describe the histogram's fixed x-domain — not the plot line's Y-scale.
+        // Axis ticks describe the histogram's fixed x-domain — same value also drives the plot Y-scale
+        // so the graph stays readable (a jumping auto-scaled max is harder to parse than a fixed one).
         var axisLeft = axisFormat(slots[0].ValueRangeMin);
         var axisMid = axisFormat(slots[slots.Length / 2].ValueRangeMin);
         var axisRight = axisFormat(domainMax);
 
-        // Plot line Y-scale tracks the window's current max so the graph always uses its full vertical range.
-        var plotMaxY = metric.Max;
-
         var drawList = ImGui.GetWindowDrawList();
-        MetricGraphView.DrawGraph(drawList, rect, metric, _floatGraphBuffer,
-                                  BarColor, FlashColor, LineColor,
-                                  PerformanceMetrics.Now, domainMax,
-                                  axisLeft, axisMid, axisRight);
+        var hoveredBucket = MetricGraphView.DrawGraph(drawList, rect, metric, _floatGraphBuffer,
+                                                      BarColor, FlashColor, LineColor,
+                                                      PerformanceMetrics.Now, domainMax,
+                                                      axisLeft, axisMid, axisRight);
+        if (hoveredBucket >= 0)
+            DrawBucketTooltip(label, unit, axisFormat, domainMax, metric, hoveredBucket);
+    }
+
+    /// <summary>
+    /// Tooltip shown while hovering a histogram bucket. Shows count + share + estimated periodicity
+    /// for the current window and all-time. Holding <c>Shift</c> switches to cumulative
+    /// ("this bucket and everything higher") — useful for "how often do we see at least X".
+    /// </summary>
+    private static void DrawBucketTooltip(string label, string unit, Func<float, string> axisFormat,
+                                          float domainMax, RollingMetric metric, int bucketIndex)
+    {
+        var slots = metric.Slots;
+        var cumulative = ImGui.GetIO().KeyShift;
+
+        int countRecent;
+        long countTotal;
+        if (cumulative)
+        {
+            countRecent = 0;
+            countTotal = 0;
+            for (var i = bucketIndex; i < slots.Length; i++)
+            {
+                countRecent += slots[i].CountRecent;
+                countTotal += slots[i].CountTotal;
+            }
+        }
+        else
+        {
+            countRecent = slots[bucketIndex].CountRecent;
+            countTotal = slots[bucketIndex].CountTotal;
+        }
+
+        string rangeLabel;
+        if (cumulative)
+        {
+            rangeLabel = $"≥ {axisFormat(slots[bucketIndex].ValueRangeMin)}{unit}";
+        }
+        else
+        {
+            var upperEdge = bucketIndex + 1 < slots.Length
+                                ? slots[bucketIndex + 1].ValueRangeMin
+                                : domainMax;
+            rangeLabel = $"{axisFormat(slots[bucketIndex].ValueRangeMin)} .. {axisFormat(upperEdge)}{unit}";
+        }
+
+        ImGui.BeginTooltip();
+        {
+            ImGui.PushFont(Fonts.FontBold);
+            ImGui.TextUnformatted(label);
+            ImGui.PopFont();
+
+            ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
+            ImGui.TextUnformatted($"({rangeLabel})");
+            ImGui.PopStyleColor();
+
+            ImGui.Separator();
+
+            // Recent window.
+            ImGui.TextUnformatted($"Last {PerformanceMetrics.WindowSize} Frames");
+            var pctRecent = countRecent / (float)PerformanceMetrics.WindowSize * 100f;
+            ImGui.TextUnformatted($"  {countRecent}×   {pctRecent:0.#}%");
+            if (countRecent > 0)
+            {
+                var periodFrames = PerformanceMetrics.WindowSize / countRecent;
+                var avgFrameMs = PerformanceMetrics.FrameDuration.Average;
+                var periodSeconds = periodFrames * avgFrameMs / 1000f;
+                ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
+                ImGui.TextUnformatted($"  ~ every {periodFrames}F / {periodSeconds:0.00}s");
+                ImGui.PopStyleColor();
+            }
+
+            // Per-frame occurrence strip: shows *when* in the window each hit happened.
+            DrawOccurrenceBar(metric, bucketIndex, cumulative, domainMax);
+
+            ImGui.Spacing();
+
+            // All-time.
+            var total = PerformanceMetrics.TotalFrameCount;
+            ImGui.TextUnformatted($"Total ({total:N0} Frames)");
+            if (total > 0)
+            {
+                var pctTotal = countTotal / (float)total * 100f;
+                ImGui.TextUnformatted($"  {countTotal}×   {pctTotal:0.##}%");
+            }
+
+            ImGui.Spacing();
+            ImGui.PushFont(Fonts.FontSmall);
+            ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
+            ImGui.TextUnformatted(cumulative ? "(release Shift for single bucket)" : "(hold Shift for cumulative)");
+            ImGui.PopStyleColor();
+            ImGui.PopFont();
+        }
+        ImGui.EndTooltip();
+    }
+
+    /// <summary>
+    /// Draws a compact horizontal strip inside the tooltip where every tick marks a frame in the
+    /// current window whose sample fell into the hovered bucket (or any higher bucket when cumulative).
+    /// Makes the temporal pattern of allocations (periodic / clustered / one-off) visible at a glance.
+    /// Scans the value buffer directly — matching against bucket value-range bounds — so the
+    /// hot Metrics API stays lean.
+    /// </summary>
+    private static void DrawOccurrenceBar(RollingMetric metric, int bucketIndex, bool cumulative, float domainMax)
+    {
+        var barWidth = 220f * T3Ui.UiScaleFactor;
+        var barHeight = 10f * T3Ui.UiScaleFactor;
+
+        var pos = ImGui.GetCursorScreenPos();
+        ImGui.Dummy(new Vector2(barWidth, barHeight));
+        var drawList = ImGui.GetWindowDrawList();
+
+        drawList.AddRectFilled(pos, pos + new Vector2(barWidth, barHeight), UiColors.BackgroundFull.Fade(0.8f));
+
+        var samples = metric.AsOrderedSpan(_floatGraphBuffer);
+        var count = samples.Length;
+        if (count < 2)
+            return;
+
+        var slots = metric.Slots;
+        var lowerEdge = slots[bucketIndex].ValueRangeMin;
+        float upperEdge;
+        if (cumulative)
+        {
+            upperEdge = float.PositiveInfinity;
+        }
+        else
+        {
+            upperEdge = bucketIndex + 1 < slots.Length
+                            ? slots[bucketIndex + 1].ValueRangeMin
+                            : domainMax;
+        }
+
+        var step = barWidth / (count - 1);
+        uint tickColor = UiColors.ForegroundFull;
+        var yTop = pos.Y + 1f;
+        var yBottom = pos.Y + barHeight - 1f;
+        for (var i = 0; i < count; i++)
+        {
+            var v = samples[i];
+            if (v < lowerEdge || v >= upperEdge)
+                continue;
+            var x = pos.X + i * step;
+            drawList.AddLine(new Vector2(x, yTop), new Vector2(x, yBottom), tickColor, 1f);
+        }
     }
 
     private static string FormatMs(float ms) => $"{ms:0.#}";
@@ -194,6 +354,7 @@ internal static class T3Metrics
     private static float _uiSmoothedRenderDurationMs;
     private static readonly Stopwatch _watchImgRenderTime = new();
 
-    // Scratch buffer for plot-line copy-out. Sized to match PerformanceMetrics.WindowSize.
+    // Scratch buffer for plot-line copy-out (and reused by the tooltip's occurrence strip).
+    // Sized to match PerformanceMetrics.WindowSize.
     private static readonly float[] _floatGraphBuffer = new float[PerformanceMetrics.WindowSize];
 }
