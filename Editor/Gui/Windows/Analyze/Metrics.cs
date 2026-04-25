@@ -1,5 +1,6 @@
 #nullable enable
 using System.Diagnostics;
+using System.Globalization;
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Stats;
@@ -103,6 +104,8 @@ internal static class T3Metrics
     /// </summary>
     internal static void DrawDetailedView()
     {
+        DrawCopyCsvButton();
+
         DrawLabeledGraph(PerformanceMetrics.FrameDuration, "Frame", "ms", 32f, FormatMs);
         ImGui.Separator();
         DrawLabeledGraph(PerformanceMetrics.UiRenderDuration, "Draw", "ms", 32f, FormatMs);
@@ -125,6 +128,52 @@ internal static class T3Metrics
             ImGui.Text($"{formattedNumber} {key}");
         }
         ImGui.PopFont();
+    }
+
+    /// <summary>
+    /// Small icon button at the top of the detailed view that copies the current window's samples
+    /// to the clipboard as CSV. Intended for quickly sharing performance snapshots (e.g. pasting
+    /// into a bug report or chat).
+    /// </summary>
+    private static void DrawCopyCsvButton()
+    {
+        var contentWidth = ImGui.GetContentRegionAvail().X;
+        var btnSize = ImGui.GetFrameHeight();
+        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + contentWidth - btnSize);
+        if (CustomComponents.TransparentIconButton(Icon.CopyToClipboard, new Vector2(btnSize)))
+        {
+            ImGui.SetClipboardText(BuildCsvExport());
+        }
+        CustomComponents.TooltipForLastItem("Copy current performance window to clipboard as CSV.");
+    }
+
+    /// <summary>Builds a CSV snapshot of the current performance window across all three metrics.</summary>
+    private static string BuildCsvExport()
+    {
+        var frameScratch = new float[PerformanceMetrics.WindowSize];
+        var drawScratch = new float[PerformanceMetrics.WindowSize];
+        var allocScratch = new float[PerformanceMetrics.WindowSize];
+
+        var frames = PerformanceMetrics.FrameDuration.AsOrderedSpan(frameScratch);
+        var draws = PerformanceMetrics.UiRenderDuration.AsOrderedSpan(drawScratch);
+        var allocs = PerformanceMetrics.GcAllocationsKb.AsOrderedSpan(allocScratch);
+
+        var count = Math.Min(Math.Min(frames.Length, draws.Length), allocs.Length);
+
+        var sb = new System.Text.StringBuilder(count * 32 + 256);
+        sb.Append("# TiXL Performance Export  ").AppendLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+        sb.Append("# Window: ").Append(PerformanceMetrics.WindowSize).Append(" samples  Total frames: ").AppendLine(PerformanceMetrics.TotalFrameCount.ToString());
+        sb.AppendLine("# Columns: frame_index, frame_ms, draw_ms, alloc_kB");
+        sb.AppendLine("frame_index,frame_ms,draw_ms,alloc_kB");
+
+        for (var i = 0; i < count; i++)
+        {
+            sb.Append(i).Append(',')
+              .Append(frames[i].ToString("0.##", CultureInfo.InvariantCulture)).Append(',')
+              .Append(draws[i].ToString("0.##", CultureInfo.InvariantCulture)).Append(',')
+              .AppendLine(allocs[i].ToString("0.#", CultureInfo.InvariantCulture));
+        }
+        return sb.ToString();
     }
 
     /// <summary>
@@ -241,13 +290,14 @@ internal static class T3Metrics
             ImGui.TextUnformatted($"Last {PerformanceMetrics.WindowSize} Frames");
             var pctRecent = countRecent / (float)PerformanceMetrics.WindowSize * 100f;
             ImGui.TextUnformatted($"  {countRecent}×   {pctRecent:0.#}%");
-            if (countRecent > 0)
+
+            // Periodicity from inner span (first..last visible occurrence) — stays steady as ticks
+            // scroll in and out of the window, unlike WindowSize/count which jumps in steps.
+            if (TryComputeInnerSpanPeriod(metric, bucketIndex, cumulative, domainMax,
+                                          out var periodFramesF, out var periodSeconds))
             {
-                var periodFrames = PerformanceMetrics.WindowSize / countRecent;
-                var avgFrameMs = PerformanceMetrics.FrameDuration.Average;
-                var periodSeconds = periodFrames * avgFrameMs / 1000f;
                 ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-                ImGui.TextUnformatted($"  ~ every {periodFrames}F / {periodSeconds:0.00}s");
+                ImGui.TextUnformatted($"  ~ every {periodFramesF:0.#}F / {periodSeconds:0.00}s");
                 ImGui.PopStyleColor();
             }
 
@@ -273,6 +323,59 @@ internal static class T3Metrics
             ImGui.PopFont();
         }
         ImGui.EndTooltip();
+    }
+
+    /// <summary>
+    /// Estimates the typical period between hits in the hovered bucket(s) using the *inner span* —
+    /// distance between the first and last visible occurrence — instead of <c>WindowSize / count</c>.
+    /// This is stable as occurrences scroll in and out at the buffer edges; the naive formula jumps
+    /// in coarse steps and visibly flickers for short periods.
+    ///
+    /// Returns false when fewer than two occurrences are present (no meaningful period available).
+    /// </summary>
+    private static bool TryComputeInnerSpanPeriod(RollingMetric metric, int bucketIndex, bool cumulative,
+                                                  float domainMax, out float periodFrames, out float periodSeconds)
+    {
+        var slots = metric.Slots;
+        var lowerEdge = slots[bucketIndex].ValueRangeMin;
+        float upperEdge;
+        if (cumulative)
+        {
+            upperEdge = float.PositiveInfinity;
+        }
+        else
+        {
+            upperEdge = bucketIndex + 1 < slots.Length
+                            ? slots[bucketIndex + 1].ValueRangeMin
+                            : domainMax;
+        }
+
+        var samples = metric.AsOrderedSpan(_floatGraphBuffer);
+        var firstIdx = -1;
+        var lastIdx = -1;
+        var matchCount = 0;
+        for (var i = 0; i < samples.Length; i++)
+        {
+            var v = samples[i];
+            if (v < lowerEdge || v >= upperEdge)
+                continue;
+            if (firstIdx < 0)
+                firstIdx = i;
+            lastIdx = i;
+            matchCount++;
+        }
+
+        if (matchCount < 2)
+        {
+            periodFrames = 0f;
+            periodSeconds = 0f;
+            return false;
+        }
+
+        periodFrames = (lastIdx - firstIdx) / (float)(matchCount - 1);
+        var avgFrameMs = PerformanceMetrics.FrameDuration.Average;
+        periodSeconds = periodFrames * avgFrameMs / 1000f;
+        return true;
     }
 
     /// <summary>

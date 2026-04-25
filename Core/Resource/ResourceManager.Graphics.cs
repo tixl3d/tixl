@@ -259,13 +259,16 @@ public static partial class ResourceManager
         }
     }
     
-    public static void UpdateConstBuffer<T>(T value, Buffer buffer) where T : struct
+    /// <summary>
+    /// Uploads <paramref name="value"/> into <paramref name="buffer"/> as a const buffer update.
+    /// Allocation-free: takes the address of the local stack value via <c>&amp;value</c> and hands it
+    /// to <c>UpdateSubresource</c> through a <see cref="SharpDX.DataBox"/> (struct, no heap alloc).
+    /// The previous implementation allocated a <c>SharpDX.DataStream</c> per call (managed wrapper +
+    /// unmanaged buffer via Marshal.AllocHGlobal), which dominated [Loop] iteration cost.
+    /// </summary>
+    public static unsafe void UpdateConstBuffer<T>(T value, Buffer buffer) where T : unmanaged
     {
-        using var ds = new SharpDX.DataStream(System.Runtime.InteropServices.Marshal.SizeOf(typeof(T)), true, true);
-        
-        ds.Write(value);
-        ds.Position = 0;
-        Device.ImmediateContext.UpdateSubresource(new SharpDX.DataBox(ds.DataPointer, 0, 0), buffer);
+        Device.ImmediateContext.UpdateSubresource(new SharpDX.DataBox((IntPtr)(&value), 0, 0), buffer);
     }
 
     public static SamplerState DefaultSamplerState { get; private set; } = null!;

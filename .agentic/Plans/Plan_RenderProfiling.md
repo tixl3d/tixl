@@ -346,3 +346,101 @@ If cross-machine sync (Part 8) is in play, per-machine A/V offset must also be m
    - Add the new pages to `advanced/README.md`'s "Pages in this section" list.
 
 Each milestone is independently shippable; M1 produces immediate value (visibility) without risk. M6 is deliberately last: the help page should describe what the feature actually ships as, not what we intended. Writing it at the end also forces a final sanity check — if the page is hard to write, the user-facing surface area is probably wrong.
+
+---
+
+## Appendix — Findings from Initial Allocation Investigation (2026-04-25)
+
+While building the performance overlay we did an exploratory pass on per-frame managed allocations using a temporary instrument that wrapped `Slot.Update` with `GC.GetTotalAllocatedBytes(precise: true)` before/after measurements (with a thread-local stack to subtract child allocations from parent self-time). The instrument was useful enough to be worth documenting, but the wrapping cost is too high for permanent inclusion (~10-30 µs per slot update at 1500+ slots/frame inflates frame time noticeably). It was reverted. Findings below.
+
+### What `precise: true` revealed
+- The "GC spike every ~1.5 s" pattern observed in the captured CSVs is **real periodic Gen 1 GC**, not a tracking artifact. Confirmed by sampling `GC.CollectionCount(0/1/2)` alongside the spike threshold logger: nearly every spike line carried `Gen0+1 Gen1+1`. Spike size (~2.5 MB) ≈ Gen 1 segment overhead at the prevailing per-iter allocation rate.
+- "Spike-splitting across two frames" (e.g. `2997 + 1866` summing to a normal `~4863` chunk) is the signature of a GC straddling a frame boundary. The first frame's sample sees the GC mid-collection; the next frame catches the spillover.
+- Switching from `precise: false` to `precise: true` flattens the *shape* of the allocation noise (no more per-thread alloc-context cache flushes showing up as bursty reporting) but does not remove the Gen 1 spikes themselves — those are real CLR overhead at high allocation rates.
+
+### Top per-op allocators (loop=100 repro scene, ~5 s capture)
+
+| Op class | Bytes / call | Notes |
+|---|---|---|
+| `ComputeShaderStage` | 398 | SharpDX state-setter marshalling + (since fixed) per-call array literals + `GetRenderTargets(2)` array alloc |
+| `SetPixelAndVertexShaderStage` | 296 | `vsStage.GetConstantBuffers/Resources/Samplers` each allocate a fresh array |
+| `OutputMergerStage` | 184 | Same pattern as PS+VS |
+| `Loop` | 158 | Self-time after subtracting child Updates; suspect `Command.InvalidateGraph()` or context-dictionary churn |
+| `Draw` | 69 | DX11 state setters |
+| `GetFloatVar` | 74 | Higher than expected for a dictionary lookup; worth a follow-up audit |
+| `Rasterizer` | 54 | DX11 state setter |
+| `IntsToBuffer` | 43 | Same family as FloatsToBuffer (now ~7) |
+
+### Fixes that landed
+
+These are real wins that survived the cleanup and are part of the codebase:
+
+1. **`Core/Rendering/ResourceUtils.WriteDynamicBufferData<T>`** — the `MapSubresource(..., out _)` overload bound to `out DataStream` and allocated a `DataStream` wrapper per call. Switched to the no-DataStream `MapSubresource(buffer, 0, MapMode, MapFlags)` overload that returns `DataBox` directly. **Estimated savings: ~0.21 kB per Loop iteration.**
+
+2. **`Core/Resource/ResourceManager.UpdateConstBuffer<T>`** — same `DataStream` allocation pattern. Replaced with stack-address-of-value (`&value`) feeding `UpdateSubresource` directly through a `DataBox`. Constraint changed from `where T : struct` to `where T : unmanaged`; all call sites already pass blittable structs. **Estimated savings: ~0.07 kB per Loop iteration** (called by `[TransformsConstBuffer]` per Loop iteration via dirty-flag invalidation).
+
+3. **`Operators/TypeOperators/Gfx/ComputeShaderStage`** — array literals `[-1, 0, -1, -1]`, `[counter]`, `[0, 0]`, `[counter, -1, -1]` were being allocated per call. Cached as static-readonly (constants) and instance fields (counter-dependent, mutated head element). **Estimated savings: ~24-40 bytes per call.**
+
+Aggregate: per-Loop-iteration allocation went from ~1.4 kB to ~0.95 kB. At loop=1000 × 60 fps that's ~27 MB/sec less GC pressure.
+
+### What got blocked
+
+The bigger remaining wins (the ~250-400 b/call across the four DX11 state-setter ops) are all the same pattern: SharpDX 4.2.0's no-allocation `Get*(int, int, T[])` overloads are documented in the SharpDX XML metadata but **not exposed publicly** in the assembly — they appear as `internal` or stripped from the public surface. Also affects the no-allocation `OutputMergerStage.GetRenderTargets(int, RenderTargetView[], out DepthStencilView)` overload.
+
+This isn't a per-op problem; it's an API-surface ceiling in this SharpDX version. Options:
+
+1. **Surgical P/Invoke** of `OMGetRenderTargets`, `VSGetConstantBuffers`, `PSGetConstantBuffers`, etc. directly via `[LibraryImport]`. Each is ~10-20 lines. Acceptable if the savings are needed before Vulkan migration; not essential.
+2. **SharpDX → Vortice.Windows migration.** Drop-in replacement, exposes all the no-alloc overloads. Out of scope given Vulkan is the planned long-term target.
+3. **Accept the floor.** With the fixes above, per-iter is ~0.95 kB. Gen 1 fires every ~3500 iter at that rate. Tolerable for normal scenes; only stress-test setups (loop=1000 over a non-trivial sub-graph) hit the wall.
+
+### Prior swap-chain FlipDiscard attempt (resolved by ImGui upgrade)
+
+Commit `5046734e` (June 2025) reverted a switch from `SwapEffect.Discard` + `BufferCount = 2` to `SwapEffect.FlipDiscard` + `BufferCount = 3`. The revert reason wasn't documented. **Re-tested April 2026 against the current ImGui.NET 1.91.6.1 — no problems found across the five candidate failure modes** (resize stress, viewer window, MirrorUiOnSecondView toggle, cold-start, dock-out tab rebuilds). The original blocker was almost certainly fixed by the ImGui DX11 backend upgrades between 1.91.0.1 (when the revert happened) and 1.91.6.1.
+
+Current state: ready to land FlipDiscard + BufferCount=3, with `FrameLatencyWaitableObject` as the immediate follow-up unlocked by the swap-effect change.
+
+Important context: the FlipDiscard switch was originally suggested by mrvux, who works in an equivalent C# + SharpDX visual-programming stack and runs flip-model in production successfully. So the design is *known* to work in TiXL-shaped applications. The blocker is therefore TiXL-specific — something in this codebase interacts badly with flip-model semantics.
+
+Investigation order for finding the TiXL-specific issue:
+
+1. **ImGui version drift.** The revert happened at ImGui.NET 1.91.0.1 (June 2025); the current version is 1.91.6.1 (April 2026). Six minor upstream Dear ImGui revisions between those dates touched the DX11 backend's swap-chain handling. **The original blocker may already be fixed by the ImGui bump** — re-attempt cleanly first; if it works, the appendix is mostly historical.
+2. **Resize handling.** Flip-model requires specific flags preserved across `ResizeBuffers` (in particular keeping the original `SwapChainFlags` value); bitblt is more forgiving and silently tolerates flag drift.
+3. **Second swap chain (`Viewer` in `ProgramWindows.cs`).** Multiple flip-model chains in one process have stricter present-ordering requirements than bitblt.
+4. **`MirrorUiOnSecondView` path.** Cross-swap-chain texture sharing semantics differ under flip-model's discard policy.
+5. **First-frame artifacts.** Some implementations need a warmup present before stable output.
+6. **Sikarugir / Wine.** Flip-model support has varied by Wine version; if Sikarugir testing was happening at the time of the original revert, that's a candidate.
+
+Recommended revised M2:
+
+- **M2a (low-risk slice):** Add `IDXGIDevice1::SetMaximumFrameLatency(2)` on the *existing* bitblt swap chain. Coarser than flip-model's `FrameLatencyWaitableObject`, but a real latency reduction without changing `SwapEffect`. Useful as a baseline that survives even if M2b takes a while.
+- **M2b (the real win):** Re-attempt FlipDiscard with a focused bisection of the five candidates above. The fix is whatever TiXL-side code makes the migration safe; the swap-chain config change itself is a known-good design.
+- **`FrameLatencyWaitableObject` itself requires flip-model** (the flag is rejected on bitblt swap chains), so the precise frame-pacing benefit ultimately depends on M2b.
+
+---
+
+### Cautionary precedent: the 2025 ImGui buffer upload revert
+
+Commit `edf36f2c` reverted an earlier attempt (`19fcd1b`, July 2025) to apply this same `out DataStream` removal pattern to the ImGui per-frame vertex/index buffer upload in `WindowsUiContentDrawer.cs`. The revert reason: *"did cause UI artifacts with complex graphs."*
+
+Reading the original diff: the failed attempt bundled **two** changes into one commit — (a) the DataStream removal we'd recommend, and (b) moving the index buffer's allocation from constructor-time (always `ushort.MaxValue` slots) to dynamic per-frame growth. The artifacts were almost certainly caused by (b) — a stale `IASetIndexBuffer` binding when the IB grew mid-frame. The pointer arithmetic in (a) is well-formed and would have been safe on its own.
+
+Lesson for any future revisit of this code path: the DataStream removal is fine in isolation, but don't bundle it with buffer-allocation-strategy changes. Use the no-DataStream `MapSubresource(buffer, 0, MapMode, MapFlags)` overload + `Span<byte>` copies (bounds-checked) instead of raw `IntPtr` arithmetic, and leave the IB sizing strategy alone in the same commit.
+
+The two DataStream fixes we landed today (`WriteDynamicBufferData`, `UpdateConstBuffer`) are deliberately scoped to be the inverse of the 2025 attempt: each one is a single mechanical replacement, no buffer-strategy change, no pointer arithmetic, no cross-call state.
+
+### Process lessons
+- The `precise: true` flag costs more than the docs suggest. Useful for diagnostic captures, not for live monitoring. The default `precise: false` undercount-then-flush behaviour is itself misleading without context — recommend documenting that `PerformanceMetrics.GcAllocationsKb` numbers are slightly batched.
+- The single biggest lever we found across this whole investigation was **not** the allocation work — it was the `SwapEffect.Discard` → `FlipDiscard` swap-chain change (Part 2 / M2) which directly addresses the fast-after-slow oscillation seen in the early frame-time captures. The allocation work moved per-iter cost ~30%, but the swap-chain change reshapes the entire frame-time distribution.
+- The temporary `AllocationAttribution` instrument (wrapping `Slot.Update` with paired `precise: true` GC samples) was the right tool for *this* investigation but the wrong tool to keep in the codebase. Documented here in case the same pattern is needed for a future allocation hunt — the implementation lives in this commit's history.
+
+### What kept shipping
+Independent of this investigation, the broader performance-monitoring surface delivered:
+- `T3.Core.Stats.PerformanceMetrics` registry (FrameDuration, UiRenderDuration, GcAllocationsKb, TotalFrameCount; `RecordFrame`/`RecordUiRender` API; `GcSpikeDetected` event with Gen-counter deltas)
+- `T3.Core.Stats.RollingMetric` data structure (sliding-window histogram + min/max via monotonic deque + sliding average)
+- `T3.Core.Stats.FrameTimeGrader` (percentile/grade derivation)
+- Editor `MetricGraphView` (plot line + histogram + mean triangle + bucket hover with shift-cumulative)
+- Editor `PerformanceWindow` (toggleable from app-bar mini graph; same content as the hover tooltip)
+- `UserSettings.UseVSync` (promoted from runtime-only flag)
+- CSV export button for sharing capture data
+
+These are all preserved; only the experimental allocation-attribution machinery was removed.

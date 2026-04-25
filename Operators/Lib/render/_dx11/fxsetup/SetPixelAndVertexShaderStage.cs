@@ -24,6 +24,9 @@ internal sealed class SetPixelAndVertexShaderStage : Instance<SetPixelAndVertexS
         ShaderResources.GetValues(ref _shaderResourceViews, context);
         SamplerStates.GetValues(ref _samplerStates, context);
 
+        // TODO: SharpDX 4.2.0 doesn't publicly expose the no-allocation `GetX(int, int, T[])` overloads
+        // that are documented in its XML doc — the calls below allocate three small arrays per frame.
+        // ~half of this op's per-call allocation budget. Worth revisiting (P/Invoke or SharpDX upgrade).
         _prevConstantBuffers = vsStage.GetConstantBuffers(0, _constantBuffers.Length);
         _prevShaderResourceViews = vsStage.GetShaderResources(0, _shaderResourceViews.Length);
         _prevSamplerStates = vsStage.GetSamplers(0, _samplerStates.Length);

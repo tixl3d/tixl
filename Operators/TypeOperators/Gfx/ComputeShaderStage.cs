@@ -42,6 +42,9 @@ public sealed class ComputeShaderStage : Instance<ComputeShaderStage>, IRenderSt
         if (_uavs.Length == 0 || _cs == null)
             return;
         
+        // TODO: SharpDX 4.2.0 does not expose the no-allocation 3-arg overload publicly,
+        // so this still allocates a fresh RenderTargetView[2] each frame. Worth a follow-up
+        // (P/Invoke OMGetRenderTargets directly, or upgrade SharpDX) — see allocation report.
         _prevRenderTargetViews = device.ImmediateContext.OutputMerger.GetRenderTargets(2);
         device.ImmediateContext.OutputMerger.GetRenderTargets(out _prevDepthStencilView);
         
@@ -58,24 +61,32 @@ public sealed class ComputeShaderStage : Instance<ComputeShaderStage>, IRenderSt
         csStage.SetShaderResources(_shaderResourceViews.Length, _additionalSrvs.Length, _additionalSrvs);
             
         csStage.SetSamplers(0, _samplerStates);
+        // Initial-counts arrays — cached to avoid the per-call `[..]` array literals that allocated each frame.
+        // Static for the constant cases; instance fields with mutated head element for the counter-dependent ones.
         if (_uavs.Length == 4)
         {
-            csStage.SetUnorderedAccessViews(0, _uavs, [-1, 0, -1, -1]);
+            csStage.SetUnorderedAccessViews(0, _uavs, _uavCountsLength4);
         }
         else if (_uavs.Length == 1)
         {
             if (counter == -1)
+            {
                 csStage.SetUnorderedAccessView(0, _uavs[0]);
+            }
             else
-                csStage.SetUnorderedAccessViews(0, _uavs, [counter]);
+            {
+                _uavCountsLength1[0] = counter;
+                csStage.SetUnorderedAccessViews(0, _uavs, _uavCountsLength1);
+            }
         }
         else if (_uavs.Length == 2)
         {
-            csStage.SetUnorderedAccessViews(0, _uavs, [0, 0]);
+            csStage.SetUnorderedAccessViews(0, _uavs, _uavCountsLength2);
         }
         else if (_uavs.Length == 3)
         {
-            csStage.SetUnorderedAccessViews(0, _uavs, [counter, -1, -1]);
+            _uavCountsLength3[0] = counter;
+            csStage.SetUnorderedAccessViews(0, _uavs, _uavCountsLength3);
         }
         else
         {
@@ -254,6 +265,13 @@ public sealed class ComputeShaderStage : Instance<ComputeShaderStage>, IRenderSt
 
     private RenderTargetView?[]? _prevRenderTargetViews;
     private DepthStencilView? _prevDepthStencilView;
+
+    // Cached initial-counts arrays for SetUnorderedAccessViews, replacing per-call `[..]` literals.
+    // Constant ones are static (never mutated). Mutating ones are per-instance.
+    private static readonly int[] _uavCountsLength4 = [-1, 0, -1, -1];
+    private static readonly int[] _uavCountsLength2 = [0, 0];
+    private readonly int[] _uavCountsLength1 = new int[1];
+    private readonly int[] _uavCountsLength3 = [0, -1, -1];
     
     
     

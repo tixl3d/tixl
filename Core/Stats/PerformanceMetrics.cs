@@ -59,10 +59,11 @@ public static class PerformanceMetrics
 
     private static void SampleGc(double now)
     {
-        var total = GC.GetTotalAllocatedBytes();
+        var total = GC.GetTotalAllocatedBytes(precise:true);
         var delta = total - _lastGcTotalBytes;
         _lastGcTotalBytes = total;
-        if (delta < 0) delta = 0; // tolerate counter wrap / host reset
+        if (delta < 0)
+            delta = 0; // tolerate counter wrap / host reset
         GcAllocationsKb.Update((float)(delta / 1024.0), now);
     }
 }

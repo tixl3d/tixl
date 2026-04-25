@@ -65,7 +65,10 @@ namespace T3.Core.Rendering
 
         public static unsafe void WriteDynamicBufferData<T>(DeviceContext deviceContext, Buffer buffer, ReadOnlySpan<T> data) where T : unmanaged
         {
-            SharpDX.DataBox box = deviceContext.MapSubresource(buffer, MapMode.WriteDiscard, MapFlags.None, out _);
+            // Use the no-DataStream MapSubresource overload — the (..., out DataStream) overloads
+            // allocate a managed DataStream wrapper per call which becomes the dominant per-iteration
+            // allocation under heavy [Loop] use.
+            SharpDX.DataBox box = deviceContext.MapSubresource(buffer, 0, MapMode.WriteDiscard, MapFlags.None);
             Span<T> boxData = new Span<T>((void*)box.DataPointer, data.Length);
             data.CopyTo(boxData);
             deviceContext.UnmapSubresource(buffer, 0);
@@ -73,7 +76,7 @@ namespace T3.Core.Rendering
 
         public static unsafe void WriteDynamicBufferData<T>(DeviceContext deviceContext, Buffer buffer, T data) where T : unmanaged
         {
-            SharpDX.DataBox box = deviceContext.MapSubresource(buffer, MapMode.WriteDiscard, MapFlags.None, out _);
+            SharpDX.DataBox box = deviceContext.MapSubresource(buffer, 0, MapMode.WriteDiscard, MapFlags.None);
             Unsafe.Write((void*)box.DataPointer, data);
             deviceContext.UnmapSubresource(buffer, 0);
         }
