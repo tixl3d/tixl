@@ -103,6 +103,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="DirectShowLib.Standard" Version="2.1.0" />
+    <PackageReference Include="SlugText-Sharp" Version="0.1.2" />
     <PackageReference Include="System.ServiceModel.Primitives" Version="10.0.5" />
     <PackageReference Include="System.ServiceModel.Http" Version="10.0.5" />
     <PackageReference Include="System.ServiceModel.Security" Version="6.0.0" />
