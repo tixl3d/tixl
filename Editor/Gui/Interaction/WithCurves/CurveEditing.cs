@@ -119,7 +119,7 @@ internal abstract class CurveEditing
                 }
 
                 
-                if (ImGui.MenuItem("Safe Smooth", null, modes.Contains(VDefinition.KeyInterpolation.Smooth)))
+                if (ImGui.MenuItem("Smooth (Clamped)", null, modes.Contains(VDefinition.KeyInterpolation.Smooth)))
                 {
                     OnSmooth();
                     UpdateAllTangents();
