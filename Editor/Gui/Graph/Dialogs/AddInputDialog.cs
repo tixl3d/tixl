@@ -2,12 +2,13 @@
 
 using ImGuiNET;
 using T3.Core.Operator;
+using T3.Editor.Gui.Dialogs;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel.Modification;
 
-namespace T3.Editor.Gui.Dialogs;
+namespace T3.Editor.Gui.Graph.Dialogs;
 
 internal sealed class AddInputDialog : ModalDialog
 {
@@ -23,13 +24,17 @@ internal sealed class AddInputDialog : ModalDialog
         if (BeginDialog("Add parameter input"))
         {
             FormInputs.SetIndent(100);
-                
-            _ = SymbolModificationInputs.DrawFieldInputs(symbol, ref _parameterName, ref _selectedType, out var isValid);
+            
+            if(ImGui.IsWindowAppearing())
+                ImGui.SetKeyboardFocusHere();
+            
+            _ = SymbolModificationInputs.DrawFieldInputs(symbol,  "Input Name", "Input", ref _parameterName, ref _selectedType, out var isValid);
                 
             FormInputs.AddCheckBox("Multi-Input", ref _multiInput);
                 
             FormInputs.AddVerticalSpace(5);
             FormInputs.ApplyIndent();
+            
             if (CustomComponents.DisablableButton("Add", isValid))
             {
                 InputsAndOutputs.AddInputToSymbol(_parameterName, _multiInput, _selectedType!, symbol);

@@ -1,5 +1,4 @@
 ﻿#nullable enable
-using System.Diagnostics.CodeAnalysis;
 using ImGuiNET;
 using T3.Core.Model;
 using T3.Core.Operator;
@@ -8,42 +7,35 @@ using T3.Editor.Gui.Styling;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Helpers;
 
-namespace T3.Editor.Gui.Dialogs;
+namespace T3.Editor.Gui.Graph.Dialogs;
 
 internal static class SymbolModificationInputs
 {
-    public static bool DrawFieldInputs(Symbol symbol, [NotNullWhen(true)] ref string parameterName, [NotNullWhen(true)] ref Type selectedType, out bool isValid)
+    public static bool DrawFieldInputs(Symbol symbol,
+        string label,
+        string placeHolder,
+        ref string parameterName, 
+        ref Type selectedType, out bool isValid)
     {
-        var changed = DrawFieldNameInput(symbol, ref parameterName, out var isNameValid);
-        changed |= DrawTypeInput(ref selectedType, out var hasType);
-        isValid = isNameValid && hasType;
-        return changed;
-    }
+        var changed = DrawFieldNameInput(symbol,  label,placeHolder, ref parameterName, out var isNameValid);
 
-    private static bool DrawTypeInput(ref Type selectedType, out bool isValid)
-    {
         FormInputs.DrawInputLabel("Type");
 
         var previous = selectedType;
         TypeSelector.Draw(ref selectedType);
-        var changed = previous != selectedType;
-        isValid = selectedType != null;
+        
+        changed |= previous != selectedType;
+
+        isValid = selectedType != null && GraphUtils.IsNewFieldNameValid(parameterName, symbol, out _);
         return changed;
     }
 
-    public static bool DrawFieldNameInput(Symbol symbol, ref string parameterName, out bool isValid)
+    public static bool DrawFieldNameInput(Symbol symbol, string label, string placeHolder, ref string parameterName, out bool isValid)
     {
-        var tmp = parameterName;
-        var changed = FormInputs.AddStringInput("Name", ref tmp);
-        parameterName = tmp ?? string.Empty;
-        
-        CustomComponents.HelpText("This is a C# field name. It must be unique and not include spaces or special characters");
-
         isValid = GraphUtils.IsNewFieldNameValid(parameterName, symbol, out var reason);
-        if (!isValid)
-        {
-            ImGui.TextColored(UiColors.StatusWarning, reason);
-        }
+        var changed = FormInputs.AddStringInput(label, ref parameterName, placeHolder, 
+            reason, 
+            "This is a C# field name. It must be unique and not include spaces or special characters", string.Empty);
 
         return changed;
     }

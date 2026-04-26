@@ -5,9 +5,9 @@ using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel.Modification;
 
-namespace T3.Editor.Gui.Dialogs;
+namespace T3.Editor.Gui.Graph.Dialogs;
 
-public sealed class AddOutputDialog : ModalDialog
+internal sealed class AddOutputDialog : ModalDialog
 {
     internal AddOutputDialog()
     {
@@ -20,8 +20,14 @@ public sealed class AddOutputDialog : ModalDialog
         if (BeginDialog("Add output"))
         {
             FormInputs.SetIndent(100);
-            //ImGui.SetKeyboardFocusHere();
-            _ = SymbolModificationInputs.DrawFieldInputs(symbol, ref _parameterName, ref _selectedType, out var isValid);
+            if(ImGui.IsWindowAppearing())
+                ImGui.SetKeyboardFocusHere();
+            
+            _ = SymbolModificationInputs.DrawFieldInputs(symbol,  "Output name" ,"Output", 
+                ref _parameterName, 
+                ref _selectedType, 
+                out var isValid);
+            
             FormInputs.AddCheckBox("Is time clip", ref _isTimeClip);
                 
             FormInputs.ApplyIndent();
@@ -46,5 +52,5 @@ public sealed class AddOutputDialog : ModalDialog
 
     private bool _isTimeClip;
     private string _parameterName = string.Empty;
-    private Type _selectedType;                                                                        
+    private Type _selectedType = typeof(float);                                                                        
 }

@@ -1,13 +1,14 @@
 ﻿using ImGuiNET;
 using T3.Core.Operator;
+using T3.Editor.Gui.Dialogs;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel.Modification;
 
-namespace T3.Editor.Gui.Dialogs;
+namespace T3.Editor.Gui.Graph.Dialogs;
 
-public sealed class RenameInputDialog : ModalDialog
+internal sealed class RenameInputDialog : ModalDialog
 {
     public void Draw()
     {
@@ -43,17 +44,15 @@ public sealed class RenameInputDialog : ModalDialog
         if (isWindowAppearing)
         {
             _newInputName = inputDef.Name;
-            _lastWarning = string.Empty;
         }
 
         // ImGui.SetNextItemWidth(150);
 
         //var warning = String.Empty;
-        var changed = SymbolModificationInputs.DrawFieldNameInput(symbol, ref _newInputName, out var isValid);
+        var changed = SymbolModificationInputs.DrawFieldNameInput(symbol, "New Input name", "Input", ref _newInputName, out var isValid);
 
         if (isValid && (isWindowAppearing || changed))
         {
-            _lastWarning = null;
         }
 
         if (isWindowAppearing)
@@ -68,7 +67,6 @@ public sealed class RenameInputDialog : ModalDialog
             // Fix simulate
             if (!InputsAndOutputs.RenameInput(symbol, _inputId, _newInputName, dryRun: true, out var newWarning))
             {
-                _lastWarning = newWarning;
             }
             else
             {
@@ -98,5 +96,4 @@ public sealed class RenameInputDialog : ModalDialog
     private static Symbol _symbol;
     private static Guid _inputId;
     private static string _newInputName = string.Empty;
-    private static string _lastWarning = string.Empty;
 }

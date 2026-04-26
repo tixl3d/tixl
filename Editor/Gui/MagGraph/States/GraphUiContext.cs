@@ -211,11 +211,6 @@ internal sealed class GraphUiContext
     internal string SymbolDescriptionForDialog ="";
 
 
-    // internal Vector2 PeekAnchorInCanvas => PrimaryOutputItem == null
-    //                                            ? Vector2.Zero
-    //                                            : new Vector2(PrimaryOutputItem.Area.Max.X - MagGraphItem.GridSize.Y * 0.25f,
-    //                                                          PrimaryOutputItem.Area.Min.Y + MagGraphItem.GridSize.Y * 0.5f);
-
     
     internal readonly List<MagGraphConnection> TempConnections = [];
 

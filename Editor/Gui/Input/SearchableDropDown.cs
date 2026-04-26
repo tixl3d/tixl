@@ -1,4 +1,5 @@
 ﻿using ImGuiNET;
+using T3.Core.Utils;
 using T3.Editor.App;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
@@ -6,9 +7,14 @@ using T3.SystemUi;
 
 namespace T3.Editor.Gui.Input;
 
+/// <summary>
+/// A searchable dropdown driven by an <see cref="ImGui.InputText"/> with a tooltip-style
+/// popup below. Mirrors the structure of <see cref="AssetInputWithTypeAheadSearch"/> so the
+/// popup escapes any parent clip rect (e.g. modal dialogs); per-item drawing is delegated
+/// to the caller's <c>filterAndDrawItem</c> callback so callers can colour items as needed.
+/// </summary>
 public static class SearchableDropDown
 {
-
     [Flags]
     public enum ItemResults
     {
@@ -18,287 +24,195 @@ public static class SearchableDropDown
         Completed,
     }
 
-    private static bool _justOpened = false;
-    private static bool _scrollNeedsUpdate;
-    
-    public static bool Draw(ref int selectedIndex, string currentValue,  Func<string, bool, ItemResults> filterAndDrawItem)
+    public static bool Draw(ref int selectedIndex, string currentValue, Func<string, bool, ItemResults> filterAndDrawItem)
     {
-        var inputId = ImGui.GetID("");
-        var isSearchResultWindowOpen = inputId == _activeInputId;
-
-        if (!isSearchResultWindowOpen)
-        {
-            _searchString = currentValue;
-            if (ImGui.Button(currentValue))
-            {
-                _activeInputId = inputId;
-                _searchString = string.Empty;
-                
-                _activeInputId = inputId;
-                _filtedCount = 0;
-                _scrollNeedsUpdate = false;
-                _selectedFilteredResultIndex = -1;
-
-                _justOpened = true;
-                DrawUtils.DisableImGuiKeyboardNavigation();
-            }
-            return false;
-        }
-
-        if (ImGui.IsKeyPressed(Key.CursorDown.ToImGuiKey(), true))
-        {
-            if (_filtedCount > 0)
-            {
-                _selectedFilteredResultIndex++;
-                _selectedFilteredResultIndex %= _filtedCount;
-                _scrollNeedsUpdate = true;
-            }
-        }
-        else if (ImGui.IsKeyPressed(Key.CursorUp.ToImGuiKey(), true))
-        {
-            if (_filtedCount > 0)
-            {
-                _selectedFilteredResultIndex--;
-                if (_selectedFilteredResultIndex < 0)
-                    _selectedFilteredResultIndex = _filtedCount - 1;
-                
-                _scrollNeedsUpdate = true;
-            }
-        }
-
-        if (_justOpened || ImGui.IsMouseReleased(ImGuiMouseButton.Left))
-        {
-            ImGui.SetKeyboardFocusHere();
-        }
-
+        var inputId = ImGui.GetID("Input");
+        var isActive = inputId == _activeInputId;
         var wasChanged = false;
-        var filterChanged = ImGui.InputText("##search", ref _searchString, 256);
-        _scrollNeedsUpdate |= filterChanged;
+        var shouldUpdateScroll = false;
+        var upDownKeysPressed = false;
 
-        if (ImGui.IsItemActivated())
+        // Handle keyboard navigation before InputText so the field doesn't swallow the keys.
+        if (isActive)
         {
-            _justOpened = false;
+            // Auto-close if we weren't drawn for a couple of frames (parent UI changed, etc.)
+            if (ImGui.GetFrameCount() - _lastActiveFrame > 2)
+            {
+                Reset();
+                return false;
+            }
+            _lastActiveFrame = ImGui.GetFrameCount();
+
+            if (ImGui.IsKeyPressed(Key.CursorDown.ToImGuiKey(), true))
+            {
+                if (_filteredCount > 0)
+                {
+                    _selectedFilteredResultIndex = (_selectedFilteredResultIndex + 1).Clamp(0, _filteredCount - 1);
+                    shouldUpdateScroll = true;
+                    upDownKeysPressed = true;
+                }
+            }
+            else if (ImGui.IsKeyPressed(Key.CursorUp.ToImGuiKey(), true))
+            {
+                if (_filteredCount > 0)
+                {
+                    _selectedFilteredResultIndex--;
+                    if (_selectedFilteredResultIndex < 0)
+                        _selectedFilteredResultIndex = 0;
+                    shouldUpdateScroll = true;
+                    upDownKeysPressed = true;
+                }
+            }
+
+            if (ImGui.IsKeyPressed(Key.Esc.ToImGuiKey(), false))
+            {
+                Reset();
+                return false;
+            }
         }
 
-        // We defer exit to get clicks on opened popup list
-        var lostFocus =  ImGui.IsKeyDown(Key.Esc.ToImGuiKey());
+        // Show the search string while active, otherwise the current selection.
+        var inputString = isActive && !string.IsNullOrEmpty(_searchString)
+                              ? _searchString
+                              : currentValue ?? string.Empty;
+
+        ImGui.SetNextItemWidth(-1);
+        ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 5);
+        var filterChanged = ImGui.InputText("##search", ref inputString, 256, ImGuiInputTextFlags.AutoSelectAll);
+        ImGui.PopStyleVar();
         
-        ImGui.SetNextWindowPos(new Vector2(ImGui.GetItemRectMin().X, ImGui.GetItemRectMax().Y));
-        var size = new Vector2(ImGui.GetItemRectSize().X, 320);
-        ImGui.SetNextWindowSize(size);
+        if (filterChanged)
+            _searchString = inputString;
 
-        if (ImGui.Begin("##typeAheadSearchPopup", ref isSearchResultWindowOpen,
-                        ImGuiWindowFlags.NoTitleBar
-                        | ImGuiWindowFlags.NoMove
-                        | ImGuiWindowFlags.Popup
-                        | ImGuiWindowFlags.ChildWindow
-                       ))
+        var justOpened = ImGui.IsItemActivated();
+        if (justOpened)
         {
-            //_lastTypeAheadResults.Clear();
-            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, UiColors.Gray.Rgba);
+            _activeInputId = inputId;
+            _searchString = string.Empty;
+            _selectedFilteredResultIndex = -1;
+            _filteredCount = 0;
+            _lastActiveFrame = ImGui.GetFrameCount();
+            DrawUtils.DisableImGuiKeyboardNavigation();
+        }
 
-            // ImGuiHoveredFlags.RectOnly contains AllowWhenOverlappedByItem/ByWindow which 1.91
-            // forbids for IsWindowHovered. Spell out the window-level valid flags.
-            if (ImGui.IsMouseClicked(ImGuiMouseButton.Left) && !ImGui.IsWindowHovered(ImGuiHoveredFlags.AllowWhenBlockedByPopup
-                                                                                      | ImGuiHoveredFlags.AllowWhenBlockedByActiveItem))
+        var inputFieldDeactivated = ImGui.IsItemDeactivated();
+        var isPopupHovered = false;
+
+        if (ImGui.IsItemActive() || isActive)
+        {
+            _activeInputId = inputId;
+
+            // Tooltip flag is internal but is the only practical way to escape a parent modal's
+            // clip rect (matches the pattern used in AssetInputWithTypeAheadSearch). Popup is
+            // avoided because it conflicts with manual _activeInputId tracking.
+            var popupPos = new Vector2(ImGui.GetItemRectMin().X, ImGui.GetItemRectMax().Y);
+            var popupSize = new Vector2(ImGui.GetItemRectSize().X, 320 * T3Ui.UiScaleFactor);
+            ImGui.SetNextWindowPos(popupPos);
+            ImGui.SetNextWindowSize(popupSize);
+
+            ImGui.PushStyleColor(ImGuiCol.ChildBg, UiColors.BackgroundFull.Rgba);
+            ImGui.PushStyleColor(ImGuiCol.PopupBg, UiColors.BackgroundFull.Rgba);
+            ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(3));
+            ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(4));
+            ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, 0);
+            var dummyOpen = true;
+            var clickedOutside = false;
+            if (ImGui.Begin("##typeAheadSearchPopup", ref dummyOpen,
+                            ImGuiWindowFlags.NoTitleBar
+                            | ImGuiWindowFlags.NoMove
+                            | ImGuiWindowFlags.Tooltip
+                            | ImGuiWindowFlags.NoFocusOnAppearing))
             {
-                _activeInputId = 0;
-                ImGui.CloseCurrentPopup();
-            }
+                ImGui.PushStyleColor(ImGuiCol.HeaderHovered, UiColors.BackgroundActive.Fade(0.3f).Rgba);
 
-            var visibleIndex = 0;
-            var processedIndex = -1;
-            while (true)
-            {
-                processedIndex++;
-
-                if (_selectedFilteredResultIndex == -1 && processedIndex == selectedIndex)
+                // Inside a modal, ImGui blocks mouse-wheel routing to the tooltip-flagged
+                // popup. A BeginChild inside the popup registers a proper scrollable region
+                // whose wheel/scrollbar works regardless. AlwaysVerticalScrollbar so the
+                // bar is reliably present even when the user expects to scroll just below
+                // the threshold.
+                if (ImGui.BeginChild("##scroll", Vector2.Zero, ImGuiChildFlags.None,
+                                     ImGuiWindowFlags.AlwaysVerticalScrollbar 
+                                     | ImGuiWindowFlags.NoSavedSettings ))
                 {
-                    _selectedFilteredResultIndex = visibleIndex;
-                }
-                
-                var isCurrentIndex = _selectedFilteredResultIndex == visibleIndex;
-                if (isCurrentIndex)
-                    selectedIndex = processedIndex;
-
-                ImGui.PushID(processedIndex);
-                var result = filterAndDrawItem(_searchString, isCurrentIndex);
-                ImGui.PopID();
-                
-                if (isCurrentIndex)
-                {
-                    if (_scrollNeedsUpdate)
+                    var visibleIndex = 0;
+                    var processedIndex = -1;
+                    while (true)
                     {
-                        UiListHelpers.ScrollToMakeItemVisible();
-                        _scrollNeedsUpdate = false;
+                        processedIndex++;
+
+                        if (_selectedFilteredResultIndex == -1 && processedIndex == selectedIndex)
+                            _selectedFilteredResultIndex = visibleIndex;
+
+                        var isCurrentIndex = _selectedFilteredResultIndex == visibleIndex;
+                        if (isCurrentIndex)
+                            selectedIndex = processedIndex;
+
+                        if (isCurrentIndex && shouldUpdateScroll)
+                            ImGui.SetScrollHereY();
+
+                        ImGui.PushID(processedIndex);
+                        var result = filterAndDrawItem(_searchString, isCurrentIndex);
+                        ImGui.PopID();
+
+                        if (result == ItemResults.Completed)
+                            break;
+
+                        if (result == ItemResults.FilteredOut)
+                            continue;
+
+                        if (result is ItemResults.Visible or ItemResults.Activated)
+                            visibleIndex++;
+
+                        if (result == ItemResults.Activated
+                            || (isCurrentIndex && !upDownKeysPressed && ImGui.IsKeyPressed(Key.Return.ToImGuiKey())))
+                        {
+                            wasChanged = true;
+                            selectedIndex = processedIndex;
+                            Reset();
+                            break;
+                        }
                     }
+                    _filteredCount = visibleIndex;
+                    ImGuiUtils.ResetCursorForExtentCheck();
                 }
+                ImGui.EndChild();
+
+                isPopupHovered = ImRect.RectWithSize(ImGui.GetWindowPos(), ImGui.GetWindowSize())
+                                       .Contains(ImGui.GetMousePos());
                 
-                if (result == ItemResults.Completed)
-                    break;
+                clickedOutside = !justOpened && !isPopupHovered && ImGui.IsMouseClicked(ImGuiMouseButton.Left);
 
-                if (result == ItemResults.FilteredOut)
-                    continue;
-
-                if (result is ItemResults.Visible or ItemResults.Activated)
-                    visibleIndex++;
-
-                if (result == ItemResults.Activated || isCurrentIndex && ImGui.IsKeyPressed(Key.Return.ToImGuiKey()))
-                {
-                    wasChanged = true;
-                    selectedIndex = processedIndex;
-                    _activeInputId = 0;
-                    break;
-                }
+                ImGui.PopStyleColor();
             }
+            ImGui.End();
+            ImGui.PopStyleColor(2);
+            ImGui.PopStyleVar(3);
 
-            _filtedCount = visibleIndex;
-            ImGui.PopStyleColor();
+            if (clickedOutside)
+            {
+                Reset();
+                return wasChanged;
+            }
         }
 
-        ImGui.End();
-
-        if (lostFocus)
-        {
-            _activeInputId = 0;
-            DrawUtils.RestoreImGuiKeyboardNavigation();
-        }
+        if (inputFieldDeactivated && !isPopupHovered)
+            Reset();
 
         return wasChanged;
     }
-    
-    // public static bool Draw<T>(ref T selectedItem,  IEnumerable<T> items, Func<T, bool, string,  ItemResults> filterAndDrawItem) where T: IEquatable<T>
-    // {
-    //     var inputId = ImGui.GetID(string.Empty);
-    //     var isSearchResultWindowOpen = inputId == _activeInputId;
-    //         
-    //     if (isSearchResultWindowOpen)
-    //     {
-    //         if (ImGui.IsKeyPressed(Key.CursorDown.ToImGuiKey(), true))
-    //         {
-    //             if (_filtedCount > 0)
-    //             {
-    //                 _selectedResultIndex++;
-    //                 _selectedResultIndex %= _filtedCount;
-    //             }
-    //         }
-    //         else if (ImGui.IsKeyPressed(Key.CursorUp.ToImGuiKey(), true))
-    //         {
-    //             if (_filtedCount > 0)
-    //             {
-    //                 _selectedResultIndex--;
-    //                 if (_selectedResultIndex < 0)
-    //                     _selectedResultIndex = _filtedCount - 1;
-    //             }
-    //         }
-    //     }
-    //     else
-    //     {
-    //         _searchString = string.Empty;
-    //     }
-    //         
-    //     ImGui.PushStyleColor(ImGuiCol.Text, UiColors.Text.Rgba);
-    //     var wasChanged = ImGui.InputText("##search", ref _searchString, 256);
-    //     ImGui.PopStyleColor();
-    //
-    //     if (ImGui.IsItemActivated())
-    //     {
-    //         _filtedCount = 0;
-    //         //_lastTypeAheadResults.Clear();
-    //         _selectedResultIndex = -1;
-    //         THelpers.DisableImGuiKeyboardNavigation();
-    //     }
-    //
-    //     var isItemDeactivated = ImGui.IsItemDeactivated();
-    //         
-    //     // We defer exit to get clicks on opened popup list
-    //     var lostFocus = isItemDeactivated || ImGui.IsKeyDown(Key.Esc.ToImGuiKey());
-    //         
-    //     if ( ImGui.IsItemActive() || isSearchResultWindowOpen)
-    //     {
-    //         _activeInputId = inputId;
-    //
-    //         ImGui.SetNextWindowPos(new Vector2(ImGui.GetItemRectMin().X, ImGui.GetItemRectMax().Y));
-    //         ImGui.SetNextWindowSize(new Vector2(ImGui.GetItemRectSize().X, 320));
-    //             
-    //         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(7, 7));
-    //         if (ImGui.Begin("##typeAheadSearchPopup", ref isSearchResultWindowOpen,
-    //                         ImGuiWindowFlags.NoTitleBar 
-    //                         | ImGuiWindowFlags.NoMove 
-    //                         | ImGuiWindowFlags.Popup 
-    //                         | ImGuiWindowFlags.ChildWindow
-    //                        ))
-    //         {
-    //             //_lastTypeAheadResults.Clear();
-    //             var index = 0;
-    //             ImGui.PushStyleColor(ImGuiCol.ButtonHovered, UiColors.Gray.Rgba);
-    //
-    //             if (ImGui.IsMouseClicked(ImGuiMouseButton.Left) && !ImGui.IsWindowHovered(ImGuiHoveredFlags.RectOnly))
-    //             {
-    //                 _activeInputId = 0;
-    //                 ImGui.CloseCurrentPopup();
-    //             }
-    //
-    //             foreach (var item in items)
-    //             {
-    //                 var isCurrent = item.Equals(selectedItem) || _selectedResultIndex == index;
-    //                 switch (filterAndDrawItem(item, isCurrent, _searchString))
-    //                 {
-    //                     case ItemResults.FilteredOut:
-    //                         break;
-    //                         
-    //                     case ItemResults.Visible:
-    //                         index++;
-    //                         break;
-    //                         
-    //                     case ItemResults.Activated:
-    //                         //filter = item;
-    //                         wasChanged = true;
-    //                         _activeInputId = 0;
-    //                         break;
-    //                 }
-    //                 // {
-    //                 //     
-    //                 // }
-    //                 // if (item == null ||  !item.Contains(text, StringComparison.InvariantCultureIgnoreCase))
-    //                 //     continue;
-    //                 //
-    //                 // var isSelected = index == _selectedResultIndex;
-    //                 // ImGui.PushStyleColor(ImGuiCol.Text, UiColors.Text.Rgba);
-    //                 // ImGui.Selectable(item, isSelected);
-    //                 // ImGui.PopStyleColor();
-    //                 //     
-    //                 // if (ImGui.IsItemClicked() || (isSelected && ImGui.IsKeyPressed(Key.Return.ToImGuiKey())))
-    //                 // {
-    //                 //     text = item;
-    //                 //     wasChanged = true;
-    //                 //     _activeInputId = 0;
-    //                 // }
-    //                     
-    //                 //_lastTypeAheadResults.Add(item);
-    //                 if (++index > 100)
-    //                     break;
-    //             }
-    //
-    //             _filtedCount = index;
-    //             ImGui.PopStyleColor();
-    //         }
-    //
-    //         ImGui.End();
-    //         ImGui.PopStyleVar();
-    //     }
-    //
-    //     if (lostFocus)
-    //     {
-    //         THelpers.RestoreImGuiKeyboardNavigation();
-    //     }
-    //
-    //     return wasChanged;
-    // }
-    
-    private static string _searchString= string.Empty;
 
+    private static void Reset()
+    {
+        DrawUtils.RestoreImGuiKeyboardNavigation();
+        _searchString = string.Empty;
+        _activeInputId = 0;
+        _selectedFilteredResultIndex = -1;
+        _filteredCount = 0;
+    }
+    
+    private static string _searchString = string.Empty;
     private static int _selectedFilteredResultIndex;
     private static uint _activeInputId;
-    private static int _filtedCount;
+    private static int _filteredCount;
+    private static int _lastActiveFrame;
 }

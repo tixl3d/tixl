@@ -6,7 +6,7 @@ using T3.Editor.UiModel.InputsAndTypes;
 
 // ReSharper disable AccessToDisposedClosure
 
-namespace T3.Editor.Gui.Dialogs;
+namespace T3.Editor.Gui.Graph.Dialogs;
 
 internal static class TypeSelector
 {
@@ -31,54 +31,83 @@ internal static class TypeSelector
         }
         
         using var enumerator = TypeNameRegistry.Entries.GetEnumerator();
+
         var typeChanged = SearchableDropDown.Draw(ref _selectedTypeIndex,
                                                   SelectedTypeName,
-                                                  (filter, isSelected) =>
-                                                  {
-                                                      if (!enumerator.MoveNext())
-                                                          return SearchableDropDown.ItemResults.Completed;
-
-                                                      var (type, typeName) = enumerator.Current;
-                                                      var isMatch = false;
-                                                      isMatch |= typeName.Contains(filter, StringComparison.InvariantCultureIgnoreCase);
-                                                      if (_synonyms.TryGetValue(typeName, out var synonymsForType))
-                                                      {
-                                                          foreach (var s in synonymsForType)
-                                                          {
-                                                              isMatch |= s.Contains(filter, StringComparison.InvariantCultureIgnoreCase);
-                                                          }
-                                                      }
-
-                                                      if (!isMatch)
-                                                          return SearchableDropDown.ItemResults.FilteredOut;
-
-                                                      if (!TypeUiRegistry.TryGetPropertiesForType(type, out var properties))
-                                                      {
-                                                          properties = UiProperties.Default;
-                                                      }
-
-                                                      var typeColor = ColorVariations.OperatorLabel.Apply(properties.Color).Rgba;
-                                                      ImGui.PushStyleColor(ImGuiCol.Text, typeColor);
-
-                                                      ImGui.PushStyleColor(ImGuiCol.HeaderHovered, UiColors.BackgroundActive.Fade(0.2f).Rgba);
-                                                      ImGui.Selectable("##", isSelected);
-                                                      var clicked = ImGui.IsItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Left);
-                                                      ImGui.SetCursorScreenPos(ImGui.GetItemRectMin() + new Vector2(4, 4));
-                                                      ImGui.TextUnformatted(typeName);
-                                                      ImGui.SameLine();
-                                                      ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 0.3f * ImGui.GetStyle().Alpha);
-                                                      ImGui.TextUnformatted(" - " + type.Namespace);
-                                                      ImGui.PopStyleVar();
-                                                      ImGui.PopStyleColor(2);
-
-                                                      return clicked
-                                                                 ? SearchableDropDown.ItemResults.Activated
-                                                                 : SearchableDropDown.ItemResults.Visible;
-                                                  });
+                                                  FilterAndDrawItem);
 
         if (typeChanged)
         {
             selectedType = SelectedType;
+        }
+
+        return;
+
+        SearchableDropDown.ItemResults FilterAndDrawItem(string filter, bool isSelected)
+        {
+            if (!enumerator.MoveNext()) return SearchableDropDown.ItemResults.Completed;
+
+            var (type, typeName) = enumerator.Current;
+            var isMatch = false;
+            isMatch |= typeName.Contains(filter, StringComparison.InvariantCultureIgnoreCase);
+            if (_synonyms.TryGetValue(typeName, out var synonymsForType))
+            {
+                foreach (var s in synonymsForType)
+                {
+                    isMatch |= s.Contains(filter, StringComparison.InvariantCultureIgnoreCase);
+                }
+            }
+
+            if (!isMatch) return SearchableDropDown.ItemResults.FilteredOut;
+
+            if (!TypeUiRegistry.TryGetPropertiesForType(type, out var properties))
+            {
+                properties = UiProperties.Default;
+            }
+
+            var typeColor = ColorVariations.OperatorLabel.Apply(properties.Color).Rgba;
+
+            ImGui.PushStyleColor(ImGuiCol.HeaderHovered, UiColors.BackgroundActive.Fade(0.3f).Rgba);
+            var rowStart = ImGui.GetCursorPos();
+            ImGui.Selectable("##" + typeName, isSelected, ImGuiSelectableFlags.None);
+            var rowMin = ImGui.GetItemRectMin();
+            var rowMax = ImGui.GetItemRectMax();
+            var nextRow = ImGui.GetCursorPos();
+
+            // The dropdown lives inside a modal; ImGui blocks hover/click within
+            // the modal rect for non-descendant windows, so Selectable's natural
+            // hover and IsItemHovered() return false for items overlapping the
+            // modal. Hit-test manually so both click and hover visuals work for
+            // every row regardless of where the popup falls.
+            var mousePos = ImGui.GetMousePos();
+            var isMouseOverRow = mousePos.X >= rowMin.X && mousePos.X <= rowMax.X && mousePos.Y >= rowMin.Y && mousePos.Y <= rowMax.Y;
+            var clicked = isMouseOverRow && ImGui.IsMouseClicked(ImGuiMouseButton.Left);
+
+            if (isMouseOverRow && !isSelected && !ImGui.IsItemHovered()) 
+                ImGui.GetWindowDrawList().AddRectFilled(rowMin, rowMax, UiColors.BackgroundActive.Fade(0.3f));
+
+            ImGui.SetCursorPos(rowStart + new Vector2(4, 0));
+            
+            ImGui.PushFont(isSelected ? Fonts.FontBold : Fonts.FontNormal);
+            
+            ImGui.PushStyleColor(ImGuiCol.Text, typeColor);
+            ImGui.TextUnformatted(typeName);
+            ImGui.PopStyleColor();
+            
+            
+            ImGui.SameLine();
+            ImGui.PushStyleColor(ImGuiCol.Text, UiColors.Text.Fade(0.4f).Rgba);
+            ImGui.TextUnformatted(" - " + type.Namespace);
+            ImGui.PopStyleColor();
+            CustomComponents.DrawSearchMatchUnderline(filter, typeName, rowMin + new Vector2(4, 2));
+            ImGui.PopFont();
+
+            ImGui.SetCursorPos(nextRow);
+            ImGui.PopStyleColor();
+
+            return clicked
+                ? SearchableDropDown.ItemResults.Activated
+                : SearchableDropDown.ItemResults.Visible;
         }
     }
     

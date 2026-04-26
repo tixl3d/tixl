@@ -3,6 +3,7 @@ using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.SystemUi;
 using T3.Editor.Gui.Dialogs;
+using T3.Editor.Gui.Graph.Dialogs;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.Interaction.Variations;
