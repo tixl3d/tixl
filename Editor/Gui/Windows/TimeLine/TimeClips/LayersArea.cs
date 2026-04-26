@@ -298,9 +298,11 @@ internal sealed class LayersArea : ITimeObjectManipulation, IValueSnapAttractor
             var originalName = symbolChildUi.SymbolChild.ReadableName;
             var newPos = symbolChildUi.PosOnCanvas;
             newPos.Y += MagGraphItem.GridSize.Y;
+            // Pass an empty annotation list (not null) so the command does not fall back
+            // to cloning every annotation in the composition.
             var cmd = new CopySymbolChildrenCommand(compositionSymbolUi,
                                                     [symbolChildUi],
-                                                    null,
+                                                    [],
                                                     compositionSymbolUi,
                                                     newPos);
             commands.Add(cmd);
@@ -558,7 +560,11 @@ internal sealed class LayersArea : ITimeObjectManipulation, IValueSnapAttractor
         var timeRange = TimeRange.Undefined;
         foreach (var id in _context.ClipSelection.SelectedClipsIds)
         {
-            var s = _context.ClipSelection.CompositionTimeClips[id];
+            // Selection can transiently reference clips no longer in the composition
+            // (e.g. immediately after a split, before ClipSelection re-syncs).
+            if (!_context.ClipSelection.CompositionTimeClips.TryGetValue(id, out var s))
+                continue;
+
             // fix broken time ranges
             // FIXME: make sure these don't happen at all
             if (s.TimeRange.Duration <= 0
