@@ -154,6 +154,9 @@ internal static partial class ProjectSetup
                                   if (needsCompile && !csProjFile.TryRecompile(true, out var failureLog))
                                   {
                                       Log.Error($"Failed to recompile project '{csProjFile.Name}:\n{failureLog}'");
+                                      var explanation = Compiler.ExplainBuildFailure(failureLog);
+                                      if (explanation != null)
+                                          Log.Warning($"Likely cause for '{csProjFile.Name}' compile failure:\n{explanation}");
                                       return new ProjectLoadInfo(fileInfo, csProjFile, false);
                                   }
 

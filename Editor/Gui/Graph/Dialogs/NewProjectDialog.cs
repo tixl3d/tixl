@@ -113,25 +113,47 @@ internal sealed class NewProjectDialog : ModalDialog
                 }
                 else
                 {
-                    var message = $"""
+                    var explanation = Compiler.ExplainBuildFailure(failureLog);
+                    string message;
+                    string caption;
+
+                    if (explanation != null)
+                    {
+                        // Known cause (e.g. missing .NET targeting pack) — surface a
+                        // useful next step instead of the generic "file a bug report".
+                        caption = "Could not create new project";
+                        message = $"""
+                                   Failed to create project "{_newProjectName}" in "{_newSubNamespace}".
+
+                                   {explanation}
+
+                                   The empty project folder has been left on disk; you may want to delete it before retrying.
+                                   """;
+                        Log.Error(message);
+                        BlockingWindow.Instance.ShowMessageBox(message, caption, "Ok");
+                    }
+                    else
+                    {
+                        caption = "Failed to create new project";
+                        message = $"""
                                    Failed to create project "{_newProjectName}" in "{_newSubNamespace}".
                                    This should never happen - please file a bug report.
-                                   Currently this error is unhandled, so you may want to manually delete the project from disk if it still does not work after 
+                                   Currently this error is unhandled, so you may want to manually delete the project from disk if it still does not work after
                                    an application restart.
                                    """;
-                        
-                    Log.Error(message);
-                    
-        
-                    const string button = "Copy error and go to report page";
-                    const string buttonWithEnvironmentVariables = "Copy error + environment variables and go to report page\n" +
-                                                                  "(Most helpful, but check your list of variables before submitting to avoid leaking " +
-                                                                  "sensitive information)";
-                    var result = BlockingWindow.Instance.ShowMessageBox(message, "Failed to create new project", buttons: button);
-                    var hasResult = !string.IsNullOrWhiteSpace(result);
-                    ReportError(report: hasResult, 
-                                includeEnvVars: result == buttonWithEnvironmentVariables || !hasResult, 
-                                failureLog, fullName);
+
+                        Log.Error(message);
+
+                        const string button = "Copy error and go to report page";
+                        const string buttonWithEnvironmentVariables = "Copy error + environment variables and go to report page\n" +
+                                                                      "(Most helpful, but check your list of variables before submitting to avoid leaking " +
+                                                                      "sensitive information)";
+                        var result = BlockingWindow.Instance.ShowMessageBox(message, caption, buttons: button);
+                        var hasResult = !string.IsNullOrWhiteSpace(result);
+                        ReportError(report: hasResult,
+                                    includeEnvVars: result == buttonWithEnvironmentVariables || !hasResult,
+                                    failureLog, fullName);
+                    }
                 }
             }
 

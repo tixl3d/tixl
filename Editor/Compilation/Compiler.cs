@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using T3.Editor.Gui.UiHelpers;
 
 namespace T3.Editor.Compilation;
@@ -214,6 +215,38 @@ internal static class Compiler
 
         return success;
     }
+
+    /// <summary>
+    /// Translate a known build/restore failure pattern into a human-readable hint.
+    /// Returns null if the failure is not recognized.
+    /// </summary>
+    public static string? ExplainBuildFailure(string? buildOutput)
+    {
+        if (string.IsNullOrEmpty(buildOutput))
+            return null;
+
+        // NU1100: Unable to resolve '<package>' for '<tfm>'
+        // Most common cause: the matching .NET SDK / targeting pack for that TFM
+        // is not installed on this machine.
+        var nu1100 = _nu1100Regex.Match(buildOutput);
+        if (nu1100.Success)
+        {
+            var pkg = nu1100.Groups[1].Value;
+            var tfm = nu1100.Groups[2].Value;
+            return $"NuGet could not resolve '{pkg}' for target framework '{tfm}'.\n\n" +
+                   $"This usually means the .NET SDK / targeting pack for '{tfm}' " +
+                   $"is not installed on this machine.\n\n" +
+                   $"Fix: install the matching .NET SDK from https://dotnet.microsoft.com/download " +
+                   $"(make sure it includes the targeting pack for '{tfm}'), or update the project's " +
+                   $"<TargetFramework> to a TFM you do have installed.";
+        }
+
+        return null;
+    }
+
+    private static readonly Regex _nu1100Regex = new(
+        @"NU1100:\s*Unable to resolve '([^']+)' for '([^']+)'",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     public enum BuildMode
     {
