@@ -97,7 +97,9 @@
     <ProjectReference Include="../../Logging/Logging.csproj" Private="false" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.Windows.Compatibility" Version="10.0.6" />
     <PackageReference Include="NDILibDotNet6" Version="1.0.11" />
+    <PackageReference Include="System.Security.Cryptography.Xml" Version="10.0.6" />
   </ItemGroup>
   <!-- Native dependencies -->
   <ItemGroup>
