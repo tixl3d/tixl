@@ -6,6 +6,11 @@
         <VersionSuffix>$(TixlVersionSuffix)</VersionSuffix>
         <InformationalVersion>$(Version)</InformationalVersion>
         <OutputType>Exe</OutputType>
+        <!-- Allow launching on the next major .NET runtime if the targeted one isn't installed.
+             "Major" rolls forward at most one major version (e.g. net10 app on .NET 11),
+             which is conservative enough for an app that does runtime Roslyn compilation
+             and heavy native interop. See issue #1043. -->
+        <RollForward>Major</RollForward>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <StartupObject>T3.Editor.Program</StartupObject>
         <ApplicationIcon>..\EditorResources\images\t3.ico</ApplicationIcon>
