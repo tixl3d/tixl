@@ -1,6 +1,9 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "e179e0da-f2cd-4cae-a39f-f89957440e74"/*PointToMatrix*/,
   "Description": "Converts a point to transform matrix.",
+  "SymbolTags": "8",
   "InputUis": [
     {
       "InputId": "26b8e9e8-c979-4c48-92db-297a3e48139f"/*CamPointBuffer*/,

@@ -1,6 +1,9 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "ef938762-4341-42f4-b421-c14e162e159e"/*DrawMovingPoints*/,
   "Description": "",
+  "SymbolTags": "1",
   "InputUis": [
     {
       "InputId": "32aba77d-f7b6-4106-bb98-a7b654e21fc0"/*VelocityJumpThreshold*/,

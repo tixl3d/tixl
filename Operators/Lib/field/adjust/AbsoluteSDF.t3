@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "5b911a78-8cad-4dbd-9f74-afccb0cb0787"/*AbsoluteSDF*/,
   "Inputs": [
     {

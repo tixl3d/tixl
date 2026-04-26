@@ -1,6 +1,9 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "f393bb49-bea5-42f7-a437-c6896bdfd7d8"/*BoxFrameSDF*/,
   "Description": "Generates a procedural Box Frame field which can be rendered with [RaymarchField] and visualized with [VisualizeFieldDistance].\nCan be used with [RepeatFieldLimit] to generate a chain.\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToRaymarchField].\n\nIt can be modified with [BendField], [TransformField], [PolarRepeat] and more.\n\nSimilar nodes: [BoxSDF], [OctahedronSDF], [PyramidSDF].",
+  "SymbolTags": "8",
   "InputUis": [
     {
       "InputId": "26389c32-410e-4240-9cf7-9ed0908b9cf8"/*Thickness*/,

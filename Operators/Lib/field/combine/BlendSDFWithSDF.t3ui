@@ -1,6 +1,9 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "dbef3c50-ada6-437d-adac-62824daa9b6b"/*BlendSDFWithSDF*/,
   "Description": "",
+  "SymbolTags": "8",
   "InputUis": [
     {
       "InputId": "3301f9bb-8938-40e4-b3fc-501bcfa140a3"/*Offset*/,

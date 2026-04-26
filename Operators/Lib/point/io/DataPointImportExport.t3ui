@@ -1,6 +1,9 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "d4e5f6a7-b8c9-4d0e-1f2a-9b8c7d6e5f4a"/*DataPointImportExport*/,
   "Description": "Imports a JSON point list into a GPU structured buffer and optionally exports it again. The node keeps the imported data in an internal buffer, so the points remain visible even when the import trigger is released. It also features an autoload capability that re-imports the file when the ImportFilePath is modified.",
+  "SymbolTags": "8",
   "InputUis": [
     {
       "InputId": "27320742-221f-4383-8241-995083c87b8b"/*PointBufferIn*/,

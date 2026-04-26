@@ -1,6 +1,9 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "15a1da54-2869-4d98-a61c-aa9fe89b0125"/*SDFToColor*/,
   "Description": "",
+  "SymbolTags": "1",
   "InputUis": [
     {
       "InputId": "8b5f65ba-4b18-49eb-803d-28e028cf67f7"/*GainAndBias*/,

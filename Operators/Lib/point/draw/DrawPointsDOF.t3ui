@@ -1,6 +1,9 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "dcd04bb7-4531-40ab-bb18-26a3bc269dc4"/*DrawPointsDOF*/,
   "Description": "",
+  "SymbolTags": "1024",
   "InputUis": [
     {
       "InputId": "37e8a9f7-8496-4fca-90e9-b5ffc0cdf25e"/*Texture_*/,

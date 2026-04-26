@@ -164,11 +164,11 @@ internal static class PlaceHolderUi
         }
         else
         {
-            ImGui.SetCursorPos(ImGui.GetCursorPos() + new Vector2(5, 5));
+            ImGui.SetCursorPos(ImGui.GetCursorPos() + new Vector2(5, 0));
             ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 10);
-            ImGui.PushStyleColor(ImGuiCol.Button, Color.Transparent.Rgba);
-            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, UiColors.ForegroundFull.Fade(0.1f).Rgba);
-            ImGui.PushStyleColor(ImGuiCol.ButtonActive, UiColors.ForegroundFull.Fade(0.2f).Rgba);
+            ImGui.PushStyleColor(ImGuiCol.Button, UiColors.ForegroundFull.Fade(0.1f).Rgba);
+            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, UiColors.ForegroundFull.Fade(0.2f).Rgba);
+            ImGui.PushStyleColor(ImGuiCol.ButtonActive, UiColors.ForegroundFull.Fade(0.3f).Rgba);
 
             if (ImGui.Button(favoriteGroup + " ×"))
             {
@@ -277,7 +277,7 @@ internal static class PlaceHolderUi
             }
         }
 
-        last.Y = last.Y.Clamp(0, 300);
+        last.Y = last.Y.Clamp(0, 250);
 
         var resultAreaOnScreen = ImRect.RectWithSize(resultPosOnScreen, last);
 
@@ -397,7 +397,7 @@ internal static class PlaceHolderUi
         return result;
     }
 
-    internal static UiResults DrawSymbolUiEntry(GraphUiContext context, SymbolUi symbolUi)
+    internal static UiResults DrawSymbolUiEntry(GraphUiContext context, SymbolUi symbolUi, bool showType=true)
     {
         var result = UiResults.None;
 
@@ -456,7 +456,7 @@ internal static class PlaceHolderUi
         ImGui.SameLine(ImGui.GetItemRectMin().X - ImGui.GetWindowPos().X);
         ImGui.TextUnformatted(symbolUi.Symbol.Name);
 
-        if (type != null)
+        if (showType && type != null)
         {
             ImGui.SameLine(0,10);
             ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 0.3f);

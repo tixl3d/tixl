@@ -1,6 +1,9 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "6f65e325-21cc-4bc5-9aea-4a691476e3bf"/*SampleCpuPoints*/,
   "Description": "Samples a list of line points with cubic bezier spline interpolation. \nThis can useful to animate cameras and other objects.",
+  "SymbolTags": "16",
   "InputUis": [
     {
       "InputId": "1bd99405-7fe5-4712-9ef2-6e66b8d41aeb"/*TangentScale*/,

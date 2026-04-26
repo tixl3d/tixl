@@ -1,6 +1,9 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "023fa572-a3e0-4dfc-9b42-79bc1f5c353e"/*CombineFieldColor*/,
   "Description": "",
+  "SymbolTags": "8",
   "InputUis": [
     {
       "InputId": "494b16a6-320a-4197-b5ae-62dd8a697c7c"/*InputFields*/,

@@ -84,7 +84,8 @@ public static class SearchableDropDown
         var lostFocus =  ImGui.IsKeyDown(Key.Esc.ToImGuiKey());
         
         ImGui.SetNextWindowPos(new Vector2(ImGui.GetItemRectMin().X, ImGui.GetItemRectMax().Y));
-        ImGui.SetNextWindowSize(new Vector2(ImGui.GetItemRectSize().X, 320));
+        var size = new Vector2(ImGui.GetItemRectSize().X, 320);
+        ImGui.SetNextWindowSize(size);
 
         if (ImGui.Begin("##typeAheadSearchPopup", ref isSearchResultWindowOpen,
                         ImGuiWindowFlags.NoTitleBar

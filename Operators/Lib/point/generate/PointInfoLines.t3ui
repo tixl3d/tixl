@@ -1,6 +1,9 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "24848671-a827-45f0-84f2-52efccd4fbd5"/*PointInfoLines*/,
   "Description": "Generates a line point buffer that can visualize numerical point attribute data.\nThe result can be drawn with [DrawLines].",
+  "SymbolTags": "8",
   "InputUis": [
     {
       "InputId": "012bd45d-ecb4-49f5-970d-0d64d162bb6a"/*ShownInfo*/,

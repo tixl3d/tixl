@@ -1,7 +1,7 @@
 {
   "FormatVersion": 2,
   "TixlVersion": "4.2.0.2",
-  "Id": "6e89c814-cc67-40c2-933c-d03ff1b30ef7"/*DrawLinesAlt*/,
+  "Id": "6e89c814-cc67-40c2-933c-d03ff1b30ef7"/*DrawClosedLines*/,
   "Inputs": [
     {
       "Id": "0bcf77ac-d6b2-443d-883e-2c05491145cf"/*EnableZTest*/,

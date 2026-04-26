@@ -1,6 +1,9 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "c7752832-7155-4082-acd5-276c1abe7eb4"/*KeepPreviousPointBuffer*/,
   "Description": "Can be used to implement double buffering of points.",
+  "SymbolTags": "8",
   "InputUis": [
     {
       "InputId": "07ca7e81-02b8-4cb4-92f4-7afaaa07b751"/*InputBuffer*/,

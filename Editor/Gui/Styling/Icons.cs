@@ -29,6 +29,13 @@ internal static class Icons
         ImGui.PopFont();
     }
 
+    public static void DrawAtCursor(this Icon icon, Color color)
+    {
+        ImGui.PushStyleColor(ImGuiCol.Text, color.Rgba);
+        DrawAtCursor(icon);
+        ImGui.PopStyleColor();
+    }
+
     public static void DrawIconAtScreenPosition(Icon icon, Vector2 screenPos)
     {
         DrawIconAtScreenPosition(icon, screenPos, ImGui.GetWindowDrawList(), Color.White);
@@ -206,7 +213,7 @@ internal static class Icons
             new(Icon.Warning, 56),
             new(Icon.Flame, 57),
             new(Icon.Help, 58),
-            new(Icon.Tip, 58),
+            new(Icon.Tip, 59),
             new(Icon.Comment, 60),
             new(Icon.IO, 61),
             new(Icon.Presets, 62),

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "ef938762-4341-42f4-b421-c14e162e159e"/*DrawMovingPoints*/,
   "Inputs": [
     {

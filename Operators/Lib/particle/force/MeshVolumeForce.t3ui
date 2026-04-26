@@ -1,6 +1,9 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "c3cdcbed-7d2e-4f2f-8725-bf18bc4a2b73"/*MeshVolumeForce*/,
   "Description": "Experimental force that moves particles along a low poly mesh.",
+  "SymbolTags": "8",
   "InputUis": [
     {
       "InputId": "145cf7e8-3120-40f4-ab4a-a23c5dd27ff6"/*Repulsion*/,

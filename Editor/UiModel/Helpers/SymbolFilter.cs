@@ -211,6 +211,12 @@ internal sealed class SymbolFilter
         _logList.Clear();
         _logList.Add(symbolUi.Symbol.Name);
 
+
+        if (query.Length == 1 && symbolName.StartsWith(query, StringComparison.InvariantCultureIgnoreCase ))
+        {
+            relevancy *= 20;
+        }
+        
         if (symbol.Namespace.StartsWith("Types.", StringComparison.InvariantCulture))
         {
             _logList.Add("Type: x4");

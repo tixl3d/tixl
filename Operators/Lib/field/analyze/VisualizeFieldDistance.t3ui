@@ -1,6 +1,9 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "89dd9ee0-8754-4e4c-abdc-74425c39dcc2"/*VisualizeFieldDistance*/,
   "Description": "Visualizes the distance a field by drawing a plane with contour lines.\n\nThis plane can be rotated or moved through your field. This can be very useful to analyze and understand your field and inspect the Lipschitz continuity and potential problems for [RaymarchSDF].\n",
+  "SymbolTags": "8",
   "InputUis": [
     {
       "InputId": "0abd3f44-27f3-4f4c-a56b-e1fbfcb32cb6"/*Background*/,

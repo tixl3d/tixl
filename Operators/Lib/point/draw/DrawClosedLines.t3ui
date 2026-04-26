@@ -1,8 +1,9 @@
 {
   "FormatVersion": 2,
   "TixlVersion": "4.2.0.2",
-  "Id": "6e89c814-cc67-40c2-933c-d03ff1b30ef7"/*DrawLinesAlt*/,
+  "Id": "6e89c814-cc67-40c2-933c-d03ff1b30ef7"/*DrawClosedLines*/,
   "Description": "Alternative version of [DrawLines] that allow to draw closed shapes by connecting the first and the last points. ",
+  "SymbolTags": "8",
   "InputUis": [
     {
       "InputId": "0bcf77ac-d6b2-443d-883e-2c05491145cf"/*EnableZTest*/,

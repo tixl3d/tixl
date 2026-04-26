@@ -1,6 +1,9 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "dda268e8-fed6-4137-b21d-56ed907e3a51"/*StairCombineSDF*/,
   "Description": "A set of sdf combine operations that will turn intersections into stairs or bumps.",
+  "SymbolTags": "8",
   "InputUis": [
     {
       "InputId": "2607bb4f-a9cc-4289-9404-841c12a03e96"/*K*/,

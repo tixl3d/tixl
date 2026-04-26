@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "2fdb72b0-ac0b-4269-8822-e7d38497835a"/*PointColorWithField*/,
   "Inputs": [
     {

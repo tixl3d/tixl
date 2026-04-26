@@ -1,6 +1,9 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "2db5e90a-f02a-47ce-b1c0-3c5c4513f8fd"/*CustomForce*/,
   "Description": "Allows to write small shaders to create custom particle force effects.",
+  "SymbolTags": "8",
   "InputUis": [
     {
       "InputId": "18b352f3-0863-4ad4-a569-a63000841736"/*Field*/,

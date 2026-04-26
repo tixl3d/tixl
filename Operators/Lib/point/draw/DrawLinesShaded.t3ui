@@ -1,6 +1,9 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "6b2f5350-6bb8-4f2c-92af-6e5fc81b8a82"/*DrawLinesShaded*/,
   "Description": "",
+  "SymbolTags": "1024",
   "InputUis": [
     {
       "InputId": "05dbd5e7-7794-410a-8b01-717cb5b451fa"/*Color*/,

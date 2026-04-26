@@ -1,6 +1,9 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "4af7bbd1-9231-4ef3-bb7a-1d643c7d16cf"/*SdfReflectionLinePoints*/,
   "Description": "Moves points along their Z-axis until they hit an SDF surface.\n\nThis can be used for visualizing raymarching or simlurate rays being reflected from an SDF surface.",
+  "SymbolTags": "8",
   "InputUis": [
     {
       "InputId": "0d73ebd5-c76b-46c2-b15f-96ff2ec498bd"/*MaxReflectionCount*/,

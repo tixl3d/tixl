@@ -1,6 +1,9 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d"/*DataPointConverter*/,
   "Description": "Converts point data from CSV or JSON files into a GPU structured buffer of Point objects. It supports custom column mapping for CSV files and can export the converted points back to CSV or JSON.",
+  "SymbolTags": "8",
   "InputUis": [
     {
       "InputId": "1a2b3c4d-5e6f-4a1b-8c9d-1e2f3a4b5c6d"/*FilePath*/,

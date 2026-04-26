@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "0cfc80fc-7b98-4cf7-982f-1aa42697bb76"/*CpuPointToCamera*/,
   "Inputs": [
     {

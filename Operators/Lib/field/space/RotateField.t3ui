@@ -1,6 +1,9 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "6ca6420a-4c05-4c33-81a3-1a9c4872e29d"/*RotateField*/,
   "Description": "",
+  "SymbolTags": "1",
   "InputUis": [
     {
       "InputId": "2e930b97-159d-4e29-ac28-1ff5c796820f"/*InputField*/,

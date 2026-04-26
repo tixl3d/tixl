@@ -1,6 +1,9 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "88926602-4694-4632-9fd7-04c8d6ddd728"/*SetSDFMaterial*/,
   "Description": "Injects a Color provider into the shader graph. \n\nThere can be multiple colors which can be mixed with [CombineSDF]",
+  "SymbolTags": "1",
   "InputUis": [
     {
       "InputId": "7c656067-ef12-4990-b094-7f8160a242d1"/*SdfField*/,

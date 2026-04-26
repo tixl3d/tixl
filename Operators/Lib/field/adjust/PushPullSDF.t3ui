@@ -1,6 +1,9 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "0ff18a32-c1e9-406d-b3e3-23700e2453a0"/*PushPullSDF*/,
   "Description": "Makes the incoming SDF volumes thicker or thinner by pushing or pulling the surface by adding a constant value to the distance.",
+  "SymbolTags": "1",
   "InputUis": [
     {
       "InputId": "463149fa-b53b-4d43-b4e7-57dcb045bba0"/*StepScale*/,
