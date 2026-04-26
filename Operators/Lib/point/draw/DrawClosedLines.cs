@@ -3,8 +3,7 @@ using T3.Core.Utils;
 namespace Lib.point.draw;
 
 [Guid("6e89c814-cc67-40c2-933c-d03ff1b30ef7")]
-internal sealed class DrawLinesAlt : Instance<DrawLinesAlt>
-{
+internal sealed class DrawClosedLines :Instance<DrawClosedLines>{
     [Output(Guid = "3b11b346-638d-47b5-8b2c-79e5cdaf7e34")]
     public readonly Slot<Command> Output = new();
 
