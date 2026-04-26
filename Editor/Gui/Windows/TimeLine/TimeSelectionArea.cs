@@ -120,6 +120,10 @@ internal sealed class TimeSelectionArea
                 var mouseU = _canvas.InverseTransformX(ImGui.GetMousePos().X);
                 _dragGrabOffset = mouseU - _draggingKeys[0].U;
                 _isDragging = true;
+                // Tell DSA's snap attractor to skip the bucket's own keys for this drag — the
+                // bucket carries the whole set, not just the selected ones, so unselected siblings
+                // would otherwise pull the dragged anchor onto themselves each frame.
+                _canvas.DopeSheetArea.ExternalDragSnapExclusions = _draggingKeys;
             }
         }
 
@@ -206,6 +210,7 @@ internal sealed class TimeSelectionArea
             _isPressed = false;
             _isBackgroundPressed = false;
             _isFencing = false;
+            _canvas.DopeSheetArea.ExternalDragSnapExclusions = null;
             _draggingKeys.Clear();
             _draggingCurves.Clear();
         }

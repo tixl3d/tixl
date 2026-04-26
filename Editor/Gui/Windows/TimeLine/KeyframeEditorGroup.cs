@@ -168,8 +168,16 @@ internal sealed class KeyframeEditorGroup
 
     public void ApplyKeyframeTimeOffset(IReadOnlyList<VDefinition> keys, double deltaU)
     {
+        // Editors share the same VDefinition instances via SharedSelectedKeyframes, so the U
+        // shift must be applied exactly once. Calling editor.ApplyKeyframeTimeOffset per editor
+        // would mutate keys[i].U += deltaU N times — visible as TimeSelectionArea drag jitter
+        // when the inline curve editor is open (DSA + TimelineCurveEditor both active → 2x).
+        for (var i = 0; i < keys.Count; i++)
+            keys[i].U += deltaU;
+
+        // Curve tables are per-editor, so each still needs to rebuild.
         for (var i = 0; i < _editors.Count; i++)
-            _editors[i].ApplyKeyframeTimeOffset(keys, deltaU);
+            _editors[i].RebuildCurves();
     }
 
     /// <summary>

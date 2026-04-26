@@ -1105,9 +1105,29 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
             if (_draggedKeyframe == vDefinition)
                 continue;
 
+            if (ExternalDragSnapExclusions != null && ContainsRef(ExternalDragSnapExclusions, vDefinition))
+                continue;
+
             snapResult.TryToImproveWithAnchorValue(vDefinition.U);
         }
     }
+
+    private static bool ContainsRef(IReadOnlyList<VDefinition> list, VDefinition target)
+    {
+        for (var i = 0; i < list.Count; i++)
+        {
+            if (ReferenceEquals(list[i], target))
+                return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Keyframes for an external drag (e.g. a <see cref="TimeSelectionArea"/> bucket drag) that
+    /// should not contribute snap anchors. Generalises <see cref="_draggedKeyframe"/> for callers
+    /// that move several keys at once. Caller sets on drag start, clears on drag end.
+    /// </summary>
+    internal IReadOnlyList<VDefinition>? ExternalDragSnapExclusions { get; set; }
 
     private VDefinition? _draggedKeyframe; // ignore snapping to self
     private const float KeyframeIconWidth = 10;
