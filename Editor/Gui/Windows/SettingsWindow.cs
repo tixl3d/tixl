@@ -329,7 +329,7 @@ internal sealed partial class SettingsWindow : Window
                                                        The total number of files stored will not exceed 40.
                                                        Files exceed 100mb will not be archived.
 
-                                                       They are saved as zip-archives to {AutoBackup.AutoBackup.BackupDirectory}.
+                                                       They are saved as zip-archives next to each user project at <project>/{AutoBackup.AutoBackup.BackupSubFolder}/.
                                                        """,
                                                       UserSettings.Defaults.EnableAutoBackup);
                         if (UserSettings.Config.EnableAutoBackup)

@@ -101,9 +101,9 @@ internal static class CrashReporting
             var message = $"""
                            TiXL crashed. We're really sorry.
 
-                           The last backup was saved {lastBackupTime} to...
-                           {AutoBackup.BackupDirectory}
-                            
+                           The last backup was saved {lastBackupTime}.
+                           Backups live inside each user project at <project>/{AutoBackup.BackupSubFolder}/.
+
                            Please refer to Help > Using Backups on what to do next.
                            """;
 

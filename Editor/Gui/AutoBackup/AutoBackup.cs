@@ -6,7 +6,6 @@ using System.IO.Compression;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using T3.Core.Settings;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
 
@@ -15,14 +14,19 @@ namespace T3.Editor.Gui.AutoBackup;
 internal static class AutoBackup
 {
     public static int SecondsBetweenSaves { get; set; } = 3 * 60;
-    
+
     /// <summary>
-    /// Should be call after all frame operators are completed
+    /// Per-project subfolder where backup zips are written, relative to a project's root folder.
+    /// </summary>
+    public const string BackupSubFolder = ".temp/Backup";
+
+    /// <summary>
+    /// Should be called after all frame operators are completed.
     /// </summary>
     public static void CheckForSave()
     {
-        if (!UserSettings.Config.EnableAutoBackup 
-            || _isSaving 
+        if (!UserSettings.Config.EnableAutoBackup
+            || _isSaving
             || _stopwatch.ElapsedMilliseconds < SecondsBetweenSaves * 1000)
             return;
 
@@ -33,181 +37,354 @@ internal static class AutoBackup
 
     private static void CreateBackupCallback()
     {
-        if (T3Ui.IsCurrentlySaving)
+        try
         {
-            Log.Debug("Skipped backup because saving is in progress.");
-            return;
+            if (T3Ui.IsCurrentlySaving)
+            {
+                Log.Debug("Skipped backup because saving is in progress.");
+                return;
+            }
+
+            T3Ui.Save(false);
+
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+
+            foreach (var project in EditableSymbolProject.AllProjects)
+            {
+                if (!project.HasHome)
+                    continue;
+
+                BackupProject(project.Folder);
+            }
+        }
+        finally
+        {
+            _isSaving = false;
+        }
+    }
+
+    private static void BackupProject(string projectFolder)
+    {
+        var backupDir = Path.Combine(projectFolder, BackupSubFolder);
+        Directory.CreateDirectory(backupDir);
+
+        // Skip identical backups: if no source file is newer than the latest zip,
+        // refresh the existing zip's filename timestamp instead of writing a duplicate copy.
+        var latestArchive = GetLatestArchiveFilePath(backupDir);
+        if (latestArchive != null)
+        {
+            var latestArchiveTime = File.GetLastWriteTime(latestArchive);
+            if (!HasAnySourceChangedSince(projectFolder, latestArchiveTime))
+            {
+                TouchLatestBackupTimestamp(latestArchive);
+                return;
+            }
         }
 
-        T3Ui.Save(false);
+        var index = GetIndexOfLastBackup(backupDir) + 1;
+        ReduceNumberOfBackups(backupDir);
 
-        Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
-        Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
-
-        Directory.CreateDirectory(BackupDirectory);
-
-        var index = GetIndexOfLastBackup();
-        index++;
-        ReduceNumberOfBackups();
-
-        var zipFilePath = Path.Join(BackupDirectory, $"#{index:D5}-{DateTime.Now:yyyy_MM_dd-HH_mm_ss_fff}.zip");
-
-        var excludedDirs = new[] { "bin", "obj", ".git", "Render", "ImageSequence", "Screenshots" };
-        const long maxSizeBytes = 100 * 1024 * 1024; // 100 MB
-
-        // Allowed extensions filter for minimal backup 
-        var minimalBackupExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ".csproj", ".cs", ".t3", ".t3ui", ".hlsl", ".json", ".txt" //maybe this list should be editable by the user in the future?
-        };
+        var zipFilePath = Path.Join(backupDir, $"#{index:D5}-{DateTime.Now:yyyy_MM_dd-HH_mm_ss_fff}.zip");
 
         try
         {
             using var archive = ZipFile.Open(zipFilePath, ZipArchiveMode.Create);
-
-            foreach (var sourcePath in SourcePaths)
+            foreach (var filepath in EnumerateProjectFiles(projectFolder))
             {
-                if (!Directory.Exists(sourcePath))
+                var fileInfo = new FileInfo(filepath);
+
+                if (UserSettings.Config.MinimalBackup
+                    && !_minimalBackupExtensions.Contains(fileInfo.Extension))
                     continue;
 
-                var projectRootName = Path.GetFileName(sourcePath);
+                if (fileInfo.Length > MaxFileSizeBytes)
+                    continue;
 
-                foreach (var filepath in Directory.GetFiles(sourcePath, "*", SearchOption.AllDirectories))
-                {
-                    var relativeUnderProject = filepath[sourcePath.Length..].TrimStart(Path.DirectorySeparatorChar);
-                    var relativePath = Path.Combine(projectRootName, relativeUnderProject);
-
-                    var parts = relativePath.Split(Path.DirectorySeparatorChar);
-                    if (parts.Any(part => excludedDirs.Contains(part, StringComparer.OrdinalIgnoreCase)))
-                        continue;
-
-                    var fileInfo = new FileInfo(filepath);
-
-                    // Apply extension filtering based on MinimalBackup setting 
-                    if (UserSettings.Config.MinimalBackup)
-                    {
-                        if (!minimalBackupExtensions.Contains(fileInfo.Extension))
-                            continue;
-                    }
-
-                    if (fileInfo.Length > maxSizeBytes)
-                        continue;
-
-                    archive.CreateEntryFromFile(filepath, relativePath, CompressionLevel.Fastest);
-                }
+                var relativePath = filepath[projectFolder.Length..].TrimStart(Path.DirectorySeparatorChar);
+                archive.CreateEntryFromFile(filepath, relativePath, CompressionLevel.Fastest);
             }
         }
         catch (Exception ex)
         {
             DeleteFile(zipFilePath);
-            Log.Error("auto backup failed: {0}", ex.Message);
+            Log.Error("Auto backup of {0} failed: {1}", projectFolder, ex.Message);
         }
-
-        _isSaving = false;
     }
 
-    private static void DeleteFile(string file)
+    private static IEnumerable<string> EnumerateProjectFiles(string projectFolder)
+    {
+        if (!Directory.Exists(projectFolder))
+            yield break;
+
+        foreach (var filepath in Directory.EnumerateFiles(projectFolder, "*", SearchOption.AllDirectories))
+        {
+            var relativePath = filepath[projectFolder.Length..].TrimStart(Path.DirectorySeparatorChar);
+            if (IsPathExcluded(relativePath))
+                continue;
+            yield return filepath;
+        }
+    }
+
+    private static bool HasAnySourceChangedSince(string projectFolder, DateTime since)
+    {
+        foreach (var filepath in EnumerateProjectFiles(projectFolder))
+        {
+            if (File.GetLastWriteTime(filepath) > since)
+                return true;
+        }
+        return false;
+    }
+
+    private static bool IsPathExcluded(string relativePath)
+    {
+        var parts = relativePath.Split(_pathSeparators);
+        for (var i = 0; i < parts.Length; i++)
+        {
+            for (var e = 0; e < _excludedDirs.Length; e++)
+            {
+                if (string.Equals(parts[i], _excludedDirs[e], StringComparison.OrdinalIgnoreCase))
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    private static void TouchLatestBackupTimestamp(string latestArchive)
     {
         try
         {
-            File.Delete(file);
+            var fileName = Path.GetFileName(latestArchive);
+            var match = _backupNameRegex.Match(fileName);
+            if (!match.Success)
+                return;
+
+            var index = int.Parse(match.Groups[1].Value);
+            var dir = Path.GetDirectoryName(latestArchive);
+            if (dir == null)
+                return;
+
+            var renamed = Path.Combine(dir, $"#{index:D5}-{DateTime.Now:yyyy_MM_dd-HH_mm_ss_fff}.zip");
+            if (string.Equals(renamed, latestArchive, StringComparison.OrdinalIgnoreCase))
+                return;
+
+            File.Move(latestArchive, renamed);
+            File.SetLastWriteTime(renamed, DateTime.Now);
         }
         catch (Exception e)
         {
-            Log.Info("Failed to delete file:" + e.Message);
+            Log.Debug("Failed to refresh backup timestamp: " + e.Message);
         }
     }
 
-    public static bool RestoreLast()
+    /// <summary>
+    /// Restore the latest backup of every project that has one. Build artifacts
+    /// (bin/, obj/) under each restored project are deleted first so stale
+    /// build output does not conflict with the restored sources.
+    /// </summary>
+    /// <returns>The number of projects that were successfully restored.</returns>
+    public static int RestoreLatestBackups()
     {
-        var latestArchivePath = GetLatestArchiveFilePath();
-        if (latestArchivePath == null)
+        var restoredCount = 0;
+        foreach (var projectFolder in EnumerateCandidateProjectFolders())
+        {
+            if (RestoreLatestForProject(projectFolder))
+                restoredCount++;
+        }
+        return restoredCount;
+    }
+
+    private static bool RestoreLatestForProject(string projectFolder)
+    {
+        var backupDir = Path.Combine(projectFolder, BackupSubFolder);
+        var latestArchive = GetLatestArchiveFilePath(backupDir);
+        if (latestArchive == null)
             return false;
+
+        DeleteBuildArtifacts(projectFolder);
 
         try
         {
-            using var archive = ZipFile.Open(latestArchivePath, ZipArchiveMode.Read);
+            using var archive = ZipFile.Open(latestArchive, ZipArchiveMode.Read);
+            var projectFolderFull = Path.GetFullPath(projectFolder);
 
-            foreach (var file in archive.Entries)
+            foreach (var entry in archive.Entries)
             {
-                var targetFilePath = file.FullName;
+                if (string.IsNullOrEmpty(entry.Name))
+                    continue;
 
-                if (File.Exists(targetFilePath))
-                {
-                    File.Delete(targetFilePath);
-                }
+                var targetPath = Path.GetFullPath(Path.Combine(projectFolder, entry.FullName));
 
-                var directory = Path.GetDirectoryName(targetFilePath);
+                // Defensive: refuse entries that would write outside the project folder.
+                if (!targetPath.StartsWith(projectFolderFull, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                var directory = Path.GetDirectoryName(targetPath);
                 if (directory != null && !Directory.Exists(directory))
-                {
-                    try
-                    {
-                        Directory.CreateDirectory(directory);
-                    }
-                    catch (Exception e)
-                    {
-                        Log.Warning($"Failed to create target directory for restoring{targetFilePath}:" + e.Message);
-                        continue;
-                    }
-                }
+                    Directory.CreateDirectory(directory);
 
-                file.ExtractToFile(targetFilePath, true);
+                entry.ExtractToFile(targetPath, true);
             }
         }
         catch (Exception e)
         {
-            Log.Error($"Restoring archive {latestArchivePath} failed. Is Zip archive corrupted?" + e.Message);
+            Log.Error($"Restoring archive {latestArchive} failed. Is the zip corrupted? " + e.Message);
             return false;
         }
-
         return true;
     }
 
+    private static void DeleteBuildArtifacts(string projectFolder)
+    {
+        TryDeleteRecursively(Path.Combine(projectFolder, "bin"));
+        TryDeleteRecursively(Path.Combine(projectFolder, "obj"));
+    }
+
+    private static void TryDeleteRecursively(string folder)
+    {
+        if (!Directory.Exists(folder))
+            return;
+        try
+        {
+            Directory.Delete(folder, recursive: true);
+        }
+        catch (Exception e)
+        {
+            Log.Warning($"Failed to delete {folder} before restore: {e.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Returns the time of the most recent backup across all projects, or null if
+    /// no backup exists. Safe to call before EditableSymbolProject.AllProjects has
+    /// been populated.
+    /// </summary>
     public static DateTime? GetTimeOfLastBackup()
     {
-        var lastFilePath = GetLatestArchiveFilePath();
-        if (lastFilePath == null)
-            return null;
+        DateTime? latest = null;
+        foreach (var projectFolder in EnumerateCandidateProjectFolders())
+        {
+            var backupDir = Path.Combine(projectFolder, BackupSubFolder);
+            var latestArchive = GetLatestArchiveFilePath(backupDir);
+            if (latestArchive == null)
+                continue;
 
-        var result = Regex.Match(lastFilePath, @"(#\d\d\d\d\d)?-(\d\d\d\d)_(\d\d)_(\d\d)-(\d\d)_(\d\d)_(\d\d)_(\d\d\d)");
-
-        if (!result.Success)
-            return null;
-
-        var year = result.Groups[2].Value;
-        var month = result.Groups[3].Value;
-        var day = result.Groups[4].Value;
-        var hour = result.Groups[5].Value;
-        var min = result.Groups[6].Value;
-        var second = result.Groups[7].Value;
-
-        var timeFromName = year + "-" + month + "-" + day + " " + hour + ":" + min + ":" + second;
-
-        var date = DateTime.Parse(timeFromName);
-        return date;
+            var time = ParseTimestampFromName(latestArchive);
+            if (time.HasValue && (!latest.HasValue || time.Value > latest.Value))
+                latest = time;
+        }
+        return latest;
     }
 
-    private static int GetIndexOfLastBackup()
+    /// <summary>
+    /// True if any user project folder contains at least one backup zip. Safe to
+    /// call before EditableSymbolProject.AllProjects has been populated.
+    /// </summary>
+    public static bool HasAnyBackups()
     {
-        var lastFilePath = GetLatestArchiveFilePath();
-        if (lastFilePath == null)
-            return -1;
-
-        var result = Regex.Match(lastFilePath, @"#(\d\d\d\d\d)-(\d\d\d\d)_(\d\d)_(\d\d)-(\d\d)_(\d\d)_(\d\d)_(\d\d\d)");
-
-        if (!result.Success)
-            return -1;
-
-        var index = int.Parse(result.Groups[1].Value);
-        return index;
+        foreach (var projectFolder in EnumerateCandidateProjectFolders())
+        {
+            var backupDir = Path.Combine(projectFolder, BackupSubFolder);
+            if (GetLatestArchiveFilePath(backupDir) != null)
+                return true;
+        }
+        return false;
     }
 
-    public static string? GetLatestArchiveFilePath()
+    /// <summary>
+    /// Yields every project root under any of the user's configured project
+    /// directories. Used by the startup-time crash recovery flow when
+    /// EditableSymbolProject.AllProjects is not yet populated.
+    /// </summary>
+    private static IEnumerable<string> EnumerateCandidateProjectFolders()
     {
-        Directory.CreateDirectory(BackupDirectory);
-        return Directory.EnumerateFiles(BackupDirectory, "*.zip", SearchOption.TopDirectoryOnly)
-                        .Reverse()
-                        .FirstOrDefault();
+        var projectDirectories = UserSettings.Config?.ProjectDirectories;
+        if (projectDirectories == null)
+            yield break;
+
+        foreach (var topDir in projectDirectories)
+        {
+            if (string.IsNullOrWhiteSpace(topDir) || !Directory.Exists(topDir))
+                continue;
+
+            string[] subdirs;
+            try
+            {
+                subdirs = Directory.GetDirectories(topDir);
+            }
+            catch (Exception e)
+            {
+                Log.Debug($"Failed to enumerate {topDir}: {e.Message}");
+                continue;
+            }
+
+            foreach (var subDir in subdirs)
+                yield return subDir;
+        }
+    }
+
+    private static DateTime? ParseTimestampFromName(string filePath)
+    {
+        var fileName = Path.GetFileName(filePath);
+        var match = _backupNameRegex.Match(fileName);
+        if (!match.Success)
+            return null;
+
+        try
+        {
+            var year = int.Parse(match.Groups[2].Value);
+            var month = int.Parse(match.Groups[3].Value);
+            var day = int.Parse(match.Groups[4].Value);
+            var hour = int.Parse(match.Groups[5].Value);
+            var min = int.Parse(match.Groups[6].Value);
+            var sec = int.Parse(match.Groups[7].Value);
+            var ms = int.Parse(match.Groups[8].Value);
+            return new DateTime(year, month, day, hour, min, sec, ms);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static int GetIndexOfLastBackup(string backupDir)
+    {
+        if (!Directory.Exists(backupDir))
+            return -1;
+
+        var highestIndex = -1;
+        foreach (var path in Directory.EnumerateFiles(backupDir, "*.zip", SearchOption.TopDirectoryOnly))
+        {
+            var match = _backupNameRegex.Match(Path.GetFileName(path));
+            if (!match.Success)
+                continue;
+            var index = int.Parse(match.Groups[1].Value);
+            if (index > highestIndex)
+                highestIndex = index;
+        }
+        return highestIndex;
+    }
+
+    private static string? GetLatestArchiveFilePath(string backupDir)
+    {
+        if (!Directory.Exists(backupDir))
+            return null;
+
+        string? latestPath = null;
+        var latestIndex = -1;
+        foreach (var path in Directory.EnumerateFiles(backupDir, "*.zip", SearchOption.TopDirectoryOnly))
+        {
+            var match = _backupNameRegex.Match(Path.GetFileName(path));
+            if (!match.Success)
+                continue;
+            var index = int.Parse(match.Groups[1].Value);
+            if (index > latestIndex)
+            {
+                latestIndex = index;
+                latestPath = path;
+            }
+        }
+        return latestPath;
     }
 
     /*
@@ -215,7 +392,7 @@ internal static class AutoBackup
      * less versions are kept. We're using the binary representation of the backup index to separate
      * the deleted versions from the ones we keep.
      *
-     * This algorithm is a hard to describe in words, but it basically thins out the backup-copies
+     * This algorithm is hard to describe in words, but it basically thins out the backup-copies
      * according to their respective binary code:
      *
      *     bits    significant bit
@@ -233,36 +410,31 @@ internal static class AutoBackup
      *  1. 00001 - 0            2 remove
      *  0. 00000   inf         +2 keep(level2/2nd)
      *
-     * This means that we're keeping N*log2 backups (e.g. 3*16 out of 65536 saved versions) where N is the backup density.
+     * This means that we're keeping N*log2 backups (e.g. 3*16 out of 65536 saved versions)
+     * where N is the backup density.
      */
-    private static void ReduceNumberOfBackups(int backupDensity = 3)
+    private static void ReduceNumberOfBackups(string backupDir, int backupDensity = 3)
     {
-        // Gather list of backups with indexes and find latest index
-        var regexMatchIndex = new Regex(@"#(\d\d\d\d\d)-(\d\d\d\d)_(\d\d)_(\d\d)-(\d\d)_(\d\d)_(\d\d)_(\d\d\d)");
         var backupFilePathsByIndex = new Dictionary<int, string>();
         var highestIndex = int.MinValue;
 
-        foreach (var filename in Directory.GetFiles(BackupDirectory))
+        foreach (var filename in Directory.EnumerateFiles(backupDir, "*.zip", SearchOption.TopDirectoryOnly))
         {
-            var result = regexMatchIndex.Match(filename);
-            if (!result.Success)
+            var match = _backupNameRegex.Match(Path.GetFileName(filename));
+            if (!match.Success)
                 continue;
 
-            var index = int.Parse(result.Groups[1].Value);
+            var index = int.Parse(match.Groups[1].Value);
             if (index > highestIndex)
                 highestIndex = index;
-
             backupFilePathsByIndex[index] = filename;
         }
 
-        // Iterate over all files and thin out the backups
         var limit = 0;
         var limitCount = 0;
         for (var i = highestIndex - 1; i >= 0; i--)
         {
             var b = GetSignificantBit(0xffffff - i) + 1;
-
-            // Keep
             if (b > limit)
             {
                 limitCount++;
@@ -272,31 +444,23 @@ internal static class AutoBackup
                     limit++;
                 }
             }
-            // Remove
             else
             {
-                if (!backupFilePathsByIndex.ContainsKey(i))
+                if (!backupFilePathsByIndex.TryGetValue(i, out var path))
                     continue;
-
-                //Log.Debug($"removing... old backup {backupFilePathsByIndex[i]} (level 2^{b})...");
-                File.Delete(backupFilePathsByIndex[i]);
+                DeleteFile(path);
             }
         }
     }
 
-    /**
-     * Get the significant bit in an integer
-     */
     private static int GetSignificantBit(int n)
     {
         var a = new bool[32];
         var rest = n;
-
-        // Break down integer into bits
         while (rest > 0)
         {
             var h = (int)Math.Floor(Math.Log(rest, 2));
-            rest = rest - (int)Math.Pow(2, h);
+            rest -= (int)Math.Pow(2, h);
             a[h] = true;
         }
 
@@ -304,35 +468,41 @@ internal static class AutoBackup
         while (rest > 0)
         {
             var h = (int)Math.Floor(Math.Log(rest, 2));
-            rest = rest - (int)Math.Pow(2, h);
-            if (a[h] == false)
-            {
+            rest -= (int)Math.Pow(2, h);
+            if (!a[h])
                 return h;
-            }
         }
-
         return 0;
     }
 
-    private static readonly Stopwatch _stopwatch = Stopwatch.StartNew();
-    private static bool _isSaving;
-    internal static string BackupDirectory => Path.Combine(FileLocations.SettingsDirectory, "Backup");
-
-    private static string[] SourcePaths
+    private static void DeleteFile(string file)
     {
-        get
+        try
         {
-            return EditableSymbolProject.AllProjects
-                                        .Where(x => x.HasHome)
-                                        .Select(x => x.Folder)
-                                        .Concat(_nonProjectSourcePaths)
-                                        .ToArray();
+            File.Delete(file);
+        }
+        catch (Exception e)
+        {
+            Log.Info("Failed to delete file: " + e.Message);
         }
     }
 
-    private static readonly string[] _nonProjectSourcePaths =
-        {
-            //ThemeHandling.ThemeFolder,
-            //LayoutHandling.LayoutFolder
-        };
+    private static readonly Regex _backupNameRegex = new(
+        @"^#(\d{5})-(\d{4})_(\d{2})_(\d{2})-(\d{2})_(\d{2})_(\d{2})_(\d{3})\.zip$",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+    private static readonly char[] _pathSeparators = { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
+
+    private static readonly string[] _excludedDirs =
+        { "bin", "obj", ".git", ".temp", "Render", "Export", "ImageSequence", "Screenshots" };
+
+    private const long MaxFileSizeBytes = 100L * 1024 * 1024;
+
+    private static readonly HashSet<string> _minimalBackupExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".csproj", ".cs", ".t3", ".t3ui", ".hlsl", ".json", ".txt"
+    };
+
+    private static readonly Stopwatch _stopwatch = Stopwatch.StartNew();
+    private static bool _isSaving;
 }

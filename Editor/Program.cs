@@ -136,17 +136,15 @@ internal static class Program
             //StartupValidation.CheckInstallation();
         }
 
-        StartUp.FlagBeginStartupSequence();
-
         CultureInfo.CurrentCulture = new CultureInfo("en-US");
         ShaderCompiler.ShaderCacheSubdirectory = $"Editor_{VersionText}";
-            
+
         // ReSharper disable once UnusedVariable
         var userSettings = new UserSettings(saveOnQuit: true);
-        
+
         // Initialize debug logging configuration from user settings
         UserSettings.InitializeGatedLogging();
-        
+
         // ReSharper disable once UnusedVariable
         var projectSettings = new CoreSettings(saveOnQuit: true);
 
@@ -154,6 +152,10 @@ internal static class Program
         {
             UserSettings.Config.ProjectDirectories.Add(FileLocations.DefaultProjectFolder);
         }
+
+        // Run after UserSettings is initialized — the crash-recovery dialog needs
+        // ProjectDirectories to locate per-project backups under .temp/Backup/.
+        StartUp.FlagBeginStartupSequence();
 
         Log.Debug("Initializing ProgramWindows...");
         ProgramWindows.InitializeMainWindow(FormattedEditorVersion, out var device);
