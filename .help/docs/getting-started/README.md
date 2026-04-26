@@ -4,7 +4,6 @@ If you're new to TiXL, start here. This section answers "what is it", "is it for
 
 ## Pages in this section
 
-- [Welcome](Welcome.md) — the 60-second pitch and where to land next.
 - [What is TiXL](WhatIsTiXL.md) — the product in one page, including use-cases.
 - [System requirements](SystemRequirements.md) — what you need to run TiXL.
 - [Introduction](Introduction.md) — a guided tour; what the 15-minute video covers, in text.

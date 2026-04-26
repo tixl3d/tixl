@@ -29,9 +29,9 @@ From there, you can explore operators, modify existing setups, and gradually bui
 
 ## Pick your path
 
-- Watch the [video tutorials](VideoTutorials.md). Start with the short intro, then follow the full playlist when you have 15 minutes.
+- Watch the [video tutorials](/getting-started/VideoTutorials.md). Start with the short intro, then follow the full playlist when you have 15 minutes.
 
-- To understand the concepts and technology behind read [What is TiXL](WhatIsTiXL.md), then [How TiXL works](HowTixlWorks.md). The terms in [Concepts](Concepts.md) will appear everywhere.
+- To understand the concepts and technology behind read [What is TiXL](/getting-started/WhatIsTiXL.md), then [How TiXL works](/getting-started/HowTixlWorks.md). The terms in [Concepts](/getting-started/Concepts.md) will appear everywhere.
 
 ## Community
 
@@ -39,7 +39,7 @@ If you have questions or feedback, the easiest way is to join us on Discord:
 
  [![Discord](https://img.shields.io/discord/823853172619083816.svg?style=for-the-badge)](https://discord.gg/YmSyQdeH3S). 
  
-But the [Community](Community.md) is also active on GitHub, YouTube and in real life :-)
+But the [Community](/getting-started/Community.md) is also active on GitHub, YouTube and in real life :-)
 
 ___
 
