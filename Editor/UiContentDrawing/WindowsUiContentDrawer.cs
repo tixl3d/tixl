@@ -109,6 +109,11 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
         if (Program.IsShuttingDown)
             return;
 
+        // Frame-pacing wait via DXGI's FrameLatencyWaitableObject. Must run *before* any other
+        // per-frame work so the loop is locked to the swap chain's signalled cadence rather than
+        // queueing up speculatively. No-op if the waitable wasn't enabled at swap-chain creation.
+        ProgramWindows.Main.WaitForFrameLatency();
+
         lock (_contextLock)
         {
             ImGui.SetCurrentContext(_imguiContext);

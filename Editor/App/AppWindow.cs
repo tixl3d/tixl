@@ -1,5 +1,6 @@
 using System.Drawing;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using SharpDX;
 using SharpDX.Direct3D;
@@ -33,6 +34,15 @@ internal sealed class AppWindow
     internal RenderTargetView RenderTargetView { get => _renderTargetView; private set => _renderTargetView = value; }
     internal ImGuiDx11RenderForm Form { get; private set; }
 
+    /// <summary>
+    /// Set before swap-chain creation. When true, the swap chain is created with
+    /// <see cref="SwapChainFlags.FrameLatencyWaitAbleObject"/>; the latency handle is captured
+    /// after creation and <see cref="WaitForFrameLatency"/> can be called once per frame as the
+    /// pacing primitive — the proper replacement for the accidental pacing that was happening
+    /// via the secondary Viewer's `Present(1)` call.
+    /// </summary>
+    internal bool UseFrameLatencyWaitable { get; set; }
+
     internal SwapChainDescription SwapChainDescription => new()
                                                               {
                                                                   ModeDescription = new ModeDescription(Width,
@@ -42,14 +52,13 @@ internal sealed class AppWindow
                                                                   IsWindowed = true,
                                                                   OutputHandle = Form.Handle,
                                                                   SampleDescription = new SampleDescription(1, 0),
-                                                                  
-                                                                  // Working consistently
+
                                                                   BufferCount = 2,
-                                                                  SwapEffect = SwapEffect.Discard,
-                                                                  
-                                                                  //BufferCount = 2,
-                                                                  //SwapEffect = SwapEffect.FlipDiscard,
-                                                                  Usage = Usage.RenderTargetOutput
+                                                                  SwapEffect = SwapEffect.FlipDiscard,
+                                                                  Usage = Usage.RenderTargetOutput,
+                                                                  Flags = UseFrameLatencyWaitable
+                                                                              ? SwapChainFlags.FrameLatencyWaitAbleObject
+                                                                              : SwapChainFlags.None,
                                                               };
 
     internal bool IsMinimized => Form.WindowState == FormWindowState.Minimized;
@@ -113,6 +122,7 @@ internal sealed class AppWindow
         SwapChain = new SwapChain(factory, _device, SwapChainDescription);
         SwapChain.ResizeBuffers(bufferCount: 3, Width, Height,
                                 SwapChain.Description.ModeDescription.Format, SwapChain.Description.Flags);
+        CaptureFrameLatencyWaitableHandleIfEnabled();
     }
 
     internal void PrepareRenderingFrame()
@@ -162,7 +172,50 @@ internal sealed class AppWindow
         _device = device;
         _deviceContext = deviceContext;
         _swapChain = swapChain;
+        CaptureFrameLatencyWaitableHandleIfEnabled();
     }
+
+    /// <summary>
+    /// Captures the swap chain's frame-latency waitable handle (if the chain was created with the
+    /// matching flag) and sets a low maximum frame latency. The handle must then be waited on once
+    /// per frame via <see cref="WaitForFrameLatency"/> as the loop's pacing primitive.
+    /// </summary>
+    private void CaptureFrameLatencyWaitableHandleIfEnabled()
+    {
+        if (!UseFrameLatencyWaitable || _swapChain == null)
+            return;
+        try
+        {
+            using var swapChain2 = _swapChain.QueryInterface<SwapChain2>();
+            _frameLatencyWaitableHandle = swapChain2.FrameLatencyWaitableObject;
+            // 1 = lowest latency, 2 = small queue depth (less risk of stalls under jitter).
+            swapChain2.MaximumFrameLatency = 2;
+        }
+        catch (SharpDX.SharpDXException e)
+        {
+            // QueryInterface or property access can fail on very old DXGI runtimes.
+            // Falls back to no-pacing — frame still works, just no waitable benefit.
+            Log.Warning($"Could not enable FrameLatencyWaitableObject pacing: {e.Message}");
+            _frameLatencyWaitableHandle = IntPtr.Zero;
+        }
+    }
+
+    /// <summary>
+    /// Block until DXGI signals "you may submit the next frame." Should be called once at the very
+    /// start of each frame iteration. No-op if <see cref="UseFrameLatencyWaitable"/> wasn't enabled
+    /// before swap-chain creation, or if the handle couldn't be obtained.
+    /// </summary>
+    public void WaitForFrameLatency()
+    {
+        if (_frameLatencyWaitableHandle == IntPtr.Zero)
+            return;
+        WaitForSingleObjectEx(_frameLatencyWaitableHandle, 1000, false);
+    }
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern uint WaitForSingleObjectEx(IntPtr hHandle, uint dwMilliseconds, bool bAlertable);
+
+    private IntPtr _frameLatencyWaitableHandle;
 
     internal void Release()
     {
@@ -211,7 +264,9 @@ internal sealed class AppWindow
     {
         rtv.Dispose();
         buffer.Dispose();
-        swapChain.ResizeBuffers(3, form.ClientSize.Width, form.ClientSize.Height, Format.Unknown, 0);
+        // Preserve the swap chain's existing flags (in particular FrameLatencyWaitableObject must
+        // be carried across resize, otherwise the waitable handle becomes invalid).
+        swapChain.ResizeBuffers(3, form.ClientSize.Width, form.ClientSize.Height, Format.Unknown, swapChain.Description.Flags);
         buffer = Resource.FromSwapChain<Texture2D>(swapChain, 0);
         rtv = new RenderTargetView(device, buffer);
     }

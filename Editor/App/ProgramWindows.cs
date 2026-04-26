@@ -110,6 +110,10 @@ internal static class ProgramWindows
     internal static void InitializeMainWindow(string version, out Device device)
     {
         Main = new AppWindow("TiXL " + version, disableClose: false);
+        // Enable explicit frame-latency pacing on Main's swap chain. Replaces the accidental
+        // pacing previously provided by Viewer's secondary `Present(1)` call. Must be set before
+        // SwapChainDescription is consumed by Device.CreateWithSwapChain.
+        Main.UseFrameLatencyWaitable = true;
         device = null;
         string[] highPerformanceKeywords = ["dedicated", "high performance", "rtx", "gtx"];
         string[] integratedKeywords = ["integrated", "intel(r) uhd graphics", "microsoft basic render", "microsoft basic render"]; // twice to make MS worse
@@ -322,8 +326,14 @@ internal static class ProgramWindows
         {
             Main.SwapChain.Present(useVSync ? 1 : 0, PresentFlags.None);
 
-            if (showSecondaryRenderWindow)
-                Viewer.SwapChain.Present(useVSync ? 1 : 0, PresentFlags.None);
+            // Always present the Viewer's swap chain, regardless of whether its window is shown.
+            // Empirically, having two flip-model Present calls per frame in the same process
+            // gives DWM's scheduler a noticeably better composition slot for Main — the Viewer's
+            // Present acts as a co-pacing primitive even when its window is hidden. The cost of
+            // the extra Present is small (the back buffer is unchanged when ShowSecondaryRenderWindow
+            // is false; DWM doesn't display the hidden window; FlipDiscard discards the buffer
+            // immediately on the next present cycle).
+            Viewer?.SwapChain?.Present(useVSync ? 1 : 0, PresentFlags.None);
         }
         catch (SharpDX.SharpDXException e)
         {
