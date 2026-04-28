@@ -45,19 +45,22 @@ public static class TableList
                 if (TypeComponents.TryGetValue(fi.FieldType, out var components))
                 {
                     bool isFirst = true;
+                    
                     foreach (var c in components)
                     {
+                        ImGui.PushID(fi.Name + c);
                         ImGui.Selectable((isFirst ? " " + fi.Name : "_") + "\n" + c, 
                                          false, 
                                          ImGuiSelectableFlags.None,
                                          new Vector2(valueColumnWidth, headerHeight));
                         if (ImGui.IsItemHovered())
                         {
-                            ImGui.SetTooltip(fieldIndex + ": " +fi.Name);
+                            ImGui.SetTooltip(fieldIndex + ": " +fi.Name + c );
                         }
-                            
+                        ImGui.PopID();    
                         ImGui.SameLine();
                         isFirst = false;
+                        
                     }
                 }
                 else
