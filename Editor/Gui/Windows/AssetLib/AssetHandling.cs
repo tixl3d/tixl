@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 
 using T3.Core.Resource.Assets;
 using T3.Editor.Gui.Styling;
@@ -18,6 +18,7 @@ internal static class AssetHandling
                                              FileExtensionRegistry.GetUniqueId("tga"),
                                              FileExtensionRegistry.GetUniqueId("gif"),
                                              FileExtensionRegistry.GetUniqueId("dds"),
+                                             FileExtensionRegistry.GetUniqueId("tiff"),
                                          ])
                                          {
                                              PrimaryOperators = [new Guid("0b3436db-e283-436e-ba85-2f3a1de76a9d")], // Load Image
