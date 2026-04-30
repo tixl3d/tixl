@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "04b8f508-2101-42dc-8d91-60b585bc561e"/*SpringExample*/,
   "Description": "",
   "InputUis": [],
@@ -20,8 +22,8 @@
     {
       "ChildId": "1b83cefa-f242-4f40-b2fd-b06c79e250f5"/*AnimValue*/,
       "Position": {
-        "X": -304.20984,
-        "Y": 696.8009
+        "X": -319.2498,
+        "Y": 647.72314
       }
     },
     {
@@ -313,5 +315,13 @@
         "Y": 389.4063
       }
     }
-  ]
+  ],
+  "Settings": {
+    "Timeline": {
+  "ScaleX": 126.15041,
+  "ScrollX": 0.3109159,
+  "Mode": "CurveEditor",
+  "TimelineHeight": 194
+}
+  }
 }

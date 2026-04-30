@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "ddf3077b-6273-4023-88e5-2948312e012b"/*ReactionDiffusionExample*/,
   "Description": "An example of how to use the sharpen effect in a feedback loop to create a reaction diffusion texture",
   "InputUis": [
@@ -504,6 +506,13 @@
       }
     },
     {
+      "ChildId": "d01c6bcf-fccf-4fcf-a36c-70c2b84481ac"/*HSBToColor*/,
+      "Position": {
+        "X": -1560.8329,
+        "Y": 1752.6992
+      }
+    },
+    {
       "ChildId": "d4ea38ee-5f14-4d64-9ee5-4aab91ea5f82"/*Layer2d*/,
       "Position": {
         "X": -1191.2548,
@@ -514,7 +523,7 @@
       "ChildId": "d55ad72f-38c6-47b3-b87d-5cf26caab947"/*RadialGradient*/,
       "Position": {
         "X": -1349.4487,
-        "Y": 1854.4275
+        "Y": 1889.4275
       }
     },
     {
@@ -659,5 +668,13 @@
         "Y": 752.953
       }
     }
-  ]
+  ],
+  "Settings": {
+    "Timeline": {
+  "ScaleX": 126.15041,
+  "ScrollX": 0.3109159,
+  "Mode": "CurveEditor",
+  "TimelineHeight": 194
+}
+  }
 }
