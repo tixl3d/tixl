@@ -1,0 +1,59 @@
+{
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
+  "Id": "5ea3d627-e44b-4531-9f06-4503a1a4dd0e"/*SwiftCamDevice*/,
+  "Inputs": [
+    {
+      "Id": "370fc7fa-29f8-492e-b443-cce968ece722"/*AnalogGainFactor*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "3e021070-038f-453d-96ca-33c27bc8ddc4"/*RoiAlignment*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "Id": "48e138e2-c31f-45fe-81f2-cf3789fe7d10"/*Exposure*/,
+      "DefaultValue": 10.0
+    },
+    {
+      "Id": "7965cea6-2fe4-4240-9f9c-ab2af0aedea8"/*LogMessages*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "7cd0acca-d843-472e-9fcc-e8deaf129336"/*Reconnect*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "c44f7b21-0418-490f-a2c1-4d57b70bfa32"/*DeviceName*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "d73af73f-e71c-4a6b-a4cf-f8069c1db30d"/*Active*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "df2f5f6b-2b27-44b7-989d-6c8225113234"/*ResolutionIndex*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "e9bc114b-75ac-4bec-a337-5b16404da4de"/*AutoExposure*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "ea6b3503-9a68-405e-9b34-7f44a74d5b31"/*RoiResolution*/,
+      "DefaultValue": {
+        "X": 1954,
+        "Y": 1062
+      }
+    },
+    {
+      "Id": "caa5d946-060d-45eb-907b-601c4f0a677c"/*HardReset*/,
+      "DefaultValue": false
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

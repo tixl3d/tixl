@@ -1,0 +1,128 @@
+{
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
+  "Id": "5ea3d627-e44b-4531-9f06-4503a1a4dd0e"/*SwiftCamDevice*/,
+  "Description": "Captures live video from a Swift Imaging scientific USB camera via the vendor SDK.\n\nDelivers BGRA8 frames into a Texture2D using the SDK's pull-mode callback. Hardware ROI, exposure and gain control, automatic recovery from disconnects.\n\nRequires the Swift Imaging SDK to be installed (provides swiftcam.dll at %LOCALAPPDATA%\\TiXL\\NativeDeps\\). If the DLL is missing, the Status output explains how to install it. Trigger Reconnect after install.\n\nAKA: swift, swiftcam, scientific camera, microscope camera",
+  "InputUis": [
+    {
+      "InputId": "370fc7fa-29f8-492e-b443-cce968ece722"/*AnalogGainFactor*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 375.0
+      },
+      "Description": "Analog gain factor (1.0 = unity, 5.0 = 5×). Prefer raising Exposure before reaching for gain. Maximum supported gain depends on the camera (often around 5×)."
+    },
+    {
+      "InputId": "3e021070-038f-453d-96ca-33c27bc8ddc4"/*RoiAlignment*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 525.0
+      },
+      "Description": "Where the ROI sits inside the sensor: (0,0) = centered, (-1,-1) = top-left, (1,1) = bottom-right. Each axis independent. Changes restart the stream (the camera SDK doesn't accept ROI changes mid-stream cleanly)."
+    },
+    {
+      "InputId": "48e138e2-c31f-45fe-81f2-cf3789fe7d10"/*Exposure*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 300.0
+      },
+      "Description": "Manual exposure time in milliseconds. Applied while streaming. Ignored when AutoExposure is on. Lower values give faster frame rates but darker images. Default 10 ms."
+    },
+    {
+      "InputId": "7965cea6-2fe4-4240-9f9c-ab2af0aedea8"/*LogMessages*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 675.0
+      },
+      "Description": "Enable verbose debug logging (per-frame events, every put_Option result). Off by default to keep the log readable. Errors and one-time lifecycle events are always logged."
+    },
+    {
+      "InputId": "7cd0acca-d843-472e-9fcc-e8deaf129336"/*Reconnect*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 750.0
+      },
+      "Description": "Trigger to re-probe the SDK, rescan devices, and restart streaming. Useful after installing the SDK, replugging the camera, or recovering from a stuck state."
+    },
+    {
+      "InputId": "caa5d946-060d-45eb-907b-601c4f0a677c"/*HardReset*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 825.0
+      },
+      "Description": "Aggressive recovery — calls put_Option(OPTION_RESET_SENSOR) and put_Option(OPTION_FLUSH) on the camera, then a full Close + Open cycle. Use this when the camera is in a stuck state that plain Reconnect can't recover, before resorting to physically unplugging the USB cable."
+    },
+    {
+      "InputId": "c44f7b21-0418-490f-a2c1-4d57b70bfa32"/*DeviceName*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      },
+      "Description": "The Swift camera to use. The dropdown lists every Swift camera detected by the SDK.",
+      "Usage": "CustomDropdown"
+    },
+    {
+      "InputId": "d73af73f-e71c-4a6b-a4cf-f8069c1db30d"/*Active*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "Enables or disables the video capture."
+    },
+    {
+      "InputId": "df2f5f6b-2b27-44b7-989d-6c8225113234"/*ResolutionIndex*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      },
+      "Description": "Camera resolution preset (0 = full sensor; higher indices are typically binned/downsampled and run faster). Pick from the dropdown to see the actual dimensions per index. Changing this restarts the stream."
+    },
+    {
+      "InputId": "e9bc114b-75ac-4bec-a337-5b16404da4de"/*AutoExposure*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      },
+      "Description": "When on, the camera adjusts exposure automatically based on scene brightness — the Exposure input below is ignored. When off, Exposure takes effect."
+    },
+    {
+      "InputId": "ea6b3503-9a68-405e-9b34-7f44a74d5b31"/*RoiResolution*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 450.0
+      },
+      "Description": "Hardware ROI crop dimensions in sensor pixels. (0, 0) disables ROI (full sensor). Snapped to multiples of 2 for Bayer alignment. Changes restart the stream with a 3-second cooldown to give the camera firmware time to settle.\n\nNote: hardware ROI is unreliable on the Swiftcam_SC1003 (firmware 4.0.5) — even pre-start ROI fails with EVENT_ERROR. For live-performance ROI animation, prefer software cropping in TiXL after the texture output."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "5f1552ab-e9e5-49ac-b2f1-3019becf6f96"/*Texture*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    },
+    {
+      "OutputId": "083525a9-1c9d-4ac4-96dc-915a4c0b6aaa"/*UpdateCount*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 300.0
+      }
+    },
+    {
+      "OutputId": "c5d201f4-020c-4f84-9ba2-1a3e59423f22"/*Resolution*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 400.0
+      }
+    },
+    {
+      "OutputId": "d6862579-03df-48e8-a495-070fb6614497"/*Status*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 500.0
+      }
+    }
+  ]
+}

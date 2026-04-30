@@ -315,3 +315,6 @@ shadertoolsconfig.json
 # MkDocs build output and build venv
 .help/site/
 .help/.venv/
+
+# Vendor camera SDK binary — not redistributed (see Operators/Lib/io/video/swiftcam/Swiftcam.NOTICE.md).
+**/swiftcam.dll
