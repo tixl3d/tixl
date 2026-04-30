@@ -1,0 +1,151 @@
+{
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
+  "Id": "29da7486-cee4-40cd-a708-96b1a84c4f9c"/*MoveMeshToPointLineExample*/,
+  "Description": "Deform a mesh along a path",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "1b4b157a-7e61-49e8-a093-bd76d0f00ba2"/*RenderTarget*/,
+      "Position": {
+        "X": 872.2261,
+        "Y": 202.27948
+      }
+    },
+    {
+      "ChildId": "605f277f-3b16-48d9-91cf-5e463c1b7920"/*OrbitCamera*/,
+      "Position": {
+        "X": 872.2261,
+        "Y": 167.27948
+      }
+    },
+    {
+      "ChildId": "67c18928-1cdd-46da-81eb-7cf6d9fcfd14"/*Vector3*/,
+      "Position": {
+        "X": 276.99664,
+        "Y": -201.00693
+      }
+    },
+    {
+      "ChildId": "6cd02123-0436-4b02-88ed-1ebc0625b651"/*AnimValue*/,
+      "Position": {
+        "X": 136.99664,
+        "Y": -201.00693
+      }
+    },
+    {
+      "ChildId": "77c0941a-7a14-4467-9c63-3960ff0474bd"/*MoveMeshToPointLine*/,
+      "Position": {
+        "X": 518.4697,
+        "Y": -70.160095
+      }
+    },
+    {
+      "ChildId": "7bbcde95-c865-4b28-9f2c-0508ee053864"/*TransformMesh*/,
+      "Position": {
+        "X": 513.4463,
+        "Y": -161.25845
+      }
+    },
+    {
+      "ChildId": "7cae587d-a686-42b6-8107-f6d49ddad86e"/*Time*/,
+      "Position": {
+        "X": -62.86418,
+        "Y": -66.39188
+      }
+    },
+    {
+      "ChildId": "804b5cb1-c104-4b9b-bb42-74d2edc28650"/*LinePoints*/,
+      "Position": {
+        "X": 77.13582,
+        "Y": -136.39188
+      }
+    },
+    {
+      "ChildId": "8da6ca85-7827-4e9c-83e1-c5d5394f0145"/*LoadObj*/,
+      "Position": {
+        "X": 512.3794,
+        "Y": -315.7703
+      }
+    },
+    {
+      "ChildId": "9cc23a34-d104-49c6-be52-995eb32f81be"/*AnimValue*/,
+      "Position": {
+        "X": 378.46973,
+        "Y": -0.16009521
+      }
+    },
+    {
+      "ChildId": "ba740954-d923-45e2-b4a5-91b2dbb98e65"/*VisualizePoints*/,
+      "Position": {
+        "X": 90.83595,
+        "Y": 94.90527
+      }
+    },
+    {
+      "ChildId": "c9c00b5b-89e1-4c4a-a337-5cb7e051c1d4"/*Group*/,
+      "Position": {
+        "X": 872.2261,
+        "Y": 97.27948
+      }
+    },
+    {
+      "ChildId": "dba07be6-6576-44e1-8109-01d2b913f815"/*DrawMesh*/,
+      "Position": {
+        "X": 732.2261,
+        "Y": 132.27948
+      }
+    },
+    {
+      "ChildId": "e00ce935-3035-41bf-9a3f-d353adc382df"/*ResampleLinePoints*/,
+      "Position": {
+        "X": 77.13582,
+        "Y": -31.391876
+      }
+    },
+    {
+      "ChildId": "e8faa07c-4ee7-4eee-a128-538b80b6294a"/*RandomizePoints*/,
+      "Position": {
+        "X": 77.13582,
+        "Y": -101.39188
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "4bb4d23c-f5d8-4db2-b694-8a822cc14464"/*ColorBuffer*/,
+      "Position": {
+        "X": 1185.7474,
+        "Y": 199.36768
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "7f29cd99-534e-4312-b935-bab610b47570",
+      "Title": "Your mesh needs\nenough vertex density\nin order to be deformed",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 479.5059,
+        "Y": -441.7984
+      },
+      "Size": {
+        "X": 230.0,
+        "Y": 265.0
+      }
+    }
+  ],
+  "Settings": {
+    "Timeline": {
+  "ScaleX": 126.15041,
+  "ScrollX": 0.3109159,
+  "Mode": "CurveEditor",
+  "TimelineHeight": 194
+}
+  }
+}
