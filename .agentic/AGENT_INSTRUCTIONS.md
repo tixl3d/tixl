@@ -156,6 +156,18 @@ Reading the tail of an active log file is safe: use the standard file-read tooli
 
 **Cleanup.** Remove temporary `Log.Debug` probes once the bug is understood and fixed, unless they have lasting diagnostic value worth keeping.
 
+**Always pass `this` as the second argument inside operator code.** `Log.Debug(...)` / `Log.Warning(...)` / `Log.Error(...)` accept an instance reference via the `params object[]` arg list — passing `this` makes the log line clickable in the editor's Console window so the user can jump straight to the offending operator instance. Skip it only in `static` contexts (static constructors, static probes) where no instance exists.
+
+```csharp
+// Inside an operator (instance context):
+Log.Warning($"SwiftCam: capture failed - {e.Message}", this);
+
+// Static context — no `this`:
+Log.Debug("SwiftCam: pre-loading native DLL");
+```
+
+**Use `Log.Warning` for user-actionable problems** (failed Open, disconnects, frame timeouts, unrecoverable state) and `Log.Debug` for one-time lifecycle traces (start/stop, first frame, reconnect triggered). High-frequency or per-frame trace probes belong behind a `LogMessages` (or equivalent) input toggle — default off — so the log stays readable in steady state.
+
 ## Review and Quality Expectations
 - Point out obvious problems, misleading code, incorrect implementations, and typos
 - Fix spelling mistakes in touched comments on the fly

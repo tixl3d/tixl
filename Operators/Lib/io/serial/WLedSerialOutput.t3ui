@@ -1,0 +1,94 @@
+{
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
+  "Id": "f830faa6-02c1-475c-99aa-c5e0d9ea33b8"/*WLedSerialOutput*/,
+  "Description": "Drives a WLED-based LED strip or ring over USB serial using the Adalight protocol.\n\nTakes a `Colors` list (e.g. from a [ColorList] or gradient op) and writes one frame per Update at the given `BaudRate` (115200 is the WLED default). Adalight framing and per-pixel color-order conversion are handled internally.\n\nTips:\n- Set `LedCount` to -1 to use the size of the `Colors` list. Otherwise the colors are mapped to `LedCount` LEDs using `MapMode` (Stretch = nearest-neighbor scaling, Repeat = tile).\n- `ColorOrder` must match the `LED Type / Color Order` saved in your WLED config (most WS281x rings are GRB).\n- Brightness multiplies all channels in the float domain; saves wiring a separate scale op.\n- The op auto-reconnects (every 2s) when the cable is unplugged and replugged. Status is reported via the warning-icon next to the op.\n- For first-time WLED setup (LED count, data pin, AP mode), use the WLED web UI before connecting this op.\n\nAKA: wled, adalight, led, neopixel, ws2812, ring, strip",
+  "InputUis": [
+    {
+      "InputId": "0128d1c3-0cfa-4ed1-8c8c-406b72a410be"/*MapMode*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      },
+      "Description": "How to map the `Colors` list onto `LedCount` LEDs:\n- Stretch: spread the source colors evenly across all LEDs (nearest-neighbor).\n- Repeat: tile the source pattern.\n- Lerp: linearly interpolate between adjacent source colors so the strip is a smooth gradient."
+    },
+    {
+      "InputId": "166106d5-3354-440a-a37f-b21ddc49e597"/*Colors*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "List of RGBA colors (one per LED, or fewer if `LedCount` is set and `MapMode` is Stretch/Repeat). Alpha is ignored."
+    },
+    {
+      "InputId": "2df165c3-6441-444f-abe1-2d1915794710"/*LedCount*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      },
+      "Description": "Number of LEDs to drive. Set to -1 to use the size of the `Colors` list. Otherwise colors are mapped to this count via `MapMode`."
+    },
+    {
+      "InputId": "6cfd3bad-7c7b-45bc-9ab6-e7c5b30cb0b1"/*ColorOrder*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      },
+      "Description": "Per-pixel byte order on the wire. Must match the `Color Order` saved in your WLED config. Most WS2812 / WS281x parts are GRB."
+    },
+    {
+      "InputId": "8a58f4b4-3250-4344-af5c-346929ed2e6f"/*PortName*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 450.0
+      },
+      "Description": "The COM port the WLED device is on, e.g. 'COM3'. The dropdown lists detected serial devices.",
+      "Usage": "CustomDropdown"
+    },
+    {
+      "InputId": "a9e27361-77ac-48fc-ae09-4be0b2ff933b"/*Brightness*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 300.0
+      },
+      "Description": "Multiplied into each color channel (0..1) before quantization to bytes. Useful as a master dimmer without rescaling the upstream `Colors`.",
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "aff14ddf-0a72-4ee3-be79-ea44102ddd4f"/*Connect*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 600.0
+      },
+      "Description": "Connect to / disconnect from the serial port. Toggle off to release the port for other tools."
+    },
+    {
+      "InputId": "ba4441fb-625e-4f49-8e9b-6c5237875f2b"/*BaudRate*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 525.0
+      },
+      "Description": "Serial baud rate. WLED default is 115200; raise it only if the WLED config explicitly sets a higher rate."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "ca36142c-cd17-41df-b86c-cc2ed333aa61"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    },
+    {
+      "OutputId": "23ae93a1-0c4a-4296-8de6-b2b2cf187ef0"/*IsConnected*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 300.0
+      }
+    }
+  ]
+}

@@ -72,6 +72,7 @@ public static class SerialConnectionManager
     public static void WriteLine(string portName, string data) { lock (_lock) { if (_connections.TryGetValue(portName, out var c)) c.WriteLine(data); } }
     public static void Write(string portName, string data) { lock (_lock) { if (_connections.TryGetValue(portName, out var c)) c.Write(data); } }
     public static void SendDmxFrame(string portName, byte[] dmxFrame) { lock (_lock) { if (_connections.TryGetValue(portName, out var c)) c.SendDmxFrame(dmxFrame); } }
+    public static bool WriteBytes(string portName, byte[] data, int length) { lock (_lock) { return _connections.TryGetValue(portName, out var c) && c.WriteBytes(data, length); } }
     #endregion
 
     #region Port Scanning
@@ -173,6 +174,22 @@ public static class SerialConnectionManager
 
         public void WriteLine(string data) { if (Mode == PortModes.Standard) try { if (IsOpen) _serialPort.WriteLine(data); } catch (Exception e) { Log.Warning($"Serial write error: {e.Message}"); } }
         public void Write(string data) { if (Mode == PortModes.Standard) try { if (IsOpen) _serialPort.Write(data); } catch (Exception e) { Log.Warning($"Serial write error: {e.Message}"); } }
+
+        public bool WriteBytes(byte[] data, int length)
+        {
+            if (Mode != PortModes.Standard || !IsOpen)
+                return false;
+            try
+            {
+                _serialPort.Write(data, 0, length);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Log.Warning($"Serial write error: {e.Message}");
+                return false;
+            }
+        }
 
         private void StandardReadLoop()
         {

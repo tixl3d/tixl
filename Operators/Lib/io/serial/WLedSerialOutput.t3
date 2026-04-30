@@ -1,0 +1,50 @@
+{
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
+  "Id": "f830faa6-02c1-475c-99aa-c5e0d9ea33b8"/*WLedSerialOutput*/,
+  "Inputs": [
+    {
+      "Id": "0128d1c3-0cfa-4ed1-8c8c-406b72a410be"/*MapMode*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "166106d5-3354-440a-a37f-b21ddc49e597"/*Colors*/,
+      "DefaultValue": {
+        "Values": [
+          {
+            "X": 1.0,
+            "Y": 0.98725796,
+            "Z": 0.99530137,
+            "W": 1.0
+          }
+        ]
+      }
+    },
+    {
+      "Id": "2df165c3-6441-444f-abe1-2d1915794710"/*LedCount*/,
+      "DefaultValue": -1
+    },
+    {
+      "Id": "6cfd3bad-7c7b-45bc-9ab6-e7c5b30cb0b1"/*ColorOrder*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "8a58f4b4-3250-4344-af5c-346929ed2e6f"/*PortName*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "a9e27361-77ac-48fc-ae09-4be0b2ff933b"/*Brightness*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "aff14ddf-0a72-4ee3-be79-ea44102ddd4f"/*Connect*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "ba4441fb-625e-4f49-8e9b-6c5237875f2b"/*BaudRate*/,
+      "DefaultValue": 115200
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}
