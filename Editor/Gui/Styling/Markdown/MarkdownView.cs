@@ -18,7 +18,14 @@ internal sealed class MarkdownView
 {
     public delegate void UrlClicked(string url);
 
-    public delegate void OperatorRefClicked(string opName);
+    /// <summary>
+    /// Called once per rendered <c>[OpName]</c> fragment, every frame, after
+    /// the fragment is drawn. The implementation can inspect the last item
+    /// (<see cref="ImGui.IsItemHovered"/>, drag handlers, tooltips, ...) and
+    /// attach whatever interaction is appropriate. Without a callback, op-refs
+    /// only show a hand cursor on hover.
+    /// </summary>
+    public delegate void OperatorRefRendered(string opName);
 
     public struct Options
     {
@@ -34,7 +41,7 @@ internal sealed class MarkdownView
 
     public void Draw(string markdown,
                      UrlClicked? onUrl = null,
-                     OperatorRefClicked? onOperatorRef = null)
+                     OperatorRefRendered? onOperatorRef = null)
     {
         if (string.IsNullOrEmpty(markdown))
             return;
@@ -67,7 +74,7 @@ internal sealed class MarkdownView
         MarkdownLayout.Build(_parsed, _layout, _options, wrapWidthPx);
     }
 
-    private void Render(UrlClicked? onUrl, OperatorRefClicked? onOperatorRef)
+    private void Render(UrlClicked? onUrl, OperatorRefRendered? onOperatorRef)
     {
         var origin = ImGui.GetCursorPos();
         var scale = T3Ui.UiScaleFactor;
@@ -109,26 +116,46 @@ internal sealed class MarkdownView
         ImGui.PopStyleColor();
     }
 
-    private void DrawLineFragments(LineBox box, UrlClicked? onUrl, OperatorRefClicked? onOperatorRef)
+    private void DrawLineFragments(LineBox box, UrlClicked? onUrl, OperatorRefRendered? onOperatorRef)
     {
         // Push the line-level font and color (heading vs body).
         var (lineFont, lineColor) = LineStyle(box.Kind);
         ImGui.PushFont(lineFont);
         ImGui.PushStyleColor(ImGuiCol.Text, lineColor.Rgba);
 
+        var lineOriginY = ImGui.GetCursorPosY();
+        var lineFontAscent = lineFont.Ascent;
+
         for (var fi = 0; fi < box.FragmentCount; fi++)
         {
             var fragment = _layout.Fragments[box.FragmentStart + fi];
-            DrawFragment(fragment, onUrl, onOperatorRef);
-            if (fi + 1 < box.FragmentCount)
+
+            if (fi > 0)
                 ImGui.SameLine(0, 0);
+
+            // Per-fragment Y so different fonts (e.g. JetBrainsMono code spans)
+            // share a baseline with the line font instead of riding higher.
+            var fragmentFont = FragmentFont(fragment, lineFont);
+            var fragmentY = lineOriginY + (lineFontAscent - fragmentFont.Ascent);
+            ImGui.SetCursorPosY(fragmentY);
+
+            DrawFragment(fragment, onUrl, onOperatorRef);
         }
 
         ImGui.PopStyleColor();
         ImGui.PopFont();
     }
 
-    private void DrawFragment(Fragment fragment, UrlClicked? onUrl, OperatorRefClicked? onOperatorRef)
+    private static ImFontPtr FragmentFont(Fragment fragment, ImFontPtr lineFont)
+    {
+        if ((fragment.Style & RunStyle.Code) != 0)
+            return Fonts.Code;
+        if ((fragment.Style & RunStyle.Bold) != 0)
+            return Fonts.FontBold;
+        return lineFont;
+    }
+
+    private void DrawFragment(Fragment fragment, UrlClicked? onUrl, OperatorRefRendered? onOperatorRef)
     {
         var fontPushed = false;
         var colorPushed = false;
@@ -137,7 +164,7 @@ internal sealed class MarkdownView
         {
             ImGui.PushFont(Fonts.Code);
             fontPushed = true;
-            ImGui.PushStyleColor(ImGuiCol.Text, UiColors.StatusAutomated.Fade(0.85f).Rgba);
+            ImGui.PushStyleColor(ImGuiCol.Text, UiColors.ForegroundFull.Fade(0.8f).Rgba);
             colorPushed = true;
         }
         else if ((fragment.Style & RunStyle.Bold) != 0)
@@ -158,35 +185,38 @@ internal sealed class MarkdownView
 
         ImGui.TextUnformatted(fragment.Text);
 
-        var hasInteraction = (fragment.Style & (RunStyle.Link | RunStyle.OpRef)) != 0;
-        if (hasInteraction)
-        {
-            if (ImGui.IsItemHovered())
-            {
-                ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
-
-                if (ImGui.IsMouseClicked(ImGuiMouseButton.Left) && fragment.UrlIndex >= 0)
-                {
-                    var target = _layout.Urls[fragment.UrlIndex];
-                    if ((fragment.Style & RunStyle.Link) != 0)
-                    {
-                        if (onUrl != null)
-                            onUrl(target);
-                        else
-                            CoreUi.Instance.OpenWithDefaultApplication(target);
-                    }
-                    else if ((fragment.Style & RunStyle.OpRef) != 0)
-                    {
-                        onOperatorRef?.Invoke(target);
-                    }
-                }
-            }
-        }
-
         if (colorPushed)
             ImGui.PopStyleColor();
         if (fontPushed)
             ImGui.PopFont();
+
+        // Interaction. Pop styles first so callbacks see the natural item state.
+        if ((fragment.Style & RunStyle.Link) != 0 && fragment.UrlIndex >= 0)
+        {
+            if (ImGui.IsItemHovered())
+            {
+                ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+                if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+                {
+                    var url = _layout.Urls[fragment.UrlIndex];
+                    if (onUrl != null)
+                        onUrl(url);
+                    else
+                        CoreUi.Instance.OpenWithDefaultApplication(url);
+                }
+            }
+        }
+        else if ((fragment.Style & RunStyle.OpRef) != 0 && fragment.UrlIndex >= 0)
+        {
+            if (onOperatorRef != null)
+            {
+                onOperatorRef(_layout.Urls[fragment.UrlIndex]);
+            }
+            else if (ImGui.IsItemHovered())
+            {
+                ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+            }
+        }
     }
 
     private static (ImFontPtr font, Color color) LineStyle(LineKind kind)

@@ -9,6 +9,8 @@ using T3.Editor.Gui.Dialogs;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
+using T3.Editor.Gui.Styling.Markdown;
+using T3.Editor.Gui.Windows.SymbolLib;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Helpers;
 using T3.Editor.UiModel.InputsAndTypes;
@@ -144,19 +146,7 @@ internal sealed class OperatorHelp
 
         if (!string.IsNullOrEmpty(symbolUi.Description))
         {
-            ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-            ImGui.TextWrapped(symbolUi.Description);
-
-            ImGui.PopStyleColor();
-            if (ImGui.IsItemHovered())
-            {
-                if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
-                {
-                    EditDescriptionDialog.ShowNextFrame();
-                }
-            }
-
-            CustomComponents.TooltipForLastItem("Click to edit description and links");
+            _descriptionView.Draw(symbolUi.Description, onOperatorRef: HandleOperatorRefClicked);
         }
         else
         {
@@ -238,10 +228,26 @@ internal sealed class OperatorHelp
 
             DrawLinks();
             DrawExamples();
-            DrawReferencedSymbols();
+            // Inline [OpName] refs in the description body now provide
+            // per-reference navigation; the standalone thumbnail row is gone.
 
             ImGui.PopFont();
             ImGui.PopStyleVar();
+        }
+
+        internal static bool TryGetReferencedSymbol(string name, out SymbolUi symbolUi)
+        {
+            for (var i = 0; i < _cachedReferencedSymbols.Count; i++)
+            {
+                if (_cachedReferencedSymbols[i].Name == name)
+                {
+                    symbolUi = _cachedReferencedSymbols[i].SymbolUi;
+                    return true;
+                }
+            }
+
+            symbolUi = null!;
+            return false;
         }
 
         private static void CacheSymbolData(SymbolUi symbolUi)
@@ -341,20 +347,6 @@ internal sealed class OperatorHelp
             }
         }
 
-        private static void DrawReferencedSymbols()
-        {
-            if (_cachedReferencedSymbols.Count == 0) return;
-
-            ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-            ImGui.TextUnformatted("Also see:");
-            ImGui.PopStyleColor();
-            ImGui.Dummy(Vector2.One);
-
-            foreach (var (exampleSymbolUi, referencedName) in _cachedReferencedSymbols)
-            {
-                UiElements.DrawExampleOperator(exampleSymbolUi, referencedName);
-            }
-        }
     }
 
     private static void DrawGroupLabel(string title)
@@ -366,12 +358,32 @@ internal sealed class OperatorHelp
     }
 
     internal static readonly EditSymbolDescriptionDialog EditDescriptionDialog = new();
+
+    /// <summary>
+    /// Used by <see cref="DocumentationRenderer.CacheSymbolData"/> to populate
+    /// the referenced-symbol lookup that backs inline <c>[OpName]</c> clicks.
+    /// Same identifier shape as <see cref="MarkdownParser"/> uses.
+    /// </summary>
     private static readonly Regex _itemRegex = new(@"\[([A-Za-z\d_]+)\]", RegexOptions.Compiled);
 
     private static readonly List<IInputUi> _parametersWithDescription = new(10);
 
-    // public bool IsActive => _isDocumentationActive;
-    // private bool _isDocumentationActive = false;
+    private static readonly MarkdownView _descriptionView = new(new MarkdownView.Options());
+
+    private static void HandleOperatorRefClicked(string opName)
+    {
+        if (!DocumentationRenderer.TryGetReferencedSymbol(opName, out var refUi))
+            return;
+
+        // Mirrors the drag/click affordance used elsewhere for symbol items:
+        // dragging starts a symbol drop on the graph; a non-drag click spawns
+        // it next to the current selection.
+        SymbolLibrary.HandleDragAndDropForSymbolItem(refUi.Symbol);
+
+        if (ImGui.IsItemHovered() && !string.IsNullOrEmpty(refUi.Description))
+            CustomComponents.TooltipForLastItem(refUi.Description);
+    }
+
     private static float _timeSinceTooltipHovered = 0;
     private static readonly string _openLink = "Open link in browser:";
 }

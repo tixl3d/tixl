@@ -37,8 +37,21 @@ internal static class MarkdownPreview
                          ImGuiChildFlags.Borders, ImGuiWindowFlags.None);
         _view.Draw(_sample,
                    url => Log.Info($"[MarkdownPreview] link clicked: {url}"),
-                   op => Log.Info($"[MarkdownPreview] op ref clicked: {op}"));
+                   onOperatorRef: HandleOperatorRefRendered);
         ImGui.EndChild();
+    }
+
+    private static void HandleOperatorRefRendered(string opName)
+    {
+        // The OpRef callback fires every frame for each rendered [OpName]
+        // fragment. Only log on a real hover+click so the console doesn't
+        // flood.
+        if (!ImGui.IsItemHovered())
+            return;
+
+        ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+        if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+            Log.Info($"[MarkdownPreview] op ref clicked: {opName}");
     }
 
     private static readonly MarkdownView _view = new(new MarkdownView.Options());
