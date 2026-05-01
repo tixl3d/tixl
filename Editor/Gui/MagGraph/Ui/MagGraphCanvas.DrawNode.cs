@@ -387,7 +387,9 @@ internal sealed partial class MagGraphView
             var isMissing = inputLine.InputUi?.Relevancy == Relevancy.Required && inputLine.ConnectionIn == null;
             if (isMissing)
             {
+                ImGui.PushID(item.Instance.SymbolChildId.GetHashCode());
                 DrawMissingInputIndicator(drawList, pMin, inputLine);
+                ImGui.PopID();
             }
         }
 
