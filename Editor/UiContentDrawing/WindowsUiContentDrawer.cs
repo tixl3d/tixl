@@ -71,7 +71,8 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
             SetPerFrameImGuiData(1f / 60f);
 
             var io = ImGui.GetIO();
-            io.BackendFlags |= ImGuiBackendFlags.HasMouseCursors;
+            io.BackendFlags |= ImGuiBackendFlags.HasMouseCursors
+                             | ImGuiBackendFlags.RendererHasVtxOffset;
             io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
 
             // ImGui 1.91 error-recovery: stack imbalances (Push/Pop, Begin/End, etc.)
@@ -371,16 +372,17 @@ internal sealed class WindowsUiContentDrawer : IUiContentDrawer<Device>
 
                     _customImageView.NativePointer = cmd.TextureId;
                     _deviceContext.PixelShader.SetShaderResource(0, _customImageView);
-                    _deviceContext.DrawIndexed((int)cmd.ElemCount, idxOffset, vtxOffset);
+                    _deviceContext.DrawIndexed((int)cmd.ElemCount,
+                                               idxOffset + (int)cmd.IdxOffset,
+                                               vtxOffset + (int)cmd.VtxOffset);
 
                     //Set to IntPtr.Zero since that would create issue when disposing (on application Exit)
                     //Internally it only resets the pointer and deref the device if it was queried (which in this case, did not)
                     _customImageView.NativePointer = IntPtr.Zero;
                 }
-
-                idxOffset += (int)cmd.ElemCount;
             }
 
+            idxOffset += cmdList.IdxBuffer.Size;
             vtxOffset += cmdList.VtxBuffer.Size;
         }
 
