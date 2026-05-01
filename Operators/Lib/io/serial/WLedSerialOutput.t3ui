@@ -58,12 +58,20 @@
       "ClampMax": true
     },
     {
-      "InputId": "aff14ddf-0a72-4ee3-be79-ea44102ddd4f"/*Connect*/,
+      "InputId": "aff14ddf-0a72-4ee3-be79-ea44102ddd4f"/*Sending*/,
       "Position": {
         "X": -200.0,
         "Y": 600.0
       },
-      "Description": "Connect to / disconnect from the serial port. Toggle off to release the port for other tools."
+      "Description": "While true, the op holds the serial port open and pushes a frame on every Update; auto-recovers if the cable is unplugged. Toggle off to release the port for other tools."
+    },
+    {
+      "InputId": "ad110199-d20a-48a8-8dc2-892e67e7a6af"/*Reconnect*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 675.0
+      },
+      "Description": "Trigger button: forces the connection to be torn down and reopened on the next frame. Useful when the link is wedged but `Sending` is still true. Auto-resets to false after firing."
     },
     {
       "InputId": "ba4441fb-625e-4f49-8e9b-6c5237875f2b"/*BaudRate*/,

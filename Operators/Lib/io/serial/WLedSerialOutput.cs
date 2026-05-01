@@ -28,15 +28,25 @@ internal sealed class WLedSerialOutput : Instance<WLedSerialOutput>, IStatusProv
 
     private void Update(EvaluationContext context)
     {
-        var shouldConnect = Connect.GetValue(context);
+        var sending = Sending.GetValue(context);
+        var manualReconnect = Reconnect.GetValue(context);
         var portName = PortName.GetValue(context) ?? string.Empty;
         var baudRate = BaudRate.GetValue(context);
 
-        var settingsChanged = portName != _lastPortName || baudRate != _lastBaudRate || shouldConnect != _lastConnectState;
+        if (manualReconnect)
+        {
+            Reconnect.SetTypedInputValue(false);
+            // Force the connection to be torn down and reopened on this frame
+            SerialConnectionManager.Unregister(this, _lastPortName);
+            _lastConnectState = false;
+            _nextRetryAt = DateTime.MinValue;
+        }
+
+        var settingsChanged = portName != _lastPortName || baudRate != _lastBaudRate || sending != _lastConnectState;
         if (settingsChanged)
         {
             SerialConnectionManager.Unregister(this, _lastPortName);
-            if (shouldConnect && !string.IsNullOrEmpty(portName))
+            if (sending && !string.IsNullOrEmpty(portName))
             {
                 try
                 {
@@ -55,13 +65,13 @@ internal sealed class WLedSerialOutput : Instance<WLedSerialOutput>, IStatusProv
             }
             _lastPortName = portName;
             _lastBaudRate = baudRate;
-            _lastConnectState = shouldConnect;
+            _lastConnectState = sending;
         }
 
         var isConnected = SerialConnectionManager.IsPortOpen(portName);
 
         // Throttled auto-reconnect when the port has dropped
-        if (shouldConnect && !isConnected && !string.IsNullOrEmpty(portName))
+        if (sending && !isConnected && !string.IsNullOrEmpty(portName))
         {
             var now = DateTime.UtcNow;
             if (now >= _nextRetryAt)
@@ -244,5 +254,6 @@ internal sealed class WLedSerialOutput : Instance<WLedSerialOutput>, IStatusProv
     [Input(Guid = "A9E27361-77AC-48FC-AE09-4BE0B2FF933B")] public readonly InputSlot<float> Brightness = new(1f);
     [Input(Guid = "8A58F4B4-3250-4344-AF5C-346929ED2E6F")] public readonly InputSlot<string> PortName = new();
     [Input(Guid = "BA4441FB-625E-4F49-8E9B-6C5237875F2B")] public readonly InputSlot<int> BaudRate = new(115200);
-    [Input(Guid = "AFF14DDF-0A72-4EE3-BE79-EA44102DDD4F")] public readonly InputSlot<bool> Connect = new();
+    [Input(Guid = "AFF14DDF-0A72-4EE3-BE79-EA44102DDD4F")] public readonly InputSlot<bool> Sending = new(true);
+    [Input(Guid = "AD110199-D20A-48A8-8DC2-892E67E7A6AF")] public readonly InputSlot<bool> Reconnect = new();
 }

@@ -31,6 +31,10 @@
       "DefaultValue": ""
     },
     {
+      "Id": "caa5d946-060d-45eb-907b-601c4f0a677c"/*HardReset*/,
+      "DefaultValue": false
+    },
+    {
       "Id": "d73af73f-e71c-4a6b-a4cf-f8069c1db30d"/*Active*/,
       "DefaultValue": false
     },
@@ -48,10 +52,6 @@
         "X": 1954,
         "Y": 1062
       }
-    },
-    {
-      "Id": "caa5d946-060d-45eb-907b-601c4f0a677c"/*HardReset*/,
-      "DefaultValue": false
     }
   ],
   "Children": [],

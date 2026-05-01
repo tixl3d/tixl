@@ -115,9 +115,16 @@ public static class SerialConnectionManager
 
         private readonly SerialPort _serialPort;
         private readonly Thread? _workerThread;
+        private readonly Thread? _writerThread;
         private volatile bool _keepRunning;
         private readonly HashSet<object> _subscribers = new();
         private readonly List<ISerialReceiver> _receivers = new();
+
+        private readonly object _frameLock = new();
+        private readonly AutoResetEvent _frameReady = new(false);
+        private byte[]? _pendingFrame;
+        private int _pendingFrameLength;
+        private byte[]? _writerScratch;
 
         public PortConnection(string portName, int baudRate, PortModes mode)
         {
@@ -134,6 +141,8 @@ public static class SerialConnectionManager
                     _keepRunning = true;
                     _workerThread = new Thread(StandardReadLoop) { IsBackground = true, Name = $"SerialReader_{portName}" };
                     _workerThread.Start();
+                    _writerThread = new Thread(WriterLoop) { IsBackground = true, Name = $"SerialWriter_{portName}" };
+                    _writerThread.Start();
                 }
             }
             catch (Exception e)
@@ -175,19 +184,55 @@ public static class SerialConnectionManager
         public void WriteLine(string data) { if (Mode == PortModes.Standard) try { if (IsOpen) _serialPort.WriteLine(data); } catch (Exception e) { Log.Warning($"Serial write error: {e.Message}"); } }
         public void Write(string data) { if (Mode == PortModes.Standard) try { if (IsOpen) _serialPort.Write(data); } catch (Exception e) { Log.Warning($"Serial write error: {e.Message}"); } }
 
+        // Latest-wins enqueue. Real serial write happens on the writer thread,
+        // so the caller is not blocked by ~13 ms of TX time at 115200 baud.
         public bool WriteBytes(byte[] data, int length)
         {
-            if (Mode != PortModes.Standard || !IsOpen)
+            if (Mode != PortModes.Standard || !_keepRunning || !IsOpen)
                 return false;
-            try
+
+            lock (_frameLock)
             {
-                _serialPort.Write(data, 0, length);
-                return true;
+                if (_pendingFrame == null || _pendingFrame.Length < length)
+                    _pendingFrame = new byte[length];
+                Buffer.BlockCopy(data, 0, _pendingFrame, 0, length);
+                _pendingFrameLength = length;
             }
-            catch (Exception e)
+            _frameReady.Set();
+            return true;
+        }
+
+        private void WriterLoop()
+        {
+            while (_keepRunning)
             {
-                Log.Warning($"Serial write error: {e.Message}");
-                return false;
+                _frameReady.WaitOne();
+                if (!_keepRunning)
+                    break;
+
+                int length;
+                lock (_frameLock)
+                {
+                    length = _pendingFrameLength;
+                    if (length == 0 || _pendingFrame == null)
+                        continue;
+                    if (_writerScratch == null || _writerScratch.Length < length)
+                        _writerScratch = new byte[length];
+                    Buffer.BlockCopy(_pendingFrame, 0, _writerScratch, 0, length);
+                    _pendingFrameLength = 0;
+                }
+
+                try
+                {
+                    if (_serialPort.IsOpen)
+                        _serialPort.Write(_writerScratch, 0, length);
+                }
+                catch (Exception e)
+                {
+                    Log.Warning($"Serial write error: {e.Message}");
+                    _keepRunning = false;
+                    break;
+                }
             }
         }
 
@@ -208,7 +253,10 @@ public static class SerialConnectionManager
         public void Dispose()
         {
             _keepRunning = false;
+            _frameReady.Set();
             _workerThread?.Join(100);
+            _writerThread?.Join(100);
+            _frameReady.Dispose();
             if (_serialPort.IsOpen) _serialPort.Close();
             _serialPort.Dispose();
         }

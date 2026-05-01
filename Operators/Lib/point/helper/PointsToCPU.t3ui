@@ -40,6 +40,14 @@
         "X": -200.0,
         "Y": 0.0
       }
+    },
+    {
+      "InputId": "b2a36ab5-5b81-4b72-9f40-9e66d3dcf94b"/*Async*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 315.0
+      },
+      "Description": "When true, readback uses a 3-buffer rotation and does not block rendering. The data is 1-2 frames old. When false (default), the readback is synchronous - same-frame data, but the GPU pipeline stalls each Update."
     }
   ],
   "SymbolChildUis": [],

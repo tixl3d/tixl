@@ -10,7 +10,10 @@
         "X": -200.0,
         "Y": 375.0
       },
-      "Description": "Analog gain factor (1.0 = unity, 5.0 = 5×). Prefer raising Exposure before reaching for gain. Maximum supported gain depends on the camera (often around 5×)."
+      "Description": "Analog gain factor (1.0 = unity, 5.0 = 5×). Prefer raising Exposure before reaching for gain. Maximum supported gain depends on the camera (often around 5×).",
+      "Min": 1.0,
+      "Max": 50.0,
+      "ClampMin": true
     },
     {
       "InputId": "3e021070-038f-453d-96ca-33c27bc8ddc4"/*RoiAlignment*/,
@@ -26,7 +29,11 @@
         "X": -200.0,
         "Y": 300.0
       },
-      "Description": "Manual exposure time in milliseconds. Applied while streaming. Ignored when AutoExposure is on. Lower values give faster frame rates but darker images. Default 10 ms."
+      "Description": "Manual exposure time in milliseconds. Applied while streaming. Ignored when AutoExposure is on. Lower values give faster frame rates but darker images. Default 10 ms.",
+      "Min": 16.0,
+      "Max": 1000.0,
+      "Scale": 1.0,
+      "ClampMin": true
     },
     {
       "InputId": "7965cea6-2fe4-4240-9f9c-ab2af0aedea8"/*LogMessages*/,
@@ -45,14 +52,6 @@
       "Description": "Trigger to re-probe the SDK, rescan devices, and restart streaming. Useful after installing the SDK, replugging the camera, or recovering from a stuck state."
     },
     {
-      "InputId": "caa5d946-060d-45eb-907b-601c4f0a677c"/*HardReset*/,
-      "Position": {
-        "X": -200.0,
-        "Y": 825.0
-      },
-      "Description": "Aggressive recovery — calls put_Option(OPTION_RESET_SENSOR) and put_Option(OPTION_FLUSH) on the camera, then a full Close + Open cycle. Use this when the camera is in a stuck state that plain Reconnect can't recover, before resorting to physically unplugging the USB cable."
-    },
-    {
       "InputId": "c44f7b21-0418-490f-a2c1-4d57b70bfa32"/*DeviceName*/,
       "Position": {
         "X": -200.0,
@@ -60,6 +59,14 @@
       },
       "Description": "The Swift camera to use. The dropdown lists every Swift camera detected by the SDK.",
       "Usage": "CustomDropdown"
+    },
+    {
+      "InputId": "caa5d946-060d-45eb-907b-601c4f0a677c"/*HardReset*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 825.0
+      },
+      "Description": "Aggressive recovery — calls put_Option(OPTION_RESET_SENSOR) and put_Option(OPTION_FLUSH) on the camera, then a full Close + Open cycle. Use this when the camera is in a stuck state that plain Reconnect can't recover, before resorting to physically unplugging the USB cable."
     },
     {
       "InputId": "d73af73f-e71c-4a6b-a4cf-f8069c1db30d"/*Active*/,

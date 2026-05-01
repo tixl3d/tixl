@@ -1,4 +1,5 @@
 using SharpDX.Direct3D11;
+using T3.Core.Resource;
 using T3.Core.Utils;
 using Utilities = T3.Core.Utils.Utilities;
 
@@ -18,7 +19,8 @@ internal sealed class PointsToCPU : Instance<PointsToCPU>
     private void Update(EvaluationContext context)
     {
         var updateContinuously = UpdateContinuously.GetValue(context);
-            
+        var async = Async.GetValue(context);
+
         try
         {
             var wasTriggered = MathUtils.WasTriggered(TriggerUpdate.GetValue(context), ref _triggerUpdate);
@@ -34,6 +36,21 @@ internal sealed class PointsToCPU : Instance<PointsToCPU>
                 return;
             }
 
+            if (async && (updateContinuously || wasTriggered))
+            {
+                if (pointBuffer.Buffer == null || pointBuffer.Srv == null)
+                    return;
+
+                _pendingStartIndex = StartIndex.GetValue(context).ClampMin(0);
+                _pendingMaxCount = MaxCount.GetValue(context);
+                _pendingTotalElements = pointBuffer.Srv.Description.Buffer.ElementCount;
+                _pendingStride = pointBuffer.Buffer.Description.StructureByteStride;
+
+                _bufferReader.InitiateRead(pointBuffer.Buffer, _pendingTotalElements, _pendingStride, OnAsyncReadComplete);
+                _bufferReader.Update();
+                Output.DirtyFlag.Trigger = updateContinuously ? DirtyFlagTrigger.Animated : DirtyFlagTrigger.None;
+                return;
+            }
 
             var d3DDevice = ResourceManager.Device;
             var immediateContext = d3DDevice.ImmediateContext;
@@ -126,8 +143,30 @@ internal sealed class PointsToCPU : Instance<PointsToCPU>
     }
 
 
+    private void OnAsyncReadComplete(StructuredBufferReadAccess.ReadRequestItem item, IntPtr dataPointer, SharpDX.DataStream stream)
+    {
+        using (stream)
+        {
+            if (_pendingStartIndex >= _pendingTotalElements)
+            {
+                Output.Value = new StructuredList<Point>(0);
+                return;
+            }
+            var maxCount = _pendingMaxCount > 0 ? _pendingMaxCount : int.MaxValue;
+            var outputCount = Math.Min(_pendingTotalElements - _pendingStartIndex, maxCount);
+            stream.Position = (long)_pendingStartIndex * _pendingStride;
+            var points = outputCount > 0 ? stream.ReadRange<Point>(outputCount) : Array.Empty<Point>();
+            Output.Value = new StructuredList<Point>(points);
+        }
+    }
+
     private bool _triggerUpdate;
     private BufferWithViews _bufferWithViewsCpuAccess = new();
+    private readonly StructuredBufferReadAccess _bufferReader = new();
+    private int _pendingStartIndex;
+    private int _pendingMaxCount;
+    private int _pendingTotalElements;
+    private int _pendingStride;
 
         [Input(Guid = "F267534C-59AE-4758-B04A-13B6337BC0EB")]
         public readonly InputSlot<T3.Core.DataTypes.BufferWithViews> PointBuffer = new InputSlot<T3.Core.DataTypes.BufferWithViews>();
@@ -143,4 +182,7 @@ internal sealed class PointsToCPU : Instance<PointsToCPU>
 
         [Input(Guid = "63014058-5418-4711-AE57-A9BA8841CB67")]
         public readonly InputSlot<int> MaxCount = new InputSlot<int>();
+
+        [Input(Guid = "B2A36AB5-5B81-4B72-9F40-9E66D3DCF94B")]
+        public readonly InputSlot<bool> Async = new InputSlot<bool>(false);
 }

@@ -14,7 +14,7 @@ namespace T3.Core.Stats;
 /// </summary>
 public static class PerformanceMetrics
 {
-    public const int WindowSize = 200;
+    public const int WindowSize = 400;
     public const int BucketCount = 16;
 
     /// <summary>Total frames recorded since process start. Grows monotonically.</summary>

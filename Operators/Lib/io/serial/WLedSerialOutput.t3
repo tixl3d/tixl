@@ -37,7 +37,11 @@
       "DefaultValue": 1.0
     },
     {
-      "Id": "aff14ddf-0a72-4ee3-be79-ea44102ddd4f"/*Connect*/,
+      "Id": "aff14ddf-0a72-4ee3-be79-ea44102ddd4f"/*Sending*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "ad110199-d20a-48a8-8dc2-892e67e7a6af"/*Reconnect*/,
       "DefaultValue": false
     },
     {
