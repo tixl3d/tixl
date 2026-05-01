@@ -1,6 +1,8 @@
 {
-  "Id": "fc7fdcf6-8efa-4cec-82b6-cb6ce0696cc0"/*DrawLinesAltExample*/,
-  "Description": "With [DrawLinesAlt] you can draw perfectly closed shapes like triangle, quad, star, arrow, diamond and more.",
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
+  "Id": "fc7fdcf6-8efa-4cec-82b6-cb6ce0696cc0"/*DrawClosedLinesExample*/,
+  "Description": "With [DrawClosedLines] you can draw perfectly closed shapes like triangle, quad, star, arrow, diamond and more.",
   "InputUis": [],
   "SymbolChildUis": [
     {
@@ -32,7 +34,7 @@
       }
     },
     {
-      "ChildId": "0da0ca08-58ba-427e-af14-5b5bfec778cc"/*DrawLinesAlt*/,
+      "ChildId": "0da0ca08-58ba-427e-af14-5b5bfec778cc"/*DrawClosedLines*/,
       "Position": {
         "X": 63.82866,
         "Y": -6.477539
@@ -81,7 +83,7 @@
       }
     },
     {
-      "ChildId": "1dedbcb9-d4db-43b8-afcc-6d56f63ca19c"/*DrawLinesAlt*/,
+      "ChildId": "1dedbcb9-d4db-43b8-afcc-6d56f63ca19c"/*DrawClosedLines*/,
       "Position": {
         "X": 428.20654,
         "Y": 498.47144
@@ -130,7 +132,7 @@
       }
     },
     {
-      "ChildId": "2519e161-c276-42af-9559-ca5149ed6a8d"/*DrawLinesAlt*/,
+      "ChildId": "2519e161-c276-42af-9559-ca5149ed6a8d"/*DrawClosedLines*/,
       "Position": {
         "X": 721.7414,
         "Y": -942.0869
@@ -144,7 +146,7 @@
       }
     },
     {
-      "ChildId": "2a325ecc-be82-4ea4-9875-e58150c43011"/*DrawLinesAlt*/,
+      "ChildId": "2a325ecc-be82-4ea4-9875-e58150c43011"/*DrawClosedLines*/,
       "Position": {
         "X": 930.814,
         "Y": 986.94885
@@ -221,7 +223,7 @@
       }
     },
     {
-      "ChildId": "44f9e77b-c37d-4517-801c-709abcbdd9c1"/*DrawLinesAlt*/,
+      "ChildId": "44f9e77b-c37d-4517-801c-709abcbdd9c1"/*DrawClosedLines*/,
       "Position": {
         "X": 52.4478,
         "Y": 476.41382
@@ -347,7 +349,7 @@
       }
     },
     {
-      "ChildId": "8492941c-c155-409c-b313-cdaa6508d3d5"/*DrawLinesAlt*/,
+      "ChildId": "8492941c-c155-409c-b313-cdaa6508d3d5"/*DrawClosedLines*/,
       "Position": {
         "X": 895.736,
         "Y": 1054.0034
@@ -452,7 +454,7 @@
       }
     },
     {
-      "ChildId": "b6dff2be-8844-4489-b299-9296eb63c962"/*DrawLinesAlt*/,
+      "ChildId": "b6dff2be-8844-4489-b299-9296eb63c962"/*DrawClosedLines*/,
       "Position": {
         "X": 1152.5431,
         "Y": 524.4566
@@ -501,7 +503,7 @@
       }
     },
     {
-      "ChildId": "c79ac8ab-3781-41a6-b6b1-a5c07b01c3e7"/*DrawLinesAlt*/,
+      "ChildId": "c79ac8ab-3781-41a6-b6b1-a5c07b01c3e7"/*DrawClosedLines*/,
       "Position": {
         "X": 532.22614,
         "Y": -377.46594
@@ -592,7 +594,7 @@
       }
     },
     {
-      "ChildId": "e5723a23-7aae-4c6b-98f0-4d8bad13eb7a"/*DrawLinesAlt*/,
+      "ChildId": "e5723a23-7aae-4c6b-98f0-4d8bad13eb7a"/*DrawClosedLines*/,
       "Position": {
         "X": 794.09686,
         "Y": 478.1828
@@ -891,5 +893,13 @@
         "Y": 523.7374
       }
     }
-  ]
+  ],
+  "Settings": {
+    "Timeline": {
+  "ScaleX": 126.15041,
+  "ScrollX": 0.3109159,
+  "Mode": "CurveEditor",
+  "TimelineHeight": 194
+}
+  }
 }

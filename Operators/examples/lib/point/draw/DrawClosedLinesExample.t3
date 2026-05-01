@@ -1,5 +1,7 @@
 {
-  "Id": "fc7fdcf6-8efa-4cec-82b6-cb6ce0696cc0"/*DrawLinesAltExample*/,
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
+  "Id": "fc7fdcf6-8efa-4cec-82b6-cb6ce0696cc0"/*DrawClosedLinesExample*/,
   "Inputs": [],
   "Children": [
     {
@@ -64,7 +66,7 @@
       "Outputs": []
     },
     {
-      "Id": "0da0ca08-58ba-427e-af14-5b5bfec778cc"/*DrawLinesAlt*/,
+      "Id": "0da0ca08-58ba-427e-af14-5b5bfec778cc"/*DrawClosedLines*/,
       "SymbolId": "6e89c814-cc67-40c2-933c-d03ff1b30ef7",
       "InputValues": [
         {
@@ -163,7 +165,7 @@
       "Outputs": []
     },
     {
-      "Id": "1dedbcb9-d4db-43b8-afcc-6d56f63ca19c"/*DrawLinesAlt*/,
+      "Id": "1dedbcb9-d4db-43b8-afcc-6d56f63ca19c"/*DrawClosedLines*/,
       "SymbolId": "6e89c814-cc67-40c2-933c-d03ff1b30ef7",
       "InputValues": [],
       "Outputs": []
@@ -258,7 +260,7 @@
       "Outputs": []
     },
     {
-      "Id": "2519e161-c276-42af-9559-ca5149ed6a8d"/*DrawLinesAlt*/,
+      "Id": "2519e161-c276-42af-9559-ca5149ed6a8d"/*DrawClosedLines*/,
       "SymbolId": "6e89c814-cc67-40c2-933c-d03ff1b30ef7",
       "InputValues": [
         {
@@ -352,7 +354,7 @@
       "Outputs": []
     },
     {
-      "Id": "2a325ecc-be82-4ea4-9875-e58150c43011"/*DrawLinesAlt*/,
+      "Id": "2a325ecc-be82-4ea4-9875-e58150c43011"/*DrawClosedLines*/,
       "SymbolId": "6e89c814-cc67-40c2-933c-d03ff1b30ef7",
       "InputValues": [
         {
@@ -532,7 +534,7 @@
       "Outputs": []
     },
     {
-      "Id": "44f9e77b-c37d-4517-801c-709abcbdd9c1"/*DrawLinesAlt*/,
+      "Id": "44f9e77b-c37d-4517-801c-709abcbdd9c1"/*DrawClosedLines*/,
       "SymbolId": "6e89c814-cc67-40c2-933c-d03ff1b30ef7",
       "InputValues": [
         {
@@ -850,7 +852,7 @@
       "Outputs": []
     },
     {
-      "Id": "8492941c-c155-409c-b313-cdaa6508d3d5"/*DrawLinesAlt*/,
+      "Id": "8492941c-c155-409c-b313-cdaa6508d3d5"/*DrawClosedLines*/,
       "SymbolId": "6e89c814-cc67-40c2-933c-d03ff1b30ef7",
       "InputValues": [
         {
@@ -1081,7 +1083,7 @@
       "Outputs": []
     },
     {
-      "Id": "b6dff2be-8844-4489-b299-9296eb63c962"/*DrawLinesAlt*/,
+      "Id": "b6dff2be-8844-4489-b299-9296eb63c962"/*DrawClosedLines*/,
       "SymbolId": "6e89c814-cc67-40c2-933c-d03ff1b30ef7",
       "InputValues": [
         {
@@ -1210,7 +1212,7 @@
       "Outputs": []
     },
     {
-      "Id": "c79ac8ab-3781-41a6-b6b1-a5c07b01c3e7"/*DrawLinesAlt*/,
+      "Id": "c79ac8ab-3781-41a6-b6b1-a5c07b01c3e7"/*DrawClosedLines*/,
       "SymbolId": "6e89c814-cc67-40c2-933c-d03ff1b30ef7",
       "InputValues": [
         {
@@ -1413,7 +1415,7 @@
       "Outputs": []
     },
     {
-      "Id": "e5723a23-7aae-4c6b-98f0-4d8bad13eb7a"/*DrawLinesAlt*/,
+      "Id": "e5723a23-7aae-4c6b-98f0-4d8bad13eb7a"/*DrawClosedLines*/,
       "SymbolId": "6e89c814-cc67-40c2-933c-d03ff1b30ef7",
       "InputValues": [],
       "Outputs": []
