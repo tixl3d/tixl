@@ -78,12 +78,47 @@ public static class SerialConnectionManager
     #region Port Scanning
     private static List<string>? _cachedPortList;
     private static readonly Stopwatch _portListCacheStopwatch = new();
+    private static int _portListRefreshing;
     private const int CacheDurationMs = 2000;
     private static readonly Regex _comPortRegex = new(@"\((COM\d+)\)", RegexOptions.Compiled);
 
+    // Returns the cached port list immediately. When the cache is stale, kicks off a
+    // background refresh so the UI thread never blocks on the ~200-400 ms WMI query.
+    // Only the very first call (no cache yet) does a synchronous query to populate.
     public static List<string> GetAvailableSerialPortsWithDescriptions()
     {
-        if (_cachedPortList != null && _portListCacheStopwatch.IsRunning && _portListCacheStopwatch.ElapsedMilliseconds < CacheDurationMs) return _cachedPortList;
+        var cacheStale = !_portListCacheStopwatch.IsRunning || _portListCacheStopwatch.ElapsedMilliseconds >= CacheDurationMs;
+
+        if (_cachedPortList == null)
+        {
+            // Cold start: populate synchronously so the dropdown isn't empty.
+            _cachedPortList = QueryPortListBlocking();
+            _portListCacheStopwatch.Restart();
+            return _cachedPortList;
+        }
+
+        if (cacheStale && Interlocked.CompareExchange(ref _portListRefreshing, 1, 0) == 0)
+        {
+            ThreadPool.QueueUserWorkItem(static _ =>
+            {
+                try
+                {
+                    var fresh = QueryPortListBlocking();
+                    _cachedPortList = fresh;
+                    _portListCacheStopwatch.Restart();
+                }
+                finally
+                {
+                    Volatile.Write(ref _portListRefreshing, 0);
+                }
+            });
+        }
+
+        return _cachedPortList;
+    }
+
+    private static List<string> QueryPortListBlocking()
+    {
         var portList = new List<string>();
         try
         {
@@ -95,9 +130,7 @@ public static class SerialConnectionManager
             Log.Warning($"WMI query for serial ports failed, falling back to basic list. Error: {ex.Message}");
             return SerialPort.GetPortNames().ToList();
         }
-        _cachedPortList = portList.OrderBy(s => s).ToList();
-        _portListCacheStopwatch.Restart();
-        return _cachedPortList;
+        return portList.OrderBy(s => s).ToList();
     }
 
     public static string GetPortNameFromDeviceDescription(string description)
