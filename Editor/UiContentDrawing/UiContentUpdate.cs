@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using ImGuiNET;
 using SilkWindows;
 using T3.Core.Resource;
@@ -53,21 +54,53 @@ internal static class UiContentUpdate
         var smallFont = new TtfFont(string.Format(format, "Regular"), 14f * dpiAwareScale);
         var largeFont = new TtfFont(string.Format(format, "Light"), 30f * dpiAwareScale);
 
-        Fonts.FontNormal = fontAtlasPtr.AddFontFromFileTTF(normalFont.Path, normalFont.PixelSize);
-        Fonts.FontBold = fontAtlasPtr.AddFontFromFileTTF(boldFont.Path, boldFont.PixelSize);
-        Fonts.FontSmall = fontAtlasPtr.AddFontFromFileTTF(smallFont.Path, smallFont.PixelSize);
-        Fonts.FontLarge = fontAtlasPtr.AddFontFromFileTTF(largeFont.Path, largeFont.PixelSize);
+        var ranges = GetExtendedGlyphRanges();
+        Fonts.FontNormal = fontAtlasPtr.AddFontFromFileTTF(normalFont.Path, normalFont.PixelSize, default, ranges);
+        Fonts.FontBold = fontAtlasPtr.AddFontFromFileTTF(boldFont.Path, boldFont.PixelSize, default, ranges);
+        Fonts.FontSmall = fontAtlasPtr.AddFontFromFileTTF(smallFont.Path, smallFont.PixelSize, default, ranges);
+        Fonts.FontLarge = fontAtlasPtr.AddFontFromFileTTF(largeFont.Path, largeFont.PixelSize, default, ranges);
 
         var codeFontPath = Path.Combine(SharedResources.EditorResourcesDirectory, SharedResources.EditorResourcesDirectory,"fonts", "JetBrainsMono-Regular.ttf");
         var codeFont = new TtfFont(codeFontPath, 18f * dpiAwareScale);
-        Fonts.Code = fontAtlasPtr.AddFontFromFileTTF(codeFont.Path, codeFont.PixelSize);
+        Fonts.Code = fontAtlasPtr.AddFontFromFileTTF(codeFont.Path, codeFont.PixelSize, default, ranges);
 
         ImGuiWindowService.Instance.SetFonts(new FontPack(normalFont, boldFont, smallFont, largeFont));
     }
 
+    /// <summary>
+    /// Extended glyph ranges for the editor's TTF fonts. Default ImGui only
+    /// rasterizes 0x0020-0x00FF (basic Latin); we additionally pull in common
+    /// punctuation used by the markdown renderer and elsewhere — bullet (•),
+    /// dashes (– —), smart quotes (' ' " "), and ellipsis (…).
+    ///
+    /// The returned pointer references a static, GC-pinned array — ImGui only
+    /// reads from it during atlas Build(), so the pin can live for the
+    /// process lifetime.
+    /// </summary>
+    private static IntPtr GetExtendedGlyphRanges()
+    {
+        if (_glyphRangesPtr != IntPtr.Zero)
+            return _glyphRangesPtr;
+
+        // Pairs of (first, last), terminated with 0.
+        _extendedGlyphRanges = new ushort[]
+                                   {
+                                       0x0020, 0x00FF,   // Basic Latin + Latin Supplement
+                                       0x2010, 0x205E,   // General punctuation: dashes, quotes, bullet, ellipsis, dagger
+                                       0,
+                                   };
+        _glyphRangesHandle = GCHandle.Alloc(_extendedGlyphRanges, GCHandleType.Pinned);
+        _glyphRangesPtr = _glyphRangesHandle.AddrOfPinnedObject();
+        return _glyphRangesPtr;
+    }
+
+    private static ushort[]? _extendedGlyphRanges;
+    private static GCHandle _glyphRangesHandle;
+    private static IntPtr _glyphRangesPtr;
+
     private static long _lastElapsedTicks;
     private static readonly Stopwatch _stopwatch = new();
-    
+
     private static float _lastUiScale = 1;
 
     private static bool _hasSetScaling;

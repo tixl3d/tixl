@@ -1,0 +1,285 @@
+#nullable enable
+
+namespace T3.Editor.Gui.Styling.Markdown;
+
+/// <summary>
+/// Parses the v1 markdown subset documented in Plan_MarkdownRenderer.md
+/// into a logical-line + inline-run representation. Runs reference the
+/// owning source string by (start, length) slices — no substring allocation.
+/// </summary>
+internal static class MarkdownParser
+{
+    public static void Parse(string source, ParsedDoc doc)
+    {
+        doc.Reset(source);
+
+        var i = 0;
+        var len = source.Length;
+        while (i < len)
+        {
+            // Find end of logical line (terminator excluded).
+            var lineStart = i;
+            while (i < len && source[i] != '\n')
+                i++;
+            var lineEnd = i;
+            // Drop trailing CR for \r\n.
+            if (lineEnd > lineStart && source[lineEnd - 1] == '\r')
+                lineEnd--;
+
+            ParseLine(source, lineStart, lineEnd, doc);
+
+            // Skip the \n.
+            if (i < len && source[i] == '\n')
+                i++;
+        }
+    }
+
+    private static void ParseLine(string src, int from, int to, ParsedDoc doc)
+    {
+        // Indent: count leading spaces (tab = 2 spaces). Depth = indent / 2.
+        var indentSpaces = 0;
+        var p = from;
+        while (p < to)
+        {
+            var c = src[p];
+            if (c == ' ')
+                indentSpaces++;
+            else if (c == '\t')
+                indentSpaces += 2;
+            else
+                break;
+            p++;
+        }
+
+        // Blank line.
+        if (p == to)
+        {
+            doc.Lines.Add(new Line
+                              {
+                                  Kind = LineKind.Blank,
+                                  IndentLevel = 0,
+                                  RunStart = doc.Runs.Count,
+                                  RunCount = 0,
+                              });
+            return;
+        }
+
+        var depth = (byte)(indentSpaces / 2);
+
+        // Heading.
+        var hashCount = 0;
+        var hp = p;
+        while (hp < to && src[hp] == '#' && hashCount < 3)
+        {
+            hashCount++;
+            hp++;
+        }
+
+        if (hashCount > 0 && hp < to && src[hp] == ' ')
+        {
+            var contentStart = hp + 1;
+            var kind = hashCount switch
+                          {
+                              1 => LineKind.H1,
+                              2 => LineKind.H2,
+                              _ => LineKind.H3,
+                          };
+            var runStart = doc.Runs.Count;
+            ParseInline(src, contentStart, to, doc);
+            doc.Lines.Add(new Line
+                              {
+                                  Kind = kind,
+                                  IndentLevel = 0,
+                                  RunStart = runStart,
+                                  RunCount = doc.Runs.Count - runStart,
+                              });
+            return;
+        }
+
+        // Bullet list (- or *).
+        if ((src[p] == '-' || src[p] == '*') && p + 1 < to && src[p + 1] == ' ')
+        {
+            var contentStart = p + 2;
+            var runStart = doc.Runs.Count;
+            ParseInline(src, contentStart, to, doc);
+            doc.Lines.Add(new Line
+                              {
+                                  Kind = LineKind.Bullet,
+                                  IndentLevel = depth,
+                                  RunStart = runStart,
+                                  RunCount = doc.Runs.Count - runStart,
+                              });
+            return;
+        }
+
+        // Numbered list (digits followed by ". ").
+        if (char.IsDigit(src[p]))
+        {
+            var np = p;
+            var num = 0;
+            while (np < to && char.IsDigit(src[np]))
+            {
+                num = num * 10 + (src[np] - '0');
+                np++;
+            }
+
+            if (np < to - 1 && src[np] == '.' && src[np + 1] == ' ')
+            {
+                var contentStart = np + 2;
+                var runStart = doc.Runs.Count;
+                ParseInline(src, contentStart, to, doc);
+                doc.Lines.Add(new Line
+                                  {
+                                      Kind = LineKind.Numbered,
+                                      IndentLevel = depth,
+                                      Number = num,
+                                      RunStart = runStart,
+                                      RunCount = doc.Runs.Count - runStart,
+                                  });
+                return;
+            }
+        }
+
+        // Plain paragraph line. Indent only meaningful for lists; we discard it
+        // here (lazy continuation is out of scope per the plan).
+        {
+            var runStart = doc.Runs.Count;
+            ParseInline(src, p, to, doc);
+            doc.Lines.Add(new Line
+                              {
+                                  Kind = LineKind.Paragraph,
+                                  IndentLevel = 0,
+                                  RunStart = runStart,
+                                  RunCount = doc.Runs.Count - runStart,
+                              });
+        }
+    }
+
+    private static void ParseInline(string src, int from, int to, ParsedDoc doc)
+    {
+        var i = from;
+        var plainStart = from;
+
+        while (i < to)
+        {
+            var c = src[i];
+
+            // **bold**
+            if (c == '*' && i + 1 < to && src[i + 1] == '*')
+            {
+                var close = IndexOfDouble(src, i + 2, to, '*');
+                if (close >= 0)
+                {
+                    FlushPlain(src, plainStart, i, doc);
+                    doc.Runs.Add(new Run(new Slice(i + 2, close - (i + 2)), RunStyle.Bold, -1));
+                    i = close + 2;
+                    plainStart = i;
+                    continue;
+                }
+            }
+
+            // `code`
+            if (c == '`')
+            {
+                var close = IndexOf(src, i + 1, to, '`');
+                if (close >= 0)
+                {
+                    FlushPlain(src, plainStart, i, doc);
+                    doc.Runs.Add(new Run(new Slice(i + 1, close - (i + 1)), RunStyle.Code, -1));
+                    i = close + 1;
+                    plainStart = i;
+                    continue;
+                }
+            }
+
+            // [label](url) or [OpName]
+            if (c == '[')
+            {
+                var close = IndexOf(src, i + 1, to, ']');
+                if (close >= 0)
+                {
+                    var labelStart = i + 1;
+                    var labelLen = close - labelStart;
+
+                    // Link: [label](url)
+                    if (close + 1 < to && src[close + 1] == '(')
+                    {
+                        var urlClose = IndexOf(src, close + 2, to, ')');
+                        if (urlClose >= 0)
+                        {
+                            FlushPlain(src, plainStart, i, doc);
+                            var urlSlice = new Slice(close + 2, urlClose - (close + 2));
+                            var urlIndex = doc.Urls.Count;
+                            doc.Urls.Add(urlSlice);
+                            doc.Runs.Add(new Run(new Slice(labelStart, labelLen), RunStyle.Link, urlIndex));
+                            i = urlClose + 1;
+                            plainStart = i;
+                            continue;
+                        }
+                    }
+
+                    // Operator reference: [Identifier]
+                    if (labelLen > 0 && IsIdentifier(src, labelStart, labelLen))
+                    {
+                        FlushPlain(src, plainStart, i, doc);
+                        var refSlice = new Slice(labelStart, labelLen);
+                        var refIndex = doc.Urls.Count;
+                        doc.Urls.Add(refSlice);
+                        doc.Runs.Add(new Run(refSlice, RunStyle.OpRef, refIndex));
+                        i = close + 1;
+                        plainStart = i;
+                        continue;
+                    }
+                }
+            }
+
+            i++;
+        }
+
+        FlushPlain(src, plainStart, to, doc);
+    }
+
+    private static void FlushPlain(string src, int from, int to, ParsedDoc doc)
+    {
+        if (to > from)
+            doc.Runs.Add(new Run(new Slice(from, to - from), RunStyle.None, -1));
+    }
+
+    private static int IndexOf(string src, int from, int to, char target)
+    {
+        for (var i = from; i < to; i++)
+        {
+            if (src[i] == target)
+                return i;
+        }
+
+        return -1;
+    }
+
+    private static int IndexOfDouble(string src, int from, int to, char target)
+    {
+        for (var i = from; i < to - 1; i++)
+        {
+            if (src[i] == target && src[i + 1] == target)
+                return i;
+        }
+
+        return -1;
+    }
+
+    private static bool IsIdentifier(string src, int from, int length)
+    {
+        for (var i = 0; i < length; i++)
+        {
+            var c = src[from + i];
+            var ok = (c >= 'A' && c <= 'Z')
+                     || (c >= 'a' && c <= 'z')
+                     || (c >= '0' && c <= '9')
+                     || c == '_';
+            if (!ok)
+                return false;
+        }
+
+        return true;
+    }
+}

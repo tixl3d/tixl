@@ -1,6 +1,7 @@
 using ImGuiNET;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
+using T3.Editor.Gui.Styling.Markdown;
 using T3.Editor.Gui.UiHelpers.Thumbnails;
 using T3.Editor.Gui.Windows.Utilities;
 using T3.Editor.UiModel.Commands;
@@ -32,6 +33,7 @@ internal sealed class UtilitiesWindow : Window
         MsdfGeneration,
         OperatorMigration,
         Thumbnails,
+        MarkdownPreview,
     }
 
     private Categories _activeCategory;
@@ -155,12 +157,16 @@ internal sealed class UtilitiesWindow : Window
                     {
                         ThumbnailManager.Reset();
                     }
-                    
+
                     if (ThumbnailManager.AtlasSrv != null)
                     {
                         ImGui.Image(ThumbnailManager.AtlasSrv.NativePointer, new Vector2(1024));
                     }
 
+                    break;
+
+                case Categories.MarkdownPreview:
+                    MarkdownPreview.Draw();
                     break;
             }
 
