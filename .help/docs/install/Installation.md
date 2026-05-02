@@ -21,3 +21,16 @@ A native port to Linux and macOS is in progress. Until then you can run TiXL und
 ## Run TiXL from an IDE
 
 For developing and debugging C# operators, set up a development environment and run TiXL from an IDE. See [Set up a development environment](InstallDev.md).
+
+## Build with command line .Net SDK 
+
+If you don't want to run from an IDE you can clone the repository or download the [zip](https://github.com/tixl3d/tixl/archive/refs/heads/main.zip)
+Make sure you have the .net Sdk installed. 
+
+### Release mode
+Within the root folder of the solution open a terminal and run `dotnet build --configuration Release`  
+Go to \Editor\bin\Release\net10.0-windows folder and run Tixl.exe
+
+### Debug mode
+Within the root folder of the solution open a terminal and run `dotnet build`  
+Go to \Editor\bin\Debug\net10.0-windows folder and run Tixl.exe
