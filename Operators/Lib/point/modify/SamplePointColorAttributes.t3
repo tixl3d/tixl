@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "056ea55a-91a2-4b55-bcce-e44cc8602623"/*SamplePointColorAttributes*/,
   "Inputs": [
     {
@@ -475,12 +477,6 @@
       "TargetSlotId": "5d73ebe6-9aa0-471a-ae6b-3f5bfd5a0f9c"
     },
     {
-      "SourceParentOrChildId": "272928db-89c9-46d8-8f03-51b035aa4ae9",
-      "SourceSlotId": "e81c99ce-fcee-4e7c-a1c7-0aa3b352b7e1",
-      "TargetParentOrChildId": "2b0d4b5d-2478-4dcc-bbf6-005f56ec2f5b",
-      "TargetSlotId": "5d73ebe6-9aa0-471a-ae6b-3f5bfd5a0f9c"
-    },
-    {
       "SourceParentOrChildId": "4a3deca8-a65a-47c2-86ed-bb4bc2877ad9",
       "SourceSlotId": "a6fe06e0-b6a9-463c-9e62-930c58b0a0a1",
       "TargetParentOrChildId": "344248e4-005c-417e-9f47-4910551b77e2",
@@ -643,7 +639,7 @@
       "TargetSlotId": "7a13b834-21e5-4cef-ad5b-23c3770ea763"
     },
     {
-      "SourceParentOrChildId": "2b0d4b5d-2478-4dcc-bbf6-005f56ec2f5b",
+      "SourceParentOrChildId": "272928db-89c9-46d8-8f03-51b035aa4ae9",
       "SourceSlotId": "e81c99ce-fcee-4e7c-a1c7-0aa3b352b7e1",
       "TargetParentOrChildId": "77fa7029-218f-4922-871f-f77c484d7c76",
       "TargetSlotId": "51110d89-083e-42b8-b566-87b144dfbed9"

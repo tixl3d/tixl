@@ -23,6 +23,12 @@ public interface ISerialReceiver
 
 public static class SerialConnectionManager
 {
+    /// <summary>
+    /// When true, the writer thread logs serial-write durations above 0.5 ms.
+    /// Driven from operator-side LogMessages toggles. Cheap volatile read on the hot path.
+    /// </summary>
+    public static volatile bool DebugLogSlowWrites;
+
     private static readonly Dictionary<string, PortConnection> _connections = new();
     private static readonly object _lock = new();
 
@@ -258,7 +264,20 @@ public static class SerialConnectionManager
                 try
                 {
                     if (_serialPort.IsOpen)
-                        _serialPort.Write(_writerScratch, 0, length);
+                    {
+                        if (DebugLogSlowWrites)
+                        {
+                            var startTicks = Stopwatch.GetTimestamp();
+                            _serialPort.Write(_writerScratch, 0, length);
+                            var elapsedMs = (Stopwatch.GetTimestamp() - startTicks) * 1000.0 / Stopwatch.Frequency;
+                            if (elapsedMs > 0.5)
+                                Log.Debug($"Serial writer thread: _serialPort.Write took {elapsedMs:F2}ms ({length}B)");
+                        }
+                        else
+                        {
+                            _serialPort.Write(_writerScratch, 0, length);
+                        }
+                    }
                 }
                 catch (Exception e)
                 {
@@ -290,8 +309,16 @@ public static class SerialConnectionManager
             _workerThread?.Join(100);
             _writerThread?.Join(100);
             _frameReady.Dispose();
-            if (_serialPort.IsOpen) _serialPort.Close();
-            _serialPort.Dispose();
+
+            // The USB device may have already vanished (cable yanked / ESP unplugged).
+            // SerialPort.Close()/Dispose() then throws IOException from the kernel; swallow it.
+            try
+            {
+                if (_serialPort.IsOpen) _serialPort.Close();
+            }
+            catch (Exception e) { Log.Debug($"Serial port close failed (device gone?): {e.Message}"); }
+            try { _serialPort.Dispose(); }
+            catch (Exception e) { Log.Debug($"Serial port dispose failed (device gone?): {e.Message}"); }
         }
     }
 }

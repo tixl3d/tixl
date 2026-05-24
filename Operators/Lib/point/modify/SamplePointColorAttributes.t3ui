@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "056ea55a-91a2-4b55-bcce-e44cc8602623"/*SamplePointColorAttributes*/,
   "Description": "Use a texture to color the points. Same as [SamplePointAttributes] but for colors only",
   "SymbolTags": "1",
@@ -127,8 +129,8 @@
     {
       "ChildId": "2b0d4b5d-2478-4dcc-bbf6-005f56ec2f5b"/*Execute*/,
       "Position": {
-        "X": 455.49756,
-        "Y": 643.88513
+        "X": 769.30115,
+        "Y": 655.66614
       }
     },
     {
@@ -189,7 +191,7 @@
       "ChildId": "3f93dbf7-aeff-460d-9241-98e136ef40f4"/*StructuredBufferWithViews*/,
       "Position": {
         "X": 315.49756,
-        "Y": 713.88513
+        "Y": 678.88513
       }
     },
     {
@@ -252,7 +254,7 @@
       "ChildId": "77fa7029-218f-4922-871f-f77c484d7c76"/*ExecuteBufferUpdate*/,
       "Position": {
         "X": 455.49756,
-        "Y": 678.88513
+        "Y": 643.88513
       }
     },
     {
@@ -355,5 +357,13 @@
         "Y": 915.90283
       }
     }
-  ]
+  ],
+  "Settings": {
+    "Timeline": {
+  "ScaleX": 7.054155,
+  "ScrollX": -13.796197,
+  "Mode": "DopeView",
+  "TimelineHeight": 155
+}
+  }
 }

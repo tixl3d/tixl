@@ -44,13 +44,13 @@
     },
     {
       "Id": "e9bc114b-75ac-4bec-a337-5b16404da4de"/*AutoExposure*/,
-      "DefaultValue": true
+      "DefaultValue": false
     },
     {
       "Id": "ea6b3503-9a68-405e-9b34-7f44a74d5b31"/*RoiResolution*/,
       "DefaultValue": {
-        "X": 1954,
-        "Y": 1062
+        "X": 0,
+        "Y": 0
       }
     }
   ],

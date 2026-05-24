@@ -1,4 +1,5 @@
 #nullable enable
+using System.Diagnostics;
 using System.Numerics;
 using T3.Core.IO;
 
@@ -32,6 +33,27 @@ internal sealed class WLedSerialOutput : Instance<WLedSerialOutput>, IStatusProv
         var manualReconnect = Reconnect.GetValue(context);
         var portName = PortName.GetValue(context) ?? string.Empty;
         var baudRate = BaudRate.GetValue(context);
+        var logMessages = LogMessages.GetValue(context);
+        SerialConnectionManager.DebugLogSlowWrites = logMessages;
+
+        var updateStartTicks = logMessages ? Stopwatch.GetTimestamp() : 0L;
+        try
+        {
+            UpdateInner(context, sending, manualReconnect, portName, baudRate, logMessages);
+        }
+        finally
+        {
+            if (logMessages)
+            {
+                var totalMs = TicksToMilliseconds(Stopwatch.GetTimestamp() - updateStartTicks);
+                if (totalMs > 0.5)
+                    Log.Debug($"WLED Update total: {totalMs:F2}ms", this);
+            }
+        }
+    }
+
+    private void UpdateInner(EvaluationContext context, bool sending, bool manualReconnect, string portName, int baudRate, bool logMessages)
+    {
 
         if (manualReconnect)
         {
@@ -117,6 +139,8 @@ internal sealed class WLedSerialOutput : Instance<WLedSerialOutput>, IStatusProv
 
         EnsureBuffer(ledCount);
 
+        var loopStartTicks = logMessages ? Stopwatch.GetTimestamp() : 0L;
+
         // Position of R / G / B in the per-pixel triplet on the wire
         int rPos, gPos, bPos;
         switch (colorOrder)
@@ -186,7 +210,25 @@ internal sealed class WLedSerialOutput : Instance<WLedSerialOutput>, IStatusProv
             buffer[pixelStart + bPos] = ToByte(b * brightness);
         }
 
+        long loopElapsedTicks = 0;
+        if (logMessages)
+        {
+            loopElapsedTicks = Stopwatch.GetTimestamp() - loopStartTicks;
+        }
+
+        var writeStartTicks = logMessages ? Stopwatch.GetTimestamp() : 0L;
         var ok = SerialConnectionManager.WriteBytes(portName, buffer, buffer.Length);
+        if (logMessages)
+        {
+            var writeElapsedTicks = Stopwatch.GetTimestamp() - writeStartTicks;
+            var loopMs = TicksToMilliseconds(loopElapsedTicks);
+            var writeMs = TicksToMilliseconds(writeElapsedTicks);
+            if (writeMs > 0.5 || loopMs > 0.5)
+            {
+                Log.Debug($"WLED Update slow: loop={loopMs:F2}ms write={writeMs:F2}ms ({buffer.Length}B, {ledCount} LEDs)", this);
+            }
+        }
+
         if (!ok)
         {
             SetStatus($"Write to {portName} failed - connection lost", IStatusProvider.StatusLevel.Warning);
@@ -195,6 +237,8 @@ internal sealed class WLedSerialOutput : Instance<WLedSerialOutput>, IStatusProv
             IsConnected.Value = false;
         }
     }
+
+    private static double TicksToMilliseconds(long ticks) => ticks * 1000.0 / Stopwatch.Frequency;
 
     private void EnsureBuffer(int ledCount)
     {
@@ -256,4 +300,5 @@ internal sealed class WLedSerialOutput : Instance<WLedSerialOutput>, IStatusProv
     [Input(Guid = "BA4441FB-625E-4F49-8E9B-6C5237875F2B")] public readonly InputSlot<int> BaudRate = new(115200);
     [Input(Guid = "AFF14DDF-0A72-4EE3-BE79-EA44102DDD4F")] public readonly InputSlot<bool> Sending = new(true);
     [Input(Guid = "AD110199-D20A-48A8-8DC2-892E67E7A6AF")] public readonly InputSlot<bool> Reconnect = new();
+    [Input(Guid = "72CFDEDC-7999-43C6-9615-BD4CAE0A8903")] public readonly InputSlot<bool> LogMessages = new();
 }
