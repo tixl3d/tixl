@@ -5,159 +5,163 @@ scope: io-video
 tags: [hardware, essential]
 prerequisites:
   - A Swift Imaging USB camera is on hand (e.g. Swiftcam_SC1003).
-  - The vendor's Swift Imaging app is **closed** (only one process can hold the camera).
-  - For most steps, swiftcam.dll (x64) is installed at %LOCALAPPDATA%\TiXL\NativeDeps\swiftcam.dll. The first step verifies the missing-DLL path.
+  - The vendor's Swift Imaging app is closed (only one process can hold the camera).
+  - For most steps, swiftcam.dll (x64) is installed at `%LOCALAPPDATA%\TiXL\NativeDeps\swiftcam.dll`. The first step verifies the missing-DLL path.
 related-help:
   - ../.help/docs/using/SwiftCamSetup.md
 ---
 
-End-to-end verification of the `SwiftCamDevice` operator: missing-DLL UX, device discovery, streaming, manual exposure, ROI changes, hot-unplug recovery.
+End-to-end verification of the `[SwiftCamDevice]` operator: missing-DLL UX, device
+discovery, streaming, manual exposure, ROI changes, hot-unplug recovery.
 
-## Step: Verify missing-DLL message
+## Step: Reacting to a missing DLL
 
-**Context:** swiftcam.dll is **not** present at `%LOCALAPPDATA%\TiXL\NativeDeps\swiftcam.dll` (rename or move it temporarily).
 **Action:**
-- Drop a `[SwiftCamDevice]` operator into a composition.
-- Open the **Device Name** dropdown.
+Before starting, make sure `swiftcam.dll` is **not** at
+`%LOCALAPPDATA%\TiXL\NativeDeps\swiftcam.dll` (rename or move it temporarily).
+
+Drop a `[SwiftCamDevice]` operator into a composition and open its **Device Name**
+dropdown.
 
 **Expected:**
 - The dropdown shows a single entry beginning with `swiftcam.dll not found`.
-- The operator's **Status** output and badge indicate an error level.
-- The editor does not crash, no exception spam in the log.
+- The operator's **Status** output and its node badge indicate an error level.
+- The editor does not crash and there's no exception spam in the Console.
 
-## Step: Recover after installing the DLL
+## Step: Recovering after the DLL is installed
 
-**Context:** From the previous step, with the missing-DLL message visible.
 **Action:**
-- Restore swiftcam.dll (x64) at `%LOCALAPPDATA%\TiXL\NativeDeps\swiftcam.dll`.
-- Trigger the operator's **Reconnect** input.
+With the previous step's missing-DLL state still showing, restore `swiftcam.dll`
+(x64) at `%LOCALAPPDATA%\TiXL\NativeDeps\swiftcam.dll` and trigger the operator's
+**Reconnect** input.
 
 **Expected:**
-- After up to one second, the **Device Name** dropdown lists the connected camera by its product name (e.g. `Swiftcam_SC1003`).
+- After up to one second, the **Device Name** dropdown lists the connected
+  camera by its product name (e.g. `Swiftcam_SC1003`).
 - The Status no longer shows the missing-DLL message.
 
-## Step: Pick the device and start streaming
+## Step: Starting the stream
 
-**Context:** Camera detected, dropdown open.
 **Action:**
-- Pick the camera from the dropdown.
-- Toggle **Active** on.
-- Wire **Texture** into a viewer (`[Layer 2 d]`, `[Display]`, or any operator that accepts a Texture2D).
+With the camera detected, pick it from the **Device Name** dropdown, toggle
+**Active** on, and wire the operator's **Texture** output into a viewer
+(`[Layer2d]`, `[Display]`, or anything that accepts a Texture2D).
 
 **Expected:**
 - **Status** shows `Streaming.` with a success badge.
-- A live image appears in the viewer (may take 1–2 seconds for the first frame).
+- A live image appears in the viewer (the first frame can take 1–2 seconds).
 - The **Resolution** output reports the streaming resolution.
-- **UpdateCount** increments while frames flow.
+- **UpdateCount** increments while frames are flowing.
 
-## Step: Pick a smaller resolution preset
+## Step: Switching to a smaller resolution preset
 
-**Context:** Streaming at the default `Resolution Index = 0`.
 **Action:**
-- Open the **Resolution Index** dropdown.
-- Pick a smaller preset (e.g. `1: 1832x1374`).
+While streaming at the default `Resolution Index = 0`, open the **Resolution
+Index** dropdown and pick a smaller preset such as `1: 1832x1374`.
 
 **Expected:**
-- The stream restarts within ~2 seconds.
+- The stream restarts within roughly two seconds.
 - **Resolution** output and the viewport image switch to the smaller dimensions.
 - Frame rate is noticeably higher than at full sensor.
 
-## Step: Disable auto exposure and adjust manually
+## Step: Manual exposure control
 
-**Context:** Streaming.
 **Action:**
-- Toggle **Auto Exposure** off.
-- Move **Exposure** between low (e.g. 1 ms) and high (e.g. 100 ms).
+While streaming, toggle **Auto Exposure** off, then move **Exposure** between
+a low value (around 1 ms) and a high one (around 100 ms).
 
 **Expected:**
-- With low Exposure, the image is dark; high Exposure brightens it.
+- At low Exposure the image is dark; at high Exposure it brightens.
 - Frame rate visibly increases at low Exposure.
-- No restart; changes apply during streaming.
+- The changes apply during streaming — no restart.
 
-## Step: Apply a ROI
+## Step: Applying a region of interest
 
-**Context:** Streaming with `Roi Resolution = (0, 0)` (full sensor).
 **Action:**
-- Set **Roi Resolution** to `(1920, 1080)`.
+While streaming with `Roi Resolution = (0, 0)` (full sensor), set
+**Roi Resolution** to `(1920, 1080)`.
 
 **Expected:**
-- After ~1 second, the viewport texture switches to a 1920×1080 (or close, snapped to multiples of 4) crop.
-- The Status briefly shows `Starting…` during the restart, then returns to `Streaming.`.
-- The editor remains responsive throughout (no ImGui freeze).
+- After roughly one second the viewport texture switches to a 1920×1080 crop
+  (or close, snapped to multiples of 4).
+- Status briefly shows `Starting…` during the restart and then returns to
+  `Streaming.`.
+- The editor stays responsive throughout — no ImGui freeze.
 
-## Step: Move the ROI window
+## Step: Moving the ROI window
 
-**Context:** ROI active at `(1920, 1080)` from the previous step.
 **Action:**
-- Move **Roi Alignment** to `(-1, -1)`, then `(1, 1)`, then back to `(0, 0)`.
+With the ROI active at `(1920, 1080)`, move **Roi Alignment** to `(-1, -1)`,
+then `(1, 1)`, and finally back to `(0, 0)`.
 
 **Expected:**
-- Each change triggers a stream restart (~1 second) — the SDK doesn't accept ROI changes mid-stream cleanly.
-- `(0, 0)` shows the centered crop; `(-1, -1)` the top-left of the sensor; `(1, 1)` the bottom-right.
-- The editor remains responsive throughout.
+- Each change triggers a stream restart of about one second — the SDK doesn't
+  accept ROI changes mid-stream cleanly.
+- `(0, 0)` shows the centered crop, `(-1, -1)` the top-left of the sensor, and
+  `(1, 1)` the bottom-right.
+- The editor stays responsive throughout.
 
-## Step: Reset ROI
+## Step: Resetting the ROI
 
-**Context:** ROI active from previous step.
 **Action:**
-- Set **Roi Resolution** back to `(0, 0)`.
+With the ROI still active, set **Roi Resolution** back to `(0, 0)`.
 
 **Expected:**
-- After ~1 second, the viewport returns to the full preset resolution.
+- After roughly one second the viewport returns to the full preset resolution.
 
-## Step: Enable verbose log messages
+## Step: Enabling verbose log messages
 
-**Context:** Streaming.
 **Action:**
-- Open the editor's Console window.
-- Toggle **Log Messages** on.
+While streaming, open the editor's Console window and toggle **Log Messages** on.
 
 **Expected:**
-- The Console begins receiving `SwiftCamDevice: event EVENT_IMAGE` lines (one per frame) and `put_Option(...)`-style traces.
+- The Console begins receiving `SwiftCamDevice: event EVENT_IMAGE` lines (one
+  per frame) and `put_Option(…)`-style traces.
 - Each log line is clickable and selects the operator instance.
 
-## Step: Disable verbose log messages
+## Step: Disabling verbose log messages
 
-**Context:** Verbose logs flowing.
 **Action:**
-- Toggle **Log Messages** off.
+With the verbose logs flowing, toggle **Log Messages** off again.
 
 **Expected:**
 - Per-frame and per-step log lines stop within one frame.
-- Errors and one-time lifecycle events (start, stop, first frame, disconnect) still log.
+- Errors and one-time lifecycle events (start, stop, first frame, disconnect)
+  still log.
 
-## Step: Recover from a USB unplug
+## Step: Recovering from a USB unplug
 
-**Context:** Streaming.
 **Action:**
-- Unplug the camera's USB cable.
-- Wait until you see `Camera disconnected` or `Camera reported an error` in the **Status**.
-- Plug the cable back in.
+While streaming, unplug the camera's USB cable. Wait until you see
+`Camera disconnected` or `Camera reported an error` in the **Status**, then
+plug the cable back in.
 
 **Expected:**
-- Within ~2 seconds of unplug, **Status** shows a warning/error and the operator stops trying to deliver frames.
-- The Console logs `EVENT_DISCONNECTED` (or a related error) once at warning level.
-- After replug, the operator auto-reconnects within a few seconds without manual intervention. **Status** returns to `Streaming.` and frames resume.
+- Within roughly two seconds of the unplug, **Status** shows a warning or error
+  and the operator stops trying to deliver frames.
+- The Console logs `EVENT_DISCONNECTED` (or a related error) once at warning
+  level.
+- After replug, the operator auto-reconnects within a few seconds without
+  manual intervention. **Status** returns to `Streaming.` and frames resume.
 
-## Step: Stop streaming cleanly
+## Step: Stopping the stream cleanly
 
-**Context:** Streaming.
 **Action:**
-- Toggle **Active** off.
+While streaming, toggle **Active** off.
 
 **Expected:**
-- Within one frame, **Status** shows `Inactive.` with a notice badge.
+- Within one frame **Status** shows `Inactive.` with a notice badge.
 - **UpdateCount** stops incrementing.
-- Re-toggling Active resumes streaming within ~1–2 seconds.
+- Re-toggling Active resumes streaming within one to two seconds.
 
-## Step: Delete the operator while streaming
+## Step: Deleting the operator while streaming
 
-**Context:** Streaming.
 **Action:**
-- Select the `[SwiftCamDevice]` operator.
-- Press `Delete` (or right-click → Delete).
+While streaming, select the `[SwiftCamDevice]` operator and press `Delete`
+(or right-click → Delete).
 
 **Expected:**
 - The operator is removed from the graph.
-- No error in the Console (camera handle releases cleanly via `Dispose`).
-- Re-instancing a fresh `[SwiftCamDevice]` and toggling Active streams the same camera again without needing the editor restart.
+- No error in the Console — the camera handle releases cleanly via `Dispose`.
+- Spawning a fresh `[SwiftCamDevice]` and toggling Active streams the same
+  camera again without needing an editor restart.
