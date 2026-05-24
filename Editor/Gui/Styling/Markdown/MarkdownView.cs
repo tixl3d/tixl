@@ -164,7 +164,7 @@ internal sealed class MarkdownView
         {
             ImGui.PushFont(Fonts.Code);
             fontPushed = true;
-            ImGui.PushStyleColor(ImGuiCol.Text, UiColors.ForegroundFull.Fade(0.8f).Rgba);
+            ImGui.PushStyleColor(ImGuiCol.Text, UiColors.ForegroundFull.Fade(0.65f).Rgba);
             colorPushed = true;
         }
         else if ((fragment.Style & RunStyle.Bold) != 0)

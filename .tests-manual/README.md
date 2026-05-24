@@ -23,7 +23,7 @@ title: Creating Operators         # human-readable, shown in runner UI
 scope: graph-window               # broad feature area (free-form tag)
 tags: [smoke, essential]          # optional — used by the runner to filter sets
 prerequisites:                    # optional — free-text setup requirements
-  - An empty project is open
+  - An empty project is open.
 related-help:                     # optional — relative links into .help/
   - ../.help/using/graph-window.md
 ---
@@ -31,36 +31,44 @@ related-help:                     # optional — relative links into .help/
 Short prose intro (optional): what this set covers, who should run it,
 and anything that applies to all steps.
 
-## Step: Open the symbol browser
+## Step: Opening the Symbol Browser
 
-**Context:** On the Graph Window.
 **Action:**
-- Press `Tab`
+With the Graph Window focused, press `Tab`.
 
 **Expected:**
 - The Symbol Browser opens.
-- The search field is focused.
+- Its search field is focused and empty.
 
-## Step: Search and create a RadialGradient
+## Step: Finding an operator by name
 
-**Context:** Symbol Browser is open.
 **Action:**
-- Type `RG`
-- Press `Enter` to accept the top result
+With the Symbol Browser open, type `RG`.
 
 **Expected:**
-- A `[RadialGradient]` operator is created.
-- It is selected.
-- Its inputs show in the Parameter Window.
+- The result list filters down to operators whose names contain those letters.
+- `[RadialGradient]` is visible somewhere in the list.
 ```
 
 ### Field conventions
 
-- **Step delimiter** — each step begins with `## Step: <short imperative title>`. No nested headings inside a step; use bullet lists.
-- **`**Context:**`** — one sentence establishing where the tester is. Can be omitted if continuous from the previous step.
-- **`**Action:**`** — bullets, imperative mood. One keystroke / click per bullet where practical.
-- **`**Expected:**`** — bullets, present tense, observable outcomes only. No "should probably" language; if the outcome is fuzzy, split the step.
-- **Links** — use relative paths into `.help/` for deep dives. Keep prose scannable — the step card in the runner is small.
+- **Step delimiter** — each step begins with `## Step: <short imperative title>`.
+  The title is shown in the runner subtitle ("Step 3/12 — Creating an operator"),
+  so phrase it as the thing being verified, not the keystroke.
+- **`**Action:**`** — the instruction to the tester. Write it as prose, the way
+  you'd guide a new user: "With the search results visible, use the cursor
+  up/down keys to highlight `[RadialGradient]`." Use bullets only when steps
+  are genuinely parallel (e.g. "either click this, or press Enter"). Avoid
+  one-keystroke-per-bullet — it reads like a checklist instead of a tour.
+- **`**Expected:**`** — present tense, observable outcomes only. Bullets are
+  fine here since they're separate checks. No "should probably" language; if
+  the outcome is fuzzy, split the step.
+- **`**Context:**`** *(optional, legacy)* — one sentence establishing where
+  the tester is. Older sets used this; new sets should fold the context into
+  the first sentence of `**Action:**` instead. The runner still parses it for
+  back-compat and merges it into the Action body at display time.
+- **Links** — use relative paths into `.help/` for deep dives. Keep prose
+  scannable — the step card in the runner is small.
 
 ### Step outcomes
 

@@ -2,6 +2,8 @@
 using System.Text;
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
+using T3.Core.SystemUi;
+using T3.Editor.Gui.Hub;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.Styling.Markdown;
@@ -20,9 +22,8 @@ internal sealed class ManualTestRunnerWindow : Window
 {
     internal ManualTestRunnerWindow()
     {
-        Config.Title = "Manual Test Runner";
-        MenuTitle = "Manual Test Runner...";
-        WindowPaddingOverride = new Vector2(16, 14);
+        Config.Title = "Editor Feature Tests";
+        MenuTitle = "Editor Feature Tests...";
     }
 
     internal override IReadOnlyList<Window> GetInstances() => Array.Empty<Window>();
@@ -51,83 +52,105 @@ internal sealed class ManualTestRunnerWindow : Window
     private void DrawPickState()
     {
         var sets = _allSets!;
+        var displayDir = ShortenTestsDir(_testsDir);
+        var subtitle = $"Loaded {sets.Count} test set{(sets.Count == 1 ? "" : "s")} from {displayDir}";
 
-        FormInputs.AddSectionHeader("Manual test runner");
-        ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-        ImGui.TextWrapped($"Loaded {sets.Count} test set{(sets.Count == 1 ? "" : "s")} from {_testsDir}");
-        ImGui.PopStyleColor();
+        ContentPanel.Begin("Editor Feature Tests", subtitle, drawTools: DrawPickHeaderTools);
 
+        DrawFilterRow(sets);
         FormInputs.AddVerticalSpace(6);
 
-        // Reload + filter row.
-        if (ImGui.Button("Reload"))
+        // Reserve room at the bottom for the footer so the list scrolls
+        // independently while the action row stays pinned.
+        var scale = T3Ui.UiScaleFactor;
+        var footerH = ImGui.GetFrameHeight() + 16 * scale;
+        ImGui.BeginChild("##setlist", new Vector2(0, -footerH),
+                         ImGuiChildFlags.None, ImGuiWindowFlags.NoBackground);
+        {
+            ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(0, 4 * scale));
+
+            var visibleCount = 0;
+            foreach (var set in sets)
+            {
+                if (!Matches(set, _filter, _selectedTags))
+                    continue;
+
+                visibleCount++;
+                DrawSetRow(set);
+            }
+
+            ImGui.PopStyleVar();
+
+            if (visibleCount == 0)
+            {
+                ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
+                ImGui.TextWrapped(sets.Count == 0
+                                      ? $"No `.md` test sets found in {_testsDir}"
+                                      : "No sets match the current filter.");
+                ImGui.PopStyleColor();
+            }
+        }
+        ImGui.EndChild();
+
+        DrawPickFooter(sets);
+
+        ContentPanel.End();
+    }
+
+    private void DrawPickHeaderTools()
+    {
+        var iconSize = new Vector2(ImGui.GetFrameHeight(), ImGui.GetFrameHeight());
+        CustomComponents.RightAlign(iconSize.X, sameLine: false);
+        if (CustomComponents.TransparentIconButton(Icon.Refresh, iconSize))
             ReloadSets();
-        ImGui.SameLine();
-        ImGui.SetNextItemWidth(220 * T3Ui.UiScaleFactor);
+        if (ImGui.IsItemHovered())
+            CustomComponents.TooltipForLastItem("Reload test sets from disk");
+    }
+
+    private void DrawFilterRow(List<TestSet> sets)
+    {
+        var scale = T3Ui.UiScaleFactor;
+
+        ImGui.SetNextItemWidth(260 * scale);
         ImGui.InputTextWithHint("##filter", "Filter…", ref _filter, 256);
 
         var allTags = CollectAllTags(sets);
-        if (allTags.Count > 0)
+        if (allTags.Count == 0)
+            return;
+
+        // Estimate width of the tag row so we can right-align it.
+        ImGui.PushFont(Fonts.FontSmall);
+        var tagRowWidth = 0f;
+        for (var i = 0; i < allTags.Count; i++)
         {
-            ImGui.SameLine();
-            ImGui.TextDisabled("Tags:");
-            foreach (var tag in allTags)
-            {
-                ImGui.SameLine();
-                var active = _selectedTags.Contains(tag);
-                if (active)
-                {
-                    ImGui.PushStyleColor(ImGuiCol.Button, UiColors.StatusActivated.Rgba);
-                    ImGui.PushStyleColor(ImGuiCol.ButtonHovered, UiColors.StatusActivated.Rgba);
-                    ImGui.PushStyleColor(ImGuiCol.ButtonActive, UiColors.StatusActivated.Rgba);
-                }
-                if (ImGui.SmallButton(tag))
-                {
-                    if (active) _selectedTags.Remove(tag);
-                    else _selectedTags.Add(tag);
-                }
-                if (active)
-                    ImGui.PopStyleColor(3);
-            }
+            tagRowWidth += ImGui.CalcTextSize(allTags[i].ToUpperInvariant()).X
+                           + 16 * scale;       // horizontal padding of the pill
+            if (i > 0)
+                tagRowWidth += ImGui.GetStyle().ItemSpacing.X;
         }
-
-        FormInputs.AddVerticalSpace(8);
-        ImGui.Separator();
-        FormInputs.AddVerticalSpace(4);
-
-        // Set list.
-        var visibleCount = 0;
-        foreach (var set in sets)
-        {
-            if (!Matches(set, _filter, _selectedTags))
-                continue;
-
-            visibleCount++;
-            DrawSetRow(set);
-        }
-
-        if (visibleCount == 0)
-        {
-            ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-            ImGui.TextWrapped(sets.Count == 0
-                                  ? $"No `.md` test sets found in {_testsDir}"
-                                  : "No sets match the current filter.");
-            ImGui.PopStyleColor();
-        }
-
-        FormInputs.AddVerticalSpace(8);
-        ImGui.Separator();
-        FormInputs.AddVerticalSpace(4);
-
-        var anySelected = _selectedSetIds.Count > 0;
-        if (!anySelected)
-            ImGui.BeginDisabled();
-        if (ImGui.Button("Start Run"))
-            StartRun();
-        if (!anySelected)
-            ImGui.EndDisabled();
+        ImGui.PopFont();
 
         ImGui.SameLine();
+        CustomComponents.RightAlign(tagRowWidth);
+
+        for (var i = 0; i < allTags.Count; i++)
+        {
+            if (i > 0)
+                ImGui.SameLine();
+            var tag = allTags[i];
+            var active = _selectedTags.Contains(tag);
+            if (CustomComponents.TagFilterToggle(tag, active))
+            {
+                if (active) _selectedTags.Remove(tag);
+                else _selectedTags.Add(tag);
+            }
+        }
+    }
+
+    private void DrawPickFooter(List<TestSet> sets)
+    {
+        var scale = T3Ui.UiScaleFactor;
+
         if (ImGui.Button("Select All"))
         {
             foreach (var s in sets)
@@ -135,61 +158,189 @@ internal sealed class ManualTestRunnerWindow : Window
                     _selectedSetIds.Add(s.Id);
         }
         ImGui.SameLine();
+
+        // Snapshot the disabled state so the matching pop runs even when the
+        // click clears the set in-between (otherwise EndDisabled fires without
+        // a matching Begin and ImGui's disabled stack underflows for one frame).
+        var clearDisabled = _selectedSetIds.Count == 0;
+        if (clearDisabled)
+            ImGui.BeginDisabled();
         if (ImGui.Button("Clear"))
             _selectedSetIds.Clear();
+        if (clearDisabled)
+            ImGui.EndDisabled();
+
+        // Start CTA right-aligned. Style follows the user's design proposal:
+        // bright filled CTA when something is selected, dimmed otherwise.
+        var startSize = CustomComponents.GetCtaButtonSize("Start");
+        ImGui.SameLine();
+        CustomComponents.RightAlign(startSize.X);
+
+        var anySelected = _selectedSetIds.Count > 0;
+        if (!anySelected)
+            ImGui.BeginDisabled();
+
+        var startBg = anySelected ? UiColors.StatusActivated : UiColors.BackgroundButton;
+        var startText = anySelected ? UiColors.ForegroundFull : UiColors.TextMuted;
+        if (CustomComponents.DrawCtaButton("Start", Icon.None, startText, startBg, Color.Transparent))
+            StartRun();
+
+        if (!anySelected)
+            ImGui.EndDisabled();
     }
 
     private void DrawSetRow(TestSet set)
     {
+        var scale = T3Ui.UiScaleFactor;
+        var dl = ImGui.GetWindowDrawList();
+
+        ImGui.PushID(set.Id);
+
         var selected = _selectedSetIds.Contains(set.Id);
-        if (ImGui.Checkbox($"##{set.Id}", ref selected))
+        var rowSize = new Vector2(ImGui.GetContentRegionAvail().X, 50 * scale);
+        var clicked = ImGui.InvisibleButton("##row", rowSize);
+        var hovered = ImGui.IsItemHovered();
+        var min = ImGui.GetItemRectMin();
+        var max = ImGui.GetItemRectMax();
+
+        if (clicked)
         {
-            if (selected) _selectedSetIds.Add(set.Id);
-            else _selectedSetIds.Remove(set.Id);
+            if (selected) _selectedSetIds.Remove(set.Id);
+            else _selectedSetIds.Add(set.Id);
+            selected = !selected;
         }
 
-        ImGui.SameLine();
-        ImGui.PushFont(Fonts.FontBold);
-        ImGui.TextUnformatted(set.Title);
-        ImGui.PopFont();
+        // Row background.
+        var bg = selected
+                     ? UiColors.StatusActivated.Fade(hovered ? 1f : 0.9f)
+                     : hovered
+                         ? UiColors.ForegroundFull.Fade(0.1f)
+                         : UiColors.ForegroundFull.Fade(0.04f);
+        dl.AddRectFilled(min, max, bg, 4 * scale);
 
+        var textColor = selected ? UiColors.ForegroundFull : UiColors.Text;
+        var mutedColor = selected ? UiColors.ForegroundFull.Fade(0.75f) : UiColors.TextMuted;
+        var padX = 12 * scale;
+        var padY = 6 * scale;
+
+        // Title (top-left).
+        dl.AddText(Fonts.FontBold, Fonts.FontBold.FontSize,
+                   new Vector2(min.X + padX, min.Y + padY),
+                   textColor, set.Title);
+
+        // Scope (bottom-left).
+        if (!string.IsNullOrEmpty(set.Scope))
+        {
+            var scopeY = min.Y + padY + Fonts.FontBold.FontSize + 2 * scale;
+            dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize,
+                       new Vector2(min.X + padX, scopeY),
+                       mutedColor, set.Scope);
+        }
+
+        // Tag pills + step count + optional warning icon (right side).
+        var rightCursor = max.X - padX;
+        DrawTagPillsRight(dl, set.Tags, ref rightCursor, max.Y - padY - Fonts.FontSmall.FontSize,
+                          mutedColor, scale);
+
+        // Step count (top-right).
+        var stepCount = $"{set.Steps.Count} step{(set.Steps.Count == 1 ? "" : "s")}";
+        ImGui.PushFont(Fonts.FontSmall);
+        var stepsWidth = ImGui.CalcTextSize(stepCount).X;
+        ImGui.PopFont();
+        dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize,
+                   new Vector2(max.X - padX - stepsWidth, min.Y + padY),
+                   mutedColor, stepCount);
+
+        // Warning icon (if any) next to the step count.
         if (set.ParseWarnings.Count > 0)
         {
-            ImGui.SameLine();
-            ImGui.PushStyleColor(ImGuiCol.Text, UiColors.StatusWarning.Rgba);
-            ImGui.TextUnformatted($"  ⚠ {set.ParseWarnings.Count} warning(s)");
-            ImGui.PopStyleColor();
-            if (ImGui.IsItemHovered())
-            {
-                ImGui.BeginTooltip();
-                foreach (var w in set.ParseWarnings)
-                    ImGui.TextUnformatted(w);
-                ImGui.EndTooltip();
-            }
+            var warnX = max.X - padX - stepsWidth - 18 * scale;
+            Icons.DrawIconAtScreenPosition(Icon.Warning,
+                                            new Vector2(warnX, min.Y + padY - 1 * scale),
+                                            dl, UiColors.StatusWarning);
         }
 
-        // Sub-line: scope + tags + step count.
-        ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-        ImGui.PushFont(Fonts.FontSmall);
-        var sb = _scratch;
-        sb.Clear();
-        if (!string.IsNullOrEmpty(set.Scope))
-            sb.Append(set.Scope).Append(" — ");
-        sb.Append(set.Steps.Count).Append(" step").Append(set.Steps.Count == 1 ? "" : "s");
-        if (set.Tags.Count > 0)
+        // Hover tooltip: intro paragraph from the .md file, rendered as
+        // markdown so **bold**, `code`, links, [OpRef]s read correctly.
+        if (hovered && (!string.IsNullOrWhiteSpace(set.Intro) || set.ParseWarnings.Count > 0))
         {
-            sb.Append("  [");
-            for (var i = 0; i < set.Tags.Count; i++)
+            // Pin the tooltip width BEFORE BeginTooltip so frame 1 already has
+            // the right ContentRegionAvail (otherwise the auto-resize window
+            // defaults to viewport width on its first appearance and flashes
+            // huge before settling next frame).
+            var tooltipWidth = 420 * scale;
+            ImGui.SetNextWindowSizeConstraints(
+                new Vector2(tooltipWidth, 0),
+                new Vector2(tooltipWidth, float.MaxValue));
+
+            ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(10, 8) * scale);
+            ImGui.BeginTooltip();
+
+            if (!string.IsNullOrWhiteSpace(set.Intro))
             {
-                if (i > 0) sb.Append(", ");
-                sb.Append(set.Tags[i]);
+                // Lazy-create so hot-reload that adds new fields doesn't NRE
+                // until the next editor restart.
+                _introMarkdown ??= new MarkdownView(new MarkdownView.Options());
+                _introMarkdown.Draw(set.Intro);
             }
-            sb.Append(']');
+
+            if (set.ParseWarnings.Count > 0)
+            {
+                if (!string.IsNullOrWhiteSpace(set.Intro))
+                    FormInputs.AddVerticalSpace(6);
+                ImGui.PushStyleColor(ImGuiCol.Text, UiColors.StatusWarning.Rgba);
+                ImGui.PushTextWrapPos(tooltipWidth);
+                foreach (var w in set.ParseWarnings)
+                    ImGui.TextWrapped(w);
+                ImGui.PopTextWrapPos();
+                ImGui.PopStyleColor();
+            }
+
+            ImGui.EndTooltip();
+            ImGui.PopStyleVar();
         }
-        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + 26 * T3Ui.UiScaleFactor);
-        ImGui.TextUnformatted(sb.ToString());
+
+        ImGui.PopID();
+    }
+
+    private static void DrawTagPillsRight(ImDrawListPtr dl, IReadOnlyList<string> tags,
+                                           ref float rightX, float y,
+                                           Color textColor, float scale)
+    {
+        if (tags.Count == 0)
+            return;
+
+        ImGui.PushFont(Fonts.FontSmall);
+        var pillPadX = 6 * scale;
+        var pillPadY = 1 * scale;
+        var fontSize = Fonts.FontSmall.FontSize;
+        var bgColor = ImGui.GetColorU32(UiColors.ForegroundFull.Fade(0.12f).Rgba);
+        var fgColor = ImGui.GetColorU32(textColor.Rgba);
+
+        for (var i = tags.Count - 1; i >= 0; i--)
+        {
+            var label = tags[i].ToUpperInvariant();
+            var w = ImGui.CalcTextSize(label).X + pillPadX * 2;
+            rightX -= w;
+            dl.AddRectFilled(new Vector2(rightX, y - pillPadY),
+                             new Vector2(rightX + w, y + fontSize + pillPadY),
+                             bgColor, 6 * scale);
+            dl.AddText(Fonts.FontSmall, fontSize,
+                       new Vector2(rightX + pillPadX, y),
+                       fgColor, label);
+            rightX -= 4 * scale;
+        }
         ImGui.PopFont();
-        ImGui.PopStyleColor();
+    }
+
+    private static string ShortenTestsDir(string fullPath)
+    {
+        if (string.IsNullOrEmpty(fullPath))
+            return fullPath;
+        // Show the .tests-manual folder name and one level above for context,
+        // not the full Windows path.
+        var name = System.IO.Path.GetFileName(fullPath);
+        return string.IsNullOrEmpty(name) ? fullPath : name;
     }
 
     // ----- Run state ----------------------------------------------------
@@ -214,139 +365,157 @@ internal sealed class ManualTestRunnerWindow : Window
         var globalIdx = ComputeGlobalStepIndex();
         var globalCount = ComputeTotalStepCount();
 
-        DrawRunHeader(set, globalIdx, globalCount);
-        FormInputs.AddVerticalSpace(8);
+        var title = set.Title;
+        var subtitle = $"Step {globalIdx + 1}/{globalCount} — {step.Title}";
+
+        ContentPanel.Begin(title, subtitle, drawTools: DrawRunHeaderTools);
+
+        // The Abandon button inside DrawRunHeaderTools may have nulled _run;
+        // stop drawing the rest of this frame to avoid an NRE in the side panel.
+        if (_run == null || _state != State.Run)
+        {
+            ContentPanel.End();
+            return;
+        }
 
         // Two-column layout: step content (left) + comment + outcome (right).
+        var scale = T3Ui.UiScaleFactor;
+        var gutter = 30f * scale;
         var avail = ImGui.GetContentRegionAvail();
-        var rightWidth = MathF.Max(220 * T3Ui.UiScaleFactor, avail.X * 0.32f);
-        var leftWidth = MathF.Max(280 * T3Ui.UiScaleFactor, avail.X - rightWidth - 16 * T3Ui.UiScaleFactor);
+        var rightWidth = MathF.Max(280 * scale, avail.X * 0.34f);
+        var leftWidth = MathF.Max(280 * scale, avail.X - rightWidth - gutter);
+
+        // The nav buttons in drawTools may have changed _currentSetIdx /
+        // _currentStepIdx. Re-resolve set and step now so the body cache is
+        // keyed and built from the CURRENT state, not the pre-click snapshot.
+        set = run.Sets[_currentSetIdx];
+        if (set.Steps.Count == 0)
+        {
+            ContentPanel.End();
+            return;
+        }
+        step = set.Steps[_currentStepIdx];
 
         ImGui.BeginChild("##step-content", new Vector2(leftWidth, -1),
                          ImGuiChildFlags.None, ImGuiWindowFlags.NoBackground);
         DrawStepBody(set, step);
         ImGui.EndChild();
 
-        ImGui.SameLine();
+        ImGui.SameLine(0, gutter);
         ImGui.BeginChild("##step-side", new Vector2(rightWidth, -1),
                          ImGuiChildFlags.None, ImGuiWindowFlags.NoBackground);
         DrawStepSide(set, step);
         ImGui.EndChild();
+
+        ContentPanel.End();
     }
 
-    private void DrawRunHeader(TestSet set, int globalIdx, int globalCount)
+    private void DrawRunHeaderTools()
     {
-        var startY = ImGui.GetCursorPosY();
+        var scale = T3Ui.UiScaleFactor;
         var iconSize = new Vector2(ImGui.GetFrameHeight(), ImGui.GetFrameHeight());
+        // 4 icons + 1 group gap + 1 group gap.
+        var toolsWidth = iconSize.X * 4 + 16 * scale;
+        CustomComponents.RightAlign(toolsWidth, sameLine: false);
 
-        // Title + step counter (left).
-        ImGui.PushFont(Fonts.FontLarge);
-        ImGui.PushStyleColor(ImGuiCol.Text, UiColors.Text.Rgba);
-        ImGui.TextUnformatted(set.Title);
-        ImGui.PopStyleColor();
-        ImGui.SameLine();
-        ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-        ImGui.TextUnformatted($"  {_currentStepIdx + 1}/{set.Steps.Count}");
-        ImGui.PopStyleColor();
-        ImGui.PopFont();
-
-        // Right-aligned nav: ← → Abandon.
-        var navWidth = iconSize.X * 2 + 6 * T3Ui.UiScaleFactor + 70 * T3Ui.UiScaleFactor;
-        ImGui.SameLine();
-        ImGui.SetCursorPosX(ImGui.GetWindowWidth() - navWidth - WindowPaddingOverride.X);
-        ImGui.SetCursorPosY(startY + 4 * T3Ui.UiScaleFactor);
-
-        if (CustomComponents.IconButton(Icon.ChevronLeft, iconSize))
-            StepBack();
-        ImGui.SameLine(0, 0);
-        if (CustomComponents.IconButton(Icon.ChevronRight, iconSize))
-            AdvanceStep();
-        ImGui.SameLine(0, 6);
-        if (ImGui.SmallButton("Abandon"))
+        // Edit this test set's source markdown — handy when the wording on a
+        // step is awkward and you want to fix it in place.
+        if (CustomComponents.TransparentIconButton(Icon.OpenExternally, iconSize))
+            OpenCurrentSetSource();
+        if (ImGui.IsItemHovered())
         {
-            _state = State.Pick;
-            _run = null;
+            var set = _run?.Sets[_currentSetIdx];
+            CustomComponents.TooltipForLastItem(
+                "Open this test set's markdown source in the default editor",
+                set?.SourcePath ?? string.Empty);
         }
 
-        // Sub-line: "Step N of M".
-        ImGui.PushFont(Fonts.FontSmall);
-        ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-        ImGui.TextUnformatted($"Step {globalIdx + 1} of {globalCount}");
-        ImGui.PopStyleColor();
-        ImGui.PopFont();
+        ImGui.SameLine(0, 8 * scale);
+        if (CustomComponents.TransparentIconButton(Icon.ArrowLeft, iconSize))
+            StepBack();
+        if (ImGui.IsItemHovered())
+            CustomComponents.TooltipForLastItem("Previous step");
+
+        ImGui.SameLine(0, 0);
+        if (CustomComponents.TransparentIconButton(Icon.ArrowRight, iconSize))
+            AdvanceStep();
+        if (ImGui.IsItemHovered())
+            CustomComponents.TooltipForLastItem("Next step");
+
+        ImGui.SameLine(0, 8 * scale);
+        if (CustomComponents.TransparentIconButton(Icon.ChevronRight, iconSize))
+            SkipToNextSet();
+        if (ImGui.IsItemHovered())
+            CustomComponents.TooltipForLastItem("Skip to the next set\n(ends the run if this is the last set)");
+    }
+
+    private void OpenCurrentSetSource()
+    {
+        if (_run == null || _currentSetIdx >= _run.Sets.Count)
+            return;
+        var path = _run.Sets[_currentSetIdx].SourcePath;
+        if (string.IsNullOrEmpty(path))
+            return;
+        CoreUi.Instance.OpenWithDefaultApplication(path);
+    }
+
+    private void SkipToNextSet()
+    {
+        var run = _run!;
+        _currentSetIdx++;
+        _currentStepIdx = 0;
+        if (_currentSetIdx >= run.Sets.Count)
+            FinishRun();
     }
 
     private void DrawStepBody(TestSet set, TestStep step)
     {
-        ImGui.PushFont(Fonts.FontBold);
-        ImGui.TextUnformatted(step.Title);
-        ImGui.PopFont();
-        FormInputs.AddVerticalSpace(6);
-
-        // Synthesize three markdown blocks (one each for context, action,
-        // expected) on step transition. Three caches stay hot independently
-        // so a frame on the same step is layout-free.
+        // Two markdown blocks per step (Context folds into Action). Caches
+        // invalidate on step transition; subsequent frames are layout-free.
         if (_cachedStepKey != (set.Id, _currentStepIdx))
         {
-            _cachedContext = string.IsNullOrEmpty(step.Context) ? null : step.Context;
-            _cachedAction = BuildBulletMarkdown(step.ActionBullets);
-            _cachedExpected = BuildBulletMarkdown(step.ExpectedBullets);
+            _cachedAction = BuildActionMarkdown(step);
+            _cachedExpected = string.IsNullOrEmpty(step.ExpectedMarkdown) ? null : step.ExpectedMarkdown;
             _cachedStepKey = (set.Id, _currentStepIdx);
-        }
-
-        if (_cachedContext != null)
-        {
-            DrawSectionLabel("Context");
-            _contextMarkdown.Draw(_cachedContext);
-            FormInputs.AddVerticalSpace(4);
         }
 
         if (_cachedAction != null)
         {
-            DrawSectionLabel("Action");
+            DrawSectionLabel("Please do the following");
             _actionMarkdown.Draw(_cachedAction);
-            FormInputs.AddVerticalSpace(4);
         }
 
         if (_cachedExpected != null)
         {
-            DrawSectionLabel("Expected");
+            DrawSectionLabel("Expected Results");
             _expectedMarkdown.Draw(_cachedExpected);
         }
     }
 
     private static void DrawSectionLabel(string label)
     {
-        ImGui.PushFont(Fonts.FontSmall);
-        ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-        ImGui.TextUnformatted(label);
-        ImGui.PopStyleColor();
-        ImGui.PopFont();
+        FormInputs.AddVerticalSpace(10);
+        CustomComponents.StylizedText(label, Fonts.FontSmall, UiColors.TextMuted);
     }
 
-    private static string? BuildBulletMarkdown(IReadOnlyList<string> bullets)
+    private static string? BuildActionMarkdown(TestStep step)
     {
-        if (bullets.Count == 0)
+        var hasContext = !string.IsNullOrWhiteSpace(step.Context);
+        var hasAction = !string.IsNullOrWhiteSpace(step.ActionMarkdown);
+        if (!hasContext && !hasAction)
             return null;
-        var sb = new StringBuilder();
-        for (var i = 0; i < bullets.Count; i++)
-        {
-            sb.Append("- ").Append(bullets[i]);
-            if (i + 1 < bullets.Count)
-                sb.Append('\n');
-        }
-        return sb.ToString();
+        if (!hasContext)
+            return step.ActionMarkdown;
+        if (!hasAction)
+            return step.Context;
+        return step.Context + "\n\n" + step.ActionMarkdown;
     }
 
     private void DrawStepSide(TestSet set, TestStep step)
     {
         var result = GetOrCreateResult(set.Id, _currentStepIdx);
 
-        ImGui.PushFont(Fonts.FontSmall);
-        ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-        ImGui.TextUnformatted("Actual result");
-        ImGui.PopStyleColor();
-        ImGui.PopFont();
+        CustomComponents.StylizedText("Actual result", Fonts.FontSmall, UiColors.TextMuted);
 
         var comment = result.Comment;
         var inputPos = ImGui.GetCursorScreenPos();
@@ -356,7 +525,7 @@ internal sealed class ManualTestRunnerWindow : Window
             result.Comment = comment;
         }
 
-        // Manual placeholder text — ImGui has no InputTextMultilineWithHint.
+        // Manual placeholder — ImGui has no InputTextMultilineWithHint.
         if (string.IsNullOrEmpty(result.Comment) && !ImGui.IsItemActive())
         {
             var dl = ImGui.GetWindowDrawList();
@@ -367,42 +536,44 @@ internal sealed class ManualTestRunnerWindow : Window
 
         FormInputs.AddVerticalSpace(10);
 
-        // Outcome buttons: bold font, rounded corners, slightly taller.
-        var btnH = ImGui.GetFrameHeight() * 1.5f;
-        ImGui.PushFont(Fonts.FontBold);
-        ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 4f * T3Ui.UiScaleFactor);
-
-        DrawOutcomeButton("Success", UiColors.StatusControlled, btnH,
-                          () => RecordOutcomeAndAdvance(result, Outcome.Pass));
+        // Outcome buttons via the project's standard CTA button helper.
+        if (CustomComponents.DrawCtaButton("Success", Icon.None,
+                                            UiColors.ForegroundFull,
+                                            UiColors.StatusControlled,
+                                            Color.Transparent))
+            RecordOutcomeAndAdvance(result, Outcome.Pass);
 
         ImGui.SameLine();
-        DrawOutcomeButton("Fail", UiColors.StatusWarning, btnH,
-                          () => RecordOutcomeAndAdvance(result, Outcome.Fail));
+        if (CustomComponents.DrawCtaButton("Fail", Icon.None,
+                                            UiColors.ForegroundFull,
+                                            UiColors.StatusWarning,
+                                            Color.Transparent))
+            RecordOutcomeAndAdvance(result, Outcome.Fail);
 
         ImGui.SameLine();
         var otherEnabled = !string.IsNullOrWhiteSpace(result.Comment);
         if (!otherEnabled)
             ImGui.BeginDisabled();
-        if (ImGui.Button("Other…", new Vector2(0, btnH)))
+        if (CustomComponents.DrawCtaButton("Other…", Icon.None,
+                                            CustomComponents.ButtonStates.Dimmed))
             RecordOutcomeAndAdvance(result, Outcome.Other);
         if (!otherEnabled)
             ImGui.EndDisabled();
         if (!otherEnabled && ImGui.IsItemHovered())
             CustomComponents.TooltipForLastItem("Add a comment first");
-
-        ImGui.PopStyleVar();
-        ImGui.PopFont();
     }
 
-    private static void DrawOutcomeButton(string label, Color fill, float height, Action onClick)
+    private static void DrawOutcomeBadge(Outcome outcome)
     {
-        ImGui.PushStyleColor(ImGuiCol.Button, fill.Rgba);
-        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, fill.Fade(0.85f).Rgba);
-        ImGui.PushStyleColor(ImGuiCol.ButtonActive, fill.Rgba);
-        ImGui.PushStyleColor(ImGuiCol.Text, UiColors.ForegroundFull.Rgba);
-        if (ImGui.Button(label, new Vector2(0, height)))
-            onClick();
-        ImGui.PopStyleColor(4);
+        var (icon, color) = outcome switch
+                              {
+                                  Outcome.Pass    => (Icon.Checkmark, UiColors.StatusControlled),
+                                  Outcome.Fail    => (Icon.Error,     UiColors.StatusWarning),
+                                  Outcome.Other   => (Icon.Warning,   UiColors.StatusAttention),
+                                  Outcome.Skipped => (Icon.Hidden,    UiColors.TextMuted),
+                                  _               => (Icon.Hidden,    UiColors.TextMuted),
+                              };
+        icon.DrawAtCursor(color);
     }
 
     private void RecordOutcomeAndAdvance(StepResult result, Outcome outcome)
@@ -459,14 +630,119 @@ internal sealed class ManualTestRunnerWindow : Window
     private void DrawSummaryState()
     {
         var run = _run!;
-        FormInputs.AddSectionHeader("Run summary");
+        var subtitle = $"Started {run.StartedUtc:HH:mm:ss} UTC, finished {run.FinishedUtc:HH:mm:ss} UTC " +
+                       $"— {run.Sets.Count} set(s), {run.Results.Count} step(s).";
 
-        ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-        ImGui.TextWrapped($"Started {run.StartedUtc:HH:mm:ss} UTC, finished {run.FinishedUtc:HH:mm:ss} UTC " +
-                          $"— {run.Sets.Count} set(s), {run.Results.Count} step(s).");
+        ContentPanel.Begin("Summary", subtitle);
+
+        var scale = T3Ui.UiScaleFactor;
+        var footerH = ImGui.GetFrameHeight() + 16 * scale;
+
+        DrawBlackSeparator();
+
+        ImGui.BeginChild("##summary-scroll", new Vector2(0, -footerH),
+                         ImGuiChildFlags.None, ImGuiWindowFlags.NoBackground);
+        DrawSummaryScrollContent(run);
+        ImGui.EndChild();
+
+        DrawBlackSeparator();
+
+        DrawSummaryToolbar(run);
+
+        ContentPanel.End();
+    }
+
+    private static void DrawSummaryScrollContent(RunReport run)
+    {
+        foreach (var set in run.Sets)
+        {
+            var pass = 0;
+            var fail = 0;
+            var other = 0;
+            var skipped = 0;
+            foreach (var r in run.Results)
+            {
+                if (r.SetId != set.Id) continue;
+                switch (r.Outcome)
+                {
+                    case Outcome.Pass: pass++; break;
+                    case Outcome.Fail: fail++; break;
+                    case Outcome.Other: other++; break;
+                    default: skipped++; break;
+                }
+            }
+
+            CustomComponents.StylizedText(set.Title, Fonts.FontBold, UiColors.Text);
+            CustomComponents.StylizedText($"  {pass} pass / {fail} fail / {other} other / {skipped} skipped",
+                                           Fonts.FontNormal, UiColors.TextMuted);
+
+            foreach (var r in run.Results)
+            {
+                if (r.SetId != set.Id) continue;
+                if (r.StepIndex >= set.Steps.Count) continue;
+
+                DrawOutcomeBadge(r.Outcome);
+                ImGui.SameLine();
+                ImGui.TextUnformatted(set.Steps[r.StepIndex].Title);
+                if (!string.IsNullOrEmpty(r.Comment))
+                {
+                    CustomComponents.StylizedText($"      {r.Comment}",
+                                                   Fonts.FontNormal, UiColors.TextMuted);
+                }
+            }
+
+            FormInputs.AddVerticalSpace(8);
+        }
+    }
+
+    private void DrawSummaryToolbar(RunReport run)
+    {
+        // Copy Markdown is the one export wired in Phase 1; the others stay
+        // visibly disabled with a tooltip for later phases.
+        if (ImGui.Button("Copy Markdown"))
+        {
+            ImGui.SetClipboardText(BuildMarkdownReport(run));
+        }
+
+        ImGui.SameLine();
+        ImGui.BeginDisabled();
+        ImGui.Button("Copy JSON");
+        ImGui.EndDisabled();
+        if (ImGui.IsItemHovered())
+            CustomComponents.TooltipForLastItem("Coming in Phase 2");
+
+        ImGui.SameLine();
+        ImGui.BeginDisabled();
+        ImGui.Button("Open GitHub Issue");
+        ImGui.EndDisabled();
+        if (ImGui.IsItemHovered())
+            CustomComponents.TooltipForLastItem("Coming in Phase 3");
+
+        // Right-align "New Run".
+        var newRunSize = ImGui.CalcTextSize("New Run") + ImGui.GetStyle().FramePadding * 2;
+        ImGui.SameLine();
+        CustomComponents.RightAlign(newRunSize.X);
+        if (ImGui.Button("New Run"))
+        {
+            _state = State.Pick;
+            _run = null;
+        }
+    }
+
+    private static void DrawBlackSeparator()
+    {
+        ImGui.PushStyleColor(ImGuiCol.Separator, UiColors.BackgroundFull.Rgba);
+        ImGui.Separator();
         ImGui.PopStyleColor();
+    }
 
-        FormInputs.AddVerticalSpace(8);
+    private static string BuildMarkdownReport(RunReport run)
+    {
+        var sb = new StringBuilder();
+        sb.Append("# Editor Feature Tests run\n\n");
+        sb.Append($"Started {run.StartedUtc:yyyy-MM-dd HH:mm:ss} UTC  \n");
+        sb.Append($"Finished {run.FinishedUtc:yyyy-MM-dd HH:mm:ss} UTC  \n");
+        sb.Append($"Sets: {run.Sets.Count}, steps: {run.Results.Count}\n\n");
 
         foreach (var set in run.Sets)
         {
@@ -486,68 +762,34 @@ internal sealed class ManualTestRunnerWindow : Window
                 }
             }
 
-            ImGui.PushFont(Fonts.FontBold);
-            ImGui.TextUnformatted(set.Title);
-            ImGui.PopFont();
-            ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-            ImGui.TextUnformatted($"  {pass} pass / {fail} fail / {other} other / {skipped} skipped");
-            ImGui.PopStyleColor();
+            sb.Append("## ").Append(set.Title)
+              .Append(" — ").Append(pass).Append(" pass")
+              .Append(" / ").Append(fail).Append(" fail")
+              .Append(" / ").Append(other).Append(" other")
+              .Append(" / ").Append(skipped).Append(" skipped\n");
 
             foreach (var r in run.Results)
             {
                 if (r.SetId != set.Id) continue;
                 if (r.StepIndex >= set.Steps.Count) continue;
 
-                var icon = r.Outcome switch
+                var glyph = r.Outcome switch
                               {
-                                  Outcome.Pass => "✓",
-                                  Outcome.Fail => "✗",
-                                  Outcome.Other => "?",
-                                  _ => "·",
+                                  Outcome.Pass    => "✓",
+                                  Outcome.Fail    => "✗",
+                                  Outcome.Other   => "?",
+                                  _               => "·",
                               };
-                var color = r.Outcome switch
-                               {
-                                   Outcome.Pass => UiColors.StatusControlled,
-                                   Outcome.Fail => UiColors.StatusWarning,
-                                   Outcome.Other => UiColors.StatusAttention,
-                                   _ => UiColors.TextMuted,
-                               };
-                ImGui.PushStyleColor(ImGuiCol.Text, color.Rgba);
-                ImGui.TextUnformatted($"  {icon}");
-                ImGui.PopStyleColor();
-                ImGui.SameLine();
-                ImGui.TextUnformatted(set.Steps[r.StepIndex].Title);
-                if (!string.IsNullOrEmpty(r.Comment))
-                {
-                    ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-                    ImGui.TextWrapped($"      {r.Comment}");
-                    ImGui.PopStyleColor();
-                }
+                sb.Append("- ").Append(glyph).Append(' ')
+                  .Append(set.Steps[r.StepIndex].Title);
+                if (!string.IsNullOrWhiteSpace(r.Comment))
+                    sb.Append(" — ").Append(r.Comment.Replace("\n", " "));
+                sb.Append('\n');
             }
-
-            FormInputs.AddVerticalSpace(8);
+            sb.Append('\n');
         }
 
-        ImGui.Separator();
-        FormInputs.AddVerticalSpace(4);
-
-        // Phase 1: export buttons stubbed. Phase 2 will fill these in.
-        ImGui.BeginDisabled();
-        ImGui.Button("Copy JSON");
-        ImGui.SameLine();
-        ImGui.Button("Copy Markdown");
-        ImGui.SameLine();
-        ImGui.Button("Open GitHub Issue");
-        ImGui.EndDisabled();
-        if (ImGui.IsItemHovered())
-            CustomComponents.TooltipForLastItem("Coming in Phase 2");
-
-        ImGui.SameLine();
-        if (ImGui.Button("New Run"))
-        {
-            _state = State.Pick;
-            _run = null;
-        }
+        return sb.ToString();
     }
 
     // ----- Helpers ------------------------------------------------------
@@ -675,11 +917,10 @@ internal sealed class ManualTestRunnerWindow : Window
     private int _currentSetIdx;
     private int _currentStepIdx;
 
-    private readonly MarkdownView _contextMarkdown = new(new MarkdownView.Options());
     private readonly MarkdownView _actionMarkdown = new(new MarkdownView.Options());
     private readonly MarkdownView _expectedMarkdown = new(new MarkdownView.Options());
+    private MarkdownView? _introMarkdown;
     private (string SetId, int StepIdx) _cachedStepKey = (string.Empty, -1);
-    private string? _cachedContext;
     private string? _cachedAction;
     private string? _cachedExpected;
 

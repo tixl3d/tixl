@@ -4,42 +4,45 @@ title: Creating Operators
 scope: graph-window
 tags: [smoke, essential]
 prerequisites:
-  - An empty project is open
-  - The Graph Window is visible
+  - An empty project is open.
+  - The Graph Window is visible.
 related-help:
   - ../.help/using/graph-window.md
 ---
 
-Verifies the core flow of opening the Symbol Browser, finding an operator, and spawning it on the graph. Also a smoke test for the Parameter Window's selection-follows behavior.
+A short tour of how to spawn an operator on the graph. This is the most common
+flow in TiXL — if any step here feels surprising, that's worth noting in the
+comment box.
 
-## Step: Open the Symbol Browser
+## Step: Opening the Symbol Browser
 
-**Context:** On the Graph Window.
 **Action:**
-- Press `Tab`
+With the Graph Window focused, press `Tab`.
 
 **Expected:**
 - The Symbol Browser opens.
-- The search field is focused and empty.
+- Its search field is focused and empty — you can start typing immediately.
 
-## Step: Search for "RG"
+## Step: Finding an operator by name
 
-**Context:** Symbol Browser is open.
 **Action:**
-- Type `RG`
+With the Symbol Browser open, type `RG` (the search is case-insensitive and
+matches partial names).
 
 **Expected:**
-- The result list filters to operators matching the query.
-- `[RadialGradient]` appears in the list.
+- The result list filters down to operators whose names contain those letters.
+- `[RadialGradient]` is visible somewhere in the list.
 
-## Step: Create a RadialGradient operator
+## Step: Creating an operator
 
-**Context:** Search results are visible.
 **Action:**
-- Select `[RadialGradient]` (arrow keys + `Enter`, or click)
+With the search results visible, use the cursor up/down keys to highlight
+`[RadialGradient]`.
+
+Press `Return` — or click the entry with the mouse — to place it.
 
 **Expected:**
-- A `[RadialGradient]` operator is created on the graph at the cursor position.
+- A `[RadialGradient]` operator appears on the graph at the cursor position.
 - The new operator is selected.
 - Its inputs are shown in the Parameter Window.
 - The Symbol Browser closes.

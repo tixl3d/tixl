@@ -98,7 +98,11 @@ TiXL's editor is Dear ImGui plus custom widgets, rendered every frame at the out
 - For state-based blending (e.g. active vs idle), use `Color.Mix(a, b, t)`.
 
 ### Scaling
-- Apply `T3Ui.UiScaleFactor` to every layout constant (sizes, paddings, offsets). Pixel literals break on high-DPI displays.
+- **Every pixel literal must be multiplied by `T3Ui.UiScaleFactor`.** No exceptions. This includes widths, heights, paddings, gutters, indents, font sizes, marker radii, draw-list line thicknesses, `SameLine` spacing, `Dummy` sizes, `SetCursorPosX/Y` offsets, manual cursor adjustments, anything passed into `new Vector2(...)` for ImGui. Pixel literals render correctly on the developer's monitor and then collapse or balloon on every other display — high-DPI laptops, 4K monitors, users with non-100% UI scale.
+  - Wrong: `ImGui.Dummy(new Vector2(0, 16))`, `SameLine(0, 6)`, `ImGui.GetWindowDrawList().AddCircleFilled(p, 2, color)`.
+  - Right: `ImGui.Dummy(new Vector2(0, 16 * T3Ui.UiScaleFactor))`, `SameLine(0, 6 * T3Ui.UiScaleFactor)`, `AddCircleFilled(p, 2 * T3Ui.UiScaleFactor, color)`.
+  - The only things you can leave unscaled are values that *already* came from ImGui (`GetFrameHeight()`, `CalcTextSize(...)`, `GetWindowWidth()`, item-rect sizes) — those are already in scaled pixel space.
+- Helpers that already scale internally — `FormInputs.AddVerticalSpace(n)` — take an *unscaled* number and apply the factor themselves. Don't double-scale: pass `5`, not `5 * T3Ui.UiScaleFactor`.
 - On the MagGraph canvas or any zoomable surface, combine factors in this order: `value / T3Ui.UiScaleFactor * CanvasScale` — UI-scale first, then canvas zoom.
 - Threshold-cull expensive detail at low zoom. MagGraph skips labels below `CanvasScale 0.25f`, thumbnails below `0.2f`, etc.
 
@@ -111,6 +115,58 @@ TiXL's editor is Dear ImGui plus custom widgets, rendered every frame at the out
 - Only split the draw list (channels) when overlapping elements need independent z-order *and* the top one must receive clicks. Merge immediately after — extra channels cost draw calls.
 - For overlapping clickable elements, emit the topmost `InvisibleButton` last so it wins the hit test. If that is not feasible, split channels.
 - Avoid excessive `PushClipRect` — each clip region adds draw calls. Clip only when drawn content would genuinely overflow.
+
+### Prefer existing helpers over hand-rolled ImGui
+
+TiXL has accumulated a set of small helpers in `Editor/Gui/Styling/CustomComponents*.cs`,
+`Editor/Gui/Input/FormInputs.cs`, `Editor/Gui/Styling/Icons.cs`, and
+`Editor/Gui/Hub/ContentPanel.cs` that already encode the editor's look-and-feel.
+Use them before writing new patterns. New `PushFont` / `PushStyleColor` /
+`TextUnformatted` blocks for things that already have helpers are a review
+flag — they drift from the theme as it evolves.
+
+Quick map of what to reach for:
+
+- **Styled text** — `CustomComponents.StylizedText(text, font, color)` instead
+  of `PushFont` + `PushStyleColor` + `TextUnformatted` + two pops. Use it for
+  every short, non-wrapped label that needs a non-default font or color.
+  For wrapped paragraphs you still need `TextWrapped` (StylizedText uses
+  `TextUnformatted`).
+- **Section panels with a title bar** — `ContentPanel.Begin(title, subtitle,
+  drawTools)` / `ContentPanel.End()`. Handles the indent, title font,
+  subtitle, and optional right-side tool slot. Don't hand-roll a header row
+  with `FormInputs.AddSectionHeader` + manual `PushFont` calls unless the
+  layout genuinely doesn't fit the panel shape.
+- **CTA / outcome buttons** — `CustomComponents.DrawCtaButton(label, icon,
+  textColor, bgColor, borderColor)` or the `ButtonStates` overload. Picks
+  up the project's CTA proportions and the FontLarge text style.
+- **Right-aligned tool clusters** — `CustomComponents.RightAlign(itemWidth)`
+  instead of `SetCursorPosX(GetWindowWidth() - … - WindowPaddingOverride.X)`.
+  Cleaner and stays correct if padding changes.
+- **Icon buttons** — `CustomComponents.IconButton(Icon.X, size)` /
+  `CustomComponents.TransparentIconButton(...)` for clickable icons; use the
+  enum, not character literals or per-call `PushStyleColor`.
+- **Inline icons in text rows** — `Icon.X.DrawAtCursor()` or
+  `Icon.X.DrawAtCursor(color)`. For ad-hoc positioning use
+  `Icons.DrawIconAtScreenPosition(...)`.
+
+### Don't draw UTF-8 glyphs in place of icons
+
+If a `✓` / `✗` / `⚠` / `→` would do, **use the corresponding `Icon` enum value
+plus the helpers above**. Two reasons:
+
+1. The font atlas only rasterises a fixed glyph range
+   (`Editor/UiContentDrawing/UiContentUpdate.cs`). Characters outside it
+   render as the missing-glyph rect (`?`). Don't expand the atlas just to
+   sneak in a single literal character.
+2. Drawing through `Icons.cs` keeps everything baseline-aligned with the rest
+   of the editor, theme-coloured, and consistent across DPI.
+
+If the icon you need isn't in the `Icon` enum (`Editor/Gui/Styling/Icons.cs`)
+**ask the user to add it** rather than fall back to a character. A draw-list
+primitive (filled circle, rect) is acceptable as a *temporary* placeholder
+when no icon exists yet — call it out in the response so it can be replaced
+later.
 
 ### Performance in draw methods
 - No allocations in per-frame draw code (see "Realtime Performance Constraints" above). No LINQ, no closures, no `params` arrays.

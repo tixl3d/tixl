@@ -112,6 +112,42 @@ internal static partial class CustomComponents
         ImGui.PopStyleColor();
         return result;
     }
+
+    /// <summary>
+    /// Toggleable filter chip: all-caps small text, rounded pill, distinct
+    /// colors for active vs. inactive. Returns true on click — caller toggles
+    /// the active flag. Designed for tag-style filter rows (test runner Pick
+    /// state, Console log severity filter, …).
+    /// </summary>
+    public static bool TagFilterToggle(string label, bool active)
+    {
+        ImGui.PushFont(Fonts.FontSmall);
+        ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 8 * T3Ui.UiScaleFactor);
+        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding,
+                           new Vector2(8 * T3Ui.UiScaleFactor, 2 * T3Ui.UiScaleFactor));
+
+        if (active)
+        {
+            ImGui.PushStyleColor(ImGuiCol.Button, UiColors.StatusActivated.Rgba);
+            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, UiColors.StatusActivated.Fade(0.85f).Rgba);
+            ImGui.PushStyleColor(ImGuiCol.ButtonActive, UiColors.StatusActivated.Rgba);
+            ImGui.PushStyleColor(ImGuiCol.Text, UiColors.ForegroundFull.Rgba);
+        }
+        else
+        {
+            ImGui.PushStyleColor(ImGuiCol.Button, UiColors.BackgroundButton.Rgba);
+            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, UiColors.BackgroundHover.Rgba);
+            ImGui.PushStyleColor(ImGuiCol.ButtonActive, UiColors.BackgroundButtonActivated.Rgba);
+            ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
+        }
+
+        var clicked = ImGui.Button(label.ToUpperInvariant());
+
+        ImGui.PopStyleColor(4);
+        ImGui.PopStyleVar(2);
+        ImGui.PopFont();
+        return clicked;
+    }
     
     public static bool IconButton(Icon icon, Vector2 size, ButtonStates state = ButtonStates.Normal)
     {

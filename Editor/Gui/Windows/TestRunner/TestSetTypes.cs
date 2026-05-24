@@ -26,9 +26,13 @@ internal sealed class TestSet
 internal sealed class TestStep
 {
     public required string Title;
+    /// <summary>Optional one-line context. Will be folded into the Action body
+    /// at render time so the user reads a single, narrative instruction.</summary>
     public required string? Context;
-    public required IReadOnlyList<string> ActionBullets;
-    public required IReadOnlyList<string> ExpectedBullets;
+    /// <summary>Raw markdown for the Action body — prose, bullets, or both.</summary>
+    public required string ActionMarkdown;
+    /// <summary>Raw markdown for the Expected Results body.</summary>
+    public required string ExpectedMarkdown;
 }
 
 internal enum Outcome

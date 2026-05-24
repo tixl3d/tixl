@@ -11,27 +11,101 @@ internal static class MarkdownParser
 {
     public static void Parse(string source, ParsedDoc doc)
     {
-        doc.Reset(source);
+        // Soft line breaks: in markdown a single newline between two
+        // paragraph-shaped lines means "join with a space", not "force line
+        // break". CommonMark-style. Special lines (headings, list items,
+        // blanks) keep their hard breaks.
+        var normalized = NormalizeSoftLineBreaks(source);
+        doc.Reset(normalized);
 
         var i = 0;
-        var len = source.Length;
+        var len = normalized.Length;
         while (i < len)
         {
             // Find end of logical line (terminator excluded).
             var lineStart = i;
-            while (i < len && source[i] != '\n')
+            while (i < len && normalized[i] != '\n')
                 i++;
             var lineEnd = i;
-            // Drop trailing CR for \r\n.
-            if (lineEnd > lineStart && source[lineEnd - 1] == '\r')
-                lineEnd--;
+            // Normalisation already collapsed \r\n → \n, so no CR cleanup needed.
 
-            ParseLine(source, lineStart, lineEnd, doc);
+            ParseLine(normalized, lineStart, lineEnd, doc);
 
             // Skip the \n.
-            if (i < len && source[i] == '\n')
+            if (i < len && normalized[i] == '\n')
                 i++;
         }
+    }
+
+    private static string NormalizeSoftLineBreaks(string source)
+    {
+        var raw = source.Replace("\r\n", "\n");
+        var lines = raw.Split('\n');
+        var sb = new System.Text.StringBuilder(raw.Length);
+        var prevKind = SoftLineKind.None;
+
+        for (var i = 0; i < lines.Length; i++)
+        {
+            var line = lines[i];
+            var kind = ClassifySoftLine(line, out var hasLeadingWhitespace);
+
+            // Two folding cases:
+            //   1. Paragraph after Paragraph — classic CommonMark soft line break.
+            //   2. Indented Paragraph after a list item — "lazy continuation"
+            //      so the item's content keeps reading as one wrapped run.
+            // Anything else (blank, heading, new list item) keeps the hard \n.
+            var foldIntoListItem = kind == SoftLineKind.Paragraph
+                                    && prevKind == SoftLineKind.ListItem
+                                    && hasLeadingWhitespace;
+            var foldIntoParagraph = kind == SoftLineKind.Paragraph
+                                    && prevKind == SoftLineKind.Paragraph;
+            var fold = foldIntoListItem || foldIntoParagraph;
+
+            if (sb.Length > 0)
+                sb.Append(fold ? ' ' : '\n');
+
+            // Trim leading whitespace from a folded line so the join doesn't
+            // produce "foo   bar".
+            sb.Append(fold ? line.TrimStart() : line);
+
+            // When we fold a continuation into a list item, keep prevKind as
+            // ListItem so subsequent indented lines also fold instead of
+            // detaching after the first.
+            if (!foldIntoListItem)
+                prevKind = kind;
+        }
+
+        return sb.ToString();
+    }
+
+    private static SoftLineKind ClassifySoftLine(string line, out bool hasLeadingWhitespace)
+    {
+        hasLeadingWhitespace = line.Length > 0 && (line[0] == ' ' || line[0] == '\t');
+        var trimmed = line.TrimStart();
+        if (trimmed.Length == 0)
+            return SoftLineKind.Blank;
+        if (trimmed[0] == '#')
+            return SoftLineKind.Heading;
+        if ((trimmed[0] == '-' || trimmed[0] == '*') && trimmed.Length > 1 && trimmed[1] == ' ')
+            return SoftLineKind.ListItem;
+        if (char.IsDigit(trimmed[0]))
+        {
+            var i = 0;
+            while (i < trimmed.Length && char.IsDigit(trimmed[i]))
+                i++;
+            if (i + 1 < trimmed.Length && trimmed[i] == '.' && trimmed[i + 1] == ' ')
+                return SoftLineKind.ListItem;
+        }
+        return SoftLineKind.Paragraph;
+    }
+
+    private enum SoftLineKind
+    {
+        None,
+        Blank,
+        Paragraph,
+        Heading,
+        ListItem,
     }
 
     private static void ParseLine(string src, int from, int to, ParsedDoc doc)

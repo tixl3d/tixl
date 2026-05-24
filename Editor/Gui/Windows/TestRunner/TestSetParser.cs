@@ -241,8 +241,8 @@ internal static class TestSetParser
                                        string title, List<string> warnings)
     {
         string? context = null;
-        var actionBullets = new List<string>();
-        var expectedBullets = new List<string>();
+        var action = new StringBuilder();
+        var expected = new StringBuilder();
         var collecting = StepSection.None;
 
         for (var i = from; i < toExclusive; i++)
@@ -263,7 +263,7 @@ internal static class TestSetParser
                 collecting = StepSection.Action;
                 var rest = trimmed.Substring("**Action:**".Length).Trim();
                 if (rest.Length > 0)
-                    actionBullets.Add(rest);
+                    action.Append(rest).Append('\n');
                 continue;
             }
 
@@ -272,42 +272,39 @@ internal static class TestSetParser
                 collecting = StepSection.Expected;
                 var rest = trimmed.Substring("**Expected:**".Length).Trim();
                 if (rest.Length > 0)
-                    expectedBullets.Add(rest);
+                    expected.Append(rest).Append('\n');
                 continue;
             }
 
-            // Bullet items.
-            if (trimmed.StartsWith("- ") || trimmed.StartsWith("* "))
+            // Everything else is captured verbatim into the current section so
+            // the markdown renderer can handle bullets, paragraphs, and inline
+            // styling without the parser dictating shape.
+            switch (collecting)
             {
-                var item = trimmed.Substring(2).Trim();
-                if (collecting == StepSection.Action)
-                    actionBullets.Add(item);
-                else if (collecting == StepSection.Expected)
-                    expectedBullets.Add(item);
-                else if (collecting == StepSection.Context)
-                {
-                    // Allow multi-line context: "**Context:** ... \n - foo bar"
-                    context = string.IsNullOrEmpty(context) ? item : context + " " + item;
-                }
-                continue;
-            }
-
-            // Continuation prose under Context can extend the context string.
-            if (collecting == StepSection.Context && trimmed.Length > 0)
-            {
-                context = string.IsNullOrEmpty(context) ? trimmed : context + " " + trimmed;
+                case StepSection.Action:
+                    action.Append(raw).Append('\n');
+                    break;
+                case StepSection.Expected:
+                    expected.Append(raw).Append('\n');
+                    break;
+                case StepSection.Context when trimmed.Length > 0:
+                    context = string.IsNullOrEmpty(context) ? trimmed : context + " " + trimmed;
+                    break;
             }
         }
 
-        if (actionBullets.Count == 0 && expectedBullets.Count == 0)
-            warnings.Add($"Step \"{title}\" has no Action or Expected bullets.");
+        var actionMd = action.ToString().Trim();
+        var expectedMd = expected.ToString().Trim();
+
+        if (actionMd.Length == 0 && expectedMd.Length == 0)
+            warnings.Add($"Step \"{title}\" has no Action or Expected content.");
 
         return new TestStep
                    {
                        Title = title,
                        Context = context,
-                       ActionBullets = actionBullets,
-                       ExpectedBullets = expectedBullets,
+                       ActionMarkdown = actionMd,
+                       ExpectedMarkdown = expectedMd,
                    };
     }
 

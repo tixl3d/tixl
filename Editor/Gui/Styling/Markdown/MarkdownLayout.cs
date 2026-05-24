@@ -190,6 +190,21 @@ internal static class MarkdownLayout
         if (sliceLen <= 0)
             return;
 
+        // At line start, drop any leading whitespace from this slice. Source
+        // text often has " " between runs (e.g. "type `RG` (the …)"); when the
+        // wrap puts that boundary at the start of a visual line, the leading
+        // space is visually wrong.
+        if (Math.Abs(penX - contentLeft) < 0.5f)
+        {
+            while (sliceLen > 0 && src[sliceStart] == ' ')
+            {
+                sliceStart++;
+                sliceLen--;
+            }
+            if (sliceLen <= 0)
+                return;
+        }
+
         var text = src.Substring(sliceStart, sliceLen);
         var width = ImGui.CalcTextSize(text).X;
 
