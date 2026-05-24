@@ -70,8 +70,9 @@ internal static class UiContentUpdate
     /// <summary>
     /// Extended glyph ranges for the editor's TTF fonts. Default ImGui only
     /// rasterizes 0x0020-0x00FF (basic Latin); we additionally pull in common
-    /// punctuation used by the markdown renderer and elsewhere — bullet (•),
-    /// dashes (– —), smart quotes (' ' " "), and ellipsis (…).
+    /// punctuation used by the markdown renderer (bullet •, dashes – —, smart
+    /// quotes ' ' " ", ellipsis …), arrows (→ ← ↑ ↓), miscellaneous symbols
+    /// (warning ⚠, gear ⚙), and dingbats (check ✓, cross ✗).
     ///
     /// The returned pointer references a static, GC-pinned array — ImGui only
     /// reads from it during atlas Build(), so the pin can live for the
@@ -86,7 +87,10 @@ internal static class UiContentUpdate
         _extendedGlyphRanges = new ushort[]
                                    {
                                        0x0020, 0x00FF,   // Basic Latin + Latin Supplement
-                                       0x2010, 0x205E,   // General punctuation: dashes, quotes, bullet, ellipsis, dagger
+                                       0x2010, 0x205E,   // General punctuation
+                                       0x2190, 0x21FF,   // Arrows
+                                       0x2600, 0x26FF,   // Miscellaneous symbols (⚠ ⚙ ☆ …)
+                                       0x2700, 0x27BF,   // Dingbats (✓ ✗ ✱ …)
                                        0,
                                    };
         _glyphRangesHandle = GCHandle.Alloc(_extendedGlyphRanges, GCHandleType.Pinned);

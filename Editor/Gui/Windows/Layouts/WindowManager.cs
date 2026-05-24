@@ -9,6 +9,7 @@ using T3.Editor.Gui.Windows.AssetLib;
 using T3.Editor.Gui.Windows.Exploration;
 using T3.Editor.Gui.Windows.Output;
 using T3.Editor.Gui.Windows.RenderExport;
+using T3.Editor.Gui.Windows.TestRunner;
 using T3.Editor.Gui.Windows.TimeLine;
 using T3.Editor.Gui.Windows.SymbolLib;
 using T3.Editor.Gui.Windows.Variations;
@@ -52,6 +53,7 @@ internal static partial class WindowManager
     internal static readonly UtilitiesWindow UtilitiesWindow = new();
     internal static readonly ScreenManagerWindow ScreenManagerWindow = new();
     internal static readonly SnixlWindow SnixlWindow = new();
+    internal static readonly ManualTestRunnerWindow ManualTestRunnerWindow = new();
 
 
     private static void TryToInitialize()
@@ -75,6 +77,7 @@ internal static partial class WindowManager
                 new PerformanceWindow(),
                 Program.ConsoleLogWindow,
                 UtilitiesWindow,    // item shown in TiXL > Development menu
+                ManualTestRunnerWindow,
                 SettingsWindow, // item shown in TiXL menu
                 ProjectSettingsWindow, // item shown in TiXL menu
                 ScreenManagerWindow,

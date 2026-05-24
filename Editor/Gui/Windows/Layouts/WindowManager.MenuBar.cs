@@ -11,8 +11,10 @@ internal static partial class WindowManager
     {
         foreach (var window in _windows)
         {
-            // Settings and SymbolSettings windows are shown in the TiXL menu
-            if (window == SettingsWindow || window == ProjectSettingsWindow)
+            // These windows live in the TiXL menu and shouldn't be re-listed here.
+            if (window == SettingsWindow
+                || window == ProjectSettingsWindow
+                || window == ManualTestRunnerWindow)
                 continue;
 
             window.DrawMenuItemToggle();

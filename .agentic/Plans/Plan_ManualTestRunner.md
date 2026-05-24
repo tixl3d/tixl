@@ -1,7 +1,7 @@
 # In-Editor Manual Test Runner
 
 **Date:** 2026-04-19
-**Status:** Outline — not yet scheduled
+**Status:** Phase 1 landed (2026-05-01) — parser + Pick + Run + in-memory Summary. Export and polish phases pending.
 
 ## Goal
 
