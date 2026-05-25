@@ -132,9 +132,9 @@ public static class UserData
 
     private static string GetFilePath(string relativeFilePath, UserDataLocation location)
     {
-        var filePath = Path.Combine(location == UserDataLocation.User 
-                                        ? FileLocations.SettingsDirectory 
-                                        : FileLocations.ReadOnlySettingsPath, relativeFilePath);
+        var filePath = Path.Combine(location == UserDataLocation.User
+                                        ? FileLocations.SettingsDirectory
+                                        : FileLocations.DefaultsSourcePath, relativeFilePath);
         return filePath;
     }
 

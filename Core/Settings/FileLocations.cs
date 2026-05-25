@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 
+#nullable enable
+
 namespace T3.Core.Settings;
 
 /// <summary>
@@ -41,6 +43,34 @@ public static string TestReferencesFolder => Path.Combine(".tixl", TestsSubFolde
     /// A subfolder next in the editor start folder.
     /// </summary>
     public static string ReadOnlySettingsPath => Path.Combine(StartFolder, ".tixl");
+
+    /// <summary>
+    /// Resolves where files marked as <see cref="T:T3.Core.Settings.UserData.UserDataLocation.Defaults"/>
+    /// are read from and written to.
+    /// In Release this is the same as <see cref="ReadOnlySettingsPath"/>.
+    /// In Debug we walk up from the build output to find the repo's <c>.Defaults</c> source folder, so
+    /// newly-created defaults (notably variations saved with <c>#if DEBUG</c>) land in git-tracked files
+    /// instead of being orphaned in the build output and lost on the next rebuild.
+    /// </summary>
+    public static string DefaultsSourcePath => _defaultsSourcePath ??= ResolveDefaultsSourcePath();
+    private static string? _defaultsSourcePath;
+
+    private static string ResolveDefaultsSourcePath()
+    {
+#if DEBUG
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir != null)
+        {
+            var candidate = Path.Combine(dir.FullName, ".Defaults");
+            if (Directory.Exists(candidate))
+                return candidate;
+
+            dir = dir.Parent;
+        }
+#endif
+        return ReadOnlySettingsPath;
+    }
+
     public static HashSet<string> IgnoredFiles => ["shadertoolsconfig.json", ".gitattributes", ".git"];
     
     
@@ -56,7 +86,7 @@ public static string TestReferencesFolder => Path.Combine(".tixl", TestsSubFolde
     private static string GetAssemblyVersion()
     {
         var version = Assembly.GetExecutingAssembly().GetName().Version;
-        return $"{version.Major}.{version.Minor}";
+        return version == null ? "0.0" : $"{version.Major}.{version.Minor}";
     }
 
     public static readonly string DefaultProjectFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), $"{AppSubFolder}{GetAssemblyVersion()}");
