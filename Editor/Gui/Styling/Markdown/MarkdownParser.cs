@@ -9,13 +9,16 @@ namespace T3.Editor.Gui.Styling.Markdown;
 /// </summary>
 internal static class MarkdownParser
 {
-    public static void Parse(string source, ParsedDoc doc)
+    public static void Parse(string source, ParsedDoc doc, bool hardLineBreaks = false)
     {
         // Soft line breaks: in markdown a single newline between two
         // paragraph-shaped lines means "join with a space", not "force line
         // break". CommonMark-style. Special lines (headings, list items,
-        // blanks) keep their hard breaks.
-        var normalized = NormalizeSoftLineBreaks(source);
+        // blanks) keep their hard breaks. Callers that want every `\n` to be
+        // a hard break (e.g. legacy TourPoint content) can pass true.
+        var normalized = hardLineBreaks
+                             ? source.Replace("\r\n", "\n")
+                             : NormalizeSoftLineBreaks(source);
         doc.Reset(normalized);
 
         var i = 0;

@@ -3,6 +3,7 @@ using T3.Core.DataTypes.Vector;
 using T3.Core.Utils;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
+using T3.Editor.Gui.Styling.Markdown;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
@@ -98,13 +99,17 @@ internal static class TourInteraction
 
             if (!string.IsNullOrEmpty(activeTourPoint.Description))
             {
-                ImGui.PushFont(Fonts.FontLarge);
-                ImGui.PushTextWrapPos(ImGui.GetCursorPosX() + 470 * T3Ui.UiScaleFactor);
+                // Use the original description string once typing is done so
+                // MarkdownView's reference-equality cache stays warm. During
+                // typing we allocate a sliced snapshot per frame — brief and
+                // bounded by the description length.
+                var textToRender = typeWriterProgress >= 1f
+                                       ? activeTourPoint.Description
+                                       : StringUtils.SliceToProgress(activeTourPoint.Description,
+                                                                      typeWriterProgress).ToString();
 
-                var shortedText = StringUtils.SliceToProgress(activeTourPoint.Description, typeWriterProgress);
-                DrawTextWithParagraphs(shortedText);
-                ImGui.PopTextWrapPos();
-                ImGui.PopFont();
+                EnsureMarkdownView();
+                _markdown.Draw(textToRender);
             }
 
             if (typeWriterProgress >= 1 && !isDotHovered)
@@ -271,32 +276,19 @@ internal static class TourInteraction
                        );
     }
 
-    private static void DrawTextWithParagraphs(ReadOnlySpan<char> text, float paragraphSpacing = 6f)
+    private static void EnsureMarkdownView()
     {
-        var start = 0;
-
-        ImGui.BeginGroup();
-        for (var i = 0; i < text.Length; i++)
-        {
-            if (i + 1 >= text.Length || text[i] != '\n')
-                continue;
-
-            var paragraph = text.Slice(start, i - start);
-            ImGui.TextUnformatted(paragraph);
-
-            // Add paragraph spacing
-            ImGui.Dummy(new Vector2(0, paragraphSpacing * T3Ui.UiScaleFactor));
-            start = i + 1;
-        }
-
-        // Last paragraph
-        if (start < text.Length)
-        {
-            var paragraph = text.Slice(start);
-            ImGui.TextUnformatted(paragraph);
-        }
-
-        ImGui.EndGroup();
+        if (_markdown != null)
+            return;
+        _markdown = new MarkdownView(new MarkdownView.Options
+                                          {
+                                              BodyFont = Fonts.FontLarge,
+                                              // TourPoint descriptions historically treat each \n as a
+                                              // hard line break (used as paragraph separators by the
+                                              // legacy paragraph-renderer); preserve that here.
+                                              HardLineBreaks = true,
+                                              WrapWidthPx = 470 * T3Ui.UiScaleFactor,
+                                          });
     }
 
     private static void SetProgressIndex(SymbolUi symbolUi, int index)
@@ -321,4 +313,6 @@ internal static class TourInteraction
 
     // -1 means completed or hidden
     private static Dictionary<Guid, int> _symbolTourProgress = new();
+
+    private static MarkdownView _markdown;
 }

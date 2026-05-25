@@ -32,6 +32,23 @@ internal sealed class MarkdownView
         /// <summary>0 = use ContentRegionAvail.X each frame.</summary>
         public float WrapWidthPx { get; set; }
         public float IndentPx { get; set; }
+
+        /// <summary>
+        /// Override the body font (used for Paragraph, Bullet, Numbered lines).
+        /// Default = unset → falls back to <see cref="Fonts.FontNormal"/>.
+        /// Inline `bold` and `code` still use <see cref="Fonts.FontBold"/> /
+        /// <see cref="Fonts.Code"/>, which can look size-mismatched if the
+        /// body font is larger than them.
+        /// </summary>
+        public ImFontPtr BodyFont { get; set; }
+
+        /// <summary>
+        /// Treat every newline in the source as a hard line break instead of
+        /// the CommonMark default (single newline within a paragraph = space).
+        /// Useful for legacy content (e.g. TourPoint descriptions) authored
+        /// expecting each `\n` to start a new line.
+        /// </summary>
+        public bool HardLineBreaks { get; set; }
     }
 
     public MarkdownView(in Options options)
@@ -70,7 +87,7 @@ internal sealed class MarkdownView
 
     private void Rebuild(string source, float wrapWidthPx)
     {
-        MarkdownParser.Parse(source, _parsed);
+        MarkdownParser.Parse(source, _parsed, _options.HardLineBreaks);
         MarkdownLayout.Build(_parsed, _layout, _options, wrapWidthPx);
     }
 
@@ -219,15 +236,28 @@ internal sealed class MarkdownView
         }
     }
 
-    private static (ImFontPtr font, Color color) LineStyle(LineKind kind)
+    private (ImFontPtr font, Color color) LineStyle(LineKind kind)
     {
         return kind switch
                   {
                       LineKind.H1 => (Fonts.FontLarge, UiColors.TextMuted),
                       LineKind.H2 => (Fonts.FontBold, UiColors.Text),
                       LineKind.H3 => (Fonts.FontBold, UiColors.ForegroundFull.Fade(0.8f)),
-                      _ => (Fonts.FontNormal, UiColors.Text),
+                      _           => (BodyFont, UiColors.Text),
                   };
+    }
+
+    private ImFontPtr BodyFont
+    {
+        get
+        {
+            unsafe
+            {
+                return _options.BodyFont.NativePtr != null
+                           ? _options.BodyFont
+                           : Fonts.FontNormal;
+            }
+        }
     }
 
     private readonly Options _options;

@@ -25,7 +25,8 @@ internal static class MarkdownLayout
         var indentPx = opt.IndentPx > 0 ? opt.IndentPx * scale : 14f * scale;
         var markerPx = 16f * scale;
 
-        var bodyHeight = MeasureLineHeight(Fonts.FontNormal);
+        var bodyFont = ResolveBodyFont(opt);
+        var bodyHeight = MeasureLineHeight(bodyFont);
         var h1Height = MeasureLineHeight(Fonts.FontLarge);
         var h2Height = MeasureLineHeight(Fonts.FontBold);
         var h3Height = h2Height;
@@ -76,7 +77,7 @@ internal static class MarkdownLayout
                               {
                                   LineKind.H1 => Fonts.FontLarge,
                                   LineKind.H2 or LineKind.H3 => Fonts.FontBold,
-                                  _ => Fonts.FontNormal,
+                                  _ => bodyFont,
                               };
 
             var lineHeight = line.Kind switch
@@ -396,5 +397,13 @@ internal static class MarkdownLayout
         var h = ImGui.GetTextLineHeight();
         ImGui.PopFont();
         return h;
+    }
+
+    private static ImFontPtr ResolveBodyFont(in MarkdownView.Options opt)
+    {
+        unsafe
+        {
+            return opt.BodyFont.NativePtr != null ? opt.BodyFont : Fonts.FontNormal;
+        }
     }
 }
