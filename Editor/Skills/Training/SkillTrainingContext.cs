@@ -16,4 +16,5 @@ internal sealed class SkillTrainingContext // can't be generic because it's used
     public QuestLevel? ActiveLevel;
     public QuestTopic? ActiveTopic;
     public GraphWindow? GraphWindow;
+    internal LevelFeedback? LevelFeedback;
 }

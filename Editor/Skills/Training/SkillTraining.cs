@@ -146,6 +146,8 @@ internal static partial class SkillTraining
 
         FitViewToSelectionHandling.FitViewToSelection();
 
+        _context.LevelFeedback = LevelFeedback.TryCreate(rootInstance);
+
         _context.StateMachine.SetState(SkillTrainingStates.Playing, _context);
     }
 
@@ -183,6 +185,8 @@ internal static partial class SkillTraining
 
         // Try to prevent saving accidental changes...
         _context.ProjectView?.CompositionInstance?.GetSymbolUi().ClearModifiedFlag();
+
+        _context.LevelFeedback?.Rebuild();
 
         if (!outputWindow.EvaluationContext.FloatVariables.TryGetValue(PlayModeProgressVariableId, out var progress))
         {
@@ -440,6 +444,7 @@ internal static partial class SkillTraining
 
         _context.ProjectView?.Close();
         _context.OpenedProject.Package.Reload(homeSymbolId);
+        _context.LevelFeedback = null;
         _context.StateMachine.SetState(SkillTrainingStates.Inactive, _context);
     }
 
@@ -468,6 +473,9 @@ internal static partial class SkillTraining
     
     public static bool IsInPlayMode => (_context.StateMachine.CurrentState == SkillTrainingStates.Playing ||
                                         _context.StateMachine.CurrentState == SkillTrainingStates.Completed);
+
+    /// <summary>Active level feedback, or null when not in play mode or no solution snapshot exists.</summary>
+    internal static LevelFeedback? ActiveLevelFeedback => IsInPlayMode ? _context.LevelFeedback : null;
 
     public static void DrawLevelHeader()
     {

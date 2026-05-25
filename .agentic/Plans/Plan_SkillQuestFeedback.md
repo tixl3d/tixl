@@ -115,6 +115,8 @@ No new authoring UI in v1. The validation warnings at load time are the only fee
 - **Multiple instances of the same symbol child.** Snapshots key by `SymbolChildId`, so this is one-to-one per composition. Should be fine for the simple level shapes in use today.
 - **Hot reload / level restart.** `OpenedProject.Reload` on exit means the `LevelFeedback` instance must be discarded on `ExitPlayMode`. Already gated by the IsInPlayMode check, but worth verifying no stale references survive a reload.
 - **Stickiness algorithm.** Naive "first required" can flicker if two parameters become required simultaneously. Keep current focus until it resolves; only re-pick when the current one transitions to `Correct` or out of the required set.
+- **Float / vector equality is bit-exact.** `AreEqual` in `LevelFeedback` uses `ValueUtils.CompareFunctions`, which compares floats directly. A user-entered value like `0.5` will not match a snapshot value of `0.49999998` and the parameter stays `Warm` forever. A custom compare with a small tolerance band (per scalar type, possibly normalized against input range) would fix this. Deferred: most current tutorials use round numbers, so typed values likely round-trip exactly; revisit if real levels expose the gap.
+- **Tip ordering by severity.** When multiple feedback items are eligible to surface as a hint, `Warm`-with-tiny-gap should rank *last*. The `_PlayModeProgress` completion check has its own threshold, so a near-correct float may already end the level before the user needs a nudge about it. Sort priority roughly: `Forbidden` > `Required` > `Warm` (large gap) > `Warm` (small gap).
 
 ## Phases
 
