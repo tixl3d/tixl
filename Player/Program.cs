@@ -239,24 +239,39 @@ internal static partial class Program
             _resolution = new Int2(_resolvedOptions.Width, _resolvedOptions.Height);
 
             // Init wasapi input if required
-            if (playbackSettings is { Playback.AudioSource: CompositionSettings.AudioSources.ProjectSoundTrack }
-                && playbackSettings.TryGetMainSoundtrack(_project, out _soundtrackHandle))
+            if (playbackSettings is { Playback.AudioSource: CompositionSettings.AudioSources.ProjectSoundTrack })
             {
-                //var soundtrack = _soundtrackHandle.Value;
-                if (_soundtrackHandle.TryGetFileResource(out var file))
+                // Cache handles for every clip with a valid AssetPath so the per-frame
+                // render loop can register them all. The first IsMainSoundtrack=true clip
+                // is also stored in _soundtrackHandle for end-of-timeline / preload semantics.
+                foreach (var clip in playbackSettings.Playback.AudioClips)
                 {
-                    // BPM is no longer stored on the clip; it lives on Playback. The settings
-                    // loader has already migrated any legacy per-clip BPM into playbackSettings.Playback.Bpm.
-                    _playback.Bpm = playbackSettings.Playback.Bpm;
-                    // Trigger loading clip
-                    AudioEngine.UseSoundtrackClip(_soundtrackHandle, 0);
-                    AudioEngine.CompleteFrame(_playback, Playback.LastFrameDuration); // Initialize
-                    prerenderRequired = true;
+                    if (string.IsNullOrEmpty(clip.AssetPath))
+                        continue;
+                    var handle = new AudioClipResourceHandle(clip, _project);
+                    _allSoundtrackHandles.Add(handle);
+                    if (clip.IsMainSoundtrack && _soundtrackHandle == null)
+                        _soundtrackHandle = handle;
                 }
-                else
+
+                if (_soundtrackHandle != null)
                 {
-                    Log.Warning($"Can't find soundtrack {_soundtrackHandle.Clip.AssetPath}");
-                    _soundtrackHandle = null;
+                    if (_soundtrackHandle.TryGetFileResource(out var file))
+                    {
+                        // BPM lives on Playback now; the settings loader migrated any legacy
+                        // per-clip BPM into playbackSettings.Playback.Bpm.
+                        _playback.Bpm = playbackSettings.Playback.Bpm;
+                        // Pre-register every clip so all streams load before the first frame.
+                        foreach (var h in _allSoundtrackHandles)
+                            AudioEngine.UseSoundtrackClip(h, 0);
+                        AudioEngine.CompleteFrame(_playback, Playback.LastFrameDuration); // Initialize
+                        prerenderRequired = true;
+                    }
+                    else
+                    {
+                        Log.Warning($"Can't find soundtrack {_soundtrackHandle.Clip.AssetPath}");
+                        _soundtrackHandle = null;
+                    }
                 }
             }
 
@@ -459,6 +474,10 @@ internal static partial class Program
     private static EvaluationContext _evalContext;
     private static Playback _playback;
     private static AudioClipResourceHandle _soundtrackHandle;
+    // All clips registered with the engine each frame so multiple clips play simultaneously.
+    // _soundtrackHandle above remains the first IsMainSoundtrack=true entry for end-of-timeline
+    // and preload semantics.
+    private static readonly List<AudioClipResourceHandle> _allSoundtrackHandles = new();
     private static DeviceContext _deviceContext;
     private static Options _resolvedOptions;
     private static RenderForm _renderForm;

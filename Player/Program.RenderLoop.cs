@@ -22,12 +22,19 @@ internal static partial class Program
         _playback.Update();
 
         //Log.Debug($" render at playback time {_playback.TimeInSecs:0.00}s");
+        // Register every cached clip so the engine plays them all in parallel.
+        var timeInSecs = _playback.TimeInSecs;
+        foreach (var handle in _allSoundtrackHandles)
+        {
+            AudioEngine.UseSoundtrackClip(handle, timeInSecs);
+        }
+
+        // End-of-timeline check is driven by the main soundtrack only.
         if (_soundtrackHandle != null)
         {
-            AudioEngine.UseSoundtrackClip(_soundtrackHandle, _playback.TimeInSecs);
             // Clip TimeRange.Start is in bars; convert to seconds for the end-of-clip comparison.
             var clipStartSecs = _playback.SecondsFromBars(_soundtrackHandle.Clip.TimeRange.Start);
-            if (_playback.TimeInSecs >= _soundtrackHandle.Clip.LengthInSeconds + clipStartSecs)
+            if (timeInSecs >= _soundtrackHandle.Clip.LengthInSeconds + clipStartSecs)
             {
                 if (_resolvedOptions.Loop)
                 {

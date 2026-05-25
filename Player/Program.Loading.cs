@@ -145,9 +145,10 @@ internal static partial class Program
             playback.TimeInSecs = sampleTimeInSecs;
             playback.Update();
 
-            if (_soundtrackHandle != null)
+            // Register every cached clip so all streams stay loaded during preload sampling.
+            foreach (var handle in _allSoundtrackHandles)
             {
-                AudioEngine.UseSoundtrackClip(_soundtrackHandle, playback.TimeInSecs);
+                AudioEngine.UseSoundtrackClip(handle, playback.TimeInSecs);
             }
 
             AudioEngine.CompleteFrame(playback, Playback.LastFrameDuration);
