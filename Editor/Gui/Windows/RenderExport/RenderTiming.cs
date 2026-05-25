@@ -37,9 +37,9 @@ internal static class RenderTiming
                 {
                     var playback = Playback.Current;
                     var clip = handle.Clip;
-                    renderSettings.StartInBars = (float)SecondsToReferenceTime(playback.SecondsFromBars(clip.StartTime), renderSettings.TimeReference, renderSettings.FrameRate);
-                    if (clip.EndTime > 0)
-                        renderSettings.EndInBars = (float)SecondsToReferenceTime(playback.SecondsFromBars(clip.EndTime), renderSettings.TimeReference, renderSettings.FrameRate);
+                    renderSettings.StartInBars = (float)SecondsToReferenceTime(playback.SecondsFromBars(clip.TimeRange.Start), renderSettings.TimeReference, renderSettings.FrameRate);
+                    if (clip.TimeRange.End > clip.TimeRange.Start)
+                        renderSettings.EndInBars = (float)SecondsToReferenceTime(playback.SecondsFromBars(clip.TimeRange.End), renderSettings.TimeReference, renderSettings.FrameRate);
                     else
                         renderSettings.EndInBars = (float)SecondsToReferenceTime(clip.LengthInSeconds, renderSettings.TimeReference, renderSettings.FrameRate);
                 }

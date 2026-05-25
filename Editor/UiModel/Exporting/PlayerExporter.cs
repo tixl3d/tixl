@@ -361,7 +361,7 @@ internal static partial class PlayerExporter
         {
             if (PlaybackUtils.TryFindingSoundtrack(out soundtrack, out _))
             {
-                Log.Warning($"You should define soundtracks withing the exported operators. Falling back to {soundtrack.Clip.FilePath} set in parent...");
+                Log.Warning($"You should define soundtracks withing the exported operators. Falling back to {soundtrack.Clip.AssetPath} set in parent...");
             }
             else
             {
@@ -372,8 +372,8 @@ internal static partial class PlayerExporter
             Log.Debug("No soundtrack defined within operator.");
         }
 
-        address = soundtrack.Clip.FilePath;
-        return FileResource.TryGetFileResource(soundtrack.Clip.FilePath, instance, out _);
+        address = soundtrack.Clip.AssetPath;
+        return FileResource.TryGetFileResource(soundtrack.Clip.AssetPath, instance, out _);
     }
 
     private static void CheckInputForResourcePath(ISlot inputSlot, ExportData exportData)

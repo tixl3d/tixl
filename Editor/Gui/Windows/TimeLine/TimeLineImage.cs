@@ -26,9 +26,11 @@ internal sealed class TimeLineImage
         var yMin = ImGui.GetWindowPos().Y;
         
             
-        var songDurationInBars = (float)(clip.LengthInSeconds * clip.Bpm / 240);
-        var xMin = TimeLineCanvas.Current.TransformX((float) clip.StartTime);
-        var xMax = TimeLineCanvas.Current.TransformX(songDurationInBars + (float)clip.StartTime);
+        // BPM lives on Playback now (post Phase B). Same math as before, just sourced from there.
+        var bpm = (float)TimeLineCanvas.Current.Playback.Bpm;
+        var songDurationInBars = (float)(clip.LengthInSeconds * bpm / 240);
+        var xMin = TimeLineCanvas.Current.TransformX(clip.TimeRange.Start);
+        var xMax = TimeLineCanvas.Current.TransformX(songDurationInBars + clip.TimeRange.Start);
             
         if (_srv is { IsDisposed: false })
         {

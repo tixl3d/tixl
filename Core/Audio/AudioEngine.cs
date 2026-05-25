@@ -226,7 +226,7 @@ public static class AudioEngine
             {
                 clip.TargetTime = time;
             }
-            else if (!string.IsNullOrEmpty(handle.Clip.FilePath) && 
+            else if (!string.IsNullOrEmpty(handle.Clip.AssetPath) &&
                      SoundtrackClipStream.TryLoadSoundtrackClip(handle, out var soundtrackClipStream))
             {
                 SoundtrackClipStreams[handle] = soundtrackClipStream;
@@ -240,7 +240,11 @@ public static class AudioEngine
         foreach (var (handle, clipStream) in SoundtrackClipStreams)
         {
             clipStream.IsInUse = _updatedSoundtrackClipTimes.ContainsKey(clipStream.ResourceHandle);
-            if (!clipStream.IsInUse && clipStream.ResourceHandle.Clip.DiscardAfterUse)
+            // Free streams that weren't touched this frame. Otherwise a stream whose owner stopped
+            // calling UseSoundtrackClip stays alive and unpaused, and worse, can win the
+            // handledMainSoundtrack guard below — starving the active soundtrack of seek/pause
+            // updates.
+            if (!clipStream.IsInUse)
             {
                 _obsoleteSoundtrackHandles.Add(handle);
                 continue;

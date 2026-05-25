@@ -99,7 +99,7 @@ public static class AudioRendering
                 }
                 else
                 {
-                    Log.Gated.AudioRender($"[AudioRendering] Soundtrack '{handle.Clip.FilePath}' added to export mixer");
+                    Log.Gated.AudioRender($"[AudioRendering] Soundtrack '{handle.Clip.AssetPath}' added to export mixer");
                 }
             }
         }
@@ -207,16 +207,21 @@ public static class AudioRendering
         // Position each soundtrack clip and set its volume based on whether it should be active
         foreach (var (handle, clipStream) in AudioEngine.SoundtrackClipStreams)
         {
-            double clipStart = Playback.Current.SecondsFromBars(handle.Clip.StartTime);
-            double timeInClip = currentTime - clipStart;
-            
+            var clip = handle.Clip;
+            double clipStart = Playback.Current.SecondsFromBars(clip.TimeRange.Start);
+            double elapsedInClip = currentTime - clipStart;
+            double targetSourcePos = clip.SourceOffsetSecs + elapsedInClip;
+            double sourceEnd = clip.SourceDurationSecs > 0
+                                   ? clip.SourceOffsetSecs + clip.SourceDurationSecs
+                                   : clip.LengthInSeconds;
+
             // Check if clip is active at this time
-            bool isActive = timeInClip >= 0 && timeInClip <= handle.Clip.LengthInSeconds;
-            
+            bool isActive = elapsedInClip >= 0 && targetSourcePos < sourceEnd;
+
             if (isActive)
             {
-                // Position the stream at the correct time in the clip
-                long targetBytes = Bass.ChannelSeconds2Bytes(clipStream.StreamHandle, timeInClip);
+                // Position the stream at the correct time in the source file
+                long targetBytes = Bass.ChannelSeconds2Bytes(clipStream.StreamHandle, targetSourcePos);
                 Bass.ChannelSetPosition(clipStream.StreamHandle, targetBytes);
                 
                 // Apply volume: clip.Volume * SoundtrackVolume * AppVolume

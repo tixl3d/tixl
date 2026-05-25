@@ -151,6 +151,23 @@ UI implementation guidelines:
 - use fonts sparingly (prefer `Normal` and `Small`)
 - prefer `CustomComponents` and `FormInputs` for layout/input widgets
 
+### Registering a file extension / drag-drop on the graph
+
+When you need a new file extension (e.g. `.data`, `.wav`, `.gltf`) to be drag-droppable onto the graph and automatically create a specific operator, the registry lives in two places that work together:
+
+1. **`Editor/Gui/Windows/AssetLib/AssetHandling.cs`** — `InitAssetTypes()` registers each `AssetType` with its extensions and a `PrimaryOperators` array of Symbol GUIDs. `PrimaryOperators[0]` is the default operator created on drop. Adding a `.wav` → `AudioClip` mapping is a few-line edit here (alongside Images, Video, Audio, Obj, Gltf, Shader, JSON, etc.).
+2. **The operator's `.t3ui`** — set `"Usage": "FilePath"` on the path-input UI and `"FileFilter": "wav mp3 ogg"` so the editor's file picker filters correctly when the user clicks `…`. Example: `Operators/Lib/io/audio/AudioClip.t3ui`.
+
+What happens automatically on drop:
+
+- `Editor/Gui/MagGraph/Ui/DropHandling.cs` resolves the file's extension via `FileExtensionRegistry` → `AssetType.TryGetForFilePath()` → picks `PrimaryOperators[0]`.
+- `FileImport.TryImportDroppedFile()` **copies the file into the active project's `Assets/<subfolder>/`**, creating the subfolder if needed (subfolder name comes from `AssetType.Subfolders[0]`).
+- `CreateAssetOperatorOnGraph()` then instantiates the operator at the drop position and writes the project-relative asset path (e.g. `pixtur.Playground:audio/rec-005.wav`) into the operator's path input.
+
+So the contract for a new asset-droppable operator is: pick a `Subfolder` name in `AssetHandling.cs`, add the extension(s), add the operator GUID as `PrimaryOperators[0]`, and set `Usage: FilePath` + `FileFilter` on the path input UI. No drop-handler code to write.
+
+For TimeClip-shaped media operators (e.g. `AudioClip`, `PlayVideoClip`), also set `DirtyFlagTrigger = DirtyFlagTrigger.Animated` on the `TimeClipSlot` output — without it, an unconnected dropped clip won't be evaluated each frame and won't play.
+
 ## 5) Code Quality and Review Expectations
 
 When touching code, always:

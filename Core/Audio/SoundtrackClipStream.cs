@@ -11,7 +11,7 @@ using T3.Core.Logging;
 namespace T3.Core.Audio;
 
 /// <summary>
-/// Controls the playback of a <see cref="SoundtrackClipDefinition"/> with BASS by the <see cref="AudioEngine"/>.
+/// Controls the playback of a <see cref="TimelineAudioClip"/> with BASS by the <see cref="AudioEngine"/>.
 /// 
 /// The stream is created as a decode stream and added to the SoundtrackMixer.
 /// For live playback, audio flows through: Stream -> SoundtrackMixer -> GlobalMixer -> Soundcard
@@ -73,21 +73,21 @@ internal sealed class SoundtrackClipStream
         if (handle.LoadingAttemptFailed)
             return false;
         
-        if (string.IsNullOrEmpty(handle.Clip.FilePath))
+        if (string.IsNullOrEmpty(handle.Clip.AssetPath))
             return false;
 
         handle.LoadingAttemptFailed = true;
         
         if (!handle.TryGetFileResource(out var file))
         {
-            Log.Error($"AudioClip file '{handle.Clip.FilePath}' does not exist.");
+            Log.Error($"AudioClip file '{handle.Clip.AssetPath}' does not exist.");
             return false;
         }
 
         var fileInfo = file.FileInfo;
         if (fileInfo is not { Exists: true })
         {
-            Log.Error($"AudioClip file '{handle.Clip.FilePath}' does not exist.");
+            Log.Error($"AudioClip file '{handle.Clip.AssetPath}' does not exist.");
             return false;
         }
 
@@ -128,7 +128,7 @@ internal sealed class SoundtrackClipStream
             }
             else
             {
-                Log.Gated.Audio($"[SoundtrackClipStream] Added '{handle.Clip.FilePath}' to SoundtrackMixer");
+                Log.Gated.Audio($"[SoundtrackClipStream] Added '{handle.Clip.AssetPath}' to SoundtrackMixer");
             }
         }
 
@@ -163,8 +163,26 @@ internal sealed class SoundtrackClipStream
         }
 
         var clip = ResourceHandle.Clip;
-        var localTargetTimeInSecs = TargetTime - playback.SecondsFromBars(clip.StartTime);
-        var isOutOfBounds = localTargetTimeInSecs < 0 || localTargetTimeInSecs >= clip.LengthInSeconds;
+
+        // Elapsed seconds since the clip's TimeRange.Start on the timeline.
+        // (TargetTime is set externally to the current playback time-in-seconds.)
+        var elapsedInClipSecs = TargetTime - playback.SecondsFromBars(clip.TimeRange.Start);
+
+        // Native-rate target position in the source file.
+        var targetSourcePosSecs = clip.SourceOffsetSecs + elapsedInClipSecs;
+
+        // Effective source-end (where the audible content stops).
+        var sourceEndSecs = clip.SourceDurationSecs > 0
+                                ? clip.SourceOffsetSecs + clip.SourceDurationSecs
+                                : clip.LengthInSeconds;
+
+        // Optional TimeRange.End bound: skip when End <= Start (the "no explicit end" sentinel).
+        var hasClipEnd = clip.TimeRange.End > clip.TimeRange.Start;
+        var clipEndSecs = hasClipEnd ? playback.SecondsFromBars(clip.TimeRange.End) : double.PositiveInfinity;
+
+        var isOutOfBounds = elapsedInClipSecs < 0
+                            || targetSourcePosSecs >= sourceEndSecs
+                            || (hasClipEnd && TargetTime >= clipEndSecs);
         
         // Check if paused in mixer
         var flags = BassMix.ChannelFlags(StreamHandle, 0, 0);
@@ -187,7 +205,7 @@ internal sealed class SoundtrackClipStream
         // Get the current playback position from the mixer
         var currentStreamBufferPos = BassMix.ChannelGetPosition(StreamHandle);
         var currentPosInSec = Bass.ChannelBytes2Seconds(StreamHandle, currentStreamBufferPos) - AudioSyncingOffset;
-        var soundDelta = (currentPosInSec - localTargetTimeInSecs) * playback.PlaybackSpeed;
+        var soundDelta = (currentPosInSec - targetSourcePosSecs) * playback.PlaybackSpeed;
 
         // Set volume on the stream
         var audio = CompositionSettings.Current.Audio;
@@ -205,7 +223,7 @@ internal sealed class SoundtrackClipStream
 
         // Resync
         var resyncOffset = AudioTriggerDelayOffset * playback.PlaybackSpeed + AudioSyncingOffset;
-        var newStreamPos = Bass.ChannelSeconds2Bytes(StreamHandle, localTargetTimeInSecs + resyncOffset);
+        var newStreamPos = Bass.ChannelSeconds2Bytes(StreamHandle, targetSourcePosSecs + resyncOffset);
         BassMix.ChannelSetPosition(StreamHandle, newStreamPos, PositionFlags.Bytes | PositionFlags.MixerReset);
     }
 
@@ -214,11 +232,14 @@ internal sealed class SoundtrackClipStream
     /// </summary>
     internal long UpdateTimeWhileRecording(Playback playback, double fps, bool reinitialize)
     {
-        // Offset timing dependent on position in clip
-        var localTargetTimeInSecs = playback.TimeInSecs - playback.SecondsFromBars(ResourceHandle.Clip.StartTime) + RecordSyncingOffset;
-        var newStreamPos = localTargetTimeInSecs < 0
-                               ? -Bass.ChannelSeconds2Bytes(StreamHandle, -localTargetTimeInSecs)
-                               : Bass.ChannelSeconds2Bytes(StreamHandle, localTargetTimeInSecs);
+        // Offset timing dependent on position in clip. SourceOffsetSecs lets a clip skip
+        // into the middle of the file at its start; defaults to 0 for migrated clips.
+        var clip = ResourceHandle.Clip;
+        var elapsedInClipSecs = playback.TimeInSecs - playback.SecondsFromBars(clip.TimeRange.Start);
+        var targetSourcePosSecs = clip.SourceOffsetSecs + elapsedInClipSecs + RecordSyncingOffset;
+        var newStreamPos = targetSourcePosSecs < 0
+                               ? -Bass.ChannelSeconds2Bytes(StreamHandle, -targetSourcePosSecs)
+                               : Bass.ChannelSeconds2Bytes(StreamHandle, targetSourcePosSecs);
 
         // Re-initialize playback?
         if (!reinitialize)

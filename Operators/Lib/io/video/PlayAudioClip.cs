@@ -14,22 +14,21 @@ internal sealed class PlayAudioClip : Instance<PlayAudioClip>, IStatusProvider
     public PlayAudioClip()
     {
         Result.UpdateAction += Update;
-        _audioClipResource = new Resource<SoundtrackClipDefinition>(Path, TryCreateClip);
+        _audioClipResource = new Resource<TimelineAudioClip>(Path, TryCreateClip);
         _audioClipResource.AddDependentSlots(Result);
     }
 
-    private bool TryCreateClip(FileResource file, SoundtrackClipDefinition? currentValue, [NotNullWhen(true)] out SoundtrackClipDefinition? newClip, out string failureReason)
+    private bool TryCreateClip(FileResource file, TimelineAudioClip? currentValue, [NotNullWhen(true)] out TimelineAudioClip? newClip, out string failureReason)
     {
         var fileInfo = file.FileInfo;
         if (fileInfo is { Exists: true })
         {
-            newClip = new SoundtrackClipDefinition
+            newClip = new TimelineAudioClip
                            {
-                               FilePath = Path.GetCurrentValue(),
-                               StartTime = 0,
-                               EndTime = 0,
+                               AssetPath = Path.GetCurrentValue(),
+                               // TimeRange left at default (Start=End=0). PlayAudioClip is trigger-based
+                               // (driven by TimeInSecs input via UseSoundtrackClip), not timeline-driven.
                                IsMainSoundtrack = true,
-                               LengthInSeconds = 0,
                                Volume = Volume.GetCurrentValue(),
                                Id = Guid.NewGuid(),
                            };
@@ -75,7 +74,7 @@ internal sealed class PlayAudioClip : Instance<PlayAudioClip>, IStatusProvider
     }
 
     private double _startRunTimeInSecs;
-    private readonly Resource<SoundtrackClipDefinition> _audioClipResource;
+    private readonly Resource<TimelineAudioClip> _audioClipResource;
 
     IStatusProvider.StatusLevel IStatusProvider.GetStatusLevel()
     {

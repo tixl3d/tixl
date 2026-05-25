@@ -266,7 +266,7 @@ internal sealed class ProjectSettingsWindow : Window
                     if (ImGui.Button("Add soundtrack to composition"))
                     {
                         modified = true;
-                        playback.AudioClips.Add(new SoundtrackClipDefinition()
+                        playback.AudioClips.Add(new TimelineAudioClip()
                         {
                             IsMainSoundtrack = true,
                         });
@@ -275,7 +275,7 @@ internal sealed class ProjectSettingsWindow : Window
                 }
                 else
                 {
-                    if (string.IsNullOrEmpty(soundtrackHandle.Clip.FilePath))
+                    if (string.IsNullOrEmpty(soundtrackHandle.Clip.AssetPath))
                     {
                         _tempSoundtrackFilepathForEdit = string.Empty;
                     }
@@ -286,13 +286,13 @@ internal sealed class ProjectSettingsWindow : Window
                         {
                             if (ImGui.IsWindowAppearing())
                             {
-                                _tempSoundtrackFilepathForEdit = soundtrackHandle.Clip.FilePath;
+                                _tempSoundtrackFilepathForEdit = soundtrackHandle.Clip.AssetPath;
                             }
                         }
                         else
                         {
-                            Log.Warning($"Removing invalid soundtrack file: {soundtrackHandle.Clip.FilePath}");
-                            soundtrackHandle.Clip.FilePath = string.Empty;
+                            Log.Warning($"Removing invalid soundtrack file: {soundtrackHandle.Clip.AssetPath}");
+                            soundtrackHandle.Clip.AssetPath = string.Empty;
                             modified = true;
                         }
                     }
@@ -305,6 +305,16 @@ internal sealed class ProjectSettingsWindow : Window
                     var filepathModified = (editResult & InputEditStateFlags.Modified) != 0;
                     if (filepathModified)
                     {
+                        // Push the picker's value back onto the clip. TryToApplyFilePath validates
+                        // via AssetRegistry and clears AssetPath if the path doesn't resolve.
+                        if (!string.IsNullOrEmpty(_tempSoundtrackFilepathForEdit))
+                        {
+                            soundtrackHandle.TryToApplyFilePath(_tempSoundtrackFilepathForEdit, compositionWithSettings);
+                        }
+                        else
+                        {
+                            soundtrackHandle.Clip.AssetPath = string.Empty;
+                        }
                         modified = true;
                     }
 
@@ -326,8 +336,10 @@ internal sealed class ProjectSettingsWindow : Window
 
                     FormInputs.AddVerticalSpace();
 
+                    // BPM lives on Playback now (post Phase B of Plan_TimelineAudioClips.md).
+                    var bpm = (float)playback.Bpm;
                     if (FormInputs.AddFloat("BPM",
-                            ref soundtrackHandle.Clip.Bpm,
+                            ref bpm,
                             0,
                             1000,
                             0.02f,
@@ -335,23 +347,23 @@ internal sealed class ProjectSettingsWindow : Window
                             "In T3 animation units are in bars.\nThe BPM rate controls the animation speed of your project.",
                             120))
                     {
-                        Playback.Current.Bpm = soundtrackHandle.Clip.Bpm;
-                        playback.Bpm = soundtrackHandle.Clip.Bpm;
+                        Playback.Current.Bpm = bpm;
+                        playback.Bpm = bpm;
                         modified = true;
                     }
 
-                    var soundtrackStartTime = (float) soundtrackHandle.Clip.StartTime;
-
+                    // Offset is the clip's TimeRange.Start (bars on the timeline).
+                    var soundtrackStart = soundtrackHandle.Clip.TimeRange.Start;
                     if (FormInputs.AddFloat("Offset",
-                            ref soundtrackStartTime,
+                            ref soundtrackStart,
                             -100,
                             100,
                             0.02f,
                             false, true,
-                            "Offsets the beginning of the soundtrack in seconds.",
+                            "Offsets the start of the soundtrack on the timeline, in bars.",
                             0))
                     {
-                        soundtrackHandle.Clip.StartTime = soundtrackStartTime;
+                        soundtrackHandle.Clip.TimeRange.Start = soundtrackStart;
                         modified = true;
                     }
 
@@ -554,7 +566,9 @@ internal sealed class ProjectSettingsWindow : Window
 
             if (playback.AudioClips.Count > 0)
             {
-                Playback.Current.Bpm = playback.AudioClips[0].Bpm;
+                // BPM lives on Playback now (post Phase B of Plan_TimelineAudioClips.md). The
+                // settings loader already migrated any legacy per-clip BPM into playback.Bpm.
+                Playback.Current.Bpm = playback.Bpm;
                 if (Playback.Current.Settings != null)
                     Playback.Current.Settings.Playback.Syncing = CompositionSettings.SyncModes.Timeline;
             }
@@ -579,23 +593,24 @@ internal sealed class ProjectSettingsWindow : Window
         }
     }
 
-    private static void UpdateBpmFromSoundtrackConfig(SoundtrackClipDefinition? audioClip)
+    private static void UpdateBpmFromSoundtrackConfig(TimelineAudioClip? audioClip)
     {
-        if (audioClip == null || string.IsNullOrEmpty(audioClip.FilePath))
+        if (audioClip == null || string.IsNullOrEmpty(audioClip.AssetPath))
         {
             Log.Error("Can't detected BPM-rate from empty undefined audio-clip filename");
             return;
         }
 
         var matchBpmPattern = new Regex(@"(\d+\.?\d*)bpm");
-        var result = matchBpmPattern.Match(audioClip.FilePath);
+        var result = matchBpmPattern.Match(audioClip.AssetPath);
         if (!result.Success)
             return;
 
         if (float.TryParse(result.Groups[1].Value, out var bpm))
         {
+            // BPM lives on Playback now (post Phase B of Plan_TimelineAudioClips.md).
             Log.Debug($"Using bpm-rate {bpm} from filename.");
-            audioClip.Bpm = bpm;
+            Playback.Current.Bpm = bpm;
         }
     }
 

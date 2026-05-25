@@ -85,19 +85,19 @@ internal static class PlaybackTimeScrubHandling
             return false;
 
         var clip = soundtrack.Clip;
-        minTimeInBars = clip.StartTime;
+        minTimeInBars = clip.TimeRange.Start;
 
-        if (clip.EndTime > clip.StartTime)
+        if (clip.TimeRange.End > clip.TimeRange.Start)
         {
-            maxTimeInBars = clip.EndTime;
+            maxTimeInBars = clip.TimeRange.End;
         }
         else if (clip.LengthInSeconds > 0)
         {
-            maxTimeInBars = clip.StartTime + Playback.Current.BarsFromSeconds(clip.LengthInSeconds);
+            maxTimeInBars = clip.TimeRange.Start + Playback.Current.BarsFromSeconds(clip.LengthInSeconds);
         }
         else
         {
-            maxTimeInBars = clip.StartTime;
+            maxTimeInBars = clip.TimeRange.Start;
         }
 
         if (maxTimeInBars < minTimeInBars)

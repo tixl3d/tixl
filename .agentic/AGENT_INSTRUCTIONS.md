@@ -229,6 +229,27 @@ Log.Debug("SwiftCam: pre-loading native DLL");
 - Fix spelling mistakes in touched comments on the fly
 - Add parameter documentation only when parameter purpose is not obvious from the name
 
+## Comment Hygiene Across Phased Work
+
+When work is split into phases (typically tracked under `.agentic/Plans/`), it is fine — sometimes useful — to leave transitional comments in code during the work:
+
+- "Phase B of `Plan_X.md` will replace this with …"
+- "Pre-rename projects used the property name `Foo`."
+- "Behavior preserved during the transition; full unbundling deferred."
+
+These comments help the next reviewer (or the same agent on the next turn) understand why the code currently looks half-done. **But they are temporary scaffolding, not documentation.** Once the feature lands they become agent-generated cruft: a future reader has to dig into a plan doc that may itself be archived to understand what the code is saying.
+
+**Rules:**
+
+1. **During phase work**, transitional comments referencing phases, plans, or prior names are acceptable as long as they justify *current* code shape or flag *imminent* follow-up.
+2. **In the final phase or a dedicated cleanup commit at the end of a feature**, sweep them out. For each transitional comment, choose one:
+   - **Delete** if the reasoning is now obvious from the code itself.
+   - **Rewrite** to remove the phase / plan / "post-rename" framing, keeping only the lasting *why* (e.g. "Streams stay loaded until the composition closes — avoids thrash when scrubbing across a TimeRange boundary." — no mention of "DiscardAfterUse was removed in Phase B…").
+3. **Don't reference `.agentic/Plans/` from production code.** Plans are working documents; they may be archived or rewritten. Code comments that point at them go stale silently. References from other plans, agent instructions, or tests are fine — those documents track their own lifecycle.
+4. **Back-compat readers** (e.g. JSON migration paths reading old field names) are an exception: keep them, and explain that they're back-compat handlers for old saved data, without naming a phase or plan. The migration is permanent code now, not scaffolding.
+
+When picking up a feature mid-phase, treat existing transitional comments as a working state of the prior author's thinking — don't aggressively prune them until the feature is being wrapped up.
+
 ## Change Workflow
 ### Before editing
 1. Check whether the target code runs every frame

@@ -25,7 +25,9 @@ internal static partial class Program
         if (_soundtrackHandle != null)
         {
             AudioEngine.UseSoundtrackClip(_soundtrackHandle, _playback.TimeInSecs);
-            if (_playback.TimeInSecs >= _soundtrackHandle.Clip.LengthInSeconds + _soundtrackHandle.Clip.StartTime)
+            // Clip TimeRange.Start is in bars; convert to seconds for the end-of-clip comparison.
+            var clipStartSecs = _playback.SecondsFromBars(_soundtrackHandle.Clip.TimeRange.Start);
+            if (_playback.TimeInSecs >= _soundtrackHandle.Clip.LengthInSeconds + clipStartSecs)
             {
                 if (_resolvedOptions.Loop)
                 {

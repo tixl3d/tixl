@@ -245,7 +245,9 @@ internal static partial class Program
                 //var soundtrack = _soundtrackHandle.Value;
                 if (_soundtrackHandle.TryGetFileResource(out var file))
                 {
-                    _playback.Bpm = _soundtrackHandle.Clip.Bpm;
+                    // BPM is no longer stored on the clip; it lives on Playback. The settings
+                    // loader has already migrated any legacy per-clip BPM into playbackSettings.Playback.Bpm.
+                    _playback.Bpm = playbackSettings.Playback.Bpm;
                     // Trigger loading clip
                     AudioEngine.UseSoundtrackClip(_soundtrackHandle, 0);
                     AudioEngine.CompleteFrame(_playback, Playback.LastFrameDuration); // Initialize
@@ -253,7 +255,7 @@ internal static partial class Program
                 }
                 else
                 {
-                    Log.Warning($"Can't find soundtrack {_soundtrackHandle.Clip.FilePath}");
+                    Log.Warning($"Can't find soundtrack {_soundtrackHandle.Clip.AssetPath}");
                     _soundtrackHandle = null;
                 }
             }

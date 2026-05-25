@@ -16,9 +16,9 @@ namespace T3.Editor.Gui.Audio;
 
 internal static class AudioImageGenerator
 {
-    public static bool TryGenerateSoundSpectrumAndVolume(SoundtrackClipDefinition clip, IResourceConsumer? instance, [NotNullWhen(true)] out string? imagePathAbsolute)
+    public static bool TryGenerateSoundSpectrumAndVolume(TimelineAudioClip clip, IResourceConsumer? instance, [NotNullWhen(true)] out string? imagePathAbsolute)
     {
-        var relativePath = clip.FilePath;
+        var relativePath = clip.AssetPath;
         if (relativePath == null)
         {
             Log.Error("Audio clip has no file path");

@@ -91,7 +91,7 @@ public sealed class CompositionSettings
     public sealed class PlaybackConfig
     {
         public float Bpm = 120;
-        public List<SoundtrackClipDefinition> AudioClips { get; internal init; } = [];
+        public List<TimelineAudioClip> AudioClips { get; internal init; } = [];
         public AudioSources AudioSource;
         public SyncModes Syncing;
 
@@ -258,12 +258,15 @@ public sealed class CompositionSettings
 
         settings.Playback.AudioClips.AddRange(GetClips(settingsToken)); // Support clips inside settings token
 
+        // BPM migration: pre-rewrite projects stored BPM on the clip itself. The new model
+        // keeps BPM only on Playback. If the legacy field was present on the loaded clip,
+        // copy it once into Playback.Bpm.
         if (settings.Playback.Bpm == 0)
         {
             var soundtrack = settings.Playback.AudioClips.FirstOrDefault(c => c.IsMainSoundtrack);
-            if (soundtrack != null)
+            if (soundtrack != null && soundtrack.LegacyBpmForMigration > 0)
             {
-                settings.Playback.Bpm = soundtrack.Bpm;
+                settings.Playback.Bpm = soundtrack.LegacyBpmForMigration;
                 settings.Enabled = true;
             }
         }
@@ -271,7 +274,7 @@ public sealed class CompositionSettings
         return settings;
     }
 
-    private static IEnumerable<SoundtrackClipDefinition> GetClips(JToken token)
+    private static IEnumerable<TimelineAudioClip> GetClips(JToken token)
     {
         var jClipsToken = token["AudioClips"];
         if (jClipsToken == null)
@@ -280,7 +283,7 @@ public sealed class CompositionSettings
         var jAudioClipArray = (JArray)jClipsToken;
         foreach (var c in jAudioClipArray)
         {
-            if (SoundtrackClipDefinition.TryFromJson(c, out var clip))
+            if (TimelineAudioClip.TryFromJson(c, out var clip))
             {
                 yield return clip;
             }
