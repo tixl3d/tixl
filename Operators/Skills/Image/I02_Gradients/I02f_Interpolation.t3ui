@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "88adf4e5-64af-4a86-b8f6-2b236fa7e4f3"/*I02f_Interpolation*/,
   "Description": "LinearGradient: Interpolation",
   "InputUis": [],
@@ -31,7 +33,8 @@
       "Position": {
         "X": 1139.5903,
         "Y": 1908.7638
-      }
+      },
+      "SnapshotGroupIndex": "1"
     },
     {
       "ChildId": "cf6f1aa3-22fd-4f37-9125-04c346e9c043"/*LinearGradient*/,
@@ -46,7 +49,8 @@
       "Position": {
         "X": 1139.5903,
         "Y": 1973.7705
-      }
+      },
+      "SnapshotGroupIndex": "1"
     }
   ],
   "OutputUis": [
@@ -101,5 +105,13 @@
       "Description": "Most SkillQuest challenges use simple values like 1/2 or 1/10.\nYou can also use the Infinity Slider. It appears when dragging numeric values and often marks the target value with a small dot.",
       "Style": "Tip"
     }
-  ]
+  ],
+  "Settings": {
+    "Timeline": {
+  "ScaleX": 7.054155,
+  "ScrollX": -13.796197,
+  "Mode": "DopeView",
+  "TimelineHeight": 155
+}
+  }
 }

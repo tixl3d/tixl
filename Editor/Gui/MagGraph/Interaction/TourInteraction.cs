@@ -311,6 +311,30 @@ internal static class TourInteraction
         _symbolTourProgress[compositionId] = index;
     }
 
+    /// <summary>
+    /// True while the user is reading an introductory tour point (Info / InfoFor) on this
+    /// composition. Used by SkillQuest feedback to suppress hint icons while the tour owns
+    /// the user's attention. Call-to-Action, Conclusion, and Tip points expect the user to
+    /// engage with the graph, so they don't block hints.
+    /// </summary>
+    public static bool IsTourBlockingHints(SymbolUi compositionUi)
+    {
+        if (compositionUi.TourPoints.Count == 0)
+            return false;
+
+        if (_symbolTourProgress == null)
+            return true;
+
+        if (!_symbolTourProgress.TryGetValue(compositionUi.Symbol.Id, out var progressIndex))
+            return true;
+
+        if (progressIndex < 0 || progressIndex >= compositionUi.TourPoints.Count)
+            return false;
+
+        var style = compositionUi.TourPoints[progressIndex].Style;
+        return style == TourPoint.Styles.Info || style == TourPoint.Styles.InfoFor;
+    }
+
     // -1 means completed or hidden
     private static Dictionary<Guid, int> _symbolTourProgress = new();
 

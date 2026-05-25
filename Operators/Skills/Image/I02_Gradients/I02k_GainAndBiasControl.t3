@@ -107,7 +107,7 @@
               "Interpolation": "Linear",
               "Steps": [
                 {
-                  "Id": "6a8c1e98-8ac9-4206-ba37-8b395444b10d",
+                  "Id": "5283767f-a42b-47c1-bd0b-28e22ae6dd6a",
                   "NormalizedPosition": 0.0,
                   "Color": {
                     "R": 1.0,
@@ -117,7 +117,7 @@
                   }
                 },
                 {
-                  "Id": "3beb18f7-b394-47a8-b63b-e42acaed2cf7",
+                  "Id": "f52a6c46-01b7-4a74-96a8-a0c2632455cc",
                   "NormalizedPosition": 1.0,
                   "Color": {
                     "R": 0.0,

@@ -15,6 +15,7 @@ using T3.Editor.Gui.OpUis;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.UiHelpers.Thumbnails;
+using T3.Editor.Skills.Training;
 using T3.Editor.UiModel.Helpers;
 using T3.Editor.UiModel.InputsAndTypes;
 using Texture2D = T3.Core.DataTypes.Texture2D;
@@ -563,9 +564,11 @@ internal sealed partial class MagGraphView
                 DrawIndicator(drawList, UiColors.Selection, idleFadeFactor, pMin, pMax, CanvasScale, ref indicatorCount, "is pinned");
             }
 
-            // Snapshot indicator
+            // Snapshot indicator — suppressed during SkillQuest play mode because every
+            // solution-bearing op is snapshot-enabled by design; the indicator would just
+            // be visual noise and reveal which ops the user is "supposed" to touch.
             {
-                if (item.ChildUi.EnabledForSnapshots)
+                if (item.ChildUi.EnabledForSnapshots && !SkillTraining.IsInPlayMode)
                 {
                     DrawIndicator(drawList, UiColors.StatusAutomated, idleFadeFactor, pMin, pMax, CanvasScale, ref indicatorCount, "enabled for snapshot");
                 }
@@ -1044,25 +1047,42 @@ internal sealed partial class MagGraphView
         if (item.Variant == MagGraphItem.Variants.Operator)
         {
             var instance = item.Instance;
-            if (instance is IStatusProvider statusProvider)
+
+            // SkillQuest feedback takes precedence over the op's own IStatusProvider so
+            // training hints can override status from operators that already self-report.
+            var statusLevel = IStatusProvider.StatusLevel.Undefined;
+            string? statusMessage = null;
+            var badgeAlpha = 1f;
+            var feedback = SkillTraining.ActiveLevelFeedback;
+            if (feedback != null && feedback.TryGetOpStatus(instance.SymbolChildId, out var feedbackLevel, out var feedbackMessage))
             {
-                var statusLevel = statusProvider.GetStatusLevel();
-                if (statusLevel != IStatusProvider.StatusLevel.Success && statusLevel != IStatusProvider.StatusLevel.Undefined)
-                {
-                    ImGui.SetCursorScreenPos(pMinVisible + new Vector2(8, -7));
-                    ImGui.InvisibleButton("#warning", new Vector2(15, 15));
-                    var color = statusLevel switch
-                                    {
-                                        IStatusProvider.StatusLevel.Tip     => UiColors.StatusAttention,
-                                        IStatusProvider.StatusLevel.Notice  => UiColors.StatusAttention,
-                                        IStatusProvider.StatusLevel.Warning => UiColors.StatusWarning,
-                                        IStatusProvider.StatusLevel.Error   => UiColors.StatusError,
-                                        _                                   => UiColors.StatusError
-                                    };
-                    var icon = statusLevel == IStatusProvider.StatusLevel.Tip ? Icon.Tip : Icon.Warning;
-                    Icons.DrawIconOnLastItem(icon, color);
-                    CustomComponents.TooltipForLastItem(color, statusLevel.ToString(), statusProvider.GetStatusMessage(), false);
-                }
+                statusLevel = feedbackLevel;
+                statusMessage = feedbackMessage;
+                badgeAlpha = feedback.GetOpHintAlpha(instance.SymbolChildId, feedbackLevel);
+            }
+            else if (instance is IStatusProvider statusProvider)
+            {
+                statusLevel = statusProvider.GetStatusLevel();
+                statusMessage = statusProvider.GetStatusMessage();
+            }
+
+            if (statusLevel != IStatusProvider.StatusLevel.Success
+                && statusLevel != IStatusProvider.StatusLevel.Undefined
+                && badgeAlpha > 0f)
+            {
+                ImGui.SetCursorScreenPos(pMinVisible + new Vector2(8, -7));
+                ImGui.InvisibleButton("#warning", new Vector2(15, 15));
+                var color = (statusLevel switch
+                                {
+                                    IStatusProvider.StatusLevel.Tip     => UiColors.StatusActivated,
+                                    IStatusProvider.StatusLevel.Notice  => UiColors.StatusAttention,
+                                    IStatusProvider.StatusLevel.Warning => UiColors.StatusWarning,
+                                    IStatusProvider.StatusLevel.Error   => UiColors.StatusError,
+                                    _                                   => UiColors.StatusError
+                                }).Fade(badgeAlpha);
+                var icon = statusLevel == IStatusProvider.StatusLevel.Tip ? Icon.Tip : Icon.Warning;
+                Icons.DrawIconOnLastItem(icon, color);
+                CustomComponents.TooltipForLastItem(color, statusLevel.ToString(), statusMessage, false);
             }
 
             if (UserSettings.Config.ShowOperatorStats)

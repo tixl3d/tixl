@@ -94,7 +94,7 @@ internal sealed class GraphNode
                         ImGui.InvisibleButton("#warning", new Vector2(15, 15));
                         var color = statusLevel switch
                                         {
-                                            IStatusProvider.StatusLevel.Tip     => UiColors.StatusAttention,
+                                            IStatusProvider.StatusLevel.Tip     => UiColors.StatusActivated,
                                             IStatusProvider.StatusLevel.Notice  => UiColors.StatusAttention,
                                             IStatusProvider.StatusLevel.Warning => UiColors.StatusWarning,
                                             IStatusProvider.StatusLevel.Error   => UiColors.StatusError,

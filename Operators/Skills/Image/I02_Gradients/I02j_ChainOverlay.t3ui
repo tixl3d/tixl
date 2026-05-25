@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "e207e194-3f2d-48b6-b195-d1e147b09cca"/*I02j_ChainOverlay*/,
   "Description": "LinearGradient: Chain Overlay",
   "InputUis": [],
@@ -8,7 +10,8 @@
       "Position": {
         "X": 1310.8925,
         "Y": 1977.4424
-      }
+      },
+      "SnapshotGroupIndex": "1"
     },
     {
       "ChildId": "581e6942-6f1a-4de0-a306-ece698d5ab49"/*ImageQuiz*/,
@@ -91,5 +94,13 @@
       "Description": "Select a gradient step to open the Color picker. \nThen use the opacity slider at the bottom. \nAdjust the opacity of the gradient's color steps to complete the challenge.\n",
       "Style": "CallToAction"
     }
-  ]
+  ],
+  "Settings": {
+    "Timeline": {
+  "ScaleX": 7.054155,
+  "ScrollX": -13.796197,
+  "Mode": "DopeView",
+  "TimelineHeight": 155
+}
+  }
 }

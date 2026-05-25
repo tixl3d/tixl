@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "cdcd9df3-e941-428a-9dd4-7b05266a4bec"/*I02g_CleanupGradient*/,
   "Inputs": [],
   "Children": [
@@ -164,6 +166,11 @@
           "Value": 0.5
         },
         {
+          "Id": "5774969c-ef4d-482e-ab37-b3a84b09debb"/*PingPong*/,
+          "Type": "System.Boolean",
+          "Value": false
+        },
+        {
           "Id": "7f3fe86d-f259-458a-908a-0a71d39ca678"/*Repeat*/,
           "Type": "System.Boolean",
           "Value": true
@@ -176,7 +183,7 @@
               "Interpolation": "Smooth",
               "Steps": [
                 {
-                  "Id": "6e9a11ee-f15b-4650-b042-0c4f1972c69e",
+                  "Id": "fe5a2d41-daa6-4a3f-9163-1df7316f4416",
                   "NormalizedPosition": 0.0,
                   "Color": {
                     "R": 1.0,
@@ -186,8 +193,8 @@
                   }
                 },
                 {
-                  "Id": "7014c475-2d5a-4d9d-8378-11a7103347a8",
-                  "NormalizedPosition": 0.048114434,
+                  "Id": "3c768786-e813-4975-9946-67990179ca7f",
+                  "NormalizedPosition": 0.09296264,
                   "Color": {
                     "R": 1.0,
                     "G": 0.9500792,
@@ -196,8 +203,8 @@
                   }
                 },
                 {
-                  "Id": "e8ffaa08-0bb6-4994-a3ec-5ccbe7f2afbd",
-                  "NormalizedPosition": 0.5630689,
+                  "Id": "27181052-f7fb-4899-a443-004233f4a4a1",
+                  "NormalizedPosition": 0.17289314,
                   "Color": {
                     "R": 0.0,
                     "G": 1.0,
@@ -206,8 +213,8 @@
                   }
                 },
                 {
-                  "Id": "cff839fa-c6a6-4c05-ba0d-f5fe1585e860",
-                  "NormalizedPosition": 0.66189855,
+                  "Id": "5c222385-392b-4dcc-84dd-1cbf525011ab",
+                  "NormalizedPosition": 0.5,
                   "Color": {
                     "R": 0.10326699,
                     "G": 0.7896903,
@@ -216,8 +223,8 @@
                   }
                 },
                 {
-                  "Id": "ad6a875c-f4d4-4bbd-9884-1c9ec370a94e",
-                  "NormalizedPosition": 0.7347204,
+                  "Id": "7931ff56-1d58-4c2f-8c5c-f8a2e9aeb602",
+                  "NormalizedPosition": 0.7497828,
                   "Color": {
                     "R": 0.0,
                     "G": 0.6253992,
@@ -226,8 +233,8 @@
                   }
                 },
                 {
-                  "Id": "324c3730-22ad-4e79-9d32-97b81c17ef25",
-                  "NormalizedPosition": 0.8439532,
+                  "Id": "0bc3ea09-4b03-40f2-8685-62b2f6dd7b06",
+                  "NormalizedPosition": 0.87836665,
                   "Color": {
                     "R": 0.9081521,
                     "G": 0.0,
@@ -236,7 +243,7 @@
                   }
                 },
                 {
-                  "Id": "5c5c7d69-bf0f-4929-9b3b-1e1bce1058fa",
+                  "Id": "6b0d7cb1-16c7-4d98-98fd-7312972ce50d",
                   "NormalizedPosition": 1.0,
                   "Color": {
                     "R": 1.0,

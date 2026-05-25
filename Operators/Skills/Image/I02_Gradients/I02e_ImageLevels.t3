@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "face6050-9e32-4f6e-8095-280e2ccf70e5"/*I02e_ImageLevels*/,
   "Inputs": [],
   "Children": [

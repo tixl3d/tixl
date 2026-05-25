@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "3442c4dd-fb4d-406c-b696-4a2830398395"/*I02b_GradientRotate*/,
   "Description": "LinearGradient: Rotate",
   "InputUis": [],
@@ -8,7 +10,8 @@
       "Position": {
         "X": 1238.5605,
         "Y": 1882.29
-      }
+      },
+      "SnapshotGroupIndex": "1"
     },
     {
       "ChildId": "b2f938b1-07c7-4d0a-808c-36a43fa68be8"/*LinearGradient*/,
@@ -74,5 +77,13 @@
       "Description": "Rotate the gradient until it matches the goal.",
       "Style": "CallToAction"
     }
-  ]
+  ],
+  "Settings": {
+    "Timeline": {
+  "ScaleX": 7.054155,
+  "ScrollX": -13.796197,
+  "Mode": "DopeView",
+  "TimelineHeight": 155
+}
+  }
 }

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "face6050-9e32-4f6e-8095-280e2ccf70e5"/*I02e_ImageLevels*/,
   "Description": "Analyze: ImageLevels",
   "InputUis": [],
@@ -8,7 +10,8 @@
       "Position": {
         "X": 1212.9983,
         "Y": 1831.984
-      }
+      },
+      "SnapshotGroupIndex": "1"
     },
     {
       "ChildId": "9557cb56-b6bf-4fe5-b20c-d8b081aa96b1"/*LinearGradient*/,
@@ -46,7 +49,8 @@
       "Position": {
         "X": 1212.9982,
         "Y": 1899.2506
-      }
+      },
+      "SnapshotGroupIndex": "1"
     }
   ],
   "OutputUis": [
@@ -104,5 +108,13 @@
       "Description": "Increase the width to better see the curve and to match the example.",
       "Style": "CallToAction"
     }
-  ]
+  ],
+  "Settings": {
+    "Timeline": {
+  "ScaleX": 7.054155,
+  "ScrollX": -13.796197,
+  "Mode": "DopeView",
+  "TimelineHeight": 155
+}
+  }
 }

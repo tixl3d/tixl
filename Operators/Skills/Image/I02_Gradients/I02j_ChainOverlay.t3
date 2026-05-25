@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "e207e194-3f2d-48b6-b195-d1e147b09cca"/*I02j_ChainOverlay*/,
   "Inputs": [],
   "Children": [
@@ -24,7 +26,7 @@
               "Interpolation": "Linear",
               "Steps": [
                 {
-                  "Id": "4322d8ee-ced0-4f16-a12a-1d89cb65013f",
+                  "Id": "7492f528-1d40-4440-8fd8-3e671cc939d1",
                   "NormalizedPosition": 0.0,
                   "Color": {
                     "R": 0.0,
@@ -34,7 +36,7 @@
                   }
                 },
                 {
-                  "Id": "b069b764-993f-4566-b4d3-8f9867e9c4ad",
+                  "Id": "a927923b-92a0-4e83-b37e-4643c3cfdb34",
                   "NormalizedPosition": 1.0,
                   "Color": {
                     "R": 0.0,

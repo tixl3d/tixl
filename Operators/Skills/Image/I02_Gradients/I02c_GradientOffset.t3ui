@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "0534ef90-6c31-4c9c-bf3a-f0f558fa61c9"/*I02c_GradientOffset*/,
   "Description": "LinearGradient: Offset",
   "InputUis": [],
@@ -8,7 +10,8 @@
       "Position": {
         "X": 1238.5605,
         "Y": 1882.29
-      }
+      },
+      "SnapshotGroupIndex": "1"
     },
     {
       "ChildId": "5115acfd-f376-4b5f-98c8-086ca4d2d0d6"/*LinearGradient*/,
@@ -75,5 +78,13 @@
       "Description": "Move the gradient so it only appears at the bottom of the screen without changing its color ramp.",
       "Style": "CallToAction"
     }
-  ]
+  ],
+  "Settings": {
+    "Timeline": {
+  "ScaleX": 7.054155,
+  "ScrollX": -13.796197,
+  "Mode": "DopeView",
+  "TimelineHeight": 155
+}
+  }
 }

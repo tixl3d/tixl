@@ -31,6 +31,16 @@ internal static partial class WindowManager
             ToggleWindowTypeVisibility<VariationsWindow>();
         }
 
+        if (UserActions.ToggleManualTestWindow.Triggered())
+        {
+            ManualTestRunnerWindow.Config.Visible = !ManualTestRunnerWindow.Config.Visible;
+        }
+
+        if (UserActions.ToggleConsoleLogWindow.Triggered())
+        {
+            ToggleWindowTypeVisibility<ConsoleLogWindow>();
+        }
+
         UpdateAppWindowSize();
 
         foreach (var windowType in _windows)

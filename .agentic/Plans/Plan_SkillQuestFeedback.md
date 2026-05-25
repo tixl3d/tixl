@@ -117,17 +117,26 @@ No new authoring UI in v1. The validation warnings at load time are the only fee
 - **Stickiness algorithm.** Naive "first required" can flicker if two parameters become required simultaneously. Keep current focus until it resolves; only re-pick when the current one transitions to `Correct` or out of the required set.
 - **Float / vector equality is bit-exact.** `AreEqual` in `LevelFeedback` uses `ValueUtils.CompareFunctions`, which compares floats directly. A user-entered value like `0.5` will not match a snapshot value of `0.49999998` and the parameter stays `Warm` forever. A custom compare with a small tolerance band (per scalar type, possibly normalized against input range) would fix this. Deferred: most current tutorials use round numbers, so typed values likely round-trip exactly; revisit if real levels expose the gap.
 - **Tip ordering by severity.** When multiple feedback items are eligible to surface as a hint, `Warm`-with-tiny-gap should rank *last*. The `_PlayModeProgress` completion check has its own threshold, so a near-correct float may already end the level before the user needs a nudge about it. Sort priority roughly: `Forbidden` > `Required` > `Warm` (large gap) > `Warm` (small gap).
+- **Gradient comparison.** `Gradient` inputs are currently excluded from the classifier because `AreEqual` falls back to `ToString` and produces phantom mismatches between visually identical gradients. A proper comparison would sample the gradient at N evenly spaced positions (e.g. 100), sum the per-channel color differences, and treat anything under a tolerance as equal. Same approach would give us a `GetTipProximity` value for gradient tips. Until then any level that depends on a gradient parameter cannot use feedback.
 
 ## Phases
 
-1. **IStatusProvider extension.** Add `Tip` to the enum, wire it through both node renderers, no SkillQuest dependency. Standalone PR-able. ✓ build target.
-2. **Read-only `LevelFeedback`** — class skeleton, validation warnings, state derivation, no UI changes. Add a debug log probe that dumps the state dict on a key press for inspection. ✓ build target.
-3. **Op badge integration** — smallest visible slice. Forbidden + Required statuses on the MagGraph node. ✓ visible behavior.
-4. **Parameter-line icon** — locate the hook, render the icon, add tooltips.
-5. **"What's next" focus** — pulse / emphasis on the single focused target.
-6. **Manual test set** — add `.tests-manual/SkillQuestFeedback/` covering: forbidden touch, wrong value, missing required, multiple snapshots warning, no snapshots warning.
+All six landed. Code lives in [LevelFeedback.cs](../Editor/Skills/Training/LevelFeedback.cs) and [SkillQuestParameterHint.cs](../Editor/Skills/Training/SkillQuestParameterHint.cs); manual tests in [.tests-manual/skill-quest-feedback.md](../.tests-manual/skill-quest-feedback.md).
 
-Each phase is independently shippable. Phase 1 stands alone.
+1. ✅ **IStatusProvider extension** — added `Tip` to the enum, wired both MagGraph and Legacy node renderers, decoupled from SkillQuest.
+2. ✅ **Read-only `LevelFeedback`** — state derivation, validation warnings on load, per-frame `Rebuild`, observable via the `[LevelFeedback] R=… W=… C=… F=…` fingerprint log.
+3. ✅ **Op badge integration** — MagGraph node consults `TryGetOpStatus`; Forbidden → Warning, focused Tip's op → Tip badge; others stay quiet.
+4. ✅ **Parameter-line icon** — overlay at the name-button revert slot via `SkillQuestParameterHint.DrawIcon`; tooltip prefix folded into the existing description tooltip via the `Hint?` parameter on `DrawInputTooltipAndResetIcon`.
+5. ✅ **"What's next" focus** — sticky single tip with categorical relevancy (bool > enum > numeric, then position), per-key fade-in timers, tour-gate (Info/InfoFor suppress hints; CallToAction/Tip/Conclusion let them through), proximity arc with log scaling + gain/bias, drag-aware focus pinning.
+6. ✅ **Manual test set** — [skill-quest-feedback.md](../.tests-manual/skill-quest-feedback.md). Opens by teaching the new `Ctrl+Shift+Alt+T` / `Ctrl+Shift+Alt+L` debug-window shortcuts that make the runner reachable during play mode.
+
+### Beyond plan
+
+Picked up along the way and worth noting:
+
+- Snapshot-enabled indicator on the MagGraph node is hidden in play mode — every solution op is snapshot-enabled, so the badge would just spoil "what to touch."
+- Output window forces the "Fill" resolution preset in play mode so level projects don't open at their saved 1920×1080.
+- "Effectively default" classification — Forbidden now requires the value to actually differ from default, not just have `IsDefault == false`. Toggling a bool back to its default value or typing the default into a field correctly clears the warning.
 
 ## Out of scope (deferred)
 

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "7cdd542a-39ab-4aec-bfdb-dffa86c0c18d"/*I02d_GradientRepeat*/,
   "Inputs": [],
   "Children": [
@@ -95,6 +97,12 @@
       "SourceSlotId": "d140f068-d71e-4af5-a563-ab599dae5dbf",
       "TargetParentOrChildId": "de9596c5-e296-458b-b22f-d85d2b89f31f",
       "TargetSlotId": "629ec47f-64d7-4c05-a5b1-29fe9303c8eb"
+    },
+    {
+      "SourceParentOrChildId": "aa9e5f28-5a93-4475-b25f-9b8297578951",
+      "SourceSlotId": "d140f068-d71e-4af5-a563-ab599dae5dbf",
+      "TargetParentOrChildId": "de9596c5-e296-458b-b22f-d85d2b89f31f",
+      "TargetSlotId": "a8d44123-99b4-4285-82f5-84531f0e27d3"
     }
   ]
 }

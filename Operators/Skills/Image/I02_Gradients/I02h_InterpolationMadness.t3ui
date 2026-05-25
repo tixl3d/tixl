@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "bf67074b-b2a2-4231-b1fc-6abd38e159aa"/*I02h_InterpolationMadness*/,
   "Description": "",
   "InputUis": [],
@@ -15,7 +17,8 @@
       "Position": {
         "X": 1293.5648,
         "Y": 2005.7007
-      }
+      },
+      "SnapshotGroupIndex": "1"
     },
     {
       "ChildId": "6561177b-012f-47dc-b2e5-22508649110b"/*ImageLevels*/,
@@ -46,7 +49,8 @@
       "Position": {
         "X": 1293.5648,
         "Y": 1970.7007
-      }
+      },
+      "SnapshotGroupIndex": "1"
     }
   ],
   "OutputUis": [
@@ -94,5 +98,13 @@
       "Description": "Select the [LinearGradient] operator.\n\nThen adjust the position of the middle gradient step to resolve the clamping.",
       "Style": "CallToAction"
     }
-  ]
+  ],
+  "Settings": {
+    "Timeline": {
+  "ScaleX": 7.054155,
+  "ScrollX": -13.796197,
+  "Mode": "DopeView",
+  "TimelineHeight": 155
+}
+  }
 }

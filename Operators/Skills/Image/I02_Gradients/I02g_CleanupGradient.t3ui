@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "cdcd9df3-e941-428a-9dd4-7b05266a4bec"/*I02g_CleanupGradient*/,
   "Description": "LinearGradient: Cleanup Tools",
   "InputUis": [],
@@ -23,14 +25,16 @@
       "Position": {
         "X": 1153.5648,
         "Y": 1970.7007
-      }
+      },
+      "SnapshotGroupIndex": "1"
     },
     {
       "ChildId": "485595eb-8afa-4076-af28-7078930fab98"/*ImageLevels*/,
       "Position": {
         "X": 1293.5648,
         "Y": 2005.7007
-      }
+      },
+      "SnapshotGroupIndex": "1"
     },
     {
       "ChildId": "8559c44a-d917-49ae-a929-e5e5b9be98cf"/*LinearGradient*/,
@@ -61,7 +65,8 @@
       "Position": {
         "X": 1293.5648,
         "Y": 1935.7007
-      }
+      },
+      "SnapshotGroupIndex": "1"
     }
   ],
   "OutputUis": [
@@ -104,5 +109,13 @@
       "Description": "Recreate the goal without dragging or changing any color steps.",
       "Style": "CallToAction"
     }
-  ]
+  ],
+  "Settings": {
+    "Timeline": {
+  "ScaleX": 7.054155,
+  "ScrollX": -13.796197,
+  "Mode": "DopeView",
+  "TimelineHeight": 155
+}
+  }
 }

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "680bb1ae-d906-48cc-adbd-240e0df0497d"/*I02i_Flip*/,
   "Description": "LinearGradient: Flip with Negative Width",
   "InputUis": [],
@@ -23,7 +25,8 @@
       "Position": {
         "X": 1306.5621,
         "Y": 1987.0873
-      }
+      },
+      "SnapshotGroupIndex": "1"
     },
     {
       "ChildId": "c64506bf-8350-4f42-b06b-20d7eb4568e4"/*LinearGradient*/,
@@ -74,5 +77,13 @@
       "Description": "Solve the challenge without changing any of the gradient's color steps.",
       "Style": "CallToAction"
     }
-  ]
+  ],
+  "Settings": {
+    "Timeline": {
+  "ScaleX": 7.054155,
+  "ScrollX": -13.796197,
+  "Mode": "DopeView",
+  "TimelineHeight": 155
+}
+  }
 }

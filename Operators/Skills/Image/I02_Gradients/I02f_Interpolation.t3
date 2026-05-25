@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "88adf4e5-64af-4a86-b8f6-2b236fa7e4f3"/*I02f_Interpolation*/,
   "Inputs": [],
   "Children": [

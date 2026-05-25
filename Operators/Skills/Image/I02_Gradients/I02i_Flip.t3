@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "680bb1ae-d906-48cc-adbd-240e0df0497d"/*I02i_Flip*/,
   "Inputs": [],
   "Children": [
@@ -42,7 +44,7 @@
               "Interpolation": "Smooth",
               "Steps": [
                 {
-                  "Id": "42823d44-3238-4e19-9aa0-ed4f0bb31cb5",
+                  "Id": "34fac4d8-055d-48d9-acb7-526b6e6230c6",
                   "NormalizedPosition": 0.0,
                   "Color": {
                     "R": 0.3062201,
@@ -52,7 +54,7 @@
                   }
                 },
                 {
-                  "Id": "a0501aee-2c42-4c5d-aa90-e4a3610425e9",
+                  "Id": "fee72710-0fd1-4ed4-96da-da521b83d4a1",
                   "NormalizedPosition": 0.43693107,
                   "Color": {
                     "R": 0.31000337,
@@ -62,7 +64,7 @@
                   }
                 },
                 {
-                  "Id": "4f39ffb0-842c-490b-8f1d-798cb535c06d",
+                  "Id": "3796cd3a-a13a-4b8c-b371-ea6eb452fd57",
                   "NormalizedPosition": 0.46814042,
                   "Color": {
                     "R": 0.6076555,
@@ -72,7 +74,7 @@
                   }
                 },
                 {
-                  "Id": "bbc567e8-8182-4493-9fac-b44136496c08",
+                  "Id": "0101771e-b3d9-40a2-a8c5-83ac010582b7",
                   "NormalizedPosition": 0.59817946,
                   "Color": {
                     "R": 0.95196825,
@@ -82,7 +84,7 @@
                   }
                 },
                 {
-                  "Id": "7f2e87f3-1ff0-4c34-855b-6a43c3808b23",
+                  "Id": "dd5a48d9-2dd5-411a-8480-4ad4a345f34f",
                   "NormalizedPosition": 0.6762029,
                   "Color": {
                     "R": 0.9521531,
@@ -92,7 +94,7 @@
                   }
                 },
                 {
-                  "Id": "109c99f3-bf9b-4dfb-ad45-ff1b9b08bf25",
+                  "Id": "c2df1d31-ba94-43ed-b628-74cd7bc63428",
                   "NormalizedPosition": 1.0,
                   "Color": {
                     "R": 0.14168192,

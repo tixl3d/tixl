@@ -17,6 +17,7 @@ using T3.Editor.Gui.Interaction.Animation;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows;
+using T3.Editor.Skills.Training;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Animation;
 using T3.Editor.UiModel.Commands.Graph;
@@ -448,13 +449,24 @@ public abstract class InputValueUi<T> : IInputUi
             }
 
             var isClicked = ImGui.Button($"{input.Name.AddSpacesForImGuiOutput()}##ParamName", new Vector2(ParameterNameWidth, 0.0f));
+            var nameButtonHovered = ImGui.IsItemHovered();
 
             if (hasStyleCount > 0)
             {
                 ImGui.PopStyleColor(hasStyleCount);
             }
 
-            DrawInputTooltipAndResetIcon(input);
+            // SkillQuest feedback: only the focused "what's next" tip and all blockers are
+            // visible (after a shared fade-in delay). Tooltip and icon use the same gate so a
+            // non-focused Required parameter stays silent everywhere.
+            var hasSkillHint = SkillQuestParameterHint.TryGetVisible(symbolChildUi.Id, input.InputDefinition.Id,
+                                                                     out var skillHint, out var skillAlpha);
+
+            DrawInputTooltipAndResetIcon(input, hasSkillHint ? skillHint : null);
+
+            var revertIconWouldShow = nameButtonHovered && !input.IsDefault;
+            if (hasSkillHint && !revertIconWouldShow)
+                SkillQuestParameterHint.DrawIcon(symbolChildUi.Id, input.InputDefinition.Id, skillHint, skillAlpha);
 
             if (isClicked)
             {
@@ -585,7 +597,8 @@ public abstract class InputValueUi<T> : IInputUi
 
     private const Relevancy DefaultRelevancy = Relevancy.Optional;
 
-    private void DrawInputTooltipAndResetIcon(Symbol.Child.Input input)
+    private void DrawInputTooltipAndResetIcon(Symbol.Child.Input input,
+                                              SkillQuestParameterHint.Hint? skillQuestHint = null)
     {
         if (!ImGui.IsItemHovered())
             return;
@@ -593,9 +606,20 @@ public abstract class InputValueUi<T> : IInputUi
         var text = Description ?? string.Empty;
         var additionalNotes = input.IsDefault ? null : "Click to reset to default";
 
-        if (!string.IsNullOrEmpty(text) || !string.IsNullOrEmpty(additionalNotes))
+        if (skillQuestHint.HasValue || !string.IsNullOrEmpty(text) || !string.IsNullOrEmpty(additionalNotes))
         {
-            CustomComponents.TooltipForLastItem(text, additionalNotes);
+            var hint = skillQuestHint;
+            CustomComponents.TooltipForLastItem(() =>
+                                                {
+                                                    if (hint.HasValue)
+                                                        SkillQuestParameterHint.DrawTooltipPrefix(hint.Value);
+
+                                                    if (!string.IsNullOrEmpty(text))
+                                                        ImGui.TextColored(UiColors.Text, text);
+
+                                                    if (!string.IsNullOrEmpty(additionalNotes))
+                                                        ImGui.TextColored(UiColors.Text.Fade(0.7f), additionalNotes);
+                                                });
         }
 
         if (!input.IsDefault)
@@ -735,6 +759,7 @@ internal static class InputArea
         ConnectWithSearch,
         Extract,
     }
+
 
     public static void PublishAsInput(NodeSelection selection, IInputSlot originalInputSlot, SymbolUi.Child symbolChildUi, Symbol.Child.Input input)
     {

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "bf67074b-b2a2-4231-b1fc-6abd38e159aa"/*I02h_InterpolationMadness*/,
   "Inputs": [],
   "Children": [
@@ -90,14 +92,19 @@
       "SymbolId": "2c3d2c26-ac45-42e9-8f13-6ea338333568",
       "InputValues": [
         {
+          "Id": "10d59d0f-a5a3-42e6-b874-345ab028978e"/*Width*/,
+          "Type": "System.Single",
+          "Value": 2.0
+        },
+        {
           "Id": "e47e9e63-9c94-4c29-9555-2452fa498d57"/*Gradient*/,
           "Type": "T3.Core.DataTypes.Gradient",
           "Value": {
             "Gradient": {
-              "Interpolation": "Spline",
+              "Interpolation": "OkLab",
               "Steps": [
                 {
-                  "Id": "ecd84e38-3f18-414a-8cc5-aba42dd00110",
+                  "Id": "8bb0b0f1-bf43-4f2e-a556-712d42bb8015",
                   "NormalizedPosition": 0.0,
                   "Color": {
                     "R": 0.103,
@@ -107,8 +114,8 @@
                   }
                 },
                 {
-                  "Id": "d7a9f291-76a5-4c4c-b4b7-07414dbf4fcb",
-                  "NormalizedPosition": 0.25097528,
+                  "Id": "67f51bb7-7f87-4f7a-b6c7-05799721b9c1",
+                  "NormalizedPosition": 0.26324934,
                   "Color": {
                     "R": 0.9521531,
                     "G": 0.65446067,
@@ -117,7 +124,7 @@
                   }
                 },
                 {
-                  "Id": "2aa2636b-7939-4b09-ba35-0f75569dc332",
+                  "Id": "b597fcd9-a7d6-4ec3-80d3-105edb9e4961",
                   "NormalizedPosition": 1.0,
                   "Color": {
                     "R": 0.78947365,

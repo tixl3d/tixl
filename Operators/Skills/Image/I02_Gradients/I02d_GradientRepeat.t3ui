@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "7cdd542a-39ab-4aec-bfdb-dffa86c0c18d"/*I02d_GradientRepeat*/,
   "Description": "LinearGradient: Repeat and PingPong",
   "InputUis": [],
@@ -8,7 +10,8 @@
       "Position": {
         "X": 1273.0266,
         "Y": 1877.7842
-      }
+      },
+      "SnapshotGroupIndex": "1"
     },
     {
       "ChildId": "19ae4415-ef55-4f65-98cb-60981b0ab4e7"/*LinearGradient*/,
@@ -31,7 +34,8 @@
       "Position": {
         "X": 1273.0267,
         "Y": 1955.1827
-      }
+      },
+      "SnapshotGroupIndex": "1"
     },
     {
       "ChildId": "b0bd57f2-e5b8-4be0-a5a3-72402a5770c3"/*LinearGradient*/,
@@ -95,5 +99,13 @@
       "Description": "Use Repeat and PingPong to recreate the goal.",
       "Style": "CallToAction"
     }
-  ]
+  ],
+  "Settings": {
+    "Timeline": {
+  "ScaleX": 7.054155,
+  "ScrollX": -13.796197,
+  "Mode": "DopeView",
+  "TimelineHeight": 155
+}
+  }
 }
