@@ -222,7 +222,7 @@ internal sealed partial class AssetLibrary
                 if (ContainsTargetFile(folder))
                 {
                     var h = ImGui.GetFontSize();
-                    var x = ImGui.GetWindowSize().X - h;
+                    var x = ImGui.GetContentRegionAvail().X - h/2;
                     ImGui.SameLine(x);
 
                     var clicked = ImGui.InvisibleButton("Reveal", new Vector2(h));
@@ -256,9 +256,9 @@ internal sealed partial class AssetLibrary
     private static void ShowMatchCount(AssetFolder folder, bool containsTargetFile, bool isOpen)
     {
         Span<char> buffer = stackalloc char[32];
-        var countLabel = buffer.Format($"{folder.MatchingAssetCount}\0");
+        var countLabel = buffer.Format($"{folder.MatchingAssetCount}");
 
-        var labelSize = ImGui.CalcTextSize(countLabel[..^1]); // skip null byte
+        var labelSize = ImGui.CalcTextSize(countLabel); // skip null byte
         CustomComponents.RightAlign(labelSize.X + 4 + ((containsTargetFile && !isOpen) ? Icons.FontSize : 0));
         ImGui.PushStyleColor(ImGuiCol.Text, UiColors.ForegroundFull.Fade(0.3f).Rgba);
         ImGui.TextUnformatted(countLabel);

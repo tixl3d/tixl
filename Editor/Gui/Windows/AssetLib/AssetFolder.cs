@@ -96,7 +96,7 @@ internal sealed class AssetFolder
         // No filter: count everything
         if (compatibleExtensionIds.Count == 0 && string.IsNullOrEmpty(searchString))
         {
-            count += FolderAssets.Count;
+            count += FolderAssets.Count(a => !a.IsDirectory);
         }
         else
         {

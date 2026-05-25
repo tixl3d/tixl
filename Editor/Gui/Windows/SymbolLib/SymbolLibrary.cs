@@ -328,7 +328,7 @@ internal sealed class SymbolLibrary : Window
             if (!isOpen && containsSelected)
             {
                 var h = ImGui.GetFontSize();
-                var x = ImGui.GetWindowSize().X - h;
+                var x = ImGui.GetContentRegionAvail().X -h/2; // GetContentRegionAvail() prevents the scrollbar to overlap the content aligned to the right.  
                 ImGui.SameLine(x);
 
                 var clicked = ImGui.InvisibleButton("Reveal", new Vector2(h));
