@@ -28,7 +28,7 @@ internal sealed class PlayAudioClip : Instance<PlayAudioClip>, IStatusProvider
                                FilePath = Path.GetCurrentValue(),
                                StartTime = 0,
                                EndTime = 0,
-                               IsSoundtrack = true,
+                               IsMainSoundtrack = true,
                                LengthInSeconds = 0,
                                Volume = Volume.GetCurrentValue(),
                                Id = Guid.NewGuid(),

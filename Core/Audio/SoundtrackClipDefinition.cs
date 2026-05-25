@@ -73,7 +73,17 @@ public sealed class SoundtrackClipDefinition
     public double EndTime;
     public float Bpm = 120;
     public bool DiscardAfterUse = true;
-    public bool IsSoundtrack;
+    /// <summary>
+    /// Marks the project's "main soundtrack" clip. This single flag currently bundles three concerns:
+    /// (1) the clip is drawn as the timeline-background waveform, (2) it gets FFT routing for
+    /// audio-reactive effects, and (3) it's wired into the export pipeline. Only one clip per
+    /// project should set this — see <c>AudioEngine.ProcessSoundtrackClips</c>'s
+    /// <c>handledMainSoundtrack</c> guard.
+    ///
+    /// The overload is acknowledged technical debt and may be split in a future change. See
+    /// <c>.agentic/Plans/Plan_TimelineAudioClips.md</c>.
+    /// </summary>
+    public bool IsMainSoundtrack;
     public float Volume = 1.0f;
     #endregion
 
@@ -100,7 +110,11 @@ public sealed class SoundtrackClipDefinition
                                    EndTime = jToken[nameof(EndTime)]?.Value<double>() ?? 0,
                                    Bpm = jToken[nameof(Bpm)]?.Value<float>() ?? 0,
                                    DiscardAfterUse = jToken[nameof(DiscardAfterUse)]?.Value<bool>() ?? true,
-                                   IsSoundtrack = jToken[nameof(IsSoundtrack)]?.Value<bool>() ?? true,
+                                   // Back-compat: pre-rename projects used the property name "IsSoundtrack".
+                                   // Read the new name first; fall through to the old name; default true.
+                                   IsMainSoundtrack = jToken[nameof(IsMainSoundtrack)]?.Value<bool>()
+                                                      ?? jToken["IsSoundtrack"]?.Value<bool>()
+                                                      ?? true,
                                    Volume = jToken[nameof(Volume)]?.Value<float>() ?? 1,
                                };
         
@@ -120,7 +134,7 @@ public sealed class SoundtrackClipDefinition
             writer.WriteValue(nameof(EndTime), EndTime);
             writer.WriteValue(nameof(Bpm), Bpm);
             writer.WriteValue(nameof(DiscardAfterUse), DiscardAfterUse);
-            writer.WriteValue(nameof(IsSoundtrack), IsSoundtrack);
+            writer.WriteValue(nameof(IsMainSoundtrack), IsMainSoundtrack);
             if (string.IsNullOrEmpty(FilePath))
             {
                 Log.Warning("Empty file path in AudioClip.");

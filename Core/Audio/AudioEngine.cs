@@ -249,7 +249,7 @@ public static class AudioEngine
             if (!playback.IsRenderingToFile && playbackSpeedChanged)
                 clipStream.UpdateSoundtrackPlaybackSpeed(playback.PlaybackSpeed);
 
-            if (handledMainSoundtrack || !clipStream.ResourceHandle.Clip.IsSoundtrack)
+            if (handledMainSoundtrack || !clipStream.ResourceHandle.Clip.IsMainSoundtrack)
                 continue;
 
             handledMainSoundtrack = true;

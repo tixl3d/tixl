@@ -44,7 +44,7 @@ public sealed class CompositionSettings
 
         foreach (var clip in Playback.AudioClips)
         {
-            if (!clip.IsSoundtrack)
+            if (!clip.IsMainSoundtrack)
                 continue;
 
             soundtrack = new AudioClipResourceHandle(clip, instance);
@@ -260,7 +260,7 @@ public sealed class CompositionSettings
 
         if (settings.Playback.Bpm == 0)
         {
-            var soundtrack = settings.Playback.AudioClips.FirstOrDefault(c => c.IsSoundtrack);
+            var soundtrack = settings.Playback.AudioClips.FirstOrDefault(c => c.IsMainSoundtrack);
             if (soundtrack != null)
             {
                 settings.Playback.Bpm = soundtrack.Bpm;

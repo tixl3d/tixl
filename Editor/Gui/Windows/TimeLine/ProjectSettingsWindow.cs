@@ -268,7 +268,7 @@ internal sealed class ProjectSettingsWindow : Window
                         modified = true;
                         playback.AudioClips.Add(new SoundtrackClipDefinition()
                         {
-                            IsSoundtrack = true,
+                            IsMainSoundtrack = true,
                         });
                         _tempSoundtrackFilepathForEdit = string.Empty;
                     }
