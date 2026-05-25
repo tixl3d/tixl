@@ -84,6 +84,11 @@ internal sealed class OutputWindow : Window
     {
         SyncStateWithProject();
 
+        // In skill training the toolbar is hidden, so force the window-fitting resolution
+        // instead of whatever the level project saved (typically 1920x1080).
+        if (SkillTraining.IsInPlayMode && _selectedResolution != ResolutionHandling.DefaultResolution)
+            _selectedResolution = ResolutionHandling.DefaultResolution;
+
         // Sync copy-based fields to State every frame so saves always capture current values
         SyncCopyFieldsToState();
 
