@@ -253,18 +253,31 @@ public static class AudioEngine
             if (!playback.IsRenderingToFile && playbackSpeedChanged)
                 clipStream.UpdateSoundtrackPlaybackSpeed(playback.PlaybackSpeed);
 
+            // Export path: per-clip positioning is done separately in
+            // AudioRendering.MixSoundtracksFromExportMixer. Here we only route the main
+            // clip into ExportAudioFrame (which drives FFT for the rendered frames).
+            if (playback.IsRenderingToFile)
+            {
+                if (!handledMainSoundtrack && clipStream.ResourceHandle.Clip.IsMainSoundtrack)
+                {
+                    handledMainSoundtrack = true;
+                    AudioRendering.ExportAudioFrame(playback, frameDurationInSeconds, clipStream);
+                }
+                continue;
+            }
+
+            // Live playback: every clip gets seek/pause/volume sync so multiple clips
+            // can play simultaneously.
+            clipStream.UpdateSoundtrackTime(playback);
+
+            // FFT routing is still bound to a single "main" clip. The IsMainSoundtrack
+            // flag bundles waveform + FFT + export concerns; unbundling those is a
+            // separate later refactor.
             if (handledMainSoundtrack || !clipStream.ResourceHandle.Clip.IsMainSoundtrack)
                 continue;
 
             handledMainSoundtrack = true;
-
-            if (playback.IsRenderingToFile)
-                AudioRendering.ExportAudioFrame(playback, frameDurationInSeconds, clipStream);
-            else
-            {
-                UpdateFftBufferFromSoundtrack(playback);
-                clipStream.UpdateSoundtrackTime(playback);
-            }
+            UpdateFftBufferFromSoundtrack(playback);
         }
 
         foreach (var handle in _obsoleteSoundtrackHandles)

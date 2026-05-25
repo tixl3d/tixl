@@ -24,9 +24,15 @@ public static class PlaybackUtils
 
         if (settings.Playback.AudioSource == CompositionSettings.AudioSources.ProjectSoundTrack)
         {
-            if (settings.TryGetMainSoundtrack(audioComposition, out var soundtrack))
+            // Register every clip in the composition's AudioClips list so the engine
+            // can play multiple clips simultaneously. The engine's per-clip TimeRange
+            // bound-check decides which clips are audible at the current playhead.
+            var time = Playback.Current.TimeInSecs;
+            foreach (var clip in settings.Playback.AudioClips)
             {
-                AudioEngine.UseSoundtrackClip(soundtrack, Playback.Current.TimeInSecs);
+                if (string.IsNullOrEmpty(clip.AssetPath))
+                    continue;
+                AudioEngine.UseSoundtrackClip(new AudioClipResourceHandle(clip, audioComposition), time);
             }
         }
 

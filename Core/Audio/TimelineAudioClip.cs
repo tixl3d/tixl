@@ -77,7 +77,7 @@ public sealed record AudioClipResourceHandle(TimelineAudioClip Clip, IResourceCo
 public sealed class TimelineAudioClip
 {
     #region serialized attributes
-    public Guid Id;
+    public Guid Id = Guid.NewGuid();
     public string? AssetPath;
 
     /// <summary>
@@ -136,6 +136,15 @@ public sealed class TimelineAudioClip
             Log.Warning("Missing or malformed id in TimelineAudioClip.");
             newClip = null;
             return false;
+        }
+
+        // Heal old data that was saved with Guid.Empty (the "Add soundtrack" button used
+        // to construct clips without initializing Id). Assigning a fresh Guid here means
+        // the next save will write a stable, unique Id.
+        if (clipId == Guid.Empty)
+        {
+            clipId = Guid.NewGuid();
+            Log.Debug("TimelineAudioClip had Guid.Empty as Id; reassigning a fresh one.");
         }
 
         // Back-compat: pre-rewrite projects use FilePath / StartTime / EndTime / Bpm /
