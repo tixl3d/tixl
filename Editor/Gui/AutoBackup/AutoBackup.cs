@@ -6,6 +6,7 @@ using System.IO.Compression;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using T3.Core.Settings;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
 
@@ -69,24 +70,56 @@ internal static class AutoBackup
         var backupDir = Path.Combine(projectFolder, BackupSubFolder);
         Directory.CreateDirectory(backupDir);
 
-        // Skip identical backups: if no source file is newer than the latest zip,
-        // refresh the existing zip's filename timestamp instead of writing a duplicate copy.
+        // Clean up any leftover pending file from a crashed previous run.
+        var pendingZipPath = Path.Join(backupDir, PendingZipName);
+        if (File.Exists(pendingZipPath))
+            DeleteFile(pendingZipPath);
+
         var latestArchive = GetLatestArchiveFilePath(backupDir);
-        if (latestArchive != null)
+
+        // The first backup for a project is always full, so the user has at least one
+        // complete copy on disk regardless of the MinimalBackup toggle. Subsequent
+        // backups follow the toggle.
+        var isFirstBackup = latestArchive == null;
+        var doMinimal = !isFirstBackup && UserSettings.Config.MinimalBackup;
+
+        // Build the new zip to a temp path first, then byte-compare against the
+        // previous backup. If identical, drop the new file and just refresh the
+        // existing archive's timestamp. This is more reliable than comparing source
+        // file mtimes — external tools (e.g. shader-tools) touch files without
+        // changing their content.
+        if (!TryWriteBackupZip(projectFolder, pendingZipPath, doMinimal))
         {
-            var latestArchiveTime = File.GetLastWriteTime(latestArchive);
-            if (!HasAnySourceChangedSince(projectFolder, latestArchiveTime))
-            {
-                TouchLatestBackupTimestamp(latestArchive);
-                return;
-            }
+            DeleteFile(pendingZipPath);
+            return;
+        }
+
+        if (latestArchive != null && FilesAreByteEqual(pendingZipPath, latestArchive))
+        {
+            DeleteFile(pendingZipPath);
+            TouchLatestBackupTimestamp(latestArchive);
+            return;
         }
 
         var index = GetIndexOfLastBackup(backupDir) + 1;
         ReduceNumberOfBackups(backupDir);
 
-        var zipFilePath = Path.Join(backupDir, $"#{index:D5}-{DateTime.Now:yyyy_MM_dd-HH_mm_ss_fff}.zip");
+        var suffix = doMinimal ? "-minimal" : "";
+        var finalZipPath = Path.Join(backupDir, $"#{index:D5}-{DateTime.Now:yyyy_MM_dd-HH_mm_ss_fff}{suffix}.zip");
 
+        try
+        {
+            File.Move(pendingZipPath, finalZipPath);
+        }
+        catch (Exception e)
+        {
+            Log.Error("Failed to finalize backup {0}: {1}", finalZipPath, e.Message);
+            DeleteFile(pendingZipPath);
+        }
+    }
+
+    private static bool TryWriteBackupZip(string projectFolder, string zipFilePath, bool minimal)
+    {
         try
         {
             using var archive = ZipFile.Open(zipFilePath, ZipArchiveMode.Create);
@@ -94,8 +127,7 @@ internal static class AutoBackup
             {
                 var fileInfo = new FileInfo(filepath);
 
-                if (UserSettings.Config.MinimalBackup
-                    && !_minimalBackupExtensions.Contains(fileInfo.Extension))
+                if (minimal && !_minimalBackupExtensions.Contains(fileInfo.Extension))
                     continue;
 
                 if (fileInfo.Length > MaxFileSizeBytes)
@@ -104,11 +136,48 @@ internal static class AutoBackup
                 var relativePath = filepath[projectFolder.Length..].TrimStart(Path.DirectorySeparatorChar);
                 archive.CreateEntryFromFile(filepath, relativePath, CompressionLevel.Fastest);
             }
+            return true;
         }
         catch (Exception ex)
         {
-            DeleteFile(zipFilePath);
             Log.Error("Auto backup of {0} failed: {1}", projectFolder, ex.Message);
+            return false;
+        }
+    }
+
+    private static bool FilesAreByteEqual(string pathA, string pathB)
+    {
+        try
+        {
+            var infoA = new FileInfo(pathA);
+            var infoB = new FileInfo(pathB);
+            if (!infoA.Exists || !infoB.Exists)
+                return false;
+            if (infoA.Length != infoB.Length)
+                return false;
+
+            const int bufferSize = 64 * 1024;
+            using var streamA = File.OpenRead(pathA);
+            using var streamB = File.OpenRead(pathB);
+            var bufferA = new byte[bufferSize];
+            var bufferB = new byte[bufferSize];
+
+            while (true)
+            {
+                var readA = streamA.Read(bufferA, 0, bufferSize);
+                var readB = streamB.Read(bufferB, 0, bufferSize);
+                if (readA != readB)
+                    return false;
+                if (readA == 0)
+                    return true;
+                if (!bufferA.AsSpan(0, readA).SequenceEqual(bufferB.AsSpan(0, readB)))
+                    return false;
+            }
+        }
+        catch (Exception e)
+        {
+            Log.Debug("Failed to compare backup archives: " + e.Message);
+            return false;
         }
     }
 
@@ -122,18 +191,13 @@ internal static class AutoBackup
             var relativePath = filepath[projectFolder.Length..].TrimStart(Path.DirectorySeparatorChar);
             if (IsPathExcluded(relativePath))
                 continue;
+            // Skip files that external tooling rewrites independently of the user's edits
+            // (e.g. Assets/shadertoolsconfig.json). Otherwise their mtime churn defeats
+            // dedup and we accumulate identical zips.
+            if (FileLocations.IgnoredFiles.Contains(Path.GetFileName(filepath)))
+                continue;
             yield return filepath;
         }
-    }
-
-    private static bool HasAnySourceChangedSince(string projectFolder, DateTime since)
-    {
-        foreach (var filepath in EnumerateProjectFiles(projectFolder))
-        {
-            if (File.GetLastWriteTime(filepath) > since)
-                return true;
-        }
-        return false;
     }
 
     private static bool IsPathExcluded(string relativePath)
@@ -160,11 +224,12 @@ internal static class AutoBackup
                 return;
 
             var index = int.Parse(match.Groups[1].Value);
+            var minimalSuffix = match.Groups[9].Success ? "-minimal" : "";
             var dir = Path.GetDirectoryName(latestArchive);
             if (dir == null)
                 return;
 
-            var renamed = Path.Combine(dir, $"#{index:D5}-{DateTime.Now:yyyy_MM_dd-HH_mm_ss_fff}.zip");
+            var renamed = Path.Combine(dir, $"#{index:D5}-{DateTime.Now:yyyy_MM_dd-HH_mm_ss_fff}{minimalSuffix}.zip");
             if (string.Equals(renamed, latestArchive, StringComparison.OrdinalIgnoreCase))
                 return;
 
@@ -487,8 +552,11 @@ internal static class AutoBackup
         }
     }
 
+    private const string PendingZipName = ".pending.zip";
+
+    // Group 9 captures the optional "-minimal" suffix that marks reduced backups.
     private static readonly Regex _backupNameRegex = new(
-        @"^#(\d{5})-(\d{4})_(\d{2})_(\d{2})-(\d{2})_(\d{2})_(\d{2})_(\d{3})\.zip$",
+        @"^#(\d{5})-(\d{4})_(\d{2})_(\d{2})-(\d{2})_(\d{2})_(\d{2})_(\d{3})(-minimal)?\.zip$",
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     private static readonly char[] _pathSeparators = { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };

@@ -132,7 +132,7 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         // Load Save
         public string UserName = UndefinedUserName;
         public bool EnableAutoBackup = true;
-        public bool MinimalBackup = false;
+        public bool MinimalBackup = true;
 
         public float GizmoSize = 100;
 
