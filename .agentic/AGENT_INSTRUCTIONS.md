@@ -41,6 +41,18 @@ Apply these rules where they matter — code that actually runs every frame and 
 - Prefer storing and resolving by `Guid`.
 - Be careful with stale references across reloads and graph changes.
 
+### Undo / redo commands
+
+`ICommand` implementations live longer than any single graph state — they sit on the undo stack until the user closes the project (or further) and need to survive operator-package hot reloads, which recreate `Instance` objects under the same `Symbol`.
+
+- **Do not store `Instance` references** in command fields. Store the relevant `Guid` (`compositionOp.Symbol.Id`, `instance.SymbolChildId`, etc.) and resolve at call time via `SymbolUiRegistry.TryGetSymbolUi(...)` / `Symbol.Children` / similar.
+- **Do not store `Symbol` or `SymbolUi` references** either — same reload exposure. Re-resolve from the registry each `Do`/`Undo`.
+- Resolution helpers should be defensive: if the registry no longer has the symbol (project closed, package unloaded), log a warning and silently no-op the command. Don't throw — the undo stack may invoke the command long after the symbol's lifetime.
+- `SymbolChild` lifetimes are tied to the parent `Symbol`, so storing a `SymbolChild` works as long as the parent symbol is still registered. Resolving from the parent symbol's `Children` dict is more robust than caching the child directly.
+- Pure data captured for undo (clip ranges, parameter values, etc.) can be stored by value — those snapshots don't depend on graph instance lifetime.
+
+The canonical references are [`AddSymbolChildCommand`](../Editor/UiModel/Commands/Graph/AddSymbolChildCommand.cs) and [`DeleteSymbolChildrenCommand`](../Editor/UiModel/Commands/Graph/DeleteSymbolChildrenCommand.cs) — both store `_parentSymbolId` / `_compositionSymbolId` and look up the live symbol per call. Some older commands (`MoveTimeClipsCommand`) still hold `Instance` references; treat those as latent bugs to fix when next touching them, not patterns to copy.
+
 ## Operator Rules
 When changing operators, follow:
 - https://github.com/tixl3d/tixl/wiki/dev.OperatorConventions

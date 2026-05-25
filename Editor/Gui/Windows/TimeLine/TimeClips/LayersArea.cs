@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using ImGuiNET;
 using T3.Core.Animation;
+using T3.Core.Audio;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.Utils;
@@ -68,6 +69,8 @@ internal sealed class LayersArea : ITimeObjectManipulation, IValueSnapAttractor
         }
         ImGui.EndGroup();
 
+        HandleAudioFileDrop(compositionOp);
+
         // Drag Layer area height
         if (_context.ClipSelection.AllClipIds.Count > 0)
         {
@@ -101,6 +104,114 @@ internal sealed class LayersArea : ITimeObjectManipulation, IValueSnapAttractor
         if (UserActions.DeleteSelection.Triggered())
         {
             DeleteSelectedClips(compositionOp);
+            DeleteSelectedAudioClips(compositionOp);
+        }
+    }
+
+    private void DeleteSelectedAudioClips(Instance compositionOp)
+    {
+        if (_selectedAudioClipIds.Count == 0)
+            return;
+
+        var allClips = compositionOp.Symbol.CompositionSettings.Playback.AudioClips;
+        var toDelete = new List<TimelineAudioClip>();
+        foreach (var clip in allClips)
+        {
+            if (_selectedAudioClipIds.Contains(clip.Id))
+                toDelete.Add(clip);
+        }
+
+        if (toDelete.Count == 0)
+            return;
+
+        UndoRedoStack.AddAndExecute(new DeleteTimelineAudioClipsCommand(compositionOp, toDelete));
+        _selectedAudioClipIds.Clear();
+    }
+
+    private void HandleAudioFileDrop(Instance compositionOp)
+    {
+        // The layers-area BeginGroup..EndGroup pair has just closed; the group's bounding
+        // rect is the current "last item." TryHandleDropOnItem hangs its drop target on it.
+        var result = DragAndDropHandling.TryHandleDropOnItem(
+            DragAndDropHandling.DragTypes.ExternalFile,
+            out var data);
+
+        if (result != DragAndDropHandling.DragInteractionResult.Dropped || string.IsNullOrEmpty(data))
+            return;
+
+        // Filter for audio extensions. The drop payload may carry multiple files separated
+        // by "|" (the graph drop handler splits on it); we import each in turn.
+        var package = compositionOp.Symbol.SymbolPackage;
+        if (package == null)
+        {
+            Log.Warning("Cannot resolve composition's resource package for audio drop.");
+            return;
+        }
+
+        var playback = _playback;
+        if (playback == null)
+            return;
+
+        var mousePos = ImGui.GetMousePos();
+        var dropTimeBars = (float)_context.TimeCanvas.InverseTransformX(mousePos.X);
+
+        // Derive target layer index from drop Y. If no clips exist yet, default to layer 0.
+        int dropLayerIndex;
+        if (_minLayerIndex == int.MaxValue)
+        {
+            dropLayerIndex = 0;
+        }
+        else
+        {
+            var layerOffset = (mousePos.Y - _minScreenPos.Y - LayerHeight * 0.5f) / LayerHeight;
+            dropLayerIndex = _minLayerIndex + (int)Math.Round(layerOffset);
+        }
+
+        var commands = new List<ICommand>();
+        foreach (var path in data.Split('|'))
+        {
+            var ext = System.IO.Path.GetExtension(path).ToLowerInvariant();
+            if (ext != ".wav" && ext != ".mp3" && ext != ".ogg")
+                continue;
+
+            if (!FileImport.TryImportDroppedFile(path, package, null, out var asset))
+            {
+                Log.Warning($"Failed to import audio file: {path}");
+                continue;
+            }
+
+            // Probe the source duration so the new clip's TimeRange.End matches the
+            // file's natural length (option β from the timeline-clips design — clips
+            // visually default to native duration at the current BPM; engine plays at
+            // native rate regardless of later BPM changes).
+            var durationSecs = AudioMixerManager.TryProbeAudioDurationSecs(asset.FullPath);
+            var durationBars = durationSecs > 0
+                                   ? (float)playback.BarsFromSeconds(durationSecs)
+                                   : 4f; // sensible fallback if BASS could not read the file
+
+            var newClip = new TimelineAudioClip
+                              {
+                                  AssetPath = asset.Address,
+                                  TimeRange = new TimeRange(dropTimeBars, dropTimeBars + durationBars),
+                                  LayerIndex = dropLayerIndex,
+                                  IsMainSoundtrack = false,
+                              };
+
+            commands.Add(new AddTimelineAudioClipCommand(compositionOp, newClip));
+            // Stack subsequent drops by 1 layer so they don't overlap when multi-dropping.
+            dropLayerIndex++;
+        }
+
+        if (commands.Count == 0)
+            return;
+
+        if (commands.Count == 1)
+        {
+            UndoRedoStack.AddAndExecute(commands[0]);
+        }
+        else
+        {
+            UndoRedoStack.AddAndExecute(new MacroCommand("Drop audio clips", commands));
         }
     }
 
@@ -108,13 +219,28 @@ internal sealed class LayersArea : ITimeObjectManipulation, IValueSnapAttractor
     {
         var clips = _context.ClipSelection.CompositionTimeClips.Values;
 
-        if (clips.Count == 0)
+        // Non-op audio clips that live in the symbol's CompositionSettings.Playback.AudioClips.
+        // We exclude the main soundtrack — it still renders as the timeline background image
+        // via TimeLineImage. Secondary clips are drawn here as TimeClip-shaped items.
+        var compositionSettings = compositionOp.Symbol.CompositionSettings;
+        var audioClips = compositionSettings.Playback.AudioClips;
+
+        // Count visible audio clips up-front so we can decide whether the layer area is empty.
+        var visibleAudioClipCount = 0;
+        foreach (var ac in audioClips)
+        {
+            if (ac.IsMainSoundtrack || string.IsNullOrEmpty(ac.AssetPath))
+                continue;
+            visibleAudioClipCount++;
+        }
+
+        if (clips.Count == 0 && visibleAudioClipCount == 0)
         {
             LastHeight = 0;
             return;
         }
 
-        // Adjust height to bounds
+        // Adjust height to bounds — includes both op-backed and audio clips so layer rows extend correctly.
         {
             _minLayerIndex = int.MaxValue;
             _maxLayerIndex = int.MinValue;
@@ -122,6 +248,13 @@ internal sealed class LayersArea : ITimeObjectManipulation, IValueSnapAttractor
             {
                 _minLayerIndex = Math.Min(clip.LayerIndex, _minLayerIndex);
                 _maxLayerIndex = Math.Max(clip.LayerIndex, _maxLayerIndex);
+            }
+            foreach (var ac in audioClips)
+            {
+                if (ac.IsMainSoundtrack || string.IsNullOrEmpty(ac.AssetPath))
+                    continue;
+                _minLayerIndex = Math.Min(ac.LayerIndex, _minLayerIndex);
+                _maxLayerIndex = Math.Max(ac.LayerIndex, _maxLayerIndex);
             }
         }
 
@@ -177,8 +310,41 @@ internal sealed class LayersArea : ITimeObjectManipulation, IValueSnapAttractor
             TimeClipItem.DrawClip(clip, ref drawAttributes);
         }
 
+        // Symbol-level audio clips. Read-only render + click-to-select for Phase D;
+        // editing (drag, trim, delete, snap) lands in Phase E.
+        if (visibleAudioClipCount > 0)
+        {
+            var audioAttrs = new TimelineAudioClipItem.DrawAttrs(
+                new ImRect(min, max),
+                _minLayerIndex,
+                _drawList,
+                _selectedAudioClipIds,
+                _context.TimeCanvas,
+                compositionOp);
+
+            foreach (var ac in audioClips)
+            {
+                if (ac.IsMainSoundtrack || string.IsNullOrEmpty(ac.AssetPath))
+                    continue;
+                TimelineAudioClipItem.DrawClip(ac, ref audioAttrs);
+            }
+        }
+
         ImGui.SetCursorScreenPos(min + new Vector2(0, LayerHeight));
     }
+
+    // Parallel selection store for audio clips. ClipSelection (op-backed) is keyed by
+    // TimeClip references — won't accept TimelineAudioClip instances. Kept separate from
+    // ClipSelection for now; the asymmetries between op-backed and audio clips are easier
+    // to spot one operation at a time. A future tidy may merge them.
+    private readonly HashSet<Guid> _selectedAudioClipIds = new();
+
+    /// <summary>
+    /// Cross-frame drag state for moving / trimming <see cref="TimelineAudioClip"/>s.
+    /// Set by <c>TimelineAudioClipItem</c> on drag start, pushed to the undo stack on
+    /// drag completion. Static because there is at most one active drag in flight.
+    /// </summary>
+    internal static MoveTimelineAudioClipsCommand? ActiveAudioMoveCommand;
 
     
     private void AvoidOverlaps()

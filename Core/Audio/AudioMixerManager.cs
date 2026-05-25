@@ -460,6 +460,29 @@ public static class AudioMixerManager
     }
 
     /// <summary>
+    /// Reads the duration of an audio file in seconds by opening a temporary decode stream.
+    /// Returns 0 on failure. Used by the timeline-drop handler to size a new clip's TimeRange
+    /// at the moment of import, without going through the full playback path.
+    /// </summary>
+    public static double TryProbeAudioDurationSecs(string filePath)
+    {
+        var stream = CreateOfflineAnalysisStream(filePath);
+        if (stream == 0)
+            return 0;
+        try
+        {
+            var bytes = Bass.ChannelGetLength(stream);
+            if (bytes < 0)
+                return 0;
+            return Bass.ChannelBytes2Seconds(stream, bytes);
+        }
+        finally
+        {
+            FreeOfflineAnalysisStream(stream);
+        }
+    }
+
+    /// <summary>
     /// Frees an offline analysis stream created by CreateOfflineAnalysisStream.
     /// </summary>
     public static void FreeOfflineAnalysisStream(int streamHandle)
