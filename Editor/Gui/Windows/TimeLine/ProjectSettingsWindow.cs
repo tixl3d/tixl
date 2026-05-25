@@ -508,6 +508,31 @@ internal sealed class ProjectSettingsWindow : Window
                     ImGui.PopStyleColor();
                 }
 
+                // DEV: Phase 1 live-session recording verification button.
+                // Replaced by the real record button on the timeline toolbar in Phase 4
+                // (see .agentic/Plans/Plan_LiveSessionRecording.md). Files land in
+                // RecordingPaths.DevRecordingsDirectory.
+                FormInputs.AddVerticalSpace();
+                FormInputs.DrawInputLabel("DEV: Record WAV");
+
+                if (WasapiAudioInput.IsRecording)
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Button, UiColors.StatusAttention.Rgba);
+                    var label = $"Stop recording ({WasapiAudioInput.ActiveRecordingPath ?? "?"})";
+                    if (ImGui.Button(label))
+                    {
+                        WasapiAudioInput.EndRecording();
+                    }
+                    ImGui.PopStyleColor();
+                }
+                else
+                {
+                    if (ImGui.Button("Start recording WAV"))
+                    {
+                        WasapiAudioInput.BeginRecording();
+                    }
+                }
+
                 ImGui.EndGroup();
                 break;
             }

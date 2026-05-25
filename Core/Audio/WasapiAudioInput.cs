@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using ManagedBass;
 using ManagedBass.Wasapi;
@@ -154,19 +155,115 @@ public static class WasapiAudioInput
         }
 
         ActiveInputDeviceName = device.DeviceInfo.Name;
+
+        // Record the channel count BASS settled on, so an active WavFileWriter knows
+        // the correct interleave layout. Falls back to stereo if Info isn't populated yet.
+        var info = BassWasapi.Info;
+        _activeChannelCount = info.Channels > 0 ? info.Channels : 2;
+
         BassWasapi.Start();
     }
         
     /// <summary>
     /// Stops the WASAPI audio capture and releases associated resources.
+    /// Any active recording session is finalised first so the WAV file isn't left
+    /// with a placeholder header.
     /// </summary>
     private static void Stop()
     {
         //Log.Debug("Wasapi.Stop()");
+
+        if (_activeRecording != null)
+        {
+            EndRecording();
+        }
+
         BassWasapi.Stop();
         BassWasapi.Free();
         ActiveInputDeviceName = null;
     }
+
+    /// <summary>
+    /// Starts writing the live WASAPI capture to an uncompressed 16-bit PCM WAV file.
+    /// Phase 1 of the live-session recording feature; the file lands in
+    /// <see cref="RecordingPaths.DevRecordingsDirectory"/>.
+    /// </summary>
+    /// <param name="suffix">Optional source identifier appended to the filename
+    /// (e.g. <c>mic1</c>). Sanitised before use.</param>
+    /// <returns>The absolute path of the WAV file, or <c>null</c> if recording could not start.</returns>
+    public static string BeginRecording(string suffix = null)
+    {
+        if (string.IsNullOrEmpty(ActiveInputDeviceName))
+        {
+            Log.Warning("Cannot start WAV recording: no active WASAPI input device. Select an input device in Playback Settings first.");
+            return null;
+        }
+
+        if (_activeRecording != null)
+        {
+            Log.Warning($"WAV recording already active at '{_activeRecording.Path}'. Call EndRecording first.");
+            return null;
+        }
+
+        var directory = RecordingPaths.DevRecordingsDirectory;
+        try
+        {
+            Directory.CreateDirectory(directory);
+        }
+        catch (Exception e)
+        {
+            Log.Warning($"Cannot create recordings directory '{directory}': {e.Message}");
+            return null;
+        }
+
+        var sessionIndex = RecordingPaths.NextSessionIndex(directory);
+        var fileName = RecordingPaths.BuildFileName(sessionIndex, ".wav", suffix);
+        var path = Path.Combine(directory, fileName);
+
+        var sampleRate = SampleRate > 0 ? SampleRate : 48000;
+        var channels = _activeChannelCount > 0 ? _activeChannelCount : 2;
+
+        try
+        {
+            // Assign last so the capture callback only sees a fully constructed writer.
+            var writer = new WavFileWriter(path, sampleRate, channels);
+            _activeRecording = writer;
+            Log.Debug($"WAV recording started: {path} ({sampleRate} Hz, {channels} ch)");
+            return path;
+        }
+        catch (Exception e)
+        {
+            Log.Warning($"Failed to start WAV recording at '{path}': {e.Message}");
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Stops the active WAV recording started by <see cref="BeginRecording"/> and
+    /// finalises the file header so the WAV is readable.
+    /// </summary>
+    /// <returns>The path of the finalised file, or <c>null</c> if no recording was active.</returns>
+    public static string EndRecording()
+    {
+        var writer = _activeRecording;
+        if (writer == null)
+            return null;
+
+        // Clear the field before disposing so the callback stops feeding the writer
+        // the moment it next observes the change. The writer's own lock guards against
+        // a callback that may already be inside AppendFloat32Samples.
+        _activeRecording = null;
+        writer.Dispose();
+
+        Log.Debug($"WAV recording stopped: {writer.Path} ({writer.DurationSeconds:F1} s, {writer.BytesWritten} bytes)");
+        return writer.Path;
+    }
+
+    /// <summary>True while a WAV recording session is active.</summary>
+    public static bool IsRecording => _activeRecording != null;
+
+    /// <summary>Path of the WAV file currently being written, or <c>null</c> if not recording.</summary>
+    public static string ActiveRecordingPath => _activeRecording?.Path;
 
     /// <summary>
     /// Flag indicating whether a warning about missing device name has been logged.
@@ -230,8 +327,18 @@ public static class WasapiAudioInput
         // Skip all WASAPI processing during export - AudioRendering handles FFT/waveform
         if (Playback.Current.IsRenderingToFile)
             return length;
-        
-        var time = Playback.RunTimeInSecs;  // Keep because timer is still running 
+
+        // Stream the raw captured samples to the active WAV recording, if any.
+        // Read directly from the callback's buffer instead of issuing another GetData()
+        // call — GetData consumes BASS's internal queue and would compete with the
+        // analysis paths below for the same samples.
+        var writer = _activeRecording;
+        if (writer != null && buffer != IntPtr.Zero && length > 0)
+        {
+            writer.AppendFloat32Samples(buffer, length);
+        }
+
+        var time = Playback.RunTimeInSecs;  // Keep because timer is still running
         TimeSinceLastUpdate = time - LastUpdateTime;
         LastUpdateTime = time;
 
@@ -357,6 +464,19 @@ public static class WasapiAudioInput
     /// The raw audio level value from the last WASAPI level measurement.
     /// </summary>
     private static float _lastAudioLevel;
+
+    /// <summary>
+    /// Active WAV writer for the live-session recording (Phase 1).
+    /// Set by <see cref="BeginRecording"/>, cleared by <see cref="EndRecording"/> and
+    /// <see cref="Stop"/>. Read on the BASS capture thread inside the callback.
+    /// </summary>
+    private static WavFileWriter _activeRecording;
+
+    /// <summary>
+    /// Channel count of the active WASAPI capture, captured after BASS_WASAPI_Init.
+    /// Used as the channel count for new WAV recordings.
+    /// </summary>
+    private static int _activeChannelCount;
     
     /// <summary>
     /// Gets a time-decayed audio level value suitable for visual metering. (gain meter in playback settings)
