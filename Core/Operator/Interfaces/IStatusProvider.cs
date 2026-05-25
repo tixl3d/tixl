@@ -13,6 +13,7 @@ public interface IStatusProvider
     {
         Undefined,
         Success,
+        Tip,
         Notice,
         Warning,
         Error,

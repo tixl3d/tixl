@@ -94,13 +94,15 @@ internal sealed class GraphNode
                         ImGui.InvisibleButton("#warning", new Vector2(15, 15));
                         var color = statusLevel switch
                                         {
+                                            IStatusProvider.StatusLevel.Tip     => UiColors.StatusAttention,
                                             IStatusProvider.StatusLevel.Notice  => UiColors.StatusAttention,
                                             IStatusProvider.StatusLevel.Warning => UiColors.StatusWarning,
                                             IStatusProvider.StatusLevel.Error   => UiColors.StatusError,
                                             _                                   => UiColors.StatusError
                                         };
-                        Icons.DrawIconOnLastItem(Icon.Warning, color);
-                        CustomComponents.TooltipForLastItem(UiColors.StatusWarning, statusLevel.ToString(), statusProvider.GetStatusMessage(), false);
+                        var icon = statusLevel == IStatusProvider.StatusLevel.Tip ? Icon.Tip : Icon.Warning;
+                        Icons.DrawIconOnLastItem(icon, color);
+                        CustomComponents.TooltipForLastItem(color, statusLevel.ToString(), statusProvider.GetStatusMessage(), false);
                     }
                 }
 
