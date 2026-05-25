@@ -137,16 +137,33 @@ public static class GradientEditor
                                                     editResult = InputEditStateFlags.ModifiedAndFinished;
                                                 }
 
-                                                if (ImGui.MenuItem("Distribute evenly", gradientForEditing.Steps.Count > 2))
+                                                var isHold = gradientForEditing.Interpolation == Gradient.Interpolations.Hold;
+                                                var stepCount = gradientForEditing.Steps.Count;
+                                                var canDistribute = stepCount >= 2 || (stepCount == 1 && !isHold);
+                                                if (ImGui.MenuItem("Distribute evenly", canDistribute))
                                                 {
-                                                    var stepsCount = (gradientForEditing.Steps.Count - 1);
-                                                    if (gradientForEditing.Interpolation == Gradient.Interpolations.Hold)
-                                                        stepsCount++;
-                                                        
-                                                    for (var index = 0; index < gradientForEditing.Steps.Count; index++)
+                                                    var steps = gradientForEditing.Steps;
+                                                    if (isHold)
                                                     {
-                                                        gradientForEditing.Steps[index].NormalizedPosition =
-                                                            (float)index / stepsCount;
+                                                        // Hold: split the gradient into equal-width color bands
+                                                        for (var index = 0; index < steps.Count; index++)
+                                                        {
+                                                            steps[index].NormalizedPosition = (float)index / steps.Count;
+                                                        }
+                                                    }
+                                                    else if (steps.Count == 1)
+                                                    {
+                                                        // Single stop with smooth interpolation -> center
+                                                        steps[0].NormalizedPosition = 0.5f;
+                                                    }
+                                                    else
+                                                    {
+                                                        // Smooth: anchor first/last to the corners, spread the rest evenly
+                                                        var divisor = steps.Count - 1;
+                                                        for (var index = 0; index < steps.Count; index++)
+                                                        {
+                                                            steps[index].NormalizedPosition = (float)index / divisor;
+                                                        }
                                                     }
 
                                                     gradientForEditing.SortHandles();
