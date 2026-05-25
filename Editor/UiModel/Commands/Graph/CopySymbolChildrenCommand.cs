@@ -198,8 +198,8 @@ public sealed class CopySymbolChildrenCommand : ICommand
         var oldToNewIdDict = _childrenToCopy.ToDictionary(entry => entry.OrgChildId, entry => entry.NewChildId);
         sourceCompositionSymbol.Animator.CopyAnimationsTo(targetSymbol.Animator, childIdsToCopyAnimations, oldToNewIdDict);
 
+        var bypassedChildIds = new List<Guid>();
 
-        
         foreach (var childEntryToCopy in _childrenToCopy)
         {
             if (!sourceCompositionSymbol.Children.TryGetValue(childEntryToCopy.OrgChildId, out var symbolChildToCopy))
@@ -244,9 +244,12 @@ public sealed class CopySymbolChildrenCommand : ICommand
 
             if (symbolChildToCopy.IsBypassed)
             {
-                newSymbolChild.IsBypassed = true;
+                // Defer until after connections are added — Symbol.Child.SetBypassed
+                // skips the assignment when the new child has live instances but no
+                // output connection yet (which is always the case at this point during paste/duplicate).
+                bypassedChildIds.Add(newSymbolChild.Id);
             }
-            
+
             // Update annotation id
             if (newChildUi.CollapsedIntoAnnotationFrameId != Guid.Empty)
             {
@@ -254,13 +257,22 @@ public sealed class CopySymbolChildrenCommand : ICommand
                 {
                     newChildUi.CollapsedIntoAnnotationFrameId = newAnnotationId;
                 }
-            }            
+            }
         }
 
         // add connections between copied children
         foreach (var connection in _connectionsToCopy)
         {
             targetCompositionSymbolUi.Symbol.AddConnection(connection);
+        }
+
+        // Apply bypass state now that connections exist so SetBypassed propagates to instances
+        foreach (var bypassedChildId in bypassedChildIds)
+        {
+            if (targetCompositionSymbolUi.Symbol.Children.TryGetValue(bypassedChildId, out var bypassedChild))
+            {
+                bypassedChild.IsBypassed = true;
+            }
         }
         
         foreach (var newAnnotation in _annotationsToCopy)
