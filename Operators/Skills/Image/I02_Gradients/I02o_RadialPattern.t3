@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "58c70018-0764-43c3-8bc5-c7257c6dc5ba"/*I02o_RadialPattern*/,
   "Inputs": [],
   "Children": [
@@ -14,28 +16,33 @@
               "Interpolation": "Hold",
               "Steps": [
                 {
-                  "Id": "f6eb43f5-21ba-4151-bd77-57d377af1954",
+                  "Id": "01c79ded-febb-4b25-91b9-e5cb238ed168",
                   "NormalizedPosition": 0.0,
-                  "Color": {
-                    "R": 0.0,
-                    "G": 0.0,
-                    "B": 0.0,
-                    "A": 1.0
-                  }
-                },
-                {
-                  "Id": "353b9634-4681-4150-be93-8ffe80b9f6a6",
-                  "NormalizedPosition": 0.5,
                   "Color": {
                     "R": 1.0,
                     "G": 0.99999,
                     "B": 1.0,
                     "A": 1.0
                   }
+                },
+                {
+                  "Id": "e4bf657b-64fb-4907-bcd3-1c347ec787db",
+                  "NormalizedPosition": 0.4926151,
+                  "Color": {
+                    "R": 0.0,
+                    "G": 0.0,
+                    "B": 0.0,
+                    "A": 1.0
+                  }
                 }
               ]
             }
           }
+        },
+        {
+          "Id": "bfdcfed4-263f-4115-a1a8-291088e34c0a"/*Width*/,
+          "Type": "System.Single",
+          "Value": 0.1
         }
       ],
       "Outputs": []
@@ -207,7 +214,7 @@
               "Interpolation": "Hold",
               "Steps": [
                 {
-                  "Id": "96147bbb-47d3-474f-ac5e-0f0c6a735589",
+                  "Id": "76168b9b-962f-4a2c-8f14-6584dcc68a9e",
                   "NormalizedPosition": 0.0,
                   "Color": {
                     "R": 0.0,
@@ -217,7 +224,7 @@
                   }
                 },
                 {
-                  "Id": "fe05361c-6565-41bd-89fe-13e21fbea548",
+                  "Id": "d21d8033-4b44-47fe-b90a-3faf4ca6699d",
                   "NormalizedPosition": 0.5,
                   "Color": {
                     "R": 1.0,

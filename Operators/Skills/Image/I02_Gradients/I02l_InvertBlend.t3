@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "7741bee3-17cf-4185-a92a-53efeba3da65"/*I02l_InvertBlend*/,
   "Inputs": [],
   "Children": [
@@ -14,12 +16,17 @@
         {
           "Id": "5774969c-ef4d-482e-ab37-b3a84b09debb"/*PingPong*/,
           "Type": "System.Boolean",
-          "Value": false
+          "Value": true
         },
         {
           "Id": "7f3fe86d-f259-458a-908a-0a71d39ca678"/*Repeat*/,
           "Type": "System.Boolean",
-          "Value": false
+          "Value": true
+        },
+        {
+          "Id": "8169be8f-cb35-4900-b462-f2139b412d59"/*Rotate*/,
+          "Type": "System.Single",
+          "Value": -45.0
         }
       ],
       "Outputs": []
@@ -138,6 +145,26 @@
           "Id": "10d59d0f-a5a3-42e6-b874-345ab028978e"/*Width*/,
           "Type": "System.Single",
           "Value": 0.25
+        },
+        {
+          "Id": "1d0cf561-858d-4510-95c4-f3ad9148355d"/*BlendMode*/,
+          "Type": "System.Int32",
+          "Value": 4
+        },
+        {
+          "Id": "5774969c-ef4d-482e-ab37-b3a84b09debb"/*PingPong*/,
+          "Type": "System.Boolean",
+          "Value": true
+        },
+        {
+          "Id": "7f3fe86d-f259-458a-908a-0a71d39ca678"/*Repeat*/,
+          "Type": "System.Boolean",
+          "Value": true
+        },
+        {
+          "Id": "8169be8f-cb35-4900-b462-f2139b412d59"/*Rotate*/,
+          "Type": "System.Single",
+          "Value": 45.0
         }
       ],
       "Outputs": []

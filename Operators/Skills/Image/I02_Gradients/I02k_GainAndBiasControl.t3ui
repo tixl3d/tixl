@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "6681a029-e23f-4c6b-aa95-df30906ea58c"/*I02k_GainAndBiasControl*/,
   "Description": "LinearGradient: GainAndBias",
   "InputUis": [],
@@ -46,7 +48,8 @@
       "Position": {
         "X": 1286.6545,
         "Y": 1861.9941
-      }
+      },
+      "SnapshotGroupIndex": "1"
     }
   ],
   "OutputUis": [
@@ -112,5 +115,13 @@
       "Description": "Combine both directions and find the setting that matches the goal.",
       "Style": "CallToAction"
     }
-  ]
+  ],
+  "Settings": {
+    "Timeline": {
+  "ScaleX": 7.054155,
+  "ScrollX": -13.796197,
+  "Mode": "DopeView",
+  "TimelineHeight": 155
+}
+  }
 }

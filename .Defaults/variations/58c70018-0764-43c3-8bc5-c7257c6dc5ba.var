@@ -1,0 +1,83 @@
+{
+  "Id": "58c70018-0764-43c3-8bc5-c7257c6dc5ba",
+  "Variations": [
+    {
+      "Id": "e6624c37-60ee-4b02-8b15-0c19372ee195",
+      "IsPreset": false,
+      "ActivationIndex": 1,
+      "Title": "Solution",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "2d3a8c46-47e0-4894-8571-d81772268262": {
+          "3f5a284b-e2f0-47e2-bf79-2a7fe8949519": {
+            "Gradient": {
+              "Interpolation": "Hold",
+              "Steps": [
+                {
+                  "Id": "7a4a4924-94b4-49ce-b130-239d8a9d5eb3",
+                  "NormalizedPosition": 0.0,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.99999,
+                    "B": 1.0,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "464ccb19-79f9-4d61-9c45-e416de53a770",
+                  "NormalizedPosition": 0.4926151,
+                  "Color": {
+                    "R": 0.0,
+                    "G": 0.0,
+                    "B": 0.0,
+                    "A": 1.0
+                  }
+                }
+              ]
+            }
+          },
+          "bfdcfed4-263f-4115-a1a8-291088e34c0a": 0.1,
+          "6c1dc695-1c0a-47fe-aea1-e3abec904883": true,
+          "eab31c38-0e6f-432a-9f15-04bfb0aae28c": true,
+          "dc383dbd-9dab-4bb2-8c6e-7f094e28d8a9": true
+        },
+        "b2b2a6b3-c38b-474a-b71a-9fa73677a229": {
+          "3f5a284b-e2f0-47e2-bf79-2a7fe8949519": {
+            "Gradient": {
+              "Interpolation": "Hold",
+              "Steps": [
+                {
+                  "Id": "b6a7824e-5c82-4ff7-8635-840eb65157ee",
+                  "NormalizedPosition": 0.0,
+                  "Color": {
+                    "R": 0.0,
+                    "G": 0.0,
+                    "B": 0.0,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "5c2e656a-6d00-416c-8239-ccb03216d848",
+                  "NormalizedPosition": 0.5,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.99999,
+                    "B": 1.0,
+                    "A": 1.0
+                  }
+                }
+              ]
+            }
+          },
+          "bfdcfed4-263f-4115-a1a8-291088e34c0a": 0.2,
+          "6c1dc695-1c0a-47fe-aea1-e3abec904883": true,
+          "eab31c38-0e6f-432a-9f15-04bfb0aae28c": true,
+          "7270a7df-744e-4b66-8f85-71fbdf0848d6": 4
+        }
+      }
+    }
+  ]
+}

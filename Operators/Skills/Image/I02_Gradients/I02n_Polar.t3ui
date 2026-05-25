@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "0a591e7e-5631-4f32-9ea2-5fddbdb6566f"/*I02n_Polar*/,
   "Description": "RadialGradient: Polar Direction",
   "InputUis": [],
@@ -47,7 +49,8 @@
       "Position": {
         "X": 1393.4087,
         "Y": 1859.5094
-      }
+      },
+      "SnapshotGroupIndex": "1"
     },
     {
       "ChildId": "f51c1a53-826e-4f81-8bbb-3624491b8f9d"/*Time*/,
@@ -104,5 +107,13 @@
       "Description": "Recreate the goal.",
       "Style": "CallToAction"
     }
-  ]
+  ],
+  "Settings": {
+    "Timeline": {
+  "ScaleX": 7.054155,
+  "ScrollX": -13.796197,
+  "Mode": "DopeView",
+  "TimelineHeight": 155
+}
+  }
 }

@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "58c70018-0764-43c3-8bc5-c7257c6dc5ba"/*I02o_RadialPattern*/,
   "Description": "RadialGradient: Invert Pattern",
   "InputUis": [],
@@ -7,8 +9,9 @@
       "ChildId": "2d3a8c46-47e0-4894-8571-d81772268262"/*RadialGradient*/,
       "Position": {
         "X": 1391.3212,
-        "Y": 1853.3733
-      }
+        "Y": 1859.333
+      },
+      "SnapshotGroupIndex": "1"
     },
     {
       "ChildId": "3384e813-39d4-4e0d-90ee-1950d3052c9c"/*LinearGradient*/,
@@ -54,13 +57,14 @@
       "Position": {
         "X": 1391.3212,
         "Y": 1924.3414
-      }
+      },
+      "SnapshotGroupIndex": "1"
     },
     {
       "ChildId": "c71ae37b-d01b-4555-a332-09fd0b6e943f"/*Time*/,
       "Position": {
-        "X": 1391.3212,
-        "Y": 1983.5812
+        "X": 1220.008,
+        "Y": 1924.1141
       }
     }
   ],
@@ -104,5 +108,13 @@
       "Description": "Connect and adjust the parameters of the two gradients to recreate the pattern.",
       "Style": "CallToAction"
     }
-  ]
+  ],
+  "Settings": {
+    "Timeline": {
+  "ScaleX": 7.054155,
+  "ScrollX": -13.796197,
+  "Mode": "DopeView",
+  "TimelineHeight": 155
+}
+  }
 }

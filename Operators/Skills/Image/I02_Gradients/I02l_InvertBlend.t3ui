@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "7741bee3-17cf-4185-a92a-53efeba3da65"/*I02l_InvertBlend*/,
   "Description": "LinearGradient: Invert Blend Mode",
   "InputUis": [],
@@ -6,9 +8,10 @@
     {
       "ChildId": "0d7395b1-1bc0-41f3-b3ab-9b51642b5062"/*LinearGradient*/,
       "Position": {
-        "X": 1298.5903,
-        "Y": 1817.5378
-      }
+        "X": 1298.4764,
+        "Y": 1844.6852
+      },
+      "SnapshotGroupIndex": "1"
     },
     {
       "ChildId": "35110282-1b14-4e4f-8621-bc74dc437e3d"/*LinearGradient*/,
@@ -29,8 +32,8 @@
     {
       "ChildId": "72df8843-517e-48f0-96b8-f1c7109e9269"/*Time*/,
       "Position": {
-        "X": 1298.5902,
-        "Y": 1938.7958
+        "X": 1298.4764,
+        "Y": 1967.5139
       }
     },
     {
@@ -60,8 +63,9 @@
       "ChildId": "f45a5925-d315-4f1b-9fda-b216af6adf5c"/*LinearGradient*/,
       "Position": {
         "X": 1298.4764,
-        "Y": 1879.6852
-      }
+        "Y": 1907.6056
+      },
+      "SnapshotGroupIndex": "1"
     }
   ],
   "OutputUis": [
@@ -104,5 +108,13 @@
       "Description": "Use the Difference blend mode to to solve the puzzle.",
       "Style": "CallToAction"
     }
-  ]
+  ],
+  "Settings": {
+    "Timeline": {
+  "ScaleX": 7.054155,
+  "ScrollX": -13.796197,
+  "Mode": "DopeView",
+  "TimelineHeight": 155
+}
+  }
 }
