@@ -19,7 +19,7 @@ internal static class TimeClipItem
     /// Attributes required and identically for drawing and handling all time clip items of a canvas for the current frame.
     /// </summary>
     public record struct ClipDrawingAttributes(
-        LayersArea.LayerContext LayerContext,
+        ClipArea.LayerContext LayerContext,
         ImRect LayerRect,
         int MinLayerIndex,
         Instance CompositionOp,
@@ -32,7 +32,7 @@ internal static class TimeClipItem
         var xStartTime = attr.LayerContext.TimeCanvas.TransformX(timeClip.TimeRange.Start) + 1;
         var xEndTime = attr.LayerContext.TimeCanvas.TransformX(timeClip.TimeRange.End) + 1;
         var position = new Vector2(xStartTime,
-                                   attr.LayerRect.Min.Y + (timeClip.LayerIndex - attr.MinLayerIndex) * LayersArea.LayerHeight);
+                                   attr.LayerRect.Min.Y + (timeClip.LayerIndex - attr.MinLayerIndex) * ClipArea.LayerHeight);
 
         var clipWidth = xEndTime - xStartTime;
         var showSizeHandles = clipWidth > 4 * HandleWidth;
@@ -40,8 +40,8 @@ internal static class TimeClipItem
                             ? (clipWidth - 2 * HandleWidth)
                             : clipWidth;
 
-        var bodySize = new Vector2(bodyWidth, LayersArea.LayerHeight - 2);
-        var clipSize = new Vector2(clipWidth, LayersArea.LayerHeight - 2);
+        var bodySize = new Vector2(bodyWidth, ClipArea.LayerHeight - 2);
+        var clipSize = new Vector2(clipWidth, ClipArea.LayerHeight - 2);
 
         var symbolChildUi = attr.CompositionSymbolUi.ChildUis[timeClip.Id];
 
@@ -72,7 +72,7 @@ internal static class TimeClipItem
 
 
         // Label
-        if(LayersArea.LayerHeight > Fonts.FontSmall.FontSize){
+        if(ClipArea.LayerHeight > Fonts.FontSmall.FontSize){
             var label = timeStretched
                             ? symbolChildUi.SymbolChild.ReadableName + $" ({timeClip.Speed*100:0.0}%)"
                             : symbolChildUi.SymbolChild.ReadableName;
@@ -111,9 +111,9 @@ internal static class TimeClipItem
         // Draw stretch indicators
         if (isSelected && timeRemapped && attr.LayerContext.ClipSelection.Count == 1)
         {
-            var verticalOffset = ImGui.GetWindowPos().Y + ImGui.GetWindowSize().Y - position.Y - LayersArea.LayerHeight;
+            var verticalOffset = ImGui.GetWindowPos().Y + ImGui.GetWindowSize().Y - position.Y - ClipArea.LayerHeight;
             var horizontalOffset = attr.LayerContext.TimeCanvas.TransformDirection(new Vector2(timeClip.SourceRange.Start - timeClip.TimeRange.Start, 0)).X;
-            var startPosition = position + new Vector2(0, LayersArea.LayerHeight);
+            var startPosition = position + new Vector2(0, ClipArea.LayerHeight);
             attr.DrawList.AddBezierCubic(startPosition,
                                          startPosition + new Vector2(0, verticalOffset),
                                          startPosition + new Vector2(horizontalOffset, 0),
@@ -121,7 +121,7 @@ internal static class TimeClipItem
                                          _timeRemappingColor, 1);
 
             horizontalOffset = attr.LayerContext.TimeCanvas.TransformDirection(new Vector2(timeClip.SourceRange.End - timeClip.TimeRange.End, 0)).X;
-            var endPosition = position + new Vector2(clipSize.X, LayersArea.LayerHeight);
+            var endPosition = position + new Vector2(clipSize.X, ClipArea.LayerHeight);
             attr.DrawList.AddBezierCubic(endPosition,
                                          endPosition + new Vector2(0, verticalOffset),
                                          endPosition + new Vector2(horizontalOffset, 0),
@@ -193,7 +193,7 @@ internal static class TimeClipItem
 
         HandleDragging(attr, timeClip, isSelected, wasClickedDown, HandleDragMode.Body);
 
-        var handleSize = showSizeHandles ? new Vector2(HandleWidth, LayersArea.LayerHeight) : Vector2.One;
+        var handleSize = showSizeHandles ? new Vector2(HandleWidth, ClipArea.LayerHeight) : Vector2.One;
 
         ImGui.SetCursorScreenPos(position);
         var aHandleClicked = ImGui.InvisibleButton("startHandle", handleSize);

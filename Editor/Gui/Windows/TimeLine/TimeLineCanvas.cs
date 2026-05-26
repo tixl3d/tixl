@@ -40,7 +40,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
         _timeSelectionRange = new TimeSelectionRange(this, SnapHandlerForU);
         _selectionRangeIndicator = new SelectionRangeIndicator(this, SnapHandlerForU);
         _timeSelectionArea = new TimeSelectionArea(this);
-        LayersArea = new LayersArea(this, getCompositionOp, requestChildCompositionFunc, SnapHandlerForU);
+        ClipArea = new ClipArea(this, getCompositionOp, requestChildCompositionFunc, SnapHandlerForU);
         _curveEditCanvas = new InlineCurveArea(this, _timelineCurveEditArea, _horizontalRaster);
 
         SnapHandlerForV.AddSnapAttractor(_horizontalRaster);
@@ -48,7 +48,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
         SnapHandlerForU.AddSnapAttractor(_loopRange);
         SnapHandlerForU.AddSnapAttractor(_timeRasterSwitcher);
         SnapHandlerForU.AddSnapAttractor(_currentTimeMarker);
-        SnapHandlerForU.AddSnapAttractor(LayersArea);
+        SnapHandlerForU.AddSnapAttractor(ClipArea);
         SnapHandlerForU.AddSnapAttractor(_selectionRangeIndicator);
         _selectionDragSnapExclusions = [_selectionRangeIndicator];
 
@@ -189,7 +189,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
                         {
                             var availHeight = ImGui.GetContentRegionAvail().Y;
 
-                            // DSA pane sizes to last frame's measured content (LayersArea +
+                            // DSA pane sizes to last frame's measured content (ClipArea +
                             // DSA rows + anything else drawn in that child). Clamped at 50% of
                             // available height so it never hogs the pane; curve area gets the
                             // remainder. See _lastDopeContentHeight update after the child draws.
@@ -212,11 +212,11 @@ internal sealed class TimeLineCanvas : AnimationCanvas
                                              ImGuiWindowFlags.NoBackground
                                              | ImGuiWindowFlags.NoScrollWithMouse);
                             var dopeContentStartY = ImGui.GetCursorScreenPos().Y;
-                            LayersArea.Draw(compositionOp, Playback, SnapHandlerForU);
+                            ClipArea.Draw(compositionOp, Playback, SnapHandlerForU);
                             DopeSheetArea.Draw(compositionOp, _selectedAnimationParameters);
 
                             // Dope-local fence (outer fence is null in inline layout). Dispatches
-                            // only to DSA + LayersArea so a fence drawn in dope never selects keys
+                            // only to DSA + ClipArea so a fence drawn in dope never selects keys
                             // that live only in the curve pane.
                             if (!T3Ui.IsAnyPopupOpen)
                             {
@@ -230,7 +230,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
                                             selectMode = SelectionFence.SelectModes.Add;
                                         }
                                         DopeSheetArea.UpdateSelectionForArea(_dopeFence.BoundsInScreen, selectMode);
-                                        LayersArea.UpdateSelectionForArea(_dopeFence.BoundsInScreen, selectMode);
+                                        ClipArea.UpdateSelectionForArea(_dopeFence.BoundsInScreen, selectMode);
                                         break;
                                 }
                             }
@@ -242,7 +242,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
                             CustomComponents.HandleDragScrolling(this);
 
                             // Snapshot this frame's total dope-pane content height for next
-                            // frame's split (LayersArea + DSA + anything else drawn above).
+                            // frame's split (ClipArea + DSA + anything else drawn above).
                             _lastDopeContentHeight = MathF.Max(0f, ImGui.GetCursorScreenPos().Y - dopeContentStartY);
                             ImGui.EndChild();
 
@@ -252,7 +252,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
                         }
                         else
                         {
-                            LayersArea.Draw(compositionOp, Playback, SnapHandlerForU);
+                            ClipArea.Draw(compositionOp, Playback, SnapHandlerForU);
                             DopeSheetArea.Draw(compositionOp, _selectedAnimationParameters);
                         }
                         break;
@@ -576,7 +576,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
         {
             case Modes.DopeView:
                 TimeObjectManipulators.Remove(DopeSheetArea);
-                TimeObjectManipulators.Remove(LayersArea);
+                TimeObjectManipulators.Remove(ClipArea);
                 SnapHandlerForU.RemoveSnapAttractor(DopeSheetArea);
                 _activeKeyframeEditors.Remove(DopeSheetArea);
                 break;
@@ -592,7 +592,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
         {
             case Modes.DopeView:
                 TimeObjectManipulators.Add(DopeSheetArea);
-                TimeObjectManipulators.Add(LayersArea);
+                TimeObjectManipulators.Add(ClipArea);
                 SnapHandlerForU.AddSnapAttractor(DopeSheetArea);
                 _activeKeyframeEditors.Add(DopeSheetArea);
                 break;
@@ -841,7 +841,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
 
     internal Playback Playback;
     public readonly DopeSheetArea DopeSheetArea;
-    public readonly LayersArea LayersArea;
+    public readonly ClipArea ClipArea;
     public static TimeLineCanvas? Current;
 
     private enum Selected
@@ -880,7 +880,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
     private readonly SelectionFence _selectionFence = new();
     private readonly SelectionFence _dopeFence = new();
 
-    // Measured dope-pane content height from the previous frame (LayersArea + DSA rows + any
+    // Measured dope-pane content height from the previous frame (ClipArea + DSA rows + any
     // other interactive content drawn in that child). Drives the inline-layout split so the
     // dope pane takes only what it needs, capped at 50% of available height.
     private float _lastDopeContentHeight = 120f;
@@ -930,7 +930,7 @@ internal sealed class TimeLineCanvas : AnimationCanvas
         private float CurrentHeight => UsingCustomTimelineHeight ? _customTimeLineHeight : ComputedTimelineHeight;
 
         private float ComputedTimelineHeight => MathF.Min( _timeline._selectedAnimationParameters.Count * DopeSheetArea.LayerHeight
-                                                + _timeline.LayersArea.LastHeight
+                                                + _timeline.ClipArea.LastHeight
                                                 + TimeLineDragHeight
                                                 + 10, 200 * T3Ui.UiScaleFactor);
 

@@ -76,7 +76,7 @@ internal sealed class TimeWarpDrag
         }
 
         // Clips: retime start/end of each selected clip.
-        foreach (var clip in _canvas.LayersArea.EnumerateSelectedClips())
+        foreach (var clip in _canvas.ClipArea.EnumerateSelectedClips())
         {
             _clips.Add(clip);
             _clipOrigStart.Add(clip.TimeRange.Start);

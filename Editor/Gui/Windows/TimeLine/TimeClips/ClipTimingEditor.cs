@@ -10,7 +10,7 @@ namespace T3.Editor.Gui.Windows.TimeLine.TimeClips;
 internal static class ClipTimingEditor
 {
 
-    internal static void DrawPopUp(LayersArea.LayerContext context)
+    internal static void DrawPopUp(ClipArea.LayerContext context)
     {
         if (TimeClipEditorRequested)
         {
@@ -34,7 +34,7 @@ internal static class ClipTimingEditor
     }
 
     
-    private static void DrawContent(LayersArea.LayerContext context)
+    private static void DrawContent(ClipArea.LayerContext context)
     {
         _clips.Clear();
         _clips.AddRange(context.ClipSelection.GetAllOrSelectedClips());

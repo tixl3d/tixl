@@ -26,7 +26,7 @@ namespace T3.Editor.Gui.Windows.TimeLine.TimeClips;
 ///
 /// Supports: click-select, multi-select (shift/ctrl), body-drag (move along time + layer),
 /// start-/end-handle drag (trim), delete via the layers-area delete-key path. Drag state
-/// is held on <see cref="LayersArea.ActiveAudioMoveCommand"/> so it survives across frames.
+/// is held on <see cref="AudioClipInteractions.ActiveMoveCommand"/> so it survives across frames.
 /// </summary>
 internal static class TimelineAudioClipItem
 {
@@ -65,9 +65,9 @@ internal static class TimelineAudioClipItem
 
         var pos = new Vector2(xStart,
                               attr.LayerRect.Min.Y
-                              + (clip.LayerIndex - attr.MinLayerIndex) * LayersArea.LayerHeight);
-        var clipSize = new Vector2(clipWidth, LayersArea.LayerHeight - 2);
-        var bodySize = new Vector2(bodyWidth, LayersArea.LayerHeight - 2);
+                              + (clip.LayerIndex - attr.MinLayerIndex) * ClipArea.LayerHeight);
+        var clipSize = new Vector2(clipWidth, ClipArea.LayerHeight - 2);
+        var bodySize = new Vector2(bodyWidth, ClipArea.LayerHeight - 2);
         var maxPos = pos + clipSize;
 
         const float rounding = 4.5f;
@@ -117,7 +117,7 @@ internal static class TimelineAudioClipItem
         Icons.DrawIconAtScreenPosition(Icon.FileAudio, iconPos, attr.DrawList, UiColors.ForegroundFull);
 
         // Label
-        if (LayersArea.LayerHeight > Fonts.FontSmall.FontSize)
+        if (ClipArea.LayerHeight > Fonts.FontSmall.FontSize)
         {
             var label = Path.GetFileNameWithoutExtension(clip.AssetPath);
             ImGui.PushFont(Fonts.FontSmall);
@@ -172,7 +172,7 @@ internal static class TimelineAudioClipItem
         // narrow to show them) so a trim drag-in-progress survives the clip shrinking.
         // Skipping the InvisibleButton call mid-drag clears ImGui's active-item state
         // for the handle and the drag dies abruptly. Same pattern as TimeClipItem.
-        var handleSize = showHandles ? new Vector2(HandleWidth, LayersArea.LayerHeight) : Vector2.One;
+        var handleSize = showHandles ? new Vector2(HandleWidth, ClipArea.LayerHeight) : Vector2.One;
 
         // Start handle
         ImGui.SetCursorScreenPos(pos);
@@ -236,7 +236,7 @@ internal static class TimelineAudioClipItem
 
         // First active frame for this drag: ensure the clicked clip is in the selection
         // and construct the move command capturing original values.
-        if (isActive && LayersArea.ActiveAudioMoveCommand == null)
+        if (isActive && AudioClipInteractions.ActiveMoveCommand == null)
         {
             var io = ImGui.GetIO();
             if (!attr.SelectedAudioClipIds.Contains(clip.Id))
@@ -254,7 +254,7 @@ internal static class TimelineAudioClipItem
                     selected.Add(c);
             }
             if (selected.Count > 0)
-                LayersArea.ActiveAudioMoveCommand = new MoveTimelineAudioClipsCommand(attr.Composition, selected);
+                AudioClipInteractions.ActiveMoveCommand = new MoveTimelineAudioClipsCommand(attr.Composition, selected);
         }
 
         if (!ImGui.IsMouseDragging(0, UserSettings.Config.ClickThreshold))
@@ -349,11 +349,11 @@ internal static class TimelineAudioClipItem
 
     private static void CompleteDrag()
     {
-        if (LayersArea.ActiveAudioMoveCommand == null)
+        if (AudioClipInteractions.ActiveMoveCommand == null)
             return;
-        LayersArea.ActiveAudioMoveCommand.StoreCurrentValues();
-        UndoRedoStack.Add(LayersArea.ActiveAudioMoveCommand);
-        LayersArea.ActiveAudioMoveCommand = null;
+        AudioClipInteractions.ActiveMoveCommand.StoreCurrentValues();
+        UndoRedoStack.Add(AudioClipInteractions.ActiveMoveCommand);
+        AudioClipInteractions.ActiveMoveCommand = null;
     }
 
     /// <summary>

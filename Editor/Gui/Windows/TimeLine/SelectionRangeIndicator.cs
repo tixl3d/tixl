@@ -100,7 +100,7 @@ internal sealed class SelectionRangeIndicator : IValueSnapAttractor
         scale = T3Ui.UiScaleFactor;
 
         var editors = _canvas.KeyframeEditors;
-        var layers = _canvas.LayersArea;
+        var layers = _canvas.ClipArea;
 
         // Keyframes: aggregated across all active editors — selection if it covers a positive range,
         // else fall back to all keyframes. Clips: only selected clips contribute.
