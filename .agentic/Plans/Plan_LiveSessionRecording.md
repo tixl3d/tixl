@@ -81,6 +81,23 @@ What is **missing**: WAV writer, streaming AudioClip playback, DataSet recorder,
 
 ## Phase 3 — DataSet recording + `DataClip` / `SimulateIoData` operators
 
+**Locked design (2026-05 review):**
+
+- `DataClip` is a **plain `[TimeClip]` operator**. No symbol-level `DataClipDefinition` — that was rejected. The op carries a `FilePath` input and loads via the existing `Resource<>` machinery, so file-watch + hot reload come for free.
+- Deserialization (`.data` JSON → `DataSet`) happens **once per asset path**, cached in a static `Dictionary<string, DataSet>` helper. Multiple `DataClip` ops referencing the same file share one parsed `DataSet`. Eviction tied to `Resource<>` invalidation.
+- One `.data` per recording session — all enabled MIDI/OSC sources merge into a single `DataSet` (its existing channel model already supports that). No per-source split for data, unlike audio.
+- Live op creation during recording. `DataClip` op spawned on record-start, `TimeRange.End` extended each frame (mirrors audio).
+- `SimulateIoData` injects under the **real device's name** — no `(playback)` suffix, no override toggle. Real + simulated event streams merge on the consumer side. "Simulate" means *be* the device, not impersonate it.
+- **Variation / snapshot controller MIDI** capture-side is already handled by Phase 3a: `DataSetSessionRecorder` registers as an independent `IMidiConsumer`, so `MidiConnectionManager` fans every real device event out to it alongside `CompatibleMidiDevice` (which drives the snapshot recalls). The control-mode flag (`MidiConnectionManager.SetDeviceControlMode`) only suppresses passthrough to the `MidiInput` op via an opt-in check inside that op — it doesn't gate the recorder.
+- **Variation / snapshot replay (Phase 3c work).** Injecting events back through `MidiInput` alone is not enough — variations are driven by `CompatibleMidiDevice` instances, which are *separate* `IMidiConsumer`s. For a recorded snapshot trigger to fire on playback, `SimulateIoData` must fan the event out to **all** registered MIDI / OSC consumers (including `CompatibleMidiDevice`). Add a `MidiConnectionManager.BroadcastSimulatedMessage(sender, args)` and the equivalent on `OscConnectionManager`:
+  - The `sender` must be the live `MidiIn` whose name matches the recorded device, so `CompatibleMidiDevice.GetDescriptionForMidiIn` resolves to the right device descriptor. If the original device is disconnected, log a warning and skip the event.
+  - Mark broadcast args with an `isSimulated` flag so `DataSetSessionRecorder` (if a session is concurrently active) can skip-record them and avoid feedback loops.
+- Drag-drop unification via `AssetType` registration:
+  - `.data` registered as a new `AssetType` whose `PrimaryOperators` includes the `DataClip` op Guid.
+  - Drop on graph → standard `AssetType` flow creates a `DataClip` op at cursor with `FilePath` pre-filled. Free.
+  - Drop on clip area → needs a small generalisation of the existing audio-only drop handler so any `AssetType` whose primary op is a `[TimeClip]` creates the op as a SymbolChild on a layer. Out of scope for 3a–3d, lands as 3e or a follow-up.
+
+
 **Goal:** IO events (MIDI, OSC) can be recorded into a `DataSet`, saved per project, and played back through either a graph output or a virtual input device.
 
 **Scope:**

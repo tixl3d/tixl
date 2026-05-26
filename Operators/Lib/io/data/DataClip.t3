@@ -1,0 +1,11 @@
+{
+  "Id": "4d1c0e80-7b2a-4f6d-9c1b-12d3e4f50607"/*DataClip*/,
+  "Inputs": [
+    {
+      "Id": "70419103-ae5d-4ca0-cf4e-456071829304"/*FilePath*/,
+      "DefaultValue": ""
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

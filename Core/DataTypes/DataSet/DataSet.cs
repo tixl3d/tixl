@@ -24,11 +24,24 @@ public sealed class DataSet
         Channels.Clear();
     }
 
-    public void WriteToFile()
+    /// <summary>
+    /// Writes the dataset to a hardcoded <c>dataset.json</c> in the working directory.
+    /// Kept for compatibility with the always-on IO window snapshot path; new callers
+    /// should use <see cref="WriteToFile(string)"/> with an explicit destination.
+    /// </summary>
+    public void WriteToFile() => WriteToFile("dataset.json");
+
+    /// <summary>
+    /// Serialises the dataset to <paramref name="path"/> as JSON. Used by the live-session
+    /// recording feature to persist a recorded session as a <c>.data</c> asset for later
+    /// playback through a <c>DataClip</c> operator. The on-disk format is the same as
+    /// <see cref="WriteToFile()"/> — only the destination is parameterised.
+    /// </summary>
+    public void WriteToFile(string path)
     {
-        using var sw = new StreamWriter("dataset.json");
+        using var sw = new StreamWriter(path);
         using var writer = new JsonTextWriter(sw);
-        
+
         writer.Formatting = Formatting.Indented;
         writer.WriteStartObject();
         writer.WritePropertyName("Channels");
