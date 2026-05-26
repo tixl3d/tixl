@@ -44,7 +44,12 @@ internal sealed class ClipArea : ITimeObjectManipulation, IValueSnapAttractor
                                     timeLineCanvas,
                                     snapHandlerForU);
         OpClips = new TimeClipInteractions(_context, getCompositionOp);
-        AudioClips = new AudioClipInteractions(_context);
+        AudioClips = new AudioClipInteractions(_context, getCompositionOp);
+
+        // Cross-references so each helper can drive the other during cross-type drag
+        // (drag-op-clip also moves audio clips in audio selection, and vice versa).
+        OpClips.AudioInteractions = AudioClips;
+        AudioClips.OpInteractions = OpClips;
     }
 
     /// <summary>
@@ -164,6 +169,14 @@ internal sealed class ClipArea : ITimeObjectManipulation, IValueSnapAttractor
         if (visibleAudioClipCount > 0)
             AudioClips.DrawClips(compositionOp, layerRect, _minLayerIndex, _drawList);
 
+        // Force the surrounding BeginGroup bbox to span the entire layer area so the
+        // file-drop target (resolved via the group's "last item" rect) covers full width
+        // and full height. Without this, the group's bbox shrinks to the union of the
+        // emitted InvisibleButtons (clip bodies), and the right portion of the timeline
+        // — past the last clip's edge — silently rejects audio file drops.
+        ImGui.SetCursorScreenPos(min);
+        ImGui.Dummy(max - min);
+
         ImGui.SetCursorScreenPos(min + new Vector2(0, LayerHeight));
     }
 
@@ -174,7 +187,10 @@ internal sealed class ClipArea : ITimeObjectManipulation, IValueSnapAttractor
     public float LastHeight { get; private set; }
 
     public void UpdateSelectionForArea(ImRect screenArea, SelectionFence.SelectModes selectMode)
-        => OpClips.UpdateSelectionForArea(screenArea, selectMode, _minScreenPos, _minLayerIndex);
+    {
+        OpClips.UpdateSelectionForArea(screenArea, selectMode, _minScreenPos, _minLayerIndex);
+        AudioClips.UpdateSelectionForArea(screenArea, selectMode, _minScreenPos, _minLayerIndex);
+    }
 
     public IEnumerable<TimeClip> EnumerateSelectedClips() => OpClips.EnumerateSelectedClips();
     public bool TryGetBounds(out ImRect bounds, bool useAllIfNonSelected = true)
@@ -217,7 +233,11 @@ internal sealed class ClipArea : ITimeObjectManipulation, IValueSnapAttractor
     // IValueSnapAttractor
     // ---------------------------------------------------------------------------
 
-    void IValueSnapAttractor.CheckForSnap(ref SnapResult snapResult) => OpClips.CheckForSnap(ref snapResult);
+    void IValueSnapAttractor.CheckForSnap(ref SnapResult snapResult)
+    {
+        OpClips.CheckForSnap(ref snapResult);
+        AudioClips.CheckForSnap(ref snapResult);
+    }
 
     // ---------------------------------------------------------------------------
     // Frame state

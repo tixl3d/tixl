@@ -178,7 +178,7 @@ Already shipped. Behaviour-preserving rename + back-compat JSON reader (`IsMainS
 
 - [`.help/docs/using/Timeline.md`](../../.help/docs/using/Timeline.md) — new "Audio clips" section: drop-on-LayersArea flow, the inspector, the difference between an audio clip on the timeline and an `[AudioPlayer]` op in the graph.
 - [`.help/docs/using/LivePerformances.md`](../../.help/docs/using/LivePerformances.md) — cross-link.
-- [`.agentic/SOLUTION_OVERVIEW.md`](../SOLUTION_OVERVIEW.md) — drag-drop section updated to reflect that audio files target LayersArea, not the graph.
+- [`.agentic/SOLUTION_OVERVIEW.md`](../SOLUTION_OVERVIEW.md) — drag-drop section updated to reflect that audio files target the timeline clip area (`ClipArea`), not the graph.
 
 ## Manual test sets
 
@@ -195,3 +195,31 @@ Already shipped. Behaviour-preserving rename + back-compat JSON reader (`IsMainS
 4. **`Resource<>` pattern for clips.** The current `Resource<SoundtrackClipDefinition>` wrapper (in `PlayAudioClip` and the doomed `AudioClip` op) does file-watching and reload-on-change. The new model doesn't need it — clips are pure data, the engine loads BASS streams as needed. Asset resolution (`AssetRegistry.TryResolveAddress`) is still used at load time; only the `Resource<>` wrapper goes away from the deleted op paths.
 5. **DataClips.** Library + placement model. Designed in `Plan_LiveSessionRecording.md` Phase 3.
 6. **`PlayAudioClip` and `[AudioPlayer]` ops** — unchanged in this plan. They cover the interactive / graph-driven use case the user reaches for via the graph, not the timeline.
+
+## Follow-up feature wishlist (post-v1)
+
+User-captured feature ideas to consider after v1 ships. These are not committed to a phase yet — group/scope them into a follow-up plan once priorities are clear.
+
+### Editing parity with op-clip / operator UX
+- **Mute / disable.** Unify with the operator "disable" toggle for selected items. For a mixed selection of clips (`TimelineAudioClip`, `TimeClip`, future `VideoClip`, …) pressing the disable shortcut:
+  - disables all if any are still enabled,
+  - enables all if all are already disabled.
+  Mute and Disabled become synonymous for audio clips.
+- **Trim to playhead.** Drag-free shortcut: snap selected clip's Start or End to the current play time, clamped to available source content.
+- **Cut at playhead.** Split selected clips at the current play time (mirrors the existing op-clip `SplitClipsAtTime`).
+- **Duplicate.** Duplicate selected clips with `LayerIndex` incremented so the copy lands on the row below.
+- **Rename.** Per-clip display name; falls back to asset filename when empty.
+- **Source-range indicator.** While hovering or dragging body/start/end, draw a ghost outline showing the maximum available content range ("flesh") so the user can see how much more can be revealed by extending.
+
+### Controlling audio from the graph
+- **`ControlTimelineAudioClip` operator.** References a `TimelineAudioClip` by Guid (dropdown in inspector), drives volume, panning, mute, and (long-term) BASS-effect parameters. Needs to evaluate per-frame to feed the engine.
+
+### Long-term ambitions
+- **Clip markers / bookmarks.** Per-clip waypoints with small text labels. Use case: local Whisper / cloud transcription writes SRT data back as markers for voice-over alignment.
+- **Audio pipeline routing.** Named outputs, compressor/effect chains, sidechaining (ducking) between clips.
+- **Clip linking / groups.** Link a set of clips so move/trim/delete propagate together. Especially useful for live-event recordings where an audio clip and its companion IO/data clips must stay in sync.
+
+### DataClip editing (relates to `Plan_LiveSessionRecording.md` Phase 3)
+- Extend the IO Window to edit captured data:
+  - **events** — select, delete, move, edit, quantize, filter / clean up.
+  - **channels** — per-channel inspection and editing.

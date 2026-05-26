@@ -10,6 +10,7 @@ using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
 using T3.Core.Resource;
 using T3.Editor.Gui.Audio;
+using T3.Editor.Gui.Interaction.Snapping;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel.Commands;
@@ -20,7 +21,7 @@ namespace T3.Editor.Gui.Windows.TimeLine.TimeClips;
 
 /// <summary>
 /// Renderer + interaction handler for symbol-level <see cref="TimelineAudioClip"/>s in
-/// <c>LayersArea</c>. These clips are not backed by a <c>SymbolChild</c>; they live in
+/// <see cref="ClipArea"/>. These clips are not backed by a <c>SymbolChild</c>; they live in
 /// <c>composition.Symbol.CompositionSettings.Playback.AudioClips</c> and are drawn
 /// alongside op-backed <c>TimeClip</c>s by <c>TimeClipItem</c>.
 ///
@@ -36,7 +37,9 @@ internal static class TimelineAudioClipItem
         ImDrawListPtr DrawList,
         HashSet<Guid> SelectedAudioClipIds,
         TimeLineCanvas TimeCanvas,
-        Instance Composition);
+        Instance Composition,
+        TimeClipInteractions OpInteractions,
+        ValueSnapHandler SnapHandler);
 
     internal static void DrawClip(TimelineAudioClip clip, ref DrawAttrs attr)
     {
@@ -254,19 +257,81 @@ internal static class TimelineAudioClipItem
                     selected.Add(c);
             }
             if (selected.Count > 0)
+            {
                 AudioClipInteractions.ActiveMoveCommand = new MoveTimelineAudioClipsCommand(attr.Composition, selected);
+                AudioClipInteractions.LayerShiftOnDragStart = 0;
+            }
+
+            // Cross-type drag: when the user drags an audio clip body, op clips in
+            // the op selection move along too.
+            if (mode == DragMode.Body)
+                attr.OpInteractions.StartCrossDrag();
         }
 
         if (!ImGui.IsMouseDragging(0, UserSettings.Config.ClickThreshold))
         {
             if (isDeactivated)
-                CompleteDrag();
+                CompleteDrag(ref attr);
             return;
         }
 
         var mouseDelta = ImGui.GetIO().MouseDelta;
         var timeDelta = (float)attr.TimeCanvas.InverseTransformDirection(new Vector2(mouseDelta.X, 0)).X;
         var playback = attr.TimeCanvas.Playback;
+
+        // Snap-during-drag. Shift / Alt+Ctrl bypass snapping, mirroring the op-clip behavior
+        // in TimeClipItem. The dragged clip is used as the reference edge so a single edge
+        // snaps cleanly; both Start and End are checked for body drags so whichever lands
+        // closest to a snap anchor wins.
+        var allowSnapping = !ImGui.GetIO().KeyShift && !(ImGui.GetIO().KeyAlt && ImGui.GetIO().KeyCtrl);
+        if (allowSnapping)
+        {
+            var snapScale = attr.TimeCanvas.Scale.X;
+            switch (mode)
+            {
+                case DragMode.Body:
+                {
+                    var candidateStart = clip.TimeRange.Start + timeDelta;
+                    var candidateEnd = clip.TimeRange.End + timeDelta;
+                    if (attr.SnapHandler.TryCheckForSnapping(candidateStart, out var snappedStart, snapScale))
+                    {
+                        timeDelta += (float)(snappedStart - candidateStart);
+                    }
+                    else if (attr.SnapHandler.TryCheckForSnapping(candidateEnd, out var snappedEnd, snapScale))
+                    {
+                        timeDelta += (float)(snappedEnd - candidateEnd);
+                    }
+                    break;
+                }
+                case DragMode.Start:
+                {
+                    var candidate = clip.TimeRange.Start + timeDelta;
+                    if (attr.SnapHandler.TryCheckForSnapping(candidate, out var snapped, snapScale))
+                        timeDelta += (float)(snapped - candidate);
+                    break;
+                }
+                case DragMode.End:
+                {
+                    var candidate = clip.TimeRange.End + timeDelta;
+                    if (attr.SnapHandler.TryCheckForSnapping(candidate, out var snapped, snapScale))
+                        timeDelta += (float)(snapped - candidate);
+                    break;
+                }
+            }
+        }
+
+        // Vertical layer shift (Body drag only) — quantise cumulative-from-drag-start mouse Y
+        // into integer LayerIndex deltas and ratchet via LayerShiftOnDragStart so each frame
+        // applies only the incremental shift.
+        var layerIndexDelta = 0;
+        if (mode == DragMode.Body)
+        {
+            var cumulativeDragY = ImGui.GetMouseDragDelta(0).Y;
+            var currentLayerShift = (int)Math.Round(cumulativeDragY / ClipArea.LayerHeight);
+            layerIndexDelta = currentLayerShift - AudioClipInteractions.LayerShiftOnDragStart;
+            if (layerIndexDelta != 0)
+                AudioClipInteractions.LayerShiftOnDragStart = currentLayerShift;
+        }
 
         var allClipsRef = attr.Composition.Symbol.CompositionSettings.Playback.AudioClips;
         foreach (var c in allClipsRef)
@@ -291,6 +356,8 @@ internal static class TimelineAudioClipItem
                     c.TimeRange = new TimeRange(
                         c.TimeRange.Start + timeDelta,
                         c.TimeRange.End + timeDelta);
+                    if (layerIndexDelta != 0)
+                        c.LayerIndex += layerIndexDelta;
                     break;
 
                 case DragMode.Start:
@@ -343,17 +410,26 @@ internal static class TimelineAudioClipItem
             }
         }
 
+        // Cross-type drag: propagate the body drag delta to op clips in the op
+        // selection so a mixed selection moves together. Only Body mode — handle
+        // trims stay per-clip-type.
+        if (mode == DragMode.Body)
+            attr.OpInteractions.ApplyDragDelta(timeDelta, layerIndexDelta);
+
         if (isDeactivated)
-            CompleteDrag();
+            CompleteDrag(ref attr);
     }
 
-    private static void CompleteDrag()
+    private static void CompleteDrag(ref DrawAttrs attr)
     {
-        if (AudioClipInteractions.ActiveMoveCommand == null)
-            return;
-        AudioClipInteractions.ActiveMoveCommand.StoreCurrentValues();
-        UndoRedoStack.Add(AudioClipInteractions.ActiveMoveCommand);
-        AudioClipInteractions.ActiveMoveCommand = null;
+        if (AudioClipInteractions.ActiveMoveCommand != null)
+        {
+            AudioClipInteractions.ActiveMoveCommand.StoreCurrentValues();
+            UndoRedoStack.Add(AudioClipInteractions.ActiveMoveCommand);
+            AudioClipInteractions.ActiveMoveCommand = null;
+        }
+        // Cross-type drag: push the op-side move command if one was built.
+        attr.OpInteractions.CompleteCrossDrag();
     }
 
     /// <summary>

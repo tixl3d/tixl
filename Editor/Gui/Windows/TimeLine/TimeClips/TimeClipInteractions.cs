@@ -37,6 +37,13 @@ internal sealed class TimeClipInteractions
         _getCompositionOp = getCompositionOp;
     }
 
+    /// <summary>
+    /// Back-reference to the audio-clip side, set by <see cref="ClipArea"/> at
+    /// construction. Used by cross-type drag (audio clips in the audio selection
+    /// move along with op-clip body drag).
+    /// </summary>
+    internal AudioClipInteractions? AudioInteractions;
+
     public void SetPlayback(Playback? playback) => _playback = playback;
 
     public void DrawClips(Instance compositionOp, ImRect layerRect, int minLayerIndex, ImDrawListPtr drawList)
@@ -299,6 +306,10 @@ internal sealed class TimeClipInteractions
 
         _moveClipsCommand = new MoveTimeClipsCommand(composition, selection);
         _layerIndexOnDragStart = 0;
+
+        // Cross-type drag: ensure audio clips in the audio selection follow this drag.
+        AudioInteractions?.StartCrossDrag();
+
         return _moveClipsCommand;
     }
 
@@ -309,11 +320,7 @@ internal sealed class TimeClipInteractions
         var dragInside = io.KeyCtrl && io.KeyAlt;
         var lockTime = io.KeyCtrl && !io.KeyAlt;
 
-        if (_context.ClipSelection.SelectedClipsIds.Count == 0)
-            return;
-
         var indexDelta = _layerIndexOnDragStart - (int)(dy / ClipArea.LayerHeight);
-
         if (indexDelta != 0)
             _layerIndexOnDragStart -= indexDelta;
 
@@ -343,6 +350,15 @@ internal sealed class TimeClipInteractions
                 clip.SourceRange.End += (float)dt;
             }
         }
+
+        // Cross-type drag: propagate the same delta to audio clips in the audio
+        // selection. lockTime / dragInside / toggleLinkMode are op-clip-specific
+        // (audio clips don't have a SourceRange-in-bars to manipulate), so we
+        // always apply the simple TimeRange+LayerIndex shift to audio clips when
+        // the user is dragging — unless lockTime is held, in which case neither
+        // side moves time-wise.
+        if (!lockTime)
+            AudioInteractions?.ApplyDragDelta(dt, indexDelta);
     }
 
     public void UpdateDragAtStartPointCommand(double dt, double dv)
@@ -388,6 +404,62 @@ internal sealed class TimeClipInteractions
         if (_moveClipsCommand == null)
             return;
         _moveClipsCommand.StoreCurrentValues();
+        _moveClipsCommand = null;
+
+        // Cross-type drag: also push the audio-side command if one is in flight.
+        AudioInteractions?.CompleteCrossDrag();
+    }
+
+    // ---------------------------------------------------------------------------
+    // Cross-type drag — used when an audio clip body drag should also move op
+    // clips in the op selection.
+    // ---------------------------------------------------------------------------
+
+    /// <summary>
+    /// Builds the op-side <see cref="MoveTimeClipsCommand"/> for the current selection
+    /// so op clips will follow an audio-clip body drag. No-op if no op clips are selected.
+    /// </summary>
+    public void StartCrossDrag()
+    {
+        if (_context.ClipSelection.SelectedClipsIds.Count == 0)
+            return;
+        var composition = _getCompositionOp();
+        var selection = _context.ClipSelection.GetSelectedClips().ToList();
+        if (selection.Count > 0)
+            _moveClipsCommand = new MoveTimeClipsCommand(composition, selection);
+    }
+
+    /// <summary>
+    /// Applies a (dt-in-bars, layerIndexDelta) drag delta to every op clip in the
+    /// current selection. Used by cross-type drag initiated from the audio side.
+    /// SourceRange tracks TimeRange (the natural body-drag invariant) — no support
+    /// for the lockTime / dragInside / toggleLinkMode modifiers in this path.
+    /// </summary>
+    public void ApplyDragDelta(double dtBars, int layerIndexDelta)
+    {
+        if (_context.ClipSelection.SelectedClipsIds.Count == 0)
+            return;
+        foreach (var clipId in _context.ClipSelection.SelectedClipsIds)
+        {
+            if (!_context.ClipSelection.CompositionTimeClips.TryGetValue(clipId, out var clip))
+                continue;
+            clip.TimeRange.Start += (float)dtBars;
+            clip.TimeRange.End += (float)dtBars;
+            clip.SourceRange.Start += (float)dtBars;
+            clip.SourceRange.End += (float)dtBars;
+            clip.LayerIndex += layerIndexDelta;
+        }
+    }
+
+    /// <summary>
+    /// Pushes the op-side move command from a cross-type drag onto the undo stack.
+    /// </summary>
+    public void CompleteCrossDrag()
+    {
+        if (_moveClipsCommand == null)
+            return;
+        _moveClipsCommand.StoreCurrentValues();
+        UndoRedoStack.Add(_moveClipsCommand);
         _moveClipsCommand = null;
     }
 

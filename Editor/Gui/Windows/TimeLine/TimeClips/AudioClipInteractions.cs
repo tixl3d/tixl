@@ -4,10 +4,12 @@ using T3.Core.Animation;
 using T3.Core.Audio;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
+using T3.Editor.Gui.Interaction.Snapping;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Animation;
 using T3.Editor.UiModel.ProjectHandling;
+using T3.Editor.UiModel.Selection;
 
 namespace T3.Editor.Gui.Windows.TimeLine.TimeClips;
 
@@ -21,10 +23,18 @@ namespace T3.Editor.Gui.Windows.TimeLine.TimeClips;
 /// </summary>
 internal sealed class AudioClipInteractions
 {
-    public AudioClipInteractions(ClipArea.LayerContext context)
+    public AudioClipInteractions(ClipArea.LayerContext context, Func<Instance> getCompositionOp)
     {
         _context = context;
+        _getCompositionOp = getCompositionOp;
     }
+
+    /// <summary>
+    /// Back-reference to the op-clip side, set by <see cref="ClipArea"/> at construction.
+    /// Used by cross-type drag (when an audio clip is dragged, op clips in the op
+    /// selection move along) and by other cross-type operations.
+    /// </summary>
+    internal TimeClipInteractions? OpInteractions;
 
     /// <summary>
     /// Cross-frame drag state for moving / trimming <see cref="TimelineAudioClip"/>s.
@@ -32,6 +42,13 @@ internal sealed class AudioClipInteractions
     /// on drag completion. Static because there is at most one active drag in flight.
     /// </summary>
     internal static MoveTimelineAudioClipsCommand? ActiveMoveCommand;
+
+    /// <summary>
+    /// Accumulator for vertical layer-shift during a body drag. Quantises pixel-level
+    /// mouse Y movement into integer <see cref="TimelineAudioClip.LayerIndex"/> changes
+    /// so the clip snaps cleanly between rows. Reset to 0 on drag start.
+    /// </summary>
+    internal static int LayerShiftOnDragStart;
 
     /// <summary>
     /// Selection by clip Guid. Parallel to op-backed <see cref="TimeClipInteractions"/>
@@ -44,7 +61,9 @@ internal sealed class AudioClipInteractions
     {
         var audioClips = compositionOp.Symbol.CompositionSettings.Playback.AudioClips;
         var attrs = new TimelineAudioClipItem.DrawAttrs(
-            layerRect, minLayerIndex, drawList, SelectedClipIds, _context.TimeCanvas, compositionOp);
+            layerRect, minLayerIndex, drawList, SelectedClipIds, _context.TimeCanvas, compositionOp,
+            OpInteractions ?? throw new InvalidOperationException("OpInteractions not set"),
+            _context.SnapHandler);
 
         foreach (var ac in audioClips)
         {
@@ -164,5 +183,138 @@ internal sealed class AudioClipInteractions
             UndoRedoStack.AddAndExecute(new MacroCommand("Drop audio clips", commands));
     }
 
+    // ---------------------------------------------------------------------------
+    // Cross-type drag — used when op-clip body drag should also move audio clips
+    // in the audio selection (and vice versa via TimelineAudioClipItem calling into
+    // TimeClipInteractions).
+    // ---------------------------------------------------------------------------
+
+    /// <summary>
+    /// Builds the audio-side <see cref="MoveTimelineAudioClipsCommand"/> for the current
+    /// selection so audio clips will follow an op-clip body drag. No-op if no audio
+    /// clips are selected.
+    /// </summary>
+    public void StartCrossDrag()
+    {
+        if (SelectedClipIds.Count == 0)
+            return;
+
+        var compositionOp = _getCompositionOp();
+        var allClips = compositionOp.Symbol.CompositionSettings.Playback.AudioClips;
+        var selected = new List<TimelineAudioClip>();
+        foreach (var c in allClips)
+        {
+            if (SelectedClipIds.Contains(c.Id))
+                selected.Add(c);
+        }
+        if (selected.Count > 0)
+        {
+            ActiveMoveCommand = new MoveTimelineAudioClipsCommand(compositionOp, selected);
+            LayerShiftOnDragStart = 0;
+        }
+    }
+
+    /// <summary>
+    /// Applies a (dt-in-bars, layerIndexDelta) drag delta to every audio clip in the
+    /// current selection. Called either by the audio-clip-driven drag loop or by
+    /// <see cref="TimeClipInteractions"/> propagating a cross-type drag.
+    /// </summary>
+    public void ApplyDragDelta(double dtBars, int layerIndexDelta)
+    {
+        if (SelectedClipIds.Count == 0)
+            return;
+
+        var allClips = _getCompositionOp().Symbol.CompositionSettings.Playback.AudioClips;
+        foreach (var c in allClips)
+        {
+            if (!SelectedClipIds.Contains(c.Id))
+                continue;
+            c.TimeRange.Start += (float)dtBars;
+            c.TimeRange.End += (float)dtBars;
+            c.LayerIndex += layerIndexDelta;
+        }
+    }
+
+    /// <summary>
+    /// Pushes the audio-side move command from a cross-type drag onto the undo stack.
+    /// </summary>
+    public void CompleteCrossDrag()
+    {
+        if (ActiveMoveCommand == null)
+            return;
+        ActiveMoveCommand.StoreCurrentValues();
+        UndoRedoStack.Add(ActiveMoveCommand);
+        ActiveMoveCommand = null;
+    }
+
+    // ---------------------------------------------------------------------------
+    // Snap + selection-rect — audio clips contribute to the same operations as op
+    // clips so the user sees a unified clip area.
+    // ---------------------------------------------------------------------------
+
+    public void CheckForSnap(ref SnapResult snapResult)
+    {
+        var compositionOp = _getCompositionOp();
+        var audioClips = compositionOp.Symbol.CompositionSettings.Playback.AudioClips;
+        foreach (var clip in audioClips)
+        {
+            if (clip.IsMainSoundtrack || string.IsNullOrEmpty(clip.AssetPath))
+                continue;
+            if (SelectedClipIds.Contains(clip.Id))
+                continue;
+            snapResult.TryToImproveWithAnchorValue(clip.TimeRange.Start);
+            snapResult.TryToImproveWithAnchorValue(clip.TimeRange.End);
+        }
+    }
+
+    public void UpdateSelectionForArea(ImRect screenArea,
+                                       SelectionFence.SelectModes selectMode,
+                                       Vector2 minScreenPos,
+                                       int minLayerIndex)
+    {
+        if (selectMode == SelectionFence.SelectModes.Replace)
+            SelectedClipIds.Clear();
+
+        var startTime = _context.TimeCanvas.InverseTransformX(screenArea.Min.X);
+        var endTime = _context.TimeCanvas.InverseTransformX(screenArea.Max.X);
+
+        var layerMinIndex = (screenArea.Min.Y - minScreenPos.Y - ClipArea.LayerHeight * 0.5f) / ClipArea.LayerHeight + minLayerIndex;
+        var layerMaxIndex = (screenArea.Max.Y - minScreenPos.Y - ClipArea.LayerHeight * 0.5f) / ClipArea.LayerHeight + minLayerIndex;
+
+        var compositionOp = _getCompositionOp();
+        var audioClips = compositionOp.Symbol.CompositionSettings.Playback.AudioClips;
+        foreach (var clip in audioClips)
+        {
+            if (clip.IsMainSoundtrack || string.IsNullOrEmpty(clip.AssetPath))
+                continue;
+
+            // Effective right edge accounts for the sentinel-End case (length-derived).
+            var hasExplicitEnd = clip.TimeRange.End > clip.TimeRange.Start;
+            var clipEnd = hasExplicitEnd
+                              ? clip.TimeRange.End
+                              : clip.TimeRange.Start + (float)_context.TimeCanvas.Playback.BarsFromSeconds(clip.LengthInSeconds);
+
+            var matches = clip.TimeRange.Start <= endTime
+                          && clipEnd >= startTime
+                          && clip.LayerIndex <= layerMaxIndex
+                          && clip.LayerIndex >= layerMinIndex - 1;
+
+            if (!matches)
+                continue;
+
+            switch (selectMode)
+            {
+                case SelectionFence.SelectModes.Add:
+                case SelectionFence.SelectModes.Replace:
+                    SelectedClipIds.Add(clip.Id);
+                    break;
+                case SelectionFence.SelectModes.Remove:
+                    SelectedClipIds.Remove(clip.Id);
+                    break;
+            }
+        }
+    }
+
     private readonly ClipArea.LayerContext _context;
+    private readonly Func<Instance> _getCompositionOp;
 }
