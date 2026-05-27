@@ -83,14 +83,15 @@ internal static class AssetHandling
 
                                    });
         // Live-session recording: .data files hold a serialised DataSet (see
-        // Core/DataTypes/DataSet/DataSetCache.cs). Drop on the graph creates a DataClip op
-        // wired to the file; drop on the timeline clip area is a future generalisation.
+        // Core/DataTypes/DataSet/DataSetCache.cs). Drop on the graph creates an
+        // LoadDataClip op wired to the file; drop on the timeline clip area is a future
+        // generalisation.
         AssetType.RegisterType(new AssetType("Data", [
                                        FileExtensionRegistry.GetUniqueId("data"),
                                    ])
                                    {
                                        PrimaryOperators =
-                                               [new Guid("4d1c0e80-7b2a-4f6d-9c1b-12d3e4f50607")], // DataClip
+                                               [new Guid("4d1c0e80-7b2a-4f6d-9c1b-12d3e4f50607")], // LoadDataClip
                                        Color = UiColors.ColorForCommands,
                                        IconId = (uint)Icon.FileDocument,
                                        Subfolders = ["dataclips", "data"],

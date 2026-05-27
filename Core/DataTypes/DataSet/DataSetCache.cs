@@ -121,12 +121,23 @@ public static class DataSetCache
     }
 
     // ---------------------------------------------------------------------------
-    // JSON → DataSet. Mirrors the layout produced by DataSet.WriteToFile:
-    //   { "Channels": [ { "Path": "a/b/c", "Type": "float", "Events": [ ... ] } ] }
+    // JSON → DataSet. Mirrors the v1 layout produced by DataSet.WriteToFile:
+    //   {
+    //     "Channels": [
+    //       {
+    //         "Path": ["a", "b", "c"],         // array of segments (no '/' join)
+    //         "Type": "float",
+    //         "Events": [
+    //           { "Time": <num>, "Value": <typed> },                       // plain
+    //           { "Time": <num>, "EndTime": <num>, "Value": <typed> }      // interval
+    //         ]
+    //       }
+    //     ]
+    //   }
     //
-    // Event shape:
-    //   regular DataEvent       — { "TimeCode": <num>, "Value": <typed> }
-    //   DataIntervalEvent       — { "TimeCode": <num>, "Time": <num>, "EndTime": <num>, "Value": <typed> }
+    // Interval events are distinguished by the presence of "EndTime". Plain events use
+    // a single "Time" field — the legacy "TimeCode" key from pre-v1 dev recordings is
+    // not supported (no migration shim by design; the format was not in production yet).
     //
     // For v1 only "float" channels are reconstructed — that's everything the current
     // recorder (MIDI / OSC) produces. Non-float channels are skipped with a warning so
@@ -151,10 +162,16 @@ public static class DataSetCache
                 continue;
             }
 
-            var pathRaw = (string?)channelObj["Path"] ?? string.Empty;
-            var pathSegments = pathRaw.Length == 0
-                                   ? new List<string>()
-                                   : new List<string>(pathRaw.Split('/'));
+            var pathSegments = new List<string>();
+            if (channelObj["Path"] is JArray pathArr)
+            {
+                foreach (var seg in pathArr)
+                {
+                    var s = (string?)seg;
+                    if (s != null)
+                        pathSegments.Add(s);
+                }
+            }
 
             var channel = new DataChannel(typeof(float)) { Path = pathSegments };
             dataSet.Channels.Add(channel);
@@ -167,31 +184,25 @@ public static class DataSetCache
                 if (eventToken is not JObject ev)
                     continue;
 
-                var timeCode = (double?)ev["TimeCode"] ?? 0.0;
-                var endTimeToken = ev["EndTime"];
+                var time = (double?)ev["Time"] ?? 0.0;
                 var value = (float?)ev["Value"] ?? 0f;
+                var endTimeToken = ev["EndTime"];
 
                 if (endTimeToken != null)
                 {
-                    // Interval event. "Time" field is explicit; fall back to TimeCode if absent.
-                    var time = (double?)ev["Time"] ?? timeCode;
                     var endTime = (double?)endTimeToken ?? double.PositiveInfinity;
                     channel.Events.Add(new DataIntervalEvent
                                            {
                                                Time = time,
-                                               TimeCode = timeCode,
                                                EndTime = endTime,
                                                Value = value,
                                            });
                 }
                 else
                 {
-                    // Plain event. WriteToFile only persists TimeCode for these; mirror it into Time
-                    // so DataChannel.FindIndexForTime (which reads Time) works on the loaded data.
                     channel.Events.Add(new DataEvent
                                            {
-                                               Time = timeCode,
-                                               TimeCode = timeCode,
+                                               Time = time,
                                                Value = value,
                                            });
                 }

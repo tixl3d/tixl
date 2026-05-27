@@ -1,0 +1,33 @@
+{
+  "Id": "7e1c4a82-9c5d-4f8e-bd6f-1a2b3c4d5e60"/*SimulateIoData*/,
+  "Description": "Replays one or more recorded DataClips so MidiInput and OscInput operators react identically to live hardware. Use case: tweak audio reactions, midi mappings, and animations against a captured live performance without the original devices plugged in.\n\nClips is a multi-input — wire as many LoadDataClip.Clip outputs as you want; each gets its own source-time cursor and event dispatch.\n\nToggle Enabled to mute the simulation.\n\nDoes NOT trigger Variation/Snapshot surface controllers — those need the active composition state to be reproducible across sessions, which is outside this op's scope.",
+  "SymbolTags": "64",
+  "InputUis": [
+    {
+      "InputId": "9a3e6cb4-be7f-4fb0-df81-3c4d5e6f7182"/*Clips*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Description": "DataClips to replay. Connect multiple LoadDataClip.Clip outputs here; each is dispatched independently."
+    },
+    {
+      "InputId": "bc508ed6-d091-4fc2-fa03-5e6f718293a4"/*Enabled*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      },
+      "Description": "When false, no events are dispatched. Useful for A/B-comparing simulated vs live input."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "58F26C1B-B49B-4626-ACF2-F757182B8EC7"/*Execute*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 400.0
+      }
+    }
+  ]
+}

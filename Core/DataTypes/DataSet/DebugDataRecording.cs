@@ -21,7 +21,6 @@ public static class DebugDataRecording
         var dataEvent = new DataEvent
                             {
                                 Time = Playback.RunTimeInSecs,
-                                TimeCode = Playback.RunTimeInSecs,
                                 Value = data,
                             };
         
@@ -45,7 +44,6 @@ public static class DebugDataRecording
         channel.Events.Add(new DataEvent
                                {
                                    Time = Playback.RunTimeInSecs,
-                                   TimeCode = Playback.RunTimeInSecs,
                                    Value = data,
                                });
     }
@@ -64,7 +62,6 @@ public static class DebugDataRecording
                                {
                                    Time = Playback.RunTimeInSecs,
                                    EndTime = double.PositiveInfinity,
-                                   TimeCode = Playback.RunTimeInSecs,
                                    Value = data,
                                });
     }

@@ -548,13 +548,13 @@ internal sealed class ProjectSettingsWindow : Window
                 FormInputs.AddVerticalSpace();
                 FormInputs.DrawInputLabel("DEV: Record IO data");
 
-                if (DataSetSessionRecorder.IsRecording)
+                if (IoDataSetRecorder.IsRecording)
                 {
                     ImGui.PushStyleColor(ImGuiCol.Button, UiColors.StatusAttention.Rgba);
-                    var label = $"Stop IO recording ({DataSetSessionRecorder.ActiveRecordingPath ?? "?"})";
+                    var label = $"Stop IO recording ({IoDataSetRecorder.ActiveRecordingPath ?? "?"})";
                     if (ImGui.Button(label))
                     {
-                        DataSetSessionRecorder.EndRecording();
+                        IoDataSetRecorder.EndRecording();
                     }
                     ImGui.PopStyleColor();
                 }
@@ -562,7 +562,7 @@ internal sealed class ProjectSettingsWindow : Window
                 {
                     if (ImGui.Button("Start recording IO data"))
                     {
-                        DataSetSessionRecorder.BeginRecording();
+                        IoDataSetRecorder.BeginRecording();
                     }
                 }
 

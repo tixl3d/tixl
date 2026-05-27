@@ -3,6 +3,7 @@ using System.Net.Sockets;
 using System.Text.RegularExpressions;
 using Operators.Utils;
 using Rug.Osc;
+using T3.Core.IO;
 
 namespace Lib.io.osc;
 
@@ -24,6 +25,22 @@ internal sealed class OscInput : Instance<OscInput>, OscConnectionManager.IOscCo
         Contents.UpdateAction += Update;
 
         WasTrigger.UpdateAction += AnimatedUpdate;
+
+        // Receive replayed OSC from SimulateIoData (live-session recording Phase 3c).
+        // Filtering by port + address happens inside HandleSimulatedOsc so the existing
+        // ProcessMessage code path is reused unchanged.
+        SimulatedIoBus.OscEventReceived += HandleSimulatedOsc;
+    }
+
+    private void HandleSimulatedOsc(SimulatedIoBus.SimulatedOscEvent ev)
+    {
+        // Match the OscInput's currently bound port; ignore events for other ports.
+        if (ev.Port != _port)
+            return;
+
+        // Reconstruct an OscMessage and route through the existing handler so the
+        // address-prefix filter, key grouping, search regex etc. all behave identically.
+        ProcessMessage(new OscMessage(ev.Address, ev.Value));
     }
 
     private bool _isListening;
@@ -383,6 +400,7 @@ internal sealed class OscInput : Instance<OscInput>, OscConnectionManager.IOscCo
             return;
 
         OscConnectionManager.UnregisterConsumer(this);
+        SimulatedIoBus.OscEventReceived -= HandleSimulatedOsc;
     }
 
     private static string GetLocalIpAddress()

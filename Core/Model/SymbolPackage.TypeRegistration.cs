@@ -451,6 +451,9 @@ public partial class SymbolPackage
         RegisterType(typeof(DataSet), "DataSet",
                      () => new InputValue<DataSet>());
 
+        RegisterType(typeof(DataClip), "DataClip",
+                     () => new InputValue<DataClip>());
+
         RegisterType(typeof(PbrMaterial), "Material",
                      () => new InputValue<PbrMaterial>());
 

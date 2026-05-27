@@ -39,7 +39,7 @@ namespace T3.Core.IO;
 /// happens at <see cref="BeginRecording"/> / <see cref="EndRecording"/>, not per frame.
 /// </para>
 /// </remarks>
-public sealed class DataSetSessionRecorder : MidiConnectionManager.IMidiConsumer, OscConnectionManager.IOscConsumer, IDisposable
+public sealed class IoDataSetRecorder : MidiConnectionManager.IMidiConsumer, OscConnectionManager.IOscConsumer, IDisposable
 {
     /// <summary>
     /// Starts a new IO recording session. Returns the destination file path that will be
@@ -77,7 +77,7 @@ public sealed class DataSetSessionRecorder : MidiConnectionManager.IMidiConsumer
 
         try
         {
-            _active = new DataSetSessionRecorder(path, CoreSettings.Config.DefaultOscPort);
+            _active = new IoDataSetRecorder(path, CoreSettings.Config.DefaultOscPort);
             Log.Debug($"IO data recording started: {path}");
             return path;
         }
@@ -123,7 +123,7 @@ public sealed class DataSetSessionRecorder : MidiConnectionManager.IMidiConsumer
     public string Path { get; }
     public DataSet DataSet { get; } = new();
 
-    private DataSetSessionRecorder(string path, int oscPort)
+    private IoDataSetRecorder(string path, int oscPort)
     {
         Path = path;
         _recordStartRunSecs = Playback.RunTimeInSecs;
@@ -163,10 +163,13 @@ public sealed class DataSetSessionRecorder : MidiConnectionManager.IMidiConsumer
             return;
 
         var device = MidiConnectionManager.GetDescriptionForMidiIn(midiIn);
-        var deviceName = (device.ProductName
-                          + (device.ProductId is not (0 or 65535)
-                                 ? device.ProductId.ToString()
-                                 : string.Empty)).Replace("/", "_");
+        // Use ProductName verbatim so it matches what MidiInput.Device sees during live
+        // capture — that's the value SimulateIoData hands to MidiInput on replay, and
+        // any divergence here breaks the round-trip. The legacy MidiDataRecording
+        // (always-on, IO Window display only) appends ProductId for disambiguation;
+        // we don't, because MidiInput itself can't distinguish same-name devices either.
+        // Forward slashes still get replaced because the path uses '/' as a separator.
+        var deviceName = device.ProductName.Replace("/", "_");
 
         var t = Playback.RunTimeInSecs - _recordStartRunSecs;
 
@@ -194,7 +197,6 @@ public sealed class DataSetSessionRecorder : MidiConnectionManager.IMidiConsumer
                                                {
                                                    Time = t,
                                                    EndTime = double.PositiveInfinity,
-                                                   TimeCode = t,
                                                    Value = (float)noteEvent.Velocity,
                                                });
                         break;
@@ -206,7 +208,6 @@ public sealed class DataSetSessionRecorder : MidiConnectionManager.IMidiConsumer
                 FindOrCreateControlChangeChannel(deviceName, cc).Events.Add(new DataEvent
                                                                                 {
                                                                                     Time = t,
-                                                                                    TimeCode = t,
                                                                                     Value = (float)cc.ControllerValue,
                                                                                 });
                 break;
@@ -215,7 +216,6 @@ public sealed class DataSetSessionRecorder : MidiConnectionManager.IMidiConsumer
                 FindOrCreatePitchWheelChannel(deviceName, pb).Events.Add(new DataEvent
                                                                              {
                                                                                  Time = t,
-                                                                                 TimeCode = t,
                                                                                  Value = (float)pb.Pitch,
                                                                              });
                 break;
@@ -224,7 +224,6 @@ public sealed class DataSetSessionRecorder : MidiConnectionManager.IMidiConsumer
                 FindOrCreateChannelPressureChannel(deviceName, cat).Events.Add(new DataEvent
                                                                                    {
                                                                                        Time = t,
-                                                                                       TimeCode = t,
                                                                                        Value = (float)cat.AfterTouchPressure,
                                                                                    });
                 break;
@@ -259,7 +258,6 @@ public sealed class DataSetSessionRecorder : MidiConnectionManager.IMidiConsumer
             channel.Events.Add(new DataEvent
                                    {
                                        Time = t,
-                                       TimeCode = t,
                                        Value = value,
                                    });
         }
@@ -278,10 +276,10 @@ public sealed class DataSetSessionRecorder : MidiConnectionManager.IMidiConsumer
                                               {
                                                   Path = new List<string>
                                                              {
-                                                                 MidiNamespacePrefix,
+                                                                 ChannelPaths.MidiNamespacePrefix,
                                                                  deviceName,
-                                                                 ChannelPathPrefix + noteEvent.Channel,
-                                                                 "N" + noteEvent.NoteNumber,
+                                                                 ChannelPaths.ChannelPathPrefix + noteEvent.Channel,
+                                                                 ChannelPaths.MidiNoteTag + noteEvent.NoteNumber,
                                                              },
                                               });
     }
@@ -293,10 +291,10 @@ public sealed class DataSetSessionRecorder : MidiConnectionManager.IMidiConsumer
                                               {
                                                   Path = new List<string>
                                                              {
-                                                                 MidiNamespacePrefix,
+                                                                 ChannelPaths.MidiNamespacePrefix,
                                                                  deviceName,
-                                                                 ChannelPathPrefix + cc.Channel,
-                                                                 "CC" + (int)cc.Controller,
+                                                                 ChannelPaths.ChannelPathPrefix + cc.Channel,
+                                                                 ChannelPaths.MidiControlChangeTag + (int)cc.Controller,
                                                              },
                                               });
     }
@@ -308,10 +306,10 @@ public sealed class DataSetSessionRecorder : MidiConnectionManager.IMidiConsumer
                                               {
                                                   Path = new List<string>
                                                              {
-                                                                 MidiNamespacePrefix,
+                                                                 ChannelPaths.MidiNamespacePrefix,
                                                                  deviceName,
-                                                                 ChannelPathPrefix + pb.Channel,
-                                                                 "PB",
+                                                                 ChannelPaths.ChannelPathPrefix + pb.Channel,
+                                                                 ChannelPaths.MidiPitchBendTag,
                                                              },
                                               });
     }
@@ -323,10 +321,10 @@ public sealed class DataSetSessionRecorder : MidiConnectionManager.IMidiConsumer
                                               {
                                                   Path = new List<string>
                                                              {
-                                                                 MidiNamespacePrefix,
+                                                                 ChannelPaths.MidiNamespacePrefix,
                                                                  deviceName,
-                                                                 ChannelPathPrefix + cat.Channel,
-                                                                 "CP",
+                                                                 ChannelPaths.ChannelPathPrefix + cat.Channel,
+                                                                 ChannelPaths.MidiChannelPressureTag,
                                                              },
                                               });
     }
@@ -339,7 +337,7 @@ public sealed class DataSetSessionRecorder : MidiConnectionManager.IMidiConsumer
                                        var segments = string.IsNullOrEmpty(path)
                                                           ? new List<string> { "/" }
                                                           : new List<string>(path.Split('/'));
-                                       segments[0] = $"{OscNamespacePrefix}:{_oscPort}";
+                                       segments[0] = $"{ChannelPaths.OscNamespacePrefix}:{_oscPort}";
                                        return new DataChannel(typeof(float)) { Path = segments };
                                    });
     }
@@ -355,13 +353,56 @@ public sealed class DataSetSessionRecorder : MidiConnectionManager.IMidiConsumer
         return newChannel;
     }
 
-    private const string MidiNamespacePrefix = "Midi";
-    private const string OscNamespacePrefix = "OSC";
-    private const string ChannelPathPrefix = "Ch";
+    /// <summary>
+    /// Wire-format constants for <see cref="DataChannel.Path"/> segments produced by this
+    /// recorder. Forms the read / write contract between the recorder (here, in
+    /// <c>T3.Core</c>) and the <c>SimulateIoData</c> operator (in <c>Operators/Lib</c>)
+    /// that decodes the segments back into MIDI / OSC events for replay.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Centralised here so renaming a segment is safe-by-construction — both writer and
+    /// reader pick up the change atomically. Adding a new MIDI event family (e.g.
+    /// program change) means adding a new tag here, a writer call site below, and a
+    /// matching decoder branch in <c>SimulateIoData.DispatchMidiChannel</c>.
+    /// </para>
+    /// <para>
+    /// Layouts:
+    /// <list type="bullet">
+    /// <item>MIDI: <c>["Midi", &lt;device&gt;, "Ch&lt;n&gt;", "&lt;tag&gt;&lt;param?&gt;"]</c>
+    ///       where <c>tag</c> is one of <see cref="MidiNoteTag"/>, <see cref="MidiControlChangeTag"/>,
+    ///       <see cref="MidiPitchBendTag"/>, <see cref="MidiChannelPressureTag"/>.</item>
+    /// <item>OSC: <c>["&lt;OscNamespacePrefix&gt;:&lt;port&gt;", ...address segments]</c>.</item>
+    /// </list>
+    /// </para>
+    /// </remarks>
+    public static class ChannelPaths
+    {
+        /// <summary>First segment for every recorded MIDI channel.</summary>
+        public const string MidiNamespacePrefix = "Midi";
+
+        /// <summary>First-segment prefix for OSC channels — followed by <c>:&lt;port&gt;</c>.</summary>
+        public const string OscNamespacePrefix = "OSC";
+
+        /// <summary>Prefix for the channel-number segment, e.g. <c>"Ch1"</c>.</summary>
+        public const string ChannelPathPrefix = "Ch";
+
+        /// <summary>MIDI note channel tag, followed by note number, e.g. <c>"N60"</c>.</summary>
+        public const string MidiNoteTag = "N";
+
+        /// <summary>MIDI control-change channel tag, followed by controller number, e.g. <c>"CC74"</c>.</summary>
+        public const string MidiControlChangeTag = "CC";
+
+        /// <summary>MIDI pitch-bend channel tag — no parameter; one channel per (device, midiChannel).</summary>
+        public const string MidiPitchBendTag = "PB";
+
+        /// <summary>MIDI channel-pressure (aftertouch) tag — no parameter.</summary>
+        public const string MidiChannelPressureTag = "CP";
+    }
 
     private readonly Dictionary<int, DataChannel> _channelsByHash = new();
     private readonly double _recordStartRunSecs;
     private readonly int _oscPort;
 
-    private static DataSetSessionRecorder? _active;
+    private static IoDataSetRecorder? _active;
 }

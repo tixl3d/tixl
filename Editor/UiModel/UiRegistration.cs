@@ -78,8 +78,9 @@ internal static class UiRegistration
                                );
         
         RegisterTypesToProperty(UiProperties.GpuData,
-                                typeof(DataSet), 
-                                typeof(SceneSetup), 
+                                typeof(DataSet),
+                                typeof(DataClip),
+                                typeof(SceneSetup),
                                 typeof(PbrMaterial), 
                                 typeof(Texture3dWithViews), 
                                 typeof(MeshBuffers), 
@@ -123,6 +124,7 @@ internal static class UiRegistration
 
         // Rendering
         RegisterIOType(typeof(DataSet), null, () => new DataSetOutputUi());
+        RegisterIOType(typeof(DataClip), null, () => new DataClipOutputUi());
         RegisterIOType(typeof(Texture2D), null, () => new Texture2dOutputUi());
         RegisterIOType(typeof(Texture3dWithViews), null, () => new Texture3dOutputUi());
         RegisterIOType(typeof(Command), null, () => new CommandOutputUi());

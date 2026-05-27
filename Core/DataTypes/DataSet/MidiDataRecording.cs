@@ -75,7 +75,6 @@ public class MidiDataRecording : MidiConnectionManager.IMidiConsumer
                                                    {
                                                        Time = someTime,
                                                        EndTime = Double.PositiveInfinity,
-                                                       TimeCode = someTime,
                                                        Value = (float)midiNoteEvent.Velocity,
                                                    });
                         break;
@@ -90,7 +89,6 @@ public class MidiDataRecording : MidiConnectionManager.IMidiConsumer
                    .Add(new DataEvent()
                             {
                                 Time = someTime,
-                                TimeCode = someTime,
                                 Value = (float)controlChangeEvent.ControllerValue,
                             });
                 break;
@@ -101,7 +99,6 @@ public class MidiDataRecording : MidiConnectionManager.IMidiConsumer
                    .Add(new DataEvent()
                             {
                                 Time = someTime,
-                                TimeCode = someTime,
                                 Value = (float)pitchWheelChangeEvent.Pitch,
                             });
                 break;
@@ -112,7 +109,6 @@ public class MidiDataRecording : MidiConnectionManager.IMidiConsumer
                    .Add(new DataEvent()
                             {
                                 Time = someTime,
-                                TimeCode = someTime,
                                 Value = (float)channelAfterTouchEvent.AfterTouchPressure,
                             });
                 break;

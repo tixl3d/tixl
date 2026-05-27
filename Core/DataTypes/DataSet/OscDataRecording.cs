@@ -54,7 +54,6 @@ public class OscDataRecording : OscConnectionManager.IOscConsumer, IDisposable
             channel.Events.Add(new DataEvent()
                                    {
                                        Time = Playback.RunTimeInSecs,
-                                       TimeCode = Playback.RunTimeInSecs,
                                        Value = value,
                                    });
         }

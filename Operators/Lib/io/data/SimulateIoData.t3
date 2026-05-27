@@ -1,0 +1,14 @@
+{
+  "Id": "7e1c4a82-9c5d-4f8e-bd6f-1a2b3c4d5e60"/*SimulateIoData*/,
+  "Inputs": [
+    {
+      "Id": "9a3e6cb4-be7f-4fb0-df81-3c4d5e6f7182"/*Clips*/
+    },
+    {
+      "Id": "bc508ed6-d091-4fc2-fa03-5e6f718293a4"/*Enabled*/,
+      "DefaultValue": true
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}
