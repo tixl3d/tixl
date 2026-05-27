@@ -67,9 +67,10 @@ internal sealed class AudioClipInteractions
 
         foreach (var ac in audioClips)
         {
-            // Skip the main soundtrack — it still renders as the timeline background image
-            // via TimeLineImage. Empty AssetPath = unconfigured entry.
-            if (ac.IsMainSoundtrack || string.IsNullOrEmpty(ac.AssetPath))
+            // Skip the main soundtrack — it renders as the timeline background image
+            // via TimeLineImage instead. In-progress recordings (empty AssetPath) still
+            // draw so the user sees the clip growing on the row.
+            if (ac.IsMainSoundtrack)
                 continue;
             TimelineAudioClipItem.DrawClip(ac, ref attrs);
         }
@@ -258,7 +259,7 @@ internal sealed class AudioClipInteractions
         var audioClips = compositionOp.Symbol.CompositionSettings.Playback.AudioClips;
         foreach (var clip in audioClips)
         {
-            if (clip.IsMainSoundtrack || string.IsNullOrEmpty(clip.AssetPath))
+            if (clip.IsMainSoundtrack)
                 continue;
             if (SelectedClipIds.Contains(clip.Id))
                 continue;
@@ -285,7 +286,7 @@ internal sealed class AudioClipInteractions
         var audioClips = compositionOp.Symbol.CompositionSettings.Playback.AudioClips;
         foreach (var clip in audioClips)
         {
-            if (clip.IsMainSoundtrack || string.IsNullOrEmpty(clip.AssetPath))
+            if (clip.IsMainSoundtrack)
                 continue;
 
             // Effective right edge accounts for the sentinel-End case (length-derived).

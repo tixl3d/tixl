@@ -136,12 +136,12 @@ public sealed class TimelineAudioClip
         }
 
         // Heal old data that was saved with Guid.Empty (the "Add soundtrack" button used
-        // to construct clips without initializing Id). Assigning a fresh Guid here means
-        // the next save will write a stable, unique Id.
+        // to construct clips without initializing Id). Silent — the assignment is fully
+        // backward-compatible and gets persisted on the next save; logging once per clip
+        // floods the console on project load when many legacy clips are present.
         if (clipId == Guid.Empty)
         {
             clipId = Guid.NewGuid();
-            Log.Debug("TimelineAudioClip had Guid.Empty as Id; reassigning a fresh one.");
         }
 
         // Back-compat: pre-rewrite projects use FilePath / StartTime / EndTime / Bpm /

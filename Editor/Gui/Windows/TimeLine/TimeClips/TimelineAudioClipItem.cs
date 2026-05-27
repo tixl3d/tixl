@@ -43,9 +43,6 @@ internal static class TimelineAudioClipItem
 
     internal static void DrawClip(TimelineAudioClip clip, ref DrawAttrs attr)
     {
-        if (string.IsNullOrEmpty(clip.AssetPath))
-            return;
-
         // Compute the clip's right edge. When TimeRange.End is the "no explicit end"
         // sentinel (End <= Start), derive it from LengthInSeconds at the current BPM
         // so the body width matches what the engine actually plays.
@@ -119,10 +116,14 @@ internal static class TimelineAudioClipItem
         var iconPos = pos + new Vector2(3, 1) * T3Ui.UiScaleFactor;
         Icons.DrawIconAtScreenPosition(Icon.FileAudio, iconPos, attr.DrawList, UiColors.ForegroundFull);
 
-        // Label
+        // Label — falls back to "(recording…)" while the AssetPath isn't set yet (an
+        // in-progress recording owns its TimelineAudioClip entry with an empty path
+        // until Stop finalises it).
         if (ClipArea.LayerHeight > Fonts.FontSmall.FontSize)
         {
-            var label = Path.GetFileNameWithoutExtension(clip.AssetPath);
+            var label = string.IsNullOrEmpty(clip.AssetPath)
+                            ? "(recording…)"
+                            : Path.GetFileNameWithoutExtension(clip.AssetPath);
             ImGui.PushFont(Fonts.FontSmall);
             var labelSize = ImGui.CalcTextSize(label);
             var labelPos = pos + new Vector2(18, 1) * T3Ui.UiScaleFactor;
@@ -218,7 +219,9 @@ internal static class TimelineAudioClipItem
         var isActive = ImGui.IsItemActive();
         var isDeactivated = ImGui.IsItemDeactivated();
 
-        // Handle plain click (release without drag): manage selection.
+        // Handle plain click (release without drag): manage selection. Plain click clears
+        // op-clip selection too so the two clip types share one unified selection from the
+        // user's POV — Shift/Ctrl preserves both sides for additive selection.
         if (wasClickRelease)
         {
             var io = ImGui.GetIO();
@@ -230,6 +233,7 @@ internal static class TimelineAudioClipItem
             else
             {
                 attr.SelectedAudioClipIds.Clear();
+                attr.OpInteractions.ClearSelection();
                 attr.SelectedAudioClipIds.Add(clip.Id);
             }
         }
@@ -245,7 +249,10 @@ internal static class TimelineAudioClipItem
             if (!attr.SelectedAudioClipIds.Contains(clip.Id))
             {
                 if (!io.KeyShift && !io.KeyCtrl)
+                {
                     attr.SelectedAudioClipIds.Clear();
+                    attr.OpInteractions.ClearSelection();
+                }
                 attr.SelectedAudioClipIds.Add(clip.Id);
             }
 

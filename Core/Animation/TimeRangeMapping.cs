@@ -62,6 +62,28 @@ public readonly struct TimeRangeMapping
     public double LocalBarsToSourceSecs(double localBars)
         => LocalBarsToSourceBars(localBars) * 240.0 / Bpm;
 
+    /// <summary>
+    /// Inverse of <see cref="LocalBarsToSourceBars"/>: maps a source-relative time (bars)
+    /// to its timeline-local position (bars). Useful for rendering source-time events
+    /// (e.g. recorded MIDI / data points) at the right X on the timeline.
+    /// </summary>
+    public double SourceBarsToLocalBars(double sourceBars)
+    {
+        var sourceDur = SourceRange.End - SourceRange.Start;
+        var timeDur = TimeRange.End - TimeRange.Start;
+        if (Math.Abs(sourceDur) < 0.0001f)
+            return TimeRange.Start;
+
+        var rate = timeDur / sourceDur;
+        return TimeRange.Start + (sourceBars - SourceRange.Start) * rate;
+    }
+
+    /// <summary>
+    /// Convenience: <see cref="SourceBarsToLocalBars"/> with the input in seconds.
+    /// </summary>
+    public double SourceSecsToLocalBars(double sourceSecs)
+        => SourceBarsToLocalBars(sourceSecs * Bpm / 240.0);
+
     /// <summary>True if <paramref name="localBars"/> falls inside <see cref="TimeRange"/>.</summary>
     public bool IsActive(double localBars)
         => localBars >= TimeRange.Start && localBars <= TimeRange.End;

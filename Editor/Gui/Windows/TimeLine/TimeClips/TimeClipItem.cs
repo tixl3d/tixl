@@ -35,6 +35,12 @@ internal static class TimeClipItem
                                    attr.LayerRect.Min.Y + (timeClip.LayerIndex - attr.MinLayerIndex) * ClipArea.LayerHeight);
 
         var clipWidth = xEndTime - xStartTime;
+        // Clamp so a freshly-created zero-width clip (e.g. a recording in progress with
+        // TimeRange.Start == TimeRange.End) still submits a hit-testable body and doesn't
+        // trip ImGui's "InvisibleButton size must be non-zero" assert.
+        if (clipWidth < 1)
+            clipWidth = 1;
+
         var showSizeHandles = clipWidth > 4 * HandleWidth;
         var bodyWidth = showSizeHandles
                             ? (clipWidth - 2 * HandleWidth)
@@ -67,15 +73,37 @@ internal static class TimeClipItem
         var fadeIfNotConnected = isConnected ? 1f : 0.2f;
         attr.DrawList.AddRectFilled(position, itemRectMax, randomColor.Fade(0.4f * fadeIfNotConnected * fadeIfInActive), rounding);
 
+        // Live Instance for this clip — used both for the DataClip tick overlay below and
+        // for the filename label further down. Missing = null; both consumers handle.
+        attr.CompositionOp.Children.TryGetChildInstance(timeClip.Id, out var clipInstance);
+
+        // Per-event tick overlay for ops that publish a DataClip. No-op for everything else.
+        if (clipInstance != null)
+        {
+            DataClipBodyRenderer.TryDraw(clipInstance, position, itemRectMax, attr.DrawList);
+        }
+
         if (isSelected)
             attr.DrawList.AddRect(position, itemRectMax, UiColors.Selection, rounding);
 
 
-        // Label
+        // Label — for ops that load from a file (LoadDataClip, future MidiClip etc.), use
+        // the loaded filename instead of the op's symbol name so the user can tell which
+        // recording a clip references without opening the parameter window.
         if(ClipArea.LayerHeight > Fonts.FontSmall.FontSize){
+            var nameSource = symbolChildUi.SymbolChild.ReadableName;
+            if (clipInstance is T3.Core.Operator.Interfaces.IDescriptiveFilename descriptive)
+            {
+                var path = descriptive.SourcePathSlot.TypedInputValue.Value;
+                if (!string.IsNullOrEmpty(path))
+                {
+                    nameSource = System.IO.Path.GetFileNameWithoutExtension(path);
+                }
+            }
+
             var label = timeStretched
-                            ? symbolChildUi.SymbolChild.ReadableName + $" ({timeClip.Speed*100:0.0}%)"
-                            : symbolChildUi.SymbolChild.ReadableName;
+                            ? nameSource + $" ({timeClip.Speed*100:0.0}%)"
+                            : nameSource;
 
             ImGui.PushFont(Fonts.FontSmall);
             var labelSize = ImGui.CalcTextSize(label);

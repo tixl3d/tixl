@@ -129,7 +129,10 @@ internal sealed class ClipArea : ITimeObjectManipulation, IValueSnapAttractor
         var visibleAudioClipCount = 0;
         foreach (var ac in audioClips)
         {
-            if (ac.IsMainSoundtrack || string.IsNullOrEmpty(ac.AssetPath))
+            // Main-soundtrack clips draw as the timeline background image, not as layer
+            // clips. Everything else — including in-progress recordings with empty
+            // AssetPath — gets a row in the clip area.
+            if (ac.IsMainSoundtrack)
                 continue;
             visibleAudioClipCount++;
         }
@@ -150,7 +153,7 @@ internal sealed class ClipArea : ITimeObjectManipulation, IValueSnapAttractor
         }
         foreach (var ac in audioClips)
         {
-            if (ac.IsMainSoundtrack || string.IsNullOrEmpty(ac.AssetPath))
+            if (ac.IsMainSoundtrack)
                 continue;
             _minLayerIndex = Math.Min(ac.LayerIndex, _minLayerIndex);
             _maxLayerIndex = Math.Max(ac.LayerIndex, _maxLayerIndex);
