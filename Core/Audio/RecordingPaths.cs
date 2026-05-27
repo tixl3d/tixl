@@ -8,8 +8,7 @@ using T3.Core.Settings;
 namespace T3.Core.Audio;
 
 /// <summary>
-/// Resolves file-system paths and session indices for live-session recordings
-/// (see <c>.agentic/Plans/Plan_LiveSessionRecording.md</c>).
+/// Resolves file-system paths and session indices for live-session recordings.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -33,9 +32,9 @@ namespace T3.Core.Audio;
 public static class RecordingPaths
 {
     /// <summary>
-    /// Dev-only recordings directory: <c>%APPDATA%\TiXL&lt;version&gt;\Recordings\</c>.
-    /// Used by Phase 1 of the live-session recording feature, replaced by per-project
-    /// <c>Assets/audio/</c> in Phase 4.
+    /// Recordings directory: <c>%APPDATA%\TiXL&lt;version&gt;\Recordings\</c>. Used when
+    /// no project-specific destination is configured. A future per-project
+    /// <c>Assets/audio/</c> destination is on the roadmap but doesn't change this fallback.
     /// </summary>
     public static string DevRecordingsDirectory => Path.Combine(FileLocations.SettingsDirectory, "Recordings");
 

@@ -10,8 +10,7 @@ using T3.Core.Logging;
 namespace T3.Core.DataTypes.DataSet;
 
 /// <summary>
-/// Shared JSON-backed cache for <see cref="DataSet"/> assets loaded from <c>.data</c> files
-/// (live-session recording, see <c>.agentic/Plans/Plan_LiveSessionRecording.md</c> Phase 3b).
+/// Shared JSON-backed cache for <see cref="DataSet"/> assets loaded from <c>.data</c> files.
 /// </summary>
 /// <remarks>
 /// <para>

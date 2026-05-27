@@ -15,27 +15,22 @@ using T3.Core.Settings;
 namespace T3.Core.IO;
 
 /// <summary>
-/// Session-scoped MIDI / OSC recorder for the live-session recording feature
-/// (see <c>.agentic/Plans/Plan_LiveSessionRecording.md</c>, Phase 3a).
+/// Session-scoped MIDI / OSC recorder. A single static façade starts a session, captures
+/// incoming MIDI and OSC events into a fresh <see cref="DataSet"/> with timestamps
+/// relative to record-start, and serialises the result to a <c>.data</c> file on stop.
+/// Mirrors <see cref="T3.Core.Audio.WasapiAudioInput.BeginRecording"/> on the data side.
 /// </summary>
 /// <remarks>
 /// <para>
-/// Mirrors <see cref="T3.Core.Audio.WasapiAudioInput.BeginRecording"/> on the data side:
-/// a single static façade starts a session, captures incoming MIDI and OSC events into a
-/// fresh <see cref="DataSet"/> with timestamps relative to record-start, and serialises
-/// the result to a <c>.data</c> file on stop.
+/// Coexists with the always-on <see cref="MidiDataRecording"/> / <see cref="OscDataRecording"/>
+/// singletons that feed the IO window's live view — events go to both. The always-on path
+/// stamps events with absolute <see cref="Playback.RunTimeInSecs"/> for a continuously
+/// scrolling visualisation; this session path uses elapsed seconds since record-start, so
+/// the saved file's events start at <c>t = 0</c>.
 /// </para>
 /// <para>
-/// This is a parallel consumer to the always-on <see cref="MidiDataRecording"/> and
-/// <see cref="OscDataRecording"/> singletons that feed the IO window's live view —
-/// the two systems coexist (events go to both) and use different time bases. The
-/// always-on path uses absolute <see cref="Playback.RunTimeInSecs"/> for a continuously
-/// scrolling visualisation; the session path uses elapsed seconds since record-start
-/// so the saved file's events start at <c>t = 0</c>.
-/// </para>
-/// <para>
-/// Allocation behaviour: per-event allocations (<see cref="DataEvent"/>, possibly a new
-/// channel on first encounter) are unavoidable, but registration / un-registration only
+/// Allocation behaviour: per-event allocations (<see cref="DataEvent"/>, occasionally a
+/// new channel on first encounter) are unavoidable; registration / un-registration only
 /// happens at <see cref="BeginRecording"/> / <see cref="EndRecording"/>, not per frame.
 /// </para>
 /// </remarks>
@@ -48,8 +43,8 @@ public sealed class IoDataSetRecorder : MidiConnectionManager.IMidiConsumer, Osc
     /// </summary>
     /// <param name="suffix">
     /// Optional filename suffix. Audio sessions use suffixes per source (e.g. <c>mic1</c>);
-    /// for data we record all selected MIDI / OSC sources into a single file so the suffix
-    /// is normally left null. Kept here for symmetry with
+    /// data sessions merge all selected MIDI / OSC sources into a single file so this is
+    /// normally null. Kept for symmetry with
     /// <see cref="T3.Core.Audio.WasapiAudioInput.BeginRecording"/>.
     /// </param>
     public static string? BeginRecording(string? suffix = null)

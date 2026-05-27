@@ -166,41 +166,5 @@ internal sealed class UiElements
         ImGui.EndChild();
     }
 
-    public static void DrawProjectControlToolbar(ProjectView components)
-    {
-        TimeControls.HandleTimeControlActions();
-        if (!UserSettings.Config.ShowToolbar)
-            return;
-
-        ImGui.SetCursorPos(new Vector2(1,
-                                       ImGui.GetWindowSize().Y - TimeControls.ControlSize.Y - 1));
-        // ImGui 1.91 sets an internal IsSetPos flag on SetCursorPos and asserts in End()
-        // if no item is submitted afterwards. Dummy(0,0) submits an empty item which both
-        // clears the flag and validates the extent without visually moving anything.
-        ImGui.Dummy(Vector2.Zero);
-        ImGui.BeginChild("TimeControls", Vector2.Zero, ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoBackground);
-        {
-            var icon = components.TimeLineCanvas.FoldingHeight.UsingCustomTimelineHeight ? Icon.ChevronDown : Icon.ChevronUp;
-            if (CustomComponents.IconButton(icon, TimeControls.ControlSize, CustomComponents.ButtonStates.Dimmed))
-            {
-                components.TimeLineCanvas.FoldingHeight.Toggle();
-                UserSettings.Config.ShowTimeline = true;
-            }
-
-            ImGui.SameLine();
-
-            ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, Vector2.Zero);
-            TimeControls.DrawTimeControls(components.TimeLineCanvas, components.CompositionInstance);
-            ImGui.PopStyleVar();
-            // Use SameLine spacing instead of SetCursorPosX. SetCursorPosX flags the window
-            // as having a manual cursor move, and ImGui 1.91 then asserts at EndChild if the
-            // next code path does not submit an item.
-            ImGui.SameLine(0, 10);
-
-            ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(5, 5));
-            components.GraphImageBackground.DrawToolbarItems();
-            ImGui.PopStyleVar();
-        }
-        ImGui.EndChild();
-    }
+    // DrawProjectControlToolbar moved to Editor/Gui/Windows/TimeLine/TimelineToolbar.cs.
 }

@@ -184,8 +184,7 @@ public static class WasapiAudioInput
     }
 
     /// <summary>
-    /// Starts writing the live WASAPI capture to an uncompressed 16-bit PCM WAV file.
-    /// Phase 1 of the live-session recording feature; the file lands in
+    /// Starts writing the live WASAPI capture to an uncompressed 16-bit PCM WAV file in
     /// <see cref="RecordingPaths.DevRecordingsDirectory"/>.
     /// </summary>
     /// <param name="suffix">Optional source identifier appended to the filename
@@ -466,9 +465,9 @@ public static class WasapiAudioInput
     private static float _lastAudioLevel;
 
     /// <summary>
-    /// Active WAV writer for the live-session recording (Phase 1).
-    /// Set by <see cref="BeginRecording"/>, cleared by <see cref="EndRecording"/> and
-    /// <see cref="Stop"/>. Read on the BASS capture thread inside the callback.
+    /// Active WAV writer. Set by <see cref="BeginRecording"/>, cleared by
+    /// <see cref="EndRecording"/> and <see cref="Stop"/>. Read on the BASS capture thread
+    /// inside the callback.
     /// </summary>
     private static WavFileWriter _activeRecording;
 

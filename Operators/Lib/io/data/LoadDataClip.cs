@@ -8,23 +8,16 @@ namespace Lib.io.data;
 
 /// <summary>
 /// Loads a recorded <c>.data</c> file and presents it as a timeline-bound
-/// <see cref="T3CoreDataClip"/>. The op is the file → clip adapter: it owns the
-/// <see cref="Resource{T}"/> load + <see cref="T3.Core.Animation.TimeClip"/>
-/// placement, then publishes the result as a single <see cref="T3CoreDataClip"/>
-/// output. Downstream ops (<c>SimulateIoData</c>, future analysis ops) consume
-/// the clip and read <c>.Set</c> for content and <c>.Mapping</c> for timing.
+/// <see cref="T3CoreDataClip"/>. Owns the <see cref="Resource{T}"/> load +
+/// <see cref="T3.Core.Animation.TimeClip"/> placement, then publishes the result as a
+/// single <see cref="T3CoreDataClip"/> output. Downstream ops consume the clip and read
+/// <c>.Set</c> for content and <c>.Mapping</c> for timing.
 /// </summary>
 /// <remarks>
-/// <para>
 /// Loading flows through the shared <see cref="DataSetCache"/>, so multiple
 /// <c>LoadDataClip</c> ops referencing the same file share one parsed
-/// <see cref="DataSet"/>. The <c>Resource&lt;DataSet&gt;</c> wrapper additionally
-/// gives file-watch invalidation when the source is re-recorded.
-/// </para>
-/// <para>
-/// Renamed from <c>DataClip</c> (the op) so the value type
-/// <see cref="T3CoreDataClip"/> can own that name unambiguously.
-/// </para>
+/// <see cref="DataSet"/>. The <c>Resource&lt;DataSet&gt;</c> wrapper additionally gives
+/// file-watch invalidation when the source is re-recorded.
 /// </remarks>
 [Guid("4d1c0e80-7b2a-4f6d-9c1b-12d3e4f50607")]
 internal sealed class LoadDataClip : Instance<LoadDataClip>, IStatusProvider, IDescriptiveFilename

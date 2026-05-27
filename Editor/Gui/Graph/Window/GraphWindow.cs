@@ -9,6 +9,7 @@ using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows;
 using T3.Editor.Gui.Windows.Layouts;
+using T3.Editor.Gui.Windows.TimeLine;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
@@ -258,7 +259,7 @@ internal sealed class GraphWindow : Windows.Window
             if (ProjectView == null)
                 return;
 
-            UiElements.DrawProjectControlToolbar(ProjectView);
+            TimelineToolbar.Draw(ProjectView);
         }
 
         // Draw content

@@ -6,11 +6,10 @@ using T3.Core.Logging;
 namespace T3.Core.Audio;
 
 /// <summary>
-/// Streaming RIFF / WAVE writer for 16-bit PCM audio.
-/// Built for the live-session recording feature (see <c>.agentic/Plans/Plan_LiveSessionRecording.md</c>):
-/// opens a file with a placeholder header, accepts interleaved float32 sample buffers
-/// from a WASAPI capture callback, converts to int16 PCM on the fly, and finalises the
-/// RIFF / data chunk sizes on <see cref="Dispose"/>.
+/// Streaming RIFF / WAVE writer for 16-bit PCM audio. Opens a file with a placeholder
+/// header, accepts interleaved float32 sample buffers from a WASAPI capture callback,
+/// converts to int16 PCM on the fly, and finalises the RIFF / data chunk sizes on
+/// <see cref="Dispose"/>.
 /// </summary>
 /// <remarks>
 /// <para>

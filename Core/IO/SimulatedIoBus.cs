@@ -9,23 +9,19 @@ namespace T3.Core.IO;
 /// Parallel dispatch path for replaying recorded IO events through graph-side input
 /// operators (<c>MidiInput</c>, <c>OscInput</c>) without going through the normal
 /// hardware-bound <c>MidiConnectionManager</c> / <c>OscConnectionManager</c> routes.
+/// Makes those ops fire identically whether their events come from a real device or
+/// from a recorded <c>.data</c> file, identified by the same device name.
 /// </summary>
 /// <remarks>
+/// Does <b>not</b> reach <c>CompatibleMidiDevice</c> instances (the surface controllers
+/// driving variations / snapshots) — those filter by <c>sender == _midiInputConnection</c>
+/// and always need a real <see cref="MidiIn"/>. Variation replay is out of scope for
+/// this bus by design.
 /// <para>
-/// Lives next to the connection managers in <c>Core/IO/</c> but does <b>not</b>
-/// reach <c>CompatibleMidiDevice</c> instances (surface controllers driving variations
-/// / snapshots) — those filter by <c>sender == _midiInputConnection</c>, so they
-/// always need a real <see cref="MidiIn"/>. Variation / snapshot replay is explicitly
-/// out of scope for this bus (see <c>.agentic/Plans/Plan_LiveSessionRecording.md</c>
-/// Phase 3c discussion). The bus's job is to make <c>MidiInput</c> / <c>OscInput</c>
-/// fire identically whether their events come from a real device or from a recorded
-/// <c>.data</c> file, identified by the same device name.
-/// </para>
-/// <para>
-/// The <c>SimulateIoData</c> operator (Phase 3c) is the producer; <c>MidiInput</c>
-/// and <c>OscInput</c> opt in as consumers. Real-time recording
+/// The producer side is the <c>SimulateIoData</c> operator; consumers subscribe in
+/// their constructor and unsubscribe on dispose. Real-time recording
 /// (<see cref="IoDataSetRecorder"/>) only listens to the connection managers, so
-/// simulated events do not feed back into the recorder — no recursion guard needed.
+/// simulated events never feed back into a concurrent recording.
 /// </para>
 /// </remarks>
 public static class SimulatedIoBus

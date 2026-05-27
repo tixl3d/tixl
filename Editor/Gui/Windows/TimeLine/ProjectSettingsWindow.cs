@@ -520,9 +520,9 @@ internal sealed class ProjectSettingsWindow : Window
                     ImGui.PopStyleColor();
                 }
 
-                // DEV: live-session recording verification buttons.
-                // Phase 1 (audio) + Phase 3a (data). Both replaced by the real record button
-                // on the timeline toolbar in Phase 4. Files land in
+                // DEV: side-channel single-source recording. The real record button
+                // lives on the timeline toolbar and drives both audio + IO together;
+                // these are kept for testing one side in isolation. Files land in
                 // RecordingPaths.DevRecordingsDirectory.
                 FormInputs.AddVerticalSpace();
                 FormInputs.DrawInputLabel("DEV: Record WAV");

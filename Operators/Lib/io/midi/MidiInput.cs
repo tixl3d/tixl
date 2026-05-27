@@ -49,9 +49,9 @@ public sealed class MidiInput : Instance<MidiInput>, MidiConnectionManager.IMidi
         if (!_initialized)
         {
             MidiConnectionManager.RegisterConsumer(this);
-            // Also subscribe to the simulated-event bus so SimulateIoData (live-session
-            // recording Phase 3c) can drive this MidiInput exactly like a real device,
-            // even when the original controller isn't connected.
+            // Also subscribe to the simulated-event bus so SimulateIoData can drive this
+            // MidiInput exactly like a real device — even without the original controller
+            // connected, matched by device name.
             SimulatedIoBus.MidiEventReceived += HandleSimulatedMidi;
             _initialized = true;
         }

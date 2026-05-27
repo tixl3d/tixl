@@ -127,7 +127,15 @@ What is **missing**: WAV writer, streaming AudioClip playback, DataSet recorder,
 
 **Goal:** End-to-end recording from the UI: one click captures audio + IO into clips placed on the timeline, with visible growth during capture.
 
-**Scope:**
+Sub-phases:
+- **4a — Toolbar refactor.** ✓ `UiElements.DrawProjectControlToolbar` moved to `Editor/Gui/Windows/TimeLine/TimelineToolbar.cs`. Behaviour-preserving. Caller in `GraphWindow` updated.
+- **4b — Basic record button.** ✓ Toggle on the timeline toolbar drives `WasapiAudioInput.BeginRecording` + `IoDataSetRecorder.BeginRecording` in lockstep. Visual: pulsing red filled circle while recording, hollow outline at rest. The button is a **draw-list placeholder** — no `Icon.Record` glyph exists in the atlas yet; flag for icon addition before shipping.
+- **4c — Settings popup.** Gear icon → audio source dropdown, MIDI/OSC source multi-select, start-mode radio. Greyed-but-openable during active recording.
+- **4d — Live op creation during record.** Spawn a `LoadDataClip` op on `maxLayerIndex+1`, extend its `TimeRange.End` each frame. Audio side: append a `TimelineAudioClip` entry to `CompositionSettings.Playback.AudioClips` (symbol-level, not op).
+- **4e — Stop / finalize / macro-command undo.** Close writers, kick off waveform generation, push the whole session as one `MacroCommand`.
+- **4f — DataClip body rendering.** Per-event ticks below ~0.3 events/pixel, density-faded rect above.
+
+**Scope (legacy plan body, kept for reference):**
 - Refactor `UiElements.DrawProjectControlToolbar()` into a new `Editor/Gui/Windows/TimeLine/TimelineToolbar.cs` (rename + move, otherwise behaviour-preserving — small standalone commit at the start of this phase).
 - Add a record toggle icon to the toolbar. While recording: paint red, pulse via the shared `Blink` source.
 - Add a gear icon next to it that opens a small popup:

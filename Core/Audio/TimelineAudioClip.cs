@@ -71,8 +71,6 @@ public sealed record AudioClipResourceHandle(TimelineAudioClip Clip, IResourceCo
 /// while <see cref="SourceOffsetSecs"/> and <see cref="SourceDurationSecs"/> describe
 /// what part of the source file is audible (in seconds). BPM changes never pitch-shift
 /// the audio — they only shift the bar-to-seconds mapping for the timeline.
-///
-/// See <c>.agentic/Plans/Plan_TimelineAudioClips.md</c> for the broader design.
 /// </summary>
 public sealed class TimelineAudioClip
 {
@@ -108,8 +106,7 @@ public sealed class TimelineAudioClip
     /// project should set this — see <c>AudioEngine.ProcessSoundtrackClips</c>'s
     /// <c>handledMainSoundtrack</c> guard.
     ///
-    /// The overload is acknowledged technical debt and may be split in a future change. See
-    /// <c>.agentic/Plans/Plan_TimelineAudioClips.md</c>.
+    /// The overload is acknowledged technical debt and may be split in a future change.
     /// </summary>
     public bool IsMainSoundtrack;
     #endregion

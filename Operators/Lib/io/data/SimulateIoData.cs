@@ -25,8 +25,7 @@ namespace Lib.io.data;
 /// Scope: this op intentionally bypasses <see cref="MidiConnectionManager"/> and
 /// <c>CompatibleMidiDevice</c>. Variation / snapshot recalls do not replay through
 /// this op — they require the active composition's state to be reproducible across
-/// the session, which is out of scope for the live-perf-tweaking use case this op
-/// targets (see <c>.agentic/Plans/Plan_LiveSessionRecording.md</c> Phase 3c).
+/// the session.
 /// </para>
 /// <para>
 /// Time model: events in the underlying <see cref="DataSet"/> are stored in

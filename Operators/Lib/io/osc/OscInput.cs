@@ -26,9 +26,8 @@ internal sealed class OscInput : Instance<OscInput>, OscConnectionManager.IOscCo
 
         WasTrigger.UpdateAction += AnimatedUpdate;
 
-        // Receive replayed OSC from SimulateIoData (live-session recording Phase 3c).
-        // Filtering by port + address happens inside HandleSimulatedOsc so the existing
-        // ProcessMessage code path is reused unchanged.
+        // Receive replayed OSC from SimulateIoData. Filtering by port + address happens
+        // inside HandleSimulatedOsc so the existing ProcessMessage code path is reused.
         SimulatedIoBus.OscEventReceived += HandleSimulatedOsc;
     }
 
