@@ -24,29 +24,28 @@ public static class WasapiAudioInput
 {
     /// <summary>
     /// Processes audio input at the start of each frame.
-    /// Handles device switching, capture restart on failure, and stops capture when not using external audio.
+    /// Handles device switching, capture restart on failure, and stops capture when not
+    /// using external audio. Capture is also kept running while an audio recording
+    /// session is active (<see cref="BeginRecording"/>), regardless of the
+    /// <see cref="CompositionSettings.PlaybackConfig.AudioSource"/> setting — recording
+    /// and FFT analysis are independent capture consumers.
     /// </summary>
     /// <param name="settings">The playback settings containing audio configuration. If null, no action is taken.</param>
-    /// <remarks>
-    /// This method should be called once per frame. It manages the following:
-    /// <list type="bullet">
-    /// <item>Stops capture if audio source is not set to external device</item>
-    /// <item>Attempts to restart capture if previous FFT data fetch failed</item>
-    /// <item>Initializes capture for the specified input device</item>
-    /// </list>
-    /// </remarks>
     public static void StartFrame(CompositionSettings settings)
     {
         if (settings == null)
             return;
-                    
-        if (settings.Playback.AudioSource != CompositionSettings.AudioSources.ExternalDevice)
+
+        var wantsCaptureForFft = settings.Playback.AudioSource == CompositionSettings.AudioSources.ExternalDevice;
+        var wantsCaptureForRecording = _isCaptureNeededForRecording;
+
+        if (!wantsCaptureForFft && !wantsCaptureForRecording)
         {
             if (!string.IsNullOrEmpty(ActiveInputDeviceName))
             {
                 Stop();
             }
-            return ;
+            return;
         }
 
         var deviceName = settings.Playback.AudioInputDeviceName;
@@ -60,22 +59,37 @@ public static class WasapiAudioInput
             _failedToGetLastFffData = false;
         }
             
+        // No configured device name. For FFT capture this is an error (user has
+        // ExternalDevice mode but no device picked). For recording-only capture
+        // (AudioSource is ProjectSoundtrack but a record session is active), silently
+        // fall back to the system default input so the recording still gets audio.
         if (string.IsNullOrEmpty(deviceName))
         {
-            if (_complainedOnce)
-                return ;
-                
-            Log.Warning("Can't switch to WASAPI device without a name");
-            _complainedOnce = true;
-            return ;
+            if (wantsCaptureForFft)
+            {
+                if (_complainedOnce)
+                    return;
+
+                Log.Warning("Can't switch to WASAPI device without a name");
+                _complainedOnce = true;
+                return;
+            }
+
+            // Recording-only path: pick the first available input device.
+            if (InputDevices.Count == 0)
+                return;
+
+            StartInputCapture(InputDevices[0]);
+            _complainedOnce = false;
+            return;
         }
-        
+
         var device = InputDevices.FirstOrDefault(d => d.DeviceInfo.Name == deviceName);
         if (device == null)
         {
             Log.Warning($"Can't find input device {deviceName}");
             _complainedOnce = true;
-            return ;
+            return;
         }
 
         StartInputCapture(device);
@@ -192,15 +206,26 @@ public static class WasapiAudioInput
     /// <returns>The absolute path of the WAV file, or <c>null</c> if recording could not start.</returns>
     public static string BeginRecording(string suffix = null)
     {
-        if (string.IsNullOrEmpty(ActiveInputDeviceName))
-        {
-            Log.Warning("Cannot start WAV recording: no active WASAPI input device. Select an input device in Playback Settings first.");
-            return null;
-        }
-
         if (_activeRecording != null)
         {
             Log.Warning($"WAV recording already active at '{_activeRecording.Path}'. Call EndRecording first.");
+            return null;
+        }
+
+        // Mark capture as needed for recording so StartFrame won't tear it down even if
+        // the composition's AudioSource is something other than ExternalDevice. If WASAPI
+        // isn't running yet, bring it up on demand using whatever input device is
+        // configured — or fall back to the system default.
+        _isCaptureNeededForRecording = true;
+        if (string.IsNullOrEmpty(ActiveInputDeviceName))
+        {
+            EnsureCaptureRunningForRecording();
+        }
+
+        if (string.IsNullOrEmpty(ActiveInputDeviceName))
+        {
+            _isCaptureNeededForRecording = false;
+            Log.Warning("Cannot start WAV recording: no WASAPI input device available.");
             return null;
         }
 
@@ -254,8 +279,38 @@ public static class WasapiAudioInput
         _activeRecording = null;
         writer.Dispose();
 
+        // Recording is done; let StartFrame tear capture down again on the next tick
+        // (it will, if AudioSource isn't ExternalDevice). Holding capture alive until the
+        // next frame avoids a stutter if BeginRecording is called again immediately.
+        _isCaptureNeededForRecording = false;
+
         Log.Debug($"WAV recording stopped: {writer.Path} ({writer.DurationSeconds:F1} s, {writer.BytesWritten} bytes)");
         return writer.Path;
+    }
+
+    /// <summary>
+    /// Brings WASAPI capture up on demand when a recording is requested but no capture
+    /// is currently active (because the composition's AudioSource isn't ExternalDevice).
+    /// Picks the configured input device if one is set, else the first available.
+    /// </summary>
+    private static void EnsureCaptureRunningForRecording()
+    {
+        var configuredDeviceName = Playback.Current?.Settings?.Playback.AudioInputDeviceName;
+
+        WasapiInputDevice device = null;
+        if (!string.IsNullOrEmpty(configuredDeviceName))
+            device = InputDevices.FirstOrDefault(d => d.DeviceInfo.Name == configuredDeviceName);
+
+        if (device == null && InputDevices.Count > 0)
+            device = InputDevices[0];
+
+        if (device == null)
+        {
+            Log.Warning("Cannot start WASAPI capture for recording: no input devices available.");
+            return;
+        }
+
+        StartInputCapture(device);
     }
 
     /// <summary>True while a WAV recording session is active.</summary>
@@ -269,6 +324,15 @@ public static class WasapiAudioInput
     /// Used to prevent repeated log spam.
     /// </summary>
     private static bool _complainedOnce;
+
+    /// <summary>
+    /// True while a recording session needs WASAPI capture running, regardless of the
+    /// composition's <see cref="CompositionSettings.PlaybackConfig.AudioSource"/>. Set by
+    /// <see cref="BeginRecording"/>, cleared by <see cref="EndRecording"/>. Lets the
+    /// FFT-input and recording paths use the WASAPI input independently — the OS allows
+    /// simultaneous render-and-capture, so there's no hardware reason to couple them.
+    /// </summary>
+    private static bool _isCaptureNeededForRecording;
     
     /// <summary>
     /// Enumerates and initializes the list of available WASAPI input devices.
