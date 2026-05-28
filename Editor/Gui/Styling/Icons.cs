@@ -303,6 +303,7 @@ internal static class Icons
             new(Icon.InterpolateBrokenTangents, slotIndex: 146),
             new(Icon.NormalizeCurves, slotIndex: 147),
             new(Icon.Error, slotIndex: 148),
+            new(Icon.Record, slotIndex: 149),
         };
 
     public static readonly string IconAtlasPath = Path.Combine(SharedResources.EditorResourcesDirectory, @"images/t3-icons.png");
@@ -469,5 +470,6 @@ public enum Icon
     InterpolateSmooth,
     InterpolateBrokenTangents,
     NormalizeCurves,
-    Error
+    Error,
+    Record
 }

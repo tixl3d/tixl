@@ -520,52 +520,6 @@ internal sealed class ProjectSettingsWindow : Window
                     ImGui.PopStyleColor();
                 }
 
-                // DEV: side-channel single-source recording. The real record button
-                // lives on the timeline toolbar and drives both audio + IO together;
-                // these are kept for testing one side in isolation. Files land in
-                // RecordingPaths.DevRecordingsDirectory.
-                FormInputs.AddVerticalSpace();
-                FormInputs.DrawInputLabel("DEV: Record WAV");
-
-                if (WasapiAudioInput.IsRecording)
-                {
-                    ImGui.PushStyleColor(ImGuiCol.Button, UiColors.StatusAttention.Rgba);
-                    var label = $"Stop recording ({WasapiAudioInput.ActiveRecordingPath ?? "?"})";
-                    if (ImGui.Button(label))
-                    {
-                        WasapiAudioInput.EndRecording();
-                    }
-                    ImGui.PopStyleColor();
-                }
-                else
-                {
-                    if (ImGui.Button("Start recording WAV"))
-                    {
-                        WasapiAudioInput.BeginRecording();
-                    }
-                }
-
-                FormInputs.AddVerticalSpace();
-                FormInputs.DrawInputLabel("DEV: Record IO data");
-
-                if (IoDataSetRecorder.IsRecording)
-                {
-                    ImGui.PushStyleColor(ImGuiCol.Button, UiColors.StatusAttention.Rgba);
-                    var label = $"Stop IO recording ({IoDataSetRecorder.ActiveRecordingPath ?? "?"})";
-                    if (ImGui.Button(label))
-                    {
-                        IoDataSetRecorder.EndRecording();
-                    }
-                    ImGui.PopStyleColor();
-                }
-                else
-                {
-                    if (ImGui.Button("Start recording IO data"))
-                    {
-                        IoDataSetRecorder.BeginRecording();
-                    }
-                }
-
                 ImGui.EndGroup();
                 break;
             }

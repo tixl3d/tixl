@@ -164,12 +164,11 @@ public sealed class IoDataSetRecorder : MidiConnectionManager.IMidiConsumer, Osc
 
         var device = MidiConnectionManager.GetDescriptionForMidiIn(midiIn);
         // Use ProductName verbatim so it matches what MidiInput.Device sees during live
-        // capture — that's the value SimulateIoData hands to MidiInput on replay, and
-        // any divergence here breaks the round-trip. The legacy MidiDataRecording
-        // (always-on, IO Window display only) appends ProductId for disambiguation;
-        // we don't, because MidiInput itself can't distinguish same-name devices either.
-        // Forward slashes still get replaced because the path uses '/' as a separator.
-        var deviceName = device.ProductName.Replace("/", "_");
+        // capture. SimulateIoData hands this same name to MidiInput on replay; any
+        // divergence here breaks the round-trip. MidiDataRecording (always-on, IO Window
+        // display only) appends ProductId for visual disambiguation; we don't, because
+        // MidiInput itself can't distinguish same-name devices either.
+        var deviceName = device.ProductName;
 
         var t = Playback.RunTimeInSecs - _recordStartRunSecs;
 

@@ -3,6 +3,7 @@
 using ImGuiNET;
 using T3.Core.Animation;
 using T3.Core.Audio;
+using T3.Core.DataTypes.Vector;
 using T3.Core.IO;
 using T3.Core.Logging;
 using T3.Core.Settings;
@@ -73,9 +74,9 @@ internal static class TimelineToolbar
     /// stop drops the recordings onto the active composition's timeline.
     /// </summary>
     /// <remarks>
-    /// Visual: a filled red circle while recording (pulsing via a local
-    /// <see cref="ImGui.GetTime"/> sine), a hollow outline at rest. Drawn as a draw-list
-    /// primitive — no atlas glyph for "record" exists yet.
+    /// Visual: <see cref="Icon.Record"/> glyph, tinted by state — pulsing
+    /// <see cref="UiColors.StatusAttention"/> while recording, hovered colour at rest,
+    /// faded when disabled.
     /// </remarks>
     private static void DrawRecordButton(ProjectView components)
     {
@@ -93,29 +94,33 @@ internal static class TimelineToolbar
 
         var size = TimeControls.ControlSize;
         var clicked = ImGui.InvisibleButton("##RecordToggle", size);
-        var min = ImGui.GetItemRectMin();
-        var max = ImGui.GetItemRectMax();
-        var center = (min + max) * 0.5f;
-        var radius = MathF.Min(size.X, size.Y) * 0.32f;
+        var itemMin = ImGui.GetItemRectMin();
+        var itemMax = ImGui.GetItemRectMax();
+        var itemCenter = (itemMin + itemMax) * 0.5f;
 
         var drawList = ImGui.GetWindowDrawList();
         var hovered = ImGui.IsItemHovered();
 
+        Color iconColor;
         if (isRecording)
         {
             // Pulse via sine. Local computation; if more toolbar items need pulse later,
             // promote to a shared helper.
             var pulse = MathF.Sin((float)ImGui.GetTime() * 4f) * 0.25f + 0.75f;
-            var color = UiColors.StatusAttention.Fade(pulse);
-            drawList.AddCircleFilled(center, radius, color);
+            iconColor = UiColors.StatusAttention.Fade(pulse);
+        }
+        else if (!enabled)
+        {
+            iconColor = UiColors.TextMuted.Fade(0.3f);
         }
         else
         {
-            var baseColor = enabled
-                                ? (hovered ? UiColors.StatusAttention : UiColors.TextMuted)
-                                : UiColors.TextMuted.Fade(0.3f);
-            drawList.AddCircle(center, radius, baseColor, 0, 2 * T3Ui.UiScaleFactor);
+            iconColor = hovered ? UiColors.StatusAttention : UiColors.TextMuted;
         }
+
+        // Centre the glyph on the button rect — pass the button size so the icon scales
+        // with the control rather than rendering at its native atlas size.
+        Icons.DrawIconAtScreenPosition(Icon.Record, itemMin, size, drawList, iconColor);
 
         if (hovered)
         {

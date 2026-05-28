@@ -235,3 +235,12 @@ Open the **Clip Timing Editor** to set precise times for one or more selected cl
 ![Clip timing editor](/images/Animation/anim-10.gif)
 
 When a selection contains multiple values, the editor shows `NaN` for the mismatched field — type a number to set it across all selected clips at once.
+
+### Audio and data clips
+
+In addition to op-backed time clips, the timeline also hosts two clip types that aren't tied to a graph operator:
+
+- **Audio clips** are placed by dropping a `.wav` / `.mp3` / `.ogg` onto the clip area. They render as waveform bodies and play back through the audio engine.
+- **Data clips** are produced by recording a live session (see [Recording](./Recording.md)) or by dropping a `.data` file. They render with per-event tick marks across the body — sparse recordings show every event, dense ones show a soft fill.
+
+Both types share the timeline with op-backed clips: same drag, trim, snap, and selection behavior across all three. Selecting a clip of one type clears selection on the other types unless you hold `Shift` or `Ctrl`.

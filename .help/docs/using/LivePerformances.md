@@ -83,6 +83,10 @@ You can use [LinkToMidiTime] to control the playback time using a MIDI clock. Th
 
 You can use a virtual MIDI device like [LoopBe1](https://www.nerds.de/en/loopbe1.html) to forward the MIDI events.
 
+## Recording a session
+
+You can capture a live performance — audio and the MIDI / OSC events that drove it — with a single click on the timeline toolbar's record button, then replay it later to tune the visuals against the exact session you played. See [Recording](./Recording.md) for details.
+
 ## Advanced Steps
 
 In addition to the basic setups described above, TiXL offers many advanced features that can help you create complex, sophisticated live performance setups. Here are a few examples:
