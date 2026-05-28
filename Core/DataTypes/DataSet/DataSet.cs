@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using T3.Core.Logging;
 using T3.Core.Model;
 
@@ -19,35 +20,58 @@ namespace T3.Core.DataTypes.DataSet;
 /// </summary>
 public sealed class DataSet
 {
+    /// <summary>
+    /// On-disk format version. New files always write <see cref="CurrentVersion"/>;
+    /// old files without the key are treated as v1. Bumping the version lets a future
+    /// reader degrade gracefully (warn and load what it understands) rather than fail.
+    /// </summary>
+    public int Version { get; set; } = CurrentVersion;
+
+    /// <summary>
+    /// Optional session-level metadata bag — null when unused. Use for things that don't
+    /// belong on a channel or event: recording-fps, source device tree, session notes,
+    /// the wall-clock timestamp the recording started, etc. Backed by <see cref="JObject"/>
+    /// so arbitrary JSON shapes round-trip without per-key allocations.
+    /// </summary>
+    public JObject? Metadata { get; set; }
+
     public List<DataChannel> Channels { get; set; } = new();
+
+    /// <summary>Current writer version. Old readers ignore the key; new readers honour it.</summary>
+    public const int CurrentVersion = 1;
 
     public void Clear()
     {
         Channels.Clear();
+        Metadata = null;
     }
 
     /// <summary>
-    /// Serialises the dataset to <paramref name="path"/> as JSON. Used by the live-session
-    /// recording feature (<see cref="T3.Core.IO.IoDataSetRecorder"/>) to persist a captured
-    /// session as a <c>.data</c> asset for later playback through an <c>LoadDataClip</c>
-    /// operator.
+    /// Serialises the dataset to <paramref name="path"/> as JSON.
     /// </summary>
     /// <remarks>
     /// On-disk shape (v1):
     /// <code>
     /// {
+    ///   "Version": 1,                         // optional, defaults to 1 if absent
+    ///   "Metadata": { ... },                  // optional, omitted when null
     ///   "Channels": [
     ///     {
     ///       "Path": ["Midi", "&lt;device&gt;", "Ch&lt;n&gt;", "CC74"],
     ///       "Type": "float",
+    ///       "DurationType": "Tick",           // optional; old files sniff per event
+    ///       "Metadata": { ... },              // optional, omitted when null
     ///       "Events": [
-    ///         { "Time": 0.301, "Value": 70.0 },                          // plain event
+    ///         { "Time": 0.301, "Value": 70.0 },                          // point event
     ///         { "Time": 1.5,   "EndTime": 2.0, "Value": 1.0 }            // interval event
     ///       ]
     ///     }
     ///   ]
     /// }
     /// </code>
+    /// All event-shape information lives on the channel (<see cref="DataChannel.DurationType"/>),
+    /// not per event — events are the hot multiplicand, so duration-type / metadata stay
+    /// channel-level.
     /// </remarks>
     public void WriteToFile(string path)
     {
@@ -56,6 +80,16 @@ public sealed class DataSet
 
         writer.Formatting = Formatting.Indented;
         writer.WriteStartObject();
+
+        writer.WritePropertyName("Version");
+        writer.WriteValue(Version);
+
+        if (Metadata != null && Metadata.HasValues)
+        {
+            writer.WritePropertyName("Metadata");
+            Metadata.WriteTo(writer);
+        }
+
         writer.WritePropertyName("Channels");
         writer.WriteStartArray();
 
@@ -71,7 +105,7 @@ public sealed class DataSet
 
 public sealed class DataChannel
 {
-    internal DataChannel(Type type)
+    internal DataChannel(Type type, string durationType = ChannelDurationTypes.Tick)
     {
         _type = type;
 
@@ -81,12 +115,27 @@ public sealed class DataChannel
         }
 
         _typeName = typeName;
+        DurationType = durationType;
     }
 
     public required List<string> Path { get; init; }
+
+    /// <summary>
+    /// Whether events on this channel occupy a moment in time (tick) or span a duration
+    /// (interval). Channel-level so high-cardinality streams (e.g. 30 Hz CC) don't pay
+    /// per-event overhead. Use <see cref="ChannelDurationTypes"/> constants — the value
+    /// is a string so future shapes can be added without subclass churn.
+    /// </summary>
+    public string DurationType { get; init; }
+
+    /// <summary>
+    /// Optional channel-level metadata bag — null when unused. Use for display label,
+    /// color, source device info, controller-friendly-name, etc. Backed by
+    /// <see cref="JObject"/> so arbitrary JSON shapes round-trip without per-key allocations.
+    /// </summary>
+    public JObject? Metadata { get; set; }
+
     public List<DataEvent?> Events { get; set; } = new(100);
-    private readonly Type _type;
-    private readonly string _typeName;
 
     public DataEvent? GetLastEvent()
     {
@@ -116,6 +165,15 @@ public sealed class DataChannel
 
             writer.WritePropertyName("Type");
             writer.WriteValue(_typeName);
+
+            writer.WritePropertyName("DurationType");
+            writer.WriteValue(DurationType);
+
+            if (Metadata != null && Metadata.HasValues)
+            {
+                writer.WritePropertyName("Metadata");
+                Metadata.WriteTo(writer);
+            }
 
             writer.WritePropertyName("Events");
             writer.WriteStartArray();
@@ -160,6 +218,23 @@ public sealed class DataChannel
         }
         return firstIndex;
     }
+
+    private readonly Type _type;
+    private readonly string _typeName;
+}
+
+/// <summary>
+/// Event duration-type discriminators stored in <see cref="DataChannel.DurationType"/>.
+/// New values can be added freely; readers that don't recognise the string fall back to
+/// sniffing the event payload, so additions are safe for old code.
+/// </summary>
+public static class ChannelDurationTypes
+{
+    /// <summary>Moment-in-time events: <c>{ Time, Value }</c>. The common case (MIDI CC, OSC, telemetry).</summary>
+    public const string Tick = "Tick";
+
+    /// <summary>Events with duration: <c>{ Time, EndTime, Value }</c>. MIDI notes, subtitles, regions.</summary>
+    public const string Interval = "Interval";
 }
 
 public class DataEvent

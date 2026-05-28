@@ -16,14 +16,14 @@ public static class DebugDataRecording
 
     public static void KeepTraceData(string path, object data, ref DataChannel channel)
     {
-        channel ??= FindOrCreateChannel(path);
+        channel ??= FindOrCreateChannel(path, ChannelDurationTypes.Tick);
 
         var dataEvent = new DataEvent
                             {
                                 Time = Playback.RunTimeInSecs,
                                 Value = data,
                             };
-        
+
         lock (channel.Events)
         {
             channel.Events.Add(dataEvent);
@@ -39,7 +39,7 @@ public static class DebugDataRecording
     public static void KeepTraceData(Instance instance, string path, object data, ref DataChannel channel)
     {
         var instancePath = instance.Symbol.Name + instance.SymbolChildId.ToString()[..4] + "/" + path;
-        channel ??= FindOrCreateChannel(instancePath);
+        channel ??= FindOrCreateChannel(instancePath, ChannelDurationTypes.Tick);
 
         channel.Events.Add(new DataEvent
                                {
@@ -56,8 +56,8 @@ public static class DebugDataRecording
 
     public static void StartRegion(string path, object data, ref DataChannel channel)
     {
-        channel ??= FindOrCreateChannel(path);
-        
+        channel ??= FindOrCreateChannel(path, ChannelDurationTypes.Interval);
+
         channel.Events.Add(new DataIntervalEvent()
                                {
                                    Time = Playback.RunTimeInSecs,
@@ -79,7 +79,7 @@ public static class DebugDataRecording
     }
     
     
-    private static DataChannel FindOrCreateChannel(string path)
+    private static DataChannel FindOrCreateChannel(string path, string kind)
     {
         var hash = path.GetHashCode();
 
@@ -92,7 +92,7 @@ public static class DebugDataRecording
 
         pathSegments.Insert(0, ChannelNamespacePrefix);
 
-        var newChannel = new DataChannel(typeof(float))
+        var newChannel = new DataChannel(typeof(float), kind)
                              {
                                  Path = pathSegments
                              };

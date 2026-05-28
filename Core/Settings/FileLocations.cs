@@ -83,7 +83,16 @@ public static string TestReferencesFolder => Path.Combine(".tixl", TestsSubFolde
 
                      //, Process.GetCurrentProcess().ProcessName
                      );
-    private static string GetAssemblyVersion()
+    private static string GetAssemblyVersion() => TixlVersion;
+
+    /// <summary>
+    /// TiXL's <c>major.minor</c> version, read from the executing assembly. Used in
+    /// settings folder names and stamped into recording metadata so users can later see
+    /// which build produced a given file. Falls back to <c>"0.0"</c> if reflection fails.
+    /// </summary>
+    public static readonly string TixlVersion = ReadTixlVersionOrFallback();
+
+    private static string ReadTixlVersionOrFallback()
     {
         var version = Assembly.GetExecutingAssembly().GetName().Version;
         return version == null ? "0.0" : $"{version.Major}.{version.Minor}";

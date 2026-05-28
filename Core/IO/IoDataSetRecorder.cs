@@ -101,6 +101,7 @@ public sealed class IoDataSetRecorder : MidiConnectionManager.IMidiConsumer, Osc
         try
         {
             active.Dispose();
+            StampRecordingMetadata(active.DataSet, active.SessionStartUtc);
             active.DataSet.WriteToFile(active.Path);
             Log.Debug($"IO data recording stopped: {active.Path} ({active.DataSet.Channels.Count} channel(s))");
             return active.Path;
@@ -118,10 +119,14 @@ public sealed class IoDataSetRecorder : MidiConnectionManager.IMidiConsumer, Osc
     public string Path { get; }
     public DataSet DataSet { get; } = new();
 
+    /// <summary>Wall-clock UTC moment the session started. Stamped into file metadata on stop.</summary>
+    public DateTime SessionStartUtc { get; }
+
     private IoDataSetRecorder(string path, int oscPort)
     {
         Path = path;
         _recordStartRunSecs = Playback.RunTimeInSecs;
+        SessionStartUtc = DateTime.UtcNow;
 
         MidiConnectionManager.RegisterConsumer(this);
 
@@ -267,7 +272,7 @@ public sealed class IoDataSetRecorder : MidiConnectionManager.IMidiConsumer, Osc
     private DataChannel FindOrCreateNoteChannel(string deviceName, NoteEvent noteEvent)
     {
         var hash = HashCode.Combine(deviceName, "note", noteEvent.Channel, noteEvent.NoteNumber);
-        return GetOrAddChannel(hash, () => new DataChannel(typeof(float))
+        return GetOrAddChannel(hash, () => new DataChannel(typeof(float), ChannelDurationTypes.Interval)
                                               {
                                                   Path = new List<string>
                                                              {
@@ -282,7 +287,7 @@ public sealed class IoDataSetRecorder : MidiConnectionManager.IMidiConsumer, Osc
     private DataChannel FindOrCreateControlChangeChannel(string deviceName, ControlChangeEvent cc)
     {
         var hash = HashCode.Combine(deviceName, "cc", cc.Channel, (int)cc.Controller);
-        return GetOrAddChannel(hash, () => new DataChannel(typeof(float))
+        return GetOrAddChannel(hash, () => new DataChannel(typeof(float), ChannelDurationTypes.Tick)
                                               {
                                                   Path = new List<string>
                                                              {
@@ -297,7 +302,7 @@ public sealed class IoDataSetRecorder : MidiConnectionManager.IMidiConsumer, Osc
     private DataChannel FindOrCreatePitchWheelChannel(string deviceName, PitchWheelChangeEvent pb)
     {
         var hash = HashCode.Combine(deviceName, "pb", pb.Channel);
-        return GetOrAddChannel(hash, () => new DataChannel(typeof(float))
+        return GetOrAddChannel(hash, () => new DataChannel(typeof(float), ChannelDurationTypes.Tick)
                                               {
                                                   Path = new List<string>
                                                              {
@@ -312,7 +317,7 @@ public sealed class IoDataSetRecorder : MidiConnectionManager.IMidiConsumer, Osc
     private DataChannel FindOrCreateChannelPressureChannel(string deviceName, ChannelAfterTouchEvent cat)
     {
         var hash = HashCode.Combine(deviceName, "cp", cat.Channel);
-        return GetOrAddChannel(hash, () => new DataChannel(typeof(float))
+        return GetOrAddChannel(hash, () => new DataChannel(typeof(float), ChannelDurationTypes.Tick)
                                               {
                                                   Path = new List<string>
                                                              {
@@ -333,7 +338,7 @@ public sealed class IoDataSetRecorder : MidiConnectionManager.IMidiConsumer, Osc
                                                           ? new List<string> { "/" }
                                                           : new List<string>(path.Split('/'));
                                        segments[0] = $"{ChannelPaths.OscNamespacePrefix}:{_oscPort}";
-                                       return new DataChannel(typeof(float)) { Path = segments };
+                                       return new DataChannel(typeof(float), ChannelDurationTypes.Tick) { Path = segments };
                                    });
     }
 
@@ -346,6 +351,20 @@ public sealed class IoDataSetRecorder : MidiConnectionManager.IMidiConsumer, Osc
         _channelsByHash[hash] = newChannel;
         DataSet.Channels.Add(newChannel);
         return newChannel;
+    }
+
+    /// <summary>
+    /// Stamps session-level provenance onto <see cref="DataSet.Metadata"/> right before
+    /// the file is written: the TiXL build that recorded it and the wall-clock UTC moment
+    /// the session started. Lets the user tell at a glance which build / when a clip is
+    /// from when re-opening it months later.
+    /// </summary>
+    private static void StampRecordingMetadata(DataSet dataSet, DateTime sessionStartUtc)
+    {
+        var metadata = dataSet.Metadata ?? new Newtonsoft.Json.Linq.JObject();
+        metadata["TixlVersion"] = FileLocations.TixlVersion;
+        metadata["RecordedAtUtc"] = sessionStartUtc.ToString("o");  // ISO 8601 round-trip
+        dataSet.Metadata = metadata;
     }
 
     /// <summary>
@@ -369,6 +388,22 @@ public sealed class IoDataSetRecorder : MidiConnectionManager.IMidiConsumer, Osc
     ///       <see cref="MidiPitchBendTag"/>, <see cref="MidiChannelPressureTag"/>.</item>
     /// <item>OSC: <c>["&lt;OscNamespacePrefix&gt;:&lt;port&gt;", ...address segments]</c>.</item>
     /// </list>
+    /// </para>
+    /// <para>
+    /// <b>Reserved top-level prefixes</b> — the first <c>Path[0]</c> segment identifies
+    /// the source family. Decoders early-return on unknown prefixes, so a new family can
+    /// be added freely without breaking existing consumers. Currently reserved:
+    /// <list type="bullet">
+    /// <item><c>"Midi"</c> — MIDI capture (this recorder).</item>
+    /// <item><c>"OSC:&lt;port&gt;"</c> — OSC capture (this recorder).</item>
+    /// <item><c>"Text"</c> — reserved for transcription / SRT subtitle channels.</item>
+    /// <item><c>"Audio"</c> — reserved for audio-analysis channels (FFT bands, RMS, etc.).</item>
+    /// <item><c>"Animation"</c> — reserved for keyframe-driven streams.</item>
+    /// <item><c>"Annotation"</c> — reserved for markers, regions, user comments.</item>
+    /// <item><c>"Debug"</c> — debug telemetry from <c>DebugDataRecording</c>.</item>
+    /// </list>
+    /// Picking a fresh prefix and writing the decoder is all that's needed for a new
+    /// source type; existing files and ops keep working unchanged.
     /// </para>
     /// </remarks>
     public static class ChannelPaths

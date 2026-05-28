@@ -122,21 +122,27 @@ public static class DataSetCache
     // ---------------------------------------------------------------------------
     // JSON → DataSet. Mirrors the v1 layout produced by DataSet.WriteToFile:
     //   {
+    //     "Version": 1,                        // optional, defaults to 1
+    //     "Metadata": { ... },                 // optional
     //     "Channels": [
     //       {
-    //         "Path": ["a", "b", "c"],         // array of segments (no '/' join)
+    //         "Path": ["a", "b", "c"],                  // array of segments (no '/' join)
     //         "Type": "float",
+    //         "DurationType": "Tick" | "Interval",      // optional; absent → sniff per event
+    //         "Metadata": { ... },                      // optional
     //         "Events": [
-    //           { "Time": <num>, "Value": <typed> },                       // plain
-    //           { "Time": <num>, "EndTime": <num>, "Value": <typed> }      // interval
+    //           { "Time": <num>, "Value": <typed> },                       // Tick
+    //           { "Time": <num>, "EndTime": <num>, "Value": <typed> }      // Interval
     //         ]
     //       }
     //     ]
     //   }
     //
-    // Interval events are distinguished by the presence of "EndTime". Plain events use
-    // a single "Time" field — the legacy "TimeCode" key from pre-v1 dev recordings is
-    // not supported (no migration shim by design; the format was not in production yet).
+    // Duration-type discrimination:
+    //   - "Tick"      → construct DataEvent regardless of whether EndTime is present.
+    //   - "Interval"  → construct DataIntervalEvent (EndTime defaults to PositiveInfinity).
+    //   - absent      → sniff per event: presence of "EndTime" → DataIntervalEvent, otherwise DataEvent.
+    //                   Same as the original behaviour for pre-DurationType files.
     //
     // For v1 only "float" channels are reconstructed — that's everything the current
     // recorder (MIDI / OSC) produces. Non-float channels are skipped with a warning so
@@ -144,7 +150,12 @@ public static class DataSetCache
     // ---------------------------------------------------------------------------
     private static DataSet ParseDataSet(JObject root)
     {
-        var dataSet = new DataSet();
+        var dataSet = new DataSet
+                          {
+                              Version = (int?)root["Version"] ?? 1,
+                              Metadata = root["Metadata"] as JObject,
+                          };
+
         var channelsToken = root["Channels"];
         if (channelsToken is not JArray channels)
             return dataSet;
@@ -172,7 +183,18 @@ public static class DataSetCache
                 }
             }
 
-            var channel = new DataChannel(typeof(float)) { Path = pathSegments };
+            // DurationType is optional on the wire — absent means "pre-DurationType
+            // file, sniff per event". Default to Tick in memory because that's the
+            // conservative assumption; the sniff logic below promotes individual events
+            // to interval when EndTime is present.
+            var declaredDurationType = (string?)channelObj["DurationType"];
+            var inMemoryDurationType = declaredDurationType ?? ChannelDurationTypes.Tick;
+
+            var channel = new DataChannel(typeof(float), inMemoryDurationType)
+                              {
+                                  Path = pathSegments,
+                                  Metadata = channelObj["Metadata"] as JObject,
+                              };
             dataSet.Channels.Add(channel);
 
             if (channelObj["Events"] is not JArray eventArr)
@@ -187,7 +209,25 @@ public static class DataSetCache
                 var value = (float?)ev["Value"] ?? 0f;
                 var endTimeToken = ev["EndTime"];
 
-                if (endTimeToken != null)
+                // Promote to interval if either (a) the channel declares DurationType =
+                // Interval, or (b) DurationType is absent (legacy) and the event has an
+                // EndTime field. A Tick channel never produces intervals even if a stray
+                // EndTime appears — defensive against writer bugs.
+                bool isInterval;
+                if (declaredDurationType == ChannelDurationTypes.Interval)
+                {
+                    isInterval = true;
+                }
+                else if (declaredDurationType == ChannelDurationTypes.Tick)
+                {
+                    isInterval = false;
+                }
+                else
+                {
+                    isInterval = endTimeToken != null;
+                }
+
+                if (isInterval)
                 {
                     var endTime = (double?)endTimeToken ?? double.PositiveInfinity;
                     channel.Events.Add(new DataIntervalEvent

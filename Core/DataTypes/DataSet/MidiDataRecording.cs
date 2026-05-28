@@ -125,7 +125,7 @@ public class MidiDataRecording : MidiConnectionManager.IMidiConsumer
             return channel;
         }
 
-        var newChannel = new DataChannel(typeof(float))
+        var newChannel = new DataChannel(typeof(float), ChannelDurationTypes.Tick)
                              {
                                  Path = new List<string>
                                             {
@@ -150,7 +150,7 @@ public class MidiDataRecording : MidiConnectionManager.IMidiConsumer
             return channel;
         }
 
-        var newChannel = new DataChannel(typeof(float))
+        var newChannel = new DataChannel(typeof(float), ChannelDurationTypes.Tick)
                              {
                                  Path = new List<string>
                                             {
@@ -175,7 +175,7 @@ public class MidiDataRecording : MidiConnectionManager.IMidiConsumer
             return channel;
         }
 
-        var newChannel = new DataChannel(typeof(float))
+        var newChannel = new DataChannel(typeof(float), ChannelDurationTypes.Tick)
                              {
                                  Path = new List<string>
                                             {
@@ -200,7 +200,7 @@ public class MidiDataRecording : MidiConnectionManager.IMidiConsumer
             return channel;
         }
 
-        var newChannel = new DataChannel(typeof(float))
+        var newChannel = new DataChannel(typeof(float), ChannelDurationTypes.Interval)
                              {
                                  Path = new List<string>
                                             {

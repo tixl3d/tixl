@@ -262,6 +262,35 @@ These comments help the next reviewer (or the same agent on the next turn) under
 
 When picking up a feature mid-phase, treat existing transitional comments as a working state of the prior author's thinking — don't aggressively prune them until the feature is being wrapped up.
 
+## Interface stability for new features
+
+Before locking in a data format, wire type, or operator parameter set — typically right before a feature ships — pause and audit. Once data lands on user disks and ops land in user projects, every shape change carries migration cost. Optional extension points are cheap today; forced migrations are expensive forever.
+
+**The audit:**
+
+1. **List the next 6 months of plausible use cases**, even speculative ones. For a recording feature, that might mean: scripting capture, transcribing audio, importing MIDI files, driving keyframes, exporting CSV, editing in a spreadsheet, procedural writes. Don't filter for likelihood — listing surfaces what's *expressible* vs what would force a redesign.
+2. **For each, identify what would force a migration.** If a use case can be served by adding a new op, a new file, or an optional field, the format is safe. If it would force renaming an existing field, splitting a type, or breaking the wire shape, the format is too narrow.
+3. **Prefer additive flexibility:**
+   - Optional metadata bags (JSON objects, dictionaries) at every level where future fields might land — root, channel, etc. Old readers ignore them; new readers use them when present.
+   - Version fields on serialized formats. Lets a future reader say "v3? I only know v2 — load what I can, warn about the rest."
+   - String discriminators over closed enums where the discriminator might grow (event kinds, source types, AssetType identifiers).
+   - Reserved-but-unused values, documented in code comments, so contributors don't accidentally collide with planned ones.
+4. **Avoid:**
+   - Per-event fields that multiply with cardinality. Hoist discriminators / metadata to the lowest level where the value is constant. A duration-type that's the same for every event on a channel goes on the channel, not the event.
+   - Subclass proliferation as the extension mechanism. Each new subclass needs serializer support, deserializer support, exhaustive switch handling, and rules about what a writer of v3 should do when an old v2 reader encounters it. Optional fields on a single class scale better.
+   - Coupling unrelated concerns into one field. Value type (float / string / int) is orthogonal to event duration type (tick / interval). Don't fold them.
+
+The cost of skipping this audit shows up months later as JSON migration scripts, op-input renames, and broken saved projects.
+
+## Feature retrospective: overlaps and low-hanging fruit
+
+When a major feature wraps — the last planned phase ships, or the user signals "this is shippable" — pause before moving on and surface two things explicitly in the next message:
+
+1. **Overlap with other in-flight or planned features.** What did this work touch that another upcoming feature also touches? Did we build infrastructure (a cache, a bus, a value type, a UI hook) that something else on the roadmap could now lean on instead of duplicating? Flag the overlap and link it to the relevant plan doc.
+2. **Low-hanging fruit that's now cheap.** What small follow-ups became 10x cheaper because of what we just built? An icon that's now one-line because the helper exists; a manual test that became feasible because the dev trigger is wired up; a small UX polish that's a few lines now and a refactor later; a renaming sweep that this feature made obvious. Don't silently postpone them — list them so the user can decide what's worth catching now vs after a break.
+
+The point isn't to slip more work into the current PR — it's to make decisions visible. Often the user will defer all of them and that's fine. But not surfacing them at the natural breakpoint means each one resurfaces later as friction.
+
 ## Change Workflow
 ### Before editing
 1. Check whether the target code runs every frame

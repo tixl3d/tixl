@@ -74,7 +74,7 @@ public class OscDataRecording : OscConnectionManager.IOscConsumer, IDisposable
 
         pathSegments[0] = OscNamespacePrefix + ":" + _port;
 
-        var newChannel = new DataChannel(typeof(float))
+        var newChannel = new DataChannel(typeof(float), ChannelDurationTypes.Tick)
                              {
                                  Path = pathSegments
                              };
