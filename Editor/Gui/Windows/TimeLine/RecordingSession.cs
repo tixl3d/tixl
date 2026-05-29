@@ -77,9 +77,10 @@ internal static class RecordingSession
         _recordStartRunSecs = Playback.RunTimeInSecs;
 
         var startBars = (float)_recordStartBars;
-        var baseLayer = FindNextLayerIndex(compositionOp);
+        var baseLayer = FindNextLayerIndex(compositionOp, startBars);
         var dataLayer = baseLayer;
         var audioLayer = baseLayer + 1;
+        _lastBaseLayerIndex = baseLayer;
 
         _activeMacro = new MacroCommand("Live recording session");
 
@@ -356,22 +357,27 @@ internal static class RecordingSession
     }
 
     /// <summary>
-    /// Picks the lowest layer pair <c>(i, i+1)</c> that's currently free of any TimeClip /
-    /// TimelineAudioClip, so a sequence of record-undo-record cycles reuses the same row
-    /// instead of pushing every retry two layers higher. Falls back to a fresh layer above
-    /// the highest occupied one when nothing's free below — same behaviour as before for
-    /// the genuinely-stacking case.
+    /// Picks the base layer for a new recording's (data, audio) pair. Occupancy is
+    /// evaluated at the recording's start position only — a clip parked far down the
+    /// timeline doesn't reserve its row for a recording happening earlier. Preference order:
+    /// (1) the previous session's base layer if both rows there are free at start — keeps
+    ///     consecutive recordings on the same lane the user already cleared / dedicated;
+    /// (2) the lowest pair (i, i+1) that's free at start;
+    /// (3) one layer above the highest occupied row anywhere in the composition.
+    /// Step (3) only triggers when (1) and (2) both fail, i.e. the timeline is densely
+    /// packed at this position — same fallback the original behaviour produced.
     /// </summary>
-    private static int FindNextLayerIndex(Instance compositionOp)
+    private static int FindNextLayerIndex(Instance compositionOp, float startBars)
     {
-        _occupiedLayersScratch.Clear();
-        var maxLayer = -1;
+        _occupiedAtStartScratch.Clear();
+        var maxLayerAnywhere = -1;
 
         foreach (var clip in Structure.GetAllTimeClips(compositionOp))
         {
-            _occupiedLayersScratch.Add(clip.LayerIndex);
-            if (clip.LayerIndex > maxLayer)
-                maxLayer = clip.LayerIndex;
+            if (clip.LayerIndex > maxLayerAnywhere)
+                maxLayerAnywhere = clip.LayerIndex;
+            if (clip.TimeRange.Start <= startBars && startBars < clip.TimeRange.End)
+                _occupiedAtStartScratch.Add(clip.LayerIndex);
         }
 
         foreach (var audioClip in compositionOp.Symbol.CompositionSettings.Playback.AudioClips)
@@ -382,26 +388,41 @@ internal static class RecordingSession
             // layer 2 instead of 0.
             if (audioClip.IsMainSoundtrack)
                 continue;
-            _occupiedLayersScratch.Add(audioClip.LayerIndex);
-            if (audioClip.LayerIndex > maxLayer)
-                maxLayer = audioClip.LayerIndex;
+            if (audioClip.LayerIndex > maxLayerAnywhere)
+                maxLayerAnywhere = audioClip.LayerIndex;
+            if (audioClip.TimeRange.Start <= startBars && startBars < audioClip.TimeRange.End)
+                _occupiedAtStartScratch.Add(audioClip.LayerIndex);
         }
 
-        // Scan from 0 up to the first pair (i, i+1) where neither row holds a clip. Capped
-        // at maxLayer + 1 so we don't search forever in an empty composition.
-        for (var i = 0; i <= maxLayer + 1; i++)
+        // Re-use the previous session's lane when nothing's parked across it at this start
+        // position. Makes "record, listen back, record again at a different point" stay on
+        // the same dedicated row instead of marching downward each take.
+        if (_lastBaseLayerIndex >= 0
+            && !_occupiedAtStartScratch.Contains(_lastBaseLayerIndex)
+            && !_occupiedAtStartScratch.Contains(_lastBaseLayerIndex + 1))
         {
-            if (!_occupiedLayersScratch.Contains(i) && !_occupiedLayersScratch.Contains(i + 1))
+            return _lastBaseLayerIndex;
+        }
+
+        // Otherwise scan from 0 up for the first free pair at this start position.
+        for (var i = 0; i <= maxLayerAnywhere + 1; i++)
+        {
+            if (!_occupiedAtStartScratch.Contains(i) && !_occupiedAtStartScratch.Contains(i + 1))
                 return i;
         }
 
-        return maxLayer + 1;
+        return maxLayerAnywhere + 1;
     }
 
     // Reused across calls to keep FindNextLayerIndex allocation-free — Begin is user-
     // triggered (one click) but the helper is cheap to call and we already follow the
     // editor's "no per-frame allocations" habit.
-    private static readonly HashSet<int> _occupiedLayersScratch = new();
+    private static readonly HashSet<int> _occupiedAtStartScratch = new();
+
+    // Last base layer the user actually recorded onto. Persists across sessions so the
+    // next recording prefers the same lane when it's free at the new start position.
+    // -1 means "no preference yet" — fresh editor launch falls back to the scan path.
+    private static int _lastBaseLayerIndex = -1;
 
     private static readonly Guid _loadDataClipSymbolId = new("4d1c0e80-7b2a-4f6d-9c1b-12d3e4f50607");
     private static readonly Guid _loadDataClipFilePathInputId = new("70419103-ae5d-4ca0-cf4e-456071829304");

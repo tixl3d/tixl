@@ -20,10 +20,37 @@ namespace T3.Editor.Gui.OutputUi;
 /// </summary>
 internal sealed class DataSetViewCanvas
 {
-    internal void Draw(DataSet? dataSet)
+    /// <summary>
+    /// Raw-DataSet draw — used by <see cref="DataSetOutputUi"/> for live IO logging.
+    /// The time axis represents wall-clock <see cref="Playback.RunTimeInSecs"/>, so the
+    /// playhead matches the moment events arrived.
+    /// </summary>
+    internal void Draw(DataSet? dataSet) => DrawInternal(dataSet, mapping: null);
+ 
+    /// <summary>
+    /// Clip-aware draw — used by <see cref="DataClipOutputUi"/> when the source is a
+    /// timeline-bound clip. The time axis represents the clip's source-time space and the
+    /// playhead is mapped from <see cref="Playback.TimeInBars"/> through the clip's
+    /// <see cref="TimeRangeMapping"/>, so a paused timeline shows a stationary playhead at
+    /// the file position the engine would sample.
+    /// </summary>
+    internal void Draw(DataClip? clip)
+    {
+        if (clip?.Set == null)
+        {
+            DrawInternal(null, mapping: null);
+            return;
+        }
+
+        DrawInternal(clip.Set, clip.Mapping);
+    }
+
+    private void DrawInternal(DataSet? dataSet, TimeRangeMapping? mapping)
     {
         if (dataSet == null)
             return;
+
+        _mapping = mapping;
 
         // Very ugly hack to prevent scaling the output above window size
         var keepScale = T3Ui.UiScaleFactor;
@@ -34,7 +61,16 @@ internal sealed class DataSetViewCanvas
 
         void DrawCanvas()
         {
-            var currentTime = Playback.RunTimeInSecs;
+            // Two timebases share one canvas:
+            //   * runtime mode (no mapping) — currentTime is wall-clock seconds, so the
+            //     playhead tracks event arrivals.
+            //   * clip mode (mapping present) — currentTime is source seconds derived from
+            //     the timeline playhead. When the timeline is paused the marker freezes at
+            //     the file position the engine would sample; scrubbing moves it along the
+            //     recorded source axis instead of wall-clock.
+            var currentTime = _mapping is { } m && Playback.Current is { } pb
+                                  ? m.LocalBarsToSourceSecs(pb.TimeInBars)
+                                  : Playback.RunTimeInSecs;
             ImGui.BeginChild("Scrollable", Vector2.Zero, ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.NoBackground);
 
             var isRangeSelected = Math.Abs(_selectRangeStart - _selectRangeEnd) > 0.001;
@@ -213,8 +249,13 @@ internal sealed class DataSetViewCanvas
                 }
             }
 
-            _standardRaster.Draw(_canvas);
-
+            // Canvas state has to settle BEFORE the raster reads Scale/Scroll, otherwise
+            // the raster anchors to the previous frame's scope while events get drawn
+            // against the freshly-computed scope further down. In runtime mode the two
+            // were close enough to look fine; in clip mode currentTime jumps to a
+            // completely different value range (source seconds via the mapping) and the
+            // raster ends up rendered at coordinates that no longer overlap the visible
+            // viewport — so it disappears.
             _canvas.UpdateCanvas(out var interactionState);
 
             if (ImGui.IsWindowHovered(ImGuiHoveredFlags.ChildWindows | ImGuiHoveredFlags.RootAndChildWindows) && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
@@ -248,12 +289,49 @@ internal sealed class DataSetViewCanvas
                                             });
             }
 
+            _standardRaster.Draw(_canvas);
+
             var dl = ImGui.GetWindowDrawList();
             var min = ImGui.GetWindowPos();
             var max = ImGui.GetContentRegionAvail() + min;
 
             var visibleMinTime = _canvas.InverseTransformX(min.X);
-            var visibleMaxTime = _canvas.InverseTransformX(max.X); 
+            var visibleMaxTime = _canvas.InverseTransformX(max.X);
+
+            // Clip-mode boundary overlay: shade regions outside the source slice the clip
+            // actually plays and draw thin lines at the edges. Mirrors the look the
+            // TimeClip composition view uses for SourceRange (ClipRange.cs) so the two
+            // canvases feel like part of one editor. Drawn here — after the raster but
+            // before events — so the (low-alpha) overlay sits behind the per-channel
+            // markers and the current-time marker.
+            if (_mapping is { } mapping)  
+            {
+                var bpm = mapping.Bpm > 0 ? mapping.Bpm : 120.0;
+                var clipStartSecs = mapping.SourceRange.Start * 240.0 / bpm;
+                var clipEndSecs = mapping.SourceRange.End * 240.0 / bpm;
+                var xClipStart = _canvas.TransformX((float)clipStartSecs);
+                var xClipEnd = _canvas.TransformX((float)clipEndSecs);
+
+                if (xClipStart > min.X)
+                {
+                    dl.AddRectFilled(new Vector2(min.X, min.Y),
+                                     new Vector2(xClipStart, max.Y),
+                                     _clipOutsideColor);
+                }
+                if (xClipEnd < max.X)
+                {
+                    dl.AddRectFilled(new Vector2(xClipEnd, min.Y),
+                                     new Vector2(max.X, max.Y),
+                                     _clipOutsideColor);
+                }
+
+                dl.AddRectFilled(new Vector2(xClipStart, min.Y),
+                                 new Vector2(xClipStart + 1, max.Y),
+                                 _clipBoundaryColor);
+                dl.AddRectFilled(new Vector2(xClipEnd, min.Y),
+                                 new Vector2(xClipEnd + 1, max.Y),
+                                 _clipBoundaryColor);
+            }
 
             const int maxVisibleEvents = 500;
             const float layerHeight = 20f;
@@ -664,6 +742,15 @@ internal sealed class DataSetViewCanvas
     private double _lastEventTime;
 
     private bool _isDraggingRange;
+    // Non-null when the canvas is drawing a timeline-bound DataClip — see the Draw(DataClip)
+    // overload. Re-set on every Draw call so a canvas reused across runtime and clip slots
+    // doesn't leak a stale mapping between frames.
+    private TimeRangeMapping? _mapping;
+
+    // Same StatusAnimated palette ClipRange.cs uses for the composition-level TimeClip
+    // overlay so the two surfaces feel like one editor at a glance.
+    private static readonly Color _clipOutsideColor = UiColors.StatusAnimated.Fade(0.08f);
+    private static readonly Color _clipBoundaryColor = UiColors.StatusAnimated.Fade(0.35f);
 
     private readonly PathTreeDrawer _pathTreeDrawer = new();
     private readonly StandardValueRaster _standardRaster = new() { EnableSnapping = true };

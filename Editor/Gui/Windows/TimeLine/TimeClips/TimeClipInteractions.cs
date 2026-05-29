@@ -112,12 +112,14 @@ internal sealed class TimeClipInteractions
             {
                 var selectedClips = _context.ClipSelection.GetAllOrSelectedClips().ToList();
                 var moveTimeClipCommand = new MoveTimeClipsCommand(compositionOp, selectedClips);
-                // SourceRange lives in file-time bars (DataClip / PlayVideoClip / MidiClip
-                // convention). Reset trim *and* stretch by anchoring to file-time 0 with the
-                // current timeline duration — that's the unambiguous "1:1, start of source"
-                // state the menu item promises.
+                // Reset stretch only — keep the user's source-side trim. The source slice
+                // continues to start at its existing SourceRange.Start (so the event sitting
+                // at the trimmed-in edge stays put), and the End is pulled to match the
+                // timeline duration so the rate becomes 1. Pinning SourceRange.Start to 0
+                // here would silently undo the trim and snap content the user had pushed
+                // off-screen back into view.
                 foreach (var clip in selectedClips)
-                    clip.SourceRange = new TimeRange(0f, clip.TimeRange.Duration);
+                    clip.SourceRange.End = clip.SourceRange.Start + clip.TimeRange.Duration;
 
                 moveTimeClipCommand.StoreCurrentValues();
                 UndoRedoStack.AddAndExecute(moveTimeClipCommand);
