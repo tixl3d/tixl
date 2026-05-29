@@ -351,6 +351,13 @@ internal static class TimeClipItem
             return;
         
         var allowSnapping = !ImGui.GetIO().KeyShift && !(ImGui.GetIO().KeyAlt && ImGui.GetIO().KeyCtrl);
+
+        // SelectionRangeIndicator's anchors are the selected clips' aggregate Start/End —
+        // when we drag selected clips, those anchors move along with the clip, so without
+        // exclusion the snap handler perpetually "re-snaps to self" and stutters. Same
+        // exclusion list keyframe drags already use.
+        var snapExclusions = attr.LayerContext.TimeCanvas.SelectionDragSnapExclusions;
+
         switch (mode)
         {
             case HandleDragMode.Body:
@@ -367,13 +374,15 @@ internal static class TimeClipItem
 
                 if (allowSnapping && attr.LayerContext.SnapHandler.TryCheckForSnapping(unsnappedTargetStart,
                                                                                        out var snappedClipStartTime,
-                                                                                       attr.LayerContext.TimeCanvas.Scale.X))
+                                                                                       attr.LayerContext.TimeCanvas.Scale.X,
+                                                                                       snapExclusions))
                 {
                     targetStart = (float)snappedClipStartTime;
                 }
                 else if (allowSnapping && attr.LayerContext.SnapHandler.TryCheckForSnapping(unsnappedTargetStart + timeClip.TimeRange.Duration,
                                                                                             out var snappedClipEndTime,
-                                                                                            attr.LayerContext.TimeCanvas.Scale.X))
+                                                                                            attr.LayerContext.TimeCanvas.Scale.X,
+                                                                                            snapExclusions))
                 {
                     targetStart = (float)snappedClipEndTime - timeClip.TimeRange.Duration;
                 }
@@ -390,7 +399,7 @@ internal static class TimeClipItem
 
             case HandleDragMode.Start:
                 var newDragStartTime = attr.LayerContext.TimeCanvas.InverseTransformX(mousePos.X);
-                if (allowSnapping && attr.LayerContext.SnapHandler.TryCheckForSnapping(newDragStartTime, out var snappedValue3, attr.LayerContext.TimeCanvas.Scale.X))
+                if (allowSnapping && attr.LayerContext.SnapHandler.TryCheckForSnapping(newDragStartTime, out var snappedValue3, attr.LayerContext.TimeCanvas.Scale.X, snapExclusions))
                 {
                     newDragStartTime = (float)snappedValue3;
                 }
@@ -400,7 +409,7 @@ internal static class TimeClipItem
 
             case HandleDragMode.End:
                 var newDragTime = attr.LayerContext.TimeCanvas.InverseTransformX(mousePos.X);
-                if (allowSnapping && attr.LayerContext.SnapHandler.TryCheckForSnapping(newDragTime, out var snappedValue4, attr.LayerContext.TimeCanvas.Scale.X))
+                if (allowSnapping && attr.LayerContext.SnapHandler.TryCheckForSnapping(newDragTime, out var snappedValue4, attr.LayerContext.TimeCanvas.Scale.X, snapExclusions))
                 {
                     newDragTime = (float)snappedValue4;
                 }

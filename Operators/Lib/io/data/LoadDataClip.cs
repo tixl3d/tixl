@@ -68,24 +68,15 @@ internal sealed class LoadDataClip : Instance<LoadDataClip>, IStatusProvider, ID
             return;
         }
 
-        // Build the TimeRangeMapping so that at the clip's left edge the consumer sees
-        // source time = 0. The default TiXL TimeClip mirrors SourceRange to TimeRange
-        // (i.e. "source is timeline-positioned"), which is the right convention for
-        // audio / video where the file plays in place. For .data files, events are
-        // stored relative to record-start, so the source content is conceptually
-        // "anchored at 0" and the SourceRange's offset *from TimeRange.Start* is the
-        // user-controlled trim.
-        //
-        // Rebase: shift SourceRange so SourceRange.Start - TimeRange.Start becomes the
-        // trim offset (in bars). Default state (mirrored) → 0 offset; user shifting
-        // SourceRange.Start later → trim into the recording.
+        // SourceRange is in file-time (bars), TimeRange in timeline-time (bars).
+        // Recording sets SourceRange = (0, durationBars) — file events are anchored to
+        // record-start (file-time 0). Cut / drag-start trim adjust SourceRange in
+        // file-time directly, so the mapping is a straight identity build with no
+        // rebasing. Same convention as PlayVideoClip / MidiClip — keeps split, trim,
+        // and body-drag math consistent across clip types.
         var timeRange = Clip.TimeClip.TimeRange;
         var sourceRange = Clip.TimeClip.SourceRange;
-        var trimOffsetBars = sourceRange.Start - timeRange.Start;
-        var sourceDurationBars = sourceRange.End - sourceRange.Start;
-        var rebasedSourceRange = new TimeRange(trimOffsetBars, trimOffsetBars + sourceDurationBars);
-
-        var mapping = new TimeRangeMapping(timeRange, rebasedSourceRange, context.Playback.Bpm);
+        var mapping = new TimeRangeMapping(timeRange, sourceRange, context.Playback.Bpm);
 
         Clip.Value = new T3CoreDataClip
                          {

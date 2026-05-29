@@ -110,7 +110,7 @@ internal static class TimelineAudioClipInspector
         }
 
         var layerIndex = clip.LayerIndex;
-        if (FormInputs.AddInt("Layer", ref layerIndex, min: 0, max: 999, defaultValue: 0))
+        if (FormInputs.AddInt("Layer", ref layerIndex, min: -999, max: 999, defaultValue: 0))
         {
             clip.LayerIndex = layerIndex;
         }
@@ -152,7 +152,7 @@ internal static class TimelineAudioClipInspector
         var maxLayer = clips.Max(c => c.LayerIndex);
         var layer = minLayer;
         var layerLabel = minLayer == maxLayer ? "Layer" : $"Lowest Layer (range {minLayer}…{maxLayer})";
-        if (FormInputs.AddInt(layerLabel, ref layer, min: 0, max: 999))
+        if (FormInputs.AddInt(layerLabel, ref layer, min: -999, max: 999))
         {
             var delta = layer - minLayer;
             if (delta != 0)

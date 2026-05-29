@@ -112,12 +112,17 @@ internal sealed class TimeClipInteractions
             {
                 var selectedClips = _context.ClipSelection.GetAllOrSelectedClips().ToList();
                 var moveTimeClipCommand = new MoveTimeClipsCommand(compositionOp, selectedClips);
+                // SourceRange lives in file-time bars (DataClip / PlayVideoClip / MidiClip
+                // convention). Reset trim *and* stretch by anchoring to file-time 0 with the
+                // current timeline duration — that's the unambiguous "1:1, start of source"
+                // state the menu item promises.
                 foreach (var clip in selectedClips)
-                    clip.SourceRange = clip.TimeRange.Clone();
+                    clip.SourceRange = new TimeRange(0f, clip.TimeRange.Duration);
 
                 moveTimeClipCommand.StoreCurrentValues();
                 UndoRedoStack.AddAndExecute(moveTimeClipCommand);
-                _context.ClipSelection.Clear();
+                // Keep the selection — the user is mid-edit on these clips and the next
+                // action (Edit clip times, Cut, drag) is almost always still on them.
             }
 
             if (ImGui.MenuItem("Edit clip times", null, false, _context.ClipSelection.Count > 0))

@@ -64,18 +64,21 @@ internal sealed class ParameterWindow : Window
             ImGui.SameLine();
         }
 
+        // Timeline audio clips live on a parallel selection set (AudioClipInteractions.
+        // SelectedClipIds), not in NodeSelection. Check first so a picked audio clip wins
+        // over TryGetSelectedInstanceOrInput's composition-fallback (which returns the
+        // composition instance even when nothing is selected — that would otherwise hide
+        // the audio inspector behind the composition's parameter view).
+        var focusedNodeSelection = ProjectView.Focused?.NodeSelection;
+        if (focusedNodeSelection != null && !focusedNodeSelection.IsAnythingSelected()
+            && TryDrawTimelineAudioClipInspector())
+        {
+            _lastSelectedInstanceId = Guid.Empty;
+            return;
+        }
+
         if (!NodeSelection.TryGetSelectedInstanceOrInput(out var instance, out var inputUi, out _selectionChanged))
         {
-            // No operator selected — check for selected timeline audio clips first. They
-            // own a parallel selection set (AudioClipInteractions.SelectedClipIds), and
-            // when one or more are picked the Parameter window should show the audio-clip
-            // inspector instead of falling through to annotations / empty.
-            if (TryDrawTimelineAudioClipInspector())
-            {
-                _lastSelectedInstanceId = Guid.Empty;
-                return;
-            }
-
             if (ProjectView.Focused?.NodeSelection != null)
                 DrawSettingsForSelectedAnnotations(ProjectView.Focused.NodeSelection);
 

@@ -74,9 +74,10 @@ internal static class TimelineToolbar
     /// stop drops the recordings onto the active composition's timeline.
     /// </summary>
     /// <remarks>
-    /// Visual: <see cref="Icon.Record"/> glyph, tinted by state — pulsing
-    /// <see cref="UiColors.StatusAttention"/> while recording, hovered colour at rest,
-    /// faded when disabled.
+    /// Visual: <see cref="Icon.Record"/> glyph via <see cref="CustomComponents.IconButton"/>
+    /// to match the look of the surrounding transport buttons. Uses
+    /// <see cref="CustomComponents.ButtonStates.NeedsAttention"/> (red) while a session is
+    /// active, <c>Disabled</c> when the sync mode can't host a clip, <c>Normal</c> at rest.
     /// </remarks>
     private static void DrawRecordButton(ProjectView components)
     {
@@ -92,37 +93,15 @@ internal static class TimelineToolbar
         // they've toggled away from Timeline since.
         var enabled = inTimelineMode || isRecording;
 
-        var size = TimeControls.ControlSize;
-        var clicked = ImGui.InvisibleButton("##RecordToggle", size);
-        var itemMin = ImGui.GetItemRectMin();
-        var itemMax = ImGui.GetItemRectMax();
-        var itemCenter = (itemMin + itemMax) * 0.5f;
+        var state = isRecording
+                        ? CustomComponents.ButtonStates.NeedsAttention
+                        : enabled
+                            ? CustomComponents.ButtonStates.Normal
+                            : CustomComponents.ButtonStates.Disabled;
 
-        var drawList = ImGui.GetWindowDrawList();
-        var hovered = ImGui.IsItemHovered();
+        var clicked = CustomComponents.IconButton(Icon.Record, TimeControls.ControlSize, state);
 
-        Color iconColor;
-        if (isRecording)
-        {
-            // Pulse via sine. Local computation; if more toolbar items need pulse later,
-            // promote to a shared helper.
-            var pulse = MathF.Sin((float)ImGui.GetTime() * 4f) * 0.25f + 0.75f;
-            iconColor = UiColors.StatusAttention.Fade(pulse);
-        }
-        else if (!enabled)
-        {
-            iconColor = UiColors.TextMuted.Fade(0.3f);
-        }
-        else
-        {
-            iconColor = hovered ? UiColors.StatusAttention : UiColors.TextMuted;
-        }
-
-        // Centre the glyph on the button rect — pass the button size so the icon scales
-        // with the control rather than rendering at its native atlas size.
-        Icons.DrawIconAtScreenPosition(Icon.Record, itemMin, size, drawList, iconColor);
-
-        if (hovered)
+        if (ImGui.IsItemHovered())
         {
             ImGui.BeginTooltip();
             if (!enabled)

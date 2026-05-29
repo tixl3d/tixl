@@ -111,10 +111,32 @@ internal sealed class SimulateIoData : Instance<SimulateIoData>
             return;
         }
 
+        // Source-bar bounds the dispatch is allowed to fire across. Anything outside this
+        // belongs to a sibling clip (after a Cut) or a future trim — without clamping, a
+        // single playhead pass would re-dispatch the other half's events. Bars → seconds
+        // via the BPM baked into the mapping at construction.
+        var sourceMinSecs = mapping.SourceRange.Start * 240.0 / mapping.Bpm;
+        var sourceMaxSecs = mapping.SourceRange.End * 240.0 / mapping.Bpm;
+
+        // Skip dispatch entirely when the playhead sits outside the clip's TimeRange.
+        // Snap the cursor to the clip's start so re-entry fires from the leading edge of
+        // the source slice instead of replaying everything between 0 and the entry point.
+        if (!mapping.IsActive(context.LocalTime))
+        {
+            _lastSourceTimeByClipSlot[slot] = sourceMinSecs;
+            return;
+        }
+
         if (!_lastSourceTimeByClipSlot.TryGetValue(slot, out var lastSourceTime))
-            lastSourceTime = 0;
+            lastSourceTime = sourceMinSecs;
+
+        // Clamp both cursors to the source slice. Past the trailing edge the dispatch
+        // is a no-op; before the leading edge the clamp keeps a cold-start (cursor = 0)
+        // from replaying events that belong to an earlier sibling slice.
+        if (lastSourceTime < sourceMinSecs) lastSourceTime = sourceMinSecs;
 
         var currentSourceTime = mapping.LocalBarsToSourceSecs(context.LocalTime);
+        if (currentSourceTime > sourceMaxSecs) currentSourceTime = sourceMaxSecs;
 
         // Backward scrub or no movement: snap cursor and skip dispatch.
         if (currentSourceTime <= lastSourceTime)

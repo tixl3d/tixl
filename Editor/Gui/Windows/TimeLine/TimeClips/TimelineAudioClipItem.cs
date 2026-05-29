@@ -294,17 +294,20 @@ internal static class TimelineAudioClipItem
         if (allowSnapping)
         {
             var snapScale = attr.TimeCanvas.Scale.X;
+            // SelectionRangeIndicator follows the dragged clip(s) frame-to-frame; without
+            // exclusion the snap handler perpetually "re-snaps to self" and stutters.
+            var snapExclusions = attr.TimeCanvas.SelectionDragSnapExclusions;
             switch (mode)
             {
                 case DragMode.Body:
                 {
                     var candidateStart = clip.TimeRange.Start + timeDelta;
                     var candidateEnd = clip.TimeRange.End + timeDelta;
-                    if (attr.SnapHandler.TryCheckForSnapping(candidateStart, out var snappedStart, snapScale))
+                    if (attr.SnapHandler.TryCheckForSnapping(candidateStart, out var snappedStart, snapScale, snapExclusions))
                     {
                         timeDelta += (float)(snappedStart - candidateStart);
                     }
-                    else if (attr.SnapHandler.TryCheckForSnapping(candidateEnd, out var snappedEnd, snapScale))
+                    else if (attr.SnapHandler.TryCheckForSnapping(candidateEnd, out var snappedEnd, snapScale, snapExclusions))
                     {
                         timeDelta += (float)(snappedEnd - candidateEnd);
                     }
@@ -313,14 +316,14 @@ internal static class TimelineAudioClipItem
                 case DragMode.Start:
                 {
                     var candidate = clip.TimeRange.Start + timeDelta;
-                    if (attr.SnapHandler.TryCheckForSnapping(candidate, out var snapped, snapScale))
+                    if (attr.SnapHandler.TryCheckForSnapping(candidate, out var snapped, snapScale, snapExclusions))
                         timeDelta += (float)(snapped - candidate);
                     break;
                 }
                 case DragMode.End:
                 {
                     var candidate = clip.TimeRange.End + timeDelta;
-                    if (attr.SnapHandler.TryCheckForSnapping(candidate, out var snapped, snapScale))
+                    if (attr.SnapHandler.TryCheckForSnapping(candidate, out var snapped, snapScale, snapExclusions))
                         timeDelta += (float)(snapped - candidate);
                     break;
                 }

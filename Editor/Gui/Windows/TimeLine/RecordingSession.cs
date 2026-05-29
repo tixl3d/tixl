@@ -6,6 +6,7 @@ using T3.Core.IO;
 using T3.Core.Logging;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
+using T3.Editor.Gui.Interaction;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.Gui.UiHelpers;
@@ -112,6 +113,13 @@ internal static class RecordingSession
         WasapiAudioInput.BeginRecording();
         IoDataSetRecorder.BeginRecording();
 
+        // Without this, the graph canvas keeps drawing its cached child list until the
+        // user clicks on it — the new LoadDataClip op isn't visible until then.
+        // FlagAsModified bumps the symbol-UI revision; FlagChanges notifies the open
+        // ProjectView so it rebuilds its child renderable set.
+        compositionOp.GetSymbolUi().FlagAsModified();
+        ProjectView.Focused?.FlagChanges(ProjectView.ChangeTypes.Children);
+
         IsActive = true;
     }
 
@@ -120,6 +128,13 @@ internal static class RecordingSession
     /// based on wall-clock elapsed time since Start, converted to bars at the current BPM.
     /// No-op when no session is active.
     /// </summary>
+    /// <remarks>
+    /// Auto-stops the session when the user pauses playback (Spacebar → PlaybackSpeed = 0).
+    /// The mental model the user works with is "record while playing": running the recorders
+    /// past a pause produces a clip whose TimeRange end doesn't match the audible content,
+    /// and the audio buffer keeps growing in the background. Stopping at pause matches the
+    /// "Start recording also starts playback" affordance on the Record button.
+    /// </remarks>
     public static void OnFrame()
     {
         if (!IsActive)
@@ -129,12 +144,25 @@ internal static class RecordingSession
         if (playback == null)
             return;
 
+        // Pause-stops-recording: if playback is paused, finalise the session here so the
+        // user doesn't have to remember to click Record off. Same Stop() the toolbar runs,
+        // so the file finalisation, asset import, and undo macro all flow normally.
+        if (playback.PlaybackSpeed == 0)
+        {
+            Stop();
+            return;
+        }
+
         var elapsedSecs = Playback.RunTimeInSecs - _recordStartRunSecs;
         var elapsedBars = elapsedSecs * playback.Bpm / 240.0;
-        var newEnd = (float)(_recordStartBars + elapsedBars);
+        var timelineEnd = (float)(_recordStartBars + elapsedBars);
+        var sourceEnd = (float)elapsedBars;
 
         // LoadDataClip's TimeClip output data — mutate in place. Animated dirty flag on
         // the op's Clip output ensures the next Update picks up the new range.
+        // TimeRange extends in timeline-bar space (startBars + elapsed); SourceRange
+        // extends in file-time-bar space (elapsed since record-start). Keeping the two
+        // separate lets cut and start-handle trim work correctly — see InitDataClipTimeClip.
         if (SymbolUiRegistry.TryGetSymbolUi(_compositionSymbolId, out var compositionUi)
             && compositionUi.Symbol.Children.TryGetValue(_activeDataClipChildId, out var symbolChild))
         {
@@ -142,8 +170,8 @@ internal static class RecordingSession
             {
                 if (output.OutputData is TimeClip tc)
                 {
-                    tc.TimeRange.End = newEnd;
-                    tc.SourceRange.End = newEnd;
+                    tc.TimeRange.End = timelineEnd;
+                    tc.SourceRange.End = sourceEnd;
                     break;
                 }
             }
@@ -151,7 +179,7 @@ internal static class RecordingSession
 
         if (_activeAudioClip != null)
         {
-            _activeAudioClip.TimeRange.End = newEnd;
+            _activeAudioClip.TimeRange.End = timelineEnd;
         }
     }
 
@@ -209,6 +237,12 @@ internal static class RecordingSession
         if (_activeMacro != null)
             UndoRedoStack.Add(_activeMacro);
 
+        // Mirror the Begin-side flagging so the file-path commit on Stop (which makes the
+        // clip's label switch from "rec…" to the real filename) and any other late mutations
+        // propagate to the graph view without a click.
+        compositionUi.FlagAsModified();
+        ProjectView.Focused?.FlagChanges(ProjectView.ChangeTypes.Children);
+
         ResetSessionState();
     }
 
@@ -256,8 +290,13 @@ internal static class RecordingSession
         {
             if (output.OutputData is TimeClip tc)
             {
+                // TimeRange is in timeline bars (placement); SourceRange is in file-time
+                // bars (anchored at 0). Keeping the two in different spaces is what makes
+                // cut / drag-start trim mathematically consistent — splitting a clip just
+                // narrows both ranges in their own coordinate space, and LoadDataClip
+                // maps file events without rebasing.
                 tc.TimeRange = new TimeRange(startBars, startBars);
-                tc.SourceRange = new TimeRange(startBars, startBars);
+                tc.SourceRange = new TimeRange(0f, 0f);
                 tc.LayerIndex = layer;
                 break;
             }
@@ -267,8 +306,9 @@ internal static class RecordingSession
     /// <summary>
     /// Canvas position for a fresh <c>LoadDataClip</c> op. Stacks below the lowest
     /// existing LoadDataClip child so successive recordings line up vertically instead
-    /// of overlapping at the default (0, 0). If no LoadDataClips exist yet, places at a
-    /// sensible default offset from origin.
+    /// of overlapping at the default (0, 0). If the candidate isn't inside the focused
+    /// canvas's visible region, falls back to the visible centre so the user doesn't have
+    /// to hunt for a clip that landed off-screen.
     /// </summary>
     private static Vector2 FindFreeCanvasPositionForLoadDataClip(Symbol compositionSymbol)
     {
@@ -276,52 +316,92 @@ internal static class RecordingSession
         const float defaultX = 0f;
         const float defaultY = 200f;
 
-        if (!SymbolUiRegistry.TryGetSymbolUi(compositionSymbol.Id, out var compositionUi))
-            return new Vector2(defaultX, defaultY);
+        var candidate = new Vector2(defaultX, defaultY);
 
-        var maxY = float.NegativeInfinity;
-        var anchorX = defaultX;
-        foreach (var (childId, childUi) in compositionUi.ChildUis)
+        if (SymbolUiRegistry.TryGetSymbolUi(compositionSymbol.Id, out var compositionUi))
         {
-            if (!compositionSymbol.Children.TryGetValue(childId, out var symbolChild))
-                continue;
-            if (symbolChild.Symbol.Id != _loadDataClipSymbolId)
-                continue;
-
-            if (childUi.PosOnCanvas.Y > maxY)
+            var maxY = float.NegativeInfinity;
+            var anchorX = defaultX;
+            foreach (var (childId, childUi) in compositionUi.ChildUis)
             {
-                maxY = childUi.PosOnCanvas.Y;
-                anchorX = childUi.PosOnCanvas.X;
+                if (!compositionSymbol.Children.TryGetValue(childId, out var symbolChild))
+                    continue;
+                if (symbolChild.Symbol.Id != _loadDataClipSymbolId)
+                    continue;
+
+                if (childUi.PosOnCanvas.Y > maxY)
+                {
+                    maxY = childUi.PosOnCanvas.Y;
+                    anchorX = childUi.PosOnCanvas.X;
+                }
             }
+
+            if (!float.IsNegativeInfinity(maxY))
+                candidate = new Vector2(anchorX, maxY + spacingY);
         }
 
-        return float.IsNegativeInfinity(maxY)
-                   ? new Vector2(defaultX, defaultY)
-                   : new Vector2(anchorX, maxY + spacingY);
+        // Re-centre on the visible canvas when the stack-anchor candidate is off-screen.
+        // Common case: the user is inside a deep composition and the existing
+        // LoadDataClips (or the origin fallback) sit far outside the current viewport —
+        // a new clip dropped there would look like nothing happened until the user
+        // pans to find it.
+        if (ProjectView.Focused?.GraphView is ScalableCanvas canvas)
+        {
+            var visible = canvas.GetVisibleCanvasArea();
+            if (visible.GetWidth() > 0 && visible.GetHeight() > 0 && !visible.Contains(candidate))
+                candidate = visible.GetCenter();
+        }
+
+        return candidate;
     }
 
     /// <summary>
-    /// Top layer above any existing TimeClip / TimelineAudioClip, so new recordings land
-    /// on a fresh row rather than overlapping pre-existing clips.
+    /// Picks the lowest layer pair <c>(i, i+1)</c> that's currently free of any TimeClip /
+    /// TimelineAudioClip, so a sequence of record-undo-record cycles reuses the same row
+    /// instead of pushing every retry two layers higher. Falls back to a fresh layer above
+    /// the highest occupied one when nothing's free below — same behaviour as before for
+    /// the genuinely-stacking case.
     /// </summary>
     private static int FindNextLayerIndex(Instance compositionOp)
     {
+        _occupiedLayersScratch.Clear();
         var maxLayer = -1;
 
         foreach (var clip in Structure.GetAllTimeClips(compositionOp))
         {
+            _occupiedLayersScratch.Add(clip.LayerIndex);
             if (clip.LayerIndex > maxLayer)
                 maxLayer = clip.LayerIndex;
         }
 
         foreach (var audioClip in compositionOp.Symbol.CompositionSettings.Playback.AudioClips)
         {
+            // The main soundtrack isn't drawn as a layer clip — it lives outside the clip
+            // grid as the timeline background image, so its LayerIndex doesn't reserve a
+            // row. Without this skip every project with a soundtrack starts recording at
+            // layer 2 instead of 0.
+            if (audioClip.IsMainSoundtrack)
+                continue;
+            _occupiedLayersScratch.Add(audioClip.LayerIndex);
             if (audioClip.LayerIndex > maxLayer)
                 maxLayer = audioClip.LayerIndex;
         }
 
+        // Scan from 0 up to the first pair (i, i+1) where neither row holds a clip. Capped
+        // at maxLayer + 1 so we don't search forever in an empty composition.
+        for (var i = 0; i <= maxLayer + 1; i++)
+        {
+            if (!_occupiedLayersScratch.Contains(i) && !_occupiedLayersScratch.Contains(i + 1))
+                return i;
+        }
+
         return maxLayer + 1;
     }
+
+    // Reused across calls to keep FindNextLayerIndex allocation-free — Begin is user-
+    // triggered (one click) but the helper is cheap to call and we already follow the
+    // editor's "no per-frame allocations" habit.
+    private static readonly HashSet<int> _occupiedLayersScratch = new();
 
     private static readonly Guid _loadDataClipSymbolId = new("4d1c0e80-7b2a-4f6d-9c1b-12d3e4f50607");
     private static readonly Guid _loadDataClipFilePathInputId = new("70419103-ae5d-4ca0-cf4e-456071829304");

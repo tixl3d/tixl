@@ -282,26 +282,37 @@ internal static class DataClipBodyRenderer
 
     /// <summary>
     /// Resolves the <see cref="DataSet"/> + <see cref="TimeRangeMapping"/> for the
-    /// current clip in three priority order:
-    /// (1) the op's output slot value when it's been evaluated this frame,
+    /// current clip. <see cref="DataSet"/> source priority order:
+    /// (1) the op's output slot value when it's been evaluated,
     /// (2) the live <see cref="DataSet"/> from an active <see cref="RecordingSession"/>
     ///     when this clip is the recording target — lets the timeline show events
     ///     streaming in during capture,
     /// (3) the file on disk via the shared <see cref="DataSetCache"/> when the op is
     ///     unwired and not being recorded into.
     /// </summary>
+    /// <remarks>
+    /// The mapping is always rebuilt from the live <see cref="TimeClip"/> via
+    /// <see cref="TryBuildMapping"/>, never read from <c>slot.Value.Mapping</c>. The slot
+    /// has <c>DirtyFlagTrigger.Animated</c>, so its cached value is refreshed only when
+    /// playback time advances — drag-mutating <see cref="TimeClip.TimeRange"/> or
+    /// <see cref="TimeClip.SourceRange"/> doesn't fire <c>Update</c>, and the cached
+    /// mapping would otherwise drift one or more frames behind the body bounds until the
+    /// user scrubbed. Reading from the live <see cref="TimeClip"/> is allocation-free and
+    /// keeps the visualisation in lockstep with the drag.
+    /// </remarks>
     private static bool TryGetDataSetAndMapping(Instance instance,
                                                 Slot<DataClip?> dataSlot,
                                                 TimeClip timeClip,
                                                 out DataSet? dataSet,
                                                 out TimeRangeMapping mapping)
     {
+        mapping = default;
+
         var clipValue = dataSlot.Value;
-        if (clipValue?.Set != null && clipValue.Mapping is { } m)
+        if (clipValue?.Set != null)
         {
             dataSet = clipValue.Set;
-            mapping = m;
-            return true;
+            return TryBuildMapping(timeClip, out mapping);
         }
 
         // Live-recording fallback: if this clip is the active session's target, use the
@@ -315,7 +326,6 @@ internal static class DataClipBodyRenderer
         // File fallback: read the path from the op's IDescriptiveFilename interface and
         // look up the parsed DataSet from the shared cache.
         dataSet = null;
-        mapping = default;
         if (instance is not IDescriptiveFilename descriptive)
             return false;
 
@@ -333,10 +343,12 @@ internal static class DataClipBodyRenderer
     }
 
     /// <summary>
-    /// Builds the source-content-relative <see cref="TimeRangeMapping"/> the way
-    /// <c>LoadDataClip.Update</c> does — rebases <see cref="TimeClip.SourceRange"/> to
-    /// start at 0 (or at the user's trim offset) so source seconds map to the right
-    /// timeline bars.
+    /// Builds the source-content-relative <see cref="TimeRangeMapping"/> the same way
+    /// <c>LoadDataClip.Update</c> does — direct identity from <see cref="TimeClip.TimeRange"/>
+    /// and <see cref="TimeClip.SourceRange"/>. SourceRange is in file-time (recording
+    /// anchored at 0); cut / start-handle trim adjust it in that space. Keeps the
+    /// renderer's culling and tick placement consistent with what <c>SimulateIoData</c>
+    /// uses for dispatch.
     /// </summary>
     private static bool TryBuildMapping(TimeClip timeClip, out TimeRangeMapping mapping)
     {
@@ -345,11 +357,7 @@ internal static class DataClipBodyRenderer
         if (playback == null)
             return false;
 
-        var trimOffsetBars = timeClip.SourceRange.Start - timeClip.TimeRange.Start;
-        var sourceDurationBars = timeClip.SourceRange.End - timeClip.SourceRange.Start;
-        var rebasedSourceRange = new TimeRange(trimOffsetBars, trimOffsetBars + sourceDurationBars);
-
-        mapping = new TimeRangeMapping(timeClip.TimeRange, rebasedSourceRange, playback.Bpm);
+        mapping = new TimeRangeMapping(timeClip.TimeRange, timeClip.SourceRange, playback.Bpm);
         return true;
     }
 
