@@ -10,6 +10,8 @@ using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.TimeLine.Raster;
+using T3.Editor.UiModel.Commands;
+using T3.Editor.UiModel.Commands.Animation;
 
 namespace T3.Editor.Gui.OutputUi;
 
@@ -80,29 +82,34 @@ internal sealed class DataSetViewCanvas
 
                     if (ImGui.Button("Remove"))
                     {
-                        var list = areChannelsSelected ? _selectedChannels.ToList() : dataSet.Channels;
-                        foreach (var channel in list)
+                        // Three intents map onto two command modes:
+                        //   selection + range   → drop events in range on the selected channels
+                        //   selection + no range → drop the selected channels themselves
+                        //   no selection + range → drop events in range across all channels
+                        // (no-selection + no-range was previously "clear every channel's events"
+                        // — now folded into the channel-removal path so it actually removes the
+                        // channels, matching the user mental model of "Remove with nothing
+                        // narrowed = drop the lot".)
+                        ICommand? command = null;
+                        if (isRangeSelected)
                         {
-                            if (isRangeSelected)
-                            {
-                                var sortedMin = _selectRangeStart;
-                                var sortedMax = _selectRangeEnd;
-                                if (sortedMin > sortedMax)
-                                {
-                                    (sortedMin, sortedMax) = (sortedMax, sortedMin);
-                                }
-
-                                var eventsInRange = channel.Events.Where(e => e?.Time >= sortedMin && e.Time <= sortedMax).ToList();
-                                foreach (var e in eventsInRange)
-                                {
-                                    channel.Events.Remove(e);
-                                }
-                            }
-                            else
-                            {
-                                channel.Events.Clear();
-                            }
+                            var channels = areChannelsSelected
+                                               ? _selectedChannels.ToList()
+                                               : (IReadOnlyList<DataChannel>)dataSet.Channels;
+                            command = RemoveDataSetItemsCommand.ForEventRange(dataSet, channels, _selectRangeStart, _selectRangeEnd);
                         }
+                        else
+                        {
+                            var channels = areChannelsSelected
+                                               ? _selectedChannels.ToList()
+                                               : dataSet.Channels.ToList();
+                            command = RemoveDataSetItemsCommand.ForChannels(dataSet, channels);
+                        }
+
+                        UndoRedoStack.AddAndExecute(command);
+                        _selectedChannels.Clear();
+                        _selectRangeStart = 0;
+                        _selectRangeEnd = 0;
                     }
 
                     ImGui.SameLine();
@@ -204,13 +211,6 @@ internal sealed class DataSetViewCanvas
                         }
                     }
                 }
-
-                // This is too unstable to expose it to users
-                // ImGui.SameLine(0, 20);
-                // if (ImGui.Button("Export as JSON"))
-                // {
-                //     dataSet.WriteToFile();
-                // }
             }
 
             _standardRaster.Draw(_canvas);
@@ -252,8 +252,8 @@ internal sealed class DataSetViewCanvas
             var min = ImGui.GetWindowPos();
             var max = ImGui.GetContentRegionAvail() + min;
 
-            var visibleMinTime = _canvas.InverseTransformX(min.X + 200);
-            var visibleMaxTime = _canvas.InverseTransformX(max.X);
+            var visibleMinTime = _canvas.InverseTransformX(min.X);
+            var visibleMaxTime = _canvas.InverseTransformX(max.X); 
 
             const int maxVisibleEvents = 500;
             const float layerHeight = 20f;
@@ -450,11 +450,11 @@ internal sealed class DataSetViewCanvas
 
                     //ImGui.SameLine(0,100);
                     ImGui.SetCursorPosX(200);
-                    using (new ChildWindowScope(channel.Path.Last(),
-                                                new Vector2(ImGui.GetWindowSize().X - 200, layerHeight),
-                                                ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoNav |
-                                                ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoBringToFrontOnFocus,
-                                                Color.Transparent))
+                    // using (new ChildWindowScope(channel.Path.Last(),
+                    //                             new Vector2(ImGui.GetWindowSize().X - 200, layerHeight),
+                    //                             ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoNav |
+                    //                             ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoBringToFrontOnFocus,
+                    //                             Color.Transparent))
                     {
                         var dl2 = ImGui.GetWindowDrawList();
 

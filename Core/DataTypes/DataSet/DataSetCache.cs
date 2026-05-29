@@ -91,6 +91,74 @@ public static class DataSetCache
     }
 
     /// <summary>
+    /// Resolves the source path the given <see cref="DataSet"/> was loaded from. Returns
+    /// false when the dataset isn't cache-owned (e.g. an in-flight recording's live set,
+    /// or a programmatically-constructed set that never went through <see cref="TryGet"/>).
+    /// </summary>
+    public static bool TryGetPathFor(DataSet dataSet, [NotNullWhen(true)] out string? absolutePath)
+    {
+        lock (_cache)
+        {
+            foreach (var (path, entry) in _cache)
+            {
+                if (!ReferenceEquals(entry.DataSet, dataSet))
+                    continue;
+                absolutePath = path;
+                return true;
+            }
+        }
+        absolutePath = null;
+        return false;
+    }
+
+    /// <summary>
+    /// Persists in-memory edits to disk for a cache-owned <see cref="DataSet"/>. Used by
+    /// commands that mutate the live set (Remove channel / events) so the change survives
+    /// project reload and any subsequent cache miss. After the write the cache entry's
+    /// timestamp is refreshed so a follow-up <see cref="TryGet"/> doesn't see "file newer
+    /// than cache" and re-parse — which would orphan every existing consumer pointing at
+    /// the old instance.
+    /// </summary>
+    public static bool TryWriteBack(DataSet dataSet, out string failureReason)
+    {
+        if (!TryGetPathFor(dataSet, out var absolutePath))
+        {
+            failureReason = "DataSet is not cache-owned; no source path to write to.";
+            return false;
+        }
+
+        try
+        {
+            dataSet.WriteToFile(absolutePath);
+        }
+        catch (Exception e)
+        {
+            failureReason = $"Failed to write {absolutePath}: {e.Message}";
+            return false;
+        }
+
+        // Stamp the cache entry with the file's new last-write so TryGet keeps returning
+        // the same DataSet instance. If reading the timestamp fails we log and carry on —
+        // worst case is a one-time re-parse on the next TryGet, which still produces an
+        // equivalent set (we just wrote the file).
+        try
+        {
+            var lastWrite = File.GetLastWriteTimeUtc(absolutePath);
+            lock (_cache)
+            {
+                _cache[absolutePath] = new CacheEntry(lastWrite, dataSet);
+            }
+        }
+        catch (Exception e)
+        {
+            Log.Warning($"DataSetCache.TryWriteBack: wrote {absolutePath} but failed to refresh cache timestamp: {e.Message}");
+        }
+
+        failureReason = string.Empty;
+        return true;
+    }
+
+    /// <summary>
     /// Parses a <c>.data</c> JSON file into a fresh <see cref="DataSet"/> without touching
     /// the cache. Prefer <see cref="TryGet"/> for normal use.
     /// </summary>

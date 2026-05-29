@@ -372,11 +372,18 @@ internal sealed class TimeClipInteractions
         foreach (var clipId in _context.ClipSelection.SelectedClipsIds)
         {
             var clip = _context.ClipSelection.CompositionTimeClips[clipId];
+
+            // Capture the stretch rate BEFORE mutation so trim preserves it. Without
+            // this, a clip at e.g. 50% speed gradually equalises toward 100% over a few
+            // frames of trim drag because both ends move by the same delta — events
+            // inside the clip appear to scale until the rate flattens.
+            var rate = ComputeRate(clip);
+
             var org = clip.TimeRange.Start;
             clip.TimeRange.Start = (float)Math.Min(clip.TimeRange.Start + dt, clip.TimeRange.End - MinDuration);
             var d = clip.TimeRange.Start - org;
             if (trim)
-                clip.SourceRange.Start += d;
+                clip.SourceRange.Start += (float)(d * rate);
         }
     }
 
@@ -386,12 +393,30 @@ internal sealed class TimeClipInteractions
         foreach (var clipId in _context.ClipSelection.SelectedClipsIds)
         {
             var clip = _context.ClipSelection.CompositionTimeClips[clipId];
+
+            var rate = ComputeRate(clip);
+
             var org = clip.TimeRange.End;
             clip.TimeRange.End = (float)Math.Max(clip.TimeRange.End + dt, clip.TimeRange.Start + MinDuration);
             var d = clip.TimeRange.End - org;
             if (trim)
-                clip.SourceRange.End += d;
+                clip.SourceRange.End += (float)(d * rate);
         }
+    }
+
+    /// <summary>
+    /// Source-bars-per-timeline-bar ratio. 1.0 for a clip whose source plays at native
+    /// speed; &lt; 1 when the source is stretched (plays slower than the timeline) and
+    /// &gt; 1 when compressed (plays faster). Falls back to 1 for the zero-duration edge
+    /// case so a fresh clip with TimeRange.Start == TimeRange.End behaves like the
+    /// non-stretched path before any drag samples a duration.
+    /// </summary>
+    private static double ComputeRate(TimeClip clip)
+    {
+        var timelineDuration = clip.TimeRange.Duration;
+        if (Math.Abs(timelineDuration) < 0.0001)
+            return 1.0;
+        return clip.SourceRange.Duration / (double)timelineDuration;
     }
 
     public void UpdateDragStretchCommand(double scaleU, double scaleV, double originU, double originV)

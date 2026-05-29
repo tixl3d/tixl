@@ -115,10 +115,9 @@ internal static class DataClipBodyRenderer
     }
 
     /// <summary>
-    /// Single horizontal track for one channel. Walks events in order, groups
-    /// consecutive ones within <see cref="MinTickGapPx"/> into runs, and renders each
-    /// run as either individual ticks (small / sparse runs) or a single density-rect
-    /// (larger / denser runs). Returns the number of draw commands emitted.
+    /// Single horizontal track for one channel. Dispatches between tick (point-in-time)
+    /// rendering and interval rendering based on the channel's
+    /// <see cref="DataChannel.DurationType"/>; both honour the per-channel budget.
     /// </summary>
     private static int DrawChannelTrack(DataChannel channel,
                                         TimeRangeMapping mapping,
@@ -129,6 +128,36 @@ internal static class DataClipBodyRenderer
                                         int budget,
                                         Color tickColor,
                                         ImDrawListPtr drawList)
+    {
+        if (channel.DurationType == ChannelDurationTypes.Interval)
+        {
+            return DrawIntervalChannelTrack(channel, mapping,
+                                            bodyMinX, bodyMaxX,
+                                            trackTopY, trackBottomY,
+                                            budget, tickColor, drawList);
+        }
+
+        return DrawTickChannelTrack(channel, mapping,
+                                    bodyMinX, bodyMaxX,
+                                    trackTopY, trackBottomY,
+                                    budget, tickColor, drawList);
+    }
+
+    /// <summary>
+    /// Tick rendering for point-in-time channels (MIDI CC, OSC, telemetry). Walks events
+    /// in order, groups consecutive ones within <see cref="MinTickGapPx"/> into runs, and
+    /// renders each run as either individual ticks (small / sparse runs) or a single
+    /// density-rect (larger / denser runs). Returns the number of draw commands emitted.
+    /// </summary>
+    private static int DrawTickChannelTrack(DataChannel channel,
+                                            TimeRangeMapping mapping,
+                                            float bodyMinX,
+                                            float bodyMaxX,
+                                            float trackTopY,
+                                            float trackBottomY,
+                                            int budget,
+                                            Color tickColor,
+                                            ImDrawListPtr drawList)
     {
         // Channel.Events may be appended on a background thread during recording. Snapshot
         // the count once; any later additions appear on the next frame.
@@ -176,7 +205,11 @@ internal static class DataClipBodyRenderer
                 continue;
 
             var t = (localBars - rangeStart) / rangeSpan;
-            var x = (float)(bodyMinX + t * bodySpan);
+            // Snap to integer pixels — sub-pixel float positions get rasterised with
+            // anti-aliasing, and a fractional change frame-to-frame (e.g. body width
+            // edging from 132.4 → 132.5 px while dragging an edge) shows up as a 1 px
+            // tick jitter even though the absolute timeline position barely moved.
+            var x = MathF.Floor((float)(bodyMinX + t * bodySpan));
 
             if (float.IsNaN(runStartX))
             {
@@ -214,6 +247,90 @@ internal static class DataClipBodyRenderer
     }
 
     /// <summary>
+    /// Interval rendering for span-in-time channels (MIDI notes today; subtitles /
+    /// regions later). Draws each event as a filled bar from its <see cref="DataEvent.Time"/>
+    /// to its <see cref="DataIntervalEvent.EndTime"/>, clipped to the body bounds.
+    /// Unfinished intervals (live-recording note-ons before the note-off arrives) stretch
+    /// to the right edge of the body so the user sees the held note grow.
+    /// </summary>
+    /// <remarks>
+    /// Run-collapsing isn't applied here — every interval is a distinct event with its own
+    /// duration, so the tick-density heuristic that works for point streams would smear
+    /// the timing information. The per-channel budget still caps draw commands; once it's
+    /// reached the loop bails out, leaving the leading interval(s) visible.
+    /// </remarks>
+    private static int DrawIntervalChannelTrack(DataChannel channel,
+                                                TimeRangeMapping mapping,
+                                                float bodyMinX,
+                                                float bodyMaxX,
+                                                float trackTopY,
+                                                float trackBottomY,
+                                                int budget,
+                                                Color tickColor,
+                                                ImDrawListPtr drawList)
+    {
+        var eventCount = channel.Events.Count;
+        if (eventCount == 0 || budget <= 0)
+            return 0;
+
+        var rangeStart = mapping.TimeRange.Start;
+        var rangeEnd = mapping.TimeRange.End;
+        var rangeSpan = rangeEnd - rangeStart;
+        if (rangeSpan < 0.0001)
+            return 0;
+        var bodySpan = bodyMaxX - bodyMinX;
+
+        var step = Math.Max(1, eventCount / Math.Max(1, budget));
+        var commands = 0;
+
+        for (var i = 0; i < eventCount; i += step)
+        {
+            if (commands >= budget)
+                break;
+
+            DataEvent? ev;
+            try { ev = channel.Events[i]; }
+            catch (ArgumentOutOfRangeException) { break; }
+
+            if (ev is not DataIntervalEvent interval)
+                continue;
+
+            var startLocalBars = mapping.SourceSecsToLocalBars(interval.Time);
+            // Unfinished interval (recorder hasn't seen note-off yet) — visualise it
+            // running to the end of the clip so the user sees it grow as they hold the
+            // note rather than vanishing because EndTime is +∞.
+            var endLocalBars = double.IsInfinity(interval.EndTime)
+                                   ? rangeEnd
+                                   : mapping.SourceSecsToLocalBars(interval.EndTime);
+
+            // Cull intervals fully outside the clip's TimeRange.
+            if (endLocalBars < rangeStart || startLocalBars > rangeEnd)
+                continue;
+
+            // Clip the visible span to the body so a long interval that overlaps the
+            // edge stops at the edge instead of drawing off-clip.
+            var clippedStart = Math.Max(startLocalBars, rangeStart);
+            var clippedEnd = Math.Min(endLocalBars, rangeEnd);
+
+            var t1 = (clippedStart - rangeStart) / rangeSpan;
+            var t2 = (clippedEnd - rangeStart) / rangeSpan;
+            var x1 = MathF.Floor((float)(bodyMinX + t1 * bodySpan));
+            var x2 = MathF.Floor((float)(bodyMinX + t2 * bodySpan));
+            // Even a zero-duration interval should be visible — same TickWidthPx the
+            // point-event branch uses for parity at high zoom.
+            if (x2 < x1 + TickWidthPx)
+                x2 = x1 + TickWidthPx;
+
+            drawList.AddRectFilled(new Vector2(x1, trackTopY),
+                                   new Vector2(x2, trackBottomY),
+                                   tickColor);
+            commands++;
+        }
+
+        return commands;
+    }
+
+    /// <summary>
     /// Emits draw commands for one run of consecutive close-together events. Small runs
     /// (≤ <see cref="RunSizeForTicks"/>) render as individual ticks; larger runs collapse
     /// into a single density-rect with alpha scaled by events-per-pixel.
@@ -238,7 +355,10 @@ internal static class DataClipBodyRenderer
             for (var i = 0; i < eventCount; i++)
             {
                 var t = eventCount == 1 ? 0f : i / (float)(eventCount - 1);
-                var x = startX + t * (endX - startX);
+                // Floor the interpolated tick position too — startX/endX are already
+                // pixel-aligned at this point, but t * (endX - startX) reintroduces
+                // sub-pixel offsets that cause the same jitter the outer loop avoids.
+                var x = MathF.Floor(startX + t * (endX - startX));
                 drawList.AddRectFilled(new Vector2(x, trackTopY),
                                        new Vector2(x + TickWidthPx, trackBottomY),
                                        tickColor);

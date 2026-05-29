@@ -37,14 +37,14 @@ internal sealed class LoadDataClip : Instance<LoadDataClip>, IStatusProvider, ID
                          [NotNullWhen(true)] out DataSet? newValue,
                          [NotNullWhen(false)] out string? failureReason)
     {
-        // Re-parse on every TryLoad invocation. The Resource<> file-watch invalidates the
-        // lazy value when the file changes; the shared DataSetCache is the source of
-        // truth for "have we already parsed this version?", so we explicitly invalidate
-        // before re-asking. That way all LoadDataClip ops pointing at the same file see
-        // the new content in lockstep.
+        // Let the cache decide whether to re-parse. It already keys entries by file path
+        // + last-write timestamp, so a real file change forces a fresh parse; otherwise
+        // every LoadDataClip pointing at the same path shares one DataSet instance.
+        // That sharing matters for in-memory mutations (e.g. "Remove channel" in the
+        // DataSet output view): a Split that creates a sibling LoadDataClip used to
+        // wipe those edits because we explicitly invalidated here on every TryLoad,
+        // re-parsing the on-disk file and resurrecting the removed channels.
         var absolutePath = file.AbsolutePath;
-        DataSetCache.Invalidate(absolutePath);
-
         if (!DataSetCache.TryGet(absolutePath, out var loaded, out var reason))
         {
             newValue = null;
