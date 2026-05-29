@@ -124,8 +124,10 @@ public static class DataSetCache
     //   {
     //     "Version": 1,                        // optional, defaults to 1
     //     "Metadata": { ... },                 // optional
+    //     "Guid": "<guid>",                            // dataset identity; healed on load if absent
     //     "Channels": [
     //       {
+    //         "Guid": "<guid>",                        // channel identity; healed on load if absent
     //         "Path": ["a", "b", "c"],                  // array of segments (no '/' join)
     //         "Type": "float",
     //         "DurationType": "Tick" | "Interval",      // optional; absent → sniff per event
@@ -148,10 +150,26 @@ public static class DataSetCache
     // recorder (MIDI / OSC) produces. Non-float channels are skipped with a warning so
     // a future extension can land without breaking older files.
     // ---------------------------------------------------------------------------
+    /// <summary>
+    /// Parses a Guid from a JSON token if present and well-formed. Returns null when
+    /// the token is missing, null, or unparseable — the caller heals with a fresh
+    /// <see cref="Guid.NewGuid"/> so old files transparently gain identity on load.
+    /// </summary>
+    private static Guid? TryParseGuid(JToken? token)
+    {
+        if (token == null)
+            return null;
+        var s = (string?)token;
+        if (string.IsNullOrEmpty(s))
+            return null;
+        return Guid.TryParse(s, out var guid) ? guid : null;
+    }
+
     private static DataSet ParseDataSet(JObject root)
     {
         var dataSet = new DataSet
                           {
+                              Guid = TryParseGuid(root["Guid"]) ?? Guid.NewGuid(),
                               Version = (int?)root["Version"] ?? 1,
                               Metadata = root["Metadata"] as JObject,
                           };
@@ -192,6 +210,7 @@ public static class DataSetCache
 
             var channel = new DataChannel(typeof(float), inMemoryDurationType)
                               {
+                                  Guid = TryParseGuid(channelObj["Guid"]) ?? Guid.NewGuid(),
                                   Path = pathSegments,
                                   Metadata = channelObj["Metadata"] as JObject,
                               };

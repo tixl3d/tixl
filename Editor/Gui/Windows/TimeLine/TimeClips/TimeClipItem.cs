@@ -80,7 +80,7 @@ internal static class TimeClipItem
         // Per-event tick overlay for ops that publish a DataClip. No-op for everything else.
         if (clipInstance != null)
         {
-            DataClipBodyRenderer.TryDraw(clipInstance, position, itemRectMax, attr.DrawList);
+            DataClipBodyRenderer.TryDraw(clipInstance, timeClip, position, itemRectMax, attr.DrawList);
         }
 
         if (isSelected)
@@ -341,8 +341,9 @@ internal static class TimeClipItem
             
             _timeWithinDraggedClip = currentDragTime - timeClip.TimeRange.Start;
             _posPosYOnDragStart = mousePos.Y;
-            _dragStartTime = currentDragTime;
-            _lastAppliedDeltaTime = currentDragTime;
+            _dragStartMouseTime = currentDragTime;
+            _originalDraggedClipStart = timeClip.TimeRange.Start;
+            _lastAppliedDeltaTime = 0;
             attr.LayerContext.TimeCanvas.StartDragCommand(attr.CompositionOp.Symbol.Id);
         }
         
@@ -355,21 +356,36 @@ internal static class TimeClipItem
             case HandleDragMode.Body:
                 var dy = _posPosYOnDragStart - mousePos.Y;
 
+                // Derive the unsnapped target from the ORIGINAL drag-start positions, not
+                // from incrementally accumulated state. This avoids the slow-drag artefact
+                // where snap was sticky for several frames and the cumulative "applied
+                // delta" diverged from the absolute mouse motion — leaving the clip stuck
+                // or jumping unexpectedly when the mouse finally left the snap range.
+                var rawDelta = currentDragTime - _dragStartMouseTime;
+                var unsnappedTargetStart = _originalDraggedClipStart + rawDelta;
+                var targetStart = unsnappedTargetStart;
 
-                if (allowSnapping && attr.LayerContext.SnapHandler.TryCheckForSnapping(currentDragTime - _timeWithinDraggedClip, 
-                                                                                   out var snappedClipStartTime,
-                                                                                   attr.LayerContext.TimeCanvas.Scale.X))
+                if (allowSnapping && attr.LayerContext.SnapHandler.TryCheckForSnapping(unsnappedTargetStart,
+                                                                                       out var snappedClipStartTime,
+                                                                                       attr.LayerContext.TimeCanvas.Scale.X))
                 {
-                    currentDragTime = (float)snappedClipStartTime + _timeWithinDraggedClip;
+                    targetStart = (float)snappedClipStartTime;
                 }
-                else if (allowSnapping && attr.LayerContext.SnapHandler.TryCheckForSnapping(currentDragTime - _timeWithinDraggedClip + timeClip.TimeRange.Duration, 
-                                                                                            out var snappedClipEndTime, 
+                else if (allowSnapping && attr.LayerContext.SnapHandler.TryCheckForSnapping(unsnappedTargetStart + timeClip.TimeRange.Duration,
+                                                                                            out var snappedClipEndTime,
                                                                                             attr.LayerContext.TimeCanvas.Scale.X))
                 {
-                    currentDragTime = (float)snappedClipEndTime + _timeWithinDraggedClip - timeClip.TimeRange.Duration;
+                    targetStart = (float)snappedClipEndTime - timeClip.TimeRange.Duration;
                 }
-                
-                attr.LayerContext.TimeCanvas.UpdateDragCommand(GetIncrement(currentDragTime), dy);
+
+                // _lastAppliedDeltaTime stores the cumulative delta-from-original we've
+                // committed so far. Compare absolute target → cumulative; emit the
+                // increment needed to reach the new cumulative value.
+                var finalDelta = targetStart - _originalDraggedClipStart;
+                var incrementToApply = finalDelta - _lastAppliedDeltaTime;
+                _lastAppliedDeltaTime = finalDelta;
+
+                attr.LayerContext.TimeCanvas.UpdateDragCommand(incrementToApply, dy);
                 break;
 
             case HandleDragMode.Start:
@@ -397,16 +413,14 @@ internal static class TimeClipItem
         }
     }
 
-    private static double GetIncrement(double snappedTotalDelta)
-    {
-        var dt = snappedTotalDelta - _lastAppliedDeltaTime;
-        _lastAppliedDeltaTime = snappedTotalDelta;
-        return dt;
-    }
-    
     private const float HandleWidth = 7;
     private static float _timeWithinDraggedClip;
-    private static double _dragStartTime;
+
+    // Drag-start snapshots. Body drag computes the target position from these +
+    // the absolute mouse-time delta, then derives the per-frame increment by subtracting
+    // the cumulative delta already committed. Avoids drift across snap boundaries.
+    private static double _dragStartMouseTime;
+    private static double _originalDraggedClipStart;
     private static double _lastAppliedDeltaTime;
     private static readonly Vector2 _handleOffset = new(HandleWidth, 0);
     private static readonly Color _timeRemappingColor = UiColors.StatusAnimated.Fade(0.5f);

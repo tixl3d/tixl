@@ -1,104 +1,375 @@
 #nullable enable
 
 using ImGuiNET;
+using T3.Core.Animation;
 using T3.Core.DataTypes.DataSet;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
+using T3.Core.Operator.Interfaces;
 using T3.Core.Operator.Slots;
+using T3.Core.Resource.Assets;
 using T3.Editor.Gui.Styling;
 
 namespace T3.Editor.Gui.Windows.TimeLine.TimeClips;
 
 /// <summary>
-/// Extra rendering applied to TimeClip op bodies whose output is a <see cref="DataClip"/>:
-/// per-event tick marks across the clip body, so the user can see at a glance what
-/// events are recorded and roughly where they fall.
+/// Renders per-channel tick / density-rect overlays inside <see cref="DataClip"/>-output
+/// TimeClip bodies. Each channel gets its own horizontal track within the body, and
+/// events are chunked into either individual ticks (sparse) or faded rects (dense)
+/// based on inter-event pixel spacing.
 /// </summary>
 /// <remarks>
-/// Hooked from <see cref="TimeClipItem"/> after the body fill and before the label, so
-/// the ticks paint over the background colour but under the clip name. Cheap when the
-/// op isn't a DataClip producer — a single type check returns early.
+/// Reads the slot's cached value when populated; falls back to loading the file directly
+/// via <see cref="DataSetCache"/> when no downstream consumer pulls on the op; falls
+/// back further to the in-progress recording's live <see cref="DataSet"/> when this clip
+/// is the target of an active <see cref="RecordingSession"/>. All three paths feed the
+/// same per-channel renderer.
 /// </remarks>
 internal static class DataClipBodyRenderer
 {
-    /// <summary>
-    /// If <paramref name="instance"/> exposes a <see cref="DataClip"/> output with a
-    /// non-null value, draws per-event ticks inside the clip body rectangle. No-ops for
-    /// any other op type (so it's safe to call unconditionally from the generic clip
-    /// renderer).
-    /// </summary>
     public static void TryDraw(Instance instance,
+                               TimeClip timeClip,
                                Vector2 bodyMin,
                                Vector2 bodyMax,
                                ImDrawListPtr drawList)
     {
-        DataClip? clip = null;
+        // Op-type gate: only proceed if this op publishes a Slot<DataClip?>. Quick reject
+        // for the 99% case (any other TimeClip op).
+        Slot<DataClip?>? dataSlot = null;
         foreach (var slot in instance.Outputs)
         {
-            if (slot is Slot<DataClip?> dataSlot)
+            if (slot is Slot<DataClip?> ds)
             {
-                clip = dataSlot.Value;
+                dataSlot = ds;
                 break;
             }
         }
+        if (dataSlot == null)
+            return;
 
-        if (clip?.Set == null || clip.Mapping is not { } mapping)
+        if (!TryGetDataSetAndMapping(instance, dataSlot, timeClip, out var dataSet, out var mapping)
+            || dataSet == null)
             return;
 
         var bodyWidth = bodyMax.X - bodyMin.X;
-        if (bodyWidth < 3)
+        var bodyHeight = bodyMax.Y - bodyMin.Y;
+        if (bodyWidth < 3 || bodyHeight < 4)
             return;
 
-        // Total event count gates "individual ticks" vs "density block". The threshold is
-        // a soft heuristic — at very high density per-event ticks would alias to a solid
-        // smear and 30 Hz CC streams could ship thousands of ticks per channel.
-        var totalEvents = 0;
-        foreach (var channel in clip.Set.Channels)
-            totalEvents += channel.Events.Count;
+        // Filter to channels that have events. Empty channels don't get a track so the
+        // layout stays compact.
+        _visibleChannelsScratch.Clear();
+        foreach (var channel in dataSet.Channels)
+        {
+            if (channel.Events.Count > 0)
+                _visibleChannelsScratch.Add(channel);
+        }
+        if (_visibleChannelsScratch.Count == 0)
+            return;
 
+        // Track layout: 2 px tracks with 1 px gap when the body is tall enough, 1 px
+        // tracks with no gap when tight, fall back to a single overlay rect when even
+        // 1 px per channel doesn't fit.
+        const float topPadding = 2f;
+        const float bottomPadding = 2f;
+        var usableHeight = bodyHeight - topPadding - bottomPadding;
+        var n = _visibleChannelsScratch.Count;
+
+        float trackHeight;
+        float gap;
+        if (usableHeight >= n * 2f + (n - 1) * 1f)
+        {
+            trackHeight = 2f;
+            gap = 1f;
+        }
+        else if (usableHeight >= n * 1f)
+        {
+            trackHeight = 1f;
+            gap = 0f;
+        }
+        else
+        {
+            // Too many channels for individual tracks — single overlay rect spanning
+            // mapping.TimeRange, alpha proportional to total event density.
+            DrawSingleOverlay(_visibleChannelsScratch, mapping, bodyMin, bodyMax, drawList);
+            return;
+        }
+
+        // Each channel gets its own fair slice of the per-clip budget so a heavy channel
+        // can't starve later channels. A channel that uses less than its share doesn't
+        // donate it — keeps the allocation predictable across frames.
+        const int perClipBudget = 1500;
+        var perChannelBudget = Math.Max(40, perClipBudget / n);
+        var trackColor = UiColors.ForegroundFull.Fade(0.55f);
+
+        for (var i = 0; i < n; i++)
+        {
+            var trackTopY = bodyMin.Y + topPadding + i * (trackHeight + gap);
+            var trackBottomY = trackTopY + trackHeight;
+            DrawChannelTrack(_visibleChannelsScratch[i], mapping,
+                             bodyMin.X, bodyMax.X,
+                             trackTopY, trackBottomY,
+                             perChannelBudget,
+                             trackColor, drawList);
+        }
+    }
+
+    /// <summary>
+    /// Single horizontal track for one channel. Walks events in order, groups
+    /// consecutive ones within <see cref="MinTickGapPx"/> into runs, and renders each
+    /// run as either individual ticks (small / sparse runs) or a single density-rect
+    /// (larger / denser runs). Returns the number of draw commands emitted.
+    /// </summary>
+    private static int DrawChannelTrack(DataChannel channel,
+                                        TimeRangeMapping mapping,
+                                        float bodyMinX,
+                                        float bodyMaxX,
+                                        float trackTopY,
+                                        float trackBottomY,
+                                        int budget,
+                                        Color tickColor,
+                                        ImDrawListPtr drawList)
+    {
+        // Channel.Events may be appended on a background thread during recording. Snapshot
+        // the count once; any later additions appear on the next frame.
+        var eventCount = channel.Events.Count;
+        if (eventCount == 0 || budget <= 0)
+            return 0;
+
+        var rangeStart = mapping.TimeRange.Start;
+        var rangeEnd = mapping.TimeRange.End;
+        var rangeSpan = rangeEnd - rangeStart;
+        if (rangeSpan < 0.0001)
+            return 0;
+        var bodySpan = bodyMaxX - bodyMinX;
+
+        // Even-decimation step when the worst case (every event its own tick) would blow
+        // the budget. Better than front-loading: spreading the omissions evenly preserves
+        // the visual rhythm of activity across the track instead of fading after the
+        // first N events.
+        var step = Math.Max(1, eventCount / Math.Max(1, budget));
+
+        var commands = 0;
+
+        // Run state. We walk events and either:
+        //   - extend the current run if the new event is within MinTickGapPx of the previous
+        //   - flush the run (as ticks or rect, depending on count) and start a new one
+        var runStartX = float.NaN;
+        var runEndX = float.NaN;
+        var runEventCount = 0;
+        var prevX = float.NegativeInfinity;
+
+        for (var i = 0; i < eventCount; i += step)
+        {
+            if (commands >= budget)
+                break;
+
+            DataEvent? ev;
+            try { ev = channel.Events[i]; }
+            catch (ArgumentOutOfRangeException) { break; }  // list shrank under us
+
+            if (ev == null)
+                continue;
+
+            var localBars = mapping.SourceSecsToLocalBars(ev.Time);
+            if (localBars < rangeStart || localBars > rangeEnd)
+                continue;
+
+            var t = (localBars - rangeStart) / rangeSpan;
+            var x = (float)(bodyMinX + t * bodySpan);
+
+            if (float.IsNaN(runStartX))
+            {
+                runStartX = x;
+                runEndX = x;
+                runEventCount = 1;
+                prevX = x;
+                continue;
+            }
+
+            if (x - prevX <= MinTickGapPx)
+            {
+                runEndX = x;
+                runEventCount++;
+                prevX = x;
+            }
+            else
+            {
+                commands += FlushRun(runStartX, runEndX, runEventCount,
+                                     trackTopY, trackBottomY, tickColor, drawList);
+                runStartX = x;
+                runEndX = x;
+                runEventCount = 1;
+                prevX = x;
+            }
+        }
+
+        if (!float.IsNaN(runStartX) && commands < budget)
+        {
+            commands += FlushRun(runStartX, runEndX, runEventCount,
+                                 trackTopY, trackBottomY, tickColor, drawList);
+        }
+
+        return commands;
+    }
+
+    /// <summary>
+    /// Emits draw commands for one run of consecutive close-together events. Small runs
+    /// (≤ <see cref="RunSizeForTicks"/>) render as individual ticks; larger runs collapse
+    /// into a single density-rect with alpha scaled by events-per-pixel.
+    /// </summary>
+    private static int FlushRun(float startX, float endX, int eventCount,
+                                float trackTopY, float trackBottomY,
+                                Color tickColor, ImDrawListPtr drawList)
+    {
+        if (eventCount == 1)
+        {
+            drawList.AddRectFilled(new Vector2(startX, trackTopY),
+                                   new Vector2(startX + TickWidthPx, trackBottomY),
+                                   tickColor);
+            return 1;
+        }
+
+        if (eventCount <= RunSizeForTicks)
+        {
+            // Sparse run — N ticks across the run, evenly spaced. (Intermediate event
+            // positions weren't recorded; interpolation matches the original spacing at
+            // sub-pixel precision.)
+            for (var i = 0; i < eventCount; i++)
+            {
+                var t = eventCount == 1 ? 0f : i / (float)(eventCount - 1);
+                var x = startX + t * (endX - startX);
+                drawList.AddRectFilled(new Vector2(x, trackTopY),
+                                       new Vector2(x + TickWidthPx, trackBottomY),
+                                       tickColor);
+            }
+            return eventCount;
+        }
+
+        // Dense run — single rect with alpha scaled by density.
+        var width = MathF.Max(1f, endX - startX);
+        var density = eventCount / width;
+        var alpha = MathF.Min(0.7f, 0.25f + density * 0.4f);
+        drawList.AddRectFilled(new Vector2(startX, trackTopY),
+                               new Vector2(endX + TickWidthPx, trackBottomY),
+                               tickColor.Fade(alpha));
+        return 1;
+    }
+
+    /// <summary>
+    /// Fallback when there are too many channels for even 1 px per track: one rect
+    /// spanning the clip body, alpha scaled by total event density across all channels.
+    /// Same visual the renderer used pre-redesign, kept for the high-channel-count case.
+    /// </summary>
+    private static void DrawSingleOverlay(List<DataChannel> channels,
+                                          TimeRangeMapping mapping,
+                                          Vector2 bodyMin, Vector2 bodyMax,
+                                          ImDrawListPtr drawList)
+    {
+        var totalEvents = 0;
+        foreach (var ch in channels)
+            totalEvents += ch.Events.Count;
         if (totalEvents == 0)
             return;
 
-        var minY = bodyMin.Y + 3;
-        var maxY = bodyMax.Y - 3;
-        if (maxY <= minY)
-            return;
-
-        // Density fallback: one faded fill across the audible region instead of N ticks
-        // when individual ticks would alias. The audible region is mapping.TimeRange
-        // (we draw the fill regardless of how far the user has scrolled, clipped by the
-        // body rect).
-        if (totalEvents > bodyWidth * 0.3f && totalEvents > 200)
-        {
-            drawList.AddRectFilled(new Vector2(bodyMin.X, minY),
-                                   new Vector2(bodyMax.X, maxY),
-                                   UiColors.ForegroundFull.Fade(0.18f));
-            return;
-        }
-
-        // Individual ticks. Use AddLine — single primitive per event, no allocations in
-        // the hot path.
-        var tickColor = UiColors.ForegroundFull.Fade(0.55f);
-        foreach (var channel in clip.Set.Channels)
-        {
-            foreach (var ev in channel.Events)
-            {
-                if (ev == null)
-                    continue;
-
-                var localBars = mapping.SourceSecsToLocalBars(ev.Time);
-                if (localBars < mapping.TimeRange.Start || localBars > mapping.TimeRange.End)
-                    continue;
-
-                // World bars → screen X via the TimeRange's pixel span. We don't have a
-                // TimeCanvas reference here (the renderer is canvas-agnostic), so derive
-                // the X from the proportion within the body rect.
-                var t = (localBars - mapping.TimeRange.Start) /
-                        (mapping.TimeRange.End - mapping.TimeRange.Start);
-                var x = (float)(bodyMin.X + t * bodyWidth);
-
-                drawList.AddLine(new Vector2(x, minY), new Vector2(x, maxY), tickColor);
-            }
-        }
+        var bodyWidth = bodyMax.X - bodyMin.X;
+        var density = totalEvents / MathF.Max(1f, bodyWidth);
+        var alpha = MathF.Min(0.45f, 0.15f + density * 0.05f);
+        drawList.AddRectFilled(new Vector2(bodyMin.X, bodyMin.Y + 2f),
+                               new Vector2(bodyMax.X, bodyMax.Y - 2f),
+                               UiColors.ForegroundFull.Fade(alpha));
     }
+
+    /// <summary>
+    /// Resolves the <see cref="DataSet"/> + <see cref="TimeRangeMapping"/> for the
+    /// current clip in three priority order:
+    /// (1) the op's output slot value when it's been evaluated this frame,
+    /// (2) the live <see cref="DataSet"/> from an active <see cref="RecordingSession"/>
+    ///     when this clip is the recording target — lets the timeline show events
+    ///     streaming in during capture,
+    /// (3) the file on disk via the shared <see cref="DataSetCache"/> when the op is
+    ///     unwired and not being recorded into.
+    /// </summary>
+    private static bool TryGetDataSetAndMapping(Instance instance,
+                                                Slot<DataClip?> dataSlot,
+                                                TimeClip timeClip,
+                                                out DataSet? dataSet,
+                                                out TimeRangeMapping mapping)
+    {
+        var clipValue = dataSlot.Value;
+        if (clipValue?.Set != null && clipValue.Mapping is { } m)
+        {
+            dataSet = clipValue.Set;
+            mapping = m;
+            return true;
+        }
+
+        // Live-recording fallback: if this clip is the active session's target, use the
+        // in-flight DataSet.
+        if (RecordingSession.TryGetLiveDataSet(instance.SymbolChildId, out var liveSet) && liveSet != null)
+        {
+            dataSet = liveSet;
+            return TryBuildMapping(timeClip, out mapping);
+        }
+
+        // File fallback: read the path from the op's IDescriptiveFilename interface and
+        // look up the parsed DataSet from the shared cache.
+        dataSet = null;
+        mapping = default;
+        if (instance is not IDescriptiveFilename descriptive)
+            return false;
+
+        var path = descriptive.SourcePathSlot.TypedInputValue.Value;
+        if (string.IsNullOrEmpty(path))
+            return false;
+        if (!path.EndsWith(".data", StringComparison.OrdinalIgnoreCase))
+            return false;
+        if (!AssetRegistry.TryResolveAddress(path, instance, out var absolutePath, out _))
+            return false;
+        if (!DataSetCache.TryGet(absolutePath, out dataSet, out _))
+            return false;
+
+        return TryBuildMapping(timeClip, out mapping);
+    }
+
+    /// <summary>
+    /// Builds the source-content-relative <see cref="TimeRangeMapping"/> the way
+    /// <c>LoadDataClip.Update</c> does — rebases <see cref="TimeClip.SourceRange"/> to
+    /// start at 0 (or at the user's trim offset) so source seconds map to the right
+    /// timeline bars.
+    /// </summary>
+    private static bool TryBuildMapping(TimeClip timeClip, out TimeRangeMapping mapping)
+    {
+        mapping = default;
+        var playback = Playback.Current;
+        if (playback == null)
+            return false;
+
+        var trimOffsetBars = timeClip.SourceRange.Start - timeClip.TimeRange.Start;
+        var sourceDurationBars = timeClip.SourceRange.End - timeClip.SourceRange.Start;
+        var rebasedSourceRange = new TimeRange(trimOffsetBars, trimOffsetBars + sourceDurationBars);
+
+        mapping = new TimeRangeMapping(timeClip.TimeRange, rebasedSourceRange, playback.Bpm);
+        return true;
+    }
+
+    /// <summary>Width of a single tick in pixels — 2 keeps marks visible at all zooms.</summary>
+    private const float TickWidthPx = 2f;
+
+    /// <summary>
+    /// Min gap in pixels between consecutive events for them to remain visually distinct
+    /// ticks rather than collapse into a density-rect. Sub-pixel resolution events become
+    /// rects automatically.
+    /// </summary>
+    private const float MinTickGapPx = 2.5f;
+
+    /// <summary>
+    /// Threshold for ticks-vs-rect within a run: runs with this many events or fewer
+    /// render as individual ticks, larger runs collapse to a single density-rect.
+    /// </summary>
+    private const int RunSizeForTicks = 5;
+
+    // Scratch buffer reused across frames to avoid per-frame allocation when filtering
+    // channels by event count.
+    private static readonly List<DataChannel> _visibleChannelsScratch = new();
 }

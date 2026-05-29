@@ -42,6 +42,21 @@ internal static class RecordingSession
 {
     public static bool IsActive { get; private set; }
 
+    /// <summary>
+    /// During an active session, returns the in-progress <see cref="DataSet"/> being
+    /// written by <see cref="IoDataSetRecorder"/> if the given SymbolChild is the one
+    /// the session is targeting. Lets timeline UI (the clip-body renderer) show events
+    /// streaming in live before the file is finalised on stop.
+    /// </summary>
+    public static bool TryGetLiveDataSet(Guid clipChildId, out T3.Core.DataTypes.DataSet.DataSet? dataSet)
+    {
+        dataSet = null;
+        if (!IsActive || clipChildId != _activeDataClipChildId)
+            return false;
+        dataSet = IoDataSetRecorder.ActiveDataSet;
+        return dataSet != null;
+    }
+
     public static void Start(Instance compositionOp)
     {
         if (IsActive)

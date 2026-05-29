@@ -16,6 +16,7 @@ using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.InputsAndTypes;
+using T3.Editor.Gui.Windows.TimeLine;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
 using T3.SystemUi;
@@ -65,9 +66,19 @@ internal sealed class ParameterWindow : Window
 
         if (!NodeSelection.TryGetSelectedInstanceOrInput(out var instance, out var inputUi, out _selectionChanged))
         {
+            // No operator selected — check for selected timeline audio clips first. They
+            // own a parallel selection set (AudioClipInteractions.SelectedClipIds), and
+            // when one or more are picked the Parameter window should show the audio-clip
+            // inspector instead of falling through to annotations / empty.
+            if (TryDrawTimelineAudioClipInspector())
+            {
+                _lastSelectedInstanceId = Guid.Empty;
+                return;
+            }
+
             if (ProjectView.Focused?.NodeSelection != null)
                 DrawSettingsForSelectedAnnotations(ProjectView.Focused.NodeSelection);
-            
+
             _lastSelectedInstanceId = Guid.Empty;
             return;
         }
@@ -670,6 +681,22 @@ internal sealed class ParameterWindow : Window
     }
 
     // TODO: Refactor this into a separate class
+    /// <summary>
+    /// Routes to <see cref="TimelineAudioClipInspector.TryDraw"/> when the focused
+    /// project view's timeline has audio clips selected. Returns true if the inspector
+    /// drew its own content (the caller skips annotation / empty-state rendering).
+    /// </summary>
+    private static bool TryDrawTimelineAudioClipInspector()
+    {
+        var projectView = ProjectView.Focused;
+        if (projectView == null)
+            return false;
+
+        var audioClips = projectView.TimeLineCanvas.ClipArea.AudioClips;
+        return TimelineAudioClipInspector.TryDraw(projectView.CompositionInstance,
+                                                  audioClips.SelectedClipIds);
+    }
+
     private static bool DrawSettingsForSelectedAnnotations(NodeSelection nodeSelection)
     {
         var somethingVisible = false;

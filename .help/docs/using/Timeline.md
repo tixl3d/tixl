@@ -244,3 +244,19 @@ In addition to op-backed time clips, the timeline also hosts two clip types that
 - **Data clips** are produced by recording a live session (see [Recording](./Recording.md)) or by dropping a `.data` file. They render with per-event tick marks across the body — sparse recordings show every event, dense ones show a soft fill.
 
 Both types share the timeline with op-backed clips: same drag, trim, snap, and selection behavior across all three. Selecting a clip of one type clears selection on the other types unless you hold `Shift` or `Ctrl`.
+
+#### Editing audio clips
+
+Click an audio clip to select it. The **Parameter window** then shows an inspector with:
+
+- **Volume** — 0.0 to 4.0, default 1.0.
+- **Source Offset** (s) — skip the first N seconds of the source file.
+- **Source Duration** (s) — how much of the source plays under the clip's TimeRange. `0` means "until the end of the source".
+- **Layer** — which row the clip lives on.
+- **Main soundtrack** — when set, the clip drives the timeline waveform background, FFT routing for `[AudioReaction]`-driven effects, and the video export pipeline. **Only one clip per project should have this set.**
+
+Trimming via the start/end handles on the timeline adjusts `Source Offset` and `Source Duration` together — the clip stays anchored in time while the audible window shrinks. The clip's body width follows the audible duration; it can never extend beyond the source content (no synthetic silence at the end).
+
+Selecting multiple audio clips shows a simplified inspector with shared fields only — Volume and Layer can be bulk-edited, the rest are per-clip.
+
+Drag a clip body horizontally to shift its TimeRange, vertically (across a full row height) to change `Layer`. Hold `Shift` while clicking to add to selection across both audio and data clip types.

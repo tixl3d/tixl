@@ -116,6 +116,14 @@ public sealed class IoDataSetRecorder : MidiConnectionManager.IMidiConsumer, Osc
     public static bool IsRecording => _active != null;
     public static string? ActiveRecordingPath => _active?.Path;
 
+    /// <summary>
+    /// The live <see cref="DataSet"/> being written during an active session, or
+    /// <c>null</c> when no session is in progress. Consumers iterating the channels'
+    /// event lists must be tolerant of mutation: events arrive on MIDI / OSC callback
+    /// threads and the list may be appended to mid-read.
+    /// </summary>
+    public static DataSet? ActiveDataSet => _active?.DataSet;
+
     public string Path { get; }
     public DataSet DataSet { get; } = new();
 

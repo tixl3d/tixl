@@ -21,6 +21,14 @@ namespace T3.Core.DataTypes.DataSet;
 public sealed class DataSet
 {
     /// <summary>
+    /// Stable identity for the dataset, persisted to disk. Lets caches and future
+    /// cross-references survive file renames. Generated fresh by new in-memory datasets
+    /// (recording or programmatic creation); old files without the field get a fresh
+    /// Guid healed on load and persisted on the next save.
+    /// </summary>
+    public Guid Guid { get; set; } = Guid.NewGuid();
+
+    /// <summary>
     /// On-disk format version. New files always write <see cref="CurrentVersion"/>;
     /// old files without the key are treated as v1. Bumping the version lets a future
     /// reader degrade gracefully (warn and load what it understands) rather than fail.
@@ -53,10 +61,12 @@ public sealed class DataSet
     /// On-disk shape (v1):
     /// <code>
     /// {
+    ///   "Guid": "&lt;guid&gt;",                     // identity, healed on load if absent
     ///   "Version": 1,                         // optional, defaults to 1 if absent
     ///   "Metadata": { ... },                  // optional, omitted when null
     ///   "Channels": [
     ///     {
+    ///       "Guid": "&lt;guid&gt;",                 // per-channel identity, healed on load
     ///       "Path": ["Midi", "&lt;device&gt;", "Ch&lt;n&gt;", "CC74"],
     ///       "Type": "float",
     ///       "DurationType": "Tick",           // optional; old files sniff per event
@@ -80,6 +90,9 @@ public sealed class DataSet
 
         writer.Formatting = Formatting.Indented;
         writer.WriteStartObject();
+
+        writer.WritePropertyName("Guid");
+        writer.WriteValue(Guid.ToString());
 
         writer.WritePropertyName("Version");
         writer.WriteValue(Version);
@@ -121,6 +134,13 @@ public sealed class DataChannel
     public required List<string> Path { get; init; }
 
     /// <summary>
+    /// Stable identity for the channel within its <see cref="DataSet"/>, persisted to
+    /// disk. Survives <see cref="Path"/> rewrites — useful once channel renaming /
+    /// editing arrives. Generated fresh on construction; healed on load when missing.
+    /// </summary>
+    public Guid Guid { get; set; } = Guid.NewGuid();
+
+    /// <summary>
     /// Whether events on this channel occupy a moment in time (tick) or span a duration
     /// (interval). Channel-level so high-cardinality streams (e.g. 30 Hz CC) don't pay
     /// per-event overhead. Use <see cref="ChannelDurationTypes"/> constants — the value
@@ -155,6 +175,9 @@ public sealed class DataChannel
 
         writer.WriteStartObject();
         {
+            writer.WritePropertyName("Guid");
+            writer.WriteValue(Guid.ToString());
+
             // Path serialises as a JSON array — segments stay separate, no '/' join /
             // split round-trip, no need to escape forward slashes in device names.
             writer.WritePropertyName("Path");
