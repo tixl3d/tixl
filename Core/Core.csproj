@@ -10,7 +10,8 @@
         <Configurations>Debug;Release</Configurations>
         <Platforms>AnyCPU</Platforms>
         <VersionPrefix>$(TixlVersion)</VersionPrefix>
-        <Version>$(TixlVersion)</Version>
+        <VersionSuffix>$(TixlVersionSuffix)</VersionSuffix>
+        <InformationalVersion>$(Version)</InformationalVersion>
         <Nullable>disable</Nullable>
         <NoWarn>NU1900;NU1603</NoWarn>
     </PropertyGroup>

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
+using T3.Core.Compilation;
 
 #nullable enable
 
@@ -73,17 +73,28 @@ public static string TestReferencesFolder => Path.Combine(".tixl", TestsSubFolde
 
     public static HashSet<string> IgnoredFiles => ["shadertoolsconfig.json", ".gitattributes", ".git"];
     
-    /// <summary>
-    /// TiXL's <c>major.minor</c> version, read from the executing assembly. Used in
-    /// settings folder names and stamped into recording metadata so users can later see
-    /// which build produced a given file. Falls back to <c>"0.0"</c> if reflection fails.
-    /// </summary>
-    public static readonly string TixlVersion = ReadTixlVersionOrFallback();
-    private static string GetAssemblyVersion() => TixlVersion;
     
+    /// <summary>
+    /// TiXL's <c>major.minor</c> version, e.g. <c>"4.2"</c>. Deliberately excludes the alpha
+    /// suffix — recordings stamped with this stay diffable between stable and alpha builds of
+    /// the same minor. The suffix is added only to folder names via <see cref="VersionedAppFolderName"/>.
+    /// </summary>
+    public static readonly string TixlVersion = $"{RuntimeAssemblies.Version.Major}.{RuntimeAssemblies.Version.Minor}";
+
+    /// <summary>
+    /// Per-version folder name (<c>"TiXL4.2"</c>, or <c>"TiXL4.2-alpha"</c> for prerelease builds)
+    /// so alpha and stable installs don't clobber each other's settings, layouts, themes, and projects.
+    /// Declared before the folders below — static initialisers run in source order, so reading it
+    /// earlier would observe <c>null</c>.
+    /// </summary>
+    public static readonly string VersionedAppFolderName =
+        RuntimeAssemblies.IsAlpha
+            ? $"{AppSubFolder}{TixlVersion}-{RuntimeAssemblies.VersionSuffix}"
+            : $"{AppSubFolder}{TixlVersion}";
+
     public static readonly string SettingsDirectory =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                 $"{AppSubFolder}{GetAssemblyVersion()}"
+                     VersionedAppFolderName
 
                      // Skip process name to avoid double nesting of TiXL
                      // This will lump together logs from player
@@ -91,14 +102,9 @@ public static string TestReferencesFolder => Path.Combine(".tixl", TestsSubFolde
                      //, Process.GetCurrentProcess().ProcessName
                      );
 
-
-    public static readonly string DefaultProjectFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), $"{AppSubFolder}{GetAssemblyVersion()}");
-    private static string ReadTixlVersionOrFallback()
-    {
-        var version = Assembly.GetExecutingAssembly().GetName().Version;
-        return version == null ? "0.0" : $"{version.Major}.{version.Minor}";
-    }
-
+    public static readonly string DefaultProjectFolder =
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                     VersionedAppFolderName);
     public const string LegacyResourcesSubfolder = "Resources";
     public const string AssetsSubfolder = "Assets";
     public const string EditorResourcesSubfolder = "EditorResources";
