@@ -139,9 +139,10 @@ internal static class TimeClipItem
         // Draw stretch indicators
         if (isSelected && timeRemapped && attr.LayerContext.ClipSelection.Count == 1)
         {
-            var verticalOffset = ImGui.GetWindowPos().Y + ImGui.GetWindowSize().Y - position.Y - ClipArea.LayerHeight;
+            var estimatedRulerHeight = 40;
+            var verticalOffset = ImGui.GetWindowPos().Y  + estimatedRulerHeight - position.Y - ClipArea.LayerHeight;
             var horizontalOffset = attr.LayerContext.TimeCanvas.TransformDirection(new Vector2(timeClip.SourceRange.Start - timeClip.TimeRange.Start, 0)).X;
-            var startPosition = position + new Vector2(0, ClipArea.LayerHeight);
+            var startPosition = position;
             attr.DrawList.AddBezierCubic(startPosition,
                                          startPosition + new Vector2(0, verticalOffset),
                                          startPosition + new Vector2(horizontalOffset, 0),
@@ -149,7 +150,7 @@ internal static class TimeClipItem
                                          _timeRemappingColor, 1);
 
             horizontalOffset = attr.LayerContext.TimeCanvas.TransformDirection(new Vector2(timeClip.SourceRange.End - timeClip.TimeRange.End, 0)).X;
-            var endPosition = position + new Vector2(clipSize.X, ClipArea.LayerHeight);
+            var endPosition = position + new Vector2(clipSize.X, 0);
             attr.DrawList.AddBezierCubic(endPosition,
                                          endPosition + new Vector2(0, verticalOffset),
                                          endPosition + new Vector2(horizontalOffset, 0),
@@ -334,8 +335,11 @@ internal static class TimeClipItem
                 }
                 else
                 {
+                    // Full clear before adding — ClipSelection.Select only touches the
+                    // op-clip side, so without this an audio clip selected before this
+                    // press would remain selected alongside the new op clip.
+                    attr.LayerContext.TimeCanvas.ClearSelection();
                     attr.LayerContext.ClipSelection.Select(timeClip);
-                    
                 }
             }
             
@@ -432,6 +436,6 @@ internal static class TimeClipItem
     private static double _originalDraggedClipStart;
     private static double _lastAppliedDeltaTime;
     private static readonly Vector2 _handleOffset = new(HandleWidth, 0);
-    private static readonly Color _timeRemappingColor = UiColors.StatusAnimated.Fade(0.5f);
+    private static readonly Color _timeRemappingColor = UiColors.StatusAnimated.Fade(0.25f);
     private static float _posPosYOnDragStart;
 }

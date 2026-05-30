@@ -73,8 +73,13 @@ internal static class TimelineAudioClipItem
         const float rounding = 4.5f;
         var isSelected = attr.SelectedAudioClipIds.Contains(clip.Id);
 
+        // Mute fade — silenced clips render at ~40 % opacity so the user can tell at a
+        // glance which clips won't be heard. Applied to fill, waveform image and label;
+        // selection border + audio icon stay full opacity so the clip is still findable.
+        var muteFade = clip.IsMuted ? 0.4f : 1f;
+
         // Fixed audio-tinted fill — distinct from the random-per-id colour of op-backed clips.
-        var fill = UiColors.ColorForValues.Fade(0.4f);
+        var fill = UiColors.ColorForValues.Fade(0.4f * muteFade);
         attr.DrawList.AddRectFilled(pos, maxPos, fill, rounding);
 
         // Waveform image (lazy load + cache). Map UVs to the audible source portion so
@@ -105,7 +110,7 @@ internal static class TimelineAudioClipItem
                                    maxPos - new Vector2(1, 1),
                                    uvMin,
                                    uvMax,
-                                   UiColors.ForegroundFull.Fade(0.6f));
+                                   UiColors.ForegroundFull.Fade(0.6f * muteFade));
             attr.DrawList.PopClipRect();
         }
 
@@ -131,9 +136,10 @@ internal static class TimelineAudioClipItem
             if (needsClipping)
                 ImGui.PushClipRect(pos, maxPos - new Vector2(3, 0), true);
 
-            attr.DrawList.AddText(labelPos,
-                                  isSelected ? UiColors.Selection : UiColors.ForegroundFull,
-                                  label);
+            var labelColor = isSelected
+                                 ? UiColors.Selection
+                                 : UiColors.ForegroundFull.Fade(muteFade);
+            attr.DrawList.AddText(labelPos, labelColor, label);
 
             if (needsClipping)
                 ImGui.PopClipRect();
@@ -269,6 +275,16 @@ internal static class TimelineAudioClipItem
                 AudioClipInteractions.LayerShiftOnDragStart = 0;
             }
 
+            // Snapshot the dragged clip's original edges + mouse time so the per-frame
+            // drag target is computed from absolute drag-start state, not by accumulating
+            // per-frame deltas. The latter pattern lets snap absorb a delta and trap
+            // the clip at the snap target — the mouse keeps moving but the per-frame
+            // post-snap timeDelta is zero, so the clip never escapes.
+            _dragStartMouseTime = attr.TimeCanvas.InverseTransformX(ImGui.GetIO().MousePos.X);
+            _originalDraggedClipStart = clip.TimeRange.Start;
+            _originalDraggedClipEnd = clip.TimeRange.End;
+            _lastAppliedTimeDelta = 0;
+
             // Cross-type drag: when the user drags an audio clip body, op clips in
             // the op selection move along too.
             if (mode == DragMode.Body)
@@ -282,53 +298,64 @@ internal static class TimelineAudioClipItem
             return;
         }
 
-        var mouseDelta = ImGui.GetIO().MouseDelta;
-        var timeDelta = (float)attr.TimeCanvas.InverseTransformDirection(new Vector2(mouseDelta.X, 0)).X;
         var playback = attr.TimeCanvas.Playback;
 
-        // Snap-during-drag. Shift / Alt+Ctrl bypass snapping, mirroring the op-clip behavior
-        // in TimeClipItem. The dragged clip is used as the reference edge so a single edge
-        // snaps cleanly; both Start and End are checked for body drags so whichever lands
-        // closest to a snap anchor wins.
+        // Absolute drag target from the drag-start snapshot. Mirrors the body-drag pattern
+        // in TimeClipItem: compute target = original + (currentMouseTime - dragStartMouseTime),
+        // snap that target, then emit just the increment beyond what's already been applied.
+        // Per-frame delta + snap (the old shape) lets snap absorb a delta and trap the clip
+        // at the snap anchor — the mouse keeps moving but timeDelta goes to zero so the
+        // clip never escapes.
+        var currentMouseTime = (float)attr.TimeCanvas.InverseTransformX(ImGui.GetIO().MousePos.X);
+        var rawDelta = currentMouseTime - _dragStartMouseTime;
+
         var allowSnapping = !ImGui.GetIO().KeyShift && !(ImGui.GetIO().KeyAlt && ImGui.GetIO().KeyCtrl);
-        if (allowSnapping)
+        var snapScale = attr.TimeCanvas.Scale.X;
+        var snapExclusions = attr.TimeCanvas.SelectionDragSnapExclusions;
+
+        float finalDelta;
+        switch (mode)
         {
-            var snapScale = attr.TimeCanvas.Scale.X;
-            // SelectionRangeIndicator follows the dragged clip(s) frame-to-frame; without
-            // exclusion the snap handler perpetually "re-snaps to self" and stutters.
-            var snapExclusions = attr.TimeCanvas.SelectionDragSnapExclusions;
-            switch (mode)
+            case DragMode.Body:
             {
-                case DragMode.Body:
+                var unsnappedTargetStart = _originalDraggedClipStart + rawDelta;
+                var unsnappedTargetEnd = _originalDraggedClipEnd + rawDelta;
+                var targetDelta = rawDelta;
+                if (allowSnapping)
                 {
-                    var candidateStart = clip.TimeRange.Start + timeDelta;
-                    var candidateEnd = clip.TimeRange.End + timeDelta;
-                    if (attr.SnapHandler.TryCheckForSnapping(candidateStart, out var snappedStart, snapScale, snapExclusions))
-                    {
-                        timeDelta += (float)(snappedStart - candidateStart);
-                    }
-                    else if (attr.SnapHandler.TryCheckForSnapping(candidateEnd, out var snappedEnd, snapScale, snapExclusions))
-                    {
-                        timeDelta += (float)(snappedEnd - candidateEnd);
-                    }
-                    break;
+                    if (attr.SnapHandler.TryCheckForSnapping(unsnappedTargetStart, out var snapped, snapScale, snapExclusions))
+                        targetDelta = (float)snapped - _originalDraggedClipStart;
+                    else if (attr.SnapHandler.TryCheckForSnapping(unsnappedTargetEnd, out snapped, snapScale, snapExclusions))
+                        targetDelta = (float)snapped - _originalDraggedClipEnd;
                 }
-                case DragMode.Start:
-                {
-                    var candidate = clip.TimeRange.Start + timeDelta;
-                    if (attr.SnapHandler.TryCheckForSnapping(candidate, out var snapped, snapScale, snapExclusions))
-                        timeDelta += (float)(snapped - candidate);
-                    break;
-                }
-                case DragMode.End:
-                {
-                    var candidate = clip.TimeRange.End + timeDelta;
-                    if (attr.SnapHandler.TryCheckForSnapping(candidate, out var snapped, snapScale, snapExclusions))
-                        timeDelta += (float)(snapped - candidate);
-                    break;
-                }
+                finalDelta = targetDelta;
+                break;
             }
+            case DragMode.Start:
+            {
+                var unsnappedTarget = _originalDraggedClipStart + rawDelta;
+                var snappedTarget = unsnappedTarget;
+                if (allowSnapping && attr.SnapHandler.TryCheckForSnapping(unsnappedTarget, out var snapped, snapScale, snapExclusions))
+                    snappedTarget = (float)snapped;
+                finalDelta = snappedTarget - _originalDraggedClipStart;
+                break;
+            }
+            case DragMode.End:
+            {
+                var unsnappedTarget = _originalDraggedClipEnd + rawDelta;
+                var snappedTarget = unsnappedTarget;
+                if (allowSnapping && attr.SnapHandler.TryCheckForSnapping(unsnappedTarget, out var snapped, snapScale, snapExclusions))
+                    snappedTarget = (float)snapped;
+                finalDelta = snappedTarget - _originalDraggedClipEnd;
+                break;
+            }
+            default:
+                finalDelta = 0;
+                break;
         }
+
+        var timeDelta = finalDelta - _lastAppliedTimeDelta;
+        _lastAppliedTimeDelta = finalDelta;
 
         // Vertical layer shift (Body drag only) — quantise cumulative-from-drag-start mouse Y
         // into integer LayerIndex deltas and ratchet via LayerShiftOnDragStart so each frame
@@ -474,6 +501,16 @@ internal static class TimelineAudioClipItem
 
     private const float HandleWidth = 7;
     private const float MinDuration = 1f / 60f; // bars
+
+    // Drag-start snapshot — clip edges + mouse time at the moment the drag began. Body /
+    // Start / End drags compute their target from these + the current mouse-time delta,
+    // then derive the per-frame increment by subtracting the cumulative delta already
+    // committed. Avoids snap-trap behaviour when the mouse moves slowly across a snap
+    // anchor.
+    private static float _dragStartMouseTime;
+    private static float _originalDraggedClipStart;
+    private static float _originalDraggedClipEnd;
+    private static float _lastAppliedTimeDelta;
 
     // Lifetime: entries live for the editor session.
     private static readonly Dictionary<string, CachedImage> _imageCache = new();

@@ -114,7 +114,10 @@ internal sealed class TimelineDetailsArea
 
         var paneMin = ImGui.GetWindowPos();
         var paneMax = paneMin + ImGui.GetWindowSize();
-        var closePos = new Vector2(paneMax.X - padding - hitSize.X, paneMin.Y + padding);
+        // Avoid overlapping the vertical scrollbar — when present it eats the rightmost
+        // ScrollbarSize px and the close button would render under it.
+        var scrollbarOffset = ImGui.GetScrollMaxY() > 0 ? ImGui.GetStyle().ScrollbarSize : 0f;
+        var closePos = new Vector2(paneMax.X - padding - hitSize.X - scrollbarOffset, paneMin.Y + padding);
 
         ImGui.SetCursorScreenPos(closePos);
         if (ImGui.InvisibleButton("##timelineDetailsClose", hitSize))

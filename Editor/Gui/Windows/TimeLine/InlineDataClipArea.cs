@@ -74,11 +74,15 @@ internal sealed class InlineDataClipArea
                          ImGuiChildFlags.None,
                          ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoScrollWithMouse);
         {
-            if (clipChanged || justAppeared)
-                ImGui.SetScrollY(0);
-
-            _embeddedView.DrawEmbedded(dataClip, _timeLineCanvas);
-            TimelineDetailsArea.DrawCloseButton(_timeLineCanvas);
+            // Scroll-reset and close button live INSIDE the embedded view's Scrollable
+            // child — anything we draw out here gets blocked by that child's hit-rect.
+            _embeddedView.DrawEmbedded(dataClip, _timeLineCanvas,
+                                       drawOverlay: () =>
+                                                    {
+                                                        if (clipChanged || justAppeared)
+                                                            ImGui.SetScrollY(0);
+                                                        TimelineDetailsArea.DrawCloseButton(_timeLineCanvas);
+                                                    });
         }
         ImGui.EndChild();
         ImGui.PopStyleColor();

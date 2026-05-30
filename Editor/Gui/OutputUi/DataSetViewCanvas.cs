@@ -51,26 +51,30 @@ internal sealed class DataSetViewCanvas
     /// <see cref="T3.Editor.Gui.Windows.TimeLine.InlineDataClipArea"/>). The parent's
     /// <see cref="ScalableCanvas"/> takes over X transforms so event positions line up
     /// with the parent's ruler / playhead, and this view skips its own chrome / raster /
-    /// auto-scroll (the parent owns those).
+    /// auto-scroll (the parent owns those). The optional <paramref name="drawOverlay"/>
+    /// callback runs inside this view's Scrollable child window — that's the only place
+    /// host-supplied widgets (close button, scroll-reset) can land without being blocked
+    /// by ImGui's child-window hit-rect rules.
     /// </summary>
-    internal void DrawEmbedded(DataClip? clip, ScalableCanvas externalCanvas)
+    internal void DrawEmbedded(DataClip? clip, ScalableCanvas externalCanvas, Action? drawOverlay = null)
     {
         if (clip?.Set == null)
         {
-            DrawInternal(null, mapping: null, externalCanvas: externalCanvas);
+            DrawInternal(null, mapping: null, externalCanvas: externalCanvas, drawOverlay: drawOverlay);
             return;
         }
 
-        DrawInternal(clip.Set, clip.Mapping, externalCanvas: externalCanvas);
+        DrawInternal(clip.Set, clip.Mapping, externalCanvas: externalCanvas, drawOverlay: drawOverlay);
     }
 
-    private void DrawInternal(DataSet? dataSet, TimeRangeMapping? mapping, ScalableCanvas? externalCanvas)
+    private void DrawInternal(DataSet? dataSet, TimeRangeMapping? mapping, ScalableCanvas? externalCanvas, Action? drawOverlay = null)
     {
         if (dataSet == null)
             return;
 
         _mapping = mapping;
         _externalCanvas = externalCanvas;
+        _embeddedOverlay = drawOverlay;
 
         // Very ugly hack to prevent scaling the output above window size
         var keepScale = T3Ui.UiScaleFactor;
@@ -78,6 +82,7 @@ internal sealed class DataSetViewCanvas
         DrawCanvas();
         T3Ui.UiScaleFactor = keepScale;
         _externalCanvas = null;
+        _embeddedOverlay = null;
         return;
 
         void DrawCanvas()
@@ -771,6 +776,11 @@ internal sealed class DataSetViewCanvas
             // Draw current time
             var xTime = EventSecsToScreenX(currentTime);
             dl.AddRectFilled(new Vector2(xTime, min.Y), new Vector2(xTime + 1, max.Y), UiColors.WidgetActiveLine);
+
+            // Host-supplied overlay (close button, scroll-reset) — must run INSIDE this
+            // Scrollable child or the host's items get blocked by its hit-rect.
+            _embeddedOverlay?.Invoke();
+
             ImGui.EndChild();
             ImGui.SetCursorPos(Vector2.Zero);
         }
@@ -813,6 +823,11 @@ internal sealed class DataSetViewCanvas
     // event positions line up. Cleared at the end of every DrawInternal call so a reused
     // view instance doesn't leak embedded state into a later standalone draw.
     private ScalableCanvas? _externalCanvas;
+
+    // Host-supplied overlay invoked inside the Scrollable child — host's only chance to
+    // place widgets (close button, scroll-reset) that are actually hit-testable. Cleared
+    // alongside _externalCanvas at the end of every DrawInternal.
+    private Action? _embeddedOverlay;
 
     /// <summary>Picks the canvas used for X transforms — host's when embedded, own otherwise.</summary>
     private ScalableCanvas EffectiveCanvas => _externalCanvas ?? _canvas;

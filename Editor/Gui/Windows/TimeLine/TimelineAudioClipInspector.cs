@@ -117,6 +117,13 @@ internal static class TimelineAudioClipInspector
 
         FormInputs.AddVerticalSpace(4);
 
+        var isMuted = clip.IsMuted;
+        if (FormInputs.AddCheckBox("Muted", ref isMuted,
+                                   tooltip: "Silence this clip without removing it. The clip body renders faded so you can see at a glance which clips won't be heard."))
+        {
+            clip.IsMuted = isMuted;
+        }
+
         var isMain = clip.IsMainSoundtrack;
         if (FormInputs.AddCheckBox("Main soundtrack", ref isMain,
                                    tooltip: "When set, this clip drives the timeline waveform background, FFT routing for AudioReaction, and the video export pipeline. Only one clip per project should be marked."))
@@ -160,6 +167,19 @@ internal static class TimelineAudioClipInspector
                 foreach (var c in clips)
                     c.LayerIndex += delta;
             }
+        }
+
+        // Mute toggle — tri-state across the selection (all muted / none muted / mixed).
+        // Clicking sets every clip to the same state; mixed defaults to muting all so a
+        // partial mute can be resolved with one click.
+        var allMuted = clips.All(c => c.IsMuted);
+        var anyMuted = clips.Any(c => c.IsMuted);
+        var muteLabel = allMuted ? "Muted" : anyMuted ? "Muted (mixed)" : "Muted";
+        var isMuted = allMuted;
+        if (FormInputs.AddCheckBox(muteLabel, ref isMuted))
+        {
+            foreach (var c in clips)
+                c.IsMuted = isMuted;
         }
 
         FormInputs.AddVerticalSpace(4);

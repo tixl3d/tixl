@@ -100,6 +100,13 @@ public sealed class TimelineAudioClip
     public float Volume = 1.0f;
 
     /// <summary>
+    /// Per-clip mute. Silences playback (the audio engine multiplies the channel volume
+    /// by 0) and the clip body renders faded so the user can tell at a glance that the
+    /// clip won't be heard.
+    /// </summary>
+    public bool IsMuted;
+
+    /// <summary>
     /// Marks the project's "main soundtrack" clip. This single flag currently bundles three concerns:
     /// (1) the clip is drawn as the timeline-background waveform, (2) it gets FFT routing for
     /// audio-reactive effects, and (3) it's wired into the export pipeline. Only one clip per
@@ -181,6 +188,7 @@ public sealed class TimelineAudioClip
                           SourceDurationSecs = jToken[nameof(SourceDurationSecs)]?.Value<double>() ?? 0,
                           LayerIndex = jToken[nameof(LayerIndex)]?.Value<int>() ?? 0,
                           Volume = jToken[nameof(Volume)]?.Value<float>() ?? 1f,
+                          IsMuted = jToken[nameof(IsMuted)]?.Value<bool>() ?? false,
                           IsMainSoundtrack = isMainSoundtrack,
                           LegacyBpmForMigration = legacyBpm,
                       };
@@ -215,6 +223,10 @@ public sealed class TimelineAudioClip
 
             if (Math.Abs(Volume - 1.0f) > 0.001f)
                 writer.WriteValue(nameof(Volume), Volume);
+
+            // Only emit the mute flag when set — keeps the JSON lean for the common case.
+            if (IsMuted)
+                writer.WriteValue(nameof(IsMuted), IsMuted);
 
             writer.WriteValue(nameof(IsMainSoundtrack), IsMainSoundtrack);
         }

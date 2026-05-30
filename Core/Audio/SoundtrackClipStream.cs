@@ -213,6 +213,7 @@ internal sealed class SoundtrackClipStream
                                  clip.Volume
                                  * audio.SoundtrackVolume
                                  * CoreSettings.Config.AppVolume
+                                 * (clip.IsMuted ? 0f:1f)
                                  * (audio.SoundtrackMute ? 0f:1f)
                                  * (CoreSettings.Config.AppMute ? 0f:1f));
 

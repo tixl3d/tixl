@@ -103,3 +103,34 @@ While playback is running through the clip, drag the playhead backward over the 
 - No events fire on the backward jump (the cursor snaps without dispatching).
 - Forward playback after the scrub resumes dispatching from the new cursor position.
 - Held MIDI notes are **not** auto-released (known limitation; not a regression).
+
+## Step: Cutting a clip preserves event timing on both halves
+
+**Action:**
+With the data clip selected and `SimulateIoData` still wired in, position the playhead somewhere inside the clip and pick **Cut at time** from the clip context menu (or use the shortcut). Move the playhead through both halves and watch the simulated event dispatches.
+
+**Expected:**
+- The data clip is split into two clips; their `LoadDataClip` ops both reference the same `.data` file.
+- The body of the **left** clip shows only the events whose source time is before the cut; the **right** clip shows the events after the cut. No events vanish or shift sideways inside either body.
+- Playing across the split fires the recorded events in the same order and at the same wall-clock positions as before the cut — the playhead crossing the split is seamless.
+- Events that belong to the right half do **not** fire while the playhead is still in the left half (no cross-clip leakage).
+
+## Step: Trimming preserves stretch
+
+**Action:**
+Stretch the data clip first by holding `Alt` and dragging its right edge — the bar at the bottom of the clip turns red and the "(NN%)" speed indicator in the name updates. Now release `Alt` and drag the right edge inward without any modifier.
+
+**Expected:**
+- The speed indicator stays at the same percentage during the no-modifier drag — trim alone does not change the stretch ratio.
+- Event ticks inside the clip body stay at the same screen positions while the right edge moves; events past the new trim simply stop being visible.
+- Dragging the left edge inward (also no modifier) behaves the same — speed stays, the event sitting at the new left edge stays put.
+
+## Step: Clear Time Stretch keeps the trimmed-in start
+
+**Action:**
+With the same stretched clip, also trim the **start** inward (no modifier) so the source no longer begins at file-time 0. Right-click → **Clear Time Stretch**.
+
+**Expected:**
+- The "(NN%)" indicator returns to (or is removed from) the name — stretch is gone, rate is 1.
+- The event that was sitting at the left edge of the clip before the action is still at the same left edge afterwards (the trim is preserved).
+- The clip stays selected after the menu action.

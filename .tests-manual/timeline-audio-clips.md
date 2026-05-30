@@ -81,10 +81,14 @@ Click the clip body once. Then hover (without clicking) over the body.
 ## Step: Drag the clip body horizontally
 
 **Action:**
-Click and drag the clip body left and right.
+Click and drag the clip body left and right at a slow, near-zero-velocity pace.
 
 **Expected:**
-- The clip moves with the cursor along the timeline.
+- The clip moves smoothly with the cursor along the timeline — no per-pixel
+  jitter or "stuttering" while the cursor crawls. (The drag excludes the
+  SelectionRangeIndicator from snap targets, which would otherwise re-snap to
+  the selection's own edge frame-to-frame.)
+- Snapping still engages against beat raster lines and other clips' edges.
 - Releasing the drag pushes a single undo entry — Ctrl+Z restores the
   original TimeRange.
 
@@ -100,6 +104,33 @@ height. Drop both above and below existing rows.
 - Sub-layer-height movements don't cause jitter — only crossing a full row
   triggers the LayerIndex change.
 - Undo restores the original layer.
+
+## Step: Mute a clip via the inspector
+
+**Action:**
+Select an audible audio clip (one that plays back). In the Parameter Window, tick the
+**Muted** checkbox. Hit play and listen. Untick it.
+
+**Expected:**
+- With Muted on: the clip body renders noticeably faded compared to its siblings.
+  Playback through the clip's TimeRange produces no audio from this clip; other clips
+  continue to play normally.
+- With Muted off: opacity returns to normal and audio plays again.
+- Saving and reopening the project preserves the mute state on the clip.
+- Multi-select two clips with mixed mute state; the bulk inspector shows "Muted (mixed)"
+  and one click resolves them all to the same state.
+
+## Step: Parameter Window shows clip fields and accepts negative Layer
+
+**Action:**
+Click the clip body once to select it (no operator selected on the graph).
+Look at the Parameter Window.
+
+**Expected:**
+- The Audio Clip inspector renders — asset path, volume, source offset / duration, layer, and the main-soundtrack flag are visible.
+- Scrubbing the **Layer** field down past 0 sets the layer to a negative integer
+  (the field is no longer clamped at 0). The clip jumps to the corresponding row above the timeline grid origin.
+- Selecting multiple audio clips switches the inspector to the bulk-edit view; shifting Layer there applies the same delta to every selected clip and still accepts negative values.
 
 ## Step: Trim the start handle (DAW-style)
 
@@ -154,6 +185,20 @@ succession instead.)
 - Each file becomes its own clip.
 - Subsequent clips land on stacked layers so they don't overlap on the same row.
 - A single undo reverts all of them at once (when dropped as a batch).
+
+## Step: Single-click between clip types replaces selection
+
+**Action:**
+Click an op-backed `[TimeClip]` (no modifier). Then click an audio clip. Then click the
+op-backed clip again. Then alternate a few more times.
+
+**Expected:**
+- Each click leaves **only** the just-clicked clip selected; the previously-selected
+  clip of the OTHER type is cleared.
+- The Parameter window switches between op-clip details and audio-clip inspector
+  accordingly — never shows a "phantom" selection from the other side.
+- Shift-click still extends the selection across both types (standard additive
+  behavior preserved by the cross-type drag step further down).
 
 ## Step: Cross-type drag (mixed selection)
 
