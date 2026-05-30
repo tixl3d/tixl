@@ -659,17 +659,20 @@ internal static class SymbolUiJson
     private static void WriteSettings(SymbolUi symbolUi, JsonTextWriter writer)
     {
         var hasRenderSettings = symbolUi.RenderSettings != null;
+        var hasRecordingSettings = symbolUi.RecordingSettings is { } rec && !rec.IsAtDefault();
         var hasOutputWindowStates = symbolUi.OutputWindowStates is { Count: > 0 };
         var hasTimelineState = symbolUi.TimelineState != null;
         var hasWindowLayout = !string.IsNullOrEmpty(symbolUi.WindowLayout);
 
-        if (!hasRenderSettings && !hasOutputWindowStates && !hasTimelineState && !hasWindowLayout)
+        if (!hasRenderSettings && !hasRecordingSettings && !hasOutputWindowStates && !hasTimelineState && !hasWindowLayout)
             return;
 
         writer.WritePropertyName("Settings");
         writer.WriteStartObject();
         {
             symbolUi.RenderSettings?.WriteToJson(writer);
+            if (hasRecordingSettings)
+                symbolUi.RecordingSettings!.WriteToJson(writer);
             OutputWindowState.WriteAllToJson(writer, symbolUi.OutputWindowStates);
             symbolUi.TimelineState?.WriteToJson(writer);
 
@@ -703,6 +706,7 @@ internal static class SymbolUiJson
             return;
 
         symbolUi.RenderSettings = Gui.Windows.RenderExport.RenderSettings.ReadFromJson(settingsToken);
+        symbolUi.RecordingSettings = Gui.Windows.TimeLine.RecordingSettings.ReadFromJson(settingsToken);
         symbolUi.OutputWindowStates = OutputWindowState.ReadAllFromJson(settingsToken);
         symbolUi.TimelineState = Gui.Windows.TimeLine.TimelineState.ReadFromJson(settingsToken);
         symbolUi.WindowLayout = settingsToken["WindowLayout"]?.Value<string>();

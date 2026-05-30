@@ -123,6 +123,7 @@ internal sealed class ProjectSettingsWindow : Window
     {
         Playback,
         Audio,
+        Recording,
         Executable,
     }
 
@@ -154,6 +155,9 @@ internal sealed class ProjectSettingsWindow : Window
                     break;
                 case Categories.Audio:
                     modified |= DrawAudioSettings(settings);
+                    break;
+                case Categories.Recording:
+                    modified |= DrawRecordingSettings(composition);
                     break;
                 case Categories.Executable:
                     modified |= DrawRenderingSettings(settings);
@@ -206,6 +210,63 @@ internal sealed class ProjectSettingsWindow : Window
             ref audio.AudioResyncThreshold, 0.001f, 0.1f, 0.001f, true, true,
             "If audio playback drifts too far from the animation it will be resynced. A normal range is between 0.02s and 0.05s.",
             defaults.AudioResyncThreshold);
+
+        return modified;
+    }
+
+    /// <summary>
+    /// Per-composition toggles for the live recording feature: what the Record button on
+    /// the timeline toolbar should actually capture. Lives on
+    /// <see cref="T3.Editor.UiModel.SymbolUi.RecordingSettings"/> (Editor-only — Core has
+    /// no consumer for these flags). Defaults to capturing everything so compositions
+    /// that never visited this panel keep working unchanged. The settings instance is
+    /// lazily created on first edit so .t3ui files for never-touched compositions stay
+    /// clean.
+    /// </summary>
+    private static bool DrawRecordingSettings(Instance composition)
+    {
+        var modified = false;
+        var symbolUi = composition.GetSymbolUi();
+        var recording = symbolUi.RecordingSettings ??= new RecordingSettings();
+        var defaults = RecordingSettings.Defaults;
+
+        FormInputs.AddSectionHeader("Recording");
+        CustomComponents.HelpText("Which sources the timeline Record button captures.");
+        FormInputs.AddVerticalSpace();
+
+        modified |= FormInputs.AddCheckBox("Capture Audio",
+                                           ref recording.CaptureAudio,
+                                           "Record the active WASAPI input device while the session is running. The device is configured under Playback → Audio Source.",
+                                           defaults.CaptureAudio);
+
+        FormInputs.AddVerticalSpace();
+
+        modified |= FormInputs.AddCheckBox("Capture IO",
+                                           ref recording.CaptureIo,
+                                           "Record MIDI and / or OSC events into a .data file alongside the audio clip.",
+                                           defaults.CaptureIo);
+
+        // Indent the IO sub-flags so the visual hierarchy matches "MIDI / OSC are children
+        // of IO". Skip the sub-rows entirely when the parent is off — they're inert and
+        // would just clutter the panel.
+        if (recording.CaptureIo)
+        {
+            ImGui.Indent(20 * T3Ui.UiScaleFactor);
+            modified |= FormInputs.AddCheckBox("MIDI",
+                                               ref recording.CaptureMidi,
+                                               "Subscribe to MIDI events for this recording.",
+                                               defaults.CaptureMidi);
+            modified |= FormInputs.AddCheckBox("OSC",
+                                               ref recording.CaptureOsc,
+                                               "Subscribe to OSC events on the configured DefaultOscPort for this recording.",
+                                               defaults.CaptureOsc);
+            ImGui.Unindent(20 * T3Ui.UiScaleFactor);
+
+            if (!recording.CaptureMidi && !recording.CaptureOsc)
+            {
+                CustomComponents.HelpText("Both MIDI and OSC are off — Capture IO has nothing to record.");
+            }
+        }
 
         return modified;
     }

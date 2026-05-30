@@ -47,11 +47,17 @@ public sealed class IoDataSetRecorder : MidiConnectionManager.IMidiConsumer, Osc
     /// normally null. Kept for symmetry with
     /// <see cref="T3.Core.Audio.WasapiAudioInput.BeginRecording"/>.
     /// </param>
-    public static string? BeginRecording(string? suffix = null)
+    public static string? BeginRecording(string? suffix = null, bool captureMidi = true, bool captureOsc = true)
     {
         if (_active != null)
         {
             Log.Warning($"IO data recording already active at '{_active.Path}'. Call EndRecording first.");
+            return null;
+        }
+
+        if (!captureMidi && !captureOsc)
+        {
+            Log.Warning("IoDataSetRecorder.BeginRecording called with both MIDI and OSC disabled — nothing to capture.");
             return null;
         }
 
@@ -72,8 +78,12 @@ public sealed class IoDataSetRecorder : MidiConnectionManager.IMidiConsumer, Osc
 
         try
         {
-            _active = new IoDataSetRecorder(path, CoreSettings.Config.DefaultOscPort);
-            Log.Debug($"IO data recording started: {path}");
+            // Pass -1 for the OSC port when OSC is disabled — the constructor's existing
+            // out-of-range branch already skips OSC registration on negative ports, so we
+            // don't need a separate flag here.
+            var oscPort = captureOsc ? CoreSettings.Config.DefaultOscPort : -1;
+            _active = new IoDataSetRecorder(path, oscPort, captureMidi);
+            Log.Debug($"IO data recording started: {path} (midi={captureMidi}, osc={captureOsc})");
             return path;
         }
         catch (Exception e)
@@ -130,13 +140,14 @@ public sealed class IoDataSetRecorder : MidiConnectionManager.IMidiConsumer, Osc
     /// <summary>Wall-clock UTC moment the session started. Stamped into file metadata on stop.</summary>
     public DateTime SessionStartUtc { get; }
 
-    private IoDataSetRecorder(string path, int oscPort)
+    private IoDataSetRecorder(string path, int oscPort, bool registerMidi = true)
     {
         Path = path;
         _recordStartRunSecs = Playback.RunTimeInSecs;
         SessionStartUtc = DateTime.UtcNow;
 
-        MidiConnectionManager.RegisterConsumer(this);
+        if (registerMidi)
+            MidiConnectionManager.RegisterConsumer(this);
 
         if (oscPort >= 0 && oscPort <= 65535)
         {

@@ -256,6 +256,13 @@ public sealed partial class SymbolUi : ISelectionContainer
     internal Gui.Windows.RenderExport.RenderSettings? RenderSettings { get; set; }
 
     /// <summary>
+    /// Per-symbol live-recording configuration (audio / IO / MIDI / OSC toggles for the
+    /// timeline Record button). Null if no recording settings have been customised.
+    /// Serialized to .t3ui files.
+    /// </summary>
+    internal Gui.Windows.TimeLine.RecordingSettings? RecordingSettings { get; set; }
+
+    /// <summary>
     /// Per-symbol output window states (one per OutputWindow instance).
     /// Serialized to .t3ui files.
     /// </summary>

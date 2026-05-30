@@ -76,6 +76,24 @@ internal static class RecordingSession
         _recordStartBars = Playback.Current.TimeInBars;
         _recordStartRunSecs = Playback.RunTimeInSecs;
 
+        // Capture what to record per the composition's recording settings (lives on the
+        // composition's SymbolUi — see RecordingSettings.cs). Permissive defaults — a
+        // composition that never touched the panel still grabs everything (RecordingSettings
+        // has a Defaults instance with all flags on). CaptureMidi / CaptureOsc only have
+        // an effect when CaptureIo is on; the IoDataSetRecorder no-ops the session if
+        // both sub-flags would land it with nothing to subscribe to.
+        var recording = compositionOp.GetSymbolUi().RecordingSettings ?? RecordingSettings.Defaults;
+        var captureAudio = recording.CaptureAudio;
+        var captureIo = recording.CaptureIo && (recording.CaptureMidi || recording.CaptureOsc);
+        var captureMidi = recording.CaptureMidi;
+        var captureOsc = recording.CaptureOsc;
+
+        if (!captureAudio && !captureIo)
+        {
+            Log.Warning("RecordingSession.Start: nothing to record — both Audio and IO are disabled in this project's recording settings.");
+            return;
+        }
+
         var startBars = (float)_recordStartBars;
         var baseLayer = FindNextLayerIndex(compositionOp, startBars);
         var dataLayer = baseLayer;
@@ -84,35 +102,44 @@ internal static class RecordingSession
 
         _activeMacro = new MacroCommand("Live recording session");
 
-        // LoadDataClip op — created up-front so its TimeClip is visible on the timeline
-        // immediately. FilePath stays empty until Stop fills it in. Stack below any
-        // existing LoadDataClip ops on the canvas so successive recordings don't pile up
-        // on top of each other at the default (0, 0) position.
-        var addCmd = new AddSymbolChildCommand(compositionOp.Symbol, _loadDataClipSymbolId)
-                         {
-                             PosOnCanvas = FindFreeCanvasPositionForLoadDataClip(compositionOp.Symbol),
-                         };
-        _activeMacro.AddAndExecCommand(addCmd);
-        _activeDataClipChildId = addCmd.AddedChildId;
-        InitDataClipTimeClip(compositionOp.Symbol, _activeDataClipChildId, startBars, dataLayer);
+        // LoadDataClip op — only created when the user actually wants IO recorded.
+        // Same rationale: avoid an empty clip + op pair just because the user opted out.
+        if (captureIo)
+        {
+            var addCmd = new AddSymbolChildCommand(compositionOp.Symbol, _loadDataClipSymbolId)
+                             {
+                                 PosOnCanvas = FindFreeCanvasPositionForLoadDataClip(compositionOp.Symbol),
+                             };
+            _activeMacro.AddAndExecCommand(addCmd);
+            _activeDataClipChildId = addCmd.AddedChildId;
+            InitDataClipTimeClip(compositionOp.Symbol, _activeDataClipChildId, startBars, dataLayer);
+        }
 
-        // TimelineAudioClip — appended with empty AssetPath; final path lands on Stop.
-        // Sits one layer above the data clip so the two pair stays visually grouped but
-        // doesn't overlap.
-        _activeAudioClip = new TimelineAudioClip
-                               {
-                                   Id = Guid.NewGuid(),
-                                   AssetPath = string.Empty,
-                                   TimeRange = new TimeRange(startBars, startBars),
-                                   LayerIndex = audioLayer,
-                                   IsMainSoundtrack = false,
-                               };
-        _activeMacro.AddAndExecCommand(new AddTimelineAudioClipCommand(compositionOp, _activeAudioClip));
+        // TimelineAudioClip — only created when audio capture is enabled.
+        if (captureAudio)
+        {
+            // When IO is off and audio is the only capture, stash the audio on the
+            // base layer instead of layer+1 — there's no data clip to pair with.
+            var rowForAudio = captureIo ? audioLayer : dataLayer;
+            _activeAudioClip = new TimelineAudioClip
+                                   {
+                                       Id = Guid.NewGuid(),
+                                       AssetPath = string.Empty,
+                                       TimeRange = new TimeRange(startBars, startBars),
+                                       LayerIndex = rowForAudio,
+                                       IsMainSoundtrack = false,
+                                   };
+            _activeMacro.AddAndExecCommand(new AddTimelineAudioClipCommand(compositionOp, _activeAudioClip));
+        }
 
         // Recorders last — if a Begin fails, the clips already exist but stay zero-width
         // until Stop. The user sees something went wrong; undo cleanly removes both clips.
-        WasapiAudioInput.BeginRecording();
-        IoDataSetRecorder.BeginRecording();
+        _audioCaptureActive = captureAudio;
+        _ioCaptureActive = captureIo;
+        if (captureAudio)
+            WasapiAudioInput.BeginRecording();
+        if (captureIo)
+            IoDataSetRecorder.BeginRecording(captureMidi: captureMidi, captureOsc: captureOsc);
 
         // Without this, the graph canvas keeps drawing its cached child list until the
         // user clicks on it — the new LoadDataClip op isn't visible until then.
@@ -191,8 +218,13 @@ internal static class RecordingSession
 
         IsActive = false;
 
-        var audioPath = WasapiAudioInput.EndRecording();
-        var dataPath = IoDataSetRecorder.EndRecording();
+        // Skip EndRecording on whichever side never started — the underlying recorders
+        // log a warning when called without an active session, which would otherwise spam
+        // the Console every time the user records with only one source selected.
+        var audioPath = _audioCaptureActive ? WasapiAudioInput.EndRecording() : null;
+        var dataPath = _ioCaptureActive ? IoDataSetRecorder.EndRecording() : null;
+        _audioCaptureActive = false;
+        _ioCaptureActive = false;
 
         // Final extend with one last frame's worth so the clip ends precisely where the
         // recorders did. The recorders' EndRecording closes the files synchronously, so
@@ -433,4 +465,10 @@ internal static class RecordingSession
     private static MacroCommand? _activeMacro;
     private static double _recordStartBars;
     private static double _recordStartRunSecs;
+
+    // Track which underlying recorders the active session actually started so Stop()
+    // only calls EndRecording on the ones with a running session — avoids the underlying
+    // recorder logging "no session active" warnings when capture was opted out.
+    private static bool _audioCaptureActive;
+    private static bool _ioCaptureActive;
 }
