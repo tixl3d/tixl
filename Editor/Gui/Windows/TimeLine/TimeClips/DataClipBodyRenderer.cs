@@ -67,6 +67,14 @@ internal static class DataClipBodyRenderer
         if (_visibleChannelsScratch.Count == 0)
             return;
 
+        // Sort by joined path so the per-track ordering matches the channel list in the
+        // DataSet output canvas (DataSetViewCanvas iterates `OrderBy(c => string.Join(".",
+        // c.Path))`). Without this the clip body shows tracks in DataSet.Channels insertion
+        // order — which is recorder-arrival order, hardware-dependent, and unrelated to
+        // what the user sees in the output window. Comparer cached statically to skip the
+        // per-frame string concatenation cost.
+        _visibleChannelsScratch.Sort(_channelByPathComparer);
+
         // Track layout: 2 px tracks with 1 px gap when the body is tall enough, 1 px
         // tracks with no gap when tight, fall back to a single overlay rect when even
         // 1 px per channel doesn't fit.
@@ -500,4 +508,11 @@ internal static class DataClipBodyRenderer
     // Scratch buffer reused across frames to avoid per-frame allocation when filtering
     // channels by event count.
     private static readonly List<DataChannel> _visibleChannelsScratch = new();
+
+    // Joined-path comparer for the per-clip track order. Joins on '.' so the sort matches
+    // the DataSet output canvas's `OrderBy(c => string.Join(".", c.Path))`. Inline strings
+    // get allocated per comparison — acceptable here because the visible channel set is
+    // small (typically &lt; 20) and sort runs once per clip per frame, not per event.
+    private static readonly Comparison<DataChannel> _channelByPathComparer =
+        (a, b) => string.CompareOrdinal(string.Join('.', a.Path), string.Join('.', b.Path));
 }

@@ -9,6 +9,7 @@ using T3.Core.Utils;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Gui.Windows.TimeLine;
 using T3.Editor.Gui.Windows.TimeLine.Raster;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Animation;
@@ -25,8 +26,8 @@ internal sealed class DataSetViewCanvas
     /// The time axis represents wall-clock <see cref="Playback.RunTimeInSecs"/>, so the
     /// playhead matches the moment events arrived.
     /// </summary>
-    internal void Draw(DataSet? dataSet) => DrawInternal(dataSet, mapping: null);
- 
+    internal void Draw(DataSet? dataSet) => DrawInternal(dataSet, mapping: null, externalCanvas: null);
+
     /// <summary>
     /// Clip-aware draw — used by <see cref="DataClipOutputUi"/> when the source is a
     /// timeline-bound clip. The time axis represents the clip's source-time space and the
@@ -38,25 +39,45 @@ internal sealed class DataSetViewCanvas
     {
         if (clip?.Set == null)
         {
-            DrawInternal(null, mapping: null);
+            DrawInternal(null, mapping: null, externalCanvas: null);
             return;
         }
 
-        DrawInternal(clip.Set, clip.Mapping);
+        DrawInternal(clip.Set, clip.Mapping, externalCanvas: null);
     }
 
-    private void DrawInternal(DataSet? dataSet, TimeRangeMapping? mapping)
+    /// <summary>
+    /// Embedded draw — used by panes that host this view inside a parent canvas (today:
+    /// <see cref="T3.Editor.Gui.Windows.TimeLine.InlineDataClipArea"/>). The parent's
+    /// <see cref="ScalableCanvas"/> takes over X transforms so event positions line up
+    /// with the parent's ruler / playhead, and this view skips its own chrome / raster /
+    /// auto-scroll (the parent owns those).
+    /// </summary>
+    internal void DrawEmbedded(DataClip? clip, ScalableCanvas externalCanvas)
+    {
+        if (clip?.Set == null)
+        {
+            DrawInternal(null, mapping: null, externalCanvas: externalCanvas);
+            return;
+        }
+
+        DrawInternal(clip.Set, clip.Mapping, externalCanvas: externalCanvas);
+    }
+
+    private void DrawInternal(DataSet? dataSet, TimeRangeMapping? mapping, ScalableCanvas? externalCanvas)
     {
         if (dataSet == null)
             return;
 
         _mapping = mapping;
+        _externalCanvas = externalCanvas;
 
         // Very ugly hack to prevent scaling the output above window size
         var keepScale = T3Ui.UiScaleFactor;
         T3Ui.UiScaleFactor = 1;
         DrawCanvas();
         T3Ui.UiScaleFactor = keepScale;
+        _externalCanvas = null;
         return;
 
         void DrawCanvas()
@@ -76,7 +97,10 @@ internal sealed class DataSetViewCanvas
             var isRangeSelected = Math.Abs(_selectRangeStart - _selectRangeEnd) > 0.001;
             var areChannelsSelected = _selectedChannels.Count > 0;
 
-            if (ShowInteraction)
+            // Embedded mode skips the toolbar — the host pane (e.g. InlineDataClipArea)
+            // owns its own chrome. ShowInteraction still wins when the host explicitly
+            // opts out via that flag in standalone usage.
+            if (ShowInteraction && !IsEmbedded)
             {
                 CustomComponents.ToggleButton(ref _onlyRecentEvents, "Only Recent", Vector2.Zero);
                 ImGui.SameLine();
@@ -256,47 +280,84 @@ internal sealed class DataSetViewCanvas
             // completely different value range (source seconds via the mapping) and the
             // raster ends up rendered at coordinates that no longer overlap the visible
             // viewport — so it disappears.
-            _canvas.UpdateCanvas(out var interactionState);
-
-            if (ImGui.IsWindowHovered(ImGuiHoveredFlags.ChildWindows | ImGuiHoveredFlags.RootAndChildWindows) && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
+            //
+            // Embedded mode: the host's parent canvas owns scope updates / pan / zoom /
+            // raster. We just read the parent's transform via EffectiveCanvas and skip
+            // these standalone-canvas hooks so we don't fight the parent's interaction.
+            if (!IsEmbedded)
             {
-                _scrollPosStart = ImGui.GetScrollY();
-                _isDraggingCanvas = true;
-            }
+                _canvas.UpdateCanvas(out _);
 
-            if (_isDraggingCanvas && !ImGui.IsMouseDown(ImGuiMouseButton.Right))
+                if (ImGui.IsWindowHovered(ImGuiHoveredFlags.ChildWindows | ImGuiHoveredFlags.RootAndChildWindows) && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
+                {
+                    _scrollPosStart = ImGui.GetScrollY();
+                    _isDraggingCanvas = true;
+                }
+
+                if (_isDraggingCanvas && !ImGui.IsMouseDown(ImGuiMouseButton.Right))
+                {
+                    _isDraggingCanvas = false;
+                }
+
+                if (_isDraggingCanvas)
+                {
+                    var dragDelta = ImGui.GetMouseDragDelta(ImGuiMouseButton.Right);
+                    var newScrollY = _scrollPosStart - dragDelta.Y;
+                    ImGui.SetScrollY((int)newScrollY);
+                }
+
+                if (_scroll)
+                {
+                    var windowWidth = ImGui.GetWindowWidth();
+                    var width = _canvas.InverseTransformDirection(ImGui.GetWindowSize()).X;
+                    var scale = windowWidth / width;
+
+                    _canvas.SetScopeInstant(new CanvasScope
+                                                {
+                                                    Scale = new Vector2(scale, -1),
+                                                    Scroll = new Vector2((float)currentTime - (windowWidth - 50 * T3Ui.UiScaleFactor) / scale, 0)
+                                                });
+                }
+
+                _standardRaster.Draw(_canvas);
+            }
+            else
             {
-                _isDraggingCanvas = false;
+                // Embedded: RMB drag pans both axes (Y inside this child, X on the parent
+                // timeline canvas so the timeline scrolls in sync); mouse wheel zooms X
+                // on the parent so events stay aligned with the ruler.
+                var hovered = ImGui.IsWindowHovered(ImGuiHoveredFlags.ChildWindows);
+
+                if (hovered && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
+                {
+                    _scrollPosStart = ImGui.GetScrollY();
+                    _externalScrollXAtDragStart = _externalCanvas!.Scroll.X;
+                    _isDraggingCanvas = true;
+                }
+                if (_isDraggingCanvas && !ImGui.IsMouseDown(ImGuiMouseButton.Right))
+                    _isDraggingCanvas = false;
+                if (_isDraggingCanvas)
+                {
+                    var dragDelta = ImGui.GetMouseDragDelta(ImGuiMouseButton.Right);
+                    ImGui.SetScrollY((int)(_scrollPosStart - dragDelta.Y));
+                    if (_externalCanvas is TimeLineCanvas tlc)
+                        tlc.PanXFromEmbedded(_externalScrollXAtDragStart, dragDelta.X);
+                }
+
+                if (hovered && !_isDraggingCanvas)
+                {
+                    var wheel = ImGui.GetIO().MouseWheel;
+                    if (Math.Abs(wheel) > 0.0001f && _externalCanvas is TimeLineCanvas tlcZoom)
+                        tlcZoom.ZoomXFromEmbedded(wheel, ImGui.GetMousePos());
+                }
             }
-
-            if (_isDraggingCanvas)
-            {
-                var dragDelta = ImGui.GetMouseDragDelta(ImGuiMouseButton.Right);
-                var newScrollY = _scrollPosStart - dragDelta.Y;
-                ImGui.SetScrollY((int)newScrollY);
-            }
-
-            if (_scroll)
-            {
-                var windowWidth = ImGui.GetWindowWidth();
-                var width = _canvas.InverseTransformDirection(ImGui.GetWindowSize()).X;
-                var scale = windowWidth / width;
-
-                _canvas.SetScopeInstant(new CanvasScope
-                                            {
-                                                Scale = new Vector2(scale, -1),
-                                                Scroll = new Vector2((float)currentTime - (windowWidth - 50 * T3Ui.UiScaleFactor) / scale, 0)
-                                            });
-            }
-
-            _standardRaster.Draw(_canvas);
 
             var dl = ImGui.GetWindowDrawList();
             var min = ImGui.GetWindowPos();
             var max = ImGui.GetContentRegionAvail() + min;
 
-            var visibleMinTime = _canvas.InverseTransformX(min.X);
-            var visibleMaxTime = _canvas.InverseTransformX(max.X);
+            var visibleMinTime = ScreenXToEventSecs(min.X);
+            var visibleMaxTime = ScreenXToEventSecs(max.X);
 
             // Clip-mode boundary overlay: shade regions outside the source slice the clip
             // actually plays and draw thin lines at the edges. Mirrors the look the
@@ -309,8 +370,8 @@ internal sealed class DataSetViewCanvas
                 var bpm = mapping.Bpm > 0 ? mapping.Bpm : 120.0;
                 var clipStartSecs = mapping.SourceRange.Start * 240.0 / bpm;
                 var clipEndSecs = mapping.SourceRange.End * 240.0 / bpm;
-                var xClipStart = _canvas.TransformX((float)clipStartSecs);
-                var xClipEnd = _canvas.TransformX((float)clipEndSecs);
+                var xClipStart = EventSecsToScreenX(clipStartSecs);
+                var xClipEnd = EventSecsToScreenX(clipEndSecs);
 
                 if (xClipStart > min.X)
                 {
@@ -350,8 +411,8 @@ internal sealed class DataSetViewCanvas
             // Draw Selection range...
             if (isRangeSelected)
             {
-                var start = _canvas.TransformX((float)_selectRangeStart);
-                var end = _canvas.TransformX((float)_selectRangeEnd);
+                var start = EventSecsToScreenX(_selectRangeStart);
+                var end = EventSecsToScreenX(_selectRangeEnd);
                 if (start > end)
                 {
                     (start, end) = (end, start);
@@ -592,10 +653,10 @@ internal sealed class DataSetViewCanvas
                                     continue;
                                 }
 
-                                xStart = _canvas.TransformX((float)intervalEvent.Time);
+                                xStart = EventSecsToScreenX(intervalEvent.Time);
 
                                 var endTime = intervalEvent.IsUnfinished ? currentTime : intervalEvent.EndTime;
-                                var xEnd = MathF.Max(_canvas.TransformX((float)endTime), xStart + 1);
+                                var xEnd = MathF.Max(EventSecsToScreenX(endTime), xStart + 1);
 
                                 dl2.AddRectFilled(new Vector2(xStart, layerMin.Y + markerYInLayer),
                                                   new Vector2(xEnd, layerMax.Y),
@@ -614,7 +675,7 @@ internal sealed class DataSetViewCanvas
                                 if (!(dataEvent.Time > visibleMinTime) || !(dataEvent.Time < visibleMaxTime))
                                     continue;
 
-                                xStart = _canvas.TransformX((float)dataEvent.Time);
+                                xStart = EventSecsToScreenX(dataEvent.Time);
                                 var y = layerMin.Y + markerYInLayer;
                                 dl2.AddTriangleFilled(new Vector2(xStart, y - 3),
                                                       new Vector2(xStart + 2.5f, y + 2),
@@ -689,12 +750,12 @@ internal sealed class DataSetViewCanvas
                 if (ImGui.IsWindowHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
                 {
                     _isDraggingRange = true;
-                    _selectRangeStart = _canvas.InverseTransformX(mouseMouse.X);
+                    _selectRangeStart = ScreenXToEventSecs(mouseMouse.X);
                 }
 
                 if (_isDraggingRange)
                 {
-                    _selectRangeEnd = _canvas.InverseTransformX(mouseMouse.X);
+                    _selectRangeEnd = ScreenXToEventSecs(mouseMouse.X);
                 }
 
                 if (ImGui.IsMouseReleased(ImGuiMouseButton.Left))
@@ -708,7 +769,7 @@ internal sealed class DataSetViewCanvas
             _pathTreeDrawer.Complete();
 
             // Draw current time
-            var xTime = _canvas.TransformX((float)currentTime);
+            var xTime = EventSecsToScreenX(currentTime);
             dl.AddRectFilled(new Vector2(xTime, min.Y), new Vector2(xTime + 1, max.Y), UiColors.WidgetActiveLine);
             ImGui.EndChild();
             ImGui.SetCursorPos(Vector2.Zero);
@@ -747,6 +808,41 @@ internal sealed class DataSetViewCanvas
     // doesn't leak a stale mapping between frames.
     private TimeRangeMapping? _mapping;
 
+    // Non-null when a host pane embeds this view in its own canvas (DrawEmbedded). The
+    // host's canvas owns X transforms / pan / zoom; we just consume its TransformX so
+    // event positions line up. Cleared at the end of every DrawInternal call so a reused
+    // view instance doesn't leak embedded state into a later standalone draw.
+    private ScalableCanvas? _externalCanvas;
+
+    /// <summary>Picks the canvas used for X transforms — host's when embedded, own otherwise.</summary>
+    private ScalableCanvas EffectiveCanvas => _externalCanvas ?? _canvas;
+
+    /// <summary>True for the duration of a <see cref="DrawEmbedded"/> call.</summary>
+    private bool IsEmbedded => _externalCanvas != null;
+
+    /// <summary>
+    /// Maps an event time (source seconds — the unit DataEvent.Time is stored in) to a
+    /// screen X. In standalone mode the own canvas is already scaled in seconds so the
+    /// call is direct; in embedded mode the parent canvas (e.g. TimeLineCanvas) is scaled
+    /// in BARS, so the seconds value has to round-trip through the clip's
+    /// <see cref="TimeRangeMapping"/> first or events land hundreds of bars off the
+    /// visible region. Inverse symmetric in <see cref="ScreenXToEventSecs"/>.
+    /// </summary>
+    private float EventSecsToScreenX(double secs)
+    {
+        if (IsEmbedded && _mapping is { } m)
+            return EffectiveCanvas.TransformX((float)m.SourceSecsToLocalBars(secs));
+        return EffectiveCanvas.TransformX((float)secs);
+    }
+
+    /// <summary>Inverse of <see cref="EventSecsToScreenX"/>.</summary>
+    private double ScreenXToEventSecs(float screenX)
+    {
+        if (IsEmbedded && _mapping is { } m)
+            return m.LocalBarsToSourceSecs(EffectiveCanvas.InverseTransformX(screenX));
+        return EffectiveCanvas.InverseTransformX(screenX);
+    }
+
     // Same StatusAnimated palette ClipRange.cs uses for the composition-level TimeClip
     // overlay so the two surfaces feel like one editor at a glance.
     private static readonly Color _clipOutsideColor = UiColors.StatusAnimated.Fade(0.08f);
@@ -762,4 +858,5 @@ internal sealed class DataSetViewCanvas
 
     private float _scrollPosStart;
     private bool _isDraggingCanvas;
+    private float _externalScrollXAtDragStart;
 }

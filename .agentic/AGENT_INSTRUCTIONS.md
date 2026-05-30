@@ -241,6 +241,25 @@ Log.Debug("SwiftCam: pre-loading native DLL");
 - Fix spelling mistakes in touched comments on the fly
 - Add parameter documentation only when parameter purpose is not obvious from the name
 
+## Comment Restraint
+
+Comments are not free — every line a reader scans is a line that has to be kept honest as the code evolves. Restraint matters more than verbosity. Optimise for: a future reader skimming a method understands *what it does* in seconds, and only sees a comment when the *why* isn't obvious from the code.
+
+**Default to no comment.** Reach for one only when:
+
+- The *why* is non-obvious from the code (an invariant, an ordering constraint, a workaround tied to an external bug, a perf-vs-clarity tradeoff). Spell out the why; the what is already in the code.
+- A method's name doesn't fully convey its contract (XML `<summary>` — one short sentence).
+- A back-compat handler reads a legacy field shape (briefly note it's back-compat).
+
+**Don't write:**
+
+- Multi-paragraph rationales reconstructing the debugging session that led to the current code ("we tried X first but ImGui hit-tested through child rects so we did Y …"). The reader needs the current invariant, not the history. If the history matters, link to a plan / PR.
+- Comments restating what the next line of code says (`// increment counter` above `i++`).
+- "Phase 4 will replace this with …" markers — see [Comment Hygiene Across Phased Work](#comment-hygiene-across-phased-work) below. Sweep them on the wrap-up commit.
+- XML docs that re-describe parameter types or the obvious shape of a method (e.g. `<param name="path">The path</param>`). Per the Review Expectations above, parameter docs are for non-obvious purpose only.
+
+**On revisions:** if you're touching a section with a sprawling block comment you wrote earlier in the session, trim it. The first draft often over-explains because every detail felt important at the time; once the code stabilises, most of those details are noise. Aim for the comment-to-code ratio you'd expect in well-maintained open-source library code — sparse and load-bearing.
+
 ## Comment Hygiene Across Phased Work
 
 When work is split into phases (typically tracked under `.agentic/Plans/`), it is fine — sometimes useful — to leave transitional comments in code during the work:

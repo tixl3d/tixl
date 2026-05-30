@@ -21,6 +21,29 @@ internal sealed class TimelineState
     // Layout
     public int TimelineHeight = -1; // -1 = auto-computed
 
+    // Inline DataClip edit area — toggled via the AudioFile icon next to the Record button
+    // on the timeline toolbar. When on AND a TimeClip with a DataClip output is selected,
+    // the TimelineDetailsArea pane below the dope sheet resolves to clip-editing mode.
+    public bool InlineDataClipEditEnabled = false;
+
+    /// <summary>
+    /// User-controlled height of the inline details pane (curve editor OR DataClip editor
+    /// — both share one pane and one persisted height). Resized via the splitter above
+    /// the pane. Default 200 px roughly matches the previous curve area's auto-fit at a
+    /// typical timeline height; the splitter clamps to a sensible band so the pane can't
+    /// collapse to nothing or eat the whole timeline.
+    /// </summary>
+    public float DetailsAreaHeight = 200f;
+
+    /// <summary>
+    /// Back-compat alias for <see cref="DetailsAreaHeight"/>. Older .t3ui files persisted
+    /// the per-mode "InlineDataClipStripHeight"; Newtonsoft's deserializer surfaces it
+    /// here and we forward the value in <see cref="ReadFromJson"/>. Kept private so
+    /// nothing else writes through it.
+    /// </summary>
+    [JsonProperty(Required = Required.Default)]
+    private float? InlineDataClipStripHeight { get; set; }
+
     #region Serialization
 
     internal void WriteToJson(JsonTextWriter writer)
@@ -35,7 +58,17 @@ internal sealed class TimelineState
             return null;
 
         var token = settingsToken["Timeline"];
-        return token?.ToObject<TimelineState>();
+        var state = token?.ToObject<TimelineState>();
+        if (state == null)
+            return null;
+
+        // Back-compat: forward the legacy per-mode field onto the unified one when the
+        // .t3ui predates the merge. Wins over the default 200 px but loses to any
+        // explicit DetailsAreaHeight that's also present in the file.
+        if (state.InlineDataClipStripHeight is { } legacy && state.DetailsAreaHeight == 200f)
+            state.DetailsAreaHeight = legacy;
+
+        return state;
     }
 
     #endregion

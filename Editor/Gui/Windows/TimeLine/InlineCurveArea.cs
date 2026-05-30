@@ -188,6 +188,7 @@ internal sealed class InlineCurveArea : ScalableCanvas
         _curveRenderer.UpdateSelectionForCanvasArea(canvasArea, selectMode);
     }
 
+    /// <summary>Curve-specific chrome (Normalize toggle). Close is shared via TimelineDetailsArea.</summary>
     private void DrawFloatingChrome()
     {
         var drawList = ImGui.GetWindowDrawList();
@@ -206,13 +207,8 @@ internal sealed class InlineCurveArea : ScalableCanvas
                          Icon.NormalizeCurves, _timeLineCanvas.NormalizeCurveView, drawList,
                          () => _timeLineCanvas.NormalizeCurveView = !_timeLineCanvas.NormalizeCurveView);
 
-        DrawChromeButton("##curvePaneClose", closePos, hitSize, iconSize,
-                         Icon.Close, false, drawList,
-                         () =>
-                         {
-                             _timeLineCanvas.CurveEditingParamHashes.Clear();
-                             _timeLineCanvas.VisibleComponentMask.Clear();
-                         });
+        // Close button — shared with the clip pane via the detail-area helper.
+        TimelineDetailsArea.DrawCloseButton(_timeLineCanvas);
     }
 
     private static void DrawChromeButton(string id, Vector2 screenPos, Vector2 hitSize, float iconSize,
