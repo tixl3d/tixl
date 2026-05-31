@@ -210,6 +210,8 @@ internal sealed class MarkdownView
                               ? _operatorColor(_layout.Urls[fragment.UrlIndex])
                               : UiColors.StatusActivated;
             ImGui.PushStyleColor(ImGuiCol.Text, opColor.Rgba);
+            ImGui.PushFont(Fonts.FontBold);
+            fontPushed = true;            
             colorPushed = true;
         }
 

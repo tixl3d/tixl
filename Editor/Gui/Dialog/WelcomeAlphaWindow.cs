@@ -11,6 +11,8 @@ using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.Styling.Markdown;
 using T3.Editor.Gui.Windows.Layouts;
 using T3.Editor.Gui.Windows.TestRunner;
+// `Window` (singular) is also a sibling namespace, so the base class is referenced by its alias.
+using WindowBase = T3.Editor.Gui.Windows.Window;
 
 namespace T3.Editor.Gui.Dialog;
 
@@ -21,25 +23,32 @@ namespace T3.Editor.Gui.Dialog;
 /// Currently serves both the alpha and the stable variant; named with the <c>Alpha</c> suffix to leave
 /// room for a future lighter-weight <c>WelcomeWindow</c> for the stable "what's new in this version" case.
 /// </summary>
-internal sealed class WelcomeAlphaWindow
+internal sealed class WelcomeAlphaWindow : WindowBase
 {
-    internal bool IsVisible => _isVisible;
-
-    internal void ShowNextFrame()
+    internal WelcomeAlphaWindow()
     {
-        _isVisible = true;
-        _needsInit = true;
+        _isAlpha = RuntimeAssemblies.IsAlpha;
+        Config.Title = _isAlpha ? "Welcome to the TiXL Alpha" : "Welcome to TiXL";
+        // No window padding so the sidebar sits flush like the Settings window; the header and the
+        // content panel add their own inner padding. The base supplies the Settings-matching chrome.
+        WindowPaddingOverride = Vector2.Zero;
+        WindowSizeOverride = new Vector2(680, 480);
+        WindowFlags = ImGuiWindowFlags.NoDocking;
     }
 
-    internal void Draw()
-    {
-        if (!_isVisible)
-            return;
+    internal bool IsVisible => Config.Visible;
 
-        if (_needsInit)
+    /// <summary>Opens the window (re-initialising its tabs). Used by the version-welcome trigger and Help → Welcome.</summary>
+    internal void Open() => Config.Visible = true;
+
+    internal override IReadOnlyList<WindowBase> GetInstances() => Array.Empty<WindowBase>();
+
+    protected override void DrawContent()
+    {
+        if (!_isInitialized)
         {
             Initialize();
-            _needsInit = false;
+            _isInitialized = true;
         }
 
         // Handle background project-copy completion on the UI thread, regardless of the active tab.
@@ -51,38 +60,16 @@ internal sealed class WelcomeAlphaWindow
                 _projects = PreviousVersionImport.EnumerateProjects(_previous);
         }
 
-        var scale = T3Ui.UiScaleFactor;
-        var viewport = ImGui.GetMainViewport();
-        ImGui.SetNextWindowPos(viewport.GetCenter(), ImGuiCond.Appearing, new Vector2(0.5f, 0.5f));
-        ImGui.SetNextWindowSize(new Vector2(680, 480) * scale, ImGuiCond.Appearing);
-
-        var title = _isAlpha ? "Welcome to the TiXL Alpha" : "Welcome to TiXL";
-        var isOpen = true;
-        // No window padding: the sidebar sits flush to the window edge like the Settings window. The
-        // header and the content panel add their own inner padding. Background matches Settings.
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Vector2.Zero);
-        ImGui.PushStyleColor(ImGuiCol.WindowBg, UiColors.WindowBackground.Rgba);
-        if (ImGui.Begin($"{title}###WelcomeWindow", ref isOpen,
-                        ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoSavedSettings))
-        {
-            DrawHeaderBand();
-            DrawSidebar();
-            ImGui.SameLine(0, 0);
-            DrawContent();
-        }
-
-        ImGui.End();
-        ImGui.PopStyleColor();
-        ImGui.PopStyleVar();
-
-        if (!isOpen)
-            Close();
+        DrawHeaderBand();
+        DrawSidebar();
+        ImGui.SameLine(0, 0);
+        DrawContentPanel();
     }
 
-    private void Close()
+    protected override void Close()
     {
-        _isVisible = false;
         VersionMarker.MarkCurrentVersionSeen();
+        _isInitialized = false;
     }
 
     private void Initialize()
@@ -150,11 +137,11 @@ internal sealed class WelcomeAlphaWindow
         NavigationSidebar.EndColumn();
     }
 
-    private void DrawContent()
+    private void DrawContentPanel()
     {
         // Match the Settings window's content panel (padding + border + see-through background).
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(20, 5) * T3Ui.UiScaleFactor);
-        ImGui.BeginChild("content", new Vector2(0, 0), ImGuiChildFlags.Borders, ImGuiWindowFlags.NoBackground);
+        ImGui.BeginChild("content", new Vector2(0, 0), ImGuiChildFlags.Borders | ImGuiChildFlags.AlwaysUseWindowPadding, ImGuiWindowFlags.NoBackground);
 
         switch (_activeTab)
         {
@@ -351,7 +338,7 @@ internal sealed class WelcomeAlphaWindow
                                            Color.Transparent))
         {
             WindowManager.GuidedFeatureTestsWindow.StartSet(_selectedTestSetId!);
-            Close();
+            Config.Visible = false; // base calls Close() → stamps the version marker
         }
 
         ImGui.EndDisabled();
@@ -500,7 +487,7 @@ internal sealed class WelcomeAlphaWindow
         """
         To avoid affecting already installed versions and your projects, alpha versions always [create their own folders](https://github.com/tixl3d/tixl/wiki) for Settings and Projects. Use the import options on the left to copy data over.
 
-        This version is under [active development](https://github.com/tixl3d/tixl/wiki) — please don't use it for production work.
+        This version is under [active development](https://github.com/tixl3d/tixl/wiki/dev.UsingDev) — please don't use it for production work.
 
         Please report all issues on our [Discord server](https://discord.gg/YmSyQdeH3S), or browse the [project planning board](https://github.com/orgs/tixl3d/projects/3/views/8).
         """;
@@ -512,8 +499,7 @@ internal sealed class WelcomeAlphaWindow
     private readonly MarkdownView _releaseNotesMarkdown = new(new MarkdownView.Options());
     private string? _releaseNotes;
 
-    private bool _isVisible;
-    private bool _needsInit;
+    private bool _isInitialized;
     private bool _isAlpha;
     private Tab _activeTab = Tab.Welcome;
 

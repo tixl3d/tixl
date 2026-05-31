@@ -1,5 +1,6 @@
 #nullable enable
 using ImGuiNET;
+using T3.Editor.Gui.Dialog;
 using T3.Editor.Gui.Window;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Keyboard;
@@ -65,6 +66,7 @@ internal static partial class WindowManager
     internal static readonly ScreenManagerWindow ScreenManagerWindow = new();
     internal static readonly SnixlWindow SnixlWindow = new();
     internal static readonly GuidedFeatureTestsWindow GuidedFeatureTestsWindow = new();
+    internal static readonly WelcomeAlphaWindow WelcomeAlphaWindow = new();
 
 
     private static void TryToInitialize()
@@ -92,6 +94,7 @@ internal static partial class WindowManager
                 SettingsWindow, // item shown in TiXL menu
                 ProjectSettingsWindow, // item shown in TiXL menu
                 ScreenManagerWindow,
+                WelcomeAlphaWindow, // opened from Help → Welcome / the version-welcome trigger
             ];
 
 

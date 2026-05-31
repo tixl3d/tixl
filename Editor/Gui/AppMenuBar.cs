@@ -447,7 +447,7 @@ internal static class AppMenuBar
         {
             if (ImGui.MenuItem(RuntimeAssemblies.IsAlpha ? "Welcome to Alpha" : "Welcome"))
             {
-                T3Ui.WelcomeAlphaWindow.ShowNextFrame();
+                WindowManager.WelcomeAlphaWindow.Open();
             }
 
             ImGui.Separator();

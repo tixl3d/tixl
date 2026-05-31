@@ -1,6 +1,4 @@
-# Welcome to v4.2
-
-This a test release note.
+# TiXL v4.2 - Release Notes (WIP)
 
 ## UI Features
 
@@ -10,15 +8,14 @@ Testing "alpha" versions is crucial for development. But it shouldn't interfer w
 
 ### Guided Testing
 
-
-
+TiXL now ships with suite of guided test sets that cover many of TiXL's editor features. Interactive features are notorious to test automatically. Although these tests where initially planned to test for regressions, the guided tests turned out great to walk users through new features and discover all details.
 
 
 ## New Operators
 
-- New: [SwiftCamDevice] access to Switft microscope cameras
-- New: [ReadPointColors] a simple helper to read colors from point
-- New: [WLedSerialOutput] Sends LED color data to WLed.
+- [SwiftCamDevice] access to Switft microscope cameras
+- [ReadPointColors] a simple helper to read colors from point
+- [WLedSerialOutput] Sends LED color data to WLed.
 
 ## Examples
-- New: [MoveMeshToPointLineExample] description missing
+- [MoveMeshToPointLineExample] description missing

@@ -33,6 +33,8 @@ Phase 2 (`VersionMarker` + welcome popup) is unblocked.
 
 Deferred to Phase 3: the "What's new" section currently just links to GitHub Releases; the per-version `release-notes/<version>.md` rendering replaces that link without touching the popup's structure.
 
+**2026-05-31 (Window integration)** — `WelcomeAlphaWindow` now inherits the editor's `Window` base and is registered in `WindowManager` (skipped in the Windows menu; opened via `Open()` from the version-welcome trigger and `Help → Welcome`). This gives it the same chrome/background as the Settings window for free and removes the bespoke `ImGui.Begin`/visibility/marker handling (now `Config.Visible` + the base's `Close()` override stamps the marker). `WindowPaddingOverride = Vector2.Zero` keeps the sidebar flush. (Trade-off: it inherits the base's default 550×450 first-open size instead of the old centered 680×480 — revisit if the base grows a size hook.)
+
 **2026-05-31 (redesign)** — Per design feedback, the single-column modal was replaced with a **non-modal, Settings-style tabbed window** (sidebar: Welcome / Import Settings / Import Projects / Test new Features), reusing the `SettingsWindow` child-layout pattern:
 - [`WelcomeDialog.cs`](../Editor/Gui/Dialog/WelcomeDialog.cs) is now a standalone floating `ImGui.Begin` window (no longer `ModalDialog`). Sidebar items show a checkmark once their import has run.
 - **Import Settings** tab: granular category checklist — Editor Settings / Themes / Keyboard Maps / Layouts — each mapping to the corresponding `PreviousVersionImport` op. (This restores granularity over the two-button sketch, per confirmation.)

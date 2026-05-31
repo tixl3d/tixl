@@ -109,7 +109,6 @@ public static partial class T3Ui
         CreateFromTemplateDialog.Draw();
         _userNameDialog.Draw();
         AboutDialog.Draw();
-        WelcomeAlphaWindow.Draw();
         ExitDialog.Draw();
         SkillMapPopup.Draw();
 
@@ -118,7 +117,7 @@ public static partial class T3Ui
         // welcome window is closed (see the IsVisible guard below).
         CheckForVersionWelcome();
 
-        if (IsWindowLayoutComplete() && _versionWelcomeChecked && !WelcomeAlphaWindow.IsVisible)
+        if (IsWindowLayoutComplete() && _versionWelcomeChecked && !WindowManager.WelcomeAlphaWindow.IsVisible)
         {
             if (!UserSettings.IsUserNameDefined())
             {
@@ -159,7 +158,7 @@ public static partial class T3Ui
         _versionWelcomeChecked = true;
 
         if (VersionMarker.Classify() == VersionMarker.LaunchKind.NewToUser)
-            WelcomeAlphaWindow.ShowNextFrame();
+            WindowManager.WelcomeAlphaWindow.Open();
         else
             VersionMarker.MarkCurrentVersionSeen();
     }

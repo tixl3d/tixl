@@ -11,10 +11,11 @@ internal static partial class WindowManager
     {
         foreach (var window in _windows)
         {
-            // These windows live in the TiXL menu and shouldn't be re-listed here.
+            // These windows live in other menus (TiXL / Help) and shouldn't be re-listed here.
             if (window == SettingsWindow
                 || window == ProjectSettingsWindow
-                || window == GuidedFeatureTestsWindow)
+                || window == GuidedFeatureTestsWindow
+                || window == WelcomeAlphaWindow)
                 continue;
 
             window.DrawMenuItemToggle();

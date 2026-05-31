@@ -14,6 +14,9 @@ internal abstract class Window
 
     protected ImGuiWindowFlags WindowFlags;
     protected Vector2 WindowPaddingOverride = new Vector2(-1);
+
+    /// <summary>Initial window size (unscaled). Multiplied by <see cref="T3Ui.UiScaleFactor"/> when the window first appears.</summary>
+    protected Vector2 WindowSizeOverride = new Vector2(550, 450);
     protected string? MenuTitle;
 
 
@@ -42,7 +45,7 @@ internal abstract class Window
 
         if (!_wasVisible)
         {
-            ImGui.SetNextWindowSize(new Vector2(550, 450));
+            ImGui.SetNextWindowSize(WindowSizeOverride * T3Ui.UiScaleFactor);
             _wasVisible = true;
         }
 
