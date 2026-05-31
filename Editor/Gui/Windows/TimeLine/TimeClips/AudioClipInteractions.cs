@@ -60,13 +60,12 @@ internal sealed class AudioClipInteractions
     public void DrawClips(Instance compositionOp, ImRect layerRect, int minLayerIndex, ImDrawListPtr drawList)
     {
         var settings = compositionOp.Symbol.CompositionSettings;
-        if (settings == null)
-            return;
         var audioClips = settings.Playback.AudioClips;
         var attrs = new TimelineAudioClipItem.DrawAttrs(
             layerRect, minLayerIndex, drawList, SelectedClipIds, _context.TimeCanvas, compositionOp,
             OpInteractions ?? throw new InvalidOperationException("OpInteractions not set"),
-            _context.SnapHandler);
+            _context.SnapHandler,
+            settings.Enabled);
 
         foreach (var ac in audioClips)
         {
@@ -84,10 +83,7 @@ internal sealed class AudioClipInteractions
         if (SelectedClipIds.Count == 0)
             return;
 
-        var settings = compositionOp.Symbol.CompositionSettings;
-        if (settings == null)
-            return;
-        var allClips = settings.Playback.AudioClips;
+        var allClips = compositionOp.Symbol.CompositionSettings.Playback.AudioClips;
         var toDelete = new List<TimelineAudioClip>();
         foreach (var clip in allClips)
         {
@@ -207,10 +203,7 @@ internal sealed class AudioClipInteractions
             return;
 
         var compositionOp = _getCompositionOp();
-        var settings = compositionOp.Symbol.CompositionSettings;
-        if (settings == null)
-            return;
-        var allClips = settings.Playback.AudioClips;
+        var allClips = compositionOp.Symbol.CompositionSettings.Playback.AudioClips;
         var selected = new List<TimelineAudioClip>();
         foreach (var c in allClips)
         {
@@ -234,10 +227,7 @@ internal sealed class AudioClipInteractions
         if (SelectedClipIds.Count == 0)
             return;
 
-        var settings = _getCompositionOp().Symbol.CompositionSettings;
-        if (settings == null)
-            return;
-        var allClips = settings.Playback.AudioClips;
+        var allClips = _getCompositionOp().Symbol.CompositionSettings.Playback.AudioClips;
         foreach (var c in allClips)
         {
             if (!SelectedClipIds.Contains(c.Id))
@@ -268,10 +258,7 @@ internal sealed class AudioClipInteractions
     public void CheckForSnap(ref SnapResult snapResult)
     {
         var compositionOp = _getCompositionOp();
-        var settings = compositionOp.Symbol.CompositionSettings;
-        if (settings == null)
-            return;
-        var audioClips = settings.Playback.AudioClips;
+        var audioClips = compositionOp.Symbol.CompositionSettings.Playback.AudioClips;
         foreach (var clip in audioClips)
         {
             if (clip.IsMainSoundtrack)
@@ -298,10 +285,7 @@ internal sealed class AudioClipInteractions
         var layerMaxIndex = (screenArea.Max.Y - minScreenPos.Y - ClipArea.LayerHeight * 0.5f) / ClipArea.LayerHeight + minLayerIndex;
 
         var compositionOp = _getCompositionOp();
-        var settings = compositionOp.Symbol.CompositionSettings;
-        if (settings == null)
-            return;
-        var audioClips = settings.Playback.AudioClips;
+        var audioClips = compositionOp.Symbol.CompositionSettings.Playback.AudioClips;
         foreach (var clip in audioClips)
         {
             if (clip.IsMainSoundtrack)

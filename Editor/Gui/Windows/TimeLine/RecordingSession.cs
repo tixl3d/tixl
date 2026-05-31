@@ -412,22 +412,18 @@ internal static class RecordingSession
                 _occupiedAtStartScratch.Add(clip.LayerIndex);
         }
 
-        var settings = compositionOp.Symbol.CompositionSettings;
-        if (settings != null)
+        foreach (var audioClip in compositionOp.Symbol.CompositionSettings.Playback.AudioClips)
         {
-            foreach (var audioClip in settings.Playback.AudioClips)
-            {
-                // The main soundtrack isn't drawn as a layer clip — it lives outside the clip
-                // grid as the timeline background image, so its LayerIndex doesn't reserve a
-                // row. Without this skip every project with a soundtrack starts recording at
-                // layer 2 instead of 0.
-                if (audioClip.IsMainSoundtrack)
-                    continue;
-                if (audioClip.LayerIndex > maxLayerAnywhere)
-                    maxLayerAnywhere = audioClip.LayerIndex;
-                if (audioClip.TimeRange.Start <= startBars && startBars < audioClip.TimeRange.End)
-                    _occupiedAtStartScratch.Add(audioClip.LayerIndex);
-            }
+            // The main soundtrack isn't drawn as a layer clip — it lives outside the clip
+            // grid as the timeline background image, so its LayerIndex doesn't reserve a
+            // row. Without this skip every project with a soundtrack starts recording at
+            // layer 2 instead of 0.
+            if (audioClip.IsMainSoundtrack)
+                continue;
+            if (audioClip.LayerIndex > maxLayerAnywhere)
+                maxLayerAnywhere = audioClip.LayerIndex;
+            if (audioClip.TimeRange.Start <= startBars && startBars < audioClip.TimeRange.End)
+                _occupiedAtStartScratch.Add(audioClip.LayerIndex);
         }
 
         // Re-use the previous session's lane when nothing's parked across it at this start

@@ -364,7 +364,10 @@ public static class SymbolJson
             }
         }
 
-        symbol.CompositionSettings = CompositionSettings.ReadFromJson(jToken);
+        // CompositionSettings is never null — symbols without a serialized "ProjectSettings"
+        // block (e.g. freshly imported custom symbols) get a default, inactive instance.
+        // The Enabled flag, not nullability, distinguishes "provides settings" from "doesn't".
+        symbol.CompositionSettings = CompositionSettings.ReadFromJson(jToken) ?? new CompositionSettings();
 
         var animatorJsonData = (JArray?)jToken[JsonKeys.Animator];
         return new SymbolReadResult(symbol, childrenJsons, animatorJsonData);

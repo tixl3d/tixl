@@ -55,13 +55,12 @@ public sealed partial class Symbol : IDisposable, IResource
     public Animator Animator { get; private set; } = new();
 
     /// <summary>
-    /// Per-symbol project / playback configuration. May be null on symbols that never
-    /// had it initialised (entering a custom op symbol cold). Callers must null-check
-    /// before reading <see cref="CompositionSettings.Playback"/> etc.
+    /// Per-symbol project / playback configuration. Always non-null and auto-initialised
+    /// (including on deserialization — see <see cref="Model.SymbolJson"/>). Whether the
+    /// settings are actually active for this symbol's subtree is governed by
+    /// <see cref="CompositionSettings.Enabled"/>, not by nullability.
     /// </summary>
-#nullable enable annotations
-    public CompositionSettings? CompositionSettings { get; set; } = new();
-#nullable restore
+    public CompositionSettings CompositionSettings { get; set; } = new();
 
     public SymbolPackage SymbolPackage { get; set; }
     IResourcePackage IResource.OwningPackage => SymbolPackage;

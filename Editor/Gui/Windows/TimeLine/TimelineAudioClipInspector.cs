@@ -28,11 +28,7 @@ internal static class TimelineAudioClipInspector
         if (composition == null || selectedClipIds == null || selectedClipIds.Count == 0)
             return false;
 
-        var settings = composition.Symbol.CompositionSettings;
-        if (settings == null)
-            return false;
-
-        var allClips = settings.Playback.AudioClips;
+        var allClips = composition.Symbol.CompositionSettings.Playback.AudioClips;
 
         // Resolve selection to clip references. Skip stale IDs (selection set can lag
         // deletion by one frame).

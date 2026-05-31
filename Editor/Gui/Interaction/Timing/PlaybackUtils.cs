@@ -126,10 +126,9 @@ public static class PlaybackUtils
                 return false;
             }
 
-            var candidate = instanceWithSettings.Symbol.CompositionSettings;
-            if (candidate != null && candidate.Enabled)
+            settings = instanceWithSettings.Symbol.CompositionSettings;
+            if (settings.Enabled)
             {
-                settings = candidate;
                 return true;
             }
 

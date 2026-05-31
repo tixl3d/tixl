@@ -51,14 +51,8 @@ internal sealed class AddTimelineAudioClipCommand : ICommand
             Log.Warning($"AddTimelineAudioClipCommand: symbol {_compositionSymbolId} not found — was the project closed?");
             return false;
         }
-        var settings = ui.Symbol.CompositionSettings;
-        if (settings == null)
-        {
-            Log.Warning($"AddTimelineAudioClipCommand: symbol {_compositionSymbolId} has no CompositionSettings.");
-            return false;
-        }
         symbolUi = ui;
-        clips = settings.Playback.AudioClips;
+        clips = ui.Symbol.CompositionSettings.Playback.AudioClips;
         return true;
     }
 }
