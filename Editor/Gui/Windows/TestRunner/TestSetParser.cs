@@ -1,4 +1,5 @@
 #nullable enable
+using System.Globalization;
 using System.IO;
 using System.Text;
 using T3.Editor.Gui.Help;
@@ -37,8 +38,33 @@ internal static class TestSetParser
                 result.Add(set);
         }
 
-        result.Sort((a, b) => string.Compare(a.Title, b.Title, StringComparison.OrdinalIgnoreCase));
+        Sort(result, TestSetSort.RecentlyAdded);
         return result;
+    }
+
+    /// <summary>Sorts in place by the chosen mode; ties break on title.</summary>
+    public static void Sort(List<TestSet> sets, TestSetSort mode)
+    {
+        switch (mode)
+        {
+            case TestSetSort.RecentlyAdded:
+                sets.Sort((a, b) =>
+                          {
+                              var byDate = b.Added.CompareTo(a.Added); // newest first
+                              return byDate != 0 ? byDate : string.Compare(a.Title, b.Title, StringComparison.OrdinalIgnoreCase);
+                          });
+                break;
+            case TestSetSort.ByScope:
+                sets.Sort((a, b) =>
+                          {
+                              var byScope = string.Compare(a.Scope, b.Scope, StringComparison.OrdinalIgnoreCase);
+                              return byScope != 0 ? byScope : string.Compare(a.Title, b.Title, StringComparison.OrdinalIgnoreCase);
+                          });
+                break;
+            default:
+                sets.Sort((a, b) => string.Compare(a.Title, b.Title, StringComparison.OrdinalIgnoreCase));
+                break;
+        }
     }
 
     public static TestSet? TryParseFile(string path)
@@ -94,6 +120,12 @@ internal static class TestSetParser
         var prerequisites = AsStringList(frontmatter, "prerequisites");
         var relatedHelp = AsStringList(frontmatter, "related-help");
 
+        var addedRaw = AsString(frontmatter, "added");
+        var added = DateTime.TryParse(addedRaw, CultureInfo.InvariantCulture, DateTimeStyles.None, out var addedDate)
+                        ? addedDate
+                        : DateTime.MinValue;
+        var addedInVersion = AsString(frontmatter, "added-in-version") ?? AsString(frontmatter, "addedInVersion") ?? string.Empty;
+
         ParseBody(lines, bodyStart, out var intro, out var steps, warnings);
 
         if (steps.Count == 0)
@@ -105,6 +137,8 @@ internal static class TestSetParser
                        Title = title,
                        Scope = scope,
                        Tags = tags,
+                       Added = added,
+                       AddedInVersion = addedInVersion,
                        Prerequisites = prerequisites,
                        RelatedHelp = relatedHelp,
                        Intro = intro,

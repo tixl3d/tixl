@@ -495,10 +495,22 @@ internal sealed class WelcomeAlphaWindow : WindowBase
         var padX = 12 * scale;
         var padY = 5 * scale;
 
-        dl.AddText(Fonts.FontBold, Fonts.FontBold.FontSize, new Vector2(min.X + padX, min.Y + padY), textColor, set.Title);
+        // Left gutter holds a completion checkmark from a past run (always reserved so titles align).
+        var statusGutter = 18 * scale;
+        if (TestRunHistoryStore.TryGet(set.Id, out var history))
+        {
+            var checkColor = history.Outcome == TestRunHistoryStore.SetOutcome.Passed
+                                 ? UiColors.StatusActivated
+                                 : UiColors.StatusAttention;
+            Icons.DrawIconAtScreenPosition(Icon.Checkmark, new Vector2(min.X + padX, min.Y + padY), dl, checkColor);
+        }
+
+        var leftX = min.X + padX + statusGutter;
+
+        dl.AddText(Fonts.FontBold, Fonts.FontBold.FontSize, new Vector2(leftX, min.Y + padY), textColor, set.Title);
         if (!string.IsNullOrEmpty(set.Scope))
             dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize,
-                       new Vector2(min.X + padX, min.Y + padY + Fonts.FontBold.FontSize + 2 * scale), muted, set.Scope);
+                       new Vector2(leftX, min.Y + padY + Fonts.FontBold.FontSize + 2 * scale), muted, set.Scope);
 
         var steps = $"{set.Steps.Count} step{(set.Steps.Count == 1 ? "" : "s")}";
         ImGui.PushFont(Fonts.FontSmall);

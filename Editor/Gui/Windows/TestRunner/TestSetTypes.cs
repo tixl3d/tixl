@@ -13,6 +13,12 @@ internal sealed class TestSet
     public required string Title;
     public required string Scope;
     public required IReadOnlyList<string> Tags;
+
+    /// <summary>When the set was first added (from the `added` frontmatter). <see cref="DateTime.MinValue"/> if absent — sorts oldest.</summary>
+    public required DateTime Added;
+
+    /// <summary>TiXL <c>major.minor</c> the set first shipped in (from `added-in-version`). Empty if absent.</summary>
+    public required string AddedInVersion;
     public required IReadOnlyList<string> Prerequisites;
     public required IReadOnlyList<string> RelatedHelp;
     public required string Intro;
@@ -42,6 +48,14 @@ internal enum Outcome
     Fail,
     Other,
     Skipped,
+}
+
+/// <summary>Display order for the test-set list. Order matches the runner's sort dropdown.</summary>
+internal enum TestSetSort
+{
+    RecentlyAdded,
+    Alphabetical,
+    ByScope,
 }
 
 internal sealed class StepResult
