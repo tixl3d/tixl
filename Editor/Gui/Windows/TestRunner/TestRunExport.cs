@@ -1,8 +1,10 @@
 #nullable enable
 using System.IO;
+using System.Reflection;
 using Newtonsoft.Json;
 using T3.Core.Compilation;
 using T3.Core.Settings;
+using T3.Editor.Gui.UiHelpers;
 
 namespace T3.Editor.Gui.Windows.TestRunner;
 
@@ -37,7 +39,10 @@ internal static class TestRunExport
     {
         var dto = new RunDto
                       {
+                          RunId = run.Id.ToString(),
                           AppVersion = RuntimeAssemblies.FormattedVersion,
+                          CommitHash = _commitHash,
+                          UserNick = UserSettings.Config.UserName,
                           StartedUtc = run.StartedUtc,
                           FinishedUtc = run.FinishedUtc,
                       };
@@ -94,10 +99,30 @@ internal static class TestRunExport
         return null;
     }
 
+    private static readonly string _commitHash = ReadCommitHash();
+
+    private static string ReadCommitHash()
+    {
+        // The build stamps the git SHA after a '+' in the informational version (see Editor.csproj).
+        var info = Assembly.GetEntryAssembly()?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+        if (string.IsNullOrEmpty(info))
+            return string.Empty;
+
+        var plus = info.IndexOf('+');
+        if (plus < 0 || plus == info.Length - 1)
+            return string.Empty;
+
+        var hash = info[(plus + 1)..];
+        return hash.Length > 12 ? hash[..12] : hash;
+    }
+
     // Internal (not private) so TestRunResults can deserialize the same shape it reads back.
     internal sealed class RunDto
     {
+        public string RunId = string.Empty;
         public string AppVersion = string.Empty;
+        public string CommitHash = string.Empty;
+        public string UserNick = string.Empty;
         public DateTime StartedUtc;
         public DateTime FinishedUtc;
         public List<SetDto> Sets = new();

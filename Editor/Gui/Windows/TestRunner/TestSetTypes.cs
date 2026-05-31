@@ -74,6 +74,8 @@ internal sealed class StepResult
 /// </summary>
 internal sealed class RunReport
 {
+    /// <summary>Stable id for this run — used in the exported JSON and as a key when sharing results.</summary>
+    public Guid Id = Guid.NewGuid();
     public DateTime StartedUtc;
     public DateTime FinishedUtc;
     public required IReadOnlyList<TestSet> Sets;
