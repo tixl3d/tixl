@@ -39,7 +39,12 @@ internal static class TimelineAudioClipItem
         TimeLineCanvas TimeCanvas,
         Instance Composition,
         TimeClipInteractions OpInteractions,
-        ValueSnapHandler SnapHandler);
+        ValueSnapHandler SnapHandler,
+        // True when the drawn symbol is itself an enabled composition. Only an enabled
+        // composition's clips are registered for playback (PlaybackUtils resolves the
+        // nearest *enabled* ancestor), so when false the clips are visible-but-silent and
+        // get dimmed + a hint tooltip.
+        bool CompositionEnabled);
 
     internal static void DrawClip(TimelineAudioClip clip, ref DrawAttrs attr)
     {
@@ -73,10 +78,14 @@ internal static class TimelineAudioClipItem
         const float rounding = 4.5f;
         var isSelected = attr.SelectedAudioClipIds.Contains(clip.Id);
 
-        // Mute fade — silenced clips render at ~40 % opacity so the user can tell at a
-        // glance which clips won't be heard. Applied to fill, waveform image and label;
-        // selection border + audio icon stay full opacity so the clip is still findable.
-        var muteFade = clip.IsMuted ? 0.4f : 1f;
+        // Two independent "won't be heard" dimmings, multiplied together:
+        // - Mute fade (~40 %): this individual clip is muted.
+        // - Composition fade (~50 %): the whole op isn't an enabled composition, so none
+        //   of its clips play. Distinct cause, so it also dims the audio icon (which mute
+        //   leaves at full opacity) to read as "the entire row is inactive".
+        var notPlayable = !attr.CompositionEnabled;
+        var muteFade = (clip.IsMuted ? 0.4f : 1f) * (notPlayable ? 0.5f : 1f);
+        var iconFade = notPlayable ? 0.5f : 1f;
 
         // Fixed audio-tinted fill — distinct from the random-per-id colour of op-backed clips.
         var fill = UiColors.ColorForValues.Fade(0.4f * muteFade);
@@ -119,7 +128,7 @@ internal static class TimelineAudioClipItem
 
         // Audio icon in top-left.
         var iconPos = pos + new Vector2(3, 1) * T3Ui.UiScaleFactor;
-        Icons.DrawIconAtScreenPosition(Icon.FileAudio, iconPos, attr.DrawList, UiColors.ForegroundFull);
+        Icons.DrawIconAtScreenPosition(Icon.FileAudio, iconPos, attr.DrawList, UiColors.ForegroundFull.Fade(iconFade));
 
         // Label — falls back to "(recording…)" while the AssetPath isn't set yet (an
         // in-progress recording owns its TimelineAudioClip entry with an empty path
@@ -170,6 +179,16 @@ internal static class TimelineAudioClipItem
                 if (clip.IsMainSoundtrack)
                     ImGui.TextUnformatted("(main soundtrack — also drawn as timeline background)");
                 ImGui.PopStyleColor();
+
+                if (notPlayable)
+                {
+                    ImGui.Spacing();
+                    ImGui.PushStyleColor(ImGuiCol.Text, UiColors.StatusWarning.Rgba);
+                    ImGui.PushTextWrapPos(ImGui.GetCursorPosX() + 220 * T3Ui.UiScaleFactor);
+                    ImGui.TextWrapped("Enable playback settings for this operator to play its audio clips.");
+                    ImGui.PopTextWrapPos();
+                    ImGui.PopStyleColor();
+                }
                 ImGui.PopFont();
             }
             ImGui.EndTooltip();
@@ -262,10 +281,7 @@ internal static class TimelineAudioClipItem
                 attr.SelectedAudioClipIds.Add(clip.Id);
             }
 
-            var dragStartSettings = attr.Composition.Symbol.CompositionSettings;
-            if (dragStartSettings == null)
-                return;
-            var allClips = dragStartSettings.Playback.AudioClips;
+            var allClips = attr.Composition.Symbol.CompositionSettings.Playback.AudioClips;
             var selected = new List<TimelineAudioClip>();
             foreach (var c in allClips)
             {
@@ -373,10 +389,7 @@ internal static class TimelineAudioClipItem
                 AudioClipInteractions.LayerShiftOnDragStart = currentLayerShift;
         }
 
-        var dragSettings = attr.Composition.Symbol.CompositionSettings;
-        if (dragSettings == null)
-            return;
-        var allClipsRef = dragSettings.Playback.AudioClips;
+        var allClipsRef = attr.Composition.Symbol.CompositionSettings.Playback.AudioClips;
         foreach (var c in allClipsRef)
         {
             if (!attr.SelectedAudioClipIds.Contains(c.Id))
