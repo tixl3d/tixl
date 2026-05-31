@@ -1,7 +1,7 @@
 #nullable enable
 using System.IO;
 using System.Text;
-using T3.Core.Settings;
+using T3.Editor.Gui.Help;
 
 namespace T3.Editor.Gui.Windows.TestRunner;
 
@@ -15,12 +15,9 @@ internal static class TestSetParser
 {
     public static string ResolveTestsDirectory()
     {
-        // Walk up from the running editor's bin folder to the repo root. In a
-        // typical dev layout this resolves to <repo>/.tests-manual/. Once we
-        // ship the runner to non-dev users we'll need a packaged copy too.
-        var candidate = Path.GetFullPath(Path.Combine(FileLocations.StartFolder,
-                                                      "..", "..", "..", "..", ".tests-manual"));
-        return candidate;
+        // Dev: the repo's <repo>/.tests-manual/ (live files). Packaged release: the copy shipped next
+        // to the binaries (see Editor.csproj). ShippedContent handles both.
+        return ShippedContent.ResolveDirectory(".tests-manual");
     }
 
     public static List<TestSet> LoadAll(string directory)
