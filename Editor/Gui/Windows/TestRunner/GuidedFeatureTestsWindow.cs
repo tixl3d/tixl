@@ -102,15 +102,38 @@ internal sealed class GuidedFeatureTestsWindow : Window
     {
         var iconSize = new Vector2(ImGui.GetFrameHeight(), ImGui.GetFrameHeight());
         var spacing = ImGui.GetStyle().ItemSpacing.X;
-        CustomComponents.RightAlign(iconSize.X * 2 + spacing, sameLine: false);
+        CustomComponents.RightAlign(iconSize.X * 3 + spacing * 2, sameLine: false);
 
         DocumentationButton.Draw("GuidedFeatureTests", DocumentationWikiUrl, iconSize);
+
+        ImGui.SameLine();
+        // BeginDisabled doesn't dim a transparent icon button (the glyph is drawn via the draw list,
+        // bypassing the disabled alpha), so use the Disabled button state for the dimmed look and just
+        // ignore the click when nothing is selected.
+        var anySelected = _selectedSetIds.Count > 0;
+        var openState = anySelected ? CustomComponents.ButtonStates.Normal : CustomComponents.ButtonStates.Disabled;
+        if (CustomComponents.TransparentIconButton(Icon.OpenExternally, iconSize, openState) && anySelected)
+            OpenSelectedSourceFiles();
+        if (ImGui.IsItemHovered())
+            CustomComponents.TooltipForLastItem("Open source files for the selected tests");
 
         ImGui.SameLine();
         if (CustomComponents.TransparentIconButton(Icon.Refresh, iconSize))
             ReloadSets();
         if (ImGui.IsItemHovered())
             CustomComponents.TooltipForLastItem("Reload test sets from disk");
+    }
+
+    private void OpenSelectedSourceFiles()
+    {
+        if (_allSets == null)
+            return;
+
+        foreach (var set in _allSets)
+        {
+            if (_selectedSetIds.Contains(set.Id) && !string.IsNullOrEmpty(set.SourcePath))
+                CoreUi.Instance.OpenWithDefaultApplication(set.SourcePath);
+        }
     }
 
     private const string DocumentationWikiUrl = "https://github.com/tixl3d/tixl/wiki/dev.GuidedFeatureTests";
