@@ -1,4 +1,5 @@
 #nullable enable
+using System.Diagnostics;
 using System.Threading.Tasks;
 using ImGuiNET;
 using T3.Core.Compilation;
@@ -9,6 +10,7 @@ using T3.Editor.Gui.Help;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.Styling.Markdown;
+using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.Layouts;
 using T3.Editor.Gui.Windows.TestRunner;
 // `Window` (singular) is also a sibling namespace, so the base class is referenced by its alias.
@@ -115,6 +117,10 @@ internal sealed class WelcomeAlphaWindow : WindowBase
         ImGui.TextUnformatted(heading);
         ImGui.PopStyleColor();
         ImGui.PopFont();
+
+        // "Show on startup" toggle, right-aligned on the heading row.
+        DrawShowOnStartupCheckbox();
+
         ImGui.Unindent(12 * scale);
 
         ImGui.Dummy(new Vector2(0, 6 * scale));
@@ -225,7 +231,9 @@ internal sealed class WelcomeAlphaWindow : WindowBase
         if (_settingsImported)
         {
             ImGui.SameLine();
-            ImGui.TextColored(UiColors.StatusActivated, "Imported. Some items apply after a restart.");
+            ImGui.TextColored(UiColors.StatusActivated, "Imported.");
+            FormInputs.AddVerticalSpace(6);
+            DrawRestartEditorButton("Restart TiXL to apply the imported settings, themes, keymaps and layouts.");
         }
     }
 
@@ -294,7 +302,62 @@ internal sealed class WelcomeAlphaWindow : WindowBase
         {
             ImGui.SameLine();
             ImGui.TextColored(UiColors.StatusActivated, "Imported.");
+            FormInputs.AddVerticalSpace(6);
+            DrawRestartEditorButton("Restart TiXL to load the imported projects.");
         }
+    }
+
+    private static void DrawShowOnStartupCheckbox()
+    {
+        var scale = T3Ui.UiScaleFactor;
+        const string label = "Show on startup";
+
+        var width = ImGui.GetFrameHeight() + ImGui.GetStyle().ItemInnerSpacing.X + ImGui.CalcTextSize(label).X;
+        CustomComponents.RightAlign(width + 14 * scale);
+
+        // Vertically center the normal-height checkbox against the FontLarge heading on this row.
+        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + (Fonts.FontLarge.FontSize - ImGui.GetFrameHeight()) * 0.5f);
+
+        var show = UserSettings.Config.ShowWelcomeOnStartup;
+        ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
+        if (ImGui.Checkbox(label, ref show))
+        {
+            UserSettings.Config.ShowWelcomeOnStartup = show;
+            UserSettings.Save();
+        }
+
+        ImGui.PopStyleColor();
+        CustomComponents.TooltipForLastItem("When off, the window no longer opens at launch — reopen it any time from Help → Welcome.");
+    }
+
+    private static void DrawRestartEditorButton(string tooltip)
+    {
+        if (CustomComponents.DrawCtaButton("Restart Editor", Icon.None, UiColors.ForegroundFull, UiColors.StatusActivated, Color.Transparent))
+            RestartEditor();
+        CustomComponents.TooltipForLastItem(tooltip);
+    }
+
+    /// <summary>Launches a fresh editor process and exits this one. Settings are saved by the process-exit handler.</summary>
+    private static void RestartEditor()
+    {
+        var exePath = Environment.ProcessPath;
+        if (string.IsNullOrEmpty(exePath))
+        {
+            Log.Warning("Could not restart: the executable path is unknown.");
+            return;
+        }
+
+        try
+        {
+            Process.Start(exePath);
+        }
+        catch (Exception e)
+        {
+            Log.Warning($"Could not restart the editor: {e.Message}");
+            return;
+        }
+
+        Environment.Exit(0);
     }
 
     private void DrawTestFeaturesTab()

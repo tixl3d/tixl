@@ -63,6 +63,9 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         public bool ShowInteractionOverlay = false;
         public float LayerHeight = 18;
 
+        /// <summary>When true, the Welcome window opens automatically at startup. Toggled from that window.</summary>
+        public bool ShowWelcomeOnStartup = true;
+
         // UI-State
         public float UiScaleFactor = 1;
         public bool FullScreen = false;

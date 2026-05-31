@@ -146,9 +146,10 @@ public static partial class T3Ui
     private static bool _initialed;
 
     /// <summary>
-    /// Once per launch, after the layout is up and no other popup is open, shows the welcome popup if
-    /// this is a version the user hasn't run in this folder before. Otherwise just records the run so
-    /// the next new version is detected. Waits for any startup popup (e.g. user name) to close first.
+    /// Once per launch, after the layout is up and no other popup is open, opens the welcome window if
+    /// the user keeps it on startup, or if this is a version they haven't run in this folder before.
+    /// Otherwise just records the run so the next new version is detected. Waits for any startup popup
+    /// (e.g. user name) to close first.
     /// </summary>
     private static void CheckForVersionWelcome()
     {
@@ -157,7 +158,8 @@ public static partial class T3Ui
 
         _versionWelcomeChecked = true;
 
-        if (VersionMarker.Classify() == VersionMarker.LaunchKind.NewToUser)
+        var isNewVersion = VersionMarker.Classify() == VersionMarker.LaunchKind.NewToUser;
+        if (UserSettings.Config.ShowWelcomeOnStartup || isNewVersion)
             WindowManager.WelcomeAlphaWindow.Open();
         else
             VersionMarker.MarkCurrentVersionSeen();

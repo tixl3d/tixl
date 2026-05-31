@@ -32,6 +32,9 @@ You can now record live sets as io-data- and audio-clips. io-Clips can then be r
 Many settings are now saved directly with your project:
 - Output Resolution, Loop Range, Layout, Pinned operators, etc.
 
+### Skill Quest Tips
+
+The skill quest tutorials are awesome. But sometimes hunting down the precise float parameter value can be frustrating. TiXL 4.2 comes with an improved tutorial guidance system that will point out if unnecssary parameter have been modified and nudges you what to try next.
 
 ### Markdown Format in the Editor
 
