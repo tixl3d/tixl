@@ -58,13 +58,25 @@ On a fresh run, tick only `Projects`, click "Import selected", and wait for comp
 - The project tree appears under the current version's Documents folder.
 - The previous version's project folder is byte-for-byte unchanged (nothing moved or deleted).
 
+## Step: Release notes render with operator links
+
+**Action:**
+On the Welcome tab, scroll to the "Release Notes" section. Hover an operator reference such as `[SwiftCamDevice]`, then click it.
+
+**Expected:**
+- The release notes from `.help/release-notes/alpha.md` (alpha) or `<major>.<minor>.md` (stable) render as formatted markdown — headings, bullets, and inline `[text](url)` links.
+- Operator references like `[SwiftCamDevice]` show a hand cursor and a tooltip with the operator's namespace and description on hover.
+- Clicking an operator reference opens the Symbol Library filtered to that operator.
+- An unknown operator name renders as plain text with no tooltip or click.
+- If no release-notes file exists for the version, the section shows "No release notes for this version yet."
+
 ## Step: Open Feature Tests from the welcome
 
 **Action:**
-Click "Open Feature Tests".
+On the Test new Features tab, select a set and click "Start Test".
 
 **Expected:**
-- The manual feature tests window becomes visible.
+- The manual feature tests window becomes visible and starts the selected set.
 - The welcome popup closes.
 
 ## Step: Marker is written, popup does not repeat

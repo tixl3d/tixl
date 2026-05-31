@@ -44,6 +44,18 @@ internal sealed class SymbolLibrary : Window
     }
 
     /// <summary>
+    /// Opens the window, expands the namespace tree to <paramref name="symbolId"/>, and scrolls it into
+    /// view (without touching the search filter). Used by operator links in markdown.
+    /// </summary>
+    internal void Reveal(Guid symbolId)
+    {
+        _expandToSymbolTargetId = symbolId;
+        _expandToSymbolTriggered = true;
+        _scrollToSymbolId = symbolId;
+        Config.Visible = true;
+    }
+
+    /// <summary>
     /// Draws the main content of the Symbol Library window, including dialogs and the symbol tree or usage view.
     /// </summary>
     protected override void DrawContent()
@@ -227,6 +239,9 @@ internal sealed class SymbolLibrary : Window
 
     // The target symbol ID to expand to
     private Guid? _expandToSymbolTargetId;
+
+    // Set by Reveal(): the symbol item scrolls itself into view once, then clears this.
+    private Guid? _scrollToSymbolId;
 
     /// <summary>
     /// Checks if a <see cref="NamespaceTreeNode"/> is in the path to a symbol, returning the path if found.
@@ -681,6 +696,16 @@ internal sealed class SymbolLibrary : Window
             var color = symbol.OutputDefinitions.Count > 0
                             ? TypeUiRegistry.GetPropertiesForType(symbol.OutputDefinitions[0]?.ValueType).Color
                             : UiColors.Gray;
+
+            // A pending Reveal() scrolls this item into view and highlights it. The path nodes are
+            // expanded by the _expandToSymbolTargetId logic above, so by here the item is laid out.
+            if (_scrollToSymbolId == symbol.Id)
+            {
+                ImGui.SetScrollHereY(0.5f);
+                _lastSelectedSymbolId = symbol.Id;
+                _lastSelectionTime = ImGui.GetTime();
+                _scrollToSymbolId = null;
+            }
 
             // --- Highlight and Aim Icon for selected symbol ---
             var isSelected = false;

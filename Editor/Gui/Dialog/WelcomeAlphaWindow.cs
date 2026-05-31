@@ -5,6 +5,7 @@ using T3.Core.Compilation;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Settings;
 using T3.Core.SystemUi;
+using T3.Editor.Gui.Help;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.Styling.Markdown;
@@ -57,14 +58,16 @@ internal sealed class WelcomeAlphaWindow
 
         var title = _isAlpha ? "Welcome to the TiXL Alpha" : "Welcome to TiXL";
         var isOpen = true;
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(14, 12) * scale);
-        ImGui.PushStyleColor(ImGuiCol.WindowBg, UiColors.BackgroundPopup.Rgba);
+        // No window padding: the sidebar sits flush to the window edge like the Settings window. The
+        // header and the content panel add their own inner padding. Background matches Settings.
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Vector2.Zero);
+        ImGui.PushStyleColor(ImGuiCol.WindowBg, UiColors.WindowBackground.Rgba);
         if (ImGui.Begin($"{title}###WelcomeWindow", ref isOpen,
                         ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoSavedSettings))
         {
             DrawHeaderBand();
             DrawSidebar();
-            ImGui.SameLine();
+            ImGui.SameLine(0, 0);
             DrawContent();
         }
 
@@ -108,20 +111,27 @@ internal sealed class WelcomeAlphaWindow
         }
 
         _testSets = TestSetParser.LoadAll(TestSetParser.ResolveTestsDirectory());
+        _releaseNotes = ReleaseNotesLoader.TryLoadForCurrentVersion();
     }
 
     private void DrawHeaderBand()
     {
+        var scale = T3Ui.UiScaleFactor;
         var shortVersion = FileLocations.TixlVersion;
         var heading = _isAlpha ? $"Thanks for testing v{shortVersion} Alpha" : $"Welcome to TiXL v{shortVersion}";
+
+        // Window padding is 0, so pad the header explicitly.
+        ImGui.Dummy(new Vector2(0, 8 * scale));
+        ImGui.Indent(12 * scale);
         ImGui.PushFont(Fonts.FontLarge);
         ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
         ImGui.TextUnformatted(heading);
         ImGui.PopStyleColor();
         ImGui.PopFont();
-        FormInputs.AddVerticalSpace(4);
+        ImGui.Unindent(12 * scale);
+
+        ImGui.Dummy(new Vector2(0, 6 * scale));
         ImGui.Separator();
-        FormInputs.AddVerticalSpace(4);
     }
 
     private void DrawSidebar()
@@ -142,7 +152,8 @@ internal sealed class WelcomeAlphaWindow
 
     private void DrawContent()
     {
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(20, 8) * T3Ui.UiScaleFactor);
+        // Match the Settings window's content panel (padding + border + see-through background).
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(20, 5) * T3Ui.UiScaleFactor);
         ImGui.BeginChild("content", new Vector2(0, 0), ImGuiChildFlags.Borders, ImGuiWindowFlags.NoBackground);
 
         switch (_activeTab)
@@ -175,13 +186,23 @@ internal sealed class WelcomeAlphaWindow
 
         FormInputs.AddVerticalSpace(8);
         ImGui.Separator();
-        FormInputs.AddSectionHeader(_isAlpha ? $"Release Notes v{FileLocations.TixlVersion} (WIP)" : $"Release Notes v{FileLocations.TixlVersion}");
+        //FormInputs.AddSectionHeader(_isAlpha ? $"Release Notes v{FileLocations.TixlVersion} (WIP)" : $"Release Notes v{FileLocations.TixlVersion}");
 
-        // Phase 3 replaces this stub with the rendered release-notes file (through the same
-        // markdown renderer, so inline links and [Operator] references work there too).
-        ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-        ImGui.TextWrapped("Release notes will be shown here.");
-        ImGui.PopStyleColor();
+        if (_releaseNotes != null)
+        {
+            // Same renderer as the welcome prose, so [text](url) links and [OperatorName] references
+            // are both interactive — the latter open the Symbol Library on click.
+            _releaseNotesMarkdown.Draw(_releaseNotes,
+                                       onUrl: url => CoreUi.Instance.OpenWithDefaultApplication(url),
+                                       onOperatorRef: opName => MarkdownOperatorLinks.HandleOperatorRef(opName),
+                                       operatorColor: MarkdownOperatorLinks.GetOperatorColor);
+        }
+        else
+        {
+            ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
+            ImGui.TextWrapped("No release notes for this version yet.");
+            ImGui.PopStyleColor();
+        }
     }
 
     private void DrawImportSettingsTab()
@@ -488,6 +509,8 @@ internal sealed class WelcomeAlphaWindow
         "Each TiXL version keeps its own folders for Settings and Projects, so different versions don't overwrite each other. Use the import options on the left to copy data from a previous version.";
 
     private readonly MarkdownView _welcomeMarkdown = new(new MarkdownView.Options());
+    private readonly MarkdownView _releaseNotesMarkdown = new(new MarkdownView.Options());
+    private string? _releaseNotes;
 
     private bool _isVisible;
     private bool _needsInit;

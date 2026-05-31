@@ -27,6 +27,13 @@ internal sealed class MarkdownView
     /// </summary>
     public delegate void OperatorRefRendered(string opName);
 
+    /// <summary>
+    /// Returns the text color for a rendered <c>[OpName]</c> fragment — e.g. the operator's output-type
+    /// color. Returning the body text color makes an unknown reference read as plain text. Without a
+    /// resolver, op-refs use the default link accent.
+    /// </summary>
+    public delegate Color OperatorRefColor(string opName);
+
     public struct Options
     {
         /// <summary>0 = use ContentRegionAvail.X each frame.</summary>
@@ -58,10 +65,13 @@ internal sealed class MarkdownView
 
     public void Draw(string markdown,
                      UrlClicked? onUrl = null,
-                     OperatorRefRendered? onOperatorRef = null)
+                     OperatorRefRendered? onOperatorRef = null,
+                     OperatorRefColor? operatorColor = null)
     {
         if (string.IsNullOrEmpty(markdown))
             return;
+
+        _operatorColor = operatorColor;
 
         var availableWrap = _options.WrapWidthPx > 0
                                 ? _options.WrapWidthPx
@@ -196,7 +206,10 @@ internal sealed class MarkdownView
         }
         else if ((fragment.Style & RunStyle.OpRef) != 0)
         {
-            ImGui.PushStyleColor(ImGuiCol.Text, UiColors.StatusActivated.Rgba);
+            var opColor = _operatorColor != null && fragment.UrlIndex >= 0
+                              ? _operatorColor(_layout.Urls[fragment.UrlIndex])
+                              : UiColors.StatusActivated;
+            ImGui.PushStyleColor(ImGuiCol.Text, opColor.Rgba);
             colorPushed = true;
         }
 
@@ -261,6 +274,7 @@ internal sealed class MarkdownView
     }
 
     private readonly Options _options;
+    private OperatorRefColor? _operatorColor;
     private readonly ParsedDoc _parsed = new();
     private readonly LayoutResult _layout = new();
 

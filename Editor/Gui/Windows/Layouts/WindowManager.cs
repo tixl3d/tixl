@@ -58,6 +58,7 @@ internal static partial class WindowManager
             ImGui.ShowMetricsWindow(ref MetricsWindowVisible);
     }
 
+    internal static readonly SymbolLibrary SymbolLibrary = new();
     internal static readonly SettingsWindow SettingsWindow = new();
     internal static readonly ProjectSettingsWindow ProjectSettingsWindow = new();
     internal static readonly UtilitiesWindow UtilitiesWindow = new();
@@ -79,7 +80,7 @@ internal static partial class WindowManager
                 new OutputWindow(),
                 new GraphWindow(),
                 new ParameterWindow(),
-                new SymbolLibrary(),
+                SymbolLibrary,
                 new AssetLibrary(),
                 new ExplorationWindow(),
                 new RenderWindow(),
