@@ -73,7 +73,7 @@ public sealed class IoDataSetRecorder : MidiConnectionManager.IMidiConsumer, Osc
         }
 
         var sessionIndex = T3.Core.Audio.RecordingPaths.NextSessionIndex(directory);
-        var fileName = T3.Core.Audio.RecordingPaths.BuildFileName(sessionIndex, ".data", suffix);
+        var fileName = T3.Core.Audio.RecordingPaths.BuildFileName(T3.Core.Audio.RecordingPaths.DataRecordingPrefix, sessionIndex, ".data", suffix);
         var path = System.IO.Path.Combine(directory, fileName);
 
         try

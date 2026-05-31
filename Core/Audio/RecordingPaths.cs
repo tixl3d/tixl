@@ -12,16 +12,17 @@ namespace T3.Core.Audio;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Recording sessions share a single incrementing index across audio and data files:
+/// Recording sessions share a single incrementing index across audio and data files; the
+/// prefix distinguishes the kind so a clip's name reads as its type at a glance:
 /// </para>
 /// <list type="bullet">
-/// <item><c>rec-007-mic1.wav</c> — single audio source, session 7</item>
-/// <item><c>rec-007.data</c>     — IO data capture (Phase 3) for the same session</item>
+/// <item><c>AudioRec-007-mic1.wav</c> — single audio source, session 7</item>
+/// <item><c>DataRec-007.data</c>      — IO data capture for the same session</item>
 /// </list>
 /// <para>
-/// <see cref="NextSessionIndex"/> scans both audio and data directories so an audio-only
-/// session still bumps the counter that a later data-only session sees. Phase 1 only
-/// writes audio, so the data side of the scan is harmlessly empty until Phase 3 lands.
+/// <see cref="NextSessionIndex"/> scans for both prefixes (and the legacy <c>rec-</c> name,
+/// so indices don't collide with recordings made before the rename) so an audio-only
+/// session still bumps the counter that a later data-only session sees.
 /// </para>
 /// <para>
 /// The dev-only target directory for Phase 1 is <see cref="DevRecordingsDirectory"/> under
@@ -38,10 +39,17 @@ public static class RecordingPaths
     /// </summary>
     public static string DevRecordingsDirectory => Path.Combine(FileLocations.SettingsDirectory, "Recordings");
 
+    /// <summary>Filename prefix for IO-data recordings (<c>DataRec-NNN.data</c>).</summary>
+    public const string DataRecordingPrefix = "DataRec";
+
+    /// <summary>Filename prefix for audio recordings (<c>AudioRec-NNN.wav</c>).</summary>
+    public const string AudioRecordingPrefix = "AudioRec";
+
     /// <summary>
-    /// Returns <c>N+1</c> where <c>N</c> is the highest <c>rec-NNN</c> index found
-    /// across any combination of the supplied directories. Returns 1 if nothing matches.
-    /// Non-existent directories are skipped silently.
+    /// Returns <c>N+1</c> where <c>N</c> is the highest session index found across any
+    /// combination of the supplied directories, recognising both current prefixes and the
+    /// legacy <c>rec-</c> name. Returns 1 if nothing matches. Non-existent directories are
+    /// skipped silently.
     /// </summary>
     public static int NextSessionIndex(params string[] directories)
     {
@@ -52,7 +60,7 @@ public static class RecordingPaths
             if (string.IsNullOrEmpty(directory) || !Directory.Exists(directory))
                 continue;
 
-            foreach (var path in Directory.EnumerateFiles(directory, "rec-*"))
+            foreach (var path in Directory.EnumerateFiles(directory))
             {
                 var match = _sessionIndexRegex.Match(Path.GetFileName(path));
                 if (!match.Success)
@@ -67,20 +75,21 @@ public static class RecordingPaths
     }
 
     /// <summary>
-    /// Builds a recording filename of the form <c>rec-NNN[-suffix].extension</c>.
+    /// Builds a recording filename of the form <c>{prefix}-NNN[-suffix].extension</c>.
     /// Pads the index to three digits; the suffix is omitted when null or empty.
     /// </summary>
+    /// <param name="prefix">Recording-kind prefix — <see cref="DataRecordingPrefix"/> or <see cref="AudioRecordingPrefix"/>.</param>
     /// <param name="sessionIndex">Session index from <see cref="NextSessionIndex"/>.</param>
     /// <param name="extension">File extension including the leading dot (e.g. <c>.wav</c>).</param>
     /// <param name="suffix">Optional source identifier (e.g. <c>mic1</c>, <c>loopback</c>).</param>
-    public static string BuildFileName(int sessionIndex, string extension, string? suffix = null)
+    public static string BuildFileName(string prefix, int sessionIndex, string extension, string? suffix = null)
     {
         var sanitisedSuffix = SanitiseSuffix(suffix);
         var indexPart = sessionIndex.ToString("D3");
 
         return string.IsNullOrEmpty(sanitisedSuffix)
-                   ? $"rec-{indexPart}{extension}"
-                   : $"rec-{indexPart}-{sanitisedSuffix}{extension}";
+                   ? $"{prefix}-{indexPart}{extension}"
+                   : $"{prefix}-{indexPart}-{sanitisedSuffix}{extension}";
     }
 
     private static string SanitiseSuffix(string? suffix)
@@ -120,5 +129,7 @@ public static class RecordingPaths
         return new string(buffer.Slice(0, write));
     }
 
-    private static readonly Regex _sessionIndexRegex = new(@"^rec-(\d{3,})(?:-|\.)", RegexOptions.Compiled);
+    // Matches the index in current (DataRec-/AudioRec-) and legacy (rec-) recording names,
+    // so a session counter computed after the rename still clears pre-rename files.
+    private static readonly Regex _sessionIndexRegex = new(@"^(?:DataRec|AudioRec|rec)-(\d{3,})(?:-|\.)", RegexOptions.Compiled);
 }

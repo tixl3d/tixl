@@ -241,7 +241,7 @@ public static class WasapiAudioInput
         }
 
         var sessionIndex = RecordingPaths.NextSessionIndex(directory);
-        var fileName = RecordingPaths.BuildFileName(sessionIndex, ".wav", suffix);
+        var fileName = RecordingPaths.BuildFileName(RecordingPaths.AudioRecordingPrefix, sessionIndex, ".wav", suffix);
         var path = Path.Combine(directory, fileName);
 
         var sampleRate = SampleRate > 0 ? SampleRate : 48000;
