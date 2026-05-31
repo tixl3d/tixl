@@ -70,6 +70,7 @@ public static class UiColors
     public static Color StatusAutomated = new(0.08f, 0.48f, 0.7f, 1f);
     public static Color StatusControlled = new(0.08f, 0.7f, 0.48f, 1f);
     
+    public static Color StatusOkay = new(154, 199, 32, 255);
     public static Color StatusAttention = new(203, 19, 113, 255);
     public static Color StatusWarning = new(203, 19, 113, 255);
     public static Color StatusError = new(203, 19, 113, 255);

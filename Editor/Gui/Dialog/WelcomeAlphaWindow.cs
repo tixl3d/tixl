@@ -383,7 +383,7 @@ internal sealed class WelcomeAlphaWindow : WindowBase
             {
                 foreach (var set in _testSets)
                 {
-                    if (DrawTestRow(set, _selectedTestSetId == set.Id))
+                    if (TestSetRow.Draw(set, _selectedTestSetId == set.Id, height: 50).Clicked)
                         _selectedTestSetId = set.Id;
                 }
             }
@@ -469,85 +469,6 @@ internal sealed class WelcomeAlphaWindow : WindowBase
         ImGui.EndDisabled();
         if (!available)
             CustomComponents.TooltipForLastItem($"No {label.ToLowerInvariant()} found in the previous version.");
-    }
-
-    private bool DrawTestRow(TestSet set, bool selected)
-    {
-        var scale = T3Ui.UiScaleFactor;
-        var dl = ImGui.GetWindowDrawList();
-        ImGui.PushID(set.Id);
-
-        var rowSize = new Vector2(ImGui.GetContentRegionAvail().X, 44 * scale);
-        var clicked = ImGui.InvisibleButton("##row", rowSize);
-        var hovered = ImGui.IsItemHovered();
-        var min = ImGui.GetItemRectMin();
-        var max = ImGui.GetItemRectMax();
-
-        var bg = selected
-                     ? UiColors.StatusActivated.Fade(hovered ? 1f : 0.9f)
-                     : hovered
-                         ? UiColors.ForegroundFull.Fade(0.1f)
-                         : UiColors.ForegroundFull.Fade(0.04f);
-        dl.AddRectFilled(min, max, bg, 4 * scale);
-
-        var textColor = selected ? UiColors.ForegroundFull : UiColors.Text;
-        var muted = selected ? UiColors.ForegroundFull.Fade(0.75f) : UiColors.TextMuted;
-        var padX = 12 * scale;
-        var padY = 5 * scale;
-
-        // Left gutter holds a completion checkmark from a past run (always reserved so titles align).
-        var statusGutter = 18 * scale;
-        if (TestRunHistoryStore.TryGet(set.Id, out var history))
-        {
-            var checkColor = history.Outcome == TestRunHistoryStore.SetOutcome.Passed
-                                 ? UiColors.StatusActivated
-                                 : UiColors.StatusAttention;
-            Icons.DrawIconAtScreenPosition(Icon.Checkmark, new Vector2(min.X + padX, min.Y + padY), dl, checkColor);
-        }
-
-        var leftX = min.X + padX + statusGutter;
-
-        dl.AddText(Fonts.FontBold, Fonts.FontBold.FontSize, new Vector2(leftX, min.Y + padY), textColor, set.Title);
-        if (!string.IsNullOrEmpty(set.Scope))
-            dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize,
-                       new Vector2(leftX, min.Y + padY + Fonts.FontBold.FontSize + 2 * scale), muted, set.Scope);
-
-        var steps = $"{set.Steps.Count} step{(set.Steps.Count == 1 ? "" : "s")}";
-        ImGui.PushFont(Fonts.FontSmall);
-        var stepsWidth = ImGui.CalcTextSize(steps).X;
-        ImGui.PopFont();
-        dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize, new Vector2(max.X - padX - stepsWidth, min.Y + padY), muted, steps);
-
-        var rightX = max.X - padX;
-        DrawTagPills(dl, set.Tags, ref rightX, max.Y - padY - Fonts.FontSmall.FontSize, muted, scale);
-
-        ImGui.PopID();
-        return clicked;
-    }
-
-    private static void DrawTagPills(ImDrawListPtr dl, IReadOnlyList<string> tags, ref float rightX, float y, Color textColor, float scale)
-    {
-        if (tags.Count == 0)
-            return;
-
-        ImGui.PushFont(Fonts.FontSmall);
-        var pillPadX = 6 * scale;
-        var pillPadY = 1 * scale;
-        var fontSize = Fonts.FontSmall.FontSize;
-        var bgColor = ImGui.GetColorU32(UiColors.ForegroundFull.Fade(0.12f).Rgba);
-        var fgColor = ImGui.GetColorU32(textColor.Rgba);
-
-        for (var i = tags.Count - 1; i >= 0; i--)
-        {
-            var label = tags[i].ToUpperInvariant();
-            var w = ImGui.CalcTextSize(label).X + pillPadX * 2;
-            rightX -= w;
-            dl.AddRectFilled(new Vector2(rightX, y - pillPadY), new Vector2(rightX + w, y + fontSize + pillPadY), bgColor, 6 * scale);
-            dl.AddText(Fonts.FontSmall, fontSize, new Vector2(rightX + pillPadX, y), fgColor, label);
-            rightX -= 4 * scale;
-        }
-
-        ImGui.PopFont();
     }
 
     private enum Tab

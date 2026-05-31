@@ -94,7 +94,8 @@ internal static class TestRunExport
         return null;
     }
 
-    private sealed class RunDto
+    // Internal (not private) so TestRunResults can deserialize the same shape it reads back.
+    internal sealed class RunDto
     {
         public string AppVersion = string.Empty;
         public DateTime StartedUtc;
@@ -102,7 +103,7 @@ internal static class TestRunExport
         public List<SetDto> Sets = new();
     }
 
-    private sealed class SetDto
+    internal sealed class SetDto
     {
         public string Id = string.Empty;
         public string Title = string.Empty;
@@ -112,7 +113,7 @@ internal static class TestRunExport
         public List<StepDto> Steps = new();
     }
 
-    private sealed class StepDto
+    internal sealed class StepDto
     {
         public int Index;
         public string Title = string.Empty;
@@ -121,7 +122,7 @@ internal static class TestRunExport
         public DateTime? TimestampUtc;
     }
 
-    private sealed class SummaryDto
+    internal sealed class SummaryDto
     {
         public int Total;
         public int Pass;

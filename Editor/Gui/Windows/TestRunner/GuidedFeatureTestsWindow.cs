@@ -210,158 +210,55 @@ internal sealed class GuidedFeatureTestsWindow : Window
 
     private void DrawSetRow(TestSet set)
     {
-        var scale = T3Ui.UiScaleFactor;
-        var dl = ImGui.GetWindowDrawList();
+        var result = TestSetRow.Draw(set, _selectedSetIds.Contains(set.Id), height: 50);
 
-        ImGui.PushID(set.Id);
-
-        var selected = _selectedSetIds.Contains(set.Id);
-        var rowSize = new Vector2(ImGui.GetContentRegionAvail().X, 50 * scale);
-        var clicked = ImGui.InvisibleButton("##row", rowSize);
-        var hovered = ImGui.IsItemHovered();
-        var min = ImGui.GetItemRectMin();
-        var max = ImGui.GetItemRectMax();
-
-        if (clicked)
+        if (result.Clicked)
         {
-            if (selected) _selectedSetIds.Remove(set.Id);
-            else _selectedSetIds.Add(set.Id);
-            selected = !selected;
+            if (!_selectedSetIds.Remove(set.Id))
+                _selectedSetIds.Add(set.Id);
         }
 
-        // Row background.
-        var bg = selected
-                     ? Color.Mix( UiColors.StatusActivated, UiColors.BackgroundFull, 0.2f).Fade(hovered ? 1f : 0.9f)
-                     : hovered
-                         ? UiColors.ForegroundFull.Fade(0.1f)
-                         : UiColors.ForegroundFull.Fade(0.04f);
-        dl.AddRectFilled(min, max, bg, 4 * scale);
-
-        var textColor = selected ? UiColors.ForegroundFull : UiColors.Text;
-        var mutedColor = selected ? UiColors.ForegroundFull.Fade(0.75f) : UiColors.TextMuted;
-        var padX = 12 * scale;
-        var padY = 6 * scale;
-
-        // Left gutter holds a completion checkmark from a past run (always reserved so titles align).
-        var statusGutter = 18 * scale;
-        if (TestRunHistoryStore.TryGet(set.Id, out var history))
-        {
-            var checkColor = history.Outcome == TestRunHistoryStore.SetOutcome.Passed
-                                 ? UiColors.StatusActivated
-                                 : UiColors.StatusAttention;
-            Icons.DrawIconAtScreenPosition(Icon.Checkmark, new Vector2(min.X + padX, min.Y + padY), dl, checkColor);
-        }
-
-        var leftX = min.X + padX + statusGutter;
-
-        // Title (top-left).
-        dl.AddText(Fonts.FontBold, Fonts.FontBold.FontSize,
-                   new Vector2(leftX, min.Y + padY),
-                   textColor, set.Title);
-
-        // Scope (bottom-left).
-        if (!string.IsNullOrEmpty(set.Scope))
-        {
-            var scopeY = min.Y + padY + Fonts.FontBold.FontSize + 2 * scale;
-            dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize,
-                       new Vector2(leftX, scopeY),
-                       mutedColor, set.Scope);
-        }
-
-        // Tag pills + step count + optional warning icon (right side).
-        var rightCursor = max.X - padX;
-        DrawTagPillsRight(dl, set.Tags, ref rightCursor, max.Y - padY - Fonts.FontSmall.FontSize,
-                          mutedColor, scale);
-
-        // Step count (top-right).
-        var stepCount = $"{set.Steps.Count} step{(set.Steps.Count == 1 ? "" : "s")}";
-        ImGui.PushFont(Fonts.FontSmall);
-        var stepsWidth = ImGui.CalcTextSize(stepCount).X;
-        ImGui.PopFont();
-        dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize,
-                   new Vector2(max.X - padX - stepsWidth, min.Y + padY),
-                   mutedColor, stepCount);
-
-        // Warning icon (if any) next to the step count.
-        if (set.ParseWarnings.Count > 0)
-        {
-            var warnX = max.X - padX - stepsWidth - 18 * scale;
-            Icons.DrawIconAtScreenPosition(Icon.Warning,
-                                            new Vector2(warnX, min.Y + padY - 1 * scale),
-                                            dl, UiColors.StatusWarning);
-        }
-
-        // Hover tooltip: intro paragraph from the .md file, rendered as
-        // markdown so **bold**, `code`, links, [OpRef]s read correctly.
-        if (hovered && (!string.IsNullOrWhiteSpace(set.Intro) || set.ParseWarnings.Count > 0))
-        {
-            // Pin the tooltip width BEFORE BeginTooltip so frame 1 already has
-            // the right ContentRegionAvail (otherwise the auto-resize window
-            // defaults to viewport width on its first appearance and flashes
-            // huge before settling next frame).
-            var tooltipWidth = 420 * scale;
-            ImGui.SetNextWindowSizeConstraints(
-                new Vector2(tooltipWidth, 0),
-                new Vector2(tooltipWidth, float.MaxValue));
-
-            ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(10, 8) * scale);
-            ImGui.BeginTooltip();
-
-            if (!string.IsNullOrWhiteSpace(set.Intro))
-            {
-                // Lazy-create so hot-reload that adds new fields doesn't NRE
-                // until the next editor restart.
-                _introMarkdown ??= new MarkdownView(new MarkdownView.Options());
-                _introMarkdown.Draw(set.Intro);
-            }
-
-            if (set.ParseWarnings.Count > 0)
-            {
-                if (!string.IsNullOrWhiteSpace(set.Intro))
-                    FormInputs.AddVerticalSpace(6);
-                ImGui.PushStyleColor(ImGuiCol.Text, UiColors.StatusWarning.Rgba);
-                ImGui.PushTextWrapPos(tooltipWidth);
-                foreach (var w in set.ParseWarnings)
-                    ImGui.TextWrapped(w);
-                ImGui.PopTextWrapPos();
-                ImGui.PopStyleColor();
-            }
-
-            ImGui.EndTooltip();
-            ImGui.PopStyleVar();
-        }
-
-        ImGui.PopID();
+        // The shared row already shows a per-tick tooltip; otherwise show this set's intro markdown.
+        if (result.Hovered && !result.TickHovered)
+            DrawIntroTooltip(set);
     }
 
-    private static void DrawTagPillsRight(ImDrawListPtr dl, IReadOnlyList<string> tags,
-                                           ref float rightX, float y,
-                                           Color textColor, float scale)
+    private void DrawIntroTooltip(TestSet set)
     {
-        if (tags.Count == 0)
+        if (string.IsNullOrWhiteSpace(set.Intro) && set.ParseWarnings.Count == 0)
             return;
 
-        ImGui.PushFont(Fonts.FontSmall);
-        var pillPadX = 6 * scale;
-        var pillPadY = 1 * scale;
-        var fontSize = Fonts.FontSmall.FontSize;
-        var bgColor = ImGui.GetColorU32(UiColors.ForegroundFull.Fade(0.12f).Rgba);
-        var fgColor = ImGui.GetColorU32(textColor.Rgba);
+        var scale = T3Ui.UiScaleFactor;
 
-        for (var i = tags.Count - 1; i >= 0; i--)
+        // Pin the tooltip width BEFORE BeginTooltip so frame 1 already has the right ContentRegionAvail
+        // (otherwise the auto-resize window flashes at viewport width on its first appearance).
+        var tooltipWidth = 420 * scale;
+        ImGui.SetNextWindowSizeConstraints(new Vector2(tooltipWidth, 0), new Vector2(tooltipWidth, float.MaxValue));
+
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(10, 8) * scale);
+        ImGui.BeginTooltip();
+
+        if (!string.IsNullOrWhiteSpace(set.Intro))
         {
-            var label = tags[i].ToUpperInvariant();
-            var w = ImGui.CalcTextSize(label).X + pillPadX * 2;
-            rightX -= w;
-            dl.AddRectFilled(new Vector2(rightX, y - pillPadY),
-                             new Vector2(rightX + w, y + fontSize + pillPadY),
-                             bgColor, 6 * scale);
-            dl.AddText(Fonts.FontSmall, fontSize,
-                       new Vector2(rightX + pillPadX, y),
-                       fgColor, label);
-            rightX -= 4 * scale;
+            // Lazy-create so hot-reload that adds new fields doesn't NRE until the next editor restart.
+            _introMarkdown ??= new MarkdownView(new MarkdownView.Options());
+            _introMarkdown.Draw(set.Intro);
         }
-        ImGui.PopFont();
+
+        if (set.ParseWarnings.Count > 0)
+        {
+            if (!string.IsNullOrWhiteSpace(set.Intro))
+                FormInputs.AddVerticalSpace(6);
+            ImGui.PushStyleColor(ImGuiCol.Text, UiColors.StatusWarning.Rgba);
+            ImGui.PushTextWrapPos(tooltipWidth);
+            foreach (var w in set.ParseWarnings)
+                ImGui.TextWrapped(w);
+            ImGui.PopTextWrapPos();
+            ImGui.PopStyleColor();
+        }
+
+        ImGui.EndTooltip();
+        ImGui.PopStyleVar();
     }
 
     private static string ShortenTestsDir(string fullPath)
@@ -653,49 +550,9 @@ internal sealed class GuidedFeatureTestsWindow : Window
     {
         var run = _run!;
         run.FinishedUtc = DateTime.UtcNow;
-        RecordRunHistory(run);
         TestRunExport.AutoSave(run);
+        TestRunResults.Invalidate(); // pick up this run's results for the checkmarks / status bars
         _state = State.Summary;
-    }
-
-    /// <summary>Stores a completion checkmark for every set whose steps all got an outcome this run.</summary>
-    private static void RecordRunHistory(RunReport run)
-    {
-        foreach (var set in run.Sets)
-        {
-            if (set.Steps.Count == 0)
-                continue;
-
-            var allDecided = true;
-            var hadIssues = false;
-            for (var stepIdx = 0; stepIdx < set.Steps.Count; stepIdx++)
-            {
-                var outcome = FindOutcome(run, set.Id, stepIdx);
-                if (outcome == Outcome.Pending)
-                {
-                    allDecided = false;
-                    break;
-                }
-
-                if (outcome is Outcome.Fail or Outcome.Other)
-                    hadIssues = true;
-            }
-
-            if (allDecided)
-                TestRunHistoryStore.MarkCompleted(set.Id,
-                                                  hadIssues ? TestRunHistoryStore.SetOutcome.HadIssues : TestRunHistoryStore.SetOutcome.Passed);
-        }
-    }
-
-    private static Outcome FindOutcome(RunReport run, string setId, int stepIdx)
-    {
-        foreach (var result in run.Results)
-        {
-            if (result.SetId == setId && result.StepIndex == stepIdx)
-                return result.Outcome;
-        }
-
-        return Outcome.Pending;
     }
 
     // ----- Summary state -----------------------------------------------
