@@ -1,6 +1,7 @@
 #nullable enable
 using ImGuiNET;
 using T3.Core.Animation;
+using T3.Core.Audio;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
 using T3.Core.Utils;
@@ -124,7 +125,10 @@ internal sealed class ClipArea : ITimeObjectManipulation, IValueSnapAttractor
     private void DrawAllLayers(Instance compositionOp)
     {
         var opClips = _context.ClipSelection.CompositionTimeClips.Values;
-        var audioClips = compositionOp.Symbol.CompositionSettings.Playback.AudioClips;
+        // Cold custom symbols can have null CompositionSettings; fall back to "no audio
+        // clips" rather than NRE, so op-clip drawing still works.
+        var audioClips = compositionOp.Symbol.CompositionSettings?.Playback.AudioClips
+                         ?? (IReadOnlyList<TimelineAudioClip>)Array.Empty<TimelineAudioClip>();
 
         var visibleAudioClipCount = 0;
         foreach (var ac in audioClips)

@@ -53,7 +53,15 @@ public sealed partial class Symbol : IDisposable, IResource
     public string Name => InstanceType?.Name;
     public string Namespace => InstanceType.Namespace ?? SymbolPackage.AssemblyInformation.Name;
     public Animator Animator { get; private set; } = new();
-    public CompositionSettings CompositionSettings { get; set; } = new();
+
+    /// <summary>
+    /// Per-symbol project / playback configuration. May be null on symbols that never
+    /// had it initialised (entering a custom op symbol cold). Callers must null-check
+    /// before reading <see cref="CompositionSettings.Playback"/> etc.
+    /// </summary>
+#nullable enable annotations
+    public CompositionSettings? CompositionSettings { get; set; } = new();
+#nullable restore
 
     public SymbolPackage SymbolPackage { get; set; }
     IResourcePackage IResource.OwningPackage => SymbolPackage;

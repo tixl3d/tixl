@@ -24,11 +24,13 @@ internal sealed class DeleteTimelineAudioClipsCommand : ICommand
     internal DeleteTimelineAudioClipsCommand(Instance compositionOp, IReadOnlyList<TimelineAudioClip> clips)
     {
         _compositionSymbolId = compositionOp.Symbol.Id;
-        var list = compositionOp.Symbol.CompositionSettings.Playback.AudioClips;
+        var list = compositionOp.Symbol.CompositionSettings?.Playback.AudioClips;
         _entries = new (TimelineAudioClip, int)[clips.Count];
         for (var i = 0; i < clips.Count; i++)
         {
-            _entries[i] = (clips[i], list.IndexOf(clips[i]));
+            // If CompositionSettings is null, treat the clip as not-in-list (-1) — Undo
+            // will append at end rather than crash.
+            _entries[i] = (clips[i], list?.IndexOf(clips[i]) ?? -1);
         }
     }
 
@@ -68,8 +70,14 @@ internal sealed class DeleteTimelineAudioClipsCommand : ICommand
             Log.Warning($"DeleteTimelineAudioClipsCommand: symbol {_compositionSymbolId} not found — was the project closed?");
             return false;
         }
+        var settings = ui.Symbol.CompositionSettings;
+        if (settings == null)
+        {
+            Log.Warning($"DeleteTimelineAudioClipsCommand: symbol {_compositionSymbolId} has no CompositionSettings.");
+            return false;
+        }
         symbolUi = ui;
-        clips = ui.Symbol.CompositionSettings.Playback.AudioClips;
+        clips = settings.Playback.AudioClips;
         return true;
     }
 }

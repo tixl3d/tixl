@@ -262,7 +262,10 @@ internal static class TimelineAudioClipItem
                 attr.SelectedAudioClipIds.Add(clip.Id);
             }
 
-            var allClips = attr.Composition.Symbol.CompositionSettings.Playback.AudioClips;
+            var dragStartSettings = attr.Composition.Symbol.CompositionSettings;
+            if (dragStartSettings == null)
+                return;
+            var allClips = dragStartSettings.Playback.AudioClips;
             var selected = new List<TimelineAudioClip>();
             foreach (var c in allClips)
             {
@@ -370,7 +373,10 @@ internal static class TimelineAudioClipItem
                 AudioClipInteractions.LayerShiftOnDragStart = currentLayerShift;
         }
 
-        var allClipsRef = attr.Composition.Symbol.CompositionSettings.Playback.AudioClips;
+        var dragSettings = attr.Composition.Symbol.CompositionSettings;
+        if (dragSettings == null)
+            return;
+        var allClipsRef = dragSettings.Playback.AudioClips;
         foreach (var c in allClipsRef)
         {
             if (!attr.SelectedAudioClipIds.Contains(c.Id))
