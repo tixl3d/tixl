@@ -33,8 +33,14 @@ internal static class MarkdownOperatorLinks
         // operator's own description, which can itself contain [OpName] references).
         if (!suppressTooltip)
         {
+            var scale = T3Ui.UiScaleFactor;
+            var tooltipWidth = TooltipWidth * scale;
+
+            // Pin the width before BeginTooltip so the auto-resizing tooltip doesn't flash at viewport
+            // width on its first frame.
+            ImGui.SetNextWindowSizeConstraints(new Vector2(tooltipWidth, 0), new Vector2(tooltipWidth, float.MaxValue));
+            ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(10, 8) * scale);
             ImGui.BeginTooltip();
-            ImGui.Dummy(new Vector2(TooltipWidth * T3Ui.UiScaleFactor, 0)); // pin width so markdown wraps
 
             ImGui.PushFont(Fonts.FontBold);
             ImGui.TextUnformatted(symbol.Name);
@@ -52,6 +58,7 @@ internal static class MarkdownOperatorLinks
             }
 
             ImGui.EndTooltip();
+            ImGui.PopStyleVar();
         }
 
         if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))

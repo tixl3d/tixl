@@ -3,6 +3,7 @@ using System.Text;
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.SystemUi;
+using T3.Editor.Gui.Help;
 using T3.Editor.Gui.Hub;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
@@ -100,12 +101,19 @@ internal sealed class GuidedFeatureTestsWindow : Window
     private void DrawPickHeaderTools()
     {
         var iconSize = new Vector2(ImGui.GetFrameHeight(), ImGui.GetFrameHeight());
-        CustomComponents.RightAlign(iconSize.X, sameLine: false);
+        var spacing = ImGui.GetStyle().ItemSpacing.X;
+        CustomComponents.RightAlign(iconSize.X * 2 + spacing, sameLine: false);
+
+        DocumentationButton.Draw("GuidedFeatureTests", DocumentationWikiUrl, iconSize);
+
+        ImGui.SameLine();
         if (CustomComponents.TransparentIconButton(Icon.Refresh, iconSize))
             ReloadSets();
         if (ImGui.IsItemHovered())
             CustomComponents.TooltipForLastItem("Reload test sets from disk");
     }
+
+    private const string DocumentationWikiUrl = "https://github.com/tixl3d/tixl/wiki/dev.GuidedFeatureTests";
 
     private void DrawFilterRow(List<TestSet> sets)
     {

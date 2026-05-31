@@ -34,6 +34,7 @@ internal static class MarkdownLayout
         var y = 0f;
         var prevExisted = false;
         var prevWasHeading = false;
+        var prevWasListItem = false;
         var sawBlank = false;
 
         foreach (var line in doc.Lines)
@@ -45,6 +46,7 @@ internal static class MarkdownLayout
             }
 
             // Spacing above this line.
+            var isListItem = line.Kind is LineKind.Bullet or LineKind.Numbered;
             var spacing = 0f;
             if (prevExisted)
             {
@@ -54,9 +56,9 @@ internal static class MarkdownLayout
                     if (prevWasHeading)
                         spacing = 0;
                     else if (line.Kind == LineKind.H1)
-                        spacing = 7 * scale;
+                        spacing = 12 * scale;
                     else
-                        spacing = 3 * scale;
+                        spacing = 8 * scale;
                 }
                 else
                 {
@@ -65,6 +67,10 @@ internal static class MarkdownLayout
                     else
                         spacing = 3 * scale;
                 }
+
+                // Extra gap between consecutive list items for readability.
+                if (isListItem && prevWasListItem)
+                    spacing += 2 * scale;
 
                 if (sawBlank)
                     spacing += 4 * scale;
@@ -104,6 +110,7 @@ internal static class MarkdownLayout
 
             prevExisted = true;
             prevWasHeading = line.Kind is LineKind.H1 or LineKind.H2 or LineKind.H3;
+            prevWasListItem = isListItem;
             sawBlank = false;
         }
 

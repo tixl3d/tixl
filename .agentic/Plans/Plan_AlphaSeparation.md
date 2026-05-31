@@ -333,6 +333,11 @@ Extends `.tests-manual/version-welcome-and-import.md` — newest sets sort to th
 
 Open questions for the design pass: where the feature registry lives (static table vs attributes vs data file), how `FeatureMenuItem` avoids per-frame allocations in the menu bar, and whether feature ids are authored by hand or generated.
 
+**Building block landed (2026-05-31):** a reusable window-level help affordance, independent of the Parameter window (which is untouched):
+- [`EmbeddedHelpLoader`](../Editor/Gui/Help/EmbeddedHelpLoader.cs) reads `.help/embedded/<id>.md`. The folder is copied next to the binaries by an `Editor.csproj` target (like `EditorResources`), so it resolves in both dev and packaged builds — solving the release-packaging gap that still affects `ReleaseNotesLoader`/`TestSetParser` (those should migrate to this shipped-folder approach too).
+- [`DocumentationButton`](../Editor/Gui/Help/DocumentationButton.cs) — a `HelpOutline` icon that renders the embedded markdown as a tooltip (with the type-colored `[OpName]` links) on hover and opens the wiki page on click. First instance is on the Guided Feature Tests header; `[GuidedFeatureTests.md](../.help/embedded/GuidedFeatureTests.md)` is the seed doc.
+- This is the natural seed for the feature ↔ doc ↔ UI cross-reference: a window/feature declares `(docId, wikiUrl)` and gets discoverable in-editor docs.
+
 ---
 
 ## Phase 7 (deferred): Agentic release-notes generation

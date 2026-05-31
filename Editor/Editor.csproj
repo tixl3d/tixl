@@ -119,6 +119,18 @@
     </Target>
     <!-- ===========================//=============================== -->
 
+    <!-- ===================== Embedded help docs ===================== -->
+    <!-- Copies .help/embedded into the output so DocumentationButton finds the markdown
+         next to the binaries in both dev and packaged builds. -->
+    <ItemGroup>
+        <EmbeddedHelp Include="../.help/embedded/**/*" Visible="false" />
+    </ItemGroup>
+
+    <Target Name="CopyEmbeddedHelp" AfterTargets="AfterBuild">
+        <Copy SourceFiles="@(EmbeddedHelp)" SkipUnchangedFiles="true" UseHardlinksIfPossible="true" DestinationFiles="@(EmbeddedHelp->'$(OutputPath)/.help/embedded/%(RecursiveDir)%(Filename)%(Extension)')" />
+    </Target>
+    <!-- ===========================//=============================== -->
+
     <!-- ===================== Define build output paths ==================== -->
     <!-- This creates a local variable for us to target the right build version based on the default
     paths associated with Debug/Release builds, -->
