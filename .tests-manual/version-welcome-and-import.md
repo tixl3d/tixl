@@ -4,6 +4,7 @@ title: Version welcome popup & import
 scope: settings
 tags: [essential]
 added: 2026-05-31
+added-in-version: 4.2
 prerequisites:
   - A TiXL build to test (alpha or stable).
   - For import steps, a previous version's user folders present under `%APPDATA%` and `%USERPROFILE%\Documents` (e.g. a `TiXL4.2` folder while testing `4.3`).

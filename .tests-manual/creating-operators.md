@@ -1,6 +1,8 @@
 ---
 id: creating-operators
 title: Creating Operators
+added: 2026-04-19
+added-in-version: 4.2
 scope: graph-window
 tags: [smoke, essential]
 prerequisites:

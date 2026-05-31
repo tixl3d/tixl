@@ -1,6 +1,8 @@
 ---
 id: recording-audio
 title: Recording — Audio capture end-to-end
+added: 2026-05-29
+added-in-version: 4.2
 scope: timeline
 tags: [hardware, essential]
 prerequisites:

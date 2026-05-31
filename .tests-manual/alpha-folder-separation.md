@@ -4,6 +4,7 @@ title: Alpha & stable folder separation
 scope: settings
 tags: [essential]
 added: 2026-05-31
+added-in-version: 4.2
 prerequisites:
   - Two TiXL builds available: one stable, one alpha (or two consecutive alpha builds where one was built before this change landed).
   - File Explorer (or any file manager) open at `%APPDATA%` and at `%USERPROFILE%\Documents`.

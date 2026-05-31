@@ -22,6 +22,8 @@ id: creating-operators            # kebab-case, unique, matches filename
 title: Creating Operators         # human-readable, shown in runner UI
 scope: graph-window               # broad feature area (free-form tag)
 tags: [smoke, essential]          # optional — used by the runner to filter sets
+added: 2026-05-31                 # ISO date the set was first added — drives "Recently added" sort
+added-in-version: 4.2             # TiXL major.minor the set first shipped in
 prerequisites:                    # optional — free-text setup requirements
   - An empty project is open.
 related-help:                     # optional — relative links into .help/
@@ -52,6 +54,10 @@ With the Symbol Browser open, type `RG`.
 
 ### Field conventions
 
+- **`added`** *(required for new sets)* — the ISO date (`YYYY-MM-DD`) the set was
+  first added. Drives the runner's "Recently added" sort. Legacy sets without it
+  sort as oldest. **`added-in-version`** — the TiXL `major.minor` it first shipped
+  in (e.g. `4.2`). Both were backfilled from git history for existing sets.
 - **Step delimiter** — each step begins with `## Step: <short imperative title>`.
   The title is shown in the runner subtitle ("Step 3/12 — Creating an operator"),
   so phrase it as the thing being verified, not the keystroke.

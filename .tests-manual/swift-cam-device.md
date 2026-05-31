@@ -1,6 +1,8 @@
 ---
 id: swift-cam-device
 title: SwiftCamDevice — Swift Imaging camera capture
+added: 2026-04-30
+added-in-version: 4.2
 scope: io-video
 tags: [hardware, essential]
 prerequisites:

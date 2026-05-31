@@ -1,6 +1,8 @@
 ---
 id: recording-io-data
 title: Recording — IO data (MIDI / OSC) capture and replay
+added: 2026-05-29
+added-in-version: 4.2
 scope: timeline
 tags: [hardware, essential]
 prerequisites:

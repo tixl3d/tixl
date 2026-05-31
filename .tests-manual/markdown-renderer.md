@@ -1,6 +1,8 @@
 ---
 id: markdown-renderer
 title: Markdown Renderer
+added: 2026-05-01
+added-in-version: 4.2
 scope: editor-styling
 tags: [smoke, dev]
 prerequisites:

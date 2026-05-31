@@ -1,6 +1,8 @@
 ---
 id: dopesheet-curve-expand
 title: DopeSheet Per-Parameter Curve Expand
+added: 2026-04-19
+added-in-version: 4.2
 scope: timeline
 tags: [essential]
 prerequisites:

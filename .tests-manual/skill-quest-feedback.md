@@ -1,6 +1,8 @@
 ---
 id: skill-quest-feedback
 title: SkillQuest Feedback
+added: 2026-05-25
+added-in-version: 4.2
 scope: skill-quest
 tags: [essential]
 prerequisites:

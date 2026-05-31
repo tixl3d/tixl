@@ -1,6 +1,8 @@
 ---
 id: timeline-audio-clips
 title: Timeline Audio Clips — drop, drag, trim, delete
+added: 2026-05-26
+added-in-version: 4.2
 scope: timeline
 tags: [essential, hardware]
 prerequisites:

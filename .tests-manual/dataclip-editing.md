@@ -1,6 +1,8 @@
 ---
 id: dataclip-editing
 title: DataClip — inspection and editing
+added: 2026-05-31
+added-in-version: 4.2
 scope: timeline
 tags: [essential]
 prerequisites:

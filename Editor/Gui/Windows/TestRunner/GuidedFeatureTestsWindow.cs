@@ -119,8 +119,17 @@ internal sealed class GuidedFeatureTestsWindow : Window
     {
         var scale = T3Ui.UiScaleFactor;
 
-        ImGui.SetNextItemWidth(260 * scale);
+        ImGui.SetNextItemWidth(220 * scale);
         ImGui.InputTextWithHint("##filter", "Filter…", ref _filter, 256);
+
+        ImGui.SameLine();
+        ImGui.SetNextItemWidth(150 * scale);
+        var sortIdx = (int)_sortMode;
+        if (ImGui.Combo("##sort", ref sortIdx, "Recently added\0Alphabetical\0By scope\0"))
+        {
+            _sortMode = (TestSetSort)sortIdx;
+            TestSetParser.Sort(sets, _sortMode);
+        }
 
         var allTags = CollectAllTags(sets);
         if (allTags.Count == 0)
@@ -233,9 +242,21 @@ internal sealed class GuidedFeatureTestsWindow : Window
         var padX = 12 * scale;
         var padY = 6 * scale;
 
+        // Left gutter holds a completion checkmark from a past run (always reserved so titles align).
+        var statusGutter = 18 * scale;
+        if (TestRunHistoryStore.TryGet(set.Id, out var history))
+        {
+            var checkColor = history.Outcome == TestRunHistoryStore.SetOutcome.Passed
+                                 ? UiColors.StatusActivated
+                                 : UiColors.StatusAttention;
+            Icons.DrawIconAtScreenPosition(Icon.Checkmark, new Vector2(min.X + padX, min.Y + padY), dl, checkColor);
+        }
+
+        var leftX = min.X + padX + statusGutter;
+
         // Title (top-left).
         dl.AddText(Fonts.FontBold, Fonts.FontBold.FontSize,
-                   new Vector2(min.X + padX, min.Y + padY),
+                   new Vector2(leftX, min.Y + padY),
                    textColor, set.Title);
 
         // Scope (bottom-left).
@@ -243,7 +264,7 @@ internal sealed class GuidedFeatureTestsWindow : Window
         {
             var scopeY = min.Y + padY + Fonts.FontBold.FontSize + 2 * scale;
             dl.AddText(Fonts.FontSmall, Fonts.FontSmall.FontSize,
-                       new Vector2(min.X + padX, scopeY),
+                       new Vector2(leftX, scopeY),
                        mutedColor, set.Scope);
         }
 
@@ -632,7 +653,49 @@ internal sealed class GuidedFeatureTestsWindow : Window
     {
         var run = _run!;
         run.FinishedUtc = DateTime.UtcNow;
+        RecordRunHistory(run);
+        TestRunExport.AutoSave(run);
         _state = State.Summary;
+    }
+
+    /// <summary>Stores a completion checkmark for every set whose steps all got an outcome this run.</summary>
+    private static void RecordRunHistory(RunReport run)
+    {
+        foreach (var set in run.Sets)
+        {
+            if (set.Steps.Count == 0)
+                continue;
+
+            var allDecided = true;
+            var hadIssues = false;
+            for (var stepIdx = 0; stepIdx < set.Steps.Count; stepIdx++)
+            {
+                var outcome = FindOutcome(run, set.Id, stepIdx);
+                if (outcome == Outcome.Pending)
+                {
+                    allDecided = false;
+                    break;
+                }
+
+                if (outcome is Outcome.Fail or Outcome.Other)
+                    hadIssues = true;
+            }
+
+            if (allDecided)
+                TestRunHistoryStore.MarkCompleted(set.Id,
+                                                  hadIssues ? TestRunHistoryStore.SetOutcome.HadIssues : TestRunHistoryStore.SetOutcome.Passed);
+        }
+    }
+
+    private static Outcome FindOutcome(RunReport run, string setId, int stepIdx)
+    {
+        foreach (var result in run.Results)
+        {
+            if (result.SetId == setId && result.StepIndex == stepIdx)
+                return result.Outcome;
+        }
+
+        return Outcome.Pending;
     }
 
     // ----- Summary state -----------------------------------------------
@@ -715,18 +778,26 @@ internal sealed class GuidedFeatureTestsWindow : Window
         }
 
         ImGui.SameLine();
-        ImGui.BeginDisabled();
-        ImGui.Button("Copy JSON");
-        ImGui.EndDisabled();
+        if (ImGui.Button("Copy JSON"))
+        {
+            ImGui.SetClipboardText(TestRunExport.BuildJson(run));
+        }
+
+        ImGui.SameLine();
+        if (ImGui.Button("Open Saved Runs"))
+        {
+            CoreUi.Instance.OpenWithDefaultApplication(TestRunExport.RunsDirectory);
+        }
+
         if (ImGui.IsItemHovered())
-            CustomComponents.TooltipForLastItem("Coming in Phase 2");
+            CustomComponents.TooltipForLastItem("Each finished run is auto-saved here as JSON.");
 
         ImGui.SameLine();
         ImGui.BeginDisabled();
         ImGui.Button("Open GitHub Issue");
         ImGui.EndDisabled();
         if (ImGui.IsItemHovered())
-            CustomComponents.TooltipForLastItem("Coming in Phase 3");
+            CustomComponents.TooltipForLastItem("Coming in a later phase");
 
         // Right-align "New Run".
         var newRunSize = ImGui.CalcTextSize("New Run") + ImGui.GetStyle().FramePadding * 2;
@@ -897,6 +968,7 @@ internal sealed class GuidedFeatureTestsWindow : Window
     {
         _testsDir = TestSetParser.ResolveTestsDirectory();
         _allSets = TestSetParser.LoadAll(_testsDir);
+        TestSetParser.Sort(_allSets, _sortMode);
         _selectedSetIds.RemoveWhere(id => !ContainsId(_allSets, id));
     }
 
@@ -961,6 +1033,7 @@ internal sealed class GuidedFeatureTestsWindow : Window
 
     private readonly HashSet<string> _selectedSetIds = new(StringComparer.OrdinalIgnoreCase);
     private string _filter = string.Empty;
+    private TestSetSort _sortMode = TestSetSort.RecentlyAdded;
     private readonly HashSet<string> _selectedTags = new(StringComparer.OrdinalIgnoreCase);
 
     private RunReport? _run;
