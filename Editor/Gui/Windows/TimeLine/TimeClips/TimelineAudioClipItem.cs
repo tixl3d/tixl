@@ -119,7 +119,7 @@ internal static class TimelineAudioClipItem
                                    maxPos - new Vector2(1, 1),
                                    uvMin,
                                    uvMax,
-                                   UiColors.ForegroundFull.Fade(0.6f * muteFade));
+                                   UiColors.ForegroundFull.Fade(muteFade));
             attr.DrawList.PopClipRect();
         }
 

@@ -85,6 +85,7 @@ internal static class DataClipBodyRenderer
 
         float trackHeight;
         float gap;
+        var visibleTrackCount = n;
         if (usableHeight >= n * 2f + (n - 1) * 1f)
         {
             trackHeight = 2f;
@@ -97,20 +98,22 @@ internal static class DataClipBodyRenderer
         }
         else
         {
-            // Too many channels for individual tracks — single overlay rect spanning
-            // mapping.TimeRange, alpha proportional to total event density.
-            DrawSingleOverlay(_visibleChannelsScratch, mapping, bodyMin, bodyMax, drawList);
-            return;
+            // More channels than fit even at 1 px each — render as many real tracks as
+            // fit and clip the rest at the bottom. A truncated set of per-channel tracks
+            // reads better than collapsing everything into one featureless block.
+            trackHeight = 1f;
+            gap = 0f;
+            visibleTrackCount = Math.Max(1, (int)usableHeight);
         }
 
         // Each channel gets its own fair slice of the per-clip budget so a heavy channel
         // can't starve later channels. A channel that uses less than its share doesn't
         // donate it — keeps the allocation predictable across frames.
         const int perClipBudget = 1500;
-        var perChannelBudget = Math.Max(40, perClipBudget / n);
+        var perChannelBudget = Math.Max(40, perClipBudget / visibleTrackCount);
         var trackColor = UiColors.ForegroundFull.Fade(0.55f);
 
-        for (var i = 0; i < n; i++)
+        for (var i = 0; i < visibleTrackCount; i++)
         {
             var trackTopY = bodyMin.Y + topPadding + i * (trackHeight + gap);
             var trackBottomY = trackTopY + trackHeight;
@@ -382,30 +385,6 @@ internal static class DataClipBodyRenderer
                                new Vector2(endX + TickWidthPx, trackBottomY),
                                tickColor.Fade(alpha));
         return 1;
-    }
-
-    /// <summary>
-    /// Fallback when there are too many channels for even 1 px per track: one rect
-    /// spanning the clip body, alpha scaled by total event density across all channels.
-    /// Same visual the renderer used pre-redesign, kept for the high-channel-count case.
-    /// </summary>
-    private static void DrawSingleOverlay(List<DataChannel> channels,
-                                          TimeRangeMapping mapping,
-                                          Vector2 bodyMin, Vector2 bodyMax,
-                                          ImDrawListPtr drawList)
-    {
-        var totalEvents = 0;
-        foreach (var ch in channels)
-            totalEvents += ch.Events.Count;
-        if (totalEvents == 0)
-            return;
-
-        var bodyWidth = bodyMax.X - bodyMin.X;
-        var density = totalEvents / MathF.Max(1f, bodyWidth);
-        var alpha = MathF.Min(0.45f, 0.15f + density * 0.05f);
-        drawList.AddRectFilled(new Vector2(bodyMin.X, bodyMin.Y + 2f),
-                               new Vector2(bodyMax.X, bodyMax.Y - 2f),
-                               UiColors.ForegroundFull.Fade(alpha));
     }
 
     /// <summary>

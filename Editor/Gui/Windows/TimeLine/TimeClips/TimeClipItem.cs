@@ -97,7 +97,12 @@ internal static class TimeClipItem
                 var path = descriptive.SourcePathSlot.TypedInputValue.Value;
                 if (!string.IsNullOrEmpty(path))
                 {
-                    nameSource = System.IO.Path.GetFileNameWithoutExtension(path);
+                    var fileName = System.IO.Path.GetFileNameWithoutExtension(path);
+                    // A renamed op keeps its custom name visible alongside the file it
+                    // references, e.g. "Song 1 (rec-004)"; an unnamed op shows just the file.
+                    nameSource = symbolChildUi.SymbolChild.HasCustomName
+                                     ? $"{symbolChildUi.SymbolChild.Name} ({fileName})"
+                                     : fileName;
                 }
             }
 

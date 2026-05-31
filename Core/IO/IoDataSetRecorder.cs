@@ -111,7 +111,7 @@ public sealed class IoDataSetRecorder : MidiConnectionManager.IMidiConsumer, Osc
         try
         {
             active.Dispose();
-            StampRecordingMetadata(active.DataSet, active.SessionStartUtc);
+            StampRecordingMetadata(active.DataSet, active.SessionStartUtc, active.RecordStartBpm);
             active.DataSet.WriteToFile(active.Path);
             Log.Debug($"IO data recording stopped: {active.Path} ({active.DataSet.Channels.Count} channel(s))");
             return active.Path;
@@ -140,11 +140,20 @@ public sealed class IoDataSetRecorder : MidiConnectionManager.IMidiConsumer, Osc
     /// <summary>Wall-clock UTC moment the session started. Stamped into file metadata on stop.</summary>
     public DateTime SessionStartUtc { get; }
 
+    /// <summary>
+    /// Playback BPM at record-start. Event times are stored in absolute seconds, but a clip's
+    /// TimeRange / SourceRange are in bars — so the bars↔seconds conversion needs the tempo
+    /// the recording was made at. Captured here (rather than read from live playback at replay
+    /// time) so a later project-tempo change can't silently re-time the recording.
+    /// </summary>
+    public double RecordStartBpm { get; }
+
     private IoDataSetRecorder(string path, int oscPort, bool registerMidi = true)
     {
         Path = path;
         _recordStartRunSecs = Playback.RunTimeInSecs;
         SessionStartUtc = DateTime.UtcNow;
+        RecordStartBpm = Playback.Current?.Bpm ?? CompositionSettings.Defaults.Playback.Bpm;
 
         if (registerMidi)
             MidiConnectionManager.RegisterConsumer(this);
@@ -373,15 +382,18 @@ public sealed class IoDataSetRecorder : MidiConnectionManager.IMidiConsumer, Osc
 
     /// <summary>
     /// Stamps session-level provenance onto <see cref="DataSet.Metadata"/> right before
-    /// the file is written: the TiXL build that recorded it and the wall-clock UTC moment
-    /// the session started. Lets the user tell at a glance which build / when a clip is
-    /// from when re-opening it months later.
+    /// the file is written: the TiXL build that recorded it, the wall-clock UTC moment the
+    /// session started, the playback BPM at record-start (the tempo anchor for the clip's
+    /// bars↔seconds mapping), and the event time unit (always seconds today). Lets the user
+    /// tell at a glance which build / when a clip is from when re-opening it months later.
     /// </summary>
-    private static void StampRecordingMetadata(DataSet dataSet, DateTime sessionStartUtc)
+    private static void StampRecordingMetadata(DataSet dataSet, DateTime sessionStartUtc, double recordStartBpm)
     {
         var metadata = dataSet.Metadata ?? new Newtonsoft.Json.Linq.JObject();
-        metadata["TixlVersion"] = FileLocations.TixlVersion;
-        metadata["RecordedAtUtc"] = sessionStartUtc.ToString("o");  // ISO 8601 round-trip
+        metadata[DataSet.MetadataKeys.TixlVersion] = FileLocations.TixlVersion;
+        metadata[DataSet.MetadataKeys.RecordedAtUtc] = sessionStartUtc.ToString("o");  // ISO 8601 round-trip
+        metadata[DataSet.MetadataKeys.Bpm] = recordStartBpm;
+        metadata[DataSet.MetadataKeys.TimeUnits] = DataSet.MetadataKeys.TimeUnitSeconds;
         dataSet.Metadata = metadata;
     }
 

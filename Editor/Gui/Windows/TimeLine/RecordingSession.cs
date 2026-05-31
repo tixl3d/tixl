@@ -12,6 +12,7 @@ using T3.Editor.UiModel.Commands;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel.Commands.Animation;
 using T3.Editor.UiModel.Commands.Graph;
+using T3.Editor.UiModel.Helpers;
 using T3.Editor.UiModel.ProjectHandling;
 
 namespace T3.Editor.Gui.Windows.TimeLine;
@@ -337,11 +338,12 @@ internal static class RecordingSession
     }
 
     /// <summary>
-    /// Canvas position for a fresh <c>LoadDataClip</c> op. Stacks below the lowest
-    /// existing LoadDataClip child so successive recordings line up vertically instead
-    /// of overlapping at the default (0, 0). If the candidate isn't inside the focused
-    /// canvas's visible region, falls back to the visible centre so the user doesn't have
-    /// to hunt for a clip that landed off-screen.
+    /// Canvas position for a fresh <c>LoadDataClip</c> op. Anchors below the lowest
+    /// existing LoadDataClip (so successive recordings stay in a tidy column), re-centres
+    /// on the viewport when that anchor is off-screen, then hands the preferred spot to
+    /// <see cref="GraphUtils.FindFreePosition"/> for collision-avoidance — without that
+    /// last step, repeated recordings that all re-centre to the same viewport pile up on
+    /// top of each other.
     /// </summary>
     private static Vector2 FindFreeCanvasPositionForLoadDataClip(Symbol compositionSymbol)
     {
@@ -349,43 +351,41 @@ internal static class RecordingSession
         const float defaultX = 0f;
         const float defaultY = 200f;
 
-        var candidate = new Vector2(defaultX, defaultY);
+        var preferred = new Vector2(defaultX, defaultY);
 
-        if (SymbolUiRegistry.TryGetSymbolUi(compositionSymbol.Id, out var compositionUi))
+        if (!SymbolUiRegistry.TryGetSymbolUi(compositionSymbol.Id, out var compositionUi))
+            return preferred;
+
+        var maxY = float.NegativeInfinity;
+        var anchorX = defaultX;
+        foreach (var (childId, childUi) in compositionUi.ChildUis)
         {
-            var maxY = float.NegativeInfinity;
-            var anchorX = defaultX;
-            foreach (var (childId, childUi) in compositionUi.ChildUis)
+            if (!compositionSymbol.Children.TryGetValue(childId, out var symbolChild))
+                continue;
+            if (symbolChild.Symbol.Id != _loadDataClipSymbolId)
+                continue;
+
+            if (childUi.PosOnCanvas.Y > maxY)
             {
-                if (!compositionSymbol.Children.TryGetValue(childId, out var symbolChild))
-                    continue;
-                if (symbolChild.Symbol.Id != _loadDataClipSymbolId)
-                    continue;
-
-                if (childUi.PosOnCanvas.Y > maxY)
-                {
-                    maxY = childUi.PosOnCanvas.Y;
-                    anchorX = childUi.PosOnCanvas.X;
-                }
+                maxY = childUi.PosOnCanvas.Y;
+                anchorX = childUi.PosOnCanvas.X;
             }
-
-            if (!float.IsNegativeInfinity(maxY))
-                candidate = new Vector2(anchorX, maxY + spacingY);
         }
 
-        // Re-centre on the visible canvas when the stack-anchor candidate is off-screen.
-        // Common case: the user is inside a deep composition and the existing
-        // LoadDataClips (or the origin fallback) sit far outside the current viewport —
-        // a new clip dropped there would look like nothing happened until the user
-        // pans to find it.
+        if (!float.IsNegativeInfinity(maxY))
+            preferred = new Vector2(anchorX, maxY + spacingY);
+
+        // Re-centre on the visible canvas when the stack-anchor candidate is off-screen,
+        // so a new clip doesn't land far outside the viewport where it looks like nothing
+        // happened.
         if (ProjectView.Focused?.GraphView is ScalableCanvas canvas)
         {
             var visible = canvas.GetVisibleCanvasArea();
-            if (visible.GetWidth() > 0 && visible.GetHeight() > 0 && !visible.Contains(candidate))
-                candidate = visible.GetCenter();
+            if (visible.GetWidth() > 0 && visible.GetHeight() > 0 && !visible.Contains(preferred))
+                preferred = visible.GetCenter();
         }
 
-        return candidate;
+        return GraphUtils.FindFreePosition(compositionUi, preferred, SymbolUi.Child.DefaultOpSize);
     }
 
     /// <summary>

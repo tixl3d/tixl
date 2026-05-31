@@ -188,7 +188,9 @@ internal sealed class GuidedFeatureTestsWindow : Window
         if (!anySelected)
             ImGui.BeginDisabled();
 
-        var startBg = anySelected ? UiColors.StatusActivated : UiColors.BackgroundButton;
+        var startBg = anySelected 
+            ? Color.Mix( UiColors.StatusActivated, UiColors.BackgroundFull, 0.2f) 
+            : UiColors.BackgroundButton;
         var startText = anySelected ? UiColors.ForegroundFull : UiColors.TextMuted;
         if (CustomComponents.DrawCtaButton("Start", Icon.None, startText, startBg, Color.Transparent))
             StartRun();
@@ -220,7 +222,7 @@ internal sealed class GuidedFeatureTestsWindow : Window
 
         // Row background.
         var bg = selected
-                     ? UiColors.StatusActivated.Fade(hovered ? 1f : 0.9f)
+                     ? Color.Mix( UiColors.StatusActivated, UiColors.BackgroundFull, 0.2f).Fade(hovered ? 1f : 0.9f)
                      : hovered
                          ? UiColors.ForegroundFull.Fade(0.1f)
                          : UiColors.ForegroundFull.Fade(0.04f);

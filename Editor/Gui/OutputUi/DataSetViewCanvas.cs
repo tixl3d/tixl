@@ -451,7 +451,7 @@ internal sealed class DataSetViewCanvas
                 if (lastEvent1 == null)
                     continue;
 
-                if (_onlyRecentEvents)
+                if (_onlyRecentEvents && ! IsEmbedded)
                 {
                     var lastEvent = lastEvent1;
                     
@@ -860,8 +860,8 @@ internal sealed class DataSetViewCanvas
 
     // Same StatusAnimated palette ClipRange.cs uses for the composition-level TimeClip
     // overlay so the two surfaces feel like one editor at a glance.
-    private static readonly Color _clipOutsideColor = UiColors.StatusAnimated.Fade(0.08f);
-    private static readonly Color _clipBoundaryColor = UiColors.StatusAnimated.Fade(0.35f);
+    private static readonly Color _clipOutsideColor = UiColors.StatusAnimated.Fade(0.02f);
+    private static readonly Color _clipBoundaryColor = UiColors.StatusAnimated.Fade(0.25f);
 
     private readonly PathTreeDrawer _pathTreeDrawer = new();
     private readonly StandardValueRaster _standardRaster = new() { EnableSnapping = true };

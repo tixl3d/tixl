@@ -48,6 +48,39 @@ public sealed class DataSet
     /// <summary>Current writer version. Old readers ignore the key; new readers honour it.</summary>
     public const int CurrentVersion = 1;
 
+    /// <summary>
+    /// Well-known <see cref="Metadata"/> keys and reserved values — the read/write contract
+    /// for the session metadata bag, so the recorder and consumers can't drift on spelling.
+    /// Keys not listed here are free-form.
+    /// </summary>
+    public static class MetadataKeys
+    {
+        /// <summary>TiXL build that produced the recording (provenance).</summary>
+        public const string TixlVersion = "TixlVersion";
+
+        /// <summary>ISO-8601 wall-clock moment the session started (provenance).</summary>
+        public const string RecordedAtUtc = "RecordedAtUtc";
+
+        /// <summary>Playback BPM at record-start — the tempo anchor for the clip's bars↔seconds mapping.</summary>
+        public const string Bpm = "Bpm";
+
+        /// <summary>
+        /// Unit that <see cref="DataEvent.Time"/> / <see cref="DataIntervalEvent.EndTime"/>
+        /// are expressed in. Absent ⇒ <see cref="TimeUnitSeconds"/> (back-compat default).
+        /// A string discriminator rather than a bool so it can grow without a format bump.
+        /// </summary>
+        public const string TimeUnits = "TimeUnits";
+
+        /// <summary>Absolute seconds since record-start — tempo-independent. The only mode written today.</summary>
+        public const string TimeUnitSeconds = "seconds";
+
+        /// <summary>
+        /// Reserved: bar-relative time that re-stretches with the project BPM (for piano-roll
+        /// MIDI clips). Not yet written or consumed — documented so future work uses this token.
+        /// </summary>
+        public const string TimeUnitBars = "bars";
+    }
+
     public void Clear()
     {
         Channels.Clear();
