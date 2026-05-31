@@ -3,6 +3,7 @@ using T3.Core.Animation;
 using T3.Core.Audio;
 using T3.Core.Resource;
 using T3.Editor.App;
+using T3.Editor.Gui.Dialog;
 using T3.Editor.Compilation;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Interaction;
@@ -108,10 +109,16 @@ public static partial class T3Ui
         CreateFromTemplateDialog.Draw();
         _userNameDialog.Draw();
         AboutDialog.Draw();
+        WelcomeAlphaWindow.Draw();
         ExitDialog.Draw();
         SkillMapPopup.Draw();
 
-        if (IsWindowLayoutComplete())
+        // Classify the launch first so the welcome window claims the foreground before the
+        // user-name prompt. They must not overlap — the user-name dialog waits until the
+        // welcome window is closed (see the IsVisible guard below).
+        CheckForVersionWelcome();
+
+        if (IsWindowLayoutComplete() && _versionWelcomeChecked && !WelcomeAlphaWindow.IsVisible)
         {
             if (!UserSettings.IsUserNameDefined())
             {
@@ -138,6 +145,26 @@ public static partial class T3Ui
     }
 
     private static bool _initialed;
+
+    /// <summary>
+    /// Once per launch, after the layout is up and no other popup is open, shows the welcome popup if
+    /// this is a version the user hasn't run in this folder before. Otherwise just records the run so
+    /// the next new version is detected. Waits for any startup popup (e.g. user name) to close first.
+    /// </summary>
+    private static void CheckForVersionWelcome()
+    {
+        if (_versionWelcomeChecked || !IsWindowLayoutComplete() || IsAnyPopupOpen)
+            return;
+
+        _versionWelcomeChecked = true;
+
+        if (VersionMarker.Classify() == VersionMarker.LaunchKind.NewToUser)
+            WelcomeAlphaWindow.ShowNextFrame();
+        else
+            VersionMarker.MarkCurrentVersionSeen();
+    }
+
+    private static bool _versionWelcomeChecked;
 
     private static void UpdateModifiedProjects()
     {

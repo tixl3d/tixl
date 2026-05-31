@@ -1,6 +1,7 @@
 #nullable enable
 using System.Threading.Tasks;
 using ImGuiNET;
+using T3.Core.Compilation;
 using T3.Core.Stats;
 using T3.Core.SystemUi;
 using T3.Core.Utils;
@@ -444,6 +445,13 @@ internal static class AppMenuBar
 
         if (ImGui.BeginMenu("Help"))
         {
+            if (ImGui.MenuItem(RuntimeAssemblies.IsAlpha ? "Welcome to Alpha" : "Welcome"))
+            {
+                T3Ui.WelcomeAlphaWindow.ShowNextFrame();
+            }
+
+            ImGui.Separator();
+
             if (ImGui.BeginMenu("Documentation"))
             {
                 foreach (var link in _helpLinks)

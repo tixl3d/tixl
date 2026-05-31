@@ -890,6 +890,46 @@ internal sealed class ManualTestRunnerWindow : Window
         _selectedSetIds.RemoveWhere(id => !ContainsId(_allSets, id));
     }
 
+    /// <summary>
+    /// Opens the runner and starts a single-set run for <paramref name="setId"/>. Used by the welcome
+    /// window's "Start Test" action. Falls back to the Pick state if the set can't be found.
+    /// </summary>
+    internal void StartSet(string setId)
+    {
+        Config.Visible = true;
+
+        if (_allSets == null)
+            ReloadSets();
+
+        TestSet? target = null;
+        foreach (var s in _allSets!)
+        {
+            if (s.Id == setId)
+            {
+                target = s;
+                break;
+            }
+        }
+
+        if (target == null)
+        {
+            _state = State.Pick;
+            return;
+        }
+
+        _run = new RunReport
+                   {
+                       StartedUtc = DateTime.UtcNow,
+                       FinishedUtc = DateTime.MinValue,
+                       Sets = new List<TestSet> { target },
+                       Results = new List<StepResult>(32),
+                   };
+        _currentSetIdx = 0;
+        _currentStepIdx = 0;
+        _cachedStepKey = (string.Empty, -1);
+        _state = State.Run;
+    }
+
     private static bool ContainsId(List<TestSet> sets, string id)
     {
         foreach (var s in sets)

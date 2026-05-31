@@ -23,6 +23,26 @@ This plan formalizes the split — separate folders for alpha vs stable, a singl
 
 Phase 2 (`VersionMarker` + welcome popup) is unblocked.
 
+**2026-05-31** — Phase 2 landed:
+- [`Core/Settings/VersionMarker.cs`](../Core/Settings/VersionMarker.cs) — persists `lastRunVersion` in `versionMarker.json`; `Classify()` returns `Silent` / `NewToUser` / `Downgrade`; `MarkCurrentVersionSeen()` refuses to lower the recorded version.
+- [`Editor/Gui/Dialog/PreviousVersionImport.cs`](../Editor/Gui/Dialog/PreviousVersionImport.cs) — discovers the best sibling `TiXL<major>.<minor>[-suffix]` folder (highest non-current, stable preferred), and copies projects / settings-allowlist / layouts / themes / keymaps. All copy-only; sources never modified. "Folder already used" is keyed off the marker + `userSettings.json` (not theme/layout files, which startup may write).
+- [`Editor/Gui/Dialog/WelcomeDialog.cs`](../Editor/Gui/Dialog/WelcomeDialog.cs) — one modal, alpha/stable content variants, conditional import section (only on a fresh folder). Project copy runs on a background task; small categories inline. Stamps the marker on close.
+- Wired into [`T3Ui`](../Editor/Gui/T3Ui.Update.cs): one-shot `CheckForVersionWelcome()` fires after layout is ready and any startup popup (user-name) has closed. `Help → Welcome` reopens it.
+- Manual test set: [`.tests-manual/version-welcome-and-import.md`](../.tests-manual/version-welcome-and-import.md).
+- Editor builds clean (only the pre-existing `ProjectSettingsWindow` CS8604 warning, unrelated).
+
+Deferred to Phase 3: the "What's new" section currently just links to GitHub Releases; the per-version `release-notes/<version>.md` rendering replaces that link without touching the popup's structure.
+
+**2026-05-31 (redesign)** — Per design feedback, the single-column modal was replaced with a **non-modal, Settings-style tabbed window** (sidebar: Welcome / Import Settings / Import Projects / Test new Features), reusing the `SettingsWindow` child-layout pattern:
+- [`WelcomeDialog.cs`](../Editor/Gui/Dialog/WelcomeDialog.cs) is now a standalone floating `ImGui.Begin` window (no longer `ModalDialog`). Sidebar items show a checkmark once their import has run.
+- **Import Settings** tab: granular category checklist — Editor Settings / Themes / Keyboard Maps / Layouts — each mapping to the corresponding `PreviousVersionImport` op. (This restores granularity over the two-button sketch, per confirmation.)
+- **Import Projects** tab: per-project list (`PreviousVersionImport.EnumerateProjects`), already-imported rows disabled + labelled, open-source-folder icon per row, background copy.
+- **Test new Features** tab: lists `.tests-manual` sets via `TestSetParser.LoadAll`, single-select rows (tag pills + step count), "Start Test" → `ManualTestRunnerWindow.StartSet(id)` (new entry point) and closes the welcome.
+- **User-name dialog deferral**: `CheckForVersionWelcome()` runs before the user-name prompt; the prompt is gated on `_versionWelcomeChecked && !WelcomeDialog.IsVisible`, so on a fresh install the welcome shows first and the name prompt follows after it closes.
+- Editor builds clean (only the pre-existing `ProjectSettingsWindow` CS8604 warning).
+
+Release Notes (Welcome tab) is still a stub; Phase 3 fills it in — including the operator-reference link enhancement now recorded in Phase 3 task 5.
+
 ## Non-goals
 
 - Auto-generating release notes from commits. Worth doing later; not in v1. Release notes for v1 are hand-written by the release-cut author into per-version markdown files.
@@ -220,6 +240,13 @@ Add `.tests-manual/version-welcome-and-import.md` covering:
 
 4. **Missing-file fallback.** If `release-notes/<version>.md` doesn't exist for the current stable, the popup shows "TiXL was updated to `<version>` — see release notes on GitHub" with a link. Don't block the upgrade UX on the release author having written notes.
 
+5. **Operator-reference links in the markdown renderer.** The renderer already recognises bare `[OpName]` fragments (no `(url)` suffix) and exposes an `onOperatorRef(opName)` callback ([`MarkdownView`](../Editor/Gui/Styling/Markdown/MarkdownView.cs)). This task supplies the callback:
+   - **Resolve `OpName` → `SymbolId`** via the symbol registry (name lookup over `SymbolUiRegistry` / `SymbolRegistry`). Cache the lookup.
+   - **Hover tooltip** built from the resolved `SymbolUi`: type color, namespace, description — the same affordance the Symbol Library shows. Guard against recursion: skip the tooltip when the markdown is *already* being rendered inside a tooltip (e.g. the test-runner row hover), since ImGui can't nest tooltips cleanly.
+   - **Click → reveal in Symbol Library**: open the library and focus/select that symbol.
+   - Makes release notes ("`[DrawLines]` now fades long lines") and `.tests-manual` intros navigable. The Welcome tab's Release Notes area renders through the same renderer, so it inherits this for free.
+   - Unresolved names (renamed/removed operators) render as plain text, not a dead link.
+
 ### Risks
 
 - **Release notes drift.** If the author forgets to add a file, every user sees the GitHub fallback. Acceptable. A CI check that the file exists for the version in `Tixl.props` would catch this — add later if the omission becomes a pattern.
@@ -235,33 +262,76 @@ Extends `.tests-manual/version-welcome-and-import.md`:
 
 ---
 
-## Phase 4: Manual Features Tests recently-added sort
+## Phase 4: Manual Features Tests — recency sort + run history
 
-**Goal:** A tester opening the Manual Tests window from the welcome dialog sees newest tests first, so "try the new stuff" is obvious.
+**Goal:** A tester opening the Feature Tests sees the newest tests first, and sets they've already completed are marked done — so "try the new stuff" and "what's left" are both obvious. The same recency metadata feeds the Welcome tab's Test new Features list.
 
 ### Tasks
 
-1. **Add `added: YYYY-MM-DD` to the frontmatter contract** in [`.tests-manual/README.md`](../.tests-manual/README.md). Required for new test sets, optional for legacy (legacy sort as oldest).
+1. **Frontmatter: `added` date + `addedInVersion`.** Add both to the `.tests-manual` contract in [`.tests-manual/README.md`](../.tests-manual/README.md):
+   - `added: YYYY-MM-DD` — when the set was first added.
+   - `addedInVersion: 4.2` — the TiXL `major.minor` it first shipped in.
+   Required for new sets; optional for legacy (sort as oldest).
 
-2. **Update existing test sets** with a best-guess `added` date (git introduction date is fine for the seed). One-time backfill commit.
+2. **Backfill from git history.** Compute each existing set's first-commit date and map it to the TiXL version active at that time, then write `added` + `addedInVersion` into every `.tests-manual/*.md`. Drive from `git log --diff-filter=A --follow --format=%ad -- <file>` for the introduction date; map date → version from the release history. One-time backfill (line-ending-safe per the bulk-edit rules in AGENT_INSTRUCTIONS).
 
-3. **Update `Editor/Gui/Windows/TestRunner/TestSetParser.cs`** to read the new field.
+3. **Parse the new fields** in [`TestSetParser.cs`](../Editor/Gui/Windows/TestRunner/TestSetParser.cs); surface on `TestSet`.
 
-4. **Add sort modes to the Manual Tests window:** `Recently added` (new default), `Alphabetical`, `By scope`. Default to `Recently added` when opened via the alpha welcome flow.
+4. **Sort modes** in the Feature Tests window and the Welcome tab list: `Recently added` (default), `Alphabetical`, `By scope`.
 
-5. **Update `.agentic/AGENT_INSTRUCTIONS.md`** §"Documentation and Manual Tests" to mention the new `added` field requirement.
+5. **Persist run results to AppData.** Save per-set completion (last run date, outcome summary) to a `testRunHistory.json` in `SettingsDirectory`. The runner's `RunReport` already has per-step outcomes; collapse to a per-set status on finish.
+   - Mark completed sets with a checkmark in both the runner list and the Welcome tab's Test new Features list (the row renderer + `NavigationSidebar.Item` already support a trailing checkmark).
+   - "Completed" = all steps recorded pass/other (define precisely during implementation).
+
+6. **Update AGENT_INSTRUCTIONS** §"Documentation and Manual Tests" to require `added` + `addedInVersion` on new sets.
 
 ### Risks
 
-- **Backfill accuracy doesn't matter much.** The seed dates are approximate; they exist only so older tests don't sort *above* genuinely new ones. Don't sink time into being precise.
+- **Backfill accuracy is approximate** — seed dates just need to keep genuinely-new sets above old ones. Don't over-invest.
+- **Run-history schema drift** — keep `testRunHistory.json` minimal (set id → {lastRunUtc, status}) so it survives test-set edits; ignore unknown/removed ids.
 
 ### Manual test set
 
-Extension to `.tests-manual/version-welcome-and-import.md` — "Open Manual Tests from welcome → newest sets at top, dates visible."
+Extends `.tests-manual/version-welcome-and-import.md` — newest sets sort to the top; a completed set shows a checkmark on next open.
 
 ---
 
-## Phase 5 (deferred): Agentic release-notes generation
+## Phase 5: `AddedInVersion` metadata + new-operator highlighting
+
+**Goal:** Operators added or changed in the current version are discoverable in the Symbol Library (e.g. a small blue dot), gated behind a user option. This establishes the `AddedInVersion` concept that Phase 6 builds on.
+
+### Tasks
+
+1. **`AddedInVersion` on `SymbolUi`.** A `major.minor` string (or empty) stored alongside the symbol's UI metadata. Authored when an operator is introduced; persisted in the `.t3ui`/symbol metadata.
+
+2. **New-operator highlight in the Symbol Library.** When `AddedInVersion` equals the running version (or is within N versions), draw a small accent dot on the entry. Threshold-cull at low zoom like other Symbol Library detail.
+
+3. **Symbol Library settings popup (new).** There's no settings popup for the Symbol Library yet — add one, visually aligned with the existing **Asset Library** settings icon + popup. First option: "Highlight new operators" (on/off, and maybe "since version"). Reuse the Asset-Lib popup pattern so the two libraries stay consistent.
+
+### Risks
+
+- **Authoring burden.** `AddedInVersion` is only useful if it's filled in. Consider deriving a default from git on first save, or a lint that nudges when a new symbol lacks it. Decide during implementation.
+- **Metadata migration.** Existing symbols have no `AddedInVersion`; treat missing as "unknown / not new", never as "new".
+
+---
+
+## Phase 6: Feature cross-reference registry (design-first)
+
+**Goal:** A single registry of "features" that ties **release notes ↔ a feature entry (added in version) ↔ the actual UI component**, so users can discover new/improved features directly in the interface, and release notes can deep-link to them.
+
+**This phase needs a design pass before any code** — it touches menus app-wide and overlaps Phase 5's `AddedInVersion`. Sketch only:
+
+- **Feature entry**: id, title, `addedInVersion`, optional description, optional link to a release-note section.
+- **`FeatureMenuItem`**: a drop-in replacement for plain `MenuItem`s that carries a feature reference. Lets the UI flag new/changed menu actions (e.g. a dot or "new" badge) and lets release notes point at a concrete menu path.
+- **"Highlight new features" user option**: when on, `FeatureMenuItem`s whose `addedInVersion` matches the current version get an accent.
+- **Cross-reference both ways**: release-notes markdown can reference a feature id (rendered like the `[OpName]` links from Phase 3); the UI component can link back to its release-note entry.
+- **Shared `addedInVersion` source**: Phases 4 (tests), 5 (operators), and 6 (features) all express "added in version X" — design the metadata once so all three read from a common shape rather than three parallel mechanisms.
+
+Open questions for the design pass: where the feature registry lives (static table vs attributes vs data file), how `FeatureMenuItem` avoids per-frame allocations in the menu bar, and whether feature ids are authored by hand or generated.
+
+---
+
+## Phase 7 (deferred): Agentic release-notes generation
 
 Not part of v1. Sketching here so future work has a starting point.
 
@@ -274,13 +344,10 @@ Not part of v1. Sketching here so future work has a starting point.
 
 ## Branch interaction note
 
-This plan touches files that don't currently overlap with `feat/live-recording`:
-- `Tixl.props`, `Core.csproj` — build plumbing
-- `Core/Compilation/RuntimeAssemblies.cs`, `Core/Settings/FileLocations.cs`, `Core/Settings/VersionMarker.cs` (new) — Core
-- `Editor/Program.cs` (small) — wiring
-- `Editor/Gui/Graph/Dialogs/WelcomeDialog.cs`, `Editor/Gui/Help/ReleaseNotesLoader.cs` (both new)
-- `release-notes/` (new top-level directory, hand-authored markdown)
-- `.tests-manual/` (backfill + new sets) — additive
-- `.agentic/AGENT_INSTRUCTIONS.md` (one paragraph)
+Key files by area:
+- **Phase 1 (landed):** `Tixl.props`, `Core.csproj` (build plumbing); `Core/Compilation/RuntimeAssemblies.cs`, `Core/Settings/FileLocations.cs`.
+- **Phase 2 (landed):** `Editor/Gui/Dialog/VersionMarker.cs`, `WelcomeAlphaWindow.cs`, `PreviousVersionImport.cs` (all Editor — version marker lives in `Editor/`, not `Core/`); `Editor/Gui/Styling/NavigationSidebar.cs` (shared with Settings); wiring in `T3Ui`, `AppMenuBar`, `SettingsWindow`, `ManualTestRunnerWindow`.
+- **Phase 3+:** `Editor/Gui/Help/ReleaseNotesLoader.cs` (new), `release-notes/` (new top-level dir, hand-authored markdown), `MarkdownView` op-ref callback.
+- **Cross-cutting:** `.tests-manual/` (frontmatter + backfill), `SymbolUi` (`AddedInVersion`), `.agentic/AGENT_INSTRUCTIONS.md`.
 
-Phase 1 is the cleanest atomic unit and can land first as its own PR. Phase 2 can land with a stub release-notes fallback (just the GitHub link); Phase 3 then drops in actual `release-notes/<version>.md` content without further code changes to the popup.
+`WelcomeAlphaWindow` is named to leave room for a future general-purpose `WelcomeWindow` (the lighter "what's new in this stable version" surface) — see the Help-menu note in Phase 2.

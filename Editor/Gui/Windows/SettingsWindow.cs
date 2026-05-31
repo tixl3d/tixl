@@ -3,6 +3,7 @@ using ImGuiNET;
 using Operators.Utils;
 using T3.Core.IO;
 using T3.Core.Settings;
+using T3.Core.SystemUi;
 using T3.Core.Utils;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Interaction.Keyboard;
@@ -35,20 +36,34 @@ internal sealed partial class SettingsWindow : Window
 
     private Categories _activeCategory;
 
+    /// <summary>Pinned to the bottom of the sidebar: opens the per-version settings folder in the OS file browser.</summary>
+    private static void DrawOpenSettingsFolderButton()
+    {
+        var scale = T3Ui.UiScaleFactor;
+        var frameHeight = ImGui.GetFrameHeight();
+        ImGui.SetCursorPosY(ImGui.GetWindowHeight() - frameHeight - 8 * scale);
+        if (CustomComponents.TransparentIconButton(Icon.FolderOpen, new Vector2(frameHeight, frameHeight)))
+            CoreUi.Instance.OpenWithDefaultApplication(FileLocations.SettingsDirectory);
+        CustomComponents.TooltipForLastItem("Open the settings folder", FileLocations.SettingsDirectory);
+    }
+
     protected override void DrawContent()
     {
         var changed = false;
         var projectSettingsChanged = false;
         
-        ImGui.BeginChild("categories", new Vector2(120 * T3Ui.UiScaleFactor, -1),
-                         ImGuiChildFlags.Borders,
-                         ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoBackground);
+        NavigationSidebar.BeginColumn("categories", 120);
         {
-            ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, new Vector2(0, 0.5f));
-            FormInputs.AddSegmentedButtonWithLabel(ref _activeCategory, "", 110 * T3Ui.UiScaleFactor);
-            ImGui.PopStyleVar();
+            foreach (var category in Enum.GetValues<Categories>())
+            {
+                var name = CustomComponents.HumanReadablePascalCase(Enum.GetName(category));
+                if (NavigationSidebar.Item(name, _activeCategory == category))
+                    _activeCategory = category;
+            }
+
+            DrawOpenSettingsFolderButton();
         }
-        ImGui.EndChild();
+        NavigationSidebar.EndColumn();
 
         ImGui.SameLine();
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(20, 5));

@@ -24,6 +24,8 @@ If documentation and implementation differ, follow local code patterns in the af
 
 Keep changes scoped to the smallest project boundary that solves the task.
 
+**Keep `Core/` changes minimal.** `Core` is shared by the Editor, the Player, and every operator package, so additions there have the widest blast radius and the longest lifetime. Prefer putting new types in `Editor/` (or the relevant operator project) unless the functionality is genuinely needed by `Player` or operators. "It's settings-ish" or "it might be reused" is not enough of a reason. When in doubt, put it in `Editor/` and ask before promoting it to `Core`. (Example: editor-only UI state like the welcome-popup version marker belongs in `Editor/`, not `Core/Settings/`.)
+
 ## Realtime Performance Constraints (Critical)
 TiXL uses realtime rendering and Dear ImGui. UI refresh is synchronized with output rendering, so slower frame times reduce UI responsiveness.
 

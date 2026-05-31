@@ -115,6 +115,7 @@ public static partial class T3Ui
     internal static readonly CreateFromTemplateDialog CreateFromTemplateDialog = new();
     private static readonly UserNameDialog _userNameDialog = new();
     internal static readonly AboutDialog AboutDialog = new();
+    internal static readonly WelcomeAlphaWindow WelcomeAlphaWindow = new();
     private static readonly SearchDialog _searchDialog = new();
     internal static readonly NewProjectDialog NewProjectDialog = new();
     internal static readonly ExitDialog ExitDialog = new();
