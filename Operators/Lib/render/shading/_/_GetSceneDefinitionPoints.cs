@@ -33,36 +33,36 @@ internal sealed class _GetSceneDefinitionPoints : Instance<_GetSceneDefinitionPo
         if (dispatchesCount == 0)
             return;
 
-        //var instancePoints = new StructuredList<Point>(dispatchesCount);
         if (dispatchesCount != _pointList.NumElements)
         {
             _pointList = new StructuredList<Point>(dispatchesCount);
         }
 
-        var chunkIndices = new int[dispatchesCount];
+        if (_chunkIndices.Length != dispatchesCount)
+        {
+            _chunkIndices = new int[dispatchesCount];
+        }
 
         for (var index = 0; index < dispatchesCount; index++)
         {
             var sceneDispatch = sceneDefinition.Dispatches[index];
             var matrix = sceneDispatch.CombinedTransform;
-
-            _pointList.TypedElements[index].F1 = 1;
-            _pointList.TypedElements[index].F2 = 1;
-            _pointList.TypedElements[index].Color = Vector4.One;
             Matrix4x4.Decompose(matrix, out var scale, out var rotation, out var translation);
             _pointList.TypedElements[index].Position = translation;
-            _pointList.TypedElements[index].Scale = new Vector3(MathF.Abs(scale.X), MathF.Abs(scale.Y), MathF.Abs(scale.Z));
+            _pointList.TypedElements[index].F1 = 1.0f;
             _pointList.TypedElements[index].Orientation = rotation;
-            chunkIndices[index] = sceneDispatch.ChunkIndex;
+            _pointList.TypedElements[index].Color = Vector4.One;
+            _pointList.TypedElements[index].Scale = new Vector3(MathF.Abs(scale.X), MathF.Abs(scale.Y), MathF.Abs(scale.Z));
+            _pointList.TypedElements[index].F2 = 1.0f;
+
+            _chunkIndices[index] = sceneDispatch.ChunkIndex;
         }
 
-        _chunksDefBuffer = new BufferWithViews();
-        ResourceManager.SetupStructuredBuffer(chunkIndices, dispatchesCount * 4, 4, ref _chunksDefBuffer.Buffer);
+        ResourceManager.SetupStructuredBuffer(_chunkIndices, dispatchesCount * 4, 4, ref _chunksDefBuffer.Buffer);
         ResourceManager.CreateStructuredBufferSrv(_chunksDefBuffer.Buffer, ref _chunksDefBuffer.Srv);
         ResourceManager.CreateStructuredBufferUav(_chunksDefBuffer.Buffer, UnorderedAccessViewBufferFlags.None,
                                                   ref _chunksDefBuffer.Uav);
 
-        _pointsBuffer = new BufferWithViews();
         ResourceManager.SetupStructuredBuffer(_pointList.TypedElements, _pointList.ElementSizeInBytes * _pointList.NumElements, _pointList.ElementSizeInBytes,
                                               ref _pointsBuffer.Buffer);
         ResourceManager.CreateStructuredBufferSrv(_pointsBuffer.Buffer, ref _pointsBuffer.Srv);
@@ -77,6 +77,7 @@ internal sealed class _GetSceneDefinitionPoints : Instance<_GetSceneDefinitionPo
     }
 
     private StructuredList<Point> _pointList = new(1);
+    private int[] _chunkIndices = [];
     private BufferWithViews _chunksDefBuffer = new();
     private BufferWithViews _pointsBuffer = new();
 
