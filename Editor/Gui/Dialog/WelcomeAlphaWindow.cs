@@ -350,7 +350,7 @@ internal sealed class WelcomeAlphaWindow
                                            hasSelection ? UiColors.StatusActivated : UiColors.BackgroundButton,
                                            Color.Transparent))
         {
-            WindowManager.ManualTestRunnerWindow.StartSet(_selectedTestSetId!);
+            WindowManager.GuidedFeatureTestsWindow.StartSet(_selectedTestSetId!);
             Close();
         }
 

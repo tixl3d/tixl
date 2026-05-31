@@ -18,12 +18,12 @@ namespace T3.Editor.Gui.Windows.TestRunner;
 /// State machine: Pick → Run → Summary → Pick. See
 /// <see href="../../../../../.agentic/Plans/Plan_ManualTestRunner.md"/>.
 /// </summary>
-internal sealed class ManualTestRunnerWindow : Window
+internal sealed class GuidedFeatureTestsWindow : Window
 {
-    internal ManualTestRunnerWindow()
+    internal GuidedFeatureTestsWindow()
     {
-        Config.Title = "Editor Feature Tests";
-        MenuTitle = "Editor Feature Tests...";
+        Config.Title = "Guided Feature Tests";
+        MenuTitle = "Guided Feature Tests...";
     }
 
     internal override IReadOnlyList<Window> GetInstances() => Array.Empty<Window>();
@@ -55,7 +55,7 @@ internal sealed class ManualTestRunnerWindow : Window
         var displayDir = ShortenTestsDir(_testsDir);
         var subtitle = $"Loaded {sets.Count} test set{(sets.Count == 1 ? "" : "s")} from {displayDir}";
 
-        ContentPanel.Begin("Editor Feature Tests", subtitle, drawTools: DrawPickHeaderTools);
+        ContentPanel.Begin("Guided Feature Tests", subtitle, drawTools: DrawPickHeaderTools);
 
         DrawFilterRow(sets);
         FormInputs.AddVerticalSpace(6);
@@ -739,7 +739,7 @@ internal sealed class ManualTestRunnerWindow : Window
     private static string BuildMarkdownReport(RunReport run)
     {
         var sb = new StringBuilder();
-        sb.Append("# Editor Feature Tests run\n\n");
+        sb.Append("# Guided Feature Tests run\n\n");
         sb.Append($"Started {run.StartedUtc:yyyy-MM-dd HH:mm:ss} UTC  \n");
         sb.Append($"Finished {run.FinishedUtc:yyyy-MM-dd HH:mm:ss} UTC  \n");
         sb.Append($"Sets: {run.Sets.Count}, steps: {run.Results.Count}\n\n");

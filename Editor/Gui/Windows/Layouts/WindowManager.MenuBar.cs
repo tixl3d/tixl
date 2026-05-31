@@ -14,7 +14,7 @@ internal static partial class WindowManager
             // These windows live in the TiXL menu and shouldn't be re-listed here.
             if (window == SettingsWindow
                 || window == ProjectSettingsWindow
-                || window == ManualTestRunnerWindow)
+                || window == GuidedFeatureTestsWindow)
                 continue;
 
             window.DrawMenuItemToggle();

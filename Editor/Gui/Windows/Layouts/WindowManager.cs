@@ -33,7 +33,7 @@ internal static partial class WindowManager
 
         if (UserActions.ToggleManualTestWindow.Triggered())
         {
-            ManualTestRunnerWindow.Config.Visible = !ManualTestRunnerWindow.Config.Visible;
+            GuidedFeatureTestsWindow.Config.Visible = !GuidedFeatureTestsWindow.Config.Visible;
         }
 
         if (UserActions.ToggleConsoleLogWindow.Triggered())
@@ -64,7 +64,7 @@ internal static partial class WindowManager
     internal static readonly UtilitiesWindow UtilitiesWindow = new();
     internal static readonly ScreenManagerWindow ScreenManagerWindow = new();
     internal static readonly SnixlWindow SnixlWindow = new();
-    internal static readonly ManualTestRunnerWindow ManualTestRunnerWindow = new();
+    internal static readonly GuidedFeatureTestsWindow GuidedFeatureTestsWindow = new();
 
 
     private static void TryToInitialize()
@@ -88,7 +88,7 @@ internal static partial class WindowManager
                 new PerformanceWindow(),
                 Program.ConsoleLogWindow,
                 UtilitiesWindow,    // item shown in TiXL > Development menu
-                ManualTestRunnerWindow,
+                GuidedFeatureTestsWindow,
                 SettingsWindow, // item shown in TiXL menu
                 ProjectSettingsWindow, // item shown in TiXL menu
                 ScreenManagerWindow,
