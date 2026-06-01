@@ -1,5 +1,8 @@
 #nullable enable
 
+using T3.Editor.Gui.Input;
+using T3.Editor.Gui.UiHelpers;
+
 namespace T3.Editor.Gui.Windows.Analyze;
 
 /// <summary>
@@ -17,6 +20,8 @@ internal sealed class PerformanceWindow : Window
 
     protected override void DrawContent()
     {
+        FormInputs.AddCheckBox("Use VSync",ref UserSettings.Config.UseVSync,
+                               "Synchronise frame presentation to the display refresh rate. Turn off to uncap the frame rate (useful for benchmarking; can cause tearing).");
         T3Metrics.DrawDetailedView();
     }
 
