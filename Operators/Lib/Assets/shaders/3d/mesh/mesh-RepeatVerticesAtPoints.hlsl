@@ -72,5 +72,6 @@ RWStructuredBuffer<PbrVertex> ResultVertices : u0;
     v.Normal = qRotateVec3(v.Normal, p.Rotation);
     v.Tangent = qRotateVec3(v.Tangent, p.Rotation);
     v.Bitangent = qRotateVec3(v.Bitangent, p.Rotation);
+    v.ColorRGB *= p.Color.rgb;
     ResultVertices[targetVertexIndex] = v;
 }
