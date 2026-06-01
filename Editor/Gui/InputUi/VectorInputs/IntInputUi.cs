@@ -153,8 +153,8 @@ internal sealed class IntInputUi : IntVectorInputValueUi<int>
                 }
 
                 ImGui.EndCombo();
-                
-                if (hoveredIndex != _lastHoveredComboItem)
+
+                if (UserSettings.Config.ApplyDropdownValuesOnHover && hoveredIndex != _lastHoveredComboItem)
                 {
                     _lastHoveredComboItem = hoveredIndex;
 

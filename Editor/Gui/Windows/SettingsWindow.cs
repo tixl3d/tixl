@@ -182,6 +182,11 @@ internal sealed partial class SettingsWindow : Window
                                                       """,
                                                       UserSettings.Defaults.AddSpacesToParameterNames);
 
+                    changed |= FormInputs.AddCheckBox("Apply dropdown values on hover",
+                                                      ref UserSettings.Config.ApplyDropdownValuesOnHover,
+                                                      "Preview a value while hovering its entry in an open parameter dropdown. Turn this off to avoid unintended changes while live performing.",
+                                                      UserSettings.Defaults.ApplyDropdownValuesOnHover);
+
                     FormInputs.AddVerticalSpace();
                     FormInputs.AddSectionSubHeader("Input");
                     
