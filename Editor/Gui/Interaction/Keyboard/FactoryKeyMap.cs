@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using T3.SystemUi;
 
 namespace T3.Editor.Gui.Interaction.Keyboard;
@@ -113,7 +113,7 @@ internal static class FactoryKeyMap
                       {
                           Bindings =
                               keyBindings,
-                          Name = "Default (QUERTY)",
+                          Name = "Default (QWERTY)",
                           Author = "TiXL Community",
                           ReadOnly = true,
                       };
