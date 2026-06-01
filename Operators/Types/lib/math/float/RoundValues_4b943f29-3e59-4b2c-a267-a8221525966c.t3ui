@@ -1,0 +1,35 @@
+{
+  "Id": "4b943f29-3e59-4b2c-a267-a8221525966c"/*RoundValues*/,
+  "Description": "Round values to the nearest integer \n\n Also see [RoundValuesExample]",
+  "InputUis": [
+    {
+      "InputId": "854b35c6-696a-4706-bdf3-785f7f47b4e8"/*Input*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "Description": "The input value to be rounded."
+    },
+    {
+      "InputId": "e89bb94e-d12e-45f2-9158-497ea3071456"/*Mode*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 45.0
+      },
+      "Description": "Selects the rounding Mode.",
+      "Min": 0,
+      "Max": 2,
+      "Scale": 0.0
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "9e3535dc-49ca-44ce-8b86-9770077289e0"/*Output*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

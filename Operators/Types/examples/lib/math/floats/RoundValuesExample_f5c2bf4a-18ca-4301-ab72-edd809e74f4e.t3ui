@@ -1,0 +1,213 @@
+{
+  "Id": "f5c2bf4a-18ca-4301-ab72-edd809e74f4e"/*RoundValuesExample*/,
+  "Description": "Example for the [RoundValuesNode] Node",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "e20b3e3b-073b-40bc-bf12-93dd7d398b23"/*FloatsToList*/,
+      "Position": {
+        "X": 150.0,
+        "Y": 83.0
+      }
+    },
+    {
+      "ChildId": "5d014c0b-70cd-4251-a68a-4c380c0278d5"/*Value*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 83.0
+      }
+    },
+    {
+      "ChildId": "dbd5f52c-3b2b-4fb1-bf49-e1d18c9f0255"/*Value*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 126.0
+      }
+    },
+    {
+      "ChildId": "0a9b2a3b-b287-4f48-a020-1c4954ac7e21"/*Value*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 169.0
+      }
+    },
+    {
+      "ChildId": "92a29b7f-b2c8-4464-b208-0ecc92a3deca"/*Value*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 212.0
+      }
+    },
+    {
+      "ChildId": "303e43d6-a9f8-4467-8e59-c7734682729a"/*Value*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 255.0
+      }
+    },
+    {
+      "ChildId": "98aa70cd-a8cd-4dca-9c04-1982a9299323"/*Output*/,
+      "Position": {
+        "X": 1049.9999,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "8a6e42e2-b5c3-48d0-bfd6-68f9f96fd689"/*Round*/,
+      "Position": {
+        "X": 299.99988,
+        "Y": 381.0
+      }
+    },
+    {
+      "ChildId": "f195956e-c9d9-4c51-b035-aa8ec9676dcc"/*Floor*/,
+      "Position": {
+        "X": 299.99988,
+        "Y": 540.0
+      }
+    },
+    {
+      "ChildId": "e40c568a-a632-424c-bad0-2406b00f600d"/*Ceiling*/,
+      "Position": {
+        "X": 299.99988,
+        "Y": 699.0
+      }
+    },
+    {
+      "ChildId": "ab21bd77-cce9-47a7-882b-b0cad04c9dc8"/*SpreadLayout*/,
+      "Position": {
+        "X": 899.9999,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "c1d3fc91-83f5-4de1-816e-5e99ffb919c5"/*FloatListToString*/,
+      "Position": {
+        "X": 449.99988,
+        "Y": 540.0
+      }
+    },
+    {
+      "ChildId": "4b36f429-9785-47db-8f32-6696549e1075"/*Text*/,
+      "Position": {
+        "X": 749.9999,
+        "Y": 497.0
+      }
+    },
+    {
+      "ChildId": "fea71cb2-fb17-41da-b68e-ceb3cd78928d"/*CombineStrings*/,
+      "Position": {
+        "X": 599.9999,
+        "Y": 497.0
+      }
+    },
+    {
+      "ChildId": "8fb38a62-c961-4173-80e1-7dd28396d8d4"/*AString*/,
+      "Position": {
+        "X": 449.99988,
+        "Y": 497.0
+      }
+    },
+    {
+      "ChildId": "b75d4ed4-1415-4432-97e3-b84078e47d95"/*FloatListToString*/,
+      "Position": {
+        "X": 449.99988,
+        "Y": 381.0
+      }
+    },
+    {
+      "ChildId": "33287337-e199-437b-9b6c-6a1e2859201d"/*Text*/,
+      "Position": {
+        "X": 749.9999,
+        "Y": 338.0
+      }
+    },
+    {
+      "ChildId": "e2f694e9-c779-49e8-aa65-073c622aeada"/*CombineStrings*/,
+      "Position": {
+        "X": 599.9999,
+        "Y": 338.0
+      }
+    },
+    {
+      "ChildId": "f0d4ced2-f38d-44e8-86f6-66ae9699e62f"/*AString*/,
+      "Position": {
+        "X": 449.99988,
+        "Y": 338.0
+      }
+    },
+    {
+      "ChildId": "612a2dda-309e-4037-89a4-4f1b5100ca20"/*FloatListToString*/,
+      "Position": {
+        "X": 449.99988,
+        "Y": 699.0
+      }
+    },
+    {
+      "ChildId": "d2bb2c7b-0cdd-4914-9f30-16a4b47e9f66"/*Text*/,
+      "Position": {
+        "X": 749.9999,
+        "Y": 656.0
+      }
+    },
+    {
+      "ChildId": "b1a7afa6-f03b-48ce-82bf-e72fe515e046"/*CombineStrings*/,
+      "Position": {
+        "X": 599.9999,
+        "Y": 656.0
+      }
+    },
+    {
+      "ChildId": "f85737d4-3854-4acf-ad58-ba0f92dabba5"/*AString*/,
+      "Position": {
+        "X": 449.99988,
+        "Y": 656.0
+      }
+    },
+    {
+      "ChildId": "48c21386-79dd-488b-8588-bb2382b216b8"/*FloatListToString*/,
+      "Position": {
+        "X": 449.99988,
+        "Y": 43.0
+      }
+    },
+    {
+      "ChildId": "c3444c40-dba5-43c1-b9e5-cb4bb96979c1"/*Text*/,
+      "Position": {
+        "X": 749.9999,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "720121d1-630d-4372-ac49-902c81932538"/*CombineStrings*/,
+      "Position": {
+        "X": 599.9999,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "415bd6f1-0787-4225-99f2-5e6ba85de6a1"/*AString*/,
+      "Position": {
+        "X": 449.99988,
+        "Y": 0.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "2d2af358-b6c2-4714-8722-fc182a391f3b"/*ImgOutput*/,
+      "Position": {
+        "X": 1212.3529,
+        "Y": -21.878174
+      }
+    }
+  ],
+  "Links": [
+    {
+      "Id": "0696d45d-e35d-4260-87ec-33290c3dd3e8",
+      "Title": "",
+      "Description": "",
+      "LinkType": "Documentation"
+    }
+  ]
+}

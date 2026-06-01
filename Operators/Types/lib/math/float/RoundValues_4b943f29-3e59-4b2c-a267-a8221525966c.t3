@@ -1,0 +1,22 @@
+{
+  "Name": "RoundValues",
+  "Id": "4b943f29-3e59-4b2c-a267-a8221525966c",
+  "Namespace": "lib.math.float",
+  "Inputs": [
+    {
+      "Id": "854b35c6-696a-4706-bdf3-785f7f47b4e8"/*Input*/,
+      "DefaultValue": {
+        "Values": [
+          5.0,
+          17.0
+        ]
+      }
+    },
+    {
+      "Id": "e89bb94e-d12e-45f2-9158-497ea3071456"/*Mode*/,
+      "DefaultValue": 0
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}
