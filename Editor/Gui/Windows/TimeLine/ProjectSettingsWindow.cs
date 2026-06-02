@@ -470,16 +470,16 @@ internal sealed class ProjectSettingsWindow : Window
                     modified |= FormInputs.AddCheckBox("Enable audio beat lock",
                         ref playback.EnableAudioBeatLocking,
                         """
-                        If enabled, the editor will look for transient bass, hihats and snares and attempt to look the playback onto the incoming audio signal.
-                        To use this, start by tapping the base beat (e.g. with X) then tap the beginning of the bar with (e.g. with X).
-                        From now on, you will see the BPM be constantly sliding to look onto the beat).
+                        If enabled, the editor will look for transient bass, hi-hats and snares and attempt to lock the playback speed onto the incoming audio signal.
+                        To use this, start by tapping the base beat (e.g. with Z) then tap the beginning of the bar with (e.g. with X).
+                        From now on, you will see the BPM be constantly sliding to lock onto the beat).
                         """,
                         true
                     );
                     FormInputs.AddVerticalSpace();
                 }
 
-                if (!playback.EnableAudioBeatLocking)
+                if (!playback.EnableAudioBeatLocking || playback.Syncing == CompositionSettings.SyncModes.Timeline)
                 {
                     modified |= FormInputs.AddFloat("BPM",
                         ref playback.Bpm,
