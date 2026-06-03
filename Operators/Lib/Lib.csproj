@@ -177,4 +177,13 @@
     </PropertyGroup>
     <WriteLinesToFile File="$(OutputPath)/OperatorPackage.json" Lines="$(OperatorPackageInfoJson)" Overwrite="True" Encoding="UTF-8" />
   </Target>
+  <!-- The Sdcb.FFmpeg.runtime package delivers its native DLLs under runtimes/win-x64/native/, but TiXL's
+       operator loader (TixlAssemblyLoadContext.LoadUnmanagedDll) resolves native DLLs flat next to the
+       operator assembly. Copy them up so FFmpeg loads in the editor and the exported player. -->
+  <Target Name="FlattenFFmpegNatives" AfterTargets="AfterBuild">
+    <ItemGroup>
+      <_FFmpegNativeDlls Include="$(OutputPath)/runtimes/win-x64/native/*.dll" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_FFmpegNativeDlls)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" />
+  </Target>
 </Project>

@@ -170,9 +170,29 @@ baseline** — if D3D11VA can't be stabilized in M1, zero-copy slips to M1.x.
 
 - **FFmpeg DLLs are delivered by NuGet, not committed to git** (avoids ~137 MB of binaries / the GitHub
   100 MB-per-file limit; no Git LFS). Managed `Sdcb.FFmpeg` bindings live in `Video.csproj`; the **native**
-  runtime package is referenced by [`Lib.csproj`](../../Operators/Lib/Lib.csproj) so the DLLs land in
-  `Operators/lib/runtimes/win-x64/native/` and resolve via `Lib.deps.json` at runtime — the exact mechanism
-  `OpenCvSharp4.runtime.win` uses for `OpenCvSharpExtern.dll` (verified by build).
+  runtime package is referenced by [`Lib.csproj`](../../Operators/Lib/Lib.csproj). The package drops the
+  DLLs into `runtimes/win-x64/native/` — but TiXL's operator loader
+  (`TixlAssemblyLoadContext.LoadUnmanagedDll`) resolves natives **flat** next to the operator assembly, not
+  from `runtimes/native` (deps.json native resolution only works for the default ALC / test host, *not* the
+  editor's custom operator ALC). So a `FlattenFFmpegNatives` MSBuild target in `Lib.csproj` copies the DLLs
+  up next to `Lib.dll`; they then ride the operator-package copy (and shadow-copy) into the editor/player.
+  Verified: the flat DLLs appear next to `Lib.dll`.
+- **Editor load-context integration (three hard-won fixes, all needed):** getting Sdcb.FFmpeg to load inside
+  TiXL's operator `AssemblyLoadContext` required: **(1)** the flat-DLL target above; **(2)** `FfmpegLibrary`
+  **pre-loads** the FFmpeg DLLs by full path, `avutil` first — because once `avcodec` is found, the OS
+  resolves *its* dependencies (`avutil`/`swresample`) by name through the standard search order, which
+  excludes the operator dir; **(3)** a small skip in
+  [`AssemblyTreeNode`](../../Core/Compilation/AssemblyTreeNode.cs): a hardcoded
+  `_assembliesWithOwnNativeResolver` set (currently `"Sdcb.FFmpeg"`) that suppresses TiXL's
+  `DllImportResolver` registration for those assemblies. Sdcb registers its *own* resolver in its static
+  ctor, and .NET allows only one per assembly, so pre-empting it threw `InvalidOperationException: A resolver
+  is already set` and poisoned the `ffmpeg` type. **Note:** an attempt to make this an assembly attribute
+  (`[SelfManagedNativeResolver]`) declared by `Video` was reverted — reading custom attributes
+  (`GetCustomAttributes`) inside the `AssemblyTreeNode` ctor runs *on the assembly-load path* and triggers
+  **reentrant assembly resolution**, which broke loading of *every* operator package. Matching by assembly
+  name (`GetName().Name`) is metadata-only and safe; the name must stay in Core. With all three,
+  `PlayVideo` decodes and displays in the editor (verified). *(These are integration tax specific to the
+  operator-ALC; the unit-test host needed none of them.)*
 - **⚠ Licensing — open item (the headline risk).** `Sdcb.FFmpeg.runtime.windows-x64` is a **GPL build**
   (`--enable-gpl --enable-version3`, x264/x265) — confirmed via `avcodec_configuration()`, and **rejected by
   the license guardrail**. Fine for local dev/test (decode is identical; GPL is a *distribution* concern via
@@ -191,9 +211,11 @@ baseline** — if D3D11VA can't be stabilized in M1, zero-copy slips to M1.x.
 ## Licensing guardrail + UI
 
 - `FfmpegLibrary` refuses GPL/nonfree builds at init — **done, and it already caught the GPL Sdcb runtime**
-  (see Packaging). A dev/test opt-in (`AllowRestrictedBuildForTesting`, off by default, loudly warned) lets
-  local decode tests run against whatever build is installed; the shipped editor always enforces LGPL.
-  Operators surface `StatusError` via `IStatusProvider`.
+  (see Packaging). Two off-by-default, loudly-warned dev escape hatches let local runs use whatever build is
+  installed: `AllowRestrictedBuildForTesting` (set by the test module-init) and the
+  **`TIXL_FFMPEG_ALLOW_RESTRICTED=1`** env var (for running the editor against the GPL build until the LGPL
+  one is sourced). The shipped editor (no env var) always enforces LGPL. Operators surface `StatusError` via
+  `IStatusProvider`.
 - TODO: add an "FFmpeg `<version>` — LGPL shared build" line to
   [`AboutDialog.cs`](../../Editor/Gui/Dialog/AboutDialog.cs) info block + copyable system info.
 
@@ -211,10 +233,17 @@ baseline** — if D3D11VA can't be stabilized in M1, zero-copy slips to M1.x.
 5. **Software converter done.** `SoftwareFrameConverter` (swscale YUV→RGBA8/RGBA16) + tests — full
    decode→RGBA verified deterministic (24/24 green). Remaining for first light: the texture upload (lands
    with the operator rewire) and the GPU compute converter (moved into the D3D11VA step).
-6. Rewire `PlayVideo` → `VideoPlaybackController` (software path, **sequential read-ahead — seek only on
-   discontinuity**) + upload RGBA → `Texture2D`; re-enable export-gated `Playback.OpNotReady`; remove MF
-   `_engine`. **First visible frame.** Verify scrub/loop/clamp/export determinism **and that forward export
-   streams without per-frame seeks** (fixes the MF 4× export-seek stall).
+6. **Done & verified in the editor.** `PlayVideo` rewired to `VideoPlaybackController` (synchronous for now —
+   decode/convert/upload in `Update()`, sequential vs seek-on-discontinuity); RGBA→`Texture2D` upload; MF
+   machinery removed; export-gated `Playback.OpNotReady` re-enabled. **First visible frame achieved** —
+   video displays and scrubs in the editor, performance comparable to MF (main-thread blocking as expected).
+   **Follow-up done:** decode + convert moved to a per-controller **worker thread**; the render thread only
+   uploads the latest ready RGBA buffer (D3D immediate context stays on the render thread). Latest-wins
+   target; sequential-vs-seek on the worker; worker exceptions are contained (a background-thread throw would
+   otherwise kill the editor). Realtime playback is async (last-valid texture meanwhile); **export blocks
+   per-frame until the requested frame is decoded** (`renderingToFile` → `WaitForRequestedFrame`, bounded by
+   a timeout) — without this, the worker's extra frame of latency defeated the exporter's one-frame-lag
+   compensation and prepended a stale frame.
 7. Rewire `PlayVideoClip` onto the same controller (preserve TimeClip mapping). Verify render-to-file.
 8. **`D3D11VaBackend` zero-copy** (riskiest) behind a runtime flag, auto-fallback to software on init
    failure. Verify H.264 8-bit + HEVC 10-bit (HDR → RGBA16, stub tone-map).

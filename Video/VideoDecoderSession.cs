@@ -66,9 +66,17 @@ public sealed class VideoDecoderSession : IDisposable
             }
 
             var videoStream = stream.Value;
-            var codec = Codec.FindDecoderById(videoStream.Codecpar.CodecId);
+            var codecParameters = videoStream.Codecpar;
+            if (codecParameters == null)
+            {
+                error = "Video stream has no codec parameters: " + url;
+                formatContext.Dispose();
+                return null;
+            }
+
+            var codec = Codec.FindDecoderById(codecParameters.CodecId);
             var codecContext = new CodecContext(codec);
-            codecContext.FillParameters(videoStream.Codecpar);
+            codecContext.FillParameters(codecParameters);
             codecContext.Open();
 
             return new VideoDecoderSession(formatContext, codecContext, videoStream);

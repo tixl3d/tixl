@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using Sdcb.FFmpeg.Raw;
 using T3.Core.Logging;
 
@@ -52,6 +53,8 @@ public static class FfmpegLibrary
 
     private static void Initialize()
     {
+        PreloadNativeLibraries();
+
         string configuration;
         try
         {
@@ -61,15 +64,22 @@ public static class FfmpegLibrary
         }
         catch (Exception e)
         {
-            StatusError = "FFmpeg libraries could not be loaded: " + e.Message;
+            // A TypeInitializationException's own message is generic; the real cause (DllNotFound, bad image,
+            // missing dependency) is in the inner exception.
+            var cause = e.InnerException ?? e;
+            StatusError = $"FFmpeg libraries could not be loaded: {cause.GetType().Name}: {cause.Message}";
             Log.Warning(StatusError);
+            Log.Warning("FFmpeg load failure detail: " + e);
             return;
         }
 
         // The editor ships an LGPL shared build. A GPL/non-free build dropped in by a user would silently
-        // break the project's MIT/LGPL distribution guarantee, so refuse to use it.
+        // break the project's MIT/LGPL distribution guarantee, so refuse to use it. Developers can opt in to
+        // running against whatever build they have installed via the TIXL_FFMPEG_ALLOW_RESTRICTED env var.
         var isRestricted = configuration.Contains("--enable-gpl") || configuration.Contains("--enable-nonfree");
-        if (isRestricted && !AllowRestrictedBuildForTesting)
+        var allowRestricted = AllowRestrictedBuildForTesting
+                              || !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("TIXL_FFMPEG_ALLOW_RESTRICTED"));
+        if (isRestricted && !allowRestricted)
         {
             StatusError = "Bundled FFmpeg build is GPL/non-free and not permitted — an LGPL build is required.";
             Log.Warning(StatusError);
@@ -81,6 +91,35 @@ public static class FfmpegLibrary
             Log.Warning($"FFmpeg {VersionInfo} loaded but is a GPL/non-free build — for development/testing only, NOT for distribution.");
         else
             Log.Debug($"FFmpeg {VersionInfo} loaded (LGPL).");
+    }
+
+    // The FFmpeg DLLs live next to this assembly, which is not on the OS DLL search path inside the editor's
+    // custom operator load context. So a library's inter-dependencies (avcodec → avutil/swresample) won't
+    // resolve by name. Pre-load each by full path, avutil first, so dependencies are already in the process.
+    private static void PreloadNativeLibraries()
+    {
+        var directory = Path.GetDirectoryName(typeof(FfmpegLibrary).Assembly.Location);
+        if (string.IsNullOrEmpty(directory) || !Directory.Exists(directory))
+            return;
+
+        static int LoadOrder(string fileName)
+            => fileName.Contains("avutil") ? 0
+               : fileName.Contains("swresample") ? 1
+               : fileName.Contains("swscale") ? 2
+               : 3;
+
+        var libraries = Directory.GetFiles(directory, "*.dll")
+                                 .Where(IsFfmpegLibrary)
+                                 .OrderBy(path => LoadOrder(Path.GetFileName(path)));
+
+        foreach (var path in libraries)
+            NativeLibrary.TryLoad(path, out _);
+    }
+
+    private static bool IsFfmpegLibrary(string path)
+    {
+        var name = Path.GetFileName(path);
+        return name.StartsWith("av") || name.StartsWith("sw") || name.StartsWith("postproc");
     }
 
     private static readonly object _initLock = new();

@@ -45,7 +45,8 @@ internal sealed class AssemblyTreeNode
     public AssemblyTreeNode(Assembly assembly, AssemblyLoadContext parent, bool searchNestedFolders, bool canSearchDlls, DllImportResolver? nativeResolver)
     {
         Assembly = assembly;
-        if (nativeResolver != null)
+        // Skip assemblies that install their own native resolver (see _assembliesWithOwnNativeResolver).
+        if (nativeResolver != null && !_assembliesWithOwnNativeResolver.Contains(assembly.GetName().Name ?? string.Empty))
             NativeLibrary.SetDllImportResolver(assembly, nativeResolver);
 
         _nativeResolver = nativeResolver;
@@ -64,6 +65,18 @@ internal sealed class AssemblyTreeNode
         // if (debug && !node.NameStr.StartsWith("System")) // don't log system assemblies - too much log spam for things that are probably not error-prone
         //Log.Debug($"{parent}: Loaded assembly {NameStr} from {assembly.Location}");
     }
+
+    // Assemblies that install their own native DllImportResolver in their static constructor. .NET permits
+    // one resolver per assembly and TiXL always registers first, so it must leave these alone — otherwise
+    // their constructor throws "a resolver is already set" and poisons the type.
+    //
+    // This is listed here rather than read from an assembly attribute on purpose: reading custom attributes
+    // (GetCustomAttributes) during the assembly-load path triggers reentrant assembly resolution and breaks
+    // loading of every operator package. Matching by assembly name is metadata-only and safe.
+    private static readonly HashSet<string> _assembliesWithOwnNativeResolver = new(StringComparer.Ordinal)
+                                                                                   {
+                                                                                       "Sdcb.FFmpeg", // locates its native libav* DLLs itself
+                                                                                   };
 
     private DllReference Reference => new(Assembly.Location, NameStr, Name);
 
