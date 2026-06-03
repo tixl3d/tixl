@@ -38,7 +38,10 @@ internal sealed class ClipSelection
 
         foreach (var id in SelectedClipsIds)
         {
-            yield return CompositionTimeClips[id];
+            // A selected id can briefly outlive its clip (e.g. right after a cut replaces it), so skip
+            // stale selections rather than throwing KeyNotFoundException.
+            if (CompositionTimeClips.TryGetValue(id, out var clip))
+                yield return clip;
         }
     }
 
@@ -46,7 +49,10 @@ internal sealed class ClipSelection
     {
         foreach (var id in SelectedClipsIds)
         {
-            yield return CompositionTimeClips[id];
+            // A selected id can briefly outlive its clip (e.g. right after a cut replaces it), so skip
+            // stale selections rather than throwing KeyNotFoundException.
+            if (CompositionTimeClips.TryGetValue(id, out var clip))
+                yield return clip;
         }
     }
 
