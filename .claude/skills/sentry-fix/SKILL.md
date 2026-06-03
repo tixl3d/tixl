@@ -84,54 +84,41 @@ Identify the project from the changed file's path (Core, Editor, Operators/Lib, 
 dotnet build <project>.csproj
 ```
 
-If the build fails, fix the build error before continuing. Do not commit a broken build.
+If the build fails, fix the build error before continuing. Do not hand off a broken build for review.
 
-### 2g. Commit
+### 2g. Hand off for review — do not commit
 
-Stage only the files you actually changed (`git add <files>`, not `git add -A`). Commit message format:
+**The user commits the change themselves**, so they're forced to review every diff before it lands. After the build is green:
 
-```
-<area>: <one-line fix summary>
+1. Run `git status --short` and `git diff --stat` so the user sees what they're reviewing.
+2. Draft a suggested commit message in a fenced block (don't run `git commit`). Format:
 
-Fixes Sentry tooll3 issue <SHORT-ID> (<permalink>).
-<2-4 lines: what was happening, what the fix does, any caveats.>
-```
+   ```
+   <area>: <one-line fix summary>
 
-Examples of `<area>`: `Core`, `Editor`, `Operators`, `Gui`. Match the project root the file lives in.
+   Fixes Sentry tooll3 issue <SHORT-ID> (<permalink>).
+   <2-4 lines: what was happening, what the fix does, any caveats.>
+   ```
 
-Do **not** include `Co-Authored-By` in this commit unless the user has asked for it project-wide — check `git log` for the recent convention.
+   Examples of `<area>`: `Core`, `Editor`, `Operators`, `Gui`. Match the project root the file lives in. Do **not** include `Co-Authored-By` unless the user has asked for it project-wide — check `git log` for the recent convention.
+3. State the next issue from the list (short-ID + title) so the user knows what's queued.
 
-Use a HEREDOC for the message so multi-line formatting survives:
+### 2h. Pause for the user
 
-```powershell
-git commit -m @'
-<area>: <summary>
+**Stop and wait.** Do not run `git commit`, `git add`, or move to the next issue. The user will commit (or adjust the message, or revert), then reply with one of:
 
-Fixes Sentry tooll3 issue <SHORT-ID> (<permalink>).
-<body>
-'@
-```
-
-### 2h. Pause for review
-
-Show the user:
-- The commit hash + one-line summary.
-- The Sentry issue ID/short-ID just addressed.
-- The next issue from the list (short-ID + title).
-
-Then **stop and wait**. Do not move on. The user will reply with one of:
 - `next` / `continue` — proceed to the next issue (loop back to step 2a).
 - `skip` — drop the current next-issue, present the one after.
-- `redo` / `revert` — `git reset --soft HEAD~1` (only on the just-made commit, and only if the user explicitly says so), then re-examine.
+- `revert` / `undo` — they've reverted the working-tree edit themselves; re-examine or move on.
 - `stop` — end the session.
 
 If the user says nothing or asks a question, answer the question and stay paused.
 
 ## Anti-patterns — do not
 
-- Do not batch multiple issues into one commit.
-- Do not push (`git push`) — local commits only.
-- Do not amend a published commit; if you got a fix wrong, make a follow-up commit.
+- **Do not run `git commit` or `git add`** — the user commits themselves so they're forced to review every diff.
+- Do not batch multiple issues' edits into one set of working-tree changes — fix one, hand off, wait, then start the next.
+- Do not push (`git push`).
 - Do not "mark resolved" in Sentry via the API — the user will resolve issues manually after deployment.
 - Do not invent stack-trace lines that aren't in the returned event payload. If a frame says `(12 additional frames were not displayed)` and you need them, ask the user to open the issue in the Sentry web UI and paste the full trace.
 - Do not use `git worktree`. The project explicitly forbids worktrees (see `.claude/CLAUDE.md`).
