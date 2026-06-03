@@ -140,8 +140,16 @@ public static class SceneSetupPopup
 
         if (isOpen)
         {
-            // Mesh Label
-            var meshLabel = string.IsNullOrEmpty(node.MeshName) ? "-" : $"  {node.MeshName.Truncate(25)} ({node.MeshBuffers.FaceCount.FormatCount()})";
+            // Mesh Label — MeshBuffers can be null for transform-only nodes or
+            // nodes whose mesh failed to load (line 149 already handles that
+            // case for the tooltip); see Sentry TOOLL3-Y7.
+            string meshLabel;
+            if (string.IsNullOrEmpty(node.MeshName))
+                meshLabel = "-";
+            else if (node.MeshBuffers == null)
+                meshLabel = $"  {node.MeshName.Truncate(25)} (no mesh)";
+            else
+                meshLabel = $"  {node.MeshName.Truncate(25)} ({node.MeshBuffers.FaceCount.FormatCount()})";
             ImGui.SameLine(300);
             ImGui.TextColored(UiColors.TextMuted.Rgba, meshLabel);
             if (ImGui.IsItemHovered())
