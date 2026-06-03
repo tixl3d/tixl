@@ -1,5 +1,6 @@
 using ImGuiNET;
 using T3.Core.Model;
+using T3.Core.Settings;
 using T3.Core.SystemUi;
 using T3.Editor.Compilation;
 using T3.Editor.Gui.Input;
@@ -24,6 +25,15 @@ internal sealed class NewProjectDialog : ModalDialog
     public void Draw()
     {
         DialogSize = new Vector2(550, 320);
+
+        // Defensive: ProjectDirectories is normally populated at startup
+        // (Program.cs), but a corrupted user-settings file or an early-draw
+        // race can leave it empty. Indexing [0] every frame would crash the
+        // app — see Sentry TOOLL3-YG. Fall back to the default folder.
+        var projectDirectories = UserSettings.Config.ProjectDirectories;
+        var primaryProjectDirectory = projectDirectories.Count > 0
+                                          ? projectDirectories[0]
+                                          : FileLocations.DefaultProjectFolder;
 
         if (BeginDialog("Create new project"))
         {
@@ -152,7 +162,7 @@ internal sealed class NewProjectDialog : ModalDialog
                         var hasResult = !string.IsNullOrWhiteSpace(result);
                         ReportError(report: hasResult,
                                     includeEnvVars: result == buttonWithEnvironmentVariables || !hasResult,
-                                    failureLog, fullName);
+                                    failureLog, fullName, primaryProjectDirectory);
                     }
                 }
             }
@@ -165,7 +175,7 @@ internal sealed class NewProjectDialog : ModalDialog
 
             
             FormInputs.SetIndentToLeft();
-            var projectFolder = System.IO.Path.Combine(UserSettings.Config.ProjectDirectories[0], _newProjectName);
+            var projectFolder = System.IO.Path.Combine(primaryProjectDirectory, _newProjectName);
             FormInputs.AddHint($"""
                                 Creates a new project. Projects are used to group operators and resources. 
                                 You can find your project in "{projectFolder}".
@@ -180,7 +190,7 @@ internal sealed class NewProjectDialog : ModalDialog
         EndDialog();
         return;
 
-        void ReportError(bool report, bool includeEnvVars, string failureLog, string fullProjectName)
+        void ReportError(bool report, bool includeEnvVars, string failureLog, string fullProjectName, string projectsDirectory)
         {
             var envVars = "\n\n## Environment variables:\n";
             try
@@ -201,7 +211,7 @@ internal sealed class NewProjectDialog : ModalDialog
                               $"Project namespace:{_newSubNamespace}\n" +
                               $"Project name:{_newProjectName}\n" +
                               $"Project full name:{fullProjectName}\n" +
-                              $"Projects directory:{UserSettings.Config.ProjectDirectories[0]}\n" +
+                              $"Projects directory:{projectsDirectory}\n" +
                               "--- \n" +
                               "## Additional details" +
                               "<!--Insert any relevant additional details here, if any-->\n\n";
