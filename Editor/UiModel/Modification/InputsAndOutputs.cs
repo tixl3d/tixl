@@ -164,7 +164,7 @@ internal static class InputsAndOutputs
         public SyntaxNode[] ReplacementNodes =[];
     }
 
-    public static bool AddInputToSymbol(string inputName, bool multiInput, Type inputType, Symbol symbol)
+    public static bool AddInputToSymbol(Guid inputId, string inputName, bool multiInput, Type inputType, Symbol symbol)
     {
         var syntaxTree = GraphUtils.GetSyntaxTree(symbol);
         if (syntaxTree == null)
@@ -195,7 +195,7 @@ internal static class InputsAndOutputs
             @namespace = String.Empty;
         else
             @namespace += ".";
-        var attributeString = "\n        [Input(Guid = \"" + Guid.NewGuid() + "\")]\n";
+        var attributeString = "\n        [Input(Guid = \"" + inputId + "\")]\n";
         var typeName = TypeNameRegistry.Entries[inputType];
         var slotString = (multiInput ? "MultiInputSlot<" : "InputSlot<") + @namespace + typeName + ">";
         var inputString = "        public readonly " + slotString + " " + inputName + " = new " + slotString + "();\n";
@@ -232,7 +232,7 @@ internal static class InputsAndOutputs
     }
 
     // todo - factor out common code between AddInputToSymbol and AddOutputToSymbol
-    public static bool AddOutputToSymbol(string outputName, bool isTimeClipOutput, Type outputType, Symbol symbol)
+    public static bool AddOutputToSymbol(Guid outputId, string outputName, bool isTimeClipOutput, Type outputType, Symbol symbol)
     {
         var syntaxTree = GraphUtils.GetSyntaxTree(symbol);
         if (syntaxTree == null)
@@ -262,7 +262,7 @@ internal static class InputsAndOutputs
             @namespace = String.Empty;
         else
             @namespace += ".";
-        var attributeString = "\n        [Output(Guid = \"" + Guid.NewGuid() + "\")]\n";
+        var attributeString = "\n        [Output(Guid = \"" + outputId + "\")]\n";
         var typeName = TypeNameRegistry.Entries[outputType];
         var slotString = (isTimeClipOutput ? "TimeClipSlot<" : "Slot<") + @namespace + typeName + ">";
         var inputString = $"        public readonly {slotString} {outputName} = new {slotString}();\n";
@@ -398,7 +398,7 @@ internal static class InputsAndOutputs
         var root = syntaxTree.GetRoot();
         var sourceCode = root.GetText().ToString();
         
-        var alreadyExistsResult = Regex.Match(sourceCode, $"\b{newName}\b");
+        var alreadyExistsResult = Regex.Match(sourceCode, $@"\b{newName}\b");
         if (alreadyExistsResult.Success)
         {
             warning= $"{newName} is already used within the operators source code.";
@@ -416,7 +416,49 @@ internal static class InputsAndOutputs
 
         if (dryRun)
             return true;
-        
+
+        return EditableSymbolProject.RecompileSymbol(symbol, newSource, true, out warning);
+    }
+
+    public static bool RenameOutput(Symbol symbol, Guid outputId, string newName, bool dryRun, out string? warning)
+    {
+        warning = null;
+
+        var isValid = GraphUtils.IsNewFieldNameValid(newName, symbol, out var reason);
+        if (!isValid)
+        {
+            warning = $"{newName} is not a valid output name: {reason}";
+            return false;
+        }
+        var syntaxTree = GraphUtils.GetSyntaxTree(symbol);
+        if (syntaxTree == null)
+        {
+            warning = $"Error getting syntax tree from symbol '{symbol.Name}' source.";
+            return false;
+        }
+
+        var root = syntaxTree.GetRoot();
+        var sourceCode = root.GetText().ToString();
+
+        var alreadyExistsResult = Regex.Match(sourceCode, $@"\b{newName}\b");
+        if (alreadyExistsResult.Success)
+        {
+            warning = $"{newName} is already used within the operators source code.";
+            return false;
+        }
+
+        var outputDef = symbol.OutputDefinitions.FirstOrDefault(o => o.Id == outputId);
+        if (outputDef == null)
+        {
+            warning = $"{outputId} output definition not found.";
+            return false;
+        }
+
+        var newSource = Regex.Replace(sourceCode, @$"\b{outputDef.Name}\b(?!\()", newName);
+
+        if (dryRun)
+            return true;
+
         return EditableSymbolProject.RecompileSymbol(symbol, newSource, true, out warning);
     }
 }

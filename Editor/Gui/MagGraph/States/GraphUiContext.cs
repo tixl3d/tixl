@@ -201,6 +201,7 @@ internal sealed class GraphUiContext
     internal readonly EditCommentDialog EditCommentDialog = new();
     internal readonly AddInputDialog AddInputDialog = new();
     internal readonly AddOutputDialog AddOutputDialog = new();
+    internal readonly RenameOutputDialog RenameOutputDialog = new();
     internal readonly CombineToSymbolDialog CombineToSymbolDialog = new();
     internal readonly DuplicateSymbolDialog DuplicateSymbolDialog = new();
     public readonly RenameSymbolDialog RenameSymbolDialog = new();
@@ -227,6 +228,7 @@ internal sealed class GraphUiContext
             {
                 results |= AddInputDialog.Draw(compositionSymbol);
                 results |= AddOutputDialog.Draw(compositionSymbol);
+                RenameOutputDialog.Draw();
             }
             
             results |= DuplicateSymbolDialog.Draw(compositionSymbol.Id, 

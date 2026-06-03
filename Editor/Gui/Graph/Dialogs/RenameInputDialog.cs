@@ -4,6 +4,8 @@ using T3.Editor.Gui.Dialogs;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.UiModel.Commands;
+using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.Modification;
 
 namespace T3.Editor.Gui.Graph.Dialogs;
@@ -64,17 +66,10 @@ internal sealed class RenameInputDialog : ModalDialog
 
         if (CustomComponents.DisablableButton("Rename input", isValid))
         {
-            // Fix simulate
-            if (!InputsAndOutputs.RenameInput(symbol, _inputId, _newInputName, dryRun: true, out var newWarning))
+            // Validate with a dry run before committing the recompile to the undo stack.
+            if (InputsAndOutputs.RenameInput(symbol, _inputId, _newInputName, dryRun: true, out _))
             {
-            }
-            else
-            {
-                if (!InputsAndOutputs.RenameInput(symbol, _inputId, _newInputName, dryRun: false, out var warning))
-                {
-                    Log.Warning(warning);
-                }
-
+                UndoRedoStack.AddAndExecute(new RenameSlotCommand(symbol.Id, _inputId, inputDef.Name, _newInputName, isInput: true));
                 ImGui.CloseCurrentPopup();
             }
         }
