@@ -122,7 +122,20 @@ internal static class Compiler
                                      };
 
         var startTime = Stopwatch.StartNew();
-        process.Start();
+        try
+        {
+            process.Start();
+        }
+        catch (System.ComponentModel.Win32Exception e)
+        {
+            // dotnet (or the requested exe) is not on PATH, or otherwise
+            // refused to launch — see Sentry TOOLL3-XM. Route through the
+            // normal failureLog channel with a recognisable marker so
+            // ExplainBuildFailure can surface a useful hint instead of an
+            // unhandled exception crashing the editor.
+            var marker = e.NativeErrorCode == 2 ? "DOTNET_NOT_FOUND" : "WIN32_EXEC_FAILED";
+            return ($"{marker}: {fileName}: {e.Message}", -1);
+        }
         process.BeginOutputReadLine();
         process.BeginErrorReadLine();
         
@@ -224,6 +237,19 @@ internal static class Compiler
     {
         if (string.IsNullOrEmpty(buildOutput))
             return null;
+
+        // DOTNET_NOT_FOUND: synthetic marker emitted by RunCommand when the
+        // dotnet executable couldn't be launched (typically because the .NET
+        // SDK is not installed, or installed but not yet on PATH).
+        if (buildOutput.StartsWith("DOTNET_NOT_FOUND:", StringComparison.Ordinal))
+        {
+            return "TiXL needs the .NET SDK to compile your projects, but the `dotnet` " +
+                   "command was not found in PATH.\n\n" +
+                   "Fix: install the .NET SDK from https://dotnet.microsoft.com/download. " +
+                   "If you just installed it, sign out and back in (or reboot) so PATH " +
+                   "refreshes — the installer doesn't push the change to already-running " +
+                   "processes.";
+        }
 
         // NU1100: Unable to resolve '<package>' for '<tfm>'
         // Most common cause: the matching .NET SDK / targeting pack for that TFM
