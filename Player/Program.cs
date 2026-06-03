@@ -76,6 +76,9 @@ internal static partial class Program
     [STAThread]
     private static void Main(string[] args)
     {
+        // Must run before any code that may trigger assembly resolution.
+        T3.Core.Diagnostics.AssemblyLoadDiagnostics.Install();
+
         CoreUi.Instance = new MsForms.MsForms();
         BlockingWindow.Instance = new SilkWindowProvider();
             

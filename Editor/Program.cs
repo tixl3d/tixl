@@ -82,6 +82,9 @@ internal static class Program
     [STAThread]
     private static void Main(string[] args)
     {
+        // Must run before any code that may trigger assembly resolution.
+        T3.Core.Diagnostics.AssemblyLoadDiagnostics.Install();
+
         // Not calling this first will cause exceptions...
         Console.WriteLine("Starting T3 Editor");
         Console.WriteLine("Creating EditorUi");
