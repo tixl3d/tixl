@@ -182,8 +182,13 @@
        operator assembly. Copy them up so FFmpeg loads in the editor and the exported player. -->
   <Target Name="FlattenFFmpegNatives" AfterTargets="AfterBuild">
     <ItemGroup>
-      <_FFmpegNativeDlls Include="$(OutputPath)/runtimes/win-x64/native/*.dll" />
+      <_FFmpegNativeDlls Include="$(OutputPath)/runtimes/win-x64/native/av*.dll;$(OutputPath)/runtimes/win-x64/native/sw*.dll;$(OutputPath)/runtimes/win-x64/native/postproc*.dll" />
     </ItemGroup>
     <Copy SourceFiles="@(_FFmpegNativeDlls)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" />
+  </Target>
+  <!-- OpenCV's FFmpeg video plugin is unused now that VideoStreamInput decodes via FFmpeg directly, so drop
+       it to avoid shipping a second FFmpeg alongside the LGPL Sdcb build. -->
+  <Target Name="DropUnusedOpenCvFfmpegPlugin" AfterTargets="AfterBuild">
+    <Delete Files="$(OutputPath)/runtimes/win-x64/native/opencv_videoio_ffmpeg4110_64.dll" />
   </Target>
 </Project>

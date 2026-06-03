@@ -41,8 +41,12 @@ public sealed class VideoDecoderSession : IDisposable
     /// </summary>
     public Frame CurrentFrame => _frame;
 
-    /// <summary>Opens <paramref name="url"/> and selects the best video stream. Returns null on failure.</summary>
-    public static VideoDecoderSession? TryOpen(string url, out string? error)
+    /// <summary>
+    /// Opens <paramref name="url"/> (file or network stream) and selects the best video stream. Returns null
+    /// on failure. <paramref name="demuxerOptions"/> passes demuxer options (e.g. <c>rtsp_transport=tcp</c>).
+    /// </summary>
+    public static VideoDecoderSession? TryOpen(string url, out string? error,
+                                               IReadOnlyDictionary<string, string>? demuxerOptions = null)
     {
         error = null;
         if (!FfmpegLibrary.EnsureInitialized())
@@ -52,9 +56,17 @@ public sealed class VideoDecoderSession : IDisposable
         }
 
         FormatContext? formatContext = null;
+        MediaDictionary? options = null;
         try
         {
-            formatContext = FormatContext.OpenInputUrl(url);
+            if (demuxerOptions != null)
+            {
+                options = new MediaDictionary();
+                foreach (var pair in demuxerOptions)
+                    options[pair.Key] = pair.Value;
+            }
+
+            formatContext = FormatContext.OpenInputUrl(url, null, options);
             formatContext.LoadStreamInfo();
 
             var stream = formatContext.FindBestStreamOrNull(AVMediaType.Video);
@@ -86,6 +98,10 @@ public sealed class VideoDecoderSession : IDisposable
             error = "Failed to open video: " + e.Message;
             formatContext?.Dispose();
             return null;
+        }
+        finally
+        {
+            options?.Dispose();
         }
     }
 

@@ -250,8 +250,14 @@ baseline** — if D3D11VA can't be stabilized in M1, zero-copy slips to M1.x.
    export-sync automatically. Verify timeline scrub + render-to-file.
 8. **`D3D11VaBackend` zero-copy** (riskiest) behind a runtime flag, auto-fallback to software on init
    failure. Verify H.264 8-bit + HEVC 10-bit (HDR → RGBA16, stub tone-map).
-9. Port `VideoStreamInput` to `VideoDecoderSession`; update `PlayerExporter` (add FFmpeg definition, remove
-   opencv ffmpeg plugin). Verify export includes/excludes FFmpeg DLLs by op usage.
+9. **Code done (pending live-RTSP verify).** `VideoStreamInput` ported off OpenCV `VideoCapture(FFMPEG)` to
+   `VideoDecoderSession` + `SoftwareFrameConverter` (sequential decode of the live stream; RTSP gets
+   `rtsp_transport=tcp` + a socket `timeout` via a new `TryOpen(..., demuxerOptions)` overload). The dead
+   **opencv FFmpeg plugin is dropped** from Lib's output via a `DropUnusedOpenCvFfmpegPlugin` MSBuild target
+   (no op uses OpenCV's video backend now); `PlayerExporter` no longer maps `VideoStreamInput` to the OpenCV
+   bundle, so a stream-only project ships no OpenCV. *(Note: the FFmpeg DLLs always ship with the Lib
+   operator package — the operator-package copy doesn't apply file-exclusion, unlike the Player-dir copy. A
+   per-project FFmpeg exclusion would need the export to exclude operator-package files too — deferred.)*
 10. Licensing guardrail surfacing + AboutDialog line. Cleanup dead MF **decode** code (keep MF **encode**).
 
 **Riskiest = step 8.** Fallbacks, in order: own-device + shared-texture (keyed mutex) → software path
