@@ -97,6 +97,9 @@
   <ItemGroup>
     <ProjectReference Include="..\Mediapipe\Mediapipe.csproj" Private="false" PrivateAssets="all" />
     <ProjectReference Include="..\..\Core\Core.csproj" Private="false" PrivateAssets="all" />
+    <!-- FFmpeg decode engine. Copied into the operator package (Private default) since the editor host
+         does not provide it; its native LGPL DLLs arrive via the Sdcb.FFmpeg.runtime package below. -->
+    <ProjectReference Include="..\..\Video\Video.csproj" />
     <ProjectReference Include="..\..\Serialization\Serialization.csproj" Private="false" PrivateAssets="all" />
     <ProjectReference Include="..\..\SystemUi\SystemUi.csproj" Private="false" PrivateAssets="all" />
     <ProjectReference Include="..\..\Logging\Logging.csproj" Private="false" PrivateAssets="all" />
@@ -116,6 +119,11 @@
     <PackageReference Include="Rug.Osc" Version="1.2.5">
       <NoWarn>NU1701</NoWarn>
     </PackageReference>
+    <!-- FFmpeg video decode. Sdcb.FFmpeg = LGPL managed bindings; the runtime package delivers the
+         matching LGPL shared DLLs under runtimes/win-x64/native and is resolved via Lib.deps.json
+         (same mechanism as OpenCvSharp4.runtime.win) — no DLLs are committed to the repo. -->
+    <PackageReference Include="Sdcb.FFmpeg" Version="7.0.0" />
+    <PackageReference Include="Sdcb.FFmpeg.runtime.windows-x64" Version="7.0.0" />
     <PackageReference Include="SharpGLTF.Core" Version="1.0.6" />
     <PackageReference Include="Svg" Version="3.4.7" />
     <PackageReference Include="System.IO.Ports" Version="10.0.5" />

@@ -1,0 +1,88 @@
+using Sdcb.FFmpeg.Raw;
+using T3.Core.Logging;
+
+namespace T3.Video;
+
+/// <summary>
+/// One-time, thread-safe entry point for the bundled FFmpeg libraries. Triggers native load, records the
+/// version, and enforces the LGPL distribution guarantee by rejecting GPL/non-free builds. Every decode
+/// path must call <see cref="EnsureInitialized"/> before touching any libav* API.
+/// </summary>
+public static class FfmpegLibrary
+{
+    /// <summary>True once the native libraries loaded and passed the license check.</summary>
+    public static bool IsAvailable { get; private set; }
+
+    /// <summary>Human-readable FFmpeg version string (e.g. "7.0"), or null until initialized.</summary>
+    public static string? VersionInfo { get; private set; }
+
+    /// <summary>
+    /// Non-null when initialization failed (native load failure or a disallowed GPL/non-free build).
+    /// Operators surface this through <c>IStatusProvider</c>.
+    /// </summary>
+    public static string? StatusError { get; private set; }
+
+    /// <summary>
+    /// Dev/test escape hatch: when true, a GPL/non-free build is allowed (with a loud warning) instead of
+    /// rejected. The GPL flag is a *distribution* concern — decode behavior is identical — so local testing
+    /// against whatever build is installed is fine. Off by default so the shipped editor always enforces LGPL.
+    /// </summary>
+    internal static bool AllowRestrictedBuildForTesting;
+
+    /// <summary>
+    /// Idempotent. Returns true when FFmpeg is usable. Safe to call from any thread and every frame —
+    /// the work runs exactly once.
+    /// </summary>
+    public static bool EnsureInitialized()
+    {
+        if (_initialized)
+            return IsAvailable;
+
+        lock (_initLock)
+        {
+            if (_initialized)
+                return IsAvailable;
+
+            Initialize();
+            _initialized = true;
+        }
+
+        return IsAvailable;
+    }
+
+    private static void Initialize()
+    {
+        string configuration;
+        try
+        {
+            // First libav* call — forces the native DLLs to resolve. Throws if they can't be found.
+            VersionInfo = ffmpeg.av_version_info();
+            configuration = ffmpeg.avcodec_configuration();
+        }
+        catch (Exception e)
+        {
+            StatusError = "FFmpeg libraries could not be loaded: " + e.Message;
+            Log.Warning(StatusError);
+            return;
+        }
+
+        // The editor ships an LGPL shared build. A GPL/non-free build dropped in by a user would silently
+        // break the project's MIT/LGPL distribution guarantee, so refuse to use it.
+        var isRestricted = configuration.Contains("--enable-gpl") || configuration.Contains("--enable-nonfree");
+        if (isRestricted && !AllowRestrictedBuildForTesting)
+        {
+            StatusError = "Bundled FFmpeg build is GPL/non-free and not permitted — an LGPL build is required.";
+            Log.Warning(StatusError);
+            return;
+        }
+
+        IsAvailable = true;
+        if (isRestricted)
+            Log.Warning($"FFmpeg {VersionInfo} loaded but is a GPL/non-free build — for development/testing only, NOT for distribution.");
+        else
+            Log.Debug($"FFmpeg {VersionInfo} loaded (LGPL).");
+    }
+
+    private static readonly object _initLock = new();
+    private static volatile bool _initialized;
+}
