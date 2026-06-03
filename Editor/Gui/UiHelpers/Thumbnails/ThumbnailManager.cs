@@ -280,6 +280,17 @@ internal static class ThumbnailManager
     #region GPU / Saving Methods
     internal static void SaveThumbnail(Guid guid, IResourcePackage package, T3.Core.DataTypes.Texture2D sourceTexture, Categories category, bool saveToFile = true)
     {
+        // Variations whose underlying graph hasn't rendered yet (broken op,
+        // unresolved input, mid-load) produce a null Slot<Texture2D>.Value.
+        // The implicit Texture2D -> SharpDX conversion at Texture.cs:135
+        // dereferences this directly and NREs — see Sentry TOOLL3-Y2.
+        // Silently skip; the next frame will retry once the slot has a value.
+        if (sourceTexture == null)
+        {
+            if (EnableLogging)
+                Log.Debug($"SaveThumbnail: skipped for {guid} — source texture not yet available");
+            return;
+        }
 
         var isNew = false;
         if (!_slots.TryGetValue(guid, out var slot))
