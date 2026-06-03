@@ -16,11 +16,15 @@ Per-project incremental backups already live at `<projectFolder>/.temp/Backup/` 
 
 **2026-04-27** — NU1100 detection added: `Compiler.ExplainBuildFailure(string?)` ([Compiler.cs](Editor/Compilation/Compiler.cs)) recognises the missing-reference-pack error and returns a "install the matching .NET SDK / change the TFM" hint. Wired into [NewProjectDialog.cs](Editor/Gui/Graph/Dialogs/NewProjectDialog.cs) (replaces the "should never happen" dialog when the cause is known) and into the startup recompile log in [ProjectSetup.Startup.cs](Editor/Compilation/ProjectSetup.Startup.cs).
 
+## Related plans
+
+- [Plan_RuntimeConsistencyRecovery](Plan_RuntimeConsistencyRecovery.md) — the runtime-detection counterpart. Where this plan handles "package broken at load time" by routing it into a `BrokenProjectInfo`, the consistency-recovery plan handles "state observed to be corrupt at runtime" by suspending the editor and offering recovery. They share the backup-restore primitives in Phase 2 / 3 of this plan.
+
 ## Related Sentry issues
 
 These crashes are symptoms of the same root problem this plan addresses (partially-loaded packages reaching code that assumes a fully-valid Symbol graph). Phase 1's startup consistency check should catch them at the load boundary rather than letting them surface downstream:
 
-- **[TOOLL3-YE](https://tooll.sentry.io/issues/7514716102/)** — `Symbol.get_Namespace()` NRE during `SymbolLibrary` tree population at startup. A Symbol with null `InstanceType` survives into `EditorSymbolPackage.AllSymbolUis` and crashes the OrderBy in [NamespaceTreeNode.PopulateCompleteTree](Editor/Gui/Windows/SymbolLib/NamespaceTreeNode.cs:69). The accessor itself is not the bug — a Symbol in this state is corrupt and any null-safe band-aid just defers the crash to graph rendering or save. Phase 1 should reject the malformed Symbol during package load (record as `BrokenProjectInfo` with category `SymbolLoadFailed`) before it reaches the global symbol-UI list.
+- **[TOOLL3-YE](https://tooll.sentry.io/issues/7514716102/)** — `Symbol.get_Namespace()` NRE during `SymbolLibrary` tree population at startup. A Symbol with null `InstanceType` survives into `EditorSymbolPackage.AllSymbolUis` and crashes the OrderBy in [NamespaceTreeNode.PopulateCompleteTree](Editor/Gui/Windows/SymbolLib/NamespaceTreeNode.cs:69). The accessor itself is not the bug — a Symbol in this state is corrupt and any null-safe band-aid just defers the crash to graph rendering or save. Phase 1 should reject the malformed Symbol during package load (record as `BrokenProjectInfo` with category `SymbolLoadFailed`) before it reaches the global symbol-UI list. Also a trip-source for [Plan_RuntimeConsistencyRecovery](Plan_RuntimeConsistencyRecovery.md) Phase 2 if a malformed Symbol slips past the load-time check.
 
 ---
 

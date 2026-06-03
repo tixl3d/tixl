@@ -10,10 +10,12 @@ Drive a review-gated loop over open Sentry issues for the `tooll/tooll3` project
 ## Prerequisites — check before doing anything else
 
 1. **Token present.** Read `.env` at repo root. If `SENTRY_AUTH_TOKEN=` is empty or the file does not exist, stop and tell the user:
-   - Create a token at https://sentry.io/settings/account/api/auth-tokens/ with `event:read` scope.
+   - Create a token at https://sentry.io/settings/account/api/auth-tokens/ with **both** `event:read` and `event:write` scopes. `event:read` covers listing/fetching; `event:write` is required to mark issues resolved at hand-off.
    - Copy `.env.example` to `.env` and paste the token in.
    - Then re-invoke the skill.
 2. **Helper script reachable.** Confirm `Scripts/sentry-issues.ps1` exists. If not, the skill is incomplete — tell the user.
+
+If a `-Resolve` call returns `403 Forbidden`, the token is read-only — tell the user to regenerate it with `event:write` (Sentry doesn't allow editing scopes after creation).
 
 Do not store the token, do not echo it, do not print it.
 
@@ -105,21 +107,41 @@ If the build fails, fix the build error before continuing. Do not hand off a bro
 
 ### 2h. Pause for the user
 
-**Stop and wait.** Do not run `git commit`, `git add`, or move to the next issue. The user will commit (or adjust the message, or revert), then reply with one of:
+**Stop and wait.** Do not run `git commit`, `git add`, or move to the next issue. End the hand-off message with the question:
 
-- `next` / `continue` — proceed to the next issue (loop back to step 2a).
-- `skip` — drop the current next-issue, present the one after.
-- `revert` / `undo` — they've reverted the working-tree edit themselves; re-examine or move on.
-- `stop` — end the session.
+> **Resolve Sentry `<SHORT-ID>` as fixed-in-next-release?** Reply `next` to mark resolved and continue, `next nores` to continue without resolving, or `skip` / `revert` / `stop`.
+
+User reply mapping:
+
+- `next` / `yes` / `continue` — first run `Scripts\sentry-issues.ps1 -Resolve <numericId> -InNextRelease`, then proceed to the next issue (step 2a). Sentry auto-resolves on the next release tag and auto-reopens as a regression if it recurs.
+- `next nores` / `next no` — proceed to the next issue without resolving. Use this when the user committed but isn't confident enough to mark resolved (e.g. wants to manually verify first).
+- `skip` — drop the current next-issue, present the one after. Don't resolve.
+- `revert` / `undo` — they've reverted the working-tree edit themselves; re-examine or move on. Don't resolve.
+- `stop` — end the session. Don't resolve.
+
+If the user only says `next` without any explicit yes/no on resolution, treat it as the default (`next` = resolve). If they previously said `next nores` for some issues, don't assume that sticks for the next one — re-ask each time.
 
 If the user says nothing or asks a question, answer the question and stay paused.
+
+## Won't-fix items (Archive instead of Resolve)
+
+Some issues aren't fixable from TiXL's code: driver bugs (DXGI E_NOTIMPL), library version mismatches we don't control, user environment problems (missing .NET runtime on the target machine in a way TiXL can't detect), broken installs we can't recover. For these, mark the issue archived on Sentry instead of resolved-in-next-release:
+
+```powershell
+.\Scripts\sentry-issues.ps1 -Archive <numericId>
+```
+
+Sentry hides archived issues from the default unresolved view. They auto-reopen if Sentry's "escalation" detector decides the issue has become significant again (e.g. starts hitting a much wider user base). The right surface for "won't fix from our side."
+
+When triaging, propose `Archive` rather than `Resolve` for clearly out-of-our-hands cases, and let the user confirm.
 
 ## Anti-patterns — do not
 
 - **Do not run `git commit` or `git add`** — the user commits themselves so they're forced to review every diff.
 - Do not batch multiple issues' edits into one set of working-tree changes — fix one, hand off, wait, then start the next.
 - Do not push (`git push`).
-- Do not "mark resolved" in Sentry via the API — the user will resolve issues manually after deployment.
+- Do not resolve an issue on Sentry without the user's explicit `next` / `yes` at step 2h. The hand-off question is the trigger; silence is not consent.
+- Do not `Resolve` an issue we didn't actually fix — that falsely claims a fix landed and will mark it as a regression when it recurs. Use `Archive` for won't-fix.
 - Do not invent stack-trace lines that aren't in the returned event payload. If a frame says `(12 additional frames were not displayed)` and you need them, ask the user to open the issue in the Sentry web UI and paste the full trace.
 - Do not use `git worktree`. The project explicitly forbids worktrees (see `.claude/CLAUDE.md`).
 

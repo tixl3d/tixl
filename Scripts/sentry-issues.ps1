@@ -16,6 +16,21 @@
 .PARAMETER Issue
   Fetch a single issue plus its latest event (stack trace, tags, context).
 
+.PARAMETER Resolve
+  Mark an issue resolved. Combine with -InNextRelease to get Sentry's
+  "resolved in the next release" semantics — Sentry will auto-resolve once
+  the next release tag appears, and auto-reopen as a regression if the
+  exception comes back in that release or later.
+
+.PARAMETER InNextRelease
+  Modifier for -Resolve. Marks the issue resolved-in-next-release rather
+  than immediately resolved.
+
+.PARAMETER Archive
+  Mark an issue as archived ("ignored" in Sentry's older API). Use for
+  "won't fix": driver bugs, third-party library version mismatches,
+  user-environment install errors we can't address from code.
+
 .PARAMETER Limit
   Max number of issues to return when using -List. Default 25, server caps at 100.
 
@@ -26,6 +41,8 @@
   .\Scripts\sentry-issues.ps1 -List
   .\Scripts\sentry-issues.ps1 -List -Limit 50 -Query "is:unresolved environment:production"
   .\Scripts\sentry-issues.ps1 -Issue 7514716102
+  .\Scripts\sentry-issues.ps1 -Resolve 7514716102 -InNextRelease
+  .\Scripts\sentry-issues.ps1 -Archive 7465802639
 #>
 
 [CmdletBinding(DefaultParameterSetName = 'List')]
@@ -35,6 +52,15 @@ param(
 
     [Parameter(ParameterSetName = 'Issue', Mandatory = $true)]
     [string]$Issue,
+
+    [Parameter(ParameterSetName = 'Resolve', Mandatory = $true)]
+    [string]$Resolve,
+
+    [Parameter(ParameterSetName = 'Resolve')]
+    [switch]$InNextRelease,
+
+    [Parameter(ParameterSetName = 'Archive', Mandatory = $true)]
+    [string]$Archive,
 
     [Parameter(ParameterSetName = 'List')]
     [int]$Limit = 25,
@@ -86,6 +112,54 @@ function Invoke-Sentry {
         [Console]::Error.WriteLine("URL: $Url")
         exit 3
     }
+}
+
+if ($PSCmdlet.ParameterSetName -eq 'Resolve') {
+    $body = if ($InNextRelease) {
+        @{ status = 'resolved'; statusDetails = @{ inNextRelease = $true } } | ConvertTo-Json -Compress
+    } else {
+        @{ status = 'resolved' } | ConvertTo-Json -Compress
+    }
+    $url = "https://sentry.io/api/0/issues/$Resolve/"
+    try {
+        $response = Invoke-RestMethod -Uri $url -Headers $headers -Method Put `
+            -ContentType 'application/json' -Body $body
+        $detail = if ($InNextRelease) { 'in next release' } else { 'immediately' }
+        [Console]::Error.WriteLine("Resolved $($response.shortId) ($detail).")
+        [pscustomobject]@{
+            shortId = $response.shortId
+            id = $response.id
+            status = $response.status
+            statusDetails = $response.statusDetails
+        } | ConvertTo-Json -Depth 5
+    }
+    catch {
+        [Console]::Error.WriteLine("Sentry resolve failed: $($_.Exception.Message)")
+        [Console]::Error.WriteLine("URL: $url")
+        exit 3
+    }
+    return
+}
+
+if ($PSCmdlet.ParameterSetName -eq 'Archive') {
+    $body = @{ status = 'ignored' } | ConvertTo-Json -Compress
+    $url = "https://sentry.io/api/0/issues/$Archive/"
+    try {
+        $response = Invoke-RestMethod -Uri $url -Headers $headers -Method Put `
+            -ContentType 'application/json' -Body $body
+        [Console]::Error.WriteLine("Archived $($response.shortId).")
+        [pscustomobject]@{
+            shortId = $response.shortId
+            id = $response.id
+            status = $response.status
+        } | ConvertTo-Json -Depth 3
+    }
+    catch {
+        [Console]::Error.WriteLine("Sentry archive failed: $($_.Exception.Message)")
+        [Console]::Error.WriteLine("URL: $url")
+        exit 3
+    }
+    return
 }
 
 if ($PSCmdlet.ParameterSetName -eq 'Issue') {
