@@ -244,7 +244,10 @@ baseline** — if D3D11VA can't be stabilized in M1, zero-copy slips to M1.x.
    per-frame until the requested frame is decoded** (`renderingToFile` → `WaitForRequestedFrame`, bounded by
    a timeout) — without this, the worker's extra frame of latency defeated the exporter's one-frame-lag
    compensation and prepended a stale frame.
-7. Rewire `PlayVideoClip` onto the same controller (preserve TimeClip mapping). Verify render-to-file.
+7. **Code done (pending editor verify).** `PlayVideoClip` rewired onto the same `VideoPlaybackController`,
+   preserving the TimeClip→source-time mapping (`TimeRange`/`SourceRange` + per-clip rate, clamped to the
+   clip's source range); MF machinery removed; now also an `IStatusProvider`. Inherits the worker thread +
+   export-sync automatically. Verify timeline scrub + render-to-file.
 8. **`D3D11VaBackend` zero-copy** (riskiest) behind a runtime flag, auto-fallback to software on init
    failure. Verify H.264 8-bit + HEVC 10-bit (HDR → RGBA16, stub tone-map).
 9. Port `VideoStreamInput` to `VideoDecoderSession`; update `PlayerExporter` (add FFmpeg definition, remove
