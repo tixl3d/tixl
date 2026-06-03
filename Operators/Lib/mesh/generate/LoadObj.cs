@@ -185,12 +185,26 @@ internal sealed class LoadObj : Instance<LoadObj>, IDescriptiveFilename, IStatus
 
         public void Dispose()
         {
-            DataBuffers.Dispose();
+            // Null-safe: the constructor can throw partway through (bad .obj
+            // data, GPU buffer creation failure) and leave DataBuffers null.
+            // GC will then finalize the partially-constructed instance and
+            // call Dispose() — see Sentry TOOLL3-X5.
+            DataBuffers?.Dispose();
             GC.SuppressFinalize(this);
         }
         ~MeshDataSet()
         {
-            Dispose();
+            // Finalizers must never throw — an unhandled exception on the
+            // finalizer thread terminates the process. Defense in depth on
+            // top of the null-safe Dispose above.
+            try
+            {
+                Dispose();
+            }
+            catch
+            {
+                // Swallow: nothing useful we can do from the finalizer thread.
+            }
         }
     }
 
