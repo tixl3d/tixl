@@ -39,12 +39,12 @@ float SmootherStep(float x)
     if (PairingMode > 0.5 && countA != countB)
     {
         uint maxCount = max(countA, countB);
-        
+
         // This calculates the first index i.x that would map to the current pair.
         // It's essentially the inverse of (count * i.x) / resultCount
         uint firstIxA = (uint)((aIndex * (float)resultCount) / countA);
         uint firstIxB = (uint)((bIndex * (float)resultCount) / countB);
-        
+
         uint firstIx = max(firstIxA, firstIxB);
 
         if (i.x > firstIx)
@@ -87,7 +87,7 @@ float SmootherStep(float x)
         f = 1 - SmootherStep(saturate((t - b) / Width - b + 1));
     }
 
-    float fallOffFromCenter = smoothstep(0, 1, 1 - abs(f - 0.5) * 2); 
+    float fallOffFromCenter = smoothstep(0, 1, 1 - abs(f - 0.5) * 2);
     //float fallOffFromCenter = SmootherStep(1 - abs(f - 0.5) * 2);
     f += (hash11(t) - 0.5) * Scatter * fallOffFromCenter;
 
@@ -102,5 +102,5 @@ float SmootherStep(float x)
     ResultPoints[i.x].FX2 = lerp(A.FX2, B.FX2, f);
     ResultPoints[i.x].Color = lerp(A.Color, B.Color, f);
     ResultPoints[i.x].Position = lerp(A.Position, B.Position, f);
-    ResultPoints[i.x].FX1 = f;
+    // ResultPoints[i.x].FX1 = f; why this overwriting ?
 }
