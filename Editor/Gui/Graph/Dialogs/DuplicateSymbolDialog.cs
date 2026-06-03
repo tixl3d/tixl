@@ -85,7 +85,9 @@ internal sealed class DuplicateSymbolDialog : ModalDialog
 
                 FormInputs.DrawInputLabel("Description");
                 ImGui.InputTextMultiline("##description", ref description, 1024, new Vector2(450, 60));
-                    
+
+                FormInputs.AddHint("Duplicating creates a new operator and can't be undone — this clears the undo history.");
+
                 if (CustomComponents.DisablableButton("Duplicate", symbolNamesValid, enableTriggerWithReturn: false))
                 {
                     if(!SymbolUiRegistry.TryGetSymbolUi(symbolGuid, out var compositionSymbolUi))

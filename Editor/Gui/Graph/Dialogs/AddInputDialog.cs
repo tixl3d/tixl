@@ -6,6 +6,8 @@ using T3.Editor.Gui.Dialogs;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.UiModel.Commands;
+using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.Modification;
 
 namespace T3.Editor.Gui.Graph.Dialogs;
@@ -37,7 +39,7 @@ internal sealed class AddInputDialog : ModalDialog
             
             if (CustomComponents.DisablableButton("Add", isValid))
             {
-                InputsAndOutputs.AddInputToSymbol(_parameterName, _multiInput, _selectedType!, symbol);
+                UndoRedoStack.AddAndExecute(new AddInputCommand(symbol.Id, _parameterName, _selectedType!, _multiInput));
                 _parameterName = string.Empty;
             }
 

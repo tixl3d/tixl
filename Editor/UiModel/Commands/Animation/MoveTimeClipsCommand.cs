@@ -1,4 +1,5 @@
 ﻿#nullable enable
+using System.Diagnostics.CodeAnalysis;
 using T3.Core.Animation;
 using T3.Core.Operator;
 using T3.Editor.UiModel.ProjectHandling;
@@ -24,11 +25,11 @@ internal sealed class MoveTimeClipsCommand : ICommand
     }
 
     private readonly Entry[] _entries;
-    private readonly Instance _compositionOp;
+    private readonly Guid[] _compositionPath;
 
     internal MoveTimeClipsCommand(Instance compositionOp, IReadOnlyList<TimeClip> clips)
     {
-        _compositionOp = compositionOp;
+        _compositionPath = compositionOp.InstancePath.ToArray();
         _entries = new Entry[clips.Count];
         for (var i = 0; i < _entries.Length; i++)
         {
@@ -50,7 +51,10 @@ internal sealed class MoveTimeClipsCommand : ICommand
 
     internal void StoreCurrentValues()
     {
-        foreach (var clip in Structure.GetAllTimeClips(_compositionOp))
+        if (!TryGetCompositionOp(out var compositionOp))
+            return;
+
+        foreach (var clip in Structure.GetAllTimeClips(compositionOp))
         {
             var selectedEntry = _entries.SingleOrDefault(entry => entry.Id == clip.Id);
             if (selectedEntry == null)
@@ -65,8 +69,11 @@ internal sealed class MoveTimeClipsCommand : ICommand
 
     public void Undo()
     {
+        if (!TryGetCompositionOp(out var compositionOp))
+            return;
+
         bool changed = false;
-        foreach (var clip in Structure.GetAllTimeClips(_compositionOp))
+        foreach (var clip in Structure.GetAllTimeClips(compositionOp))
         {
             var selectedEntry = _entries.SingleOrDefault(entry => entry.Id == clip.Id);
             if (selectedEntry == null)
@@ -80,14 +87,17 @@ internal sealed class MoveTimeClipsCommand : ICommand
 
         if (changed)
         {
-            _compositionOp.GetSymbolUi().FlagAsModified();
+            compositionOp.GetSymbolUi().FlagAsModified();
         }
     }
 
     public void Do()
     {
-        var allTimeClips = Structure.GetAllTimeClips(_compositionOp).ToList();
-            
+        if (!TryGetCompositionOp(out var compositionOp))
+            return;
+
+        var allTimeClips = Structure.GetAllTimeClips(compositionOp).ToList();
+
         bool changed = false;
         foreach (var clip in allTimeClips)
         {
@@ -109,7 +119,21 @@ internal sealed class MoveTimeClipsCommand : ICommand
 
         if (changed)
         {
-            _compositionOp.GetSymbolUi().FlagAsModified();
+            compositionOp.GetSymbolUi().FlagAsModified();
         }
+    }
+
+    /// <summary>
+    /// Re-resolves the composition from its path rather than holding a live <see cref="Instance"/>, which would
+    /// go stale across operator-package hot reloads while this command sits on the undo stack.
+    /// </summary>
+    private bool TryGetCompositionOp([NotNullWhen(true)] out Instance? compositionOp)
+    {
+        compositionOp = ProjectView.Focused?.Structure.GetInstanceFromIdPath(_compositionPath);
+        if (compositionOp != null)
+            return true;
+
+        Log.Warning("Can't move time clips - composition is no longer available.");
+        return false;
     }
 }

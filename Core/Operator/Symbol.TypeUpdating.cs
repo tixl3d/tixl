@@ -79,6 +79,7 @@ public sealed partial class Symbol
                 var alreadyExistingOutput = removedOutputDefinitions.FirstOrDefault(o => o.Id == attribute.Id);
                 if (alreadyExistingOutput != null)
                 {
+                    alreadyExistingOutput.Name = info.Name; // pick up renames in place, like inputs above
                     OutputDefinitions.Add(alreadyExistingOutput);
                     removedOutputDefinitions.Remove(alreadyExistingOutput);
                 }

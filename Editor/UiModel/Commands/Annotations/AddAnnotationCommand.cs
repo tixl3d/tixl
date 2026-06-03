@@ -1,31 +1,40 @@
-﻿namespace T3.Editor.UiModel.Commands.Annotations;
+namespace T3.Editor.UiModel.Commands.Annotations;
 
 public sealed class AddAnnotationCommand : ICommand
 {
-    public string Name => "Add Preset";
+    public string Name => "Add Annotation";
     public bool IsUndoable => true;
-        
-    private SymbolUi _symbolUi;
-    private Annotation _newAnnotation;
-        
-    private readonly Dictionary<Annotation, Annotation> _originalDefForReferences = new();
-    private readonly Dictionary<Annotation, Annotation> _newDefForReferences = new();
 
     public AddAnnotationCommand(SymbolUi symbolUi, Annotation annotation)
     {
-        _symbolUi = symbolUi;
+        _symbolId = symbolUi.Symbol.Id;
         _newAnnotation = annotation;
     }
-        
+
     public void Do()
     {
-        _symbolUi.Annotations[_newAnnotation.Id] = _newAnnotation;
-        _symbolUi.FlagAsModified();
+        if (!SymbolUiRegistry.TryGetSymbolUi(_symbolId, out var symbolUi))
+        {
+            Log.Warning($"Can't add annotation - symbol {_symbolId} is no longer available.");
+            return;
+        }
+
+        symbolUi.Annotations[_newAnnotation.Id] = _newAnnotation;
+        symbolUi.FlagAsModified();
     }
-        
+
     public void Undo()
     {
-        _symbolUi.Annotations.Remove(_newAnnotation.Id);
-        _symbolUi.FlagAsModified();
+        if (!SymbolUiRegistry.TryGetSymbolUi(_symbolId, out var symbolUi))
+        {
+            Log.Warning($"Can't remove annotation - symbol {_symbolId} is no longer available.");
+            return;
+        }
+
+        symbolUi.Annotations.Remove(_newAnnotation.Id);
+        symbolUi.FlagAsModified();
     }
+
+    private readonly Guid _symbolId;
+    private readonly Annotation _newAnnotation;
 }

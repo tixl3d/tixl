@@ -32,7 +32,7 @@ public sealed partial class Symbol
     public sealed class OutputDefinition : ISlotDefinition
     {
         public Guid Id { get; init; }
-        public string Name { get; init; }
+        public string Name { get; internal set; }
         public Type ValueType { get; init; }
         public Type OutputDataType { get; init; }
         public DirtyFlagTrigger DirtyFlagTrigger { get; init; }

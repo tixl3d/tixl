@@ -771,7 +771,7 @@ internal static class InputArea
             return;
         }
 
-        if (!InputsAndOutputs.AddInputToSymbol(input.Name, input.IsMultiInput, input.DefaultValue.ValueType, composition.Symbol))
+        if (!InputsAndOutputs.AddInputToSymbol(Guid.NewGuid(), input.Name, input.IsMultiInput, input.DefaultValue.ValueType, composition.Symbol))
             return;
 
         // FIXME: Adding the input will trigger a recompile and thus discard the previous composition

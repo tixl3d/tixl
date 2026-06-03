@@ -4,6 +4,8 @@ using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
+using T3.Editor.UiModel.Commands;
+using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.Modification;
 using T3.Editor.UiModel.Selection;
@@ -195,23 +197,16 @@ public sealed class ParameterSettings
             {
                 _isDraggingParameterOrder = false;
 
-                // Sort inputDef by order of inputUis...
-                var originalList = symbol.InputDefinitions.ToList();
-                symbol.InputDefinitions.Clear();
-                foreach (var inputUi in _symbolUisWhileDragging)
-                {
-                    var inputDefinition = originalList.Find(def => def.Id == inputUi.InputDefinition.Id);
-                    if (inputDefinition != null)
-                    {
-                        symbol.InputDefinitions.Add(inputDefinition);
-                    }
-                }
+                var oldOrder = symbol.InputDefinitions.Select(def => def.Id).ToList();
+                var newOrder = _symbolUisWhileDragging.Select(inputUi => inputUi.InputDefinition.Id).ToList();
 
                 _symbolUisWhileDragging.Clear();
                 _wasDraggingParameterOrder = false;
-                symbol.SortInputSlotsByDefinitionOrder();
-                InputsAndOutputs.AdjustInputOrderOfSymbol(symbol);
-                Log.Debug(" Applying new parameter order");
+
+                if (!oldOrder.SequenceEqual(newOrder))
+                {
+                    UndoRedoStack.AddAndExecute(new ChangeInputOrderCommand(symbol.Id, oldOrder, newOrder));
+                }
             }
         }
 

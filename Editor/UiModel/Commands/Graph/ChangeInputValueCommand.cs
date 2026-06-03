@@ -11,9 +11,8 @@ public sealed class ChangeInputValueCommand : ICommand
 
     public ChangeInputValueCommand(Symbol composition, Guid symbolChildId, Symbol.Child.Input input, InputValue newValue)
     {
-        _inputParentSymbol = composition;
         _inputParentSymbolId = composition.Id;
-            
+
         _childId = symbolChildId;
         _inputId = input.InputDefinition.Id;
         _wasAnimated = composition.Animator.IsAnimated(_childId, _inputId);
@@ -147,7 +146,6 @@ public sealed class ChangeInputValueCommand : ICommand
     private InputValue OriginalValue { get; set; }
     private readonly InputValue _newValue;
     private readonly Guid _inputParentSymbolId;
-    private readonly Symbol _inputParentSymbol;
     private readonly Guid _childId;
     private readonly Guid _inputId;
     private readonly bool _wasDefault;

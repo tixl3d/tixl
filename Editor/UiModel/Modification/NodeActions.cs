@@ -91,9 +91,11 @@ internal static class NodeActions
             selectedOutputUis ??= nodeSelection.GetSelectedNodes<IOutputUi>().ToList();
             if (selectedInputUis.Count > 0 || selectedOutputUis.Count > 0)
             {
-                InputsAndOutputs.RemoveInputsAndOutputsFromSymbol(inputIdsToRemove: selectedInputUis.Select(entry => entry.Id).ToArray(),
-                                                                  outputIdsToRemove: selectedOutputUis.Select(entry => entry.Id).ToArray(),
-                                                                  symbol: compositionSymbolUi.Symbol);
+                // Added after the child/annotation deletes so its undo restores the slots before
+                // those commands restore child-side connections (see RemoveInputsOrOutputsCommand).
+                commands.Add(new RemoveInputsOrOutputsCommand(compositionSymbolUi.Symbol.Id,
+                                                              selectedInputUis.Select(entry => entry.Id).ToArray(),
+                                                              selectedOutputUis.Select(entry => entry.Id).ToArray()));
             }
         }
 

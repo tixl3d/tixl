@@ -20,8 +20,6 @@ internal static class Combine
                                         string newSymbolName,
                                         string nameSpace, string description, bool shouldBeTimeClip)
     {
-        var executedCommands = new List<ICommand>();
-
         Dictionary<Guid, Guid> oldToNewIdMap = new Dictionary<Guid, Guid>();
         Dictionary<Symbol.Connection, Guid> connectionToNewSlotIdMap = new Dictionary<Symbol.Connection, Guid>();
 
@@ -171,7 +169,6 @@ internal static class Combine
         // Apply content to new symbol
         var copyCmd = new CopySymbolChildrenCommand(parentCompositionSymbolUi, selectedChildUis, selectedAnnotations, newSymbolUi, Vector2.Zero);
         copyCmd.Do();
-        executedCommands.Add(copyCmd);
 
         var newChildrenArea = GetAreaFromChildren(newSymbolUi.ChildUis.Values);
 
@@ -220,7 +217,6 @@ internal static class Combine
                              { PosOnCanvas = originalChildrenArea.GetCenter() };
 
         addCommand.Do();
-        executedCommands.Add(addCommand);
 
         var newSymbolChildId = addCommand.AddedChildId;
 
@@ -250,17 +246,17 @@ internal static class Combine
 
         var deleteCmd = new DeleteSymbolChildrenCommand(parentCompositionSymbolUi, selectedChildUis);
         deleteCmd.Do();
-        executedCommands.Add(deleteCmd);
 
         // Delete original annotations
         foreach (var annotation in selectedAnnotations)
         {
             var deleteAnnotationCommand = new DeleteAnnotationCommand(parentCompositionSymbolUi, annotation);
             deleteAnnotationCommand.Do();
-            executedCommands.Add(deleteAnnotationCommand);
         }
 
-        UndoRedoStack.Add(new MacroCommand("Combine into symbol", executedCommands));
+        // Creating a new symbol/assembly can't be cleanly undone (undoing the children delete would
+        // orphan the new operator), so drop the history rather than leave it inconsistent.
+        UndoRedoStack.Clear();
 
         // Sadly saving in background does not save the source files.
         // This needs to be fixed.

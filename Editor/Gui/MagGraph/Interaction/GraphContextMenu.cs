@@ -344,6 +344,11 @@ internal static class GraphContextMenu
             context.Layout.FlagStructureAsChanged();
         }
 
+        if (canModify && selectedOutputUis.Count == 1 && ImGui.MenuItem("Rename output"))
+        {
+            context.RenameOutputDialog.ShowNextFrame(compositionSymbolUi.Symbol, selectedOutputUis[0].Id);
+        }
+
         if (ImGui.MenuItem("Duplicate",
                            UserActions.Duplicate.ListShortcuts(),
                            selected: false,

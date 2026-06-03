@@ -308,6 +308,11 @@ public sealed class CopySymbolChildrenCommand : ICommand
 
     private readonly Vector2 _targetPosition;
     private readonly Guid _sourceSymbolId;
+
+    // Clipboard modes copy from / into a transient symbol that is parsed from clipboard JSON and
+    // never registered in SymbolUiRegistry, so it cannot be re-resolved by Guid like the other paths.
+    // Holding it by reference is safe here: a detached, unregistered symbol is not recreated by package
+    // hot reload. For Normal mode these stay null and resolution goes through _sourceSymbolId/_targetSymbolId.
     private readonly Symbol? _sourcePastedSymbol;
     private readonly SymbolUi? _clipboardSymbolUi;
     private readonly Guid _targetSymbolId;

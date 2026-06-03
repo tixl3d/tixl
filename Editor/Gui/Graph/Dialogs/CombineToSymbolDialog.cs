@@ -1,5 +1,6 @@
 ﻿using ImGuiNET;
 using T3.Editor.Gui.Graph.Dialogs;
+using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
@@ -42,7 +43,9 @@ internal sealed class CombineToSymbolDialog : ModalDialog
                 ImGui.InputTextMultiline("##description", ref description, 1024, new Vector2(450, 60));
 
                 ImGui.Checkbox("Combine as time clip", ref _shouldBeTimeClip);
-                    
+
+                FormInputs.AddHint("Combining creates a new operator and can't be undone — this clears the undo history.");
+
                 if (CustomComponents.DisablableButton("Combine", symbolNamesValid, enableTriggerWithReturn: false))
                 {
                     if(!SymbolUiRegistry.TryGetSymbolUi(symbolGuid, out var compositionSymbolUi))

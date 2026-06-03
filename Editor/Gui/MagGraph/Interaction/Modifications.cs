@@ -183,9 +183,11 @@ internal static class Modifications
 
         if (deletedInputUis.Count > 0 || deletedOutputUis.Count > 0)
         {
-            InputsAndOutputs.RemoveInputsAndOutputsFromSymbol(inputIdsToRemove: deletedInputUis.Select(entry => entry.Id).ToArray(),
-                                                              outputIdsToRemove: deletedOutputUis.Select(entry => entry.Id).ToArray(),
-                                                              symbol: compositionUi.Symbol);
+            // Executed after the child deletes above, so the command only captures the connections
+            // still present (child-side connections were already removed by DeleteSymbolChildrenCommand).
+            macroCommand.AddAndExecCommand(new RemoveInputsOrOutputsCommand(compositionUi.Symbol.Id,
+                                                                            deletedInputUis.Select(entry => entry.Id).ToArray(),
+                                                                            deletedOutputUis.Select(entry => entry.Id).ToArray()));
         }
 
         if (deletedAnnotations.Count > 0)

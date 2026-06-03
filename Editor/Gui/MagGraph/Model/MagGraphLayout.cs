@@ -183,14 +183,18 @@ internal sealed class MagGraphLayout
 
         foreach (var input in compositionOp.Inputs)
         {
+            var inputUi = compositionSymbolUi.InputUis[input.Id];
             if (Items.TryGetValue(input.Id, out var inputOp))
             {
                 inputOp.ResetConnections(_structureUpdateCycle);
+                // Refresh references so renames (same id, new definition) are picked up
+                inputOp.Selectable = inputUi;
+                inputOp.SymbolChild = compositionOp.SymbolChild;
+                inputOp.InstancePath = compositionOp.InstancePath;
                 updatedItemCount++;
             }
             else
             {
-                var inputUi = compositionSymbolUi.InputUis[input.Id];
                 Items[input.Id] = new MagGraphItem
                                       {
                                           Variant = MagGraphItem.Variants.Input,
@@ -212,6 +216,10 @@ internal sealed class MagGraphLayout
             if (Items.TryGetValue(output.Id, out var outputOp))
             {
                 outputOp.ResetConnections(_structureUpdateCycle);
+                // Refresh references so renames (same id, new definition) are picked up
+                outputOp.Selectable = outputUi;
+                outputOp.SymbolChild = compositionOp.SymbolChild;
+                outputOp.InstancePath = compositionOp.InstancePath;
                 updatedItemCount++;
             }
             else

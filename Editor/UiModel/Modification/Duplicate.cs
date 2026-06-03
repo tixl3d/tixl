@@ -170,6 +170,10 @@ internal static class Duplicate
         compositionUi.FlagAsModified();
         project.SaveModifiedSymbols();
 
+        // Creating a new symbol/assembly can't be cleanly undone (undoing the instance add would
+        // orphan the new operator), so drop the history rather than leave it inconsistent.
+        UndoRedoStack.Clear();
+
         return newSymbol;
     }
 
