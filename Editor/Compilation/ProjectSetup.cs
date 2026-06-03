@@ -43,13 +43,31 @@ internal static partial class ProjectSetup
 
         Environment.SetEnvironmentVariable(envVar, envValue, EnvironmentVariableTarget.User);
     }
-    public static bool TryCreateProject(string nameSpace, 
+    public static bool TryCreateProject(string nameSpace,
                                         bool shareResources,
-                                        [NotNullWhen(true)] out EditableSymbolProject? newProject, 
+                                        [NotNullWhen(true)] out EditableSymbolProject? newProject,
                                         [NotNullWhen(false)] out string? failureLog)
     {
         var name = nameSpace.Split('.').Last();
-        var newCsProj = CsProjectFile.CreateNewProject(name, nameSpace, shareResources, UserSettings.Config.ProjectDirectories[0]);
+
+        // CreateNewProject writes files to disk under ProjectDirectories[0]. That
+        // can fail with FileNotFoundException / UnauthorizedAccessException /
+        // IOException on OneDrive-virtualised Documents folders, broken symlinks,
+        // antivirus filters, or disappeared removable drives — see Sentry
+        // TOOLL3-XS. Surface those through the failureLog channel instead of
+        // letting the exception propagate and crash the editor.
+        CsProjectFile newCsProj;
+        try
+        {
+            newCsProj = CsProjectFile.CreateNewProject(name, nameSpace, shareResources, UserSettings.Config.ProjectDirectories[0]);
+        }
+        catch (Exception e)
+        {
+            failureLog = $"Failed to create project files on disk: {e.Message}";
+            Log.Error(failureLog);
+            newProject = null;
+            return false;
+        }
 
         if (!newCsProj.TryRecompile(true, out failureLog))
         {
