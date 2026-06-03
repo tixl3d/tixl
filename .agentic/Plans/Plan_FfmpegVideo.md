@@ -200,9 +200,12 @@ baseline** — if D3D11VA can't be stabilized in M1, zero-copy slips to M1.x.
   FFmpeg 7.0 (avcodec-61)** source. Options: (a) the **`ffmpeg.lgpl`** NuGet pinned to its avcodec-61
   (FFmpeg-7.0) date-version — keeps all code, NuGet-delivered, but a third-party package; or (b) a
   **self-hosted/vendored BtbN `lgpl-shared` 7.0** build (the notes' "custom runtime NuGet with verified LGPL
-  DLLs") — full control + reproducibility, more setup. **Decision pending.** Ship the FFmpeg LGPL license
-  text + attribution in `Dependencies/licenses/` regardless. New HLSL shader(s) go under
-  `Operators/Lib/Assets/shaders/img/`.
+  DLLs") — full control + reproducibility, more setup. **Decision pending.** **Done:** shipped the FFmpeg
+  LGPL license text + attribution as
+  [`Dependencies/licenses/LGPL-v2.1-FFmpeg.txt`](../../Dependencies/licenses/LGPL-v2.1-FFmpeg.txt)
+  (FFmpeg attribution header + the verbatim GNU LGPL v2.1; the `Dependencies/**` content glob in
+  `Editor.csproj`/`Player.csproj` copies it into both the editor and the exported player). New HLSL
+  shader(s) go under `Operators/Lib/Assets/shaders/img/`.
 - [`PlayerExporter.cs`](../../Editor/UiModel/Exporting/PlayerExporter.cs): add a new `OpDependencyDefinition`
   mapping the three video GUIDs (`914fb032…` PlayVideo, `04c1a6dc…` PlayVideoClip, `D9A7233D…`
   VideoStreamInput) → the FFmpeg DLL set. After porting `VideoStreamInput`, **remove
@@ -216,8 +219,14 @@ baseline** — if D3D11VA can't be stabilized in M1, zero-copy slips to M1.x.
   **`TIXL_FFMPEG_ALLOW_RESTRICTED=1`** env var (for running the editor against the GPL build until the LGPL
   one is sourced). The shipped editor (no env var) always enforces LGPL. Operators surface `StatusError` via
   `IStatusProvider`.
-- TODO: add an "FFmpeg `<version>` — LGPL shared build" line to
-  [`AboutDialog.cs`](../../Editor/Gui/Dialog/AboutDialog.cs) info block + copyable system info.
+- **Done.** The About dialog now shows an `FFmpeg: <version> (LGPL)` line (or
+  `(GPL/non-free — development build)` on a dev machine) in both the
+  [`AboutDialog.cs`](../../Editor/Gui/Dialog/AboutDialog.cs) System Information block and the copyable
+  system-info text. Cross-context bridge: `FfmpegLibrary` lives in `Video.dll` (operator load context) while
+  the dialog lives in the editor, so `FfmpegLibrary.Initialize()` registers its version/license line into a
+  new shared-Core registry — [`ThirdPartyRuntimeInfo`](../../Core/Resource/ThirdPartyRuntimeInfo.cs)
+  (Core is the assembly shared across both load contexts) — and the dialog reads it back. The line registers
+  lazily on first video use, so it only appears once a video op has initialised FFmpeg.
 
 ## Phasing (build-verifiable; `dotnet build` after each step)
 
@@ -258,7 +267,13 @@ baseline** — if D3D11VA can't be stabilized in M1, zero-copy slips to M1.x.
    bundle, so a stream-only project ships no OpenCV. *(Note: the FFmpeg DLLs always ship with the Lib
    operator package — the operator-package copy doesn't apply file-exclusion, unlike the Player-dir copy. A
    per-project FFmpeg exclusion would need the export to exclude operator-package files too — deferred.)*
-10. Licensing guardrail surfacing + AboutDialog line. Cleanup dead MF **decode** code (keep MF **encode**).
+10. **Done.** Licensing surfacing: About-dialog `FFmpeg: <version> (LGPL)` line via the shared-Core
+    `ThirdPartyRuntimeInfo` registry (see *Licensing guardrail + UI*). Dead MF **decode** sweep verified a
+    no-op — the `PlayVideo`/`PlayVideoClip`/`VideoStreamInput` rewrites already removed every MF decode usage
+    from the operators (`grep` for `MediaEngine`/`MediaFoundation` in `Operators/**` is empty; no leftover MF
+    package reference in `Lib.csproj`); the only remaining MF code is the **encoder** in
+    `Editor/Gui/Windows/RenderExport/MF/*`, kept by design. Manual test set
+    [`video-playback-determinism.md`](../../.tests-manual/video-playback-determinism.md) added.
 
 **Riskiest = step 8.** Fallbacks, in order: own-device + shared-texture (keyed mutex) → software path
 (steps 4-7 are a complete, shippable M1 without zero-copy).
@@ -298,7 +313,10 @@ works.
 - **Packaging:** fresh Editor run loads FFmpeg from output dir (version logged, license check passes);
   export a project using a video op → FFmpeg DLLs present; one that doesn't → excluded;
   `opencv_videoio_ffmpeg4110_64.dll` no longer shipped once `VideoStreamInput` is ported.
-- Add a manual test set under `.tests-manual/` for video playback determinism.
+- **Done.** Manual test set [`video-playback-determinism.md`](../../.tests-manual/video-playback-determinism.md)
+  added under `.tests-manual/` (first frame, About-dialog FFmpeg line, deterministic scrub, paused→play with
+  no offset, loop-vs-clamp, fast-scrub last-valid, `PlayVideoClip` source-range mapping, render-to-file
+  frame alignment).
 
 ## Milestone 2 — Caching, prefetch & reverse (deferred; design locked)
 
@@ -348,5 +366,9 @@ forward play/export; M2 adds retention for random seek, framewise stepping, and 
   that makes random seeking fast for everyday media — a "killer feature," explicitly wanted in the encode plan.
 - Route a video's audio track through the BASS `AudioEngine` (new push-stream `BASS_STREAMPROC`; no existing
   pattern). Lower priority.
+- (Optional) Port `VideoDeviceInput` (webcam) capture to FFmpeg's **dshow** input device (`avdevice` already
+  ships). Keep **DirectShowLib** for device/capability enumeration — FFmpeg's dshow listing is log-based and
+  worse. The image transforms (flip/rotate/scale/resize, currently OpenCV) would move to a GPU shader/swscale.
+  Buys consistency, *not* a DLL reduction (CameraCalibrator still needs OpenCV).
 - Full HDR tone-mapping (PQ/HLG → linear); HAP fast-path (reuse the [DDS BCn upload](../../Core/Resource/Dds/DdsDirectX.cs));
   TiXLClip cache/bake; the media setup/install assistant.

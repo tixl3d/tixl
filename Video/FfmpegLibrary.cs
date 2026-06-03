@@ -87,6 +87,8 @@ public static class FfmpegLibrary
         }
 
         IsAvailable = true;
+        var licenseLabel = isRestricted ? "GPL/non-free — development build" : "LGPL";
+        T3.Core.Resource.ThirdPartyRuntimeInfo.Register("FFmpeg", $"{VersionInfo} ({licenseLabel})");
         if (isRestricted)
             Log.Warning($"FFmpeg {VersionInfo} loaded but is a GPL/non-free build — for development/testing only, NOT for distribution.");
         else
