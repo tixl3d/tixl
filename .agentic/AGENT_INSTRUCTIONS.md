@@ -71,6 +71,17 @@ Also:
 - Prefer slightly longer, descriptive names when clarity improves (e.g. `faceIndex` over `i`)
 - When separating concerns, consider splitting pure data/state from drawing/IO into distinct classes (`RollingMetric` + `MetricGraphView` is a reference example). Useful when the data class has non-editor consumers, but don't force it when there's only one caller.
 
+## Comments
+
+Comments live forever. They must earn their place. Anyone reading the file six months from now should still benefit from every line of comment in it.
+
+- **No session context in source.** Do not reference Sentry issue IDs (`see Sentry TOOLL3-XYZ`), plan filenames (`see Plan_FooBar.md Phase 2`), commit titles, dates, or "this fix / the previous commit." Those belong in commit messages and plan files, not in code. A reader without the conversation has no use for them — they're noise that erodes signal.
+- **Comment why, not what.** If the code says `DataBuffers?.Dispose()`, explain *why* `DataBuffers` can be null in this branch — don't explain what `?.` does.
+- **One short line beats a paragraph.** `// MidiIn callbacks fire on per-device threads; serialize writes here.` is more useful than a five-line block restating the same. If you find yourself writing a third sentence, ask whether the function name or xmldoc should carry it instead.
+- **No procedural narration.** "Register X as the very first thing because if we don't, Y will happen later" — drop. The order of statements is visible; the *reason ordering matters* is the only useful note, and it can be one line.
+- **xmldoc is for API contracts.** Use `<summary>` to describe what a member does and when callers should use it. Don't journal bugs of the day or fix history there.
+- **Preserve good existing comments.** Architectural notes, non-obvious invariants, "this looks wrong but it's correct because X" — leave them. The rule is about *not adding* noise, not about scrubbing the file.
+
 ## Encapsulation and Visibility
 - **Default to `private`.** Raise visibility (`internal`, `public`) only when a member is actually read or written from outside the declaring type. "Mirroring a nearby class" or "might be useful later" is not a reason — unnecessary public surface area is a long-term review tax.
 - **Prefer constructor parameters over public setters** for values needed at construction time. `new Foo(x, y)` is always better than `new Foo { X = x, Y = y }` unless the setter is also used later. Command classes in `Editor/UiModel/Commands/` are a common place this goes wrong — initialize `_newValue` / `_originalValue` in the constructor and keep them `private readonly`.

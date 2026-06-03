@@ -41,16 +41,8 @@ public class MidiDataRecording : MidiConnectionManager.IMidiConsumer
         if (msg.MidiEvent.CommandCode == MidiCommandCode.AutoSensing)
             return;
 
-        // Each MidiIn instance has its own callback thread (NAudio wraps
-        // winmm.dll's midiInOpen). With multiple devices connected, two
-        // callbacks can fire simultaneously and concurrently mutate
-        // _channelsByHash / _dataSet.Channels / channel.Events — see Sentry
-        // TOOLL3-YC and TOOLL3-XQ.
-        //
-        // IMPROVE: UI-thread readers (DataSetViewCanvas, DataClipBodyRenderer)
-        // and writers (RemoveDataSetItemsCommand) of _dataSet.Channels do not
-        // acquire this lock yet. A full fix would extend coordination to those
-        // sites or move to thread-safe collections — out of scope here.
+        // MidiIn callbacks fire on per-device threads; serialize writes.
+        // IMPROVE: UI-thread readers/writers of _dataSet.Channels don't yet share this lock.
         lock (_writeLock)
         {
             LastEventTime = Playback.RunTimeInSecs;

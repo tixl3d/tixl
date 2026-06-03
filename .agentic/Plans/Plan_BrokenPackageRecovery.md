@@ -19,6 +19,7 @@ Per-project incremental backups already live at `<projectFolder>/.temp/Backup/` 
 ## Related plans
 
 - [Plan_RuntimeConsistencyRecovery](Plan_RuntimeConsistencyRecovery.md) — the runtime-detection counterpart. Where this plan handles "package broken at load time" by routing it into a `BrokenProjectInfo`, the consistency-recovery plan handles "state observed to be corrupt at runtime" by suspending the editor and offering recovery. They share the backup-restore primitives in Phase 2 / 3 of this plan.
+- [Plan_InstallVerificationAndSafeStartup](Plan_InstallVerificationAndSafeStartup.md) — handles TiXL's *own* deployed-file integrity (missing/corrupt DLLs, missing resources). Where this plan deals with user-project corruption, that plan deals with the installation underneath it. Both share the recovery dialog UX and the "Safe Startup" entry point.
 
 ## Related Sentry issues
 

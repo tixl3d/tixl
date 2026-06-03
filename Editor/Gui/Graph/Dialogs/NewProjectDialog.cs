@@ -26,10 +26,8 @@ internal sealed class NewProjectDialog : ModalDialog
     {
         DialogSize = new Vector2(550, 320);
 
-        // Defensive: ProjectDirectories is normally populated at startup
-        // (Program.cs), but a corrupted user-settings file or an early-draw
-        // race can leave it empty. Indexing [0] every frame would crash the
-        // app — see Sentry TOOLL3-YG. Fall back to the default folder.
+        // ProjectDirectories is normally populated at startup but can be empty
+        // on a corrupted user-settings file. Drawn every frame, so guard the indexer.
         var projectDirectories = UserSettings.Config.ProjectDirectories;
         var primaryProjectDirectory = projectDirectories.Count > 0
                                           ? projectDirectories[0]

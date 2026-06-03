@@ -397,7 +397,6 @@ internal sealed class ProjectSettingsWindow : Window
 
                     FormInputs.AddVerticalSpace();
 
-                    // BPM lives on Playback now (post Phase B of Plan_TimelineAudioClips.md).
                     var bpm = (float)playback.Bpm;
                     if (FormInputs.AddFloat("BPM",
                             ref bpm,
@@ -602,8 +601,7 @@ internal sealed class ProjectSettingsWindow : Window
 
             if (playback.AudioClips.Count > 0)
             {
-                // BPM lives on Playback now (post Phase B of Plan_TimelineAudioClips.md). The
-                // settings loader already migrated any legacy per-clip BPM into playback.Bpm.
+                // The settings loader already migrated any legacy per-clip BPM into playback.Bpm.
                 Playback.Current.Bpm = playback.Bpm;
                 if (Playback.Current.Settings != null)
                     Playback.Current.Settings.Playback.Syncing = CompositionSettings.SyncModes.Timeline;
@@ -644,7 +642,6 @@ internal sealed class ProjectSettingsWindow : Window
 
         if (float.TryParse(result.Groups[1].Value, out var bpm))
         {
-            // BPM lives on Playback now (post Phase B of Plan_TimelineAudioClips.md).
             Log.Debug($"Using bpm-rate {bpm} from filename.");
             Playback.Current.Bpm = bpm;
         }

@@ -6,13 +6,9 @@ using T3.Core.SystemUi;
 namespace T3.Editor.Gui.Styling.Markdown;
 
 /// <summary>
-/// Renders a small, fixed Markdown subset inside an ImGui window. See
-/// <see href="../../../../../.agentic/Plans/Plan_MarkdownRenderer.md"/>
-/// for the supported syntax and design notes.
-///
-/// One <see cref="MarkdownView"/> per host window: the cache holds the last
-/// parsed/laid-out document and is invalidated when the source text, wrap
-/// width, or UI scale changes.
+/// Renders a small, fixed Markdown subset inside an ImGui window. One instance per host
+/// window: the cache holds the last parsed/laid-out document and is invalidated when the
+/// source text, wrap width, or UI scale changes.
 /// </summary>
 internal sealed class MarkdownView
 {

@@ -140,9 +140,7 @@ public static class SceneSetupPopup
 
         if (isOpen)
         {
-            // Mesh Label — MeshBuffers can be null for transform-only nodes or
-            // nodes whose mesh failed to load (line 149 already handles that
-            // case for the tooltip); see Sentry TOOLL3-Y7.
+            // MeshBuffers is null for transform-only nodes or failed mesh loads.
             string meshLabel;
             if (string.IsNullOrEmpty(node.MeshName))
                 meshLabel = "-";

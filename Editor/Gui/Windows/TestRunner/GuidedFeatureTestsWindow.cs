@@ -12,12 +12,9 @@ using T3.Editor.Gui.Styling.Markdown;
 namespace T3.Editor.Gui.Windows.TestRunner;
 
 /// <summary>
-/// In-editor manual test runner. Phase 1: parse <c>.tests-manual/*.md</c>,
-/// pick a subset, walk through steps recording Pass/Fail/Other + comment,
-/// summarize in-memory. Export buttons are stubbed in this phase.
-///
-/// State machine: Pick → Run → Summary → Pick. See
-/// <see href="../../../../../.agentic/Plans/Plan_ManualTestRunner.md"/>.
+/// In-editor manual test runner. Parses <c>.tests-manual/*.md</c>, walks through steps
+/// recording Pass/Fail/Other + comment, summarizes in-memory.
+/// State machine: Pick → Run → Summary → Pick.
 /// </summary>
 internal sealed class GuidedFeatureTestsWindow : Window
 {

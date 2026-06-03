@@ -72,11 +72,8 @@ internal sealed class AppWindow
 
     public void SetVisible(bool isVisible)
     {
-        // Defensive: the secondary Viewer's form can be disposed mid-frame
-        // (display reconfigure, late shutdown) while the render loop is still
-        // calling SetVisible every frame. Setting Visible on a disposed Form
-        // routes through CreateHandle and throws ObjectDisposedException —
-        // see Sentry TOOLL3-S3.
+        // Form can be disposed mid-frame (shutdown / display reconfigure);
+        // Visible= on a disposed Form throws via CreateHandle.
         if (Form.IsDisposed)
             return;
         Form.Visible = isVisible;

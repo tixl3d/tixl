@@ -9,9 +9,8 @@ using T3.Editor.UiModel.InputsAndTypes;
 namespace T3.Editor.Gui.UiHelpers.Wiki;
 
 /// <summary>
-/// Exports a folder structure with a complete documentation for all operators in Lib.*
-/// into <c>.help/docs/operators/</c>, matching the nested URL shape used by the MkDocs site
-/// (see <c>.agentic/Plans/Plan_UpdateHelp.md</c>, Section 4c).
+/// Exports per-operator documentation into <c>.help/docs/operators/</c>,
+/// matching the nested URL shape used by the MkDocs site.
 /// </summary>
 public static class ExportWikiDocumentation
 {

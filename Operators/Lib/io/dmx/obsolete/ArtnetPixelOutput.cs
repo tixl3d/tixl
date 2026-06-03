@@ -33,9 +33,7 @@ internal sealed class ArtnetPixelOutput : Instance<ArtnetPixelOutput>, IStatusPr
     {
         var artNetSendRateHz = ArtNetSendRate.GetValue(context);
         var updateContinuously = true;
-        // IpAddress has no default; an unset input returns null. Treat as empty
-        // so TryGetValidAddress surfaces a clean parse error via _lastErrorMessage
-        // instead of crashing — see Sentry TOOLL3-Y6.
+        // Empty (rather than null) so TryGetValidAddress surfaces a parse error via _lastErrorMessage.
         var ipAddressString = IpAddress.GetValue(context)?.Trim() ?? string.Empty;
         var reconnect = Reconnect.GetValue(context);
 

@@ -612,10 +612,8 @@ internal sealed class TimeLineCanvas : AnimationCanvas
     private float _lastCurveEditorHeight;
     private int _lastSelectionHash;
 
-    // --- Per-parameter curve-expand state (see Plan_DopeSheetCurveExpand.md) ---
-    // Populated by the curve-toggle icon on each dope-sheet row.
-    // When non-empty in DopeView mode, the timeline body splits into a dope-sheet pane
-    // on top and an inline curve-editor pane below.
+    // Per-parameter curve-expand state, populated by the curve-toggle icon on each dope-sheet row.
+    // When non-empty in DopeView mode, the timeline body splits into dope-sheet (top) + curve-editor (below).
     internal readonly HashSet<int> CurveEditingParamHashes = new();
 
     // paramHash -> visible-component bitmask; missing entry = "all components visible".

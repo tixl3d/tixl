@@ -3,9 +3,8 @@
 namespace T3.Editor.Gui.Styling.Markdown;
 
 /// <summary>
-/// Parses the v1 markdown subset documented in Plan_MarkdownRenderer.md
-/// into a logical-line + inline-run representation. Runs reference the
-/// owning source string by (start, length) slices — no substring allocation.
+/// Parses a small fixed markdown subset into a logical-line + inline-run representation.
+/// Runs reference the owning source string by (start, length) slices — no substring allocation.
 /// </summary>
 internal static class MarkdownParser
 {

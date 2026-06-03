@@ -50,12 +50,8 @@ internal static partial class ProjectSetup
     {
         var name = nameSpace.Split('.').Last();
 
-        // CreateNewProject writes files to disk under ProjectDirectories[0]. That
-        // can fail with FileNotFoundException / UnauthorizedAccessException /
-        // IOException on OneDrive-virtualised Documents folders, broken symlinks,
-        // antivirus filters, or disappeared removable drives — see Sentry
-        // TOOLL3-XS. Surface those through the failureLog channel instead of
-        // letting the exception propagate and crash the editor.
+        // Filesystem failures (OneDrive virtualisation, broken symlinks, antivirus,
+        // missing/removed drives) surface as exceptions; route them through failureLog.
         CsProjectFile newCsProj;
         try
         {

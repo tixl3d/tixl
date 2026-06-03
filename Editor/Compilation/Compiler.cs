@@ -128,11 +128,7 @@ internal static class Compiler
         }
         catch (System.ComponentModel.Win32Exception e)
         {
-            // dotnet (or the requested exe) is not on PATH, or otherwise
-            // refused to launch — see Sentry TOOLL3-XM. Route through the
-            // normal failureLog channel with a recognisable marker so
-            // ExplainBuildFailure can surface a useful hint instead of an
-            // unhandled exception crashing the editor.
+            // Emit a marker ExplainBuildFailure recognises so the caller can show a useful hint.
             var marker = e.NativeErrorCode == 2 ? "DOTNET_NOT_FOUND" : "WIN32_EXEC_FAILED";
             return ($"{marker}: {fileName}: {e.Message}", -1);
         }
