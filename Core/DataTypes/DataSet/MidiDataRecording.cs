@@ -41,77 +41,90 @@ public class MidiDataRecording : MidiConnectionManager.IMidiConsumer
         if (msg.MidiEvent.CommandCode == MidiCommandCode.AutoSensing)
             return;
 
-        LastEventTime = Playback.RunTimeInSecs;
-
-        var device = MidiConnectionManager.GetDescriptionForMidiIn(midiIn);
-        var deviceName = (device.ProductName
-                          + (device.ProductId is not (0 or 65535)
-                                 ? device.ProductId.ToString()
-                                 : string.Empty)).Replace("/", "_");
-
-        var someTime = Playback.RunTimeInSecs; // (float)msg.MidiEvent.AbsoluteTime;
-        switch (msg.MidiEvent)
+        // Each MidiIn instance has its own callback thread (NAudio wraps
+        // winmm.dll's midiInOpen). With multiple devices connected, two
+        // callbacks can fire simultaneously and concurrently mutate
+        // _channelsByHash / _dataSet.Channels / channel.Events — see Sentry
+        // TOOLL3-YC and TOOLL3-XQ.
+        //
+        // IMPROVE: UI-thread readers (DataSetViewCanvas, DataClipBodyRenderer)
+        // and writers (RemoveDataSetItemsCommand) of _dataSet.Channels do not
+        // acquire this lock yet. A full fix would extend coordination to those
+        // sites or move to thread-safe collections — out of scope here.
+        lock (_writeLock)
         {
-            case NoteEvent midiNoteEvent:
-                var noteChannel = FindOrCreateNoteChannel(deviceName, midiNoteEvent);
-                var lastNote = noteChannel.GetLastEvent() as DataIntervalEvent;
+            LastEventTime = Playback.RunTimeInSecs;
 
-                switch (msg.MidiEvent.CommandCode)
-                {
-                    case MidiCommandCode.NoteOff:
-                        lastNote?.Finish((float)someTime);
-                        break;
+            var device = MidiConnectionManager.GetDescriptionForMidiIn(midiIn);
+            var deviceName = (device.ProductName
+                              + (device.ProductId is not (0 or 65535)
+                                     ? device.ProductId.ToString()
+                                     : string.Empty)).Replace("/", "_");
 
-                    case MidiCommandCode.NoteOn:
+            var someTime = Playback.RunTimeInSecs; // (float)msg.MidiEvent.AbsoluteTime;
+            switch (msg.MidiEvent)
+            {
+                case NoteEvent midiNoteEvent:
+                    var noteChannel = FindOrCreateNoteChannel(deviceName, midiNoteEvent);
+                    var lastNote = noteChannel.GetLastEvent() as DataIntervalEvent;
+
+                    switch (msg.MidiEvent.CommandCode)
                     {
-                        if (lastNote != null && lastNote.IsUnfinished)
+                        case MidiCommandCode.NoteOff:
+                            lastNote?.Finish((float)someTime);
+                            break;
+
+                        case MidiCommandCode.NoteOn:
                         {
-                            lastNote.Finish((float)someTime);
-                            if (midiNoteEvent.Velocity == 0)
-                                break;
+                            if (lastNote != null && lastNote.IsUnfinished)
+                            {
+                                lastNote.Finish((float)someTime);
+                                if (midiNoteEvent.Velocity == 0)
+                                    break;
+                            }
+
+                            noteChannel.Events.Add(new DataIntervalEvent()
+                                                       {
+                                                           Time = someTime,
+                                                           EndTime = Double.PositiveInfinity,
+                                                           Value = (float)midiNoteEvent.Velocity,
+                                                       });
+                            break;
                         }
-
-                        noteChannel.Events.Add(new DataIntervalEvent()
-                                                   {
-                                                       Time = someTime,
-                                                       EndTime = Double.PositiveInfinity,
-                                                       Value = (float)midiNoteEvent.Velocity,
-                                                   });
-                        break;
                     }
-                }
 
-                break;
+                    break;
 
-            case ControlChangeEvent controlChangeEvent:
-                FindOrCreateControlChangeChannel(deviceName, controlChangeEvent)
-                   .Events
-                   .Add(new DataEvent()
-                            {
-                                Time = someTime,
-                                Value = (float)controlChangeEvent.ControllerValue,
-                            });
-                break;
+                case ControlChangeEvent controlChangeEvent:
+                    FindOrCreateControlChangeChannel(deviceName, controlChangeEvent)
+                       .Events
+                       .Add(new DataEvent()
+                                {
+                                    Time = someTime,
+                                    Value = (float)controlChangeEvent.ControllerValue,
+                                });
+                    break;
 
-            case PitchWheelChangeEvent pitchWheelChangeEvent:
-                FindOrCreatePitchWheelChangeChannel(deviceName, pitchWheelChangeEvent)
-                   .Events
-                   .Add(new DataEvent()
-                            {
-                                Time = someTime,
-                                Value = (float)pitchWheelChangeEvent.Pitch,
-                            });
-                break;
+                case PitchWheelChangeEvent pitchWheelChangeEvent:
+                    FindOrCreatePitchWheelChangeChannel(deviceName, pitchWheelChangeEvent)
+                       .Events
+                       .Add(new DataEvent()
+                                {
+                                    Time = someTime,
+                                    Value = (float)pitchWheelChangeEvent.Pitch,
+                                });
+                    break;
 
-            case ChannelAfterTouchEvent channelAfterTouchEvent:
-                FindOrCreateChannelAfterTouchChannel(deviceName, channelAfterTouchEvent)
-                   .Events
-                   .Add(new DataEvent()
-                            {
-                                Time = someTime,
-                                Value = (float)channelAfterTouchEvent.AfterTouchPressure,
-                            });
-                break;
+                case ChannelAfterTouchEvent channelAfterTouchEvent:
+                    FindOrCreateChannelAfterTouchChannel(deviceName, channelAfterTouchEvent)
+                       .Events
+                       .Add(new DataEvent()
+                                {
+                                    Time = someTime,
+                                    Value = (float)channelAfterTouchEvent.AfterTouchPressure,
+                                });
+                    break;
+            }
         }
     }
 
@@ -226,4 +239,5 @@ public class MidiDataRecording : MidiConnectionManager.IMidiConsumer
     private const string ChannelPathPrefix = "Ch";
     private const string MidiNamespacePrefix = "Midi";
     private readonly Dictionary<int, DataChannel> _channelsByHash = new();
+    private readonly object _writeLock = new();
 }
