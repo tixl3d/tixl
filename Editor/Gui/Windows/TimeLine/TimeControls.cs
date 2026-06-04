@@ -345,15 +345,13 @@ internal static class TimeControls
             var timeSinceLastEvent = Playback.RunTimeInSecs - Math.Max(T3Ui.MidiDataRecording.LastEventTime, T3Ui.OscDataRecording.LastEventTime);
             var flashFactor = MathF.Pow((float)timeSinceLastEvent.Clamp(0, 1) / 1, 0.5f);
             var color = Color.Mix(UiColors.StatusAnimated, UiColors.BackgroundFull.Fade(0.3f), flashFactor);
-            ImGui.PushStyleColor(ImGuiCol.Text, color.Rgba);
-            if (CustomComponents.IconButton(Icon.IO, ControlSize))
+            
+            if (CustomComponents.IconButton(Icon.IO, ControlSize, color))
             {
                 //T3Ui.MidiStreamRecorder.Reset();
                 //DataRecording.ActiveRecordingSet.WriteToFile();
                 WindowManager.ToggleInstanceVisibility<IoViewWindow>();
             }
-
-            ImGui.PopStyleColor();
 
             if (ImGui.IsItemHovered())
             {

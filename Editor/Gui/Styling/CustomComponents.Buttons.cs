@@ -1,4 +1,4 @@
-﻿using ImGuiNET;
+using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Utils;
 using T3.Editor.App;
@@ -176,6 +176,28 @@ internal static partial class CustomComponents
         if (state == ButtonStates.Activated)
             ImGui.PopStyleColor(2);
 
+        ImGui.PopStyleVar(1);
+        return clicked;
+    }
+
+    // New overload
+    public static bool IconButton(Icon icon, Vector2 size, Color color)
+    {
+        if (size == Vector2.Zero)
+        {
+            var h = ImGui.GetFrameHeight();
+            size = new Vector2(h);
+        }
+
+        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Vector2.Zero);
+        ImGui.PushStyleColor(ImGuiCol.ButtonActive, UiColors.BackgroundButtonActivated.Rgba);
+
+        ImGui.PushID((int)icon);
+        var clicked = ImGui.Button("##iconBtn", size);
+        ImGui.PopID();
+        Icons.DrawIconOnLastItem(icon, color.Rgba);  // use passed color directly
+
+        ImGui.PopStyleColor();
         ImGui.PopStyleVar(1);
         return clicked;
     }
