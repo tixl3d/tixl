@@ -193,19 +193,30 @@ baseline** — if D3D11VA can't be stabilized in M1, zero-copy slips to M1.x.
   name (`GetName().Name`) is metadata-only and safe; the name must stay in Core. With all three,
   `PlayVideo` decodes and displays in the editor (verified). *(These are integration tax specific to the
   operator-ALC; the unit-test host needed none of them.)*
-- **⚠ Licensing — open item (the headline risk).** `Sdcb.FFmpeg.runtime.windows-x64` is a **GPL build**
-  (`--enable-gpl --enable-version3`, x264/x265) — confirmed via `avcodec_configuration()`, and **rejected by
-  the license guardrail**. Fine for local dev/test (decode is identical; GPL is a *distribution* concern via
-  the test opt-in) but it **must not ship**. Before release, swap the native runtime to a verified **LGPL
-  FFmpeg 7.0 (avcodec-61)** source. Options: (a) the **`ffmpeg.lgpl`** NuGet pinned to its avcodec-61
-  (FFmpeg-7.0) date-version — keeps all code, NuGet-delivered, but a third-party package; or (b) a
-  **self-hosted/vendored BtbN `lgpl-shared` 7.0** build (the notes' "custom runtime NuGet with verified LGPL
-  DLLs") — full control + reproducibility, more setup. **Decision pending.** **Done:** shipped the FFmpeg
-  LGPL license text + attribution as
-  [`Dependencies/licenses/LGPL-v2.1-FFmpeg.txt`](../../Dependencies/licenses/LGPL-v2.1-FFmpeg.txt)
-  (FFmpeg attribution header + the verbatim GNU LGPL v2.1; the `Dependencies/**` content glob in
-  `Editor.csproj`/`Player.csproj` copies it into both the editor and the exported player). New HLSL
-  shader(s) go under `Operators/Lib/Assets/shaders/img/`.
+- **Licensing — RESOLVED (the headline risk).** `Sdcb.FFmpeg.runtime.windows-x64` was a **GPL build**
+  (`--enable-gpl --enable-version3`, x264/x265) — confirmed via `avcodec_configuration()` and rejected by the
+  license guardrail. **Swapped 2026-06-03** for the **`FFmpeg.LGPL`** NuGet package (`20250329.1.0`), a BtbN
+  `lgpl-shared` build: avcodec-61 (FFmpeg 7.x, matches the `Sdcb.FFmpeg` 7.0.0 bindings, which stay
+  unchanged), configured **without** the gpl/nonfree flags and without x264/x265 — statically verified by
+  scanning the shipped `avcodec-61.dll`'s embedded configure string (`--enable-gpl`/`--enable-nonfree`/
+  `--enable-libx264` all absent). Its `.targets` copies the av/sw DLLs **flat** into the operator output
+  (verified by a build), which is where `FfmpegLibrary` loads them, so the guardrail now passes **without**
+  the dev opt-in. Residual notes:
+  - This build enables `--enable-version3` → it is **LGPL v3** (not v2.1). We ship the LGPL v3 text; LGPL v3
+    incorporates GPL v3 (already present as `GPL-v3-EmguCV.txt`).
+  - Pinned to `20250329.1.0`, the **newest avcodec-61 (FFmpeg 7.x)** FFmpeg.LGPL build — `20250330` bumped to
+    avcodec-62 (the FFmpeg 8.x-dev SONAME, from the "libs: bump major version" commit), whose ABI the
+    `Sdcb.FFmpeg` 7.0.0 bindings do **not** match. Crossover found by range-reading each candidate nupkg's zip
+    directory. To go past 7.x, bump `Sdcb.FFmpeg` to a matching major and pin a same-SONAME FFmpeg.LGPL build.
+  - It is a broad BtbN "everything" build (~100 MB of DLLs, statically bundling dav1d/libaom/libvpx/…); a
+    minimal custom LGPL build is the smaller-footprint alternative if size or third-party attribution matters.
+  - **Pending: runtime confirmation** (editor restart) that the new DLLs load + decode and the guardrail
+    passes with no opt-in.
+  Shipped the FFmpeg LGPL v3 license text + attribution as
+  [`Dependencies/licenses/LGPL-v3-FFmpeg.txt`](../../Dependencies/licenses/LGPL-v3-FFmpeg.txt) (FFmpeg
+  attribution + bundled-library note + the verbatim GNU LGPL v3); the `Dependencies/**` content glob in
+  `Editor.csproj`/`Player.csproj` copies it into both the editor and the exported player. New HLSL shader(s)
+  go under `Operators/Lib/Assets/shaders/img/`.
 - [`PlayerExporter.cs`](../../Editor/UiModel/Exporting/PlayerExporter.cs): add a new `OpDependencyDefinition`
   mapping the three video GUIDs (`914fb032…` PlayVideo, `04c1a6dc…` PlayVideoClip, `D9A7233D…`
   VideoStreamInput) → the FFmpeg DLL set. After porting `VideoStreamInput`, **remove
@@ -216,9 +227,9 @@ baseline** — if D3D11VA can't be stabilized in M1, zero-copy slips to M1.x.
 - `FfmpegLibrary` refuses GPL/nonfree builds at init — **done, and it already caught the GPL Sdcb runtime**
   (see Packaging). Two off-by-default, loudly-warned dev escape hatches let local runs use whatever build is
   installed: `AllowRestrictedBuildForTesting` (set by the test module-init) and the
-  **`TIXL_FFMPEG_ALLOW_RESTRICTED=1`** env var (for running the editor against the GPL build until the LGPL
-  one is sourced). The shipped editor (no env var) always enforces LGPL. Operators surface `StatusError` via
-  `IStatusProvider`.
+  **`TIXL_FFMPEG_ALLOW_RESTRICTED=1`** env var (now only needed if a developer deliberately points at a
+  GPL/non-free build; the shipped `FFmpeg.LGPL` runtime passes the guardrail on its own). The shipped editor
+  (no env var) always enforces LGPL. Operators surface `StatusError` via `IStatusProvider`.
 - **Done.** The About dialog now shows an `FFmpeg: <version> (LGPL)` line (or
   `(GPL/non-free — development build)` on a dev machine) in both the
   [`AboutDialog.cs`](../../Editor/Gui/Dialog/AboutDialog.cs) System Information block and the copyable
