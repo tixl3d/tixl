@@ -1,3 +1,4 @@
+using System.Threading;
 using Sdcb.FFmpeg.Utils;
 
 namespace T3.Video;
@@ -60,6 +61,13 @@ public sealed class VideoFrameCache : IDisposable
         EvictToBudget();
     }
 
+    /// <summary>
+    /// Updates the byte budget (the engine divides one shared global budget across live streams). Called from
+    /// the engine's eval thread while the worker owns this cache, so it only stores the new value; eviction to
+    /// it happens on the worker's next <see cref="Add"/>.
+    /// </summary>
+    public void SetBudget(long byteBudget) => Volatile.Write(ref _byteBudget, byteBudget);
+
     public void Clear()
     {
         foreach (var entry in _entries.Values)
@@ -76,7 +84,8 @@ public sealed class VideoFrameCache : IDisposable
     // it beats a LinkedList LRU that would allocate a node per cached frame on the per-frame decode path.
     private void EvictToBudget()
     {
-        while (_totalBytes > _byteBudget && _entries.Count > 1)
+        var budget = Volatile.Read(ref _byteBudget);
+        while (_totalBytes > budget && _entries.Count > 1)
         {
             var oldestPts = 0L;
             var oldestAccess = long.MaxValue;
@@ -97,7 +106,7 @@ public sealed class VideoFrameCache : IDisposable
     }
 
     private readonly Dictionary<long, Entry> _entries = new();
-    private readonly long _byteBudget;
+    private long _byteBudget;
     private long _totalBytes;
     private long _accessCounter;
 }

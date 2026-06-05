@@ -129,6 +129,12 @@ public sealed class VideoPlaybackController : IDisposable
         _cancellation.Dispose();
     }
 
+    /// <summary>
+    /// Assigns this stream's frame-cache budget — the engine's share of the shared global budget. Safe to
+    /// call from the engine's eval thread; the worker applies it to its cache on the next request.
+    /// </summary>
+    public void SetCacheBudget(long bytes) => Volatile.Write(ref _cacheBudget, bytes);
+
     // ---- render thread ----
 
     private void EnsureWorkerStarted()
@@ -220,6 +226,8 @@ public sealed class VideoPlaybackController : IDisposable
         if (_session == null)
             return;
 
+        _cache?.SetBudget(Volatile.Read(ref _cacheBudget));
+
         var playSeconds = TimeToFrameMapper.ResolvePlaybackSeconds(seconds, _session.DurationSeconds, loop);
         var target = TimeToFrameMapper.SecondsToPts(playSeconds, _session.StreamStartPts,
                                                     _session.TimeBaseNum, _session.TimeBaseDen);
@@ -275,7 +283,7 @@ public sealed class VideoPlaybackController : IDisposable
         _converter = new SoftwareFrameConverter(session.IsHdr);
         // Treat up to ~0.5 s ahead as sequential playback; larger jumps seek.
         _workerSequentialThreshold = session.TimeBaseDen / (2L * Math.Max(1, session.TimeBaseNum));
-        _cache = new VideoFrameCache(CacheBudgetBytes);
+        _cache = new VideoFrameCache(Volatile.Read(ref _cacheBudget));
         _cachedFrameBytes = ffmpeg.av_image_get_buffer_size(session.PixelFormat, session.Width, session.Height, 1);
     }
 
@@ -379,8 +387,7 @@ public sealed class VideoPlaybackController : IDisposable
     private const double FrameEpsilonSeconds = 1.0 / 1000.0;
     private const int ExportFrameTimeoutMs = 5000;
 
-    // Per-controller retention budget. The VideoPlaybackEngine will later replace this with a shared global
-    // budget arbitrated across all streams; until then each stream caches independently.
+    // Default cache budget until the engine assigns this stream a share of the shared global budget.
     private const long CacheBudgetBytes = 512L * 1024 * 1024;
 
     // Cap on frames read ahead per cycle, so the first prefetch after a seek can't monopolize the worker; the
@@ -416,6 +423,10 @@ public sealed class VideoPlaybackController : IDisposable
 
     // Render-thread only.
     private long _lastUploadedTarget = NotSet;
+
+    // Cache budget assigned by the engine (its share of the shared global budget); the eval thread writes it,
+    // the worker reads it when creating or refreshing the cache.
+    private long _cacheBudget = CacheBudgetBytes;
 
     // Worker-thread only.
     private VideoDecoderSession? _session;

@@ -83,6 +83,32 @@ public class VideoFrameCacheTests
         Assert.True(cache.ByteCount <= 2L * frameBytes);
     }
 
+    [Fact]
+    public void SetBudget_Shrink_EvictsOnNextAdd()
+    {
+        using var session = VideoDecoderSession.TryOpen(TestAssets.Video720p, out _);
+        Assert.NotNull(session);
+        var frameBytes = FrameBytes(session!);
+
+        using var cache = new VideoFrameCache(10L * frameBytes);
+        Assert.True(session.TryReadNextFrame(out var p0));
+        cache.Add(p0, session.CurrentFrame, frameBytes);
+        Assert.True(session.TryReadNextFrame(out var p1));
+        cache.Add(p1, session.CurrentFrame, frameBytes);
+        Assert.True(session.TryReadNextFrame(out var p2));
+        cache.Add(p2, session.CurrentFrame, frameBytes);
+        Assert.Equal(3, cache.Count);
+
+        // Shrink to one frame; eviction is applied lazily on the next add (the worker owns the cache).
+        cache.SetBudget(frameBytes);
+        Assert.True(session.TryReadNextFrame(out var p3));
+        cache.Add(p3, session.CurrentFrame, frameBytes);
+
+        Assert.Equal(1, cache.Count);
+        Assert.True(cache.ByteCount <= frameBytes);
+        Assert.True(cache.TryGet(p3, out _), "the just-added frame must survive");
+    }
+
     private static int FrameBytes(VideoDecoderSession session)
         => Sdcb.FFmpeg.Raw.ffmpeg.av_image_get_buffer_size(session.PixelFormat, session.Width, session.Height, 1);
 

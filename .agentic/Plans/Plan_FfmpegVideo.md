@@ -421,6 +421,17 @@ clips, eviction of far ones — so hundreds of timeline clips don't mean hundred
 
 ## VideoPlaybackEngine (global media manager — facade in Core, impl in Video)
 
+**Foundation implemented:** the Core facade ([`Core/Video/VideoPlayback.cs`](../../Core/Video/VideoPlayback.cs)
+— `IVideoPlaybackEngine` + `VideoFrameResult` + the `VideoPlayback.Engine` holder, no FFmpeg types) and the
+Video impl ([`VideoPlaybackEngine.cs`](../../Video/VideoPlaybackEngine.cs) — a singleton owning per-stream
+`VideoPlaybackController`s, `RequestFrame`/`ReleaseStream`, publishing itself to the Core holder on first
+use). `PlayVideo` + `PlayVideoClip` are now thin clients keyed by a per-instance stream id (behavior
+unchanged). The **shared cache budget** is in too: the engine divides one global 1 GB budget evenly across
+live streams (a lone video gets the full 1 GB — double the old per-controller cap; the total stays bounded
+as streams multiply), pushed to each `VideoFrameCache` via a settable, lazily-applied budget.
+**Remaining:** bounded decoder pool + preroll/eviction, activity-weighted budget shares, and the editor-side
+consumer (cache indicators).
+
 A single global manager owns all video decode resources — the decode-stream pool, frame cache, texture pool,
 the parallel-playback budget, and (later) `-optimized.mp4` proxies — in the role of `AudioEngine` /
 `ResourceManager`, not operator logic. `PlayVideo` and every `VideoClip` are thin **clients** that ask it for

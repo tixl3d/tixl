@@ -39,17 +39,19 @@ internal sealed class PlayVideo : Instance<PlayVideo>, IStatusProvider
             return;
         }
 
-        if (_controller.Update(absolutePath!, requestedTime, Loop.GetValue(context), context.Playback.IsRenderingToFile))
+        var result = VideoPlaybackEngine.Instance.RequestFrame(_streamId, absolutePath!, requestedTime,
+                                                               Loop.GetValue(context), context.Playback.IsRenderingToFile);
+        if (result.Produced)
             UpdateCount.Value++;
 
-        _statusMessage = _controller.ErrorMessage;
-        HasCompleted.Value = _controller.HasCompleted;
-        Texture.Value = _controller.Texture;
-        Duration.Value = _controller.Duration;
+        _statusMessage = result.ErrorMessage;
+        HasCompleted.Value = result.HasCompleted;
+        Texture.Value = result.Texture;
+        Duration.Value = result.Duration;
 
         // Only stall the exporter for the exact frame; realtime keeps showing the last valid texture.
         if (context.Playback.IsRenderingToFile)
-            Playback.OpNotReady |= !_controller.IsReady;
+            Playback.OpNotReady |= !result.IsReady;
 
         Texture.DirtyFlag.Clear();
         Duration.DirtyFlag.Clear();
@@ -62,7 +64,7 @@ internal sealed class PlayVideo : Instance<PlayVideo>, IStatusProvider
         if (!isDisposing)
             return;
 
-        _controller.Dispose();
+        VideoPlaybackEngine.Instance.ReleaseStream(_streamId);
     }
 
     public IStatusProvider.StatusLevel GetStatusLevel()
@@ -70,7 +72,7 @@ internal sealed class PlayVideo : Instance<PlayVideo>, IStatusProvider
 
     public string? GetStatusMessage() => _statusMessage;
 
-    private readonly VideoPlaybackController _controller = new();
+    private readonly Guid _streamId = Guid.NewGuid();
     private string? _statusMessage;
 
     // Input parameters

@@ -50,9 +50,10 @@ internal sealed class PlayVideoClip : Instance<PlayVideoClip>, IStatusProvider
         var sourceEnd = context.Playback.SecondsFromBars(sourceRange.End);
         var clampedTime = Math.Clamp(sourceTimeInSecs, Math.Min(sourceStart, sourceEnd), Math.Max(sourceStart, sourceEnd));
 
-        _controller.Update(absolutePath, clampedTime, loop: false, context.Playback.IsRenderingToFile);
-        _statusMessage = _controller.ErrorMessage;
-        Texture.Value = _controller.Texture;
+        var result = VideoPlaybackEngine.Instance.RequestFrame(_streamId, absolutePath, clampedTime,
+                                                               loop: false, context.Playback.IsRenderingToFile);
+        _statusMessage = result.ErrorMessage;
+        Texture.Value = result.Texture;
 
         Texture.DirtyFlag.Clear();
     }
@@ -62,7 +63,7 @@ internal sealed class PlayVideoClip : Instance<PlayVideoClip>, IStatusProvider
         if (!isDisposing)
             return;
 
-        _controller.Dispose();
+        VideoPlaybackEngine.Instance.ReleaseStream(_streamId);
     }
 
     public IStatusProvider.StatusLevel GetStatusLevel()
@@ -70,7 +71,7 @@ internal sealed class PlayVideoClip : Instance<PlayVideoClip>, IStatusProvider
 
     public string GetStatusMessage() => _statusMessage;
 
-    private readonly VideoPlaybackController _controller = new();
+    private readonly Guid _streamId = Guid.NewGuid();
     private string _statusMessage;
 
     // Input parameters
