@@ -429,8 +429,14 @@ use). `PlayVideo` + `PlayVideoClip` are now thin clients keyed by a per-instance
 unchanged). The **shared cache budget** is in too: the engine divides one global 1 GB budget evenly across
 live streams (a lone video gets the full 1 GB — double the old per-controller cap; the total stays bounded
 as streams multiply), pushed to each `VideoFrameCache` via a settable, lazily-applied budget.
-**Remaining:** bounded decoder pool + preroll/eviction, activity-weighted budget shares, and the editor-side
-consumer (cache indicators).
+The **bounded decoder pool** is in: each stream's last-request time is stamped on `RequestFrame`, and the
+engine opportunistically evicts streams that are idle past a timeout (5 s) or — when above the live cap (8) —
+the most-idle ones past a short grace, freeing their decoder + worker + cache and re-dividing the budget. A
+genuinely active stream is never evicted, so >cap simultaneous clips degrade by exceeding the cap rather than
+thrashing decoders. So `# controllers` now tracks *near-playhead* clips, not every video op in the graph.
+**Remaining:** **preroll** of upcoming clips (needs the clip player's schedule — until then an evicted clip
+re-opens with a brief seek when it returns), activity-weighted budget shares, the cap/budget as project
+settings, and the editor-side consumer (cache indicators).
 
 A single global manager owns all video decode resources — the decode-stream pool, frame cache, texture pool,
 the parallel-playback budget, and (later) `-optimized.mp4` proxies — in the role of `AudioEngine` /
