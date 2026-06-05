@@ -1,8 +1,9 @@
 # Video clip player
 
-**Status:** Drafted 2026-06-04. Design agreed; no code yet. Follows the FFmpeg playback work
-([`Plan_FfmpegVideo.md`](Plan_FfmpegVideo.md)) which made frame-precise video playback cheap enough
-to composite several clips on one timeline.
+**Status:** Updated 2026-06-04. The `_ProcessVideoClips` C# helper is **built + committed**; creating +
+wiring the `VideoClipPlayer` symbol op around it is the next step — see *Phase-1 implementation — settled*
+below, which **supersedes the "player composites in C#" mechanism** in *Architectural decisions*. Follows the
+FFmpeg playback work ([`Plan_FfmpegVideo.md`](Plan_FfmpegVideo.md)).
 
 ## Goal
 
@@ -21,6 +22,52 @@ off-screen clips keep decoding. The player owns the composite and only the activ
 
 `[PlayVideo]` (the single-file, graph-driven op) is **out of scope** and unchanged — it covers the
 "one video, programmatically scrubbed" case the way `[AudioPlayer]` covers graph-driven audio.
+
+## Phase-1 implementation — settled (symbol op + `_ProcessVideoClips`)
+
+**This supersedes the "player composites in C#" / `IVideoClipProvider` mechanism in *Architectural decisions*
+below.** Reading the existing render ops settled it: `VideoClipPlayer` is a **symbol op** (a composition
+graph), not a C# operator. The only new C# is one small helper, `_ProcessVideoClips`, modeled on
+[`Loop`](../../Operators/Lib/flow/Loop.cs) — so there is **no hand-written low-level rendering**; the drawing
+reuses `[RenderTarget]` + `[DrawQuad]`. (Why the change: a C# player would mean writing blind D3D blit code I
+can't runtime-verify; the symbol-op route reuses proven ops, and the user wires the graph.)
+
+**The graph inside `VideoClipPlayer`** (user creates + wires this in the editor):
+```
+VideoClipPlayer.Clips (MultiInput<Texture2D>) ─► _ProcessVideoClips.Textures
+[UseTextureReference].Reference ─► _ProcessVideoClips.TextureReference
+[UseTextureReference].Texture   ─► [DrawQuad].Texture
+[DrawQuad].Output (Command)     ─► _ProcessVideoClips.DrawCommand
+_ProcessVideoClips.Output       ─► [RenderTarget].Command
+[RenderTarget].ColorBuffer      ─► VideoClipPlayer.Output
+```
+
+**Texture-passing — the `[UseTextureReference]` / `RenderTargetReference` indirection.** A
+[`RenderTargetReference`](../../Core/DataTypes/RenderTargetReference.cs) is a mutable holder with a settable
+`ColorTexture`; [`UseTextureReference`](../../Operators/Lib/image/use/UseTextureReference.cs) outputs both the
+holder (`Reference`) and its current `ColorTexture` (`Texture`). `_ProcessVideoClips` is the *provider*: each
+iteration it writes the current clip's frame into the holder, then re-evaluates the draw subgraph so
+`[UseTextureReference].Texture` resolves to that clip and `[DrawQuad]` composites it. This is `Loop`'s
+invalidate-then-evaluate, with a typed texture ref instead of `context.FloatVariables`. (`[RenderTarget]`
+already drives the same ref the same way.)
+
+**`_ProcessVideoClips` — built + committed**
+([`Operators/Lib/io/video/_ProcessVideoClips.cs`](../../Operators/Lib/io/video/_ProcessVideoClips.cs), op Guid
+`0162ddd9-4611-4a0a-b02f-8f68ded99cfb`):
+- Slots: `Textures` `MultiInputSlot<Texture2D>` · `TextureReference` `InputSlot<RenderTargetReference>` ·
+  `DrawCommand` `InputSlot<Command>` · `Output` `Slot<Command>`.
+- `Update`: get the reference; for each connected clip texture, set `reference.ColorTexture = texture`, then
+  `DrawCommand.InvalidateGraph()` + `DrawCommand.GetValue(context)`.
+- **Build gotcha:** it lives in `Lib/io/video/` (namespace `Lib.io.video`), *not* a `_/` subfolder — a `_`
+  child namespace shadows the bare `_` discards (`out _`) the sibling video ops use and breaks the build. The
+  `_`-prefixed name + `SymbolTags: "16"` keep it internal/hidden instead.
+
+**Known limitations of this first cut (the next code tasks):**
+- **Draws *all* connected clips, not just active ones.** A `MultiInput<Texture2D>` carries no `TimeClip`, so
+  active-filtering ("only clips whose `TimeRange` contains the playhead" — needed for a sequential cut-to-cut
+  timeline, else the top clip always shows) needs the `TimeClip`/active-set threaded in.
+- **No per-clip transform / opacity / blend yet** — full-frame overlay. That's the `ImageComposeTransform` /
+  `TransformImage` story (below, and [`Plan_ImageComposeTransform.md`](Plan_ImageComposeTransform.md)).
 
 ## Why this is mostly assembly, not new infrastructure
 
@@ -44,6 +91,10 @@ The one genuinely new thing is the player **driving** the scanned clips' evaluat
 wired path (Phase 1) is just `Group` specialised to video, so it carries no new risk.
 
 ## Architectural decisions (proposed — confirm before Phase 2)
+
+> The **mechanism** here (C# player composites; `IVideoClipProvider`) is **superseded** by *Phase-1
+> implementation — settled* above (symbol op + `_ProcessVideoClips` + `[UseTextureReference]`). The
+> **behaviour** below — active-set filter, `LayerIndex` order, per-clip opacity/blend — still applies.
 
 - **One player, one output.** `VideoClipPlayer` owns an internal render target and outputs its
   `Texture2D`. Single op, single output.
