@@ -329,11 +329,49 @@ works.
   no offset, loop-vs-clamp, fast-scrub last-valid, `PlayVideoClip` source-range mapping, render-to-file
   frame alignment).
 
-## Milestone 2 — Caching, prefetch & reverse (deferred; design locked)
+## Milestone 2 — Caching, prefetch & reverse (in progress)
+
+**Implemented (per-controller, software path):** the native ref-counted frame cache
+([`VideoFrameCache.cs`](../../Video/VideoFrameCache.cs) — PTS-keyed, byte-budgeted LRU, frames retained as
+`Frame.Clone()` so pixel bytes stay native) wired into the worker so every frame decoded along a
+seek/sequential pass is cached and a revisited frame skips decode; plus **forward read-ahead** (the worker
+decodes ~0.5 s past the playhead into the cache, never seeking, bailing on scrub). 512 MB/controller for now.
+**Remaining:** GOP-band eviction (current is pure-recency LRU), reverse read-behind, the engine-centralized
+shared budget, and the `Optimize for` on/off gating.
 
 Design center is **large-GOP H.264/HEVC, 1080p @ 30/60** (what most users drop in), *not* HAP. Decode is
 sequential within a GOP, so the cache must respect GOP structure. M1's sequential read-ahead already covers
 forward play/export; M2 adds retention for random seek, framewise stepping, and reverse.
+
+**Two pipelines, selected per use-case — not one tuned pipeline.** The decode→convert core is shared, but
+memory policy diverges and the two compete for the same GPU/RAM budget, so a heavy clip picks *one*:
+- **(A) Seeking — NLE / procedural VJ:** latency-bound, frames revisited (scrub, loop, step, reverse).
+  → **software decode + RAM GOP-cache** (this section). Cache is the lever; upload/decode cost is secondary.
+  Vendor-neutral, no GPU device-sharing risk.
+- **(B) High-res throughput — parallel 4K+ streams:** bandwidth-bound, each frame plays once, forward.
+  → **D3D11VA zero-copy** (M1 step 8): convert-and-release, **no cache** (retaining huge once-used frames is
+  pure waste). Throughput is the lever; caching is irrelevant.
+These are near-mutually-exclusive for a given heavy clip: caching needs retainable RAM frames (⇒ software
+decode), zero-copy needs the decoder's fixed hardware ring (⇒ no retention). Path selection is therefore an
+**explicit operator parameter** — `Optimize for: { Fast Seeking, Playback Performance }` on
+`PlayVideo`/`PlayVideoClip` (default **Fast Seeking**) — not a heuristic and not a global mode:
+- `Fast Seeking` → pipeline **A** (software decode + RAM GOP-cache).
+- `Playback Performance` → pipeline **B** (D3D11VA zero-copy, no cache), **falling back to
+  software-without-cache** if hwaccel init fails.
+The enum expresses *intent*; the controller picks the best available backend and re-inits if the value
+changes at runtime. This also simplifies the budget story — only `Fast Seeking` clips draw on the shared
+cache budget. Add the input only once both backends exist (don't ship a dead parameter). The `IFrameSource`
++ frame-descriptor seam (below) is what lets both share the converter and the controller.
+
+**Also codec-gated.** The cache (and the whole A/B choice) only matters where decode is expensive —
+**long-GOP H.264/HEVC**. All-intra codecs (ProRes/DNxHD/MJPEG, all-intra H.264) seek cheaply (every frame a
+keyframe) → decode-on-demand, no GOP-cache. **HAP and GPU-texture codecs (HAP Q/Alpha, NotchLC, DXV) bypass
+it entirely → GPU→GPU upload, no RAM cache** — their compressed form *is* the efficient GPU-resident form,
+so caching decoded RGBA would discard the point. Effective pipeline = **(codec class) × (`Optimize for`
+intent)**; the codec can override the param (HAP is always GPU). The companion
+[`Plan_VideoClipPlayer.md`](Plan_VideoClipPlayer.md) covers this codec table **and** the many-clip
+**decode pool** (a `VideoClipPlayer` owning N pooled controllers — temporal scheduling, preroll of upcoming
+clips, eviction of far ones — so hundreds of timeline clips don't mean hundreds of live decoders).
 
 - **Cache tier = CPU/RAM, not GPU.** Upload-on-display is cheap (1080p NV12 ≈ 3.1 MB ≈ 0.25 ms over PCIe; MF
   already does CPU upload acceptably) and RAM is plentiful/uncontended (a 4 GB budget holds ~1300 1080p-NV12
@@ -363,10 +401,106 @@ forward play/export; M2 adds retention for random seek, framewise stepping, and 
 - **Reverse playback** = decode the covering GOP forward into the cache, **emit backward** from it (back-step
   becomes a cache hit, GOP size irrelevant), with **read-behind** pre-warming the previous GOP at the
   boundary. Same mechanism as the GOP-band cache, direction flipped.
+- **Realtime predictive seek (live, beat-locked clock).** *Realtime-only* — export waits for the exact frame
+  (`OpNotReady`) and NLE scrub can pause; only the beat-locked live clock can't, because the seek target
+  moves *while you decode it*. A cache-miss seek must target **where the clock will be when the decode
+  lands**, not where it is now: `t_target = t_now + rate × T_seek_est`. Deliberately **overshoot**
+  (`T_seek_est = EWMA(measured) × (1 + margin)`) so you land slightly *ahead* and **hold the frame until the
+  clock reaches its PTS** — landing ahead is stable; landing behind chases. Feeding measured seek time back
+  makes it a converging control loop (a Smith predictor for the decode transport delay; the beat-lock makes
+  the clock's future position exactly predictable — an asset). **Two failure modes, only one is a seek
+  problem:** (1) transient seek latency → the predictor fixes it; (2) *sustained* decode-slower-than-realtime
+  → no predictor helps (realtime re-passes the target each cycle) → **degrade**: frame-skip → keyframe-only
+  → request hardware/proxy. Detect via "can't land ahead after k tries." Only bites **long-GOP + cache-miss
+  + live clock**; cache hits, preroll, and HAP/intra avoid it. M1 holds last-valid (accepted stutter); the
+  predictor + optional keyframe-first coarse preview are M2 polish.
 - **M1 seams that keep this cheap to add (build these in M1):** frames identified by PTS (✅ mapper); the
   controller pulls frames through a thin `IFrameSource.TryGet(pts)` (decode-only in M1, cache-backed in M2);
   the display frame is a *descriptor* that may be a GPU texture (zero-copy) **or** a native RAM buffer
   (cache) — the converter accepts either input; sequential read-ahead already lands in M1.
+
+## VideoPlaybackEngine (global media manager — facade in Core, impl in Video)
+
+A single global manager owns all video decode resources — the decode-stream pool, frame cache, texture pool,
+the parallel-playback budget, and (later) `-optimized.mp4` proxies — in the role of `AudioEngine` /
+`ResourceManager`, not operator logic. `PlayVideo` and every `VideoClip` are thin **clients** that ask it for
+frames; it arbitrates the finite resources across all of them.
+
+**Why it must be anchored in Core.** TiXL's operator load contexts are **per-package and collectible**
+([`AssemblyInformation.cs`](../../Core/Compilation/AssemblyInformation.cs) creates a
+`TixlAssemblyLoadContext` per package; they unload/reload). A `static` in `T3.Video` is therefore single only
+*by convention* (Lib is its sole read-only loader) and would reset if that context reloaded. **Core is the
+only assembly loaded exactly once and shared across every operator context + editor + player** — the same
+reason `AudioEngine` lives in `Core/Audio`. So the singleton is anchored in Core.
+
+**Split (keeps Core slim — most exports have no video):**
+- **Core** holds *only*: the **`IVideoPlaybackEngine` interface** (methods use Core types — `Texture2D`,
+  `Guid`, `double`, the `Optimize for` enum — **no FFmpeg types**, so Core's dependency closure gains nothing
+  heavy), a **`VideoPlayback.Engine` static accessor** (null / null-object when no video assembly is loaded —
+  non-video projects never touch it), and the **max-parallel-playbacks project setting**.
+- **T3.Video** holds the implementation (`VideoPlaybackEngine : IVideoPlaybackEngine` + the pool, frame
+  cache, texture pool, scheduler, decode backends, Sdcb). It **registers itself into the Core accessor on
+  first init** (first-load-wins). FFmpeg's ~100 MB therefore still ships only with the video operator
+  package — a video-less export carries none of it.
+
+**Division of labor:** the **operator knows the graph** — a `VideoClipPlayer` scans clips and computes the
+active + upcoming sets from each `TimeRange` + the playhead, and `PlayVideo` is just a single stream — and
+tells the engine *what* it needs and *when*. The **engine manages the finite decode resources** (*how*): the
+pool + preroll + eviction (see [`Plan_VideoClipPlayer.md`](Plan_VideoClipPlayer.md)), the GOP-cache +
+realtime predictive seek (M2 above), the texture pool, and the shared budget. The engine reads the live
+clock/rate from Core's `Playback`.
+
+**Tick model:** driven by the clients' per-frame `Update` (the VCP / `PlayVideo` call `RequestFrame` /
+`Preroll`) — **no central editor tick**, which is also why it works unchanged in the exported player (the
+player evaluates the graph identically). Multiple VCPs, or a mix of `PlayVideo` + VCPs, all share the one
+Core-held engine and its single budget.
+
+**Budget model — start simple (1 GB).** Two *separate* constraints, both fixed constants to start:
+- **RAM frame-cache budget = 1 GB** (≈ 330 1080p-NV12 frames ≈ 5.5 s @60, or ≈ 80 4K frames ≈ 1.4 s @60).
+- **Live-decoder cap → project setting, default 8** — bounds threads + file handles + decoder state (which
+  byte budgets don't); its own knob, not derived from cache bytes. The cap must cover *peak live = active +
+  preroll + crossfade*, not the average: expected concurrency is mostly 0–1, occasionally 2–3, rarely >7, so
+  8 leaves ~5 slots above the typical ≤3 active (preroll + crossfade headroom). The common case never hits
+  it; the rare >7-simultaneous case falls to graceful degradation; many-layer setups raise the setting, weak
+  machines lower it, and the future `Auto (% CPU/GPU)` can derive it. Lives in the same export-safe
+  Video-playback project-settings group as the cache budget.
+The texture/VRAM side starts minimal (output textures for active clips; pipeline A's cache is RAM, not GPU).
+Fixed constants mean **no live-resize logic yet**. **Later:** an `Auto (N% RAM, M% VRAM)` / `Custom (explicit
+bytes)` model — `Auto` reads total system RAM/VRAM (already queried for the About dialog), the two knobs map
+to the RAM cache and the VRAM/texture pool, and changing it **reinitializes the pools** (restart/reinit), so
+the simple start needs nothing dynamic.
+
+**Settings travel with exports:** the budget is a **project setting** (Core), never an Editor `UserSettings`
+value (the player has no editor); optionally clamped by a per-machine cap, combined with `min()`.
+
+**`-optimized.mp4` proxies (later):** the engine auto-transcodes heavy sources to lightweight proxies and
+substitutes them transparently — closer to an asset/`ResourceManager` concern. Depends on the deferred
+**encode milestone** (needs an FFmpeg encoder).
+
+## Build sequence (the designed engine / clip-player work)
+
+M1 (decode + playback for `PlayVideo` / `PlayVideoClip`, software path) is **done and in use**. The
+architecture above — engine, pool, cache, clip player, A/B, predictive seek — is the **next body of work**.
+Recommended order, value-first and risk-managed; each step is independently shippable:
+
+0. **Confirm the LGPL runtime swap** (editor restart) — validates the current decode foundation before
+   building on it. *(User action; the only unverified piece from prior work.)*
+1. **Pipeline A — seeking cache.** RAM GOP-cache + read-ahead behind an `IFrameSource` seam on the existing
+   controller. Immediate scrubbing win, lowest risk, additive to the working software path. *(No engine yet.)*
+2. **`VideoPlaybackEngine` + `VideoClipPlayer` (Phase 1 wired → AutoCollect).** Introduce the Core facade +
+   Video impl (it now owns the step-1 cache), the `ImageComposeTransform` field + `VideoClip` /
+   `TransformImage`, and the compositing player. The engine arrives here because the clip player is the first
+   thing that needs the **global** pool / budget.
+3. **Decode pool + preroll + eviction.** Many-clip scaling in the engine (folds into the clip player's later
+   phase).
+4. **Pipeline B — D3D11VA zero-copy.** The throughput path (riskiest); independent of A — slot in when
+   high-res / many-stream playback is the target.
+5. **Later:** realtime predictive seek, `-optimized.mp4` proxies (needs the encode milestone), and the
+   general texture-op rollout ([`Plan_ImageComposeTransform.md`](Plan_ImageComposeTransform.md)).
+
+*Alternative — architecture-first:* do the engine facade (step 2's Core/Video scaffolding) before step 1 so
+the cache lands in the engine directly (no rework, but a refactor of working code with no immediate
+user-visible win). Value-first (cache first) ships a scrubbing improvement sooner.
 
 ## Backlog / deferred (beyond M1 & M2)
 

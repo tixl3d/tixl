@@ -1,4 +1,6 @@
 using System.Threading;
+using Sdcb.FFmpeg.Raw;
+using Sdcb.FFmpeg.Utils;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
 using T3.Core.Logging;
@@ -119,6 +121,7 @@ public sealed class VideoPlaybackController : IDisposable
         // The worker has exited, so its resources can be released without racing it.
         _converter?.Dispose();
         _session?.Dispose();
+        _cache?.Dispose();
         Texture?.Dispose();
         Texture = null;
         _wake.Dispose();
@@ -224,11 +227,22 @@ public sealed class VideoPlaybackController : IDisposable
         if (target == _workerLastTarget)
             return;
 
-        if (!DecodeTo(target))
-            return;
+        Frame frameToPublish;
+        if (_cache != null && _cache.TryGet(target, out var cachedFrame))
+        {
+            frameToPublish = cachedFrame;
+        }
+        else
+        {
+            if (!DecodeTo(target))
+                return;
 
-        PublishFrame(target);
+            frameToPublish = _session!.CurrentFrame;
+        }
+
+        PublishFrame(frameToPublish, target);
         _workerLastTarget = target;
+        PrefetchAhead(target);
     }
 
     private void OpenSource(string url)
@@ -238,6 +252,8 @@ public sealed class VideoPlaybackController : IDisposable
         _converter = null;
         _session?.Dispose();
         _session = null;
+        _cache?.Dispose();
+        _cache = null;
         _workerLastTarget = NotSet;
         _workerLastDecodedPts = NotSet;
 
@@ -259,43 +275,88 @@ public sealed class VideoPlaybackController : IDisposable
         _converter = new SoftwareFrameConverter(session.IsHdr);
         // Treat up to ~0.5 s ahead as sequential playback; larger jumps seek.
         _workerSequentialThreshold = session.TimeBaseDen / (2L * Math.Max(1, session.TimeBaseNum));
+        _cache = new VideoFrameCache(CacheBudgetBytes);
+        _cachedFrameBytes = ffmpeg.av_image_get_buffer_size(session.PixelFormat, session.Width, session.Height, 1);
     }
 
+    // Decodes forward to the target frame, caching every frame read so the surrounding GOP is available for
+    // cheap scrub-back. Seeks to the preceding keyframe first unless the target is a short hop ahead of the
+    // decoder's current position. Returns false if the stream ends before reaching the target.
     private bool DecodeTo(long target)
     {
         var delta = target - _workerLastDecodedPts;
         var advancingSequentially = _workerLastDecodedPts != NotSet && delta > 0 && delta <= _workerSequentialThreshold;
 
-        long decodedPts;
-        if (advancingSequentially)
-        {
-            decodedPts = _workerLastDecodedPts;
-            var reached = false;
-            while (_session!.TryReadNextFrame(out var pts))
-            {
-                decodedPts = pts;
-                if (pts >= target)
-                {
-                    reached = true;
-                    break;
-                }
-            }
+        if (!advancingSequentially)
+            _session!.SeekToKeyframeBefore(target);
 
-            if (!reached)
-                return false;
-        }
-        else if (!_session!.SeekAndDecodeTo(target, out decodedPts))
+        var decodedPts = _workerLastDecodedPts;
+        var reached = false;
+        while (_session!.TryReadNextFrame(out var pts))
         {
-            return false;
+            _cache?.Add(pts, _session.CurrentFrame, _cachedFrameBytes);
+            decodedPts = pts;
+            if (pts >= target)
+            {
+                reached = true;
+                break;
+            }
         }
+
+        if (!reached)
+            return false;
 
         _workerLastDecodedPts = decodedPts;
         return true;
     }
 
-    private void PublishFrame(long target)
+    // After serving the requested frame, decodes a short way past it into the cache so forward playback rides
+    // on cache hits and absorbs decode jitter. Only runs when the decoder is already at or ahead of the shown
+    // frame (the normal forward case) — it never seeks — and bails the instant the requested frame changes,
+    // so scrubbing stays responsive. Only caches; never publishes.
+    private void PrefetchAhead(long displayTarget)
     {
-        var rgba = _converter!.Convert(_session!.CurrentFrame);
+        if (_session == null || _cache == null || _workerLastDecodedPts == NotSet || _workerLastDecodedPts < displayTarget)
+            return;
+
+        var leadTarget = displayTarget + _workerSequentialThreshold;
+        for (var i = 0; i < PrefetchMaxFramesPerCycle && _workerLastDecodedPts < leadTarget; i++)
+        {
+            if (CurrentRequestTarget() != displayTarget)
+                return;
+
+            if (!_session.TryReadNextFrame(out var pts))
+                return;
+
+            _cache.Add(pts, _session.CurrentFrame, _cachedFrameBytes);
+            _workerLastDecodedPts = pts;
+        }
+    }
+
+    // The frame the render thread currently wants, recomputed from the latest posted request, so the prefetch
+    // loop can bail the moment the user scrubs. Returns NotSet if the source changed or isn't open.
+    private long CurrentRequestTarget()
+    {
+        string? url;
+        double seconds;
+        bool loop;
+        lock (_lock)
+        {
+            url = _requestedUrl;
+            seconds = _requestedSeconds;
+            loop = _requestedLoop;
+        }
+
+        if (url != _workerUrl || _session == null)
+            return NotSet;
+
+        var playSeconds = TimeToFrameMapper.ResolvePlaybackSeconds(seconds, _session.DurationSeconds, loop);
+        return TimeToFrameMapper.SecondsToPts(playSeconds, _session.StreamStartPts, _session.TimeBaseNum, _session.TimeBaseDen);
+    }
+
+    private void PublishFrame(Frame frame, long target)
+    {
+        var rgba = _converter!.Convert(frame);
         var byteCount = rgba.Width * rgba.Height * _converter.BytesPerPixel;
 
         lock (_lock)
@@ -306,7 +367,7 @@ public sealed class VideoPlaybackController : IDisposable
             rgba.FillImageBuffer(_pendingBuffer, 1);
             _pendingWidth = rgba.Width;
             _pendingHeight = rgba.Height;
-            _pendingIsHdr = _session.IsHdr;
+            _pendingIsHdr = _session!.IsHdr;
             _pendingTarget = target;
             _hasPendingFrame = true;
         }
@@ -317,6 +378,14 @@ public sealed class VideoPlaybackController : IDisposable
     private const long NotSet = long.MinValue;
     private const double FrameEpsilonSeconds = 1.0 / 1000.0;
     private const int ExportFrameTimeoutMs = 5000;
+
+    // Per-controller retention budget. The VideoPlaybackEngine will later replace this with a shared global
+    // budget arbitrated across all streams; until then each stream caches independently.
+    private const long CacheBudgetBytes = 512L * 1024 * 1024;
+
+    // Cap on frames read ahead per cycle, so the first prefetch after a seek can't monopolize the worker; the
+    // lead distance itself is bounded by the sequential threshold (~0.5 s of video).
+    private const int PrefetchMaxFramesPerCycle = 90;
 
     private readonly object _lock = new();
     private readonly AutoResetEvent _wake = new(false);
@@ -351,6 +420,8 @@ public sealed class VideoPlaybackController : IDisposable
     // Worker-thread only.
     private VideoDecoderSession? _session;
     private SoftwareFrameConverter? _converter;
+    private VideoFrameCache? _cache;
+    private int _cachedFrameBytes;
     private string? _workerUrl;
     private long _workerLastTarget = NotSet;
     private long _workerLastDecodedPts = NotSet;

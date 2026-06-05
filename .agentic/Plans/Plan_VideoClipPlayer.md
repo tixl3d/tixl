@@ -67,15 +67,108 @@ wired path (Phase 1) is just `Group` specialised to video, so it carries no new 
 - **Driving is isolated to the scanned set.** Wired clips flow through normal `MultiInput`
   invalidation (zero new risk). Only auto-collected clips are force-evaluated by the player. Build
   order follows from this: wired first, scan behind the flag.
-- **Per-clip `VideoPlaybackController`.** Each `VideoClip` keeps its own decoder + intermediate
-  texture (as today). A shared decode pool in the player is deferred — crossfades need ≥2 live
-  decoders anyway, so "one texture total" is not a real target.
+- **Decode pool, not per-clip controllers (for the many-clip case).** A handful of wired clips can keep
+  their own `VideoPlaybackController` (Phase 1–2). But an NLE timeline with **hundreds of small clips**
+  needs a **bounded pool of N live controllers owned by the player**, assigned by temporal relevance, with
+  preroll + eviction — see *Decode pool, preroll & eviction* below. Crossfades just need ≥2 pool slots, not
+  "one texture total."
 - **Composition-scoped scan.** `AutoCollect` walks the player's own composition only (no nesting),
   matching the audio precedent.
 - **Rename keeps the Guid.** `PlayVideoClip` → `VideoClip` preserves symbol Guid
   `04c1a6dc-3042-48a8-81d2-0a5a162016dc` so existing projects load. New inputs are additive.
 - **A lone `VideoClip` with no player renders nothing.** Intended (like a `TimelineAudioClip` without
   the audio engine), but surface it as an operator status hint so it isn't mistaken for a bug.
+
+## Decode pool, preroll & eviction (scaling to many clips)
+
+The per-clip-controller model is fine for a few wired clips, but an NLE timeline can hold **hundreds of
+small clips** with only a few visible at once. One `VideoPlaybackController` per clip would mean hundreds of
+open demuxers, decoder contexts, worker threads, and textures — infeasible. The fix is a **single global
+decode pool owned by the `VideoPlaybackEngine`** (see `Plan_FfmpegVideo.md` — *not* a per-player pool, since
+two players plus PlayVideo must share one budget). The player is the **scheduler that feeds it**: because it
+already scans every clip and knows each `TimeRange` plus the playhead — and, unlike a per-clip op, is *not*
+gated by the pull-based graph — it can tell the engine which clips to warm *before* they're visible.
+
+- **Clips are descriptors; the engine owns the controllers.** A `VideoClip` carries `{file, TimeRange,
+  SourceRange, Opacity, BlendMode, Optimize-for}` but does not own a controller. The **engine's** pool holds
+  **N live controllers** (~5–20, budgeted, shared across all players + PlayVideo) and assigns them to the
+  clips the players ask for; a clip's `VideoTexture` is served by its assigned controller, or the last frame
+  / a placeholder if it has none.
+- **Temporal scheduling each frame.** From the playhead + direction/speed and every clip's `TimeRange`,
+  classify clips as **active** (visible now → must hold a controller), **upcoming** (visible within a
+  lookahead horizon → preroll), or **far** (evict).
+- **Preroll = no seek delay on cut-in.** For an upcoming clip, acquire a controller early and **open + seek
+  to its `SourceRange` in-point + decode the first GOP**, so the first frame is ready the instant the clip
+  becomes visible. The lookahead horizon covers preroll latency (open + seek + first-GOP decode), widened by
+  cut density (rapid cuts ⇒ preroll several clips ahead).
+- **Eviction returns resources to the pool.** A clip that drifts far from the playhead releases its
+  controller: close the demuxer/decoder (frees decoder memory + file handle), **park the worker thread** in
+  a shared pool (don't tear down), and **return textures to a size-bucketed texture pool**. Re-acquiring
+  later re-opens + re-prerolls — the cost the lookahead hides.
+- **Budget by decode cost, not clip count.** A long-GOP H.264/HEVC decoder is the expensive resource; HAP /
+  all-intra clips are cheap (codec note below). The pool budgets by *cost* — many cheap clips can be live
+  while only a few expensive decoders are.
+- **Graceful degradation when active > budget.** If more clips are simultaneously visible than the pool
+  holds (e.g. a 30-layer composite), prioritize by layer/size/opacity and show last-frame (or a placeholder)
+  for the overflow rather than thrashing decoders.
+- **Pooled threads + textures, no per-clip spawn/alloc** — same no-per-frame-allocation discipline as the
+  rest of the engine.
+
+This supersedes "keep per-clip controllers" for the many-clip case; per-clip controllers remain the trivial
+fallback for a few wired clips (Phase 1–2). The pool lands with the AutoCollect / many-clip work (Phase 3).
+
+### Codec determines the decode path (and whether caching even helps)
+
+Caching exists only to avoid **re-decoding a GOP** on a seek; that payoff is codec-dependent:
+
+- **Long-GOP H.264/HEVC** — expensive seek ⇒ the RAM GOP-cache (pipeline A) earns its keep, or D3D11VA
+  zero-copy (pipeline B) for forward throughput. The `Optimize for` param picks between them.
+- **All-intra CPU codecs (ProRes, DNxHD, MJPEG, all-intra H.264)** — every frame is a keyframe ⇒ seeking is
+  already cheap ⇒ **no GOP-cache**; decode the target frame on demand. The param mostly affects whether to
+  use a hardware decoder for forward throughput.
+- **HAP (and GPU-texture codecs: HAP Q/Alpha, NotchLC, DXV)** — all-intra **and** GPU-compressed (BC/DXT).
+  **Always GPU→GPU**: read the chunk, Snappy-decompress (cheap, CPU), upload the BC texture, sample it. No
+  swscale, no CPU RGBA decode, **no RAM cache** — caching decoded RGBA throws away HAP's whole point (its
+  compressed form *is* the efficient GPU-resident form). Note FFmpeg's built-in `hap` decoder outputs full
+  RGBA on the CPU, so a real HAP path takes the raw chunks and uploads BC directly — HAP is its own
+  codepath, not the swscale pipeline. (HAP stays low priority per the original scope; captured here as the
+  canonical "codec overrides the cache choice" case.)
+
+So the effective pipeline = **(codec class) × (`Optimize for` intent)**: the param is the user's hint, but
+the codec can override it — HAP / intra-GPU is always GPU regardless; long-GOP honors the intent.
+
+## Compose params & `TransformImage` (the context convention)
+
+Compose state — 2D transform, color/tint, opacity, blend, sampler — follows the standard TiXL context
+convention, **the same one Scene `[Transform]` uses for 3D** (no new connection type):
+
+- **`EvaluationContext` carries an `ImageComposeTransform` with a neutral, meaningful default** — identity
+  matrix, color = 1, opacity = 1, normal blend. A leaf that does nothing special leaves it untouched.
+- **`TransformImage` is the general subgraph modifier** (not video-specific): like Scene `[Transform]`, it
+  **manipulates `context.ImageComposeTransform` for its subgraph's evaluation**, so every image / `VideoClip`
+  in its subtree picks up the accumulated transform. This is how a wired clip gets an external / graph-driven
+  transform.
+- **`VideoClip` carries its own full compose-param set** (transform / color / opacity / blend / sampler) as
+  animatable inputs. As a leaf it **reads** the current `context.ImageComposeTransform`, **combines** it with
+  its own params, and **registers** `{frame, TimeClip, finalTransform}` for the player's blit — it does *not*
+  write the context field; only transform ops do. With no ancestor `TransformImage` (context neutral) it uses
+  only its own params — the everyday and **virtual (auto-collected)** path. Auto clips sit outside any
+  `TransformImage` subtree, so they can only be transformed via their own params — exactly the earlier rule,
+  now enforced by the mechanism rather than a special case.
+
+This is **exactly Scene `[Transform]` for images** (an op transforms the contribution of its subgraph as it
+composes further up), so the "transforms upward" quirk is idiomatic — no new mental model. The player
+composites the registered set per `LayerIndex`, applying each clip's final transform in its single blit; the
+per-clip param *interface* shrinks to a marker ("this child is a video clip") for the auto-collect scan.
+`ImageComposeTransform` becomes a real `EvaluationContext` field (Core). Build-time detail: how the player
+collects each clip's `{frame, TimeClip, transform}` (a context sink the clips register into, or a per-clip
+reset→pull→read) — inactive clips no-op cheaply via `TimeClipSlot` gating, so pull-then-filter is fine.
+
+**Scope for the video work:** only the video ops (`VideoClipPlayer` blit + `VideoClip` + `TransformImage`)
+consume the field here — the video feature is *not* blocked on broad adoption. Extending it so **every**
+texture-consuming op honors the context transform (UV transforms free everywhere, ~100+ ops) is a separate,
+larger initiative — see [`Plan_ImageComposeTransform.md`](Plan_ImageComposeTransform.md). The neutral default
+keeps the two decoupled: un-migrated ops simply ignore the (identity) context.
 
 ## Interface sketch
 
@@ -191,11 +284,12 @@ Phase 1 (wired) is unaffected.
 
 - Wired set: feed active indices into `Clips.LimitMultiInputInvalidationToIndices` (Switch pattern) so
   inactive branches don't invalidate/decode.
-- Scanned set: skip inactive clips before pulling them (already implied by the active-filter); consider
-  releasing a `VideoPlaybackController`'s decode session after N idle frames (audio-style stale
-  thresholding) to cap memory on many-clip projects.
+- Scanned set: skip inactive clips before pulling them (already implied by the active-filter).
 - Thread `Playback.OpNotReady |= !IsReady` per active clip so export waits for every contributing clip.
-- Decide per-clip-controller vs shared pool based on observed memory; default: keep per-clip.
+- **Introduce the decode pool** (see *Decode pool, preroll & eviction*): clips become descriptors; the
+  player owns N pooled controllers with temporal scheduling, preroll of upcoming clips, and eviction of far
+  ones. This is the core mechanism for many-clip timelines, not an optional memory tweak — per-clip
+  controllers are kept only as the few-clips fallback.
 
 **Testable outcome:** A 20-clip timeline with 1–2 active at a time holds steady decode/memory; export
 of a crossfade is frame-exact on both clips.
@@ -229,8 +323,8 @@ of a crossfade is frame-exact on both clips.
    driving siblings — the item to prototype before committing to `AutoCollect`.
 4. **Compositing choice** (player-composites vs clip-self-draws `Command`): assumed player-composites;
    confirm with the Phase-1 prototype.
-5. **Crossfades** need ≥2 live decoders — fine with per-clip controllers; only a concern if a shared
-   pool is introduced.
+5. **Crossfades** need ≥2 live decoders — the pool reserves ≥2 slots at a cut/transition so the outgoing
+   and incoming clips both stay warm (drives the minimum pool budget).
 6. **Resolution / aspect handling** when clips differ in size (fit/cover/stretch, like `[Blend]`'s
    `ScaleMode`). Phase 1 can stretch; expose a mode later.
 
