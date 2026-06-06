@@ -6,6 +6,10 @@
     {
       "Id": "7b80b49f-c5f5-4c86-8c12-f854fff027c2"/*VideoClips*/,
       "DefaultValue": null
+    },
+    {
+      "Id": "ac80c531-90ff-449a-8d60-f6a4fa27b818"/*AutoCollect*/,
+      "DefaultValue": false
     }
   ],
   "Children": [
@@ -81,6 +85,12 @@
       "SourceSlotId": "cb9850b3-119a-4839-b79f-a882112503c6",
       "TargetParentOrChildId": "1302bbfd-2acd-4df8-815d-2acd58ce2063",
       "TargetSlotId": "956080eb-e811-4b4a-bb73-d70a36455fa2"
+    },
+    {
+      "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "SourceSlotId": "ac80c531-90ff-449a-8d60-f6a4fa27b818",
+      "TargetParentOrChildId": "1302bbfd-2acd-4df8-815d-2acd58ce2063",
+      "TargetSlotId": "a431cf04-491d-4b0d-9691-a0375e07e855"
     },
     {
       "SourceParentOrChildId": "84c7b008-c974-4e76-802d-08993498652b",

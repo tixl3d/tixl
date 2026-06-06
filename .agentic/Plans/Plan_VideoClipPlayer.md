@@ -1,9 +1,11 @@
 # Video clip player
 
-**Status:** Updated 2026-06-04. The `_ProcessVideoClips` C# helper is **built + committed**; creating +
-wiring the `VideoClipPlayer` symbol op around it is the next step — see *Phase-1 implementation — settled*
-below, which **supersedes the "player composites in C#" mechanism** in *Architectural decisions*. Follows the
-FFmpeg playback work ([`Plan_FfmpegVideo.md`](Plan_FfmpegVideo.md)).
+**Status:** Updated 2026-06-07. **Phase 1 is done.** The `VideoClipPlayer` symbol op is wired and in use:
+`PlayVideoClip` is renamed to `VideoClip`; the `_ProcessVideoClips` helper does active-set filtering,
+`LayerIndex` ordering, and per-clip `Color`/`BlendMode`; and an interim forward **preroll** warms a clip's
+decoder before its cut-in. See *Phase-1 implementation — settled* below (which **supersedes the "player
+composites in C#" mechanism** in *Architectural decisions*) and the *Status: DONE* block under *Phase 1*.
+Next: Phase 2 (`AutoCollect`). Follows the FFmpeg playback work ([`Plan_FfmpegVideo.md`](Plan_FfmpegVideo.md)).
 
 ## Goal
 
@@ -29,17 +31,19 @@ off-screen clips keep decoding. The player owns the composite and only the activ
 below.** Reading the existing render ops settled it: `VideoClipPlayer` is a **symbol op** (a composition
 graph), not a C# operator. The only new C# is one small helper, `_ProcessVideoClips`, modeled on
 [`Loop`](../../Operators/Lib/flow/Loop.cs) — so there is **no hand-written low-level rendering**; the drawing
-reuses `[RenderTarget]` + `[DrawQuad]`. (Why the change: a C# player would mean writing blind D3D blit code I
+reuses `[RenderTarget]` + `[DrawScreenQuad]`. (Why the change: a C# player would mean writing blind D3D blit code I
 can't runtime-verify; the symbol-op route reuses proven ops, and the user wires the graph.)
 
-**The graph inside `VideoClipPlayer`** (user creates + wires this in the editor):
+**The graph inside `VideoClipPlayer`** (wired in the editor):
 ```
 VideoClipPlayer.Clips (MultiInput<Texture2D>) ─► _ProcessVideoClips.Textures
-[UseTextureReference].Reference ─► _ProcessVideoClips.TextureReference
-[UseTextureReference].Texture   ─► [DrawQuad].Texture
-[DrawQuad].Output (Command)     ─► _ProcessVideoClips.DrawCommand
-_ProcessVideoClips.Output       ─► [RenderTarget].Command
-[RenderTarget].ColorBuffer      ─► VideoClipPlayer.Output
+[UseTextureReference].Reference          ─► _ProcessVideoClips.TextureReference
+[UseTextureReference].Texture            ─► [DrawScreenQuad].Texture
+[GetForegroundColor].Color               ─► [DrawScreenQuad].Color        (per-clip tint + opacity)
+[GetIntVar "VideoClip.BlendMode"].Result ─► [DrawScreenQuad].BlendMode    (per-clip blend; optional)
+[DrawScreenQuad].Output (Command)        ─► _ProcessVideoClips.DrawCommand
+_ProcessVideoClips.Output                ─► [RenderTarget].Command
+[RenderTarget].ColorBuffer               ─► VideoClipPlayer.Output
 ```
 
 **Texture-passing — the `[UseTextureReference]` / `RenderTargetReference` indirection.** A
@@ -47,7 +51,7 @@ _ProcessVideoClips.Output       ─► [RenderTarget].Command
 `ColorTexture`; [`UseTextureReference`](../../Operators/Lib/image/use/UseTextureReference.cs) outputs both the
 holder (`Reference`) and its current `ColorTexture` (`Texture`). `_ProcessVideoClips` is the *provider*: each
 iteration it writes the current clip's frame into the holder, then re-evaluates the draw subgraph so
-`[UseTextureReference].Texture` resolves to that clip and `[DrawQuad]` composites it. This is `Loop`'s
+`[UseTextureReference].Texture` resolves to that clip and `[DrawScreenQuad]` composites it. This is `Loop`'s
 invalidate-then-evaluate, with a typed texture ref instead of `context.FloatVariables`. (`[RenderTarget]`
 already drives the same ref the same way.)
 
@@ -56,18 +60,24 @@ already drives the same ref the same way.)
 `0162ddd9-4611-4a0a-b02f-8f68ded99cfb`):
 - Slots: `Textures` `MultiInputSlot<Texture2D>` · `TextureReference` `InputSlot<RenderTargetReference>` ·
   `DrawCommand` `InputSlot<Command>` · `Output` `Slot<Command>`.
-- `Update`: get the reference; for each connected clip texture, set `reference.ColorTexture = texture`, then
-  `DrawCommand.InvalidateGraph()` + `DrawCommand.GetValue(context)`.
+- `Update`: classify each connected clip by its `TimeClip` range vs. the playhead. **Active** clips are
+  insertion-sorted by `LayerIndex` (descending → lowest layer on top), then for each: publish its per-clip
+  `Color` to `context.ForegroundColor` and blend to `context.IntVariables["VideoClip.BlendMode"]`, set
+  `reference.ColorTexture = texture`, and `DrawCommand.InvalidateGraph()` + `GetValue(context)`. **Upcoming**
+  clips (within `PrerollSeconds` of their start) are pulled but not drawn, to warm their decoder. Inactive
+  clips are skipped, so gaps keep the RenderTarget's (transparent) clear color.
 - **Build gotcha:** it lives in `Lib/io/video/` (namespace `Lib.io.video`), *not* a `_/` subfolder — a `_`
   child namespace shadows the bare `_` discards (`out _`) the sibling video ops use and breaks the build. The
   `_`-prefixed name + `SymbolTags: "16"` keep it internal/hidden instead.
 
-**Known limitations of this first cut (the next code tasks):**
-- **Draws *all* connected clips, not just active ones.** A `MultiInput<Texture2D>` carries no `TimeClip`, so
-  active-filtering ("only clips whose `TimeRange` contains the playhead" — needed for a sequential cut-to-cut
-  timeline, else the top clip always shows) needs the `TimeClip`/active-set threaded in.
-- **No per-clip transform / opacity / blend yet** — full-frame overlay. That's the `ImageComposeTransform` /
-  `TransformImage` story (below, and [`Plan_ImageComposeTransform.md`](Plan_ImageComposeTransform.md)).
+**Resolved in Phase 1 (these were the first-cut limitations):**
+- **Active-set filtering — done.** Only clips whose `TimeClip.TimeRange` contains the playhead composite,
+  reached via each texture slot's `Parent` → its `ITimeClipProvider` output. Exclusive end matches
+  `TimeClipSlot`, so adjacent clips at a cut don't both draw.
+- **Per-clip color + blend — done.** `VideoClip` carries a `Color` (Vector4, tint + alpha opacity) and a
+  `BlendMode`; the player applies them per clip (see *Status: DONE* under Phase 1). Per-clip 2D *transform* is
+  still the `ImageComposeTransform` / `TransformImage` story (below, and
+  [`Plan_ImageComposeTransform.md`](Plan_ImageComposeTransform.md)).
 
 ## Why this is mostly assembly, not new infrastructure
 
@@ -223,6 +233,12 @@ keeps the two decoupled: un-migrated ops simply ignore the (identity) context.
 
 ## Interface sketch
 
+> **Superseded by the as-built (see *Status: DONE* under Phase 1).** The shipped `IVideoClipProvider` exposes
+> the input **slots** (`ColorInput` / `BlendModeInput`), not values; `TimeClip`/`LayerIndex` come from the
+> clip's `TimeClipSlot` output (`ITimeClipProvider`) rather than this interface, and the player pulls the
+> texture from the multi-input slot, not a `VideoTexture` member. The original sketch is kept below for the
+> Phase-2 scan rationale.
+
 ```csharp
 // Implemented by VideoClip; consumed by VideoClipPlayer for both wired and scanned clips.
 internal interface IVideoClipProvider
@@ -306,6 +322,28 @@ clip behaves like today minus the manual remap.
 
 **Effort:** ~1–1.5 days. The real work is the player's RT + per-clip blend; the rename is mechanical.
 
+**Status: DONE (2026-06-07) — as built, with deviations from the scope above:**
+- `PlayVideoClip` → `VideoClip` (Guid kept `04c1a6dc-…`); the manual source-time remap is dropped in favor of
+  `TimeClipSlot`.
+- **The per-clip param is `Color` (Vector4, default white), not a separate `Opacity` float.** It carries tint
+  *and* opacity (alpha) in one parameter and maps 1:1 onto `context.ForegroundColor`. Plus `BlendMode` (int,
+  `SharedEnums.BlendModes`, default `Normal`). Both are additive inputs on `VideoClip` (new Guids).
+- `IVideoClipProvider` exposes the input *slots* as `ColorInput` / `BlendModeInput` (the `…Input` suffix
+  convention, cf. `ITransformable`); the player reads each active clip's values through it.
+- **Conveyance:** per-clip `Color` rides `context.ForegroundColor` → `[GetForegroundColor]` →
+  `DrawScreenQuad.Color` (no string var, no `Vector4` construct op). Per-clip blend rides
+  `context.IntVariables["VideoClip.BlendMode"]` → `[GetIntVar]` → `DrawScreenQuad.BlendMode` (optional wiring;
+  unwired ⇒ `Normal`). The helper restores `ForegroundColor` after the loop.
+- **`LayerIndex` order is descending** (lowest layer composites last → on top), stable by multi-input
+  connection order for ties.
+- **Interim forward preroll** (`PrerollSeconds = 0.5`, timeline-seconds): a clip within that window before its
+  start is pulled-but-not-drawn to warm its decoder, so its first frame is ready at the cut instead of a
+  transparent blink. Caveats: forward play only; very fast playback may still blink; scrub/seek jumps still
+  cold-start. Player-level stand-in for the engine-level direction-aware scheduler (Phase 3 /
+  `Plan_FfmpegVideo.md`).
+- **Not added:** the `AutoCollect` input (Phase 2) and a `Resolution` input — RT defaults to
+  `context.RequestedResolution`. Don't ship a dead `AutoCollect` input before its scan exists.
+
 ### Phase 2 — `AutoCollect` (scan + drive)
 
 **Goal:** with `AutoCollect` on, the player also composites unwired sibling `VideoClip`s.
@@ -340,7 +378,10 @@ Phase 1 (wired) is unaffected.
 - **Introduce the decode pool** (see *Decode pool, preroll & eviction*): clips become descriptors; the
   player owns N pooled controllers with temporal scheduling, preroll of upcoming clips, and eviction of far
   ones. This is the core mechanism for many-clip timelines, not an optional memory tweak — per-clip
-  controllers are kept only as the few-clips fallback.
+  controllers are kept only as the few-clips fallback. *(An interim, player-level forward preroll already
+  ships in `_ProcessVideoClips` — `PrerollSeconds` look-ahead, warm-by-non-drawn-pull; the engine-level,
+  direction-aware scheduler here supersedes it, and should also own the `PrerollSeconds`-equivalent horizon
+  as a project setting alongside `MaxLiveStreams`.)*
 
 **Testable outcome:** A 20-clip timeline with 1–2 active at a time holds steady decode/memory; export
 of a crossfade is frame-exact on both clips.

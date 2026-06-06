@@ -13,6 +13,9 @@ namespace Lib.io.video{
         [Input(Guid = "7b80b49f-c5f5-4c86-8c12-f854fff027c2")]
         public readonly MultiInputSlot<T3.Core.DataTypes.Texture2D> VideoClips = new MultiInputSlot<T3.Core.DataTypes.Texture2D>();
 
+        [Input(Guid = "ac80c531-90ff-449a-8d60-f6a4fa27b818")]
+        public readonly InputSlot<bool> AutoCollect = new InputSlot<bool>();
+
 
     }
 }

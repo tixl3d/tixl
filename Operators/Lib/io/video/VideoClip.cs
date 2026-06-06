@@ -10,6 +10,7 @@ namespace Lib.io.video;
 /// </summary>
 internal interface IVideoClipProvider
 {
+    Slot<Texture2D> TextureOutput { get; }
     InputSlot<Vector4> ColorInput { get; }
     InputSlot<int> BlendModeInput { get; }
 }
@@ -82,6 +83,7 @@ internal sealed class VideoClip : Instance<VideoClip>, IStatusProvider, IVideoCl
 
     public string GetStatusMessage() => _statusMessage;
 
+    Slot<Texture2D> IVideoClipProvider.TextureOutput => Texture;
     InputSlot<Vector4> IVideoClipProvider.ColorInput => Color;
     InputSlot<int> IVideoClipProvider.BlendModeInput => BlendMode;
 
