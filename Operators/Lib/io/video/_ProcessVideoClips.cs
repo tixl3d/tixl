@@ -5,11 +5,18 @@ namespace Lib.io.video;
 /// into the bound render target. Per clip it points the draw subgraph's [UseTextureReference] at that clip's
 /// current frame, then re-evaluates the subgraph so [DrawScreenQuad] draws it — the same invalidate-then-evaluate
 /// pattern as [Loop], over a texture multi-input instead of a counter. Clips whose TimeClip range doesn't
-/// contain the playhead are skipped.
+/// contain the playhead are skipped; one about to start is pre-rolled so its first frame is ready at the cut.
 /// </summary>
 [Guid("0162ddd9-4611-4a0a-b02f-8f68ded99cfb")]
 internal sealed class _ProcessVideoClips : Instance<_ProcessVideoClips>
 {
+    private enum ClipState
+    {
+        Inactive,
+        Active,
+        Upcoming,
+    }
+
     [Output(Guid = "4022374f-2022-466d-9787-a7c47fe45737")]
     public readonly Slot<Command> Output = new();
 
@@ -42,7 +49,18 @@ internal sealed class _ProcessVideoClips : Instance<_ProcessVideoClips>
         var activeCount = 0;
         for (var i = 0; i < count; i++)
         {
-            if (!TryGetActiveLayer(clips[i].Parent, localTime, out var layerIndex))
+            var state = ClassifyClip(clips[i].Parent, localTime, out var layerIndex);
+
+            if (state == ClipState.Upcoming)
+            {
+                // Preroll: pulling the texture warms the clip's decoder (open + seek to in-point + decode the
+                // first GOP) without compositing it, so the frame is ready at the cut instead of a transparent
+                // blink. The engine keeps the warmed stream live until the clip turns active.
+                clips[i].GetValue(context);
+                continue;
+            }
+
+            if (state != ClipState.Active)
                 continue;
 
             var b = activeCount - 1;
@@ -93,15 +111,16 @@ internal sealed class _ProcessVideoClips : Instance<_ProcessVideoClips>
         Textures.DirtyFlag.Clear();
     }
 
-    // A VideoClip exposes its TimeClip via a TimeClipSlot output (ITimeClipProvider). Returns whether the clip
-    // is active at localTime and (out) its layer index. Exclusive end matches TimeClipSlot's own range test so
-    // adjacent clips sharing a cut boundary never both draw on that frame. A wired texture without a TimeClip
-    // (e.g. a plain image) has no range, so it is always active and sits on layer 0.
-    private static bool TryGetActiveLayer(Instance clipInstance, double localTime, out int layerIndex)
+    // A VideoClip exposes its TimeClip via a TimeClipSlot output (ITimeClipProvider). Classifies the clip at
+    // localTime and (out) its layer index. Exclusive end matches TimeClipSlot's own range test so adjacent
+    // clips sharing a cut boundary never both draw on that frame. Upcoming = within PrerollSeconds before the
+    // clip's start, so its decoder can be warmed ahead of the cut. A wired texture without a TimeClip (e.g. a
+    // plain image) has no range, so it is always active and sits on layer 0.
+    private static ClipState ClassifyClip(Instance clipInstance, double localTime, out int layerIndex)
     {
         layerIndex = 0;
         if (clipInstance == null)
-            return true;
+            return ClipState.Active;
 
         var outputs = clipInstance.Outputs;
         for (var i = 0; i < outputs.Count; i++)
@@ -111,16 +130,25 @@ internal sealed class _ProcessVideoClips : Instance<_ProcessVideoClips>
                 var clip = clipProvider.TimeClip;
                 layerIndex = clip.LayerIndex;
                 var range = clip.TimeRange;
-                return localTime >= range.Start && localTime < range.End;
+                if (localTime >= range.Start && localTime < range.End)
+                    return ClipState.Active;
+                if (localTime >= range.Start - PrerollSeconds && localTime < range.Start)
+                    return ClipState.Upcoming;
+                return ClipState.Inactive;
             }
         }
 
-        return true;
+        return ClipState.Active;
     }
 
     // Variable name the wrapper's draw subgraph reads via [GetIntVar] to pick up the active clip's blend mode.
     // Must match exactly what that op is configured with in [VideoClipPlayer]. (Opacity rides ForegroundColor.)
     private const string BlendModeVariableName = "VideoClip.BlendMode";
+
+    // Forward look-ahead for warming a clip's decoder before its cut-in (covers cold open + seek + first-GOP
+    // decode). Timeline seconds; very fast playback leaves less wall-clock to preroll, so it may still blink.
+    // Direction-aware preroll for reverse play lives in the engine scheduler (later).
+    private const double PrerollSeconds = 0.5;
 
     // Reused across frames; grown to the connected-clip count on first use (and if more clips are wired in).
     private int[] _activeIndices = [];
