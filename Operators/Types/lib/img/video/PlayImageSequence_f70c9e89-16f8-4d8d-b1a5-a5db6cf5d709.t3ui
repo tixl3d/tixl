@@ -1,0 +1,244 @@
+{
+  "Id": "f70c9e89-16f8-4d8d-b1a5-a5db6cf5d709"/*PlayImageSequence*/,
+  "Description": "Plays a series of images like a video.\nSelect a folder and all the images therein (as filtered) will be played in order.\nYou can view the FileList output to see what files are going to be played.\n\nTips:\n-All calculations are handled from the timeline. Idle Motion will not affect anything.\n-If you want Idle Motion to control this, set the Framerate to 0 and connect an [AnimValue] to the FrameOffset\n-Negative values of FrameOffset will delay the start of the video when looping is disabled.\n-Negative values of Framerate will reverse the video.\n-JPG decodes slightly faster than PNG. BMP is ideal if you can support the read speed.\n\nFor video files, see [PlayVideo] and/or [PlayVideoClip]. For image atlases, see [PlayAtlas]",
+  "InputUis": [
+    {
+      "InputId": "73ca7259-128f-46a3-9fe3-669957add8da"/*FolderPath*/,
+      "Position": {
+        "X": -236.06279,
+        "Y": -712.83325
+      },
+      "Description": "Directory containing all of the frames you want to display",
+      "Usage": "DirectoryPath"
+    },
+    {
+      "InputId": "bc5f36cc-2090-41ba-aafb-ae0a98e42dad"/*FilenameFilter*/,
+      "Position": {
+        "X": -236.06279,
+        "Y": -667.83325
+      },
+      "Description": "The loaded filenames must include this string",
+      "Usage": "Default"
+    },
+    {
+      "InputId": "570691e0-425a-4a61-a824-f72917c71c14"/*MinFrameNumber*/,
+      "Position": {
+        "X": -236.06279,
+        "Y": -622.83325
+      },
+      "Description": "Sets the start frame, for if you want to skip the first few files in your directory.",
+      "Min": 0
+    },
+    {
+      "InputId": "46337a40-cd2e-4ce8-8176-c07d9ba4b822"/*MaxFrameNumber*/,
+      "Position": {
+        "X": -236.06279,
+        "Y": -577.83325
+      },
+      "Description": "Sets the end frame, for if you want to skip the last few files in your directory.",
+      "Min": 0,
+      "Clamp": true
+    },
+    {
+      "InputId": "5fb8b5d3-05c5-4e0a-a89a-6ad53641da67"/*LoopPlayback*/,
+      "Position": {
+        "X": -236.06279,
+        "Y": -532.83325
+      },
+      "Description": "If enabled, the selected frames will loop indefinitely. If disabled, the playback will freeze on the last frame."
+    },
+    {
+      "InputId": "ea058707-1906-4c75-92cc-56d147496b07"/*FrameOffset*/,
+      "Relevancy": "Relevant",
+      "Position": {
+        "X": -236.06279,
+        "Y": -487.83325
+      },
+      "Description": "Change when the frames play on your timeline. Can be automated to control playback with AnimValue, etc",
+      "Scale": 1.0
+    },
+    {
+      "InputId": "b5161355-66d4-478e-bcf0-1876c5b1765a"/*Framerate*/,
+      "Position": {
+        "X": -236.06279,
+        "Y": -442.83325
+      },
+      "Description": "Sets the playback speed, in frames per bar. Defaults to 60 (equivalent to 30FPS at 120BPM)",
+      "Min": -100000000.0,
+      "Max": 100000000.0,
+      "Scale": 1.0
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0ede09d7-5f25-4065-b075-1b112e94591b"/*LoadImage*/,
+      "Position": {
+        "X": 1695.9446,
+        "Y": 453.12775
+      }
+    },
+    {
+      "ChildId": "287a2c01-98b3-4de5-a62d-ee2fe4ea9b8b"/*FilesInFolder*/,
+      "Position": {
+        "X": 109.05371,
+        "Y": -710.4381
+      }
+    },
+    {
+      "ChildId": "509337fe-87e6-46e7-8b69-651e1e1475d9"/*PickFromStringList*/,
+      "Position": {
+        "X": 1271.8899,
+        "Y": 498.35895
+      }
+    },
+    {
+      "ChildId": "a3d7823e-bdb2-46b4-94fa-259d4898a5e6"/*JoinStringList*/,
+      "Position": {
+        "X": 335.22894,
+        "Y": -757.8709
+      }
+    },
+    {
+      "ChildId": "00d3ed5d-d73f-4034-b994-ca8a1eca791a"/*PickStringPart*/,
+      "Position": {
+        "X": 563.63855,
+        "Y": -744.93097
+      }
+    },
+    {
+      "ChildId": "77fdd98a-d1b8-427c-8529-7ebb98590116"/*SplitString*/,
+      "Position": {
+        "X": 799.72296,
+        "Y": -737.47327
+      }
+    },
+    {
+      "ChildId": "d822c5f1-50b7-4e94-a588-f37a4d5e0ca7"/*CompareInt*/,
+      "Position": {
+        "X": 318.40958,
+        "Y": -684.84686
+      }
+    },
+    {
+      "ChildId": "d1a45ae9-b910-402c-95b8-4f4bd5057ba4"/*CompareInt*/,
+      "Position": {
+        "X": 336.68292,
+        "Y": -585.6242
+      }
+    },
+    {
+      "ChildId": "298a4b5c-21b1-4c6f-b31f-2021714de30f"/*CompareInt*/,
+      "Position": {
+        "X": 595.986,
+        "Y": -589.37286
+      }
+    },
+    {
+      "ChildId": "cbba48b4-52ef-4f92-ba06-5629067877a2"/*ClipTime*/,
+      "Position": {
+        "X": -11.051575,
+        "Y": 39.82086
+      }
+    },
+    {
+      "ChildId": "8de7cb3f-06e0-4cfb-84b2-d637ca2d26ca"/*Multiply*/,
+      "Position": {
+        "X": 185.28906,
+        "Y": 24.120605
+      }
+    },
+    {
+      "ChildId": "7bbd8fb9-3b22-47fa-8de4-9a5bad8cd698"/*Add*/,
+      "Position": {
+        "X": 369.16217,
+        "Y": 21.222565
+      }
+    },
+    {
+      "ChildId": "51222936-cd8a-4f8c-8bde-222463804749"/*Clamp*/,
+      "Position": {
+        "X": 672.5188,
+        "Y": 118.58536
+      }
+    },
+    {
+      "ChildId": "5412ce85-1b26-4a72-9869-696f546d52bc"/*IntToFloat*/,
+      "Position": {
+        "X": 172.12149,
+        "Y": -274.57278
+      }
+    },
+    {
+      "ChildId": "4caed860-5260-4915-9df3-d104a575e024"/*BoolToFloat*/,
+      "Position": {
+        "X": 663.6662,
+        "Y": 269.77838
+      }
+    },
+    {
+      "ChildId": "2211703a-47e0-4f3e-948f-d70cc7fcb9b1"/*Floor*/,
+      "Position": {
+        "X": 906.08276,
+        "Y": 473.58173
+      }
+    },
+    {
+      "ChildId": "747f14e9-9144-499c-9c75-629e4e1ce073"/*FloatToInt*/,
+      "Position": {
+        "X": 1056.0828,
+        "Y": 473.58173
+      }
+    },
+    {
+      "ChildId": "e8c5e537-75a7-4b5b-bdf9-f34aa6336a1d"/*SubInts*/,
+      "Position": {
+        "X": 715.8056,
+        "Y": -653.2764
+      }
+    },
+    {
+      "ChildId": "63a2a350-f7b2-45ec-801a-369698013d91"/*IntToFloat*/,
+      "Position": {
+        "X": 86.29239,
+        "Y": -147.75076
+      }
+    },
+    {
+      "ChildId": "574c034b-060d-429a-a90f-5315b3a33dfe"/*PickFloat*/,
+      "Position": {
+        "X": 424.95364,
+        "Y": -167.24234
+      }
+    },
+    {
+      "ChildId": "71ec2f1a-e0ad-4796-b823-c1aadb4c4a65"/*CompareInt*/,
+      "Position": {
+        "X": -13.041283,
+        "Y": -225.75278
+      }
+    },
+    {
+      "ChildId": "f674b6f2-76d1-4555-a6ba-f17ba1d28d20"/*Sub*/,
+      "Position": {
+        "X": 270.48434,
+        "Y": -119.202484
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "94262a4f-0b0c-420b-aed2-4200f5956942"/*output*/,
+      "Position": {
+        "X": 1904.3059,
+        "Y": 420.922
+      }
+    },
+    {
+      "OutputId": "69ab3d65-aed5-437e-87d1-254490d34d0e"/*FileList*/,
+      "Position": {
+        "X": 1346.9937,
+        "Y": -674.38214
+      }
+    }
+  ]
+}
