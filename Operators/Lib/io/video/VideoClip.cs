@@ -1,10 +1,21 @@
 using T3.Core.Resource.Assets;
+using T3.Core.Utils;
 using T3.Video;
 
 namespace Lib.io.video;
 
+/// <summary>
+/// Implemented by [VideoClip] so the [VideoClipPlayer] compositor ([_ProcessVideoClips]) can read each clip's
+/// per-clip compositing params. The clip's TimeClip / LayerIndex come from its TimeClipSlot output instead.
+/// </summary>
+internal interface IVideoClipProvider
+{
+    InputSlot<Vector4> ColorInput { get; }
+    InputSlot<int> BlendModeInput { get; }
+}
+
 [Guid("04c1a6dc-3042-48a8-81d2-0a5a162016dc")]
-internal sealed class VideoClip :Instance<VideoClip>,IStatusProvider
+internal sealed class VideoClip : Instance<VideoClip>, IStatusProvider, IVideoClipProvider
 {
     [Output(Guid = "eb954aeb-535b-4b22-ac49-858f71bdaac4", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
     public readonly Slot<Texture2D> Texture = new();
@@ -71,6 +82,9 @@ internal sealed class VideoClip :Instance<VideoClip>,IStatusProvider
 
     public string GetStatusMessage() => _statusMessage;
 
+    InputSlot<Vector4> IVideoClipProvider.ColorInput => Color;
+    InputSlot<int> IVideoClipProvider.BlendModeInput => BlendMode;
+
     private readonly Guid _streamId = Guid.NewGuid();
     private string _statusMessage;
 
@@ -88,4 +102,12 @@ internal sealed class VideoClip :Instance<VideoClip>,IStatusProvider
     // No longer used: FFmpeg gives direct PTS control, so there is no resync threshold.
     [Input(Guid = "5EB10090-AE6A-4AE7-9FBD-5BD9FFD13B1B")]
     public readonly InputSlot<float> ResyncThreshold = new();
+
+    // Per-clip compositing params, read by [VideoClipPlayer] when stacking active clips. Color is tint + alpha
+    // (alpha = opacity); it rides context.ForegroundColor into the composite.
+    [Input(Guid = "7fb1d490-6c9b-4380-b88c-800d44c16475")]
+    public readonly InputSlot<Vector4> Color = new(Vector4.One);
+
+    [Input(Guid = "27f02af3-06f3-4cb2-8731-2e8777634275", MappedType = typeof(SharedEnums.BlendModes))]
+    public readonly InputSlot<int> BlendMode = new();
 }

@@ -26,20 +26,59 @@ internal sealed class _ProcessVideoClips : Instance<_ProcessVideoClips>
 
         var localTime = context.LocalTime;
         var clips = Textures.CollectedInputs;
-        for (var i = 0; i < clips.Count; i++)
-        {
-            var clip = clips[i];
+        var count = clips.Count;
 
-            // Composite only clips whose timeline range contains the playhead, so a sequential cut-to-cut
-            // timeline shows the active clip(s) instead of always the last-drawn one, and gaps composite
-            // nothing (the bound target keeps its clear color). A wired texture without a TimeClip (e.g. a
-            // plain image) has no range and always draws.
-            if (!IsClipActive(clip.Parent, localTime))
+        if (_activeIndices.Length < count)
+        {
+            _activeIndices = new int[count];
+            _activeLayers = new int[count];
+        }
+
+        // Gather the clips whose timeline range contains the playhead (a sequential cut-to-cut timeline then
+        // shows only the active clip(s); gaps composite nothing and the bound target keeps its clear color),
+        // insertion-sorting each into descending LayerIndex order as it's found. The active set is tiny
+        // (usually 1-3); the lowest layer ends up last so it draws on top, and equal layers keep multi-input
+        // connection order (stable: `i` only advances and the shift condition is strict ( < )).
+        var activeCount = 0;
+        for (var i = 0; i < count; i++)
+        {
+            if (!TryGetActiveLayer(clips[i].Parent, localTime, out var layerIndex))
                 continue;
 
-            var texture = clip.GetValue(context);
+            var b = activeCount - 1;
+            while (b >= 0 && _activeLayers[b] < layerIndex)
+            {
+                _activeIndices[b + 1] = _activeIndices[b];
+                _activeLayers[b + 1] = _activeLayers[b];
+                b--;
+            }
+            _activeIndices[b + 1] = i;
+            _activeLayers[b + 1] = layerIndex;
+            activeCount++;
+        }
+
+        // Per-clip color (tint + alpha opacity) rides context.ForegroundColor (restored after the loop); the
+        // wrapper feeds it into [DrawScreenQuad].Color via [GetForegroundColor]. Blend mode goes through a
+        // context variable read by [GetIntVar].
+        var baseForeground = context.ForegroundColor;
+        for (var a = 0; a < activeCount; a++)
+        {
+            var clipSlot = clips[_activeIndices[a]];
+            var texture = clipSlot.GetValue(context);
             if (texture == null)
                 continue;
+
+            // A wired texture that isn't a [VideoClip] keeps the white / Normal defaults.
+            var color = Vector4.One;
+            var blendMode = 0;
+            if (clipSlot.Parent is IVideoClipProvider provider)
+            {
+                color = provider.ColorInput.GetValue(context);
+                blendMode = provider.BlendModeInput.GetValue(context);
+            }
+
+            context.ForegroundColor = baseForeground * color;
+            context.IntVariables[BlendModeVariableName] = blendMode;
 
             // Point the subgraph's [UseTextureReference] at this clip's frame, then re-evaluate the draw
             // subtree so [DrawScreenQuad] composites it into the bound render target.
@@ -50,13 +89,17 @@ internal sealed class _ProcessVideoClips : Instance<_ProcessVideoClips>
             DrawCommand.GetValue(context);
         }
 
+        context.ForegroundColor = baseForeground;
         Textures.DirtyFlag.Clear();
     }
 
-    // A VideoClip exposes its TimeClip via a TimeClipSlot output (ITimeClipProvider). Exclusive end matches
-    // TimeClipSlot's own range test so adjacent clips sharing a cut boundary never both draw on that frame.
-    private static bool IsClipActive(Instance clipInstance, double localTime)
+    // A VideoClip exposes its TimeClip via a TimeClipSlot output (ITimeClipProvider). Returns whether the clip
+    // is active at localTime and (out) its layer index. Exclusive end matches TimeClipSlot's own range test so
+    // adjacent clips sharing a cut boundary never both draw on that frame. A wired texture without a TimeClip
+    // (e.g. a plain image) has no range, so it is always active and sits on layer 0.
+    private static bool TryGetActiveLayer(Instance clipInstance, double localTime, out int layerIndex)
     {
+        layerIndex = 0;
         if (clipInstance == null)
             return true;
 
@@ -65,13 +108,23 @@ internal sealed class _ProcessVideoClips : Instance<_ProcessVideoClips>
         {
             if (outputs[i] is ITimeClipProvider clipProvider)
             {
-                var range = clipProvider.TimeClip.TimeRange;
+                var clip = clipProvider.TimeClip;
+                layerIndex = clip.LayerIndex;
+                var range = clip.TimeRange;
                 return localTime >= range.Start && localTime < range.End;
             }
         }
 
         return true;
     }
+
+    // Variable name the wrapper's draw subgraph reads via [GetIntVar] to pick up the active clip's blend mode.
+    // Must match exactly what that op is configured with in [VideoClipPlayer]. (Opacity rides ForegroundColor.)
+    private const string BlendModeVariableName = "VideoClip.BlendMode";
+
+    // Reused across frames; grown to the connected-clip count on first use (and if more clips are wired in).
+    private int[] _activeIndices = [];
+    private int[] _activeLayers = [];
 
     [Input(Guid = "116a67d9-e985-4c2e-a71b-73fbcdadbb18")]
     public readonly MultiInputSlot<Texture2D> Textures = new();

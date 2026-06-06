@@ -10,9 +10,27 @@
   ],
   "Children": [
     {
+      "Id": "0bfc8cd5-a08c-4acd-93fd-6d460c3974ce"/*GetForegroundColor*/,
+      "SymbolId": "6c1271a0-058f-4ff0-940b-f196e5debdf7",
+      "InputValues": [],
+      "Outputs": []
+    },
+    {
       "Id": "1302bbfd-2acd-4df8-815d-2acd58ce2063"/*_ProcessVideoClips*/,
       "SymbolId": "0162ddd9-4611-4a0a-b02f-8f68ded99cfb",
       "InputValues": [],
+      "Outputs": []
+    },
+    {
+      "Id": "1c0843b2-4b85-4a69-9f3b-3f4ed0165a95"/*GetIntVar*/,
+      "SymbolId": "470db771-c7f2-4c52-8897-d3a9b9fc6a4e",
+      "InputValues": [
+        {
+          "Id": "d7662b65-f249-4887-a319-dc2cf7d192f2"/*VariableName*/,
+          "Type": "System.String",
+          "Value": "VideoClip.BlendMode"
+        }
+      ],
       "Outputs": []
     },
     {
@@ -69,6 +87,18 @@
       "SourceSlotId": "3c8116a2-2686-41ba-8bfd-d1b3fb929b02",
       "TargetParentOrChildId": "1302bbfd-2acd-4df8-815d-2acd58ce2063",
       "TargetSlotId": "b6930a1d-ae4a-4c79-81b4-97ff8c23b681"
+    },
+    {
+      "SourceParentOrChildId": "0bfc8cd5-a08c-4acd-93fd-6d460c3974ce",
+      "SourceSlotId": "f962854b-00d6-4eb3-aa4c-e5d4bd500672",
+      "TargetParentOrChildId": "84c7b008-c974-4e76-802d-08993498652b",
+      "TargetSlotId": "4e8fecd0-00ca-404e-a9d4-1cb0d3e044f1"
+    },
+    {
+      "SourceParentOrChildId": "1c0843b2-4b85-4a69-9f3b-3f4ed0165a95",
+      "SourceSlotId": "b306b216-630c-4611-90fd-52ff322ebd00",
+      "TargetParentOrChildId": "84c7b008-c974-4e76-802d-08993498652b",
+      "TargetSlotId": "60cef5fb-b22a-4fa0-83bb-093d0f1d5b56"
     },
     {
       "SourceParentOrChildId": "363742e9-f79e-48f9-ad73-e9b748e96429",

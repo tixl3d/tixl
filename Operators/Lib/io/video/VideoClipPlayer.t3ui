@@ -14,10 +14,24 @@
   ],
   "SymbolChildUis": [
     {
+      "ChildId": "0bfc8cd5-a08c-4acd-93fd-6d460c3974ce"/*GetForegroundColor*/,
+      "Position": {
+        "X": -463.90225,
+        "Y": 132.42017
+      }
+    },
+    {
       "ChildId": "1302bbfd-2acd-4df8-815d-2acd58ce2063"/*_ProcessVideoClips*/,
       "Position": {
         "X": -183.90225,
         "Y": 27.420166
+      }
+    },
+    {
+      "ChildId": "1c0843b2-4b85-4a69-9f3b-3f4ed0165a95"/*GetIntVar*/,
+      "Position": {
+        "X": -463.90225,
+        "Y": 167.42017
       }
     },
     {
@@ -37,8 +51,8 @@
     {
       "ChildId": "dedfeb9e-60c5-4c87-b853-860f2c0944a2"/*RenderTarget*/,
       "Position": {
-        "X": -183.90225,
-        "Y": 132.42017
+        "X": -115.141205,
+        "Y": 221.93019
       }
     }
   ],
@@ -46,8 +60,8 @@
     {
       "OutputId": "7edfda73-1877-4463-85ad-7ec4182c0385"/*ColorBuffer*/,
       "Position": {
-        "X": -183.90225,
-        "Y": 167.42017
+        "X": -115.141205,
+        "Y": 256.93018
       }
     }
   ],
