@@ -1,0 +1,143 @@
+{
+  "Id": "c154b616-8aaf-4d43-ae95-035951b531c8"/*ConvertPointAttributes*/,
+  "Description": "Takes one point attribute and converts it into another on a per-point basis, with some controls for transforming those attributes.\n\nFor finer control over point color or W, try [SpreadPointAttributes].\n",
+  "InputUis": [
+    {
+      "InputId": "cace5c6d-5411-4835-97c0-b2690b4e1b26"/*Points*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -501.39294,
+        "Y": 452.90167
+      },
+      "Description": "Input points to be converted."
+    },
+    {
+      "InputId": "c1631db3-ba6f-4bd5-badf-30309b001d60"/*Mode*/,
+      "Position": {
+        "X": -485.94177,
+        "Y": 849.4209
+      },
+      "Description": "Replace: Sets ConvertTo to be exactly the same as ConvertFrom.\nAdd: Adds ConvertFrom onto ConvertTo.\nMultiply: Multiplies ConvertFrom by ConvertTo.\n\n"
+    },
+    {
+      "InputId": "ec70d9cc-d0ed-4490-8f50-542e442f38cd"/*ConvertFrom*/,
+      "Position": {
+        "X": -483.93066,
+        "Y": 673.4205
+      },
+      "Description": "Input attribute for use in conversion."
+    },
+    {
+      "InputId": "035af505-295a-4ecd-9230-8e1e22f38c4a"/*ConvertTo*/,
+      "Position": {
+        "X": -483.93066,
+        "Y": 718.4206
+      },
+      "Description": "Output attribute to be modified by this operator."
+    },
+    {
+      "InputId": "ab049e91-c918-43f2-97b5-457c4eaffa89"/*Amount*/,
+      "Position": {
+        "X": -484.9242,
+        "Y": 915.43134
+      },
+      "Description": "Multiplies the input attribute before converting."
+    },
+    {
+      "InputId": "2d55ff51-5f1b-421a-95ab-9c18d34b0efe"/*Offset*/,
+      "Position": {
+        "X": -484.9242,
+        "Y": 960.4316
+      },
+      "Description": "Added to the input attribute before converting."
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0ef2108d-1bdf-4c0b-b1f5-035b2f467814"/*ComputeShader*/,
+      "Position": {
+        "X": -98.3772,
+        "Y": 545.09485
+      }
+    },
+    {
+      "ChildId": "ee3b14ba-d455-42c6-b247-303f741b251c"/*ComputeShaderStage*/,
+      "Position": {
+        "X": 317.05783,
+        "Y": 532.0112
+      }
+    },
+    {
+      "ChildId": "e254d581-cb71-45c8-96e6-c7d10b0fcaf7"/*ExecuteBufferUpdate*/,
+      "Position": {
+        "X": 499.75,
+        "Y": 420.2702
+      }
+    },
+    {
+      "ChildId": "4e42d81b-02a0-4e5f-8997-fe2a8a09edc8"/*CalcDispatchCount*/,
+      "Position": {
+        "X": 147.17853,
+        "Y": 571.37103
+      }
+    },
+    {
+      "ChildId": "cf3f4c55-8981-4ef1-8425-79539356727e"/*StructuredBufferWithViews*/,
+      "Position": {
+        "X": -98.3772,
+        "Y": 502.09485
+      }
+    },
+    {
+      "ChildId": "226ce4bf-0dd2-4b94-b437-2625941fec09"/*GetBufferComponents*/,
+      "Position": {
+        "X": -351.39294,
+        "Y": 452.90167
+      }
+    },
+    {
+      "ChildId": "2260fb25-f406-4a72-b79b-e632be281f54"/*GetBufferComponents*/,
+      "Position": {
+        "X": 147.17853,
+        "Y": 640.37103
+      }
+    },
+    {
+      "ChildId": "c3dd7c91-1785-4a81-8c05-5a6164c20c69"/*FloatsToBuffer*/,
+      "Position": {
+        "X": -99.74078,
+        "Y": 668.5633
+      }
+    },
+    {
+      "ChildId": "c969ecbe-910a-4886-8ce0-44078040bbc8"/*IntToFloat*/,
+      "Position": {
+        "X": -333.93066,
+        "Y": 673.4205
+      }
+    },
+    {
+      "ChildId": "c69394fc-2ff1-4f1b-b729-ee3cd51f9d05"/*IntToFloat*/,
+      "Position": {
+        "X": -333.93066,
+        "Y": 729.4205
+      }
+    },
+    {
+      "ChildId": "41933e73-6c89-4215-92a8-48cdfc6b743a"/*IntToFloat*/,
+      "Position": {
+        "X": -335.94177,
+        "Y": 849.4209
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "5ea9c3fa-7c27-4d4f-a056-c37b70ae4796"/*Output*/,
+      "Position": {
+        "X": 649.75,
+        "Y": 420.2702
+      }
+    }
+  ]
+}
