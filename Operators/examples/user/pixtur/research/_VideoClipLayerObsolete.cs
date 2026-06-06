@@ -1,8 +1,7 @@
 namespace Examples.user.pixtur.research;
 
 [Guid("0dbc4f3f-8fdb-402b-a7cb-6949cf21a98a")]
-public class VideoClipLayer : Instance<VideoClipLayer>
-{
+public class _VideoClipLayerObsolete :Instance<_VideoClipLayerObsolete>{
     [Output(Guid = "44A513CA-AB20-46DF-BB6B-F28B42DC86E0")]
     public readonly TimeClipSlot<Command> Output = new();
 

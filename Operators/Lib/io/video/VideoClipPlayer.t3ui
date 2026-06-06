@@ -1,0 +1,65 @@
+{
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
+  "Id": "f98d28ed-5f30-4416-93be-f0d7a15a7f77"/*VideoClipPlayer*/,
+  "Description": "",
+  "InputUis": [
+    {
+      "InputId": "7b80b49f-c5f5-4c86-8c12-f854fff027c2"/*VideoClips*/,
+      "Position": {
+        "X": -368.2997,
+        "Y": -40.381287
+      }
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "1302bbfd-2acd-4df8-815d-2acd58ce2063"/*_ProcessVideoClips*/,
+      "Position": {
+        "X": -183.90225,
+        "Y": 27.420166
+      }
+    },
+    {
+      "ChildId": "363742e9-f79e-48f9-ad73-e9b748e96429"/*UseTextureReference*/,
+      "Position": {
+        "X": -463.90225,
+        "Y": 62.420166
+      }
+    },
+    {
+      "ChildId": "84c7b008-c974-4e76-802d-08993498652b"/*DrawScreenQuad*/,
+      "Position": {
+        "X": -323.90225,
+        "Y": 97.420166
+      }
+    },
+    {
+      "ChildId": "dedfeb9e-60c5-4c87-b853-860f2c0944a2"/*RenderTarget*/,
+      "Position": {
+        "X": -183.90225,
+        "Y": 132.42017
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "7edfda73-1877-4463-85ad-7ec4182c0385"/*ColorBuffer*/,
+      "Position": {
+        "X": -183.90225,
+        "Y": 167.42017
+      }
+    }
+  ],
+  "Settings": {
+    "Timeline": {
+  "ScaleX": 80.0,
+  "ScrollX": -2.5,
+  "Mode": "DopeView",
+  "TimelineHeight": -1,
+  "InlineDataClipEditEnabled": false,
+  "DetailsAreaHeight": 200.0,
+  "InlineDataClipStripHeight": null
+}
+  }
+}
