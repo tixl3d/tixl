@@ -661,7 +661,12 @@ internal static class SymbolUiJson
         var hasRenderSettings = symbolUi.RenderSettings != null;
         var hasRecordingSettings = symbolUi.RecordingSettings is { } rec && !rec.IsAtDefault();
         var hasOutputWindowStates = symbolUi.OutputWindowStates is { Count: > 0 };
-        var hasTimelineState = symbolUi.TimelineState != null;
+        // TimelineState (scroll/zoom/mode of the timeline view) is only meaningful for
+        // symbols the user marked as a playback root via "Specify settings for ..." in
+        // the Composition Settings window. On every other symbol the editor still keeps
+        // an in-memory TimelineState while the user navigates the timeline, but writing
+        // it would pollute the .t3ui of sub-ops the user never intentionally configured.
+        var hasTimelineState = symbolUi.TimelineState != null && symbolUi.Symbol.CompositionSettings.Enabled;
         var hasWindowLayout = !string.IsNullOrEmpty(symbolUi.WindowLayout);
 
         if (!hasRenderSettings && !hasRecordingSettings && !hasOutputWindowStates && !hasTimelineState && !hasWindowLayout)
@@ -674,7 +679,8 @@ internal static class SymbolUiJson
             if (hasRecordingSettings)
                 symbolUi.RecordingSettings!.WriteToJson(writer);
             OutputWindowState.WriteAllToJson(writer, symbolUi.OutputWindowStates);
-            symbolUi.TimelineState?.WriteToJson(writer);
+            if (hasTimelineState)
+                symbolUi.TimelineState!.WriteToJson(writer);
 
             if (hasWindowLayout)
             {
