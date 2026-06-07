@@ -154,8 +154,14 @@
     <Folder Include="io\video\" />
   </ItemGroup>
   <Target Name="ClearBuildOutput" BeforeTargets="BeforeBuild">
-    <!-- Clear previous files in the export folder -->
-    <RemoveDir Directories="bin/$(Configuration)" />
+    <!-- Clear previous build output, but keep the FFmpeg native DLLs. A running editor with a video playing has
+         them loaded, and native libraries can't be unloaded, so a blunt RemoveDir fails with "access denied" and
+         breaks rebuild / hot-reload. These DLLs come from NuGet and don't change between builds; a stale one is
+         refreshed by restarting the editor. ContinueOnError so any other transiently-locked file can't fail the build. -->
+    <ItemGroup>
+      <_StaleBuildOutput Include="bin/$(Configuration)/**/*" Exclude="bin/$(Configuration)/**/av*.dll;bin/$(Configuration)/**/sw*.dll;bin/$(Configuration)/**/postproc*.dll" />
+    </ItemGroup>
+    <Delete Files="@(_StaleBuildOutput)" ContinueOnError="true" />
   </Target>
   <Target Name="CreatePackageInfo" AfterTargets="AfterBuild">
     <ItemGroup Label="Define json structure of referenced operator packages">

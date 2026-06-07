@@ -166,8 +166,7 @@ public sealed class VideoPlaybackController : IDisposable
         _converter?.Dispose();
         _session?.Dispose();
         _cache?.Dispose();
-        if (!_zeroCopy)
-            Texture?.Dispose(); // in zero-copy the converter owns the output texture, disposed above
+        _softwareTexture?.Dispose(); // the zero-copy output texture is owned (and disposed) by the converter above
         Texture = null;
         _wake.Dispose();
         _framePublished.Dispose();
@@ -196,11 +195,14 @@ public sealed class VideoPlaybackController : IDisposable
         var format = _pendingIsHdr ? Format.R16G16B16A16_UNorm : Format.R8G8B8A8_UNorm;
         var bytesPerPixel = _pendingIsHdr ? 8 : 4;
 
-        if (Texture == null || Texture.Description.Width != _pendingWidth || Texture.Description.Height != _pendingHeight
-            || Texture.Description.Format != format)
+        // Own a dedicated software-upload texture, separate from the zero-copy converter's output. The two used to
+        // alias through Texture, so switching zero-copy → software disposed the converter's output behind its back;
+        // switching back then threw "COM object null" when EnsureOutput read the freed texture's description.
+        if (_softwareTexture == null || _softwareTexture.Description.Width != _pendingWidth
+            || _softwareTexture.Description.Height != _pendingHeight || _softwareTexture.Description.Format != format)
         {
-            Texture?.Dispose();
-            Texture = CoreTexture2D.CreateTexture2D(new Texture2DDescription
+            _softwareTexture?.Dispose();
+            _softwareTexture = CoreTexture2D.CreateTexture2D(new Texture2DDescription
                                                         {
                                                             Width = _pendingWidth,
                                                             Height = _pendingHeight,
@@ -218,8 +220,10 @@ public sealed class VideoPlaybackController : IDisposable
         fixed (byte* pixels = _pendingBuffer)
         {
             var dataBox = new SharpDX.DataBox((IntPtr)pixels, _pendingWidth * bytesPerPixel, 0);
-            ResourceManager.Device.ImmediateContext.UpdateSubresource(dataBox, Texture, 0);
+            ResourceManager.Device.ImmediateContext.UpdateSubresource(dataBox, _softwareTexture, 0);
         }
+
+        Texture = _softwareTexture;
     }
 
     // ---- worker thread ----
@@ -561,6 +565,7 @@ public sealed class VideoPlaybackController : IDisposable
     // Render-thread only.
     private long _lastUploadedTarget = NotSet;
     private HardwareFrameConverter? _hardwareConverter;
+    private CoreTexture2D? _softwareTexture; // software/read-back upload target; the zero-copy output is the converter's.
     private readonly Frame _renderGpuFrame = new();
 
     // Cache budget assigned by the engine (its share of the shared global budget); the eval thread writes it,
