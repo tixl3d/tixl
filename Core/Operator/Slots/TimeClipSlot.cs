@@ -32,6 +32,14 @@ internal interface IOutputDataUser<T> : IOutputDataUser
 /// </summary>
 public interface IPreventingTimeRemap;
 
+/// <summary>
+/// Marks a clip whose <see cref="TimeClip.SourceRange"/> is <b>content-time</b> — anchored at the source's start
+/// (0), not the placement position. The editor uses this at creation to default SourceRange to <c>[0, duration]</c>
+/// instead of the generic <c>SourceRange = TimeRange</c> (which is right only for region-mapping clips). Implemented
+/// by media clips like [VideoClip]. (Future: pair with an instance-side AvailableSourceRange the editor can snap to.)
+/// </summary>
+public interface IContentTimeClip;
+
 public sealed class TimeClipSlot<T> : Slot<T>, ITimeClipProvider, IOutputDataUser<TimeClip>
 {
     public TimeClip TimeClip { get; private set; }

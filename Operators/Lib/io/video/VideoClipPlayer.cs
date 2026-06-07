@@ -16,6 +16,9 @@ namespace Lib.io.video{
         [Input(Guid = "ac80c531-90ff-449a-8d60-f6a4fa27b818")]
         public readonly InputSlot<bool> AutoCollect = new InputSlot<bool>();
 
+        [Input(Guid = "f2ca9226-b302-4a77-8c8b-1b1db6022eee")]
+        public readonly InputSlot<int> ScaleMethod = new InputSlot<int>();
+
 
     }
 }

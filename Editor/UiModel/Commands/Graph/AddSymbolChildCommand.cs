@@ -44,6 +44,26 @@ public sealed class AddSymbolChildCommand : ICommand
         }
             
         parentSymbolUi!.AddChild(symbolToAdd!.Symbol, _addedChildId, PosOnCanvas, Size, ChildName);
+        InitContentClipSourceRange(parentSymbolUi.Symbol);
+    }
+
+    // Content clips (e.g. [VideoClip]) play from the start of their source, so their SourceRange is content-time
+    // (0-based), not the placement position the generic TimeClip default uses. Set it on the new child's persisted
+    // TimeClip here — editor-side — so it serializes and undoes together with the add (mirrors RecordingSession).
+    private void InitContentClipSourceRange(Symbol composition)
+    {
+        if (!composition.Children.TryGetValue(_addedChildId, out var child)
+            || !typeof(T3.Core.Operator.Slots.IContentTimeClip).IsAssignableFrom(child.Symbol.InstanceType))
+            return;
+
+        foreach (var output in child.Outputs.Values)
+        {
+            if (output.OutputData is T3.Core.Animation.TimeClip timeClip)
+            {
+                timeClip.SourceRange = new T3.Core.Animation.TimeRange(0f, timeClip.TimeRange.Duration);
+                break;
+            }
+        }
     }
 
     // core data

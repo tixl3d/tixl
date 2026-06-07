@@ -17,14 +17,21 @@
         "X": -213.47714,
         "Y": 140.25677
       }
+    },
+    {
+      "InputId": "f2ca9226-b302-4a77-8c8b-1b1db6022eee"/*ScaleMethod*/,
+      "Position": {
+        "X": -504.34915,
+        "Y": 163.75607
+      }
     }
   ],
   "SymbolChildUis": [
     {
       "ChildId": "0bfc8cd5-a08c-4acd-93fd-6d460c3974ce"/*GetForegroundColor*/,
       "Position": {
-        "X": -550.10516,
-        "Y": 139.54437
+        "X": -797.00146,
+        "Y": 126.0235
       }
     },
     {
@@ -37,22 +44,36 @@
     {
       "ChildId": "1c0843b2-4b85-4a69-9f3b-3f4ed0165a95"/*GetIntVar*/,
       "Position": {
-        "X": -550.10516,
-        "Y": 174.54437
+        "X": -797.00134,
+        "Y": 172.87396
+      }
+    },
+    {
+      "ChildId": "22b80bb4-6130-49d0-a551-adc89ceb9092"/*Layer2d*/,
+      "Position": {
+        "X": -558.81177,
+        "Y": 262.3715
       }
     },
     {
       "ChildId": "363742e9-f79e-48f9-ad73-e9b748e96429"/*UseTextureReference*/,
       "Position": {
-        "X": -550.10516,
-        "Y": 69.54437
+        "X": -797.00134,
+        "Y": 17.921448
       }
     },
     {
       "ChildId": "84c7b008-c974-4e76-802d-08993498652b"/*DrawScreenQuad*/,
       "Position": {
-        "X": -410.10507,
-        "Y": 104.54437
+        "X": -564.5,
+        "Y": 428.77344
+      }
+    },
+    {
+      "ChildId": "c87daeb2-c7ce-4de2-898f-aef330fc16c9"/*Switch*/,
+      "Position": {
+        "X": -364.34915,
+        "Y": 93.75607
       }
     },
     {
@@ -71,16 +92,5 @@
         "Y": 210.25677
       }
     }
-  ],
-  "Settings": {
-    "Timeline": {
-  "ScaleX": 80.0,
-  "ScrollX": -2.5,
-  "Mode": "DopeView",
-  "TimelineHeight": -1,
-  "InlineDataClipEditEnabled": false,
-  "DetailsAreaHeight": 200.0,
-  "InlineDataClipStripHeight": null
-}
-  }
+  ]
 }

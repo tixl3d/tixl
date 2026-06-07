@@ -97,9 +97,26 @@ public sealed class VideoPlaybackController : IDisposable
             // Convert on the render thread's immediate context (outside the lock). The converter owns the output
             // texture; Texture just points at it.
             _hardwareConverter ??= new HardwareFrameConverter();
-            Texture = _hardwareConverter.Convert(_renderGpuFrame, _renderGpuFrame.Width, _renderGpuFrame.Height);
-            _renderGpuFrame.Unref();
-            produced = true;
+            try
+            {
+                var converted = _hardwareConverter.Convert(_renderGpuFrame, _renderGpuFrame.Width, _renderGpuFrame.Height);
+                if (converted != null)
+                {
+                    Texture = converted;
+                    produced = true;
+                }
+            }
+            catch (Exception e)
+            {
+                // A convert can transiently fail right after a source/mode switch — a frame whose decoder session is
+                // being torn down, or the shared device mid-reconfigure. Keep the last valid texture rather than
+                // nulling the output or letting the exception surface as an operator error; the next frame recovers.
+                Log.Debug($"Zero-copy convert skipped (transient): {e.Message}");
+            }
+            finally
+            {
+                _renderGpuFrame.Unref();
+            }
         }
 
         Duration = (float)duration;
@@ -287,6 +304,20 @@ public sealed class VideoPlaybackController : IDisposable
     {
         _workerUrl = url;
         _workerMode = mode;
+
+        // Drop any GPU frame still queued from the previous session before disposing it: that frame's surface
+        // belongs to the decoder we're about to tear down, and converting it on the render thread after teardown
+        // is what throws E_INVALIDARG on the shader-resource-view. (A frame already moved into _renderGpuFrame is
+        // covered by the try/catch around Convert.)
+        lock (_lock)
+        {
+            if (_hasPendingGpuFrame)
+            {
+                _pendingGpuFrame.Unref();
+                _hasPendingGpuFrame = false;
+            }
+        }
+
         _converter?.Dispose();
         _converter = null;
         _session?.Dispose();

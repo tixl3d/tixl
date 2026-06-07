@@ -21,7 +21,7 @@ internal interface IVideoClipProvider
 }
 
 [Guid("04c1a6dc-3042-48a8-81d2-0a5a162016dc")]
-internal sealed class VideoClip : Instance<VideoClip>, IStatusProvider, IVideoClipProvider
+internal sealed class VideoClip : Instance<VideoClip>, IStatusProvider, IVideoClipProvider, IContentTimeClip
 {
     [Output(Guid = "eb954aeb-535b-4b22-ac49-858f71bdaac4", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
     public readonly Slot<Texture2D> Texture = new();
