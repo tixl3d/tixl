@@ -85,6 +85,9 @@ internal static class Program
         // Must run before any code that may trigger assembly resolution.
         T3.Core.Diagnostics.AssemblyLoadDiagnostics.Install();
 
+        // Must run before anything reads FileLocations.SettingsDirectory (e.g. the log path below).
+        ApplyVersionIdOverrideArg(args);
+
         // Not calling this first will cause exceptions...
         Console.WriteLine("Starting T3 Editor");
         Console.WriteLine("Creating EditorUi");
@@ -128,7 +131,10 @@ internal static class Program
         Log.AddWriter(ConsoleLogWindow);
             
         Log.Info($"Starting {FormattedEditorVersion}");
-            
+
+        if (FileLocations.VersionIdOverride != null)
+            Log.Info($"Settings folder overridden via '{FileLocations.VersionIdOverrideEnvVar}': {FileLocations.SettingsDirectory}");
+
         CrashReporting.LogPath = logPath;
         //if (IsStandAlone)
         {
@@ -267,6 +273,32 @@ internal static class Program
         }
 
         Log.Debug("Shutdown complete");
+    }
+
+    /// <summary>
+    /// Honors <c>--override-version-id=&lt;id&gt;</c> (or <c>--override-version-id &lt;id&gt;</c>) by setting
+    /// <see cref="FileLocations.VersionIdOverrideEnvVar"/> for this process, so two editor instances of the
+    /// same build keep separate settings/project folders. Must run before any <see cref="FileLocations"/> access.
+    /// </summary>
+    private static void ApplyVersionIdOverrideArg(string[] args)
+    {
+        const string flag = "--override-version-id";
+        for (var i = 0; i < args.Length; i++)
+        {
+            var arg = args[i];
+            string? value = null;
+
+            if (arg.StartsWith(flag + "=", StringComparison.OrdinalIgnoreCase))
+                value = arg[(flag.Length + 1)..];
+            else if (arg.Equals(flag, StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+                value = args[i + 1];
+
+            if (string.IsNullOrWhiteSpace(value))
+                continue;
+
+            Environment.SetEnvironmentVariable(FileLocations.VersionIdOverrideEnvVar, value);
+            return;
+        }
     }
 
     // Main loop

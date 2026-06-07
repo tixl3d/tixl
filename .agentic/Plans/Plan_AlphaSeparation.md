@@ -45,6 +45,8 @@ Deferred to Phase 3: the "What's new" section currently just links to GitHub Rel
 
 Release Notes (Welcome tab) is still a stub; Phase 3 fills it in — including the operator-reference link enhancement now recorded in Phase 3 task 5.
 
+**2026-06-07 (manual folder override)** — Added a developer/power-user escape hatch on top of the version-derived folder naming, so two builds of the *same* version (e.g. two parallel dev checkouts) can keep separate settings/projects. [`FileLocations`](../Core/Settings/FileLocations.cs) reads `TIXL_OVERRIDE_VERSION_ID` during static init; when set, it replaces the prerelease suffix in `VersionedAppFolderName` (`TiXL4.2-skillQuest` instead of `TiXL4.2-alpha`). The value is sanitised against `Path.GetInvalidFileNameChars()` so it can't redirect the tree outside AppData. The Editor also accepts `--override-version-id=<id>` ([`Program.ApplyVersionIdOverrideArg`](../Editor/Program.cs)), which just seeds the same env var before any `FileLocations` access and logs the resolved folder. Player inherits the env-var path for free (no CLI arg). Manual test steps appended to [`alpha-folder-separation.md`](../.tests-manual/alpha-folder-separation.md).
+
 ## Non-goals
 
 - Auto-generating release notes from commits. Worth doing later; not in v1. Release notes for v1 are hand-written by the release-cut author into per-version markdown files.

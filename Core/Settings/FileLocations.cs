@@ -82,15 +82,54 @@ public static string TestReferencesFolder => Path.Combine(".tixl", TestsSubFolde
     public static readonly string TixlVersion = $"{RuntimeAssemblies.Version.Major}.{RuntimeAssemblies.Version.Minor}";
 
     /// <summary>
+    /// Environment variable that overrides the per-version folder suffix so two builds of the same
+    /// version can run side by side with isolated settings and projects. The value replaces the
+    /// prerelease suffix: <c>TIXL_OVERRIDE_VERSION_ID=skillQuest</c> → folder <c>TiXL4.2-skillQuest</c>.
+    /// The Editor also accepts <c>--override-version-id=&lt;id&gt;</c>, which sets this variable at startup.
+    /// </summary>
+    public const string VersionIdOverrideEnvVar = "TIXL_OVERRIDE_VERSION_ID";
+
+    /// <summary>
+    /// Sanitised value of <see cref="VersionIdOverrideEnvVar"/>, or <c>null</c> when unset or blank.
+    /// </summary>
+    public static readonly string? VersionIdOverride = ReadVersionIdOverride();
+
+    /// <summary>
     /// Per-version folder name (<c>"TiXL4.2"</c>, or <c>"TiXL4.2-alpha"</c> for prerelease builds)
     /// so alpha and stable installs don't clobber each other's settings, layouts, themes, and projects.
+    /// A set <see cref="VersionIdOverrideEnvVar"/> replaces the suffix instead (<c>"TiXL4.2-skillQuest"</c>),
+    /// keeping two builds of the same version isolated.
     /// Declared before the folders below — static initialisers run in source order, so reading it
     /// earlier would observe <c>null</c>.
     /// </summary>
-    public static readonly string VersionedAppFolderName =
-        RuntimeAssemblies.IsAlpha
-            ? $"{AppSubFolder}{TixlVersion}-{RuntimeAssemblies.VersionSuffix}"
-            : $"{AppSubFolder}{TixlVersion}";
+    public static readonly string VersionedAppFolderName = ResolveVersionedAppFolderName();
+
+    private static string ResolveVersionedAppFolderName()
+    {
+        if (VersionIdOverride != null)
+            return $"{AppSubFolder}{TixlVersion}-{VersionIdOverride}";
+
+        return RuntimeAssemblies.IsAlpha
+                   ? $"{AppSubFolder}{TixlVersion}-{RuntimeAssemblies.VersionSuffix}"
+                   : $"{AppSubFolder}{TixlVersion}";
+    }
+
+    /// <summary>
+    /// Reads <see cref="VersionIdOverrideEnvVar"/> and strips anything that isn't valid in a single
+    /// folder-name segment, so a stray separator can't redirect the settings tree outside AppData.
+    /// </summary>
+    private static string? ReadVersionIdOverride()
+    {
+        var raw = Environment.GetEnvironmentVariable(VersionIdOverrideEnvVar);
+        if (string.IsNullOrWhiteSpace(raw))
+            return null;
+
+        var sanitized = raw.Trim();
+        foreach (var invalid in Path.GetInvalidFileNameChars())
+            sanitized = sanitized.Replace(invalid, '_');
+
+        return sanitized.Length == 0 ? null : sanitized;
+    }
 
     public static readonly string SettingsDirectory =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
