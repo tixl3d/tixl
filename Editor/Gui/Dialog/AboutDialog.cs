@@ -102,8 +102,21 @@ internal sealed class AboutDialog : ModalDialog
 
             FormInputs.AddVerticalSpace(8);
 
-            ImGui.TextColored(UiColors.TextMuted, "Graphics processing unit(s):"); 
+            ImGui.TextColored(UiColors.TextMuted, "Graphics processing unit(s):");
             ImGui.Text($"{gpuInformation}");
+
+            var thirdPartyComponents = ThirdPartyRuntimeInfo.GetAll();
+            if (thirdPartyComponents.Count > 0)
+            {
+                FormInputs.AddVerticalSpace(8);
+                foreach (var component in thirdPartyComponents)
+                {
+                    ImGui.TextColored(UiColors.TextMuted, $"{component.Key}:");
+                    ImGui.SameLine();
+                    ImGui.Text(component.Value);
+                }
+            }
+
             FormInputs.AddVerticalSpace(8);
             ImGui.Separator();
             ImGui.PopStyleVar();
@@ -170,7 +183,10 @@ internal sealed class AboutDialog : ModalDialog
             systemInfo.AppendLine($".NET runtime: {GetDotNetRuntimeVersion()}");
             systemInfo.AppendLine($".NET SDK: {GetDotNetSdkVersion()}");
             systemInfo.AppendLine($"GPU: {GetGpuInformation()}");
-            
+
+            foreach (var component in ThirdPartyRuntimeInfo.GetAll())
+                systemInfo.AppendLine($"{component.Key}: {component.Value}");
+
             _systemInfo = systemInfo.ToString();
         }
         catch (Exception e)

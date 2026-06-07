@@ -542,7 +542,8 @@ internal static partial class PlayerExporter
             new Guid("34567890-abcd-ef12-3456-7890abcdef12"), // PoseLandmarkDetection  
             new Guid("8b23c93b-3b45-4c9b-9c23-4d5e6f7a8b9c"), // OnvifCamera
             new Guid("7b4d3c2a-5b16-4b2a-8f3a-7e8c9d0b1a2b"), // CameraCalibrartor  
-            new Guid("D9A7233D-5D03-4268-A58B-465972852A5B"), // VideoStreamInput
+            // VideoStreamInput now decodes via FFmpeg (the LGPL Sdcb build shipped with the Lib package), so
+            // it no longer needs the OpenCV DLLs.
         ], [
             "mediapipe_c.dll",
             "Emgu.CV.dll",

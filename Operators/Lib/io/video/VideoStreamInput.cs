@@ -1,7 +1,8 @@
 #nullable enable
 using System.Threading;
-using OpenCvSharp;
 using SharpDX;
+using T3.Core.Video;
+using T3.Video;
 using Utilities = T3.Core.Utils.Utilities;
 
 namespace Lib.io.video
@@ -16,7 +17,7 @@ namespace Lib.io.video
 
         [Input(Guid = "9A240243-71B5-4235-86A9-D5369A3311A9")]
         public readonly InputSlot<bool> Reconnect = new();
-        
+
         [Output(Guid = "2E7E2404-5881-4327-9653-CA9533B856A9", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
         public readonly Slot<Texture2D?> Texture = new();
 
@@ -30,25 +31,22 @@ namespace Lib.io.video
         public readonly InputSlot<string> Url = new("rtsp://your_stream_url");
 
         private CancellationTokenSource? _cancellationTokenSource;
-        private VideoCapture? _capture;
-
         private Thread? _captureThread;
 
         private Texture2D? _gpuTexture;
         private bool _lastConnectState;
         private volatile string _lastStatusMessage = "Not connected.";
-
         private string _lastUrl = string.Empty;
-        private Mat? _sharedBgraMat;
+
+        // The most recent decoded frame as packed RGBA, shared between the capture thread and the render thread.
+        private byte[]? _sharedRgba;
+        private int _sharedWidth;
+        private int _sharedHeight;
+        private bool _hasFrame;
 
         public VideoStreamInput()
         {
-            // CORRECT: Only the primary data output should trigger the update cycle.
             Texture.UpdateAction = Update;
-
-            // REMOVED: These lines were causing the infinite recursion.
-            // Status.UpdateAction = Update;
-            // Resolution.UpdateAction = Update;
         }
 
         public IStatusProvider.StatusLevel GetStatusLevel()
@@ -60,7 +58,6 @@ namespace Lib.io.video
         {
             return _lastStatusMessage;
         }
-        //private bool _disposed;
 
         private void SetStatus(string message) => _lastStatusMessage = message;
 
@@ -71,7 +68,7 @@ namespace Lib.io.video
             var reconnect = Reconnect.GetValue(context);
             if (reconnect) Reconnect.SetTypedInputValue(false);
 
-            bool settingsChanged = shouldConnect != _lastConnectState || (shouldConnect && url != _lastUrl);
+            var settingsChanged = shouldConnect != _lastConnectState || (shouldConnect && url != _lastUrl);
 
             if (shouldConnect)
             {
@@ -91,15 +88,14 @@ namespace Lib.io.video
 
             lock (_lockObject)
             {
-                if (_sharedBgraMat != null && !_sharedBgraMat.Empty())
+                if (_hasFrame && _sharedRgba != null)
                 {
-                    UploadMatToGpu(_sharedBgraMat);
+                    UploadFrameToGpu(_sharedRgba, _sharedWidth, _sharedHeight);
                     Texture.Value = _gpuTexture;
-                    Resolution.Value = new Int2(_sharedBgraMat.Width, _sharedBgraMat.Height);
+                    Resolution.Value = new Int2(_sharedWidth, _sharedHeight);
                 }
                 else
                 {
-                    // If there's no frame, ensure the output is cleared
                     Texture.Value = null;
                 }
             }
@@ -134,53 +130,53 @@ namespace Lib.io.video
             _captureThread = null;
             _cancellationTokenSource?.Dispose();
             _cancellationTokenSource = null;
-            _capture?.Dispose();
-            _capture = null;
             SetStatus("Disconnected");
         }
 
         private void CaptureLoop(string url, CancellationToken token)
         {
+            VideoDecoderSession? session = null;
+            SoftwareFrameConverter? converter = null;
             try
             {
                 SetStatus($"Connecting to {url}...");
 
-                _capture = new VideoCapture(url, VideoCaptureAPIs.FFMPEG);
+                // A live stream is consumed sequentially through this op's own SoftwareFrameConverter, so it needs
+                // CPU-side frames — FastSeeking decodes in software, which provides exactly that.
+                session = VideoDecoderSession.TryOpen(url, VideoPlaybackOptimization.FastSeeking, out var error, BuildDemuxerOptions(url));
 
-                if (token.IsCancellationRequested || !_capture.IsOpened())
+                if (token.IsCancellationRequested)
+                    return;
+
+                if (session == null)
                 {
-                    SetStatus($"Error: Failed to open stream '{url}'.");
-                    _capture.Dispose();
+                    SetStatus($"Error: Failed to open stream '{url}'. {error}");
                     return;
                 }
 
+                converter = new SoftwareFrameConverter(session.IsHdr);
                 SetStatus("Streaming");
-
-                using var frame = new Mat();
 
                 while (!token.IsCancellationRequested)
                 {
-                    if (_capture.Read(frame) && !frame.Empty())
+                    if (!session.TryReadNextFrame(out _))
                     {
-                        lock (_lockObject)
-                        {
-                            if (_sharedBgraMat == null || _sharedBgraMat.Width != frame.Width || _sharedBgraMat.Height != frame.Height)
-                            {
-                                _sharedBgraMat?.Dispose();
-                                _sharedBgraMat = new Mat(frame.Rows, frame.Cols, MatType.CV_8UC4);
-                            }
-
-                            Cv2.CvtColor(frame, _sharedBgraMat, ColorConversionCodes.BGR2BGRA);
-                        }
-                    }
-                    else if (_capture.IsOpened())
-                    {
-                        SetStatus("Warning: Stream interrupted. Waiting...");
-                        Thread.Sleep(500);
-                    }
-                    else
-                    {
+                        SetStatus("Warning: Stream ended or interrupted.");
                         break;
+                    }
+
+                    var rgba = converter.Convert(session.CurrentFrame);
+                    var byteCount = rgba.Width * rgba.Height * converter.BytesPerPixel;
+
+                    lock (_lockObject)
+                    {
+                        if (_sharedRgba == null || _sharedRgba.Length < byteCount)
+                            _sharedRgba = new byte[byteCount];
+
+                        rgba.FillImageBuffer(_sharedRgba, 1);
+                        _sharedWidth = rgba.Width;
+                        _sharedHeight = rgba.Height;
+                        _hasFrame = true;
                     }
                 }
             }
@@ -194,51 +190,57 @@ namespace Lib.io.video
             }
             finally
             {
-                _capture?.Dispose();
+                converter?.Dispose();
+                session?.Dispose();
                 lock (_lockObject)
                 {
-                    _sharedBgraMat?.Dispose();
-                    _sharedBgraMat = null;
+                    _hasFrame = false;
                 }
             }
         }
 
-        private void UploadMatToGpu(Mat mat)
+        // TCP is more reliable than the default UDP, and a socket timeout keeps a dead URL from hanging the open.
+        private static IReadOnlyDictionary<string, string>? BuildDemuxerOptions(string url)
         {
-            if (mat.Empty()) return;
+            if (!url.StartsWith("rtsp", StringComparison.OrdinalIgnoreCase))
+                return null;
 
-            var width = mat.Width;
-            var height = mat.Height;
+            return new Dictionary<string, string>
+                       {
+                           ["rtsp_transport"] = "tcp",
+                           ["timeout"] = "5000000", // microseconds
+                       };
+        }
+
+        private unsafe void UploadFrameToGpu(byte[] buffer, int width, int height)
+        {
+            if (width <= 0 || height <= 0) return;
 
             if (_gpuTexture == null || _gpuTexture.Description.Width != width || _gpuTexture.Description.Height != height)
             {
                 Utilities.Dispose(ref _gpuTexture);
 
-                var texDesc = new Texture2DDescription
-                                  {
-                                      Width = width,
-                                      Height = height,
-                                      MipLevels = 1,
-                                      ArraySize = 1,
-                                      Format = Format.B8G8R8A8_UNorm,
-                                      SampleDescription = new SampleDescription(1, 0),
-                                      Usage = ResourceUsage.Default,
-                                      BindFlags = BindFlags.ShaderResource,
-                                      CpuAccessFlags = CpuAccessFlags.None,
-                                      OptionFlags = ResourceOptionFlags.None
-                                  };
-                _gpuTexture = Texture2D.CreateTexture2D(texDesc);
+                _gpuTexture = Texture2D.CreateTexture2D(new Texture2DDescription
+                                                            {
+                                                                Width = width,
+                                                                Height = height,
+                                                                MipLevels = 1,
+                                                                ArraySize = 1,
+                                                                Format = Format.R8G8B8A8_UNorm,
+                                                                SampleDescription = new SampleDescription(1, 0),
+                                                                Usage = ResourceUsage.Default,
+                                                                BindFlags = BindFlags.ShaderResource,
+                                                                CpuAccessFlags = CpuAccessFlags.None,
+                                                                OptionFlags = ResourceOptionFlags.None
+                                                            });
             }
 
-            var dataBox = new DataBox(mat.Data, (int)mat.Step(), 0);
-            ResourceManager.Device.ImmediateContext.UpdateSubresource(dataBox, _gpuTexture);
+            fixed (byte* pixels = buffer)
+            {
+                var dataBox = new DataBox((IntPtr)pixels, width * 4, 0);
+                ResourceManager.Device.ImmediateContext.UpdateSubresource(dataBox, _gpuTexture, 0);
+            }
         }
-
-        // public void Dispose()
-        // {
-        //     Dispose(true);
-        //     GC.SuppressFinalize(this);
-        // }
 
         protected override void Dispose(bool isDisposing)
         {
@@ -252,7 +254,8 @@ namespace Lib.io.video
             Utilities.Dispose(ref _gpuTexture);
             lock (_lockObject)
             {
-                _sharedBgraMat?.Dispose();
+                _sharedRgba = null;
+                _hasFrame = false;
             }
         }
     }

@@ -364,8 +364,12 @@ public class VideoDeviceInput : Instance<VideoDeviceInput>, ICustomDropdownHolde
         }
         catch (Exception e)
         {
-            Log.Debug($"Video capture thread failed: {e.Message}\n{e.StackTrace}");
-            SetStatus($"Error: Capture failed - {e.Message}");
+            // A TypeInitializationException (e.g. OpenCV's native NativeMethods cctor failing to load
+            // OpenCvSharpExtern.dll or one of its dependencies) carries the real cause — DllNotFound,
+            // BadImageFormat, etc. — only in its inner exception; the outer message is generic.
+            var cause = e.InnerException ?? e;
+            Log.Debug($"Video capture thread failed: {cause.GetType().Name}: {cause.Message}\n{e}");
+            SetStatus($"Error: Capture failed - {cause.Message}");
         }
         finally
         {

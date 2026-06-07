@@ -64,6 +64,21 @@ Also:
 - Match existing naming and slot conventions
 - Avoid hidden side effects unless explicitly intended
 
+### Operator descriptions
+
+An operator's Description field (edited in the TiXL editor) is the source for both the editor's help panel and
+the generated `.help/docs/operators/**` page — so write descriptions **in the editor**, not in the generated
+`.md` (hand-edits to the `.md` are overwritten on regeneration). Follow the description conventions from the
+wiki ([dev.OperatorConventions](https://github.com/tixl3d/tixl/wiki/dev.OperatorConventions)):
+
+- **The first line is a one-line summary** that conveys what the operator does and nothing more, followed by a
+  **blank line** before any further detail. Descriptions render as Markdown, so the summary needs that
+  paragraph break (a single newline won't separate it). Lists, search, and tooltips use the first line as the
+  short summary, so it must stand on its own.
+- Put further detail in the following paragraphs. List synonyms under an `AKA:` line, and subjective usage
+  advice under a `Tips` section.
+- Write the description body in the third person (avoid "you" / "I"); the `Tips` section may use second person.
+
 ## Code Formatting and Style
 - Put `return` statements on their own line (not inline after `if`)
 - Order class members public-first → private, with private fields at the very end. Nest helper types (structs, enums) used only by the owning class inside it, at the top.

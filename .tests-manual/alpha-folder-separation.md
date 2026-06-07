@@ -62,3 +62,24 @@ Close the current build, start the other build (alpha if you just ran stable, or
 - Each build writes only to its own `TiXL<version>[-alpha]\` folder.
 - Settings, themes, layouts, and keybindings touched in one build are not visible in the other (they live in separate folders).
 - Both folders' logs grow only when their matching build runs.
+
+## Step: Override the folder suffix with an environment variable
+
+Lets a single build run as a second, isolated session — useful for two parallel dev checkouts of the same version.
+
+**Action:**
+Set the environment variable `TIXL_OVERRIDE_VERSION_ID=skillQuest` (in the run configuration, or `setx`/a shell `$env:`) and start the build. Watch the startup log lines.
+
+**Expected:**
+- The log shows a `Settings folder overridden via 'TIXL_OVERRIDE_VERSION_ID': …\TiXL<version>-skillQuest` line.
+- `%APPDATA%\TiXL<version>-skillQuest\` and `%USERPROFILE%\Documents\TiXL<version>-skillQuest\` are created; the normal `TiXL<version>[-alpha]\` folders are untouched by this run.
+- The suffix replaces the build's own suffix — an alpha build run with the override lands in `TiXL<version>-skillQuest`, not `TiXL<version>-alpha-skillQuest`.
+
+## Step: Override via the command-line argument
+
+**Action:**
+Clear the environment variable, then launch the editor with `--override-version-id=parallelB` (e.g. as a Rider run-configuration program argument, or `Tooll3.exe --override-version-id=parallelB`).
+
+**Expected:**
+- Folders resolve to `TiXL<version>-parallelB` under both `%APPDATA%` and Documents, with the same override log line.
+- Running one session with `TIXL_OVERRIDE_VERSION_ID=skillQuest` and a second with `--override-version-id=parallelB` keeps the two sessions' settings, layouts, and projects fully separate.

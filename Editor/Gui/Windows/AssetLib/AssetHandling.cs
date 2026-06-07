@@ -62,6 +62,8 @@ internal static class AssetHandling
                                        FileExtensionRegistry.GetUniqueId("mpg"),
                                        FileExtensionRegistry.GetUniqueId("mpeg"),
                                        FileExtensionRegistry.GetUniqueId("m4v"),
+                                       FileExtensionRegistry.GetUniqueId("mkv"),
+                                       FileExtensionRegistry.GetUniqueId("avi"),
                                    ])
                                    {
                                        PrimaryOperators = [new Guid("914fb032-d7eb-414b-9e09-2bdd7049e049")], // PlayVideo

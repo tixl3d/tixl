@@ -40,7 +40,7 @@
     },
     {
       "Id": "df2f5f6b-2b27-44b7-989d-6c8225113234"/*ResolutionIndex*/,
-      "DefaultValue": 0
+      "DefaultValue": 1
     },
     {
       "Id": "e9bc114b-75ac-4bec-a337-5b16404da4de"/*AutoExposure*/,
