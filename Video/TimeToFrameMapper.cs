@@ -51,11 +51,16 @@ public static class TimeToFrameMapper
     /// </summary>
     public static long SecondsToFramePts(double seconds, long streamStartPts, int timeBaseNum, int timeBaseDen, double fps)
     {
-        if (fps <= 0)
+        if (fps <= 0 || timeBaseNum <= 0 || timeBaseDen <= 0)
             return SecondsToPts(seconds, streamStartPts, timeBaseNum, timeBaseDen);
 
+        // The frame index FLOORS the time to the displayed frame; its PTS must then land exactly on that frame's
+        // boundary, so ROUND the conversion (not floor). Flooring here lets float error at the boundary push the
+        // target a tick into the previous frame, so the decoder lands one frame early and disagrees with a cache
+        // lookup that floored the same time to this index — a reproducible 1-frame split at certain times.
         var frameIndex = Math.Floor(seconds * fps);
-        return SecondsToPts(frameIndex / fps, streamStartPts, timeBaseNum, timeBaseDen);
+        var ticks = (long)Math.Round(frameIndex / fps * timeBaseDen / timeBaseNum);
+        return streamStartPts + ticks;
     }
 
     /// <summary>Inverse of <see cref="SecondsToPts"/>, for diagnostics and clamping.</summary>

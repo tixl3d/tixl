@@ -266,7 +266,7 @@ public sealed class VideoPlaybackController : IDisposable
             return;
 
         Frame frameToPublish;
-        if (_cache != null && _cache.TryGet(target, out var cachedFrame))
+        if (_cache != null && _cache.TryGet(FrameIndexForTime(playSeconds), out var cachedFrame))
         {
             frameToPublish = cachedFrame;
         }
@@ -336,11 +336,25 @@ public sealed class VideoPlaybackController : IDisposable
     // render thread asks for (SecondsToFramePts). Keying by the raw decode PTS instead misses on every lookup
     // (the snapped target rarely equals the frame's exact PTS, e.g. 41 vs 42 at 23.976 fps), which forces a
     // re-decode — and, since prefetch has run the decoder ahead, a backward seek + GOP re-decode — every frame.
-    private long FrameKey(long pts)
+    // Cache key = integer frame index. The render thread asks for the frame at a time via FLOOR (the frame whose
+    // display interval contains it); a decoded frame reports which frame it IS via ROUND (its PTS sits on a frame
+    // boundary, so rounding avoids the float-edge off-by-one a floor would hit). Both yield the same index for one
+    // frame, so forward playback hits the prefetched cache instead of re-decoding (and backward-seeking) at stray
+    // indices. Falls back to raw PTS only when the frame rate is unknown.
+    private long FrameIndexForTime(double seconds)
     {
-        var seconds = TimeToFrameMapper.PtsToSeconds(pts, _session!.StreamStartPts, _session.TimeBaseNum, _session.TimeBaseDen);
-        return TimeToFrameMapper.SecondsToFramePts(seconds, _session.StreamStartPts, _session.TimeBaseNum,
-                                                   _session.TimeBaseDen, _session.FrameRate);
+        var fps = _session!.FrameRate;
+        return fps > 0 ? (long)Math.Floor(seconds * fps) : 0;
+    }
+
+    private long FrameIndexForPts(long pts)
+    {
+        var fps = _session!.FrameRate;
+        if (fps <= 0)
+            return pts;
+
+        var seconds = TimeToFrameMapper.PtsToSeconds(pts, _session.StreamStartPts, _session.TimeBaseNum, _session.TimeBaseDen);
+        return (long)Math.Round(seconds * fps);
     }
 
     // Decodes forward to the target frame, caching every frame read so the surrounding GOP is available for
@@ -367,7 +381,7 @@ public sealed class VideoPlaybackController : IDisposable
         {
             if (firstPts == NotSet)
                 firstPts = pts;
-            _cache?.Add(FrameKey(pts), _session.CurrentFrame, _cachedFrameBytes);
+            _cache?.Add(FrameIndexForPts(pts), _session.CurrentFrame, _cachedFrameBytes);
             decodedPts = pts;
             if (pts >= target)
             {
@@ -406,7 +420,7 @@ public sealed class VideoPlaybackController : IDisposable
             if (!_session.TryReadNextFrame(out var pts))
                 return;
 
-            _cache.Add(FrameKey(pts), _session.CurrentFrame, _cachedFrameBytes);
+            _cache.Add(FrameIndexForPts(pts), _session.CurrentFrame, _cachedFrameBytes);
             _workerLastDecodedPts = pts;
         }
     }
