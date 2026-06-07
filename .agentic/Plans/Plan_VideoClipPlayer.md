@@ -428,6 +428,19 @@ of a crossfade is frame-exact on both clips.
 
 **Effort:** ~0.5–1 day.
 
+**Status (2026-06-07) — partly done:**
+- **Manual tests added:** [`video-clip-player-wired.md`](../../.tests-manual/video-clip-player-wired.md) and
+  [`video-clip-player-autocollect.md`](../../.tests-manual/video-clip-player-autocollect.md). The
+  `video-clip-player-efficiency.md` (many-clip decode/memory) set is **deferred with Phase 3** — it exercises
+  the decode-pool scaling that isn't fully built yet.
+- **Operator descriptions:** drafted for `[VideoClipPlayer]` and `[VideoClip]`; these live in each operator's
+  Description field (edited in the TiXL editor), which regenerates the `.md` pages — so they're entered in the
+  editor, not hand-written into `.help/docs/`. (The current `VideoClip.md` / orphaned `PlayVideoClip.md` are
+  stale auto-generated stubs that refresh on the next docs regeneration.)
+- **Pending:** input-name decision (`AutoCollect` currently in place — keep, or rename to
+  `IncludeTimelineClips`, before user projects lock it); a hand-written workflow/guide page under
+  `.help/docs/using/`; sweeping bundled examples off the old `[PlayVideoClip]` name.
+
 ## Open questions / deferred
 
 1. **Audio.** Video clips usually carry audio; it's currently muted (BASS routing is backlog, see
@@ -449,8 +462,8 @@ of a crossfade is frame-exact on both clips.
 
 ## Manual test sets (Phase 4)
 
-- `video-clip-player-wired.md` — two wired clips, overlap composite, layer order, scrub, export.
+- `video-clip-player-wired.md` — two wired clips, overlap composite, layer order, scrub, export. **Added.**
 - `video-clip-player-autocollect.md` — unwired clips + `AutoCollect`, continuous cuts, toggle off,
-  wired+scanned dedup.
+  wired+scanned dedup. **Added.**
 - `video-clip-player-efficiency.md` — many clips, few active; decode/memory steady; crossfade export
-  frame-exact.
+  frame-exact. **Deferred with Phase 3** (decode-pool scaling not fully built).
