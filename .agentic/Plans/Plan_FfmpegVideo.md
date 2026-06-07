@@ -269,7 +269,10 @@ baseline** — if D3D11VA can't be stabilized in M1, zero-copy slips to M1.x.
    clip's source range); MF machinery removed; now also an `IStatusProvider`. Inherits the worker thread +
    export-sync automatically. Verify timeline scrub + render-to-file.
 8. **`D3D11VaBackend` zero-copy** (riskiest) behind a runtime flag, auto-fallback to software on init
-   failure. Verify H.264 8-bit + HEVC 10-bit (HDR → RGBA16, stub tone-map).
+   failure. Verify H.264 8-bit + HEVC 10-bit (HDR → RGBA16, stub tone-map). **Detailed implementation plan:**
+   [`Plan_VideoZeroCopyDecode.md`](Plan_VideoZeroCopyDecode.md) — the backend seam, the D3D11VA device-sharing
+   sequence, the worker→render handoff rework, the GPU converter + shader, the fallback tiers, and the phased,
+   GPU-verifiable build order.
 9. **Code done (pending live-RTSP verify).** `VideoStreamInput` ported off OpenCV `VideoCapture(FFMPEG)` to
    `VideoDecoderSession` + `SoftwareFrameConverter` (sequential decode of the live stream; RTSP gets
    `rtsp_transport=tcp` + a socket `timeout` via a new `TryOpen(..., demuxerOptions)` overload). The dead
@@ -511,7 +514,8 @@ Recommended order, value-first and risk-managed; each step is independently ship
 3. **Decode pool + preroll + eviction.** Many-clip scaling in the engine (folds into the clip player's later
    phase).
 4. **Pipeline B — D3D11VA zero-copy.** The throughput path (riskiest); independent of A — slot in when
-   high-res / many-stream playback is the target.
+   high-res / many-stream playback is the target. Planned in detail in
+   [`Plan_VideoZeroCopyDecode.md`](Plan_VideoZeroCopyDecode.md).
 5. **Later:** realtime predictive seek, `-optimized.mp4` proxies (needs the encode milestone), and the
    general texture-op rollout ([`Plan_ImageComposeTransform.md`](Plan_ImageComposeTransform.md)).
 

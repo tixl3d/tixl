@@ -40,6 +40,24 @@ public static class TimeToFrameMapper
         return streamStartPts + ticks;
     }
 
+    /// <summary>
+    /// Like <see cref="SecondsToPts"/> but snapped to the frame grid: the PTS of the frame whose display
+    /// interval contains <paramref name="seconds"/>, assuming constant <paramref name="fps"/>. Keeping the
+    /// target on actual frame boundaries means a decoder that stops at the first <c>pts &gt;= target</c> lands
+    /// exactly on the displayed frame instead of overshooting to the next one — and repeated requests within
+    /// one frame resolve to the same target. Without this, a display refresh that outruns the video frame rate
+    /// (e.g. 24 fps clip on a 60 Hz editor) overshoots, then seeks backward every frame and re-decodes the GOP.
+    /// Falls back to per-tick flooring when fps is unknown.
+    /// </summary>
+    public static long SecondsToFramePts(double seconds, long streamStartPts, int timeBaseNum, int timeBaseDen, double fps)
+    {
+        if (fps <= 0)
+            return SecondsToPts(seconds, streamStartPts, timeBaseNum, timeBaseDen);
+
+        var frameIndex = Math.Floor(seconds * fps);
+        return SecondsToPts(frameIndex / fps, streamStartPts, timeBaseNum, timeBaseDen);
+    }
+
     /// <summary>Inverse of <see cref="SecondsToPts"/>, for diagnostics and clamping.</summary>
     public static double PtsToSeconds(long pts, long streamStartPts, int timeBaseNum, int timeBaseDen)
     {

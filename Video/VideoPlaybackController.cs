@@ -54,12 +54,23 @@ public sealed class VideoPlaybackController : IDisposable
             WaitForRequestedFrame(requestedSeconds, loop);
 
         var produced = false;
+        var gotGpuFrame = false;
         double duration;
         bool isOpen;
         long readyTarget;
         lock (_lock)
         {
-            if (_hasPendingFrame)
+            if (_zeroCopy)
+            {
+                if (_hasPendingGpuFrame)
+                {
+                    unsafe { ffmpeg.av_frame_move_ref(_renderGpuFrame, _pendingGpuFrame); }
+                    _lastUploadedTarget = _pendingTarget;
+                    _hasPendingGpuFrame = false;
+                    gotGpuFrame = true;
+                }
+            }
+            else if (_hasPendingFrame)
             {
                 UploadPendingFrame();
                 _lastUploadedTarget = _pendingTarget;
@@ -72,10 +83,20 @@ public sealed class VideoPlaybackController : IDisposable
             ErrorMessage = _errorMessage;
 
             readyTarget = isOpen && _timeBaseDen > 0
-                              ? TimeToFrameMapper.SecondsToPts(
+                              ? TimeToFrameMapper.SecondsToFramePts(
                                   TimeToFrameMapper.ResolvePlaybackSeconds(requestedSeconds, duration, loop),
-                                  _streamStartPts, _timeBaseNum, _timeBaseDen)
+                                  _streamStartPts, _timeBaseNum, _timeBaseDen, _frameRate)
                               : 0;
+        }
+
+        if (gotGpuFrame)
+        {
+            // Convert on the render thread's immediate context (outside the lock). The converter owns the output
+            // texture; Texture just points at it.
+            _hardwareConverter ??= new HardwareFrameConverter();
+            Texture = _hardwareConverter.Convert(_renderGpuFrame, _renderGpuFrame.Width, _renderGpuFrame.Height);
+            _renderGpuFrame.Unref();
+            produced = true;
         }
 
         Duration = (float)duration;
@@ -98,9 +119,9 @@ public sealed class VideoPlaybackController : IDisposable
 
                 if (_isOpen && _timeBaseDen > 0)
                 {
-                    var target = TimeToFrameMapper.SecondsToPts(
+                    var target = TimeToFrameMapper.SecondsToFramePts(
                         TimeToFrameMapper.ResolvePlaybackSeconds(requestedSeconds, _duration, loop),
-                        _streamStartPts, _timeBaseNum, _timeBaseDen);
+                        _streamStartPts, _timeBaseNum, _timeBaseDen, _frameRate);
 
                     if (_lastUploadedTarget == target || (_hasPendingFrame && _pendingTarget == target))
                         return;
@@ -119,10 +140,14 @@ public sealed class VideoPlaybackController : IDisposable
         _worker?.Join(TimeSpan.FromSeconds(2));
 
         // The worker has exited, so its resources can be released without racing it.
+        _hardwareConverter?.Dispose();
+        _pendingGpuFrame.Dispose();
+        _renderGpuFrame.Dispose();
         _converter?.Dispose();
         _session?.Dispose();
         _cache?.Dispose();
-        Texture?.Dispose();
+        if (!_zeroCopy)
+            Texture?.Dispose(); // in zero-copy the converter owns the output texture, disposed above
         Texture = null;
         _wake.Dispose();
         _framePublished.Dispose();
@@ -229,8 +254,8 @@ public sealed class VideoPlaybackController : IDisposable
         _cache?.SetBudget(Volatile.Read(ref _cacheBudget));
 
         var playSeconds = TimeToFrameMapper.ResolvePlaybackSeconds(seconds, _session.DurationSeconds, loop);
-        var target = TimeToFrameMapper.SecondsToPts(playSeconds, _session.StreamStartPts,
-                                                    _session.TimeBaseNum, _session.TimeBaseDen);
+        var target = TimeToFrameMapper.SecondsToFramePts(playSeconds, _session.StreamStartPts,
+                                                         _session.TimeBaseNum, _session.TimeBaseDen, _session.FrameRate);
 
         if (target == _workerLastTarget)
             return;
@@ -270,21 +295,33 @@ public sealed class VideoPlaybackController : IDisposable
         {
             _errorMessage = error;
             _isOpen = session != null;
+            _zeroCopy = session?.UsesZeroCopy ?? false;
             _duration = session?.DurationSeconds ?? 0;
             _timeBaseNum = session?.TimeBaseNum ?? 0;
             _timeBaseDen = session?.TimeBaseDen ?? 0;
             _streamStartPts = session?.StreamStartPts ?? 0;
+            _frameRate = session?.FrameRate ?? 0;
         }
 
         if (session == null)
             return;
 
         _session = session;
-        _converter = new SoftwareFrameConverter(session.IsHdr);
+        var path = session.UsesZeroCopy ? "D3D11VA hardware (zero-copy)"
+                       : session.UsesHardwareDecode ? "D3D11VA hardware (CPU read-back)" : "software";
+        Log.Debug($"Video decode path: {path} — {session.Width}x{session.Height} {session.PixelFormat}");
+
         // Treat up to ~0.5 s ahead as sequential playback; larger jumps seek.
         _workerSequentialThreshold = session.TimeBaseDen / (2L * Math.Max(1, session.TimeBaseNum));
-        _cache = new VideoFrameCache(Volatile.Read(ref _cacheBudget));
-        _cachedFrameBytes = ffmpeg.av_image_get_buffer_size(session.PixelFormat, session.Width, session.Height, 1);
+
+        // Zero-copy converts on the render thread straight from the GPU surface, so it uses neither the swscale
+        // converter nor the RAM frame cache (the decoder's fixed texture pool can't be retained).
+        if (!session.UsesZeroCopy)
+        {
+            _converter = new SoftwareFrameConverter(session.IsHdr);
+            _cache = new VideoFrameCache(Volatile.Read(ref _cacheBudget));
+            _cachedFrameBytes = ffmpeg.av_image_get_buffer_size(session.PixelFormat, session.Width, session.Height, 1);
+        }
     }
 
     // Decodes forward to the target frame, caching every frame read so the surrounding GOP is available for
@@ -359,11 +396,25 @@ public sealed class VideoPlaybackController : IDisposable
             return NotSet;
 
         var playSeconds = TimeToFrameMapper.ResolvePlaybackSeconds(seconds, _session.DurationSeconds, loop);
-        return TimeToFrameMapper.SecondsToPts(playSeconds, _session.StreamStartPts, _session.TimeBaseNum, _session.TimeBaseDen);
+        return TimeToFrameMapper.SecondsToFramePts(playSeconds, _session.StreamStartPts, _session.TimeBaseNum, _session.TimeBaseDen, _session.FrameRate);
     }
 
-    private void PublishFrame(Frame frame, long target)
+    private unsafe void PublishFrame(Frame frame, long target)
     {
+        if (_zeroCopy)
+        {
+            lock (_lock)
+            {
+                _pendingGpuFrame.Unref();                     // drop the previous un-shown frame (latest-wins)
+                ffmpeg.av_frame_ref(_pendingGpuFrame, frame); // pin the decoder's GPU surface for the render thread
+                _pendingTarget = target;
+                _hasPendingGpuFrame = true;
+            }
+
+            _framePublished.Set();
+            return;
+        }
+
         var rgba = _converter!.Convert(frame);
         var byteCount = rgba.Width * rgba.Height * _converter.BytesPerPixel;
 
@@ -412,6 +463,7 @@ public sealed class VideoPlaybackController : IDisposable
     private int _timeBaseNum;
     private int _timeBaseDen;
     private long _streamStartPts;
+    private double _frameRate;
 
     // Converted-frame handoff (worker → render thread), guarded by _lock.
     private byte[]? _pendingBuffer;
@@ -421,8 +473,16 @@ public sealed class VideoPlaybackController : IDisposable
     private long _pendingTarget;
     private bool _hasPendingFrame;
 
+    // Zero-copy GPU handoff (worker → render thread). _zeroCopy is set at open under _lock; the pending GPU
+    // frame is ref'd by the worker and moved out by the render thread, both under _lock.
+    private bool _zeroCopy;
+    private readonly Frame _pendingGpuFrame = new();
+    private bool _hasPendingGpuFrame;
+
     // Render-thread only.
     private long _lastUploadedTarget = NotSet;
+    private HardwareFrameConverter? _hardwareConverter;
+    private readonly Frame _renderGpuFrame = new();
 
     // Cache budget assigned by the engine (its share of the shared global budget); the eval thread writes it,
     // the worker reads it when creating or refreshing the cache.

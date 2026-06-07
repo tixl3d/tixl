@@ -418,6 +418,17 @@ of a crossfade is frame-exact on both clips.
 
 **Effort:** ~1 day.
 
+**Status (2026-06-07) — substantially met by earlier work + the engine, not a dedicated push:**
+- **Done:** export frame-exactness (`OpNotReady`, above); off-screen clips never decode (the active-set filter
+  skips them); bounded live decoders + idle eviction + shared cache budget already ship in
+  `VideoPlaybackEngine` (`MaxLiveStreams`, `EvictStaleStreams`, `RedistributeBudget` — the "decode pool"
+  core); interim forward preroll. The 20-clip-steady testable outcome should largely pass today.
+- **Remaining (optimization-at-scale / deferred, not core):** wired-set `LimitMultiInputInvalidationToIndices`
+  (niche — only helps many *wired* clips; the many-clip case is AutoCollect, which bypasses the multi-input);
+  the AutoCollect scan cache (deferred above, needs the Core structure-version counter); folding the interim
+  preroll + existing engine pool into the fuller engine-level descriptor/scheduler (a refactor, low marginal
+  value now). The one real rough edge at scale is the per-frame AutoCollect scan allocation.
+
 ### Phase 4 — Naming, docs, tests, deprecation
 
 **Scope:**
