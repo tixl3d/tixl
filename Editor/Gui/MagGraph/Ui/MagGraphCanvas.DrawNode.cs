@@ -1070,6 +1070,7 @@ internal sealed partial class MagGraphView
                 && statusLevel != IStatusProvider.StatusLevel.Undefined
                 && badgeAlpha > 0f)
             {
+                ImGui.PushID(item.Id.GetHashCode());
                 ImGui.SetCursorScreenPos(pMinVisible + new Vector2(8, -7));
                 ImGui.InvisibleButton("#warning", new Vector2(15, 15));
                 var color = (statusLevel switch
@@ -1082,7 +1083,12 @@ internal sealed partial class MagGraphView
                                 }).Fade(badgeAlpha);
                 var icon = statusLevel == IStatusProvider.StatusLevel.Tip ? Icon.Tip : Icon.Warning;
                 Icons.DrawIconOnLastItem(icon, color);
-                CustomComponents.TooltipForLastItem(color, statusLevel.ToString(), statusMessage, false);
+                if (ImGui.IsItemHovered())
+                {
+                    CustomComponents.TooltipForLastItem(color, statusLevel.ToString(), statusMessage, false);
+                }
+                ImGui.PopID();
+                
             }
 
             if (UserSettings.Config.ShowOperatorStats)
