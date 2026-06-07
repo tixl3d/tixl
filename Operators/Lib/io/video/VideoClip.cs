@@ -1,6 +1,7 @@
 using T3.Core.Animation;
 using T3.Core.Resource.Assets;
 using T3.Core.Utils;
+using T3.Core.Video;
 using T3.Video;
 
 namespace Lib.io.video;
@@ -67,7 +68,8 @@ internal sealed class VideoClip : Instance<VideoClip>, IStatusProvider, IVideoCl
         var clampedTime = Math.Clamp(sourceTimeInSecs, Math.Min(sourceStart, sourceEnd), Math.Max(sourceStart, sourceEnd));
 
         var result = VideoPlaybackEngine.Instance.RequestFrame(_streamId, absolutePath, clampedTime,
-                                                               loop: false, context.Playback.IsRenderingToFile);
+                                                               loop: false, context.Playback.IsRenderingToFile,
+                                                               (VideoPlaybackOptimization)OptimizeFor.GetValue(context));
         _statusMessage = result.ErrorMessage;
         Texture.Value = result.Texture;
 
@@ -141,4 +143,9 @@ internal sealed class VideoClip : Instance<VideoClip>, IStatusProvider, IVideoCl
 
     [Input(Guid = "27f02af3-06f3-4cb2-8731-2e8777634275", MappedType = typeof(SharedEnums.BlendModes))]
     public readonly InputSlot<int> BlendMode = new();
+
+    // Fast Seeking (default) decodes in software with a RAM cache for snappy scrub-back and smooth HD playback;
+    // Playback Performance decodes zero-copy on the GPU for the smoothest large/4K playback.
+    [Input(Guid = "f7e8f5f1-3333-409f-92da-573b1f32c0d6", MappedType = typeof(VideoPlaybackOptimization))]
+    public readonly InputSlot<int> OptimizeFor = new();
 }

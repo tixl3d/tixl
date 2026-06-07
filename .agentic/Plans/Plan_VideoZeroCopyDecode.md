@@ -1,11 +1,17 @@
 # D3D11VA GPU→GPU Zero-Copy Video Decode (Pipeline B)
 
-**Status:** 2026-06-07 — **working end-to-end on NVIDIA.** Phases 0–3 done and GPU-verified: D3D11VA hardware
-decode on the shared `ResourceManager.Device`, NV12/P010→RGBA compute-shader convert with no CPU read-back,
-correct image, smooth playback. Gated behind `TIXL_FFMPEG_FORCE_HW=1` + `TIXL_FFMPEG_ZEROCOPY=1`. **Remaining:**
-Phase 4 (the `Optimize for` operator parameter to replace the env vars + auto-fallback), teardown/repeated-open
-stability, other GPU vendors, and the deferred refinements (BT.601 for SD, PQ/HLG HDR tone-map, keyed-mutex
-fallback). Implementation of **M1 step 8** of [`Plan_FfmpegVideo.md`](Plan_FfmpegVideo.md) — the hardware decode
+**Status:** 2026-06-07 — **working end-to-end on NVIDIA, all four phases wired.** Phases 0–3 GPU-verified:
+D3D11VA hardware decode on the shared `ResourceManager.Device`, NV12/P010→RGBA compute-shader convert with no
+CPU read-back, correct image, smooth playback. Phase 4 wired: chosen via the `Optimize For` dropdown
+(`FastSeeking` default = software decode + cache; `PlaybackPerformance` = hardware zero-copy) on
+`PlayVideo`/`VideoClip` — the `TIXL_FFMPEG_*` env vars are gone. **Remaining:** in-editor verification of live mode-switching, teardown/
+repeated-open stability, other GPU vendors, and the deferred refinements (BT.601 for SD, PQ/HLG HDR tone-map,
+keyed-mutex fallback). The separate-decode-device "totally async" isolation (overlap NVDEC with render) is a
+later, larger pass.
+
+**Manual tests:** [`video-optimize-for-modes`](../../.tests-manual/video-optimize-for-modes.md) (the `Optimize For`
+toggle, mode smoothness, 23.976 fps cadence) and [`video-playback-determinism`](../../.tests-manual/video-playback-determinism.md)
+(frame-accuracy, loop/clamp, export). Implementation of **M1 step 8** of [`Plan_FfmpegVideo.md`](Plan_FfmpegVideo.md) — the hardware decode
 path deferred during M1. Was the **riskiest** piece of the FFmpeg effort; the device-sharing + decode/convert
 locking were the hard-won parts.
 
@@ -195,6 +201,17 @@ guardrail is unaffected — but presence must be confirmed). **Phase-0 verificat
    never re-seeks, while genuine jumps past a GOP still seek. Verified with 4 concurrent same-file decoders all
    converging to steady `seq` after a jump. Seek *latency* (one GOP grind) is unchanged — that's the cache's job
    (Phase 4 *Fast Seeking* mode).
+   **Cache-key mismatch — Fast Seeking jitter (2026-06-07):** with the toggle's *Fast Seeking* (software + cache)
+   as default, a 23.976 fps clip stuttered badly while 60 fps clips were fine. A per-second probe showed every
+   displayed frame was a fresh decode (`decoded == published`) with decode time ramping 22→340 ms then resetting —
+   a backward-seek GOP re-decode every frame. Cause: the cache stored frames under their **raw decoded PTS** but
+   the render thread looked them up by the **frame-grid-snapped target** (`SecondsToFramePts`); at fractional
+   frame rates those differ by ~1 ms (target 41 vs PTS 42), so *every* lookup missed, and since prefetch had run
+   the decoder ahead, the forced `DecodeTo` saw a negative delta → backward seek → GOP re-decode. 60 fps masked it
+   (snapped target and PTS coincide). Fix: `VideoPlaybackController.FrameKey(pts)` maps a decoded PTS back through
+   the same snapping, so cache writes and the render-side lookup use one key. Probe-verified: steady playback went
+   to `published 25/s, decoded 0, maxDecode 0.0 ms` (forward frames now all cache hits); spikes remain only during
+   genuine hard seeks (the GOP grind), as expected.
 3. **Shared device (full zero-copy).** Swap FFmpeg's own device for `ResourceManager.Device` with the
    AddRef-careful sharing + `SetMultithreadProtected` + lock/unlock callbacks; eliminate the cross-device copy.
    Keep tier 2 (own-device + keyed-mutex) as the fallback. *Verify: stable across AMD/Intel/NVIDIA; **no
@@ -218,6 +235,18 @@ guardrail is unaffected — but presence must be confirmed). **Phase-0 verificat
 4. **`Optimize for` param + auto-fallback.** The enum on `PlayVideo`/`VideoClip`, A/B selection, runtime
    re-init on change, graceful fallback to software on hwaccel failure. *Verify: switching the param swaps
    pipelines live; forcing hwaccel failure degrades to software without a stall or error state.*
+   **DONE — wired (2026-06-07):** `VideoPlaybackOptimization { FastSeeking = 0 (default), PlaybackPerformance }`
+   in `Core/Video`, surfaced as the `OptimizeFor` dropdown on `PlayVideo` and `VideoClip` (C#-only — TiXL
+   auto-reconciles `.t3`/`.t3ui`). Threaded operator → `IVideoPlaybackEngine.RequestFrame` → `controller.Update`
+   → `OpenSource` → `VideoDecoderSession.TryOpen(url, optimization, ...)`. `FastSeeking` decodes in **software** with
+   the RAM cache — no per-frame GPU read-back stall, so playback stays smooth and the GPU is free for the editor
+   (a hardware read-back default was tried first and was visibly jittery even at 720p). `PlaybackPerformance`
+   decodes **zero-copy on the GPU** (falls back to software if the profile is unsupported). The
+   `TIXL_FFMPEG_FORCE_HW` / `_ZEROCOPY` env vars are **removed**. The stream re-opens when the mode
+   changes (`mode != _workerMode` in `ProcessLatestRequest`). `VideoStreamInput` (live) passes `FastSeeking`;
+   29 Video.Tests pass (they fall back to software — no D3D device in the test host). **Still to verify in-editor:**
+   live mode-switch mid-playback (a stale pending GPU frame may be retained one cycle — benign, but watch it), and
+   the dropdown label/position (user repositions in the editor, which regenerates the `.t3`/`.t3ui`).
 
 **Riskiest = Phase 3** (global-device lifetime). Fallbacks in order: own-device + keyed-mutex → software.
 Phases 0–2 already deliver a working hardware decode (with a single GPU→GPU copy at worst); Phase 3 is the

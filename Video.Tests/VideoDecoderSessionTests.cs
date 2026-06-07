@@ -1,4 +1,5 @@
 using Sdcb.FFmpeg.Utils;
+using T3.Core.Video;
 using Xunit;
 
 namespace T3.Video.Tests;
@@ -13,7 +14,7 @@ public class VideoDecoderSessionTests
     [Fact]
     public void Open720p_ReadsExpectedMetadata()
     {
-        using var session = VideoDecoderSession.TryOpen(TestAssets.Video720p, out var error);
+        using var session = VideoDecoderSession.TryOpen(TestAssets.Video720p, VideoPlaybackOptimization.FastSeeking, out var error);
 
         Assert.Null(error);
         Assert.NotNull(session);
@@ -28,7 +29,7 @@ public class VideoDecoderSessionTests
     [Fact]
     public void Open1080p_Succeeds()
     {
-        using var session = VideoDecoderSession.TryOpen(TestAssets.Video1080p, out var error);
+        using var session = VideoDecoderSession.TryOpen(TestAssets.Video1080p, VideoPlaybackOptimization.FastSeeking, out var error);
 
         Assert.Null(error);
         Assert.NotNull(session);
@@ -38,7 +39,7 @@ public class VideoDecoderSessionTests
     [Fact]
     public void Open_MissingFile_ReturnsError()
     {
-        using var session = VideoDecoderSession.TryOpen("does-not-exist.mp4", out var error);
+        using var session = VideoDecoderSession.TryOpen("does-not-exist.mp4", VideoPlaybackOptimization.FastSeeking, out var error);
 
         Assert.Null(session);
         Assert.NotNull(error);
@@ -47,7 +48,7 @@ public class VideoDecoderSessionTests
     [Fact]
     public void SequentialDecode_PtsAreMonotonic()
     {
-        using var session = VideoDecoderSession.TryOpen(TestAssets.Video720p, out _);
+        using var session = VideoDecoderSession.TryOpen(TestAssets.Video720p, VideoPlaybackOptimization.FastSeeking, out _);
         Assert.NotNull(session);
 
         var previous = long.MinValue;
@@ -68,7 +69,7 @@ public class VideoDecoderSessionTests
     [InlineData(4.0)]
     public void Seek_IsFrameAccurate(double seconds)
     {
-        using var session = VideoDecoderSession.TryOpen(TestAssets.Video720p, out _);
+        using var session = VideoDecoderSession.TryOpen(TestAssets.Video720p, VideoPlaybackOptimization.FastSeeking, out _);
         Assert.NotNull(session);
 
         var target = TimeToFrameMapper.SecondsToPts(seconds, session!.StreamStartPts, session.TimeBaseNum, session.TimeBaseDen);
@@ -79,7 +80,7 @@ public class VideoDecoderSessionTests
     [Fact]
     public void Seek_IsDeterministic_SameTimeYieldsSameFrame()
     {
-        using var session = VideoDecoderSession.TryOpen(TestAssets.Video720p, out _);
+        using var session = VideoDecoderSession.TryOpen(TestAssets.Video720p, VideoPlaybackOptimization.FastSeeking, out _);
         Assert.NotNull(session);
 
         var early = TimeToFrameMapper.SecondsToPts(1.0, session!.StreamStartPts, session.TimeBaseNum, session.TimeBaseDen);

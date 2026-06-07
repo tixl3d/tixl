@@ -1,3 +1,4 @@
+using T3.Core.Video;
 using Xunit;
 
 namespace T3.Video.Tests;
@@ -7,7 +8,7 @@ public class SoftwareFrameConverterTests
     [Fact]
     public void Convert_ProducesPackedRgbaOfExpectedSize()
     {
-        using var session = VideoDecoderSession.TryOpen(TestAssets.Video720p, out _);
+        using var session = VideoDecoderSession.TryOpen(TestAssets.Video720p, VideoPlaybackOptimization.FastSeeking, out _);
         Assert.NotNull(session);
         using var converter = new SoftwareFrameConverter(session!.IsHdr);
 
@@ -20,7 +21,7 @@ public class SoftwareFrameConverterTests
     [Fact]
     public void Convert_IsDeterministic_SameTimeYieldsSameRgba()
     {
-        using var session = VideoDecoderSession.TryOpen(TestAssets.Video720p, out _);
+        using var session = VideoDecoderSession.TryOpen(TestAssets.Video720p, VideoPlaybackOptimization.FastSeeking, out _);
         Assert.NotNull(session);
         using var converter = new SoftwareFrameConverter(session!.IsHdr);
 

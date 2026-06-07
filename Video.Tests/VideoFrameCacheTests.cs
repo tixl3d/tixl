@@ -1,4 +1,5 @@
 using Sdcb.FFmpeg.Utils;
+using T3.Core.Video;
 using Xunit;
 
 namespace T3.Video.Tests;
@@ -12,7 +13,7 @@ public class VideoFrameCacheTests
     [Fact]
     public void Get_AfterAdd_ReturnsIdenticalFrame()
     {
-        using var session = VideoDecoderSession.TryOpen(TestAssets.Video720p, out _);
+        using var session = VideoDecoderSession.TryOpen(TestAssets.Video720p, VideoPlaybackOptimization.FastSeeking, out _);
         Assert.NotNull(session);
         var frameBytes = FrameBytes(session!);
 
@@ -42,7 +43,7 @@ public class VideoFrameCacheTests
     [Fact]
     public void Add_SamePtsTwice_DoesNotDoubleCount()
     {
-        using var session = VideoDecoderSession.TryOpen(TestAssets.Video720p, out _);
+        using var session = VideoDecoderSession.TryOpen(TestAssets.Video720p, VideoPlaybackOptimization.FastSeeking, out _);
         Assert.NotNull(session);
         var frameBytes = FrameBytes(session!);
         Assert.True(session.TryReadNextFrame(out var pts));
@@ -58,7 +59,7 @@ public class VideoFrameCacheTests
     [Fact]
     public void Budget_EvictsLeastRecentlyUsed()
     {
-        using var session = VideoDecoderSession.TryOpen(TestAssets.Video720p, out _);
+        using var session = VideoDecoderSession.TryOpen(TestAssets.Video720p, VideoPlaybackOptimization.FastSeeking, out _);
         Assert.NotNull(session);
         var frameBytes = FrameBytes(session!);
 
@@ -86,7 +87,7 @@ public class VideoFrameCacheTests
     [Fact]
     public void SetBudget_Shrink_EvictsOnNextAdd()
     {
-        using var session = VideoDecoderSession.TryOpen(TestAssets.Video720p, out _);
+        using var session = VideoDecoderSession.TryOpen(TestAssets.Video720p, VideoPlaybackOptimization.FastSeeking, out _);
         Assert.NotNull(session);
         var frameBytes = FrameBytes(session!);
 

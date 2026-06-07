@@ -6,6 +6,7 @@ using Sdcb.FFmpeg.Raw;
 using Sdcb.FFmpeg.Utils;
 using T3.Core.Logging;
 using T3.Core.Resource;
+using T3.Core.Video;
 
 namespace T3.Video;
 
@@ -64,7 +65,7 @@ public sealed class VideoDecoderSession : IDisposable
     /// Opens <paramref name="url"/> (file or network stream) and selects the best video stream. Returns null
     /// on failure. <paramref name="demuxerOptions"/> passes demuxer options (e.g. <c>rtsp_transport=tcp</c>).
     /// </summary>
-    public static unsafe VideoDecoderSession? TryOpen(string url, out string? error,
+    public static unsafe VideoDecoderSession? TryOpen(string url, VideoPlaybackOptimization optimization, out string? error,
                                                       IReadOnlyDictionary<string, string>? demuxerOptions = null)
     {
         error = null;
@@ -107,9 +108,11 @@ public sealed class VideoDecoderSession : IDisposable
 
             var codec = Codec.FindDecoderById(codecParameters.CodecId);
 
-            // Temporary Phase-1 trigger for the D3D11VA hardware path; the "Optimize for" operator parameter
-            // replaces this env var once both backends ship (see Plan_VideoZeroCopyDecode.md).
-            var preferHardware = Environment.GetEnvironmentVariable("TIXL_FFMPEG_FORCE_HW") == "1";
+            // Playback-performance decodes on the GPU (zero-copy below). Fast-seeking decodes in software: it keeps
+            // the GPU free for the editor and avoids a per-frame GPU→CPU read-back stall (the readback path syncs
+            // every frame and stutters), while caching the CPU frames for cheap re-seeks. Hardware is the fallback
+            // target only for playback-performance; fast-seeking is already software.
+            var preferHardware = optimization == VideoPlaybackOptimization.PlaybackPerformance;
 
             CodecContext codecContext = null!;
             AVBufferRef* hwDeviceCtx = null;
@@ -124,12 +127,11 @@ public sealed class VideoDecoderSession : IDisposable
                 codecContext.Open();
             }
 
-            // Zero-copy keeps the decoded surface on the GPU (no read-back); the controller converts it with a
-            // compute shader. Only meaningful when hardware actually engaged. Temporary env var, like FORCE_HW —
-            // both fold into the "Optimize for" operator parameter later. The GPU converter handles 4:2:0 NV12
-            // (8-bit) and P010/P016 (10/12-bit), adapting the plane-SRV format to the bit depth; other layouts
-            // stay on the hardware read-back path.
-            var wantsZeroCopy = usesHardware && Environment.GetEnvironmentVariable("TIXL_FFMPEG_ZEROCOPY") == "1";
+            // Playback-performance keeps the decoded surface on the GPU (zero-copy, no read-back, no cache); the
+            // controller converts it with a compute shader. The GPU converter handles 4:2:0 NV12 (8-bit) and
+            // P010/P016 (10/12-bit), adapting the plane-SRV format to the bit depth; if the codec produces some
+            // other layout it falls back to hardware read-back here.
+            var wantsZeroCopy = usesHardware && optimization == VideoPlaybackOptimization.PlaybackPerformance;
             var zeroCopy = wantsZeroCopy && SupportsZeroCopy(codecContext, codecParameters);
             if (wantsZeroCopy && !zeroCopy)
                 Log.Info("Zero-copy decode skipped: stream pixel format isn't a supported 4:2:0 surface. "

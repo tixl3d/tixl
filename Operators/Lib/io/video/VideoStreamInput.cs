@@ -1,6 +1,7 @@
 #nullable enable
 using System.Threading;
 using SharpDX;
+using T3.Core.Video;
 using T3.Video;
 using Utilities = T3.Core.Utils.Utilities;
 
@@ -140,7 +141,9 @@ namespace Lib.io.video
             {
                 SetStatus($"Connecting to {url}...");
 
-                session = VideoDecoderSession.TryOpen(url, out var error, BuildDemuxerOptions(url));
+                // A live stream is consumed sequentially through this op's own SoftwareFrameConverter, so it needs
+                // CPU-side frames — FastSeeking decodes in software, which provides exactly that.
+                session = VideoDecoderSession.TryOpen(url, VideoPlaybackOptimization.FastSeeking, out var error, BuildDemuxerOptions(url));
 
                 if (token.IsCancellationRequested)
                     return;

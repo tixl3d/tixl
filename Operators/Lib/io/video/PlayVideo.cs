@@ -1,6 +1,7 @@
 #nullable enable
 using T3.Core.Animation;
 using T3.Core.Resource.Assets;
+using T3.Core.Video;
 using T3.Video;
 
 namespace Lib.io.video;
@@ -40,7 +41,8 @@ internal sealed class PlayVideo : Instance<PlayVideo>, IStatusProvider
         }
 
         var result = VideoPlaybackEngine.Instance.RequestFrame(_streamId, absolutePath!, requestedTime,
-                                                               Loop.GetValue(context), context.Playback.IsRenderingToFile);
+                                                               Loop.GetValue(context), context.Playback.IsRenderingToFile,
+                                                               (VideoPlaybackOptimization)OptimizeFor.GetValue(context));
         if (result.Produced)
             UpdateCount.Value++;
 
@@ -93,6 +95,13 @@ internal sealed class PlayVideo : Instance<PlayVideo>, IStatusProvider
     [Input(Guid = "21B5671B-862F-4CEA-A355-FA019996C936")]
     public readonly InputSlot<bool> Loop = new();
 
+    // No longer used: FFmpeg's frame-exact PTS control makes paused→play seamless without the old precise-mode
+    // start-offset priming. Kept (slot + GUID) for graph compatibility with existing projects.
     [Input(Guid = "B62C208C-3735-4130-87DE-8C03C8A9B5FA")]
     public readonly InputSlot<bool> IsPreciseAtPlayback = new();
+
+    // Fast Seeking (default) decodes in software with a RAM cache for snappy scrub-back and smooth HD playback;
+    // Playback Performance decodes zero-copy on the GPU for the smoothest large/4K playback.
+    [Input(Guid = "28c8b698-1897-4f8c-b9e7-85a983dfa654", MappedType = typeof(VideoPlaybackOptimization))]
+    public readonly InputSlot<int> OptimizeFor = new();
 }

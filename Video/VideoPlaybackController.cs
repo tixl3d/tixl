@@ -5,6 +5,7 @@ using SharpDX.Direct3D11;
 using SharpDX.DXGI;
 using T3.Core.Logging;
 using T3.Core.Resource;
+using T3.Core.Video;
 using CoreTexture2D = T3.Core.DataTypes.Texture2D;
 
 namespace T3.Video;
@@ -35,7 +36,8 @@ public sealed class VideoPlaybackController : IDisposable
     /// Posts the requested time to the decode worker and uploads the latest ready frame. Returns true when a
     /// new frame was uploaded this call. Runs on the render thread; never blocks on decoding.
     /// </summary>
-    public bool Update(string absolutePath, double requestedSeconds, bool loop, bool renderingToFile)
+    public bool Update(string absolutePath, double requestedSeconds, bool loop, bool renderingToFile,
+                       VideoPlaybackOptimization optimization)
     {
         EnsureWorkerStarted();
 
@@ -44,6 +46,7 @@ public sealed class VideoPlaybackController : IDisposable
             _requestedUrl = absolutePath;
             _requestedSeconds = requestedSeconds;
             _requestedLoop = loop;
+            _requestedMode = optimization;
         }
 
         _wake.Set();
@@ -235,18 +238,20 @@ public sealed class VideoPlaybackController : IDisposable
         string? url;
         double seconds;
         bool loop;
+        VideoPlaybackOptimization mode;
         lock (_lock)
         {
             url = _requestedUrl;
             seconds = _requestedSeconds;
             loop = _requestedLoop;
+            mode = _requestedMode;
         }
 
         if (url == null)
             return;
 
-        if (url != _workerUrl)
-            OpenSource(url);
+        if (url != _workerUrl || mode != _workerMode)
+            OpenSource(url, mode);
 
         if (_session == null)
             return;
@@ -278,9 +283,10 @@ public sealed class VideoPlaybackController : IDisposable
         PrefetchAhead(target);
     }
 
-    private void OpenSource(string url)
+    private void OpenSource(string url, VideoPlaybackOptimization mode)
     {
         _workerUrl = url;
+        _workerMode = mode;
         _converter?.Dispose();
         _converter = null;
         _session?.Dispose();
@@ -290,7 +296,7 @@ public sealed class VideoPlaybackController : IDisposable
         _workerLastTarget = NotSet;
         _workerLastDecodedPts = NotSet;
 
-        var session = VideoDecoderSession.TryOpen(url, out var error);
+        var session = VideoDecoderSession.TryOpen(url, mode, out var error);
         lock (_lock)
         {
             _errorMessage = error;
@@ -326,6 +332,17 @@ public sealed class VideoPlaybackController : IDisposable
         }
     }
 
+    // Cache key for a decoded frame: the frame-grid-snapped PTS of the frame containing it — the same value the
+    // render thread asks for (SecondsToFramePts). Keying by the raw decode PTS instead misses on every lookup
+    // (the snapped target rarely equals the frame's exact PTS, e.g. 41 vs 42 at 23.976 fps), which forces a
+    // re-decode — and, since prefetch has run the decoder ahead, a backward seek + GOP re-decode — every frame.
+    private long FrameKey(long pts)
+    {
+        var seconds = TimeToFrameMapper.PtsToSeconds(pts, _session!.StreamStartPts, _session.TimeBaseNum, _session.TimeBaseDen);
+        return TimeToFrameMapper.SecondsToFramePts(seconds, _session.StreamStartPts, _session.TimeBaseNum,
+                                                   _session.TimeBaseDen, _session.FrameRate);
+    }
+
     // Decodes forward to the target frame, caching every frame read so the surrounding GOP is available for
     // cheap scrub-back. Seeks to the preceding keyframe first unless the target is a short hop ahead of the
     // decoder's current position. Returns false if the stream ends before reaching the target.
@@ -350,7 +367,7 @@ public sealed class VideoPlaybackController : IDisposable
         {
             if (firstPts == NotSet)
                 firstPts = pts;
-            _cache?.Add(pts, _session.CurrentFrame, _cachedFrameBytes);
+            _cache?.Add(FrameKey(pts), _session.CurrentFrame, _cachedFrameBytes);
             decodedPts = pts;
             if (pts >= target)
             {
@@ -389,7 +406,7 @@ public sealed class VideoPlaybackController : IDisposable
             if (!_session.TryReadNextFrame(out var pts))
                 return;
 
-            _cache.Add(pts, _session.CurrentFrame, _cachedFrameBytes);
+            _cache.Add(FrameKey(pts), _session.CurrentFrame, _cachedFrameBytes);
             _workerLastDecodedPts = pts;
         }
     }
@@ -471,6 +488,7 @@ public sealed class VideoPlaybackController : IDisposable
     private string? _requestedUrl;
     private double _requestedSeconds;
     private bool _requestedLoop;
+    private VideoPlaybackOptimization _requestedMode;
 
     // Source metadata (worker → render thread), guarded by _lock.
     private bool _isOpen;
@@ -510,6 +528,7 @@ public sealed class VideoPlaybackController : IDisposable
     private VideoFrameCache? _cache;
     private int _cachedFrameBytes;
     private string? _workerUrl;
+    private VideoPlaybackOptimization _workerMode;
     private long _workerLastTarget = NotSet;
     private long _workerLastDecodedPts = NotSet;
     private long _workerSequentialThreshold = 1;

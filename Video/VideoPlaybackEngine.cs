@@ -24,7 +24,8 @@ public sealed class VideoPlaybackEngine : IVideoPlaybackEngine
     /// <summary>The singleton; creating it also publishes it to <see cref="VideoPlayback.Engine"/>.</summary>
     public static VideoPlaybackEngine Instance => _instance ??= Register();
 
-    public VideoFrameResult RequestFrame(Guid streamId, string absolutePath, double requestedSeconds, bool loop, bool renderingToFile)
+    public VideoFrameResult RequestFrame(Guid streamId, string absolutePath, double requestedSeconds, bool loop,
+                                         bool renderingToFile, VideoPlaybackOptimization optimization)
     {
         var now = Environment.TickCount64;
         if (!_streams.TryGetValue(streamId, out var stream))
@@ -38,7 +39,7 @@ public sealed class VideoPlaybackEngine : IVideoPlaybackEngine
         EvictStaleStreams(now);
 
         var controller = stream.Controller;
-        var produced = controller.Update(absolutePath, requestedSeconds, loop, renderingToFile);
+        var produced = controller.Update(absolutePath, requestedSeconds, loop, renderingToFile, optimization);
         return new VideoFrameResult(produced, controller.Texture, controller.Duration, controller.HasCompleted,
                                     controller.IsReady, controller.ErrorMessage);
     }
