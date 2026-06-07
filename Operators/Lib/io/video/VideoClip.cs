@@ -1,3 +1,4 @@
+using T3.Core.Animation;
 using T3.Core.Resource.Assets;
 using T3.Core.Utils;
 using T3.Video;
@@ -66,6 +67,12 @@ internal sealed class VideoClip : Instance<VideoClip>, IStatusProvider, IVideoCl
                                                                loop: false, context.Playback.IsRenderingToFile);
         _statusMessage = result.ErrorMessage;
         Texture.Value = result.Texture;
+
+        // During export, make the renderer wait for this clip's exact frame — but only while it's actually
+        // active. The player also pulls clips ahead of their cut to pre-warm the decoder, and those must not
+        // stall export waiting for a frame that isn't on screen yet.
+        if (context.Playback.IsRenderingToFile && context.LocalTime >= timeRange.Start && context.LocalTime < timeRange.End)
+            Playback.OpNotReady |= !result.IsReady;
 
         Texture.DirtyFlag.Clear();
     }

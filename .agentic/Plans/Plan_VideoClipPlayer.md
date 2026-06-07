@@ -1,11 +1,12 @@
 # Video clip player
 
-**Status:** Updated 2026-06-07. **Phase 1 is done.** The `VideoClipPlayer` symbol op is wired and in use:
-`PlayVideoClip` is renamed to `VideoClip`; the `_ProcessVideoClips` helper does active-set filtering,
-`LayerIndex` ordering, and per-clip `Color`/`BlendMode`; and an interim forward **preroll** warms a clip's
-decoder before its cut-in. See *Phase-1 implementation — settled* below (which **supersedes the "player
-composites in C#" mechanism** in *Architectural decisions*) and the *Status: DONE* block under *Phase 1*.
-Next: Phase 2 (`AutoCollect`). Follows the FFmpeg playback work ([`Plan_FfmpegVideo.md`](Plan_FfmpegVideo.md)).
+**Status:** Updated 2026-06-07. **Phases 1 and 2 are done.** The `VideoClipPlayer` symbol op is wired and in
+use: `PlayVideoClip` is renamed to `VideoClip`; the `_ProcessVideoClips` helper does active-set filtering,
+`LayerIndex` ordering, per-clip `Color`/`BlendMode`, an interim forward **preroll**, and — with `AutoCollect`
+on — scans + drives unwired sibling `VideoClip`s. See *Phase-1 implementation — settled* below (which
+**supersedes the "player composites in C#" mechanism** in *Architectural decisions*) and the *Status: DONE*
+blocks under *Phase 1* and *Phase 2*. Next: Phase 3 (efficiency / export hardening) and Phase 4 (docs/tests).
+Follows the FFmpeg playback work ([`Plan_FfmpegVideo.md`](Plan_FfmpegVideo.md)).
 
 ## Goal
 
@@ -365,6 +366,21 @@ wired-only; a clip both wired and scanned draws once.
 **Effort:** ~1–2 days, mostly de-risking the forced evaluation. If it fights the dirty-flag system,
 Phase 1 (wired) is unaffected.
 
+**Status: DONE (2026-06-07) — as built:**
+- The scan lives in `_ProcessVideoClips` (the helper inside the `VideoClipPlayer` symbol), so the composition
+  is `Parent.Parent.Children` — the helper's grandparent — not `Parent.Children`. Guarded (`Parent?.Parent`).
+  Gated by a new `AutoCollect` bool input on `_ProcessVideoClips`, wired from the symbol's `AutoCollect`.
+- **Forced evaluation needs no invalidate.** `VideoClip.Texture` is `DirtyFlagTrigger.Animated`, and
+  `DirtyFlag.IsDirty` is `TriggerIsEnabled || …`, so the slot is always dirty → a plain
+  `provider.TextureOutput.GetValue(context)` re-decodes every frame for an unwired sibling. (`TextureOutput`
+  was added to `IVideoClipProvider` for this.) The dirty-flag fight the open question feared didn't materialise.
+- Wired + auto-collected clips merge into **one** active list, deduped by `SymbolChildId` (recorded in a reused
+  `HashSet`), insertion-sorted by `LayerIndex`, then composited once. Reused `List`/`HashSet`, no per-frame
+  allocation. Preroll applies to both sources.
+- **Not done:** the status hint on a `VideoClip` no player is drawing (deferred — needs cross-instance
+  "is anyone drawing me" state). Multiple `AutoCollect` players in one composition each draw all clips (open
+  question 2) — still just documented, not handled.
+
 ### Phase 3 — Efficiency, lifecycle, export hardening
 
 **Goal:** off-screen clips cost nothing; export is frame-exact for every active clip.
@@ -374,7 +390,18 @@ Phase 1 (wired) is unaffected.
 - Wired set: feed active indices into `Clips.LimitMultiInputInvalidationToIndices` (Switch pattern) so
   inactive branches don't invalidate/decode.
 - Scanned set: skip inactive clips before pulling them (already implied by the active-filter).
-- Thread `Playback.OpNotReady |= !IsReady` per active clip so export waits for every contributing clip.
+- **Done (2026-06-07):** `Playback.OpNotReady |= !IsReady` per active clip — set in `VideoClip.Update`, gated
+  by `IsRenderingToFile` *and* the clip being active, so pre-warmed upcoming clips don't stall export.
+- **Deferred — cache the AutoCollect sibling scan.** `_ProcessVideoClips` rescans `Parent.Parent.Children.Values`
+  every frame while AutoCollect is on; that `yield` iterator allocates per frame (`InstanceChildren`'s own TODO
+  flags it as a frame-drop source on large graphs). The fix is to cache the sibling-clip list and rebuild only
+  on a structure change — but the structure-version signals (`EditorSymbolPackage.SymbolStructureVersionCounter`,
+  `SymbolUi.VersionCounter`) are **Editor-side / internal**, unreachable from an operator (Core-only) and absent
+  in the Player. Wiring it up means promoting a structure-version counter to **Core** (`Symbol` is the natural
+  home), bumped by the editor's `NotifySymbolStructureChange`, like the `VideoPlayback.Engine` /
+  `ThirdPartyRuntimeInfo` facades. Cache key = that version **or** `Children.Count` (both alloc-free); store
+  child `Guid`s and re-resolve via `Children.TryGetValue` (crash-safe vs. removed clips). Only bites at the
+  many-clips design center, so it can ride with the decode-pool work below.
 - **Introduce the decode pool** (see *Decode pool, preroll & eviction*): clips become descriptors; the
   player owns N pooled controllers with temporal scheduling, preroll of upcoming clips, and eviction of far
   ones. This is the core mechanism for many-clip timelines, not an optional memory tweak — per-clip
