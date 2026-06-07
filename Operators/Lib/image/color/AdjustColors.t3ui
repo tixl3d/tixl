@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "55411442-d538-48bf-ab78-b8c24c85aa46"/*AdjustColors*/,
   "Description": "Adjusts various color properties of the incoming image and adds a slight vignette.\n\nOperator with more options that also allows objects far away from the camera to be colored differently than close objects: [ColorGradeDepth]\n\nAlso consider using [ColorGrade].",
   "SymbolTags": "1",
@@ -6,8 +8,8 @@
     {
       "InputId": "008b025e-64eb-44c3-8959-dc8ac5dc2cbb"/*PreventClamping*/,
       "Position": {
-        "X": -39.329453,
-        "Y": 848.59656
+        "X": 190.97151,
+        "Y": 852.7887
       },
       "AddPadding": "True",
       "Min": 0.0,
@@ -16,8 +18,8 @@
     {
       "InputId": "090c56b2-bbed-447e-baa1-5993b4e12ddc"/*Vignette*/,
       "Position": {
-        "X": -39.329453,
-        "Y": 983.59656
+        "X": 330.9715,
+        "Y": 992.7887
       },
       "GroupTitle": "Additional Options",
       "Min": 0.0,
@@ -28,8 +30,8 @@
     {
       "InputId": "42d296cf-6c53-4da9-bef8-da36c4ca3aea"/*Hue*/,
       "Position": {
-        "X": -39.329453,
-        "Y": 938.59656
+        "X": 330.9715,
+        "Y": 957.7887
       },
       "Min": -180.0,
       "Max": 180.0,
@@ -38,8 +40,8 @@
     {
       "InputId": "4a10edf1-9bb4-4bd5-8455-357618f68ca9"/*OrangeTeal*/,
       "Position": {
-        "X": -39.329453,
-        "Y": 803.59656
+        "X": 330.9715,
+        "Y": 817.7887
       },
       "AddPadding": "True",
       "Min": 0.0,
@@ -48,15 +50,15 @@
     {
       "InputId": "689fdfbe-e78d-42f8-af0b-ae8159dec216"/*Background*/,
       "Position": {
-        "X": -39.329453,
-        "Y": 1028.5966
+        "X": -15.378929,
+        "Y": 1026.6075
       }
     },
     {
       "InputId": "74d63ccb-7ae5-45d9-af69-ad91b8582407"/*Exposure*/,
       "Position": {
-        "X": -39.329453,
-        "Y": 668.59656
+        "X": 330.9715,
+        "Y": 712.7887
       },
       "Min": -5.0,
       "Max": 5.0,
@@ -65,8 +67,8 @@
     {
       "InputId": "8cb24377-04ad-4bf3-b191-00a0f7af9989"/*Colorize*/,
       "Position": {
-        "X": -39.329453,
-        "Y": 623.59656
+        "X": 190.9715,
+        "Y": 432.7887
       },
       "GroupTitle": "Color Options"
     },
@@ -74,15 +76,15 @@
       "InputId": "c325d01a-5232-4696-9b58-e24f72779597"/*Texture2d*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -40.1006,
-        "Y": 507.03662
+        "X": 470.9715,
+        "Y": 362.7887
       }
     },
     {
       "InputId": "e3395a18-619b-4fcc-b16c-c04d1df8afd9"/*Contrast*/,
       "Position": {
-        "X": -39.329453,
-        "Y": 713.59656
+        "X": 330.9715,
+        "Y": 747.7887
       },
       "GroupTitle": "Image Options",
       "Min": -5.0,
@@ -92,8 +94,8 @@
     {
       "InputId": "edcc911a-fa64-49fd-84d0-6fc0286c77db"/*Brightness*/,
       "Position": {
-        "X": -39.329453,
-        "Y": 893.59656
+        "X": 330.9715,
+        "Y": 922.7887
       },
       "Min": -1.0,
       "Max": 1.0
@@ -101,8 +103,8 @@
     {
       "InputId": "f6753ecc-a97e-4854-9f27-09bb9000858c"/*Saturation*/,
       "Position": {
-        "X": -39.329453,
-        "Y": 758.59656
+        "X": 330.9715,
+        "Y": 782.7887
       },
       "AddPadding": "True",
       "Min": -2.0,
@@ -114,29 +116,29 @@
     {
       "ChildId": "25c48790-15e9-4f3c-a509-8dc9efa54ede"/*Vector2Components*/,
       "Position": {
-        "X": 242.25406,
-        "Y": 838.0634
+        "X": 330.9715,
+        "Y": 852.7887
       }
     },
     {
       "ChildId": "76ba6253-5852-43af-b858-da176bcb612b"/*Vector4Components*/,
       "Position": {
-        "X": 261.9446,
-        "Y": 577.09564
+        "X": 330.9715,
+        "Y": 432.7887
       }
     },
     {
       "ChildId": "86f9a136-1f29-4ba9-907f-604c60f3a293"/*_ImageFxShaderSetupStatic*/,
       "Position": {
-        "X": 897.6512,
-        "Y": 431.74585
+        "X": 470.9715,
+        "Y": 397.7887
       }
     },
     {
       "ChildId": "ab65d77c-65c4-4231-b17e-f33bbf108b60"/*Vector4Components*/,
       "Position": {
-        "X": 261.9446,
-        "Y": 633.09564
+        "X": 330.9715,
+        "Y": 572.7887
       }
     }
   ],
@@ -144,8 +146,8 @@
     {
       "OutputId": "c4dcede0-34be-48a8-961e-1f8b7d4ada0a"/*Output*/,
       "Position": {
-        "X": 1273.5383,
-        "Y": 660.0025
+        "X": 470.9715,
+        "Y": 1062.7887
       }
     }
   ]

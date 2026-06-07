@@ -1,0 +1,54 @@
+{
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
+  "Id": "45d12ccb-3da8-41e5-85fd-61d7abfaa92d"/*ChromaBlur*/,
+  "Description": "Blurs only the colors of an image. This can be useful to reduce chromatic abberation artifacts.",
+  "InputUis": [
+    {
+      "InputId": "3e6e1e6d-ea12-4cc6-b2db-b901d0743f99"/*ImageA*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "8507382b-0baf-47a0-8ca4-2a3a51d7aa99"/*BlurLevels*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      }
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "191a4985-3b65-4eb5-b85f-1c71564170e4"/*CustomPixelShader*/,
+      "Position": {
+        "X": 140.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "ChildId": "2b6056cf-2ede-4093-bb43-5aecf0b52e14"/*FastBlur*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 35.0
+      }
+    },
+    {
+      "ChildId": "fd12c8ca-43ad-47bf-9e8e-e97a7a76b7ae"/*CustomPixelShader*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "b5ba0ee4-b4ee-47b1-87c1-5fc7864bc604"/*TextureOutput*/,
+      "Position": {
+        "X": 550.0,
+        "Y": 30.0
+      }
+    }
+  ]
+}

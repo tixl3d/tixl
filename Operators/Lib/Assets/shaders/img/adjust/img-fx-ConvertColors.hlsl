@@ -3,17 +3,11 @@
 Texture2D<float4> InputTexture : register(t0);
 sampler texSampler : register(s0);
 
-cbuffer ParamConstants : register(b0)
-{    
-    float Mode;
-}
 
-cbuffer TimeConstants : register(b1)
+
+cbuffer TimeConstants : register(b2)
 {
-    float globalTime;
-    float time;
-    float runTime;
-    float beatTime;
+    int Mode;
 }
 
 struct vsOutput
@@ -22,25 +16,32 @@ struct vsOutput
     float2 texCoord : TEXCOORD;
 };
 
+#define Mode_RgbToOKLab 0
+#define Mode_OKLabToRgb 1
+#define Mode_RgbToLCh 2
+#define Mode_LChToRgb 3
+
 float4 psMain(vsOutput psInput) : SV_TARGET
 {
     float2 uv = psInput.texCoord;
     float4 c = InputTexture.SampleLevel(texSampler, uv, 0.0);
 
-    if(Mode< 0.5) {
-        return float4(RgbToOkLab(c.rgb),c.a);
+    if(Mode == Mode_RgbToOKLab) 
+    {
+        return float4(RgbToOkLab(c.rgb),c.a); 
     }
 
-    if(Mode < 1.5) {
+    if(Mode == Mode_OKLabToRgb) 
+    {
         return float4(OklabToRgb(c.rgb), c.a); 
     }
 
-    if(Mode < 2.5) 
+    if(Mode == Mode_RgbToLCh) 
     {
         return float4(RgbToLCh(c.rgb), c.a);
     }
 
-    if(Mode < 3.5) 
+    if(Mode == Mode_LChToRgb) 
     {
         return float4(LChToRgb(c.rgb), c.a);
     }

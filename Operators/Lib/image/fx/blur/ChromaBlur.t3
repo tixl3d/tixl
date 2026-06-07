@@ -1,0 +1,106 @@
+{
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
+  "Id": "45d12ccb-3da8-41e5-85fd-61d7abfaa92d"/*ChromaBlur*/,
+  "Inputs": [
+    {
+      "Id": "3e6e1e6d-ea12-4cc6-b2db-b901d0743f99"/*ImageA*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "8507382b-0baf-47a0-8ca4-2a3a51d7aa99"/*BlurLevels*/,
+      "DefaultValue": 3
+    }
+  ],
+  "Children": [
+    {
+      "Id": "191a4985-3b65-4eb5-b85f-1c71564170e4"/*CustomPixelShader*/,
+      "SymbolId": "46daab0e-e957-413e-826c-0699569d0e07",
+      "InputValues": [
+        {
+          "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
+          "Type": "System.String",
+          "Value": "float3 sharpLab = ImageA.Sample(Sampler, uv).rgb;\nfloat3 blurredLab = ImageB.Sample(Sampler, uv).rgb;\n\nfloat3 comp = LabToRgb( float3(sharpLab.x, blurredLab.yz-0.5));\n\nc = float4(comp , 1);\n"
+        },
+        {
+          "Id": "c9a801ec-13fb-4ad4-b0cd-d125b5db500a"/*AdditionalCode*/,
+          "Type": "System.String",
+          "Value": "static const float3x3 LinRgbToXyz = {\n    0.4124564, 0.3575761, 0.1804375,\n    0.2126729, 0.7151522, 0.0721750,\n    0.0193339, 0.1191920, 0.9503041\n};\nstatic const float3x3 XyzToLinRgb = {\n     3.2404542, -1.5371385, -0.4985314,\n    -0.9692660,  1.8760108,  0.0415560,\n     0.0556434, -0.2040259,  1.0572252\n};\nstatic const float3 D65 = float3(0.95047, 1.0, 1.08883);\n\nfloat labF(float t) {\n    return t > 0.008856 ? pow(abs(t), 1.0 / 3.0) : (7.787 * t + 16.0 / 116.0);\n}\nfloat labFinv(float t) {\n    float t3 = t * t * t;\n    return t3 > 0.008856 ? t3 : (t - 16.0 / 116.0) / 7.787;\n}\n\n// Expects LINEAR RGB. L in [0,100], a/b roughly [-128,128].\nfloat3 RgbToLab(float3 rgb) {\n    float3 xyz = mul(LinRgbToXyz, rgb) / D65;\n    float3 f = float3(labF(xyz.x), labF(xyz.y), labF(xyz.z));\n    return float3(116.0 * f.y - 16.0,\n                  500.0 * (f.x - f.y),\n                  200.0 * (f.y - f.z));\n}\n\nfloat3 LabToRgb(float3 lab) {\n    float fy = (lab.x + 16.0) / 116.0;\n    float fx = fy + lab.y / 500.0;\n    float fz = fy - lab.z / 200.0;\n    float3 xyz = float3(labFinv(fx), labFinv(fy), labFinv(fz)) * D65;\n    return mul(XyzToLinRgb, xyz);\n}"
+        }
+      ],
+      "Outputs": []
+    },
+    {
+      "Id": "2b6056cf-2ede-4093-bb43-5aecf0b52e14"/*FastBlur*/,
+      "SymbolId": "1112d3ea-fef0-4d7c-a265-a067030256a1",
+      "InputValues": [
+        {
+          "Id": "01d8a4a8-56ca-4e6d-a6c9-8092e4153963"/*MaxLevels*/,
+          "Type": "System.Int32",
+          "Value": 3
+        }
+      ],
+      "Outputs": []
+    },
+    {
+      "Id": "fd12c8ca-43ad-47bf-9e8e-e97a7a76b7ae"/*CustomPixelShader*/,
+      "SymbolId": "46daab0e-e957-413e-826c-0699569d0e07",
+      "InputValues": [
+        {
+          "Id": "8c3ffefe-8721-4dde-b252-22eb8be02d3f"/*ShaderCode*/,
+          "Type": "System.String",
+          "Value": "float4 ca= ImageA.Sample(Sampler, uv);\n\n\nc = float4(RgbToLab(ca.rgb) + float3(0,0.5,0.5),1);"
+        },
+        {
+          "Id": "c9a801ec-13fb-4ad4-b0cd-d125b5db500a"/*AdditionalCode*/,
+          "Type": "System.String",
+          "Value": "static const float3x3 LinRgbToXyz = {\n    0.4124564, 0.3575761, 0.1804375,\n    0.2126729, 0.7151522, 0.0721750,\n    0.0193339, 0.1191920, 0.9503041\n};\nstatic const float3x3 XyzToLinRgb = {\n     3.2404542, -1.5371385, -0.4985314,\n    -0.9692660,  1.8760108,  0.0415560,\n     0.0556434, -0.2040259,  1.0572252\n};\nstatic const float3 D65 = float3(0.95047, 1.0, 1.08883);\n\nfloat labF(float t) {\n    return t > 0.008856 ? pow(abs(t), 1.0 / 3.0) : (7.787 * t + 16.0 / 116.0);\n}\nfloat labFinv(float t) {\n    float t3 = t * t * t;\n    return t3 > 0.008856 ? t3 : (t - 16.0 / 116.0) / 7.787;\n}\n\n// Expects LINEAR RGB. L in [0,100], a/b roughly [-128,128].\nfloat3 RgbToLab(float3 rgb) {\n    float3 xyz = mul(LinRgbToXyz, rgb) / D65;\n    float3 f = float3(labF(xyz.x), labF(xyz.y), labF(xyz.z));\n    return float3(116.0 * f.y - 16.0,\n                  500.0 * (f.x - f.y),\n                  200.0 * (f.y - f.z));\n}\n\nfloat3 LabToRgb(float3 lab) {\n    float fy = (lab.x + 16.0) / 116.0;\n    float fx = fy + lab.y / 500.0;\n    float fz = fy - lab.z / 200.0;\n    float3 xyz = float3(labFinv(fx), labFinv(fy), labFinv(fz)) * D65;\n    return mul(XyzToLinRgb, xyz);\n}"
+        },
+        {
+          "Id": "e0d05b9c-d433-4b9d-8e70-db2f7993d628"/*TextureFormat*/,
+          "Type": "SharpDX.DXGI.Format",
+          "Value": "R32G32B32A32_Float"
+        }
+      ],
+      "Outputs": []
+    }
+  ],
+  "Connections": [
+    {
+      "SourceParentOrChildId": "191a4985-3b65-4eb5-b85f-1c71564170e4",
+      "SourceSlotId": "12fcfd9e-1c2f-46fc-b570-83b93ec7d101",
+      "TargetParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "TargetSlotId": "b5ba0ee4-b4ee-47b1-87c1-5fc7864bc604"
+    },
+    {
+      "SourceParentOrChildId": "fd12c8ca-43ad-47bf-9e8e-e97a7a76b7ae",
+      "SourceSlotId": "12fcfd9e-1c2f-46fc-b570-83b93ec7d101",
+      "TargetParentOrChildId": "191a4985-3b65-4eb5-b85f-1c71564170e4",
+      "TargetSlotId": "5f90f885-0ccc-4014-a921-dc710257835a"
+    },
+    {
+      "SourceParentOrChildId": "2b6056cf-2ede-4093-bb43-5aecf0b52e14",
+      "SourceSlotId": "e0a77e1e-d60f-4e37-987d-80fba2468497",
+      "TargetParentOrChildId": "191a4985-3b65-4eb5-b85f-1c71564170e4",
+      "TargetSlotId": "e63cf24c-0e01-47d4-9532-18261310315e"
+    },
+    {
+      "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "SourceSlotId": "8507382b-0baf-47a0-8ca4-2a3a51d7aa99",
+      "TargetParentOrChildId": "2b6056cf-2ede-4093-bb43-5aecf0b52e14",
+      "TargetSlotId": "01d8a4a8-56ca-4e6d-a6c9-8092e4153963"
+    },
+    {
+      "SourceParentOrChildId": "fd12c8ca-43ad-47bf-9e8e-e97a7a76b7ae",
+      "SourceSlotId": "12fcfd9e-1c2f-46fc-b570-83b93ec7d101",
+      "TargetParentOrChildId": "2b6056cf-2ede-4093-bb43-5aecf0b52e14",
+      "TargetSlotId": "c1a630e8-2d0b-412d-b2c2-c26e79befae2"
+    },
+    {
+      "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "SourceSlotId": "3e6e1e6d-ea12-4cc6-b2db-b901d0743f99",
+      "TargetParentOrChildId": "fd12c8ca-43ad-47bf-9e8e-e97a7a76b7ae",
+      "TargetSlotId": "5f90f885-0ccc-4014-a921-dc710257835a"
+    }
+  ]
+}

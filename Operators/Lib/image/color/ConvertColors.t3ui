@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "d5516087-f7dd-44d4-a7e1-3c18767de921"/*ConvertColors*/,
   "Description": "Converts between different color spaces. \n\nPlease note that for high precision (e.g. when converting back and forth between color spaces) you should change the render target format to 32bit.",
   "SymbolTags": "8",
@@ -6,30 +8,30 @@
     {
       "InputId": "c11ad183-0f0c-46cb-b543-8f39cc707427"/*GenerateMipmaps*/,
       "Position": {
-        "X": -5.607086,
-        "Y": 530.75006
+        "X": 584.6041,
+        "Y": 376.76242
       }
     },
     {
       "InputId": "caa374cf-d07a-4af9-89a0-42597e11a6ff"/*OutputFormat*/,
       "Position": {
-        "X": -5.607086,
-        "Y": 575.75006
+        "X": 584.6041,
+        "Y": 341.76242
       }
     },
     {
       "InputId": "dd2f08a9-a539-41e9-aa1e-f8ad64fb8d29"/*Texture2d*/,
       "Relevancy": "Required",
       "Position": {
-        "X": -8.08049,
-        "Y": 292.35626
+        "X": 584.6041,
+        "Y": 271.76242
       }
     },
     {
       "InputId": "ffcba423-04e2-4bc6-b3bf-fbc3b15c84b8"/*Mode*/,
       "Position": {
-        "X": -11.590698,
-        "Y": 411.62772
+        "X": 37.37989,
+        "Y": 385.8991
       }
     }
   ],
@@ -40,21 +42,14 @@
         "X": 724.6041,
         "Y": 271.76242
       }
-    },
-    {
-      "ChildId": "9f5cda1c-a9a9-4dc7-9dc3-40cf59c8fb91"/*IntToFloat*/,
-      "Position": {
-        "X": 419.88486,
-        "Y": 424.72818
-      }
     }
   ],
   "OutputUis": [
     {
       "OutputId": "49e4972f-e360-4bc3-b780-032d5e985540"/*Output*/,
       "Position": {
-        "X": 940.21375,
-        "Y": 340.364
+        "X": 724.6041,
+        "Y": 446.76242
       }
     }
   ]

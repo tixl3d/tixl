@@ -2,7 +2,7 @@
 #define COLOR_H
 
 static const float3x3 fwdA = {1.0, 1.0, 1.0,
-                       0.3963377774, -0.1055613458, -0.0894841775,
+                       0.3963377774, -0.1055613458, -0.0894841775 ,
                        0.2158037573, -0.0638541728, -1.2914855480};
                        
 static const float3x3 fwdB= {4.0767245293, -1.2681437731, -0.0041119885,
@@ -19,13 +19,13 @@ static const float3x3 invA = {0.2104542553, 1.9779984951, 0.0259040371,
 
 inline float3 RgbToOkLab(float3 c) {
 
-    float3 lms = mul(invB, c);
-    return mul(invA, (sign(lms) * pow(abs(lms), 0.3333333333333)));    
-} 
+    float3 lms = mul(c, invB);
+    return mul((sign(lms) * pow(abs(lms), 0.3333333333333)), invA);
+}
 
 inline float3 OklabToRgb(float3 c) {
-    float3 lms = mul(fwdA, c);
-    return mul( fwdB , (lms * lms * lms));    
+    float3 lms = mul(c, fwdA);
+    return mul((lms * lms * lms), fwdB);
 }
 
 
@@ -52,5 +52,29 @@ inline float3 LChToRgb(float3 polar) {
     return mul( (lms * lms * lms), fwdB);   
 }
 
+float3 hsb2rgb(float3 c)
+{
+    float4 K = float4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+    float3 p = abs(frac(c.xxx + K.xyz) * 6.0 - K.www);
+    return c.z < 0.5 ?
+                     // float3 p = abs(frac(c.xxx + K.xyz) * 6.0 - K.www);
+               c.z * 2 * lerp(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y)
+                     : lerp(K.xxx, clamp(p - K.xxx, 0.0, 1.0), lerp(c.y, 0, (c.z * 2 - 1)));
+}
+
+float3 rgb2hsb(float3 c)
+{
+    float4 K = float4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+    float4 p = lerp(float4(c.bg, K.wz), float4(c.gb, K.xy), step(c.b, c.g));
+    float4 q = lerp(float4(p.xyw, c.r), float4(c.r, p.yzx), step(p.x, c.r));
+
+    float d = q.x - min(q.w, q.y);
+    float e = 1.0e-10;
+    return float3(
+        abs(q.z + (q.w - q.y) / (6.0 * d + e)),
+        d / (q.x + e),
+        q.x * 0.5);
+}
+static float PI = 3.141578;
 
 #endif
