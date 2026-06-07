@@ -14,6 +14,9 @@ internal interface IVideoClipProvider
     Slot<Texture2D> TextureOutput { get; }
     InputSlot<Vector4> ColorInput { get; }
     InputSlot<int> BlendModeInput { get; }
+
+    /// <summary>Called by a [VideoClipPlayer] each frame for every clip it manages, so an unmanaged clip can hint.</summary>
+    void MarkManaged();
 }
 
 [Guid("04c1a6dc-3042-48a8-81d2-0a5a162016dc")]
@@ -86,16 +89,35 @@ internal sealed class VideoClip : Instance<VideoClip>, IStatusProvider, IVideoCl
     }
 
     public IStatusProvider.StatusLevel GetStatusLevel()
-        => string.IsNullOrEmpty(_statusMessage) ? IStatusProvider.StatusLevel.Success : IStatusProvider.StatusLevel.Error;
+    {
+        if (!string.IsNullOrEmpty(_statusMessage))
+            return IStatusProvider.StatusLevel.Error;
 
-    public string GetStatusMessage() => _statusMessage;
+        return IsManagedByAPlayer ? IStatusProvider.StatusLevel.Success : IStatusProvider.StatusLevel.Notice;
+    }
+
+    public string GetStatusMessage()
+    {
+        if (!string.IsNullOrEmpty(_statusMessage))
+            return _statusMessage;
+
+        return IsManagedByAPlayer ? null : "Not drawn by any [VideoClipPlayer] — wire it into one or enable the player's AutoCollect.";
+    }
 
     Slot<Texture2D> IVideoClipProvider.TextureOutput => Texture;
     InputSlot<Vector4> IVideoClipProvider.ColorInput => Color;
     InputSlot<int> IVideoClipProvider.BlendModeInput => BlendMode;
 
+    // A [VideoClipPlayer] stamps the current frame on every clip it manages — wired or auto-collected, and even
+    // while the clip sits between its in/out points. A clip no player has stamped for a couple of frames is
+    // drawn by nobody, so its status hints at that instead of silently showing nothing.
+    void IVideoClipProvider.MarkManaged() => _lastManagedFrame = Playback.FrameCount;
+    private bool IsManagedByAPlayer => Playback.FrameCount - _lastManagedFrame <= ManagedFrameSlack;
+    private const int ManagedFrameSlack = 2;
+
     private readonly Guid _streamId = Guid.NewGuid();
     private string _statusMessage;
+    private int _lastManagedFrame;
 
     // Input parameters
     [Input(Guid = "10c311ee-6426-463a-a1fe-cfac6de04224")]

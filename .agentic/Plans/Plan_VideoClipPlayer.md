@@ -377,9 +377,12 @@ Phase 1 (wired) is unaffected.
 - Wired + auto-collected clips merge into **one** active list, deduped by `SymbolChildId` (recorded in a reused
   `HashSet`), insertion-sorted by `LayerIndex`, then composited once. Reused `List`/`HashSet`, no per-frame
   allocation. Preroll applies to both sources.
-- **Not done:** the status hint on a `VideoClip` no player is drawing (deferred — needs cross-instance
-  "is anyone drawing me" state). Multiple `AutoCollect` players in one composition each draw all clips (open
-  question 2) — still just documented, not handled.
+- **Status hint — done (2026-06-07).** A `VideoClip` no player is drawing returns a `Notice` ("Not drawn by
+  any [VideoClipPlayer] — wire it into one or enable AutoCollect"). The player stamps `Playback.FrameCount` on
+  every clip it visits (wired + scanned, including inactive-in-gap ones) via `IVideoClipProvider.MarkManaged`;
+  a clip unstamped for >2 frames hints. Tied to evaluation (the player must be in the rendered graph to stamp).
+- **Still just documented, not handled:** multiple `AutoCollect` players in one composition each draw all
+  clips (open question 2).
 
 ### Phase 3 — Efficiency, lifecycle, export hardening
 

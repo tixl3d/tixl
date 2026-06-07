@@ -54,11 +54,14 @@ internal sealed class _ProcessVideoClips : Instance<_ProcessVideoClips>
             if (instance != null)
                 _seenChildIds.Add(instance.SymbolChildId);
 
+            var provider = instance as IVideoClipProvider;
+            provider?.MarkManaged(); // mark before classifying, so an inactive-but-managed clip doesn't hint
+
             var state = ClassifyClip(instance, localTime, out var layerIndex);
             if (state == ClipState.Upcoming)
                 slot.GetValue(context);
             else if (state == ClipState.Active)
-                InsertActive(new ClipEntry(slot, instance as IVideoClipProvider, layerIndex));
+                InsertActive(new ClipEntry(slot, provider, layerIndex));
         }
 
         // Auto-collected sibling [VideoClip]s in the same composition (unwired), if enabled. Force-evaluating
@@ -73,6 +76,8 @@ internal sealed class _ProcessVideoClips : Instance<_ProcessVideoClips>
                     continue;
                 if (!_seenChildIds.Add(child.SymbolChildId))
                     continue;
+
+                provider.MarkManaged();
 
                 var state = ClassifyClip(child, localTime, out var layerIndex);
                 if (state == ClipState.Upcoming)
