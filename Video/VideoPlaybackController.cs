@@ -311,8 +311,10 @@ public sealed class VideoPlaybackController : IDisposable
                        : session.UsesHardwareDecode ? "D3D11VA hardware (CPU read-back)" : "software";
         Log.Debug($"Video decode path: {path} — {session.Width}x{session.Height} {session.PixelFormat}");
 
-        // Treat up to ~0.5 s ahead as sequential playback; larger jumps seek.
+        // ~0.5 s prefetch lead. Forward catch-up seeks only past this; it grows to the observed GOP depth so
+        // decoding forward inside one long GOP never re-seeks the keyframe (starts at ~0.5 s before learning).
         _workerSequentialThreshold = session.TimeBaseDen / (2L * Math.Max(1, session.TimeBaseNum));
+        _workerForwardSeekThreshold = _workerSequentialThreshold;
 
         // Zero-copy converts on the render thread straight from the GPU surface, so it uses neither the swscale
         // converter nor the RAM frame cache (the decoder's fixed texture pool can't be retained).
@@ -329,16 +331,25 @@ public sealed class VideoPlaybackController : IDisposable
     // decoder's current position. Returns false if the stream ends before reaching the target.
     private bool DecodeTo(long target)
     {
-        var delta = target - _workerLastDecodedPts;
-        var advancingSequentially = _workerLastDecodedPts != NotSet && delta > 0 && delta <= _workerSequentialThreshold;
+        var known = _workerLastDecodedPts != NotSet;
+        var delta = known ? target - _workerLastDecodedPts : 0;
 
-        if (!advancingSequentially)
+        // Seek only when the target is behind the decoder (no backward decode) or far enough ahead to likely cross
+        // into a later GOP, where a keyframe seek skips real decode work. A forward target inside the current GOP
+        // decodes forward instead — seeking back to the keyframe and re-running the whole GOP on every catch-up
+        // frame is what stops long-GOP playback from ever converging.
+        var seeking = !known || delta < 0 || delta > _workerForwardSeekThreshold;
+
+        if (seeking)
             _session!.SeekToKeyframeBefore(target);
 
+        var firstPts = NotSet;
         var decodedPts = _workerLastDecodedPts;
         var reached = false;
         while (_session!.TryReadNextFrame(out var pts))
         {
+            if (firstPts == NotSet)
+                firstPts = pts;
             _cache?.Add(pts, _session.CurrentFrame, _cachedFrameBytes);
             decodedPts = pts;
             if (pts >= target)
@@ -347,6 +358,11 @@ public sealed class VideoPlaybackController : IDisposable
                 break;
             }
         }
+
+        // After a seek the first decoded frame is the GOP keyframe, so keyframe→target is a live GOP-depth sample.
+        // Grow the forward-seek threshold to the deepest seen, so forward catch-up within one GOP stays sequential.
+        if (seeking && reached && firstPts != NotSet && target - firstPts > _workerForwardSeekThreshold)
+            _workerForwardSeekThreshold = target - firstPts;
 
         if (!reached)
             return false;
@@ -497,4 +513,5 @@ public sealed class VideoPlaybackController : IDisposable
     private long _workerLastTarget = NotSet;
     private long _workerLastDecodedPts = NotSet;
     private long _workerSequentialThreshold = 1;
+    private long _workerForwardSeekThreshold = 1;
 }

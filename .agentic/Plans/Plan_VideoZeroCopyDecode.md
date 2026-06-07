@@ -184,6 +184,17 @@ guardrail is unaffected — but presence must be confirmed). **Phase-0 verificat
    `PixelFormat`/cache correctly (P010le, was defaulting to Nv12). **Still a stub for true HDR:** PQ/HLG (BT.2020)
    P010 decodes but the BT.709 matrix + no tone-map leaves it washed — full PQ/HLG is the remaining HDR item.
    bt709 10-bit (the common UHD-SDR case) is correct.
+   **Seek policy — surfaced by zero-copy having no cache (2026-06-07):** real long-GOP 4K (`~250-frame / ~10 s`
+   GOPs) soft-locked when jump-seeking during playback — playback time ran ahead, every catch-up frame tripped the
+   old 0.5 s sequential threshold, and `DecodeTo` seeked *back* to the keyframe and re-decoded the whole GOP each
+   frame (~100 ms/frame, never converging). The cache hid this on the software path. Fix in
+   `VideoPlaybackController.DecodeTo`: seek only when the target is **behind** the decoder or **beyond a
+   forward-seek threshold** (a forward target inside the current GOP decodes forward — far cheaper, and it
+   converges since decode at ~52 fps outruns 24 fps playback). The threshold is **adaptive** — it grows to the
+   deepest observed keyframe→target span, learning the stream's GOP depth (~10 s here) so within-GOP catch-up
+   never re-seeks, while genuine jumps past a GOP still seek. Verified with 4 concurrent same-file decoders all
+   converging to steady `seq` after a jump. Seek *latency* (one GOP grind) is unchanged — that's the cache's job
+   (Phase 4 *Fast Seeking* mode).
 3. **Shared device (full zero-copy).** Swap FFmpeg's own device for `ResourceManager.Device` with the
    AddRef-careful sharing + `SetMultithreadProtected` + lock/unlock callbacks; eliminate the cross-device copy.
    Keep tier 2 (own-device + keyed-mutex) as the fallback. *Verify: stable across AMD/Intel/NVIDIA; **no
