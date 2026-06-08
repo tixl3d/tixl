@@ -67,6 +67,7 @@ internal static class AssetHandling
                                    ])
                                    {
                                        PrimaryOperators = [new Guid("914fb032-d7eb-414b-9e09-2bdd7049e049")], // PlayVideo
+                                       TimelineClipOperator = new Guid("04c1a6dc-3042-48a8-81d2-0a5a162016dc"), // VideoClip
                                        Color = UiColors.ColorForTextures,
                                        IconId = (uint)Icon.FileVideo,
                                        Subfolders = ["videos", "video", "media"],
@@ -77,11 +78,8 @@ internal static class AssetHandling
                                        FileExtensionRegistry.GetUniqueId("ogg"),
                                    ])
                                    {
-                                       PrimaryOperators =
-                                               [
-                                                   new Guid("f0008b50-091d-4e9f-91eb-baa212acfa20"),
-                                                   new Guid("c2b2758a-5b3e-465a-87b7-c6a13d3fba48")
-                                               ], // PlayAudioClip
+                                       PrimaryOperators = [new Guid("c2b2758a-5b3e-465a-87b7-c6a13d3fba48")], // PlayAudioClip (graph)
+                                       TimelineClipOperator = new Guid("f0008b50-091d-4e9f-91eb-baa212acfa20"), // AudioClip (timeline)
                                        Color = UiColors.ColorForValues,
                                        IconId = (uint)Icon.FileAudio,
                                        Subfolders = ["audio", "soundtrack","samples"],
@@ -97,6 +95,7 @@ internal static class AssetHandling
                                    {
                                        PrimaryOperators =
                                                [new Guid("4d1c0e80-7b2a-4f6d-9c1b-12d3e4f50607")], // LoadDataClip
+                                       TimelineClipOperator = new Guid("4d1c0e80-7b2a-4f6d-9c1b-12d3e4f50607"), // LoadDataClip
                                        Color = UiColors.ColorForCommands,
                                        IconId = (uint)Icon.FileDocument,
                                        Subfolders = ["dataclips", "data"],

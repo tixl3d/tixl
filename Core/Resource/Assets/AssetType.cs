@@ -15,7 +15,15 @@ public sealed class AssetType
     public required uint IconId;
     public int Index;
     public string[] Subfolders = [];
-    
+
+    /// <summary>
+    /// When set, dropping this asset onto the timeline clip area creates a TimeClip-backed op of this
+    /// symbol (e.g. AudioClip, VideoClip, LoadDataClip). Kept separate from <see cref="PrimaryOperators"/>[0]
+    /// (the graph-drop default) because a type's timeline-clip op can differ from its graph op — e.g. video
+    /// drops <c>PlayVideo</c> on the graph but <c>VideoClip</c> on the timeline. Null ⇒ not timeline-droppable.
+    /// </summary>
+    public Guid? TimelineClipOperator;
+
     public AssetType(string name, List<int> extensionIds)
     {
         Name = name;

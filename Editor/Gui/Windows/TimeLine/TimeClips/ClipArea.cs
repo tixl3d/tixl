@@ -69,8 +69,9 @@ internal sealed class ClipArea : ITimeObjectManipulation, IValueSnapAttractor
         }
         ImGui.EndGroup();
 
-        // Audio files dropped onto the clip area become [AudioClip] ops at the drop time / layer.
-        AudioClipTimelineDrop.Handle(compositionOp, _context.TimeCanvas, _minScreenPos.Y, _minLayerIndex);
+        // Files / assets dropped onto the clip area become the matching timeline-clip op (AudioClip,
+        // VideoClip, LoadDataClip, …) at the drop time / layer — see AssetType.TimelineClipOperator.
+        TimelineClipDrop.Handle(compositionOp, _context.TimeCanvas, _minScreenPos.Y, _minLayerIndex);
 
         // Layer-area height drag handle. Only meaningful when there is at least one op clip to size.
         if (_context.ClipSelection.AllClipIds.Count > 0)
