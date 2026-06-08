@@ -53,8 +53,12 @@ internal static class AudioClipBodyRenderer
         // (converted to seconds via BPM); the waveform image spans the whole file [0, length]. Draw
         // the image only across the body sub-rect where file content actually exists — so a clip
         // longer than its source isn't stretched, and a trimmed clip shows just its used slice.
-        // Falls back to a full stretch until the file length is known (populated on first playback).
+        // File length comes from the played clip when available, else an async probe (so the crop
+        // works immediately, not only after the clip plays once). Full-stretch fallback until known.
         var lengthSecs = provider.SourceLengthInSeconds;
+        if (lengthSecs <= 0.0001)
+            AudioClipDurationCache.TryGetDurationSecs(path, instance, out lengthSecs);
+
         var playback = Playback.Current;
         var drawn = false;
         if (lengthSecs > 0.0001 && playback != null)
