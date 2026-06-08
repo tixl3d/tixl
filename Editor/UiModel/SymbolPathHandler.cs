@@ -119,9 +119,11 @@ internal sealed class SymbolPathHandler
     {
         @namespace ??= string.Empty;
         rootNamespace ??= string.Empty;
-        
-        var symbolNamespace = @namespace.StartsWith(rootNamespace)
-                                  ? @namespace.Replace(rootNamespace, "")
+
+        // Strip the root-namespace prefix (case-insensitive — csproj RootNamespace casing may differ from
+        // the operators' namespace). Length-strip, not String.Replace, to drop only the prefix.
+        var symbolNamespace = @namespace.StartsWith(rootNamespace, StringComparison.OrdinalIgnoreCase)
+                                  ? @namespace[rootNamespace.Length..]
                                   : @namespace;
 
         string directory;
