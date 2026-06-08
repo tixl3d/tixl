@@ -244,9 +244,17 @@ guardrail is unaffected — but presence must be confirmed). **Phase-0 verificat
    decodes **zero-copy on the GPU** (falls back to software if the profile is unsupported). The
    `TIXL_FFMPEG_FORCE_HW` / `_ZEROCOPY` env vars are **removed**. The stream re-opens when the mode
    changes (`mode != _workerMode` in `ProcessLatestRequest`). `VideoStreamInput` (live) passes `FastSeeking`;
-   29 Video.Tests pass (they fall back to software — no D3D device in the test host). **Still to verify in-editor:**
-   live mode-switch mid-playback (a stale pending GPU frame may be retained one cycle — benign, but watch it), and
-   the dropdown label/position (user repositions in the editor, which regenerates the `.t3`/`.t3ui`).
+   29 Video.Tests pass (they fall back to software — no D3D device in the test host).
+   **Mode-switch teardown — two bugs found + fixed (2026-06-08):** switching Fast Seeking ↔ Playback Performance
+   (especially with a resolution change) bricked the op. (1) On re-open the worker dropped the pending GPU frame
+   under `_lock` so the render thread can't convert a frame from a just-disposed session, and the zero-copy convert
+   is wrapped in try/catch (keeps the last texture instead of surfacing an operator error). (2) The real brick: the
+   controller's `Texture` and the converter's `_output` were the **same object**, but the software path's
+   `UploadPendingFrame` disposed `Texture` on a size change — freeing the converter's output behind its back, so the
+   next `EnsureOutput` read a dead texture's `Description` and threw "COM object null" permanently. Fix: the software
+   path owns a **separate `_softwareTexture`**; the converter exclusively owns/disposes `_output`. Invariant: never
+   let two owners dispose the output texture. **Still to verify in-editor:** the `Optimize For` dropdown
+   label/position (user repositions in the editor, which regenerates the `.t3`/`.t3ui`).
 
 **Riskiest = Phase 3** (global-device lifetime). Fallbacks in order: own-device + keyed-mutex → software.
 Phases 0–2 already deliver a working hardware decode (with a single GPU→GPU copy at worst); Phase 3 is the

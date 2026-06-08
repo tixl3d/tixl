@@ -77,10 +77,12 @@ internal static class TimeClipItem
         // for the filename label further down. Missing = null; both consumers handle.
         attr.CompositionOp.Children.TryGetChildInstance(timeClip.Id, out var clipInstance);
 
-        // Per-event tick overlay for ops that publish a DataClip. No-op for everything else.
+        // Per-event tick overlay for ops that publish a DataClip; waveform for [AudioClip] ops.
+        // Each no-ops for op kinds it doesn't handle.
         if (clipInstance != null)
         {
             DataClipBodyRenderer.TryDraw(clipInstance, timeClip, position, itemRectMax, attr.DrawList);
+            AudioClipBodyRenderer.TryDraw(clipInstance, timeClip, position, itemRectMax, attr.DrawList);
         }
 
         if (isSelected)

@@ -92,7 +92,7 @@ Comments live forever. They must earn their place. Anyone reading the file six m
 
 - **No session context in source.** Do not reference Sentry issue IDs (`see Sentry TOOLL3-XYZ`), plan filenames (`see Plan_FooBar.md Phase 2`), commit titles, dates, or "this fix / the previous commit." Those belong in commit messages and plan files, not in code. A reader without the conversation has no use for them — they're noise that erodes signal.
 - **Comment why, not what.** If the code says `DataBuffers?.Dispose()`, explain *why* `DataBuffers` can be null in this branch — don't explain what `?.` does.
-- **One short line beats a paragraph.** `// MidiIn callbacks fire on per-device threads; serialize writes here.` is more useful than a five-line block restating the same. If you find yourself writing a third sentence, ask whether the function name or xmldoc should carry it instead.
+- **One short line beats a paragraph.** `// MidiIn callbacks fire on per-device threads; serialize writes here.` is more useful than a five-line block restating the same. **Cap inline comments at ~2 lines.** A longer block enumerating every reason/edge case/alternative (e.g. "case-insensitive because X… strip by length not Replace because Y… which would also Z…") is a smell — keep the single most important *why* and drop the rest, or move it to xmldoc. If you find yourself writing a third sentence, ask whether the function name or xmldoc should carry it instead.
 - **No procedural narration.** "Register X as the very first thing because if we don't, Y will happen later" — drop. The order of statements is visible; the *reason ordering matters* is the only useful note, and it can be one line.
 - **xmldoc is for API contracts.** Use `<summary>` to describe what a member does and when callers should use it. Don't journal bugs of the day or fix history there.
 - **Preserve good existing comments.** Architectural notes, non-obvious invariants, "this looks wrong but it's correct because X" — leave them. The rule is about *not adding* noise, not about scrubbing the file.
@@ -281,7 +281,8 @@ Comments are not free — every line a reader scans is a line that has to be kep
 
 **Don't write:**
 
-- Multi-paragraph rationales reconstructing the debugging session that led to the current code ("we tried X first but ImGui hit-tested through child rects so we did Y …"). The reader needs the current invariant, not the history. If the history matters, link to a plan / PR.
+- Multi-paragraph rationales reconstructing the debugging session that led to the current code ("we tried X first but ImGui hit-tested through child rects so we did Y …"). The reader needs the current invariant, not the history. If the history genuinely matters, put it in the PR description — not the comment.
+- **Any reference to a plan in a code comment** — `.agentic/Plans/`, a `Plan_*.md` filename, "see the plan", "open question #N", and the like. This applies to *every* comment, not only phased work: plans get archived, renamed, and rewritten, so the pointer rots silently and sends the reader chasing a doc that may be gone. State the lasting *why* inline instead. Cross-references to other *code* (a class, an op, a sibling file's behaviour) are fine; pointers to plan documents are not.
 - Comments restating what the next line of code says (`// increment counter` above `i++`).
 - "Phase 4 will replace this with …" markers — see [Comment Hygiene Across Phased Work](#comment-hygiene-across-phased-work) below. Sweep them on the wrap-up commit.
 - XML docs that re-describe parameter types or the obvious shape of a method (e.g. `<param name="path">The path</param>`). Per the Review Expectations above, parameter docs are for non-obvious purpose only.

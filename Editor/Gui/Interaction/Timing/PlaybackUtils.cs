@@ -36,6 +36,13 @@ public static class PlaybackUtils
             }
         }
 
+        // Op-backed audio clips ([AudioClip]) with AutoPlay register themselves here, independent of
+        // the AudioSource mode. Coexists with the CompositionSettings layer clips above while the
+        // op-backed audio-clip system is being migrated in.
+        AudioClipCollector.RegisterAutoPlayClips(ProjectView.Focused?.CompositionInstance,
+                                                 Playback.Current.TimeInBars,
+                                                 Playback.Current.TimeInSecs);
+
         if (settings.Playback.AudioSource == CompositionSettings.AudioSources.ExternalDevice
             && settings.Playback.Syncing == CompositionSettings.SyncModes.Tapping)
         {

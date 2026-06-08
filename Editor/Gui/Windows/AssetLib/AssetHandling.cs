@@ -78,7 +78,10 @@ internal static class AssetHandling
                                    ])
                                    {
                                        PrimaryOperators =
-                                               [new Guid("c2b2758a-5b3e-465a-87b7-c6a13d3fba48")], // PlayAudioClip
+                                               [
+                                                   new Guid("f0008b50-091d-4e9f-91eb-baa212acfa20"),
+                                                   new Guid("c2b2758a-5b3e-465a-87b7-c6a13d3fba48")
+                                               ], // PlayAudioClip
                                        Color = UiColors.ColorForValues,
                                        IconId = (uint)Icon.FileAudio,
                                        Subfolders = ["audio", "soundtrack","samples"],

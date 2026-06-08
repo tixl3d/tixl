@@ -41,18 +41,30 @@ internal static class AudioImageFactory
 
         Task.Run(() =>
                  {
-                     Log.Debug($"Creating sound image for {audioClip.AssetPath}");
-                     if (AudioImageGenerator.TryGenerateSoundSpectrumAndVolume(audioClip, handle.Owner, out var imagePath))
+                     try
                      {
-                         _imageForAudioFiles[audioClip.AssetPath] = imagePath;
+                         Log.Debug($"Creating sound image for {audioClip.AssetPath}");
+                         if (AudioImageGenerator.TryGenerateSoundSpectrumAndVolume(audioClip, handle.Owner, out var imagePath))
+                         {
+                             _imageForAudioFiles[audioClip.AssetPath] = imagePath;
+                         }
+                         else
+                         {
+                             Log.Error($"Failed to create sound image for {audioClip.AssetPath}", handle.Owner);
+                             _imageForAudioFiles.TryRemove(audioClip.AssetPath, out _);
+                         }
                      }
-                     else
+                     catch (Exception e)
                      {
-                         Log.Error($"Failed to create sound image for {audioClip.AssetPath}", handle.Owner);
+                         // Without this, a throw faults the task silently and the AssetPath stays in
+                         // _loadingClips forever — permanently blocking regeneration with no log line.
+                         Log.Error($"Sound image generation threw for {audioClip.AssetPath}: {e}", handle.Owner);
                          _imageForAudioFiles.TryRemove(audioClip.AssetPath, out _);
                      }
-
-                     _loadingClips.TryRemove(audioClip.AssetPath, out _);
+                     finally
+                     {
+                         _loadingClips.TryRemove(audioClip.AssetPath, out _);
+                     }
                  });
             
         return false;

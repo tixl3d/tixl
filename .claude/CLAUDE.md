@@ -27,6 +27,7 @@
 - Use `UiColor`/`UiColors` helpers instead of hard-coded color values
 - Store references by `Guid`, not by direct object reference
 - Prefer editing existing files over creating new ones
+- **Never reference a plan in a code comment** — no `.agentic/Plans/` paths, `Plan_*.md` filenames, or "see the plan / open question #N". Plans get archived and rewritten; the pointer rots. State the lasting *why* inline. (Agent-neutral rule; full version under "Comment Restraint" in AGENT_INSTRUCTIONS.)
 
 ## Documentation, Tests, and Background
 

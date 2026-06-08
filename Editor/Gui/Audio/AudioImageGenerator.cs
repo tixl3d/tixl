@@ -74,7 +74,20 @@ internal static class AudioImageGenerator
             const double samplingResolution = 1.0 / 100;
 
             var sampleLength = Bass.ChannelSeconds2Bytes(stream, samplingResolution);
-            var numSamples = streamLength / sampleLength;
+            // Short samples (e.g. a one-shot drum hit) can yield <1 column at 0.01s resolution;
+            // a zero/negative width makes `new Bitmap(...)` throw. Use at least one column so the
+            // generator works for short clips, not just long soundtracks.
+            var numSamples = sampleLength > 0 ? streamLength / sampleLength : 0;
+            if (numSamples < 1)
+            {
+                if (streamLength <= 0)
+                {
+                    Log.Warning($"Audio file is empty or unreadable for waveform image: {soundFilePathAbsolute}");
+                    imagePathAbsolute = null;
+                    return false;
+                }
+                numSamples = 1;
+            }
 
             const int maxSamples = 16384; // 4k texture size limit
             if (numSamples > maxSamples)
