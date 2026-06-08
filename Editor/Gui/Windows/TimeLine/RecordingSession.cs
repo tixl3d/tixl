@@ -28,8 +28,8 @@ namespace T3.Editor.Gui.Windows.TimeLine;
 /// <remarks>
 /// <para>
 /// Clip growth is wall-clock driven: each frame, <see cref="OnFrame"/> extends the
-/// <c>TimeRange.End</c> on both the <c>LoadDataClip</c> op and the
-/// <c>TimelineAudioClip</c> by the elapsed seconds since record-start (converted to
+/// <c>TimeRange.End</c> on both the <c>LoadDataClip</c> and <c>AudioClip</c> ops by the
+/// elapsed seconds since record-start (converted to
 /// bars at the current BPM). The recordings themselves measure wall-clock time
 /// regardless of playback scrubbing, so the clip's visual duration matches the file's
 /// real duration.
@@ -109,28 +109,28 @@ internal static class RecordingSession
         {
             var addCmd = new AddSymbolChildCommand(compositionOp.Symbol, _loadDataClipSymbolId)
                              {
-                                 PosOnCanvas = FindFreeCanvasPositionForLoadDataClip(compositionOp.Symbol),
+                                 PosOnCanvas = FindFreeCanvasPositionForClip(compositionOp.Symbol, _loadDataClipSymbolId),
                              };
             _activeMacro.AddAndExecCommand(addCmd);
             _activeDataClipChildId = addCmd.AddedChildId;
-            InitDataClipTimeClip(compositionOp.Symbol, _activeDataClipChildId, startBars, dataLayer);
+            InitClipTimeClip(compositionOp.Symbol, _activeDataClipChildId, startBars, dataLayer);
         }
 
-        // TimelineAudioClip — only created when audio capture is enabled.
+        // AudioClip op — only created when audio capture is enabled. Symmetric with the
+        // LoadDataClip op above: both are TimeClip-backed ops that grow during capture and
+        // get their file path committed on stop.
         if (captureAudio)
         {
             // When IO is off and audio is the only capture, stash the audio on the
             // base layer instead of layer+1 — there's no data clip to pair with.
             var rowForAudio = captureIo ? audioLayer : dataLayer;
-            _activeAudioClip = new TimelineAudioClip
-                                   {
-                                       Id = Guid.NewGuid(),
-                                       AssetPath = string.Empty,
-                                       TimeRange = new TimeRange(startBars, startBars),
-                                       LayerIndex = rowForAudio,
-                                       IsMainSoundtrack = false,
-                                   };
-            _activeMacro.AddAndExecCommand(new AddTimelineAudioClipCommand(compositionOp, _activeAudioClip));
+            var addAudioCmd = new AddSymbolChildCommand(compositionOp.Symbol, _audioClipSymbolId)
+                                  {
+                                      PosOnCanvas = FindFreeCanvasPositionForClip(compositionOp.Symbol, _audioClipSymbolId),
+                                  };
+            _activeMacro.AddAndExecCommand(addAudioCmd);
+            _activeAudioClipChildId = addAudioCmd.AddedChildId;
+            InitClipTimeClip(compositionOp.Symbol, _activeAudioClipChildId, startBars, rowForAudio);
         }
 
         // Recorders last — if a Begin fails, the clips already exist but stay zero-width
@@ -187,28 +187,31 @@ internal static class RecordingSession
         var timelineEnd = (float)(_recordStartBars + elapsedBars);
         var sourceEnd = (float)elapsedBars;
 
-        // LoadDataClip's TimeClip output data — mutate in place. Animated dirty flag on
-        // the op's Clip output ensures the next Update picks up the new range.
-        // TimeRange extends in timeline-bar space (startBars + elapsed); SourceRange
-        // extends in file-time-bar space (elapsed since record-start). Keeping the two
-        // separate lets cut and start-handle trim work correctly — see InitDataClipTimeClip.
-        if (SymbolUiRegistry.TryGetSymbolUi(_compositionSymbolId, out var compositionUi)
-            && compositionUi.Symbol.Children.TryGetValue(_activeDataClipChildId, out var symbolChild))
+        // Grow both clip ops' TimeClip output data in place. Animated dirty flag on each op's
+        // output ensures the next Update picks up the new range. TimeRange extends in
+        // timeline-bar space (startBars + elapsed); SourceRange extends in file-time-bar space
+        // (elapsed since record-start). Keeping the two separate lets cut / start-handle trim
+        // work correctly — see InitClipTimeClip.
+        if (SymbolUiRegistry.TryGetSymbolUi(_compositionSymbolId, out var compositionUi))
         {
-            foreach (var output in symbolChild.Outputs.Values)
-            {
-                if (output.OutputData is TimeClip tc)
-                {
-                    tc.TimeRange.End = timelineEnd;
-                    tc.SourceRange.End = sourceEnd;
-                    break;
-                }
-            }
+            GrowClipTimeRange(compositionUi.Symbol, _activeDataClipChildId, timelineEnd, sourceEnd);
+            GrowClipTimeRange(compositionUi.Symbol, _activeAudioClipChildId, timelineEnd, sourceEnd);
         }
+    }
 
-        if (_activeAudioClip != null)
+    private static void GrowClipTimeRange(Symbol composition, Guid childId, float timelineEnd, float sourceEnd)
+    {
+        if (childId == Guid.Empty || !composition.Children.TryGetValue(childId, out var symbolChild))
+            return;
+
+        foreach (var output in symbolChild.Outputs.Values)
         {
-            _activeAudioClip.TimeRange.End = timelineEnd;
+            if (output.OutputData is TimeClip tc)
+            {
+                tc.TimeRange.End = timelineEnd;
+                tc.SourceRange.End = sourceEnd;
+                break;
+            }
         }
     }
 
@@ -260,12 +263,18 @@ internal static class RecordingSession
                                                                         newValue));
         }
 
-        // Audio AssetPath is part of the TimelineAudioClip value the macro already owns;
-        // mutating it in place is fine because the macro's undo path removes the clip
-        // outright (no separate "restore AssetPath" entry needed).
-        if (!string.IsNullOrEmpty(audioAddress) && _activeAudioClip != null)
+        // Apply the recorded file to the AudioClip op's Path input via the standard
+        // input-value command (same pattern as the data clip above), so undo restores the
+        // empty default.
+        if (!string.IsNullOrEmpty(audioAddress)
+            && compositionUi.Symbol.Children.TryGetValue(_activeAudioClipChildId, out var audioChild)
+            && audioChild.Inputs.TryGetValue(_audioClipPathInputId, out var audioPathInput))
         {
-            _activeAudioClip.AssetPath = audioAddress;
+            var newAudioValue = new InputValue<string>(audioAddress);
+            _activeMacro?.AddAndExecCommand(new ChangeInputValueCommand(compositionUi.Symbol,
+                                                                        _activeAudioClipChildId,
+                                                                        audioPathInput,
+                                                                        newAudioValue));
         }
 
         if (_activeMacro != null)
@@ -284,7 +293,7 @@ internal static class RecordingSession
     {
         _activeMacro = null;
         _activeDataClipChildId = Guid.Empty;
-        _activeAudioClip = null;
+        _activeAudioClipChildId = Guid.Empty;
         _compositionSymbolId = Guid.Empty;
         _recordStartBars = 0;
         _recordStartRunSecs = 0;
@@ -312,11 +321,11 @@ internal static class RecordingSession
         return asset.Address;
     }
 
-    private static void InitDataClipTimeClip(Symbol composition, Guid childId, float startBars, int layer)
+    private static void InitClipTimeClip(Symbol composition, Guid childId, float startBars, int layer)
     {
         if (!composition.Children.TryGetValue(childId, out var symbolChild))
         {
-            Log.Warning("RecordingSession: newly added LoadDataClip not found in composition; TimeRange not initialised.");
+            Log.Warning("RecordingSession: newly added recording clip not found in composition; TimeRange not initialised.");
             return;
         }
 
@@ -338,14 +347,14 @@ internal static class RecordingSession
     }
 
     /// <summary>
-    /// Canvas position for a fresh <c>LoadDataClip</c> op. Anchors below the lowest
-    /// existing LoadDataClip (so successive recordings stay in a tidy column), re-centres
-    /// on the viewport when that anchor is off-screen, then hands the preferred spot to
-    /// <see cref="GraphUtils.FindFreePosition"/> for collision-avoidance — without that
-    /// last step, repeated recordings that all re-centre to the same viewport pile up on
-    /// top of each other.
+    /// Canvas position for a fresh recording-clip op of type <paramref name="anchorSymbolId"/>.
+    /// Anchors below the lowest existing op of the same type (so successive recordings stay in a
+    /// tidy column), re-centres on the viewport when that anchor is off-screen, then hands the
+    /// preferred spot to <see cref="GraphUtils.FindFreePosition"/> for collision-avoidance —
+    /// without that last step, repeated recordings that all re-centre to the same viewport pile
+    /// up on top of each other.
     /// </summary>
-    private static Vector2 FindFreeCanvasPositionForLoadDataClip(Symbol compositionSymbol)
+    private static Vector2 FindFreeCanvasPositionForClip(Symbol compositionSymbol, Guid anchorSymbolId)
     {
         const float spacingY = 80f;
         const float defaultX = 0f;
@@ -362,7 +371,7 @@ internal static class RecordingSession
         {
             if (!compositionSymbol.Children.TryGetValue(childId, out var symbolChild))
                 continue;
-            if (symbolChild.Symbol.Id != _loadDataClipSymbolId)
+            if (symbolChild.Symbol.Id != anchorSymbolId)
                 continue;
 
             if (childUi.PosOnCanvas.Y > maxY)
@@ -404,26 +413,15 @@ internal static class RecordingSession
         _occupiedAtStartScratch.Clear();
         var maxLayerAnywhere = -1;
 
+        // Both data and audio recording clips are now TimeClip-backed ops, so a single
+        // GetAllTimeClips pass covers layer occupancy (the main soundtrack lives outside the
+        // clip grid as the background image and never reserved a row).
         foreach (var clip in Structure.GetAllTimeClips(compositionOp))
         {
             if (clip.LayerIndex > maxLayerAnywhere)
                 maxLayerAnywhere = clip.LayerIndex;
             if (clip.TimeRange.Start <= startBars && startBars < clip.TimeRange.End)
                 _occupiedAtStartScratch.Add(clip.LayerIndex);
-        }
-
-        foreach (var audioClip in compositionOp.Symbol.CompositionSettings.Playback.AudioClips)
-        {
-            // The main soundtrack isn't drawn as a layer clip — it lives outside the clip
-            // grid as the timeline background image, so its LayerIndex doesn't reserve a
-            // row. Without this skip every project with a soundtrack starts recording at
-            // layer 2 instead of 0.
-            if (audioClip.IsMainSoundtrack)
-                continue;
-            if (audioClip.LayerIndex > maxLayerAnywhere)
-                maxLayerAnywhere = audioClip.LayerIndex;
-            if (audioClip.TimeRange.Start <= startBars && startBars < audioClip.TimeRange.End)
-                _occupiedAtStartScratch.Add(audioClip.LayerIndex);
         }
 
         // Re-use the previous session's lane when nothing's parked across it at this start
@@ -458,10 +456,12 @@ internal static class RecordingSession
 
     private static readonly Guid _loadDataClipSymbolId = new("4d1c0e80-7b2a-4f6d-9c1b-12d3e4f50607");
     private static readonly Guid _loadDataClipFilePathInputId = new("70419103-ae5d-4ca0-cf4e-456071829304");
+    private static readonly Guid _audioClipSymbolId = new("f0008b50-091d-4e9f-91eb-baa212acfa20");
+    private static readonly Guid _audioClipPathInputId = new("625951af-5f99-4171-b5b0-c97413121f56");
 
     private static Guid _compositionSymbolId;
     private static Guid _activeDataClipChildId;
-    private static TimelineAudioClip? _activeAudioClip;
+    private static Guid _activeAudioClipChildId;
     private static MacroCommand? _activeMacro;
     private static double _recordStartBars;
     private static double _recordStartRunSecs;

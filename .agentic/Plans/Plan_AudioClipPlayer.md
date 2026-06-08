@@ -1,7 +1,9 @@
 # Audio clip player
 
-**Status:** Phase 1 in progress (2026-06-08) — new `[AudioClip]` op + registrar + waveform built additively and
-building clean; pending runtime verification, then the old-system deletion sweep. See *Status* under Phase 1.
+**Status:** Phase 1 + Phase 3 landed (2026-06-09). New `[AudioClip]` op + AutoPlay registrar + waveform are in
+and verified by the user (playback, waveform with source-window mapping). The old `TimelineAudioClip` layer-clip
+system is **deleted**, and recording now creates `[AudioClip]` ops (symmetric with `LoadDataClip`). Remaining:
+Phase 2 `[AudioClipPlayer]` / export support, and the Phase 4 soundtrack migration. See *Status* under Phase 1.
 Re-implements timeline **layer** audio clips as `TimeClip`-backed
 operators, mirroring [`VideoClip`/`VideoClipPlayer`](Plan_VideoClipPlayer.md). Replaces the bespoke
 `TimelineAudioClip` layer-clip system (data in `CompositionSettings.Playback.AudioClips`, hand-rolled
@@ -216,10 +218,15 @@ runtime-verified, and the old system is NOT yet deleted (deliberate — see belo
 - **Waveform body** ([`AudioClipBodyRenderer.cs`](../../Editor/Gui/Windows/TimeLine/TimeClips/AudioClipBodyRenderer.cs))
   hooked into `TimeClipItem` next to `DataClipBodyRenderer`; reuses `AudioImageFactory` + the SRV cache. v1 is a
   full-image stretch (no source-window UV crop) and no mute-fade yet.
-- **Deferred deliberately:** the deletion sweep (old `TimelineAudioClip` layer system) — it's destructive,
-  breaks audio recording until Phase 3, and can't be agent-runtime-verified. Do it **after** the user confirms
-  the new op works in the editor (place / play / waveform / drag-trim-split-snap-delete). New + old coexist
-  cleanly meanwhile (different clips, different registration paths).
+- **Deletion sweep — DONE (2026-06-09).** Removed `AudioClipInteractions`, `TimelineAudioClipItem`,
+  `TimelineAudioClipInspector`, and the `Add`/`Delete`/`Move` `TimelineAudioClipsCommand`s; stripped the audio
+  branches from `ClipArea`, the cross-drag hooks from `TimeClipInteractions`, and the inspector route from
+  `ParameterWindow`. **Phase 3 folded in:** `RecordingSession` now creates an `[AudioClip]` op for the audio take
+  (mirrors the `LoadDataClip` op — grows its TimeClip during capture, commits the Path input on stop via
+  `ChangeInputValueCommand`). `TimelineAudioClip` (the data class) and `CompositionSettings.Playback.AudioClips`
+  **stay** — still used by the main soundtrack, the `[AudioClip]` op's internal carrier, the engine, and
+  `[PlayAudioClip]`. One UX drop: timeline-clip-area audio file-drop is gone (it lived in `AudioClipInteractions`);
+  graph/library drop creates an `[AudioClip]` op via the AssetType mapping instead.
 - **v1 simplifications to revisit:** source-trim mapping is `SourceOffsetSecs = SecondsFromBars(SourceRange.Start)`
   + full-stretch waveform (Plan open question #3); the registrar reads **static** `TypedInputValue` for unwired
   clips, so animated `Volume`/`Mute`/`Path` on an unwired clip won't update (acceptable for v1).

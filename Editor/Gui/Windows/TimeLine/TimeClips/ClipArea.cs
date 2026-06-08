@@ -18,18 +18,12 @@ namespace T3.Editor.Gui.Windows.TimeLine.TimeClips;
 
 /// <summary>
 /// The clip-editing area inside the timeline window. Orchestrates per-frame layout,
-/// renders both op-backed <see cref="TimeClip"/>s and symbol-level
-/// <see cref="T3.Core.Audio.TimelineAudioClip"/>s, dispatches keyboard actions, and
-/// implements the public <see cref="ITimeObjectManipulation"/> /
-/// <see cref="IValueSnapAttractor"/> interfaces consumed by <see cref="TimeLineCanvas"/>.
-///
-/// Most of the interaction work is delegated to two siblings:
-/// <list type="bullet">
-/// <item><see cref="TimeClipInteractions"/> — op-backed clip selection, drag command lifecycle,
-///       delete-with-children, split-at-time, snap.</item>
-/// <item><see cref="AudioClipInteractions"/> — audio clip selection, file drop, delete.
-///       Per-clip drag handling lives directly in <see cref="TimelineAudioClipItem"/>.</item>
-/// </list>
+/// renders op-backed <see cref="TimeClip"/>s (including <c>[AudioClip]</c>, which is itself a
+/// TimeClip op), dispatches keyboard actions, and implements the public
+/// <see cref="ITimeObjectManipulation"/> / <see cref="IValueSnapAttractor"/> interfaces
+/// consumed by <see cref="TimeLineCanvas"/>. Interaction work is delegated to
+/// <see cref="TimeClipInteractions"/> (selection, drag lifecycle, delete-with-children,
+/// split-at-time, snap).
 /// </summary>
 internal sealed class ClipArea : ITimeObjectManipulation, IValueSnapAttractor
 {
@@ -38,24 +32,15 @@ internal sealed class ClipArea : ITimeObjectManipulation, IValueSnapAttractor
                     Func<Guid, bool> requestChildCompositionFunc,
                     ValueSnapHandler snapHandlerForU)
     {
-        _getCompositionOp = getCompositionOp;
         _context = new LayerContext(new ClipSelection(timeLineCanvas.NodeSelection),
                                     requestChildCompositionFunc,
                                     timeLineCanvas,
                                     snapHandlerForU);
         OpClips = new TimeClipInteractions(_context, getCompositionOp);
-        AudioClips = new AudioClipInteractions(_context, getCompositionOp);
-
-        // Cross-references so each helper can drive the other during cross-type drag
-        // (drag-op-clip also moves audio clips in audio selection, and vice versa).
-        OpClips.AudioInteractions = AudioClips;
-        AudioClips.OpInteractions = OpClips;
     }
 
     /// <summary>
-    /// Per-frame shared state passed into <see cref="TimeClipItem"/> and the interaction
-    /// helpers. <see cref="ClipSelection"/> is op-clip-only — audio clips use the parallel
-    /// selection set on <see cref="AudioClipInteractions"/>.
+    /// Per-frame shared state passed into <see cref="TimeClipItem"/> and the interaction helpers.
     /// </summary>
     internal sealed record LayerContext(
         ClipSelection ClipSelection,
@@ -64,12 +49,10 @@ internal sealed class ClipArea : ITimeObjectManipulation, IValueSnapAttractor
         ValueSnapHandler SnapHandler);
 
     public TimeClipInteractions OpClips { get; }
-    public AudioClipInteractions AudioClips { get; }
 
     public void Draw(Instance compositionOp, Playback playback, ValueSnapHandler snapHandler)
     {
         _drawList = ImGui.GetWindowDrawList();
-        _playback = playback;
         OpClips.SetPlayback(playback);
 
         ImGui.BeginGroup();
@@ -86,10 +69,7 @@ internal sealed class ClipArea : ITimeObjectManipulation, IValueSnapAttractor
         }
         ImGui.EndGroup();
 
-        AudioClips.HandleFileDrop(compositionOp, _minScreenPos, _minLayerIndex, _playback);
-
-        // Layer-area height drag handle. Only meaningful when there is at least one op clip
-        // to size; audio-clip-only compositions still draw rows but don't trigger this.
+        // Layer-area height drag handle. Only meaningful when there is at least one op clip to size.
         if (_context.ClipSelection.AllClipIds.Count > 0)
         {
             ImGui.SetCursorPosY(ImGui.GetCursorPosY() - 2);
@@ -117,46 +97,24 @@ internal sealed class ClipArea : ITimeObjectManipulation, IValueSnapAttractor
         if (UserActions.DeleteSelection.Triggered())
         {
             OpClips.DeleteSelectedClips(compositionOp);
-            AudioClips.DeleteSelectedClips(compositionOp);
         }
     }
 
     private void DrawAllLayers(Instance compositionOp)
     {
         var opClips = _context.ClipSelection.CompositionTimeClips.Values;
-        var audioClips = compositionOp.Symbol.CompositionSettings.Playback.AudioClips;
-
-        var visibleAudioClipCount = 0;
-        foreach (var ac in audioClips)
-        {
-            // Main-soundtrack clips draw as the timeline background image, not as layer
-            // clips. Everything else — including in-progress recordings with empty
-            // AssetPath — gets a row in the clip area.
-            if (ac.IsMainSoundtrack)
-                continue;
-            visibleAudioClipCount++;
-        }
-
-        if (opClips.Count == 0 && visibleAudioClipCount == 0)
+        if (opClips.Count == 0)
         {
             LastHeight = 0;
             return;
         }
 
-        // Layer bounds span both clip kinds so rows extend even when only one kind is present.
         _minLayerIndex = int.MaxValue;
         _maxLayerIndex = int.MinValue;
         foreach (var clip in opClips)
         {
             _minLayerIndex = Math.Min(clip.LayerIndex, _minLayerIndex);
             _maxLayerIndex = Math.Max(clip.LayerIndex, _maxLayerIndex);
-        }
-        foreach (var ac in audioClips)
-        {
-            if (ac.IsMainSoundtrack)
-                continue;
-            _minLayerIndex = Math.Min(ac.LayerIndex, _minLayerIndex);
-            _maxLayerIndex = Math.Max(ac.LayerIndex, _maxLayerIndex);
         }
 
         var min = ImGui.GetCursorScreenPos() + new Vector2(0, LayerHeight * 0.5f);
@@ -169,14 +127,9 @@ internal sealed class ClipArea : ITimeObjectManipulation, IValueSnapAttractor
         var layerRect = new ImRect(min, max);
         OpClips.DrawClips(compositionOp, layerRect, _minLayerIndex, _drawList);
 
-        if (visibleAudioClipCount > 0)
-            AudioClips.DrawClips(compositionOp, layerRect, _minLayerIndex, _drawList);
-
-        // Force the surrounding BeginGroup bbox to span the entire layer area so the
-        // file-drop target (resolved via the group's "last item" rect) covers full width
-        // and full height. Without this, the group's bbox shrinks to the union of the
-        // emitted InvisibleButtons (clip bodies), and the right portion of the timeline
-        // — past the last clip's edge — silently rejects audio file drops.
+        // Span the surrounding BeginGroup bbox over the whole layer area so the layer-height
+        // drag handle and hit-testing cover the full width/height, not just the union of the
+        // emitted clip-body buttons.
         ImGui.SetCursorScreenPos(min);
         ImGui.Dummy(max - min);
 
@@ -192,7 +145,6 @@ internal sealed class ClipArea : ITimeObjectManipulation, IValueSnapAttractor
     public void UpdateSelectionForArea(ImRect screenArea, SelectionFence.SelectModes selectMode)
     {
         OpClips.UpdateSelectionForArea(screenArea, selectMode, _minScreenPos, _minLayerIndex);
-        AudioClips.UpdateSelectionForArea(screenArea, selectMode, _minScreenPos, _minLayerIndex);
     }
 
     public IEnumerable<TimeClip> EnumerateSelectedClips() => OpClips.EnumerateSelectedClips();
@@ -211,7 +163,6 @@ internal sealed class ClipArea : ITimeObjectManipulation, IValueSnapAttractor
     public void ClearSelection()
     {
         OpClips.ClearSelection();
-        AudioClips.ClearSelection();
     }
 
     public ICommand StartDragCommand(in Guid compositionSymbolId) => OpClips.StartDragCommand();
@@ -239,7 +190,6 @@ internal sealed class ClipArea : ITimeObjectManipulation, IValueSnapAttractor
     void IValueSnapAttractor.CheckForSnap(ref SnapResult snapResult)
     {
         OpClips.CheckForSnap(ref snapResult);
-        AudioClips.CheckForSnap(ref snapResult);
     }
 
     // ---------------------------------------------------------------------------
@@ -249,13 +199,11 @@ internal sealed class ClipArea : ITimeObjectManipulation, IValueSnapAttractor
     internal static float LayerHeight => UserSettings.Config.LayerHeight.Clamp(4, 40);
 
     private readonly LayerContext _context;
-    private readonly Func<Instance> _getCompositionOp;
 
     private int _minLayerIndex = int.MaxValue;
     private int _maxLayerIndex = int.MinValue;
     private Vector2 _minScreenPos;
     private ImDrawListPtr _drawList;
-    private Playback? _playback;
 
     private static float _layerHeightOnDragStart;
     private static float _mouseYOnDragStart;

@@ -64,19 +64,6 @@ internal sealed class ParameterWindow : Window
             ImGui.SameLine();
         }
 
-        // Timeline audio clips live on a parallel selection set (AudioClipInteractions.
-        // SelectedClipIds), not in NodeSelection. Check first so a picked audio clip wins
-        // over TryGetSelectedInstanceOrInput's composition-fallback (which returns the
-        // composition instance even when nothing is selected — that would otherwise hide
-        // the audio inspector behind the composition's parameter view).
-        var focusedNodeSelection = ProjectView.Focused?.NodeSelection;
-        if (focusedNodeSelection != null && !focusedNodeSelection.IsAnythingSelected()
-            && TryDrawTimelineAudioClipInspector())
-        {
-            _lastSelectedInstanceId = Guid.Empty;
-            return;
-        }
-
         if (!NodeSelection.TryGetSelectedInstanceOrInput(out var instance, out var inputUi, out _selectionChanged))
         {
             if (ProjectView.Focused?.NodeSelection != null)
@@ -681,23 +668,6 @@ internal sealed class ParameterWindow : Window
         var parentUi = instance.Parent.GetSymbolUi();
         symbolChildUi = parentUi.ChildUis[instance.SymbolChildId];
             return true;
-    }
-
-    // TODO: Refactor this into a separate class
-    /// <summary>
-    /// Routes to <see cref="TimelineAudioClipInspector.TryDraw"/> when the focused
-    /// project view's timeline has audio clips selected. Returns true if the inspector
-    /// drew its own content (the caller skips annotation / empty-state rendering).
-    /// </summary>
-    private static bool TryDrawTimelineAudioClipInspector()
-    {
-        var projectView = ProjectView.Focused;
-        if (projectView == null)
-            return false;
-
-        var audioClips = projectView.TimeLineCanvas.ClipArea.AudioClips;
-        return TimelineAudioClipInspector.TryDraw(projectView.CompositionInstance,
-                                                  audioClips.SelectedClipIds);
     }
 
     private static bool DrawSettingsForSelectedAnnotations(NodeSelection nodeSelection)
