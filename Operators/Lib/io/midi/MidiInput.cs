@@ -66,7 +66,7 @@ public sealed class MidiInput : Instance<MidiInput>, MidiConnectionManager.IMidi
         else
         {
             _warningMessage = $"Midi device '{_trainedDeviceName}' is not captured.\nYou can try Windows » Settings » Midi » Rescan Devices.";
-            this.LogWarningState(_warningMessage);
+            //this.LogWarningState(_warningMessage);
         }
 
         _trainedChannel = Channel.GetValue(context);
