@@ -21,7 +21,7 @@ public sealed partial class Symbol
         {
             throw new InvalidOperationException("The ID for symbol child must be unique.");
         }
-        
+
         SymbolPackage.AddDependencyOn(symbol);
 
         List<Instance> newChildInstances;

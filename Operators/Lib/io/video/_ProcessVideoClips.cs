@@ -68,13 +68,29 @@ internal sealed class _ProcessVideoClips : Instance<_ProcessVideoClips>
         // them works because VideoClip.Texture is DirtyFlagTrigger.Animated (always re-evaluates), so a plain
         // GetValue re-decodes for the current time without an explicit InvalidateGraph. Deduped against the
         // wired set (and each other) by SymbolChildId so a clip that's both wired and a sibling draws once.
-        if (AutoCollect.GetValue(context) && Parent?.Parent != null)
+        if (AutoCollect.GetValue(context) && Parent?.Parent is { } composition)
         {
-            foreach (var child in Parent.Parent.Children.Values)
+            // Rebuild the sibling-clip list only when the composition instance changes (focus / hot-reload)
+            // or its Symbol.VersionCounter bumps (any edit) — not every frame. Avoids the per-frame
+            // Children.Values walk + locked per-child lookup, a frame-drop source on large graphs.
+            if (!ReferenceEquals(_cachedComposition, composition) || _cachedStructureVersion != composition.Symbol.VersionCounter)
             {
-                if (child is not IVideoClipProvider provider)
-                    continue;
+                _cachedComposition = composition;
+                _cachedStructureVersion = composition.Symbol.VersionCounter;
+                _autoCollectedChildren.Clear();
+                foreach (var child in composition.Children.Values)
+                {
+                    if (child is IVideoClipProvider)
+                        _autoCollectedChildren.Add(child);
+                }
+            }
+
+            for (var i = 0; i < _autoCollectedChildren.Count; i++)
+            {
+                var child = _autoCollectedChildren[i];
                 if (!_seenChildIds.Add(child.SymbolChildId))
+                    continue;
+                if (child is not IVideoClipProvider provider)
                     continue;
 
                 provider.MarkManaged();
@@ -172,6 +188,12 @@ internal sealed class _ProcessVideoClips : Instance<_ProcessVideoClips>
     // Reused across frames (Update runs on the single graph-eval thread); cleared, not reallocated, each frame.
     private readonly List<ClipEntry> _activeEntries = new();
     private readonly HashSet<Guid> _seenChildIds = new();
+
+    // AutoCollect scan cache — rebuilt only when the composition instance changes (reload) or its
+    // Symbol.VersionCounter bumps (any edit), not every frame.
+    private Instance? _cachedComposition;
+    private int _cachedStructureVersion = -1;
+    private readonly List<Instance> _autoCollectedChildren = new();
 
     [Input(Guid = "116a67d9-e985-4c2e-a71b-73fbcdadbb18")]
     public readonly MultiInputSlot<Texture2D> Textures = new();

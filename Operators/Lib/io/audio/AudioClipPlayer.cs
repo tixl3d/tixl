@@ -45,9 +45,25 @@ internal sealed class AudioClipPlayer : Instance<AudioClipPlayer>
         // Auto-collected sibling [AudioClip]s in the same composition, deduped against the wired set.
         if (AutoCollect.GetValue(context) && Parent != null)
         {
-            foreach (var child in Parent.Children.Values)
+            // Rebuild the sibling-clip list only on a Parent change (hot-reload → new instance) or a graph
+            // structure change — not every frame. Avoids the per-frame Children.Values walk + locked
+            // per-child lookup, which is a frame-drop source on large graphs.
+            if (!ReferenceEquals(_cachedParent, Parent) || _cachedStructureVersion != Parent.Symbol.VersionCounter)
             {
-                if (child is IAudioClipProvider provider && _seenChildIds.Add(child.SymbolChildId))
+                _cachedParent = Parent;
+                _cachedStructureVersion = Parent.Symbol.VersionCounter;
+                _autoCollected.Clear();
+                foreach (var child in Parent.Children.Values)
+                {
+                    if (child is IAudioClipProvider)
+                        _autoCollected.Add(child);
+                }
+            }
+
+            for (var i = 0; i < _autoCollected.Count; i++)
+            {
+                var child = _autoCollected[i];
+                if (_seenChildIds.Add(child.SymbolChildId) && child is IAudioClipProvider provider)
                     Drive(provider, timeInBars, timeInSecs);
             }
         }
@@ -65,6 +81,12 @@ internal sealed class AudioClipPlayer : Instance<AudioClipPlayer>
 
     // Reused across frames (Update runs on the single graph-eval thread); cleared, not reallocated.
     private readonly HashSet<Guid> _seenChildIds = new();
+
+    // AutoCollect scan cache — rebuilt only when Parent changes (reload) or the composition's
+    // VersionCounter bumps (any edit), not every frame.
+    private Instance? _cachedParent;
+    private int _cachedStructureVersion = -1;
+    private readonly List<Instance> _autoCollected = new();
 
     [Input(Guid = "98702b93-b904-4a19-8e58-90809aaa5c42")]
     public readonly MultiInputSlot<Command> AudioClips = new();

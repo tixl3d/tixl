@@ -313,9 +313,9 @@ public sealed partial class Symbol : IDisposable, IResource
         // first remove all connections to or from the child
         Connections.RemoveAll(c => c.SourceParentOrChildId == childId || c.TargetParentOrChildId == childId);
 
-        if (!_children.Remove(childId, out var symbolChild)) 
+        if (!_children.Remove(childId, out var symbolChild))
             return false;
-        
+
         lock (_creationLock)
         {
             foreach (var me in _childrenCreatedFromMe.Values)
@@ -384,6 +384,15 @@ public sealed partial class Symbol : IDisposable, IResource
             }
         }
     }
+
+    /// <summary>
+    /// Mirror of this symbol's editor-side <c>SymbolUi.VersionCounter</c>, forwarded by
+    /// <c>SymbolUi.FlagAsModified</c>. Lets Core operators (and the Player, where it stays 0 because the graph
+    /// is static) cache per-frame child scans and rebuild only when the symbol actually changes, instead of
+    /// re-walking <c>Children</c> every frame. Bumps on any modification — coarser than "structure only", but
+    /// modifications are rare relative to frames, so the occasional extra cache rebuild is cheap.
+    /// </summary>
+    public int VersionCounter { get; set; }
 
     internal bool NeedsTypeUpdate { get; private set; } = true;
     private readonly ConcurrentDictionary<Guid, Child> _children = new();

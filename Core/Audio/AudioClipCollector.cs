@@ -1,4 +1,5 @@
 #nullable enable
+using System.Collections.Generic;
 using T3.Core.Operator;
 
 namespace T3.Core.Audio;
@@ -23,17 +24,34 @@ public static class AudioClipCollector
         if (composition == null)
             return;
 
-        // PERF (deferred): this rescans Children every frame, and InstanceChildren.Values is a yield
-        // iterator that allocates + does a locked per-child lookup (its class TODO flags it as a
-        // frame-drop source on big graphs). The fix — cache the filtered provider list, rebuilt on an
-        // atomic Symbol structure-version counter (none in Core yet) — is shared with VideoClip's
-        // identical AutoCollect scan.
-        foreach (var child in composition.Children.Values)
+        // Rebuild the cached provider list only when the composition instance changes (focus switch /
+        // hot-reload → a new instance) or the graph structure changes (Symbol.StructureVersion). This
+        // avoids the per-frame Children.Values walk + locked per-child lookup, which is a frame-drop
+        // source on large graphs (InstanceChildren's own TODO flags it).
+        if (!ReferenceEquals(_cachedComposition, composition) || _cachedStructureVersion != composition.Symbol.VersionCounter)
         {
-            if (child is IAudioClipProvider provider && provider.AutoPlay)
+            _cachedComposition = composition;
+            _cachedStructureVersion = composition.Symbol.VersionCounter;
+            _cachedProviders.Clear();
+            foreach (var child in composition.Children.Values)
+            {
+                if (child is IAudioClipProvider provider)
+                    _cachedProviders.Add(provider);
+            }
+        }
+
+        // AutoPlay is a per-frame input value, so it's read each frame (not cached).
+        for (var i = 0; i < _cachedProviders.Count; i++)
+        {
+            var provider = _cachedProviders[i];
+            if (provider.AutoPlay)
                 RegisterIfActive(provider, timeInBars, timeInSecs);
         }
     }
+
+    private static Instance? _cachedComposition;
+    private static int _cachedStructureVersion = -1;
+    private static readonly List<IAudioClipProvider> _cachedProviders = new();
 
     /// <summary>
     /// Registers a single clip with the engine for this frame if the playhead is inside its TimeRange.

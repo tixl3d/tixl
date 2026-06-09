@@ -67,6 +67,9 @@ public sealed partial class SymbolUi
     {
         _hasBeenModified = true;
         VersionCounter++;
+        // Forward to the Core Symbol so operators can cache per-frame child scans and rebuild only when
+        // the symbol changes (the Player has no SymbolUi, but its graph is static so the mirror stays 0).
+        Symbol.VersionCounter = VersionCounter;
     }
 
     /// <summary>

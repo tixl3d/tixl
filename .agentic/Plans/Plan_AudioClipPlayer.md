@@ -307,17 +307,15 @@ Docs (`.help/docs/using/`) + manual test sets land with the phases they describe
 3. **Source trim semantics** — map `SourceOffsetSecs` / `SourceDurationSecs` (seconds) onto the op's
    `TimeClip.SourceRange` (bars). Video does the bars↔seconds remap in `VideoClip.Update`; audio plays at native
    rate, so the offset is a seek into the file, not a rate change. Define the mapping explicitly before locking inputs.
-4. **Per-frame scan cost (confirmed hotspot — shared fix with VideoClip).** `AudioClipCollector` (and
-   `[AudioClipPlayer].AutoCollect`) rescan `composition.Children.Values` every frame; `InstanceChildren.Values`
-   is a `yield` iterator that allocates *and* does a locked per-child lookup — its class-level TODO flags it as a
-   frame-drop source on large graphs. There's no non-allocating iteration exposed, so the only real fix is to
-   **cache the filtered `IAudioClipProvider` list per composition and rebuild only on a structure change.** The
-   needed signal lives **Editor-side only** today (`EditorSymbolPackage.SymbolStructureVersionCounter` /
-   `SymbolUi.VersionCounter`, e.g. `TimeClipInteractions.cs:61`) — unreachable from the Core registrar and absent
-   in the Player. **Real fix: promote an atomic structure-version counter to Core** (`Symbol` is the natural
-   home, bumped where the editor calls `NotifySymbolStructureChange`). This is the **same deferred caching as
-   `Plan_VideoClipPlayer.md` Phase 3** — build the Core counter once and both `_ProcessVideoClips` *and* this
-   registrar (plus any future op-collector) cache against it. Deferred; the v1 scan is correct, just allocaty.
+4. **Per-frame scan cost — RESOLVED (2026-06-09).** `AudioClipCollector` and `[AudioClipPlayer].AutoCollect`
+   no longer walk `Children.Values` every frame. New Core field **`Symbol.VersionCounter`** mirrors the editor's
+   `SymbolUi.VersionCounter`, forwarded in `SymbolUi.FlagAsModified` (which every child add / remove / copy-paste
+   already calls — verified). Each scanner caches its filtered provider list, rebuilding only when the composition
+   **instance** changes (focus switch / hot-reload) or its `Symbol.VersionCounter` bumps (any edit). In the Player
+   there's no `SymbolUi`, so the mirror stays 0 and the static graph builds the list once. **`_ProcessVideoClips`'
+   AutoCollect scan (`Plan_VideoClipPlayer.md` Phase 3) can now adopt the same `Symbol.VersionCounter`** — the
+   shared infra is in place. (Chosen over a Core-side `AddChild`/`RemoveChild` bump because forwarding the existing
+   UI signal also catches copy-paste and other non-`AddChild` mutations.)
 5. **Multiple `AutoCollect` players** in one composition each register all clips — document or scope to a layer range.
 6. **The `IsMainSoundtrack` overload** (background draw + FFT + export bundled in one flag) is the thing Phase 4
    has to unbundle; `DisplayAs` is the first step (separates the *draw* concern from the others).

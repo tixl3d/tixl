@@ -395,16 +395,14 @@ Phase 1 (wired) is unaffected.
 - Scanned set: skip inactive clips before pulling them (already implied by the active-filter).
 - **Done (2026-06-07):** `Playback.OpNotReady |= !IsReady` per active clip — set in `VideoClip.Update`, gated
   by `IsRenderingToFile` *and* the clip being active, so pre-warmed upcoming clips don't stall export.
-- **Deferred — cache the AutoCollect sibling scan.** `_ProcessVideoClips` rescans `Parent.Parent.Children.Values`
-  every frame while AutoCollect is on; that `yield` iterator allocates per frame (`InstanceChildren`'s own TODO
-  flags it as a frame-drop source on large graphs). The fix is to cache the sibling-clip list and rebuild only
-  on a structure change — but the structure-version signals (`EditorSymbolPackage.SymbolStructureVersionCounter`,
-  `SymbolUi.VersionCounter`) are **Editor-side / internal**, unreachable from an operator (Core-only) and absent
-  in the Player. Wiring it up means promoting a structure-version counter to **Core** (`Symbol` is the natural
-  home), bumped by the editor's `NotifySymbolStructureChange`, like the `VideoPlayback.Engine` /
-  `ThirdPartyRuntimeInfo` facades. Cache key = that version **or** `Children.Count` (both alloc-free); store
-  child `Guid`s and re-resolve via `Children.TryGetValue` (crash-safe vs. removed clips). Only bites at the
-  many-clips design center, so it can ride with the decode-pool work below.
+- **DONE (2026-06-09) — cache the AutoCollect sibling scan.** `_ProcessVideoClips` no longer walks
+  `Parent.Parent.Children.Values` every frame. The structure-version signal was promoted to Core as
+  **`Symbol.VersionCounter`** (mirrors `SymbolUi.VersionCounter`, forwarded in `SymbolUi.FlagAsModified`, which
+  every child add/remove/copy-paste calls). The helper caches the sibling-clip list (child `Instance`s that are
+  `IVideoClipProvider`) and rebuilds only when the composition instance changes (focus / hot-reload) or its
+  `Symbol.VersionCounter` bumps. In the Player there's no `SymbolUi` so the mirror stays 0 and the static graph
+  builds once. (Shared with the audio system — see `Plan_AudioClipPlayer.md` open question #4, which drove the
+  Core counter.)
 - **Introduce the decode pool** (see *Decode pool, preroll & eviction*): clips become descriptors; the
   player owns N pooled controllers with temporal scheduling, preroll of upcoming clips, and eviction of far
   ones. This is the core mechanism for many-clip timelines, not an optional memory tweak — per-clip
