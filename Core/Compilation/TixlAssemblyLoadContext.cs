@@ -48,33 +48,15 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
     private static List<AssemblyTreeNode> CoreNodes => _coreNodes;
     public readonly string MainDirectory;
 
-    private static string RootShadowCopyDir
-    {
-        get
-        {
-            var processId = Environment.ProcessId;
-            return Path.Combine(FileLocations.TempFolder, "ShadowCopy", $"{processId}");
-        }
-    }
+    private static string ShadowCopyRootFolder => Path.Combine(FileLocations.TempFolder, "ShadowCopy");
+    private static string RootShadowCopyDir => Path.Combine(ShadowCopyRootFolder, $"{Environment.ProcessId}");
 
     private readonly string _shadowCopyDirectory;
     private readonly bool _shouldCopyBinaries;
 
     static TixlAssemblyLoadContext()
     {
-        try
-        {
-            if (Directory.Exists(RootShadowCopyDir))
-            {
-                Directory.Delete(RootShadowCopyDir, true);
-            }
-        }
-        catch (Exception e)
-        {
-            // This warning happens quite frequently
-            Log.Debug($"Failed to delete shadow copy directory {RootShadowCopyDir}: {e.Message}");
-        }
-
+        CleanUpStaleShadowCopies();
         Directory.CreateDirectory(RootShadowCopyDir);
 
         (AssemblyLoadContext Context, (Assembly Assembly, AssemblyName name)[] assemblies)[]? allAssemblies = All
@@ -635,6 +617,52 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
         }
 
         Unload();
+    }
+
+    /// <summary>
+    /// Each run shadow-copies its assemblies into a per-process subfolder; closed or crashed instances never
+    /// clean theirs up, so they pile up across rebuilds. Remove every folder that isn't owned by a still-running
+    /// process — those are skipped because their assemblies are loaded and locked.
+    /// </summary>
+    private static void CleanUpStaleShadowCopies()
+    {
+        var rootFolder = ShadowCopyRootFolder;
+        if (!Directory.Exists(rootFolder))
+            return;
+
+        var currentProcessId = Environment.ProcessId;
+        foreach (var processFolder in Directory.EnumerateDirectories(rootFolder))
+        {
+            var folderName = Path.GetFileName(processFolder);
+            if (int.TryParse(folderName, out var processId)
+                && processId != currentProcessId
+                && IsProcessRunning(processId))
+            {
+                continue;
+            }
+
+            try
+            {
+                Directory.Delete(processFolder, true);
+            }
+            catch (Exception e)
+            {
+                Log.Debug($"Failed to delete shadow copy directory {processFolder}: {e.Message}");
+            }
+        }
+    }
+
+    private static bool IsProcessRunning(int processId)
+    {
+        try
+        {
+            using var process = Process.GetProcessById(processId);
+            return !process.HasExited;
+        }
+        catch (ArgumentException)
+        {
+            return false;
+        }
     }
 }
 
