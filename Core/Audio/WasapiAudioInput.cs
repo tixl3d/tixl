@@ -199,12 +199,12 @@ public static class WasapiAudioInput
 
     /// <summary>
     /// Starts writing the live WASAPI capture to an uncompressed 16-bit PCM WAV file in
-    /// <see cref="RecordingPaths.DevRecordingsDirectory"/>.
+    /// <see cref="RecordingPaths.TempRecordingsDirectory"/>.
     /// </summary>
     /// <param name="suffix">Optional source identifier appended to the filename
     /// (e.g. <c>mic1</c>). Sanitised before use.</param>
     /// <returns>The absolute path of the WAV file, or <c>null</c> if recording could not start.</returns>
-    public static string BeginRecording(string suffix = null)
+    public static string BeginRecording(int sessionIndex = -1, string suffix = null)
     {
         if (_activeRecording != null)
         {
@@ -229,7 +229,7 @@ public static class WasapiAudioInput
             return null;
         }
 
-        var directory = RecordingPaths.DevRecordingsDirectory;
+        var directory = RecordingPaths.TempRecordingsDirectory;
         try
         {
             Directory.CreateDirectory(directory);
@@ -240,7 +240,10 @@ public static class WasapiAudioInput
             return null;
         }
 
-        var sessionIndex = RecordingPaths.NextSessionIndex(directory);
+        // -1 = compute independently; the recording session passes a shared index so the audio + data
+        // files of one session line up (AudioRec-007 / DataRec-007).
+        if (sessionIndex < 0)
+            sessionIndex = RecordingPaths.NextSessionIndex(directory);
         var fileName = RecordingPaths.BuildFileName(RecordingPaths.AudioRecordingPrefix, sessionIndex, ".wav", suffix);
         var path = Path.Combine(directory, fileName);
 

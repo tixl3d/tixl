@@ -80,6 +80,7 @@ internal static class AssetHandling
                                    {
                                        PrimaryOperators = [new Guid("c2b2758a-5b3e-465a-87b7-c6a13d3fba48")], // PlayAudioClip (graph)
                                        TimelineClipOperator = new Guid("f0008b50-091d-4e9f-91eb-baa212acfa20"), // AudioClip (timeline)
+                                       RecordingFolder = "audio",
                                        Color = UiColors.ColorForValues,
                                        IconId = (uint)Icon.FileAudio,
                                        Subfolders = ["audio", "soundtrack","samples"],
@@ -96,6 +97,7 @@ internal static class AssetHandling
                                        PrimaryOperators =
                                                [new Guid("4d1c0e80-7b2a-4f6d-9c1b-12d3e4f50607")], // LoadDataClip
                                        TimelineClipOperator = new Guid("4d1c0e80-7b2a-4f6d-9c1b-12d3e4f50607"), // LoadDataClip
+                                       RecordingFolder = "dataclips",
                                        Color = UiColors.ColorForCommands,
                                        IconId = (uint)Icon.FileDocument,
                                        Subfolders = ["dataclips", "data"],

@@ -24,6 +24,13 @@ public sealed class AssetType
     /// </summary>
     public Guid? TimelineClipOperator;
 
+    /// <summary>
+    /// Subfolder under the project's <c>Assets/</c> where live-session recordings of this type are imported,
+    /// and which the recorder scans to compute the next session index. Non-null marks the type as recordable.
+    /// Set in <c>AssetHandling</c> — e.g. Audio → <c>"audio"</c>, Data → <c>"dataclips"</c>.
+    /// </summary>
+    public string? RecordingFolder;
+
     public AssetType(string name, List<int> extensionIds)
     {
         Name = name;

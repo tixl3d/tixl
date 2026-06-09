@@ -25,19 +25,19 @@ namespace T3.Core.Audio;
 /// session still bumps the counter that a later data-only session sees.
 /// </para>
 /// <para>
-/// The dev-only target directory for Phase 1 is <see cref="DevRecordingsDirectory"/> under
-/// the editor's settings folder — same parent as the log directory, easy for testers to
-/// locate. Phase 4 will switch to the active project's <c>Assets/audio/</c>.
+/// Recorders write to <see cref="TempRecordingsDirectory"/> during capture; on stop the finalised file is
+/// imported into the project's <c>Assets/</c> (the canonical location the clip references) and the staging
+/// copy is removed.
 /// </para>
 /// </remarks>
 public static class RecordingPaths
 {
     /// <summary>
-    /// Recordings directory: <c>%APPDATA%\TiXL&lt;version&gt;\Recordings\</c>. Used when
-    /// no project-specific destination is configured. A future per-project
-    /// <c>Assets/audio/</c> destination is on the roadmap but doesn't change this fallback.
+    /// Temp staging directory for in-progress recordings: <c>%APPDATA%\TiXL&lt;version&gt;\Tmp\Recordings\</c>.
+    /// Transient — the finalised file is imported into the project's <c>Assets/</c> on stop and the staging
+    /// copy deleted, so nothing here is meant to persist.
     /// </summary>
-    public static string DevRecordingsDirectory => Path.Combine(FileLocations.SettingsDirectory, "Recordings");
+    public static string TempRecordingsDirectory => Path.Combine(FileLocations.TempFolder, "Recordings");
 
     /// <summary>Filename prefix for IO-data recordings (<c>DataRec-NNN.data</c>).</summary>
     public const string DataRecordingPrefix = "DataRec";

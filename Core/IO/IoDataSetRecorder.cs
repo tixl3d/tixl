@@ -47,7 +47,7 @@ public sealed class IoDataSetRecorder : MidiConnectionManager.IMidiConsumer, Osc
     /// normally null. Kept for symmetry with
     /// <see cref="T3.Core.Audio.WasapiAudioInput.BeginRecording"/>.
     /// </param>
-    public static string? BeginRecording(string? suffix = null, bool captureMidi = true, bool captureOsc = true)
+    public static string? BeginRecording(int sessionIndex = -1, string? suffix = null, bool captureMidi = true, bool captureOsc = true)
     {
         if (_active != null)
         {
@@ -61,7 +61,7 @@ public sealed class IoDataSetRecorder : MidiConnectionManager.IMidiConsumer, Osc
             return null;
         }
 
-        var directory = T3.Core.Audio.RecordingPaths.DevRecordingsDirectory;
+        var directory = T3.Core.Audio.RecordingPaths.TempRecordingsDirectory;
         try
         {
             Directory.CreateDirectory(directory);
@@ -72,7 +72,10 @@ public sealed class IoDataSetRecorder : MidiConnectionManager.IMidiConsumer, Osc
             return null;
         }
 
-        var sessionIndex = T3.Core.Audio.RecordingPaths.NextSessionIndex(directory);
+        // -1 = compute independently; the recording session passes a shared index so the audio + data
+        // files of one session line up (AudioRec-007 / DataRec-007).
+        if (sessionIndex < 0)
+            sessionIndex = T3.Core.Audio.RecordingPaths.NextSessionIndex(directory);
         var fileName = T3.Core.Audio.RecordingPaths.BuildFileName(T3.Core.Audio.RecordingPaths.DataRecordingPrefix, sessionIndex, ".data", suffix);
         var path = System.IO.Path.Combine(directory, fileName);
 

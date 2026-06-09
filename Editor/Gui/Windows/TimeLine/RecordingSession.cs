@@ -6,6 +6,7 @@ using T3.Core.IO;
 using T3.Core.Logging;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
+using T3.Core.Resource.Assets;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
@@ -137,10 +138,15 @@ internal static class RecordingSession
         // until Stop. The user sees something went wrong; undo cleanly removes both clips.
         _audioCaptureActive = captureAudio;
         _ioCaptureActive = captureIo;
+        // One shared session index so a session's audio + data files line up (AudioRec-007 / DataRec-007).
+        // Computed once here (before either recorder writes) from the persistent imported recordings in the
+        // project's Assets — not the temp dir, whose copies are deleted after import (which would reset the
+        // index to 001 every session).
+        var sessionIndex = RecordingPaths.NextSessionIndex(NextIndexScanDirs(compositionOp));
         if (captureAudio)
-            WasapiAudioInput.BeginRecording();
+            WasapiAudioInput.BeginRecording(sessionIndex);
         if (captureIo)
-            IoDataSetRecorder.BeginRecording(captureMidi: captureMidi, captureOsc: captureOsc);
+            IoDataSetRecorder.BeginRecording(sessionIndex, captureMidi: captureMidi, captureOsc: captureOsc);
 
         // Without this, the graph canvas keeps drawing its cached child list until the
         // user clicks on it — the new LoadDataClip op isn't visible until then.
@@ -244,7 +250,8 @@ internal static class RecordingSession
 
         // Import the just-finalised files into the project's Assets folder so they land
         // under the active package, register with AssetRegistry, and show up in the
-        // AssetLib UI. The original copy in the recordings dir stays in place as a backup.
+        // AssetLib UI. The temp-staging copy in the recordings dir is removed on success
+        // (see TryImportRecording) so each session doesn't leave a duplicate behind.
         var package = compositionUi.Symbol.SymbolPackage;
         var dataAddress = TryImportRecording(dataPath, package) ?? dataPath;
         var audioAddress = TryImportRecording(audioPath, package) ?? audioPath;
@@ -312,13 +319,55 @@ internal static class RecordingSession
         if (string.IsNullOrEmpty(absolutePath) || package == null)
             return null;
 
-        if (!FileImport.TryImportDroppedFile(absolutePath, package, subfolder: null, out var asset))
+        // Import into the type's RecordingFolder (audio / dataclips) — the same folder NextIndexScanDirs
+        // reads, so storage + index-scan stay driven by the one AssetType field.
+        var subfolder = AssetType.TryGetForFilePath(absolutePath, out var assetType, out _) ? assetType.RecordingFolder : null;
+
+        if (!FileImport.TryImportDroppedFile(absolutePath, package, subfolder, out var asset))
         {
             Log.Warning($"RecordingSession: failed to import {absolutePath} into project Assets; clip will reference the original absolute path.");
             return null;
         }
 
+        // The recording now lives in the project's Assets folder (the canonical location the clip
+        // references). Remove the temp-staging copy so each session doesn't leave a duplicate behind.
+        // Best-effort — only runs after a successful import, so the data is already safe in Assets.
+        try
+        {
+            System.IO.File.Delete(absolutePath);
+        }
+        catch (Exception e)
+        {
+            Log.Debug($"RecordingSession: could not remove temp recording {absolutePath}: {e.Message}");
+        }
+
         return asset.Address;
+    }
+
+    /// <summary>
+    /// Directories scanned to pick the next session index: the project's imported-recording folders (the
+    /// persistent record) plus the temp staging dir (covers a leftover from a failed import). Deleting the
+    /// temp copies on import is why the persistent Assets folders must be the source of truth — scanning only
+    /// the temp dir would reset the index to 001 every session.
+    /// </summary>
+    private static string[] NextIndexScanDirs(Instance compositionOp)
+    {
+        var dirs = new List<string> { RecordingPaths.TempRecordingsDirectory };
+
+        var assetsFolder = compositionOp.Symbol.SymbolPackage?.AssetsFolder;
+        if (!string.IsNullOrEmpty(assetsFolder))
+        {
+            // Each recordable asset type declares its import subfolder via AssetType.RecordingFolder (set in
+            // AssetHandling). Scanning those persistent folders is what keeps the session index climbing after
+            // the temp copies are deleted on import.
+            foreach (var assetType in AssetType.AvailableTypes)
+            {
+                if (!string.IsNullOrEmpty(assetType.RecordingFolder))
+                    dirs.Add(System.IO.Path.Combine(assetsFolder, assetType.RecordingFolder));
+            }
+        }
+
+        return dirs.ToArray();
     }
 
     private static void InitClipTimeClip(Symbol composition, Guid childId, float startBars, int layer)
