@@ -1,9 +1,13 @@
 # Audio clip player
 
-**Status:** Phase 1 + Phase 3 landed (2026-06-09). New `[AudioClip]` op + AutoPlay registrar + waveform are in
-and verified by the user (playback, waveform with source-window mapping). The old `TimelineAudioClip` layer-clip
-system is **deleted**, and recording now creates `[AudioClip]` ops (symmetric with `LoadDataClip`). Remaining:
-Phase 2 `[AudioClipPlayer]` / export support, and the Phase 4 soundtrack migration. See *Status* under Phase 1.
+**Status:** Phases 1, 2, 3 landed (2026-06-09); building clean. `[AudioClip]` op + AutoPlay registrar + waveform
+(Phase 1, user-verified), old `TimelineAudioClip` layer system **deleted** + recording creates `[AudioClip]` ops
+(Phase 3), and `[AudioClipPlayer]` (Phase 2) — a single C# op (wired multi-input + AutoCollect) that registers
+active clips through the graph, so it drives nested compositions and **exported** playback (the Player calls
+`AudioEngine.CompleteFrame`). Also: timeline drop is now generic via `AssetType.TimelineClipOperator`
+(Audio→AudioClip, Video→VideoClip, Data→LoadDataClip), with graph-drop = `[Play*]` / timeline-drop = `*Clip`.
+Remaining: the Phase 4 soundtrack migration, and per-type drop-duration probes (only audio probed today).
+See *Status* under each phase below.
 Re-implements timeline **layer** audio clips as `TimeClip`-backed
 operators, mirroring [`VideoClip`/`VideoClipPlayer`](Plan_VideoClipPlayer.md). Replaces the bespoke
 `TimelineAudioClip` layer-clip system (data in `CompositionSettings.Playback.AudioClips`, hand-rolled
@@ -244,6 +248,26 @@ engine-dedups).
 `AutoCollect`) drives them; a clip both wired and scanned plays once.
 
 **Effort:** ~1 day.
+
+**Status: DONE (2026-06-09) — as built:**
+- Single C# op ([`Operators/Lib/io/audio/AudioClipPlayer.cs`](../../Operators/Lib/io/audio/AudioClipPlayer.cs) +
+  `.t3`/`.t3ui`, Guid `3f78a8a8-…`) — *not* a symbol graph like `[VideoClipPlayer]`, because audio registers
+  rather than composites. Inputs: `MultiInputSlot<Command> AudioClips`, `bool AutoCollect` (default true);
+  `Slot<Command> Output` (Animated) so it sits in a render command chain like `[SimulateIoData]`.
+- `Update` uses `context.LocalTime` (bars) + `context.Playback.SecondsFromBars` (secs) so nested compositions
+  get locally-correct timing. Collects wired clips via each multi-input slot's `Parent`, then (if AutoCollect)
+  scans `Parent.Children` for `IAudioClipProvider`, deduped by `SymbolChildId` in a reused `HashSet`.
+- Per-clip registration factored into Core `AudioClipCollector.RegisterIfActive` (shared with the AutoPlay
+  registrar). The player `MarkManaged`s every clip it drives (active or not) for the status hint, then registers
+  the active ones.
+- **Double-registration resolved:** the engine keys `_updatedSoundtrackClipTimes` by handle and the op returns
+  one cached handle, so a clip registered by both registrar and player collapses to one entry — no skip needed.
+- **`AudioClip` status is now AutoPlay-aware:** AutoPlay clips read Success (self-playing); only `AutoPlay=false`
+  clips with no recent player show the "not played" Notice.
+- **Export:** the player is evaluated in the Player's render path and the Player calls `AudioEngine.CompleteFrame`
+  each frame (`Program.RenderLoop.cs:51`), so placing an `[AudioClipPlayer]` makes the new clips sound in export.
+  The editor-only AutoPlay registrar still doesn't run in the Player — so export needs the player op (or a future
+  registrar-in-Player wiring, deferred).
 
 ### Phase 3 — Recording integration (symmetry with data)
 

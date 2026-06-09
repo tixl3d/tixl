@@ -83,7 +83,11 @@ internal sealed class AudioClip : Instance<AudioClip>, IAudioClipProvider, ICont
         if (string.IsNullOrEmpty(_clip.AssetPath))
             return IStatusProvider.StatusLevel.Warning;
 
-        return IsManaged ? IStatusProvider.StatusLevel.Success : IStatusProvider.StatusLevel.Notice;
+        // AutoPlay clips drive themselves via the registrar; otherwise they rely on an [AudioClipPlayer].
+        if (AutoPlay.TypedInputValue.Value || IsManaged)
+            return IStatusProvider.StatusLevel.Success;
+
+        return IStatusProvider.StatusLevel.Notice;
     }
 
     public string? GetStatusMessage()
@@ -91,7 +95,10 @@ internal sealed class AudioClip : Instance<AudioClip>, IAudioClipProvider, ICont
         if (string.IsNullOrEmpty(_clip.AssetPath))
             return "No audio file set.";
 
-        return IsManaged ? null : "Not played — enable AutoPlay or add an [AudioClipPlayer] that collects this clip.";
+        if (AutoPlay.TypedInputValue.Value || IsManaged)
+            return null;
+
+        return "Not played — enable AutoPlay or add an [AudioClipPlayer] that collects this clip.";
     }
 
     private readonly TimelineAudioClip _clip = new() { IsMainSoundtrack = false };

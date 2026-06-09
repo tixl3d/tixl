@@ -30,20 +30,27 @@ public static class AudioClipCollector
         // identical AutoCollect scan.
         foreach (var child in composition.Children.Values)
         {
-            if (child is not IAudioClipProvider provider || !provider.AutoPlay)
-                continue;
-
-            var timeClip = provider.TimeClip;
-            if (timeClip == null)
-                continue;
-
-            // Exclusive end matches TimeClipSlot's own range test, so adjacent clips sharing a cut
-            // boundary don't both register on that frame.
-            if (timeInBars < timeClip.TimeRange.Start || timeInBars >= timeClip.TimeRange.End)
-                continue;
-
-            AudioEngine.UseSoundtrackClip(provider.GetResourceHandle(), timeInSecs);
-            provider.MarkManaged();
+            if (child is IAudioClipProvider provider && provider.AutoPlay)
+                RegisterIfActive(provider, timeInBars, timeInSecs);
         }
+    }
+
+    /// <summary>
+    /// Registers a single clip with the engine for this frame if the playhead is inside its TimeRange.
+    /// Shared by the AutoPlay registrar and <c>[AudioClipPlayer]</c>. Does not mark the clip as managed —
+    /// the player does that separately (for all clips it drives, active or not) to feed its status hint.
+    /// </summary>
+    public static void RegisterIfActive(IAudioClipProvider provider, double timeInBars, double timeInSecs)
+    {
+        var timeClip = provider.TimeClip;
+        if (timeClip == null)
+            return;
+
+        // Exclusive end matches TimeClipSlot's own range test, so adjacent clips sharing a cut
+        // boundary don't both register on that frame.
+        if (timeInBars < timeClip.TimeRange.Start || timeInBars >= timeClip.TimeRange.End)
+            return;
+
+        AudioEngine.UseSoundtrackClip(provider.GetResourceHandle(), timeInSecs);
     }
 }
