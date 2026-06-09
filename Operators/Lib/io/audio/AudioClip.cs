@@ -50,7 +50,7 @@ internal sealed class AudioClip : Instance<AudioClip>, IAudioClipProvider, ICont
     AudioClipResourceHandle IAudioClipProvider.GetResourceHandle()
     {
         // Registrar path: no EvaluationContext, so read static input values. Animated inputs on an
-        // unwired clip aren't evaluated — acceptable for v1.
+        // unwired clip aren't evaluated
         SyncClip(Playback.Current, Path.TypedInputValue.Value, Volume.TypedInputValue.Value, Mute.TypedInputValue.Value);
         return _handle ??= new AudioClipResourceHandle(_clip, this);
     }
@@ -76,10 +76,15 @@ internal sealed class AudioClip : Instance<AudioClip>, IAudioClipProvider, ICont
         // Interim mapping — refine when start-handle source trim editing lands.
         if (playback != null)
             _clip.SourceOffsetSecs = playback.SecondsFromBars(timeClip.SourceRange.Start);
+
+        _syncedClip = true;
     }
 
     public IStatusProvider.StatusLevel GetStatusLevel()
     {
+        if (!_syncedClip)
+            return IStatusProvider.StatusLevel.Success;
+        
         if (string.IsNullOrEmpty(_clip.AssetPath))
             return IStatusProvider.StatusLevel.Warning;
 
@@ -92,6 +97,9 @@ internal sealed class AudioClip : Instance<AudioClip>, IAudioClipProvider, ICont
 
     public string? GetStatusMessage()
     {
+        if (!_syncedClip)
+            return string.Empty;
+        
         if (string.IsNullOrEmpty(_clip.AssetPath))
             return "No audio file set.";
 
@@ -104,6 +112,7 @@ internal sealed class AudioClip : Instance<AudioClip>, IAudioClipProvider, ICont
     private readonly TimelineAudioClip _clip = new() { IsMainSoundtrack = false };
     private AudioClipResourceHandle? _handle;
     private int _lastManagedFrame;
+    private bool _syncedClip;
 
     [Input(Guid = "97948c5e-10d5-4e18-824e-aea17eb4eb2a")]
     public readonly InputSlot<Command> Command = new();
