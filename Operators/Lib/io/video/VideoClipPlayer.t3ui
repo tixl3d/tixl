@@ -2,36 +2,40 @@
   "FormatVersion": 2,
   "TixlVersion": "4.2.0.2",
   "Id": "f98d28ed-5f30-4416-93be-f0d7a15a7f77"/*VideoClipPlayer*/,
-  "Description": "",
+  "Description": "Manages the playback and rendering of [VideoClip]s into a Texture.\n\n",
+  "SymbolTags": "1",
   "InputUis": [
     {
       "InputId": "7b80b49f-c5f5-4c86-8c12-f854fff027c2"/*VideoClips*/,
       "Position": {
         "X": -213.47714,
         "Y": 35.256775
-      }
+      },
+      "Description": "The [VideoClip]s the should be play with AutoCollect disabled."
     },
     {
       "InputId": "ac80c531-90ff-449a-8d60-f6a4fa27b818"/*AutoCollect*/,
       "Position": {
         "X": -213.47714,
         "Y": 140.25677
-      }
+      },
+      "Description": "When enabled will scan the current composition for [VideoClips] and plays them back without the need for actually connecting them."
     },
     {
       "InputId": "f2ca9226-b302-4a77-8c8b-1b1db6022eee"/*ScaleMethod*/,
       "Position": {
-        "X": -504.34915,
-        "Y": 163.75607
-      }
+        "X": -656.6175,
+        "Y": 120.15579
+      },
+      "Description": "Selects the mode in which the plane should dynamically adapt to the aspect ratio of the viewport."
     }
   ],
   "SymbolChildUis": [
     {
       "ChildId": "0bfc8cd5-a08c-4acd-93fd-6d460c3974ce"/*GetForegroundColor*/,
       "Position": {
-        "X": -797.00146,
-        "Y": 126.0235
+        "X": -656.6175,
+        "Y": 155.15579
       }
     },
     {
@@ -44,15 +48,15 @@
     {
       "ChildId": "1c0843b2-4b85-4a69-9f3b-3f4ed0165a95"/*GetIntVar*/,
       "Position": {
-        "X": -797.00134,
-        "Y": 172.87396
+        "X": -656.6175,
+        "Y": 190.15579
       }
     },
     {
       "ChildId": "22b80bb4-6130-49d0-a551-adc89ceb9092"/*Layer2d*/,
       "Position": {
-        "X": -558.81177,
-        "Y": 262.3715
+        "X": -516.6175,
+        "Y": 85.15579
       }
     },
     {
@@ -60,20 +64,6 @@
       "Position": {
         "X": -797.00134,
         "Y": 17.921448
-      }
-    },
-    {
-      "ChildId": "84c7b008-c974-4e76-802d-08993498652b"/*DrawScreenQuad*/,
-      "Position": {
-        "X": -564.5,
-        "Y": 428.77344
-      }
-    },
-    {
-      "ChildId": "c87daeb2-c7ce-4de2-898f-aef330fc16c9"/*Switch*/,
-      "Position": {
-        "X": -364.34915,
-        "Y": 93.75607
       }
     },
     {

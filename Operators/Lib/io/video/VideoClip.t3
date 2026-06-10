@@ -1,11 +1,15 @@
 {
   "FormatVersion": 2,
   "TixlVersion": "4.2.0.2",
-  "Id": "04c1a6dc-3042-48a8-81d2-0a5a162016dc"/*PlayVideoClip*/,
+  "Id": "04c1a6dc-3042-48a8-81d2-0a5a162016dc"/*VideoClip*/,
   "Inputs": [
     {
       "Id": "10c311ee-6426-463a-a1fe-cfac6de04224"/*Command*/,
       "DefaultValue": null
+    },
+    {
+      "Id": "27f02af3-06f3-4cb2-8731-2e8777634275"/*BlendMode*/,
+      "DefaultValue": 0
     },
     {
       "Id": "28f27625-37fe-409a-b6c1-d4eabf6c1eb8"/*Volume*/,
@@ -18,6 +22,19 @@
     {
       "Id": "5eb10090-ae6a-4ae7-9fbd-5bd9ffd13b1b"/*ResyncThreshold*/,
       "DefaultValue": 1.0
+    },
+    {
+      "Id": "7fb1d490-6c9b-4380-b88c-800d44c16475"/*Color*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 1.0,
+        "Z": 1.0,
+        "W": 1.0
+      }
+    },
+    {
+      "Id": "f7e8f5f1-3333-409f-92da-573b1f32c0d6"/*OptimizeFor*/,
+      "DefaultValue": 0
     }
   ],
   "Children": [],

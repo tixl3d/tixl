@@ -1,15 +1,22 @@
 {
   "FormatVersion": 2,
   "TixlVersion": "4.2.0.2",
-  "Id": "04c1a6dc-3042-48a8-81d2-0a5a162016dc"/*PlayVideoClip*/,
+  "Id": "04c1a6dc-3042-48a8-81d2-0a5a162016dc"/*VideoClip*/,
   "Description": "Implementation to load and play video files with similar options like a [TimeClip]\n\nAlso see [PlayVideo] and [PlayVideoExample] for an operator with more options",
-  "SymbolTags": "1024",
+  "SymbolTags": "1",
   "InputUis": [
     {
       "InputId": "10c311ee-6426-463a-a1fe-cfac6de04224"/*Command*/,
       "Position": {
         "X": -200.0,
         "Y": 0.0
+      }
+    },
+    {
+      "InputId": "27f02af3-06f3-4cb2-8731-2e8777634275"/*BlendMode*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 285.0
       }
     },
     {
@@ -38,6 +45,23 @@
         "Y": 135.0
       },
       "Description": "Threshold for timing resyncing"
+    },
+    {
+      "InputId": "7fb1d490-6c9b-4380-b88c-800d44c16475"/*Color*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 210.0
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true
+    },
+    {
+      "InputId": "f7e8f5f1-3333-409f-92da-573b1f32c0d6"/*OptimizeFor*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 360.0
+      }
     }
   ],
   "SymbolChildUis": [],
