@@ -119,20 +119,20 @@ Wire the clip into `SimulateIoData` and play through the clip.
   inside a deleted time range produce dispatches on the bus.
 - Remaining events fire at the same source positions as before the edit.
 
-## Step: Inline DataClip edit pane — toggle reveals the pane below the timeline
+## Step: Inline DataClip edit pane — context menu reveals the pane below the timeline
 
 **Action:**
-Click the **AudioFile** icon button on the timeline toolbar (the one next to the record
-button). With **no** DataClip selected, look at the timeline area. Then click a DataClip
-in the clip area to select it.
+Right-click on the empty clip area with **no** DataClip selected and inspect the context
+menu. Then select a DataClip in the clip area, right-click it, and choose
+**Show Clip Data**.
 
 **Expected:**
-- With the toggle on and nothing selected, the timeline area looks unchanged — no pane
-  is reserved (the dope sheet still gets the full height).
-- The moment a DataClip becomes selected, a bottom pane appears with the clip's channel
-  list and event markers. Selecting an audio clip (or any non-DataClip) makes the pane
-  disappear again.
-- Clicking the toolbar button again toggles the pane off regardless of selection.
+- With no DataClip in the selection, the context menu has no **Show Clip Data** entry.
+- With a DataClip selected, the entry appears; choosing it opens a bottom pane with the
+  clip's channel list and event markers. Selecting an audio clip (or any non-DataClip)
+  makes the pane disappear again.
+- Re-opening the context menu while the pane is visible shows a checkmark on
+  **Show Clip Data**; choosing it again hides the pane.
 
 ## Step: Inline pane — channel rows align with the timeline ruler above
 
@@ -158,7 +158,8 @@ the pane, drag up to grow it.
   pane and the dope sheet area complementarily.
 - The pane height clamps so neither the dope sheet nor the pane can be squashed below
   ~80 px.
-- Closing and re-opening the pane (toolbar toggle) restores the dragged height.
+- Closing and re-opening the pane (close button, then context menu **Show Clip Data**)
+  restores the dragged height.
 
 ## Step: Mouse wheel zooms the timeline X from inside the pane
 
@@ -186,8 +187,8 @@ Inside the pane, press and hold the right mouse button. Drag in any direction.
 
 **Action:**
 Open the pane with a clip that has enough channels to require vertical scrolling. Scroll
-down inside the pane. Close the pane (toolbar toggle or close button). Re-open it with
-the same clip selected.
+down inside the pane. Close the pane (close button or context menu **Show Clip Data**).
+Re-open it with the same clip selected.
 
 **Expected:**
 - The pane reopens scrolled back to the top (first channel visible), not at the
@@ -204,9 +205,10 @@ pane being open.
 
 **Expected:**
 - The pane disappears regardless of which mode (clip-editing OR curve-editing) drove it
-  open; the AudioFile toggle on the toolbar visually returns to its off state.
+  open, and the Show-Clip-Data flag is cleared: selecting another DataClip does **not**
+  bring the pane back until **Show Clip Data** is chosen from the context menu again.
 - If curve editing was also active, that's cleared too — the pane stays hidden until
-  the user explicitly toggles either gate back on.
+  the user explicitly re-enables either gate.
 - The close icon is not occluded by the vertical scrollbar (when the channel list
   overflows and the scrollbar appears, the icon shifts left to remain clickable).
 

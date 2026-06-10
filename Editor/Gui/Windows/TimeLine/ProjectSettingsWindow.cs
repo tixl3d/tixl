@@ -258,7 +258,7 @@ internal sealed class ProjectSettingsWindow : Window
                                                "Subscribe to MIDI events for this recording.",
                                                defaults.CaptureMidi);
             modified |= FormInputs.AddCheckBox("OSC",
-                                               ref recording.CaptureOsc,
+                                               ref recording.CaptureOsc, 
                                                "Subscribe to OSC events on the configured DefaultOscPort for this recording.",
                                                defaults.CaptureOsc);
             FormInputs.Unindent(20 * T3Ui.UiScaleFactor);

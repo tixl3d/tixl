@@ -63,45 +63,9 @@ internal static class TimelineToolbar
             components.GraphImageBackground.DrawToolbarItems();
 
             DrawRecordButton(components);
-            DrawInlineDataClipEditToggle(components);
             ImGui.PopStyleVar();
         }
         ImGui.EndChild();
-    }
-
-    /// <summary>
-    /// Toggle for the inline DataClip edit pane on the timeline (below the dope sheet).
-    /// Uses <see cref="Icon.FileAudio"/> as the placeholder glyph — a dedicated icon can
-    /// land later once the surface stabilises. Activation gates on
-    /// <see cref="TimeLineCanvas.InlineDataClipEditEnabled"/>; the pane itself decides
-    /// what to show based on the current selection.
-    /// </summary>
-    private static void DrawInlineDataClipEditToggle(ProjectView components)
-    {
-        var timeLineCanvas = components.TimeLineCanvas;
-        if (timeLineCanvas == null)
-            return;
-
-        ImGui.SameLine(0, 6 * T3Ui.UiScaleFactor);
-
-        var isOn = timeLineCanvas.InlineDataClipEditEnabled;
-        var state = isOn ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Normal;
-        var clicked = CustomComponents.IconButton(Icon.FileAudio, TimeControls.ControlSize, state);
-
-        if (ImGui.IsItemHovered())
-        {
-            ImGui.BeginTooltip();
-            ImGui.TextUnformatted(isOn
-                                      ? "Hide DataClip editor pane"
-                                      : "Show DataClip editor pane");
-            ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-            ImGui.TextUnformatted("Select a DataClip on the timeline to edit it inline below.");
-            ImGui.PopStyleColor();
-            ImGui.EndTooltip();
-        }
-
-        if (clicked)
-            timeLineCanvas.InlineDataClipEditEnabled = !isOn;
     }
 
     /// <summary>

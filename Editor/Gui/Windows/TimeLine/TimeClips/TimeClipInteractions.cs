@@ -130,6 +130,16 @@ internal sealed class TimeClipInteractions
                 SplitClipsAtTime(compositionOp);
             }
 
+            // Only offered when the selection includes a DataClip op - the inline pane has nothing to show otherwise.
+            if (InlineDataClipArea.HasSelectedDataClipInstance(_context.TimeCanvas, compositionOp))
+            {
+                var showClipData = _context.TimeCanvas.InlineDataClipEditEnabled;
+                if (ImGui.MenuItem("Show Clip Data", null, showClipData))
+                {
+                    _context.TimeCanvas.InlineDataClipEditEnabled = !showClipData;
+                }
+            }
+
             ImGui.Separator();
 
             ImGui.EndPopup();
