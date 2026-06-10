@@ -195,6 +195,13 @@ internal sealed class SearchDialog : ModalDialog
                 ImGui.SameLine();
 
                 ImGui.TextUnformatted(instance.Symbol.Name);
+
+                if (instance.SymbolChild.HasCustomName)
+                {
+                    ImGui.SameLine(0, 10);
+                    CustomComponents.StylizedText($"\"{instance.SymbolChild.Name}\"", Fonts.FontNormal, UiColors.Gray);
+                }
+
                 ImGui.SameLine(0, 10);
 
                 CustomComponents.StylizedText(readablePath, Fonts.FontNormal, UiColors.Gray.Fade(0.5f));
@@ -319,7 +326,9 @@ internal sealed class SearchDialog : ModalDialog
 
         foreach (var child in composition.Children.Values)
         {
-            if (child.Symbol.Name.Contains(_searchString, StringComparison.InvariantCultureIgnoreCase))
+            var symbolChild = child.SymbolChild;
+            if (child.Symbol.Name.Contains(_searchString, StringComparison.InvariantCultureIgnoreCase)
+                || (symbolChild.HasCustomName && symbolChild.Name.Contains(_searchString, StringComparison.InvariantCultureIgnoreCase)))
             {
                 instanceCallback(child);
             }
