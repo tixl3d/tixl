@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "2fcb6afc-2d82-47a5-a6dd-39c85348b8c4"/*SelectPointsExample*/,
   "Description": "Illustrates how to combine [GridGPoints] with [SelectPoints].\n",
   "InputUis": [],
@@ -6,50 +8,50 @@
     {
       "ChildId": "129c3c72-080f-48c0-af3f-2bb31928bbf6"/*_GridPoints_Old*/,
       "Position": {
-        "X": 4.4589844,
-        "Y": 0.0
+        "X": 754.45905,
+        "Y": -244.8274
       }
     },
     {
       "ChildId": "3a6c8ebc-5aa6-4ba7-aec6-ad342bd03d3b"/*OscillateVec3*/,
       "Position": {
-        "X": -169.21396,
-        "Y": 37.805756
+        "X": 614.459,
+        "Y": -209.8274
       }
     },
     {
       "ChildId": "3f7f85ee-0208-444f-a064-eca32283bac1"/*TransformPoints*/,
       "Position": {
-        "X": 304.45898,
-        "Y": 0.0
+        "X": 754.45905,
+        "Y": -139.8274
       }
     },
     {
       "ChildId": "41ead94a-a6fb-4029-bc22-89b512d196cd"/*DrawPoints*/,
       "Position": {
-        "X": 454.45898,
-        "Y": 0.6491699
+        "X": 754.459,
+        "Y": -69.82739
       }
     },
     {
       "ChildId": "5188e433-1b28-4022-b8bd-c5d07129e859"/*OscillateVec3*/,
       "Position": {
-        "X": 154.45898,
-        "Y": 56.0
+        "X": 614.459,
+        "Y": -104.82739
       }
     },
     {
       "ChildId": "61e4062c-7410-4628-a634-4b1560dddea4"/*SelectPoints*/,
       "Position": {
-        "X": 154.45898,
-        "Y": 0.0
+        "X": 754.45905,
+        "Y": -174.8274
       }
     },
     {
       "ChildId": "eb454251-6595-48ce-918a-64dc67fff674"/*SetFog*/,
       "Position": {
-        "X": 604.459,
-        "Y": 0.6491699
+        "X": 754.459,
+        "Y": -34.827393
       }
     },
     {
@@ -64,8 +66,8 @@
     {
       "OutputId": "015dd888-70a7-412c-a2da-daada267c1ae"/*ColorBuffer*/,
       "Position": {
-        "X": 904.459,
-        "Y": 0.17260742
+        "X": 754.459,
+        "Y": 35.172607
       }
     }
   ]

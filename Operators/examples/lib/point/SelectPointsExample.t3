@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "2fcb6afc-2d82-47a5-a6dd-39c85348b8c4"/*SelectPointsExample*/,
   "Inputs": [],
   "Children": [
@@ -160,6 +162,7 @@
     },
     {
       "Id": "eb454251-6595-48ce-918a-64dc67fff674"/*SetFog*/,
+      "IsBypassed": true,
       "SymbolId": "74cbfce0-f8b8-46a1-b5d6-38477d4eec99",
       "InputValues": [
         {
