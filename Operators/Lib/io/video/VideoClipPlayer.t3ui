@@ -22,7 +22,7 @@
       "Description": "When enabled will scan the current composition for [VideoClips] and plays them back without the need for actually connecting them."
     },
     {
-      "InputId": "f2ca9226-b302-4a77-8c8b-1b1db6022eee"/*ScaleMethod*/,
+      "InputId": "f2ca9226-b302-4a77-8c8b-1b1db6022eee"/*ScaleMode*/,
       "Position": {
         "X": -656.6175,
         "Y": 120.15579

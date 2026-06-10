@@ -12,7 +12,7 @@
       "DefaultValue": false
     },
     {
-      "Id": "f2ca9226-b302-4a77-8c8b-1b1db6022eee"/*ScaleMethod*/,
+      "Id": "f2ca9226-b302-4a77-8c8b-1b1db6022eee"/*ScaleMode*/,
       "DefaultValue": 0
     }
   ],
