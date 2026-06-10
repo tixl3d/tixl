@@ -507,7 +507,7 @@ internal sealed partial class MagItemMovement
                                                                                               pair.Ca.SourceOutput.Id,
                                                                                               pair.Cb.TargetItem.Id,
                                                                                               pair.Cb.TargetInput.Id),
-                                                                        0));
+                                                                        pair.Cb.MultiInputIndex));
         return true;
     }
 
@@ -1188,7 +1188,7 @@ internal sealed partial class MagItemMovement
 
         context.MacroCommand.AddAndExecCommand(new DeleteConnectionCommand(context.CompositionInstance.Symbol,
                                                                            connection.AsSymbolConnection(),
-                                                                           0));
+                                                                           connection.MultiInputIndex));
         context.MacroCommand.AddAndExecCommand(new AddConnectionCommand(context.CompositionInstance.Symbol,
                                                                         new Symbol.Connection(connection.SourceParentOrChildId,
                                                                                               connection.SourceOutput.Id,
@@ -1201,7 +1201,7 @@ internal sealed partial class MagItemMovement
                                                                                               spliceLink.OutputId,
                                                                                               connection.TargetParentOrChildId,
                                                                                               connection.TargetInput.Id
-                                                                                             ), 0));
+                                                                                             ), connection.MultiInputIndex));
 
         // Move items
         if (spliceLink.Direction == MagGraphItem.Directions.Vertical)
