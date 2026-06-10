@@ -52,6 +52,12 @@ internal sealed class MarkdownView
         /// expecting each `\n` to start a new line.
         /// </summary>
         public bool HardLineBreaks { get; set; }
+
+        /// <summary>
+        /// Render body text with <see cref="UiColors.TextMuted"/> instead of
+        /// <see cref="UiColors.Text"/> — for secondary content like parameter descriptions.
+        /// </summary>
+        public bool MutedBodyText { get; set; }
     }
 
     public MarkdownView(in Options options)
@@ -254,7 +260,7 @@ internal sealed class MarkdownView
                       LineKind.H1 => (Fonts.FontLarge, UiColors.TextMuted),
                       LineKind.H2 => (Fonts.FontBold, UiColors.Text),
                       LineKind.H3 => (Fonts.FontBold, UiColors.ForegroundFull.Fade(0.8f)),
-                      _           => (BodyFont, UiColors.Text),
+                      _           => (BodyFont, _options.MutedBodyText ? UiColors.TextMuted : UiColors.Text),
                   };
     }
 

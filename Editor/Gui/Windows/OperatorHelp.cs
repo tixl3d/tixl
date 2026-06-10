@@ -177,8 +177,9 @@ internal sealed class OperatorHelp
             ImGui.PopStyleColor();
 
             var parameterColorWidth = 150f * T3Ui.UiScaleFactor;
-            foreach (var p in _parametersWithDescription)
+            for (var parameterIndex = 0; parameterIndex < _parametersWithDescription.Count; parameterIndex++)
             {
+                var p = _parametersWithDescription[parameterIndex];
                 ImGui.PushStyleColor(ImGuiCol.Text, UiColors.Text.Rgba);
 
                 var parameterNameWidth = ImGui.CalcTextSize(p.InputDefinition.Name).X;
@@ -186,10 +187,8 @@ internal sealed class OperatorHelp
                 ImGui.TextUnformatted(p.InputDefinition.Name);
                 ImGui.PopStyleColor();
 
-                ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
                 ImGui.SameLine(parameterColorWidth + 10);
-                ImGui.TextWrapped(p.Description);
-                ImGui.PopStyleColor();
+                GetParameterDescriptionView(parameterIndex).Draw(p.Description, onOperatorRef: HandleOperatorRefClicked);
             }
         }
 
@@ -269,28 +268,37 @@ internal sealed class OperatorHelp
                 }
             }
 
-            // Cache referenced symbols
-            if (!string.IsNullOrEmpty(symbolUi.Description))
+            // Cache referenced symbols from the description and all parameter descriptions
+            CollectReferencedSymbols(symbolUi, symbolUi.Description);
+            foreach (var inputUi in symbolUi.InputUis.Values)
             {
-                foreach (Match match in _itemRegex.Matches(symbolUi.Description))
+                CollectReferencedSymbols(symbolUi, inputUi.Description);
+            }
+        }
+
+        private static void CollectReferencedSymbols(SymbolUi symbolUi, string? text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return;
+
+            foreach (Match match in _itemRegex.Matches(text))
+            {
+                var referencedName = match.Groups[1].Value;
+
+                if (referencedName == symbolUi.Symbol.Name || _cachedReferencedSymbols.Any(x => x.Name == referencedName))
+                    continue;
+
+                foreach (var symbol in EditorSymbolPackage.AllSymbols)
                 {
-                    var referencedName = match.Groups[1].Value;
-
-                    if (referencedName == symbolUi.Symbol.Name || _cachedReferencedSymbols.Any(x => x.Name == referencedName))
-                        continue;
-
-                    foreach (var symbol in EditorSymbolPackage.AllSymbols)
+                    if (symbol.Name == referencedName)
                     {
-                        if (symbol.Name == referencedName)
+                        var package = (EditorSymbolPackage)symbol.SymbolPackage;
+                        if (package.TryGetSymbolUi(symbol.Id, out var exampleSymbolUi))
                         {
-                            var package = (EditorSymbolPackage)symbol.SymbolPackage;
-                            if (package.TryGetSymbolUi(symbol.Id, out var exampleSymbolUi))
-                            {
-                                _cachedReferencedSymbols.Add((exampleSymbolUi, referencedName));
-                            }
-
-                            break;
+                            _cachedReferencedSymbols.Add((exampleSymbolUi, referencedName));
                         }
+
+                        break;
                     }
                 }
             }
@@ -369,6 +377,27 @@ internal sealed class OperatorHelp
     private static readonly List<IInputUi> _parametersWithDescription = new(10);
 
     private static readonly MarkdownView _descriptionView = new(new MarkdownView.Options());
+
+    /// <summary>
+    /// One view per parameter row — MarkdownView caches a single document, so sharing one
+    /// instance across parameters would reparse every description every frame.
+    /// Most descriptions were authored as plain text, so newlines stay hard line breaks.
+    /// </summary>
+    private static readonly List<MarkdownView> _parameterDescriptionViews = new(10);
+
+    private static MarkdownView GetParameterDescriptionView(int parameterIndex)
+    {
+        while (_parameterDescriptionViews.Count <= parameterIndex)
+        {
+            _parameterDescriptionViews.Add(new MarkdownView(new MarkdownView.Options
+                                                                {
+                                                                    HardLineBreaks = true,
+                                                                    MutedBodyText = true,
+                                                                }));
+        }
+
+        return _parameterDescriptionViews[parameterIndex];
+    }
 
     private static void HandleOperatorRefClicked(string opName)
     {
