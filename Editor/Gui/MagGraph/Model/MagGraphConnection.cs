@@ -63,19 +63,20 @@ internal sealed class MagGraphConnection
         Unknown,
     }
 
+    /** Symbol connections use Guid.Empty for the composition's own inputs and outputs */
+    public Guid SourceParentOrChildId =>
+        SourceItem.Variant == MagGraphItem.Variants.Input ? Guid.Empty : SourceItem.Id;
+
+    /** Symbol connections use Guid.Empty for the composition's own inputs and outputs */
+    public Guid TargetParentOrChildId =>
+        TargetItem.Variant == MagGraphItem.Variants.Output ? Guid.Empty : TargetItem.Id;
+
     public Symbol.Connection AsSymbolConnection()
     {
-        var sourceParentOfSymbolChildId =
-            SourceItem.Variant == MagGraphItem.Variants.Input ? Guid.Empty : SourceItem.Id;
-            
-        var targetParentOfSymbolChildId =
-            TargetItem.Variant == MagGraphItem.Variants.Output ? Guid.Empty : TargetItem.Id;
-        
-        
         return new Symbol.Connection(
-                                     sourceParentOfSymbolChildId,
+                                     SourceParentOrChildId,
                               SourceOutput.Id,
-                              targetParentOfSymbolChildId,
+                              TargetParentOrChildId,
                               TargetInput.Id
                              );
     }

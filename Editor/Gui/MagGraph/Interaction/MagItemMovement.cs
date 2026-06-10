@@ -1190,7 +1190,7 @@ internal sealed partial class MagItemMovement
                                                                            connection.AsSymbolConnection(),
                                                                            0));
         context.MacroCommand.AddAndExecCommand(new AddConnectionCommand(context.CompositionInstance.Symbol,
-                                                                        new Symbol.Connection(connection.SourceItem.Id,
+                                                                        new Symbol.Connection(connection.SourceParentOrChildId,
                                                                                               connection.SourceOutput.Id,
                                                                                               spliceLink.InputItemId,
                                                                                               spliceLink.InputId
@@ -1199,7 +1199,7 @@ internal sealed partial class MagItemMovement
         context.MacroCommand.AddAndExecCommand(new AddConnectionCommand(context.CompositionInstance.Symbol,
                                                                         new Symbol.Connection(spliceLink.OutputItemId,
                                                                                               spliceLink.OutputId,
-                                                                                              connection.TargetItem.Id,
+                                                                                              connection.TargetParentOrChildId,
                                                                                               connection.TargetInput.Id
                                                                                              ), 0));
 

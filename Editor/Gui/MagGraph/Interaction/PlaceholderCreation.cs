@@ -36,7 +36,10 @@ internal sealed class PlaceholderCreation
         var firstHover = context.ConnectionHovering.ConnectionHoversWhenClicked[0];
         var hoverConnection = firstHover.Connection;
 
-        var outputLineIndex = hoverConnection.SourceItem.Instance?.Outputs.IndexOf(hoverConnection.SourceOutput) ?? 0;
+        // For composition inputs the source slot is the parent's input, not in Outputs - fall back to line 0
+        var outputLineIndex = hoverConnection.SourceItem.Variant == MagGraphItem.Variants.Input
+                                  ? 0
+                                  : Math.Max(0, hoverConnection.SourceItem.Instance?.Outputs.IndexOf(hoverConnection.SourceOutput) ?? 0);
 
         var styleToUse = MagGraphConnection.ConnectionStyles.Unknown;
         if (hoverConnection.Style is MagGraphConnection.ConnectionStyles.BottomToTop or MagGraphConnection.ConnectionStyles.RightToLeft)
@@ -405,7 +408,7 @@ internal sealed class PlaceholderCreation
                                .AddAndExecCommand(new AddConnectionCommand(context.CompositionInstance.Symbol,
                                                                            new Symbol.Connection(newInstance.SymbolChildId,
                                                                                                  newItemOutput.Id,
-                                                                                                 mc.TargetItem.Id,
+                                                                                                 mc.TargetParentOrChildId,
                                                                                                  mc.TargetInput.Id
                                                                                                 ),
                                                                            mc.MultiInputIndex));
@@ -545,7 +548,7 @@ internal sealed class PlaceholderCreation
                         var matchingInput = newInstance.Inputs.FirstOrDefault(i => i.ValueType == tcSourceOutput.ValueType);
                         if (matchingInput != null)
                         {
-                            var connectionToAdd = new Symbol.Connection(tc.SourceItem.Id,
+                            var connectionToAdd = new Symbol.Connection(tc.SourceParentOrChildId,
                                                                         tcSourceOutput.Id,
                                                                         newInstance.SymbolChildId,
                                                                         matchingInput.Id);
@@ -560,7 +563,7 @@ internal sealed class PlaceholderCreation
                     {
                         var connectionToAdd = new Symbol.Connection(newInstance.SymbolChildId,
                                                                     primaryOutput.Id,
-                                                                    tc.TargetItem.Id,
+                                                                    tc.TargetParentOrChildId,
                                                                     tc.TargetInput.Id);
                         context.MacroCommand
                                .AddAndExecCommand(new AddConnectionCommand(context.CompositionInstance.Symbol,
