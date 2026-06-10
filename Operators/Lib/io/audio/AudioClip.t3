@@ -1,24 +1,27 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "f0008b50-091d-4e9f-91eb-baa212acfa20"/*AudioClip*/,
   "Inputs": [
     {
-      "Id": "97948c5e-10d5-4e18-824e-aea17eb4eb2a"/*Command*/,
-      "DefaultValue": null
+      "Id": "06b8b927-ec47-4392-bb67-b9a140cc852b"/*Volume*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "260b61ae-7605-4f06-a3fb-793ae5a23646"/*AutoPlay*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "4ad8fba6-6e13-4698-b3c6-bd5c808724ab"/*Mute*/,
+      "DefaultValue": false
     },
     {
       "Id": "625951af-5f99-4171-b5b0-c97413121f56"/*Path*/,
       "DefaultValue": ""
     },
     {
-      "Id": "06b8b927-ec47-4392-bb67-b9a140cc852b"/*Volume*/,
-      "DefaultValue": 1.0
-    },
-    {
-      "Id": "4ad8fba6-6e13-4698-b3c6-bd5c808724ab"/*Mute*/
-    },
-    {
-      "Id": "260b61ae-7605-4f06-a3fb-793ae5a23646"/*AutoPlay*/,
-      "DefaultValue": true
+      "Id": "97948c5e-10d5-4e18-824e-aea17eb4eb2a"/*Command*/,
+      "DefaultValue": null
     }
   ],
   "Children": [],
