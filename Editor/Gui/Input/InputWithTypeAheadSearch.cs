@@ -184,8 +184,12 @@ internal static class InputWithTypeAheadSearch
                     }
 
                     ImGui.PushStyleColor(ImGuiCol.Text, UiColors.Text.Rgba);
-                    
+
+                    // Seed the ID from the index: empty items would otherwise hash to an
+                    // empty ID at the window root, which newer ImGui versions assert on.
+                    ImGui.PushID(index);
                     ImGui.Selectable( item , isSelected, ImGuiSelectableFlags.None);
+                    ImGui.PopID();
                     var isItemHovered = new ImRect(ImGui.GetItemRectMin(), ImGui.GetItemRectMax()).Contains( ImGui.GetMousePos());
                     isSelected = item == searchString;
                         
