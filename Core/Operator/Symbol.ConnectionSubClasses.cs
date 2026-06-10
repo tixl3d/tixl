@@ -123,11 +123,15 @@ public sealed partial class Symbol
 
         public sealed override bool Equals(object other)
         {
-            return GetHashCode() == other?.GetHashCode();
+            return other is Connection c
+                   && c.SourceParentOrChildId == SourceParentOrChildId
+                   && c.SourceSlotId == SourceSlotId
+                   && c.TargetParentOrChildId == TargetParentOrChildId
+                   && c.TargetSlotId == TargetSlotId;
         }
 
-        public static bool operator ==(Connection a, Connection b) => a?.GetHashCode() == b?.GetHashCode();
-        public static bool operator !=(Connection a, Connection b) => a?.GetHashCode() != b?.GetHashCode();
+        public static bool operator ==(Connection a, Connection b) => a is null ? b is null : a.Equals(b);
+        public static bool operator !=(Connection a, Connection b) => !(a == b);
 
         public bool IsSourceOf(Guid sourceParentOrChildId, Guid sourceSlotId)
         {

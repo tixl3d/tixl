@@ -209,11 +209,11 @@ public sealed partial class Symbol : IDisposable, IResource
             }
             else
             {
-                // Use the target index to find the existing successor among the connections
+                // Use the target index to find the existing successor among the connections.
+                // Compare by reference: duplicate connections from the same source are value-equal,
+                // so == would match the first duplicate and insert at the wrong position.
                 var existingConnection = connectionsAtInput[multiInputIndex];
-
-                // ReSharper disable once PossibleUnintendedReferenceComparison
-                var insertIndex = Connections.FindIndex(c => c == existingConnection);
+                var insertIndex = Connections.FindIndex(c => ReferenceEquals(c, existingConnection));
 
                 Connections.Insert(insertIndex, connection);
             }
@@ -255,12 +255,13 @@ public sealed partial class Symbol : IDisposable, IResource
 
         var existingConnection = connectionsAtInput[multiInputIndex];
 
-        // ReSharper disable once PossibleUnintendedReferenceComparison
+        // Compare by reference: duplicate connections from the same source are value-equal,
+        // so == would remove the first duplicate and reorder the multi-input.
         bool removed = false;
         var connectionCount = connections.Count;
         for (var index = 0; index < connectionCount; index++)
         {
-            if (connections[index] == existingConnection)
+            if (ReferenceEquals(connections[index], existingConnection))
             {
                 connections.RemoveAt(index);
                 removed = true;
