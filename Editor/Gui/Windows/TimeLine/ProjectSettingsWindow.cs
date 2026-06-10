@@ -251,7 +251,8 @@ internal sealed class ProjectSettingsWindow : Window
         // would just clutter the panel.
         if (recording.CaptureIo)
         {
-            ImGui.Indent(20 * T3Ui.UiScaleFactor);
+            FormInputs.AddVerticalSpace();
+            FormInputs.Indent(20 * T3Ui.UiScaleFactor);
             modified |= FormInputs.AddCheckBox("MIDI",
                                                ref recording.CaptureMidi,
                                                "Subscribe to MIDI events for this recording.",
@@ -260,8 +261,8 @@ internal sealed class ProjectSettingsWindow : Window
                                                ref recording.CaptureOsc,
                                                "Subscribe to OSC events on the configured DefaultOscPort for this recording.",
                                                defaults.CaptureOsc);
-            ImGui.Unindent(20 * T3Ui.UiScaleFactor);
-
+            FormInputs.Unindent(20 * T3Ui.UiScaleFactor);
+            
             if (!recording.CaptureMidi && !recording.CaptureOsc)
             {
                 CustomComponents.HelpText("Both MIDI and OSC are off — Capture IO has nothing to record.");

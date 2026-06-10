@@ -819,6 +819,16 @@ internal static class FormInputs
     {
         _paramIndent = newIndent;
     }
+    
+    public static void Indent(float delta)
+    {
+        _paramIndent += delta;
+    }
+    
+    public static void Unindent(float delta)
+    {
+        _paramIndent -= delta;
+    }
 
     public static void SetIndentToLeft()
     {
