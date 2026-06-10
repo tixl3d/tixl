@@ -148,6 +148,20 @@ internal static class Modifications
         {
             var collapsableConnectionPairs= MagItemMovement.FindLinkedVerticalCollapsableConnectionPairs(obsoleteConnections.ToList());
 
+            // The bridge index must be computed before the deletion below removes
+            // other connections into the same multi-input and shifts the positions.
+            var deletedChildIds = new HashSet<Guid>();
+            foreach (var childUi in deletedChildUis)
+            {
+                deletedChildIds.Add(childUi.Id);
+            }
+
+            var bridgeMultiInputIndices = new List<int>(collapsableConnectionPairs.Count);
+            foreach (var pair in collapsableConnectionPairs)
+            {
+                bridgeMultiInputIndices.Add(ComputeMultiInputIndexAfterDeletion(context.CompositionInstance.Symbol, pair.Cb, deletedChildIds));
+            }
+
             // Delete items...
             macroCommand.AddAndExecCommand(new DeleteSymbolChildrenCommand(compositionUi, deletedChildUis));
 
@@ -155,8 +169,9 @@ internal static class Modifications
             var relevantItems = MagItemMovement.CollectSnappedItems(deletedItems);
             var movableItems = new HashSet<MagGraphItem>(relevantItems.Except(deletedItems));
 
-            foreach (var pair in collapsableConnectionPairs)
+            for (var pairIndex = 0; pairIndex < collapsableConnectionPairs.Count; pairIndex++)
             {
+                var pair = collapsableConnectionPairs[pairIndex];
                 var mci = pair.Ca;
                 var mco = pair.Cb;
                 var affectedItems = MagItemMovement.MoveToCollapseVerticalGaps(mci, mco, movableItems, true);
@@ -176,7 +191,74 @@ internal static class Modifications
                                                                                                   mci.SourceOutput.Id,
                                                                                                   mco.TargetItem.Id,
                                                                                                   mco.TargetInput.Id),
-                                                                        0));                            
+                                                                        bridgeMultiInputIndices[pairIndex]));
+            }
+
+            // Removing a connection can also free an input row on a surviving target
+            // (e.g. an extra multi-input line): move snapped items below up to close the gap.
+            var rebridgedConnections = new HashSet<MagGraphConnection>();
+            foreach (var pair in collapsableConnectionPairs)
+            {
+                rebridgedConnections.Add(pair.Ca);
+                rebridgedConnections.Add(pair.Cb);
+            }
+
+            foreach (var obsoleteConnection in obsoleteConnections)
+            {
+                if (rebridgedConnections.Contains(obsoleteConnection))
+                    continue;
+
+                var targetItem = obsoleteConnection.TargetItem;
+                if (targetItem == null || deletedItems.Contains(targetItem))
+                    continue;
+
+                var lines = targetItem.InputLines;
+                var lineIndex = obsoleteConnection.InputLineIndex;
+                if (lineIndex >= lines.Length)
+                    continue;
+
+                var line = lines[lineIndex];
+                var linesForSlot = 0;
+                foreach (var otherLine in lines)
+                {
+                    if (otherLine.Id == line.Id)
+                        linesForSlot++;
+                }
+
+                // The row only disappears for extra multi-input lines and for optional inputs shown while connected
+                var freesInputLine = linesForSlot > 1
+                                     || (targetItem.Variant == MagGraphItem.Variants.Operator
+                                         && line.InputUi is { Relevancy: Relevancy.Optional }
+                                         && lineIndex > 0);
+                if (!freesInputLine)
+                    continue;
+
+                var snappedItems = MagItemMovement.CollectSnappedItems(targetItem);
+                var yThreshold = targetItem.PosOnCanvas.Y + MagGraphItem.GridSize.Y * (lineIndex - 0.5f);
+                var itemsBelow = new List<ISelectableCanvasObject>();
+                foreach (var snappedItem in snappedItems)
+                {
+                    if (snappedItem != targetItem
+                        && !deletedItems.Contains(snappedItem)
+                        && snappedItem.PosOnCanvas.Y > yThreshold)
+                    {
+                        itemsBelow.Add(snappedItem);
+                    }
+                }
+
+                if (itemsBelow.Count == 0)
+                    continue;
+
+                var moveUpCommand = new ModifyCanvasElementsCommand(context.CompositionInstance.Symbol.Id, itemsBelow, context.Selector);
+                macroCommand.AddExecutedCommandForUndo(moveUpCommand);
+                foreach (var itemBelow in itemsBelow)
+                {
+                    var pos = itemBelow.PosOnCanvas;
+                    pos.Y -= MagGraphItem.GridSize.Y;
+                    itemBelow.PosOnCanvas = pos;
+                }
+
+                moveUpCommand.StoreCurrentValues();
             }
         }
 
@@ -207,4 +289,34 @@ internal static class Modifications
     }
 
     //private record ItemWithChildUi(MagGraphItem Item, SymbolUi.Child UiChild);
+
+    /// <summary>
+    /// Computes the multi-input index a bridging connection should be inserted at once the
+    /// given children are deleted: the number of surviving connections into the same target
+    /// slot that precede the replaced connection.
+    /// </summary>
+    private static int ComputeMultiInputIndexAfterDeletion(Symbol symbol, MagGraphConnection replacedConnection, HashSet<Guid> deletedChildIds)
+    {
+        var survivingIndex = 0;
+        var slotConnectionIndex = 0;
+        foreach (var connection in symbol.Connections)
+        {
+            if (connection.TargetParentOrChildId != replacedConnection.TargetItem.Id
+                || connection.TargetSlotId != replacedConnection.TargetInput.Id)
+                continue;
+
+            if (slotConnectionIndex == replacedConnection.MultiInputIndex)
+                break;
+
+            slotConnectionIndex++;
+
+            if (!deletedChildIds.Contains(connection.SourceParentOrChildId)
+                && !deletedChildIds.Contains(connection.TargetParentOrChildId))
+            {
+                survivingIndex++;
+            }
+        }
+
+        return survivingIndex;
+    }
 }
