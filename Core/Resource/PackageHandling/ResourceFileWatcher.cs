@@ -21,7 +21,11 @@ public sealed class ResourceFileWatcher : IDisposable
     public ResourceFileWatcher(string watchedFolder)
     {
         Directory.CreateDirectory(watchedFolder);
-        _watchedDirectory = watchedFolder; 
+        _watchedDirectory = watchedFolder;
+
+        // Watch unconditionally (not only while file hooks exist): external changes to the
+        // assets folder must keep the AssetRegistry and asset library in sync.
+        _fsWatcher = CreateFsWatcher();
         ResourcePackageManager.RegisterWatcher(this);
     }
 
@@ -53,21 +57,6 @@ public sealed class ResourceFileWatcher : IDisposable
         }
 
         existingActions.Add(action);
-
-        if (_fsWatcher != null) return;
-
-        _fsWatcher = new FileSystemWatcher(_watchedDirectory)
-                         {
-                             IncludeSubdirectories = true,
-                             EnableRaisingEvents = true,
-                             NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName
-                         };
-        
-        _fsWatcher.Changed += OnFileChanged;
-        _fsWatcher.Renamed += OnFileChanged;
-        _fsWatcher.Created += OnFileCreated;
-        _fsWatcher.Deleted += OnFileDeleted;
-        _fsWatcher.Error += OnError;
     }
 
     private bool FilepathStartsWith(string path, string start)
@@ -101,11 +90,6 @@ public sealed class ResourceFileWatcher : IDisposable
             return;
 
         _fileChangeActions.Remove(absolutePathFs, out _);
-
-        if (_fileChangeActions.Count == 0)
-        {
-            DisposeFileWatcher(ref _fsWatcher);
-        }
     }
 
     internal void RaiseQueuedFileChanges()
@@ -199,8 +183,9 @@ public sealed class ResourceFileWatcher : IDisposable
     {
         if(CoreSettings.Config.LogFileEvents)
             Log.Debug($"FileEvent(create): {e.FullPath}");
-        
-        FileCreated?.Invoke(this, e.FullPath);
+
+        // FileCreated is raised from the debounced queue in RaiseQueuedFileChanges,
+        // on the main thread and with IgnoredFiles filtered out.
         OnFileChanged(this, e);
     }
 
@@ -230,13 +215,26 @@ public sealed class ResourceFileWatcher : IDisposable
     {
         if(CoreSettings.Config.LogFileEvents)
             Log.Error($"FileEvent(error): {e.GetException()}");
-        
-        _fsWatcher?.Dispose();
-        _fsWatcher = new FileSystemWatcher(_watchedDirectory)
-                         {
-                             IncludeSubdirectories = true,
-                             EnableRaisingEvents = true
-                         };
+
+        DisposeFileWatcher(ref _fsWatcher);
+        _fsWatcher = CreateFsWatcher();
+    }
+
+    private FileSystemWatcher CreateFsWatcher()
+    {
+        var fsWatcher = new FileSystemWatcher(_watchedDirectory)
+                            {
+                                IncludeSubdirectories = true,
+                                EnableRaisingEvents = true,
+                                NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName
+                            };
+
+        fsWatcher.Changed += OnFileChanged;
+        fsWatcher.Renamed += OnFileChanged;
+        fsWatcher.Created += OnFileCreated;
+        fsWatcher.Deleted += OnFileDeleted;
+        fsWatcher.Error += OnError;
+        return fsWatcher;
     }
 
     private void OnFileDeleted(object sender, FileSystemEventArgs e)
