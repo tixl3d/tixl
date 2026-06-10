@@ -626,29 +626,38 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
     /// </summary>
     private static void CleanUpStaleShadowCopies()
     {
-        var rootFolder = ShadowCopyRootFolder;
-        if (!Directory.Exists(rootFolder))
-            return;
-
-        var currentProcessId = Environment.ProcessId;
-        foreach (var processFolder in Directory.EnumerateDirectories(rootFolder))
+        // Runs in the static constructor: any escaping exception would poison the type initializer
+        // and make every project fail to load, so cleanup must never throw.
+        try
         {
-            var folderName = Path.GetFileName(processFolder);
-            if (int.TryParse(folderName, out var processId)
-                && processId != currentProcessId
-                && IsProcessRunning(processId))
-            {
-                continue;
-            }
+            var rootFolder = ShadowCopyRootFolder;
+            if (!Directory.Exists(rootFolder))
+                return;
 
-            try
+            var currentProcessId = Environment.ProcessId;
+            foreach (var processFolder in Directory.EnumerateDirectories(rootFolder))
             {
-                Directory.Delete(processFolder, true);
+                var folderName = Path.GetFileName(processFolder);
+                if (int.TryParse(folderName, out var processId)
+                    && processId != currentProcessId
+                    && IsProcessRunning(processId))
+                {
+                    continue;
+                }
+
+                try
+                {
+                    Directory.Delete(processFolder, true);
+                }
+                catch (Exception e)
+                {
+                    Log.Debug($"Failed to delete shadow copy directory {processFolder}: {e.Message}");
+                }
             }
-            catch (Exception e)
-            {
-                Log.Debug($"Failed to delete shadow copy directory {processFolder}: {e.Message}");
-            }
+        }
+        catch (Exception e)
+        {
+            Log.Warning($"Failed to clean up stale shadow copies: {e.Message}");
         }
     }
 
@@ -662,6 +671,12 @@ internal sealed partial class TixlAssemblyLoadContext : AssemblyLoadContext
         catch (ArgumentException)
         {
             return false;
+        }
+        catch (Exception)
+        {
+            // E.g. access denied when the pid was reused by an elevated or protected process.
+            // If we can't tell, assume it's running and keep its folder - it gets cleaned next run.
+            return true;
         }
     }
 }

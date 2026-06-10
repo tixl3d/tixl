@@ -424,7 +424,8 @@ public sealed partial class AssemblyInformation
             }
             catch (Exception e)
             {
-                Log.Error($"Failed to create assembly load context for {Name}\n{e.Message}\n{e.StackTrace}");
+                // Log e itself (not just Message) so inner exceptions of e.g. TypeInitializationException show up
+                Log.Error($"Failed to create assembly load context for {Name}\n{e}");
                 _loadContext = null;
                 return;
             }
