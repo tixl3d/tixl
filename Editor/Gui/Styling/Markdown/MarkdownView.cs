@@ -46,6 +46,13 @@ internal sealed class MarkdownView
         public ImFontPtr BodyFont { get; set; }
 
         /// <summary>
+        /// Override the font for inline <c>[OpName]</c> references.
+        /// Default = unset → falls back to <see cref="Fonts.FontBold"/>, which can look
+        /// size-mismatched if <see cref="BodyFont"/> is larger (e.g. <see cref="Fonts.FontLarge"/>).
+        /// </summary>
+        public ImFontPtr OpRefFont { get; set; }
+
+        /// <summary>
         /// Treat every newline in the source as a hard line break instead of
         /// the CommonMark default (single newline within a paragraph = space).
         /// Useful for legacy content (e.g. TourPoint descriptions) authored
@@ -175,10 +182,12 @@ internal sealed class MarkdownView
         ImGui.PopFont();
     }
 
-    private static ImFontPtr FragmentFont(Fragment fragment, ImFontPtr lineFont)
+    private ImFontPtr FragmentFont(Fragment fragment, ImFontPtr lineFont)
     {
         if ((fragment.Style & RunStyle.Code) != 0)
             return Fonts.Code;
+        if ((fragment.Style & RunStyle.OpRef) != 0)
+            return OpRefFont;
         if ((fragment.Style & RunStyle.Bold) != 0)
             return Fonts.FontBold;
         return lineFont;
@@ -212,7 +221,7 @@ internal sealed class MarkdownView
                               ? _operatorColor(_layout.Urls[fragment.UrlIndex])
                               : UiColors.StatusActivated;
             ImGui.PushStyleColor(ImGuiCol.Text, opColor.Rgba);
-            ImGui.PushFont(Fonts.FontBold);
+            ImGui.PushFont(OpRefFont);
             fontPushed = true;            
             colorPushed = true;
         }
@@ -273,6 +282,19 @@ internal sealed class MarkdownView
                 return _options.BodyFont.NativePtr != null
                            ? _options.BodyFont
                            : Fonts.FontNormal;
+            }
+        }
+    }
+
+    private ImFontPtr OpRefFont
+    {
+        get
+        {
+            unsafe
+            {
+                return _options.OpRefFont.NativePtr != null
+                           ? _options.OpRefFont
+                           : Fonts.FontBold;
             }
         }
     }

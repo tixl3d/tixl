@@ -26,6 +26,7 @@ internal static class MarkdownLayout
         var markerPx = 16f * scale;
 
         var bodyFont = ResolveBodyFont(opt);
+        var opRefFont = ResolveOpRefFont(opt);
         var bodyHeight = MeasureLineHeight(bodyFont);
         var h1Height = MeasureLineHeight(Fonts.FontLarge);
         var h2Height = MeasureLineHeight(Fonts.FontBold);
@@ -105,7 +106,7 @@ internal static class MarkdownLayout
                                     ? wrapWidthPx
                                     : contentLeft + 200f;
 
-            EmitLineRuns(doc, result, line, lineFont, lineHeight,
+            EmitLineRuns(doc, result, line, lineFont, opRefFont, lineHeight,
                          contentLeft, effectiveWrap, ref y, scale);
 
             prevExisted = true;
@@ -118,7 +119,7 @@ internal static class MarkdownLayout
     }
 
     private static void EmitLineRuns(ParsedDoc doc, LayoutResult result, Line line,
-                                     ImFontPtr lineFont, float lineHeight,
+                                     ImFontPtr lineFont, ImFontPtr opRefFont, float lineHeight,
                                      float contentLeft, float wrapWidth,
                                      ref float y, float scale)
     {
@@ -133,7 +134,7 @@ internal static class MarkdownLayout
             for (var ri = 0; ri < line.RunCount; ri++)
             {
                 var run = doc.Runs[line.RunStart + ri];
-                EmitRun(src, run, ref penX, contentLeft, wrapWidth,
+                EmitRun(src, run, opRefFont, ref penX, contentLeft, wrapWidth,
                         result, line, lineHeight, ref y,
                         ref firstVisualLineOfLogical, ref fragmentStart);
             }
@@ -148,15 +149,20 @@ internal static class MarkdownLayout
                         ref firstVisualLineOfLogical, ref fragmentStart);
     }
 
-    private static void EmitRun(string src, Run run, ref float penX,
+    private static void EmitRun(string src, Run run, ImFontPtr opRefFont, ref float penX,
                                 float contentLeft, float wrapWidth,
                                 LayoutResult result, Line line, float lineHeight,
                                 ref float y, ref bool firstVisualLineOfLogical,
                                 ref int fragmentStart)
     {
-        // Bold/Code runs need their own font for accurate measurement.
+        // Bold/Code/OpRef runs need their own font for accurate measurement.
         var pushed = false;
-        if ((run.Style & RunStyle.Bold) != 0 || (run.Style & RunStyle.Link) != 0)
+        if ((run.Style & RunStyle.OpRef) != 0)
+        {
+            ImGui.PushFont(opRefFont);
+            pushed = true;
+        }
+        else if ((run.Style & RunStyle.Bold) != 0 || (run.Style & RunStyle.Link) != 0)
         {
             // Links inherit normal font (color/style differs); bold inside heading would
             // also already be bold via the line font. Push bold for explicit bold runs.
@@ -411,6 +417,14 @@ internal static class MarkdownLayout
         unsafe
         {
             return opt.BodyFont.NativePtr != null ? opt.BodyFont : Fonts.FontNormal;
+        }
+    }
+
+    private static ImFontPtr ResolveOpRefFont(in MarkdownView.Options opt)
+    {
+        unsafe
+        {
+            return opt.OpRefFont.NativePtr != null ? opt.OpRefFont : Fonts.FontBold;
         }
     }
 }

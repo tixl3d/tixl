@@ -283,6 +283,9 @@ internal static class TourInteraction
         _markdown = new MarkdownView(new MarkdownView.Options
                                           {
                                               BodyFont = Fonts.FontLarge,
+                                              // Keep op links at body size — the default FontBold
+                                              // would render them visibly smaller than FontLarge.
+                                              OpRefFont = Fonts.FontLarge,
                                               // TourPoint descriptions historically treat each \n as a
                                               // hard line break (used as paragraph separators by the
                                               // legacy paragraph-renderer); preserve that here.
