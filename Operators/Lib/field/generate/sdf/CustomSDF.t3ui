@@ -1,6 +1,6 @@
 {
   "Id": "637d00e4-ab63-4fe3-8e63-1e206c728841"/*CustomSDF*/,
-  "Description": "Creates a custom SDF with optional parameters.\nThe default code generates a procedural sphere field which can be rendered with [RaymarchField] and visualized with [VisualizeFieldDistance].\nFor more Fractals check the different variations.\n\nFor a simple and interactive tutorial on the TiXL rendering pipeline, see [HowToRaymarchField].\n\nThe result can be modified with [BendField], [TransformField], [PolarRepeat] and more.\n\nSimilar nodes: [BoxSDF], [CapsuleLineSDF], [FractalSDF].",
+  "Description": "Creates a custom distance field (SDF) from a short HLSL code fragment.\n\nWrite the body of a distance function: `p` is the sample position; return the signed distance to the surface. Offset, A, B and C are available as parameters, and a GLSL-style mod() is predefined. The default code generates a sphere; explore the presets for many fractal examples.\n\nRender the result with [RaymarchField], visualize it with [VisualizeFieldDistance], and modify it with [BendField], [TransformField], [PolarRepeat] and more. For an interactive tutorial see [HowToRaymarchField].\n\nSimilar nodes: [BoxSDF], [CapsuleLineSDF], [FractalSDF].\n\nFull documentation: https://help.tixl.app/advanced/UsingCustomShaders/",
   "SymbolTags": "1",
   "InputUis": [
     {
@@ -67,6 +67,15 @@
         "X": 0.0,
         "Y": 0.0
       }
+    }
+  ],
+  "Links": [
+    {
+      "Id": "e8a4c2d6-7b15-4f9e-a3c8-1d6b9e2f5a37",
+      "Title": "Using Custom Shaders",
+      "Description": "Documentation with required variables, helper functions and examples",
+      "LinkUrl": "https://help.tixl.app/advanced/UsingCustomShaders/",
+      "LinkType": "Documentation"
     }
   ]
 }

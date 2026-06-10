@@ -1,6 +1,6 @@
 {
   "Id": "3d958f08-9c0f-45eb-a252-de880b5834f3"/*CustomPointShader*/,
-  "Description": "A very fast method of writing simple compute shaders to manipulate the connected points.\n\nEach point has the following properties/attributes:\n\np.Position  // as float3\np.Rotation // as quaternion\np.FX1 // correspond to F1 for scaling and other effects.\np.FX2 // correspond to F2\np.Color // as float4\np.Scale // as float3\n\nThe following float values are initialized:\n\ni - index of the point\nf - a normalized float value of the index 0 ... 1.",
+  "Description": "Manipulates the points of a buffer with a short HLSL code fragment - a very fast way to write custom compute shaders.\n\nModify the prepared point `p` (Position, Rotation, Color, Scale, FX1/FX2). `idx` is the point index, `f` its normalized 0…1 position in the buffer. Helpers like SampleGradient(f), Biased(f) and quaternion functions are available. Explore the presets for examples.\n\nFull documentation: https://help.tixl.app/advanced/UsingCustomShaders/",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -381,6 +381,15 @@
         "X": 164.5965,
         "Y": -321.3
       }
+    }
+  ],
+  "Links": [
+    {
+      "Id": "b7e2d4c8-5a91-4f3b-8c6d-7e0a1b2c3d45",
+      "Title": "Using Custom Shaders",
+      "Description": "Documentation with required variables, helper functions and examples",
+      "LinkUrl": "https://help.tixl.app/advanced/UsingCustomShaders/",
+      "LinkType": "Documentation"
     }
   ]
 }

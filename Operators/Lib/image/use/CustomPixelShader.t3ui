@@ -1,6 +1,6 @@
 {
   "Id": "46daab0e-e957-413e-826c-0699569d0e07"/*CustomPixelShader*/,
-  "Description": "Creates a custom shader from a source parameter. This can be useful for prototyping.\n\nUse \"Ignore Template\" to bring in your entire shader.\n",
+  "Description": "Computes the output color for every pixel of a texture from a short HLSL code fragment.\n\nWrite the body of a pixel shader that sets the result color `c` (float4). Prepared variables include `uv`, `PixelCoord` and the images ImageA / ImageB; helpers like SampleGradient(f) and Biased(f) connect the code to the Gradient and GainAndBias parameters. Explore the presets for examples.\n\nFull documentation: https://help.tixl.app/advanced/UsingCustomShaders/",
   "InputUis": [
     {
       "InputId": "1ed14f4d-3b1e-4f24-9d83-d96005217716"/*TemplateFile*/,
@@ -422,6 +422,15 @@
         "X": 2039.3372,
         "Y": 250.80954
       }
+    }
+  ],
+  "Links": [
+    {
+      "Id": "a3c1f9d2-8b47-4e6a-9d1c-2f5e8a7b6c01",
+      "Title": "Using Custom Shaders",
+      "Description": "Documentation with required variables, helper functions and examples",
+      "LinkUrl": "https://help.tixl.app/advanced/UsingCustomShaders/",
+      "LinkType": "Documentation"
     }
   ]
 }

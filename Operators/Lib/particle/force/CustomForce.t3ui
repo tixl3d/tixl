@@ -2,7 +2,7 @@
   "FormatVersion": 2,
   "TixlVersion": "4.2.0.2",
   "Id": "2db5e90a-f02a-47ce-b1c0-3c5c4513f8fd"/*CustomForce*/,
-  "Description": "Allows to write small shaders to create custom particle force effects.",
+  "Description": "Applies a custom particle force written as a short HLSL code fragment.\n\nModify the prepared variables `vel`, `col` and `pos`; they are blended back into the particle by the Amount parameter. `age` and a connected Field (GetDistance, GetNormal) help with building collision and flow effects. Explore the presets for examples.\n\nFull documentation: https://help.tixl.app/advanced/UsingCustomShaders/",
   "SymbolTags": "8",
   "InputUis": [
     {
@@ -302,6 +302,15 @@
         "X": 1559.8612,
         "Y": 959.3563
       }
+    }
+  ],
+  "Links": [
+    {
+      "Id": "c9f4a6e1-2d38-47b5-a90e-5c1d6f8e7a23",
+      "Title": "Using Custom Shaders",
+      "Description": "Documentation with required variables, helper functions and examples",
+      "LinkUrl": "https://help.tixl.app/advanced/UsingCustomShaders/",
+      "LinkType": "Documentation"
     }
   ]
 }
