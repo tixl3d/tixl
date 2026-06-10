@@ -36,8 +36,9 @@ internal sealed class SymbolVariationPool
     public SymbolVariationPool(Guid symbolId)
     {
         SymbolId = symbolId;
-        _userVariations = LoadVariations(symbolId, UserData.UserDataLocation.User);
-        _defaults = LoadVariations(symbolId, UserData.UserDataLocation.Defaults);
+        ResolveVariationFilePaths(symbolId, out var writableFilePath, out var readOnlyDefaultsFilePath);
+        _userVariations = LoadVariationsFromFile(writableFilePath, symbolId);
+        _defaults = readOnlyDefaultsFilePath != null ? LoadVariationsFromFile(readOnlyDefaultsFilePath, symbolId) : [];
         _allVariations = new List<Variation>(_userVariations.Count + _defaults.Count);
         _allVariations.AddRange(_userVariations);
         _allVariations.AddRange(_defaults);
@@ -48,14 +49,52 @@ internal sealed class SymbolVariationPool
     }
 
     #region serialization
-    private static List<Variation> LoadVariations(Guid compositionId, UserData.UserDataLocation location)
+    /// <summary>
+    /// Variations live in the owning package's .meta/Variations folder. For read-only packages
+    /// (e.g. Lib in standalone builds) that folder only provides the shipped defaults, and user
+    /// created variations are kept in a per-user overlay folder in AppData instead.
+    /// Paths are resolved on every load/save because symbols can move between packages.
+    /// </summary>
+    private static void ResolveVariationFilePaths(Guid symbolId, out string writableFilePath, out string? readOnlyDefaultsFilePath)
     {
-        var relativePath = GetFilePathForVariationId(compositionId);
-        var loaded = UserData.TryLoad(relativePath, location, out var fileContent, out _);
-        if (!loaded)
-            return [];
+        readOnlyDefaultsFilePath = null;
+        if (SymbolUiRegistry.TryGetSymbolUi(symbolId, out var symbolUi))
+        {
+            var package = symbolUi.Symbol.SymbolPackage;
+            var packageFilePath = GetVariationFilePathInPackage(package.Folder, symbolId);
+            if (!package.IsReadOnly)
+            {
+                writableFilePath = packageFilePath;
+                return;
+            }
 
-        //Log.Info($"Reading presets definition for : {compositionId}");
+            readOnlyDefaultsFilePath = packageFilePath;
+        }
+
+        writableFilePath = GetVariationFilePathInUserOverlay(symbolId);
+    }
+
+    internal static string GetVariationFilePathInPackage(string packageFolder, Guid symbolId)
+        => Path.Combine(packageFolder, FileLocations.MetaSubFolder, VariationsSubFolder, $"{symbolId}.var");
+
+    internal static string GetVariationFilePathInUserOverlay(Guid symbolId)
+        => Path.Combine(FileLocations.SettingsDirectory, UserOverlaySubFolder, $"{symbolId}.var");
+
+    internal static List<Variation> LoadVariationsFromFile(string filePath, Guid compositionId)
+    {
+        string fileContent;
+        try
+        {
+            if (!File.Exists(filePath))
+                return [];
+
+            fileContent = File.ReadAllText(filePath);
+        }
+        catch (Exception e)
+        {
+            Log.Warning($"Failed to read variations file {filePath}: {e.Message}");
+            return [];
+        }
 
         using var sr = new StringReader(fileContent);
         using var jsonReader = new JsonTextReader(sr);
@@ -99,35 +138,27 @@ internal sealed class SymbolVariationPool
 
     public void SaveVariationsToFile()
     {
-        // FIXME: Unclear after merge: verify if this is done implicitly by SaveVariationsToFile()
-        // CreateFolderIfNotExists(UserData.UserDataLocation.User);
-
-        SaveVariationsToFile(UserData.UserDataLocation.User);
-
-        #if DEBUG
-            SaveVariationsToFile(UserData.UserDataLocation.Defaults);
-        #endif
+        ResolveVariationFilePaths(SymbolId, out var writableFilePath, out _);
+        if (!TrySaveVariationsToFile(writableFilePath, SymbolId, UserVariations))
+            Log.Error($"Failed to save presets and variations for {SymbolId}");
     }
 
-    private void SaveVariationsToFile(UserData.UserDataLocation location)
+    internal static bool TrySaveVariationsToFile(string filePath, Guid symbolId, IReadOnlyList<Variation> variations)
     {
-        var relativePath = GetFilePathForVariationId(SymbolId);
-
         using var sw = new StringWriter();
         using var writer = new JsonTextWriter(sw);
-        var variationCollection = location == UserData.UserDataLocation.User ? UserVariations : Defaults;
 
         try
         {
             writer.Formatting = Formatting.Indented;
             writer.WriteStartObject();
 
-            writer.WriteValue("Id", SymbolId);
+            writer.WriteValue("Id", symbolId);
 
             writer.WritePropertyName("Variations");
             writer.WriteStartArray();
 
-            foreach (var variation in variationCollection)
+            foreach (var variation in variations)
             {
                 variation.ToJson(writer);
             }
@@ -139,15 +170,29 @@ internal sealed class SymbolVariationPool
         catch (Exception e)
         {
             Log.Error($"Json variation serialization failed: {e.Message}");
+            return false;
         }
 
-        if (!UserData.TrySave(relativePath, sw.ToString(), location))
-            Log.Error($"Failed to save presets and variations for {SymbolId}");
+        try
+        {
+            var directory = Path.GetDirectoryName(filePath);
+            if (directory != null)
+                Directory.CreateDirectory(directory);
+
+            File.WriteAllText(filePath, sw.ToString());
+            return true;
+        }
+        catch (Exception e)
+        {
+            Log.Error($"Failed to save variations file {filePath}: {e.Message}");
+            return false;
+        }
     }
 
-    private const string VariationsSubFolder = "variations";
+    internal const string VariationsSubFolder = "Variations";
 
-    private static string GetFilePathForVariationId(Guid compositionId) => Path.Combine(VariationsSubFolder, $"{compositionId}.var");
+    /** Pre-4.2 location of all variation files; still the writable location for symbols of read-only packages. */
+    internal const string UserOverlaySubFolder = "variations";
     #endregion
 
     public void Apply(Instance instance, Variation variation)
@@ -871,18 +916,6 @@ internal sealed class SymbolVariationPool
         }
 
         return false;
-    }
-
-    public void AddDefaultVariation(Variation newVariation)
-    {
-        _defaults.Add(newVariation);
-        _allVariations.Add(newVariation);
-    }
-
-    public void RemoveDefaultVariation(Variation newVariation)
-    {
-        _defaults.Remove(newVariation);
-        _allVariations.Remove(newVariation);
     }
 
     public void AddUserVariation(Variation newVariation)

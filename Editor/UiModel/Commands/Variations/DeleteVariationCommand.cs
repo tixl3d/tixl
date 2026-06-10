@@ -18,21 +18,11 @@ internal sealed class DeleteVariationCommand : ICommand
         
     public void Undo()
     {
-        #if DEBUG
-
-                _variationPool.AddDefaultVariation(_originalVariation);
-        #else
         _variationPool.AddUserVariation(_originalVariation);
-        #endif
     }
 
     public void Do()
     {
-        #if DEBUG
-
-                _variationPool.RemoveDefaultVariation(_originalVariation);
-        #else
         _variationPool.RemoveUserVariation(_originalVariation);
-        #endif
     }
 }

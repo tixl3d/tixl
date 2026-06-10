@@ -130,6 +130,7 @@
     <PackageSymbols Include="**/*.t3" Exclude="bin/**" />
     <PackageSymbolUis Include="**/*.t3ui" Exclude="bin/**" />
     <PackageSourceCode Include="**/*.cs" Exclude="bin/**;obj/**" />
+    <PackageMeta Include=".meta/**/*" />
   </ItemGroup>
   <Target Name="CopyPackageContent" AfterTargets="AfterBuild"
     Condition="'$(Configuration)' == 'Release'">
@@ -142,6 +143,7 @@
     <Copy SourceFiles="@(PackageSymbolUis)"
       DestinationFiles="@(PackageSymbolUis->'$(OutputPath)/SymbolUis/%(RecursiveDir)%(Filename)%(Extension)')"
       SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(PackageMeta)" DestinationFiles="@(PackageMeta->'$(OutputPath)/.meta/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(PackageSourceCode)"
       DestinationFiles="@(PackageSourceCode->'$(OutputPath)/SourceCode/%(RecursiveDir)%(Filename)%(Extension)')"
       SkipUnchangedFiles="true" />

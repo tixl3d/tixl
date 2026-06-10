@@ -7,6 +7,7 @@ using T3.Core.Model;
 using T3.Core.Resource.Assets;
 using T3.Core.Settings;
 using T3.Editor.Gui.Interaction.StartupCheck;
+using T3.Editor.Gui.Interaction.Variations.Model;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
 
@@ -76,7 +77,10 @@ internal static partial class ProjectSetup
         var allPackages = _activePackages.ToArray();
         // Update all symbol packages
         UpdateSymbolPackages(allPackages);
-        
+
+        // Needs registered symbols to resolve which project owns each variation file
+        VariationsMigration.MigrateLegacyVariationsToPackageMeta();
+
         // Initialize resources and shader linting
         Log.Info("Initializing package resources...");
         foreach (var package in allPackages)

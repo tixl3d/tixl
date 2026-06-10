@@ -8,6 +8,7 @@ using T3.Core.Resource.Assets;
 using T3.Core.SystemUi;
 using T3.Core.Settings;
 using T3.Editor.Compilation;
+using T3.Editor.Gui.Interaction.Variations.Model;
 using T3.Editor.Gui.UiHelpers.Thumbnails;
 
 namespace T3.Editor.UiModel;
@@ -114,8 +115,26 @@ internal sealed partial class EditableSymbolProject : EditorSymbolPackage
                 }
             }
         }
-        
-        
+
+        // Move variations...
+        {
+            var sourceFilePath = SymbolVariationPool.GetVariationFilePathInPackage(Folder, id);
+            if (File.Exists(sourceFilePath))
+            {
+                var targetFilePath = SymbolVariationPool.GetVariationFilePathInPackage(newDestinationProject.Folder, id);
+                try
+                {
+                    Directory.CreateDirectory(Path.GetDirectoryName(targetFilePath)!);
+                    File.Move(sourceFilePath, targetFilePath);
+                }
+                catch (Exception e)
+                {
+                    Log.Warning("Can't move variations " + e.Message);
+                }
+            }
+        }
+
+
         // move files to new project - incorrect paths will be corrected by the loading process
         symbolPathHandler.UpdateFromSymbol();
         

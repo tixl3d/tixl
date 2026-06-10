@@ -28,13 +28,7 @@ internal sealed class AddPresetOrVariationCommand : ICommand
             return;
         }
 
-        #if DEBUG
-
-                pool.AddDefaultVariation(_newVariation);
-        #else
         pool.AddUserVariation(_newVariation);
-        #endif
-            
         FlagSymbolAsModified();
     }
 
@@ -49,12 +43,7 @@ internal sealed class AddPresetOrVariationCommand : ICommand
         }
 
 
-        #if DEBUG
-
-                pool.RemoveDefaultVariation(_newVariation);
-        #else
         pool.RemoveUserVariation(_newVariation);
-        #endif
         FlagSymbolAsModified();
     }
 
