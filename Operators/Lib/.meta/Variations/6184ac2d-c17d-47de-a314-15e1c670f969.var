@@ -1,0 +1,82 @@
+{
+  "Id": "6184ac2d-c17d-47de-a314-15e1c670f969",
+  "Variations": [
+    {
+      "Id": "122d9604-65a6-451c-8085-88fa2dda6678",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Small Centered",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "223cfd01-d3e3-402c-85af-1f493ea5f201": 0.11
+        }
+      }
+    },
+    {
+      "Id": "c2c14851-c617-4198-a1f4-0b4eb7f02b4b",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Large Fall Off",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "223cfd01-d3e3-402c-85af-1f493ea5f201": 0.11,
+          "b3230397-8052-4bd6-8ecb-747f62c1bb3d": 10.0
+        }
+      }
+    },
+    {
+      "Id": "8da3798a-925d-4fe1-a21c-db885e186423",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "Zebra",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "a9807f1e-bd65-4006-a42e-a1d8f67387f9": 3,
+          "9fcdd319-5120-402b-ac8e-07aa711bdaf5": {
+            "X": 0.0,
+            "Y": 0.252643,
+            "Z": 0.0
+          },
+          "223cfd01-d3e3-402c-85af-1f493ea5f201": 0.25,
+          "b3230397-8052-4bd6-8ecb-747f62c1bb3d": 0.04
+        }
+      }
+    },
+    {
+      "Id": "514da584-826c-4605-a71d-8fdc20fc4d6b",
+      "IsPreset": true,
+      "ActivationIndex": 4,
+      "Title": "Subtle Noise",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "a9807f1e-bd65-4006-a42e-a1d8f67387f9": 4,
+          "9fcdd319-5120-402b-ac8e-07aa711bdaf5": {
+            "X": 0.0,
+            "Y": 0.252643,
+            "Z": 0.0
+          },
+          "223cfd01-d3e3-402c-85af-1f493ea5f201": 0.25,
+          "b3230397-8052-4bd6-8ecb-747f62c1bb3d": 0.04,
+          "c1223666-d19a-4fa5-96c6-3582e0a685d0": 0.5,
+          "6c434ee8-f6e9-49cb-af39-878e4b8e490a": 0.12
+        }
+      }
+    }
+  ]
+}

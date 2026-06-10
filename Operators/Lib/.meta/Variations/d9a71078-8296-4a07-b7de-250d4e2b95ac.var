@@ -1,0 +1,260 @@
+{
+  "Id": "d9a71078-8296-4a07-b7de-250d4e2b95ac",
+  "Variations": [
+    {
+      "Id": "87bf6227-c6a0-40dd-9371-084980f288d6",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Alpha Mask",
+      "PosOnCanvas": {
+        "X": 36.626404,
+        "Y": 18.1594
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "387ce8fc-42c2-438d-bf52-144b5dfd8811": {
+            "X": 1.0,
+            "Y": 0.9999899,
+            "Z": 0.9999899,
+            "W": 0.0
+          }
+        }
+      }
+    },
+    {
+      "Id": "dc542397-fff3-4608-92a5-b28148062d3e",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Call 1 for Pony",
+      "PosOnCanvas": {
+        "X": 199.6264,
+        "Y": 18.1594
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "387ce8fc-42c2-438d-bf52-144b5dfd8811": {
+            "X": 0.4736842,
+            "Y": 0.0,
+            "Z": 0.013171396,
+            "W": 1.0
+          },
+          "26a45300-c4d6-4e43-8550-37d2fa87799d": {
+            "X": 0.6076555,
+            "Y": 0.34646016,
+            "Z": 0.5006777,
+            "W": 1.0
+          },
+          "7307d198-d2d5-41d4-b8b8-d2ece26dade8": 0.5,
+          "d09c7a75-d02d-421b-ba0f-17b345f523ec": {
+            "X": 1.0,
+            "Y": 0.6516619,
+            "Z": 0.7871888,
+            "W": 1.0
+          }
+        }
+      }
+    },
+    {
+      "Id": "bafd99ef-8c05-4976-8d50-62a9aea574f0",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "How frogs see",
+      "PosOnCanvas": {
+        "X": 362.6264,
+        "Y": 18.1594
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "387ce8fc-42c2-438d-bf52-144b5dfd8811": {
+            "X": 0.31464043,
+            "Y": 0.4736842,
+            "Z": 0.0,
+            "W": 1.0
+          },
+          "26a45300-c4d6-4e43-8550-37d2fa87799d": {
+            "X": 0.6076555,
+            "Y": 0.24755833,
+            "Z": 0.0,
+            "W": 1.0
+          },
+          "7307d198-d2d5-41d4-b8b8-d2ece26dade8": 2.0,
+          "d09c7a75-d02d-421b-ba0f-17b345f523ec": {
+            "X": 0.0,
+            "Y": 0.36729908,
+            "Z": 1.0,
+            "W": 0.0
+          }
+        }
+      }
+    },
+    {
+      "Id": "5f0f2af2-9f91-4cc7-b126-e2a394df6d94",
+      "IsPreset": true,
+      "ActivationIndex": 4,
+      "Title": "Color boost",
+      "PosOnCanvas": {
+        "X": 362.6264,
+        "Y": 140.70996
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "387ce8fc-42c2-438d-bf52-144b5dfd8811": {
+            "X": 0.0,
+            "Y": 0.4736842,
+            "Z": 0.13378587,
+            "W": 1.0
+          },
+          "26a45300-c4d6-4e43-8550-37d2fa87799d": {
+            "X": 0.0,
+            "Y": 0.1473807,
+            "Z": 0.6076555,
+            "W": 1.0
+          },
+          "7307d198-d2d5-41d4-b8b8-d2ece26dade8": -0.5
+        }
+      }
+    },
+    {
+      "Id": "792328a6-40f1-43bf-a5ff-092fd1d7aafa",
+      "IsPreset": true,
+      "ActivationIndex": 5,
+      "Title": "Negativ",
+      "PosOnCanvas": {
+        "X": 36.626404,
+        "Y": 140.70996
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "387ce8fc-42c2-438d-bf52-144b5dfd8811": {
+            "X": 1.0,
+            "Y": 1.0,
+            "Z": 1.0,
+            "W": 1.0
+          },
+          "26a45300-c4d6-4e43-8550-37d2fa87799d": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0,
+            "W": 1.0
+          },
+          "d09c7a75-d02d-421b-ba0f-17b345f523ec": {
+            "X": 1.0,
+            "Y": 0.4885525,
+            "Z": 0.6179481,
+            "W": 0.0
+          }
+        }
+      }
+    },
+    {
+      "Id": "692a0ef6-2e0f-4316-9cac-709c795546d1",
+      "IsPreset": true,
+      "ActivationIndex": 6,
+      "Title": "Cancer",
+      "PosOnCanvas": {
+        "X": 199.6264,
+        "Y": 140.70996
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "387ce8fc-42c2-438d-bf52-144b5dfd8811": {
+            "X": 1.0,
+            "Y": 1.0,
+            "Z": 1.0,
+            "W": 1.0
+          },
+          "26a45300-c4d6-4e43-8550-37d2fa87799d": {
+            "X": 0.23923445,
+            "Y": 0.004153189,
+            "Z": 0.0,
+            "W": 1.0
+          },
+          "d09c7a75-d02d-421b-ba0f-17b345f523ec": {
+            "X": 1.0,
+            "Y": 0.4885525,
+            "Z": 0.6179481,
+            "W": 0.0
+          }
+        }
+      }
+    },
+    {
+      "Id": "b89ade39-1d03-4f7c-9d39-566ee14550fe",
+      "IsPreset": true,
+      "ActivationIndex": 7,
+      "Title": "Threshold Mask",
+      "PosOnCanvas": {
+        "X": 36.626404,
+        "Y": 263.26053
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "7db67f48-5947-422b-8eb3-33d641cc276e": {
+            "X": 0.0,
+            "Y": 0.525
+          }
+        }
+      }
+    },
+    {
+      "Id": "58eb845f-4342-4363-af7e-bca26e38740f",
+      "IsPreset": true,
+      "ActivationIndex": 8,
+      "Title": "Vibrant Reds",
+      "PosOnCanvas": {
+        "X": 362.6264,
+        "Y": 263.26053
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "7307d198-d2d5-41d4-b8b8-d2ece26dade8": -1.0,
+          "d09c7a75-d02d-421b-ba0f-17b345f523ec": {
+            "X": 0.8367279,
+            "Y": 0.9131716,
+            "Z": 1.0,
+            "W": 0.0
+          }
+        }
+      }
+    },
+    {
+      "Id": "f861f801-07ed-4c19-8ee6-f02ababcca0e",
+      "IsPreset": true,
+      "ActivationIndex": 9,
+      "Title": "Colors!",
+      "PosOnCanvas": {
+        "X": 199.6264,
+        "Y": 263.26053
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "7307d198-d2d5-41d4-b8b8-d2ece26dade8": -0.76
+        }
+      }
+    },
+    {
+      "Id": "9e2d17f1-443c-4eb9-b87a-3b91a200e27a",
+      "IsPreset": true,
+      "ActivationIndex": 10,
+      "Title": "B&W Portrait",
+      "PosOnCanvas": {
+        "X": 362.6264,
+        "Y": 385.8111
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "d09c7a75-d02d-421b-ba0f-17b345f523ec": {
+            "X": 1.0,
+            "Y": 0.8716727,
+            "Z": 0.76290405,
+            "W": 0.0
+          },
+          "7db67f48-5947-422b-8eb3-33d641cc276e": {
+            "X": 0.445,
+            "Y": 0.455
+          }
+        }
+      }
+    }
+  ]
+}

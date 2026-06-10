@@ -1,0 +1,82 @@
+{
+  "Id": "da8ebc61-87cf-44ff-888e-994c8628ddb7",
+  "Variations": [
+    {
+      "Id": "19870bc1-afc7-45c0-a1c0-d21e5a4ed9eb",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "With Gaps",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "0c6065b9-eb20-4a37-9d70-419d1c8912a6": {
+            "X": -0.79999983,
+            "Y": 0.0
+          },
+          "8c652498-33c7-4faa-a8c0-3f3d296474c8": 0.5,
+          "8d4e1265-8479-4525-adbc-fe5c31d9984a": {
+            "X": 0.08,
+            "Y": 0.05
+          },
+          "d99d5c03-2563-41e6-9bfe-bd61a7fed37d": 0.3
+        }
+      }
+    },
+    {
+      "Id": "e09c97db-d979-4a42-9668-e79fb3670ffe",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Larger",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "0c6065b9-eb20-4a37-9d70-419d1c8912a6": {
+            "X": -0.79999983,
+            "Y": 0.0
+          },
+          "6164020b-3059-4ce5-8a8f-a56150b8a6be": 5.0,
+          "8c652498-33c7-4faa-a8c0-3f3d296474c8": 0.5,
+          "8d4e1265-8479-4525-adbc-fe5c31d9984a": {
+            "X": 0.08,
+            "Y": 0.05
+          },
+          "d99d5c03-2563-41e6-9bfe-bd61a7fed37d": 0.3
+        }
+      }
+    },
+    {
+      "Id": "15fce03f-d6ad-40b3-99cd-1a7497409c62",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "untitled",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "e97a432e-4996-41b0-8ae8-10c9f2d15bc4": {
+            "X": 0.99849755,
+            "Y": 0.99813884,
+            "Z": 1.0,
+            "W": 1.0
+          },
+          "6164020b-3059-4ce5-8a8f-a56150b8a6be": 20.0,
+          "8c652498-33c7-4faa-a8c0-3f3d296474c8": 0.5,
+          "dab4e3df-aaa6-411c-83f6-e4c730b740ce": 0.0,
+          "8d4e1265-8479-4525-adbc-fe5c31d9984a": {
+            "X": 0.08,
+            "Y": 0.05
+          },
+          "d99d5c03-2563-41e6-9bfe-bd61a7fed37d": 1.5
+        }
+      }
+    }
+  ]
+}

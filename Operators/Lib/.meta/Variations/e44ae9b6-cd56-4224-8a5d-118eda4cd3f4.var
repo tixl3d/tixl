@@ -1,0 +1,53 @@
+{
+  "Id": "e44ae9b6-cd56-4224-8a5d-118eda4cd3f4",
+  "Variations": [
+    {
+      "Id": "0488f2b1-df03-4b4a-8315-3fc0ed8f131b",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Default",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "c6bdbb07-6996-4e5b-a058-37c9cbeca6fe": false
+        }
+      }
+    },
+    {
+      "Id": "054e59e1-f77a-4c2b-8dea-866704029440",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Some velocity and drag",
+      "PosOnCanvas": {
+        "X": 162.99998,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "e9f068dd-9bd9-4b1c-9122-f78df0ec18b9": true,
+          "5a61994e-42c7-47e7-b0a5-5beb48f4a34b": 0.012
+        }
+      }
+    },
+    {
+      "Id": "10ca7a0d-b9e5-43e1-9220-9480aa8a6b34",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "Aging",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "e9f068dd-9bd9-4b1c-9122-f78df0ec18b9": true,
+          "5a61994e-42c7-47e7-b0a5-5beb48f4a34b": 0.012,
+          "a7350ba8-08be-4afc-92f1-d223ee9bcbeb": 1
+        }
+      }
+    }
+  ]
+}

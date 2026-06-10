@@ -1,0 +1,304 @@
+{
+  "Id": "c8590f8f-cca1-434a-a880-67bb91920e1a",
+  "Variations": [
+    {
+      "Id": "2bb950ca-bd02-4f59-b4f5-ee64462e1ba3",
+      "IsPreset": true,
+      "ActivationIndex": 5,
+      "Title": "vignette",
+      "PosOnCanvas": {
+        "X": -119.60246,
+        "Y": -122.09662
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bbda1c8c-fa81-43ef-b773-f7ecfb8968e1": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0,
+            "W": 1.0
+          },
+          "de54f18b-6a1e-4610-8d6d-58897df6959b": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0,
+            "W": 0.0
+          },
+          "8a908810-2482-4088-8b21-a7ee15531e64": {
+            "X": 0.25,
+            "Y": 0.0
+          },
+          "41f4065a-0b65-4dda-9cd3-ef7802ed170b": 0.0,
+          "8846aa50-e4d0-433c-9e5b-013a93f17f79": -5.0,
+          "2d3a7e9a-9efe-486a-8c33-10a5a16dc17b": -10.0
+        }
+      }
+    },
+    {
+      "Id": "50ac08c7-8d3a-445f-8e7e-d239a4fa8a91",
+      "IsPreset": true,
+      "ActivationIndex": 9,
+      "Title": "white blob",
+      "PosOnCanvas": {
+        "X": 206.39754,
+        "Y": -122.09662
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bbda1c8c-fa81-43ef-b773-f7ecfb8968e1": {
+            "X": 1.0,
+            "Y": 1.0,
+            "Z": 1.0,
+            "W": 1.0
+          },
+          "de54f18b-6a1e-4610-8d6d-58897df6959b": {
+            "X": 1.0,
+            "Y": 1.0,
+            "Z": 1.0,
+            "W": 0.0
+          }
+        }
+      }
+    },
+    {
+      "Id": "d98c0b3f-c99e-4474-be70-c0bc2957d161",
+      "IsPreset": true,
+      "ActivationIndex": 9,
+      "Title": "White on Black",
+      "PosOnCanvas": {
+        "X": 43.397537,
+        "Y": -122.09662
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bbda1c8c-fa81-43ef-b773-f7ecfb8968e1": {
+            "X": 1.0,
+            "Y": 1.0,
+            "Z": 1.0,
+            "W": 1.0
+          },
+          "de54f18b-6a1e-4610-8d6d-58897df6959b": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0,
+            "W": 1.0
+          }
+        }
+      }
+    },
+    {
+      "Id": "5d02910e-177a-4492-bf6b-f11337dd84aa",
+      "IsPreset": true,
+      "ActivationIndex": 4,
+      "Title": "PeepHole Vignette",
+      "PosOnCanvas": {
+        "X": -119.60246,
+        "Y": 63.90338
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bbda1c8c-fa81-43ef-b773-f7ecfb8968e1": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0,
+            "W": 1.0
+          },
+          "de54f18b-6a1e-4610-8d6d-58897df6959b": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0,
+            "W": 0.0
+          },
+          "8a908810-2482-4088-8b21-a7ee15531e64": {
+            "X": 0.25,
+            "Y": 0.0
+          },
+          "41f4065a-0b65-4dda-9cd3-ef7802ed170b": 0.0,
+          "8846aa50-e4d0-433c-9e5b-013a93f17f79": -3.8,
+          "2d3a7e9a-9efe-486a-8c33-10a5a16dc17b": 1.1
+        }
+      }
+    },
+    {
+      "Id": "0c8be8b4-bb1f-45bd-99f7-43b95e2cc7de",
+      "IsPreset": true,
+      "ActivationIndex": 5,
+      "Title": "PeepHole 2",
+      "PosOnCanvas": {
+        "X": -119.60246,
+        "Y": -29.096619
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bbda1c8c-fa81-43ef-b773-f7ecfb8968e1": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0,
+            "W": 1.0
+          },
+          "de54f18b-6a1e-4610-8d6d-58897df6959b": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0,
+            "W": 0.0
+          },
+          "8a908810-2482-4088-8b21-a7ee15531e64": {
+            "X": 0.25,
+            "Y": 0.0
+          },
+          "41f4065a-0b65-4dda-9cd3-ef7802ed170b": 0.0,
+          "8846aa50-e4d0-433c-9e5b-013a93f17f79": -3.8,
+          "2d3a7e9a-9efe-486a-8c33-10a5a16dc17b": -2.5
+        }
+      }
+    },
+    {
+      "Id": "e98a3441-068f-4109-939b-be4708e6204a",
+      "IsPreset": true,
+      "ActivationIndex": 6,
+      "Title": "Black on White",
+      "PosOnCanvas": {
+        "X": 43.397537,
+        "Y": -29.096619
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bbda1c8c-fa81-43ef-b773-f7ecfb8968e1": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0,
+            "W": 1.0
+          },
+          "de54f18b-6a1e-4610-8d6d-58897df6959b": {
+            "X": 1.0,
+            "Y": 1.0,
+            "Z": 1.0,
+            "W": 1.0
+          }
+        }
+      }
+    },
+    {
+      "Id": "0ee6d2ff-7354-4fae-9cf5-3e9c6caa98ce",
+      "IsPreset": true,
+      "ActivationIndex": 7,
+      "Title": "Dark Blob",
+      "PosOnCanvas": {
+        "X": 206.39754,
+        "Y": -29.096619
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bbda1c8c-fa81-43ef-b773-f7ecfb8968e1": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0,
+            "W": 1.0
+          },
+          "de54f18b-6a1e-4610-8d6d-58897df6959b": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0,
+            "W": 0.0
+          }
+        }
+      }
+    },
+    {
+      "Id": "e3da0247-056f-497d-a71e-55c889c73c31",
+      "IsPreset": true,
+      "ActivationIndex": 8,
+      "Title": "I love you",
+      "PosOnCanvas": {
+        "X": -119.60246,
+        "Y": 156.90338
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bbda1c8c-fa81-43ef-b773-f7ecfb8968e1": {
+            "X": 0.05552897,
+            "Y": 0.042023193,
+            "Z": 0.08133972,
+            "W": 1.0
+          },
+          "de54f18b-6a1e-4610-8d6d-58897df6959b": {
+            "X": 0.30123153,
+            "Y": 0.07192185,
+            "Z": 0.3014354,
+            "W": 0.0
+          },
+          "8a908810-2482-4088-8b21-a7ee15531e64": {
+            "X": 0.25,
+            "Y": 0.0
+          },
+          "41f4065a-0b65-4dda-9cd3-ef7802ed170b": 0.0,
+          "8846aa50-e4d0-433c-9e5b-013a93f17f79": -3.8,
+          "2d3a7e9a-9efe-486a-8c33-10a5a16dc17b": -2.5
+        }
+      }
+    },
+    {
+      "Id": "ce0b1778-b586-41d9-8f11-a3e5b31d101a",
+      "IsPreset": true,
+      "ActivationIndex": 9,
+      "Title": "untitled",
+      "PosOnCanvas": {
+        "X": 43.397537,
+        "Y": 63.90338
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bbda1c8c-fa81-43ef-b773-f7ecfb8968e1": {
+            "X": 0.13875598,
+            "Y": 0.0,
+            "Z": 0.039227977,
+            "W": 1.0
+          },
+          "de54f18b-6a1e-4610-8d6d-58897df6959b": {
+            "X": 0.30123153,
+            "Y": 0.07192185,
+            "Z": 0.3014354,
+            "W": 0.0
+          },
+          "8a908810-2482-4088-8b21-a7ee15531e64": {
+            "X": 0.42,
+            "Y": 0.0
+          },
+          "41f4065a-0b65-4dda-9cd3-ef7802ed170b": -0.04000002,
+          "8846aa50-e4d0-433c-9e5b-013a93f17f79": -4.29,
+          "2d3a7e9a-9efe-486a-8c33-10a5a16dc17b": -4.3
+        }
+      }
+    },
+    {
+      "Id": "c6f24218-0aef-4f27-9e38-683eb8672731",
+      "IsPreset": true,
+      "ActivationIndex": 10,
+      "Title": "Shadow Blob 256px",
+      "PosOnCanvas": {
+        "X": 43.397537,
+        "Y": 156.90338
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bbda1c8c-fa81-43ef-b773-f7ecfb8968e1": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0,
+            "W": 1.0
+          },
+          "de54f18b-6a1e-4610-8d6d-58897df6959b": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0,
+            "W": 0.0
+          },
+          "9786d2b3-2cff-40fb-8ab7-d96f3ac3dd76": {
+            "Width": 256,
+            "Height": 256
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "Id": "9f43f769-d32a-4f49-92ac-e0be3ba250cf",
+  "Variations": [
+    {
+      "Id": "3e0bc5ef-1ae1-41e2-aea2-4367540fb83b",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Mask B with A Alpha",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "cad32967-e91b-4bd1-af09-5fdfdeee630e": 3
+        }
+      }
+    },
+    {
+      "Id": "781700b6-04b5-4fdc-b5c3-1bfd298905ee",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Mask A with B Alpha",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "fc5f1d08-3997-4ba3-ac59-d86e4e501fb0": 5,
+          "cad32967-e91b-4bd1-af09-5fdfdeee630e": 4
+        }
+      }
+    }
+  ]
+}

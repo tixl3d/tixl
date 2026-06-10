@@ -1,0 +1,27 @@
+{
+  "Id": "7a08d73e-1aea-479f-8d36-ecb119d75c3a",
+  "Variations": [
+    {
+      "Id": "11ed258b-26b3-466f-85c7-b809f8f3a808",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Gravity",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "1840e5b8-2aee-44d0-b826-d34395325506": {
+            "X": 0.0,
+            "Y": -0.081,
+            "Z": 0.0
+          },
+          "4f9ab443-3885-4a57-9116-6be5824bd95b": 0.1,
+          "9c8c1407-bf6a-47c0-8c6c-2cd9f303151d": true,
+          "1f561bbd-a272-4c06-bd56-a580a2022bc6": 1
+        }
+      }
+    }
+  ]
+}

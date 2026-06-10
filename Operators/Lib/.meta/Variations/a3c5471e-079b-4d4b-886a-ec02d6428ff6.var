@@ -1,0 +1,77 @@
+{
+  "Id": "a3c5471e-079b-4d4b-886a-ec02d6428ff6",
+  "Variations": [
+    {
+      "Id": "8dde3627-ca06-42d3-97df-072b51853a3e",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Both Sided",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "9c17fa15-35f1-49d4-802f-a3a796cad96a": 0
+        }
+      }
+    },
+    {
+      "Id": "b06ec618-93d5-4401-9627-7baf7ff224d0",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "untitled",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "9c17fa15-35f1-49d4-802f-a3a796cad96a": 1
+        }
+      }
+    },
+    {
+      "Id": "4cceea8b-f1ba-43db-a6ee-944db2764b4c",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "Image -> Face Colors",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {}
+    },
+    {
+      "Id": "e3070e13-e106-4648-a1e5-a4cdff3e0f83",
+      "IsPreset": true,
+      "ActivationIndex": 4,
+      "Title": "FlatShaded",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "05e0b0e3-6e79-48bd-a356-3dcb65c9040f": 1
+        }
+      }
+    },
+    {
+      "Id": "9472744c-37b1-440f-a355-bb58dd899ba6",
+      "IsPreset": true,
+      "ActivationIndex": 5,
+      "Title": "Weird Wireframe",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "2c4b5f3a-e9ec-432e-b1ae-6d999ae44f1b": 2,
+          "05e0b0e3-6e79-48bd-a356-3dcb65c9040f": 1
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "Id": "9989f539-f86c-4508-83d7-3fc0e559f502",
+  "Variations": [
+    {
+      "Id": "862add94-333c-4ceb-8cd2-a5fc9241a0f5",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Aligned towards camera",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "55a3370f-1768-414f-b38d-4accc5e93914": {
+            "X": 1.0,
+            "Y": 0.0,
+            "Z": 0.0
+          },
+          "e9859381-eb88-4856-91c5-60d30ac6035a": 90.0
+        }
+      }
+    }
+  ]
+}

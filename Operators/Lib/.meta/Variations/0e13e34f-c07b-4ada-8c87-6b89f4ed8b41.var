@@ -1,0 +1,58 @@
+{
+  "Id": "0e13e34f-c07b-4ada-8c87-6b89f4ed8b41",
+  "Variations": [
+    {
+      "Id": "d18b0aae-a120-4535-a24d-b7942f73f275",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Vertical",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "f46ed94a-7eb2-44d6-9cbb-f8eab586f7c5": 90.0
+        }
+      }
+    },
+    {
+      "Id": "230d4f94-d5b3-4cf9-928c-f429e3bf062b",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Mostly First",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "f46ed94a-7eb2-44d6-9cbb-f8eab586f7c5": 90.0,
+          "beada8f0-cece-4526-aa29-3546bebd276a": {
+            "X": 0.79,
+            "Y": 0.0
+          }
+        }
+      }
+    },
+    {
+      "Id": "28b8a996-3e70-4346-b532-01e0adeb067d",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "untitled",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "f46ed94a-7eb2-44d6-9cbb-f8eab586f7c5": 90.0,
+          "beada8f0-cece-4526-aa29-3546bebd276a": {
+            "X": -0.76,
+            "Y": 0.0
+          }
+        }
+      }
+    }
+  ]
+}

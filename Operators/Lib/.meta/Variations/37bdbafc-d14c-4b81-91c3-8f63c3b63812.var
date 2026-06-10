@@ -1,0 +1,64 @@
+{
+  "Id": "37bdbafc-d14c-4b81-91c3-8f63c3b63812",
+  "Variations": [
+    {
+      "Id": "30e4727d-da0b-47bc-84cb-a21c87c47652",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "BigPatch",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "8f72275d-d903-4372-852c-51c3db35fe90": false,
+          "621bf2cf-8d49-4b5f-88b9-4460045e8914": 1.0,
+          "b857b40b-2ca7-42a4-bebe-1cb11700ed71": 0.17,
+          "98fe7249-39ea-4f45-b045-36e07a8f2018": false,
+          "08174efd-78e5-4552-b559-5aa7b1b8c33e": true
+        }
+      }
+    },
+    {
+      "Id": "d197ee3c-6e3f-46e0-ad7a-f8587624284b",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "For Nerds",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "8f72275d-d903-4372-852c-51c3db35fe90": false,
+          "d0ac63c5-639b-4b3c-b40b-348b76fa0fd2": true,
+          "621bf2cf-8d49-4b5f-88b9-4460045e8914": 0.02,
+          "b857b40b-2ca7-42a4-bebe-1cb11700ed71": 0.015000001,
+          "bbc26907-416d-4168-9e89-72ee1c6a530e": true
+        }
+      }
+    },
+    {
+      "Id": "e2b8f43c-0ce0-4263-a038-68d48775f4a7",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "Sprite Orientations",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "8f72275d-d903-4372-852c-51c3db35fe90": false,
+          "d0ac63c5-639b-4b3c-b40b-348b76fa0fd2": true,
+          "d2472768-dd40-436f-af1b-7359289b5118": false,
+          "621bf2cf-8d49-4b5f-88b9-4460045e8914": 0.02,
+          "b857b40b-2ca7-42a4-bebe-1cb11700ed71": 0.015000001,
+          "bbc26907-416d-4168-9e89-72ee1c6a530e": false,
+          "08174efd-78e5-4552-b559-5aa7b1b8c33e": true
+        }
+      }
+    }
+  ]
+}

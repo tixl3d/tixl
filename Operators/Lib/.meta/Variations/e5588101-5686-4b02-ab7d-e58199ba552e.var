@@ -1,0 +1,83 @@
+{
+  "Id": "e5588101-5686-4b02-ab7d-e58199ba552e",
+  "Variations": [
+    {
+      "Id": "e761b8b8-5a96-47bd-a771-33d8fd2413ba",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "XY Grid",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "feae6a6f-5fd7-490d-a95a-2c8758ceb9bf": {
+            "X": 1.0,
+            "Y": 1.0,
+            "Z": 1.0,
+            "W": 0.120000005
+          },
+          "60070155-b8ee-4d3d-ab04-c9765fe825a2": {
+            "X": 90.0,
+            "Y": 0.0,
+            "Z": 0.0
+          },
+          "ec754488-a2f9-466d-8605-edf58677df39": 0.1
+        }
+      }
+    },
+    {
+      "Id": "abce72ae-dc39-4e18-b977-aea3566cff77",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "YZ Grid",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "feae6a6f-5fd7-490d-a95a-2c8758ceb9bf": {
+            "X": 0.5330086,
+            "Y": 0.5843513,
+            "Z": 1.0,
+            "W": 0.120000005
+          },
+          "60070155-b8ee-4d3d-ab04-c9765fe825a2": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 90.0
+          },
+          "ec754488-a2f9-466d-8605-edf58677df39": 0.1
+        }
+      }
+    },
+    {
+      "Id": "0a446ad5-ec9d-4dff-802a-cd5f5fb76ad7",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "untitled",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "feae6a6f-5fd7-490d-a95a-2c8758ceb9bf": {
+            "X": 0.6123628,
+            "Y": 1.0,
+            "Z": 0.5968297,
+            "W": 0.120000005
+          },
+          "60070155-b8ee-4d3d-ab04-c9765fe825a2": {
+            "X": 90.0,
+            "Y": 0.0,
+            "Z": 0.0
+          },
+          "ec754488-a2f9-466d-8605-edf58677df39": 0.1
+        }
+      }
+    }
+  ]
+}

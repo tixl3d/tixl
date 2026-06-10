@@ -1,0 +1,51 @@
+{
+  "Id": "4499dcb1-c936-49ed-861b-2ad8ae58cb28",
+  "Variations": [
+    {
+      "Id": "d1912fe3-d30a-4800-8a28-aa58a2b38fa1",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Default",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {}
+      }
+    },
+    {
+      "Id": "40f7b642-a052-466c-ac4e-c4da0cb2fd02",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Additive Both Sided",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "922cf855-2676-4a96-9d90-622791a6a423": 1
+        }
+      }
+    },
+    {
+      "Id": "d47bb73a-3d3a-4891-bfbe-346b75476b84",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "Use alpha cut off",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "922cf855-2676-4a96-9d90-622791a6a423": 1,
+          "c004d3c2-de74-48ee-9504-d7de7fe1e554": true,
+          "2c88e7c4-04f8-4e45-94d8-214775c5609c": true,
+          "72060e5d-090f-4c84-890a-ca9ee238fe82": 0.2
+        }
+      }
+    }
+  ]
+}

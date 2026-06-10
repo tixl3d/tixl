@@ -1,0 +1,84 @@
+{
+  "Id": "2cc44046-2702-40d5-ab42-8b36ff3d6ca7",
+  "Variations": [
+    {
+      "Id": "f03fdd35-0a0f-4ee2-b073-5495e1012429",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Radial Tunnel, maybe?",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "7a0aaade-2cf4-45f8-85aa-1133278899ad": true,
+          "f5e93296-efe1-42e0-add8-f8b6298fe183": {
+            "X": 0.34,
+            "Y": 0.21,
+            "Z": 6.12
+          },
+          "ab591dbc-b521-4ef0-b1e2-d03ff27b959e": 1
+        }
+      }
+    },
+    {
+      "Id": "73c05407-0d14-4a4b-ab46-3483feeb57be",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Sometimes",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "7a0aaade-2cf4-45f8-85aa-1133278899ad": true,
+          "42501a2b-4b10-43ff-8774-1e34fb868417": 0.02
+        }
+      }
+    },
+    {
+      "Id": "38bd3b32-bbd4-4a00-8baa-c51a7342c7ac",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "Chaos",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "7a0aaade-2cf4-45f8-85aa-1133278899ad": true,
+          "1f642c68-fca9-4552-bb23-9d066f4b2dda": 0.39,
+          "42501a2b-4b10-43ff-8774-1e34fb868417": 0.81,
+          "25e77db3-6ccb-4857-8dd6-e5c19395d85b": 0.54,
+          "ab591dbc-b521-4ef0-b1e2-d03ff27b959e": 1
+        }
+      }
+    },
+    {
+      "Id": "674cb5b5-97fa-4fcb-9814-289fb186c97e",
+      "IsPreset": true,
+      "ActivationIndex": 4,
+      "Title": "Three two one",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "7a0aaade-2cf4-45f8-85aa-1133278899ad": true,
+          "1f642c68-fca9-4552-bb23-9d066f4b2dda": 0.0,
+          "42501a2b-4b10-43ff-8774-1e34fb868417": 0.81,
+          "f5e93296-efe1-42e0-add8-f8b6298fe183": {
+            "X": 3.0,
+            "Y": 1.0,
+            "Z": 0.0
+          },
+          "ab591dbc-b521-4ef0-b1e2-d03ff27b959e": 1
+        }
+      }
+    }
+  ]
+}

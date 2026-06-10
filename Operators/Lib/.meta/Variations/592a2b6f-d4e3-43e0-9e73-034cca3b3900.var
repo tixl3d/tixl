@@ -1,0 +1,81 @@
+{
+  "Id": "592a2b6f-d4e3-43e0-9e73-034cca3b3900",
+  "Variations": [
+    {
+      "Id": "da012853-e5e3-4ed8-8b9a-bfbda7e61566",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Test At Bottom",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "1224b62e-5fca-41e9-a388-4c13c1458d56": {
+            "X": 0.25,
+            "Y": 0.4
+          }
+        }
+      }
+    },
+    {
+      "Id": "bb90299f-cee8-4d0d-b2f5-63752487f095",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Vertical Slice",
+      "PosOnCanvas": {
+        "X": 400.8869,
+        "Y": -0.6954346
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "1224b62e-5fca-41e9-a388-4c13c1458d56": {
+            "X": 0.0,
+            "Y": 0.0
+          },
+          "f1084d72-f8b8-4723-82be-e1e98880faf3": 90.0
+        }
+      }
+    },
+    {
+      "Id": "c302b9e8-4445-43ed-8f28-f1179646de2e",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "On Right Edge",
+      "PosOnCanvas": {
+        "X": 400.8869,
+        "Y": 92.304565
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "1224b62e-5fca-41e9-a388-4c13c1458d56": {
+            "X": 0.869,
+            "Y": 0.0
+          },
+          "48e80f45-9685-4ded-aa1c-d05e16658c5a": 0.2,
+          "f1084d72-f8b8-4723-82be-e1e98880faf3": 90.0
+        }
+      }
+    },
+    {
+      "Id": "839779d5-614a-4dcf-92ff-6fab684fab11",
+      "IsPreset": true,
+      "ActivationIndex": 4,
+      "Title": "BottomEdge",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "1224b62e-5fca-41e9-a388-4c13c1458d56": {
+            "X": 0.25,
+            "Y": 0.5
+          },
+          "48e80f45-9685-4ded-aa1c-d05e16658c5a": 0.1
+        }
+      }
+    }
+  ]
+}

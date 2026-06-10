@@ -1,0 +1,69 @@
+{
+  "Id": "af9c5db8-7144-4164-b605-b287aaf71bf6",
+  "Variations": [
+    {
+      "Id": "f1884eb7-110b-44f5-84c3-e8dad7fe2c09",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Spring Damp Medium",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "f29d5426-5e31-4c7c-be77-5e45bfb9daa9": 0.1,
+          "76d52df1-597e-4429-9916-13e6e0d93248": 1
+        }
+      }
+    },
+    {
+      "Id": "d6270135-a412-4249-8635-d4f3f4548c7f",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Spring Damp Snappy",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "f29d5426-5e31-4c7c-be77-5e45bfb9daa9": 0.01,
+          "76d52df1-597e-4429-9916-13e6e0d93248": 1
+        }
+      }
+    },
+    {
+      "Id": "5029e50b-b2ad-44fc-a67a-21028adad3f5",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "Spring Damp Slow",
+      "PosOnCanvas": {
+        "X": 489.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "f29d5426-5e31-4c7c-be77-5e45bfb9daa9": 0.2,
+          "76d52df1-597e-4429-9916-13e6e0d93248": 1
+        }
+      }
+    },
+    {
+      "Id": "653d04b5-cc1f-423f-8459-c91fe05dead4",
+      "IsPreset": true,
+      "ActivationIndex": 4,
+      "Title": "untitled",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "f29d5426-5e31-4c7c-be77-5e45bfb9daa9": 0.0,
+          "76d52df1-597e-4429-9916-13e6e0d93248": 0
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "Id": "15f056a3-ee8b-41a2-92c9-eb85153f8200",
+  "Variations": [
+    {
+      "Id": "b762cd0f-7161-414a-8ce8-6becf27271ad",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "RandomizeRotation",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "dedd7211-21c2-4fa0-88d3-14e7a062e7ab": {
+            "X": 10.0,
+            "Y": 10.0,
+            "Z": 10.0
+          }
+        }
+      }
+    },
+    {
+      "Id": "dffed20c-443a-458a-91b5-178525fb5b78",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "untitled",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "dedd7211-21c2-4fa0-88d3-14e7a062e7ab": {
+            "X": 180.0,
+            "Y": 180.0,
+            "Z": 180.0
+          }
+        }
+      }
+    }
+  ]
+}

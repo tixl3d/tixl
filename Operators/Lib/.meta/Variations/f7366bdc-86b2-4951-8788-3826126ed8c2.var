@@ -1,0 +1,189 @@
+{
+  "Id": "f7366bdc-86b2-4951-8788-3826126ed8c2",
+  "Variations": [
+    {
+      "Id": "290a21b6-cb0e-4f2e-9d95-0d7c93fbc5cb",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Default",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "79c84135-5390-455b-bf60-53d4002d0606": 3.0,
+          "912cfd4d-5bef-4fdc-abfc-2f5bf8239875": {
+            "X": 0.5,
+            "Y": 0.5
+          },
+          "0b6c67e6-338e-4bb3-bcee-5cc9e2045824": {
+            "X": 0.0,
+            "Y": 0.0
+          },
+          "a1b3ae23-cb29-4e3e-93b6-fd4f1efadbf1": 0.0,
+          "c355fa5c-c1f5-4e80-b1b1-d2d233dea3fc": 6,
+          "9618504d-bfbd-4d3d-b4d4-03a7064f0fea": 0.0,
+          "05d0a5b2-a7a6-45c5-969a-f00150558a30": 0.0,
+          "d2e12b96-7be3-4b31-bcdd-c882543a6ca6": 0.0
+        }
+      }
+    },
+    {
+      "Id": "2b78f08d-b97e-40d4-a79f-0d801cebcdfb",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Hexa",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "79c84135-5390-455b-bf60-53d4002d0606": 1.5,
+          "912cfd4d-5bef-4fdc-abfc-2f5bf8239875": {
+            "X": 0.5,
+            "Y": 0.5
+          },
+          "0b6c67e6-338e-4bb3-bcee-5cc9e2045824": {
+            "X": 0.0,
+            "Y": 0.0
+          },
+          "a1b3ae23-cb29-4e3e-93b6-fd4f1efadbf1": -45.1,
+          "c355fa5c-c1f5-4e80-b1b1-d2d233dea3fc": 3,
+          "9618504d-bfbd-4d3d-b4d4-03a7064f0fea": 0.0,
+          "05d0a5b2-a7a6-45c5-969a-f00150558a30": 0.0,
+          "d2e12b96-7be3-4b31-bcdd-c882543a6ca6": 0.0
+        }
+      }
+    },
+    {
+      "Id": "124c7db9-8509-4cc1-ac52-c07d0c84bee9",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "Shaded",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "79c84135-5390-455b-bf60-53d4002d0606": 2.0,
+          "912cfd4d-5bef-4fdc-abfc-2f5bf8239875": {
+            "X": 0.5,
+            "Y": 0.5
+          },
+          "0b6c67e6-338e-4bb3-bcee-5cc9e2045824": {
+            "X": 0.0,
+            "Y": 0.0
+          },
+          "a1b3ae23-cb29-4e3e-93b6-fd4f1efadbf1": -45.1,
+          "c355fa5c-c1f5-4e80-b1b1-d2d233dea3fc": 3,
+          "9618504d-bfbd-4d3d-b4d4-03a7064f0fea": 0.07,
+          "05d0a5b2-a7a6-45c5-969a-f00150558a30": 0.0,
+          "d2e12b96-7be3-4b31-bcdd-c882543a6ca6": 0.0
+        }
+      }
+    },
+    {
+      "Id": "e87e5a6c-cbda-4587-acbe-7786bb256f5b",
+      "IsPreset": true,
+      "ActivationIndex": 4,
+      "Title": "Offset Crystal",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "79c84135-5390-455b-bf60-53d4002d0606": 1.8000001,
+          "912cfd4d-5bef-4fdc-abfc-2f5bf8239875": {
+            "X": 0.5,
+            "Y": 0.5
+          },
+          "0b6c67e6-338e-4bb3-bcee-5cc9e2045824": {
+            "X": 0.5,
+            "Y": 0.0
+          },
+          "a1b3ae23-cb29-4e3e-93b6-fd4f1efadbf1": -53.0,
+          "c355fa5c-c1f5-4e80-b1b1-d2d233dea3fc": 4,
+          "9618504d-bfbd-4d3d-b4d4-03a7064f0fea": 0.0,
+          "05d0a5b2-a7a6-45c5-969a-f00150558a30": 0.0,
+          "d2e12b96-7be3-4b31-bcdd-c882543a6ca6": 0.807
+        }
+      }
+    },
+    {
+      "Id": "45e505fa-394f-4692-a388-bee5e9ef7a7b",
+      "IsPreset": true,
+      "ActivationIndex": 5,
+      "Title": "untitled",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "79c84135-5390-455b-bf60-53d4002d0606": 2.74,
+          "912cfd4d-5bef-4fdc-abfc-2f5bf8239875": {
+            "X": 0.5,
+            "Y": 0.6
+          },
+          "0b6c67e6-338e-4bb3-bcee-5cc9e2045824": {
+            "X": 0.5,
+            "Y": -0.53999996
+          },
+          "a1b3ae23-cb29-4e3e-93b6-fd4f1efadbf1": -17.7,
+          "c355fa5c-c1f5-4e80-b1b1-d2d233dea3fc": 1,
+          "9618504d-bfbd-4d3d-b4d4-03a7064f0fea": 0.05,
+          "05d0a5b2-a7a6-45c5-969a-f00150558a30": 0.0,
+          "d2e12b96-7be3-4b31-bcdd-c882543a6ca6": 0.16
+        }
+      }
+    },
+    {
+      "Id": "2fda7307-f2a9-4b6e-8d5f-cf8191d46c75",
+      "IsPreset": true,
+      "ActivationIndex": 6,
+      "Title": "untitled",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "79c84135-5390-455b-bf60-53d4002d0606": 1.5,
+          "912cfd4d-5bef-4fdc-abfc-2f5bf8239875": {
+            "X": 0.5,
+            "Y": 0.5
+          },
+          "0b6c67e6-338e-4bb3-bcee-5cc9e2045824": {
+            "X": 1.05,
+            "Y": 0.0
+          },
+          "a1b3ae23-cb29-4e3e-93b6-fd4f1efadbf1": -45.0,
+          "c355fa5c-c1f5-4e80-b1b1-d2d233dea3fc": 1,
+          "9618504d-bfbd-4d3d-b4d4-03a7064f0fea": -0.029999971,
+          "d2e12b96-7be3-4b31-bcdd-c882543a6ca6": -0.100999996
+        }
+      }
+    },
+    {
+      "Id": "b0942fb4-3df3-4b35-91a5-3ee0ed4109e4",
+      "IsPreset": true,
+      "ActivationIndex": 7,
+      "Title": "Snowflake",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "79c84135-5390-455b-bf60-53d4002d0606": 1.5,
+          "a1b3ae23-cb29-4e3e-93b6-fd4f1efadbf1": 90.0,
+          "c355fa5c-c1f5-4e80-b1b1-d2d233dea3fc": 3
+        }
+      }
+    }
+  ]
+}

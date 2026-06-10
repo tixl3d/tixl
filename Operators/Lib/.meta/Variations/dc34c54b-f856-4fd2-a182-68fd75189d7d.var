@@ -1,0 +1,112 @@
+{
+  "Id": "dc34c54b-f856-4fd2-a182-68fd75189d7d",
+  "Variations": [
+    {
+      "Id": "ed30be80-03a0-464f-af76-0e2b396a6a66",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Mist",
+      "PosOnCanvas": {
+        "X": -23.72124,
+        "Y": -38.216812
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "2c6a429d-5a38-4457-94d5-8994e7d1242d": {
+            "X": 0.5,
+            "Y": 0.5,
+            "Z": 0.5,
+            "W": 1.0
+          },
+          "3abec2c0-a46b-439a-8b00-21e3e9a36933": {
+            "X": 0.25,
+            "Y": 0.5
+          },
+          "3949fce5-e285-4787-9db6-0ef2e533b15e": {
+            "X": 1.0,
+            "Y": 1.0
+          },
+          "f5233be8-dfdf-463b-af49-029f3459bbeb": 7.04,
+          "58ff3aee-7ced-4634-ac4a-871d67d96b57": 0.03,
+          "12d39fbe-cea2-44af-acf7-901df793e0c4": 3.27,
+          "0b76c7f3-32b0-4aa0-a17d-16cb8bde5f80": 4.0,
+          "35852bd6-be0a-4dae-b078-b6db734ca772": 1,
+          "d2e58300-b054-4df5-b3e8-5d7fb36d1ebc": {
+            "X": 0,
+            "Y": 0
+          }
+        }
+      }
+    },
+    {
+      "Id": "51539125-ff4d-4ec9-aedf-0ce2b50ddb1b",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Cubism",
+      "PosOnCanvas": {
+        "X": -23.72124,
+        "Y": -160.76736
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "3949fce5-e285-4787-9db6-0ef2e533b15e": {
+            "X": 1.0,
+            "Y": 1.0
+          },
+          "f5233be8-dfdf-463b-af49-029f3459bbeb": 7.0,
+          "58ff3aee-7ced-4634-ac4a-871d67d96b57": 0.68,
+          "12d39fbe-cea2-44af-acf7-901df793e0c4": 3.27,
+          "0b76c7f3-32b0-4aa0-a17d-16cb8bde5f80": 2.0,
+          "35852bd6-be0a-4dae-b078-b6db734ca772": 0,
+          "d2e58300-b054-4df5-b3e8-5d7fb36d1ebc": {
+            "X": 512,
+            "Y": 512
+          }
+        }
+      }
+    },
+    {
+      "Id": "e9a6411e-7ddb-42ef-9b4a-43e46d125504",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "Wallpaper",
+      "PosOnCanvas": {
+        "X": -23.72124,
+        "Y": 84.33375
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "2c6a429d-5a38-4457-94d5-8994e7d1242d": {
+            "X": 0.0019363784,
+            "Y": 0.007948934,
+            "Z": 0.15311003,
+            "W": 1.0
+          },
+          "5d02399d-dcfa-41c0-bc6b-59833389b580": {
+            "X": 0.0,
+            "Y": 1.0,
+            "Z": 0.0,
+            "W": 1.0
+          },
+          "3abec2c0-a46b-439a-8b00-21e3e9a36933": {
+            "X": 0.07,
+            "Y": 0.0
+          },
+          "3949fce5-e285-4787-9db6-0ef2e533b15e": {
+            "X": 1.0,
+            "Y": 1.0
+          },
+          "f5233be8-dfdf-463b-af49-029f3459bbeb": 7.0,
+          "58ff3aee-7ced-4634-ac4a-871d67d96b57": 0.9,
+          "12d39fbe-cea2-44af-acf7-901df793e0c4": 3.27,
+          "0b76c7f3-32b0-4aa0-a17d-16cb8bde5f80": 1.0,
+          "35852bd6-be0a-4dae-b078-b6db734ca772": 1,
+          "d2e58300-b054-4df5-b3e8-5d7fb36d1ebc": {
+            "X": 768,
+            "Y": 512
+          }
+        }
+      }
+    }
+  ]
+}

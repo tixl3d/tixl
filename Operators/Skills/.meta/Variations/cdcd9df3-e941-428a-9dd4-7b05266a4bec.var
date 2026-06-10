@@ -1,0 +1,101 @@
+{
+  "Id": "cdcd9df3-e941-428a-9dd4-7b05266a4bec",
+  "Variations": [
+    {
+      "Id": "2f56f50a-ef4a-4a8e-8ad7-6fd60fe2ccc9",
+      "IsPreset": false,
+      "ActivationIndex": 1,
+      "Title": "untitled",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "d2f615c5-4575-4ccf-bb6c-77aa85738505": {
+          "e47e9e63-9c94-4c29-9555-2452fa498d57": {
+            "Gradient": {
+              "Interpolation": "Smooth",
+              "Steps": [
+                {
+                  "Id": "425c07e3-faf8-4ed0-a409-e045b13e1ecb",
+                  "NormalizedPosition": 0.0,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.0,
+                    "B": 0.010892391,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "5501e86f-d439-4550-8f2e-6298be037a10",
+                  "NormalizedPosition": 0.16666669,
+                  "Color": {
+                    "R": 0.9081521,
+                    "G": 0.0,
+                    "B": 1.0,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "7f4af994-35bd-40ae-a26b-eb3dc5136a8b",
+                  "NormalizedPosition": 0.3333333,
+                  "Color": {
+                    "R": 0.0,
+                    "G": 0.6253992,
+                    "B": 0.98564595,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "c67c7b8d-2627-489f-93b6-d9f16662a314",
+                  "NormalizedPosition": 0.5,
+                  "Color": {
+                    "R": 0.10326699,
+                    "G": 0.7896903,
+                    "B": 0.83732057,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "87c4a172-a11f-49b7-905a-137591f6caae",
+                  "NormalizedPosition": 0.6666666,
+                  "Color": {
+                    "R": 0.0,
+                    "G": 1.0,
+                    "B": 0.13341331,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "b221836f-88c4-42b0-9da8-dce487f0c926",
+                  "NormalizedPosition": 0.8333333,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.9500792,
+                    "B": 0.0,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "54c3ca8c-ec99-43af-966e-ba4e37524b4d",
+                  "NormalizedPosition": 1.0,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.04149252,
+                    "B": 0.0,
+                    "A": 1.0
+                  }
+                }
+              ]
+            }
+          },
+          "5774969c-ef4d-482e-ab37-b3a84b09debb": false,
+          "7f3fe86d-f259-458a-908a-0a71d39ca678": true
+        },
+        "45c8e3a0-41ac-4494-a25c-7c0fdcc48d3e": {
+          "e0f765f3-ac71-45c9-87a4-e9be3fa9a9a0": 0.5
+        }
+      }
+    }
+  ]
+}

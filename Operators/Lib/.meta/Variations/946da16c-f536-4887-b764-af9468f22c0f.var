@@ -1,0 +1,29 @@
+{
+  "Id": "946da16c-f536-4887-b764-af9468f22c0f",
+  "Variations": [
+    {
+      "Id": "554a47bf-9388-4ee9-afd7-71c4628a9a38",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "default",
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "99188668-b6ac-468b-a892-cd020a3862b2": 1.0,
+          "3c8b43be-430f-4afe-8244-5282be49bfbc": 8.0
+        }
+      }
+    },
+    {
+      "Id": "d96f18e8-3bce-4176-a73a-59d6734fdd8a",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "untitled",
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "99188668-b6ac-468b-a892-cd020a3862b2": 2.0,
+          "3c8b43be-430f-4afe-8244-5282be49bfbc": 16.0
+        }
+      }
+    }
+  ]
+}

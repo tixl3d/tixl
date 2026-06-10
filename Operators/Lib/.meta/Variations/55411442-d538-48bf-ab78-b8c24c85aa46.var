@@ -1,0 +1,150 @@
+{
+  "Id": "55411442-d538-48bf-ab78-b8c24c85aa46",
+  "Variations": [
+    {
+      "Id": "d8350205-d92d-4adf-992d-a2210f9d77c2",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Orange",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "8cb24377-04ad-4bf3-b191-00a0f7af9989": {
+            "X": 1.0,
+            "Y": 0.5662143,
+            "Z": 0.0,
+            "W": 0.8899522
+          }
+        }
+      }
+    },
+    {
+      "Id": "10c81859-8010-44d6-8a5a-0bb2f453bc64",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Orange teal",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "8cb24377-04ad-4bf3-b191-00a0f7af9989": {
+            "X": 0.8088434,
+            "Y": 0.92125165,
+            "Z": 1.0,
+            "W": 0.0
+          },
+          "74d63ccb-7ae5-45d9-af69-ad91b8582407": 0.92,
+          "e3395a18-619b-4fcc-b16c-c04d1df8afd9": 2.5,
+          "f6753ecc-a97e-4854-9f27-09bb9000858c": 0.93,
+          "4a10edf1-9bb4-4bd5-8455-357618f68ca9": 0.24,
+          "090c56b2-bbed-447e-baa1-5993b4e12ddc": 0.099999994
+        }
+      }
+    },
+    {
+      "Id": "0165edb2-2878-4be6-a04e-2739aecb3fb3",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "Colorful",
+      "PosOnCanvas": {
+        "X": 489.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "8cb24377-04ad-4bf3-b191-00a0f7af9989": {
+            "X": 1.0,
+            "Y": 1.0,
+            "Z": 1.0,
+            "W": 0.0
+          },
+          "74d63ccb-7ae5-45d9-af69-ad91b8582407": 0.68,
+          "e3395a18-619b-4fcc-b16c-c04d1df8afd9": 1.3,
+          "f6753ecc-a97e-4854-9f27-09bb9000858c": 1.5,
+          "090c56b2-bbed-447e-baa1-5993b4e12ddc": 0.099999994,
+          "689fdfbe-e78d-42f8-af0b-ae8159dec216": {
+            "X": 9.971077E-07,
+            "Y": 9.978309E-07,
+            "Z": 1E-06,
+            "W": 1.0
+          }
+        }
+      }
+    },
+    {
+      "Id": "106e2bc4-41d3-4543-91ee-4bba9adbca89",
+      "IsPreset": true,
+      "ActivationIndex": 4,
+      "Title": "Blue Yellow",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "8cb24377-04ad-4bf3-b191-00a0f7af9989": {
+            "X": 1.0,
+            "Y": 0.70375127,
+            "Z": 0.22061712,
+            "W": 0.5645933
+          },
+          "74d63ccb-7ae5-45d9-af69-ad91b8582407": 0.46,
+          "e3395a18-619b-4fcc-b16c-c04d1df8afd9": 3.4,
+          "f6753ecc-a97e-4854-9f27-09bb9000858c": 0.0,
+          "090c56b2-bbed-447e-baa1-5993b4e12ddc": 0.0,
+          "689fdfbe-e78d-42f8-af0b-ae8159dec216": {
+            "X": 0.16931002,
+            "Y": 0.317404,
+            "Z": 0.35885167,
+            "W": 1.0
+          }
+        }
+      }
+    },
+    {
+      "Id": "b22ec3ce-37a0-4302-a5c3-2e6339ea31aa",
+      "IsPreset": true,
+      "ActivationIndex": 5,
+      "Title": "Hue Shift",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "8cb24377-04ad-4bf3-b191-00a0f7af9989": {
+            "X": 1.0,
+            "Y": 0.70375127,
+            "Z": 0.22061712,
+            "W": 0.0
+          },
+          "74d63ccb-7ae5-45d9-af69-ad91b8582407": 0.46,
+          "e3395a18-619b-4fcc-b16c-c04d1df8afd9": 3.4,
+          "f6753ecc-a97e-4854-9f27-09bb9000858c": 1.5,
+          "42d296cf-6c53-4da9-bef8-da36c4ca3aea": 143.0,
+          "090c56b2-bbed-447e-baa1-5993b4e12ddc": 0.0
+        }
+      }
+    },
+    {
+      "Id": "ce4cf2cd-3220-412a-a846-e69383e39b1d",
+      "IsPreset": true,
+      "ActivationIndex": 6,
+      "Title": "Default",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "090c56b2-bbed-447e-baa1-5993b4e12ddc": 0.1
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,111 @@
+{
+  "Id": "ea7b8491-2f8e-4add-b0b1-fd068ccfed0d",
+  "Variations": [
+    {
+      "Id": "a069167e-0854-4066-aa2c-8ea7126e30e9",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Saws",
+      "PosOnCanvas": {
+        "X": 326.00018,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "4cf5d20b-7335-4584-b246-c260ac5cdf4f": 2
+        }
+      }
+    },
+    {
+      "Id": "e3fc9678-40e6-46ff-8222-b40de83a4926",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Endless",
+      "PosOnCanvas": {
+        "X": 326.00003,
+        "Y": 186.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "4cf5d20b-7335-4584-b246-c260ac5cdf4f": 0
+        }
+      }
+    },
+    {
+      "Id": "252314c6-dcff-41fc-8db8-3c4178963ad7",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "Wave",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "4cf5d20b-7335-4584-b246-c260ac5cdf4f": 6
+        }
+      }
+    },
+    {
+      "Id": "e368d096-a9d8-429e-b9b1-6bf5c792b734",
+      "IsPreset": true,
+      "ActivationIndex": 4,
+      "Title": "untitled",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "4cf5d20b-7335-4584-b246-c260ac5cdf4f": 10
+        }
+      }
+    },
+    {
+      "Id": "57dff4f6-0a29-4d8f-902b-2f2e9ba92f8d",
+      "IsPreset": true,
+      "ActivationIndex": 5,
+      "Title": "untitled",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "4cf5d20b-7335-4584-b246-c260ac5cdf4f": 0,
+          "79917ef7-64ca-4825-9c6a-c9b2a7f6ff86": 15.0
+        }
+      }
+    },
+    {
+      "Id": "c12d9d4d-713c-4075-a653-76d5a25187f9",
+      "IsPreset": true,
+      "ActivationIndex": 6,
+      "Title": "Sine",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "4cf5d20b-7335-4584-b246-c260ac5cdf4f": 7
+        }
+      }
+    },
+    {
+      "Id": "88d767eb-ff3d-4435-95a6-cec84a3edde3",
+      "IsPreset": true,
+      "ActivationIndex": 7,
+      "Title": "Steps",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 186.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "4cf5d20b-7335-4584-b246-c260ac5cdf4f": 12
+        }
+      }
+    }
+  ]
+}

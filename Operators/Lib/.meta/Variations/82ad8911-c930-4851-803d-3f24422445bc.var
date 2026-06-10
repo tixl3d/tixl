@@ -1,0 +1,368 @@
+{
+  "Id": "82ad8911-c930-4851-803d-3f24422445bc",
+  "Variations": [
+    {
+      "Id": "98ce6dfc-16b0-4236-bfd8-530f2eaece59",
+      "IsPreset": true,
+      "ActivationIndex": 4,
+      "Title": "Look into my eye",
+      "PosOnCanvas": {
+        "X": 174.29375,
+        "Y": 29.000847
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bfdcfed4-263f-4115-a1a8-291088e34c0a": 0.61,
+          "98314ae6-b2a9-433b-90e9-931b059ae62e": 1.04,
+          "5e93ba7d-a33d-4574-a438-a13c03361c29": {
+            "X": 0.08000001,
+            "Y": 0.51
+          },
+          "6c1dc695-1c0a-47fe-aea1-e3abec904883": true,
+          "eab31c38-0e6f-432a-9f15-04bfb0aae28c": false
+        }
+      }
+    },
+    {
+      "Id": "083a2bbc-83bd-40d4-a5ae-88a2da31764f",
+      "IsPreset": true,
+      "ActivationIndex": 6,
+      "Title": "Sun",
+      "PosOnCanvas": {
+        "X": 11.293751,
+        "Y": 151.5514
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bfdcfed4-263f-4115-a1a8-291088e34c0a": 0.47,
+          "98314ae6-b2a9-433b-90e9-931b059ae62e": 0.84,
+          "5e93ba7d-a33d-4574-a438-a13c03361c29": {
+            "X": 0.65000004,
+            "Y": 1.0
+          },
+          "eab31c38-0e6f-432a-9f15-04bfb0aae28c": false
+        }
+      }
+    },
+    {
+      "Id": "ff695724-054b-44d0-b942-82748ed55daa",
+      "IsPreset": true,
+      "ActivationIndex": 7,
+      "Title": "But Why?",
+      "PosOnCanvas": {
+        "X": 174.29375,
+        "Y": 151.5514
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bfdcfed4-263f-4115-a1a8-291088e34c0a": 0.055555556,
+          "98314ae6-b2a9-433b-90e9-931b059ae62e": 1.0,
+          "5e93ba7d-a33d-4574-a438-a13c03361c29": {
+            "X": 0.0,
+            "Y": 0.94
+          },
+          "6c1dc695-1c0a-47fe-aea1-e3abec904883": true,
+          "eab31c38-0e6f-432a-9f15-04bfb0aae28c": true
+        }
+      }
+    },
+    {
+      "Id": "28c83e30-8b10-4d34-bc9e-1cfdafb07f21",
+      "IsPreset": true,
+      "ActivationIndex": 10,
+      "Title": "Sugar",
+      "PosOnCanvas": {
+        "X": 174.29375,
+        "Y": 274.10196
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bfdcfed4-263f-4115-a1a8-291088e34c0a": 0.05,
+          "6c1dc695-1c0a-47fe-aea1-e3abec904883": true,
+          "eab31c38-0e6f-432a-9f15-04bfb0aae28c": true,
+          "dc383dbd-9dab-4bb2-8c6e-7f094e28d8a9": true
+        }
+      }
+    },
+    {
+      "Id": "6bef3837-3d9b-4283-86c0-cdf1f9f1ffcd",
+      "IsPreset": true,
+      "ActivationIndex": 11,
+      "Title": "Rays from above",
+      "PosOnCanvas": {
+        "X": 337.29376,
+        "Y": 274.10196
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bfdcfed4-263f-4115-a1a8-291088e34c0a": 0.05,
+          "6c1dc695-1c0a-47fe-aea1-e3abec904883": true,
+          "eab31c38-0e6f-432a-9f15-04bfb0aae28c": true,
+          "1cf83367-7a34-4369-86d8-77dd4fe48d63": {
+            "X": 0.765,
+            "Y": 0.68
+          },
+          "dc383dbd-9dab-4bb2-8c6e-7f094e28d8a9": true,
+          "7270a7df-744e-4b66-8f85-71fbdf0848d6": 1
+        }
+      }
+    },
+    {
+      "Id": "06f2d446-7699-4986-9716-6bcf03a2d8a6",
+      "IsPreset": true,
+      "ActivationIndex": 12,
+      "Title": "Tora Tora Tora",
+      "PosOnCanvas": {
+        "X": 11.293747,
+        "Y": 274.10196
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bfdcfed4-263f-4115-a1a8-291088e34c0a": 0.025,
+          "5e93ba7d-a33d-4574-a438-a13c03361c29": {
+            "X": 0.0,
+            "Y": 0.44
+          },
+          "6c1dc695-1c0a-47fe-aea1-e3abec904883": true,
+          "eab31c38-0e6f-432a-9f15-04bfb0aae28c": true,
+          "1cf83367-7a34-4369-86d8-77dd4fe48d63": {
+            "X": -0.07,
+            "Y": -0.5
+          },
+          "dc383dbd-9dab-4bb2-8c6e-7f094e28d8a9": true,
+          "7270a7df-744e-4b66-8f85-71fbdf0848d6": 1
+        }
+      }
+    },
+    {
+      "Id": "ef4fd123-e61a-4868-a972-96df8e72a254",
+      "IsPreset": true,
+      "ActivationIndex": 13,
+      "Title": "Low res particle",
+      "PosOnCanvas": {
+        "X": 11.293747,
+        "Y": 519.20306
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "cf2e1698-f996-4b83-8b59-3150e75d59c6": {
+            "X": 128,
+            "Y": 128
+          }
+        }
+      }
+    },
+    {
+      "Id": "85b62d6d-da0c-461f-a438-8ae9aa6bae35",
+      "IsPreset": true,
+      "ActivationIndex": 14,
+      "Title": "I hate date",
+      "PosOnCanvas": {
+        "X": 174.29375,
+        "Y": 396.65253
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bfdcfed4-263f-4115-a1a8-291088e34c0a": 0.055555556,
+          "98314ae6-b2a9-433b-90e9-931b059ae62e": 1.0,
+          "5e93ba7d-a33d-4574-a438-a13c03361c29": {
+            "X": 0.11500001,
+            "Y": 0.125
+          },
+          "6c1dc695-1c0a-47fe-aea1-e3abec904883": true,
+          "eab31c38-0e6f-432a-9f15-04bfb0aae28c": true
+        }
+      }
+    },
+    {
+      "Id": "afcbee81-2d7c-4034-9f06-0b6e41d9e035",
+      "IsPreset": true,
+      "ActivationIndex": 14,
+      "Title": "Star Light 2",
+      "PosOnCanvas": {
+        "X": 11.293747,
+        "Y": 396.65253
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bfdcfed4-263f-4115-a1a8-291088e34c0a": 0.055555556,
+          "98314ae6-b2a9-433b-90e9-931b059ae62e": 1.0,
+          "5e93ba7d-a33d-4574-a438-a13c03361c29": {
+            "X": 0.16999996,
+            "Y": 0.56
+          },
+          "6c1dc695-1c0a-47fe-aea1-e3abec904883": true,
+          "eab31c38-0e6f-432a-9f15-04bfb0aae28c": true,
+          "dc383dbd-9dab-4bb2-8c6e-7f094e28d8a9": true
+        }
+      }
+    },
+    {
+      "Id": "7270c869-09af-40e2-ad0c-0c429247736e",
+      "IsPreset": true,
+      "ActivationIndex": 14,
+      "Title": "A circle",
+      "PosOnCanvas": {
+        "X": 11.293751,
+        "Y": 29.000847
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "5e93ba7d-a33d-4574-a438-a13c03361c29": {
+            "X": 0.0,
+            "Y": 0.5
+          }
+        }
+      }
+    },
+    {
+      "Id": "d201709c-342e-4ea2-8c75-546d037fe2d5",
+      "IsPreset": true,
+      "ActivationIndex": 14,
+      "Title": "Default",
+      "PosOnCanvas": {
+        "X": 11.293751,
+        "Y": -93.54971
+      },
+      "ParameterSetsForChildIds": {}
+    },
+    {
+      "Id": "eea2cec9-532b-4c7e-971f-35a675824b7a",
+      "IsPreset": true,
+      "ActivationIndex": 14,
+      "Title": "A Dot",
+      "PosOnCanvas": {
+        "X": 174.29375,
+        "Y": -93.54971
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bfdcfed4-263f-4115-a1a8-291088e34c0a": 0.06,
+          "5e93ba7d-a33d-4574-a438-a13c03361c29": {
+            "X": 0.0,
+            "Y": 0.5
+          }
+        }
+      }
+    },
+    {
+      "Id": "5baee2cd-2894-4cff-b0d1-823b03419188",
+      "IsPreset": true,
+      "ActivationIndex": 14,
+      "Title": "Glow Ring",
+      "PosOnCanvas": {
+        "X": 337.29376,
+        "Y": -93.54971
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bfdcfed4-263f-4115-a1a8-291088e34c0a": 0.2,
+          "98314ae6-b2a9-433b-90e9-931b059ae62e": 1.0,
+          "6c1dc695-1c0a-47fe-aea1-e3abec904883": true,
+          "eab31c38-0e6f-432a-9f15-04bfb0aae28c": false,
+          "5e93ba7d-a33d-4574-a438-a13c03361c29": {
+            "X": 0.18,
+            "Y": 0.5
+          }
+        }
+      }
+    },
+    {
+      "Id": "29853851-f0af-40ee-9a1b-7e7decc8cdab",
+      "IsPreset": true,
+      "ActivationIndex": 14,
+      "Title": "Transparent Dot",
+      "PosOnCanvas": {
+        "X": 174.29375,
+        "Y": 519.20306
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "3f5a284b-e2f0-47e2-bf79-2a7fe8949519": {
+            "Gradient": {
+              "Interpolation": "Linear",
+              "Steps": [
+                {
+                  "Id": "f93dc7a4-9d2d-4aa0-8acb-fd7e1117d3ea",
+                  "NormalizedPosition": 0.0,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.99999,
+                    "B": 1.0,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "1ccb9285-3acb-48f8-8e8b-ee87cab16cca",
+                  "NormalizedPosition": 1.0,
+                  "Color": {
+                    "R": 0.0,
+                    "G": 0.0,
+                    "B": 0.0,
+                    "A": 0.0
+                  }
+                }
+              ]
+            }
+          },
+          "5e93ba7d-a33d-4574-a438-a13c03361c29": {
+            "X": 0.03,
+            "Y": 0.02
+          },
+          "cf2e1698-f996-4b83-8b59-3150e75d59c6": {
+            "X": 128,
+            "Y": 128
+          }
+        }
+      }
+    },
+    {
+      "Id": "ce834342-0163-4b2a-90c7-ea68647c55a0",
+      "IsPreset": true,
+      "ActivationIndex": 15,
+      "Title": "Light Sabre",
+      "PosOnCanvas": {
+        "X": 337.29376,
+        "Y": 29.000847
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "3f5a284b-e2f0-47e2-bf79-2a7fe8949519": {
+            "Gradient": {
+              "Interpolation": "Linear",
+              "Steps": [
+                {
+                  "Id": "ee509e92-c82b-4d48-9962-6ca6f8371f9c",
+                  "NormalizedPosition": 0.0,
+                  "Color": {
+                    "R": 0.0,
+                    "G": 1.2159347E-11,
+                    "B": 1E-06,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "45bc5a6c-d0c5-411b-9034-e9ccc9f73949",
+                  "NormalizedPosition": 1.0,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.99999,
+                    "B": 1.0,
+                    "A": 1.0
+                  }
+                }
+              ]
+            }
+          },
+          "6c1dc695-1c0a-47fe-aea1-e3abec904883": true,
+          "dc383dbd-9dab-4bb2-8c6e-7f094e28d8a9": true,
+          "5e93ba7d-a33d-4574-a438-a13c03361c29": {
+            "X": 0.825,
+            "Y": 0.61
+          },
+          "f22859b1-044b-44c7-8953-ea0f9cee36e8": 0.016
+        }
+      }
+    }
+  ]
+}

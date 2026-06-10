@@ -1,0 +1,49 @@
+{
+  "Id": "01f405c6-097f-40c7-8b5a-3995565c0034",
+  "Variations": [
+    {
+      "Id": "3fb19bca-7626-4112-9e0c-2efecee14b35",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Twisty things",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "40b1eda0-506e-4cd7-803f-b22c3b5034c1": 0.02,
+          "0403061c-e513-4f14-a53c-da6a9f974ab0": false,
+          "def87ad5-85a3-4e3f-b41d-863bcdb9a274": false,
+          "a9fc4458-8466-4c1e-9ff1-6a1027ac2452": 100000,
+          "3376f092-0f31-4f33-94aa-dc1d87765ca1": 1,
+          "370abbce-6242-47ed-97e5-0449279bcdc3": {
+            "X": 0.984,
+            "Y": 0.804,
+            "Z": 0.966,
+            "W": 0.994
+          },
+          "699612ce-8d27-4e18-a20b-0805ace4c2a3": {
+            "X": 2.7,
+            "Y": 3.2,
+            "Z": 0.7,
+            "W": 1.0
+          },
+          "fe1c94d9-83ab-4de7-a7c8-873a21cb7ec1": {
+            "X": 1.1,
+            "Y": 1.0,
+            "Z": 2.7,
+            "W": 0.55
+          },
+          "c55aff93-3dbe-41d9-a95a-218fd97b73d0": 2.8,
+          "41ed47e8-3752-47ff-87cc-92dd321fad9a": -0.4,
+          "51ec134a-446c-4491-a800-ad031dc4173f": -2.0,
+          "dce3fa87-ea7e-4efc-83c7-fd404d294384": 28.0,
+          "8c4c5d7e-127c-421f-8ab3-5c434f804e4c": 3.9,
+          "f8fe6b09-b760-4bec-a17c-a2d4d2f5b07f": 0.0,
+          "be543da0-fae2-4e1e-8f97-87ec37e4e2a0": 5.0
+        }
+      }
+    }
+  ]
+}

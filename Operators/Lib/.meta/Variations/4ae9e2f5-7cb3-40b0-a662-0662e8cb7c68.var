@@ -1,0 +1,22 @@
+{
+  "Id": "4ae9e2f5-7cb3-40b0-a662-0662e8cb7c68",
+  "Variations": [
+    {
+      "Id": "ff05283f-a92c-4075-b293-1934e312ef56",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "untitled",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "951a1792-e607-4595-b211-97be7d27694c": 2,
+          "af75835a-04c9-4721-8c7a-a31ef8012f06": 0.5,
+          "ddc2ea6a-d356-46c9-b333-4cce69c02570": true
+        }
+      }
+    }
+  ]
+}

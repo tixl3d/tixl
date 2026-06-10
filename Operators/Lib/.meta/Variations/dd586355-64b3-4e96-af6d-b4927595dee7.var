@@ -1,0 +1,38 @@
+{
+  "Id": "dd586355-64b3-4e96-af6d-b4927595dee7",
+  "Variations": [
+    {
+      "Id": "79cf7ead-10e9-46b5-948c-5c9988681afb",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "A little chaos",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "5894156a-cc31-4236-908c-de0e5385fd84": 100.0,
+          "929db7b2-f19c-4a28-b4c2-187365b99760": 2.0,
+          "1dfb45ae-b376-41ea-a1d2-97b170645b50": 0.1
+        }
+      }
+    },
+    {
+      "Id": "4b6710f4-726e-41c6-be95-389f12a00ead",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Piggy Tail",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "5894156a-cc31-4236-908c-de0e5385fd84": 20.0,
+          "929db7b2-f19c-4a28-b4c2-187365b99760": 5.0
+        }
+      }
+    }
+  ]
+}

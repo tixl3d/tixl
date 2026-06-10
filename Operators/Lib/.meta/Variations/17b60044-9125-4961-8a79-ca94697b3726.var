@@ -1,0 +1,20 @@
+{
+  "Id": "17b60044-9125-4961-8a79-ca94697b3726",
+  "Variations": [
+    {
+      "Id": "3b2d5f7d-74a7-4c23-a6b1-064fdda07db7",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Negate",
+      "PosOnCanvas": {
+        "X": -2.8318596,
+        "Y": 20.04425
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "5ae4bb07-4214-4ec3-a499-24d9f6d404a5": -1.0
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,284 @@
+{
+  "Id": "3352d3a1-ab04-4d0a-bb43-da69095b73fd",
+  "Variations": [
+    {
+      "Id": "a2d31fc5-3db4-4c9f-9ce5-775f1c7f92c8",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "spiral",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "b654ffe2-d46e-4a62-89b3-a9692d5c6481": 1000,
+          "acce4779-56d6-47c4-9c52-874fca91a3a1": 1.0,
+          "13cbb509-f90c-4ae7-a9d3-a8fc907794e3": -1.0,
+          "5a3347a2-ba87-4b38-a1a8-94bd0ef70f48": 0.0,
+          "94b2a118-f760-4043-933c-31283e6e7006": 10.0
+        }
+      }
+    },
+    {
+      "Id": "c0b4d85d-a8b7-431e-ad8e-596f0daed065",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "100 y",
+      "PosOnCanvas": {
+        "X": -3.8146973E-06,
+        "Y": 583.2023
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "6df5829e-a534-4620-bcd5-9324f94b4f54": {
+            "X": 0.0,
+            "Y": 1.0,
+            "Z": 0.0
+          }
+        }
+      }
+    },
+    {
+      "Id": "0248c8e3-15ab-4244-93f9-f5f2fdbea8c6",
+      "IsPreset": true,
+      "ActivationIndex": 5,
+      "Title": "Ring XY tangential",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": -29.55056
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "b654ffe2-d46e-4a62-89b3-a9692d5c6481": 7,
+          "6df5829e-a534-4620-bcd5-9324f94b4f54": {
+            "X": 0.0,
+            "Y": 1.0,
+            "Z": 0.0
+          },
+          "01a62754-7629-487d-a43a-f0cd2fbfafce": {
+            "X": 1.0,
+            "Y": 0.0,
+            "Z": 0.0
+          },
+          "cd917c3d-489e-4e4d-b5dc-eacc846d82ef": 90.0
+        }
+      }
+    },
+    {
+      "Id": "18b2a6d5-e8a5-4728-be11-c1c704ce2003",
+      "IsPreset": true,
+      "ActivationIndex": 4,
+      "Title": "Double Helix",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "b654ffe2-d46e-4a62-89b3-a9692d5c6481": 2000,
+          "f6986f68-851b-4cd1-ae59-bf189aa1698e": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": -2.0
+          },
+          "94b2a118-f760-4043-933c-31283e6e7006": 1000.0
+        }
+      }
+    },
+    {
+      "Id": "18398976-8779-4d7b-8998-43415c5d14d0",
+      "IsPreset": true,
+      "ActivationIndex": 5,
+      "Title": "Spring",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 215.55057
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "b654ffe2-d46e-4a62-89b3-a9692d5c6481": 2000,
+          "f6986f68-851b-4cd1-ae59-bf189aa1698e": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": -2.0
+          },
+          "94b2a118-f760-4043-933c-31283e6e7006": 5.0
+        }
+      }
+    },
+    {
+      "Id": "5d233ce7-1d75-40e7-8be8-1570bd57f985",
+      "IsPreset": true,
+      "ActivationIndex": 6,
+      "Title": "Tornado",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 215.55057
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "b654ffe2-d46e-4a62-89b3-a9692d5c6481": 20000,
+          "acce4779-56d6-47c4-9c52-874fca91a3a1": 0.0,
+          "13cbb509-f90c-4ae7-a9d3-a8fc907794e3": 1.5,
+          "ca84209e-d821-40c6-b23c-38fc4bbd47b0": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0
+          },
+          "f6986f68-851b-4cd1-ae59-bf189aa1698e": {
+            "X": 0.0,
+            "Y": 4.5,
+            "Z": 0.0
+          },
+          "94b2a118-f760-4043-933c-31283e6e7006": 20.0,
+          "6df5829e-a534-4620-bcd5-9324f94b4f54": {
+            "X": 0.0,
+            "Y": 1.0,
+            "Z": 0.0
+          }
+        }
+      }
+    },
+    {
+      "Id": "f6e43534-5e41-4793-8059-5b9ddbdd8711",
+      "IsPreset": true,
+      "ActivationIndex": 7,
+      "Title": "untitled",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 583.2023
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "b654ffe2-d46e-4a62-89b3-a9692d5c6481": 20000,
+          "acce4779-56d6-47c4-9c52-874fca91a3a1": 0.0,
+          "13cbb509-f90c-4ae7-a9d3-a8fc907794e3": 0.0,
+          "ca84209e-d821-40c6-b23c-38fc4bbd47b0": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0
+          },
+          "f6986f68-851b-4cd1-ae59-bf189aa1698e": {
+            "X": 0.0,
+            "Y": 4.5,
+            "Z": 0.0
+          },
+          "94b2a118-f760-4043-933c-31283e6e7006": 10.0,
+          "6df5829e-a534-4620-bcd5-9324f94b4f54": {
+            "X": 0.0,
+            "Y": 1.0,
+            "Z": 0.0
+          },
+          "01a62754-7629-487d-a43a-f0cd2fbfafce": {
+            "X": 1.0,
+            "Y": 0.0,
+            "Z": 0.0
+          },
+          "cd917c3d-489e-4e4d-b5dc-eacc846d82ef": 90.0
+        }
+      }
+    },
+    {
+      "Id": "32ddbd58-c8ac-495f-bafe-4fdfc5bd4aca",
+      "IsPreset": true,
+      "ActivationIndex": 8,
+      "Title": "Letter Spiral",
+      "PosOnCanvas": {
+        "X": -3.8146973E-06,
+        "Y": 338.10114
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "b654ffe2-d46e-4a62-89b3-a9692d5c6481": 1000,
+          "acce4779-56d6-47c4-9c52-874fca91a3a1": 0.0,
+          "13cbb509-f90c-4ae7-a9d3-a8fc907794e3": 1.0,
+          "94b2a118-f760-4043-933c-31283e6e7006": -10.0,
+          "cd917c3d-489e-4e4d-b5dc-eacc846d82ef": -83.0
+        }
+      }
+    },
+    {
+      "Id": "cbbc489e-55bd-47fc-ad4f-9777950630a0",
+      "IsPreset": true,
+      "ActivationIndex": 9,
+      "Title": "untitled",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": -29.55056
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "acce4779-56d6-47c4-9c52-874fca91a3a1": -0.41000003,
+          "6df5829e-a534-4620-bcd5-9324f94b4f54": {
+            "X": 0.0,
+            "Y": 1.0,
+            "Z": 0.0
+          },
+          "01a62754-7629-487d-a43a-f0cd2fbfafce": {
+            "X": 0.0,
+            "Y": 1.0,
+            "Z": 0.0
+          },
+          "cd917c3d-489e-4e4d-b5dc-eacc846d82ef": -90.0
+        }
+      }
+    },
+    {
+      "Id": "2f59d0c3-4f1c-43f5-85f1-7780723984eb",
+      "IsPreset": true,
+      "ActivationIndex": 10,
+      "Title": "Square",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 338.10114
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "b654ffe2-d46e-4a62-89b3-a9692d5c6481": 6,
+          "5a3347a2-ba87-4b38-a1a8-94bd0ef70f48": 45.0
+        }
+      }
+    },
+    {
+      "Id": "3166188a-5918-40f5-b397-598784f9e563",
+      "IsPreset": true,
+      "ActivationIndex": 11,
+      "Title": "Z-To Center",
+      "PosOnCanvas": {
+        "X": -3.8146973E-06,
+        "Y": 460.6517
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "01a62754-7629-487d-a43a-f0cd2fbfafce": {
+            "X": 0.0,
+            "Y": 1.0,
+            "Z": 0.0
+          },
+          "cd917c3d-489e-4e4d-b5dc-eacc846d82ef": 270.0
+        }
+      }
+    },
+    {
+      "Id": "e1ca55fe-265f-4dc0-b91f-82e23b166fe6",
+      "IsPreset": true,
+      "ActivationIndex": 12,
+      "Title": "Z To outside",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 460.6517
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "01a62754-7629-487d-a43a-f0cd2fbfafce": {
+            "X": 0.0,
+            "Y": 1.0,
+            "Z": 0.0
+          },
+          "cd917c3d-489e-4e4d-b5dc-eacc846d82ef": 90.0
+        }
+      }
+    }
+  ]
+}

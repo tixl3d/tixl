@@ -1,0 +1,167 @@
+{
+  "Id": "0ed2bee3-641f-4b08-8685-df1506e9af3c",
+  "Variations": [
+    {
+      "Id": "ccdd2c2f-e9ac-4618-97a2-cbdbef4d3f0b",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Rough",
+      "PosOnCanvas": {
+        "X": 120.95604,
+        "Y": -111.462555
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "e14dcc43-7c18-4ed7-ad39-dfeab10e3d33": 0.46
+        }
+      }
+    },
+    {
+      "Id": "ecace59e-beff-4450-a0bc-2066ae4a3e5e",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "untitled",
+      "PosOnCanvas": {
+        "X": -137.19656,
+        "Y": -22.447502
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "e14dcc43-7c18-4ed7-ad39-dfeab10e3d33": 0.46
+        }
+      }
+    },
+    {
+      "Id": "1176df9b-eb27-4470-9696-67c17dcf2543",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "untitled",
+      "PosOnCanvas": {
+        "X": -137.19656,
+        "Y": -115.4475
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "9ff5ade2-cfa7-4616-ad89-356f3248e04f": {
+            "X": 1.0,
+            "Y": 0.318331,
+            "Z": 0.0,
+            "W": 1.0
+          },
+          "e14dcc43-7c18-4ed7-ad39-dfeab10e3d33": 0.46
+        }
+      }
+    },
+    {
+      "Id": "4da4c7af-dd32-4538-b159-9192d0681c81",
+      "IsPreset": true,
+      "ActivationIndex": 4,
+      "Title": "untitled",
+      "PosOnCanvas": {
+        "X": 120.95604,
+        "Y": -18.462555
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "9ff5ade2-cfa7-4616-ad89-356f3248e04f": {
+            "X": 1.0,
+            "Y": 0.318331,
+            "Z": 0.0,
+            "W": 1.0
+          },
+          "2c91c306-1815-4b22-a70f-746232f024d7": {
+            "X": 0.0057432125,
+            "Y": 0.42657775,
+            "Z": 0.7751196,
+            "W": 1.0
+          },
+          "e14dcc43-7c18-4ed7-ad39-dfeab10e3d33": 0.46
+        }
+      }
+    },
+    {
+      "Id": "6158a6d7-8057-41b2-984a-7dfc44e69e33",
+      "IsPreset": true,
+      "ActivationIndex": 5,
+      "Title": "Mirror Ball",
+      "PosOnCanvas": {
+        "X": 28.045746,
+        "Y": 323.88904
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "e14dcc43-7c18-4ed7-ad39-dfeab10e3d33": 0.003,
+          "108ff533-f205-4989-b894-acf48e3cc1db": 1.0
+        }
+      }
+    },
+    {
+      "Id": "24c0ed47-2e90-408d-abbd-fc62c594fd9d",
+      "IsPreset": true,
+      "ActivationIndex": 6,
+      "Title": "Copper",
+      "PosOnCanvas": {
+        "X": -134.95425,
+        "Y": 230.88902
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "9ff5ade2-cfa7-4616-ad89-356f3248e04f": {
+            "X": 0.8133971,
+            "Y": 0.58395994,
+            "Z": 0.46687907,
+            "W": 1.0
+          },
+          "9d5ca726-28b0-4f3d-a5aa-f0ae3e2043a9": 2.95,
+          "e14dcc43-7c18-4ed7-ad39-dfeab10e3d33": 0.4,
+          "108ff533-f205-4989-b894-acf48e3cc1db": 1.0
+        }
+      }
+    },
+    {
+      "Id": "21155632-b368-4b94-ae83-4e5d18ce0361",
+      "IsPreset": true,
+      "ActivationIndex": 7,
+      "Title": "Gold",
+      "PosOnCanvas": {
+        "X": 28.045746,
+        "Y": 230.88902
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "9ff5ade2-cfa7-4616-ad89-356f3248e04f": {
+            "X": 0.8484831,
+            "Y": 0.60470295,
+            "Z": 0.24660772,
+            "W": 1.0
+          },
+          "9d5ca726-28b0-4f3d-a5aa-f0ae3e2043a9": 0.99,
+          "e14dcc43-7c18-4ed7-ad39-dfeab10e3d33": 0.31,
+          "108ff533-f205-4989-b894-acf48e3cc1db": 0.99
+        }
+      }
+    },
+    {
+      "Id": "48840ab4-9f7f-4e08-ad67-6ef72a77c3d7",
+      "IsPreset": true,
+      "ActivationIndex": 8,
+      "Title": "Cheap Plastics",
+      "PosOnCanvas": {
+        "X": -134.95425,
+        "Y": 323.88904
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "9ff5ade2-cfa7-4616-ad89-356f3248e04f": {
+            "X": 1.0,
+            "Y": 0.3274448,
+            "Z": 0.08981466,
+            "W": 1.0
+          },
+          "e14dcc43-7c18-4ed7-ad39-dfeab10e3d33": 0.17,
+          "108ff533-f205-4989-b894-acf48e3cc1db": 0.01
+        }
+      }
+    }
+  ]
+}

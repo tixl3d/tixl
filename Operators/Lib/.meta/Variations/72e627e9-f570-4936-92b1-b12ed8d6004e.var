@@ -1,0 +1,155 @@
+{
+  "Id": "72e627e9-f570-4936-92b1-b12ed8d6004e",
+  "Variations": [
+    {
+      "Id": "dc6212a0-a4eb-44ed-8c5a-14f837488b34",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Default",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {}
+      }
+    },
+    {
+      "Id": "bbde927d-4503-48c8-8a3d-a112b17cbfe8",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Slit",
+      "PosOnCanvas": {
+        "X": 162.99998,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "b77a3329-c938-4dd3-bf3b-8774db187ef5": 0.02,
+          "b465481c-8b5d-4c6d-a659-6f51135b86fa": 0.0
+        }
+      }
+    },
+    {
+      "Id": "b51d25cc-912d-49a0-9736-188207520ec6",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "Scanner",
+      "PosOnCanvas": {
+        "X": 326.00003,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "b9859a88-4dd1-4221-9884-0a6e8cec9da4": {
+            "X": 1.0,
+            "Y": 0.99999,
+            "Z": 0.99999,
+            "W": 1.0
+          },
+          "b77a3329-c938-4dd3-bf3b-8774db187ef5": 0.02,
+          "b465481c-8b5d-4c6d-a659-6f51135b86fa": 0.0
+        }
+      }
+    },
+    {
+      "Id": "3b388b1f-e9a9-4bdf-af78-3297b58dbbe4",
+      "IsPreset": true,
+      "ActivationIndex": 4,
+      "Title": "Consider this",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "b9859a88-4dd1-4221-9884-0a6e8cec9da4": {
+            "X": 1.0,
+            "Y": 0.99999,
+            "Z": 0.99999,
+            "W": 1.0
+          },
+          "549020f5-e405-4f78-a973-9e9fb3c9c25e": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0,
+            "W": 1.0
+          },
+          "b77a3329-c938-4dd3-bf3b-8774db187ef5": 0.12,
+          "b465481c-8b5d-4c6d-a659-6f51135b86fa": 90.0,
+          "881e04f7-1014-4e87-81c9-f4791086e57d": 3.3000002
+        }
+      }
+    },
+    {
+      "Id": "ff39a6f2-8487-4981-ba8d-bdb1758a841f",
+      "IsPreset": true,
+      "ActivationIndex": 5,
+      "Title": "Cutout",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "b9859a88-4dd1-4221-9884-0a6e8cec9da4": {
+            "X": 1.0,
+            "Y": 0.99999,
+            "Z": 0.99999,
+            "W": 0.0
+          },
+          "549020f5-e405-4f78-a973-9e9fb3c9c25e": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0,
+            "W": 1.0
+          },
+          "b77a3329-c938-4dd3-bf3b-8774db187ef5": 0.02,
+          "b465481c-8b5d-4c6d-a659-6f51135b86fa": 90.0,
+          "0f597b6c-eec8-4b06-92de-28f7cbe2243a": -6.2,
+          "881e04f7-1014-4e87-81c9-f4791086e57d": 3.3000002,
+          "3acc47a3-83a8-4994-8456-e365595ed38c": -1.38,
+          "294af91e-65f2-4e2c-8bd2-0896019f8e65": -0.19999981
+        }
+      }
+    },
+    {
+      "Id": "35181933-7e27-4e55-b8dc-2bb0da3ee253",
+      "IsPreset": true,
+      "ActivationIndex": 6,
+      "Title": "Mind the gap",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "35e6faff-7e13-4fa8-8aca-32efc02f29e0": {
+            "X": 1.0,
+            "Y": 1.0,
+            "Z": 1.0,
+            "W": 0.0
+          },
+          "b9859a88-4dd1-4221-9884-0a6e8cec9da4": {
+            "X": 1.0,
+            "Y": 0.99999,
+            "Z": 0.99999,
+            "W": 1.0
+          },
+          "549020f5-e405-4f78-a973-9e9fb3c9c25e": {
+            "X": 1.0,
+            "Y": 0.073311746,
+            "Z": 0.0,
+            "W": 1.0
+          },
+          "b77a3329-c938-4dd3-bf3b-8774db187ef5": 0.05,
+          "b465481c-8b5d-4c6d-a659-6f51135b86fa": 90.0,
+          "0f597b6c-eec8-4b06-92de-28f7cbe2243a": -6.2,
+          "881e04f7-1014-4e87-81c9-f4791086e57d": 3.3000002,
+          "3acc47a3-83a8-4994-8456-e365595ed38c": -1.38,
+          "294af91e-65f2-4e2c-8bd2-0896019f8e65": -0.19999981
+        }
+      }
+    }
+  ]
+}

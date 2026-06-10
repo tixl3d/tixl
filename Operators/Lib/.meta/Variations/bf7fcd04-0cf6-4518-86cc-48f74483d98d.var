@@ -1,0 +1,348 @@
+{
+  "Id": "bf7fcd04-0cf6-4518-86cc-48f74483d98d",
+  "Variations": [
+    {
+      "Id": "9349d56e-8455-4452-a8ff-0cb10001e5ed",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Default",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {}
+    },
+    {
+      "Id": "af254711-9494-451f-8447-9b3b2d2d1f69",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Traffic Sign",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "d4f79203-401a-4f6e-8f83-74a3d61c0177": {
+            "X": 0.44,
+            "Y": 0.44,
+            "Z": 0.44,
+            "W": 0.72
+          },
+          "d4c20bfc-3943-4c5d-a8f8-5175fa152e91": {
+            "X": 1.0,
+            "Y": 1.0,
+            "Z": 1.0,
+            "W": 0.0
+          },
+          "d2401798-593b-4cc3-85d8-3570ddec1f2a": 0.88,
+          "ef3d0313-50a1-42d3-b3cb-e8ea1b93cd34": 0.32,
+          "80bd2460-c28d-490c-981b-77a6e89f3983": 0.05,
+          "be43e160-f9a0-4991-b764-2b5e533b37cc": 0.02
+        }
+      }
+    },
+    {
+      "Id": "76aad5ab-6a44-4ca3-b228-a7f75f745d32",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "Panel",
+      "PosOnCanvas": {
+        "X": 489.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "d4f79203-401a-4f6e-8f83-74a3d61c0177": {
+            "X": 0.44,
+            "Y": 0.44,
+            "Z": 0.44,
+            "W": 0.72
+          },
+          "d4c20bfc-3943-4c5d-a8f8-5175fa152e91": {
+            "X": 1.0,
+            "Y": 1.0,
+            "Z": 1.0,
+            "W": 0.0
+          },
+          "c608e4c4-c545-45ed-8e37-95a53f6871d0": {
+            "X": 1.4,
+            "Y": 1.0
+          },
+          "d2401798-593b-4cc3-85d8-3570ddec1f2a": 0.88,
+          "ef3d0313-50a1-42d3-b3cb-e8ea1b93cd34": 0.02,
+          "80bd2460-c28d-490c-981b-77a6e89f3983": 0.03,
+          "be43e160-f9a0-4991-b764-2b5e533b37cc": 0.02
+        }
+      }
+    },
+    {
+      "Id": "56fc8c6e-eb83-4428-94e3-6421b8abb4fd",
+      "IsPreset": true,
+      "ActivationIndex": 4,
+      "Title": "45er",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "d4f79203-401a-4f6e-8f83-74a3d61c0177": {
+            "X": 0.44,
+            "Y": 0.44,
+            "Z": 0.44,
+            "W": 0.72
+          },
+          "d4c20bfc-3943-4c5d-a8f8-5175fa152e91": {
+            "X": 1.0,
+            "Y": 1.0,
+            "Z": 1.0,
+            "W": 0.0
+          },
+          "c608e4c4-c545-45ed-8e37-95a53f6871d0": {
+            "X": 2.19,
+            "Y": 0.21
+          },
+          "d2401798-593b-4cc3-85d8-3570ddec1f2a": 0.88,
+          "ef3d0313-50a1-42d3-b3cb-e8ea1b93cd34": 0.02,
+          "80bd2460-c28d-490c-981b-77a6e89f3983": 0.1,
+          "be43e160-f9a0-4991-b764-2b5e533b37cc": 0.02,
+          "202340b4-0629-40a1-9399-0cda047df116": 55.0
+        }
+      }
+    },
+    {
+      "Id": "6c3adba0-31cb-4877-9ddd-a933e2218340",
+      "IsPreset": true,
+      "ActivationIndex": 5,
+      "Title": "CopperBar",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "d4f79203-401a-4f6e-8f83-74a3d61c0177": {
+            "X": 0.44,
+            "Y": 0.44,
+            "Z": 0.44,
+            "W": 0.72
+          },
+          "d4c20bfc-3943-4c5d-a8f8-5175fa152e91": {
+            "X": 1.0,
+            "Y": 1.0,
+            "Z": 1.0,
+            "W": 0.0
+          },
+          "c608e4c4-c545-45ed-8e37-95a53f6871d0": {
+            "X": 2.19,
+            "Y": 0.21
+          },
+          "d2401798-593b-4cc3-85d8-3570ddec1f2a": 0.88,
+          "ef3d0313-50a1-42d3-b3cb-e8ea1b93cd34": 0.02,
+          "80bd2460-c28d-490c-981b-77a6e89f3983": 0.1,
+          "be43e160-f9a0-4991-b764-2b5e533b37cc": 1.0
+        }
+      }
+    },
+    {
+      "Id": "f522ae1d-2341-47b0-8f3c-5296e3a39843",
+      "IsPreset": true,
+      "ActivationIndex": 6,
+      "Title": "StarLike",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "d4f79203-401a-4f6e-8f83-74a3d61c0177": {
+            "X": 1.0,
+            "Y": 1.0,
+            "Z": 1.0,
+            "W": 0.0
+          },
+          "d4c20bfc-3943-4c5d-a8f8-5175fa152e91": {
+            "X": 1.0,
+            "Y": 1.0,
+            "Z": 1.0,
+            "W": 0.0
+          },
+          "d2401798-593b-4cc3-85d8-3570ddec1f2a": 0.88,
+          "ef3d0313-50a1-42d3-b3cb-e8ea1b93cd34": 0.0,
+          "80bd2460-c28d-490c-981b-77a6e89f3983": 0.1,
+          "be43e160-f9a0-4991-b764-2b5e533b37cc": 1.0,
+          "202340b4-0629-40a1-9399-0cda047df116": 45.0
+        }
+      }
+    },
+    {
+      "Id": "32c60896-b292-4b7d-a92b-23c20c9e02bc",
+      "IsPreset": true,
+      "ActivationIndex": 7,
+      "Title": "Condom",
+      "PosOnCanvas": {
+        "X": 489.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "a20d31a3-115f-4d38-a988-2a41f6e5cbea": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0,
+            "W": 1.0
+          },
+          "d4f79203-401a-4f6e-8f83-74a3d61c0177": {
+            "X": 1.0,
+            "Y": 1.0,
+            "Z": 1.0,
+            "W": 0.0
+          },
+          "d4c20bfc-3943-4c5d-a8f8-5175fa152e91": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0,
+            "W": 1.0
+          },
+          "d2401798-593b-4cc3-85d8-3570ddec1f2a": 0.5,
+          "ef3d0313-50a1-42d3-b3cb-e8ea1b93cd34": 1.0,
+          "80bd2460-c28d-490c-981b-77a6e89f3983": 0.1,
+          "be43e160-f9a0-4991-b764-2b5e533b37cc": 0.3
+        }
+      }
+    },
+    {
+      "Id": "d669e1d8-3ba1-4bdd-a848-6e974b6148a4",
+      "IsPreset": true,
+      "ActivationIndex": 8,
+      "Title": "Blob Black",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 186.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "a20d31a3-115f-4d38-a988-2a41f6e5cbea": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0,
+            "W": 1.0
+          },
+          "d4f79203-401a-4f6e-8f83-74a3d61c0177": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0,
+            "W": 0.0
+          },
+          "d4c20bfc-3943-4c5d-a8f8-5175fa152e91": {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0,
+            "W": 0.0
+          },
+          "d2401798-593b-4cc3-85d8-3570ddec1f2a": 1.0,
+          "ef3d0313-50a1-42d3-b3cb-e8ea1b93cd34": 1.0,
+          "80bd2460-c28d-490c-981b-77a6e89f3983": 0.1,
+          "be43e160-f9a0-4991-b764-2b5e533b37cc": 1.0
+        }
+      }
+    },
+    {
+      "Id": "17c6366c-742f-431f-a96f-83b16baf79ae",
+      "IsPreset": true,
+      "ActivationIndex": 9,
+      "Title": "256px white alpha blob",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 186.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "d4c20bfc-3943-4c5d-a8f8-5175fa152e91": {
+            "X": 1.0,
+            "Y": 1.0,
+            "Z": 1.0,
+            "W": 0.0
+          },
+          "ef3d0313-50a1-42d3-b3cb-e8ea1b93cd34": 1.0,
+          "be43e160-f9a0-4991-b764-2b5e533b37cc": 1.0,
+          "07e57992-ea38-4e3b-8d69-cb4e99ae587c": {
+            "Width": 256,
+            "Height": 256
+          },
+          "c9c66f57-5c8c-4481-9b9d-a8aa8569ac12": true
+        }
+      }
+    },
+    {
+      "Id": "c62c8fc3-eb57-4467-96bb-2ba232140c60",
+      "IsPreset": true,
+      "ActivationIndex": 10,
+      "Title": "Square",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 186.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "ef3d0313-50a1-42d3-b3cb-e8ea1b93cd34": 0.0
+        }
+      }
+    },
+    {
+      "Id": "f25357b1-2809-4443-9a7a-c4f7b0562fd2",
+      "IsPreset": true,
+      "ActivationIndex": 11,
+      "Title": "Ring 256px",
+      "PosOnCanvas": {
+        "X": 489.0,
+        "Y": 186.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "a20d31a3-115f-4d38-a988-2a41f6e5cbea": {
+            "X": 1.0,
+            "Y": 1.0,
+            "Z": 1.0,
+            "W": 0.0
+          },
+          "d4c20bfc-3943-4c5d-a8f8-5175fa152e91": {
+            "X": 1.0,
+            "Y": 1.0,
+            "Z": 1.0,
+            "W": 0.0
+          },
+          "d2401798-593b-4cc3-85d8-3570ddec1f2a": 0.8,
+          "ef3d0313-50a1-42d3-b3cb-e8ea1b93cd34": 1.0,
+          "80bd2460-c28d-490c-981b-77a6e89f3983": 0.1,
+          "be43e160-f9a0-4991-b764-2b5e533b37cc": 0.01,
+          "07e57992-ea38-4e3b-8d69-cb4e99ae587c": {
+            "Width": 256,
+            "Height": 256
+          },
+          "c9c66f57-5c8c-4481-9b9d-a8aa8569ac12": true
+        }
+      }
+    },
+    {
+      "Id": "a90da521-60de-426f-a4da-1fb4235fd302",
+      "IsPreset": true,
+      "ActivationIndex": 12,
+      "Title": "Square 256px",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 279.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "ef3d0313-50a1-42d3-b3cb-e8ea1b93cd34": 0.0,
+          "07e57992-ea38-4e3b-8d69-cb4e99ae587c": {
+            "Width": 256,
+            "Height": 256
+          }
+        }
+      }
+    }
+  ]
+}

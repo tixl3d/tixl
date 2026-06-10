@@ -1,0 +1,257 @@
+{
+  "Id": "b882a5d0-f5ae-40a4-8c42-5b25e5775def",
+  "Variations": [
+    {
+      "Id": "87376096-7a13-4124-a884-bc58a80e1136",
+      "IsPreset": true,
+      "ActivationIndex": 9,
+      "Title": "Club house",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 424.9322
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "52243bdc-6dce-46b9-95d9-af90cde3d56f": 4.0,
+          "40ea5583-313d-4a48-82f4-d52bfa7c9e17": 13.53,
+          "48008617-deee-459b-a492-b86f6cbde3df": 0.33,
+          "28111fbf-92ea-4674-9b65-0def5a7252cd": 0.095,
+          "31d0e3ab-5aaf-4bf2-8d50-ac3c58026a51": 0.0,
+          "bf6d5734-8fa7-455f-a207-55a6501722e6": 0.5
+        }
+      }
+    },
+    {
+      "Id": "48e182e7-4ee7-4e69-8b3c-4e4cd81e40fc",
+      "IsPreset": true,
+      "ActivationIndex": 10,
+      "Title": "Classic 1",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 424.9322
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "48008617-deee-459b-a492-b86f6cbde3df": 0.31,
+          "28111fbf-92ea-4674-9b65-0def5a7252cd": 0.06,
+          "31d0e3ab-5aaf-4bf2-8d50-ac3c58026a51": 0.0,
+          "bf6d5734-8fa7-455f-a207-55a6501722e6": 0.5
+        }
+      }
+    },
+    {
+      "Id": "4121056b-d562-4438-8022-45bb0232bd70",
+      "IsPreset": true,
+      "ActivationIndex": 11,
+      "Title": "Church of Fräser 1",
+      "PosOnCanvas": {
+        "X": 489.0,
+        "Y": 424.9322
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "df99e74d-4add-4600-a7c7-d6db74b0186a": {
+            "X": 0.82,
+            "Y": 0.82,
+            "Z": 0.82,
+            "W": 1.0
+          },
+          "7551f216-17a7-4818-9cb0-6490e38fcb44": {
+            "X": 16.0,
+            "Y": 16.0
+          },
+          "84afcc08-74ae-4218-8250-2a0c72130f41": 0.011,
+          "48008617-deee-459b-a492-b86f6cbde3df": 0.35,
+          "28111fbf-92ea-4674-9b65-0def5a7252cd": 0.07,
+          "31d0e3ab-5aaf-4bf2-8d50-ac3c58026a51": 0.05,
+          "bf6d5734-8fa7-455f-a207-55a6501722e6": -0.00999999
+        }
+      }
+    },
+    {
+      "Id": "d95f4e69-424c-4a2b-a5ec-720f32afa2a2",
+      "IsPreset": true,
+      "ActivationIndex": 12,
+      "Title": "Classic1",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 517.9322
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "48008617-deee-459b-a492-b86f6cbde3df": 0.35,
+          "28111fbf-92ea-4674-9b65-0def5a7252cd": 0.04,
+          "31d0e3ab-5aaf-4bf2-8d50-ac3c58026a51": 0.0,
+          "bf6d5734-8fa7-455f-a207-55a6501722e6": 0.5
+        }
+      }
+    },
+    {
+      "Id": "da11be51-4eae-46ac-9bfc-e93013156fca",
+      "IsPreset": true,
+      "ActivationIndex": 13,
+      "Title": "Sushi2",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 517.9322
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "df99e74d-4add-4600-a7c7-d6db74b0186a": {
+            "X": 1.0,
+            "Y": 1.0,
+            "Z": 1.0,
+            "W": 1.0
+          },
+          "84afcc08-74ae-4218-8250-2a0c72130f41": 0.011,
+          "48008617-deee-459b-a492-b86f6cbde3df": 0.35,
+          "31d0e3ab-5aaf-4bf2-8d50-ac3c58026a51": 0.16,
+          "bf6d5734-8fa7-455f-a207-55a6501722e6": 0.5
+        }
+      }
+    },
+    {
+      "Id": "171d5dd4-ac20-4af0-b44d-1a7cacdd2ee7",
+      "IsPreset": true,
+      "ActivationIndex": 14,
+      "Title": "Strange Sushi",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 517.9322
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "df99e74d-4add-4600-a7c7-d6db74b0186a": {
+            "X": 1.0,
+            "Y": 1.0,
+            "Z": 1.0,
+            "W": 1.0
+          },
+          "84afcc08-74ae-4218-8250-2a0c72130f41": 0.011,
+          "40ea5583-313d-4a48-82f4-d52bfa7c9e17": 36.2,
+          "48008617-deee-459b-a492-b86f6cbde3df": 0.351,
+          "31d0e3ab-5aaf-4bf2-8d50-ac3c58026a51": 0.16,
+          "bf6d5734-8fa7-455f-a207-55a6501722e6": 0.5
+        }
+      }
+    },
+    {
+      "Id": "8df67ccc-53d0-421a-b258-784524281bb1",
+      "IsPreset": true,
+      "ActivationIndex": 15,
+      "Title": "Totally off",
+      "PosOnCanvas": {
+        "X": 489.0,
+        "Y": 517.9322
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "40ea5583-313d-4a48-82f4-d52bfa7c9e17": 38.0,
+          "48008617-deee-459b-a492-b86f6cbde3df": 0.35,
+          "28111fbf-92ea-4674-9b65-0def5a7252cd": 0.07,
+          "31d0e3ab-5aaf-4bf2-8d50-ac3c58026a51": 0.08,
+          "bf6d5734-8fa7-455f-a207-55a6501722e6": 0.5
+        }
+      }
+    },
+    {
+      "Id": "8f6e16b7-f7b7-49ee-aed0-2d952272f8cf",
+      "IsPreset": true,
+      "ActivationIndex": 16,
+      "Title": "Bee Hell",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 610.9322
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "7551f216-17a7-4818-9cb0-6490e38fcb44": {
+            "X": 24.0,
+            "Y": 16.0
+          },
+          "48008617-deee-459b-a492-b86f6cbde3df": 0.46,
+          "28111fbf-92ea-4674-9b65-0def5a7252cd": 0.086,
+          "31d0e3ab-5aaf-4bf2-8d50-ac3c58026a51": -0.029999971,
+          "bf6d5734-8fa7-455f-a207-55a6501722e6": 0.49
+        }
+      }
+    },
+    {
+      "Id": "0e24c496-1dba-44a5-bdae-9d794e99237e",
+      "IsPreset": true,
+      "ActivationIndex": 17,
+      "Title": "Hex Plot",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 610.9322
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "df99e74d-4add-4600-a7c7-d6db74b0186a": {
+            "X": 1.0,
+            "Y": 0.049024343,
+            "Z": 0.0,
+            "W": 1.0
+          },
+          "7551f216-17a7-4818-9cb0-6490e38fcb44": {
+            "X": 32.0,
+            "Y": 12.0
+          },
+          "48008617-deee-459b-a492-b86f6cbde3df": 0.729,
+          "28111fbf-92ea-4674-9b65-0def5a7252cd": 0.07,
+          "bf6d5734-8fa7-455f-a207-55a6501722e6": 0.5
+        }
+      }
+    },
+    {
+      "Id": "427f569c-ef65-46bb-9dad-df3aa5f1248f",
+      "IsPreset": true,
+      "ActivationIndex": 10,
+      "Title": "untitled",
+      "PosOnCanvas": {
+        "X": -0.18643951,
+        "Y": 788.0847
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "52243bdc-6dce-46b9-95d9-af90cde3d56f": 4.0,
+          "48008617-deee-459b-a492-b86f6cbde3df": 0.22,
+          "28111fbf-92ea-4674-9b65-0def5a7252cd": 0.03,
+          "31d0e3ab-5aaf-4bf2-8d50-ac3c58026a51": 0.0,
+          "bf6d5734-8fa7-455f-a207-55a6501722e6": 0.5,
+          "bde3ed03-b704-4948-8d54-886593aa148f": 0.1,
+          "a4a70b12-ab9b-4c53-a93c-6f2460228e1e": 0.71,
+          "a5843a42-ed4f-4c11-8e23-e780b5bd453a": 0.08,
+          "75c859fa-9dad-4da3-994c-7232811d5ede": {
+            "Width": 1024,
+            "Height": 1024
+          }
+        }
+      }
+    },
+    {
+      "Id": "3c2d2be4-3c09-44d2-b42e-1276249aa759",
+      "IsPreset": true,
+      "ActivationIndex": 11,
+      "Title": "untitled",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "df99e74d-4add-4600-a7c7-d6db74b0186a": {
+            "X": 0.50980395,
+            "Y": 0.50980395,
+            "Z": 0.50980395,
+            "W": 1.0
+          },
+          "48008617-deee-459b-a492-b86f6cbde3df": 0.35,
+          "28111fbf-92ea-4674-9b65-0def5a7252cd": 0.04,
+          "31d0e3ab-5aaf-4bf2-8d50-ac3c58026a51": 0.03,
+          "bf6d5734-8fa7-455f-a207-55a6501722e6": 0.5
+        }
+      }
+    }
+  ]
+}

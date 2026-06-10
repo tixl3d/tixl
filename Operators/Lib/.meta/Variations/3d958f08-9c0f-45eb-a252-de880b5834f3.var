@@ -1,0 +1,206 @@
+{
+  "Id": "3d958f08-9c0f-45eb-a252-de880b5834f3",
+  "Variations": [
+    {
+      "Id": "b1c26ee7-a46d-49a0-bdba-a6d81f117ec3",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Knot",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 122.55056
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "e9712b03-e7aa-4fe5-b5cf-f2c5d0c0b0df": "float3 pos=float3(0,0,1);\npos=Generator(f);\np.Position = pos;\nfloat3 up=float3(0,-1,0);\nfloat3 fwd=normalize(Generator(f-.01)-Generator(f+.01));\np.Rotation=qLookAt(fwd,up);\n",
+          "a5c7863e-9c26-4109-9851-3244086b0ccc": 1.0,
+          "e5a7649f-684e-4938-8ae3-7289f5b9ff45": 2.52,
+          "b909844f-cff7-4907-9bc8-e9c2281582bf": 7.0,
+          "20226539-a481-4df6-8dc7-cc65de915ea9": 2.0,
+          "864dfe5a-14f2-490f-be9c-ee13ad58605c": "float3 Generator(float f){\n\nfloat3 v=(f*A+B)*float3(C,D,1);\n    float3 p=float3(0,0,0.2);\n    p=qRotateVec3(p,qFromAngleAxis(PI*2*v.x,float3(1,0,0)));\n    p.z+=1;\n    p=qRotateVec3(p,qFromAngleAxis(PI*2*v.y,float3(0,1,0)));\n    //p*=0.25;p.x+=1;\n    //p=qRotateVec3(p,qFromAngleAxis(PI*2*v.z,float3(0,0,1)));\n//p*=exp2(.15*sin(f*23.2));\n    return p;\n}",
+          "2a0cf45c-bcf5-4802-b32b-84cef0f1c129": 1000
+        }
+      }
+    },
+    {
+      "Id": "0d2fbfe5-dc58-4516-8b74-f7f0af5e8eca",
+      "IsPreset": true,
+      "ActivationIndex": 4,
+      "Title": "Another Knot",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 122.55056
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "e9712b03-e7aa-4fe5-b5cf-f2c5d0c0b0df": "float3 pos=float3(0,0,1);\npos=Generator(f);\np.Position = pos;\nfloat3 up=float3(0,-1,0);\nfloat3 fwd=normalize(Generator(f-.01)-Generator(f+.01));\np.Rotation=qLookAt(fwd,up);\n",
+          "a5c7863e-9c26-4109-9851-3244086b0ccc": 0.84,
+          "e5a7649f-684e-4938-8ae3-7289f5b9ff45": 2.52,
+          "864dfe5a-14f2-490f-be9c-ee13ad58605c": "float3 Generator(float f){\n\nfloat3 v=(f*A+B)*float3(3,5,7);\n    float3 p=float3(0,0,1);\n    p=qRotateVec3(p,qFromAngleAxis(PI*2*v.x,float3(1,0,0)));\n    p=qRotateVec3(p,qFromAngleAxis(PI*2*v.y,float3(0,1,0)));\n    p=qRotateVec3(p,qFromAngleAxis(PI*2*v.z,float3(0,0,1)));\np*=exp2(.15*sin(f*23.2));\n    return p;\n}",
+          "2a0cf45c-bcf5-4802-b32b-84cef0f1c129": 1000
+        }
+      }
+    },
+    {
+      "Id": "64612b56-770a-4671-9b16-02e708a0c9c4",
+      "IsPreset": true,
+      "ActivationIndex": 7,
+      "Title": "Visualize Image Colors",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 245.10112
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "e9712b03-e7aa-4fe5-b5cf-f2c5d0c0b0df": "int2 ip= int2(idx % 256, idx / 256);\n\n//float4 smp= Image.Load(int3(ip.xy,0));\nfloat4 c = Image.SampleLevel(ClampedSampler, float2(ip.xy) / 256.0, 0);\n\np.Position = c.rgb-0.5;\np.Color=c;",
+          "2a0cf45c-bcf5-4802-b32b-84cef0f1c129": 65536
+        }
+      }
+    },
+    {
+      "Id": "aad67ebc-44ec-4853-8f87-a0e42caffb6a",
+      "IsPreset": true,
+      "ActivationIndex": 7,
+      "Title": "yuruyurau Fish",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 245.1011
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "a5c7863e-9c26-4109-9851-3244086b0ccc": 0.81,
+          "e5a7649f-684e-4938-8ae3-7289f5b9ff45": 60.0,
+          "b909844f-cff7-4907-9bc8-e9c2281582bf": 60.0,
+          "e9712b03-e7aa-4fe5-b5cf-f2c5d0c0b0df": "// Author: @yuruyurau\n/* original p5.js code: \na=(y,d=mag(k=(y<11?6+sin(y^8)*6:y/5+cos(y/2))*cos(i-t/4),e=y/7-13)+sin(e/4+t)/2)=>point((q=y*k/d*(3+sin(d*2+y/2-t*4)))+60*cos(c=d/2+1-t/2)+200,q*sin(c)+d*29-170) t=0,draw=$=>{t||createCanvas(w=400,w);background(9).stroke(w,96);for(t+=PI/120,i=1e4;i--;)a(i/345)}\n*/\n\nfloat t = A;          // time\nfloat y = idx / 345.0;\n\n// k\nfloat kBase = (y < 11.0) \n    ? 6.0 + sin((float)((int)y ^ 8)) * 6.0\n    : y / 5.0 + cos(y / 2.0);\n\nfloat k = kBase * cos(idx - t / 4.0);\n\n// e and d\nfloat e = y / 7.0 - 13.0;\nfloat d = mag(k, e) + sin(e / 4.0 + t) / 2.0;\n\n// q\nfloat q = y * k / d * (3.0 + sin(d * 2.0 + y / 2.0 - t * 4.0));\n\n// c\nfloat c = d / 2.0 + 1.0 - t / 4.0;\n\n// final position\nfloat xPos = q + C * cos(c) ;\nfloat yPos = q * sin(c) + d * 29 -340;\nfloat r = sqrt(xPos*xPos + yPos*yPos);\nfloat angle =k* atan2(yPos, xPos)*20\n;\n\nfloat zPos =  sin(angle);\n// assign\n\np.Position = float3(xPos, -yPos, zPos); // original has zPos = 0.0\np.Position *= 0.01;\n\n//Colors: comment for original \nfloat hue = (y / 30.0 +A * 0.1) % 1.0;\np.Color = float4(\n    0.5 + 0.5 * sin(hue * 6.283 + 0.0), // Red\n    0.5 + 0.5 * sin(hue * 6.283 + 2.094), // Green (120° phase shift)\n    0.5 + 0.5 * sin(hue * 6.283 + 4.189), // Blue (240° phase shift)\n    0.8 // Alpha\n);\n",
+          "864dfe5a-14f2-490f-be9c-ee13ad58605c": "float mag(float x, float y)\n{\n    return sqrt(x * x + y * y);\n}\n\nfloat3 hsv2rgb(float3 c) {\n    float4 K = float4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);\n    float3 p = abs(frac(c.xxx + K.xyz) * 6.0 - K.www);\n    return c.z * lerp(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);\n}",
+          "2a0cf45c-bcf5-4802-b32b-84cef0f1c129": 10000
+        }
+      }
+    },
+    {
+      "Id": "82d8acb9-ba2c-4161-9e09-a4130c76bb54",
+      "IsPreset": true,
+      "ActivationIndex": 7,
+      "Title": "Wave",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 245.1011
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "01898885-4140-4435-bb44-a7a6f6f32657": {
+            "X": 0.93,
+            "Y": 0.0,
+            "Z": -5.1
+          },
+          "377151fc-49a7-4407-bf85-74c4a7d5188d": {
+            "Gradient": {
+              "Interpolation": "Linear",
+              "Steps": [
+                {
+                  "Id": "643456a9-8a15-4295-8e59-fb6dc12d67a2",
+                  "NormalizedPosition": 0.006840706,
+                  "Color": {
+                    "R": 0.12769377,
+                    "G": 0.68069595,
+                    "B": 0.79425836,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "9e56720b-3f29-4952-a835-51dfd6000de6",
+                  "NormalizedPosition": 0.7947783,
+                  "Color": {
+                    "R": 0.0,
+                    "G": 0.57446504,
+                    "B": 1.0,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "84d52eb2-55e6-4971-8161-69745fec3fe5",
+                  "NormalizedPosition": 1.0,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 1.0,
+                    "B": 1.0,
+                    "A": 1.0
+                  }
+                }
+              ]
+            }
+          },
+          "e9712b03-e7aa-4fe5-b5cf-f2c5d0c0b0df": "int gs = sqrt(TotalCount);\nfloat2 gpos= float2(idx % gs, idx / gs) / gs-0.5;\n\np.Position = float3(gpos.x,0,gpos.y);\nfloat h = length(sin(gpos*8 + Offset.xz) * 0.1);\np.Position.y=h;\np.Color = SampleGradient(h * 8 );\n\n",
+          "2a0cf45c-bcf5-4802-b32b-84cef0f1c129": 6120
+        }
+      }
+    },
+    {
+      "Id": "a42c340c-5e4a-48b0-aa2e-ab7abb9b0556",
+      "IsPreset": true,
+      "ActivationIndex": 7,
+      "Title": "Control Example 2",
+      "PosOnCanvas": {
+        "X": 325.99997,
+        "Y": 122.55056
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "01898885-4140-4435-bb44-a7a6f6f32657": {
+            "X": 0.57,
+            "Y": -0.29,
+            "Z": -0.45
+          },
+          "a5c7863e-9c26-4109-9851-3244086b0ccc": 1.73,
+          "e5a7649f-684e-4938-8ae3-7289f5b9ff45": -3.1,
+          "b909844f-cff7-4907-9bc8-e9c2281582bf": 0.45,
+          "20226539-a481-4df6-8dc7-cc65de915ea9": 50.0,
+          "e9712b03-e7aa-4fe5-b5cf-f2c5d0c0b0df": "//move points position\np.Position += Offset;\n\n//move points on Y for sine wave\np.Position.y += sin(6*f * A+B + Time)*C;\n\n// color every point\np.Color = float4(1,1,0,1); \n\n// control a specific point\nif(idx == (int)D){\n  p.FX1 = 5.0;\n  p.Color = float4(1,0,1,1);\n}"
+        }
+      }
+    },
+    {
+      "Id": "8b6d4c10-7c60-412b-9f16-1d3e3d657b2c",
+      "IsPreset": true,
+      "ActivationIndex": 7,
+      "Title": "Rotate to SDF.",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 367.65167
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "377151fc-49a7-4407-bf85-74c4a7d5188d": {
+            "Gradient": {
+              "Interpolation": "Linear",
+              "Steps": [
+                {
+                  "Id": "7471fd7d-43da-4393-874d-5b9d37c3bc26",
+                  "NormalizedPosition": 0.006840706,
+                  "Color": {
+                    "R": 0.79425836,
+                    "G": 0.38209665,
+                    "B": 0.0,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "3ac14285-232e-44cb-b406-c191531f2860",
+                  "NormalizedPosition": 1.0,
+                  "Color": {
+                    "R": 0.50547916,
+                    "G": 0.92379344,
+                    "B": 1.0,
+                    "A": 1.0
+                  }
+                }
+              ]
+            }
+          },
+          "e9712b03-e7aa-4fe5-b5cf-f2c5d0c0b0df": "// Orient points to SDF\nfloat3 pos = p.Position;\nfloat3 normal = GetFieldNormal(pos);\n\np.Rotation = qLookAt(normal, normal.zxy);\n\nfloat d=GetDistance(p.Position);\np.Scale = 1/ ( abs(d)+1);\n\np.Color = SampleGradient( d);\n\n\n\n\n",
+          "2a0cf45c-bcf5-4802-b32b-84cef0f1c129": 6120
+        }
+      }
+    }
+  ]
+}

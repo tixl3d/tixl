@@ -1,0 +1,84 @@
+{
+  "Id": "2db5e90a-f02a-47ce-b1c0-3c5c4513f8fd",
+  "Variations": [
+    {
+      "Id": "736e9c04-8fff-45b8-94ad-3ba5228912e8",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "SDF Simple Displace",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "76299c6d-3add-4f26-a81c-ed628257ed8f": "float d= GetDistance(p.Position);\nfloat3 n = GetNormal(p.Position);\n\nif(d<0) \n  v += n / (d+ 1);"
+        }
+      }
+    },
+    {
+      "Id": "0c52ff3f-bb7f-43f6-8ced-b9151be934b3",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "SDF Color Displace",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "2261a69e-0862-41d2-b3a2-48b77ab8b873": 0.92,
+          "38de95a0-1ef5-4bc6-b930-fb16c278c359": 0.02,
+          "5de0657c-119a-441c-9876-e47191b5ac46": {
+            "Gradient": {
+              "Interpolation": "Linear",
+              "Steps": [
+                {
+                  "Id": "eb3d48fb-6740-44cd-aaad-268cffbb2c24",
+                  "NormalizedPosition": 0.0,
+                  "Color": {
+                    "R": 0.0,
+                    "G": 0.0,
+                    "B": 0.0,
+                    "A": 0.0
+                  }
+                },
+                {
+                  "Id": "33122217-9497-4326-8977-3e71eab50c8b",
+                  "NormalizedPosition": 0.33420026,
+                  "Color": {
+                    "R": 0.59008265,
+                    "G": 0.0,
+                    "B": 0.16767205,
+                    "A": 0.59008265
+                  }
+                },
+                {
+                  "Id": "b0f5f766-860d-4866-af8e-ce176fd43620",
+                  "NormalizedPosition": 0.786736,
+                  "Color": {
+                    "R": 0.61424834,
+                    "G": 0.67771614,
+                    "B": 1.0,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "be5dff9c-83e8-4787-9d90-88e2bed0336b",
+                  "NormalizedPosition": 1.0,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.8730884,
+                    "B": 0.5324775,
+                    "A": 1.0
+                  }
+                }
+              ]
+            }
+          },
+          "76299c6d-3add-4f26-a81c-ed628257ed8f": "float d= GetDistance(p.Position);\n\nif(d<0)  {\n  float4 c = SampleGradient( saturate(-d/A));\n  p.Color.rgb = lerp(p.Color.rgb, c.rgb, c.a); \n} \n\nv+= B*GetNormal(p.Position)*saturate(0.5-d);"
+        }
+      }
+    }
+  ]
+}

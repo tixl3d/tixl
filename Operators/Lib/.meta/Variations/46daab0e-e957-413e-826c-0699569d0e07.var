@@ -1,0 +1,303 @@
+{
+  "Id": "46daab0e-e957-413e-826c-0699569d0e07",
+  "Variations": [
+    {
+      "Id": "1be2f0fc-b7dc-4b52-b47c-574e33b24546",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Simple Vignette",
+      "PosOnCanvas": {
+        "X": -1.3915405,
+        "Y": 7.637192
+      },
+      "ParameterSetsForChildIds": {}
+    },
+    {
+      "Id": "2272f806-a674-41e1-9ea2-2cc0eb378dd0",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "Displacement",
+      "PosOnCanvas": {
+        "X": 161.60846,
+        "Y": 7.637192
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "674cabbd-cf31-46ac-9a1a-4f6bd727c977": {
+            "X": 0.24000001,
+            "Y": 0.55499995
+          },
+          "3d84725a-594b-46d8-aa21-eec99026115d": 0.35,
+          "b4914d9d-7a39-46e1-8b45-803e1449039a": {
+            "X": 0.43500006,
+            "Y": 0.735
+          },
+          "8c3ffefe-8721-4dde-b252-22eb8be02d3f": "// Simple Displacement\n// Connect two images and use Offset Parameter\n\nfloat4 cb= ImageB.Sample(Sampler, uv  );\nfloat d= ApplyGainAndBias(cb.r, GainAndBias);\nc= ImageA.Sample(Sampler, uv - d * Offset * float2(1,-1));"
+        }
+      }
+    },
+    {
+      "Id": "f81da97c-4cbb-4d6e-beb3-57c9d3a95d7a",
+      "IsPreset": true,
+      "ActivationIndex": 4,
+      "Title": "Color Grading",
+      "PosOnCanvas": {
+        "X": 324.60846,
+        "Y": 7.637192
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "b4914d9d-7a39-46e1-8b45-803e1449039a": {
+            "X": 0.29000002,
+            "Y": 0.565
+          },
+          "e1c50230-8821-4109-8119-fd8b66b43e7f": {
+            "Gradient": {
+              "Interpolation": "Spline",
+              "Steps": [
+                {
+                  "Id": "c13c5953-a21a-4582-8d7d-4e51cb56222e",
+                  "NormalizedPosition": 0.0,
+                  "Color": {
+                    "R": 0.023070455,
+                    "G": 0.045856144,
+                    "B": 0.062200963,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "e867c522-d3d7-4218-bcf7-4fb2a0ae3e1f",
+                  "NormalizedPosition": 0.4983469,
+                  "Color": {
+                    "R": 0.0546763,
+                    "G": 0.3349282,
+                    "B": 0.27531293,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "7aa3d762-356f-4b6d-98ce-0598f3761cae",
+                  "NormalizedPosition": 1.0,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.77476525,
+                    "B": 0.54206735,
+                    "A": 1.0
+                  }
+                }
+              ]
+            }
+          },
+          "8c3ffefe-8721-4dde-b252-22eb8be02d3f": "// A simple color grading using the gradient\n\nc= ImageA.Sample(Sampler, uv);\n\nc = float4(\n  Biased(Gradient.SampleLevel( ClampedSampler, float2(c.r, 0.5),0).r),\n  Biased(Gradient.SampleLevel( ClampedSampler, float2(c.g, 0.5),0).g),\n  Biased(Gradient.SampleLevel( ClampedSampler, float2(c.b, 0.5),0).b),\n  Biased(Gradient.SampleLevel( ClampedSampler, float2(c.a, 0.5),0).a)\n);\n"
+        }
+      }
+    },
+    {
+      "Id": "b2e39229-ef75-4b5a-a44a-fcdf99653323",
+      "IsPreset": true,
+      "ActivationIndex": 4,
+      "Title": "untitled",
+      "PosOnCanvas": {
+        "X": -1.3915405,
+        "Y": 130.18774
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "674cabbd-cf31-46ac-9a1a-4f6bd727c977": {
+            "X": 0.020000003,
+            "Y": 0.695
+          },
+          "3d84725a-594b-46d8-aa21-eec99026115d": 0.35,
+          "b4914d9d-7a39-46e1-8b45-803e1449039a": {
+            "X": 0.44000006,
+            "Y": 0.46
+          },
+          "e1c50230-8821-4109-8119-fd8b66b43e7f": {
+            "Gradient": {
+              "Interpolation": "Linear",
+              "Steps": [
+                {
+                  "Id": "58451cb4-c544-47e4-bec4-c2ef86ebcdea",
+                  "NormalizedPosition": 0.30635834,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.99999,
+                    "B": 1.0,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "780b922e-fbdc-4f36-b9f6-cfe718603202",
+                  "NormalizedPosition": 0.34609824,
+                  "Color": {
+                    "R": 0.9208633,
+                    "G": 0.92085403,
+                    "B": 0.9208633,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "77a6224a-f59e-4186-aa99-18bce42163b6",
+                  "NormalizedPosition": 0.4653179,
+                  "Color": {
+                    "R": 0.59782994,
+                    "G": 0.6834532,
+                    "B": 0.58879733,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "d661b20f-f4eb-4f54-b568-ac3f01bb1e4b",
+                  "NormalizedPosition": 0.808526,
+                  "Color": {
+                    "R": 0.0,
+                    "G": 0.0,
+                    "B": 0.0,
+                    "A": 1.0
+                  }
+                }
+              ]
+            }
+          },
+          "8c3ffefe-8721-4dde-b252-22eb8be02d3f": "// Simple Displacement\n// Connect two images and use Offset Parameter\n\nfloat4 cb= ImageB.Sample(Sampler, uv );\n\nfloat d= ApplyGainAndBias(cb.r, GainAndBias);\nc= ImageA.Sample(Sampler, uv - d * Offset * float2(1,-1));\nc.rgb *= SampleGradient(d);\n"
+        }
+      }
+    },
+    {
+      "Id": "22ca68ac-0707-42a3-81c9-b6d4e5823827",
+      "IsPreset": true,
+      "ActivationIndex": 5,
+      "Title": "remap value, preserve hue/saturation",
+      "PosOnCanvas": {
+        "X": 161.60846,
+        "Y": 130.18774
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "e1c50230-8821-4109-8119-fd8b66b43e7f": {
+            "Gradient": {
+              "Interpolation": "Linear",
+              "Steps": [
+                {
+                  "Id": "463ac79e-a94f-49c3-9d80-9b255aeb048f",
+                  "NormalizedPosition": 0.0,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.99999,
+                    "B": 1.0,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "4142d75b-28f2-4845-b542-f38eced26624",
+                  "NormalizedPosition": 1.0,
+                  "Color": {
+                    "R": 0.0,
+                    "G": 0.0,
+                    "B": 0.0,
+                    "A": 1.0
+                  }
+                }
+              ]
+            }
+          },
+          "8c3ffefe-8721-4dde-b252-22eb8be02d3f": "c= ImageA.Sample(Sampler, uv);\nc.rgb=max(0,c.rgb);\nfloat3 h=rgb2hsv(c.rgb);\nc.rgb=max(c.rgb,0);\n\nh.z=ApplyGainAndBias(SampleGradient(h.z).x, GainAndBias);\nc.rgb=hsv2rgb(h);\n",
+          "c9a801ec-13fb-4ad4-b0cd-d125b5db500a": "float3 hsv2rgb(float3 hsv){return lerp(1,saturate(abs(frac((hsv.x-float3(0,2,4)/6))-.5)*6-1),hsv.y)*hsv.z;}\nfloat3 rgb2hsv(float3 c){\n     float v=max(c.x,max(c.y,c.z));float m=min(c.x,min(c.y,c.z));float r=v-m;\n     float h=(r!=0)?frac(((v==c.x)?((c.y-c.z)/r):(v==c.y)?(2+(c.z-c.x)/r):(4+(c.x-c.y)/r))/6):0;\n     float s=(v!=0)?(1-m/v):0;\n     return float3(h,s,v);\n}"
+        }
+      }
+    },
+    {
+      "Id": "72c0706d-a463-4d75-8de1-a65c1d5ebd9d",
+      "IsPreset": true,
+      "ActivationIndex": 6,
+      "Title": "remap hue",
+      "PosOnCanvas": {
+        "X": 324.60846,
+        "Y": 130.18774
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "e1c50230-8821-4109-8119-fd8b66b43e7f": {
+            "Gradient": {
+              "Interpolation": "OkLab",
+              "Steps": [
+                {
+                  "Id": "1d52b4c2-f2d6-4e0e-8b0b-77d2e6156155",
+                  "NormalizedPosition": 0.0,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.04149252,
+                    "B": 0.0,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "b4eac5ef-3d43-4f1d-8f3e-11da7a0ba8e8",
+                  "NormalizedPosition": 0.16666667,
+                  "Color": {
+                    "R": 0.16746414,
+                    "G": 0.16746414,
+                    "B": 0.0,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "f4556ff0-40d2-4ba1-a710-37f084d626ea",
+                  "NormalizedPosition": 0.33716154,
+                  "Color": {
+                    "R": 0.9658998,
+                    "G": 0.013474464,
+                    "B": 1.0,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "55b5d5ff-e982-4a19-a1f0-fcd4ee23728c",
+                  "NormalizedPosition": 0.5,
+                  "Color": {
+                    "R": 0.10326699,
+                    "G": 0.7896903,
+                    "B": 0.83732057,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "aee63e22-3631-4751-b062-85d01447469d",
+                  "NormalizedPosition": 0.6666667,
+                  "Color": {
+                    "R": 0.0,
+                    "G": 0.6253992,
+                    "B": 0.98564595,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "4bdaca43-e101-44aa-9f56-6b64bb709482",
+                  "NormalizedPosition": 0.8333333,
+                  "Color": {
+                    "R": 0.9081521,
+                    "G": 0.0,
+                    "B": 1.0,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "e901a49b-c0dc-4907-a2d2-c7b2e56f76f6",
+                  "NormalizedPosition": 1.0,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.0,
+                    "B": 0.010892391,
+                    "A": 1.0
+                  }
+                }
+              ]
+            }
+          },
+          "8c3ffefe-8721-4dde-b252-22eb8be02d3f": "c= ImageA.Sample(Sampler, uv);\nc.rgb=max(0,c.rgb);\nfloat4 c0=c;\nfloat3 h=rgb2hsv(c.rgb);\nc.rgb=max(c.rgb,0);\n\n\nc.rgb=SampleGradient(h.x);\nc.rgb=max(c.rgb,0);\nc.rgb=lerp(dot(c0.rgb,1./3),c.rgb,h.y)*h.z;",
+          "c9a801ec-13fb-4ad4-b0cd-d125b5db500a": "float3 hsv2rgb(float3 hsv){return lerp(1,saturate(abs(frac((hsv.x-float3(0,2,4)/6))-.5)*6-1),hsv.y)*hsv.z;}\nfloat3 rgb2hsv(float3 c){\n     float v=max(c.x,max(c.y,c.z));float m=min(c.x,min(c.y,c.z));float r=v-m;\n     float h=(r!=0)?frac(((v==c.x)?((c.y-c.z)/r):(v==c.y)?(2+(c.z-c.x)/r):(4+(c.x-c.y)/r))/6):0;\n     float s=(v!=0)?(1-m/v):0;\n     return float3(h,s,v);\n}"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "Id": "208a86b5-55cc-460a-86e6-2b17da818494",
+  "Variations": [
+    {
+      "Id": "401e7965-098b-475e-b586-0d34ca2fec22",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Radial Twist",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "4b8a067d-8630-485e-b390-1fca7cc06323": {
+            "X": 3.0,
+            "Y": 1.0,
+            "Z": 1.0
+          },
+          "da73250e-fcf2-4fe9-9a84-a1d139a0390c": {
+            "X": 19.3,
+            "Y": 0.0,
+            "Z": -68.0
+          }
+        }
+      }
+    },
+    {
+      "Id": "a33e7dba-6213-4d5a-a7f2-97675107753a",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Twist2",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "4b8a067d-8630-485e-b390-1fca7cc06323": {
+            "X": 4.0,
+            "Y": 1.81,
+            "Z": 1.0
+          },
+          "d2d278d9-7933-49ea-83c2-3566f5a13d1f": 2.0,
+          "da73250e-fcf2-4fe9-9a84-a1d139a0390c": {
+            "X": 32.0,
+            "Y": 180.0,
+            "Z": 21.6
+          }
+        }
+      }
+    }
+  ]
+}

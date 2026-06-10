@@ -1,0 +1,86 @@
+{
+  "Id": "b5709297-c714-4019-9d0b-6982590b5590",
+  "Variations": [
+    {
+      "Id": "ed468fca-5e7d-4f17-ab74-3fe9b498d090",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Crumble",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "b7559321-2dbe-4fe0-ab86-52532d008980": 19.0,
+          "4b1a66a4-b5e4-4bc3-97f5-bd3cda668893": 1.5999999
+        }
+      }
+    },
+    {
+      "Id": "38f9881f-a010-43cd-8b36-21399072099e",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Puffy",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "b7559321-2dbe-4fe0-ab86-52532d008980": 29.4,
+          "4b1a66a4-b5e4-4bc3-97f5-bd3cda668893": 2.23,
+          "08e2222f-6de1-46a8-bbdc-da83251f424e": 3.33,
+          "357ed675-212f-4b2c-b93b-c8460867a9ae": 1,
+          "f108f6f7-5e6f-43c8-9d0b-c2e7bf5adf9c": 1
+        }
+      }
+    },
+    {
+      "Id": "d369a5f5-dee9-4152-bc68-e3c0c26a3c0e",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "Spike",
+      "PosOnCanvas": {
+        "X": 489.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "b7559321-2dbe-4fe0-ab86-52532d008980": 29.4,
+          "4b1a66a4-b5e4-4bc3-97f5-bd3cda668893": 2.23,
+          "e02379a9-fadf-46d4-a6c2-74264e91b5a6": {
+            "X": 0.0,
+            "Y": 0.01,
+            "Z": 1.99
+          },
+          "f108f6f7-5e6f-43c8-9d0b-c2e7bf5adf9c": 1
+        }
+      }
+    },
+    {
+      "Id": "a9ef7ffa-e412-4007-91c9-843c9f063b96",
+      "IsPreset": true,
+      "ActivationIndex": 4,
+      "Title": "Hairy Peter",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "b7559321-2dbe-4fe0-ab86-52532d008980": 38.1,
+          "4b1a66a4-b5e4-4bc3-97f5-bd3cda668893": 1.02,
+          "e5213b00-6302-45e1-a172-5a11bd91892e": 0.38,
+          "e02379a9-fadf-46d4-a6c2-74264e91b5a6": {
+            "X": 0.12,
+            "Y": 0.15,
+            "Z": 1.99
+          },
+          "08e2222f-6de1-46a8-bbdc-da83251f424e": 1.0,
+          "f108f6f7-5e6f-43c8-9d0b-c2e7bf5adf9c": 1
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "Id": "daacabd8-0338-4998-898f-94580abd8eac",
+  "Variations": [
+    {
+      "Id": "e4ed35c1-f193-4398-a398-02d346127b08",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Poly Explosion",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "de7b5f05-d936-43af-a18d-bc27692dc9ed": 1.0,
+          "5ece59ea-9e0d-48bc-a19b-c8b33cbbaa47": 0.11,
+          "77c28c83-7592-4ab3-b7ca-d64a176965b1": 0.23,
+          "cf800a99-185b-44a1-b9f4-8d8bf4154fb3": 1.9
+        }
+      }
+    },
+    {
+      "Id": "57031a75-c89f-4e50-a460-a248211f9798",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "untitled",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "a795f91b-75e7-4b95-a8c7-28cbbe17fc04": 2,
+          "de7b5f05-d936-43af-a18d-bc27692dc9ed": -0.2999997,
+          "46dbd416-53ab-4efc-bfe0-5e82e98db3b6": 0.0,
+          "77c28c83-7592-4ab3-b7ca-d64a176965b1": 1.5,
+          "cf800a99-185b-44a1-b9f4-8d8bf4154fb3": -0.6,
+          "95162eb0-c762-4370-8ae0-8fe8c05247fe": 8.3,
+          "cb0e3b52-fc4f-429b-a3c0-48138defcfe5": -0.75,
+          "30764b06-86f1-4194-9b14-e76b327a7f78": 0.51,
+          "811ab837-44a7-4780-91d0-1058e6bf3557": 0.14,
+          "80778578-bdcc-469f-bae2-23f5d496f3cb": true
+        }
+      }
+    },
+    {
+      "Id": "07353a5e-12a2-4778-89ff-ec2e4ce8eef3",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "untitled",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "46dbd416-53ab-4efc-bfe0-5e82e98db3b6": 0.0,
+          "77c28c83-7592-4ab3-b7ca-d64a176965b1": 0.099999994
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,144 @@
+{
+  "Id": "2a5475c8-9e16-409f-8c40-a3063e045d38",
+  "Variations": [
+    {
+      "Id": "4edb7d52-4b8f-46a5-b19e-f9eb6eb07e51",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Default",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "7f66aa8d-fbdd-47d6-ba38-07e257e19401": 1.0,
+          "d3197979-b418-4182-b1c9-f3126b175f8d": 1.0,
+          "9dae724d-7be8-4f82-8907-28550ddbf6e6": 0.0
+        }
+      }
+    },
+    {
+      "Id": "c66d4983-5332-4192-a063-e6e1aabc7049",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Rough",
+      "PosOnCanvas": {
+        "X": 173.0,
+        "Y": 0.5
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "7f66aa8d-fbdd-47d6-ba38-07e257e19401": 2.0,
+          "d3197979-b418-4182-b1c9-f3126b175f8d": 0.5,
+          "9dae724d-7be8-4f82-8907-28550ddbf6e6": -0.5
+        }
+      }
+    },
+    {
+      "Id": "c05931b4-90f4-463b-a2b2-ff5174a2e3c9",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "Course",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "7f66aa8d-fbdd-47d6-ba38-07e257e19401": 3.0,
+          "d3197979-b418-4182-b1c9-f3126b175f8d": 0.5,
+          "9dae724d-7be8-4f82-8907-28550ddbf6e6": -0.25,
+          "c0a17636-f75b-45c0-ab63-cb0f9130a7ac": 0.0
+        }
+      }
+    },
+    {
+      "Id": "43c2dd18-3eb9-488c-8fa3-a5ce5a97ff44",
+      "IsPreset": true,
+      "ActivationIndex": 4,
+      "Title": "Gross",
+      "PosOnCanvas": {
+        "X": 336.0,
+        "Y": 93.5
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "7f66aa8d-fbdd-47d6-ba38-07e257e19401": 3.0,
+          "d3197979-b418-4182-b1c9-f3126b175f8d": 0.5,
+          "9dae724d-7be8-4f82-8907-28550ddbf6e6": -0.25,
+          "6d10c73c-37b8-443b-94d9-854b04027a3c": {
+            "X": 1.0,
+            "Y": 0.4777918,
+            "Z": 0.21539891,
+            "W": 1.0
+          },
+          "c0a17636-f75b-45c0-ab63-cb0f9130a7ac": 0.0
+        }
+      }
+    },
+    {
+      "Id": "afe94c80-f1d3-48ef-85c9-44845558a9e1",
+      "IsPreset": true,
+      "ActivationIndex": 5,
+      "Title": "Outlines",
+      "PosOnCanvas": {
+        "X": 336.0,
+        "Y": 0.5
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "7f66aa8d-fbdd-47d6-ba38-07e257e19401": 3.0,
+          "d3197979-b418-4182-b1c9-f3126b175f8d": 0.8,
+          "9dae724d-7be8-4f82-8907-28550ddbf6e6": -0.19,
+          "6d10c73c-37b8-443b-94d9-854b04027a3c": {
+            "X": 1.0,
+            "Y": 1.0,
+            "Z": 1.0,
+            "W": 1.0
+          },
+          "c0a17636-f75b-45c0-ab63-cb0f9130a7ac": 0.65
+        }
+      }
+    },
+    {
+      "Id": "447f171d-4399-4788-88fe-b7fb0502ee01",
+      "IsPreset": true,
+      "ActivationIndex": 6,
+      "Title": "untitled",
+      "PosOnCanvas": {
+        "X": 499.0,
+        "Y": 0.5
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "7f66aa8d-fbdd-47d6-ba38-07e257e19401": 10.0,
+          "d3197979-b418-4182-b1c9-f3126b175f8d": 0.25,
+          "9dae724d-7be8-4f82-8907-28550ddbf6e6": 0.0
+        }
+      }
+    },
+    {
+      "Id": "88b35564-3d62-489e-8256-21e755daa489",
+      "IsPreset": true,
+      "ActivationIndex": 7,
+      "Title": "untitled",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "d3197979-b418-4182-b1c9-f3126b175f8d": -1.0000002,
+          "9dae724d-7be8-4f82-8907-28550ddbf6e6": 1.0,
+          "6d10c73c-37b8-443b-94d9-854b04027a3c": {
+            "X": 1.0,
+            "Y": 1.0,
+            "Z": 1.0,
+            "W": 1.0
+          }
+        }
+      }
+    }
+  ]
+}

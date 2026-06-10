@@ -1,0 +1,74 @@
+{
+  "Id": "ffd94e5a-bc98-4e70-84d8-cce831e6925f",
+  "Variations": [
+    {
+      "Id": "5ba7b1b4-b883-4ee9-960a-bf2d634e70a0",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Default",
+      "PosOnCanvas": {
+        "X": 1.5258789E-05,
+        "Y": -29.55056
+      },
+      "ParameterSetsForChildIds": {}
+    },
+    {
+      "Id": "3b320b43-a3b5-46d5-a91f-95c8ea6f12ef",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Ignore W",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": -29.55056
+      },
+      "ParameterSetsForChildIds": {}
+    },
+    {
+      "Id": "49be7325-a499-466c-abcc-36d05ff6119f",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "Zienni",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "cc442161-e9ca-40ea-be3b-f87189d4e155": {
+            "X": 1.0,
+            "Y": 1.0,
+            "Z": 1.0,
+            "W": 0.20999998
+          },
+          "414c8045-5086-4449-9d9a-03f28c3966b3": 0.16,
+          "8fab9161-48d4-43b0-a18f-5942b7071a49": 1
+        }
+      }
+    },
+    {
+      "Id": "64ca8c99-752a-4c32-8cec-4635e8d9bcaa",
+      "IsPreset": true,
+      "ActivationIndex": 4,
+      "Title": "Depth is overrated",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "cc442161-e9ca-40ea-be3b-f87189d4e155": {
+            "X": 1.0,
+            "Y": 1.0,
+            "Z": 1.0,
+            "W": 0.20999998
+          },
+          "414c8045-5086-4449-9d9a-03f28c3966b3": 0.16,
+          "8fab9161-48d4-43b0-a18f-5942b7071a49": 1,
+          "3fbad175-6060-40f2-a675-bdae20107698": 0.34,
+          "814fc516-250f-4383-8f20-c2a358bbe4e1": false,
+          "7acc95ad-d317-42fc-97f8-85f48d7e516f": false
+        }
+      }
+    }
+  ]
+}

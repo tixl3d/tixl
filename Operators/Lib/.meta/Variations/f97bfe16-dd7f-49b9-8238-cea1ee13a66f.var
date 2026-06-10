@@ -1,0 +1,333 @@
+{
+  "Id": "f97bfe16-dd7f-49b9-8238-cea1ee13a66f",
+  "Variations": [
+    {
+      "Id": "22cfc70c-be18-43a9-8e14-600c99e84f30",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Simple gradient.",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "63fcdf71-45ce-4abd-a0f4-28364939e065": false,
+          "cb9f9b0e-0486-400e-9fa1-5d2a997bb7d6": 1.3,
+          "ee09aa68-6191-494f-9900-f0dff16df27d": 0.4,
+          "c79b7cd6-ca23-4e3b-8eb7-3468e157f592": {
+            "Gradient": {
+              "Interpolation": "OkLab",
+              "Steps": [
+                {
+                  "Id": "41de4faf-3d1d-461e-842c-a14e4f343a80",
+                  "NormalizedPosition": 0.0,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.72460896,
+                    "B": 0.0,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "e35a5d79-8c4a-4226-8952-49e4e3ec88af",
+                  "NormalizedPosition": 0.33333334,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.48703903,
+                    "B": 0.13195556,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "ecc4a6ed-d098-4e53-8b95-ae834b4125c3",
+                  "NormalizedPosition": 0.6666667,
+                  "Color": {
+                    "R": 0.49247694,
+                    "G": 0.08999183,
+                    "B": 0.6582595,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "2a44ee8f-9e50-4014-8f5b-35395b0c7f60",
+                  "NormalizedPosition": 1.0,
+                  "Color": {
+                    "R": 0.09676862,
+                    "G": 0.29133904,
+                    "B": 1.0,
+                    "A": 1.0
+                  }
+                }
+              ]
+            }
+          },
+          "0957ec56-8c74-4e72-aee3-c14abddcc655": "float3 avgPos = (v1.Position + v2.Position + v3.Position)/3;\nfloat4 color = Gradient.SampleLevel(ClampedSampler, (avgPos.y + Offset) * A +B, 0);\n\nv1.ColorRGB = color.rgb;\nv2.ColorRGB = color.rgb;\nv3.ColorRGB = color.rgb;\n",
+          "1dc7a589-93f7-4e0b-acbd-02670c97ebf8": "// additional"
+        }
+      }
+    },
+    {
+      "Id": "e0f458e9-e301-4b43-8814-88765269cea1",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Preset1",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "63fcdf71-45ce-4abd-a0f4-28364939e065": true,
+          "54059d29-e8d9-457c-9dff-25b23753872d": true,
+          "cb9f9b0e-0486-400e-9fa1-5d2a997bb7d6": 2.49,
+          "ee09aa68-6191-494f-9900-f0dff16df27d": 0.4,
+          "043ef621-40fb-49dd-895b-ea8226d42d20": 0.32,
+          "6643b344-a69d-4142-85a6-f7c642a1e93a": 0.21,
+          "c79b7cd6-ca23-4e3b-8eb7-3468e157f592": {
+            "Gradient": {
+              "Interpolation": "OkLab",
+              "Steps": [
+                {
+                  "Id": "52c7090b-215d-4ce1-81f3-808774860531",
+                  "NormalizedPosition": 0.0,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.72460896,
+                    "B": 0.0,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "94c702cd-f0e3-4ee7-b3a7-ed0a9e671e84",
+                  "NormalizedPosition": 0.33333334,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.48703903,
+                    "B": 0.13195556,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "df54356a-ef5f-437d-9bb5-3b72eb7ad60f",
+                  "NormalizedPosition": 0.6666667,
+                  "Color": {
+                    "R": 0.49247694,
+                    "G": 0.08999183,
+                    "B": 0.6582595,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "f791d3f1-51f8-4ea4-810f-78dd8b9ae02a",
+                  "NormalizedPosition": 1.0,
+                  "Color": {
+                    "R": 0.09676862,
+                    "G": 0.29133904,
+                    "B": 1.0,
+                    "A": 1.0
+                  }
+                }
+              ]
+            }
+          },
+          "0957ec56-8c74-4e72-aee3-c14abddcc655": "//int3 faceIndicies\n//PbrVertex v1,v2,v3\n//float4 noise= hash41u(faceIndices.x);\n\nfloat3 avgPos = (v1.Position + v2.Position + v3.Position)/3;\nfloat4 color = Gradient.SampleLevel(ClampedSampler, (avgPos.y + Offset) * A +B, 0);\n\nv1.ColorRGB = color.rgb;\nv2.ColorRGB = color.rgb;\nv3.ColorRGB = color.rgb;\n\nv1.Position += (hash41u(faceIndices.x)-0.5) * C;\nv2.Position += (hash41u(faceIndices.y)-0.5) * C;\nv3.Position += (hash41u(faceIndices.z)-0.5) * C;\n"
+        }
+      }
+    },
+    {
+      "Id": "c508ab52-419a-4480-8d55-538fdfb01692",
+      "IsPreset": true,
+      "ActivationIndex": 4,
+      "Title": "Image -> Polygonize Color",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "cb9f9b0e-0486-400e-9fa1-5d2a997bb7d6": -0.28,
+          "ee09aa68-6191-494f-9900-f0dff16df27d": 0.53,
+          "c79b7cd6-ca23-4e3b-8eb7-3468e157f592": {
+            "Gradient": {
+              "Interpolation": "Linear",
+              "Steps": [
+                {
+                  "Id": "18e0c67c-c3d7-441a-b773-1701f16e66cf",
+                  "NormalizedPosition": 0.0,
+                  "Color": {
+                    "R": 0.99999,
+                    "G": 0.99999684,
+                    "B": 1.0,
+                    "A": 0.0
+                  }
+                },
+                {
+                  "Id": "d8603331-8664-4fdc-81aa-e61942020a92",
+                  "NormalizedPosition": 1.0,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.99999,
+                    "B": 1.0,
+                    "A": 1.0
+                  }
+                }
+              ]
+            }
+          },
+          "0957ec56-8c74-4e72-aee3-c14abddcc655": "// A: strength\n// B: Mode (0-> position, 1->UV)\n\nfloat2 uv1=v1.TexCoord.xy;\nfloat2 uv2=v2.TexCoord.xy;\nfloat2 uv3=v3.TexCoord.xy;\n\nif(B>0.5){\n  float s=1;\n  uv1=(v1.Position+Offset).xy*s+0.5;\n  uv2=(v2.Position+Offset).xy*s+0.5;\n  uv3=(v3.Position+Offset).xy*s+0.5;\n}\n\nfloat2 uvc=(uv1+uv2+uv3)/3;\nuv1=(uv1-(uv2+uv3)/2)*A+(uv2+uv3)/2;\nuv2=(uv2-(uv1+uv3)/2)*A+(uv1+uv3)/2;\nuv3=(uv3-(uv2+uv1)/2)*A+(uv2+uv1)/2;\n\nuv1.y=1.0-uv1.y;\nuv2.y=1.0-uv2.y;\nuv3.y=1.0-uv3.y;\n\nfloat4 smpc=Image.SampleLevel(Sampler,uvc,0);\nfloat4 smp1=Image.SampleLevel(Sampler,uv1,0);\nfloat4 smp2=Image.SampleLevel(Sampler,uv2,0);\nfloat4 smp3=Image.SampleLevel(Sampler,uv3,0);\n\nv1.ColorRGB=smp1.rgb;\nv2.ColorRGB=smp2.rgb;\nv3.ColorRGB=smp3.rgb;\n"
+        }
+      }
+    },
+    {
+      "Id": "d86cf4ae-d083-42c7-8860-99350b797a9a",
+      "IsPreset": true,
+      "ActivationIndex": 4,
+      "Title": "SDF -> Simple Gradient",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 122.55056
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "cb9f9b0e-0486-400e-9fa1-5d2a997bb7d6": 0.41,
+          "ee09aa68-6191-494f-9900-f0dff16df27d": 0.2,
+          "c79b7cd6-ca23-4e3b-8eb7-3468e157f592": {
+            "Gradient": {
+              "Interpolation": "Linear",
+              "Steps": [
+                {
+                  "Id": "9ebdc1e5-46cd-4a32-b5cf-cb5078efc1ef",
+                  "NormalizedPosition": 0.0,
+                  "Color": {
+                    "R": 0.99999,
+                    "G": 0.99999684,
+                    "B": 1.0,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "fd3d0297-5cb8-499e-b9e3-81cad483740a",
+                  "NormalizedPosition": 1.0,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.0,
+                    "B": 0.36987686,
+                    "A": 1.0
+                  }
+                }
+              ]
+            }
+          },
+          "0957ec56-8c74-4e72-aee3-c14abddcc655": "// SDF -> simple gradient\n// A: Range\n// B: FallOff\n\nfloat3 pCenter = (v1.Position + v2.Position + v3.Position)/3;\n\nfloat f= GetField(float4(pCenter,1)).w;\nf= smoothstep(1,0, (f-A)/B);\n\nfloat4 c = SampleGradient(f);\nv1.ColorRGB = c.rgb;\nv2.ColorRGB = c.rgb;\nv3.ColorRGB = c.rgb;\n\n"
+        }
+      }
+    },
+    {
+      "Id": "044ef340-3ff2-44fe-99ef-86867bdf0dbc",
+      "IsPreset": true,
+      "ActivationIndex": 5,
+      "Title": "SDF -> Displace v2",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 122.55056
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "e7f9c927-5d70-40d2-b5e3-43bd06731bf7": {
+            "X": 0.0,
+            "Y": 0.05,
+            "Z": 0.0
+          },
+          "cb9f9b0e-0486-400e-9fa1-5d2a997bb7d6": -0.5,
+          "ee09aa68-6191-494f-9900-f0dff16df27d": 0.41,
+          "043ef621-40fb-49dd-895b-ea8226d42d20": 0.81,
+          "6643b344-a69d-4142-85a6-f7c642a1e93a": 0.12,
+          "c79b7cd6-ca23-4e3b-8eb7-3468e157f592": {
+            "Gradient": {
+              "Interpolation": "Linear",
+              "Steps": [
+                {
+                  "Id": "7e88a094-d0f2-4b68-9606-7d33e8e9accf",
+                  "NormalizedPosition": 0.0,
+                  "Color": {
+                    "R": 0.99999,
+                    "G": 0.99999684,
+                    "B": 1.0,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "ea6bdcae-9137-4a1f-b18d-e36bf1a843a1",
+                  "NormalizedPosition": 0.93555003,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.16091663,
+                    "B": 0.5806323,
+                    "A": 1.0
+                  }
+                }
+              ]
+            }
+          },
+          "0957ec56-8c74-4e72-aee3-c14abddcc655": "// SDF -> simple gradient\n// A: Range\n// B: FallOff\n// C: Displace\n// D: Noise\n\nfloat3 pCenter = (v1.Position + v2.Position + v3.Position)/3 \n                 + Offset;\n\nfloat3 fn= GetFieldNormal(pCenter);\n\nfloat f= GetField(float4(pCenter,1)).w;\n\nfloat vn = (v1.Normal + v2.Normal + v3.Normal)/3;\n\nf= Biased(1-(f-A)/B);\n\nfloat4 c = SampleGradient(f);\nv1.ColorRGB = c.rgb;\nv2.ColorRGB = c.rgb;\nv3.ColorRGB = c.rgb;\n\nfloat noise = hash11u(faceIndex) * D;\n\nfloat3 d = (vn ) * C * noise * f;\n\nv1.Position +=  d;\nv2.Position +=  d;\nv3.Position +=  d;\n\n"
+        }
+      }
+    },
+    {
+      "Id": "3c58cb6a-2b94-4780-b6f2-f09c64865fa6",
+      "IsPreset": true,
+      "ActivationIndex": 6,
+      "Title": "SDF -> Displace with Rotation",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 122.55056
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "e7f9c927-5d70-40d2-b5e3-43bd06731bf7": {
+            "X": 0.94,
+            "Y": 2.1,
+            "Z": 0.0
+          },
+          "cb9f9b0e-0486-400e-9fa1-5d2a997bb7d6": -0.3,
+          "ee09aa68-6191-494f-9900-f0dff16df27d": 0.15,
+          "043ef621-40fb-49dd-895b-ea8226d42d20": 0.09,
+          "6643b344-a69d-4142-85a6-f7c642a1e93a": 0.23,
+          "d23cbda2-0ac6-40ec-8600-590b1c50e0bd": {
+            "X": 0.23000002,
+            "Y": 0.43
+          },
+          "c79b7cd6-ca23-4e3b-8eb7-3468e157f592": {
+            "Gradient": {
+              "Interpolation": "Linear",
+              "Steps": [
+                {
+                  "Id": "5ccd1747-3b91-47f9-ab51-188ee069c8d2",
+                  "NormalizedPosition": 0.0,
+                  "Color": {
+                    "R": 0.99999,
+                    "G": 0.99999684,
+                    "B": 1.0,
+                    "A": 1.0
+                  }
+                },
+                {
+                  "Id": "29e39a3c-c75c-4425-8ad0-88d3eb50a50a",
+                  "NormalizedPosition": 1.0,
+                  "Color": {
+                    "R": 1.0,
+                    "G": 0.16091663,
+                    "B": 0.5806323,
+                    "A": 1.0
+                  }
+                }
+              ]
+            }
+          },
+          "0957ec56-8c74-4e72-aee3-c14abddcc655": "// SDF -> simple gradient\n// A: Range\n// B: FallOff\n// C: Displace\n// D: Noise\n// Offset: RandomSpin\n\nfloat3 pCenter = (v1.Position + v2.Position + v3.Position)/3 ;\n\nfloat3 fn= GetFieldNormal(pCenter);\nfloat f= GetField(float4(pCenter,1)).w;\nfloat vn = (v1.Normal + v2.Normal + v3.Normal)/3;\n\nfloat noise = hash11u(faceIndex) * D;\n\nf= 1-(f-A)/B;\nf *=  C * (noise+1);\nf = Biased(f); \n\nfloat4 rot = qFromEuler(Offset.x *f / TAU, Offset.y *f / TAU, Offset.z*f / TAU);\nfloat3 p1InF = qRotateVec3(pos1 - pCenter, rot);\nfloat3 p2InF = qRotateVec3(pos2 - pCenter, rot);\nfloat3 p3InF = qRotateVec3(pos3 - pCenter, rot);\n\n\nfloat4 c = SampleGradient(f);\nv1.ColorRGB = c.rgb;\nv2.ColorRGB = c.rgb;\nv3.ColorRGB = c.rgb;\n\nfloat3 d = (vn + fn) * f;\npCenter += d;\n\nv1.Position =  pCenter + p1InF;\nv2.Position =  pCenter + p2InF;\nv3.Position =  pCenter + p3InF;\n\n"
+        }
+      }
+    }
+  ]
+}

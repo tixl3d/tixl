@@ -1,0 +1,25 @@
+{
+  "Id": "fbe1a703-f372-4236-9f20-5d0b69183843",
+  "Variations": [
+    {
+      "Id": "ffb0ae9f-3108-4733-8a66-916731aa5824",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Bouncy Floor",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "60eb8c10-93fa-487b-9eda-1767b485bb21": 0.38,
+          "86c81e40-79e8-4699-a7fe-581f0b09d266": 2,
+          "ceb7008d-c536-4d87-b3f8-d5ba9fe29eed": 0.9,
+          "3b975bd9-b8aa-4a41-97fc-ccd3b5e89e63": 0.1,
+          "7c6f58e7-27fc-4271-adef-248cffe5a8b7": 2.0,
+          "2ab85ac3-819d-4e3e-891a-7f27af627fdf": false
+        }
+      }
+    }
+  ]
+}

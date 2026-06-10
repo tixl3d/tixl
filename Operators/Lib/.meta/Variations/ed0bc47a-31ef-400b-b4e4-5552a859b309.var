@@ -1,0 +1,39 @@
+{
+  "Id": "ed0bc47a-31ef-400b-b4e4-5552a859b309",
+  "Variations": [
+    {
+      "Id": "edf6107b-fe5b-4c4a-a541-5c13044bf9b8",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "BouncyBunch",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "0724bf0c-8f97-44de-bf42-6a89b89f1632": 10.0,
+          "d0036a34-d7e4-4542-b231-5d1b687b0028": 0.8,
+          "91966b2c-342a-420a-bad1-cbcf4d6af1ae": 0.75
+        }
+      }
+    },
+    {
+      "Id": "b84a2efc-379b-4b7b-b2b8-b17a207e8554",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Collision For Small Points",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "0724bf0c-8f97-44de-bf42-6a89b89f1632": 1.0,
+          "d0036a34-d7e4-4542-b231-5d1b687b0028": 0.8,
+          "91966b2c-342a-420a-bad1-cbcf4d6af1ae": 0.0024
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,101 @@
+{
+  "Id": "eaeb8937-f6ff-4a4a-8f00-27484285cd2d",
+  "Variations": [
+    {
+      "Id": "b873bf4f-6d38-41cf-8f1b-76d5291463f6",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Huge Spiral",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bfc2279a-7bf8-436a-a04d-813ecee1776a": 2,
+          "77f01a41-38ff-4186-8336-84a030be124f": 5
+        }
+      }
+    },
+    {
+      "Id": "5c4716fa-76ea-4451-a034-e7af818ab545",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Nested Pentagrams",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bfc2279a-7bf8-436a-a04d-813ecee1776a": 5,
+          "77f01a41-38ff-4186-8336-84a030be124f": 5
+        }
+      }
+    },
+    {
+      "Id": "b490c5be-0d43-4299-bc38-240f17889916",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "Nested 8",
+      "PosOnCanvas": {
+        "X": 489.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bfc2279a-7bf8-436a-a04d-813ecee1776a": 8,
+          "77f01a41-38ff-4186-8336-84a030be124f": 8
+        }
+      }
+    },
+    {
+      "Id": "c73f3ea2-4a8b-40c3-8f57-3a4b7e8c3e7b",
+      "IsPreset": true,
+      "ActivationIndex": 4,
+      "Title": "Nested secondary 8",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bfc2279a-7bf8-436a-a04d-813ecee1776a": 8,
+          "77f01a41-38ff-4186-8336-84a030be124f": 16
+        }
+      }
+    },
+    {
+      "Id": "35fc237d-f9f6-4fa6-99b5-27adab5b04b6",
+      "IsPreset": true,
+      "ActivationIndex": 5,
+      "Title": "Not a sunflower",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bfc2279a-7bf8-436a-a04d-813ecee1776a": 8,
+          "77f01a41-38ff-4186-8336-84a030be124f": 31
+        }
+      }
+    },
+    {
+      "Id": "60c16c32-e131-4549-aabe-da9bf8a77007",
+      "IsPreset": true,
+      "ActivationIndex": 6,
+      "Title": "untitled",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "bfc2279a-7bf8-436a-a04d-813ecee1776a": 3,
+          "77f01a41-38ff-4186-8336-84a030be124f": 6
+        }
+      }
+    }
+  ]
+}

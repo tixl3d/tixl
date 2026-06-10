@@ -1,0 +1,78 @@
+{
+  "Id": "1192ae86-b174-4b58-9cc6-38afb666ce35",
+  "Variations": [
+    {
+      "Id": "e08008b5-f824-42b3-a88e-20efeb944b4e",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Vertical",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "11cb8f1e-fac5-4623-b61c-d6482633e505": 60.0,
+          "ab3206bf-9413-4f31-9c3d-0c1fe7477862": 90.0,
+          "815975d2-5613-4ca8-b208-f09ac07b0518": 0.92
+        }
+      }
+    },
+    {
+      "Id": "0c1d4c8a-5f8e-469e-ae54-a075171348e0",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Crazy Twist",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "11cb8f1e-fac5-4623-b61c-d6482633e505": 60.0,
+          "ab3206bf-9413-4f31-9c3d-0c1fe7477862": 90.0,
+          "815975d2-5613-4ca8-b208-f09ac07b0518": 0.90000004,
+          "dfa5e772-0cb4-440f-8483-dcc89b40107d": 0.0
+        }
+      }
+    },
+    {
+      "Id": "23f205f3-cda1-43c4-907e-970bfabaa4ac",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "GhostLines",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "e94e2b7e-6f0a-42b5-bf5e-abdffe728273": 0.0107,
+          "11cb8f1e-fac5-4623-b61c-d6482633e505": 60.0,
+          "ab3206bf-9413-4f31-9c3d-0c1fe7477862": -51.0,
+          "815975d2-5613-4ca8-b208-f09ac07b0518": 0.02,
+          "dfa5e772-0cb4-440f-8483-dcc89b40107d": 0.08
+        }
+      }
+    },
+    {
+      "Id": "5f830328-9708-404d-a6bf-b9ffa3c8b66a",
+      "IsPreset": true,
+      "ActivationIndex": 4,
+      "Title": "Noise Machine",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "e94e2b7e-6f0a-42b5-bf5e-abdffe728273": 0.0039999997,
+          "11cb8f1e-fac5-4623-b61c-d6482633e505": 60.0,
+          "ab3206bf-9413-4f31-9c3d-0c1fe7477862": 0.0,
+          "815975d2-5613-4ca8-b208-f09ac07b0518": -0.18,
+          "dfa5e772-0cb4-440f-8483-dcc89b40107d": 0.75
+        }
+      }
+    }
+  ]
+}

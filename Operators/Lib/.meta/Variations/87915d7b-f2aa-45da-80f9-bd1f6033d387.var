@@ -1,0 +1,91 @@
+{
+  "Id": "87915d7b-f2aa-45da-80f9-bd1f6033d387",
+  "Variations": [
+    {
+      "Id": "8882101c-0897-4139-82b4-35a4361d4cf2",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "CrazyOrbits",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "129f21fb-3206-4b0a-b455-485f1c11bd83": {
+            "X": 0.0,
+            "Y": 0.82,
+            "Z": 0.0
+          },
+          "cbcfcceb-309b-4a25-856a-cb4eb3798cf4": 6.6000004,
+          "02f34a62-bd83-47ac-962a-f1af6a92f0b8": 3.1999998,
+          "93cae017-8bf6-44c8-9b45-8b9a4e64b9bd": -1.6000003
+        }
+      }
+    },
+    {
+      "Id": "fd7d68dc-5c71-4b4a-b8a9-f1b212ca5dfd",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "QuietLimits",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "129f21fb-3206-4b0a-b455-485f1c11bd83": {
+            "X": 0.0,
+            "Y": 0.82,
+            "Z": 0.0
+          },
+          "cbcfcceb-309b-4a25-856a-cb4eb3798cf4": 0.19,
+          "02f34a62-bd83-47ac-962a-f1af6a92f0b8": 3.1999998,
+          "93cae017-8bf6-44c8-9b45-8b9a4e64b9bd": 2.0
+        }
+      }
+    },
+    {
+      "Id": "68c5a17d-e0bf-441f-960b-47bdaddbbdd0",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "CrazyConvergenz",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "129f21fb-3206-4b0a-b455-485f1c11bd83": {
+            "X": 0.0,
+            "Y": 0.82,
+            "Z": 0.0
+          },
+          "02f34a62-bd83-47ac-962a-f1af6a92f0b8": 1.0,
+          "93cae017-8bf6-44c8-9b45-8b9a4e64b9bd": 0.13
+        }
+      }
+    },
+    {
+      "Id": "bb9bcf7f-4ef4-4120-ab2a-9fd667f0a283",
+      "IsPreset": true,
+      "ActivationIndex": 4,
+      "Title": "LinearConvergence",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "129f21fb-3206-4b0a-b455-485f1c11bd83": {
+            "X": 0.0,
+            "Y": 0.82,
+            "Z": 0.0
+          },
+          "02f34a62-bd83-47ac-962a-f1af6a92f0b8": 0.23,
+          "93cae017-8bf6-44c8-9b45-8b9a4e64b9bd": 0.0
+        }
+      }
+    }
+  ]
+}

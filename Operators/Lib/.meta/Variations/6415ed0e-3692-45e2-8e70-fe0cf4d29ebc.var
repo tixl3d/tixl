@@ -1,0 +1,125 @@
+{
+  "Id": "6415ed0e-3692-45e2-8e70-fe0cf4d29ebc",
+  "Variations": [
+    {
+      "Id": "d52cc217-07b4-4aa2-a6d2-1b998989a1d6",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "CloseUp",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "dd92fb0a-4b3e-4492-bf59-437d914a1ad3": 5.0,
+          "df65e717-e2fd-4e4f-9e41-d6bcd3fe67f1": 0.01
+        }
+      }
+    },
+    {
+      "Id": "d7fd39d2-a7a1-4260-8862-080b8831f724",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Drunken",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "dd92fb0a-4b3e-4492-bf59-437d914a1ad3": 6.5,
+          "df65e717-e2fd-4e4f-9e41-d6bcd3fe67f1": 0.01,
+          "8b75047f-03b7-4619-8869-2906e66731d1": {
+            "X": 25.0,
+            "Y": 6.0
+          },
+          "7412e22c-1f15-4471-883b-4fcd792146f7": {
+            "X": 0.0,
+            "Y": 8.0
+          },
+          "4d2d2d2d-00bd-4df9-b209-62f0c7926c38": {
+            "X": 0.0,
+            "Y": 5.0
+          },
+          "066cd0e7-de72-4e04-bf13-686ccc301c5a": {
+            "X": 0.0,
+            "Y": 2.0
+          },
+          "1af76b2e-cffe-4e3f-8793-c7a59d00430b": {
+            "X": 0.0,
+            "Y": 2.0
+          },
+          "b6bf6fe1-6733-46c0-a274-fab2a950f606": 0.27,
+          "0ad10e15-06ef-4dde-8eb3-ed7fe989c88e": 2
+        }
+      }
+    },
+    {
+      "Id": "8db27eb8-4847-4b32-88ac-753a7ff2844e",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "Mosquito",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "dd92fb0a-4b3e-4492-bf59-437d914a1ad3": 6.5,
+          "df65e717-e2fd-4e4f-9e41-d6bcd3fe67f1": 0.01,
+          "8b75047f-03b7-4619-8869-2906e66731d1": {
+            "X": -4.000002,
+            "Y": 6.0
+          },
+          "7412e22c-1f15-4471-883b-4fcd792146f7": {
+            "X": -11.000002,
+            "Y": 8.0
+          },
+          "4d2d2d2d-00bd-4df9-b209-62f0c7926c38": {
+            "X": 14.0,
+            "Y": 20.0
+          },
+          "066cd0e7-de72-4e04-bf13-686ccc301c5a": {
+            "X": -7.999998,
+            "Y": 2.0
+          },
+          "1af76b2e-cffe-4e3f-8793-c7a59d00430b": {
+            "X": 2.0,
+            "Y": 2.0
+          },
+          "b6bf6fe1-6733-46c0-a274-fab2a950f606": 3.35,
+          "0ad10e15-06ef-4dde-8eb3-ed7fe989c88e": 2,
+          "21f595ad-0808-48f1-bdd8-118d1527944c": 60.0
+        }
+      }
+    },
+    {
+      "Id": "165133d6-8ded-4b00-9c18-f05a2d4f430f",
+      "IsPreset": true,
+      "ActivationIndex": 4,
+      "Title": "Dance with me",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 93.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "dd92fb0a-4b3e-4492-bf59-437d914a1ad3": 4.3,
+          "df65e717-e2fd-4e4f-9e41-d6bcd3fe67f1": 0.01,
+          "7412e22c-1f15-4471-883b-4fcd792146f7": {
+            "X": 16.0,
+            "Y": 161.0
+          },
+          "4d2d2d2d-00bd-4df9-b209-62f0c7926c38": {
+            "X": 2.0,
+            "Y": 0.0
+          },
+          "b6bf6fe1-6733-46c0-a274-fab2a950f606": 2.06,
+          "0ad10e15-06ef-4dde-8eb3-ed7fe989c88e": 2,
+          "21f595ad-0808-48f1-bdd8-118d1527944c": 75.5
+        }
+      }
+    }
+  ]
+}

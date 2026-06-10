@@ -1,0 +1,135 @@
+{
+  "Id": "5cbb8f47-5093-495d-bfb6-fbc5b00b7036",
+  "Variations": [
+    {
+      "Id": "e573e68b-cadc-4ba9-9631-00aba27618f6",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Default",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {}
+    },
+    {
+      "Id": "80bc3819-4f38-4754-97e5-687c900556db",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Clouds",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "c1a6aad2-75a7-4c15-9bea-a8f8f5c69d73": 5,
+          "f1ed5a42-7366-4b6f-b286-f7195c6ae213": 2.6,
+          "c926feba-e2f9-4189-9cbc-b0f52d6a484f": {
+            "X": 0.02,
+            "Y": 0.54499996
+          },
+          "1e245b3d-2aba-4f12-a235-3a5b5b7f0812": 1.0
+        }
+      }
+    },
+    {
+      "Id": "b8df0232-1131-416f-bc23-2b082ec23eec",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "Milk",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 0.0
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "c1a6aad2-75a7-4c15-9bea-a8f8f5c69d73": 3,
+          "1d6d9bba-dddb-4130-bb92-a55d92c43b48": 1.5,
+          "f1ed5a42-7366-4b6f-b286-f7195c6ae213": 2.0,
+          "91186518-2b7e-4def-92bc-ff56519c4883": 5.78,
+          "c926feba-e2f9-4189-9cbc-b0f52d6a484f": {
+            "X": 0.049999997,
+            "Y": 0.47499996
+          },
+          "1e245b3d-2aba-4f12-a235-3a5b5b7f0812": 1.0
+        }
+      }
+    },
+    {
+      "Id": "0aac5309-485d-4807-9a0f-57f2ecf918e9",
+      "IsPreset": true,
+      "ActivationIndex": 4,
+      "Title": "Dalamtines",
+      "PosOnCanvas": {
+        "X": 0.0,
+        "Y": 122.55056
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "c1a6aad2-75a7-4c15-9bea-a8f8f5c69d73": 4,
+          "1d6d9bba-dddb-4130-bb92-a55d92c43b48": 4.5,
+          "f1ed5a42-7366-4b6f-b286-f7195c6ae213": 2.0,
+          "91186518-2b7e-4def-92bc-ff56519c4883": 5.78,
+          "c926feba-e2f9-4189-9cbc-b0f52d6a484f": {
+            "X": 0.01,
+            "Y": 0.56999993
+          },
+          "1e245b3d-2aba-4f12-a235-3a5b5b7f0812": 1.0
+        }
+      }
+    },
+    {
+      "Id": "2d0b86be-2c21-452e-8b67-724ac0ee951d",
+      "IsPreset": true,
+      "ActivationIndex": 5,
+      "Title": "Static",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 122.55056
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "80acacd1-9b12-4564-b6b4-06ab4c8ba1f6": 3,
+          "c1a6aad2-75a7-4c15-9bea-a8f8f5c69d73": 4,
+          "1d6d9bba-dddb-4130-bb92-a55d92c43b48": 3.2,
+          "f1ed5a42-7366-4b6f-b286-f7195c6ae213": 3.0,
+          "91186518-2b7e-4def-92bc-ff56519c4883": 6.11,
+          "c926feba-e2f9-4189-9cbc-b0f52d6a484f": {
+            "X": 0.3,
+            "Y": 0.49
+          },
+          "1e245b3d-2aba-4f12-a235-3a5b5b7f0812": 1.0
+        }
+      }
+    },
+    {
+      "Id": "5049c149-e289-4447-a6cb-54882781baeb",
+      "IsPreset": true,
+      "ActivationIndex": 6,
+      "Title": "Stripe",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 122.55056
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "80acacd1-9b12-4564-b6b4-06ab4c8ba1f6": 3,
+          "c1a6aad2-75a7-4c15-9bea-a8f8f5c69d73": 4,
+          "1d6d9bba-dddb-4130-bb92-a55d92c43b48": 3.2,
+          "f1ed5a42-7366-4b6f-b286-f7195c6ae213": 3.0,
+          "91186518-2b7e-4def-92bc-ff56519c4883": 6.11,
+          "c926feba-e2f9-4189-9cbc-b0f52d6a484f": {
+            "X": 0.3,
+            "Y": 0.49
+          },
+          "1e245b3d-2aba-4f12-a235-3a5b5b7f0812": 1.0,
+          "6c463d39-13a2-41c0-b015-cdfb1971f3ca": {
+            "X": 256,
+            "Y": 1024
+          }
+        }
+      }
+    }
+  ]
+}

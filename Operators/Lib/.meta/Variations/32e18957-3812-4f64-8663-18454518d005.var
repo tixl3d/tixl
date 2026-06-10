@@ -1,0 +1,83 @@
+{
+  "Id": "32e18957-3812-4f64-8663-18454518d005",
+  "Variations": [
+    {
+      "Id": "c4fd4b5f-5d80-445b-bdc1-630d40135162",
+      "IsPreset": true,
+      "ActivationIndex": 1,
+      "Title": "Decal",
+      "PosOnCanvas": {
+        "X": 327.17477,
+        "Y": -165.5575
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "6f4184f1-6017-4bcc-ac1f-5ea4862bfb0c": {
+            "X": 0.14,
+            "Y": 0.15
+          },
+          "5b8ff5d7-e4d6-4631-8f0a-afb8086383e7": 0.5,
+          "6a786aa9-edf4-4363-9e34-0ddc7e763f0b": 22.0,
+          "43eb4d4e-2bb5-4c97-a5dd-91539b8258cd": 3
+        }
+      }
+    },
+    {
+      "Id": "eab0122b-852d-4a90-9109-ad5cfe2b239f",
+      "IsPreset": true,
+      "ActivationIndex": 2,
+      "Title": "Moquette",
+      "PosOnCanvas": {
+        "X": 150.63937,
+        "Y": -164.66591
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "5b8ff5d7-e4d6-4631-8f0a-afb8086383e7": 0.25,
+          "6a786aa9-edf4-4363-9e34-0ddc7e763f0b": 0.0,
+          "c31a95a9-2cfb-4eea-8006-97f883d11847": true,
+          "43eb4d4e-2bb5-4c97-a5dd-91539b8258cd": 0
+        }
+      }
+    },
+    {
+      "Id": "8b7edead-5008-46a6-9317-a71452440906",
+      "IsPreset": true,
+      "ActivationIndex": 3,
+      "Title": "MirrorSeamlessPattern",
+      "PosOnCanvas": {
+        "X": 149.0762,
+        "Y": -61.27054
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "5b8ff5d7-e4d6-4631-8f0a-afb8086383e7": 0.25,
+          "6a786aa9-edf4-4363-9e34-0ddc7e763f0b": 0.0,
+          "c31a95a9-2cfb-4eea-8006-97f883d11847": true,
+          "43eb4d4e-2bb5-4c97-a5dd-91539b8258cd": 1
+        }
+      }
+    },
+    {
+      "Id": "28865b49-c7a1-4964-9e48-76aca3019881",
+      "IsPreset": true,
+      "ActivationIndex": 4,
+      "Title": "InterstellarBookshelf",
+      "PosOnCanvas": {
+        "X": 329.72058,
+        "Y": -61.27054
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "6f4184f1-6017-4bcc-ac1f-5ea4862bfb0c": {
+            "X": -0.125,
+            "Y": -0.125
+          },
+          "5b8ff5d7-e4d6-4631-8f0a-afb8086383e7": 0.25,
+          "c31a95a9-2cfb-4eea-8006-97f883d11847": true,
+          "43eb4d4e-2bb5-4c97-a5dd-91539b8258cd": 4
+        }
+      }
+    }
+  ]
+}
