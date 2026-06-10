@@ -1,6 +1,7 @@
 #nullable enable
 
 using ImGuiNET;
+using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
 using T3.Core.SystemUi;
 using T3.Core.Utils;
@@ -240,7 +241,7 @@ internal sealed class SymbolLibrary : Window
     // The target symbol ID to expand to
     private Guid? _expandToSymbolTargetId;
 
-    // Set by Reveal(): the symbol item scrolls itself into view once, then clears this.
+    // Set by Reveal() and the aim icon: the symbol item scrolls itself into view once, then clears this.
     private Guid? _scrollToSymbolId;
 
     /// <summary>
@@ -320,8 +321,17 @@ internal sealed class SymbolLibrary : Window
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, UiColors.Text.Fade(0.7f).Rgba);
             }
-            
+
+            // Tight rows and subtle hover matching the folder styling of the asset library
+            ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Color.Transparent.Rgba);
+            ImGui.PushStyleColor(ImGuiCol.HeaderActive, Color.Transparent.Rgba);
+            ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Vector2.Zero);
+            ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, Vector2.Zero);
             var isOpen = ImGui.TreeNode(subtree.Name);
+            ImGui.PopStyleVar(2);
+            ImGui.PopStyleColor(2);
+
+            CustomComponents.DrawHoverHighlightOnLastItem();
 
             if (isProject)
             {
@@ -343,8 +353,7 @@ internal sealed class SymbolLibrary : Window
             if (!isOpen && containsSelected)
             {
                 var h = ImGui.GetFontSize();
-                var x = ImGui.GetContentRegionAvail().X -h/2; // GetContentRegionAvail() prevents the scrollbar to overlap the content aligned to the right.  
-                ImGui.SameLine(x);
+                CustomComponents.RightAlign(h);
 
                 var clicked = ImGui.InvisibleButton("Reveal", new Vector2(h));
                 if (ImGui.IsItemHovered())
@@ -370,6 +379,7 @@ internal sealed class SymbolLibrary : Window
                 {
                     _expandToSymbolTriggered = true;
                     _expandToSymbolTargetId = selectedSymbolId;
+                    _scrollToSymbolId = selectedSymbolId;
                 }
             }
 

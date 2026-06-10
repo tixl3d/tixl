@@ -332,6 +332,20 @@ internal static partial class CustomComponents
             ImGui.Dummy(new Vector2(1, 5 * T3Ui.UiScaleFactor));
     }
 
+    /// <summary>
+    /// Draws the subtle rounded hover background used for library tree folders, covering only the
+    /// clickable label area. Push transparent HeaderHovered/HeaderActive colors before drawing the
+    /// tree node so ImGui's default header highlight doesn't show through.
+    /// </summary>
+    public static void DrawHoverHighlightOnLastItem()
+    {
+        if (!ImGui.IsItemHovered())
+            return;
+
+        ImGui.GetWindowDrawList().AddRectFilled(ImGui.GetItemRectMin(), ImGui.GetItemRectMax(),
+                                                UiColors.BackgroundActive.Fade(0.2f), 5 * T3Ui.UiScaleFactor);
+    }
+
     public static void RightAlign(float itemWidth, bool sameLine = true)
     {
         if(sameLine)

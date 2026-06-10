@@ -123,7 +123,7 @@ internal sealed partial class AssetLibrary
 
             ImGui.PushStyleColor(ImGuiCol.Text, textMutedRgba.Rgba);
             ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Color.Transparent.Rgba);
-            ImGui.PushStyleColor(ImGuiCol.HeaderActive, Color.Transparent.Rgba); // WTF?
+            ImGui.PushStyleColor(ImGuiCol.HeaderActive, Color.Transparent.Rgba);
 
             var containsTargetFile = ContainsTargetFile(folder);
             if (_expandToFileTriggered && containsTargetFile)
@@ -141,10 +141,7 @@ internal sealed partial class AssetLibrary
             ImGui.PopFont();
             ImGui.PopStyleColor(3);
 
-            if (ImGui.IsItemHovered())
-            {
-                ImGui.GetWindowDrawList().AddRectFilled(ImGui.GetItemRectMin(), ImGui.GetItemRectMax(), UiColors.BackgroundActive.Fade(0.2f), 5);
-            }
+            CustomComponents.DrawHoverHighlightOnLastItem();
 
             CustomComponents.DrawSearchMatchUnderline(_state.SearchString, folderName,
                                                       ImGui.GetItemRectMin()
@@ -222,8 +219,7 @@ internal sealed partial class AssetLibrary
                 if (ContainsTargetFile(folder))
                 {
                     var h = ImGui.GetFontSize();
-                    var x = ImGui.GetContentRegionAvail().X - h/2;
-                    ImGui.SameLine(x);
+                    CustomComponents.RightAlign(h);
 
                     var clicked = ImGui.InvisibleButton("Reveal", new Vector2(h));
                     if (ImGui.IsItemHovered())
@@ -231,9 +227,9 @@ internal sealed partial class AssetLibrary
                         CustomComponents.TooltipForLastItem("Reveal selected asset");
                     }
 
-                    if (_state.HasActiveInstanceChanged)
+                    if (_state.HasActiveInstanceChanged && !IsLastItemFullyVisible())
                     {
-                        ImGui.SetScrollHereY();
+                        ImGui.SetScrollHereY(0.5f);
                     }
 
                     var timeSinceChange = (float)(ImGui.GetTime() - _state.TimeActiveInstanceChanged);
@@ -263,6 +259,13 @@ internal sealed partial class AssetLibrary
         ImGui.PushStyleColor(ImGuiCol.Text, UiColors.ForegroundFull.Fade(0.3f).Rgba);
         ImGui.TextUnformatted(countLabel);
         ImGui.PopStyleColor();
+    }
+
+    private static bool IsLastItemFullyVisible()
+    {
+        var windowTop = ImGui.GetWindowPos().Y;
+        var windowBottom = windowTop + ImGui.GetWindowSize().Y;
+        return ImGui.GetItemRectMin().Y >= windowTop && ImGui.GetItemRectMax().Y <= windowBottom;
     }
 
     private static bool ContainsTargetFile(AssetFolder folder)
@@ -371,16 +374,17 @@ internal sealed partial class AssetLibrary
                                                       ImGui.GetItemRectMin()
                                                       + new Vector2(ImGui.GetFontSize() + 5, 3));
 
-            if (isActive && !ImGui.IsItemVisible() && _state.HasActiveInstanceChanged)
+            // IsItemVisible() would be true for partially visible items, so check the full rect
+            if (isActive && _state.HasActiveInstanceChanged && !IsLastItemFullyVisible())
             {
-                ImGui.SetScrollHereY();
+                ImGui.SetScrollHereY(0.5f);
             }
 
             // Stop expanding if item becomes visible
             if (isActive && _expandToFileTriggered)
             {
                 _expandToFileTriggered = false;
-                ImGui.SetScrollHereY(1f);
+                ImGui.SetScrollHereY(0.5f);
             }
 
             CustomComponents.ContextMenuForItem(drawMenuItems: () =>
