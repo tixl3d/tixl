@@ -563,32 +563,46 @@ internal static class NodeActions
             removeCommands.Add(new DeleteConnectionCommand(compositionOp.Symbol, outputConnection.connection, outputConnection.multiInputIndex));
         }
 
-        // Reconnect inputs of 1th nodes and outputs of last nodes if are of the same type
-        // and reconnect them in ascending order
+        // Reconnect inputs of first nodes to outputs of last nodes if they are of the same type,
+        // in ascending order. Inputs are paired one-to-one first; once exhausted, a matching
+        // input is reused so a single source fans out to all targets the dragged nodes fed.
         outputConnections.Sort((x, y) => x.multiInputIndex.CompareTo(y.multiInputIndex));
         inputConnections.Sort((x, y) => x.multiInputIndex.CompareTo(y.multiInputIndex));
-        var outputConnectionsRemaining = new List<(Symbol.Connection connection, Type connectionType, bool isMultiIndex, int multiInputIndex)>(outputConnections);
-        foreach (var itemInputConnection in inputConnections)
+        var unusedInputConnections = new List<(Symbol.Connection connection, Type connectionType, bool isMultiIndex, int multiInputIndex)>(inputConnections);
+        foreach (var itemOutputConnection in outputConnections)
         {
-            foreach (var itemOutputConnectionRemaining in outputConnectionsRemaining)
+            (Symbol.Connection connection, Type connectionType, bool isMultiIndex, int multiInputIndex)? matchingInput = null;
+            foreach (var candidate in unusedInputConnections)
             {
-                if (itemInputConnection.connectionType == itemOutputConnectionRemaining.connectionType)
+                if (candidate.connectionType != itemOutputConnection.connectionType)
+                    continue;
+
+                matchingInput = candidate;
+                unusedInputConnections.Remove(candidate);
+                break;
+            }
+
+            if (matchingInput == null)
+            {
+                foreach (var candidate in inputConnections)
                 {
-                    var newConnection = new Symbol.Connection(sourceParentOrChildId: itemInputConnection.connection.SourceParentOrChildId,
-                                                              sourceSlotId: itemInputConnection.connection.SourceSlotId,
-                                                              targetParentOrChildId: itemOutputConnectionRemaining.connection.TargetParentOrChildId,
-                                                              targetSlotId: itemOutputConnectionRemaining.connection.TargetSlotId);
+                    if (candidate.connectionType != itemOutputConnection.connectionType)
+                        continue;
 
-                    removeCommands.Add(new AddConnectionCommand(compositionOp.Symbol, newConnection, itemOutputConnectionRemaining.multiInputIndex));
-                    outputConnectionsRemaining.Remove(itemOutputConnectionRemaining);
-
+                    matchingInput = candidate;
                     break;
                 }
             }
-            if (outputConnectionsRemaining.Count < 1)
-            {
-                break;
-            }
+
+            if (matchingInput == null)
+                continue;
+
+            var newConnection = new Symbol.Connection(sourceParentOrChildId: matchingInput.Value.connection.SourceParentOrChildId,
+                                                      sourceSlotId: matchingInput.Value.connection.SourceSlotId,
+                                                      targetParentOrChildId: itemOutputConnection.connection.TargetParentOrChildId,
+                                                      targetSlotId: itemOutputConnection.connection.TargetSlotId);
+
+            removeCommands.Add(new AddConnectionCommand(compositionOp.Symbol, newConnection, itemOutputConnection.multiInputIndex));
         }
 
         if (removeCommands.Count > 0)
