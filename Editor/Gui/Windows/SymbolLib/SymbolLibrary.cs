@@ -53,6 +53,12 @@ internal sealed class SymbolLibrary : Window
         _expandToSymbolTargetId = symbolId;
         _expandToSymbolTriggered = true;
         _scrollToSymbolId = symbolId;
+
+        // The highlight normally mirrors the graph selection. Hold the revealed symbol
+        // highlighted until that selection changes, so reveals from documentation links
+        // (which don't select anything) stay visible.
+        _revealHighlightActive = true;
+        _graphSelectionAtReveal = TryGetSingleSelectedSymbolId();
         Config.Visible = true;
     }
 
@@ -640,24 +646,33 @@ internal sealed class SymbolLibrary : Window
     private static Guid? _lastSelectedSymbolId;
     private static double _lastSelectionTime;
 
+    // A highlight from Reveal() persists until the graph selection changes away from this snapshot.
+    private static bool _revealHighlightActive;
+    private static Guid? _graphSelectionAtReveal;
+
     /// <summary>
     /// Updates the highlight/aim icon state for the currently selected symbol in the node graph.
     /// </summary>
     private void UpdateSelectedSymbolHighlight()
     {
-        var projectView = ProjectView.Focused;
-        if (projectView?.NodeSelection == null)
+        if (ProjectView.Focused?.NodeSelection == null)
             return;
 
-        // Only highlight if exactly one operator is selected in the node graph
-        var selectedChildUis = projectView.NodeSelection.GetSelectedChildUis().ToList();
-        if (selectedChildUis.Count == 1)
+        var selectedSymbolId = TryGetSingleSelectedSymbolId();
+
+        // A Reveal() highlight is not backed by the graph selection - keep it
+        // (set via _scrollToSymbolId in DrawSymbolItemInstance) until that selection changes.
+        if (_revealHighlightActive)
         {
-            var symbolChild = selectedChildUis[0].SymbolChild;
-            if (symbolChild == null)
+            if (selectedSymbolId == _graphSelectionAtReveal)
                 return;
 
-            var selectedSymbolId = symbolChild.Symbol.Id;
+            _revealHighlightActive = false;
+        }
+
+        // Only highlight if exactly one operator is selected in the node graph
+        if (selectedSymbolId.HasValue)
+        {
             if (_lastSelectedSymbolId != selectedSymbolId)
             {
                 _lastSelectedSymbolId = selectedSymbolId;
@@ -668,6 +683,19 @@ internal sealed class SymbolLibrary : Window
         {
             _lastSelectedSymbolId = null;
         }
+    }
+
+    private static Guid? TryGetSingleSelectedSymbolId()
+    {
+        var nodeSelection = ProjectView.Focused?.NodeSelection;
+        if (nodeSelection == null)
+            return null;
+
+        var selectedChildUis = nodeSelection.GetSelectedChildUis().ToList();
+        if (selectedChildUis.Count != 1)
+            return null;
+
+        return selectedChildUis[0].SymbolChild?.Symbol.Id;
     }
 
     // Helper for clamping float/double values between 0 and 1

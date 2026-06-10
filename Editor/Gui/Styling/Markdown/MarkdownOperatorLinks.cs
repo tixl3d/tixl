@@ -81,9 +81,15 @@ internal static class MarkdownOperatorLinks
 
     private static bool TryResolve(string opName, out Symbol symbol)
     {
-        // Built once on first use. Release notes describe operators that already exist at startup, so a
-        // missing entry means a renamed/removed operator rather than one loaded later — no live refresh.
-        _symbolsByName ??= BuildLookup();
+        // Rebuilt when the symbol structure changes so references to ops from
+        // later-loaded projects resolve too.
+        var structureVersion = EditorSymbolPackage.SymbolStructureVersionCounter;
+        if (_symbolsByName == null || structureVersion != _lookupVersion)
+        {
+            _symbolsByName = BuildLookup();
+            _lookupVersion = structureVersion;
+        }
+
         return _symbolsByName.TryGetValue(opName, out symbol!);
     }
 
@@ -96,6 +102,7 @@ internal static class MarkdownOperatorLinks
     }
 
     private static Dictionary<string, Symbol>? _symbolsByName;
+    private static int _lookupVersion = -1;
 
     private const float TooltipWidth = 320f;
     private static readonly MarkdownView _tooltipMarkdown = new(new MarkdownView.Options());

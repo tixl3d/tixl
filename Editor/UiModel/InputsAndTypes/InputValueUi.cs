@@ -15,6 +15,7 @@ using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Animation;
 using T3.Editor.Gui.Styling;
+using T3.Editor.Gui.Styling.Markdown;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows;
 using T3.Editor.Skills.Training;
@@ -295,12 +296,16 @@ public abstract class InputValueUi<T> : IInputUi
                 }
                 if (ImGui.IsItemHovered())
                 {
-                    var text = "Input: " + connectedName ;
-                    if (!string.IsNullOrEmpty(Description))
-                    {
-                       text += "\n-----";
-                    }
-                    CustomComponents.TooltipForLastItem(text, Description);
+                    var name = connectedName;
+                    CustomComponents.TooltipForLastItem(() =>
+                                                        {
+                                                            ImGui.TextUnformatted("Input: " + name);
+                                                            if (string.IsNullOrEmpty(Description))
+                                                                return;
+
+                                                            ImGui.Separator();
+                                                            MarkdownTooltip.Draw(Description);
+                                                        });
                 }
 
                 ImGui.PushStyleColor(ImGuiCol.Text, typeColor.Rgba);
@@ -615,7 +620,7 @@ public abstract class InputValueUi<T> : IInputUi
                                                         SkillQuestParameterHint.DrawTooltipPrefix(hint.Value);
 
                                                     if (!string.IsNullOrEmpty(text))
-                                                        ImGui.TextColored(UiColors.Text, text);
+                                                        MarkdownTooltip.Draw(text);
 
                                                     if (!string.IsNullOrEmpty(additionalNotes))
                                                         ImGui.TextColored(UiColors.Text.Fade(0.7f), additionalNotes);

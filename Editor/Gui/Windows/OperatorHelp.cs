@@ -1,6 +1,5 @@
 #nullable enable
 using System.IO;
-using System.Text.RegularExpressions;
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.SystemUi;
@@ -10,7 +9,6 @@ using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.Styling.Markdown;
-using T3.Editor.Gui.Windows.SymbolLib;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Helpers;
 using T3.Editor.UiModel.InputsAndTypes;
@@ -59,7 +57,7 @@ internal sealed class OperatorHelp
             ImGui.BeginTooltip();
             ImGui.Dummy(new Vector2(500 * T3Ui.UiScaleFactor, 1));
 
-            DrawHelp(symbolUi);
+            DrawHelp(symbolUi, isInTooltip: true);
             ImGui.EndTooltip();
             ImGui.PopStyleVar();
         }
@@ -124,8 +122,11 @@ internal sealed class OperatorHelp
         return helpRequested;
     }
 
-    public static void DrawHelp(SymbolUi symbolUi)
+    public static void DrawHelp(SymbolUi symbolUi, bool isInTooltip = false)
     {
+        // Inside a tooltip the op-ref hover must not open its own (nested) tooltip.
+        var opRefHandler = isInTooltip ? _operatorRefHandlerInTooltip : _operatorRefHandler;
+
         // Title and namespace
         ImGui.Indent(10);
         FormInputs.AddSectionHeader(symbolUi.Symbol.Name);
@@ -146,7 +147,9 @@ internal sealed class OperatorHelp
 
         if (!string.IsNullOrEmpty(symbolUi.Description))
         {
-            _descriptionView.Draw(symbolUi.Description, onOperatorRef: HandleOperatorRefClicked);
+            _descriptionView.Draw(symbolUi.Description,
+                                  onOperatorRef: opRefHandler,
+                                  operatorColor: MarkdownOperatorLinks.GetOperatorColor);
         }
         else
         {
@@ -172,7 +175,7 @@ internal sealed class OperatorHelp
 
             ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
             ImGui.PushFont(Fonts.FontNormal);
-            ImGui.TextUnformatted("Parameters details");
+            ImGui.TextUnformatted("Parameter Details");
             ImGui.PopFont();
             ImGui.PopStyleColor();
 
@@ -188,7 +191,9 @@ internal sealed class OperatorHelp
                 ImGui.PopStyleColor();
 
                 ImGui.SameLine(parameterColorWidth + 10);
-                GetParameterDescriptionView(parameterIndex).Draw(p.Description, onOperatorRef: HandleOperatorRefClicked);
+                GetParameterDescriptionView(parameterIndex).Draw(p.Description,
+                                                                 onOperatorRef: opRefHandler,
+                                                                 operatorColor: MarkdownOperatorLinks.GetOperatorColor);
             }
         }
 
@@ -208,7 +213,6 @@ internal sealed class OperatorHelp
         private static Guid _cachedSymbolId;
 
         private static readonly List<(string Title, string Description, string Url, Icon? Icon)> _cachedLinks = [];
-        private static readonly List<(SymbolUi SymbolUi, string Name)> _cachedReferencedSymbols = [];
         private static int _cachedSymbolUiVersion = -1;
 
         public static void DrawLinksAndExamples(SymbolUi symbolUi)
@@ -234,27 +238,10 @@ internal sealed class OperatorHelp
             ImGui.PopStyleVar();
         }
 
-        internal static bool TryGetReferencedSymbol(string name, out SymbolUi symbolUi)
-        {
-            for (var i = 0; i < _cachedReferencedSymbols.Count; i++)
-            {
-                if (_cachedReferencedSymbols[i].Name == name)
-                {
-                    symbolUi = _cachedReferencedSymbols[i].SymbolUi;
-                    return true;
-                }
-            }
-
-            symbolUi = null!;
-            return false;
-        }
-
         private static void CacheSymbolData(SymbolUi symbolUi)
         {
             _cachedLinks.Clear();
-            _cachedReferencedSymbols.Clear();
 
-            // Cache links
             foreach (var link in symbolUi.Links.Values)
             {
                 if (!string.IsNullOrEmpty(link.Url))
@@ -265,41 +252,6 @@ internal sealed class OperatorHelp
                                       link.Description,
                                       ExternalLink.LinkIcons.TryGetValue(link.Type, out var icon) ? icon : (Icon?)null)
                                     );
-                }
-            }
-
-            // Cache referenced symbols from the description and all parameter descriptions
-            CollectReferencedSymbols(symbolUi, symbolUi.Description);
-            foreach (var inputUi in symbolUi.InputUis.Values)
-            {
-                CollectReferencedSymbols(symbolUi, inputUi.Description);
-            }
-        }
-
-        private static void CollectReferencedSymbols(SymbolUi symbolUi, string? text)
-        {
-            if (string.IsNullOrEmpty(text))
-                return;
-
-            foreach (Match match in _itemRegex.Matches(text))
-            {
-                var referencedName = match.Groups[1].Value;
-
-                if (referencedName == symbolUi.Symbol.Name || _cachedReferencedSymbols.Any(x => x.Name == referencedName))
-                    continue;
-
-                foreach (var symbol in EditorSymbolPackage.AllSymbols)
-                {
-                    if (symbol.Name == referencedName)
-                    {
-                        var package = (EditorSymbolPackage)symbol.SymbolPackage;
-                        if (package.TryGetSymbolUi(symbol.Id, out var exampleSymbolUi))
-                        {
-                            _cachedReferencedSymbols.Add((exampleSymbolUi, referencedName));
-                        }
-
-                        break;
-                    }
                 }
             }
         }
@@ -367,13 +319,6 @@ internal sealed class OperatorHelp
 
     internal static readonly EditSymbolDescriptionDialog EditDescriptionDialog = new();
 
-    /// <summary>
-    /// Used by <see cref="DocumentationRenderer.CacheSymbolData"/> to populate
-    /// the referenced-symbol lookup that backs inline <c>[OpName]</c> clicks.
-    /// Same identifier shape as <see cref="MarkdownParser"/> uses.
-    /// </summary>
-    private static readonly Regex _itemRegex = new(@"\[([A-Za-z\d_]+)\]", RegexOptions.Compiled);
-
     private static readonly List<IInputUi> _parametersWithDescription = new(10);
 
     private static readonly MarkdownView _descriptionView = new(new MarkdownView.Options());
@@ -399,19 +344,12 @@ internal sealed class OperatorHelp
         return _parameterDescriptionViews[parameterIndex];
     }
 
-    private static void HandleOperatorRefClicked(string opName)
-    {
-        if (!DocumentationRenderer.TryGetReferencedSymbol(opName, out var refUi))
-            return;
+    // Cached so the per-frame Draw calls don't allocate new delegates.
+    private static readonly MarkdownView.OperatorRefRendered _operatorRefHandler =
+        static opName => MarkdownOperatorLinks.HandleOperatorRef(opName);
 
-        // Mirrors the drag/click affordance used elsewhere for symbol items:
-        // dragging starts a symbol drop on the graph; a non-drag click spawns
-        // it next to the current selection.
-        SymbolLibrary.HandleDragAndDropForSymbolItem(refUi.Symbol);
-
-        if (ImGui.IsItemHovered() && !string.IsNullOrEmpty(refUi.Description))
-            CustomComponents.TooltipForLastItem(refUi.Description);
-    }
+    private static readonly MarkdownView.OperatorRefRendered _operatorRefHandlerInTooltip =
+        static opName => MarkdownOperatorLinks.HandleOperatorRef(opName, suppressTooltip: true);
 
     private static float _timeSinceTooltipHovered = 0;
     private static readonly string _openLink = "Open link in browser:";

@@ -6,6 +6,7 @@ using T3.Core.Operator.Slots;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.Styling;
+using T3.Editor.Gui.Styling.Markdown;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.InputsAndTypes;
@@ -246,7 +247,8 @@ internal static class InputPicking
 
                         if (!string.IsNullOrEmpty(inputUi.Description))
                         {
-                            CustomComponents.TooltipForLastItem(inputUi.Description);
+                            var description = inputUi.Description;
+                            CustomComponents.TooltipForLastItem(() => MarkdownTooltip.Draw(description));
                         }
                         
                         WindowContentExtend.ExtendToLastItem();
