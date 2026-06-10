@@ -1,6 +1,8 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "46daab0e-e957-413e-826c-0699569d0e07"/*CustomPixelShader*/,
-  "Description": "Computes the output color for every pixel of a texture from a short HLSL code fragment.\n\nWrite the body of a pixel shader that sets the result color `c` (float4). Prepared variables include `uv`, `PixelCoord` and the images ImageA / ImageB; helpers like SampleGradient(f) and Biased(f) connect the code to the Gradient and GainAndBias parameters. Explore the presets for examples.\n\nFull documentation: https://help.tixl.app/advanced/UsingCustomShaders/",
+  "Description": "Computes the output color for every pixel of a texture from a short HLSL code fragment.\n\nWrite the body of a pixel shader that sets the result color `c` (float4). Prepared variables include `uv`, `PixelCoord` and the images ImageA / ImageB; helpers like SampleGradient(f) and Biased(f) connect the code to the Gradient and GainAndBias parameters. Explore the presets for examples.\n\nFull documentation: https://help.tixl.app/advanced/UsingCustomShaders/\n\n\n```\nTesdf\najdfklsdf\n```",
   "InputUis": [
     {
       "InputId": "1ed14f4d-3b1e-4f24-9d83-d96005217716"/*TemplateFile*/,
@@ -17,7 +19,7 @@
         "X": 2617.35,
         "Y": 430.8828
       },
-      "Description": "Use FloatsToBuffer or Ints to buffer to pass additional input params, define in AdditionalCode for example:\n\ncbuffer AdditionalIntParams : register(b2)\n{\n    int Index;\n}\ncbuffer AdditionalFloatParams : register(b3)\n{\n    float4 Color;\n}"
+      "Description": "Use FloatsToBuffer or Ints to buffer to pass additional input params, define in AdditionalCode for example:\n\n`cbuffer AdditionalIntParams: register(b2) { int Index; }`\n\n`cbuffer AdditionalFloatParams: register(b3) { float4 Color; }`"
     },
     {
       "InputId": "3d84725a-594b-46d8-aa21-eec99026115d"/*A*/,
@@ -75,7 +77,7 @@
         "X": 2617.35,
         "Y": 675.8828
       },
-      "Description": "Use SamplerState node to add custom sampler(s); first sampler input is defined in template as CustomSampler.\nsamplers coming after that will need to be defined in AdditionalCode, for example:\n\nsampler Sampler2 : register(s2);"
+      "Description": "Use SamplerState node to add custom sampler(s); first sampler input is defined in template as CustomSampler.\nsamplers coming after that will need to be defined in AdditionalCode, for example:\n\n`sampler Sampler2 : register(s2);`"
     },
     {
       "InputId": "92fdfa08-e7da-4a71-9145-277b74c93729"/*GenerateMips*/,
@@ -118,7 +120,7 @@
         "X": 2617.35,
         "Y": 570.8828
       },
-      "Description": "Use SrvFromTexutre2d for additional texture inputs. They will need to be defined in AdditionalCode, for example:\n\nTexture2D<float4> Image3 : register(t2);"
+      "Description": "Use SrvFromTexutre2d for additional texture inputs. They will need to be defined in AdditionalCode, for example:\n\n`Texture2D<float4> Image3 : register(t2);`"
     },
     {
       "InputId": "c9a801ec-13fb-4ad4-b0cd-d125b5db500a"/*AdditionalCode*/,
