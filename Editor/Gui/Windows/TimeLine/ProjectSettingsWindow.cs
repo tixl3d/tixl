@@ -535,8 +535,12 @@ internal sealed class ProjectSettingsWindow : Window
 
                 if (ImGui.BeginCombo("##SelectDevice", playback.AudioInputDeviceName, ImGuiComboFlags.HeightLarge))
                 {
+                    var deviceIndex = 0;
                     foreach (var d in WasapiAudioInput.InputDevices)
                     {
+                        // Seed the ID from the index: devices can share the same display name,
+                        // which ImGui flags as conflicting IDs.
+                        ImGui.PushID(deviceIndex++);
                         var isSelected = d.DeviceInfo.Name == playback.AudioInputDeviceName;
                         if (ImGui.Selectable($"{d.DeviceInfo.Name}", isSelected,
                                 ImGuiSelectableFlags.NoAutoClosePopups))
@@ -568,6 +572,8 @@ internal sealed class ProjectSettingsWindow : Window
                             ImGui.PopFont();
                             ImGui.EndTooltip();
                         }
+
+                        ImGui.PopID();
                     }
 
                     ImGui.EndCombo();
