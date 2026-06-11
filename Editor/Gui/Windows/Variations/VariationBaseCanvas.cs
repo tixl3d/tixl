@@ -103,11 +103,23 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
         var modified = false;
         if (_currentRenderInstance != null)
         {
+            // Live previews are volatile and load from the temp cache so the curated defaults
+            // in the package's .meta folder stay untouched. The defaults serve as fallback
+            // until the live rendering has produced a temp thumbnail.
+            var liveThumbnails = UserSettings.Config.VariationLiveThumbnails;
+            var thumbnailCategory = liveThumbnails
+                                        ? ThumbnailManager.Categories.Temp
+                                        : ThumbnailManager.Categories.PackageMeta;
+            var fallbackCategory = liveThumbnails
+                                       ? ThumbnailManager.Categories.PackageMeta
+                                       : (ThumbnailManager.Categories?)null;
+
             for (var index = 0; index < PoolForBlendOperations.AllVariations.Count; index++)
             {
                 var variation = PoolForBlendOperations.AllVariations[index];
 
-                var thumbnail = ThumbnailManager.GetThumbnail(variation.Id, _currentRenderInstance.Symbol.SymbolPackage, ThumbnailManager.Categories.PackageMeta);
+                var thumbnail = ThumbnailManager.GetThumbnail(variation.Id, _currentRenderInstance.Symbol.SymbolPackage, thumbnailCategory,
+                                                              fallbackCategory: fallbackCategory);
                 modified |= VariationThumbnail.Draw(this,
                                                     variation,
                                                     InstanceForBlendOperations,
@@ -399,8 +411,12 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
                                                                 }
 
                                                                 ImGui.Separator();
-                                                                ImGui.MenuItem("Live Render Previews", "", ref UserSettings.Config.VariationLiveThumbnails,
-                                                                               true);
+                                                                var liveThumbnails = UserSettings.Config.VariationLiveThumbnails;
+                                                                if (ImGui.MenuItem("Live Render Previews", "", ref liveThumbnails, true))
+                                                                {
+                                                                    EnableLiveThumbnails(liveThumbnails);
+                                                                }
+
                                                                 ImGui.MenuItem("Preview on Hover", "", ref UserSettings.Config.VariationHoverPreview, true);
 
                                                                 DrawAdditionalContextMenuContent(instance);
@@ -432,6 +448,44 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
     public void StopHover()
     {
         PoolForBlendOperations?.StopHover();
+    }
+
+    /// <summary>
+    /// Switches live thumbnail rendering on or off. Disabling restores the default
+    /// thumbnails that live previews replaced in the atlas.
+    /// </summary>
+    internal void EnableLiveThumbnails(bool enabled)
+    {
+        UserSettings.Config.VariationLiveThumbnails = enabled;
+        if (enabled)
+        {
+            TriggerThumbnailUpdate();
+        }
+        else
+        {
+            RestoreDefaultThumbnails();
+        }
+    }
+
+    private void RestoreDefaultThumbnails()
+    {
+        foreach (var id in _liveThumbnailIds)
+        {
+            ThumbnailManager.InvalidateThumbnail(id);
+        }
+
+        _liveThumbnailIds.Clear();
+
+        // Thumbnails loaded from the temp cache of a previous session aren't in the tracking
+        // set, so also invalidate the visible pool to reload its defaults from .meta.
+        var pool = PoolForBlendOperations;
+        if (pool == null)
+            return;
+
+        foreach (var variation in pool.AllVariations)
+        {
+            ThumbnailManager.InvalidateThumbnail(variation.Id);
+        }
     }
 
     protected void TriggerThumbnailUpdate()
@@ -614,14 +668,21 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
         
         textureOutputSlot.DirtyFlag.ForceInvalidate();
         textureOutputSlot.Update(_imageContext);
-        
-        var saveAs = _rerenderToFileRequested
+
+        // Only explicit "Update thumbnails" requests overwrite the curated defaults in the
+        // package's .meta folder. Live previews go to the temp cache and are tracked so the
+        // defaults can be restored when live previews get disabled.
+        var savesDefaultThumbnail = _rerenderToFileRequested;
+        var saveAs = savesDefaultThumbnail
                          ? ThumbnailManager.Categories.PackageMeta
                          : ThumbnailManager.Categories.Temp;
-        
-        var saveToFile = _rerenderToFileRequested;
-        
-        ThumbnailManager.SaveThumbnail(variation.Id, instanceForBlending.Symbol.SymbolPackage, textureOutputSlot.Value, saveAs, saveToFile);
+
+        ThumbnailManager.SaveThumbnail(variation.Id, instanceForBlending.Symbol.SymbolPackage, textureOutputSlot.Value, saveAs, saveToFile: true);
+
+        if (savesDefaultThumbnail)
+            _liveThumbnailIds.Remove(variation.Id);
+        else
+            _liveThumbnailIds.Add(variation.Id);
 
         PoolForBlendOperations.StopHover();
     }
@@ -764,6 +825,9 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
     private readonly List<float> _blendWeights = new(3);
     private readonly List<Vector2> _blendPoints = new(3);
     private readonly List<Variation> _blendVariations = new(3);
+
+    /// <summary>Variation ids whose atlas slot holds a live preview instead of the default thumbnail.</summary>
+    private static readonly HashSet<Guid> _liveThumbnailIds = new();
 
     private int _renderThumbnailIndex;
     private bool _allThumbnailsRendered;

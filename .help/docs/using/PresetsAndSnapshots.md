@@ -32,7 +32,9 @@ By default TiXL will generate live thumbnails for your currently pinned output. 
 
 ![preset-preview](https://user-images.githubusercontent.com/1732545/232548921-d204da36-67af-4f3f-b2ee-ab8af5dc7625.gif)
 
-You can enable or disable live previews with the context menu. 
+You can enable or disable live previews and hover preview with the toggle icons in the window header (highlighted when active) or with the context menu.
+
+Live thumbnails are temporary: they never overwrite the default thumbnails stored with the project. When you disable live previews, the default thumbnails reappear. Use "Update thumbnails" in the context menu to explicitly save the current renderings as new defaults.
 
 Note: Rendering of thumbnails will interfere with effects that rely on feedback rendering, eg. [AdvancedFeedback] or [SimpleLiquid]. 
 

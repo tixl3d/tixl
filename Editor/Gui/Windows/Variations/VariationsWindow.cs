@@ -1,9 +1,11 @@
 ﻿using ImGuiNET;
 using T3.Core.SystemUi;
+using T3.Editor.Gui.Help;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Interaction.Variations;
 using T3.Editor.Gui.Interaction.Variations.Model;
 using T3.Editor.Gui.Styling;
+using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.ProjectHandling;
 
@@ -103,6 +105,8 @@ internal sealed class VariationsWindow : Window
                         break;
                 }
 
+                DrawHeaderIcons();
+
                 ImGui.EndChild();
             }
         }
@@ -161,6 +165,47 @@ internal sealed class VariationsWindow : Window
 
         drawList.ChannelsMerge();
     }
+
+    /// <summary>
+    /// Right-aligned cluster with the preview mode toggles and the documentation button.
+    /// </summary>
+    private void DrawHeaderIcons()
+    {
+        var iconSize = new Vector2(ImGui.GetFrameHeight(), ImGui.GetFrameHeight());
+        var spacing = ImGui.GetStyle().ItemSpacing.X;
+        CustomComponents.RightAlign(iconSize.X * 3 + spacing * 2);
+
+        CustomComponents.ToggleTwoIconsButton(ref UserSettings.Config.VariationHoverPreview,
+                                              iconOff:Icon.HoverScrub,
+                                              iconOn:Icon.HoverScrub,
+                                              CustomComponents.ButtonStates.NeedsAttention,
+                                              CustomComponents.ButtonStates.Dimmed,
+                                              noBackground:true);
+
+        CustomComponents.TooltipForLastItem("Preview on hover",
+                                            "Hovering a thumbnail temporarily applies the variation to the output.");
+
+        ImGui.SameLine();
+        var liveThumbnails = UserSettings.Config.VariationLiveThumbnails;
+        if (CustomComponents.ToggleTwoIconsButton(ref liveThumbnails,
+                                                  iconOff:Icon.AutoRefresh,
+                                                  iconOn:Icon.AutoRefresh,
+                                                  CustomComponents.ButtonStates.NeedsAttention,
+                                                  CustomComponents.ButtonStates.Dimmed,
+                                                  noBackground:true))
+        {
+            _presetCanvas.EnableLiveThumbnails(liveThumbnails);
+            _snapshotCanvas.EnableLiveThumbnails(liveThumbnails);
+        }
+
+        CustomComponents.TooltipForLastItem("Live render previews",
+                                            "Continuously renders thumbnails for the pinned output.\nDisabling restores the default thumbnails.");
+
+        ImGui.SameLine();
+        DocumentationButton.Draw("Variations", DocumentationWikiUrl, iconSize);
+    }
+
+    private const string DocumentationWikiUrl = "https://github.com/tixl3d/tixl/wiki/help.PresetsAndSnapshots";
 
     private enum InteractionModes
     {

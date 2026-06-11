@@ -99,7 +99,8 @@ internal static class ThumbnailManager
         return GetThumbnail(asset.Id, package, category, asset.FileSystemInfo);
     }
 
-    internal static ThumbnailRect GetThumbnail(Guid guid, IResourcePackage? package, Categories category = Categories.Temp, FileSystemInfo? sourceInfo = null)
+    internal static ThumbnailRect GetThumbnail(Guid guid, IResourcePackage? package, Categories category = Categories.Temp, FileSystemInfo? sourceInfo = null,
+                                               Categories? fallbackCategory = null)
     {
         if (package == null) return _fallback;
 
@@ -127,6 +128,11 @@ internal static class ThumbnailManager
 
         // 5. Trigger Load or Generate
         var path = Path.Combine(GetPath(package, category), $"{guid}.png");
+        if (!File.Exists(path) && fallbackCategory.HasValue)
+        {
+            path = Path.Combine(GetPath(package, fallbackCategory.Value), $"{guid}.png");
+        }
+
         if (File.Exists(path))
         {
             RequestAsyncLoad(guid, path);
@@ -418,6 +424,16 @@ internal static class ThumbnailManager
         };
     }
     #endregion
+
+    /// <summary>
+    /// Forces a reload from disk on the next request, e.g. to restore default thumbnails
+    /// after live previews overwrote the atlas content.
+    /// </summary>
+    internal static void InvalidateThumbnail(Guid guid)
+    {
+        if (_slots.TryGetValue(guid, out var slot))
+            slot.State = LoadingState.NotLoaded;
+    }
 
     public static void Reset()
     {
