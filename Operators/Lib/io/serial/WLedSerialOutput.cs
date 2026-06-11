@@ -58,8 +58,10 @@ internal sealed class WLedSerialOutput : Instance<WLedSerialOutput>, IStatusProv
         if (manualReconnect)
         {
             Reconnect.SetTypedInputValue(false);
-            // Force the connection to be torn down and reopened on this frame
-            SerialConnectionManager.Unregister(this, _lastPortName);
+            // Force the connection to be torn down (regardless of other subscribers,
+            // hung writer thread, etc.) and reopened on the next frame.
+            SerialConnectionManager.ForceClose(_lastPortName);
+            SerialConnectionManager.ForceClose(portName);
             _lastConnectState = false;
             _nextRetryAt = DateTime.MinValue;
         }
@@ -232,9 +234,10 @@ internal sealed class WLedSerialOutput : Instance<WLedSerialOutput>, IStatusProv
         if (!ok)
         {
             SetStatus($"Write to {portName} failed - connection lost", IStatusProvider.StatusLevel.Warning);
-            // Force re-register on next Update
-            _lastConnectState = false;
             IsConnected.Value = false;
+            // No forced re-register here. If the writer thread truly died, it has closed
+            // the port; IsPortOpen() will return false next frame and the throttled retry
+            // path picks it up. Avoids a 100+ms main-thread teardown on transient hiccups.
         }
     }
 

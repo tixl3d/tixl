@@ -39,6 +39,15 @@ public static class SerialConnectionManager
         {
             if (string.IsNullOrEmpty(portName)) return;
 
+            // If a previous PortConnection here died (writer thread exited on a USB hiccup,
+            // device unplugged, etc.), dispose it and create a fresh one. Otherwise we'd
+            // keep handing out subscriptions to a zombie connection.
+            if (_connections.TryGetValue(portName, out var existing) && !existing.IsAlive)
+            {
+                existing.Dispose();
+                _connections.Remove(portName);
+            }
+
             if (!_connections.TryGetValue(portName, out var connection))
             {
                 connection = new PortConnection(portName, baudRate, mode);
@@ -51,6 +60,21 @@ public static class SerialConnectionManager
             }
 
             connection.AddSubscriber(owner, receiver);
+        }
+    }
+
+    /// <summary>
+    /// Forcibly disposes and removes a PortConnection regardless of subscriber count.
+    /// Use when a connection is wedged (hung writer thread, zombie state) and a clean
+    /// teardown is needed before reconnecting. Subscribers should re-Register afterward.
+    /// </summary>
+    public static void ForceClose(string? portName)
+    {
+        lock (_lock)
+        {
+            if (string.IsNullOrEmpty(portName) || !_connections.TryGetValue(portName, out var connection)) return;
+            connection.Dispose();
+            _connections.Remove(portName);
         }
     }
 
@@ -149,11 +173,12 @@ public static class SerialConnectionManager
     private class PortConnection : IDisposable
     {
         public bool IsOpen => _serialPort.IsOpen;
+        public bool IsAlive => _keepRunning && _serialPort.IsOpen;
         public int SubscriberCount => _subscribers.Count;
         public readonly PortModes Mode;
 
         private readonly SerialPort _serialPort;
-        private readonly Thread? _workerThread;
+        private Thread? _workerThread;
         private readonly Thread? _writerThread;
         private volatile bool _keepRunning;
         private readonly HashSet<object> _subscribers = new();
@@ -172,14 +197,15 @@ public static class SerialConnectionManager
             {
                 _serialPort = mode == PortModes.DMX
                                   ? new SerialPort(portName, 250000, Parity.None, 8, StopBits.Two)
-                                  : new SerialPort(portName, baudRate) { ReadTimeout = 1000 };
+                                  : new SerialPort(portName, baudRate) { ReadTimeout = 1000, WriteTimeout = 500 };
                 _serialPort.Open();
 
                 if (mode == PortModes.Standard)
                 {
                     _keepRunning = true;
-                    _workerThread = new Thread(StandardReadLoop) { IsBackground = true, Name = $"SerialReader_{portName}" };
-                    _workerThread.Start();
+                    // Reader thread is started lazily in AddSubscriber when the first receiver
+                    // is added. Output-only consumers (e.g. WLedSerialOutput) pass receiver=null
+                    // and never pay the per-second TimeoutException cost from ReadLine.
                     _writerThread = new Thread(WriterLoop) { IsBackground = true, Name = $"SerialWriter_{portName}" };
                     _writerThread.Start();
                 }
@@ -212,6 +238,13 @@ public static class SerialConnectionManager
             if (receiver == null || _receivers.Contains(receiver)) return;
             _receivers.Add(receiver);
             receiver.SetStatus($"Connected to {_serialPort.PortName}.", IStatusProvider.StatusLevel.Success);
+
+            // Start the reader thread on first receiver. Output-only consumers never trigger this.
+            if (Mode == PortModes.Standard && _workerThread == null && _keepRunning)
+            {
+                _workerThread = new Thread(StandardReadLoop) { IsBackground = true, Name = $"SerialReader_{_serialPort.PortName}" };
+                _workerThread.Start();
+            }
         }
 
         public void RemoveSubscriber(object owner)
@@ -283,6 +316,10 @@ public static class SerialConnectionManager
                 {
                     Log.Warning($"Serial write error: {e.Message}");
                     _keepRunning = false;
+                    // Close the underlying port so IsOpen / IsAlive reflect the failure
+                    // and the caller's auto-reconnect path can do its work without
+                    // having to detect a zombie connection out-of-band.
+                    try { if (_serialPort.IsOpen) _serialPort.Close(); } catch { }
                     break;
                 }
             }
@@ -306,8 +343,12 @@ public static class SerialConnectionManager
         {
             _keepRunning = false;
             _frameReady.Set();
-            _workerThread?.Join(100);
-            _writerThread?.Join(100);
+            // Writer responds to _frameReady immediately, so 20 ms is plenty.
+            _writerThread?.Join(20);
+            // Reader is blocked in ReadLine() with a 1 s timeout; capping at 50 ms keeps
+            // disposal snappy on the main thread. The thread is IsBackground=true so it
+            // dies with the process if it outlives us by the timeout.
+            _workerThread?.Join(50);
             _frameReady.Dispose();
 
             // The USB device may have already vanished (cable yanked / ESP unplugged).
