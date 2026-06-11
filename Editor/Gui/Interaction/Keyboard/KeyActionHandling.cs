@@ -108,6 +108,7 @@ internal static class KeyActionHandling
         RegisterActionsFlags(UserActions.Save, Flags.KeyPressOnly);
         RegisterActionsFlags(UserActions.FocusSelection, Flags.NeedsWindowHover);
         RegisterActionsFlags(UserActions.Duplicate, Flags.NeedsWindowFocus);
+        RegisterActionsFlags(UserActions.DuplicateWithConnections, Flags.NeedsWindowFocus);
         RegisterActionsFlags(UserActions.DeleteSelection, Flags.NeedsWindowFocus);
         RegisterActionsFlags(UserActions.DeleteSelection, Flags.NeedsWindowFocus);
         RegisterActionsFlags(UserActions.CopyToClipboard, Flags.NeedsWindowFocus);

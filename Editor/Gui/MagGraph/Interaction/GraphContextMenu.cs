@@ -359,6 +359,15 @@ internal static class GraphContextMenu
             context.Layout.FlagStructureAsChanged();
         }
 
+        if (ImGui.MenuItem("Duplicate With Connections",
+                           UserActions.DuplicateWithConnections.ListShortcuts(),
+                           selected: false,
+                           enabled: selectedChildUis.Count > 0 && !isSaving))
+        {
+            Modifications.DuplicateWithConnections(context);
+            context.Layout.FlagStructureAsChanged();
+        }
+
         ImGui.Separator();
 
         // if (ImGui.MenuItem("Change Symbol", someOpsSelected && !isSaving))

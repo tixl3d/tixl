@@ -1,4 +1,5 @@
-﻿using T3.Core.Operator;
+﻿using ImGuiNET;
+using T3.Core.Operator;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.OutputUi;
@@ -14,6 +15,143 @@ namespace T3.Editor.Gui.MagGraph.Interaction;
 
 internal static class Modifications
 {
+    /// <summary>
+    /// Duplicates the selected operators while preserving their external wiring: connections feeding the
+    /// selection from the outside are recreated on the duplicates, and any external multi-inputs the originals
+    /// fed get the duplicates' outputs appended — pushing snapped items below the new input line down, like an
+    /// interactive connection drop. Single external inputs are left untouched so the duplicate doesn't steal
+    /// the original's connection. Pastes at the mouse position and does not touch the clipboard.
+    /// </summary>
+    internal static void DuplicateWithConnections(GraphUiContext context)
+    {
+        var compositionOp = context.CompositionInstance;
+        var compositionSymbolUi = compositionOp.GetSymbolUi();
+        var compositionSymbol = compositionSymbolUi.Symbol;
+
+        var selectedChildUis = context.Selector.GetSelectedChildUis().ToList();
+        if (selectedChildUis.Count == 0)
+            return;
+
+        var selectedAnnotations = context.Selector.GetSelectedNodes<Annotation>().ToList();
+        var targetPosition = context.View.InverseTransformPositionFloat(ImGui.GetMousePos());
+
+        var copyCommand = new CopySymbolChildrenCommand(compositionSymbolUi,
+                                                        selectedChildUis,
+                                                        selectedAnnotations,
+                                                        compositionSymbolUi,
+                                                        targetPosition);
+        // Authoritative set of duplicated children (includes any pulled in via collapsed annotations).
+        var oldToNewChildIds = copyCommand.OldToNewChildIds;
+
+        // Connections feeding the selection from outside, kept with their original multi-input index so
+        // inserting them ascending lands each one at its original slot among the copied internal connections.
+        var inboundCommands = new List<(int multiInputIndex, AddConnectionCommand command)>();
+
+        // Outputs of the selection feeding external multi-inputs, appended right after the original connection.
+        // The original connection is kept for the push-down of snapped items below its input line.
+        var outboundEntries = new List<(Symbol.Connection original, int multiInputIndex, AddConnectionCommand command)>();
+
+        foreach (var connection in compositionSymbol.Connections)
+        {
+            var sourceDuplicated = connection.SourceParentOrChildId != Guid.Empty
+                                   && oldToNewChildIds.ContainsKey(connection.SourceParentOrChildId);
+            var targetDuplicated = connection.TargetParentOrChildId != Guid.Empty
+                                   && oldToNewChildIds.ContainsKey(connection.TargetParentOrChildId);
+
+            var multiInputIndex = compositionSymbol.GetMultiInputIndexFor(connection);
+
+            if (targetDuplicated && !sourceDuplicated)
+            {
+                // External source -> duplicated target (also covers connections from the composition's own inputs).
+                var newConnection = new Symbol.Connection(connection.SourceParentOrChildId,
+                                                          connection.SourceSlotId,
+                                                          oldToNewChildIds[connection.TargetParentOrChildId],
+                                                          connection.TargetSlotId);
+                inboundCommands.Add((multiInputIndex, new AddConnectionCommand(compositionSymbol, newConnection, multiInputIndex)));
+            }
+            else if (sourceDuplicated && !targetDuplicated && compositionSymbol.IsTargetMultiInput(connection))
+            {
+                // Duplicated source -> external multi-input. Single inputs are skipped on purpose: adding the
+                // duplicate's output there would replace (steal) the original's connection.
+                var newConnection = new Symbol.Connection(oldToNewChildIds[connection.SourceParentOrChildId],
+                                                          connection.SourceSlotId,
+                                                          connection.TargetParentOrChildId,
+                                                          connection.TargetSlotId);
+                outboundEntries.Add((connection, multiInputIndex, new AddConnectionCommand(compositionSymbol, newConnection, multiInputIndex + 1)));
+            }
+        }
+
+        // Inbound ascending: each insert at the original index reconstructs the source order on duplicated inputs.
+        inboundCommands.Sort((a, b) => a.multiInputIndex.CompareTo(b.multiInputIndex));
+
+        // Outbound descending: inserting at (originalIndex + 1) high-to-low keeps earlier indices valid as the
+        // multi-input grows.
+        outboundEntries.Sort((a, b) => b.multiInputIndex.CompareTo(a.multiInputIndex));
+
+        var macroCommand = context.StartMacroCommand("Duplicate with connections");
+        macroCommand.AddAndExecCommand(copyCommand);
+        foreach (var entry in inboundCommands)
+        {
+            macroCommand.AddAndExecCommand(entry.command);
+        }
+
+        foreach (var entry in outboundEntries)
+        {
+            macroCommand.AddAndExecCommand(entry.command);
+        }
+
+        // Each appended multi-input connection adds an input line to its target: push snapped items below
+        // the new line down by one row, like an interactive connection drop. The layout still reflects the
+        // pre-duplication state here, which is exactly the geometry the thresholds need.
+        foreach (var entry in outboundEntries)
+        {
+            if (!context.Layout.Items.TryGetValue(entry.original.TargetParentOrChildId, out var targetItem))
+                continue;
+
+            var lines = targetItem.InputLines;
+            var originalLineIndex = -1;
+            for (var lineIndex = 0; lineIndex < lines.Length; lineIndex++)
+            {
+                if (lines[lineIndex].Id == entry.original.TargetSlotId
+                    && lines[lineIndex].MultiInputIndex == entry.multiInputIndex)
+                {
+                    originalLineIndex = lineIndex;
+                    break;
+                }
+            }
+
+            if (originalLineIndex == -1)
+                continue;
+
+            var snappedItems = MagItemMovement.CollectSnappedItems(targetItem);
+            snappedItems.Remove(targetItem);
+            MagItemMovement.MoveSnappedItemsVertically(context,
+                                                       snappedItems,
+                                                       targetItem.PosOnCanvas.Y + MagGraphItem.GridSize.Y * (originalLineIndex + 0.5f),
+                                                       MagGraphItem.GridSize.Y);
+        }
+
+        context.CompleteMacroCommand();
+
+        // Select the duplicated nodes
+        context.Selector.Clear();
+        foreach (var newId in copyCommand.NewSymbolChildIds)
+        {
+            if (compositionSymbolUi.ChildUis.TryGetValue(newId, out var newChildUi)
+                && compositionOp.Children.TryGetChildInstance(newId, out var instance))
+            {
+                context.Selector.AddSelection(newChildUi, instance);
+            }
+        }
+
+        foreach (var newId in copyCommand.NewSymbolAnnotationIds)
+        {
+            if (compositionSymbolUi.Annotations.TryGetValue(newId, out var annotation))
+            {
+                context.Selector.AddSelection(annotation);
+            }
+        }
+    }
 
     internal static ChangeSymbol.SymbolModificationResults AlignSelectionToLeft(GraphUiContext context)
     {

@@ -50,6 +50,7 @@ internal enum UserActions
     DisplayImageAsBackground,
     ClearBackgroundImage,
     Duplicate,
+    DuplicateWithConnections,
     LayoutSelection,
     ToggleDisabled,
     ToggleBypassed,

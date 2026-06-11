@@ -21,6 +21,7 @@ The following is a list of the **default keyboard** short-cuts. With v4.0.4 you 
  | Save                           | ctrl + S                                           |
  | FocusSelection                 | F (NeedsWindowHover)                               |
  | Duplicate                      | ctrl + D (NeedsWindowFocus)                        |
+ | DuplicateWithConnections       | ctrl + shift + D (NeedsWindowFocus)                |
  | DeleteSelection                | Delete (NeedsWindowFocus)                          |
  | DeleteSelection                | Backspace (NeedsWindowFocus)                       |
  | CopyToClipboard                | ctrl + C (NeedsWindowFocus)                        |

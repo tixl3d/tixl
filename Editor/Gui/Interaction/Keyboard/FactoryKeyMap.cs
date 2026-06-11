@@ -12,6 +12,7 @@ internal static class FactoryKeyMap
                 new(UserActions.Save, new KeyCombination(Key.S, ctrl: true)),
                 new(UserActions.FocusSelection, new KeyCombination(Key.F)),
                 new(UserActions.Duplicate, new KeyCombination(Key.D, ctrl: true)),
+                new(UserActions.DuplicateWithConnections, new KeyCombination(Key.D, ctrl: true, shift: true)),
                 new(UserActions.DeleteSelection, new KeyCombination(Key.Delete)),
                 new(UserActions.DeleteSelection, new KeyCombination(Key.Backspace)),
                 new(UserActions.CopyToClipboard, new KeyCombination(Key.C, ctrl: true)),

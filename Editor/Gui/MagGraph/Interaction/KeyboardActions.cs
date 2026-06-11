@@ -33,6 +33,14 @@ internal static class KeyboardActions
             result |= ChangeSymbol.SymbolModificationResults.StructureChanged;
         }
 
+        if (!T3Ui.IsCurrentlySaving && UserActions.DuplicateWithConnections.Triggered())
+        {
+            Modifications.DuplicateWithConnections(context);
+            context.Layout.FlagStructureAsChanged();
+
+            result |= ChangeSymbol.SymbolModificationResults.StructureChanged;
+        }
+
         if (!T3Ui.IsCurrentlySaving && UserActions.DeleteSelection.Triggered()
                                     && context.Selector.Selection.Count > 0
                                     && context.StateMachine.CurrentState == GraphStates.Default)
