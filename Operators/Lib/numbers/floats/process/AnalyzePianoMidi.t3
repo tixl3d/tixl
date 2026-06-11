@@ -1,0 +1,33 @@
+{
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
+  "Id": "60adca24-4ae4-474a-b205-a814d89a7d53"/*AnalysePianoMidi*/,
+  "Inputs": [
+    {
+      "Id": "3e02c9d5-28bb-4913-b983-bc5464c9f387"/*Input*/,
+      "DefaultValue": {
+        "Values": [
+          5.0,
+          17.0
+        ]
+      }
+    },
+    {
+      "Id": "78a357b0-668a-47d6-91db-b172955e8436"/*Amplitude*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "b5761d3f-4c56-47c7-a2d5-06ec7baa7d57"/*GainAndBias*/,
+      "DefaultValue": {
+        "X": 0.14500001,
+        "Y": 0.405
+      }
+    },
+    {
+      "Id": "dbd07421-6e96-467a-91ae-c526316e6aee"/*PeakDecay*/,
+      "DefaultValue": 0.96
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

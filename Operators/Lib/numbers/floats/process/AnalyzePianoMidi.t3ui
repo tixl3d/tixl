@@ -1,0 +1,59 @@
+{
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
+  "Id": "60adca24-4ae4-474a-b205-a814d89a7d53"/*AnalysePianoMidi*/,
+  "Description": "Takes a List<float> from [MidiInput] and computes average, last velocity and last played note.",
+  "InputUis": [
+    {
+      "InputId": "3e02c9d5-28bb-4913-b983-bc5464c9f387"/*Input*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "78a357b0-668a-47d6-91db-b172955e8436"/*Amplitude*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 150.0
+      }
+    },
+    {
+      "InputId": "b5761d3f-4c56-47c7-a2d5-06ec7baa7d57"/*GainAndBias*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 225.0
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true,
+      "Format": "{0:0.000}",
+      "UseVec2Control": "BiasAndGain"
+    },
+    {
+      "InputId": "dbd07421-6e96-467a-91ae-c526316e6aee"/*PeakDecay*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 75.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "df5e7f93-7d89-4d0c-b3cc-18bf0e7655d2"/*VelocityPulse*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    },
+    {
+      "OutputId": "33c3a89b-6d62-4754-8c07-86b4a8ffc748"/*LastNormalizedNote*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 300.0
+      }
+    }
+  ]
+}
