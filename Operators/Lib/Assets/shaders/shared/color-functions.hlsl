@@ -75,6 +75,5 @@ float3 rgb2hsb(float3 c)
         d / (q.x + e),
         q.x * 0.5);
 }
-static float PI = 3.141578;
 
 #endif
