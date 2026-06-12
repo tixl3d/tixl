@@ -1,0 +1,93 @@
+# Sections (annotation rework)
+
+Implements GitHub issue **#1037 "Improve annotation interaction"**: rename Annotations to **Sections**, give them an explicit membership model (`sectionId` on graph items), and improve resize/expand/visibility UX for large graphs.
+
+Consumers of the new section tree beyond the graph itself:
+- [`Plan_SnapshotControlView.md`](Plan_SnapshotControlView.md) Phase C — grouping controlled ops by section.
+- Timeline dope-sheet grouping/sorting of animated parameters (upcoming, per issue).
+- Potential graph navigation (breadcrumbs / center-on-section).
+
+## Goal
+
+Sections become a first-class structural element: membership is an explicit, serialized, undoable property — not a per-frame geometric test. On top of that model: better resizing, automatic overlap avoidance, slow-resize ("push the border") interactions, and viewport-clamped titles.
+
+## Architectural decisions (locked in)
+
+- **Rename "Annotation" → "Section"** in UI, code, and serialization. Reading old `.t3ui` files gracefully maps `Annotation` → `Section`. Hotkey: introduce the new binding; keep the old one as a hidden alias for at least one release (muscle memory).
+- **Explicit membership.** Ops (and where relevant inputs/outputs) carry an optional serialized `SectionId`. Sections carry an optional `ParentSectionId`, forming a tree per symbol graph.
+- **Membership changes only through discrete user actions** (drop into / drag out of a section, paste, section delete), each folded into the relevant `MacroCommand` so undo/redo restores membership together with positions. No frame-by-frame recomputation from rect intersection.
+  - Assignment rule on drop: the op joins the **innermost** section whose bounds contain the drop position. Dragging fully out clears (or reassigns to the section under the drop point).
+  - Overlapping non-nested sections at a drop point: innermost-by-area wins; the auto overlap-avoidance below should make this state rare.
+- **Collapse state is stored on the section** (today: `Child.CollapsedIntoAnnotationFrameId` per op). The per-op flag is refactored into a fast runtime lookup `GraphItem.IsHiddenInCollapsedSection` (not serialized) for MagGraph layout and connection routing.
+- **Member order lives on the section** (serialized list of child ids), defaulting to canvas position order when absent. Wanted identically by the dope sheet and the snapshot control view; introduced when the first consumer needs manual ordering — derived order until then.
+- **One shared tree helper.** A single builder (e.g. `SectionTree.Build(SymbolUi)`) producing sections → nesting → member items in display order. Graph, dope sheet, and snapshot control view all consume this; none re-derives structure.
+- **Overlap resolution must terminate.** Resolve pushes in the direction of the triggering change, single pass per axis with a capped iteration count — no unbounded recursion (cyclic overlap arrangements can ping-pong a naive solver).
+- **Legacy Graph**: keeps working read-only with sections (rendering, membership respected); auto-expand and slow-resize are MagGraph-only.
+- Existing section coloring / title styling remains.
+
+## Current state — what exists
+
+- [`Editor/UiModel/Annotation.cs`](../../Editor/UiModel/Annotation.cs) — `Label`, `Title`, `Color`, `PosOnCanvas`, `Size`, `Collapsed`; no membership, no parent reference, no order.
+- [`Editor/UiModel/SymbolUi.Child.cs`](../../Editor/UiModel/SymbolUi.Child.cs) — `CollapsedIntoAnnotationFrameId` (per-op hidden-in-collapsed-frame marker; to be replaced per decisions above).
+- [`Editor/Gui/MagGraph/Ui/MagGraphCanvas.DrawAnnotation.cs`](../../Editor/Gui/MagGraph/Ui/MagGraphCanvas.DrawAnnotation.cs) — drawing, header hit-testing, collapse, current geometric containment logic.
+- [`Editor/UiModel/SymbolUiJson.cs`](../../Editor/UiModel/SymbolUiJson.cs) — serialization of annotations and child flags; back-compat reader location.
+- [`Editor/Gui/MagGraph/Interaction/GraphContextMenu.cs`](../../Editor/Gui/MagGraph/Interaction/GraphContextMenu.cs) — current "Add annotation" / hide entries (to surface in a main menu per issue point 3).
+- MagGraph layout/routing: `Editor/Gui/MagGraph/Model/MagGraphLayout*.cs` — where the resolved section reference speeds up layout (issue implementation detail 2).
+- Undo: `MacroCommand` infrastructure under `Editor/UiModel/Commands/`.
+
+## Phases
+
+### Phase 1 — Model + rename (foundation; unblocks dependent plans)
+
+**Goal:** sections exist as a tree with explicit membership; everything renamed; old files load.
+
+**Scope:**
+
+1. Rename `Annotation` → `Section` (class, fields, UI strings, serialization key with back-compat reader mapping `"Annotations"` → sections on load; write new key only).
+2. Add `SectionId` to `SymbolUi.Child` (serialized, optional) and `ParentSectionId` to `Section` (serialized, optional). Resolve both into fast references in MagGraph layout.
+3. Membership assignment/clearing wired into move/paste/duplicate/delete commands (MacroCommand composition; undoable). Initial migration: on first load of a file without `SectionId`s, derive membership once from geometry (innermost containing section) — same rule users see today — and mark the symbol UI modified only when the user saves.
+4. `SectionTree.Build(SymbolUi)` helper + collapse state moved onto the section; `IsHiddenInCollapsedSection` runtime flag replaces per-op serialized field (reader still accepts the old field).
+5. Hotkey + menu: rename to "Add Section", keep old shortcut as alias; expose add/hide in a Graph/Edit main menu (issue point 3).
+
+**Verification:** old projects load with identical visual result; collapse/expand round-trips; undo restores membership with positions; manual test set added.
+
+### Phase 2 — Resize & interaction polish
+
+**Scope (issue points 2, 3, 6 partial):**
+
+1. Resizing on all corners and edges (today: limited).
+2. Collapse toggle sized/scaled with title font (`T3Ui.UiScaleFactor`-correct).
+3. Header hit-test fix when zoomed in (accidental clicks on invisible header near edges — issue point 6 status quo).
+
+### Phase 3 — Auto-expand & overlap avoidance
+
+**Scope (issue points 4, 5):**
+
+1. Layout solver: expanding a section pushes neighboring sections (and their contents) to avoid overlap, preserving relative positions; capped-iteration, direction-of-change resolution.
+2. Invoked on: insert into stacks, section expand, add/duplicate/paste near bottom/right borders, (evaluate: collapse). All resulting moves folded into the triggering MacroCommand.
+3. Slow-resize mode: dragging nodes slowly against a section border grows the section; dragging a border slowly pushes neighbors. Disabled while the section is selected or Shift is held. Unlock speed ~10–30 px/s, smoothed — needs hands-on tuning.
+
+### Phase 4 — Title visibility (clamped/stacked titles)
+
+**Scope (issue point 6):**
+
+1. Clamp section frame border + title position to the viewport when the section is cut off top/left, so titles stay readable.
+2. Double-click on a clamped title still renames.
+3. Multiple nested sections cut off → keep innermost title; optional stacked-titles treatment with timed cross-fade (stretch goal).
+4. Decide whether clamped borders render sharp (no rounding) on the clamped side.
+
+### Phase 5 — Extras (optional)
+
+- Section background image attribute (issue point 7).
+- Graph toolbar "Add Section" button.
+- Persisted member order + drag-reorder (when the dope sheet or snapshot control view asks for it).
+
+## Open questions
+
+- Exact reassignment semantics when a *section* (not an op) is dragged: do contained ops move with it (presumably yes, as today), and does dragging a section into another section re-parent it?
+- Should `SectionId` apply to inputs/outputs of the composition too (issue implementation detail 1 says "all UI elements")? Concrete consumer unclear — defer until one exists.
+- Collapse of a section containing a *nested* section: nested collapse state preserved or forced?
+
+## Documentation
+
+- Update `.help/` graph-organization page (rename + new interactions) per phase; manual test sets per phase in `.tests-manual/`.

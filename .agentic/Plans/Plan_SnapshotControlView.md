@@ -1,0 +1,100 @@
+# Snapshot control view
+
+A new state of the Parameter window that appears when no child op is selected (the composition itself is active): a detailed control surface for snapshot-affected parameters. Complements the Variations window thumbnails, which stay the visual/blending interface; this view is the precise, per-parameter one.
+
+Related: [`Plan_Sections.md`](Plan_Sections.md) provides the grouping structure (section tree) consumed in Phase C. Phases A and B do **not** depend on it.
+
+## Goal
+
+When the composition is active in a Parameter window, show:
+
+- A **snapshot selector bar**: numeric index indicator, snapshot dropdown, prev/next arrow buttons, and three action buttons — **write** (update snapshot from current values; disabled when values match), **revert** (re-apply the snapshot), **remove**.
+- Below, the **controlled ops with their controlled parameters**, editable exactly like the regular parameter view. Clicking an op name selects it and centers it in the graph.
+- Composition inputs (already capturable in snapshots via the `Guid.Empty` child id) appear as an **"Inputs" group**.
+- Eventually (Phase B): snapshot enablement moves from per-op to **per-parameter**, with a context-menu toggle ("Enable for control") and a green controller icon on controlled parameters.
+- Eventually (Phase C, after Sections): ops grouped by their enclosing section, headers showing the nesting path ("Init / Render Quality"), each path segment clickable to center that section.
+
+## Architectural decisions (locked in)
+
+- **List order is derived, not stored.** Ops sort by canvas position (top-to-bottom, then left-to-right). No persisted ordering, no drag-to-reorder in this plan. If derived order proves annoying, reordering becomes a follow-up once sections own member order (see `Plan_Sections.md`, implementation detail on member order).
+- **Per-parameter enablement is per child instance**, not per symbol. The existing `IInputUi.ExcludedFromPresets` flag is symbol-level (excludes the input for *all* instances) and serves a different purpose; it stays. The new flag lives on `SymbolUi.Child` as a set of enabled input ids, serialized in the `.t3ui` child entry.
+- **Back-compat for the per-op flag:** a child with `SnapshotGroupIndex == 1` and no per-parameter set reads as "all parameters enabled". The graph context-menu toggle ("Enable for snapshots") stays as the bulk on/off convenience and sets/clears all parameters at once.
+- **Dirty checking is throttled/cached**, never a naive per-frame compare of every `InputValue` against the variation. Recompute on parameter-change (command execution) plus a low-frequency fallback (e.g. every ~30 frames), cached per snapshot id.
+- **All mutations go through commands.** Write/revert/remove and enablement toggles must be undoable (`UndoRedoStack.AddAndExecute`). Reuse `ChangeSnapshotEnabledCommand` patterns; store guids, not instance references.
+- **Visual hierarchy** (from the design sketch): view area background `UiColors.WindowBackground`-level fade ~0.5, group background `Button.Fade(0.5)`, input rows `Button`. Use `UiColors.*` + `.Fade()` only — no literal colors. All pixel literals × `T3Ui.UiScaleFactor`.
+- **Controller icon**: needs a glyph in the `Icon` enum (atlas-baked). Until it exists, a small filled circle in `UiColors.StatusAutomated`-style green is an acceptable placeholder — flag it for replacement.
+
+## Current state — what exists
+
+- [`Editor/Gui/Interaction/Variations/VariationHandling.cs`](../../Editor/Gui/Interaction/Variations/VariationHandling.cs) — `ActivePoolForSnapshots` / `ActiveInstanceForSnapshots` already resolve to the composition when nothing is selected. `CreateOrUpdateSnapshotVariation()` and `AddSnapshotEnabledChildrenToList()` iterate per-op `EnabledForSnapshots`.
+- [`Editor/Gui/Interaction/Variations/Model/Variation.cs`](../../Editor/Gui/Interaction/Variations/Model/Variation.cs) — `ParameterSetsForChildIds` is already `childId → inputId → value`, so the *file format is per-parameter today*; composition inputs use key `Guid.Empty`. `States` enum already has `Modified`.
+- [`Editor/Gui/Interaction/Variations/Model/SymbolVariationPool.cs`](../../Editor/Gui/Interaction/Variations/Model/SymbolVariationPool.cs) — `Apply`, `BeginBlendTowardsSnapshot`, `TryCreateVariationForCompositionInstances`, `UpdateVariationPropertiesForInstances`, `DeleteVariation`, `SaveVariationsToFile`.
+- [`Editor/UiModel/SymbolUi.Child.cs`](../../Editor/UiModel/SymbolUi.Child.cs) — `SnapshotGroupIndex` backing field; `EnabledForSnapshots` property. Serialized in [`Editor/UiModel/SymbolUiJson.cs`](../../Editor/UiModel/SymbolUiJson.cs).
+- [`Editor/UiModel/Commands/Graph/ChangeSnapshotEnabledCommand.cs`](../../Editor/UiModel/Commands/Graph/ChangeSnapshotEnabledCommand.cs) — undoable per-op toggle; pattern reference for the per-parameter variant.
+- [`Editor/Gui/Windows/ParameterWindow.cs`](../../Editor/Gui/Windows/ParameterWindow.cs) — `ViewModes` enum (Parameters/Settings/Help); the no-selection branch currently calls `DrawSettingsForSelectedAnnotations()` and returns — this is the insertion point. Static `DrawParameters()` renders editable input rows and is reusable.
+- [`Editor/Gui/Windows/ParameterSettings.cs`](../../Editor/Gui/Windows/ParameterSettings.cs) — reference for row styling and (later) drag-handle interaction.
+- [`Editor/UiModel/InputsAndTypes/InputValueUi.cs`](../../Editor/UiModel/InputsAndTypes/InputValueUi.cs) — parameter context menu (`CustomComponents.ContextMenuForItem`), insertion point for "Enable for control".
+- [`Editor/Gui/MagGraph/Interaction/GraphContextMenu.cs`](../../Editor/Gui/MagGraph/Interaction/GraphContextMenu.cs) — per-op "Enable for snapshots" toggle (stays, becomes bulk toggle).
+- [`Editor/Gui/Windows/Variations/VariationsWindow.cs`](../../Editor/Gui/Windows/Variations/VariationsWindow.cs) + `SnapshotCanvas.cs` — the other UI mutating the same pool; must stay in sync (activation state, thumbnails) when this view writes/removes.
+- Centering an op in the graph: see `ProjectView` / `NodeSelection` fit-view handling used by existing "center on selection" interactions.
+
+## Phases
+
+### Phase A — Snapshot control view with per-op granularity
+
+**Goal:** the view ships and is useful with the *existing* data model. No serialization changes.
+
+**Scope:**
+
+1. New view state in `ParameterWindow`. In the no-selection branch: if `VariationHandling.ActivePoolForSnapshots != null`, draw the snapshot control view (annotation settings remain reachable when an annotation is explicitly selected). Each window instance keeps its own scroll state; the pool is global per focused composition.
+2. **Selector bar** (top, fixed): index indicator (`ActivationIndex`), dropdown listing snapshots (title + index; fall back to "Snapshot #n"), prev/next arrows cycling by `ActivationIndex` order, then right-aligned via `CustomComponents.RightAlign`: write / revert / remove icon buttons. Write + revert enable only when the dirty check reports modification; remove always enabled when a snapshot is selected.
+   - Write = `UpdateVariationPropertiesForInstances` (existing undoable path), not delete + recreate, so id/thumbnail position survive.
+   - Revert = `Apply` of the selected variation (already command-based).
+   - Empty pool → `CustomComponents.EmptyWindowMessage` with a hint + "create snapshot" button (`CreateOrUpdateSnapshotVariation`).
+3. **Op list** (flat, this phase): all children with `EnabledForSnapshots`, sorted by canvas position (top-to-bottom, left-to-right). Per op: a header row (op name, colored by type like the graph; click → select + center in graph; collapse toggle via `FormInputs.BeginGroup` semantics) and below it the parameter rows for the inputs captured in the selected snapshot, rendered with the existing `DrawParameters` row machinery so editing, context menus, and animation indicators behave identically.
+   - Ops present in the snapshot but no longer enabled (or deleted) → show a muted "stale" row with a cleanup affordance (`RemoveInstancesFromVariationsCommand` exists).
+4. **Inputs group**: if the snapshot contains the `Guid.Empty` set, list composition inputs as a group titled "Inputs".
+5. **Dirty check**: small helper class (e.g. `SnapshotModificationCheck`) comparing current instance values against the selected variation's `InputValue`s — event-driven via command execution plus throttled fallback; no per-frame allocations (reuse buffers, no LINQ).
+6. Sync with Variations window: after write/remove, the pool's variation list and `State` flags must reflect immediately (both UIs read the same `SymbolVariationPool`; verify `UpdateActiveStateForVariation` paths).
+
+**Out of scope for A:** grouping, reordering, per-parameter enablement.
+
+**Verification:** manual test set under `.tests-manual/` (create/select/modify/write/revert/remove; undo each; check Variations window stays consistent; check lib-namespace compositions show no view since `ActivePoolForSnapshots` is null there).
+
+### Phase B — Per-parameter enablement
+
+**Goal:** "enabled for snapshots" becomes a per-parameter property of the child instance.
+
+**Scope:**
+
+1. Data: `SymbolUi.Child` gains a serialized set of snapshot-enabled input ids (e.g. `HashSet<Guid> SnapshotEnabledInputIds`). Reader back-compat: `SnapshotGroupIndex == 1` with an absent/empty set → all inputs enabled (materialize lazily, don't write until the user changes something). Writer keeps `SnapshotGroupIndex` for ParameterCollections (>1) untouched.
+2. New undoable command `ChangeSnapshotEnabledInputsCommand` (guid-based, defensive resolution per the undo/redo rules in `AGENT_INSTRUCTIONS.md`).
+3. `VariationHandling` / `SymbolVariationPool.TryCreateVariationForCompositionInstances` filter captured inputs by the per-parameter set (today they capture all non-default, non-`ExcludedFromPresets` inputs of enabled ops).
+4. Parameter context menu (`InputValueUi`): add "Enable for control" toggle alongside animate / extract / publish-as-input. Controlled params get the green controller icon next to the name (new `Icon` enum glyph — ask for one; placeholder circle until then).
+5. Graph context menu per-op toggle becomes bulk: enable = all params, disable = clear set. Existing auto-update of snapshots on toggle (`GraphContextMenu` behavior) extends to parameter-level changes.
+6. Snapshot control view: enabling/disabling a parameter updates the listed rows; per-op "stale" handling from Phase A covers params removed from control.
+7. Decide and document interplay with symbol-level `ExcludedFromPresets` (exclusion wins; the control view never offers excluded inputs).
+
+**Verification:** extend manual test set; specifically test old `.t3ui` files (per-op flag only) load with all-params semantics and don't rewrite files on mere load.
+
+### Phase C — Section grouping (depends on `Plan_Sections.md` Phase 1)
+
+**Goal:** ops grouped under their enclosing section, with nesting paths.
+
+**Scope:**
+
+1. Consume the section tree helper (built in the Sections plan) — never re-derive membership geometrically here.
+2. Group headers: innermost section per op; header shows the nesting path ("Init / Render Quality"); each segment clickable → center that section in the graph. Ops without a section fall into "Ungrouped" at the bottom; composition inputs stay the "Inputs" group at top.
+3. Groups collapsible (collapse state per window instance, not serialized). Group-level revert button: re-applies the snapshot values for ops in that group only, enabled when any contained parameter is dirty (reuse the dirty-check cache).
+4. Group order derived from section canvas position. Manual reordering of groups/ops via the drag-handle interaction (`ParameterSettings` pattern) is a *stretch goal*, only if sections own a persisted member order by then.
+5. Ops hidden in a collapsed section still appear; clicking them expands/centers on the collapsed frame.
+
+## Open questions
+
+- Should the snapshot control view *also* replace the regular no-selection state when the composition has published inputs (the "this whole view could be the parameter window" idea)? Deferred until the view has proven itself — it changes what "nothing selected" means for every user.
+- Prev/next arrows: cycle by `ActivationIndex` or by list order in the pool? (Proposal assumes activation index; gaps are skipped.)
+- Should "write" while a *blend* is active commit the blended state? Probably yes (it equals current values), but verify against `BlendActions.SmoothVariationBlending`.
+
+## Documentation
+
+- New page or section under `.help/using/` for snapshots/control view in the same PR as Phase A; extend for B and C.
