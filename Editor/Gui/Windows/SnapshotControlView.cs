@@ -63,16 +63,21 @@ internal sealed class SnapshotControlView
         /// Mirrors the apply semantics: inputs captured in the snapshot must match their stored
         /// value; captured ops' other blendable inputs must be at default (apply resets them).
         /// </summary>
-        private static bool Compute(Instance composition, Variation variation)
+        internal static bool Compute(Instance composition, Variation variation)
         {
             foreach (var (childId, parameterSet) in variation.ParameterSetsForChildIds)
             {
                 Instance? instance;
+                SymbolUi.Child? childUi = null;
                 if (childId == Guid.Empty)
                 {
                     instance = composition;
                 }
-                else if (!composition.Children.TryGetChildInstance(childId, out instance))
+                else if (composition.Children.TryGetChildInstance(childId, out instance))
+                {
+                    childUi = instance.GetChildUi();
+                }
+                else
                 {
                     continue;
                 }
@@ -91,7 +96,8 @@ internal sealed class SnapshotControlView
                         if (!compare(storedValue, inputSlot.Input.Value))
                             return true;
                     }
-                    else if (!inputSlot.Input.IsDefault)
+                    else if (!inputSlot.Input.IsDefault
+                             && (childUi == null || childUi.IsInputIncludedForVariation(inputSlot.Id)))
                     {
                         return true;
                     }
@@ -129,14 +135,49 @@ internal sealed class SnapshotControlView
             return;
         }
 
-        Variation? selectedSnapshot = null;
-        if (pool.ActiveVariation is { IsSnapshot: true } activeVariation && _snapshots.Contains(activeVariation))
-            selectedSnapshot = activeVariation;
-
+        var selectedSnapshot = GetDisplayedSnapshot(pool, composition);
         var isModified = selectedSnapshot != null && _modificationCheck.IsModified(composition, selectedSnapshot);
 
         DrawSelectorBar(pool, composition, selectedSnapshot, isModified);
         DrawOpList(composition, selectedSnapshot);
+    }
+
+    /// <summary>
+    /// The snapshot shown in the view: the pool's active one when set; otherwise a display-only
+    /// fallback — the snapshot matching the current values, or the first — so the view isn't
+    /// empty before the user activates anything. The fallback is never applied.
+    /// </summary>
+    private Variation? GetDisplayedSnapshot(SymbolVariationPool pool, Instance composition)
+    {
+        if (pool.ActiveVariation is { IsSnapshot: true } activeVariation && _snapshots.Contains(activeVariation))
+        {
+            _fallbackSnapshotId = Guid.Empty;
+            return activeVariation;
+        }
+
+        if (_snapshots.Count == 0)
+            return null;
+
+        foreach (var snapshot in _snapshots)
+        {
+            if (snapshot.Id == _fallbackSnapshotId)
+                return snapshot;
+        }
+
+        // Stale or unset fallback (first view, composition switch, snapshot removed): re-pick
+        Variation? fallback = null;
+        foreach (var snapshot in _snapshots)
+        {
+            if (ModificationCheck.Compute(composition, snapshot))
+                continue;
+
+            fallback = snapshot;
+            break;
+        }
+
+        fallback ??= _snapshots[0];
+        _fallbackSnapshotId = fallback.Id;
+        return fallback;
     }
 
     private void CollectSnapshots(SymbolVariationPool pool)
@@ -297,7 +338,7 @@ internal sealed class SnapshotControlView
 
                 if (isExpanded)
                 {
-                    DrawControlledParameters(entry.Instance, entry.Instance.GetSymbolUi(), entry.ChildUi, compositionUi);
+                    DrawControlledParameters(entry.Instance, entry.Instance.GetSymbolUi(), entry.ChildUi, compositionUi, onlyEnabledInputs: true);
                 }
 
                 FormInputs.AddVerticalSpace(5);
@@ -349,7 +390,8 @@ internal sealed class SnapshotControlView
     private static void DrawControlledParameters(Instance instance,
                                                  SymbolUi symbolUi,
                                                  SymbolUi.Child symbolChildUi,
-                                                 SymbolUi compositionSymbolUi)
+                                                 SymbolUi compositionSymbolUi,
+                                                 bool onlyEnabledInputs = false)
     {
         ImGui.PushStyleColor(ImGuiCol.FrameBg, UiColors.BackgroundButton.Rgba);
         ImGui.PushStyleColor(ImGuiCol.FrameBgHovered, UiColors.BackgroundHover.Rgba);
@@ -364,6 +406,9 @@ internal sealed class SnapshotControlView
                 continue;
 
             if (inputUi.ExcludedFromPresets)
+                continue;
+
+            if (onlyEnabledInputs && !symbolChildUi.IsInputEnabledForSnapshots(inputSlot.Id))
                 continue;
 
             ImGui.PushID(inputSlot.Id.GetHashCode());
@@ -541,6 +586,7 @@ internal sealed class SnapshotControlView
     private readonly Guid[] _singleStaleId = new Guid[1];
     private readonly Variation[] _singleVariation = new Variation[1];
     private Guid _pendingStaleRemovalId;
+    private Guid _fallbackSnapshotId;
 
     private Guid _lastLabelVariationId = Guid.NewGuid(); // force initial label update
     private string? _lastLabelTitle;

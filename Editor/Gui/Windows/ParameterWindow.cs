@@ -12,6 +12,7 @@ using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Interaction.Variations;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Skills.Training;
 using T3.Editor.Gui.Windows.Layouts;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
@@ -69,8 +70,12 @@ internal sealed class ParameterWindow : Window
         {
             var nodeSelection = ProjectView.Focused?.NodeSelection;
             var annotationSettingsShown = nodeSelection != null && DrawSettingsForSelectedAnnotations(nodeSelection);
-            if (!annotationSettingsShown && VariationHandling.ActivePoolForSnapshots != null)
+            if (!annotationSettingsShown
+                && VariationHandling.ActivePoolForSnapshots != null
+                && !SkillTraining.IsInPlayMode)
+            {
                 _snapshotControlView.Draw();
+            }
 
             _lastSelectedInstanceId = Guid.Empty;
             return;
@@ -112,7 +117,8 @@ internal sealed class ParameterWindow : Window
         if (_viewMode == ViewModes.Parameters
             && IsFocusedComposition(instance)
             && instance.Inputs.Count == 0
-            && VariationHandling.ActivePoolForSnapshots != null)
+            && VariationHandling.ActivePoolForSnapshots != null
+            && !SkillTraining.IsInPlayMode)
         {
             if (DrawSymbolHeader(instance, instance.GetSymbolUi()))
                 instance.GetSymbolUi().FlagAsModified();

@@ -1,10 +1,13 @@
 ﻿#nullable enable
 
 using T3.Core.Operator;
+using T3.Core.Operator.Slots;
+using T3.Core.Utils;
 using T3.Editor.Gui.Interaction.Variations.Model;
 using T3.Editor.Gui.Windows.Variations;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
+using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.Commands.Variations;
 using T3.Editor.UiModel.ProjectHandling;
 
@@ -147,6 +150,145 @@ internal static class VariationHandling
             collectInto.AddAndExecCommand(command);
         else
             UndoRedoStack.AddAndExecute(command);
+    }
+
+    /// <summary>
+    /// Toggles snapshot control for a single parameter as one undoable macro: updates the
+    /// child's enabled set (enabling the first / disabling the last parameter also flips the
+    /// per-op flag) and keeps all existing snapshots consistent — enabling captures the
+    /// parameter's current value, disabling removes its stored values.
+    /// </summary>
+    internal static void ToggleParameterSnapshotControl(SymbolUi compositionUi, SymbolUi.Child childUi, Symbol.Child.Input input, bool enable)
+    {
+        // ParameterCollections (group index above 1) keep their own semantics
+        if (childUi.SnapshotGroupIndex > 1)
+            return;
+
+        var inputId = input.InputDefinition.Id;
+        HashSet<Guid>? newEnabledIds;
+        int newGroupIndex;
+
+        if (enable)
+        {
+            if (childUi.IsInputEnabledForSnapshots(inputId))
+                return;
+
+            newGroupIndex = 1;
+            newEnabledIds = childUi.EnabledForSnapshots && childUi.SnapshotEnabledInputIds != null
+                                ? [..childUi.SnapshotEnabledInputIds]
+                                : [];
+            newEnabledIds.Add(inputId);
+        }
+        else
+        {
+            if (!childUi.IsInputEnabledForSnapshots(inputId))
+                return;
+
+            // A null set means all parameters: materialize it before removing one
+            newEnabledIds = childUi.SnapshotEnabledInputIds != null
+                                ? [..childUi.SnapshotEnabledInputIds]
+                                : CollectControlledInputIds(childUi);
+            newEnabledIds.Remove(inputId);
+
+            if (newEnabledIds.Count == 0)
+            {
+                newGroupIndex = 0;
+                newEnabledIds = null;
+            }
+            else
+            {
+                newGroupIndex = 1;
+            }
+        }
+
+        var macro = new MacroCommand("Toggle parameter snapshot control");
+        macro.AddAndExecCommand(new ChangeSnapshotEnabledInputsCommand(compositionUi.Symbol.Id, childUi, newGroupIndex, newEnabledIds));
+
+        var pool = GetOrLoadVariations(compositionUi.Symbol.Id);
+        foreach (var variation in pool.AllVariations)
+        {
+            if (variation.IsPreset)
+                continue;
+
+            if (enable)
+            {
+                // Default values are not stored — apply resets non-stored controlled params anyway
+                if (input.IsDefault)
+                    continue;
+
+                var newSets = CloneParameterSetsWithValue(variation.ParameterSetsForChildIds, childUi.Id, inputId, input.Value);
+                macro.AddAndExecCommand(new UpdateVariationParametersCommand(pool, variation, newSets));
+            }
+            else
+            {
+                if (!variation.ParameterSetsForChildIds.TryGetValue(childUi.Id, out var storedSet))
+                    continue;
+
+                var removeWholeChild = newGroupIndex == 0;
+                if (!removeWholeChild && !storedSet.ContainsKey(inputId))
+                    continue;
+
+                var newSets = CloneParameterSetsWithoutValue(variation.ParameterSetsForChildIds, childUi.Id, inputId, removeWholeChild);
+                macro.AddAndExecCommand(new UpdateVariationParametersCommand(pool, variation, newSets));
+            }
+        }
+
+        UndoRedoStack.Add(macro);
+    }
+
+    /// <summary>
+    /// All blendable, non-excluded input ids of the child's symbol — the parameters the
+    /// snapshot system can control. Used to materialize the legacy "all enabled" state.
+    /// </summary>
+    private static HashSet<Guid> CollectControlledInputIds(SymbolUi.Child childUi)
+    {
+        var result = new HashSet<Guid>();
+        var symbol = childUi.SymbolChild.Symbol;
+        var symbolUi = symbol.GetSymbolUi();
+
+        foreach (var inputDefinition in symbol.InputDefinitions)
+        {
+            if (!ValueUtils.BlendMethods.ContainsKey(inputDefinition.DefaultValue.ValueType))
+                continue;
+
+            if (symbolUi.InputUis.TryGetValue(inputDefinition.Id, out var inputUi) && inputUi.ExcludedFromPresets)
+                continue;
+
+            result.Add(inputDefinition.Id);
+        }
+
+        return result;
+    }
+
+    private static Dictionary<Guid, Dictionary<Guid, InputValue>> CloneParameterSetsWithValue(Dictionary<Guid, Dictionary<Guid, InputValue>> source,
+                                                                                              Guid childId, Guid inputId, InputValue value)
+    {
+        var result = new Dictionary<Guid, Dictionary<Guid, InputValue>>(source);
+        result[childId] = result.TryGetValue(childId, out var childSet)
+                              ? new Dictionary<Guid, InputValue>(childSet)
+                              : new Dictionary<Guid, InputValue>();
+        result[childId][inputId] = value.Clone();
+        return result;
+    }
+
+    private static Dictionary<Guid, Dictionary<Guid, InputValue>> CloneParameterSetsWithoutValue(Dictionary<Guid, Dictionary<Guid, InputValue>> source,
+                                                                                                 Guid childId, Guid inputId, bool removeWholeChild)
+    {
+        var result = new Dictionary<Guid, Dictionary<Guid, InputValue>>(source);
+        if (removeWholeChild)
+        {
+            result.Remove(childId);
+            return result;
+        }
+
+        if (result.TryGetValue(childId, out var childSet))
+        {
+            var newChildSet = new Dictionary<Guid, InputValue>(childSet);
+            newChildSet.Remove(inputId);
+            result[childId] = newChildSet;
+        }
+
+        return result;
     }
 
     internal static void AddSnapshotEnabledChildrenToList(Instance instance, List<Instance> list)

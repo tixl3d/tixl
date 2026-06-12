@@ -9,11 +9,13 @@ using T3.Core.DataTypes.Vector;
 using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
+using T3.Core.Utils;
 using T3.Editor.Gui;
 using T3.Editor.Gui.Legacy.Interaction.Connections;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Animation;
+using T3.Editor.Gui.Interaction.Variations;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.Styling.Markdown;
 using T3.Editor.Gui.UiHelpers;
@@ -269,6 +271,8 @@ public abstract class InputValueUi<T> : IInputUi
                                                         CustomComponents
                                                            .TooltipForLastItem("Publishing as input is not yet implemented. Please create a input of that type and connect manually.");
 
+                                                        InputArea.DrawSnapshotControlMenuItem(compositionUi, symbolChildUi, input);
+
                                                         if (ParameterWindow.IsAnyInstanceVisible() && ImGui.MenuItem("Rename input"))
                                                         {
                                                             ParameterWindow.RenameInputDialog.ShowNextFrame(symbolChildUi.SymbolChild.Symbol, input.InputDefinition.Id);
@@ -506,6 +510,8 @@ public abstract class InputValueUi<T> : IInputUi
                      CustomComponents
                         .TooltipForLastItem("Publishing as input is not yet implemented. Please create a input of that type and connect manually.");
 
+                     InputArea.DrawSnapshotControlMenuItem(compositionUi, symbolChildUi, input);
+
                      if (ParameterWindow.IsAnyInstanceVisible() && ImGui.MenuItem("Rename input"))
                      {
                          ParameterWindow.RenameInputDialog.ShowNextFrame(symbolChildUi.SymbolChild.Symbol, input.InputDefinition.Id);
@@ -641,6 +647,30 @@ internal static class InputArea
 {
     internal static float ConnectionAreaWidth => 28.0f * T3Ui.UiScaleFactor;
 
+    /// <summary>
+    /// Context-menu toggle for per-parameter snapshot control. Hidden for parameters the
+    /// snapshot system can't capture (non-blendable, excluded from presets) and for
+    /// ParameterCollection children.
+    /// </summary>
+    internal static void DrawSnapshotControlMenuItem(SymbolUi compositionUi, SymbolUi.Child symbolChildUi, Symbol.Child.Input input)
+    {
+        if (symbolChildUi.SnapshotGroupIndex > 1)
+            return;
+
+        if (!ValueUtils.BlendMethods.ContainsKey(input.DefaultValue.ValueType))
+            return;
+
+        var symbolUi = symbolChildUi.SymbolChild.Symbol.GetSymbolUi();
+        if (symbolUi.InputUis.TryGetValue(input.InputDefinition.Id, out var inputUi) && inputUi.ExcludedFromPresets)
+            return;
+
+        var isEnabled = symbolChildUi.IsInputEnabledForSnapshots(input.InputDefinition.Id);
+        if (ImGui.MenuItem("Enable for control", null, isEnabled))
+        {
+            VariationHandling.ToggleParameterSnapshotControl(compositionUi, symbolChildUi, input, !isEnabled);
+        }
+    }
+
     internal static void DrawNormalInputArea<T>(InputSlot<T> inputSlot,
                                                 SymbolUi compositionUi,
                                                 SymbolUi.Child symbolChildUi,
@@ -708,6 +738,10 @@ internal static class InputArea
                            };
 
             Icons.DrawIconOnLastItem(icon, typeColor);
+        }
+        else if (symbolChildUi.IsInputEnabledForSnapshots(input.InputDefinition.Id))
+        {
+            Icons.DrawIconOnLastItem(Icon.Knob, UiColors.StatusControlled);
         }
         else
         {
@@ -839,7 +873,15 @@ internal static class InputArea
             }
         }
 
-        Icons.DrawIconOnLastItem(Icon.ConnectedInput, typeColor.Rgba);
+        if (symbolChildUi.IsInputEnabledForSnapshots(inputSlot.Id))
+        {
+            Icons.DrawIconOnLastItem(Icon.Knob, UiColors.StatusControlled.Rgba);
+        }
+        else
+        {
+            Icons.DrawIconOnLastItem(Icon.ConnectedInput, typeColor.Rgba);
+        }
+
         ImGui.SameLine();
     }
 

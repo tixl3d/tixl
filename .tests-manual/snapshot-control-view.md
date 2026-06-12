@@ -40,6 +40,18 @@ Click the "Create snapshot" button in the Parameter window.
   ordered by their vertical position in the graph.
 - The Variations window shows a new snapshot thumbnail.
 
+## Step: A snapshot is shown without manual selection
+
+**Action:**
+Navigate into another composition and back (or restart TiXL), then click the
+graph background so the snapshot control view appears again.
+
+**Expected:**
+- A snapshot is already displayed — the one matching the current parameter
+  values if one exists, otherwise the first.
+- Merely opening the view does not change any parameter values (no new undo
+  entry appears).
+
 ## Step: Editing a parameter from the control view
 
 **Action:**
@@ -125,6 +137,71 @@ Click the trash button on the right of the selector bar.
 **Expected:**
 - The snapshot disappears from the dropdown and from the Variations window.
 - `Ctrl+Z` brings it back in both places.
+
+## Step: Enabling a single parameter for control
+
+**Action:**
+Add a new operator (e.g. `[Transform]`) that is *not* enabled for snapshots.
+Select it, right-click one of its value parameters (e.g. `Scale`) in the
+Parameter window and choose "Enable for control".
+
+**Expected:**
+- A green knob icon appears in the connection area left of the parameter's
+  name.
+- The operator now appears in the snapshot control view with only that one
+  parameter listed.
+- If the parameter had a non-default value, existing snapshots now include it
+  (applying another snapshot resets it).
+- `Ctrl+Z` reverts both the toggle and the snapshot updates.
+
+## Step: Disabling a single parameter of a fully enabled op
+
+**Action:**
+For an operator enabled via the graph context menu (all parameters
+controlled), right-click one of its parameters and uncheck "Enable for
+control".
+
+**Expected:**
+- The knob icon disappears, and the parameter vanishes from the snapshot
+  control view while the op's other parameters stay.
+- The parameter's stored values are removed from all snapshots — switching
+  snapshots no longer changes it.
+- Editing this parameter no longer makes write/revert light up in the
+  selector bar.
+
+## Step: Disabling the last controlled parameter
+
+**Action:**
+Uncheck "Enable for control" on every remaining controlled parameter of that
+operator.
+
+**Expected:**
+- After the last one, the operator is no longer enabled for snapshots at all:
+  it disappears from the snapshot control view, and the graph context menu's
+  "Enable for snapshots" is unchecked.
+
+## Step: Bulk toggle resets the per-parameter selection
+
+**Action:**
+With an operator that has only some parameters enabled, right-click it in the
+graph and choose "Enable for snapshots".
+
+**Expected:**
+- All of its parameters become controlled (knob icons everywhere, all rows
+  listed in the control view).
+
+## Step: Old project files keep per-op semantics
+
+**Action:**
+Open a project saved before per-parameter control existed, with operators
+enabled for snapshots. Inspect them in the snapshot control view, then close
+TiXL *without changing anything* and check the project's `.t3ui` file
+modification time.
+
+**Expected:**
+- All blendable parameters of the enabled operators are listed and marked as
+  controlled — identical to the old behavior.
+- The `.t3ui` files are not rewritten by merely loading and viewing.
 
 ## Step: No control view for read-only library compositions
 

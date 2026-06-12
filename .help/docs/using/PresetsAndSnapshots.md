@@ -30,6 +30,16 @@ Below the bar, all operators enabled for snapshots are listed with the parameter
 
 All actions are undoable, and the view stays in sync with the Variations window — both operate on the same snapshots.
 
+### Controlling individual parameters
+
+Snapshot control can be limited to individual parameters: right-click a parameter in the Parameter window and choose **"Enable for control"**. Controlled parameters show a green knob icon in the connection area next to their name.
+
+- Enabling a parameter on an operator that wasn't snapshot-enabled yet enables the operator with just that parameter.
+- Disabling the last controlled parameter disables the operator for snapshots entirely.
+- The operator's context menu entry "Enable for snapshots" in the graph remains the bulk toggle: it enables or disables all parameters at once.
+
+Existing snapshots are kept consistent automatically — enabling a parameter captures its current value into all snapshots, disabling removes its stored values. Parameters that are not controlled are never touched when snapshots are applied or blended.
+
 ## Using Snapshots with Midi-Controllers
 Snapshots are incredibly powerful in combination with a launch-pad controller like the APC Mini. Each of the highlighted buttons will indicate a snapshot for the current operator. Clicking an empty button will create a new snapshot.
 

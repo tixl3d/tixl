@@ -53,7 +53,37 @@ public partial class SymbolUi
         {
             get => GroupIndexForSnapshots == SnapshotGroupIndex;
             set => SnapshotGroupIndex = value ? GroupIndexForSnapshots : 0;
-        }            
+        }
+
+        /// <summary>
+        /// Input ids enabled for snapshot control while <see cref="EnabledForSnapshots"/> is set.
+        /// Null means all blendable inputs are enabled — the legacy per-op semantics. The set is
+        /// only materialized once the user toggles an individual parameter, so untouched files
+        /// keep their original shape.
+        /// </summary>
+        internal HashSet<Guid>? SnapshotEnabledInputIds { get; set; }
+
+        /// <summary>
+        /// True if the parameter is controlled by snapshots — shown with the controller indicator
+        /// and listed in the snapshot control view.
+        /// </summary>
+        internal bool IsInputEnabledForSnapshots(Guid inputId)
+        {
+            return EnabledForSnapshots
+                   && (SnapshotEnabledInputIds == null || SnapshotEnabledInputIds.Contains(inputId));
+        }
+
+        /// <summary>
+        /// Filter for variation capture and apply paths that already qualified the child:
+        /// ParameterCollections (group index above 1) always include everything.
+        /// </summary>
+        internal bool IsInputIncludedForVariation(Guid inputId)
+        {
+            if (SnapshotGroupIndex != GroupIndexForSnapshots || SnapshotEnabledInputIds == null)
+                return true;
+
+            return SnapshotEnabledInputIds.Contains(inputId);
+        }
             
         internal Styles Style;
         internal string Comment;
@@ -77,6 +107,7 @@ public partial class SymbolUi
                 Style = original.Style,
                 Comment = original.Comment,
                 SnapshotGroupIndex = original.SnapshotGroupIndex,
+                SnapshotEnabledInputIds = original.SnapshotEnabledInputIds == null ? null : [..original.SnapshotEnabledInputIds],
             };
             foreach(var overridePair in original.ConnectionStyleOverrides)
             {

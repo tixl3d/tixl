@@ -65,6 +65,8 @@ When the composition is active in a Parameter window, show:
 
 ### Phase B — Per-parameter enablement
 
+**Status (2026-06-13): implemented** — `SymbolUi.Child.SnapshotEnabledInputIds` (null = all, legacy), `ChangeSnapshotEnabledInputsCommand`, capture/apply/blend filtering in `SymbolVariationPool`, "Enable for control" context-menu toggle via `VariationHandling.ToggleParameterSnapshotControl`. Controller indicator: `Icon.Knob` tinted `UiColors.StatusControlled` in the input connection area. The view is suppressed during SkillQuest play mode.
+
 **Goal:** "enabled for snapshots" becomes a per-parameter property of the child instance.
 
 **Scope:**

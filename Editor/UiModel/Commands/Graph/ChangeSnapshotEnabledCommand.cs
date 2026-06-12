@@ -20,7 +20,10 @@ internal sealed class ChangeSnapshotEnabledCommand : ICommand
         _parentSymbolId = parentSymbolId;
         var newIndex = newEnabled ? GroupIndexForSnapshots : 0;
         foreach (var child in children)
-            _changes.Add(new Entry(child.Id, child.SnapshotGroupIndex, newIndex));
+        {
+            var originalEnabledInputIds = child.SnapshotEnabledInputIds == null ? null : new HashSet<Guid>(child.SnapshotEnabledInputIds);
+            _changes.Add(new Entry(child.Id, child.SnapshotGroupIndex, originalEnabledInputIds, newIndex));
+        }
     }
 
     public void Do() => Apply(useNew: true);
@@ -37,10 +40,15 @@ internal sealed class ChangeSnapshotEnabledCommand : ICommand
                 continue;
 
             child.SnapshotGroupIndex = useNew ? change.NewGroupIndex : change.OriginalGroupIndex;
+
+            // The bulk toggle resets per-parameter selection: enable means all parameters
+            child.SnapshotEnabledInputIds = useNew || change.OriginalEnabledInputIds == null
+                                                ? null
+                                                : [..change.OriginalEnabledInputIds];
         }
 
         symbolUi.FlagAsModified();
     }
 
-    private readonly record struct Entry(Guid ChildId, int OriginalGroupIndex, int NewGroupIndex);
+    private readonly record struct Entry(Guid ChildId, int OriginalGroupIndex, HashSet<Guid>? OriginalEnabledInputIds, int NewGroupIndex);
 }

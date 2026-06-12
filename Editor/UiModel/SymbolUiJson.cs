@@ -117,6 +117,20 @@ internal static class SymbolUiJson
             if (childUi.SnapshotGroupIndex != 0)
                 writer.WriteObject(nameof(SymbolUi.Child.SnapshotGroupIndex), childUi.SnapshotGroupIndex);
 
+            if (childUi.SnapshotEnabledInputIds != null)
+            {
+                // Sorted for stable file diffs
+                var sortedInputIds = childUi.SnapshotEnabledInputIds.ToList();
+                sortedInputIds.Sort();
+
+                writer.WritePropertyName(nameof(SymbolUi.Child.SnapshotEnabledInputIds));
+                writer.WriteStartArray();
+                foreach (var inputId in sortedInputIds)
+                    writer.WriteValue(inputId);
+
+                writer.WriteEndArray();
+            }
+
             // Safely handle connection style overrides
             if (childUi.ConnectionStyleOverrides != null &&
                 childUi.ConnectionStyleOverrides.Count > 0)
@@ -460,6 +474,19 @@ internal static class SymbolUiJson
             if (childEntry[nameof(SymbolUi.Child.SnapshotGroupIndex)] != null)
             {
                 childUi.SnapshotGroupIndex = (childEntry[nameof(SymbolUi.Child.SnapshotGroupIndex)] ?? -1).Value<int>();
+            }
+
+            // Absent in pre-per-parameter files: null keeps the legacy "all inputs enabled" semantics
+            if (childEntry[nameof(SymbolUi.Child.SnapshotEnabledInputIds)] is JArray enabledInputIdsArray)
+            {
+                var enabledInputIds = new HashSet<Guid>();
+                foreach (var idToken in enabledInputIdsArray)
+                {
+                    if (JsonUtils.TryGetGuid(idToken, out var inputId))
+                        enabledInputIds.Add(inputId);
+                }
+
+                childUi.SnapshotEnabledInputIds = enabledInputIds;
             }
 
             childUi.Style = JsonUtils.TryGetEnumValue(childEntry[JsonKeys.Style], out SymbolUi.Child.Styles childStyle)

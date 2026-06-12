@@ -410,12 +410,16 @@ internal sealed class SymbolVariationPool
 
             parentSymbol = instance.Parent.Symbol;
 
+            var childUi = instance.GetChildUi();
             var changeSet = new Dictionary<Guid, InputValue>();
             var hasAnimatableParameters = false;
 
             foreach (var input in instance.Inputs)
             {
                 if (!ValueUtils.BlendMethods.ContainsKey(input.Input.Value.ValueType))
+                    continue;
+
+                if (childUi != null && !childUi.IsInputIncludedForVariation(input.Id))
                     continue;
 
                 hasAnimatableParameters = true;
@@ -425,10 +429,7 @@ internal sealed class SymbolVariationPool
                     continue;
                 }
 
-                if (ValueUtils.BlendMethods.ContainsKey(input.Input.Value.ValueType))
-                {
-                    changeSet[input.Id] = input.Input.Value.Clone();
-                }
+                changeSet[input.Id] = input.Input.Value.Clone();
             }
 
             if (!hasAnimatableParameters)
@@ -473,12 +474,16 @@ internal sealed class SymbolVariationPool
                 return;
             }
 
+            var childUi = instance.GetChildUi();
             var changeSet = new Dictionary<Guid, InputValue>();
             var hasAnimatableParameters = false;
 
             foreach (var input in instance.Inputs)
             {
                 if (!ValueUtils.BlendMethods.ContainsKey(input.Input.Value.ValueType))
+                    continue;
+
+                if (childUi != null && !childUi.IsInputIncludedForVariation(input.Id))
                     continue;
 
                 hasAnimatableParameters = true;
@@ -488,10 +493,7 @@ internal sealed class SymbolVariationPool
                     continue;
                 }
 
-                if (ValueUtils.BlendMethods.ContainsKey(input.Input.Value.ValueType))
-                {
-                    changeSet[input.Id] = input.Input.Value.Clone();
-                }
+                changeSet[input.Id] = input.Input.Value.Clone();
             }
 
             if (!hasAnimatableParameters)
@@ -546,6 +548,7 @@ internal sealed class SymbolVariationPool
                 continue;
 
             var symbolChild = instance.SymbolChild;
+            var childUi = instance.GetChildUi();
 
             // SymbolChild would only be null if the instance has no parent - this would only ever happen if the composition
             // erroneously has a non-child instance in its children list
@@ -563,9 +566,9 @@ internal sealed class SymbolVariationPool
                     var newCommand = new ChangeInputValueCommand(compositionSymbol, childId, input, param);
                     commands.Add(newCommand);
                 }
-                else
+                else if (childUi == null || childUi.IsInputIncludedForVariation(input.Id))
                 {
-                    // Reset non-defaults
+                    // Reset non-defaults, but leave parameters alone that are not snapshot-controlled
                     commands.Add(new ResetInputToDefault(compositionSymbol, childId, input));
                 }
             }
@@ -652,6 +655,8 @@ internal sealed class SymbolVariationPool
             if (!variation.ParameterSetsForChildIds.TryGetValue(child.SymbolChildId, out var parametersForInputs))
                 continue;
 
+            var childUi = child.GetChildUi();
+
             foreach (var inputSlot in child.Inputs)
             {
                 if (!ValueUtils.BlendMethods.TryGetValue(inputSlot.Input.DefaultValue.ValueType, out var blendFunction))
@@ -664,7 +669,8 @@ internal sealed class SymbolVariationPool
                     var newCommand = new ChangeInputValueCommand(compositionInstance.Symbol, child.SymbolChildId, inputSlot.Input, mixed);
                     commands.Add(newCommand);
                 }
-                else if (!inputSlot.Input.IsDefault)
+                else if (!inputSlot.Input.IsDefault
+                         && (childUi == null || childUi.IsInputIncludedForVariation(inputSlot.Id)))
                 {
                     var mixed = blendFunction(inputSlot.Input.Value, inputSlot.Input.DefaultValue, blend);
                     var newCommand = new ChangeInputValueCommand(compositionInstance.Symbol, child.SymbolChildId, inputSlot.Input, mixed);
