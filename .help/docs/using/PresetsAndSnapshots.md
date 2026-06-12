@@ -16,6 +16,20 @@ Presets showcase whats possible with an operator, and highlight options and para
 
 ![snapshots1](https://user-images.githubusercontent.com/1732545/232545725-7d528af0-325e-4b31-9bcc-812ecc595878.gif)
 
+### The snapshot control view
+
+While the Variations window is the visual interface for snapshots, the Parameter window offers a precise, per-parameter one: when nothing is selected in the graph (the composition itself is active), it shows the **snapshot control view**.
+
+At the top, a selector bar shows the index of the active snapshot, a dropdown to pick one, and prev/next arrows that cycle through snapshots in index order. On the right are three actions:
+
+- **Write** (camera icon) — update the snapshot with the current parameter values. Only enabled when values differ from the snapshot.
+- **Revert** (circular arrow) — re-apply the snapshot's stored values. Also only enabled when something changed.
+- **Remove** (trash icon) — delete the snapshot.
+
+Below the bar, all operators enabled for snapshots are listed with the parameters captured in the active snapshot. The values are editable exactly like in the regular parameter view, including undo. Clicking an operator's name selects it and centers it in the graph. Parameters published as composition inputs appear in their own "Inputs" group.
+
+All actions are undoable, and the view stays in sync with the Variations window — both operate on the same snapshots.
+
 ## Using Snapshots with Midi-Controllers
 Snapshots are incredibly powerful in combination with a launch-pad controller like the APC Mini. Each of the highlighted buttons will indicate a snapshot for the current operator. Clicking an empty button will create a new snapshot.
 

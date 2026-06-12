@@ -42,6 +42,8 @@ When the composition is active in a Parameter window, show:
 
 ### Phase A — Snapshot control view with per-op granularity
 
+**Status (2026-06-13): implemented** — `Editor/Gui/Windows/SnapshotControlView.cs`, wired into `ParameterWindow`'s no-selection branch. Test set: [`snapshot-control-view.md`](../../.tests-manual/snapshot-control-view.md). Controller icon and per-parameter enablement remain for Phase B.
+
 **Goal:** the view ships and is useful with the *existing* data model. No serialization changes.
 
 **Scope:**

@@ -9,6 +9,7 @@ using T3.Editor.App;
 using T3.Editor.Gui.Dialogs;
 using T3.Editor.Gui.Graph.Dialogs;
 using T3.Editor.Gui.Input;
+using T3.Editor.Gui.Interaction.Variations;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.Layouts;
@@ -66,8 +67,10 @@ internal sealed class ParameterWindow : Window
 
         if (!NodeSelection.TryGetSelectedInstanceOrInput(out var instance, out var inputUi, out _selectionChanged))
         {
-            if (ProjectView.Focused?.NodeSelection != null)
-                DrawSettingsForSelectedAnnotations(ProjectView.Focused.NodeSelection);
+            var nodeSelection = ProjectView.Focused?.NodeSelection;
+            var annotationSettingsShown = nodeSelection != null && DrawSettingsForSelectedAnnotations(nodeSelection);
+            if (!annotationSettingsShown && VariationHandling.ActivePoolForSnapshots != null)
+                _snapshotControlView.Draw();
 
             _lastSelectedInstanceId = Guid.Empty;
             return;
@@ -101,7 +104,23 @@ internal sealed class ParameterWindow : Window
             Log.Error($"Failed to get instance for {symbol.Name} with path {string.Join(",", path)}");
             return;
         }
-        
+
+        // Clicking the graph background selects the composition itself. If it has no inputs
+        // to show, the snapshot control view is more useful than an empty parameter list.
+        // Handled before the ui-definition lookup, which requires a parent and would bail
+        // out for compositions at the home level.
+        if (_viewMode == ViewModes.Parameters
+            && IsFocusedComposition(instance)
+            && instance.Inputs.Count == 0
+            && VariationHandling.ActivePoolForSnapshots != null)
+        {
+            if (DrawSymbolHeader(instance, instance.GetSymbolUi()))
+                instance.GetSymbolUi().FlagAsModified();
+
+            _snapshotControlView.Draw();
+            return;
+        }
+
         if (!TryGetUiDefinitions(instance, out var symbolUi, out var symbolChildUi))
             return;
 
@@ -577,36 +596,7 @@ internal sealed class ParameterWindow : Window
             var editState = inputUi.DrawParameterEdit(inputSlot, compositionSymbolUi, symbolChildUi, hideNonEssentials: hideNonEssentials, skipIfDefault);
             ImGui.PopID();
 
-            // ... and handle the edit state
-            if ((editState&InputEditStateFlags.Started) != 0)
-            {
-                _inputSlotForActiveCommand = inputSlot;
-                _inputValueCommandInFlight =
-                    new ChangeInputValueCommand(instance.Parent.Symbol, instance.SymbolChildId, inputSlot.Input, inputSlot.Input.Value);
-            }
-
-            if ((editState&InputEditStateFlags.Modified) != 0)
-            {
-                if (_inputValueCommandInFlight == null || _inputSlotForActiveCommand != inputSlot)
-                {
-                    _inputValueCommandInFlight =
-                        new ChangeInputValueCommand(instance.Parent.Symbol, instance.SymbolChildId, inputSlot.Input, inputSlot.Input.Value);
-                    _inputSlotForActiveCommand = inputSlot;
-                }
-
-                _inputValueCommandInFlight.AssignNewValue(inputSlot.Input.Value);
-                inputSlot.DirtyFlag.Invalidate();
-            }
-
-            if ((editState&InputEditStateFlags.Finished) != 0)
-            {
-                if (_inputValueCommandInFlight != null && _inputSlotForActiveCommand == inputSlot)
-                {
-                    UndoRedoStack.Add(_inputValueCommandInFlight);
-                }
-
-                _inputValueCommandInFlight = null;
-            }
+            HandleInputEditState(instance, inputSlot, editState);
 
             if (editState == InputEditStateFlags.ShowOptions && parameterWindow != null)
             {
@@ -623,6 +613,46 @@ internal sealed class ParameterWindow : Window
 
         if (groupState == GroupState.InsideOpened)
             FormInputs.EndGroup();
+    }
+
+    /// <summary>
+    /// Translates the edit state of a parameter row into in-flight value commands so edits
+    /// are undoable. Shared by the regular parameter view and the snapshot control view.
+    /// </summary>
+    internal static void HandleInputEditState(Instance instance, IInputSlot inputSlot, InputEditStateFlags editState)
+    {
+        if (instance.Parent == null)
+            return;
+
+        if ((editState & InputEditStateFlags.Started) != 0)
+        {
+            _inputSlotForActiveCommand = inputSlot;
+            _inputValueCommandInFlight =
+                new ChangeInputValueCommand(instance.Parent.Symbol, instance.SymbolChildId, inputSlot.Input, inputSlot.Input.Value);
+        }
+
+        if ((editState & InputEditStateFlags.Modified) != 0)
+        {
+            if (_inputValueCommandInFlight == null || _inputSlotForActiveCommand != inputSlot)
+            {
+                _inputValueCommandInFlight =
+                    new ChangeInputValueCommand(instance.Parent.Symbol, instance.SymbolChildId, inputSlot.Input, inputSlot.Input.Value);
+                _inputSlotForActiveCommand = inputSlot;
+            }
+
+            _inputValueCommandInFlight.AssignNewValue(inputSlot.Input.Value);
+            inputSlot.DirtyFlag.Invalidate();
+        }
+
+        if ((editState & InputEditStateFlags.Finished) != 0)
+        {
+            if (_inputValueCommandInFlight != null && _inputSlotForActiveCommand == inputSlot)
+            {
+                UndoRedoStack.Add(_inputValueCommandInFlight);
+            }
+
+            _inputValueCommandInFlight = null;
+        }
     }
 
     private static void InsertGroupsAndPadding(IInputUi inputUi, ref GroupState groupState)
@@ -656,7 +686,21 @@ internal sealed class ParameterWindow : Window
         }
     }
 
-    private static bool TryGetUiDefinitions(Instance instance, 
+    /// <summary>
+    /// The selected instance is re-resolved from its path each frame, so compare ids
+    /// rather than relying on reference identity with the focused composition.
+    /// </summary>
+    private static bool IsFocusedComposition(Instance instance)
+    {
+        var composition = ProjectView.Focused?.CompositionInstance;
+        if (composition == null)
+            return false;
+
+        return composition == instance
+               || (composition.Symbol.Id == instance.Symbol.Id && composition.SymbolChildId == instance.SymbolChildId);
+    }
+
+    private static bool TryGetUiDefinitions(Instance instance,
                                             [NotNullWhen(true)] out SymbolUi? symbolUi, 
                                             [NotNullWhen(true)] out SymbolUi.Child? symbolChildUi)
     {
@@ -752,5 +796,6 @@ internal sealed class ParameterWindow : Window
     private bool _selectionChanged;
 
     private readonly ParameterSettings _parameterSettings = new();
+    private readonly SnapshotControlView _snapshotControlView = new();
     public static readonly RenameInputDialog RenameInputDialog = new();
 }

@@ -149,7 +149,7 @@ internal static class VariationHandling
             UndoRedoStack.AddAndExecute(command);
     }
 
-    private static void AddSnapshotEnabledChildrenToList(Instance instance, List<Instance> list)
+    internal static void AddSnapshotEnabledChildrenToList(Instance instance, List<Instance> list)
     {
         var compositionUi = instance.GetSymbolUi();
         foreach (var childInstance in instance.Children.Values)
