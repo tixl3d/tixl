@@ -34,7 +34,7 @@ public static class UiColors
     public static Color PopupBorder = new(0, 0, 0, 1f);
     
     [T3Style.Hint(Description = "Buttons and form inputs.")]
-    public static Color BackgroundButton = new(0.3f,0.3f,0.3f,0.5f);
+    public static Color BackgroundButton = new(0.3f,0.3f,0.3f,0.35f);
     public static Color BackgroundButtonActivated = new(0.10f,0.10f,0.10f,0.8f);
     public static Color BackgroundHover = new(0.32f,0.32f,0.32f,0.8f);
     

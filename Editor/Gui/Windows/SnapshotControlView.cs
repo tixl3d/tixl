@@ -5,6 +5,7 @@ using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.Utils;
 using T3.Editor.Gui.Input;
+using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Variations;
 using T3.Editor.Gui.Interaction.Variations.Model;
 using T3.Editor.Gui.Styling;
@@ -156,8 +157,7 @@ internal sealed class SnapshotControlView
             if (CustomComponents.EmptyWindowMessage("No snapshots yet.\nSnapshots capture the parameters of all\noperators enabled for snapshots.",
                                                     "Create snapshot"))
             {
-                VariationHandling.CreateOrUpdateSnapshotVariation();
-                _modificationCheck.Invalidate();
+                CreateAndRenameSnapshot(pool);
             }
 
             return;
@@ -229,100 +229,144 @@ internal sealed class SnapshotControlView
         {
             UpdateCachedLabels(selectedSnapshot);
 
-            // Index indicator
-            ImGui.AlignTextToFramePadding();
-            CustomComponents.StylizedText(_indexLabel, Fonts.FontBold, UiColors.TextMuted);
-            ImGui.SameLine();
-
             var frameHeight = ImGui.GetFrameHeight();
             var spacing = ImGui.GetStyle().ItemSpacing.X;
             var addButtonGap = 4 * T3Ui.UiScaleFactor;
             var actionButtonsWidth = 4 * frameHeight + 3 * spacing + addButtonGap;
             var arrowsWidth = 2 * (frameHeight + spacing);
 
-            // Snapshot dropdown
-            ImGui.SetNextItemWidth(MathF.Max(frameHeight,
-                                             ImGui.GetContentRegionAvail().X - arrowsWidth - actionButtonsWidth - 3 * spacing));
-            if (ImGui.BeginCombo("##snapshotDropdown", _selectedSnapshotLabel))
+            // Index indicator — click to rename the active snapshot
+            ImGui.AlignTextToFramePadding();
+            CustomComponents.StylizedText(_indexLabel, Fonts.FontBold, UiColors.TextMuted);
+            if (ImGui.IsItemClicked() && selectedSnapshot != null)
+                StartRenaming(selectedSnapshot);
+
+            CustomComponents.TooltipForLastItem("Click to rename snapshot");
+            ImGui.SameLine();
+
+            var dropdownWidth = MathF.Max(frameHeight,
+                                          ImGui.GetContentRegionAvail().X - arrowsWidth - actionButtonsWidth - 3 * spacing);
+
+            var isRenaming = selectedSnapshot != null && _renamingSnapshotId == selectedSnapshot.Id;
+            if (isRenaming)
             {
-                foreach (var snapshot in _snapshots)
+                ImGui.SetNextItemWidth(dropdownWidth);
+                if (_renameJustStarted)
                 {
-                    var isSelected = snapshot == selectedSnapshot;
-                    var label = string.IsNullOrEmpty(snapshot.Title) || snapshot.Title == "untitled"
-                                    ? $"Snapshot #{snapshot.ActivationIndex}"
-                                    : $"{snapshot.Title} #{snapshot.ActivationIndex}";
-                    if (ImGui.Selectable(label, isSelected))
-                    {
-                        ApplySnapshot(pool, composition, snapshot);
-                    }
+                    ImGui.SetKeyboardFocusHere();
+                    _renameJustStarted = false;
                 }
 
-                ImGui.EndCombo();
+                ImGui.InputText("##renameSnapshot", ref _renameBuffer, 256);
+                if (ImGui.IsItemDeactivated())
+                {
+                    selectedSnapshot!.Title = string.IsNullOrWhiteSpace(_renameBuffer) ? null : _renameBuffer;
+                    pool.SaveVariationsToFile();
+                    _renamingSnapshotId = Guid.Empty;
+                }
+            }
+            else
+            {
+                // Snapshot dropdown
+                ImGui.SetNextItemWidth(dropdownWidth);
+                if (ImGui.BeginCombo("##snapshotDropdown", _selectedSnapshotLabel))
+                {
+                    foreach (var snapshot in _snapshots)
+                    {
+                        var isSelected = snapshot == selectedSnapshot;
+                        var label = string.IsNullOrEmpty(snapshot.Title) || snapshot.Title == "untitled"
+                                        ? $"Snapshot #{snapshot.ActivationIndex}"
+                                        : $"{snapshot.Title} #{snapshot.ActivationIndex}";
+                        if (ImGui.Selectable(label, isSelected))
+                        {
+                            ApplySnapshot(pool, composition, snapshot);
+                        }
+                    }
+
+                    ImGui.EndCombo();
+                }
             }
 
             // Prev / next arrows cycle by activation index order
+            var hasSnapshots = _snapshots.Count > 0;
             ImGui.SameLine();
-            if (CustomComponents.IconButton(Icon.ArrowLeft, Vector2.Zero) && _snapshots.Count > 0)
-            {
+            if (DrawBarButton(Icon.ArrowLeft, hasSnapshots, "Previous snapshot"))
                 ApplySnapshot(pool, composition, GetNeighborSnapshot(selectedSnapshot, -1));
-            }
 
             ImGui.SameLine();
-            if (CustomComponents.IconButton(Icon.ArrowRight, Vector2.Zero) && _snapshots.Count > 0)
-            {
+            if (DrawBarButton(Icon.ArrowRight, hasSnapshots, "Next snapshot"))
                 ApplySnapshot(pool, composition, GetNeighborSnapshot(selectedSnapshot, +1));
-            }
 
             // Right-aligned actions
             CustomComponents.RightAlign(actionButtonsWidth);
 
             var canWrite = selectedSnapshot != null && isModified;
-            if (CustomComponents.IconButton(Icon.Apply, Vector2.Zero,
-                                            canWrite ? CustomComponents.ButtonStates.Normal : CustomComponents.ButtonStates.Disabled)
-                && canWrite)
-            {
+            if (DrawBarButton(Icon.Apply, canWrite, "Update snapshot from current values"))
                 WriteSnapshot(pool, composition, selectedSnapshot!);
-            }
-
-            CustomComponents.TooltipForLastItem("Update snapshot from current values");
 
             ImGui.SameLine();
-            var canRevert = selectedSnapshot != null && isModified;
-            if (CustomComponents.IconButton(Icon.Reset, Vector2.Zero,
-                                            canRevert ? CustomComponents.ButtonStates.Normal : CustomComponents.ButtonStates.Disabled)
-                && canRevert)
-            {
+            if (DrawBarButton(Icon.Reset, canWrite, "Revert to snapshot values"))
                 ApplySnapshot(pool, composition, selectedSnapshot!);
-            }
-
-            CustomComponents.TooltipForLastItem("Revert to snapshot values");
 
             ImGui.SameLine();
-            if (CustomComponents.IconButton(Icon.Trash, Vector2.Zero,
-                                            selectedSnapshot != null ? CustomComponents.ButtonStates.Normal : CustomComponents.ButtonStates.Disabled)
-                && selectedSnapshot != null)
+            if (DrawBarButton(Icon.Trash, selectedSnapshot != null, "Remove snapshot"))
             {
-                pool.DeleteVariation(selectedSnapshot);
+                pool.DeleteVariation(selectedSnapshot!);
                 _modificationCheck.Invalidate();
             }
-
-            CustomComponents.TooltipForLastItem("Remove snapshot");
 
             // Creating a new snapshot only makes sense when the current values differ
             ImGui.SameLine(0, spacing + addButtonGap);
             var canCreate = selectedSnapshot == null || isModified;
-            if (CustomComponents.IconButton(Icon.Plus, Vector2.Zero,
-                                            canCreate ? CustomComponents.ButtonStates.Normal : CustomComponents.ButtonStates.Disabled)
-                && canCreate)
-            {
-                VariationHandling.CreateOrUpdateSnapshotVariation();
-                _modificationCheck.Invalidate();
-            }
-
-            CustomComponents.TooltipForLastItem("Create new snapshot from current values");
+            if (DrawBarButton(Icon.Plus, canCreate, "Create new snapshot from current values"))
+                CreateAndRenameSnapshot(pool);
         }
         ImGui.EndChild();
         ImGui.PopStyleVar();
+    }
+
+    /// <summary>
+    /// Selector-bar tool icon with a transparent background. Active: bright (ForegroundFull)
+    /// with a hover background to read as clickable. Inactive: drawn disabled with no hover
+    /// feedback — but the tooltip still shows. Returns true only when active.
+    /// </summary>
+    private static bool DrawBarButton(Icon icon, bool isActive, string tooltip)
+    {
+        var size = new Vector2(ImGui.GetFrameHeight());
+        ImGui.PushID((int)icon);
+        var pressed = ImGui.InvisibleButton("##barBtn", size);
+        ImGui.PopID();
+
+        if (isActive && ImGui.IsItemHovered())
+        {
+            ImGui.GetWindowDrawList().AddRectFilled(ImGui.GetItemRectMin(), ImGui.GetItemRectMax(),
+                                                    UiColors.BackgroundButton.Fade(0.5f), 4 * T3Ui.UiScaleFactor);
+        }
+
+        var color = isActive ? UiColors.ForegroundFull : UiColors.TextDisabled.Fade(0.6f);
+        Icons.DrawIconOnLastItem(icon, color);
+
+        CustomComponents.TooltipForLastItem(tooltip);
+        return pressed && isActive;
+    }
+
+    private void StartRenaming(Variation variation)
+    {
+        _renamingSnapshotId = variation.Id;
+        _renameBuffer = string.IsNullOrEmpty(variation.Title) || variation.Title == "untitled" ? "" : variation.Title;
+        _renameJustStarted = true;
+    }
+
+    private void CreateAndRenameSnapshot(SymbolVariationPool pool)
+    {
+        var newVariation = VariationHandling.CreateOrUpdateSnapshotVariation();
+        if (newVariation != null)
+        {
+            pool.SetActiveVariationWithoutApply(newVariation);
+            StartRenaming(newVariation);
+        }
+
+        _modificationCheck.Invalidate();
     }
 
     private void DrawOpList(Instance composition, Variation? selectedSnapshot)
@@ -348,9 +392,11 @@ internal sealed class SnapshotControlView
                 var parentUi = composition.Parent.GetSymbolUi();
                 if (parentUi.ChildUis.TryGetValue(composition.SymbolChildId, out var compositionChildUi))
                 {
+                    BeginBlock();
                     DrawGroupHeader(composition.SymbolChildId, "Inputs", UiColors.TextMuted, out _);
                     DrawControlledParameters(composition, compositionUi, compositionChildUi, parentUi,
                                              selectedSnapshot, childKey: Guid.Empty);
+                    EndBlock(Guid.Empty);
                     FormInputs.AddVerticalSpace(5);
                 }
             }
@@ -364,6 +410,7 @@ internal sealed class SnapshotControlView
                 var labelColor = ColorVariations.OperatorLabel.Apply(typeColor);
 
                 var symbolChild = entry.ChildUi.SymbolChild;
+                BeginBlock();
                 DrawGroupHeader(entry.ChildUi.Id, GetOpGroupLabel(symbolChild), labelColor, out var nameClicked);
 
                 if (nameClicked)
@@ -378,6 +425,7 @@ internal sealed class SnapshotControlView
 
                 DrawControlledParameters(entry.Instance, entry.Instance.GetSymbolUi(), entry.ChildUi, compositionUi,
                                          selectedSnapshot, childKey: entry.ChildUi.Id, onlyEnabledInputs: true);
+                EndBlock(entry.ChildUi.Id);
 
                 FormInputs.AddVerticalSpace(5);
             }
@@ -387,6 +435,44 @@ internal sealed class SnapshotControlView
         ImGui.EndChild();
         ImGui.PopStyleVar();
         ImGui.PopStyleColor();
+    }
+
+    /// <summary>
+    /// Wraps a header+params block so a rounded background can be drawn behind it. Uses a
+    /// draw-list channel split: content goes on the front channel, the box on the back one.
+    /// </summary>
+    private void BeginBlock()
+    {
+        var pos = ImGui.GetCursorScreenPos();
+        _blockLeftX = pos.X;
+        _blockRightX = pos.X + ImGui.GetContentRegionAvail().X;
+
+        var drawList = ImGui.GetWindowDrawList();
+        drawList.ChannelsSplit(2);
+        drawList.ChannelsSetCurrent(1);
+        ImGui.BeginGroup();
+    }
+
+    private void EndBlock(Guid highlightId)
+    {
+        ImGui.EndGroup();
+
+        var drawList = ImGui.GetWindowDrawList();
+        var pad = new Vector2(0, 3) * T3Ui.UiScaleFactor;
+        var min = new Vector2(_blockLeftX, ImGui.GetItemRectMin().Y - pad.Y);
+        var max = new Vector2(_blockRightX, ImGui.GetItemRectMax().Y + pad.Y);
+
+        // Hovering the block highlights the matching operator in the graph; the same shared
+        // hover set drives the reverse (hovering the op in the graph brightens the block).
+        if (highlightId != Guid.Empty && ImGui.IsMouseHoveringRect(min, max))
+            FrameStats.AddHoveredId(highlightId);
+
+        var isOpHovered = highlightId != Guid.Empty && FrameStats.IsIdHovered(highlightId);
+        var fade = isOpHovered ? 0.6f : 0.3f;
+
+        drawList.ChannelsSetCurrent(0);
+        drawList.AddRectFilled(min, max, UiColors.BackgroundButton.Fade(fade), 6 * T3Ui.UiScaleFactor);
+        drawList.ChannelsMerge();
     }
 
     /// <summary>
@@ -420,10 +506,15 @@ internal sealed class SnapshotControlView
 
         ImGui.PushFont(Fonts.FontSmall);
         ImGui.PushStyleColor(ImGuiCol.Text, labelColor.Rgba);
+        ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Color.Transparent.Rgba);
+        ImGui.PushStyleColor(ImGuiCol.HeaderActive, Color.Transparent.Rgba);
         ImGui.AlignTextToFramePadding();
         nameClicked = ImGui.Selectable(label);
-        ImGui.PopStyleColor();
+        ImGui.PopStyleColor(3);
         ImGui.PopFont();
+
+        // Subtle rounded highlight instead of the full-width Selectable header bar
+        CustomComponents.DrawHoverHighlightOnLastItem();
 
         ImGui.PopID();
         ImGui.PopStyleVar();
@@ -464,18 +555,20 @@ internal sealed class SnapshotControlView
                 continue;
 
             var isMismatch = _modificationCheck.IsInputModified(childKey, inputSlot.Id);
+            var isDraggingThis = _revertDragInputId == inputSlot.Id && _revertDragChildKey == childKey;
+            var highlight = isMismatch || isDraggingThis;
 
             ImGui.PushID(inputSlot.Id.GetHashCode());
 
             // In this view highlighting means "differs from the snapshot", not "non-default"
-            InputArea.DimHighlightOverride = !isMismatch;
+            InputArea.DimHighlightOverride = !highlight;
             var editState = inputUi.DrawParameterEdit(inputSlot, compositionSymbolUi, symbolChildUi, hideNonEssentials: false, skipIfDefault: false);
             InputArea.DimHighlightOverride = null;
 
             ParameterWindow.HandleInputEditState(instance, inputSlot, editState);
 
-            if (isMismatch)
-                DrawRevertButtonOnLastItem(instance, snapshot, childKey, inputSlot);
+            if (highlight)
+                HandleRevertHandle(instance, snapshot, childKey, inputSlot);
 
             ImGui.PopID();
         }
@@ -487,10 +580,15 @@ internal sealed class SnapshotControlView
     }
 
     /// <summary>
-    /// Draws the revert button in the space reserved right of the value edit.
+    /// Revert handle in the space reserved right of the value edit. A plain click reverts the
+    /// parameter to the snapshot value; dragging opens an infinity slider whose factor scales
+    /// the delta (1 = current, 0 = full revert, &gt;1 amplifies away from the snapshot).
     /// </summary>
-    private void DrawRevertButtonOnLastItem(Instance instance, Variation snapshot, Guid childKey, IInputSlot inputSlot)
+    private void HandleRevertHandle(Instance instance, Variation snapshot, Guid childKey, IInputSlot inputSlot)
     {
+        if (instance.Parent == null)
+            return;
+
         var itemMin = ImGui.GetItemRectMin();
         var itemMax = ImGui.GetItemRectMax();
         var buttonSize = ImGui.GetFrameHeight();
@@ -499,15 +597,78 @@ internal sealed class SnapshotControlView
         ImGui.SetCursorScreenPos(new Vector2(itemMax.X + 2 * T3Ui.UiScaleFactor, itemMin.Y));
 
         ImGui.PushStyleColor(ImGuiCol.Button, Color.Transparent.Rgba);
-        var clicked = CustomComponents.IconButton(Icon.Reset, new Vector2(buttonSize, buttonSize), UiColors.ForegroundFull);
+        CustomComponents.IconButton(Icon.Reset, new Vector2(buttonSize, buttonSize), UiColors.ForegroundFull);
         ImGui.PopStyleColor();
-        if (clicked)
+        CustomComponents.TooltipForLastItem("Click to revert, drag to scale the change");
+
+        if (ImGui.IsItemActivated())
         {
-            RevertParameterToSnapshot(instance, snapshot, childKey, inputSlot);
+            _revertDragInputId = inputSlot.Id;
+            _revertDragChildKey = childKey;
+            _revertStartValue = inputSlot.Input.Value.Clone();
+            _revertSnapshotValue = snapshot.ParameterSetsForChildIds.TryGetValue(childKey, out var set)
+                                   && set.TryGetValue(inputSlot.Id, out var stored)
+                                       ? stored.Clone()
+                                       : inputSlot.Input.DefaultValue.Clone();
+            _revertFactor = 1;
+            _revertModified = false;
+            _revertDragCommand = null;
+            _revertSliderStarted = false;
         }
 
-        CustomComponents.TooltipForLastItem("Revert to snapshot value");
+        var isThis = _revertDragInputId == inputSlot.Id && _revertDragChildKey == childKey;
+
+        if (isThis && ImGui.IsItemActive())
+        {
+            var draggedFar = ImGui.GetIO().MouseDragMaxDistanceSqr[0] > UserSettings.Config.ClickThreshold;
+            if (draggedFar
+                && _revertStartValue != null && _revertSnapshotValue != null
+                && ValueUtils.BlendMethods.TryGetValue(inputSlot.Input.Value.ValueType, out var blend))
+            {
+                // Restart on the first slider frame so the factor initializes to 1 rather than
+                // keeping the overlay's stale value from a previous (unrelated) edit.
+                var restarted = !_revertSliderStarted;
+                _revertSliderStarted = true;
+                InfinitySliderOverlay.Draw(ref _revertFactor, restarted, ImGui.GetMousePos(), min: 0, max: 1, scale: 0.05f);
+
+                var blended = blend(_revertSnapshotValue, _revertStartValue, (float)_revertFactor);
+                if (blended != null)
+                {
+                    _revertDragCommand ??= new ChangeInputValueCommand(instance.Parent.Symbol, instance.SymbolChildId,
+                                                                       inputSlot.Input, inputSlot.Input.Value);
+                    _revertDragCommand.AssignNewValue(blended);
+                    inputSlot.DirtyFlag.Invalidate();
+                    _revertModified = true;
+                }
+            }
+        }
+
+        if (isThis && ImGui.IsItemDeactivated())
+        {
+            if (_revertModified && _revertDragCommand != null)
+            {
+                // Dragging back to factor 1 leaves the value unchanged — nothing to record
+                if (Math.Abs(_revertFactor - 1) > 0.0001)
+                    UndoRedoStack.Add(_revertDragCommand);
+            }
+            else
+            {
+                RevertParameterToSnapshot(instance, snapshot, childKey, inputSlot);
+            }
+
+            _revertDragInputId = Guid.Empty;
+            _revertDragChildKey = Guid.Empty;
+            _revertStartValue = null;
+            _revertSnapshotValue = null;
+            _revertDragCommand = null;
+            _revertModified = false;
+            _modificationCheck.Invalidate();
+        }
+
+        // Restoring the cursor with SetCursorScreenPos leaves ImGui's "set-pos" flag pending;
+        // a zero Dummy validates the extent so a following EndGroup (block box) doesn't assert.
         ImGui.SetCursorScreenPos(cursorToRestore);
+        ImGui.Dummy(Vector2.Zero);
     }
 
     private void RevertParameterToSnapshot(Instance instance, Variation snapshot, Guid childKey, IInputSlot inputSlot)
@@ -694,10 +855,27 @@ internal sealed class SnapshotControlView
     private readonly Variation[] _singleVariation = new Variation[1];
     private Guid _pendingStaleRemovalId;
     private Guid _fallbackSnapshotId;
+    private float _blockLeftX;
+    private float _blockRightX;
     private readonly Dictionary<Guid, (string CustomName, string Label)> _opLabelCache = new();
 
     private Guid _lastLabelVariationId = Guid.NewGuid(); // force initial label update
     private string? _lastLabelTitle;
     private string _indexLabel = "-";
     private string _selectedSnapshotLabel = "Select snapshot...";
+
+    // Inline snapshot rename (selector bar)
+    private Guid _renamingSnapshotId;
+    private bool _renameJustStarted;
+    private string _renameBuffer = "";
+
+    // Per-row revert drag (infinity slider scaling the delta to the snapshot)
+    private Guid _revertDragInputId;
+    private Guid _revertDragChildKey;
+    private InputValue? _revertStartValue;
+    private InputValue? _revertSnapshotValue;
+    private ChangeInputValueCommand? _revertDragCommand;
+    private double _revertFactor;
+    private bool _revertSliderStarted;
+    private bool _revertModified;
 }

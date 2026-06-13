@@ -75,6 +75,15 @@ internal sealed class ParameterWindow : Window
                 && VariationHandling.ActivePoolForSnapshots != null
                 && !SkillTraining.IsInPlayMode)
             {
+                // Show the active composition's header (name/namespace) too, so entering an
+                // operator doesn't require a background click to reveal it.
+                var composition = ProjectView.Focused?.CompositionInstance;
+                if (composition != null)
+                {
+                    if (DrawSymbolHeader(composition, composition.GetSymbolUi()))
+                        composition.GetSymbolUi().FlagAsModified();
+                }
+
                 _snapshotControlView.Draw();
             }
 
