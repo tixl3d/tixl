@@ -157,7 +157,7 @@ internal sealed class SnapshotControlView
             if (CustomComponents.EmptyWindowMessage("No snapshots yet.\nSnapshots capture the parameters of all\noperators enabled for snapshots.",
                                                     "Create snapshot"))
             {
-                CreateAndRenameSnapshot(pool);
+                CreateAndRenameSnapshot(pool, composition);
             }
 
             return;
@@ -260,6 +260,12 @@ internal sealed class SnapshotControlView
                 }
 
                 ImGui.InputText("##renameSnapshot", ref _renameBuffer, 256);
+                if (ImGui.IsItemActive() || ImGui.IsItemFocused())
+                {
+                    ImGui.GetWindowDrawList().AddRect(ImGui.GetItemRectMin(), ImGui.GetItemRectMax(),
+                                                      UiColors.StatusActivated, 4 * T3Ui.UiScaleFactor);
+                }
+
                 if (ImGui.IsItemDeactivated())
                 {
                     selectedSnapshot!.Title = string.IsNullOrWhiteSpace(_renameBuffer) ? null : _renameBuffer;
@@ -321,7 +327,7 @@ internal sealed class SnapshotControlView
             ImGui.SameLine(0, spacing + addButtonGap);
             var canCreate = selectedSnapshot == null || isModified;
             if (DrawBarButton(Icon.Plus, canCreate, "Create new snapshot from current values"))
-                CreateAndRenameSnapshot(pool);
+                CreateAndRenameSnapshot(pool, composition);
         }
         ImGui.EndChild();
         ImGui.PopStyleVar();
@@ -412,13 +418,14 @@ internal sealed class SnapshotControlView
         _renameFocusFramesLeft = 2;
     }
 
-    private void CreateAndRenameSnapshot(SymbolVariationPool pool)
+    private void CreateAndRenameSnapshot(SymbolVariationPool pool, Instance composition)
     {
+        // CreateOrUpdateSnapshotVariation already makes the new snapshot active.
         var newVariation = VariationHandling.CreateOrUpdateSnapshotVariation();
         if (newVariation != null)
         {
-            pool.SetActiveVariationWithoutApply(newVariation);
             StartRenaming(newVariation);
+            VariationThumbnailRenderer.RequestRender(pool, composition, newVariation.Id, toFile: true);
         }
 
         _modificationCheck.Invalidate();

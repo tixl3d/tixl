@@ -87,6 +87,10 @@ internal static class VariationHandling
         }
 
         BlendActions.SmoothVariationBlending.UpdateBlend();
+
+        // Frame-driven, window-independent: lets callers (e.g. the snapshot control view) render
+        // thumbnails without the Variations window being open.
+        VariationThumbnailRenderer.Update();
     }
 
     public static SymbolVariationPool GetOrLoadVariations(Guid symbolId)
@@ -133,7 +137,9 @@ internal static class VariationHandling
         if (activationIndex != AutoIndex)
             newVariation.ActivationIndex = activationIndex;
 
-        newVariation.State = Variation.States.Active;
+        // Make the new snapshot the active one so every view (Variations window + control view)
+        // agrees. The values already equal the current state, so no apply command is needed.
+        ActivePoolForSnapshots.SetActiveVariationWithoutApply(newVariation);
         ActivePoolForSnapshots.SaveVariationsToFile();
         return newVariation;
     }

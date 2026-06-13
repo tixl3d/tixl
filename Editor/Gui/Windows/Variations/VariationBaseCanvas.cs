@@ -8,6 +8,7 @@ using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Keyboard;
+using T3.Editor.Gui.Interaction.Variations;
 using T3.Editor.Gui.Interaction.Variations.Model;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
@@ -507,7 +508,6 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
         _rerenderToFileRequested = true;
         _rerenderRequested = true;
     }
-    
 
     protected void ResetView(bool hideHeader = false)
     {
@@ -696,6 +696,9 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
         PoolForBlendOperations.BeginHover(instanceForBlending, variation);
         textureOutputSlot.DirtyFlag.ForceInvalidate();
         textureOutputSlot.Update(_imageContext);
+
+        // Let the standalone renderer stand aside while we drive the pinned output.
+        VariationThumbnailRenderer.NotifyCanvasRendered();
 
         _pendingThumbnailVariation = variation;
         _thumbnailCaptureDelayFrames = ThumbnailCaptureDelayInFrames;
