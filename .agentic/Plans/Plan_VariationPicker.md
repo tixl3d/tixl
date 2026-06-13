@@ -84,7 +84,12 @@ Replace `ImGui.BeginCombo` for snapshots with `VariationPicker(pool, instance)` 
    closed. Decision (2026-06-13): leave as-is, documented via the canvas-toggle tooltip. If it
    becomes annoying, the clean fix is a picker-drawn thumbnail grid with hover preview through
    `pool.BeginHover` (no second canvas, no shared state) — preferred over refactoring `DrawBaseCanvas`.
-3. **Drag-to-reorder.** List drag repositions `PosOnCanvas` (undoable); shared with canvas order.
+3. **Drag-to-reorder.** ✅ **Done (2026-06-14).** Whole-row drag swaps the dragged variation's
+   `PosOnCanvas` with its neighbor as the mouse crosses each row (classic ImGui swap-on-drag),
+   committed once on release as a `ModifyCanvasElementsCommand` (undoable) + `SaveVariationsToFile`.
+   A grip is drawn in a reserved left strip on the highlighted row. Enabled only when the picker
+   has a canvas (the move's selection container) and the search is empty; a drag suppresses the
+   row's click-to-apply. Shares order with the canvas since both read `PosOnCanvas`.
 4. **Activation faders.** Per-row blend-toward-variation infinity-slider gesture, bake-on-release
    as one undoable command; negative-subtract with attention fill; sequential mixing.
 5. **Preset reuse.** Mount the same `VariationPicker` as a preset chip next to the instance title

@@ -140,6 +140,19 @@ In the Graph window:
   mouse moves it only when the mouse itself moves); Enter or a click applies
   the highlighted/clicked snapshot and closes the popup.
 
+## Step: Reordering snapshots in the picker
+
+**Action:**
+With the picker open in list mode and the search field empty, drag a row up or
+down by a few rows.
+
+**Expected:**
+- A grip appears on the highlighted row; dragging swaps the snapshot past its
+  neighbours, and the order also updates in the Variations window grid (both
+  follow canvas position).
+- Releasing keeps the new order (undoable with `Ctrl+Z`); a plain click without
+  dragging still just applies the snapshot.
+
 ## Step: Picker hover preview and canvas mode
 
 **Action:**

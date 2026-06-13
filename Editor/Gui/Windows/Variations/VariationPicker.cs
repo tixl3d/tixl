@@ -7,6 +7,9 @@ using T3.Editor.Gui.Interaction.Variations.Model;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.UiHelpers.Thumbnails;
+using T3.Editor.UiModel.Commands;
+using T3.Editor.UiModel.Commands.Graph;
+using T3.Editor.UiModel.Selection;
 
 namespace T3.Editor.Gui.Windows.Variations;
 
@@ -151,7 +154,7 @@ internal sealed class VariationPicker
             }
             else
             {
-                chosen = DrawList(composition, selected);
+                chosen = DrawList(composition, pool, selected, canvas);
             }
 
             // Hover preview: while enabled in list mode, apply the highlighted variation to the
@@ -186,10 +189,14 @@ internal sealed class VariationPicker
         return chosen;
     }
 
-    private Variation? DrawList(Instance composition, Variation? selected)
+    private Variation? DrawList(Instance composition, SymbolVariationPool pool, Variation? selected, VariationBaseCanvas? canvas)
     {
         Variation? chosen = null;
         var scale = T3Ui.UiScaleFactor;
+
+        // Drag-to-reorder writes variation PosOnCanvas, so it needs the canvas (as the selection
+        // container for the undoable move) and an unfiltered list.
+        var reorderEnabled = canvas != null && string.IsNullOrEmpty(_searchString) && _filtered.Count > 1;
 
         // Keyboard navigation — single-line search input leaves the arrows/Enter free.
         var scrollToHighlight = false;
@@ -228,7 +235,10 @@ internal sealed class VariationPicker
         {
             var variation = _filtered[i];
             var highlighted = i == _highlightIndex;
-            if (DrawRow(composition, variation, variation == selected, highlighted))
+            var clicked = DrawRow(composition, variation, variation == selected, highlighted, reorderEnabled);
+            var draggedToReorder = reorderEnabled && HandleRowReorder(i, canvas!, pool);
+
+            if (clicked && !draggedToReorder)
             {
                 chosen = variation;
                 ImGui.CloseCurrentPopup();
@@ -248,6 +258,72 @@ internal sealed class VariationPicker
             _highlightIndex = hoveredIndex;
 
         return chosen;
+    }
+
+    /// <summary>
+    /// Whole-row drag reorder: swaps the dragged variation's canvas position with its neighbor as
+    /// the mouse crosses each row (the classic ImGui swap-on-drag), committed as one undoable
+    /// <see cref="ModifyCanvasElementsCommand"/> on release. Returns true while a drag is in
+    /// progress / just ended, so the caller suppresses the click-to-apply.
+    /// </summary>
+    private bool HandleRowReorder(int index, VariationBaseCanvas canvas, SymbolVariationPool pool)
+    {
+        var variation = _filtered[index];
+
+        if (ImGui.IsItemActivated())
+        {
+            _reorderId = variation.Id;
+            _reorderDragged = false;
+            _reorderVariations.Clear();
+            foreach (var v in _sorted)
+                _reorderVariations.Add(v);
+
+            _reorderCommand = new ModifyCanvasElementsCommand(canvas, _reorderVariations, canvas.CanvasElementSelection);
+        }
+
+        if (_reorderId != variation.Id)
+            return false;
+
+        if (ImGui.IsItemActive())
+        {
+            var rowStride = (RowHeight + RowSpacing) * T3Ui.UiScaleFactor;
+            var dragY = ImGui.GetMouseDragDelta(ImGuiMouseButton.Left).Y;
+            if (dragY < -rowStride * 0.5f && index > 0)
+            {
+                SwapPositions(variation, _filtered[index - 1]);
+                ImGui.ResetMouseDragDelta(ImGuiMouseButton.Left);
+                _reorderDragged = true;
+            }
+            else if (dragY > rowStride * 0.5f && index < _filtered.Count - 1)
+            {
+                SwapPositions(variation, _filtered[index + 1]);
+                ImGui.ResetMouseDragDelta(ImGuiMouseButton.Left);
+                _reorderDragged = true;
+            }
+        }
+
+        if (ImGui.IsMouseReleased(ImGuiMouseButton.Left))
+        {
+            var dragged = _reorderDragged;
+            if (dragged && _reorderCommand != null)
+            {
+                _reorderCommand.StoreCurrentValues();
+                UndoRedoStack.Add(_reorderCommand);
+                pool.SaveVariationsToFile();
+            }
+
+            _reorderId = Guid.Empty;
+            _reorderCommand = null;
+            _reorderDragged = false;
+            return dragged;
+        }
+
+        return _reorderDragged;
+    }
+
+    private static void SwapPositions(Variation a, Variation b)
+    {
+        (a.PosOnCanvas, b.PosOnCanvas) = (b.PosOnCanvas, a.PosOnCanvas);
     }
 
     private static bool DrawTriggerButton(string label, float width, float frameHeight)
@@ -275,7 +351,7 @@ internal sealed class VariationPicker
         return clicked;
     }
 
-    private bool DrawRow(Instance composition, Variation variation, bool isSelected, bool isHighlighted)
+    private bool DrawRow(Instance composition, Variation variation, bool isSelected, bool isHighlighted, bool reorderEnabled)
     {
         var scale = T3Ui.UiScaleFactor;
         var rowHeight = RowHeight * scale;
@@ -291,9 +367,18 @@ internal sealed class VariationPicker
         else if (isHighlighted)
             drawList.AddRectFilled(min, max, UiColors.BackgroundActive.Fade(0.2f), 4 * scale);
 
+        // Reserve a left strip for the drag-reorder grip (drawn for the highlighted row).
+        var leftInset = reorderEnabled ? Icons.FontSize + 4 * scale : 2 * scale;
+        if (reorderEnabled)
+        {
+            var gripColor = isHighlighted ? UiColors.TextMuted : UiColors.TextMuted.Fade(0.3f);
+            var gripPos = new Vector2(min.X + 2 * scale, (min.Y + max.Y) / 2 - Icons.FontSize / 2).Floor();
+            Icons.DrawIconAtScreenPosition(Icon.DragIndicator, gripPos, drawList, gripColor);
+        }
+
         // Thumbnail: a rounded border with the image inset 1px so the outline doesn't overlap it.
         var rounding = 2 * scale;
-        var borderMin = new Vector2(min.X + 2 * scale, min.Y + 2 * scale);
+        var borderMin = new Vector2(min.X + leftInset, min.Y + 2 * scale);
         var borderMax = new Vector2(borderMin.X + thumbWidth, max.Y - 2 * scale);
         var imageMin = borderMin + new Vector2(1 * scale);
         var imageMax = borderMax - new Vector2(1 * scale);
@@ -380,4 +465,10 @@ internal sealed class VariationPicker
     private float _popupWidth = 220;
     private Modes _mode = Modes.List;
     private Guid _previewedVariationId;
+
+    // Drag-to-reorder state
+    private Guid _reorderId;
+    private bool _reorderDragged;
+    private ModifyCanvasElementsCommand? _reorderCommand;
+    private readonly List<ISelectableCanvasObject> _reorderVariations = new();
 }
