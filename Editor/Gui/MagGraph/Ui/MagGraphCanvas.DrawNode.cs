@@ -570,7 +570,7 @@ internal sealed partial class MagGraphView
             {
                 if (item.ChildUi.EnabledForSnapshots && !SkillTraining.IsInPlayMode)
                 {
-                    DrawIndicator(drawList, UiColors.StatusAutomated, idleFadeFactor, pMin, pMax, CanvasScale, ref indicatorCount, "enabled for snapshot");
+                    DrawIndicator(drawList, UiColors.StatusControlled, idleFadeFactor, pMin, pMax, CanvasScale, ref indicatorCount, "enabled for snapshot");
                 }
             }
 

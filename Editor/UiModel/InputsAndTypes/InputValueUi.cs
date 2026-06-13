@@ -790,7 +790,7 @@ internal static class InputArea
         }
         else if (symbolChildUi.IsInputEnabledForSnapshots(input.InputDefinition.Id))
         {
-            Icons.DrawIconOnLastItem(Icon.Knob, UiColors.StatusAutomated);
+            Icons.DrawIconOnLastItem(Icon.Knob, UiColors.StatusControlled);
         }
         else
         {
@@ -924,7 +924,7 @@ internal static class InputArea
 
         if (symbolChildUi.IsInputEnabledForSnapshots(inputSlot.Id))
         {
-            Icons.DrawIconOnLastItem(Icon.Knob, UiColors.StatusAutomated.Rgba);
+            Icons.DrawIconOnLastItem(Icon.Knob, UiColors.StatusControlled.Rgba);
         }
         else
         {

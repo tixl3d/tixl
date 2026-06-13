@@ -212,7 +212,7 @@ internal sealed class MarkdownView
         }
         else if ((fragment.Style & RunStyle.Link) != 0)
         {
-            ImGui.PushStyleColor(ImGuiCol.Text, UiColors.StatusAutomated.Rgba);
+            ImGui.PushStyleColor(ImGuiCol.Text, UiColors.StatusActivated.Rgba);
             colorPushed = true;
         }
         else if ((fragment.Style & RunStyle.OpRef) != 0)

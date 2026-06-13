@@ -391,9 +391,9 @@ internal sealed class ParameterWindow : Window
     {
         return new Dictionary<SymbolUi.SymbolTags, Color>
                    {
-                       { SymbolUi.SymbolTags.Essential, UiColors.StatusAutomated },
-                       { SymbolUi.SymbolTags.Example, UiColors.StatusAutomated },
-                       { SymbolUi.SymbolTags.Project, UiColors.StatusAutomated },
+                       { SymbolUi.SymbolTags.Essential, UiColors.StatusActivated },
+                       { SymbolUi.SymbolTags.Example, UiColors.StatusActivated },
+                       { SymbolUi.SymbolTags.Project, UiColors.StatusActivated },
                        { SymbolUi.SymbolTags.Obsolete, UiColors.StatusAttention },
                        { SymbolUi.SymbolTags.NeedsFix, UiColors.StatusAttention },
                        { SymbolUi.SymbolTags.HasUpdate, UiColors.StatusAttention },

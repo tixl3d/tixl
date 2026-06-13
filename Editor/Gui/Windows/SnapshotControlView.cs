@@ -285,7 +285,8 @@ internal sealed class SnapshotControlView
                         var label = string.IsNullOrEmpty(snapshot.Title) || snapshot.Title == "untitled"
                                         ? "Untitled"
                                         : snapshot.Title;
-                        if (ImGui.Selectable(label, isSelected))
+                        // Suffix the id so identical titles don't collide (## keeps the visible text)
+                        if (ImGui.Selectable($"{label}##{snapshot.Id}", isSelected))
                         {
                             ApplySnapshot(pool, composition, snapshot);
                         }
@@ -360,8 +361,12 @@ internal sealed class SnapshotControlView
     /// </summary>
     private void DrawBarRevertButton(SymbolVariationPool pool, Instance composition, Variation? snapshot, bool canRevert)
     {
-        CustomComponents.IconButton(Icon.Reset, Vector2.Zero,
-                                    canRevert ? CustomComponents.ButtonStates.Emphasized : CustomComponents.ButtonStates.Disabled);
+        var barRevertState = _barRevertActive
+                                 ? CustomComponents.ButtonStates.Activated
+                                 : canRevert
+                                     ? CustomComponents.ButtonStates.Emphasized
+                                     : CustomComponents.ButtonStates.Disabled;
+        CustomComponents.IconButton(Icon.Reset, Vector2.Zero, barRevertState);
         CustomComponents.TooltipForLastItem("Click to revert, drag to scale the snapshot");
 
         if (snapshot == null)
@@ -520,7 +525,8 @@ internal sealed class SnapshotControlView
         ImGui.EndGroup();
 
         var drawList = ImGui.GetWindowDrawList();
-        var pad = new Vector2(0, 3) * T3Ui.UiScaleFactor;
+        // 1px around the content; with the 5px between blocks below this leaves a ~3px gap.
+        var pad = new Vector2(0, 1) * T3Ui.UiScaleFactor;
         var min = new Vector2(_blockLeftX, ImGui.GetItemRectMin().Y - pad.Y);
         var max = new Vector2(_blockRightX, ImGui.GetItemRectMax().Y + pad.Y);
 
@@ -571,6 +577,7 @@ internal sealed class SnapshotControlView
         ImGui.PushStyleColor(ImGuiCol.HeaderHovered, Color.Transparent.Rgba);
         ImGui.PushStyleColor(ImGuiCol.HeaderActive, Color.Transparent.Rgba);
         ImGui.AlignTextToFramePadding();
+        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + 2 * T3Ui.UiScaleFactor);
         nameClicked = ImGui.Selectable(label);
         ImGui.PopStyleColor(3);
         ImGui.PopFont();
@@ -580,6 +587,9 @@ internal sealed class SnapshotControlView
 
         ImGui.PopID();
         ImGui.PopStyleVar();
+
+        // Small gap between the header label and the parameter rows
+        FormInputs.AddVerticalSpace(1);
     }
 
     /// <summary>
@@ -658,7 +668,12 @@ internal sealed class SnapshotControlView
         var cursorToRestore = ImGui.GetCursorScreenPos();
         ImGui.SetCursorScreenPos(new Vector2(itemMax.X + 2 * T3Ui.UiScaleFactor, itemMin.Y));
 
-        CustomComponents.IconButton(Icon.Reset, new Vector2(buttonSize, buttonSize), UiColors.ForegroundFull);
+        var isDraggingThis = _revertDragInputId == inputSlot.Id && _revertDragChildKey == childKey;
+        if (isDraggingThis)
+            CustomComponents.IconButton(Icon.Reset, new Vector2(buttonSize, buttonSize), CustomComponents.ButtonStates.Activated);
+        else
+            CustomComponents.IconButton(Icon.Reset, new Vector2(buttonSize, buttonSize), UiColors.ForegroundFull);
+
         CustomComponents.TooltipForLastItem("Click to revert, drag to scale the change");
 
         if (ImGui.IsItemActivated())
