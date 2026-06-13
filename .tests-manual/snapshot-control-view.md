@@ -127,13 +127,30 @@ In the Graph window:
 - The index indicator and dropdown label follow the active snapshot.
 - The active thumbnail highlight in the Variations window follows along.
 
-## Step: Selecting a snapshot from the dropdown
+## Step: Selecting a snapshot from the picker
 
 **Action:**
 1. Open the snapshot dropdown in the selector bar and pick the other snapshot.
 
 **Expected:**
-- The chosen snapshot is applied; parameter rows update to its values.
+- The picker opens as a popup with a focused search field and a list of
+  snapshots, each showing a thumbnail, its index, and title, ordered to match
+  the Variations window grid (top-left first).
+- Typing filters the list by title; arrow keys move a single highlight (the
+  mouse moves it only when the mouse itself moves); Enter or a click applies
+  the highlighted/clicked snapshot and closes the popup.
+
+## Step: Picker hover preview and canvas mode
+
+**Action:**
+With the picker open, toggle the hover-preview icon (top-right) on and move the
+highlight over different snapshots. Then toggle the canvas icon.
+
+**Expected:**
+- With hover preview on, the output previews the highlighted snapshot; closing
+  the popup without picking restores the previous state.
+- The canvas toggle switches the popup to the embedded snapshot canvas; the
+  list toggle returns to the list.
 
 ## Step: Hover highlight between view and graph
 

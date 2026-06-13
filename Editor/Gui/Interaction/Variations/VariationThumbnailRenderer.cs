@@ -99,7 +99,9 @@ internal static class VariationThumbnailRenderer
         outputSlot.Update(_context);
 
         var category = request.ToFile ? ThumbnailManager.Categories.PackageMeta : ThumbnailManager.Categories.Temp;
-        ThumbnailManager.SaveThumbnail(request.VariationId, request.Instance.Symbol.SymbolPackage, outputSlot.Value, category, saveToFile: request.ToFile);
+        // Cover (crop) rather than letterbox — the 16:9 output otherwise leaves bars in the 4:3 slot.
+        ThumbnailManager.SaveThumbnail(request.VariationId, request.Instance.Symbol.SymbolPackage, outputSlot.Value, category,
+                                       saveToFile: request.ToFile, cover: true);
 
         request.Pool.StopHover();
     }

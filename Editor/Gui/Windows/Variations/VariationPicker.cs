@@ -5,6 +5,7 @@ using T3.Core.Operator;
 using T3.Core.Utils;
 using T3.Editor.Gui.Interaction.Variations.Model;
 using T3.Editor.Gui.Styling;
+using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.UiHelpers.Thumbnails;
 
 namespace T3.Editor.Gui.Windows.Variations;
@@ -21,7 +22,8 @@ internal sealed class VariationPicker
     /// Draws a combo-style trigger showing <paramref name="label"/>; opens a popup listing
     /// <paramref name="variations"/> in canvas order. Returns the chosen variation, or null.
     /// </summary>
-    public Variation? Draw(IReadOnlyList<Variation> variations, Instance composition, Variation? selected, string label, float width)
+    public Variation? Draw(IReadOnlyList<Variation> variations, SymbolVariationPool pool, Instance composition,
+                           Variation? selected, string label, float width, VariationBaseCanvas? canvas = null)
     {
         Variation? chosen = null;
         var scale = T3Ui.UiScaleFactor;
@@ -35,20 +37,60 @@ internal sealed class VariationPicker
             ImGui.OpenPopup(PopupId);
             _searchString = string.Empty;
             _justOpened = true;
-            _popupWidth = MathF.Max(width, 220 * scale);
+            _initHighlight = true;
         }
 
-        // Align the popup just below the trigger, like a combo dropdown.
-        ImGui.SetNextWindowPos(new Vector2(triggerMin.X, triggerMax.Y + 2 * scale));
+        // Wider than the trigger, but still left-aligned to it.
+        _popupWidth = MathF.Max(width, 320 * scale);
 
-        // Fix the width via constraints and let height auto-fit; the list child below gets an
-        // explicit height so the popup doesn't enter a shrink-by-1px-per-frame feedback loop.
+        // Estimate the popup height so it can be kept on-screen.
+        float contentHeight;
+        if (_mode == Modes.Canvas && canvas != null)
+        {
+            contentHeight = CanvasHeight * scale;
+        }
+        else
+        {
+            var rowStride = RowHeight * scale + RowSpacing * scale;
+            var matchCount = 0;
+            foreach (var v in variations)
+            {
+                if (Matches(v, _searchString))
+                    matchCount++;
+            }
+
+            contentHeight = MathF.Min(matchCount * rowStride, MaxListHeight * scale);
+        }
+
+        var estHeight = 12 * scale + frameHeight + 10 * scale + contentHeight; // padding + search row + separator + content
+
+        // Drop below the trigger; shift left / flip above to stay within the viewport's work area.
+        var viewport = ImGui.GetMainViewport();
+        var workMin = viewport.WorkPos;
+        var workMax = viewport.WorkPos + viewport.WorkSize;
+        var popupPos = new Vector2(triggerMin.X, triggerMax.Y + 2 * scale);
+        if (popupPos.X + _popupWidth > workMax.X)
+            popupPos.X = workMax.X - _popupWidth;
+        popupPos.X = MathF.Max(popupPos.X, workMin.X);
+        if (popupPos.Y + estHeight > workMax.Y)
+        {
+            var above = triggerMin.Y - 2 * scale - estHeight;
+            popupPos.Y = above >= workMin.Y ? above : MathF.Max(workMin.Y, workMax.Y - estHeight);
+        }
+
+        ImGui.SetNextWindowPos(popupPos);
         ImGui.SetNextWindowSizeConstraints(new Vector2(_popupWidth, 0), new Vector2(_popupWidth, 800 * scale));
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(6, 6) * scale);
         ImGui.PushStyleColor(ImGuiCol.PopupBg, UiColors.BackgroundFull.Rgba);
+
         if (ImGui.BeginPopup(PopupId))
         {
-            ImGui.SetNextItemWidth(-1);
+            var hasCanvas = canvas != null;
+
+            // Top row: search + view-mode toggles + hover-preview toggle.
+            var toolCount = hasCanvas ? 3 : 2;
+            var toolsWidth = toolCount * (frameHeight + ImGui.GetStyle().ItemSpacing.X);
+            ImGui.SetNextItemWidth(MathF.Max(40 * scale, ImGui.GetContentRegionAvail().X - toolsWidth));
             if (_justOpened)
             {
                 ImGui.SetKeyboardFocusHere();
@@ -58,12 +100,32 @@ internal sealed class VariationPicker
             var searchBefore = _searchString;
             ImGui.InputTextWithHint("##variationSearch", "Search…", ref _searchString, 128);
 
-            // Padding + a faint divider between the search field and the list.
+            ImGui.SameLine();
+            if (CustomComponents.IconButton(Icon.ViewList, Vector2.Zero,
+                                            _mode == Modes.List ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Default))
+                _mode = Modes.List;
+            CustomComponents.TooltipForLastItem("List");
+
+            if (hasCanvas)
+            {
+                ImGui.SameLine();
+                if (CustomComponents.IconButton(Icon.ViewGrid, Vector2.Zero,
+                                                _mode == Modes.Canvas ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Default))
+                    _mode = Modes.Canvas;
+                // The embedded canvas shares the pinned output with the Variations window; its live
+                // preview only updates while that window is closed.
+                CustomComponents.TooltipForLastItem("Canvas view (live preview needs the Variations window closed)");
+            }
+
+            ImGui.SameLine();
+            var hoverPreview = UserSettings.Config.VariationHoverPreview;
+            if (CustomComponents.ToggleIconButton(ref hoverPreview, Icon.HoverScrub, Vector2.Zero))
+                UserSettings.Config.VariationHoverPreview = hoverPreview;
+            CustomComponents.TooltipForLastItem("Preview on hover");
+
             CustomComponents.SeparatorLine();
 
             SortByCanvasPosition(variations);
-
-            // Rebuild the filtered list (also gives us indices for keyboard navigation).
             _filtered.Clear();
             foreach (var v in _sorted)
             {
@@ -74,55 +136,117 @@ internal sealed class VariationPicker
             if (_searchString != searchBefore)
                 _highlightIndex = 0;
 
-            // Keyboard navigation — single-line search input leaves the arrows/Enter free.
-            var scrollToHighlight = false;
-            if (_filtered.Count > 0)
+            if (_initHighlight)
             {
-                if (ImGui.IsKeyPressed(ImGuiKey.DownArrow))
-                {
-                    _highlightIndex = Math.Min(_highlightIndex + 1, _filtered.Count - 1);
-                    scrollToHighlight = true;
-                }
-                else if (ImGui.IsKeyPressed(ImGuiKey.UpArrow))
-                {
-                    _highlightIndex = Math.Max(_highlightIndex - 1, 0);
-                    scrollToHighlight = true;
-                }
-
-                _highlightIndex = Math.Clamp(_highlightIndex, 0, _filtered.Count - 1);
-
-                if (ImGui.IsKeyPressed(ImGuiKey.Enter) || ImGui.IsKeyPressed(ImGuiKey.KeypadEnter))
-                {
-                    chosen = _filtered[_highlightIndex];
-                    ImGui.CloseCurrentPopup();
-                }
+                _highlightIndex = Math.Max(0, _filtered.IndexOf(selected!));
+                _initHighlight = false;
             }
 
-            var listHeight = MathF.Min(_filtered.Count * (RowHeight * scale + RowSpacing * scale), MaxListHeight * scale);
-
-            ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(0, RowSpacing * scale));
-            ImGui.BeginChild("##variationList", new Vector2(0, listHeight), ImGuiChildFlags.None, ImGuiWindowFlags.NoBackground);
-            for (var i = 0; i < _filtered.Count; i++)
+            var inCanvasMode = hasCanvas && _mode == Modes.Canvas;
+            if (inCanvasMode)
             {
-                var variation = _filtered[i];
-                var highlighted = i == _highlightIndex;
-                if (DrawRow(composition, variation, variation == selected, highlighted))
-                {
-                    chosen = variation;
-                    ImGui.CloseCurrentPopup();
-                }
-
-                if (highlighted && scrollToHighlight)
-                    ImGui.SetScrollHereY();
+                ImGui.BeginChild("##variationCanvas", new Vector2(0, CanvasHeight * scale));
+                canvas!.DrawBaseCanvas(ImGui.GetWindowDrawList(), hideHeader: true);
+                ImGui.EndChild();
+            }
+            else
+            {
+                chosen = DrawList(composition, selected);
             }
 
-            ImGui.EndChild();
-            ImGui.PopStyleVar();
+            // Hover preview: while enabled in list mode, apply the highlighted variation to the
+            // output (restoring on change/close) — the same transient mechanism as the Variations
+            // window. The canvas drives its own preview, so skip there.
+            if (UserSettings.Config.VariationHoverPreview && !inCanvasMode && _filtered.Count > 0)
+            {
+                var toPreview = _filtered[Math.Clamp(_highlightIndex, 0, _filtered.Count - 1)];
+                if (toPreview.Id != _previewedVariationId)
+                {
+                    pool.BeginHover(composition, toPreview);
+                    _previewedVariationId = toPreview.Id;
+                }
+            }
+            else if (_previewedVariationId != Guid.Empty)
+            {
+                pool.StopHover();
+                _previewedVariationId = Guid.Empty;
+            }
+
             ImGui.EndPopup();
+        }
+        else if (_previewedVariationId != Guid.Empty)
+        {
+            // Popup closed — drop any lingering hover preview.
+            pool.StopHover();
+            _previewedVariationId = Guid.Empty;
         }
 
         ImGui.PopStyleColor();
         ImGui.PopStyleVar();
+        return chosen;
+    }
+
+    private Variation? DrawList(Instance composition, Variation? selected)
+    {
+        Variation? chosen = null;
+        var scale = T3Ui.UiScaleFactor;
+
+        // Keyboard navigation — single-line search input leaves the arrows/Enter free.
+        var scrollToHighlight = false;
+        if (_filtered.Count > 0)
+        {
+            if (ImGui.IsKeyPressed(ImGuiKey.DownArrow))
+            {
+                _highlightIndex = Math.Min(_highlightIndex + 1, _filtered.Count - 1);
+                scrollToHighlight = true;
+            }
+            else if (ImGui.IsKeyPressed(ImGuiKey.UpArrow))
+            {
+                _highlightIndex = Math.Max(_highlightIndex - 1, 0);
+                scrollToHighlight = true;
+            }
+
+            _highlightIndex = Math.Clamp(_highlightIndex, 0, _filtered.Count - 1);
+
+            if (ImGui.IsKeyPressed(ImGuiKey.Enter) || ImGui.IsKeyPressed(ImGuiKey.KeypadEnter))
+            {
+                chosen = _filtered[_highlightIndex];
+                ImGui.CloseCurrentPopup();
+            }
+        }
+
+        var listHeight = MathF.Min(_filtered.Count * (RowHeight * scale + RowSpacing * scale), MaxListHeight * scale);
+
+        // One highlight, driven by the keyboard. The mouse only moves it when the mouse actually
+        // moves — so a stationary pointer never locks out arrow-key navigation.
+        var mouseMoved = ImGui.GetIO().MouseDelta.LengthSquared() > 0;
+        var hoveredIndex = -1;
+
+        ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(0, RowSpacing * scale));
+        ImGui.BeginChild("##variationList", new Vector2(0, listHeight), ImGuiChildFlags.None, ImGuiWindowFlags.NoBackground);
+        for (var i = 0; i < _filtered.Count; i++)
+        {
+            var variation = _filtered[i];
+            var highlighted = i == _highlightIndex;
+            if (DrawRow(composition, variation, variation == selected, highlighted))
+            {
+                chosen = variation;
+                ImGui.CloseCurrentPopup();
+            }
+
+            if (ImGui.IsItemHovered())
+                hoveredIndex = i;
+
+            if (highlighted && scrollToHighlight)
+                ImGui.SetScrollHereY();
+        }
+
+        ImGui.EndChild();
+        ImGui.PopStyleVar();
+
+        if (mouseMoved && hoveredIndex >= 0)
+            _highlightIndex = hoveredIndex;
+
         return chosen;
     }
 
@@ -164,7 +288,7 @@ internal sealed class VariationPicker
 
         if (isSelected)
             drawList.AddRectFilled(min, max, UiColors.BackgroundActive.Fade(0.4f), 4 * scale);
-        else if (isHighlighted || ImGui.IsItemHovered())
+        else if (isHighlighted)
             drawList.AddRectFilled(min, max, UiColors.BackgroundActive.Fade(0.2f), 4 * scale);
 
         // Thumbnail: a rounded border with the image inset 1px so the outline doesn't overlap it.
@@ -239,15 +363,21 @@ internal sealed class VariationPicker
                      });
     }
 
+    private enum Modes { List, Canvas }
+
     private const string PopupId = "##variationPickerPopup";
     private const float RowHeight = 40;
     private const float RowSpacing = 2;
     private const float MaxListHeight = 360;
+    private const float CanvasHeight = 300;
 
     private readonly List<Variation> _sorted = new();
     private readonly List<Variation> _filtered = new();
     private int _highlightIndex;
     private string _searchString = string.Empty;
     private bool _justOpened;
+    private bool _initHighlight;
     private float _popupWidth = 220;
+    private Modes _mode = Modes.List;
+    private Guid _previewedVariationId;
 }

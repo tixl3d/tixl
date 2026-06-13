@@ -290,7 +290,8 @@ internal sealed class SnapshotControlView
             }
             else
             {
-                var chosen = _picker.Draw(_snapshots, composition, selectedSnapshot, _selectedSnapshotLabel, dropdownWidth);
+                var chosen = _picker.Draw(_snapshots, pool, composition, selectedSnapshot, _selectedSnapshotLabel, dropdownWidth,
+                                          canvas: _snapshotCanvas);
                 if (chosen != null)
                     ApplySnapshot(pool, composition, chosen);
             }
@@ -945,6 +946,7 @@ internal sealed class SnapshotControlView
 
     private readonly ModificationCheck _modificationCheck = new();
     private readonly VariationPicker _picker = new();
+    private readonly SnapshotCanvas _snapshotCanvas = new();
     private readonly List<Variation> _snapshots = new();
     private readonly List<OpEntry> _opEntries = new();
     private readonly List<Guid> _staleChildIds = new();

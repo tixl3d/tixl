@@ -2,7 +2,7 @@
 
 A new state of the Parameter window that appears when no child op is selected (the composition itself is active): a detailed control surface for snapshot-affected parameters. Complements the Variations window thumbnails, which stay the visual/blending interface; this view is the precise, per-parameter one.
 
-Related: [`Plan_Sections.md`](Plan_Sections.md) provides the grouping structure (section tree) consumed in Phase C. Phases A and B do **not** depend on it.
+Related: [`Plan_Sections.md`](Plan_Sections.md) provides the grouping structure (section tree) consumed in Phase C. Phases A and B do **not** depend on it. [`Plan_VariationPicker.md`](Plan_VariationPicker.md) replaces the selector bar's snapshot dropdown with a reusable searchable picker (thumbnails, activation faders, embedded-canvas mode).
 
 ## Goal
 

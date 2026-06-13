@@ -284,7 +284,8 @@ internal static class ThumbnailManager
     #endregion
 
     #region GPU / Saving Methods
-    internal static void SaveThumbnail(Guid guid, IResourcePackage package, T3.Core.DataTypes.Texture2D sourceTexture, Categories category, bool saveToFile = true)
+    internal static void SaveThumbnail(Guid guid, IResourcePackage package, T3.Core.DataTypes.Texture2D sourceTexture, Categories category,
+                                       bool saveToFile = true, bool cover = false)
     {
         // Variations may pass null while their graph hasn't rendered yet; the implicit
         // Texture<T> -> SharpDX conversion would NRE. Skip; next frame retries.
@@ -339,15 +340,18 @@ internal static class ThumbnailManager
         var sourceAspect = (float)sourceTexture.Description.Width / sourceTexture.Description.Height;
         var targetAspect = (float)targetWidth / targetHeight;
 
-        // --- Fit Logic (Letterbox/Pillarbox) ---
-        float viewWidth, viewHeight, offsetX, offsetY;
-        if (sourceAspect > targetAspect) {
-            viewWidth = targetWidth; viewHeight = targetWidth / sourceAspect;
-            offsetX = 0; offsetY = (targetHeight - viewHeight) / 2f;
-        } else {
+        // Fit (letterbox/pillarbox) keeps the whole source; cover fills the slot and crops the
+        // overflow. The branch flips between the two; centering the (possibly oversized) viewport
+        // lets the rasterizer clip the crop.
+        float viewWidth, viewHeight;
+        if ((sourceAspect > targetAspect) == cover) {
             viewHeight = targetHeight; viewWidth = targetHeight * sourceAspect;
-            offsetX = (targetWidth - viewWidth) / 2f; offsetY = 0;
+        } else {
+            viewWidth = targetWidth; viewHeight = targetWidth / sourceAspect;
         }
+
+        var offsetX = (targetWidth - viewWidth) / 2f;
+        var offsetY = (targetHeight - viewHeight) / 2f;
 
         context.OutputMerger.SetTargets(rtv);
         context.ClearRenderTargetView(rtv, new RawColor4(0, 0, 0, 0));

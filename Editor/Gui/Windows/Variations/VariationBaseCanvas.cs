@@ -677,7 +677,7 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
                          ? ThumbnailManager.Categories.PackageMeta
                          : ThumbnailManager.Categories.Temp;
 
-        ThumbnailManager.SaveThumbnail(variation.Id, instanceForBlending.Symbol.SymbolPackage, textureOutputSlot.Value, saveAs, saveToFile: true);
+        ThumbnailManager.SaveThumbnail(variation.Id, instanceForBlending.Symbol.SymbolPackage, textureOutputSlot.Value, saveAs, saveToFile: true, cover: true);
 
         if (savesDefaultThumbnail)
             _liveThumbnailIds.Remove(variation.Id);
