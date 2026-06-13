@@ -21,6 +21,7 @@ internal static partial class CustomComponents
 
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(6, 6));
         ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(6, 6));
+        ImGui.PushStyleVar(ImGuiStyleVar.PopupRounding, 6);
 
         if (ImGui.BeginPopupContextItem(id, flags))
         {
@@ -41,7 +42,17 @@ internal static partial class CustomComponents
             ImGui.EndPopup();
         }
 
-        ImGui.PopStyleVar(2);
+        ImGui.PopStyleVar(3);
+    }
+
+    /// <summary>
+    /// Small muted label to group menu items into sections, aligned with the icon column.
+    /// </summary>
+    public static void DrawMenuGroupLabel(string label)
+    {
+        FormInputs.AddVerticalSpace(2);
+        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetStyle().ItemSpacing.X + Icons.FontSize * 1.4f);
+        HintLabel(label);
     }
 
     public static bool DrawMenuItem(int id, string label, ref bool isChecked, string keyboardShortCut = null)
@@ -57,6 +68,15 @@ internal static partial class CustomComponents
 
     public static bool DrawMenuItem(int id, string label, string keyboardShortCut = null, bool isChecked = false, bool isEnabled = true)
     {
+        return DrawMenuItem(id, Icon.None, label, keyboardShortCut, isChecked, isEnabled);
+    }
+
+    /// <summary>
+    /// Menu item with the checkbox slot on the left, an optional icon, label and an optional
+    /// right-aligned keyboard shortcut.
+    /// </summary>
+    public static bool DrawMenuItem(int id, Icon icon, string label, string keyboardShortCut = null, bool isChecked = false, bool isEnabled = true)
+    {
         var h = ImGui.GetFrameHeight();
         var imguiPadding = ImGui.GetStyle().ItemSpacing;
 
@@ -64,9 +84,12 @@ internal static partial class CustomComponents
         var labelWidth = ImGui.CalcTextSize(label).X;
 
         var paddingFactor = 1.4f;
-        var leftPadding = imguiPadding.X + Icons.FontSize * paddingFactor;
+        var iconSlotWidth = Icons.FontSize * paddingFactor;
+        var leftPaddingIcon = imguiPadding.X + iconSlotWidth;
+        var hasIcon = icon != Icon.None;
+        var leftPaddingText = hasIcon ? leftPaddingIcon + iconSlotWidth : leftPaddingIcon;
 
-        var width = leftPadding + labelWidth + imguiPadding.X * 2;
+        var width = leftPaddingText + labelWidth + imguiPadding.X * 2;
         if (shortCutWidth > 0)
         {
             width += shortCutWidth + h;
@@ -80,8 +103,9 @@ internal static partial class CustomComponents
 
         ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, Vector2.Zero);
         ImGui.PushID(id);
-        //var clicked = ImGui.Selectable(string.Empty);
-        var clicked = ImGui.InvisibleButton("##menuItem", new Vector2(width, h)) && isEnabled;
+        // The label seeds the imgui id too: int ids alone can collapse to 0 after hot reload
+        // (initializers of newly added static fields don't run), which made all items conflict.
+        var clicked = ImGui.InvisibleButton(label, new Vector2(width, h)) && isEnabled;
         ImGui.PopID();
         ImGui.PopStyleVar();
 
@@ -105,8 +129,16 @@ internal static partial class CustomComponents
                                            drawList, UiColors.Text);
         }
 
+        if (hasIcon)
+        {
+            Icons.DrawIconAtScreenPosition(icon,
+                                           (min + new Vector2(leftPaddingIcon,
+                                                              h / 2 - Icons.FontSize / 2)).Floor(),
+                                           drawList, UiColors.Text.Fade(fade));
+        }
+
         var textHeight = ImGui.GetFontSize();
-        drawList.AddText(min + new Vector2(leftPadding,
+        drawList.AddText(min + new Vector2(leftPaddingText,
                                            h / 2 - textHeight / 2),
                          UiColors.Text.Fade(fade),
                          label);

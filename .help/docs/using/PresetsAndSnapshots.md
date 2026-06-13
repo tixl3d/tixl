@@ -26,13 +26,17 @@ At the top, a selector bar shows the index of the active snapshot, a dropdown to
 - **Revert** (circular arrow) — re-apply the snapshot's stored values. Also only enabled when something changed.
 - **Remove** (trash icon) — delete the snapshot.
 
-Below the bar, all operators enabled for snapshots are listed with the parameters captured in the active snapshot. The values are editable exactly like in the regular parameter view, including undo. Clicking an operator's name selects it and centers it in the graph. Parameters published as composition inputs appear in their own "Inputs" group.
+Click the **+** button to create a new snapshot from the current values; it becomes active and its name field is focused so it can be named right away. Clicking the index number on the left of the bar renames the active snapshot.
+
+Below the bar, all operators enabled for snapshots are listed in rounded panels with the parameters captured in the active snapshot. The values are editable exactly like in the regular parameter view, including undo. Clicking an operator's name selects it and centers it in the graph. Parameters published as composition inputs appear in their own "Inputs" group.
+
+Parameters that no longer match the snapshot are highlighted, with a revert handle next to them. Clicking the handle restores the snapshot value; dragging it opens a slider that scales the change — towards 0 reverts, above 1 amplifies it beyond the current value.
 
 All actions are undoable, and the view stays in sync with the Variations window — both operate on the same snapshots.
 
 ### Controlling individual parameters
 
-Snapshot control can be limited to individual parameters: right-click a parameter in the Parameter window and choose **"Enable for control"**. Controlled parameters show a green knob icon in the connection area next to their name.
+Snapshot control can be limited to individual parameters: right-click a parameter in the Parameter window and choose **"Control with Snapshots"**. Controlled parameters show a green knob icon in the connection area next to their name.
 
 - Enabling a parameter on an operator that wasn't snapshot-enabled yet enables the operator with just that parameter.
 - Disabling the last controlled parameter disables the operator for snapshots entirely.

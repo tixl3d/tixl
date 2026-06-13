@@ -65,6 +65,7 @@ internal sealed class ParameterWindow : Window
             ImGui.PopStyleColor();
             ImGui.SameLine();
         }
+        
 
         if (!NodeSelection.TryGetSelectedInstanceOrInput(out var instance, out var inputUi, out _selectionChanged))
         {

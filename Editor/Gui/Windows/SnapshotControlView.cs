@@ -11,6 +11,7 @@ using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
+using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
@@ -55,16 +56,33 @@ internal sealed class SnapshotControlView
             _lastVariationId = variation.Id;
             _lastUndoStackCount = undoStackCount;
             _framesUntilRecheck = CheckIntervalFrames;
-            _isModified = Compute(composition, variation);
+            _modifiedInputs.Clear();
+            _isModified = Compute(composition, variation, _modifiedInputs);
             return _isModified;
+        }
+
+        /// <summary>
+        /// Per-input result of the last <see cref="IsModified"/> check. Composition inputs use
+        /// Guid.Empty as child key, matching the variation's parameter sets.
+        /// </summary>
+        public bool IsInputModified(Guid childKey, Guid inputId)
+        {
+            return _modifiedInputs.Contains((childKey, inputId));
+        }
+
+        internal static bool Compute(Instance composition, Variation variation)
+        {
+            return Compute(composition, variation, null);
         }
 
         /// <summary>
         /// Mirrors the apply semantics: inputs captured in the snapshot must match their stored
         /// value; captured ops' other blendable inputs must be at default (apply resets them).
+        /// Without a result set the first mismatch returns early; with one, all are collected.
         /// </summary>
-        internal static bool Compute(Instance composition, Variation variation)
+        private static bool Compute(Instance composition, Variation variation, HashSet<(Guid, Guid)>? modifiedInputs)
         {
+            var anyModified = false;
             foreach (var (childId, parameterSet) in variation.ParameterSetsForChildIds)
             {
                 Instance? instance;
@@ -91,20 +109,29 @@ internal sealed class SnapshotControlView
                     if (!ValueUtils.CompareFunctions.TryGetValue(valueType, out var compare))
                         continue;
 
+                    bool inputModified;
                     if (parameterSet.TryGetValue(inputSlot.Id, out var storedValue))
                     {
-                        if (!compare(storedValue, inputSlot.Input.Value))
-                            return true;
+                        inputModified = !compare(storedValue, inputSlot.Input.Value);
                     }
-                    else if (!inputSlot.Input.IsDefault
-                             && (childUi == null || childUi.IsInputIncludedForVariation(inputSlot.Id)))
+                    else
                     {
-                        return true;
+                        inputModified = !inputSlot.Input.IsDefault
+                                        && (childUi == null || childUi.IsInputIncludedForVariation(inputSlot.Id));
                     }
+
+                    if (!inputModified)
+                        continue;
+
+                    if (modifiedInputs == null)
+                        return true;
+
+                    modifiedInputs.Add((childId, inputSlot.Id));
+                    anyModified = true;
                 }
             }
 
-            return false;
+            return anyModified;
         }
 
         private const int CheckIntervalFrames = 30;
@@ -112,6 +139,7 @@ internal sealed class SnapshotControlView
         private int _lastUndoStackCount = -1;
         private int _framesUntilRecheck;
         private bool _isModified;
+        private readonly HashSet<(Guid, Guid)> _modifiedInputs = new();
     }
 
     public void Draw()
@@ -208,12 +236,13 @@ internal sealed class SnapshotControlView
 
             var frameHeight = ImGui.GetFrameHeight();
             var spacing = ImGui.GetStyle().ItemSpacing.X;
-            var actionButtonsWidth = 3 * frameHeight + 2 * spacing;
+            var addButtonGap = 4 * T3Ui.UiScaleFactor;
+            var actionButtonsWidth = 4 * frameHeight + 3 * spacing + addButtonGap;
             var arrowsWidth = 2 * (frameHeight + spacing);
 
             // Snapshot dropdown
             ImGui.SetNextItemWidth(MathF.Max(frameHeight,
-                                             ImGui.GetContentRegionAvail().X - arrowsWidth - actionButtonsWidth - 2 * spacing));
+                                             ImGui.GetContentRegionAvail().X - arrowsWidth - actionButtonsWidth - 3 * spacing));
             if (ImGui.BeginCombo("##snapshotDropdown", _selectedSnapshotLabel))
             {
                 foreach (var snapshot in _snapshots)
@@ -233,13 +262,13 @@ internal sealed class SnapshotControlView
 
             // Prev / next arrows cycle by activation index order
             ImGui.SameLine();
-            if (CustomComponents.IconButton(Icon.ChevronLeft, Vector2.Zero) && _snapshots.Count > 0)
+            if (CustomComponents.IconButton(Icon.ArrowLeft, Vector2.Zero) && _snapshots.Count > 0)
             {
                 ApplySnapshot(pool, composition, GetNeighborSnapshot(selectedSnapshot, -1));
             }
 
             ImGui.SameLine();
-            if (CustomComponents.IconButton(Icon.ChevronRight, Vector2.Zero) && _snapshots.Count > 0)
+            if (CustomComponents.IconButton(Icon.ArrowRight, Vector2.Zero) && _snapshots.Count > 0)
             {
                 ApplySnapshot(pool, composition, GetNeighborSnapshot(selectedSnapshot, +1));
             }
@@ -248,7 +277,7 @@ internal sealed class SnapshotControlView
             CustomComponents.RightAlign(actionButtonsWidth);
 
             var canWrite = selectedSnapshot != null && isModified;
-            if (CustomComponents.IconButton(Icon.Snapshot, Vector2.Zero,
+            if (CustomComponents.IconButton(Icon.Apply, Vector2.Zero,
                                             canWrite ? CustomComponents.ButtonStates.Normal : CustomComponents.ButtonStates.Disabled)
                 && canWrite)
             {
@@ -259,7 +288,7 @@ internal sealed class SnapshotControlView
 
             ImGui.SameLine();
             var canRevert = selectedSnapshot != null && isModified;
-            if (CustomComponents.IconButton(Icon.Revert, Vector2.Zero,
+            if (CustomComponents.IconButton(Icon.Reset, Vector2.Zero,
                                             canRevert ? CustomComponents.ButtonStates.Normal : CustomComponents.ButtonStates.Disabled)
                 && canRevert)
             {
@@ -278,6 +307,19 @@ internal sealed class SnapshotControlView
             }
 
             CustomComponents.TooltipForLastItem("Remove snapshot");
+
+            // Creating a new snapshot only makes sense when the current values differ
+            ImGui.SameLine(0, spacing + addButtonGap);
+            var canCreate = selectedSnapshot == null || isModified;
+            if (CustomComponents.IconButton(Icon.Plus, Vector2.Zero,
+                                            canCreate ? CustomComponents.ButtonStates.Normal : CustomComponents.ButtonStates.Disabled)
+                && canCreate)
+            {
+                VariationHandling.CreateOrUpdateSnapshotVariation();
+                _modificationCheck.Invalidate();
+            }
+
+            CustomComponents.TooltipForLastItem("Create new snapshot from current values");
         }
         ImGui.EndChild();
         ImGui.PopStyleVar();
@@ -291,7 +333,7 @@ internal sealed class SnapshotControlView
             return;
         }
 
-        ImGui.PushStyleColor(ImGuiCol.ChildBg, UiColors.WindowBackground.Fade(0.5f).Rgba);
+        ImGui.PushStyleColor(ImGuiCol.ChildBg, UiColors.BackgroundFull.Fade(0.25f).Rgba);
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(5, 5) * T3Ui.UiScaleFactor);
         ImGui.BeginChild("snapshotParameters", Vector2.Zero, ImGuiChildFlags.AlwaysUseWindowPadding);
         {
@@ -306,11 +348,9 @@ internal sealed class SnapshotControlView
                 var parentUi = composition.Parent.GetSymbolUi();
                 if (parentUi.ChildUis.TryGetValue(composition.SymbolChildId, out var compositionChildUi))
                 {
-                    if (DrawGroupHeader(composition.SymbolChildId, "Inputs", UiColors.TextMuted, out _))
-                    {
-                        DrawControlledParameters(composition, compositionUi, compositionChildUi, parentUi);
-                    }
-
+                    DrawGroupHeader(composition.SymbolChildId, "Inputs", UiColors.TextMuted, out _);
+                    DrawControlledParameters(composition, compositionUi, compositionChildUi, parentUi,
+                                             selectedSnapshot, childKey: Guid.Empty);
                     FormInputs.AddVerticalSpace(5);
                 }
             }
@@ -324,7 +364,7 @@ internal sealed class SnapshotControlView
                 var labelColor = ColorVariations.OperatorLabel.Apply(typeColor);
 
                 var symbolChild = entry.ChildUi.SymbolChild;
-                var isExpanded = DrawGroupHeader(entry.ChildUi.Id, symbolChild.ReadableName, labelColor, out var nameClicked);
+                DrawGroupHeader(entry.ChildUi.Id, GetOpGroupLabel(symbolChild), labelColor, out var nameClicked);
 
                 if (nameClicked)
                 {
@@ -336,10 +376,8 @@ internal sealed class SnapshotControlView
                     }
                 }
 
-                if (isExpanded)
-                {
-                    DrawControlledParameters(entry.Instance, entry.Instance.GetSymbolUi(), entry.ChildUi, compositionUi, onlyEnabledInputs: true);
-                }
+                DrawControlledParameters(entry.Instance, entry.Instance.GetSymbolUi(), entry.ChildUi, compositionUi,
+                                         selectedSnapshot, childKey: entry.ChildUi.Id, onlyEnabledInputs: true);
 
                 FormInputs.AddVerticalSpace(5);
             }
@@ -352,26 +390,34 @@ internal sealed class SnapshotControlView
     }
 
     /// <summary>
-    /// Header row: a collapse chevron followed by the clickable op name.
-    /// Returns true when the group content should be drawn.
+    /// Renamed ops show as 'Blob "MyBlob"' — type first, then the custom name. Cached per
+    /// child because the view draws every frame.
     /// </summary>
-    private bool DrawGroupHeader(Guid groupId, string label, Color labelColor, out bool nameClicked)
+    private string GetOpGroupLabel(Symbol.Child symbolChild)
     {
-        nameClicked = false;
-        ImGui.PushID(groupId.GetHashCode());
-
-        var isCollapsed = _collapsedGroupIds.Contains(groupId);
-        if (CustomComponents.TransparentIconButton(isCollapsed ? Icon.ChevronRight : Icon.ChevronDown,
-                                                   Vector2.Zero,
-                                                   CustomComponents.ButtonStates.Dimmed))
+        var customName = symbolChild.Name;
+        if (_opLabelCache.TryGetValue(symbolChild.Id, out var cached)
+            && ReferenceEquals(cached.CustomName, customName))
         {
-            if (isCollapsed)
-                _collapsedGroupIds.Remove(groupId);
-            else
-                _collapsedGroupIds.Add(groupId);
+            return cached.Label;
         }
 
-        ImGui.SameLine();
+        var label = string.IsNullOrEmpty(customName)
+                        ? symbolChild.Symbol.Name
+                        : $"{symbolChild.Symbol.Name} \"{customName}\"";
+        _opLabelCache[symbolChild.Id] = (customName, label);
+        return label;
+    }
+
+    /// <summary>
+    /// Header row with the clickable op name. Operator groups are not collapsible —
+    /// collapsing is reserved for the annotation/section groups coming with the section tree.
+    /// </summary>
+    private static void DrawGroupHeader(Guid groupId, string label, Color labelColor, out bool nameClicked)
+    {
+        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(0));
+        ImGui.PushID(groupId.GetHashCode());
+
         ImGui.PushFont(Fonts.FontSmall);
         ImGui.PushStyleColor(ImGuiCol.Text, labelColor.Rgba);
         ImGui.AlignTextToFramePadding();
@@ -380,22 +426,28 @@ internal sealed class SnapshotControlView
         ImGui.PopFont();
 
         ImGui.PopID();
-        return !isCollapsed;
+        ImGui.PopStyleVar();
     }
 
     /// <summary>
     /// Draws editable parameter rows like the regular parameter view, but only for the
-    /// controlled inputs — the blendable ones a snapshot write would capture.
+    /// controlled inputs — the blendable ones a snapshot write would capture. Rows are
+    /// highlighted when they no longer match the snapshot and get a revert button.
     /// </summary>
-    private static void DrawControlledParameters(Instance instance,
-                                                 SymbolUi symbolUi,
-                                                 SymbolUi.Child symbolChildUi,
-                                                 SymbolUi compositionSymbolUi,
-                                                 bool onlyEnabledInputs = false)
+    private void DrawControlledParameters(Instance instance,
+                                          SymbolUi symbolUi,
+                                          SymbolUi.Child symbolChildUi,
+                                          SymbolUi compositionSymbolUi,
+                                          Variation snapshot,
+                                          Guid childKey,
+                                          bool onlyEnabledInputs = false)
     {
         ImGui.PushStyleColor(ImGuiCol.FrameBg, UiColors.BackgroundButton.Rgba);
         ImGui.PushStyleColor(ImGuiCol.FrameBgHovered, UiColors.BackgroundHover.Rgba);
         ImGui.PushID(instance.GetHashCode());
+
+        // Keep room right of the value edits for the per-row revert buttons
+        InputArea.ValueEditRightMargin = ImGui.GetFrameHeight() + 2 * T3Ui.UiScaleFactor;
 
         foreach (var inputSlot in instance.Inputs)
         {
@@ -411,14 +463,70 @@ internal sealed class SnapshotControlView
             if (onlyEnabledInputs && !symbolChildUi.IsInputEnabledForSnapshots(inputSlot.Id))
                 continue;
 
+            var isMismatch = _modificationCheck.IsInputModified(childKey, inputSlot.Id);
+
             ImGui.PushID(inputSlot.Id.GetHashCode());
+
+            // In this view highlighting means "differs from the snapshot", not "non-default"
+            InputArea.DimHighlightOverride = !isMismatch;
             var editState = inputUi.DrawParameterEdit(inputSlot, compositionSymbolUi, symbolChildUi, hideNonEssentials: false, skipIfDefault: false);
+            InputArea.DimHighlightOverride = null;
+
             ParameterWindow.HandleInputEditState(instance, inputSlot, editState);
+
+            if (isMismatch)
+                DrawRevertButtonOnLastItem(instance, snapshot, childKey, inputSlot);
+
             ImGui.PopID();
         }
 
+        InputArea.ValueEditRightMargin = 0;
+
         ImGui.PopID();
         ImGui.PopStyleColor(2);
+    }
+
+    /// <summary>
+    /// Draws the revert button in the space reserved right of the value edit.
+    /// </summary>
+    private void DrawRevertButtonOnLastItem(Instance instance, Variation snapshot, Guid childKey, IInputSlot inputSlot)
+    {
+        var itemMin = ImGui.GetItemRectMin();
+        var itemMax = ImGui.GetItemRectMax();
+        var buttonSize = ImGui.GetFrameHeight();
+
+        var cursorToRestore = ImGui.GetCursorScreenPos();
+        ImGui.SetCursorScreenPos(new Vector2(itemMax.X + 2 * T3Ui.UiScaleFactor, itemMin.Y));
+
+        ImGui.PushStyleColor(ImGuiCol.Button, Color.Transparent.Rgba);
+        var clicked = CustomComponents.IconButton(Icon.Reset, new Vector2(buttonSize, buttonSize), UiColors.ForegroundFull);
+        ImGui.PopStyleColor();
+        if (clicked)
+        {
+            RevertParameterToSnapshot(instance, snapshot, childKey, inputSlot);
+        }
+
+        CustomComponents.TooltipForLastItem("Revert to snapshot value");
+        ImGui.SetCursorScreenPos(cursorToRestore);
+    }
+
+    private void RevertParameterToSnapshot(Instance instance, Variation snapshot, Guid childKey, IInputSlot inputSlot)
+    {
+        if (instance.Parent == null)
+            return;
+
+        if (snapshot.ParameterSetsForChildIds.TryGetValue(childKey, out var parameterSet)
+            && parameterSet.TryGetValue(inputSlot.Id, out var storedValue))
+        {
+            UndoRedoStack.AddAndExecute(new ChangeInputValueCommand(instance.Parent.Symbol, instance.SymbolChildId, inputSlot.Input, storedValue));
+        }
+        else
+        {
+            // Not captured in the snapshot: applying it would reset the parameter to default
+            UndoRedoStack.AddAndExecute(new ResetInputToDefault(instance.Parent.Symbol, instance.SymbolChildId, inputSlot.Input));
+        }
+
+        _modificationCheck.Invalidate();
     }
 
     /// <summary>
@@ -582,11 +690,11 @@ internal sealed class SnapshotControlView
     private readonly List<OpEntry> _opEntries = new();
     private readonly List<Guid> _staleChildIds = new();
     private readonly List<Instance> _affectedInstances = new();
-    private readonly HashSet<Guid> _collapsedGroupIds = new();
     private readonly Guid[] _singleStaleId = new Guid[1];
     private readonly Variation[] _singleVariation = new Variation[1];
     private Guid _pendingStaleRemovalId;
     private Guid _fallbackSnapshotId;
+    private readonly Dictionary<Guid, (string CustomName, string Label)> _opLabelCache = new();
 
     private Guid _lastLabelVariationId = Guid.NewGuid(); // force initial label update
     private string? _lastLabelTitle;

@@ -35,10 +35,35 @@ Click the "Create snapshot" button in the Parameter window.
 
 **Expected:**
 - A selector bar appears at the top: index indicator, a snapshot dropdown,
-  prev/next arrow buttons, and three action buttons on the right.
-- Below it, both enabled operators are listed with their captured parameters,
-  ordered by their vertical position in the graph.
+  prev/next arrow buttons, and write/revert/remove plus an add (+) button.
+- A text field is focused immediately so the snapshot can be named; typing a
+  name and pressing Enter (or clicking away) stores it.
+- The new snapshot is the active one.
+- Below the bar, both enabled operators are listed with their captured
+  parameters in rounded panels, ordered by their vertical position in the
+  graph.
 - The Variations window shows a new snapshot thumbnail.
+
+## Step: Renaming a snapshot from the selector bar
+
+**Action:**
+Click the index number on the left of the selector bar.
+
+**Expected:**
+- The dropdown is replaced by a focused text field pre-filled with the current
+  name; editing and pressing Enter renames the snapshot.
+
+## Step: Adding a snapshot with the + button
+
+**Action:**
+Change a parameter so the snapshot is modified, then click the + button at the
+right end of the selector bar.
+
+**Expected:**
+- A new snapshot is created from the current values, becomes active, and its
+  name field is focused for immediate renaming.
+- The + button is disabled (dimmed) when the current values still match the
+  active snapshot.
 
 ## Step: A snapshot is shown without manual selection
 
@@ -62,6 +87,32 @@ Drag a value of one of the listed parameters in the snapshot control view.
   output updates live.
 - After a moment, the write and revert buttons in the selector bar become
   enabled (the current state differs from the snapshot).
+
+## Step: Modified rows are highlighted with a revert button
+
+**Action:**
+In the snapshot control view, change one parameter's value and wait a moment.
+
+**Expected:**
+- The edited parameter's name and value turn bright while parameters matching
+  the snapshot stay muted — regardless of whether the values are at default.
+- A revert icon appears at the right end of the edited row, in the gap kept
+  free beside the value.
+- Clicking it restores the snapshot's stored value for just that parameter
+  (undoable); the row turns muted again, and if no other parameter differs,
+  the selector bar's write/revert buttons disable.
+
+## Step: Scaling a change with the revert handle
+
+**Action:**
+Modify a parameter, then press and drag horizontally on its revert icon.
+
+**Expected:**
+- An infinity-slider overlay appears showing a factor starting at 1.
+- Dragging the factor towards 0 moves the value back to the snapshot; dragging
+  above 1 amplifies the difference beyond the current value.
+- Releasing keeps the scaled value (undoable as one step); releasing at factor
+  1 leaves the value unchanged.
 
 ## Step: Reverting to the snapshot
 
@@ -106,6 +157,27 @@ Open the snapshot dropdown in the selector bar and pick the other snapshot.
 **Expected:**
 - The chosen snapshot is applied; parameter rows update to its values.
 
+## Step: Hover highlight between view and graph
+
+**Action:**
+Hover the mouse over one of the operator panels in the snapshot control view,
+then over the same operator's node in the Graph window.
+
+**Expected:**
+- Hovering the panel highlights the matching operator node in the graph.
+- Hovering the operator node in the graph brightens its panel in the control
+  view.
+
+## Step: Header shown when entering a composition
+
+**Action:**
+Double-click an operator in the graph to enter (open) it, without selecting
+anything inside.
+
+**Expected:**
+- The Parameter window immediately shows the composition's name and namespace
+  header above the snapshot control view — no background click required.
+
 ## Step: Jumping to an operator from the list
 
 **Action:**
@@ -143,7 +215,7 @@ Click the trash button on the right of the selector bar.
 **Action:**
 Add a new operator (e.g. `[Transform]`) that is *not* enabled for snapshots.
 Select it, right-click one of its value parameters (e.g. `Scale`) in the
-Parameter window and choose "Enable for control".
+Parameter window and choose "Control with Snapshots".
 
 **Expected:**
 - A green knob icon appears in the connection area left of the parameter's
@@ -158,8 +230,8 @@ Parameter window and choose "Enable for control".
 
 **Action:**
 For an operator enabled via the graph context menu (all parameters
-controlled), right-click one of its parameters and uncheck "Enable for
-control".
+controlled), right-click one of its parameters and uncheck "Control with
+Snapshots".
 
 **Expected:**
 - The knob icon disappears, and the parameter vanishes from the snapshot
@@ -172,7 +244,7 @@ control".
 ## Step: Disabling the last controlled parameter
 
 **Action:**
-Uncheck "Enable for control" on every remaining controlled parameter of that
+Uncheck "Control with Snapshots" on every remaining controlled parameter of that
 operator.
 
 **Expected:**

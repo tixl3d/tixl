@@ -287,7 +287,7 @@ public abstract class InputValueUi<T> : IInputUi
                 ImGui.SameLine();
 
                 ImGui.PushItemWidth(200.0f);
-                ImGui.SetNextItemWidth(-1);
+                ImGui.SetNextItemWidth(-1 - InputArea.ValueEditRightMargin);
 
                 var connectedName = "???";
                 if (typedInputSlot.TryGetFirstConnection(out var connectedSlot) && connectedSlot?.Parent != null)
@@ -428,7 +428,7 @@ public abstract class InputValueUi<T> : IInputUi
             ImGui.PushStyleColor(ImGuiCol.Text, UiColors.StatusAnimated.Rgba);
             ImGui.PushStyleColor(ImGuiCol.FrameBgActive, UiColors.BackgroundFull.Rgba);
 
-            ImGui.SetNextItemWidth(-1);
+            ImGui.SetNextItemWidth(-1 - InputArea.ValueEditRightMargin);
 
             editState |= DrawAnimatedValue(name, typedInputSlot, animator);
 
@@ -449,12 +449,19 @@ public abstract class InputValueUi<T> : IInputUi
             ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, new Vector2(1.0f, 0.5f));
 
             var hasStyleCount = 0;
+            var showDimmed = InputArea.DimHighlightOverride ?? input.IsDefault;
 
-            if (input.IsDefault)
+            if (showDimmed)
             {
                 ImGui.PushStyleColor(ImGuiCol.ButtonHovered, UiColors.BackgroundButton.Rgba);
                 ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
                 hasStyleCount = 2;
+            }
+            else if (InputArea.DimHighlightOverride == false)
+            {
+                // Extra contrast for parameters flagged as modified by the snapshot control view
+                ImGui.PushStyleColor(ImGuiCol.Text, UiColors.ForegroundFull.Rgba);
+                hasStyleCount = 1;
             }
 
             var isClicked = ImGui.Button($"{input.Name.AddSpacesForImGuiOutput()}##ParamName", new Vector2(ParameterNameWidth, 0.0f));
@@ -486,45 +493,64 @@ public abstract class InputValueUi<T> : IInputUi
             CustomComponents.ContextMenuForItem
                 (() =>
                  {
-                     if (ImGui.MenuItem("Set as default", !input.IsDefault))
+                     CustomComponents.DrawMenuGroupLabel("Parameter");
+
+                     if (CustomComponents.DrawMenuItem(_animateItemId, Icon.AddKeyframe, "Animate",
+                                                       isEnabled: IsAnimatable))
                      {
-                         UndoRedoStack.AddAndExecute(new SetInputDefaultCommand(compositionSymbol, symbolChildUi.Id, input));
+                         var animateCommand = new MacroCommand("add animation",
+                                                               new List<ICommand>
+                                                                   {
+                                                                       new ChangeInputValueCommand(compositionSymbol, symbolChildUi.Id, input,
+                                                                                                   inputSlot.Input.Value),
+                                                                       new AddAnimationCommand(animator, inputSlot),
+                                                                   });
+                         UndoRedoStack.AddAndExecute(animateCommand);
                      }
 
-                     if (ImGui.MenuItem("Reset to default", !input.IsDefault))
+                     if (CustomComponents.DrawMenuItem(_createConnectedItemId, Icon.AddOpToInput, "Create connected"))
+                     {
+                         ProjectView.Focused?.GraphView.CreatePlaceHolderConnectedToInput(symbolChildUi, input.InputDefinition);
+                     }
+
+                     if (CustomComponents.DrawMenuItem(_extractItemId, Icon.ExtractInput, "Extract",
+                                                       isEnabled: ParameterExtraction.IsInputSlotExtractable(typedInputSlot)))
+                     {
+                         ProjectView.Focused?.GraphView.ExtractAsConnectedOperator(typedInputSlot, symbolChildUi, input);
+                     }
+
+                     InputArea.DrawSnapshotControlMenuItem(compositionUi, symbolChildUi, input);
+
+                     if (CustomComponents.DrawMenuItem(_resetItemId, Icon.Reset, "Reset",
+                                                       isEnabled: !input.IsDefault))
                      {
                          UndoRedoStack.AddAndExecute(new ResetInputToDefault(compositionSymbol, symbolChildUi.Id,
                                                                              input));
                      }
 
-                     if (ImGui.MenuItem("Extract as connection operator"))
+                     CustomComponents.SeparatorLine();
+                     CustomComponents.DrawMenuGroupLabel("Symbol");
+
+                     if (CustomComponents.DrawMenuItem(_setAsDefaultItemId, Icon.Pin, "Set as Default",
+                                                       isEnabled: !input.IsDefault))
                      {
-                         ProjectView.Focused?.GraphView.ExtractAsConnectedOperator(typedInputSlot, symbolChildUi, input);
+                         UndoRedoStack.AddAndExecute(new SetInputDefaultCommand(compositionSymbol, symbolChildUi.Id, input));
                      }
 
-                     if (ImGui.MenuItem("Publish as Input", null, false, false))
-                     {
-                         InputArea.PublishAsInput(nodeSelection, inputSlot, symbolChildUi, input);
-                     }
-
-                     CustomComponents
-                        .TooltipForLastItem("Publishing as input is not yet implemented. Please create a input of that type and connect manually.");
-
-                     InputArea.DrawSnapshotControlMenuItem(compositionUi, symbolChildUi, input);
-
-                     if (ParameterWindow.IsAnyInstanceVisible() && ImGui.MenuItem("Rename input"))
+                     if (CustomComponents.DrawMenuItem(_renameItemId, Icon.None, "Rename...",
+                                                       isEnabled: ParameterWindow.IsAnyInstanceVisible()))
                      {
                          ParameterWindow.RenameInputDialog.ShowNextFrame(symbolChildUi.SymbolChild.Symbol, input.InputDefinition.Id);
                      }
 
-                     if (ImGui.MenuItem("Parameters settings"))
+                     if (CustomComponents.DrawMenuItem(_inputSettingsItemId, Icon.Settings2, "Input Settings"))
                          editState = InputEditStateFlags.ShowOptions;
                  });
             ImGui.PopStyleVar();
 
             // Draw parameter value
-            ImGui.SetNextItemWidth(-1);
-            ImGui.PushStyleColor(ImGuiCol.Text, input.IsDefault ? UiColors.TextMuted.Rgba : UiColors.ForegroundFull.Rgba);
+            ImGui.SetNextItemWidth(-1 - InputArea.ValueEditRightMargin);
+            ImGui.PushStyleColor(ImGuiCol.Text, showDimmed ? UiColors.TextMuted.Rgba : UiColors.ForegroundFull.Rgba);
             if (input.IsDefault)
             {
                 input.Value.Assign(input.DefaultValue);
@@ -608,6 +634,14 @@ public abstract class InputValueUi<T> : IInputUi
 
     private const Relevancy DefaultRelevancy = Relevancy.Optional;
 
+    private static readonly int _animateItemId = "animateParam".GetHashCode();
+    private static readonly int _createConnectedItemId = "createConnectedParam".GetHashCode();
+    private static readonly int _extractItemId = "extractParam".GetHashCode();
+    private static readonly int _resetItemId = "resetParam".GetHashCode();
+    private static readonly int _setAsDefaultItemId = "setParamAsDefault".GetHashCode();
+    private static readonly int _renameItemId = "renameParam".GetHashCode();
+    private static readonly int _inputSettingsItemId = "paramInputSettings".GetHashCode();
+
     private void DrawInputTooltipAndResetIcon(Symbol.Child.Input input,
                                               SkillQuestParameterHint.Hint? skillQuestHint = null)
     {
@@ -648,6 +682,19 @@ internal static class InputArea
     internal static float ConnectionAreaWidth => 28.0f * T3Ui.UiScaleFactor;
 
     /// <summary>
+    /// Lets a view redefine what the dimmed/highlighted row styling means: by default rows
+    /// dim when the value is at default; the snapshot control view dims rows that match the
+    /// selected snapshot instead. Set around DrawParameterEdit and reset to null afterwards.
+    /// </summary>
+    internal static bool? DimHighlightOverride;
+
+    /// <summary>
+    /// Space in pixels kept free right of the value edit, e.g. for the snapshot control
+    /// view's per-row revert button. Set around DrawParameterEdit and reset to 0 afterwards.
+    /// </summary>
+    internal static float ValueEditRightMargin;
+
+    /// <summary>
     /// Context-menu toggle for per-parameter snapshot control. Hidden for parameters the
     /// snapshot system can't capture (non-blendable, excluded from presets) and for
     /// ParameterCollection children.
@@ -665,11 +712,13 @@ internal static class InputArea
             return;
 
         var isEnabled = symbolChildUi.IsInputEnabledForSnapshots(input.InputDefinition.Id);
-        if (ImGui.MenuItem("Enable for control", null, isEnabled))
+        if (CustomComponents.DrawMenuItem(_controlWithSnapshotsItemId, Icon.Knob, "Control with Snapshots", null, isChecked: isEnabled))
         {
             VariationHandling.ToggleParameterSnapshotControl(compositionUi, symbolChildUi, input, !isEnabled);
         }
     }
+
+    private static readonly int _controlWithSnapshotsItemId = "controlWithSnapshots".GetHashCode();
 
     internal static void DrawNormalInputArea<T>(InputSlot<T> inputSlot,
                                                 SymbolUi compositionUi,
@@ -741,7 +790,7 @@ internal static class InputArea
         }
         else if (symbolChildUi.IsInputEnabledForSnapshots(input.InputDefinition.Id))
         {
-            Icons.DrawIconOnLastItem(Icon.Knob, UiColors.StatusControlled);
+            Icons.DrawIconOnLastItem(Icon.Knob, UiColors.StatusAutomated);
         }
         else
         {
@@ -875,7 +924,7 @@ internal static class InputArea
 
         if (symbolChildUi.IsInputEnabledForSnapshots(inputSlot.Id))
         {
-            Icons.DrawIconOnLastItem(Icon.Knob, UiColors.StatusControlled.Rgba);
+            Icons.DrawIconOnLastItem(Icon.Knob, UiColors.StatusAutomated.Rgba);
         }
         else
         {

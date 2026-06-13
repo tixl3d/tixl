@@ -1218,7 +1218,8 @@ internal sealed partial class MagGraphView
                 ImGui.EndTooltip();
             }
         }
-            indicatorCount++;
+        
+        indicatorCount++;
     }
     
 

@@ -10,7 +10,9 @@ internal static class VectorValueEdit
     internal static InputEditStateFlags Draw(float[] components, float min, float max, float scale, bool clampMin, bool clampMax, float rightPadding = 0,
                                              string format = null)
     {
-        var width = (ImGui.GetContentRegionAvail().X - rightPadding) / components.Length - 1;
+        // Editors fill the content region, so the snapshot control view's reserved space for
+        // per-row revert buttons has to be subtracted here - SetNextItemWidth has no effect.
+        var width = (ImGui.GetContentRegionAvail().X - rightPadding - InputArea.ValueEditRightMargin) / components.Length - 1;
         var size = new Vector2(width, 0);
 
         var resultingEditState = InputEditStateFlags.Nothing;
@@ -76,7 +78,7 @@ internal static class VectorValueEdit
         var hasButtons = components.Length == 1;
 
         // Calculate sizes
-        var width = ImGui.GetContentRegionAvail().X / components.Length - 1;
+        var width = (ImGui.GetContentRegionAvail().X - InputArea.ValueEditRightMargin) / components.Length - 1;
         var buttonSize = hasButtons ? Vector2.One * ImGui.GetFrameHeight() : Vector2.Zero;
         var fieldWidth = hasButtons ? width - buttonSize.X * 2 : width;
         var size = new Vector2(fieldWidth, 0);

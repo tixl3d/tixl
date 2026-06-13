@@ -217,6 +217,16 @@ internal sealed class SymbolVariationPool
         UndoRedoStack.AddAndExecute(newCommand);
     }
 
+    /// <summary>
+    /// Marks a variation as the active one without applying its values — used when a freshly
+    /// created snapshot already equals the current state, so applying would be a no-op command.
+    /// </summary>
+    public void SetActiveVariationWithoutApply(Variation variation)
+    {
+        ActiveVariation = variation;
+        UpdateActiveStateForVariation(variation.ActivationIndex);
+    }
+
     public void UpdateActiveStateForVariation(int variationIndex)
     {
         foreach (var v in AllVariations)
