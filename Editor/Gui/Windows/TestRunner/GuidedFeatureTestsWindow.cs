@@ -155,21 +155,7 @@ internal sealed class GuidedFeatureTestsWindow : Window
         if (allTags.Count == 0)
             return;
 
-        // Estimate width of the tag row so we can right-align it.
-        ImGui.PushFont(Fonts.FontSmall);
-        var tagRowWidth = 0f;
-        for (var i = 0; i < allTags.Count; i++)
-        {
-            tagRowWidth += ImGui.CalcTextSize(allTags[i].ToUpperInvariant()).X
-                           + 16 * scale;       // horizontal padding of the pill
-            if (i > 0)
-                tagRowWidth += ImGui.GetStyle().ItemSpacing.X;
-        }
-        ImGui.PopFont();
-
-        ImGui.SameLine();
-        CustomComponents.RightAlign(tagRowWidth);
-
+        // Tags on their own row (left-aligned) so they don't overlap the filter/sort controls.
         for (var i = 0; i < allTags.Count; i++)
         {
             if (i > 0)

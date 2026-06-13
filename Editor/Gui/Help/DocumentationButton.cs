@@ -8,7 +8,7 @@ using T3.Editor.Gui.Styling.Markdown;
 namespace T3.Editor.Gui.Help;
 
 /// <summary>
-/// Reusable help affordance for a window or panel header: a <see cref="Icon.HelpOutline"/> button that
+/// Reusable help affordance for a window or panel header: a <see cref="Icon.Help"/> button that
 /// shows the embedded <c>.help/embedded/&lt;docId&gt;.md</c> as a formatted tooltip on hover and opens the
 /// canonical wiki page on click. Operator references in the doc become type-colored links.
 /// </summary>
@@ -16,7 +16,7 @@ internal static class DocumentationButton
 {
     internal static void Draw(string docId, string wikiUrl, Vector2 size)
     {
-        if (CustomComponents.TransparentIconButton(Icon.HelpOutline, size))
+        if (CustomComponents.TransparentIconButton(Icon.Help, size))
             CoreUi.Instance.OpenWithDefaultApplication(wikiUrl);
 
         if (!ImGui.IsItemHovered())

@@ -178,7 +178,7 @@ internal sealed class VariationsWindow : Window
         CustomComponents.ToggleTwoIconsButton(ref UserSettings.Config.VariationHoverPreview,
                                               iconOff:Icon.HoverScrub,
                                               iconOn:Icon.HoverScrub,
-                                              CustomComponents.ButtonStates.NeedsAttention,
+                                              CustomComponents.ButtonStates.Activated,
                                               CustomComponents.ButtonStates.Default,
                                               noBackground:true);
 
@@ -190,7 +190,7 @@ internal sealed class VariationsWindow : Window
         if (CustomComponents.ToggleTwoIconsButton(ref liveThumbnails,
                                                   iconOff:Icon.AutoRefresh,
                                                   iconOn:Icon.AutoRefresh,
-                                                  CustomComponents.ButtonStates.NeedsAttention,
+                                                  CustomComponents.ButtonStates.Activated,
                                                   CustomComponents.ButtonStates.Default,
                                                   noBackground:true))
         {

@@ -701,14 +701,7 @@ internal static class InputArea
     /// </summary>
     internal static void DrawSnapshotControlMenuItem(SymbolUi compositionUi, SymbolUi.Child symbolChildUi, Symbol.Child.Input input)
     {
-        if (symbolChildUi.SnapshotGroupIndex > 1)
-            return;
-
-        if (!ValueUtils.BlendMethods.ContainsKey(input.DefaultValue.ValueType))
-            return;
-
-        var symbolUi = symbolChildUi.SymbolChild.Symbol.GetSymbolUi();
-        if (symbolUi.InputUis.TryGetValue(input.InputDefinition.Id, out var inputUi) && inputUi.ExcludedFromPresets)
+        if (!IsSnapshotControllable(symbolChildUi, input))
             return;
 
         var isEnabled = symbolChildUi.IsInputEnabledForSnapshots(input.InputDefinition.Id);
@@ -716,6 +709,22 @@ internal static class InputArea
         {
             VariationHandling.ToggleParameterSnapshotControl(compositionUi, symbolChildUi, input, !isEnabled);
         }
+    }
+
+    /// <summary>
+    /// True if the parameter can be snapshot-controlled: a blendable, non-excluded input on a
+    /// child that isn't a ParameterCollection.
+    /// </summary>
+    internal static bool IsSnapshotControllable(SymbolUi.Child symbolChildUi, Symbol.Child.Input input)
+    {
+        if (symbolChildUi.SnapshotGroupIndex > 1)
+            return false;
+
+        if (!ValueUtils.BlendMethods.ContainsKey(input.DefaultValue.ValueType))
+            return false;
+
+        var symbolUi = symbolChildUi.SymbolChild.Symbol.GetSymbolUi();
+        return !(symbolUi.InputUis.TryGetValue(input.InputDefinition.Id, out var inputUi) && inputUi.ExcludedFromPresets);
     }
 
     private static readonly int _controlWithSnapshotsItemId = "controlWithSnapshots".GetHashCode();
@@ -732,11 +741,16 @@ internal static class InputArea
 
         if (tempConnections.Count == 0)
         {
-            if (isAnimatable && ImGui.GetIO().KeyAlt)
+            var io = ImGui.GetIO();
+            if (io.KeyCtrl && io.KeyAlt && IsSnapshotControllable(symbolChildUi, input))
+            {
+                inputOperation = InputOperations.ToggleSnapshotControl;
+            }
+            else if (isAnimatable && io.KeyAlt)
             {
                 inputOperation = InputOperations.Animate;
             }
-            else if (ImGui.GetIO().KeyCtrl && ParameterExtraction.IsInputSlotExtractable(inputSlot))
+            else if (io.KeyCtrl && ParameterExtraction.IsInputSlotExtractable(inputSlot))
             {
                 inputOperation = InputOperations.Extract;
             }
@@ -772,10 +786,22 @@ internal static class InputArea
                     ProjectView.Focused?.GraphView.CreatePlaceHolderConnectedToInput(symbolChildUi, input.InputDefinition);
                     break;
                 }
+
+                case InputOperations.ToggleSnapshotControl:
+                {
+                    var enabled = symbolChildUi.IsInputEnabledForSnapshots(input.InputDefinition.Id);
+                    VariationHandling.ToggleParameterSnapshotControl(compositionUi, symbolChildUi, input, !enabled);
+                    break;
+                }
             }
         }
 
-        if (inputOperation != InputOperations.None)
+        if (inputOperation == InputOperations.ToggleSnapshotControl)
+        {
+            // Green knob preview for the snapshot-control action (matches the controlled indicator).
+            Icons.DrawIconOnLastItem(Icon.Knob, UiColors.StatusControlled);
+        }
+        else if (inputOperation != InputOperations.None)
         {
             var icon = inputOperation switch
                            {
@@ -834,6 +860,11 @@ internal static class InputArea
                 ImGui.TextUnformatted("CTRL+Click to extract");
             }
 
+            if (IsSnapshotControllable(symbolChildUi, input))
+            {
+                ImGui.TextUnformatted("CTRL+ALT+Click to control with snapshots");
+            }
+
             ImGui.PopFont();
             ImGui.PopStyleColor();
             ImGui.EndTooltip();
@@ -846,6 +877,7 @@ internal static class InputArea
         Animate,
         ConnectWithSearch,
         Extract,
+        ToggleSnapshotControl,
     }
 
 

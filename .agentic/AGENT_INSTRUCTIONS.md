@@ -137,6 +137,15 @@ TiXL's editor is Dear ImGui plus custom widgets, rendered every frame at the out
 - For alpha/shading, use `color.Fade(alpha)` (1 = fully opaque). Never mutate `.A` directly.
 - For state-based blending (e.g. active vs idle), use `Color.Mix(a, b, t)`.
 
+**Status-color meaning.** The `UiColors.Status*` hues carry a consistent meaning across the editor — use the matching one so indicators read the same everywhere:
+
+| Hue | Color | Meaning |
+| --- | --- | --- |
+| Orange | `StatusAnimated` | Related to time (animation, keyframes, playback) |
+| Blue | `StatusAutomated` | Driven or linked (input connection, expression) |
+| Green | `StatusControlled` | Controllable by snapshots or other UI features |
+| Magenta | `StatusAttention` | Needs attention (errors, recording, muted audio) |
+
 ### Scaling
 - **Every pixel literal must be multiplied by `T3Ui.UiScaleFactor`.** No exceptions. This includes widths, heights, paddings, gutters, indents, font sizes, marker radii, draw-list line thicknesses, `SameLine` spacing, `Dummy` sizes, `SetCursorPosX/Y` offsets, manual cursor adjustments, anything passed into `new Vector2(...)` for ImGui. Pixel literals render correctly on the developer's monitor and then collapse or balloon on every other display — high-DPI laptops, 4K monitors, users with non-100% UI scale.
   - Wrong: `ImGui.Dummy(new Vector2(0, 16))`, `SameLine(0, 6)`, `ImGui.GetWindowDrawList().AddCircleFilled(p, 2, color)`.

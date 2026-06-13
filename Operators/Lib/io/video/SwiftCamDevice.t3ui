@@ -57,6 +57,7 @@
         "X": -200.0,
         "Y": 75.0
       },
+      "ExcludedFromPresets": "True",
       "Description": "The Swift camera to use. The dropdown lists every Swift camera detected by the SDK.",
       "Usage": "CustomDropdown"
     },

@@ -478,7 +478,8 @@ internal sealed class SnapshotControlView
 
                 var symbolChild = entry.ChildUi.SymbolChild;
                 BeginBlock();
-                DrawGroupHeader(entry.ChildUi.Id, GetOpGroupLabel(symbolChild), labelColor, out var nameClicked);
+                DrawGroupHeader(entry.ChildUi.Id, GetOpGroupLabel(symbolChild), labelColor, out var nameClicked,
+                                bypassChild: entry.ChildUi);
 
                 if (nameClicked)
                 {
@@ -566,11 +567,18 @@ internal sealed class SnapshotControlView
     /// <summary>
     /// Header row with the clickable op name. Operator groups are not collapsible —
     /// collapsing is reserved for the annotation/section groups coming with the section tree.
+    /// A bypassable op gets a small bypass toggle on the right (like the parameter popup).
     /// </summary>
-    private static void DrawGroupHeader(Guid groupId, string label, Color labelColor, out bool nameClicked)
+    private static void DrawGroupHeader(Guid groupId, string label, Color labelColor, out bool nameClicked,
+                                        SymbolUi.Child? bypassChild = null)
     {
         ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(0));
         ImGui.PushID(groupId.GetHashCode());
+
+        var bypassable = bypassChild != null && bypassChild.SymbolChild.IsBypassable();
+        var nameWidth = bypassable
+                            ? ImGui.GetContentRegionAvail().X - ImGui.GetFrameHeight() - ImGui.GetStyle().ItemSpacing.X
+                            : 0f;
 
         ImGui.PushFont(Fonts.FontSmall);
         ImGui.PushStyleColor(ImGuiCol.Text, labelColor.Rgba);
@@ -578,12 +586,26 @@ internal sealed class SnapshotControlView
         ImGui.PushStyleColor(ImGuiCol.HeaderActive, Color.Transparent.Rgba);
         ImGui.AlignTextToFramePadding();
         ImGui.SetCursorPosX(ImGui.GetCursorPosX() + 2 * T3Ui.UiScaleFactor);
-        nameClicked = ImGui.Selectable(label);
+        nameClicked = ImGui.Selectable(label, false, ImGuiSelectableFlags.None, new Vector2(nameWidth, 0));
         ImGui.PopStyleColor(3);
         ImGui.PopFont();
 
         // Subtle rounded highlight instead of the full-width Selectable header bar
         CustomComponents.DrawHoverHighlightOnLastItem();
+
+        if (bypassable)
+        {
+            ImGui.SameLine();
+            var isBypassed = bypassChild!.SymbolChild.IsBypassed;
+            if (CustomComponents.ToggleTwoIconsButton(ref isBypassed, Icon.OperatorBypassOff, Icon.OperatorBypassOn,
+                                                      CustomComponents.ButtonStates.NeedsAttention,
+                                                      CustomComponents.ButtonStates.Default))
+            {
+                UndoRedoStack.AddAndExecute(new ChangeInstanceBypassedCommand(bypassChild.SymbolChild, isBypassed));
+            }
+
+            CustomComponents.TooltipForLastItem(isBypassed ? "Bypassed — click to enable" : "Bypass this operator");
+        }
 
         ImGui.PopID();
         ImGui.PopStyleVar();
@@ -914,11 +936,12 @@ internal sealed class SnapshotControlView
     private static readonly Comparison<Variation> _byActivationIndex
         = (a, b) => a.ActivationIndex.CompareTo(b.ActivationIndex);
 
+    // Temporary ordering experiment: bottom-right first → top-left last (descending Y, then X).
     private static readonly Comparison<OpEntry> _byCanvasPosition
         = (a, b) =>
           {
-              var byY = a.ChildUi.PosOnCanvas.Y.CompareTo(b.ChildUi.PosOnCanvas.Y);
-              return byY != 0 ? byY : a.ChildUi.PosOnCanvas.X.CompareTo(b.ChildUi.PosOnCanvas.X);
+              var byY = b.ChildUi.PosOnCanvas.Y.CompareTo(a.ChildUi.PosOnCanvas.Y);
+              return byY != 0 ? byY : b.ChildUi.PosOnCanvas.X.CompareTo(a.ChildUi.PosOnCanvas.X);
           };
 
     private readonly ModificationCheck _modificationCheck = new();

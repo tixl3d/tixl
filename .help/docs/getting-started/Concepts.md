@@ -81,6 +81,17 @@ You might have notices that TiXL works a lot with numbers like these: `723cd13e-
 
 ------
 
+## Color coding in the interface
+
+TiXL reuses a small set of accent colors so the same hue always means the same thing — whether it shows up on a parameter, an indicator, or a button:
+
+- **Orange** — related to time: animated values, keyframes and playback.
+- **Blue** — driven or linked: a value coming from an input connection or expression rather than typed in directly.
+- **Green** — controllable by Snapshots (or other UI features). For example, a parameter enabled for snapshot control shows a small green knob next to its name.
+- **Magenta** — needs attention: errors, an active recording, or muted audio.
+
+------
+
 ## Performance 
 
 TiXL uses realtime rendering, and a library called [Dear ImGui](https://github.com/ocornut/imgui) to render its user interface. The refresh rate of the user interface is directly synchronized with that of the Output window - this means that more performance-intensive scenes, where a single frame takes longer than 16ms to render, will cause TiXL's interface to become less responsive. Be aware of this before experimenting with rendering millions of points!

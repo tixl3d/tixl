@@ -87,7 +87,8 @@ internal static partial class CustomComponents
         var iconSlotWidth = Icons.FontSize * paddingFactor;
         var leftPaddingIcon = imguiPadding.X + iconSlotWidth;
         var hasIcon = icon != Icon.None;
-        var leftPaddingText = hasIcon ? leftPaddingIcon + iconSlotWidth : leftPaddingIcon;
+        // Always reserve the icon column so icon-less items (e.g. Rename) stay aligned with the rest.
+        var leftPaddingText = leftPaddingIcon + iconSlotWidth;
 
         var width = leftPaddingText + labelWidth + imguiPadding.X * 2;
         if (shortCutWidth > 0)
@@ -131,10 +132,12 @@ internal static partial class CustomComponents
 
         if (hasIcon)
         {
+            // Emphasized when actionable, Default (faded) when disabled.
+            var iconColor = GetStateColor(isEnabled ? ButtonStates.Emphasized : ButtonStates.Default);
             Icons.DrawIconAtScreenPosition(icon,
                                            (min + new Vector2(leftPaddingIcon,
                                                               h / 2 - Icons.FontSize / 2)).Floor(),
-                                           drawList, UiColors.Text.Fade(fade));
+                                           drawList, iconColor);
         }
 
         var textHeight = ImGui.GetFontSize();
