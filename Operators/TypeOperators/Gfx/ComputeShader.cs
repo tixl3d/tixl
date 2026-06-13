@@ -59,6 +59,9 @@ public sealed class ComputeShader : Instance<ComputeShader>, IDescriptiveFilenam
     string IShaderOperator<ComputeShaderT3>.CachedEntryPoint { get; set; } = default!; // set by Initialize()
 
     Slot<ComputeShaderT3> IShaderOperator<ComputeShaderT3>.ShaderSlot => Shader;
+
+    // ThreadCount is derived from the shader, so it must also be re-invalidated when the shader recompiles.
+    ISlot[] IShaderOperator<ComputeShaderT3>.ShaderDerivedOutputs => [ThreadCount];
     #endregion
 
     #region IStatusProvider implementation

@@ -116,7 +116,15 @@ public interface IShaderOperator<T> : IDescriptiveFilename where T : AbstractSha
     
     protected string CachedEntryPoint { get; set; }
     void OnShaderUpdate(EvaluationContext context, T? shader);
-    
+
+    /// <summary>
+    /// Outputs derived from the compiled shader (e.g. a compute shader's thread-group count) that must be
+    /// re-invalidated when the shader file recompiles. A live recompile force-invalidates only the resource's
+    /// dependent slots, so a second derived output must be listed here — otherwise downstream consumers keep
+    /// the stale value until the graph is invalidated some other way (reconnect, restart).
+    /// </summary>
+    protected ISlot[]? ShaderDerivedOutputs => null;
+
     IResourceConsumer Instance => ShaderSlot.Parent;
 
     void Initialize()
@@ -124,6 +132,11 @@ public interface IShaderOperator<T> : IDescriptiveFilename where T : AbstractSha
         var resource = ResourceManager.CreateShaderResource<T>(Path, () => CachedEntryPoint);
         var shaderSlot = ShaderSlot;
         resource.AddDependentSlots(shaderSlot);
+
+        var derivedOutputs = ShaderDerivedOutputs;
+        if (derivedOutputs != null)
+            resource.AddDependentSlots(derivedOutputs);
+
         shaderSlot.UpdateAction = context =>
                                   {
                                       if (EntryPoint.DirtyFlag.IsDirty)
