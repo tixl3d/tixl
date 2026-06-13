@@ -63,9 +63,10 @@ public sealed class ApcMini : CompatibleMidiDevice
                           };
     }
 
-    // 8×8 clip grid with index 1 at the bottom-left (the APC Mini's physical arrangement).
+    // 8×8 clip grid, note 0 at the bottom-left (the APC Mini's physical arrangement). The index
+    // is the raw pad note (0-based), matching how the LED range maps button → snapshot index.
     public override ControllerGridLayout? GridLayout { get; }
-        = new("APC Mini", 8, 8, (row, column) => (8 - 1 - row) * 8 + column + 1);
+        = new("APC Mini", 8, 8, (row, column) => (8 - 1 - row) * 8 + column);
 
     protected override void UpdateVariationVisualization()
     {

@@ -64,21 +64,20 @@ internal sealed class SetIntVar : Instance<SetIntVar>
         }
     }
 
-        
-    [Input(Guid = "662b8a63-58db-4c9e-b53a-7ece1f118e12")]
-    public readonly InputSlot<Command> SubGraph = new();
-        
-    [Input(Guid = "bfd87742-aaf5-4fa8-b714-fd275de1c60d")]
-    public readonly InputSlot<string> VariableName = new();
-        
-    [Input(Guid = "72DD0C80-8E95-474B-9AA5-D8292D0FF0DD")]
-    public readonly InputSlot<int> Value = new();
+        [Input(Guid = "72DD0C80-8E95-474B-9AA5-D8292D0FF0DD")]
+        public readonly InputSlot<int> Value = new InputSlot<int>();
 
-    [Input(Guid = "4AB2A742-7F3F-4D96-B67E-73E14B4A8F47", MappedType = typeof(LogLevels))]
-    public readonly InputSlot<int> LogLevel = new();
+        [Input(Guid = "bfd87742-aaf5-4fa8-b714-fd275de1c60d")]
+        public readonly InputSlot<string> VariableName = new InputSlot<string>();
 
-    [Input(Guid = "DA431996-4C4C-4CDC-9723-9116BBB5440C")]
-    public readonly InputSlot<bool> ClearAfterExecution = new ();
+        [Input(Guid = "662b8a63-58db-4c9e-b53a-7ece1f118e12")]
+        public readonly InputSlot<T3.Core.DataTypes.Command> SubGraph = new InputSlot<T3.Core.DataTypes.Command>();
+
+        [Input(Guid = "4AB2A742-7F3F-4D96-B67E-73E14B4A8F47", MappedType = typeof(LogLevels))]
+        public readonly InputSlot<int> LogLevel = new InputSlot<int>();
+
+        [Input(Guid = "DA431996-4C4C-4CDC-9723-9116BBB5440C")]
+        public readonly InputSlot<bool> ClearAfterExecution = new InputSlot<bool>();
 
     private enum LogLevels
     {

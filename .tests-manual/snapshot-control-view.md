@@ -46,8 +46,11 @@ In the Graph window:
 1. Click the index number on the left of the selector bar.
 
 **Expected:**
-- An 8×8 grid opens (index 1 at bottom-left, like an APC Mini); cells holding a
+- An 8×8 grid opens in reading order (index 1 at the top-left); cells holding a
   snapshot are highlighted, the active one in green, empty cells are dim.
+- When a supported controller defines a layout, a dropdown (top-right) switches
+  the arrangement — e.g. the APC Mini's bottom-up, 0-based pad grid that matches
+  its hardware.
 - Clicking a used cell applies that snapshot and closes the grid; hovering one
   shows its title (and previews it live when hover preview is enabled).
 

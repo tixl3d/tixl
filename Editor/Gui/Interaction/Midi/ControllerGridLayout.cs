@@ -15,7 +15,11 @@ public sealed class ControllerGridLayout(string name, int columns, int rows, Fun
     public int Columns { get; } = columns;
     public int Rows { get; } = rows;
 
-    /// <summary>1-based activation index for the cell at (row from top, column from left).</summary>
+    /// <summary>
+    /// Activation index for the cell at (row from top, column from left). The base depends on the
+    /// layout: the reading order starts at 1, hardware layouts use the controller's own pad numbering
+    /// (the APC Mini's pads are 0-based, matching how its LED range maps a button to a snapshot index).
+    /// </summary>
     public int CellToIndex(int row, int column) => cellToIndex(row, column);
 }
 
