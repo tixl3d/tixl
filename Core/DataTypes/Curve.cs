@@ -28,7 +28,11 @@ public sealed class Curve : IEditableInputType
 
     public Curve TypedClone()
     {
-        return new Curve { _state = _state.Clone() };
+        var clone = new Curve { _state = _state.Clone() };
+        // Re-parent the cloned keys to the clone (Clone() leaves them detached) so VDefinition
+        // setters auto-invalidate the clone's sample cache — e.g. live tangent edits in the curve editor.
+        clone.SetParentOnAllKeys();
+        return clone;
     }
 
     public Animation.CurveUtils.OutsideCurveBehavior PreCurveMapping
