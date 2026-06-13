@@ -609,7 +609,7 @@ internal sealed partial class MagGraphView
 
             if (isNonLib)
             {
-                  DrawIndicator(drawList, UiColors.StatusControlled, idleFadeFactor, pMin, pMax, CanvasScale, ref indicatorCount, "is a custom symbol");
+                  DrawIndicator(drawList, UiColors.StatusActivated, idleFadeFactor, pMin, pMax, CanvasScale, ref indicatorCount, "is a custom symbol");
             }
 
         }

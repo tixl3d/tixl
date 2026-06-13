@@ -63,6 +63,10 @@ public sealed class ApcMini : CompatibleMidiDevice
                           };
     }
 
+    // 8×8 clip grid with index 1 at the bottom-left (the APC Mini's physical arrangement).
+    public override ControllerGridLayout? GridLayout { get; }
+        = new("APC Mini", 8, 8, (row, column) => (8 - 1 - row) * 8 + column + 1);
+
     protected override void UpdateVariationVisualization()
     {
         _updateCount++;

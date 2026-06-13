@@ -6,6 +6,7 @@ using T3.Core.Operator.Slots;
 using T3.Core.Utils;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Interaction;
+using T3.Editor.Gui.Interaction.Midi;
 using T3.Editor.Gui.Interaction.Variations;
 using T3.Editor.Gui.Interaction.Variations.Model;
 using T3.Editor.Gui.Styling;
@@ -247,16 +248,18 @@ internal sealed class SnapshotControlView
             var frameHeight = ImGui.GetFrameHeight();
             var spacing = ImGui.GetStyle().ItemSpacing.X;
             var addButtonGap = 4 * T3Ui.UiScaleFactor;
-            var actionButtonsWidth = 4 * frameHeight + 3 * spacing + addButtonGap;
+            // revert (drag) + create (drag) + actions menu
+            var actionButtonsWidth = 3 * frameHeight + 2 * spacing + addButtonGap;
             var arrowsWidth = 2 * (frameHeight + spacing);
 
-            // Index indicator — click to rename the active snapshot
+            // Index indicator — click to open the controller-index grid
             ImGui.AlignTextToFramePadding();
             CustomComponents.StylizedText(_indexLabel, Fonts.FontBold, UiColors.TextMuted);
-            if (ImGui.IsItemClicked() && selectedSnapshot != null)
-                StartRenaming(selectedSnapshot);
+            if (ImGui.IsItemClicked())
+                ImGui.OpenPopup(ControllerGridPopupId);
 
-            CustomComponents.TooltipForLastItem("Click to rename snapshot");
+            _indexPopupPos = new Vector2(ImGui.GetItemRectMin().X, ImGui.GetItemRectMax().Y + 2 * T3Ui.UiScaleFactor);
+            CustomComponents.TooltipForLastItem("Click to set the controller index");
             ImGui.SameLine();
 
             var dropdownWidth = MathF.Max(frameHeight,
@@ -306,32 +309,200 @@ internal sealed class SnapshotControlView
             if (DrawBarButton(Icon.ArrowRight, hasSnapshots, "Next snapshot", CustomComponents.ButtonStates.Default))
                 ApplySnapshot(pool, composition, GetNeighborSnapshot(selectedSnapshot, +1));
 
-            // Right-aligned actions
+            // Right-aligned actions: revert (drag) + create (drag) stay icons; the rest move into
+            // an actions menu (revert/create keep their drag-to-scale gestures).
             CustomComponents.RightAlign(actionButtonsWidth);
 
             var canWrite = selectedSnapshot != null && isModified;
-            if (DrawBarButton(Icon.Apply, canWrite, "Update snapshot from current values"))
-                WriteSnapshot(pool, composition, selectedSnapshot!);
-
-            ImGui.SameLine();
             DrawBarRevertButton(pool, composition, selectedSnapshot, canWrite);
-
-            ImGui.SameLine();
-            if (DrawBarButton(Icon.Trash, selectedSnapshot != null, "Remove snapshot",
-                    CustomComponents.ButtonStates.Default, attentionOnHover: true))
-            {
-                pool.DeleteVariation(selectedSnapshot!);
-                _modificationCheck.Invalidate();
-            }
 
             // Creating a new snapshot only makes sense when the current values differ
             ImGui.SameLine(0, spacing + addButtonGap);
             var canCreate = selectedSnapshot == null || isModified;
             if (DrawBarButton(Icon.Plus, canCreate, "Create new snapshot from current values"))
                 CreateAndRenameSnapshot(pool, composition);
+
+            ImGui.SameLine();
+            if (DrawBarButton(Icon.Settings2, selectedSnapshot != null, "Snapshot actions", CustomComponents.ButtonStates.Default))
+                ImGui.OpenPopup(SnapshotActionsPopupId);
+
+            DrawSnapshotActionsMenu(pool, composition, selectedSnapshot, isModified);
+            DrawControllerGrid(pool, composition, selectedSnapshot);
         }
         ImGui.EndChild();
         ImGui.PopStyleVar();
+    }
+
+    /// <summary>
+    /// The "…" actions popup for the active snapshot. Apply / Rename / Update thumbnail, then
+    /// Remove below a divider. (Revert and create stay as bar icons for their drag gestures.)
+    /// </summary>
+    private void DrawSnapshotActionsMenu(SymbolVariationPool pool, Instance composition, Variation? selectedSnapshot, bool isModified)
+    {
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(6, 6) * T3Ui.UiScaleFactor);
+        if (ImGui.BeginPopup(SnapshotActionsPopupId))
+        {
+            if (CustomComponents.DrawMenuItem(_applyActionId, Icon.Apply, "Apply changes", isEnabled: selectedSnapshot != null && isModified))
+                WriteSnapshot(pool, composition, selectedSnapshot!);
+
+            if (CustomComponents.DrawMenuItem(_renameActionId, Icon.None, "Rename", isEnabled: selectedSnapshot != null))
+                StartRenaming(selectedSnapshot!);
+
+            if (CustomComponents.DrawMenuItem(_updateThumbnailActionId, Icon.Refresh, "Update thumbnail", isEnabled: selectedSnapshot != null))
+                VariationThumbnailRenderer.RequestRender(pool, composition, selectedSnapshot!.Id, toFile: true);
+
+            CustomComponents.SeparatorLine();
+
+            if (CustomComponents.DrawMenuItem(_removeActionId, Icon.Trash, "Remove", isEnabled: selectedSnapshot != null))
+            {
+                pool.DeleteVariation(selectedSnapshot!);
+                _modificationCheck.Invalidate();
+            }
+
+            ImGui.EndPopup();
+        }
+
+        ImGui.PopStyleVar();
+    }
+
+    /// <summary>
+    /// A launchpad-style 8×8 grid of activation indices (index 1 at bottom-left, like an APC Mini).
+    /// Used snapshots highlight on their cell (active = green); clicking one applies it, hovering
+    /// previews it (when hover preview is on) and shows its title. Makes the MIDI index layout
+    /// explicit and distinct from the list's display order.
+    /// </summary>
+    private void DrawControllerGrid(SymbolVariationPool pool, Instance composition, Variation? active)
+    {
+        var scale = T3Ui.UiScaleFactor;
+        ImGui.SetNextWindowPos(_indexPopupPos);
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(8, 8) * scale);
+        ImGui.PushStyleColor(ImGuiCol.PopupBg, UiColors.BackgroundFull.Rgba);
+
+        var hoveredAny = false;
+        if (ImGui.BeginPopup(ControllerGridPopupId))
+        {
+            var layouts = ControllerGridLayouts.All;
+            if (_gridLayoutIndex >= layouts.Count)
+                _gridLayoutIndex = 0;
+            var layout = layouts[_gridLayoutIndex];
+
+            CustomComponents.StylizedText("Set controller index", Fonts.FontSmall, UiColors.TextMuted);
+            if (layouts.Count > 1)
+            {
+                var comboWidth = 120 * scale;
+                CustomComponents.RightAlign(comboWidth);
+                ImGui.SetNextItemWidth(comboWidth);
+                var layoutIndex = _gridLayoutIndex;
+                if (ImGui.Combo("##gridLayout", ref layoutIndex, GetLayoutNames()))
+                    _gridLayoutIndex = layoutIndex;
+            }
+
+            FormInputs.AddVerticalSpace(4);
+
+            var cell = 34 * scale;
+            var gap = 3 * scale;
+            var drawList = ImGui.GetWindowDrawList();
+
+            ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(gap, gap));
+            ImGui.PushFont(Fonts.FontSmall);
+            for (var row = 0; row < layout.Rows; row++)
+            {
+                for (var col = 0; col < layout.Columns; col++)
+                {
+                    if (col > 0)
+                        ImGui.SameLine();
+
+                    var index = layout.CellToIndex(row, col);
+                    var snapshot = FindByActivationIndex(index);
+
+                    ImGui.PushID(index);
+                    var clicked = ImGui.InvisibleButton("##cell", new Vector2(cell, cell));
+                    var min = ImGui.GetItemRectMin();
+                    var max = ImGui.GetItemRectMax();
+                    var isActive = snapshot != null && snapshot == active;
+                    var isHovered = ImGui.IsItemHovered();
+
+                    var bg = isActive ? UiColors.StatusControlled
+                             : snapshot != null ? (isHovered ? UiColors.BackgroundHover : UiColors.BackgroundButton)
+                             : UiColors.BackgroundFull.Fade(0.4f);
+                    drawList.AddRectFilled(min, max, bg, 4 * scale);
+
+                    var label = index.ToString("00");
+                    var textColor = snapshot == null ? UiColors.TextMuted.Fade(0.4f)
+                                    : isActive ? UiColors.ForegroundFull : UiColors.Text;
+                    var textSize = ImGui.CalcTextSize(label);
+                    drawList.AddText(((min + max) / 2 - textSize / 2).Floor(), textColor, label);
+
+                    if (snapshot != null && isHovered)
+                    {
+                        hoveredAny = true;
+                        CustomComponents.TooltipForLastItem(GetTitleOrDefault(snapshot));
+
+                        if (UserSettings.Config.VariationHoverPreview && _gridPreviewedId != snapshot.Id)
+                        {
+                            pool.BeginHover(composition, snapshot);
+                            _gridPreviewedId = snapshot.Id;
+                        }
+
+                        if (clicked)
+                        {
+                            ApplySnapshot(pool, composition, snapshot);
+                            ImGui.CloseCurrentPopup();
+                        }
+                    }
+
+                    ImGui.PopID();
+                }
+            }
+
+            ImGui.PopFont();
+            ImGui.PopStyleVar();
+
+            if (!hoveredAny && _gridPreviewedId != Guid.Empty)
+            {
+                pool.StopHover();
+                _gridPreviewedId = Guid.Empty;
+            }
+
+            ImGui.EndPopup();
+        }
+        else if (_gridPreviewedId != Guid.Empty)
+        {
+            pool.StopHover();
+            _gridPreviewedId = Guid.Empty;
+        }
+
+        ImGui.PopStyleColor();
+        ImGui.PopStyleVar();
+    }
+
+    private string GetLayoutNames()
+    {
+        if (_layoutNamesForCombo != null)
+            return _layoutNamesForCombo;
+
+        var names = "";
+        foreach (var layout in ControllerGridLayouts.All)
+            names += layout.Name + "\0";
+
+        _layoutNamesForCombo = names;
+        return _layoutNamesForCombo;
+    }
+
+    private Variation? FindByActivationIndex(int activationIndex)
+    {
+        foreach (var s in _snapshots)
+        {
+            if (s.ActivationIndex == activationIndex)
+                return s;
+        }
+
+        return null;
+    }
+
+    private static string GetTitleOrDefault(Variation variation)
+    {
+        return string.IsNullOrEmpty(variation.Title) || variation.Title == "untitled" ? "Untitled" : variation.Title!;
     }
 
     /// <summary>
@@ -944,6 +1115,13 @@ internal sealed class SnapshotControlView
             return byY != 0 ? byY : b.ChildUi.PosOnCanvas.X.CompareTo(a.ChildUi.PosOnCanvas.X);
         };
 
+    private const string SnapshotActionsPopupId = "##snapshotActions";
+    private const string ControllerGridPopupId = "##controllerGrid";
+    private static readonly int _applyActionId = "snapshotApply".GetHashCode();
+    private static readonly int _renameActionId = "snapshotRename".GetHashCode();
+    private static readonly int _updateThumbnailActionId = "snapshotUpdateThumbnail".GetHashCode();
+    private static readonly int _removeActionId = "snapshotRemove".GetHashCode();
+
     private readonly ModificationCheck _modificationCheck = new();
     private readonly VariationPicker _picker = new();
     private readonly SnapshotCanvas _snapshotCanvas = new();
@@ -963,6 +1141,12 @@ internal sealed class SnapshotControlView
     private string? _lastLabelTitle;
     private string _indexLabel = "-";
     private string _selectedSnapshotLabel = "Select snapshot...";
+
+    // Controller-index grid
+    private Vector2 _indexPopupPos;
+    private Guid _gridPreviewedId;
+    private int _gridLayoutIndex;
+    private string? _layoutNamesForCombo;
 
     // Inline snapshot rename (selector bar)
     private Guid _renamingSnapshotId;

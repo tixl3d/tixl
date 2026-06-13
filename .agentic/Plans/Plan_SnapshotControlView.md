@@ -93,6 +93,14 @@ When the composition is active in a Parameter window, show:
 4. Group order derived from section canvas position. Manual reordering of groups/ops via the drag-handle interaction (`ParameterSettings` pattern) is a *stretch goal*, only if sections own a persisted member order by then.
 5. Ops hidden in a collapsed section still appear; clicking them expands/centers on the collapsed frame.
 
+## Controller-index grid
+
+Clicking the index left of the selector dropdown opens a launchpad-style grid of activation indices. It makes the MIDI index layout explicit and visually distinct from the list's display order, addressing the index-vs-order confusion.
+
+- **Done (2026-06-14):** grid view (`DrawControllerGrid`) with used cells highlighted (active = green `StatusControlled`), click-to-apply, hover preview (gated on `VariationHoverPreview`) + title tooltip.
+- **Done (2026-06-14): pluggable layouts.** [`ControllerGridLayout`](../../Editor/Gui/Interaction/Midi/ControllerGridLayout.cs) maps a screen cell → activation index; `CompatibleMidiDevice.GridLayout` lets each controller surface its own arrangement (it already knows this mapping for LED colors — `ApcMini` returns its bottom-up 8×8). `ControllerGridLayouts.All` collects them (reflection over the device scan) plus a built-in **"Reading order"** (top-down), which is now the **default** — fixing the counter-intuitive bottom-up. The grid popup has a layout dropdown when more than one exists.
+- **Deferred:** drag a used cell to an empty/other cell to **reassign `ActivationIndex`** (the user's core "organize" motivation — needs an undoable index-change command + collision/swap handling); optional **thumbnail cells**; persisting the chosen layout (currently session-only) and a per-device layout for the non-APC controllers.
+
 ## Open questions
 
 - Should the snapshot control view *also* replace the regular no-selection state when the composition has published inputs (the "this whole view could be the parameter window" idea)? Deferred until the view has proven itself — it changes what "nothing selected" means for every user.

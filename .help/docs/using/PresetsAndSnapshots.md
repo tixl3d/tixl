@@ -20,11 +20,11 @@ Presets showcase whats possible with an operator, and highlight options and para
 
 While the Variations window is the visual interface for snapshots, the Parameter window offers a precise, per-parameter one: when nothing is selected in the graph (the composition itself is active), it shows the **snapshot control view**.
 
-At the top, a selector bar shows the index of the active snapshot, a dropdown to pick one, and prev/next arrows that cycle through snapshots in index order. On the right are three actions:
+At the top, a selector bar shows the index of the active snapshot, a searchable picker to choose one, and prev/next arrows that cycle through snapshots in index order. On the right are:
 
-- **Write** (camera icon) — update the snapshot with the current parameter values. Only enabled when values differ from the snapshot.
-- **Revert** (circular arrow) — re-apply the snapshot's stored values. Also only enabled when something changed.
-- **Remove** (trash icon) — delete the snapshot.
+- **Revert** — re-apply the snapshot's stored values (enabled when the current values differ). Drag it to scale the change: towards 0 reverts fully, above 1 amplifies it.
+- **Create (+)** — make a new snapshot from the current values.
+- An **actions menu (…)** with **Apply changes** (update the snapshot from the current values), **Rename**, **Update thumbnail**, and **Remove**.
 
 Click the **+** button to create a new snapshot from the current values; it becomes active and its name field is focused so it can be named right away. Clicking the index number on the left of the bar renames the active snapshot.
 

@@ -31,19 +31,34 @@ In the Graph window:
 1. Click the "Create snapshot" button in the Parameter window.
 
 **Expected:**
-- A selector bar appears at the top: index indicator, a snapshot dropdown, prev/next arrow buttons, and write/revert/remove plus an add (+) button.
-- A text field is focused immediately so the snapshot can be named; typing a name and pressing Enter (or clicking away) stores it.
+- A selector bar appears at the top: index indicator, a snapshot dropdown,
+  prev/next arrows, a revert button, an add (+) button, and an actions (…) menu
+  (holding Apply changes / Rename / Update thumbnail / Remove).
+- A text field is focused immediately so the snapshot can be named; typing a
+  name and pressing Enter (or clicking away) stores it.
 - The new snapshot is the active one.
 - Below the bar, both enabled operators are listed with their captured parameters in rounded panels, ordered by their vertical position in the graph.
 - The Variations window shows a new snapshot thumbnail.
 
-## Step: Renaming a snapshot from the selector bar
+## Step: Controller-index grid
 
 **Action:**
 1. Click the index number on the left of the selector bar.
 
 **Expected:**
-- The dropdown is replaced by a focused text field pre-filled with the current name; editing and pressing Enter renames the snapshot.
+- An 8×8 grid opens (index 1 at bottom-left, like an APC Mini); cells holding a
+  snapshot are highlighted, the active one in green, empty cells are dim.
+- Clicking a used cell applies that snapshot and closes the grid; hovering one
+  shows its title (and previews it live when hover preview is enabled).
+
+## Step: Renaming a snapshot
+
+**Action:**
+Open the actions (…) menu in the selector bar and choose "Rename".
+
+**Expected:**
+- The dropdown is replaced by a focused text field pre-filled with the current
+  name; editing and pressing Enter renames the snapshot.
 
 ## Step: Adding a snapshot with the + button
 
@@ -102,7 +117,7 @@ In the Graph window:
 
 **Expected:**
 - The edited parameter returns to the value stored in the snapshot.
-- The write and revert buttons become disabled again.
+- The revert button disables again (and "Apply changes" greys out).
 - `Ctrl+Z` restores the edited value; `Ctrl+Y`/redo re-applies the snapshot.
 
 ## Step: Writing changes into the snapshot
