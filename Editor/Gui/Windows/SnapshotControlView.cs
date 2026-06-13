@@ -251,10 +251,12 @@ internal sealed class SnapshotControlView
             if (isRenaming)
             {
                 ImGui.SetNextItemWidth(dropdownWidth);
-                if (_renameJustStarted)
+                // Focus for two frames: when started by clicking the index, the triggering click
+                // would otherwise steal focus back on the first frame.
+                if (_renameFocusFramesLeft > 0)
                 {
                     ImGui.SetKeyboardFocusHere();
-                    _renameJustStarted = false;
+                    _renameFocusFramesLeft--;
                 }
 
                 ImGui.InputText("##renameSnapshot", ref _renameBuffer, 256);
@@ -275,8 +277,8 @@ internal sealed class SnapshotControlView
                     {
                         var isSelected = snapshot == selectedSnapshot;
                         var label = string.IsNullOrEmpty(snapshot.Title) || snapshot.Title == "untitled"
-                                        ? $"Snapshot #{snapshot.ActivationIndex}"
-                                        : $"{snapshot.Title} #{snapshot.ActivationIndex}";
+                                        ? "Untitled"
+                                        : snapshot.Title;
                         if (ImGui.Selectable(label, isSelected))
                         {
                             ApplySnapshot(pool, composition, snapshot);
@@ -305,8 +307,7 @@ internal sealed class SnapshotControlView
                 WriteSnapshot(pool, composition, selectedSnapshot!);
 
             ImGui.SameLine();
-            if (DrawBarButton(Icon.Reset, canWrite, "Revert to snapshot values"))
-                ApplySnapshot(pool, composition, selectedSnapshot!);
+            DrawBarRevertButton(pool, composition, selectedSnapshot, canWrite);
 
             ImGui.SameLine();
             if (DrawBarButton(Icon.Trash, selectedSnapshot != null, "Remove snapshot",
@@ -346,11 +347,69 @@ internal sealed class SnapshotControlView
         return clicked && isActive;
     }
 
+    /// <summary>
+    /// The bar's revert button: a plain click re-applies the snapshot; dragging opens an infinity
+    /// slider that scales the whole snapshot blend (1 = current, 0 = full revert, &gt;1 amplifies).
+    /// Reuses the pool's blend-towards-snapshot machinery (same as the Variations window hover-blend).
+    /// </summary>
+    private void DrawBarRevertButton(SymbolVariationPool pool, Instance composition, Variation? snapshot, bool canRevert)
+    {
+        CustomComponents.IconButton(Icon.Reset, Vector2.Zero,
+                                    canRevert ? CustomComponents.ButtonStates.Emphasized : CustomComponents.ButtonStates.Disabled);
+        CustomComponents.TooltipForLastItem("Click to revert, drag to scale the snapshot");
+
+        if (snapshot == null)
+            return;
+
+        if (ImGui.IsItemActivated() && canRevert)
+        {
+            _barRevertActive = true;
+            _barRevertModified = false;
+            _barRevertSliderStarted = false;
+            _barRevertFactor = 1;
+        }
+
+        if (_barRevertActive && ImGui.IsItemActive())
+        {
+            var draggedFar = ImGui.GetIO().MouseDragMaxDistanceSqr[0] > UserSettings.Config.ClickThreshold;
+            if (draggedFar)
+            {
+                var restarted = !_barRevertSliderStarted;
+                _barRevertSliderStarted = true;
+                InfinitySliderOverlay.Draw(ref _barRevertFactor, restarted, ImGui.GetMousePos(), min: 0, max: 1, scale: 0.05f * 0.25f);
+
+                // factor 1 = current, 0 = snapshot, >1 amplifies — blend amount is the complement
+                pool.BeginBlendTowardsSnapshot(composition, snapshot, (float)(1 - _barRevertFactor));
+                _barRevertModified = true;
+            }
+        }
+
+        if (_barRevertActive && ImGui.IsItemDeactivated())
+        {
+            if (_barRevertModified)
+            {
+                // Dragged back to factor 1 leaves the state unchanged — discard the live blend
+                if (Math.Abs(_barRevertFactor - 1) > 0.0001)
+                    pool.ApplyCurrentBlend();
+                else
+                    pool.StopHover();
+            }
+            else
+            {
+                ApplySnapshot(pool, composition, snapshot);
+            }
+
+            _barRevertActive = false;
+            _barRevertModified = false;
+            _modificationCheck.Invalidate();
+        }
+    }
+
     private void StartRenaming(Variation variation)
     {
         _renamingSnapshotId = variation.Id;
         _renameBuffer = string.IsNullOrEmpty(variation.Title) || variation.Title == "untitled" ? "" : variation.Title;
-        _renameJustStarted = true;
+        _renameFocusFramesLeft = 2;
     }
 
     private void CreateAndRenameSnapshot(SymbolVariationPool pool)
@@ -623,7 +682,7 @@ internal sealed class SnapshotControlView
                 // keeping the overlay's stale value from a previous (unrelated) edit.
                 var restarted = !_revertSliderStarted;
                 _revertSliderStarted = true;
-                InfinitySliderOverlay.Draw(ref _revertFactor, restarted, ImGui.GetMousePos(), min: 0, max: 1, scale: 0.05f);
+                InfinitySliderOverlay.Draw(ref _revertFactor, restarted, ImGui.GetMousePos(), min: 0, max: 1, scale: 0.05f * 0.25f);
 
                 var blended = blend(_revertSnapshotValue, _revertStartValue, (float)_revertFactor);
                 if (blended != null)
@@ -825,8 +884,8 @@ internal sealed class SnapshotControlView
         {
             _indexLabel = selectedSnapshot.ActivationIndex.ToString();
             _selectedSnapshotLabel = string.IsNullOrEmpty(title) || title == "untitled"
-                                         ? $"Snapshot #{selectedSnapshot.ActivationIndex}"
-                                         : $"{title} #{selectedSnapshot.ActivationIndex}";
+                                         ? "Untitled"
+                                         : title;
         }
     }
 
@@ -860,8 +919,14 @@ internal sealed class SnapshotControlView
 
     // Inline snapshot rename (selector bar)
     private Guid _renamingSnapshotId;
-    private bool _renameJustStarted;
+    private int _renameFocusFramesLeft;
     private string _renameBuffer = "";
+
+    // Bar revert drag (infinity slider scaling the whole snapshot blend)
+    private bool _barRevertActive;
+    private bool _barRevertModified;
+    private bool _barRevertSliderStarted;
+    private double _barRevertFactor;
 
     // Per-row revert drag (infinity slider scaling the delta to the snapshot)
     private Guid _revertDragInputId;

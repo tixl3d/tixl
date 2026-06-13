@@ -306,6 +306,7 @@ internal static class Icons
             new(Icon.Record, slotIndex: 149),    
             new(Icon.Reset, slotIndex: 150),
             new(Icon.Apply, slotIndex: 151),
+            new(Icon.DragIndicator, slotIndex: 152),
         };
 
     public static readonly string IconAtlasPath = Path.Combine(SharedResources.EditorResourcesDirectory, @"images/t3-icons.png");
@@ -475,5 +476,6 @@ public enum Icon
     Error,
     Record,
     Reset,
-    Apply
+    Apply,
+    DragIndicator
 }
