@@ -181,13 +181,15 @@ internal sealed class OutputWindow : Window
         
         // Begin a horizontally scrollable child region
         ImGui.BeginChild("##toolbar_scroll", new Vector2(availableWidth, toolbarHeight), ImGuiChildFlags.None, ImGuiWindowFlags.HorizontalScrollbar);
+        // Keep filled backgrounds so the toolbar reads as a continuous bar.
+        CustomComponents.PushToolbarIconBackground();
 
         Pinning.DrawPinning();
 
         if (CustomComponents.StateButton("1:1",
                                          Math.Abs(_imageCanvas.Scale.X - 1f) < 0.001f
                                              ? CustomComponents.ButtonStates.Disabled
-                                             : CustomComponents.ButtonStates.Normal))
+                                             : CustomComponents.ButtonStates.Emphasized))
         {
             _imageCanvas.SetScaleToMatchPixels();
             _imageCanvas.SetViewMode(ImageOutputCanvas.Modes.Pixel);
@@ -199,7 +201,7 @@ internal sealed class OutputWindow : Window
             if (CustomComponents.StateButton("Fit",
                                              _imageCanvas.ViewMode == ImageOutputCanvas.Modes.Fitted
                                                  ? CustomComponents.ButtonStates.Disabled
-                                                 : CustomComponents.ButtonStates.Normal))
+                                                 : CustomComponents.ButtonStates.Emphasized))
             {
                 if (drawnType == typeof(Texture2D))
                 {
@@ -326,7 +328,7 @@ internal sealed class OutputWindow : Window
 
 
             var screenshotState = !RenderProcess.IsExporting && RenderProcess.MainOutputType != null
-                                      ? CustomComponents.ButtonStates.Normal
+                                      ? CustomComponents.ButtonStates.Emphasized
                                       : CustomComponents.ButtonStates.Disabled;
 
             if (CustomComponents.IconButton(Icon.Snapshot, Vector2.Zero, screenshotState))
@@ -343,7 +345,7 @@ internal sealed class OutputWindow : Window
             var renderAnimState = RenderProcess.IsExporting
                                       ? CustomComponents.ButtonStates.NeedsAttention
                                       : RenderProcess.MainOutputType != null
-                                          ? CustomComponents.ButtonStates.Normal
+                                          ? CustomComponents.ButtonStates.Emphasized
                                           : CustomComponents.ButtonStates.Disabled;
 
             if (CustomComponents.IconButton(Icon.RenderAnimation, Vector2.Zero, renderAnimState))
@@ -368,6 +370,7 @@ internal sealed class OutputWindow : Window
             }
         }
 
+        CustomComponents.PopToolbarIconBackground();
         ImGui.EndChild();
     }
 

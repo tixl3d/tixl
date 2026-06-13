@@ -179,7 +179,7 @@ internal sealed class VariationsWindow : Window
                                               iconOff:Icon.HoverScrub,
                                               iconOn:Icon.HoverScrub,
                                               CustomComponents.ButtonStates.NeedsAttention,
-                                              CustomComponents.ButtonStates.Dimmed,
+                                              CustomComponents.ButtonStates.Default,
                                               noBackground:true);
 
         CustomComponents.TooltipForLastItem("Preview on hover",
@@ -191,7 +191,7 @@ internal sealed class VariationsWindow : Window
                                                   iconOff:Icon.AutoRefresh,
                                                   iconOn:Icon.AutoRefresh,
                                                   CustomComponents.ButtonStates.NeedsAttention,
-                                                  CustomComponents.ButtonStates.Dimmed,
+                                                  CustomComponents.ButtonStates.Default,
                                                   noBackground:true))
         {
             _presetCanvas.EnableLiveThumbnails(liveThumbnails);

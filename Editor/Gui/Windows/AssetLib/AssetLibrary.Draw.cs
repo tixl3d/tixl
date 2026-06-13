@@ -34,8 +34,8 @@ internal sealed partial class AssetLibrary
         {
             ImGui.SameLine();
             var collapseIconState = _state.TreeHandler.NoFolderOpen
-                                        ? CustomComponents.ButtonStates.Dimmed
-                                        : CustomComponents.ButtonStates.Normal;
+                                        ? CustomComponents.ButtonStates.Default
+                                        : CustomComponents.ButtonStates.Emphasized;
 
             if (CustomComponents.IconButton(Icon.TreeCollapse, Vector2.Zero, collapseIconState))
             {
@@ -48,7 +48,7 @@ internal sealed partial class AssetLibrary
             ImGui.SameLine();
             var toolItemState = _state.ActiveTypeFilters.Count > 0
                                     ? CustomComponents.ButtonStates.NeedsAttention
-                                    : CustomComponents.ButtonStates.Normal;
+                                    : CustomComponents.ButtonStates.Emphasized;
 
             if (CustomComponents.IconButton(Icon.Settings2, Vector2.Zero, toolItemState))
             {

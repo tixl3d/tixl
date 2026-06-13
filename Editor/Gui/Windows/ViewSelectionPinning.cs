@@ -42,7 +42,7 @@ internal sealed class ViewSelectionPinning
         var iconSize = new Vector2(ImGui.GetFrameHeight(), ImGui.GetFrameHeight());
         if (CustomComponents.IconButton(Icon.Pin,
                                         iconSize,
-                                        _isPinned ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Dimmed
+                                        _isPinned ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Default
                                        ))
         {
             if (_isPinned)
@@ -63,7 +63,7 @@ internal sealed class ViewSelectionPinning
             ImGui.SameLine();
             if (CustomComponents.IconButton(Icon.PlayOutput,
                                             iconSize,
-                                            isPinnedToSelected ? CustomComponents.ButtonStates.Disabled : CustomComponents.ButtonStates.Normal
+                                            isPinnedToSelected ? CustomComponents.ButtonStates.Disabled : CustomComponents.ButtonStates.Emphasized
                                            )
                 && !isPinnedToSelected
                 && oneSelected)

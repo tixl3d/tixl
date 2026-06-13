@@ -39,11 +39,13 @@ internal static class TimelineToolbar
         ImGui.Dummy(Vector2.Zero);
         ImGui.BeginChild("TimeControls", Vector2.Zero, ImGuiChildFlags.None,
                          ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoBackground);
+        // Transport buttons keep filled backgrounds so the toolbar reads as a continuous bar.
+        CustomComponents.PushToolbarIconBackground();
         {
             var icon = components.TimeLineCanvas.FoldingHeight.UsingCustomTimelineHeight
                            ? Icon.ChevronDown
                            : Icon.ChevronUp;
-            if (CustomComponents.IconButton(icon, TimeControls.ControlSize, CustomComponents.ButtonStates.Dimmed))
+            if (CustomComponents.IconButton(icon, TimeControls.ControlSize, CustomComponents.ButtonStates.Default))
             {
                 components.TimeLineCanvas.FoldingHeight.Toggle();
                 UserSettings.Config.ShowTimeline = true;
@@ -65,6 +67,7 @@ internal static class TimelineToolbar
             DrawRecordButton(components);
             ImGui.PopStyleVar();
         }
+        CustomComponents.PopToolbarIconBackground();
         ImGui.EndChild();
     }
 
@@ -96,7 +99,7 @@ internal static class TimelineToolbar
         var state = isRecording
                         ? CustomComponents.ButtonStates.NeedsAttention
                         : enabled
-                            ? CustomComponents.ButtonStates.Normal
+                            ? CustomComponents.ButtonStates.Emphasized
                             : CustomComponents.ButtonStates.Disabled;
 
         var clicked = CustomComponents.IconButton(Icon.Record, TimeControls.ControlSize, state);

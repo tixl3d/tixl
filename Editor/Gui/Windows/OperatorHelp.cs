@@ -32,7 +32,7 @@ internal sealed class OperatorHelp
                                         new Vector2(w, w),
                                         isEnabled
                                             ? CustomComponents.ButtonStates.Activated
-                                            : CustomComponents.ButtonStates.Dimmed
+                                            : CustomComponents.ButtonStates.Default
                                        ))
         {
             changed = true;

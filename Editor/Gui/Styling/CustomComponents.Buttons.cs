@@ -36,7 +36,7 @@ internal static partial class CustomComponents
 
     public static bool ToggleIconButton(ref bool isSelected, Icon icon, Vector2 size, ButtonStates activeState = ButtonStates.Activated)
     {
-        var state = isSelected ? activeState : ButtonStates.Dimmed;
+        var state = isSelected ? activeState : ButtonStates.Default;
         var clicked = IconButton(icon, size, state);
         if (clicked)
             isSelected = !isSelected;
@@ -105,12 +105,13 @@ internal static partial class CustomComponents
         return modified;
     }
 
-    public static bool TransparentIconButton(Icon icon, Vector2 size, ButtonStates state = ButtonStates.Normal)
+    /// <summary>
+    /// Kept for call-site compatibility — <see cref="IconButton(Icon,Vector2,ButtonStates)"/> is
+    /// already transparent, so this just forwards to it.
+    /// </summary>
+    public static bool TransparentIconButton(Icon icon, Vector2 size, ButtonStates state = ButtonStates.Default)
     {
-        ImGui.PushStyleColor(ImGuiCol.Button, Color.Transparent.Rgba);
-        var result = IconButton(icon, size, state);
-        ImGui.PopStyleColor();
-        return result;
+        return IconButton(icon, size, state);
     }
 
     /// <summary>
@@ -149,64 +150,100 @@ internal static partial class CustomComponents
         return clicked;
     }
     
-    public static bool IconButton(Icon icon, Vector2 size, ButtonStates state = ButtonStates.Normal)
+    /// <summary>
+    /// The canonical tool icon: transparent background with a subtle rounded hover, so it stays
+    /// quiet in toolbars and panels. <see cref="ButtonStates.Activated"/> draws a filled
+    /// background to read as "on". Icon tint comes from <see cref="GetStateColor"/>.
+    /// </summary>
+    public static bool IconButton(Icon icon, Vector2 size, ButtonStates state = ButtonStates.Default)
     {
         if (size == Vector2.Zero)
-        {
-            var h = ImGui.GetFrameHeight();
-            size = new Vector2(h);
-        }
+            size = new Vector2(ImGui.GetFrameHeight());
 
-        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Vector2.Zero);
-        ImGui.PushStyleColor(ImGuiCol.ButtonActive, UiColors.BackgroundButtonActivated.Rgba);
-
-        if (state == ButtonStates.Activated)
-        {
-            ImGui.PushStyleColor(ImGuiCol.Button, UiColors.BackgroundButtonActivated.Rgba);
-            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, UiColors.BackgroundButtonActivated.Fade(0.8f).Rgba);
-        }
+        var isActivated = state == ButtonStates.Activated;
+        // A disabled icon isn't meant to be clicked, so it gets no hover feedback (tooltip still shows).
+        PushToolIconStyle(GetRestingIconBackground(isActivated),
+                          showHover: state != ButtonStates.Disabled);
 
         ImGui.PushID((int)icon);
         var clicked = ImGui.Button("##iconBtn", size);
         ImGui.PopID();
         Icons.DrawIconOnLastItem(icon, GetStateColor(state).Rgba);
 
-        ImGui.PopStyleColor();
-
-        if (state == ButtonStates.Activated)
-            ImGui.PopStyleColor(2);
-
-        ImGui.PopStyleVar(1);
+        PopToolIconStyle();
         return clicked;
     }
 
-    // New overload
+    /// <summary>
+    /// Transparent tool icon with an explicit tint (used where the color isn't a
+    /// <see cref="ButtonStates"/>, e.g. type-colored or status-colored icons).
+    /// </summary>
     public static bool IconButton(Icon icon, Vector2 size, Color color)
     {
         if (size == Vector2.Zero)
-        {
-            var h = ImGui.GetFrameHeight();
-            size = new Vector2(h);
-        }
+            size = new Vector2(ImGui.GetFrameHeight());
 
-        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Vector2.Zero);
-        ImGui.PushStyleColor(ImGuiCol.ButtonActive, UiColors.BackgroundButtonActivated.Rgba);
+        PushToolIconStyle(GetRestingIconBackground(isActivated: false));
 
         ImGui.PushID((int)icon);
         var clicked = ImGui.Button("##iconBtn", size);
         ImGui.PopID();
-        Icons.DrawIconOnLastItem(icon, color.Rgba);  // use passed color directly
+        Icons.DrawIconOnLastItem(icon, color.Rgba);
 
-        ImGui.PopStyleColor();
-        ImGui.PopStyleVar(1);
+        PopToolIconStyle();
         return clicked;
     }
+
+    /// <summary>
+    /// Within this scope tool icons keep a filled background so a toolbar's buttons tile into a
+    /// continuous bar shape. Wrap the toolbar's icon cluster and <see cref="PopToolbarIconBackground"/>
+    /// afterwards. Everywhere else tool icons stay transparent.
+    /// </summary>
+    public static void PushToolbarIconBackground() => _useFilledIconBackground = true;
+    public static void PopToolbarIconBackground() => _useFilledIconBackground = false;
+
+    private static Color GetRestingIconBackground(bool isActivated)
+    {
+        if (isActivated)
+            return UiColors.BackgroundButtonActivated;
+
+        return _useFilledIconBackground ? UiColors.BackgroundButton : Color.Transparent;
+    }
+
+    private static void PushToolIconStyle(Color background, bool showHover = true)
+    {
+        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, Vector2.Zero);
+        // Square corners in toolbars so filled buttons tile into a continuous bar; rounded elsewhere.
+        ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, _useFilledIconBackground ? 0 : 4 * T3Ui.UiScaleFactor);
+        ImGui.PushStyleColor(ImGuiCol.Button, background.Rgba);
+
+        // A muted hover for transparent icons (the regular button-hover is too dominant under
+        // one); toolbar buttons keep the stronger theme hover to stay button-like.
+        Color hover;
+        if (!showHover)
+            hover = background;
+        else if (_useFilledIconBackground)
+            hover = UiColors.BackgroundHover;
+        else
+            hover = UiColors.BackgroundButton.Fade(0.5f);
+
+        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, hover.Rgba);
+        ImGui.PushStyleColor(ImGuiCol.ButtonActive, showHover ? UiColors.BackgroundButtonActivated.Rgba : background.Rgba);
+    }
+
+    private static void PopToolIconStyle()
+    {
+        ImGui.PopStyleColor(3);
+        ImGui.PopStyleVar(2);
+    }
+
+    private static bool _useFilledIconBackground;
 
     /// <summary>
     /// An override that allows to pass rounded corner flags to have segmented buttons rounded on the outer edges.
     /// </summary>
     public static bool RoundedIconButton(string id, Icon icon, float width, ImDrawFlags corners = ImDrawFlags.RoundCornersNone,
-                                         ButtonStates state = ButtonStates.Normal, bool triggered = false)
+                                         ButtonStates state = ButtonStates.Emphasized, bool triggered = false)
     {
         var iconColor = GetStateColor(state);
 
@@ -223,11 +260,11 @@ internal static partial class CustomComponents
         return triggered;
     }
 
-    public static bool StateButton(string label, ButtonStates state = ButtonStates.Normal)
+    public static bool StateButton(string label, ButtonStates state = ButtonStates.Emphasized)
     {
         ImGui.PushStyleColor(ImGuiCol.ButtonActive, UiColors.BackgroundButtonActivated.Rgba);
 
-        if (state != ButtonStates.Normal)
+        if (state != ButtonStates.Emphasized)
         {
             ImGui.PushStyleColor(ImGuiCol.Text, GetStateColor(state).Rgba);
             if (state == ButtonStates.Activated)
@@ -240,7 +277,7 @@ internal static partial class CustomComponents
         ImGui.AlignTextToFramePadding();
         var clicked = ImGui.Button(label);
 
-        if (state != ButtonStates.Normal)
+        if (state != ButtonStates.Emphasized)
             ImGui.PopStyleColor();
 
         if (state == ButtonStates.Activated)
@@ -254,11 +291,12 @@ internal static partial class CustomComponents
     {
         return state switch
                    {
-                       ButtonStates.Dimmed         => UiColors.TextMuted.Fade(0.8f),
+                       ButtonStates.Default        => UiColors.TextMuted.Fade(0.8f),
+                       ButtonStates.Emphasized     => UiColors.Text,
                        ButtonStates.Disabled       => UiColors.TextDisabled.Fade(0.6f),
                        ButtonStates.Activated      => UiColors.StatusActivated,
                        ButtonStates.NeedsAttention => UiColors.StatusAttention,
-                       _                           => UiColors.Text
+                       _                           => UiColors.TextMuted
                    };
     }
 
@@ -350,7 +388,7 @@ internal static partial class CustomComponents
         return clicked;
     }
 
-    internal static bool DrawCtaButton(string label, Icon icon = Icon.None, ButtonStates state = ButtonStates.Normal)
+    internal static bool DrawCtaButton(string label, Icon icon = Icon.None, ButtonStates state = ButtonStates.Emphasized)
     {
         var textColor = UiColors.Text;
         var bgColor = UiColors.BackgroundButton;
@@ -363,7 +401,7 @@ internal static partial class CustomComponents
                 bgColor = UiColors.BackgroundActive;
                 borderColor = Color.Transparent;
                 break;
-            case ButtonStates.Dimmed:
+            case ButtonStates.Default:
                 textColor = UiColors.Text;
                 bgColor = Color.Transparent;
                 borderColor = UiColors.ForegroundFull.Fade(0.3f);
@@ -376,10 +414,19 @@ internal static partial class CustomComponents
 
     public enum ButtonStates
     {
-        Normal,
-        Dimmed,
+        /// <summary>Slightly faded — the default look for tool icons; contrasts with Emphasized and Activated.</summary>
+        Default,
+
+        /// <summary>Slightly brighter, to emphasize a single icon.</summary>
+        Emphasized,
+
+        /// <summary>Barely visible and not meant to be clicked, but its tooltip still shows.</summary>
         Disabled,
+
+        /// <summary>Rare, but currently active — e.g. "has project settings", "show gizmos", "loop mode", console auto-scroll.</summary>
         Activated,
+
+        /// <summary>Temporarily important and easy to overlook — e.g. "audio muted", "currently rendering". A remove icon only needs this on hover.</summary>
         NeedsAttention,
     }
 

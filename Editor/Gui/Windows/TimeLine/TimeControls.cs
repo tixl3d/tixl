@@ -178,7 +178,7 @@ internal static class TimeControls
         //                                 ControlSize,
         //                                 CoreSettings.Config.AudioMuted
         //                                     ? CustomComponents.ButtonStates.NeedsAttention
-        //                                     : CustomComponents.ButtonStates.Dimmed
+        //                                     : CustomComponents.ButtonStates.Default
         //                                ))
         // {
         //     CoreSettings.Config.AudioMuted = !CoreSettings.Config.AudioMuted;
@@ -186,8 +186,8 @@ internal static class TimeControls
         // }
         
         if (CustomComponents.IconButton(Icon.Settings, ControlSize, opHasSettings
-                                                                        ? CustomComponents.ButtonStates.Normal
-                                                                        : CustomComponents.ButtonStates.Dimmed))
+                                                                        ? CustomComponents.ButtonStates.Emphasized
+                                                                        : CustomComponents.ButtonStates.Default))
         {
             WindowManager.ToggleInstanceVisibility<ProjectSettingsWindow>();
         }
@@ -421,7 +421,7 @@ internal static class TimeControls
             if (CustomComponents.IconButton(Icon.JumpToRangeStart,
                                             ControlSize,
                                             playback.TimeInBars != playback.LoopRange.Start
-                                                ? CustomComponents.ButtonStates.Dimmed
+                                                ? CustomComponents.ButtonStates.Default
                                                 : CustomComponents.ButtonStates.Disabled
                                            )
                 || UserActions.PlaybackJumpToStartTime.Triggered()
@@ -439,7 +439,7 @@ internal static class TimeControls
             if (CustomComponents.IconButton(Icon.JumpToPreviousKeyframe,
                                             ControlSize,
                                             FrameStats.Last.HasKeyframesBeforeCurrentTime
-                                                ? CustomComponents.ButtonStates.Dimmed
+                                                ? CustomComponents.ButtonStates.Default
                                                 : CustomComponents.ButtonStates.Disabled)
                )
             {
@@ -456,7 +456,7 @@ internal static class TimeControls
                                             ControlSize,
                                             playback.PlaybackSpeed < 0
                                                 ? CustomComponents.ButtonStates.Activated
-                                                : CustomComponents.ButtonStates.Dimmed
+                                                : CustomComponents.ButtonStates.Default
                                            ))
             {
                 if (playback.PlaybackSpeed != 0)
@@ -486,7 +486,7 @@ internal static class TimeControls
                                             ControlSize,
                                             playback.PlaybackSpeed > 0
                                                 ? CustomComponents.ButtonStates.Activated
-                                                : CustomComponents.ButtonStates.Dimmed
+                                                : CustomComponents.ButtonStates.Default
                                            ))
             {
                 if (Math.Abs(playback.PlaybackSpeed) > 0.001f)
@@ -517,7 +517,7 @@ internal static class TimeControls
             if (CustomComponents.IconButton(Icon.JumpToNextKeyframe,
                                             ControlSize,
                                             FrameStats.Last.HasKeyframesAfterCurrentTime
-                                                ? CustomComponents.ButtonStates.Dimmed
+                                                ? CustomComponents.ButtonStates.Default
                                                 : CustomComponents.ButtonStates.Disabled)
                )
             {
@@ -534,7 +534,7 @@ internal static class TimeControls
                                             ControlSize,
                                             playback.IsLooping
                                                 ? CustomComponents.ButtonStates.Activated
-                                                : CustomComponents.ButtonStates.Dimmed))
+                                                : CustomComponents.ButtonStates.Default))
             {
                 playback.IsLooping = !playback.IsLooping;
                 var loopRangeMatchesTime = playback.LoopRange.IsValid && playback.LoopRange.Contains(playback.TimeInBars);
@@ -569,7 +569,7 @@ internal static class TimeControls
                                         ControlSize,
                                         CoreSettings.Config.AppMute
                                             ? CustomComponents.ButtonStates.NeedsAttention
-                                            : CustomComponents.ButtonStates.Dimmed
+                                            : CustomComponents.ButtonStates.Default
                                        ))
         {
             AudioEngine.SetGlobalMute(!CoreSettings.Config.AppMute);
@@ -581,11 +581,11 @@ internal static class TimeControls
             Icon icon;
             string hoverModeTooltip;
             string hoverModeAdditionalTooltip = null;
-            CustomComponents.ButtonStates state = CustomComponents.ButtonStates.Normal;
+            CustomComponents.ButtonStates state = CustomComponents.ButtonStates.Emphasized;
             switch (UserSettings.Config.HoverMode)
             {
                 case UserSettings.GraphHoverModes.Disabled:
-                    state = CustomComponents.ButtonStates.Dimmed;
+                    state = CustomComponents.ButtonStates.Default;
                     icon = Icon.HoverPreviewDisabled;
                     hoverModeTooltip = "No preview images on hover";
                     break;
@@ -616,7 +616,7 @@ internal static class TimeControls
             ImGui.SameLine();
             var state = UserSettings.Config.AutoPinAllAnimations
                             ? CustomComponents.ButtonStates.Activated
-                            : CustomComponents.ButtonStates.Dimmed;
+                            : CustomComponents.ButtonStates.Default;
 
             if (CustomComponents.IconButton(Icon.PinParams, ControlSize, state) 
                 ||  UserActions.ToggleAnimationPinning.Triggered())

@@ -290,11 +290,11 @@ internal sealed class SnapshotControlView
             // Prev / next arrows cycle by activation index order
             var hasSnapshots = _snapshots.Count > 0;
             ImGui.SameLine();
-            if (DrawBarButton(Icon.ArrowLeft, hasSnapshots, "Previous snapshot"))
+            if (DrawBarButton(Icon.ArrowLeft, hasSnapshots, "Previous snapshot", CustomComponents.ButtonStates.Default))
                 ApplySnapshot(pool, composition, GetNeighborSnapshot(selectedSnapshot, -1));
 
             ImGui.SameLine();
-            if (DrawBarButton(Icon.ArrowRight, hasSnapshots, "Next snapshot"))
+            if (DrawBarButton(Icon.ArrowRight, hasSnapshots, "Next snapshot", CustomComponents.ButtonStates.Default))
                 ApplySnapshot(pool, composition, GetNeighborSnapshot(selectedSnapshot, +1));
 
             // Right-aligned actions
@@ -309,7 +309,8 @@ internal sealed class SnapshotControlView
                 ApplySnapshot(pool, composition, selectedSnapshot!);
 
             ImGui.SameLine();
-            if (DrawBarButton(Icon.Trash, selectedSnapshot != null, "Remove snapshot"))
+            if (DrawBarButton(Icon.Trash, selectedSnapshot != null, "Remove snapshot",
+                              CustomComponents.ButtonStates.Default, attentionOnHover: true))
             {
                 pool.DeleteVariation(selectedSnapshot!);
                 _modificationCheck.Invalidate();
@@ -326,28 +327,23 @@ internal sealed class SnapshotControlView
     }
 
     /// <summary>
-    /// Selector-bar tool icon with a transparent background. Active: bright (ForegroundFull)
-    /// with a hover background to read as clickable. Inactive: drawn disabled with no hover
-    /// feedback — but the tooltip still shows. Returns true only when active.
+    /// Selector-bar tool icon: drawn in <paramref name="activeState"/> when actionable, disabled
+    /// (no hover, tooltip kept) otherwise. Returns true only when active. With
+    /// <paramref name="attentionOnHover"/> the glyph turns "needs attention" while hovered — for
+    /// destructive actions like remove. Uses the shared tool-icon styling.
     /// </summary>
-    private static bool DrawBarButton(Icon icon, bool isActive, string tooltip)
+    private static bool DrawBarButton(Icon icon, bool isActive, string tooltip,
+                                      CustomComponents.ButtonStates activeState = CustomComponents.ButtonStates.Emphasized,
+                                      bool attentionOnHover = false)
     {
-        var size = new Vector2(ImGui.GetFrameHeight());
-        ImGui.PushID((int)icon);
-        var pressed = ImGui.InvisibleButton("##barBtn", size);
-        ImGui.PopID();
+        var state = isActive ? activeState : CustomComponents.ButtonStates.Disabled;
+        var clicked = CustomComponents.IconButton(icon, Vector2.Zero, state);
 
-        if (isActive && ImGui.IsItemHovered())
-        {
-            ImGui.GetWindowDrawList().AddRectFilled(ImGui.GetItemRectMin(), ImGui.GetItemRectMax(),
-                                                    UiColors.BackgroundButton.Fade(0.5f), 4 * T3Ui.UiScaleFactor);
-        }
-
-        var color = isActive ? UiColors.ForegroundFull : UiColors.TextDisabled.Fade(0.6f);
-        Icons.DrawIconOnLastItem(icon, color);
+        if (isActive && attentionOnHover && ImGui.IsItemHovered())
+            Icons.DrawIconOnLastItem(icon, UiColors.StatusAttention);
 
         CustomComponents.TooltipForLastItem(tooltip);
-        return pressed && isActive;
+        return clicked && isActive;
     }
 
     private void StartRenaming(Variation variation)
@@ -596,9 +592,7 @@ internal sealed class SnapshotControlView
         var cursorToRestore = ImGui.GetCursorScreenPos();
         ImGui.SetCursorScreenPos(new Vector2(itemMax.X + 2 * T3Ui.UiScaleFactor, itemMin.Y));
 
-        ImGui.PushStyleColor(ImGuiCol.Button, Color.Transparent.Rgba);
         CustomComponents.IconButton(Icon.Reset, new Vector2(buttonSize, buttonSize), UiColors.ForegroundFull);
-        ImGui.PopStyleColor();
         CustomComponents.TooltipForLastItem("Click to revert, drag to scale the change");
 
         if (ImGui.IsItemActivated())
@@ -715,7 +709,7 @@ internal sealed class SnapshotControlView
             CustomComponents.StylizedText("no longer enabled", Fonts.FontSmall, UiColors.TextMuted.Fade(0.4f));
 
             ImGui.SameLine();
-            if (CustomComponents.TransparentIconButton(Icon.Trash, Vector2.Zero, CustomComponents.ButtonStates.Dimmed))
+            if (CustomComponents.TransparentIconButton(Icon.Trash, Vector2.Zero, CustomComponents.ButtonStates.Default))
             {
                 _pendingStaleRemovalId = childId;
             }

@@ -349,7 +349,7 @@ internal static class EditTourPointsPopup
             var x = ImGui.GetContentRegionAvail().X - ImGui.GetFrameHeight();
             ImGui.SameLine(x);
 
-            if (CustomComponents.TransparentIconButton(Icon.Trash, Vector2.Zero, CustomComponents.ButtonStates.Dimmed))
+            if (CustomComponents.TransparentIconButton(Icon.Trash, Vector2.Zero, CustomComponents.ButtonStates.Default))
             {
                 _compositionUi.TourPoints.Remove(tourPoint);
                 modified = true;

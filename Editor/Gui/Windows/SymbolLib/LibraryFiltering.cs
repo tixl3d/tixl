@@ -28,7 +28,7 @@ internal sealed class LibraryFiltering
     internal void DrawSymbolFilters()
     {
         ImGui.SameLine();
-        var status = _showFilters ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Dimmed;
+        var status = _showFilters ? CustomComponents.ButtonStates.Activated : CustomComponents.ButtonStates.Default;
 
         if (CustomComponents.IconButton(Icon.Flame, Vector2.Zero, status))
             _showFilters = !_showFilters;

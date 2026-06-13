@@ -888,7 +888,7 @@ internal static class FormInputs
                 ImDrawFlags.RoundCornersLeft,
                 clampedMin
                     ? CustomComponents.ButtonStates.NeedsAttention
-                    : CustomComponents.ButtonStates.Dimmed))
+                    : CustomComponents.ButtonStates.Default))
         {
             modified = true;
             clampedMin = !clampedMin;
@@ -905,7 +905,7 @@ internal static class FormInputs
                 ImDrawFlags.RoundCornersRight,
                 clampedMax
                     ? CustomComponents.ButtonStates.NeedsAttention
-                    : CustomComponents.ButtonStates.Dimmed))
+                    : CustomComponents.ButtonStates.Default))
         {
             modified = true;
             clampedMax = !clampedMax;
@@ -945,7 +945,7 @@ internal static class FormInputs
                 ImDrawFlags.RoundCornersLeft,
                 clampedMin
                     ? CustomComponents.ButtonStates.NeedsAttention
-                    : CustomComponents.ButtonStates.Dimmed))
+                    : CustomComponents.ButtonStates.Default))
         {
             modified = true;
             clampedMin = !clampedMin;
@@ -962,7 +962,7 @@ internal static class FormInputs
                 ImDrawFlags.RoundCornersRight,
                 clampedMax
                     ? CustomComponents.ButtonStates.NeedsAttention
-                    : CustomComponents.ButtonStates.Dimmed))
+                    : CustomComponents.ButtonStates.Default))
         {
             modified = true;
             clampedMax = !clampedMax;

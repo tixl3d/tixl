@@ -75,8 +75,8 @@ internal sealed partial class MagGraphView
             if (CustomComponents.ToggleTwoIconsButton(ref isCollapsed, 
                                                       Icon.ChevronDown,
                                                       Icon.ChevronRight,
-                                                      CustomComponents.ButtonStates.Normal,
-                                                      CustomComponents.ButtonStates.Normal,
+                                                      CustomComponents.ButtonStates.Emphasized,
+                                                      CustomComponents.ButtonStates.Emphasized,
                                                       true, 
                                                       true))
             {

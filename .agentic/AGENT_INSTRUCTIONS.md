@@ -183,12 +183,42 @@ Quick map of what to reach for:
 - **Right-aligned tool clusters** — `CustomComponents.RightAlign(itemWidth)`
   instead of `SetCursorPosX(GetWindowWidth() - … - WindowPaddingOverride.X)`.
   Cleaner and stays correct if padding changes.
-- **Icon buttons** — `CustomComponents.IconButton(Icon.X, size)` /
-  `CustomComponents.TransparentIconButton(...)` for clickable icons; use the
-  enum, not character literals or per-call `PushStyleColor`.
+- **Icon buttons** — `CustomComponents.IconButton(Icon.X, size, state)` for
+  clickable tool icons; use the enum, not character literals or per-call
+  `PushStyleColor`. See "Tool icons" below for the state semantics.
 - **Inline icons in text rows** — `Icon.X.DrawAtCursor()` or
   `Icon.X.DrawAtCursor(color)`. For ad-hoc positioning use
   `Icons.DrawIconAtScreenPosition(...)`.
+
+### Tool icons
+
+`CustomComponents.IconButton` is the one canonical tool icon. Don't hand-roll
+icon buttons (no `InvisibleButton` + manual hover rect, no per-call
+`PushStyleColor(Button, …)` wrappers) — that fragments the look. The helper is:
+
+- **Transparent background by default**, with a *subtle* rounded hover. The
+  plain ImGui button-hover color is too dominant under a transparent icon, so
+  the helper uses a muted one. Don't reintroduce opaque backgrounds.
+- Tinted by **`ButtonStates`** (the icon color carries the meaning, not a
+  background):
+  - `Default` — slightly faded; the resting look for almost every tool icon.
+  - `Emphasized` — slightly brighter; for the one primary/active action in a row.
+  - `Disabled` — barely visible **and not hoverable** (no hover background), but
+    the tooltip still shows. Use for actions that aren't currently available;
+    gate the click yourself (`IconButton(…, Disabled)` still returns the click).
+  - `Activated` — the only state with a filled background, to read as "on"
+    (toggles like loop mode, show-gizmos, console auto-scroll).
+  - `NeedsAttention` — temporarily important and easy to overlook (audio muted,
+    currently rendering); a destructive icon only needs this on hover.
+- For an icon whose color isn't a state (type-colored, status-colored) use the
+  `IconButton(Icon, size, Color)` overload — still transparent with the same
+  hover. `TransparentIconButton` is a backwards-compatible alias and forwards to
+  `IconButton`; prefer `IconButton` in new code.
+- **Toolbars** (playback transport, output toolbar) are the exception: their
+  buttons need filled backgrounds to tile into a continuous bar. Wrap the
+  toolbar's icon cluster in `CustomComponents.PushToolbarIconBackground()` /
+  `PopToolbarIconBackground()` — every icon-button variant inside then keeps a
+  background. Don't reintroduce per-button background pushes.
 
 ### Don't draw UTF-8 glyphs in place of icons
 

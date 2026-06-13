@@ -108,7 +108,7 @@ internal sealed class GuidedFeatureTestsWindow : Window
         // bypassing the disabled alpha), so use the Disabled button state for the dimmed look and just
         // ignore the click when nothing is selected.
         var anySelected = _selectedSetIds.Count > 0;
-        var openState = anySelected ? CustomComponents.ButtonStates.Normal : CustomComponents.ButtonStates.Disabled;
+        var openState = anySelected ? CustomComponents.ButtonStates.Emphasized : CustomComponents.ButtonStates.Disabled;
         if (CustomComponents.TransparentIconButton(Icon.OpenExternally, iconSize, openState) && anySelected)
             OpenSelectedSourceFiles();
         if (ImGui.IsItemHovered())
@@ -503,7 +503,7 @@ internal sealed class GuidedFeatureTestsWindow : Window
         if (!otherEnabled)
             ImGui.BeginDisabled();
         if (CustomComponents.DrawCtaButton("Other…", Icon.None,
-                                            CustomComponents.ButtonStates.Dimmed))
+                                            CustomComponents.ButtonStates.Default))
             RecordOutcomeAndAdvance(result, Outcome.Other);
         if (!otherEnabled)
             ImGui.EndDisabled();

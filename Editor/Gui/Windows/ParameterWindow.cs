@@ -342,7 +342,7 @@ internal sealed class ParameterWindow : Window
 
     public static CustomComponents.ButtonStates GetButtonStatesForSymbolTags(SymbolUi.SymbolTags symbolUiTags)
     {
-        var state = (int)symbolUiTags == 0 ? CustomComponents.ButtonStates.Disabled : CustomComponents.ButtonStates.Normal;
+        var state = (int)symbolUiTags == 0 ? CustomComponents.ButtonStates.Disabled : CustomComponents.ButtonStates.Emphasized;
 
         if ((symbolUiTags & (SymbolUi.SymbolTags.Essential | SymbolUi.SymbolTags.Example | SymbolUi.SymbolTags.Project)) != 0)
             state = CustomComponents.ButtonStates.Activated;

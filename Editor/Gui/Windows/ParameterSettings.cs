@@ -28,7 +28,7 @@ public sealed class ParameterSettings
                                         new Vector2(w, w),
                                         IsActive
                                             ? CustomComponents.ButtonStates.Activated
-                                            : CustomComponents.ButtonStates.Dimmed
+                                            : CustomComponents.ButtonStates.Default
                                        ))
         {
             IsActive = !IsActive;

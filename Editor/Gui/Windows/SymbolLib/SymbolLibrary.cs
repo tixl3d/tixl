@@ -119,8 +119,8 @@ internal sealed class SymbolLibrary : Window
         {
             ImGui.SameLine();
             var collapseIconState = _treeHandler.NoFolderOpen
-                                        ? CustomComponents.ButtonStates.Dimmed
-                                        : CustomComponents.ButtonStates.Normal;
+                                        ? CustomComponents.ButtonStates.Default
+                                        : CustomComponents.ButtonStates.Emphasized;
 
             if (CustomComponents.IconButton(Icon.TreeCollapse, Vector2.Zero, collapseIconState))
             {
@@ -130,7 +130,7 @@ internal sealed class SymbolLibrary : Window
 
         ImGui.SameLine();
         // Draw refresh button and handle refresh logic
-        if (CustomComponents.IconButton(Icon.Refresh, Vector2.Zero, CustomComponents.ButtonStates.Dimmed) || NeedsRebuild)
+        if (CustomComponents.IconButton(Icon.Refresh, Vector2.Zero, CustomComponents.ButtonStates.Default) || NeedsRebuild)
         {
             UpdateSymbolLibraryState();
         }

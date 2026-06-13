@@ -142,7 +142,7 @@ internal static class ParameterPopUp
                                                                   Icon.OperatorBypassOff,
                                                                   Icon.OperatorBypassOn, 
                                                                   CustomComponents.ButtonStates.NeedsAttention, 
-                                                                  CustomComponents.ButtonStates.Dimmed))
+                                                                  CustomComponents.ButtonStates.Default))
                         {
                             UndoRedoStack.AddAndExecute(isBypassed
                                                             ? new ChangeInstanceBypassedCommand(symbolChildUi.SymbolChild, true)
