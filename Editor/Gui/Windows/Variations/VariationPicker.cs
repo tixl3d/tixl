@@ -411,12 +411,15 @@ internal sealed class VariationPicker
         rowHovered |= weightHovered;
         var io = ImGui.GetIO();
         var freeMode = io.KeyCtrl;
-        if (ImGui.IsItemActivated())
+        // While a [BlendSnapshots] operator drives the pool, the faders are read-only so the two don't
+        // fight — the cell still shows the live weight the operator is producing.
+        var opDriven = pool.IsBlendDrivenByOperator;
+        if (!opDriven && ImGui.IsItemActivated())
         {
             _weightDragId = variation.Id;
             pool.BeginBlendWeightDrag();
         }
-        var weightDragging = _weightDragId == variation.Id;
+        var weightDragging = !opDriven && _weightDragId == variation.Id;
         if (weightDragging && ImGui.IsItemActive())
         {
             var dx = io.MouseDelta.X;
@@ -436,8 +439,10 @@ internal sealed class VariationPicker
         var flagSource = _weightDragId != Guid.Empty && !weightDragging && pool.IsDragSource(variation.Id);
 
         if (weightHovered || (weightDragging && ImGui.IsItemActive()))
-            ImGui.SetMouseCursor(lockedFull ? ImGuiMouseCursor.NotAllowed : ImGuiMouseCursor.ResizeEW);
-        if (weightHovered && lockedFull)
+            ImGui.SetMouseCursor(opDriven || lockedFull ? ImGuiMouseCursor.NotAllowed : ImGuiMouseCursor.ResizeEW);
+        if (weightHovered && opDriven)
+            CustomComponents.TooltipForLastItem("Blend is driven by a [BlendSnapshots] operator");
+        else if (weightHovered && lockedFull)
             CustomComponents.TooltipForLastItem("Use the other sliders to reduce this level");
 
         if (rowHovered)

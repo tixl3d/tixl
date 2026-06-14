@@ -44,6 +44,12 @@ internal sealed class SymbolVariationPool
         }
     }
 
+    /// <summary>
+    /// True while a [BlendSnapshots] operator is procedurally driving this pool's blend. Manual
+    /// blend faders treat the pool as read-only while this is set so the two don't fight.
+    /// </summary>
+    public bool IsBlendDrivenByOperator { get; set; }
+
     // Live cross-fade weight vector (session-only): variationId → weight. Persists across picker
     // opens, resets to the single active variation on activation, drops entries on removal.
     private readonly Dictionary<Guid, float> _blendWeights = new();
@@ -237,6 +243,33 @@ internal sealed class SymbolVariationPool
     }
 
     /// <summary>
+    /// Applies a variation's values like <see cref="Apply"/> but without recording an undo step. Used by
+    /// procedural drivers (e.g. the [ActivateSnapshot] operator): each activation is automation output,
+    /// not a user edit that belongs on the undo stack. The values still persist as the current state.
+    /// </summary>
+    public void ApplyWithoutUndo(Instance instance, Variation variation)
+    {
+        StopHover();
+        ActiveVariation = variation;
+
+        MacroCommand? newCommand;
+
+        if (variation.IsPreset)
+        {
+            if (!TryCreateApplyPresetCommand(instance, variation, out newCommand))
+                return;
+        }
+        else
+        {
+            if (!TryCreateApplyVariationCommand(instance, variation, out newCommand))
+                return;
+        }
+
+        UpdateActiveStateForVariation(variation.ActivationIndex);
+        newCommand.Do();
+    }
+
+    /// <summary>
     /// Marks a variation as the active one without applying its values — used when a freshly
     /// created snapshot already equals the current state, so applying would be a no-op command.
     /// </summary>
@@ -420,6 +453,20 @@ internal sealed class SymbolVariationPool
             return;
 
         BeginWeightedBlend(instance, _weightedBlendVariations, _weightedBlendWeights);
+    }
+
+    /// <summary>
+    /// Drives the live cross-fade from a [BlendSnapshots] operator: replaces the weight vector with the
+    /// given normalized weights — so the picker faders and thumbnails reflect the procedural mix — and
+    /// applies the blend.
+    /// </summary>
+    public void ApplyOperatorDrivenBlend(Instance instance, List<Variation> variations, List<float> normalizedWeights)
+    {
+        _blendWeights.Clear();
+        for (var i = 0; i < variations.Count && i < normalizedWeights.Count; i++)
+            _blendWeights[variations[i].Id] = normalizedWeights[i];
+
+        ApplyBlendWeights(instance);
     }
 
     private void DropBlendWeight(Guid variationId)

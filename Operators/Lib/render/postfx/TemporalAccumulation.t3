@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "196ad0dc-035a-4fb6-8871-a8f3c9cdbef5"/*TemporalAccumulation*/,
   "Inputs": [
     {
@@ -7,7 +9,7 @@
     },
     {
       "Id": "b0eece89-6c27-48d6-87c7-62d04469ab2e"/*FeedbackAmount*/,
-      "DefaultValue": 0.0
+      "DefaultValue": 0.5
     }
   ],
   "Children": [

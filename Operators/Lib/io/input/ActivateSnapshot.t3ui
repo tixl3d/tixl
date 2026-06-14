@@ -1,0 +1,32 @@
+{
+  "Id": "7b4e9a30-2c81-4d6f-9a15-3e8f1c2b4d70"/*ActivateSnapshot*/,
+  "Description": "Activates one snapshot of the composition this operator lives in, selected by index.\n\nWhen SetTrigger goes high, the snapshot at Index — taken modulo the number of snapshots in reading order, so any integer wraps to an existing snapshot — is applied, exactly as if its launchpad pad were pressed.\n\nThis is an editor-only operator: an exported player has no snapshot system, so it has no effect there. Connect Result into a command chain so the operator is evaluated every frame.\n\nAKA: trigger snapshot, recall snapshot, snapshot index\n\nTips:\n- Drive Index from a counter and pulse SetTrigger on the beat to step through snapshots.",
+  "InputUis": [
+    {
+      "InputId": "9d60fb52-4ea3-4f8b-bc37-5a0b3e4d6f92"/*Index*/,
+      "Position": {
+        "X": -220.0,
+        "Y": 0.0
+      },
+      "Description": "Which snapshot to activate, wrapped modulo the number of snapshots."
+    },
+    {
+      "InputId": "ae71ac63-5fb4-4a9c-cd48-6b1c4f5e70a3"/*SetTrigger*/,
+      "Position": {
+        "X": -220.0,
+        "Y": 45.0
+      },
+      "Description": "On its rising edge the snapshot at Index is activated."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "8c5f0a41-3d92-4e7a-ab26-4f9a2d3c5e81"/*Result*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

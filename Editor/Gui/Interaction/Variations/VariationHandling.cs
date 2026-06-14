@@ -1,6 +1,8 @@
 ﻿#nullable enable
 
+using T3.Core.IO;
 using T3.Core.Operator;
+using T3.Core.Operator.Interfaces;
 using T3.Core.Operator.Slots;
 using T3.Core.Utils;
 using T3.Editor.Gui.Interaction.Variations.Model;
@@ -88,9 +90,227 @@ internal static class VariationHandling
 
         BlendActions.SmoothVariationBlending.UpdateBlend();
 
+        ProcessSnapshotActivationRequests();
+        ProcessSnapshotBlendRequests();
+
         // Frame-driven, window-independent: lets callers (e.g. the snapshot control view) render
         // thumbnails without the Variations window being open.
         VariationThumbnailRenderer.Update();
+    }
+
+    /// <summary>
+    /// Applies one-shot snapshot activations forwarded by [ActivateSnapshot] operators and clears them
+    /// (a pending entry means "activate now"). Activations only apply to the composition currently
+    /// active for snapshots.
+    /// </summary>
+    private static void ProcessSnapshotActivationRequests()
+    {
+        var pending = SnapShotBlendingData.PendingActivationsByComposition;
+        if (pending.Count == 0)
+            return;
+
+        foreach (var (compositionSymbolId, rawIndex) in pending)
+        {
+            if (ActiveInstanceForSnapshots != null && ActiveInstanceForSnapshots.Symbol.Id == compositionSymbolId)
+                SnapshotActions.ActivateSnapshotByModuloIndex(rawIndex);
+        }
+
+        pending.Clear();
+    }
+
+    /// <summary>
+    /// Applies any procedural snapshot-blend requests forwarded by [BlendSnapshots] operators. Each
+    /// operator re-arms its request every evaluation; we consume the flag here so an operator that
+    /// stops evaluating (deleted, disconnected, paused) releases its blend after one frame.
+    /// </summary>
+    private static void ProcessSnapshotBlendRequests()
+    {
+        foreach (var (compositionSymbolId, request) in SnapShotBlendingData.RequestsByComposition)
+        {
+            if (!request.Enabled)
+            {
+                ReleaseOpDrivenBlend(compositionSymbolId);
+                continue;
+            }
+
+            request.Enabled = false;
+
+            if (ActivePoolForSnapshots == null || ActiveInstanceForSnapshots == null
+                || ActiveInstanceForSnapshots.Symbol.Id != compositionSymbolId)
+            {
+                request.ResolvedStatusLevel = IStatusProvider.StatusLevel.Notice;
+                request.ResolvedStatusMessage = "This composition is not currently active for snapshots.";
+                ReleaseOpDrivenBlend(compositionSymbolId);
+                continue;
+            }
+
+            ApplyOpDrivenBlend(ActivePoolForSnapshots, ActiveInstanceForSnapshots, request);
+        }
+    }
+
+    private static void ApplyOpDrivenBlend(SymbolVariationPool pool, Instance instance, SnapShotBlendingData.BlendRequest request)
+    {
+        _opOrderedSnapshots.Clear();
+        foreach (var v in pool.AllVariations)
+        {
+            if (v.IsSnapshot)
+                _opOrderedSnapshots.Add(v);
+        }
+
+        if (_opOrderedSnapshots.Count == 0)
+        {
+            request.ResolvedStatusLevel = IStatusProvider.StatusLevel.Warning;
+            request.ResolvedStatusMessage = "This composition has no snapshots.";
+            ReleaseOpDrivenBlend(instance.Symbol.Id);
+            return;
+        }
+
+        if (request.Mode == SnapShotBlendingData.IndexMode.SnapshotIndices)
+            VariationBaseCanvas.SortByReadingOrder(_opOrderedSnapshots);
+
+        _opBlendVariations.Clear();
+        _opBlendWeights.Clear();
+        var notFoundCount = 0;
+
+        for (var i = 0; i < request.Indices.Count; i++)
+        {
+            var weight = i < request.WeightFactors.Count ? request.WeightFactors[i] : 0f;
+            if (weight <= 0.0001f)
+                continue;
+
+            if (!TryResolveSnapshot(request.Mode, request.Indices[i], out var variation))
+            {
+                notFoundCount++;
+                continue;
+            }
+
+            _opBlendVariations.Add(variation);
+            _opBlendWeights.Add(weight);
+        }
+
+        if (_opBlendVariations.Count == 0)
+        {
+            if (notFoundCount > 0)
+            {
+                request.ResolvedStatusLevel = IStatusProvider.StatusLevel.Warning;
+                request.ResolvedStatusMessage = "None of the snapshot indices were found.";
+            }
+            else
+            {
+                request.ResolvedStatusLevel = IStatusProvider.StatusLevel.Notice;
+                request.ResolvedStatusMessage = "All weight factors are zero.";
+            }
+
+            ReleaseOpDrivenBlend(instance.Symbol.Id);
+            return;
+        }
+
+        // Normalize so the raw weighted-sum blend stays well-formed (weights must sum to 1).
+        var sum = 0f;
+        foreach (var w in _opBlendWeights)
+            sum += w;
+
+        if (sum > 0.0001f)
+        {
+            for (var i = 0; i < _opBlendWeights.Count; i++)
+                _opBlendWeights[i] /= sum;
+        }
+
+        // Re-applying an unchanged blend would needlessly rebuild the macro command every frame; the
+        // previous apply stays live until released, so a steady hold costs nothing.
+        var alreadyDriving = pool.IsBlendDrivenByOperator && _opDrivenCompositionId == instance.Symbol.Id;
+        if (!alreadyDriving || HasOpBlendChanged())
+        {
+            pool.ApplyOperatorDrivenBlend(instance, _opBlendVariations, _opBlendWeights);
+            pool.IsBlendDrivenByOperator = true;
+            _opDrivenCompositionId = instance.Symbol.Id;
+            CacheAppliedOpBlend();
+        }
+
+        if (notFoundCount > 0)
+        {
+            request.ResolvedStatusLevel = IStatusProvider.StatusLevel.Notice;
+            request.ResolvedStatusMessage = $"Blending {_opBlendVariations.Count} snapshot(s); {notFoundCount} index(es) not found.";
+        }
+        else
+        {
+            request.ResolvedStatusLevel = IStatusProvider.StatusLevel.Success;
+            request.ResolvedStatusMessage = $"Blending {_opBlendVariations.Count} snapshot(s).";
+        }
+    }
+
+    private static bool TryResolveSnapshot(SnapShotBlendingData.IndexMode mode, int index, out Variation variation)
+    {
+        if (mode == SnapShotBlendingData.IndexMode.ControllerIndices)
+        {
+            foreach (var v in _opOrderedSnapshots)
+            {
+                if (v.ActivationIndex == index)
+                {
+                    variation = v;
+                    return true;
+                }
+            }
+
+            variation = null!;
+            return false;
+        }
+
+        // Ordinal position in reading order (the list is pre-sorted by the caller).
+        if (index >= 0 && index < _opOrderedSnapshots.Count)
+        {
+            variation = _opOrderedSnapshots[index];
+            return true;
+        }
+
+        variation = null!;
+        return false;
+    }
+
+    private static void ReleaseOpDrivenBlend(Guid compositionSymbolId)
+    {
+        if (_opDrivenCompositionId != compositionSymbolId)
+            return;
+
+        var pool = GetOrLoadVariations(compositionSymbolId);
+        if (pool.IsBlendDrivenByOperator)
+        {
+            pool.StopHover();
+            pool.IsBlendDrivenByOperator = false;
+            // Collapse the weight vector back to the active variation so the picker stops showing the mix.
+            pool.ResetBlendWeights(pool.ActiveVariation?.Id ?? Guid.Empty);
+        }
+
+        _opDrivenCompositionId = Guid.Empty;
+        _lastAppliedVariationIds.Clear();
+        _lastAppliedWeights.Clear();
+    }
+
+    private static bool HasOpBlendChanged()
+    {
+        if (_lastAppliedVariationIds.Count != _opBlendVariations.Count)
+            return true;
+
+        for (var i = 0; i < _opBlendVariations.Count; i++)
+        {
+            if (_lastAppliedVariationIds[i] != _opBlendVariations[i].Id)
+                return true;
+
+            if (MathF.Abs(_lastAppliedWeights[i] - _opBlendWeights[i]) > 0.0005f)
+                return true;
+        }
+
+        return false;
+    }
+
+    private static void CacheAppliedOpBlend()
+    {
+        _lastAppliedVariationIds.Clear();
+        _lastAppliedWeights.Clear();
+        foreach (var v in _opBlendVariations)
+            _lastAppliedVariationIds.Add(v.Id);
+        foreach (var w in _opBlendWeights)
+            _lastAppliedWeights.Add(w);
     }
 
     public static SymbolVariationPool GetOrLoadVariations(Guid symbolId)
@@ -400,4 +620,12 @@ internal static class VariationHandling
 
     private static readonly Dictionary<Guid, SymbolVariationPool> _variationPoolForOperators = new();
     private static readonly List<Instance> _affectedInstances = new(100);
+
+    // Reused buffers for procedural snapshot blending (per-frame, allocation-free).
+    private static readonly List<Variation> _opOrderedSnapshots = new();
+    private static readonly List<Variation> _opBlendVariations = new();
+    private static readonly List<float> _opBlendWeights = new();
+    private static readonly List<Guid> _lastAppliedVariationIds = new();
+    private static readonly List<float> _lastAppliedWeights = new();
+    private static Guid _opDrivenCompositionId = Guid.Empty;
 }

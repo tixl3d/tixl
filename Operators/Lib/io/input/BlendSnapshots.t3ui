@@ -1,0 +1,48 @@
+{
+  "Id": "0a8497a1-8740-4561-b258-51475c44473b"/*BlendSnapshots*/,
+  "Description": "Procedurally triggers and cross-fades the snapshots of the composition this operator lives in.\n\nDrives the editor's snapshot blend from operator inputs, so snapshots can be sequenced or mixed from LFOs, audio reactions, or other animation without touching the Variations window. Provide a list of snapshot indices and a matching list of weight factors; the weights are normalized and applied as a live blend while Enable is on.\n\nThis is an editor-only operator: an exported player has no snapshot system, so it has no effect there. Connect Result into a command chain so the operator is evaluated every frame.\n\nAKA: snapshot mixer, preset blend, variation crossfade\n\nTips:\n- Use Mode 'ControllerIndices' to address snapshots by their launchpad/MIDI index, which stays stable when you reorder them.\n- Weight factors below or at zero are ignored, so a single non-zero weight simply activates that snapshot.",
+  "InputUis": [
+    {
+      "InputId": "e1d2c3b4-5a6f-4e10-9b20-1a2b3c4d5e60"/*Enable*/,
+      "Position": {
+        "X": -220.0,
+        "Y": 0.0
+      },
+      "Description": "While on, the listed snapshots are blended into the composition. Turning it off releases control back to manual blending."
+    },
+    {
+      "InputId": "a3f4e5d6-7c8b-4a32-9d42-3c4d5e6f7a82"/*SnapshotIndices*/,
+      "Position": {
+        "X": -220.0,
+        "Y": 45.0
+      },
+      "Description": "Which snapshots to blend, interpreted according to Mode."
+    },
+    {
+      "InputId": "f2e3d4c5-6b7a-4f21-8c31-2b3c4d5e6f71"/*WeightFactors*/,
+      "Position": {
+        "X": -220.0,
+        "Y": 90.0
+      },
+      "Description": "Blend weight for each entry in SnapshotIndices. Normalized internally, so only the relative proportions matter."
+    },
+    {
+      "InputId": "b4a5f6e7-8d9c-4b43-ae53-4d5e6f7a8b93"/*Mode*/,
+      "Position": {
+        "X": -220.0,
+        "Y": 135.0
+      },
+      "Description": "How SnapshotIndices are interpreted: by controller/launchpad index (stable) or by ordinal position."
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "7d83da79-94a9-4ac8-bb30-c1efa5a0a205"/*Result*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

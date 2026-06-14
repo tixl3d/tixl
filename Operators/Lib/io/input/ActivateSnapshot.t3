@@ -1,0 +1,15 @@
+{
+  "Id": "7b4e9a30-2c81-4d6f-9a15-3e8f1c2b4d70"/*ActivateSnapshot*/,
+  "Inputs": [
+    {
+      "Id": "9d60fb52-4ea3-4f8b-bc37-5a0b3e4d6f92"/*Index*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "ae71ac63-5fb4-4a9c-cd48-6b1c4f5e70a3"/*SetTrigger*/,
+      "DefaultValue": false
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

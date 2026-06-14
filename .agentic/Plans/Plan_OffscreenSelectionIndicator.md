@@ -6,7 +6,7 @@ Feature: when the current selection — or a hovered operator — lies outside t
 
 - Show **where** an off-screen selection or hovered operator is, relative to the visible area, as a screen-space edge marker — without moving the view.
 - Be **non-destructive**: this is a passive wayfinding hint, complementary to the existing `F` "fit view to selection" (which *does* move the view). It never steals focus or interaction.
-- **Allocation-free, no extra iteration.** Reuse the existing per-item `DrawNode` loop and the already-computed `_visibleCanvasArea`. No LINQ, no per-frame heap traffic (the editor draws this every frame at output refresh rate).
+- **Allocation-free.** Iterate the (small) selection list and hovered-id set directly and reuse the already-computed `_visibleCanvasArea`. No LINQ, no per-frame heap traffic (the editor draws this every frame at output refresh rate).
 - Read consistently with the editor: reuse `UiColors.ForegroundFull` and the shared `Blink` sine; markers smoothly fade/blend rather than pop.
 
 ## Non-Goals (initial release)
@@ -62,13 +62,15 @@ Multiple hovered/selected items → union into one box per kind (cheap, and avoi
 
 | System | File | Change |
 |---|---|---|
-| Per-item bounds accumulation | [MagGraphCanvas.DrawNode.cs:144-159](../../Editor/Gui/MagGraph/Ui/MagGraphCanvas.DrawNode.cs:144) | Inside the existing loop, where `isSelected` / `isHighlighted` are already known, accumulate two `ImRect` bounds + "any" flags. Zero extra iteration. |
-| Overlay draw pass | [MagGraphCanvas.Drawing.cs:157-161](../../Editor/Gui/MagGraph/Ui/MagGraphCanvas.Drawing.cs:157) | After the connection loop, draw the edge markers from the accumulated bounds + `_visibleCanvasArea` / window rect. New private `DrawOffscreenIndicators(...)` partial method. |
-| Frame-local accumulators | [MagGraphView.cs:220](../../Editor/Gui/MagGraph/Ui/MagGraphView.cs:220) (near `_visibleCanvasArea`) | Add private fields: `_selectionBounds`, `_hoverBounds`, `_anySelectionBounds`, `_anyHoverBounds`; reset at frame start (next to where `_visibleCanvasArea` is set). |
-| Screen transform | [ScalableCanvas.cs](../../Editor/Gui/Interaction/ScalableCanvas.cs) `TransformRect` / `WindowPos` / `WindowSize` | Read-only use; no change. |
-| Hover source | [FrameStats.cs:39](../../Editor/Gui/FrameStats.cs:39) `IsIdHovered`, [Drawing.cs:459](../../Editor/Gui/MagGraph/Ui/MagGraphCanvas.Drawing.cs:459) `Blink` | Read-only use; no change. |
+| Overlay draw pass (new) | `Editor/Gui/MagGraph/Ui/MagGraphCanvas.OffscreenIndicators.cs` (new partial) | `DrawOffscreenIndicators(drawList)` + `DrawEdgeMarker(...)` + `GetClampedSpan(...)` / `AccumulateBounds(...)` helpers. Builds selection bounds by iterating `_context.Selector.Selection`, hover bounds by iterating `FrameStats.Last.HoveredIds` → `Layout.Items` lookup. Allocation-free. |
+| Hook call | [MagGraphCanvas.Drawing.cs:161](../../Editor/Gui/MagGraph/Ui/MagGraphCanvas.Drawing.cs:161) | Single `DrawOffscreenIndicators(drawList)` call right after the connection loop. |
+| Screen transform | [ScalableCanvas.cs:152](../../Editor/Gui/Interaction/ScalableCanvas.cs:152) `TransformRect` / `WindowPos` / `WindowSize` | Read-only use; no change. |
+| Hover source | [FrameStats.cs:79](../../Editor/Gui/FrameStats.cs:79) `Last.HoveredIds`, [Drawing.cs:459](../../Editor/Gui/MagGraph/Ui/MagGraphCanvas.Drawing.cs:459) `Blink` | Read-only use; no change. |
+| Selection source | [NodeSelection.cs:334](../../Editor/UiModel/Selection/NodeSelection.cs:334) `Selection` (via [GraphUiContext.cs:80](../../Editor/Gui/MagGraph/States/GraphUiContext.cs:80) `Selector`) | Read-only use; no change. |
 
-All changes are in `Editor/`. **No `Core/` changes.** No new state outside the graph view. No overlap with the in-flight Snapshot/Variation work (`SnapshotControlView.cs`, `VariationPicker.cs`, `CustomComponents.Menus.cs`).
+All changes are in `Editor/` — one new file plus a one-line call. **No `Core/` changes, no `DrawNode` changes, no new persistent state.** No overlap with the in-flight Snapshot/Variation work (`SnapshotControlView.cs`, `VariationPicker.cs`, `CustomComponents.Menus.cs`).
+
+> **Why not accumulate inside the `DrawNode` loop (as first sketched).** `DrawNode` early-returns at [DrawNode.cs:32](../../Editor/Gui/MagGraph/Ui/MagGraphCanvas.DrawNode.cs:32) — `if (!IsRectVisible(item.Area)) return;` — *before* the selection/highlight code. Off-screen items (exactly the ones this feature targets) never reach it. So bounds are built from the selection list and hovered-id set instead, both small and allocation-free to iterate.
 
 ---
 
@@ -76,47 +78,41 @@ All changes are in `Editor/`. **No `Core/` changes.** No new state outside the g
 
 Each phase compiles and is independently shippable. `dotnet build Editor/Editor.csproj` must pass at the end of each.
 
-### Phase 1 — Selection edge marker
+### Phase 1 — Selection edge marker — **done**
 
-Goal: a steady marker appears at the nearest edge when the selection is fully off-screen, with the edge/corner blend and appear-fade.
+A steady marker appears at the nearest edge when the selection is fully off-screen, with the edge/corner blend and appear-fade. Implemented in `DrawOffscreenIndicators` / `DrawEdgeMarker`:
 
-1. Add the frame-local accumulator fields near `_visibleCanvasArea` and reset them where `_visibleCanvasArea` is assigned ([Drawing.cs:50](../../Editor/Gui/MagGraph/Ui/MagGraphCanvas.Drawing.cs:50)).
-2. In `DrawNode`, where `isSelected` is already computed ([DrawNode.cs:144](../../Editor/Gui/MagGraph/Ui/MagGraphCanvas.DrawNode.cs:144)), `Add(item.Area)` into `_selectionBounds` and set `_anySelectionBounds = true`. (Use `item.Area`, the canvas rect — not the clamped on-screen `pMinVisible/pMaxVisible`.)
-3. Add `DrawOffscreenIndicators(drawList)` as a new partial, called after the connection loop ([Drawing.cs:161](../../Editor/Gui/MagGraph/Ui/MagGraphCanvas.Drawing.cs:161)). It:
-   - early-outs if `!_anySelectionBounds` or `_selectionBounds.Overlaps(_visibleCanvasArea)`;
-   - transforms `_selectionBounds` to screen via `TransformRect`;
-   - computes the window screen rect (`ImRect.RectWithSize(WindowPos, WindowSize)`), inset by padding × `T3Ui.UiScaleFactor`;
-   - clamps the screen box into the inset window rect, applies the min-leg length, and draws the marker leg(s) with `drawList.AddRectFilled` in `UiColors.ForegroundFull`;
-   - ramps alpha by distance-past-edge.
-4. **Thickness/inset/min-leg are screen pixels → multiply by `T3Ui.UiScaleFactor`, NOT `CanvasScale`.** This is the easy-to-miss gotcha: the marker is a HUD element, independent of zoom.
+- selection bounds built by iterating `_context.Selector.Selection` (`ImRect.RectWithSize(s.PosOnCanvas, s.Size)`), allocation-free;
+- early-out via the existing `IsRectVisible(bounds)` (canvas-space `_visibleCanvasArea.Overlaps`);
+- box transformed to screen via `TransformRect`; window rect from `WindowPos`/`WindowSize`, inset by padding;
+- `GetClampedSpan` clamps the projected extent into the inset window and enforces the min leg length (edge→corner is one continuous rule);
+- alpha ramps by distance-past-edge; drawn with `UiColors.ForegroundFull`;
+- **all sizes × `T3Ui.UiScaleFactor`, never `CanvasScale`** — the marker is a zoom-independent HUD element.
 
-**Deliverable:** select an operator, scroll it off-screen → a steady edge marker tracks its direction; scroll it past a corner → a corner stub; scroll it back into view → marker fades out.
+### Phase 2 — Hover marker (blinking) — **done**
 
-### Phase 2 — Hover marker (blinking)
+- hover bounds built by iterating `FrameStats.Last.HoveredIds` → `Layout.Items.TryGetValue(id, …)` → `item.Area`;
+- gated on `!IsHovered`, mirroring the on-node highlight condition (so it's the cross-panel hover case);
+- drawn with `UiColors.ForegroundFull.Fade(Blink)` — the same blink as the on-node highlight;
+- shares `DrawEdgeMarker`, so the distance-fade compounds with the blink.
 
-1. In `DrawNode`, where `isHighlighted` is already computed ([DrawNode.cs:152](../../Editor/Gui/MagGraph/Ui/MagGraphCanvas.DrawNode.cs:152)), `Add(item.Area)` into `_hoverBounds` / set `_anyHoverBounds`.
-2. In `DrawOffscreenIndicators`, after the selection marker, draw the hover marker from `_hoverBounds` with `UiColors.ForegroundFull.Fade(Blink)` and a slightly different edge inset so it doesn't z-fight a coincident selection marker.
-3. Verify the cross-panel hover path: hover an operator's row in the Parameter window / a connection endpoint while the op is scrolled off-screen → blinking edge marker points to it.
+### Phase 3 — Tuning & polish (open)
 
-**Deliverable:** the "locate this operator" affordance now works when the target is off-screen — the feature's primary payoff.
+The marker is drawn with **one unified model** (no per-edge modes — earlier mode-based drawing caused jumps at every edge/corner boundary): the box's four corners are projected onto the rounded window border as arc-length positions (`BorderArcLength`), the smallest arc containing them is taken (drop the largest gap between sorted positions), and that span is stroked by walking the border (`BorderPointAt` → `PathStroke`, rounded end-caps). The span slides along edges and wraps the rounded corners as one continuous function of the selection's position; a too-short span grows symmetrically along the border (no inward snap). Constants live at the bottom of the new partial (`EdgePadding 3`, `MarkerThickness 2`, `MarkerMinLength 14`, `CornerRadius 8`, `FadeInDistance 50`). Remaining:
 
-### Phase 3 — Tuning & polish
-
-1. Tune padding, min-leg length, marker thickness, alpha-ramp distance, and corner stub leg length against real graphs at several zoom levels.
+1. Tune the constants against real graphs at several zoom levels (run the editor, observe).
 2. Confirm the marker insets clear existing edge chrome (the faded left-edge `GraphOpacity` region; any toolbars).
-3. Decide persistent-vs-fading for selection (see Open Questions) and the optional settings toggle.
+3. Decide persistent-vs-fading for selection and the optional settings toggle (see Open Questions — currently persistent + always-on).
 4. Add the manual test set; update `.help/` if a graph-navigation page warrants a mention.
-
-**Deliverable:** shippable.
+5. Selection currently covers operator/annotation items in the selection list. A coincident selection+hover marker on the same edge uses the same inset (overlap is acceptable since both are `ForegroundFull`; revisit if the blink reads poorly under a steady marker).
 
 ---
 
 ## Implementation notes
 
-- **Why accumulate in `DrawNode`, not call `GetSelectionBounds`.** [`NodeSelection.GetSelectionBounds`](../../Editor/UiModel/Selection/NodeSelection.cs:245) uses `.ToArray()` + LINQ — fine for the user-triggered `F` framing, **not** for a per-frame overlay. The `DrawNode` loop already visits every item and already knows `isSelected`/`isHighlighted`, so accumulating `item.Area` there is free and allocation-free. Bounds also stay correct while item positions are damped/animated, since they're recomputed each frame from live positions.
-- **Use `item.Area`** (`ImRect.RectWithSize(PosOnCanvas, Size)`, [MagGraphItem.cs:42](../../Editor/Gui/MagGraph/Model/MagGraphItem.cs:42)) for canvas-space bounds — not the clamped visible screen corners.
-- **Static buffers** for any small point arrays in the draw, per the per-frame draw rules.
-- **Single draw list, drawn last** (after connections) so markers sit on top; no channel split needed (markers aren't clickable in v1).
+- **Build bounds from the small sets, not `GetSelectionBounds`.** [`NodeSelection.GetSelectionBounds`](../../Editor/UiModel/Selection/NodeSelection.cs:245) uses `.ToArray()` + LINQ — fine for the user-triggered `F` framing, **not** for a per-frame overlay. Instead iterate `_context.Selector.Selection` (selection) and `FrameStats.Last.HoveredIds` (hover) directly — both small, both allocation-free (the `HashSet<Guid>` `foreach` uses its struct enumerator).
+- **Selection uses `s.PosOnCanvas`/`s.Size`** (model position), hover uses `item.Area` from the `Layout.Items` lookup. Model position is fine — the marker points to roughly where the op sits; nodes don't move during canvas scroll, only during drag.
+- **Single draw list, drawn after connections** so markers sit on top; no channel split needed (markers aren't clickable in v1).
 
 ---
 
@@ -131,13 +127,7 @@ Goal: a steady marker appears at the nearest edge when the selection is fully of
 
 ## Manual test set
 
-To be added with the implementation PR as `.tests-manual/offscreen-selection-indicator.md` (frontmatter `added` / `added-in-version` per [`.tests-manual/README.md`](../../.tests-manual/README.md)). Outline:
-
-- Select an operator, scroll it off the top → a steady marker appears on the top edge, tracking its horizontal position; scroll back → it fades out.
-- Scroll the selection past the top-left corner → the marker becomes an L-shaped corner stub.
-- With nothing off-screen visible, hover the selected op's row in the Parameter window while it's scrolled away → a blinking marker points to it.
-- Selection + hover land on the same edge → both readable (steady vs. blinking), not overlapping into one blob.
-- Zoom to several levels → marker thickness/inset stay constant in screen pixels (DPI/zoom independent).
+Added: [`.tests-manual/offscreen-selection-indicator.md`](../../.tests-manual/offscreen-selection-indicator.md) (scope `graph-window`, `added-in-version: 4.3`). Covers: selection marker off one edge; corner stub past two edges; clearing when back in view; zoom-independent sizing; and the blinking hover marker driven from another panel (Console / Timeline / Variations).
 
 ---
 
@@ -148,4 +138,6 @@ To be added with the implementation PR as `.tests-manual/offscreen-selection-ind
 
 ## Status
 
-Draft — not yet implemented. Phase 1 is self-contained and safe to start; no dependency on the in-flight Snapshot/Variation work.
+Implemented and accepted by the user — selection + hover markers, riding the rounded window border with smooth continuous corner wrapping. `Editor.csproj` compiles clean; verified live via hot reload. Manual test set added. Not committed yet (left to the user).
+
+Deferred follow-ups (not requested, recorded for later): click-to-focus on the marker (reuse `FocusViewToSelection`); a `UserSettings` on/off toggle; optionally keep a straight dominant-edge leg at diagonal corners instead of the small arc-bracket. The reusable border helpers (`BorderArcLength` / `BorderPointAt`) could back other off-screen indicators (playback cursor, erroring op). No dependency on the in-flight Snapshot/Variation work.

@@ -1,9 +1,43 @@
 ﻿using T3.Editor.Gui.Interaction.Variations.Model;
+using T3.Editor.Gui.Windows.Variations;
 
 namespace T3.Editor.Gui.Interaction.Variations;
 
 internal static class SnapshotActions
 {
+    /// <summary>
+    /// Activates the snapshot at <paramref name="rawIndex"/> taken modulo the number of snapshots in the
+    /// active pool (reading order), so any integer wraps to an existing snapshot. Applies it like a
+    /// launchpad pad press; never creates a snapshot. Backs the [ActivateSnapshot] operator.
+    /// </summary>
+    public static void ActivateSnapshotByModuloIndex(int rawIndex)
+    {
+        var pool = VariationHandling.ActivePoolForSnapshots;
+        var instance = VariationHandling.ActiveInstanceForSnapshots;
+        if (pool == null || instance == null)
+            return;
+
+        var snapshots = new List<Variation>();
+        foreach (var v in pool.AllVariations)
+        {
+            if (v.IsSnapshot)
+                snapshots.Add(v);
+        }
+
+        if (snapshots.Count == 0)
+            return;
+
+        VariationBaseCanvas.SortByReadingOrder(snapshots);
+
+        var count = snapshots.Count;
+        var position = ((rawIndex % count) + count) % count;
+        var variation = snapshots[position];
+
+        // No undo step: a procedural trigger is automation output, not a user edit on the undo stack.
+        pool.ApplyWithoutUndo(instance, variation);
+        BlendActions.SetActiveSnapshot(variation.ActivationIndex);
+    }
+
     public static void ActivateOrCreateSnapshotAtIndex(int activationIndex)
     {
         // Log.Debug($"SnapshotActions.ActivateOrCreateSnapshotAtIndex called with index {activationIndex}");
