@@ -33,6 +33,9 @@ internal sealed class SnapshotControlView
         public SymbolUi.Child ChildUi;
     }
 
+    /// <summary>Set while the view draws its rows so the parameter menus can offer snapshot writes.</summary>
+    private readonly record struct SnapshotMenuContext(SymbolVariationPool Pool, Variation ActiveSnapshot, Guid ChildKey);
+
     /// <summary>
     /// Caches whether current values differ from the selected snapshot. Comparing every input
     /// each frame would be too expensive, so results are recomputed only when the snapshot or
@@ -180,8 +183,44 @@ internal sealed class SnapshotControlView
             DrawOpList(composition, selectedSnapshot);
         }
         ImGui.EndChild();
+
+        HandleSnapshotKeyboardNav(pool, composition, selectedSnapshot);
+
         ImGui.PopStyleVar();
         ImGui.PopStyleColor();
+    }
+
+    /// <summary>
+    /// Left/right cycle snapshots while the parameter window holds focus (and nothing is being
+    /// edited). Draws the same focus frame as the Graph / Output windows so the binding is visible.
+    /// </summary>
+    private void HandleSnapshotKeyboardNav(SymbolVariationPool pool, Instance composition, Variation? selectedSnapshot)
+    {
+        if (!ImGui.IsWindowFocused(ImGuiFocusedFlags.RootAndChildWindows))
+            return;
+
+        var drawList = ImGui.GetWindowDrawList();
+        var min = ImGui.GetWindowPos();
+        drawList.AddRect(min, min + ImGui.GetWindowSize(), UiColors.ForegroundFull.Fade(0.2f));
+
+        // Don't steal arrows from an active value drag or any text field (rename, search).
+        if (ImGui.IsAnyItemActive() || ImGui.GetIO().WantTextInput)
+            return;
+
+        if (ImGui.IsKeyPressed(ImGuiKey.LeftArrow))
+        {
+            ApplySnapshot(pool, composition, GetNeighborSnapshot(selectedSnapshot, -1));
+        }
+        else if (ImGui.IsKeyPressed(ImGuiKey.RightArrow))
+        {
+            ApplySnapshot(pool, composition, GetNeighborSnapshot(selectedSnapshot, +1));
+        }
+        else if (selectedSnapshot != null && (ImGui.IsKeyPressed(ImGuiKey.Enter) || ImGui.IsKeyPressed(ImGuiKey.KeypadEnter)))
+        {
+            // Safe here: the control view only shows when nothing is selected in the graph, so this
+            // can't collide with the graph's own Enter-to-rename.
+            StartRenaming(selectedSnapshot);
+        }
     }
 
     /// <summary>
@@ -315,19 +354,22 @@ internal sealed class SnapshotControlView
             else
             {
                 var chosen = _picker.Draw(_snapshots, pool, composition, selectedSnapshot, _selectedSnapshotLabel, dropdownWidth,
-                                          canvas: _snapshotCanvas);
+                                          out var renameRequested, canvas: _snapshotCanvas);
                 if (chosen != null)
                     ApplySnapshot(pool, composition, chosen);
+
+                if (renameRequested && selectedSnapshot != null)
+                    StartRenaming(selectedSnapshot);
             }
 
             // Prev / next arrows cycle by activation index order
             var hasSnapshots = _snapshots.Count > 0;
             ImGui.SameLine();
-            if (DrawBarButton(Icon.ArrowLeft, hasSnapshots, "Previous snapshot", CustomComponents.ButtonStates.Default))
+            if (DrawBarButton(Icon.ArrowLeft, hasSnapshots, "Previous snapshot  (Left arrow)", CustomComponents.ButtonStates.Default))
                 ApplySnapshot(pool, composition, GetNeighborSnapshot(selectedSnapshot, -1));
 
             ImGui.SameLine();
-            if (DrawBarButton(Icon.ArrowRight, hasSnapshots, "Next snapshot", CustomComponents.ButtonStates.Default))
+            if (DrawBarButton(Icon.ArrowRight, hasSnapshots, "Next snapshot  (Right arrow)", CustomComponents.ButtonStates.Default))
                 ApplySnapshot(pool, composition, GetNeighborSnapshot(selectedSnapshot, +1));
 
             // Right-aligned actions: revert (drag) + create (drag) stay icons; the rest move into
@@ -337,10 +379,10 @@ internal sealed class SnapshotControlView
             var canWrite = selectedSnapshot != null && isModified;
             DrawBarRevertButton(pool, composition, selectedSnapshot, canWrite);
 
-            // Creating a new snapshot only makes sense when the current values differ
+            // Always available; emphasized when the active snapshot has unsaved changes.
             ImGui.SameLine(0, spacing + addButtonGap);
-            var canCreate = selectedSnapshot == null || isModified;
-            if (DrawBarButton(Icon.Plus, canCreate, "Create new snapshot from current values"))
+            var createState = isModified ? CustomComponents.ButtonStates.Emphasized : CustomComponents.ButtonStates.Default;
+            if (DrawBarButton(Icon.Plus, true, "Create new snapshot from current values", createState))
                 CreateAndRenameSnapshot(pool, composition);
 
             ImGui.SameLine();
@@ -366,18 +408,18 @@ internal sealed class SnapshotControlView
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(6, 6) * T3Ui.UiScaleFactor);
         if (ImGui.BeginPopup(SnapshotActionsPopupId))
         {
-            if (CustomComponents.DrawMenuItem(_applyActionId, Icon.Apply, "Write changes", isEnabled: selectedSnapshot != null && isModified))
+            if (CustomComponents.DrawMenuItem(_applyActionId, Icon.Apply, "Write changes", isEnabled: selectedSnapshot != null && isModified, reserveCheckmarkColumn: false))
                 WriteSnapshot(pool, composition, selectedSnapshot!);
 
-            if (CustomComponents.DrawMenuItem(_renameActionId, Icon.None, "Rename", isEnabled: selectedSnapshot != null))
+            if (CustomComponents.DrawMenuItem(_renameActionId, Icon.None, "Rename", isEnabled: selectedSnapshot != null, reserveCheckmarkColumn: false))
                 StartRenaming(selectedSnapshot!);
 
-            if (CustomComponents.DrawMenuItem(_updateThumbnailActionId, Icon.Refresh, "Update thumbnail", isEnabled: selectedSnapshot != null))
+            if (CustomComponents.DrawMenuItem(_updateThumbnailActionId, Icon.Refresh, "Update thumbnail", isEnabled: selectedSnapshot != null, reserveCheckmarkColumn: false))
                 VariationThumbnailRenderer.RequestRender(pool, composition, selectedSnapshot!.Id, toFile: true);
 
             CustomComponents.SeparatorLine();
 
-            if (CustomComponents.DrawMenuItem(_removeActionId, Icon.Trash, "Remove", isEnabled: selectedSnapshot != null))
+            if (CustomComponents.DrawMenuItem(_removeActionId, Icon.Trash, "Remove", isEnabled: selectedSnapshot != null, reserveCheckmarkColumn: false))
             {
                 pool.DeleteVariation(selectedSnapshot!);
                 _modificationCheck.Invalidate();
@@ -689,6 +731,12 @@ internal sealed class SnapshotControlView
         // Keep room right of the value edits for the per-row revert button + actions menu
         InputArea.ValueEditRightMargin = 2 * ImGui.GetFrameHeight() + 4 * T3Ui.UiScaleFactor;
 
+        // Context for the parameter menus (right-click + per-row) so they can offer snapshot writes.
+        var menuPool = VariationHandling.ActivePoolForSnapshots;
+        _activeSnapshotMenuContext = menuPool != null
+            ? new SnapshotMenuContext(menuPool, snapshot, childKey)
+            : null;
+
         foreach (var inputSlot in instance.Inputs)
         {
             if (!ValueUtils.BlendMethods.ContainsKey(inputSlot.Input.Value.ValueType))
@@ -723,12 +771,13 @@ internal sealed class SnapshotControlView
             if (highlight)
                 HandleRevertHandle(instance, snapshot, childKey, inputSlot, valueMin, valueMax);
 
-            DrawParameterActionMenu(instance, symbolChildUi, compositionSymbolUi, snapshot, childKey, inputSlot, valueMin, valueMax);
+            DrawParameterActionMenu(instance, symbolChildUi, compositionSymbolUi, childKey, inputSlot, valueMin, valueMax);
 
             ImGui.PopID();
         }
 
         InputArea.ValueEditRightMargin = 0;
+        _activeSnapshotMenuContext = null;
 
         ImGui.PopID();
         ImGui.PopStyleColor(2);
@@ -855,7 +904,7 @@ internal sealed class SnapshotControlView
     /// parameter into the active snapshot / all snapshots, reset it, or drop it from snapshot control.
     /// </summary>
     private void DrawParameterActionMenu(Instance instance, SymbolUi.Child symbolChildUi, SymbolUi compositionSymbolUi,
-        Variation snapshot, Guid childKey, IInputSlot inputSlot, Vector2 valueMin, Vector2 valueMax)
+        Guid childKey, IInputSlot inputSlot, Vector2 valueMin, Vector2 valueMax)
     {
         var scale = T3Ui.UiScaleFactor;
         var buttonSize = ImGui.GetFrameHeight();
@@ -864,7 +913,7 @@ internal sealed class SnapshotControlView
         // Far slot — right of the revert column (which only shows when modified).
         ImGui.SetCursorScreenPos(new Vector2(valueMax.X + 2 * scale + buttonSize + 2 * scale, valueMin.Y));
 
-        if (CustomComponents.IconButton(Icon.ChevronDown, new Vector2(buttonSize, buttonSize), CustomComponents.ButtonStates.Default))
+        if (CustomComponents.IconButton(Icon.Settings2, new Vector2(buttonSize, buttonSize), CustomComponents.ButtonStates.Default))
             ImGui.OpenPopup(ParameterActionPopupId);
 
         CustomComponents.TooltipForLastItem("Parameter actions");
@@ -872,27 +921,15 @@ internal sealed class SnapshotControlView
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(6, 6) * scale);
         if (ImGui.BeginPopup(ParameterActionPopupId))
         {
-            var isModified = _modificationCheck.IsInputModified(childKey, inputSlot.Id);
-
-            if (CustomComponents.DrawMenuItem(_paramApplyToSnapshotId, Icon.Apply, "Write to snapshot", isEnabled: isModified)
-                && VariationHandling.ActivePoolForSnapshots is { } pool)
+            // Write to snapshot / all + Reset to Snapshot — shared with the parameter right-click menu.
+            if (instance.Parent != null
+                && DrawSnapshotActionMenuItems(instance.Parent.Symbol, symbolChildUi, inputSlot.Input, reserveCheckmarkColumn: false))
             {
-                VariationHandling.ApplyParameterToVariations(pool, new[] { snapshot }, childKey, inputSlot.Id,
-                    inputSlot.Input.Value, "Write parameter to snapshot");
                 _modificationCheck.Invalidate();
             }
 
-            // Comparing against every snapshot is only done while the popup is open.
-            var differsFromAny = DiffersFromAnySnapshot(inputSlot, childKey);
-            if (CustomComponents.DrawMenuItem(_paramApplyToAllId, Icon.None, "Write to all snapshots", isEnabled: differsFromAny)
-                && VariationHandling.ActivePoolForSnapshots is { } poolForAll)
-            {
-                VariationHandling.ApplyParameterToVariations(poolForAll, _snapshots, childKey, inputSlot.Id,
-                    inputSlot.Input.Value, "Write parameter to all snapshots");
-                _modificationCheck.Invalidate();
-            }
-
-            if (CustomComponents.DrawMenuItem(_paramResetId, Icon.Reset, "Reset", isEnabled: instance.Parent != null)
+            if (CustomComponents.DrawMenuItem(_paramResetId, Icon.Reset, "Reset to Default",
+                    isEnabled: instance.Parent != null && !inputSlot.Input.IsDefault, reserveCheckmarkColumn: false)
                 && instance.Parent != null)
             {
                 UndoRedoStack.AddAndExecute(new ResetInputToDefault(instance.Parent.Symbol, instance.SymbolChildId, inputSlot.Input));
@@ -903,7 +940,7 @@ internal sealed class SnapshotControlView
 
             // Composition inputs (childKey == Guid.Empty) live in a different owner; their toggle
             // isn't reachable through this child-ui, so the action is offered for ops only.
-            if (CustomComponents.DrawMenuItem(_paramDisableId, Icon.None, "Disable Snapshot control", isEnabled: childKey != Guid.Empty))
+            if (CustomComponents.DrawMenuItem(_paramDisableId, Icon.None, "Disable Snapshot control", isEnabled: childKey != Guid.Empty, reserveCheckmarkColumn: false))
             {
                 VariationHandling.ToggleParameterSnapshotControl(compositionSymbolUi, symbolChildUi, inputSlot.Input, enable: false);
                 _modificationCheck.Invalidate();
@@ -920,26 +957,73 @@ internal sealed class SnapshotControlView
     }
 
     /// <summary>
-    /// True if the parameter's current value differs from its stored value in at least one snapshot
-    /// (a non-stored controlled input counts as the default). Drives "Apply to all snapshots".
+    /// Snapshot-specific parameter actions for the parameter menus, active only while this view is
+    /// drawing (see <see cref="_activeSnapshotMenuContext"/>): write the parameter into the active
+    /// snapshot or all snapshots, and reset it to the active snapshot's stored value. Shared by the
+    /// per-row gear menu and the parameter right-click menu. Returns true when one was triggered.
     /// </summary>
-    private bool DiffersFromAnySnapshot(IInputSlot inputSlot, Guid childKey)
+    internal static bool DrawSnapshotActionMenuItems(Symbol compositionSymbol, SymbolUi.Child symbolChildUi, Symbol.Child.Input input,
+        bool reserveCheckmarkColumn)
     {
-        if (!ValueUtils.CompareFunctions.TryGetValue(inputSlot.Input.Value.ValueType, out var compare))
+        if (_activeSnapshotMenuContext is not { } ctx)
             return false;
 
-        var current = inputSlot.Input.Value;
-        foreach (var s in _snapshots)
-        {
-            var stored = s.ParameterSetsForChildIds.TryGetValue(childKey, out var set) && set.TryGetValue(inputSlot.Id, out var v)
-                ? v
-                : inputSlot.Input.DefaultValue;
+        var inputId = input.InputDefinition.Id;
+        var value = input.Value;
+        var differsFromActive = SnapshotValueDiffers(ctx.ActiveSnapshot, ctx.ChildKey, inputId, value, input.DefaultValue);
+        var acted = false;
 
-            if (!compare(stored, current))
-                return true;
+        if (CustomComponents.DrawMenuItem(_writeToSnapshotItemId, Icon.Apply, "Write to snapshot", null, isEnabled: differsFromActive,
+                reserveCheckmarkColumn: reserveCheckmarkColumn))
+        {
+            VariationHandling.ApplyParameterToVariations(ctx.Pool, new[] { ctx.ActiveSnapshot }, ctx.ChildKey, inputId, value,
+                "Write parameter to snapshot");
+            acted = true;
         }
 
-        return false;
+        var differsFromAny = false;
+        foreach (var v in ctx.Pool.AllVariations)
+        {
+            if (v.IsPreset)
+                continue;
+
+            if (SnapshotValueDiffers(v, ctx.ChildKey, inputId, value, input.DefaultValue))
+            {
+                differsFromAny = true;
+                break;
+            }
+        }
+
+        if (CustomComponents.DrawMenuItem(_writeToAllSnapshotsItemId, Icon.None, "Write to all snapshots", null, isEnabled: differsFromAny,
+                reserveCheckmarkColumn: reserveCheckmarkColumn))
+        {
+            VariationHandling.ApplyParameterToVariations(ctx.Pool, ctx.Pool.AllVariations, ctx.ChildKey, inputId, value,
+                "Write parameter to all snapshots");
+            acted = true;
+        }
+
+        if (CustomComponents.DrawMenuItem(_resetToSnapshotItemId, Icon.Reset, "Reset to Snapshot", null, isEnabled: differsFromActive,
+                reserveCheckmarkColumn: reserveCheckmarkColumn))
+        {
+            if (ctx.ActiveSnapshot.ParameterSetsForChildIds.TryGetValue(ctx.ChildKey, out var set) && set.TryGetValue(inputId, out var stored))
+                UndoRedoStack.AddAndExecute(new ChangeInputValueCommand(compositionSymbol, symbolChildUi.Id, input, stored));
+            else
+                UndoRedoStack.AddAndExecute(new ResetInputToDefault(compositionSymbol, symbolChildUi.Id, input));
+            acted = true;
+        }
+
+        return acted;
+    }
+
+    private static bool SnapshotValueDiffers(Variation variation, Guid childKey, Guid inputId, InputValue current, InputValue defaultValue)
+    {
+        if (!ValueUtils.CompareFunctions.TryGetValue(current.ValueType, out var compare))
+            return false;
+
+        var stored = variation.ParameterSetsForChildIds.TryGetValue(childKey, out var set) && set.TryGetValue(inputId, out var v)
+                         ? v
+                         : defaultValue;
+        return !compare(stored, current);
     }
 
     /// <summary>
@@ -1068,11 +1152,13 @@ internal sealed class SnapshotControlView
     {
         var selectedId = selectedSnapshot?.Id ?? Guid.Empty;
         var title = selectedSnapshot?.Title;
-        if (selectedId == _lastLabelVariationId && title == _lastLabelTitle)
+        var activationIndex = selectedSnapshot?.ActivationIndex ?? int.MinValue;
+        if (selectedId == _lastLabelVariationId && title == _lastLabelTitle && activationIndex == _lastLabelActivationIndex)
             return;
 
         _lastLabelVariationId = selectedId;
         _lastLabelTitle = title;
+        _lastLabelActivationIndex = activationIndex;
 
         if (selectedSnapshot == null)
         {
@@ -1102,10 +1188,12 @@ internal sealed class SnapshotControlView
     private const string SnapshotActionsPopupId = "##snapshotActions";
     private const string ParameterActionPopupId = "##parameterActions";
     private static readonly int _applyActionId = "snapshotApply".GetHashCode();
-    private static readonly int _paramApplyToSnapshotId = "paramApplyToSnapshot".GetHashCode();
-    private static readonly int _paramApplyToAllId = "paramApplyToAll".GetHashCode();
     private static readonly int _paramResetId = "paramReset".GetHashCode();
     private static readonly int _paramDisableId = "paramDisable".GetHashCode();
+    private static readonly int _writeToSnapshotItemId = "writeToSnapshot".GetHashCode();
+    private static readonly int _writeToAllSnapshotsItemId = "writeToAllSnapshots".GetHashCode();
+    private static readonly int _resetToSnapshotItemId = "resetToSnapshot".GetHashCode();
+    private static SnapshotMenuContext? _activeSnapshotMenuContext;
     private static readonly int _renameActionId = "snapshotRename".GetHashCode();
     private static readonly int _updateThumbnailActionId = "snapshotUpdateThumbnail".GetHashCode();
     private static readonly int _removeActionId = "snapshotRemove".GetHashCode();
@@ -1128,6 +1216,7 @@ internal sealed class SnapshotControlView
 
     private Guid _lastLabelVariationId = Guid.NewGuid(); // force initial label update
     private string? _lastLabelTitle;
+    private int _lastLabelActivationIndex = int.MinValue;
     private string _indexLabel = "-";
     private string _selectedSnapshotLabel = "Select snapshot...";
 

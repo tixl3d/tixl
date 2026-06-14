@@ -26,16 +26,19 @@ internal sealed class VariationPicker
     /// <paramref name="variations"/> in canvas order. Returns the chosen variation, or null.
     /// </summary>
     public Variation? Draw(IReadOnlyList<Variation> variations, SymbolVariationPool pool, Instance composition,
-                           Variation? selected, string label, float width, VariationBaseCanvas? canvas = null)
+                           Variation? selected, string label, float width, out bool renameRequested, VariationBaseCanvas? canvas = null)
     {
         Variation? chosen = null;
+        renameRequested = false;
         var scale = T3Ui.UiScaleFactor;
         var frameHeight = ImGui.GetFrameHeight();
 
         var triggerClicked = DrawTriggerButton(label, width, frameHeight);
+        // Double-clicking the trigger renames rather than opening the picker (caller's concern).
+        renameRequested = ImGui.IsItemHovered() && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left);
         var triggerMin = ImGui.GetItemRectMin();
         var triggerMax = ImGui.GetItemRectMax();
-        if (triggerClicked)
+        if (triggerClicked && !renameRequested)
         {
             ImGui.OpenPopup(PopupId);
             _searchString = string.Empty;

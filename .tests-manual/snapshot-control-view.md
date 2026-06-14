@@ -78,11 +78,13 @@ onto an empty cell, then (in a second drag) onto another used cell.
 ## Step: Renaming a snapshot
 
 **Action:**
-Open the actions (…) menu in the selector bar and choose "Rename".
+Open the actions (…) menu in the selector bar and choose "Rename". Also try
+**double-clicking the snapshot name** (the picker dropdown) directly.
 
 **Expected:**
-- The dropdown is replaced by a focused text field pre-filled with the current
-  name; editing and pressing Enter renames the snapshot.
+- Either route replaces the dropdown with a focused text field pre-filled with
+  the current name; editing and pressing Enter renames the snapshot.
+- The double-click does not leave the picker popup open.
 
 ## Step: Adding a snapshot with the + button
 
@@ -137,19 +139,25 @@ Open the actions (…) menu in the selector bar and choose "Rename".
 ## Step: Per-parameter actions menu
 
 **Action:**
-Each parameter row has a small actions button (chevron) at its right edge. Click
-it to open the menu, on both an unchanged parameter and one you've edited.
+Each parameter row has a small actions button (gear) at its right edge. Click it
+to open the menu, on both an unchanged parameter and one you've edited. Then
+**right-click the parameter** and compare.
 
 **Expected:**
-- The menu lists: Write to snapshot, Write to all snapshots, Reset, then below a
-  divider, Disable Snapshot control.
+- The gear menu lists: Write to snapshot, Write to all snapshots, Reset to
+  Snapshot, Reset to Default, then below a divider, Disable Snapshot control.
+- The parameter **right-click menu** shows the same Write / Reset to Snapshot
+  actions under a **"Snapshot control"** section header (alongside "Control with
+  Snapshots"); its "Reset to Default" stays in the Parameter section.
 - **Write to snapshot** is enabled only when the parameter differs from the
   active snapshot; choosing it writes the current value into the snapshot (the
   row's revert button then disables). Undoable.
 - **Write to all snapshots** is enabled only when the value differs from at least
   one snapshot; choosing it writes the current value into every snapshot (one
   undo step). Switching snapshots no longer changes this parameter.
-- **Reset** returns the parameter to its operator default (undoable).
+- **Reset to Snapshot** restores the active snapshot's stored value (enabled when
+  modified) — the menu equivalent of the row's revert icon.
+- **Reset to Default** returns the parameter to its operator default (undoable).
 - **Disable Snapshot control** removes the parameter from snapshot control (knob
   icon disappears, row leaves the view); it is disabled for the composition's own
   "Inputs" group.
@@ -185,6 +193,22 @@ it to open the menu, on both an unchanged parameter and one you've edited.
 - The arrows cycle through the snapshots in index order and apply each one.
 - The index indicator and dropdown label follow the active snapshot.
 - The active thumbnail highlight in the Variations window follows along.
+
+## Step: Cycling and renaming snapshots with the keyboard
+
+**Action:**
+Click inside the snapshot control view to focus it, then press the Left / Right
+arrow keys, and press Enter. Then click into a parameter value (or the picker
+search) and press the arrows / Enter again. Also hover the prev/next bar arrows.
+
+**Expected:**
+- While the window is focused a thin focus frame is drawn around it (as on the
+  Graph / Output windows).
+- Left / Right cycle to the previous / next snapshot (same as the bar arrows);
+  the arrow buttons' tooltips name the Left / Right arrow shortcut.
+- Enter starts renaming the active snapshot.
+- Neither the arrows nor Enter fire while a value is being edited or a text field
+  (rename / search) is active.
 
 ## Step: Selecting a snapshot from the picker
 

@@ -75,7 +75,8 @@ internal static partial class CustomComponents
     /// Menu item with the checkbox slot on the left, an optional icon, label and an optional
     /// right-aligned keyboard shortcut.
     /// </summary>
-    public static bool DrawMenuItem(int id, Icon icon, string label, string keyboardShortCut = null, bool isChecked = false, bool isEnabled = true)
+    public static bool DrawMenuItem(int id, Icon icon, string label, string keyboardShortCut = null, bool isChecked = false, bool isEnabled = true,
+                                    bool reserveCheckmarkColumn = true)
     {
         var h = ImGui.GetFrameHeight();
         var imguiPadding = ImGui.GetStyle().ItemSpacing;
@@ -85,7 +86,10 @@ internal static partial class CustomComponents
 
         var paddingFactor = 1.4f;
         var iconSlotWidth = Icons.FontSize * paddingFactor;
-        var leftPaddingIcon = imguiPadding.X + iconSlotWidth;
+        // Reserve the checkmark column only for menus that actually have toggle items; menus that
+        // never check (e.g. the snapshot actions) drop it so icon + label sit further left.
+        var checkmarkSlot = reserveCheckmarkColumn ? iconSlotWidth : 0f;
+        var leftPaddingIcon = imguiPadding.X + checkmarkSlot;
         var hasIcon = icon != Icon.None;
         // Always reserve the icon column so icon-less items (e.g. Rename) stay aligned with the rest.
         var leftPaddingText = leftPaddingIcon + iconSlotWidth;

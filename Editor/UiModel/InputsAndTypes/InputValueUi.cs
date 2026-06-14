@@ -519,13 +519,18 @@ public abstract class InputValueUi<T> : IInputUi
                          ProjectView.Focused?.GraphView.ExtractAsConnectedOperator(typedInputSlot, symbolChildUi, input);
                      }
 
-                     InputArea.DrawSnapshotControlMenuItem(compositionUi, symbolChildUi, input);
-
-                     if (CustomComponents.DrawMenuItem(_resetItemId, Icon.Reset, "Reset",
+                     if (CustomComponents.DrawMenuItem(_resetItemId, Icon.Reset, "Reset to Default",
                                                        isEnabled: !input.IsDefault))
                      {
                          UndoRedoStack.AddAndExecute(new ResetInputToDefault(compositionSymbol, symbolChildUi.Id,
                                                                              input));
+                     }
+
+                     if (InputArea.IsSnapshotControllable(symbolChildUi, input))
+                     {
+                         CustomComponents.DrawMenuGroupLabel("Snapshot control");
+                         InputArea.DrawSnapshotControlMenuItem(compositionUi, symbolChildUi, input);
+                         SnapshotControlView.DrawSnapshotActionMenuItems(compositionSymbol, symbolChildUi, input, reserveCheckmarkColumn: true);
                      }
 
                      CustomComponents.SeparatorLine();
