@@ -67,6 +67,8 @@ When the composition is active in a Parameter window, show:
 
 **Status (2026-06-13): implemented** — `SymbolUi.Child.SnapshotEnabledInputIds` (null = all, legacy), `ChangeSnapshotEnabledInputsCommand`, capture/apply/blend filtering in `SymbolVariationPool`, "Enable for control" context-menu toggle via `VariationHandling.ToggleParameterSnapshotControl`. Controller indicator: `Icon.Knob` tinted `UiColors.StatusControlled` in the input connection area. The view is suppressed during SkillQuest play mode.
 
+**Per-parameter actions menu (2026-06-14):** each parameter row has a `…` (`Icon.ChevronDown`) actions button in the right gutter beside the revert icon (gutter widened to two icons). Items: **Write to snapshot** (enabled when modified), **Write to all snapshots** (enabled when it differs from any — compared only while the popup is open), **Reset** (to default), `---`, **Disable Snapshot control** (ops only; composition `Guid.Empty` inputs can't toggle through this child-ui). Writes reuse `VariationHandling.ApplyParameterToVariations` (built on the existing `CloneParameterSetsWithValue` + `UpdateVariationParametersCommand`), one undoable macro each.
+
 **Goal:** "enabled for snapshots" becomes a per-parameter property of the child instance.
 
 **Scope:**

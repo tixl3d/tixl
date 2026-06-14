@@ -33,7 +33,7 @@ In the Graph window:
 **Expected:**
 - A selector bar appears at the top: a zero-padded index button, a snapshot
   dropdown, prev/next arrows, a revert button, an add (+) button, and an actions
-  (…) menu (holding Apply changes / Rename / Update thumbnail / Remove).
+  (…) menu (holding Write changes / Rename / Update thumbnail / Remove).
 - A text field is focused immediately so the snapshot can be named; typing a
   name and pressing Enter (or clicking away) stores it.
 - The new snapshot is the active one.
@@ -134,6 +134,26 @@ Open the actions (…) menu in the selector bar and choose "Rename".
 - Dragging the factor towards 0 moves the value back to the snapshot; dragging above 1 amplifies the difference beyond the current value.
 - Releasing keeps the scaled value (undoable as one step); releasing at factor 1 leaves the value unchanged.
 
+## Step: Per-parameter actions menu
+
+**Action:**
+Each parameter row has a small actions button (chevron) at its right edge. Click
+it to open the menu, on both an unchanged parameter and one you've edited.
+
+**Expected:**
+- The menu lists: Write to snapshot, Write to all snapshots, Reset, then below a
+  divider, Disable Snapshot control.
+- **Write to snapshot** is enabled only when the parameter differs from the
+  active snapshot; choosing it writes the current value into the snapshot (the
+  row's revert button then disables). Undoable.
+- **Write to all snapshots** is enabled only when the value differs from at least
+  one snapshot; choosing it writes the current value into every snapshot (one
+  undo step). Switching snapshots no longer changes this parameter.
+- **Reset** returns the parameter to its operator default (undoable).
+- **Disable Snapshot control** removes the parameter from snapshot control (knob
+  icon disappears, row leaves the view); it is disabled for the composition's own
+  "Inputs" group.
+
 ## Step: Reverting to the snapshot
 
 **Action:**
@@ -141,7 +161,7 @@ Open the actions (…) menu in the selector bar and choose "Rename".
 
 **Expected:**
 - The edited parameter returns to the value stored in the snapshot.
-- The revert button disables again (and "Apply changes" greys out).
+- The revert button disables again (and "Write changes" greys out).
 - `Ctrl+Z` restores the edited value; `Ctrl+Y`/redo re-applies the snapshot.
 
 ## Step: Writing changes into the snapshot

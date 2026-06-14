@@ -243,6 +243,31 @@ internal static class VariationHandling
     }
 
     /// <summary>
+    /// Writes <paramref name="value"/> as the stored value of one input (<paramref name="childId"/> /
+    /// <paramref name="inputId"/>) into each of the given snapshots, as a single undoable macro.
+    /// Backs the per-parameter "Apply to snapshot" / "Apply to all snapshots" actions in the
+    /// snapshot control view.
+    /// </summary>
+    internal static void ApplyParameterToVariations(SymbolVariationPool pool, IEnumerable<Variation> targets,
+                                                    Guid childId, Guid inputId, InputValue value, string commandName)
+    {
+        var macro = new MacroCommand(commandName);
+        var any = false;
+        foreach (var variation in targets)
+        {
+            if (variation.IsPreset)
+                continue;
+
+            var newSets = CloneParameterSetsWithValue(variation.ParameterSetsForChildIds, childId, inputId, value);
+            macro.AddAndExecCommand(new UpdateVariationParametersCommand(pool, variation, newSets));
+            any = true;
+        }
+
+        if (any)
+            UndoRedoStack.Add(macro);
+    }
+
+    /// <summary>
     /// All blendable, non-excluded input ids of the child's symbol — the parameters the
     /// snapshot system can control. Used to materialize the legacy "all enabled" state.
     /// </summary>

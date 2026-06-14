@@ -24,7 +24,7 @@ At the top, a selector bar shows the index of the active snapshot, a searchable 
 
 - **Revert** — re-apply the snapshot's stored values (enabled when the current values differ). Drag it to scale the change: towards 0 reverts fully, above 1 amplifies it.
 - **Create (+)** — make a new snapshot from the current values.
-- An **actions menu (…)** with **Apply changes** (update the snapshot from the current values), **Rename**, **Update thumbnail**, and **Remove**.
+- An **actions menu (…)** with **Write changes** (update the snapshot from the current values), **Rename**, **Update thumbnail**, and **Remove**.
 
 Click the **+** button to create a new snapshot from the current values; it becomes active and its name field is focused so it can be named right away. Clicking the index number on the left of the bar renames the active snapshot.
 
