@@ -136,12 +136,13 @@ Replace `ImGui.BeginCombo` for snapshots with `VariationPicker(pool, instance)` 
   embedded-canvas pinned-output contention since a fader list drives the real blend. Overlaps with
   phase 5 (same extraction).
 - **Live weight on the Variations thumbnails** (user idea, 2026-06-14, "love that"): two levels.
-  *(a) Display* — each thumbnail overlays its live `pool.GetBlendWeight(id)` (reuse
-  `VariationThumbnail.DrawBlendIndicator`, or a bottom fill + `NN%`), shown only during a real mix
-  (>1 non-zero weight, not the resting `{active:1}`). Turns the canvas into a live mix readout for
-  free. *(b) Interactive* — thumbnails become faders (scrub to set weight via the same
-  `BeginBlendWeightDrag`/`SetBlendWeight` path), which needs disentangling from the thumbnail's
-  existing click-to-apply and drag-to-reposition. Do (a) first.
+  - *(a) Display* — ✅ **Done (2026-06-14).** Thumbnails overlay their live `pool.GetBlendWeight(id)`
+    via the existing `VariationThumbnail.DrawBlendIndicator`, gated on `SymbolVariationPool.IsLiveBlendMix`
+    (2+ non-zero weights, so the resting `{active:1}` stays unannotated). `VariationBaseCanvas.TryGetLiveBlendWeight`
+    bridges canvas → pool; yields to the canvas's own fence/ALT blend gestures.
+  - *(b) Interactive* — thumbnails become faders (scrub to set weight via the same
+    `BeginBlendWeightDrag`/`SetBlendWeight` path), which needs disentangling from the thumbnail's
+    existing click-to-apply and drag-to-reposition. Not started.
 - **Live console mode** — largely realized by the phase-4 fader list (persistent pool-owned weights,
   `BeginWeightedBlend`). Remaining: a dedicated "ride several at once" performance layout if needed.
 - **t-SNE landscape**: a third canvas mode laying thumbnails out by parameter-set similarity for

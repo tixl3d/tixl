@@ -370,6 +370,22 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
         return true;
     }
 
+    /// <summary>
+    /// Live cross-fade weight of a variation in the pool's persistent mix (set by the picker faders,
+    /// MIDI, arrows). Reports a weight only during a genuine mix of 2+ variations, so the resting
+    /// single-active state stays unannotated.
+    /// </summary>
+    public bool TryGetLiveBlendWeight(Variation v, out float weight)
+    {
+        weight = 0;
+        var pool = PoolForBlendOperations;
+        if (pool == null || !pool.IsLiveBlendMix)
+            return false;
+
+        weight = pool.GetBlendWeight(v.Id);
+        return weight > 0.001f;
+    }
+
     private Vector2 GetNodeCenterOnScreen(ISelectableCanvasObject node)
     {
         var min = TransformPosition(node.PosOnCanvas);

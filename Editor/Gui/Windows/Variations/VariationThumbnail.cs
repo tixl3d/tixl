@@ -171,6 +171,14 @@ internal static class VariationThumbnail
             }
         }
 
+        // Annotate the live cross-fade weight from the pool's persistent mix (picker faders, MIDI,
+        // arrows). Yields to the canvas's own blend gestures, which draw their own indicator.
+        var altPreviewing = isHovered && ImGui.GetIO().KeyAlt && UserSettings.Config.VariationHoverPreview;
+        if (!_canvas.IsBlendingActive && !altPreviewing && _canvas.TryGetLiveBlendWeight(variation, out var liveWeight))
+        {
+            DrawBlendIndicator(drawList, areaOnScreen, liveWeight);
+        }
+
         var modified = false;
         if (!_canvas.IsBlendingActive)
         {

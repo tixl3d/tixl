@@ -263,6 +263,25 @@ internal sealed class SymbolVariationPool
     public bool HasBlendWeights => _blendWeights.Count > 0;
 
     /// <summary>
+    /// True when the live weight vector is a genuine mix of 2+ variations — i.e. not the resting
+    /// single-active state — so it's worth annotating (e.g. on the Variations thumbnails).
+    /// </summary>
+    public bool IsLiveBlendMix
+    {
+        get
+        {
+            var count = 0;
+            foreach (var v in _blendWeights.Values)
+            {
+                if (v > 0.001f && ++count > 1)
+                    return true;
+            }
+
+            return false;
+        }
+    }
+
+    /// <summary>
     /// True when this variation holds the entire weight (the lone 100%) — its fader can't be reduced
     /// directly because there's nowhere to hand the weight to; another fader has to be raised first.
     /// </summary>
