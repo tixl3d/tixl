@@ -160,6 +160,8 @@ internal sealed partial class MagGraphView
                 DrawConnection(connection, drawList, _context);
             }
 
+            DrawOffscreenIndicators(drawList);
+
             // Draw special overlays
             if (_context.StateMachine.CurrentState == GraphStates.RenameChild)
             {
