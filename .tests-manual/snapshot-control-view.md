@@ -31,9 +31,9 @@ In the Graph window:
 1. Click the "Create snapshot" button in the Parameter window.
 
 **Expected:**
-- A selector bar appears at the top: index indicator, a snapshot dropdown,
-  prev/next arrows, a revert button, an add (+) button, and an actions (…) menu
-  (holding Apply changes / Rename / Update thumbnail / Remove).
+- A selector bar appears at the top: a zero-padded index button, a snapshot
+  dropdown, prev/next arrows, a revert button, an add (+) button, and an actions
+  (…) menu (holding Apply changes / Rename / Update thumbnail / Remove).
 - A text field is focused immediately so the snapshot can be named; typing a
   name and pressing Enter (or clicking away) stores it.
 - The new snapshot is the active one.
@@ -47,12 +47,33 @@ In the Graph window:
 
 **Expected:**
 - An 8×8 grid opens in reading order (index 1 at the top-left); cells holding a
-  snapshot are highlighted, the active one in green, empty cells are dim.
+  snapshot are green, the active (live) one magenta, empty cells are dim.
 - When a supported controller defines a layout, a dropdown (top-right) switches
   the arrangement — e.g. the APC Mini's bottom-up, 0-based pad grid that matches
-  its hardware.
+  its hardware. A documentation button is right-aligned next to the dropdown;
+  hovering it explains the controller index.
+- Hovering a filled cell shows a move cursor (it can be dragged to another slot).
 - Clicking a used cell applies that snapshot and closes the grid; hovering one
   shows its title (and previews it live when hover preview is enabled).
+- While the grid is open, hovering it does not highlight the operator panels in
+  the control view behind it.
+
+## Step: Reassigning a controller index by drag
+
+**Action:**
+With at least two snapshots, open the controller-index grid and drag a used cell
+onto an empty cell, then (in a second drag) onto another used cell.
+
+**Expected:**
+- While dragging, the source cell dims evenly (whether it is the active snapshot
+  or not) and a small chip showing its index and name follows the cursor; the
+  cell under the cursor is outlined.
+- Dropping on an empty cell moves the snapshot to that index; dropping on a used
+  cell swaps the two snapshots' indices.
+- The index shown in the selector bar (and the order the prev/next arrows cycle)
+  follows the change; releasing back on the source cell, or outside the grid,
+  leaves everything unchanged and does not apply the snapshot.
+- `Ctrl+Z` restores the previous index assignment (the swap reverts both).
 
 ## Step: Renaming a snapshot
 
