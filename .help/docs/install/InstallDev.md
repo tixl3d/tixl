@@ -1,22 +1,24 @@
 # Installing with development environment
 
-For developing and debugging C# Operators we recommend setting up the development
-environment and running it from an IDE (Integrated Development Environment). You have two options:
+For developing and debugging C# Operators we recommend setting up the development environment and running it from an IDE (Integrated Development Environment).
 
-## A: Using Microsoft **Visual Studio (Community Edition)**
+## First your need .NET SDK 10.0 
+- Download and [.net SDK](https://dotnet.microsoft.com/en-us/download/dotnet/10.0) As of 2026-04-10 we use v10.0 But this version might have changed. Make sure to use the SDK, not the runtime.
 
-If you don't have a .NET IDE installed already, download and install [Microsoft Visual Studio Community Edition](https://visualstudio.microsoft.com/downloads/) 
+### Choose your IDE, you have two options:
+
+## A: Microsoft **Visual Studio (Community Edition)**
+
+If you don't have a .NET IDE installed already, download and install [Microsoft Visual Studio 2026 Community Edition](https://visualstudio.microsoft.com/downloads/)
 - In the installer, make sure to select the features:
   - .NET Desktop Application development
   - .NET 4.7.1  (on the right side)
-- Download and [.net SDK](https://dotnet.microsoft.com/en-us/download/dotnet/9.0) As of 2025-09-20 we use v9.0.203. But this version might have changed. Make sure to use the SDK, not the runtime.
 
-## B: Using Jetbrains **Rider**
+## B: Jetbrains **Rider**
 
-Rider is an excellent IDE for developing .net applications. It's free to use for non-commercial work like TiXL and its core development team uses Rider as the primary IDE.
+Rider is an excellent IDE for developing .NET applications. It's free to use for non-commercial work like TiXL and its core development team uses Rider as the primary IDE.
 
 - Download and install [Rider](https://www.jetbrains.com/rider/download/?section=windows)
-- Download and [.net SDK](https://dotnet.microsoft.com/en-us/download/dotnet/9.0) As of 2025-09-20 we use v9.0.203. But this version might have changed. Make sure to use the SDK, not the runtime.
 
 ## Additional requirements
 
