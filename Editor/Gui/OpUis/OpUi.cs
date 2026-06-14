@@ -79,7 +79,7 @@ public static class OpUi
               {
                   { Guid.Parse("11882635-4757-4cac-a024-70bb4e8b504c"), CounterUi.DrawChildUi },
                   { Guid.Parse("8211249d-7a26-4ad0-8d84-56da72a5c536"), GradientSliderUi.DrawChildUi },
-
+                  { Guid.Parse("c5c3232c-70f8-4d1d-847d-6b6b25f3d9d6"), GradientUi.DrawChildUi },
                   { Guid.Parse("b724ea74-d5d7-4928-9cd1-7a7850e4e179"), SampleCurveUi.DrawChildUi },
                   { Guid.Parse("3b0eb327-6ad8-424f-bca7-ccbfa2c9a986"), _JitterUi.DrawChildUi },
                   { Guid.Parse("23794a1f-372d-484b-ac31-9470d0e77819"), Jitter2dUi.DrawChildUi },

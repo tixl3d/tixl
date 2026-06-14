@@ -13,7 +13,7 @@ namespace T3.Editor.Gui.OpUis.WidgetUi;
 /// </summary>
 internal static class WidgetElements
 {
-    internal static void DrawPrimaryTitle(ImDrawListPtr drawList, ImRect widgetRect, string formattedValue, Vector2 canvasScale)
+    internal static void DrawPrimaryTitle(ImDrawListPtr drawList, ImRect widgetRect, string formattedValue, Vector2 canvasScale, bool addShadow=false)
     {
         if (string.IsNullOrEmpty(formattedValue))
             return;
@@ -26,18 +26,28 @@ internal static class WidgetElements
                            : Fonts.FontNormal;
 
         ImGui.PushFont(font);
-        var fadingColor = UiColors.WidgetTitle
-                                  .Fade(MathUtils.NormalizeAndClamp
-                                            (
-                                             canvasScaleY,
-                                             ScaleFactors.SmallerScale,
-                                             ScaleFactors.SmallScale));
+        var fadeFactor = MathUtils.NormalizeAndClamp
+        (
+            canvasScaleY,
+            ScaleFactors.SmallerScale,
+            ScaleFactors.SmallScale);
+        var fadingColor = UiColors.WidgetTitle.Fade(fadeFactor);
 
+        if (addShadow)
+        {
+            drawList.AddText(new Vector2
+                (widgetRect.Min.X + 6,
+                    widgetRect.Min.Y + 3),
+                UiColors.BackgroundFull.Fade(fadeFactor*0.6f), formattedValue);
+            
+        }
+        
         //var labelSize = ImGui.CalcTextSize(formattedValue);
         drawList.AddText(new Vector2
                              (widgetRect.Min.X + 5,
                               widgetRect.Min.Y + 2),
                          fadingColor, formattedValue);
+
         ImGui.PopFont();
     }
 

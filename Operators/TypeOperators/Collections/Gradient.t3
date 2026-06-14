@@ -1,28 +1,24 @@
 {
   "FormatVersion": 2,
   "TixlVersion": "4.2.0.2",
-  "Id": "8211249d-7a26-4ad0-8d84-56da72a5c536"/*SampleGradient*/,
+  "Id": "c5c3232c-70f8-4d1d-847d-6b6b25f3d9d6"/*SampleGradient2*/,
   "Inputs": [
     {
-      "Id": "11657d72-6ad9-41d9-ab5a-de7177af5be4"/*OverrideInterpolation*/,
+      "Id": "0da9cbbe-09d3-4a5c-b1ec-189bf7055143"/*OverrideInterpolation*/,
       "DefaultValue": false
     },
     {
-      "Id": "76cf4a72-2d25-48cb-a1ec-08d0ddabb053"/*Interpolation*/,
+      "Id": "3ad07564-e191-4d51-ad79-db9c673478eb"/*Interpolation*/,
       "DefaultValue": 0
     },
     {
-      "Id": "a4527e01-f19a-4200-85e5-00144f3ce061"/*SamplePos*/,
-      "DefaultValue": 0.0
-    },
-    {
-      "Id": "eff10fad-cf95-4133-91db-efc41258cd1b"/*Gradient*/,
+      "Id": "b129b4d8-7c1b-47e4-b156-b24d6632b13a"/*Gradient*/,
       "DefaultValue": {
         "Gradient": {
           "Interpolation": "Linear",
           "Steps": [
             {
-              "Id": "34fd8178-f7eb-4196-85ef-b879a10ab649",
+              "Id": "3c3d0fbc-2aa6-4a4e-998f-a104c68a4a27",
               "NormalizedPosition": 0.0,
               "Color": {
                 "R": 9.9999E-07,
@@ -32,7 +28,7 @@
               }
             },
             {
-              "Id": "b35f3e4e-81d9-484a-abb0-8a1a88f495f3",
+              "Id": "739beb51-8831-421b-99a5-80890affe3bd",
               "NormalizedPosition": 1.0,
               "Color": {
                 "R": 1.0,
@@ -44,6 +40,10 @@
           ]
         }
       }
+    },
+    {
+      "Id": "b945f9e1-c4ce-4e5b-8acf-0aee26318cb6"/*SamplePos*/,
+      "DefaultValue": 0.0
     }
   ],
   "Children": [],
