@@ -552,23 +552,7 @@ internal sealed class VariationPicker
     {
         _sorted.Clear();
         _sorted.AddRange(variations);
-
-        if (_sorted.Count == 0)
-            return;
-
-        var minY = float.MaxValue;
-        foreach (var v in _sorted)
-            minY = MathF.Min(minY, v.PosOnCanvas.Y);
-
-        var stepHeight = MathF.Max(1, VariationThumbnail.ThumbnailSize.Y + VariationThumbnail.SnapPadding.Y);
-
-        _sorted.Sort((a, b) =>
-                     {
-                         var rowA = (int)MathF.Round((a.PosOnCanvas.Y - minY) / stepHeight);
-                         var rowB = (int)MathF.Round((b.PosOnCanvas.Y - minY) / stepHeight);
-                         var byRow = rowA.CompareTo(rowB);
-                         return byRow != 0 ? byRow : a.PosOnCanvas.X.CompareTo(b.PosOnCanvas.X);
-                     });
+        VariationBaseCanvas.SortByReadingOrder(_sorted);
     }
 
     private enum Modes { List, Canvas }

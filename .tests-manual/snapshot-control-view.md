@@ -48,10 +48,14 @@ In the Graph window:
 **Expected:**
 - An 8×8 grid opens in reading order (index 1 at the top-left); cells holding a
   snapshot are green, the active (live) one magenta, empty cells are dim.
-- When a supported controller defines a layout, a dropdown (top-right) switches
-  the arrangement — e.g. the APC Mini's bottom-up, 0-based pad grid that matches
-  its hardware. A documentation button is right-aligned next to the dropdown;
-  hovering it explains the controller index.
+- The header has, right-aligned, a **settings gear** and then a documentation
+  button (hovering the latter explains the controller index).
+- The gear opens a menu with **Show thumbnails** and — when a supported controller
+  defines a layout — a **Controller layout** list (checkmark on the active one;
+  e.g. the APC Mini's bottom-up, 0-based pad grid that matches its hardware).
+- With **Show thumbnails** on, cells show the snapshot's thumbnail and the
+  green/magenta state moves to the cell **border**; the index stays legible over
+  a dark backing.
 - Hovering a filled cell shows a move cursor (it can be dragged to another slot).
 - Clicking a used cell applies that snapshot and closes the grid; hovering one
   shows its title (and previews it live when hover preview is enabled).
@@ -93,8 +97,16 @@ Open the actions (…) menu in the selector bar and choose "Rename". Also try
 2. Click the + button at the right end of the selector bar.
 
 **Expected:**
-- A new snapshot is created from the current values, becomes active, and its name field is focused for immediate renaming.
-- The + button is disabled (dimmed) when the current values still match the active snapshot.
+- A new snapshot is created from the current values, becomes active, and its
+  name field is focused for immediate renaming.
+- The + button is always enabled; it is emphasized (brighter) when the active
+  snapshot has unsaved changes and muted (default) when the values match it.
+- The new snapshot is inserted **right behind the previously active one** — it
+  takes the next free controller index above that one, and on the canvas it lands
+  in the slot just after the active, shifting the snapshots that followed one slot
+  later (no overlap or gap), so it sorts directly after in the picker too.
+  (Creating the very first snapshot, with none active, falls back to the next free
+  slot at the end.)
 
 ## Step: A snapshot is shown without manual selection
 

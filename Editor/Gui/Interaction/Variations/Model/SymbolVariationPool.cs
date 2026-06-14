@@ -670,6 +670,33 @@ internal sealed class SymbolVariationPool
         return true;
     }
 
+    /// <summary>
+    /// The lowest controller index above <paramref name="afterIndex"/> not used by a snapshot.
+    /// <paramref name="ignore"/> skips one variation (e.g. the freshly-created one being placed).
+    /// </summary>
+    public int GetNextFreeActivationIndexAfter(int afterIndex, Variation? ignore = null)
+    {
+        var index = afterIndex + 1;
+        while (IsActivationIndexUsed(index, ignore))
+            index++;
+
+        return index;
+    }
+
+    private bool IsActivationIndexUsed(int activationIndex, Variation? ignore)
+    {
+        foreach (var v in _allVariations)
+        {
+            if (v == ignore || v.IsPreset)
+                continue;
+
+            if (v.ActivationIndex == activationIndex)
+                return true;
+        }
+
+        return false;
+    }
+
     public void UpdateVariationPropertiesForInstances(Variation variation, List<Instance> instances, MacroCommand? collectInto = null)
     {
         if (instances == null! || instances.Count == 0)

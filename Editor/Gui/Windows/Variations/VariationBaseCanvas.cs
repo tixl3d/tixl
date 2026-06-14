@@ -815,6 +815,31 @@ internal abstract class VariationBaseCanvas : ScalableCanvas, ISelectionContaine
             }
         }
     }
+
+    /// <summary>
+    /// Sorts variations into reading order — top-to-bottom by row, then left-to-right. Y is banded
+    /// by the thumbnail row height so small per-row jitter doesn't misorder a wrapped grid. Shared
+    /// by the picker list and snapshot insertion so list and canvas order can't drift.
+    /// </summary>
+    internal static void SortByReadingOrder(List<Variation> variations)
+    {
+        if (variations.Count == 0)
+            return;
+
+        var minY = float.MaxValue;
+        foreach (var v in variations)
+            minY = MathF.Min(minY, v.PosOnCanvas.Y);
+
+        var stepHeight = MathF.Max(1, VariationThumbnail.ThumbnailSize.Y + VariationThumbnail.SnapPadding.Y);
+
+        variations.Sort((a, b) =>
+                        {
+                            var rowA = (int)MathF.Round((a.PosOnCanvas.Y - minY) / stepHeight);
+                            var rowB = (int)MathF.Round((b.PosOnCanvas.Y - minY) / stepHeight);
+                            var byRow = rowA.CompareTo(rowB);
+                            return byRow != 0 ? byRow : a.PosOnCanvas.X.CompareTo(b.PosOnCanvas.X);
+                        });
+    }
     #endregion
 
     // Compute barycentric coordinates (u, v, w) for
