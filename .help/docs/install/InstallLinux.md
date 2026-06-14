@@ -5,6 +5,7 @@ This guide covers running TiXL on Linux under Wine. Native Linux support is not 
 ## Prerequisites
 
 Before installing TiXL, install Microsoft's .NET certificate package. This ensures your custom operators compile (TiXL runs `dotnet` via Wine, which can have certificate issues).
+
 1. Download both `codesignctl.pem` and `timestampctl.pem` from [.NET's github repository](https://github.com/dotnet/sdk/tree/main/src/Layout/redist/trustedroots).
 2. Install the certificates system-wide [(steps to do that linked here)](https://wiki.archlinux.org/title/User:Grawity/Adding_a_trusted_CA_certificate).
 
@@ -12,14 +13,14 @@ Before installing TiXL, install Microsoft's .NET certificate package. This ensur
 
 1. Install [Bottles](https://usebottles.com/) – either via Flatpak or your distro's package manager.
 2. Start a new Wine prefix using the 'Gaming' preset - at time of writing, the default runner is `soda-9.0-1`.
-3. Go to Options > Dependencies and install `powershell_core` 
+3. Go to Options → Dependencies and install `powershell_core` 
 4. Download the [TiXL installer](https://github.com/tixl3d/tixl/releases); that's the .exe under "Assets".
 5. Place the installer in an accessible location under your Wine prefix:
     - In Bottles, click the three dots next to the power icon in the toolbar, then "Browse Files..." - you'll probably want to pin/bookmark this directory in your file explorer for ease of access. That's your prefix's C: drive.
     - I saved mine in `$WINE_PREFIX/drive_c/users/Public/Desktop`, for example.
-6. In Bottles, click "Run Executable..." and run the TiXL installer; this should also install the .NET 9 SDK.
+6. In Bottles, click "Run Executable..." and run the TiXL installer; this should also install the .NET 10 SDK.
 7. Once it's done installing, you can either allow it to launch TiXL automatically or run the executable via Bottles. Unless you changed the default install location, it'll be in `$WINE_PREFIX/drive_c/TiXL`.
-8. If all is well, add the program executable as a shortcut, then click the three dots next to its program entry and select "Add Desktop Entry". TiXL should now show up amongst your usual apps :rocket: 
+8. If all is well, add the program executable as a shortcut, then click the three dots next to its program entry and select "Add Desktop Entry". TiXL should now show up amongst your usual apps 🚀
  
 ## Option 2. Install with system WINE
 
@@ -41,6 +42,7 @@ WINEPREFIX=~/.wine-tixl wine "$WINEPREFIX/drive_c/Program Files/TiXL/TiXL 4.0.6.
 ```
 
 # Troubleshooting
+
 ### TiXL launches but crashes or fail to compile shader when a shader operator is selected
 Install `d3dcompiler_46.dll` from the Dependencies list:
 
@@ -103,6 +105,4 @@ launch button and click ‘Add Desktop Entry’.
 
 ![image](https://github.com/user-attachments/assets/bedcbc2a-7db3-48ac-8c46-439768df3ae8)
 ![image](https://github.com/user-attachments/assets/716dae2f-113e-4d27-9b76-e042b48b9ea3)
-
-
 
