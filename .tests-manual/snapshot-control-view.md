@@ -32,8 +32,8 @@ In the Graph window:
 
 **Expected:**
 - A selector bar appears at the top: a zero-padded index button, a snapshot
-  dropdown, prev/next arrows, a revert button, an add (+) button, and an actions
-  (…) menu (holding Write changes / Rename / Update thumbnail / Remove).
+  dropdown, prev/next arrows, a write button, an add (+) button, and an actions
+  (…) menu (holding Revert / Rename / Update thumbnail / Remove).
 - A text field is focused immediately so the snapshot can be named; typing a
   name and pressing Enter (or clicking away) stores it.
 - The new snapshot is the active one.
@@ -181,7 +181,7 @@ to open the menu, on both an unchanged parameter and one you've edited. Then
 
 **Expected:**
 - The edited parameter returns to the value stored in the snapshot.
-- The revert button disables again (and "Write changes" greys out).
+- The Write button disables again (and Revert greys out in the menu).
 - `Ctrl+Z` restores the edited value; `Ctrl+Y`/redo re-applies the snapshot.
 
 ## Step: Writing changes into the snapshot

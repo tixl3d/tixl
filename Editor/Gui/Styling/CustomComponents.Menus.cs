@@ -55,9 +55,9 @@ internal static partial class CustomComponents
         HintLabel(label);
     }
 
-    public static bool DrawMenuItem(int id, string label, ref bool isChecked, string keyboardShortCut = null)
+    public static bool DrawMenuItem(int id, string label, ref bool isChecked, string keyboardShortCut = null, bool reserveIconColumn = true)
     {
-        var clicked = DrawMenuItem(id, label, keyboardShortCut, isChecked);
+        var clicked = DrawMenuItem(id, label, keyboardShortCut, isChecked, reserveIconColumn: reserveIconColumn);
         if (clicked)
         {
             isChecked = !isChecked;
@@ -66,9 +66,10 @@ internal static partial class CustomComponents
         return clicked;
     }
 
-    public static bool DrawMenuItem(int id, string label, string keyboardShortCut = null, bool isChecked = false, bool isEnabled = true)
+    public static bool DrawMenuItem(int id, string label, string keyboardShortCut = null, bool isChecked = false, bool isEnabled = true,
+                                    bool reserveIconColumn = true)
     {
-        return DrawMenuItem(id, Icon.None, label, keyboardShortCut, isChecked, isEnabled);
+        return DrawMenuItem(id, Icon.None, label, keyboardShortCut, isChecked, isEnabled, reserveIconColumn: reserveIconColumn);
     }
 
     /// <summary>
@@ -76,7 +77,7 @@ internal static partial class CustomComponents
     /// right-aligned keyboard shortcut.
     /// </summary>
     public static bool DrawMenuItem(int id, Icon icon, string label, string keyboardShortCut = null, bool isChecked = false, bool isEnabled = true,
-                                    bool reserveCheckmarkColumn = true)
+                                    bool reserveCheckmarkColumn = true, bool reserveIconColumn = true)
     {
         var h = ImGui.GetFrameHeight();
         var imguiPadding = ImGui.GetStyle().ItemSpacing;
@@ -86,13 +87,13 @@ internal static partial class CustomComponents
 
         var paddingFactor = 1.4f;
         var iconSlotWidth = Icons.FontSize * paddingFactor;
-        // Reserve the checkmark column only for menus that actually have toggle items; menus that
-        // never check (e.g. the snapshot actions) drop it so icon + label sit further left.
+        // Each column is reserved only when the menu uses it: the checkmark column for menus with
+        // toggles, the icon column for menus with icons. A menu without either sits flush left.
         var checkmarkSlot = reserveCheckmarkColumn ? iconSlotWidth : 0f;
         var leftPaddingIcon = imguiPadding.X + checkmarkSlot;
         var hasIcon = icon != Icon.None;
-        // Always reserve the icon column so icon-less items (e.g. Rename) stay aligned with the rest.
-        var leftPaddingText = leftPaddingIcon + iconSlotWidth;
+        // Reserve the icon column so icon-less items (e.g. Rename) stay aligned with icon ones.
+        var leftPaddingText = leftPaddingIcon + (reserveIconColumn ? iconSlotWidth : 0f);
 
         var width = leftPaddingText + labelWidth + imguiPadding.X * 2;
         if (shortCutWidth > 0)

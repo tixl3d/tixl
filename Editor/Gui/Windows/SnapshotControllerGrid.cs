@@ -9,6 +9,7 @@ using T3.Editor.Gui.Interaction.Midi;
 using T3.Editor.Gui.Interaction.Variations.Model;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Gui.UiHelpers.Thumbnails;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Variations;
 
@@ -44,36 +45,29 @@ internal sealed class SnapshotControllerGrid
         if (ImGui.BeginPopup(PopupId))
         {
             var layouts = ControllerGridLayouts.All;
-            if (_gridLayoutIndex >= layouts.Count)
-                _gridLayoutIndex = 0;
-            var layout = layouts[_gridLayoutIndex];
+            var layout = layouts[ResolveLayoutIndex(layouts)];
 
-            // Header row: title on the left, the layout dropdown and a doc button on the right.
-            // The right cluster is drawn first (frame-height tall) so the title can be vertically
-            // centered against it.
+            // Header row: title on the left, a settings gear + doc button on the right. The right
+            // cluster is drawn first (frame-height tall) so the title can be vertically centered.
             var frameHeight = ImGui.GetFrameHeight();
             var iconSize = new Vector2(frameHeight, frameHeight);
             var headerStartX = ImGui.GetCursorPosX();
             var headerStartY = ImGui.GetCursorPosY();
             var headerGap = 4 * scale;
 
-            var hasLayoutCombo = layouts.Count > 1;
-            var comboWidth = 120 * scale;
-            var clusterWidth = iconSize.X + (hasLayoutCombo ? comboWidth + headerGap : 0);
             // Flush the cluster's right edge to the content edge (RightAlign would inset it by an
-            // extra window padding, leaving the doc button looking un-aligned).
+            // extra window padding, leaving the icons looking un-aligned).
+            var clusterWidth = 2 * iconSize.X + headerGap;
             ImGui.SetCursorPosX(headerStartX + ImGui.GetContentRegionAvail().X - clusterWidth);
-            if (hasLayoutCombo)
-            {
-                ImGui.SetNextItemWidth(comboWidth);
-                var layoutIndex = _gridLayoutIndex;
-                if (ImGui.Combo("##gridLayout", ref layoutIndex, GetLayoutNames()))
-                    _gridLayoutIndex = layoutIndex;
 
-                ImGui.SameLine(0, headerGap);
-            }
+            if (CustomComponents.IconButton(Icon.Settings2, iconSize, CustomComponents.ButtonStates.Default))
+                ImGui.OpenPopup(SettingsPopupId);
+            CustomComponents.TooltipForLastItem("Grid settings");
+            ImGui.SameLine(0, headerGap);
 
             DocumentationButton.Draw(DocId, WikiUrl, iconSize);
+
+            DrawSettingsPopup(layouts);
 
             ImGui.SetCursorPos(new Vector2(headerStartX,
                                            headerStartY + MathF.Max(0, (frameHeight - ImGui.GetTextLineHeight()) * 0.5f)));
@@ -132,11 +126,28 @@ internal sealed class SnapshotControllerGrid
 
                     // Mirror the APC Mini's LEDs: a filled slot is green (a controllable snapshot
                     // lives there), the one that's live is magenta. Keeps "green = controlled".
-                    var bg = snapshot == null ? UiColors.BackgroundFull.Fade(0.4f)
-                             : isActive ? UiColors.StatusAttention
-                             : isHovered && !isDragging ? UiColors.StatusControlled
-                             : UiColors.StatusControlled.Fade(0.7f);
-                    drawList.AddRectFilled(min, max, bg, 4 * scale);
+                    // In thumbnail mode the colour moves to the cell border so the image stays clear.
+                    var stateColor = isActive ? UiColors.StatusAttention
+                                     : isHovered && !isDragging ? UiColors.StatusControlled
+                                     : UiColors.StatusControlled.Fade(0.7f);
+
+                    if (_showThumbnails && snapshot != null)
+                    {
+                        drawList.AddRectFilled(min, max, UiColors.BackgroundFull, 4 * scale);
+                        var thumb = ThumbnailManager.GetThumbnail(snapshot.Id, composition.Symbol.SymbolPackage,
+                                                                  ThumbnailManager.Categories.PackageMeta,
+                                                                  fallbackCategory: ThumbnailManager.Categories.Temp);
+                        if (thumb.IsReady && ThumbnailManager.AtlasSrv != null)
+                            drawList.AddImageRounded(ThumbnailManager.AtlasSrv.NativePointer, min, max,
+                                                     thumb.UvMin, thumb.UvMax, Color.White, 4 * scale);
+
+                        drawList.AddRect(min, max, stateColor, 4 * scale, ImDrawFlags.None, 2 * scale);
+                    }
+                    else
+                    {
+                        var bg = snapshot == null ? UiColors.BackgroundFull.Fade(0.4f) : stateColor;
+                        drawList.AddRectFilled(min, max, bg, 4 * scale);
+                    }
 
                     if (isDropTarget)
                         drawList.AddRect(min, max, UiColors.ForegroundFull, 4 * scale, ImDrawFlags.None, 2 * scale);
@@ -144,7 +155,16 @@ internal sealed class SnapshotControllerGrid
                     var label = index.ToString("00");
                     var textColor = snapshot == null ? UiColors.TextMuted.Fade(0.4f) : UiColors.ForegroundFull;
                     var textSize = ImGui.CalcTextSize(label);
-                    drawList.AddText(((min + max) / 2 - textSize / 2).Floor(), textColor, label);
+                    var textPos = ((min + max) / 2 - textSize / 2).Floor();
+
+                    // A dark backing keeps the index legible over a thumbnail.
+                    if (_showThumbnails && snapshot != null)
+                    {
+                        var backingPad = new Vector2(3, 1) * scale;
+                        drawList.AddRectFilled(textPos - backingPad, textPos + textSize + backingPad, UiColors.BackgroundFull.Fade(0.6f), 2 * scale);
+                    }
+
+                    drawList.AddText(textPos, textColor, label);
 
                     // Dim the lifted cell uniformly with a scrim — fading bg/text by alpha instead
                     // makes the muted (inactive) cells vanish while the bright active one survives.
@@ -218,17 +238,45 @@ internal sealed class SnapshotControllerGrid
         return picked;
     }
 
-    private string GetLayoutNames()
+    private void DrawSettingsPopup(IReadOnlyList<ControllerGridLayout> layouts)
     {
-        if (_layoutNamesForCombo != null)
-            return _layoutNamesForCombo;
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(6, 6) * T3Ui.UiScaleFactor);
+        if (ImGui.BeginPopup(SettingsPopupId))
+        {
+            CustomComponents.DrawMenuItem(_showThumbnailsItemId, "Show thumbnails", ref _showThumbnails, reserveIconColumn: false);
 
-        var names = "";
-        foreach (var layout in ControllerGridLayouts.All)
-            names += layout.Name + "\0";
+            if (layouts.Count > 1)
+            {
+                CustomComponents.SeparatorLine();
+                CustomComponents.DrawMenuGroupLabel("Controller layout");
+                var activeIndex = ResolveLayoutIndex(layouts);
+                for (var i = 0; i < layouts.Count; i++)
+                {
+                    if (CustomComponents.DrawMenuItem(layouts[i].Name.GetHashCode(), layouts[i].Name, isChecked: i == activeIndex, reserveIconColumn: false))
+                    {
+                        UserSettings.Config.SnapshotControllerLayout = layouts[i].Name;
+                        UserSettings.Save();
+                    }
+                }
+            }
 
-        _layoutNamesForCombo = names;
-        return _layoutNamesForCombo;
+            ImGui.EndPopup();
+        }
+
+        ImGui.PopStyleVar();
+    }
+
+    /// <summary>Index of the saved layout (by name) in the current list, or 0 ("Reading order").</summary>
+    private static int ResolveLayoutIndex(IReadOnlyList<ControllerGridLayout> layouts)
+    {
+        var name = UserSettings.Config.SnapshotControllerLayout;
+        for (var i = 0; i < layouts.Count; i++)
+        {
+            if (layouts[i].Name == name)
+                return i;
+        }
+
+        return 0;
     }
 
     private static Variation? FindByActivationIndex(IReadOnlyList<Variation> snapshots, int activationIndex)
@@ -265,12 +313,13 @@ internal sealed class SnapshotControllerGrid
     }
 
     private const string PopupId = "##controllerGrid";
+    private const string SettingsPopupId = "##controllerGridSettings";
     private const string DocId = "ControllerIndex";
     private const string WikiUrl = "https://github.com/tixl3d/tixl/wiki/help.PresetsAndSnapshots";
+    private static readonly int _showThumbnailsItemId = "controllerGridShowThumbnails".GetHashCode();
 
     private Vector2 _popupPosition;
     private Guid _gridPreviewedId;
     private Guid _gridDragSourceId;
-    private int _gridLayoutIndex;
-    private string? _layoutNamesForCombo;
+    private bool _showThumbnails;
 }
