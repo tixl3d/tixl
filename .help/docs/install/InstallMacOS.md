@@ -1,3 +1,7 @@
+# Install on MacOS
+
+This guide covers running TiXL on MacOs under Sikarugir.
+
 ## Background
 We are working on MacOS support, but this is a major task that requires multiple drastic refactoring efforts. We have already made large strides in separating Windows dependencies from the .NET architecture. However, moving from DirectX to Vulkan and supporting abstraction layers for Metal will be another significant undertaking.
 
