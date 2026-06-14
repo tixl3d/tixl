@@ -35,24 +35,53 @@ Replace `ImGui.BeginCombo` for snapshots with `VariationPicker(pool, instance)` 
 - **Drag-to-reorder repositions on the canvas.** Dragging a list row updates its `PosOnCanvas`
   (undoable, mirroring the canvas thumbnail drag), so list and canvas modes share one order. No
   separate persisted order field.
-- **Activation faders are per-gesture blend-toward-variation, undoable per release.** A fader
-  drag blends the *current* state toward that variation (`blend(current, V, t)`), reusing the
-  pool's existing blend paths (`BeginBlendTowardsSnapshot` for snapshots, `BeginBlendToPresent`
-  for presets) and the infinity-slider interaction. On mouse-up it bakes the result as **one**
-  `MacroCommand` of `ChangeInputValueCommand`s and pushes it to the undo stack. Consequences:
-  - Mixing is **sequential/additive**: "mix in red, then blue, then magenta" each blends from
-    what's already there. Undo peels off exactly one mix-in — matching the user's mental model.
-  - `t < 0` subtracts (extrapolates); the fader bar fills from the right with
-    `UiColors.StatusAttention`. `t > 1` over-drives.
-  - **No weight vector lives on the undo stack** — commands stay pure parameter mutations
-    (guids + value snapshots), reload-safe, per the undo rules in `AGENT_INSTRUCTIONS.md`. What
-    the user perceives as "my mix" is the resulting parameter state, which is exactly what each
-    command restores.
-  - To *reduce* an earlier ingredient you re-drag it toward subtract from the current state, not
-    "pull a held fader back down."
-- **The live simultaneous console is a separate, optional future mode**, not the core. Holding a
-  persistent weight vector across several variations (`BeginWeightedBlend`) is the only place
-  weights would be session state; defer until performing shows it's needed.
+- **Activation faders are a normalized cross-fade over a persistent weight vector** (refined
+  2026-06-14; supersedes the earlier per-gesture blend-toward model). The primary use is *slowly
+  cross-fading* one variation into another, not free mixing. The picker holds a live
+  `weights: variationId → float` vector while it's open, applied via `pool.BeginWeightedBlend`.
+  - **Normalized (default):** weights sum to 1. Dragging row R to `w` distributes `1-w` across the
+    **other faders in their ratio as captured at drag-start** (`BeginBlendWeightDrag`), not their
+    current values. A simple A→B fade gives the 95/5 example; 3+ ingredients keep their relative
+    balance — and crucially the fade is **reversible within the gesture**: drag R to 100% (others →
+    0) and back down and the sources refill from the captured ratio instead of stranding at 0.
+    Per-slider clamp at 100% completes the fade; pulling the old one to 0 does the same. While a
+    fader drags, its drag-start sources are flagged (faint accent border) so the blend-back target
+    is visible.
+  - **CTRL = free mode:** drop the sum constraint; weights move independently and may exceed 100%
+    (over-drive / extrapolate). Indicated while held.
+  - **SHIFT = ⅓-speed fine drag.** Active slider draws blue (border + fill + text). Reorder only via
+    the left grip (see row-region split below).
+  - **Edge:** the sole non-zero (active) row, when idle, can't be dragged below 100% — there's
+    nowhere to send the weight until another row is raised (it shows a `NotAllowed` cursor +
+    tooltip). Once a drag is in flight the drag-start ratio supplies the blend-back target, so
+    dragging down during the gesture works.
+- **`WeightedBlendMethods` is a raw weighted *sum*, not internally normalized**
+  ([`Core/Utils/ValueUtils.cs`](../../Core/Utils/ValueUtils.cs)). So the UI must (a) keep weights
+  summing to 1 in normalized mode and (b) **always pass the base variation** in the list — else
+  dragging a row to 0.1 yields 10% of its own values over defaults, not a cross-fade. In free mode
+  the raw sum is exactly what produces the >100% over-drive.
+- **Blend lifecycle / undo.** While a weight drag changes the vector, call `ApplyBlendWeights`
+  each frame (it re-runs `BeginWeightedBlend`, auto-reverting the prior uncommitted blend). On
+  mouse-up, `ApplyCurrentBlend` bakes the result as **one** `MacroCommand` on the undo stack. The
+  undo stack holds only pure parameter mutations (guids + value snapshots), reload-safe per
+  `AGENT_INSTRUCTIONS.md`. Suppress the hover-preview loop (`BeginHover`) while dragging — both
+  share `_activeBlendCommand`.
+- **The weight vector is pool-owned session state, not transient picker state** (revised
+  2026-06-14). It lives on `SymbolVariationPool` (`_blendWeights`, with `GetBlendWeight` /
+  `SetBlendWeight` / `ResetBlendWeights` / `ApplyBlendWeights` / `GetDominantBlendVariation`) so it
+  **persists across picker opens** and stays coherent with activations from the arrows, controller
+  grid and MIDI. The weights are the *source of truth*; parameters are their rendered output — so a
+  manual parameter edit (or an undo) is just an override the next blend overwrites, and **does not**
+  invalidate the vector. Invalidation rules: **activating a single variation** (any surface — it
+  flows through the `ActiveVariation` setter) resets it to `{that: 1}`; **removing a variation**
+  drops its entry and renormalizes the rest; a **new pool** (composition switch / reload) starts
+  empty. The picker only seeds it (`ResetBlendWeights`) when the pool has none yet.
+- **Selector bar mid-mix** follows `GetDominantBlendVariation()` — for a plain activation the vector
+  is `{active:1}` so that's just the active; during a fade it tracks whichever ingredient dominates.
+- **Row-region split (prerequisite).** The row currently reorders on a whole-row drag; the grip is
+  only drawn. Split the row into **left grip = reorder**, **middle = click-to-apply**, **right
+  weight cell = fader drag** (the weight cell is a second `InvisibleButton` emitted after the row
+  button so it wins hit-testing; reorder is gated to a mouse-down within the grip strip).
 - **Visual:** transparent tool icons + `ButtonStates` per the tool-icon convention; status hues
   per the legend (green = controllable, magenta = attention, etc.).
 
@@ -90,15 +119,31 @@ Replace `ImGui.BeginCombo` for snapshots with `VariationPicker(pool, instance)` 
    A grip is drawn in a reserved left strip on the highlighted row. Enabled only when the picker
    has a canvas (the move's selection container) and the search is empty; a drag suppresses the
    row's click-to-apply. Shares order with the canvas since both read `PosOnCanvas`.
-4. **Activation faders.** Per-row blend-toward-variation infinity-slider gesture, bake-on-release
-   as one undoable command; negative-subtract with attention fill; sequential mixing.
+4. **Activation faders (normalized cross-fade).** Right-cell weight slider per row over a live
+   weight vector; proportional normalize (default) / CTRL free over-drive / SHIFT fine; blue active
+   highlight; live `BeginWeightedBlend` → `ApplyCurrentBlend` bake on release; row-region split with
+   grip-gated reorder. See the decisions above.
 5. **Preset reuse.** Mount the same `VariationPicker` as a preset chip next to the instance title
    in the parameter window header.
 
 ## Future ideas (out of scope here)
 
-- **Live console mode**: persistent weight vector + `BeginWeightedBlend`, ride several faders at
-  once. Session-only weights; bake on demand.
+- **Variations-window fader view** (user idea, 2026-06-14): host the list+faders as a third view
+  mode in the Variations window alongside canvas/grid. Cheap now that the weight vector is
+  pool-owned (shared state, no divergence) and the row drawing is already factored — the work is
+  extracting the list into an *inline* panel (not popup-hosted) + a view toggle. Fits the
+  architecture (the Variations window is the designated blending interface) and avoids the
+  embedded-canvas pinned-output contention since a fader list drives the real blend. Overlaps with
+  phase 5 (same extraction).
+- **Live weight on the Variations thumbnails** (user idea, 2026-06-14, "love that"): two levels.
+  *(a) Display* — each thumbnail overlays its live `pool.GetBlendWeight(id)` (reuse
+  `VariationThumbnail.DrawBlendIndicator`, or a bottom fill + `NN%`), shown only during a real mix
+  (>1 non-zero weight, not the resting `{active:1}`). Turns the canvas into a live mix readout for
+  free. *(b) Interactive* — thumbnails become faders (scrub to set weight via the same
+  `BeginBlendWeightDrag`/`SetBlendWeight` path), which needs disentangling from the thumbnail's
+  existing click-to-apply and drag-to-reposition. Do (a) first.
+- **Live console mode** — largely realized by the phase-4 fader list (persistent pool-owned weights,
+  `BeginWeightedBlend`). Remaining: a dedicated "ride several at once" performance layout if needed.
 - **t-SNE landscape**: a third canvas mode laying thumbnails out by parameter-set similarity for
   spatial blending. Needs a similarity metric + dimensionality reduction — a separate research
   spike, not this widget's first life.

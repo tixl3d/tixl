@@ -31,7 +31,26 @@ internal sealed class SymbolVariationPool
     private readonly List<Variation> _defaults;
     private readonly List<Variation> _allVariations;
 
-    public Variation? ActiveVariation { get; private set; }
+    private Variation? _activeVariation;
+
+    public Variation? ActiveVariation
+    {
+        get => _activeVariation;
+        private set
+        {
+            _activeVariation = value;
+            // Activating a single variation collapses any live cross-fade back to it.
+            ResetBlendWeights(value?.Id ?? Guid.Empty);
+        }
+    }
+
+    // Live cross-fade weight vector (session-only): variationId → weight. Persists across picker
+    // opens, resets to the single active variation on activation, drops entries on removal.
+    private readonly Dictionary<Guid, float> _blendWeights = new();
+    private readonly Dictionary<Guid, float> _dragStartWeights = new();
+    private readonly List<Guid> _blendWeightKeyBuffer = new();
+    private readonly List<Variation> _weightedBlendVariations = new();
+    private readonly List<float> _weightedBlendWeights = new();
 
     public SymbolVariationPool(Guid symbolId)
     {
@@ -236,6 +255,174 @@ internal sealed class SymbolVariationPool
 
         //variation.State = Variation.States.Active;
     }
+
+    #region live blend weights
+    /// <summary>Current live cross-fade weight for a variation (0 when not part of the mix).</summary>
+    public float GetBlendWeight(Guid variationId) => _blendWeights.GetValueOrDefault(variationId, 0f);
+
+    public bool HasBlendWeights => _blendWeights.Count > 0;
+
+    /// <summary>
+    /// True when this variation holds the entire weight (the lone 100%) — its fader can't be reduced
+    /// directly because there's nowhere to hand the weight to; another fader has to be raised first.
+    /// </summary>
+    public bool IsSoleFullWeight(Guid variationId)
+    {
+        if (GetBlendWeight(variationId) < 0.999f)
+            return false;
+
+        foreach (var (k, v) in _blendWeights)
+        {
+            if (k != variationId && v > 0.001f)
+                return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>Collapse the live weight vector to a single fully-active variation (empty clears it).</summary>
+    public void ResetBlendWeights(Guid activeVariationId)
+    {
+        _blendWeights.Clear();
+        if (activeVariationId != Guid.Empty)
+            _blendWeights[activeVariationId] = 1f;
+    }
+
+    /// <summary>
+    /// Snapshot the weight vector at the start of a fader drag. The dragged fader then cross-fades
+    /// against these starting ratios, so it can be dragged to 100% and back without losing the
+    /// sources it faded out.
+    /// </summary>
+    public void BeginBlendWeightDrag()
+    {
+        _dragStartWeights.Clear();
+        foreach (var (k, v) in _blendWeights)
+            _dragStartWeights[k] = v;
+    }
+
+    /// <summary>True if this variation was a source (non-zero) at the start of the current drag.</summary>
+    public bool IsDragSource(Guid variationId)
+        => _dragStartWeights.TryGetValue(variationId, out var w) && w > 0.001f;
+
+    /// <summary>
+    /// Sets one variation's cross-fade weight. Normalized (the rest rebalance proportionally so the
+    /// vector sums to 1) unless <paramref name="free"/> drops the clamp, leaving weights independent
+    /// and free to exceed 1. The sole non-zero weight can't be reduced — there's nowhere to send it.
+    /// </summary>
+    public void SetBlendWeight(Guid variationId, float newWeight, bool free)
+    {
+        if (free)
+        {
+            _blendWeights[variationId] = newWeight < 0 ? 0 : newWeight;
+            return;
+        }
+
+        newWeight = newWeight < 0 ? 0 : (newWeight > 1 ? 1 : newWeight);
+
+        // Cross-fade against the *other faders' ratio at the start of this drag* (captured by
+        // BeginBlendWeightDrag), not their current values — so dragging to 100% and back refills the
+        // sources instead of stranding them at 0.
+        var sumStartOthers = 0f;
+        foreach (var (k, v) in _dragStartWeights)
+        {
+            if (k != variationId)
+                sumStartOthers += v;
+        }
+
+        if (sumStartOthers <= 0.0001f)
+        {
+            // No source to fade back to — keep the lone fader full.
+            _blendWeights.Clear();
+            _blendWeights[variationId] = 1f;
+            return;
+        }
+
+        var budget = 1f - newWeight;
+        _blendWeights.Clear();
+        foreach (var (k, v) in _dragStartWeights)
+        {
+            if (k == variationId || v <= 0.0001f)
+                continue;
+
+            var scaled = v / sumStartOthers * budget;
+            if (scaled > 0.0001f)
+                _blendWeights[k] = scaled;
+        }
+
+        if (newWeight > 0.0001f)
+            _blendWeights[variationId] = newWeight;
+    }
+
+    /// <summary>The variation carrying the largest live weight, or null when the vector is empty.</summary>
+    public Variation? GetDominantBlendVariation()
+    {
+        var bestId = Guid.Empty;
+        var best = 0f;
+        foreach (var (k, v) in _blendWeights)
+        {
+            if (v > best)
+            {
+                best = v;
+                bestId = k;
+            }
+        }
+
+        if (bestId == Guid.Empty)
+            return null;
+
+        foreach (var v in _allVariations)
+        {
+            if (v.Id == bestId)
+                return v;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Applies the current weight vector as a live weighted blend (preview). Call
+    /// <see cref="ApplyCurrentBlend"/> to bake it onto the undo stack.
+    /// </summary>
+    public void ApplyBlendWeights(Instance instance)
+    {
+        _weightedBlendVariations.Clear();
+        _weightedBlendWeights.Clear();
+        foreach (var v in _allVariations)
+        {
+            var w = GetBlendWeight(v.Id);
+            if (w > 0.0001f)
+            {
+                _weightedBlendVariations.Add(v);
+                _weightedBlendWeights.Add(w);
+            }
+        }
+
+        if (_weightedBlendVariations.Count == 0)
+            return;
+
+        BeginWeightedBlend(instance, _weightedBlendVariations, _weightedBlendWeights);
+    }
+
+    private void DropBlendWeight(Guid variationId)
+    {
+        if (!_blendWeights.Remove(variationId))
+            return;
+
+        // Renormalize the remainder so the cross-fade still sums to 1.
+        var sum = 0f;
+        foreach (var v in _blendWeights.Values)
+            sum += v;
+
+        if (sum <= 0.0001f)
+            return;
+
+        _blendWeightKeyBuffer.Clear();
+        foreach (var k in _blendWeights.Keys)
+            _blendWeightKeyBuffer.Add(k);
+        foreach (var k in _blendWeightKeyBuffer)
+            _blendWeights[k] /= sum;
+    }
+    #endregion
 
     public void BeginHover(Instance instance, Variation variation)
     {
@@ -944,6 +1131,7 @@ internal sealed class SymbolVariationPool
     {
         _userVariations.Remove(newVariation);
         _allVariations.Remove(newVariation);
+        DropBlendWeight(newVariation.Id);
     }
 
     private MacroCommand? _activeBlendCommand;

@@ -41,6 +41,11 @@ internal sealed class VariationPicker
             _searchString = string.Empty;
             _justOpened = true;
             _initHighlight = true;
+            _weightDragId = Guid.Empty;
+            // Persist the live weight vector across opens; only seed it the first time (the pool
+            // otherwise resets it to the active variation on every activation).
+            if (!pool.HasBlendWeights)
+                pool.ResetBlendWeights(selected?.Id ?? Guid.Empty);
         }
 
         // Wider than the trigger, but still left-aligned to it.
@@ -160,7 +165,7 @@ internal sealed class VariationPicker
             // Hover preview: while enabled in list mode, apply the highlighted variation to the
             // output (restoring on change/close) — the same transient mechanism as the Variations
             // window. The canvas drives its own preview, so skip there.
-            if (UserSettings.Config.VariationHoverPreview && !inCanvasMode && _filtered.Count > 0)
+            if (UserSettings.Config.VariationHoverPreview && !inCanvasMode && _weightDragId == Guid.Empty && _filtered.Count > 0)
             {
                 var toPreview = _filtered[Math.Clamp(_highlightIndex, 0, _filtered.Count - 1)];
                 if (toPreview.Id != _previewedVariationId)
@@ -177,11 +182,20 @@ internal sealed class VariationPicker
 
             ImGui.EndPopup();
         }
-        else if (_previewedVariationId != Guid.Empty)
+        else
         {
-            // Popup closed — drop any lingering hover preview.
-            pool.StopHover();
-            _previewedVariationId = Guid.Empty;
+            // Popup closed — drop any lingering hover preview and bake a pending fader blend.
+            if (_previewedVariationId != Guid.Empty)
+            {
+                pool.StopHover();
+                _previewedVariationId = Guid.Empty;
+            }
+
+            if (_weightDragId != Guid.Empty)
+            {
+                pool.ApplyCurrentBlend();
+                _weightDragId = Guid.Empty;
+            }
         }
 
         ImGui.PopStyleColor();
@@ -227,7 +241,8 @@ internal sealed class VariationPicker
         // One highlight, driven by the keyboard. The mouse only moves it when the mouse actually
         // moves — so a stationary pointer never locks out arrow-key navigation.
         var mouseMoved = ImGui.GetIO().MouseDelta.LengthSquared() > 0;
-        var hoveredIndex = -1;
+        _hoveredRowThisFrame = -1;
+        _weightsChangedThisFrame = false;
 
         ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(0, RowSpacing * scale));
         ImGui.BeginChild("##variationList", new Vector2(0, listHeight), ImGuiChildFlags.None, ImGuiWindowFlags.NoBackground);
@@ -235,17 +250,13 @@ internal sealed class VariationPicker
         {
             var variation = _filtered[i];
             var highlighted = i == _highlightIndex;
-            var clicked = DrawRow(composition, variation, variation == selected, highlighted, reorderEnabled);
-            var draggedToReorder = reorderEnabled && HandleRowReorder(i, canvas!, pool);
+            var clicked = DrawRow(composition, pool, canvas, variation, i, variation == selected, highlighted, reorderEnabled);
 
-            if (clicked && !draggedToReorder)
+            if (clicked)
             {
                 chosen = variation;
                 ImGui.CloseCurrentPopup();
             }
-
-            if (ImGui.IsItemHovered())
-                hoveredIndex = i;
 
             if (highlighted && scrollToHighlight)
                 ImGui.SetScrollHereY();
@@ -254,8 +265,19 @@ internal sealed class VariationPicker
         ImGui.EndChild();
         ImGui.PopStyleVar();
 
-        if (mouseMoved && hoveredIndex >= 0)
-            _highlightIndex = hoveredIndex;
+        // Live weighted blend: re-apply while a fader is dragging, bake once on release.
+        if (_weightDragId != Guid.Empty && !ImGui.IsMouseDown(ImGuiMouseButton.Left))
+        {
+            pool.ApplyCurrentBlend();
+            _weightDragId = Guid.Empty;
+        }
+        else if (_weightsChangedThisFrame)
+        {
+            pool.ApplyBlendWeights(composition);
+        }
+
+        if (mouseMoved && _hoveredRowThisFrame >= 0)
+            _highlightIndex = _hoveredRowThisFrame;
 
         return chosen;
     }
@@ -351,35 +373,94 @@ internal sealed class VariationPicker
         return clicked;
     }
 
-    private bool DrawRow(Instance composition, Variation variation, bool isSelected, bool isHighlighted, bool reorderEnabled)
+    private bool DrawRow(Instance composition, SymbolVariationPool pool, VariationBaseCanvas? canvas,
+                         Variation variation, int index, bool isSelected, bool isHighlighted, bool reorderEnabled)
     {
         var scale = T3Ui.UiScaleFactor;
         var rowHeight = RowHeight * scale;
         var thumbWidth = rowHeight * 4 / 3;
-
-        var clicked = ImGui.InvisibleButton("##row" + variation.Id, new Vector2(-1, rowHeight));
-        var min = ImGui.GetItemRectMin();
-        var max = ImGui.GetItemRectMax();
         var drawList = ImGui.GetWindowDrawList();
 
-        if (isSelected)
-            drawList.AddRectFilled(min, max, UiColors.BackgroundActive.Fade(0.4f), 4 * scale);
-        else if (isHighlighted)
-            drawList.AddRectFilled(min, max, UiColors.BackgroundActive.Fade(0.2f), 4 * scale);
+        var totalW = ImGui.GetContentRegionAvail().X;
+        var rowMin = ImGui.GetCursorScreenPos();
+        var rowMax = new Vector2(rowMin.X + totalW, rowMin.Y + rowHeight);
 
-        // Reserve a left strip for the drag-reorder grip (drawn for the highlighted row).
-        var leftInset = reorderEnabled ? Icons.FontSize + 4 * scale : 2 * scale;
+        var gripW = reorderEnabled ? Icons.FontSize + 4 * scale : 2 * scale;
+        var weightW = WeightCellWidth * scale;
+        var middleW = MathF.Max(10 * scale, totalW - gripW - weightW);
+
+        // Hit regions left→right: grip (reorder), middle (apply), weight cell (fader). Separate
+        // buttons so a fader drag never reorders and the grip is the only reorder handle.
+        ImGui.InvisibleButton("##grip" + variation.Id, new Vector2(gripW, rowHeight));
+        var draggedToReorder = reorderEnabled && HandleRowReorder(index, canvas!, pool);
+        var rowHovered = ImGui.IsItemHovered();
+        ImGui.SameLine(0, 0);
+
+        var midClicked = ImGui.InvisibleButton("##mid" + variation.Id, new Vector2(middleW, rowHeight));
+        rowHovered |= ImGui.IsItemHovered();
+        ImGui.SameLine(0, 0);
+
+        // Weight fader hit region + interaction (visual is painted later, after the row bg).
+        ImGui.InvisibleButton("##w" + variation.Id, new Vector2(weightW, rowHeight));
+        var cellMin = ImGui.GetItemRectMin();
+        var cellMax = ImGui.GetItemRectMax();
+        var weightHovered = ImGui.IsItemHovered();
+        rowHovered |= weightHovered;
+        var io = ImGui.GetIO();
+        var freeMode = io.KeyCtrl;
+        if (ImGui.IsItemActivated())
+        {
+            _weightDragId = variation.Id;
+            pool.BeginBlendWeightDrag();
+        }
+        var weightDragging = _weightDragId == variation.Id;
+        if (weightDragging && ImGui.IsItemActive())
+        {
+            var dx = io.MouseDelta.X;
+            if (dx != 0)
+            {
+                var span = MathF.Max(1, cellMax.X - cellMin.X);
+                var delta = dx / span * (io.KeyShift ? 1f / 3f : 1f);
+                pool.SetBlendWeight(variation.Id, pool.GetBlendWeight(variation.Id) + delta, freeMode);
+                _weightsChangedThisFrame = true;
+            }
+        }
+
+        // A lone 100% fader has nowhere to send its weight, so it's locked — but only while idle.
+        // Mid-drag it cross-fades against the drag-start ratio, so dragging back down still refills.
+        var lockedFull = !freeMode && !weightDragging && pool.IsSoleFullWeight(variation.Id);
+        // While another fader drags, flag the sources it's fading from so the blend-back target is visible.
+        var flagSource = _weightDragId != Guid.Empty && !weightDragging && pool.IsDragSource(variation.Id);
+
+        if (weightHovered || (weightDragging && ImGui.IsItemActive()))
+            ImGui.SetMouseCursor(lockedFull ? ImGuiMouseCursor.NotAllowed : ImGuiMouseCursor.ResizeEW);
+        if (weightHovered && lockedFull)
+            CustomComponents.TooltipForLastItem("Use the other sliders to reduce this level");
+
+        if (rowHovered)
+            _hoveredRowThisFrame = index;
+
+        // --- visuals (painted after the invisible hit regions) ---
+        if (isSelected)
+        {
+            drawList.AddRectFilled(rowMin, rowMax, UiColors.BackgroundActive.Fade(0.4f), 4 * scale);
+        }
+        else if (isHighlighted)
+        {
+            drawList.AddRectFilled(rowMin, rowMax, UiColors.BackgroundActive.Fade(0.2f), 4 * scale);
+        }
+
         if (reorderEnabled)
         {
             var gripColor = isHighlighted ? UiColors.TextMuted : UiColors.TextMuted.Fade(0.3f);
-            var gripPos = new Vector2(min.X + 2 * scale, (min.Y + max.Y) / 2 - Icons.FontSize / 2).Floor();
+            var gripPos = new Vector2(rowMin.X + 2 * scale, (rowMin.Y + rowMax.Y) / 2 - Icons.FontSize / 2).Floor();
             Icons.DrawIconAtScreenPosition(Icon.DragIndicator, gripPos, drawList, gripColor);
         }
 
         // Thumbnail: a rounded border with the image inset 1px so the outline doesn't overlap it.
         var rounding = 2 * scale;
-        var borderMin = new Vector2(min.X + leftInset, min.Y + 2 * scale);
-        var borderMax = new Vector2(borderMin.X + thumbWidth, max.Y - 2 * scale);
+        var borderMin = new Vector2(rowMin.X + gripW, rowMin.Y + 2 * scale);
+        var borderMax = new Vector2(borderMin.X + thumbWidth, rowMax.Y - 2 * scale);
         var imageMin = borderMin + new Vector2(1 * scale);
         var imageMax = borderMax - new Vector2(1 * scale);
         var thumbnail = ThumbnailManager.GetThumbnail(variation.Id, composition.Symbol.SymbolPackage,
@@ -392,20 +473,59 @@ internal sealed class VariationPicker
 
         drawList.AddRect(borderMin, borderMax, UiColors.ForegroundFull.Fade(0.2f), rounding);
 
-        var thumbMax = borderMax;
-
-        // Index + title (extra gap between them)
-        var textX = thumbMax.X + 8 * scale;
+        // Index + title (clipped so a long title can't run into the weight cell).
+        var textX = borderMax.X + 8 * scale;
+        drawList.PushClipRect(new Vector2(textX, rowMin.Y), new Vector2(cellMin.X - 4 * scale, rowMax.Y), true);
         ImGui.PushFont(Fonts.FontSmall);
-        drawList.AddText(new Vector2(textX, min.Y + 4 * scale), UiColors.TextMuted, variation.ActivationIndex.ToString("00"));
+        drawList.AddText(new Vector2(textX, rowMin.Y + 4 * scale), UiColors.TextMuted, variation.ActivationIndex.ToString("00"));
         ImGui.PopFont();
-
         drawList.AddText(Fonts.FontBold, Fonts.FontBold.FontSize,
-                         new Vector2(textX, min.Y + 4 * scale + Fonts.FontSmall.FontSize + 4 * scale),
+                         new Vector2(textX, rowMin.Y + 4 * scale + Fonts.FontSmall.FontSize + 4 * scale),
                          isSelected ? UiColors.ForegroundFull : UiColors.Text,
                          GetTitle(variation));
+        drawList.PopClipRect();
 
-        return clicked;
+        DrawWeightCellVisual(drawList, cellMin, cellMax, pool.GetBlendWeight(variation.Id), weightDragging, freeMode, flagSource);
+
+        return midClicked && !draggedToReorder && !weightDragging;
+    }
+
+    private static void DrawWeightCellVisual(ImDrawListPtr drawList, Vector2 cellMin, Vector2 cellMax, float weight, bool dragging, bool freeMode, bool flagSource)
+    {
+        var scale = T3Ui.UiScaleFactor;
+        var pad = 2 * scale;
+        var innerMin = new Vector2(cellMin.X + pad, cellMin.Y + pad);
+        var innerMax = new Vector2(cellMax.X - pad, cellMax.Y - pad);
+        var rounding = 3 * scale;
+        drawList.AddRectFilled(innerMin, innerMax, UiColors.BackgroundInputField, rounding);
+
+        // Blue while dragging in normalized mode; magenta when CTRL frees the clamp (over-drive).
+        var accent = dragging && freeMode ? UiColors.StatusAttention : UiColors.StatusAutomated;
+        var displayW = Math.Clamp(weight, 0f, 1f);
+        if (displayW > 0.001f)
+        {
+            var fillColor = dragging ? accent.Fade(0.5f) : UiColors.StatusAutomated.Fade(0.2f);
+            var fillMax = new Vector2(innerMin.X + (innerMax.X - innerMin.X) * displayW, innerMax.Y);
+            drawList.AddRectFilled(innerMin, fillMax, fillColor, rounding);
+        }
+
+        if (dragging)
+        {
+            drawList.AddRect(innerMin, innerMax, accent, rounding, ImDrawFlags.None, 2 * scale);
+        }
+        else if (flagSource)
+        {
+            // A source for the fader currently dragging — dragging it back down refills here.
+            drawList.AddRect(innerMin, innerMax, UiColors.StatusAutomated.Fade(0.5f), rounding, ImDrawFlags.None, 1 * scale);
+        }
+
+        var pct = (weight * 100f).ToString("0") + "%";
+        ImGui.PushFont(Fonts.FontNormal);
+        var ts = ImGui.CalcTextSize(pct);
+        var textColor = dragging ? accent : (weight > 0.001f ? UiColors.Text : UiColors.TextMuted.Fade(0.5f));
+        drawList.AddText(new Vector2((cellMin.X + cellMax.X) / 2 - ts.X / 2, (cellMin.Y + cellMax.Y) / 2 - ts.Y / 2).Floor(),
+                         textColor, pct);
+        ImGui.PopFont();
     }
 
     private static string GetTitle(Variation variation)
@@ -455,6 +575,7 @@ internal sealed class VariationPicker
     private const float RowSpacing = 2;
     private const float MaxListHeight = 360;
     private const float CanvasHeight = 300;
+    private const float WeightCellWidth = 78;
 
     private readonly List<Variation> _sorted = new();
     private readonly List<Variation> _filtered = new();
@@ -471,4 +592,10 @@ internal sealed class VariationPicker
     private bool _reorderDragged;
     private ModifyCanvasElementsCommand? _reorderCommand;
     private readonly List<ISelectableCanvasObject> _reorderVariations = new();
+
+    // Activation-fader interaction state. The weight vector itself is session state on the pool, so
+    // it persists across picker opens and stays coherent with the arrows / grid / MIDI activations.
+    private Guid _weightDragId;
+    private bool _weightsChangedThisFrame;
+    private int _hoveredRowThisFrame = -1;
 }

@@ -81,6 +81,7 @@ wiki ([dev.OperatorConventions](https://github.com/tixl3d/tixl/wiki/dev.Operator
 
 ## Code Formatting and Style
 - Put `return` statements on their own line (not inline after `if`)
+- **Brace every branch of an `if` / `else` / `else if` chain**, even single-statement branches — a brace-less `else if` (especially with a comment under it) reads poorly and is easy to misedit. A lone `if (x) foo();` with no `else` may stay brace-less (matches the prevailing idiom; don't mass-reformat existing ones).
 - Order class members public-first → private, with private fields at the very end. Nest helper types (structs, enums) used only by the owning class inside it, at the top.
 - Prefix private fields with `_`
 - Prefer slightly longer, descriptive names when clarity improves (e.g. `faceIndex` over `i`)
@@ -409,4 +410,9 @@ When reporting changes:
 - Mention performance impact (or confirm none expected)
 - Highlight tradeoffs and residual risks
 - Keep follow-up suggestions actionable
+
+## Push Back and Surface Ideas
+
+- **Don't hesitate to push back or raise concerns — including about the *interaction design*, not just the code.** If a proposed UX, control scheme, or flow seems confusing, inconsistent, or likely to surprise users, say so plainly and explain why. A dissenting view delivered early is far cheaper than a redesign later, and the user would rather hear it. (Don't manufacture objections — push back when you genuinely see a problem, and be equally willing to say when something is solid.)
+- **Proactively offer future UX improvements and feature ideas.** When you notice a worthwhile enhancement adjacent to the work — a smoother interaction, a missing affordance, a feature the new infrastructure now makes cheap — mention it, even if it's out of scope for the current change. Surfacing it lets the user decide; staying silent quietly forecloses the option. Keep ideas concrete and actionable, and don't let them bloat the current change.
 

@@ -191,6 +191,14 @@ internal sealed class SnapshotControlView
     /// </summary>
     private Variation? GetDisplayedSnapshot(SymbolVariationPool pool, Instance composition)
     {
+        // During a live cross-fade the single "active" snapshot is ambiguous, so follow the
+        // dominant weight (for a plain activation the vector is {active:1}, so this is the active).
+        if (pool.GetDominantBlendVariation() is {IsSnapshot: true} dominant && _snapshots.Contains(dominant))
+        {
+            _fallbackSnapshotId = Guid.Empty;
+            return dominant;
+        }
+
         if (pool.ActiveVariation is {IsSnapshot: true} activeVariation && _snapshots.Contains(activeVariation))
         {
             _fallbackSnapshotId = Guid.Empty;
