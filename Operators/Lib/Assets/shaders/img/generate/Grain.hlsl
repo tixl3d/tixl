@@ -8,15 +8,8 @@ cbuffer ParamConstants : register(b0)
     float Brightness;
     float Time;
     float Scale;
+    float CleanMode;
 }
-
-/*cbuffer TimeConstants : register(b1)
-{
-//     float globalTime;
-//     float time;
-//     float runTime;
-//     float beatTime;
-}*/
 
 cbuffer Resolution : register(b1)
 {
@@ -65,19 +58,30 @@ float4 psMain(vsOutput psInput) : SV_TARGET
 {
     float2 uv = psInput.texCoord;
     float4 orgColor = ImageA.Sample(texSampler, uv);
+
     if (Scale > 1)
     {
-        float2 pixelStep = float2(1 / TargetWidth, 1 / TargetHeight);
+        float2 pixelStep = float2(1.0 / TargetWidth, 1.0 / TargetHeight);
         float2 offset = Scale * pixelStep;
-        // float2 offset = Scale * step;
         float2 fraction = uv % offset;
-        float4 n1 = GetNoiseFromRandom(uv - fraction + 0.001 * pixelStep);
-        float4 n2 = GetNoiseFromRandom(uv - fraction + 0.004 * pixelStep + offset);
 
-        float4 noise = lerp(n1, n2, 0);
-
-        float4 color = float4(orgColor.rgb + noise.rgb * Amount, 1);
-        return color;
+        if (CleanMode > 0.5)
+        {
+            // CLEAN VERSION - no stripes
+            float2 cellIndex = floor(uv / offset);
+            float4 noise = GetNoiseFromRandom(cellIndex);
+            float4 color = float4(orgColor.rgb + noise.rgb * Amount, 1);
+            return color;
+        }
+        else
+        {
+            // ORIGINAL VERSION - maintains the unique stripe style
+            float4 n1 = GetNoiseFromRandom(uv - fraction + 0.001 * pixelStep);
+            float4 n2 = GetNoiseFromRandom(uv - fraction + 0.004 * pixelStep + offset);
+            float4 noise = lerp(n1, n2, 0);
+            float4 color = float4(orgColor.rgb + noise.rgb * Amount, 1);
+            return color;
+        }
     }
     else
     {

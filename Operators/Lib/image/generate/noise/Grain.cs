@@ -30,6 +30,9 @@ internal sealed class Grain : Instance<Grain>
         [Input(Guid = "edb719cd-be40-4758-9c13-98cf14d1a5c5")]
         public readonly InputSlot<float> Scale = new InputSlot<float>();
 
+        [Input(Guid = "87b8eeac-14d7-4cb5-8669-4c8bb8f54419")]
+        public readonly InputSlot<bool> CleanMode = new InputSlot<bool>();
+
         [Input(Guid = "61bb0df6-6c8a-4f3a-b7f4-9d979377cab8")]
         public readonly InputSlot<T3.Core.DataTypes.Vector.Int2> Resolution = new InputSlot<T3.Core.DataTypes.Vector.Int2>();
 
