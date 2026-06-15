@@ -27,6 +27,12 @@ public sealed class CoreSettings : Settings<CoreSettings.ConfigData>
         public bool AppMute = false;
         public float AppVolume = 1;
 
+        /// <summary>
+        /// Machine-specific WASAPI input device used when a project leaves its AudioInputDeviceName
+        /// empty ("use default input"). Kept out of the project file so shared projects stay portable.
+        /// </summary>
+        public string LocalAudioInputDeviceName = string.Empty;
+
         // IO
         public int DefaultOscPort = 8000;
 

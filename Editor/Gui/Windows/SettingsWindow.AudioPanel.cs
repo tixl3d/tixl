@@ -2,6 +2,7 @@ using ImGuiNET;
 using T3.Core.Audio;
 using T3.Core.IO;
 using T3.Core.Settings;
+using T3.Editor.Gui.Audio;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Styling;
@@ -64,6 +65,13 @@ internal sealed partial class SettingsWindow
             ref audio.SoundtrackMute,
             audioDefaults.SoundtrackMute,
             "Mute soundtrack audio only.");
+
+        FormInputs.AddVerticalSpace();
+        FormInputs.AddSectionSubHeader("Default Input Device");
+        CustomComponents.HelpText("The WASAPI input device used when a project leaves its input set to \"" +
+                                  AudioDeviceSelector.DefaultDeviceLabel + "\". Stored per machine, so shared projects stay portable.");
+        FormInputs.DrawInputLabel("Device");
+        changed |= AudioDeviceSelector.DrawLocalDefaultDeviceCombo("##SettingsLocalAudioDevice");
     }
     
     /// <summary>

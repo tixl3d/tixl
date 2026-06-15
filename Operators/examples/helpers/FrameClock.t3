@@ -1171,7 +1171,7 @@
     "Syncing": 0,
     "AudioDecayFactor": 0.9,
     "AudioGainFactor": 1.0,
-    "AudioInputDeviceName": "Microphone Builtin (Realtek(R) Audio)",
+    "AudioInputDeviceName": "",
     "EnableAudioBeatLocking": "False",
     "BeatLockAudioOffsetSec": "0"
   }

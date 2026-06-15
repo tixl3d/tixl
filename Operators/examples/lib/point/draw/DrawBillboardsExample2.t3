@@ -1420,7 +1420,7 @@
     "Syncing": 0,
     "AudioDecayFactor": 0.9,
     "AudioGainFactor": 1.0,
-    "AudioInputDeviceName": "T-Bone (SC420 USB Microphone)",
+    "AudioInputDeviceName": "",
     "EnableAudioBeatLocking": "False",
     "BeatLockAudioOffsetSec": "0"
   }

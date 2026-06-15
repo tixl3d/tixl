@@ -533,54 +533,17 @@ internal sealed class ProjectSettingsWindow : Window
                 FormInputs.DrawInputLabel("Input Device");
                 ImGui.BeginGroup();
 
-                if (ImGui.BeginCombo("##SelectDevice", playback.AudioInputDeviceName, ImGuiComboFlags.HeightLarge))
+                modified |= AudioDeviceSelector.DrawProjectDeviceCombo("##SelectDevice", ref playback.AudioInputDeviceName);
+
+                if (string.IsNullOrEmpty(playback.AudioInputDeviceName))
                 {
-                    var deviceIndex = 0;
-                    foreach (var d in WasapiAudioInput.InputDevices)
-                    {
-                        // Seed the ID from the index: devices can share the same display name,
-                        // which ImGui flags as conflicting IDs.
-                        ImGui.PushID(deviceIndex++);
-                        var isSelected = d.DeviceInfo.Name == playback.AudioInputDeviceName;
-                        if (ImGui.Selectable($"{d.DeviceInfo.Name}", isSelected,
-                                ImGuiSelectableFlags.NoAutoClosePopups))
-                        {
-                            Bass.Configure(Configuration.UpdateThreads, false);
-                            playback.AudioInputDeviceName = d.DeviceInfo.Name;
-                            modified = true;
-                            CoreSettings.Save();
-                            AudioEngine.OnAudioDeviceChanged();
-                        }
-
-                        if (ImGui.IsItemHovered())
-                        {
-                            ImGui.BeginTooltip();
-                            ImGui.PushFont(Fonts.FontSmall);
-                            var sb = new StringBuilder();
-                            var di = d.DeviceInfo;
-
-                            var fields = typeof(WasapiDeviceInfo).GetProperties();
-                            foreach (var f in fields)
-                            {
-                                sb.Append(f.Name);
-                                sb.Append(": ");
-                                sb.Append(f.GetValue(di));
-                                sb.Append("\n");
-                            }
-
-                            ImGui.TextUnformatted(sb.ToString());
-                            ImGui.PopFont();
-                            ImGui.EndTooltip();
-                        }
-
-                        ImGui.PopID();
-                    }
-
-                    ImGui.EndCombo();
+                    // Project defers to the machine default; expose the local device so a portable
+                    // project still resolves to a real input on this machine.
+                    FormInputs.DrawInputLabel("Default Device");
+                    AudioDeviceSelector.DrawLocalDefaultDeviceCombo("##SelectLocalDevice");
+                    CustomComponents.HelpText("Stored per machine, not in the project. Set this once and shared projects work everywhere.");
                 }
-
-                if (!string.IsNullOrEmpty(playback.AudioInputDeviceName)
-                    && playback.AudioInputDeviceName != WasapiAudioInput.ActiveInputDeviceName)
+                else if (playback.AudioInputDeviceName != WasapiAudioInput.ActiveInputDeviceName)
                 {
                     ImGui.PushStyleColor(ImGuiCol.Text, UiColors.StatusWarning.Rgba);
                     ImGui.TextUnformatted(playback.AudioInputDeviceName + " (NOT FOUND)");

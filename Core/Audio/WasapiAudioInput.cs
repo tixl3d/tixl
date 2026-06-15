@@ -5,6 +5,7 @@ using System.Linq;
 using ManagedBass;
 using ManagedBass.Wasapi;
 using T3.Core.Animation;
+using T3.Core.IO;
 using T3.Core.Logging;
 using T3.Core.Settings;
 
@@ -48,7 +49,7 @@ public static class WasapiAudioInput
             return;
         }
 
-        var deviceName = settings.Playback.AudioInputDeviceName;
+        var deviceName = ResolveInputDeviceName(settings.Playback.AudioInputDeviceName);
         if (ActiveInputDeviceName == deviceName)
         {
             // Try to restart capture
@@ -96,6 +97,19 @@ public static class WasapiAudioInput
         _complainedOnce = false;
     }
     
+    /// <summary>
+    /// Resolves the device a composition asks for into the actual device name to capture from.
+    /// An empty project-level name means "use this machine's configured default input"
+    /// (<see cref="CoreSettings.ConfigData.LocalAudioInputDeviceName"/>), which keeps shared
+    /// projects portable. A non-empty name is an explicit per-project override.
+    /// </summary>
+    public static string ResolveInputDeviceName(string projectDeviceName)
+    {
+        return string.IsNullOrEmpty(projectDeviceName)
+                   ? CoreSettings.Config.LocalAudioInputDeviceName ?? string.Empty
+                   : projectDeviceName;
+    }
+
     /// <summary>
     /// Gets the list of available WASAPI input devices.
     /// </summary>
@@ -298,7 +312,7 @@ public static class WasapiAudioInput
     /// </summary>
     private static void EnsureCaptureRunningForRecording()
     {
-        var configuredDeviceName = Playback.Current?.Settings?.Playback.AudioInputDeviceName;
+        var configuredDeviceName = ResolveInputDeviceName(Playback.Current?.Settings?.Playback.AudioInputDeviceName);
 
         WasapiInputDevice device = null;
         if (!string.IsNullOrEmpty(configuredDeviceName))
