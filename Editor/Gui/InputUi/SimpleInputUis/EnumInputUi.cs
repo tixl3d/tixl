@@ -73,9 +73,66 @@ public sealed class EnumInputUi<T> : InputValueUi<T> where T : Enum
         }
         else
         {
-            int index = Array.IndexOf(enumInfo.Values, value);
-            InputEditStateFlags editStateFlags = InputEditStateFlags.Nothing;
-            bool modified = ImGui.Combo("##dropDownParam", ref index, enumInfo.ValueNames, enumInfo.ValueNames.Length, 20);
+            var index = Array.IndexOf(enumInfo.Values, value);
+            var editStateFlags = InputEditStateFlags.Nothing;
+            var modified = false;
+
+            var preview = index >= 0 && index < enumInfo.ValueNames.Length
+                              ? enumInfo.ValueNames[index]
+                              : string.Empty;
+
+            var isOpen = ImGui.BeginCombo("##dropDownParam", preview);
+            if (isOpen)
+            {
+                var hoveredIndex = -1;
+                if (ImGui.IsWindowAppearing())
+                {
+                    _originalValue = value;
+                    _hasOriginalValue = true;
+                }
+
+                for (var i = 0; i < enumInfo.ValueNames.Length; i++)
+                {
+                    var isSelected = i == index;
+                    if (ImGui.Selectable(enumInfo.ValueNames[i], isSelected))
+                    {
+                        index = i;
+                        modified = true;
+                    }
+
+                    if (ImGui.IsItemHovered())
+                    {
+                        hoveredIndex = i;
+                    }
+
+                    if (isSelected)
+                    {
+                        ImGui.SetItemDefaultFocus();
+                    }
+                }
+
+                ImGui.EndCombo();
+
+                // Preview the hovered entry live until the user commits or leaves the list.
+                if (UserSettings.Config.ApplyDropdownValuesOnHover && hoveredIndex != _lastHoveredComboItem)
+                {
+                    _lastHoveredComboItem = hoveredIndex;
+
+                    if (hoveredIndex >= 0)
+                    {
+                        value = enumInfo[hoveredIndex];
+                        return InputEditStateFlags.Modified;
+                    }
+
+                    if (_hasOriginalValue)
+                    {
+                        value = _originalValue;
+                        _lastHoveredComboItem = -1;
+                        return InputEditStateFlags.Modified;
+                    }
+                }
+            }
+
             if (modified)
             {
                 value = enumInfo[index];
@@ -95,4 +152,8 @@ public sealed class EnumInputUi<T> : InputValueUi<T> where T : Enum
     {
         ImGui.TextUnformatted(value.ToString());
     }
+
+    private static int _lastHoveredComboItem = -1;
+    private static T _originalValue;
+    private static bool _hasOriginalValue;
 }
