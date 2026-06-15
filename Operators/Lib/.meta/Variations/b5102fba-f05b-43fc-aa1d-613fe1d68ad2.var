@@ -69,6 +69,39 @@
           "d24cce46-dd3f-4047-a33f-50abbca89cc4": 26.0
         }
       }
+    },
+    {
+      "Id": "51306651-96f2-468f-86a7-5cef5f4f5dff",
+      "IsPreset": true,
+      "ActivationIndex": 5,
+      "Title": "LargeAndClean",
+      "PosOnCanvas": {
+        "X": 163.0,
+        "Y": 122.55056
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "195da7e0-5279-4900-80cd-5635e96ab454": 1.0,
+          "edb719cd-be40-4758-9c13-98cf14d1a5c5": 128.0,
+          "87b8eeac-14d7-4cb5-8669-4c8bb8f54419": true
+        }
+      }
+    },
+    {
+      "Id": "c053e6db-4bcd-4a28-a654-252ea969368a",
+      "IsPreset": true,
+      "ActivationIndex": 6,
+      "Title": "LargeAndStylish",
+      "PosOnCanvas": {
+        "X": 326.0,
+        "Y": 122.55056
+      },
+      "ParameterSetsForChildIds": {
+        "00000000-0000-0000-0000-000000000000": {
+          "195da7e0-5279-4900-80cd-5635e96ab454": 1.0,
+          "edb719cd-be40-4758-9c13-98cf14d1a5c5": 128.0
+        }
+      }
     }
   ]
 }
