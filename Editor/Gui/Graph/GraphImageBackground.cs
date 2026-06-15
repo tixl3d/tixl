@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using ImGuiNET;
 using T3.Core.Animation;
+using T3.Core.DataTypes;
 using T3.Core.Operator;
 using T3.Core.Operator.Interfaces;
 using T3.Editor.Gui.Interaction.Camera;
@@ -39,6 +40,12 @@ internal sealed class GraphImageBackground
         set => _backgroundNodePath = value?.InstancePath;
         get => _structure.GetInstanceFromIdPath(_backgroundNodePath);
     }
+
+    /// <summary>
+    /// The most recently rendered background texture. In focus mode the output window is hidden and
+    /// the output renders here instead, so the render export reads its source texture from this.
+    /// </summary>
+    public Texture2D? GetCurrentTexture() => _imageCanvas.LastTexture;
 
     private void DrawResolutionSelector()
     {

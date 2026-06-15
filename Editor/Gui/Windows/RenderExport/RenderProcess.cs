@@ -8,6 +8,7 @@ using T3.Core.Utils;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Gui.Windows.Layouts;
 using T3.Editor.Gui.Windows.Output;
 using T3.Editor.Gui.Windows.RenderExport.MF;
 using T3.Editor.UiModel;
@@ -191,20 +192,31 @@ internal static class RenderProcess
     /// </summary>
     public static void Update()
     {
-        if (!OutputWindow.TryGetPrimaryOutputWindow(out OutputWindow))
+        if (OutputWindow.TryGetPrimaryOutputWindow(out OutputWindow))
+        {
+            MainOutputTexture = OutputWindow.GetCurrentTexture();
+            MainOutputType = OutputWindow.ShownInstance?.Outputs.FirstOrDefault()?.ValueType;
+        }
+        else if (LayoutHandling.FocusMode && ProjectView.Focused?.GraphImageBackground is { IsActive: true } background)
+        {
+            // In focus mode the output window is hidden and the output renders into the graph background,
+            // so source the texture from there to keep render shortcuts working.
+            OutputWindow = null;
+            MainOutputTexture = background.GetCurrentTexture();
+            MainOutputType = background.OutputInstance?.Outputs.FirstOrDefault()?.ValueType;
+        }
+        else
         {
             State = States.NoOutputWindow;
             return;
         }
 
-        MainOutputTexture = OutputWindow.GetCurrentTexture();
         if (MainOutputTexture == null || MainOutputTexture.IsDisposed)
         {
             State = States.NoValidOutputTexture;
             return;
         }
 
-        MainOutputType = OutputWindow.ShownInstance?.Outputs.FirstOrDefault()?.ValueType;
         if (MainOutputType != typeof(Texture2D))
         {
             State = States.NoValidOutputType;
