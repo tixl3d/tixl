@@ -189,6 +189,7 @@ internal static class InputWithTypeAheadSearch
                     // empty ID at the window root, which newer ImGui versions assert on.
                     ImGui.PushID(index);
                     ImGui.Selectable( item , isSelected, ImGuiSelectableFlags.None);
+                    CustomComponents.DrawSearchMatchUnderline(searchString, item, ImGui.GetItemRectMin());
                     ImGui.PopID();
                     var isItemHovered = new ImRect(ImGui.GetItemRectMin(), ImGui.GetItemRectMax()).Contains( ImGui.GetMousePos());
                     isSelected = item == searchString;
@@ -261,6 +262,10 @@ internal static class InputWithTypeAheadSearch
         switch (matches.Count)
         {
             case 0:
+                // Nothing matches the typed text (e.g. a fresh value that isn't a list item yet):
+                // show the complete list so the available options stay discoverable without
+                // having to clear the field first.
+                filteredItems.AddRange(allValidItems);
                 return;
             case 1 when matches[0].Word == filter:
                 filteredItems.AddRange(allValidItems);
