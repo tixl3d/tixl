@@ -1,0 +1,274 @@
+{
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
+  "Id": "2fc0840b-4ba4-4919-aa2b-214e8ccc3d82"/*R01e_Instancing*/,
+  "Description": "Instancing",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0da75eee-0a0f-4864-b7dc-492b9e9cfc4d"/*TorusMesh*/,
+      "AnnotationId": "7cdf02d3-9e2b-4d40-8a83-2f033a047d8e",
+      "Position": {
+        "X": 1089.6206,
+        "Y": 2117.4194
+      }
+    },
+    {
+      "ChildId": "1fd449f8-f10c-40ae-9f96-605519f8b127"/*AnimVec3*/,
+      "Position": {
+        "X": 980.0613,
+        "Y": 1728.1345
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "1ff7825a-286f-4f97-8cd3-d1a2b564b904"/*Group*/,
+      "AnnotationId": "7cdf02d3-9e2b-4d40-8a83-2f033a047d8e",
+      "Position": {
+        "X": 1265.5308,
+        "Y": 2299.4067
+      }
+    },
+    {
+      "ChildId": "3c58347e-fcc1-45df-930a-2b23fd5346bc"/*DrawMeshUnlit*/,
+      "Position": {
+        "X": 1120.0613,
+        "Y": 1442.4758
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "3ded7b8f-f997-4f88-92eb-2ccc72581c5a"/*Group*/,
+      "Position": {
+        "X": 1295.9714,
+        "Y": 1589.4633
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "40bb49a4-00c8-4d58-af14-9f6867bb1a26"/*Transform*/,
+      "Position": {
+        "X": 1120.0613,
+        "Y": 1512.4758
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "49ba1e19-86ba-4d9c-a425-a7729fe8b616"/*Group*/,
+      "Position": {
+        "X": 1627.0559,
+        "Y": 1633.0433
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "5a8f1598-6e6a-4bbf-9910-5d41cb861683"/*AnimVec3*/,
+      "AnnotationId": "7cdf02d3-9e2b-4d40-8a83-2f033a047d8e",
+      "Position": {
+        "X": 949.6206,
+        "Y": 2438.0781
+      }
+    },
+    {
+      "ChildId": "7ed109cd-2a16-4429-b41f-15346e2a4edb"/*Transform*/,
+      "AnnotationId": "7cdf02d3-9e2b-4d40-8a83-2f033a047d8e",
+      "Position": {
+        "X": 1530.0266,
+        "Y": 1923.225
+      }
+    },
+    {
+      "ChildId": "9141acd6-a837-4d3a-9072-373373f8f42f"/*Transform*/,
+      "Position": {
+        "X": 1441.6676,
+        "Y": 1490.5243
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "94947757-4923-4937-809b-db040d139ab4"/*Transform*/,
+      "AnnotationId": "7cdf02d3-9e2b-4d40-8a83-2f033a047d8e",
+      "Position": {
+        "X": 1089.6206,
+        "Y": 2403.0781
+      }
+    },
+    {
+      "ChildId": "9e6fdfd6-afa3-4307-bf12-b6c90e3ed42c"/*TorusMesh*/,
+      "Position": {
+        "X": 1120.0613,
+        "Y": 1623.1345
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "a374473f-06f8-44a6-abd6-5b096fe956e8"/*Transform*/,
+      "AnnotationId": "7cdf02d3-9e2b-4d40-8a83-2f033a047d8e",
+      "Position": {
+        "X": 1530.0266,
+        "Y": 1958.225
+      }
+    },
+    {
+      "ChildId": "a5f52db2-0d83-4b97-bbb8-d8204d05fcbe"/*Group*/,
+      "AnnotationId": "7cdf02d3-9e2b-4d40-8a83-2f033a047d8e",
+      "Position": {
+        "X": 1670.0266,
+        "Y": 1923.225
+      }
+    },
+    {
+      "ChildId": "a6b7f3bb-31ac-48f9-aa95-78c0862678f4"/*DrawMeshUnlit*/,
+      "AnnotationId": "7cdf02d3-9e2b-4d40-8a83-2f033a047d8e",
+      "Position": {
+        "X": 1089.6206,
+        "Y": 2152.4194
+      }
+    },
+    {
+      "ChildId": "a850a128-7c1a-43b4-b7ed-4da82c1a92e5"/*Transform*/,
+      "Position": {
+        "X": 1120.0613,
+        "Y": 1693.1345
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "ade72500-78ca-4048-862a-cf6deefe522d"/*TorusMesh*/,
+      "AnnotationId": "7cdf02d3-9e2b-4d40-8a83-2f033a047d8e",
+      "Position": {
+        "X": 1089.6206,
+        "Y": 2333.0781
+      }
+    },
+    {
+      "ChildId": "b5f087b2-7d9e-4779-a55f-c3971f7233b9"/*AnimVec3*/,
+      "Position": {
+        "X": 980.0613,
+        "Y": 1547.4758
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "d1a242fb-bc53-4830-8816-830f10e95192"/*DrawMesh*/,
+      "Position": {
+        "X": 1120.0613,
+        "Y": 1658.1345
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "d2d69137-d06d-428b-ad34-1ea08a00a004"/*Transform*/,
+      "Position": {
+        "X": 1441.6676,
+        "Y": 1525.5243
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "e0dd0467-bb8b-4e95-8f5c-af7da839a90d"/*DrawQuiz*/,
+      "Position": {
+        "X": 1901.468,
+        "Y": 1745.4009
+      }
+    },
+    {
+      "ChildId": "e5208705-c2fa-4c5c-a3f0-f6e77799c015"/*AnimVec3*/,
+      "AnnotationId": "7cdf02d3-9e2b-4d40-8a83-2f033a047d8e",
+      "Position": {
+        "X": 949.6206,
+        "Y": 2257.4194
+      }
+    },
+    {
+      "ChildId": "ec0bdfa2-5ffb-43bc-9b51-78c4da528fc9"/*TorusMesh*/,
+      "Position": {
+        "X": 1120.0613,
+        "Y": 1407.4758
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "ecdac90a-4ac3-425b-a54f-ab1c2d4cee31"/*AnimVec3*/,
+      "AnnotationId": "7cdf02d3-9e2b-4d40-8a83-2f033a047d8e",
+      "Position": {
+        "X": 1530.0266,
+        "Y": 1993.225
+      }
+    },
+    {
+      "ChildId": "efe59ea6-2d0b-4029-b23f-0afe95216454"/*DrawMesh*/,
+      "AnnotationId": "7cdf02d3-9e2b-4d40-8a83-2f033a047d8e",
+      "Position": {
+        "X": 1089.6206,
+        "Y": 2368.0781
+      }
+    },
+    {
+      "ChildId": "eff48a29-0736-4c74-bacd-ae2ab3b4692d"/*AnimVec3*/,
+      "Position": {
+        "X": 1487.0559,
+        "Y": 1668.0433
+      },
+      "SnapshotGroupIndex": "1"
+    },
+    {
+      "ChildId": "f57602ff-b618-4941-8c3b-badea8edfd6e"/*Transform*/,
+      "AnnotationId": "7cdf02d3-9e2b-4d40-8a83-2f033a047d8e",
+      "Position": {
+        "X": 1089.6206,
+        "Y": 2222.4194
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "42bf4faf-8c00-4178-8416-d098e5137de0"/*ColorBuffer*/,
+      "Position": {
+        "X": 1901.468,
+        "Y": 1815.4009
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "7cdf02d3-9e2b-4d40-8a83-2f033a047d8e",
+      "Label": "Solution",
+      "Collapsed": "True",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": 889.98804,
+        "Y": 1876.1785
+      },
+      "Size": {
+        "X": 1062.5436,
+        "Y": 824.0137
+      }
+    }
+  ],
+  "TourPoints": [
+    {
+      "Id": "72af5cc7-7b0b-4eca-a045-9b91b37c3f28",
+      "Description": "In this step, a transform is not only used to define where something is drawn.\nThe same object is drawn multiple times at different positions."
+    },
+    {
+      "Id": "d2e06216-d1aa-4303-bb61-188b107d9ac3",
+      "Description": "This is called instancing.\nIt allows all copies to be defined and adjusted together."
+    },
+    {
+      "Id": "61fed925-973d-4582-95f0-32c86fb62fa7",
+      "Description": "Instancing is a powerful concept, and TiXL provides multiple ways to work with it."
+    },
+    {
+      "Id": "91ac350d-fefd-4272-88b7-6e0def2717c4",
+      "ChildId": "9141acd6-a837-4d3a-9072-373373f8f42f",
+      "Description": "Replicate the example.",
+      "Style": "CallToAction"
+    }
+  ]
+}
