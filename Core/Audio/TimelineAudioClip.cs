@@ -124,6 +124,22 @@ public sealed class TimelineAudioClip
     public double LengthInSeconds;
 
     /// <summary>
+    /// Returns a resource handle for this clip, cached per owner. Per-frame callers must reuse the
+    /// same handle so the engine's load/fail state (<see cref="AudioClipResourceHandle.LoadingAttemptFailed"/>)
+    /// and stream-dictionary key stay stable — a fresh handle each frame would re-attempt a missing
+    /// file and re-log the failure on every frame, and allocate in the hot path.
+    /// </summary>
+    public AudioClipResourceHandle GetResourceHandle(IResourceConsumer? owner)
+    {
+        if (_handle == null || !ReferenceEquals(_handle.Owner, owner))
+            _handle = new AudioClipResourceHandle(this, owner);
+
+        return _handle;
+    }
+
+    private AudioClipResourceHandle? _handle;
+
+    /// <summary>
     /// Read-only mirror of a pre-rewrite project's per-clip <c>Bpm</c> field. Populated only by
     /// <see cref="TryFromJson"/> for back-compat with old JSON. Consumed by
     /// <c>CompositionSettings</c> to copy into <c>Playback.Bpm</c> once on load, then ignored.

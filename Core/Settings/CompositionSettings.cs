@@ -1,11 +1,13 @@
 #nullable enable
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using T3.Core.Audio;
 using T3.Core.IO;
+using T3.Core.Logging;
 using T3.Serialization;
 using T3.Core.Resource;
 
@@ -47,7 +49,7 @@ public sealed class CompositionSettings
             if (!clip.IsMainSoundtrack)
                 continue;
 
-            soundtrack = new AudioClipResourceHandle(clip, instance);
+            soundtrack = clip.GetResourceHandle(instance);
             return true;
         }
 
@@ -283,11 +285,32 @@ public sealed class CompositionSettings
         var jAudioClipArray = (JArray)jClipsToken;
         foreach (var c in jAudioClipArray)
         {
-            if (TimelineAudioClip.TryFromJson(c, out var clip))
+            if (!TimelineAudioClip.TryFromJson(c, out var clip))
+                continue;
+
+            if (IsUnmanageableMissingClip(clip))
             {
-                yield return clip;
+                // Non-main clips have no UI to remove them; drop dead references on load so
+                // they stop being re-registered (and re-logged) every frame. Persisted out on next save.
+                Log.Warning($"Removing audio clip with missing file '{clip.AssetPath}' from composition settings.");
+                continue;
             }
+
+            yield return clip;
         }
+    }
+
+    /// <summary>
+    /// True for a non-main audio clip whose absolute file path no longer exists. Restricted to
+    /// absolute paths so package-relative clips (resolved later against a resource consumer) and
+    /// the user-manageable main soundtrack are never dropped.
+    /// </summary>
+    private static bool IsUnmanageableMissingClip(TimelineAudioClip clip)
+    {
+        if (clip.IsMainSoundtrack || string.IsNullOrEmpty(clip.AssetPath))
+            return false;
+
+        return Path.IsPathRooted(clip.AssetPath) && !File.Exists(clip.AssetPath);
     }
 
     #endregion

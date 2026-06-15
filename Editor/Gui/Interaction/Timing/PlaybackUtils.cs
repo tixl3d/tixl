@@ -32,7 +32,7 @@ public static class PlaybackUtils
             {
                 if (string.IsNullOrEmpty(clip.AssetPath))
                     continue;
-                AudioEngine.UseSoundtrackClip(new AudioClipResourceHandle(clip, audioComposition), time);
+                AudioEngine.UseSoundtrackClip(clip.GetResourceHandle(audioComposition), time);
             }
         }
 

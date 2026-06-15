@@ -162,6 +162,10 @@ public static class AudioEngine
             Bass.StreamFree(stream.StreamHandle);
             SoundtrackClipStreams.Remove(handle);
         }
+
+        // Handles are now cached per clip, so a prior failed attempt would otherwise be sticky.
+        // An explicit reload should always re-attempt (e.g. after the file path was fixed).
+        handle.LoadingAttemptFailed = false;
         UseSoundtrackClip(handle, 0);
     }
 
