@@ -1,4 +1,6 @@
 {
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
   "Id": "b5102fba-f05b-43fc-aa1d-613fe1d68ad2"/*Grain*/,
   "Inputs": [
     {
@@ -29,6 +31,10 @@
       "DefaultValue": 0.0
     },
     {
+      "Id": "87b8eeac-14d7-4cb5-8669-4c8bb8f54419"/*CleanMode*/,
+      "DefaultValue": false
+    },
+    {
       "Id": "903c0270-dc46-402e-8088-8db8368a6dfb"/*Color*/,
       "DefaultValue": 0.0
     },
@@ -49,6 +55,12 @@
     {
       "Id": "65e2c0b4-5b8d-4352-8102-14e5771b0f8c"/*Add*/,
       "SymbolId": "c160f925-0a66-4505-a569-cadd878dbb6f",
+      "InputValues": [],
+      "Outputs": []
+    },
+    {
+      "Id": "8279b637-2891-4dfc-b176-60352e80f465"/*BoolToFloat*/,
+      "SymbolId": "9db2fcbf-54b9-4222-878b-80d1a0dc6edf",
       "InputValues": [],
       "Outputs": []
     },
@@ -120,6 +132,12 @@
       "TargetSlotId": "e3550929-8905-4cdf-bc85-c31e97da4baa"
     },
     {
+      "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
+      "SourceSlotId": "87b8eeac-14d7-4cb5-8669-4c8bb8f54419",
+      "TargetParentOrChildId": "8279b637-2891-4dfc-b176-60352e80f465",
+      "TargetSlotId": "253b9ae4-fac5-4641-bf0c-d8614606a840"
+    },
+    {
       "SourceParentOrChildId": "e424e7ed-a636-4d26-8b06-aaf9a4a5606c",
       "SourceSlotId": "b0cfa6f9-3c3d-4499-b21a-5904d1cb3bd7",
       "TargetParentOrChildId": "b7f99a6d-7c1f-4767-bc8a-77632bcf1661",
@@ -176,6 +194,12 @@
     {
       "SourceParentOrChildId": "00000000-0000-0000-0000-000000000000",
       "SourceSlotId": "edb719cd-be40-4758-9c13-98cf14d1a5c5",
+      "TargetParentOrChildId": "c938672c-ac6a-466a-9075-d1c2daa7ef83",
+      "TargetSlotId": "4ef6f204-1894-4b0a-bb2d-8b5ecbad4040"
+    },
+    {
+      "SourceParentOrChildId": "8279b637-2891-4dfc-b176-60352e80f465",
+      "SourceSlotId": "f0321a54-e844-482f-a161-7f137abc54b0",
       "TargetParentOrChildId": "c938672c-ac6a-466a-9075-d1c2daa7ef83",
       "TargetSlotId": "4ef6f204-1894-4b0a-bb2d-8b5ecbad4040"
     },
