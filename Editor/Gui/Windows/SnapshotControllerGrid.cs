@@ -76,7 +76,8 @@ internal sealed class SnapshotControllerGrid
             ImGui.SetCursorPosY(headerStartY + frameHeight);
             FormInputs.AddVerticalSpace(4);
 
-            var cell = 34 * scale;
+            var cellW = 68 * scale;
+            var cellH = 51 * scale;
             var gap = 3 * scale;
             var drawList = ImGui.GetWindowDrawList();
 
@@ -99,7 +100,7 @@ internal sealed class SnapshotControllerGrid
                     var snapshot = FindByActivationIndex(snapshots, index);
 
                     ImGui.PushID(index);
-                    var clicked = ImGui.InvisibleButton("##cell", new Vector2(cell, cell));
+                    var clicked = ImGui.InvisibleButton("##cell", new Vector2(cellW, cellH));
                     var min = ImGui.GetItemRectMin();
                     var max = ImGui.GetItemRectMax();
                     var isActive = snapshot != null && snapshot == active;
@@ -157,13 +158,9 @@ internal sealed class SnapshotControllerGrid
                     var textSize = ImGui.CalcTextSize(label);
                     var textPos = ((min + max) / 2 - textSize / 2).Floor();
 
-                    // A dark backing keeps the index legible over a thumbnail.
-                    if (_showThumbnails && snapshot != null)
-                    {
-                        var backingPad = new Vector2(3, 1) * scale;
-                        drawList.AddRectFilled(textPos - backingPad, textPos + textSize + backingPad, UiColors.BackgroundFull.Fade(0.6f), 2 * scale);
-                    }
-
+                    // A 1px drop shadow keeps the index legible over a thumbnail
+                    // without a backing box that would obscure the image.
+                    drawList.AddText(textPos + new Vector2(1, 1) * scale, UiColors.BackgroundFull.Fade(0.5f), label);
                     drawList.AddText(textPos, textColor, label);
 
                     // Dim the lifted cell uniformly with a scrim — fading bg/text by alpha instead
