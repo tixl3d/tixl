@@ -31,6 +31,16 @@ internal static class TimeClipItem
     {
         var xStartTime = attr.LayerContext.TimeCanvas.TransformX(timeClip.TimeRange.Start) + 1;
         var xEndTime = attr.LayerContext.TimeCanvas.TransformX(timeClip.TimeRange.End) + 1;
+
+        // Horizontal off-screen cull. A clip entirely left or right of the visible layer
+        // area draws nothing and can't be interacted with — the item being dragged stays
+        // under the mouse, hence on-screen, so the active drag is never the culled one.
+        // This is the main win for compositions with many clips but only a few in view:
+        // it skips the body, the per-event DataClip/audio overlays, the label, and the
+        // interaction buttons entirely.
+        if (xEndTime < attr.LayerRect.Min.X || xStartTime > attr.LayerRect.Max.X)
+            return;
+
         var position = new Vector2(xStartTime,
                                    attr.LayerRect.Min.Y + (timeClip.LayerIndex - attr.MinLayerIndex) * ClipArea.LayerHeight);
 
@@ -81,7 +91,8 @@ internal static class TimeClipItem
         // Each no-ops for op kinds it doesn't handle.
         if (clipInstance != null)
         {
-            DataClipBodyRenderer.TryDraw(clipInstance, timeClip, position, itemRectMax, attr.DrawList);
+            DataClipBodyRenderer.TryDraw(clipInstance, timeClip, position, itemRectMax,
+                                         attr.LayerRect.Min.X, attr.LayerRect.Max.X, attr.DrawList);
             AudioClipBodyRenderer.TryDraw(clipInstance, timeClip, position, itemRectMax, attr.DrawList);
         }
 

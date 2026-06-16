@@ -1,5 +1,6 @@
 #nullable enable
 
+using System.Runtime.CompilerServices;
 using ImGuiNET;
 using T3.Core.Animation;
 using T3.Core.DataTypes.DataSet;
@@ -31,6 +32,8 @@ internal static class DataClipBodyRenderer
                                TimeClip timeClip,
                                Vector2 bodyMin,
                                Vector2 bodyMax,
+                               float viewMinX,
+                               float viewMaxX,
                                ImDrawListPtr drawList)
     {
         // Op-type gate: only proceed if this op publishes a Slot<DataClip?>. Quick reject
@@ -119,6 +122,7 @@ internal static class DataClipBodyRenderer
             var trackBottomY = trackTopY + trackHeight;
             DrawChannelTrack(_visibleChannelsScratch[i], mapping,
                              bodyMin.X, bodyMax.X,
+                             viewMinX, viewMaxX,
                              trackTopY, trackBottomY,
                              perChannelBudget,
                              trackColor, drawList);
@@ -134,6 +138,8 @@ internal static class DataClipBodyRenderer
                                         TimeRangeMapping mapping,
                                         float bodyMinX,
                                         float bodyMaxX,
+                                        float viewMinX,
+                                        float viewMaxX,
                                         float trackTopY,
                                         float trackBottomY,
                                         int budget,
@@ -150,6 +156,7 @@ internal static class DataClipBodyRenderer
 
         return DrawTickChannelTrack(channel, mapping,
                                     bodyMinX, bodyMaxX,
+                                    viewMinX, viewMaxX,
                                     trackTopY, trackBottomY,
                                     budget, tickColor, drawList);
     }
@@ -164,6 +171,8 @@ internal static class DataClipBodyRenderer
                                             TimeRangeMapping mapping,
                                             float bodyMinX,
                                             float bodyMaxX,
+                                            float viewMinX,
+                                            float viewMaxX,
                                             float trackTopY,
                                             float trackBottomY,
                                             int budget,
@@ -182,12 +191,41 @@ internal static class DataClipBodyRenderer
         if (rangeSpan < 0.0001)
             return 0;
         var bodySpan = bodyMaxX - bodyMinX;
+        if (bodySpan < 0.0001)
+            return 0;
 
-        // Even-decimation step when the worst case (every event its own tick) would blow
-        // the budget. Better than front-loading: spreading the omissions evenly preserves
-        // the visual rhythm of activity across the track instead of fading after the
-        // first N events.
-        var step = Math.Max(1, eventCount / Math.Max(1, budget));
+        // Restrict the walk to events whose source time maps into the visible slice of the
+        // body. For a long clip zoomed in (the "thousands of CC events" case), the bulk of
+        // the list sits off-screen; events are stored in ascending source-time order, so a
+        // binary search on the visible window's edges bounds the loop instead of stepping
+        // across the whole channel every frame. Both window edges are converted to source
+        // time and min/max'd so a time-reversed clip (SourceRange running backwards) still
+        // searches a valid ascending range.
+        var visMinX = MathF.Max(bodyMinX, viewMinX);
+        var visMaxX = MathF.Min(bodyMaxX, viewMaxX);
+        if (visMaxX < visMinX)
+            return 0;
+
+        var winStartBars = rangeStart + (visMinX - bodyMinX) / bodySpan * rangeSpan;
+        var winEndBars = rangeStart + (visMaxX - bodyMinX) / bodySpan * rangeSpan;
+        var secsA = mapping.LocalBarsToSourceSecs(winStartBars);
+        var secsB = mapping.LocalBarsToSourceSecs(winEndBars);
+        var minSecs = Math.Min(secsA, secsB);
+        var maxSecs = Math.Max(secsA, secsB);
+
+        // Widen by one event each side so a run beginning just outside the window still
+        // contributes its leading / trailing tick.
+        var firstIndex = Math.Max(0, channel.FindIndexForTime(minSecs) - 1);
+        var lastIndex = Math.Min(eventCount - 1, channel.FindIndexForTime(maxSecs) + 1);
+        if (lastIndex < firstIndex)
+            return 0;
+        var visibleCount = lastIndex - firstIndex + 1;
+
+        // Even-decimation step when the worst case (every visible event its own tick) would
+        // blow the budget. Better than front-loading: spreading the omissions evenly
+        // preserves the visual rhythm of activity across the track instead of fading after
+        // the first N events.
+        var step = Math.Max(1, visibleCount / Math.Max(1, budget));
 
         var commands = 0;
 
@@ -199,7 +237,7 @@ internal static class DataClipBodyRenderer
         var runEventCount = 0;
         var prevX = float.NegativeInfinity;
 
-        for (var i = 0; i < eventCount; i += step)
+        for (var i = firstIndex; i <= lastIndex; i += step)
         {
             if (commands >= budget)
                 break;
@@ -489,9 +527,16 @@ internal static class DataClipBodyRenderer
     private static readonly List<DataChannel> _visibleChannelsScratch = new();
 
     // Joined-path comparer for the per-clip track order. Joins on '.' so the sort matches
-    // the DataSet output canvas's `OrderBy(c => string.Join(".", c.Path))`. Inline strings
-    // get allocated per comparison — acceptable here because the visible channel set is
-    // small (typically &lt; 20) and sort runs once per clip per frame, not per event.
+    // the DataSet output canvas's `OrderBy(c => string.Join(".", c.Path))`. The joined key
+    // is stable (Path is init-only), so it's cached per channel — the sort runs once per
+    // clip per frame and the naive `string.Join` in the comparer otherwise allocated two
+    // strings per comparison, churning the GC across every visible DataClip. The weak table
+    // lets the keys collect with their channels across project reloads.
+    private static readonly ConditionalWeakTable<DataChannel, string> _channelPathKeys = new();
+
+    private static string GetChannelPathKey(DataChannel channel)
+        => _channelPathKeys.GetValue(channel, static c => string.Join('.', c.Path));
+
     private static readonly Comparison<DataChannel> _channelByPathComparer =
-        (a, b) => string.CompareOrdinal(string.Join('.', a.Path), string.Join('.', b.Path));
+        (a, b) => string.CompareOrdinal(GetChannelPathKey(a), GetChannelPathKey(b));
 }
