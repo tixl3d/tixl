@@ -52,7 +52,7 @@ internal sealed class VariationPicker
         }
 
         // Wider than the trigger, but still left-aligned to it.
-        _popupWidth = MathF.Max(width, 320 * scale);
+        _popupWidth = MathF.Max(width, 400 * scale);
 
         // Estimate the popup height so it can be kept on-screen.
         float contentHeight;
