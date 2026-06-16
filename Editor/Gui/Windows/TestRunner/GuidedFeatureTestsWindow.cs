@@ -725,10 +725,21 @@ internal sealed class GuidedFeatureTestsWindow : Window
                                   _               => "·",
                               };
                 sb.Append("- ").Append(glyph).Append(' ')
-                  .Append(set.Steps[r.StepIndex].Title);
+                  .Append(set.Steps[r.StepIndex].Title).Append('\n');
+
+                // Keep each comment line as its own nested list item so multi-line
+                // notes stay readable instead of collapsing onto the title line.
                 if (!string.IsNullOrWhiteSpace(r.Comment))
-                    sb.Append(" — ").Append(r.Comment.Replace("\n", " "));
-                sb.Append('\n');
+                {
+                    foreach (var commentLine in r.Comment.Split('\n'))
+                    {
+                        var trimmed = commentLine.Trim();
+                        if (trimmed.Length == 0)
+                            continue;
+
+                        sb.Append("    - ").Append(trimmed).Append('\n');
+                    }
+                }
             }
             sb.Append('\n');
         }
