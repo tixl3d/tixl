@@ -98,12 +98,6 @@ public abstract class CompatibleMidiDevice : MidiConnectionManager.IMidiConsumer
     protected abstract void UpdateVariationVisualization();
 
     /// <summary>
-    /// The device's snapshot-grid arrangement (matching its physical button layout), surfaced to
-    /// the snapshot control view's controller grid. Null for devices without a snapshot grid.
-    /// </summary>
-    public virtual ControllerGridLayout? GridLayout => null;
-
-    /// <summary>
     /// Called when in passthrough mode to clear/reset device LEDs.
     /// Override in derived classes to send device-specific reset commands.
     /// </summary>

@@ -102,11 +102,10 @@ Open the actions (…) menu in the selector bar and choose "Rename". Also try
 - The + button is always enabled; it is emphasized (brighter) when the active
   snapshot has unsaved changes and muted (default) when the values match it.
 - The new snapshot is inserted **right behind the previously active one** — it
-  takes the next free controller index above that one, and on the canvas it lands
-  in the slot just after the active, shifting the snapshots that followed one slot
-  later (no overlap or gap), so it sorts directly after in the picker too.
-  (Creating the very first snapshot, with none active, falls back to the next free
-  slot at the end.)
+  takes the next free controller index after that one, and since the list is
+  ordered by controller index, it appears directly after the active in the picker
+  and the controller grid. (Creating the very first snapshot, with none active,
+  falls back to the next free index at the end.)
 
 ## Step: A snapshot is shown without manual selection
 
@@ -229,8 +228,8 @@ search) and press the arrows / Enter again. Also hover the prev/next bar arrows.
 
 **Expected:**
 - The picker opens as a popup with a focused search field and a list of
-  snapshots, each showing a thumbnail, its index, and title, ordered to match
-  the Variations window grid (top-left first).
+  snapshots, each showing a thumbnail, its index, and title, ordered by their
+  controller index (the same order as the controller-index grid).
 - Typing filters the list by title; arrow keys move a single highlight (the
   mouse moves it only when the mouse itself moves); Enter or a click applies
   the highlighted/clicked snapshot and closes the popup.
@@ -242,11 +241,14 @@ With the picker open in list mode and the search field empty, drag a row up or
 down by a few rows.
 
 **Expected:**
-- A grip appears on the highlighted row; dragging swaps the snapshot past its
-  neighbours, and the order also updates in the Variations window grid (both
-  follow canvas position).
+- A grip appears on the highlighted row; dragging swaps the snapshot's
+  **controller index** with its neighbour's, so the list reorders and the
+  controller-index grid (and the index shown in the selector bar) update to
+  match — the list, the grid and the MIDI pads all share one order.
 - Releasing keeps the new order (undoable with `Ctrl+Z`); a plain click without
   dragging still just applies the snapshot.
+- The Variations window's 2D canvas is unaffected — its thumbnails keep their
+  free positions (used for Alt-drag spatial blending), independent of this order.
 
 ## Step: Picker hover preview and canvas mode
 

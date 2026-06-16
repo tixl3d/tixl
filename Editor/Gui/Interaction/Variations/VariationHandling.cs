@@ -166,7 +166,7 @@ internal static class VariationHandling
         }
 
         if (request.Mode == SnapShotBlendingData.IndexMode.SnapshotIndices)
-            VariationBaseCanvas.SortByReadingOrder(_opOrderedSnapshots);
+            VariationBaseCanvas.SortByActivationIndex(_opOrderedSnapshots);
 
         _opBlendVariations.Clear();
         _opBlendWeights.Clear();
@@ -355,22 +355,24 @@ internal static class VariationHandling
             return null;
         }
 
+        // The list now sorts by ActivationIndex, so placement is purely a matter of which index the new
+        // snapshot gets; its free canvas position is independent.
+        newVariation.PosOnCanvas = VariationBaseCanvas.FindFreePositionForNewThumbnail(ActivePoolForSnapshots.AllVariations);
+
         if (activationIndex != AutoIndex)
         {
             // Explicit slot (e.g. a MIDI pad).
-            newVariation.PosOnCanvas = VariationBaseCanvas.FindFreePositionForNewThumbnail(ActivePoolForSnapshots.AllVariations);
             newVariation.ActivationIndex = activationIndex;
         }
         else if (activeBefore is { IsSnapshot: true })
         {
-            // Insert right behind the active snapshot: next free controller index, and a canvas slot
-            // immediately after it (shifting the snapshots that followed one slot later).
+            // Insert right behind the active snapshot: the next free controller index after it.
             newVariation.ActivationIndex = ActivePoolForSnapshots.GetNextFreeActivationIndexAfter(activeBefore.ActivationIndex, newVariation);
-            InsertSnapshotBehind(ActivePoolForSnapshots, activeBefore, newVariation);
         }
         else
         {
-            newVariation.PosOnCanvas = VariationBaseCanvas.FindFreePositionForNewThumbnail(ActivePoolForSnapshots.AllVariations);
+            // No active snapshot (e.g. the first one): take the lowest free index so 0 (top-left) is used.
+            newVariation.ActivationIndex = ActivePoolForSnapshots.GetNextFreeActivationIndexAfter(-1, newVariation);
         }
 
         // Make the new snapshot the active one so every view (Variations window + control view)
@@ -378,37 +380,6 @@ internal static class VariationHandling
         ActivePoolForSnapshots.SetActiveVariationWithoutApply(newVariation);
         ActivePoolForSnapshots.SaveVariationsToFile();
         return newVariation;
-    }
-
-    /// <summary>
-    /// Parks the new snapshot at the next free canvas slot, then bubbles it back so it sits directly
-    /// behind <paramref name="active"/> in reading order — each swap moves an in-between snapshot one
-    /// slot later, so the grid stays gap-free with no overlap.
-    /// </summary>
-    private static void InsertSnapshotBehind(SymbolVariationPool pool, Variation active, Variation newVariation)
-    {
-        var ordered = new List<Variation>();
-        foreach (var v in pool.AllVariations)
-        {
-            if (v.IsSnapshot && v != newVariation)
-                ordered.Add(v);
-        }
-
-        newVariation.PosOnCanvas = VariationBaseCanvas.FindFreePositionForNewThumbnail(ordered);
-
-        ordered.Add(newVariation);
-        VariationBaseCanvas.SortByReadingOrder(ordered);
-
-        var targetIndex = ordered.IndexOf(active) + 1;
-        var currentIndex = ordered.IndexOf(newVariation);
-        while (currentIndex > targetIndex)
-        {
-            var prev = ordered[currentIndex - 1];
-            (newVariation.PosOnCanvas, prev.PosOnCanvas) = (prev.PosOnCanvas, newVariation.PosOnCanvas);
-            ordered[currentIndex] = prev;
-            ordered[currentIndex - 1] = newVariation;
-            currentIndex--;
-        }
     }
 
     public static void RemoveInstancesFromVariations(IEnumerable<Guid> symbolChildIds, IReadOnlyList<Variation> variations, MacroCommand? collectInto = null)

@@ -71,6 +71,44 @@ internal sealed class SymbolVariationPool
         UserVariations = _userVariations;
         Defaults = _defaults;
         AllVariations = _allVariations;
+
+        DeduplicateSnapshotActivationIndices();
+    }
+
+    /// <summary>
+    /// The ActivationIndex is both the MIDI/controller slot and the snapshot sort order, so it must be
+    /// unique per snapshot. Old files (or hand edits) can hold clashing or negative indices; reassign
+    /// those to the lowest free slots on load so the list, grid and pads stay coherent. In-memory only —
+    /// the fix is written out by the next save.
+    /// </summary>
+    private void DeduplicateSnapshotActivationIndices()
+    {
+        var used = new HashSet<int>();
+        List<Variation>? clashing = null;
+
+        foreach (var v in _allVariations)
+        {
+            if (!v.IsSnapshot)
+                continue;
+
+            if (v.ActivationIndex >= 0 && used.Add(v.ActivationIndex))
+                continue;
+
+            (clashing ??= new List<Variation>()).Add(v);
+        }
+
+        if (clashing == null)
+            return;
+
+        var nextFree = 0;
+        foreach (var v in clashing)
+        {
+            while (!used.Add(nextFree))
+                nextFree++;
+
+            Log.Warning($"Snapshot '{v.Title ?? "(unnamed)"}' had a clashing controller index {v.ActivationIndex}; reassigned to {nextFree} to keep the snapshot order unique.");
+            v.ActivationIndex = nextFree;
+        }
     }
 
     #region serialization

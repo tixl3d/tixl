@@ -8,7 +8,7 @@ using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.UiHelpers.Thumbnails;
 using T3.Editor.UiModel.Commands;
-using T3.Editor.UiModel.Commands.Graph;
+using T3.Editor.UiModel.Commands.Variations;
 using T3.Editor.UiModel.Selection;
 
 namespace T3.Editor.Gui.Windows.Variations;
@@ -136,7 +136,7 @@ internal sealed class VariationPicker
 
             CustomComponents.SeparatorLine();
 
-            SortByCanvasPosition(variations);
+            SortByActivationIndex(variations);
             _filtered.Clear();
             foreach (var v in _sorted)
             {
@@ -211,9 +211,9 @@ internal sealed class VariationPicker
         Variation? chosen = null;
         var scale = T3Ui.UiScaleFactor;
 
-        // Drag-to-reorder writes variation PosOnCanvas, so it needs the canvas (as the selection
-        // container for the undoable move) and an unfiltered list.
-        var reorderEnabled = canvas != null && string.IsNullOrEmpty(_searchString) && _filtered.Count > 1;
+        // Drag-to-reorder swaps ActivationIndex, so it only needs the unfiltered list (an active search
+        // filters it, which would make adjacent-row swaps lie).
+        var reorderEnabled = string.IsNullOrEmpty(_searchString) && _filtered.Count > 1;
 
         // Keyboard navigation — single-line search input leaves the arrows/Enter free.
         var scrollToHighlight = false;
@@ -253,7 +253,7 @@ internal sealed class VariationPicker
         {
             var variation = _filtered[i];
             var highlighted = i == _highlightIndex;
-            var clicked = DrawRow(composition, pool, canvas, variation, i, variation == selected, highlighted, reorderEnabled);
+            var clicked = DrawRow(composition, pool, variation, i, variation == selected, highlighted, reorderEnabled);
 
             if (clicked)
             {
@@ -286,12 +286,12 @@ internal sealed class VariationPicker
     }
 
     /// <summary>
-    /// Whole-row drag reorder: swaps the dragged variation's canvas position with its neighbor as
-    /// the mouse crosses each row (the classic ImGui swap-on-drag), committed as one undoable
-    /// <see cref="ModifyCanvasElementsCommand"/> on release. Returns true while a drag is in
+    /// Whole-row drag reorder: swaps the dragged snapshot's ActivationIndex with its neighbor as the
+    /// mouse crosses each row (the classic ImGui swap-on-drag), committed as one undoable
+    /// <see cref="ModifyVariationIndicesCommand"/> on release. Returns true while a drag is in
     /// progress / just ended, so the caller suppresses the click-to-apply.
     /// </summary>
-    private bool HandleRowReorder(int index, VariationBaseCanvas canvas, SymbolVariationPool pool)
+    private bool HandleRowReorder(int index, SymbolVariationPool pool)
     {
         var variation = _filtered[index];
 
@@ -303,7 +303,7 @@ internal sealed class VariationPicker
             foreach (var v in _sorted)
                 _reorderVariations.Add(v);
 
-            _reorderCommand = new ModifyCanvasElementsCommand(canvas, _reorderVariations, canvas.CanvasElementSelection);
+            _reorderCommand = new ModifyVariationIndicesCommand(pool, _reorderVariations);
         }
 
         if (_reorderId != variation.Id)
@@ -315,13 +315,13 @@ internal sealed class VariationPicker
             var dragY = ImGui.GetMouseDragDelta(ImGuiMouseButton.Left).Y;
             if (dragY < -rowStride * 0.5f && index > 0)
             {
-                SwapPositions(variation, _filtered[index - 1]);
+                SwapActivationIndices(variation, _filtered[index - 1]);
                 ImGui.ResetMouseDragDelta(ImGuiMouseButton.Left);
                 _reorderDragged = true;
             }
             else if (dragY > rowStride * 0.5f && index < _filtered.Count - 1)
             {
-                SwapPositions(variation, _filtered[index + 1]);
+                SwapActivationIndices(variation, _filtered[index + 1]);
                 ImGui.ResetMouseDragDelta(ImGuiMouseButton.Left);
                 _reorderDragged = true;
             }
@@ -346,9 +346,9 @@ internal sealed class VariationPicker
         return _reorderDragged;
     }
 
-    private static void SwapPositions(Variation a, Variation b)
+    private static void SwapActivationIndices(Variation a, Variation b)
     {
-        (a.PosOnCanvas, b.PosOnCanvas) = (b.PosOnCanvas, a.PosOnCanvas);
+        (a.ActivationIndex, b.ActivationIndex) = (b.ActivationIndex, a.ActivationIndex);
     }
 
     private static bool DrawTriggerButton(string label, float width, float frameHeight)
@@ -376,7 +376,7 @@ internal sealed class VariationPicker
         return clicked;
     }
 
-    private bool DrawRow(Instance composition, SymbolVariationPool pool, VariationBaseCanvas? canvas,
+    private bool DrawRow(Instance composition, SymbolVariationPool pool,
                          Variation variation, int index, bool isSelected, bool isHighlighted, bool reorderEnabled)
     {
         var scale = T3Ui.UiScaleFactor;
@@ -395,7 +395,7 @@ internal sealed class VariationPicker
         // Hit regions left→right: grip (reorder), middle (apply), weight cell (fader). Separate
         // buttons so a fader drag never reorders and the grip is the only reorder handle.
         ImGui.InvisibleButton("##grip" + variation.Id, new Vector2(gripW, rowHeight));
-        var draggedToReorder = reorderEnabled && HandleRowReorder(index, canvas!, pool);
+        var draggedToReorder = reorderEnabled && HandleRowReorder(index, pool);
         var rowHovered = ImGui.IsItemHovered();
         ImGui.SameLine(0, 0);
 
@@ -549,15 +549,12 @@ internal sealed class VariationPicker
                || GetTitle(variation).Contains(search, StringComparison.OrdinalIgnoreCase);
     }
 
-    /// <summary>
-    /// Reading order of the 3-column auto-layout: band Y into rows (so small per-row jitter
-    /// doesn't misorder), then left-to-right within the row.
-    /// </summary>
-    private void SortByCanvasPosition(IReadOnlyList<Variation> variations)
+    /// <summary>Orders the list by ActivationIndex — the same order as the MIDI controller grid.</summary>
+    private void SortByActivationIndex(IReadOnlyList<Variation> variations)
     {
         _sorted.Clear();
         _sorted.AddRange(variations);
-        VariationBaseCanvas.SortByReadingOrder(_sorted);
+        VariationBaseCanvas.SortByActivationIndex(_sorted);
     }
 
     private enum Modes { List, Canvas }
@@ -582,8 +579,8 @@ internal sealed class VariationPicker
     // Drag-to-reorder state
     private Guid _reorderId;
     private bool _reorderDragged;
-    private ModifyCanvasElementsCommand? _reorderCommand;
-    private readonly List<ISelectableCanvasObject> _reorderVariations = new();
+    private ModifyVariationIndicesCommand? _reorderCommand;
+    private readonly List<Variation> _reorderVariations = new();
 
     // Activation-fader interaction state. The weight vector itself is session state on the pool, so
     // it persists across picker opens and stays coherent with the arrows / grid / MIDI activations.

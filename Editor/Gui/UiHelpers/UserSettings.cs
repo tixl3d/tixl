@@ -125,10 +125,6 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         public bool VariationLiveThumbnails = false;
         public bool VariationHoverPreview = true;
 
-        // Snapshot controller-index grid: the chosen layout, stored by name (the reflection-built
-        // index isn't stable across runs). Empty falls back to the first ("Reading order").
-        public string SnapshotControllerLayout = "";
-
         public bool EditorHoverPreview = true;
 
         public bool ApplyDropdownValuesOnHover = true;

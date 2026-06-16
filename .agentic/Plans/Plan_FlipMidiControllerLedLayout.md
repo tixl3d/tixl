@@ -1,44 +1,53 @@
-# Horizontally flip LED layout for APCmini / APC40 controllers
+# Canonical 0-based snapshot index across all MIDI controllers
 
 Ticket: #1081 — https://github.com/tixl3d/tixl/issues/1081
-Size: —   Milestone: v4.2
+Milestone: v4.2 (plan predates the snapshot-ordering rework; updated 2026-06-17)
 
-## Problem
-APCmini/APC40 hardware numbers buttons/LEDs from the BOTTOM-LEFT, which makes controller indices
-confusing in the editor. Rather than supporting flipped editing layouts, flip the *representation sent
-to the controllers* so indices map sensibly. Expected snapshot impact is small (the feature isn't widely
-used and layouts can be re-adjusted with the new ControllerGrid editor).
+## Decided architecture
+The snapshot **activation index is canonical: 0-based, with 0 at the top-left, reading order**
+(left→right, top→bottom). This is what snapshots store, what the editor's controller grid shows, and what
+the picker list sorts by. Each MIDI controller is responsible — *in its own implementation* — for translating
+that canonical index to whatever physical note/LED makes its own top-left pad show index 0. No per-device
+"editor layout" divergence: the editor always shows reading order; the device hides its physical quirks.
 
-## Affected code
-Mapping lives per device under `Editor/Gui/Interaction/Midi/CompatibleDevices/`:
-- `ApcMini.cs:66-69` — `GridLayout = new("APC Mini", 8, 8, (row, column) => (8-1-row)*8 + column);`
-  (rows already inverted to match hardware; columns are *not* flipped).
-- `Apc40Mk1.cs` — outbound `SendColor()` ~366-379 computes `row/col` then note/channel; inbound
-  `ConvertNoteToButtonId()` ~403-432.
-- `Apc40Mk2.cs` — outbound `SendLedState()` ~414-431; inbound `ConvertNoteToButtonId()` ~488-497.
-- `ApcMiniMk2.cs` — `SendColor()` ~112-129 (simple note mapping; no row/col decomposition exposed).
-- Base helpers: `CompatibleMidiDevice.cs:341` (`UpdateRangeLeds`), `ControllerGridLayout.cs`.
+(Index base 0, not 1, by decision — leaves the top-left slot usable and avoids a "squeeze in front of 1"
+problem.)
 
-## Proposed approach
-Apply a horizontal (column) mirror — `col → (columns-1 - col)` — consistently in three coupled places per
-device so hardware LEDs and button presses stay in sync with stored indices:
-1. The `GridLayout` lambda / index→cell mapping (UI + LED out).
-2. `SendColor()` / `SendLedState()` outbound column computation.
-3. `ConvertNoteToButtonId()` inbound column computation.
-Centralize the mirror (e.g. a flag/helper on `ControllerGridLayout` or the base device) instead of editing
-each Mk1/Mk2 copy independently, since the Mk1/Mk2 logic is duplicated.
+## Why this replaces the original draft
+The previous draft proposed a horizontal column mirror routed through per-device editor layouts. That was the
+wrong transform (the APC Mini's mismatch is vertical — it numbers pads row-major *from the bottom*) and the
+wrong layer (editor display vs. the device's hardware mapping). The device should own the flip; the rest of the
+app stays canonical.
 
-## Risks / side-effects
-- **Bidirectional mapping = the main risk.** Outbound (index→LED) and inbound (button→index) must be flipped
-  *together*; flipping one side desyncs LEDs from presses.
-- **Existing saved snapshots** are stored by activation index. Flipping changes which physical button maps to
-  an index, so previously-saved layouts will appear mirrored. The ticket accepts this (low usage), but it's a
-  behavior change on existing user data — call it out in the PR and the changelog; no data migration is
-  planned (re-adjust via the ControllerGrid editor).
-- Per-device duplication (Mk1/Mk2) makes it easy to fix one and miss another — do all four, plus ApcMiniMk2.
+## Done — Stage 1 (2026-06-17): canonical order + APC Mini
+- `ControllerGridLayout.ReadingOrder` is now **0-based** (`row*8 + col`) — the canonical order.
+- `ButtonRange` gained an optional **`mapToIndex`** transform (position-in-range → activation index), applied
+  in `GetMappedIndex`, so it flows through **both** LED output (`UpdateRangeLeds`) and button input
+  (`CommandTriggerCombination`) — one place keeps lights and presses in sync.
+- **APC Mini**: its clip-grid `ButtonRange` carries the row-flip `position => (8-1 - position/8)*8 + position%8`,
+  so the physical top-left pad is index 0. Its bottom-up editor `GridLayout` override was removed (the editor
+  now just uses reading order).
+- New `+` snapshot with none active takes the **lowest free index** (so index 0 / top-left is used).
 
-## Open questions
-- Centralize the flip in `ControllerGridLayout` (one place, all devices) vs. per-device edits?
-- Confirm ApcMiniMk2's simple note path needs the same flip and where.
-- Is a one-time opt-in/migration for existing snapshots wanted, or is "re-adjust manually" acceptable
-  (as the ticket implies)?
+Build verified. **Needs hardware testing on the APC Mini** (build ≠ correct): LEDs must match the editor's
+reading-order grid, and pressing a pad must activate the snapshot shown in that grid cell. Also re-check the
+Save / Delete / Blend modes (they all route through the same range, so should follow automatically).
+
+## Remaining stages
+- **Stage 2 — APC40 Mk1/Mk2 + ApcMini Mk2.** Apply the same row-flip in their LED-out / button-in paths
+  (`SendColor`/`SendLedState` + `ConvertNoteToButtonId`; these decompose row/col already, so the flip slots in
+  there rather than via `ButtonRange`). Remove their editor `GridLayout` overrides. Hardware-test each.
+- **Stage 3 — remove the now-vestigial editor layout selection.** Once no device exposes a `GridLayout`, the
+  pluggable-layout machinery is dead weight: `CompatibleMidiDevice.GridLayout`, the reflection in
+  `ControllerGridLayouts.Collect`, the layout list in the controller-grid settings menu, and
+  `UserSettings.Config.SnapshotControllerLayout` / `ResolveLayoutIndex`. The editor grid then just uses
+  `ControllerGridLayouts.ReadingOrder`.
+- **Docs/tests.** `.help` controller section + the manual test set; note the data-behavior change in the PR.
+
+## Risks / notes
+- **Bidirectional**: LED-out and button-in must flip together. The `ButtonRange.mapToIndex` approach guarantees
+  this for the APC Mini (single source); the APC40s need both their out- and in-paths edited consistently.
+- **Existing user data**: snapshots stored by index now light a *different* physical pad (mirrored vertically).
+  The ticket accepts this; re-adjusting is now trivial via the controller-grid drag-reassign + list reorder.
+- **Per-device duplication** (Mk1/Mk2/Mini/MiniMk2) — do them all in Stage 2; easy to fix one and miss another.
+- **Not build-verifiable** — every stage needs the physical hardware to confirm both directions.

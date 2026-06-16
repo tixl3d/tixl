@@ -63,11 +63,6 @@ public sealed class ApcMini : CompatibleMidiDevice
                           };
     }
 
-    // 8×8 clip grid, note 0 at the bottom-left (the APC Mini's physical arrangement). The index
-    // is the raw pad note (0-based), matching how the LED range maps button → snapshot index.
-    public override ControllerGridLayout? GridLayout { get; }
-        = new("APC Mini", 8, 8, (row, column) => (8 - 1 - row) * 8 + column);
-
     protected override void UpdateVariationVisualization()
     {
         _updateCount++;
@@ -140,7 +135,10 @@ public sealed class ApcMini : CompatibleMidiDevice
         YellowBlinking,
     }
 
-    private static readonly ButtonRange SceneTrigger1To64 = new(0, 63);
+    // The APC Mini numbers its clip pads row-major from the bottom (note 0 = bottom-left), but the
+    // snapshot index is canonical: 0 = top-left, reading order. Flip rows so the top-left pad is index 0.
+    // The transform feeds both LED output and button input, keeping lights and presses in sync.
+    private static readonly ButtonRange SceneTrigger1To64 = new(0, 63, mapToIndex: position => (8 - 1 - position / 8) * 8 + position % 8);
     private static readonly ButtonRange Sliders1To9 = new(48, 48 + 8);
     private static readonly ButtonRange Sliders1To8 = new(48, 48 + 7);
     private static readonly ButtonRange Slider9 = new(48 + 8, 48 + 8);

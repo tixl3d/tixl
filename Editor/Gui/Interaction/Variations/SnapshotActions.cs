@@ -27,7 +27,7 @@ internal static class SnapshotActions
         if (snapshots.Count == 0)
             return;
 
-        VariationBaseCanvas.SortByReadingOrder(snapshots);
+        VariationBaseCanvas.SortByActivationIndex(snapshots);
 
         var count = snapshots.Count;
         var position = ((rawIndex % count) + count) % count;

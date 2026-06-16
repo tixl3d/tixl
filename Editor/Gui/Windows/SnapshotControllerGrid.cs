@@ -44,8 +44,9 @@ internal sealed class SnapshotControllerGrid
         var hoveredAny = false;
         if (ImGui.BeginPopup(PopupId))
         {
-            var layouts = ControllerGridLayouts.All;
-            var layout = layouts[ResolveLayoutIndex(layouts)];
+            // Every controller maps the canonical reading-order index onto its own pads, so the grid
+            // always shows reading order.
+            var layout = ControllerGridLayouts.ReadingOrder;
 
             // Header row: title on the left, a settings gear + doc button on the right. The right
             // cluster is drawn first (frame-height tall) so the title can be vertically centered.
@@ -67,7 +68,7 @@ internal sealed class SnapshotControllerGrid
 
             DocumentationButton.Draw(DocId, WikiUrl, iconSize);
 
-            DrawSettingsPopup(layouts);
+            DrawSettingsPopup();
 
             ImGui.SetCursorPos(new Vector2(headerStartX,
                                            headerStartY + MathF.Max(0, (frameHeight - ImGui.GetTextLineHeight()) * 0.5f)));
@@ -76,8 +77,10 @@ internal sealed class SnapshotControllerGrid
             ImGui.SetCursorPosY(headerStartY + frameHeight);
             FormInputs.AddVerticalSpace(4);
 
-            var cellW = 68 * scale;
-            var cellH = 51 * scale;
+            // Thumbnail cells need the 4:3 preview area; index-only cells can be much smaller, square
+            // pads like the hardware.
+            var cellW = (_showThumbnails ? 68 : 34) * scale;
+            var cellH = (_showThumbnails ? 51 : 34) * scale;
             var gap = 3 * scale;
             var drawList = ImGui.GetWindowDrawList();
 
@@ -235,45 +238,16 @@ internal sealed class SnapshotControllerGrid
         return picked;
     }
 
-    private void DrawSettingsPopup(IReadOnlyList<ControllerGridLayout> layouts)
+    private void DrawSettingsPopup()
     {
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(6, 6) * T3Ui.UiScaleFactor);
         if (ImGui.BeginPopup(SettingsPopupId))
         {
             CustomComponents.DrawMenuItem(_showThumbnailsItemId, "Show thumbnails", ref _showThumbnails, reserveIconColumn: false);
-
-            if (layouts.Count > 1)
-            {
-                CustomComponents.SeparatorLine();
-                CustomComponents.DrawMenuGroupLabel("Controller layout");
-                var activeIndex = ResolveLayoutIndex(layouts);
-                for (var i = 0; i < layouts.Count; i++)
-                {
-                    if (CustomComponents.DrawMenuItem(layouts[i].Name.GetHashCode(), layouts[i].Name, isChecked: i == activeIndex, reserveIconColumn: false))
-                    {
-                        UserSettings.Config.SnapshotControllerLayout = layouts[i].Name;
-                        UserSettings.Save();
-                    }
-                }
-            }
-
             ImGui.EndPopup();
         }
 
         ImGui.PopStyleVar();
-    }
-
-    /// <summary>Index of the saved layout (by name) in the current list, or 0 ("Reading order").</summary>
-    private static int ResolveLayoutIndex(IReadOnlyList<ControllerGridLayout> layouts)
-    {
-        var name = UserSettings.Config.SnapshotControllerLayout;
-        for (var i = 0; i < layouts.Count; i++)
-        {
-            if (layouts[i].Name == name)
-                return i;
-        }
-
-        return 0;
     }
 
     private static Variation? FindByActivationIndex(IReadOnlyList<Variation> snapshots, int activationIndex)

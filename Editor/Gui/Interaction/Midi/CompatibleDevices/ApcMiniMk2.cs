@@ -300,7 +300,9 @@ public sealed class ApcMiniMk2 : CompatibleMidiDevice
         DarkRed2 = 127, //4B1502
     }
 
-    private static readonly ButtonRange SceneTrigger1To64 = new(0, 63);
+    // Same bottom-up 8×8 grid as the APC Mini (note 0 = bottom-left); flip rows so the canonical
+    // snapshot index 0 lands on the physical top-left pad, for both LED output and button input.
+    private static readonly ButtonRange SceneTrigger1To64 = new(0, 63, mapToIndex: position => (8 - 1 - position / 8) * 8 + position % 8);
     private static readonly ButtonRange Sliders1To9 = new(48, 48 + 8);
     private static readonly ButtonRange Sliders1To8 = new(48, 48 + 7);
     private static readonly ButtonRange Slider9 = new(48 + 8, 48 + 8);
