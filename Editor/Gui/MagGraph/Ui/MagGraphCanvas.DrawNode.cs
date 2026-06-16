@@ -640,7 +640,10 @@ internal sealed partial class MagGraphView
             var type2UiProperties = TypeUiRegistry.GetPropertiesForType(inputAnchor.ConnectionType);
             var center = TransformPosition(inputAnchor.PositionOnCanvas);
 
-            var isInputHovered = //isItemHovered && 
+            var isInputHovered =
+                // Only when the canvas is the window under the cursor — otherwise the anchor
+                // "hovers" through a window covering the graph and shows its tooltip on top.
+                IsHovered &&
                 Vector2.Distance(ImGui.GetMousePos(), center) < 7 * CanvasScale &&
                 context.StateMachine.CurrentState == GraphStates.Default;
 
@@ -892,9 +895,10 @@ internal sealed partial class MagGraphView
                 }
             }
 
-            var isOutputHovered = //isItemHovered
-                                  //&& 
-                                  Vector2.Distance(ImGui.GetMousePos(), center) < 7 * CanvasScale
+            var isOutputHovered =
+                                  // Suppress the hover when another window covers the graph at the cursor.
+                                  IsHovered
+                                  && Vector2.Distance(ImGui.GetMousePos(), center) < 7 * CanvasScale
                                   && context.StateMachine.CurrentState == GraphStates.Default;
             
             var anchorOutlineColor = ColorVariations.OperatorOutline.Apply(type2UiProperties.Color);
@@ -993,7 +997,8 @@ internal sealed partial class MagGraphView
                     var area = new ImRect(p + new Vector2(-0.4f, -0.5f) * CanvasScale * 7,
                                           p + new Vector2(0.4f, 0.5f) * CanvasScale * 7);
 
-                    var isToggleHovered = area.Contains(ImGui.GetMousePos());
+                    // Don't react to the toggle (tooltip or click) when another window covers the graph.
+                    var isToggleHovered = IsHovered && area.Contains(ImGui.GetMousePos());
 
                     //var opacity = hoverProgress.RemapAndClamp(0, 1, 0.1f, 0.7f);
                     drawList.AddTriangleFilled(
@@ -1191,8 +1196,8 @@ internal sealed partial class MagGraphView
         InputSnapper.RegisterAsPotentialTargetInput(item, pOnScreen, slotId, snapType, multiInputIndex);
     }
 
-    private static void DrawIndicator(ImDrawListPtr drawList, Color color, float opacity, Vector2 areaMin, Vector2 areaMax, float canvasScale,
-                                      ref int indicatorCount, string tooltip=null)
+    private void DrawIndicator(ImDrawListPtr drawList, Color color, float opacity, Vector2 areaMin, Vector2 areaMax, float canvasScale,
+                               ref int indicatorCount, string tooltip=null)
     {
         const int s = 4;
         var dx = (s + 1) * indicatorCount;
@@ -1211,7 +1216,7 @@ internal sealed partial class MagGraphView
         {
             var mousePos = ImGui.GetMousePos();
             var area= new ImRect(pMin, pMax);
-            if (area.Contains(mousePos))
+            if (IsHovered && area.Contains(mousePos))
             {
                 ImGui.BeginTooltip();
                 ImGui.TextUnformatted(tooltip);
