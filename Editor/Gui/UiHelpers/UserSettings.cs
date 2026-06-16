@@ -6,6 +6,7 @@ using T3.Core.IO;
 using T3.Core.Settings;
 using T3.Editor.Compilation;
 using T3.Editor.Gui.Windows;
+using T3.Editor.Gui.Windows.RenderExport;
 using T3.Editor.Gui.Windows.TimeLine;
 
 namespace T3.Editor.Gui.UiHelpers;
@@ -150,6 +151,15 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         // Output window
         public int FullScreenIndexViewer = 0;
         public Vector4 OutputArea = new(0,0,0,0);
+
+        /// <summary>Seconds between captures while continuous screenshot mode is active (Ctrl-click the output's screenshot icon).</summary>
+        public float ContinuousScreenshotDelay = 5;
+
+        // FileFormats is internal, so this field must be too; JsonProperty keeps it serialized.
+        /// <summary>File format used by the output window's screenshot icon. JPG produces much smaller files for sequences.</summary>
+        [JsonProperty]
+        [JsonConverter(typeof(StringEnumConverter))]
+        internal ScreenshotWriter.FileFormats ScreenshotFileFormat = ScreenshotWriter.FileFormats.Png;
 
         // Timeline
         public float TimeRasterDensity = 1f;

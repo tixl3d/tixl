@@ -199,6 +199,28 @@ Quick map of what to reach for:
 - **Inline icons in text rows** — `Icon.X.DrawAtCursor()` or
   `Icon.X.DrawAtCursor(color)`. For ad-hoc positioning use
   `Icons.DrawIconAtScreenPosition(...)`.
+- **Context menus** — `CustomComponents.ContextMenuForItem(drawItems, title,
+  id)` with `CustomComponents.DrawMenuItem(...)` rows and
+  `CustomComponents.DrawMenuGroupLabel(...)` section headers. See "Context
+  menus" below.
+
+### Context menus
+
+Right-click / popup menus must use the `CustomComponents` menu API for a
+consistent look — **do not hand-roll** `ImGui.BeginPopupContextItem` +
+`ImGui.MenuItem` / `ImGui.Separator` / `ImGui.TextDisabled` blocks (they drift
+from the theme: wrong padding, no checkmark column, mismatched fonts).
+
+- Wrap the menu in `CustomComponents.ContextMenuForItem(drawItems, title, id)`.
+  It handles the drag-guard, popup styling, and the small gray `title` header.
+- Emit rows with `CustomComponents.DrawMenuItem(id, label, …)` — it has a
+  checkmark column (`isChecked:`), an optional icon column, and a right-aligned
+  shortcut. Group rows under `CustomComponents.DrawMenuGroupLabel(label)`
+  instead of `Separator` + `TextDisabled`.
+- `ContextMenuForItem` runs every frame for the item, so pass the `drawItems`
+  callback as a **static method group**, not a lambda, whenever the menu body
+  reads only static state — a capturing lambda allocates a closure each frame.
+  Reach for a lambda only when the menu genuinely needs per-instance locals.
 
 ### Tool icons
 

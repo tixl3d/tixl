@@ -25,6 +25,34 @@ internal static class RenderProcess
     public static bool IsExporting => State == States.Exporting;
     public static States State;
 
+    /// <summary>When active, a screenshot is saved automatically every <see cref="UserSettings.ConfigData.ContinuousScreenshotDelay"/> seconds.</summary>
+    public static bool IsContinuousScreenshotActive { get; private set; }
+
+    /// <summary>
+    /// Opacity for the screenshot icon while continuous capture runs: 1 right after a capture, fading
+    /// toward 0.5 as the next one approaches, so the icon pulses in sync with the captures.
+    /// </summary>
+    public static float ContinuousScreenshotOpacity
+    {
+        get
+        {
+            var fraction = (float)((Playback.RunTimeInSecs - _lastContinuousScreenshotTime) / ContinuousScreenshotInterval).Clamp(0, 1);
+            return 1f - 0.5f * fraction;
+        }
+    }
+
+    public static void SetContinuousScreenshot(bool enabled)
+    {
+        IsContinuousScreenshotActive = enabled;
+        if (!enabled)
+            return;
+
+        // Capture on the next update and start the pulse at full opacity.
+        _lastContinuousScreenshotTime = _nextContinuousScreenshotTime = Playback.RunTimeInSecs;
+    }
+
+    private static double ContinuousScreenshotInterval => Math.Max(UserSettings.Config.ContinuousScreenshotDelay, 0.1f);
+
     public enum States
     {
         Undefined,
@@ -58,8 +86,10 @@ internal static class RenderProcess
         if (!Directory.Exists(folder))
             Directory.CreateDirectory(folder);
 
-        var filename = Path.Join(folder, $"{DateTime.Now:yyyy_MM_dd-HH_mm_ss_fff}.png");
-        ScreenshotWriter.StartSavingToFile(RenderProcess.MainOutputTexture, filename, ScreenshotWriter.FileFormats.Png);
+        var format = UserSettings.Config.ScreenshotFileFormat;
+        var extension = format == ScreenshotWriter.FileFormats.Jpg ? "jpg" : "png";
+        var filename = Path.Join(folder, $"{DateTime.Now:yyyy_MM_dd-HH_mm_ss_fff}.{extension}");
+        ScreenshotWriter.StartSavingToFile(RenderProcess.MainOutputTexture, filename, format);
         Log.Debug("Screenshot saved in: " + folder);
     }
 
@@ -229,6 +259,7 @@ internal static class RenderProcess
         }
 
         HandleRenderShortCuts();
+        HandleContinuousScreenshot();
 
         if (!IsExporting)
             return;
@@ -404,6 +435,21 @@ internal static class RenderProcess
         return audioFrame;
     }
 
+    private static void HandleContinuousScreenshot()
+    {
+        // Paused while a video/image-sequence export owns the screenshot queue; resumes when it finishes.
+        if (!IsContinuousScreenshotActive || IsExporting)
+            return;
+
+        var now = Playback.RunTimeInSecs;
+        if (now < _nextContinuousScreenshotTime)
+            return;
+
+        TryRenderScreenShot();
+        _lastContinuousScreenshotTime = now;
+        _nextContinuousScreenshotTime = now + ContinuousScreenshotInterval;
+    }
+
     private static void HandleRenderShortCuts()
     {
         if (MainOutputTexture == null)
@@ -549,4 +595,7 @@ internal static class RenderProcess
     }
 
     private static ExportSession? _activeExportSession;
+
+    private static double _lastContinuousScreenshotTime;
+    private static double _nextContinuousScreenshotTime;
 }

@@ -22,6 +22,14 @@ You can use TiXL to render your project as a video or image sequence:
 ![Alt text](/images/03-quality-preview.gif)
 
 
+## Saving Screenshots
+
+The screenshot (camera) icon in the output window's toolbar saves the current frame as a PNG into your project's `Screenshots/` folder.
+
+**Ctrl-click** the icon to start **continuous screenshot mode**: TiXL then saves a screenshot on a fixed interval and the icon pulses in the attention colour, brightest right after each capture. Click the icon again to stop. Continuous capture pauses while a video or image-sequence export is running and resumes once it finishes.
+
+**Right-click** the icon for options: start/stop continuous capture, pick the interval (1 s … 10 min), and choose the file format. PNG is lossless; **JPG** produces much smaller files, which is handy when capturing long continuous sequences. The interval can also be set under *Settings → Interface → Output*.
+
 ## Optimizing Export Performance **(_Since version 3.9.1, TiXL is taking care of this automatically_)** 
 
 Rendering a 5-minute project at 60fps will be roughly 20000 frames. With a naive export this will take several hours. Your CPU will spend most of this time converting pixels. But we can use DirectX and the graphics card to convert the texture into the correct format. This will reduce rendering by an order of magnitude:

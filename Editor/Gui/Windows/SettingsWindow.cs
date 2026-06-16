@@ -217,6 +217,15 @@ internal sealed partial class SettingsWindow : Window
                                                       "After the playback is halted, the time will reset to the moment when the playback began. This feature proves beneficial for iteratively reviewing animations without requiring manual rewinding.",
                                                       UserSettings.Defaults.ResetTimeAfterPlayback);
 
+                    FormInputs.AddVerticalSpace();
+                    FormInputs.AddSectionSubHeader("Output");
+
+                    changed |= FormInputs.AddFloat("Continuous screenshot interval",
+                                                   ref UserSettings.Config.ContinuousScreenshotDelay,
+                                                   0.1f, 60f, 0.1f, true, true,
+                                                   "Seconds between captures when continuous screenshot mode is active. Ctrl-click the screenshot icon in the output window to start it.",
+                                                   UserSettings.Defaults.ContinuousScreenshotDelay);
+
 
                     FormInputs.AddVerticalSpace();
                     FormInputs.AddSectionSubHeader("Skill Quest");
