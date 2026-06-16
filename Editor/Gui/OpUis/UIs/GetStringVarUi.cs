@@ -36,6 +36,14 @@ internal static class GetStringVarUi
         if (!data.IsValid)
             return OpUi.CustomUiResult.PreventOpenSubGraph;
 
+        // Draw reference lines on hover — links to the matching Set op (mirror of the Set side).
+        if (area.Contains(ImGui.GetMousePos()))
+        {
+            OpUi.DrawVariableReferences(drawList, canvas, area.GetCenter(), instance, data.VariableName.Value,
+                                        Guid.Parse("9c9274c1-3f85-4f57-9eb5-1e0a0b1cce00"),
+                                        Guid.Parse("5be2939b-27f5-4af8-b78e-3ae220d6b1a4"));
+        }
+
         drawList.PushClipRect(area.Min, area.Max, true);
 
         var value = data.Result.Value;

@@ -36,6 +36,14 @@ internal static class GetVec3VarUi
         if (!data.IsValid)
             return OpUi.CustomUiResult.PreventOpenSubGraph;
 
+        // Draw reference lines on hover — links to the matching Set op (mirror of the Set side).
+        if (area.Contains(ImGui.GetMousePos()))
+        {
+            OpUi.DrawVariableReferences(drawList, canvas, area.GetCenter(), instance, data.VariableName.Value,
+                                        Guid.Parse("fdad077d-e919-4f40-a154-36e86245a585"),
+                                        Guid.Parse("0edf7837-4555-4e62-902f-930abf72e8b8"));
+        }
+
         drawList.PushClipRect(area.Min, area.Max, true);
 
         var value = data.Result.Value;

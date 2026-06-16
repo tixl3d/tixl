@@ -36,6 +36,14 @@ internal static class GetFloatVarUi
         if (!data.IsValid)
             return OpUi.CustomUiResult.PreventOpenSubGraph;
 
+        // Draw reference lines on hover — links to the matching Set op (mirror of the Set side).
+        if (area.Contains(ImGui.GetMousePos()))
+        {
+            OpUi.DrawVariableReferences(drawList, canvas, area.GetCenter(), instance, data.VariableName.Value,
+                                        Guid.Parse("2a0c932a-eb81-4a7d-aeac-836a23b0b789"),
+                                        Guid.Parse("6EE64D39-855A-4B20-A8F5-39B4F98E8036"));
+        }
+
         drawList.PushClipRect(area.Min, area.Max, true);
 
         var value = data.Result.Value;
