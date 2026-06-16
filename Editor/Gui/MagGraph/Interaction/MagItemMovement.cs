@@ -503,9 +503,9 @@ internal sealed partial class MagItemMovement
         newMoveCommand.StoreCurrentValues();
 
         context.MacroCommand.AddAndExecCommand(new AddConnectionCommand(context.CompositionInstance.Symbol,
-                                                                        new Symbol.Connection(pair.Ca.SourceItem.Id,
+                                                                        new Symbol.Connection(pair.Ca.SourceParentOrChildId,
                                                                                               pair.Ca.SourceOutput.Id,
-                                                                                              pair.Cb.TargetItem.Id,
+                                                                                              pair.Cb.TargetParentOrChildId,
                                                                                               pair.Cb.TargetInput.Id),
                                                                         pair.Cb.MultiInputIndex));
         return true;
@@ -555,9 +555,9 @@ internal sealed partial class MagItemMovement
         newMoveCommand.StoreCurrentValues();
 
         context.MacroCommand.AddAndExecCommand(new AddConnectionCommand(context.CompositionInstance.Symbol,
-                                                                        new Symbol.Connection(pair.Ca.SourceItem.Id,
+                                                                        new Symbol.Connection(pair.Ca.SourceParentOrChildId,
                                                                                               pair.Ca.SourceOutput.Id,
-                                                                                              pair.Cb.TargetItem.Id,
+                                                                                              pair.Cb.TargetParentOrChildId,
                                                                                               pair.Cb.TargetInput.Id),
                                                                         pair.Cb.MultiInputIndex));
         return true;
