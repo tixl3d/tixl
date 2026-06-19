@@ -83,12 +83,28 @@ the package is loaded only by projects that reference it, and that load is where
    `Video.Tests/`→`VideoServices.Tests/`, csproj/assembly renamed, and every reference updated (`t3.sln`,
    Lib's `ProjectReference`, the test's `ProjectReference`, `InternalsVisibleTo`). 32/32 tests pass; Lib builds
    and `VideoServices.dll` ships in the operator output. No behavior change.
-2. **Create the empty `Video` package** (csproj + `<Using>` block + PackageId + deps). Builds, ships nothing yet.
-3. **Move the FFmpeg cluster** (`PlayVideo`, `VideoClip`, `VideoClipPlayer`, `VideoStreamInput`,
-   `_ProcessVideoClips`, `_VideoClipObsolete` — `.cs`/`.t3`/`.t3ui`) into `Video`; adjust namespaces (GUIDs
-   unchanged). **Lib drops the `Video.csproj` reference.** *Verify in-editor: a project referencing `Video`
-   loads the ops and plays a video (cross-package GUID resolution); a project without it doesn't load FFmpeg.*
-4. **Move FFmpeg native shipping** (`FFmpeg.LGPL` + flatten target) to `Video`; update `PlayerExporter`.
+2. **Create the empty `Video` package — DONE & VERIFIED.**
+   [`Operators/Video/Video.csproj`](../../Operators/Video/Video.csproj) mirrors Lib's structure (the operator
+   `<Using>` block verbatim, a fresh `PackageId`, `RootNamespace`/assembly `Video`, refs to
+   Core+Logging+VideoServices, `<Operators Include="lib"/>`+`Types`, and the package-info/content targets).
+   Builds standalone → `Video.dll` + `OperatorPackage.json`; registered in `t3.sln` (project entry + config
+   block; solution parses). **Deliberately *not* yet in the Editor/Player `ProjectDependencies`** so the editor
+   doesn't load an empty package — that wiring lands in Phase 3 with the operators.
+3. **Move the FFmpeg cluster — DONE (build-verified; in-editor verify pending).** All 6 (`PlayVideo`,
+   `VideoClip`, `VideoClipPlayer`, `VideoStreamInput`, `_ProcessVideoClips`, `_VideoClipObsolete` —
+   `.cs`/`.t3`/`.t3ui`, 18 files) → `Operators/Video/lib/io/video/`. **Namespaces kept `Lib.io.video`** —
+   it's a *shared* namespace (Ndi/Spout/Mediapipe already ship ops into it from their own packages), i.e. the
+   operator-browser location, not a per-package name; keeping it preserves where users find the ops and needs
+   no `.t3` edits. **Lib dropped the `VideoServices` reference** (its only 3 users moved out). examples gained
+   `<Operators Include="Video"/>`; the Editor's `.sln` `ProjectDependencies` gained Video. Lib + Video +
+   examples + **Editor all build**. *In-editor verify (user): editor loads the package, ops resolve
+   (cross-package GUID), a video plays, FFmpeg natives load from the Video output, and a no-Video-dep project
+   loads no FFmpeg.*
+4. **Move FFmpeg native shipping — DONE (the natives half).** `Sdcb.FFmpeg` + `FFmpeg.LGPL` + the
+   `FlattenFFmpegNatives` target moved Lib → `Video`; verified `Video/bin` co-locates `Video.dll` +
+   `VideoServices.dll` + the av/sw natives, so `FfmpegLibrary` (next to `VideoServices.dll`) resolves them.
+   **Remaining: `PlayerExporter`** — map the video op GUIDs to the `Video` package so exported players bundle
+   it + the natives.
    *Verify: an export using video bundles the FFmpeg DLLs; one that doesn't, doesn't.*
 5. **Registration in `Video`** → `Register()`. *(Lib hack already removed.)* Then **resume encode wiring**
    ([`Plan_FfmpegEncode.md`](Plan_FfmpegEncode.md) 1c-ii) with registration in the right place.

@@ -101,7 +101,7 @@ public sealed class VideoFileEncoder : IDisposable
         if (needsGlobalHeader)
             _videoCodecContext.Flags |= AV_CODEC_FLAG.GlobalHeader;
         _videoCodecContext.Open();
-        _videoStream.Codecpar.CopyFrom(_videoCodecContext);
+        _videoStream.Codecpar!.CopyFrom(_videoCodecContext);
         _videoStream.TimeBase = _videoCodecContext.TimeBase;
 
         if (settings.EncodeAudio)
@@ -138,7 +138,7 @@ public sealed class VideoFileEncoder : IDisposable
         if (needsGlobalHeader)
             _audioCodecContext.Flags |= AV_CODEC_FLAG.GlobalHeader;
         _audioCodecContext.Open();
-        _audioStream.Codecpar.CopyFrom(_audioCodecContext);
+        _audioStream.Codecpar!.CopyFrom(_audioCodecContext);
         _audioStream.TimeBase = _audioCodecContext.TimeBase;
 
         // AAC fixes its frame size (1024 samples); buffer incoming PCM and emit exactly that many per frame.

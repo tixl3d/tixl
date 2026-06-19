@@ -9,7 +9,7 @@
     <Configurations>Debug;Release</Configurations>
     <Platforms>AnyCPU</Platforms>
     <Deterministic>true</Deterministic>
-    <NoWarn>$(NoWarn);NU1900</NoWarn>
+    <NoWarn>$(NoWarn);NU1900;NU1701</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

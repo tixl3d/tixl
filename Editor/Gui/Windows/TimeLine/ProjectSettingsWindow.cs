@@ -371,7 +371,8 @@ internal sealed class ProjectSettingsWindow : Window
                         // via AssetRegistry and clears AssetPath if the path doesn't resolve.
                         if (!string.IsNullOrEmpty(_tempSoundtrackFilepathForEdit))
                         {
-                            soundtrackHandle.TryToApplyFilePath(_tempSoundtrackFilepathForEdit, compositionWithSettings);
+                            if (compositionWithSettings != null)
+                                soundtrackHandle.TryToApplyFilePath(_tempSoundtrackFilepathForEdit, compositionWithSettings);
                         }
                         else
                         {
