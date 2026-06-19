@@ -1,0 +1,45 @@
+{
+  "FormatVersion": 2,
+  "TixlVersion": "4.2.0.2",
+  "Id": "7f3a2c10-5b84-4e29-9a6d-1c7e0b45d832"/*StepperSerialOutput*/,
+  "Inputs": [
+    {
+      "Id": "2c4e6a80-0001-4f10-9c30-aa0000000001"/*SpeedX*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "2c4e6a80-0002-4f10-9c30-aa0000000002"/*SpeedY*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "2c4e6a80-0003-4f10-9c30-aa0000000003"/*SpeedZ*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "2c4e6a80-0004-4f10-9c30-aa0000000004"/*StepsPerRevolution*/,
+      "DefaultValue": 4096
+    },
+    {
+      "Id": "2c4e6a80-0005-4f10-9c30-aa0000000005"/*MaxSpeed*/,
+      "DefaultValue": 60.0
+    },
+    {
+      "Id": "2c4e6a80-0006-4f10-9c30-aa0000000006"/*PortName*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "2c4e6a80-0007-4f10-9c30-aa0000000007"/*BaudRate*/,
+      "DefaultValue": 115200
+    },
+    {
+      "Id": "2c4e6a80-0008-4f10-9c30-aa0000000008"/*Sending*/,
+      "DefaultValue": true
+    },
+    {
+      "Id": "2c4e6a80-0009-4f10-9c30-aa0000000009"/*Reconnect*/,
+      "DefaultValue": false
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}
