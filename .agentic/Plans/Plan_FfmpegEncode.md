@@ -223,9 +223,14 @@ FFmpeg) is orthogonal to audio *routing*.
      **Video operator package** ([`VideoExportRegistration.cs`](../../Operators/Video/VideoExportRegistration.cs)).
      Editor builds. *In-editor verify: a render produces a playable FFmpeg file (H.264 via the HW probe);
      audio muxed + aligned; `ExportAudio=false` → silent; MF fallback engages when FFmpeg is absent.*
-     **Known gap:** the `[ModuleInitializer]` fires on first Video-package code execution, so an export from a
-     project that never touched a video op may find the factory unset → MF fallback (Windows) or fails on Linux.
-     An on-demand register-at-export trigger closes this (needed for the Linux "always works" goal).
+     **Eager registration — CLOSED (build-verified).** The `[ModuleInitializer]` otherwise fires only on first
+     Video-package code execution, so an export from a project that never touched a video op would find the
+     factory unset. Fix: when `TryCreate` sees a null factory it calls a new
+     [`AssemblyInformation.RunModuleInitializers()`](../../Core/Compilation/AssemblyInformation.cs)
+     (`RuntimeHelpers.RunModuleConstructor` — idempotent, no-op for packages without one, exception-guarded) on
+     every loaded package, firing the Video package's initializer so the encoder registers without any video
+     op, then re-checks (MF only if the package genuinely isn't loaded). Runs once per session (only while the
+     factory is unset) and **doesn't touch the package-load flow**.
 2. **Codec/container selector.** Add the enum to `RenderSettings` (project-persisted) + the
    [`RenderWindow`](../../Editor/Gui/Windows/RenderExport/RenderWindow.cs) dropdown; expose the LGPL codecs
    (ProRes / DNxHD / VP9 / AV1 / FFV1 / HAP). *Verify: each renders a valid file; choice survives save/reload.*

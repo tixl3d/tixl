@@ -103,9 +103,13 @@ the package is loaded only by projects that reference it, and that load is where
 4. **Move FFmpeg native shipping — DONE (the natives half).** `Sdcb.FFmpeg` + `FFmpeg.LGPL` + the
    `FlattenFFmpegNatives` target moved Lib → `Video`; verified `Video/bin` co-locates `Video.dll` +
    `VideoServices.dll` + the av/sw natives, so `FfmpegLibrary` (next to `VideoServices.dll`) resolves them.
-   **Remaining: `PlayerExporter`** — map the video op GUIDs to the `Video` package so exported players bundle
-   it + the natives.
-   *Verify: an export using video bundles the FFmpeg DLLs; one that doesn't, doesn't.*
+   **`PlayerExporter` — NO CHANGE NEEDED (verified).** The export collects each *used* symbol's `SymbolPackage`
+   (`ExportData`) and copies that package's whole output directory (`TryExportSymbolPackages`), so a project
+   using a video op bundles the `Video` package **with its co-located FFmpeg natives automatically** — no
+   GUID→DLL mapping required. And since the natives left Lib, a **non-video project now ships no FFmpeg at all**
+   (Player.csproj has no FFmpeg ref; the player base carries none), which is smaller than before. Only fix: a
+   stale comment in `PlayerExporter._dependencyDefinitions` (said the LGPL build ships with Lib → now Video).
+   *Verify in a real export: a video project's player decodes; a non-video one carries no av*.dll.*
 5. **Registration in `Video`** → `Register()`. *(Lib hack already removed.)* Then **resume encode wiring**
    ([`Plan_FfmpegEncode.md`](Plan_FfmpegEncode.md) 1c-ii) with registration in the right place.
 6. **Migration:** add `<Operators Include="Video"/>` to `examples.csproj` (+ any first-party project using

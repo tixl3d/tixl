@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using SharpDX.Direct3D11;
+using T3.Core.Model;
 using T3.Core.Resource;
 using T3.Core.Video;
 using Texture2D = T3.Core.DataTypes.Texture2D;
@@ -29,7 +30,17 @@ internal sealed class FfmpegVideoExportWriter : IRenderVideoWriter
         var factory = VideoExport.Factory;
         if (factory == null)
         {
-            error = "FFmpeg video encoder not registered (video operator package not loaded yet).";
+            // The factory registers via the Video package's [ModuleInitializer], which only fires once that
+            // package's code has run (e.g. a video op was used). For an export from a project with no video
+            // operator, force each loaded package's module initializer so the encoder registers regardless.
+            foreach (var package in SymbolPackage.AllPackages)
+                package.AssemblyInformation.RunModuleInitializers();
+            factory = VideoExport.Factory;
+        }
+
+        if (factory == null)
+        {
+            error = "FFmpeg video encoder is unavailable (video package not loaded).";
             return null;
         }
 
