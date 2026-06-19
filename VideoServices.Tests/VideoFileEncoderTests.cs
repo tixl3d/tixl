@@ -123,6 +123,61 @@ public class VideoFileEncoderTests
         }
     }
 
+    [Theory]
+    [InlineData("libvpx-vp9", "mp4")] // VP9
+    [InlineData("libsvtav1", "mp4")]  // AV1 (SVT)
+    [InlineData("ffv1", "mkv")]       // lossless
+    public void Encode_SoftwareCodec_RoundTripsThroughDecoder(string encoderName, string ext)
+    {
+        const int width = 192;
+        const int height = 144;
+        const int frameCount = 8;
+        var path = Path.Combine(Path.GetTempPath(), $"tixl-encode-{encoderName}-{Guid.NewGuid():N}.{ext}");
+
+        try
+        {
+            var settings = new VideoEncoderSettings
+                               {
+                                   FilePath = path,
+                                   Width = width,
+                                   Height = height,
+                                   FrameRate = new AVRational(30, 1),
+                                   BitRate = 4_000_000,
+                                   VideoEncoderName = encoderName,
+                                   EncoderPixelFormat = AVPixelFormat.Yuv420p,
+                                   SourceFormat = AVPixelFormat.Rgba,
+                                   SourceBytesPerPixel = 4,
+                               };
+
+            var frame = new byte[width * height * 4];
+            using (var encoder = new VideoFileEncoder(settings))
+            {
+                for (var i = 0; i < frameCount; i++)
+                {
+                    FillGradient(frame, width, height, i);
+                    encoder.WriteVideoFrame(frame, width * 4);
+                }
+            }
+
+            Assert.True(File.Exists(path));
+            Assert.True(new FileInfo(path).Length > 0, "encoded file is empty");
+
+            using var session = VideoDecoderSession.TryOpen(path, VideoPlaybackOptimization.FastSeeking, out var error);
+            Assert.Null(error);
+            Assert.NotNull(session);
+
+            var decoded = 0;
+            while (session!.TryReadNextFrame(out _))
+                decoded++;
+            Assert.True(decoded >= frameCount - 1, $"decoded {decoded} {encoderName} frames, expected ~{frameCount}");
+        }
+        finally
+        {
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+    }
+
     [Fact]
     public void HardwareEncoder_WhenAvailable_RoundTripsThroughDecoder()
     {

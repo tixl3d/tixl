@@ -11,6 +11,15 @@ public enum VideoExportCodec
 
     /// <summary>Apple ProRes 422 in MOV — an all-intra editing codec (larger files); always available (LGPL).</summary>
     ProRes = 1,
+
+    /// <summary>VP9 in MP4 — an efficient delivery codec, software-encoded (libvpx, slower than H.264).</summary>
+    VP9 = 2,
+
+    /// <summary>AV1 in MP4 — the most efficient delivery codec, software-encoded (SVT-AV1).</summary>
+    AV1 = 3,
+
+    /// <summary>FFV1 in MKV — a lossless intra archival codec (very large files).</summary>
+    FFV1 = 4,
 }
 
 /// <summary>Container/extension helpers for <see cref="VideoExportCodec"/>.</summary>
@@ -20,7 +29,8 @@ public static class VideoExportCodecExtensions
     public static string GetFileExtension(this VideoExportCodec codec) => codec switch
                                                                               {
                                                                                   VideoExportCodec.ProRes => ".mov",
-                                                                                  _ => ".mp4",
+                                                                                  VideoExportCodec.FFV1 => ".mkv",
+                                                                                  _ => ".mp4", // H264, VP9, AV1
                                                                               };
 }
 

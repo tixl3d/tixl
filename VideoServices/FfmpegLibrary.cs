@@ -1,6 +1,8 @@
 using System.Runtime.InteropServices;
 using Sdcb.FFmpeg.Raw;
+using Sdcb.FFmpeg.Utils;
 using T3.Core.Logging;
+using SdcbLogLevel = Sdcb.FFmpeg.Raw.LogLevel;
 
 namespace T3.VideoServices;
 
@@ -87,12 +89,32 @@ public static class FfmpegLibrary
         }
 
         IsAvailable = true;
+        ConfigureLogging();
         var licenseLabel = isRestricted ? "GPL/non-free — development build" : "LGPL";
         T3.Core.Resource.ThirdPartyRuntimeInfo.Register("FFmpeg", $"{VersionInfo} ({licenseLabel})");
         if (isRestricted)
             Log.Warning($"FFmpeg {VersionInfo} loaded but is a GPL/non-free build — for development/testing only, NOT for distribution.");
         else
             Log.Debug($"FFmpeg {VersionInfo} loaded (LGPL).");
+    }
+
+    // Route libav* logging through TiXL's logger instead of FFmpeg's default raw-stderr callback. Benign,
+    // repetitive notices (e.g. swscale's "deprecated pixel format" warning when decoding full-range sources)
+    // land at Debug so they don't flood the console; genuine errors stay visible at Warning.
+    private static void ConfigureLogging()
+    {
+        FFmpegLogger.LogLevel = SdcbLogLevel.Warning; // drop FFmpeg's Info/Verbose chatter at the source
+        FFmpegLogger.LogWriter = static (level, message) =>
+                                 {
+                                     var text = message.TrimEnd();
+                                     if (text.Length == 0)
+                                         return;
+
+                                     if (level <= SdcbLogLevel.Error) // Panic, Fatal, Error
+                                         Log.Warning("FFmpeg: " + text);
+                                     else
+                                         Log.Debug("FFmpeg: " + text);
+                                 };
     }
 
     // The FFmpeg DLLs live next to this assembly, which is not on the OS DLL search path inside the editor's

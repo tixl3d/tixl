@@ -69,6 +69,36 @@ public sealed class FfmpegVideoEncoderFactory : IVideoEncoderFactory
                            };
             }
 
+            case VideoExportCodec.VP9:
+            {
+                // VP9 (libvpx) in MP4 — an efficient delivery codec; software-encoded, so slower than H.264.
+                return common with
+                           {
+                               VideoEncoderName = "libvpx-vp9",
+                               EncoderPixelFormat = AVPixelFormat.Yuv420p,
+                           };
+            }
+
+            case VideoExportCodec.AV1:
+            {
+                // AV1 via SVT-AV1 in MP4 — the most efficient delivery codec; SVT is the fast software AV1 encoder.
+                return common with
+                           {
+                               VideoEncoderName = "libsvtav1",
+                               EncoderPixelFormat = AVPixelFormat.Yuv420p,
+                           };
+            }
+
+            case VideoExportCodec.FFV1:
+            {
+                // FFV1 in MKV — a lossless intra archival codec; large files, ignores the target bitrate.
+                return common with
+                           {
+                               VideoEncoderName = "ffv1",
+                               EncoderPixelFormat = AVPixelFormat.Yuv420p,
+                           };
+            }
+
             case VideoExportCodec.H264:
             default:
             {

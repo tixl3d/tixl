@@ -1,8 +1,8 @@
 # FFmpeg Video Encoding (replacing Media Foundation export)
 
 **Status:** In progress — 2026-06-19. Tier-1 LGPL writer (video + AAC audio), the cross-ALC bridge, eager
-registration, and the codec selector (v1: H.264 + ProRes) are implemented & tested; the tier-2 GPL path +
-install assistant, the inline availability UI, and full MF removal remain. The **encode milestone** deferred by
+registration, and the codec selector (H.264, ProRes, VP9, AV1, FFV1) are implemented & tested; the tier-2 GPL
+path + install assistant, the inline availability UI, and full MF removal remain. The **encode milestone** deferred by
 [`Plan_FfmpegVideo.md`](Plan_FfmpegVideo.md) (which replaced MF *decode* with FFmpeg but left *encode* on
 Media Foundation).
 
@@ -234,17 +234,21 @@ FFmpeg) is orthogonal to audio *routing*.
      every loaded package, firing the Video package's initializer so the encoder registers without any video
      op, then re-checks (MF only if the package genuinely isn't loaded). Runs once per session (only while the
      factory is unset) and **doesn't touch the package-load flow**.
-2. **Codec/container selector — DONE & TESTED (v1: H.264 + ProRes).** `VideoExportCodec` enum in the Core
-   facade ([`Core/Video/VideoExport.cs`](../../Core/Video/VideoExport.cs)) with a `GetFileExtension` helper;
+2. **Codec/container selector — DONE & TESTED (H.264, ProRes, VP9, AV1, FFV1).** `VideoExportCodec` enum in the
+   Core facade ([`Core/Video/VideoExport.cs`](../../Core/Video/VideoExport.cs)) with a `GetFileExtension` helper;
    project-persisted `RenderSettings.VideoCodec` (string-enum) + a "Codec" dropdown in
    [`RenderWindow`](../../Editor/Gui/Windows/RenderExport/RenderWindow.cs). The factory's `BuildEncoderSettings`
-   switches on it: **H.264** → HW probe / MPEG-4 fallback at `Yuv420p`; **ProRes 422** → `AVCodecID.Prores` at
-   `Yuv422p10le` in `.mov`. The encoder now carries an explicit `EncoderPixelFormat` (was a hardcoded 4:2:0),
-   since ProRes rejects 4:2:0. UI: the filename extension tracks the codec (`.mp4`/`.mov`); the Bitrate control
-   shows only for H.264 (ProRes is profile-based). ProRes round-trip unit test green. Scoped to two
-   AAC-friendly codecs for v1 — DNxHD / VP9 / AV1 / FFV1 / HAP (and webm/Opus audio) are a later add to the same
-   enum + switch. *Verify (in-editor): a ProRes render produces a playable `.mov`; codec choice survives
-   save/reload.*
+   switches on it: **H.264** → HW probe / MPEG-4 fallback at `Yuv420p` (`.mp4`); **ProRes 422** →
+   `AVCodecID.Prores` at `Yuv422p10le` (`.mov`); **VP9** → `libvpx-vp9` (`.mp4`); **AV1** → `libsvtav1` (`.mp4`);
+   **FFV1** → `ffv1`, lossless (`.mkv`) — all at `Yuv420p` with AAC audio (no Opus rework needed, since VP9/AV1
+   mux into `.mp4`). The encoder carries an explicit `EncoderPixelFormat` (was a hardcoded 4:2:0), since ProRes
+   needs 4:2:2. UI: the filename extension tracks the codec (`.mp4`/`.mov`/`.mkv`); Bitrate shows only for the
+   rate-controlled codecs (H.264/VP9/AV1), hidden for ProRes/FFV1. Round-trip unit tests green for all five.
+   Codec availability **verified against the shipped LGPL `avcodec-61.dll`** (config grep:
+   libvpx/libaom/libsvtav1/libopus present; libx264/libx265 absent). **Still to add:** DNxHR (needs a profile +
+   pixel-format knob), HAP (libsnappy unverified), and webm/Opus delivery (container-aware audio codec).
+   *Verify (in-editor): each codec renders a playable file via `[PlayVideo]` re-import; choice survives
+   save/reload — see [`render-export-codecs`](../../.tests-manual/render-export-codecs.md).*
 3. **Hardware probe + fallback order + inline availability UI.** The cached HW probe, the resolution order,
    the quiet inline indicator. *Verify: H.264 silently uses HW where present; the ⚠/[Set up] line appears
    only when neither HW nor GPL can serve it.*
@@ -269,8 +273,11 @@ software quality" toggle are polish.
 - **Wine + hardware encode.** If Wine blocks `*_nvenc`/`*_qsv` *and* MF is gone, a Linux/Wine user wanting
   H.264 specifically falls to the GPL exe — which on Linux is a one-line `apt install ffmpeg`. The
   system-`ffmpeg` detection makes this painless; worth validating it actually engages under Wine.
-- **Pinned-build codec presence.** Confirm `libsnappy` (HAP encode) and `libmp3lame` (MP3) are compiled
-  into `FFmpeg.LGPL 20250329.1.0`; native AAC/FLAC/ProRes/FFV1 are certain, these two are not.
+- **Pinned-build codec presence.** Verified by grepping the shipped LGPL `avcodec-61.dll` configuration
+  string: `--enable-libvpx` / `--enable-libaom` / `--enable-libsvtav1` / `--enable-libopus` /
+  `--enable-libvorbis` are **present** (VP9/AV1/Opus/Vorbis usable); `--enable-libx264` / `--enable-libx265`
+  are **absent** (the GPL premise holds). Native AAC/FLAC/ProRes/FFV1 are built in. Still unconfirmed:
+  `libsnappy` (HAP encode) and `libmp3lame` (MP3).
 - **Pipe throughput (tier 2).** Raw BGRA at 4K60 is ~2 GB/s over the pipe — fine locally, but confirm no
   stall vs. letting `ffmpeg` read frames; consider `nv12`/`yuv420p` rawvideo to cut bandwidth.
 - **HW encoder quality.** HW H.264 trades efficiency for speed vs x264 at equal bitrate — some users will

@@ -177,6 +177,10 @@ internal sealed class RenderWindow : Window
     }
 
 
+    // ProRes is profile-based and FFV1 is lossless, so a target bitrate is meaningless for them.
+    private static bool CodecUsesBitrate(VideoExportCodec codec)
+        => codec is VideoExportCodec.H264 or VideoExportCodec.VP9 or VideoExportCodec.AV1;
+
     private bool DrawVideoSettings()
     {
         var modified = false;
@@ -184,12 +188,14 @@ internal sealed class RenderWindow : Window
 
         // Codec / container
         modified |= FormInputs.AddEnumDropdown(ref s.VideoCodec, "Codec",
-                                               "H.264 (.mp4) is broadly compatible and hardware-accelerated.\n"
-                                               + "ProRes (.mov) is a high-quality all-intra editing codec (larger files).",
+                                               "H.264 (.mp4): broadly compatible, hardware-accelerated.\n"
+                                               + "ProRes (.mov): high-quality all-intra editing codec.\n"
+                                               + "VP9 / AV1 (.mp4): efficient delivery codecs; software-encoded (slower).\n"
+                                               + "FFV1 (.mkv): lossless archival (very large files).",
                                                RenderSettings.Defaults.VideoCodec);
 
-        // Bitrate only applies to H.264 — ProRes is profile-based and picks its own rate.
-        if (s.VideoCodec == VideoExportCodec.H264)
+        // Bitrate applies to the rate-controlled codecs only — ProRes (profile-based) and FFV1 (lossless) ignore it.
+        if (CodecUsesBitrate(s.VideoCodec))
         {
             var bitrateMbps = s.Bitrate / 1_000_000f;
             var defaultBitrateMbps = RenderSettings.Defaults.Bitrate / 1_000_000f;
@@ -234,7 +240,8 @@ internal sealed class RenderWindow : Window
         // Keep the filename's extension in sync with the chosen codec's container.
         var videoExtension = s.VideoCodec.GetFileExtension();
         if (filename.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase)
-            || filename.EndsWith(".mov", StringComparison.OrdinalIgnoreCase))
+            || filename.EndsWith(".mov", StringComparison.OrdinalIgnoreCase)
+            || filename.EndsWith(".mkv", StringComparison.OrdinalIgnoreCase))
         {
             filename = filename[..^4];
         }
