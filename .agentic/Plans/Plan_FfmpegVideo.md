@@ -18,7 +18,8 @@ covers Milestone 1 only.**
 - **Wrapper:** `Sdcb.FFmpeg` (LGPL) managed bindings. **Ship exactly one FFmpeg shared build**, and
   **remove the duplicate `opencv_videoio_ffmpeg4110_64.dll`** by porting
   [`VideoStreamInput`](../../Operators/Lib/io/video/VideoStreamInput.cs) off OpenCV's `VideoCapture`.
-- **Encoding stays on Media Foundation** this milestone (deferred). Keep `SharpDX.MediaFoundation` and the
+- **Encoding stays on Media Foundation** this milestone (deferred to the **encode milestone** —
+  [`Plan_FfmpegEncode.md`](Plan_FfmpegEncode.md)). Keep `SharpDX.MediaFoundation` and the
   [`RenderExport/MF/*`](../../Editor/Gui/Windows/RenderExport/MF) path untouched.
 - **Video audio is silent** this milestone. Routing a video's audio track through the BASS `AudioEngine`
   is **backlog** (lower priority). This matches today's behavior — render-export already drops video audio,
@@ -286,7 +287,8 @@ baseline** — if D3D11VA can't be stabilized in M1, zero-copy slips to M1.x.
     no-op — the `PlayVideo`/`PlayVideoClip`/`VideoStreamInput` rewrites already removed every MF decode usage
     from the operators (`grep` for `MediaEngine`/`MediaFoundation` in `Operators/**` is empty; no leftover MF
     package reference in `Lib.csproj`); the only remaining MF code is the **encoder** in
-    `Editor/Gui/Windows/RenderExport/MF/*`, kept by design. Manual test set
+    `Editor/Gui/Windows/RenderExport/MF/*`, kept only until the **encode milestone** removes it
+    ([`Plan_FfmpegEncode.md`](Plan_FfmpegEncode.md)). Manual test set
     [`video-playback-determinism.md`](../../.tests-manual/video-playback-determinism.md) added.
 
 **Riskiest = step 8.** Fallbacks, in order: own-device + shared-texture (keyed mutex) → software path
@@ -525,11 +527,17 @@ user-visible win). Value-first (cache first) ships a scrubbing improvement soone
 
 ## Backlog / deferred (beyond M1 & M2)
 
-- **Encode milestone** (replace MF `SinkWriter` with FFmpeg, LGPL/GPL split — external `ffmpeg.exe` worker
-  for GPL codecs). **Includes the background "optimizer": auto-transcode imported media to a seek-optimized
-  sibling (small-GOP / all-intra `name-optimized.mp4`), auto-preferred when present, so large-GOP random seek
-  gets cheap without the user thinking about codecs** (the notes' `OptimizerService`). This is the real lever
-  that makes random seeking fast for everyday media — a "killer feature," explicitly wanted in the encode plan.
+- **Encode milestone — now planned in [`Plan_FfmpegEncode.md`](Plan_FfmpegEncode.md).** Replace MF
+  `SinkWriter` with FFmpeg so **export works on Linux/Wine** (MF is Windows-only — the driving reason).
+  Two tiers: **LGPL in-process** (the bundled decode DLLs reused) covers audio + ProRes/HAP/VP9/AV1/FFV1 +
+  **hardware** H.264/HEVC (`*_nvenc`/`*_qsv`/`*_amf`); **GPL only** for *software* x264/x265, served by a
+  **user-supplied `ffmpeg.exe`** (subprocess) installed via an assistant. The codec dropdown the assistant
+  hangs off of does not exist yet and is added there.
+- **Proxy media** — now its own plan ([`Plan_VideoProxyMedia.md`](Plan_VideoProxyMedia.md)). Auto-transcode
+  long-GOP imports to a seek-friendly all-intra proxy (ProRes/HAP — never H.264, which would need GPL),
+  auto-preferred at playback so large-GOP random seek gets cheap without the user thinking about codecs (the
+  notes' `OptimizerService`). Downstream of the encoder (tier-1 LGPL writer); supersedes the M2 cache for a
+  proxied clip. The real lever that makes random seeking fast for everyday media — a "killer feature."
 - Route a video's audio track through the BASS `AudioEngine` (new push-stream `BASS_STREAMPROC`; no existing
   pattern). Lower priority.
 - (Optional) Port `VideoDeviceInput` (webcam) capture to FFmpeg's **dshow** input device (`avdevice` already

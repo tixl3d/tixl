@@ -88,6 +88,11 @@ frame). A live "buffer-ahead" push stream does not fit that directly. For each e
 `[t, t+frameDur]`, the feeder must supply **exactly that slice's PCM** (decode audio for the slice, push, mix down) —
 a distinct, deterministic, time-sliced feeding mode vs the live buffer-ahead mode. This is its own phase.
 
+Once this Phase 3 lands, the video's audio is summed into the export mixdown like any other source, so the
+**encode milestone** ([`Plan_FfmpegEncode.md`](Plan_FfmpegEncode.md)) encodes it **for free** — that writer
+consumes the same `GetFullMixDownBuffer` PCM the MF path does, and audio never forces the GPL build (native
+AAC/FLAC are LGPL). The encoder choice (MF vs FFmpeg) is orthogonal to the audio *routing* designed here.
+
 ## Phases
 
 1. **MVP — `[PlayVideo]` audio, forward 1× only.** FFmpeg decodes + resamples the audio track in the existing
