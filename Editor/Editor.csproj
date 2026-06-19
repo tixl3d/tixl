@@ -171,6 +171,7 @@
         <PackageNames Include="skills" />
         <PackageNames Include="spout" />
         <PackageNames Include="ndi" />
+        <PackageNames Include="Video" />
         <PackageNames Include="Mediapipe">
             <Name>t3.mediapipe</Name>
         </PackageNames>
