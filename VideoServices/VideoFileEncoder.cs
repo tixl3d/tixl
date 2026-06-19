@@ -36,6 +36,13 @@ public readonly record struct VideoEncoderSettings
     /// <summary>Used when <see cref="VideoEncoderName"/> is null (e.g. <c>Mpeg4</c> for the LGPL fallback).</summary>
     public AVCodecID VideoCodecId { get; init; }
 
+    /// <summary>
+    /// Pixel format fed to the encoder; the swscale step converts <see cref="SourceFormat"/> into it, so it must be
+    /// one the encoder accepts (e.g. <c>Yuv420p</c> for H.264/MPEG-4, <c>Yuv422p10le</c> for ProRes). Defaults to
+    /// <c>Yuv420p</c> (the enum's zero value); <see cref="AVPixelFormat.None"/> is treated the same.
+    /// </summary>
+    public AVPixelFormat EncoderPixelFormat { get; init; }
+
     /// <summary>Pixel format of the bytes passed to <see cref="VideoFileEncoder.WriteVideoFrame"/> (e.g. <c>Rgba</c>).</summary>
     public AVPixelFormat SourceFormat { get; init; }
 
@@ -65,9 +72,6 @@ public readonly record struct VideoEncoderSettings
 /// </summary>
 public sealed class VideoFileEncoder : IDisposable
 {
-    // H.264 and the LGPL fallbacks all accept planar 4:2:0; the swscale step lands the source frame here.
-    private const AVPixelFormat EncoderPixelFormat = AVPixelFormat.Yuv420p;
-
     // FFmpeg's native AAC encoder consumes planar float.
     private const AVSampleFormat AudioSampleFormat = AVSampleFormat.Fltp;
 
@@ -77,6 +81,11 @@ public sealed class VideoFileEncoder : IDisposable
             throw new InvalidOperationException(FfmpegLibrary.StatusError ?? "FFmpeg is not available");
 
         _settings = settings;
+
+        // None (and the struct's zero default) means "let the encoder use planar 4:2:0".
+        var encoderPixelFormat = settings.EncoderPixelFormat == AVPixelFormat.None
+                                     ? AVPixelFormat.Yuv420p
+                                     : settings.EncoderPixelFormat;
 
         var videoCodec = !string.IsNullOrEmpty(settings.VideoEncoderName)
                              ? Codec.FindEncoderByName(settings.VideoEncoderName)
@@ -95,7 +104,7 @@ public sealed class VideoFileEncoder : IDisposable
                                      Height = settings.Height,
                                      TimeBase = new AVRational(settings.FrameRate.Den, settings.FrameRate.Num),
                                      Framerate = settings.FrameRate,
-                                     PixelFormat = EncoderPixelFormat,
+                                     PixelFormat = encoderPixelFormat,
                                      BitRate = settings.BitRate,
                                  };
         if (needsGlobalHeader)
@@ -114,7 +123,7 @@ public sealed class VideoFileEncoder : IDisposable
 
         _sourceFrame = Frame.CreateVideo(settings.Width, settings.Height, settings.SourceFormat);
         _sourceFrame.EnsureBuffer(1);
-        _encoderFrame = Frame.CreateVideo(settings.Width, settings.Height, EncoderPixelFormat);
+        _encoderFrame = Frame.CreateVideo(settings.Width, settings.Height, encoderPixelFormat);
         _encoderFrame.EnsureBuffer(1);
     }
 

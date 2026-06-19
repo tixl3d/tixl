@@ -51,6 +51,7 @@ internal sealed class FfmpegVideoExportWriter : IRenderVideoWriter
                                Height = session.RenderToFileResolution.Height,
                                FrameRate = session.Settings.FrameRate,
                                BitRate = session.Settings.Bitrate,
+                               Codec = session.Settings.VideoCodec,
                                ExportAudio = session.Settings.ExportAudio,
                                AudioChannels = RenderAudioInfo.SoundtrackChannels(),
                                AudioSampleRate = RenderAudioInfo.SoundtrackSampleRate(),

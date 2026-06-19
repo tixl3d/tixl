@@ -1,6 +1,8 @@
 # FFmpeg Video Encoding (replacing Media Foundation export)
 
-**Status:** Draft — 2026-06-19. Design only, no code yet. The **encode milestone** deferred by
+**Status:** In progress — 2026-06-19. Tier-1 LGPL writer (video + AAC audio), the cross-ALC bridge, eager
+registration, and the codec selector (v1: H.264 + ProRes) are implemented & tested; the tier-2 GPL path +
+install assistant, the inline availability UI, and full MF removal remain. The **encode milestone** deferred by
 [`Plan_FfmpegVideo.md`](Plan_FfmpegVideo.md) (which replaced MF *decode* with FFmpeg but left *encode* on
 Media Foundation).
 
@@ -196,7 +198,8 @@ FFmpeg) is orthogonal to audio *routing*.
 
 1. **Tier-1 parity writer** — split into:
    - **1a. Encoder core (video) — DONE & TESTED.** [`VideoServices/VideoFileEncoder.cs`](../../VideoServices/VideoFileEncoder.cs)
-     (RGBA→YUV420p swscale → caller-chosen codec → mux) + a round-trip unit test.
+     (RGBA→YUV swscale at the codec's `EncoderPixelFormat` → caller-chosen codec → mux) + round-trip unit tests
+     (MPEG-4 + ProRes).
    - **1b-i. Hardware-encoder selection — DONE & TESTED.**
      [`VideoServices/HardwareEncoderProbe.cs`](../../VideoServices/HardwareEncoderProbe.cs) opens each candidate
      (`h264_nvenc`→`_qsv`→`_amf`) to find the one that actually works on this GPU; the caller falls to an LGPL
@@ -231,9 +234,17 @@ FFmpeg) is orthogonal to audio *routing*.
      every loaded package, firing the Video package's initializer so the encoder registers without any video
      op, then re-checks (MF only if the package genuinely isn't loaded). Runs once per session (only while the
      factory is unset) and **doesn't touch the package-load flow**.
-2. **Codec/container selector.** Add the enum to `RenderSettings` (project-persisted) + the
-   [`RenderWindow`](../../Editor/Gui/Windows/RenderExport/RenderWindow.cs) dropdown; expose the LGPL codecs
-   (ProRes / DNxHD / VP9 / AV1 / FFV1 / HAP). *Verify: each renders a valid file; choice survives save/reload.*
+2. **Codec/container selector — DONE & TESTED (v1: H.264 + ProRes).** `VideoExportCodec` enum in the Core
+   facade ([`Core/Video/VideoExport.cs`](../../Core/Video/VideoExport.cs)) with a `GetFileExtension` helper;
+   project-persisted `RenderSettings.VideoCodec` (string-enum) + a "Codec" dropdown in
+   [`RenderWindow`](../../Editor/Gui/Windows/RenderExport/RenderWindow.cs). The factory's `BuildEncoderSettings`
+   switches on it: **H.264** → HW probe / MPEG-4 fallback at `Yuv420p`; **ProRes 422** → `AVCodecID.Prores` at
+   `Yuv422p10le` in `.mov`. The encoder now carries an explicit `EncoderPixelFormat` (was a hardcoded 4:2:0),
+   since ProRes rejects 4:2:0. UI: the filename extension tracks the codec (`.mp4`/`.mov`); the Bitrate control
+   shows only for H.264 (ProRes is profile-based). ProRes round-trip unit test green. Scoped to two
+   AAC-friendly codecs for v1 — DNxHD / VP9 / AV1 / FFV1 / HAP (and webm/Opus audio) are a later add to the same
+   enum + switch. *Verify (in-editor): a ProRes render produces a playable `.mov`; codec choice survives
+   save/reload.*
 3. **Hardware probe + fallback order + inline availability UI.** The cached HW probe, the resolution order,
    the quiet inline indicator. *Verify: H.264 silently uses HW where present; the ⚠/[Set up] line appears
    only when neither HW nor GPL can serve it.*
@@ -276,7 +287,7 @@ software quality" toggle are polish.
 | Concern | File |
 |---|---|
 | Render driver (per-frame texture + audio → writer) | `Editor/Gui/Windows/RenderExport/RenderProcess.cs` |
-| Render settings (add codec selector; project `.t3ui`) | `Editor/Gui/Windows/RenderExport/RenderSettings.cs` |
+| Render settings (codec selector — DONE; project `.t3ui`) | `Editor/Gui/Windows/RenderExport/RenderSettings.cs` |
 | Render window UI (add dropdown + inline availability) | `Editor/Gui/Windows/RenderExport/RenderWindow.cs` |
 | FFmpeg encoder core (DONE — video + AAC audio) | `VideoServices/VideoFileEncoder.cs` |
 | Hardware-encoder probe (DONE) | `VideoServices/HardwareEncoderProbe.cs` |

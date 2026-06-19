@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using T3.Core.Video;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.ProjectHandling;
@@ -57,6 +58,8 @@ internal sealed class RenderSettings
 
     [JsonConverter(typeof(StringEnumConverter))]
     public RenderModes RenderMode = RenderModes.Video;
+    [JsonConverter(typeof(StringEnumConverter))]
+    public VideoExportCodec VideoCodec = VideoExportCodec.H264;
     public int Bitrate = 25_000_000;
     public bool AutoIncrementVersionNumber = true;
     public bool CreateSubFolder = true;
@@ -82,6 +85,7 @@ internal sealed class RenderSettings
         FrameRate = other.FrameRate;
         OverrideMotionBlurSamples = other.OverrideMotionBlurSamples;
         RenderMode = other.RenderMode;
+        VideoCodec = other.VideoCodec;
         Bitrate = other.Bitrate;
         AutoIncrementVersionNumber = other.AutoIncrementVersionNumber;
         CreateSubFolder = other.CreateSubFolder;

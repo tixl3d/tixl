@@ -3,6 +3,27 @@ using System;
 
 namespace T3.Core.Video;
 
+/// <summary>The video codec for a render-export; the video assembly maps each to an FFmpeg encoder + container.</summary>
+public enum VideoExportCodec
+{
+    /// <summary>H.264 in MP4 — hardware-encoded where available, else an LGPL software fallback. The default.</summary>
+    H264 = 0,
+
+    /// <summary>Apple ProRes 422 in MOV — an all-intra editing codec (larger files); always available (LGPL).</summary>
+    ProRes = 1,
+}
+
+/// <summary>Container/extension helpers for <see cref="VideoExportCodec"/>.</summary>
+public static class VideoExportCodecExtensions
+{
+    /// <summary>The output-file extension (which selects the container) for a codec.</summary>
+    public static string GetFileExtension(this VideoExportCodec codec) => codec switch
+                                                                              {
+                                                                                  VideoExportCodec.ProRes => ".mov",
+                                                                                  _ => ".mp4",
+                                                                              };
+}
+
 /// <summary>
 /// FFmpeg-free description of a render-export target. The editor's render-export builds this; the video
 /// assembly maps it onto its own FFmpeg settings. Kept in Core so the editor (which must not depend on the
@@ -22,6 +43,9 @@ public readonly record struct VideoExportSettings
     public bool ExportAudio { get; init; }
     public int AudioChannels { get; init; }
     public int AudioSampleRate { get; init; }
+
+    /// <summary>Which codec/container to encode. Default <see cref="VideoExportCodec.H264"/>.</summary>
+    public VideoExportCodec Codec { get; init; }
 }
 
 /// <summary>

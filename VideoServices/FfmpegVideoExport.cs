@@ -40,32 +40,53 @@ public sealed class FfmpegVideoEncoderFactory : IVideoEncoderFactory
 
     private static VideoEncoderSettings BuildEncoderSettings(VideoExportSettings s)
     {
-        // H.264 via a hardware encoder when the GPU supports it; otherwise an LGPL software fallback. Software
-        // H.264 is libx264 = GPL and absent from the shipped build, so MPEG-4 Part 2 stands in until the codec
-        // selector (Phase 2) and the user-supplied GPL ffmpeg.exe path (Phase 4) land.
-        var hardwareEncoder = HardwareEncoderProbe.H264HardwareEncoder;
-        if (hardwareEncoder == null)
-            Log.Warning("No hardware H.264 encoder available - exporting with MPEG-4 (lower quality). "
-                        + "A later update adds a codec selector and software H.264.");
-
         var fps = Math.Max(1, (int)Math.Round(s.FrameRate)); // integer rate, matching the previous MF writer
 
-        return new VideoEncoderSettings
-                   {
-                       FilePath = s.FilePath,
-                       Width = s.Width,
-                       Height = s.Height,
-                       FrameRate = new AVRational(fps, 1),
-                       BitRate = s.BitRate,
-                       VideoEncoderName = hardwareEncoder, // null => fall back to VideoCodecId
-                       VideoCodecId = AVCodecID.Mpeg4,
-                       SourceFormat = AVPixelFormat.Rgba,
-                       SourceBytesPerPixel = 4,
-                       EncodeAudio = s.ExportAudio,
-                       AudioSampleRate = s.AudioSampleRate,
-                       AudioChannels = s.AudioChannels,
-                       AudioBitRate = 192_000,
-                   };
+        var common = new VideoEncoderSettings
+                         {
+                             FilePath = s.FilePath,
+                             Width = s.Width,
+                             Height = s.Height,
+                             FrameRate = new AVRational(fps, 1),
+                             BitRate = s.BitRate,
+                             SourceFormat = AVPixelFormat.Rgba,
+                             SourceBytesPerPixel = 4,
+                             EncodeAudio = s.ExportAudio,
+                             AudioSampleRate = s.AudioSampleRate,
+                             AudioChannels = s.AudioChannels,
+                             AudioBitRate = 192_000,
+                         };
+
+        switch (s.Codec)
+        {
+            case VideoExportCodec.ProRes:
+            {
+                // ProRes 422 is an all-intra LGPL editing codec; it needs 10-bit 4:2:2 and sets its own rate.
+                return common with
+                           {
+                               VideoCodecId = AVCodecID.Prores,
+                               EncoderPixelFormat = AVPixelFormat.Yuv422p10le,
+                           };
+            }
+
+            case VideoExportCodec.H264:
+            default:
+            {
+                // Hardware H.264 when the GPU supports it; otherwise MPEG-4 Part 2. Software H.264 is libx264 =
+                // GPL and absent from the bundled LGPL build, so the fallback stands in until a user-supplied GPL
+                // ffmpeg path is available.
+                var hardwareEncoder = HardwareEncoderProbe.H264HardwareEncoder;
+                if (hardwareEncoder == null)
+                    Log.Warning("No hardware H.264 encoder available - exporting with MPEG-4 (lower quality).");
+
+                return common with
+                           {
+                               VideoEncoderName = hardwareEncoder, // null => fall back to VideoCodecId
+                               VideoCodecId = AVCodecID.Mpeg4,
+                               EncoderPixelFormat = AVPixelFormat.Yuv420p,
+                           };
+            }
+        }
     }
 }
 

@@ -7,6 +7,7 @@ using T3.Editor.Gui.UiHelpers;
 using T3.Core.Utils;
 using T3.Core.Animation;
 using T3.Core.SystemUi;
+using T3.Core.Video;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.ProjectHandling;
 
@@ -181,31 +182,40 @@ internal sealed class RenderWindow : Window
         var modified = false;
         var s = RenderSettings.Current;
 
-        // Bitrate in Mbps
-        var bitrateMbps = s.Bitrate / 1_000_000f;
-        var defaultBitrateMbps = RenderSettings.Defaults.Bitrate / 1_000_000f;
-        if (FormInputs.AddFloat("Bitrate", ref bitrateMbps, 0.1f, 500f, 0.5f, true, true,
-                                "Video bitrate in megabits per second.",
-                                defaultBitrateMbps))
+        // Codec / container
+        modified |= FormInputs.AddEnumDropdown(ref s.VideoCodec, "Codec",
+                                               "H.264 (.mp4) is broadly compatible and hardware-accelerated.\n"
+                                               + "ProRes (.mov) is a high-quality all-intra editing codec (larger files).",
+                                               RenderSettings.Defaults.VideoCodec);
+
+        // Bitrate only applies to H.264 — ProRes is profile-based and picks its own rate.
+        if (s.VideoCodec == VideoExportCodec.H264)
         {
-            modified = true;
-            s.Bitrate = (int)(bitrateMbps * 1_000_000f);
+            var bitrateMbps = s.Bitrate / 1_000_000f;
+            var defaultBitrateMbps = RenderSettings.Defaults.Bitrate / 1_000_000f;
+            if (FormInputs.AddFloat("Bitrate", ref bitrateMbps, 0.1f, 500f, 0.5f, true, true,
+                                    "Video bitrate in megabits per second.",
+                                    defaultBitrateMbps))
+            {
+                modified = true;
+                s.Bitrate = (int)(bitrateMbps * 1_000_000f);
+            }
+
+            var startSec = RenderTiming.ReferenceTimeToSeconds(s.StartInBars, s.TimeReference, s.FrameRate);
+            var endSec = RenderTiming.ReferenceTimeToSeconds(s.EndInBars, s.TimeReference, s.FrameRate);
+            var duration = Math.Max(0, endSec - startSec);
+
+            RenderProcess.TryGetRenderResolution(s, out var resolution);
+            var totalPixels = (long)resolution.Width * resolution.Height;
+            bool isValidSize = totalPixels > 0 && s.FrameRate > 0;
+            double bitsPerPixel = isValidSize
+                                      ? s.Bitrate / (double)totalPixels / s.FrameRate
+                                      : 0;
+
+            var matchingQuality = GetQualityLevelFromRate((float)bitsPerPixel);
+            FormInputs.AddHint($"{matchingQuality.Title} quality (Est. {s.Bitrate * duration / 1024 / 1024 / 8:0.#} MB)");
+            CustomComponents.TooltipForLastItem(matchingQuality.Description);
         }
-
-        var startSec = RenderTiming.ReferenceTimeToSeconds(s.StartInBars, s.TimeReference, s.FrameRate);
-        var endSec = RenderTiming.ReferenceTimeToSeconds(s.EndInBars, s.TimeReference, s.FrameRate);
-        var duration = Math.Max(0, endSec - startSec);
-
-        RenderProcess.TryGetRenderResolution(s, out var resolution);
-        var totalPixels = (long)resolution.Width * resolution.Height;
-        bool isValidSize = totalPixels > 0 && s.FrameRate > 0;
-        double bitsPerPixel = isValidSize
-                                  ? s.Bitrate / (double)totalPixels / s.FrameRate
-                                  : 0;
-
-        var matchingQuality = GetQualityLevelFromRate((float)bitsPerPixel);
-        FormInputs.AddHint($"{matchingQuality.Title} quality (Est. {s.Bitrate * duration / 1024 / 1024 / 8:0.#} MB)");
-        CustomComponents.TooltipForLastItem(matchingQuality.Description);
 
         // Path
         var currentPath = s.VideoFilePath ?? "./Render/render-v01.mp4";
@@ -221,7 +231,17 @@ internal sealed class RenderWindow : Window
             foreach (var c in Path.GetInvalidFileNameChars()) filename = filename.Replace(c, '_');
         }
 
-        if (!filename.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase)) filename += ".mp4";
+        // Keep the filename's extension in sync with the chosen codec's container.
+        var videoExtension = s.VideoCodec.GetFileExtension();
+        if (filename.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase)
+            || filename.EndsWith(".mov", StringComparison.OrdinalIgnoreCase))
+        {
+            filename = filename[..^4];
+        }
+
+        if (!filename.EndsWith(videoExtension, StringComparison.OrdinalIgnoreCase))
+            filename += videoExtension;
+
         s.VideoFilePath = Path.Combine(directory, filename);
 
         modified |= FormInputs.AddCheckBox("Auto-increment version", ref s.AutoIncrementVersionNumber, null, RenderSettings.Defaults.AutoIncrementVersionNumber);
@@ -302,7 +322,7 @@ internal sealed class RenderWindow : Window
 
         var outputPath = RenderPaths.GetExpectedTargetDisplayPath(settings.RenderMode);
         string format = settings.RenderMode == RenderSettings.RenderModes.Video
-                            ? "MP4 Video"
+                            ? $"{settings.VideoCodec} Video"
                             : $"{settings.FileFormat} Sequence";
 
         RenderProcess.TryGetRenderResolution(settings, out var resolution);

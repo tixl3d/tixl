@@ -70,6 +70,60 @@ public class VideoFileEncoderTests
     }
 
     [Fact]
+    public void Encode_ProRes_RoundTripsThroughDecoder()
+    {
+        const int width = 320;
+        const int height = 240;
+        const int frameCount = 30;
+        var path = Path.Combine(Path.GetTempPath(), $"tixl-encode-prores-{Guid.NewGuid():N}.mov");
+
+        try
+        {
+            var settings = new VideoEncoderSettings
+                               {
+                                   FilePath = path,
+                                   Width = width,
+                                   Height = height,
+                                   FrameRate = new AVRational(30, 1),
+                                   BitRate = 0, // ProRes derives its own rate from the profile
+                                   VideoCodecId = AVCodecID.Prores,
+                                   EncoderPixelFormat = AVPixelFormat.Yuv422p10le, // ProRes rejects 4:2:0
+                                   SourceFormat = AVPixelFormat.Rgba,
+                                   SourceBytesPerPixel = 4,
+                               };
+
+            var frame = new byte[width * height * 4];
+            using (var encoder = new VideoFileEncoder(settings))
+            {
+                for (var i = 0; i < frameCount; i++)
+                {
+                    FillGradient(frame, width, height, i);
+                    encoder.WriteVideoFrame(frame, width * 4);
+                }
+            }
+
+            Assert.True(File.Exists(path));
+            Assert.True(new FileInfo(path).Length > 0, "encoded file is empty");
+
+            using var session = VideoDecoderSession.TryOpen(path, VideoPlaybackOptimization.FastSeeking, out var error);
+            Assert.Null(error);
+            Assert.NotNull(session);
+            Assert.Equal(width, session!.Width);
+            Assert.Equal(height, session.Height);
+
+            var decoded = 0;
+            while (session.TryReadNextFrame(out _))
+                decoded++;
+            Assert.True(decoded >= frameCount - 1, $"decoded {decoded} ProRes frames, expected ~{frameCount}");
+        }
+        finally
+        {
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+    }
+
+    [Fact]
     public void HardwareEncoder_WhenAvailable_RoundTripsThroughDecoder()
     {
         var encoderName = HardwareEncoderProbe.H264HardwareEncoder;
