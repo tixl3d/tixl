@@ -1,4 +1,4 @@
-namespace T3.Video.Tests;
+namespace T3.VideoServices.Tests;
 
 /// <summary>Locates the checked-in sample videos by walking up to the repo root (the folder with t3.sln).</summary>
 internal static class TestAssets

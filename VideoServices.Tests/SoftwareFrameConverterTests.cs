@@ -1,7 +1,7 @@
 using T3.Core.Video;
 using Xunit;
 
-namespace T3.Video.Tests;
+namespace T3.VideoServices.Tests;
 
 public class SoftwareFrameConverterTests
 {

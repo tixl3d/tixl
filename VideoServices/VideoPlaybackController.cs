@@ -8,7 +8,7 @@ using T3.Core.Resource;
 using T3.Core.Video;
 using CoreTexture2D = T3.Core.DataTypes.Texture2D;
 
-namespace T3.Video;
+namespace T3.VideoServices;
 
 /// <summary>
 /// Drives playback of one video for one operator instance. Decoding and YUV→RGBA conversion run on a

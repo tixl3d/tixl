@@ -2,7 +2,7 @@ using Sdcb.FFmpeg.Utils;
 using T3.Core.Video;
 using Xunit;
 
-namespace T3.Video.Tests;
+namespace T3.VideoServices.Tests;
 
 /// <summary>
 /// Exercises the real FFmpeg decode + seek path against the checked-in sample videos. These assert the

@@ -1,6 +1,6 @@
 using T3.Core.Utils;
 
-namespace T3.Video;
+namespace T3.VideoServices;
 
 /// <summary>
 /// Pure, deterministic mapping from a requested playback time (seconds) to a stream presentation

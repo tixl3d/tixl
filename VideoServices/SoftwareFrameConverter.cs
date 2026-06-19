@@ -2,7 +2,7 @@ using Sdcb.FFmpeg.Raw;
 using Sdcb.FFmpeg.Swscales;
 using Sdcb.FFmpeg.Utils;
 
-namespace T3.Video;
+namespace T3.VideoServices;
 
 /// <summary>
 /// Converts a software-decoded planar YUV frame to packed RGBA on the CPU via swscale — RGBA8 for SDR,

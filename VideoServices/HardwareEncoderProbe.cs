@@ -2,7 +2,7 @@ using Sdcb.FFmpeg.Codecs;
 using Sdcb.FFmpeg.Raw;
 using T3.Core.Logging;
 
-namespace T3.Video;
+namespace T3.VideoServices;
 
 /// <summary>
 /// Picks this machine's best available H.264/HEVC <em>hardware</em> encoder by actually opening each

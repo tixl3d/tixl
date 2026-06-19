@@ -4,7 +4,7 @@ using Sdcb.FFmpeg.Raw;
 using T3.Core.Video;
 using Xunit;
 
-namespace T3.Video.Tests;
+namespace T3.VideoServices.Tests;
 
 /// <summary>
 /// Exercises the real FFmpeg encode path: encode synthetic RGBA frames to a file, then decode it back with

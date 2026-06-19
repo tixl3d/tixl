@@ -8,7 +8,7 @@ using T3.Core.Logging;
 using T3.Core.Resource;
 using T3.Core.Video;
 
-namespace T3.Video;
+namespace T3.VideoServices;
 
 /// <summary>
 /// Wraps one open video file: its demuxer (<see cref="FormatContext"/>) and decoder

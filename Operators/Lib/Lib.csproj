@@ -97,9 +97,9 @@
   <ItemGroup>
     <ProjectReference Include="..\Mediapipe\Mediapipe.csproj" Private="false" PrivateAssets="all" />
     <ProjectReference Include="..\..\Core\Core.csproj" Private="false" PrivateAssets="all" />
-    <!-- FFmpeg decode engine. Copied into the operator package (Private default) since the editor host
-         does not provide it; its native LGPL DLLs arrive via the FFmpeg.LGPL package below. -->
-    <ProjectReference Include="..\..\Video\Video.csproj" />
+    <!-- FFmpeg video services (decode + encode). Copied into the operator package (Private default) since the
+         editor host does not provide it; its native LGPL DLLs arrive via the FFmpeg.LGPL package below. -->
+    <ProjectReference Include="..\..\VideoServices\VideoServices.csproj" />
     <ProjectReference Include="..\..\Serialization\Serialization.csproj" Private="false" PrivateAssets="all" />
     <ProjectReference Include="..\..\SystemUi\SystemUi.csproj" Private="false" PrivateAssets="all" />
     <ProjectReference Include="..\..\Logging\Logging.csproj" Private="false" PrivateAssets="all" />

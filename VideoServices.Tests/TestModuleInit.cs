@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 
-namespace T3.Video.Tests;
+namespace T3.VideoServices.Tests;
 
 internal static class TestModuleInit
 {

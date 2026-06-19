@@ -9,7 +9,7 @@ using ComputeShader = T3.Core.DataTypes.ComputeShader;
 using CoreTexture2D = T3.Core.DataTypes.Texture2D;
 using SharpDxTexture2D = SharpDX.Direct3D11.Texture2D;
 
-namespace T3.Video;
+namespace T3.VideoServices;
 
 /// <summary>
 /// GPU YUV→RGBA converter for the D3D11VA zero-copy path. A hardware <see cref="Frame"/> carries the decoder

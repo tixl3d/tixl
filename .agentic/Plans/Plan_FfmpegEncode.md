@@ -99,16 +99,22 @@ assumed — it lives in **`Video`** and the Editor reaches it through a **Core f
 existing `IVideoPlaybackEngine` / `VideoPlayback.Engine` holder in
 [`Core/Video/VideoPlayback.cs`](../../Core/Video/VideoPlayback.cs).
 
-- **Encoder core — done & tested.** [`Video/VideoFileEncoder.cs`](../../Video/VideoFileEncoder.cs) is a
+- **Encoder core — done & tested.** [`VideoServices/VideoFileEncoder.cs`](../../VideoServices/VideoFileEncoder.cs) is a
   self-contained, **CPU-byte-level** encoder (RGBA bytes in → muxed file out; the GPU texture read-back
   stays in the caller, so it unit-tests without a D3D device). Codec is caller-chosen
   (`h264_nvenc`/`_qsv`/`_amf` for the editor; `mpeg4` for CI). Verified by
-  [`Video.Tests/VideoFileEncoderTests.cs`](../../Video.Tests/VideoFileEncoderTests.cs): encode 30 synthetic
+  [`VideoServices.Tests/VideoFileEncoderTests.cs`](../../VideoServices.Tests/VideoFileEncoderTests.cs): encode 30 synthetic
   frames → decode back → correct size + frame count.
-- **Open item for the wiring step — eager registration.** `VideoPlayback.Engine` is published lazily on
-  *first video-op use*. Encode can't inherit that limitation (render-export may run with no prior video
-  playback), so the encode facade's Core holder must be populated **eagerly** when operator packages load —
-  to be solved when wiring `RenderProcess`.
+- **Eager registration — deferred to the Video package extraction
+  ([`Plan_VideoOperatorPackage.md`](Plan_VideoOperatorPackage.md)).** `VideoPlayback.Engine` is published
+  lazily on *first video-op use*; encode can't inherit that (render-export may run with no prior playback). A
+  first cut put a `[ModuleInitializer]` in **Lib** to force `Video.dll` to load+register eagerly — **rejected
+  and removed**: it couples FFmpeg's load to Lib's hot-reload path (the most-edited package, behind most
+  real-world load/reload exceptions) for a <1% feature. The right home is the new **`Video` operator package**:
+  referencing it loads it → it registers `FfmpegVideoEncoderFactory.Register()` into the Core
+  `VideoExport.Factory` holder, covering the no-video-op case without touching Lib. Core is loaded once and
+  shared across the editor and operator load contexts, so the single holder bridges them. *Until that lands,
+  `VideoExport.Factory` is simply unset (the impl + Register entry exist in `FfmpegVideoExport.cs`).*
 
 ## The codec selector + fallback order (new UI)
 
@@ -189,20 +195,30 @@ FFmpeg) is orthogonal to audio *routing*.
 ## Phasing (build-verifiable; `dotnet build` after each step)
 
 1. **Tier-1 parity writer** — split into:
-   - **1a. Encoder core (video) — DONE & TESTED.** [`Video/VideoFileEncoder.cs`](../../Video/VideoFileEncoder.cs)
+   - **1a. Encoder core (video) — DONE & TESTED.** [`VideoServices/VideoFileEncoder.cs`](../../VideoServices/VideoFileEncoder.cs)
      (RGBA→YUV420p swscale → caller-chosen codec → mux) + a round-trip unit test.
    - **1b-i. Hardware-encoder selection — DONE & TESTED.**
-     [`Video/HardwareEncoderProbe.cs`](../../Video/HardwareEncoderProbe.cs) opens each candidate
+     [`VideoServices/HardwareEncoderProbe.cs`](../../VideoServices/HardwareEncoderProbe.cs) opens each candidate
      (`h264_nvenc`→`_qsv`→`_amf`) to find the one that actually works on this GPU; the caller falls to an LGPL
      software codec when none does. Verified live (NVENC H.264 round-trip on an NVIDIA dev machine; `_qsv`/
      `_amf` correctly reported unavailable). Reused by Phase 3's dropdown-availability UI.
    - **1b-ii. Audio — DONE & TESTED.** AAC stream from the interleaved-float mixdown PCM (manual
      deinterleave to planar + buffering to AAC's fixed 1024-sample frames; stereo/48k→stereo/48k needs no
      resample). Verified: a video+audio render muxes a readable AAC stream. Full `Video.Tests` suite 32/32.
-   - **1c. Core facade + eager registration + `RenderProcess` wiring.** A Core encode facade (Core-typed,
-     no FFmpeg types) implemented in `Video` and registered eagerly; `RenderProcess` drives it instead of
-     `new Mp4VideoWriter`. **This is what makes export work on Linux/Wine.** *Verify: Windows render matches
-     MF; a Wine/Linux run produces a playable file; audio frame-aligned; `ExportAudio=false` → silent file.*
+   - **1c-i. Cross-ALC bridge — DONE & BUILD-VERIFIED.** Core facade
+     ([`Core/Video/VideoExport.cs`](../../Core/Video/VideoExport.cs): `IVideoFileWriter` /
+     `IVideoEncoderFactory` / `VideoExport.Factory`, all FFmpeg-free, byte-level) + the Video impl
+     ([`VideoServices/FfmpegVideoExport.cs`](../../VideoServices/FfmpegVideoExport.cs) wrapping `VideoFileEncoder`, picking
+     the HW encoder via the probe with an MPEG-4 LGPL fallback). Core + Video build. **Registration** (who
+     calls `Register()`) moves to the new `Video` operator package — see
+     [`Plan_VideoOperatorPackage.md`](Plan_VideoOperatorPackage.md); the interim Lib trigger was removed.
+   - **1c-ii. Editor readback adapter + `RenderProcess` wiring — REMAINING.** The render output frame must be
+     read back GPU→CPU as RGBA8 (the editor owns this — its format-converting readback `ScreenshotWriter` /
+     `TextureBgraReadAccess` is editor/Core-side, robust to HDR/float outputs). A new editor adapter replaces
+     `Mp4VideoWriter`: it drives the readback and feeds the Core `IVideoFileWriter`; `RenderProcess` creates it
+     via `VideoExport.Factory` and keeps the `ProcessFrames`/`Dispose` call sites. **This is the step that
+     makes export run in the app.** *Verify in-editor: Windows render plays back; audio frame-aligned;
+     `ExportAudio=false` → silent; the `[ModuleInitializer]` fires before export.*
 2. **Codec/container selector.** Add the enum to `RenderSettings` (project-persisted) + the
    [`RenderWindow`](../../Editor/Gui/Windows/RenderExport/RenderWindow.cs) dropdown; expose the LGPL codecs
    (ProRes / DNxHD / VP9 / AV1 / FFV1 / HAP). *Verify: each renders a valid file; choice survives save/reload.*
@@ -250,15 +266,18 @@ software quality" toggle are polish.
 | Render driver (per-frame texture + audio → writer) | `Editor/Gui/Windows/RenderExport/RenderProcess.cs` |
 | Render settings (add codec selector; project `.t3ui`) | `Editor/Gui/Windows/RenderExport/RenderSettings.cs` |
 | Render window UI (add dropdown + inline availability) | `Editor/Gui/Windows/RenderExport/RenderWindow.cs` |
-| FFmpeg encoder core (DONE — video + AAC audio) | `Video/VideoFileEncoder.cs` |
-| Hardware-encoder probe (DONE) | `Video/HardwareEncoderProbe.cs` |
-| Encoder round-trip + HW tests (DONE) | `Video.Tests/VideoFileEncoderTests.cs` |
-| Core facade pattern to mirror for the encode holder | `Core/Video/VideoPlayback.cs` |
+| FFmpeg encoder core (DONE — video + AAC audio) | `VideoServices/VideoFileEncoder.cs` |
+| Hardware-encoder probe (DONE) | `VideoServices/HardwareEncoderProbe.cs` |
+| Encoder round-trip + HW tests (DONE) | `VideoServices.Tests/VideoFileEncoderTests.cs` |
+| Core encode facade (DONE) | `Core/Video/VideoExport.cs` |
+| Video factory + writer impl (DONE) | `VideoServices/FfmpegVideoExport.cs` |
+| Eager registration | moves to the `Video` package — see [`Plan_VideoOperatorPackage.md`](Plan_VideoOperatorPackage.md) |
+| Editor readback adapter to add + wire (1c-ii) | `Editor/Gui/Windows/RenderExport/RenderProcess.cs` |
 | Encoder contract to mirror (`ProcessFrames`/`Dispose`), then delete | `Editor/Gui/Windows/RenderExport/MF/MfVideoWriter.cs` |
 | MF package reference to drop (Phase 5) | `Core/Core.csproj` (`SharpDX.MediaFoundation`, line 46) |
 | Mixdown PCM source (reused unchanged) | `Editor/Gui/Windows/RenderExport/RenderProcess.cs` + `Core/Audio/AudioRendering.cs` |
 | Per-machine GPL exe path | `Editor/Gui/UiHelpers/UserSettings.cs` |
-| Bundled LGPL FFmpeg + guardrail (tier-1 reuse) | `Video/FfmpegLibrary.cs` |
+| Bundled LGPL FFmpeg + guardrail (tier-1 reuse) | `VideoServices/FfmpegLibrary.cs` |
 | Texture readback for CPU encode | `Core/Resource/Utils/TextureBgraReadAccess.cs` |
 
 ## Manual test set

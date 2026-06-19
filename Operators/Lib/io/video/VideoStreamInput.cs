@@ -2,7 +2,7 @@
 using System.Threading;
 using SharpDX;
 using T3.Core.Video;
-using T3.Video;
+using T3.VideoServices;
 using Utilities = T3.Core.Utils.Utilities;
 
 namespace Lib.io.video

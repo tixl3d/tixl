@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using T3.Core.Video;
 
-namespace T3.Video;
+namespace T3.VideoServices;
 
 /// <summary>
 /// The global <see cref="IVideoPlaybackEngine"/>. Operators are thin clients: each posts its per-frame

@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <RootNamespace>T3.Video</RootNamespace>
+    <RootNamespace>T3.VideoServices</RootNamespace>
     <Configurations>Debug;Release</Configurations>
     <Platforms>AnyCPU</Platforms>
     <Deterministic>true</Deterministic>
@@ -13,7 +13,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="Video.Tests" />
+    <InternalsVisibleTo Include="VideoServices.Tests" />
   </ItemGroup>
 
   <!-- Managed LGPL bindings only. The native LGPL DLLs are delivered (and shipped) via the

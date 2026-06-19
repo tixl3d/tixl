@@ -1,7 +1,7 @@
 using System.Threading;
 using Sdcb.FFmpeg.Utils;
 
-namespace T3.Video;
+namespace T3.VideoServices;
 
 /// <summary>
 /// Per-stream LRU cache of decoded frames in their native (source) pixel format, keyed by PTS. Frames are

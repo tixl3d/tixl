@@ -1,6 +1,6 @@
 using Xunit;
 
-namespace T3.Video.Tests;
+namespace T3.VideoServices.Tests;
 
 public class TimeToFrameMapperTests
 {

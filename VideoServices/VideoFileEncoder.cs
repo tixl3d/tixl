@@ -6,7 +6,7 @@ using Sdcb.FFmpeg.Swscales;
 using Sdcb.FFmpeg.Utils;
 using T3.Core.Logging;
 
-namespace T3.Video;
+namespace T3.VideoServices;
 
 /// <summary>
 /// Settings for one <see cref="VideoFileEncoder"/>. Pixel/codec types are FFmpeg-level on purpose — the

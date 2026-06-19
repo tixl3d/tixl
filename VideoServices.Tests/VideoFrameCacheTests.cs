@@ -2,7 +2,7 @@ using Sdcb.FFmpeg.Utils;
 using T3.Core.Video;
 using Xunit;
 
-namespace T3.Video.Tests;
+namespace T3.VideoServices.Tests;
 
 /// <summary>
 /// Covers the per-stream frame cache: a cached frame is byte-identical to a fresh decode, lookups miss

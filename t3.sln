@@ -67,9 +67,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mediapipe", "Operators\Medi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Tests", "Core.Tests\Core.Tests.csproj", "{B1C1C13E-BEDA-41F3-8C47-C67E0981F17A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Video", "Video\Video.csproj", "{2841A054-7AFB-4E9A-B293-F8DA3CEA0BC9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VideoServices", "VideoServices\VideoServices.csproj", "{2841A054-7AFB-4E9A-B293-F8DA3CEA0BC9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Video.Tests", "Video.Tests\Video.Tests.csproj", "{E746BB80-1FC8-4588-8DD0-F409A2F457FB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VideoServices.Tests", "VideoServices.Tests\VideoServices.Tests.csproj", "{E746BB80-1FC8-4588-8DD0-F409A2F457FB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

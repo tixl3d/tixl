@@ -2,7 +2,7 @@ using System.Runtime.InteropServices;
 using Sdcb.FFmpeg.Raw;
 using T3.Core.Logging;
 
-namespace T3.Video;
+namespace T3.VideoServices;
 
 /// <summary>
 /// One-time, thread-safe entry point for the bundled FFmpeg libraries. Triggers native load, records the
