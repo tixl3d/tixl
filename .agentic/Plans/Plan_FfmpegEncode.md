@@ -333,12 +333,23 @@ FFmpeg) is orthogonal to audio *routing*.
      `.mov` and the two-pass AAC mux both produce correct streams. *In-editor verify pending: HAP renders a
      playable `.mov` via `[PlayVideo]` re-import, `ExportAudio` muxes AAC, and HAP is gated only when no
      hap-capable ffmpeg is found.*
+   - **4a-bis. No-HW H.264 → tier-2 x264 (was deferred; now DONE).** When no hardware encoder works, H.264 no
+     longer silently drops to MPEG-4: the availability cache upgrades the `SoftwareFallback` to `External` when
+     a located ffmpeg has `libx264`, and `RenderProcess` routes it to tier-2 (`-c:v libx264`). The export
+     decision uses a synchronous `VideoEncoderAvailabilityCache.GetBlocking` and **gates `Unavailable`** codecs
+     so a HAP request can never silently mux through MF. This is resolution-order **case 4** (no HW + external
+     ffmpeg → tier-2). The *only* remaining "prefer software" piece is routing H.264 to tier-2 **even when HW
+     works** (a quality-over-speed toggle) — still deferred.
+   - **4a-ter. Hardware-probe pixel-format fix (DONE & hardware-verified).** The probe and the encode path used
+     `yuv420p` for *every* hardware encoder, but `h264_qsv` only accepts `nv12` — so **Intel Quick Sync could
+     never open** (it failed at probe *and* encode). Both now use `HardwareEncoderProbe.EncoderInputFormat`
+     (`nv12` for `*_qsv`, `yuv420p` for NVENC/MPEG-4). Verified on real Intel hardware: `h264_qsv` opens with
+     `nv12`, fails with `yuv420p`. Separately, **NVENC in the bundled BtbN build needs NVIDIA driver 570.0+**
+     (nvenc API 13.0) — older drivers fail to open it (env requirement, surfaced in the no-HW indicator copy).
    - **4b. Install/onboarding assistant — TODO.** The popup with two entry copies (licence for software
      H.264/HEVC vs. *missing-encoder* for HAP — **no GPL framing for HAP**), the download/browse/extract
      checklist, a pinned SHA-256, and a path-entry settings UI (4a relies on PATH/env auto-detection only).
-     Wire the Phase 3 `[Set up]` warning lines to launch it for cases 4 and 6. **Note:** the "prefer software
-     H.264 quality over the HW encoder" toggle (route H.264 to tier-2 even when HW exists) is *not* in 4a —
-     today tier-2 engages only when tier-1 can't serve the codec; H.264 stays on HW/MPEG-4.
+     Wire the Phase 3 `[Set up]` warning lines to launch it for cases 4 and 6.
    *Verify: with no HW + no GPL, software H.264 prompts; after install it encodes. HAP, with a system/LGPL
    ffmpeg that has `hap`, encodes a playable `.mov` with **no GPL prompt**; a system `ffmpeg` on PATH is
    detected for either without a download; the per-encoder verify rejects an ffmpeg missing the needed codec.*

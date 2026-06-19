@@ -210,7 +210,7 @@ internal sealed class RenderWindow : Window
                 break;
             case VideoEncoderKind.SoftwareFallback:
                 DrawInlineEncoderHint(Icon.Warning, UiColors.StatusAttention,
-                                      "No hardware H.264 encoder — exporting as MPEG-4 (lower quality).");
+                                      "No hardware H.264 encoder — using MPEG-4. Update the GPU driver or install FFmpeg for x264.");
                 break;
             case VideoEncoderKind.Unavailable:
             default:

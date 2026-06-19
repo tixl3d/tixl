@@ -5,6 +5,7 @@ using T3.Core.Audio;
 using T3.Core.DataTypes;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Utils;
+using T3.Core.Video;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.UiHelpers;
@@ -165,28 +166,34 @@ internal static class RenderProcess
     {
         try
         {
-            var ffmpegWriter = FfmpegVideoExportWriter.TryCreate(session, out var ffmpegError);
-            if (ffmpegWriter != null)
+            var codec = session.Settings.VideoCodec;
+            var availability = VideoEncoderAvailabilityCache.GetBlocking(codec);
+
+            if (availability.Kind == VideoEncoderKind.Unavailable)
+            {
+                LastHelpString = $"Can't render {codec}: no in-process encoder, and no external FFmpeg with that encoder was found.";
+                Log.Warning(LastHelpString);
+                CleanupSession();
+                return false;
+            }
+
+            // Prefer an external ffmpeg (tier 2) when the in-process build can't serve the codec well: HAP (no
+            // in-process encoder), or software H.264 when no hardware encoder works (beats the MPEG-4 fallback).
+            if (availability.Kind == VideoEncoderKind.External
+                && ExternalFfmpegFileWriter.TryCreate(session, out _) is { } externalWriter)
+            {
+                session.VideoWriter = FfmpegVideoExportWriter.Wrap(externalWriter);
+                Log.Debug("Render-export: using an external FFmpeg encoder (tier 2).");
+            }
+            else if (FfmpegVideoExportWriter.TryCreate(session, out var ffmpegError) is { } ffmpegWriter)
             {
                 session.VideoWriter = ffmpegWriter;
                 Log.Debug("Render-export: using the in-process FFmpeg encoder.");
             }
             else
             {
-                // Tier 2: codecs the bundled build can't encode in-process (HAP; software H.264/HEVC) run an
-                // external ffmpeg.exe as a subprocess, behind the same texture-readback adapter.
-                var externalWriter = ExternalFfmpegFileWriter.TryCreate(session, out var externalError);
-                if (externalWriter != null)
-                {
-                    session.VideoWriter = FfmpegVideoExportWriter.Wrap(externalWriter);
-                    Log.Debug("Render-export: using an external FFmpeg encoder (tier 2).");
-                }
-                else
-                {
-                    Log.Debug($"Render-export: in-process FFmpeg unavailable ({ffmpegError}); "
-                              + $"external FFmpeg unavailable ({externalError}); falling back to Media Foundation.");
-                    session.VideoWriter = new Mp4VideoWriter(session);
-                }
+                Log.Debug($"Render-export: in-process FFmpeg unavailable ({ffmpegError}); falling back to Media Foundation.");
+                session.VideoWriter = new Mp4VideoWriter(session);
             }
 
             Log.Gated.VideoRender($"Mp4VideoWriter initialized: " +

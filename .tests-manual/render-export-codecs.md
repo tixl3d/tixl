@@ -54,9 +54,12 @@ switching the codec. Try **H264** first, then a non-H.264 codec (e.g. **ProRes**
 **Expected:**
 - A single muted line appears under the dropdown (it may briefly read "Checking encoder…" the first time).
 - On a machine with a working GPU encoder, **H264** shows **"Hardware encoder (NVIDIA NVENC / Intel Quick
-  Sync / AMD AMF)"** matching the GPU.
-- On a machine with **no** hardware H.264 encoder, **H264** shows a ⚠ warning line: **"No hardware H.264
-  encoder — exporting as MPEG-4 (lower quality)."**
+  Sync / AMD AMF)"** matching the GPU. (NVENC in the bundled build needs NVIDIA driver 570+; Intel Quick Sync
+  works via `nv12`.)
+- On a machine with **no** working hardware encoder but an `ffmpeg` with `libx264` on PATH, **H264** shows
+  **"External FFmpeg encoder"** (it will software-encode x264 rather than MPEG-4).
+- On a machine with **neither**, **H264** shows a ⚠ line: **"No hardware H.264 encoder — using MPEG-4. Update
+  the GPU driver or install FFmpeg for x264."**
 - Non-H.264 codecs (ProRes/VP9/AV1/FFV1) show **"Software encoder"**.
 - Switching codecs swaps the line in place without shifting the rest of the panel.
 

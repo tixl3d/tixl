@@ -23,6 +23,14 @@ public static class HardwareEncoderProbe
     /// <summary>The working HEVC hardware encoder name, or null if none initializes.</summary>
     public static string? HevcHardwareEncoder => _hevc ??= FindWorkingEncoder(HevcCandidates);
 
+    /// <summary>
+    /// The encoder-input pixel format a given encoder accepts. Quick Sync (<c>*_qsv</c>) only takes <c>nv12</c>
+    /// (or a hardware <c>qsv</c> surface); NVENC and the software/AMF encoders accept planar <c>yuv420p</c>.
+    /// Used by both the probe and the real encode so they agree — feeding QSV <c>yuv420p</c> fails to open.
+    /// </summary>
+    public static AVPixelFormat EncoderInputFormat(string? encoderName)
+        => encoderName != null && encoderName.Contains("_qsv") ? AVPixelFormat.Nv12 : AVPixelFormat.Yuv420p;
+
     private static string? FindWorkingEncoder(string[] candidates)
     {
         if (!FfmpegLibrary.EnsureInitialized())
@@ -54,7 +62,7 @@ public static class HardwareEncoderProbe
                               Height = 240,
                               TimeBase = new AVRational(1, 30),
                               Framerate = new AVRational(30, 1),
-                              PixelFormat = AVPixelFormat.Yuv420p,
+                              PixelFormat = EncoderInputFormat(encoderName),
                               BitRate = 1_000_000,
                           };
             context.Open();

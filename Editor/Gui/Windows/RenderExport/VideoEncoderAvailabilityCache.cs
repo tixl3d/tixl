@@ -28,6 +28,18 @@ internal static class VideoEncoderAvailabilityCache
         return null;
     }
 
+    /// <summary>Resolves availability synchronously, using the cache. For the export decision (off the UI thread,
+    /// where a one-time blocking probe is acceptable); the UI uses <see cref="Get"/> to avoid stalling a frame.</summary>
+    public static VideoEncoderAvailability GetBlocking(VideoExportCodec codec)
+    {
+        if (_results.TryGetValue(codec, out var result))
+            return result;
+
+        var resolved = Resolve(codec);
+        _results[codec] = resolved;
+        return resolved;
+    }
+
     private static void Probe(VideoExportCodec codec)
     {
         _results[codec] = Resolve(codec);
@@ -50,10 +62,12 @@ internal static class VideoEncoderAvailabilityCache
 
             var availability = factory?.GetAvailability(codec) ?? new VideoEncoderAvailability { Kind = VideoEncoderKind.Unavailable };
 
-            // The in-process build can't encode this codec (e.g. HAP) — but a located external ffmpeg might
-            // (tier 2). Probe the resolver here (off the UI thread already) so the indicator and export gate
-            // can treat it as available.
-            if (availability.Kind == VideoEncoderKind.Unavailable && ExternalFfmpegResolver.CanEncode(codec))
+            // A located external ffmpeg can take over (tier 2) when the in-process build either can't encode
+            // the codec at all (HAP → Unavailable) or only has a poor substitute (H.264 with no hardware
+            // encoder → SoftwareFallback/MPEG-4; an external libx264 is far better). Probe the resolver here
+            // (off the UI thread already) so the indicator and export both treat it as available.
+            if (availability.Kind is VideoEncoderKind.Unavailable or VideoEncoderKind.SoftwareFallback
+                && ExternalFfmpegResolver.CanEncode(codec))
                 return new VideoEncoderAvailability { Kind = VideoEncoderKind.External, EncoderName = "external FFmpeg" };
 
             return availability;

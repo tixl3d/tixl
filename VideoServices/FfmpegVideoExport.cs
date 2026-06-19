@@ -193,7 +193,8 @@ public sealed class FfmpegVideoEncoderFactory : IVideoEncoderFactory
                            {
                                VideoEncoderName = hardwareEncoder, // null => fall back to VideoCodecId
                                VideoCodecId = AVCodecID.Mpeg4,
-                               EncoderPixelFormat = AVPixelFormat.Yuv420p,
+                               // QSV needs nv12; NVENC/MPEG-4 take yuv420p. Must match what the probe opened with.
+                               EncoderPixelFormat = HardwareEncoderProbe.EncoderInputFormat(hardwareEncoder),
                            };
             }
         }
