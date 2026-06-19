@@ -6,6 +6,7 @@ using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Core.Utils;
 using T3.Core.Animation;
+using T3.Core.DataTypes.Vector;
 using T3.Core.SystemUi;
 using T3.Core.Video;
 using T3.Editor.UiModel;
@@ -181,6 +182,53 @@ internal sealed class RenderWindow : Window
     private static bool CodecUsesBitrate(VideoExportCodec codec)
         => codec is VideoExportCodec.H264 or VideoExportCodec.VP9 or VideoExportCodec.AV1;
 
+    private static bool IsHapCodec(VideoExportCodec codec)
+        => codec is VideoExportCodec.Hap or VideoExportCodec.HapAlpha or VideoExportCodec.HapQ;
+
+    // Inline indicator under the codec dropdown: shows whether the chosen codec will hardware-encode, use a
+    // built-in software encoder, or fall back to a lower-quality substitute (software H.264 needs a GPL exe,
+    // not yet bundled). The line keeps a constant footprint so switching codecs doesn't shift the layout.
+    private static void DrawCodecAvailabilityHint(VideoExportCodec codec)
+    {
+        var availability = VideoEncoderAvailabilityCache.Get(codec);
+        if (availability == null)
+        {
+            DrawInlineEncoderHint(Icon.Tip, UiColors.TextMuted, "Checking encoder…");
+            return;
+        }
+
+        switch (availability.Value.Kind)
+        {
+            case VideoEncoderKind.Hardware:
+                DrawInlineEncoderHint(Icon.Checkmark, UiColors.TextMuted, $"Hardware encoder ({availability.Value.EncoderName})");
+                break;
+            case VideoEncoderKind.Software:
+                DrawInlineEncoderHint(Icon.Checkmark, UiColors.TextMuted, "Software encoder");
+                break;
+            case VideoEncoderKind.SoftwareFallback:
+                DrawInlineEncoderHint(Icon.Warning, UiColors.StatusAttention,
+                                      "No hardware H.264 encoder — exporting as MPEG-4 (lower quality).");
+                break;
+            case VideoEncoderKind.Unavailable:
+            default:
+                // HAP encoding isn't in the bundled LGPL build (decode-only) — it needs an external FFmpeg.
+                var message = IsHapCodec(codec)
+                                  ? "HAP encoding needs an external FFmpeg (not available yet)."
+                                  : "This codec can't be encoded in this build.";
+                DrawInlineEncoderHint(Icon.Warning, UiColors.StatusAttention, message);
+                break;
+        }
+    }
+
+    private static void DrawInlineEncoderHint(Icon icon, Color color, string text)
+    {
+        FormInputs.AddVerticalSpace(5);
+        FormInputs.ApplyIndent();
+        icon.DrawAtCursor(color);
+        ImGui.SameLine();
+        CustomComponents.StylizedText(text, Fonts.FontSmall, color);
+    }
+
     private bool DrawVideoSettings()
     {
         var modified = false;
@@ -191,8 +239,11 @@ internal sealed class RenderWindow : Window
                                                "H.264 (.mp4): broadly compatible, hardware-accelerated.\n"
                                                + "ProRes (.mov): high-quality all-intra editing codec.\n"
                                                + "VP9 / AV1 (.mp4): efficient delivery codecs; software-encoded (slower).\n"
-                                               + "FFV1 (.mkv): lossless archival (very large files).",
+                                               + "FFV1 (.mkv): lossless archival (very large files).\n"
+                                               + "HAP / HAP Alpha / HAP Q (.mov): GPU-friendly intra codecs for realtime/VJ playback.",
                                                RenderSettings.Defaults.VideoCodec);
+
+        DrawCodecAvailabilityHint(s.VideoCodec);
 
         // Bitrate applies to the rate-controlled codecs only — ProRes (profile-based) and FFV1 (lossless) ignore it.
         if (CodecUsesBitrate(s.VideoCodec))
@@ -442,6 +493,18 @@ internal sealed class RenderWindow : Window
             if (string.IsNullOrWhiteSpace(filename) || filename == ".")
             {
                 errorMessage = "Filename cannot be empty.";
+                return false;
+            }
+
+            // Block codecs the encoder can't actually produce so export doesn't silently fall back to another
+            // codec. H.264 is exempt — it always has a path (hardware, the MPEG-4 substitute, or Media Foundation).
+            var codec = RenderSettings.Current.VideoCodec;
+            if (codec != VideoExportCodec.H264
+                && VideoEncoderAvailabilityCache.Get(codec) is { Kind: VideoEncoderKind.Unavailable })
+            {
+                errorMessage = IsHapCodec(codec)
+                                   ? "HAP encoding needs an external FFmpeg, which isn't available yet."
+                                   : $"The {codec} encoder isn't available in this build.";
                 return false;
             }
         }

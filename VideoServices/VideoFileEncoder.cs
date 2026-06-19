@@ -36,6 +36,10 @@ public readonly record struct VideoEncoderSettings
     /// <summary>Used when <see cref="VideoEncoderName"/> is null (e.g. <c>Mpeg4</c> for the LGPL fallback).</summary>
     public AVCodecID VideoCodecId { get; init; }
 
+    /// <summary>Codec-private AVOptions applied when the encoder is opened (e.g. HAP's <c>format</c> =
+    /// <c>hap_q</c>). Optional; null applies none.</summary>
+    public IReadOnlyList<KeyValuePair<string, string>>? VideoCodecOptions { get; init; }
+
     /// <summary>
     /// Pixel format fed to the encoder; the swscale step converts <see cref="SourceFormat"/> into it, so it must be
     /// one the encoder accepts (e.g. <c>Yuv420p</c> for H.264/MPEG-4, <c>Yuv422p10le</c> for ProRes). Defaults to
@@ -109,7 +113,7 @@ public sealed class VideoFileEncoder : IDisposable
                                  };
         if (needsGlobalHeader)
             _videoCodecContext.Flags |= AV_CODEC_FLAG.GlobalHeader;
-        _videoCodecContext.Open();
+        OpenVideoCodec(settings.VideoCodecOptions);
         _videoStream.Codecpar!.CopyFrom(_videoCodecContext);
         _videoStream.TimeBase = _videoCodecContext.TimeBase;
 
@@ -125,6 +129,19 @@ public sealed class VideoFileEncoder : IDisposable
         _sourceFrame.EnsureBuffer(1);
         _encoderFrame = Frame.CreateVideo(settings.Width, settings.Height, encoderPixelFormat);
         _encoderFrame.EnsureBuffer(1);
+    }
+
+    // Opens the video encoder, applying any codec-private AVOptions (e.g. HAP's "format") first. Children search
+    // descends into the codec's private data, where these options live (mirrors the CLI's `-format hap_q`).
+    private void OpenVideoCodec(IReadOnlyList<KeyValuePair<string, string>>? options)
+    {
+        if (options != null)
+        {
+            foreach (var (key, value) in options)
+                _videoCodecContext.Options.Set(key, value, AV_OPT_SEARCH.Children);
+        }
+
+        _videoCodecContext.Open();
     }
 
     private unsafe void SetupAudioStream(in VideoEncoderSettings settings, bool needsGlobalHeader)

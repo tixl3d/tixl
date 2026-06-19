@@ -20,6 +20,15 @@ public enum VideoExportCodec
 
     /// <summary>FFV1 in MKV — a lossless intra archival codec (very large files).</summary>
     FFV1 = 4,
+
+    /// <summary>HAP (DXT1, RGB) in MOV — a GPU-friendly intra codec for realtime/VJ playback; no alpha. (LGPL.)</summary>
+    Hap = 5,
+
+    /// <summary>HAP Alpha (DXT5) in MOV — HAP carrying an alpha channel. (LGPL.)</summary>
+    HapAlpha = 6,
+
+    /// <summary>HAP Q (scaled DXT5-YCoCg) in MOV — higher-quality HAP; larger than standard HAP. (LGPL.)</summary>
+    HapQ = 7,
 }
 
 /// <summary>Container/extension helpers for <see cref="VideoExportCodec"/>.</summary>
@@ -29,6 +38,9 @@ public static class VideoExportCodecExtensions
     public static string GetFileExtension(this VideoExportCodec codec) => codec switch
                                                                               {
                                                                                   VideoExportCodec.ProRes => ".mov",
+                                                                                  VideoExportCodec.Hap => ".mov",
+                                                                                  VideoExportCodec.HapAlpha => ".mov",
+                                                                                  VideoExportCodec.HapQ => ".mov",
                                                                                   VideoExportCodec.FFV1 => ".mkv",
                                                                                   _ => ".mp4", // H264, VP9, AV1
                                                                               };
@@ -75,11 +87,41 @@ public interface IVideoFileWriter : IDisposable
     void Finish();
 }
 
+/// <summary>How a <see cref="VideoExportCodec"/> will be encoded on this machine — for inline UI before export.</summary>
+public enum VideoEncoderKind
+{
+    /// <summary>FFmpeg / the video package isn't available, so the codec can't be encoded at all.</summary>
+    Unavailable,
+
+    /// <summary>A built-in LGPL software encoder serves it (ProRes/VP9/AV1/FFV1). Always available, no setup.</summary>
+    Software,
+
+    /// <summary>A GPU hardware encoder (NVENC/Quick Sync/AMF) initialised successfully (H.264). Preferred, silent.</summary>
+    Hardware,
+
+    /// <summary>Software H.264/HEVC is GPL and absent from the bundled build, and no hardware encoder works here,
+    /// so a lower-quality LGPL substitute (MPEG-4) stands in until a user-supplied GPL ffmpeg is installed.</summary>
+    SoftwareFallback,
+}
+
+/// <summary>How the requested codec will be served, for the render window's inline availability indicator.</summary>
+public readonly record struct VideoEncoderAvailability
+{
+    public required VideoEncoderKind Kind { get; init; }
+
+    /// <summary>A human-readable label for the encoder that will run (e.g. "NVIDIA NVENC", "MPEG-4"). May be null.</summary>
+    public string? EncoderName { get; init; }
+}
+
 /// <summary>Creates <see cref="IVideoFileWriter"/>s; implemented by the video assembly.</summary>
 public interface IVideoEncoderFactory
 {
     /// <summary>Returns null and an <paramref name="error"/> message when no usable encoder can be created.</summary>
     IVideoFileWriter? TryCreateWriter(VideoExportSettings settings, out string? error);
+
+    /// <summary>Reports how <paramref name="codec"/> will be encoded here. The hardware probe behind it is a
+    /// one-shot GPU-encoder open (cached); callers on a UI thread should run this off-thread on first use.</summary>
+    VideoEncoderAvailability GetAvailability(VideoExportCodec codec);
 }
 
 /// <summary>

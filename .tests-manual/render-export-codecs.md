@@ -45,6 +45,21 @@ Switch **Codec** through all five options and watch for the **Bitrate** control 
 - **Bitrate** (and the "… quality (Est. … MB)" hint) appear for **H264**, **VP9**, and **AV1**.
 - They are hidden for **ProRes** and **FFV1** (those set their own rate / are lossless).
 
+## Step: The codec dropdown shows an inline encoder indicator
+
+**Action:**
+With **Render Mode** set to **Video**, watch the small line just below the **Codec** dropdown while
+switching the codec. Try **H264** first, then a non-H.264 codec (e.g. **ProRes**).
+
+**Expected:**
+- A single muted line appears under the dropdown (it may briefly read "Checking encoder…" the first time).
+- On a machine with a working GPU encoder, **H264** shows **"Hardware encoder (NVIDIA NVENC / Intel Quick
+  Sync / AMD AMF)"** matching the GPU.
+- On a machine with **no** hardware H.264 encoder, **H264** shows a ⚠ warning line: **"No hardware H.264
+  encoder — exporting as MPEG-4 (lower quality)."**
+- Non-H.264 codecs (ProRes/VP9/AV1/FFV1) show **"Software encoder"**.
+- Switching codecs swaps the line in place without shifting the rest of the panel.
+
 ## Step: H.264 export produces a playable MP4 with audio
 
 **Action:**
@@ -76,6 +91,19 @@ H.264 — especially at high resolution.
 - Each writes its file (`.mp4` for VP9/AV1, `.mkv` for FFV1) and plays back with the correct image.
 - FFV1 is visually lossless and its file is much larger than the others.
 - No red operator-error state on the `[PlayVideo]` re-import, and no editor freeze during the render.
+
+## Step: HAP is listed but reports it needs an external FFmpeg
+
+**Action:**
+Open the **Codec** dropdown and select **Hap** (also try **HapAlpha** / **HapQ**). Watch the inline line
+under the dropdown and the **Start Render** button.
+
+**Expected:**
+- The three HAP entries appear in the dropdown, and the filename extension becomes `.mov`.
+- The inline line shows a ⚠ warning: **"HAP encoding needs an external FFmpeg (not available yet)."** — the
+  bundled LGPL build ships the HAP decoder but no HAP encoder.
+- **Start Render** is disabled for HAP; hovering it explains HAP needs an external FFmpeg. (It does **not**
+  silently render a different codec.)
 
 ## Step: Codec choice survives save and reload
 

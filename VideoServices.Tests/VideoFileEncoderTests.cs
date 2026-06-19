@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using Sdcb.FFmpeg.Codecs;
 using Sdcb.FFmpeg.Formats;
 using Sdcb.FFmpeg.Raw;
 using T3.Core.Video;
@@ -232,6 +233,68 @@ public class VideoFileEncoderTests
         }
     }
 
+    [Theory]
+    [InlineData("hap")]       // DXT1, RGB
+    [InlineData("hap_alpha")] // DXT5, with alpha
+    [InlineData("hap_q")]     // scaled DXT5-YCoCg, higher quality
+    public void Encode_Hap_RoundTripsThroughDecoder(string hapFormat)
+    {
+        // The bundled LGPL build currently ships the HAP decoder but no HAP encoder, so this is skipped there;
+        // it validates the encode path on any build that does include it (e.g. a tier-2 ffmpeg).
+        if (Codec.FindEncoderByName("hap") == null)
+            return;
+
+        const int width = 320; // HAP is a DXT (4×4 block) codec, so both dimensions must be multiples of 4.
+        const int height = 240;
+        const int frameCount = 12;
+        var path = Path.Combine(Path.GetTempPath(), $"tixl-encode-{hapFormat}-{Guid.NewGuid():N}.mov");
+
+        try
+        {
+            var settings = new VideoEncoderSettings
+                               {
+                                   FilePath = path,
+                                   Width = width,
+                                   Height = height,
+                                   FrameRate = new AVRational(30, 1),
+                                   VideoEncoderName = "hap",
+                                   EncoderPixelFormat = AVPixelFormat.Rgba, // HAP compresses RGBA directly
+                                   SourceFormat = AVPixelFormat.Rgba,
+                                   SourceBytesPerPixel = 4,
+                                   VideoCodecOptions = new[] { new KeyValuePair<string, string>("format", hapFormat) },
+                               };
+
+            var frame = new byte[width * height * 4];
+            using (var encoder = new VideoFileEncoder(settings))
+            {
+                for (var i = 0; i < frameCount; i++)
+                {
+                    FillGradient(frame, width, height, i);
+                    encoder.WriteVideoFrame(frame, width * 4);
+                }
+            }
+
+            Assert.True(File.Exists(path));
+            Assert.True(new FileInfo(path).Length > 0, "encoded file is empty");
+
+            using var session = VideoDecoderSession.TryOpen(path, VideoPlaybackOptimization.FastSeeking, out var error);
+            Assert.Null(error);
+            Assert.NotNull(session);
+            Assert.Equal(width, session!.Width);
+            Assert.Equal(height, session.Height);
+
+            var decoded = 0;
+            while (session.TryReadNextFrame(out _))
+                decoded++;
+            Assert.True(decoded >= frameCount - 1, $"decoded {decoded} {hapFormat} frames, expected ~{frameCount}");
+        }
+        finally
+        {
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+    }
+
     [Fact]
     public void Encode_WithAudio_MuxesVideoAndAacStreams()
     {
@@ -294,6 +357,46 @@ public class VideoFileEncoderTests
             if (File.Exists(path))
                 File.Delete(path);
         }
+    }
+
+    [Theory]
+    [InlineData(VideoExportCodec.ProRes)]
+    [InlineData(VideoExportCodec.VP9)]
+    [InlineData(VideoExportCodec.AV1)]
+    [InlineData(VideoExportCodec.FFV1)]
+    public void GetAvailability_NonH264Codec_IsSoftware(VideoExportCodec codec)
+    {
+        var availability = new FfmpegVideoEncoderFactory().GetAvailability(codec);
+        Assert.Equal(VideoEncoderKind.Software, availability.Kind);
+        Assert.False(string.IsNullOrEmpty(availability.EncoderName));
+    }
+
+    [Theory]
+    [InlineData(VideoExportCodec.Hap)]
+    [InlineData(VideoExportCodec.HapAlpha)]
+    [InlineData(VideoExportCodec.HapQ)]
+    public void GetAvailability_Hap_MatchesEncoderPresence(VideoExportCodec codec)
+    {
+        // HAP availability must track whether the build actually ships the encoder — Software when present,
+        // Unavailable otherwise (the bundled LGPL build is decode-only for HAP). Either way, never a crash.
+        var expected = Codec.FindEncoderByName("hap") == null
+                           ? VideoEncoderKind.Unavailable
+                           : VideoEncoderKind.Software;
+        Assert.Equal(expected, new FfmpegVideoEncoderFactory().GetAvailability(codec).Kind);
+    }
+
+    [Fact]
+    public void GetAvailability_H264_IsHardwareOrSoftwareFallback()
+    {
+        var availability = new FfmpegVideoEncoderFactory().GetAvailability(VideoExportCodec.H264);
+
+        // With the FFmpeg library present, H.264 resolves to a hardware encoder where the GPU supports one,
+        // otherwise the MPEG-4 software fallback (software H.264 is GPL, absent from the build) — never null.
+        var expected = HardwareEncoderProbe.H264HardwareEncoder == null
+                           ? VideoEncoderKind.SoftwareFallback
+                           : VideoEncoderKind.Hardware;
+        Assert.Equal(expected, availability.Kind);
+        Assert.False(string.IsNullOrEmpty(availability.EncoderName));
     }
 
     // One video frame's worth of a 440 Hz stereo sine, as interleaved float32 bytes.

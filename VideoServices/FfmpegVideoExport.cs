@@ -1,3 +1,4 @@
+using Sdcb.FFmpeg.Codecs;
 using Sdcb.FFmpeg.Raw;
 using T3.Core.Logging;
 using T3.Core.Video;
@@ -37,6 +38,76 @@ public sealed class FfmpegVideoEncoderFactory : IVideoEncoderFactory
             return null;
         }
     }
+
+    public VideoEncoderAvailability GetAvailability(VideoExportCodec codec)
+    {
+        if (!FfmpegLibrary.EnsureInitialized())
+            return new VideoEncoderAvailability { Kind = VideoEncoderKind.Unavailable };
+
+        if (codec == VideoExportCodec.H264)
+        {
+            // H.264 is dynamic: software H.264 (libx264) is GPL and absent from the bundled LGPL build, so it
+            // needs a GPU encoder, else the MPEG-4 fallback stands in until a user-supplied GPL ffmpeg exists.
+            var hardwareEncoder = HardwareEncoderProbe.H264HardwareEncoder;
+            return hardwareEncoder == null
+                       ? new VideoEncoderAvailability { Kind = VideoEncoderKind.SoftwareFallback, EncoderName = "MPEG-4" }
+                       : new VideoEncoderAvailability { Kind = VideoEncoderKind.Hardware, EncoderName = FriendlyHardwareName(hardwareEncoder) };
+        }
+
+        // The rest are LGPL software encoders — but only if this build actually ships them. The BtbN
+        // lgpl-shared build omits some native encoders (notably HAP, decode-only here), so probe before
+        // claiming availability rather than failing at export time.
+        return SoftwareEncoderIsPresent(codec)
+                   ? new VideoEncoderAvailability { Kind = VideoEncoderKind.Software, EncoderName = SoftwareEncoderLabel(codec) }
+                   : new VideoEncoderAvailability { Kind = VideoEncoderKind.Unavailable, EncoderName = SoftwareEncoderLabel(codec) };
+    }
+
+    // Whether the bundled FFmpeg build includes the encoder a given software codec maps to.
+    private static bool SoftwareEncoderIsPresent(VideoExportCodec codec)
+    {
+        if (codec == VideoExportCodec.ProRes)
+        {
+            try
+            {
+                Codec.FindEncoderById(AVCodecID.Prores);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        var encoderName = codec switch
+                              {
+                                  VideoExportCodec.VP9 => "libvpx-vp9",
+                                  VideoExportCodec.AV1 => "libsvtav1",
+                                  VideoExportCodec.FFV1 => "ffv1",
+                                  VideoExportCodec.Hap or VideoExportCodec.HapAlpha or VideoExportCodec.HapQ => "hap",
+                                  _ => null,
+                              };
+        return encoderName != null && Codec.FindEncoderByName(encoderName) != null;
+    }
+
+    private static string FriendlyHardwareName(string encoderName) => encoderName switch
+                                                                          {
+                                                                              "h264_nvenc" or "hevc_nvenc" => "NVIDIA NVENC",
+                                                                              "h264_qsv" or "hevc_qsv" => "Intel Quick Sync",
+                                                                              "h264_amf" or "hevc_amf" => "AMD AMF",
+                                                                              _ => encoderName,
+                                                                          };
+
+    private static string SoftwareEncoderLabel(VideoExportCodec codec) => codec switch
+                                                                              {
+                                                                                  VideoExportCodec.ProRes => "ProRes 422",
+                                                                                  VideoExportCodec.VP9 => "VP9 (libvpx)",
+                                                                                  VideoExportCodec.AV1 => "AV1 (SVT-AV1)",
+                                                                                  VideoExportCodec.FFV1 => "FFV1",
+                                                                                  VideoExportCodec.Hap => "HAP",
+                                                                                  VideoExportCodec.HapAlpha => "HAP Alpha",
+                                                                                  VideoExportCodec.HapQ => "HAP Q",
+                                                                                  _ => codec.ToString(),
+                                                                              };
 
     private static VideoEncoderSettings BuildEncoderSettings(VideoExportSettings s)
     {
@@ -99,6 +170,15 @@ public sealed class FfmpegVideoEncoderFactory : IVideoEncoderFactory
                            };
             }
 
+            case VideoExportCodec.Hap:
+                return BuildHapSettings(common, "hap");
+
+            case VideoExportCodec.HapAlpha:
+                return BuildHapSettings(common, "hap_alpha");
+
+            case VideoExportCodec.HapQ:
+                return BuildHapSettings(common, "hap_q");
+
             case VideoExportCodec.H264:
             default:
             {
@@ -117,6 +197,21 @@ public sealed class FfmpegVideoEncoderFactory : IVideoEncoderFactory
                            };
             }
         }
+    }
+
+    private static VideoEncoderSettings BuildHapSettings(VideoEncoderSettings common, string hapFormat)
+    {
+        // HAP feeds RGBA straight in and snappy-compresses DXT blocks itself, so it ignores the target bitrate.
+        // DXT works on 4×4 blocks, so the frame size must be a multiple of 4 — round down (crops ≤ 3 px) rather
+        // than let the encoder reject odd sizes.
+        return common with
+                   {
+                       VideoEncoderName = "hap",
+                       EncoderPixelFormat = AVPixelFormat.Rgba,
+                       Width = common.Width & ~3,
+                       Height = common.Height & ~3,
+                       VideoCodecOptions = new[] { new KeyValuePair<string, string>("format", hapFormat) },
+                   };
     }
 }
 

@@ -1,8 +1,10 @@
 # FFmpeg Video Encoding (replacing Media Foundation export)
 
 **Status:** In progress — 2026-06-19. Tier-1 LGPL writer (video + AAC audio), the cross-ALC bridge, eager
-registration, and the codec selector (H.264, ProRes, VP9, AV1, FFV1) are implemented & tested; the tier-2 GPL
-path + install assistant, the inline availability UI, and full MF removal remain. The **encode milestone** deferred by
+registration, the codec selector (H.264, ProRes, VP9, AV1, FFV1), and the **inline availability indicator**
+(hardware / software / MPEG-4-fallback, probed off the UI thread) are implemented & tested; the tier-2 GPL
+path + install assistant (which also turns the fallback line into a `[Set up]` action), and full MF removal
+remain. The **encode milestone** deferred by
 [`Plan_FfmpegVideo.md`](Plan_FfmpegVideo.md) (which replaced MF *decode* with FFmpeg but left *encode* on
 Media Foundation).
 
@@ -245,13 +247,31 @@ FFmpeg) is orthogonal to audio *routing*.
    needs 4:2:2. UI: the filename extension tracks the codec (`.mp4`/`.mov`/`.mkv`); Bitrate shows only for the
    rate-controlled codecs (H.264/VP9/AV1), hidden for ProRes/FFV1. Round-trip unit tests green for all five.
    Codec availability **verified against the shipped LGPL `avcodec-61.dll`** (config grep:
-   libvpx/libaom/libsvtav1/libopus present; libx264/libx265 absent). **Still to add:** DNxHR (needs a profile +
-   pixel-format knob), HAP (libsnappy unverified), and webm/Opus delivery (container-aware audio codec).
-   *Verify (in-editor): each codec renders a playable file via `[PlayVideo]` re-import; choice survives
-   save/reload — see [`render-export-codecs`](../../.tests-manual/render-export-codecs.md).*
-3. **Hardware probe + fallback order + inline availability UI.** The cached HW probe, the resolution order,
-   the quiet inline indicator. *Verify: H.264 silently uses HW where present; the ⚠/[Set up] line appears
-   only when neither HW nor GPL can serve it.*
+   libvpx/libaom/libsvtav1/libopus present; libx264/libx265 absent).
+   **HAP — wired but tier-2-gated.** The three variants (`Hap`/`HapAlpha`/`HapQ` → encoder `hap` with the
+   `format` private option, RGBA in, dimensions rounded to a multiple of 4) and a generic codec-private-option
+   mechanism (`VideoEncoderSettings.VideoCodecOptions`, applied via `av_opt_set`/`AV_OPT_SEARCH.Children`) are
+   implemented and round-trip-tested. **But the bundled build has no HAP encoder** (decode-only — see Risks), so
+   `GetAvailability` reports HAP `Unavailable`, the render window shows a "needs an external FFmpeg" indicator,
+   and **export is gated** (H.264 stays exempt — it always has a fallback path). HAP lights up once Phase 4's
+   out-of-process `ffmpeg.exe` lands; the round-trip tests skip until an encoder-capable build is present.
+   **Still to add:** DNxHR (needs a profile + pixel-format knob), animated **GIF** (deferred — single-pass quality
+   is poor; wants a palettegen/paletteuse two-pass), and webm/Opus delivery (container-aware audio codec).
+   *Verify (in-editor): each available codec renders a playable file via `[PlayVideo]` re-import; HAP is listed
+   but gated; choice survives save/reload — see [`render-export-codecs`](../../.tests-manual/render-export-codecs.md).*
+3. **Hardware probe + fallback order + inline availability UI — DONE (build-verified; in-editor verify
+   pending).** The cached HW probe (Phase 1b-i) is now surfaced through the Core facade as
+   `IVideoEncoderFactory.GetAvailability(codec)` → `VideoEncoderAvailability {Kind, EncoderName}`
+   (`Unavailable`/`Software`/`Hardware`/`SoftwareFallback`). The Video impl
+   ([`FfmpegVideoExport.cs`](../../VideoServices/FfmpegVideoExport.cs)) maps H.264 to Hardware (friendly GPU
+   name) or `SoftwareFallback` ("MPEG-4"), every other codec to `Software`. The editor probes off the UI
+   thread and caches per codec ([`VideoEncoderAvailabilityCache.cs`](../../Editor/Gui/Windows/RenderExport/VideoEncoderAvailabilityCache.cs)
+   — the GPU-encoder open must not stall a draw frame), and `RenderWindow` draws a constant-footprint inline
+   line under the Codec dropdown (checkmark for HW/software, ⚠ + `StatusAttention` for the MPEG-4 fallback /
+   unavailable). **Deferred to Phase 4** (needs tier-2 to exist): the `SoftwareFallback` line becoming a live
+   `[Set up]` action, and a "GPL exe located → silent" availability state (resolution-order case 3). *Verify:
+   H.264 silently uses HW where present; the ⚠ line appears only when no HW encoder works — see
+   [`render-export-codecs`](../../.tests-manual/render-export-codecs.md).*
 4. **Tier-2 GPL path + install assistant.** The `ffmpeg.exe` subprocess writer (rawvideo + PCM pipes),
    detection precedence, the checklist popup, `UserSettings.FfmpegGplEncoderPath`, the env override.
    *Verify: with no HW + no GPL, software H.264 prompts; after install it encodes; a system `ffmpeg` on PATH
@@ -275,9 +295,15 @@ software quality" toggle are polish.
   system-`ffmpeg` detection makes this painless; worth validating it actually engages under Wine.
 - **Pinned-build codec presence.** Verified by grepping the shipped LGPL `avcodec-61.dll` configuration
   string: `--enable-libvpx` / `--enable-libaom` / `--enable-libsvtav1` / `--enable-libopus` /
-  `--enable-libvorbis` are **present** (VP9/AV1/Opus/Vorbis usable); `--enable-libx264` / `--enable-libx265`
-  are **absent** (the GPL premise holds). Native AAC/FLAC/ProRes/FFV1 are built in. Still unconfirmed:
-  `libsnappy` (HAP encode) and `libmp3lame` (MP3).
+  `--enable-libvorbis` / `--enable-libsnappy` / `--enable-libmp3lame` are **present**;
+  `--enable-libx264` / `--enable-libx265` are **absent** (the GPL premise holds). Native AAC/FLAC/ProRes/FFV1
+  are built in. **HAP: decode-only in this build.** Despite `--enable-libsnappy`, the BtbN `lgpl-shared`
+  build ships the HAP *decoder* but **no HAP encoder** (`Codec.FindEncoderByName("hap")` → null; `FindEncoderById`
+  → "codec id Hap not found"). So tier-1 in-process HAP encode is **not possible with the shipped DLLs** — HAP
+  must go through the tier-2 out-of-process `ffmpeg.exe` (Phase 4). HAP is **not GPL**, so any external ffmpeg
+  with the hap encoder (incl. a system LGPL one) serves it — it doesn't require the GPL build. `GetAvailability`
+  now probes real encoder presence, so an absent encoder reports `Unavailable` (and the render window gates
+  export) rather than failing mid-render.
 - **Pipe throughput (tier 2).** Raw BGRA at 4K60 is ~2 GB/s over the pipe — fine locally, but confirm no
   stall vs. letting `ffmpeg` read frames; consider `nv12`/`yuv420p` rawvideo to cut bandwidth.
 - **HW encoder quality.** HW H.264 trades efficiency for speed vs x264 at equal bitrate — some users will
@@ -295,7 +321,8 @@ software quality" toggle are polish.
 |---|---|
 | Render driver (per-frame texture + audio → writer) | `Editor/Gui/Windows/RenderExport/RenderProcess.cs` |
 | Render settings (codec selector — DONE; project `.t3ui`) | `Editor/Gui/Windows/RenderExport/RenderSettings.cs` |
-| Render window UI (add dropdown + inline availability) | `Editor/Gui/Windows/RenderExport/RenderWindow.cs` |
+| Render window UI (codec dropdown + inline availability — DONE) | `Editor/Gui/Windows/RenderExport/RenderWindow.cs` |
+| Off-thread encoder-availability probe + cache (DONE) | `Editor/Gui/Windows/RenderExport/VideoEncoderAvailabilityCache.cs` |
 | FFmpeg encoder core (DONE — video + AAC audio) | `VideoServices/VideoFileEncoder.cs` |
 | Hardware-encoder probe (DONE) | `VideoServices/HardwareEncoderProbe.cs` |
 | Encoder round-trip + HW tests (DONE) | `VideoServices.Tests/VideoFileEncoderTests.cs` |
