@@ -102,6 +102,10 @@ public enum VideoEncoderKind
     /// <summary>Software H.264/HEVC is GPL and absent from the bundled build, and no hardware encoder works here,
     /// so a lower-quality LGPL substitute (MPEG-4) stands in until a user-supplied GPL ffmpeg is installed.</summary>
     SoftwareFallback,
+
+    /// <summary>The bundled build can't encode this codec in-process (e.g. HAP), but a located external
+    /// <c>ffmpeg.exe</c> has the encoder, so export runs it out-of-process (tier 2).</summary>
+    External,
 }
 
 /// <summary>How the requested codec will be served, for the render window's inline availability indicator.</summary>

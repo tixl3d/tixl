@@ -92,18 +92,28 @@ H.264 — especially at high resolution.
 - FFV1 is visually lossless and its file is much larger than the others.
 - No red operator-error state on the `[PlayVideo]` re-import, and no editor freeze during the render.
 
-## Step: HAP is listed but reports it needs an external FFmpeg
+## Step: HAP encodes via an external FFmpeg (tier 2)
 
-**Action:**
-Open the **Codec** dropdown and select **Hap** (also try **HapAlpha** / **HapQ**). Watch the inline line
-under the dropdown and the **Start Render** button.
+The bundled LGPL build ships the HAP *decoder* but no HAP *encoder*, so HAP export runs an external
+`ffmpeg.exe` (any build with the `hap` encoder — a system ffmpeg is fine; no GPL needed). It's located from
+`UserSettings.ExternalFfmpegPath` → the `TIXL_FFMPEG_EXE` env var → `ffmpeg` on `PATH`.
+
+**Action (machine *with* a hap-capable ffmpeg on PATH):**
+Select **Hap** (also try **HapAlpha** / **HapQ**), keep the range short, **Start Render**, then re-import the
+output with `[PlayVideo]`.
 
 **Expected:**
-- The three HAP entries appear in the dropdown, and the filename extension becomes `.mov`.
-- The inline line shows a ⚠ warning: **"HAP encoding needs an external FFmpeg (not available yet)."** — the
-  bundled LGPL build ships the HAP decoder but no HAP encoder.
-- **Start Render** is disabled for HAP; hovering it explains HAP needs an external FFmpeg. (It does **not**
-  silently render a different codec.)
+- The three HAP entries appear; the filename extension becomes `.mov`.
+- The inline line reads **"External FFmpeg encoder"** (not a warning), and **Start Render** is enabled.
+- A `.mov` is written and plays back with the correct image (HapAlpha preserves alpha; HapQ is higher
+  quality / larger). With **Export Audio** on, it carries an AAC track.
+
+**Action (machine *without* a hap-capable ffmpeg):**
+Select **Hap** with no `ffmpeg` on `PATH`/env/setting.
+
+**Expected:**
+- The inline line shows a ⚠ **"HAP encoding needs an external FFmpeg (not available yet)."** and **Start
+  Render** is disabled for HAP — it does **not** silently render a different codec.
 
 ## Step: Codec choice survives save and reload
 

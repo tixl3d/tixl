@@ -205,6 +205,9 @@ internal sealed class RenderWindow : Window
             case VideoEncoderKind.Software:
                 DrawInlineEncoderHint(Icon.Checkmark, UiColors.TextMuted, "Software encoder");
                 break;
+            case VideoEncoderKind.External:
+                DrawInlineEncoderHint(Icon.Checkmark, UiColors.TextMuted, "External FFmpeg encoder");
+                break;
             case VideoEncoderKind.SoftwareFallback:
                 DrawInlineEncoderHint(Icon.Warning, UiColors.StatusAttention,
                                       "No hardware H.264 encoder — exporting as MPEG-4 (lower quality).");

@@ -61,6 +61,9 @@ internal sealed class FfmpegVideoExportWriter : IRenderVideoWriter
         return writer == null ? null : new FfmpegVideoExportWriter(writer);
     }
 
+    /// <summary>Wraps a pre-built file writer (e.g. the tier-2 external-ffmpeg sink) with the texture readback.</summary>
+    public static FfmpegVideoExportWriter Wrap(IVideoFileWriter writer) => new(writer);
+
     private FfmpegVideoExportWriter(IVideoFileWriter writer) => _writer = writer;
 
     public unsafe bool ProcessFrames(Texture2D gpuTexture, ref byte[] audioFrame, int channels, int sampleRate)

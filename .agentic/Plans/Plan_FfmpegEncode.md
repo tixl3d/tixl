@@ -1,10 +1,16 @@
 # FFmpeg Video Encoding (replacing Media Foundation export)
 
-**Status:** In progress — 2026-06-19. Tier-1 LGPL writer (video + AAC audio), the cross-ALC bridge, eager
+**Status:** In progress — 2026-06-20. Tier-1 LGPL writer (video + AAC audio), the cross-ALC bridge, eager
 registration, the codec selector (H.264, ProRes, VP9, AV1, FFV1), and the **inline availability indicator**
-(hardware / software / MPEG-4-fallback, probed off the UI thread) are implemented & tested; the tier-2 GPL
-path + install assistant (which also turns the fallback line into a `[Set up]` action), and full MF removal
-remain. The **encode milestone** deferred by
+(hardware / software / MPEG-4-fallback, probed off the UI thread) are implemented & tested. **HAP** (3
+variants) is wired and round-trip-tested. The **tier-2 external-`ffmpeg.exe` path (4a)** is implemented and
+CLI-verified: a subprocess writer (rawvideo pipe + two-pass AAC mux) + a per-encoder resolver
+(`UserSettings.ExternalFfmpegPath` → `TIXL_FFMPEG_EXE` → `PATH`) now encode **HAP** (and could serve software
+H.264/HEVC) via any ffmpeg that has the encoder — no GPL needed for HAP; HAP shows "External FFmpeg encoder"
+and exports when a capable ffmpeg is found, else stays gated. **HAP render + playback verified in-editor.**
+What remains: the **install/onboarding assistant
+(4b)** — the popup, download/browse/extract checklist, path-entry UI, and wiring the `[Set up]` lines — and
+full MF removal. The **encode milestone** deferred by
 [`Plan_FfmpegVideo.md`](Plan_FfmpegVideo.md) (which replaced MF *decode* with FFmpeg but left *encode* on
 Media Foundation).
 
@@ -74,23 +80,38 @@ The decode→convert core is irrelevant here; what matters is **where the encode
 
 ### Tier 1 — LGPL, in-process (the default; no download, no popup)
 Reuse the **already-bundled** LGPL FFmpeg via the in-process `Sdcb.FFmpeg` bindings (the same path decode
-uses). Covers: **all audio**; **ProRes / DNxHD / VP9 / AV1 / FFV1 / HAP**; **hardware H.264/HEVC**
+uses). Covers: **all audio**; **ProRes / DNxHD / VP9 / AV1 / FFV1**; **hardware H.264/HEVC**
 (`*_nvenc`/`*_qsv`/`*_amf`). A new `FfmpegVideoWriter` mirrors the `MfVideoWriter` contract
 (`ProcessFrames(Texture2D, ref byte[] audio, channels, sampleRate)` + `Dispose`), reads the BGRA/RGBA
 texture back (reuse `TextureBgraReadAccess`), feeds video + the mixdown PCM into libav, and muxes.
 
-### Tier 2 — GPL, out-of-process (only software x264/x265)
-A user-supplied **`ffmpeg.exe`** invoked as a **subprocess**: raw BGRA frames piped on stdin, raw PCM on a
-second input, `ffmpeg` does video + audio + mux. Chosen over an in-process GPL `.dll` deliberately:
+> **HAP is *not* tier-1**, despite the early assumption above. The shipped BtbN `lgpl-shared` build ships the
+> HAP *decoder* but **no HAP encoder** (verified — see Risks), so HAP encode falls to tier 2. It is **not** a
+> licence problem (HAP isn't GPL) — the encoder is simply absent from our build.
 
-- **Licence boundary.** LGPL permits in-process dynamic linking (why decode is in-process); **GPL does
-  not** — a process boundary is the unambiguous, FFmpeg-recommended way to keep TiXL MIT while the user
-  runs their own GPL binary. TiXL distributes nothing GPL.
+### Tier 2 — out-of-process `ffmpeg.exe` (software x264/x265 — *and* HAP)
+A user-supplied / system **`ffmpeg.exe`** invoked as a **subprocess**: raw BGRA frames piped on stdin, raw
+PCM on a second input, `ffmpeg` does video + audio + mux. **Two distinct reasons a codec lands here:**
+
+- **Licence (software H.264/HEVC):** `libx264`/`libx265` are GPL and we won't distribute them. The process
+  boundary is the FFmpeg-recommended way to keep TiXL MIT while the user runs their own GPL binary — TiXL
+  distributes nothing GPL. **Needs a GPL build.**
+- **Missing encoder (HAP):** the encoder just isn't in our LGPL build. **Any** external ffmpeg that has the
+  `hap` encoder serves it — a system/LGPL build is fine; **no GPL involved.** (HAP variants map to
+  `-c:v hap -format hap|hap_alpha|hap_q`; dimensions must be a multiple of 4.)
+
+Chosen over an in-process build deliberately:
+
 - **ABI decoupling.** Decode is painfully pinned to avcodec-61/FFmpeg-7.x to match the Sdcb bindings (a
-  `.0330` bump to avcodec-62 already broke it). The **CLI is stable across majors**, so the exe is immune.
+  `.0330` bump to avcodec-62 already broke it). Swapping the bundled DLLs just to gain the hap encoder would
+  risk that pin. The **CLI is stable across majors**, so the exe is immune.
 - **Linux/Wine.** On Linux the user almost certainly has `/usr/bin/ffmpeg` already — a subprocess uses it
   for free. (Especially relevant where Wine blocks hardware encode *and* MF: system `ffmpeg` is the answer.)
 - **Crash isolation.** A bad user-supplied binary fails the export, not the editor.
+
+**Per-codec encoder requirement.** The resolver must check the located ffmpeg actually *has* the encoder the
+codec needs (`ffmpeg -hide_banner -h encoder=hap` / `=libx264`), not just that an exe exists — a stock system
+ffmpeg has `hap` but may lack `libx264`, and vice-versa. Cache the per-encoder result like the HW probe.
 
 **Audio follows the tier** — whichever tier encodes the video also encodes/muxes the audio, so there is
 never a cross-process audio handoff.
@@ -127,65 +148,85 @@ A one-shot, cached **hardware-encoder probe** (ask the bundled LGPL `ffmpeg` to 
 — *availability in the build ≠ a working GPU*) decides what's silently available. Resolution order for a
 requested codec:
 
-1. Codec is LGPL-native (ProRes/VP9/AV1/FFV1/HAP/audio) → **tier 1**, always.
+1. Codec is LGPL-native (ProRes/VP9/AV1/FFV1/audio) → **tier 1**, always.
 2. H.264/HEVC + a hardware encoder initialises → **tier 1** (HW), silent.
 3. H.264/HEVC + no HW + GPL `ffmpeg.exe` located → **tier 2**, silent.
 4. H.264/HEVC + no HW + no GPL → **the install assistant** (below).
+5. **HAP** + an external `ffmpeg.exe` with the `hap` encoder located → **tier 2**, silent (no GPL needed).
+6. **HAP** + no such ffmpeg → **the external-ffmpeg assistant** (same flow as 4, different copy — *missing
+   encoder*, not *licence*). A located GPL build that also has `hap` satisfies both 4 and 5.
+
+The current build (Phase 3) implements 1, 2, and the "unsatisfiable" half of 4/6: `GetAvailability` reports
+`Unavailable` for HAP, the inline indicator says so, and export is gated. Phase 4 adds the tier-2 subprocess
+and turns those gates into the located/assistant paths.
 
 UI surfacing — **don't fire a modal on dropdown change** (twiddling to compare options shouldn't nag):
 - **On selection:** a quiet inline indicator next to the dropdown — `Hardware encoder` tag when HW serves
-  it, or a ⚠ `Software H.264 needs an extra component — [Set up]` line in case 4. Optionally grey-tag the
-  dropdown option itself (`H.264 (needs setup)`) only when neither HW nor GPL can serve it.
+  it; a ⚠ `Software H.264 needs an extra component — [Set up]` line in case 4; a ⚠ `HAP needs an external
+  FFmpeg — [Set up]` line in case 6. Optionally grey-tag the dropdown option itself only when nothing can
+  serve it. *(Phase 3 already draws these warning lines; Phase 4 wires the `[Set up]` action.)*
 - **Modal only at commitment:** the user clicks `[Set up]`, *or* hits **Export** with an unsatisfiable
   codec.
 
-## Install-assistant popup (tier-2 only)
+## External-ffmpeg assistant (tier-2)
 
-Triggered only in case 4 above. Corrected from the first sketch: it's **`ffmpeg.exe`** (not a `.dll`), and
-the BtbN GPL build is a **zip, not an installer**.
+Triggered by case 4 (software H.264/HEVC, no HW) **or** case 6 (HAP, no ffmpeg with the encoder). One flow,
+two entry copies — the difference is *why* an external ffmpeg is needed, and HAP must **not** imply GPL:
+
+- **Case 4 (software H.264/HEVC):** "…we can't bundle the **GPL** build (licence) — install it yourself."
+  The download offer points at the BtbN **gpl** zip.
+- **Case 6 (HAP):** "…the bundled FFmpeg doesn't include the **HAP** encoder — point TiXL at an FFmpeg that
+  does." **No GPL framing.** A system ffmpeg or any non-GPL build with `hap` is fine; the download offer can
+  point at a permissive (lgpl/full) build. If a GPL build is already present and has `hap`, reuse it.
+
+It's **`ffmpeg.exe`** (not a `.dll`), and the BtbN builds are a **zip, not an installer**.
 
 ```
 ┌─ Video encoding needs an extra component ──────────────┐
-│  TiXL can encode H.264/HEVC with FFmpeg. We can't       │
-│  bundle the GPL build (its licence isn't compatible     │
-│  with TiXL's permissive MIT licence) — so you install   │
-│  it yourself, once.                  [ Set up FFmpeg ]   │
+│  «case 4» TiXL can encode software H.264/HEVC with      │
+│  FFmpeg, but can't bundle the GPL build (licence).      │
+│  «case 6» HAP needs an FFmpeg build that includes the   │
+│  HAP encoder, which the bundled one doesn't.            │
+│  Install/point to one yourself, once.  [ Set up FFmpeg ]│
 └─────────────────────────────────────────────────────────┘
   on click → a checklist that advances live:
-  ✓ 1. Open the download page (BtbN ffmpeg-*-gpl-*.zip)  → [Open page]
-  ◐ 2. Pick the downloaded zip (auto-found in Downloads;   [Browse…]
-        verified by a pinned SHA-256)
-  ○ 3. TiXL extracts ffmpeg.exe into its tools folder   (no installer to run)
-  ○ 4. Verify: ffmpeg.exe N.N (GPL) ✓
+  ✓ 1. Open the download page (BtbN ffmpeg-*.zip)        → [Open page]
+  ◐ 2. Pick the downloaded zip / an existing ffmpeg.exe    [Browse…]
+        (auto-found in Downloads; zip verified by SHA-256)
+  ○ 3. TiXL extracts/records ffmpeg.exe in its tools folder
+  ○ 4. Verify it has the needed encoder: -h encoder=hap|libx264 ✓
                                             [ Done ] [ Cancel ]
 ```
 
-Detection precedence (only show the popup if all miss): TiXL-installed exe in AppData → system `ffmpeg`
-on `PATH` (covers Linux/Wine and Windows users who already have it) → offer the download. The pinned
-SHA-256 over the official BtbN release is what makes auto-picking a Downloads file safe; the install
-target is a persistent **AppData** tools folder (not the app dir — read-only on some installs, wiped on
-update), remembered across sessions.
+Detection precedence (only show the popup if all miss): TiXL-recorded exe in AppData → system `ffmpeg` on
+`PATH` (covers Linux/Wine and Windows users who already have it) → offer the download. **The verify step is
+per-encoder**, not just "an exe exists" (a system ffmpeg may have `hap` but not `libx264`). The pinned
+SHA-256 over an official BtbN release is what makes auto-picking a Downloads file safe; the install target is
+a persistent **AppData** tools folder (not the app dir — read-only on some installs, wiped on update),
+remembered across sessions.
 
 ## Settings — where each value lives
 
 | Value | Home | Why |
 |---|---|---|
 | **Codec / container choice** | `RenderSettings` (Core-adjacent, **project** `.t3ui`) | Travels with the project — a project that renders ProRes should remember it. Mirrors existing `Bitrate`/`ExportAudio`. |
-| **GPL `ffmpeg.exe` path** | `UserSettings.ConfigData` (**Editor, per-machine**) | Export is editor-only (the Player never encodes) → not Core. A per-machine install path **must not** ride exports → not a project setting. The mirror image of the decode budget, which *is* a Core project setting because the player plays back. |
+| **External `ffmpeg.exe` path** | `UserSettings.ConfigData` (**Editor, per-machine**) | Export is editor-only (the Player never encodes) → not Core. A per-machine install path **must not** ride exports → not a project setting. The mirror image of the decode budget, which *is* a Core project setting because the player plays back. **One path, not "the GPL path"** — the same exe serves both software H.264/HEVC (GPL build) and HAP (any build with `hap`); the resolver checks per-encoder, not by licence. |
 | **Override** | env `TIXL_FFMPEG_EXE` | Power-user / CI, mirroring the existing `TIXL_FFMPEG_ALLOW_RESTRICTED` precedent. Resolver order: UserSettings path → env → `PATH`. |
 
 ```csharp
 // UserSettings.ConfigData
-/// Path to a user-installed GPL FFmpeg (ffmpeg.exe) for software H.264/HEVC export.
-/// Per-machine; not shipped with projects. Empty = not installed / not located yet.
-public string? FfmpegGplEncoderPath = null;
+/// Path to a user-supplied external FFmpeg (ffmpeg.exe) for codecs the bundled LGPL build can't encode:
+/// software H.264/HEVC (a GPL build) and HAP (any build that includes the hap encoder). The resolver verifies
+/// the *specific* encoder is present, so this single path can satisfy either. Per-machine; not shipped with
+/// projects. Empty = not configured / not located yet.
+public string? ExternalFfmpegPath = null;
 ```
 
-**Two separate FFmpeg installs.** This path is *only* the GPL encode exe. Decode resolves its own bundled
-LGPL DLLs flat next to `Lib.dll` and needs no path — don't conflate them in UI or naming. *(Note for
-[`Plan_InstallVerificationAndSafeStartup.md`](Plan_InstallVerificationAndSafeStartup.md): the GPL exe is an
-**optional, user-supplied** component — it must **not** appear in the install-verifier manifest, which
-covers TiXL's own shipped files. The bundled LGPL decode DLLs do belong in the manifest; the GPL encoder
+**Two separate FFmpeg installs.** This path is *only* the external encode exe (tier-2). Decode resolves its
+own bundled LGPL DLLs flat next to `Lib.dll` and needs no path — don't conflate them in UI or naming. *(Note
+for [`Plan_InstallVerificationAndSafeStartup.md`](Plan_InstallVerificationAndSafeStartup.md): the external exe
+is an **optional, user-supplied** component — it must **not** appear in the install-verifier manifest, which
+covers TiXL's own shipped files. The bundled LGPL decode DLLs do belong in the manifest; the external encoder
 does not.)*
 
 ## Audio (intersection with Plan_VideoAudio)
@@ -267,15 +308,40 @@ FFmpeg) is orthogonal to audio *routing*.
    name) or `SoftwareFallback` ("MPEG-4"), every other codec to `Software`. The editor probes off the UI
    thread and caches per codec ([`VideoEncoderAvailabilityCache.cs`](../../Editor/Gui/Windows/RenderExport/VideoEncoderAvailabilityCache.cs)
    — the GPU-encoder open must not stall a draw frame), and `RenderWindow` draws a constant-footprint inline
-   line under the Codec dropdown (checkmark for HW/software, ⚠ + `StatusAttention` for the MPEG-4 fallback /
-   unavailable). **Deferred to Phase 4** (needs tier-2 to exist): the `SoftwareFallback` line becoming a live
-   `[Set up]` action, and a "GPL exe located → silent" availability state (resolution-order case 3). *Verify:
+   line under the Codec dropdown (checkmark for HW/software, ⚠ + `StatusAttention` for the MPEG-4 fallback,
+   and a HAP-specific "needs an external FFmpeg" line for the gated HAP variants). Export is gated for any
+   `Unavailable` non-H.264 codec so it can't silently fall back. **Deferred to Phase 4** (needs tier-2 to
+   exist): the `SoftwareFallback` / HAP lines becoming live `[Set up]` actions, and the "external ffmpeg
+   located → silent" availability states (resolution-order cases 3 and 5). *Verify:
    H.264 silently uses HW where present; the ⚠ line appears only when no HW encoder works — see
    [`render-export-codecs`](../../.tests-manual/render-export-codecs.md).*
-4. **Tier-2 GPL path + install assistant.** The `ffmpeg.exe` subprocess writer (rawvideo + PCM pipes),
-   detection precedence, the checklist popup, `UserSettings.FfmpegGplEncoderPath`, the env override.
-   *Verify: with no HW + no GPL, software H.264 prompts; after install it encodes; a system `ffmpeg` on PATH
-   is detected without a download.*
+4. **Tier-2 external-`ffmpeg.exe` path + assistant (serves software H.264/HEVC *and* HAP).** Split into:
+   - **4a. Functional tier-2 path — DONE & VERIFIED (HAP render + `[PlayVideo]` playback confirmed in-editor).** The subprocess
+     writer ([`ExternalFfmpegFileWriter.cs`](../../Editor/Gui/Windows/RenderExport/ExternalFfmpegFileWriter.cs):
+     rawvideo RGBA on stdin → `-c:v hap -format hap|hap_alpha|hap_q` or `libx264`; audio via a **two-pass mux**
+     — pass 1 a temp video-only file + PCM appended to a temp `f32le`, pass 2 `-c:v copy -c:a aac` — since the
+     single stdin pipe can't also carry audio), reusing the same texture-readback adapter
+     (`FfmpegVideoExportWriter.Wrap`). The resolver
+     ([`ExternalFfmpegResolver.cs`](../../Editor/Gui/Windows/RenderExport/ExternalFfmpegResolver.cs)) locates an
+     exe (`UserSettings.ExternalFfmpegPath` → `TIXL_FFMPEG_EXE` env → `ffmpeg` on `PATH`) and **verifies the
+     specific encoder** with `-h encoder=…` (a system ffmpeg may have `hap` but not `libx264`); cached, probed
+     off the UI thread. `RenderProcess` tries tier-1, then tier-2, then MF. `GetAvailability` gains an
+     `External` kind: the editor cache upgrades a tier-1-`Unavailable` codec to `External` when the resolver
+     finds the encoder, so the indicator reads "External FFmpeg encoder" and the export gate opens.
+     `UserSettings.ExternalFfmpegPath` + the env override are wired. The dims are rounded to the codec's block
+     size (×4 HAP / even H.264) in the writer. **CLI-validated** against a real ffmpeg: rawvideo→`hap` (HapY)
+     `.mov` and the two-pass AAC mux both produce correct streams. *In-editor verify pending: HAP renders a
+     playable `.mov` via `[PlayVideo]` re-import, `ExportAudio` muxes AAC, and HAP is gated only when no
+     hap-capable ffmpeg is found.*
+   - **4b. Install/onboarding assistant — TODO.** The popup with two entry copies (licence for software
+     H.264/HEVC vs. *missing-encoder* for HAP — **no GPL framing for HAP**), the download/browse/extract
+     checklist, a pinned SHA-256, and a path-entry settings UI (4a relies on PATH/env auto-detection only).
+     Wire the Phase 3 `[Set up]` warning lines to launch it for cases 4 and 6. **Note:** the "prefer software
+     H.264 quality over the HW encoder" toggle (route H.264 to tier-2 even when HW exists) is *not* in 4a —
+     today tier-2 engages only when tier-1 can't serve the codec; H.264 stays on HW/MPEG-4.
+   *Verify: with no HW + no GPL, software H.264 prompts; after install it encodes. HAP, with a system/LGPL
+   ffmpeg that has `hap`, encodes a playable `.mov` with **no GPL prompt**; a system `ffmpeg` on PATH is
+   detected for either without a download; the per-encoder verify rejects an ffmpeg missing the needed codec.*
 5. **Remove MF encode entirely.** Delete the `Editor/Gui/Windows/RenderExport/MF/` folder (`MfVideoWriter`,
    `MFAudioWriter`, `MFHelper`, `FormatConversion`) and drop the `SharpDX.MediaFoundation` package reference
    from [`Core.csproj`](../../Core/Core.csproj) (line 46 — it's in Core, though only the Editor used it).
@@ -333,7 +399,9 @@ software quality" toggle are polish.
 | Encoder contract to mirror (`ProcessFrames`/`Dispose`), then delete | `Editor/Gui/Windows/RenderExport/MF/MfVideoWriter.cs` |
 | MF package reference to drop (Phase 5) | `Core/Core.csproj` (`SharpDX.MediaFoundation`, line 46) |
 | Mixdown PCM source (reused unchanged) | `Editor/Gui/Windows/RenderExport/RenderProcess.cs` + `Core/Audio/AudioRendering.cs` |
-| Per-machine GPL exe path | `Editor/Gui/UiHelpers/UserSettings.cs` |
+| Per-machine external ffmpeg.exe path (tier-2; GPL H.264/HEVC + HAP) | `Editor/Gui/UiHelpers/UserSettings.cs` |
+| Tier-2 subprocess writer (DONE — rawvideo pipe + two-pass AAC mux) | `Editor/Gui/Windows/RenderExport/ExternalFfmpegFileWriter.cs` |
+| Tier-2 exe resolver + per-encoder verify (DONE) | `Editor/Gui/Windows/RenderExport/ExternalFfmpegResolver.cs` |
 | Bundled LGPL FFmpeg + guardrail (tier-1 reuse) | `VideoServices/FfmpegLibrary.cs` |
 | Texture readback for CPU encode | `Core/Resource/Utils/TextureBgraReadAccess.cs` |
 
@@ -341,6 +409,9 @@ software quality" toggle are polish.
 
 Add `.tests-manual/video-export-ffmpeg.md` covering: H.264 parity vs the old MF file; a Wine/Linux render
 producing a playable file; `ExportAudio` on/off; a non-GPL codec (ProRes/VP9) rendering with no popup;
-H.264 on a HW-capable machine staying silent; the install assistant appearing only when neither HW nor GPL
-is available, and the checklist completing to a working `ffmpeg.exe`; a system-`ffmpeg`-on-PATH machine
-skipping the download.
+H.264 on a HW-capable machine staying silent; the external-ffmpeg assistant appearing only when neither HW
+nor an external ffmpeg is available, and the checklist completing to a working `ffmpeg.exe`; a
+system-`ffmpeg`-on-PATH machine skipping the download. **HAP-specific:** with the bundled build HAP is listed
+but gated ("needs an external FFmpeg"); after pointing TiXL at a `hap`-capable ffmpeg it renders a playable
+`.mov` **with no GPL prompt**; the per-encoder verify rejects an ffmpeg that lacks the needed codec. *(The
+HAP-gated half is in [`render-export-codecs`](../../.tests-manual/render-export-codecs.md) today.)*

@@ -169,12 +169,24 @@ internal static class RenderProcess
             if (ffmpegWriter != null)
             {
                 session.VideoWriter = ffmpegWriter;
-                Log.Debug("Render-export: using the FFmpeg encoder.");
+                Log.Debug("Render-export: using the in-process FFmpeg encoder.");
             }
             else
             {
-                Log.Debug($"Render-export: FFmpeg encoder unavailable ({ffmpegError}); falling back to Media Foundation.");
-                session.VideoWriter = new Mp4VideoWriter(session);
+                // Tier 2: codecs the bundled build can't encode in-process (HAP; software H.264/HEVC) run an
+                // external ffmpeg.exe as a subprocess, behind the same texture-readback adapter.
+                var externalWriter = ExternalFfmpegFileWriter.TryCreate(session, out var externalError);
+                if (externalWriter != null)
+                {
+                    session.VideoWriter = FfmpegVideoExportWriter.Wrap(externalWriter);
+                    Log.Debug("Render-export: using an external FFmpeg encoder (tier 2).");
+                }
+                else
+                {
+                    Log.Debug($"Render-export: in-process FFmpeg unavailable ({ffmpegError}); "
+                              + $"external FFmpeg unavailable ({externalError}); falling back to Media Foundation.");
+                    session.VideoWriter = new Mp4VideoWriter(session);
+                }
             }
 
             Log.Gated.VideoRender($"Mp4VideoWriter initialized: " +

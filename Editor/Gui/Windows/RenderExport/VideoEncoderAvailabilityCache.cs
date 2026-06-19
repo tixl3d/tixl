@@ -48,7 +48,15 @@ internal static class VideoEncoderAvailabilityCache
                 factory = VideoExport.Factory;
             }
 
-            return factory?.GetAvailability(codec) ?? new VideoEncoderAvailability { Kind = VideoEncoderKind.Unavailable };
+            var availability = factory?.GetAvailability(codec) ?? new VideoEncoderAvailability { Kind = VideoEncoderKind.Unavailable };
+
+            // The in-process build can't encode this codec (e.g. HAP) — but a located external ffmpeg might
+            // (tier 2). Probe the resolver here (off the UI thread already) so the indicator and export gate
+            // can treat it as available.
+            if (availability.Kind == VideoEncoderKind.Unavailable && ExternalFfmpegResolver.CanEncode(codec))
+                return new VideoEncoderAvailability { Kind = VideoEncoderKind.External, EncoderName = "external FFmpeg" };
+
+            return availability;
         }
         catch (Exception e)
         {
