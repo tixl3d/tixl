@@ -212,13 +212,20 @@ FFmpeg) is orthogonal to audio *routing*.
      the HW encoder via the probe with an MPEG-4 LGPL fallback). Core + Video build. **Registration** (who
      calls `Register()`) moves to the new `Video` operator package — see
      [`Plan_VideoOperatorPackage.md`](Plan_VideoOperatorPackage.md); the interim Lib trigger was removed.
-   - **1c-ii. Editor readback adapter + `RenderProcess` wiring — REMAINING.** The render output frame must be
-     read back GPU→CPU as RGBA8 (the editor owns this — its format-converting readback `ScreenshotWriter` /
-     `TextureBgraReadAccess` is editor/Core-side, robust to HDR/float outputs). A new editor adapter replaces
-     `Mp4VideoWriter`: it drives the readback and feeds the Core `IVideoFileWriter`; `RenderProcess` creates it
-     via `VideoExport.Factory` and keeps the `ProcessFrames`/`Dispose` call sites. **This is the step that
-     makes export run in the app.** *Verify in-editor: Windows render plays back; audio frame-aligned;
-     `ExportAudio=false` → silent; the `[ModuleInitializer]` fires before export.*
+   - **1c-ii. Editor readback adapter + `RenderProcess` wiring — DONE (build-verified; in-editor verify
+     pending).** [`FfmpegVideoExportWriter`](../../Editor/Gui/Windows/RenderExport/FfmpegVideoExportWriter.cs)
+     reads each output frame back via `TextureBgraReadAccess`'s **synchronous `useImmediateReadback`** mode
+     (`ConvertToCpuReadableBgra` — compute-shader convert of any source format straight to **RGBA8**, then map),
+     and feeds the bytes + the audio mixdown to the Core `IVideoFileWriter`. No async/one-frame-delay/drain
+     needed (export is offline). A shared `IRenderVideoWriter` interface lets it and `MfVideoWriter` coexist;
+     `RenderProcess` prefers FFmpeg (via `VideoExport.Factory`) and **falls back to MF** when the factory isn't
+     registered (so nothing regresses during the transition). Registration is a `[ModuleInitializer]` in the
+     **Video operator package** ([`VideoExportRegistration.cs`](../../Operators/Video/VideoExportRegistration.cs)).
+     Editor builds. *In-editor verify: a render produces a playable FFmpeg file (H.264 via the HW probe);
+     audio muxed + aligned; `ExportAudio=false` → silent; MF fallback engages when FFmpeg is absent.*
+     **Known gap:** the `[ModuleInitializer]` fires on first Video-package code execution, so an export from a
+     project that never touched a video op may find the factory unset → MF fallback (Windows) or fails on Linux.
+     An on-demand register-at-export trigger closes this (needed for the Linux "always works" goal).
 2. **Codec/container selector.** Add the enum to `RenderSettings` (project-persisted) + the
    [`RenderWindow`](../../Editor/Gui/Windows/RenderExport/RenderWindow.cs) dropdown; expose the LGPL codecs
    (ProRes / DNxHD / VP9 / AV1 / FFV1 / HAP). *Verify: each renders a valid file; choice survives save/reload.*

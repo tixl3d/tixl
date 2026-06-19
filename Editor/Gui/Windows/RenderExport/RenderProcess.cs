@@ -165,7 +165,17 @@ internal static class RenderProcess
     {
         try
         {
-            session.VideoWriter = new Mp4VideoWriter(session);
+            var ffmpegWriter = FfmpegVideoExportWriter.TryCreate(session, out var ffmpegError);
+            if (ffmpegWriter != null)
+            {
+                session.VideoWriter = ffmpegWriter;
+                Log.Debug("Render-export: using the FFmpeg encoder.");
+            }
+            else
+            {
+                Log.Debug($"Render-export: FFmpeg encoder unavailable ({ffmpegError}); falling back to Media Foundation.");
+                session.VideoWriter = new Mp4VideoWriter(session);
+            }
 
             Log.Gated.VideoRender($"Mp4VideoWriter initialized: " +
                                   $"Codec=H.264" +
@@ -472,7 +482,7 @@ internal static class RenderProcess
                 Log.Debug($"""
                            SaveVideoFrameAndAdvance: frame={session.FrameIndex}
                            MainOutputTexture null? {MainOutputTexture == null}
-                           audioFrame.Length={audioFrame?.Length}
+                           audioFrame.Length={audioFrame.Length}
                            channels={channels}
                            sampleRate={sampleRate}
                            """);
@@ -534,7 +544,7 @@ internal static class RenderProcess
 
     internal sealed class ExportSession
     {
-        public Mp4VideoWriter? VideoWriter;
+        public IRenderVideoWriter? VideoWriter;
         public string TargetDirectory = string.Empty;
         public string TargetFilePath = string.Empty;
         public double ExportStartedTime;

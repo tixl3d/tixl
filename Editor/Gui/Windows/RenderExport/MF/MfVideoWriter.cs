@@ -20,7 +20,7 @@ namespace T3.Editor.Gui.Windows.RenderExport.MF;
 /// Abstract base class for writing video files using Media Foundation.
 /// Handles video and optional audio stream setup, frame processing, and resource management.
 /// </summary>
-internal abstract class MfVideoWriter : IDisposable
+internal abstract class MfVideoWriter : IRenderVideoWriter
 {
     private readonly Int2 _videoPixelSize;
 
