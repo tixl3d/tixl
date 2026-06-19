@@ -169,6 +169,7 @@ Add `.tests-manual/install-verification.md` covering:
 
 - **Auto-repair**: actually downloading replacement files from a CDN. We just guide the user to reinstall. Auto-repair would need code-signed update infrastructure that's a much bigger commitment.
 - **Per-user-project install verification**: this plan is about TiXL's *own* deployed files. User-project files are [Plan_BrokenPackageRecovery](Plan_BrokenPackageRecovery.md)'s domain.
+- **Optional user-supplied components**: the GPL `ffmpeg.exe` for software H.264/HEVC export ([Plan_FfmpegEncode](Plan_FfmpegEncode.md)) is **deliberately not shipped** and lives in AppData, not the install — it must **not** be added to the manifest (it would always report "missing"). The *bundled LGPL decode* DLLs next to `Lib.dll` are shipped and do belong in the manifest.
 - **Cross-platform**: the verifier is Windows-only because TiXL is currently Windows-only. If/when there's a Linux/macOS build, the manifest format generalises trivially; the Win32-fallback recovery dialog does not.
 - **Detecting which file *should* contain `X` when it's been replaced by something else of the same size.** SHA256 verification in Safe Mode covers this; fast verification deliberately doesn't.
 
