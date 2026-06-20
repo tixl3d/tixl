@@ -153,7 +153,6 @@ internal static class Program
 
         // Initialize debug logging configuration from user settings
         UserSettings.InitializeGatedLogging();
-        UserSettings.ApplyVideoPlaybackSettings();
 
         // ReSharper disable once UnusedVariable
         var projectSettings = new CoreSettings(saveOnQuit: true);

@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
+using Sdcb.FFmpeg.Raw;
 using Sdcb.FFmpeg.Utils;
 using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
@@ -27,6 +28,14 @@ internal sealed class HardwareFrameConverter : IDisposable
     {
         var shader = ShaderResource?.Value;
         if (shader == null || width <= 0 || height <= 0)
+            return _output;
+
+        // Only a real D3D11VA surface carries an ID3D11Texture2D in data[0]. A hardware decoder can still emit a
+        // software-format frame — e.g. the first frame right after opening, while the hwaccel initialises — even
+        // though the session already reports zero-copy. Treating that frame's data[0] (a CPU pixel buffer) as a COM
+        // object would AddRef a non-pointer and crash hard (AccessViolationException, uncatchable). Skip it; the
+        // next real surface converts normally and the last-valid texture stays on screen meanwhile.
+        if ((AVPixelFormat)gpuFrame.Format != AVPixelFormat.D3d11)
             return _output;
 
         var texturePtr = (IntPtr)gpuFrame.Data[0];

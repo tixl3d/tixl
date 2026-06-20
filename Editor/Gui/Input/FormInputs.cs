@@ -334,6 +334,11 @@ internal static class FormInputs
 
         var previewLabel = selectedValue == null ? "please select" : getDisplayTextFunc(selectedValue);
 
+        // Constrain to the standard input column (reserving room for the tooltip icon) like the other inputs —
+        // otherwise the combo spans the whole content region and overflows narrow panels.
+        var inputSize = GetAvailableInputSize(tooltip, false, true);
+        ImGui.SetNextItemWidth(inputSize.X);
+
         var modified = false;
         if (ImGui.BeginCombo(imguiLabel,
                 previewLabel,

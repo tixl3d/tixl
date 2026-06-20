@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using T3.Core.Logging;
 using T3.Core.Model;
+using T3.Core.Settings;
 using T3.Core.Video;
 using T3.Editor.Gui.UiHelpers;
 
@@ -15,8 +16,8 @@ namespace T3.Editor.Gui.Windows.RenderExport;
 /// <summary>
 /// Editor-side background queue that transcodes video sources into seek-friendly proxies, one at a time. The
 /// actual decode→encode runs in the video assembly (<see cref="VideoExport.Factory"/>'s
-/// <c>GenerateProxy</c>); this owns the queue, the sibling-file path, progress/status, and the per-machine
-/// <see cref="UserSettings.ConfigData.ProxyFormat"/> / <c>ProxyResolution</c>. Editor-only — the player never
+/// <c>GenerateProxy</c>); this owns the queue, the sibling-file path, and progress/status. Format and resolution
+/// come from the per-project <see cref="CompositionSettings.ProxyConfig"/>. Editor-only — the player never
 /// generates proxies.
 /// </summary>
 internal static class ProxyGenerationService
@@ -78,8 +79,9 @@ internal static class ProxyGenerationService
             return;
         }
 
-        var codec = UserSettings.Config.ProxyFormat;
-        var scale = Math.Clamp(UserSettings.Config.ProxyResolution, 0.1f, 1f);
+        var proxySettings = CompositionSettings.Current.Proxy;
+        var codec = proxySettings.Format;
+        var scale = Math.Clamp(proxySettings.Resolution, 0.1f, 1f);
         var proxyPath = ProxyPathFor(source);
 
         _jobs[source] = new JobStatus(JobState.Generating, 0, null);

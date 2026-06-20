@@ -9,6 +9,7 @@ using T3.Core.Audio;
 using T3.Core.IO;
 using T3.Core.Operator;
 using T3.Core.Settings;
+using T3.Core.Video;
 using T3.Editor.Gui.Audio;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Interaction.Timing;
@@ -125,6 +126,7 @@ internal sealed class ProjectSettingsWindow : Window
     {
         Playback,
         Audio,
+        Proxies,
         Recording,
         Executable,
     }
@@ -157,6 +159,9 @@ internal sealed class ProjectSettingsWindow : Window
                 case Categories.Audio:
                     modified |= DrawAudioSettings(settings);
                     break;
+                case Categories.Proxies:
+                    modified |= DrawProxySettings(settings);
+                    break;
                 case Categories.Recording:
                     modified |= DrawRecordingSettings(composition);
                     break;
@@ -175,6 +180,7 @@ internal sealed class ProjectSettingsWindow : Window
                                                                  {
                                                                      Categories.Playback   => "Playback",
                                                                      Categories.Audio      => "Audio Mix",
+                                                                     Categories.Proxies    => "Video Proxies",
                                                                      Categories.Recording  => "Recording",
                                                                      Categories.Executable => "Export",
                                                                      _                     => string.Empty,
@@ -219,6 +225,48 @@ internal sealed class ProjectSettingsWindow : Window
 
         return modified;
     }
+
+    private static bool DrawProxySettings(CompositionSettings settings)
+    {
+        var modified = false;
+        var proxy = settings.Proxy;
+        var defaults = CompositionSettings.Defaults.Proxy;
+
+        CustomComponents.HelpText("Proxies are downscaled, fast-seeking copies of video clips used for preview. "
+                                  + "Rendering to file always uses the full-resolution source. Generate them from a "
+                                  + "video operator's context menu.");
+        FormInputs.AddVerticalSpace();
+
+        modified |= FormInputs.AddCheckBox("Use proxies for preview",
+            ref proxy.UseForPreview,
+            "When a clip has a generated proxy beside it, play the proxy while previewing/scrubbing for faster seeking.",
+            defaults.UseForPreview);
+
+        FormInputs.AddVerticalSpace();
+
+        // Restricted to all-intra / LGPL codecs — a proxy never uses H.264/HEVC (libx264/libx265 = GPL).
+        modified |= FormInputs.AddDropdown(ref proxy.Format, ProxyFormats, "Proxy Format", ProxyFormatName,
+            "All-intra codec used when generating proxies. ProRes is a balanced default; Hap variants scrub fastest at a larger file size.");
+
+        modified |= FormInputs.AddFloat("Proxy Resolution",
+            ref proxy.Resolution, 0.1f, 1f, 0.05f, true, true,
+            "Proxy size as a fraction of the source resolution (0.5 = half-size). Smaller seeks faster and uses less disk.",
+            defaults.Resolution);
+
+        return modified;
+    }
+
+    private static readonly VideoExportCodec[] ProxyFormats =
+        [VideoExportCodec.ProRes, VideoExportCodec.Hap, VideoExportCodec.HapAlpha, VideoExportCodec.HapQ];
+
+    private static string ProxyFormatName(VideoExportCodec codec) => codec switch
+                                                                         {
+                                                                             VideoExportCodec.ProRes   => "ProRes",
+                                                                             VideoExportCodec.Hap      => "Hap",
+                                                                             VideoExportCodec.HapAlpha => "Hap Alpha",
+                                                                             VideoExportCodec.HapQ     => "Hap Q",
+                                                                             _                         => codec.ToString(),
+                                                                         };
 
     /// <summary>
     /// Per-composition toggles for the live recording feature: what the Record button on

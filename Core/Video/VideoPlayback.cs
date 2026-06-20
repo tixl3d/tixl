@@ -64,10 +64,6 @@ public static class VideoPlayback
 {
     public static IVideoPlaybackEngine? Engine { get; set; }
 
-    /// <summary>When true, the engine opens a clip's sibling proxy (if one exists) for preview/scrub instead of
-    /// the source — never while rendering to file. The editor sets this from the user/project setting.</summary>
-    public static bool UseProxies { get; set; } = true;
-
     /// <summary>The sibling proxy path for a source video (<c>clip.mp4</c> → <c>clip.proxy.mov</c>). Shared by
     /// proxy generation and the engine's substitution so both agree. Proxy codecs (ProRes/HAP/…) all mux to MOV.</summary>
     public static string GetProxyPath(string sourcePath)

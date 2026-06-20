@@ -227,18 +227,6 @@ internal sealed partial class SettingsWindow : Window
 
 
                     FormInputs.AddVerticalSpace();
-                    FormInputs.AddSectionSubHeader("Video Proxies");
-                    FormInputs.SetIndentToLeft();
-                    if (FormInputs.AddCheckBox("Use proxy videos for preview",
-                                               ref UserSettings.Config.UseProxyVideos,
-                                               "When a video clip has a generated proxy beside it, use the proxy for preview and scrubbing (faster seeking). Rendering to file always uses the full-resolution source. Generate proxies from a video operator's context menu.",
-                                               UserSettings.Defaults.UseProxyVideos))
-                    {
-                        UserSettings.ApplyVideoPlaybackSettings();
-                        changed = true;
-                    }
-
-                    FormInputs.AddVerticalSpace();
                     FormInputs.AddSectionSubHeader("Skill Quest");
                     FormInputs.SetIndentToLeft();
                     changed |= FormInputs.AddCheckBox("Show Skill Quest in Hub",

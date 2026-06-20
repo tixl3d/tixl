@@ -71,6 +71,9 @@ public sealed class VideoPlaybackController : IDisposable
                     _lastUploadedTarget = _pendingTarget;
                     _hasPendingGpuFrame = false;
                     gotGpuFrame = true;
+                    // This frame's surface belongs to the current session. Claim it so a concurrent mode/source
+                    // switch on the worker can't dispose that session while Convert is reading the surface below.
+                    _renderConverting = true;
                 }
             }
             else if (_hasPendingFrame)
@@ -116,6 +119,11 @@ public sealed class VideoPlaybackController : IDisposable
             finally
             {
                 _renderGpuFrame.Unref();
+                lock (_lock)
+                {
+                    _renderConverting = false;
+                    Monitor.PulseAll(_lock); // release a worker waiting in OpenSource to tear the session down
+                }
             }
         }
 
@@ -309,10 +317,10 @@ public sealed class VideoPlaybackController : IDisposable
         _workerUrl = url;
         _workerMode = mode;
 
-        // Drop any GPU frame still queued from the previous session before disposing it: that frame's surface
-        // belongs to the decoder we're about to tear down, and converting it on the render thread after teardown
-        // is what throws E_INVALIDARG on the shader-resource-view. (A frame already moved into _renderGpuFrame is
-        // covered by the try/catch around Convert.)
+        // Both GPU frames referencing the previous session's surfaces must be released before we dispose it, or a
+        // convert on the render thread reads freed D3D resources. The still-queued frame we can drop here; a frame
+        // already handed to the render thread (mid-Convert) we must WAIT for — its convert AddRefs the surface, and
+        // on a freed resource that's an AccessViolationException, which a normal try/catch can't contain.
         lock (_lock)
         {
             if (_hasPendingGpuFrame)
@@ -320,6 +328,9 @@ public sealed class VideoPlaybackController : IDisposable
                 _pendingGpuFrame.Unref();
                 _hasPendingGpuFrame = false;
             }
+
+            while (_renderConverting)
+                Monitor.Wait(_lock);
         }
 
         _converter?.Dispose();
@@ -561,6 +572,10 @@ public sealed class VideoPlaybackController : IDisposable
     private bool _zeroCopy;
     private readonly Frame _pendingGpuFrame = new();
     private bool _hasPendingGpuFrame;
+
+    // True while the render thread is converting _renderGpuFrame; OpenSource waits on it (under _lock) before
+    // disposing the session whose surface that frame references.
+    private bool _renderConverting;
 
     // Render-thread only.
     private long _lastUploadedTarget = NotSet;

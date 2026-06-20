@@ -37,6 +37,12 @@ public class ProxyTranscoderTests
             Assert.True(File.Exists(proxy));
             Assert.True(new FileInfo(proxy).Length > 0, "proxy file is empty");
 
+            // The encode goes to a temp ".partial" sibling that is atomically swapped in; it must not linger
+            // (a stray partial next to the source is what the engine could otherwise pick up half-written).
+            var partial = Path.Combine(Path.GetDirectoryName(proxy)!,
+                                       Path.GetFileNameWithoutExtension(proxy) + ".partial" + Path.GetExtension(proxy));
+            Assert.False(File.Exists(partial), "temp .partial proxy should have been swapped away");
+
             using var session = VideoDecoderSession.TryOpen(proxy, VideoPlaybackOptimization.FastSeeking, out var openError);
             Assert.Null(openError);
             Assert.NotNull(session);

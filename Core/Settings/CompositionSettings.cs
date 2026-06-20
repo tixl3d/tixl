@@ -10,6 +10,7 @@ using T3.Core.IO;
 using T3.Core.Logging;
 using T3.Serialization;
 using T3.Core.Resource;
+using T3.Core.Video;
 
 namespace T3.Core.Settings;
 
@@ -35,6 +36,7 @@ public sealed class CompositionSettings
     public PlaybackConfig Playback { get; init; } = new();
     public AudioMixConfig Audio { get; init; } = new();
     public ExportConfig Export { get; init; } = new();
+    public ProxyConfig Proxy { get; init; } = new();
 
     public bool TryGetMainSoundtrack(IResourceConsumer? instance, [NotNullWhen(true)] out AudioClipResourceHandle? soundtrack)
     {
@@ -90,6 +92,16 @@ public sealed class CompositionSettings
         public bool EnablePlaybackControlWithKeyboard = true;
     }
 
+    /// <summary>Preview-proxy preferences for this project: how seek-proxies are transcoded and whether the engine
+    /// substitutes them for source clips during preview. Per-project so the choice travels with the project (the
+    /// proxy *files* are still local). Proxy codecs are all-intra/LGPL — never H.264/HEVC (libx264 = GPL).</summary>
+    public sealed class ProxyConfig
+    {
+        public VideoExportCodec Format = VideoExportCodec.ProRes; // all-intra, no GPL
+        public float Resolution = 0.5f;                           // fraction of the source resolution
+        public bool UseForPreview = true;                         // open a clip's proxy when one exists (never while rendering)
+    }
+
     public sealed class PlaybackConfig
     {
         public float Bpm = 120;
@@ -111,7 +123,7 @@ public sealed class CompositionSettings
 
     internal void WriteToJson(JsonTextWriter writer)
     {
-        var hasSettings = Enabled || Playback.AudioClips.Count > 0;
+        var hasSettings = Enabled || Playback.AudioClips.Count > 0 || ProxyIsNonDefault();
         if (!hasSettings)
             return;
 
@@ -168,10 +180,25 @@ public sealed class CompositionSettings
             }
             writer.WriteEndObject();
 
+            // Proxy section
+            writer.WritePropertyName("Proxy");
+            writer.WriteStartObject();
+            {
+                writer.WriteValue(nameof(ProxyConfig.Format), Proxy.Format);
+                writer.WriteValue(nameof(ProxyConfig.Resolution), Proxy.Resolution);
+                writer.WriteValue(nameof(ProxyConfig.UseForPreview), Proxy.UseForPreview);
+            }
+            writer.WriteEndObject();
+
         }
 
         writer.WriteEndObject();
     }
+
+    private bool ProxyIsNonDefault()
+        => Proxy.Format != Defaults.Proxy.Format
+           || Proxy.Resolution != Defaults.Proxy.Resolution
+           || Proxy.UseForPreview != Defaults.Proxy.UseForPreview;
 
     internal static CompositionSettings? ReadFromJson(JToken symbolToken)
     {
@@ -198,6 +225,7 @@ public sealed class CompositionSettings
         var clips = GetClips(playbackToken).ToList();
         var audioToken = settingsToken["Audio"] as JObject;
         var exportToken = settingsToken["Export"] as JObject;
+        var proxyToken = settingsToken["Proxy"] as JObject;
         var debugToken = settingsToken["Debug"] as JObject; // legacy compat
 
         var settings = new CompositionSettings
@@ -232,6 +260,18 @@ public sealed class CompositionSettings
                                      EnablePlaybackControlWithKeyboard = JsonUtils.ReadValueSafe(exportToken, nameof(ExportConfig.EnablePlaybackControlWithKeyboard), Defaults.Export.EnablePlaybackControlWithKeyboard),
                                  }
                                : new ExportConfig(),
+                           Proxy = proxyToken != null
+                               ? new ProxyConfig
+                                 {
+                                     // ReadEnum returns the enum's zero value when the key is missing, which isn't the
+                                     // proxy default (ProRes) — so fall back explicitly when "Format" is absent.
+                                     Format = proxyToken[nameof(ProxyConfig.Format)] != null
+                                                  ? JsonUtils.ReadEnum<VideoExportCodec>(proxyToken, nameof(ProxyConfig.Format))
+                                                  : Defaults.Proxy.Format,
+                                     Resolution = JsonUtils.ReadValueSafe(proxyToken, nameof(ProxyConfig.Resolution), Defaults.Proxy.Resolution),
+                                     UseForPreview = JsonUtils.ReadValueSafe(proxyToken, nameof(ProxyConfig.UseForPreview), Defaults.Proxy.UseForPreview),
+                                 }
+                               : new ProxyConfig(),
                        };
 
         return settings;

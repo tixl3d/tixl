@@ -4,7 +4,6 @@ using Newtonsoft.Json.Converters;
 using T3.Core.Animation;
 using T3.Core.IO;
 using T3.Core.Settings;
-using T3.Core.Video;
 using T3.Editor.Compilation;
 using T3.Editor.Gui.Windows;
 using T3.Editor.Gui.Windows.RenderExport;
@@ -31,13 +30,6 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
             Config.LogAudioDetails,
             Config.LogAudioRenderingDetails,
             Config.LogVideoRenderingDetails);
-    }
-
-    /// <summary>Pushes settings the video assembly reads through Core into <see cref="VideoPlayback"/>. Call at
-    /// startup and whenever the relevant setting changes (the engine reads the static, not the config).</summary>
-    public static void ApplyVideoPlaybackSettings()
-    {
-        VideoPlayback.UseProxies = Config.UseProxyVideos;
     }
 
     public sealed class ConfigData
@@ -184,12 +176,8 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         [Obsolete("Migrated to per-symbol RenderSettings in .t3ui")]
         public string? RenderSequencePrefix;
 
-        // Video proxies (preview transcode for fast seeking). Per-machine: generation needs the encoder, and
-        // proxies are a local authoring optimisation, not project content.
-        [JsonConverter(typeof(StringEnumConverter))]
-        public VideoExportCodec ProxyFormat = VideoExportCodec.ProRes; // all-intra, no GPL; never H.264/HEVC
-        public float ProxyResolution = 0.5f; // fraction of the source resolution
-        public bool UseProxyVideos = true; // open a clip's proxy for preview/scrub when one exists (never while rendering)
+        // Video-proxy preferences moved to per-project CompositionSettings.ProxyConfig (they travel with the
+        // project) — ProxyFormat / ProxyResolution / UseProxyVideos are no longer per-machine user settings.
 
         // Profiling and debugging
         public bool LoadMultiThreaded = true;

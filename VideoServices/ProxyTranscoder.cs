@@ -36,9 +36,17 @@ public static class ProxyTranscoder
         var (proxyW, proxyH) = proxyCodec.RoundToEncoderBlock(Math.Max(2, rawW), Math.Max(2, rawH));
 
         var fps = decoder.FrameRate > 0 ? decoder.FrameRate : 30;
+
+        // Encode to a temp sibling and atomically swap into place on success. The engine substitutes a proxy the
+        // moment its file exists, but a MOV/MP4 has no playable moov atom until the muxer finalizes — so writing the
+        // final path directly lets preview pick up a half-written file ("moov atom not found"). The swap also means a
+        // crash mid-encode can't leave a broken-but-present proxy. Keeps the .mov extension so the muxer is inferred.
+        var tempPath = Path.Combine(Path.GetDirectoryName(proxyPath) ?? ".",
+                                    Path.GetFileNameWithoutExtension(proxyPath) + ".partial" + Path.GetExtension(proxyPath));
+
         var settings = new VideoExportSettings
                            {
-                               FilePath = proxyPath,
+                               FilePath = tempPath,
                                Width = proxyW,
                                Height = proxyH,
                                FrameRate = fps,
@@ -54,11 +62,11 @@ public static class ProxyTranscoder
         var converter = new VideoFrameConverter();
         var rgba = Frame.CreateVideo(proxyW, proxyH, AVPixelFormat.Rgba);
         rgba.EnsureBuffer(1);
+        var frameIndex = 0;
 
         try
         {
             var totalFrames = decoder.DurationSeconds > 0 ? decoder.DurationSeconds * fps : 0;
-            var frameIndex = 0;
             while (decoder.TryReadNextFrame(out _))
             {
                 if (cancel.IsCancellationRequested)
@@ -81,7 +89,6 @@ public static class ProxyTranscoder
             {
                 writer.Finish();
                 progress?.Report(1.0);
-                Log.Gated.VideoRender($"Proxy generated: {proxyPath} ({proxyW}×{proxyH} {proxyCodec}, {frameIndex} frames)");
             }
         }
         catch (Exception e)
@@ -90,13 +97,28 @@ public static class ProxyTranscoder
         }
         finally
         {
+            // Dispose closes the file handle — must happen before the swap can move it.
             writer.Dispose();
             rgba.Dispose();
             converter.Free();
         }
 
+        // Swap the finished temp file into place only now that it's complete and closed.
+        if (error == null)
+        {
+            try
+            {
+                File.Move(tempPath, proxyPath, overwrite: true);
+                Log.Gated.VideoRender($"Proxy generated: {proxyPath} ({proxyW}×{proxyH} {proxyCodec}, {frameIndex} frames)");
+            }
+            catch (Exception e)
+            {
+                error = "Could not finalize proxy: " + e.Message;
+            }
+        }
+
         if (error != null)
-            TryDelete(proxyPath);
+            TryDelete(tempPath);
 
         return error;
     }

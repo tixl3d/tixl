@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using T3.Core.Settings;
 using T3.Core.Video;
 
 namespace T3.VideoServices;
@@ -106,12 +107,14 @@ public sealed class VideoPlaybackEngine : IVideoPlaybackEngine
             stream.Controller.SetCacheBudget(perStream);
     }
 
-    // Preview/scrub uses the sibling proxy when one exists and proxies are enabled; rendering to file always
-    // uses the full-resolution source. Substitution is transparent to the operator — flipping the path makes
-    // the controller re-open on its next worker tick. (Existence-only for now; staleness checks come later.)
+    // Preview/scrub uses the sibling proxy when one exists and the project enables proxy preview; rendering to
+    // file always uses the full-resolution source. The preference is a per-project setting (it travels with the
+    // project); the engine reads it straight from the active composition. Substitution is transparent to the
+    // operator — flipping the path makes the controller re-open on its next worker tick. (Existence-only for now;
+    // staleness checks come later.)
     private static string ResolveEffectivePath(string absolutePath, bool renderingToFile)
     {
-        if (renderingToFile || !VideoPlayback.UseProxies)
+        if (renderingToFile || !CompositionSettings.Current.Proxy.UseForPreview)
             return absolutePath;
 
         var proxyPath = VideoPlayback.GetProxyPath(absolutePath);

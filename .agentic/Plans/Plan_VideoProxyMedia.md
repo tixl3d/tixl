@@ -53,17 +53,20 @@ lean below.)
 | Setting | Home | Default | Note |
 |---|---|---|---|
 | `GenerateProxyVideos` (Off/Ask/On) | **Project** (`.t3ui` / `RenderSettings`-adjacent) | **Ask** | auto-gen derives from the *project's* proxy settings |
-| `ProxyFormat` (ProRes/HAP/DNxHR/MJPEG) | **Project** | ProRes 422 | never H.264/HEVC (GPL) |
-| `ProxyResolution` (100/50/25 %) | **Project** | 50 % | scaled proxy = preview-only |
-| `UseProxyVideos` (interactive preview) | **Project** — per-symbol `CompositionSettings` *(decided 2026-06-20)* | true | preview only; interim per-machine `UserSettings` until Phase 3 |
+| `ProxyFormat` (ProRes/HAP) | **Project** — `CompositionSettings.ProxyConfig.Format` ✅ | ProRes | never H.264/HEVC (GPL) |
+| `ProxyResolution` (0.1–1.0) | **Project** — `…ProxyConfig.Resolution` ✅ | 0.5 | scaled proxy = preview-only |
+| `UseProxyVideos` (interactive preview) | **Project** — `…ProxyConfig.UseForPreview` ✅ | true | preview only; engine reads `CompositionSettings.Current` |
 | `UseProxiesForRendering` | **`RenderSettings`** (project `.t3ui`) | **false** | opt-in draft render from the proxy; default export uses the source |
 
-**Interim (Phases 1–2):** `UserSettings.ProxyFormat` / `ProxyResolution` / `UseProxyVideos` were added
-per-machine to get manual generation + preview substitution working. **Migrate all three into per-symbol
-`CompositionSettings`** (the per-project store that travels in `.t3`) when the state machine + UI land (Phase 3)
-— decided 2026-06-20; involves `.t3` serialization, a `SymbolFormatVersion` bump, and a Project-Settings-window
-toggle. (`UseProxyVideos` is editor/preview-only, so the engine keeps reading the `VideoPlayback.UseProxies`
-Core static; Phase 3 just changes what the editor pushes into it from per-machine to per-project.)
+**Migration — DONE (Phase 3).** `ProxyFormat` / `ProxyResolution` / `UseProxyVideos` moved off per-machine
+`UserSettings` into per-project `CompositionSettings.ProxyConfig` (`Format` / `Resolution` / `UseForPreview`),
+serialized under a new `"Proxy"` section of the `.t3` `ProjectSettings` block (additive; old files fall back to
+defaults — see [`CompositionSettings.cs`](../../Core/Settings/CompositionSettings.cs)). The engine now reads
+`CompositionSettings.Current.Proxy.UseForPreview` directly (the `VideoPlayback.UseProxies` Core static and the
+editor push were removed); `ProxyGenerationService` reads `Format`/`Resolution` from the same place. UI is a new
+**Video Proxies** category in the Project Settings window. *Format-version bump deferred: the `"Proxy"` section
+is additive/forward-tolerant and this is mid-feature — bump `SymbolFormatVersion` when the proxy feature is
+finalized and a release is tagged (per the file-format-versioning convention).*
 
 ## Generation (the `OptimizerService`)
 
@@ -133,7 +136,10 @@ Proxy (persistent disk, survives restart, helps draft export) and cache (in-sess
      scales+converts each YUV frame to RGBA at the proxy size in one swscale pass, and feeds the **existing
      render-export encoder** (`FfmpegVideoEncoderFactory.TryCreateWriter`) → all-intra proxy. CPU-byte-level (no
      D3D, no render pipeline), background-thread-safe, cancellable, progress, deletes partial output on
-     error/cancel. **Video-only** (no audio in the preview proxy). Verified by
+     error/cancel. **Video-only** (no audio in the preview proxy). **Encodes to a temp `.partial.mov` sibling and
+     atomically swaps into place on success** — the engine substitutes a proxy the instant its file exists, and a
+     MOV has no playable `moov` atom until finalize, so writing the final path directly let preview pick up a
+     half-written file ("moov atom not found"). The swap also prevents a crash leaving a broken-but-present proxy. Verified by
      [`ProxyTranscoderTests`](../../VideoServices.Tests/ProxyTranscoderTests.cs): a real long-GOP H.264 → half-res
      ProRes proxy decodes back as a smaller playable video (HAP skips on the no-hap test build). *Caveat:* the
      YUV→RGBA decode uses swscale's BT.601 default, so a 709 source picks up a slight preview-only colour drift
@@ -175,7 +181,15 @@ Proxy (persistent disk, survives restart, helps draft export) and cache (in-sess
      `VideoProxyAdvice` ([`Core/Video/VideoExport.cs`](../../Core/Video/VideoExport.cs)). Verified by
      [`ProxyEligibilityTests`](../../VideoServices.Tests/ProxyEligibilityTests.cs): a 1 s-GOP H.264 is
      `Recommended`; the all-intra ProRes proxy transcoded from it is `NotNeeded`; a missing file is `Unknown`.
-   - **3b. Auto-trigger + state machine + Ask popup — TODO.** On import, consult `EvaluateProxyNeed`; if
+   - **3b. Per-project settings migration — DONE & TESTED.** `ProxyFormat`/`ProxyResolution`/`UseProxyVideos`
+     moved from per-machine `UserSettings` into per-project `CompositionSettings.ProxyConfig`, serialized under a
+     new `"Proxy"` section in `.t3` (additive; missing → defaults). Engine reads `CompositionSettings.Current.Proxy`
+     directly (removed the `VideoPlayback.UseProxies` static + editor push); generation reads it too; UI is a new
+     **Video Proxies** category in the Project Settings window. Verified by
+     [`CompositionSettingsProxyTests`](../../Core.Tests/CompositionSettingsProxyTests.cs): non-default round-trip,
+     persistence when not Enabled, and missing-section → defaults. *(`SymbolFormatVersion` bump deferred to feature
+     finalization.)*
+   - **3c. Auto-trigger + state machine + Ask popup — TODO.** On import, consult `EvaluateProxyNeed`; if
      `Recommended`, apply the `GenerateProxyVideos` tri-state (Ask → prompt once and remember; On → enqueue;
      Off → skip). The Ask popup; the Generate/Use matrix; remembering the choice; move the manual trigger to
      the Assets Library. *Verify: a long-GOP H.264 import prompts; a ProRes import does not; the choice is
@@ -208,9 +222,10 @@ Proxy (persistent disk, survives restart, helps draft export) and cache (in-sess
 | Manual trigger (Phase 1 graph menu; → move to Assets Library) | `Editor/Gui/MagGraph/Interaction/GraphContextMenu.cs`, `Editor/Gui/Windows/AssetLib/*` |
 | Engine substitution + shared proxy path (DONE — Phase 2) | `VideoServices/VideoPlaybackEngine.cs`, `Core/Video/VideoPlayback.cs` |
 | Eligibility detection (DONE — Phase 3a; `EvaluateProxyNeed` facade) | `VideoServices/ProxyEligibility.cs`, `Core/Video/VideoExport.cs` |
+| Per-project proxy settings (DONE — Phase 3b) | `Core/Settings/CompositionSettings.cs` (`ProxyConfig`), `Editor/Gui/Windows/TimeLine/ProjectSettingsWindow.cs` |
 | Decode session — open proxy vs source (Phase 2) | `VideoServices/VideoDecoderSession.cs`, `VideoPlaybackController.cs` |
 | Cache (already codec-gated; auto-skips) | `VideoServices/VideoFrameCache.cs` |
-| Proxy config (Phase-1 interim in UserSettings → migrate to **project** settings) | `Editor/Gui/UiHelpers/UserSettings.cs` |
+| Proxy config (migrated off UserSettings → per-project `CompositionSettings.ProxyConfig`) | `Core/Settings/CompositionSettings.cs` |
 | `UseProxiesForRendering` | `Editor/Gui/Windows/RenderExport/RenderSettings.cs` |
 
 ## Manual test set

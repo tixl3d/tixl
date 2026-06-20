@@ -322,3 +322,4 @@ shadertoolsconfig.json
 
 # Vendor camera SDK binary — not redistributed (see Operators/Lib/io/video/swiftcam/Swiftcam.NOTICE.md).
 **/swiftcam.dll
+**/Assets/**/*.proxy.mov
