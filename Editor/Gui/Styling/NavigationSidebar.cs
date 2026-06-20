@@ -42,6 +42,7 @@ internal static class NavigationSidebar
         ImGui.BeginChild(id, new Vector2(width * T3Ui.UiScaleFactor, 0),
                          ImGuiChildFlags.None,
                          ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoBackground);
+        FormInputs.AddVerticalSpace();
     }
 
     internal static void EndColumn()
@@ -100,7 +101,7 @@ internal static class NavigationSidebar
     internal static void BeginContentPanel(string title)
     {
         var scale = T3Ui.UiScaleFactor;
-        var margin = 8 * scale;
+        var margin = 3 * scale;
 
         // No gap on the left: the panel sits flush against the selected sidebar entry.
         ImGui.SameLine(0, 0);

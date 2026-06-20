@@ -120,6 +120,7 @@ internal static class ColorThemeEditor
 
             var hint = string.Empty;
             var groupTitle = string.Empty;
+            var displayName = string.Empty;
             foreach (var ca in f.GetCustomAttributes(true))
             {
                 if (ca is not T3Style.HintAttribute hintAttribute)
@@ -127,11 +128,13 @@ internal static class ColorThemeEditor
 
                 hint = hintAttribute.Description;
                 groupTitle = hintAttribute.GroupTitle;
+                displayName = hintAttribute.DisplayName;
             }
             
             
             if (!string.IsNullOrWhiteSpace(groupTitle))
             {
+                FormInputs.AddVerticalSpace(8);
                 ImGui.PushFont(Fonts.FontBold);
                 ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
                 ImGui.TextUnformatted(groupTitle);
@@ -150,7 +153,7 @@ internal static class ColorThemeEditor
             }
 
             ImGui.SameLine(0, 10);
-            ImGui.Text(CustomComponents.HumanReadablePascalCase(f.Name));
+            ImGui.Text(string.IsNullOrEmpty(displayName) ? CustomComponents.HumanReadablePascalCase(f.Name) : displayName);
             if (ImGui.IsItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
             {
                 FrameStats.Current.UiColorsChanged = true;
@@ -159,9 +162,7 @@ internal static class ColorThemeEditor
             }
 
             if (!string.IsNullOrWhiteSpace(hint))
-            {
-                CustomComponents.TooltipForLastItem(hint);
-            }
+                DrawHelpIcon(hint);
 
             if (isChanged)
             {
@@ -258,6 +259,19 @@ internal static class ColorThemeEditor
         }
     }
     
+    // Visible "?" affordance carrying the color's description, so the hint isn't hidden behind hovering the label.
+    private static void DrawHelpIcon(string hint)
+    {
+        ImGui.SameLine(0, 6 * T3Ui.UiScaleFactor);
+        ImGui.PushFont(Icons.IconFont);
+        ImGui.AlignTextToFramePadding();
+        ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Fade(0.6f).Rgba);
+        ImGui.TextUnformatted(((char)Icon.Help).ToString());
+        ImGui.PopStyleColor();
+        ImGui.PopFont();
+        CustomComponents.TooltipForLastItem(hint);
+    }
+
     private static void SetColor(FieldInfo f, Vector4 vec4Color)
     {
         _currentTheme.Colors[f.Name] = vec4Color;

@@ -219,7 +219,7 @@ internal sealed partial class SettingsWindow : Window
                     FormInputs.AddVerticalSpace();
                     FormInputs.AddSectionSubHeader("Output");
 
-                    changed |= FormInputs.AddFloat("Continuous screenshot interval",
+                    changed |= FormInputs.AddFloat("Sequential screenshots",
                                                    ref UserSettings.Config.ContinuousScreenshotDelay,
                                                    0.1f, 60f, 0.1f, true, true,
                                                    "Seconds between captures when continuous screenshot mode is active. Ctrl-click the screenshot icon in the output window to start it.",
@@ -411,9 +411,8 @@ internal sealed partial class SettingsWindow : Window
                                                                      Can impact rendering performance. Requires a restart.
                                                                      """,
                                                                      CoreSettings.Defaults.EnableDirectXDebug);
-
+                    FormInputs.SetIndentToParameters();
                     FormInputs.AddSectionSubHeader("OSC");
-                    FormInputs.SetIndentToLeft();
 
                     projectSettingsChanged |= FormInputs.AddInt("Default Port", ref CoreSettings.Config.DefaultOscPort,
                                                                 0, 65535, 1,

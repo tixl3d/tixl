@@ -1,5 +1,6 @@
 #nullable enable
 using ImGuiNET;
+using T3.Core.DataTypes.Vector;
 using T3.Editor.Gui.Styling;
 
 namespace T3.Editor.Gui.Windows;
@@ -17,6 +18,10 @@ internal abstract class Window
 
     /// <summary>Initial window size (unscaled). Multiplied by <see cref="T3Ui.UiScaleFactor"/> when the window first appears.</summary>
     protected Vector2 WindowSizeOverride = new Vector2(550, 450);
+
+    /// <summary>Override the window's inner-content backdrop (ImGui ChildBg). Null inherits the shared
+    /// Panel Background; set it to give a window its own themeable background (e.g. the graph canvas).</summary>
+    protected virtual Color? InnerBackgroundColor => null;
     protected string? MenuTitle;
 
 
@@ -26,14 +31,17 @@ internal abstract class Window
 
     public void Draw()
     {
+        ImGui.PushStyleColor(ImGuiCol.ChildBg, UiColors.WindowBackground.Rgba);
         if (AllowMultipleInstances)
         {
             DrawAllInstances();
         }
         else
         {
+            
             DrawOneInstance();
         }
+        ImGui.PopStyleColor();
     }
 
     private void DrawOneInstance()
@@ -82,6 +90,12 @@ internal abstract class Window
 
             // Draw child to prevent imgui window dragging
             {
+                // Windows that want a distinct content backdrop (e.g. the graph editor canvas) override
+                // InnerBackgroundColor; the rest inherit the shared Panel Background (style ChildBg).
+                var innerBackground = InnerBackgroundColor;
+                if (innerBackground.HasValue)
+                    ImGui.PushStyleColor(ImGuiCol.ChildBg, innerBackground.Value.Rgba);
+
                 ImGui.BeginChild("inner", ImGui.GetContentRegionAvail(),
                     ImGuiChildFlags.Borders | ImGuiChildFlags.AlwaysUseWindowPadding,
                     ImGuiWindowFlags.NoMove | preventMouseScrolling | WindowFlags);
@@ -95,6 +109,9 @@ internal abstract class Window
                     Log.Warning($"Inconsistent ImGui-ID after rendering {this}  {idBefore} != {idAfter}");
 
                 ImGui.EndChild();
+
+                if (innerBackground.HasValue)
+                    ImGui.PopStyleColor();
             }
 
             ImGui.PopStyleVar(); // WindowPadding

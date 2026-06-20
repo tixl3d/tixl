@@ -61,8 +61,8 @@ internal sealed class ImGuiHandler
             // we apply the copied style to the current context
             Unsafe.Copy(ImGui.GetStyle().NativePtr, ref copiedStyle);
         }
-        
-        var colorVector = ImGui.GetStyle().Colors[(int)ImGuiCol.WindowBg];
+
+        Vector4 colorVector = new Vector4(0, 1, 1, 1);// ImGui.GetStyle().Colors[(int)ImGuiCol.WindowBg];
         var colorVecByteValue = colorVector * 255;
         ClearColor = Color.FromArgb((int)colorVecByteValue.X, (int)colorVecByteValue.Y, (int)colorVecByteValue.Z);
         

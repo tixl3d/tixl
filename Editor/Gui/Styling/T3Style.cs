@@ -15,6 +15,10 @@ public static class T3Style
     {
         public string GroupTitle;
         public string Description;
+
+        /// <summary>Optional label for the Theme editor when the field name reads poorly. Falls back to the
+        /// humanized field name. The field name stays the serialization key, so this never affects saved themes.</summary>
+        public string DisplayName;
     }
 
     public const float ToolBarHeight = 25;
@@ -54,6 +58,9 @@ public static class T3Style
         style.Colors[(int)ImGuiCol.WindowBg] = UiColors.BackgroundGaps; // Only shines through at window edges
         style.Colors[(int)ImGuiCol.ChildBg] = UiColors.WindowBackground; // Graph see through strength
         style.Colors[(int)ImGuiCol.PopupBg] = UiColors.BackgroundPopup;
+        // The empty area of a dock space defaults to a hard-coded ImGui gray otherwise — theme it too,
+        // so no part of the main background escapes the App / Menu Background color.
+        style.Colors[(int)ImGuiCol.DockingEmptyBg] = UiColors.BackgroundGaps;
 
         style.Colors[(int)ImGuiCol.CheckMark] = UiColors.CheckMark;
         // Tab

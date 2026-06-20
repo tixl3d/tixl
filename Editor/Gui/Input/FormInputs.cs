@@ -625,6 +625,8 @@ internal static class FormInputs
                 modified = true;
             }
 
+            var isHovered = ImGui.IsItemHovered();
+
             var segMin = new Vector2(x, start.Y);
             if (isSelected)
             {
@@ -632,9 +634,17 @@ internal static class FormInputs
                                  segMin + new Vector2(segWidth - inset, h - inset),
                                  UiColors.BackgroundButton, rounding);
             }
+            else if (isHovered)
+            {
+                dl.AddRectFilled(segMin + new Vector2(inset, inset),
+                                 segMin + new Vector2(segWidth - inset, h - inset),
+                                 UiColors.BackgroundButton.Fade(0.4f), rounding);
+            }
 
             var font = isSelected ? Fonts.FontBold : Fonts.FontNormal;
-            var textColor = isSelected ? UiColors.ForegroundFull : UiColors.TextMuted;
+            var textColor = isSelected
+                                ? UiColors.ForegroundFull
+                                : (isHovered ? UiColors.Text : UiColors.TextMuted);
             ImGui.PushFont(font);
             var textSize = ImGui.CalcTextSize(name);
             var textPos = new Vector2(segMin.X + (segWidth - textSize.X) * 0.5f, segMin.Y + (h - textSize.Y) * 0.5f);

@@ -95,8 +95,10 @@ public static class ThemeHandling
         foreach (var filepath in Directory.EnumerateFiles(ThemeFolder))
             userFiles.Add(Path.GetFileName(filepath));
 
+        var defaultFileCount = 0;
         foreach (var filepath in Directory.EnumerateFiles(DefaultThemeFolder))
         {
+            defaultFileCount++;
             if (userFiles.Contains(Path.GetFileName(filepath)))
                 continue; // user override exists
 
@@ -107,6 +109,11 @@ public static class ThemeHandling
         {
             LoadThemeFile(filepath);
         }
+
+        // The shipped themes live next to the executable; if they're missing the dropdown silently
+        // collapses to whatever the user saved. Surface that instead of leaving it a mystery.
+        if (defaultFileCount == 0)
+            Log.Warning($"No default themes found in {DefaultThemeFolder}. Only user themes will be listed.");
     }
 
     private static void LoadThemeFile(string filepath)

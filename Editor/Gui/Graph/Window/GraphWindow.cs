@@ -35,6 +35,10 @@ internal sealed class GraphWindow : Windows.Window
         GraphWindowInstances.Add(this);
     }
 
+    // The graph editor canvas (and the Hub it hosts) get their own themeable backdrop, separate from
+    // regular panels' Panel Background.
+    protected override T3.Core.DataTypes.Vector.Color? InnerBackgroundColor => UiColors.EditorBackground;
+
     private readonly int _instanceNumber;
 
     internal override IReadOnlyList<Gui.Windows.Window> GetInstances() => GraphWindowInstances;

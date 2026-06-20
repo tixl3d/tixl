@@ -167,7 +167,7 @@ internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectMani
             }
 
             // Backdrop so keyframes drawn on channel 0 don't bleed through the header
-            drawList.AddRectFilled(headerMin, headerMin + new Vector2(reservedWidth, rowHeight), UiColors.CanvasBackground.Fade(0.8f));
+            drawList.AddRectFilled(headerMin, headerMin + new Vector2(reservedWidth, rowHeight), UiColors.BackgroundFull.Fade(0.8f));
 
             // --- Pin toggle ---
             ImGui.SetCursorScreenPos(headerMin);
