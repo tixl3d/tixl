@@ -28,13 +28,9 @@ internal static class ProxyGenerationService
     /// <summary>Per-source status, for UI feedback.</summary>
     public static IReadOnlyDictionary<string, JobStatus> Jobs => _jobs;
 
-    /// <summary>The sibling proxy path for a source (e.g. <c>clip.mp4</c> → <c>clip.proxy.mov</c>).</summary>
-    public static string ProxyPathFor(string sourcePath)
-        => ProxyPathFor(sourcePath, UserSettings.Config.ProxyFormat);
-
-    public static string ProxyPathFor(string sourcePath, VideoExportCodec codec)
-        => Path.Combine(Path.GetDirectoryName(sourcePath) ?? ".",
-                        Path.GetFileNameWithoutExtension(sourcePath) + ".proxy" + codec.GetFileExtension());
+    /// <summary>The sibling proxy path for a source (e.g. <c>clip.mp4</c> → <c>clip.proxy.mov</c>). Shared with the
+    /// playback engine via <see cref="VideoPlayback.GetProxyPath"/> so generation and lookup never diverge.</summary>
+    public static string ProxyPathFor(string sourcePath) => VideoPlayback.GetProxyPath(sourcePath);
 
     /// <summary>Queues a proxy generation for <paramref name="sourcePath"/> using the current settings. No-op if
     /// one is already queued or running for that source.</summary>
@@ -84,7 +80,7 @@ internal static class ProxyGenerationService
 
         var codec = UserSettings.Config.ProxyFormat;
         var scale = Math.Clamp(UserSettings.Config.ProxyResolution, 0.1f, 1f);
-        var proxyPath = ProxyPathFor(source, codec);
+        var proxyPath = ProxyPathFor(source);
 
         _jobs[source] = new JobStatus(JobState.Generating, 0, null);
         var progress = new SynchronousProgress(p => _jobs[source] = new JobStatus(JobState.Generating, (float)p, null));

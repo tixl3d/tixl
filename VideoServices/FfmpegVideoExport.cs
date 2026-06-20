@@ -45,6 +45,18 @@ public sealed class FfmpegVideoEncoderFactory : IVideoEncoderFactory
                                  IProgress<double>? progress, CancellationToken cancel)
         => ProxyTranscoder.Generate(sourcePath, proxyPath, proxyCodec, scale, progress, cancel);
 
+    public VideoProxyAdvice EvaluateProxyNeed(string sourcePath)
+    {
+        var result = ProxyEligibility.Evaluate(sourcePath);
+        var recommendation = result.Recommendation switch
+                                 {
+                                     ProxyEligibility.Recommendation.Recommended => VideoProxyRecommendation.Recommended,
+                                     ProxyEligibility.Recommendation.NotNeeded   => VideoProxyRecommendation.NotNeeded,
+                                     _                                           => VideoProxyRecommendation.Unknown,
+                                 };
+        return new VideoProxyAdvice(recommendation, result.KeyframeIntervalSeconds, result.Reason);
+    }
+
     public VideoEncoderAvailability GetAvailability(VideoExportCodec codec)
     {
         if (!FfmpegLibrary.EnsureInitialized())

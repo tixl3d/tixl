@@ -135,6 +135,24 @@ public readonly record struct VideoEncoderAvailability
     public string? EncoderName { get; init; }
 }
 
+/// <summary>Whether a video source benefits from a seek-proxy — decided from its measured keyframe spacing.</summary>
+public enum VideoProxyRecommendation
+{
+    /// <summary>Already seek-cheap (all-intra or short-GOP); a proxy would waste disk and time.</summary>
+    NotNeeded,
+
+    /// <summary>Long-GOP inter-frame video; a proxy makes scrubbing/seeking cheap.</summary>
+    Recommended,
+
+    /// <summary>Couldn't tell (file unreadable, no video stream, no usable timestamps).</summary>
+    Unknown,
+}
+
+/// <summary>The proxy advice for one source: the recommendation, the measured keyframe interval, and a
+/// human-readable reason for UI tooltips.</summary>
+public readonly record struct VideoProxyAdvice(VideoProxyRecommendation Recommendation,
+                                               double KeyframeIntervalSeconds, string Reason);
+
 /// <summary>Creates <see cref="IVideoFileWriter"/>s; implemented by the video assembly.</summary>
 public interface IVideoEncoderFactory
 {
@@ -150,6 +168,10 @@ public interface IVideoEncoderFactory
     /// calls it on a background thread. Returns null on success, otherwise an error message.</summary>
     string? GenerateProxy(string sourcePath, string proxyPath, VideoExportCodec proxyCodec, double scale,
                           IProgress<double>? progress, CancellationToken cancel);
+
+    /// <summary>Reports whether <paramref name="sourcePath"/> is worth proxying, from its measured keyframe
+    /// spacing (demux-only — no decode). Used to decide auto-generation and to hint the manual trigger.</summary>
+    VideoProxyAdvice EvaluateProxyNeed(string sourcePath);
 }
 
 /// <summary>

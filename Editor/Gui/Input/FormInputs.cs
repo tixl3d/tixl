@@ -176,15 +176,18 @@ internal static class FormInputs
 
     /// <param name="itemLabel">Optional display-name formatter for each enum value (e.g. "HapQ" → "Hap Q").
     /// When null, the raw enum member names are shown.</param>
+    /// <param name="itemSuffix">Optional secondary text drawn muted after each item's label (e.g. a size/time
+    /// estimate). When provided, the dropdown renders items itself so the suffix can be de-emphasised.</param>
     public static bool AddEnumDropdown<T>(ref T selectedValue, string? label, string? tooltip = null,
-        T defaultValue = default, Func<T, string>? itemLabel = null) where T : struct, Enum, IConvertible, IFormattable
+        T defaultValue = default, Func<T, string>? itemLabel = null, Func<T, string>? itemSuffix = null)
+        where T : struct, Enum, IConvertible, IFormattable
     {
         DrawInputLabel(label);
 
         var inputSize = GetAvailableInputSize(tooltip, false, true);
         ImGui.SetNextItemWidth(inputSize.X);
 
-        var modified = DrawEnumDropdown(ref selectedValue, label, defaultValue, itemLabel);
+        var modified = DrawEnumDropdown(ref selectedValue, label, defaultValue, itemLabel, itemSuffix);
 
         AppendTooltip(tooltip);
 
@@ -192,7 +195,7 @@ internal static class FormInputs
     }
 
     public static bool DrawEnumDropdown<T>(ref T selectedValue, string? label, T defaultValue = default,
-                                           Func<T, string>? itemLabel = null)
+                                           Func<T, string>? itemLabel = null, Func<T, string>? itemSuffix = null)
         where T : struct, Enum, IConvertible, IFormattable, IComparable
     {
         var values = Enum.GetValues<T>();
@@ -217,14 +220,58 @@ internal static class FormInputs
         ImGui.PushStyleColor(ImGuiCol.Text,
             selectedValue.Equals(defaultValue) ? UiColors.TextMuted.Rgba : UiColors.ForegroundFull.Rgba);
         ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 5);
-        var modified = ImGui.Combo($"##dropDown{typeof(T)}{label}", ref selectedIndex, names, names.Length, names.Length);
-        if (modified)
+
+        bool modified;
+        if (itemSuffix != null)
+            modified = DrawEnumComboWithMutedSuffix(ref selectedValue, label, values, names, selectedIndex, itemSuffix);
+        else
         {
-            selectedValue = values[selectedIndex];
+            modified = ImGui.Combo($"##dropDown{typeof(T)}{label}", ref selectedIndex, names, names.Length, names.Length);
+            if (modified)
+                selectedValue = values[selectedIndex];
         }
 
         ImGui.PopStyleVar();
         ImGui.PopStyleColor(2);
+
+        return modified;
+    }
+
+    // Custom combo so the per-item suffix (e.g. "→ ~95 MB, ~34s") can render in TextMuted while the label keeps the
+    // normal colour. The closed preview shows label + suffix in one colour (BeginCombo can't two-tone it); the open
+    // list two-tones each row via a full-width hidden Selectable with the label/suffix drawn over it.
+    private static bool DrawEnumComboWithMutedSuffix<T>(ref T selectedValue, string? label, T[] values, string[] names,
+                                                        int selectedIndex, Func<T, string> itemSuffix)
+        where T : struct, Enum
+    {
+        var preview = names[selectedIndex] + itemSuffix(values[selectedIndex]);
+        var modified = false;
+        if (ImGui.BeginCombo($"##dropDown{typeof(T)}{label}", preview))
+        {
+            for (var i = 0; i < values.Length; i++)
+            {
+                var startX = ImGui.GetCursorPosX();
+                if (ImGui.Selectable($"##enumItem{i}", i == selectedIndex))
+                {
+                    selectedValue = values[i];
+                    modified = true;
+                }
+
+                ImGui.SameLine(startX);
+                ImGui.TextUnformatted(names[i]);
+
+                var suffix = itemSuffix(values[i]);
+                if (!string.IsNullOrEmpty(suffix))
+                {
+                    ImGui.SameLine();
+                    ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
+                    ImGui.TextUnformatted(suffix);
+                    ImGui.PopStyleColor();
+                }
+            }
+
+            ImGui.EndCombo();
+        }
 
         return modified;
     }

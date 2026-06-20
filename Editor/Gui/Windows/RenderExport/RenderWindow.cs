@@ -185,7 +185,7 @@ internal sealed class RenderWindow : Window
     private static bool IsHapCodec(VideoExportCodec codec)
         => codec is VideoExportCodec.Hap or VideoExportCodec.HapAlpha or VideoExportCodec.HapQ;
 
-    // Muted "~95 MB, ~30 min" appended to each codec dropdown item (rough estimate; empty when not yet renderable).
+    // Muted "→ ~95 MB, ~30 min" drawn after each codec dropdown item (rough estimate; empty when not yet renderable).
     private static string DropdownEstimateSuffix(VideoExportCodec codec, Int2 res, int frames, double durationSec, long bitRate, int motionBlurSamples)
     {
         if (frames <= 0 || res.Width <= 0)
@@ -193,7 +193,7 @@ internal sealed class RenderWindow : Window
 
         var bytes = RenderExportEstimate.EstimateBytes(codec, res, frames, durationSec, bitRate);
         var seconds = RenderExportEstimate.EstimateSeconds(codec, res, frames, motionBlurSamples);
-        return $"   ~{RenderExportEstimate.FormatBytes(bytes)}, {RenderExportEstimate.FormatDuration(seconds)}";
+        return $"→ ~{RenderExportEstimate.FormatBytes(bytes)}, {RenderExportEstimate.FormatDuration(seconds)}";
     }
 
     // Warn when the target drive has less than 1 GB, or less than 2× the estimated output — renders can be huge.
@@ -306,8 +306,8 @@ internal sealed class RenderWindow : Window
                                                + "FFV1 (.mkv): lossless archival (very large files).\n"
                                                + "HAP / HAP Alpha / HAP Q (.mov): GPU-friendly intra codecs for realtime/VJ playback.",
                                                RenderSettings.Defaults.VideoCodec,
-                                               codec => CodecDisplayName(codec)
-                                                        + DropdownEstimateSuffix(codec, estRes, estFrames, estDuration, estBitrate, estSamples));
+                                               codec => CodecDisplayName(codec),
+                                               codec => DropdownEstimateSuffix(codec, estRes, estFrames, estDuration, estBitrate, estSamples));
 
         DrawCodecAvailabilityHint(s.VideoCodec);
 

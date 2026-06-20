@@ -55,18 +55,27 @@ lean below.)
 | `GenerateProxyVideos` (Off/Ask/On) | **Project** (`.t3ui` / `RenderSettings`-adjacent) | **Ask** | auto-gen derives from the *project's* proxy settings |
 | `ProxyFormat` (ProRes/HAP/DNxHR/MJPEG) | **Project** | ProRes 422 | never H.264/HEVC (GPL) |
 | `ProxyResolution` (100/50/25 %) | **Project** | 50 % | scaled proxy = preview-only |
-| `UseProxyVideos` (interactive preview) | **Project** *(open: Core if the player uses proxies — see Risks)* | true | preview only |
+| `UseProxyVideos` (interactive preview) | **Project** — per-symbol `CompositionSettings` *(decided 2026-06-20)* | true | preview only; interim per-machine `UserSettings` until Phase 3 |
 | `UseProxiesForRendering` | **`RenderSettings`** (project `.t3ui`) | **false** | opt-in draft render from the proxy; default export uses the source |
 
-**Phase-1 interim:** `UserSettings.ProxyFormat` / `ProxyResolution` were added per-machine to get manual
-generation working. **Migrate them to a project setting** when the state machine + UI land (Phase 3).
+**Interim (Phases 1–2):** `UserSettings.ProxyFormat` / `ProxyResolution` / `UseProxyVideos` were added
+per-machine to get manual generation + preview substitution working. **Migrate all three into per-symbol
+`CompositionSettings`** (the per-project store that travels in `.t3`) when the state machine + UI land (Phase 3)
+— decided 2026-06-20; involves `.t3` serialization, a `SymbolFormatVersion` bump, and a Project-Settings-window
+toggle. (`UseProxyVideos` is editor/preview-only, so the engine keeps reading the `VideoPlayback.UseProxies`
+Core static; Phase 3 just changes what the editor pushes into it from per-machine to per-project.)
 
 ## Generation (the `OptimizerService`)
 
-- **Auto-trigger (the goal):** a video is added/first opened whose codec is **long-GOP H.264/HEVC** with a
-  keyframe interval past a threshold → generate per the **project's** proxy settings. **Skip** already-cheap
-  sources — all-intra (ProRes/DNxHD/MJPEG), HAP/GPU-texture, and short-GOP files don't need a proxy.
-  *(Threshold — propose "max keyframe interval > ~2 s" i.e. GOP > ~2×fps; tune.)*
+- **Auto-trigger (the goal):** a video is added/first opened whose **keyframe spacing** exceeds the proxy
+  threshold → generate per the **project's** proxy settings. **Skip** already-cheap sources. The
+  intra-vs-inter decision is **codec-agnostic and implemented** ([`ProxyEligibility.cs`](../../VideoServices/ProxyEligibility.cs)):
+  it demuxes packet headers and measures the actual keyframe interval, so all-intra (ProRes/DNxHR/MJPEG/HAP →
+  ~1 frame ≈ 0.03 s) is skipped while inter-frame H.264/HEVC is caught — and an I-frame-only H.264 is correctly
+  skipped too. *Threshold `LongGopSeconds = 0.75 s`* (revised down from the original ~2 s guess: the sample
+  `test-720p.mp4` is a perfectly normal 1 s-GOP H.264 that does scrub sluggishly at higher res, so 2 s was too
+  coarse; 0.75 s sits clear of all-intra yet catches typical ~1 s camera/screen-recording GOPs — still tunable,
+  could later scale with resolution).
 - **Manual trigger — the Assets Library window** *(decision 2026-06-20)*. The asset lib already lists the
   project's media; per-asset "Generate proxy" + status belongs there, not (only) the graph right-click menu.
   The Phase-1 graph-node menu item stays as a quick path, but the canonical manual home is the Assets Library.
@@ -145,11 +154,32 @@ Proxy (persistent disk, survives restart, helps draft export) and cache (in-sess
      Phase 1 only **generates** the file — playback still uses the source until Phase 2's engine substitution.*
    *Verify (in-editor): right-click a `[PlayVideo]` → Generate proxy → a `*.proxy.mov` appears next to the source
    and re-imports/plays.*
-2. **Engine substitution + `UseProxyVideos`.** Engine opens the proxy for preview when present; export uses
-   the source. *Verify: scrub uses the proxy (measurably faster seek); render-to-file is full-res source.*
-3. **Auto-trigger + state machine + Ask popup.** Prompt on long-GOP import; the Generate/Use matrix; the
-   keyframe-interval threshold; skip intra/HAP sources. *Verify: a long-GOP H.264 import prompts; a ProRes
-   import does not; the choice is remembered.*
+2. **Engine substitution + `UseProxyVideos` — DONE (build-verified; in-editor verify pending).** The engine
+   substitutes proxy-for-source per request: [`VideoPlaybackEngine.RequestFrame`](../../VideoServices/VideoPlaybackEngine.cs)
+   computes an *effective path* — the sibling proxy when `VideoPlayback.UseProxies` is on, the request is **not**
+   rendering to file, and the proxy file exists — else the source; flipping the path makes the existing
+   `VideoPlaybackController` re-open transparently to the operator. The proxy path is shared via
+   `VideoPlayback.GetProxyPath` ([`Core/Video/VideoPlayback.cs`](../../Core/Video/VideoPlayback.cs)) so generation
+   (`ProxyGenerationService`) and lookup can't diverge (`clip.mp4` → `clip.proxy.mov`; proxy codecs all mux to
+   MOV). The toggle is interim per-machine `UserSettings.UseProxyVideos` (default on), pushed into the Core static
+   via `UserSettings.ApplyVideoPlaybackSettings()` (startup + on change) and exposed as a **Video Proxies → "Use
+   proxy videos for preview"** checkbox in Settings. *Existence-only validity for now — staleness/regenerate is
+   Phase 5. UseProxyVideos moves to a project setting in Phase 3.*
+   *Verify (in-editor): with a `*.proxy.mov` present, scrubbing a `[PlayVideo]` uses the proxy (faster seek, smaller
+   preview texture); render-to-file stays full-res source; unchecking the setting reverts to the source.*
+3. **Auto-trigger + state machine + Ask popup.** Split:
+   - **3a. Eligibility detection — DONE & TESTED.** [`ProxyEligibility.Evaluate(sourcePath)`](../../VideoServices/ProxyEligibility.cs)
+     measures keyframe spacing from the bitstream (demux-only, no decode) → `Recommended` / `NotNeeded` /
+     `Unknown` + the measured interval + a reason string. Codec-agnostic (rides measured spacing, not an
+     allow-list). Exposed across the ALC boundary as `IVideoEncoderFactory.EvaluateProxyNeed` →
+     `VideoProxyAdvice` ([`Core/Video/VideoExport.cs`](../../Core/Video/VideoExport.cs)). Verified by
+     [`ProxyEligibilityTests`](../../VideoServices.Tests/ProxyEligibilityTests.cs): a 1 s-GOP H.264 is
+     `Recommended`; the all-intra ProRes proxy transcoded from it is `NotNeeded`; a missing file is `Unknown`.
+   - **3b. Auto-trigger + state machine + Ask popup — TODO.** On import, consult `EvaluateProxyNeed`; if
+     `Recommended`, apply the `GenerateProxyVideos` tri-state (Ask → prompt once and remember; On → enqueue;
+     Off → skip). The Ask popup; the Generate/Use matrix; remembering the choice; move the manual trigger to
+     the Assets Library. *Verify: a long-GOP H.264 import prompts; a ProRes import does not; the choice is
+     remembered.*
 4. **`UseProxiesForRendering`** `RenderSetting` (default false) — opt-in draft render from the proxy.
    *Verify: off → full-res source; on → draft at proxy resolution.*
 5. **Polish.** Regenerate-on-settings-change, queue/progress UI, source-change invalidation, per-clip format/
@@ -161,8 +191,8 @@ Proxy (persistent disk, survives restart, helps draft export) and cache (in-sess
   HAP for best scrub at a disk cost.
 - **Keyframe-interval threshold** for offering a proxy — tuning.
 - **"Generate-only" (On/Off) semantics** — propose pre-bake without switching preview; confirm.
-- **Does the player ship/use proxies?** Decides `UseProxyVideos`'s home (`UserSettings` if editor-only —
-  the v1 lean — vs a Core project setting if the player should seek fast too). Editor-only keeps exports lean.
+- **Does the player ship/use proxies?** *(home decided 2026-06-20: per-project `CompositionSettings`.)* The
+  setting travels with the project; whether the standalone player honours it is a separate, later choice.
 - **Downscaled proxy changes preview resolution downstream** — desired for speed, but flag ops that assume
   source dimensions.
 - **Disk usage** — intra proxies can exceed the source size; needs a proxy-cache budget + cleanup (Phase 5).
@@ -176,7 +206,8 @@ Proxy (persistent disk, survives restart, helps draft export) and cache (in-sess
 | Transcode facade (DONE — `IVideoEncoderFactory.GenerateProxy`) | `Core/Video/VideoExport.cs`, `VideoServices/FfmpegVideoExport.cs` |
 | Editor background queue (DONE) | `Editor/Gui/Windows/RenderExport/ProxyGenerationService.cs` |
 | Manual trigger (Phase 1 graph menu; → move to Assets Library) | `Editor/Gui/MagGraph/Interaction/GraphContextMenu.cs`, `Editor/Gui/Windows/AssetLib/*` |
-| Engine substitution / auto-switch (Phase 2) | `VideoServices/VideoPlaybackEngine.cs`, `Core/Video/VideoPlayback.cs` |
+| Engine substitution + shared proxy path (DONE — Phase 2) | `VideoServices/VideoPlaybackEngine.cs`, `Core/Video/VideoPlayback.cs` |
+| Eligibility detection (DONE — Phase 3a; `EvaluateProxyNeed` facade) | `VideoServices/ProxyEligibility.cs`, `Core/Video/VideoExport.cs` |
 | Decode session — open proxy vs source (Phase 2) | `VideoServices/VideoDecoderSession.cs`, `VideoPlaybackController.cs` |
 | Cache (already codec-gated; auto-skips) | `VideoServices/VideoFrameCache.cs` |
 | Proxy config (Phase-1 interim in UserSettings → migrate to **project** settings) | `Editor/Gui/UiHelpers/UserSettings.cs` |

@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using ImGuiNET;
 using T3.Core.Animation;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Video;
@@ -48,15 +49,35 @@ internal static class RenderExportEstimate
 
         var samples = motionBlurSamples > 0 ? motionBlurSamples : 1;
 
-        // The editor's recent wall-clock frame time captures the graph's render cost. Guard against a stale/zero
-        // or absurd value (e.g. right after a stall) with a 60 fps fallback.
-        var renderPerFrame = Playback.LastFrameDuration is > 0 and < 10 ? Playback.LastFrameDuration : 1.0 / 60;
+        var renderPerFrame = SmoothedRenderPerFrame();
 
         var megapixels = (double)resolution.Width * resolution.Height / 1e6;
         var encodePerFrame = megapixels / EncodeMegapixelsPerSec(codec);
 
         return frameCount * (renderPerFrame * samples + encodePerFrame);
     }
+
+    // The editor's recent wall-clock frame time captures the graph's render cost, but it jitters every frame —
+    // shown raw it makes the estimate flicker (34→35→33 s). Low-pass it, updated at most once per UI frame so the
+    // many per-item calls in one dropdown draw all see the same value. Guard against a stale/zero or absurd reading
+    // (e.g. right after a stall) with a 60 fps fallback.
+    private static double SmoothedRenderPerFrame()
+    {
+        var frame = ImGui.GetFrameCount();
+        if (frame != _smoothedFrame)
+        {
+            _smoothedFrame = frame;
+            var raw = Playback.LastFrameDuration is > 0 and < 10 ? Playback.LastFrameDuration : 1.0 / 60;
+            _smoothedRenderPerFrame = _smoothedRenderPerFrame > 0
+                                          ? _smoothedRenderPerFrame * 0.9 + raw * 0.1
+                                          : raw;
+        }
+
+        return _smoothedRenderPerFrame;
+    }
+
+    private static int _smoothedFrame = -1;
+    private static double _smoothedRenderPerFrame;
 
     // Rough encode throughput (megapixels/sec) on a typical desktop; H.264/HEVC assume the hardware path.
     private static double EncodeMegapixelsPerSec(VideoExportCodec codec) => codec switch
