@@ -1,7 +1,7 @@
 # Video Proxy Media (background transcode for fast seeking)
 
 **Status:** Draft — 2026-06-19. Design only, no code yet. The "background optimizer / `-optimized.mp4`"
-pulled out of [`Plan_FfmpegVideo.md`](Plan_FfmpegVideo.md)'s backlog into its own design, now that it has
+pulled out of [`Plan_FfmpegVideo.md`](archive/Plan_FfmpegVideo.md)'s backlog into its own design, now that it has
 real UX (a prompt, a Generate/Use state machine, settings).
 
 ## Goal
@@ -14,9 +14,9 @@ preview/authoring optimization.
 ## Relationship to the other video plans
 
 - **Built on the encode milestone.** A proxy is a transcode (decode source → encode proxy), so it **reuses
-  the tier-1 LGPL encoder** from [`Plan_FfmpegEncode.md`](Plan_FfmpegEncode.md) and **cannot ship before it
+  the tier-1 LGPL encoder** from [`Plan_FfmpegEncode.md`](archive/Plan_FfmpegEncode.md) and **cannot ship before it
   exists**. One encoder, two consumers (render-export + proxy generation).
-- **Substitution lives in the engine.** [`Plan_FfmpegVideo.md`](Plan_FfmpegVideo.md)'s `VideoPlaybackEngine`
+- **Substitution lives in the engine.** [`Plan_FfmpegVideo.md`](archive/Plan_FfmpegVideo.md)'s `VideoPlaybackEngine`
   already owns the "substitute proxies transparently" role; auto-switch is its job.
 - **Supersedes the M2 RAM cache for the proxied clip** (see *Cache supersession*) — they're two solutions
   to the same problem.
@@ -97,7 +97,7 @@ On stream open the engine picks **proxy vs source**:
 ## Cache supersession (why proxies skip M2)
 
 A proxy is **all-intra/HAP** — exactly the codec classes the M2 cache is **already gated to skip**
-([`Plan_FfmpegVideo.md`](Plan_FfmpegVideo.md): all-intra is decode-on-demand with no GOP-cache; HAP bypasses
+([`Plan_FfmpegVideo.md`](archive/Plan_FfmpegVideo.md): all-intra is decode-on-demand with no GOP-cache; HAP bypasses
 the cache entirely). So **no new special-case is needed** — the instant the engine switches a stream to a
 proxy, the codec class flips and the RAM cache is skipped automatically. Stated as policy:
 
@@ -142,7 +142,7 @@ Proxy (persistent disk, survives restart, helps draft export) and cache (in-sess
 |---|---|
 | Engine substitution / auto-switch | `Video/VideoPlaybackEngine.cs`, `Core/Video/VideoPlayback.cs` |
 | Decode session — open proxy vs source | `Video/VideoDecoderSession.cs`, `Video/VideoPlaybackController.cs` |
-| Tier-1 encoder reused for transcode | see [`Plan_FfmpegEncode.md`](Plan_FfmpegEncode.md) |
+| Tier-1 encoder reused for transcode | see [`Plan_FfmpegEncode.md`](archive/Plan_FfmpegEncode.md) |
 | Cache (already codec-gated; auto-skips) | `Video/VideoFrameCache.cs` |
 | Generation params + preview-use toggle | `Editor/Gui/UiHelpers/UserSettings.cs` |
 | `UseProxiesForRendering` | `Editor/Gui/Windows/RenderExport/RenderSettings.cs` |
