@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using System.Threading;
 
 namespace T3.Core.Video;
 
@@ -143,6 +144,12 @@ public interface IVideoEncoderFactory
     /// <summary>Reports how <paramref name="codec"/> will be encoded here. The hardware probe behind it is a
     /// one-shot GPU-encoder open (cached); callers on a UI thread should run this off-thread on first use.</summary>
     VideoEncoderAvailability GetAvailability(VideoExportCodec codec);
+
+    /// <summary>Transcodes a source video to an all-intra **proxy** file (decode → re-encode at
+    /// <paramref name="scale"/> of the source resolution) for fast seeking. Blocking and CPU-only — the editor
+    /// calls it on a background thread. Returns null on success, otherwise an error message.</summary>
+    string? GenerateProxy(string sourcePath, string proxyPath, VideoExportCodec proxyCodec, double scale,
+                          IProgress<double>? progress, CancellationToken cancel);
 }
 
 /// <summary>

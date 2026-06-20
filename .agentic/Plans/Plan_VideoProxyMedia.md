@@ -45,23 +45,31 @@ milestone's GPL-install dialog — different verb (speed-up vs install), differe
 
 ## Settings — where each value lives
 
+**Decision (2026-06-20): proxy config is PROJECT-level, not per-machine.** The project defines which proxies it
+wants (format/scale/auto) so the choice is consistent across machines/teammates; whether *this* machine can
+generate is the orthogonal encoder-availability question. (Supersedes the original per-machine `UserSettings`
+lean below.)
+
 | Setting | Home | Default | Note |
 |---|---|---|---|
-| `GenerateProxyVideos` (Off/Ask/On) | `UserSettings` (per-machine) | **Ask** | generation needs the encoder → editor/per-machine |
-| `ProxyFormat` (ProRes/HAP/DNxHR/MJPEG) | `UserSettings` | ProRes 422 Proxy *(confirm)* | never H.264/HEVC (GPL) |
-| `ProxyResolution` (100/50/25 %) | `UserSettings` | 50 % *(confirm)* | scaled proxy = preview-only |
-| `UseProxyVideos` (interactive preview) | `UserSettings` *(open: Core if the player uses proxies — see Risks)* | true | preview only |
+| `GenerateProxyVideos` (Off/Ask/On) | **Project** (`.t3ui` / `RenderSettings`-adjacent) | **Ask** | auto-gen derives from the *project's* proxy settings |
+| `ProxyFormat` (ProRes/HAP/DNxHR/MJPEG) | **Project** | ProRes 422 | never H.264/HEVC (GPL) |
+| `ProxyResolution` (100/50/25 %) | **Project** | 50 % | scaled proxy = preview-only |
+| `UseProxyVideos` (interactive preview) | **Project** *(open: Core if the player uses proxies — see Risks)* | true | preview only |
 | `UseProxiesForRendering` | **`RenderSettings`** (project `.t3ui`) | **false** | opt-in draft render from the proxy; default export uses the source |
 
-Mirrors the encode split: *generation* params are per-machine (`UserSettings`); the *render* behavior is a
-per-project `RenderSetting`. Only the preview-use toggle's home is still open.
+**Phase-1 interim:** `UserSettings.ProxyFormat` / `ProxyResolution` were added per-machine to get manual
+generation working. **Migrate them to a project setting** when the state machine + UI land (Phase 3).
 
 ## Generation (the `OptimizerService`)
 
-- **Trigger:** a video is added/first opened whose codec is **long-GOP H.264/HEVC** with a keyframe interval
-  past a threshold. **Skip** already-cheap sources — all-intra (ProRes/DNxHD/MJPEG), HAP/GPU-texture, and
-  short-GOP files don't need a proxy. *(Threshold — propose "max keyframe interval > ~2 s" i.e. GOP > ~2×fps;
-  tune.)*
+- **Auto-trigger (the goal):** a video is added/first opened whose codec is **long-GOP H.264/HEVC** with a
+  keyframe interval past a threshold → generate per the **project's** proxy settings. **Skip** already-cheap
+  sources — all-intra (ProRes/DNxHD/MJPEG), HAP/GPU-texture, and short-GOP files don't need a proxy.
+  *(Threshold — propose "max keyframe interval > ~2 s" i.e. GOP > ~2×fps; tune.)*
+- **Manual trigger — the Assets Library window** *(decision 2026-06-20)*. The asset lib already lists the
+  project's media; per-asset "Generate proxy" + status belongs there, not (only) the graph right-click menu.
+  The Phase-1 graph-node menu item stays as a quick path, but the canonical manual home is the Assets Library.
 - **Editor-only background job:** a queue transcoding **one** source at a time (throttled, low priority,
   cancellable, progress surfaced). The transcode is a **pure file→file** decode→encode (no render pipeline),
   so it can run on a `T3.Video` worker reusing the bundled LGPL libs, driven by an editor-side service. The
@@ -110,9 +118,33 @@ Proxy (persistent disk, survives restart, helps draft export) and cache (in-sess
 
 ## Phasing (build-verifiable)
 
-1. **Generation core.** `OptimizerService` transcode (source → proxy via the tier-1 LGPL encoder) +
-   `ProxyFormat`/`ProxyResolution` `UserSettings` + a manual "Generate proxy" action (no auto-trigger yet).
-   *Verify: a proxy file is produced for ProRes & HAP and plays back.*
+1. **Generation core.** Split:
+   - **1a. Transcoder — DONE & TESTED.** [`VideoServices/ProxyTranscoder.cs`](../../VideoServices/ProxyTranscoder.cs)
+     `Generate(source, proxyPath, codec, scale, progress, cancel)` — opens a software `VideoDecoderSession`,
+     scales+converts each YUV frame to RGBA at the proxy size in one swscale pass, and feeds the **existing
+     render-export encoder** (`FfmpegVideoEncoderFactory.TryCreateWriter`) → all-intra proxy. CPU-byte-level (no
+     D3D, no render pipeline), background-thread-safe, cancellable, progress, deletes partial output on
+     error/cancel. **Video-only** (no audio in the preview proxy). Verified by
+     [`ProxyTranscoderTests`](../../VideoServices.Tests/ProxyTranscoderTests.cs): a real long-GOP H.264 → half-res
+     ProRes proxy decodes back as a smaller playable video (HAP skips on the no-hap test build). *Caveat:* the
+     YUV→RGBA decode uses swscale's BT.601 default, so a 709 source picks up a slight preview-only colour drift
+     in the proxy — acceptable (proxies are preview; render uses the source) but a later refinement is to match
+     the decode matrix to the source tag.
+   - **1b. Facade + editor service + settings + manual trigger — DONE (build-verified; in-editor verify
+     pending).** The transcode entry is on the existing encoder facade — `IVideoEncoderFactory.GenerateProxy`
+     ([`Core/Video/VideoExport.cs`](../../Core/Video/VideoExport.cs), impl in
+     [`FfmpegVideoExport.cs`](../../VideoServices/FfmpegVideoExport.cs) delegating to `ProxyTranscoder`) — reusing
+     the existing registration (no new holder). The editor's
+     [`ProxyGenerationService`](../../Editor/Gui/Windows/RenderExport/ProxyGenerationService.cs) is a one-at-a-time
+     background queue with per-source status/progress that resolves the factory (module-initializer nudge) and
+     calls `GenerateProxy`. **Decisions made:** storage = **sibling file** (`clip.mp4` → `clip.proxy.mov`); proxy
+     params = `UserSettings.ProxyFormat` (**ProRes** default; never H.264/HEVC) + `ProxyResolution` (**0.5**
+     default); trigger = a **"Generate proxy video"** item in the graph **right-click menu** for an op whose
+     file-path input points at a video (`GraphContextMenu` + `SymbolAnalysis.TryGetFileInputFromInstance` +
+     `AssetRegistry.TryResolveAddress`), with a state-aware label (queued / generating % / regenerate). *Note:
+     Phase 1 only **generates** the file — playback still uses the source until Phase 2's engine substitution.*
+   *Verify (in-editor): right-click a `[PlayVideo]` → Generate proxy → a `*.proxy.mov` appears next to the source
+   and re-imports/plays.*
 2. **Engine substitution + `UseProxyVideos`.** Engine opens the proxy for preview when present; export uses
    the source. *Verify: scrub uses the proxy (measurably faster seek); render-to-file is full-res source.*
 3. **Auto-trigger + state machine + Ask popup.** Prompt on long-GOP import; the Generate/Use matrix; the
@@ -140,13 +172,15 @@ Proxy (persistent disk, survives restart, helps draft export) and cache (in-sess
 
 | Concern | File |
 |---|---|
-| Engine substitution / auto-switch | `Video/VideoPlaybackEngine.cs`, `Core/Video/VideoPlayback.cs` |
-| Decode session — open proxy vs source | `Video/VideoDecoderSession.cs`, `Video/VideoPlaybackController.cs` |
-| Tier-1 encoder reused for transcode | see [`Plan_FfmpegEncode.md`](archive/Plan_FfmpegEncode.md) |
-| Cache (already codec-gated; auto-skips) | `Video/VideoFrameCache.cs` |
-| Generation params + preview-use toggle | `Editor/Gui/UiHelpers/UserSettings.cs` |
+| Transcoder (DONE — decode→encode file→file) | `VideoServices/ProxyTranscoder.cs` |
+| Transcode facade (DONE — `IVideoEncoderFactory.GenerateProxy`) | `Core/Video/VideoExport.cs`, `VideoServices/FfmpegVideoExport.cs` |
+| Editor background queue (DONE) | `Editor/Gui/Windows/RenderExport/ProxyGenerationService.cs` |
+| Manual trigger (Phase 1 graph menu; → move to Assets Library) | `Editor/Gui/MagGraph/Interaction/GraphContextMenu.cs`, `Editor/Gui/Windows/AssetLib/*` |
+| Engine substitution / auto-switch (Phase 2) | `VideoServices/VideoPlaybackEngine.cs`, `Core/Video/VideoPlayback.cs` |
+| Decode session — open proxy vs source (Phase 2) | `VideoServices/VideoDecoderSession.cs`, `VideoPlaybackController.cs` |
+| Cache (already codec-gated; auto-skips) | `VideoServices/VideoFrameCache.cs` |
+| Proxy config (Phase-1 interim in UserSettings → migrate to **project** settings) | `Editor/Gui/UiHelpers/UserSettings.cs` |
 | `UseProxiesForRendering` | `Editor/Gui/Windows/RenderExport/RenderSettings.cs` |
-| Import/first-open trigger hook | TBD — asset registration / `PlayVideo` first open |
 
 ## Manual test set
 

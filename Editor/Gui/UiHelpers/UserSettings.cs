@@ -4,6 +4,7 @@ using Newtonsoft.Json.Converters;
 using T3.Core.Animation;
 using T3.Core.IO;
 using T3.Core.Settings;
+using T3.Core.Video;
 using T3.Editor.Compilation;
 using T3.Editor.Gui.Windows;
 using T3.Editor.Gui.Windows.RenderExport;
@@ -175,6 +176,12 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         public string? RenderSequenceFileName;
         [Obsolete("Migrated to per-symbol RenderSettings in .t3ui")]
         public string? RenderSequencePrefix;
+
+        // Video proxies (preview transcode for fast seeking). Per-machine: generation needs the encoder, and
+        // proxies are a local authoring optimisation, not project content.
+        [JsonConverter(typeof(StringEnumConverter))]
+        public VideoExportCodec ProxyFormat = VideoExportCodec.ProRes; // all-intra, no GPL; never H.264/HEVC
+        public float ProxyResolution = 0.5f; // fraction of the source resolution
 
         // Profiling and debugging
         public bool LoadMultiThreaded = true;

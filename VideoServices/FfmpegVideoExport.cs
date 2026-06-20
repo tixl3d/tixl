@@ -1,3 +1,5 @@
+using System;
+using System.Threading;
 using Sdcb.FFmpeg.Codecs;
 using Sdcb.FFmpeg.Raw;
 using T3.Core.Logging;
@@ -38,6 +40,10 @@ public sealed class FfmpegVideoEncoderFactory : IVideoEncoderFactory
             return null;
         }
     }
+
+    public string? GenerateProxy(string sourcePath, string proxyPath, VideoExportCodec proxyCodec, double scale,
+                                 IProgress<double>? progress, CancellationToken cancel)
+        => ProxyTranscoder.Generate(sourcePath, proxyPath, proxyCodec, scale, progress, cancel);
 
     public VideoEncoderAvailability GetAvailability(VideoExportCodec codec)
     {

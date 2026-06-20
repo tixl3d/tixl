@@ -350,7 +350,7 @@ public sealed class VideoPlaybackController : IDisposable
         _session = session;
         var path = session.UsesZeroCopy ? "D3D11VA hardware (zero-copy)"
                        : session.UsesHardwareDecode ? "D3D11VA hardware (CPU read-back)" : "software";
-        Log.Debug($"Video decode path: {path} — {session.Width}x{session.Height} {session.PixelFormat}");
+        Log.Gated.VideoRender($"Video decode path: {path} — {session.Width}x{session.Height} {session.PixelFormat}");
 
         // ~0.5 s prefetch lead. Forward catch-up seeks only past this; it grows to the observed GOP depth so
         // decoding forward inside one long GOP never re-seeks the keyframe (starts at ~0.5 s before learning).

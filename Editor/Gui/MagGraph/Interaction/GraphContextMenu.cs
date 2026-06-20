@@ -1,6 +1,9 @@
+using System.IO;
 using ImGuiNET;
 using T3.Core.DataTypes;
 using T3.Core.Operator;
+using T3.Core.Resource;
+using T3.Core.Resource.Assets;
 using T3.Core.SystemUi;
 using T3.Editor.Gui.Graph.Dialogs;
 using T3.Editor.Gui.Interaction;
@@ -310,6 +313,27 @@ internal static class GraphContextMenu
 
         ImGui.Separator();
 
+        // Top-level "Generate proxy" for a selected op whose file-path input points at a video.
+        if (oneOpSelected
+            && context.CompositionInstance.Children.TryGetChildInstance(selectedChildUis[0].Id, out var proxyOpInstance)
+            && TryGetVideoProxySource(proxyOpInstance, out var proxySource))
+        {
+            var proxyState = ProxyGenerationService.Jobs.TryGetValue(proxySource, out var status)
+                                 ? status.State
+                                 : (ProxyGenerationService.JobState?)null;
+            var (proxyLabel, proxyBusy) = proxyState switch
+                                              {
+                                                  ProxyGenerationService.JobState.Queued => ("Proxy queued…", true),
+                                                  ProxyGenerationService.JobState.Generating => ($"Generating proxy… {status.Progress * 100:0}%", true),
+                                                  ProxyGenerationService.JobState.Done => ("Regenerate proxy", false),
+                                                  _ => ("Generate proxy video", false),
+                                              };
+            if (ImGui.MenuItem(proxyLabel, enabled: !proxyBusy))
+                ProxyGenerationService.Enqueue(proxySource);
+
+            ImGui.Separator();
+        }
+
         if (ImGui.MenuItem("Copy",
                            UserActions.CopyToClipboard.ListShortcuts(),
                            selected: false,
@@ -528,4 +552,22 @@ internal static class GraphContextMenu
         // }
         //ImGui.EndMenu();
     }
+
+    // Resolves a selected op's file-path input to an absolute video path, for the "Generate proxy" action.
+    private static bool TryGetVideoProxySource(Instance instance, out string absolutePath)
+    {
+        absolutePath = string.Empty;
+        if (!SymbolAnalysis.TryGetFileInputFromInstance(instance, out var fileInput, out _))
+            return false;
+
+        var address = fileInput.TypedInputValue.Value;
+        if (string.IsNullOrEmpty(address) || !IsVideoFile(address))
+            return false;
+
+        return AssetRegistry.TryResolveAddress(address, instance as IResourceConsumer, out absolutePath, out _)
+               && File.Exists(absolutePath);
+    }
+
+    private static bool IsVideoFile(string path)
+        => Path.GetExtension(path).ToLowerInvariant() is ".mp4" or ".mov" or ".mkv" or ".avi" or ".webm" or ".m4v" or ".mpg" or ".mpeg";
 }
