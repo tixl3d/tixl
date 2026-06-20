@@ -557,30 +557,95 @@ internal static class FormInputs
 
     public static bool SegmentedButton<T>(ref T selectedValue, float columnWidth = 0) where T : struct, Enum
     {
+        if (columnWidth <= 0)
+            return SegmentedButtonPill(ref selectedValue);
+
+        // Fixed-width vertical mode (category selectors) keeps the simple per-button look.
         var modified = false;
         var selectedValueString = selectedValue.ToString();
-        var isFirst = true;
-
         foreach (var value in Enum.GetValues<T>())
         {
             var name = CustomComponents.HumanReadablePascalCase(Enum.GetName(value));
-            if (!isFirst && columnWidth <= 0)
-            {
-                ImGui.SameLine();
-            }
-
             var isSelected = selectedValueString == value.ToString();
-            var clicked = DrawSelectButton(name, isSelected, columnWidth);
-
-            if (clicked)
+            if (DrawSelectButton(name, isSelected, columnWidth))
             {
                 modified = true;
                 selectedValue = value;
             }
+        }
 
+        return modified;
+    }
+
+    /// <summary>
+    /// Horizontal segmented control drawn as one rounded track with the active option floating inside it.
+    /// Custom draw-list rendering (rather than per-option ImGui.Button) so the track and the active pill
+    /// share corners and the active label can use a heavier font.
+    /// </summary>
+    private static bool SegmentedButtonPill<T>(ref T selectedValue) where T : struct, Enum
+    {
+        var scale = T3Ui.UiScaleFactor;
+        var h = ImGui.GetFrameHeight();
+        var segPadding = 14 * scale;
+        var rounding = 4 * scale;
+        var inset = 2 * scale;
+
+        var values = Enum.GetValues<T>();
+        var selectedString = selectedValue.ToString();
+        var dl = ImGui.GetWindowDrawList();
+        var start = ImGui.GetCursorScreenPos();
+
+        var total = 0f;
+        foreach (var value in values)
+        {
+            var name = CustomComponents.HumanReadablePascalCase(Enum.GetName(value));
+            total += ImGui.CalcTextSize(name).X + segPadding * 2;
+        }
+
+        dl.AddRectFilled(start, start + new Vector2(total, h), UiColors.BackgroundButton.Fade(0.2f), rounding);
+
+        // Scope ids by enum type so two unrelated segmented controls in the same window don't collide.
+        ImGui.PushID(typeof(T).Name);
+
+        var modified = false;
+        var isFirst = true;
+        var x = start.X;
+        foreach (var value in values)
+        {
+            var name = CustomComponents.HumanReadablePascalCase(Enum.GetName(value));
+            var segWidth = ImGui.CalcTextSize(name).X + segPadding * 2;
+            var isSelected = selectedString == value.ToString();
+
+            if (!isFirst)
+                ImGui.SameLine(0, 0);
+
+            if (ImGui.InvisibleButton(name, new Vector2(segWidth, h)))
+            {
+                selectedValue = value;
+                modified = true;
+            }
+
+            var segMin = new Vector2(x, start.Y);
+            if (isSelected)
+            {
+                dl.AddRectFilled(segMin + new Vector2(inset, inset),
+                                 segMin + new Vector2(segWidth - inset, h - inset),
+                                 UiColors.BackgroundButton, rounding);
+            }
+
+            var font = isSelected ? Fonts.FontBold : Fonts.FontNormal;
+            var textColor = isSelected ? UiColors.ForegroundFull : UiColors.TextMuted;
+            ImGui.PushFont(font);
+            var textSize = ImGui.CalcTextSize(name);
+            var textPos = new Vector2(segMin.X + (segWidth - textSize.X) * 0.5f, segMin.Y + (h - textSize.Y) * 0.5f);
+            dl.AddText(textPos, ImGui.GetColorU32(textColor.Rgba), name);
+            ImGui.PopFont();
+
+            x += segWidth;
             isFirst = false;
         }
 
+        ImGui.PopID();
         return modified;
     }
 
@@ -820,9 +885,7 @@ internal static class FormInputs
         }
 
         ImGui.SetCursorPosX(MathF.Max(LeftParameterPadding, 0) + 20 * T3Ui.UiScaleFactor);
-        ImGui.PushStyleColor(ImGuiCol.FrameBg, UiColors.BackgroundButton.Rgba);
-        var modified = ImGui.Checkbox(label, ref value);
-        ImGui.PopStyleColor();
+        var modified = DrawCheckbox(label, ref value);
 
         AppendTooltip(tooltip);
         if (isDefault)
@@ -837,6 +900,50 @@ internal static class FormInputs
         }
 
         return modified;
+    }
+
+    /// <summary>
+    /// Rounded checkbox with a white atlas checkmark when on — replaces ImGui.Checkbox so checkboxes
+    /// match the editor's look (rounded field, baked glyph) instead of the default tick.
+    /// </summary>
+    private static bool DrawCheckbox(string label, ref bool value)
+    {
+        var scale = T3Ui.UiScaleFactor;
+        var h = ImGui.GetFrameHeight();
+        var boxSize = MathF.Round(h * 0.8f);
+
+        var hasLabel = !string.IsNullOrEmpty(label) && !label.StartsWith("##");
+        var labelSize = hasLabel ? ImGui.CalcTextSize(label) : Vector2.Zero;
+        var spacing = hasLabel ? 8 * scale : 0;
+
+        var id = string.IsNullOrEmpty(label) ? "##checkbox" : label;
+        var clicked = ImGui.InvisibleButton(id, new Vector2(boxSize + spacing + labelSize.X, h));
+        if (clicked)
+            value = !value;
+
+        var min = ImGui.GetItemRectMin();
+        var isHovered = ImGui.IsItemHovered();
+        var dl = ImGui.GetWindowDrawList();
+
+        var boxMin = new Vector2(min.X, min.Y + (h - boxSize) * 0.5f);
+        var boxMax = boxMin + new Vector2(boxSize, boxSize);
+        var boxColor = isHovered ? UiColors.BackgroundInputFieldHover : UiColors.BackgroundInputField;
+        dl.AddRectFilled(boxMin, boxMax, boxColor, 4 * scale);
+
+        if (value)
+        {
+            var iconSize = boxSize * 0.9f;
+            var iconPos = boxMin + new Vector2((boxSize - iconSize) * 0.5f);
+            Icons.DrawIconAtScreenPosition(Icon.Checkmark, iconPos, new Vector2(iconSize), dl, UiColors.ForegroundFull);
+        }
+
+        if (hasLabel)
+        {
+            var textPos = new Vector2(boxMax.X + spacing, min.Y + (h - labelSize.Y) * 0.5f);
+            dl.AddText(textPos, ImGui.GetColorU32(UiColors.Text.Rgba), label);
+        }
+
+        return clicked;
     }
 
     public static void AddHint(string label)

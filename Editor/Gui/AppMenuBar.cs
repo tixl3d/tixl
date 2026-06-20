@@ -22,6 +22,7 @@ using T3.Editor.Gui.Windows.RenderExport;
 using T3.Editor.Skills.Ui;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
+using T3.Editor.UiModel.Exporting;
 using T3.Editor.UiModel.Helpers;
 using T3.Editor.UiModel.ProjectHandling;
 using ShaderCompiler = T3.Core.Resource.ShaderCompiling.ShaderCompiler;
@@ -401,6 +402,29 @@ internal static class AppMenuBar
             {
                 GraphBookmarkNavigation.DrawBookmarksMenu();
                 ImGui.EndMenu();
+            }
+
+            ImGui.Separator();
+
+            var exportView = ProjectView.Focused;
+            var exportChildUis = exportView?.NodeSelection.GetSelectedChildUis().ToList();
+            var canExport = exportView?.CompositionInstance != null && exportChildUis is { Count: 1 };
+            if (ImGui.MenuItem("Export as Executable", null, false, canExport))
+            {
+                var exportChild = exportChildUis![0];
+                var exportName = exportChild.SymbolChild.ReadableName;
+                switch (PlayerExporter.TryExportInstance(exportView!.CompositionInstance!, exportChild, out var reason, out var exportDir))
+                {
+                    case false:
+                        Log.Error(reason);
+                        BlockingWindow.Instance.ShowMessageBox(reason, $"Failed to export {exportName}");
+                        break;
+                    default:
+                        Log.Info(reason);
+                        BlockingWindow.Instance.ShowMessageBox(reason, $"Exported {exportName} successfully!");
+                        CoreUi.Instance.OpenWithDefaultApplication(exportDir);
+                        break;
+                }
             }
 
             ImGui.EndMenu();

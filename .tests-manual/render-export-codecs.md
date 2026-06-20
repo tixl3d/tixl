@@ -20,8 +20,8 @@ AAC audio. The verification for each codec is a round-trip: render a short range
 ## Step: The Codec dropdown lists all codecs with friendly labels
 
 **Action:**
-Open the **Render To File** window. With **Render Mode** set to **Video**, find the **Codec** dropdown near
-the top of the video settings and open it.
+Open the **Render To File** window and select the **Format & Quality** section in the left sidebar. With
+**Render Mode** set to **Video**, find the **Codec** dropdown and open it.
 
 **Expected:**
 - A **Codec** dropdown is shown, with **H.264** selected by default.
@@ -31,8 +31,8 @@ the top of the video settings and open it.
 ## Step: The filename extension tracks the codec
 
 **Action:**
-Note the **Filename** field (e.g. `render-v01.mp4`). Change **Codec** to **ProRes**, then to **FFV1**, then
-back to **H264**, watching the filename each time.
+Note the **Filename** field in the **Output Target** section (e.g. `render-v01.mp4`). Change **Codec** (in
+**Format & Quality**) to **ProRes**, then to **FFV1**, then back to **H264**, watching the filename each time.
 
 **Expected:**
 - The extension follows the codec: ProRes → `.mov`, FFV1 → `.mkv`, VP9/AV1/H264 → `.mp4`.
@@ -69,7 +69,7 @@ switching the codec. Try **H264** first, then a non-H.264 codec (e.g. **ProRes**
 
 **Action:**
 Set **Codec** to **H264**, choose a short range (a few seconds), make sure **Export Audio** is on, and press
-**Start Render**. When it finishes, re-import the written file with a `[PlayVideo]` operator (or open it in an
+**Render**. When it finishes, re-import the written file with a `[PlayVideo]` operator (or open it in an
 external player).
 
 **Expected:**
@@ -79,7 +79,7 @@ external player).
 ## Step: HEVC export produces a playable MP4
 
 **Action:**
-Set **Codec** to **HEVC (H.265)**, choose a short range, press **Start Render**, then re-import with
+Set **Codec** to **HEVC (H.265)**, choose a short range, press **Render**, then re-import with
 `[PlayVideo]`.
 
 **Expected:**
@@ -92,7 +92,7 @@ Set **Codec** to **HEVC (H.265)**, choose a short range, press **Start Render**,
 ## Step: ProRes export produces a playable MOV
 
 **Action:**
-Set **Codec** to **ProRes**, press **Start Render**, then re-import the output with `[PlayVideo]`.
+Set **Codec** to **ProRes**, press **Render**, then re-import the output with `[PlayVideo]`.
 
 **Expected:**
 - A `.mov` file is written and plays back with the correct image.
@@ -101,7 +101,7 @@ Set **Codec** to **ProRes**, press **Start Render**, then re-import the output w
 ## Step: VP9, AV1, and FFV1 each export and re-import
 
 **Action:**
-For each of **VP9**, **AV1**, and **FFV1** in turn: keep the range short, press **Start Render**, then
+For each of **VP9**, **AV1**, and **FFV1** in turn: keep the range short, press **Render**, then
 re-import the output with `[PlayVideo]`. VP9 and AV1 are software-encoded, so expect a slower render than
 H.264 — especially at high resolution.
 
@@ -116,15 +116,15 @@ HAP encodes **in-process** with the bundled FFmpeg (the build includes the `hap`
 ffmpeg, no download.
 
 **Action:**
-Select **Hap** (also try **HapAlpha** / **HapQ**), keep the range short, **Start Render**, then re-import the
+Select **Hap** (also try **HapAlpha** / **HapQ**), keep the range short, **Render**, then re-import the
 output with `[PlayVideo]`.
 
 **Expected:**
 - The three HAP entries appear; the filename extension becomes `.mov`; the inline line reads **"Software
-  encoder"** and **Start Render** is enabled — no popup, no external ffmpeg.
+  encoder"** and **Render** is enabled — no popup, no external ffmpeg.
 - A size estimate appears (e.g. **"Est. 1.9 GB (1120×932, DXT before Snappy)"**) — HAP is a fixed-ratio codec,
   so the prediction is reliable; HapAlpha/HapQ are ~2× Hap. The dimensions shown are **rounded down to a
-  multiple of 4** (HAP's DXT block size), and the summary card shows the same rounded size, not the raw one.
+  multiple of 4** (HAP's DXT block size), and the footer summary line shows the same rounded size, not the raw one.
 - A `.mov` is written and plays back with the correct image (HapAlpha preserves alpha; HapQ is higher
   quality / larger). With **Export Audio** on, it carries an AAC track.
 

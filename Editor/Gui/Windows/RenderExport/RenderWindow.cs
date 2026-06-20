@@ -21,92 +21,222 @@ internal sealed class RenderWindow : Window
         Config.Title = "Render To File";
     }
 
+    private enum Sections
+    {
+        Source,
+        FormatAndQuality,
+        OutputTarget,
+    }
+
     protected override void DrawContent()
     {
-        FormInputs.AddVerticalSpace(15);
+        if (RenderProcess.State is RenderProcess.States.Undefined
+                                or RenderProcess.States.NoOutputWindow
+                                or RenderProcess.States.NoValidOutputType
+                                or RenderProcess.States.NoValidOutputTexture)
+        {
+            DrawBlockedState();
+            return;
+        }
+
+        _uiState.LastHelpString = "Ready to render.";
+        var scale = T3Ui.UiScaleFactor;
+        var dl = ImGui.GetWindowDrawList();
+
+        // Dark chrome behind the sidebar and footer. The selected sidebar entry and the section panel
+        // both paint WindowBackground on top of this same base, so they read as one connected surface.
+        //dl.AddRectFilled(ImGui.GetWindowPos(), ImGui.GetWindowPos() + ImGui.GetWindowSize(), UiColors.BackgroundInputField);
+
+        var footerHeight = 56 * scale;
+        var bodyHeight = ImGui.GetContentRegionAvail().Y - footerHeight;
+
         var modified = false;
-        modified |= DrawTimeSetup();
-        modified |= DrawInnerContent();
+
+        ImGui.BeginChild("body", new Vector2(0, bodyHeight), ImGuiChildFlags.None,
+                         ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoScrollbar);
+        {
+            NavigationSidebar.BeginColumn("renderNav", 140);
+            {
+                if (NavigationSidebar.Item("Source", _uiState.ActiveSection == Sections.Source))
+                    _uiState.ActiveSection = Sections.Source;
+
+                if (NavigationSidebar.Item("Format & Quality", _uiState.ActiveSection == Sections.FormatAndQuality))
+                    _uiState.ActiveSection = Sections.FormatAndQuality;
+
+                if (NavigationSidebar.Item("Output Target", _uiState.ActiveSection == Sections.OutputTarget))
+                    _uiState.ActiveSection = Sections.OutputTarget;
+            }
+            NavigationSidebar.EndColumn();
+
+            ImGui.SameLine(0, 0);
+
+            ImGui.PushStyleColor(ImGuiCol.ChildBg, UiColors.WindowBackground.Rgba);
+            ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(16, 12) * scale);
+            ImGui.BeginChild("section", new Vector2(0, 0), ImGuiChildFlags.AlwaysUseWindowPadding);
+            {
+                FormInputs.SetIndentToParameters();
+                FormInputs.AddVerticalSpace(4);
+                switch (_uiState.ActiveSection)
+                {
+                    case Sections.Source:
+                        modified |= DrawSourceSection();
+                        break;
+                    case Sections.FormatAndQuality:
+                        modified |= DrawFormatSection();
+                        break;
+                    case Sections.OutputTarget:
+                        modified |= DrawOutputSection();
+                        break;
+                }
+            }
+            ImGui.EndChild();
+            ImGui.PopStyleVar();
+            ImGui.PopStyleColor();
+        }
+        ImGui.EndChild();
+
+        DrawFooter();
+        DrawOverwriteDialog();
 
         if (modified)
             ProjectView.Focused?.CompositionInstance?.Symbol.GetSymbolUi()?.FlagAsModified();
     }
 
-    private bool DrawInnerContent()
+    // Reasons the output can't be rendered (no view, wrong output type, no texture). Shown in place of the
+    // whole sidebar UI since none of the settings are actionable until an image output is available.
+    private void DrawBlockedState()
     {
-        if (RenderProcess.State == RenderProcess.States.NoOutputWindow)
-        {
-            _uiState.LastHelpString = "No output view available";
-            CustomComponents.HelpText(_uiState.LastHelpString);
-            return false;
-        }
-
-        if (RenderProcess.State == RenderProcess.States.NoValidOutputType)
-        {
-            _uiState.LastHelpString = RenderProcess.MainOutputType == null
-                                  ? "The output view is empty"
-                                  : "Select or pin a Symbol with Texture2D output in order to render to file";
-            ImGui.Button("Start Render", new Vector2(-1, 0));
-            CustomComponents.TooltipForLastItem("Only Symbols with a texture2D output can be rendered to file");
-            //ImGui.EndDisabled();
-            CustomComponents.HelpText(_uiState.LastHelpString);
-            return false;
-        }
-
-        if (RenderProcess.State == RenderProcess.States.NoValidOutputTexture)
-        {
-            CustomComponents.HelpText("Please select or pin an Image operator.");
-            return false;
-        }
-
-        _uiState.LastHelpString = "Ready to render.";
-
-        var modified = false;
-
-        FormInputs.AddVerticalSpace();
-        modified |= FormInputs.AddSegmentedButtonWithLabel(ref RenderSettings.Current.RenderMode, "Render Mode");
-
-        FormInputs.AddVerticalSpace();
-
-        if (RenderSettings.Current.RenderMode == RenderSettings.RenderModes.Video)
-            modified |= DrawVideoSettings();
-        else
-            modified |= DrawImageSequenceSettings();
-
-        FormInputs.AddVerticalSpace(2);
-
-        // Final Summary Card
-        ImGui.PushStyleColor(ImGuiCol.ChildBg, new Vector4(0.12f, 0.12f, 0.12f, 0.45f));
-        ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 4f);
-
-        if (ImGui.BeginChild("Summary", new Vector2(-1, 64 * T3Ui.UiScaleFactor), ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollbar))
-        {
-            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + 4);
-            DrawRenderSummary(RenderProcess.GetActiveOrRequestedSettings());
-        }
-        ImGui.EndChild();
-
-        ImGui.PopStyleVar();
-        ImGui.PopStyleColor();
-
-        FormInputs.AddVerticalSpace(5);
-        DrawRenderingControls();
-        DrawOverwriteDialog();
-
-        CustomComponents.HelpText(RenderProcess.IsExporting ? RenderProcess.LastHelpString : _uiState.LastHelpString);
-
-        if (!RenderProcess.IsExporting && !string.IsNullOrEmpty(RenderProcess.LastTargetDirectory) && Directory.Exists(RenderProcess.LastTargetDirectory))
-        {
-            if (ImGui.Button("Open output folder"))
-            {
-                CoreUi.Instance.OpenWithDefaultApplication(RenderProcess.LastTargetDirectory);
-            }
-        }
-
-        return modified;
+        var message = RenderProcess.State switch
+                          {
+                              RenderProcess.States.NoOutputWindow    => "No output view available",
+                              RenderProcess.States.NoValidOutputType => RenderProcess.MainOutputType == null
+                                                                            ? "The output view is empty"
+                                                                            : "Select or pin a Symbol with Texture2D output in order to render to file",
+                              RenderProcess.States.NoValidOutputTexture => "Please select or pin an Image operator.",
+                              _                                         => "No renderable output available",
+                          };
+        _uiState.LastHelpString = message;
+        FormInputs.AddVerticalSpace(15);
+        CustomComponents.HelpText(message);
     }
 
-    private bool DrawTimeSetup()
+    private void DrawFooter()
+    {
+        var scale = T3Ui.UiScaleFactor;
+        var dl = ImGui.GetWindowDrawList();
+
+        var dividerPos = ImGui.GetCursorScreenPos();
+        dl.AddLine(dividerPos, dividerPos + new Vector2(ImGui.GetContentRegionAvail().X, 0), UiColors.BackgroundButton, 1 * scale);
+
+        FormInputs.AddVerticalSpace(8);
+
+        if (RenderProcess.IsExporting)
+        {
+            DrawExportProgressFooter();
+            return;
+        }
+
+        var settings = RenderProcess.GetActiveOrRequestedSettings();
+        var isValid = ValidateSettings(out var errorMessage);
+
+        ImGui.AlignTextToFramePadding();
+        CustomComponents.StylizedText(isValid ? BuildSummaryLine(settings) : errorMessage,
+                                      Fonts.FontSmall,
+                                      isValid ? UiColors.TextMuted : UiColors.StatusAttention);
+
+        // Right cluster: open-folder icon followed by the primary Render button.
+        var iconSize = ImGui.GetFrameHeight();
+        var ctaSize = CustomComponents.GetCtaButtonSize("Render");
+        CustomComponents.RightAlign(iconSize + 8 * scale + ctaSize.X);
+
+        var targetDir = GetConfiguredOutputDirectory();
+        var canOpen = !string.IsNullOrEmpty(targetDir) && Directory.Exists(targetDir);
+        if (CustomComponents.IconButton(Icon.FolderOpen, new Vector2(iconSize, iconSize),
+                                        canOpen ? CustomComponents.ButtonStates.Default : CustomComponents.ButtonStates.Disabled)
+            && canOpen)
+        {
+            CoreUi.Instance.OpenWithDefaultApplication(targetDir);
+        }
+        CustomComponents.TooltipForLastItem("Open output folder", targetDir);
+
+        ImGui.SameLine(0, 8 * scale);
+
+        if (!isValid)
+            ImGui.BeginDisabled();
+
+        if (CustomComponents.DrawCtaButton("Render", Icon.None, CustomComponents.ButtonStates.Activated))
+        {
+            var targetPath = GetCachedTargetFilePath(RenderSettings.Current.RenderMode);
+            if (RenderPaths.FileExists(targetPath))
+                _uiState.ShowOverwriteModal = true;
+            else
+                RenderProcess.TryStartVideoExport();
+        }
+
+        if (!isValid)
+        {
+            ImGui.EndDisabled();
+            CustomComponents.TooltipForLastItem(errorMessage);
+            _uiState.LastHelpString = errorMessage;
+        }
+    }
+
+    private static void DrawExportProgressFooter()
+    {
+        var progress = (float)RenderProcess.Progress;
+        var elapsed = Playback.RunTimeInSecs - RenderProcess.ExportStartedTimeLocal;
+
+        var timeRemainingStr = "Calculating...";
+        if (progress > 0.01)
+        {
+            var estimatedTotal = elapsed / progress;
+            timeRemainingStr = StringUtils.HumanReadableDurationFromSeconds(estimatedTotal - elapsed) + " remaining";
+        }
+
+        ImGui.PushStyleColor(ImGuiCol.PlotHistogram, UiColors.StatusAutomated.Rgba);
+        ImGui.PushStyleColor(ImGuiCol.FrameBg, UiColors.BackgroundInputField.Rgba);
+        ImGui.ProgressBar(progress, new Vector2(-1, 4 * T3Ui.UiScaleFactor), "");
+        ImGui.PopStyleColor(2);
+
+        CustomComponents.StylizedText(timeRemainingStr, Fonts.FontSmall, UiColors.TextMuted);
+
+        var cancelSize = CustomComponents.GetCtaButtonSize("Cancel");
+        CustomComponents.RightAlign(cancelSize.X);
+        if (CustomComponents.DrawCtaButton("Cancel", Icon.None, CustomComponents.ButtonStates.Default))
+        {
+            RenderProcess.Cancel("Render cancelled after " + StringUtils.HumanReadableDurationFromSeconds(elapsed));
+        }
+    }
+
+    // One-line render summary shown in the footer, e.g. "2:12.0s / 1920×1080 / H.264 → ~95 MB / 2 min".
+    private static string BuildSummaryLine(RenderSettings settings)
+    {
+        var startSec = RenderTiming.ReferenceTimeToSeconds(settings.StartInBars, settings.TimeReference, settings.FrameRate);
+        var endSec = RenderTiming.ReferenceTimeToSeconds(settings.EndInBars, settings.TimeReference, settings.FrameRate);
+        var duration = Math.Max(0, endSec - startSec);
+        var durationStr = $"{duration / 60:0}:{duration % 60:00.0}s";
+
+        RenderProcess.TryGetRenderResolution(settings, out var resolution);
+        var frameCount = RenderTiming.ComputeFrameCount(settings);
+
+        if (settings.RenderMode != RenderSettings.RenderModes.Video)
+            return $"{durationStr} / {resolution.Width}×{resolution.Height} / {settings.FileFormat} sequence / {frameCount} frames";
+
+        var (w, h) = settings.VideoCodec.RoundToEncoderBlock(resolution.Width, resolution.Height);
+        var bytes = RenderExportEstimate.EstimateBytes(settings.VideoCodec, new Int2(w, h), frameCount, duration, settings.Bitrate);
+        var renderSecs = RenderExportEstimate.EstimateSeconds(settings.VideoCodec, new Int2(w, h), frameCount, settings.OverrideMotionBlurSamples);
+        return $"{durationStr} / {w}×{h} / {CodecDisplayName(settings.VideoCodec)} → ~{RenderExportEstimate.FormatBytes(bytes)} / {RenderExportEstimate.FormatDuration(renderSecs)}";
+    }
+
+    // Folder the next render writes to, used to enable the footer's "open folder" button.
+    private static string GetConfiguredOutputDirectory()
+    {
+        var s = RenderSettings.Current;
+        var path = s.RenderMode == RenderSettings.RenderModes.Video ? s.VideoFilePath : s.SequenceFilePath;
+        return string.IsNullOrEmpty(path) ? string.Empty : (Path.GetDirectoryName(path) ?? string.Empty);
+    }
+
+    private bool DrawSourceSection()
     {
         var modified = false;
         var s = RenderSettings.Current;
@@ -285,7 +415,28 @@ internal sealed class RenderWindow : Window
         CustomComponents.StylizedText(text, Fonts.FontSmall, color);
     }
 
-    private bool DrawVideoSettings()
+    private bool DrawFormatSection()
+    {
+        var s = RenderSettings.Current;
+        var modified = FormInputs.AddSegmentedButtonWithLabel(ref s.RenderMode, "Render Mode");
+        FormInputs.AddVerticalSpace();
+
+        if (s.RenderMode == RenderSettings.RenderModes.Video)
+            modified |= DrawVideoFormatSettings();
+        else
+            modified |= FormInputs.AddEnumDropdown(ref s.FileFormat, "Format", null, RenderSettings.Defaults.FileFormat);
+
+        return modified;
+    }
+
+    private bool DrawOutputSection()
+    {
+        return RenderSettings.Current.RenderMode == RenderSettings.RenderModes.Video
+                   ? DrawVideoOutputSettings()
+                   : DrawImageSequenceOutputSettings();
+    }
+
+    private bool DrawVideoFormatSettings()
     {
         var modified = false;
         var s = RenderSettings.Current;
@@ -351,12 +502,20 @@ internal sealed class RenderWindow : Window
             FormInputs.AddHint($"Est. {hapSize} ({hapW}×{hapH}, DXT before Snappy)");
         }
 
-        // Path
+        modified |= FormInputs.AddCheckBox("Export Audio (experimental)", ref s.ExportAudio, null, RenderSettings.Defaults.ExportAudio);
+        return modified;
+    }
+
+    private bool DrawVideoOutputSettings()
+    {
+        var modified = false;
+        var s = RenderSettings.Current;
+
         var currentPath = s.VideoFilePath ?? "./Render/render-v01.mp4";
         var directory = Path.GetDirectoryName(currentPath) ?? "./Render";
         var filename = Path.GetFileName(currentPath) ?? "render-v01.mp4";
 
-        modified |= FormInputs.AddFilePicker("Main Folder", ref directory!, ".\\Render", null, "Save folder.", FileOperations.FilePickerTypes.Folder);
+        modified |= FormInputs.AddFilePicker("Folder", ref directory!, ".\\Render", null, "Save folder.", FileOperations.FilePickerTypes.Folder);
 
         if (FormInputs.AddStringInput("Filename", ref filename))
         {
@@ -379,6 +538,10 @@ internal sealed class RenderWindow : Window
 
         s.VideoFilePath = Path.Combine(directory, filename);
 
+        RenderProcess.TryGetRenderResolution(s, out var estRes);
+        var estFrames = RenderTiming.ComputeFrameCount(s);
+        var estDuration = Math.Max(0, RenderTiming.ReferenceTimeToSeconds(s.EndInBars, s.TimeReference, s.FrameRate)
+                                      - RenderTiming.ReferenceTimeToSeconds(s.StartInBars, s.TimeReference, s.FrameRate));
         DrawDiskSpaceWarning(directory, s.VideoCodec, estRes, estFrames, estDuration, s.Bitrate);
 
         modified |= FormInputs.AddCheckBox("Auto-increment version", ref s.AutoIncrementVersionNumber, null, RenderSettings.Defaults.AutoIncrementVersionNumber);
@@ -397,16 +560,15 @@ internal sealed class RenderWindow : Window
             }
         }
 
-        modified |= FormInputs.AddCheckBox("Export Audio (experimental)", ref s.ExportAudio, null, RenderSettings.Defaults.ExportAudio);
         return modified;
     }
 
-    private bool DrawImageSequenceSettings()
+    private bool DrawImageSequenceOutputSettings()
     {
         var modified = false;
         var s = RenderSettings.Current;
 
-        modified |= FormInputs.AddFilePicker("Main Folder", ref s.SequenceFilePath!, ".\\ImageSequence ", null, "Save folder.", FileOperations.FilePickerTypes.Folder);
+        modified |= FormInputs.AddFilePicker("Folder", ref s.SequenceFilePath!, ".\\ImageSequence ", null, "Save folder.", FileOperations.FilePickerTypes.Folder);
 
         if (FormInputs.AddStringInput("Subfolder", ref s.SequenceFileName))
         {
@@ -420,7 +582,6 @@ internal sealed class RenderWindow : Window
             s.SequencePrefix = (s.SequencePrefix ?? string.Empty).Trim();
         }
 
-        modified |= FormInputs.AddEnumDropdown(ref s.FileFormat, "Format", null, RenderSettings.Defaults.FileFormat);
         modified |= FormInputs.AddCheckBox("Create subfolder", ref s.CreateSubFolder, null, RenderSettings.Defaults.CreateSubFolder);
         modified |= FormInputs.AddCheckBox("Auto-increment version", ref s.AutoIncrementSubFolder, null, RenderSettings.Defaults.AutoIncrementSubFolder);
 
@@ -451,50 +612,6 @@ internal sealed class RenderWindow : Window
         return modified;
     }
 
-    private static void DrawRenderSummary(RenderSettings settings)
-    {
-        var startSec = RenderTiming.ReferenceTimeToSeconds(settings.StartInBars, settings.TimeReference, settings.FrameRate);
-        var endSec = RenderTiming.ReferenceTimeToSeconds(settings.EndInBars, settings.TimeReference, settings.FrameRate);
-        var duration = Math.Max(0, endSec - startSec);
-
-        var outputPath = RenderPaths.GetExpectedTargetDisplayPath(settings.RenderMode);
-        string format = settings.RenderMode == RenderSettings.RenderModes.Video
-                            ? $"{settings.VideoCodec} Video"
-                            : $"{settings.FileFormat} Sequence";
-
-        RenderProcess.TryGetRenderResolution(settings, out var resolution);
-
-        // HAP crops to a multiple of 4 — show the dimensions actually written, not the raw render size.
-        if (settings.RenderMode == RenderSettings.RenderModes.Video)
-        {
-            var (w, h) = settings.VideoCodec.RoundToEncoderBlock(resolution.Width, resolution.Height);
-            resolution = new Int2(w, h);
-        }
-
-        ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-        ImGui.TextUnformatted($"{format} - {resolution.Width}×{resolution.Height} @ {settings.FrameRate:0}fps");
-
-        var frameCount = RenderTiming.ComputeFrameCount(settings);
-        ImGui.TextUnformatted($"{duration / 60:0}:{duration % 60:00.0}s ({frameCount} frames)");
-
-        if (settings.RenderMode == RenderSettings.RenderModes.Video)
-        {
-            var bytes = RenderExportEstimate.EstimateBytes(settings.VideoCodec, resolution, frameCount, duration, settings.Bitrate);
-            var renderSecs = RenderExportEstimate.EstimateSeconds(settings.VideoCodec, resolution, frameCount, settings.OverrideMotionBlurSamples);
-            ImGui.TextUnformatted($"~{RenderExportEstimate.FormatBytes(bytes)}  ·  {RenderExportEstimate.FormatDuration(renderSecs)} to render");
-        }
-
-        ImGui.PushFont(Fonts.FontSmall);
-        ImGui.TextUnformatted("Export to:");
-        ImGui.SameLine();
-        ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Fade(1.2f).Rgba);
-        ImGui.TextWrapped(outputPath);
-        ImGui.PopStyleColor();
-        ImGui.PopFont();
-
-        ImGui.PopStyleColor();
-    }
-
     public string GetCachedTargetFilePath(RenderSettings.RenderModes mode)
     {
         var now = Playback.RunTimeInSecs;
@@ -504,75 +621,6 @@ internal sealed class RenderWindow : Window
         _uiState.CachedTargetPath = RenderPaths.GetTargetFilePath(mode);
         _uiState.LastPathUpdateTime = now;
         return _uiState.CachedTargetPath;
-    }
-
-    private void DrawRenderingControls()
-    {
-        if (RenderProcess.IsExporting)
-        {
-            var progress = (float)RenderProcess.Progress;
-            var elapsed = Playback.RunTimeInSecs - RenderProcess.ExportStartedTimeLocal;
-
-            var timeRemainingStr = "Calculating...";
-            if (progress > 0.01)
-            {
-                var estimatedTotal = elapsed / progress;
-                var remaining = estimatedTotal - elapsed;
-                timeRemainingStr = StringUtils.HumanReadableDurationFromSeconds(remaining) + " remaining";
-            }
-
-            ImGui.PushStyleColor(ImGuiCol.PlotHistogram, UiColors.StatusAutomated.Rgba);
-            ImGui.PushStyleColor(ImGuiCol.FrameBg, UiColors.BackgroundInputField.Rgba);
-            ImGui.ProgressBar(progress, new Vector2(-1, 4 * T3Ui.UiScaleFactor), "");
-            ImGui.PopStyleColor(2);
-
-            ImGui.PushFont(Fonts.FontSmall);
-            ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-            ImGui.TextUnformatted(timeRemainingStr);
-            ImGui.PopStyleColor();
-            ImGui.PopFont();
-
-            FormInputs.AddVerticalSpace(5);
-            if (ImGui.Button("Cancel Render", new Vector2(-1, 24 * T3Ui.UiScaleFactor)))
-            {
-                RenderProcess.Cancel("Render cancelled after " + StringUtils.HumanReadableDurationFromSeconds(elapsed));
-            }
-        }
-        else
-        {
-            ImGui.PushStyleColor(ImGuiCol.Button, UiColors.BackgroundActive.Fade(0.7f).Rgba);
-            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, UiColors.BackgroundActive.Rgba);
-            ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 4f);
-
-            var isValid = ValidateSettings(out var errorMessage);
-            if (!isValid)
-            {
-                ImGui.BeginDisabled();
-            }
-
-            if (ImGui.Button("Start Render", new Vector2(-1, 36 * T3Ui.UiScaleFactor)))
-            {
-                var targetPath = GetCachedTargetFilePath(RenderSettings.Current.RenderMode);
-                if (RenderPaths.FileExists(targetPath))
-                {
-                    _uiState.ShowOverwriteModal = true;
-                }
-                else
-                {
-                    RenderProcess.TryStartVideoExport();
-                }
-            }
-
-            if (!isValid)
-            {
-                ImGui.EndDisabled();
-                CustomComponents.TooltipForLastItem(errorMessage);
-                _uiState.LastHelpString = errorMessage;
-            }
-
-            ImGui.PopStyleVar();
-            ImGui.PopStyleColor(2);
-        }
     }
 
     private static bool ValidateSettings(out string errorMessage)
@@ -707,6 +755,7 @@ internal sealed class RenderWindow : Window
 
     private sealed class WindowUiState
     {
+        public Sections ActiveSection = Sections.Source;
         public string LastHelpString = string.Empty;
         public float LastValidFps = RenderSettings.Current.FrameRate;
 

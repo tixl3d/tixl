@@ -17,7 +17,7 @@ public static class UiColors
     public static Color BackgroundFull = new(0f, 0f, 0f, 1f);
     
     [T3Style.Hint(GroupTitle = "Text")]
-    public static Color Text = new(0.75f);
+    public static Color Text = new(0.85f);
     public static Color TextMuted = new(0.5f);
     public static Color TextDisabled = new(0.2f);
     public static Color CheckMark = new(1,1,1,0.8f);

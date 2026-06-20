@@ -1,4 +1,5 @@
 ﻿using ImGuiNET;
+using T3.Core.DataTypes.Vector;
 using T3.Core.Utils;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.UiHelpers;
@@ -52,7 +53,11 @@ internal static partial class CustomComponents
     {
         FormInputs.AddVerticalSpace(2);
         ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetStyle().ItemSpacing.X + Icons.FontSize * 1.4f);
-        HintLabel(label);
+        ImGui.PushFont(Fonts.FontSmall);
+        ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
+        ImGui.TextUnformatted(label);
+        ImGui.PopStyleColor();
+        ImGui.PopFont();
     }
 
     public static bool DrawMenuItem(int id, string label, ref bool isChecked, string keyboardShortCut = null, bool reserveIconColumn = true)
@@ -74,10 +79,13 @@ internal static partial class CustomComponents
 
     /// <summary>
     /// Menu item with the checkbox slot on the left, an optional icon, label and an optional
-    /// right-aligned keyboard shortcut.
+    /// right-aligned keyboard shortcut. <paramref name="state"/> controls the label brightness:
+    /// <see cref="ButtonStates.Emphasized"/> reads as the primary/active row, <see cref="ButtonStates.Default"/>
+    /// as a muted secondary row. A disabled item always renders greyed regardless of <paramref name="state"/>.
     /// </summary>
     public static bool DrawMenuItem(int id, Icon icon, string label, string keyboardShortCut = null, bool isChecked = false, bool isEnabled = true,
-                                    bool reserveCheckmarkColumn = true, bool reserveIconColumn = true)
+                                    bool reserveCheckmarkColumn = true, bool reserveIconColumn = true,
+                                    ButtonStates state = ButtonStates.Default)
     {
         var h = ImGui.GetFrameHeight();
         var imguiPadding = ImGui.GetStyle().ItemSpacing;
@@ -115,8 +123,6 @@ internal static partial class CustomComponents
         ImGui.PopID();
         ImGui.PopStyleVar();
 
-        var fade = isEnabled ? 1 : 0.5f;
-
         var min = ImGui.GetItemRectMin();
         var max = ImGui.GetItemRectMax();
         var drawList = ImGui.GetWindowDrawList();
@@ -126,13 +132,14 @@ internal static partial class CustomComponents
             drawList.AddRectFilled(min, max, UiColors.BackgroundActive.Fade(0.25f), 4);
         }
 
+        var textColor = GetMenuTextColor(isEnabled, state);
+
         if (isChecked)
         {
-            //Icons.DrawIconCenter(Icon.Checkmark, UiColors.Text.Fade(fade), 0);
             Icons.DrawIconAtScreenPosition(Icon.Checkmark,
                                            (min + new Vector2(imguiPadding.X,
                                                               h / 2 - Icons.FontSize / 2)).Floor(),
-                                           drawList, UiColors.Text);
+                                           drawList, textColor);
         }
 
         if (hasIcon)
@@ -148,7 +155,7 @@ internal static partial class CustomComponents
         var textHeight = ImGui.GetFontSize();
         drawList.AddText(min + new Vector2(leftPaddingText,
                                            h / 2 - textHeight / 2),
-                         UiColors.Text.Fade(fade),
+                         textColor,
                          label);
 
         if (!string.IsNullOrEmpty(keyboardShortCut))
@@ -156,7 +163,7 @@ internal static partial class CustomComponents
             drawList.AddText(min
                              + new Vector2(windowWidth - shortCutWidth,
                                            h / 2 - textHeight / 2),
-                             UiColors.TextMuted.Fade(fade),
+                             UiColors.TextMuted.Fade(isEnabled ? 0.5f : 0.2f),
                              keyboardShortCut);
         }
 
@@ -166,6 +173,65 @@ internal static partial class CustomComponents
         }
 
         return clicked;
+    }
+
+    /// <summary>
+    /// A submenu header styled to match <see cref="DrawMenuItem"/>: it reserves the same left padding and
+    /// draws a right chevron instead of ImGui's default triangle. Returns true while the submenu is open —
+    /// pair it with <see cref="ImGui.EndMenu"/> exactly like <see cref="ImGui.BeginMenu(string)"/>.
+    /// </summary>
+    public static bool DrawSubMenu(int id, string label, bool isEnabled = true, bool reserveCheckmarkColumn = true)
+    {
+        var iconSlotWidth = Icons.FontSize * 1.4f;
+        var imguiPadding = ImGui.GetStyle().ItemSpacing;
+        // Match DrawMenuItem's label start (checkmark column reserved, no icon column) so headers align with rows.
+        var leftPaddingText = imguiPadding.X + (reserveCheckmarkColumn ? iconSlotWidth : 0f);
+
+        // ImGui's menu selectable bleeds into the window padding, so GetItemRectMin sits a few px left of a
+        // normal row. Anchor instead to the row's start cursor — the same reference DrawMenuItem uses — so
+        // headers line up with rows exactly. Capture before BeginMenu, which switches to the child window when open.
+        var rowStart = ImGui.GetCursorScreenPos();
+        var columnWidth = ImGui.GetColumnWidth();
+        var parentDrawList = ImGui.GetWindowDrawList();
+        var h = ImGui.GetFrameHeight();
+
+        // Hide ImGui's own label, arrow and selectable highlight; we overdraw to match DrawMenuItem.
+        // No PushID here: when the submenu opens, BeginMenu switches to the child window before we could
+        // pop, so a PushID/PopID pair would straddle two per-window id stacks ("Missing PopID()"). The
+        // label (plus ##id for uniqueness) is the menu's id; the style-color stack is global, so its pops are safe.
+        var transparent = UiColors.ForegroundFull.Fade(0f).Rgba;
+        ImGui.PushStyleColor(ImGuiCol.Text, transparent);
+        ImGui.PushStyleColor(ImGuiCol.Header, transparent);
+        ImGui.PushStyleColor(ImGuiCol.HeaderHovered, transparent);
+        ImGui.PushStyleColor(ImGuiCol.HeaderActive, transparent);
+        var isOpen = ImGui.BeginMenu($"{label}##{id}", isEnabled);
+        ImGui.PopStyleColor(4);
+
+        if (isEnabled && (isOpen || ImGui.IsItemHovered()))
+        {
+            parentDrawList.AddRectFilled(rowStart, rowStart + new Vector2(columnWidth, h), UiColors.BackgroundActive.Fade(0.25f), 4);
+        }
+
+        var textColor = GetMenuTextColor(isEnabled, ButtonStates.Default);
+        var textHeight = ImGui.GetFontSize();
+        parentDrawList.AddText(rowStart + new Vector2(leftPaddingText, h / 2 - textHeight / 2), textColor, label);
+
+        Icons.DrawIconAtScreenPosition(Icon.ChevronRight,
+                                       (rowStart + new Vector2(columnWidth - iconSlotWidth, h / 2 - Icons.FontSize / 2)).Floor(),
+                                       parentDrawList, textColor);
+
+        return isOpen;
+    }
+
+    // Menu-row label color. Distinct from GetStateColor (tool-icon tints) so the menu look can evolve on its own.
+    private static Color GetMenuTextColor(bool isEnabled, ButtonStates state)
+    {
+        if (!isEnabled)
+            return UiColors.Text.Fade(0.15f);
+
+        return state == ButtonStates.Emphasized
+                   ? UiColors.ForegroundFull
+                   : UiColors.Text.Fade(0.7f);
     }
 
     public static void DrawContextMenuForScrollCanvas(Action drawMenuContent, ref bool contextMenuIsOpen)
@@ -185,6 +251,7 @@ internal static partial class CustomComponents
 
         ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(6, 6));
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(6, 6));
+        ImGui.PushStyleVar(ImGuiStyleVar.PopupRounding, 6);
 
         if (ImGui.BeginPopupContextWindow("windows_context_menu"))
         {
@@ -202,7 +269,7 @@ internal static partial class CustomComponents
             contextMenuIsOpen = false;
         }
 
-        ImGui.PopStyleVar(2);
+        ImGui.PopStyleVar(3);
     }
 
     public static bool DrawMultilineTextEdit(ref string value)
