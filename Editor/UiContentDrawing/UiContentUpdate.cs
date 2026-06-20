@@ -43,14 +43,14 @@ internal static class UiContentUpdate
 
         var fontAtlasPtr = ImGui.GetIO().Fonts;
         fontAtlasPtr.Clear();
-        const string fontName = "Roboto";
+        const string fontName = "Inter";
         var rootFilePath = Path.Combine(SharedResources.EditorResourcesDirectory, SharedResources.EditorResourcesDirectory, "fonts",  fontName + '-');
 
         const string fileExtension = ".ttf";
         var format = $"{rootFilePath}{{0}}{fileExtension}";
 
         var normalFont = new TtfFont(string.Format(format, "Regular"), 18f * dpiAwareScale);
-        var boldFont = new TtfFont(string.Format(format, "Medium"), 18f * dpiAwareScale);
+        var boldFont = new TtfFont(string.Format(format, "SemiBold"), 18f * dpiAwareScale);
         var smallFont = new TtfFont(string.Format(format, "Regular"), 14f * dpiAwareScale);
         var largeFont = new TtfFont(string.Format(format, "Light"), 30f * dpiAwareScale);
 
@@ -88,7 +88,9 @@ internal static class UiContentUpdate
                                    {
                                        0x0020, 0x00FF,   // Basic Latin + Latin Supplement
                                        0x2010, 0x205E,   // General punctuation
-                                       0x2190, 0x21FF,   // Arrows
+                                       0x2190, // ←
+                                       0x21FF, // ⇿  
+                                       0x2192, // → Right arrow
                                        0x2600, 0x26FF,   // Miscellaneous symbols (⚠ ⚙ ☆ …)
                                        0x2700, 0x27BF,   // Dingbats (✓ ✗ ✱ …)
                                        0,
