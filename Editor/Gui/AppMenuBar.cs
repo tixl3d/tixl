@@ -193,6 +193,27 @@ internal static class AppMenuBar
     }
 
     
+    // Thin wrappers over the styled menu components so the AppMenu dropdowns match the graph context menu.
+    // The label seeds a stable id (DrawMenuItem also keys its hit-test off the label), and the active
+    // toggle is emphasized while everything else is muted — same model as the context menu.
+    private static bool MenuItem(string label, string? shortcut = null, bool isChecked = false, bool isEnabled = true)
+        => CustomComponents.DrawMenuItem(label.GetHashCode(), Icon.None, label, shortcut, isChecked, isEnabled,
+                                         reserveIconColumn: false,
+                                         state: isChecked ? CustomComponents.ButtonStates.Emphasized : CustomComponents.ButtonStates.Default);
+
+    private static bool MenuItemToggle(string label, ref bool value, string? shortcut = null)
+    {
+        var clicked = MenuItem(label, shortcut, isChecked: value);
+        if (clicked)
+            value = !value;
+
+        return clicked;
+    }
+
+    // Nested submenu header (NOT for the horizontal top-level bar entries, which stay native ImGui.BeginMenu).
+    private static bool BeginSubMenu(string label, bool isEnabled = true)
+        => CustomComponents.DrawSubMenu(label.GetHashCode(), label, isEnabled);
+
     private static void DrawMainMenu()
     {
         if (ImGui.BeginMenu("TiXL"))
@@ -202,17 +223,17 @@ internal static class AppMenuBar
 
             var showNewTemplateOption = !T3Ui.IsCurrentlySaving && currentProject != null;
             
-            if (ImGui.MenuItem("New Project..."))
+            if (MenuItem("New Project..."))
             {
                 T3Ui.NewProjectDialog.ShowNextFrame();
             }
 
-            if (ImGui.MenuItem("New Operator...", UserActions.New.ListShortcuts(), false, showNewTemplateOption))
+            if (MenuItem("New Operator...", UserActions.New.ListShortcuts(), isEnabled: showNewTemplateOption))
             {
                 T3Ui.CreateFromTemplateDialog.ShowNextFrame();
             }
 
-            if (ImGui.BeginMenu("Recent Projects...", !T3Ui.IsCurrentlySaving && EditableSymbolProject.AllProjects.Any(x => x.HasHome)))
+            if (BeginSubMenu("Recent Projects...", !T3Ui.IsCurrentlySaving && EditableSymbolProject.AllProjects.Any(x => x.HasHome)))
             {
                 foreach (var package in EditableSymbolProject.AllProjects)
                 {
@@ -221,7 +242,7 @@ internal static class AppMenuBar
 
                     var name = package.DisplayName;
 
-                    if (ImGui.MenuItem(name))
+                    if (MenuItem(name))
                     {
                         if (GraphWindow.GraphWindowInstances.Count > 0)
                         {
@@ -239,19 +260,19 @@ internal static class AppMenuBar
             {
                 //ImGui.Separator();
 
-                if (ImGui.BeginMenu("Open Project in..."))
+                if (BeginSubMenu("Open Project in..."))
                 {
-                    if (ImGui.MenuItem("File Explorer"))
+                    if (MenuItem("File Explorer"))
                     {
                         CoreUi.Instance.OpenWithDefaultApplication(project.Folder);
                     }
 
-                    if (ImGui.MenuItem("Resource Folder"))
+                    if (MenuItem("Resource Folder"))
                     {
                         CoreUi.Instance.OpenWithDefaultApplication(project.AssetsFolder);
                     }
 
-                    if (ImGui.MenuItem("Development IDE"))
+                    if (MenuItem("Development IDE"))
                     {
                         CoreUi.Instance.OpenWithDefaultApplication(project.CsProjectFile.FullPath);
                     }
@@ -260,91 +281,88 @@ internal static class AppMenuBar
                 }
             }
 
-            ImGui.Separator();
+            CustomComponents.SeparatorLine();
 
             // Disabled, at least for now, as this is an incomplete (or not even started) operation on the Main branch atm
-            if (ImGui.MenuItem("Import Operators", null, false, !T3Ui.IsCurrentlySaving))
+            if (MenuItem("Import Operators", isEnabled: !T3Ui.IsCurrentlySaving))
             {
                 BlockingWindow.Instance.ShowMessageBox("This feature is not yet available in the main branch. Stay tuned for updates!",
                                                        "Not yet implemented");
                 //_importDialog.ShowNextFrame();
             }
 
-            
-            ImGui.Separator();
+            CustomComponents.SeparatorLine();
 
-            if (ImGui.MenuItem("Save Changes", UserActions.Save.ListShortcuts(), false, !T3Ui.IsCurrentlySaving))
+            if (MenuItem("Save Changes", UserActions.Save.ListShortcuts(), isEnabled: !T3Ui.IsCurrentlySaving))
             {
                 T3Ui.SaveInBackground(saveAll: false);
             }
 
-            if (ImGui.MenuItem("Save All", !T3Ui.IsCurrentlySaving))
+            if (MenuItem("Save All", isEnabled: !T3Ui.IsCurrentlySaving))
             {
                 Task.Run(() => { T3Ui.Save(true); });
             }
 
-            if (ImGui.MenuItem("Set Project Thumbnail", null, false, RenderProcess.MainOutputTexture != null))
+            if (MenuItem("Set Project Thumbnail", isEnabled: RenderProcess.MainOutputTexture != null))
             {
                 if (currentProject != null && RenderProcess.MainOutputTexture != null)
                 {
                     ThumbnailManager.SaveThumbnail(currentProject.Id, currentProject, RenderProcess.MainOutputTexture, ThumbnailManager.Categories.PackageMeta);
                 }
             }
-            
-            ImGui.Separator();
 
-            if (ImGui.BeginMenu("Development Tools"))
+            CustomComponents.SeparatorLine();
+
+            if (BeginSubMenu("Development Tools"))
             {
-                if (ImGui.MenuItem("Skill Map Editor"))
+                if (MenuItem("Skill Map Editor"))
                     SkillMapEditor.ShowNextFrame();
-                
-                if (ImGui.MenuItem("Tour Point Editor"))
-                    EditTourPointsPopup.ShowNextFrame();
-                
-                ImGui.Separator();
 
-                if (ImGui.MenuItem("Fix asset paths"))
+                if (MenuItem("Tour Point Editor"))
+                    EditTourPointsPopup.ShowNextFrame();
+
+                CustomComponents.SeparatorLine();
+
+                if (MenuItem("Fix asset paths"))
                     ConformAssetPaths.ConformAllPaths();
 
-                if (ImGui.MenuItem("Check symbol dependencies"))
+                if (MenuItem("Check symbol dependencies"))
                 {
                     SymbolAnalysis.LogInvalidSymbolDependencies();
                     SymbolAnalysis.LogInvalidAssetReference();
                 }
-                
-                if (ImGui.BeginMenu("Clear shader cache"))
+
+                if (BeginSubMenu("Clear shader cache"))
                 {
-                    if (ImGui.MenuItem("Editor only"))
+                    if (MenuItem("Editor only"))
                         ShaderCompiler.DeleteShaderCache(all: false);
 
-                    if (ImGui.MenuItem("All editor and player versions"))
+                    if (MenuItem("All editor and player versions"))
                         ShaderCompiler.DeleteShaderCache(all: true);
 
                     ImGui.EndMenu();
                 }
 
-                if (ImGui.BeginMenu("Documentation"))
+                if (BeginSubMenu("Documentation"))
                 {
-                    if (ImGui.MenuItem("Export as WIKI"))
+                    if (MenuItem("Export as WIKI"))
                         ExportWikiDocumentation.ExportWiki();
 
-                    if (ImGui.MenuItem("Export to JSON"))
+                    if (MenuItem("Export to JSON"))
                         ExportDocumentationStrings.ExportDocumentationAsJson();
 
-                    if (ImGui.MenuItem("Import from JSON"))
+                    if (MenuItem("Import from JSON"))
                         ExportDocumentationStrings.ImportDocumentationAsJson();
 
                     ImGui.EndMenu();
                 }
 
-                if (ImGui.BeginMenu("Debug"))
+                if (BeginSubMenu("Debug"))
                 {
-
-                    
-                    if (ImGui.MenuItem("ImGUI Demo", "", WindowManager.DemoWindowVisible))
+                    if (MenuItem("ImGUI Demo", isChecked: WindowManager.DemoWindowVisible))
                         WindowManager.DemoWindowVisible = !WindowManager.DemoWindowVisible;
 
-                    if (ImGui.MenuItem("ImGUI Metrics", "", WindowManager.MetricsWindowVisible))
+                    if (MenuItem("ImGUI Metrics", isChecked: WindowManager.MetricsWindowVisible))
                         WindowManager.MetricsWindowVisible = !WindowManager.MetricsWindowVisible;
 
                     ImGui.EndMenu();
@@ -356,21 +374,21 @@ internal static class AppMenuBar
                 ImGui.EndMenu();
             }
 
-            ImGui.Separator();
+            CustomComponents.SeparatorLine();
 
             WindowManager.SettingsWindow.DrawMenuItemToggle();
             {
                 var hasSettings = ProjectView.Focused?.CompositionInstance?.Symbol.CompositionSettings is { Enabled: true };
                 var window = WindowManager.ProjectSettingsWindow;
-                if (ImGui.MenuItem("Composition Settings", "", hasSettings))
+                if (MenuItem("Composition Settings", isChecked: hasSettings))
                 {
                     window.Config.Visible = !window.Config.Visible;
                 }
             }
 
-            ImGui.Separator();
+            CustomComponents.SeparatorLine();
 
-            if (ImGui.MenuItem("Exit", !T3Ui.IsCurrentlySaving))
+            if (MenuItem("Exit", isEnabled: !T3Ui.IsCurrentlySaving))
             {
                 T3Ui.ExitDialog.ShowNextFrame();
             }
@@ -386,30 +404,30 @@ internal static class AppMenuBar
         if (ImGui.BeginMenu("Edit"))
         {
             UserSettings.Config.ShowMainMenu = true;
-            if (ImGui.MenuItem("Undo", "CTRL+Z", false, UndoRedoStack.CanUndo))
+            if (MenuItem("Undo", "CTRL+Z", isEnabled: UndoRedoStack.CanUndo))
             {
                 UndoRedoStack.Undo();
             }
 
-            if (ImGui.MenuItem("Redo", "CTRL+SHIFT+Z", false, UndoRedoStack.CanRedo))
+            if (MenuItem("Redo", "CTRL+SHIFT+Z", isEnabled: UndoRedoStack.CanRedo))
             {
                 UndoRedoStack.Redo();
             }
 
-            ImGui.Separator();
+            CustomComponents.SeparatorLine();
 
-            if (ImGui.BeginMenu("Bookmarks"))
+            if (BeginSubMenu("Bookmarks"))
             {
                 GraphBookmarkNavigation.DrawBookmarksMenu();
                 ImGui.EndMenu();
             }
 
-            ImGui.Separator();
+            CustomComponents.SeparatorLine();
 
             var exportView = ProjectView.Focused;
             var exportChildUis = exportView?.NodeSelection.GetSelectedChildUis().ToList();
             var canExport = exportView?.CompositionInstance != null && exportChildUis is { Count: 1 };
-            if (ImGui.MenuItem("Export as Executable", null, false, canExport))
+            if (MenuItem("Export as Executable", isEnabled: canExport))
             {
                 var exportChild = exportChildUis![0];
                 var exportName = exportChild.SymbolChild.ReadableName;
@@ -434,26 +452,25 @@ internal static class AppMenuBar
         {
             UserSettings.Config.ShowMainMenu = true;
 
-            CustomComponents.MenuGroupHeader("UI Elements...");
-            ImGui.MenuItem("Main Menu", "", ref UserSettings.Config.ShowMainMenu);
-            ImGui.MenuItem("Graph Title", "", ref UserSettings.Config.ShowTitleAndDescription);
-            ImGui.MenuItem("Graph Minimap", "", ref UserSettings.Config.ShowMiniMap);
-            ImGui.MenuItem("Graph Toolbar", "", ref UserSettings.Config.ShowToolbar);
-            ImGui.MenuItem("Timeline", "", ref UserSettings.Config.ShowTimeline);
-            if (ImGui.MenuItem("Toggle All", UserActions.ToggleAllUiElements.ListShortcuts(), false,
-                               !T3Ui.IsCurrentlySaving))
+            CustomComponents.DrawMenuGroupLabel("UI Elements...");
+            MenuItemToggle("Main Menu", ref UserSettings.Config.ShowMainMenu);
+            MenuItemToggle("Graph Title", ref UserSettings.Config.ShowTitleAndDescription);
+            MenuItemToggle("Graph Minimap", ref UserSettings.Config.ShowMiniMap);
+            MenuItemToggle("Graph Toolbar", ref UserSettings.Config.ShowToolbar);
+            MenuItemToggle("Timeline", ref UserSettings.Config.ShowTimeline);
+            if (MenuItem("Toggle All", UserActions.ToggleAllUiElements.ListShortcuts(), isEnabled: !T3Ui.IsCurrentlySaving))
             {
                 UiConfig.ToggleAllUiElements();
             }
 
-            ImGui.Separator();
+            CustomComponents.SeparatorLine();
 
-            ImGui.MenuItem("Interactions Overlay", "", ref UserSettings.Config.ShowInteractionOverlay);
-            ImGui.Separator();
-            ImGui.MenuItem("Fullscreen UI", UserActions.ToggleFullscreen.ListShortcuts(), ref UserSettings.Config.FullScreen);
-            ImGui.Separator();
+            MenuItemToggle("Interactions Overlay", ref UserSettings.Config.ShowInteractionOverlay);
+            CustomComponents.SeparatorLine();
+            MenuItemToggle("Fullscreen UI", ref UserSettings.Config.FullScreen, UserActions.ToggleFullscreen.ListShortcuts());
+            CustomComponents.SeparatorLine();
 
-            if (ImGui.MenuItem("Focus Mode", UserActions.ToggleFocusMode.ListShortcuts(), LayoutHandling.FocusMode))
+            if (MenuItem("Focus Mode", UserActions.ToggleFocusMode.ListShortcuts(), isChecked: LayoutHandling.FocusMode))
             {
                 UiConfig.ToggleFocusMode();
             }
@@ -469,14 +486,14 @@ internal static class AppMenuBar
 
         if (ImGui.BeginMenu("Help"))
         {
-            if (ImGui.MenuItem(RuntimeAssemblies.IsAlpha ? "Welcome to Alpha" : "Welcome"))
+            if (MenuItem(RuntimeAssemblies.IsAlpha ? "Welcome to Alpha" : "Welcome"))
             {
                 WindowManager.WelcomeAlphaWindow.Open();
             }
 
-            ImGui.Separator();
+            CustomComponents.SeparatorLine();
 
-            if (ImGui.BeginMenu("Documentation"))
+            if (BeginSubMenu("Documentation"))
             {
                 foreach (var link in _helpLinks)
                 {
@@ -486,7 +503,7 @@ internal static class AppMenuBar
                 ImGui.EndMenu();
             }
 
-            if (ImGui.BeginMenu("YouTube"))
+            if (BeginSubMenu("YouTube"))
             {
                 foreach (var link in _youTubeLinks)
                 {
@@ -496,16 +513,16 @@ internal static class AppMenuBar
                 ImGui.EndMenu();
             }
 
-            ImGui.Separator();
+            CustomComponents.SeparatorLine();
 
             foreach (var link in _otherLinks)
             {
                 link.DrawMenuItem();
             }
 
-            ImGui.Separator();
+            CustomComponents.SeparatorLine();
 
-            if (ImGui.BeginMenu("Send Feedback"))
+            if (BeginSubMenu("Send Feedback"))
             {
                 foreach (var link in _feedbackLinks)
                 {
@@ -514,11 +531,12 @@ internal static class AppMenuBar
 
                 ImGui.EndMenu();
             }
-            ImGui.Separator();
+
+            CustomComponents.SeparatorLine();
 
             _licenseLink.DrawMenuItem();
 
-            if (ImGui.MenuItem("About TiXL"))
+            if (MenuItem("About TiXL"))
             {
                 T3Ui.AboutDialog.ShowNextFrame();
             }
@@ -535,7 +553,7 @@ internal static class AppMenuBar
 
         public void DrawMenuItem()
         {
-            if (ImGui.MenuItem(Title, null, false))
+            if (MenuItem(Title))
             {
                 CoreUi.Instance.OpenWithDefaultApplication(Url);
             }

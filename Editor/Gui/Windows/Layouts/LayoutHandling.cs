@@ -7,6 +7,7 @@ using T3.Core.Settings;
 using T3.Editor.Gui.Window;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Keyboard;
+using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.Output;
 
@@ -41,11 +42,13 @@ internal static class LayoutHandling
 
     public static void DrawMainMenuItems()
     {
-        if (ImGui.BeginMenu("Load layout"))
+        if (CustomComponents.DrawSubMenu("Load layout".GetHashCode(), "Load layout"))
         {
             for (int i = 0; i < 10; i++)
             {
-                if (ImGui.MenuItem("Layout " + (i + 1), "F" + (i + 1), false, enabled: DoesLayoutExists(i)))
+                var label = "Layout " + (i + 1);
+                if (CustomComponents.DrawMenuItem(label.GetHashCode(), Icon.None, label, "F" + (i + 1), isEnabled: DoesLayoutExists(i),
+                                                  reserveIconColumn: false))
                 {
                     LoadAndApplyLayoutOrFocusMode((Layouts)i);
                 }
@@ -54,11 +57,12 @@ internal static class LayoutHandling
             ImGui.EndMenu();
         }
 
-        if (ImGui.BeginMenu("Save layouts"))
+        if (CustomComponents.DrawSubMenu("Save layouts".GetHashCode(), "Save layouts"))
         {
             for (int i = 0; i < 10; i++)
             {
-                if (ImGui.MenuItem("Layout " + (i + 1), "Ctrl+F" + (i + 1)))
+                var label = "Layout " + (i + 1);
+                if (CustomComponents.DrawMenuItem(label.GetHashCode(), Icon.None, label, "Ctrl+F" + (i + 1), reserveIconColumn: false))
                 {
                     SaveLayout(i);
                 }
@@ -67,7 +71,7 @@ internal static class LayoutHandling
             ImGui.EndMenu();
         }
 
-        if (ImGui.MenuItem("Save current layout", ""))
+        if (CustomComponents.DrawMenuItem("Save current layout".GetHashCode(), Icon.None, "Save current layout", reserveIconColumn: false))
             SaveLayout(0);
     }
 

@@ -34,7 +34,7 @@ internal static class InputWithTypeAheadSearch
         if (outlineOnly)
         {
             ImGui.PushStyleColor(ImGuiCol.FrameBg, Color.Transparent.Rgba);
-            ImGui.PushStyleColor(ImGuiCol.FrameBgActive, Color.Red.Rgba);
+            ImGui.PushStyleColor(ImGuiCol.FrameBgActive, UiColors.StatusAttention.Rgba);
         }
             
         var color = warning ? UiColors.StatusWarning.Rgba : UiColors.Text.Rgba;

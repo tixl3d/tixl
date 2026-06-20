@@ -1,6 +1,7 @@
 #nullable enable
 using ImGuiNET;
 using T3.Editor.App;
+using T3.Editor.Gui.Styling;
 using T3.Editor.SystemUi;
 
 namespace T3.Editor.Gui.Windows.Layouts;
@@ -21,19 +22,21 @@ internal static partial class WindowManager
             window.DrawMenuItemToggle();
         }
 
-        ImGui.Separator();
+        CustomComponents.SeparatorLine();
         {
             var screens = EditorUi.Instance.AllScreens;
 
-            if (ImGui.MenuItem("Output Window", "", ShowSecondaryRenderWindow))
+            if (CustomComponents.DrawMenuItem("Output Window".GetHashCode(), Icon.None, "Output Window", isChecked: ShowSecondaryRenderWindow,
+                                              reserveIconColumn: false,
+                                              state: ShowSecondaryRenderWindow ? CustomComponents.ButtonStates.Emphasized : CustomComponents.ButtonStates.Default))
             {
                 ShowSecondaryRenderWindow = !ShowSecondaryRenderWindow;
                 ProgramWindows.UpdateViewerWindowState();
             }
-                
+
         }
 
-        ImGui.Separator();
+        CustomComponents.SeparatorLine();
 
         LayoutHandling.DrawMainMenuItems();
     }

@@ -6,6 +6,7 @@ using T3.Core.Resource;
 using T3.Core.Resource.Assets;
 using T3.Core.SystemUi;
 using T3.Editor.Gui.Graph.Dialogs;
+using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.Interaction.Variations;
@@ -344,6 +345,10 @@ internal static class GraphContextMenu
             CustomComponents.SeparatorLine();
             DrawSymbolDefinitionSubMenu(context, projectView, selectedChildUis, oneOpSelected, someOpsSelected, isSaving);
         }
+
+        // The scroll-canvas popup uses a tighter window padding than the app menu, so the last row sits
+        // flush against the bottom edge; nudge a little breathing room in.
+        FormInputs.AddVerticalSpace(2);
     }
 
     private static void DrawDisplayAsSubMenu(GraphUiContext context, NodeSelection nodeSelection, List<SymbolUi.Child> selectedChildUis,
