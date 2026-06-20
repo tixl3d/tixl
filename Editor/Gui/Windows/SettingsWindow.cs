@@ -571,7 +571,7 @@ internal sealed partial class SettingsWindow : Window
                     // Change label for video rendering logs
                     var videoRenderingDebugChanged = FormInputs.AddCheckBox("Show Video Render Logs",
                         ref UserSettings.Config.LogVideoRenderingDetails,
-                        "Shows Debug and Info log messages from video rendering/export (e.g., Mp4VideoWriter, RenderProcess).",
+                        "Shows Debug and Info log messages from video rendering/export (e.g., the FFmpeg writer, RenderProcess).",
                         UserSettings.Defaults.LogVideoRenderingDetails);
                     if (videoRenderingDebugChanged)
                     {

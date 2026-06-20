@@ -4,7 +4,8 @@
 external ffmpeg, no GPL. Working & tested: the encoder core (video + AAC audio), the cross-ALC bridge, eager
 registration, the codec selector (H.264, ProRes, VP9, AV1, FFV1, **HAP** ×3), the inline availability indicator
 (hardware / software), HAP size estimate + ×4 rounding, and the hardware-encoder fixes (QSV `nv12`; NVENC needs
-NVIDIA driver 570+). **What remains: full MF removal (Phase 5).**
+NVIDIA driver 570+). **Media Foundation encode is fully removed (Phase 5 done).** The render-export milestone
+is essentially complete — FFmpeg is the only encode path; MF decode was already gone.
 
 > **⚠ Major correction (supersedes the tier-2 / GPL design below).** The original plan assumed the bundled
 > build couldn't encode HAP or software H.264 in-process, requiring a "tier-2" external GPL `ffmpeg.exe` + an
@@ -344,11 +345,13 @@ FFmpeg) is orthogonal to audio *routing*.
    - **HAP size estimate + ×4 rounding** (`VideoExportCodec.RoundToEncoderBlock`, in Core).
    A future **"prefer libx264/libx265 max quality"** opt-in *would* reintroduce an external-GPL path — recover
    the deleted tier-2 code from git if it's ever wanted. Not planned.
-5. **Remove MF encode entirely.** Delete the `Editor/Gui/Windows/RenderExport/MF/` folder (`MfVideoWriter`,
-   `MFAudioWriter`, `MFHelper`, `FormatConversion`) and drop the `SharpDX.MediaFoundation` package reference
-   from [`Core.csproj`](../../Core/Core.csproj) (line 46 — it's in Core, though only the Editor used it).
-   *Verify: solution builds with no `SharpDX.MediaFoundation` reference; `grep` for `MediaFoundation` /
-   `SinkWriter` / `MediaFactory` is empty outside docs; export still works on every tier.*
+5. **Remove MF encode entirely — DONE.** Deleted the `Editor/Gui/Windows/RenderExport/MF/` folder
+   (`MfVideoWriter`, `MFAudioWriter`, `MFHelper`, `FormatConversion`) and dropped the `SharpDX.MediaFoundation`
+   package reference from [`Core.csproj`](../../Core/Core.csproj). `RenderProcess` no longer falls back to MF —
+   if the FFmpeg writer can't be created it fails the export with a clear message. The warmup-frame-skip
+   constant (`MfVideoWriter.SkipImages`) moved into `RenderProcess` as `WarmupFramesToSkip`. Core/Editor/Player
+   build clean; `grep` for `MediaFoundation`/`SinkWriter`/`MediaFactory` is empty in code.
+   *In-editor verify: export still works for every codec (it's the only path now).*
 
 **Later (own milestones):** **proxy media** — auto-transcode heavy imported media to a seek-friendly
 all-intra proxy, auto-preferred on load — is its own plan
@@ -397,9 +400,7 @@ software quality" toggle are polish.
 | Core encode facade (DONE) | `Core/Video/VideoExport.cs` |
 | Video factory + writer impl (DONE) | `VideoServices/FfmpegVideoExport.cs` |
 | Eager registration | moves to the `Video` package — see [`Plan_VideoOperatorPackage.md`](Plan_VideoOperatorPackage.md) |
-| Editor readback adapter to add + wire (1c-ii) | `Editor/Gui/Windows/RenderExport/RenderProcess.cs` |
-| Encoder contract to mirror (`ProcessFrames`/`Dispose`), then delete | `Editor/Gui/Windows/RenderExport/MF/MfVideoWriter.cs` |
-| MF package reference to drop (Phase 5) | `Core/Core.csproj` (`SharpDX.MediaFoundation`, line 46) |
+| Editor readback adapter + render driver (DONE) | `Editor/Gui/Windows/RenderExport/RenderProcess.cs` + `FfmpegVideoExportWriter.cs` |
 | Mixdown PCM source (reused unchanged) | `Editor/Gui/Windows/RenderExport/RenderProcess.cs` + `Core/Audio/AudioRendering.cs` |
 | Hardware-encoder probe + per-encoder pixel format (DONE) | `VideoServices/HardwareEncoderProbe.cs` |
 | Editor availability cache (DONE) | `Editor/Gui/Windows/RenderExport/VideoEncoderAvailabilityCache.cs` |
@@ -412,4 +413,4 @@ Covered by [`render-export-codecs`](../../.tests-manual/render-export-codecs.md)
 VP9, AV1, FFV1, HAP ×3) renders a playable file via `[PlayVideo]` re-import — **all in-process, no popup, no
 external ffmpeg**; the codec choice survives save/reload; the H.264 indicator reads "Hardware encoder (…)"
 where a GPU encoder works, else "Software encoder" (OpenH264). Still worth adding for the broader milestone:
-H.264 parity vs the old MF file, and a Wine/Linux render producing a playable file.
+a **Wine/Linux** render producing a playable file (the original driving reason — FFmpeg encode where MF can't run).

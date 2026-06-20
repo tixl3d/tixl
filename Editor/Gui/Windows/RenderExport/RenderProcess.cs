@@ -11,7 +11,6 @@ using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.Layouts;
 using T3.Editor.Gui.Windows.Output;
-using T3.Editor.Gui.Windows.RenderExport.MF;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.ProjectHandling;
 
@@ -122,7 +121,7 @@ internal static class RenderProcess
                 }
 
                 Log.Gated.VideoRender($"""
-                                       Initializing Mp4VideoWriter with: path={targetFilePath}
+                                       Initializing video export with: path={targetFilePath}
                                        renderedSize={newSession.RenderToFileResolution.Width}x{newSession.RenderToFileResolution.Height}
                                        bitrate={settings.Bitrate}
                                        framerate={settings.FrameRate}
@@ -175,28 +174,27 @@ internal static class RenderProcess
                 return false;
             }
 
-            if (FfmpegVideoExportWriter.TryCreate(session, out var ffmpegError) is { } ffmpegWriter)
+            if (FfmpegVideoExportWriter.TryCreate(session, out var ffmpegError) is not { } ffmpegWriter)
             {
-                session.VideoWriter = ffmpegWriter;
-                Log.Debug("Render-export: using the in-process FFmpeg encoder.");
-            }
-            else
-            {
-                Log.Debug($"Render-export: in-process FFmpeg unavailable ({ffmpegError}); falling back to Media Foundation.");
-                session.VideoWriter = new Mp4VideoWriter(session);
+                LastHelpString = "Can't render: the FFmpeg video encoder is unavailable. " + ffmpegError;
+                Log.Error(LastHelpString);
+                CleanupSession();
+                return false;
             }
 
-            Log.Gated.VideoRender($"Mp4VideoWriter initialized: " +
-                                  $"Codec=H.264" +
-                                  $"FileFormat=mp4" +
-                                  $"Bitrate={session.Settings.Bitrate}" +
-                                  $"Framerate={session.Settings.FrameRate}" +
-                                  $"Channels={RenderAudioInfo.SoundtrackChannels()}" +
+            session.VideoWriter = ffmpegWriter;
+            Log.Debug("Render-export: using the FFmpeg encoder.");
+
+            Log.Gated.VideoRender($"FFmpeg video writer initialized: " +
+                                  $"Codec={session.Settings.VideoCodec} " +
+                                  $"Bitrate={session.Settings.Bitrate} " +
+                                  $"Framerate={session.Settings.FrameRate} " +
+                                  $"Channels={RenderAudioInfo.SoundtrackChannels()} " +
                                   $"SampleRate={RenderAudioInfo.SoundtrackSampleRate()}");
         }
         catch (Exception ex)
         {
-            var msg = $"Failed to initialize Mp4VideoWriter: {ex.Message}\n{ex.StackTrace}";
+            var msg = $"Failed to initialize the FFmpeg video writer: {ex.Message}\n{ex.StackTrace}";
             Log.Error(msg);
             LastHelpString = msg;
             CleanupSession();
@@ -312,7 +310,7 @@ internal static class RenderProcess
         // Update stats
         var effectiveFrameCount = settings.RenderMode == RenderSettings.RenderModes.Video ? session.FrameCount : session.FrameCount + 2;
 
-        var exportedFrameIndex = session.FrameIndex - MfVideoWriter.SkipImages;
+        var exportedFrameIndex = session.FrameIndex - WarmupFramesToSkip;
 
         var currentFrame = settings.RenderMode == RenderSettings.RenderModes.Video
                                ? exportedFrameIndex
@@ -499,8 +497,8 @@ internal static class RenderProcess
 
             RenderTiming.SetPlaybackTimeForFrame(session);
 
-            // We need to wait for one frame of the outputTexture to update to the new time 
-            if (session.FrameIndex > 0)
+            // Skip the warmup frame(s): the output texture needs one frame to settle on the new playback time.
+            if (session.FrameIndex >= WarmupFramesToSkip)
                 session.VideoWriter?.ProcessFrames(outputTexture, ref audioFrame, channels, sampleRate);
 
             session.FrameIndex++;
@@ -568,4 +566,8 @@ internal static class RenderProcess
     }
 
     private static ExportSession? _activeExportSession;
+
+    // The output texture needs one frame to settle on each new playback time, so the first rendered frame is a
+    // warmup that isn't written. The frame-count math accounts for it.
+    private const int WarmupFramesToSkip = 1;
 }
