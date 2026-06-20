@@ -180,10 +180,25 @@ internal sealed class RenderWindow : Window
 
     // ProRes is profile-based and FFV1 is lossless, so a target bitrate is meaningless for them.
     private static bool CodecUsesBitrate(VideoExportCodec codec)
-        => codec is VideoExportCodec.H264 or VideoExportCodec.VP9 or VideoExportCodec.AV1;
+        => codec is VideoExportCodec.H264 or VideoExportCodec.Hevc or VideoExportCodec.VP9 or VideoExportCodec.AV1;
 
     private static bool IsHapCodec(VideoExportCodec codec)
         => codec is VideoExportCodec.Hap or VideoExportCodec.HapAlpha or VideoExportCodec.HapQ;
+
+    // Friendly dropdown labels — the raw enum names ("HapAlpha", "H264") read poorly.
+    private static string CodecDisplayName(VideoExportCodec codec) => codec switch
+                                                                          {
+                                                                              VideoExportCodec.H264 => "H.264",
+                                                                              VideoExportCodec.Hevc => "HEVC (H.265)",
+                                                                              VideoExportCodec.ProRes => "ProRes",
+                                                                              VideoExportCodec.VP9 => "VP9",
+                                                                              VideoExportCodec.AV1 => "AV1",
+                                                                              VideoExportCodec.FFV1 => "FFV1",
+                                                                              VideoExportCodec.Hap => "Hap",
+                                                                              VideoExportCodec.HapAlpha => "Hap Alpha",
+                                                                              VideoExportCodec.HapQ => "Hap Q",
+                                                                              _ => codec.ToString(),
+                                                                          };
 
     // Bytes per pixel of the uncompressed DXT data each HAP variant produces (Snappy then compresses it a bit).
     private static double HapBytesPerPixel(VideoExportCodec codec) => codec switch
@@ -237,11 +252,13 @@ internal sealed class RenderWindow : Window
         // Codec / container
         modified |= FormInputs.AddEnumDropdown(ref s.VideoCodec, "Codec",
                                                "H.264 (.mp4): broadly compatible, hardware-accelerated.\n"
+                                               + "HEVC / H.265 (.mp4): more efficient than H.264; hardware-accelerated where available.\n"
                                                + "ProRes (.mov): high-quality all-intra editing codec.\n"
                                                + "VP9 / AV1 (.mp4): efficient delivery codecs; software-encoded (slower).\n"
                                                + "FFV1 (.mkv): lossless archival (very large files).\n"
                                                + "HAP / HAP Alpha / HAP Q (.mov): GPU-friendly intra codecs for realtime/VJ playback.",
-                                               RenderSettings.Defaults.VideoCodec);
+                                               RenderSettings.Defaults.VideoCodec,
+                                               CodecDisplayName);
 
         DrawCodecAvailabilityHint(s.VideoCodec);
 

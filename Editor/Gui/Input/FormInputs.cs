@@ -174,47 +174,53 @@ internal static class FormInputs
         return modified;
     }
 
+    /// <param name="itemLabel">Optional display-name formatter for each enum value (e.g. "HapQ" → "Hap Q").
+    /// When null, the raw enum member names are shown.</param>
     public static bool AddEnumDropdown<T>(ref T selectedValue, string? label, string? tooltip = null,
-        T defaultValue = default) where T : struct, Enum, IConvertible, IFormattable
+        T defaultValue = default, Func<T, string>? itemLabel = null) where T : struct, Enum, IConvertible, IFormattable
     {
         DrawInputLabel(label);
 
         var inputSize = GetAvailableInputSize(tooltip, false, true);
         ImGui.SetNextItemWidth(inputSize.X);
 
-        var modified = DrawEnumDropdown(ref selectedValue, label, defaultValue);
+        var modified = DrawEnumDropdown(ref selectedValue, label, defaultValue, itemLabel);
 
         AppendTooltip(tooltip);
 
         return modified;
     }
 
-    public static bool DrawEnumDropdown<T>(ref T selectedValue, string? label, T defaultValue = default)
+    public static bool DrawEnumDropdown<T>(ref T selectedValue, string? label, T defaultValue = default,
+                                           Func<T, string>? itemLabel = null)
         where T : struct, Enum, IConvertible, IFormattable, IComparable
     {
-        var index = 0;
-        var selectedIndex = 0;
-
-        foreach (var n in Enum.GetNames<T>())
+        var values = Enum.GetValues<T>();
+        var names = Enum.GetNames<T>();
+        if (itemLabel != null)
         {
-            if (n == selectedValue.ToString())
+            for (var i = 0; i < values.Length; i++)
+                names[i] = itemLabel(values[i]);
+        }
+
+        var selectedIndex = 0;
+        for (var i = 0; i < values.Length; i++)
+        {
+            if (values[i].Equals(selectedValue))
             {
-                selectedIndex = index;
+                selectedIndex = i;
                 break;
             }
-
-            index++;
         }
 
         ImGui.PushStyleColor(ImGuiCol.FrameBg, UiColors.BackgroundButton.Rgba);
         ImGui.PushStyleColor(ImGuiCol.Text,
             selectedValue.Equals(defaultValue) ? UiColors.TextMuted.Rgba : UiColors.ForegroundFull.Rgba);
         ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 5);
-        var modified = ImGui.Combo($"##dropDown{typeof(T)}{label}", ref selectedIndex, Enum.GetNames<T>(),
-            Enum.GetNames<T>().Length, Enum.GetNames<T>().Length);
+        var modified = ImGui.Combo($"##dropDown{typeof(T)}{label}", ref selectedIndex, names, names.Length, names.Length);
         if (modified)
         {
-            selectedValue = Enum.GetValues<T>()[selectedIndex];
+            selectedValue = values[selectedIndex];
         }
 
         ImGui.PopStyleVar();

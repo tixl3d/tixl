@@ -56,6 +56,19 @@ public sealed class FfmpegVideoEncoderFactory : IVideoEncoderFactory
             return new VideoEncoderAvailability { Kind = VideoEncoderKind.Software, EncoderName = softwareName };
         }
 
+        if (codec == VideoExportCodec.Hevc)
+        {
+            // HEVC: a GPU encoder when available, otherwise software libkvazaar (BSD, no GPL). No universal
+            // last-resort fallback like H.264's MPEG-4, so it's Unavailable if neither is present.
+            var hardwareEncoder = HardwareEncoderProbe.HevcHardwareEncoder;
+            if (hardwareEncoder != null)
+                return new VideoEncoderAvailability { Kind = VideoEncoderKind.Hardware, EncoderName = FriendlyHardwareName(hardwareEncoder) };
+
+            return Codec.FindEncoderByName("libkvazaar") != null
+                       ? new VideoEncoderAvailability { Kind = VideoEncoderKind.Software, EncoderName = "kvazaar" }
+                       : new VideoEncoderAvailability { Kind = VideoEncoderKind.Unavailable };
+        }
+
         // The rest are LGPL software encoders — but only if this build actually ships them. Probe before
         // claiming availability rather than failing at export time (encoder sets differ between FFmpeg builds).
         return SoftwareEncoderIsPresent(codec)
@@ -173,6 +186,17 @@ public sealed class FfmpegVideoEncoderFactory : IVideoEncoderFactory
                            {
                                VideoEncoderName = "ffv1",
                                EncoderPixelFormat = AVPixelFormat.Yuv420p,
+                           };
+            }
+
+            case VideoExportCodec.Hevc:
+            {
+                // Hardware HEVC when the GPU supports it; otherwise software libkvazaar (BSD, not GPL libx265).
+                var hardwareEncoder = HardwareEncoderProbe.HevcHardwareEncoder;
+                return common with
+                           {
+                               VideoEncoderName = hardwareEncoder ?? "libkvazaar",
+                               EncoderPixelFormat = HardwareEncoderProbe.EncoderInputFormat(hardwareEncoder),
                            };
             }
 

@@ -11,20 +11,22 @@ prerequisites:
 ---
 
 Covers the video **Codec** selector in the "Render To File" window. The editor encodes via the bundled
-LGPL FFmpeg build: **H.264** (`.mp4`, hardware-accelerated where available), **ProRes** (`.mov`), **VP9**
-and **AV1** (`.mp4`, software-encoded delivery codecs), and **FFV1** (`.mkv`, lossless). All carry AAC audio.
-The verification for each codec is a round-trip: render a short range, then re-import the file with a
+LGPL FFmpeg build — **all in-process, no external ffmpeg, no GPL**: **H.264** and **HEVC** (`.mp4`,
+hardware-accelerated where available, else software OpenH264 / libkvazaar), **ProRes** (`.mov`), **VP9**
+and **AV1** (`.mp4`, software delivery codecs), **FFV1** (`.mkv`, lossless), and **HAP ×3** (`.mov`). All carry
+AAC audio. The verification for each codec is a round-trip: render a short range, then re-import the file with a
 `[PlayVideo]` operator (or an external player) and confirm it decodes.
 
-## Step: The Codec dropdown lists all five codecs
+## Step: The Codec dropdown lists all codecs with friendly labels
 
 **Action:**
 Open the **Render To File** window. With **Render Mode** set to **Video**, find the **Codec** dropdown near
 the top of the video settings and open it.
 
 **Expected:**
-- A **Codec** dropdown is shown, with **H264** selected by default.
-- Opening it lists exactly: **H264**, **ProRes**, **VP9**, **AV1**, **FFV1**.
+- A **Codec** dropdown is shown, with **H.264** selected by default.
+- Opening it lists: **H.264**, **HEVC (H.265)**, **ProRes**, **VP9**, **AV1**, **FFV1**, **Hap**, **Hap
+  Alpha**, **Hap Q** — note the friendly labels (e.g. "Hap Alpha", not "HapAlpha").
 
 ## Step: The filename extension tracks the codec
 
@@ -39,11 +41,12 @@ back to **H264**, watching the filename each time.
 ## Step: Bitrate shows only for the rate-controlled codecs
 
 **Action:**
-Switch **Codec** through all five options and watch for the **Bitrate** control and its quality hint.
+Switch **Codec** through the options and watch for the **Bitrate** control and its quality hint.
 
 **Expected:**
-- **Bitrate** (and the "… quality (Est. … MB)" hint) appear for **H264**, **VP9**, and **AV1**.
-- They are hidden for **ProRes** and **FFV1** (those set their own rate / are lossless).
+- **Bitrate** (and the "… quality (Est. … MB)" hint) appear for **H.264**, **HEVC**, **VP9**, and **AV1**.
+- They are hidden for **ProRes** and **FFV1** (those set their own rate / are lossless); HAP shows its own
+  fixed-size estimate instead.
 
 ## Step: The codec dropdown shows an inline encoder indicator
 
@@ -72,6 +75,19 @@ external player).
 **Expected:**
 - A `.mp4` file is written to the chosen folder.
 - It plays back with the correct image and audible, in-sync audio.
+
+## Step: HEVC export produces a playable MP4
+
+**Action:**
+Set **Codec** to **HEVC (H.265)**, choose a short range, press **Start Render**, then re-import with
+`[PlayVideo]`.
+
+**Expected:**
+- A `.mp4` file is written and plays back with the correct image. The indicator reads **"Hardware encoder
+  (…)"** on a machine with HEVC hardware support, else **"Software encoder"** (libkvazaar — software HEVC is
+  slow, so expect a slower render).
+- No external ffmpeg / no popup. (Note: HEVC-in-MP4 from a software encode may not preview in Windows
+  Explorer / QuickTime without the `hvc1` tag, but plays in `[PlayVideo]` and VLC.)
 
 ## Step: ProRes export produces a playable MOV
 

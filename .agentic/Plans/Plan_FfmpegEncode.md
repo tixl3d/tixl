@@ -2,7 +2,8 @@
 
 **Status:** In progress — 2026-06-20. Render-export is **fully in-process** via the bundled LGPL FFmpeg — no
 external ffmpeg, no GPL. Working & tested: the encoder core (video + AAC audio), the cross-ALC bridge, eager
-registration, the codec selector (H.264, ProRes, VP9, AV1, FFV1, **HAP** ×3), the inline availability indicator
+registration, the codec selector (H.264 + **OpenH264** software fallback, **HEVC** via hardware/libkvazaar,
+ProRes, VP9, AV1, FFV1, **HAP** ×3 — friendly dropdown labels), the inline availability indicator
 (hardware / software), HAP size estimate + ×4 rounding, and the hardware-encoder fixes (QSV `nv12`; NVENC needs
 NVIDIA driver 570+). **Media Foundation encode is fully removed (Phase 5 done).** The render-export milestone
 is essentially complete — FFmpeg is the only encode path; MF decode was already gone.

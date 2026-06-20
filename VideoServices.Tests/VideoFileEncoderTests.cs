@@ -128,6 +128,7 @@ public class VideoFileEncoderTests
     [InlineData("libvpx-vp9", "mp4")] // VP9
     [InlineData("libsvtav1", "mp4")]  // AV1 (SVT)
     [InlineData("ffv1", "mkv")]       // lossless
+    [InlineData("libkvazaar", "mp4")] // HEVC software (BSD, not GPL libx265)
     public void Encode_SoftwareCodec_RoundTripsThroughDecoder(string encoderName, string ext)
     {
         const int width = 192;
@@ -397,6 +398,18 @@ public class VideoFileEncoderTests
                            : VideoEncoderKind.Hardware;
         Assert.Equal(expected, availability.Kind);
         Assert.False(string.IsNullOrEmpty(availability.EncoderName));
+    }
+
+    [Fact]
+    public void GetAvailability_Hevc_IsHardwareOrSoftware()
+    {
+        // HEVC resolves to a hardware encoder where the GPU supports one, else software libkvazaar — never
+        // unavailable on a build that ships kvazaar (the bundled and test builds both do).
+        if (Codec.FindEncoderByName("libkvazaar") == null && HardwareEncoderProbe.HevcHardwareEncoder == null)
+            return;
+
+        var kind = new FfmpegVideoEncoderFactory().GetAvailability(VideoExportCodec.Hevc).Kind;
+        Assert.True(kind is VideoEncoderKind.Hardware or VideoEncoderKind.Software, $"unexpected HEVC availability: {kind}");
     }
 
     [Fact]

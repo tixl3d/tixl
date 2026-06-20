@@ -29,6 +29,10 @@ public enum VideoExportCodec
 
     /// <summary>HAP Q (scaled DXT5-YCoCg) in MOV — higher-quality HAP; larger than standard HAP. (LGPL.)</summary>
     HapQ = 7,
+
+    /// <summary>HEVC (H.265) in MP4 — hardware-encoded where available, else software (libkvazaar — BSD, no GPL).
+    /// More efficient than H.264; heavier patent licensing (orthogonal to the software licence).</summary>
+    Hevc = 8,
 }
 
 /// <summary>Container/extension helpers for <see cref="VideoExportCodec"/>.</summary>
