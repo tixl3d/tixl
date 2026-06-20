@@ -56,12 +56,11 @@ switching the codec. Try **H264** first, then a non-H.264 codec (e.g. **ProRes**
 - On a machine with a working GPU encoder, **H264** shows **"Hardware encoder (NVIDIA NVENC / Intel Quick
   Sync / AMD AMF)"** matching the GPU. (NVENC in the bundled build needs NVIDIA driver 570+; Intel Quick Sync
   works via `nv12`.)
-- On a machine with **no** working hardware encoder but an `ffmpeg` with `libx264` on PATH, **H264** shows
-  **"External FFmpeg encoder"** (it will software-encode x264 rather than MPEG-4).
-- On a machine with **neither**, **H264** shows a ⚠ line: **"No hardware H.264 encoder — using MPEG-4. Update
-  the GPU driver or install FFmpeg for x264."**
-- Non-H.264 codecs (ProRes/VP9/AV1/FFV1) show **"Software encoder"**.
+- On a machine with **no** working hardware encoder, **H264** shows **"Software encoder"** — it encodes
+  in-process with **OpenH264** (no GPL, no external ffmpeg).
+- Non-H.264 codecs (ProRes/VP9/AV1/FFV1/HAP) show **"Software encoder"** too.
 - Switching codecs swaps the line in place without shifting the rest of the panel.
+- **No codec ever asks for an external ffmpeg or a download** — everything encodes in-process.
 
 ## Step: H.264 export produces a playable MP4 with audio
 
@@ -95,28 +94,23 @@ H.264 — especially at high resolution.
 - FFV1 is visually lossless and its file is much larger than the others.
 - No red operator-error state on the `[PlayVideo]` re-import, and no editor freeze during the render.
 
-## Step: HAP encodes via an external FFmpeg (tier 2)
+## Step: HAP exports in-process with a size estimate
 
-The bundled LGPL build ships the HAP *decoder* but no HAP *encoder*, so HAP export runs an external
-`ffmpeg.exe` (any build with the `hap` encoder — a system ffmpeg is fine; no GPL needed). It's located from
-`UserSettings.ExternalFfmpegPath` → the `TIXL_FFMPEG_EXE` env var → `ffmpeg` on `PATH`.
+HAP encodes **in-process** with the bundled FFmpeg (the build includes the `hap` encoder) — no external
+ffmpeg, no download.
 
-**Action (machine *with* a hap-capable ffmpeg on PATH):**
+**Action:**
 Select **Hap** (also try **HapAlpha** / **HapQ**), keep the range short, **Start Render**, then re-import the
 output with `[PlayVideo]`.
 
 **Expected:**
-- The three HAP entries appear; the filename extension becomes `.mov`.
-- The inline line reads **"External FFmpeg encoder"** (not a warning), and **Start Render** is enabled.
+- The three HAP entries appear; the filename extension becomes `.mov`; the inline line reads **"Software
+  encoder"** and **Start Render** is enabled — no popup, no external ffmpeg.
+- A size estimate appears (e.g. **"Est. 1.9 GB (1120×932, DXT before Snappy)"**) — HAP is a fixed-ratio codec,
+  so the prediction is reliable; HapAlpha/HapQ are ~2× Hap. The dimensions shown are **rounded down to a
+  multiple of 4** (HAP's DXT block size), and the summary card shows the same rounded size, not the raw one.
 - A `.mov` is written and plays back with the correct image (HapAlpha preserves alpha; HapQ is higher
   quality / larger). With **Export Audio** on, it carries an AAC track.
-
-**Action (machine *without* a hap-capable ffmpeg):**
-Select **Hap** with no `ffmpeg` on `PATH`/env/setting.
-
-**Expected:**
-- The inline line shows a ⚠ **"HAP encoding needs an external FFmpeg (not available yet)."** and **Start
-  Render** is disabled for HAP — it does **not** silently render a different codec.
 
 ## Step: Codec choice survives save and reload
 

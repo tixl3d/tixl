@@ -167,25 +167,15 @@ internal static class RenderProcess
         try
         {
             var codec = session.Settings.VideoCodec;
-            var availability = VideoEncoderAvailabilityCache.GetBlocking(codec);
-
-            if (availability.Kind == VideoEncoderKind.Unavailable)
+            if (VideoEncoderAvailabilityCache.GetBlocking(codec).Kind == VideoEncoderKind.Unavailable)
             {
-                LastHelpString = $"Can't render {codec}: no in-process encoder, and no external FFmpeg with that encoder was found.";
+                LastHelpString = $"Can't render {codec}: this FFmpeg build has no encoder for it.";
                 Log.Warning(LastHelpString);
                 CleanupSession();
                 return false;
             }
 
-            // Prefer an external ffmpeg (tier 2) when the in-process build can't serve the codec well: HAP (no
-            // in-process encoder), or software H.264 when no hardware encoder works (beats the MPEG-4 fallback).
-            if (availability.Kind == VideoEncoderKind.External
-                && ExternalFfmpegFileWriter.TryCreate(session, out _) is { } externalWriter)
-            {
-                session.VideoWriter = FfmpegVideoExportWriter.Wrap(externalWriter);
-                Log.Debug("Render-export: using an external FFmpeg encoder (tier 2).");
-            }
-            else if (FfmpegVideoExportWriter.TryCreate(session, out var ffmpegError) is { } ffmpegWriter)
+            if (FfmpegVideoExportWriter.TryCreate(session, out var ffmpegError) is { } ffmpegWriter)
             {
                 session.VideoWriter = ffmpegWriter;
                 Log.Debug("Render-export: using the in-process FFmpeg encoder.");

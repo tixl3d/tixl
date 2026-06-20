@@ -10,7 +10,7 @@ namespace T3.Editor.Gui.Windows.RenderExport;
 
 /// <summary>
 /// Resolves — off the UI thread — how the FFmpeg encoder will serve each <see cref="VideoExportCodec"/> on this
-/// machine (hardware vs. software fallback), so the render window can show an inline indicator without stalling a
+/// machine (hardware vs. in-process software), so the render window can show an inline indicator without stalling a
 /// draw frame on the one-shot hardware-encoder probe (a GPU-encoder open). Results are cached for the session.
 /// </summary>
 internal static class VideoEncoderAvailabilityCache
@@ -60,17 +60,7 @@ internal static class VideoEncoderAvailabilityCache
                 factory = VideoExport.Factory;
             }
 
-            var availability = factory?.GetAvailability(codec) ?? new VideoEncoderAvailability { Kind = VideoEncoderKind.Unavailable };
-
-            // A located external ffmpeg can take over (tier 2) when the in-process build either can't encode
-            // the codec at all (HAP → Unavailable) or only has a poor substitute (H.264 with no hardware
-            // encoder → SoftwareFallback/MPEG-4; an external libx264 is far better). Probe the resolver here
-            // (off the UI thread already) so the indicator and export both treat it as available.
-            if (availability.Kind is VideoEncoderKind.Unavailable or VideoEncoderKind.SoftwareFallback
-                && ExternalFfmpegResolver.CanEncode(codec))
-                return new VideoEncoderAvailability { Kind = VideoEncoderKind.External, EncoderName = "external FFmpeg" };
-
-            return availability;
+            return factory?.GetAvailability(codec) ?? new VideoEncoderAvailability { Kind = VideoEncoderKind.Unavailable };
         }
         catch (Exception e)
         {

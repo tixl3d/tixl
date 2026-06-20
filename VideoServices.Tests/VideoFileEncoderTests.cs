@@ -386,17 +386,72 @@ public class VideoFileEncoderTests
     }
 
     [Fact]
-    public void GetAvailability_H264_IsHardwareOrSoftwareFallback()
+    public void GetAvailability_H264_IsHardwareOrSoftware()
     {
         var availability = new FfmpegVideoEncoderFactory().GetAvailability(VideoExportCodec.H264);
 
-        // With the FFmpeg library present, H.264 resolves to a hardware encoder where the GPU supports one,
-        // otherwise the MPEG-4 software fallback (software H.264 is GPL, absent from the build) — never null.
+        // H.264 resolves to a hardware encoder where the GPU supports one, otherwise an in-process software
+        // encoder (OpenH264, else MPEG-4) — never unavailable, never null.
         var expected = HardwareEncoderProbe.H264HardwareEncoder == null
-                           ? VideoEncoderKind.SoftwareFallback
+                           ? VideoEncoderKind.Software
                            : VideoEncoderKind.Hardware;
         Assert.Equal(expected, availability.Kind);
         Assert.False(string.IsNullOrEmpty(availability.EncoderName));
+    }
+
+    [Fact]
+    public void Encode_OpenH264_RoundTripsThroughDecoder()
+    {
+        // The no-hardware H.264 path uses OpenH264 in-process (BSD, not GPL libx264). Skips on a build without it.
+        if (Codec.FindEncoderByName("libopenh264") == null)
+            return;
+
+        const int width = 320;
+        const int height = 240;
+        const int frameCount = 20;
+        var path = Path.Combine(Path.GetTempPath(), $"tixl-encode-openh264-{Guid.NewGuid():N}.mp4");
+
+        try
+        {
+            var settings = new VideoEncoderSettings
+                               {
+                                   FilePath = path,
+                                   Width = width,
+                                   Height = height,
+                                   FrameRate = new AVRational(30, 1),
+                                   BitRate = 4_000_000,
+                                   VideoEncoderName = "libopenh264",
+                                   EncoderPixelFormat = AVPixelFormat.Yuv420p,
+                                   SourceFormat = AVPixelFormat.Rgba,
+                                   SourceBytesPerPixel = 4,
+                               };
+
+            var frame = new byte[width * height * 4];
+            using (var encoder = new VideoFileEncoder(settings))
+            {
+                for (var i = 0; i < frameCount; i++)
+                {
+                    FillGradient(frame, width, height, i);
+                    encoder.WriteVideoFrame(frame, width * 4);
+                }
+            }
+
+            using var session = VideoDecoderSession.TryOpen(path, VideoPlaybackOptimization.FastSeeking, out var error);
+            Assert.Null(error);
+            Assert.NotNull(session);
+            Assert.Equal(width, session!.Width);
+            Assert.Equal(height, session.Height);
+
+            var decoded = 0;
+            while (session.TryReadNextFrame(out _))
+                decoded++;
+            Assert.True(decoded >= frameCount - 1, $"decoded {decoded} OpenH264 frames, expected ~{frameCount}");
+        }
+        finally
+        {
+            if (File.Exists(path))
+                File.Delete(path);
+        }
     }
 
     // One video frame's worth of a 440 Hz stereo sine, as interleaved float32 bytes.

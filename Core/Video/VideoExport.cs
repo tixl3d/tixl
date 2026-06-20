@@ -44,6 +44,27 @@ public static class VideoExportCodecExtensions
                                                                                   VideoExportCodec.FFV1 => ".mkv",
                                                                                   _ => ".mp4", // H264, VP9, AV1
                                                                               };
+
+    /// <summary>The size a codec's frame dimensions must be a multiple of. HAP packs 4×4 DXT blocks, so it needs
+    /// 4; the others have no constraint the export path enforces (1).</summary>
+    public static int GetEncoderBlockSize(this VideoExportCodec codec) => codec switch
+                                                                              {
+                                                                                  VideoExportCodec.Hap => 4,
+                                                                                  VideoExportCodec.HapAlpha => 4,
+                                                                                  VideoExportCodec.HapQ => 4,
+                                                                                  _ => 1,
+                                                                              };
+
+    /// <summary>Rounds a render resolution down to the codec's block size — the dimensions the encoder actually
+    /// outputs (the export path crops the few excess pixels). A no-op for codecs with no block constraint.</summary>
+    public static (int width, int height) RoundToEncoderBlock(this VideoExportCodec codec, int width, int height)
+    {
+        var block = codec.GetEncoderBlockSize();
+        if (block <= 1)
+            return (width, height);
+
+        return (Math.Max(block, width / block * block), Math.Max(block, height / block * block));
+    }
 }
 
 /// <summary>
@@ -93,19 +114,11 @@ public enum VideoEncoderKind
     /// <summary>FFmpeg / the video package isn't available, so the codec can't be encoded at all.</summary>
     Unavailable,
 
-    /// <summary>A built-in LGPL software encoder serves it (ProRes/VP9/AV1/FFV1). Always available, no setup.</summary>
+    /// <summary>A built-in software encoder serves it in-process (ProRes/VP9/AV1/FFV1/HAP, or H.264 via OpenH264).</summary>
     Software,
 
     /// <summary>A GPU hardware encoder (NVENC/Quick Sync/AMF) initialised successfully (H.264). Preferred, silent.</summary>
     Hardware,
-
-    /// <summary>Software H.264/HEVC is GPL and absent from the bundled build, and no hardware encoder works here,
-    /// so a lower-quality LGPL substitute (MPEG-4) stands in until a user-supplied GPL ffmpeg is installed.</summary>
-    SoftwareFallback,
-
-    /// <summary>The bundled build can't encode this codec in-process (e.g. HAP), but a located external
-    /// <c>ffmpeg.exe</c> has the encoder, so export runs it out-of-process (tier 2).</summary>
-    External,
 }
 
 /// <summary>How the requested codec will be served, for the render window's inline availability indicator.</summary>

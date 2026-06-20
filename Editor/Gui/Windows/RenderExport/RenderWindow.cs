@@ -185,9 +185,17 @@ internal sealed class RenderWindow : Window
     private static bool IsHapCodec(VideoExportCodec codec)
         => codec is VideoExportCodec.Hap or VideoExportCodec.HapAlpha or VideoExportCodec.HapQ;
 
-    // Inline indicator under the codec dropdown: shows whether the chosen codec will hardware-encode, use a
-    // built-in software encoder, or fall back to a lower-quality substitute (software H.264 needs a GPL exe,
-    // not yet bundled). The line keeps a constant footprint so switching codecs doesn't shift the layout.
+    // Bytes per pixel of the uncompressed DXT data each HAP variant produces (Snappy then compresses it a bit).
+    private static double HapBytesPerPixel(VideoExportCodec codec) => codec switch
+                                                                          {
+                                                                              VideoExportCodec.Hap => 0.5,      // DXT1 (RGB)
+                                                                              VideoExportCodec.HapAlpha => 1.0, // DXT5 (RGBA)
+                                                                              VideoExportCodec.HapQ => 1.0,     // scaled DXT5-YCoCg
+                                                                              _ => 0,
+                                                                          };
+
+    // Inline indicator under the codec dropdown: hardware-accelerated, in-process software, or (rarely) an
+    // encoder this FFmpeg build lacks. Keeps a constant footprint so switching codecs doesn't shift the layout.
     private static void DrawCodecAvailabilityHint(VideoExportCodec codec)
     {
         var availability = VideoEncoderAvailabilityCache.Get(codec);
@@ -205,20 +213,9 @@ internal sealed class RenderWindow : Window
             case VideoEncoderKind.Software:
                 DrawInlineEncoderHint(Icon.Checkmark, UiColors.TextMuted, "Software encoder");
                 break;
-            case VideoEncoderKind.External:
-                DrawInlineEncoderHint(Icon.Checkmark, UiColors.TextMuted, "External FFmpeg encoder");
-                break;
-            case VideoEncoderKind.SoftwareFallback:
-                DrawInlineEncoderHint(Icon.Warning, UiColors.StatusAttention,
-                                      "No hardware H.264 encoder — using MPEG-4. Update the GPU driver or install FFmpeg for x264.");
-                break;
             case VideoEncoderKind.Unavailable:
             default:
-                // HAP encoding isn't in the bundled LGPL build (decode-only) — it needs an external FFmpeg.
-                var message = IsHapCodec(codec)
-                                  ? "HAP encoding needs an external FFmpeg (not available yet)."
-                                  : "This codec can't be encoded in this build.";
-                DrawInlineEncoderHint(Icon.Warning, UiColors.StatusAttention, message);
+                DrawInlineEncoderHint(Icon.Warning, UiColors.StatusAttention, "This codec can't be encoded in this build.");
                 break;
         }
     }
@@ -275,6 +272,17 @@ internal sealed class RenderWindow : Window
             var matchingQuality = GetQualityLevelFromRate((float)bitsPerPixel);
             FormInputs.AddHint($"{matchingQuality.Title} quality (Est. {s.Bitrate * duration / 1024 / 1024 / 8:0.#} MB)");
             CustomComponents.TooltipForLastItem(matchingQuality.Description);
+        }
+        else if (IsHapCodec(s.VideoCodec))
+        {
+            // HAP is a fixed-ratio DXT codec, so its size is predictable from pixels × frames (Snappy then
+            // shaves a little). Use the ×4-rounded dimensions the encoder actually writes.
+            RenderProcess.TryGetRenderResolution(s, out var hapResolution);
+            var (hapW, hapH) = s.VideoCodec.RoundToEncoderBlock(hapResolution.Width, hapResolution.Height);
+            var hapFrameCount = RenderTiming.ComputeFrameCount(s);
+            var hapMb = HapBytesPerPixel(s.VideoCodec) * hapW * hapH * hapFrameCount / 1024 / 1024;
+            var hapSize = hapMb >= 1024 ? $"{hapMb / 1024:0.##} GB" : $"{hapMb:0.#} MB";
+            FormInputs.AddHint($"Est. {hapSize} ({hapW}×{hapH}, DXT before Snappy)");
         }
 
         // Path
@@ -388,6 +396,13 @@ internal sealed class RenderWindow : Window
 
         RenderProcess.TryGetRenderResolution(settings, out var resolution);
 
+        // HAP crops to a multiple of 4 — show the dimensions actually written, not the raw render size.
+        if (settings.RenderMode == RenderSettings.RenderModes.Video)
+        {
+            var (w, h) = settings.VideoCodec.RoundToEncoderBlock(resolution.Width, resolution.Height);
+            resolution = new Int2(w, h);
+        }
+
         ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
         ImGui.TextUnformatted($"{format} - {resolution.Width}×{resolution.Height} @ {settings.FrameRate:0}fps");
 
@@ -499,15 +514,13 @@ internal sealed class RenderWindow : Window
                 return false;
             }
 
-            // Block codecs the encoder can't actually produce so export doesn't silently fall back to another
-            // codec. H.264 is exempt — it always has a path (hardware, the MPEG-4 substitute, or Media Foundation).
+            // Block a codec this FFmpeg build genuinely has no encoder for, so export doesn't silently fall
+            // back to another codec. (Rare — the bundled build covers every dropdown codec; H.264 always has a
+            // path: hardware, OpenH264, or MPEG-4.)
             var codec = RenderSettings.Current.VideoCodec;
-            if (codec != VideoExportCodec.H264
-                && VideoEncoderAvailabilityCache.Get(codec) is { Kind: VideoEncoderKind.Unavailable })
+            if (VideoEncoderAvailabilityCache.Get(codec) is { Kind: VideoEncoderKind.Unavailable })
             {
-                errorMessage = IsHapCodec(codec)
-                                   ? "HAP encoding needs an external FFmpeg, which isn't available yet."
-                                   : $"The {codec} encoder isn't available in this build.";
+                errorMessage = $"The {codec} encoder isn't available in this FFmpeg build.";
                 return false;
             }
         }

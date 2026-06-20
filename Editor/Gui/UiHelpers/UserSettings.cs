@@ -170,14 +170,6 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
         [Obsolete("Migrated to per-symbol RenderSettings in .t3ui")]
         public string? RenderSequencePrefix;
 
-        /// <summary>
-        /// Path to a user-supplied external FFmpeg (ffmpeg.exe) for codecs the bundled LGPL build can't encode
-        /// in-process: software H.264/HEVC (needs a GPL build) and HAP (any build that includes the hap encoder).
-        /// The resolver verifies the specific encoder is present, so this single path can satisfy either.
-        /// Per-machine; not shipped with projects. Empty = not configured / not located yet.
-        /// </summary>
-        public string? ExternalFfmpegPath = null;
-
         // Profiling and debugging
         public bool LoadMultiThreaded = true;
         public bool EnableFrameProfiling = true;

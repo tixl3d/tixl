@@ -46,21 +46,27 @@ public sealed class FfmpegVideoEncoderFactory : IVideoEncoderFactory
 
         if (codec == VideoExportCodec.H264)
         {
-            // H.264 is dynamic: software H.264 (libx264) is GPL and absent from the bundled LGPL build, so it
-            // needs a GPU encoder, else the MPEG-4 fallback stands in until a user-supplied GPL ffmpeg exists.
+            // H.264: a GPU encoder when available, otherwise in-process software OpenH264 (no GPL). Either way
+            // it encodes — there's no unavailable case (MPEG-4 backs up OpenH264 in the encode path).
             var hardwareEncoder = HardwareEncoderProbe.H264HardwareEncoder;
-            return hardwareEncoder == null
-                       ? new VideoEncoderAvailability { Kind = VideoEncoderKind.SoftwareFallback, EncoderName = "MPEG-4" }
-                       : new VideoEncoderAvailability { Kind = VideoEncoderKind.Hardware, EncoderName = FriendlyHardwareName(hardwareEncoder) };
+            if (hardwareEncoder != null)
+                return new VideoEncoderAvailability { Kind = VideoEncoderKind.Hardware, EncoderName = FriendlyHardwareName(hardwareEncoder) };
+
+            var softwareName = SoftwareH264EncoderName() != null ? "OpenH264" : "MPEG-4";
+            return new VideoEncoderAvailability { Kind = VideoEncoderKind.Software, EncoderName = softwareName };
         }
 
-        // The rest are LGPL software encoders — but only if this build actually ships them. The BtbN
-        // lgpl-shared build omits some native encoders (notably HAP, decode-only here), so probe before
-        // claiming availability rather than failing at export time.
+        // The rest are LGPL software encoders — but only if this build actually ships them. Probe before
+        // claiming availability rather than failing at export time (encoder sets differ between FFmpeg builds).
         return SoftwareEncoderIsPresent(codec)
                    ? new VideoEncoderAvailability { Kind = VideoEncoderKind.Software, EncoderName = SoftwareEncoderLabel(codec) }
                    : new VideoEncoderAvailability { Kind = VideoEncoderKind.Unavailable, EncoderName = SoftwareEncoderLabel(codec) };
     }
+
+    // OpenH264 (libopenh264 — Cisco's BSD-licensed software H.264) when the build ships it; null falls the
+    // encode path back to MPEG-4. Far better than MPEG-4, and no GPL (libx264) needed.
+    private static string? SoftwareH264EncoderName()
+        => Codec.FindEncoderByName("libopenh264") != null ? "libopenh264" : null;
 
     // Whether the bundled FFmpeg build includes the encoder a given software codec maps to.
     private static bool SoftwareEncoderIsPresent(VideoExportCodec codec)
@@ -182,18 +188,19 @@ public sealed class FfmpegVideoEncoderFactory : IVideoEncoderFactory
             case VideoExportCodec.H264:
             default:
             {
-                // Hardware H.264 when the GPU supports it; otherwise MPEG-4 Part 2. Software H.264 is libx264 =
-                // GPL and absent from the bundled LGPL build, so the fallback stands in until a user-supplied GPL
-                // ffmpeg path is available.
+                // Hardware H.264 when the GPU supports it; otherwise in-process OpenH264 (libopenh264 — BSD, ships
+                // in the LGPL build, no GPL). MPEG-4 Part 2 is only a last resort if OpenH264 is somehow absent.
+                // (libx264 is GPL and intentionally not bundled.)
                 var hardwareEncoder = HardwareEncoderProbe.H264HardwareEncoder;
-                if (hardwareEncoder == null)
-                    Log.Warning("No hardware H.264 encoder available - exporting with MPEG-4 (lower quality).");
+                var encoderName = hardwareEncoder ?? SoftwareH264EncoderName();
+                if (encoderName == null)
+                    Log.Warning("No hardware or OpenH264 encoder available - exporting with MPEG-4 (lower quality).");
 
                 return common with
                            {
-                               VideoEncoderName = hardwareEncoder, // null => fall back to VideoCodecId
+                               VideoEncoderName = encoderName, // null => fall back to VideoCodecId (MPEG-4)
                                VideoCodecId = AVCodecID.Mpeg4,
-                               // QSV needs nv12; NVENC/MPEG-4 take yuv420p. Must match what the probe opened with.
+                               // QSV needs nv12; NVENC/OpenH264/MPEG-4 take yuv420p. Must match what the probe opened with.
                                EncoderPixelFormat = HardwareEncoderProbe.EncoderInputFormat(hardwareEncoder),
                            };
             }
@@ -205,12 +212,13 @@ public sealed class FfmpegVideoEncoderFactory : IVideoEncoderFactory
         // HAP feeds RGBA straight in and snappy-compresses DXT blocks itself, so it ignores the target bitrate.
         // DXT works on 4×4 blocks, so the frame size must be a multiple of 4 — round down (crops ≤ 3 px) rather
         // than let the encoder reject odd sizes.
+        var (width, height) = VideoExportCodec.Hap.RoundToEncoderBlock(common.Width, common.Height);
         return common with
                    {
                        VideoEncoderName = "hap",
                        EncoderPixelFormat = AVPixelFormat.Rgba,
-                       Width = common.Width & ~3,
-                       Height = common.Height & ~3,
+                       Width = width,
+                       Height = height,
                        VideoCodecOptions = new[] { new KeyValuePair<string, string>("format", hapFormat) },
                    };
     }
