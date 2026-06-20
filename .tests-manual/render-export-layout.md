@@ -21,10 +21,11 @@ Open the **Render To File** window.
 
 **Expected:**
 - A left sidebar lists **Source**, **Format & Quality**, and **Output Target**.
-- The selected entry reads as one connected surface with the lighter content panel to its right; the other
-  two entries are muted with no background. Hovering an unselected entry shows a faint highlight.
-- The sidebar and the area around it (including the footer) are the darker input-field color; the active
-  section's content panel is lighter.
+- The selected entry is bold and reads as one connected surface with the lighter content panel to its right
+  (rounded on its left edge); the other two entries are muted with no background. Hovering an unselected entry
+  shows a faint highlight.
+- The sidebar and the margins around the content panel are the dark window background; the active section's
+  content panel is a lighter rounded panel floating on top, with a muted section header.
 
 ## Step: Clicking a section swaps the content without the window resizing
 
@@ -75,9 +76,9 @@ With renderable output, read the footer. Then deliberately clear the **Filename*
 settings invalid, and read the footer again.
 
 **Expected:**
-- When valid, the footer's left side shows a single muted line like
-  `2:12.0s / 1920×1080 / H.264 → ~95 MB / 2 min`, and the blue **Render** button is at the far right with a
-  small **open-folder** icon to its left.
+- When valid, the footer's left side shows a single line like
+  `2:12.0s / 1920×1080 / H.264 → ~95 MB / 2 min`, and the blue **Render** button is at the far right (kept off
+  the window edge) with a small **open-folder** icon to its left.
 - When invalid (empty filename), the footer line turns to the attention color and states the problem, and the
   **Render** button is disabled (its tooltip repeats the reason).
 - The open-folder icon is enabled only when the configured output folder exists; clicking it opens that folder.

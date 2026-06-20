@@ -48,6 +48,8 @@ internal sealed class ProjectSettingsWindow : Window
             return;
         }
 
+        NavigationSidebar.BeginLayout();
+
         PlaybackUtils.FindCompositionSettingsForInstance(composition, out var compositionWithSettings,
             out var settings);
 
@@ -132,19 +134,18 @@ internal sealed class ProjectSettingsWindow : Window
     private void DrawSettingsPanels(Instance composition, CompositionSettings settings,
         Instance? compositionWithSettings)
     {
-        ImGui.BeginChild("categories", new Vector2(120 * T3Ui.UiScaleFactor, -1),
-            ImGuiChildFlags.Borders,
-            ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoBackground);
+        NavigationSidebar.BeginColumn("categories", 120);
         {
-            ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, new Vector2(0, 0.5f));
-            FormInputs.AddSegmentedButtonWithLabel(ref _activeCategory, "", 110 * T3Ui.UiScaleFactor);
-            ImGui.PopStyleVar();
+            foreach (var category in Enum.GetValues<Categories>())
+            {
+                var name = CustomComponents.HumanReadablePascalCase(Enum.GetName(category));
+                if (NavigationSidebar.Item(name, _activeCategory == category))
+                    _activeCategory = category;
+            }
         }
-        ImGui.EndChild();
+        NavigationSidebar.EndColumn();
 
-        ImGui.SameLine();
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(20, 5));
-        ImGui.BeginChild("content", new Vector2(0, 0), ImGuiChildFlags.Borders, ImGuiWindowFlags.NoBackground);
+        NavigationSidebar.BeginContentPanel(PanelTitle(_activeCategory));
         {
             FormInputs.SetIndentToParameters();
             var modified = false;
@@ -167,10 +168,17 @@ internal sealed class ProjectSettingsWindow : Window
             if (modified)
                 composition.Symbol.GetSymbolUi().FlagAsModified();
         }
-
-        ImGui.EndChild();
-        ImGui.PopStyleVar();
+        NavigationSidebar.EndContentPanel();
     }
+
+    private static string PanelTitle(Categories category) => category switch
+                                                                 {
+                                                                     Categories.Playback   => "Playback",
+                                                                     Categories.Audio      => "Audio Mix",
+                                                                     Categories.Recording  => "Recording",
+                                                                     Categories.Executable => "Export",
+                                                                     _                     => string.Empty,
+                                                                 };
 
     #region Category panels
 
@@ -179,8 +187,6 @@ internal sealed class ProjectSettingsWindow : Window
         var modified = false;
         var audio = settings.Audio;
         var defaults = CompositionSettings.Defaults.Audio;
-
-        FormInputs.AddSectionHeader("Audio Mix");
 
         modified |= FormInputs.AddFloat("Soundtrack Volume",
             ref audio.SoundtrackVolume, 0f, 10f, 0.01f, true, true,
@@ -229,8 +235,6 @@ internal sealed class ProjectSettingsWindow : Window
         var symbolUi = composition.GetSymbolUi();
         var recording = symbolUi.RecordingSettings ??= new RecordingSettings();
         var defaults = RecordingSettings.Defaults;
-
-        FormInputs.AddSectionHeader("Recording");
         CustomComponents.HelpText("Which sources the timeline Record button captures.");
         FormInputs.AddVerticalSpace();
 
@@ -278,7 +282,6 @@ internal sealed class ProjectSettingsWindow : Window
         var export = settings.Export;
         var defaults = CompositionSettings.Defaults.Export;
 
-        FormInputs.AddSectionHeader("Export");
         CustomComponents.HelpText("These settings apply when exporting as executable.");
         FormInputs.AddVerticalSpace();
 
@@ -304,8 +307,6 @@ internal sealed class ProjectSettingsWindow : Window
         Instance? compositionWithSettings)
     {
         var modified = false;
-
-        FormInputs.AddSectionHeader("Playback");
 
         var playback = settings.Playback;
 

@@ -21,9 +21,8 @@ internal sealed partial class SettingsWindow
 
     private static void DrawAudioPanel(ref bool changed)
     {
-        FormInputs.AddSectionHeader("Audio System");
         FormInputs.AddVerticalSpace();
-        
+
         changed |= DrawMixerSection(
             "App Mixer",
             ref CoreSettings.Config.AppVolume,

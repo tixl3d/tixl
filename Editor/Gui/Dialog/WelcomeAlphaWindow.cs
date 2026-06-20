@@ -62,9 +62,9 @@ internal sealed class WelcomeAlphaWindow : WindowBase
                 _projects = PreviousVersionImport.EnumerateProjects(_previous);
         }
 
+        NavigationSidebar.BeginLayout();
         DrawHeaderBand();
         DrawSidebar();
-        ImGui.SameLine(0, 0);
         DrawContentPanel();
     }
 
@@ -145,9 +145,16 @@ internal sealed class WelcomeAlphaWindow : WindowBase
 
     private void DrawContentPanel()
     {
-        // Match the Settings window's content panel (padding + border + see-through background).
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(20, 5) * T3Ui.UiScaleFactor);
-        ImGui.BeginChild("content", new Vector2(0, 0), ImGuiChildFlags.Borders | ImGuiChildFlags.AlwaysUseWindowPadding, ImGuiWindowFlags.NoBackground);
+        var title = _activeTab switch
+                        {
+                            Tab.Welcome        => "Welcome",
+                            Tab.ImportSettings => "Import settings",
+                            Tab.ImportProjects => "Import Projects",
+                            Tab.TestFeatures   => $"Test latest features in v{FileLocations.TixlVersion}",
+                            _                  => string.Empty,
+                        };
+
+        NavigationSidebar.BeginContentPanel(title);
 
         switch (_activeTab)
         {
@@ -165,14 +172,11 @@ internal sealed class WelcomeAlphaWindow : WindowBase
                 break;
         }
 
-        ImGui.EndChild();
-        ImGui.PopStyleVar();
+        NavigationSidebar.EndContentPanel();
     }
 
     private void DrawWelcomeTab()
     {
-        FormInputs.AddSectionHeader("Welcome");
-
         // Rendered as markdown so the [text](url) links sit inline in the prose.
         _welcomeMarkdown.Draw(_isAlpha ? AlphaWelcomeMarkdown : StableWelcomeMarkdown,
                               onUrl: url => CoreUi.Instance.OpenWithDefaultApplication(url));
@@ -200,7 +204,6 @@ internal sealed class WelcomeAlphaWindow : WindowBase
 
     private void DrawImportSettingsTab()
     {
-        FormInputs.AddSectionHeader("Import settings");
         if (!RequirePrevious())
             return;
 
@@ -239,7 +242,6 @@ internal sealed class WelcomeAlphaWindow : WindowBase
 
     private void DrawImportProjectsTab()
     {
-        FormInputs.AddSectionHeader("Import Projects");
         if (!RequirePrevious())
             return;
 
@@ -362,7 +364,6 @@ internal sealed class WelcomeAlphaWindow : WindowBase
 
     private void DrawTestFeaturesTab()
     {
-        FormInputs.AddSectionHeader($"Test latest features in v{FileLocations.TixlVersion}");
         ImGui.TextColored(UiColors.TextMuted, "Walk through recently added features with guided steps.");
         FormInputs.AddVerticalSpace(6);
 

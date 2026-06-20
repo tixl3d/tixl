@@ -51,7 +51,9 @@ internal sealed partial class SettingsWindow : Window
     {
         var changed = false;
         var projectSettingsChanged = false;
-        
+
+        NavigationSidebar.BeginLayout();
+
         NavigationSidebar.BeginColumn("categories", 120);
         {
             foreach (var category in Enum.GetValues<Categories>())
@@ -65,16 +67,13 @@ internal sealed partial class SettingsWindow : Window
         }
         NavigationSidebar.EndColumn();
 
-        ImGui.SameLine();
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(20, 5));
-        ImGui.BeginChild("content", new Vector2(0, 0), ImGuiChildFlags.Borders, ImGuiWindowFlags.NoBackground);
+        NavigationSidebar.BeginContentPanel(CategoryTitle(_activeCategory));
         {
             FormInputs.SetIndentToParameters();
             switch (_activeCategory)
             {
                 case Categories.Interface:
                     FormInputs.SetIndentToLeft();
-                    FormInputs.AddSectionHeader("User Interface");
 
                     FormInputs.AddVerticalSpace();
                     FormInputs.SetIndentToParameters();
@@ -307,7 +306,6 @@ internal sealed partial class SettingsWindow : Window
 
                     break;
                 case Categories.Theme:
-                    FormInputs.AddSectionHeader("Color Theme");
                     FormInputs.AddVerticalSpace();
 
                     ColorThemeEditor.DrawEditor();
@@ -315,9 +313,8 @@ internal sealed partial class SettingsWindow : Window
 
                 case Categories.Projects:
                 {
-                    FormInputs.AddSectionHeader("Project specific settings");
                     CustomComponents
-                        .HelpText("These are global settings. Also see the Project Settings window.");                    
+                        .HelpText("These are global settings. Also see the Project Settings window.");
                     FormInputs.AddVerticalSpace();
 
                     FormInputs.AddSectionSubHeader("Project Settings");
@@ -434,8 +431,6 @@ internal sealed partial class SettingsWindow : Window
                 }
                 case Categories.Midi:
                 {
-                    FormInputs.AddSectionHeader("Midi");
-
                     if (ImGui.Button("Rescan devices"))
                     {
                         MidiConnectionManager.Rescan();
@@ -466,8 +461,6 @@ internal sealed partial class SettingsWindow : Window
                     break;
                 }
                 case Categories.SpaceMouse:
-                    FormInputs.AddSectionHeader("Space Mouse");
-
                     CustomComponents.HelpText("These settings only apply with a connected space mouse controller");
                     FormInputs.AddVerticalSpace();
 
@@ -485,13 +478,11 @@ internal sealed partial class SettingsWindow : Window
                     break;
 
                 case Categories.Keyboard:
-                    FormInputs.AddSectionHeader("Keyboard Shortcuts");
                     CustomComponents.HelpText("The keyboard layout can't be edited yet. Working on it");
                     KeyMapEditor.DrawEditor();
                     break;
                 case Categories.Profiling:
                 {
-                    FormInputs.AddSectionHeader("Profiling and debugging");
                     FormInputs.AddVerticalSpace();
 
                     // Profiling group
@@ -610,9 +601,21 @@ internal sealed partial class SettingsWindow : Window
             if (projectSettingsChanged)
                 CoreSettings.Save();
         }
-        ImGui.EndChild();
-        ImGui.PopStyleVar();
+        NavigationSidebar.EndContentPanel();
     }
+
+    private static string CategoryTitle(Categories category) => category switch
+                                                                    {
+                                                                        Categories.Interface  => "User Interface",
+                                                                        Categories.Theme      => "Color Theme",
+                                                                        Categories.Projects   => "Project specific settings",
+                                                                        Categories.Audio      => "Audio System",
+                                                                        Categories.Midi       => "Midi",
+                                                                        Categories.SpaceMouse => "Space Mouse",
+                                                                        Categories.Keyboard   => "Keyboard Shortcuts",
+                                                                        Categories.Profiling  => "Profiling and debugging",
+                                                                        _                     => string.Empty,
+                                                                    };
 
     internal override List<Window> GetInstances()
     {

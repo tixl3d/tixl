@@ -41,11 +41,8 @@ internal sealed class RenderWindow : Window
 
         _uiState.LastHelpString = "Ready to render.";
         var scale = T3Ui.UiScaleFactor;
-        var dl = ImGui.GetWindowDrawList();
 
-        // Dark chrome behind the sidebar and footer. The selected sidebar entry and the section panel
-        // both paint WindowBackground on top of this same base, so they read as one connected surface.
-        //dl.AddRectFilled(ImGui.GetWindowPos(), ImGui.GetWindowPos() + ImGui.GetWindowSize(), UiColors.BackgroundInputField);
+        NavigationSidebar.BeginLayout();
 
         var footerHeight = 56 * scale;
         var bodyHeight = ImGui.GetContentRegionAvail().Y - footerHeight;
@@ -68,14 +65,9 @@ internal sealed class RenderWindow : Window
             }
             NavigationSidebar.EndColumn();
 
-            ImGui.SameLine(0, 0);
-
-            ImGui.PushStyleColor(ImGuiCol.ChildBg, UiColors.WindowBackground.Rgba);
-            ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(16, 12) * scale);
-            ImGui.BeginChild("section", new Vector2(0, 0), ImGuiChildFlags.AlwaysUseWindowPadding);
+            NavigationSidebar.BeginContentPanel(SectionTitle(_uiState.ActiveSection));
             {
                 FormInputs.SetIndentToParameters();
-                FormInputs.AddVerticalSpace(4);
                 switch (_uiState.ActiveSection)
                 {
                     case Sections.Source:
@@ -89,9 +81,7 @@ internal sealed class RenderWindow : Window
                         break;
                 }
             }
-            ImGui.EndChild();
-            ImGui.PopStyleVar();
-            ImGui.PopStyleColor();
+            NavigationSidebar.EndContentPanel();
         }
         ImGui.EndChild();
 
@@ -101,6 +91,14 @@ internal sealed class RenderWindow : Window
         if (modified)
             ProjectView.Focused?.CompositionInstance?.Symbol.GetSymbolUi()?.FlagAsModified();
     }
+
+    private static string SectionTitle(Sections section) => section switch
+                                                                {
+                                                                    Sections.Source           => "Source",
+                                                                    Sections.FormatAndQuality => "Format & Quality",
+                                                                    Sections.OutputTarget     => "Output Target",
+                                                                    _                         => string.Empty,
+                                                                };
 
     // Reasons the output can't be rendered (no view, wrong output type, no texture). Shown in place of the
     // whole sidebar UI since none of the settings are actionable until an image output is available.
@@ -120,15 +118,14 @@ internal sealed class RenderWindow : Window
         CustomComponents.HelpText(message);
     }
 
+    private const float FooterMargin = 16f;
+
     private void DrawFooter()
     {
         var scale = T3Ui.UiScaleFactor;
-        var dl = ImGui.GetWindowDrawList();
+        var margin = FooterMargin * scale;
 
-        var dividerPos = ImGui.GetCursorScreenPos();
-        dl.AddLine(dividerPos, dividerPos + new Vector2(ImGui.GetContentRegionAvail().X, 0), UiColors.BackgroundButton, 1 * scale);
-
-        FormInputs.AddVerticalSpace(8);
+        FormInputs.AddVerticalSpace(10);
 
         if (RenderProcess.IsExporting)
         {
@@ -139,15 +136,16 @@ internal sealed class RenderWindow : Window
         var settings = RenderProcess.GetActiveOrRequestedSettings();
         var isValid = ValidateSettings(out var errorMessage);
 
+        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + margin);
         ImGui.AlignTextToFramePadding();
         CustomComponents.StylizedText(isValid ? BuildSummaryLine(settings) : errorMessage,
-                                      Fonts.FontSmall,
-                                      isValid ? UiColors.TextMuted : UiColors.StatusAttention);
+                                      Fonts.FontNormal,
+                                      isValid ? UiColors.Text : UiColors.StatusAttention);
 
-        // Right cluster: open-folder icon followed by the primary Render button.
+        // Right cluster: open-folder icon followed by the primary Render button, kept off the window edge.
         var iconSize = ImGui.GetFrameHeight();
         var ctaSize = CustomComponents.GetCtaButtonSize("Render");
-        CustomComponents.RightAlign(iconSize + 8 * scale + ctaSize.X);
+        CustomComponents.RightAlign(iconSize + 8 * scale + ctaSize.X + margin);
 
         var targetDir = GetConfiguredOutputDirectory();
         var canOpen = !string.IsNullOrEmpty(targetDir) && Directory.Exists(targetDir);
@@ -183,6 +181,9 @@ internal sealed class RenderWindow : Window
 
     private static void DrawExportProgressFooter()
     {
+        var scale = T3Ui.UiScaleFactor;
+        var margin = FooterMargin * scale;
+
         var progress = (float)RenderProcess.Progress;
         var elapsed = Playback.RunTimeInSecs - RenderProcess.ExportStartedTimeLocal;
 
@@ -193,15 +194,17 @@ internal sealed class RenderWindow : Window
             timeRemainingStr = StringUtils.HumanReadableDurationFromSeconds(estimatedTotal - elapsed) + " remaining";
         }
 
+        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + margin);
         ImGui.PushStyleColor(ImGuiCol.PlotHistogram, UiColors.StatusAutomated.Rgba);
         ImGui.PushStyleColor(ImGuiCol.FrameBg, UiColors.BackgroundInputField.Rgba);
-        ImGui.ProgressBar(progress, new Vector2(-1, 4 * T3Ui.UiScaleFactor), "");
+        ImGui.ProgressBar(progress, new Vector2(-margin, 4 * scale), "");
         ImGui.PopStyleColor(2);
 
-        CustomComponents.StylizedText(timeRemainingStr, Fonts.FontSmall, UiColors.TextMuted);
+        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + margin);
+        CustomComponents.StylizedText(timeRemainingStr, Fonts.FontNormal, UiColors.Text);
 
         var cancelSize = CustomComponents.GetCtaButtonSize("Cancel");
-        CustomComponents.RightAlign(cancelSize.X);
+        CustomComponents.RightAlign(cancelSize.X + margin);
         if (CustomComponents.DrawCtaButton("Cancel", Icon.None, CustomComponents.ButtonStates.Default))
         {
             RenderProcess.Cancel("Render cancelled after " + StringUtils.HumanReadableDurationFromSeconds(elapsed));

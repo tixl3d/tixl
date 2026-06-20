@@ -602,7 +602,7 @@ internal static class FormInputs
             total += ImGui.CalcTextSize(name).X + segPadding * 2;
         }
 
-        dl.AddRectFilled(start, start + new Vector2(total, h), UiColors.BackgroundButton.Fade(0.2f), rounding);
+        dl.AddRectFilled(start, start + new Vector2(total, h), UiColors.BackgroundInputField, rounding);
 
         // Scope ids by enum type so two unrelated segmented controls in the same window don't collide.
         ImGui.PushID(typeof(T).Name);
