@@ -22,6 +22,15 @@ AV1, FFV1, HAP ×3). Deferred polish:
 
 - [ ] **Wine/Linux render test** — the *original driving reason* for the whole milestone (MF couldn't run
       off-Windows). Validate a real export produces a playable file under Wine/Linux.
+- [x] **Colour-primaries / range fidelity (BT.709) — DONE.** `VideoFileEncoder` now tags the stream
+      `bt709` primaries/trc/colorspace + `mpeg` (limited) range, **and** drives a raw `SwsContext` with
+      `sws_setColorspaceDetails(ITU709)` so the RGBA→YUV matrix is actually 709 (swscale defaults to 601;
+      Sdcb's `VideoFrameConverter` couldn't set it). Both halves verified by test (tag = bt709/limited; pure-green
+      Y = 709 value, not 601). *In-editor: A/B vs an old render to confirm the shift is gone.* (HDR/BT.2020 future.)
+- [ ] **Async / off-thread export encode** — the export loop runs on the main thread, so a slow per-frame
+      encode (or a heavy graph) **freezes the UI** for the whole render. VP9/AV1 were sped up (row-mt, presets,
+      `ThreadCount=0`) which mitigates it, but the real fix is to keep the GPU read-back on the render thread and
+      hand the bytes to a background encoder queue. Larger change; would also make the progress UI responsive.
 - [ ] **HEVC `hvc1` stream tag** — software-HEVC-in-MP4 may not preview in Windows Explorer / QuickTime
       without it (plays fine in `[PlayVideo]`/VLC). Set the stream `codec_tag` in `VideoFileEncoder`.
 - [ ] **DNxHR codec** — needs a profile + pixel-format knob (the encoder already carries `EncoderPixelFormat`).

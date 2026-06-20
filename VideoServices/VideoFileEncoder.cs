@@ -110,6 +110,15 @@ public sealed class VideoFileEncoder : IDisposable
                                      Framerate = settings.FrameRate,
                                      PixelFormat = encoderPixelFormat,
                                      BitRate = settings.BitRate,
+                                     // Tag BT.709 / limited range, matching the previous Media Foundation output, so the
+                                     // file isn't untagged (players then guess BT.601 vs 709 and the colour shifts).
+                                     ColorRange = AVColorRange.Mpeg,
+                                     ColorPrimaries = AVColorPrimaries.Bt709,
+                                     ColorTrc = AVColorTransferCharacteristic.Bt709,
+                                     Colorspace = AVColorSpace.Bt709,
+                                     // 0 = auto-select thread count; lets the software encoders (VP9/AV1/kvazaar/FFV1) use
+                                     // all cores instead of one. Hardware encoders ignore it.
+                                     ThreadCount = 0,
                                  };
         if (needsGlobalHeader)
             _videoCodecContext.Flags |= AV_CODEC_FLAG.GlobalHeader;
@@ -127,8 +136,29 @@ public sealed class VideoFileEncoder : IDisposable
 
         _sourceFrame = Frame.CreateVideo(settings.Width, settings.Height, settings.SourceFormat);
         _sourceFrame.EnsureBuffer(1);
+        _sourceFrame.ColorRange = AVColorRange.Jpeg; // source RGB is full-range
+
         _encoderFrame = Frame.CreateVideo(settings.Width, settings.Height, encoderPixelFormat);
         _encoderFrame.EnsureBuffer(1);
+        _encoderFrame.ColorRange = AVColorRange.Mpeg;
+        _encoderFrame.ColorPrimaries = AVColorPrimaries.Bt709;
+        _encoderFrame.ColorTrc = AVColorTransferCharacteristic.Bt709;
+        _encoderFrame.Colorspace = AVColorSpace.Bt709;
+
+        // Drive swscale directly so we can force BT.709: its RGB→YUV default is BT.601, and Sdcb's
+        // VideoFrameConverter doesn't expose the colorspace. (No-op for HAP's RGBA→RGBA, where there's no matrix.)
+        _swsContext = ffmpeg.sws_getContext(settings.Width, settings.Height, settings.SourceFormat,
+                                            settings.Width, settings.Height, encoderPixelFormat,
+                                            (int)SWS.Bilinear, null, null, null);
+        if (_swsContext == null)
+            throw new InvalidOperationException("sws_getContext failed");
+
+        if (encoderPixelFormat != settings.SourceFormat)
+        {
+            var coeff709 = ffmpeg.sws_getCoefficients(1); // SWS_CS_ITU709
+            // full-range RGB in (1) → limited-range YUV out (0), BT.709 coefficients.
+            ffmpeg.sws_setColorspaceDetails(_swsContext, coeff709, 1, coeff709, 0, 0, 1 << 16, 1 << 16);
+        }
     }
 
     // Opens the video encoder, applying any codec-private AVOptions (e.g. HAP's "format") first. Children search
@@ -192,10 +222,28 @@ public sealed class VideoFileEncoder : IDisposable
                 Buffer.MemoryCopy(src + (long)y * sourceStride, dest + (long)y * destStride, destStride, rowBytes);
         }
 
-        _converter.ConvertFrame(_sourceFrame, _encoderFrame, SWS.Bilinear);
+        ScaleSourceFrame();
         _encoderFrame.Pts = _nextVideoPts++;
         _videoCodecContext.SendFrame(_encoderFrame);
         DrainEncoderToMuxer(_videoCodecContext, _videoStream);
+    }
+
+    // RGBA → encoder pixel format via our BT.709-configured swscale context.
+    private unsafe void ScaleSourceFrame()
+    {
+        var srcData = new byte*[4];
+        var srcStride = new int[4];
+        var dstData = new byte*[4];
+        var dstStride = new int[4];
+        for (var i = 0; i < 4; i++)
+        {
+            srcData[i] = (byte*)_sourceFrame.Data[i];
+            srcStride[i] = _sourceFrame.Linesize[i];
+            dstData[i] = (byte*)_encoderFrame.Data[i];
+            dstStride[i] = _encoderFrame.Linesize[i];
+        }
+
+        ffmpeg.sws_scale(_swsContext, srcData, srcStride, 0, _settings.Height, dstData, dstStride);
     }
 
     /// <summary>
@@ -281,7 +329,7 @@ public sealed class VideoFileEncoder : IDisposable
         }
     }
 
-    public void Dispose()
+    public unsafe void Dispose()
     {
         try
         {
@@ -292,7 +340,8 @@ public sealed class VideoFileEncoder : IDisposable
             Log.Warning($"VideoFileEncoder: finishing the output failed - {e.Message}");
         }
 
-        _converter.Free();
+        if (_swsContext != null)
+            ffmpeg.sws_freeContext(_swsContext);
         _sourceFrame.Dispose();
         _encoderFrame.Dispose();
         _audioFrame?.Dispose();
@@ -309,7 +358,7 @@ public sealed class VideoFileEncoder : IDisposable
 
     private readonly MediaStream _videoStream;
     private readonly CodecContext _videoCodecContext;
-    private readonly VideoFrameConverter _converter = new();
+    private readonly unsafe SwsContext* _swsContext;
     private readonly Frame _sourceFrame;
     private readonly Frame _encoderFrame;
     private long _nextVideoPts;

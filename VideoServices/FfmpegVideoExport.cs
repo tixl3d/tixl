@@ -161,21 +161,30 @@ public sealed class FfmpegVideoEncoderFactory : IVideoEncoderFactory
 
             case VideoExportCodec.VP9:
             {
-                // VP9 (libvpx) in MP4 — an efficient delivery codec; software-encoded, so slower than H.264.
+                // VP9 (libvpx) in MP4 — efficient but software-encoded. Default libvpx is single-threaded and
+                // painfully slow; row-mt + a faster cpu-used make it usable (with ThreadCount=0 in the encoder).
                 return common with
                            {
                                VideoEncoderName = "libvpx-vp9",
                                EncoderPixelFormat = AVPixelFormat.Yuv420p,
+                               VideoCodecOptions = new[]
+                                                       {
+                                                           new KeyValuePair<string, string>("deadline", "good"),
+                                                           new KeyValuePair<string, string>("cpu-used", "4"),
+                                                           new KeyValuePair<string, string>("row-mt", "1"),
+                                                       },
                            };
             }
 
             case VideoExportCodec.AV1:
             {
-                // AV1 via SVT-AV1 in MP4 — the most efficient delivery codec; SVT is the fast software AV1 encoder.
+                // AV1 via SVT-AV1 in MP4 — the most efficient delivery codec. `preset` trades speed for size
+                // (0 slowest … 13 fastest); 8 is a usable export default rather than SVT's slow default.
                 return common with
                            {
                                VideoEncoderName = "libsvtav1",
                                EncoderPixelFormat = AVPixelFormat.Yuv420p,
+                               VideoCodecOptions = new[] { new KeyValuePair<string, string>("preset", "8") },
                            };
             }
 

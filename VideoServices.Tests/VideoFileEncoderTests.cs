@@ -467,6 +467,53 @@ public class VideoFileEncoderTests
         }
     }
 
+    [Fact]
+    public void Encode_TagsBt709LimitedColor()
+    {
+        const int width = 320;
+        const int height = 240;
+        var path = Path.Combine(Path.GetTempPath(), $"tixl-encode-color-{Guid.NewGuid():N}.mp4");
+
+        try
+        {
+            var settings = new VideoEncoderSettings
+                               {
+                                   FilePath = path,
+                                   Width = width,
+                                   Height = height,
+                                   FrameRate = new AVRational(30, 1),
+                                   BitRate = 2_000_000,
+                                   VideoCodecId = AVCodecID.Mpeg4,
+                                   SourceFormat = AVPixelFormat.Rgba,
+                                   SourceBytesPerPixel = 4,
+                               };
+
+            var frame = new byte[width * height * 4];
+            using (var encoder = new VideoFileEncoder(settings))
+            {
+                for (var i = 0; i < 10; i++)
+                {
+                    FillGradient(frame, width, height, i);
+                    encoder.WriteVideoFrame(frame, width * 4);
+                }
+            }
+
+            using var fc = FormatContext.OpenInputUrl(path, null, null);
+            fc.LoadStreamInfo();
+            var video = fc.FindBestStreamOrNull(AVMediaType.Video);
+            Assert.NotNull(video);
+            var par = video!.Value.Codecpar!;
+            Assert.Equal(AVColorSpace.Bt709, par.ColorSpace);
+            Assert.Equal(AVColorPrimaries.Bt709, par.ColorPrimaries);
+            Assert.Equal(AVColorRange.Mpeg, par.ColorRange);
+        }
+        finally
+        {
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+    }
+
     // One video frame's worth of a 440 Hz stereo sine, as interleaved float32 bytes.
     private static void FillSine(byte[] buffer, int samplesPerChannel, int channels, int frameIndex, int sampleRate)
     {
