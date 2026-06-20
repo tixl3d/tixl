@@ -97,9 +97,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Mediapipe\Mediapipe.csproj" Private="false" PrivateAssets="all" />
     <ProjectReference Include="..\..\Core\Core.csproj" Private="false" PrivateAssets="all" />
-    <!-- FFmpeg decode engine. Copied into the operator package (Private default) since the editor host
-         does not provide it; its native LGPL DLLs arrive via the FFmpeg.LGPL package below. -->
-    <ProjectReference Include="..\..\Video\Video.csproj" />
     <ProjectReference Include="..\..\Serialization\Serialization.csproj" Private="false" PrivateAssets="all" />
     <ProjectReference Include="..\..\SystemUi\SystemUi.csproj" Private="false" PrivateAssets="all" />
     <ProjectReference Include="..\..\Logging\Logging.csproj" Private="false" PrivateAssets="all" />
@@ -119,17 +116,6 @@
     <PackageReference Include="Rug.Osc" Version="1.2.5">
       <NoWarn>NU1701</NoWarn>
     </PackageReference>
-    <!-- FFmpeg video decode. Sdcb.FFmpeg = LGPL managed bindings (P/Invoke signatures only). The native
-         shared DLLs come from FFmpeg.LGPL (BtbN lgpl-shared build: avcodec-61 = FFmpeg 7.x, configured
-         without the gpl and nonfree flags), NOT Sdcb.FFmpeg.runtime.windows-x64 whose binaries are
-         GPL-configured and rejected by FfmpegLibrary's license guardrail. FFmpeg.LGPL's .targets copies the
-         av/sw DLLs flat into the output dir; no DLLs are committed to the repo. NOTE: this BtbN build is
-         LGPL v3 (the version3 configure flag) — see Dependencies/licenses/LGPL-v3-FFmpeg.txt. 20250329 is the
-         NEWEST avcodec-61 (FFmpeg 7.x) FFmpeg.LGPL build: 20250330 bumped to avcodec-62 (FFmpeg 8.x dev),
-         whose ABI the Sdcb.FFmpeg 7.0.0 bindings do NOT match. To move past 7.x, bump Sdcb.FFmpeg to the
-         matching major and pin a FFmpeg.LGPL build with the same avcodec SONAME. -->
-    <PackageReference Include="Sdcb.FFmpeg" Version="7.0.0" />
-    <PackageReference Include="FFmpeg.LGPL" Version="20250329.1.0" />
     <PackageReference Include="SharpGLTF.Core" Version="1.0.6" />
     <PackageReference Include="Svg" Version="3.4.7" />
     <PackageReference Include="System.IO.Ports" Version="10.0.5" />
@@ -190,16 +176,6 @@
 }</OperatorPackageInfoJson>
     </PropertyGroup>
     <WriteLinesToFile File="$(OutputPath)/OperatorPackage.json" Lines="$(OperatorPackageInfoJson)" Overwrite="True" Encoding="UTF-8" />
-  </Target>
-  <!-- TiXL's operator loader (TixlAssemblyLoadContext.LoadUnmanagedDll) resolves native DLLs flat next to
-       the operator assembly. FFmpeg.LGPL's own .targets already copies the av/sw DLLs flat via
-       ReferenceCopyLocalPaths; this target is a backstop that also flattens any copy left under
-       runtimes/win-x64/native/, so FFmpeg loads in the editor and the exported player regardless. -->
-  <Target Name="FlattenFFmpegNatives" AfterTargets="AfterBuild">
-    <ItemGroup>
-      <_FFmpegNativeDlls Include="$(OutputPath)/runtimes/win-x64/native/av*.dll;$(OutputPath)/runtimes/win-x64/native/sw*.dll;$(OutputPath)/runtimes/win-x64/native/postproc*.dll" />
-    </ItemGroup>
-    <Copy SourceFiles="@(_FFmpegNativeDlls)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" />
   </Target>
   <!-- OpenCV's FFmpeg video plugin is unused now that VideoStreamInput decodes via FFmpeg directly, so drop
        it to avoid shipping a second FFmpeg alongside the LGPL FFmpeg build. -->

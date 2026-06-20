@@ -1,7 +1,7 @@
 # Video Audio Playback (FFmpeg → BASS)
 
 **Status:** Draft — 2026-06-07. Design only, no code yet. Extends the FFmpeg video work
-([`Plan_FfmpegVideo.md`](Plan_FfmpegVideo.md), [`Plan_VideoZeroCopyDecode.md`](Plan_VideoZeroCopyDecode.md)),
+([`Plan_FfmpegVideo.md`](archive/Plan_FfmpegVideo.md), [`Plan_VideoZeroCopyDecode.md`](archive/Plan_VideoZeroCopyDecode.md)),
 which decode the **video** track but leave **audio silent** — the `Volume` inputs on `[PlayVideo]` /
 `[VideoClip]` are no-op placeholders (see the "Audio is silent in this milestone" comments in
 `PlayVideo.cs` / `VideoClip.cs`).
@@ -89,7 +89,7 @@ frame). A live "buffer-ahead" push stream does not fit that directly. For each e
 a distinct, deterministic, time-sliced feeding mode vs the live buffer-ahead mode. This is its own phase.
 
 Once this Phase 3 lands, the video's audio is summed into the export mixdown like any other source, so the
-**encode milestone** ([`Plan_FfmpegEncode.md`](Plan_FfmpegEncode.md)) encodes it **for free** — that writer
+**encode milestone** ([`Plan_FfmpegEncode.md`](archive/Plan_FfmpegEncode.md)) encodes it **for free** — that writer
 consumes the same `GetFullMixDownBuffer` PCM the MF path does, and audio never forces the GPL build (native
 AAC/FLAC are LGPL). The encoder choice (MF vs FFmpeg) is orthogonal to the audio *routing* designed here.
 

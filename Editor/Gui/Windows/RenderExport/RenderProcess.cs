@@ -5,12 +5,12 @@ using T3.Core.Audio;
 using T3.Core.DataTypes;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Utils;
+using T3.Core.Video;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Gui.Windows.Layouts;
 using T3.Editor.Gui.Windows.Output;
-using T3.Editor.Gui.Windows.RenderExport.MF;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.ProjectHandling;
 
@@ -24,34 +24,6 @@ internal static class RenderProcess
 
     public static bool IsExporting => State == States.Exporting;
     public static States State;
-
-    /// <summary>When active, a screenshot is saved automatically every <see cref="UserSettings.ConfigData.ContinuousScreenshotDelay"/> seconds.</summary>
-    public static bool IsContinuousScreenshotActive { get; private set; }
-
-    /// <summary>
-    /// Opacity for the screenshot icon while continuous capture runs: 1 right after a capture, fading
-    /// toward 0.5 as the next one approaches, so the icon pulses in sync with the captures.
-    /// </summary>
-    public static float ContinuousScreenshotOpacity
-    {
-        get
-        {
-            var fraction = (float)((Playback.RunTimeInSecs - _lastContinuousScreenshotTime) / ContinuousScreenshotInterval).Clamp(0, 1);
-            return 1f - 0.5f * fraction;
-        }
-    }
-
-    public static void SetContinuousScreenshot(bool enabled)
-    {
-        IsContinuousScreenshotActive = enabled;
-        if (!enabled)
-            return;
-
-        // Capture on the next update and start the pulse at full opacity.
-        _lastContinuousScreenshotTime = _nextContinuousScreenshotTime = Playback.RunTimeInSecs;
-    }
-
-    private static double ContinuousScreenshotInterval => Math.Max(UserSettings.Config.ContinuousScreenshotDelay, 0.1f);
 
     public enum States
     {
@@ -86,10 +58,8 @@ internal static class RenderProcess
         if (!Directory.Exists(folder))
             Directory.CreateDirectory(folder);
 
-        var format = UserSettings.Config.ScreenshotFileFormat;
-        var extension = format == ScreenshotWriter.FileFormats.Jpg ? "jpg" : "png";
-        var filename = Path.Join(folder, $"{DateTime.Now:yyyy_MM_dd-HH_mm_ss_fff}.{extension}");
-        ScreenshotWriter.StartSavingToFile(RenderProcess.MainOutputTexture, filename, format);
+        var filename = Path.Join(folder, $"{DateTime.Now:yyyy_MM_dd-HH_mm_ss_fff}.png");
+        ScreenshotWriter.StartSavingToFile(RenderProcess.MainOutputTexture, filename, ScreenshotWriter.FileFormats.Png);
         Log.Debug("Screenshot saved in: " + folder);
     }
 
@@ -151,7 +121,7 @@ internal static class RenderProcess
                 }
 
                 Log.Gated.VideoRender($"""
-                                       Initializing Mp4VideoWriter with: path={targetFilePath}
+                                       Initializing video export with: path={targetFilePath}
                                        renderedSize={newSession.RenderToFileResolution.Width}x{newSession.RenderToFileResolution.Height}
                                        bitrate={settings.Bitrate}
                                        framerate={settings.FrameRate}
@@ -195,19 +165,36 @@ internal static class RenderProcess
     {
         try
         {
-            session.VideoWriter = new Mp4VideoWriter(session);
+            var codec = session.Settings.VideoCodec;
+            if (VideoEncoderAvailabilityCache.GetBlocking(codec).Kind == VideoEncoderKind.Unavailable)
+            {
+                LastHelpString = $"Can't render {codec}: this FFmpeg build has no encoder for it.";
+                Log.Warning(LastHelpString);
+                CleanupSession();
+                return false;
+            }
 
-            Log.Gated.VideoRender($"Mp4VideoWriter initialized: " +
-                                  $"Codec=H.264" +
-                                  $"FileFormat=mp4" +
-                                  $"Bitrate={session.Settings.Bitrate}" +
-                                  $"Framerate={session.Settings.FrameRate}" +
-                                  $"Channels={RenderAudioInfo.SoundtrackChannels()}" +
+            if (FfmpegVideoExportWriter.TryCreate(session, out var ffmpegError) is not { } ffmpegWriter)
+            {
+                LastHelpString = "Can't render: the FFmpeg video encoder is unavailable. " + ffmpegError;
+                Log.Error(LastHelpString);
+                CleanupSession();
+                return false;
+            }
+
+            session.VideoWriter = ffmpegWriter;
+            Log.Debug("Render-export: using the FFmpeg encoder.");
+
+            Log.Gated.VideoRender($"FFmpeg video writer initialized: " +
+                                  $"Codec={session.Settings.VideoCodec} " +
+                                  $"Bitrate={session.Settings.Bitrate} " +
+                                  $"Framerate={session.Settings.FrameRate} " +
+                                  $"Channels={RenderAudioInfo.SoundtrackChannels()} " +
                                   $"SampleRate={RenderAudioInfo.SoundtrackSampleRate()}");
         }
         catch (Exception ex)
         {
-            var msg = $"Failed to initialize Mp4VideoWriter: {ex.Message}\n{ex.StackTrace}";
+            var msg = $"Failed to initialize the FFmpeg video writer: {ex.Message}\n{ex.StackTrace}";
             Log.Error(msg);
             LastHelpString = msg;
             CleanupSession();
@@ -259,7 +246,6 @@ internal static class RenderProcess
         }
 
         HandleRenderShortCuts();
-        HandleContinuousScreenshot();
 
         if (!IsExporting)
             return;
@@ -324,7 +310,7 @@ internal static class RenderProcess
         // Update stats
         var effectiveFrameCount = settings.RenderMode == RenderSettings.RenderModes.Video ? session.FrameCount : session.FrameCount + 2;
 
-        var exportedFrameIndex = session.FrameIndex - MfVideoWriter.SkipImages;
+        var exportedFrameIndex = session.FrameIndex - WarmupFramesToSkip;
 
         var currentFrame = settings.RenderMode == RenderSettings.RenderModes.Video
                                ? exportedFrameIndex
@@ -435,21 +421,6 @@ internal static class RenderProcess
         return audioFrame;
     }
 
-    private static void HandleContinuousScreenshot()
-    {
-        // Paused while a video/image-sequence export owns the screenshot queue; resumes when it finishes.
-        if (!IsContinuousScreenshotActive || IsExporting)
-            return;
-
-        var now = Playback.RunTimeInSecs;
-        if (now < _nextContinuousScreenshotTime)
-            return;
-
-        TryRenderScreenShot();
-        _lastContinuousScreenshotTime = now;
-        _nextContinuousScreenshotTime = now + ContinuousScreenshotInterval;
-    }
-
     private static void HandleRenderShortCuts()
     {
         if (MainOutputTexture == null)
@@ -518,7 +489,7 @@ internal static class RenderProcess
                 Log.Debug($"""
                            SaveVideoFrameAndAdvance: frame={session.FrameIndex}
                            MainOutputTexture null? {MainOutputTexture == null}
-                           audioFrame.Length={audioFrame?.Length}
+                           audioFrame.Length={audioFrame.Length}
                            channels={channels}
                            sampleRate={sampleRate}
                            """);
@@ -526,8 +497,8 @@ internal static class RenderProcess
 
             RenderTiming.SetPlaybackTimeForFrame(session);
 
-            // We need to wait for one frame of the outputTexture to update to the new time 
-            if (session.FrameIndex > 0)
+            // Skip the warmup frame(s): the output texture needs one frame to settle on the new playback time.
+            if (session.FrameIndex >= WarmupFramesToSkip)
                 session.VideoWriter?.ProcessFrames(outputTexture, ref audioFrame, channels, sampleRate);
 
             session.FrameIndex++;
@@ -580,7 +551,7 @@ internal static class RenderProcess
 
     internal sealed class ExportSession
     {
-        public Mp4VideoWriter? VideoWriter;
+        public IRenderVideoWriter? VideoWriter;
         public string TargetDirectory = string.Empty;
         public string TargetFilePath = string.Empty;
         public double ExportStartedTime;
@@ -596,6 +567,7 @@ internal static class RenderProcess
 
     private static ExportSession? _activeExportSession;
 
-    private static double _lastContinuousScreenshotTime;
-    private static double _nextContinuousScreenshotTime;
+    // The output texture needs one frame to settle on each new playback time, so the first rendered frame is a
+    // warmup that isn't written. The frame-count math accounts for it.
+    private const int WarmupFramesToSkip = 1;
 }

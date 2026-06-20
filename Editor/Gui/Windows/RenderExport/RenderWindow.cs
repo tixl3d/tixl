@@ -6,7 +6,9 @@ using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Core.Utils;
 using T3.Core.Animation;
+using T3.Core.DataTypes.Vector;
 using T3.Core.SystemUi;
+using T3.Core.Video;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.ProjectHandling;
 
@@ -176,36 +178,178 @@ internal sealed class RenderWindow : Window
     }
 
 
+    // ProRes is profile-based and FFV1 is lossless, so a target bitrate is meaningless for them.
+    private static bool CodecUsesBitrate(VideoExportCodec codec)
+        => codec is VideoExportCodec.H264 or VideoExportCodec.Hevc or VideoExportCodec.VP9 or VideoExportCodec.AV1;
+
+    private static bool IsHapCodec(VideoExportCodec codec)
+        => codec is VideoExportCodec.Hap or VideoExportCodec.HapAlpha or VideoExportCodec.HapQ;
+
+    // Muted "~95 MB, ~30 min" appended to each codec dropdown item (rough estimate; empty when not yet renderable).
+    private static string DropdownEstimateSuffix(VideoExportCodec codec, Int2 res, int frames, double durationSec, long bitRate, int motionBlurSamples)
+    {
+        if (frames <= 0 || res.Width <= 0)
+            return string.Empty;
+
+        var bytes = RenderExportEstimate.EstimateBytes(codec, res, frames, durationSec, bitRate);
+        var seconds = RenderExportEstimate.EstimateSeconds(codec, res, frames, motionBlurSamples);
+        return $"   ~{RenderExportEstimate.FormatBytes(bytes)}, {RenderExportEstimate.FormatDuration(seconds)}";
+    }
+
+    // Warn when the target drive has less than 1 GB, or less than 2× the estimated output — renders can be huge.
+    private static void DrawDiskSpaceWarning(string directory, VideoExportCodec codec, Int2 res, int frames, double durationSec, long bitRate)
+    {
+        if (frames <= 0 || string.IsNullOrWhiteSpace(directory))
+            return;
+
+        try
+        {
+            var root = Path.GetPathRoot(Path.GetFullPath(directory));
+            if (string.IsNullOrEmpty(root))
+                return;
+
+            var free = new DriveInfo(root).AvailableFreeSpace;
+            var bytes = RenderExportEstimate.EstimateBytes(codec, res, frames, durationSec, bitRate);
+            if (free >= Math.Max(1_000_000_000L, 2 * bytes))
+                return;
+
+            FormInputs.AddVerticalSpace(5);
+            FormInputs.ApplyIndent();
+            Icon.Warning.DrawAtCursor(UiColors.StatusAttention);
+            ImGui.SameLine();
+            CustomComponents.StylizedText($"Low disk space — only {RenderExportEstimate.FormatBytes(free)} free.",
+                                          Fonts.FontSmall, UiColors.StatusAttention);
+        }
+        catch
+        {
+            // DriveInfo can throw for UNC / removed drives — a missing warning is harmless.
+        }
+    }
+
+    // Friendly dropdown labels — the raw enum names ("HapAlpha", "H264") read poorly.
+    private static string CodecDisplayName(VideoExportCodec codec) => codec switch
+                                                                          {
+                                                                              VideoExportCodec.H264 => "H.264",
+                                                                              VideoExportCodec.Hevc => "HEVC (H.265)",
+                                                                              VideoExportCodec.ProRes => "ProRes",
+                                                                              VideoExportCodec.VP9 => "VP9",
+                                                                              VideoExportCodec.AV1 => "AV1",
+                                                                              VideoExportCodec.FFV1 => "FFV1",
+                                                                              VideoExportCodec.Hap => "Hap",
+                                                                              VideoExportCodec.HapAlpha => "Hap Alpha",
+                                                                              VideoExportCodec.HapQ => "Hap Q",
+                                                                              _ => codec.ToString(),
+                                                                          };
+
+    // Bytes per pixel of the uncompressed DXT data each HAP variant produces (Snappy then compresses it a bit).
+    private static double HapBytesPerPixel(VideoExportCodec codec) => codec switch
+                                                                          {
+                                                                              VideoExportCodec.Hap => 0.5,      // DXT1 (RGB)
+                                                                              VideoExportCodec.HapAlpha => 1.0, // DXT5 (RGBA)
+                                                                              VideoExportCodec.HapQ => 1.0,     // scaled DXT5-YCoCg
+                                                                              _ => 0,
+                                                                          };
+
+    // Inline indicator under the codec dropdown: hardware-accelerated, in-process software, or (rarely) an
+    // encoder this FFmpeg build lacks. Keeps a constant footprint so switching codecs doesn't shift the layout.
+    private static void DrawCodecAvailabilityHint(VideoExportCodec codec)
+    {
+        var availability = VideoEncoderAvailabilityCache.Get(codec);
+        if (availability == null)
+        {
+            DrawInlineEncoderHint(Icon.Tip, UiColors.TextMuted, "Checking encoder…");
+            return;
+        }
+
+        switch (availability.Value.Kind)
+        {
+            case VideoEncoderKind.Hardware:
+                DrawInlineEncoderHint(Icon.Checkmark, UiColors.TextMuted, $"Hardware encoder ({availability.Value.EncoderName})");
+                break;
+            case VideoEncoderKind.Software:
+                DrawInlineEncoderHint(Icon.Checkmark, UiColors.TextMuted, "Software encoder");
+                break;
+            case VideoEncoderKind.Unavailable:
+            default:
+                DrawInlineEncoderHint(Icon.Warning, UiColors.StatusAttention, "This codec can't be encoded in this build.");
+                break;
+        }
+    }
+
+    private static void DrawInlineEncoderHint(Icon icon, Color color, string text)
+    {
+        FormInputs.AddVerticalSpace(5);
+        FormInputs.ApplyIndent();
+        icon.DrawAtCursor(color);
+        ImGui.SameLine();
+        CustomComponents.StylizedText(text, Fonts.FontSmall, color);
+    }
+
     private bool DrawVideoSettings()
     {
         var modified = false;
         var s = RenderSettings.Current;
 
-        // Bitrate in Mbps
-        var bitrateMbps = s.Bitrate / 1_000_000f;
-        var defaultBitrateMbps = RenderSettings.Defaults.Bitrate / 1_000_000f;
-        if (FormInputs.AddFloat("Bitrate", ref bitrateMbps, 0.1f, 500f, 0.5f, true, true,
-                                "Video bitrate in megabits per second.",
-                                defaultBitrateMbps))
+        // Codec / container — each option also shows a rough size/time estimate (e.g. "VP9   ~95 MB, ~30 min").
+        RenderProcess.TryGetRenderResolution(s, out var estRes);
+        var estFrames = RenderTiming.ComputeFrameCount(s);
+        var estDuration = Math.Max(0, RenderTiming.ReferenceTimeToSeconds(s.EndInBars, s.TimeReference, s.FrameRate)
+                                      - RenderTiming.ReferenceTimeToSeconds(s.StartInBars, s.TimeReference, s.FrameRate));
+        var estBitrate = (long)s.Bitrate;
+        var estSamples = s.OverrideMotionBlurSamples;
+
+        modified |= FormInputs.AddEnumDropdown(ref s.VideoCodec, "Codec",
+                                               "H.264 (.mp4): broadly compatible, hardware-accelerated.\n"
+                                               + "HEVC / H.265 (.mp4): more efficient than H.264; hardware-accelerated where available.\n"
+                                               + "ProRes (.mov): high-quality all-intra editing codec.\n"
+                                               + "VP9 / AV1 (.mp4): efficient delivery codecs; software-encoded (slower).\n"
+                                               + "FFV1 (.mkv): lossless archival (very large files).\n"
+                                               + "HAP / HAP Alpha / HAP Q (.mov): GPU-friendly intra codecs for realtime/VJ playback.",
+                                               RenderSettings.Defaults.VideoCodec,
+                                               codec => CodecDisplayName(codec)
+                                                        + DropdownEstimateSuffix(codec, estRes, estFrames, estDuration, estBitrate, estSamples));
+
+        DrawCodecAvailabilityHint(s.VideoCodec);
+
+        // Bitrate applies to the rate-controlled codecs only — ProRes (profile-based) and FFV1 (lossless) ignore it.
+        if (CodecUsesBitrate(s.VideoCodec))
         {
-            modified = true;
-            s.Bitrate = (int)(bitrateMbps * 1_000_000f);
+            var bitrateMbps = s.Bitrate / 1_000_000f;
+            var defaultBitrateMbps = RenderSettings.Defaults.Bitrate / 1_000_000f;
+            if (FormInputs.AddFloat("Bitrate", ref bitrateMbps, 0.1f, 500f, 0.5f, true, true,
+                                    "Video bitrate in megabits per second.",
+                                    defaultBitrateMbps))
+            {
+                modified = true;
+                s.Bitrate = (int)(bitrateMbps * 1_000_000f);
+            }
+
+            var startSec = RenderTiming.ReferenceTimeToSeconds(s.StartInBars, s.TimeReference, s.FrameRate);
+            var endSec = RenderTiming.ReferenceTimeToSeconds(s.EndInBars, s.TimeReference, s.FrameRate);
+            var duration = Math.Max(0, endSec - startSec);
+
+            RenderProcess.TryGetRenderResolution(s, out var resolution);
+            var totalPixels = (long)resolution.Width * resolution.Height;
+            bool isValidSize = totalPixels > 0 && s.FrameRate > 0;
+            double bitsPerPixel = isValidSize
+                                      ? s.Bitrate / (double)totalPixels / s.FrameRate
+                                      : 0;
+
+            var matchingQuality = GetQualityLevelFromRate((float)bitsPerPixel);
+            FormInputs.AddHint($"{matchingQuality.Title} quality (Est. {s.Bitrate * duration / 1024 / 1024 / 8:0.#} MB)");
+            CustomComponents.TooltipForLastItem(matchingQuality.Description);
         }
-
-        var startSec = RenderTiming.ReferenceTimeToSeconds(s.StartInBars, s.TimeReference, s.FrameRate);
-        var endSec = RenderTiming.ReferenceTimeToSeconds(s.EndInBars, s.TimeReference, s.FrameRate);
-        var duration = Math.Max(0, endSec - startSec);
-
-        RenderProcess.TryGetRenderResolution(s, out var resolution);
-        var totalPixels = (long)resolution.Width * resolution.Height;
-        bool isValidSize = totalPixels > 0 && s.FrameRate > 0;
-        double bitsPerPixel = isValidSize
-                                  ? s.Bitrate / (double)totalPixels / s.FrameRate
-                                  : 0;
-
-        var matchingQuality = GetQualityLevelFromRate((float)bitsPerPixel);
-        FormInputs.AddHint($"{matchingQuality.Title} quality (Est. {s.Bitrate * duration / 1024 / 1024 / 8:0.#} MB)");
-        CustomComponents.TooltipForLastItem(matchingQuality.Description);
+        else if (IsHapCodec(s.VideoCodec))
+        {
+            // HAP is a fixed-ratio DXT codec, so its size is predictable from pixels × frames (Snappy then
+            // shaves a little). Use the ×4-rounded dimensions the encoder actually writes.
+            RenderProcess.TryGetRenderResolution(s, out var hapResolution);
+            var (hapW, hapH) = s.VideoCodec.RoundToEncoderBlock(hapResolution.Width, hapResolution.Height);
+            var hapFrameCount = RenderTiming.ComputeFrameCount(s);
+            var hapMb = HapBytesPerPixel(s.VideoCodec) * hapW * hapH * hapFrameCount / 1024 / 1024;
+            var hapSize = hapMb >= 1024 ? $"{hapMb / 1024:0.##} GB" : $"{hapMb:0.#} MB";
+            FormInputs.AddHint($"Est. {hapSize} ({hapW}×{hapH}, DXT before Snappy)");
+        }
 
         // Path
         var currentPath = s.VideoFilePath ?? "./Render/render-v01.mp4";
@@ -221,8 +365,21 @@ internal sealed class RenderWindow : Window
             foreach (var c in Path.GetInvalidFileNameChars()) filename = filename.Replace(c, '_');
         }
 
-        if (!filename.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase)) filename += ".mp4";
+        // Keep the filename's extension in sync with the chosen codec's container.
+        var videoExtension = s.VideoCodec.GetFileExtension();
+        if (filename.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase)
+            || filename.EndsWith(".mov", StringComparison.OrdinalIgnoreCase)
+            || filename.EndsWith(".mkv", StringComparison.OrdinalIgnoreCase))
+        {
+            filename = filename[..^4];
+        }
+
+        if (!filename.EndsWith(videoExtension, StringComparison.OrdinalIgnoreCase))
+            filename += videoExtension;
+
         s.VideoFilePath = Path.Combine(directory, filename);
+
+        DrawDiskSpaceWarning(directory, s.VideoCodec, estRes, estFrames, estDuration, s.Bitrate);
 
         modified |= FormInputs.AddCheckBox("Auto-increment version", ref s.AutoIncrementVersionNumber, null, RenderSettings.Defaults.AutoIncrementVersionNumber);
         if (s.AutoIncrementVersionNumber)
@@ -302,16 +459,30 @@ internal sealed class RenderWindow : Window
 
         var outputPath = RenderPaths.GetExpectedTargetDisplayPath(settings.RenderMode);
         string format = settings.RenderMode == RenderSettings.RenderModes.Video
-                            ? "MP4 Video"
+                            ? $"{settings.VideoCodec} Video"
                             : $"{settings.FileFormat} Sequence";
 
         RenderProcess.TryGetRenderResolution(settings, out var resolution);
+
+        // HAP crops to a multiple of 4 — show the dimensions actually written, not the raw render size.
+        if (settings.RenderMode == RenderSettings.RenderModes.Video)
+        {
+            var (w, h) = settings.VideoCodec.RoundToEncoderBlock(resolution.Width, resolution.Height);
+            resolution = new Int2(w, h);
+        }
 
         ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
         ImGui.TextUnformatted($"{format} - {resolution.Width}×{resolution.Height} @ {settings.FrameRate:0}fps");
 
         var frameCount = RenderTiming.ComputeFrameCount(settings);
         ImGui.TextUnformatted($"{duration / 60:0}:{duration % 60:00.0}s ({frameCount} frames)");
+
+        if (settings.RenderMode == RenderSettings.RenderModes.Video)
+        {
+            var bytes = RenderExportEstimate.EstimateBytes(settings.VideoCodec, resolution, frameCount, duration, settings.Bitrate);
+            var renderSecs = RenderExportEstimate.EstimateSeconds(settings.VideoCodec, resolution, frameCount, settings.OverrideMotionBlurSamples);
+            ImGui.TextUnformatted($"~{RenderExportEstimate.FormatBytes(bytes)}  ·  {RenderExportEstimate.FormatDuration(renderSecs)} to render");
+        }
 
         ImGui.PushFont(Fonts.FontSmall);
         ImGui.TextUnformatted("Export to:");
@@ -415,6 +586,16 @@ internal sealed class RenderWindow : Window
             if (string.IsNullOrWhiteSpace(filename) || filename == ".")
             {
                 errorMessage = "Filename cannot be empty.";
+                return false;
+            }
+
+            // Block a codec this FFmpeg build genuinely has no encoder for, so export doesn't silently fall
+            // back to another codec. (Rare — the bundled build covers every dropdown codec; H.264 always has a
+            // path: hardware, OpenH264, or MPEG-4.)
+            var codec = RenderSettings.Current.VideoCodec;
+            if (VideoEncoderAvailabilityCache.Get(codec) is { Kind: VideoEncoderKind.Unavailable })
+            {
+                errorMessage = $"The {codec} encoder isn't available in this FFmpeg build.";
                 return false;
             }
         }

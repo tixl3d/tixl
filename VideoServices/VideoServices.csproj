@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="$(SolutionDir)/Tixl.props" />
+  <PropertyGroup>
+    <TargetFramework>$(TixlNetFrameworkVersion)</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <RootNamespace>T3.VideoServices</RootNamespace>
+    <Configurations>Debug;Release</Configurations>
+    <Platforms>AnyCPU</Platforms>
+    <Deterministic>true</Deterministic>
+    <NoWarn>$(NoWarn);NU1900;NU1701</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="VideoServices.Tests" />
+  </ItemGroup>
+
+  <!-- Managed LGPL bindings only. The native LGPL DLLs are delivered (and shipped) via the
+       Sdcb.FFmpeg.runtime package referenced by the consuming operator package (Lib) and the test host. -->
+  <ItemGroup>
+    <PackageReference Include="Sdcb.FFmpeg" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Core\Core.csproj" />
+    <ProjectReference Include="..\Logging\Logging.csproj" />
+  </ItemGroup>
+
+</Project>

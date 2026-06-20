@@ -5,6 +5,7 @@ using ImGuiNET;
 using T3.Core.DataTypes;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
+using T3.Core.Video;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.OutputUi;
@@ -327,42 +328,18 @@ internal sealed class OutputWindow : Window
 
 
 
-            if (RenderProcess.IsContinuousScreenshotActive)
-            {
-                // Pulse in sync with the captures so the active mode is obvious; click anywhere on the icon to stop.
-                if (CustomComponents.IconButton(Icon.Snapshot, Vector2.Zero, UiColors.StatusAttention.Fade(RenderProcess.ContinuousScreenshotOpacity)))
-                {
-                    RenderProcess.SetContinuousScreenshot(false);
-                }
+            var screenshotState = !RenderProcess.IsExporting && RenderProcess.MainOutputType != null
+                                      ? CustomComponents.ButtonStates.Emphasized
+                                      : CustomComponents.ButtonStates.Disabled;
 
-                CustomComponents.TooltipForLastItem("Stop continuous screenshots",
-                                                    $"Saving a screenshot every {UserSettings.Config.ContinuousScreenshotDelay:0.#}s. Click to stop.");
+            if (CustomComponents.IconButton(Icon.Snapshot, Vector2.Zero, screenshotState))
+            {
+                RenderProcess.TryRenderScreenShot();
             }
-            else
-            {
-                var screenshotState = !RenderProcess.IsExporting && RenderProcess.MainOutputType != null
-                                          ? CustomComponents.ButtonStates.Emphasized
-                                          : CustomComponents.ButtonStates.Disabled;
 
-                if (CustomComponents.IconButton(Icon.Snapshot, Vector2.Zero, screenshotState))
-                {
-                    if (ImGui.GetIO().KeyCtrl)
-                    {
-                        RenderProcess.SetContinuousScreenshot(true);
-                    }
-                    else
-                    {
-                        RenderProcess.TryRenderScreenShot();
-                    }
-                }
-
+            if(ImGui.IsAnyItemHovered())
                 CustomComponents.TooltipForLastItem("Save screenshot",
-                                                    UserActions.RenderScreenshot.ListKeyboardShortcutsForActionWithLabel()
-                                                    + "\nCtrl+click to capture continuously."
-                                                    + "\nRight-click for options.");
-            }
-
-            DrawScreenshotContextMenu();
+                                                    UserActions.RenderScreenshot.ListKeyboardShortcutsForActionWithLabel());
 
             ImGui.SameLine();
 
@@ -384,8 +361,12 @@ internal sealed class OutputWindow : Window
                 }
             }
 
-            if(ImGui.IsAnyItemHovered())
-                CustomComponents.TooltipForLastItem("Render Animation", UserActions.RenderAnimation.ListKeyboardShortcutsForActionWithLabel());
+            if (ImGui.IsAnyItemHovered())
+            {
+                CustomComponents.TooltipForLastItem("Render Animation",
+                                                    BuildRenderSummaryTooltip()
+                                                    + UserActions.RenderAnimation.ListKeyboardShortcutsForActionWithLabel());
+            }
 
             ImGui.SameLine();
             if (CustomComponents.IconButton(Icon.Settings2, Vector2.Zero))
@@ -398,58 +379,28 @@ internal sealed class OutputWindow : Window
         ImGui.EndChild();
     }
 
-    /// <summary>Right-click options for the screenshot icon: continuous-capture interval and file format.</summary>
-    private static void DrawScreenshotContextMenu()
+    // Render-icon tooltip: duration, resolution, format, and rough size / render-time estimates.
+    private static string BuildRenderSummaryTooltip()
     {
-        // Static method group (not a lambda) so no closure is allocated per frame.
-        CustomComponents.ContextMenuForItem(DrawScreenshotMenuItems, "Screenshot options", "##screenshotOptions");
+        var s = RenderSettings.Current;
+        if (!RenderProcess.TryGetRenderResolution(s, out var res))
+            return string.Empty;
+
+        var frames = RenderTiming.ComputeFrameCount(s);
+        var dur = System.Math.Max(0, RenderTiming.ReferenceTimeToSeconds(s.EndInBars, s.TimeReference, s.FrameRate)
+                                     - RenderTiming.ReferenceTimeToSeconds(s.StartInBars, s.TimeReference, s.FrameRate));
+
+        if (s.RenderMode == RenderSettings.RenderModes.Video)
+        {
+            var (w, h) = s.VideoCodec.RoundToEncoderBlock(res.Width, res.Height);
+            var bytes = RenderExportEstimate.EstimateBytes(s.VideoCodec, res, frames, dur, s.Bitrate);
+            var renderSecs = RenderExportEstimate.EstimateSeconds(s.VideoCodec, res, frames, s.OverrideMotionBlurSamples);
+            return $"{dur / 60:0}:{dur % 60:00}s · {w}×{h} · {s.VideoCodec}\n"
+                   + $"~{RenderExportEstimate.FormatBytes(bytes)} · {RenderExportEstimate.FormatDuration(renderSecs)} to render\n";
+        }
+
+        return $"{dur / 60:0}:{dur % 60:00}s · {res.Width}×{res.Height} · {s.FileFormat} sequence ({frames} frames)\n";
     }
-
-    private static void DrawScreenshotMenuItems()
-    {
-        var continuous = RenderProcess.IsContinuousScreenshotActive;
-        if (CustomComponents.DrawMenuItem(0, continuous ? "Stop continuous screenshots" : "Start continuous screenshots",
-                                          reserveIconColumn: false))
-            RenderProcess.SetContinuousScreenshot(!continuous);
-
-        CustomComponents.DrawMenuGroupLabel("Capture every");
-        for (var i = 0; i < _screenshotIntervals.Length; i++)
-        {
-            var preset = _screenshotIntervals[i];
-            var isCurrent = Math.Abs(UserSettings.Config.ContinuousScreenshotDelay - preset.Seconds) < 0.01f;
-            if (CustomComponents.DrawMenuItem(10 + i, preset.Label, isChecked: isCurrent, reserveIconColumn: false))
-            {
-                UserSettings.Config.ContinuousScreenshotDelay = preset.Seconds;
-                UserSettings.Save();
-            }
-        }
-
-        CustomComponents.DrawMenuGroupLabel("File format");
-        if (CustomComponents.DrawMenuItem(20, "PNG (lossless)", reserveIconColumn: false,
-                                          isChecked: UserSettings.Config.ScreenshotFileFormat == ScreenshotWriter.FileFormats.Png))
-        {
-            UserSettings.Config.ScreenshotFileFormat = ScreenshotWriter.FileFormats.Png;
-            UserSettings.Save();
-        }
-
-        if (CustomComponents.DrawMenuItem(21, "JPG (smaller)", reserveIconColumn: false,
-                                          isChecked: UserSettings.Config.ScreenshotFileFormat == ScreenshotWriter.FileFormats.Jpg))
-        {
-            UserSettings.Config.ScreenshotFileFormat = ScreenshotWriter.FileFormats.Jpg;
-            UserSettings.Save();
-        }
-    }
-
-    private static readonly (string Label, float Seconds)[] _screenshotIntervals =
-        [
-            ("1 second", 1),
-            ("5 seconds", 5),
-            ("10 seconds", 10),
-            ("30 seconds", 30),
-            ("1 minute", 60),
-            ("5 minutes", 300),
-            ("10 minutes", 600),
-        ];
 
     private static void DrawRenderProgressBar()
     {

@@ -121,6 +121,28 @@ public sealed partial class AssemblyInformation
             Log.Debug($"{Name}: Assembly information initialized");
     }
 
+    /// <summary>
+    /// Runs this assembly's module initializer(s) if it is loaded — used to eagerly fire a package's
+    /// <c>[ModuleInitializer]</c> (e.g. cross-load-context service registration) without instantiating any of
+    /// its operators. No-op when the assembly isn't loaded or has no module initializer; idempotent (the CLR
+    /// runs a module's initializer at most once).
+    /// </summary>
+    public void RunModuleInitializers()
+    {
+        var assembly = _loadContext?.Root?.Assembly;
+        if (assembly == null)
+            return;
+
+        try
+        {
+            System.Runtime.CompilerServices.RuntimeHelpers.RunModuleConstructor(assembly.ManifestModule.ModuleHandle);
+        }
+        catch (Exception e)
+        {
+            Log.Warning($"{Name}: module initializer failed - {e.Message}");
+        }
+    }
+
 
     /// <summary>
     /// The entry point for loading the assembly and extracting information about the types within it - particularly the operators.
