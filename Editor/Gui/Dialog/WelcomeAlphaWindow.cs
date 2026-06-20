@@ -154,7 +154,7 @@ internal sealed class WelcomeAlphaWindow : WindowBase
                             _                  => string.Empty,
                         };
 
-        NavigationSidebar.BeginContentPanel(title);
+        NavigationSidebar.BeginContentPanel(title, this);
 
         switch (_activeTab)
         {

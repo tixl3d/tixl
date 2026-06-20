@@ -168,6 +168,8 @@ internal sealed class SymbolLibrary : Window
             }
         }
         ImGui.PopStyleColor();
+
+        CustomComponents.HandleDragScrolling(this);
         ImGui.EndChild();
     }
 
@@ -224,6 +226,8 @@ internal sealed class SymbolLibrary : Window
                     }
                 }
             }
+
+            CustomComponents.HandleDragScrolling(this);
             ImGui.EndChild();
         }
     }

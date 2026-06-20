@@ -166,6 +166,7 @@ internal sealed class ConsoleLogWindow : Window, ILogWriter
 
         ImGui.Dummy(Vector2.One);
 
+        CustomComponents.HandleDragScrolling(this);
         ImGui.EndChild();
     }
 

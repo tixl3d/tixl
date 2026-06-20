@@ -65,7 +65,7 @@ internal sealed class RenderWindow : Window
             }
             NavigationSidebar.EndColumn();
 
-            NavigationSidebar.BeginContentPanel(SectionTitle(_uiState.ActiveSection));
+            NavigationSidebar.BeginContentPanel(SectionTitle(_uiState.ActiveSection), this);
             {
                 FormInputs.SetIndentToParameters();
                 switch (_uiState.ActiveSection)

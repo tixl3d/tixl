@@ -67,7 +67,7 @@ internal sealed partial class SettingsWindow : Window
         }
         NavigationSidebar.EndColumn();
 
-        NavigationSidebar.BeginContentPanel(CategoryTitle(_activeCategory));
+        NavigationSidebar.BeginContentPanel(CategoryTitle(_activeCategory), this);
         {
             FormInputs.SetIndentToParameters();
             switch (_activeCategory)

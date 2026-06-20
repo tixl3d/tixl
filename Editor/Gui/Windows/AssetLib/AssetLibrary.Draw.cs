@@ -66,6 +66,8 @@ internal sealed partial class AssetLibrary
             DrawFolder(_state.RootFolder);
             ImGui.PopStyleVar(3);
         }
+
+        CustomComponents.HandleDragScrolling(this);
         ImGui.EndChild();
     }
 

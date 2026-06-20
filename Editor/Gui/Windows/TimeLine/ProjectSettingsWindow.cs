@@ -145,7 +145,7 @@ internal sealed class ProjectSettingsWindow : Window
         }
         NavigationSidebar.EndColumn();
 
-        NavigationSidebar.BeginContentPanel(PanelTitle(_activeCategory));
+        NavigationSidebar.BeginContentPanel(PanelTitle(_activeCategory), this);
         {
             FormInputs.SetIndentToParameters();
             var modified = false;

@@ -98,8 +98,14 @@ internal static class NavigationSidebar
     /// Begins the content panel to the right of the sidebar: a rounded <see cref="UiColors.WindowBackground"/>
     /// surface with a margin to the window border, inner padding, and a muted section header.
     /// </summary>
-    internal static void BeginContentPanel(string title)
+    // Carries the per-window key from BeginContentPanel to EndContentPanel so the drag-scroll state stays
+    // distinct when several sidebar windows are open at once. Begin/End are paired and drawn sequentially.
+    private static object? _contentPanelScrollKey;
+
+    internal static void BeginContentPanel(string title, object? scrollKey = null)
     {
+        _contentPanelScrollKey = scrollKey;
+
         var scale = T3Ui.UiScaleFactor;
         var margin = 3 * scale;
 
@@ -125,6 +131,12 @@ internal static class NavigationSidebar
 
     internal static void EndContentPanel()
     {
+        if (_contentPanelScrollKey != null)
+        {
+            CustomComponents.HandleDragScrolling(_contentPanelScrollKey);
+            _contentPanelScrollKey = null;
+        }
+
         ImGui.EndChild();
         ImGui.PopStyleVar(2);
         ImGui.PopStyleColor();

@@ -433,6 +433,8 @@ internal sealed class ParameterWindow : Window
             _viewMode = ViewModes.Help;
 
         OperatorHelp.DocumentationRenderer.DrawLinksAndExamples(symbolUi);
+
+        CustomComponents.HandleDragScrolling(this);
         ImGui.EndChild();
         ImGui.PopStyleVar();
     }
