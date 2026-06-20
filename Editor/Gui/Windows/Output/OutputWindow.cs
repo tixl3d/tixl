@@ -5,6 +5,7 @@ using ImGuiNET;
 using T3.Core.DataTypes;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
+using T3.Core.Video;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Interaction.Keyboard;
 using T3.Editor.Gui.OutputUi;
@@ -360,8 +361,12 @@ internal sealed class OutputWindow : Window
                 }
             }
 
-            if(ImGui.IsAnyItemHovered())
-                CustomComponents.TooltipForLastItem("Render Animation", UserActions.RenderAnimation.ListKeyboardShortcutsForActionWithLabel());
+            if (ImGui.IsAnyItemHovered())
+            {
+                CustomComponents.TooltipForLastItem("Render Animation",
+                                                    BuildRenderSummaryTooltip()
+                                                    + UserActions.RenderAnimation.ListKeyboardShortcutsForActionWithLabel());
+            }
 
             ImGui.SameLine();
             if (CustomComponents.IconButton(Icon.Settings2, Vector2.Zero))
@@ -372,6 +377,29 @@ internal sealed class OutputWindow : Window
 
         CustomComponents.PopToolbarIconBackground();
         ImGui.EndChild();
+    }
+
+    // Render-icon tooltip: duration, resolution, format, and rough size / render-time estimates.
+    private static string BuildRenderSummaryTooltip()
+    {
+        var s = RenderSettings.Current;
+        if (!RenderProcess.TryGetRenderResolution(s, out var res))
+            return string.Empty;
+
+        var frames = RenderTiming.ComputeFrameCount(s);
+        var dur = System.Math.Max(0, RenderTiming.ReferenceTimeToSeconds(s.EndInBars, s.TimeReference, s.FrameRate)
+                                     - RenderTiming.ReferenceTimeToSeconds(s.StartInBars, s.TimeReference, s.FrameRate));
+
+        if (s.RenderMode == RenderSettings.RenderModes.Video)
+        {
+            var (w, h) = s.VideoCodec.RoundToEncoderBlock(res.Width, res.Height);
+            var bytes = RenderExportEstimate.EstimateBytes(s.VideoCodec, res, frames, dur, s.Bitrate);
+            var renderSecs = RenderExportEstimate.EstimateSeconds(s.VideoCodec, res, frames, s.OverrideMotionBlurSamples);
+            return $"{dur / 60:0}:{dur % 60:00}s · {w}×{h} · {s.VideoCodec}\n"
+                   + $"~{RenderExportEstimate.FormatBytes(bytes)} · {RenderExportEstimate.FormatDuration(renderSecs)} to render\n";
+        }
+
+        return $"{dur / 60:0}:{dur % 60:00}s · {res.Width}×{res.Height} · {s.FileFormat} sequence ({frames} frames)\n";
     }
 
     private static void DrawRenderProgressBar()

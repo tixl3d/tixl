@@ -5,10 +5,10 @@ landed: FFmpeg **decode** (M1), **encode**, the **`Video` operator package** ext
 zero-copy** decode are all done and **archived** under [`archive/`](archive/). This collects what they each
 deferred so the loose ends live in one place instead of five "done-but-not-quite" plans.
 
-**Not here (still their own plans — real unstarted features, not loose ends):**
-[`Plan_VideoAudio.md`](Plan_VideoAudio.md) (video audio → BASS) and
+**Not here (still their own plans — real features / milestones, not loose ends):**
+[`Plan_VideoAudio.md`](Plan_VideoAudio.md) (video audio → BASS),
 [`Plan_VideoProxyMedia.md`](Plan_VideoProxyMedia.md) (background proxy transcode — now unblocked, since it
-reuses the finished encoder).
+reuses the finished encoder), and [`Plan_VideoHdrExport.md`](Plan_VideoHdrExport.md) (HDR / PQ / 10-bit export).
 
 **Not yet reviewed** (out of this pass; flag for a later consolidation): `Plan_VideoClipPlayer.md` (many-clip
 decode pool, referenced by the decode plan's M2) and `Plan_VideoDeviceInput.md`.
@@ -33,6 +33,8 @@ AV1, FFV1, HAP ×3). Deferred polish:
       hand the bytes to a background encoder queue. Larger change; would also make the progress UI responsive.
 - [ ] **HEVC `hvc1` stream tag** — software-HEVC-in-MP4 may not preview in Windows Explorer / QuickTime
       without it (plays fine in `[PlayVideo]`/VLC). Set the stream `codec_tag` in `VideoFileEncoder`.
+- **HDR export (PQ/HLG, 10-bit)** → moved to its own plan: [`Plan_VideoHdrExport.md`](Plan_VideoHdrExport.md).
+      (Not a loose end — the float→PQ transfer is real design work.)
 - [ ] **DNxHR codec** — needs a profile + pixel-format knob (the encoder already carries `EncoderPixelFormat`).
 - [ ] **Animated GIF** — needs a `palettegen`/`paletteuse` two-pass (frame buffering) for acceptable quality;
       single-pass looks poor. Deferred deliberately.

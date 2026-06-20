@@ -185,6 +185,47 @@ internal sealed class RenderWindow : Window
     private static bool IsHapCodec(VideoExportCodec codec)
         => codec is VideoExportCodec.Hap or VideoExportCodec.HapAlpha or VideoExportCodec.HapQ;
 
+    // Muted "~95 MB, ~30 min" appended to each codec dropdown item (rough estimate; empty when not yet renderable).
+    private static string DropdownEstimateSuffix(VideoExportCodec codec, Int2 res, int frames, double durationSec, long bitRate, int motionBlurSamples)
+    {
+        if (frames <= 0 || res.Width <= 0)
+            return string.Empty;
+
+        var bytes = RenderExportEstimate.EstimateBytes(codec, res, frames, durationSec, bitRate);
+        var seconds = RenderExportEstimate.EstimateSeconds(codec, res, frames, motionBlurSamples);
+        return $"   ~{RenderExportEstimate.FormatBytes(bytes)}, {RenderExportEstimate.FormatDuration(seconds)}";
+    }
+
+    // Warn when the target drive has less than 1 GB, or less than 2× the estimated output — renders can be huge.
+    private static void DrawDiskSpaceWarning(string directory, VideoExportCodec codec, Int2 res, int frames, double durationSec, long bitRate)
+    {
+        if (frames <= 0 || string.IsNullOrWhiteSpace(directory))
+            return;
+
+        try
+        {
+            var root = Path.GetPathRoot(Path.GetFullPath(directory));
+            if (string.IsNullOrEmpty(root))
+                return;
+
+            var free = new DriveInfo(root).AvailableFreeSpace;
+            var bytes = RenderExportEstimate.EstimateBytes(codec, res, frames, durationSec, bitRate);
+            if (free >= Math.Max(1_000_000_000L, 2 * bytes))
+                return;
+
+            FormInputs.AddVerticalSpace(5);
+            FormInputs.ApplyIndent();
+            Icon.Warning.DrawAtCursor(UiColors.StatusAttention);
+            ImGui.SameLine();
+            CustomComponents.StylizedText($"Low disk space — only {RenderExportEstimate.FormatBytes(free)} free.",
+                                          Fonts.FontSmall, UiColors.StatusAttention);
+        }
+        catch
+        {
+            // DriveInfo can throw for UNC / removed drives — a missing warning is harmless.
+        }
+    }
+
     // Friendly dropdown labels — the raw enum names ("HapAlpha", "H264") read poorly.
     private static string CodecDisplayName(VideoExportCodec codec) => codec switch
                                                                           {
@@ -249,7 +290,14 @@ internal sealed class RenderWindow : Window
         var modified = false;
         var s = RenderSettings.Current;
 
-        // Codec / container
+        // Codec / container — each option also shows a rough size/time estimate (e.g. "VP9   ~95 MB, ~30 min").
+        RenderProcess.TryGetRenderResolution(s, out var estRes);
+        var estFrames = RenderTiming.ComputeFrameCount(s);
+        var estDuration = Math.Max(0, RenderTiming.ReferenceTimeToSeconds(s.EndInBars, s.TimeReference, s.FrameRate)
+                                      - RenderTiming.ReferenceTimeToSeconds(s.StartInBars, s.TimeReference, s.FrameRate));
+        var estBitrate = (long)s.Bitrate;
+        var estSamples = s.OverrideMotionBlurSamples;
+
         modified |= FormInputs.AddEnumDropdown(ref s.VideoCodec, "Codec",
                                                "H.264 (.mp4): broadly compatible, hardware-accelerated.\n"
                                                + "HEVC / H.265 (.mp4): more efficient than H.264; hardware-accelerated where available.\n"
@@ -258,7 +306,8 @@ internal sealed class RenderWindow : Window
                                                + "FFV1 (.mkv): lossless archival (very large files).\n"
                                                + "HAP / HAP Alpha / HAP Q (.mov): GPU-friendly intra codecs for realtime/VJ playback.",
                                                RenderSettings.Defaults.VideoCodec,
-                                               CodecDisplayName);
+                                               codec => CodecDisplayName(codec)
+                                                        + DropdownEstimateSuffix(codec, estRes, estFrames, estDuration, estBitrate, estSamples));
 
         DrawCodecAvailabilityHint(s.VideoCodec);
 
@@ -329,6 +378,8 @@ internal sealed class RenderWindow : Window
             filename += videoExtension;
 
         s.VideoFilePath = Path.Combine(directory, filename);
+
+        DrawDiskSpaceWarning(directory, s.VideoCodec, estRes, estFrames, estDuration, s.Bitrate);
 
         modified |= FormInputs.AddCheckBox("Auto-increment version", ref s.AutoIncrementVersionNumber, null, RenderSettings.Defaults.AutoIncrementVersionNumber);
         if (s.AutoIncrementVersionNumber)
@@ -425,6 +476,13 @@ internal sealed class RenderWindow : Window
 
         var frameCount = RenderTiming.ComputeFrameCount(settings);
         ImGui.TextUnformatted($"{duration / 60:0}:{duration % 60:00.0}s ({frameCount} frames)");
+
+        if (settings.RenderMode == RenderSettings.RenderModes.Video)
+        {
+            var bytes = RenderExportEstimate.EstimateBytes(settings.VideoCodec, resolution, frameCount, duration, settings.Bitrate);
+            var renderSecs = RenderExportEstimate.EstimateSeconds(settings.VideoCodec, resolution, frameCount, settings.OverrideMotionBlurSamples);
+            ImGui.TextUnformatted($"~{RenderExportEstimate.FormatBytes(bytes)}  ·  {RenderExportEstimate.FormatDuration(renderSecs)} to render");
+        }
 
         ImGui.PushFont(Fonts.FontSmall);
         ImGui.TextUnformatted("Export to:");
