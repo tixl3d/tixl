@@ -1,4 +1,5 @@
 #nullable enable
+using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using ImGuiNET;
@@ -7,7 +8,10 @@ using ManagedBass.Wasapi;
 using T3.Core.Animation;
 using T3.Core.Audio;
 using T3.Core.IO;
+using T3.Core.Logging;
+using T3.Core.Model;
 using T3.Core.Operator;
+using T3.Core.Resource;
 using T3.Core.Settings;
 using T3.Core.Video;
 using T3.Editor.Gui.Audio;
@@ -15,6 +19,7 @@ using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Interaction.Timing;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Gui.Windows.RenderExport;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.InputsAndTypes;
 using T3.Editor.UiModel.ProjectHandling;
@@ -160,7 +165,7 @@ internal sealed class ProjectSettingsWindow : Window
                     modified |= DrawAudioSettings(settings);
                     break;
                 case Categories.Proxies:
-                    modified |= DrawProxySettings(settings);
+                    modified |= DrawProxySettings(composition, settings);
                     break;
                 case Categories.Recording:
                     modified |= DrawRecordingSettings(composition);
@@ -226,7 +231,7 @@ internal sealed class ProjectSettingsWindow : Window
         return modified;
     }
 
-    private static bool DrawProxySettings(CompositionSettings settings)
+    private static bool DrawProxySettings(Instance composition, CompositionSettings settings)
     {
         var modified = false;
         var proxy = settings.Proxy;
@@ -253,7 +258,200 @@ internal sealed class ProjectSettingsWindow : Window
             "Proxy size as a fraction of the source resolution (0.5 = half-size). Smaller seeks faster and uses less disk.",
             defaults.Resolution);
 
+        // Per-machine guard (not project data) — saved to UserSettings directly so it doesn't dirty the symbol.
+        if (FormInputs.AddFloat("Min. free disk (GB)",
+                ref UserSettings.Config.ProxyMinFreeDiskGb, 0f, 500f, 1f, true, true,
+                "Generation is blocked when the source's drive has less than this much free space. Per-machine, not part of the project.",
+                UserSettings.Defaults.ProxyMinFreeDiskGb))
+        {
+            UserSettings.Save();
+        }
+
+        DrawActiveProxyJobs();
+        DrawProxyStorage(composition);
+
         return modified;
+    }
+
+    // Generated proxies pile up next to their sources; surface how much disk they use and offer a one-click cleanup.
+    // The directory scan is cached and only re-runs when the file watcher reports a change (a proxy was written or
+    // deleted) or the active project changed — so the panel stays allocation-free per frame.
+    private static void DrawProxyStorage(Instance composition)
+    {
+        var projectFolder = composition.Symbol.SymbolPackage.AssetsFolder;
+        EnsureProxyScan(projectFolder);
+
+        FormInputs.AddVerticalSpace();
+        FormInputs.AddSectionSubHeader("Storage");
+
+        DrawStorageRow(_thisProjectProxyLabel, _thisProjectProxyTooltip, _thisProjectProxyFiles, "##deleteThisProjectProxies");
+        DrawStorageRow(_allProjectsProxyLabel, _allProjectsProxyTooltip, _allProjectsProxyFiles, "##deleteAllProxies");
+    }
+
+    private static void DrawStorageRow(string label, string fileBreakdown, List<string> files, string popupId)
+    {
+        ImGui.PushFont(Fonts.FontSmall);
+        ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
+        ImGui.TextUnformatted(label);
+        ImGui.PopStyleColor();
+        ImGui.PopFont();
+
+        if (files.Count == 0)
+            return;
+
+        FormInputs.AppendTooltip(fileBreakdown); // (i) marker on the same line, hover lists the files
+        FormInputs.AddVerticalSpace(2);
+
+        if (ImGui.SmallButton($"Delete{popupId}"))
+            ImGui.OpenPopup(popupId);
+
+        if (ImGui.BeginPopup(popupId))
+        {
+            ImGui.TextUnformatted($"Delete {files.Count} proxy file(s)? Sources are untouched and proxies can be regenerated.");
+            ImGui.PushStyleColor(ImGuiCol.Text, UiColors.StatusAttention.Rgba);
+            if (ImGui.Button($"Delete{popupId}confirm"))
+            {
+                DeleteProxyFiles(files);
+                ImGui.CloseCurrentPopup();
+            }
+
+            ImGui.PopStyleColor();
+            ImGui.SameLine();
+            if (ImGui.Button($"Cancel{popupId}"))
+                ImGui.CloseCurrentPopup();
+
+            ImGui.EndPopup();
+        }
+    }
+
+    private static void DeleteProxyFiles(List<string> files)
+    {
+        int deleted = 0, failed = 0;
+        foreach (var file in files)
+        {
+            try
+            {
+                File.Delete(file);
+                deleted++;
+            }
+            catch (Exception e)
+            {
+                failed++;
+                Log.Warning($"Couldn't delete proxy '{file}': {e.Message}");
+            }
+        }
+
+        var inUseHint = failed > 0 ? $" {failed} could not be removed (in use? stop playback and retry)." : string.Empty;
+        Log.Info($"Deleted {deleted} proxy file(s).{inUseHint}");
+        _proxyScanWatcherState = -1; // force a rescan on the next draw
+    }
+
+    // Walks every writable project's asset folder for proxy files, caching totals + paths until the next change.
+    private static void EnsureProxyScan(string currentProjectFolder)
+    {
+        var watcherState = ResourceFileWatcher.FileStateChangeCounter;
+        if (watcherState == _proxyScanWatcherState && currentProjectFolder == _scannedProjectFolder)
+            return;
+
+        _proxyScanWatcherState = watcherState;
+        _scannedProjectFolder = currentProjectFolder;
+        _thisProjectProxyFiles.Clear();
+        _allProjectsProxyFiles.Clear();
+        long thisBytes = 0, allBytes = 0;
+
+        foreach (var package in SymbolPackage.AllPackages)
+        {
+            if (package.IsReadOnly) // shipped/read-only packages never hold user-generated proxies
+                continue;
+
+            var folder = package.AssetsFolder;
+            if (string.IsNullOrEmpty(folder) || !Directory.Exists(folder))
+                continue;
+
+            var isCurrent = string.Equals(folder, currentProjectFolder, StringComparison.OrdinalIgnoreCase);
+            try
+            {
+                foreach (var file in Directory.EnumerateFiles(folder, "*.mov", SearchOption.AllDirectories))
+                {
+                    if (!file.EndsWith(VideoPlayback.ProxySuffix, StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    long size;
+                    try
+                    {
+                        size = new FileInfo(file).Length;
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+
+                    _allProjectsProxyFiles.Add(file);
+                    allBytes += size;
+                    if (isCurrent)
+                    {
+                        _thisProjectProxyFiles.Add(file);
+                        thisBytes += size;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Warning($"Couldn't scan proxies in '{folder}': {e.Message}");
+            }
+        }
+
+        _thisProjectProxyLabel = $"This project: {FormatBytes(thisBytes)} in {_thisProjectProxyFiles.Count} proxy file(s).";
+        _allProjectsProxyLabel = $"All projects: {FormatBytes(allBytes)} in {_allProjectsProxyFiles.Count} proxy file(s).";
+    }
+
+    private static string FormatBytes(long bytes)
+    {
+        if (bytes < 1024)
+            return $"{bytes} B";
+
+        // _byteUnits[0] is KB, so the index trails the division count by one: after the first ÷1024 the value is
+        // in KB (unit 0), after the second it's MB (unit 1), etc.
+        double value = bytes;
+        var unit = -1;
+        while (value >= 1024 && unit < _byteUnits.Length - 1)
+        {
+            value /= 1024;
+            unit++;
+        }
+
+        return $"{value:0.#} {_byteUnits[unit]}";
+    }
+
+    // Live feedback for the background generation queue: anything currently queued / encoding, plus failures
+    // (e.g. low disk). Done jobs are omitted — they're silent successes.
+    private static void DrawActiveProxyJobs()
+    {
+        var shownHeader = false;
+        foreach (var (path, status) in ProxyGenerationService.Jobs)
+        {
+            var line = status.State switch
+                           {
+                               ProxyGenerationService.JobState.Queued     => $"Queued — {Path.GetFileName(path)}",
+                               ProxyGenerationService.JobState.Generating => $"Generating {Path.GetFileName(path)} — {status.Progress * 100:0}%",
+                               ProxyGenerationService.JobState.Failed     => $"Failed {Path.GetFileName(path)} — {status.Error}",
+                               _                                          => null,
+                           };
+            if (line == null)
+                continue;
+
+            if (!shownHeader)
+            {
+                FormInputs.AddVerticalSpace();
+                FormInputs.AddSectionSubHeader("Generation");
+                shownHeader = true;
+            }
+
+            var color = status.State == ProxyGenerationService.JobState.Failed ? UiColors.StatusError : UiColors.TextMuted;
+            ImGui.PushStyleColor(ImGuiCol.Text, color.Rgba);
+            ImGui.TextWrapped(line);
+            ImGui.PopStyleColor();
+        }
     }
 
     private static readonly VideoExportCodec[] ProxyFormats =
@@ -672,4 +870,13 @@ internal sealed class ProjectSettingsWindow : Window
     private static string? _tempSoundtrackFilepathForEdit = string.Empty;
     private static float _smoothedLevel;
     private const string AudioFileFilter = "mp3,wav,ogg";
+
+    // Cached proxy-storage scan (see DrawProxyStorage / EnsureProxyScan).
+    private static readonly string[] _byteUnits = ["KB", "MB", "GB", "TB"];
+    private static int _proxyScanWatcherState = -1;
+    private static string? _scannedProjectFolder;
+    private static readonly List<string> _thisProjectProxyFiles = [];
+    private static readonly List<string> _allProjectsProxyFiles = [];
+    private static string _thisProjectProxyLabel = string.Empty;
+    private static string _allProjectsProxyLabel = string.Empty;
 }

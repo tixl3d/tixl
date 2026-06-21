@@ -104,13 +104,18 @@ public static class FfmpegLibrary
     private static void ConfigureLogging()
     {
         FFmpegLogger.LogLevel = SdcbLogLevel.Warning; // drop FFmpeg's Info/Verbose chatter at the source
+        // Some libav* messages are logged at error level but are harmless metadata notices that recur on every
+        // file open — keep them out of the warning stream (they land at Debug). Substring match keeps it cheap.
+        static bool IsBenignNotice(string text)
+            => text.Contains("Referenced QT chapter track not found");
+
         FFmpegLogger.LogWriter = static (level, message) =>
                                  {
                                      var text = message.TrimEnd();
                                      if (text.Length == 0)
                                          return;
 
-                                     if (level <= SdcbLogLevel.Error) // Panic, Fatal, Error
+                                     if (level <= SdcbLogLevel.Error && !IsBenignNotice(text)) // Panic, Fatal, Error
                                          Log.Warning("FFmpeg: " + text);
                                      else
                                          Log.Debug("FFmpeg: " + text);

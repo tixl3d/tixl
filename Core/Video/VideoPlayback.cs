@@ -64,9 +64,13 @@ public static class VideoPlayback
 {
     public static IVideoPlaybackEngine? Engine { get; set; }
 
+    /// <summary>Sibling-file suffix that marks a generated proxy (<c>clip</c> → <c>clip.proxy.mov</c>). Proxy codecs
+    /// (ProRes/HAP/…) all mux to MOV, so a single suffix identifies every proxy for lookup and cleanup.</summary>
+    public const string ProxySuffix = ".proxy.mov";
+
     /// <summary>The sibling proxy path for a source video (<c>clip.mp4</c> → <c>clip.proxy.mov</c>). Shared by
-    /// proxy generation and the engine's substitution so both agree. Proxy codecs (ProRes/HAP/…) all mux to MOV.</summary>
+    /// proxy generation and the engine's substitution so both agree.</summary>
     public static string GetProxyPath(string sourcePath)
         => Path.Combine(Path.GetDirectoryName(sourcePath) ?? ".",
-                        Path.GetFileNameWithoutExtension(sourcePath) + ".proxy.mov");
+                        Path.GetFileNameWithoutExtension(sourcePath) + ProxySuffix);
 }

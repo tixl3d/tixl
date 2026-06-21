@@ -112,7 +112,13 @@ public sealed class VideoDecoderSession : IDisposable
             // the GPU free for the editor and avoids a per-frame GPU→CPU read-back stall (the readback path syncs
             // every frame and stutters), while caching the CPU frames for cheap re-seeks. Hardware is the fallback
             // target only for playback-performance; fast-seeking is already software.
-            var preferHardware = optimization == VideoPlaybackOptimization.PlaybackPerformance;
+            //
+            // Only prefer hardware for codecs the decoder can actually decode on D3D11VA. A decoder without a
+            // D3D11VA hwaccel (e.g. ProRes) still *accepts* a hw_device_ctx and opens fine, but decodes in
+            // software — which would make the session look hardware/zero-copy yet emit CPU frames, freezing the
+            // zero-copy convert path. The hw-config probe rules those codecs out up front.
+            var preferHardware = optimization == VideoPlaybackOptimization.PlaybackPerformance
+                                 && CodecSupportsD3d11va(codec);
 
             CodecContext codecContext = null!;
             AVBufferRef* hwDeviceCtx = null;
@@ -324,6 +330,29 @@ public sealed class VideoDecoderSession : IDisposable
         var desc = ffmpeg.av_pix_fmt_desc_get(format);
         return desc != null ? ffmpeg.av_get_bits_per_pixel(desc) : 0;
     }
+
+    // True only when the decoder advertises a D3D11VA device config — i.e. it can genuinely decode this codec on
+    // the GPU. Decoders without one (ProRes, FFV1, …) accept a hw_device_ctx but fall back to software silently.
+    private static unsafe bool CodecSupportsD3d11va(Codec codec)
+    {
+        AVCodec* c = codec;
+        if (c == null)
+            return false;
+
+        for (var i = 0; ; i++)
+        {
+            var config = ffmpeg.avcodec_get_hw_config(c, i);
+            if (config == null)
+                return false;
+
+            if (config->device_type == AVHWDeviceType.D3d11va
+                && (config->methods & AvCodecHwConfigMethodHwDeviceCtx) != 0)
+                return true;
+        }
+    }
+
+    // AV_CODEC_HW_CONFIG_METHOD_HW_DEVICE_CTX — the decoder is driven via a hw_device_ctx (our D3D11VA path).
+    private const int AvCodecHwConfigMethodHwDeviceCtx = 0x01;
 
     /// <summary>
     /// Decodes the next frame in presentation order into <see cref="CurrentFrame"/>. Returns false at

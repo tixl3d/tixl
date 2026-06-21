@@ -1213,7 +1213,9 @@ internal static class FormInputs
         return vector2;
     }
 
-    private static void AppendTooltip(string? tooltip)
+    /// <summary>Draws the small help-marker icon on the current line and shows <paramref name="tooltip"/> when
+    /// hovered. Used by the input rows here, and reusable for ad-hoc info markers next to custom labels.</summary>
+    internal static void AppendTooltip(string? tooltip)
     {
         if (string.IsNullOrEmpty(tooltip))
             return;

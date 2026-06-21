@@ -33,6 +33,28 @@ internal static class ProxyGenerationService
     /// playback engine via <see cref="VideoPlayback.GetProxyPath"/> so generation and lookup never diverge.</summary>
     public static string ProxyPathFor(string sourcePath) => VideoPlayback.GetProxyPath(sourcePath);
 
+    /// <summary>True when the proxy's target drive has at least the per-machine minimum free space
+    /// (<see cref="UserSettings.ConfigData.ProxyMinFreeDiskGb"/>). Returns true (don't block) when the drive can't
+    /// be queried. <paramref name="freeBytes"/>/<paramref name="requiredBytes"/> are for the UI message.</summary>
+    public static bool HasEnoughFreeDisk(string sourcePath, out long freeBytes, out long requiredBytes)
+    {
+        requiredBytes = (long)(Math.Max(0f, UserSettings.Config.ProxyMinFreeDiskGb) * 1_000_000_000L);
+        freeBytes = long.MaxValue;
+        try
+        {
+            var root = Path.GetPathRoot(Path.GetFullPath(ProxyPathFor(sourcePath)));
+            if (string.IsNullOrEmpty(root))
+                return true;
+
+            freeBytes = new DriveInfo(root).AvailableFreeSpace;
+            return freeBytes >= requiredBytes;
+        }
+        catch
+        {
+            return true; // a probe failure shouldn't block generation
+        }
+    }
+
     /// <summary>Queues a proxy generation for <paramref name="sourcePath"/> using the current settings. No-op if
     /// one is already queued or running for that source.</summary>
     public static void Enqueue(string sourcePath)
@@ -40,6 +62,15 @@ internal static class ProxyGenerationService
         if (string.IsNullOrWhiteSpace(sourcePath) || !File.Exists(sourcePath))
         {
             Log.Warning($"Can't generate proxy — source not found: '{sourcePath}'");
+            return;
+        }
+
+        if (!HasEnoughFreeDisk(sourcePath, out var freeBytes, out var requiredBytes))
+        {
+            var msg = $"Not enough free disk to generate a proxy ({freeBytes / 1e9:0.#} GB free, "
+                      + $"{requiredBytes / 1e9:0.#} GB required).";
+            _jobs[sourcePath] = new JobStatus(JobState.Failed, 0, msg);
+            Log.Warning(msg + $" Source: '{sourcePath}'");
             return;
         }
 
@@ -85,7 +116,17 @@ internal static class ProxyGenerationService
         var proxyPath = ProxyPathFor(source);
 
         _jobs[source] = new JobStatus(JobState.Generating, 0, null);
-        var progress = new SynchronousProgress(p => _jobs[source] = new JobStatus(JobState.Generating, (float)p, null));
+        var lastLoggedQuarter = -1;
+        var progress = new SynchronousProgress(p =>
+                                               {
+                                                   _jobs[source] = new JobStatus(JobState.Generating, (float)p, null);
+                                                   var quarter = (int)(p * 4); // log at 25/50/75 % (gated)
+                                                   if (quarter > lastLoggedQuarter && quarter is > 0 and < 4)
+                                                   {
+                                                       lastLoggedQuarter = quarter;
+                                                       Log.Gated.VideoRender($"Proxy {Path.GetFileName(source)}: {p * 100:0}%");
+                                                   }
+                                               });
 
         var error = factory.GenerateProxy(source, proxyPath, codec, scale, progress, CancellationToken.None);
 

@@ -178,6 +178,8 @@ public sealed class UserSettings : Settings<UserSettings.ConfigData>
 
         // Video-proxy preferences moved to per-project CompositionSettings.ProxyConfig (they travel with the
         // project) — ProxyFormat / ProxyResolution / UseProxyVideos are no longer per-machine user settings.
+        // This one stays per-machine: it guards the local disk against proxy generation when space is low.
+        public float ProxyMinFreeDiskGb = 5f; // refuse to generate a proxy if the target drive has less free space
 
         // Profiling and debugging
         public bool LoadMultiThreaded = true;

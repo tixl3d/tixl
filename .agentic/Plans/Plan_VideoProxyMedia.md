@@ -196,8 +196,33 @@ Proxy (persistent disk, survives restart, helps draft export) and cache (in-sess
      remembered.*
 4. **`UseProxiesForRendering`** `RenderSetting` (default false) — opt-in draft render from the proxy.
    *Verify: off → full-res source; on → draft at proxy resolution.*
-5. **Polish.** Regenerate-on-settings-change, queue/progress UI, source-change invalidation, per-clip format/
-   scale overrides, proxy-cache disk budget + LRU cleanup.
+5. **Polish.** Partly done:
+   - **DONE — low-disk guard.** Per-machine `UserSettings.ProxyMinFreeDiskGb` (default 5). Generation refuses (with
+     a `Failed` status) when the target drive is below it; the graph "Generate proxy" menu item disables with a
+     free/required tooltip; an editor for the threshold lives in the proxy panel.
+     ([`ProxyGenerationService.HasEnoughFreeDisk`](../../Editor/Gui/Windows/RenderExport/ProxyGenerationService.cs),
+     `GraphContextMenu`, `ProjectSettingsWindow`.)
+   - **DONE — progress feedback.** Gated 25/50/75 % encode logging, plus a live **Generation** status section in
+     the proxy panel (queued / generating % / failed) on top of the existing context-menu "Generating… NN%".
+   - **DONE — proxy storage management.** The proxy panel lists total `*.proxy.mov` size + count for the current
+     project and across all writable projects, each with a confirm-popup Delete button (sources untouched; in-use
+     files are skipped and reported). The directory scan is cached and invalidated via
+     `ResourceFileWatcher.FileStateChangeCounter` (the existing monotonic file-change signal — writing/deleting a
+     proxy bumps it, same pattern `AssetLibrary` uses) plus the active-project folder, so the panel stays
+     allocation-free per frame. No new "UpdateVersion" counter was needed. Proxy suffix is now the shared
+     `VideoPlayback.ProxySuffix` constant. ([`ProjectSettingsWindow.DrawProxyStorage`](../../Editor/Gui/Windows/TimeLine/ProjectSettingsWindow.cs).)
+   - **TODO — remaining:** regenerate-on-settings-change, source-change invalidation (staleness), per-clip
+     format/scale overrides, proxy-cache disk budget + LRU cleanup.
+
+## Known issue — preview tearing (under investigation)
+
+A horizontal content tear (two half-frames) appears in preview, **reported only with proxy media (possibly HAP)**.
+Not display tearing: the editor swapchain is flip-model (`FlipDiscard`), which can't tear at present, and the main
+present already uses sync-interval 1 when vsync is on — so it's a *texture* tear. The decode→upload buffer is
+locked on both sides, so the leading hypothesis is the single reused software-upload texture
+(`VideoPlaybackController._softwareTexture`, overwritten each frame via `UpdateSubresource`); the likely fix is to
+double-buffer (ping-pong two textures) so an upload never lands on a texture the GPU may still be sampling. Pending
+confirmation of whether it reproduces on the original (non-proxy) clip and whether it's constant vs. motion-only.
 
 ## Risks / open questions
 

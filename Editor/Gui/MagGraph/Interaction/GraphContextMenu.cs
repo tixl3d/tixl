@@ -149,11 +149,17 @@ internal static class GraphContextMenu
                                                   ProxyGenerationService.JobState.Done         => ("Regenerate proxy", false),
                                                   _                                            => ("Generate proxy video", false),
                                               };
+            // Block generation (but not the busy/queued states) when the target drive is low on space.
+            var hasDisk = ProxyGenerationService.HasEnoughFreeDisk(proxySource, out var proxyFreeBytes, out var proxyReqBytes);
             if (CustomComponents.DrawMenuItem((int)MenuItemIds.GenerateProxy, Icon.None, proxyLabel,
-                                              isChecked: false, isEnabled: !proxyBusy, reserveIconColumn: false, state: muted))
+                                              isChecked: false, isEnabled: !proxyBusy && hasDisk, reserveIconColumn: false, state: muted))
             {
                 ProxyGenerationService.Enqueue(proxySource);
             }
+
+            if (!proxyBusy && !hasDisk)
+                CustomComponents.TooltipForLastItem(
+                    $"Not enough free disk to generate a proxy ({proxyFreeBytes / 1e9:0.#} GB free, {proxyReqBytes / 1e9:0.#} GB required).");
 
             CustomComponents.SeparatorLine();
         }
