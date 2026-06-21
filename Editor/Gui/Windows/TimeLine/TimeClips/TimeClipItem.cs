@@ -189,6 +189,7 @@ internal static class TimeClipItem
 
         var wasClickedDown = ImGui.InvisibleButton("body", bodySize);
         var bodyHovered = ImGui.IsItemHovered();
+        var bodyActive = ImGui.IsItemActive();
 
         if (bodyHovered)
         {
@@ -287,9 +288,10 @@ internal static class TimeClipItem
 
         HandleDragging(attr, timeClip, isSelected, false, HandleDragMode.End);
 
-        // Footage extent stays visible while hovering or dragging either trim handle — that's exactly when
-        // it's most useful (it answers "can I still extend this edge, or am I at the end of the media?").
-        if ((bodyHovered || startHandleActive || endHandleActive)
+        // Footage extent stays visible while hovering or while any drag of this clip is active (body move or
+        // either trim handle). IsItemActive holds through the whole drag even when the mouse leaves the clip,
+        // so the frame doesn't flicker as the pointer outruns the clip — and that's when it's most useful.
+        if ((bodyHovered || bodyActive || startHandleActive || endHandleActive)
             && TryGetVideoFootageBars(ref attr, timeClip, clipInstance, out var hoverFootageBars))
         {
             DrawSourceFootageExtent(ref attr, timeClip, position, itemRectMax, hoverFootageBars);
