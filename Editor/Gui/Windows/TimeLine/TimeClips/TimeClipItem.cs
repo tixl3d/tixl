@@ -80,10 +80,11 @@ internal static class TimeClipItem
         var isConnected = attr.CompositionSymbolUi.Symbol.Connections.Any(c => c.SourceParentOrChildId == timeClip.Id);
 
         var isWithinPlaybackTime = timeClip.TimeRange.Contains(attr.LayerContext.TimeCanvas.Playback.TimeInBars);
-        var fadeIfInActive = (isConnected && isWithinPlaybackTime) ? 1 : 0.4f;
+        var fadeIfInActive = (isConnected && isWithinPlaybackTime) ? 1 : 0.8f;
         
-        var fadeIfNotConnected = isConnected ? 1f : 0.2f;
-        attr.DrawList.AddRectFilled(position, itemRectMax, randomColor.Fade(0.4f * fadeIfNotConnected * fadeIfInActive), rounding);
+        var fadeIfNotConnected = isConnected ? 1f : 0.4f;
+        var innerColor = Color.Mix(UiColors.BackgroundFull,randomColor,0.5f).Fade(0.8f * fadeIfNotConnected * fadeIfInActive);
+        attr.DrawList.AddRectFilled(position, itemRectMax, innerColor, rounding);
 
         // Live Instance for this clip — used both for the DataClip tick overlay below and
         // for the filename label further down. Missing = null; both consumers handle.

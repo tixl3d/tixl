@@ -80,7 +80,7 @@ internal static class AudioClipBodyRenderer
                                   new Vector2(bodyMin.X + x0 * bodyWidth + 1, bodyMin.Y + 1),
                                   new Vector2(bodyMin.X + x1 * bodyWidth - 1, bodyMax.Y - 1),
                                   new Vector2(u0, 0), new Vector2(u1, 1),
-                                  UiColors.ForegroundFull.Fade(0.5f));
+                                  UiColors.ForegroundFull.Fade(1f));
                 drawn = true;
             }
         }
