@@ -369,10 +369,18 @@ internal sealed class OutputWindow : Window
             }
 
             ImGui.SameLine();
-            if (CustomComponents.IconButton(Icon.Settings2, Vector2.Zero))
+            var renderSettingsOpen = WindowManager.IsAnyInstanceVisible<RenderWindow>();
+            var renderSettingsState = renderSettingsOpen
+                                          ? CustomComponents.ButtonStates.Activated
+                                          : CustomComponents.ButtonStates.Emphasized;
+            if (CustomComponents.IconButton(Icon.Settings2, Vector2.Zero, renderSettingsState))
             {
                 WindowManager.ToggleInstanceVisibility<RenderWindow>();
             }
+
+            if (ImGui.IsAnyItemHovered())
+                CustomComponents.TooltipForLastItem("Toggle render settings",
+                                                    "Open or close the \"Render To File\" window.");
         }
 
         CustomComponents.PopToolbarIconBackground();

@@ -52,7 +52,7 @@ internal sealed class RenderSettings
     [JsonConverter(typeof(StringEnumConverter))]
     public TimeReferences TimeReference;
     public float StartInBars;
-    public float EndInBars = 4f;
+    public float EndInBars = 8f;
     public float FrameRate = 60f;
     public int OverrideMotionBlurSamples = -1;
 

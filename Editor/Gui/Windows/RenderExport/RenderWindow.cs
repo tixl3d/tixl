@@ -324,9 +324,16 @@ internal sealed class RenderWindow : Window
 
             FormInputs.AddVerticalSpace(5);
 
+            // The canonical defaults are stored in bars; convert them to the active time unit so the
+            // revert icon targets the right value when editing in Seconds or Frames.
+            var startDefault = (float)RenderTiming.ConvertReferenceTime(RenderSettings.Defaults.StartInBars,
+                                                                        RenderSettings.TimeReferences.Bars, s.TimeReference, s.FrameRate);
+            var endDefault = (float)RenderTiming.ConvertReferenceTime(RenderSettings.Defaults.EndInBars,
+                                                                      RenderSettings.TimeReferences.Bars, s.TimeReference, s.FrameRate);
+
             // Start and End on separate rows (standard style)
-            var rangeChanged = FormInputs.AddFloat($"{"Start"} ({s.TimeReference})", ref s.StartInBars, 0, float.MaxValue, 0.1f, true);
-            rangeChanged |= FormInputs.AddFloat($"{"End"} ({s.TimeReference})", ref s.EndInBars, 0, float.MaxValue, 0.1f, true);
+            var rangeChanged = FormInputs.AddFloat($"Start ({s.TimeReference})", ref s.StartInBars, 0, float.MaxValue, 0.1f, true, false, null, startDefault);
+            rangeChanged |= FormInputs.AddFloat($"End ({s.TimeReference})", ref s.EndInBars, 0, float.MaxValue, 0.1f, true, false, null, endDefault);
 
             if (rangeChanged)
                 s.TimeRange = RenderSettings.TimeRanges.Custom;
