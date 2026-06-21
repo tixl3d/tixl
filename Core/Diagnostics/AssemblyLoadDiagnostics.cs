@@ -41,7 +41,14 @@ public static class AssemblyLoadDiagnostics
         // the runtime falls back to the neutral culture transparently. Not an error.
         try
         {
-            if (!string.IsNullOrEmpty(new AssemblyName(assemblyName).CultureName))
+            var parsedName = new AssemblyName(assemblyName);
+            if (!string.IsNullOrEmpty(parsedName.CultureName))
+                return null;
+
+            // Pre-generated XmlSerializer assemblies (e.g. 'Lib.XmlSerializers') are an
+            // opt-in build artifact we don't produce; the runtime emits the serializer at
+            // runtime instead. The probe always fails here — expected, not a broken install.
+            if (parsedName.Name?.EndsWith(".XmlSerializers", StringComparison.OrdinalIgnoreCase) == true)
                 return null;
         }
         catch { /* malformed name — fall through to log */ }
