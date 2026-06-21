@@ -10,6 +10,7 @@ using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.Resource.Assets;
 using T3.Core.Video;
+using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
@@ -43,6 +44,13 @@ internal static class TimelineClipDrop
                 CreateClipOp(compositionOp, macro, opId, asset.Address, asset.FullPath, dropBars, dropLayer, playback);
                 FinishMacro(compositionOp, macro);
             }
+            return;
+        }
+
+        // While dragging over the timeline, preview where the clip will land and how long it will be.
+        if (assetResult == DragAndDropHandling.DragInteractionResult.Hovering && !string.IsNullOrEmpty(address))
+        {
+            DrawDropPreview(compositionOp, timeCanvas, layerTopY, minLayerIndex, address);
             return;
         }
 
@@ -80,6 +88,44 @@ internal static class TimelineClipDrop
 
         if (added > 0)
             FinishMacro(compositionOp, fileMacro);
+    }
+
+    /// <summary>
+    /// Ghost of the clip a hovering asset would create: drawn at the prospective drop time/layer and sized to
+    /// the asset's real duration (audio/video probed once via the async caches, others a placeholder). Mirrors
+    /// what <see cref="CreateClipOp"/> initialises so the drag previews the actual result.
+    /// </summary>
+    private static void DrawDropPreview(Instance compositionOp, TimeLineCanvas timeCanvas, float layerTopY, int minLayerIndex, string address)
+    {
+        if (!AssetRegistry.TryGetAsset(address, out var asset) || asset.AssetType.TimelineClipOperator is null
+            || !TryComputeDrop(timeCanvas, layerTopY, minLayerIndex, out var dropBars, out var dropLayer, out var playback))
+            return;
+
+        // Probe via the async per-asset caches so the drag never blocks on a file open; until the probe lands
+        // the preview uses the same placeholder length the drop would.
+        double durationSecs = 0;
+        if (asset.AssetType.Name == "Video")
+            VideoClipDurationCache.TryGetDurationSecs(address, compositionOp, out durationSecs);
+        else if (asset.AssetType.Name == "Audio")
+            AudioClipDurationCache.TryGetDurationSecs(address, compositionOp, out durationSecs);
+
+        var durationBars = durationSecs > 0 ? (float)playback.BarsFromSeconds(durationSecs) : 4f;
+
+        var x0 = timeCanvas.TransformX(dropBars);
+        var x1 = timeCanvas.TransformX(dropBars + durationBars);
+        var layerOffset = minLayerIndex == int.MaxValue ? 0 : dropLayer - minLayerIndex;
+        var y0 = layerTopY + layerOffset * ClipArea.LayerHeight;
+        var y1 = y0 + ClipArea.LayerHeight - 2;
+
+        var drawList = ImGui.GetWindowDrawList();
+        var color = asset.AssetType.Color;
+        drawList.AddRectFilled(new Vector2(x0, y0), new Vector2(x1, y1), color.Fade(0.3f), 4.5f);
+        drawList.AddRect(new Vector2(x0, y0), new Vector2(x1, y1), color.Fade(0.8f), 4.5f);
+
+        var label = System.IO.Path.GetFileNameWithoutExtension(asset.FullPath);
+        ImGui.PushFont(Fonts.FontSmall);
+        drawList.AddText(new Vector2(x0 + 4, y0 + 1), UiColors.ForegroundFull.Fade(0.8f), label);
+        ImGui.PopFont();
     }
 
     private static void CreateClipOp(Instance compositionOp, MacroCommand macro, Guid opSymbolId,

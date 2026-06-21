@@ -292,7 +292,7 @@ internal static class TimeClipItem
         if ((bodyHovered || startHandleActive || endHandleActive)
             && TryGetVideoFootageBars(ref attr, timeClip, clipInstance, out var hoverFootageBars))
         {
-            DrawSourceFootageExtent(ref attr, timeClip, position, itemRectMax, clipWidth, hoverFootageBars);
+            DrawSourceFootageExtent(ref attr, timeClip, position, itemRectMax, hoverFootageBars);
         }
 
         if (aHandleClicked)
@@ -487,24 +487,26 @@ internal static class TimeClipItem
     /// unused head/tail to slip into, and the clip extending past the frame means it reads beyond the media.
     /// </summary>
     private static void DrawSourceFootageExtent(ref ClipDrawingAttributes attr, TimeClip timeClip,
-                                                Vector2 position, Vector2 itemRectMax, float clipWidth, float fullDurationBars)
+                                                Vector2 position, Vector2 itemRectMax, float fullDurationBars)
     {
-        var sourceRange = timeClip.SourceRange;
-        var sourceSpan = sourceRange.End - sourceRange.Start;
-        if (Math.Abs(sourceSpan) < 0.0001f)
+        var rate = timeClip.Speed;
+        if (Math.Abs(rate) < 1e-6)
             return;
 
-        var pixelsPerSourceBar = clipWidth / sourceSpan;
-        var xFootageStart = position.X + (0f - sourceRange.Start) * pixelsPerSourceBar;
-        var xFootageEnd = position.X + (fullDurationBars - sourceRange.Start) * pixelsPerSourceBar;
+        // Transform the footage boundary *times* directly. They're invariant under a slip-trim (which preserves
+        // speed), so the frame stays rock-steady while dragging a handle — unlike scaling from the clip's live
+        // pixel width, which amplifies per-frame edge rounding into visible jitter.
+        var footageStartTime = timeClip.TimeRange.Start - timeClip.SourceRange.Start / rate;
+        var footageEndTime = timeClip.TimeRange.Start + (fullDurationBars - timeClip.SourceRange.Start) / rate;
 
-        attr.DrawList.AddRect(new Vector2(Math.Min(xFootageStart, xFootageEnd), position.Y),
-                              new Vector2(Math.Max(xFootageStart, xFootageEnd), itemRectMax.Y),
+        var xStart = attr.LayerContext.TimeCanvas.TransformX((float)footageStartTime) + 1;
+        var xEnd = attr.LayerContext.TimeCanvas.TransformX((float)footageEndTime) + 1;
+
+        // The frame's left/right edges are the media's first/last frame: when an edge sits inside the clip,
+        // the clip is reading past the footage (looping/freezing); when it sits outside, there's slack to slip.
+        attr.DrawList.AddRect(new Vector2(Math.Min(xStart, xEnd), position.Y),
+                              new Vector2(Math.Max(xStart, xEnd), itemRectMax.Y),
                               UiColors.ForegroundFull.Fade(0.3f), 4.5f);
-
-        // The true media start/end: when a boundary sits inside the clip, the clip is reading past the footage.
-        attr.DrawList.AddLine(new Vector2(xFootageStart, position.Y), new Vector2(xFootageStart, itemRectMax.Y), _footageBoundaryColor, 1);
-        attr.DrawList.AddLine(new Vector2(xFootageEnd, position.Y), new Vector2(xFootageEnd, itemRectMax.Y), _footageBoundaryColor, 1);
     }
 
     /// <summary>Full source length of a video clip in bars, or false (with -1) for non-video / unknown-duration
@@ -571,7 +573,6 @@ internal static class TimeClipItem
     private static double _lastAppliedDeltaTime;
     private static readonly Vector2 _handleOffset = new(HandleWidth, 0);
     private static readonly Color _timeRemappingColor = UiColors.StatusAnimated.Fade(0.25f);
-    private static readonly Color _footageBoundaryColor = UiColors.StatusAnimated.Fade(0.6f);
     private static float _posPosYOnDragStart;
 
     private static readonly FootageSnapAttractor _footageSnapAttractor = new();

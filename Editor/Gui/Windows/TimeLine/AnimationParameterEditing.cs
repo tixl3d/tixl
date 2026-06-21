@@ -79,12 +79,10 @@ internal abstract class AnimationParameterEditing : CurveEditing
     protected override void ViewAllOrSelectedKeys(bool alsoChangeTimeRange = false)
     {
         var hasSomeKeys = TryGetBoundsOnCanvas(GetSelectedOrAllPoints(), out var bounds);
-        T3.Core.Logging.Log.Debug($"ViewAll: hasKeys={hasSomeKeys} keyBoundsX={bounds.Min.X:0.00}..{bounds.Max.X:0.00}");
         if (this is DopeSheetArea dopeSheet)
         {
             if (dopeSheet.TimeLineCanvas.ClipArea.TryGetBounds(out var clipBounds, !hasSomeKeys))
             {
-                T3.Core.Logging.Log.Debug($"ViewAll: clipBoundsX={clipBounds.Min.X:0.00}..{clipBounds.Max.X:0.00} clipBoundsY={clipBounds.Min.Y:0.00}..{clipBounds.Max.Y:0.00}");
                 if (hasSomeKeys)
                 {
                     bounds.Min.X = MathF.Min(bounds.Min.X, clipBounds.Min.X);
@@ -97,8 +95,9 @@ internal abstract class AnimationParameterEditing : CurveEditing
             }
         }
 
-        T3.Core.Logging.Log.Debug($"ViewAll: finalBoundsX={bounds.Min.X:0.00}..{bounds.Max.X:0.00} finalBoundsY={bounds.Min.Y:0.00}..{bounds.Max.Y:0.00}");
-        TimeLineCanvas.Current?.SetScopeToCanvasArea(bounds, flipY: true, 300, 50);
+        // useStoredWindowSize: this also runs from the timeline context-menu "View All" (inside a popup), where
+        // the live ImGui window is the menu, not the canvas — using the canvas's own size keeps the fit correct.
+        TimeLineCanvas.Current?.SetScopeToCanvasArea(bounds, flipY: true, 300, 50, useStoredWindowSize: true);
     }
 
     //

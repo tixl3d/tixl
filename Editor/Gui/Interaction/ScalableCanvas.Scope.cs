@@ -46,9 +46,15 @@ public partial class ScalableCanvas
     }
     
     // Todo: merge into GetScopeForCanvasArea
-    internal void SetScopeToCanvasArea(ImRect areaOnCanvas, bool flipY = false, float paddingX = 0, float paddingY = 0)
+    /// <param name="useStoredWindowSize">When true, keep the canvas's own <see cref="ScalableCanvas.WindowSize"/>
+    /// (set during its per-frame update) instead of reading the current ImGui window. Required when this is
+    /// invoked from a popup (e.g. a context-menu "View All"), where <c>GetWindowSize()</c> would return the
+    /// popup's size and wildly mis-scale the fit.</param>
+    internal void SetScopeToCanvasArea(ImRect areaOnCanvas, bool flipY = false, float paddingX = 0, float paddingY = 0,
+                                       bool useStoredWindowSize = false)
     {
-        WindowSize = ImGui.GetWindowSize();
+        if (!useStoredWindowSize)
+            WindowSize = ImGui.GetWindowSize();
 
         var areaSize = areaOnCanvas.GetSize();
         if (areaSize.X == 0)
