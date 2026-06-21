@@ -57,6 +57,9 @@ public sealed class FfmpegVideoEncoderFactory : IVideoEncoderFactory
         return new VideoProxyAdvice(recommendation, result.KeyframeIntervalSeconds, result.Reason);
     }
 
+    public bool TryProbeDurationSeconds(string sourcePath, out double seconds)
+        => VideoMetadata.TryProbeDurationSeconds(sourcePath, out seconds);
+
     public VideoEncoderAvailability GetAvailability(VideoExportCodec codec)
     {
         if (!FfmpegLibrary.EnsureInitialized())

@@ -1,4 +1,5 @@
 using T3.Core.Animation;
+using T3.Core.Operator.Interfaces;
 using T3.Core.Resource.Assets;
 using T3.Core.Utils;
 using T3.Core.Video;
@@ -21,7 +22,7 @@ internal interface IVideoClipProvider
 }
 
 [Guid("04c1a6dc-3042-48a8-81d2-0a5a162016dc")]
-internal sealed class VideoClip : Instance<VideoClip>, IStatusProvider, IVideoClipProvider, IContentTimeClip
+internal sealed class VideoClip : Instance<VideoClip>, IStatusProvider, IVideoClipProvider, IContentTimeClip, IDescriptiveFilename
 {
     [Output(Guid = "eb954aeb-535b-4b22-ac49-858f71bdaac4", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
     public readonly Slot<Texture2D> Texture = new();
@@ -109,6 +110,9 @@ internal sealed class VideoClip : Instance<VideoClip>, IStatusProvider, IVideoCl
     Slot<Texture2D> IVideoClipProvider.TextureOutput => Texture;
     InputSlot<Vector4> IVideoClipProvider.ColorInput => Color;
     InputSlot<int> IVideoClipProvider.BlendModeInput => BlendMode;
+
+    // Drives the timeline clip label (filename, or "RenamedName (file)") instead of the op's symbol name.
+    InputSlot<string> IDescriptiveFilename.SourcePathSlot => Path;
 
     // A [VideoClipPlayer] stamps the current frame on every clip it manages — wired or auto-collected, and even
     // while the clip sits between its in/out points. A clip no player has stamped for a couple of frames is

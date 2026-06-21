@@ -3,6 +3,7 @@ using ImGuiNET;
 using T3.Core.Animation;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
+using T3.Core.Resource.Assets;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
@@ -125,12 +126,18 @@ internal static class TimeClipItem
 
             ImGui.PushFont(Fonts.FontSmall);
             var labelSize = ImGui.CalcTextSize(label);
-            var needsClipping = labelSize.X > clipSize.X;
 
+            // Keep the title readable when the clip starts off the left edge of the view: pin the text to the
+            // visible area's left edge, but never push it past the clip's own right edge.
+            var labelMaxX = itemRectMax.X - 3;
+            var labelX = Math.Min(Math.Max(position.X + 4, attr.LayerRect.Min.X + 4), labelMaxX);
+            var labelPos = new Vector2(labelX, position.Y + 1);
+
+            var needsClipping = labelPos.X + labelSize.X > labelMaxX;
             if (needsClipping)
                 ImGui.PushClipRect(position, itemRectMax - new Vector2(3, 0), true);
 
-            attr.DrawList.AddText(position + new Vector2(4, 1), isSelected ? UiColors.Selection : randomColor.Fade(fadeIfNotConnected), label);
+            attr.DrawList.AddText(labelPos, isSelected ? UiColors.Selection : randomColor.Fade(fadeIfNotConnected), label);
 
             if (needsClipping)
                 ImGui.PopClipRect();
@@ -183,6 +190,21 @@ internal static class TimeClipItem
 
         if (ImGui.IsItemHovered())
         {
+            // For a video clip, outline its full available footage so a hover answers: am I using all of it,
+            // can I still extend either edge, or am I already reading past the end (looping/freezing)?
+            var footageBars = -1f;
+            if (clipInstance is T3.Core.Operator.Interfaces.IDescriptiveFilename hoveredFile)
+            {
+                var sourcePath = hoveredFile.SourcePathSlot.TypedInputValue.Value;
+                if (!string.IsNullOrEmpty(sourcePath)
+                    && AssetType.TryGetForFilePath(sourcePath, out var hoveredType, out _) && hoveredType.Name == "Video"
+                    && VideoClipDurationCache.TryGetDurationSecs(sourcePath, clipInstance, out var fullDurationSecs))
+                {
+                    footageBars = (float)attr.LayerContext.TimeCanvas.Playback.BarsFromSeconds(fullDurationSecs);
+                    DrawSourceFootageExtent(ref attr, timeClip, position, itemRectMax, clipWidth, footageBars);
+                }
+            }
+
             ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(4,4));
             ImGui.BeginTooltip();
             {
@@ -198,6 +220,14 @@ internal static class TimeClipItem
                 if (timeRemapped)
                 {
                     ImGui.TextUnformatted($"Source {timeClip.SourceRange.Start:0.00} ... {timeClip.SourceRange.End:0.00}");
+                }
+
+                if (footageBars > 0)
+                {
+                    var readsPastFootage = timeClip.SourceRange.Start < -0.001f || timeClip.SourceRange.End > footageBars + 0.001f;
+                    ImGui.TextUnformatted(readsPastFootage
+                                              ? $"Footage: 0.00 ... {footageBars:0.00} (reads past end — loops/freezes)"
+                                              : $"Footage: 0.00 ... {footageBars:0.00}");
                 }
 
                 if (timeStretched)
@@ -444,6 +474,32 @@ internal static class TimeClipItem
         }
     }
 
+    /// <summary>
+    /// Outlines the clip's full available source footage on the timeline. The footage maps through the same
+    /// linear source→screen relation as the clip's in/out points, so the frame extending past the clip means
+    /// unused head/tail to slip into, and the clip extending past the frame means it reads beyond the media.
+    /// </summary>
+    private static void DrawSourceFootageExtent(ref ClipDrawingAttributes attr, TimeClip timeClip,
+                                                Vector2 position, Vector2 itemRectMax, float clipWidth, float fullDurationBars)
+    {
+        var sourceRange = timeClip.SourceRange;
+        var sourceSpan = sourceRange.End - sourceRange.Start;
+        if (Math.Abs(sourceSpan) < 0.0001f)
+            return;
+
+        var pixelsPerSourceBar = clipWidth / sourceSpan;
+        var xFootageStart = position.X + (0f - sourceRange.Start) * pixelsPerSourceBar;
+        var xFootageEnd = position.X + (fullDurationBars - sourceRange.Start) * pixelsPerSourceBar;
+
+        attr.DrawList.AddRect(new Vector2(Math.Min(xFootageStart, xFootageEnd), position.Y),
+                              new Vector2(Math.Max(xFootageStart, xFootageEnd), itemRectMax.Y),
+                              UiColors.ForegroundFull.Fade(0.3f), 4.5f);
+
+        // The true media start/end: when a boundary sits inside the clip, the clip is reading past the footage.
+        attr.DrawList.AddLine(new Vector2(xFootageStart, position.Y), new Vector2(xFootageStart, itemRectMax.Y), _footageBoundaryColor, 1);
+        attr.DrawList.AddLine(new Vector2(xFootageEnd, position.Y), new Vector2(xFootageEnd, itemRectMax.Y), _footageBoundaryColor, 1);
+    }
+
     private const float HandleWidth = 7;
     private static float _timeWithinDraggedClip;
 
@@ -455,5 +511,6 @@ internal static class TimeClipItem
     private static double _lastAppliedDeltaTime;
     private static readonly Vector2 _handleOffset = new(HandleWidth, 0);
     private static readonly Color _timeRemappingColor = UiColors.StatusAnimated.Fade(0.25f);
+    private static readonly Color _footageBoundaryColor = UiColors.StatusAnimated.Fade(0.6f);
     private static float _posPosYOnDragStart;
 }

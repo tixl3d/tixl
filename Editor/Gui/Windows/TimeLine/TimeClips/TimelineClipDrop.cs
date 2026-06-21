@@ -9,6 +9,7 @@ using T3.Core.Logging;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.Resource.Assets;
+using T3.Core.Video;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
@@ -147,12 +148,18 @@ internal static class TimelineClipDrop
     }
 
     /// <summary>
-    /// Initial clip length in bars. Audio is probed for its real duration so the clip matches the file;
-    /// other types (video, data) default to a placeholder until a per-type probe is wired in.
+    /// Initial clip length in bars. Audio and video are probed for their real duration so the clip matches the
+    /// file; types with no probe (e.g. data) default to a placeholder.
     /// </summary>
     private static float ProbeDurationBars(string absolutePath, Playback playback)
     {
         var durationSecs = AudioMixerManager.TryProbeAudioDurationSecs(absolutePath);
+        if (durationSecs <= 0 && VideoExport.Factory is { } factory
+            && factory.TryProbeDurationSeconds(absolutePath, out var videoSecs))
+        {
+            durationSecs = videoSecs;
+        }
+
         return durationSecs > 0 ? (float)playback.BarsFromSeconds(durationSecs) : 4f;
     }
 
