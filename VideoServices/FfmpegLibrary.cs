@@ -111,8 +111,8 @@ public static class FfmpegLibrary
 
         FFmpegLogger.LogWriter = static (level, message) =>
                                  {
-                                     var text = message.TrimEnd();
-                                     if (text.Length == 0)
+                                     var text = message?.TrimEnd();
+                                     if (string.IsNullOrEmpty(text))
                                          return;
 
                                      if (level <= SdcbLogLevel.Error && !IsBenignNotice(text)) // Panic, Fatal, Error
