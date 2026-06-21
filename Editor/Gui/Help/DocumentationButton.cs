@@ -27,7 +27,10 @@ internal static class DocumentationButton
 
         // Pin the width before BeginTooltip so the auto-resizing tooltip doesn't flash at viewport
         // width on its first frame.
-        ImGui.SetNextWindowSizeConstraints(new Vector2(tooltipWidth, 0), new Vector2(tooltipWidth, float.MaxValue));
+        // Constrain width and give a generous-but-finite max height so the auto-resizing tooltip fits its
+        // content without the spurious scrollbar a 0/FLT_MAX height range can leave on the first frame.
+        var maxHeight = ImGui.GetMainViewport().WorkSize.Y - 40 * scale;
+        ImGui.SetNextWindowSizeConstraints(new Vector2(tooltipWidth, 0), new Vector2(tooltipWidth, maxHeight));
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(10, 8) * scale);
         ImGui.BeginTooltip();
 

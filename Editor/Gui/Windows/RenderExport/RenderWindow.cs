@@ -100,7 +100,11 @@ internal sealed class RenderWindow : Window
     private void DrawHeaderHelp()
     {
         var size = new Vector2(ImGui.GetFrameHeight(), ImGui.GetFrameHeight());
-        CustomComponents.RightAlign(size.X);
+
+        // Flush to the content region's right edge (the panel padding is already excluded), so it sits as far
+        // right as the title's left inset — RightAlign() would double-count the window padding and inset it more.
+        ImGui.SameLine();
+        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetContentRegionAvail().X - size.X);
 
         var docId = _uiState.ActiveSection switch
                         {
@@ -313,6 +317,16 @@ internal sealed class RenderWindow : Window
         return string.IsNullOrEmpty(path) ? string.Empty : (Path.GetDirectoryName(path) ?? string.Empty);
     }
 
+    // The timeline loop range is empty (zero length), so rendering it would produce nothing.
+    private static bool IsLoopRangeEmpty()
+    {
+        var loop = Playback.Current.LoopRange;
+        return loop.End <= loop.Start;
+    }
+
+    private static bool IsRangeOptionDisabled(RenderSettings.TimeRanges range)
+        => range == RenderSettings.TimeRanges.Loop && IsLoopRangeEmpty();
+
     private bool DrawSourceSection()
     {
         var modified = false;
@@ -320,16 +334,24 @@ internal sealed class RenderWindow : Window
 
         FormInputs.SetIndentToParameters();
 
-        // Range row
-        modified |= FormInputs.AddSegmentedButtonWithLabel(ref s.TimeRange, "Range", 0,
-                                                           """
-                                                           What time span to render:
-                                                           • Custom — a start/end you set
-                                                           • Loop — the timeline's loop range
-                                                           • Soundtrack — the main soundtrack's length
-                                                           • Continuous — keep recording until you press stop
-                                                           """);
+        // Range as a left-aligned section header (no label), divided from the timing parameters below.
+        // Loop is disabled while the timeline loop has no length — fall back to Custom if it was selected.
+        if (s.TimeRange == RenderSettings.TimeRanges.Loop && IsLoopRangeEmpty())
+            s.TimeRange = RenderSettings.TimeRanges.Custom;
+
+        modified |= FormInputs.SegmentedButton(ref s.TimeRange, 0, IsRangeOptionDisabled);
+        FormInputs.AppendTooltip("""
+                                 **What time span to render:**
+                                 - **Custom** — a start/end you set
+                                 - **Loop** — the timeline's loop range (set a loop first)
+                                 - **Soundtrack** — the main soundtrack's length
+                                 - **Continuous** — keep recording until you press stop
+                                 """);
         RenderTiming.ApplyTimeRange(s);
+
+        FormInputs.AddVerticalSpace(5);
+        ImGui.Separator();
+        FormInputs.AddVerticalSpace(5);
 
         var isContinuous = s.TimeRange == RenderSettings.TimeRanges.Continuous;
 
@@ -391,14 +413,14 @@ internal sealed class RenderWindow : Window
         {
             ImGui.BeginDisabled();
             var ignored = 1f;
-            FormInputs.AddFloat("Resolution %", ref ignored, 0.01f, 10f, 0.01f, true, true, null, 1f);
+            FormInputs.AddFloat("Resolution Scale", ref ignored, 0.01f, 10f, 0.01f, true, true, null, 1f);
             ImGui.EndDisabled();
             FormInputs.AddHint("Realtime capture uses the native output resolution.");
         }
         else
         {
-            modified |= FormInputs.AddFloat("Resolution %", ref s.ResolutionFactor, 0.01f, 10f, 0.01f, true, true,
-                                             "Scale factor for rendered resolution (1.0 = 100%).",
+            modified |= FormInputs.AddFloat("Resolution Scale", ref s.ResolutionFactor, 0.01f, 10f, 0.01f, true, true,
+                                             "Multiplies the output resolution. 1 = native size; 2 = double (e.g. 4K from a 1080p comp).",
                                              RenderSettings.Defaults.ResolutionFactor);
         }
 
@@ -431,8 +453,8 @@ internal sealed class RenderWindow : Window
 
         var modified = FormInputs.AddSegmentedButtonWithLabel(ref s.ContinuousClock, "Clock", 0,
                                                              """
-                                                             Realtime grabs the live output as you perform (video only, native resolution).
-                                                             Deterministic steps time forward at the target FPS — frame-perfect and records audio.
+                                                             - **Realtime** — grabs the live output as you perform (video only, native resolution).
+                                                             - **Deterministic** — steps time forward at the target FPS; frame-perfect and records audio.
                                                              """);
         FormInputs.AddHint(s.ContinuousClock == RenderSettings.ContinuousCaptureClock.Realtime
                                ? "Grabs the live output as you perform; press capture again to stop. (Video only — no audio yet.)"
@@ -605,12 +627,12 @@ internal sealed class RenderWindow : Window
 
         modified |= FormInputs.AddEnumDropdown(ref s.VideoCodec, "Codec",
                                                """
-                                               H.264 (.mp4): broadly compatible, hardware-accelerated.
-                                               HEVC / H.265 (.mp4): more efficient than H.264; hardware-accelerated where available.
-                                               ProRes (.mov): high-quality all-intra editing codec.
-                                               VP9 / AV1 (.mp4): efficient delivery codecs; software-encoded (slower).
-                                               FFV1 (.mkv): lossless archival (very large files).
-                                               HAP / HAP Alpha / HAP Q (.mov): GPU-friendly intra codecs for realtime/VJ playback.
+                                               - **H.264** (.mp4) — broadly compatible, hardware-accelerated.
+                                               - **HEVC / H.265** (.mp4) — more efficient than H.264; hardware-accelerated where available.
+                                               - **ProRes** (.mov) — high-quality all-intra editing codec.
+                                               - **VP9 / AV1** (.mp4) — efficient delivery codecs; software-encoded (slower).
+                                               - **FFV1** (.mkv) — lossless archival (very large files).
+                                               - **HAP / HAP Alpha / HAP Q** (.mov) — GPU-friendly intra codecs for realtime/VJ playback.
                                                """,
                                                RenderSettings.Defaults.VideoCodec,
                                                codec => CodecDisplayName(codec),

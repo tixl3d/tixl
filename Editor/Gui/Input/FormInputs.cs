@@ -2,6 +2,7 @@
 using ImGuiNET;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Styling;
+using T3.Editor.Gui.Styling.Markdown;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel.InputsAndTypes;
 
@@ -108,12 +109,16 @@ internal static class FormInputs
         string? tooltip = null,
         int defaultValue = NotADefaultValue)
     {
+        var hasReset = defaultValue != NotADefaultValue;
+        var isDefault = hasReset && value == defaultValue;
+
+        // Fade the row while it holds its default value, so an unchanged field reads as inactive (matches AddFloat).
+        if (isDefault)
+            ImGui.PushStyleVar(ImGuiStyleVar.Alpha, DefaultFadeAlpha * ImGui.GetStyle().Alpha);
+
         DrawInputLabel(label);
 
         ImGui.PushID(label);
-
-        var hasReset = defaultValue != NotADefaultValue;
-        var isDefault = hasReset && value == defaultValue;
 
         var size = GetAvailableInputSize(tooltip, hasReset);
         var result = SingleValueEdit.Draw(ref value, size, min, max, true, true, scale);
@@ -125,6 +130,9 @@ internal static class FormInputs
             value = defaultValue;
             result |= InputEditStateFlags.ModifiedAndFinished;
         }
+
+        if (isDefault)
+            ImGui.PopStyleVar();
 
         var modified = (result & InputEditStateFlags.Modified) != InputEditStateFlags.Nothing;
         return modified;
@@ -562,10 +570,11 @@ internal static class FormInputs
         return modified;
     }
 
-    public static bool SegmentedButton<T>(ref T selectedValue, float columnWidth = 0) where T : struct, Enum
+    public static bool SegmentedButton<T>(ref T selectedValue, float columnWidth = 0, Func<T, bool>? isItemDisabled = null)
+        where T : struct, Enum
     {
         if (columnWidth <= 0)
-            return SegmentedButtonPill(ref selectedValue);
+            return SegmentedButtonPill(ref selectedValue, isItemDisabled);
 
         // Fixed-width vertical mode (category selectors) keeps the simple per-button look.
         var modified = false;
@@ -589,7 +598,7 @@ internal static class FormInputs
     /// Custom draw-list rendering (rather than per-option ImGui.Button) so the track and the active pill
     /// share corners and the active label can use a heavier font.
     /// </summary>
-    private static bool SegmentedButtonPill<T>(ref T selectedValue) where T : struct, Enum
+    private static bool SegmentedButtonPill<T>(ref T selectedValue, Func<T, bool>? isItemDisabled = null) where T : struct, Enum
     {
         var scale = T3Ui.UiScaleFactor;
         var h = ImGui.GetFrameHeight();
@@ -622,17 +631,19 @@ internal static class FormInputs
             var name = CustomComponents.HumanReadablePascalCase(Enum.GetName(value));
             var segWidth = ImGui.CalcTextSize(name).X + segPadding * 2;
             var isSelected = selectedString == value.ToString();
+            var isDisabled = isItemDisabled?.Invoke(value) ?? false;
 
             if (!isFirst)
                 ImGui.SameLine(0, 0);
 
-            if (ImGui.InvisibleButton(name, new Vector2(segWidth, h)))
+            // Disabled options still reserve their slot but ignore clicks and don't highlight on hover.
+            if (ImGui.InvisibleButton(name, new Vector2(segWidth, h)) && !isDisabled)
             {
                 selectedValue = value;
                 modified = true;
             }
 
-            var isHovered = ImGui.IsItemHovered();
+            var isHovered = !isDisabled && ImGui.IsItemHovered();
 
             var segMin = new Vector2(x, start.Y);
             if (isSelected)
@@ -649,9 +660,11 @@ internal static class FormInputs
             }
 
             var font = isSelected ? Fonts.FontBold : Fonts.FontNormal;
-            var textColor = isSelected
-                                ? UiColors.ForegroundFull
-                                : (isHovered ? UiColors.Text : UiColors.TextMuted);
+            var textColor = isDisabled
+                                ? UiColors.TextMuted.Fade(0.4f)
+                                : isSelected
+                                    ? UiColors.ForegroundFull
+                                    : (isHovered ? UiColors.Text : UiColors.TextMuted);
             ImGui.PushFont(font);
             var textSize = ImGui.CalcTextSize(name);
             var textPos = new Vector2(segMin.X + (segWidth - textSize.X) * 0.5f, segMin.Y + (h - textSize.Y) * 0.5f);
@@ -1222,29 +1235,39 @@ internal static class FormInputs
         if (string.IsNullOrEmpty(tooltip))
             return;
 
-        ImGui.SameLine();
+        // A small fixed gap to the input — the default item spacing reads as detached.
+        ImGui.SameLine(0, 3 * T3Ui.UiScaleFactor);
 
         ImGui.PushFont(Icons.IconFont);
         ImGui.AlignTextToFramePadding();
         ImGui.TextUnformatted("" + (char) Icon.Help);
-
         ImGui.PopFont();
 
         if (!ImGui.IsItemHovered())
             return;
 
-        // Tooltip
+        // Tooltip — rendered as Markdown so parameter docs can use **bold**, "- " lists and [OpRef] links.
+        // HardLineBreaks keeps plain multi-line tooltips (single "\n") looking as before. The finite max height
+        // lets the auto-resizing window fit its content without a spurious scrollbar.
+        var scale = T3Ui.UiScaleFactor;
+        var width = 280 * scale;
+        var maxHeight = ImGui.GetMainViewport().WorkSize.Y - 40 * scale;
+        ImGui.SetNextWindowSizeConstraints(new Vector2(width, 0), new Vector2(width, maxHeight));
         ImGui.PushStyleColor(ImGuiCol.PopupBg, UiColors.BackgroundFull.Rgba);
-        ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 1 * ImGui.GetStyle().Alpha);
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(10, 10));
+        ImGui.PushStyleVar(ImGuiStyleVar.Alpha, ImGui.GetStyle().Alpha);
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(10, 10) * scale);
         ImGui.BeginTooltip();
-        ImGui.PushTextWrapPos(300);
-        ImGui.TextUnformatted(tooltip);
-        ImGui.PopTextWrapPos();
+        _tooltipMarkdown.Draw(tooltip);
         ImGui.EndTooltip();
         ImGui.PopStyleVar(2);
         ImGui.PopStyleColor();
     }
+
+    private static readonly MarkdownView _tooltipMarkdown = new(new MarkdownView.Options
+                                                                    {
+                                                                        MutedBodyText = true,
+                                                                        HardLineBreaks = true,
+                                                                    });
 
     private static bool AppendResetButton(bool hasReset, string? id)
     {

@@ -16,7 +16,7 @@ The filename extension follows the codec automatically (`.mp4`, `.mov`, `.mkv`),
 
 The **Render To File** window groups its settings into three sections (and a help button in the panel header links back to this page):
 
-- **Source** — the **Range** (Custom / Loop / Soundtrack / Continuous), the **Scale** unit (bars, seconds, frames), **FPS**, the **Resolution %** scale factor, and the **Motion Blur** override.
+- **Source** — the **Range** (Custom / Loop / Soundtrack / Continuous), the **Scale** unit (bars, seconds, frames), **FPS**, the **Resolution Scale** multiplier, and the **Motion Blur** override.
 - **Format & Quality** — render mode (video or image sequence), **Codec**, **Bitrate**, and audio export.
 - **Output Target** — the folder, filename, and auto-increment options.
 
@@ -68,7 +68,7 @@ While a continuous capture runs, the progress bar is replaced by a sweeping acti
 
 ## High-resolution rendering
 
-Rendering is cheap compared to encoding, so you can trade a little time for a lot of quality. Set **Resolution %** above 100 % to render **larger than the output window** — for example 200 % turns a 1080p project into 4K. Thanks to TiXL's [smart resolution setup](https://www.youtube.com/watch?v=f9E7lwUXfBM) the requested resolution flows through the whole project, so gradients, text, and antialiasing all sharpen up. This is the way to produce 4K masters or high-resolution stills from an HD comp.
+Rendering is cheap compared to encoding, so you can trade a little time for a lot of quality. Set **Resolution Scale** above 1 to render **larger than the output window** — for example 2 turns a 1080p project into 4K. Thanks to TiXL's [smart resolution setup](https://www.youtube.com/watch?v=f9E7lwUXfBM) the requested resolution flows through the whole project, so gradients, text, and antialiasing all sharpen up. This is the way to produce 4K masters or high-resolution stills from an HD comp.
 
 ## Rendering with Motion Blur
 

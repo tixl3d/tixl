@@ -40,7 +40,7 @@ With **Continuous** selected, switch **Clock** between **Realtime** and **Determ
   yet"; Deterministic mentions advancing at the target FPS, frame-perfect but not realtime.
 - The **Frame Rate** control is disabled and reads **Fixed FPS**, with a hint that Variable (VFR) is coming
   soon.
-- With **Realtime** selected, the **Resolution %** row is disabled with a hint that realtime capture uses the
+- With **Realtime** selected, the **Resolution Scale** row is disabled with a hint that realtime capture uses the
   native output resolution.
 
 ## Step: Software codecs show a warning, but capture is still allowed
