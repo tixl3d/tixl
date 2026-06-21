@@ -72,19 +72,25 @@ internal sealed class MarkdownView
         _options = options;
     }
 
+    /// <param name="wrapWidthPx">When &gt; 0, overrides both <see cref="Options.WrapWidthPx"/> and the
+    /// content-region default with a fixed wrap width. Use this inside auto-resizing windows (tooltips) where
+    /// the live content region briefly fluctuates with a transient scrollbar and would otherwise reflow.</param>
     public void Draw(string markdown,
                      UrlClicked? onUrl = null,
                      OperatorRefRendered? onOperatorRef = null,
-                     OperatorRefColor? operatorColor = null)
+                     OperatorRefColor? operatorColor = null,
+                     float wrapWidthPx = 0)
     {
         if (string.IsNullOrEmpty(markdown))
             return;
 
         _operatorColor = operatorColor;
 
-        var availableWrap = _options.WrapWidthPx > 0
-                                ? _options.WrapWidthPx
-                                : ImGui.GetContentRegionAvail().X;
+        var availableWrap = wrapWidthPx > 0
+                                ? wrapWidthPx
+                                : _options.WrapWidthPx > 0
+                                    ? _options.WrapWidthPx
+                                    : ImGui.GetContentRegionAvail().X;
 
         if (availableWrap < 32f)
             availableWrap = 32f;

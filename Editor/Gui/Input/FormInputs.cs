@@ -1257,7 +1257,14 @@ internal static class FormInputs
         ImGui.PushStyleVar(ImGuiStyleVar.Alpha, ImGui.GetStyle().Alpha);
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(10, 10) * scale);
         ImGui.BeginTooltip();
-        _tooltipMarkdown.Draw(tooltip);
+
+        // Wrap to a fixed inner width rather than the live content region. The window is auto-resizing,
+        // so on its first frame ImGui briefly shows a vertical scrollbar before it knows the content
+        // height; that scrollbar steals width, which would reflow the text taller and make the scrollbar
+        // stick. A stable wrap width (inner width minus padding and a scrollbar's worth of slack) keeps
+        // the layout from reflowing, so the spurious bar disappears on the next frame.
+        var innerWrap = width - 2 * 10 * scale - ImGui.GetStyle().ScrollbarSize;
+        _tooltipMarkdown.Draw(tooltip, wrapWidthPx: innerWrap);
         ImGui.EndTooltip();
         ImGui.PopStyleVar(2);
         ImGui.PopStyleColor();

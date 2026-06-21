@@ -588,8 +588,8 @@ internal sealed class ProjectSettingsWindow : Window
         }
 
         FormInputs.AddVerticalSpace();
-
         ImGui.Separator();
+        FormInputs.AddVerticalSpace();
 
         switch (playback.AudioSource)
         {
