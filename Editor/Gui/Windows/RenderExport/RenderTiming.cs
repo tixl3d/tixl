@@ -19,6 +19,8 @@ internal static class RenderTiming
         switch (renderSettings.TimeRange)
         {
             case RenderSettings.TimeRanges.Custom:
+            case RenderSettings.TimeRanges.Continuous:
+                // No end to derive — Continuous runs until the user stops it; Custom keeps the user's values.
                 break;
 
             case RenderSettings.TimeRanges.Loop:
@@ -125,12 +127,20 @@ internal static class RenderTiming
 
         // time range
         var startSecs = ReferenceTimeToSeconds(session.Settings.StartInBars, session.Settings.TimeReference, session.Settings.FrameRate);
-        var endSecs = startSecs + Math.Max(session.FrameCount - 1, 0) / session.Settings.FrameRate;
 
         var oldSecs = Playback.Current.TimeInSecs;
-        var progress = session.FrameCount <= 1 ? 0.0 : session.FrameIndex / (double)(session.FrameCount - 1);
-        
-        Playback.Current.TimeInSecs = MathUtils.Lerp(startSecs, endSecs, progress);
+
+        if (session.Settings.TimeRange == RenderSettings.TimeRanges.Continuous)
+        {
+            // Open-ended: advance steadily from the start, there is no end to interpolate toward.
+            Playback.Current.TimeInSecs = startSecs + session.FrameIndex / session.Settings.FrameRate;
+        }
+        else
+        {
+            var endSecs = startSecs + Math.Max(session.FrameCount - 1, 0) / session.Settings.FrameRate;
+            var progress = session.FrameCount <= 1 ? 0.0 : session.FrameIndex / (double)(session.FrameCount - 1);
+            Playback.Current.TimeInSecs = MathUtils.Lerp(startSecs, endSecs, progress);
+        }
         var adaptedDelta = Math.Max(Playback.Current.TimeInSecs - oldSecs + session.Runtime.TimingOverhang, 0.0);
 
         // audio clip for preview

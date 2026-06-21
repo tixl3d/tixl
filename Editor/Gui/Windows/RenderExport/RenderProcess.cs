@@ -38,11 +38,25 @@ internal static class RenderProcess
     public static string LastHelpString { get; private set; } = string.Empty;
     public static string LastTargetDirectory { get; private set; } = string.Empty;
 
-    public static double Progress => (_activeExportSession == null || _activeExportSession.FrameCount <= 1)
-                                         ? 0.0
-                                         : (_activeExportSession.FrameIndex / (double)(_activeExportSession.FrameCount - 1));
+    /// <summary>Export progress in 0..1, or a negative value when the active export is open-ended
+    /// (<see cref="RenderSettings.TimeRanges.Continuous"/>) and has no determinate end — the footer shows an
+    /// activity indicator in that case.</summary>
+    public static double Progress => IsContinuousActive
+                                         ? -1.0
+                                         : (_activeExportSession == null || _activeExportSession.FrameCount <= 1)
+                                             ? 0.0
+                                             : (_activeExportSession.FrameIndex / (double)(_activeExportSession.FrameCount - 1));
 
-    public static double ExportStartedTimeLocal => _activeExportSession?.ExportStartTimeLocal ?? 0;
+    /// <summary>True while an open-ended continuous capture is running.</summary>
+    public static bool IsContinuousActive
+        => _activeExportSession is { Settings.TimeRange: RenderSettings.TimeRanges.Continuous };
+
+    /// <summary>Frames written so far by the active export (for the continuous-capture activity readout).</summary>
+    public static int CapturedFrameCount => _activeExportSession?.FrameIndex ?? 0;
+
+    /// <summary>Seconds since the active export began (0 when none is running).</summary>
+    public static double ExportElapsedSeconds
+        => _activeExportSession == null ? 0.0 : Playback.RunTimeInSecs - _activeExportSession.ExportStartedTime;
 
     #region main API methods
     public static void TryRenderScreenShot()
@@ -69,6 +83,15 @@ internal static class RenderProcess
             return false;
 
         var settings = RenderSettings.Current.Clone();
+
+        // Realtime continuous capture grabs the live output and doesn't take over playback, so there is no
+        // synced audio path yet — keep the writer audio-free regardless of the (greyed) checkbox.
+        if (settings.TimeRange == RenderSettings.TimeRanges.Continuous
+            && settings.ContinuousClock == RenderSettings.ContinuousCaptureClock.Realtime)
+        {
+            settings.ExportAudio = false;
+            settings.ResolutionFactor = 1f; // realtime grabs the live texture as-is — capture at native size
+        }
 
         if (State != States.ReadyForExport)
         {
@@ -157,6 +180,32 @@ internal static class RenderProcess
 
         var duration = Playback.RunTimeInSecs - _activeExportSession.ExportStartedTime;
         LastHelpString = reason ?? $"Render cancelled after {StringUtils.HumanReadableDurationFromSeconds(duration)}";
+        CleanupSession();
+    }
+
+    /// <summary>Finalizes an open-ended continuous capture as a success — the file is muxed and kept, and the
+    /// version auto-increments like a normal render. (Unlike <see cref="Cancel"/>, which reads as discarded.)</summary>
+    public static void StopContinuous()
+    {
+        if (_activeExportSession == null)
+        {
+            State = States.Undefined;
+            return;
+        }
+
+        var session = _activeExportSession;
+        var settings = session.Settings;
+        var duration = Playback.RunTimeInSecs - session.ExportStartedTime;
+        LastHelpString = $"Captured {session.FrameIndex} frames ({StringUtils.HumanReadableDurationFromSeconds(duration)}) "
+                         + $"to {GetTargetFilePath(settings.RenderMode)}";
+        Log.Debug(LastHelpString);
+
+        if (settings.RenderMode == RenderSettings.RenderModes.Video && settings.AutoIncrementVersionNumber)
+        {
+            RenderPaths.TryIncrementVideoFileName();
+            ProjectView.Focused?.CompositionInstance?.Symbol.GetSymbolUi()?.FlagAsModified();
+        }
+
         CleanupSession();
     }
     #endregion
@@ -287,24 +336,47 @@ internal static class RenderProcess
                 return;
         }
 
-        switch (settings.RenderMode)
-        {
-            case RenderSettings.RenderModes.Video:
-            {
-                var audioFrame = ComputeAudioBufferForVideoFrame(session);
-                savingSuccessful = SaveVideoFrameAndAdvance(session, mainOutputTexture, ref audioFrame, RenderAudioInfo.SoundtrackChannels(),
-                                                            RenderAudioInfo.SoundtrackSampleRate());
-                break;
-            }
-            case RenderSettings.RenderModes.ImageSequence:
-                // Process audio for this frame to drive animations
-                var audioFrameFloat = AudioRendering.GetFullMixDownBuffer(1.0 / session.Settings.FrameRate);
+        var isRealtimeContinuous = settings.TimeRange == RenderSettings.TimeRanges.Continuous
+                                   && settings.ContinuousClock == RenderSettings.ContinuousCaptureClock.Realtime;
 
-                // Update audio metering for UI/graph
-                double localFxTime = session.FrameIndex / session.Settings.FrameRate;
-                AudioRendering.EvaluateAllAudioMeteringOutputs(localFxTime, audioFrameFloat);
-                savingSuccessful = TrySaveImageFrameAndAdvance(mainOutputTexture);
-                break;
+        if (isRealtimeContinuous)
+        {
+            // Grab the live output without taking over playback, paced to the target FPS.
+            savingSuccessful = WriteRealtimeContinuousFrames(session, mainOutputTexture);
+        }
+        else
+        {
+            switch (settings.RenderMode)
+            {
+                case RenderSettings.RenderModes.Video:
+                {
+                    var audioFrame = ComputeAudioBufferForVideoFrame(session);
+                    savingSuccessful = SaveVideoFrameAndAdvance(session, mainOutputTexture, ref audioFrame, RenderAudioInfo.SoundtrackChannels(),
+                                                                RenderAudioInfo.SoundtrackSampleRate());
+                    break;
+                }
+                case RenderSettings.RenderModes.ImageSequence:
+                    // Process audio for this frame to drive animations
+                    var audioFrameFloat = AudioRendering.GetFullMixDownBuffer(1.0 / session.Settings.FrameRate);
+
+                    // Update audio metering for UI/graph
+                    double localFxTime = session.FrameIndex / session.Settings.FrameRate;
+                    AudioRendering.EvaluateAllAudioMeteringOutputs(localFxTime, audioFrameFloat);
+                    savingSuccessful = TrySaveImageFrameAndAdvance(mainOutputTexture);
+                    break;
+            }
+        }
+
+        // Open-ended capture has no frame-count target: it ends only on an error or the user's stop press.
+        if (settings.TimeRange == RenderSettings.TimeRanges.Continuous)
+        {
+            if (savingSuccessful)
+                return;
+
+            LastHelpString = "Continuous capture stopped after an error.";
+            Log.Warning(LastHelpString);
+            CleanupSession();
+            return;
         }
 
         // Update stats
@@ -430,7 +502,11 @@ internal static class RenderProcess
         {
             if (IsExporting)
             {
-                Cancel();
+                // For continuous capture the second press is a normal stop (keep the file), not a cancel.
+                if (IsContinuousActive)
+                    StopContinuous();
+                else
+                    Cancel();
             }
             else
             {
@@ -467,8 +543,16 @@ internal static class RenderProcess
         // Audio restoration is now handled automatically by AudioRendering.EndRecording()
         // which is called during the rendering process
 
-        // Release playback time before nulling _activeSession
-        RenderTiming.ReleasePlaybackTime(ref _activeExportSession.Settings, ref _activeExportSession.Runtime);
+        // Realtime continuous capture never takes over playback, so there is nothing to release — doing so
+        // would force PlaybackSpeed to 0 and yank the user's live playback when they stop the capture.
+        var wasRealtimeContinuous = _activeExportSession.Settings.TimeRange == RenderSettings.TimeRanges.Continuous
+                                    && _activeExportSession.Settings.ContinuousClock == RenderSettings.ContinuousCaptureClock.Realtime;
+        if (!wasRealtimeContinuous)
+        {
+            // Release playback time before nulling _activeSession
+            RenderTiming.ReleasePlaybackTime(ref _activeExportSession.Settings, ref _activeExportSession.Runtime);
+        }
+
         _activeExportSession = null;
 
         State = States.ReadyForExport;
@@ -519,6 +603,70 @@ internal static class RenderProcess
         return false;
     }
 
+    // Realtime continuous capture: write as many frames of the current live texture as the wall clock says are
+    // due, so the file stays at a constant target FPS even though the editor refresh rate varies. Playback is
+    // left untouched (the user controls it live).
+    private static bool WriteRealtimeContinuousFrames(ExportSession session, Texture2D texture)
+    {
+        var fps = session.Settings.FrameRate;
+        if (fps <= 0)
+            return false;
+
+        if (!session.RealtimeClockAnchored)
+        {
+            // Start the wall clock from the first frame the (lazily created) writer is ready for, so the
+            // init delay doesn't count as captured time.
+            session.ExportStartedTime = Playback.RunTimeInSecs;
+            session.RealtimeClockAnchored = true;
+            return true;
+        }
+
+        var elapsed = Playback.RunTimeInSecs - session.ExportStartedTime;
+        var framesDue = (int)(elapsed * fps);
+        var framesToWrite = framesDue - session.FrameIndex;
+        if (framesToWrite <= 0)
+            return true; // editor running faster than the target FPS — skip a grab this frame
+
+        try
+        {
+            // A long stall (modal open, editor paused) shouldn't flood the file with duplicates: write one
+            // frame and resync the wall-clock baseline rather than filling the whole gap.
+            const int maxCatchUpFrames = 4;
+            if (framesToWrite > maxCatchUpFrames)
+            {
+                WriteOneRealtimeFrame(session, texture);
+                session.ExportStartedTime = Playback.RunTimeInSecs - session.FrameIndex / fps;
+                return true;
+            }
+
+            for (var i = 0; i < framesToWrite; i++)
+                WriteOneRealtimeFrame(session, texture);
+
+            return true;
+        }
+        catch (Exception e)
+        {
+            Log.Error($"Continuous capture failed at frame {session.FrameIndex}: {e.Message}");
+            return false;
+        }
+    }
+
+    private static void WriteOneRealtimeFrame(ExportSession session, Texture2D texture)
+    {
+        if (session.Settings.RenderMode == RenderSettings.RenderModes.Video)
+        {
+            var noAudio = Array.Empty<byte>();
+            session.VideoWriter?.ProcessFrames(texture, ref noAudio,
+                                               RenderAudioInfo.SoundtrackChannels(), RenderAudioInfo.SoundtrackSampleRate());
+        }
+        else
+        {
+            ScreenshotWriter.StartSavingToFile(texture, GetSequenceFilePath(), session.Settings.FileFormat);
+        }
+
+        session.FrameIndex++;
+    }
+
     private static string GetSequenceFilePath()
     {
         var prefix = RenderPaths.SanitizeFilename(RenderSettings.Current.SequencePrefix);
@@ -559,10 +707,12 @@ internal static class RenderProcess
         public int FrameCount;
         public RenderSettings Settings = null!;
         public RenderTiming.Runtime Runtime;
-        public readonly double ExportStartTimeLocal = 0;
         public Int2 RenderToFileResolution;
 
         public int ResolutionMismatchCount;
+
+        // Realtime continuous capture only: set once the writer is ready and the wall clock is anchored.
+        public bool RealtimeClockAnchored;
     }
 
     private static ExportSession? _activeExportSession;

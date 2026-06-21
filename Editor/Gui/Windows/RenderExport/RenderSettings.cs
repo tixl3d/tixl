@@ -69,6 +69,13 @@ internal sealed class RenderSettings
     public ScreenshotWriter.FileFormats FileFormat;
     [JsonConverter(typeof(StringEnumConverter))]
     public TimeRanges TimeRange = TimeRanges.Custom;
+
+    // Continuous-capture options — only meaningful when TimeRange == Continuous.
+    [JsonConverter(typeof(StringEnumConverter))]
+    public ContinuousCaptureClock ContinuousClock = ContinuousCaptureClock.Realtime;
+    [JsonConverter(typeof(StringEnumConverter))]
+    public ContinuousFrameRateMode ContinuousFrameRate = ContinuousFrameRateMode.FixedFps;
+
     public float ResolutionFactor = 1f;
 
     // Render paths — persisted per-project in .t3ui
@@ -93,6 +100,8 @@ internal sealed class RenderSettings
         ExportAudio = other.ExportAudio;
         FileFormat = other.FileFormat;
         TimeRange = other.TimeRange;
+        ContinuousClock = other.ContinuousClock;
+        ContinuousFrameRate = other.ContinuousFrameRate;
         ResolutionFactor = other.ResolutionFactor;
         VideoFilePath = other.VideoFilePath;
         SequenceFilePath = other.SequenceFilePath;
@@ -144,6 +153,32 @@ internal sealed class RenderSettings
         Custom,
         Loop,
         Soundtrack,
+
+        /// <summary>Open-ended recording: capture starts immediately and runs until the user stops it, with no
+        /// predetermined end. See <see cref="ContinuousClock"/> for how playback time is driven.</summary>
+        Continuous,
+    }
+
+    /// <summary>What drives playback time during a <see cref="TimeRanges.Continuous"/> capture.</summary>
+    internal enum ContinuousCaptureClock
+    {
+        /// <summary>Leave playback under live/user control and grab whatever the output shows each frame
+        /// (OBS/VJ-style). Best for live performance and audio-reactive/interactive content.</summary>
+        Realtime,
+
+        /// <summary>Step playback forward at the target FPS like a normal render, but without a fixed end —
+        /// frame-perfect even when encoding is slower than realtime.</summary>
+        Deterministic,
+    }
+
+    /// <summary>The frame-rate written for a <see cref="TimeRanges.Continuous"/> capture.</summary>
+    internal enum ContinuousFrameRateMode
+    {
+        /// <summary>Write at the settings' FPS; in realtime grab, pace via a wall-clock accumulator.</summary>
+        FixedFps,
+
+        /// <summary>Variable frame rate timestamped by wall-clock. Reserved — not yet implemented.</summary>
+        Variable,
     }
 
     internal readonly struct QualityLevel

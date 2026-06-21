@@ -184,8 +184,14 @@ internal sealed class RenderWindow : Window
         var scale = T3Ui.UiScaleFactor;
         var margin = FooterMargin * scale;
 
+        if (RenderProcess.IsContinuousActive)
+        {
+            DrawContinuousActivityFooter(scale, margin);
+            return;
+        }
+
         var progress = (float)RenderProcess.Progress;
-        var elapsed = Playback.RunTimeInSecs - RenderProcess.ExportStartedTimeLocal;
+        var elapsed = RenderProcess.ExportElapsedSeconds;
 
         var timeRemainingStr = "Calculating...";
         if (progress > 0.01)
@@ -211,9 +217,58 @@ internal sealed class RenderWindow : Window
         }
     }
 
+    // Open-ended captures have no determinate progress, so the footer shows a sweeping activity indicator —
+    // a ~30%-wide segment scrolling across the same 4px line a normal render's progress bar would use.
+    private static void DrawContinuousActivityFooter(float scale, float margin)
+    {
+        var barHeight = 4 * scale;
+        var width = ImGui.GetContentRegionAvail().X - 2 * margin;
+
+        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + margin);
+        var drawList = ImGui.GetWindowDrawList();
+        var p0 = ImGui.GetCursorScreenPos();
+        var p1 = new Vector2(p0.X + width, p0.Y + barHeight);
+        var rounding = barHeight * 0.5f;
+        drawList.AddRectFilled(p0, p1, UiColors.BackgroundInputField, rounding);
+
+        const float segmentFraction = 0.3f;
+        var segWidth = width * segmentFraction;
+        var travel = width + segWidth;
+        var t = (float)((ImGui.GetTime() * 0.3) % 1.0);
+        var segStart = p0.X - segWidth + t * travel;
+        var segLeft = Math.Max(segStart, p0.X);
+        var segRight = Math.Min(segStart + segWidth, p1.X);
+        if (segRight > segLeft)
+            drawList.AddRectFilled(new Vector2(segLeft, p0.Y), new Vector2(segRight, p1.Y), UiColors.StatusAttention, rounding);
+
+        ImGui.Dummy(new Vector2(width, barHeight));
+
+        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + margin);
+        var elapsed = RenderProcess.ExportElapsedSeconds;
+        CustomComponents.StylizedText($"Capturing… {RenderProcess.CapturedFrameCount} frames / {StringUtils.HumanReadableDurationFromSeconds(elapsed)}",
+                                      Fonts.FontNormal, UiColors.Text);
+
+        var stopSize = CustomComponents.GetCtaButtonSize("Stop");
+        CustomComponents.RightAlign(stopSize.X + margin);
+        if (CustomComponents.DrawCtaButton("Stop", Icon.None, CustomComponents.ButtonStates.Activated))
+        {
+            RenderProcess.StopContinuous();
+        }
+    }
+
     // One-line render summary shown in the footer, e.g. "2:12.0s / 1920×1080 / H.264 → ~95 MB / 2 min".
     private static string BuildSummaryLine(RenderSettings settings)
     {
+        if (settings.TimeRange == RenderSettings.TimeRanges.Continuous)
+        {
+            RenderProcess.TryGetRenderResolution(settings, out var res);
+            var clock = settings.ContinuousClock == RenderSettings.ContinuousCaptureClock.Realtime ? "realtime" : "deterministic";
+            var format = settings.RenderMode == RenderSettings.RenderModes.Video
+                             ? CodecDisplayName(settings.VideoCodec)
+                             : $"{settings.FileFormat} sequence";
+            return $"Continuous · {res.Width}×{res.Height} · {format} · {clock} · {settings.FrameRate:0} fps";
+        }
+
         var startSec = RenderTiming.ReferenceTimeToSeconds(settings.StartInBars, settings.TimeReference, settings.FrameRate);
         var endSec = RenderTiming.ReferenceTimeToSeconds(settings.EndInBars, settings.TimeReference, settings.FrameRate);
         var duration = Math.Max(0, endSec - startSec);
@@ -250,25 +305,34 @@ internal sealed class RenderWindow : Window
         modified |= FormInputs.AddSegmentedButtonWithLabel(ref s.TimeRange, "Range");
         RenderTiming.ApplyTimeRange(s);
 
-        // Scale row (now under Range)
-        var oldRef = s.TimeReference;
-        if (FormInputs.AddSegmentedButtonWithLabel(ref s.TimeReference, "Scale"))
+        var isContinuous = s.TimeRange == RenderSettings.TimeRanges.Continuous;
+
+        if (isContinuous)
         {
-            modified = true;
-            s.StartInBars = (float)RenderTiming.ConvertReferenceTime(s.StartInBars, oldRef, s.TimeReference, s.FrameRate);
-            s.EndInBars = (float)RenderTiming.ConvertReferenceTime(s.EndInBars, oldRef, s.TimeReference, s.FrameRate);
+            modified |= DrawContinuousOptions(s);
         }
+        else
+        {
+            // Scale row (now under Range)
+            var oldRef = s.TimeReference;
+            if (FormInputs.AddSegmentedButtonWithLabel(ref s.TimeReference, "Scale"))
+            {
+                modified = true;
+                s.StartInBars = (float)RenderTiming.ConvertReferenceTime(s.StartInBars, oldRef, s.TimeReference, s.FrameRate);
+                s.EndInBars = (float)RenderTiming.ConvertReferenceTime(s.EndInBars, oldRef, s.TimeReference, s.FrameRate);
+            }
 
-        FormInputs.AddVerticalSpace(5);
+            FormInputs.AddVerticalSpace(5);
 
-        // Start and End on separate rows (standard style)
-        var rangeChanged = FormInputs.AddFloat($"{"Start"} ({s.TimeReference})", ref s.StartInBars, 0, float.MaxValue, 0.1f, true);
-        rangeChanged |= FormInputs.AddFloat($"{"End"} ({s.TimeReference})", ref s.EndInBars, 0, float.MaxValue, 0.1f, true);
+            // Start and End on separate rows (standard style)
+            var rangeChanged = FormInputs.AddFloat($"{"Start"} ({s.TimeReference})", ref s.StartInBars, 0, float.MaxValue, 0.1f, true);
+            rangeChanged |= FormInputs.AddFloat($"{"End"} ({s.TimeReference})", ref s.EndInBars, 0, float.MaxValue, 0.1f, true);
 
-        if (rangeChanged)
-            s.TimeRange = RenderSettings.TimeRanges.Custom;
+            if (rangeChanged)
+                s.TimeRange = RenderSettings.TimeRanges.Custom;
 
-        modified |= rangeChanged;
+            modified |= rangeChanged;
+        }
 
         FormInputs.AddVerticalSpace(5);
 
@@ -284,10 +348,21 @@ internal sealed class RenderWindow : Window
             _uiState.LastValidFps = s.FrameRate;
         }
 
-        // Resolution row
-        modified |= FormInputs.AddFloat("Resolution %", ref s.ResolutionFactor, 0.01f, 10f, 0.01f, true, true,
-                                         "Scale factor for rendered resolution (1.0 = 100%).",
-                                         RenderSettings.Defaults.ResolutionFactor);
+        // Resolution row — realtime grab captures the live texture as-is, so the scale factor doesn't apply.
+        if (isContinuous && s.ContinuousClock == RenderSettings.ContinuousCaptureClock.Realtime)
+        {
+            ImGui.BeginDisabled();
+            var ignored = 1f;
+            FormInputs.AddFloat("Resolution %", ref ignored, 0.01f, 10f, 0.01f, true, true, null, 1f);
+            ImGui.EndDisabled();
+            FormInputs.AddHint("Realtime capture uses the native output resolution.");
+        }
+        else
+        {
+            modified |= FormInputs.AddFloat("Resolution %", ref s.ResolutionFactor, 0.01f, 10f, 0.01f, true, true,
+                                             "Scale factor for rendered resolution (1.0 = 100%).",
+                                             RenderSettings.Defaults.ResolutionFactor);
+        }
 
         FormInputs.AddVerticalSpace(10);
         FormInputs.AddVerticalSpace(5);
@@ -310,6 +385,37 @@ internal sealed class RenderWindow : Window
         return modified;
     }
 
+
+    // The Continuous-range options: which clock drives the capture, and (reserved) its frame-rate mode.
+    private static bool DrawContinuousOptions(RenderSettings s)
+    {
+        FormInputs.AddVerticalSpace(5);
+
+        var modified = FormInputs.AddSegmentedButtonWithLabel(ref s.ContinuousClock, "Clock");
+        FormInputs.AddHint(s.ContinuousClock == RenderSettings.ContinuousCaptureClock.Realtime
+                               ? "Grabs the live output as you perform; press capture again to stop. (Video only — no audio yet.)"
+                               : "Advances time at the target FPS until you stop. Frame-perfect, but not realtime.");
+
+        // Realtime capture only keeps pace with a hardware encoder — nudge toward NVENC/Quick Sync/AMF when the
+        // selected video codec would fall back to software.
+        if (s.ContinuousClock == RenderSettings.ContinuousCaptureClock.Realtime
+            && s.RenderMode == RenderSettings.RenderModes.Video
+            && VideoEncoderAvailabilityCache.Get(s.VideoCodec) is { Kind: not VideoEncoderKind.Hardware })
+        {
+            DrawInlineEncoderHint(Icon.Tip, UiColors.StatusAttention,
+                                  "Tip: pick a hardware (NVENC) codec — H.264 or HEVC — in Format & Quality for smooth realtime capture.");
+        }
+
+        // Frame-rate mode — only Fixed FPS is implemented; Variable (VFR) is reserved for a later version.
+        ImGui.BeginDisabled();
+        var frameRateMode = RenderSettings.ContinuousFrameRateMode.FixedFps;
+        FormInputs.AddEnumDropdown(ref frameRateMode, "Frame Rate", null, RenderSettings.Defaults.ContinuousFrameRate,
+                                   m => m == RenderSettings.ContinuousFrameRateMode.FixedFps ? "Fixed FPS" : "Variable (VFR)");
+        ImGui.EndDisabled();
+        FormInputs.AddHint("Fixed FPS. Variable (VFR) frame rate is coming soon.");
+
+        return modified;
+    }
 
     // ProRes is profile-based and FFV1 is lossless, so a target bitrate is meaningless for them.
     private static bool CodecUsesBitrate(VideoExportCodec codec)
@@ -465,6 +571,14 @@ internal sealed class RenderWindow : Window
 
         DrawCodecAvailabilityHint(s.VideoCodec);
 
+        // Continuous capture leans on a hardware encoder to keep realtime pace; warn (but allow) otherwise.
+        if (s.TimeRange == RenderSettings.TimeRanges.Continuous
+            && VideoEncoderAvailabilityCache.Get(s.VideoCodec) is { Kind: not VideoEncoderKind.Hardware })
+        {
+            DrawInlineEncoderHint(Icon.Warning, UiColors.StatusAttention,
+                                  "No hardware encoder — continuous capture may drop or duplicate frames.");
+        }
+
         // Bitrate applies to the rate-controlled codecs only — ProRes (profile-based) and FFV1 (lossless) ignore it.
         if (CodecUsesBitrate(s.VideoCodec))
         {
@@ -505,7 +619,21 @@ internal sealed class RenderWindow : Window
             FormInputs.AddHint($"Est. {hapSize} ({hapW}×{hapH}, DXT before Snappy)");
         }
 
-        modified |= FormInputs.AddCheckBox("Export Audio (experimental)", ref s.ExportAudio, null, RenderSettings.Defaults.ExportAudio);
+        // Realtime continuous capture has no synced-audio path yet, so the option is disabled in that mode.
+        if (s.TimeRange == RenderSettings.TimeRanges.Continuous
+            && s.ContinuousClock == RenderSettings.ContinuousCaptureClock.Realtime)
+        {
+            ImGui.BeginDisabled();
+            var noAudio = false;
+            FormInputs.AddCheckBox("Export Audio (experimental)", ref noAudio, null, false);
+            ImGui.EndDisabled();
+            FormInputs.AddHint("Audio capture isn't available in realtime mode yet.");
+        }
+        else
+        {
+            modified |= FormInputs.AddCheckBox("Export Audio (experimental)", ref s.ExportAudio, null, RenderSettings.Defaults.ExportAudio);
+        }
+
         return modified;
     }
 

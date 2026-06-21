@@ -407,9 +407,26 @@ internal sealed class OutputWindow : Window
         if (!RenderProcess.IsExporting) return;
         var dl = ImGui.GetForegroundDrawList();
         var p = ImGui.GetWindowPos();
-        var size = new Vector2(ImGui.GetWindowSize().X, 2);
+        var width = ImGui.GetWindowSize().X;
+        var size = new Vector2(width, 2);
         dl.AddRectFilled(p, p + size, UiColors.BackgroundFull.Fade(0.4f));
-        dl.AddRectFilled(p, p + new Vector2(size.X * (float)RenderProcess.Progress, size.Y), UiColors.StatusAttention);
+
+        var progress = RenderProcess.Progress;
+        if (progress < 0)
+        {
+            // Open-ended continuous capture: a sweeping segment instead of a determinate fill.
+            const float segmentFraction = 0.3f;
+            var segWidth = width * segmentFraction;
+            var t = (float)((ImGui.GetTime() * 0.3) % 1.0);
+            var segStart = p.X - segWidth + t * (width + segWidth);
+            var segLeft = Math.Max(segStart, p.X);
+            var segRight = Math.Min(segStart + segWidth, p.X + width);
+            if (segRight > segLeft)
+                dl.AddRectFilled(new Vector2(segLeft, p.Y), new Vector2(segRight, p.Y + size.Y), UiColors.StatusAttention);
+            return;
+        }
+
+        dl.AddRectFilled(p, p + new Vector2(size.X * (float)progress, size.Y), UiColors.StatusAttention);
     }
 
     /// <summary>

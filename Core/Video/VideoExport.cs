@@ -172,6 +172,11 @@ public interface IVideoEncoderFactory
     /// <summary>Reports whether <paramref name="sourcePath"/> is worth proxying, from its measured keyframe
     /// spacing (demux-only — no decode). Used to decide auto-generation and to hint the manual trigger.</summary>
     VideoProxyAdvice EvaluateProxyNeed(string sourcePath);
+
+    /// <summary>Reads <paramref name="sourcePath"/>'s duration in seconds (demux-only — no decode). Returns false
+    /// (and 0) when the file can't be read or carries no usable duration. Used to size a freshly dropped video
+    /// timeline clip to its real length.</summary>
+    bool TryProbeDurationSeconds(string sourcePath, out double seconds);
 }
 
 /// <summary>

@@ -22,6 +22,17 @@ You can use TiXL to render your project as a video or image sequence:
 ![Alt text](/images/03-quality-preview.gif)
 
 
+## Continuous Capture (open-ended recording)
+
+When you don't know the length up front — a live set, a performance, an audio-reactive jam — set **Range** to **Continuous**. Pressing **Render** then starts recording immediately and keeps going until you press the capture control again, which finalizes the file. There is no fixed end time.
+
+Two clock models are available under **Source**:
+
+- **Realtime** grabs the live output as you perform, paced to the target FPS, and leaves playback under your control. This is the mode for live/VJ use. It captures **video only** for now (no audio), at the native output resolution. A fast hardware encoder (NVENC / Quick Sync / AMF) is recommended — with a software codec the capture may drop or duplicate frames to keep pace, and the render window warns you.
+- **Deterministic** advances time at the target FPS until you stop, exactly like a normal render but without a predetermined end. It is frame-perfect even when encoding is slower than realtime, and records audio.
+
+While a continuous capture runs, the progress bar is replaced by a sweeping activity indicator showing the captured frame count and elapsed time. Press **Stop** (or the capture shortcut) to finalize.
+
 ## Saving Screenshots
 
 The screenshot (camera) icon in the output window's toolbar saves the current frame as a PNG into your project's `Screenshots/` folder.
