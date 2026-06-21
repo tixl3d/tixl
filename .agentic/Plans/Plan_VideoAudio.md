@@ -1,10 +1,47 @@
 # Video Audio Playback (FFmpeg → BASS)
 
-**Status:** Draft — 2026-06-07. Design only, no code yet. Extends the FFmpeg video work
+**Status:** In progress — Phase 1 starting (picked up 2026-06-21). Extends the FFmpeg video work
 ([`Plan_FfmpegVideo.md`](archive/Plan_FfmpegVideo.md), [`Plan_VideoZeroCopyDecode.md`](archive/Plan_VideoZeroCopyDecode.md)),
 which decode the **video** track but leave **audio silent** — the `Volume` inputs on `[PlayVideo]` /
 `[VideoClip]` are no-op placeholders (see the "Audio is silent in this milestone" comments in
 `PlayVideo.cs` / `VideoClip.cs`).
+
+## Reconciliation with current code (2026-06-21)
+
+A fresh read of the codebase confirms the design holds and sharpens three points:
+
+- **Export already muxes audio.** The render loop pulls a deterministic per-frame mix
+  (`AudioRendering.GetFullMixDownBuffer(1/fps)` → `VideoFileEncoder.WriteAudioSamples`, interleaved **float /
+  48 kHz / stereo**) and the soundtrack + operator mixers already feed it. So Phase 3 is *lighter than written*:
+  once a video's audio is a push stream on a mixer the export reads, the only new work is feeding **exactly the
+  frame's time-slice** deterministically (no live buffer-ahead). The encoder needs no changes.
+- **The decode worker is seek-to-target, not a continuous stream.** `VideoPlaybackController.DecodeTo` seeks to
+  the requested frame and decodes forward, caching the GOP; forward 1× play stays sequential but a scrub/seek
+  re-seeks. **Implication:** the audio packet buffer is owned by the controller and must **flush on every
+  `SeekToKeyframeBefore`** — audio decode and the video seek logic are coupled, so they're built together (not as
+  an isolated session method). This is exactly why Phase 1 mutes on seek/scrub.
+- **The resampler is new code.** Nothing in the repo uses `swr_*` yet (`VideoFileEncoder` deinterleaves by hand at
+  the mix rate). The audio decode path is the first `SwrContext` user — target interleaved float / 48 kHz / stereo
+  via `Sdcb.FFmpeg.Raw` (`ffmpeg.swr_alloc_set_opts2` / `swr_init` / `swr_convert`, `av_channel_layout_default`).
+
+### Phase 1 implementation breakdown (file-level)
+
+1. **`VideoServices/VideoDecoderSession.cs`** — optional audio stream. In `TryOpen`/ctor, find the best audio
+   stream (none is fine); open an audio `CodecContext`; build a `SwrContext` to interleaved float/48k/stereo.
+   In `TryReadNextFrame`'s packet loop, route audio packets (`StreamIndex == _audioStreamIndex`) → decode →
+   `swr_convert` → enqueue `(sourceSeconds, float[])` chunks. Add `HasAudio`, `FlushAudio()` (clear queue, on
+   seek), and `bool TryDequeueAudio(out chunk)`. `FlushDecoder`/`SeekToKeyframeBefore` also flush audio + the swr.
+2. **`VideoServices/VideoPlaybackController.cs`** — drain decoded audio chunks under `_lock`; expose them to the
+   engine client. Flush the audio queue whenever the worker seeks (discontinuity) so stale audio never plays.
+3. **`Core/Audio/VideoAudioStream.cs` (new)** — a BASS **push** stream
+   (`Bass.CreateStream(48000, 2, BassFlags.Float, StreamProcedureType.Push)`) on `OperatorMixer`, fed via
+   `Bass.StreamPutData`. Parallel to `OperatorAudioStreamBase` (push ≠ seekable file): reuses mixer routing, the
+   `MixerChanPause` stale flag, per-stream `Volume`, `ChannelGetLevel`. The **feeder** tops it up to ~50–100 ms
+   from the controller's drained PCM; flush+mute on seek/scrub/speed≠1.
+4. **`Core/Audio/AudioEngine.cs`** — `UseVideoAudio(Guid id, …, float volume)` entry point + stale-token
+   reaping (mirror operator-audio: paused next frame when `Update` stops calling it).
+5. **`Operators/Video/lib/io/video/PlayVideo.cs`** — call `UseVideoAudio` each `Update`, drive `Volume`; remove
+   the "audio is silent" stub comment.
 
 ## Goal
 
