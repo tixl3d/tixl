@@ -4,6 +4,7 @@ using T3.Core.Animation;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
 using T3.Core.Resource.Assets;
+using T3.Editor.Gui.Interaction.Snapping;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel;
@@ -187,23 +188,11 @@ internal static class TimeClipItem
         ImGui.SetCursorScreenPos(showSizeHandles ? (position + _handleOffset) : position);
 
         var wasClickedDown = ImGui.InvisibleButton("body", bodySize);
+        var bodyHovered = ImGui.IsItemHovered();
 
-        if (ImGui.IsItemHovered())
+        if (bodyHovered)
         {
-            // For a video clip, outline its full available footage so a hover answers: am I using all of it,
-            // can I still extend either edge, or am I already reading past the end (looping/freezing)?
-            var footageBars = -1f;
-            if (clipInstance is T3.Core.Operator.Interfaces.IDescriptiveFilename hoveredFile)
-            {
-                var sourcePath = hoveredFile.SourcePathSlot.TypedInputValue.Value;
-                if (!string.IsNullOrEmpty(sourcePath)
-                    && AssetType.TryGetForFilePath(sourcePath, out var hoveredType, out _) && hoveredType.Name == "Video"
-                    && VideoClipDurationCache.TryGetDurationSecs(sourcePath, clipInstance, out var fullDurationSecs))
-                {
-                    footageBars = (float)attr.LayerContext.TimeCanvas.Playback.BarsFromSeconds(fullDurationSecs);
-                    DrawSourceFootageExtent(ref attr, timeClip, position, itemRectMax, clipWidth, footageBars);
-                }
-            }
+            TryGetVideoFootageBars(ref attr, timeClip, clipInstance, out var footageBars);
 
             ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(4,4));
             ImGui.BeginTooltip();
@@ -274,7 +263,8 @@ internal static class TimeClipItem
 
         ImGui.SetCursorScreenPos(position);
         var aHandleClicked = ImGui.InvisibleButton("startHandle", handleSize);
-        if (ImGui.IsItemHovered() || ImGui.IsItemActive())
+        var startHandleActive = ImGui.IsItemHovered() || ImGui.IsItemActive();
+        if (startHandleActive)
         {
             attr.DrawList.AddRectFilled(ImGui.GetItemRectMin() + new Vector2(2, 3),
                                         ImGui.GetItemRectMax() - new Vector2(1, 4),
@@ -286,7 +276,8 @@ internal static class TimeClipItem
 
         ImGui.SetCursorScreenPos(position + new Vector2(bodyWidth + HandleWidth, 0));
         aHandleClicked |= ImGui.InvisibleButton("endHandle", handleSize);
-        if (ImGui.IsItemHovered() || ImGui.IsItemActive())
+        var endHandleActive = ImGui.IsItemHovered() || ImGui.IsItemActive();
+        if (endHandleActive)
         {
             attr.DrawList.AddRectFilled(ImGui.GetItemRectMin() + new Vector2(0, 3),
                                         ImGui.GetItemRectMax() - new Vector2(3, 4),
@@ -295,6 +286,14 @@ internal static class TimeClipItem
         }
 
         HandleDragging(attr, timeClip, isSelected, false, HandleDragMode.End);
+
+        // Footage extent stays visible while hovering or dragging either trim handle — that's exactly when
+        // it's most useful (it answers "can I still extend this edge, or am I at the end of the media?").
+        if ((bodyHovered || startHandleActive || endHandleActive)
+            && TryGetVideoFootageBars(ref attr, timeClip, clipInstance, out var hoverFootageBars))
+        {
+            DrawSourceFootageExtent(ref attr, timeClip, position, itemRectMax, clipWidth, hoverFootageBars);
+        }
 
         if (aHandleClicked)
         {
@@ -330,7 +329,7 @@ internal static class TimeClipItem
     /// Handles the invocation and update of drag commands. These will be forwarded to the timeline interface and
     /// applied to other selected items like keyframes and other selected time clips
     /// </summary>
-    private static void HandleDragging(ClipDrawingAttributes attr, TimeClip timeClip, bool isSelected, bool _, HandleDragMode mode)
+    private static void HandleDragging(ClipDrawingAttributes attr, TimeClip timeClip, bool isSelected, bool wasClicked, HandleDragMode mode)
     {
         if (ImGui.IsItemHovered())
         {
@@ -451,7 +450,11 @@ internal static class TimeClipItem
 
             case HandleDragMode.Start:
                 var newDragStartTime = attr.LayerContext.TimeCanvas.InverseTransformX(mousePos.X);
-                if (allowSnapping && attr.LayerContext.SnapHandler.TryCheckForSnapping(newDragStartTime, out var snappedValue3, attr.LayerContext.TimeCanvas.Scale.X, snapExclusions))
+                // Snap the in-point to the first frame of the available footage (SourceRange.Start == 0).
+                var startFootageAttractor = TryGetFootageBoundaryTimes(ref attr, timeClip, out var footageStartTime, out _)
+                                                ? UseFootageSnapAnchor(footageStartTime)
+                                                : null;
+                if (allowSnapping && attr.LayerContext.SnapHandler.TryCheckForSnapping(newDragStartTime, out var snappedValue3, attr.LayerContext.TimeCanvas.Scale.X, snapExclusions, startFootageAttractor))
                 {
                     newDragStartTime = (float)snappedValue3;
                 }
@@ -461,7 +464,11 @@ internal static class TimeClipItem
 
             case HandleDragMode.End:
                 var newDragTime = attr.LayerContext.TimeCanvas.InverseTransformX(mousePos.X);
-                if (allowSnapping && attr.LayerContext.SnapHandler.TryCheckForSnapping(newDragTime, out var snappedValue4, attr.LayerContext.TimeCanvas.Scale.X, snapExclusions))
+                // Snap the out-point to the last frame of the available footage (SourceRange.End == duration).
+                var endFootageAttractor = TryGetFootageBoundaryTimes(ref attr, timeClip, out _, out var footageEndTime)
+                                              ? UseFootageSnapAnchor(footageEndTime)
+                                              : null;
+                if (allowSnapping && attr.LayerContext.SnapHandler.TryCheckForSnapping(newDragTime, out var snappedValue4, attr.LayerContext.TimeCanvas.Scale.X, snapExclusions, endFootageAttractor))
                 {
                     newDragTime = (float)snappedValue4;
                 }
@@ -500,6 +507,59 @@ internal static class TimeClipItem
         attr.DrawList.AddLine(new Vector2(xFootageEnd, position.Y), new Vector2(xFootageEnd, itemRectMax.Y), _footageBoundaryColor, 1);
     }
 
+    /// <summary>Full source length of a video clip in bars, or false (with -1) for non-video / unknown-duration
+    /// clips. Duration is resolved through the per-asset <see cref="VideoClipDurationCache"/> (probed once).</summary>
+    private static bool TryGetVideoFootageBars(ref ClipDrawingAttributes attr, TimeClip timeClip, Instance? clipInstance, out float footageBars)
+    {
+        footageBars = -1f;
+        if (clipInstance is not T3.Core.Operator.Interfaces.IDescriptiveFilename describedFile)
+            return false;
+
+        var path = describedFile.SourcePathSlot.TypedInputValue.Value;
+        if (string.IsNullOrEmpty(path)
+            || !AssetType.TryGetForFilePath(path, out var assetType, out _) || assetType.Name != "Video"
+            || !VideoClipDurationCache.TryGetDurationSecs(path, clipInstance, out var fullDurationSecs) || fullDurationSecs <= 0)
+            return false;
+
+        footageBars = (float)attr.LayerContext.TimeCanvas.Playback.BarsFromSeconds(fullDurationSecs);
+        return true;
+    }
+
+    /// <summary>Timeline positions (bars) where the clip's source reads the first and last frame of its media.
+    /// These are stable while trimming (a slip-trim preserves speed), so they make good snap targets. False for
+    /// non-video clips or a degenerate (zero-speed) clip.</summary>
+    private static bool TryGetFootageBoundaryTimes(ref ClipDrawingAttributes attr, TimeClip timeClip,
+                                                   out double footageStartTime, out double footageEndTime)
+    {
+        footageStartTime = 0;
+        footageEndTime = 0;
+        if (!attr.CompositionOp.Children.TryGetChildInstance(timeClip.Id, out var clipInstance)
+            || !TryGetVideoFootageBars(ref attr, timeClip, clipInstance, out var footageBars))
+            return false;
+
+        var rate = timeClip.Speed;
+        if (Math.Abs(rate) < 1e-6)
+            return false;
+
+        footageStartTime = timeClip.TimeRange.Start - timeClip.SourceRange.Start / rate;
+        footageEndTime = timeClip.TimeRange.Start + (footageBars - timeClip.SourceRange.Start) / rate;
+        return true;
+    }
+
+    // Arms the shared single-anchor attractor for one TryCheckForSnapping call, returning it as a reusable
+    // one-element list so the snap check stays allocation-free during a trim drag.
+    private static IValueSnapAttractor[] UseFootageSnapAnchor(double anchorTime)
+    {
+        _footageSnapAttractor.AnchorTime = anchorTime;
+        return _footageSnapAttractorList;
+    }
+
+    private sealed class FootageSnapAttractor : IValueSnapAttractor
+    {
+        public double AnchorTime;
+        public void CheckForSnap(ref SnapResult snapResult) => snapResult.TryToImproveWithAnchorValue(AnchorTime);
+    }
+
     private const float HandleWidth = 7;
     private static float _timeWithinDraggedClip;
 
@@ -513,4 +573,7 @@ internal static class TimeClipItem
     private static readonly Color _timeRemappingColor = UiColors.StatusAnimated.Fade(0.25f);
     private static readonly Color _footageBoundaryColor = UiColors.StatusAnimated.Fade(0.6f);
     private static float _posPosYOnDragStart;
+
+    private static readonly FootageSnapAttractor _footageSnapAttractor = new();
+    private static readonly IValueSnapAttractor[] _footageSnapAttractorList = [_footageSnapAttractor];
 }
