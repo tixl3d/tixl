@@ -102,7 +102,9 @@ internal static class NavigationSidebar
     // distinct when several sidebar windows are open at once. Begin/End are paired and drawn sequentially.
     private static object? _contentPanelScrollKey;
 
-    internal static void BeginContentPanel(string title, object? scrollKey = null)
+    /// <param name="drawHeaderTools">Optional right-aligned content drawn on the header line (e.g. a help
+    /// button). The callback is responsible for its own right-alignment (e.g. <c>CustomComponents.RightAlign</c>).</param>
+    internal static void BeginContentPanel(string title, object? scrollKey = null, Action? drawHeaderTools = null)
     {
         _contentPanelScrollKey = scrollKey;
 
@@ -125,6 +127,9 @@ internal static class NavigationSidebar
             ImGui.TextUnformatted(title);
             ImGui.PopStyleColor();
             ImGui.PopFont();
+
+            drawHeaderTools?.Invoke();
+
             FormInputs.AddVerticalSpace(8);
         }
     }

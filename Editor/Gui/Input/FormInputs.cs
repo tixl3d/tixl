@@ -553,11 +553,13 @@ internal static class FormInputs
         return modified;
     }
 
-    public static bool AddSegmentedButtonWithLabel<T>(ref T selectedValue, string label, float columnWidth = 0)
+    public static bool AddSegmentedButtonWithLabel<T>(ref T selectedValue, string label, float columnWidth = 0, string? tooltip = null)
         where T : struct, Enum
     {
         DrawInputLabel(label);
-        return SegmentedButton(ref selectedValue, columnWidth);
+        var modified = SegmentedButton(ref selectedValue, columnWidth);
+        AppendTooltip(tooltip);
+        return modified;
     }
 
     public static bool SegmentedButton<T>(ref T selectedValue, float columnWidth = 0) where T : struct, Enum

@@ -136,3 +136,27 @@ window again.
 
 **Expected:**
 - **Codec** is still **AV1**, and the **Filename** still ends in `.mp4`.
+
+## Step: The content header has a section-aware help button
+
+**Action:**
+In the **Render To File** window, look at the top-right corner of the content panel (level with the section
+title). Hover the **help (?)** icon on the **Source** section, then switch to **Format & Quality** and
+**Output Target** and hover it again. Click it once.
+
+**Expected:**
+- A help icon sits in the header's top-right corner, vertically aligned with the title.
+- Hovering shows a short formatted summary **specific to the active section** (Source vs Format & Quality vs
+  Output Target) — the content changes as you switch sections.
+- Clicking opens the documentation page (`help.tixl.app/using/ExportVideos`) in the default browser.
+
+## Step: Parameters have inline (?) help
+
+**Action:**
+In the **Source** section, hover the small **(?)** icon next to **Range**, **Scale**, **Start**, **End**, and
+**FPS**. Check **Format & Quality** (**Render Mode**, **Codec**, **Export Audio**) and **Output Target**
+(**Filename**, **Auto-increment version**) too.
+
+**Expected:**
+- Each of those parameters shows a **(?)** marker that, on hover, explains the parameter in plain language.
+- The segmented controls (Range, Scale, Render Mode) also carry a **(?)** after the control.

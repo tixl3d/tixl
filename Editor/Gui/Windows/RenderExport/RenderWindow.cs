@@ -1,6 +1,7 @@
 #nullable enable
 using System.IO;
 using ImGuiNET;
+using T3.Editor.Gui.Help;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
@@ -65,7 +66,7 @@ internal sealed class RenderWindow : Window
             }
             NavigationSidebar.EndColumn();
 
-            NavigationSidebar.BeginContentPanel(SectionTitle(_uiState.ActiveSection), this);
+            NavigationSidebar.BeginContentPanel(SectionTitle(_uiState.ActiveSection), this, DrawHeaderHelp);
             {
                 FormInputs.SetIndentToParameters();
                 switch (_uiState.ActiveSection)
@@ -90,6 +91,24 @@ internal sealed class RenderWindow : Window
 
         if (modified)
             ProjectView.Focused?.CompositionInstance?.Symbol.GetSymbolUi()?.FlagAsModified();
+    }
+
+    // Help button on the content-panel header: hover shows the embedded snippet for the active section, click
+    // opens the published documentation page.
+    private const string RenderHelpUrl = "https://help.tixl.app/using/ExportVideos/";
+
+    private void DrawHeaderHelp()
+    {
+        var size = new Vector2(ImGui.GetFrameHeight(), ImGui.GetFrameHeight());
+        CustomComponents.RightAlign(size.X);
+
+        var docId = _uiState.ActiveSection switch
+                        {
+                            Sections.FormatAndQuality => "RenderExport_Format",
+                            Sections.OutputTarget     => "RenderExport_Target",
+                            _                         => "RenderExport_Source",
+                        };
+        DocumentationButton.Draw(docId, RenderHelpUrl, size);
     }
 
     private static string SectionTitle(Sections section) => section switch
@@ -302,7 +321,14 @@ internal sealed class RenderWindow : Window
         FormInputs.SetIndentToParameters();
 
         // Range row
-        modified |= FormInputs.AddSegmentedButtonWithLabel(ref s.TimeRange, "Range");
+        modified |= FormInputs.AddSegmentedButtonWithLabel(ref s.TimeRange, "Range", 0,
+                                                           """
+                                                           What time span to render:
+                                                           • Custom — a start/end you set
+                                                           • Loop — the timeline's loop range
+                                                           • Soundtrack — the main soundtrack's length
+                                                           • Continuous — keep recording until you press stop
+                                                           """);
         RenderTiming.ApplyTimeRange(s);
 
         var isContinuous = s.TimeRange == RenderSettings.TimeRanges.Continuous;
@@ -315,7 +341,8 @@ internal sealed class RenderWindow : Window
         {
             // Scale row (now under Range)
             var oldRef = s.TimeReference;
-            if (FormInputs.AddSegmentedButtonWithLabel(ref s.TimeReference, "Scale"))
+            if (FormInputs.AddSegmentedButtonWithLabel(ref s.TimeReference, "Scale", 0,
+                                                       "The unit for Start and End: musical bars, seconds, or frame numbers."))
             {
                 modified = true;
                 s.StartInBars = (float)RenderTiming.ConvertReferenceTime(s.StartInBars, oldRef, s.TimeReference, s.FrameRate);
@@ -332,8 +359,10 @@ internal sealed class RenderWindow : Window
                                                                       RenderSettings.TimeReferences.Bars, s.TimeReference, s.FrameRate);
 
             // Start and End on separate rows (standard style)
-            var rangeChanged = FormInputs.AddFloat($"Start ({s.TimeReference})", ref s.StartInBars, 0, float.MaxValue, 0.1f, true, false, null, startDefault);
-            rangeChanged |= FormInputs.AddFloat($"End ({s.TimeReference})", ref s.EndInBars, 0, float.MaxValue, 0.1f, true, false, null, endDefault);
+            var rangeChanged = FormInputs.AddFloat($"Start ({s.TimeReference})", ref s.StartInBars, 0, float.MaxValue, 0.1f, true, false,
+                                                   "Where the render begins, in the unit chosen under Scale.", startDefault);
+            rangeChanged |= FormInputs.AddFloat($"End ({s.TimeReference})", ref s.EndInBars, 0, float.MaxValue, 0.1f, true, false,
+                                                "Where the render ends, in the unit chosen under Scale.", endDefault);
 
             if (rangeChanged)
                 s.TimeRange = RenderSettings.TimeRanges.Custom;
@@ -344,7 +373,9 @@ internal sealed class RenderWindow : Window
         FormInputs.AddVerticalSpace(5);
 
         // FPS row
-        if (FormInputs.AddFloat("FPS", ref s.FrameRate, 1, 120, 0.1f, true, false, null, RenderSettings.Defaults.FrameRate))
+        if (FormInputs.AddFloat("FPS", ref s.FrameRate, 1, 120, 0.1f, true, false,
+                                "Frames per second of the output. 60 is a good default; 24–30 for film-like motion.",
+                                RenderSettings.Defaults.FrameRate))
         {
             modified = true;
             if (s.TimeReference == RenderSettings.TimeReferences.Frames)
@@ -398,7 +429,11 @@ internal sealed class RenderWindow : Window
     {
         FormInputs.AddVerticalSpace(5);
 
-        var modified = FormInputs.AddSegmentedButtonWithLabel(ref s.ContinuousClock, "Clock");
+        var modified = FormInputs.AddSegmentedButtonWithLabel(ref s.ContinuousClock, "Clock", 0,
+                                                             """
+                                                             Realtime grabs the live output as you perform (video only, native resolution).
+                                                             Deterministic steps time forward at the target FPS — frame-perfect and records audio.
+                                                             """);
         FormInputs.AddHint(s.ContinuousClock == RenderSettings.ContinuousCaptureClock.Realtime
                                ? "Grabs the live output as you perform; press capture again to stop. (Video only — no audio yet.)"
                                : "Advances time at the target FPS until you stop. Frame-perfect, but not realtime.");
@@ -534,13 +569,16 @@ internal sealed class RenderWindow : Window
     private bool DrawFormatSection()
     {
         var s = RenderSettings.Current;
-        var modified = FormInputs.AddSegmentedButtonWithLabel(ref s.RenderMode, "Render Mode");
+        var modified = FormInputs.AddSegmentedButtonWithLabel(ref s.RenderMode, "Render Mode", 0,
+                                                             "Render one video file, or a numbered sequence of image files (PNG/JPG).");
         FormInputs.AddVerticalSpace();
 
         if (s.RenderMode == RenderSettings.RenderModes.Video)
             modified |= DrawVideoFormatSettings();
         else
-            modified |= FormInputs.AddEnumDropdown(ref s.FileFormat, "Format", null, RenderSettings.Defaults.FileFormat);
+            modified |= FormInputs.AddEnumDropdown(ref s.FileFormat, "Format",
+                                                   "Image file type. PNG is lossless (larger); JPG is much smaller (no alpha).",
+                                                   RenderSettings.Defaults.FileFormat);
 
         return modified;
     }
@@ -566,12 +604,14 @@ internal sealed class RenderWindow : Window
         var estSamples = s.OverrideMotionBlurSamples;
 
         modified |= FormInputs.AddEnumDropdown(ref s.VideoCodec, "Codec",
-                                               "H.264 (.mp4): broadly compatible, hardware-accelerated.\n"
-                                               + "HEVC / H.265 (.mp4): more efficient than H.264; hardware-accelerated where available.\n"
-                                               + "ProRes (.mov): high-quality all-intra editing codec.\n"
-                                               + "VP9 / AV1 (.mp4): efficient delivery codecs; software-encoded (slower).\n"
-                                               + "FFV1 (.mkv): lossless archival (very large files).\n"
-                                               + "HAP / HAP Alpha / HAP Q (.mov): GPU-friendly intra codecs for realtime/VJ playback.",
+                                               """
+                                               H.264 (.mp4): broadly compatible, hardware-accelerated.
+                                               HEVC / H.265 (.mp4): more efficient than H.264; hardware-accelerated where available.
+                                               ProRes (.mov): high-quality all-intra editing codec.
+                                               VP9 / AV1 (.mp4): efficient delivery codecs; software-encoded (slower).
+                                               FFV1 (.mkv): lossless archival (very large files).
+                                               HAP / HAP Alpha / HAP Q (.mov): GPU-friendly intra codecs for realtime/VJ playback.
+                                               """,
                                                RenderSettings.Defaults.VideoCodec,
                                                codec => CodecDisplayName(codec),
                                                codec => DropdownEstimateSuffix(codec, estRes, estFrames, estDuration, estBitrate, estSamples));
@@ -638,7 +678,9 @@ internal sealed class RenderWindow : Window
         }
         else
         {
-            modified |= FormInputs.AddCheckBox("Export Audio (experimental)", ref s.ExportAudio, null, RenderSettings.Defaults.ExportAudio);
+            modified |= FormInputs.AddCheckBox("Export Audio (experimental)", ref s.ExportAudio,
+                                               "Include the project's soundtrack as an audio track (AAC).",
+                                               RenderSettings.Defaults.ExportAudio);
         }
 
         return modified;
@@ -655,7 +697,8 @@ internal sealed class RenderWindow : Window
 
         modified |= FormInputs.AddFilePicker("Folder", ref directory!, ".\\Render", null, "Save folder.", FileOperations.FilePickerTypes.Folder);
 
-        if (FormInputs.AddStringInput("Filename", ref filename))
+        if (FormInputs.AddStringInput("Filename", ref filename, null, null,
+                                      "Name of the output file. The extension (.mp4 / .mov / .mkv) is set automatically from the codec."))
         {
             modified = true;
             filename = (filename ?? string.Empty).Trim();
@@ -682,7 +725,9 @@ internal sealed class RenderWindow : Window
                                       - RenderTiming.ReferenceTimeToSeconds(s.StartInBars, s.TimeReference, s.FrameRate));
         DrawDiskSpaceWarning(directory, s.VideoCodec, estRes, estFrames, estDuration, s.Bitrate);
 
-        modified |= FormInputs.AddCheckBox("Auto-increment version", ref s.AutoIncrementVersionNumber, null, RenderSettings.Defaults.AutoIncrementVersionNumber);
+        modified |= FormInputs.AddCheckBox("Auto-increment version", ref s.AutoIncrementVersionNumber,
+                                           "After each render, bump a version number (v01 → v02) so you don't overwrite previous takes.",
+                                           RenderSettings.Defaults.AutoIncrementVersionNumber);
         if (s.AutoIncrementVersionNumber)
         {
             var nextTargetPath = GetCachedTargetFilePath(RenderSettings.RenderModes.Video);

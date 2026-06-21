@@ -80,6 +80,7 @@ wiki ([dev.OperatorConventions](https://github.com/tixl3d/tixl/wiki/dev.Operator
 - Write the description body in the third person (avoid "you" / "I"); the `Tips` section may use second person.
 
 ## Code Formatting and Style
+- For multi-line string literals (tooltips, log messages, help text), prefer a **raw string literal** (`"""…"""`) over `"line\n" + "line\n"` concatenation. It reads as the text it produces, avoids stray `\n`/`+` noise, and the multi-line shape is visible in source. Reach for concatenation/interpolation only when lines are built conditionally.
 - Put `return` statements on their own line (not inline after `if`)
 - **Brace every branch of an `if` / `else` / `else if` chain**, even single-statement branches — a brace-less `else if` (especially with a comment under it) reads poorly and is easy to misedit. A lone `if (x) foo();` with no `else` may stay brace-less (matches the prevailing idiom; don't mass-reformat existing ones).
 - Order class members public-first → private, with private fields at the very end. Nest helper types (structs, enums) used only by the owning class inside it, at the top.

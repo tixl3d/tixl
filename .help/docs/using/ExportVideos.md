@@ -2,25 +2,58 @@
 
 ## TL;DR
 You can use TiXL to render your project as a video or image sequence:
-- Select an image Operator like [RenderTarget].
+
+- Select (or pin) an image operator like [RenderTarget] in the **Output Window**.
 - Use the output window's resolution selector to set your output resolution.
-- From the *main menu*, open Windows → *Render Video* or *Render Image Sequence*.
-- Adjust your settings.
-- Make sure the file name has the .mp4 extension.
-- Press *Start Export*.
+- Open **Render To File** — the sliders icon in the output window's toolbar, or via the *main menu*.
+- Pick a **Range**, **Codec**, and output path, then press **Render**.
+
+The filename extension follows the codec automatically (`.mp4`, `.mov`, `.mkv`), so you don't have to set it by hand.
 
 ![Alt text](/images/01-export-as-video.gif)
 
+## Settings
 
-### Settings
+The **Render To File** window groups its settings into three sections (and a help button in the panel header links back to this page):
 
-- **Time Format** - Switch between bars (TiXL's default method of storing time), seconds or frames
-- **Use range** - Select *Custom* to define a precise start and end time. If you added *Soundtrack* to your project, you can also select that. Finally you can enable the the *Loop* option in the time line controls, adjust it's range and use that option.
-- **Motion Blur Samples** - is only useful when adding a [RenderWithMotionBlur] operator to your project (see below)
-- When rendering as video **Bitrate** handles the quality of your output. It defines the number of bits used for each second of your video. To make this more readable, TiXL gives an indication of the current setting for your current resolution and framerate: 
+- **Source** — the **Range** (Custom / Loop / Soundtrack / Continuous), the **Scale** unit (bars, seconds, frames), **FPS**, the **Resolution %** scale factor, and the **Motion Blur** override.
+- **Format & Quality** — render mode (video or image sequence), **Codec**, **Bitrate**, and audio export.
+- **Output Target** — the folder, filename, and auto-increment options.
+
+Every parameter has a small **(?)** marker next to it — hover it for a one-line explanation. The footer shows a one-line summary with a rough size and render-time estimate.
 
 ![Alt text](/images/03-quality-preview.gif)
 
+## About FFmpeg
+
+FFmpeg is the open-source engine that does the actual video encoding — it turns the frames TiXL renders into a finished `.mp4`, `.mov`, or `.mkv` file. It is the same technology that powers most video software.
+
+**FFmpeg comes built into TiXL.** There is nothing to install, download, or configure, and TiXL never has to call out to a separate program on your computer — exporting just works out of the box. The version TiXL ships uses license-friendly components, so the videos you export are free to use in your own projects.
+
+## Codecs
+
+A **codec** is the recipe used to compress the video. TiXL offers several, because no single one is best for everything — some are made for sharing online, some for editing, some for live VJ playback.
+
+Every codec can carry an **AAC** audio track when *Export Audio* is on. **H.264** and **HEVC** use your graphics card's **hardware encoder** (NVIDIA NVENC, Intel Quick Sync, or AMD AMF) when one is available, which is much faster; otherwise TiXL falls back to a slower software encoder. The small line under the **Codec** dropdown tells you which one your machine will use.
+
+| Codec | File | Best for | Notes & limitations |
+|---|---|---|---|
+| **H.264** | `.mp4` | The safe, compatible default — plays everywhere | 8-bit; quality set by **Bitrate** |
+| **HEVC (H.265)** | `.mp4` | Smaller files than H.264 at the same quality | Software encoding is slow; some players need the `hvc1` tag to preview |
+| **ProRes** | `.mov` | Handing footage to an editor (Premiere/Resolve) | High quality, **large** files |
+| **VP9** | `.mp4` | Efficient web delivery | Slow to encode |
+| **AV1** | `.mp4` | The most efficient delivery codec | Slowest to encode |
+| **FFV1** | `.mkv` | Archival / mastering | Visually lossless, **very large** |
+| **HAP / HAP Alpha / HAP Q** | `.mov` | Realtime / VJ playback (Resolume, etc.) | Cheap for the GPU to play back; HAP has no transparency, HAP Alpha/Q add alpha / more quality |
+
+### File sizes
+
+- **H.264, HEVC, VP9, AV1** are controlled by the **Bitrate** slider — higher bitrate means better quality and a bigger file. The hint next to the slider turns the current bitrate into a plain quality label for your resolution and FPS. As a rule of thumb, around *0.1 bits per pixel per second* is a good quality for sharing.
+- **ProRes** ignores the bitrate (it has its own) — expect files roughly 10× an H.264 of the same shot.
+- **FFV1** is lossless, so files can be **several GB per minute** at HD.
+- **HAP** has a predictable size — about half a byte per pixel per frame (twice that for HAP Alpha / HAP Q). The window shows an exact estimate.
+
+> **Tip:** Hardware encoding (NVENC / Quick Sync / AMF) is the fast path and matters most for realtime *Continuous* capture. NVENC needs an NVIDIA driver version 570 or newer.
 
 ## Continuous Capture (open-ended recording)
 
@@ -28,10 +61,22 @@ When you don't know the length up front — a live set, a performance, an audio-
 
 Two clock models are available under **Source**:
 
-- **Realtime** grabs the live output as you perform, paced to the target FPS, and leaves playback under your control. This is the mode for live/VJ use. It captures **video only** for now (no audio), at the native output resolution. A fast hardware encoder (NVENC / Quick Sync / AMF) is recommended — with a software codec the capture may drop or duplicate frames to keep pace, and the render window warns you.
+- **Realtime** grabs the live output as you perform, paced to the target FPS, and leaves playback under your control. This is the mode for live/VJ use. It captures **video only** for now (no audio), at the native output resolution. A fast hardware encoder is recommended — with a software codec the capture may drop or duplicate frames to keep pace, and the render window warns you.
 - **Deterministic** advances time at the target FPS until you stop, exactly like a normal render but without a predetermined end. It is frame-perfect even when encoding is slower than realtime, and records audio.
 
 While a continuous capture runs, the progress bar is replaced by a sweeping activity indicator showing the captured frame count and elapsed time. Press **Stop** (or the capture shortcut) to finalize.
+
+## High-resolution rendering
+
+Rendering is cheap compared to encoding, so you can trade a little time for a lot of quality. Set **Resolution %** above 100 % to render **larger than the output window** — for example 200 % turns a 1080p project into 4K. Thanks to TiXL's [smart resolution setup](https://www.youtube.com/watch?v=f9E7lwUXfBM) the requested resolution flows through the whole project, so gradients, text, and antialiasing all sharpen up. This is the way to produce 4K masters or high-resolution stills from an HD comp.
+
+## Rendering with Motion Blur
+
+[RenderWithMotionBlur] renders several slightly offset passes per frame and blends them, producing very high-quality motion blur. Because that is too expensive to do live, you keep its sample count low (or 0) while working and **override it only for the export** with the **Motion Blur** field in the Render To File window — so your interactive session stays smooth while the export gets the full quality.
+
+A **Motion Blur** of `-1` means "don't override" (the default). Values above `0` require a [RenderWithMotionBlur] operator somewhere above your output.
+
+[Watch the tutorial here](https://www.youtube.com/watch?v=WK4j0H-oM3g&t=626s)
 
 ## Saving Screenshots
 
@@ -41,50 +86,18 @@ The screenshot (camera) icon in the output window's toolbar saves the current fr
 
 **Right-click** the icon for options: start/stop continuous capture, pick the interval (1 s … 10 min), and choose the file format. PNG is lossless; **JPG** produces much smaller files, which is handy when capturing long continuous sequences. The interval can also be set under *Settings → Interface → Output*.
 
-## Optimizing Export Performance **(_Since version 3.9.1, TiXL is taking care of this automatically_)** 
-
-Rendering a 5-minute project at 60fps will be roughly 20000 frames. With a naive export this will take several hours. Your CPU will spend most of this time converting pixels. But we can use DirectX and the graphics card to convert the texture into the correct format. This will reduce rendering by an order of magnitude:
-
-Append a [ConvertFormat] operator and set its Format parameter to `B8G8R8A8_UNorm` and pin this to your output window.
-
-On most computers DirectX's Media Foundation will use hardware-accelerated encoding to H.264. So, exporting videos will be much faster than rendering image sequences. PNG is especially slow to write.
-
-## Increase Output Quality
-
-When rendering to an image sequence or video, we can sacrifice rendering performance for quality: Only a very small fraction of the time is spent on generating the image. The most expensive steps are format conversion and encoding. This means you could increase the output resolution to 4K or increase quality settings to your primary [RenderTarget]'s multisampling quality. Because of TiXL's default [smart resolution setup](https://www.youtube.com/watch?v=f9E7lwUXfBM), the requested resolution will be applied to your whole project.
-
-## Rendering with Motion Blur
-
-Another awesome feature is [RenderWithMotionBlur]: It uses TiXL's timeline features to render multiple slightly offset passes for each frame, resulting in a very high-quality motion blur effect. Because this process is normally too performance-intensive for real-time, you can adjust the parameter to 0 (or another acceptable low value that will provide real-time rendering).
-
-Then you can use override this setting while rendering with the "Motion Blur Samples" parameter provided in the Render Window:
-
-[Watch the tutorial here](https://www.youtube.com/watch?v=WK4j0H-oM3g&t=626s)
-
 ## Technical Background
 
-To get the most out of this feature, it can be useful to provide some background about the exporting process:
+TiXL renders into a GPU texture (by default `R16G16B16A16_Float` — 16 bits per channel, high precision in the 0…1 range). Getting that onto disk as a video is more involved than it looks:
 
-TiXL uses image operators like [RenderTarget] to render content into an image buffer on the GPU. We use DirectX for that. In technical terms, these images are called *Textures*, and DirectX provides a wide variety of texture formats. By default, TiXL's render output format is `R16G16B16A16_Float`, which means that each pixel uses 16 bits to store brightness for the Red, Green, Blue, and Alpha channels. That is 65536 different values with higher resolution in the range 0 .. 1.
+- Many file formats store pixels as Blue, Green, Red, Alpha — the bytes have to be reordered.
+- Reading a texture back from the graphics card takes up to a few frames.
+- Converting between pixel formats (16-bit float to 8-bit, etc.) is comparatively slow.
+- Effects are often audio-reactive, but a **deterministic** export is not realtime — TiXL drives the timeline frame by frame so the result is exactly repeatable.
+- Some operators are asynchronous (loading an image from the web, seeking a video). During a deterministic export TiXL waits for each to finish before writing the frame, trading speed for correctness.
 
-Exporting images and textures in files is complicated because:
+These are the reasons a *Continuous → Realtime* capture (which grabs the live output instead) trades that determinism for keeping pace with a live performance.
 
-- For historical reasons, many image formats store their pixels in the order Blue, Green, Red, Alpha.
-- Downloading textures from the GPU takes up to 3 frames.
-- For performance reasons, DirectX stores textures with a width of 16 pixels increments. So, if your image width is 1080 pixels, each pixel row will be padded with 8 pixels.
-- Converting between pixel formats can be very slow and complex (especially from 16-bit floats to C# default 32-bit floats).
-- Frequently, TiXL's effects are audio-reactive, but exporting is not real-time.
-- Some of TiXL's operators are asynchronous: preferring rendering performance over precision, but when exporting, we want to enforce repeatability, so we have to wait until each operator (e.g., loading an image from the web or seeking a frame in a video) is completed.
+## Roadmap
 
-## Exporting with Audio **(_Since version 3.9.1, TiXL can export video with Audio_)**
-
-It is still an experimental feature, please report if you have issues.
-
-### Exporting Other Formats
-
-Currently, the output formats are limited to:
-- 8-bit H.264 for video
-- 8-bit RGB JPEG 
-- 8-bit RGBA PNG
-
-Rendering to HDR-Output with formats like EXR is on our roadmap.
+Current exports are 8-bit. HDR output (e.g. EXR image sequences) and variable-frame-rate continuous capture are on the roadmap.
