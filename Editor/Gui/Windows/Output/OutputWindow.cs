@@ -379,12 +379,27 @@ internal sealed class OutputWindow : Window
         ImGui.EndChild();
     }
 
-    // Render-icon tooltip: duration, resolution, format, and rough size / render-time estimates.
+    // Render-icon tooltip: the range mode, then duration, resolution, format, and rough size / render-time estimates.
     private static string BuildRenderSummaryTooltip()
     {
         var s = RenderSettings.Current;
         if (!RenderProcess.TryGetRenderResolution(s, out var res))
             return string.Empty;
+
+        var mode = s.TimeRange.ToString(); // Custom / Loop / Soundtrack / Continuous
+
+        // Continuous has no fixed end, so a duration / size estimate would be meaningless.
+        if (s.TimeRange == RenderSettings.TimeRanges.Continuous)
+        {
+            var clock = s.ContinuousClock == RenderSettings.ContinuousCaptureClock.Realtime ? "realtime" : "deterministic";
+            if (s.RenderMode == RenderSettings.RenderModes.Video)
+            {
+                var (cw, ch) = s.VideoCodec.RoundToEncoderBlock(res.Width, res.Height);
+                return $"{mode} · {cw}×{ch} · {s.VideoCodec} · {clock} · {s.FrameRate:0} fps\n";
+            }
+
+            return $"{mode} · {res.Width}×{res.Height} · {s.FileFormat} sequence · {clock} · {s.FrameRate:0} fps\n";
+        }
 
         var frames = RenderTiming.ComputeFrameCount(s);
         var dur = System.Math.Max(0, RenderTiming.ReferenceTimeToSeconds(s.EndInBars, s.TimeReference, s.FrameRate)
@@ -395,11 +410,11 @@ internal sealed class OutputWindow : Window
             var (w, h) = s.VideoCodec.RoundToEncoderBlock(res.Width, res.Height);
             var bytes = RenderExportEstimate.EstimateBytes(s.VideoCodec, res, frames, dur, s.Bitrate);
             var renderSecs = RenderExportEstimate.EstimateSeconds(s.VideoCodec, res, frames, s.OverrideMotionBlurSamples);
-            return $"{dur / 60:0}:{dur % 60:00}s · {w}×{h} · {s.VideoCodec}\n"
+            return $"{mode} · {dur / 60:0}:{dur % 60:00}s · {w}×{h} · {s.VideoCodec}\n"
                    + $"~{RenderExportEstimate.FormatBytes(bytes)} · {RenderExportEstimate.FormatDuration(renderSecs)} to render\n";
         }
 
-        return $"{dur / 60:0}:{dur % 60:00}s · {res.Width}×{res.Height} · {s.FileFormat} sequence ({frames} frames)\n";
+        return $"{mode} · {dur / 60:0}:{dur % 60:00}s · {res.Width}×{res.Height} · {s.FileFormat} sequence ({frames} frames)\n";
     }
 
     private static void DrawRenderProgressBar()
