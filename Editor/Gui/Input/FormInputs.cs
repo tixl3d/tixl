@@ -120,7 +120,7 @@ internal static class FormInputs
 
         ImGui.PushID(label);
 
-        var size = GetAvailableInputSize(tooltip, hasReset);
+        var size = GetAvailableInputSize(tooltip, hasReset, fillWidth: true, maxWidth: MaxNumberInputWidth);
         var result = SingleValueEdit.Draw(ref value, size, min, max, true, true, scale);
         ImGui.PopID();
 
@@ -139,6 +139,10 @@ internal static class FormInputs
     }
 
     private const float DefaultFadeAlpha = 0.7f;
+
+    // Number fields fill the row on narrow panels but cap here so they don't stretch across a wide settings
+    // panel; the value-range indicator stays readable and float/int rows line up. (Unscaled px.)
+    private const float MaxNumberInputWidth = 280f;
 
     public static bool AddFloat(string label,
         ref float value,
@@ -159,7 +163,7 @@ internal static class FormInputs
 
         DrawInputLabel(label);
 
-        var size = GetAvailableInputSize(tooltip, hasReset, true);
+        var size = GetAvailableInputSize(tooltip, hasReset, fillWidth: true, maxWidth: MaxNumberInputWidth);
 
         ImGui.PushID(label);
 
@@ -1209,14 +1213,19 @@ internal static class FormInputs
 
     #region internal helpers
 
+    /// <param name="maxWidth">When &gt; 0, caps the requested width (in unscaled px, scaled internally). Used by
+    /// number fields so they fill the row on narrow panels but don't stretch across very wide ones. Dropdowns
+    /// and string inputs leave this at 0 to keep filling the full width.</param>
     public static Vector2 GetAvailableInputSize(string? tooltip, bool hasReset, bool fillWidth = false,
-        float rightPadding = 0)
+        float rightPadding = 0, float maxWidth = 0)
     {
         var toolWidth = 20f * T3Ui.UiScaleFactor;
         var sizeForResetToDefault = hasReset ? toolWidth : 0;
         var sizeForTooltip = !string.IsNullOrEmpty(tooltip) ? toolWidth : 0;
 
         var requestedWidth = fillWidth ? ImGui.GetContentRegionAvail().X * _widthRatio : 200;
+        if (maxWidth > 0)
+            requestedWidth = MathF.Min(requestedWidth, maxWidth * T3Ui.UiScaleFactor);
         var availableWidth = MathF.Min(requestedWidth, ImGui.GetContentRegionAvail().X + 20);
 
         var vector2 = new Vector2(availableWidth
