@@ -285,6 +285,7 @@ internal sealed class ProjectSettingsWindow : Window
         FormInputs.AddSectionSubHeader("Storage");
 
         DrawStorageRow(_thisProjectProxyLabel, _thisProjectProxyTooltip, _thisProjectProxyFiles, "##deleteThisProjectProxies");
+        FormInputs.AddVerticalSpace(5);
         DrawStorageRow(_allProjectsProxyLabel, _allProjectsProxyTooltip, _allProjectsProxyFiles, "##deleteAllProxies");
     }
 
@@ -358,6 +359,8 @@ internal sealed class ProjectSettingsWindow : Window
         _thisProjectProxyFiles.Clear();
         _allProjectsProxyFiles.Clear();
         long thisBytes = 0, allBytes = 0;
+        var thisBreakdown = new StringBuilder();
+        var allBreakdown = new StringBuilder();
 
         foreach (var package in SymbolPackage.AllPackages)
         {
@@ -386,12 +389,15 @@ internal sealed class ProjectSettingsWindow : Window
                         continue;
                     }
 
+                    var fileName = Path.GetFileName(file);
                     _allProjectsProxyFiles.Add(file);
                     allBytes += size;
+                    AppendBreakdownLine(allBreakdown, $"{package.Name}: {fileName} — {FormatBytes(size)}", _allProjectsProxyFiles.Count);
                     if (isCurrent)
                     {
                         _thisProjectProxyFiles.Add(file);
                         thisBytes += size;
+                        AppendBreakdownLine(thisBreakdown, $"{fileName} — {FormatBytes(size)}", _thisProjectProxyFiles.Count);
                     }
                 }
             }
@@ -403,6 +409,25 @@ internal sealed class ProjectSettingsWindow : Window
 
         _thisProjectProxyLabel = $"This project: {FormatBytes(thisBytes)} in {_thisProjectProxyFiles.Count} proxy file(s).";
         _allProjectsProxyLabel = $"All projects: {FormatBytes(allBytes)} in {_allProjectsProxyFiles.Count} proxy file(s).";
+        _thisProjectProxyTooltip = thisBreakdown.ToString();
+        _allProjectsProxyTooltip = allBreakdown.ToString();
+    }
+
+    // Keeps the hover breakdown bounded so a project with hundreds of proxies doesn't produce a screen-tall tooltip.
+    private static void AppendBreakdownLine(StringBuilder breakdown, string line, int indexSoFar)
+    {
+        const int maxLines = 40;
+        if (indexSoFar < maxLines)
+        {
+            if (breakdown.Length > 0)
+                breakdown.Append('\n');
+
+            breakdown.Append(line);
+        }
+        else if (indexSoFar == maxLines)
+        {
+            breakdown.Append("\n…");
+        }
     }
 
     private static string FormatBytes(long bytes)
@@ -879,4 +904,6 @@ internal sealed class ProjectSettingsWindow : Window
     private static readonly List<string> _allProjectsProxyFiles = [];
     private static string _thisProjectProxyLabel = string.Empty;
     private static string _allProjectsProxyLabel = string.Empty;
+    private static string _thisProjectProxyTooltip = string.Empty;
+    private static string _allProjectsProxyTooltip = string.Empty;
 }

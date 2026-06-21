@@ -38,6 +38,15 @@ internal static partial class RenderPaths
                     targetPath = GetNextIncrementedPath(targetPath);
                 }
 
+                // Keep numbering consistent across container formats: jump past the highest existing version among
+                // files sharing this name stem regardless of extension, so e.g. render-v08.mov isn't picked while
+                // render-v08.mp4 already exists.
+                var highestVersion = GetHighestExistingVersion(Path.GetDirectoryName(targetPath), Path.GetFileName(targetPath));
+                if (highestVersion >= 0)
+                {
+                    targetPath = WithVersionNumber(targetPath, highestVersion + 1);
+                }
+
                 while (File.Exists(targetPath))
                 {
                     targetPath = GetNextIncrementedPath(targetPath);
@@ -213,6 +222,58 @@ internal static partial class RenderPaths
         }
 
         return "v01";
+    }
+
+    // Highest version number among sibling files that share this name's stem (the parts before and after the
+    // version), ignoring extension. Returns -1 when the folder holds no such file.
+    private static int GetHighestExistingVersion(string? directory, string fileNameWithVersion)
+    {
+        if (string.IsNullOrEmpty(directory) || !Directory.Exists(directory))
+            return -1;
+
+        var nameNoExt = Path.GetFileNameWithoutExtension(fileNameWithVersion);
+        var match = _matchFileVersionPattern.Match(nameNoExt);
+        if (!match.Success)
+            return -1;
+
+        var digits = match.Groups[1];
+        var prefix = nameNoExt[..digits.Index];
+        var suffix = nameNoExt[(digits.Index + digits.Length)..];
+
+        var highest = -1;
+        foreach (var file in Directory.EnumerateFiles(directory, prefix + "*")) // OS-side prefix filter keeps it cheap
+        {
+            var candidate = Path.GetFileNameWithoutExtension(file);
+            if (candidate.Length <= prefix.Length + suffix.Length
+                || !candidate.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
+                || !candidate.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            var middle = candidate[prefix.Length..(candidate.Length - suffix.Length)];
+            if (middle.Length is >= 2 and <= 4 && int.TryParse(middle, out var version) && version > highest)
+                highest = version;
+        }
+
+        return highest;
+    }
+
+    // Replaces the version digits in path's filename with versionNumber, preserving the existing digit width (2-4).
+    private static string WithVersionNumber(string path, int versionNumber)
+    {
+        var filename = Path.GetFileName(path);
+        var match = _matchFileVersionPattern.Match(filename);
+        if (!match.Success)
+            return path;
+
+        var versionGroup = match.Groups[1];
+        var width = Math.Clamp(versionGroup.Value.Length, 2, 4);
+        var newFilename = filename.Remove(versionGroup.Index, versionGroup.Length)
+                                  .Insert(versionGroup.Index, versionNumber.ToString("D" + width));
+
+        var directory = Path.GetDirectoryName(path);
+        return directory == null ? newFilename : Path.Combine(directory, newFilename);
     }
 
     public static string GetNextIncrementedPath(string path)
