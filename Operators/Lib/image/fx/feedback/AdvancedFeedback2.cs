@@ -72,4 +72,7 @@ internal sealed class AdvancedFeedback2 : Instance<AdvancedFeedback2>
         [Input(Guid = "e294f6ac-04c4-489b-8d26-615c8971ce11")]
         public readonly InputSlot<bool> IsEnabled = new InputSlot<bool>();
 
+        [Input(Guid = "5a123784-082d-474c-9f00-0b5a7d3e8cfe")]
+        public readonly InputSlot<int> BlurMethod = new InputSlot<int>();
+
 }
