@@ -1,0 +1,3569 @@
+{
+  "schemaVersion": 1,
+  "emojiLegend": {
+    "💬": "chat",
+    "🗯️": "chat",
+    "💡": "tip",
+    "📘": "op-reference",
+    "🌟": "highlight",
+    "🆕": "feature",
+    "🛠️": "update",
+    "🧠": "background",
+    "📊": "background",
+    "🖱️": "ui",
+    "🎯": "planned",
+    "✨": "showcase",
+    "📝": "walkthrough",
+    "⚠️": "warning",
+    "🍿": "showcase",
+    "❓": "question"
+  },
+  "videos": [
+    {
+      "id": "LLpl6QEL7bo",
+      "type": "meetup",
+      "source": {
+        "type": "youtube",
+        "id": "LLpl6QEL7bo"
+      },
+      "date": "2025-08-25",
+      "title": "Timeline, PBR-rendering, particles, field and the future of output configurations",
+      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo",
+      "thumbnail": "https://img.youtube.com/vi/LLpl6QEL7bo/maxresdefault.jpg",
+      "durationLabel": "5h",
+      "sourcePage": "meetup.20250825",
+      "segments": [
+        {
+          "t": 0,
+          "tLabel": "0:00",
+          "category": "chat",
+          "emoji": "💬",
+          "text": "Intro / Welcome",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=0s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 126
+        },
+        {
+          "t": 126,
+          "tLabel": "2:06",
+          "category": "showcase",
+          "emoji": "✨",
+          "text": "Show casing the new “Ashborn” Making of video",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=126s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 54
+        },
+        {
+          "t": 180,
+          "tLabel": "3:00",
+          "category": "chat",
+          "emoji": "💬",
+          "text": "Chatting while compiling TiXL from",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=180s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 120
+        },
+        {
+          "t": 300,
+          "tLabel": "5:00",
+          "category": "chat",
+          "emoji": "💬",
+          "text": "Showing commits of last 14 days in Fork",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=300s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 130
+        },
+        {
+          "t": 430,
+          "tLabel": "7:10",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "UI Feature improved timeline",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=430s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 50
+        },
+        {
+          "t": 480,
+          "tLabel": "8:00",
+          "category": "chat",
+          "emoji": "💬",
+          "text": "Pixtur’s Playground",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=480s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 165
+        },
+        {
+          "t": 645,
+          "tLabel": "10:45",
+          "category": "walkthrough",
+          "emoji": "📝",
+          "text": "Working with timeclips / new features",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=645s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 340
+        },
+        {
+          "t": 985,
+          "tLabel": "16:25",
+          "category": "chat",
+          "emoji": "🗯️",
+          "text": "Ideas for importing and browsing files",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=985s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 185
+        },
+        {
+          "t": 1170,
+          "tLabel": "19:30",
+          "category": "tip",
+          "emoji": "💡",
+          "text": "Hide tabs for cleaner UI layouts",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=1170s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 270
+        },
+        {
+          "t": 1440,
+          "tLabel": "24:00",
+          "category": "highlight",
+          "emoji": "🌟",
+          "text": "Using (Focus mode) content behind graph",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=1440s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 120
+        },
+        {
+          "t": 1560,
+          "tLabel": "26:00",
+          "category": "chat",
+          "emoji": "🗯️",
+          "text": "Try to showcase WebCam operator (VideoDeviceInput)",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=1560s",
+          "ops": [
+            "Lib.io.video.VideoDeviceInput"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 240
+        },
+        {
+          "t": 1800,
+          "tLabel": "30:00",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "New feature: better live previews on hover",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=1800s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 270
+        },
+        {
+          "t": 2070,
+          "tLabel": "34:30",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "Fix Mute Audio toggle",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=2070s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 90
+        },
+        {
+          "t": 2160,
+          "tLabel": "36:00",
+          "category": "highlight",
+          "emoji": "🌟",
+          "text": "Demo: Using audio analysis / beat locking / Offset sync timing",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=2160s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 210
+        },
+        {
+          "t": 2370,
+          "tLabel": "39:30",
+          "category": "feature",
+          "emoji": "🆕",
+          "text": "AnimBoolean",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=2370s",
+          "ops": [
+            "Lib.numbers.anim.animators.AnimBoolean"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 330
+        },
+        {
+          "t": 2700,
+          "tLabel": "45:00",
+          "category": "tip",
+          "emoji": "💡",
+          "text": "Tip: Use AnimInt",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=2700s",
+          "ops": [
+            "Lib.numbers.anim.animators.AnimInt"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 120
+        },
+        {
+          "t": 2820,
+          "tLabel": "47:00",
+          "category": "chat",
+          "emoji": "💬",
+          "text": "Discussing midi controllers for VJ: Focusrite LaunchControl XL / APC Mini",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=2820s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 60
+        },
+        {
+          "t": 2880,
+          "tLabel": "48:00",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "How to use SetSpeedFactors",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=2880s",
+          "ops": [
+            "Lib.numbers.anim.vj.SetSpeedFactors"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 360
+        },
+        {
+          "t": 3240,
+          "tLabel": "54:00",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "How to use KeyboardInputAsInt",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=3240s",
+          "ops": [
+            "Lib.io.input.KeyboardInputAsInt"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 180
+        },
+        {
+          "t": 3420,
+          "tLabel": "57:00",
+          "category": "highlight",
+          "emoji": "🌟",
+          "text": "Discussing ForwardBeatTaps",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=3420s",
+          "ops": [
+            "Lib.numbers.anim.vj.ForwardBeatTaps"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 180
+        },
+        {
+          "t": 3600,
+          "tLabel": "1:00:00",
+          "category": "background",
+          "emoji": "🧠",
+          "text": "Background: Explaining implementation details of the beatlock algorithm",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=3600s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 600
+        },
+        {
+          "t": 4200,
+          "tLabel": "1:10:00",
+          "category": "feature",
+          "emoji": "🆕",
+          "text": "New Feature snap horizontally to improve graphs",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=4200s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 140
+        },
+        {
+          "t": 4340,
+          "tLabel": "1:12:20",
+          "category": "highlight",
+          "emoji": "🌟",
+          "text": "Playing with RandomizePoints",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=4340s",
+          "ops": [
+            "Lib.point.modify.RandomizePoints"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 80
+        },
+        {
+          "t": 4420,
+          "tLabel": "1:13:40",
+          "category": "walkthrough",
+          "emoji": "📝",
+          "text": "Explaining RadialPoints Attribute parameters",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=4420s",
+          "ops": [
+            "Lib.point.generate.RadialPoints"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 265
+        },
+        {
+          "t": 4685,
+          "tLabel": "1:18:05",
+          "category": "tip",
+          "emoji": "💡",
+          "text": "Accumulator to create procedural animations",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=4685s",
+          "ops": [
+            "Lib.numbers.float.process.Accumulator"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 85
+        },
+        {
+          "t": 4770,
+          "tLabel": "1:19:30",
+          "category": "background",
+          "emoji": "🧠",
+          "text": "Discussing Floating point precision",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=4770s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 410
+        },
+        {
+          "t": 5180,
+          "tLabel": "1:26:20",
+          "category": "tip",
+          "emoji": "💡",
+          "text": "pan and zoom canvas will connecting",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=5180s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 100
+        },
+        {
+          "t": 5280,
+          "tLabel": "1:28:00",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "Expand and collapse main menu bar",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=5280s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 80
+        },
+        {
+          "t": 5360,
+          "tLabel": "1:29:20",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "Tweaks to Project Hub",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=5360s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 40
+        },
+        {
+          "t": 5400,
+          "tLabel": "1:30:00",
+          "category": "feature",
+          "emoji": "🆕",
+          "text": "HDR indicators for colors",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=5400s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 360
+        },
+        {
+          "t": 5760,
+          "tLabel": "1:36:00",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "Improvements to file resource picker",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=5760s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 210
+        },
+        {
+          "t": 5970,
+          "tLabel": "1:39:30",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "Consistent PBR shading (in depth)",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=5970s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 450
+        },
+        {
+          "t": 6420,
+          "tLabel": "1:47:00",
+          "category": "tip",
+          "emoji": "💡",
+          "text": "SpreadLayout",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=6420s",
+          "ops": [
+            "Lib.render.transform.SpreadLayout"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 120
+        },
+        {
+          "t": 6540,
+          "tLabel": "1:49:00",
+          "category": "walkthrough",
+          "emoji": "📝",
+          "text": "Using color fields",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=6540s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 300
+        },
+        {
+          "t": 6840,
+          "tLabel": "1:54:00",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "Visual tests",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=6840s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 210
+        },
+        {
+          "t": 7050,
+          "tLabel": "1:57:30",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "DrawPointsShaded",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=7050s",
+          "ops": [
+            "Lib.point.draw.DrawPointsShaded"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 150
+        },
+        {
+          "t": 7200,
+          "tLabel": "2:00:00",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "Discussing Find operators interaction (Ctrl+F)",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=7200s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 220
+        },
+        {
+          "t": 7420,
+          "tLabel": "2:03:40",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "DelayTriggerChange",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=7420s",
+          "ops": [
+            "Lib.numbers.bool.process.DelayTriggerChange"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 151
+        },
+        {
+          "t": 7571,
+          "tLabel": "2:06:11",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "DelayBoolean",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=7571s",
+          "ops": [
+            "Lib.numbers.bool.process.DelayBoolean"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 49
+        },
+        {
+          "t": 7620,
+          "tLabel": "2:07:00",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "Working with Variables",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=7620s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 310
+        },
+        {
+          "t": 7930,
+          "tLabel": "2:12:10",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "SelectPointsWithSdf with ParticleSystem (In depth discussing and examples)",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=7930s",
+          "ops": [
+            "Lib.particle.ParticleSystem"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 1550
+        },
+        {
+          "t": 9480,
+          "tLabel": "2:38:00",
+          "category": "tip",
+          "emoji": "💡",
+          "text": "PlayVideo + PointsOnImage",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=9480s",
+          "ops": [
+            "Lib.io.video.PlayVideo",
+            "Lib.point.generate.PointsOnImage"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 60
+        },
+        {
+          "t": 9540,
+          "tLabel": "2:39:00",
+          "category": "chat",
+          "emoji": "💬",
+          "text": "Survey of the week (Renaming PointSimulation)",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=9540s",
+          "ops": [
+            "Lib.point.sim.PointSimulation"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 60
+        },
+        {
+          "t": 9600,
+          "tLabel": "2:40:00",
+          "category": "chat",
+          "emoji": "💬",
+          "text": "Dev background: Connection line interaction",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=9600s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 210
+        },
+        {
+          "t": 9810,
+          "tLabel": "2:43:30",
+          "category": "chat",
+          "emoji": "💬",
+          "text": "UX infinity slider",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=9810s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 320
+        },
+        {
+          "t": 10130,
+          "tLabel": "2:48:50",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "MeshFacesToPoints",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=10130s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 430
+        },
+        {
+          "t": 10560,
+          "tLabel": "2:56:00",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "MovePointsToSdf",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=10560s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 60
+        },
+        {
+          "t": 10620,
+          "tLabel": "2:57:00",
+          "category": "background",
+          "emoji": "📊",
+          "text": "Discussing raymarching performance, large graphs and caching",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=10620s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 660
+        },
+        {
+          "t": 11280,
+          "tLabel": "3:08:00",
+          "category": "tip",
+          "emoji": "💡",
+          "text": "Fading DrawLines effect",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=11280s",
+          "ops": [
+            "Lib.point.draw.DrawLines"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 0
+        },
+        {
+          "t": 11280,
+          "tLabel": "3:08:00",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "PointTrail",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=11280s",
+          "ops": [
+            "Lib.point.generate.PointTrail"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 330
+        },
+        {
+          "t": 11610,
+          "tLabel": "3:13:30",
+          "category": "chat",
+          "emoji": "💬",
+          "text": "Line transitions and SVG",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=11610s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 390
+        },
+        {
+          "t": 12000,
+          "tLabel": "3:20:00",
+          "category": "chat",
+          "emoji": "💬💬💬",
+          "text": "Discussing TiXL output handling for projection mapping and complex projects",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=12000s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 3780
+        },
+        {
+          "t": 15780,
+          "tLabel": "4:23:00",
+          "category": "chat",
+          "emoji": "💬",
+          "text": "TiXL UI font rendering / ImGUI",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=15780s",
+          "ops": [
+            "Lib.io.video.SpoutOutput"
+          ],
+          "issues": [
+            752
+          ],
+          "notes": [
+            "mentions SpoutOutput being picky with ColorFormat, addressed in #752"
+          ],
+          "durationSec": 780
+        },
+        {
+          "t": 16560,
+          "tLabel": "4:36:00",
+          "category": "chat",
+          "emoji": "💬",
+          "text": "Caching of operator updates",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=16560s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 360
+        },
+        {
+          "t": 16920,
+          "tLabel": "4:42:00",
+          "category": "chat",
+          "emoji": "💬",
+          "text": "JonBaker operator",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=16920s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 150
+        },
+        {
+          "t": 17070,
+          "tLabel": "4:44:30",
+          "category": "warning",
+          "emoji": "⚠️",
+          "text": "Operator style guide / Contributions",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=17070s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 210
+        },
+        {
+          "t": 17280,
+          "tLabel": "4:48:00",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "TransformUV",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=17280s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 128
+        },
+        {
+          "t": 17408,
+          "tLabel": "4:50:08",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "VectorFieldForce / SdfToVector (VectorFields)",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=17408s",
+          "ops": [
+            "Lib.particle.force.VectorFieldForce",
+            "Lib.field.use.SdfToVector"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 292
+        },
+        {
+          "t": 17700,
+          "tLabel": "4:55:00",
+          "category": "tip",
+          "emoji": "💡",
+          "text": "Renaming input parameters",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=17700s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 60
+        },
+        {
+          "t": 17760,
+          "tLabel": "4:56:00",
+          "category": "chat",
+          "emoji": "💬",
+          "text": "Upcoming release",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=17760s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 120
+        },
+        {
+          "t": 17880,
+          "tLabel": "4:58:00",
+          "category": "tip",
+          "emoji": "💡",
+          "text": "RandomizePoint Scale",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=17880s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 200
+        },
+        {
+          "t": 18080,
+          "tLabel": "5:01:20",
+          "category": "chat",
+          "emoji": "💬",
+          "text": "SampleGradient interpolation",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=18080s",
+          "ops": [
+            "Lib.numbers.color.SampleGradient"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 100
+        },
+        {
+          "t": 18180,
+          "tLabel": "5:03:00",
+          "category": "highlight",
+          "emoji": "🌟",
+          "text": "BuildGradient / ColorList",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=18180s",
+          "ops": [
+            "Lib.numbers.color.BuildGradient"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 320
+        },
+        {
+          "t": 18500,
+          "tLabel": "5:08:20",
+          "category": "chat",
+          "emoji": "💬",
+          "text": "Close-Up / Outlook",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=18500s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 115
+        },
+        {
+          "t": 18615,
+          "tLabel": "5:10:15",
+          "category": "chat",
+          "emoji": "💬",
+          "text": "Upcoming TiXL workshop in Berlin (booked out? 😱)",
+          "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=18615s",
+          "ops": [],
+          "issues": [],
+          "notes": []
+        }
+      ]
+    },
+    {
+      "id": "2Tu0p9Eh6Bw",
+      "type": "meetup",
+      "source": {
+        "type": "youtube",
+        "id": "2Tu0p9Eh6Bw"
+      },
+      "date": "2025-09-08",
+      "title": "New features for Roadmap; Operator Style guide; Creating a new op",
+      "url": "https://www.youtube.com/watch?v=2Tu0p9Eh6Bw",
+      "thumbnail": "https://img.youtube.com/vi/2Tu0p9Eh6Bw/maxresdefault.jpg",
+      "durationLabel": null,
+      "sourcePage": "meetup.20250908",
+      "segments": [
+        {
+          "t": 0,
+          "tLabel": "0:00",
+          "category": "chat",
+          "emoji": "💬",
+          "text": "Welcome / Introduction / Topics",
+          "url": "https://www.youtube.com/watch?v=2Tu0p9Eh6Bw&t=0s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 776
+        },
+        {
+          "t": 776,
+          "tLabel": "12:56",
+          "category": "planned",
+          "emoji": "🎯",
+          "text": "Planned: New Video Playback",
+          "url": "https://www.youtube.com/watch?v=2Tu0p9Eh6Bw&t=776s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 294
+        },
+        {
+          "t": 1070,
+          "tLabel": "17:50",
+          "category": "planned",
+          "emoji": "🎯",
+          "text": "Planned: Output management",
+          "url": "https://www.youtube.com/watch?v=2Tu0p9Eh6Bw&t=1070s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 150
+        },
+        {
+          "t": 1220,
+          "tLabel": "20:20",
+          "category": "planned",
+          "emoji": "🎯",
+          "text": "Planned: Animation Time Clip",
+          "url": "https://www.youtube.com/watch?v=2Tu0p9Eh6Bw&t=1220s",
+          "ops": [
+            "Lib.numbers.anim.time.Time"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 180
+        },
+        {
+          "t": 1400,
+          "tLabel": "23:20",
+          "category": "planned",
+          "emoji": "🎯",
+          "text": "Planned: New Camera Control",
+          "url": "https://www.youtube.com/watch?v=2Tu0p9Eh6Bw&t=1400s",
+          "ops": [
+            "Lib.render.camera.Camera"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 120
+        },
+        {
+          "t": 1520,
+          "tLabel": "25:20",
+          "category": "planned",
+          "emoji": "🎯",
+          "text": "Planned: Better shaderin",
+          "url": "https://www.youtube.com/watch?v=2Tu0p9Eh6Bw&t=1520s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 120
+        },
+        {
+          "t": 1640,
+          "tLabel": "27:20",
+          "category": "planned",
+          "emoji": "🎯",
+          "text": "Planned: Keyframe value editor",
+          "url": "https://www.youtube.com/watch?v=2Tu0p9Eh6Bw&t=1640s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 240
+        },
+        {
+          "t": 1880,
+          "tLabel": "31:20",
+          "category": "planned",
+          "emoji": "🎯",
+          "text": "Planned: Flushing GPU Resources",
+          "url": "https://www.youtube.com/watch?v=2Tu0p9Eh6Bw&t=1880s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 180
+        },
+        {
+          "t": 2060,
+          "tLabel": "34:20",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "Prototype: Help and Update Window Prototype",
+          "url": "https://www.youtube.com/watch?v=2Tu0p9Eh6Bw&t=2060s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 1060
+        },
+        {
+          "t": 3120,
+          "tLabel": "52:00",
+          "category": "chat",
+          "emoji": "💬",
+          "text": "Berlin Workshop recap",
+          "url": "https://www.youtube.com/watch?v=2Tu0p9Eh6Bw&t=3120s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 270
+        },
+        {
+          "t": 3390,
+          "tLabel": "56:30",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "Operator Style Guide (Descriptions, Tags, etc.)",
+          "url": "https://www.youtube.com/watch?v=2Tu0p9Eh6Bw&t=3390s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 1651
+        },
+        {
+          "t": 5041,
+          "tLabel": "1:24:01",
+          "category": "uncategorized",
+          "emoji": "",
+          "text": "Discussing namespaces",
+          "url": "https://www.youtube.com/watch?v=2Tu0p9Eh6Bw&t=5041s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 497
+        },
+        {
+          "t": 5538,
+          "tLabel": "1:32:18",
+          "category": "uncategorized",
+          "emoji": "",
+          "text": "Reviewing a Pull Request for Waveforms (reviewing C# style)",
+          "url": "https://www.youtube.com/watch?v=2Tu0p9Eh6Bw&t=5538s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 1648
+        },
+        {
+          "t": 7186,
+          "tLabel": "1:59:46",
+          "category": "planned",
+          "emoji": "🎯",
+          "text": "Planned: Animation sketches",
+          "url": "https://www.youtube.com/watch?v=2Tu0p9Eh6Bw&t=7186s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 500
+        },
+        {
+          "t": 7686,
+          "tLabel": "2:08:06",
+          "category": "planned",
+          "emoji": "🎯",
+          "text": "Discussing: File browser",
+          "url": "https://www.youtube.com/watch?v=2Tu0p9Eh6Bw&t=7686s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 1194
+        },
+        {
+          "t": 8880,
+          "tLabel": "2:28:00",
+          "category": "background",
+          "emoji": "📊",
+          "text": "Results voting for features",
+          "url": "https://www.youtube.com/watch?v=2Tu0p9Eh6Bw&t=8880s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 420
+        },
+        {
+          "t": 9300,
+          "tLabel": "2:35:00",
+          "category": "chat",
+          "emoji": "🗯️",
+          "text": "Video glitch effects",
+          "url": "https://www.youtube.com/watch?v=2Tu0p9Eh6Bw&t=9300s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 420
+        },
+        {
+          "t": 9720,
+          "tLabel": "2:42:00",
+          "category": "uncategorized",
+          "emoji": "",
+          "text": "Rebuilding a nice height field effect and SDF",
+          "url": "https://www.youtube.com/watch?v=2Tu0p9Eh6Bw&t=9720s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 2100
+        },
+        {
+          "t": 11820,
+          "tLabel": "3:17:00",
+          "category": "background",
+          "emoji": "🧠",
+          "text": "Discussing Color fields",
+          "url": "https://www.youtube.com/watch?v=2Tu0p9Eh6Bw&t=11820s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 120
+        },
+        {
+          "t": 11940,
+          "tLabel": "3:19:00",
+          "category": "tip",
+          "emoji": "💡",
+          "text": "Build new Op PointColorFromField",
+          "url": "https://www.youtube.com/watch?v=2Tu0p9Eh6Bw&t=11940s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 1560
+        },
+        {
+          "t": 13500,
+          "tLabel": "3:45:00",
+          "category": "tip",
+          "emoji": "💡",
+          "text": "Build new c# Op ShuffleIndex (failing)",
+          "url": "https://www.youtube.com/watch?v=2Tu0p9Eh6Bw&t=13500s",
+          "ops": [],
+          "issues": [],
+          "notes": []
+        }
+      ]
+    },
+    {
+      "id": "Mqi2mEyd4jQ",
+      "type": "meetup",
+      "source": {
+        "type": "youtube",
+        "id": "Mqi2mEyd4jQ"
+      },
+      "date": "2025-09-22",
+      "title": "Particle Effects, Groups operators, TimeClips, Time Scaling, Audio Sync",
+      "url": "https://www.youtube.com/watch?v=Mqi2mEyd4jQ",
+      "thumbnail": "https://img.youtube.com/vi/Mqi2mEyd4jQ/maxresdefault.jpg",
+      "durationLabel": null,
+      "sourcePage": "meetup.20250922",
+      "segments": [
+        {
+          "t": 0,
+          "tLabel": "0:00",
+          "category": "chat",
+          "emoji": "💬",
+          "text": "Welcome / Starting Up",
+          "url": "https://www.youtube.com/watch?v=Mqi2mEyd4jQ&t=0s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 270
+        },
+        {
+          "t": 270,
+          "tLabel": "4:30",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "Let's Make \"a Particle River\" ♥liia",
+          "url": "https://www.youtube.com/watch?v=Mqi2mEyd4jQ&t=270s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 2100
+        },
+        {
+          "t": 2370,
+          "tLabel": "39:30",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "Grouping Ops into new Ops",
+          "url": "https://www.youtube.com/watch?v=Mqi2mEyd4jQ&t=2370s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 690
+        },
+        {
+          "t": 3060,
+          "tLabel": "51:00",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "Adding a Project Soundtrack",
+          "url": "https://www.youtube.com/watch?v=Mqi2mEyd4jQ&t=3060s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 180
+        },
+        {
+          "t": 3240,
+          "tLabel": "54:00",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "Evaluation Flow and Scenes",
+          "url": "https://www.youtube.com/watch?v=Mqi2mEyd4jQ&t=3240s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 120
+        },
+        {
+          "t": 3360,
+          "tLabel": "56:00",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "TimeClips (In-depth)",
+          "url": "https://www.youtube.com/watch?v=Mqi2mEyd4jQ&t=3360s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 835
+        },
+        {
+          "t": 4195,
+          "tLabel": "1:09:55",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "Remapping Time",
+          "url": "https://www.youtube.com/watch?v=Mqi2mEyd4jQ&t=4195s",
+          "ops": [
+            "Lib.numbers.anim.time.Time"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 635
+        },
+        {
+          "t": 4830,
+          "tLabel": "1:20:30",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "Let's make: \"Ground Fog\"",
+          "url": "https://www.youtube.com/watch?v=Mqi2mEyd4jQ&t=4830s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 2130
+        },
+        {
+          "t": 6960,
+          "tLabel": "1:56:00",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "Color Grading (In-Depth)",
+          "url": "https://www.youtube.com/watch?v=Mqi2mEyd4jQ&t=6960s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 1080
+        },
+        {
+          "t": 8040,
+          "tLabel": "2:14:00",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "Fx1 Attributes and Particle System",
+          "url": "https://www.youtube.com/watch?v=Mqi2mEyd4jQ&t=8040s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 1140
+        },
+        {
+          "t": 9180,
+          "tLabel": "2:33:00",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "Let's make a \"Posterize effect\"",
+          "url": "https://www.youtube.com/watch?v=Mqi2mEyd4jQ&t=9180s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 2280
+        },
+        {
+          "t": 11460,
+          "tLabel": "3:11:00",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "Using MidiClips and FFT",
+          "url": "https://www.youtube.com/watch?v=Mqi2mEyd4jQ&t=11460s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 0
+        },
+        {
+          "t": 11460,
+          "tLabel": "3:11:00",
+          "category": "chat",
+          "emoji": "🗯️",
+          "text": "Discussing audio buffers and features",
+          "url": "https://www.youtube.com/watch?v=Mqi2mEyd4jQ&t=11460s",
+          "ops": [],
+          "issues": [],
+          "notes": []
+        }
+      ]
+    },
+    {
+      "id": "rEod2FltaPA",
+      "type": "meetup",
+      "source": {
+        "type": "youtube",
+        "id": "rEod2FltaPA"
+      },
+      "date": "2025-10-06",
+      "title": "Particle System deep dive and more",
+      "url": "https://www.youtube.com/watch?v=rEod2FltaPA",
+      "thumbnail": "https://img.youtube.com/vi/rEod2FltaPA/maxresdefault.jpg",
+      "durationLabel": null,
+      "sourcePage": "meetup.20251006",
+      "segments": [
+        {
+          "t": 0,
+          "tLabel": "0:00",
+          "category": "chat",
+          "emoji": "🗯️",
+          "text": "Introduction",
+          "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=0s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 315
+        },
+        {
+          "t": 315,
+          "tLabel": "5:15",
+          "category": "showcase",
+          "emoji": "🍿",
+          "text": "Recent TiXL Demos by MFX and Still",
+          "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=315s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 735
+        },
+        {
+          "t": 1050,
+          "tLabel": "17:30",
+          "category": "chat",
+          "emoji": "🗯️",
+          "text": "Review Video by Momo",
+          "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=1050s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 97
+        },
+        {
+          "t": 1147,
+          "tLabel": "19:07",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "Particle system",
+          "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=1147s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 113,
+          "section": "Particle System Deep dive"
+        },
+        {
+          "t": 1260,
+          "tLabel": "21:00",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "PointSimulation (Legacy)",
+          "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=1260s",
+          "ops": [
+            "Lib.point.sim.PointSimulation"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 230,
+          "section": "Particle System Deep dive"
+        },
+        {
+          "t": 1490,
+          "tLabel": "24:50",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "ParticleSystem Op",
+          "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=1490s",
+          "ops": [
+            "Lib.particle.ParticleSystem"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 465,
+          "section": "Particle System Deep dive"
+        },
+        {
+          "t": 1955,
+          "tLabel": "32:35",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "SequenceAnim",
+          "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=1955s",
+          "ops": [
+            "Lib.numbers.anim.animators.SequenceAnim"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 0,
+          "section": "Particle System Deep dive"
+        },
+        {
+          "t": 1955,
+          "tLabel": "32:35",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "Particle Orientation",
+          "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=1955s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 1975,
+          "section": "Particle System Deep dive"
+        },
+        {
+          "t": 3930,
+          "tLabel": "1:05:30",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "Particle Lifetime",
+          "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=3930s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 690,
+          "section": "Particle System Deep dive"
+        },
+        {
+          "t": 4620,
+          "tLabel": "1:17:00",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "Forces",
+          "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=4620s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 77,
+          "section": "Particle System Deep dive"
+        },
+        {
+          "t": 4697,
+          "tLabel": "1:18:17",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "TurbulenceForce",
+          "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=4697s",
+          "ops": [
+            "Lib.particle.force.TurbulenceForce"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 863,
+          "section": "Particle System Deep dive"
+        },
+        {
+          "t": 5560,
+          "tLabel": "1:32:40",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "DirectionalForce",
+          "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=5560s",
+          "ops": [
+            "Lib.particle.force.DirectionalForce"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 490,
+          "section": "Particle System Deep dive"
+        },
+        {
+          "t": 6050,
+          "tLabel": "1:40:50",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "CollisionForce",
+          "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=6050s",
+          "ops": [
+            "Lib.particle.force.CollisionForce"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 162,
+          "section": "Particle System Deep dive"
+        },
+        {
+          "t": 6212,
+          "tLabel": "1:43:32",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "FieldVolumeForce and SDF",
+          "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=6212s",
+          "ops": [
+            "Lib.particle.force.FieldVolumeForce"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 1740,
+          "section": "Particle System Deep dive"
+        },
+        {
+          "t": 7952,
+          "tLabel": "2:12:32",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "RaymarchPoints (Raycasting WIP)",
+          "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=7952s",
+          "ops": [
+            "Lib.field.use.RaymarchPoints"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 1254,
+          "section": "Particle System Deep dive"
+        },
+        {
+          "t": 9206,
+          "tLabel": "2:33:26",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "FollowMeshSurfaceForce",
+          "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=9206s",
+          "ops": [
+            "Lib.particle.force.FollowMeshSurfaceForce"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 237,
+          "section": "Particle System Deep dive"
+        },
+        {
+          "t": 9443,
+          "tLabel": "2:37:23",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "ReconstructiveForce",
+          "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=9443s",
+          "ops": [
+            "Lib.particle.force.ReconstructiveForce"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 227,
+          "section": "Particle System Deep dive"
+        },
+        {
+          "t": 9670,
+          "tLabel": "2:41:10",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "SnapToAnglesForce",
+          "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=9670s",
+          "ops": [
+            "Lib.particle.force.SnapToAnglesForce"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 340,
+          "section": "Particle System Deep dive"
+        },
+        {
+          "t": 10010,
+          "tLabel": "2:46:50",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "SwitchParticleForces",
+          "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=10010s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 145,
+          "section": "Particle System Deep dive"
+        },
+        {
+          "t": 10155,
+          "tLabel": "2:49:15",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "TextureMapForce",
+          "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=10155s",
+          "ops": [
+            "Lib.particle.force.TextureMapForce"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 485,
+          "section": "Particle System Deep dive"
+        },
+        {
+          "t": 10640,
+          "tLabel": "2:57:20",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "Particles vs Points",
+          "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=10640s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 73,
+          "section": "More effects"
+        },
+        {
+          "t": 10713,
+          "tLabel": "2:58:33",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "DrawMotionBlurPoints",
+          "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=10713s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 172,
+          "section": "More effects"
+        },
+        {
+          "t": 10885,
+          "tLabel": "3:01:25",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "KeepPreviousPointBuffer",
+          "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=10885s",
+          "ops": [
+            "Lib.point.usse.KeepPreviousPointBuffer"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 294,
+          "section": "More effects"
+        },
+        {
+          "t": 11179,
+          "tLabel": "3:06:19",
+          "category": "unknown",
+          "emoji": "🙋‍♀️",
+          "text": "Debugging MoveToSdf Problem",
+          "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=11179s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 251,
+          "section": "User projects and building stuff"
+        },
+        {
+          "t": 11430,
+          "tLabel": "3:10:30",
+          "category": "showcase",
+          "emoji": "🍿",
+          "text": "Showcase: Nik Nenov Lasers animation with Houdini",
+          "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=11430s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 480,
+          "section": "User projects and building stuff"
+        },
+        {
+          "t": 11910,
+          "tLabel": "3:18:30",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "Line Strands Effects",
+          "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=11910s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 4020,
+          "section": "User projects and building stuff"
+        },
+        {
+          "t": 15930,
+          "tLabel": "4:25:30",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "MoveToSDF surface orientation",
+          "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=15930s",
+          "ops": [
+            "Lib.point.modify.MoveToSDF"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 360,
+          "section": "User projects and building stuff"
+        },
+        {
+          "t": 16290,
+          "tLabel": "4:31:30",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "RenderWithMotionBlur",
+          "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=16290s",
+          "ops": [
+            "Lib.image.use.RenderWithMotionBlur"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 390,
+          "section": "User projects and building stuff"
+        },
+        {
+          "t": 16680,
+          "tLabel": "4:38:00",
+          "category": "tip",
+          "emoji": "💡",
+          "text": "Random Symbol Prompts with ???",
+          "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=16680s",
+          "ops": [
+            "Lib.numbers.float.random.Random"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 735,
+          "section": "User projects and building stuff"
+        },
+        {
+          "t": 17415,
+          "tLabel": "4:50:15",
+          "category": "showcase",
+          "emoji": "🍿",
+          "text": "Contribution: Newemka DrawClosedLines and other new Ops",
+          "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=17415s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 1080,
+          "section": "User projects and building stuff"
+        },
+        {
+          "t": 18495,
+          "tLabel": "5:08:15",
+          "category": "chat",
+          "emoji": "🗯️",
+          "text": "Discussion",
+          "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=18495s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 225,
+          "section": "User projects and building stuff"
+        },
+        {
+          "t": 18720,
+          "tLabel": "5:12:00",
+          "category": "showcase",
+          "emoji": "🍿",
+          "text": "Showcase: Newemka - David effect",
+          "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=18720s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 0,
+          "section": "User projects and building stuff"
+        },
+        {
+          "t": 18720,
+          "tLabel": "5:12:00",
+          "category": "showcase",
+          "emoji": "🍿",
+          "text": "Showcase: ioGen - Particles and SDF",
+          "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=18720s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "section": "User projects and building stuff"
+        }
+      ]
+    },
+    {
+      "id": "cfUWSPJDRi4",
+      "type": "meetup",
+      "source": {
+        "type": "youtube",
+        "id": "cfUWSPJDRi4"
+      },
+      "date": "2025-11-03",
+      "title": "Asset Library",
+      "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4",
+      "thumbnail": "https://img.youtube.com/vi/cfUWSPJDRi4/maxresdefault.jpg",
+      "durationLabel": null,
+      "sourcePage": "meetup.20251103",
+      "segments": [
+        {
+          "t": 0,
+          "tLabel": "0:00",
+          "category": "chat",
+          "emoji": "🗯️",
+          "text": "Introduction",
+          "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=0s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 201
+        },
+        {
+          "t": 201,
+          "tLabel": "3:21",
+          "category": "showcase",
+          "emoji": "🍿",
+          "text": "@Newemka shows the new [SubdivideLinePoints] [DrawLines] ops",
+          "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=201s",
+          "ops": [
+            "Lib.point.generate.SubdivideLinePoints",
+            "Lib.point.draw.DrawLines"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 689
+        },
+        {
+          "t": 890,
+          "tLabel": "14:50",
+          "category": "chat",
+          "emoji": "🗯️",
+          "text": "Prompt-Generator (introduction)",
+          "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=890s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 190
+        },
+        {
+          "t": 1080,
+          "tLabel": "18:00",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "Prompt #1 [RepeatAtPoints] [TransformPoints] [Sum]",
+          "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=1080s",
+          "ops": [
+            "Lib.point.generate.RepeatAtPoints",
+            "Lib.point.transform.TransformPoints",
+            "Lib.numbers.float.basic.Sum"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 374
+        },
+        {
+          "t": 1454,
+          "tLabel": "24:14",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "Documentation on Artnet",
+          "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=1454s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 282
+        },
+        {
+          "t": 1736,
+          "tLabel": "28:56",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "Prompt #2 [LoadImage] [SamplePointAttributes] [CylinderMesh]",
+          "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=1736s",
+          "ops": [
+            "Lib.image.generate.load.LoadImage",
+            "Lib.mesh.generate.CylinderMesh"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 388
+        },
+        {
+          "t": 2124,
+          "tLabel": "35:24",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "Prompt #3 [AudioReaction] [PickStringFromList] [Camera]",
+          "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=2124s",
+          "ops": [
+            "Lib.io.audio.AudioReaction",
+            "Lib.string.list.PickStringFromList",
+            "Lib.render.camera.Camera"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 496
+        },
+        {
+          "t": 2620,
+          "tLabel": "43:40",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "Challenge: Builing the classic Eurovision Logo [PolarCoodinates] [TransformPolar] [PolarRepeat] etc",
+          "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=2620s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 1760
+        },
+        {
+          "t": 4380,
+          "tLabel": "1:13:00",
+          "category": "feature",
+          "emoji": "🆕",
+          "text": "Asset Library (Introduction and Discussion)",
+          "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=4380s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 660
+        },
+        {
+          "t": 5040,
+          "tLabel": "1:24:00",
+          "category": "chat",
+          "emoji": "🗯️",
+          "text": "How to implement an free-moving camera",
+          "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=5040s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 360
+        },
+        {
+          "t": 5400,
+          "tLabel": "1:30:00",
+          "category": "tip",
+          "emoji": "💡",
+          "text": "Camera following a particle",
+          "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=5400s",
+          "ops": [
+            "Lib.render.camera.Camera"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 420
+        },
+        {
+          "t": 5820,
+          "tLabel": "1:37:00",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "[Vector3Gizmo]",
+          "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=5820s",
+          "ops": [
+            "Lib.numbers.vec3.Vector3Gizmo"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 930
+        },
+        {
+          "t": 6750,
+          "tLabel": "1:52:30",
+          "category": "tip",
+          "emoji": "💡",
+          "text": "Getting iPhone rotations with [OSCInput]",
+          "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=6750s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 210
+        },
+        {
+          "t": 6960,
+          "tLabel": "1:56:00",
+          "category": "background",
+          "emoji": "🧠",
+          "text": "Quaternions",
+          "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=6960s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 240
+        },
+        {
+          "t": 7200,
+          "tLabel": "2:00:00",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "[TransformMatrix]",
+          "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=7200s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 300
+        },
+        {
+          "t": 7500,
+          "tLabel": "2:05:00",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "[CamPosition] to place things in front of the camera",
+          "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=7500s",
+          "ops": [
+            "Lib.render.camera.CamPosition"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 540
+        },
+        {
+          "t": 8040,
+          "tLabel": "2:14:00",
+          "category": "chat",
+          "emoji": "🗯️",
+          "text": "Discussing future features: Combining States, Snaphshots, State Machines, and Webserver",
+          "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=8040s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 2596
+        },
+        {
+          "t": 10636,
+          "tLabel": "2:57:16",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "[SpatialDisplaceSDF]",
+          "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=10636s",
+          "ops": [
+            "Lib.field.adjust.SpatialDisplaceSDF"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 164
+        },
+        {
+          "t": 10800,
+          "tLabel": "3:00:00",
+          "category": "chat",
+          "emoji": "🗯️",
+          "text": "Debugging win11 graphic performance settings",
+          "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=10800s",
+          "ops": [],
+          "issues": [],
+          "notes": []
+        }
+      ]
+    },
+    {
+      "id": "wTLW7PXj2Co",
+      "type": "meetup",
+      "source": {
+        "type": "youtube",
+        "id": "wTLW7PXj2Co"
+      },
+      "date": "2025-12-15",
+      "title": "Bubble Zoom and other experiments",
+      "url": "https://www.youtube.com/watch?v=wTLW7PXj2Co",
+      "thumbnail": "https://img.youtube.com/vi/wTLW7PXj2Co/maxresdefault.jpg",
+      "durationLabel": null,
+      "sourcePage": "meetup.20251215",
+      "segments": [
+        {
+          "t": 0,
+          "tLabel": "0:00",
+          "category": "chat",
+          "emoji": "🗯️",
+          "text": "Introduction",
+          "url": "https://www.youtube.com/watch?v=wTLW7PXj2Co&t=0s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 104
+        },
+        {
+          "t": 104,
+          "tLabel": "1:44",
+          "category": "showcase",
+          "emoji": "🍿",
+          "text": "@Newemka shows the new [BubbleZoom] Effect",
+          "url": "https://www.youtube.com/watch?v=wTLW7PXj2Co&t=104s",
+          "ops": [
+            "Lib.image.fx.distort.BubbleZoom"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 1350
+        },
+        {
+          "t": 1454,
+          "tLabel": "24:14",
+          "category": "chat",
+          "emoji": "🗯️",
+          "text": "Discussion GitHub access and pull request progress",
+          "url": "https://www.youtube.com/watch?v=wTLW7PXj2Co&t=1454s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 946
+        },
+        {
+          "t": 2400,
+          "tLabel": "40:00",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "Fixing the [FluidFireLogo] example",
+          "url": "https://www.youtube.com/watch?v=wTLW7PXj2Co&t=2400s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 750
+        },
+        {
+          "t": 3150,
+          "tLabel": "52:30",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "Discuss draw mesh with shadows implementation",
+          "url": "https://www.youtube.com/watch?v=wTLW7PXj2Co&t=3150s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 1380
+        },
+        {
+          "t": 4530,
+          "tLabel": "1:15:30",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "Discuss [Equirectangular]",
+          "url": "https://www.youtube.com/watch?v=wTLW7PXj2Co&t=4530s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 0
+        },
+        {
+          "t": 4530,
+          "tLabel": "1:15:30",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "WIP: Camera on spline interpolation",
+          "url": "https://www.youtube.com/watch?v=wTLW7PXj2Co&t=4530s",
+          "ops": [
+            "Lib.render.camera.Camera"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 1080
+        },
+        {
+          "t": 5610,
+          "tLabel": "1:33:30",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "\"Endless tunnel\"",
+          "url": "https://www.youtube.com/watch?v=wTLW7PXj2Co&t=5610s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 660
+        },
+        {
+          "t": 6270,
+          "tLabel": "1:44:30",
+          "category": "background",
+          "emoji": "🧠",
+          "text": "How to file a bug report",
+          "url": "https://www.youtube.com/watch?v=wTLW7PXj2Co&t=6270s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 1110
+        },
+        {
+          "t": 7380,
+          "tLabel": "2:03:00",
+          "category": "background",
+          "emoji": "🧠",
+          "text": "How to add parameters to shaders",
+          "url": "https://www.youtube.com/watch?v=wTLW7PXj2Co&t=7380s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 1020
+        },
+        {
+          "t": 8400,
+          "tLabel": "2:20:00",
+          "category": "background",
+          "emoji": "🧠",
+          "text": "How to use Render Doc for debugging shaders",
+          "url": "https://www.youtube.com/watch?v=wTLW7PXj2Co&t=8400s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 720
+        },
+        {
+          "t": 9120,
+          "tLabel": "2:32:00",
+          "category": "showcase",
+          "emoji": "🍿",
+          "text": "More tunnel scenes",
+          "url": "https://www.youtube.com/watch?v=wTLW7PXj2Co&t=9120s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 120
+        },
+        {
+          "t": 9240,
+          "tLabel": "2:34:00",
+          "category": "showcase",
+          "emoji": "🍿",
+          "text": "Banidu show-cases a moving heads light installation with TiXL",
+          "url": "https://www.youtube.com/watch?v=wTLW7PXj2Co&t=9240s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 780
+        },
+        {
+          "t": 10020,
+          "tLabel": "2:47:00",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "Let's patch an \"Infinity zoom jump cut\"",
+          "url": "https://www.youtube.com/watch?v=wTLW7PXj2Co&t=10020s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 3000
+        },
+        {
+          "t": 13020,
+          "tLabel": "3:37:00",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "Discussing new RaymarchField options",
+          "url": "https://www.youtube.com/watch?v=wTLW7PXj2Co&t=13020s",
+          "ops": [
+            "Lib.field.render.RaymarchField"
+          ],
+          "issues": [],
+          "notes": []
+        }
+      ]
+    },
+    {
+      "id": "a5_xCfC_3m4",
+      "type": "meetup",
+      "source": {
+        "type": "youtube",
+        "id": "a5_xCfC_3m4"
+      },
+      "date": "2026-01-26",
+      "title": "Assets, Mediapipe and SkillQuest",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4",
+      "thumbnail": "https://img.youtube.com/vi/a5_xCfC_3m4/maxresdefault.jpg",
+      "durationLabel": null,
+      "sourcePage": "meetup.20260126",
+      "segments": [
+        {
+          "t": 0,
+          "tLabel": "0:00",
+          "category": "chat",
+          "emoji": "🗯️",
+          "text": "Updating and building",
+          "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=0s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 457
+        },
+        {
+          "t": 457,
+          "tLabel": "7:37",
+          "category": "tip",
+          "emoji": "💡",
+          "text": "Skill Quest tutorials",
+          "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=457s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 791
+        },
+        {
+          "t": 1248,
+          "tLabel": "20:48",
+          "category": "background",
+          "emoji": "🧠",
+          "text": "Profiling performance",
+          "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=1248s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 762
+        },
+        {
+          "t": 2010,
+          "tLabel": "33:30",
+          "category": "feature",
+          "emoji": "🆕",
+          "text": "v4.1 Asset handling",
+          "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=2010s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 1300
+        },
+        {
+          "t": 3310,
+          "tLabel": "55:10",
+          "category": "highlight",
+          "emoji": "🌟",
+          "text": "upcoming thumbnails",
+          "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=3310s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 1115
+        },
+        {
+          "t": 4425,
+          "tLabel": "1:13:45",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "Using Mediapipe",
+          "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=4425s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 4807
+        },
+        {
+          "t": 9232,
+          "tLabel": "2:33:52",
+          "category": "background",
+          "emoji": "🧠",
+          "text": "SkillQuest - Tutorials",
+          "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=9232s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 0
+        },
+        {
+          "t": 9232,
+          "tLabel": "2:33:52",
+          "category": "background",
+          "emoji": "🧠",
+          "text": "SkillQuest - Extending it",
+          "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=9232s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 4658
+        },
+        {
+          "t": 13890,
+          "tLabel": "3:51:30",
+          "category": "showcase",
+          "emoji": "🍿",
+          "text": "banidu demos AR with PTZ-cam",
+          "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=13890s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 510
+        },
+        {
+          "t": 14400,
+          "tLabel": "4:00:00",
+          "category": "showcase",
+          "emoji": "🍿",
+          "text": "newemka pitches VDA animations",
+          "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=14400s",
+          "ops": [],
+          "issues": [],
+          "notes": []
+        }
+      ]
+    },
+    {
+      "id": "PWCfyUnFGdg",
+      "type": "meetup",
+      "source": {
+        "type": "youtube",
+        "id": "PWCfyUnFGdg"
+      },
+      "date": "2026-02-23",
+      "title": "Building some Complex Scenes",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg",
+      "thumbnail": "https://img.youtube.com/vi/PWCfyUnFGdg/maxresdefault.jpg",
+      "durationLabel": null,
+      "sourcePage": "meetup.20260223",
+      "segments": [
+        {
+          "t": 0,
+          "tLabel": "0:00",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "Type Points",
+          "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=0s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 1451
+        },
+        {
+          "t": 1451,
+          "tLabel": "24:11",
+          "category": "chat",
+          "emoji": "🗯️",
+          "text": "Discussing art by @plyzitron",
+          "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=1451s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 249
+        },
+        {
+          "t": 1700,
+          "tLabel": "28:20",
+          "category": "feature",
+          "emoji": "🆕",
+          "text": "newemka demos the new IKChains op",
+          "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=1700s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 693
+        },
+        {
+          "t": 2393,
+          "tLabel": "39:53",
+          "category": "chat",
+          "emoji": "💬",
+          "text": "Merging pull requests",
+          "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=2393s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 367
+        },
+        {
+          "t": 2760,
+          "tLabel": "46:00",
+          "category": "chat",
+          "emoji": "💬",
+          "text": "Rebuilding TiXL",
+          "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=2760s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 350
+        },
+        {
+          "t": 3110,
+          "tLabel": "51:50",
+          "category": "feature",
+          "emoji": "🆕",
+          "text": "new with v4.1: Thumbnails!",
+          "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=3110s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 291
+        },
+        {
+          "t": 3401,
+          "tLabel": "56:41",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "Building a matrix tentacle robot",
+          "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=3401s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 6267
+        },
+        {
+          "t": 9668,
+          "tLabel": "2:41:08",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "Copying  @plyzitron",
+          "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=9668s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 269
+        },
+        {
+          "t": 9937,
+          "tLabel": "2:45:37",
+          "category": "background",
+          "emoji": "🧠",
+          "text": "Analyzing colors",
+          "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=9937s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 396
+        },
+        {
+          "t": 10333,
+          "tLabel": "2:52:13",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "Copying a scene",
+          "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=10333s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 5147
+        },
+        {
+          "t": 15480,
+          "tLabel": "4:18:00",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "newemka shares abstract line patterns",
+          "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=15480s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 255
+        },
+        {
+          "t": 15735,
+          "tLabel": "4:22:15",
+          "category": "chat",
+          "emoji": "🗯️",
+          "text": "Discussing presets and custom shader ops",
+          "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=15735s",
+          "ops": [],
+          "issues": [],
+          "notes": []
+        }
+      ]
+    },
+    {
+      "id": "yy1kKa-wucA",
+      "type": "meetup",
+      "source": {
+        "type": "youtube",
+        "id": "yy1kKa-wucA"
+      },
+      "date": "2026-03-09",
+      "title": "Line Numbers and Demo Scenes",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA",
+      "thumbnail": "https://img.youtube.com/vi/yy1kKa-wucA/maxresdefault.jpg",
+      "durationLabel": null,
+      "sourcePage": "meetup.20260309",
+      "segments": [
+        {
+          "t": 0,
+          "tLabel": "0:00",
+          "category": "chat",
+          "emoji": "🗯️",
+          "text": "Welcome and intro",
+          "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=0s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 174
+        },
+        {
+          "t": 174,
+          "tLabel": "2:54",
+          "category": "feature",
+          "emoji": "🆕",
+          "text": "NumberLinePoints",
+          "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=174s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 576
+        },
+        {
+          "t": 750,
+          "tLabel": "12:30",
+          "category": "background",
+          "emoji": "🧠",
+          "text": "Working with Single Line Fonts",
+          "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=750s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 456
+        },
+        {
+          "t": 1206,
+          "tLabel": "20:06",
+          "category": "unknown",
+          "emoji": "🔢",
+          "text": "NumberLinePoints (Shader Dev)",
+          "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=1206s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 1218
+        },
+        {
+          "t": 2424,
+          "tLabel": "40:24",
+          "category": "feature",
+          "emoji": "🆕",
+          "text": "Keyframe editing features (wip)",
+          "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=2424s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 156
+        },
+        {
+          "t": 2580,
+          "tLabel": "43:00",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "Animating with Keyframes Steps",
+          "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=2580s",
+          "ops": [
+            "Lib.image.fx.stylize.Steps"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 560
+        },
+        {
+          "t": 3140,
+          "tLabel": "52:20",
+          "category": "feature",
+          "emoji": "🆕",
+          "text": "Switching enum parameters",
+          "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=3140s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 160
+        },
+        {
+          "t": 3300,
+          "tLabel": "55:00",
+          "category": "background",
+          "emoji": "🧠",
+          "text": "Using beat lock for syncing visuals",
+          "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=3300s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 720
+        },
+        {
+          "t": 4020,
+          "tLabel": "1:07:00",
+          "category": "unknown",
+          "emoji": "🔢",
+          "text": "Improve CustomPointShader",
+          "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=4020s",
+          "ops": [
+            "Lib.point.modify.CustomPointShader"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 480
+        },
+        {
+          "t": 4500,
+          "tLabel": "1:15:00",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "Working on a demo (\"Every beat counts\")",
+          "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=4500s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 5100
+        },
+        {
+          "t": 9600,
+          "tLabel": "2:40:00",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "[FollowMeshSurfaceForce]",
+          "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=9600s",
+          "ops": [
+            "Lib.particle.force.FollowMeshSurfaceForce"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 480
+        },
+        {
+          "t": 10080,
+          "tLabel": "2:48:00",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "Improve CustomPointShader (add fields)",
+          "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=10080s",
+          "ops": [
+            "Lib.point.modify.CustomPointShader"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 3720
+        },
+        {
+          "t": 13800,
+          "tLabel": "3:50:00",
+          "category": "unknown",
+          "emoji": "🐛",
+          "text": "Analysing keyframe bug (and munching)",
+          "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=13800s",
+          "ops": [],
+          "issues": [],
+          "notes": []
+        }
+      ]
+    },
+    {
+      "id": "VNC-zr-JOjQ",
+      "type": "meetup",
+      "source": {
+        "type": "youtube",
+        "id": "VNC-zr-JOjQ"
+      },
+      "date": "2026-03-23",
+      "title": "Particles forces and Project Show Cases",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ",
+      "thumbnail": "https://img.youtube.com/vi/VNC-zr-JOjQ/maxresdefault.jpg",
+      "durationLabel": null,
+      "sourcePage": "meetup.20260323",
+      "segments": [
+        {
+          "t": 0,
+          "tLabel": "0:00",
+          "category": "chat",
+          "emoji": "🗯️",
+          "text": "Welcome",
+          "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=0s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 210
+        },
+        {
+          "t": 210,
+          "tLabel": "3:30",
+          "category": "highlight",
+          "emoji": "🌟",
+          "text": "Meet-Up archive Wiki & Playlist",
+          "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=210s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 150
+        },
+        {
+          "t": 360,
+          "tLabel": "6:00",
+          "category": "feature",
+          "emoji": "🆕",
+          "text": "MeshCollisionForce",
+          "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=360s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 360
+        },
+        {
+          "t": 720,
+          "tLabel": "12:00",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "FieldVolumeForce",
+          "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=720s",
+          "ops": [
+            "Lib.particle.force.FieldVolumeForce"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 1320
+        },
+        {
+          "t": 2040,
+          "tLabel": "34:00",
+          "category": "feature",
+          "emoji": "🆕",
+          "text": "DrawMovingPoints",
+          "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=2040s",
+          "ops": [
+            "Lib.point.draw.DrawMovingPoints"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 1050
+        },
+        {
+          "t": 3090,
+          "tLabel": "51:30",
+          "category": "feature",
+          "emoji": "🆕",
+          "text": "DrawMovingPoints (implementation)",
+          "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=3090s",
+          "ops": [
+            "Lib.point.draw.DrawMovingPoints"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 720
+        },
+        {
+          "t": 3810,
+          "tLabel": "1:03:30",
+          "category": "background",
+          "emoji": "🧠",
+          "text": "LoadImage texture caching",
+          "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=3810s",
+          "ops": [
+            "Lib.image.generate.load.LoadImage"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 310
+        },
+        {
+          "t": 4120,
+          "tLabel": "1:08:40",
+          "category": "uncategorized",
+          "emoji": "",
+          "text": "[Crop] and [Glow] with transparent logos",
+          "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=4120s",
+          "ops": [
+            "Lib.image.transform.Crop",
+            "Lib.image.fx.stylize.Glow"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 620
+        },
+        {
+          "t": 4740,
+          "tLabel": "1:19:00",
+          "category": "chat",
+          "emoji": "💬",
+          "text": "Discussing directional light",
+          "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=4740s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 1560
+        },
+        {
+          "t": 6300,
+          "tLabel": "1:45:00",
+          "category": "chat",
+          "emoji": "💬",
+          "text": "Fresnel with [CustomPixelShader]",
+          "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=6300s",
+          "ops": [
+            "Lib.image.use.CustomPixelShader"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 360
+        },
+        {
+          "t": 6660,
+          "tLabel": "1:51:00",
+          "category": "showcase",
+          "emoji": "🍿",
+          "text": "Nik: flashing cave lights light Projects",
+          "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=6660s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 300
+        },
+        {
+          "t": 6960,
+          "tLabel": "1:56:00",
+          "category": "feature",
+          "emoji": "🆕",
+          "text": "Build lazers with [ReflectionPoints]",
+          "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=6960s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 780
+        },
+        {
+          "t": 7740,
+          "tLabel": "2:09:00",
+          "category": "uncategorized",
+          "emoji": "",
+          "text": "Build the editor without Visual Studio",
+          "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=7740s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 240
+        },
+        {
+          "t": 7980,
+          "tLabel": "2:13:00",
+          "category": "showcase",
+          "emoji": "🍿",
+          "text": "Nik:  \"Statio\" project break down",
+          "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=7980s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 1365
+        },
+        {
+          "t": 9345,
+          "tLabel": "2:35:45",
+          "category": "tip",
+          "emoji": "💡",
+          "text": "Tip ntsc-effect app",
+          "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=9345s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 45
+        },
+        {
+          "t": 9390,
+          "tLabel": "2:36:30",
+          "category": "tip",
+          "emoji": "💡",
+          "text": "VHS blur effect [CustomPixelShader]",
+          "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=9390s",
+          "ops": [
+            "Lib.image.use.CustomPixelShader"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 610
+        },
+        {
+          "t": 10000,
+          "tLabel": "2:46:40",
+          "category": "chat",
+          "emoji": "🗯️",
+          "text": "Support with copy paste problem",
+          "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=10000s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 0
+        },
+        {
+          "t": 10000,
+          "tLabel": "2:46:40",
+          "category": "background",
+          "emoji": "🧠",
+          "text": "[RaymarchField] glow implementation",
+          "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=10000s",
+          "ops": [
+            "Lib.field.render.RaymarchField"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 860
+        },
+        {
+          "t": 10860,
+          "tLabel": "3:01:00",
+          "category": "chat",
+          "emoji": "🗯️",
+          "text": "Discussing quaternions interpolation",
+          "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=10860s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 600
+        },
+        {
+          "t": 11460,
+          "tLabel": "3:11:00",
+          "category": "chat",
+          "emoji": "🗯️",
+          "text": "Coloring SDF tunnel fractals",
+          "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=11460s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 480
+        },
+        {
+          "t": 11940,
+          "tLabel": "3:19:00",
+          "category": "chat",
+          "emoji": "🗯️",
+          "text": "Support raymarching problems on AMD graphics",
+          "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=11940s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 1260
+        },
+        {
+          "t": 13200,
+          "tLabel": "3:40:00",
+          "category": "showcase",
+          "emoji": "🍿",
+          "text": "@ioGen showcases procedural camera system",
+          "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=13200s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 300
+        },
+        {
+          "t": 13500,
+          "tLabel": "3:45:00",
+          "category": "showcase",
+          "emoji": "🍿",
+          "text": "pixtur show-cases path camera interpolation",
+          "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=13500s",
+          "ops": [],
+          "issues": [],
+          "notes": []
+        }
+      ]
+    },
+    {
+      "id": "dCX7CcL0ZJs",
+      "type": "meetup",
+      "source": {
+        "type": "youtube",
+        "id": "dCX7CcL0ZJs"
+      },
+      "date": "2026-04-20",
+      "title": "Controlling scenes and procedural modelling",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs",
+      "thumbnail": "https://img.youtube.com/vi/dCX7CcL0ZJs/maxresdefault.jpg",
+      "durationLabel": null,
+      "sourcePage": "meetup.20260420",
+      "segments": [
+        {
+          "t": 0,
+          "tLabel": "0:00",
+          "category": "chat",
+          "emoji": "💬",
+          "text": "Welcome",
+          "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=0s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 60
+        },
+        {
+          "t": 60,
+          "tLabel": "1:00",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "Deterministic animations",
+          "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=60s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 300
+        },
+        {
+          "t": 360,
+          "tLabel": "6:00",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "Picking textures and scenes and time clips",
+          "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=360s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 720
+        },
+        {
+          "t": 1080,
+          "tLabel": "18:00",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "Preloading in exported",
+          "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=1080s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 660
+        },
+        {
+          "t": 1740,
+          "tLabel": "29:00",
+          "category": "question",
+          "emoji": "❓",
+          "text": "Controlling speed with Midi",
+          "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=1740s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 660
+        },
+        {
+          "t": 2400,
+          "tLabel": "40:00",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "Custom points shaders (Sine Wave)",
+          "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=2400s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 2100
+        },
+        {
+          "t": 4500,
+          "tLabel": "1:15:00",
+          "category": "showcase",
+          "emoji": "🍿",
+          "text": "M3LockHolm3s",
+          "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=4500s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 510
+        },
+        {
+          "t": 5010,
+          "tLabel": "1:23:30",
+          "category": "question",
+          "emoji": "❓",
+          "text": "Alpha Cut Off",
+          "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=5010s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 990
+        },
+        {
+          "t": 6000,
+          "tLabel": "1:40:00",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "Copy cat (sadly creator of orignal is unknown)",
+          "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=6000s",
+          "ops": [],
+          "issues": [],
+          "notes": []
+        }
+      ]
+    },
+    {
+      "id": "qavgcL72F1Y",
+      "type": "meetup",
+      "source": {
+        "type": "youtube",
+        "id": "qavgcL72F1Y"
+      },
+      "date": "2026-06-01",
+      "title": "New Timeline, Spline Editor, Audio Clips & AI Coding",
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y",
+      "thumbnail": "https://img.youtube.com/vi/qavgcL72F1Y/maxresdefault.jpg",
+      "durationLabel": null,
+      "sourcePage": "meetup.20260601",
+      "segments": [
+        {
+          "t": 0,
+          "tLabel": "0:00",
+          "category": "feature",
+          "emoji": "🆕",
+          "text": "Recording hiccups + the new performance dashboard",
+          "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=0s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 307
+        },
+        {
+          "t": 307,
+          "tLabel": "5:07",
+          "category": "background",
+          "emoji": "🧠",
+          "text": "Reading the performance histograms",
+          "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=307s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 263
+        },
+        {
+          "t": 570,
+          "tLabel": "9:30",
+          "category": "walkthrough",
+          "emoji": "📝",
+          "text": "Quick startup animation (DrawPoints, orbit camera)",
+          "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=570s",
+          "ops": [
+            "Lib.point.draw.DrawPoints"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 408
+        },
+        {
+          "t": 978,
+          "tLabel": "16:18",
+          "category": "chat",
+          "emoji": "💬",
+          "text": "Agenda + the AI-coding topic",
+          "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=978s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 59
+        },
+        {
+          "t": 1037,
+          "tLabel": "17:17",
+          "category": "planned",
+          "emoji": "🎯",
+          "text": "The v4.2 project board and plan",
+          "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=1037s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 153
+        },
+        {
+          "t": 1190,
+          "tLabel": "19:50",
+          "category": "feature",
+          "emoji": "🆕",
+          "text": "The alpha-build workflow (pink splash, in-app release notes, separate folders)",
+          "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=1190s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 293
+        },
+        {
+          "t": 1483,
+          "tLabel": "24:43",
+          "category": "feature",
+          "emoji": "🆕",
+          "text": "Guided feature tests",
+          "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=1483s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 239
+        },
+        {
+          "t": 1722,
+          "tLabel": "28:42",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "CI, nightly builds, preview deploys",
+          "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=1722s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 542
+        },
+        {
+          "t": 2264,
+          "tLabel": "37:44",
+          "category": "background",
+          "emoji": "🧠",
+          "text": "Using AI: the release-note / acceptance-test / manual triangle",
+          "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=2264s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 226
+        },
+        {
+          "t": 2490,
+          "tLabel": "41:30",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "Project-specific settings",
+          "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=2490s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 500
+        },
+        {
+          "t": 2990,
+          "tLabel": "49:50",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "Skill Quest tutorial improvements",
+          "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=2990s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 240
+        },
+        {
+          "t": 3230,
+          "tLabel": "53:50",
+          "category": "update",
+          "emoji": "🛠️",
+          "text": "Timeline overhaul: motivation and goals",
+          "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=3230s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 150
+        },
+        {
+          "t": 3380,
+          "tLabel": "56:20",
+          "category": "feature",
+          "emoji": "🆕",
+          "text": "New timeline editing (regions, snapping, cycle modes)",
+          "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=3380s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 285
+        },
+        {
+          "t": 3665,
+          "tLabel": "1:01:05",
+          "category": "feature",
+          "emoji": "🆕",
+          "text": "New spline interpolation (adjustable tangents, Smooth-clamped)",
+          "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=3665s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 251
+        },
+        {
+          "t": 3916,
+          "tLabel": "1:05:16",
+          "category": "feature",
+          "emoji": "🆕",
+          "text": "BPM/bars grid and beat snapping",
+          "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=3916s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 154
+        },
+        {
+          "t": 4070,
+          "tLabel": "1:07:50",
+          "category": "walkthrough",
+          "emoji": "📝",
+          "text": "Trigger-keyframe workflow",
+          "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=4070s",
+          "ops": [
+            "Lib.numbers.bool.logic.Trigger"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 310
+        },
+        {
+          "t": 4380,
+          "tLabel": "1:13:00",
+          "category": "op-reference",
+          "emoji": "📘",
+          "text": "Set Sequential Values + RandomChoiceIndex",
+          "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=4380s",
+          "ops": [
+            "Lib.numbers.int.basic.RandomChoiceIndex"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 360
+        },
+        {
+          "t": 4740,
+          "tLabel": "1:19:00",
+          "category": "warning",
+          "emoji": "⚠️",
+          "text": "4.2 file-format / compatibility caveats",
+          "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=4740s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 70
+        },
+        {
+          "t": 4810,
+          "tLabel": "1:20:10",
+          "category": "feature",
+          "emoji": "🆕",
+          "text": "Audio clips and I/O recording",
+          "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=4810s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 950
+        },
+        {
+          "t": 5760,
+          "tLabel": "1:36:00",
+          "category": "chat",
+          "emoji": "💬",
+          "text": "TiXL vs Touch Designer",
+          "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=5760s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 480
+        },
+        {
+          "t": 6240,
+          "tLabel": "1:44:00",
+          "category": "walkthrough",
+          "emoji": "📝",
+          "text": "Simulating recorded I/O data; namespaces",
+          "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=6240s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 1157
+        },
+        {
+          "t": 7397,
+          "tLabel": "2:03:17",
+          "category": "background",
+          "emoji": "🧠",
+          "text": "Animating bypass: Pick vs Switch and the \"magic index\"",
+          "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=7397s",
+          "ops": [
+            "Lib.flow.Switch"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 613
+        },
+        {
+          "t": 8010,
+          "tLabel": "2:13:30",
+          "category": "chat",
+          "emoji": "💬",
+          "text": "Animated preset blending (and the export obstacle)",
+          "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=8010s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 490
+        },
+        {
+          "t": 8500,
+          "tLabel": "2:21:40",
+          "category": "walkthrough",
+          "emoji": "📝",
+          "text": "Feedback effects and custom shaders",
+          "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=8500s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 500
+        },
+        {
+          "t": 9000,
+          "tLabel": "2:30:00",
+          "category": "walkthrough",
+          "emoji": "📝",
+          "text": "CustomPixelShader walkthrough",
+          "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=9000s",
+          "ops": [
+            "Lib.image.use.CustomPixelShader"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 464
+        },
+        {
+          "t": 9464,
+          "tLabel": "2:37:44",
+          "category": "chat",
+          "emoji": "💬",
+          "text": "AI-contribution policy",
+          "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=9464s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 1096
+        },
+        {
+          "t": 10560,
+          "tLabel": "2:56:00",
+          "category": "chat",
+          "emoji": "💬",
+          "text": "Reviewing a community pull request live",
+          "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=10560s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 1134
+        },
+        {
+          "t": 11694,
+          "tLabel": "3:14:54",
+          "category": "planned",
+          "emoji": "🎯",
+          "text": "Plans for procedural mesh modeling",
+          "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=11694s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 486
+        },
+        {
+          "t": 12180,
+          "tLabel": "3:23:00",
+          "category": "showcase",
+          "emoji": "🍿",
+          "text": "City-builder demo (RepeatMeshAtPoints, RandomizePoints)",
+          "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=12180s",
+          "ops": [
+            "Lib.mesh.generate.RepeatMeshAtPoints",
+            "Lib.point.modify.RandomizePoints"
+          ],
+          "issues": [],
+          "notes": [],
+          "durationSec": 420
+        },
+        {
+          "t": 12600,
+          "tLabel": "3:30:00",
+          "category": "walkthrough",
+          "emoji": "📝",
+          "text": "Custom point shader by index; duplicating operators",
+          "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=12600s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 360
+        },
+        {
+          "t": 12960,
+          "tLabel": "3:36:00",
+          "category": "planned",
+          "emoji": "🎯",
+          "text": "Feature request: duplicate-as-new-type copies resources",
+          "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=12960s",
+          "ops": [],
+          "issues": [],
+          "notes": [],
+          "durationSec": 180
+        },
+        {
+          "t": 13140,
+          "tLabel": "3:39:00",
+          "category": "showcase",
+          "emoji": "🍿",
+          "text": "SelectPointsWithSDF demo + wrap-up",
+          "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=13140s",
+          "ops": [
+            "Lib.point.modify.SelectPointsWithSDF"
+          ],
+          "issues": [],
+          "notes": []
+        }
+      ]
+    }
+  ]
+}

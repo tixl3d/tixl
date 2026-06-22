@@ -1,0 +1,1185 @@
+{
+  "op:Lib.io.video.VideoDeviceInput": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "LLpl6QEL7bo"
+      },
+      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=1560s",
+      "date": "2025-08-25",
+      "tLabel": "26:00",
+      "category": "chat",
+      "durationMin": 4,
+      "title": "Try to showcase WebCam operator (VideoDeviceInput)",
+      "summary": null
+    }
+  ],
+  "op:Lib.numbers.anim.animators.AnimBoolean": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "LLpl6QEL7bo"
+      },
+      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=2370s",
+      "date": "2025-08-25",
+      "tLabel": "39:30",
+      "category": "feature",
+      "durationMin": 6,
+      "title": "AnimBoolean",
+      "summary": null
+    }
+  ],
+  "op:Lib.numbers.anim.animators.AnimInt": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "LLpl6QEL7bo"
+      },
+      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=2700s",
+      "date": "2025-08-25",
+      "tLabel": "45:00",
+      "category": "tip",
+      "durationMin": 2,
+      "title": "Tip: Use AnimInt",
+      "summary": null
+    }
+  ],
+  "op:Lib.numbers.anim.vj.SetSpeedFactors": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "LLpl6QEL7bo"
+      },
+      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=2880s",
+      "date": "2025-08-25",
+      "tLabel": "48:00",
+      "category": "op-reference",
+      "durationMin": 6,
+      "title": "How to use SetSpeedFactors",
+      "summary": null
+    }
+  ],
+  "op:Lib.io.input.KeyboardInputAsInt": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "LLpl6QEL7bo"
+      },
+      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=3240s",
+      "date": "2025-08-25",
+      "tLabel": "54:00",
+      "category": "op-reference",
+      "durationMin": 3,
+      "title": "How to use KeyboardInputAsInt",
+      "summary": null
+    }
+  ],
+  "op:Lib.numbers.anim.vj.ForwardBeatTaps": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "LLpl6QEL7bo"
+      },
+      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=3420s",
+      "date": "2025-08-25",
+      "tLabel": "57:00",
+      "category": "highlight",
+      "durationMin": 3,
+      "title": "Discussing ForwardBeatTaps",
+      "summary": null
+    }
+  ],
+  "op:Lib.point.modify.RandomizePoints": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "LLpl6QEL7bo"
+      },
+      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=4340s",
+      "date": "2025-08-25",
+      "tLabel": "1:12:20",
+      "category": "highlight",
+      "durationMin": 1,
+      "title": "Playing with RandomizePoints",
+      "summary": null
+    },
+    {
+      "source": {
+        "type": "youtube",
+        "id": "qavgcL72F1Y"
+      },
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=12180s",
+      "date": "2026-06-01",
+      "tLabel": "3:23:00",
+      "category": "showcase",
+      "durationMin": 7,
+      "title": "City-builder demo (RepeatMeshAtPoints, RandomizePoints)",
+      "summary": null
+    }
+  ],
+  "op:Lib.point.generate.RadialPoints": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "LLpl6QEL7bo"
+      },
+      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=4420s",
+      "date": "2025-08-25",
+      "tLabel": "1:13:40",
+      "category": "walkthrough",
+      "durationMin": 4,
+      "title": "Explaining RadialPoints Attribute parameters",
+      "summary": null
+    }
+  ],
+  "op:Lib.numbers.float.process.Accumulator": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "LLpl6QEL7bo"
+      },
+      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=4685s",
+      "date": "2025-08-25",
+      "tLabel": "1:18:05",
+      "category": "tip",
+      "durationMin": 1,
+      "title": "Accumulator to create procedural animations",
+      "summary": null
+    }
+  ],
+  "op:Lib.render.transform.SpreadLayout": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "LLpl6QEL7bo"
+      },
+      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=6420s",
+      "date": "2025-08-25",
+      "tLabel": "1:47:00",
+      "category": "tip",
+      "durationMin": 2,
+      "title": "SpreadLayout",
+      "summary": null
+    }
+  ],
+  "op:Lib.point.draw.DrawPointsShaded": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "LLpl6QEL7bo"
+      },
+      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=7050s",
+      "date": "2025-08-25",
+      "tLabel": "1:57:30",
+      "category": "op-reference",
+      "durationMin": 2,
+      "title": "DrawPointsShaded",
+      "summary": null
+    }
+  ],
+  "op:Lib.numbers.bool.process.DelayTriggerChange": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "LLpl6QEL7bo"
+      },
+      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=7420s",
+      "date": "2025-08-25",
+      "tLabel": "2:03:40",
+      "category": "op-reference",
+      "durationMin": 3,
+      "title": "DelayTriggerChange",
+      "summary": null
+    }
+  ],
+  "op:Lib.numbers.bool.process.DelayBoolean": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "LLpl6QEL7bo"
+      },
+      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=7571s",
+      "date": "2025-08-25",
+      "tLabel": "2:06:11",
+      "category": "op-reference",
+      "durationMin": 1,
+      "title": "DelayBoolean",
+      "summary": null
+    }
+  ],
+  "op:Lib.particle.ParticleSystem": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "LLpl6QEL7bo"
+      },
+      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=7930s",
+      "date": "2025-08-25",
+      "tLabel": "2:12:10",
+      "category": "op-reference",
+      "durationMin": 26,
+      "title": "SelectPointsWithSdf with ParticleSystem (In depth discussing and examples)",
+      "summary": null
+    },
+    {
+      "source": {
+        "type": "youtube",
+        "id": "rEod2FltaPA"
+      },
+      "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=1490s",
+      "date": "2025-10-06",
+      "tLabel": "24:50",
+      "category": "op-reference",
+      "durationMin": 8,
+      "title": "ParticleSystem Op",
+      "summary": null
+    }
+  ],
+  "op:Lib.io.video.PlayVideo": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "LLpl6QEL7bo"
+      },
+      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=9480s",
+      "date": "2025-08-25",
+      "tLabel": "2:38:00",
+      "category": "tip",
+      "durationMin": 1,
+      "title": "PlayVideo + PointsOnImage",
+      "summary": null
+    }
+  ],
+  "op:Lib.point.generate.PointsOnImage": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "LLpl6QEL7bo"
+      },
+      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=9480s",
+      "date": "2025-08-25",
+      "tLabel": "2:38:00",
+      "category": "tip",
+      "durationMin": 1,
+      "title": "PlayVideo + PointsOnImage",
+      "summary": null
+    }
+  ],
+  "op:Lib.point.sim.PointSimulation": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "LLpl6QEL7bo"
+      },
+      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=9540s",
+      "date": "2025-08-25",
+      "tLabel": "2:39:00",
+      "category": "chat",
+      "durationMin": 1,
+      "title": "Survey of the week (Renaming PointSimulation)",
+      "summary": null
+    },
+    {
+      "source": {
+        "type": "youtube",
+        "id": "rEod2FltaPA"
+      },
+      "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=1260s",
+      "date": "2025-10-06",
+      "tLabel": "21:00",
+      "category": "op-reference",
+      "durationMin": 4,
+      "title": "PointSimulation (Legacy)",
+      "summary": null
+    }
+  ],
+  "op:Lib.point.draw.DrawLines": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "LLpl6QEL7bo"
+      },
+      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=11280s",
+      "date": "2025-08-25",
+      "tLabel": "3:08:00",
+      "category": "tip",
+      "durationMin": null,
+      "title": "Fading DrawLines effect",
+      "summary": null
+    },
+    {
+      "source": {
+        "type": "youtube",
+        "id": "cfUWSPJDRi4"
+      },
+      "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=201s",
+      "date": "2025-11-03",
+      "tLabel": "3:21",
+      "category": "showcase",
+      "durationMin": 11,
+      "title": "@Newemka shows the new [SubdivideLinePoints] [DrawLines] ops",
+      "summary": null
+    }
+  ],
+  "op:Lib.point.generate.PointTrail": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "LLpl6QEL7bo"
+      },
+      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=11280s",
+      "date": "2025-08-25",
+      "tLabel": "3:08:00",
+      "category": "op-reference",
+      "durationMin": 6,
+      "title": "PointTrail",
+      "summary": null
+    }
+  ],
+  "op:Lib.io.video.SpoutOutput": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "LLpl6QEL7bo"
+      },
+      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=15780s",
+      "date": "2025-08-25",
+      "tLabel": "4:23:00",
+      "category": "chat",
+      "durationMin": 13,
+      "title": "TiXL UI font rendering / ImGUI",
+      "summary": null
+    }
+  ],
+  "op:Lib.particle.force.VectorFieldForce": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "LLpl6QEL7bo"
+      },
+      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=17408s",
+      "date": "2025-08-25",
+      "tLabel": "4:50:08",
+      "category": "op-reference",
+      "durationMin": 5,
+      "title": "VectorFieldForce / SdfToVector (VectorFields)",
+      "summary": null
+    }
+  ],
+  "op:Lib.field.use.SdfToVector": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "LLpl6QEL7bo"
+      },
+      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=17408s",
+      "date": "2025-08-25",
+      "tLabel": "4:50:08",
+      "category": "op-reference",
+      "durationMin": 5,
+      "title": "VectorFieldForce / SdfToVector (VectorFields)",
+      "summary": null
+    }
+  ],
+  "op:Lib.numbers.color.SampleGradient": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "LLpl6QEL7bo"
+      },
+      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=18080s",
+      "date": "2025-08-25",
+      "tLabel": "5:01:20",
+      "category": "chat",
+      "durationMin": 2,
+      "title": "SampleGradient interpolation",
+      "summary": null
+    }
+  ],
+  "op:Lib.numbers.color.BuildGradient": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "LLpl6QEL7bo"
+      },
+      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=18180s",
+      "date": "2025-08-25",
+      "tLabel": "5:03:00",
+      "category": "highlight",
+      "durationMin": 5,
+      "title": "BuildGradient / ColorList",
+      "summary": null
+    }
+  ],
+  "op:Lib.numbers.anim.time.Time": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "2Tu0p9Eh6Bw"
+      },
+      "url": "https://www.youtube.com/watch?v=2Tu0p9Eh6Bw&t=1220s",
+      "date": "2025-09-08",
+      "tLabel": "20:20",
+      "category": "planned",
+      "durationMin": 3,
+      "title": "Planned: Animation Time Clip",
+      "summary": null
+    },
+    {
+      "source": {
+        "type": "youtube",
+        "id": "Mqi2mEyd4jQ"
+      },
+      "url": "https://www.youtube.com/watch?v=Mqi2mEyd4jQ&t=4195s",
+      "date": "2025-09-22",
+      "tLabel": "1:09:55",
+      "category": "op-reference",
+      "durationMin": 11,
+      "title": "Remapping Time",
+      "summary": null
+    }
+  ],
+  "op:Lib.render.camera.Camera": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "2Tu0p9Eh6Bw"
+      },
+      "url": "https://www.youtube.com/watch?v=2Tu0p9Eh6Bw&t=1400s",
+      "date": "2025-09-08",
+      "tLabel": "23:20",
+      "category": "planned",
+      "durationMin": 2,
+      "title": "Planned: New Camera Control",
+      "summary": null
+    },
+    {
+      "source": {
+        "type": "youtube",
+        "id": "cfUWSPJDRi4"
+      },
+      "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=2124s",
+      "date": "2025-11-03",
+      "tLabel": "35:24",
+      "category": "update",
+      "durationMin": 8,
+      "title": "Prompt #3 [AudioReaction] [PickStringFromList] [Camera]",
+      "summary": null
+    },
+    {
+      "source": {
+        "type": "youtube",
+        "id": "cfUWSPJDRi4"
+      },
+      "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=5400s",
+      "date": "2025-11-03",
+      "tLabel": "1:30:00",
+      "category": "tip",
+      "durationMin": 7,
+      "title": "Camera following a particle",
+      "summary": null
+    },
+    {
+      "source": {
+        "type": "youtube",
+        "id": "wTLW7PXj2Co"
+      },
+      "url": "https://www.youtube.com/watch?v=wTLW7PXj2Co&t=4530s",
+      "date": "2025-12-15",
+      "tLabel": "1:15:30",
+      "category": "update",
+      "durationMin": 18,
+      "title": "WIP: Camera on spline interpolation",
+      "summary": null
+    }
+  ],
+  "op:Lib.numbers.anim.animators.SequenceAnim": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "rEod2FltaPA"
+      },
+      "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=1955s",
+      "date": "2025-10-06",
+      "tLabel": "32:35",
+      "category": "op-reference",
+      "durationMin": null,
+      "title": "SequenceAnim",
+      "summary": null
+    }
+  ],
+  "op:Lib.particle.force.TurbulenceForce": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "rEod2FltaPA"
+      },
+      "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=4697s",
+      "date": "2025-10-06",
+      "tLabel": "1:18:17",
+      "category": "op-reference",
+      "durationMin": 14,
+      "title": "TurbulenceForce",
+      "summary": null
+    }
+  ],
+  "op:Lib.particle.force.DirectionalForce": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "rEod2FltaPA"
+      },
+      "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=5560s",
+      "date": "2025-10-06",
+      "tLabel": "1:32:40",
+      "category": "op-reference",
+      "durationMin": 8,
+      "title": "DirectionalForce",
+      "summary": null
+    }
+  ],
+  "op:Lib.particle.force.CollisionForce": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "rEod2FltaPA"
+      },
+      "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=6050s",
+      "date": "2025-10-06",
+      "tLabel": "1:40:50",
+      "category": "op-reference",
+      "durationMin": 3,
+      "title": "CollisionForce",
+      "summary": null
+    }
+  ],
+  "op:Lib.particle.force.FieldVolumeForce": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "rEod2FltaPA"
+      },
+      "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=6212s",
+      "date": "2025-10-06",
+      "tLabel": "1:43:32",
+      "category": "op-reference",
+      "durationMin": 29,
+      "title": "FieldVolumeForce and SDF",
+      "summary": null
+    },
+    {
+      "source": {
+        "type": "youtube",
+        "id": "VNC-zr-JOjQ"
+      },
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=720s",
+      "date": "2026-03-23",
+      "tLabel": "12:00",
+      "category": "op-reference",
+      "durationMin": 22,
+      "title": "FieldVolumeForce",
+      "summary": null
+    }
+  ],
+  "op:Lib.field.use.RaymarchPoints": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "rEod2FltaPA"
+      },
+      "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=7952s",
+      "date": "2025-10-06",
+      "tLabel": "2:12:32",
+      "category": "op-reference",
+      "durationMin": 21,
+      "title": "RaymarchPoints (Raycasting WIP)",
+      "summary": null
+    }
+  ],
+  "op:Lib.particle.force.FollowMeshSurfaceForce": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "rEod2FltaPA"
+      },
+      "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=9206s",
+      "date": "2025-10-06",
+      "tLabel": "2:33:26",
+      "category": "op-reference",
+      "durationMin": 4,
+      "title": "FollowMeshSurfaceForce",
+      "summary": null
+    },
+    {
+      "source": {
+        "type": "youtube",
+        "id": "yy1kKa-wucA"
+      },
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=9600s",
+      "date": "2026-03-09",
+      "tLabel": "2:40:00",
+      "category": "op-reference",
+      "durationMin": 8,
+      "title": "[FollowMeshSurfaceForce]",
+      "summary": null
+    }
+  ],
+  "op:Lib.particle.force.ReconstructiveForce": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "rEod2FltaPA"
+      },
+      "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=9443s",
+      "date": "2025-10-06",
+      "tLabel": "2:37:23",
+      "category": "op-reference",
+      "durationMin": 4,
+      "title": "ReconstructiveForce",
+      "summary": null
+    }
+  ],
+  "op:Lib.particle.force.SnapToAnglesForce": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "rEod2FltaPA"
+      },
+      "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=9670s",
+      "date": "2025-10-06",
+      "tLabel": "2:41:10",
+      "category": "op-reference",
+      "durationMin": 6,
+      "title": "SnapToAnglesForce",
+      "summary": null
+    }
+  ],
+  "op:Lib.particle.force.TextureMapForce": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "rEod2FltaPA"
+      },
+      "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=10155s",
+      "date": "2025-10-06",
+      "tLabel": "2:49:15",
+      "category": "op-reference",
+      "durationMin": 8,
+      "title": "TextureMapForce",
+      "summary": null
+    }
+  ],
+  "op:Lib.point.usse.KeepPreviousPointBuffer": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "rEod2FltaPA"
+      },
+      "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=10885s",
+      "date": "2025-10-06",
+      "tLabel": "3:01:25",
+      "category": "op-reference",
+      "durationMin": 5,
+      "title": "KeepPreviousPointBuffer",
+      "summary": null
+    }
+  ],
+  "op:Lib.point.modify.MoveToSDF": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "rEod2FltaPA"
+      },
+      "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=15930s",
+      "date": "2025-10-06",
+      "tLabel": "4:25:30",
+      "category": "op-reference",
+      "durationMin": 6,
+      "title": "MoveToSDF surface orientation",
+      "summary": null
+    }
+  ],
+  "op:Lib.image.use.RenderWithMotionBlur": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "rEod2FltaPA"
+      },
+      "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=16290s",
+      "date": "2025-10-06",
+      "tLabel": "4:31:30",
+      "category": "op-reference",
+      "durationMin": 6,
+      "title": "RenderWithMotionBlur",
+      "summary": null
+    }
+  ],
+  "op:Lib.numbers.float.random.Random": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "rEod2FltaPA"
+      },
+      "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=16680s",
+      "date": "2025-10-06",
+      "tLabel": "4:38:00",
+      "category": "tip",
+      "durationMin": 12,
+      "title": "Random Symbol Prompts with ???",
+      "summary": null
+    }
+  ],
+  "op:Lib.point.generate.SubdivideLinePoints": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "cfUWSPJDRi4"
+      },
+      "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=201s",
+      "date": "2025-11-03",
+      "tLabel": "3:21",
+      "category": "showcase",
+      "durationMin": 11,
+      "title": "@Newemka shows the new [SubdivideLinePoints] [DrawLines] ops",
+      "summary": null
+    }
+  ],
+  "op:Lib.point.generate.RepeatAtPoints": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "cfUWSPJDRi4"
+      },
+      "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=1080s",
+      "date": "2025-11-03",
+      "tLabel": "18:00",
+      "category": "update",
+      "durationMin": 6,
+      "title": "Prompt #1 [RepeatAtPoints] [TransformPoints] [Sum]",
+      "summary": null
+    }
+  ],
+  "op:Lib.point.transform.TransformPoints": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "cfUWSPJDRi4"
+      },
+      "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=1080s",
+      "date": "2025-11-03",
+      "tLabel": "18:00",
+      "category": "update",
+      "durationMin": 6,
+      "title": "Prompt #1 [RepeatAtPoints] [TransformPoints] [Sum]",
+      "summary": null
+    }
+  ],
+  "op:Lib.numbers.float.basic.Sum": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "cfUWSPJDRi4"
+      },
+      "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=1080s",
+      "date": "2025-11-03",
+      "tLabel": "18:00",
+      "category": "update",
+      "durationMin": 6,
+      "title": "Prompt #1 [RepeatAtPoints] [TransformPoints] [Sum]",
+      "summary": null
+    }
+  ],
+  "op:Lib.image.generate.load.LoadImage": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "cfUWSPJDRi4"
+      },
+      "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=1736s",
+      "date": "2025-11-03",
+      "tLabel": "28:56",
+      "category": "update",
+      "durationMin": 6,
+      "title": "Prompt #2 [LoadImage] [SamplePointAttributes] [CylinderMesh]",
+      "summary": null
+    },
+    {
+      "source": {
+        "type": "youtube",
+        "id": "VNC-zr-JOjQ"
+      },
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=3810s",
+      "date": "2026-03-23",
+      "tLabel": "1:03:30",
+      "category": "background",
+      "durationMin": 5,
+      "title": "LoadImage texture caching",
+      "summary": null
+    }
+  ],
+  "op:Lib.mesh.generate.CylinderMesh": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "cfUWSPJDRi4"
+      },
+      "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=1736s",
+      "date": "2025-11-03",
+      "tLabel": "28:56",
+      "category": "update",
+      "durationMin": 6,
+      "title": "Prompt #2 [LoadImage] [SamplePointAttributes] [CylinderMesh]",
+      "summary": null
+    }
+  ],
+  "op:Lib.io.audio.AudioReaction": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "cfUWSPJDRi4"
+      },
+      "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=2124s",
+      "date": "2025-11-03",
+      "tLabel": "35:24",
+      "category": "update",
+      "durationMin": 8,
+      "title": "Prompt #3 [AudioReaction] [PickStringFromList] [Camera]",
+      "summary": null
+    }
+  ],
+  "op:Lib.string.list.PickStringFromList": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "cfUWSPJDRi4"
+      },
+      "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=2124s",
+      "date": "2025-11-03",
+      "tLabel": "35:24",
+      "category": "update",
+      "durationMin": 8,
+      "title": "Prompt #3 [AudioReaction] [PickStringFromList] [Camera]",
+      "summary": null
+    }
+  ],
+  "op:Lib.numbers.vec3.Vector3Gizmo": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "cfUWSPJDRi4"
+      },
+      "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=5820s",
+      "date": "2025-11-03",
+      "tLabel": "1:37:00",
+      "category": "op-reference",
+      "durationMin": 16,
+      "title": "[Vector3Gizmo]",
+      "summary": null
+    }
+  ],
+  "op:Lib.render.camera.CamPosition": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "cfUWSPJDRi4"
+      },
+      "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=7500s",
+      "date": "2025-11-03",
+      "tLabel": "2:05:00",
+      "category": "op-reference",
+      "durationMin": 9,
+      "title": "[CamPosition] to place things in front of the camera",
+      "summary": null
+    }
+  ],
+  "op:Lib.field.adjust.SpatialDisplaceSDF": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "cfUWSPJDRi4"
+      },
+      "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=10636s",
+      "date": "2025-11-03",
+      "tLabel": "2:57:16",
+      "category": "op-reference",
+      "durationMin": 3,
+      "title": "[SpatialDisplaceSDF]",
+      "summary": null
+    }
+  ],
+  "op:Lib.image.fx.distort.BubbleZoom": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "wTLW7PXj2Co"
+      },
+      "url": "https://www.youtube.com/watch?v=wTLW7PXj2Co&t=104s",
+      "date": "2025-12-15",
+      "tLabel": "1:44",
+      "category": "showcase",
+      "durationMin": 22,
+      "title": "@Newemka shows the new [BubbleZoom] Effect",
+      "summary": null
+    }
+  ],
+  "op:Lib.field.render.RaymarchField": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "wTLW7PXj2Co"
+      },
+      "url": "https://www.youtube.com/watch?v=wTLW7PXj2Co&t=13020s",
+      "date": "2025-12-15",
+      "tLabel": "3:37:00",
+      "category": "update",
+      "durationMin": null,
+      "title": "Discussing new RaymarchField options",
+      "summary": null
+    },
+    {
+      "source": {
+        "type": "youtube",
+        "id": "VNC-zr-JOjQ"
+      },
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=10000s",
+      "date": "2026-03-23",
+      "tLabel": "2:46:40",
+      "category": "background",
+      "durationMin": 14,
+      "title": "[RaymarchField] glow implementation",
+      "summary": null
+    }
+  ],
+  "op:Lib.image.fx.stylize.Steps": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "yy1kKa-wucA"
+      },
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=2580s",
+      "date": "2026-03-09",
+      "tLabel": "43:00",
+      "category": "update",
+      "durationMin": 9,
+      "title": "Animating with Keyframes Steps",
+      "summary": null
+    }
+  ],
+  "op:Lib.point.modify.CustomPointShader": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "yy1kKa-wucA"
+      },
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=4020s",
+      "date": "2026-03-09",
+      "tLabel": "1:07:00",
+      "category": "unknown",
+      "durationMin": 8,
+      "title": "Improve CustomPointShader",
+      "summary": null
+    },
+    {
+      "source": {
+        "type": "youtube",
+        "id": "yy1kKa-wucA"
+      },
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=10080s",
+      "date": "2026-03-09",
+      "tLabel": "2:48:00",
+      "category": "op-reference",
+      "durationMin": 62,
+      "title": "Improve CustomPointShader (add fields)",
+      "summary": null
+    }
+  ],
+  "op:Lib.point.draw.DrawMovingPoints": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "VNC-zr-JOjQ"
+      },
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=2040s",
+      "date": "2026-03-23",
+      "tLabel": "34:00",
+      "category": "feature",
+      "durationMin": 18,
+      "title": "DrawMovingPoints",
+      "summary": null
+    },
+    {
+      "source": {
+        "type": "youtube",
+        "id": "VNC-zr-JOjQ"
+      },
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=3090s",
+      "date": "2026-03-23",
+      "tLabel": "51:30",
+      "category": "feature",
+      "durationMin": 12,
+      "title": "DrawMovingPoints (implementation)",
+      "summary": null
+    }
+  ],
+  "op:Lib.image.transform.Crop": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "VNC-zr-JOjQ"
+      },
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=4120s",
+      "date": "2026-03-23",
+      "tLabel": "1:08:40",
+      "category": "uncategorized",
+      "durationMin": 10,
+      "title": "[Crop] and [Glow] with transparent logos",
+      "summary": null
+    }
+  ],
+  "op:Lib.image.fx.stylize.Glow": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "VNC-zr-JOjQ"
+      },
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=4120s",
+      "date": "2026-03-23",
+      "tLabel": "1:08:40",
+      "category": "uncategorized",
+      "durationMin": 10,
+      "title": "[Crop] and [Glow] with transparent logos",
+      "summary": null
+    }
+  ],
+  "op:Lib.image.use.CustomPixelShader": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "VNC-zr-JOjQ"
+      },
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=6300s",
+      "date": "2026-03-23",
+      "tLabel": "1:45:00",
+      "category": "chat",
+      "durationMin": 6,
+      "title": "Fresnel with [CustomPixelShader]",
+      "summary": null
+    },
+    {
+      "source": {
+        "type": "youtube",
+        "id": "VNC-zr-JOjQ"
+      },
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=9390s",
+      "date": "2026-03-23",
+      "tLabel": "2:36:30",
+      "category": "tip",
+      "durationMin": 10,
+      "title": "VHS blur effect [CustomPixelShader]",
+      "summary": null
+    },
+    {
+      "source": {
+        "type": "youtube",
+        "id": "qavgcL72F1Y"
+      },
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=9000s",
+      "date": "2026-06-01",
+      "tLabel": "2:30:00",
+      "category": "walkthrough",
+      "durationMin": 8,
+      "title": "CustomPixelShader walkthrough",
+      "summary": null
+    }
+  ],
+  "op:Lib.point.draw.DrawPoints": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "qavgcL72F1Y"
+      },
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=570s",
+      "date": "2026-06-01",
+      "tLabel": "9:30",
+      "category": "walkthrough",
+      "durationMin": 7,
+      "title": "Quick startup animation (DrawPoints, orbit camera)",
+      "summary": null
+    }
+  ],
+  "op:Lib.numbers.bool.logic.Trigger": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "qavgcL72F1Y"
+      },
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=4070s",
+      "date": "2026-06-01",
+      "tLabel": "1:07:50",
+      "category": "walkthrough",
+      "durationMin": 5,
+      "title": "Trigger-keyframe workflow",
+      "summary": null
+    }
+  ],
+  "op:Lib.numbers.int.basic.RandomChoiceIndex": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "qavgcL72F1Y"
+      },
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=4380s",
+      "date": "2026-06-01",
+      "tLabel": "1:13:00",
+      "category": "op-reference",
+      "durationMin": 6,
+      "title": "Set Sequential Values + RandomChoiceIndex",
+      "summary": null
+    }
+  ],
+  "op:Lib.flow.Switch": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "qavgcL72F1Y"
+      },
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=7397s",
+      "date": "2026-06-01",
+      "tLabel": "2:03:17",
+      "category": "background",
+      "durationMin": 10,
+      "title": "Animating bypass: Pick vs Switch and the \"magic index\"",
+      "summary": null
+    }
+  ],
+  "op:Lib.mesh.generate.RepeatMeshAtPoints": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "qavgcL72F1Y"
+      },
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=12180s",
+      "date": "2026-06-01",
+      "tLabel": "3:23:00",
+      "category": "showcase",
+      "durationMin": 7,
+      "title": "City-builder demo (RepeatMeshAtPoints, RandomizePoints)",
+      "summary": null
+    }
+  ],
+  "op:Lib.point.modify.SelectPointsWithSDF": [
+    {
+      "source": {
+        "type": "youtube",
+        "id": "qavgcL72F1Y"
+      },
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=13140s",
+      "date": "2026-06-01",
+      "tLabel": "3:39:00",
+      "category": "showcase",
+      "durationMin": null,
+      "title": "SelectPointsWithSDF demo + wrap-up",
+      "summary": null
+    }
+  ]
+}
