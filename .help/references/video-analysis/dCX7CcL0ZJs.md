@@ -1,0 +1,164 @@
+---
+video: dCX7CcL0ZJs
+type: meetup
+date: 2026-04-20
+title: Time control, deterministic vs procedural animation, custom point shaders, SDF fields, sine waves, mesh/spiral recreation, SSAO & project lights
+duration: 3:41:03
+---
+
+A TiXL community meet-up where the host fields member questions while live-building, covering how to control time deterministically (time clips, switches, accumulators) versus frame-dependent procedural timing, demo preloading via SetTime, and shader precompilation. A long stretch demonstrates five ways to make a sine wave from line points, custom point shaders (including SDF fields), and then an extended attempt to recreate a complex helix/spiral reference scene with repeated meshes, noise, SSAO, project lights and presets.
+
+## Mentions
+- 0:50 [Text] · passing — starts the demo with a text operator showing the date
+- 1:27 [Camera] · passing — switches to fixed resolution for more demo control
+- 1:35 [PlayAudio] · passing — adds a soundtrack/audio track to the demo
+- 2:25 [RenderTarget] · passing — renders content into a texture
+- 2:30 [PointsOnImage] · explained — converts the rendered texture into points
+- 2:35 [DrawPoints] · passing — draws the generated points
+- 2:43 [ClampPoints] · passing — referenced as the "clamp" used to constrain points
+- 2:48 [FastBlur] · passing — adds a fast blur to the point render
+- 3:07 [Noise] · passing — adds noise-driven animation
+- 5:21 [SetAudioVolume] · passing — global audio settings / volume adjustment
+- 6:11 [PickTexture] · explained — using Pick to choose between scene textures
+- 6:23 [Fork] · passing — animating a value to switch/fork between scenes
+- 6:48 [PickTexture] · explained — fades one scene out while keeping things real-time
+- 7:05 [SwitchTexture] · explained — command-style node to switch textures
+- 7:11 [SwitchLayer] · explained — Switch for layers; -1 disables all, -2 enables all
+- 8:38 [TimeClip] · in-depth — insert/name time clips to enable & disable things on the timeline
+- 9:13 [Group] · explained — collects clips; render order matters (later = on top)
+- 9:16 [RenderTarget] · passing — final output target of the composition
+- 9:40 [Text] · passing — duplicated clip becomes a titled text element
+- 10:23 [Text] · passing — "meetup" title text element
+- 10:28 [ZTest] · explained — disabling/enabling Z test to control front/back ordering
+- 10:54 [ParticleSystem] · in-depth — non-deterministic particle effect; needs reset control
+- 11:17 [EmitPoints] · explained — emits points into the particle system
+- 11:22 [TurbulenceForce] · passing — adds turbulence to the particle simulation
+- 11:22 [MovePoints] · passing — moving-points force on particles
+- 11:58 [ResetParticleSystem] · explained — reset input keyframed so Home reproduces particles
+- 13:43 [Transform] · passing — scale particles to zero to run-but-not-draw
+- 14:00 [FilterPoints] · explained — filter points to draw only one while system runs hidden
+- 16:18 [CustomPixelShader] · passing — member's question about precompiling custom HLSL shaders
+- 16:47 [ExportToImage] · explained — referencing the test export app / image output for executable export
+- 21:00 [CustomPixelShader] · explained — concatenating text into shader; shader caching makes recompiles fast
+- 22:23 [Execute] · explained — used (vs Group) to force evaluation of an offscreen branch
+- 22:46 [SetTime] · in-depth — drive a separate time range to precompile/preload the whole demo
+- 23:15 [TimeClip] · explained — preloaded screen sized to a time clip
+- 24:21 [Switch] · explained — alternative to Execute for switching at start (0 then 1)
+- 31:10 [Time] · explained — debugging/breaking out time to measure frame durations
+- 31:13 [KeepFloat] · explained — keep/store float values across frames (one-time keep)
+- 31:36 [Time] · explained — has OneTime and last-frame-duration outputs for timing
+- 29:50 [OrbitCamera] · explained — orbit camera with idle motion to replicate the flicker issue
+- 30:34 [Random] · explained — random value op; switch from Ramps to Atlas mode causing jumps
+- 31:36 [ValueInputsMoving] · in-depth — "secret weapon": smooths parameter input changes (default ~6 frames)
+- 33:16 [Accumulator] · in-depth — buffer that accumulates a value for procedural/frame-dependent timing
+- 33:40 [MouseInput] · explained — signed mouse position drives the accumulator
+- 33:51 [Vector2Components] · explained — breaks mouse position into X/Y to drive the BPM/value
+- 34:36 [Reset] · passing — accumulator reset trigger to avoid float precision drift
+- 40:00 [Image] · passing — the posted reference image used for the sine-wave question
+- 45:13 [LinePoints] · explained — line of points as the base for the sine wave
+- 45:20 [TransformPoints] · in-depth — offsets all points; core of the wave-mapping discussion
+- 46:14 [DrawPoints] · passing — draws the line points, pinned with P
+- 46:24 [Vector3] · explained — break out translation into a vec3 for the sine
+- 46:38 [Sine] · explained — "ToSine"/"ByTime" sine value feeding translation
+- 47:07 [AnimVec3] · explained — preferred operator that animates into translation (amplitude/shape sine)
+- 49:29 [LinearGradient] · explained — artist-friendly approach: gradient texture with presets
+- 50:10 [SampleLinearPointsAttribute] · in-depth — samples a texture/buffer along the point line (by normalized index)
+- 53:01 [CustomPointShader] · in-depth — line points → custom point shader → draw points to make a wave
+- 53:01 [DrawPoints] · passing — draws the custom-shader points
+- 55:01 [ImageLevels] · explained — analyze and adjust brightness levels of an image
+- 55:14 [RadialGradient] · passing — referenced as a gradient to compare against
+- 1:00:00 [CustomPointShader] · in-depth — using F (0-1), SampleGradient, point color, custom attributes
+- 1:02:20 [Bias] · in-depth — gain/bias remap of a 0-1 value; called very powerful
+- 1:02:58 [CustomPointShader] · explained — writing FX1/FX2 custom output attributes
+- 1:03:33 [Noise] · passing — add-noise modifier driven by FX strength factor
+- 1:04:19 [CustomPixelShader] · passing — listed among custom force/face/pixel shaders
+- 1:04:19 [CustomForce] · passing — mentioned alongside custom shaders
+- 1:04:19 [CustomFaceShader] · passing — mentioned alongside custom shaders
+- 1:10:40 [BoxSDF] · in-depth — custom point shader Field input; build and modify a box SDF
+- 1:11:43 [RepeatSDF] · explained — repeat the SDF in X (remerge as a field)
+- 1:12:52 [GetDistance] · explained — call GetField/GetDistance on a position in the shader
+- 1:13:27 [TransformField] · explained — transform the SDF field for powerful effects
+- 1:14:06 [SphereSDF] · explained — sphere field, transform + repeat; "dancing fish/jellyfish" preset
+- 1:23:53 [SortPoints] · in-depth — sort point buffer by camera distance (vs Z-buffer sorting)
+- 1:24:59 [DrawPoints] · in-depth — Z buffer, MSAA, AlphaCutoff slider explained for soft point edges
+- 1:29:00 [SortPoints] · explained — order-independent depth alternative discussed (not implemented)
+- 1:29:33 [Camera] · passing — camera used by sort-points; updated by frame
+- 1:30:00 [GetCameraReference] · explained — discussion of get/set camera reference and object vars
+- 1:30:00 [SetCameraVar] · explained — set object/camera var into the execution stack
+- 1:36:49 [ImageLevels] · explained — analyze whether the point texture is white/transparent
+- 1:37:41 [RadialGradient] · explained — compare PNG against a radial gradient for alpha behavior
+- 1:40:52 [Waveform] · explained — scope to inspect tonal content of the image
+- 1:41:29 [VectorScope] · in-depth — analyze color distribution of the reference image
+- 1:44:24 [ImageLevels] · in-depth — favorite op; slice through brightness distribution
+- 1:44:45 [CubeMesh] · explained — base cube mesh for the helix structure
+- 1:44:59 [RepeatMeshAtPoints] · in-depth — repeat the cube along points for the spiral
+- 1:45:18 [LinePoints] · explained — linear line points feeding the repeat (with twist/stretch)
+- 1:46:38 [DisplaceMeshNoise] · explained — noise distortion of the repeated mesh
+- 1:48:40 [Group] · passing — groups the spiral build; uses an output window
+- 1:48:59 [CylinderMesh] · explained — central cylinder mesh for the structure
+- 1:49:46 [SetMaterial] · explained — assign material/texture to the mesh
+- 1:49:55 [Raster] · explained — create a normal map at fixed resolution
+- 1:50:39 [TransformMeshUV] · explained — stretch/transform the mesh UVs for the normal map
+- 1:51:55 [SphereMesh] · explained — sphere mesh, wireframe to study structure
+- 1:52:37 [GetMeshVertices] · explained — extract vertices to use as repeat points
+- 1:53:31 [RepeatAtPoints] · explained — repeat geometry at the sphere vertices; draw lines/ribbons
+- 1:54:39 [Icosahedron] · explained — icosahedron mesh with subdivision as alternative base
+- 1:56:05 [ToolMesh] · explained — tool mesh with presets (e.g. Pacman) repeated at points
+- 1:56:43 [DrawMesh] · passing — draws the repeated tool mesh
+- 1:58:07 [RecomputeNormals] · explained — recompute normals to fix shading
+- 1:59:28 [CubeMesh] · passing — small cube mesh for radial repeat
+- 1:59:42 [RadialPoints] · explained — radial repeat points (count ~8)
+- 1:59:42 [RepeatMeshAtPoints] · passing — repeats cube on radial points
+- 2:00:00 [CombineMesh] · explained — combine meshes before repeating
+- 2:02:48 [DisplaceMeshNoise] · explained — distort-mesh noise to make form more organic
+- 2:04:00 [SelectInputConnections] · explained — new op selecting everything connected upstream
+- 2:04:27 [GridPoints] · explained — 2x2x2 grid points for the cube corners
+- 2:05:00 [IcosahedronMesh] · passing — icosa mesh repeated at points
+- 2:17:34 [ExtrudeCurves] · in-depth — extrude a profile along a rail to build the wireframe pipe
+- 2:18:06 [RadialPoints] · explained — radial points as the extrusion profile, rotated to align
+- 2:19:31 [CustomPointShader] · in-depth — FX1 = bias of abs(f) for even tapered thickness
+- 2:20:49 [ComputeNormals] · passing — recompute normals after the extrude
+- 2:21:20 [CommonPointSets] · passing — mentioned as useful (quad → circuit of points)
+- 2:25:53 [CubeMesh] · explained — rebuilding the cube edges from line points
+- 2:26:50 [CombineBuffers] · explained — combine point buffers for the box frame
+- 2:30:00 [TransformMesh] · explained — rotate/transform mesh for the box frame
+- 2:30:46 [OrthographicCamera] · explained — orthographic camera to match the reference framing
+- 2:32:28 [DisplaceMeshNoise] · in-depth — noise creating crazy spikes; debugging the vertex selection
+- 2:32:47 [UseVertexSelection] · explained — vertex selection wrongly bleeding into FX/noise
+- 2:35:21 [RepeatMeshAtPoints] · passing — repeating the box mesh along the spiral
+- 2:37:12 [SSAO] · in-depth — render to texture then SSAO for depth; near/far range tuning
+- 2:39:39 [Camera] · explained — normal camera moved far back with very small FOV to fake ortho
+- 2:42:43 [DrawBillboards] · passing — accidental draw-billboards example
+- 2:42:43 [Bloom] · explained — bloom added to the render
+- 2:46:03 [DrawPoints] · explained — extra shaded points ("easy" addition) on the spiral
+- 2:46:39 [SetMaterial] · explained — make points shinier/metallic
+- 2:47:32 [DrawLines] · passing — draw the same line points as lines
+- 2:48:14 [TransformPoints] · passing — squeeze a subset of points
+- 2:52:33 [SSAO] · in-depth — debugging hard edge; front clip plane / depth precision fix
+- 2:54:39 [SSAO] · explained — two ranges (clip and range); exposing as inputs
+- 2:55:26 [SphereSDF] · passing — negative-radius sphere example for SSAO range explanation
+- 3:00:48 [SampleLinearPointsAttribute] · explained — sample fractal noise along points to add motion
+- 3:01:05 [FractalNoise] · explained — fractal noise driving point stretch/scale
+- 3:02:21 [TileableNoise] · in-depth — repeatable/tileable noise; faster, smoother than make-tileable
+- 3:03:00 [SetRenderTarget] · explained — image format (16-bit vs 32-bit float, one channel) discussion
+- 3:07:29 [SelectConnected] · explained — select connected to reorganize the graph
+- 3:07:29 [Group] · in-depth — grouping nodes; wiring parameters to the outside
+- 3:09:48 [Execute] · explained — rename Execute to name a branch (faster than Group)
+- 3:13:33 [LinearGradient] · explained — separated gradient input op for the elements symbol
+- 3:14:01 [PingPong] · passing — ping-pong/offset the gradient over time
+- 3:14:60 [AddInput] · in-depth — add float "twist" input parameter to the new symbol
+- 3:15:36 [PublishedInput] · passing — note that publish-input is temporarily disabled
+- 3:16:05 [AddInput] · explained — add integer "count"/"sides" inputs; set as default
+- 3:19:05 [Preset] · in-depth — create presets and blend/mix between them live (the "coolest" feature)
+- 3:22:14 [CustomPointShader] · in-depth — recolorize by distance: SampleGradient(length(p.position))
+- 3:23:38 [Bloom] · explained — bloom after offset to bring the center glow through
+- 3:23:38 [ToneMapping] · passing — tone mapping discussed ("torn/tone mapping is nice")
+- 3:31:15 [SetEnvironment] · in-depth — blend between environments; feed tileable noise as a fake HDRI for lighting
+- 3:31:55 [TileableNoise] · explained — noise used as the environment map source
+- 3:33:04 [ProjectLight] · in-depth — projector/spot light needing a camera reference; casts shadows
+- 3:34:09 [ProjectLight] · explained — choose an image as the projection light source
+- 3:34:55 [Vector3Gizmo] · explained — 3D gizmo to drag light position/target in the viewport
+- 3:36:08 [ProjectLight] · explained — grabbing depth/normal from render target for normals on depth-of-field
+- 3:37:09 [Antialiasing] · explained — AA toggle makes a big quality difference (temporal AA wished for)
+- 3:37:42 [TileableNoise] · passing — another tileable-noise pass for the lighting effect
+- 3:38:41 [AmbientColor] · explained — ambient color strongly affects brightness/mood

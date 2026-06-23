@@ -1,0 +1,134 @@
+---
+video: yy1kKa-wucA
+type: meetup
+date: 2026-03-09
+title: Number line points, beat-sync, custom point shaders, SDF fields, keyframe interpolation bugs
+duration: 4:26:36
+---
+
+A TiXL community meet-up walkthrough centered on building a music-synced demo: generating text/number geometry with line-text-point operators, distributing and orienting points in particle systems, and driving values via the beat-sync engine and FX point attributes. The session also extends the custom point shader template to accept field/SDF inputs (adding get-field-normal helpers), reviews UI tweaks for blend-mode hover and parameter labels, and debugs several regressions including a constant-interpolation keyframe-jump bug and a rainbow-gradient flickering issue.
+
+## Mentions
+- 0:19 [FastBlur] · passing — suggested to blur a clip; noted as new/faster alternative to blur
+- 0:38 [DrawPoints] · passing — "add points on image" idea raised
+- 4:51 [OrbitCamera] · passing — "orbit" camera used for the scene
+- 5:31 [RepeatPointsAtPoints] · explained — number-distribution compute shader compared to repeating points at points
+- 5:42 [OrientPoints] · explained — orient points toward camera; flip option discussed; "beta" feature being merged in
+- 6:12 [AudioReaction] · passing — fetching audio reaction as external input
+- 7:43 [DampValue] · passing — adds damping so audio level "stays" between speech
+- 8:04 [FloatToInt] · passing — convert audio level into int for the buffer
+- 8:44 [TextureDisplace] · explained — discussed as the "normal" way to displace point coordinates from an image
+- 9:30 [LoadImage] · passing — load image to feed the displacement
+- 9:30 [SamplePointAttributes] · passing — mentioned for sampling per-point attributes
+- 11:16 [LineTextPoints] · in-depth — core operator of the session; generates a point buffer from text, spacing/kerning, leading-digit placeholder bug discussed at length
+- 12:51 [DrawLines] · explained — draw the line-text buffer as lines; shows the space/spacing bug
+- 13:36 [CustomPixelShader] · passing — referenced for texture emitting from lines
+- 17:55 [SetFx1] · explained — set FX attribute to slide through characters/words
+- 18:20 [RemapPoints] · explained — remap points to set color and slide via FX; noted as renamed
+- 19:41 [GenerateNumberLinePoints] · in-depth — main custom operator; buffer of digit glyphs, spacing/negative-kerning, point-shader alignment, later renamed to NumberLinePoints
+- 22:39 [RandomizePoints] · explained — randomize rotation/scale/position of the number points
+- 23:08 [StructuredBuffer] · passing — number list passed in as a structured buffer
+- 25:50 [DrawPointInfo] · passing — "drop point information" cited as already supporting float-to-digit conversion
+- 26:48 [Phase] · explained — randomize points with phase/time to animate digits moving up
+- 30:18 [UseCamera] · explained — extract camera from the flow to orient target points
+- 30:38 [CamPosition] · explained — get camera position; needs to be inside an executed group
+- 33:13 [LoadObj] · passing — "load obj / will be J" to load a mesh
+- 33:19 [RawMesh] · explained — raw mesh added to the group; fog discussed
+- 33:54 [GetPointsOnMesh] · in-depth — distribute points on mesh; flickering from changing CDF when displaced
+- 34:47 [TransformPoints] · explained — use object point space, Z-translation along normal
+- 35:28 [TransformMesh] · passing — transform the mesh before sampling points
+- 35:28 [Noise3] · passing — "further noise three" to perturb the mesh
+- 35:35 [SlowRotation] · passing — "slow random quotation/rotation" applied
+- 35:52 [DisplaceMeshNoise] · explained — "displaced mesh noise" causing flicker via redistribution
+- 37:16 [MeshFacePoints] · explained — suggested instead of points-on-mesh for stable per-face centers
+- 38:35 [CustomPointShader] · in-depth — recurring; write P.FX1 = P.position.x to author point attributes; later extended with field inputs
+- 40:09 [Timeline] · explained — timeline redesign work; drag area at bottom moving up
+- 41:01 [SpaceKeyframesEvenly] · explained — new "space evenly" curve-menu option for tapped beats
+- 42:27 [TapTempo] · explained — Alt + Shift+C to tap the beat onto the curve
+- 43:42 [ModA] · passing — "mode a low" / modulo to wrap a continuous value
+- 43:47 [Bloom] · passing — "Bloom, sure" wanting a blob/glow
+- 44:07 [FloatToInt] · explained — floor a value via float-to-int for stepping (1.999 → 1)
+- 44:37 [StringList] · explained — "node like string" / list of words to index
+- 44:51 [PickStringFromList] · explained — "big string part" used frequently to index lines
+- 44:58 [DrawText] · explained — draw the indexed text
+- 45:04 [Group] · passing — group the text and background into a layer
+- 45:06 [Layer2D] · passing — put background into a layer
+- 45:56 [Multiply] · explained — multiply continuous value (×16 / ×¼) to make a measure
+- 46:52 [SetSequentialValues] · explained — sequence to start counting from a chosen first value
+- 50:00 [PasteKeyframes] · in-depth — copy/paste keyframes across channels; assumptions about channel matching and playhead position
+- 52:18 [ScaleControl] · explained — Ctrl+mousewheel through enum options; touchpad pinch-zoom regression that broke it
+- 53:45 [LayerImageBlend] · passing — "latent image blend" with a blend mode for the hover-preview demo
+- 53:25 [BlendMode] · explained — hover-to-preset blend mode picker; Photoshop/Affinity parallel; enum vs magic-int handling
+- 56:30 [LoadAudio] · passing — load a music asset from disk
+- 58:30 [IoEventBrowser] · explained — IO event browser to visualize beat-sync output
+- 58:39 [BeatSync] · in-depth — lock-profile beat syncing; tab to tap, "rethink" to lock bar transient, FFT bass/snare/hihat ranges, BPM tracking
+- 59:57 [Value] · passing — "an value" plugged into the blob to react on beat
+- 1:00:13 [SampleGradient] · explained — sample a gradient by the beat value to drive color
+- 1:04:09 [FftAnalysis] · explained — three FFT ranges (bass, hihat, snare); deemed too noisy for triggering
+- 1:06:11 [SequenceAnim] · explained — sequence operator with a recording mode to tap/record a beat sequence
+- 1:08:00 [CustomPixelShader] · in-depth — "Pixel" template; register-semantics fix (t0/b registers must be explicitly assigned) discussed at length
+- 1:09:21 [DrawMeshAtPoints] · passing — "raw mesh at the points" with cube mesh
+- 1:09:21 [CubeMesh] · passing — cube mesh drawn at points
+- 1:09:21 [PointEffector] · explained — "effector" appearing broken due to the custom point shader already acting
+- 1:23:00 [GridPoints] · explained — "just a grid point," random points filtered to draw lines
+- 1:23:33 [FilterPoints] · explained — filter random points down to one for emission
+- 1:24:45 [ParticleSystem] · in-depth — center point emitted into a 1000-point particle system, long lifetime, no emit velocity
+- 1:25:12 [IntValue] · explained — integer with peculiar weight/offset acting as the count trigger
+- 1:26:54 [EmitParticles] · explained — emit a point each time the counter changes
+- 1:27:06 [GradientNPC] · explained — F1 particle-age mapped to gradient, glow-then-decay
+- 1:27:06 [DrawPoints] · explained — draw the particles small-to-large
+- 1:20:32 [RenderTarget] · explained — render scene to texture for reuse/bloom
+- 1:27:26 [TextureReference] · explained — reuse the rendered texture elsewhere in the graph
+- 1:27:42 [Bloom] · explained — bloom used instead of blur because faster (pre-FastBlur)
+- 1:27:48 [ToNormalMap] · explained — convert bloomed texture to signed normal map
+- 1:27:55 [TextureMapForce] · in-depth — screen-space-aligned force pushing the large particle system; not physically correct, 360 caveat
+- 1:30:00 [DrawNumberPerPoint] · in-depth — "draw number" operator to render counted numbers onto particles
+- 1:30:00 [OrientPoints] · explained — orient number points toward camera (recurring alignment issue)
+- 1:30:00 [RemapPointAttributes] · in-depth — remap attributes to control number color/alpha; RGBA unclamps alpha
+- 1:23:53 [SetVariable] · explained — float-to-int count written to a "CountIndex" variable
+- 1:34:34 [GetIntVar] · explained — read the int variable elsewhere
+- 1:34:50 [IntToString] · explained — "int to text / to string" for the text label
+- 1:34:55 [Text] · passing — text node fed the converted number
+- 1:36:14 [KeepInArea] · passing — "keep it in an area" to constrain drawn numbers
+- 1:48:51 [SetFx2] · explained — write count to FX2 (since FX1 holds particle age), read in shader
+- 1:50:34 [BillboardPoints] · explained — desired "orient points to camera"/billboard operator; searched, not found; faked via transform
+- 1:52:00 [CameraPointDistance] · passing — searched among CamPosition/point-by-camera-distance operators
+- 1:56:51 [DepthTest] · passing — discussed enabling depth test for drawn numbers
+- 1:58:34 [VolumetricBackground] · explained — requested "volumetric background"/clouds; not built in, on the to-do list
+- 2:06:00 [ImageLevels] · in-depth — HDR background too bright; image-levels clamp to fix anti-aliasing/bloom blending
+- 2:09:50 [ToneMapping] · explained — tone-map the re-bloomed result back into range
+- 2:13:17 [Gradient] · explained — gradient used to fade the number glow in then out
+- 2:16:19 [TimeClip] · explained — hard time-clip cut between scenes; transition to be done later
+- 2:18:00 [RadialPoints] · in-depth — spiral/radial points forming the tunnel; animating sides/start-angle
+- 2:19:22 [MoveTargetPoints] · explained — move/transform points among "bit gates"
+- 2:19:22 [FilterPoints] · explained — filter points to the gates for number drawing
+- 2:30:00 [LinearInterpolation] · explained — switching keyframe interpolation to linear while debugging
+- 2:33:00 [ConstantInterpolation] · in-depth — constant mode keyframe jump-to-key bug; two interpolation modes checked at once
+- 2:38:14 [FieldVolumeForce] · in-depth — favored particle force; basis for the new field-input shader work
+- 2:38:14 [BoxSDF] · passing — "box of stuff" / SDF box as the field
+- 2:39:00 [FollowMeshSurfaceForce] · explained — closest existing mesh force; lacks inside/outside
+- 2:39:00 [MeshCollisionForce] · passing — wondered whether a mesh force exists
+- 2:39:52 [MeshToSDF] · explained — convert mesh to SDF / 3D texture as guiding volume
+- 2:40:41 [DepthBufferForce] · explained — proposed force colliding particles with a depth buffer (screen-space, knows normals)
+- 2:45:50 [CustomShaderForce] · explained — idea for a fully scriptable custom force for prototyping
+- 2:48:35 [CustomVertexShader] · explained — "custom base/vertex shader" template also to get the field input
+- 2:49:33 [Field] · explained — field input wired into the custom point shader template (register alignment t/b discussion)
+- 3:03:23 [GridPointsField] · passing — "gridpoint field" test setup for the field input
+- 3:04:00 [SimpleGradient] · in-depth — sample SimpleGradient by field.w to colorize points by distance; praised as a helper
+- 3:05:03 [GetFieldDistance] · explained — "get distance"/get-field helper in the field template
+- 3:06:09 [GetFieldColor] · passing — suggested "get color" helper would be useful
+- 3:06:56 [GetFieldNormal] · in-depth — new helper added; samples normal via small offset distance; second default param
+- 3:09:54 [DrawMeshAtPoints] · explained — towards-mesh test using the new field normal
+- 3:10:50 [QLookAt] · in-depth — q-look-at with normal + swizzled (yzx/zxy) up vector to orient cubes to surface
+- 3:24:23 [TorusMesh] · explained — "toys/torus mesh" and torus SDF used to demo field orientation
+- 3:14:03 [CylinderMesh] · in-depth — cylinder mesh normal/cap-normal bug when rotated on X by 90°
+- 3:16:11 [DuplicateMesh] · passing — duplicate mesh to inspect the cylinder issue
+- 3:16:49 [SetMaterial] · explained — make the mesh shiny to reveal the normal bug
+- 3:16:58 [CubeMesh] · passing — cube mesh used to compare surface/normal behavior
+- 3:24:30 [ParameterWindow] · explained — question-mark help; connected-input name display; reset-to-default behavior
+- 3:25:42 [ScaleByVelocity] · explained — "most inefficient way to draw a wave"; stores buffer copy for position difference
+- 3:26:20 [MovingPoints] · in-depth — screen-space motion-stretch effect; keeps previous-point buffer; debated rename to MotionStretchPoints
+- 3:32:05 [DrawMeshAtPoints] · explained — re-test of the lost field/orient-to-SDF example
+- 4:10:30 [BlendCamera] · explained — used heavily in the demo; wonky position/target interpolation, wants quaternion blend
+- 4:13:17 [QuaternionInterpolation] · explained — animating a quaternion channel works for constant mode (regression isolation)
+- 4:00:00 [LinearGradient] · in-depth — rainbow linear gradient + OkLab interpolation producing negative/NaN colors → mesh flicker; ToneMap/clamp suggested

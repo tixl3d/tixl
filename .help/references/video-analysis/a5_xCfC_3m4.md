@@ -1,0 +1,95 @@
+---
+video: a5_xCfC_3m4
+type: meetup
+date: 2026-01-26
+title: Part 1 — Asset system overhaul, performance profiling, MediaPipe hand-tracking particle demo, SkillQuest tutorial editor
+duration: 4:10:42
+---
+
+This TiXL community meet-up (Part 1) walks through the major new project/asset path restructuring (resources renamed to "assets", fixed cross-platform paths, the new asset browser), then a hands-on performance primer covering fill-rate vs. draw-call profiling. The host builds a live MediaPipe hand-landmark demo that emits a particle system between two fingertips, and demonstrates the upcoming SkillQuest tutorial system and its map/tool-point editors. The episode closes with community contributions: an Assimp 3D loader, an AI shader generator, and a vertex-animation-texture (VAT) instancing trick.
+
+## Mentions
+- 0:23 [RadialGradient] · passing — host's intro background scene (a "guy" brought into the background)
+- 23:54 [RadialGradient] · explained — double-clicked background gradient used as the starting test scene
+- 24:14 [Blob] · passing — suggested cheap test operator to add via the search box
+- 24:34 [FractalNoise] · explained — recommended as a heavier procedural test ("factor noise is better… pretty expensive")
+- 25:54 [FractalNoise] · in-depth — animated by connecting its phase to time to keep it recomputing for the fill-rate benchmark
+- 26:43 [Time] · passing — connected into the noise phase so the effect can't be cached
+- 27:01 [FractalNoise] · explained — pixel/resolution count increased (256² up to 4K) to demonstrate fill-rate limits
+- 31:32 [Text] · explained — single text op used as the basis for a draw-call benchmark
+- 31:43 [RepeatAtPoints] · explained — text looped/repeated many times to multiply draw calls
+- 32:05 [Vector2] · passing — used to feed instance positions in the draw-call demo
+- 32:12 [GetFloatVar] · explained — "get float" pulling the progress/index variable to scatter copies
+- 39:53 [LoadImage] · explained — clicking its path field opens the new asset browser
+- 44:19 [PlayAudioClip] · explained — dropping an mp3 created a single audio-clip operator ("one player audio clip")
+- 57:42 [ColorGrade] · explained — shown when discussing disabling live previews and storing thumbnails
+- 1:09:54 [LoadObj] · in-depth — OBJ "tiger" mesh dragged from the asset browser into the graph; discussion of drag-into-3D-scene
+- 1:14:00 [DetectFaceLandmarks] · passing — "headmark detection" mentioned as a MediaPipe example to try
+- 1:18:33 [DetectHandLandmarks] · in-depth — MediaPipe hand landmark detector; the core of the whole demo (21 points/hand)
+- 1:18:33 [LoadInputDevice] · explained — "view input device" / webcam capture op searched via Ctrl+F
+- 1:24:45 [TransformImage] · in-depth — used to flip the camera image (-1 scale) before detection
+- 1:26:43 [ConvertFormat] · in-depth — converts the HDR RGBA16 texture to BGRA8 that the detector expects
+- 1:28:55 [DrawLines] · explained — used to connect/visualize the detected hand landmarks
+- 1:28:55 [DrawRayLines] · explained — alternative line draw for the landmark connections
+- 1:29:27 [FadeTooLongLines] · passing — suggested to hide overly long connecting lines
+- 1:30:00 [FilterPoints] · in-depth — two instances pick landmark index 4 (thumb) and 8 (index finger)
+- 1:30:00 [CombinePoints] · explained — combines the two filtered points; "combine buffers" referenced later
+- 1:30:00 [DrawPoints] · in-depth — draws the picked fingertip points (made big and orange)
+- 1:31:45 [BlendPoints] · explained — blends the two fingertips to compute a center point
+- 1:33:13 [PointSimulation] · in-depth — tried for damping/smoothing the point ("want to rename to DampPoints"); rejected because it behaves like a particle sim and scrambles the points
+- 1:36:36 [PointsToCPU] · in-depth — reads the GPU point buffer back to the CPU
+- 1:38:08 [GetListItem] · explained — "get list item / attribute" to extract point data on the CPU
+- 1:40:11 [GetPointAttributes] · in-depth — "get point data from list" used to pull position/W/orientation
+- 1:41:54 [Vector3Distance] · in-depth — "back three distance" computes the fingertip-to-fingertip distance
+- 1:42:59 [Remap] · in-depth — remaps the finger distance into a usable output range (also reused for emit velocity)
+- 1:43:23 [ParticleSystem] · in-depth — emits particles from the fingertip center point
+- 1:43:41 [TurbulenceForce] · explained — "turbo force / turbulence force" added for particle dynamics
+- 1:43:56 [DrawPoints] · explained — draws the emitted particles (Z-buffer write toggled off)
+- 1:46:33 [BlendPoints] · explained — reused (the "mighty input") to recreate the midpoint for the emitter
+- 1:47:12 [TransformPoint] · in-depth — used to set the rotation axis / orient the particle emission; long debugging of coordinate systems
+- 1:47:48 [Atan2] · in-depth — "atan two" computes the rotation angle from a Vector2
+- 1:48:32 [Vector2Components] · explained — split distance components into a new Vector2 feeding the angle
+- 1:48:32 [Vector2] · explained — recombines components into the Vector2 feeding the angle
+- 1:50:01 [TransformPoint] · in-depth — second transform used to break rotation into two steps (rotation then axis)
+- 1:55:31 [VisualizePoint] · explained — used with axis display enlarged to debug the jittery rotation axis
+- 1:58:08 [DirectionalForce] · explained — "directional force… basically gravity" added so hand up/down moves all particles
+- 2:00:00 [DetectSelfieSegmentation] · in-depth — "selfie segmenter" / multi-class segmentation producing a mask texture (noted very slow under recording)
+- 2:03:09 [FastBlur] · in-depth — new fast multi-level down/up-sample blur (~10x faster than normal blur); applied to the segmentation mask
+- 2:01:21 [ImageLevels] · passing — shown to illustrate FastBlur's smooth level falloff
+- 2:05:02 [TemporalAccumulation] · explained — "damping for images" added to smooth the jittery mask over time
+- 2:05:52 [NormalMap] · explained — segmentation mask converted to a normal map to drive particles
+- 2:06:08 [TextureMapForce] · in-depth — "detection/texture map force" pushes particles in screen space from the mask normal map; requires a signed normal map
+- 2:09:56 [SelectPoints] · explained — "select points" with discard option discussed re: keeping landmark indices consistent
+- 2:11:55 [CreateList] · explained — new list operators discussed (float/int/color lists) as future operator ideas
+- 2:13:00 [PickPointsFromBuffer] · explained — proposed new operator to pick points by index with a start-index shift
+- 2:19:08 [CrossProduct] · passing — "we have a cross product" mentioned while discussing missing Vector3 list ops
+- 2:30:00 [DrawPoints] · explained — cited as the most expensive op (~100 units) in the performance breakdown
+- 2:30:00 [TurbulenceForce] · passing — ~10 units in the relative cost estimate
+- 2:30:00 [FractalNoise] · passing — "fractional force is trivial"/3D noise ~2-15 units in the cost estimate
+- 2:30:00 [TextureMapForce] · passing — ~10 units (texture sampling) in the cost estimate
+- 2:23:00 [ParticleSystem] · passing — ~10-15 units in the relative cost estimate
+- 2:27:00 [GpuMeasure] · explained — "GPU measure" op for sub-graph timing (noted as unsupported/unreliable)
+- 2:08:00 [SetMode] · passing — used to switch the normal map to signed mode ("go to mode and give it a signed normal map")
+- 2:39:00 [LoadSvg] · passing — "load SVG as texture" appears as a recent commit while resetting git
+- 2:51:00 [Blob] · passing — referenced as a removable block in the SkillQuest drag demo
+- 2:56:00 [SkillMapEditor] · explained — new development tool to edit the SkillQuest map (node dependencies/requirements)
+- 2:57:36 [ToolPointEditor] · in-depth — new tool to author tutorial "tool points" (steps, info, call-to-action, target highlighting)
+- 3:05:00 [SkillQuest] · explained — the "goods" namespace holding playable tutorial levels
+- 3:07:00 [Math] · explained — "basic math operations" operator dragged in to demo a tutorial
+- 3:13:00 [DrawMeshAtPoints] · in-depth — "draw mesh at points" used to render a cube at the tutorial point; later swapped for DrawPoints
+- 3:14:00 [PerlinNoise] · in-depth — "perlin/perdanoise three" connected to a point's Position in the points tutorial
+- 3:15:00 [SimpleGradient] · in-depth — connected to a point's Color in the tutorial
+- 3:16:00 [Cube] · explained — cube mesh feeding DrawMeshAtPoints in the tutorial scene
+- 3:18:00 [Vector3] · passing — "bonus 3" used as the position source in the tutorial
+- 3:20:00 [ExtendPoint] · explained — suggested as the next lesson where point rotation becomes relevant
+- 3:08:00 [SetCallToValue] · explained — "call to value" tutorial-step op highlighting an input with a blinking indicator
+- 3:43:00 [DotGradient] · explained — "dot gradient" tutorial: like a linear gradient using distance-from-center with an offset to make a circle
+- 3:44:00 [LinearGradient] · passing — referenced as the comparison baseline for the dot gradient lesson
+- 4:00:00 [GridPoints] · explained — "green/grid point" scattering instances in Martin's VAT demo
+- 4:00:00 [RepeatMeshAtPoints] · in-depth — instances a mesh across points; core of the vertex-animation-texture demo and per-copy UV randomization
+- 4:00:00 [MeshVAT] · in-depth — "first mesh VAT" / mesh vertex-animation-texture; UVs (texcoord2) translated to drive the animation
+- 4:06:46 [RadialGradient] · explained — radius/offset shifted to drive a per-instance animation in the VAT demo
+- 4:07:30 [AttributesFromImage] · passing — suggested to animate per-point rotation/attributes from an image
+- 3:52:00 [LoadAssimpModel] · in-depth — community "OSIMP/Assimp" multi-format 3D model loader node (FBX, glTF, PLY point clouds), import/export, mesh/points selection
+- 3:55:00 [CustomPixelShader] · in-depth — target of the community AI shader generator (also custom point shader / SDF pixel shader); supports provider selection and undo history
+- 4:09:00 [LoadGltf] · passing — glTF/FBX animation import discussed as a desirable next building block (glTFSharp library)

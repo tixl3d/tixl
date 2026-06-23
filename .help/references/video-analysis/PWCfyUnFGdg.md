@@ -1,0 +1,238 @@
+---
+video: PWCfyUnFGdg
+type: meetup
+date: 2026-02-23
+title: Building complex scenes — text rendering, IK chains, ray-marching SDF tentacle monster, custom-point-shader circuit transition
+duration: 4:34:56
+---
+
+A long, unstructured TiXL community meet-up where the host first builds a procedural text-points scene with particles, gradients and color grading, then walks through reviewing/merging a GitHub pull request and the dev-environment setup. The bulk of the session rebuilds two scenes from scratch: a ray-marched tentacle/spider monster driven by an experimental IK-chain operator, and a glowing radial-circuit transition built around a custom point shader that normalizes points onto a sphere. Along the way the host demos new features (subnets/families, asset-browser drag-in, project thumbnails, .meta folders) and repeatedly hits a point-buffer update bug that requires reconnecting line-point inputs.
+
+## Mentions
+- 0:17 [TextLinePoint] · explained — point-buffer text generator producing XYZ/color/scale points; foundation of the opening scene
+- 1:36 [DrawPoints] · passing — drawing the generated text point buffer
+- 2:40 [RenderTarget] · explained — rendering the drawn points into a texture for further effects
+- 2:51 [BlurWithMask] · explained — "blur-with-mask" effect, called a recurring favorite for nice looks
+- 3:00 [LinearGradient] · explained — gradient fed as background/input under the text
+- 4:25 [AnimValue] · passing — animated value driving the text size
+- 4:37 [Sine] · explained — sine/wave oscillator feeding the animated amplitude
+- 4:45 [AddOffset] · passing — adding offset to the animated wave
+- 5:10 [Transform] · passing — additional scale/transform of the text
+- 7:54 [Bloom] · explained — bloom effect added to the animation
+- 8:18 [DrawPoints] · explained — drawing the text as raw points to inspect them
+- 8:38 [AddNoise] · explained — noise applied to the point positions
+- 9:24 [ParticleSystem] · explained — spawning the text points into a particle system
+- 9:39 [DrawLines] · passing — drawing line geometry from the points
+- 9:39 [Group] · explained — grouping/combining multiple draw outputs into one scene
+- 11:21 [Pin] · passing — pinning an output for preview
+- 12:01 [DrawLines] · passing — re-rendering text as lines
+- 12:08 [LivePreview] · passing — live previews keep resetting the particle system
+- 13:11 [Transform] · explained — adding a transform with gizmo to offset shadow points
+- 14:04 [HSB] · explained — "HSE/H-S-E" color op (HSB) discussed for colorizing points
+- 15:10 [CentricGradient] · explained — radial/centric gradient sampled for point color
+- 15:20 [AnimValue] · passing — value fed into the gradient sample input
+- 16:38 [ColorGrade] · explained — toning down colors, vintage 70s grade
+- 17:01 [Magenta] · passing — (tint/magenta adjustment mentioned)
+- 18:13 [DetectEdges] · explained — edge-detection producing "weird spurly" results
+- 18:27 [Contrast] · passing — increasing contrast after edge detect
+- 19:12 [PointsAtImage] · explained — using the image to generate more points
+- 19:15 [DrawLines] · passing — drawing lines from the image-derived points
+- 20:00 [InteractionOverlay] · passing — using P to flag/pin in the interaction overlay
+- 20:43 [DetectEdges] · in-depth — feeding only the points texture into detect-edges for stacked effects
+- 21:04 [FastBlur] · explained — blurring the result; "fast blur"
+- 28:25 [IKChain] · in-depth — experimental FABRIK inverse-kinematics-on-GPU operator (the IK-chain), demoed at length
+- 29:07 [LinePoint] · explained — line-point chain feeding the IK chain
+- 29:21 [PointForTarget] · explained — point used as the IK target
+- 30:33 [DrawPoints] · passing — drawing the whole mesh as points to debug the chain
+- 31:18 [TransformMesh] · explained — transform/rotate the mesh so the chain looks right
+- 33:02 [RepeatPoints] · in-depth — repeating points to create multiple IK chains (spider legs)
+- 34:26 [SharedVector3] · passing — adding a shared vector3 to vary leg targets
+- 40:43 [MeshVerticesToPoints] · explained — pull-request migration from legacy point to MeshVertices-to-points
+- 43:08 [DrawPoints] · passing — color/RGB from mesh vertices in the reviewed PR
+- 51:58 [LinearGradient] · explained — demoing new subnet/family thumbnails feature
+- 53:46 [CustomSDF] · explained — shown in the new families/subnet browser
+- 54:07 [LoadImage] · explained — asset-library browser, similar-image suggestions
+- 54:54 [Mix] · passing — searched in the new in-graph library browser
+- 56:10 [Feedback] · explained — feedback operator with new preview to avoid flickering
+- 58:54 [IKChain] · in-depth — building the tentacle-monster chain, 8 segments
+- 1:00:00 [RadialPoints] · explained — radial target points pointing outward for tentacles
+- 1:00:00 [RayMarch] · explained — ray-marching into the scene to find the surface point
+- 1:01:09 [PointSimulation] · explained — used to damp/smooth the target points (host calls it "damp points")
+- 1:01:43 [Point] · explained — CPU point with gizmo, two outputs (residue list + GPU upload)
+- 1:02:03 [RepeatAtPoints] · explained — repeating the point in a radial layout
+- 1:02:12 [RadialPoints] · explained — 8 radial points for the spider legs
+- 1:02:57 [LoadOBJ] · explained — loading a monkey/Suzanne OBJ from the asset browser
+- 1:03:37 [RawMeshAtPoints] · in-depth — much faster than repeat-mesh-at-points for placing the monster mesh
+- 1:04:00 [Transform] · passing — scaling the loaded mesh down
+- 1:04:24 [CombineMesh] · explained — combining monkey + sphere into the monster body
+- 1:04:29 [SphereMesh] · explained — sphere body for the monster
+- 1:04:53 [TransformMesh] · explained — transform/rotate the combined mesh
+- 1:05:08 [RotateBuffer] · passing — discussed for orienting the buffer
+- 1:06:27 [DrawMeshAtPoints] · in-depth — caching mesh once and drawing at points (cached, no relight)
+- 1:07:15 [VisualizePoints] · in-depth — debugging where/how the target points are oriented
+- 1:09:03 [RadialPoints] · explained — orientation-axis tweaking on the radial points
+- 1:11:19 [RepeatLinePoints] · explained — repeating line points to poke legs outward
+- 1:11:54 [LinePoints] · explained — centered lines, pivot brought to zero so they reach out
+- 1:12:13 [BiasGain] · explained — bias/gain controlling taper along the line scale
+- 1:12:45 [DrawPointsShaded] · explained — shaded points alternative to draw-lines
+- 1:13:21 [AddNoise] · explained — noise on the tentacle points with attribute control
+- 1:13:34 [SetPointsAttribute] · explained — attribute-1 ramp (0→1) along the spline to drive noise
+- 1:15:02 [CustomSDF] · in-depth — building the cave scene as a signed-distance function
+- 1:16:38 [TransformField] · explained — scaling/rotating the SDF field for the cave
+- 1:16:58 [SetFloat] · passing — "set float / set fog" for perspective fog
+- 1:17:31 [PointRepeat] · passing — scanning op list (force field, polar field, etc.)
+- 1:17:40 [PolarField] · passing — listed while searching
+- 1:17:40 [SelectPointsFromSDF] · passing — listed while searching
+- 1:17:40 [VectorFieldForce] · passing — listed while searching
+- 1:17:40 [ApplyVectorField] · passing — listed while searching
+- 1:17:40 [ColorVectors] · passing — listed while searching
+- 1:17:40 [RandomJumpForce] · passing — listed while searching
+- 1:17:48 [PushPoints] · in-depth — "push-points": moves points along Z until hidden at the SDF surface (chosen op)
+- 1:18:55 [DrawLinePairPoints] · explained — pairs two point sets to draw connecting lines
+- 1:19:53 [RayMarchPoint] · explained — ray-march-point tried but confusing for surface contact
+- 1:20:22 [MoveToSDF] · explained — moves points to nearest SDF surface via ray marching (the working approach)
+- 1:21:58 [TransformPoints] · explained — repeating/scaling the surface points
+- 1:22:18 [PointSpace] · explained — moving points forward along Z (alt to scaling)
+- 1:23:08 [SubdivideLine] · explained — subdivide-line-points to densify the tentacle line
+- 1:23:28 [DrawPointShaded] · passing — shaded points for the subdivided line
+- 1:24:43 [SelectConnectedOps] · passing — new right-click "select connected ops" feature
+- 1:26:13 [SetFog] · passing — scene fog
+- 1:26:30 [CustomSDF] · explained — the SDF generating scene + clamp points
+- 1:26:53 [TransformField] · passing — transform field for a better cave
+- 1:27:07 [RayMarch] · explained — ray-marching the field at a chosen quality
+- 1:29:18 [PointSimulation] · in-depth — damps points toward target for graceful, organic motion; >1 explodes
+- 1:31:57 [Perlin] · explained — Perlin noise added to the main point to self-animate
+- 1:33:05 [Perlin] · explained — Perlin suggested via insert menu for movement
+- 1:34:53 [Noise] · explained — finding/reducing the tentacle noise op
+- 1:35:12 [DrawLinePairPoints] · explained — pairing to interpolate the noise strain factor
+- 1:35:34 [SetPointsAttribute] · explained — setting F1 to 0/1 to blend noise size along the line
+- 1:36:46 [IKChain] · in-depth — feeding paired body/target points into the IK chain
+- 1:37:34 [RepeatLinePoints] · explained — five-point body line repeated as the chain source
+- 1:37:54 [DrawPoints] · passing — visualizing the IK output
+- 1:38:32 [BreakOut] · explained — ctrl-break a value to a named "segment count" input
+- 1:39:42 [PointSize] · passing — adjusting point size on stretched legs
+- 1:40:05 [DrawLines] · explained — debug line drawing of the legs
+- 1:41:07 [TorusMesh] · explained — building a procedural torus for a mechanical leg segment
+- 1:41:55 [RepeatMeshAtPoints] · explained — repeating the torus mesh along the legs
+- 1:43:07 [SplitVertices] · explained — split/separated vertices for flat shading
+- 1:44:26 [DrawMeshAtPoints] · in-depth — drawing the leg mesh at the line points
+- 1:46:02 [Scale] · passing — spiraling/scaling the leg segments
+- 1:48:16 [RadialPoints] · explained — radial points to build a claw
+- 1:48:32 [RawMeshAtPoints] · passing — raw-mesh-at-points for the claw segments
+- 1:48:44 [CylinderMesh] · explained — cylinder mesh as the claw element
+- 1:49:50 [Twist] · passing — twisting the cylinder for the claw look
+- 1:50:49 [RawMeshAtPoints] · explained — placing claws on the surface points
+- 1:51:51 [VisualizePoints] · explained — visualizing chain points with line fade to find the last point
+- 1:52:09 [FadeAlongLines] · explained — fade-along-lines to read 0→4 ordering, then claw point
+- 1:53:43 [FloatToInt] · explained — "float-to-int" feeding a step/skip count to filter points
+- 1:53:58 [FilterPoints] · in-depth — filtering 8 points with step/start-index to grab the claw points
+- 1:55:35 [HasChanged] · explained — "has-changed" value to detect motion (used in a wizard/reset)
+- 2:00:00 [RayMarchFitToCombine] · passing — combining a test sphere into the ray-march field
+- 2:00:00 [SphereMesh] · passing — small test sphere added to the SDF
+- 2:01:31 [FilterPoint] · in-depth — filter-point to remove the last point of each chain for claw placement
+- 2:02:32 [MultiplyInt] · explained — leg-count × (segment-1) math feeding the filter count
+- 2:05:12 [Perlin] · passing — re-enabling "paranoia"/Perlin movement
+- 2:05:52 [Camera] · explained — camera to render the laser eyes
+- 2:07:36 [PointLight] · explained — small point light added near the eyes
+- 2:08:00 [Camera] · passing — looking the camera at the head
+- 2:08:20 [SetEnvironment] · passing — changing the default environment
+- 2:08:46 [DrawLines] · explained — drawing red glowing laser-eye lines (HDR via ctrl)
+- 2:09:17 [LinePoints] · explained — line points for the laser beams
+- 2:10:13 [RandomizePoints] · explained — randomizing the laser point directions
+- 2:10:54 [Perlin] · passing — perlin noise as a randomize alternative
+- 2:11:42 [RandomPoints] · explained — random phase/time animating the laser
+- 2:12:11 [Bloom] · explained — bloom to make the lasers glow ("look at this fire")
+- 2:12:34 [RepeatAtPoints] · explained — repeating the two eye lines next to each other
+- 2:16:26 [Group] · explained — grouping the laser-eyes branch
+- 2:17:21 [RepeatAtPoints] · in-depth — repeating eyes at main point and lasers at eye points
+- 2:18:01 [DrawLines] · passing — drawing lasers ignoring Z test
+- 2:21:11 [Perlin] · explained — hinted-camera perlin rotation offset for camera shake
+- 2:21:48 [PointLight] · explained — bright red point light pushed into the back
+- 2:22:22 [Perlin] · in-depth — breaking light intensity into Perlin with min/max + bias/gain for on/off flicker
+- 2:23:49 [SetFog] · explained — adding a second set-fog so lasers aren't fogged
+- 2:25:04 [RayMarch] · explained — ray-march material: roughness/base-color discussion
+- 2:25:56 [SetEnvironment] · explained — set-environment for reflections
+- 2:26:01 [TileableNoise] · explained — tileable noise as the environment texture
+- 2:26:29 [BiasGain] · explained — bias/gain to shape the noise environment
+- 2:28:14 [RasterTexture] · explained — raster texture used as a normal-map source
+- 2:28:34 [NormalMap] · explained — converting texture to a normal map for the material
+- 2:28:56 [Feather] · passing — feathering/resizing the normal-map texture
+- 2:30:54 [TransformPoints] · explained — adding transform-points to rotate the laser lines (called "an option")
+- 2:31:33 [BreakOut] · explained — break out the 90-degree rotation value
+- 2:31:39 [Perlin] · explained — perlin(1D) + bias/gain driving laser rotation
+- 2:42:02 [SetProjectThumbnail] · passing — new asset drag-in copies video to asset browser
+- 2:46:50 [Fire] · passing — running the image into "fire"/render target for the scope
+- 2:46:58 [Waveform] · explained — waveform/vector-scope used to inspect color distribution
+- 2:47:05 [VectorScope] · in-depth — custom vector-scope library op, edited live to add a position input
+- 2:48:53 [Vector3] · passing — converting vector2 position to vector3 for the scope translation
+- 2:49:50 [Transform] · explained — gizmo/position control for the vector-scope sample point
+- 2:51:01 [Waveform] · explained — waveform on a graded sample video; skin-tone line
+- 2:52:09 [ColorGrade] · explained — color-grading toward the skin-tone vector
+- 2:53:39 [RadialPoint] · explained — radial point as the horizon ring of the rosetta scene
+- 2:55:11 [CombinePoints] · explained — combine-buffer to draw the constellation in one draw call
+- 2:55:42 [RadialPoint] · in-depth — building concentric circles via radial points and pivot/scale tricks
+- 3:00:00 [Transform] · explained — scaling/transforming the radial ring to nest circles
+- 3:05:09 [RadiatePoints] · explained — 12 radiate points for a smaller inner circle
+- 3:05:38 [DrawLines] · passing — drawing the small circuit lines
+- 3:07:54 [SpherePoints] · explained — sphere-points (Fibonacci-spiral) drawn as a line, found confusing
+- 3:08:51 [SphereIce] · passing — recalling an op that moves points toward a sphere
+- 3:10:10 [CustomPointShader] · in-depth — writing a custom point shader to force points onto a sphere via normalize+blend
+- 3:10:22 [RadiatePoints] · explained — spiral via offset/center, many points
+- 3:14:49 [DrawLines] · explained — connecting the sphere-shaded points with lines
+- 3:14:57 [RandomizePoints] · passing — randomize points considered
+- 3:14:57 [Noise] · explained — noise with high frequency on the sphere points
+- 3:15:53 [SoftTransformPoints] · in-depth — soft-transform within a volume to squeeze points toward center
+- 3:17:00 [BiasGain] · explained — falloff control on the soft transform volume
+- 3:18:00 [SetColorFromField] · passing — searching for a color-from-field op
+- 3:20:06 [PointColorWithField] · in-depth — point-color-with-field using sphere SDF
+- 3:21:04 [SDFToColor] · explained — SDF-to-color producing the center gradient
+- 3:23:58 [FilterPoints] · explained — filtering ~1000 points for glitter
+- 3:24:12 [ScatterSelection] · explained — scatter-selection then draw points as glitter
+- 3:24:32 [RandomizePoints] · explained — randomizing glitter scale/position
+- 3:25:00 [Bloom] · explained — bloom + two color stops as a cheap glow
+- 3:27:12 [BlurWithMask] · explained — blur-with-mask with a radial-coordinate mask for vignette glow
+- 3:27:31 [RadialCoordinate] · explained — radial coordinate as the blur mask
+- 3:28:57 [SpherePoints] · explained — sphere points reused for outward-shooting lines
+- 3:29:43 [RepeatLinePoints] · explained — line points repeated for radial spikes
+- 3:31:43 [RandomizePoints] · passing — randomizing the spike points
+- 3:34:45 [Transform] · in-depth — rotating the whole scene through the X axis (to avoid camera gimbal)
+- 3:35:12 [BreakOut] · explained — break out rotation, drive with time
+- 3:37:53 [Camera] · explained — moving camera in for the particle "tunnel" shot
+- 3:39:30 [TransformPoints] · explained — volume-center transform for interesting effects
+- 3:41:15 [RadialPoints] · explained — radial emitter ring for the particle system
+- 3:41:38 [ParticleSystem] · in-depth — emitting particles toward center with twirl + point force
+- 3:41:38 [DrawLines] · passing — drawing the particle trails as lines
+- 3:43:02 [TurbulenceForce] · explained — turbulence/twirl force with animated phase
+- 3:43:59 [FieldForce] · in-depth — sphere field-force attracting particles inward without repulsion
+- 3:44:13 [SphereField] · explained — sphere as the field for the force
+- 3:46:51 [AnimateValue] · explained — slow sine animating the emitter center up/down
+- 3:47:08 [Sine] · explained — sine for the up/down oscillation
+- 3:48:02 [DrawLines] · passing — drawing the central oscillating line
+- 3:50:54 [TransformPoints] · explained — squeezing particle points after simulation
+- 3:52:53 [SoftTransformPoints] · explained — soft-transform scaling/moving the particle volume
+- 3:54:06 [FilterPoints] · explained — filter + randomize for extra glitter
+- 3:55:43 [OrientPoints] · in-depth — orienting glitter points toward center; scale to ovals
+- 3:55:55 [SetPointsAttribute] · explained — set-points-attribute considered over transform for scaling
+- 3:57:35 [RandomizePoints] · explained — random selection of points to place cubes
+- 3:57:55 [DrawMeshAtPoints] · explained — drawing cube meshes at scattered points
+- 3:58:07 [CubeMesh] · explained — cube mesh placed at glitter points
+- 3:59:53 [TextLineNumber] · explained — text-line-number for the small "index" labels
+- 4:00:03 [TextLinePoints] · explained — converting numbers to point buffer for labels
+- 4:00:13 [OrientPoints] · explained — orient-to-camera for the number billboards
+- 4:01:52 [StringToFloat] · passing — string/float conversion for the animated number
+- 4:01:52 [FloatToString] · passing — float-to-string for the label text
+- 4:02:46 [Bloom] · explained — re-enabling bloom on the final scene
+- 4:03:07 [Perlin] · explained — perlin flicker on bloom intensity with offset
+- 4:06:22 [ColorGrade] · in-depth — gamma realization: color-grade gamma darkens/brightens bloom
+- 4:09:39 [SoftTransformPoints] · explained — flower-like shape attributed to soft-translate volume size
+- 4:10:48 [RandomizePoints] · explained — noise vs randomize on 30k points
+- 4:10:48 [Noise] · explained — high-frequency noise giving the better organic look
+- 4:14:14 [OrientPoints] · explained — orienting the cube labels; cleanup pass
+- 4:16:13 [SDFToColor] · explained — range-offset animating color band through the lines
+- 4:18:39 [RadialPoint] · explained — Martin's circle variant; int point-count multiplied by 2 (the rosetta)
+- 4:24:33 [CustomVertexShader] · in-depth — custom vertex shader on a mesh with gradient presets, demoed
+- 4:30:00 [DrawPoints] · explained — first-shader/custom point shader works with points not lines
+- 4:31:37 [FloatConstant] · passing — wiring fix expecting a float constant
+- 4:32:33 [TimeA] · passing — "time to A" feeding the shader animation
+- 4:32:43 [OrbitCamera] · passing — orbit camera considered then rejected (scene too flat)
+- 4:33:01 [Noise] · explained — adding noise to "make it beautiful" on the shared shader

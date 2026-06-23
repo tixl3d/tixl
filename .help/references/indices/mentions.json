@@ -1,1185 +1,4638 @@
 {
-  "op:Lib.io.video.VideoDeviceInput": [
+  "op:Lib.image.generate.basic.RadialGradient": [
     {
-      "source": {
-        "type": "youtube",
-        "id": "LLpl6QEL7bo"
-      },
-      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=1560s",
-      "date": "2025-08-25",
-      "tLabel": "26:00",
-      "category": "chat",
-      "durationMin": 4,
-      "title": "Try to showcase WebCam operator (VideoDeviceInput)",
-      "summary": null
-    }
-  ],
-  "op:Lib.numbers.anim.animators.AnimBoolean": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "LLpl6QEL7bo"
-      },
-      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=2370s",
-      "date": "2025-08-25",
-      "tLabel": "39:30",
-      "category": "feature",
-      "durationMin": 6,
-      "title": "AnimBoolean",
-      "summary": null
-    }
-  ],
-  "op:Lib.numbers.anim.animators.AnimInt": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "LLpl6QEL7bo"
-      },
-      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=2700s",
-      "date": "2025-08-25",
-      "tLabel": "45:00",
-      "category": "tip",
-      "durationMin": 2,
-      "title": "Tip: Use AnimInt",
-      "summary": null
-    }
-  ],
-  "op:Lib.numbers.anim.vj.SetSpeedFactors": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "LLpl6QEL7bo"
-      },
-      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=2880s",
-      "date": "2025-08-25",
-      "tLabel": "48:00",
-      "category": "op-reference",
-      "durationMin": 6,
-      "title": "How to use SetSpeedFactors",
-      "summary": null
-    }
-  ],
-  "op:Lib.io.input.KeyboardInputAsInt": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "LLpl6QEL7bo"
-      },
-      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=3240s",
-      "date": "2025-08-25",
-      "tLabel": "54:00",
-      "category": "op-reference",
-      "durationMin": 3,
-      "title": "How to use KeyboardInputAsInt",
-      "summary": null
-    }
-  ],
-  "op:Lib.numbers.anim.vj.ForwardBeatTaps": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "LLpl6QEL7bo"
-      },
-      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=3420s",
-      "date": "2025-08-25",
-      "tLabel": "57:00",
-      "category": "highlight",
-      "durationMin": 3,
-      "title": "Discussing ForwardBeatTaps",
-      "summary": null
-    }
-  ],
-  "op:Lib.point.modify.RandomizePoints": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "LLpl6QEL7bo"
-      },
-      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=4340s",
-      "date": "2025-08-25",
-      "tLabel": "1:12:20",
-      "category": "highlight",
-      "durationMin": 1,
-      "title": "Playing with RandomizePoints",
-      "summary": null
+      "video": "a5_xCfC_3m4",
+      "t": 23,
+      "tLabel": "0:23",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=23s",
+      "depth": "passing",
+      "note": "host's intro background scene (a \"guy\" brought into the background)"
     },
     {
-      "source": {
-        "type": "youtube",
-        "id": "qavgcL72F1Y"
-      },
-      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=12180s",
-      "date": "2026-06-01",
-      "tLabel": "3:23:00",
-      "category": "showcase",
-      "durationMin": 7,
-      "title": "City-builder demo (RepeatMeshAtPoints, RandomizePoints)",
-      "summary": null
-    }
-  ],
-  "op:Lib.point.generate.RadialPoints": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "LLpl6QEL7bo"
-      },
-      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=4420s",
-      "date": "2025-08-25",
-      "tLabel": "1:13:40",
-      "category": "walkthrough",
-      "durationMin": 4,
-      "title": "Explaining RadialPoints Attribute parameters",
-      "summary": null
-    }
-  ],
-  "op:Lib.numbers.float.process.Accumulator": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "LLpl6QEL7bo"
-      },
-      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=4685s",
-      "date": "2025-08-25",
-      "tLabel": "1:18:05",
-      "category": "tip",
-      "durationMin": 1,
-      "title": "Accumulator to create procedural animations",
-      "summary": null
-    }
-  ],
-  "op:Lib.render.transform.SpreadLayout": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "LLpl6QEL7bo"
-      },
-      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=6420s",
-      "date": "2025-08-25",
-      "tLabel": "1:47:00",
-      "category": "tip",
-      "durationMin": 2,
-      "title": "SpreadLayout",
-      "summary": null
-    }
-  ],
-  "op:Lib.point.draw.DrawPointsShaded": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "LLpl6QEL7bo"
-      },
-      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=7050s",
-      "date": "2025-08-25",
-      "tLabel": "1:57:30",
-      "category": "op-reference",
-      "durationMin": 2,
-      "title": "DrawPointsShaded",
-      "summary": null
-    }
-  ],
-  "op:Lib.numbers.bool.process.DelayTriggerChange": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "LLpl6QEL7bo"
-      },
-      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=7420s",
-      "date": "2025-08-25",
-      "tLabel": "2:03:40",
-      "category": "op-reference",
-      "durationMin": 3,
-      "title": "DelayTriggerChange",
-      "summary": null
-    }
-  ],
-  "op:Lib.numbers.bool.process.DelayBoolean": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "LLpl6QEL7bo"
-      },
-      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=7571s",
-      "date": "2025-08-25",
-      "tLabel": "2:06:11",
-      "category": "op-reference",
-      "durationMin": 1,
-      "title": "DelayBoolean",
-      "summary": null
-    }
-  ],
-  "op:Lib.particle.ParticleSystem": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "LLpl6QEL7bo"
-      },
-      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=7930s",
-      "date": "2025-08-25",
-      "tLabel": "2:12:10",
-      "category": "op-reference",
-      "durationMin": 26,
-      "title": "SelectPointsWithSdf with ParticleSystem (In depth discussing and examples)",
-      "summary": null
+      "video": "a5_xCfC_3m4",
+      "t": 1434,
+      "tLabel": "23:54",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=1434s",
+      "depth": "explained",
+      "note": "double-clicked background gradient used as the starting test scene"
     },
     {
-      "source": {
-        "type": "youtube",
-        "id": "rEod2FltaPA"
-      },
-      "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=1490s",
-      "date": "2025-10-06",
-      "tLabel": "24:50",
-      "category": "op-reference",
-      "durationMin": 8,
-      "title": "ParticleSystem Op",
-      "summary": null
-    }
-  ],
-  "op:Lib.io.video.PlayVideo": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "LLpl6QEL7bo"
-      },
-      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=9480s",
-      "date": "2025-08-25",
-      "tLabel": "2:38:00",
-      "category": "tip",
-      "durationMin": 1,
-      "title": "PlayVideo + PointsOnImage",
-      "summary": null
-    }
-  ],
-  "op:Lib.point.generate.PointsOnImage": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "LLpl6QEL7bo"
-      },
-      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=9480s",
-      "date": "2025-08-25",
-      "tLabel": "2:38:00",
-      "category": "tip",
-      "durationMin": 1,
-      "title": "PlayVideo + PointsOnImage",
-      "summary": null
-    }
-  ],
-  "op:Lib.point.sim.PointSimulation": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "LLpl6QEL7bo"
-      },
-      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=9540s",
-      "date": "2025-08-25",
-      "tLabel": "2:39:00",
-      "category": "chat",
-      "durationMin": 1,
-      "title": "Survey of the week (Renaming PointSimulation)",
-      "summary": null
+      "video": "a5_xCfC_3m4",
+      "t": 14806,
+      "tLabel": "4:06:46",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=14806s",
+      "depth": "explained",
+      "note": "radius/offset shifted to drive a per-instance animation in the VAT demo"
     },
     {
-      "source": {
-        "type": "youtube",
-        "id": "rEod2FltaPA"
-      },
-      "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=1260s",
-      "date": "2025-10-06",
-      "tLabel": "21:00",
-      "category": "op-reference",
-      "durationMin": 4,
-      "title": "PointSimulation (Legacy)",
-      "summary": null
-    }
-  ],
-  "op:Lib.point.draw.DrawLines": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "LLpl6QEL7bo"
-      },
-      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=11280s",
-      "date": "2025-08-25",
-      "tLabel": "3:08:00",
-      "category": "tip",
-      "durationMin": null,
-      "title": "Fading DrawLines effect",
-      "summary": null
+      "video": "dCX7CcL0ZJs",
+      "t": 3314,
+      "tLabel": "55:14",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=3314s",
+      "depth": "passing",
+      "note": "referenced as a gradient to compare against"
     },
     {
-      "source": {
-        "type": "youtube",
-        "id": "cfUWSPJDRi4"
-      },
-      "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=201s",
-      "date": "2025-11-03",
-      "tLabel": "3:21",
-      "category": "showcase",
-      "durationMin": 11,
-      "title": "@Newemka shows the new [SubdivideLinePoints] [DrawLines] ops",
-      "summary": null
+      "video": "dCX7CcL0ZJs",
+      "t": 5861,
+      "tLabel": "1:37:41",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=5861s",
+      "depth": "explained",
+      "note": "compare PNG against a radial gradient for alpha behavior"
+    },
+    {
+      "video": "MAyETISMFi0",
+      "t": 1779,
+      "tLabel": "29:39",
+      "url": "https://www.youtube.com/watch?v=MAyETISMFi0&t=1779s",
+      "depth": "explained",
+      "note": "radial gradient as a soft vignette-style mask, dark-to-transparent, with an animated offset reveal"
+    },
+    {
+      "video": "qavgcL72F1Y",
+      "t": 2851,
+      "tLabel": "0:47:31",
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=2851s",
+      "depth": "explained",
+      "note": "gradient skill-quest tutorial (offset/rotation tweaks shown)"
     }
   ],
-  "op:Lib.point.generate.PointTrail": [
+  "op:Lib.image.generate.basic.Blob": [
     {
-      "source": {
-        "type": "youtube",
-        "id": "LLpl6QEL7bo"
-      },
-      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=11280s",
-      "date": "2025-08-25",
-      "tLabel": "3:08:00",
-      "category": "op-reference",
-      "durationMin": 6,
-      "title": "PointTrail",
-      "summary": null
+      "video": "a5_xCfC_3m4",
+      "t": 1454,
+      "tLabel": "24:14",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=1454s",
+      "depth": "passing",
+      "note": "suggested cheap test operator to add via the search box"
+    },
+    {
+      "video": "a5_xCfC_3m4",
+      "t": 10260,
+      "tLabel": "2:51:00",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=10260s",
+      "depth": "passing",
+      "note": "referenced as a removable block in the SkillQuest drag demo"
     }
   ],
-  "op:Lib.io.video.SpoutOutput": [
+  "op:Lib.image.generate.noise.FractalNoise": [
     {
-      "source": {
-        "type": "youtube",
-        "id": "LLpl6QEL7bo"
-      },
-      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=15780s",
-      "date": "2025-08-25",
-      "tLabel": "4:23:00",
-      "category": "chat",
-      "durationMin": 13,
-      "title": "TiXL UI font rendering / ImGUI",
-      "summary": null
-    }
-  ],
-  "op:Lib.particle.force.VectorFieldForce": [
+      "video": "a5_xCfC_3m4",
+      "t": 1474,
+      "tLabel": "24:34",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=1474s",
+      "depth": "explained",
+      "note": "recommended as a heavier procedural test (\"factor noise is better… pretty expensive\")"
+    },
     {
-      "source": {
-        "type": "youtube",
-        "id": "LLpl6QEL7bo"
-      },
-      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=17408s",
-      "date": "2025-08-25",
-      "tLabel": "4:50:08",
-      "category": "op-reference",
-      "durationMin": 5,
-      "title": "VectorFieldForce / SdfToVector (VectorFields)",
-      "summary": null
-    }
-  ],
-  "op:Lib.field.use.SdfToVector": [
+      "video": "a5_xCfC_3m4",
+      "t": 1554,
+      "tLabel": "25:54",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=1554s",
+      "depth": "in-depth",
+      "note": "animated by connecting its phase to time to keep it recomputing for the fill-rate benchmark"
+    },
     {
-      "source": {
-        "type": "youtube",
-        "id": "LLpl6QEL7bo"
-      },
-      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=17408s",
-      "date": "2025-08-25",
-      "tLabel": "4:50:08",
-      "category": "op-reference",
-      "durationMin": 5,
-      "title": "VectorFieldForce / SdfToVector (VectorFields)",
-      "summary": null
-    }
-  ],
-  "op:Lib.numbers.color.SampleGradient": [
+      "video": "a5_xCfC_3m4",
+      "t": 1621,
+      "tLabel": "27:01",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=1621s",
+      "depth": "explained",
+      "note": "pixel/resolution count increased (256² up to 4K) to demonstrate fill-rate limits"
+    },
     {
-      "source": {
-        "type": "youtube",
-        "id": "LLpl6QEL7bo"
-      },
-      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=18080s",
-      "date": "2025-08-25",
-      "tLabel": "5:01:20",
-      "category": "chat",
-      "durationMin": 2,
-      "title": "SampleGradient interpolation",
-      "summary": null
-    }
-  ],
-  "op:Lib.numbers.color.BuildGradient": [
+      "video": "a5_xCfC_3m4",
+      "t": 9000,
+      "tLabel": "2:30:00",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=9000s",
+      "depth": "passing",
+      "note": "\"fractional force is trivial\"/3D noise ~2-15 units in the cost estimate"
+    },
     {
-      "source": {
-        "type": "youtube",
-        "id": "LLpl6QEL7bo"
-      },
-      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=18180s",
-      "date": "2025-08-25",
-      "tLabel": "5:03:00",
-      "category": "highlight",
-      "durationMin": 5,
-      "title": "BuildGradient / ColorList",
-      "summary": null
+      "video": "dCX7CcL0ZJs",
+      "t": 10865,
+      "tLabel": "3:01:05",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=10865s",
+      "depth": "explained",
+      "note": "fractal noise driving point stretch/scale"
     }
   ],
   "op:Lib.numbers.anim.time.Time": [
     {
-      "source": {
-        "type": "youtube",
-        "id": "2Tu0p9Eh6Bw"
-      },
-      "url": "https://www.youtube.com/watch?v=2Tu0p9Eh6Bw&t=1220s",
-      "date": "2025-09-08",
-      "tLabel": "20:20",
-      "category": "planned",
-      "durationMin": 3,
-      "title": "Planned: Animation Time Clip",
-      "summary": null
+      "video": "a5_xCfC_3m4",
+      "t": 1603,
+      "tLabel": "26:43",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=1603s",
+      "depth": "passing",
+      "note": "connected into the noise phase so the effect can't be cached"
     },
     {
-      "source": {
-        "type": "youtube",
-        "id": "Mqi2mEyd4jQ"
-      },
-      "url": "https://www.youtube.com/watch?v=Mqi2mEyd4jQ&t=4195s",
-      "date": "2025-09-22",
-      "tLabel": "1:09:55",
-      "category": "op-reference",
-      "durationMin": 11,
-      "title": "Remapping Time",
-      "summary": null
-    }
-  ],
-  "op:Lib.render.camera.Camera": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "2Tu0p9Eh6Bw"
-      },
-      "url": "https://www.youtube.com/watch?v=2Tu0p9Eh6Bw&t=1400s",
-      "date": "2025-09-08",
-      "tLabel": "23:20",
-      "category": "planned",
-      "durationMin": 2,
-      "title": "Planned: New Camera Control",
-      "summary": null
+      "video": "dCX7CcL0ZJs",
+      "t": 1870,
+      "tLabel": "31:10",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=1870s",
+      "depth": "explained",
+      "note": "debugging/breaking out time to measure frame durations"
     },
     {
-      "source": {
-        "type": "youtube",
-        "id": "cfUWSPJDRi4"
-      },
-      "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=2124s",
-      "date": "2025-11-03",
-      "tLabel": "35:24",
-      "category": "update",
-      "durationMin": 8,
-      "title": "Prompt #3 [AudioReaction] [PickStringFromList] [Camera]",
-      "summary": null
+      "video": "dCX7CcL0ZJs",
+      "t": 1896,
+      "tLabel": "31:36",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=1896s",
+      "depth": "explained",
+      "note": "has OneTime and last-frame-duration outputs for timing"
     },
     {
-      "source": {
-        "type": "youtube",
-        "id": "cfUWSPJDRi4"
-      },
-      "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=5400s",
-      "date": "2025-11-03",
-      "tLabel": "1:30:00",
-      "category": "tip",
-      "durationMin": 7,
-      "title": "Camera following a particle",
-      "summary": null
+      "video": "GF0wWpNWkVs",
+      "t": 990,
+      "tLabel": "16:30",
+      "url": "https://www.youtube.com/watch?v=GF0wWpNWkVs&t=990s",
+      "depth": "explained",
+      "note": "discussing per-frame caching so both branches update once; touches local reference time and motion-blur concerns"
     },
     {
-      "source": {
-        "type": "youtube",
-        "id": "wTLW7PXj2Co"
-      },
-      "url": "https://www.youtube.com/watch?v=wTLW7PXj2Co&t=4530s",
-      "date": "2025-12-15",
-      "tLabel": "1:15:30",
-      "category": "update",
-      "durationMin": 18,
-      "title": "WIP: Camera on spline interpolation",
-      "summary": null
-    }
-  ],
-  "op:Lib.numbers.anim.animators.SequenceAnim": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "rEod2FltaPA"
-      },
-      "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=1955s",
-      "date": "2025-10-06",
-      "tLabel": "32:35",
-      "category": "op-reference",
-      "durationMin": null,
-      "title": "SequenceAnim",
-      "summary": null
-    }
-  ],
-  "op:Lib.particle.force.TurbulenceForce": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "rEod2FltaPA"
-      },
-      "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=4697s",
-      "date": "2025-10-06",
-      "tLabel": "1:18:17",
-      "category": "op-reference",
-      "durationMin": 14,
-      "title": "TurbulenceForce",
-      "summary": null
-    }
-  ],
-  "op:Lib.particle.force.DirectionalForce": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "rEod2FltaPA"
-      },
-      "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=5560s",
-      "date": "2025-10-06",
-      "tLabel": "1:32:40",
-      "category": "op-reference",
-      "durationMin": 8,
-      "title": "DirectionalForce",
-      "summary": null
-    }
-  ],
-  "op:Lib.particle.force.CollisionForce": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "rEod2FltaPA"
-      },
-      "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=6050s",
-      "date": "2025-10-06",
-      "tLabel": "1:40:50",
-      "category": "op-reference",
-      "durationMin": 3,
-      "title": "CollisionForce",
-      "summary": null
-    }
-  ],
-  "op:Lib.particle.force.FieldVolumeForce": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "rEod2FltaPA"
-      },
-      "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=6212s",
-      "date": "2025-10-06",
-      "tLabel": "1:43:32",
-      "category": "op-reference",
-      "durationMin": 29,
-      "title": "FieldVolumeForce and SDF",
-      "summary": null
+      "video": "GF0wWpNWkVs",
+      "t": 1829,
+      "tLabel": "30:29",
+      "url": "https://www.youtube.com/watch?v=GF0wWpNWkVs&t=1829s",
+      "depth": "in-depth",
+      "note": "deep dive into Time's modes: local idle-motion time, local time, set-time remapping, playback time, and app-start time, and when each is useful"
     },
     {
-      "source": {
-        "type": "youtube",
-        "id": "VNC-zr-JOjQ"
-      },
-      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=720s",
-      "date": "2026-03-23",
-      "tLabel": "12:00",
-      "category": "op-reference",
-      "durationMin": 22,
-      "title": "FieldVolumeForce",
-      "summary": null
+      "video": "GF0wWpNWkVs",
+      "t": 5520,
+      "tLabel": "1:32:00",
+      "url": "https://www.youtube.com/watch?v=GF0wWpNWkVs&t=5520s",
+      "depth": "in-depth",
+      "note": "strongly argues for using Time (not CountInt) so frames are reproducible for video render and unit tests"
     }
   ],
-  "op:Lib.field.use.RaymarchPoints": [
+  "op:Lib.render.basic.Text": [
     {
-      "source": {
-        "type": "youtube",
-        "id": "rEod2FltaPA"
-      },
-      "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=7952s",
-      "date": "2025-10-06",
-      "tLabel": "2:12:32",
-      "category": "op-reference",
-      "durationMin": 21,
-      "title": "RaymarchPoints (Raycasting WIP)",
-      "summary": null
-    }
-  ],
-  "op:Lib.particle.force.FollowMeshSurfaceForce": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "rEod2FltaPA"
-      },
-      "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=9206s",
-      "date": "2025-10-06",
-      "tLabel": "2:33:26",
-      "category": "op-reference",
-      "durationMin": 4,
-      "title": "FollowMeshSurfaceForce",
-      "summary": null
+      "video": "a5_xCfC_3m4",
+      "t": 1892,
+      "tLabel": "31:32",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=1892s",
+      "depth": "explained",
+      "note": "single text op used as the basis for a draw-call benchmark"
     },
     {
-      "source": {
-        "type": "youtube",
-        "id": "yy1kKa-wucA"
-      },
-      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=9600s",
-      "date": "2026-03-09",
-      "tLabel": "2:40:00",
-      "category": "op-reference",
-      "durationMin": 8,
-      "title": "[FollowMeshSurfaceForce]",
-      "summary": null
-    }
-  ],
-  "op:Lib.particle.force.ReconstructiveForce": [
+      "video": "dCX7CcL0ZJs",
+      "t": 50,
+      "tLabel": "0:50",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=50s",
+      "depth": "passing",
+      "note": "starts the demo with a text operator showing the date"
+    },
     {
-      "source": {
-        "type": "youtube",
-        "id": "rEod2FltaPA"
-      },
-      "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=9443s",
-      "date": "2025-10-06",
-      "tLabel": "2:37:23",
-      "category": "op-reference",
-      "durationMin": 4,
-      "title": "ReconstructiveForce",
-      "summary": null
-    }
-  ],
-  "op:Lib.particle.force.SnapToAnglesForce": [
+      "video": "dCX7CcL0ZJs",
+      "t": 580,
+      "tLabel": "9:40",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=580s",
+      "depth": "passing",
+      "note": "duplicated clip becomes a titled text element"
+    },
     {
-      "source": {
-        "type": "youtube",
-        "id": "rEod2FltaPA"
-      },
-      "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=9670s",
-      "date": "2025-10-06",
-      "tLabel": "2:41:10",
-      "category": "op-reference",
-      "durationMin": 6,
-      "title": "SnapToAnglesForce",
-      "summary": null
-    }
-  ],
-  "op:Lib.particle.force.TextureMapForce": [
+      "video": "dCX7CcL0ZJs",
+      "t": 623,
+      "tLabel": "10:23",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=623s",
+      "depth": "passing",
+      "note": "\"meetup\" title text element"
+    },
     {
-      "source": {
-        "type": "youtube",
-        "id": "rEod2FltaPA"
-      },
-      "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=10155s",
-      "date": "2025-10-06",
-      "tLabel": "2:49:15",
-      "category": "op-reference",
-      "durationMin": 8,
-      "title": "TextureMapForce",
-      "summary": null
-    }
-  ],
-  "op:Lib.point.usse.KeepPreviousPointBuffer": [
+      "video": "GF0wWpNWkVs",
+      "t": 10297,
+      "tLabel": "2:51:37",
+      "url": "https://www.youtube.com/watch?v=GF0wWpNWkVs&t=10297s",
+      "depth": "explained",
+      "note": "building a promo/example: Text → RenderTarget for the projected image"
+    },
     {
-      "source": {
-        "type": "youtube",
-        "id": "rEod2FltaPA"
-      },
-      "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=10885s",
-      "date": "2025-10-06",
-      "tLabel": "3:01:25",
-      "category": "op-reference",
-      "durationMin": 5,
-      "title": "KeepPreviousPointBuffer",
-      "summary": null
-    }
-  ],
-  "op:Lib.point.modify.MoveToSDF": [
+      "video": "qavgcL72F1Y",
+      "t": 4519,
+      "tLabel": "1:15:19",
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=4519s",
+      "depth": "passing",
+      "note": "text operator showing the picked string"
+    },
     {
-      "source": {
-        "type": "youtube",
-        "id": "rEod2FltaPA"
-      },
-      "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=15930s",
-      "date": "2025-10-06",
-      "tLabel": "4:25:30",
-      "category": "op-reference",
-      "durationMin": 6,
-      "title": "MoveToSDF surface orientation",
-      "summary": null
-    }
-  ],
-  "op:Lib.image.use.RenderWithMotionBlur": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "rEod2FltaPA"
-      },
-      "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=16290s",
-      "date": "2025-10-06",
-      "tLabel": "4:31:30",
-      "category": "op-reference",
-      "durationMin": 6,
-      "title": "RenderWithMotionBlur",
-      "summary": null
-    }
-  ],
-  "op:Lib.numbers.float.random.Random": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "rEod2FltaPA"
-      },
-      "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=16680s",
-      "date": "2025-10-06",
-      "tLabel": "4:38:00",
-      "category": "tip",
-      "durationMin": 12,
-      "title": "Random Symbol Prompts with ???",
-      "summary": null
-    }
-  ],
-  "op:Lib.point.generate.SubdivideLinePoints": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "cfUWSPJDRi4"
-      },
-      "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=201s",
-      "date": "2025-11-03",
-      "tLabel": "3:21",
-      "category": "showcase",
-      "durationMin": 11,
-      "title": "@Newemka shows the new [SubdivideLinePoints] [DrawLines] ops",
-      "summary": null
+      "video": "yy1kKa-wucA",
+      "t": 5695,
+      "tLabel": "1:34:55",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=5695s",
+      "depth": "passing",
+      "note": "text node fed the converted number"
     }
   ],
   "op:Lib.point.generate.RepeatAtPoints": [
     {
-      "source": {
-        "type": "youtube",
-        "id": "cfUWSPJDRi4"
-      },
-      "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=1080s",
-      "date": "2025-11-03",
-      "tLabel": "18:00",
-      "category": "update",
-      "durationMin": 6,
-      "title": "Prompt #1 [RepeatAtPoints] [TransformPoints] [Sum]",
-      "summary": null
+      "video": "a5_xCfC_3m4",
+      "t": 1903,
+      "tLabel": "31:43",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=1903s",
+      "depth": "explained",
+      "note": "text looped/repeated many times to multiply draw calls"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 6811,
+      "tLabel": "1:53:31",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=6811s",
+      "depth": "explained",
+      "note": "repeat geometry at the sphere vertices; draw lines/ribbons"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 3723,
+      "tLabel": "1:02:03",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=3723s",
+      "depth": "explained",
+      "note": "repeating the point in a radial layout"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 7954,
+      "tLabel": "2:12:34",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=7954s",
+      "depth": "explained",
+      "note": "repeating the two eye lines next to each other"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 8241,
+      "tLabel": "2:17:21",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=8241s",
+      "depth": "in-depth",
+      "note": "repeating eyes at main point and lasers at eye points"
     }
   ],
-  "op:Lib.point.transform.TransformPoints": [
+  "op:Lib.flow.context.GetFloatVar": [
     {
-      "source": {
-        "type": "youtube",
-        "id": "cfUWSPJDRi4"
-      },
-      "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=1080s",
-      "date": "2025-11-03",
-      "tLabel": "18:00",
-      "category": "update",
-      "durationMin": 6,
-      "title": "Prompt #1 [RepeatAtPoints] [TransformPoints] [Sum]",
-      "summary": null
-    }
-  ],
-  "op:Lib.numbers.float.basic.Sum": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "cfUWSPJDRi4"
-      },
-      "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=1080s",
-      "date": "2025-11-03",
-      "tLabel": "18:00",
-      "category": "update",
-      "durationMin": 6,
-      "title": "Prompt #1 [RepeatAtPoints] [TransformPoints] [Sum]",
-      "summary": null
+      "video": "a5_xCfC_3m4",
+      "t": 1932,
+      "tLabel": "32:12",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=1932s",
+      "depth": "explained",
+      "note": "\"get float\" pulling the progress/index variable to scatter copies"
     }
   ],
   "op:Lib.image.generate.load.LoadImage": [
     {
-      "source": {
-        "type": "youtube",
-        "id": "cfUWSPJDRi4"
-      },
-      "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=1736s",
-      "date": "2025-11-03",
-      "tLabel": "28:56",
-      "category": "update",
-      "durationMin": 6,
-      "title": "Prompt #2 [LoadImage] [SamplePointAttributes] [CylinderMesh]",
-      "summary": null
+      "video": "a5_xCfC_3m4",
+      "t": 2393,
+      "tLabel": "39:53",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=2393s",
+      "depth": "explained",
+      "note": "clicking its path field opens the new asset browser"
     },
     {
-      "source": {
-        "type": "youtube",
-        "id": "VNC-zr-JOjQ"
-      },
-      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=3810s",
-      "date": "2026-03-23",
-      "tLabel": "1:03:30",
-      "category": "background",
-      "durationMin": 5,
-      "title": "LoadImage texture caching",
-      "summary": null
-    }
-  ],
-  "op:Lib.mesh.generate.CylinderMesh": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "cfUWSPJDRi4"
-      },
-      "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=1736s",
-      "date": "2025-11-03",
-      "tLabel": "28:56",
-      "category": "update",
-      "durationMin": 6,
-      "title": "Prompt #2 [LoadImage] [SamplePointAttributes] [CylinderMesh]",
-      "summary": null
-    }
-  ],
-  "op:Lib.io.audio.AudioReaction": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "cfUWSPJDRi4"
-      },
-      "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=2124s",
-      "date": "2025-11-03",
-      "tLabel": "35:24",
-      "category": "update",
-      "durationMin": 8,
-      "title": "Prompt #3 [AudioReaction] [PickStringFromList] [Camera]",
-      "summary": null
-    }
-  ],
-  "op:Lib.string.list.PickStringFromList": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "cfUWSPJDRi4"
-      },
-      "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=2124s",
-      "date": "2025-11-03",
-      "tLabel": "35:24",
-      "category": "update",
-      "durationMin": 8,
-      "title": "Prompt #3 [AudioReaction] [PickStringFromList] [Camera]",
-      "summary": null
-    }
-  ],
-  "op:Lib.numbers.vec3.Vector3Gizmo": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "cfUWSPJDRi4"
-      },
-      "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=5820s",
-      "date": "2025-11-03",
-      "tLabel": "1:37:00",
-      "category": "op-reference",
-      "durationMin": 16,
-      "title": "[Vector3Gizmo]",
-      "summary": null
-    }
-  ],
-  "op:Lib.render.camera.CamPosition": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "cfUWSPJDRi4"
-      },
-      "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=7500s",
-      "date": "2025-11-03",
-      "tLabel": "2:05:00",
-      "category": "op-reference",
-      "durationMin": 9,
-      "title": "[CamPosition] to place things in front of the camera",
-      "summary": null
-    }
-  ],
-  "op:Lib.field.adjust.SpatialDisplaceSDF": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "cfUWSPJDRi4"
-      },
-      "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=10636s",
-      "date": "2025-11-03",
-      "tLabel": "2:57:16",
-      "category": "op-reference",
-      "durationMin": 3,
-      "title": "[SpatialDisplaceSDF]",
-      "summary": null
-    }
-  ],
-  "op:Lib.image.fx.distort.BubbleZoom": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "wTLW7PXj2Co"
-      },
-      "url": "https://www.youtube.com/watch?v=wTLW7PXj2Co&t=104s",
-      "date": "2025-12-15",
-      "tLabel": "1:44",
-      "category": "showcase",
-      "durationMin": 22,
-      "title": "@Newemka shows the new [BubbleZoom] Effect",
-      "summary": null
-    }
-  ],
-  "op:Lib.field.render.RaymarchField": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "wTLW7PXj2Co"
-      },
-      "url": "https://www.youtube.com/watch?v=wTLW7PXj2Co&t=13020s",
-      "date": "2025-12-15",
-      "tLabel": "3:37:00",
-      "category": "update",
-      "durationMin": null,
-      "title": "Discussing new RaymarchField options",
-      "summary": null
+      "video": "GF0wWpNWkVs",
+      "t": 1395,
+      "tLabel": "23:15",
+      "url": "https://www.youtube.com/watch?v=GF0wWpNWkVs&t=1395s",
+      "depth": "explained",
+      "note": "plugging the existing image (vs. an OBJ) into the projector input; later loads a frog image"
     },
     {
-      "source": {
-        "type": "youtube",
-        "id": "VNC-zr-JOjQ"
-      },
-      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=10000s",
-      "date": "2026-03-23",
-      "tLabel": "2:46:40",
-      "category": "background",
-      "durationMin": 14,
-      "title": "[RaymarchField] glow implementation",
-      "summary": null
-    }
-  ],
-  "op:Lib.image.fx.stylize.Steps": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "yy1kKa-wucA"
-      },
-      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=2580s",
-      "date": "2026-03-09",
-      "tLabel": "43:00",
-      "category": "update",
-      "durationMin": 9,
-      "title": "Animating with Keyframes Steps",
-      "summary": null
-    }
-  ],
-  "op:Lib.point.modify.CustomPointShader": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "yy1kKa-wucA"
-      },
-      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=4020s",
-      "date": "2026-03-09",
-      "tLabel": "1:07:00",
-      "category": "unknown",
-      "durationMin": 8,
-      "title": "Improve CustomPointShader",
-      "summary": null
+      "video": "Kg5UcJJWt80",
+      "t": 11985,
+      "tLabel": "3:19:45",
+      "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80&t=11985s",
+      "depth": "explained",
+      "note": "feeding a black texture in place of unused cube faces"
     },
     {
-      "source": {
-        "type": "youtube",
-        "id": "yy1kKa-wucA"
-      },
-      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=10080s",
-      "date": "2026-03-09",
-      "tLabel": "2:48:00",
-      "category": "op-reference",
-      "durationMin": 62,
-      "title": "Improve CustomPointShader (add fields)",
-      "summary": null
-    }
-  ],
-  "op:Lib.point.draw.DrawMovingPoints": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "VNC-zr-JOjQ"
-      },
-      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=2040s",
-      "date": "2026-03-23",
-      "tLabel": "34:00",
-      "category": "feature",
-      "durationMin": 18,
-      "title": "DrawMovingPoints",
-      "summary": null
+      "video": "MAyETISMFi0",
+      "t": 764,
+      "tLabel": "12:44",
+      "url": "https://www.youtube.com/watch?v=MAyETISMFi0&t=764s",
+      "depth": "explained",
+      "note": "loads an image and unpins its output to display it; the starting point of the tour"
     },
     {
-      "source": {
-        "type": "youtube",
-        "id": "VNC-zr-JOjQ"
-      },
-      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=3090s",
-      "date": "2026-03-23",
-      "tLabel": "51:30",
-      "category": "feature",
-      "durationMin": 12,
-      "title": "DrawMovingPoints (implementation)",
-      "summary": null
-    }
-  ],
-  "op:Lib.image.transform.Crop": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "VNC-zr-JOjQ"
-      },
-      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=4120s",
-      "date": "2026-03-23",
-      "tLabel": "1:08:40",
-      "category": "uncategorized",
-      "durationMin": 10,
-      "title": "[Crop] and [Glow] with transparent logos",
-      "summary": null
-    }
-  ],
-  "op:Lib.image.fx.stylize.Glow": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "VNC-zr-JOjQ"
-      },
-      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=4120s",
-      "date": "2026-03-23",
-      "tLabel": "1:08:40",
-      "category": "uncategorized",
-      "durationMin": 10,
-      "title": "[Crop] and [Glow] with transparent logos",
-      "summary": null
-    }
-  ],
-  "op:Lib.image.use.CustomPixelShader": [
-    {
-      "source": {
-        "type": "youtube",
-        "id": "VNC-zr-JOjQ"
-      },
-      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=6300s",
-      "date": "2026-03-23",
-      "tLabel": "1:45:00",
-      "category": "chat",
-      "durationMin": 6,
-      "title": "Fresnel with [CustomPixelShader]",
-      "summary": null
+      "video": "PWCfyUnFGdg",
+      "t": 3247,
+      "tLabel": "54:07",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=3247s",
+      "depth": "explained",
+      "note": "asset-library browser, similar-image suggestions"
     },
     {
-      "source": {
-        "type": "youtube",
-        "id": "VNC-zr-JOjQ"
-      },
-      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=9390s",
-      "date": "2026-03-23",
-      "tLabel": "2:36:30",
-      "category": "tip",
-      "durationMin": 10,
-      "title": "VHS blur effect [CustomPixelShader]",
-      "summary": null
+      "video": "qavgcL72F1Y",
+      "t": 3110,
+      "tLabel": "0:51:50",
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=3110s",
+      "depth": "passing",
+      "note": "\"load a fork\" (ASR) rendered into a texture for the Instagram-portrait pin demo"
     },
     {
-      "source": {
-        "type": "youtube",
-        "id": "qavgcL72F1Y"
-      },
-      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=9000s",
-      "date": "2026-06-01",
-      "tLabel": "2:30:00",
-      "category": "walkthrough",
-      "durationMin": 8,
-      "title": "CustomPixelShader walkthrough",
-      "summary": null
+      "video": "S8chZaAS3uQ",
+      "t": 702,
+      "tLabel": "11:42",
+      "url": "https://www.youtube.com/watch?v=S8chZaAS3uQ&t=702s",
+      "depth": "passing",
+      "note": "used as the example node whose image generates a thumbnail on hover into the atlas texture"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 3774,
+      "tLabel": "1:02:54",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=3774s",
+      "depth": "in-depth",
+      "note": "new \"cache resources\" flag on image loading; resource sharing/disposal"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 570,
+      "tLabel": "9:30",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=570s",
+      "depth": "passing",
+      "note": "load image to feed the displacement"
+    }
+  ],
+  "op:Lib.io.video.PlayAudioClip": [
+    {
+      "video": "a5_xCfC_3m4",
+      "t": 2659,
+      "tLabel": "44:19",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=2659s",
+      "depth": "explained",
+      "note": "dropping an mp3 created a single audio-clip operator (\"one player audio clip\")"
+    }
+  ],
+  "op:Lib.image.color.ColorGrade": [
+    {
+      "video": "a5_xCfC_3m4",
+      "t": 3462,
+      "tLabel": "57:42",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=3462s",
+      "depth": "explained",
+      "note": "shown when discussing disabling live previews and storing thumbnails"
+    },
+    {
+      "video": "MAyETISMFi0",
+      "t": 800,
+      "tLabel": "13:20",
+      "url": "https://www.youtube.com/watch?v=MAyETISMFi0&t=800s",
+      "depth": "explained",
+      "note": "demonstrated for color grading with subnet previews and Alt-to-pick presets"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 998,
+      "tLabel": "16:38",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=998s",
+      "depth": "explained",
+      "note": "toning down colors, vintage 70s grade"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 10329,
+      "tLabel": "2:52:09",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=10329s",
+      "depth": "explained",
+      "note": "color-grading toward the skin-tone vector"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 14782,
+      "tLabel": "4:06:22",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=14782s",
+      "depth": "in-depth",
+      "note": "gamma realization: color-grade gamma darkens/brightens bloom"
+    }
+  ],
+  "op:Lib.mesh.generate.LoadObj": [
+    {
+      "video": "a5_xCfC_3m4",
+      "t": 4194,
+      "tLabel": "1:09:54",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=4194s",
+      "depth": "in-depth",
+      "note": "OBJ \"tiger\" mesh dragged from the asset browser into the graph; discussion of drag-into-3D-scene"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 3777,
+      "tLabel": "1:02:57",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=3777s",
+      "depth": "explained",
+      "note": "loading a monkey/Suzanne OBJ from the asset browser"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 4891,
+      "tLabel": "1:21:31",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=4891s",
+      "depth": "explained",
+      "note": "loads the studio backdrop OBJ scene"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 1993,
+      "tLabel": "33:13",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=1993s",
+      "depth": "passing",
+      "note": "\"load obj / will be J\" to load a mesh"
+    }
+  ],
+  "op:Lib.image.transform.TransformImage": [
+    {
+      "video": "a5_xCfC_3m4",
+      "t": 5085,
+      "tLabel": "1:24:45",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=5085s",
+      "depth": "in-depth",
+      "note": "used to flip the camera image (-1 scale) before detection"
+    },
+    {
+      "video": "MAyETISMFi0",
+      "t": 1565,
+      "tLabel": "26:05",
+      "url": "https://www.youtube.com/watch?v=MAyETISMFi0&t=1565s",
+      "depth": "explained",
+      "note": "transforms/scales the image smaller and positions it"
+    }
+  ],
+  "op:Lib.image.color.ConvertFormat": [
+    {
+      "video": "a5_xCfC_3m4",
+      "t": 5203,
+      "tLabel": "1:26:43",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=5203s",
+      "depth": "in-depth",
+      "note": "converts the HDR RGBA16 texture to BGRA8 that the detector expects"
+    }
+  ],
+  "op:Lib.point.draw.DrawLines": [
+    {
+      "video": "a5_xCfC_3m4",
+      "t": 5335,
+      "tLabel": "1:28:55",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=5335s",
+      "depth": "explained",
+      "note": "used to connect/visualize the detected hand landmarks"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 10052,
+      "tLabel": "2:47:32",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=10052s",
+      "depth": "passing",
+      "note": "draw the same line points as lines"
+    },
+    {
+      "video": "Kg5UcJJWt80",
+      "t": 3015,
+      "tLabel": "50:15",
+      "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80&t=3015s",
+      "depth": "explained",
+      "note": "combining two line sets to draw an eagle-like shape"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 579,
+      "tLabel": "9:39",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=579s",
+      "depth": "passing",
+      "note": "drawing line geometry from the points"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 721,
+      "tLabel": "12:01",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=721s",
+      "depth": "passing",
+      "note": "re-rendering text as lines"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 1155,
+      "tLabel": "19:15",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=1155s",
+      "depth": "passing",
+      "note": "drawing lines from the image-derived points"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 6005,
+      "tLabel": "1:40:05",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=6005s",
+      "depth": "explained",
+      "note": "debug line drawing of the legs"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 7726,
+      "tLabel": "2:08:46",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=7726s",
+      "depth": "explained",
+      "note": "drawing red glowing laser-eye lines (HDR via ctrl)"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 8281,
+      "tLabel": "2:18:01",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=8281s",
+      "depth": "passing",
+      "note": "drawing lasers ignoring Z test"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 11138,
+      "tLabel": "3:05:38",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=11138s",
+      "depth": "passing",
+      "note": "drawing the small circuit lines"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 11689,
+      "tLabel": "3:14:49",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=11689s",
+      "depth": "explained",
+      "note": "connecting the sphere-shaded points with lines"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 13298,
+      "tLabel": "3:41:38",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=13298s",
+      "depth": "passing",
+      "note": "drawing the particle trails as lines"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 13682,
+      "tLabel": "3:48:02",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=13682s",
+      "depth": "passing",
+      "note": "drawing the central oscillating line"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 7360,
+      "tLabel": "2:02:40",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=7360s",
+      "depth": "explained",
+      "note": "drawing the reflected ray lines (additive, no depth write)"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 14006,
+      "tLabel": "3:53:26",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=14006s",
+      "depth": "passing",
+      "note": "line drawn along the resampled path"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 771,
+      "tLabel": "12:51",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=771s",
+      "depth": "explained",
+      "note": "draw the line-text buffer as lines; shows the space/spacing bug"
+    }
+  ],
+  "op:Lib.point.draw.DrawRayLines": [
+    {
+      "video": "a5_xCfC_3m4",
+      "t": 5335,
+      "tLabel": "1:28:55",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=5335s",
+      "depth": "explained",
+      "note": "alternative line draw for the landmark connections"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 7167,
+      "tLabel": "1:59:27",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=7167s",
+      "depth": "in-depth",
+      "note": "ray lines render more consistently than draw lines for lasers"
+    }
+  ],
+  "op:Lib.point.modify.FilterPoints": [
+    {
+      "video": "a5_xCfC_3m4",
+      "t": 5400,
+      "tLabel": "1:30:00",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=5400s",
+      "depth": "in-depth",
+      "note": "two instances pick landmark index 4 (thumb) and 8 (index finger)"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 840,
+      "tLabel": "14:00",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=840s",
+      "depth": "explained",
+      "note": "filter points to draw only one while system runs hidden"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 6838,
+      "tLabel": "1:53:58",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=6838s",
+      "depth": "in-depth",
+      "note": "filtering 8 points with step/start-index to grab the claw points"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 12238,
+      "tLabel": "3:23:58",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=12238s",
+      "depth": "explained",
+      "note": "filtering ~1000 points for glitter"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 14046,
+      "tLabel": "3:54:06",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=14046s",
+      "depth": "explained",
+      "note": "filter + randomize for extra glitter"
+    },
+    {
+      "video": "qavgcL72F1Y",
+      "t": 12399,
+      "tLabel": "3:26:39",
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=12399s",
+      "depth": "explained",
+      "note": "keep only a subset of points (e.g. 10 of 30 buildings) randomly scattered"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 13416,
+      "tLabel": "3:43:36",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=13416s",
+      "depth": "in-depth",
+      "note": "recommended before PointsToCPU; pick one point by start index (wraps around)"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 5013,
+      "tLabel": "1:23:33",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=5013s",
+      "depth": "explained",
+      "note": "filter random points down to one for emission"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 8362,
+      "tLabel": "2:19:22",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=8362s",
+      "depth": "explained",
+      "note": "filter points to the gates for number drawing"
     }
   ],
   "op:Lib.point.draw.DrawPoints": [
     {
-      "source": {
-        "type": "youtube",
-        "id": "qavgcL72F1Y"
-      },
-      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=570s",
-      "date": "2026-06-01",
-      "tLabel": "9:30",
-      "category": "walkthrough",
-      "durationMin": 7,
-      "title": "Quick startup animation (DrawPoints, orbit camera)",
-      "summary": null
+      "video": "a5_xCfC_3m4",
+      "t": 5400,
+      "tLabel": "1:30:00",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=5400s",
+      "depth": "in-depth",
+      "note": "draws the picked fingertip points (made big and orange)"
+    },
+    {
+      "video": "a5_xCfC_3m4",
+      "t": 6236,
+      "tLabel": "1:43:56",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=6236s",
+      "depth": "explained",
+      "note": "draws the emitted particles (Z-buffer write toggled off)"
+    },
+    {
+      "video": "a5_xCfC_3m4",
+      "t": 9000,
+      "tLabel": "2:30:00",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=9000s",
+      "depth": "explained",
+      "note": "cited as the most expensive op (~100 units) in the performance breakdown"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 155,
+      "tLabel": "2:35",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=155s",
+      "depth": "passing",
+      "note": "draws the generated points"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 2774,
+      "tLabel": "46:14",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=2774s",
+      "depth": "passing",
+      "note": "draws the line points, pinned with P"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 3181,
+      "tLabel": "53:01",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=3181s",
+      "depth": "passing",
+      "note": "draws the custom-shader points"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 5099,
+      "tLabel": "1:24:59",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=5099s",
+      "depth": "in-depth",
+      "note": "Z buffer, MSAA, AlphaCutoff slider explained for soft point edges"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 9963,
+      "tLabel": "2:46:03",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=9963s",
+      "depth": "explained",
+      "note": "extra shaded points (\"easy\" addition) on the spiral"
+    },
+    {
+      "video": "Kg5UcJJWt80",
+      "t": 55,
+      "tLabel": "0:55",
+      "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80&t=55s",
+      "depth": "in-depth",
+      "note": "opening live doodle: line-text points converted to a point buffer"
+    },
+    {
+      "video": "Kg5UcJJWt80",
+      "t": 363,
+      "tLabel": "6:03",
+      "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80&t=363s",
+      "depth": "in-depth",
+      "note": "picking size/color params to expose to per-parameter snapshots"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 96,
+      "tLabel": "1:36",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=96s",
+      "depth": "passing",
+      "note": "drawing the generated text point buffer"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 498,
+      "tLabel": "8:18",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=498s",
+      "depth": "explained",
+      "note": "drawing the text as raw points to inspect them"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 1833,
+      "tLabel": "30:33",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=1833s",
+      "depth": "passing",
+      "note": "drawing the whole mesh as points to debug the chain"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 2588,
+      "tLabel": "43:08",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=2588s",
+      "depth": "passing",
+      "note": "color/RGB from mesh vertices in the reviewed PR"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 5874,
+      "tLabel": "1:37:54",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=5874s",
+      "depth": "passing",
+      "note": "visualizing the IK output"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 16200,
+      "tLabel": "4:30:00",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=16200s",
+      "depth": "explained",
+      "note": "first-shader/custom point shader works with points not lines"
+    },
+    {
+      "video": "qavgcL72F1Y",
+      "t": 754,
+      "tLabel": "0:12:34",
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=754s",
+      "depth": "explained",
+      "note": "points drawn using the rendered texture"
+    },
+    {
+      "video": "qavgcL72F1Y",
+      "t": 783,
+      "tLabel": "0:13:03",
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=783s",
+      "depth": "passing",
+      "note": "\"ready point\" (ASR for DrawPoints) used for simple point rendering"
+    },
+    {
+      "video": "qavgcL72F1Y",
+      "t": 872,
+      "tLabel": "0:14:32",
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=872s",
+      "depth": "explained",
+      "note": "draw settings, alpha cut-off already enabled"
+    },
+    {
+      "video": "qavgcL72F1Y",
+      "t": 7438,
+      "tLabel": "2:03:58",
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=7438s",
+      "depth": "explained",
+      "note": "regular points drawn for the bypass example"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 780,
+      "tLabel": "13:00",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=780s",
+      "depth": "explained",
+      "note": "drawing the emitted particle points"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 38,
+      "tLabel": "0:38",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=38s",
+      "depth": "passing",
+      "note": "\"add points on image\" idea raised"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 5226,
+      "tLabel": "1:27:06",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=5226s",
+      "depth": "explained",
+      "note": "draw the particles small-to-large"
     }
   ],
-  "op:Lib.numbers.bool.logic.Trigger": [
+  "op:Lib.point.combine.BlendPoints": [
     {
-      "source": {
-        "type": "youtube",
-        "id": "qavgcL72F1Y"
-      },
-      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=4070s",
-      "date": "2026-06-01",
-      "tLabel": "1:07:50",
-      "category": "walkthrough",
-      "durationMin": 5,
-      "title": "Trigger-keyframe workflow",
-      "summary": null
+      "video": "a5_xCfC_3m4",
+      "t": 5505,
+      "tLabel": "1:31:45",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=5505s",
+      "depth": "explained",
+      "note": "blends the two fingertips to compute a center point"
+    },
+    {
+      "video": "a5_xCfC_3m4",
+      "t": 6393,
+      "tLabel": "1:46:33",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=6393s",
+      "depth": "explained",
+      "note": "reused (the \"mighty input\") to recreate the midpoint for the emitter"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 13723,
+      "tLabel": "3:48:43",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=13723s",
+      "depth": "in-depth",
+      "note": "powerful for camera animations; \"blend with range\" wrap/cross-fade"
     }
   ],
-  "op:Lib.numbers.int.basic.RandomChoiceIndex": [
+  "op:Lib.point.sim.PointSimulation": [
     {
-      "source": {
-        "type": "youtube",
-        "id": "qavgcL72F1Y"
-      },
-      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=4380s",
-      "date": "2026-06-01",
-      "tLabel": "1:13:00",
-      "category": "op-reference",
-      "durationMin": 6,
-      "title": "Set Sequential Values + RandomChoiceIndex",
-      "summary": null
+      "video": "a5_xCfC_3m4",
+      "t": 5593,
+      "tLabel": "1:33:13",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=5593s",
+      "depth": "in-depth",
+      "note": "tried for damping/smoothing the point (\"want to rename to DampPoints\"); rejected because it behaves like a particle sim and scrambles the points"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 3669,
+      "tLabel": "1:01:09",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=3669s",
+      "depth": "explained",
+      "note": "used to damp/smooth the target points (host calls it \"damp points\")"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 5358,
+      "tLabel": "1:29:18",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=5358s",
+      "depth": "in-depth",
+      "note": "damps points toward target for graceful, organic motion; >1 explodes"
     }
   ],
-  "op:Lib.flow.Switch": [
+  "op:Lib.point.helper.PointsToCPU": [
     {
-      "source": {
-        "type": "youtube",
-        "id": "qavgcL72F1Y"
-      },
-      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=7397s",
-      "date": "2026-06-01",
-      "tLabel": "2:03:17",
-      "category": "background",
-      "durationMin": 10,
-      "title": "Animating bypass: Pick vs Switch and the \"magic index\"",
-      "summary": null
+      "video": "a5_xCfC_3m4",
+      "t": 5796,
+      "tLabel": "1:36:36",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=5796s",
+      "depth": "in-depth",
+      "note": "reads the GPU point buffer back to the CPU"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 13966,
+      "tLabel": "3:52:46",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=13966s",
+      "depth": "explained",
+      "note": "read sampled point back to CPU for camera/geometry placement"
+    }
+  ],
+  "op:Lib.numbers.float.adjust.Remap": [
+    {
+      "video": "a5_xCfC_3m4",
+      "t": 6179,
+      "tLabel": "1:42:59",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=6179s",
+      "depth": "in-depth",
+      "note": "remaps the finger distance into a usable output range (also reused for emit velocity)"
+    },
+    {
+      "video": "GF0wWpNWkVs",
+      "t": 2468,
+      "tLabel": "41:08",
+      "url": "https://www.youtube.com/watch?v=GF0wWpNWkVs&t=2468s",
+      "depth": "passing",
+      "note": "suggests a Remap for scaling rather than hard-coding scale"
+    },
+    {
+      "video": "qavgcL72F1Y",
+      "t": 7065,
+      "tLabel": "1:57:45",
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=7065s",
+      "depth": "explained",
+      "note": "main operator used to remap/scale values (contrast)"
+    }
+  ],
+  "op:Lib.particle.ParticleSystem": [
+    {
+      "video": "a5_xCfC_3m4",
+      "t": 6203,
+      "tLabel": "1:43:23",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=6203s",
+      "depth": "in-depth",
+      "note": "emits particles from the fingertip center point"
+    },
+    {
+      "video": "a5_xCfC_3m4",
+      "t": 8580,
+      "tLabel": "2:23:00",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=8580s",
+      "depth": "passing",
+      "note": "~10-15 units in the relative cost estimate"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 654,
+      "tLabel": "10:54",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=654s",
+      "depth": "in-depth",
+      "note": "non-deterministic particle effect; needs reset control"
+    },
+    {
+      "video": "MAyETISMFi0",
+      "t": 162,
+      "tLabel": "2:42",
+      "url": "https://www.youtube.com/watch?v=MAyETISMFi0&t=162s",
+      "depth": "passing",
+      "note": "asks how many particles exist while hunting for the slowdown; confirms it's not particles"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 564,
+      "tLabel": "9:24",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=564s",
+      "depth": "explained",
+      "note": "spawning the text points into a particle system"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 13298,
+      "tLabel": "3:41:38",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=13298s",
+      "depth": "in-depth",
+      "note": "emitting particles toward center with twirl + point force"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 360,
+      "tLabel": "6:00",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=360s",
+      "depth": "explained",
+      "note": "host emits particles to drive the mesh force demo"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 5085,
+      "tLabel": "1:24:45",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=5085s",
+      "depth": "in-depth",
+      "note": "center point emitted into a 1000-point particle system, long lifetime, no emit velocity"
+    }
+  ],
+  "op:Lib.particle.force.TurbulenceForce": [
+    {
+      "video": "a5_xCfC_3m4",
+      "t": 6221,
+      "tLabel": "1:43:41",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=6221s",
+      "depth": "explained",
+      "note": "\"turbo force / turbulence force\" added for particle dynamics"
+    },
+    {
+      "video": "a5_xCfC_3m4",
+      "t": 9000,
+      "tLabel": "2:30:00",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=9000s",
+      "depth": "passing",
+      "note": "~10 units in the relative cost estimate"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 682,
+      "tLabel": "11:22",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=682s",
+      "depth": "passing",
+      "note": "adds turbulence to the particle simulation"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 13382,
+      "tLabel": "3:43:02",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=13382s",
+      "depth": "explained",
+      "note": "turbulence/twirl force with animated phase"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 1730,
+      "tLabel": "28:50",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=1730s",
+      "depth": "explained",
+      "note": "combined with mesh force; noise-level/frequency adjustments"
+    }
+  ],
+  "op:Lib.numbers.float.trigonometry.Atan2": [
+    {
+      "video": "a5_xCfC_3m4",
+      "t": 6468,
+      "tLabel": "1:47:48",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=6468s",
+      "depth": "in-depth",
+      "note": "\"atan two\" computes the rotation angle from a Vector2"
+    }
+  ],
+  "op:Lib.numbers.vec2.Vector2Components": [
+    {
+      "video": "a5_xCfC_3m4",
+      "t": 6512,
+      "tLabel": "1:48:32",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=6512s",
+      "depth": "explained",
+      "note": "split distance components into a new Vector2 feeding the angle"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 2031,
+      "tLabel": "33:51",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=2031s",
+      "depth": "explained",
+      "note": "breaks mouse position into X/Y to drive the BPM/value"
+    }
+  ],
+  "op:Lib.particle.force.DirectionalForce": [
+    {
+      "video": "a5_xCfC_3m4",
+      "t": 7088,
+      "tLabel": "1:58:08",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=7088s",
+      "depth": "explained",
+      "note": "\"directional force… basically gravity\" added so hand up/down moves all particles"
+    }
+  ],
+  "op:Lib.image.fx.blur.FastBlur": [
+    {
+      "video": "a5_xCfC_3m4",
+      "t": 7389,
+      "tLabel": "2:03:09",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=7389s",
+      "depth": "in-depth",
+      "note": "new fast multi-level down/up-sample blur (~10x faster than normal blur); applied to the segmentation mask"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 168,
+      "tLabel": "2:48",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=168s",
+      "depth": "passing",
+      "note": "adds a fast blur to the point render"
+    },
+    {
+      "video": "Kg5UcJJWt80",
+      "t": 1255,
+      "tLabel": "20:55",
+      "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80&t=1255s",
+      "depth": "passing",
+      "note": "example output op for live render previews in the snapshot view"
+    },
+    {
+      "video": "MAyETISMFi0",
+      "t": 1314,
+      "tLabel": "21:54",
+      "url": "https://www.youtube.com/watch?v=MAyETISMFi0&t=1314s",
+      "depth": "passing",
+      "note": "mentioned as an alternative producing more twisting than the last blur"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 1264,
+      "tLabel": "21:04",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=1264s",
+      "depth": "explained",
+      "note": "blurring the result; \"fast blur\""
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 19,
+      "tLabel": "0:19",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=19s",
+      "depth": "passing",
+      "note": "suggested to blur a clip; noted as new/faster alternative to blur"
+    }
+  ],
+  "op:Lib.image.analyze.ImageLevels": [
+    {
+      "video": "a5_xCfC_3m4",
+      "t": 7281,
+      "tLabel": "2:01:21",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=7281s",
+      "depth": "passing",
+      "note": "shown to illustrate FastBlur's smooth level falloff"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 3301,
+      "tLabel": "55:01",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=3301s",
+      "depth": "explained",
+      "note": "analyze and adjust brightness levels of an image"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 5809,
+      "tLabel": "1:36:49",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=5809s",
+      "depth": "explained",
+      "note": "analyze whether the point texture is white/transparent"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 6264,
+      "tLabel": "1:44:24",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=6264s",
+      "depth": "in-depth",
+      "note": "favorite op; slice through brightness distribution"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 4515,
+      "tLabel": "1:15:15",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=4515s",
+      "depth": "explained",
+      "note": "used to inspect whiteness/premultiply of a transparent logo"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 7560,
+      "tLabel": "2:06:00",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=7560s",
+      "depth": "in-depth",
+      "note": "HDR background too bright; image-levels clamp to fix anti-aliasing/bloom blending"
+    }
+  ],
+  "op:Lib.render.postfx.TemporalAccumulation": [
+    {
+      "video": "a5_xCfC_3m4",
+      "t": 7502,
+      "tLabel": "2:05:02",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=7502s",
+      "depth": "explained",
+      "note": "\"damping for images\" added to smooth the jittery mask over time"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 9288,
+      "tLabel": "2:34:48",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=9288s",
+      "depth": "in-depth",
+      "note": "CCTV-style smearing/noise reduction; naming story; grain must come after"
+    }
+  ],
+  "op:Lib.image.use.NormalMap": [
+    {
+      "video": "a5_xCfC_3m4",
+      "t": 7552,
+      "tLabel": "2:05:52",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=7552s",
+      "depth": "explained",
+      "note": "segmentation mask converted to a normal map to drive particles"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 8914,
+      "tLabel": "2:28:34",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=8914s",
+      "depth": "explained",
+      "note": "converting texture to a normal map for the material"
+    }
+  ],
+  "op:Lib.particle.force.TextureMapForce": [
+    {
+      "video": "a5_xCfC_3m4",
+      "t": 7568,
+      "tLabel": "2:06:08",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=7568s",
+      "depth": "in-depth",
+      "note": "\"detection/texture map force\" pushes particles in screen space from the mask normal map; requires a signed normal map"
+    },
+    {
+      "video": "a5_xCfC_3m4",
+      "t": 9000,
+      "tLabel": "2:30:00",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=9000s",
+      "depth": "passing",
+      "note": "~10 units (texture sampling) in the cost estimate"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 5275,
+      "tLabel": "1:27:55",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=5275s",
+      "depth": "in-depth",
+      "note": "screen-space-aligned force pushing the large particle system; not physically correct, 360 caveat"
+    }
+  ],
+  "op:Lib.point.modify.SelectPoints": [
+    {
+      "video": "a5_xCfC_3m4",
+      "t": 7796,
+      "tLabel": "2:09:56",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=7796s",
+      "depth": "explained",
+      "note": "\"select points\" with discard option discussed re: keeping landmark indices consistent"
+    }
+  ],
+  "op:Lib.render.analyze.GpuMeasure": [
+    {
+      "video": "a5_xCfC_3m4",
+      "t": 8820,
+      "tLabel": "2:27:00",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=8820s",
+      "depth": "explained",
+      "note": "\"GPU measure\" op for sub-graph timing (noted as unsupported/unreliable)"
+    }
+  ],
+  "op:Lib.point.io.LoadSvg": [
+    {
+      "video": "a5_xCfC_3m4",
+      "t": 9540,
+      "tLabel": "2:39:00",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=9540s",
+      "depth": "passing",
+      "note": "\"load SVG as texture\" appears as a recent commit while resetting git"
+    }
+  ],
+  "op:Lib.mesh.draw.DrawMeshAtPoints": [
+    {
+      "video": "a5_xCfC_3m4",
+      "t": 11580,
+      "tLabel": "3:13:00",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=11580s",
+      "depth": "in-depth",
+      "note": "\"draw mesh at points\" used to render a cube at the tutorial point; later swapped for DrawPoints"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 3987,
+      "tLabel": "1:06:27",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=3987s",
+      "depth": "in-depth",
+      "note": "caching mesh once and drawing at points (cached, no relight)"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 6266,
+      "tLabel": "1:44:26",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=6266s",
+      "depth": "in-depth",
+      "note": "drawing the leg mesh at the line points"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 14275,
+      "tLabel": "3:57:55",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=14275s",
+      "depth": "explained",
+      "note": "drawing cube meshes at scattered points"
+    },
+    {
+      "video": "qavgcL72F1Y",
+      "t": 13578,
+      "tLabel": "3:46:18",
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=13578s",
+      "depth": "explained",
+      "note": "draw mesh at points via instancing (faster than generating one big mesh) for many meshes"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 4854,
+      "tLabel": "1:20:54",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=4854s",
+      "depth": "passing",
+      "note": "suggestion to scatter many TVs onto points"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 4161,
+      "tLabel": "1:09:21",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=4161s",
+      "depth": "passing",
+      "note": "\"raw mesh at the points\" with cube mesh"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 11394,
+      "tLabel": "3:09:54",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=11394s",
+      "depth": "explained",
+      "note": "towards-mesh test using the new field normal"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 12725,
+      "tLabel": "3:32:05",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=12725s",
+      "depth": "explained",
+      "note": "re-test of the lost field/orient-to-SDF example"
+    }
+  ],
+  "op:Lib.numbers.float.random.PerlinNoise": [
+    {
+      "video": "a5_xCfC_3m4",
+      "t": 11640,
+      "tLabel": "3:14:00",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=11640s",
+      "depth": "in-depth",
+      "note": "\"perlin/perdanoise three\" connected to a point's Position in the points tutorial"
+    },
+    {
+      "video": "Kg5UcJJWt80",
+      "t": 3370,
+      "tLabel": "56:10",
+      "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80&t=3370s",
+      "depth": "explained",
+      "note": "Perlin noise added to camera rotation offset for shake"
+    }
+  ],
+  "op:Lib.image.generate.basic.LinearGradient": [
+    {
+      "video": "a5_xCfC_3m4",
+      "t": 13440,
+      "tLabel": "3:44:00",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=13440s",
+      "depth": "passing",
+      "note": "referenced as the comparison baseline for the dot gradient lesson"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 2969,
+      "tLabel": "49:29",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=2969s",
+      "depth": "explained",
+      "note": "artist-friendly approach: gradient texture with presets"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 11613,
+      "tLabel": "3:13:33",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=11613s",
+      "depth": "explained",
+      "note": "separated gradient input op for the elements symbol"
+    },
+    {
+      "video": "Kg5UcJJWt80",
+      "t": 16210,
+      "tLabel": "4:30:10",
+      "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80&t=16210s",
+      "depth": "passing",
+      "note": "gradient defining a section of the DMX universe"
+    },
+    {
+      "video": "MAyETISMFi0",
+      "t": 1549,
+      "tLabel": "25:49",
+      "url": "https://www.youtube.com/watch?v=MAyETISMFi0&t=1549s",
+      "depth": "explained",
+      "note": "adds a linear gradient; animates its offset to mask/reveal the logo"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 180,
+      "tLabel": "3:00",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=180s",
+      "depth": "explained",
+      "note": "gradient fed as background/input under the text"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 3118,
+      "tLabel": "51:58",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=3118s",
+      "depth": "explained",
+      "note": "demoing new subnet/family thumbnails feature"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 3600,
+      "tLabel": "1:00:00",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=3600s",
+      "depth": "explained",
+      "note": "answer to \"can we gradient the particle?\" — gradient as texture"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 14400,
+      "tLabel": "4:00:00",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=14400s",
+      "depth": "in-depth",
+      "note": "rainbow linear gradient + OkLab interpolation producing negative/NaN colors → mesh flicker; ToneMap/clamp suggested"
+    }
+  ],
+  "op:Lib.point.generate.GridPoints": [
+    {
+      "video": "a5_xCfC_3m4",
+      "t": 14400,
+      "tLabel": "4:00:00",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=14400s",
+      "depth": "explained",
+      "note": "\"green/grid point\" scattering instances in Martin's VAT demo"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 7467,
+      "tLabel": "2:04:27",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=7467s",
+      "depth": "explained",
+      "note": "2x2x2 grid points for the cube corners"
+    },
+    {
+      "video": "qavgcL72F1Y",
+      "t": 12241,
+      "tLabel": "3:24:01",
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=12241s",
+      "depth": "explained",
+      "note": "XY grid of points as the base for a procedural city"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 2133,
+      "tLabel": "35:33",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=2133s",
+      "depth": "passing",
+      "note": "used to show DrawMovingPoints works on non-particle points too"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 4980,
+      "tLabel": "1:23:00",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=4980s",
+      "depth": "explained",
+      "note": "\"just a grid point,\" random points filtered to draw lines"
     }
   ],
   "op:Lib.mesh.generate.RepeatMeshAtPoints": [
     {
-      "source": {
-        "type": "youtube",
-        "id": "qavgcL72F1Y"
-      },
-      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=12180s",
-      "date": "2026-06-01",
-      "tLabel": "3:23:00",
-      "category": "showcase",
-      "durationMin": 7,
-      "title": "City-builder demo (RepeatMeshAtPoints, RandomizePoints)",
-      "summary": null
+      "video": "a5_xCfC_3m4",
+      "t": 14400,
+      "tLabel": "4:00:00",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=14400s",
+      "depth": "in-depth",
+      "note": "instances a mesh across points; core of the vertex-animation-texture demo and per-copy UV randomization"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 6299,
+      "tLabel": "1:44:59",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=6299s",
+      "depth": "in-depth",
+      "note": "repeat the cube along points for the spiral"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 7182,
+      "tLabel": "1:59:42",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=7182s",
+      "depth": "passing",
+      "note": "repeats cube on radial points"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 9321,
+      "tLabel": "2:35:21",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=9321s",
+      "depth": "passing",
+      "note": "repeating the box mesh along the spiral"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 6115,
+      "tLabel": "1:41:55",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=6115s",
+      "depth": "explained",
+      "note": "repeating the torus mesh along the legs"
+    },
+    {
+      "video": "qavgcL72F1Y",
+      "t": 743,
+      "tLabel": "0:12:23",
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=743s",
+      "depth": "explained",
+      "note": "repeat mesh at points feeding into DrawPoints/draw"
+    },
+    {
+      "video": "qavgcL72F1Y",
+      "t": 12284,
+      "tLabel": "3:24:44",
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=12284s",
+      "depth": "in-depth",
+      "note": "repeat a cube mesh at the grid points to build a 10x10 city block"
+    },
+    {
+      "video": "qavgcL72F1Y",
+      "t": 12886,
+      "tLabel": "3:34:46",
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=12886s",
+      "depth": "explained",
+      "note": "duplicate-as-new-type into project namespace, plus duplicating dependent shaders"
     }
   ],
-  "op:Lib.point.modify.SelectPointsWithSDF": [
+  "op:Lib.image.use.CustomPixelShader": [
     {
-      "source": {
-        "type": "youtube",
-        "id": "qavgcL72F1Y"
-      },
-      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=13140s",
-      "date": "2026-06-01",
-      "tLabel": "3:39:00",
-      "category": "showcase",
-      "durationMin": null,
-      "title": "SelectPointsWithSDF demo + wrap-up",
-      "summary": null
+      "video": "a5_xCfC_3m4",
+      "t": 14100,
+      "tLabel": "3:55:00",
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=14100s",
+      "depth": "in-depth",
+      "note": "target of the community AI shader generator (also custom point shader / SDF pixel shader); supports provider selection and undo history"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 978,
+      "tLabel": "16:18",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=978s",
+      "depth": "passing",
+      "note": "member's question about precompiling custom HLSL shaders"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 1260,
+      "tLabel": "21:00",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=1260s",
+      "depth": "explained",
+      "note": "concatenating text into shader; shader caching makes recompiles fast"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 3859,
+      "tLabel": "1:04:19",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=3859s",
+      "depth": "passing",
+      "note": "listed among custom force/face/pixel shaders"
+    },
+    {
+      "video": "GF0wWpNWkVs",
+      "t": 34,
+      "tLabel": "0:34",
+      "url": "https://www.youtube.com/watch?v=GF0wWpNWkVs&t=34s",
+      "depth": "passing",
+      "note": "the original inlined-shader \"guy\" being converted into a reusable post-effect operator"
+    },
+    {
+      "video": "GF0wWpNWkVs",
+      "t": 3908,
+      "tLabel": "1:05:08",
+      "url": "https://www.youtube.com/watch?v=GF0wWpNWkVs&t=3908s",
+      "depth": "in-depth",
+      "note": "long examination of the inlined CustomPixelShader: float buffer for colors, padding, vector2/vector4 layout, output params; argues it should become a real shader file"
+    },
+    {
+      "video": "qavgcL72F1Y",
+      "t": 9055,
+      "tLabel": "2:30:55",
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=9055s",
+      "depth": "in-depth",
+      "note": "add custom pixel shader, returns vector4 color C, default white; HLSL editing"
+    },
+    {
+      "video": "qavgcL72F1Y",
+      "t": 9415,
+      "tLabel": "2:36:55",
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=9415s",
+      "depth": "explained",
+      "note": "same pattern available for points and geometry"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 4584,
+      "tLabel": "1:16:24",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=4584s",
+      "depth": "in-depth",
+      "note": "recurring; here to force RGB=1 on a sampled image"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 816,
+      "tLabel": "13:36",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=816s",
+      "depth": "passing",
+      "note": "referenced for texture emitting from lines"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 4080,
+      "tLabel": "1:08:00",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=4080s",
+      "depth": "in-depth",
+      "note": "\"Pixel\" template; register-semantics fix (t0/b registers must be explicitly assigned) discussed at length"
+    }
+  ],
+  "op:Lib.render.camera.Camera": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 87,
+      "tLabel": "1:27",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=87s",
+      "depth": "passing",
+      "note": "switches to fixed resolution for more demo control"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 5373,
+      "tLabel": "1:29:33",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=5373s",
+      "depth": "passing",
+      "note": "camera used by sort-points; updated by frame"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 9579,
+      "tLabel": "2:39:39",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=9579s",
+      "depth": "explained",
+      "note": "normal camera moved far back with very small FOV to fake ortho"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 7552,
+      "tLabel": "2:05:52",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=7552s",
+      "depth": "explained",
+      "note": "camera to render the laser eyes"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 7680,
+      "tLabel": "2:08:00",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=7680s",
+      "depth": "passing",
+      "note": "looking the camera at the head"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 13073,
+      "tLabel": "3:37:53",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=13073s",
+      "depth": "explained",
+      "note": "moving camera in for the particle \"tunnel\" shot"
+    },
+    {
+      "video": "qavgcL72F1Y",
+      "t": 7692,
+      "tLabel": "2:08:12",
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=7692s",
+      "depth": "explained",
+      "note": "multiple cameras switched/duplicated to demonstrate Switch behavior"
+    }
+  ],
+  "op:Lib.image.generate.basic.RenderTarget": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 145,
+      "tLabel": "2:25",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=145s",
+      "depth": "passing",
+      "note": "renders content into a texture"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 556,
+      "tLabel": "9:16",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=556s",
+      "depth": "passing",
+      "note": "final output target of the composition"
+    },
+    {
+      "video": "GF0wWpNWkVs",
+      "t": 4701,
+      "tLabel": "1:18:21",
+      "url": "https://www.youtube.com/watch?v=GF0wWpNWkVs&t=4701s",
+      "depth": "explained",
+      "note": "routes the shader output into render targets, rewiring the whole effect"
+    },
+    {
+      "video": "GF0wWpNWkVs",
+      "t": 10308,
+      "tLabel": "2:51:48",
+      "url": "https://www.youtube.com/watch?v=GF0wWpNWkVs&t=10308s",
+      "depth": "explained",
+      "note": "render target in the example promo chain"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 160,
+      "tLabel": "2:40",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=160s",
+      "depth": "explained",
+      "note": "rendering the drawn points into a texture for further effects"
+    },
+    {
+      "video": "qavgcL72F1Y",
+      "t": 580,
+      "tLabel": "0:09:40",
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=580s",
+      "depth": "explained",
+      "note": "opaque render target with clear color used as the base for the warm-up animation"
+    },
+    {
+      "video": "S8chZaAS3uQ",
+      "t": 1074,
+      "tLabel": "17:54",
+      "url": "https://www.youtube.com/watch?v=S8chZaAS3uQ&t=1074s",
+      "depth": "passing",
+      "note": "host notes the thumbnail source needs to be a render target / image output, can be transparent"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 120,
+      "tLabel": "2:00",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=120s",
+      "depth": "passing",
+      "note": "render into a target before feedback"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 3287,
+      "tLabel": "54:47",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=3287s",
+      "depth": "explained",
+      "note": "frozen via disable update to inspect particle artifacts"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 4832,
+      "tLabel": "1:20:32",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=4832s",
+      "depth": "explained",
+      "note": "render scene to texture for reuse/bloom"
+    }
+  ],
+  "op:Lib.point.generate.PointsOnImage": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 150,
+      "tLabel": "2:30",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=150s",
+      "depth": "explained",
+      "note": "converts the rendered texture into points"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 9000,
+      "tLabel": "2:30:00",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=9000s",
+      "depth": "explained",
+      "note": "places tracker sprites on screen-space shooting-star positions"
+    }
+  ],
+  "op:Lib.image.use.PickTexture": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 371,
+      "tLabel": "6:11",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=371s",
+      "depth": "explained",
+      "note": "using Pick to choose between scene textures"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 408,
+      "tLabel": "6:48",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=408s",
+      "depth": "explained",
+      "note": "fades one scene out while keeping things real-time"
+    },
+    {
+      "video": "GF0wWpNWkVs",
+      "t": 2192,
+      "tLabel": "36:32",
+      "url": "https://www.youtube.com/watch?v=GF0wWpNWkVs&t=2192s",
+      "depth": "passing",
+      "note": "recalls intending PickTexture as the duplicate template (used PickObject instead)"
+    },
+    {
+      "video": "Kg5UcJJWt80",
+      "t": 960,
+      "tLabel": "16:00",
+      "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80&t=960s",
+      "depth": "explained",
+      "note": "index-based selection of which post effect applies"
+    }
+  ],
+  "op:Lib.flow.TimeClip": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 518,
+      "tLabel": "8:38",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=518s",
+      "depth": "in-depth",
+      "note": "insert/name time clips to enable & disable things on the timeline"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 1395,
+      "tLabel": "23:15",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=1395s",
+      "depth": "explained",
+      "note": "preloaded screen sized to a time clip"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 8179,
+      "tLabel": "2:16:19",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=8179s",
+      "depth": "explained",
+      "note": "hard time-clip cut between scenes; transition to be done later"
+    }
+  ],
+  "op:Lib.render.transform.Group": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 553,
+      "tLabel": "9:13",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=553s",
+      "depth": "explained",
+      "note": "collects clips; render order matters (later = on top)"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 6520,
+      "tLabel": "1:48:40",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=6520s",
+      "depth": "passing",
+      "note": "groups the spiral build; uses an output window"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 11249,
+      "tLabel": "3:07:29",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=11249s",
+      "depth": "in-depth",
+      "note": "grouping nodes; wiring parameters to the outside"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 579,
+      "tLabel": "9:39",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=579s",
+      "depth": "explained",
+      "note": "grouping/combining multiple draw outputs into one scene"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 8186,
+      "tLabel": "2:16:26",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=8186s",
+      "depth": "explained",
+      "note": "grouping the laser-eyes branch"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 2704,
+      "tLabel": "45:04",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=2704s",
+      "depth": "passing",
+      "note": "group the text and background into a layer"
+    }
+  ],
+  "op:Lib.render.transform.Transform": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 823,
+      "tLabel": "13:43",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=823s",
+      "depth": "passing",
+      "note": "scale particles to zero to run-but-not-draw"
+    },
+    {
+      "video": "Kg5UcJJWt80",
+      "t": 14330,
+      "tLabel": "3:58:50",
+      "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80&t=14330s",
+      "depth": "in-depth",
+      "note": "two transform ops (left/right eyes) connected to a group for instancing"
+    },
+    {
+      "video": "Kg5UcJJWt80",
+      "t": 14670,
+      "tLabel": "4:04:30",
+      "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80&t=14670s",
+      "depth": "explained",
+      "note": "\"Transform Order\" level: order of move/rotate/draw matters"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 310,
+      "tLabel": "5:10",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=310s",
+      "depth": "passing",
+      "note": "additional scale/transform of the text"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 791,
+      "tLabel": "13:11",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=791s",
+      "depth": "explained",
+      "note": "adding a transform with gizmo to offset shadow points"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 3840,
+      "tLabel": "1:04:00",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=3840s",
+      "depth": "passing",
+      "note": "scaling the loaded mesh down"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 10190,
+      "tLabel": "2:49:50",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=10190s",
+      "depth": "explained",
+      "note": "gizmo/position control for the vector-scope sample point"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 10800,
+      "tLabel": "3:00:00",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=10800s",
+      "depth": "explained",
+      "note": "scaling/transforming the radial ring to nest circles"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 12885,
+      "tLabel": "3:34:45",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=12885s",
+      "depth": "in-depth",
+      "note": "rotating the whole scene through the X axis (to avoid camera gimbal)"
+    }
+  ],
+  "op:Lib.flow.Execute": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 1343,
+      "tLabel": "22:23",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=1343s",
+      "depth": "explained",
+      "note": "used (vs Group) to force evaluation of an offscreen branch"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 11388,
+      "tLabel": "3:09:48",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=11388s",
+      "depth": "explained",
+      "note": "rename Execute to name a branch (faster than Group)"
+    }
+  ],
+  "op:Lib.numbers.anim.time.SetTime": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 1366,
+      "tLabel": "22:46",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=1366s",
+      "depth": "in-depth",
+      "note": "drive a separate time range to precompile/preload the whole demo"
+    },
+    {
+      "video": "GF0wWpNWkVs",
+      "t": 1901,
+      "tLabel": "31:41",
+      "url": "https://www.youtube.com/watch?v=GF0wWpNWkVs&t=1901s",
+      "depth": "explained",
+      "note": "remapping local time via SetTime to drive the graph"
+    },
+    {
+      "video": "qavgcL72F1Y",
+      "t": 6639,
+      "tLabel": "1:50:39",
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=6639s",
+      "depth": "explained",
+      "note": "\"set time after simulated data\" to drive playback by clip timing"
+    },
+    {
+      "video": "qavgcL72F1Y",
+      "t": 6951,
+      "tLabel": "1:55:51",
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=6951s",
+      "depth": "explained",
+      "note": "set time plus animated Value to sample ramps from the clip"
+    }
+  ],
+  "op:Lib.flow.Switch": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 1461,
+      "tLabel": "24:21",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=1461s",
+      "depth": "explained",
+      "note": "alternative to Execute for switching at start (0 then 1)"
+    },
+    {
+      "video": "qavgcL72F1Y",
+      "t": 7638,
+      "tLabel": "2:07:18",
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=7638s",
+      "depth": "in-depth",
+      "note": "Switch operator; negatives are magic numbers (-1 disables, -2 enables all), wraps around on positives"
+    }
+  ],
+  "op:Lib.render.camera.OrbitCamera": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 1790,
+      "tLabel": "29:50",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=1790s",
+      "depth": "explained",
+      "note": "orbit camera with idle motion to replicate the flicker issue"
+    },
+    {
+      "video": "GF0wWpNWkVs",
+      "t": 1278,
+      "tLabel": "21:18",
+      "url": "https://www.youtube.com/watch?v=GF0wWpNWkVs&t=1278s",
+      "depth": "explained",
+      "note": "switches the main camera to an orbit camera to rotate the projector view"
+    },
+    {
+      "video": "GF0wWpNWkVs",
+      "t": 8836,
+      "tLabel": "2:27:16",
+      "url": "https://www.youtube.com/watch?v=GF0wWpNWkVs&t=8836s",
+      "depth": "explained",
+      "note": "inspects OrbitCamera to see if it avoids the double camera-update problem (it doesn't)"
+    },
+    {
+      "video": "Kg5UcJJWt80",
+      "t": 3040,
+      "tLabel": "50:40",
+      "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80&t=3040s",
+      "depth": "explained",
+      "note": "orbit camera added to the demo scene"
+    },
+    {
+      "video": "Kg5UcJJWt80",
+      "t": 3420,
+      "tLabel": "57:00",
+      "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80&t=3420s",
+      "depth": "in-depth",
+      "note": "camera-shake snapshots built on orbit camera"
+    },
+    {
+      "video": "Kg5UcJJWt80",
+      "t": 4120,
+      "tLabel": "1:08:40",
+      "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80&t=4120s",
+      "depth": "in-depth",
+      "note": "orbit-camera target distance exposed to snapshots"
+    },
+    {
+      "video": "Kg5UcJJWt80",
+      "t": 4950,
+      "tLabel": "1:22:30",
+      "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80&t=4950s",
+      "depth": "explained",
+      "note": "preset vs. snapshot distinction explained via orbit camera \"close-up\""
+    },
+    {
+      "video": "Kg5UcJJWt80",
+      "t": 11335,
+      "tLabel": "3:08:55",
+      "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80&t=11335s",
+      "depth": "explained",
+      "note": "orbit camera flying through the SDF field"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 16363,
+      "tLabel": "4:32:43",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=16363s",
+      "depth": "passing",
+      "note": "orbit camera considered then rejected (scene too flat)"
+    },
+    {
+      "video": "qavgcL72F1Y",
+      "t": 885,
+      "tLabel": "0:14:45",
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=885s",
+      "depth": "explained",
+      "note": "orbit camera added so moving the camera changes point size with distance"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 3180,
+      "tLabel": "53:00",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=3180s",
+      "depth": "explained",
+      "note": "z-up orbit camera in the pill-shape test"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 291,
+      "tLabel": "4:51",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=291s",
+      "depth": "passing",
+      "note": "\"orbit\" camera used for the scene"
+    }
+  ],
+  "op:Lib.numbers.float.random.Random": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 1834,
+      "tLabel": "30:34",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=1834s",
+      "depth": "explained",
+      "note": "random value op; switch from Ramps to Atlas mode causing jumps"
+    },
+    {
+      "video": "qavgcL72F1Y",
+      "t": 6986,
+      "tLabel": "1:56:26",
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=6986s",
+      "depth": "explained",
+      "note": "random events generated, rate increased"
+    }
+  ],
+  "op:Lib.numbers.float.process.Accumulator": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 1996,
+      "tLabel": "33:16",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=1996s",
+      "depth": "in-depth",
+      "note": "buffer that accumulates a value for procedural/frame-dependent timing"
+    }
+  ],
+  "op:Lib.io.input.MouseInput": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 2020,
+      "tLabel": "33:40",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=2020s",
+      "depth": "explained",
+      "note": "signed mouse position drives the accumulator"
+    }
+  ],
+  "op:Lib.point.generate.LinePoints": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 2713,
+      "tLabel": "45:13",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=2713s",
+      "depth": "explained",
+      "note": "line of points as the base for the sine wave"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 6318,
+      "tLabel": "1:45:18",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=6318s",
+      "depth": "explained",
+      "note": "linear line points feeding the repeat (with twist/stretch)"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 4314,
+      "tLabel": "1:11:54",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=4314s",
+      "depth": "explained",
+      "note": "centered lines, pivot brought to zero so they reach out"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 7757,
+      "tLabel": "2:09:17",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=7757s",
+      "depth": "explained",
+      "note": "line points for the laser beams"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 2464,
+      "tLabel": "41:04",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=2464s",
+      "depth": "explained",
+      "note": "vertical emit points for the wet/surface particle demo"
+    }
+  ],
+  "op:Lib.point.transform.TransformPoints": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 2720,
+      "tLabel": "45:20",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=2720s",
+      "depth": "in-depth",
+      "note": "offsets all points; core of the wave-mapping discussion"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 10094,
+      "tLabel": "2:48:14",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=10094s",
+      "depth": "passing",
+      "note": "squeeze a subset of points"
+    },
+    {
+      "video": "Kg5UcJJWt80",
+      "t": 1540,
+      "tLabel": "25:40",
+      "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80&t=1540s",
+      "depth": "explained",
+      "note": "translating selected points away from the center"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 4918,
+      "tLabel": "1:21:58",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=4918s",
+      "depth": "explained",
+      "note": "repeating/scaling the surface points"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 9054,
+      "tLabel": "2:30:54",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=9054s",
+      "depth": "explained",
+      "note": "adding transform-points to rotate the laser lines (called \"an option\")"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 13170,
+      "tLabel": "3:39:30",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=13170s",
+      "depth": "explained",
+      "note": "volume-center transform for interesting effects"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 13854,
+      "tLabel": "3:50:54",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=13854s",
+      "depth": "explained",
+      "note": "squeezing particle points after simulation"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 784,
+      "tLabel": "13:04",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=784s",
+      "depth": "passing",
+      "note": "referenced re: translate/rotate naming (point-space rotation later at 2:02)"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 2087,
+      "tLabel": "34:47",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=2087s",
+      "depth": "explained",
+      "note": "use object point space, Z-translation along normal"
+    }
+  ],
+  "op:Lib.numbers.anim.animators.AnimVec3": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 2827,
+      "tLabel": "47:07",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=2827s",
+      "depth": "explained",
+      "note": "preferred operator that animates into translation (amplitude/shape sine)"
+    }
+  ],
+  "op:Lib.point.modify.CustomPointShader": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 3181,
+      "tLabel": "53:01",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=3181s",
+      "depth": "in-depth",
+      "note": "line points → custom point shader → draw points to make a wave"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 3600,
+      "tLabel": "1:00:00",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=3600s",
+      "depth": "in-depth",
+      "note": "using F (0-1), SampleGradient, point color, custom attributes"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 3778,
+      "tLabel": "1:02:58",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=3778s",
+      "depth": "explained",
+      "note": "writing FX1/FX2 custom output attributes"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 8371,
+      "tLabel": "2:19:31",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=8371s",
+      "depth": "in-depth",
+      "note": "FX1 = bias of abs(f) for even tapered thickness"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 12134,
+      "tLabel": "3:22:14",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=12134s",
+      "depth": "in-depth",
+      "note": "recolorize by distance: SampleGradient(length(p.position))"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 11410,
+      "tLabel": "3:10:10",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=11410s",
+      "depth": "in-depth",
+      "note": "writing a custom point shader to force points onto a sphere via normalize+blend"
+    },
+    {
+      "video": "qavgcL72F1Y",
+      "t": 12647,
+      "tLabel": "3:30:47",
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=12647s",
+      "depth": "in-depth",
+      "note": "custom point shader; color points by index (every tenth building) via HLSL"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 2315,
+      "tLabel": "38:35",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=2315s",
+      "depth": "in-depth",
+      "note": "recurring; write P.FX1 = P.position.x to author point attributes; later extended with field inputs"
+    }
+  ],
+  "op:Lib.particle.force.CustomForce": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 3859,
+      "tLabel": "1:04:19",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=3859s",
+      "depth": "passing",
+      "note": "mentioned alongside custom shaders"
+    }
+  ],
+  "op:Lib.mesh.modify.CustomFaceShader": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 3859,
+      "tLabel": "1:04:19",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=3859s",
+      "depth": "passing",
+      "note": "mentioned alongside custom shaders"
+    }
+  ],
+  "op:Lib.field.generate.sdf.BoxSDF": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 4240,
+      "tLabel": "1:10:40",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=4240s",
+      "depth": "in-depth",
+      "note": "custom point shader Field input; build and modify a box SDF"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 720,
+      "tLabel": "12:00",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=720s",
+      "depth": "explained",
+      "note": "SDF box used as the field for FieldVolumeForce"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 7295,
+      "tLabel": "2:01:35",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=7295s",
+      "depth": "explained",
+      "note": "box-minus-box tunnel built for the reflection-points demo"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 9494,
+      "tLabel": "2:38:14",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=9494s",
+      "depth": "passing",
+      "note": "\"box of stuff\" / SDF box as the field"
+    }
+  ],
+  "op:Lib.field.space.TransformField": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 4407,
+      "tLabel": "1:13:27",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=4407s",
+      "depth": "explained",
+      "note": "transform the SDF field for powerful effects"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 4598,
+      "tLabel": "1:16:38",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=4598s",
+      "depth": "explained",
+      "note": "scaling/rotating the SDF field for the cave"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 5213,
+      "tLabel": "1:26:53",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=5213s",
+      "depth": "passing",
+      "note": "transform field for a better cave"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 5074,
+      "tLabel": "1:24:34",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=5074s",
+      "depth": "explained",
+      "note": "rotate/transform the field like a projector"
+    }
+  ],
+  "op:Lib.field.generate.sdf.SphereSDF": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 4446,
+      "tLabel": "1:14:06",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=4446s",
+      "depth": "explained",
+      "note": "sphere field, transform + repeat; \"dancing fish/jellyfish\" preset"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 10526,
+      "tLabel": "2:55:26",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=10526s",
+      "depth": "passing",
+      "note": "negative-radius sphere example for SSAO range explanation"
+    },
+    {
+      "video": "Kg5UcJJWt80",
+      "t": 3200,
+      "tLabel": "53:20",
+      "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80&t=3200s",
+      "depth": "explained",
+      "note": "moving sphere SDF to drive a point selection"
+    }
+  ],
+  "op:Lib.point.modify.SortPoints": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 5033,
+      "tLabel": "1:23:53",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=5033s",
+      "depth": "in-depth",
+      "note": "sort point buffer by camera distance (vs Z-buffer sorting)"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 5340,
+      "tLabel": "1:29:00",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=5340s",
+      "depth": "explained",
+      "note": "order-independent depth alternative discussed (not implemented)"
+    }
+  ],
+  "op:Lib.image.analyze.WaveForm": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 6052,
+      "tLabel": "1:40:52",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=6052s",
+      "depth": "explained",
+      "note": "scope to inspect tonal content of the image"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 10018,
+      "tLabel": "2:46:58",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=10018s",
+      "depth": "explained",
+      "note": "waveform/vector-scope used to inspect color distribution"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 10261,
+      "tLabel": "2:51:01",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=10261s",
+      "depth": "explained",
+      "note": "waveform on a graded sample video; skin-tone line"
+    }
+  ],
+  "op:Lib.mesh.generate.CubeMesh": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 6285,
+      "tLabel": "1:44:45",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=6285s",
+      "depth": "explained",
+      "note": "base cube mesh for the helix structure"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 7168,
+      "tLabel": "1:59:28",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=7168s",
+      "depth": "passing",
+      "note": "small cube mesh for radial repeat"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 8753,
+      "tLabel": "2:25:53",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=8753s",
+      "depth": "explained",
+      "note": "rebuilding the cube edges from line points"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 14287,
+      "tLabel": "3:58:07",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=14287s",
+      "depth": "explained",
+      "note": "cube mesh placed at glitter points"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 400,
+      "tLabel": "6:40",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=400s",
+      "depth": "explained",
+      "note": "first mesh fed into MeshVolumeForce (quad cube, works oddly)"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 4161,
+      "tLabel": "1:09:21",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=4161s",
+      "depth": "passing",
+      "note": "cube mesh drawn at points"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 11818,
+      "tLabel": "3:16:58",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=11818s",
+      "depth": "passing",
+      "note": "cube mesh used to compare surface/normal behavior"
+    }
+  ],
+  "op:Lib.mesh.modify.DisplaceMeshNoise": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 6398,
+      "tLabel": "1:46:38",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=6398s",
+      "depth": "explained",
+      "note": "noise distortion of the repeated mesh"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 7368,
+      "tLabel": "2:02:48",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=7368s",
+      "depth": "explained",
+      "note": "distort-mesh noise to make form more organic"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 9148,
+      "tLabel": "2:32:28",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=9148s",
+      "depth": "in-depth",
+      "note": "noise creating crazy spikes; debugging the vertex selection"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 2152,
+      "tLabel": "35:52",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=2152s",
+      "depth": "explained",
+      "note": "\"displaced mesh noise\" causing flicker via redistribution"
+    }
+  ],
+  "op:Lib.mesh.generate.CylinderMesh": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 6539,
+      "tLabel": "1:48:59",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=6539s",
+      "depth": "explained",
+      "note": "central cylinder mesh for the structure"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 6524,
+      "tLabel": "1:48:44",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=6524s",
+      "depth": "explained",
+      "note": "cylinder mesh as the claw element"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 11643,
+      "tLabel": "3:14:03",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=11643s",
+      "depth": "in-depth",
+      "note": "cylinder mesh normal/cap-normal bug when rotated on X by 90°"
+    }
+  ],
+  "op:Lib.render.shading.SetMaterial": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 6586,
+      "tLabel": "1:49:46",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=6586s",
+      "depth": "explained",
+      "note": "assign material/texture to the mesh"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 9999,
+      "tLabel": "2:46:39",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=9999s",
+      "depth": "explained",
+      "note": "make points shinier/metallic"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 11809,
+      "tLabel": "3:16:49",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=11809s",
+      "depth": "explained",
+      "note": "make the mesh shiny to reveal the normal bug"
+    }
+  ],
+  "op:Lib.image.generate.pattern.Raster": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 6595,
+      "tLabel": "1:49:55",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=6595s",
+      "depth": "explained",
+      "note": "create a normal map at fixed resolution"
+    }
+  ],
+  "op:Lib.mesh.generate.SphereMesh": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 6715,
+      "tLabel": "1:51:55",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=6715s",
+      "depth": "explained",
+      "note": "sphere mesh, wireframe to study structure"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 3869,
+      "tLabel": "1:04:29",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=3869s",
+      "depth": "explained",
+      "note": "sphere body for the monster"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 7200,
+      "tLabel": "2:00:00",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=7200s",
+      "depth": "passing",
+      "note": "small test sphere added to the SDF"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 570,
+      "tLabel": "9:30",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=570s",
+      "depth": "passing",
+      "note": "manifold mesh alternative tried later for poly-count test"
+    }
+  ],
+  "op:Lib.mesh.draw.DrawMesh": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 7003,
+      "tLabel": "1:56:43",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=7003s",
+      "depth": "passing",
+      "note": "draws the repeated tool mesh"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 4869,
+      "tLabel": "1:21:09",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=4869s",
+      "depth": "explained",
+      "note": "drawing scene mesh; has field inputs for fragment fields"
+    }
+  ],
+  "op:Lib.mesh.modify.RecomputeNormals": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 7087,
+      "tLabel": "1:58:07",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=7087s",
+      "depth": "explained",
+      "note": "recompute normals to fix shading"
+    }
+  ],
+  "op:Lib.point.generate.RadialPoints": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 7182,
+      "tLabel": "1:59:42",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=7182s",
+      "depth": "explained",
+      "note": "radial repeat points (count ~8)"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 8286,
+      "tLabel": "2:18:06",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=8286s",
+      "depth": "explained",
+      "note": "radial points as the extrusion profile, rotated to align"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 3600,
+      "tLabel": "1:00:00",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=3600s",
+      "depth": "explained",
+      "note": "radial target points pointing outward for tentacles"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 3732,
+      "tLabel": "1:02:12",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=3732s",
+      "depth": "explained",
+      "note": "8 radial points for the spider legs"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 4143,
+      "tLabel": "1:09:03",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=4143s",
+      "depth": "explained",
+      "note": "orientation-axis tweaking on the radial points"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 6496,
+      "tLabel": "1:48:16",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=6496s",
+      "depth": "explained",
+      "note": "radial points to build a claw"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 13275,
+      "tLabel": "3:41:15",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=13275s",
+      "depth": "explained",
+      "note": "radial emitter ring for the particle system"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 3180,
+      "tLabel": "53:00",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=3180s",
+      "depth": "explained",
+      "note": "test scene points for the moving-points texture test"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 8280,
+      "tLabel": "2:18:00",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=8280s",
+      "depth": "in-depth",
+      "note": "spiral/radial points forming the tunnel; animating sides/start-angle"
+    }
+  ],
+  "op:Lib.mesh.generate.IcosahedronMesh": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 7500,
+      "tLabel": "2:05:00",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=7500s",
+      "depth": "passing",
+      "note": "icosa mesh repeated at points"
+    }
+  ],
+  "op:Lib.mesh.generate.ExtrudeCurves": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 8254,
+      "tLabel": "2:17:34",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=8254s",
+      "depth": "in-depth",
+      "note": "extrude a profile along a rail to build the wireframe pipe"
+    }
+  ],
+  "op:Lib.point.generate.CommonPointSets": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 8480,
+      "tLabel": "2:21:20",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=8480s",
+      "depth": "passing",
+      "note": "mentioned as useful (quad → circuit of points)"
+    }
+  ],
+  "op:Lib.point.combine.CombineBuffers": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 8810,
+      "tLabel": "2:26:50",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=8810s",
+      "depth": "explained",
+      "note": "combine point buffers for the box frame"
+    }
+  ],
+  "op:Lib.mesh.modify.TransformMesh": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 9000,
+      "tLabel": "2:30:00",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=9000s",
+      "depth": "explained",
+      "note": "rotate/transform mesh for the box frame"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 1878,
+      "tLabel": "31:18",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=1878s",
+      "depth": "explained",
+      "note": "transform/rotate the mesh so the chain looks right"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 3893,
+      "tLabel": "1:04:53",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=3893s",
+      "depth": "explained",
+      "note": "transform/rotate the combined mesh"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 2128,
+      "tLabel": "35:28",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=2128s",
+      "depth": "passing",
+      "note": "transform the mesh before sampling points"
+    }
+  ],
+  "op:Lib.render.camera.OrthographicCamera": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 9046,
+      "tLabel": "2:30:46",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=9046s",
+      "depth": "explained",
+      "note": "orthographic camera to match the reference framing"
+    },
+    {
+      "video": "GF0wWpNWkVs",
+      "t": 6611,
+      "tLabel": "1:50:11",
+      "url": "https://www.youtube.com/watch?v=GF0wWpNWkVs&t=6611s",
+      "depth": "explained",
+      "note": "switches projection to orthographic and adjusts scale"
+    }
+  ],
+  "op:Lib.render.postfx.SSAO": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 9432,
+      "tLabel": "2:37:12",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=9432s",
+      "depth": "in-depth",
+      "note": "render to texture then SSAO for depth; near/far range tuning"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 10353,
+      "tLabel": "2:52:33",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=10353s",
+      "depth": "in-depth",
+      "note": "debugging hard edge; front clip plane / depth precision fix"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 10479,
+      "tLabel": "2:54:39",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=10479s",
+      "depth": "explained",
+      "note": "two ranges (clip and range); exposing as inputs"
+    },
+    {
+      "video": "qavgcL72F1Y",
+      "t": 900,
+      "tLabel": "0:15:00",
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=900s",
+      "depth": "passing",
+      "note": "considered adding SSAO; mentions a depth input not connected"
+    }
+  ],
+  "op:Lib.point.draw.DrawBillboards": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 9763,
+      "tLabel": "2:42:43",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=9763s",
+      "depth": "passing",
+      "note": "accidental draw-billboards example"
+    },
+    {
+      "video": "Kg5UcJJWt80",
+      "t": 12376,
+      "tLabel": "3:26:16",
+      "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80&t=12376s",
+      "depth": "in-depth",
+      "note": "switching to DrawBillboards with point orientation"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 6873,
+      "tLabel": "1:54:33",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=6873s",
+      "depth": "passing",
+      "note": "\"plop and billboard\" blobs on the line points"
+    }
+  ],
+  "op:Lib.image.fx.blur.Bloom": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 9763,
+      "tLabel": "2:42:43",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=9763s",
+      "depth": "explained",
+      "note": "bloom added to the render"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 12218,
+      "tLabel": "3:23:38",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=12218s",
+      "depth": "explained",
+      "note": "bloom after offset to bring the center glow through"
+    },
+    {
+      "video": "GF0wWpNWkVs",
+      "t": 7890,
+      "tLabel": "2:11:30",
+      "url": "https://www.youtube.com/watch?v=GF0wWpNWkVs&t=7890s",
+      "depth": "passing",
+      "note": "\"set fork\"/glow shown working on the post-effect; later replaced with a proper Bloom"
+    },
+    {
+      "video": "GF0wWpNWkVs",
+      "t": 10591,
+      "tLabel": "2:56:31",
+      "url": "https://www.youtube.com/watch?v=GF0wWpNWkVs&t=10591s",
+      "depth": "in-depth",
+      "note": "adds Bloom to the example; \"with this new nice kernel we can physically control the falloff... looks much better with the bloom\""
+    },
+    {
+      "video": "Kg5UcJJWt80",
+      "t": 3053,
+      "tLabel": "50:53",
+      "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80&t=3053s",
+      "depth": "explained",
+      "note": "\"we always want bloom\" added to the scene"
+    },
+    {
+      "video": "MAyETISMFi0",
+      "t": 411,
+      "tLabel": "6:51",
+      "url": "https://www.youtube.com/watch?v=MAyETISMFi0&t=411s",
+      "depth": "passing",
+      "note": "mentions adding bloom on top of the fake-light rendering idea"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 474,
+      "tLabel": "7:54",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=474s",
+      "depth": "explained",
+      "note": "bloom effect added to the animation"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 7931,
+      "tLabel": "2:12:11",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=7931s",
+      "depth": "explained",
+      "note": "bloom to make the lasers glow (\"look at this fire\")"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 12300,
+      "tLabel": "3:25:00",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=12300s",
+      "depth": "explained",
+      "note": "bloom + two color stops as a cheap glow"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 14566,
+      "tLabel": "4:02:46",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=14566s",
+      "depth": "explained",
+      "note": "re-enabling bloom on the final scene"
+    },
+    {
+      "video": "S8chZaAS3uQ",
+      "t": 870,
+      "tLabel": "14:30",
+      "url": "https://www.youtube.com/watch?v=S8chZaAS3uQ&t=870s",
+      "depth": "passing",
+      "note": "right-click \"set thumbnail\" demonstrated on a Bloom preset; noted it has no auto thumbnail yet"
+    },
+    {
+      "video": "S8chZaAS3uQ",
+      "t": 1236,
+      "tLabel": "20:36",
+      "url": "https://www.youtube.com/watch?v=S8chZaAS3uQ&t=1236s",
+      "depth": "passing",
+      "note": "revisited; preset thumbnails need to be saved at preset-creation time"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 4645,
+      "tLabel": "1:17:25",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=4645s",
+      "depth": "explained",
+      "note": "blooming both logo variants to show premultiply difference"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 7448,
+      "tLabel": "2:04:08",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=7448s",
+      "depth": "passing",
+      "note": "HDR bloom on the bright reflected lines"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 2627,
+      "tLabel": "43:47",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=2627s",
+      "depth": "passing",
+      "note": "\"Bloom, sure\" wanting a blob/glow"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 5262,
+      "tLabel": "1:27:42",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=5262s",
+      "depth": "explained",
+      "note": "bloom used instead of blur because faster (pre-FastBlur)"
+    }
+  ],
+  "op:Lib.image.generate.noise.TileableNoise": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 10941,
+      "tLabel": "3:02:21",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=10941s",
+      "depth": "in-depth",
+      "note": "repeatable/tileable noise; faster, smoother than make-tileable"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 12715,
+      "tLabel": "3:31:55",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=12715s",
+      "depth": "explained",
+      "note": "noise used as the environment map source"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 13062,
+      "tLabel": "3:37:42",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=13062s",
+      "depth": "passing",
+      "note": "another tileable-noise pass for the lighting effect"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 8761,
+      "tLabel": "2:26:01",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=8761s",
+      "depth": "explained",
+      "note": "tileable noise as the environment texture"
+    }
+  ],
+  "op:Lib.image.color.ToneMapping": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 12218,
+      "tLabel": "3:23:38",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=12218s",
+      "depth": "passing",
+      "note": "tone mapping discussed (\"torn/tone mapping is nice\")"
+    },
+    {
+      "video": "GF0wWpNWkVs",
+      "t": 10818,
+      "tLabel": "3:00:18",
+      "url": "https://www.youtube.com/watch?v=GF0wWpNWkVs&t=10818s",
+      "depth": "explained",
+      "note": "building the sample scene without tone mapping for now, wiring the example inputs"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 7790,
+      "tLabel": "2:09:50",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=7790s",
+      "depth": "explained",
+      "note": "tone-map the re-bloomed result back into range"
+    }
+  ],
+  "op:Lib.render.shading.SetEnvironment": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 12675,
+      "tLabel": "3:31:15",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=12675s",
+      "depth": "in-depth",
+      "note": "blend between environments; feed tileable noise as a fake HDRI for lighting"
+    },
+    {
+      "video": "GF0wWpNWkVs",
+      "t": 2730,
+      "tLabel": "45:30",
+      "url": "https://www.youtube.com/watch?v=GF0wWpNWkVs&t=2730s",
+      "depth": "explained",
+      "note": "debates the SetEnvironment node; decides to use it with a black environment for the projector pass"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 7700,
+      "tLabel": "2:08:20",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=7700s",
+      "depth": "passing",
+      "note": "changing the default environment"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 8756,
+      "tLabel": "2:25:56",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=8756s",
+      "depth": "explained",
+      "note": "set-environment for reflections"
+    }
+  ],
+  "op:Lib.render.postfx.ProjectLight": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 12784,
+      "tLabel": "3:33:04",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=12784s",
+      "depth": "in-depth",
+      "note": "projector/spot light needing a camera reference; casts shadows"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 12849,
+      "tLabel": "3:34:09",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=12849s",
+      "depth": "explained",
+      "note": "choose an image as the projection light source"
+    },
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 12968,
+      "tLabel": "3:36:08",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=12968s",
+      "depth": "explained",
+      "note": "grabbing depth/normal from render target for normals on depth-of-field"
+    },
+    {
+      "video": "GF0wWpNWkVs",
+      "t": 3475,
+      "tLabel": "57:55",
+      "url": "https://www.youtube.com/watch?v=GF0wWpNWkVs&t=3475s",
+      "depth": "in-depth",
+      "note": "opens the ProjectLight operator code; defines the private ProjectorTypes enum (orthographic, spotlight, directional)"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 5586,
+      "tLabel": "1:33:06",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=5586s",
+      "depth": "in-depth",
+      "note": "projector/light operator with spotlight/orthographic types; multi-TV lighting"
+    }
+  ],
+  "op:Lib.numbers.vec3.Vector3Gizmo": [
+    {
+      "video": "dCX7CcL0ZJs",
+      "t": 12895,
+      "tLabel": "3:34:55",
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs&t=12895s",
+      "depth": "explained",
+      "note": "3D gizmo to drag light position/target in the viewport"
+    }
+  ],
+  "op:Lib.render.camera.ReuseCamera": [
+    {
+      "video": "GF0wWpNWkVs",
+      "t": 762,
+      "tLabel": "12:42",
+      "url": "https://www.youtube.com/watch?v=GF0wWpNWkVs&t=762s",
+      "depth": "explained",
+      "note": "reusing the outer/main camera inside the sub-graph; \"this is the view, this was the main, here we use reuse camera\""
+    }
+  ],
+  "op:Lib.data.object.PickObject": [
+    {
+      "video": "GF0wWpNWkVs",
+      "t": 1584,
+      "tLabel": "26:24",
+      "url": "https://www.youtube.com/watch?v=GF0wWpNWkVs&t=1584s",
+      "depth": "in-depth",
+      "note": "creates a new \"pick\" operator via Duplicate-as-new-type to switch between connected objects (camera/projector types); long discussion of the generic-object cast hack, renaming, and unique-id change in code"
+    },
+    {
+      "video": "GF0wWpNWkVs",
+      "t": 2238,
+      "tLabel": "37:18",
+      "url": "https://www.youtube.com/watch?v=GF0wWpNWkVs&t=2238s",
+      "depth": "explained",
+      "note": "wiring the finished PickObject: connections, index, multi-input; just assigns the selected object"
+    }
+  ],
+  "op:Lib.string.convert.FloatToString": [
+    {
+      "video": "GF0wWpNWkVs",
+      "t": 1915,
+      "tLabel": "31:55",
+      "url": "https://www.youtube.com/watch?v=GF0wWpNWkVs&t=1915s",
+      "depth": "passing",
+      "note": "float-to-string text used to visualize/evaluate the local time value"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 14512,
+      "tLabel": "4:01:52",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=14512s",
+      "depth": "passing",
+      "note": "float-to-string for the label text"
+    }
+  ],
+  "op:Lib.numbers.float.basic.Modulo": [
+    {
+      "video": "GF0wWpNWkVs",
+      "t": 1946,
+      "tLabel": "32:26",
+      "url": "https://www.youtube.com/watch?v=GF0wWpNWkVs&t=1946s",
+      "depth": "passing",
+      "note": "modulo/loop on time so the value keeps running and wraps"
+    }
+  ],
+  "op:Lib.image.use.RenderWithMotionBlur": [
+    {
+      "video": "GF0wWpNWkVs",
+      "t": 2068,
+      "tLabel": "34:28",
+      "url": "https://www.youtube.com/watch?v=GF0wWpNWkVs&t=2068s",
+      "depth": "explained",
+      "note": "example of rendering a texture then applying motion blur, motivating frame-back-time correctness"
+    }
+  ],
+  "op:Lib.numbers.float.basic.Multiply": [
+    {
+      "video": "GF0wWpNWkVs",
+      "t": 3393,
+      "tLabel": "56:33",
+      "url": "https://www.youtube.com/watch?v=GF0wWpNWkVs&t=3393s",
+      "depth": "explained",
+      "note": "plan for two artistic colors: one multiplied onto the projected image, one for the scene color"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 2756,
+      "tLabel": "45:56",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=2756s",
+      "depth": "explained",
+      "note": "multiply continuous value (×16 / ×¼) to make a measure"
+    }
+  ],
+  "op:Lib.render.postfx.GodRays": [
+    {
+      "video": "GF0wWpNWkVs",
+      "t": 4438,
+      "tLabel": "1:13:58",
+      "url": "https://www.youtube.com/watch?v=GF0wWpNWkVs&t=4438s",
+      "depth": "explained",
+      "note": "looks for a good example op (god-rays / RDS) to copy parameter wiring from"
+    }
+  ],
+  "op:Lib.numbers.int.logic.CountInt": [
+    {
+      "video": "GF0wWpNWkVs",
+      "t": 5623,
+      "tLabel": "1:33:43",
+      "url": "https://www.youtube.com/watch?v=GF0wWpNWkVs&t=5623s",
+      "depth": "explained",
+      "note": "proposed but rejected as time source because it breaks render reproducibility"
+    }
+  ],
+  "op:Lib.numbers.int.process.FloatToInt": [
+    {
+      "video": "GF0wWpNWkVs",
+      "t": 7673,
+      "tLabel": "2:07:53",
+      "url": "https://www.youtube.com/watch?v=GF0wWpNWkVs&t=7673s",
+      "depth": "explained",
+      "note": "converts shadow resolution by aspect ratio then back to int to build a resolution"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 6823,
+      "tLabel": "1:53:43",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=6823s",
+      "depth": "explained",
+      "note": "\"float-to-int\" feeding a step/skip count to filter points"
+    },
+    {
+      "video": "qavgcL72F1Y",
+      "t": 4239,
+      "tLabel": "1:10:39",
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=4239s",
+      "depth": "explained",
+      "note": "\"floor/flow to int\" converting linear ramp into integer steps"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 484,
+      "tLabel": "8:04",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=484s",
+      "depth": "passing",
+      "note": "convert audio level into int for the buffer"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 2647,
+      "tLabel": "44:07",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=2647s",
+      "depth": "explained",
+      "note": "floor a value via float-to-int for stepping (1.999 → 1)"
+    }
+  ],
+  "op:Lib.numbers.float.process.SmoothStep": [
+    {
+      "video": "GF0wWpNWkVs",
+      "t": 9000,
+      "tLabel": "2:30:00",
+      "url": "https://www.youtube.com/watch?v=GF0wWpNWkVs&t=9000s",
+      "depth": "explained",
+      "note": "adds a soft-edge / fade-out at the shadow-map sampling boundary (\"soft edge\")"
+    }
+  ],
+  "op:Lib.image.fx.glitch.SubdivisionStretch": [
+    {
+      "video": "GF0wWpNWkVs",
+      "t": 10311,
+      "tLabel": "2:51:51",
+      "url": "https://www.youtube.com/watch?v=GF0wWpNWkVs&t=10311s",
+      "depth": "passing",
+      "note": "\"subdivision stretch or so\" applied in the example scene"
+    }
+  ],
+  "op:Lib.render.postfx.MotionBlur": [
+    {
+      "video": "GF0wWpNWkVs",
+      "t": 11313,
+      "tLabel": "3:08:33",
+      "url": "https://www.youtube.com/watch?v=GF0wWpNWkVs&t=11313s",
+      "depth": "passing",
+      "note": "checks MotionBlur examples while debugging why thumbnails/descriptions aren't showing"
+    }
+  ],
+  "op:Lib.point.modify.AddNoise": [
+    {
+      "video": "Kg5UcJJWt80",
+      "t": 103,
+      "tLabel": "1:43",
+      "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80&t=103s",
+      "depth": "explained",
+      "note": "animating noise on the points with a phase input"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 518,
+      "tLabel": "8:38",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=518s",
+      "depth": "explained",
+      "note": "noise applied to the point positions"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 4401,
+      "tLabel": "1:13:21",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=4401s",
+      "depth": "explained",
+      "note": "noise on the tentacle points with attribute control"
+    }
+  ],
+  "op:Lib.image.fx.distort.ChromaticDistortion": [
+    {
+      "video": "Kg5UcJJWt80",
+      "t": 925,
+      "tLabel": "15:25",
+      "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80&t=925s",
+      "depth": "explained",
+      "note": "chromatic-distortion post effect toggled per snapshot index"
+    }
+  ],
+  "op:Lib.image.fx.stylize.Glow": [
+    {
+      "video": "Kg5UcJJWt80",
+      "t": 935,
+      "tLabel": "15:35",
+      "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80&t=935s",
+      "depth": "passing",
+      "note": "switching style effects between snapshot variations"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 4251,
+      "tLabel": "1:10:51",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=4251s",
+      "depth": "explained",
+      "note": "glow clamping on transparent-image edges (audience problem)"
+    }
+  ],
+  "op:Lib.point.generate.PointsOnMesh": [
+    {
+      "video": "Kg5UcJJWt80",
+      "t": 1535,
+      "tLabel": "25:35",
+      "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80&t=1535s",
+      "depth": "in-depth",
+      "note": "building a real demo: emit points on a posed mesh"
+    },
+    {
+      "video": "Kg5UcJJWt80",
+      "t": 3000,
+      "tLabel": "50:00",
+      "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80&t=3000s",
+      "depth": "in-depth",
+      "note": "emitting points on the posed mesh"
+    }
+  ],
+  "op:Lib.field.generate.sdf.PlaneSDF": [
+    {
+      "video": "Kg5UcJJWt80",
+      "t": 3110,
+      "tLabel": "51:50",
+      "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80&t=3110s",
+      "depth": "explained",
+      "note": "plane SDF used as the selection field"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 4967,
+      "tLabel": "1:22:47",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=4967s",
+      "depth": "explained",
+      "note": "horizon plane SDF whose distance is converted to color"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 10620,
+      "tLabel": "2:57:00",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=10620s",
+      "depth": "explained",
+      "note": "combined into the raymarch scene to test the new glow output"
+    }
+  ],
+  "op:Lib.render.postfx.DepthOfField": [
+    {
+      "video": "Kg5UcJJWt80",
+      "t": 4112,
+      "tLabel": "1:08:32",
+      "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80&t=4112s",
+      "depth": "explained",
+      "note": "DoF distance made snapshot-controllable"
+    }
+  ],
+  "op:Lib.io.video.VideoClip": [
+    {
+      "video": "Kg5UcJJWt80",
+      "t": 6600,
+      "tLabel": "1:50:00",
+      "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80&t=6600s",
+      "depth": "in-depth",
+      "note": "new FFmpeg-based video editing intro"
+    },
+    {
+      "video": "Kg5UcJJWt80",
+      "t": 6940,
+      "tLabel": "1:55:40",
+      "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80&t=6940s",
+      "depth": "in-depth",
+      "note": "new VideoClip player op, auto-freeing of unused players"
+    },
+    {
+      "video": "Kg5UcJJWt80",
+      "t": 7070,
+      "tLabel": "1:57:50",
+      "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80&t=7070s",
+      "depth": "explained",
+      "note": "cross-fading/blending two video clips by timeline order"
+    }
+  ],
+  "op:Lib.io.video.PlayVideo": [
+    {
+      "video": "Kg5UcJJWt80",
+      "t": 6780,
+      "tLabel": "1:53:00",
+      "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80&t=6780s",
+      "depth": "explained",
+      "note": "old Media-Foundation play-video and its one-frame seek delay"
+    }
+  ],
+  "op:Lib.io.midi.MidiInput": [
+    {
+      "video": "Kg5UcJJWt80",
+      "t": 8800,
+      "tLabel": "2:26:40",
+      "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80&t=8800s",
+      "depth": "in-depth",
+      "note": "recording MIDI/OSC and audio simultaneously (data clips)"
+    }
+  ],
+  "op:Lib.render.basic.Layer2d": [
+    {
+      "video": "Kg5UcJJWt80",
+      "t": 8860,
+      "tLabel": "2:27:40",
+      "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80&t=8860s",
+      "depth": "explained",
+      "note": "media input into a Layer2D scale demo"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 125,
+      "tLabel": "2:05",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=125s",
+      "depth": "passing",
+      "note": "used between render target and advanced feedback"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 2706,
+      "tLabel": "45:06",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=2706s",
+      "depth": "passing",
+      "note": "put background into a layer"
+    }
+  ],
+  "op:Lib.field.generate.sdf.CustomSDF": [
+    {
+      "video": "Kg5UcJJWt80",
+      "t": 11300,
+      "tLabel": "3:08:20",
+      "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80&t=11300s",
+      "depth": "in-depth",
+      "note": "custom SDF raymarch field for the 360 demo"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 3226,
+      "tLabel": "53:46",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=3226s",
+      "depth": "explained",
+      "note": "shown in the new families/subnet browser"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 4502,
+      "tLabel": "1:15:02",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=4502s",
+      "depth": "in-depth",
+      "note": "building the cave scene as a signed-distance function"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 5190,
+      "tLabel": "1:26:30",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=5190s",
+      "depth": "explained",
+      "note": "the SDF generating scene + clamp points"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 2688,
+      "tLabel": "44:48",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=2688s",
+      "depth": "in-depth",
+      "note": "recurring custom SDF/field node (sphere, fractals, reflection scenes)"
+    }
+  ],
+  "op:Lib.render.transform.SliceViewPort": [
+    {
+      "video": "Kg5UcJJWt80",
+      "t": 11620,
+      "tLabel": "3:13:40",
+      "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80&t=11620s",
+      "depth": "in-depth",
+      "note": "slice-viewport op to limit rendered area for performance"
+    }
+  ],
+  "op:Lib.image.transform.Crop": [
+    {
+      "video": "Kg5UcJJWt80",
+      "t": 12095,
+      "tLabel": "3:21:35",
+      "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80&t=12095s",
+      "depth": "explained",
+      "note": "cropping the equirect output to drop unused ceiling/floor pixels"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 4307,
+      "tLabel": "1:11:47",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=4307s",
+      "depth": "explained",
+      "note": "crop/expand to add empty edge pixels; \"Expand\" tag suggested"
+    }
+  ],
+  "op:Lib.point.transform.OrientPoints": [
+    {
+      "video": "Kg5UcJJWt80",
+      "t": 12425,
+      "tLabel": "3:27:05",
+      "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80&t=12425s",
+      "depth": "explained",
+      "note": "orient-points op to face camera / look-at-target"
+    },
+    {
+      "video": "Kg5UcJJWt80",
+      "t": 16280,
+      "tLabel": "4:31:20",
+      "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80&t=16280s",
+      "depth": "explained",
+      "note": "orienting light points to \"point down\"/aim precisely"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 14143,
+      "tLabel": "3:55:43",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=14143s",
+      "depth": "in-depth",
+      "note": "orienting glitter points toward center; scale to ovals"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 14413,
+      "tLabel": "4:00:13",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=14413s",
+      "depth": "explained",
+      "note": "orient-to-camera for the number billboards"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 15254,
+      "tLabel": "4:14:14",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=15254s",
+      "depth": "explained",
+      "note": "orienting the cube labels; cleanup pass"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 342,
+      "tLabel": "5:42",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=342s",
+      "depth": "explained",
+      "note": "orient points toward camera; flip option discussed; \"beta\" feature being merged in"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 5400,
+      "tLabel": "1:30:00",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=5400s",
+      "depth": "explained",
+      "note": "orient number points toward camera (recurring alignment issue)"
+    }
+  ],
+  "op:Lib.point.draw.VisualizePoints": [
+    {
+      "video": "Kg5UcJJWt80",
+      "t": 15885,
+      "tLabel": "4:24:45",
+      "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80&t=15885s",
+      "depth": "explained",
+      "note": "visualize-points showing position/orientation/color"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 4035,
+      "tLabel": "1:07:15",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=4035s",
+      "depth": "in-depth",
+      "note": "debugging where/how the target points are oriented"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 6711,
+      "tLabel": "1:51:51",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=6711s",
+      "depth": "explained",
+      "note": "visualizing chain points with line fade to find the last point"
+    }
+  ],
+  "op:Lib.image.use.Blend": [
+    {
+      "video": "MAyETISMFi0",
+      "t": 133,
+      "tLabel": "2:13",
+      "url": "https://www.youtube.com/watch?v=MAyETISMFi0&t=133s",
+      "depth": "passing",
+      "note": "routes the current element into a blend while experimenting with the live graph"
+    },
+    {
+      "video": "MAyETISMFi0",
+      "t": 1510,
+      "tLabel": "25:10",
+      "url": "https://www.youtube.com/watch?v=MAyETISMFi0&t=1510s",
+      "depth": "explained",
+      "note": "blends the twisted result with the loaded logo image (first/second order matters)"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 3674,
+      "tLabel": "1:01:14",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=3674s",
+      "depth": "passing",
+      "note": "generic blend tried while searching for the right one"
+    }
+  ],
+  "op:Lib.image.fx.stylize.FakeLight": [
+    {
+      "video": "MAyETISMFi0",
+      "t": 383,
+      "tLabel": "6:23",
+      "url": "https://www.youtube.com/watch?v=MAyETISMFi0&t=383s",
+      "depth": "passing",
+      "note": "notes its potential; muses about a future PBR/HDR-shaded fake-light tool"
+    }
+  ],
+  "op:Lib.numbers.color.SampleGradient": [
+    {
+      "video": "MAyETISMFi0",
+      "t": 936,
+      "tLabel": "15:36",
+      "url": "https://www.youtube.com/watch?v=MAyETISMFi0&t=936s",
+      "depth": "in-depth",
+      "note": "adds a gradient with start/add colors; sampling a gradient at a position to drive a value"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 3613,
+      "tLabel": "1:00:13",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=3613s",
+      "depth": "explained",
+      "note": "sample a gradient by the beat value to drive color"
+    }
+  ],
+  "op:Lib.numbers.anim.animators.AnimValue": [
+    {
+      "video": "MAyETISMFi0",
+      "t": 968,
+      "tLabel": "16:08",
+      "url": "https://www.youtube.com/watch?v=MAyETISMFi0&t=968s",
+      "depth": "explained",
+      "note": "sample position turned into an animated value (FPS/BPM-rate idle motion, no keyframes)"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 265,
+      "tLabel": "4:25",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=265s",
+      "depth": "passing",
+      "note": "animated value driving the text size"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 920,
+      "tLabel": "15:20",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=920s",
+      "depth": "passing",
+      "note": "value fed into the gradient sample input"
+    }
+  ],
+  "op:Lib.numbers.anim.animators.TriggerAnim": [
+    {
+      "video": "MAyETISMFi0",
+      "t": 993,
+      "tLabel": "16:33",
+      "url": "https://www.youtube.com/watch?v=MAyETISMFi0&t=993s",
+      "depth": "explained",
+      "note": "changing the curve shape (e.g. back-and-forth) for a keyframe-like animation without keyframes"
+    }
+  ],
+  "op:Lib.numbers.vec4.PickColor": [
+    {
+      "video": "MAyETISMFi0",
+      "t": 1120,
+      "tLabel": "18:40",
+      "url": "https://www.youtube.com/watch?v=MAyETISMFi0&t=1120s",
+      "depth": "explained",
+      "note": "tries to pick a skin-tone color from the image (color picker misbehaves)"
+    }
+  ],
+  "op:Lib.image.color.KeyColor": [
+    {
+      "video": "MAyETISMFi0",
+      "t": 1166,
+      "tLabel": "19:26",
+      "url": "https://www.youtube.com/watch?v=MAyETISMFi0&t=1166s",
+      "depth": "explained",
+      "note": "keys out a color, adjusts amount, returns just the mask/key"
+    }
+  ],
+  "op:Lib.image.fx.blur.DirectionalBlur": [
+    {
+      "video": "MAyETISMFi0",
+      "t": 1243,
+      "tLabel": "20:43",
+      "url": "https://www.youtube.com/watch?v=MAyETISMFi0&t=1243s",
+      "depth": "in-depth",
+      "note": "core effect: directional blur driven by an X-factor texture to twist/stretch; \"MRI\"-like results"
+    }
+  ],
+  "op:Lib.image.use.BlendWithMask": [
+    {
+      "video": "MAyETISMFi0",
+      "t": 1521,
+      "tLabel": "25:21",
+      "url": "https://www.youtube.com/watch?v=MAyETISMFi0&t=1521s",
+      "depth": "explained",
+      "note": "switches to masked blending to combine logo and effect"
+    }
+  ],
+  "op:Lib.image.fx.stylize.DetectEdges": [
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 1093,
+      "tLabel": "18:13",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=1093s",
+      "depth": "explained",
+      "note": "edge-detection producing \"weird spurly\" results"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 1243,
+      "tLabel": "20:43",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=1243s",
+      "depth": "in-depth",
+      "note": "feeding only the points texture into detect-edges for stacked effects"
+    },
+    {
+      "video": "S8chZaAS3uQ",
+      "t": 1236,
+      "tLabel": "20:36",
+      "url": "https://www.youtube.com/watch?v=S8chZaAS3uQ&t=1236s",
+      "depth": "passing",
+      "note": "named alongside Bloom as another preset whose thumbnail should be auto-generated"
+    }
+  ],
+  "op:Lib.point.transform.IkChain": [
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 1705,
+      "tLabel": "28:25",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=1705s",
+      "depth": "in-depth",
+      "note": "experimental FABRIK inverse-kinematics-on-GPU operator (the IK-chain), demoed at length"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 3534,
+      "tLabel": "58:54",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=3534s",
+      "depth": "in-depth",
+      "note": "building the tentacle-monster chain, 8 segments"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 5806,
+      "tLabel": "1:36:46",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=5806s",
+      "depth": "in-depth",
+      "note": "feeding paired body/target points into the IK chain"
+    }
+  ],
+  "op:Lib.point.generate.MeshVerticesToPoints": [
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 2443,
+      "tLabel": "40:43",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=2443s",
+      "depth": "explained",
+      "note": "pull-request migration from legacy point to MeshVertices-to-points"
+    }
+  ],
+  "op:Lib.point.draw.DrawPointsShaded": [
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 4365,
+      "tLabel": "1:12:45",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=4365s",
+      "depth": "explained",
+      "note": "shaded points alternative to draw-lines"
+    }
+  ],
+  "op:Lib.particle.force.VectorFieldForce": [
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 4660,
+      "tLabel": "1:17:40",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=4660s",
+      "depth": "passing",
+      "note": "listed while searching"
+    }
+  ],
+  "op:Lib.field.use.ApplyVectorField": [
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 4660,
+      "tLabel": "1:17:40",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=4660s",
+      "depth": "passing",
+      "note": "listed while searching"
+    }
+  ],
+  "op:Lib.particle.force.RandomJumpForce": [
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 4660,
+      "tLabel": "1:17:40",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=4660s",
+      "depth": "passing",
+      "note": "listed while searching"
+    }
+  ],
+  "op:Lib.point.modify.MoveToSDF": [
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 4822,
+      "tLabel": "1:20:22",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=4822s",
+      "depth": "explained",
+      "note": "moves points to nearest SDF surface via ray marching (the working approach)"
+    }
+  ],
+  "op:Lib.render.shading.SetFog": [
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 5173,
+      "tLabel": "1:26:13",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=5173s",
+      "depth": "passing",
+      "note": "scene fog"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 8629,
+      "tLabel": "2:23:49",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=8629s",
+      "depth": "explained",
+      "note": "adding a second set-fog so lasers aren't fogged"
+    }
+  ],
+  "op:Lib.mesh.generate.TorusMesh": [
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 6067,
+      "tLabel": "1:41:07",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=6067s",
+      "depth": "explained",
+      "note": "building a procedural torus for a mechanical leg segment"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 12263,
+      "tLabel": "3:24:23",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=12263s",
+      "depth": "explained",
+      "note": "\"toys/torus mesh\" and torus SDF used to demo field orientation"
+    }
+  ],
+  "op:Lib.numbers.int.basic.MultiplyInt": [
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 7352,
+      "tLabel": "2:02:32",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=7352s",
+      "depth": "explained",
+      "note": "leg-count × (segment-1) math feeding the filter count"
+    }
+  ],
+  "op:Lib.render.shading.PointLight": [
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 7656,
+      "tLabel": "2:07:36",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=7656s",
+      "depth": "explained",
+      "note": "small point light added near the eyes"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 8508,
+      "tLabel": "2:21:48",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=8508s",
+      "depth": "explained",
+      "note": "bright red point light pushed into the back"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 4781,
+      "tLabel": "1:19:41",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=4781s",
+      "depth": "explained",
+      "note": "point light has no direction; brightness/color controls discussed"
+    }
+  ],
+  "op:Lib.point.modify.RandomizePoints": [
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 7813,
+      "tLabel": "2:10:13",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=7813s",
+      "depth": "explained",
+      "note": "randomizing the laser point directions"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 11697,
+      "tLabel": "3:14:57",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=11697s",
+      "depth": "passing",
+      "note": "randomize points considered"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 12272,
+      "tLabel": "3:24:32",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=12272s",
+      "depth": "explained",
+      "note": "randomizing glitter scale/position"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 12703,
+      "tLabel": "3:31:43",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=12703s",
+      "depth": "passing",
+      "note": "randomizing the spike points"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 14255,
+      "tLabel": "3:57:35",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=14255s",
+      "depth": "explained",
+      "note": "random selection of points to place cubes"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 15048,
+      "tLabel": "4:10:48",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=15048s",
+      "depth": "explained",
+      "note": "noise vs randomize on 30k points"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 7593,
+      "tLabel": "2:06:33",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=7593s",
+      "depth": "explained",
+      "note": "slightly randomize reflection point positions/rotation"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 1359,
+      "tLabel": "22:39",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=1359s",
+      "depth": "explained",
+      "note": "randomize rotation/scale/position of the number points"
+    }
+  ],
+  "op:Lib.point.generate.SpherePoints": [
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 11274,
+      "tLabel": "3:07:54",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=11274s",
+      "depth": "explained",
+      "note": "sphere-points (Fibonacci-spiral) drawn as a line, found confusing"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 12537,
+      "tLabel": "3:28:57",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=12537s",
+      "depth": "explained",
+      "note": "sphere points reused for outward-shooting lines"
+    }
+  ],
+  "op:Lib.point.transform.SoftTransformPoints": [
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 11753,
+      "tLabel": "3:15:53",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=11753s",
+      "depth": "in-depth",
+      "note": "soft-transform within a volume to squeeze points toward center"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 13973,
+      "tLabel": "3:52:53",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=13973s",
+      "depth": "explained",
+      "note": "soft-transform scaling/moving the particle volume"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 14979,
+      "tLabel": "4:09:39",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=14979s",
+      "depth": "explained",
+      "note": "flower-like shape attributed to soft-translate volume size"
+    }
+  ],
+  "op:Lib.point.modify.PointColorWithField": [
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 12006,
+      "tLabel": "3:20:06",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=12006s",
+      "depth": "in-depth",
+      "note": "point-color-with-field using sphere SDF"
+    }
+  ],
+  "op:Lib.field.use.SDFToColor": [
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 12064,
+      "tLabel": "3:21:04",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=12064s",
+      "depth": "explained",
+      "note": "SDF-to-color producing the center gradient"
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 15373,
+      "tLabel": "4:16:13",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=15373s",
+      "depth": "explained",
+      "note": "range-offset animating color band through the lines"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 4976,
+      "tLabel": "1:22:56",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=4976s",
+      "depth": "in-depth",
+      "note": "converts field distance to color for scene colorization (recurring topic)"
+    }
+  ],
+  "op:Lib.mesh.modify.CustomVertexShader": [
+    {
+      "video": "PWCfyUnFGdg",
+      "t": 15873,
+      "tLabel": "4:24:33",
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=15873s",
+      "depth": "in-depth",
+      "note": "custom vertex shader on a mesh with gradient presets, demoed"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 10115,
+      "tLabel": "2:48:35",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=10115s",
+      "depth": "explained",
+      "note": "\"custom base/vertex shader\" template also to get the field input"
+    }
+  ],
+  "op:Lib.mesh.generate.QuadMesh": [
+    {
+      "video": "qavgcL72F1Y",
+      "t": 690,
+      "tLabel": "0:11:30",
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=690s",
+      "depth": "passing",
+      "note": "quad mesh prepared to receive a texture"
+    }
+  ],
+  "op:Lib.numbers.float.adjust.Round": [
+    {
+      "video": "qavgcL72F1Y",
+      "t": 7083,
+      "tLabel": "1:58:03",
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=7083s",
+      "depth": "passing",
+      "note": "round operator for value quantization"
+    }
+  ],
+  "op:Lib.numbers.float.logic.Compare": [
+    {
+      "video": "qavgcL72F1Y",
+      "t": 7140,
+      "tLabel": "1:59:00",
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=7140s",
+      "depth": "explained",
+      "note": "compare value against a threshold to emit a trigger"
+    },
+    {
+      "video": "qavgcL72F1Y",
+      "t": 7245,
+      "tLabel": "2:00:45",
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=7245s",
+      "depth": "passing",
+      "note": "compare shown in numbers/logic namespace via symbol library"
+    }
+  ],
+  "op:Lib.image.fx.feedback.AdvancedFeedback": [
+    {
+      "video": "qavgcL72F1Y",
+      "t": 8499,
+      "tLabel": "2:21:39",
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=8499s",
+      "depth": "in-depth",
+      "note": "advanced feedback effect with many parameters/presets; container you can dive into"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 101,
+      "tLabel": "1:41",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=101s",
+      "depth": "explained",
+      "note": "feedback layer added to the date intro scene"
+    }
+  ],
+  "op:Lib.image.use.BlendImages": [
+    {
+      "video": "qavgcL72F1Y",
+      "t": 9335,
+      "tLabel": "2:35:35",
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=9335s",
+      "depth": "explained",
+      "note": "image A / image B inputs in the custom shader (two-image blend, color grading presets)"
+    },
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 3660,
+      "tLabel": "1:01:00",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=3660s",
+      "depth": "explained",
+      "note": "blend for rounded ribbon shape (wrong blend first, then correct)"
+    }
+  ],
+  "op:Lib.field.render.SampleFieldPoints": [
+    {
+      "video": "qavgcL72F1Y",
+      "t": 12483,
+      "tLabel": "3:28:03",
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=12483s",
+      "depth": "in-depth",
+      "note": "sample a field (SDF-like) to drive point scale; name noted as not ideal"
+    }
+  ],
+  "op:Lib.particle.force.MeshVolumeForce": [
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 356,
+      "tLabel": "5:56",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=356s",
+      "depth": "in-depth",
+      "note": "main new operator; particle collision/attraction against a mesh's faces"
+    }
+  ],
+  "op:Lib.particle.force.FieldVolumeForce": [
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 658,
+      "tLabel": "10:58",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=658s",
+      "depth": "in-depth",
+      "note": "the operator MeshVolumeForce was cloned from; parallel demo"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 9494,
+      "tLabel": "2:38:14",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=9494s",
+      "depth": "in-depth",
+      "note": "favored particle force; basis for the new field-input shader work"
+    }
+  ],
+  "op:Lib.field.space.Translate": [
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 777,
+      "tLabel": "12:57",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=777s",
+      "depth": "explained",
+      "note": "inserted to offset the box; pasted values across nodes"
+    }
+  ],
+  "op:Lib.point.draw.DrawMovingPoints": [
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 1830,
+      "tLabel": "30:30",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=1830s",
+      "depth": "in-depth",
+      "note": "new operator; stretches points by velocity like motion blur"
+    }
+  ],
+  "op:Lib.mesh.modify.DeformMesh": [
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 2960,
+      "tLabel": "49:20",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=2960s",
+      "depth": "explained",
+      "note": "twist deform applied to the mesh (twist pivot/axis explored)"
+    }
+  ],
+  "op:Lib.image.use.UseFallbackTexture": [
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 3257,
+      "tLabel": "54:17",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=3257s",
+      "depth": "explained",
+      "note": "fallback white-dot texture input for DrawMovingPoints"
+    }
+  ],
+  "op:Lib.field.space.RepeatAxis": [
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 5088,
+      "tLabel": "1:24:48",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=5088s",
+      "depth": "passing",
+      "note": "field repetition tried during colorization demo"
+    }
+  ],
+  "op:Lib.field.generate.sdf.Image2dSDF": [
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 5186,
+      "tLabel": "1:26:26",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=5186s",
+      "depth": "explained",
+      "note": "SDF from a texture's greyscale; near miss for the TV-lighting idea"
+    }
+  ],
+  "op:Lib.numbers.color.PickColorFromImage": [
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 5457,
+      "tLabel": "1:30:57",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=5457s",
+      "depth": "explained",
+      "note": "sample average color from a texture (read last mip level)"
+    }
+  ],
+  "op:Lib.render.camera.CamPosition": [
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 7875,
+      "tLabel": "2:11:15",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=7875s",
+      "depth": "explained",
+      "note": "keeps grid points just in front of the camera"
+    },
+    {
+      "video": "yy1kKa-wucA",
+      "t": 1838,
+      "tLabel": "30:38",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=1838s",
+      "depth": "explained",
+      "note": "get camera position; needs to be inside an executed group"
+    }
+  ],
+  "op:Lib.field.combine.CombineSDF": [
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 6960,
+      "tLabel": "1:56:00",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=6960s",
+      "depth": "in-depth",
+      "note": "base of the laser reflection scene; group second volume"
+    }
+  ],
+  "op:Lib.field.use.SdfReflectionLinePoints": [
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 7094,
+      "tLabel": "1:58:14",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=7094s",
+      "depth": "in-depth",
+      "note": "new node; reflects line points off an SDF, ray-marched"
+    }
+  ],
+  "op:Lib.field.space.RepeatPolar": [
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 10200,
+      "tLabel": "2:50:00",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=10200s",
+      "depth": "explained",
+      "note": "polar-repeat boxes for the iteration-glow raymarch demo"
+    }
+  ],
+  "op:Lib.field.render.RaymarchField": [
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 10235,
+      "tLabel": "2:50:35",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=10235s",
+      "depth": "in-depth",
+      "note": "counts ray-march steps near a surface to produce edge/distance glow"
+    }
+  ],
+  "op:Lib.field.generate.sdf.TorusSDF": [
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 11040,
+      "tLabel": "3:04:00",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=11040s",
+      "depth": "explained",
+      "note": "base of Nikita's SDF-to-color tunnel (inverted)"
+    }
+  ],
+  "op:Lib.field.analyze.VisualizeFieldDistance": [
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 12480,
+      "tLabel": "3:28:00",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=12480s",
+      "depth": "passing",
+      "note": "tried during the AMD raymarch-failure debugging"
+    }
+  ],
+  "op:Lib.particle.force.FieldDistanceForce": [
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 12720,
+      "tLabel": "3:32:00",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=12720s",
+      "depth": "explained",
+      "note": "proves PBR/particle path works while raymarch fails on AMD"
+    }
+  ],
+  "op:Lib.point.modify.ResampleLinePoints": [
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 13915,
+      "tLabel": "3:51:55",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=13915s",
+      "depth": "in-depth",
+      "note": "interpolates one point along a line for smooth camera/motion paths; loop option requested"
+    }
+  ],
+  "op:Lib.image.generate.misc.SlidingHistory": [
+    {
+      "video": "VNC-zr-JOjQ",
+      "t": 7650,
+      "tLabel": "2:07:30",
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ&t=7650s",
+      "depth": "passing",
+      "note": "used by Nick to build the audio displacement texture"
+    }
+  ],
+  "op:Lib.io.audio.AudioReaction": [
+    {
+      "video": "yy1kKa-wucA",
+      "t": 372,
+      "tLabel": "6:12",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=372s",
+      "depth": "passing",
+      "note": "fetching audio reaction as external input"
+    }
+  ],
+  "op:Lib.point.io.LineTextPoints": [
+    {
+      "video": "yy1kKa-wucA",
+      "t": 676,
+      "tLabel": "11:16",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=676s",
+      "depth": "in-depth",
+      "note": "core operator of the session; generates a point buffer from text, spacing/kerning, leading-digit placeholder bug discussed at length"
+    }
+  ],
+  "op:Lib.string.list.PickStringFromList": [
+    {
+      "video": "yy1kKa-wucA",
+      "t": 2691,
+      "tLabel": "44:51",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=2691s",
+      "depth": "explained",
+      "note": "\"big string part\" used frequently to index lines"
+    }
+  ],
+  "op:Lib.numbers.anim.animators.SequenceAnim": [
+    {
+      "video": "yy1kKa-wucA",
+      "t": 3971,
+      "tLabel": "1:06:11",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=3971s",
+      "depth": "explained",
+      "note": "sequence operator with a recording mode to tap/record a beat sequence"
+    }
+  ],
+  "op:Lib.flow.context.GetIntVar": [
+    {
+      "video": "yy1kKa-wucA",
+      "t": 5674,
+      "tLabel": "1:34:34",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=5674s",
+      "depth": "explained",
+      "note": "read the int variable elsewhere"
+    }
+  ],
+  "op:Lib.string.convert.IntToString": [
+    {
+      "video": "yy1kKa-wucA",
+      "t": 5690,
+      "tLabel": "1:34:50",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=5690s",
+      "depth": "explained",
+      "note": "\"int to text / to string\" for the text label"
+    }
+  ],
+  "op:Lib.particle.force.FollowMeshSurfaceForce": [
+    {
+      "video": "yy1kKa-wucA",
+      "t": 9540,
+      "tLabel": "2:39:00",
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA&t=9540s",
+      "depth": "explained",
+      "note": "closest existing mesh force; lacks inside/outside"
     }
   ]
 }

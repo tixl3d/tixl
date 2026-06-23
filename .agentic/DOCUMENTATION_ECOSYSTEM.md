@@ -45,11 +45,9 @@ Rule: authored cross-links point **one tier deeper** ("learn more"); the upward 
     audio/                       #   *.wav  (whisper input, ~0.5 GB each)
     video-transcripts/           #   *.srt / *.txt  (raw ASR)
     youtube/                     #   *.txt  (generated descriptions, to paste)
+    summaries/meetup/<date>.md   #   LLM extraction — staging for the (future) mentions enrichment
   references/                    # committed — the durable, distilled layer
     videos.map.json              #   date -> YouTube id (recorded once after upload)
-    summaries/
-      meetup/<date>.md           #   the LLM extraction = source for all outputs
-      other/<video>.md
     indices/
       videos.json                #   video/meet-up chapters + segment references
       skillquest.json            #   quest entries + refs (TBD)
@@ -99,7 +97,7 @@ Two halves, by nature of the work:
 - **Runs locally, foreground.** Do *not* launch transcription as a chat/session background task —
   those die silently on long runs (observed repeatedly).
 
-### Judgment (LLM) — a Claude Code skill
+### Judgment (LLM) — the `describe-meetup` skill
 - Reads the new transcript(s); produces the distilled summary (summary + chapters + highlights +
   operators) → `references/summaries/meetup/<date>.md`.
 - Chapter **granularity** matters: enough chapters that each topic's duration (gap to the next)
@@ -155,7 +153,9 @@ ensure ffmpeg + the whisper.cpp build are present.
 
 ## Status
 
-- **Built:** chunked/resumable transcription (proven); the wiki-notes parser → index
-  (`meetup_references.py`); extraction quality validated on the 06-01 capture.
-- **Next:** `update_help_index.py` (fold in `meetup_references.py`), the LLM skill, the editor
-  tooltip consumer, the SkillQuest feeder.
+- **Built:** `update_help_index.py` (resumable transcription + index from wiki notes); the
+  wiki-notes parser (`meetup_references.py`); the **`describe-meetup`** skill (transcript →
+  summary + wiki page + YouTube text); the typed `op:`/`ui:` index with category + duration
+  qualifiers.
+- **Next:** the editor tooltip consumer (#102); `[HelpUiID]` + `components.json` (makes `ui:`
+  resolvable); the `mentions.json` `summary`/`ui:` merge step; the SkillQuest feeder.

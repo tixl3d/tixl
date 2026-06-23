@@ -5,9 +5,8 @@ ecosystem (see [`../../.agentic/DOCUMENTATION_ECOSYSTEM.md`](../../.agentic/DOCU
 
 - **`videos.map.json`** — `date → YouTube id`, recorded once per upload. Drives the video
   thumbnail embed and the deep-linked chapters.
-- **`summaries/meetup/<date>.md`**, **`summaries/other/<video>.md`** — the LLM extraction for
-  each capture (summary + chapters + highlights + operators). The single source the wiki page,
-  YouTube description, and index entries are generated from.
+- LLM extraction summaries are **not** committed here — they're regenerable staging in
+  `../.tmp/summaries/`. The index is built from the **wiki pages**, not the summaries.
 - **`indices/videos.json`** — video / meet-up chapters + per-operator backlinks.
 - **`indices/skillquest.json`** — quest entries + references (TBD).
 - **`indices/mentions.json`** — typed reference (`op:…`, `ui:…`) → the video moments

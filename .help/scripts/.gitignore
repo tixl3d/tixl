@@ -1,2 +1,2 @@
 # Machine-specific config (absolute paths) — not shared.
-update_help_index.local.json
+*.local.json

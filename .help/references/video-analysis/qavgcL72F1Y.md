@@ -1,0 +1,107 @@
+---
+video: qavgcL72F1Y
+type: meetup
+date: 2026-06-01
+title: Performance profiler, alpha workflow & guided tests, timeline/keyframe rewrite, audio & I/O recording clips, custom shaders, AI-assisted development
+duration: 3:49:01
+---
+
+A TiXL community meet-up where the maintainer walks through recent 4.2-alpha work: a new performance/allocation histogram window, the alpha-version splash/release-notes flow, guided feature tests, project-scoped settings and backups, and a major timeline and keyframe-interpolation rewrite (cubic tangents, smooth/clamped modes, embedded curve editor). The second half covers new multi-track audio and recordable MIDI/OSC I/O clips, a long Q&A comparing TiXL to TouchDesigner, demonstrations of bypassing via Pick/Switch, custom pixel/point shaders, procedural city building with SDF point selection, and a candid discussion of how AI agents fit into the project's contribution policy.
+
+## Mentions
+- 0:09:40 [RenderTarget] · explained — opaque render target with clear color used as the base for the warm-up animation
+- 0:11:30 [QuadMesh] · passing — quad mesh prepared to receive a texture
+- 0:12:23 [RepeatMeshAtPoints] · explained — repeat mesh at points feeding into DrawPoints/draw
+- 0:12:34 [DrawPoints] · explained — points drawn using the rendered texture
+- 0:13:03 [DrawPoints] · passing — "ready point" (ASR for DrawPoints) used for simple point rendering
+- 0:13:38 [SortPointsByCameraDistance] · explained — sort/fade points by camera distance so distant points fade
+- 0:14:32 [DrawPoints] · explained — draw settings, alpha cut-off already enabled
+- 0:14:45 [OrbitCamera] · explained — orbit camera added so moving the camera changes point size with distance
+- 0:15:00 [SSAO] · passing — considered adding SSAO; mentions a depth input not connected
+- 0:16:09 [Atmosphere] · passing — atmosphere added to enrich the startup-animation look
+- 0:43:00 (no operator — backups/minimal backup project settings discussion)
+- 0:47:31 [RadialGradient] · explained — gradient skill-quest tutorial (offset/rotation tweaks shown)
+- 0:51:50 [LoadImage] · passing — "load a fork" (ASR) rendered into a texture for the Instagram-portrait pin demo
+- 0:55:35 (timeline region/keyframe demo begins — keyframes via Alt, snapping, cycle modes)
+- 1:00:00 [AnimationCurve] · in-depth — embedded curve editor, tangents, spline interpolation rewrite
+- 1:02:00 (cubic spline vs fast approximation; Ctrl to change tangent length)
+- 1:03:42 [Smooth] · explained — smooth = cubic interpolation keyframe mode
+- 1:04:25 [SmoothClamped] · explained — clamped smooth so tangents never exceed neighboring keyframe values (e.g. opacity never goes negative)
+- 1:09:54 [Value] · explained — animated Value driving a soundtrack-based animation
+- 1:10:03 [Value] · explained — "value animated" plus a soundtrack used in the trigger-keyframe workaround
+- 1:10:31 [Constant] · explained — send-to-constant / release-step keyframes for stepped animation
+- 1:10:39 [FloatToInt] · explained — "floor/flow to int" converting linear ramp into integer steps
+- 1:10:48 [HasChanged] · explained — detects integer change to fire a trigger
+- 1:10:48 [TriggerAnimation] · explained — trigger animation driven by HasChanged
+- 1:11:06 [SimpleGradient] · explained — simple gradient used as clear color, flashed by the trigger
+- 1:11:28 [Reverse] · passing — reverse/click the trigger animation
+- 1:11:40 [Bias] · passing — bias adjustment on the trigger curve
+- 1:13:25 [CountIn] · explained — counts up over time, used with PickText
+- 1:13:48 [PickText] · explained — pick text by index from a string list of participants
+- 1:14:25 [String] · passing — string of participant names
+- 1:15:04 [PickText] · explained — "pick part / split fragment" picking a word/fragment by index
+- 1:15:19 [Text] · passing — text operator showing the picked string
+- 1:16:01 (right-click layer → set sequential values; start at 0 / start at first)
+- 1:16:13 [RandomIndex] · explained — "shuffle / random choice index" never repeats the same index twice in a row
+- 1:20:10 (audio clips, recording I/O tracks introduction)
+- 1:24:08 (recording tab; capturing audio I/O)
+- 1:25:01 (audio recording / spectrum capture demo)
+- 1:38:48 (multi-track audio playback; soundtrack drag-in)
+- 1:39:31 [ComputeAudioSpectrum] · passing — compute audio spectrum to show in the timeline background
+- 1:42:10 (data clip / data clips with channels, events, intervals)
+- 1:50:39 [SetTime] · explained — "set time after simulated data" to drive playback by clip timing
+- 1:54:41 [SimulateIODevice] · in-depth — simulate I/O data is the only operator using clip timing; replays recorded MIDI/OSC events
+- 1:55:51 [SetTime] · explained — set time plus animated Value to sample ramps from the clip
+- 1:56:05 [Value] · explained — sample the ramp at clip time and pin it
+- 1:56:26 [Random] · explained — random events generated, rate increased
+- 1:57:45 [Remap] · explained — main operator used to remap/scale values (contrast)
+- 1:57:49 [RemapCurve] · explained — remap curves for value shaping
+- 1:58:03 [Round] · passing — round operator for value quantization
+- 1:59:00 [Compare] · explained — compare value against a threshold to emit a trigger
+- 1:59:21 [TriggerAnimation] · explained — trigger animation fired when threshold exceeded
+- 1:59:30 [SimpleGradient] · explained — gradient color driven each time the trigger fires
+- 2:00:36 [AnyValue] · explained — "any value" found via LFO synonym search; LFO in name
+- 2:00:45 [Compare] · passing — compare shown in numbers/logic namespace via symbol library
+- 2:02:23 [Freeze] · explained — freeze = sample-and-hold equivalent
+- 2:03:24 (Q: animate bypass/enable of a node — leads to workaround demos)
+- 2:03:58 [DrawPoints] · explained — regular points drawn for the bypass example
+- 2:04:13 [RandomizeTransformPoints] · explained — "randomized points" randomizing position; example of an over-parameterized but powerful op
+- 2:04:59 [AnimateValue] · explained — "animators angle time" added so the bypass toggle can be animated
+- 2:06:21 [PickPoint] · in-depth — Pick (pick point / pick points) used to switch between original and effected point set as a bypass
+- 2:07:18 [Switch] · in-depth — Switch operator; negatives are magic numbers (-1 disables, -2 enables all), wraps around on positives
+- 2:07:39 [Noise] · explained — noise feeding the phase of a Switch to drive it into negatives
+- 2:08:12 [Camera] · explained — multiple cameras switched/duplicated to demonstrate Switch behavior
+- 2:11:38 [CirclesDemo] · passing — heavy "circuits/circles" demo loaded as a Switch-able scene
+- 2:13:32 (caching / faded-out operators no longer updated, still hold RAM)
+- 2:13:37 (presets/snapshots blending discussion; XY blend feature request)
+- 2:14:00 [BlendPresets] · explained — operator for blending presets; XY-coordinate fluid blend requested, blocked by undo/export-executable concerns
+- 2:17:39 [RemapColors] · in-depth — color remap maps brightness to a gradient; bias/gain, contrast, cycle/over-cycle, parameter presets shown
+- 2:21:39 [AdvancedFeedback] · in-depth — advanced feedback effect with many parameters/presets; container you can dive into
+- 2:28:51 (double-click into container; edit shader code, breadcrumbs/asset reveal)
+- 2:30:55 [CustomPixelShader] · in-depth — add custom pixel shader, returns vector4 color C, default white; HLSL editing
+- 2:33:05 [SimpleGradient] · explained — sample SimpleGradient inside the custom shader by UV/temp value
+- 2:34:14 (HLSL float-to-half temp value; sampling the gradient)
+- 2:35:35 [BlendImages] · explained — image A / image B inputs in the custom shader (two-image blend, color grading presets)
+- 2:36:55 [CustomPixelShader] · explained — same pattern available for points and geometry
+- 2:38:00 (long AI / agentic-coding policy discussion)
+- 2:55:48 (Round Values pull-request review begins)
+- 3:01:17 [RoundValues] · explained — pending PR "Round Values" operator; should live in Floats namespace (works on lists), not Float
+- 3:01:22 (Float vs Floats namespace distinction explained)
+- 3:23:00 (procedural geometry / CGA vision discussion)
+- 3:24:01 [GridPoints] · explained — XY grid of points as the base for a procedural city
+- 3:24:44 [RepeatMeshAtPoints] · in-depth — repeat a cube mesh at the grid points to build a 10x10 city block
+- 3:24:50 [Cube] · explained — cube used as the repeated building mesh
+- 3:25:09 (pivot offset so points sit at the bottom of the mesh)
+- 3:25:42 [RandomizeTransformPoints] · in-depth — randomize F1 attribute to vary building heights; gain/bias to shape distribution
+- 3:26:39 [FilterPoints] · explained — keep only a subset of points (e.g. 10 of 30 buildings) randomly scattered
+- 3:27:52 [RandomizeTransformPoints] · passing — larger grid randomized again before field sampling
+- 3:28:03 [SampleFieldPoints] · in-depth — sample a field (SDF-like) to drive point scale; name noted as not ideal
+- 3:28:24 (SDF field used to cut/scale points)
+- 3:30:47 [CustomPointShader] · in-depth — custom point shader; color points by index (every tenth building) via HLSL
+- 3:33:27 (duplicate an existing library node to modify it)
+- 3:34:46 [RepeatMeshAtPoints] · explained — duplicate-as-new-type into project namespace, plus duplicating dependent shaders
+- 3:40:00 [SelectPointsBySphere] · explained — distance/SDF sphere drives building scale (legacy "select point" op was obsolete)
+- 3:41:57 [SelectPointsBySDF] · in-depth — recommended replacement; range, negative ranges, smooth value curve, combine modes
+- 3:44:40 [SelectPointsBySDF] · in-depth — second SDF point selector in multiply/subtract mode to carve a street/empty center
+- 3:46:18 [DrawMeshAtPoints] · explained — draw mesh at points via instancing (faster than generating one big mesh) for many meshes
+- 3:46:49 [InstanceMeshAtPoints] · passing — "formation points" instancing approach for large meshes

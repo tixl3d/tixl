@@ -1,0 +1,114 @@
+---
+video: VNC-zr-JOjQ
+type: meetup
+date: 2026-03-23
+title: MeshVolumeForce, DrawMovingPoints, SDF reflection/colorization, raymarch fields, quaternion blending & camera paths
+duration: 4:06:20
+---
+
+A TiXL community meet-up where the host demos a new MeshVolumeForce particle operator (cloned from the field volume force) and a new DrawMovingPoints operator that stretches particles by velocity, then fields audience questions on glow/transparency, faking TV-screen lighting, GPU resource caching, SDF reflection and colorization, and raymarch "iteration glow." It closes with discussion of quaternion (slerp) flipping in blended camera paths, point-resampling for motion paths, and members sharing their own scenes.
+
+## Mentions
+- 0:50 [TextPoints] · passing — line/text points spelling out the meet-up date in the background
+- 1:07 [ListBuffer] · passing — points pushed onto a buffer for ordering
+- 1:18 [OrderAsLines] · passing — ordering the date points as lines for legibility
+- 1:41 [AdvancedFeedback] · explained — feedback layer added to the date intro scene
+- 2:00 [RenderTarget] · passing — render into a target before feedback
+- 2:05 [Layer2D] · passing — used between render target and advanced feedback
+- 5:56 [MeshVolumeForce] · in-depth — main new operator; particle collision/attraction against a mesh's faces
+- 6:00 [ParticleSystem] · explained — host emits particles to drive the mesh force demo
+- 13:00 [DrawPoints] · explained — drawing the emitted particle points
+- 6:40 [CubeMesh] · explained — first mesh fed into MeshVolumeForce (quad cube, works oddly)
+- 9:30 [SphereMesh] · passing — manifold mesh alternative tried later for poly-count test
+- 10:58 [FieldVolumeForce] · in-depth — the operator MeshVolumeForce was cloned from; parallel demo
+- 12:00 [BoxSDF] · explained — SDF box used as the field for FieldVolumeForce
+- 12:57 [Translate] · explained — inserted to offset the box; pasted values across nodes
+- 13:04 [TransformPoints] · passing — referenced re: translate/rotate naming (point-space rotation later at 2:02)
+- 21:50 [PointerNoise] · in-depth — added to rotation; gain/bias and amplitude/frequency explored
+- 28:50 [TurbulenceForce] · explained — combined with mesh force; noise-level/frequency adjustments
+- 30:30 [DrawMovingPoints] · in-depth — new operator; stretches points by velocity like motion blur
+- 34:30 [PreviousPointBuffer] · explained — internal double-buffer that finds each point's prior position
+- 35:33 [GridPoints] · passing — used to show DrawMovingPoints works on non-particle points too
+- 41:04 [LinePoints] · explained — vertical emit points for the wet/surface particle demo
+- 48:00 [Drag] · explained — recommended to bleed energy out of a runaway particle system
+- 44:30 [PerlinDistributionForce] · passing — hypothetical force he wishes existed (local densities)
+- 44:48 [CustomSDF] · in-depth — recurring custom SDF/field node (sphere, fractals, reflection scenes)
+- 45:00 [VolumeFieldForce] · explained — attraction-only force used to cluster particles into densities
+- 49:20 [DeformMesh] · explained — twist deform applied to the mesh (twist pivot/axis explored)
+- 52:00 [TextureAtlas] · passing — weekend experiment to pre-blur particles photorealistically
+- 53:00 [RadialPoints] · explained — test scene points for the moving-points texture test
+- 53:00 [OrbitCamera] · explained — z-up orbit camera in the pill-shape test
+- 54:17 [UseFallbackTexture] · explained — fallback white-dot texture input for DrawMovingPoints
+- 55:54 [UseFirstTexture] · explained — preferred multi-input variant of the fallback operator
+- 54:47 [RenderTarget] · explained — frozen via disable update to inspect particle artifacts
+- 56:00 [WhiteDotTexture] · passing — original particle sprite; mipmap artifacts discussed
+- 59:36 [SampleTextureLevel] · explained — used instead of normal sampling to disable mipmaps
+- 1:00:00 [LinearGradient] · explained — answer to "can we gradient the particle?" — gradient as texture
+- 1:01:00 [BlendImages] · explained — blend for rounded ribbon shape (wrong blend first, then correct)
+- 1:01:14 [Blend] · passing — generic blend tried while searching for the right one
+- 1:02:54 [CacheResources] [LoadImage] · in-depth — new "cache resources" flag on image loading; resource sharing/disposal
+- 1:04:56 [StringFromList] · explained — image-sequence string list driving the file path
+- 1:06:01 [Counter] · explained — "count in" to rapidly cycle textures and stress resource usage
+- 1:10:51 [Glow] · explained — glow clamping on transparent-image edges (audience problem)
+- 1:11:47 [Crop] · explained — crop/expand to add empty edge pixels; "Expand" tag suggested
+- 1:15:15 [ImageLevels] · explained — used to inspect whiteness/premultiply of a transparent logo
+- 1:16:24 [CustomPixelShader] · in-depth — recurring; here to force RGB=1 on a sampled image
+- 1:17:25 [Bloom] · explained — blooming both logo variants to show premultiply difference
+- 1:17:58 [CompareImage] · explained — side-by-side compare of the two bloom results
+- 1:19:21 [ShadowMap] · explained — the "soft shadow" directional-light workflow audience found
+- 1:19:41 [PointLight] · explained — point light has no direction; brightness/color controls discussed
+- 1:20:54 [DrawMeshAtPoints] · passing — suggestion to scatter many TVs onto points
+- 1:21:31 [LoadObj] · explained — loads the studio backdrop OBJ scene
+- 1:21:09 [DrawMesh] · explained — drawing scene mesh; has field inputs for fragment fields
+- 1:22:47 [PlaneSDF] · explained — horizon plane SDF whose distance is converted to color
+- 1:22:56 [SDFToColor] · in-depth — converts field distance to color for scene colorization (recurring topic)
+- 1:24:34 [TransformField] · explained — rotate/transform the field like a projector
+- 1:24:48 [RepeatAxis] · passing — field repetition tried during colorization demo
+- 1:26:26 [Image2DSDF] · explained — SDF from a texture's greyscale; near miss for the TV-lighting idea
+- 1:30:57 [PickColorFromImage] · explained — sample average color from a texture (read last mip level)
+- 1:33:06 [ProjectLight] · in-depth — projector/light operator with spotlight/orthographic types; multi-TV lighting
+- 1:43:35 [MeshProjectUVs] · explained — overrides UVs with planar projection (reproject-UV tangent)
+- 1:46:51 [Fresnel] · explained — fresnel edge pass for fake rim-lighting from screens (custom pixel shader)
+- 2:33:33 [Spectrogram] · explained — audio spectrogram displacing the post-render (Nick's scene)
+- 2:34:48 [TemporalAccumulation] · in-depth — CCTV-style smearing/noise reduction; naming story; grain must come after
+- 1:52:40 [MovePointsToSDF] · explained — moves grid points onto an SDF for the electric tunnel effect
+- 1:53:09 [DrawLine] · explained — lines + subdivide + noise for electric sheath
+- 1:53:09 [SubdivideLines] · passing — subdivide added to the electric line sheath
+- 1:54:33 [DrawBillboards] · passing — "plop and billboard" blobs on the line points
+- 2:11:15 [CamPosition] · explained — keeps grid points just in front of the camera
+- 2:14:00 [StarGlow] · passing — streaky glow in the VHS post chain
+- 2:30:00 [PointsOnImage] · explained — places tracker sprites on screen-space shooting-star positions
+- 2:21:00 [TerrainSDF] · explained — a terrain fractal intersected with a translated copy to crop it
+- 2:25:00 [SubtractSDF] · explained — combine fractals (subtraction) for the city
+- 2:25:00 [IntersectSDF] · explained — combine fractals (intersection) for the city
+- 1:56:00 [CombineSDF] · in-depth — base of the laser reflection scene; group second volume
+- 1:57:46 [IntersectRound] · explained — round-clamp the SDF sides
+- 1:58:05 [SpecularAA] · passing — tried to reduce SDF edge artifacts (and later raymarch jitter)
+- 1:58:14 [SDFReflectionLinePoints] · in-depth — new node; reflects line points off an SDF, ray-marched
+- 1:59:27 [DrawRayLines] · in-depth — ray lines render more consistently than draw lines for lasers
+- 2:01:35 [BoxSDF] · explained — box-minus-box tunnel built for the reflection-points demo
+- 2:02:40 [DrawLines] · explained — drawing the reflected ray lines (additive, no depth write)
+- 2:03:30 [InitializeDepth] · explained — set up depth for the tunnel laser scene
+- 2:03:30 [DepthTest] · explained — depth test set up for the tunnel laser scene
+- 2:04:08 [Bloom] · passing — HDR bloom on the bright reflected lines
+- 2:06:33 [RandomizePoints] · explained — slightly randomize reflection point positions/rotation
+- 2:19:18 [SymbolDefinition] · explained — "set as symbol definition" + Symbol Library thumbnail workflow
+- 2:42:00 [Environment] · explained — animated sky/environment technique (from Martin) in the alien scene
+- 2:50:00 [RepeatPolar] · explained — polar-repeat boxes for the iteration-glow raymarch demo
+- 2:50:35 [RaymarchField] · in-depth — counts ray-march steps near a surface to produce edge/distance glow
+- 2:51:00 [TriPlanarNormalMapping] · passing — noted as the most expensive part of the shader graph
+- 2:57:00 [PlaneSDF] · explained — combined into the raymarch scene to test the new glow output
+- 3:04:00 [TorusSDF] · explained — base of Nikita's SDF-to-color tunnel (inverted)
+- 3:28:00 [VisualizeFieldDistance] · passing — tried during the AMD raymarch-failure debugging
+- 3:32:00 [FieldDistanceForce] · explained — proves PBR/particle path works while raymarch fails on AMD
+- 3:48:43 [BlendPoints] · in-depth — powerful for camera animations; "blend with range" wrap/cross-fade
+- 3:05:02 [ReorientPoints] · explained — makes points look toward the next one (slerp flip issue)
+- 3:51:55 [ResampleLinePoints] · in-depth — interpolates one point along a line for smooth camera/motion paths; loop option requested
+- 3:52:46 [PointsToCPU] · explained — read sampled point back to CPU for camera/geometry placement
+- 3:42:13 [PointsAtCPU] · explained — reads torus-mesh point positions for the number-pad camera-path rig
+- 3:43:36 [FilterPoints] · in-depth — recommended before PointsToCPU; pick one point by start index (wraps around)
+- 3:53:14 [DrawSphere] · passing — sphere drawn at the resampled motion-path point
+- 3:53:26 [DrawLines] · passing — line drawn along the resampled path
+- 3:50:33 [ApplyCameraTransform] · explained — debug rig to visualize/blend multiple cameras in space
+- 2:07:30 [SlidingHistory] · passing — used by Nick to build the audio displacement texture
+- 4:02:55 [GainAndBias] · passing — tweaks the camera-path animation curve (a.k.a. renamed pointer-noise params)
