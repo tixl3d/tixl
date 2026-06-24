@@ -11,6 +11,35 @@ index (operator → meet-up moments, examples). The index it reads is built by t
 This plan is implementation-ready: an independent session can build it from here. Sections 3 (model)
 and 5 (indices) carry the decisions settled in design discussion.
 
+## Status
+
+**Phase 1 — implemented.** `Editor/Gui/Windows/HelpWindow.cs` (the shell: Help/Learn tabs, follow-selection
++ pin + history, body via `OperatorHelp.DrawHelp`), plus the helpers in `Editor/Gui/Help/`:
+`HelpIndex` (loads + caches `mentions.json`/`videos.json` via `ShippedContent.ResolveDirectory(".help",
+"references", "indices")`; the segment type is `OnlineVideoSegment`), `VideoResourceList` (ranked rows +
+hover tooltip; the section heading adapts to the video types present), and `HoveredHelpTarget` (the
+per-frame broker the graph feeds from `MagGraphCanvas.DrawNode`). Registered in `WindowManager`; indices
+ship via a new `Editor.csproj` copy target. Manual test set: `.tests-manual/help-window.md`.
+
+Note for any window drawing an empty-state after `CustomComponents.SeparatorLine()`: render the body
+inside a `BeginChild`/`EndChild`. `SeparatorLine` ends on a bare `SetCursorPosX` and `EmptyWindowMessage`
+draws via the draw list (submits no item), so the dangling cursor otherwise trips ImGui's "validate
+extent" assert at the window's `EndChild`. The child item validates the extent.
+
+Decisions taken while building (settle/adjust before Phase 2 ships):
+- **Pin = icon click, not bare `Shift`.** The §9 conflict risk (Shift is a heavily-used graph modifier)
+  made a reliable bare-Shift *tap* detector not worth it for Phase 1. The pin icon brightens
+  (`ButtonStates.Emphasized`) until the first pin to stay discoverable. Revisit the Shift bind in §9.
+- **No thumbnail image yet.** The `.jpg`s live in git-ignored `.help/.tmp/video-thumbnails/` (no release
+  shipping story) and need string-keyed GPU-texture plumbing (`ThumbnailManager` is Guid/atlas-only). The
+  hover tooltip carries the metadata header, title, date, and note instead. Top follow-up — see §7.
+- **Learn tab wired to `ReleaseNotesLoader`** (the loader already existed). The "has updates" dot is still
+  Phase 3.
+- **Follow-hover source = the graph only** for now. Library / Symbol-browser hover (a one-line
+  `HoveredHelpTarget.SetOperator(...)` at each hover site) is a cheap follow-up.
+- The "Edit description…" button inside an empty doc only opens the dialog when the Parameter window is
+  also visible (that window draws the shared `EditDescriptionDialog`). Minor; left to the Parameter window.
+
 ## 1. Modes
 
 Two top-level modes, switched by a tab in the header:

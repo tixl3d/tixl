@@ -8,6 +8,7 @@ using T3.Core.Operator.Interfaces;
 using T3.Core.Operator.Slots;
 using T3.Core.Resource;
 using T3.Core.Utils;
+using T3.Editor.Gui.Help;
 using T3.Editor.Gui.MagGraph.Interaction;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.MagGraph.States;
@@ -191,7 +192,13 @@ internal sealed partial class MagGraphView
         if (_context.StateMachine.CurrentState == GraphStates.Default
             && isItemHovered
             && (customUiResult & OpUi.CustomUiResult.IsActive) == 0)
+        {
             _context.ActiveItem = item;
+
+            // Feed the Help window so it follows the hovered operator without any dwell delay.
+            if (item.Variant == MagGraphItem.Variants.Operator && item.SymbolChild != null)
+                HoveredHelpTarget.SetOperator(item.SymbolChild.Symbol.Id);
+        }
 
         // if ((customUiResult & OpUi.CustomUiResult.IsActive) != 0)
         // {

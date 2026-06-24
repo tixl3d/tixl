@@ -88,6 +88,7 @@ internal static partial class WindowManager
                 new RenderWindow(),
                 new IoViewWindow(),
                 new PerformanceWindow(),
+                new HelpWindow(),
                 Program.ConsoleLogWindow,
                 UtilitiesWindow,    // item shown in TiXL > Development menu
                 GuidedFeatureTestsWindow,
