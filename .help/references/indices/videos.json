@@ -1,84 +1,68 @@
 {
   "videos": [
     {
+      "id": "5KX92VWEAG8",
+      "type": "meetup",
+      "date": "2025-11-10",
+      "title": "Beginners UI tour, real-time performance, and building a \"donut\" with SDFs, materials, lights, fog and sprinkles",
+      "duration": "2:28:27",
+      "url": "https://www.youtube.com/watch?v=5KX92VWEAG8"
+    },
+    {
+      "id": "6-8PKxPztl8",
+      "type": "tutorial",
+      "date": "2025-10-13",
+      "title": "Using the new Shader Graph (Deep Dive) — SDFs, ray marching, and field-driven particles",
+      "duration": "20:13",
+      "url": "https://www.youtube.com/watch?v=6-8PKxPztl8"
+    },
+    {
       "id": "a5_xCfC_3m4",
       "type": "meetup",
-      "date": "2026-01-26",
-      "title": "Part 1 — Asset system overhaul, performance profiling, MediaPipe hand-tracking particle demo, SkillQuest tutorial editor",
-      "duration": "4:10:42",
+      "date": "2026-02-03",
+      "title": "Performance monitor & fill-rate testing, the new asset browser, MediaPipe hand-tracking experiments, and Skill Quest authoring",
+      "duration": "4:10:44",
       "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4"
     },
     {
-      "id": "dCX7CcL0ZJs",
-      "type": "meetup",
-      "date": "2026-04-20",
-      "title": "Time control, deterministic vs procedural animation, custom point shaders, SDF fields, sine waves, mesh/spiral recreation, SSAO & project lights",
-      "duration": "3:41:03",
-      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs"
+      "id": "asiY0Jo1oJw",
+      "type": "update",
+      "date": "2024-03-17",
+      "title": "Tooll V3.9 — release overview: docs & help mode, faster export, glTF scenes, Ableton Link, colored points, bias-and-gain",
+      "duration": "15:05",
+      "url": "https://www.youtube.com/watch?v=asiY0Jo1oJw"
     },
     {
-      "id": "GF0wWpNWkVs",
-      "type": "meetup",
-      "date": "2026-02-09",
-      "title": "Part 2 — Building a ProjectLight post-effect operator (projector/shadow ray-marching, camera reference, PickObject, custom shader extraction)",
-      "duration": "3:14:54",
-      "url": "https://www.youtube.com/watch?v=GF0wWpNWkVs"
+      "id": "f9E7lwUXfBM",
+      "type": "tutorial",
+      "date": "2022-06-30",
+      "title": "Resolution Magic — how output size, image inputs, and the magic resolution parameter interact",
+      "duration": "6:37",
+      "url": "https://www.youtube.com/watch?v=f9E7lwUXfBM"
     },
     {
-      "id": "Kg5UcJJWt80",
-      "type": "meetup",
-      "date": "2026-06-15",
-      "title": "Snapshots & presets, FFmpeg video/audio/data clips, 360 optimization, ArtNet, Skill-Quest",
-      "duration": "4:45:18",
-      "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80"
+      "id": "fCz6SbxFPPA",
+      "type": "tutorial",
+      "date": "2025-05-06",
+      "title": "Get Positions in Screen Space — the GetScreenPos operator for screen-space labels",
+      "duration": "13:48",
+      "url": "https://www.youtube.com/watch?v=fCz6SbxFPPA"
     },
     {
-      "id": "MAyETISMFi0",
-      "type": "meetup",
-      "date": "2026-01-26",
-      "title": "Part 2 (SkillQuest) — Performance debugging, procedural animation, gradient sampling, directional-blur feedback, masked logo reveal",
-      "duration": "34:08",
-      "url": "https://www.youtube.com/watch?v=MAyETISMFi0"
+      "id": "PJ9QwFt1r5k",
+      "type": "update",
+      "date": "2025-09-14",
+      "title": "TiXL v4.0 — release overview: graph & timeline UI, SDF/field & color ops, particles, animation, I/O",
+      "duration": "16:43",
+      "url": "https://www.youtube.com/watch?v=PJ9QwFt1r5k"
     },
     {
-      "id": "PWCfyUnFGdg",
-      "type": "meetup",
-      "date": "2026-02-23",
-      "title": "Building complex scenes — text rendering, IK chains, ray-marching SDF tentacle monster, custom-point-shader circuit transition",
-      "duration": "4:34:56",
-      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg"
-    },
-    {
-      "id": "qavgcL72F1Y",
-      "type": "meetup",
-      "date": "2026-06-01",
-      "title": "Performance profiler, alpha workflow & guided tests, timeline/keyframe rewrite, audio & I/O recording clips, custom shaders, AI-assisted development",
-      "duration": "3:49:01",
-      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y"
-    },
-    {
-      "id": "S8chZaAS3uQ",
-      "type": "meetup",
-      "date": "2026-02-09",
-      "title": "Part 1 — Thumbnail manager feature dev, release tweaks, intro patching",
-      "duration": "31:27",
-      "url": "https://www.youtube.com/watch?v=S8chZaAS3uQ"
-    },
-    {
-      "id": "VNC-zr-JOjQ",
-      "type": "meetup",
-      "date": "2026-03-23",
-      "title": "MeshVolumeForce, DrawMovingPoints, SDF reflection/colorization, raymarch fields, quaternion blending & camera paths",
-      "duration": "4:06:20",
-      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ"
-    },
-    {
-      "id": "yy1kKa-wucA",
-      "type": "meetup",
-      "date": "2026-03-09",
-      "title": "Number line points, beat-sync, custom point shaders, SDF fields, keyframe interpolation bugs",
-      "duration": "4:26:36",
-      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA"
+      "id": "WK4j0H-oM3g",
+      "type": "update",
+      "date": "2023-06-18",
+      "title": "Tooll V3.6 — release overview: color/gradient workflow, Symbol Browser, in-editor shaders, per-project playback, new ops",
+      "duration": "13:56",
+      "url": "https://www.youtube.com/watch?v=WK4j0H-oM3g"
     }
   ]
 }
