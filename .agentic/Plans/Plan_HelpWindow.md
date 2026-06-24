@@ -21,6 +21,11 @@ hover tooltip; the section heading adapts to the video types present), and `Hove
 per-frame broker the graph feeds from `MagGraphCanvas.DrawNode`). Registered in `WindowManager`; indices
 ship via a new `Editor.csproj` copy target. Manual test set: `.tests-manual/help-window.md`.
 
+`VideoThumbnails` loads `<id>.jpg` from `.help/.tmp/video-thumbnails/` (WIC → texture → SRV, cached per
+session) for the resource tooltip. **Shipping caveat:** that folder is git-ignored and not copied to the
+build output, so thumbnails only resolve in a dev checkout. Shipping them in a release needs a tracked
+location + copy target (or a pipeline step) — open.
+
 Note for any window drawing an empty-state after `CustomComponents.SeparatorLine()`: render the body
 inside a `BeginChild`/`EndChild`. `SeparatorLine` ends on a bare `SetCursorPosX` and `EmptyWindowMessage`
 draws via the draw list (submits no item), so the dangling cursor otherwise trips ImGui's "validate

@@ -202,7 +202,7 @@ internal sealed class OperatorHelp
         DocumentationRenderer.DrawLinksAndExamples(symbolUi);
 
         ImGui.PopStyleVar();
-        ImGui.Unindent();
+        ImGui.Unindent(10); // Balance the Indent(10) above; bare Unindent() uses the larger default spacing and leaves a negative indent.
         ImGui.Dummy(new Vector2(10, 10));
         ImGui.PopFont();
     }

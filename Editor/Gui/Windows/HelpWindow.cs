@@ -147,17 +147,25 @@ internal sealed class HelpWindow : Window
             _lastShownSymbolId = showId;
         }
 
-        // The body always lives in a child: the empty-state message draws straight to the draw list and
+        SymbolUi? symbolUi = null;
+        string? operatorFullPath = null;
+        if (showId != Guid.Empty && SymbolUiRegistry.TryGetSymbolUi(showId, out symbolUi))
+            operatorFullPath = symbolUi.Symbol.Namespace + "." + symbolUi.Symbol.Name;
+
+        // Reserve space at the bottom so the video resources stay docked while the doc scrolls above them.
+        var bodyHeight = ImGui.GetContentRegionAvail().Y;
+        var footerHeight = operatorFullPath != null ? _resourceList.MeasureHeight(operatorFullPath, bodyHeight) : 0f;
+
+        // The doc always lives in a child: the empty-state message draws straight to the draw list and
         // submits no item, so without the child's own item the dangling cursor from the header separator
         // would trip ImGui's "validate extent" assert at the window's EndChild.
-        ImGui.BeginChild("helpBody", Vector2.Zero, ImGuiChildFlags.None, ImGuiWindowFlags.NoBackground);
+        ImGui.BeginChild("doc", new Vector2(0, -footerHeight), ImGuiChildFlags.None, ImGuiWindowFlags.NoBackground);
         if (topicChanged)
             ImGui.SetScrollY(0);
 
-        if (showId != Guid.Empty && SymbolUiRegistry.TryGetSymbolUi(showId, out var symbolUi))
+        if (symbolUi != null)
         {
             OperatorHelp.DrawHelp(symbolUi);
-            _resourceList.Draw(symbolUi.Symbol.Namespace + "." + symbolUi.Symbol.Name);
         }
         else
         {
@@ -167,6 +175,23 @@ internal sealed class HelpWindow : Window
         }
 
         CustomComponents.HandleDragScrolling(this);
+        ImGui.EndChild();
+
+        if (operatorFullPath != null && footerHeight > 0)
+            DrawResourceFooter(operatorFullPath);
+    }
+
+    private void DrawResourceFooter(string operatorFullPath)
+    {
+        // Subtle divider at the docked footer's top edge.
+        var top = ImGui.GetCursorScreenPos();
+        ImGui.GetWindowDrawList().AddLine(top, top + new Vector2(ImGui.GetContentRegionAvail().X, 0),
+                                          UiColors.ForegroundFull.Fade(0.1f));
+
+        ImGui.BeginChild("resources", Vector2.Zero, ImGuiChildFlags.None, ImGuiWindowFlags.NoBackground);
+        ImGui.Indent(10); // Match the inset OperatorHelp.DrawHelp uses for the doc body.
+        _resourceList.Draw(operatorFullPath);
+        ImGui.Unindent(10);
         ImGui.EndChild();
     }
 

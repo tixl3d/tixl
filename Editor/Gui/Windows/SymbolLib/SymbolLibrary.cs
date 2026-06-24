@@ -6,6 +6,7 @@ using T3.Core.Operator;
 using T3.Core.SystemUi;
 using T3.Core.Utils;
 using T3.Editor.Gui.Dialogs;
+using T3.Editor.Gui.Help;
 using T3.Editor.Gui.Legacy.Interaction.Connections;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
@@ -789,6 +790,9 @@ internal sealed class SymbolLibrary : Window
             // Show tooltip with description if hovered
             if (ImGui.IsItemHovered())
             {
+                // Let the Help window follow the symbol the mouse is over here, just like hovering it in the graph.
+                HoveredHelpTarget.SetOperator(symbol.Id);
+
                 var thumbnailRect = ThumbnailManager.GetThumbnail(symbol.Id, symbol.SymbolPackage, ThumbnailManager.Categories.PackageMeta);
                 ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeAll);
 
