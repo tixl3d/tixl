@@ -19,6 +19,7 @@ using Point = System.Drawing.Point;
 
 namespace T3.Editor.Gui.Interaction;
 
+[HelpUiID("ColorEditor")]
 internal static class ColorEditPopup
 {
     public static InputEditStateFlags DrawPopup(ref Vector4 color, Vector4 previousColor)

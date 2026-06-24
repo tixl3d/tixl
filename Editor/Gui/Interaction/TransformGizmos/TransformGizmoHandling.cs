@@ -28,6 +28,7 @@ namespace T3.Editor.Gui.Interaction.TransformGizmos;
 /**
  * Handles the interaction with 3d-gizmos for operators selected in the graph.
  */
+[HelpUiID("Gizmo")]
 internal static class TransformGizmoHandling
 {
     #region Setup and callback

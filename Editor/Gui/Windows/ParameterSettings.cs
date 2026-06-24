@@ -12,6 +12,7 @@ using T3.Editor.UiModel.Selection;
 
 namespace T3.Editor.Gui.Windows;
 
+[HelpUiID("OperatorSettings")]
 public sealed class ParameterSettings
 {
     public bool DrawToggleIcon(SymbolUi symbolUi, ref bool isEnabled)

@@ -12,6 +12,7 @@ using T3.SystemUi;
 
 namespace T3.Editor.Gui.Dialog;
 
+[HelpUiID("SearchWindow")]
 internal sealed class SearchDialog : ModalDialog
 {
     public SearchDialog()

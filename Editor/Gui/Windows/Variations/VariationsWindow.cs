@@ -11,6 +11,7 @@ using T3.Editor.UiModel.ProjectHandling;
 
 namespace T3.Editor.Gui.Windows.Variations;
 
+[HelpUiID("VariationWindow")]
 internal sealed class VariationsWindow : Window
 {
     public VariationsWindow()

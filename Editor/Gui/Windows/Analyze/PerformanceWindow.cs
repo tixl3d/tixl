@@ -9,6 +9,7 @@ namespace T3.Editor.Gui.Windows.Analyze;
 /// Toggleable window showing live frame-time, draw-duration, and GC-allocation graphs
 /// plus the per-frame render stats. Toggled by clicking the mini graph in the app bar.
 /// </summary>
+[HelpUiID("PerformanceMonitor")]
 internal sealed class PerformanceWindow : Window
 {
     public PerformanceWindow()

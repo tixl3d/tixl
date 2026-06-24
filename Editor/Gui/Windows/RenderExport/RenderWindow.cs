@@ -15,6 +15,7 @@ using T3.Editor.UiModel.ProjectHandling;
 
 namespace T3.Editor.Gui.Windows.RenderExport;
 
+[HelpUiID("RenderSettings")]
 internal sealed class RenderWindow : Window
 {
     public RenderWindow()

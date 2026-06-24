@@ -13,6 +13,7 @@ namespace T3.Editor.Gui.Windows;
 /// <summary>
 /// Renders the <see cref="ConsoleLogWindow"/>
 /// </summary>
+[HelpUiID("ConsoleLog")]
 internal sealed class ConsoleLogWindow : Window, ILogWriter
 {
     internal ConsoleLogWindow()

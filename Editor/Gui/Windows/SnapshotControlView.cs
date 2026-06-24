@@ -25,6 +25,7 @@ namespace T3.Editor.Gui.Windows;
 /// control surface for snapshot-affected operators. Complements the Variations window, which
 /// stays the visual/blending interface for the same <see cref="SymbolVariationPool"/>.
 /// </summary>
+[HelpUiID("ControlView")]
 internal sealed class SnapshotControlView
 {
     private struct OpEntry

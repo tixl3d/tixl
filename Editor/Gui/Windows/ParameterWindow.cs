@@ -25,6 +25,7 @@ using T3.SystemUi;
 
 namespace T3.Editor.Gui.Windows;
 
+[HelpUiID("ParameterWindow")]
 internal sealed class ParameterWindow : Window
 {
     public ParameterWindow()

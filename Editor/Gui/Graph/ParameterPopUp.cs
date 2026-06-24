@@ -17,6 +17,7 @@ using T3.Editor.UiModel.ProjectHandling;
 
 namespace T3.Editor.Gui;
 
+[HelpUiID("ParameterPopup")]
 internal static class ParameterPopUp
 {
     public static void HandleOpenParameterPopUp(SymbolUi.Child childUi, Instance instance, OpUi.CustomUiResult customUiResult, ImRect nodeScreenRect)

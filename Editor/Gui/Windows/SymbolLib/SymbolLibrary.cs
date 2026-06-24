@@ -28,6 +28,7 @@ namespace T3.Editor.Gui.Windows.SymbolLib;
 /// This class is the main UI for browsing, searching, and managing operator symbols in the editor.
 /// It supports advanced features such as dependency scanning, random prompt suggestions, and context menus for symbol actions.
 /// </remarks>
+[HelpUiID("SymbolLibrary")]
 internal sealed class SymbolLibrary : Window
 {
     /// <summary>

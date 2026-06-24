@@ -14,6 +14,7 @@ namespace T3.Editor.Gui.Windows.AssetLib;
 /// <summary>
 /// Shows a tree of all defined symbols sorted by namespace 
 /// </summary>
+[HelpUiID("AssetLibrary")]
 internal sealed partial class AssetLibrary : Window
 {
     internal AssetLibrary()

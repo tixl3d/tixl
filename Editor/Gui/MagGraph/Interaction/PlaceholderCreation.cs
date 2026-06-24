@@ -15,6 +15,7 @@ namespace T3.Editor.Gui.MagGraph.Interaction;
 /// <summary>
 /// Controls when and how a placeholder is shown and used to create new items / outputs etc.
 /// </summary>
+[HelpUiID("SymbolBrowser")]
 internal sealed class PlaceholderCreation
 {
     internal MagGraphItem? PlaceholderItem;

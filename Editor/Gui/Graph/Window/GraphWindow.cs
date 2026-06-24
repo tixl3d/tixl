@@ -18,6 +18,7 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace T3.Editor.Gui.Window;
 
+[HelpUiID("Graph")]
 internal sealed class GraphWindow : Windows.Window
 {
     #region Window implementation --------------------

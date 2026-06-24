@@ -29,6 +29,7 @@ namespace T3.Editor.Gui.Windows.TimeLine;
 /// Combines multiple <see cref="ITimeObjectManipulation"/>s into a single consistent
 /// timeline that allows dragging selected time elements of various types.
 /// </summary>
+[HelpUiID("Timeline")]
 internal sealed class TimeLineCanvas : AnimationCanvas
 {
     public TimeLineCanvas(NodeSelection nodeSelection, Func<Instance> getCompositionOp, Func<Guid, bool> requestChildCompositionFunc)

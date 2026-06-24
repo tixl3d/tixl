@@ -13,6 +13,7 @@ namespace T3.Editor.Gui.Interaction;
 /// valueRange - delta value for complete revolution of current dial
 /// tickInterval = Log10 delta vale between ticks.
 /// </remarks>
+[HelpUiID("InfinitySlider")]
 internal static class InfinitySliderOverlay
 {
     private const int Log10YDistance = 100;

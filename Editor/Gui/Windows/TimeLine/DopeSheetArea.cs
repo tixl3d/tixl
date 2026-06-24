@@ -22,6 +22,7 @@ using T3.Editor.UiModel.Selection;
 
 namespace T3.Editor.Gui.Windows.TimeLine;
 
+[HelpUiID("DopeSheet")]
 internal sealed class DopeSheetArea : AnimationParameterEditing, ITimeObjectManipulation, IValueSnapAttractor
 {
     public DopeSheetArea(ValueSnapHandler snapHandler, TimeLineCanvas timeLineCanvas)

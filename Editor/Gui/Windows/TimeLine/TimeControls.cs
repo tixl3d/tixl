@@ -24,6 +24,7 @@ using Vector4 = System.Numerics.Vector4;
 
 namespace T3.Editor.Gui.Windows.TimeLine;
 
+[HelpUiID("ControlBar")]
 internal static class TimeControls
 {
     internal static void HandleTimeControlActions()

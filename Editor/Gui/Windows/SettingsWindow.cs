@@ -15,6 +15,7 @@ using T3.Editor.UiModel.Helpers;
 
 namespace T3.Editor.Gui.Windows;
 
+[HelpUiID("Settings")]
 internal sealed partial class SettingsWindow : Window
 {
     internal SettingsWindow()

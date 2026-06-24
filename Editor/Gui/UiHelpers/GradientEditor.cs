@@ -10,6 +10,7 @@ using T3.Editor.UiModel.InputsAndTypes;
 
 namespace T3.Editor.Gui.UiHelpers;
 
+[HelpUiID("GradientEditor")]
 public static class GradientEditor
 {
     /// <summary>

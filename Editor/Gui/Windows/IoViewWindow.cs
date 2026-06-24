@@ -5,6 +5,7 @@ using T3.Editor.Gui.OutputUi;
 
 namespace T3.Editor.Gui.Windows;
 
+[HelpUiID("IoView")]
 internal sealed class IoViewWindow : Window
 {
     internal IoViewWindow()

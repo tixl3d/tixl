@@ -21,6 +21,7 @@ using Vector2 = System.Numerics.Vector2;
 
 namespace T3.Editor.Gui.Windows.Output;
 
+[HelpUiID("OutputWindow")]
 internal sealed class OutputWindow : Window
 {
     #region Window implementation

@@ -25,6 +25,7 @@ namespace T3.Editor.Gui.Dialog;
 /// Currently serves both the alpha and the stable variant; named with the <c>Alpha</c> suffix to leave
 /// room for a future lighter-weight <c>WelcomeWindow</c> for the stable "what's new in this version" case.
 /// </summary>
+[HelpUiID("WelcomeAlphaWindow")]
 internal sealed class WelcomeAlphaWindow : WindowBase
 {
     internal WelcomeAlphaWindow()

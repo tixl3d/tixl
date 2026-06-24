@@ -35,6 +35,7 @@ namespace T3.Editor.Gui.Windows.TimeLine;
 /// - When modifying the path we use to resolve the path (i.e. verify if file exists) before setting the filepath.
 /// - If valid and set, <see cref="AudioEngine"/> will then load them in CompleteFrame.
 /// </remarks>
+[HelpUiID("ProjectSettings")]
 internal sealed class ProjectSettingsWindow : Window
 {
     internal ProjectSettingsWindow()

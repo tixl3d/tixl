@@ -13,6 +13,7 @@ using T3.Editor.UiModel.ProjectHandling;
 
 namespace T3.Editor.Gui.Hub;
 
+[HelpUiID("ProjectPanel")]
 internal static class ProjectsPanel
 {
     public static void Draw(GraphWindow window)

@@ -13,6 +13,7 @@ namespace T3.Editor.Gui.Windows.TimeLine;
 /// Owns the shared chrome (resize handle, close button); each inner renderer owns its
 /// own <c>BeginChild</c> + content and calls <see cref="DrawCloseButton"/> from inside.
 /// </summary>
+[HelpUiID("AnimationArea")]
 internal sealed class TimelineDetailsArea
 {
     public enum DetailMode

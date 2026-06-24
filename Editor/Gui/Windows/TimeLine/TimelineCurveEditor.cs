@@ -21,6 +21,7 @@ using T3.Editor.UiModel.Selection;
 
 namespace T3.Editor.Gui.Windows.TimeLine;
 
+[HelpUiID("CurveEditor")]
 internal sealed class TimelineCurveEditor : AnimationParameterEditing, ITimeObjectManipulation, IValueSnapAttractor
 {
     internal override int? GetHoveredKeyframeUniqueId() => TimeLineCanvas.HoveredKeyframeUniqueId;
