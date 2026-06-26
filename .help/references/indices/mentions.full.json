@@ -577,18 +577,6 @@
       "score": 0.264
     },
     {
-      "video": "2cdxnKMDKU4",
-      "startSecond": 58,
-      "duration": 15,
-      "url": "https://www.youtube.com/watch?v=2cdxnKMDKU4&t=58s",
-      "depth": "explained",
-      "style": "scripted",
-      "purpose": "Example",
-      "confidence": 80,
-      "note": "Pair an original point set with a displaced copy of the same points and connect them, turning two buffers into drawn line segments between matched positions.",
-      "score": 1.44
-    },
-    {
       "video": "LLpl6QEL7bo",
       "startSecond": 11440,
       "duration": 180,
@@ -797,6 +785,42 @@
       "score": 4.4
     },
     {
+      "video": "LI5Pq5H9HFU",
+      "startSecond": 113,
+      "duration": 18,
+      "url": "https://www.youtube.com/watch?v=LI5Pq5H9HFU&t=113s",
+      "depth": "passing",
+      "style": "scripted",
+      "purpose": "Example",
+      "confidence": 70,
+      "note": "Assigning a very bright material early so an object reads as a light-emitter once glow post-processing is added.",
+      "score": 0.624
+    },
+    {
+      "video": "LI5Pq5H9HFU",
+      "startSecond": 526,
+      "duration": 19,
+      "url": "https://www.youtube.com/watch?v=LI5Pq5H9HFU&t=526s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Example",
+      "confidence": 80,
+      "note": "Pair a material with an environment so the surface picks up image-based lighting from a surrounding texture instead of looking flat.",
+      "score": 2.016
+    },
+    {
+      "video": "LI5Pq5H9HFU",
+      "startSecond": 983,
+      "duration": 35,
+      "url": "https://www.youtube.com/watch?v=LI5Pq5H9HFU&t=983s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Tip",
+      "confidence": 78,
+      "note": "A faint dark-blue emissive on a neutral material reads as distant water — a small emissive tint shifts perceived color without lighting the scene.",
+      "score": 2.7
+    },
+    {
       "video": "Mqi2mEyd4jQ",
       "startSecond": 1590,
       "duration": 180,
@@ -831,6 +855,18 @@
       "confidence": 75,
       "note": "A quick ray-march scene: feed it an SDF field and set a hard, glossy material to get a clean reflective sphere to test variable-driven parameters against.",
       "score": 3.6
+    },
+    {
+      "video": "SMKigWtk_LQ",
+      "startSecond": 326,
+      "duration": 41,
+      "url": "https://www.youtube.com/watch?v=SMKigWtk_LQ&t=326s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Parameters",
+      "confidence": 80,
+      "note": "Drive emissive color plus a high luminance (e.g. 10) for a self-lit glowing surface, or lower roughness and raise metalness for a reflective metal look.",
+      "score": 3.3
     },
     {
       "video": "wTLW7PXj2Co",
@@ -1397,6 +1433,30 @@
       "score": 0.288
     },
     {
+      "video": "LI5Pq5H9HFU",
+      "startSecond": 1185,
+      "duration": 47,
+      "url": "https://www.youtube.com/watch?v=LI5Pq5H9HFU&t=1185s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Gotcha",
+      "confidence": 80,
+      "note": "Its default strength is deliberately very intense, so expect to dial it down — this is what makes bright/emissive materials bloom.",
+      "score": 3.3
+    },
+    {
+      "video": "SMKigWtk_LQ",
+      "startSecond": 629,
+      "duration": 7,
+      "url": "https://www.youtube.com/watch?v=SMKigWtk_LQ&t=629s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Tip",
+      "confidence": 80,
+      "note": "Adds the HDR bloom that makes emissive surfaces bleed light; ease the amount back so highlights glow without blowing out.",
+      "score": 0.216
+    },
+    {
       "video": "VNC-zr-JOjQ",
       "startSecond": 4190,
       "duration": 280,
@@ -1779,21 +1839,21 @@
       "confidence": 65,
       "note": "Add it for a subtle lens fringe; the presets are the quick way to find a distortion look before fine-tuning size.",
       "score": 0.9
+    },
+    {
+      "video": "LI5Pq5H9HFU",
+      "startSecond": 1291,
+      "duration": 20,
+      "url": "https://www.youtube.com/watch?v=LI5Pq5H9HFU&t=1291s",
+      "depth": "passing",
+      "style": "scripted",
+      "purpose": "Tip",
+      "confidence": 75,
+      "note": "A final color-fringing pass at the edges to lend the rendered image a lens-like finish.",
+      "score": 0.54
     }
   ],
   "op:Lib.point.generate.RadialPoints": [
-    {
-      "video": "2cdxnKMDKU4",
-      "startSecond": 9,
-      "duration": 11,
-      "url": "https://www.youtube.com/watch?v=2cdxnKMDKU4&t=9s",
-      "depth": "passing",
-      "style": "scripted",
-      "purpose": "Example",
-      "confidence": 75,
-      "note": "Starting point for a point cloud: emits a ring of points you can immediately visualise by drawing it as a circle.",
-      "score": 0.288
-    },
     {
       "video": "5KX92VWEAG8",
       "startSecond": 8160,
@@ -1953,18 +2013,6 @@
   ],
   "op:Lib.point.modify.AddNoise": [
     {
-      "video": "2cdxnKMDKU4",
-      "startSecond": 22,
-      "duration": 10,
-      "url": "https://www.youtube.com/watch?v=2cdxnKMDKU4&t=22s",
-      "depth": "explained",
-      "style": "scripted",
-      "purpose": "Example",
-      "confidence": 80,
-      "note": "Drop it after a point generator to warp the positions, bending an otherwise regular point layout into curvy organic shapes.",
-      "score": 0.72
-    },
-    {
       "video": "PWCfyUnFGdg",
       "startSecond": 494,
       "duration": 61,
@@ -2037,6 +2085,34 @@
       "score": 0.18
     }
   ],
+  "op:Lib.point.combine.CombineBuffers": [
+    {
+      "video": "2cdxnKMDKU4",
+      "startSecond": 32,
+      "duration": 151,
+      "url": "https://www.youtube.com/watch?v=2cdxnKMDKU4&t=32s",
+      "depth": "in-depth",
+      "style": "scripted",
+      "purpose": "Concept",
+      "confidence": 72,
+      "note": "A short tip showing that each point operator emits its own GPU point buffer, and how keeping the original and modified buffers around lets you wire them together — pairing positions to draw lines, then scattering meshes across the same points.",
+      "score": 20.0,
+      "momentCount": 1,
+      "focus": true
+    },
+    {
+      "video": "PWCfyUnFGdg",
+      "startSecond": 10493,
+      "duration": 68,
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=10493s",
+      "depth": "explained",
+      "style": "experiment",
+      "purpose": "Performance",
+      "confidence": 70,
+      "note": "Merge several point sets into one buffer so an entire constellation draws in a single draw call instead of many.",
+      "score": 0.6
+    }
+  ],
   "ui:EvaluationContext": [
     {
       "video": "2Tu0p9Eh6Bw",
@@ -2049,18 +2125,6 @@
       "confidence": 50,
       "note": "A video with a large GOP (group-of-pictures > ~100) seeks slowly; re-encoding it with small GOP in the background fixes scrubbing at the cost of file size.",
       "score": 0.4125
-    },
-    {
-      "video": "2cdxnKMDKU4",
-      "startSecond": 32,
-      "duration": 26,
-      "url": "https://www.youtube.com/watch?v=2cdxnKMDKU4&t=32s",
-      "depth": "in-depth",
-      "style": "scripted",
-      "purpose": "Concept",
-      "confidence": 85,
-      "note": "Each point operator outputs a separate GPU buffer rather than overwriting in place, so the unmodified and modified point sets both survive downstream — looks wasteful but lets you combine the two stages.",
-      "score": 3.36
     },
     {
       "video": "5KX92VWEAG8",
@@ -2232,18 +2296,6 @@
     }
   ],
   "ui:Graph": [
-    {
-      "video": "2cdxnKMDKU4",
-      "startSecond": 73,
-      "duration": 14,
-      "url": "https://www.youtube.com/watch?v=2cdxnKMDKU4&t=73s",
-      "depth": "passing",
-      "style": "scripted",
-      "purpose": "Tip",
-      "confidence": 65,
-      "note": "Wrapping a working chain into a group keeps the buffer-combining setup tidy and lets you pin and animate the whole unit at once.",
-      "score": 0.324
-    },
     {
       "video": "5KX92VWEAG8",
       "startSecond": 756,
@@ -2595,16 +2647,16 @@
   ],
   "op:Lib.render.transform.Transform": [
     {
-      "video": "2cdxnKMDKU4",
-      "startSecond": 87,
-      "duration": 16,
-      "url": "https://www.youtube.com/watch?v=2cdxnKMDKU4&t=87s",
+      "video": "LI5Pq5H9HFU",
+      "startSecond": 578,
+      "duration": 17,
+      "url": "https://www.youtube.com/watch?v=LI5Pq5H9HFU&t=578s",
       "depth": "passing",
       "style": "scripted",
       "purpose": "Example",
       "confidence": 70,
-      "note": "Offsetting one buffer with a transform pushes the line endpoints away from their source points, opening a gap you can drive for animation.",
-      "score": 0.528
+      "note": "Drop a transform into a sub-graph to reposition and scale an element independently before animating it.",
+      "score": 0.576
     },
     {
       "video": "PWCfyUnFGdg",
@@ -2617,6 +2669,18 @@
       "confidence": 60,
       "note": "Continuously rotate a scene by feeding [Time] into one rotation axis, avoiding the gimbal-lock you hit when animating the camera directly.",
       "score": 0.54
+    },
+    {
+      "video": "SMKigWtk_LQ",
+      "startSecond": 802,
+      "duration": 10,
+      "url": "https://www.youtube.com/watch?v=SMKigWtk_LQ&t=802s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Example",
+      "confidence": 80,
+      "note": "Sits on a point branch so its rotation can be animated externally, turning a static cloud into one that slowly tumbles.",
+      "score": 0.72
     },
     {
       "video": "_pEhs2jQ3Gg",
@@ -2633,18 +2697,6 @@
   ],
   "op:Lib.mesh.draw.DrawMeshAtPoints": [
     {
-      "video": "2cdxnKMDKU4",
-      "startSecond": 100,
-      "duration": 16,
-      "url": "https://www.youtube.com/watch?v=2cdxnKMDKU4&t=100s",
-      "depth": "explained",
-      "style": "scripted",
-      "purpose": "Example",
-      "confidence": 80,
-      "note": "Reuse the same point buffer to instance a mesh at every point; feed a [CubeMesh] as the instanced geometry and scale it down since default instances come out oversized.",
-      "score": 1.584
-    },
-    {
       "video": "5KX92VWEAG8",
       "startSecond": 6930,
       "duration": 180,
@@ -2655,6 +2707,30 @@
       "confidence": 80,
       "note": "Scatter a mesh (here a cylinder as a sprinkle) across a point set; it's the auto-suggested op when you connect points to a mesh, and it instances the geometry at every position.",
       "score": 3.6
+    },
+    {
+      "video": "LI5Pq5H9HFU",
+      "startSecond": 368,
+      "duration": 26,
+      "url": "https://www.youtube.com/watch?v=LI5Pq5H9HFU&t=368s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Example",
+      "confidence": 86,
+      "note": "Swap raw points for actual geometry by instancing a mesh at every point; the point set supplies position while a separate mesh input supplies the shape stamped at each one.",
+      "score": 3.024
+    },
+    {
+      "video": "LI5Pq5H9HFU",
+      "startSecond": 496,
+      "duration": 30,
+      "url": "https://www.youtube.com/watch?v=LI5Pq5H9HFU&t=496s",
+      "depth": "passing",
+      "style": "scripted",
+      "purpose": "Gotcha",
+      "confidence": 70,
+      "note": "Instanced meshes inherit the point grid's scale, so an oversized result usually means dialing the per-instance size down rather than touching the points.",
+      "score": 1.1
     },
     {
       "video": "LLpl6QEL7bo",
@@ -2671,13 +2747,13 @@
     {
       "video": "LjmnVL7azYw",
       "startSecond": 51,
-      "duration": 42,
+      "duration": 271,
       "url": "https://www.youtube.com/watch?v=LjmnVL7azYw&t=51s",
       "depth": "explained",
       "style": "scripted",
       "purpose": "Gotcha",
       "confidence": 88,
-      "note": "Any deformation must sit upstream of it, before the mesh is drawn; a displace placed after instancing has no effect, and one placed on the single source mesh repeats the identical distortion at every point.",
+      "note": "A short tip contrasting two ways to multiply a mesh across scattered points: baking copies into one large mesh (cloning) versus drawing the same mesh repeatedly per point (instancing), and the trade-offs in memory, performance, and what you can still modify afterward.",
       "score": 16.5,
       "momentCount": 2,
       "focus": true
@@ -2769,13 +2845,13 @@
     {
       "video": "tZ1Uz6DmL_c",
       "startSecond": 76,
-      "duration": 48,
+      "duration": 198,
       "url": "https://www.youtube.com/watch?v=tZ1Uz6DmL_c&t=76s",
       "depth": "explained",
       "style": "scripted",
       "purpose": "Example",
       "confidence": 90,
-      "note": "Wire a loaded mesh plus a point set into one node to stamp a copy of that mesh at every point; because it instances on the GPU it scales to thousands of copies, and a gizmo on the source mesh lets you reposition the template that gets repeated.",
+      "note": "Opening tip in a points series: explains the eight-value point structure (position, weight W, quaternion orientation), pushes a point list to a GPU buffer, then instances a mesh onto every point and shows how W and randomization drive the result.",
       "score": 18.0,
       "momentCount": 2,
       "focus": true
@@ -2806,18 +2882,6 @@
     }
   ],
   "op:Lib.mesh.generate.CubeMesh": [
-    {
-      "video": "2cdxnKMDKU4",
-      "startSecond": 100,
-      "duration": 16,
-      "url": "https://www.youtube.com/watch?v=2cdxnKMDKU4&t=100s",
-      "depth": "explained",
-      "style": "scripted",
-      "purpose": "Example",
-      "confidence": 80,
-      "note": "Reuse the same point buffer to instance a mesh at every point; feed a [CubeMesh] as the instanced geometry and scale it down since default instances come out oversized.",
-      "score": 1.584
-    },
     {
       "video": "Mqi2mEyd4jQ",
       "startSecond": 4890,
@@ -3053,13 +3117,13 @@
     {
       "video": "hh1tcg4A8bU",
       "startSecond": 19,
-      "duration": 25,
+      "duration": 116,
       "url": "https://www.youtube.com/watch?v=hh1tcg4A8bU&t=19s",
       "depth": "in-depth",
       "style": "scripted",
       "purpose": "Tip",
       "confidence": 85,
-      "note": "Switch the ruler from seconds to bars mode so keyframes snap to musical measures, beats, or ticks depending on zoom — far more useful snap targets than arbitrary seconds.",
+      "note": "A short tip on snapping keyframes precisely in the timeline: pinning parameters, switching the ruler from seconds to bars/beats/ticks, and using ALT to scale and insert keyframes onto snap targets.",
       "score": 14.4,
       "momentCount": 3,
       "focus": true
@@ -3239,6 +3303,18 @@
       "score": 0.45
     },
     {
+      "video": "LI5Pq5H9HFU",
+      "startSecond": 95,
+      "duration": 18,
+      "url": "https://www.youtube.com/watch?v=LI5Pq5H9HFU&t=95s",
+      "depth": "passing",
+      "style": "scripted",
+      "purpose": "Example",
+      "confidence": 70,
+      "note": "Pulling in a bundled mesh asset (here a beveled cube) as the building block for an instanced scene before any displacement or shading.",
+      "score": 0.624
+    },
+    {
       "video": "LLpl6QEL7bo",
       "startSecond": 5700,
       "duration": 60,
@@ -3405,13 +3481,13 @@
     {
       "video": "M7eOmqiUOZM",
       "startSecond": 21,
-      "duration": 70,
+      "duration": 1019,
       "url": "https://www.youtube.com/watch?v=M7eOmqiUOZM&t=21s",
       "depth": "in-depth",
       "style": "scripted",
       "purpose": "Parameters",
       "confidence": 90,
-      "note": "Twist (in degrees) rotates the displacement relative to the slope: 0° flows straight downhill away from bright areas, 90° circles around them like contour lines, and beyond that it flows inward toward bright areas so they consume themselves into churning patterns.",
+      "note": "A deep walkthrough of the AdvancedFeedback effect: how its displace-along-a-slope feedback loop works internally, and a guided tour of nearly every parameter (twist, displacement, sample distance, shade, blur, color shifts, amplified edges, limit brights) and how to drive them for smoke-, water- and reaction-diffusion-like looks.",
       "score": 22.0,
       "momentCount": 12,
       "focus": true
@@ -3477,6 +3553,20 @@
       "confidence": 85,
       "note": "Overrides the requested resolution carried in the context: positive values force a fixed size for all downstream 0,0 operators, negative values fall back to the output window, letting a post chain ignore an odd incoming image size.",
       "score": 4.0
+    },
+    {
+      "video": "f9E7lwUXfBM",
+      "startSecond": 253,
+      "duration": 397,
+      "url": "https://www.youtube.com/watch?v=f9E7lwUXfBM&t=253s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Parameters",
+      "confidence": 75,
+      "note": "A short tip explaining how an image operator's resolution is resolved: the \"magic\" 0×0 default pulls resolution from an incoming texture if present, otherwise from the output window, and how -1 or an explicit size overrides that.",
+      "score": 16.5,
+      "momentCount": 1,
+      "focus": true
     }
   ],
   "op:Lib.field.generate.sdf.HeightMapSdf": [
@@ -3581,13 +3671,13 @@
     {
       "video": "6-8PKxPztl8",
       "startSecond": 102,
-      "duration": 145,
+      "duration": 1213,
       "url": "https://www.youtube.com/watch?v=6-8PKxPztl8&t=102s",
       "depth": "in-depth",
       "style": "scripted",
       "purpose": "Performance",
       "confidence": 85,
-      "note": "The algorithm marches each view ray forward by the field's safe distance until within the min-distance threshold or the max step count; smaller min-distance sharpens edges but needs more steps, and the normal-sampling distance trades crisp versus organic shading.",
+      "note": "A guided tour of TiXL's new SDF/field shader-graph system: the four operator categories (generators, space, adjust, combine), how ray-marching renders fields, performance and aliasing trade-offs, and using fields to drive particle forces and point selection.",
       "score": 20.0,
       "momentCount": 3,
       "focus": true
@@ -3837,6 +3927,30 @@
       "score": 0.54
     },
     {
+      "video": "SMKigWtk_LQ",
+      "startSecond": 483,
+      "duration": 51,
+      "url": "https://www.youtube.com/watch?v=SMKigWtk_LQ&t=483s",
+      "depth": "in-depth",
+      "style": "scripted",
+      "purpose": "Parameters",
+      "confidence": 88,
+      "note": "Raise decay (≈6) so falloff stays near the source instead of washing out distant elements, then balance intensity (≈5) and tint the light for mood.",
+      "score": 4.4
+    },
+    {
+      "video": "SMKigWtk_LQ",
+      "startSecond": 534,
+      "duration": 32,
+      "url": "https://www.youtube.com/watch?v=SMKigWtk_LQ&t=534s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Example",
+      "confidence": 82,
+      "note": "A second light placed off to one side in a contrasting color adds rim/fill separation; brighten it to gauge its effect, then pull intensity back down.",
+      "score": 3.6
+    },
+    {
       "video": "wTLW7PXj2Co",
       "startSecond": 3560,
       "duration": 130,
@@ -3897,6 +4011,42 @@
       "confidence": 70,
       "note": "Force a black environment before the projection pass so the projected light reads against an unlit background instead of the scene's ambient lighting.",
       "score": 0.54
+    },
+    {
+      "video": "LI5Pq5H9HFU",
+      "startSecond": 526,
+      "duration": 19,
+      "url": "https://www.youtube.com/watch?v=LI5Pq5H9HFU&t=526s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Example",
+      "confidence": 80,
+      "note": "Pair a material with an environment so the surface picks up image-based lighting from a surrounding texture instead of looking flat.",
+      "score": 2.016
+    },
+    {
+      "video": "LI5Pq5H9HFU",
+      "startSecond": 908,
+      "duration": 28,
+      "url": "https://www.youtube.com/watch?v=LI5Pq5H9HFU&t=908s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Gotcha",
+      "confidence": 80,
+      "note": "After assigning an environment texture you must trigger an \"update live once\" so the lighting actually samples the new cube map.",
+      "score": 3.036
+    },
+    {
+      "video": "LI5Pq5H9HFU",
+      "startSecond": 1249,
+      "duration": 30,
+      "url": "https://www.youtube.com/watch?v=LI5Pq5H9HFU&t=1249s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Parameters",
+      "confidence": 76,
+      "note": "An advanced \"background blur\" option blurs the environment backdrop independently of the depth-of-field on the geometry.",
+      "score": 3.3
     },
     {
       "video": "LLpl6QEL7bo",
@@ -4457,13 +4607,13 @@
     {
       "video": "6-8PKxPztl8",
       "startSecond": 8,
-      "duration": 37,
+      "duration": 1213,
       "url": "https://www.youtube.com/watch?v=6-8PKxPztl8&t=8s",
       "depth": "explained",
       "style": "scripted",
       "purpose": "Concept",
       "confidence": 90,
-      "note": "Combines small per-operator shader building blocks into one shader function compiled on the fly, replacing the old fixed one-shader-per-operator pipeline.",
+      "note": "A guided tour of TiXL's new SDF/field shader-graph system: the four operator categories (generators, space, adjust, combine), how ray-marching renders fields, performance and aliasing trade-offs, and using fields to drive particle forces and point selection.",
       "score": 15.0,
       "momentCount": 2,
       "focus": true
@@ -4737,6 +4887,18 @@
       "score": 0.924
     },
     {
+      "video": "LI5Pq5H9HFU",
+      "startSecond": 139,
+      "duration": 34,
+      "url": "https://www.youtube.com/watch?v=LI5Pq5H9HFU&t=139s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Parameters",
+      "confidence": 88,
+      "note": "Set one axis to a single point and the other two to 100 each to get a flat 100×100 sheet of points; scale the whole grid up to size the surface you'll instance onto.",
+      "score": 3.3
+    },
+    {
       "video": "LLpl6QEL7bo",
       "startSecond": 7980,
       "duration": 100,
@@ -4759,6 +4921,18 @@
       "confidence": 78,
       "note": "Scatter cube instances over a single-row grid by drawing the mesh at grid points, adjusting the grid's Y count to one layer and the cube pivot to sit on the ground.",
       "score": 0.72
+    },
+    {
+      "video": "SMKigWtk_LQ",
+      "startSecond": 189,
+      "duration": 37,
+      "url": "https://www.youtube.com/watch?v=SMKigWtk_LQ&t=189s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Parameters",
+      "confidence": 85,
+      "note": "Drop the per-axis count (e.g. 3×3) and tighten the scale to get a sparse, compact point set to scatter copies onto.",
+      "score": 3.3
     },
     {
       "video": "_pEhs2jQ3Gg",
@@ -4845,6 +5019,30 @@
       "confidence": 80,
       "note": "Overdraw demo: with few points but a large point radius, the same pixels get shaded repeatedly and the GPU stalls — shrink the radius and performance snaps back. Watch fill-rate, not just object count.",
       "score": 0.6
+    },
+    {
+      "video": "LI5Pq5H9HFU",
+      "startSecond": 154,
+      "duration": 11,
+      "url": "https://www.youtube.com/watch?v=LI5Pq5H9HFU&t=154s",
+      "depth": "passing",
+      "style": "scripted",
+      "purpose": "Tip",
+      "confidence": 80,
+      "note": "Temporarily wire it in (and pin the output) just to visualize a generated point set while you tune the generator feeding it.",
+      "score": 0.216
+    },
+    {
+      "video": "SMKigWtk_LQ",
+      "startSecond": 429,
+      "duration": 33,
+      "url": "https://www.youtube.com/watch?v=SMKigWtk_LQ&t=429s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Example",
+      "confidence": 82,
+      "note": "Render a point set as visible dots and add it into the scene group; reuse the same generator with a wider spread for a separate background layer.",
+      "score": 3.6
     },
     {
       "video": "_pEhs2jQ3Gg",
@@ -5139,6 +5337,99 @@
       "score": 2.7
     }
   ],
+  "op:Lib.io.osc.OscInput": [
+    {
+      "video": "4xxhQ1JX-ls",
+      "startSecond": 28,
+      "duration": 231,
+      "url": "https://www.youtube.com/watch?v=4xxhQ1JX-ls&t=28s",
+      "depth": "in-depth",
+      "style": "scripted",
+      "purpose": "Parameters",
+      "confidence": 90,
+      "note": "How to drive live visuals from a phone or tablet over OSC: [OscInput] auto-detects the address of any control you touch (the built-in teach mode), multiple inputs on the same port share one connection for free, and its float output can be split into X/Y/pressure to paint feedback trails whose color and line breaks follow the incoming pressure. A practical walkthrough of wiring a TouchOSC-style device into a generative drawing patch.",
+      "score": 22.0,
+      "momentCount": 1,
+      "focus": true
+    },
+    {
+      "video": "cfUWSPJDRi4",
+      "startSecond": 6780,
+      "duration": 360,
+      "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=6780s",
+      "depth": "explained",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 75,
+      "note": "Receive a phone's position and quaternion (x/y/z/w) over OSC into a dictionary, then pull individual floats out by key to reconstruct an orientation.",
+      "score": 0.72
+    }
+  ],
+  "op:Lib.numbers.float.logic.PickFloat": [],
+  "op:Lib.numbers.float.logic.Compare": [
+    {
+      "video": "qavgcL72F1Y",
+      "startSecond": 7020,
+      "duration": 180,
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=7020s",
+      "depth": "explained",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 75,
+      "note": "Build a threshold gate: compare an incoming signal against a level, and when it crosses, fire a trigger animation — the manual equivalent of a sample-and-hold/gate from a modular synth.",
+      "score": 0.72
+    }
+  ],
+  "op:Lib.numbers.float.adjust.Remap": [
+    {
+      "video": "GF0wWpNWkVs",
+      "startSecond": 2499,
+      "duration": 74,
+      "url": "https://www.youtube.com/watch?v=GF0wWpNWkVs&t=2499s",
+      "depth": "explained",
+      "style": "experiment",
+      "purpose": "Tip",
+      "confidence": 75,
+      "note": "Put it between a raw UI value and a target so one slider can feed two places with a meaningful range — e.g. mapping a 0..1 scale into the units the projector actually wants.",
+      "score": 0.54
+    },
+    {
+      "video": "a5_xCfC_3m4",
+      "startSecond": 6180,
+      "duration": 120,
+      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=6180s",
+      "depth": "explained",
+      "style": "experiment",
+      "purpose": "Example",
+      "confidence": 78,
+      "note": "Rescale a raw measured value (here a finger-gap distance) into a usable parameter range, then flip/curve the range so \"fingers close\" maps to the velocity you actually want.",
+      "score": 0.72
+    },
+    {
+      "video": "asiY0Jo1oJw",
+      "startSecond": 422,
+      "duration": 12,
+      "url": "https://www.youtube.com/watch?v=asiY0Jo1oJw&t=422s",
+      "depth": "passing",
+      "style": "scripted",
+      "purpose": "Concept",
+      "confidence": 68,
+      "note": "Among the operators that adopted the combined bias-and-gain control for reshaping a value's response curve.",
+      "score": 0.28
+    },
+    {
+      "video": "qavgcL72F1Y",
+      "startSecond": 6600,
+      "duration": 90,
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=6600s",
+      "depth": "passing",
+      "style": "experiment",
+      "purpose": "Tip",
+      "confidence": 70,
+      "note": "Map a raw MIDI value (0–127) into a usable parameter range and add damping to smooth the jittery controller signal before it drives anything.",
+      "score": 0.18
+    }
+  ],
   "op:Lib.image.generate.basic.RenderTarget": [
     {
       "video": "5KX92VWEAG8",
@@ -5201,6 +5492,18 @@
       "score": 3.6
     },
     {
+      "video": "SMKigWtk_LQ",
+      "startSecond": 585,
+      "duration": 8,
+      "url": "https://www.youtube.com/watch?v=SMKigWtk_LQ&t=585s",
+      "depth": "passing",
+      "style": "scripted",
+      "purpose": "Concept",
+      "confidence": 70,
+      "note": "Used as the entry point of the post stack, here noted for adding multi-sampling anti-aliasing to the rendered scene.",
+      "score": 0.12
+    },
+    {
       "video": "_pEhs2jQ3Gg",
       "startSecond": 2038,
       "duration": 102,
@@ -5223,6 +5526,20 @@
       "confidence": 75,
       "note": "Skip clearing the target each frame to accumulate a cheap trailing-history \"motion blur\"; reintroduce a near-transparent clear layer to slowly fade old frames instead of letting them stick forever.",
       "score": 0.54
+    },
+    {
+      "video": "f9E7lwUXfBM",
+      "startSecond": 203,
+      "duration": 397,
+      "url": "https://www.youtube.com/watch?v=f9E7lwUXfBM&t=203s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Example",
+      "confidence": 80,
+      "note": "A short tip explaining how an image operator's resolution is resolved: the \"magic\" 0×0 default pulls resolution from an incoming texture if present, otherwise from the output window, and how -1 or an explicit size overrides that.",
+      "score": 9.36,
+      "momentCount": 1,
+      "focus": true
     },
     {
       "video": "o-Ojg_LOi4k",
@@ -5273,6 +5590,18 @@
       "confidence": 82,
       "note": "Push highlights warm and shadows cool for the cinematic \"pop\" look; the gain/bias control is a contrast curve you drag left/right (steepen into an S for more contrast, flatten for less) and up/down to shift it, like a Photoshop curve in two parameters.",
       "score": 4.4
+    },
+    {
+      "video": "LI5Pq5H9HFU",
+      "startSecond": 1089,
+      "duration": 42,
+      "url": "https://www.youtube.com/watch?v=LI5Pq5H9HFU&t=1089s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Tip",
+      "confidence": 80,
+      "note": "Where most of a scene's final look is set — start from a preset or hand-tune curves to push the overall mood after geometry and lighting are done.",
+      "score": 2.7
     },
     {
       "video": "MAyETISMFi0",
@@ -5335,6 +5664,18 @@
       "score": 4.4
     },
     {
+      "video": "SMKigWtk_LQ",
+      "startSecond": 636,
+      "duration": 93,
+      "url": "https://www.youtube.com/watch?v=SMKigWtk_LQ&t=636s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Parameters",
+      "confidence": 78,
+      "note": "Push brightness and tune the overall look to set scene mood; can be dialed in by feel rather than by exact values.",
+      "score": 3.3
+    },
+    {
       "video": "WK4j0H-oM3g",
       "startSecond": 78,
       "duration": 7,
@@ -5349,13 +5690,13 @@
     {
       "video": "_P4-VKhJXhE",
       "startSecond": 27,
-      "duration": 73,
+      "duration": 714,
       "url": "https://www.youtube.com/watch?v=_P4-VKhJXhE&t=27s",
       "depth": "in-depth",
       "style": "scripted",
       "purpose": "Example",
       "confidence": 85,
-      "note": "Use the scope as a clipping gauge while grading: when whites bunch against the top the highlights are clamped, so pull gain down until they spread out, then add midtone brightness back to rebalance.",
+      "note": "A five-minute introduction to color grading in Tooll, centered on the lift/gamma/gain controls of the ColorGrade operator, reading the WaveForm operator's scope, and comparing before/after with CompareImages.",
       "score": 24.0,
       "momentCount": 12,
       "focus": true
@@ -5583,6 +5924,18 @@
       "score": 0.72
     },
     {
+      "video": "SMKigWtk_LQ",
+      "startSecond": 144,
+      "duration": 30,
+      "url": "https://www.youtube.com/watch?v=SMKigWtk_LQ&t=144s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Parameters",
+      "confidence": 85,
+      "note": "Thin the ring by dialing its thickness/inner-radius down (here to ~0.03–0.15) so it reads as a slender band rather than a fat donut.",
+      "score": 3.3
+    },
+    {
       "video": "wTLW7PXj2Co",
       "startSecond": 5580,
       "duration": 300,
@@ -5633,6 +5986,18 @@
       "score": 3.3
     },
     {
+      "video": "LI5Pq5H9HFU",
+      "startSecond": 402,
+      "duration": 48,
+      "url": "https://www.youtube.com/watch?v=LI5Pq5H9HFU&t=402s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Example",
+      "confidence": 80,
+      "note": "Build a small cylinder, reduce its segment detail and shrink its radius/height, then draw it stacked on a cube to compose a Lego-style brick from primitives.",
+      "score": 3.6
+    },
+    {
       "video": "LLpl6QEL7bo",
       "startSecond": 6300,
       "duration": 480,
@@ -5655,6 +6020,18 @@
       "confidence": 70,
       "note": "The PBR path was aligned across all the main draw ops, and they can now all override color through fields.",
       "score": 0.6
+    },
+    {
+      "video": "SMKigWtk_LQ",
+      "startSecond": 13,
+      "duration": 131,
+      "url": "https://www.youtube.com/watch?v=SMKigWtk_LQ&t=13s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Example",
+      "confidence": 88,
+      "note": "Pair a primitive mesh with a draw operator to make geometry visible in the output; shrink the mesh radius before composing it with other shapes.",
+      "score": 3.6
     },
     {
       "video": "dCX7CcL0ZJs",
@@ -5709,13 +6086,13 @@
     {
       "video": "IJLvPtz0qTg",
       "startSecond": 7,
-      "duration": 30,
+      "duration": 98,
       "url": "https://www.youtube.com/watch?v=IJLvPtz0qTg&t=7s",
       "depth": "explained",
       "style": "scripted",
       "purpose": "Tip",
       "confidence": 70,
-      "note": "How to grab a full-resolution still of whatever is currently shown: the Save Screenshot button captures the current frame even at 4K, regardless of the editor's display size.",
+      "note": "A short tip showing the Save Screenshot button, which writes the current output frame at full resolution to the `.t3/screenshots` folder.",
       "score": 13.5,
       "momentCount": 1,
       "focus": true
@@ -6563,6 +6940,18 @@
       "score": 0.6
     },
     {
+      "video": "LI5Pq5H9HFU",
+      "startSecond": 402,
+      "duration": 48,
+      "url": "https://www.youtube.com/watch?v=LI5Pq5H9HFU&t=402s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Example",
+      "confidence": 80,
+      "note": "Build a small cylinder, reduce its segment detail and shrink its radius/height, then draw it stacked on a cube to compose a Lego-style brick from primitives.",
+      "score": 3.6
+    },
+    {
       "video": "cfUWSPJDRi4",
       "startSecond": 1690,
       "duration": 110,
@@ -6819,6 +7208,30 @@
       "score": 1.32
     },
     {
+      "video": "SMKigWtk_LQ",
+      "startSecond": 275,
+      "duration": 25,
+      "url": "https://www.youtube.com/watch?v=SMKigWtk_LQ&t=275s",
+      "depth": "in-depth",
+      "style": "scripted",
+      "purpose": "Parameters",
+      "confidence": 88,
+      "note": "Insert it behind a points generator and raise the W channel to vary per-instance scale, plus push rotation to ~360 on each axis so stamped copies face random directions.",
+      "score": 3.52
+    },
+    {
+      "video": "SMKigWtk_LQ",
+      "startSecond": 462,
+      "duration": 21,
+      "url": "https://www.youtube.com/watch?v=SMKigWtk_LQ&t=462s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Tip",
+      "confidence": 80,
+      "note": "Spread a cloned point cloud across the whole scene by setting all three position-randomize axes to the same value (e.g. 5) for a uniform scatter.",
+      "score": 1.728
+    },
+    {
       "video": "_pEhs2jQ3Gg",
       "startSecond": 7340,
       "duration": 290,
@@ -6931,6 +7344,18 @@
       "confidence": 60,
       "note": "Swapped in as an alternate sprinkle shape while iterating; any mesh can instance at the scatter points.",
       "score": 0.24
+    },
+    {
+      "video": "SMKigWtk_LQ",
+      "startSecond": 13,
+      "duration": 131,
+      "url": "https://www.youtube.com/watch?v=SMKigWtk_LQ&t=13s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Example",
+      "confidence": 88,
+      "note": "Pair a primitive mesh with a draw operator to make geometry visible in the output; shrink the mesh radius before composing it with other shapes.",
+      "score": 3.6
     }
   ],
   "op:Lib.image.use.NormalMap": [
@@ -7137,13 +7562,13 @@
     {
       "video": "AMHE-paaFWE",
       "startSecond": 126,
-      "duration": 40,
+      "duration": 402,
       "url": "https://www.youtube.com/watch?v=AMHE-paaFWE&t=126s",
       "depth": "in-depth",
       "style": "scripted",
       "purpose": "Example",
       "confidence": 88,
-      "note": "Open the playback settings on a composition and use the file picker to attach an audio file; a waveform thumbnail is generated in the background and appears once ready.",
+      "note": "A tip walkthrough explaining why all time in Tooll runs in bars rather than seconds, how to add a soundtrack to a project and dial in its BPM rate so procedural animation stays synced.",
       "score": 24.0,
       "momentCount": 4,
       "focus": true
@@ -7826,13 +8251,13 @@
     {
       "video": "854OSxXzMDM",
       "startSecond": 30,
-      "duration": 30,
+      "duration": 183,
       "url": "https://www.youtube.com/watch?v=854OSxXzMDM&t=30s",
       "depth": "in-depth",
       "style": "scripted",
       "purpose": "Parameters",
       "confidence": 88,
-      "note": "Choose to break the source into lines, words, characters, or sentences, then read out one slice — the core operator for per-word or per-character text animation.",
+      "note": "A short tip-of-the-day walkthrough showing how to split a text into lines/words/characters and step through the fragments to animate text, then pointing to a simpler random-string shortcut.",
       "score": 22.0,
       "momentCount": 2,
       "focus": true
@@ -7901,18 +8326,6 @@
     }
   ],
   "op:Lib.numbers.anim.animators.TriggerAnim": [
-    {
-      "video": "DJKb0wDr0Zs",
-      "startSecond": 176,
-      "duration": 27,
-      "url": "https://www.youtube.com/watch?v=DJKb0wDr0Zs&t=176s",
-      "depth": "explained",
-      "style": "scripted",
-      "purpose": "Example",
-      "confidence": 60,
-      "note": "Wire a [TriggerAnim] into a rotation/shake offset to scale animated noise on each trigger, producing decaying camera shake whose intensity and speed you dial back to taste.",
-      "score": 3.168
-    },
     {
       "video": "LLpl6QEL7bo",
       "startSecond": 4580,
@@ -7992,13 +8405,13 @@
     {
       "video": "M67r-D4R5WM",
       "startSecond": 38,
-      "duration": 31,
+      "duration": 271,
       "url": "https://www.youtube.com/watch?v=M67r-D4R5WM&t=38s",
       "depth": "in-depth",
       "style": "scripted",
       "purpose": "Parameters",
       "confidence": 85,
-      "note": "A movable frequency window selects which band counts as a \"beat\" — slide it left for bass, right for hi-hats — so you tune which part of the track triggers the reaction.",
+      "note": "A short tip showing how to feed external audio into the graph and use [AudioReaction] to drive a particle scene — clearing the background and re-seeding randomness on each beat, and steering camera and noise with the level output.",
       "score": 22.0,
       "momentCount": 6,
       "focus": true
@@ -8154,13 +8567,13 @@
     {
       "video": "hh1tcg4A8bU",
       "startSecond": 44,
-      "duration": 14,
+      "duration": 116,
       "url": "https://www.youtube.com/watch?v=hh1tcg4A8bU&t=44s",
       "depth": "explained",
       "style": "scripted",
       "purpose": "Tip",
       "confidence": 80,
-      "note": "Hold ALT to insert a new keyframe and have it land exactly on the position of existing keyframes.",
+      "note": "A short tip on snapping keyframes precisely in the timeline: pinning parameters, switching the ruler from seconds to bars/beats/ticks, and using ALT to scale and insert keyframes onto snap targets.",
       "score": 4.86,
       "momentCount": 3,
       "focus": true
@@ -8328,13 +8741,13 @@
     {
       "video": "cGyCEkCJQUk",
       "startSecond": 29,
-      "duration": 30,
+      "duration": 251,
       "url": "https://www.youtube.com/watch?v=cGyCEkCJQUk&t=29s",
       "depth": "explained",
       "style": "scripted",
       "purpose": "Example",
       "confidence": 75,
-      "note": "How crossing from one clip into the next swaps which scene is being rendered, giving cut-style scene transitions purely from clip placement.",
+      "note": "A walkthrough of TimeClips: how clips on the timeline gate which parts of a graph get evaluated per scene, and how dragging or stretching a clip remaps the time fed into its sub-graph, with the colour cues (orange/red) that signal time remapping and time-scaling.",
       "score": 18.0,
       "momentCount": 3,
       "focus": true
@@ -8540,6 +8953,18 @@
       "score": 0.4125
     },
     {
+      "video": "SMKigWtk_LQ",
+      "startSecond": 729,
+      "duration": 32,
+      "url": "https://www.youtube.com/watch?v=SMKigWtk_LQ&t=729s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Parameters",
+      "confidence": 78,
+      "note": "Set a non-zero speed (≈55) so the grain animates instead of sitting static, then keep the amount low so it's barely perceptible.",
+      "score": 3.3
+    },
+    {
       "video": "_pEhs2jQ3Gg",
       "startSecond": 3515,
       "duration": 85,
@@ -8578,6 +9003,20 @@
       "score": 3.0
     },
     {
+      "video": "COd7gkJB0KQ",
+      "startSecond": 40,
+      "duration": 254,
+      "url": "https://www.youtube.com/watch?v=COd7gkJB0KQ&t=40s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Concept",
+      "confidence": 70,
+      "note": "A short tip on overriding the time that drives an animation: wrap a rendered texture in a command-time operator and feed it a custom time signal (a sine, a remapped random, a beat) to scrub, loop, or jump regions of a timeline non-linearly.",
+      "score": 3.6,
+      "momentCount": 1,
+      "focus": true
+    },
+    {
       "video": "GF0wWpNWkVs",
       "startSecond": 1829,
       "duration": 158,
@@ -8614,6 +9053,18 @@
       "score": 0.864
     },
     {
+      "video": "LI5Pq5H9HFU",
+      "startSecond": 320,
+      "duration": 35,
+      "url": "https://www.youtube.com/watch?v=LI5Pq5H9HFU&t=320s",
+      "depth": "passing",
+      "style": "scripted",
+      "purpose": "Tip",
+      "confidence": 70,
+      "note": "Drive an animation by wiring a running time value into a noise offset so the displacement evolves every frame.",
+      "score": 0.9
+    },
+    {
       "video": "Mqi2mEyd4jQ",
       "startSecond": 4190,
       "duration": 80,
@@ -8624,6 +9075,18 @@
       "confidence": 78,
       "note": "Read the current playback time, stringify it, and route it into a text operator to build an on-screen time readout.",
       "score": 0.72
+    },
+    {
+      "video": "SMKigWtk_LQ",
+      "startSecond": 812,
+      "duration": 19,
+      "url": "https://www.youtube.com/watch?v=SMKigWtk_LQ&t=812s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Concept",
+      "confidence": 78,
+      "note": "Wire it into a noise operator's time input to give an otherwise static field continuous animation over playback.",
+      "score": 1.68
     },
     {
       "video": "_pEhs2jQ3Gg",
@@ -8664,6 +9127,30 @@
       "confidence": 72,
       "note": "Drive a height field from one color channel; gain and bias are the knobs to reach for when shaping the silhouette of the mountains.",
       "score": 2.112
+    },
+    {
+      "video": "LI5Pq5H9HFU",
+      "startSecond": 182,
+      "duration": 42,
+      "url": "https://www.youtube.com/watch?v=LI5Pq5H9HFU&t=182s",
+      "depth": "in-depth",
+      "style": "scripted",
+      "purpose": "Example",
+      "confidence": 85,
+      "note": "Feed a noise field into the attribute sampler to push point positions along a single axis, turning a flat grid into a rolling surface; rotate the noise 90° and raise its scaling so the pattern aligns with the grid plane.",
+      "score": 4.8
+    },
+    {
+      "video": "LI5Pq5H9HFU",
+      "startSecond": 282,
+      "duration": 38,
+      "url": "https://www.youtube.com/watch?v=LI5Pq5H9HFU&t=282s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Parameters",
+      "confidence": 78,
+      "note": "Offset and warp-offset values shift where the noise samples, and animating those (rather than the underlying field) is enough to make the displaced surface drift like water.",
+      "score": 3.3
     },
     {
       "video": "Mqi2mEyd4jQ",
@@ -8780,6 +9267,18 @@
       "score": 0.288
     },
     {
+      "video": "LI5Pq5H9HFU",
+      "startSecond": 1124,
+      "duration": 34,
+      "url": "https://www.youtube.com/watch?v=LI5Pq5H9HFU&t=1124s",
+      "depth": "in-depth",
+      "style": "scripted",
+      "purpose": "Concept",
+      "confidence": 86,
+      "note": "Adds contact shadows in the crevices between geometry, giving instanced/cluttered scenes much more depth; tame it by lowering opacity or its boost settings if the darkening is too strong.",
+      "score": 4.0
+    },
+    {
       "video": "Mqi2mEyd4jQ",
       "startSecond": 10590,
       "duration": 180,
@@ -8842,16 +9341,40 @@
       "score": 0.192
     },
     {
-      "video": "DJKb0wDr0Zs",
-      "startSecond": 176,
-      "duration": 27,
-      "url": "https://www.youtube.com/watch?v=DJKb0wDr0Zs&t=176s",
+      "video": "LI5Pq5H9HFU",
+      "startSecond": 633,
+      "duration": 32,
+      "url": "https://www.youtube.com/watch?v=LI5Pq5H9HFU&t=633s",
       "depth": "explained",
       "style": "scripted",
       "purpose": "Example",
-      "confidence": 60,
-      "note": "Wire a [TriggerAnim] into a rotation/shake offset to scale animated noise on each trigger, producing decaying camera shake whose intensity and speed you dial back to taste.",
-      "score": 3.168
+      "confidence": 85,
+      "note": "Wire a noise generator into a locator's position to make an object wander smoothly through space rather than follow a fixed path.",
+      "score": 3.6
+    },
+    {
+      "video": "LI5Pq5H9HFU",
+      "startSecond": 671,
+      "duration": 44,
+      "url": "https://www.youtube.com/watch?v=LI5Pq5H9HFU&t=671s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Parameters",
+      "confidence": 82,
+      "note": "Tune the per-axis amplitude to constrain wandering motion to a plane — drop the vertical amplitude so the object circles rather than bobs up and down.",
+      "score": 3.3
+    },
+    {
+      "video": "LI5Pq5H9HFU",
+      "startSecond": 715,
+      "duration": 60,
+      "url": "https://www.youtube.com/watch?v=LI5Pq5H9HFU&t=715s",
+      "depth": "in-depth",
+      "style": "scripted",
+      "purpose": "Parameters",
+      "confidence": 82,
+      "note": "For spin, feed noise into rotation and multiply its ±1 range up to 360°; lower frequency for slower turns and reduce octaves so the rotation holds a steady speed instead of jittering.",
+      "score": 4.4
     },
     {
       "video": "MAyETISMFi0",
@@ -8962,18 +9485,6 @@
       "confidence": 68,
       "note": "Shows a camera's frustum within the scene, but only once you switch the output window's camera mode from auto to viewer.",
       "score": 1.404
-    },
-    {
-      "video": "DJKb0wDr0Zs",
-      "startSecond": 9,
-      "duration": 8,
-      "url": "https://www.youtube.com/watch?v=DJKb0wDr0Zs&t=9s",
-      "depth": "passing",
-      "style": "scripted",
-      "purpose": "Example",
-      "confidence": 70,
-      "note": "Drop it into a scene to visualize the camera's position and frustum while you tune an animated camera rig.",
-      "score": 0.144
     }
   ],
   "op:Lib.render.gizmo.VisibleGizmos": [
@@ -9056,13 +9567,13 @@
     {
       "video": "ElW_0uaeiNA",
       "startSecond": 26,
-      "duration": 39,
+      "duration": 139,
       "url": "https://www.youtube.com/watch?v=ElW_0uaeiNA&t=26s",
       "depth": "in-depth",
       "style": "scripted",
       "purpose": "Concept",
       "confidence": 88,
-      "note": "Records each frame's point positions into a cyclic GPU buffer roughly 100× the input size, so every point leaves a trail of its recent history; because it lives on the GPU the history can run very long and effectively forever.",
+      "note": "A short tip showing how to feed animated, noise-displaced points into a cyclic trail buffer to draw streaking trails, then layer extra noise and fog on the result.",
       "score": 20.0,
       "momentCount": 2,
       "focus": true
@@ -9140,6 +9651,18 @@
       "confidence": 55,
       "note": "Better for giving points an outward orientation than for connecting them, when you want shards radiating from a center.",
       "score": 0.24
+    },
+    {
+      "video": "SMKigWtk_LQ",
+      "startSecond": 367,
+      "duration": 62,
+      "url": "https://www.youtube.com/watch?v=SMKigWtk_LQ&t=367s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Parameters",
+      "confidence": 85,
+      "note": "Raise the point count and shrink the radius to wrap a dense shell of points around an object; follow with a randomizer to break the too-perfect spherical surface.",
+      "score": 3.3
     }
   ],
   "op:Lib.particle.force.ReconstructiveForce": [
@@ -9318,6 +9841,18 @@
   ],
   "op:Lib.image.color.AdjustColors": [
     {
+      "video": "LI5Pq5H9HFU",
+      "startSecond": 841,
+      "duration": 33,
+      "url": "https://www.youtube.com/watch?v=LI5Pq5H9HFU&t=841s",
+      "depth": "passing",
+      "style": "scripted",
+      "purpose": "Tip",
+      "confidence": 68,
+      "note": "Lowering exposure and saturation on an environment image tones down image-based lighting before it's converted for the scene.",
+      "score": 0.9
+    },
+    {
       "video": "Mqi2mEyd4jQ",
       "startSecond": 7500,
       "duration": 40,
@@ -9331,6 +9866,22 @@
     }
   ],
   "op:Lib.mesh.modify.DisplaceMesh": [],
+  "op:Lib.image.fx.stylize.ScreenCloseUp": [
+    {
+      "video": "_P4-VKhJXhE",
+      "startSecond": 398,
+      "duration": 714,
+      "url": "https://www.youtube.com/watch?v=_P4-VKhJXhE&t=398s",
+      "depth": "passing",
+      "style": "scripted",
+      "purpose": "Example",
+      "confidence": 55,
+      "note": "A five-minute introduction to color grading in Tooll, centered on the lift/gamma/gain controls of the ColorGrade operator, reading the WaveForm operator's scope, and comparing before/after with CompareImages.",
+      "score": 2.88,
+      "momentCount": 1,
+      "focus": true
+    }
+  ],
   "ui:LocalTime": [
     {
       "video": "GF0wWpNWkVs",
@@ -9396,6 +9947,20 @@
     }
   ],
   "op:Lib.numbers.anim.time.SetTime": [
+    {
+      "video": "COd7gkJB0KQ",
+      "startSecond": 54,
+      "duration": 254,
+      "url": "https://www.youtube.com/watch?v=COd7gkJB0KQ&t=54s",
+      "depth": "in-depth",
+      "style": "scripted",
+      "purpose": "Concept",
+      "confidence": 75,
+      "note": "A short tip on overriding the time that drives an animation: wrap a rendered texture in a command-time operator and feed it a custom time signal (a sine, a remapped random, a beat) to scrub, loop, or jump regions of a timeline non-linearly.",
+      "score": 19.2,
+      "momentCount": 1,
+      "focus": true
+    },
     {
       "video": "GF0wWpNWkVs",
       "startSecond": 1875,
@@ -9523,13 +10088,13 @@
     {
       "video": "Jpvyg-LR3f0",
       "startSecond": 12,
-      "duration": 29,
+      "duration": 358,
       "url": "https://www.youtube.com/watch?v=Jpvyg-LR3f0&t=12s",
       "depth": "explained",
       "style": "scripted",
       "purpose": "Parameters",
       "confidence": 84,
-      "note": "Drag with the left mouse to set opacity for transparent-to-opaque output, then raise the feather value to soften the dots into a blurred grain.",
+      "note": "A short tip walking through the versatile Raster operator: its presets and knobs, then driving it from an input texture and stacking offset copies into a CMYK-style halftone print effect.",
       "score": 15.84,
       "momentCount": 7,
       "focus": true
@@ -9891,13 +10456,13 @@
     {
       "video": "f9E7lwUXfBM",
       "startSecond": 222,
-      "duration": 31,
+      "duration": 397,
       "url": "https://www.youtube.com/watch?v=f9E7lwUXfBM&t=222s",
       "depth": "in-depth",
       "style": "scripted",
       "purpose": "Parameters",
       "confidence": 90,
-      "note": "The default 0×0 resolution is a sentinel meaning \"do the right thing\": take an incoming image's resolution if one exists, otherwise the output window's requested size.",
+      "note": "A short tip explaining how an image operator's resolution is resolved: the \"magic\" 0×0 default pulls resolution from an incoming texture if present, otherwise from the output window, and how -1 or an explicit size overrides that.",
       "score": 22.0,
       "momentCount": 3,
       "focus": true
@@ -10141,6 +10706,30 @@
   ],
   "op:Lib.render.postfx.DepthOfField": [
     {
+      "video": "LI5Pq5H9HFU",
+      "startSecond": 1018,
+      "duration": 35,
+      "url": "https://www.youtube.com/watch?v=LI5Pq5H9HFU&t=1018s",
+      "depth": "in-depth",
+      "style": "scripted",
+      "purpose": "Parameters",
+      "confidence": 85,
+      "note": "Needs the depth buffer wired in; set focus distance manually and raise the amount so foreground subjects drift in and out of focus.",
+      "score": 4.4
+    },
+    {
+      "video": "LI5Pq5H9HFU",
+      "startSecond": 1232,
+      "duration": 31,
+      "url": "https://www.youtube.com/watch?v=LI5Pq5H9HFU&t=1232s",
+      "depth": "passing",
+      "style": "scripted",
+      "purpose": "Parameters",
+      "confidence": 75,
+      "note": "Reduce the amount when the blur overwhelms the frame, and lean on the environment's background blur to soften distant areas separately.",
+      "score": 1.1
+    },
+    {
       "video": "Mqi2mEyd4jQ",
       "startSecond": 10590,
       "duration": 180,
@@ -10163,6 +10752,18 @@
       "confidence": 75,
       "note": "Wiring a slow Perlin noise into the depth-of-field focus distance adds constant organic focus drift for free; a bias/gain control biases it to dwell near a center distance and only occasionally swing to the extremes.",
       "score": 0.54
+    },
+    {
+      "video": "SMKigWtk_LQ",
+      "startSecond": 593,
+      "duration": 36,
+      "url": "https://www.youtube.com/watch?v=SMKigWtk_LQ&t=593s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Parameters",
+      "confidence": 82,
+      "note": "Pin it and darken/neutralize the blur so bright out-of-focus elements recede, pulling attention to the sharp center of frame.",
+      "score": 3.3
     },
     {
       "video": "_pEhs2jQ3Gg",
@@ -10797,56 +11398,6 @@
       "score": 0.72
     }
   ],
-  "op:Lib.numbers.float.adjust.Remap": [
-    {
-      "video": "GF0wWpNWkVs",
-      "startSecond": 2499,
-      "duration": 74,
-      "url": "https://www.youtube.com/watch?v=GF0wWpNWkVs&t=2499s",
-      "depth": "explained",
-      "style": "experiment",
-      "purpose": "Tip",
-      "confidence": 75,
-      "note": "Put it between a raw UI value and a target so one slider can feed two places with a meaningful range — e.g. mapping a 0..1 scale into the units the projector actually wants.",
-      "score": 0.54
-    },
-    {
-      "video": "a5_xCfC_3m4",
-      "startSecond": 6180,
-      "duration": 120,
-      "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4&t=6180s",
-      "depth": "explained",
-      "style": "experiment",
-      "purpose": "Example",
-      "confidence": 78,
-      "note": "Rescale a raw measured value (here a finger-gap distance) into a usable parameter range, then flip/curve the range so \"fingers close\" maps to the velocity you actually want.",
-      "score": 0.72
-    },
-    {
-      "video": "asiY0Jo1oJw",
-      "startSecond": 422,
-      "duration": 12,
-      "url": "https://www.youtube.com/watch?v=asiY0Jo1oJw&t=422s",
-      "depth": "passing",
-      "style": "scripted",
-      "purpose": "Concept",
-      "confidence": 68,
-      "note": "Among the operators that adopted the combined bias-and-gain control for reshaping a value's response curve.",
-      "score": 0.28
-    },
-    {
-      "video": "qavgcL72F1Y",
-      "startSecond": 6600,
-      "duration": 90,
-      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=6600s",
-      "depth": "passing",
-      "style": "experiment",
-      "purpose": "Tip",
-      "confidence": 70,
-      "note": "Map a raw MIDI value (0–127) into a usable parameter range and add damping to smooth the jittery controller signal before it drives anything.",
-      "score": 0.18
-    }
-  ],
   "op:Lib.numbers.float.trigonometry.Atan2": [
     {
       "video": "a5_xCfC_3m4",
@@ -11353,6 +11904,30 @@
   ],
   "op:Lib.numbers.vec3.PerlinNoise3": [
     {
+      "video": "SMKigWtk_LQ",
+      "startSecond": 778,
+      "duration": 24,
+      "url": "https://www.youtube.com/watch?v=SMKigWtk_LQ&t=778s",
+      "depth": "in-depth",
+      "style": "scripted",
+      "purpose": "Example",
+      "confidence": 85,
+      "note": "Feed it into a transform's rotation input to drive smooth pseudo-random orientation; keep the output range small (≈0.2) so motion is subtle.",
+      "score": 3.648
+    },
+    {
+      "video": "SMKigWtk_LQ",
+      "startSecond": 848,
+      "duration": 6,
+      "url": "https://www.youtube.com/watch?v=SMKigWtk_LQ&t=848s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Parameters",
+      "confidence": 80,
+      "note": "Lower the octave count (1–2) to trade fine detail for smoother, more continuous large-scale movement.",
+      "score": 0.132
+    },
+    {
       "video": "a5_xCfC_3m4",
       "startSecond": 11640,
       "duration": 660,
@@ -11395,13 +11970,13 @@
     {
       "video": "LjmnVL7azYw",
       "startSecond": 24,
-      "duration": 13,
+      "duration": 271,
       "url": "https://www.youtube.com/watch?v=LjmnVL7azYw&t=24s",
       "depth": "explained",
       "style": "scripted",
       "purpose": "Concept",
       "confidence": 85,
-      "note": "Bakes the source mesh into every scatter point, producing one combined mesh with all the new vertices and faces — a heavier buffer, but the result is real geometry you can keep editing.",
+      "note": "A short tip contrasting two ways to multiply a mesh across scattered points: baking copies into one large mesh (cloning) versus drawing the same mesh repeatedly per point (instancing), and the trade-offs in memory, performance, and what you can still modify afterward.",
       "score": 4.8,
       "momentCount": 1,
       "focus": true
@@ -11441,6 +12016,18 @@
       "confidence": 80,
       "note": "Rebuilding combined geometry every time the driver point moves is the slow path; prefer drawing a cached mesh at points so only the transforms update.",
       "score": 0.6
+    },
+    {
+      "video": "SMKigWtk_LQ",
+      "startSecond": 226,
+      "duration": 49,
+      "url": "https://www.youtube.com/watch?v=SMKigWtk_LQ&t=226s",
+      "depth": "in-depth",
+      "style": "scripted",
+      "purpose": "Example",
+      "confidence": 90,
+      "note": "Wire a points set into one input and a mesh into the other to stamp a copy of the mesh at every point; chain it after the points generator that defines the layout.",
+      "score": 4.8
     },
     {
       "video": "a5_xCfC_3m4",
@@ -12047,6 +12634,20 @@
   ],
   "op:Lib.image.fx.feedback.AdvancedFeedback2": [
     {
+      "video": "M7eOmqiUOZM",
+      "startSecond": 78,
+      "duration": 1019,
+      "url": "https://www.youtube.com/watch?v=M7eOmqiUOZM&t=78s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Concept",
+      "confidence": 70,
+      "note": "A deep walkthrough of the AdvancedFeedback effect: how its displace-along-a-slope feedback loop works internally, and a guided tour of nearly every parameter (twist, displacement, sample distance, shade, blur, color shifts, amplified edges, limit brights) and how to drive them for smoke-, water- and reaction-diffusion-like looks.",
+      "score": 15.0,
+      "momentCount": 1,
+      "focus": true
+    },
+    {
       "video": "asiY0Jo1oJw",
       "startSecond": 568,
       "duration": 11,
@@ -12350,6 +12951,42 @@
     }
   ],
   "op:Lib.render.gizmo.Locator": [
+    {
+      "video": "LI5Pq5H9HFU",
+      "startSecond": 595,
+      "duration": 38,
+      "url": "https://www.youtube.com/watch?v=LI5Pq5H9HFU&t=595s",
+      "depth": "in-depth",
+      "style": "scripted",
+      "purpose": "Concept",
+      "confidence": 88,
+      "note": "A single animated locator acts as one shared position source you can plug into multiple consumers (a mesh and a light) so they always stay co-located.",
+      "score": 4.0
+    },
+    {
+      "video": "LI5Pq5H9HFU",
+      "startSecond": 826,
+      "duration": 15,
+      "url": "https://www.youtube.com/watch?v=LI5Pq5H9HFU&t=826s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Example",
+      "confidence": 84,
+      "note": "Drive a light's position from the same locator that moves its host object so the light tracks the object exactly.",
+      "score": 1.44
+    },
+    {
+      "video": "LI5Pq5H9HFU",
+      "startSecond": 1053,
+      "duration": 22,
+      "url": "https://www.youtube.com/watch?v=LI5Pq5H9HFU&t=1053s",
+      "depth": "passing",
+      "style": "scripted",
+      "purpose": "Tip",
+      "confidence": 70,
+      "note": "Instead of a hand-tuned focus distance, feed a moving locator's camera-space distance into depth-of-field so focus tracks a subject automatically.",
+      "score": 0.612
+    },
     {
       "video": "cfUWSPJDRi4",
       "startSecond": 1449,
@@ -12689,20 +13326,6 @@
       "score": 1.5
     }
   ],
-  "op:Lib.io.osc.OscInput": [
-    {
-      "video": "cfUWSPJDRi4",
-      "startSecond": 6780,
-      "duration": 360,
-      "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4&t=6780s",
-      "depth": "explained",
-      "style": "experiment",
-      "purpose": "Example",
-      "confidence": 75,
-      "note": "Receive a phone's position and quaternion (x/y/z/w) over OSC into a dictionary, then pull individual floats out by key to reconstruct an orientation.",
-      "score": 0.72
-    }
-  ],
   "op:Lib.numbers.floats.logic.PickFloatFromList": [
     {
       "video": "cfUWSPJDRi4",
@@ -12917,13 +13540,13 @@
     {
       "video": "COd7gkJB0KQ",
       "startSecond": 54,
-      "duration": 29,
+      "duration": 254,
       "url": "https://www.youtube.com/watch?v=COd7gkJB0KQ&t=54s",
       "depth": "in-depth",
       "style": "scripted",
       "purpose": "Concept",
       "confidence": 75,
-      "note": "How to locally override the time feeding a sub-graph: render content into a texture, wrap it in a command-time operator, then drive that operator's time input yourself instead of the global playhead — pinning it shows the overridden frame.",
+      "note": "A short tip on overriding the time that drives an animation: wrap a rendered texture in a command-time operator and feed it a custom time signal (a sine, a remapped random, a beat) to scrub, loop, or jump regions of a timeline non-linearly.",
       "score": 19.2,
       "momentCount": 2,
       "focus": true
@@ -12931,13 +13554,13 @@
     {
       "video": "cGyCEkCJQUk",
       "startSecond": 126,
-      "duration": 26,
+      "duration": 251,
       "url": "https://www.youtube.com/watch?v=cGyCEkCJQUk&t=126s",
       "depth": "in-depth",
       "style": "scripted",
       "purpose": "Concept",
       "confidence": 82,
-      "note": "Clips tinted orange are remapping time: the clip overrides the time value its sub-graph receives rather than passing the global playhead through unchanged.",
+      "note": "A walkthrough of TimeClips: how clips on the timeline gate which parts of a graph get evaluated per scene, and how dragging or stretching a clip remaps the time fed into its sub-graph, with the colour cues (orange/red) that signal time remapping and time-scaling.",
       "score": 16.8,
       "momentCount": 5,
       "focus": true
@@ -12955,6 +13578,34 @@
       "confidence": 55,
       "note": "A slow looping animated value can be wired straight into an effect's strength to make the look breathe over time rather than sitting static.",
       "score": 0.1296
+    }
+  ],
+  "op:Lib.numbers.anim.time.GetFrameSpeedFactor": [
+    {
+      "video": "COd7gkJB0KQ",
+      "startSecond": 194,
+      "duration": 254,
+      "url": "https://www.youtube.com/watch?v=COd7gkJB0KQ&t=194s",
+      "depth": "passing",
+      "style": "scripted",
+      "purpose": "Concept",
+      "confidence": 50,
+      "note": "A short tip on overriding the time that drives an animation: wrap a rendered texture in a command-time operator and feed it a custom time signal (a sine, a remapped random, a beat) to scrub, loop, or jump regions of a timeline non-linearly.",
+      "score": 0.2,
+      "momentCount": 1,
+      "focus": true
+    },
+    {
+      "video": "rEod2FltaPA",
+      "startSecond": 4220,
+      "duration": 70,
+      "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=4220s",
+      "depth": "passing",
+      "style": "scripted",
+      "purpose": "Tip",
+      "confidence": 65,
+      "note": "Multiply a frame-duration value into particle speed so movement stays frame-rate-independent regardless of vsync or load.",
+      "score": 0.9
     }
   ],
   "op:Lib.numbers.float.trigonometry.Sin": [],
@@ -13012,6 +13663,20 @@
   ],
   "op:Lib.render.camera.OrbitCamera": [
     {
+      "video": "DJKb0wDr0Zs",
+      "startSecond": 42,
+      "duration": 239,
+      "url": "https://www.youtube.com/watch?v=DJKb0wDr0Zs&t=42s",
+      "depth": "in-depth",
+      "style": "scripted",
+      "purpose": "Parameters",
+      "confidence": 80,
+      "note": "A short tip walking through the parameters of the RandomCamera operator for procedural camera moves, plus how to drive its seed and shake inputs from a beat counter and noise.",
+      "score": 22.0,
+      "momentCount": 1,
+      "focus": true
+    },
+    {
       "video": "GF0wWpNWkVs",
       "startSecond": 1271,
       "duration": 99,
@@ -13048,6 +13713,18 @@
       "score": 0.72
     },
     {
+      "video": "LI5Pq5H9HFU",
+      "startSecond": 949,
+      "duration": 34,
+      "url": "https://www.youtube.com/watch?v=LI5Pq5H9HFU&t=949s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Example",
+      "confidence": 82,
+      "note": "Frame an instanced scene by orbiting around its center, then lower the camera to find a flattering angle on the surface.",
+      "score": 3.6
+    },
+    {
       "video": "LLpl6QEL7bo",
       "startSecond": 5600,
       "duration": 180,
@@ -13058,6 +13735,18 @@
       "confidence": 75,
       "note": "Rotating with the middle mouse used to silently change the distance between camera position and target, breaking saved camera animations; a fix keeps that distance fixed while orbiting.",
       "score": 3.3
+    },
+    {
+      "video": "SMKigWtk_LQ",
+      "startSecond": 566,
+      "duration": 19,
+      "url": "https://www.youtube.com/watch?v=SMKigWtk_LQ&t=566s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Parameters",
+      "confidence": 82,
+      "note": "Its distance and orbit-speed defaults give an automatic circling shot out of the box; just nudge distance for a closer or wider framing.",
+      "score": 1.848
     },
     {
       "video": "dCX7CcL0ZJs",
@@ -13366,18 +14055,6 @@
   ],
   "op:Lib.numbers.int.logic.CountInt": [
     {
-      "video": "DJKb0wDr0Zs",
-      "startSecond": 152,
-      "duration": 20,
-      "url": "https://www.youtube.com/watch?v=DJKb0wDr0Zs&t=152s",
-      "depth": "explained",
-      "style": "scripted",
-      "purpose": "Example",
-      "confidence": 60,
-      "note": "Feed an incrementing integer counter into a camera's random seed so each step jumps to a fresh, repeatable framing — handy for cutting on every beat.",
-      "score": 2.16
-    },
-    {
       "video": "GF0wWpNWkVs",
       "startSecond": 5520,
       "duration": 184,
@@ -13406,13 +14083,13 @@
     {
       "video": "DTIl2QmkumE",
       "startSecond": 13,
-      "duration": 29,
+      "duration": 203,
       "url": "https://www.youtube.com/watch?v=DTIl2QmkumE&t=13s",
       "depth": "explained",
       "style": "scripted",
       "purpose": "Example",
       "confidence": 80,
-      "note": "Drive the band offset from an incrementing counter to make the bands march continuously in one direction; the counter's increment sets the scroll speed and its sign the direction.",
+      "note": "A short scripted tip showing how the [Steps] image effect posterizes a gradient into bands, then animating it by wiring counters and an LFO into its offset, gradient rotation, and highlight color.",
       "score": 17.28,
       "momentCount": 5,
       "focus": true
@@ -13455,17 +14132,89 @@
     }
   ],
   "op:Lib.image.transform.MirrorRepeat": [],
+  "op:Lib.point.generate.PointTrailFast": [
+    {
+      "video": "ElW_0uaeiNA",
+      "startSecond": 26,
+      "duration": 139,
+      "url": "https://www.youtube.com/watch?v=ElW_0uaeiNA&t=26s",
+      "depth": "passing",
+      "style": "scripted",
+      "purpose": "Comparison",
+      "confidence": 55,
+      "note": "A short tip showing how to feed animated, noise-displaced points into a cyclic trail buffer to draw streaking trails, then layer extra noise and fog on the result.",
+      "score": 6.0,
+      "momentCount": 1,
+      "focus": true
+    },
+    {
+      "video": "LLpl6QEL7bo",
+      "startSecond": 11380,
+      "duration": 100,
+      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=11380s",
+      "depth": "explained",
+      "style": "discussion",
+      "purpose": "Gotcha",
+      "confidence": 75,
+      "note": "Uses a cyclic buffer so it's fast, but DrawLines can't tell where the buffer wraps, leaving one persistent gap in the trail line.",
+      "score": 1.2375
+    }
+  ],
+  "op:Lib.point.sim.SimNoiseOffset": [
+    {
+      "video": "ElW_0uaeiNA",
+      "startSecond": 85,
+      "duration": 139,
+      "url": "https://www.youtube.com/watch?v=ElW_0uaeiNA&t=85s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Tip",
+      "confidence": 60,
+      "note": "A short tip showing how to feed animated, noise-displaced points into a cyclic trail buffer to draw streaking trails, then layer extra noise and fog on the result.",
+      "score": 13.5,
+      "momentCount": 1,
+      "focus": true
+    }
+  ],
+  "op:Lib.render.utils.RequestedResolution": [
+    {
+      "video": "GF0wWpNWkVs",
+      "startSecond": 3124,
+      "duration": 15,
+      "url": "https://www.youtube.com/watch?v=GF0wWpNWkVs&t=3124s",
+      "depth": "explained",
+      "style": "experiment",
+      "purpose": "Tip",
+      "confidence": 72,
+      "note": "How to read the resolution the context is asking for, to size a derived render target instead of hard-coding a number.",
+      "score": 0.216
+    },
+    {
+      "video": "f9E7lwUXfBM",
+      "startSecond": 222,
+      "duration": 397,
+      "url": "https://www.youtube.com/watch?v=f9E7lwUXfBM&t=222s",
+      "depth": "in-depth",
+      "style": "scripted",
+      "purpose": "Concept",
+      "confidence": 80,
+      "note": "A short tip explaining how an image operator's resolution is resolved: the \"magic\" 0×0 default pulls resolution from an incoming texture if present, otherwise from the output window, and how -1 or an explicit size overrides that.",
+      "score": 20.0,
+      "momentCount": 1,
+      "focus": true
+    }
+  ],
   "op:Lib.render.analyze.GetScreenPos": [
     {
       "video": "fCz6SbxFPPA",
       "startSecond": 335,
-      "duration": 50,
+      "duration": 828,
       "url": "https://www.youtube.com/watch?v=fCz6SbxFPPA&t=335s",
       "depth": "in-depth",
       "style": "scripted",
       "purpose": "Concept",
       "confidence": 90,
-      "note": "Reads a transform that lives *after* the camera in the evaluation flow and reports where that point lands on screen; the returned Z is always 0 because depth is intentionally discarded, leaving a flat 2D position to anchor overlays.",
+      "note": "A tip-of-the-day walkthrough of the new [GetScreenPos] operator (TiXL 4.0.2), which converts a world-space locator into a 2D screen-space coordinate so a label or billboard can be pinned over a point in a post-processed 3D scene.",
       "score": 20.0,
       "momentCount": 3,
       "focus": true
@@ -13526,20 +14275,6 @@
       "confidence": 68,
       "note": "Split a texture-size vector and divide width by height to derive an aspect ratio, then feed that into the projection so a non-square light image isn't stretched.",
       "score": 0.72
-    }
-  ],
-  "op:Lib.render.utils.RequestedResolution": [
-    {
-      "video": "GF0wWpNWkVs",
-      "startSecond": 3124,
-      "duration": 15,
-      "url": "https://www.youtube.com/watch?v=GF0wWpNWkVs&t=3124s",
-      "depth": "explained",
-      "style": "experiment",
-      "purpose": "Tip",
-      "confidence": 72,
-      "note": "How to read the resolution the context is asking for, to size a derived render target instead of hard-coding a number.",
-      "score": 0.216
     }
   ],
   "op:Lib.numbers.floats.basic.FloatsToList": [
@@ -13676,6 +14411,34 @@
       "score": 0.45
     }
   ],
+  "op:Lib.image.generate.pattern.ValueRaster": [
+    {
+      "video": "Jpvyg-LR3f0",
+      "startSecond": 36,
+      "duration": 358,
+      "url": "https://www.youtube.com/watch?v=Jpvyg-LR3f0&t=36s",
+      "depth": "passing",
+      "style": "scripted",
+      "purpose": "Concept",
+      "confidence": 60,
+      "note": "A short tip walking through the versatile Raster operator: its presets and knobs, then driving it from an input texture and stacking offset copies into a CMYK-style halftone print effect.",
+      "score": 3.0,
+      "momentCount": 1,
+      "focus": true
+    },
+    {
+      "video": "Q2nHQ-5msGQ",
+      "startSecond": 4380,
+      "duration": 190,
+      "url": "https://www.youtube.com/watch?v=Q2nHQ-5msGQ&t=4380s",
+      "depth": "in-depth",
+      "style": "scripted",
+      "purpose": "Concept",
+      "confidence": 80,
+      "note": "Draws a recursively subdividing grid raster whose line density follows image resolution and the chosen value range — the background grid the math quizzes use to plot curves precisely.",
+      "score": 4.0
+    }
+  ],
   "op:Lib.point.io.LineTextPoints": [
     {
       "video": "Kg5UcJJWt80",
@@ -13774,6 +14537,18 @@
       "confidence": 72,
       "note": "Used as one selectable post effect keyed off a snapshot index — picking the index decides whether the distortion pass is applied to a shared texture.",
       "score": 0.72
+    },
+    {
+      "video": "SMKigWtk_LQ",
+      "startSecond": 761,
+      "duration": 17,
+      "url": "https://www.youtube.com/watch?v=SMKigWtk_LQ&t=761s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Gotcha",
+      "confidence": 80,
+      "note": "Defaults run far too strong; cut the size way down (≈0.025) and reduce the colorize amount to avoid a greenish tint on edges.",
+      "score": 1.584
     },
     {
       "video": "pvvPsp03Hik",
@@ -14168,6 +14943,18 @@
       "score": 3.6
     },
     {
+      "video": "LI5Pq5H9HFU",
+      "startSecond": 461,
+      "duration": 35,
+      "url": "https://www.youtube.com/watch?v=LI5Pq5H9HFU&t=461s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Concept",
+      "confidence": 80,
+      "note": "Combining several meshes under one group yields a single combined mesh you can instance as a unit; reuse the same point set twice (one per sub-mesh) to scatter the composite.",
+      "score": 3.0
+    },
+    {
       "video": "Mqi2mEyd4jQ",
       "startSecond": 3440,
       "duration": 70,
@@ -14178,6 +14965,18 @@
       "confidence": 72,
       "note": "Both expose an \"is enabled\" toggle, giving a second way to switch a scene branch on or off independent of any switch index.",
       "score": 2.7
+    },
+    {
+      "video": "SMKigWtk_LQ",
+      "startSecond": 174,
+      "duration": 15,
+      "url": "https://www.youtube.com/watch?v=SMKigWtk_LQ&t=174s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Example",
+      "confidence": 80,
+      "note": "Combine several geometry branches into one node so you can judge how the shapes relate in scale and overlap.",
+      "score": 1.44
     },
     {
       "video": "rEod2FltaPA",
@@ -14216,6 +15015,84 @@
       "confidence": 84,
       "note": "Treats each point as one fixture, mapping its position/orientation/color onto channel slots per the fixture's spec; set the fixture's channel count so a color lands on the right three channels.",
       "score": 1.8
+    }
+  ],
+  "op:Lib.numbers.float.basic.Multiply": [
+    {
+      "video": "LI5Pq5H9HFU",
+      "startSecond": 715,
+      "duration": 60,
+      "url": "https://www.youtube.com/watch?v=LI5Pq5H9HFU&t=715s",
+      "depth": "in-depth",
+      "style": "scripted",
+      "purpose": "Parameters",
+      "confidence": 82,
+      "note": "For spin, feed noise into rotation and multiply its ±1 range up to 360°; lower frequency for slower turns and reduce octaves so the rotation holds a steady speed instead of jittering.",
+      "score": 4.4
+    }
+  ],
+  "op:Lib.render.shading.SetPointLight": [
+    {
+      "video": "LI5Pq5H9HFU",
+      "startSecond": 783,
+      "duration": 43,
+      "url": "https://www.youtube.com/watch?v=LI5Pq5H9HFU&t=783s",
+      "depth": "in-depth",
+      "style": "scripted",
+      "purpose": "Parameters",
+      "confidence": 85,
+      "note": "Raising decay shrinks the lit area and intensity brightens it; recolor the light for mood — useful for an emissive object that should cast its own colored glow.",
+      "score": 4.4
+    },
+    {
+      "video": "LI5Pq5H9HFU",
+      "startSecond": 826,
+      "duration": 15,
+      "url": "https://www.youtube.com/watch?v=LI5Pq5H9HFU&t=826s",
+      "depth": "explained",
+      "style": "scripted",
+      "purpose": "Example",
+      "confidence": 84,
+      "note": "Drive a light's position from the same locator that moves its host object so the light tracks the object exactly.",
+      "score": 1.44
+    },
+    {
+      "video": "LI5Pq5H9HFU",
+      "startSecond": 1263,
+      "duration": 28,
+      "url": "https://www.youtube.com/watch?v=LI5Pq5H9HFU&t=1263s",
+      "depth": "passing",
+      "style": "scripted",
+      "purpose": "Parameters",
+      "confidence": 74,
+      "note": "Push intensity up and decay down together to make a colored light reach further across the scene.",
+      "score": 1.012
+    },
+    {
+      "video": "LLpl6QEL7bo",
+      "startSecond": 6040,
+      "duration": 60,
+      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=6040s",
+      "depth": "explained",
+      "style": "discussion",
+      "purpose": "Concept",
+      "confidence": 70,
+      "note": "The lower-level light operator PointLight builds on; usable directly but lacks the gizmo, and its position feeds the now-fixed specular computation.",
+      "score": 1.125
+    }
+  ],
+  "op:Lib.render.shading.TextureToCubeMap": [
+    {
+      "video": "LI5Pq5H9HFU",
+      "startSecond": 874,
+      "duration": 27,
+      "url": "https://www.youtube.com/watch?v=LI5Pq5H9HFU&t=874s",
+      "depth": "in-depth",
+      "style": "scripted",
+      "purpose": "Gotcha",
+      "confidence": 88,
+      "note": "Always convert an environment image into a cube map before feeding it as the lighting environment — skipping this step can crash the app.",
+      "score": 3.872
     }
   ],
   "op:Lib.mesh.modify.MeshProjectUV": [],
@@ -14387,20 +15264,6 @@
       "confidence": 78,
       "note": "FFT/audio-reaction read the global merged output buffer (the same master buffer written when exporting a video), which is why per-stem reactions aren't possible today without per-channel routing.",
       "score": 1.5
-    }
-  ],
-  "op:Lib.render.shading.SetPointLight": [
-    {
-      "video": "LLpl6QEL7bo",
-      "startSecond": 6040,
-      "duration": 60,
-      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=6040s",
-      "depth": "explained",
-      "style": "discussion",
-      "purpose": "Concept",
-      "confidence": 70,
-      "note": "The lower-level light operator PointLight builds on; usable directly but lacks the gizmo, and its position feeds the now-fixed specular computation.",
-      "score": 1.125
     }
   ],
   "op:Lib.render.transform.SpreadLayout": [
@@ -14635,20 +15498,6 @@
       "confidence": 75,
       "note": "One point per face stays put under deformation, unlike area-weighted surface scatter that redistributes when the geometry moves.",
       "score": 1.242
-    }
-  ],
-  "op:Lib.point.generate.PointTrailFast": [
-    {
-      "video": "LLpl6QEL7bo",
-      "startSecond": 11380,
-      "duration": 100,
-      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo&t=11380s",
-      "depth": "explained",
-      "style": "discussion",
-      "purpose": "Gotcha",
-      "confidence": 75,
-      "note": "Uses a cyclic buffer so it's fast, but DrawLines can't tell where the buffer wraps, leaving one persistent gap in the trail line.",
-      "score": 1.2375
     }
   ],
   "op:Lib.point.io.LoadSvg": [
@@ -15591,20 +16440,6 @@
       "score": 0.54
     }
   ],
-  "op:Lib.point.combine.CombineBuffers": [
-    {
-      "video": "PWCfyUnFGdg",
-      "startSecond": 10493,
-      "duration": 68,
-      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg&t=10493s",
-      "depth": "explained",
-      "style": "experiment",
-      "purpose": "Performance",
-      "confidence": 70,
-      "note": "Merge several point sets into one buffer so an entire constellation draws in a single draw call instead of many.",
-      "score": 0.6
-    }
-  ],
   "op:Lib.point.transform.SoftTransformPoints": [
     {
       "video": "PWCfyUnFGdg",
@@ -15659,20 +16494,6 @@
       "confidence": 80,
       "note": "Drop it on top of a group to graph a scalar over time inside the rendered scene — invaluable for debugging exported executables where you can't just open an extra output window.",
       "score": 2.7
-    }
-  ],
-  "op:Lib.image.generate.pattern.ValueRaster": [
-    {
-      "video": "Q2nHQ-5msGQ",
-      "startSecond": 4380,
-      "duration": 190,
-      "url": "https://www.youtube.com/watch?v=Q2nHQ-5msGQ&t=4380s",
-      "depth": "in-depth",
-      "style": "scripted",
-      "purpose": "Concept",
-      "confidence": 80,
-      "note": "Draws a recursively subdividing grid raster whose line density follows image resolution and the chosen value range — the background grid the math quizzes use to plot curves precisely.",
-      "score": 4.0
     }
   ],
   "op:Lib.numbers.floats.process.ValuesToTexture2": [
@@ -15887,20 +16708,6 @@
       "score": 4.0
     }
   ],
-  "op:Lib.numbers.float.logic.Compare": [
-    {
-      "video": "qavgcL72F1Y",
-      "startSecond": 7020,
-      "duration": 180,
-      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y&t=7020s",
-      "depth": "explained",
-      "style": "experiment",
-      "purpose": "Example",
-      "confidence": 75,
-      "note": "Build a threshold gate: compare an incoming signal against a level, and when it crosses, fire a trigger animation — the manual equivalent of a sample-and-hold/gate from a modular synth.",
-      "score": 0.72
-    }
-  ],
   "op:Lib.point.combine.PickPointList": [
     {
       "video": "qavgcL72F1Y",
@@ -16045,20 +16852,6 @@
       "confidence": 65,
       "note": "Combine several boolean reset triggers (rewind, fade event, button) so a simulation resets if any of them fire.",
       "score": 1.2
-    }
-  ],
-  "op:Lib.numbers.anim.time.GetFrameSpeedFactor": [
-    {
-      "video": "rEod2FltaPA",
-      "startSecond": 4220,
-      "duration": 70,
-      "url": "https://www.youtube.com/watch?v=rEod2FltaPA&t=4220s",
-      "depth": "passing",
-      "style": "scripted",
-      "purpose": "Tip",
-      "confidence": 65,
-      "note": "Multiply a frame-duration value into particle speed so movement stays frame-rate-independent regardless of vsync or load.",
-      "score": 0.9
     }
   ],
   "op:Lib.particle.force.CollisionForce": [
@@ -16731,13 +17524,13 @@
     {
       "video": "Zp0kDW1vikQ",
       "startSecond": 9,
-      "duration": 27,
+      "duration": 121,
       "url": "https://www.youtube.com/watch?v=Zp0kDW1vikQ&t=9s",
       "depth": "explained",
       "style": "scripted",
       "purpose": "Parameters",
       "confidence": 88,
-      "note": "Inner and outer radius set the band's extent, count multiplies the rings, and a rotate plus offset pair drives radial spin and trippy outward travel for animated loops.",
+      "note": "A short tip tour of the [Rings] operator, walking every parameter that shapes its concentric-ring pattern and pointing out which ones reward animation.",
       "score": 14.52,
       "momentCount": 5,
       "focus": true

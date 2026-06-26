@@ -4,13 +4,14 @@ type: tutorial
 date: 2022-06-29
 title: Tooll 3 Tip#002 - Raster Effects
 duration: 0:05:58
-focusesOn: [Raster]
+focusesOn: [Raster], [ValueRaster]
 ---
 
 A short tip walking through the versatile Raster operator: its presets and knobs, then driving it from an input texture and stacking offset copies into a CMYK-style halftone print effect.
 
 ## Mentions
 - 0:12→0:35 [Raster] · explained · scripted · Concept · 90% — Ships with a library of presets you can browse, and holding Alt while switching lets you interpolate between two presets for in-between looks.
+- 0:36→0:56 [ValueRaster] · passing · scripted · Concept · 60% — The float-list counterpart that outputs raster values for driving other operators rather than rendering pixels — useful when you want the same line/dot pattern as data instead of as an image; not shown directly here, but the pattern controls demonstrated transfer to it.
 - 0:39→0:56 [Raster] · in-depth · scripted · Parameters · 88% — Line-width-ratio places lines at or between grid intersections while dot-size controls whether you get crosses or plain separator lines; zero either the line width or line ratio to drop the lines and keep only dots.
 - 1:15→1:36 [Raster] · explained · scripted · Performance · 85% — Being a fragment shader, the cost is identical whether it draws many tiny dots or one large one, so density is free to tune.
 - 1:36→2:05 [Raster] · explained · scripted · Parameters · 84% — Drag with the left mouse to set opacity for transparent-to-opaque output, then raise the feather value to soften the dots into a blurred grain.

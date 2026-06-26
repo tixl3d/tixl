@@ -221,13 +221,5 @@
       }
     }
   ],
-  "Links": [
-    {
-      "Id": "90f2d53b-3bab-43be-a14d-8262ec56a126",
-      "Title": "Tutorial Video",
-      "Description": "Although the video explains the \"RandomCamera\". The operators has been renamed since.",
-      "LinkUrl": "https://youtu.be/DJKb0wDr0Zs",
-      "LinkType": "TutorialVideo"
-    }
-  ]
+  "Links": []
 }

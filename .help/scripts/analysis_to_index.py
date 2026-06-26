@@ -90,6 +90,7 @@ def parse_analysis(path):
                 meta[k.strip()] = v.strip()
         body = text[fm.end():]
 
+    summary = re.split(r"(?m)^##\s", body, maxsplit=1)[0].strip()   # the prose before the first heading
     mentions = []
     for line in body.splitlines():
         s = line.strip()
@@ -118,7 +119,7 @@ def parse_analysis(path):
         confidence = int(cm.group(1)) if cm else None
         mentions.append({"startSecond": start, "duration": duration, "marks": marks, "depth": depth,
                          "style": style, "purpose": purpose, "confidence": confidence, "note": note})
-    return meta, mentions
+    return meta, summary, mentions
 
 
 def parse_topics():
@@ -210,15 +211,19 @@ def build():
     INDICES.mkdir(parents=True, exist_ok=True)
     videos, raw, unknown = [], {}, {}                  # raw[key][video] = [segment dicts]
     video_focus = {}                                   # vid -> set(focus keys); present only if declared
+    video_summary, video_fulldur = {}, {}              # vid -> analysis summary / full length in seconds
 
     for path in sorted(ANALYSES.glob("*.md")):
-        meta, mentions = parse_analysis(path)
+        meta, summary, mentions = parse_analysis(path)
         vid = meta.get("video") or path.stem
         focuses = focus_keys(meta.get("focusesOn"))
         if focuses:
             video_focus[vid] = set(focuses)
+        dur_label = meta.get("duration") or ""
+        video_summary[vid] = summary
+        video_fulldur[vid] = parse_seconds(dur_label) if ":" in dur_label else 0
         videos.append({"id": vid, "type": meta.get("type"), "date": meta.get("date"),
-                       "title": meta.get("title"), "duration": meta.get("duration"),
+                       "title": meta.get("title"), "duration": dur_label, "summary": summary,
                        "focusesOn": focuses, "url": f"https://www.youtube.com/watch?v={vid}"})
         for mn in mentions:
             for kind, name in mn["marks"]:
@@ -253,6 +258,9 @@ def build():
                 best["url"] = f"https://www.youtube.com/watch?v={vid}&t={best['startSecond']}s"
                 best["momentCount"] = len(segs_out)
                 best["focus"] = True
+                # It's the whole-video tutorial: show the analysis summary, spanning the full length.
+                best["note"] = video_summary.get(vid) or best["note"]
+                best["duration"] = video_fulldur.get(vid) or best["duration"]
                 best["score"] = round(best["score"] * FOCUS_BOOST, 4)
                 segs_out = [best]
             for seg in segs_out:

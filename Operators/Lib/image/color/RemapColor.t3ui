@@ -150,13 +150,5 @@
       }
     }
   ],
-  "Links": [
-    {
-      "Id": "8294c6f7-f265-4404-a824-f989fde65f0b",
-      "Title": "Gradients and Remap Color",
-      "Description": "A short tutorial on how to use remap color to simulate Color cuves.",
-      "LinkUrl": "https://www.youtube.com/watch?v=WK4j0H-oM3g&t=61s",
-      "LinkType": "TutorialVideo"
-    }
-  ]
+  "Links": []
 }

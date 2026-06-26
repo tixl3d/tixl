@@ -369,13 +369,5 @@
       }
     }
   ],
-  "Links": [
-    {
-      "Id": "8795228a-14fd-4b23-8b8f-3b8efca4b5a3",
-      "Title": "TiXL - Let's build a logo animation from scratch",
-      "Description": "",
-      "LinkUrl": "https://youtu.be/7S4aedYxqQE?si=3Aafmh3wneREkTES&t=300",
-      "LinkType": "TutorialVideo"
-    }
-  ]
+  "Links": []
 }

@@ -550,22 +550,7 @@
       }
     }
   ],
-  "Links": [
-    {
-      "Id": "1b600a25-ed50-4ec8-bdc3-81187fe32b52",
-      "Title": "Overview",
-      "Description": "This 10 min video gives an overview of how this effect works.",
-      "LinkUrl": "https://youtu.be/M7eOmqiUOZM",
-      "LinkType": "TutorialVideo"
-    },
-    {
-      "Id": "2c1a8f78-f23c-4d91-8f23-8ae236f815bc",
-      "Title": "Example for blending",
-      "Description": "A quick illustration how blending presets and fake lighting can be applied to achive various effects.",
-      "LinkUrl": "https://www.youtube.com/watch?v=iIxSKv_WKoM",
-      "LinkType": "TutorialVideo"
-    }
-  ],
+  "Links": [],
   "Settings": {
     "RenderExport": {
   "TimeReference": "Bars",

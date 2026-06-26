@@ -219,13 +219,6 @@
   ],
   "Links": [
     {
-      "Id": "0976ba57-0979-45c0-9cc0-bb2c0a041e61",
-      "Title": "Tutorial",
-      "Description": "Follow the video-tutoral on YouTube",
-      "LinkUrl": "https://youtu.be/SMKigWtk_LQ?feature=shared",
-      "LinkType": "TutorialVideo"
-    },
-    {
       "Id": "d6c9939d-6cfc-4310-b83c-9e917b9cd97e",
       "Title": "by 1x-Vision",
       "Description": "",

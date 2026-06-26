@@ -41,13 +41,5 @@
       }
     }
   ],
-  "Links": [
-    {
-      "Id": "aaf7ca1e-181c-43e7-be16-e2a73d5a9248",
-      "Title": "Video tutorial",
-      "Description": "A quick tutorial how to use this operator override the rendering time.",
-      "LinkUrl": "https://youtu.be/COd7gkJB0KQ",
-      "LinkType": "TutorialVideo"
-    }
-  ]
+  "Links": []
 }

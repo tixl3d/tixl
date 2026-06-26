@@ -37,13 +37,5 @@
       }
     }
   ],
-  "Links": [
-    {
-      "Id": "f33c0808-ad8e-4719-be7a-c3af9e2a2d36",
-      "Title": "Resolution Magic Tutorial",
-      "Description": "A quick tutorial how Tooll handlers resolutions.",
-      "LinkUrl": "https://www.youtube.com/watch?v=f9E7lwUXfBM",
-      "LinkType": "TutorialVideo"
-    }
-  ]
+  "Links": []
 }

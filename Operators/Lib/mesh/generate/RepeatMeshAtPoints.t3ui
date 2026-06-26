@@ -333,13 +333,5 @@
       }
     }
   ],
-  "Links": [
-    {
-      "Id": "2b63fa61-ac86-4ebf-8ce9-1c1376c529a6",
-      "Title": "Tutorial Video",
-      "Description": "Examplains difference to DrawMeshAtPoints.",
-      "LinkUrl": "https://youtu.be/LjmnVL7azYw",
-      "LinkType": "TutorialVideo"
-    }
-  ]
+  "Links": []
 }

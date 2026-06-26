@@ -64,13 +64,5 @@
       }
     }
   ],
-  "Links": [
-    {
-      "Id": "5e6dc459-9868-4462-832f-f64a6eac77ee",
-      "Title": "Exporting OBJs",
-      "Description": "A short video on how to prepare and export obj-files from Blender.",
-      "LinkUrl": "https://youtu.be/YMumISn9zkw",
-      "LinkType": "TutorialVideo"
-    }
-  ]
+  "Links": []
 }

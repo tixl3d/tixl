@@ -4,7 +4,7 @@ type: tutorial
 date: 2022-09-08
 title: Tooll 3 Tip#019 - Color Grading
 duration: 0:11:54
-focusesOn: [ColorGrade]
+focusesOn: [ColorGrade], [ScreenCloseUp]
 ---
 
 A five-minute introduction to color grading in Tooll, centered on the lift/gamma/gain controls of the ColorGrade operator, reading the WaveForm operator's scope, and comparing before/after with CompareImages.
@@ -23,6 +23,7 @@ A five-minute introduction to color grading in Tooll, centered on the lift/gamma
 - 6:13→6:28 [ColorGrade] · passing · scripted · Tip · 78% — Hover a preset and hold Alt to blend it in gradually rather than applying it at full strength.
 - 6:28→6:38 [TorusMesh] [DisplaceMesh] [DrawMesh] [PointLight] [Camera] · passing · scripted · Example · 70% — A quick 3D scene wired as a grading target: a displaced torus drawn with a colored point light and an orbiting camera.
 - 6:38→6:55 [Glow] · passing · scripted · Example · 72% — Adding a glow pass before grading gives the highlights bloom that the grade then has to manage against clipping.
+- 6:38→6:55 [ScreenCloseUp] · passing · scripted · Example · 55% — Wraps a flat render onto a virtual filmed LCD so the grade reads like real camera footage; pair it with [ColorGrade] and a glow pass to sell the photographed-screen illusion. Only briefly part of the demo scene here, not called out by name.
 - 6:55→7:09 [RenderTarget] · passing · scripted · Tip · 72% — Tweaking the render target's background color shifts the overall tone of a scene before any grading is applied.
 - 7:09→8:22 [WaveForm] [ColorGrade] · in-depth · scripted · Example · 85% — Use the scope as a clipping gauge while grading: when whites bunch against the top the highlights are clamped, so pull gain down until they spread out, then add midtone brightness back to rebalance.
 - 8:22→9:01 [ui:ColorEditor] · explained · scripted · Concept · 78% — The grading color wheel uses a non-linear saturation radius — change is gentle near the center and steep at the rim — so subtle near-neutral tints are easy to dial in precisely.

@@ -119,13 +119,5 @@
       }
     }
   ],
-  "Links": [
-    {
-      "Id": "69c87947-5860-46b7-888a-1c3fa57a8629",
-      "Title": "How resolution works in T3",
-      "Description": "A quick video tutorial how Tooll handles resolution settings.",
-      "LinkUrl": "https://www.youtube.com/watch?v=f9E7lwUXfBM&list=PLj-rnPROvbn2cfnUwuyb5gRj-juOYUC7T&index=2",
-      "LinkType": "TutorialVideo"
-    }
-  ]
+  "Links": []
 }

@@ -89,13 +89,5 @@
       }
     }
   ],
-  "Links": [
-    {
-      "Id": "5ffbf1c0-06de-4988-aba1-186189a12396",
-      "Title": "Example Video",
-      "Description": "Shows how to draw meshes at points.",
-      "LinkUrl": "https://youtu.be/tZ1Uz6DmL_c?feature=shared",
-      "LinkType": "TutorialVideo"
-    }
-  ]
+  "Links": []
 }

@@ -102,21 +102,49 @@ internal sealed class VideoResourceList
     {
         var rows = new List<Row>(links.Count + 4);
 
-        // Hand-authored links rank with a focus-style boost so curated material leads; author order is preserved.
-        for (var i = 0; i < links.Count; i++)
-        {
-            if (!string.IsNullOrEmpty(links[i].Url))
-                rows.Add(Row.ForLink(links[i], LinkBaseScore - i * 0.01f));
-        }
-
+        var referencedVideoIds = new HashSet<string>();
         if (!string.IsNullOrEmpty(operatorFullPath))
         {
             foreach (var scored in GetRanked(operatorFullPath))
+            {
                 rows.Add(Row.ForVideo(scored));
+                referencedVideoIds.Add(scored.Segment.VideoId);
+            }
+        }
+
+        // A hand-authored link that points to a video we already extract is a duplicate — drop it so the
+        // (often higher-quality, focus-boosted) extracted reference is the one shown.
+        for (var i = 0; i < links.Count; i++)
+        {
+            if (string.IsNullOrEmpty(links[i].Url))
+                continue;
+            var youTubeId = ExtractYouTubeId(links[i].Url);
+            if (youTubeId != null && referencedVideoIds.Contains(youTubeId))
+                continue;
+            rows.Add(Row.ForLink(links[i], LinkBaseScore - i * 0.01f));
         }
 
         rows.Sort(static (a, b) => b.Score.CompareTo(a.Score));
         return rows;
+    }
+
+    /// <summary>Pulls the 11-char video id out of a youtu.be/… or …v=… URL, or null if it isn't one.</summary>
+    private static string? ExtractYouTubeId(string url)
+    {
+        foreach (var marker in YouTubeMarkers)
+        {
+            var idx = url.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+            if (idx < 0)
+                continue;
+            var start = idx + marker.Length;
+            var end = start;
+            while (end < url.Length && (char.IsLetterOrDigit(url[end]) || url[end] == '_' || url[end] == '-'))
+                end++;
+            if (end - start >= 10)
+                return url.Substring(start, end - start);
+        }
+
+        return null;
     }
 
     /// <summary>Names the section after what's present — specific when the videos are one type, generic otherwise.</summary>
@@ -504,7 +532,10 @@ internal sealed class VideoResourceList
 
     private const int CollapsedCount = 3;
     private const float BottomPadding = 8f;
-    private const float LinkBaseScore = 5.5f;   // curated links rank with a focus-style boost, above most videos
+    // Below a focus tutorial's score (~2.3) but above incidental video mentions — curated links sit just under
+    // the dedicated tutorial. (Interim: once symbol links are migrated into the index, this special-casing goes away.)
+    private const float LinkBaseScore = 2.0f;
+    private static readonly string[] YouTubeMarkers = { "youtu.be/", "v=" };
     private const float PredatesCurrentUiYears = 2f;
     private const int MaxTitleChars = 84;
 

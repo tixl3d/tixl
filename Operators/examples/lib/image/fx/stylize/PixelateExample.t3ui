@@ -230,13 +230,5 @@
       }
     }
   ],
-  "Links": [
-    {
-      "Id": "37228e97-d152-41b3-99ea-e1e26cac6ed5",
-      "Title": "TouchDesigner _04 Sliced Type",
-      "Description": "by Threedashes",
-      "LinkUrl": "https://youtu.be/DeCaJ5EwyIg?si=PYAPAPX5zGFnWEPc",
-      "LinkType": "Reference"
-    }
-  ]
+  "Links": []
 }

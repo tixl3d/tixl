@@ -168,20 +168,5 @@
       }
     }
   ],
-  "Links": [
-    {
-      "Id": "4b7072b5-d25d-40c4-a835-6724c8b59b50",
-      "Title": "Overview",
-      "Description": "Gives a quick overview on how to use this operator",
-      "LinkUrl": "https://youtu.be/_P4-VKhJXhE",
-      "LinkType": "TutorialVideo"
-    },
-    {
-      "Id": "eec4ba0d-e146-49b0-8e26-4db169cdb588",
-      "Title": "Combing with Presets",
-      "Description": "A quick showcase how using presets can have to refine a color grade.",
-      "LinkUrl": "https://www.youtube.com/watch?v=tk6RY-F7uGU",
-      "LinkType": "TutorialVideo"
-    }
-  ]
+  "Links": []
 }

@@ -23,13 +23,5 @@
       }
     }
   ],
-  "Links": [
-    {
-      "Id": "5424b82d-2a30-4ff5-806d-d49833943739",
-      "Title": "Video Tutorial",
-      "Description": "",
-      "LinkUrl": "https://youtu.be/cGyCEkCJQUk",
-      "LinkType": "TutorialVideo"
-    }
-  ]
+  "Links": []
 }

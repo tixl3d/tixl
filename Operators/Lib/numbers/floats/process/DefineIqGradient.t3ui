@@ -74,13 +74,5 @@
       }
     }
   ],
-  "Links": [
-    {
-      "Id": "eff809cb-2946-46fa-b3b4-1b4374c7316c",
-      "Title": "Tutorial",
-      "Description": "IQ's explanation of the algorithm",
-      "LinkUrl": "https://www.youtube.com/shorts/TH3OTy5fTog",
-      "LinkType": "TutorialVideo"
-    }
-  ]
+  "Links": []
 }

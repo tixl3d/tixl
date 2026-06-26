@@ -34,13 +34,5 @@
       }
     }
   ],
-  "Links": [
-    {
-      "Id": "336836fb-38f9-4906-b8c4-86548b04528b",
-      "Title": "Resolution Tutorial",
-      "Description": "A quick tutorial how Tooll handles resolution.",
-      "LinkUrl": "https://www.youtube.com/watch?v=f9E7lwUXfBM",
-      "LinkType": "TutorialVideo"
-    }
-  ]
+  "Links": []
 }

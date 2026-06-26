@@ -425,20 +425,5 @@
       }
     }
   ],
-  "Links": [
-    {
-      "Id": "08f1947e-a74d-4f4b-a2ce-1c8b4c45ae0c",
-      "Title": "Example video",
-      "Description": "",
-      "LinkUrl": "https://youtu.be/tZ1Uz6DmL_c?feature=shared",
-      "LinkType": "TutorialVideo"
-    },
-    {
-      "Id": "3c3810b0-7e8c-4a3a-b4ec-d2ddf0d180e7",
-      "Title": "Tutorial",
-      "Description": "Explains the difference to RepeatMeshAtPoints.",
-      "LinkUrl": "https://youtu.be/LjmnVL7azYw",
-      "LinkType": "TutorialVideo"
-    }
-  ]
+  "Links": []
 }

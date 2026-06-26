@@ -249,13 +249,5 @@
       }
     }
   ],
-  "Links": [
-    {
-      "Id": "8593c2f8-0793-40af-b58f-713fb007a618",
-      "Title": "Quick tutorial",
-      "Description": "",
-      "LinkUrl": "https://youtu.be/_x8vm2aS9FI",
-      "LinkType": "TutorialVideo"
-    }
-  ]
+  "Links": []
 }

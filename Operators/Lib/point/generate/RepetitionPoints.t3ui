@@ -79,13 +79,5 @@
       }
     }
   ],
-  "Links": [
-    {
-      "Id": "dbc10554-5e12-4200-8202-5e3eb1837590",
-      "Title": "Example video",
-      "Description": "",
-      "LinkUrl": "https://youtu.be/Nv_ctYjNOVM?feature=shared&t=62",
-      "LinkType": "TutorialVideo"
-    }
-  ]
+  "Links": []
 }

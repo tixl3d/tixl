@@ -276,13 +276,5 @@
       }
     }
   ],
-  "Links": [
-    {
-      "Id": "885345c6-c81d-4420-98d3-9f8226829bf0",
-      "Title": "Tutorial",
-      "Description": "A quick overview of the effect and its parameters.",
-      "LinkUrl": "https://youtu.be/DTIl2QmkumE",
-      "LinkType": "TutorialVideo"
-    }
-  ]
+  "Links": []
 }

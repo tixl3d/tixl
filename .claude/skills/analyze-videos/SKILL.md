@@ -171,9 +171,10 @@ type: <from the .meta.json: meetup | tutorial | release | …>
 date: <from the .meta.json, if any>
 title: <clean title>
 duration: <H:MM:SS, the last transcript timestamp>
+focusesOn: [<Op>], [ui:<Id>]   # OPTIONAL — only when this video IS the dedicated tutorial for those (see below)
 ---
 
-<1–2 sentence summary>
+<1–2 sentence summary — for a focus tutorial this becomes the reference's display note, so write it as a strong standalone "what you'll learn">
 
 ## Mentions
 - <start>→<end> [<Op>] · <depth> · <style> · <purpose> · <conf>% — <user-facing note>
@@ -181,6 +182,18 @@ duration: <H:MM:SS, the last transcript timestamp>
 - <start>→<end> [<Op>] [ui:<Id>] · <depth> · <style> · <purpose> · <conf>% — <note>   (more than one marker is fine)
 …
 ```
+
+**Focus tutorials (`focusesOn`).** If a video's whole point is to teach one or more operators/topics, list
+them in `focusesOn`. For each focus key the index collapses that video's moments into a **single** reference,
+boosts it (×5) so it leads as "the tutorial", labels it with the **summary** above and the **full video
+length**, and **drops the video's incidental mentions of other ops**. So a focus tutorial needs only:
+- a strong standalone **summary** (it becomes the reference's note), and
+- **one** mention line per focus op carrying its `· depth · style · purpose ·` axes — the line's own note is
+  superseded by the summary, so keep it short, and don't author the incidental non-focus mentions (they're dropped).
+
+Only set `focusesOn [X]` if the body actually brackets `[X]` somewhere — otherwise the whole video silently
+vanishes from `X` (the drop-incidental rule finds nothing to keep). A symbol's curated link is a strong
+signal that the linked video is that operator's focus tutorial.
 
 Rules:
 - **`<start>→<end>`** is the segment span (the index stores it as `startSecond` + `duration`). Use the

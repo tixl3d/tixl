@@ -52,13 +52,5 @@
       }
     }
   ],
-  "Links": [
-    {
-      "Id": "6db2bbfb-4c1f-439b-9796-feb60184d044",
-      "Title": "Example",
-      "Description": "Example video on how to animate strings.",
-      "LinkUrl": "https://www.youtube.com/watch?v=854OSxXzMDM",
-      "LinkType": "TutorialVideo"
-    }
-  ]
+  "Links": []
 }

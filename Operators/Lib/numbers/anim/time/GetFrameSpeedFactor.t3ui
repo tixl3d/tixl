@@ -13,13 +13,5 @@
       }
     }
   ],
-  "Links": [
-    {
-      "Id": "09b2abf8-ec45-4248-8d85-ffc32c65c5c4",
-      "Title": "Time Magic",
-      "Description": "A 4min video tutorial about overriding time.",
-      "LinkUrl": "https://www.youtube.com/watch?v=COd7gkJB0KQ&list=PLj-rnPROvbn2cfnUwuyb5gRj-juOYUC7T&index=22",
-      "LinkType": "TutorialVideo"
-    }
-  ]
+  "Links": []
 }

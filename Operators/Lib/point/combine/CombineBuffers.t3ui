@@ -37,13 +37,5 @@
       }
     }
   ],
-  "Links": [
-    {
-      "Id": "f97ff040-9e5a-42ee-b485-8f54c05d63a6",
-      "Title": "Tutorial Video",
-      "Description": "",
-      "LinkUrl": "https://youtu.be/2cdxnKMDKU4",
-      "LinkType": "TutorialVideo"
-    }
-  ]
+  "Links": []
 }

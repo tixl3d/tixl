@@ -128,13 +128,5 @@
       }
     }
   ],
-  "Links": [
-    {
-      "Id": "3b372ce6-b0f7-415d-86ed-d0bd345bf72f",
-      "Title": "Video Tutorial",
-      "Description": "Quick overview video for this effect.",
-      "LinkUrl": "https://youtu.be/Jpvyg-LR3f0",
-      "LinkType": "TutorialVideo"
-    }
-  ]
+  "Links": []
 }

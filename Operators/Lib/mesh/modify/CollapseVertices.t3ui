@@ -452,13 +452,5 @@
       }
     }
   ],
-  "Links": [
-    {
-      "Id": "2fb495ad-f7de-4d5f-8d4f-0b52d663d4cb",
-      "Title": "Example with Scattering",
-      "Description": "A quick example that highlights how to combine this with Scattering faces.",
-      "LinkUrl": "https://youtu.be/_x8vm2aS9FI",
-      "LinkType": "TutorialVideo"
-    }
-  ]
+  "Links": []
 }

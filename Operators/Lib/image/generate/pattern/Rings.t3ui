@@ -309,13 +309,5 @@
       }
     }
   ],
-  "Links": [
-    {
-      "Id": "baebc988-a0e0-48c0-9fa9-eba8b6f43b8d",
-      "Title": "Tutorial",
-      "Description": "A quick overview of all parameters.",
-      "LinkUrl": "https://youtu.be/Zp0kDW1vikQ",
-      "LinkType": "TutorialVideo"
-    }
-  ]
+  "Links": []
 }

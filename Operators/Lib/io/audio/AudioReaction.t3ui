@@ -120,13 +120,5 @@
       }
     }
   ],
-  "Links": [
-    {
-      "Id": "0b9b7b1b-57ab-46c2-ae5e-695c453c9d21",
-      "Title": "Video-Tutorial",
-      "Description": "This 5min tutorial walks you through the different parameters and modes.",
-      "LinkUrl": "https://youtu.be/M67r-D4R5WM?feature=shared",
-      "LinkType": "TutorialVideo"
-    }
-  ]
+  "Links": []
 }

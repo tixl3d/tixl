@@ -144,13 +144,5 @@
       }
     }
   ],
-  "Links": [
-    {
-      "Id": "31a10418-3bbd-4a58-99ef-48838d9ece3c",
-      "Title": "Example",
-      "Description": "An example how this operator is being used in another project.",
-      "LinkUrl": "https://youtu.be/7S4aedYxqQE?feature=shared&t=1307",
-      "LinkType": "TutorialVideo"
-    }
-  ]
+  "Links": []
 }

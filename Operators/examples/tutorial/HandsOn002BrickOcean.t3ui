@@ -565,13 +565,6 @@
       "Description": "",
       "LinkUrl": "https://1x-vision.net",
       "LinkType": "Source"
-    },
-    {
-      "Id": "8449538d-a29d-43fa-81cd-95ddaac2dfdc",
-      "Title": "Video-Tutorials",
-      "Description": "Watch the hands on tutorial on YouTube",
-      "LinkUrl": "https://www.youtube.com/watch?v=LI5Pq5H9HFU",
-      "LinkType": "TutorialVideo"
     }
   ]
 }

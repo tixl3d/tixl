@@ -56,13 +56,5 @@
       }
     }
   ],
-  "Links": [
-    {
-      "Id": "fefc4e6c-8841-4b2b-8159-f1f9ad80f5f9",
-      "Title": "Example video",
-      "Description": "Shows how to use this operator for building a retro-style logo.",
-      "LinkUrl": "https://youtu.be/7S4aedYxqQE?feature=shared&t=135",
-      "LinkType": "TutorialVideo"
-    }
-  ]
+  "Links": []
 }

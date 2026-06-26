@@ -57,13 +57,5 @@
       }
     }
   ],
-  "Links": [
-    {
-      "Id": "9f4a4729-f38b-4084-9075-fa1e25d39593",
-      "Title": "Quick Tutorial",
-      "Description": "",
-      "LinkUrl": "https://www.youtube.com/watch?v=854OSxXzMDM",
-      "LinkType": "TutorialVideo"
-    }
-  ]
+  "Links": []
 }

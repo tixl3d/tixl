@@ -4,12 +4,13 @@ type: tutorial
 date: 2022-09-11
 title: Tooll 3 Tip#22 - Lost in Feedback
 duration: 0:16:59
-focusesOn: [AdvancedFeedback]
+focusesOn: [AdvancedFeedback], [AdvancedFeedback2]
 ---
 
 A deep walkthrough of the AdvancedFeedback effect: how its displace-along-a-slope feedback loop works internally, and a guided tour of nearly every parameter (twist, displacement, sample distance, shade, blur, color shifts, amplified edges, limit brights) and how to drive them for smoke-, water- and reaction-diffusion-like looks.
 
 ## Mentions
+- 1:18→2:32 [AdvancedFeedback2] · explained · scripted · Concept · 70% — The same slope-displacement feedback loop walked through here is the basis the v2 revision builds on; the displace-along-a-gradient core, color clamping and per-frame layer transform all carry over, so this tour explains how to drive it even though the newer revision itself isn't shown.
 - 0:21→0:57 [AdvancedFeedback] · explained · scripted · Example · 90% — Holding Alt while scrubbing its preset thumbnails blends between looks, showing the same effect can yield reaction-diffusion, water, oily-color and twirl results from one text input.
 - 1:18→2:09 [AdvancedFeedback] · in-depth · scripted · Concept · 88% — The internals: a feedback loop reads the previous output, clamps color to a valid range so the sim doesn't blow up to NaN, runs edge detection, blurs the image, then uses the blurred copy as a slope to displace itself.
 - 1:33→1:56 [RenderTarget] · explained · scripted · Concept · 70% — Used as the feedback buffer: re-reading its last rendered frame each step is what closes a self-referential simulation loop. (Spoken as "use render target".)

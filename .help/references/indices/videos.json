@@ -6,6 +6,7 @@
       "date": "2024-09-30",
       "title": "Copy Cat Tutorials — Rebuilding Glowing Ribbons with 2D Effects",
       "duration": "0:58:24",
+      "summary": "A \"copycat\" walkthrough recreating a glowing, squeezed-ribbon animation found on Reddit, built almost entirely from 2D line/point operators plus a post-processing chain (blur, glow, color remap). The transcript degrades into repeated ASR noise after roughly 36:40; all real content is in the first ~37 minutes.",
       "focusesOn": [],
       "url": "https://www.youtube.com/watch?v=-cHz2vL5ETA"
     },
@@ -15,7 +16,10 @@
       "date": "2022-07-14",
       "title": "Tooll 3 Tip#011 - Combining Point Buffers",
       "duration": "0:02:31",
-      "focusesOn": [],
+      "summary": "A short tip showing that each point operator emits its own GPU point buffer, and how keeping the original and modified buffers around lets you wire them together — pairing positions to draw lines, then scattering meshes across the same points.",
+      "focusesOn": [
+        "op:Lib.point.combine.CombineBuffers"
+      ],
       "url": "https://www.youtube.com/watch?v=2cdxnKMDKU4"
     },
     {
@@ -24,8 +28,21 @@
       "date": "2025-09-09",
       "title": "TiXL Meetup 2025-09-08 — Roadmap features, operator style guide, creating a new op",
       "duration": "4:27:58",
+      "summary": "A long, mostly-unstructured roadmap meet-up: the first half is feature-voting discussion (FFmpeg playback, output manager, project namespaces, asset window), and the back half turns into a live patching session — a height-map/SDF scene rebuilt from a reference clip, then a hands-on tutorial building a new field-color operator and a deterministic-random-index operator.",
       "focusesOn": [],
       "url": "https://www.youtube.com/watch?v=2Tu0p9Eh6Bw"
+    },
+    {
+      "id": "4xxhQ1JX-ls",
+      "type": "meetup",
+      "date": null,
+      "title": "\"TiXL Update: Drawing with OSC Input\"",
+      "duration": "0:03:51",
+      "summary": "How to drive live visuals from a phone or tablet over OSC: [OscInput] auto-detects the address of any control you touch (the built-in teach mode), multiple inputs on the same port share one connection for free, and its float output can be split into X/Y/pressure to paint feedback trails whose color and line breaks follow the incoming pressure. A practical walkthrough of wiring a TouchOSC-style device into a generative drawing patch.",
+      "focusesOn": [
+        "op:Lib.io.osc.OscInput"
+      ],
+      "url": "https://www.youtube.com/watch?v=4xxhQ1JX-ls"
     },
     {
       "id": "5KX92VWEAG8",
@@ -33,6 +50,7 @@
       "date": "2025-11-10",
       "title": "TiXL for Beginners Meetup #1 — Real-Time Fundamentals & Building a Blender Donut",
       "duration": "2:28:28",
+      "summary": "A beginners meet-up that first explains TiXL's real-time CPU/GPU model and the three performance bottlenecks (poly count, fill-rate/overdraw, memory), then builds a \"Blender donut\" from scratch — a ray-marched torus with materials, a faked floor shadow, point lights, an image-based environment, color grading, and scattered sprinkles — closing with a workflow method for reproducing a reference image.",
       "focusesOn": [],
       "url": "https://www.youtube.com/watch?v=5KX92VWEAG8"
     },
@@ -42,6 +60,7 @@
       "date": "2025-10-13",
       "title": "Using the new Shader Graph (Deep Dive)",
       "duration": "0:20:13",
+      "summary": "A guided tour of TiXL's new SDF/field shader-graph system: the four operator categories (generators, space, adjust, combine), how ray-marching renders fields, performance and aliasing trade-offs, and using fields to drive particle forces and point selection.",
       "focusesOn": [
         "ui:ShaderGraph",
         "op:Lib.field.render.RaymarchField"
@@ -54,6 +73,7 @@
       "date": "2022-07-12",
       "title": "Tooll 3 Tip#009 - Animating String Parts",
       "duration": "0:03:03",
+      "summary": "A short tip-of-the-day walkthrough showing how to split a text into lines/words/characters and step through the fragments to animate text, then pointing to a simpler random-string shortcut.",
       "focusesOn": [
         "op:Lib.string.logic.PickStringPart"
       ],
@@ -65,6 +85,7 @@
       "date": "2025-08-25",
       "title": "Using Shader Graph and Particles in the Making of \"Ashborn\"",
       "duration": "0:32:10",
+      "summary": "A scripted making-of walking through the TiXL \"Ashborn\" demo: keyframing every piano note, SDF-driven particle forces, a height-map landscape field, and a late refactor of tangled graph connections into context variables. Equal parts creative-process diary and operator tour of the shader-graph + particle setup.",
       "focusesOn": [],
       "url": "https://www.youtube.com/watch?v=9qHY6pMnEcA"
     },
@@ -74,8 +95,10 @@
       "date": "2022-09-08",
       "title": "Tooll 3 Tip#019 - Color Grading",
       "duration": "0:11:54",
+      "summary": "A five-minute introduction to color grading in Tooll, centered on the lift/gamma/gain controls of the ColorGrade operator, reading the WaveForm operator's scope, and comparing before/after with CompareImages.",
       "focusesOn": [
-        "op:Lib.image.color.ColorGrade"
+        "op:Lib.image.color.ColorGrade",
+        "op:Lib.image.fx.stylize.ScreenCloseUp"
       ],
       "url": "https://www.youtube.com/watch?v=_P4-VKhJXhE"
     },
@@ -85,6 +108,7 @@
       "date": "2025-12-16",
       "title": "TiXL for Beginners Meetup #2 — Evaluation Context, Resolution & Blending",
       "duration": "3:29:09",
+      "summary": "An unstructured beginner webinar walking through TiXL's evaluation context: how time (in musical bars) and the \"magic\" 0,0 resolution flow backwards from the output, how image operators chain and blend, HDR colours, the gain/bias mapping curve, and a closing live experiment building a particle \"black hole\".",
       "focusesOn": [],
       "url": "https://www.youtube.com/watch?v=_pEhs2jQ3Gg"
     },
@@ -94,6 +118,7 @@
       "date": "2026-02-03",
       "title": "TiXL Meetup 2026-01-26 / Assets, Mediapipe and SkillQuest",
       "duration": "4:10:47",
+      "summary": "A long live meet-up covering the new asset-library/path overhaul, a performance-monitor walkthrough and GPU benchmarking, an end-to-end MediaPipe hand-tracking particle build, authoring SkillQuest tutorials, and community demos (Assimp import, AI shader generation, VAT instancing).",
       "focusesOn": [],
       "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4"
     },
@@ -103,6 +128,7 @@
       "date": "2022-07-20",
       "title": "Tooll 3 Tip#016 - Adjusting Soundtrack and BPM-Rate",
       "duration": "0:06:42",
+      "summary": "A tip walkthrough explaining why all time in Tooll runs in bars rather than seconds, how to add a soundtrack to a project and dial in its BPM rate so procedural animation stays synced.",
       "focusesOn": [
         "ui:ProjectSettings"
       ],
@@ -114,6 +140,7 @@
       "date": "2024-03-17",
       "title": "Tooll V3.9 / New Features",
       "duration": "0:15:05",
+      "summary": "Release-notes walkthrough of Tooll 3.9: expanded operator/parameter docs, faster video+audio export, glTF scene loading, Ableton Link sync, colored/stretchable points, the combined bias-and-gain control, new effects, and particle-system updates.",
       "focusesOn": [],
       "url": "https://www.youtube.com/watch?v=asiY0Jo1oJw"
     },
@@ -123,6 +150,7 @@
       "date": "2025-11-04",
       "title": "TiXL Meetup 2025-11-03 / Asset Lib and SDF fun",
       "duration": "3:12:14",
+      "summary": "A wide-ranging community meet-up: a \"Draw Lines Alt\" walkthrough, three random-operator prompt challenges, a deep dive into the new asset browser, a long camera/transform-matrix exploration driven by an OSC phone, and pitches for a parameter-level snapshot/state-machine system and SDF spatial-displacement features.",
       "focusesOn": [],
       "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4"
     },
@@ -132,6 +160,7 @@
       "date": "2022-09-09",
       "title": "Tooll 3 Tip#020 - Time Clips",
       "duration": "0:04:11",
+      "summary": "A walkthrough of TimeClips: how clips on the timeline gate which parts of a graph get evaluated per scene, and how dragging or stretching a clip remaps the time fed into its sub-graph, with the colour cues (orange/red) that signal time remapping and time-scaling.",
       "focusesOn": [
         "op:Lib.flow.TimeClip",
         "ui:TimeOverrides"
@@ -144,8 +173,12 @@
       "date": "2022-09-10",
       "title": "Tooll 3 Tip#021 - Hacking the render Time",
       "duration": "0:04:14",
+      "summary": "A short tip on overriding the time that drives an animation: wrap a rendered texture in a command-time operator and feed it a custom time signal (a sine, a remapped random, a beat) to scrub, loop, or jump regions of a timeline non-linearly.",
       "focusesOn": [
-        "ui:TimeOverrides"
+        "ui:TimeOverrides",
+        "op:Lib.numbers.anim.time.SetTime",
+        "op:Lib.numbers.anim.time.Time",
+        "op:Lib.numbers.anim.time.GetFrameSpeedFactor"
       ],
       "url": "https://www.youtube.com/watch?v=COd7gkJB0KQ"
     },
@@ -155,6 +188,7 @@
       "date": "2026-04-21",
       "title": "Meet-up — Demo Timing, Sine Waves from Line Points, the Custom Point Shader & Rebuilding a Helix",
       "duration": "3:41:08",
+      "summary": "A ~3.7h Q&A meet-up covering deterministic demo construction (time clips, preloading via set-time, smooth procedural timing), several ways to turn a line of points into a sine wave, the custom point shader and its SDF field input, point alpha/Z-sorting trade-offs, and a long live rebuild of a twisted-helix reference scene.",
       "focusesOn": [],
       "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs"
     },
@@ -164,7 +198,10 @@
       "date": "2022-07-11",
       "title": "\"Tooll 3 Tip#008 - Procedural Camera Animations\"",
       "duration": "0:03:59",
-      "focusesOn": [],
+      "summary": "A short tip walking through the parameters of the RandomCamera operator for procedural camera moves, plus how to drive its seed and shake inputs from a beat counter and noise.",
+      "focusesOn": [
+        "op:Lib.render.camera.OrbitCamera"
+      ],
       "url": "https://www.youtube.com/watch?v=DJKb0wDr0Zs"
     },
     {
@@ -173,6 +210,7 @@
       "date": "2022-07-04",
       "title": "Tooll 3 Tip#007 - Animating the Steps effect",
       "duration": "0:03:23",
+      "summary": "A short scripted tip showing how the [Steps] image effect posterizes a gradient into bands, then animating it by wiring counters and an LFO into its offset, gradient rotation, and highlight color.",
       "focusesOn": [
         "op:Lib.image.fx.stylize.Steps"
       ],
@@ -184,8 +222,11 @@
       "date": "2022-07-15",
       "title": "Tooll 3 Tip#012 - Noisy Point Trails",
       "duration": "0:02:19",
+      "summary": "A short tip showing how to feed animated, noise-displaced points into a cyclic trail buffer to draw streaking trails, then layer extra noise and fog on the result.",
       "focusesOn": [
-        "op:Lib.point.generate.PointTrail"
+        "op:Lib.point.generate.PointTrail",
+        "op:Lib.point.generate.PointTrailFast",
+        "op:Lib.point.sim.SimNoiseOffset"
       ],
       "url": "https://www.youtube.com/watch?v=ElW_0uaeiNA"
     },
@@ -195,8 +236,12 @@
       "date": "2022-06-30",
       "title": "Tooll 3 Tip#003 - Resolution Magic",
       "duration": "0:06:37",
+      "summary": "A short tip explaining how an image operator's resolution is resolved: the \"magic\" 0×0 default pulls resolution from an incoming texture if present, otherwise from the output window, and how -1 or an explicit size overrides that.",
       "focusesOn": [
-        "ui:RenderSettings"
+        "ui:RenderSettings",
+        "op:Lib.image.generate.basic.RenderTarget",
+        "op:Lib.render.utils.RequestedResolution",
+        "op:Lib.render.shading.SetRequestedResolution"
       ],
       "url": "https://www.youtube.com/watch?v=f9E7lwUXfBM"
     },
@@ -206,6 +251,7 @@
       "date": "2025-05-06",
       "title": "TiXL Tip#23 - Get Positions in Screen Space",
       "duration": "0:13:48",
+      "summary": "A tip-of-the-day walkthrough of the new [GetScreenPos] operator (TiXL 4.0.2), which converts a world-space locator into a 2D screen-space coordinate so a label or billboard can be pinned over a point in a post-processed 3D scene.",
       "focusesOn": [
         "op:Lib.render.analyze.GetScreenPos"
       ],
@@ -217,6 +263,7 @@
       "date": "2026-02-24",
       "title": "TiXL Meetup 2026-02-09 / Part 2 (Building a complex shader op)",
       "duration": "3:14:54",
+      "summary": "A long live coding session that wraps a prototype \"projected volumetric light\" graph into the new [ProjectLight] post-effect operator: wiring camera references, a switchable projector, a shadow render pass, packing parameters into a constant buffer, moving inline shader code into an `.hlsl` asset file, and finishing with grouping, a sample scene, and thumbnails.",
       "focusesOn": [],
       "url": "https://www.youtube.com/watch?v=GF0wWpNWkVs"
     },
@@ -226,6 +273,7 @@
       "date": "2022-07-02",
       "title": "Tooll 3 Tip#005 - Snapping Keyframes",
       "duration": "0:01:56",
+      "summary": "A short tip on snapping keyframes precisely in the timeline: pinning parameters, switching the ruler from seconds to bars/beats/ticks, and using ALT to scale and insert keyframes onto snap targets.",
       "focusesOn": [
         "ui:Timeline",
         "ui:DopeSheet"
@@ -238,6 +286,7 @@
       "date": "2022-09-07",
       "title": "Tooll 3 Tip#018 - Saving Screenshots",
       "duration": "0:01:38",
+      "summary": "A short tip showing the Save Screenshot button, which writes the current output frame at full resolution to the `.t3/screenshots` folder.",
       "focusesOn": [
         "ui:OutputWindow"
       ],
@@ -249,6 +298,7 @@
       "date": "2022-07-19",
       "title": "Tooll 3 Tip#015 - Draw Quads with Variations",
       "duration": "0:04:22",
+      "summary": "A short tip showing how the W (fourth) point attribute can drive per-quad variation, and how [SelectPoints] writes a spatial selection back into W to mask large point clouds interactively.",
       "focusesOn": [],
       "url": "https://www.youtube.com/watch?v=J2Rqx3szSus"
     },
@@ -258,8 +308,10 @@
       "date": "2022-06-29",
       "title": "Tooll 3 Tip#002 - Raster Effects",
       "duration": "0:05:58",
+      "summary": "A short tip walking through the versatile Raster operator: its presets and knobs, then driving it from an input texture and stacking offset copies into a CMYK-style halftone print effect.",
       "focusesOn": [
-        "op:Lib.image.generate.pattern.Raster"
+        "op:Lib.image.generate.pattern.Raster",
+        "op:Lib.image.generate.pattern.ValueRaster"
       ],
       "url": "https://www.youtube.com/watch?v=Jpvyg-LR3f0"
     },
@@ -269,8 +321,19 @@
       "date": "2026-06-15",
       "title": "TiXL Meetup — Per-Parameter Snapshots, FFmpeg Video/Audio/Data Clips, and DMX Lighting",
       "duration": "4:45:28",
+      "summary": "A long developer meet-up walking through the new per-parameter snapshot control, the FFmpeg-based video/audio/MIDI-recording clip system, guided feature tests, and a deep dive into driving DMX/Artnet moving-head lights from points.",
       "focusesOn": [],
       "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80"
+    },
+    {
+      "id": "LI5Pq5H9HFU",
+      "type": "tutorial",
+      "date": null,
+      "title": "\"Hands-On 002: Creating a 3D Animated Brick Ocean\"",
+      "duration": "0:22:04",
+      "summary": "A hands-on build of a \"brick ocean\" scene: a 100×100 grid of beveled-cube bricks displaced by noise into a rolling ocean, plus a glowing cube driven by a shared locator, finished with image-based lighting and a post-processing stack (SSAO, depth of field, color grade, glow, chromatic aberration).",
+      "focusesOn": [],
+      "url": "https://www.youtube.com/watch?v=LI5Pq5H9HFU"
     },
     {
       "id": "LjmnVL7azYw",
@@ -278,6 +341,7 @@
       "date": "2022-07-22",
       "title": "Tooll 3 Tip#017 - Cloning vs. Instancing Meshes",
       "duration": "0:04:31",
+      "summary": "A short tip contrasting two ways to multiply a mesh across scattered points: baking copies into one large mesh (cloning) versus drawing the same mesh repeatedly per point (instancing), and the trade-offs in memory, performance, and what you can still modify afterward.",
       "focusesOn": [
         "op:Lib.mesh.draw.DrawMeshAtPoints",
         "op:Lib.mesh.generate.RepeatMeshAtPoints"
@@ -290,6 +354,7 @@
       "date": "2025-08-26",
       "title": "TiXL Meetup 2025-08-25 — Timeline, PBR-rendering, particles, fields and the future of outputs",
       "duration": "5:15:59",
+      "summary": "A long maintainer-led meet-up walking the last two weeks of commits: timeline/time-clip editing, beat-locking, the unified PBR rendering path, field-driven point selection, and an extended brainstorm on a future multi-output / projection-mapping system.",
       "focusesOn": [],
       "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo"
     },
@@ -299,6 +364,7 @@
       "date": "2022-07-17",
       "title": "Tooll 3 Tip#013 - Drive Animations with Audio Reactions",
       "duration": "0:04:31",
+      "summary": "A short tip showing how to feed external audio into the graph and use [AudioReaction] to drive a particle scene — clearing the background and re-seeding randomness on each beat, and steering camera and noise with the level output.",
       "focusesOn": [
         "op:Lib.io.audio.AudioReaction"
       ],
@@ -310,8 +376,10 @@
       "date": "2022-09-11",
       "title": "Tooll 3 Tip#22 - Lost in Feedback",
       "duration": "0:16:59",
+      "summary": "A deep walkthrough of the AdvancedFeedback effect: how its displace-along-a-slope feedback loop works internally, and a guided tour of nearly every parameter (twist, displacement, sample distance, shade, blur, color shifts, amplified edges, limit brights) and how to drive them for smoke-, water- and reaction-diffusion-like looks.",
       "focusesOn": [
-        "op:Lib.image.fx.feedback.AdvancedFeedback"
+        "op:Lib.image.fx.feedback.AdvancedFeedback",
+        "op:Lib.image.fx.feedback.AdvancedFeedback2"
       ],
       "url": "https://www.youtube.com/watch?v=M7eOmqiUOZM"
     },
@@ -321,6 +389,7 @@
       "date": "2026-02-03",
       "title": "\"TiXL Meetup 2026-01-26 / Part 2: SkillQuest\"",
       "duration": "0:34:37",
+      "summary": "Improvised newcomer intro on a meet-up stream: the host walks a graphic designer through building a procedural logo animation from a loaded image — image effects, gradient sampling, oscillator-driven parameters, key/feedback, directional blur, and gradient masks — while wrestling with streaming-induced slowdowns.",
       "focusesOn": [],
       "url": "https://www.youtube.com/watch?v=MAyETISMFi0"
     },
@@ -330,6 +399,7 @@
       "date": "2025-09-23",
       "title": "TiXL Meetup 2025-09-22 / Particle Effects, Groups operators, TimeClips, Time Scaling, Audio Sync",
       "duration": "4:49:00",
+      "summary": "A live meet-up that rebuilds a viewer's water/particle scene from scratch, then dives deep into wrapping graphs into operators, time clips and time-remapping, the pull-based evaluation model, an SDF-driven fog scene with color grading, particle factor remapping, and a long open design discussion about multi-channel audio routing.",
       "focusesOn": [],
       "url": "https://www.youtube.com/watch?v=Mqi2mEyd4jQ"
     },
@@ -339,6 +409,7 @@
       "date": "2022-07-18",
       "title": "Tooll 3 Tip#014 - Complexity with the Invert Blend Mode",
       "duration": "0:01:48",
+      "summary": "A short tip showing how the Invert blend mode turns a plain field of overlapping quads into rich, animated abstract patterns, layering point generators, transforms, and an LFO to drive the complexity.",
       "focusesOn": [],
       "url": "https://www.youtube.com/watch?v=o-Ojg_LOi4k"
     },
@@ -348,6 +419,7 @@
       "date": "2025-09-14",
       "title": "TiXL v4.0 — All New Features and Updates",
       "duration": "16:46",
+      "summary": "The v4.0 release walkthrough: the new install/export flow and project-data locations, a pass of graph/timeline UI improvements, and a long tour of new and updated shader-graph, point, particle, mesh, animation, I/O, and color operators.",
       "focusesOn": [],
       "url": "https://www.youtube.com/watch?v=PJ9QwFt1r5k"
     },
@@ -357,6 +429,7 @@
       "date": "2026-01-12",
       "title": "TiXL Meetup 2026-01-12 / Fun with F1 & F2",
       "duration": "4:38:27",
+      "summary": "A long community meet-up walking through recently merged pull requests (delete-symbol, MSDF font generator, camera-distance point sorting, consistent gradients, render-to-file rework) and live-patching demos of new operators (FastBlur, RemoveStaticBackground, KeepInTextureArray, beat-tapping audio sync); the back third drifts into projection-mapping, licensing, and hardware chatter.",
       "focusesOn": [],
       "url": "https://www.youtube.com/watch?v=pvvPsp03Hik"
     },
@@ -366,6 +439,7 @@
       "date": "2026-02-24",
       "title": "TiXL Meetup 2026-02-23 / Building complex scenes",
       "duration": "4:34:56",
+      "summary": "A long, unstructured meet-up: a warm-up procedural-text background, a guest walkthrough of the new GPU FABRIK IK operator, a from-scratch \"Matrix tentacle monster\" using SDF ray-marched leg targets, and a rebuild of an Instagram generative constellation with custom point shaders. Threaded throughout are a stale dirty-flag/caching bug, the new thumbnail-everywhere browsing system, and bias-and-gain as a recurring shaping trick.",
       "focusesOn": [],
       "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg"
     },
@@ -375,6 +449,7 @@
       "date": "2025-12-15",
       "title": "TiXL Meetup 2025-12-01 / Fun with F1 & F2",
       "duration": "3:31:24",
+      "summary": "A 3.5-hour meet-up that opens with a naming/precision discussion and a tour of the new SkillQuest tutorial system, then spends most of its length on a deep, example-driven explanation of the per-point F1/F2 spare attributes — how operators write and consume them — and ends with a live code-edit adding F1/F2 and a strength factor to an operator, plus experiments with the new normal-buffer output.",
       "focusesOn": [],
       "url": "https://www.youtube.com/watch?v=Q2nHQ-5msGQ"
     },
@@ -384,6 +459,7 @@
       "date": "2026-06-15",
       "title": "TiXL Meetup 2026-06-01 / New Timeline, Spline Editor, Audio Clips & AI Coding",
       "duration": "3:48:58",
+      "summary": "A wide-ranging meetup walking through the rewritten timeline and spline curve editor, the new alpha-version workflow with guided feature tests, multi-track audio and IO-recording clips, and live demos of trigger-keyframe workarounds, Switch/Pick bypassing, custom shaders, and procedural city geometry with SDF fields.",
       "focusesOn": [],
       "url": "https://www.youtube.com/watch?v=qavgcL72F1Y"
     },
@@ -393,6 +469,7 @@
       "date": "2025-10-06",
       "title": "TiXL Meetup 2025-10-06 — Particle System Deep Dive",
       "duration": "5:18:40",
+      "summary": "A near-exhaustive walk through the particle system: emit/lifetime/orientation parameters, then every force operator with built-from-scratch examples, followed by a long live session rebuilding a Houdini line-grid demo with SDFs, point pairing, and per-strand isolation.",
       "focusesOn": [],
       "url": "https://www.youtube.com/watch?v=rEod2FltaPA"
     },
@@ -402,8 +479,19 @@
       "date": "2026-02-24",
       "title": "TiXL Meetup 2026-02-09 / Part 1 (Patching)",
       "duration": "0:31:27",
+      "summary": "A casual patching meet-up that opens by improvising a glowing title effect with [DirectionalBlur], then turns into a live walkthrough of the new thumbnail-manager system (texture atlas, per-symbol curated thumbnails) and a hot-reload coding session inside the MagGraph node-drawing code to make nodes show a stored thumbnail when they have no live texture.",
       "focusesOn": [],
       "url": "https://www.youtube.com/watch?v=S8chZaAS3uQ"
+    },
+    {
+      "id": "SMKigWtk_LQ",
+      "type": "tutorial",
+      "date": null,
+      "title": "HandsOn 001 — Build an Abstract 3D Animation in ~12 Minutes",
+      "duration": "0:14:51",
+      "summary": "A fast, scripted hands-on build of an abstract glowing 3D scene: a torus-studded sphere with scattered point clouds, two colored point lights, an orbiting camera, and a full post-processing stack (depth of field, glow, color grade, grain, chromatic distortion).",
+      "focusesOn": [],
+      "url": "https://www.youtube.com/watch?v=SMKigWtk_LQ"
     },
     {
       "id": "tZ1Uz6DmL_c",
@@ -411,6 +499,7 @@
       "date": "2022-07-13",
       "title": "\"Tooll 3 Tip#010 - Using points to draw Meshes\"",
       "duration": "0:03:18",
+      "summary": "Opening tip in a points series: explains the eight-value point structure (position, weight W, quaternion orientation), pushes a point list to a GPU buffer, then instances a mesh onto every point and shows how W and randomization drive the result.",
       "focusesOn": [
         "op:Lib.mesh.draw.DrawMeshAtPoints"
       ],
@@ -422,6 +511,7 @@
       "date": "2026-03-25",
       "title": "TiXL Meetup 2026-03-23 — Mesh-Volume Collision, Moving Points & SDF Lighting",
       "duration": "4:06:22",
+      "summary": "A long, hands-on meet-up built around the new MeshVolumeForce particle collider and the DrawMovingPoints stretch-render, followed by Q&A on faking screen lighting, an SDF laser-reflection toy, an audio-reactive SDF cityscape walkthrough, and a closing dive into quaternion blending pitfalls and procedural camera paths.",
       "focusesOn": [],
       "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ"
     },
@@ -431,6 +521,7 @@
       "date": "2023-06-18",
       "title": "Tooll V3.6 / Overview and New Features",
       "duration": "0:14:22",
+      "summary": "Release walkthrough of Tooll 3.6: color and gradient workflow improvements, dope-sheet auto-pin, smarter symbol-browser relevancy and multi-connection, the image-effect shader template, per-project playback/audio settings, and two new operators (RenderWithMotionBlur and DrawBillboards) plus the custom point shader.",
       "focusesOn": [],
       "url": "https://www.youtube.com/watch?v=WK4j0H-oM3g"
     },
@@ -440,6 +531,7 @@
       "date": "2025-12-15",
       "title": "TiXL Meetup 2025-12-15 / BubbleZoom and other experiments",
       "duration": "3:45:35",
+      "summary": "A long, exploratory TiXL meet-up: reworking the BubbleZoom magnifier parameters, reviewing the PR workflow, fixing an old feedback logo, dissecting the shadow render pipeline, debugging back-face shading and equirectangular point rendering, walking through custom-shader authoring with RenderDoc, and a deep live experiment building an \"infinite zoom\" scene-transition.",
       "focusesOn": [],
       "url": "https://www.youtube.com/watch?v=wTLW7PXj2Co"
     },
@@ -449,6 +541,7 @@
       "date": "2026-03-10",
       "title": "TiXL Meetup 2026-03-09 — Single-Line Number Fonts, Beat-Sync Tapping and a Keyframe-Constant Regression Hunt",
       "duration": "4:26:22",
+      "summary": "A long, exploratory meet-up: walking through the finicky single-line-number-font setup (LineTextPoints + a field-driven custom point shader), demoing beat-sync tapping and the \"space evenly\" keyframe tool, adding field inputs to the custom point shader, and a drawn-out hunt for a regression where constant-interpolation keyframes stopped updating on scrub.",
       "focusesOn": [],
       "url": "https://www.youtube.com/watch?v=yy1kKa-wucA"
     },
@@ -458,6 +551,7 @@
       "date": "2022-07-01",
       "title": "Tooll 3 Tip#004 - The Rings Effect",
       "duration": "0:02:01",
+      "summary": "A short tip tour of the [Rings] operator, walking every parameter that shapes its concentric-ring pattern and pointing out which ones reward animation.",
       "focusesOn": [
         "op:Lib.image.generate.pattern.Rings"
       ],

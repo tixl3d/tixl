@@ -379,13 +379,5 @@
       }
     }
   ],
-  "Links": [
-    {
-      "Id": "5350947d-c8d7-42ea-a094-79d785136de4",
-      "Title": "Example with Invert Blendmode",
-      "Description": "A quick tip how to use invert blendmode to create nice abstract patterns. ",
-      "LinkUrl": "https://youtu.be/o-Ojg_LOi4k?feature=shared",
-      "LinkType": "TutorialVideo"
-    }
-  ]
+  "Links": []
 }

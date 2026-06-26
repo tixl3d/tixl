@@ -309,13 +309,5 @@
       }
     }
   ],
-  "Links": [
-    {
-      "Id": "b4f950e2-7584-44f2-a499-3986df5470ec",
-      "Title": "Tutorial Video",
-      "Description": "",
-      "LinkUrl": "https://youtu.be/ElW_0uaeiNA?feature=shared",
-      "LinkType": "TutorialVideo"
-    }
-  ]
+  "Links": []
 }
