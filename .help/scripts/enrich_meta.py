@@ -10,7 +10,7 @@ upload date, title, channel and thumbnail via yt-dlp and merge them into
 
 Tutorials/updates rarely carry a date in their filename; this is where their `date` comes from
 (the upload date also wins over the filename date for meetups, which is the recency signal we want).
-Thumbnails are saved to .help/.tmp/video-thumbnails/<id>.jpg for the future editor playlist.
+Thumbnails are saved to .help/references/thumbs/<id>.jpg for the future editor playlist.
 
 Runs in any order vs. transcription: it creates the sidecar if missing and merges if present, and
 video_to_srt.py's write_meta preserves these fields. Idempotent — an id already carrying a `title`
@@ -29,7 +29,7 @@ from pathlib import Path
 import video_to_srt as v   # reuse discover() + load_config() + paths
 
 PYDL = [sys.executable, "-m", "yt_dlp"]
-THUMBS = v.HELP / ".tmp" / "video-thumbnails"
+THUMBS = v.HELP / "references" / "thumbs"
 
 
 def yt_meta(vid):

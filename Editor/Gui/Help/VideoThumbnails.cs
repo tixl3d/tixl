@@ -8,18 +8,20 @@ using T3.Core.Resource;
 namespace T3.Editor.Gui.Help;
 
 /// <summary>
-/// Loads referenced video thumbnails (<c>.help/.tmp/video-thumbnails/&lt;id&gt;.jpg</c>) into GPU textures for the
-/// help resource tooltips and caches the shader-resource view per id for the session. Decoding happens on the
-/// first request for a video (a few ms); a missing or unreadable file is remembered so it isn't retried.
+/// Loads referenced video thumbnails (<c>.help/references/thumbs/&lt;id&gt;.jpg</c> covers and
+/// <c>&lt;id&gt;_&lt;sec&gt;.jpg</c> per-reference moment frames) into GPU textures for the help resource tooltips,
+/// caching the shader-resource view per key for the session. Decoding happens on first request (a few ms); a
+/// missing or unreadable file is remembered so it isn't retried.
 /// </summary>
 internal static class VideoThumbnails
 {
-    /// <summary>Resolves the ImGui texture handle for the video's thumbnail, or false when none is available.</summary>
+    /// <summary>Resolves the ImGui texture handle for the video's cover thumbnail, or false when none is available.</summary>
     internal static bool TryGetTexture(string videoId, out IntPtr textureId, out float aspectRatio)
     {
         if (!_cache.TryGetValue(videoId, out var entry))
         {
-            entry = Load(videoId);
+            entry = Load(Path.Combine(ShippedContent.ResolveDirectory(".help", "references", "thumbs"),
+                                      videoId + ".jpg"));
             _cache[videoId] = entry;
         }
 
@@ -28,9 +30,24 @@ internal static class VideoThumbnails
         return entry.TextureId != IntPtr.Zero;
     }
 
-    private static Entry Load(string videoId)
+    /// <summary>Resolves a per-reference preview frame (the moment the reference points at); false when none exists.</summary>
+    internal static bool TryGetMoment(string videoId, int startSecond, out IntPtr textureId, out float aspectRatio)
     {
-        var path = Path.Combine(ShippedContent.ResolveDirectory(".help", ".tmp", "video-thumbnails"), videoId + ".jpg");
+        var key = videoId + "_" + startSecond;
+        if (!_clipCache.TryGetValue(key, out var entry))
+        {
+            entry = Load(Path.Combine(ShippedContent.ResolveDirectory(".help", "references", "thumbs"),
+                                      key + ".jpg"));
+            _clipCache[key] = entry;
+        }
+
+        textureId = entry.TextureId;
+        aspectRatio = entry.AspectRatio;
+        return entry.TextureId != IntPtr.Zero;
+    }
+
+    private static Entry Load(string path)
+    {
         if (!File.Exists(path))
             return Entry.Missing;
 
@@ -71,7 +88,7 @@ internal static class VideoThumbnails
         }
         catch (Exception e)
         {
-            Log.Debug($"Could not load video thumbnail '{videoId}': {e.Message}");
+            Log.Debug($"Could not load video thumbnail '{path}': {e.Message}");
             return Entry.Missing;
         }
     }
@@ -84,4 +101,5 @@ internal static class VideoThumbnails
     }
 
     private static readonly Dictionary<string, Entry> _cache = new();
+    private static readonly Dictionary<string, Entry> _clipCache = new();
 }

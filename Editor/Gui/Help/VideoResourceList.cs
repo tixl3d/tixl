@@ -303,18 +303,21 @@ internal sealed class VideoResourceList
         var scale = T3Ui.UiScaleFactor;
         var textureId = IntPtr.Zero;
         var aspectRatio = 16f / 9f;
-        var hasThumbnail = video != null && VideoThumbnails.TryGetTexture(video.Id, out textureId, out aspectRatio);
+        // Prefer the per-reference frame (the exact moment); fall back to the video's cover thumbnail.
+        var hasPreview = video != null
+                         && (VideoThumbnails.TryGetMoment(video.Id, segment.StartSecond, out textureId, out aspectRatio)
+                             || VideoThumbnails.TryGetTexture(video.Id, out textureId, out aspectRatio));
 
         var thumbnailWidth = 150 * scale;
         var textWidth = 260 * scale;
         var padding = 10 * scale;
-        var tooltipWidth = (hasThumbnail ? thumbnailWidth + 10 * scale : 0) + textWidth + padding * 2;
+        var tooltipWidth = (hasPreview ? thumbnailWidth + 10 * scale : 0) + textWidth + padding * 2;
 
         ImGui.SetNextWindowSizeConstraints(new Vector2(tooltipWidth, 0), new Vector2(tooltipWidth, ImGui.GetMainViewport().WorkSize.Y));
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(padding, 9 * scale));
         ImGui.BeginTooltip();
 
-        if (hasThumbnail)
+        if (hasPreview)
         {
             ImGui.BeginGroup();
             DrawThumbnail(textureId, aspectRatio, thumbnailWidth, video!);

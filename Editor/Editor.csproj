@@ -127,6 +127,7 @@
         <EmbeddedHelp Include="../.help/embedded/**/*" Visible="false" />
         <ReleaseNotes Include="../.help/release-notes/**/*" Visible="false" />
         <HelpIndices Include="../.help/references/indices/**/*" Visible="false" />
+        <HelpThumbs Include="../.help/references/thumbs/**/*" Visible="false" />
         <TestSets Include="../.tests-manual/**/*" Visible="false" />
     </ItemGroup>
 
@@ -134,6 +135,7 @@
         <Copy SourceFiles="@(EmbeddedHelp)" SkipUnchangedFiles="true" UseHardlinksIfPossible="true" DestinationFiles="@(EmbeddedHelp->'$(OutputPath)/.help/embedded/%(RecursiveDir)%(Filename)%(Extension)')" />
         <Copy SourceFiles="@(ReleaseNotes)" SkipUnchangedFiles="true" UseHardlinksIfPossible="true" DestinationFiles="@(ReleaseNotes->'$(OutputPath)/.help/release-notes/%(RecursiveDir)%(Filename)%(Extension)')" />
         <Copy SourceFiles="@(HelpIndices)" SkipUnchangedFiles="true" UseHardlinksIfPossible="true" DestinationFiles="@(HelpIndices->'$(OutputPath)/.help/references/indices/%(RecursiveDir)%(Filename)%(Extension)')" />
+        <Copy SourceFiles="@(HelpThumbs)" SkipUnchangedFiles="true" UseHardlinksIfPossible="true" DestinationFiles="@(HelpThumbs->'$(OutputPath)/.help/references/thumbs/%(RecursiveDir)%(Filename)%(Extension)')" />
         <Copy SourceFiles="@(TestSets)" SkipUnchangedFiles="true" UseHardlinksIfPossible="true" DestinationFiles="@(TestSets->'$(OutputPath)/.tests-manual/%(RecursiveDir)%(Filename)%(Extension)')" />
     </Target>
     <!-- ===========================//=============================== -->
