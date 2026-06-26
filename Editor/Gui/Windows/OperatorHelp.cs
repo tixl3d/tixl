@@ -229,13 +229,29 @@ internal sealed class OperatorHelp
             ImGui.PushFont(Fonts.FontSmall);
             ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(5, 5));
 
-            DrawLinks();
+            // The symbol links now rank into the unified "watch & learn" list (see GetLinkRows / VideoResourceList),
+            // so only the example operators remain here.
             DrawExamples();
-            // Inline [OpName] refs in the description body now provide
-            // per-reference navigation; the standalone thumbnail row is gone.
 
             ImGui.PopFont();
             ImGui.PopStyleVar();
+        }
+
+        /// <summary>The hand-authored symbol links as rows for the merged help resource list (replaces the old "Links:" section).</summary>
+        public static IReadOnlyList<Help.VideoResourceList.LinkRow> GetLinkRows(SymbolUi symbolUi)
+        {
+            var rows = new List<Help.VideoResourceList.LinkRow>();
+            foreach (var link in symbolUi.Links.Values)
+            {
+                if (string.IsNullOrEmpty(link.Url))
+                    continue;
+
+                var title = link.Title ?? link.Type.ToString();
+                var icon = ExternalLink.LinkIcons.TryGetValue(link.Type, out var i) ? i : (Icon?)null;
+                rows.Add(new Help.VideoResourceList.LinkRow(title, link.Url, link.Description, icon));
+            }
+
+            return rows;
         }
 
         private static void CacheSymbolData(SymbolUi symbolUi)

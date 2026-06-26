@@ -152,9 +152,14 @@ internal sealed class HelpWindow : Window
         if (showId != Guid.Empty && SymbolUiRegistry.TryGetSymbolUi(showId, out symbolUi))
             operatorFullPath = symbolUi.Symbol.Namespace + "." + symbolUi.Symbol.Name;
 
-        // Reserve space at the bottom so the video resources stay docked while the doc scrolls above them.
+        // The hand-authored symbol links rank into the same footer list as the extracted video references.
+        var resourceLinks = symbolUi != null
+                                ? OperatorHelp.DocumentationRenderer.GetLinkRows(symbolUi)
+                                : (IReadOnlyList<VideoResourceList.LinkRow>)Array.Empty<VideoResourceList.LinkRow>();
+
+        // Reserve space at the bottom so the resources stay docked while the doc scrolls above them.
         var bodyHeight = ImGui.GetContentRegionAvail().Y;
-        var footerHeight = operatorFullPath != null ? _resourceList.MeasureHeight(operatorFullPath, bodyHeight) : 0f;
+        var footerHeight = symbolUi != null ? _resourceList.MeasureHeight(operatorFullPath, resourceLinks, bodyHeight) : 0f;
 
         // The doc always lives in a child: the empty-state message draws straight to the draw list and
         // submits no item, so without the child's own item the dangling cursor from the header separator
@@ -177,11 +182,11 @@ internal sealed class HelpWindow : Window
         CustomComponents.HandleDragScrolling(this);
         ImGui.EndChild();
 
-        if (operatorFullPath != null && footerHeight > 0)
-            DrawResourceFooter(operatorFullPath);
+        if (footerHeight > 0)
+            DrawResourceFooter(operatorFullPath, resourceLinks);
     }
 
-    private void DrawResourceFooter(string operatorFullPath)
+    private void DrawResourceFooter(string? operatorFullPath, IReadOnlyList<VideoResourceList.LinkRow> links)
     {
         // Subtle divider at the docked footer's top edge.
         var top = ImGui.GetCursorScreenPos();
@@ -190,7 +195,7 @@ internal sealed class HelpWindow : Window
 
         ImGui.BeginChild("resources", Vector2.Zero, ImGuiChildFlags.None, ImGuiWindowFlags.NoBackground);
         ImGui.Indent(10); // Match the inset OperatorHelp.DrawHelp uses for the doc body.
-        _resourceList.Draw(operatorFullPath);
+        _resourceList.Draw(operatorFullPath, links);
         ImGui.Unindent(10);
         ImGui.EndChild();
     }

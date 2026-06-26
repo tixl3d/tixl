@@ -40,8 +40,9 @@ Decisions taken while building (settle/adjust before Phase 2 ships):
   hover tooltip carries the metadata header, title, date, and note instead. Top follow-up — see §7.
 - **Learn tab wired to `ReleaseNotesLoader`** (the loader already existed). The "has updates" dot is still
   Phase 3.
-- **Follow-hover source = the graph only** for now. Library / Symbol-browser hover (a one-line
-  `HoveredHelpTarget.SetOperator(...)` at each hover site) is a cheap follow-up.
+- **Follow-hover sources**: the graph (`MagGraphCanvas.DrawNode`) and the Symbol Library
+  (`SymbolLibrary.DrawSymbolItemInstance`). The Symbol Browser (`PlaceholderCreation`) is the remaining
+  hover site — same one-line `HoveredHelpTarget.SetOperator(...)` when wired.
 - The "Edit description…" button inside an empty doc only opens the dialog when the Parameter window is
   also visible (that window draws the shared `EditDescriptionDialog`). Minor; left to the Parameter window.
 

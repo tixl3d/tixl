@@ -22,8 +22,11 @@ internal static class HelpIndex
         string Url,
         string? Depth,
         string? Style,
+        string? Purpose,
         int? Confidence,
-        string Note);
+        string Note,
+        bool IsFocus,
+        int MomentCount);
 
     /// <summary>Catalog entry for a referenced video.</summary>
     internal sealed record VideoInfo(
@@ -112,8 +115,11 @@ internal static class HelpIndex
                                                    dto.Url ?? "",
                                                    dto.Depth,
                                                    dto.Style,
+                                                   dto.Purpose,
                                                    dto.Confidence,
-                                                   dto.Note ?? ""));
+                                                   dto.Note ?? "",
+                                                   dto.Focus,
+                                                   dto.MomentCount));
                 }
 
                 _segmentsByKey[key] = segments;
@@ -173,8 +179,11 @@ internal static class HelpIndex
         [JsonProperty("url")] public string? Url;
         [JsonProperty("depth")] public string? Depth;
         [JsonProperty("style")] public string? Style;
+        [JsonProperty("purpose")] public string? Purpose;
         [JsonProperty("confidence")] public int? Confidence;
         [JsonProperty("note")] public string? Note;
+        [JsonProperty("focus")] public bool Focus;
+        [JsonProperty("momentCount")] public int MomentCount;
     }
 
     private static bool _loaded;

@@ -11,56 +11,72 @@ using T3.Editor.Gui.Styling.Markdown;
 namespace T3.Editor.Gui.Help;
 
 /// <summary>
-/// Draws the video-resource list below an operator's help body: the topic's
-/// <see cref="HelpIndex.OnlineVideoSegment"/>s ranked by relevancy (depth × trust × confidence × age), the
-/// top couple shown with a "Show all N" toggle, each row opening the video at its timestamp and revealing a
-/// thumbnail tooltip on hover. The section heading adapts to which video types are present.
+/// Draws the unified "watch &amp; learn" list below an operator's help body: the hand-authored symbol
+/// <see cref="LinkRow"/>s (wiki pages, example links) and the auto-extracted video
+/// <see cref="HelpIndex.OnlineVideoSegment"/>s, ranked together (links carry a focus-style boost so they lead),
+/// the top few shown with an inline "SHOW ALL N" toggle. Each row opens its target; video rows reveal a
+/// thumbnail tooltip on hover.
 /// </summary>
 internal sealed class VideoResourceList
 {
-    /// <param name="operatorFullPath">The operator's namespace-qualified name, the <c>op:</c> mention key without the prefix.</param>
-    internal void Draw(string operatorFullPath)
+    /// <summary>A hand-authored symbol link (the old "Links:" section), now ranked into the same list.</summary>
+    internal readonly record struct LinkRow(string Title, string Url, string Description, Icon? Icon);
+
+    /// <param name="operatorFullPath">The operator's namespace-qualified name (the <c>op:</c> mention key without the prefix), or null.</param>
+    /// <param name="links">Hand-authored symbol links to merge in, ranked above the videos.</param>
+    internal void Draw(string? operatorFullPath, IReadOnlyList<LinkRow> links)
     {
         _tooltipDrawn = false;
 
-        var ranked = GetRanked(operatorFullPath);
-        if (ranked.Count == 0)
+        var rows = BuildRows(operatorFullPath, links);
+        if (rows.Count == 0)
             return;
 
         FormInputs.AddVerticalSpace(5);
-        CustomComponents.StylizedText(SectionHeader(ranked).ToUpperInvariant(), Fonts.FontSmall, UiColors.TextMuted);
+
+        // Heading on the left; the "SHOW ALL N" toggle sits on the same line, right-aligned, small caps, active blue.
+        var headerY = ImGui.GetCursorPosY();
+        CustomComponents.StylizedText(SectionHeader(rows).ToUpperInvariant(), Fonts.FontSmall, UiColors.TextMuted);
+        if (rows.Count > CollapsedCount)
+        {
+            var afterHeaderY = ImGui.GetCursorPosY();
+            ImGui.SetCursorPosY(headerY);
+            ImGui.PushFont(Fonts.FontSmall);
+            var toggleLabel = _showAll ? "SHOW LESS" : $"SHOW ALL {rows.Count}";
+            var toggleWidth = ImGui.CalcTextSize(toggleLabel).X;
+            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetContentRegionAvail().X - toggleWidth);
+            ImGui.PushStyleColor(ImGuiCol.Text, UiColors.StatusActivated.Rgba);
+            ImGui.PushStyleColor(ImGuiCol.HeaderHovered, UiColors.BackgroundActive.Fade(0.2f).Rgba);
+            if (ImGui.Selectable(toggleLabel, false, ImGuiSelectableFlags.None,
+                                 new Vector2(toggleWidth, ImGui.GetTextLineHeight())))
+                _showAll = !_showAll;
+            ImGui.PopStyleColor(2);
+            ImGui.PopFont();
+            ImGui.SetCursorPosY(afterHeaderY);
+        }
         FormInputs.AddVerticalSpace(3);
 
         var rowHeight = RowHeight();
-        var shownCount = _showAll ? ranked.Count : Math.Min(CollapsedCount, ranked.Count);
+        var shownCount = _showAll ? rows.Count : Math.Min(CollapsedCount, rows.Count);
         for (var i = 0; i < shownCount; i++)
         {
-            DrawRow(ranked[i], i, rowHeight);
+            DrawRow(rows[i], i, rowHeight);
         }
 
-        if (ranked.Count > CollapsedCount)
-        {
-            ImGui.PushFont(Fonts.FontSmall);
-            ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-            var moreLabel = _showAll ? "Show less" : $"Show all {ranked.Count}";
-            if (ImGui.Selectable(moreLabel))
-                _showAll = !_showAll;
-            ImGui.PopStyleColor();
-            ImGui.PopFont();
-        }
+        FormInputs.AddVerticalSpace(BottomPadding);   // breathing room under the last row
     }
 
     /// <summary>Resets the expansion state when the help topic changes, so a new operator starts collapsed.</summary>
     internal void Reset() => _showAll = false;
 
     /// <summary>
-    /// Pixel height the list will occupy for the operator (0 if it has no resources), so the Help window can
+    /// Pixel height the list will occupy for the operator (0 if it has no rows), so the Help window can
     /// dock it as a fixed footer. Capped at half <paramref name="maxHeight"/> — beyond that the footer scrolls.
     /// </summary>
-    internal float MeasureHeight(string operatorFullPath, float maxHeight)
+    internal float MeasureHeight(string? operatorFullPath, IReadOnlyList<LinkRow> links, float maxHeight)
     {
-        var ranked = GetRanked(operatorFullPath);
-        if (ranked.Count == 0)
+        var rows = BuildRows(operatorFullPath, links);
+        if (rows.Count == 0)
             return 0;
 
         ImGui.PushFont(Fonts.FontSmall);
@@ -70,25 +86,48 @@ internal sealed class VideoResourceList
         var rowHeight = RowHeight();
         var spacing = ImGui.GetStyle().ItemSpacing.Y;
         var topPadding = 5;
-        var rowCount = _showAll ? ranked.Count : Math.Min(CollapsedCount, ranked.Count);
-        var showAllRow = ranked.Count > CollapsedCount ? smallLine : 0;
+        var rowCount = _showAll ? rows.Count : Math.Min(CollapsedCount, rows.Count);
 
         var scale = T3Ui.UiScaleFactor;
         var height = ImGui.GetStyle().WindowPadding.Y * 2 // the footer child's own top/bottom padding
-                     + 3 * scale + smallLine               // heading + the AddVerticalSpace under it
+                     + 3 * scale + smallLine               // heading (with inline show-all) + the space under it
                      + rowCount * (rowHeight + spacing)
                      + topPadding
-                     + showAllRow;
+                     + BottomPadding * scale;              // breathing room under the last row
         return Math.Min(height, maxHeight * 0.5f);
     }
 
-    /// <summary>Names the section after the kinds of video present — specific when they're all one type, generic when mixed.</summary>
-    private static string SectionHeader(IReadOnlyList<ScoredSegment> ranked)
+    /// <summary>Merges hand-authored links and scored video segments into one list, ranked best-first.</summary>
+    private List<Row> BuildRows(string? operatorFullPath, IReadOnlyList<LinkRow> links)
+    {
+        var rows = new List<Row>(links.Count + 4);
+
+        // Hand-authored links rank with a focus-style boost so curated material leads; author order is preserved.
+        for (var i = 0; i < links.Count; i++)
+        {
+            if (!string.IsNullOrEmpty(links[i].Url))
+                rows.Add(Row.ForLink(links[i], LinkBaseScore - i * 0.01f));
+        }
+
+        if (!string.IsNullOrEmpty(operatorFullPath))
+        {
+            foreach (var scored in GetRanked(operatorFullPath))
+                rows.Add(Row.ForVideo(scored));
+        }
+
+        rows.Sort(static (a, b) => b.Score.CompareTo(a.Score));
+        return rows;
+    }
+
+    /// <summary>Names the section after what's present — specific when the videos are one type, generic otherwise.</summary>
+    private static string SectionHeader(IReadOnlyList<Row> rows)
     {
         bool hasTutorial = false, hasMeetup = false, hasUpdate = false, hasOther = false;
-        foreach (var scored in ranked)
+        foreach (var row in rows)
         {
-            HelpIndex.TryGetVideo(scored.Segment.VideoId, out var video);
+            if (row.IsLink)
+                continue;
+            HelpIndex.TryGetVideo(row.Segment!.VideoId, out var video);
             switch (video?.Type)
             {
                 case "tutorial": hasTutorial = true; break;
@@ -112,9 +151,62 @@ internal sealed class VideoResourceList
         return "Watch & learn";
     }
 
-    private void DrawRow(ScoredSegment scored, int index, float rowHeight)
+    private void DrawRow(Row row, int index, float rowHeight)
     {
-        var segment = scored.Segment;
+        if (row.IsLink)
+            DrawLinkRow(row.Link, index, rowHeight);
+        else
+            DrawVideoRow(row.Segment!, row.PredatesCurrentUi, index, rowHeight);
+    }
+
+    private static void DrawLinkRow(LinkRow link, int index, float rowHeight)
+    {
+        var scale = T3Ui.UiScaleFactor;
+        var width = ImGui.GetContentRegionAvail().X;
+
+        ImGui.PushID(1000 + index);
+        ImGui.InvisibleButton("##link", new Vector2(width, rowHeight));
+        ImGui.PopID();
+
+        var hovered = ImGui.IsItemHovered();
+        var clicked = ImGui.IsItemClicked();
+        var min = ImGui.GetItemRectMin();
+        var max = ImGui.GetItemRectMax();
+        var drawList = ImGui.GetWindowDrawList();
+
+        if (hovered)
+            drawList.AddRectFilled(min, max, UiColors.BackgroundActive.Fade(0.2f), 5 * scale);
+
+        // Links share the video rows' styling so the merged list reads as one consistent list.
+        var accentColor = UiColors.StatusActivated.Fade(hovered ? 1 : 0.8f);
+        var color = Color.Mix(UiColors.StatusActivated, UiColors.ForegroundFull, 0.3f).Fade(hovered ? 1 : 0.8f);
+
+        var icon = link.Icon ?? Icon.PlayOutput;
+        Icons.GetGlyphDefinition(icon, out _, out var iconSize);
+        var iconPos = new Vector2(min.X + 4 * scale, min.Y + (rowHeight - iconSize.Y) * 0.5f);
+        Icons.DrawIconAtScreenPosition(icon, iconPos, drawList, accentColor);
+        var textX = min.X + 4 * scale + iconSize.X + 6 * scale;
+
+        var textY = min.Y + (rowHeight - ImGui.GetTextLineHeight()) * 0.5f;
+        ImGui.PushFont(Fonts.FontBold);
+        drawList.AddText(new Vector2(textX, textY), color, link.Title);
+        ImGui.PopFont();
+
+        if (clicked && !string.IsNullOrEmpty(link.Url))
+            CoreUi.Instance.OpenWithDefaultApplication(link.Url);
+
+        if (hovered && !string.IsNullOrEmpty(link.Description))
+        {
+            ImGui.BeginTooltip();
+            ImGui.PushTextWrapPos(260 * scale);
+            ImGui.TextUnformatted(link.Description);
+            ImGui.PopTextWrapPos();
+            ImGui.EndTooltip();
+        }
+    }
+
+    private void DrawVideoRow(HelpIndex.OnlineVideoSegment segment, bool predatesCurrentUi, int index, float rowHeight)
+    {
         HelpIndex.TryGetVideo(segment.VideoId, out var video);
 
         var scale = T3Ui.UiScaleFactor;
@@ -138,7 +230,6 @@ internal sealed class VideoResourceList
 
         var linkColor = Color.Mix(UiColors.StatusActivated, UiColors.ForegroundFull, 0.3f);
         var reactiveLinkColor = linkColor.Fade(hovered ? 1:0.8f);
-        //var annotationColor = hovered ? UiColors.ForegroundFull.Fade(0.8f) : UiColors.TextMuted;
 
         Icons.GetGlyphDefinition(Icon.PlayOutput, out _, out var iconSize);
         var iconPos = new Vector2(min.X + 4 * scale, min.Y + (rowHeight - iconSize.Y) * 0.5f);
@@ -158,7 +249,7 @@ internal sealed class VideoResourceList
         drawList.AddText(new Vector2(textX + typeWidth + 6 * scale, textY), reactiveLinkColor, annotation);
         ImGui.PopFont();
 
-        if (scored.PredatesCurrentUi)
+        if (predatesCurrentUi)
         {
             ImGui.PushFont(Fonts.FontSmall);
             const string cue = "predates current UI";
@@ -308,6 +399,20 @@ internal sealed class VideoResourceList
 
         var confidenceScore = ((segment.Confidence ?? 65) / 100f).Clamp(0.2f, 1f);
 
+        // What the clip offers — mirrors the index's purpose weighting (Example/Comparison first).
+        var purposeScore = segment.Purpose switch
+                               {
+                                   "Example"     => 1.2f,
+                                   "Comparison"  => 1.2f,
+                                   "Parameters"  => 1.1f,
+                                   "Gotcha"      => 1.1f,
+                                   "Tip"         => 0.9f,
+                                   _             => 1.0f,
+                               };
+
+        // A focus video is the dedicated tutorial for this op — surface it first, matching the index boost.
+        var focusBoost = segment.IsFocus ? 5f : 1f;
+
         // Operator math is stable, so age decays gently here (the heavier ui:-topic curve is a Phase 2 concern).
         var yearsOld = video?.Date != null ? (float)(now - video.Date.Value).TotalDays / 365.25f : 1f;
         var ageScore = (1f - yearsOld * 0.07f).Clamp(0.45f, 1f);
@@ -316,19 +421,19 @@ internal sealed class VideoResourceList
         var deEmphasized = segment.Style == "experiment" || (segment.Confidence ?? 65) < 50;
 
         return new ScoredSegment(segment,
-                                 depthScore * styleScore * confidenceScore * ageScore,
+                                 depthScore * styleScore * confidenceScore * ageScore * purposeScore * focusBoost,
                                  predatesCurrentUi,
                                  deEmphasized);
     }
 
-    /// <summary>Compact relevancy line for a row, e.g. <c>(5min · In-depth · Experiment)</c> — duration plus the axes that survive.</summary>
+    /// <summary>Compact relevancy line for a row, e.g. <c>(5min · In-depth · Example)</c> — duration, depth, purpose.</summary>
     private static string RowAnnotation(HelpIndex.OnlineVideoSegment segment)
     {
         var annotation = "(" + FormatSegmentDuration(segment.DurationSeconds);
         if (!string.IsNullOrEmpty(segment.Depth))
             annotation += " · " + Capitalize(segment.Depth!);
-        if (!string.IsNullOrEmpty(segment.Style))
-            annotation += " · " + Capitalize(segment.Style!);
+        if (!string.IsNullOrEmpty(segment.Purpose))   // purpose (Example/Gotcha/…) replaces the old style chip
+            annotation += " · " + Capitalize(segment.Purpose!);
         return annotation + ")";
     }
 
@@ -383,7 +488,23 @@ internal sealed class VideoResourceList
         bool PredatesCurrentUi,
         bool IsDeEmphasized);
 
-    private const int CollapsedCount = 2;
+    /// <summary>A unified list entry: either a hand-authored <see cref="LinkRow"/> or a scored video segment.</summary>
+    private readonly record struct Row(
+        float Score,
+        bool IsLink,
+        LinkRow Link,
+        HelpIndex.OnlineVideoSegment? Segment,
+        bool PredatesCurrentUi)
+    {
+        internal static Row ForLink(LinkRow link, float score) => new(score, true, link, null, false);
+
+        internal static Row ForVideo(ScoredSegment scored) =>
+            new(scored.Score, false, default, scored.Segment, scored.PredatesCurrentUi);
+    }
+
+    private const int CollapsedCount = 3;
+    private const float BottomPadding = 8f;
+    private const float LinkBaseScore = 5.5f;   // curated links rank with a focus-style boost, above most videos
     private const float PredatesCurrentUiYears = 2f;
     private const int MaxTitleChars = 84;
 

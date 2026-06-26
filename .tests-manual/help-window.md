@@ -43,17 +43,32 @@ Click an operator in the Graph window to select it, then move the mouse away fro
 - The Help body stays on the selected operator once the pointer is no longer over a different one.
 - Selecting a different operator switches the Help body to it and scrolls back to the top.
 
+## Step: Following the Symbol Library
+
+**Action:**
+Open the Symbol Library window and move the mouse over different symbols in the tree (or type in its search
+field and hover a result), without clicking.
+
+**Expected:**
+- The Help body updates to each hovered symbol's description, the same as hovering it in the graph.
+- This works whether or not that operator is present on the current canvas.
+
 ## Step: Discussed in meet-ups list
 
 **Action:**
 Hover or select an operator that is covered in the videos (e.g. `[SphereSDF]` or `[RaymarchField]`).
 
 **Expected:**
-- Below the description a video-resource section lists up to two rows, each like
-  `▶ Tutorial (3min, 1 year ago)`. The heading adapts to the kinds present — "Related tutorials" when
-  they're all tutorials, "Discussed in meet-ups" when all meet-ups, "Watch & learn" when mixed.
+- Below the description a video-resource section lists up to two rows, each a ▶ play icon, the video type
+  in bold, and a relevancy annotation, e.g. **Tutorial** `(3min · In-depth · Experiment)` — no age in the row.
+- The ALL-CAPS heading adapts to the kinds present — "RELATED TUTORIALS" when all tutorials, "DISCUSSED IN
+  MEET-UPS" when all meet-ups, "WATCH & LEARN" when mixed.
+- Hovering a row gives it white text and a soft rounded highlight (same as Asset Library folder rows). Only
+  one row highlights at a time.
 - If there are more than two, a "Show all N" row expands the full list; "Show less" collapses it again.
 - Older clips show a faint right-aligned "predates current UI" note.
+- The section stays docked at the bottom of the panel (above a faint divider) while the description and
+  parameter list scroll independently above it. It aligns with the description text, not the left edge.
 
 ## Step: Resource tooltip and opening a video
 
@@ -61,8 +76,11 @@ Hover or select an operator that is covered in the videos (e.g. `[SphereSDF]` or
 Hover one of the meet-up resource rows, then click it.
 
 **Expected:**
-- A tooltip appears immediately with a header line of relevancy axes (e.g. `1 MIN · IN-DEPTH · EXPERIMENT · YOUTUBE`),
-  the video title and month/year, the "what you'll learn" note, and an "Open at m:ss in your browser" hint.
+- A tooltip appears immediately: a thumbnail on the left (with a play badge and a `Tutorial 5:23` type +
+  full-length label), and on the right a caps header like `5MIN ON YOUTUBE / SEP 2024`, the video title in
+  bold white (clamped with `...` if long), and the "what you'll learn" note.
+- (Thumbnails load from the dev checkout's `.help/.tmp/video-thumbnails/`; if absent the tooltip shows the
+  text only.)
 - Clicking the row opens the video in the default browser at the segment's start time.
 
 ## Step: Pinning a topic

@@ -2,46 +2,44 @@
 video: asiY0Jo1oJw
 type: update
 date: 2024-03-17
-title: Tooll V3.9 — release overview: docs & help mode, faster export, glTF scenes, Ableton Link, colored points, bias-and-gain
-duration: 15:05
+title: Tooll V3.9 / New Features
+duration: 0:15:05
 ---
 
-A scripted narrated walkthrough of Tooll 3.9's headline additions: greatly expanded operator/parameter documentation and an in-context help mode, a 10x-faster video exporter with audio export, full glTF scene loading for PBR, Ableton Link sync, colored/stretchable points, the new combined Bias-and-Gain control, and a batch of new operators and effects. It closes with UI quality-of-life changes and a roadmap teaser (Vulkan, magnetic graph). Most segments are tight, demo-driven explanations rather than deep dives.
+Release-notes walkthrough of Tooll 3.9: expanded operator/parameter docs, faster video+audio export, glTF scene loading, Ableton Link sync, colored/stretchable points, the combined bias-and-gain control, new effects, and particle-system updates.
 
 ## Mentions
-- 0:00→0:21 [] · passing · scripted · 100% — What Tooll3 is: an open-source realtime motion-graphics tool for animation, live shows, and installations.
-- 0:44→1:19 [ui:ParameterWindow] · explained · scripted · 80% — How the expanded per-operator and per-parameter docs surface on hover and toggle into a help mode in the parameter window.
-- 1:19→1:37 [ui:ParameterWindow] · explained · scripted · 78% — The cleaned-up parameter-window layout and a new documentation/operator style guide for consistency.
-- 1:58→2:34 [ui:PlayerExporter] · explained · scripted · 70% — The faster video export (up to 10x), no-format-conversion rendering, audio export with motion blur, and the increment-version checkbox for docked repeated renders.
-- 2:34→3:04 [LoadGltfScene] · explained · scripted · 88% — Loading complete glTF scenes (not just single meshes) with auto-combined PBR channel maps via the LoadGLTF-scene operator and its scene-setup nodes.
-- 3:04→3:40 [DrawScene] · explained · scripted · 85% — Using DrawScene to render a loaded glTF scene and override roughness/metallic to tweak appearance.
-- 3:40→3:56 [DrawMeshAtPoints] · explained · scripted · 70% — Feeding the glTF operator's mesh and material outputs into a draw-at-points + used-material setup to instance scene geometry.
-- 4:08→4:57 [AbletonLinkSync] · in-depth · scripted · 95% — How the AbletonLinkSync operator syncs tempo and bar position from Live, Traktor, Bitwig, TouchDesigner, VVVV and DJ gear over the network.
-- 4:57→5:07 [AnimValue][Blob] · explained · scripted · 75% — Driving a Blob radius with an AnimValue to get perfect beat-synced animation via Ableton Link.
-- 5:07→5:34 [] · explained · scripted · 80% — The overhauled points data type now carrying color and stretch/scale, with many new operators to set, modify, and randomize them.
-- 5:34→5:51 [RadialPoints][AddNoise][DrawMeshAtPoints] · explained · scripted · 70% — Example one: radial points plus noise used to instance meshes.
-- 5:51→6:01 [RandomizePoints] · in-depth · scripted · 90% — Inserting RandomizePoints for per-instance color and scale, with a float random seed for deterministic animated variation.
-- 6:01→6:21 [DrawBillboards] · explained · scripted · 78% — Example two: point colors on a video texture drawn with DrawBillboards, highlighting its random-face and other now-documented parameters.
-- 6:21→6:35 [LinePoints] · explained · scripted · 72% — Example three: two LinePoints sets with start/end colors and a sliding color gradient.
-- 6:35→6:56 [ui:InfinitySlider] · explained · scripted · 80% — Adding a noise offset and using the new infinity slider to crank a parameter beyond normal limits.
-- 7:07→8:26 [] · in-depth · scripted · 55% — The new combined bias-and-gain control explained as an adjustment curve: gain reshapes contrast (S-curve), bias brightens/darkens, one parameter for images, distributions, and easing.
-- 8:26→8:50 [ui:ParameterWindow] · explained · scripted · 70% — Enabling the Vec2 control in the parameter settings to drag bias and gain together with a live visual of curves and weights.
-- 8:50→9:08 [Remap][PerlinNoise][RandomizePoints][FractalNoise][RemapColor][Tint][LinePoints][RadialPoints] · passing · scripted · 80% — Rundown of operators that now embed the bias-and-gain control.
-- 9:08→9:29 [NdiInput] · explained · scripted · 82% — The much faster NDI input now handling many formats, sources, and up to 4K footage.
-- 9:29→9:39 [AdvancedFeedback2] · explained · scripted · 90% — AdvancedFeedback2 with a wide preset range for fluid-like feedback effects.
-- 9:39→10:08 [Dither] · explained · scripted · 88% — The Dither effect for a retro look, its minimal-parameter design philosophy, docs, presets, and bias-and-gain controls.
-- 10:13→10:18 [ShardNoise][WorleyNoise] · explained · scripted · 65% — Two new noise variants, "Worley" and "Shard".
-- 10:18→10:24 [FractalNoise] · passing · scripted · 70% — Updated and cleaned-up FractalNoise.
-- 10:24→10:33 [Tint][RemapColor] · explained · scripted · 82% — Tint and its bigger sibling RemapColors as bias-and-gain-friendly color adjusters, with RemapColors now doing color cycling.
-- 10:33→11:01 [ParticleSystem] · explained · scripted · 88% — Particle recap: ParticleSystem with emit points, a force, and points output as a minimal particle setup.
-- 11:01→11:27 [ParticleSystem] · in-depth · scripted · 80% — Reworked particle lifetime: the -1 default auto-derives max lifetime, and particle age in the w attribute is now normalized 0–1.
-- 11:27→11:40 [DrawMeshAtPoints2] · explained · scripted · 85% — Using the normalized age attribute with DrawMeshAtPoints2 to color and scale instance geometry over lifetime.
-- 11:40→12:30 [TextureMapForce] · in-depth · scripted · 72% — New texture-based force that accelerates particles along a connected signed-normal map, built here from text rendered to a target and blurred.
-- 12:30→12:46 [TextureMapForce] · explained · scripted · 70% — Its twist parameter (180° reverses the normal direction) and a confine-depth parameter keeping particles within camera distance.
-- 12:46→13:06 [SnapToAnglesForce] · explained · scripted · 85% — SnapToAnglesForce nudging particle velocity toward defined angles to form grid-like structures.
-- 13:06→13:16 [ui:OperatorSettings] · explained · scripted · 70% — UI improvements in 3.9, including renaming input parameters directly from the editor.
-- 13:26→13:36 [ui:FocusMode] · explained · scripted · 85% — Easier foreground/background switching in focus mode by clicking the white edge.
-- 13:36→13:42 [ui:Settings] · passing · scripted · 75% — Re-scanning devices from the settings window without restarting Tooll.
-- 13:52→14:07 [ui:GradientEditor] · explained · scripted · 80% — Gradient editing now supports undo/redo and shows the final step when distributing gradient steps evenly.
-- 14:07→14:42 [ui:Graph] · explained · scripted · 78% — Roadmap: project/resource reorganization toward Vulkan (Linux/Mac) and the upcoming magnetic graph system for snappier live patching.
-- 14:42→15:05 [] · passing · scripted · 100% — Closing call for non-coding contributions (testing, docs, ideas, sharing) and Discord invite.
+- 1:04→1:19 [ui:ParameterWindow] · explained · scripted · Concept · 80% — Per-parameter help docs now surface on hover over the help icon; clicking the icon toggles a dedicated help mode.
+- 2:01→2:34 [ui:RenderSettings] · explained · scripted · Concept · 78% — Video export gained audio output, no pre-render format conversion, and an auto-increment version-number checkbox so you can re-hit render with the panel docked to save numbered work steps.
+- 2:34→3:11 [LoadGltfScene] · explained · scripted · Concept · 85% — Loads complete glTF scenes (not just single meshes), auto-combining textures into the correct channel maps for physically-based rendering; expand the scene setup to inspect each node and its material textures.
+- 3:11→3:42 [DrawScene] · explained · scripted · Parameters · 82% — Renders a loaded glTF scene and exposes overrides for the file's roughness and metallic values to tweak surface appearance.
+- 3:42→3:55 [DrawMeshAtPoints] [UseMaterial] · explained · scripted · Example · 75% — To fold an imported scene into the mesh-effects pipeline, take the scene's separate mesh and material outputs: feed the mesh to a point-instancing draw and wire a material operator into the material slot.
+- 4:01→5:03 [AbletonLinkSync] · in-depth · scripted · Concept · 88% — Syncs to any Ableton Link source on the network (Live, Traktor, Bitwig, TouchDesigner, VVVV, DJ gear); unlike MIDI it shares bar-phase, not just BPM, so bar-based timing locks perfectly.
+- 4:57→5:06 [AnimValue] [Blob] · passing · scripted · Example · 65% — Driving a periodic value into a metaball-style radius demonstrates beat-synced animation once a network clock source is connected.
+- 5:06→5:50 [RandomizePoints] · explained · scripted · Concept · 82% — Adds per-point colors and scaling to an instanced point set; its random seed is a float, so sweeping it yields smooth deterministic animation rather than discrete reshuffles.
+- 5:36→5:43 [RadialPoints] · passing · scripted · Example · 70% — Source of a ring of points that gets noise-displaced and used to scatter mesh instances.
+- 6:00→6:21 [DrawBillboards] · explained · scripted · Parameters · 72% — Renders per-point camera-facing sprites; a random-face parameter (among many others) picks which cell of a texture each billboard shows, useful with point colors over a video texture.
+- 6:21→6:48 [LinePoints] · explained · scripted · Example · 75% — Combining two line sources — one with start/end colors, one slid through a color gradient — then layering a noise offset whose amount you crank via the infinity slider, since leaving point counts unmatched lets the offset bite.
+- 6:34→6:48 [ui:InfinitySlider] · passing · scripted · Tip · 70% — Drag-anywhere control for pushing a parameter far past its normal range without a fixed maximum.
+- 7:02→7:14 [Remap] · passing · scripted · Concept · 68% — Among the operators that adopted the combined bias-and-gain control for reshaping a value's response curve.
+- 7:14→8:25 [ui:ParameterPopup] · in-depth · scripted · Concept · 80% — The combined bias-and-gain curve acts like a tone curve: an S-shape adds contrast (gain), an inverse S flattens it; bias pushes values brighter or darker — one Vec2 parameter covers both shapes across images, distributions and easing.
+- 8:25→9:08 [ui:ParameterWindow] · explained · scripted · Tip · 78% — Enabling the Vec2 control in the parameter settings lets you drag both components of a paired parameter at once and see the resulting distribution/weighting curve live.
+- 8:50→9:08 [PerlinNoise] [FractalNoise] [Tint] [LinePoints] [RadialPoints] · passing · scripted · Concept · 70% — Listed among operators that gained the bias-and-gain control to reshape their output distribution or response.
+- 9:15→9:28 [NdiInput] · explained · scripted · Performance · 80% — Performance overhaul lets it handle a wide range of source formats and up to 4K footage reliably.
+- 9:28→9:39 [AdvancedFeedback2] · explained · scripted · Concept · 80% — Successor to [AdvancedFeedback] shipping presets that produce fluid-like feedback looks.
+- 9:39→10:07 [Dither] · explained · scripted · Concept · 80% — Adds a retro dithered look; exposes blend modes plus bias-and-gain, exemplifying few-controls/wide-range effect design.
+- 10:07→10:12 [WorleyNoise] [ShardNoise] · passing · scripted · Concept · 60% — Two new noise variants added to the noise toolkit.
+- 10:12→10:18 [FractalNoise] · passing · scripted · Concept · 65% — Cleaned-up and updated in this release.
+- 10:18→10:37 [Tint] [RemapColor] · explained · scripted · Concept · 75% — Paired color-adjustment operators that benefit from bias-and-gain; the larger one now does color cycling for generated effects.
+- 10:37→11:01 [ParticleSystem] · explained · scripted · Concept · 82% — Recap of the minimal setup: emit event points, add a force, render the buffer as points.
+- 11:01→11:33 [ParticleSystem] · in-depth · scripted · Gotcha · 80% — Lifetime reworked: a default of -1 derives the max lifetime from emitted-point count and buffer length, and particle age written to the w attribute is now normalized 0–1 so you can drive color or scale over a particle's life.
+- 11:27→11:40 [DrawMeshAtPoints2] · passing · scripted · Parameters · 70% — Offers many options for scaling instanced geometry by a per-point attribute such as normalized particle age.
+- 11:40→12:37 [TextureMapForce] · explained · scripted · Parameters · 62% — Accelerates particles along a connected normal map (which must use signed-normal mode); a twist parameter rotates the sampled direction — 180° reverses it — and a confine-depth parameter keeps particles within a visible distance from the camera.
+- 12:37→13:06 [SnapToAnglesForce] · explained · scripted · Concept · 80% — Nudges particle velocities toward a set of defined angles, producing clean grid-like structures.
+- 13:11→13:16 [ui:OperatorSettings] · passing · scripted · Tip · 65% — Input parameters can now be renamed directly from the editor.
+- 13:16→13:26 [ui:ControlBar] · passing · scripted · Tip · 60% — Beat-tapping gained shortcuts: Z to tap, X to resync to measure start.
+- 13:26→13:35 [ui:FocusMode] · passing · scripted · Tip · 70% — Switching between foreground and background control by clicking the white edge is now easier.
+- 13:35→13:41 [ui:Settings] · passing · scripted · Tip · 70% — Devices can be re-scanned from the settings window without restarting the app.
+- 13:41→13:51 · passing · scripted · Tip · 65% — A new Multiply-Alpha blend mode added to most image operators enables powerful masking.
+- 13:51→14:07 [ui:GradientEditor] · explained · scripted · Tip · 72% — Gradient editing now supports undo/redo, and evenly distributing steps before interpolation now includes the final step.
+- 14:28→14:42 [ui:Graph] · passing · scripted · Concept · 70% — Roadmap preview: the magnetic-graph system shown last year is slated for integration to make patching snappier and more live.

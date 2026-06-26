@@ -89,17 +89,78 @@ sequential chunks and return a comprehensive, deduplicated list of operator ment
   - `discussion` — open back-and-forth, opinions and trade-offs weighed.
   - `experiment` — live trial-and-error, figuring it out, hitting and fixing snags.
   Most→least reliable: `scripted` > `answer` > `discussion` > `experiment` — it feeds relevancy ranking.
+- **purpose — what this clip *gives* the reader** (a separate axis again; pick the single best fit). It lets
+  the help UI group an operator's references into sections and is written so the prose makes it obvious
+  *without* naming the tag:
+  - `Example` — a concrete setup/wiring to learn from (often pairs the op with others).
+  - `Concept` — what it is or how it works under the hood.
+  - `Parameters` — what its knobs/attributes do (a "walks every knob" tutorial is the prime case — here
+    listing the parameters covered *is* the value, not a dump).
+  - `Performance` — cost, speed, optimization behavior.
+  - `Comparison` — when to pick it over a sibling operator.
+  - `Gotcha` — a pitfall, ordering rule, constraint, or bug to avoid.
+  - `Tip` — a shortcut or practical technique.
+  `Example`, `Comparison`, `Parameters` rank a touch higher — they're what someone stuck on an op wants first.
 - **confidence `N%`** — how sure you are this segment is correctly identified *and* genuinely useful to
   someone stuck on that operator/topic: weigh ASR clarity, on-topic-ness, and how reliable the
   explanation is. A clean scripted demo of the right op ~90%; a garbled or barely-there aside ~50%.
 - **One segment per distinct moment; never overlap.** If the same operator comes up at several points,
   give each its own non-overlapping span — don't let one segment's `end` run past the next's `start`,
   and don't emit two segments for the same point.
-- **Note voice — user-facing, inviting, "what you'll learn"**, not a transcript paraphrase. Frame the
-  takeaway; reference operators in `[brackets]`; one sentence, can run a touch longer than a label:
-  - *"recommended as a heavier procedural test"* → **How `[FractalNoise]` can be used for performance tests.**
-  - *"animated by connecting its phase to time…"* → **How to prevent caching by connecting a time operator.**
-  - *"resolution increased to 4K…"* → **Example of how large resolutions like 4K quickly demonstrate fill-rate limits.**
+- **Note voice — teach the operator, not the video.** The reader wants to understand *how to use this
+  operator* or *what it's good for*, and is deciding whether this clip is worth their time. Write **one
+  self-contained sentence carrying the transferable lesson** — it must make sense to someone who has
+  never seen this video. The note is the whole payoff of the deep-link; a weak note wastes the segment.
+  - **Frame it as HOW or WHAT.** "How to …", "What … is for", "Why you'd …". Describe the technique or
+    purpose, not the on-screen steps.
+  - **Drop the scene.** No reference to *this* video's subject — not "the sprinkles", "the trail
+    source", "the monster", "the donut", "the intro text". Those are meaningless out of context.
+    Generalise to the operator's role ("scattering instances over a surface", "recording past positions
+    to draw trails").
+  - **No bare parameter dumps.** "cell vs. bounds mode; count/center params" names knobs without saying
+    what they *achieve*. Mention a parameter only alongside what it lets you do.
+  - **No cryptic shorthand.** If parsing the sentence needs the video ("randomizing the F2 texture-coord
+    per copy so repeated meshes dance out of sync"), rewrite it plainly or drop the segment.
+  - **The click test:** if the note only makes sense *because* you watched the clip, it has failed.
+  - **Don't restate the operator's own NAME.** The note hangs off the operator's marker, so the reader
+    already sees it. Open on the verb or the technique, not `"How [ThatOp] …"`. (Reference *other*
+    operators in `[brackets]` freely — those aren't redundant.)
+  - **Don't restate the operator's DESCRIPTION.** The op's one-line doc sits right above the reference
+    list in the help UI. Skip the definition and carry only the *delta* this clip adds — the non-obvious
+    step, the number, the pairing, the caveat. (`Example`/`Gotcha`/`Performance`/`Comparison` notes are
+    inherently delta-focused, which is why the purpose tag and this rule reinforce each other.)
+  - One sentence, may run a touch longer than a label.
+
+  Before → after, for `[GridPoints]` (its doc already says "lays out a grid of points" — don't repeat that):
+  - ✗ *"grid points for sprinkles; cell vs. bounds mode; count/center params"* — scene-specific + param dump
+  - ✗ *"How [GridPoints] lays out a regular grid of points across a surface…"* — restates name + description
+  - ✓ **Cell-spacing vs. bounds sizing — which mode to reach for when you want fixed gaps between instances versus filling a set volume.** · purpose: `Parameters`
+
+  More deltas (name + definition dropped, purpose in italics):
+  - `[FastBlur]` → **Up to 10× faster than [Blur] at large radii, with better quality.** *(Performance)*
+  - `[MeshVolumeForce]` → **The non-obvious catch: draw the particles before the mesh, or they're hidden inside the solid.** *(Gotcha)*
+  - `[IkChain]` → **Feed it a [LinePoints] bone chain and a target; zero the chain's pivot to anchor the root.** *(Example)*
+
+- **Keep the note about THIS operator — not about TiXL.** The lesson must be specific to the bracketed
+  operator's own job: what it does, how to drive it, what it's good for. A takeaway that would read the
+  same for any operator is a general-TiXL lesson, not an operator reference.
+  - General mechanics — stacking / evaluation order, the buffer-copy render model, pull-based caching,
+    how the graph snaps, what the Z-buffer does — belong to a **`ui:` topic** (`[ui:Graph]`,
+    `[ui:EvaluationContext]`, …), not to an operator. Tag the moment there instead, or drop the marker.
+  - If an operator is only *illustrating* a general concept, either re-frame the note to what the clip
+    shows about **that operator specifically**, or move the segment to the topic it actually teaches.
+  - **Swap test:** mentally substitute a different, unrelated operator into the sentence. If it's still
+    just as true, the note is too general — fix or drop it.
+
+  For `[SetMaterial]`:
+  - ✓ specific: **How a material operator gives an SDF or mesh its surface look, glossiness moving between shiny and frosted.**
+  - ✗ general (really a stacking lesson → belongs on `[ui:Graph]`): *"Why operator order matters in a stack: the last one wins, so set a default then override."*
+  - ✗ general (true of every image effect → drop, or `[ui:EvaluationContext]`): *"Why image effects allocate a fresh buffer rather than overwriting the original."*
+
+- **Favor depth — fewer, deeper notes beat many shallow ones.** A clip that genuinely *uses and explains*
+  an operator is worth far more than a name-drop. Spend real care on the `explained`/`in-depth` segments;
+  for a bare `passing` aside a short honest note is fine (*"briefly named while wiring a particle setup"*) —
+  don't inflate it into a lesson it doesn't deliver.
 
 ## Step 4 — write `references/video-analysis/<id>.md`
 
@@ -115,18 +176,20 @@ duration: <H:MM:SS, the last transcript timestamp>
 <1–2 sentence summary>
 
 ## Mentions
-- <start>→<end> [<Op>] · <depth> · <style> · <conf>% — <user-facing note>
-- <start>→<end> [ui:<Id>] · <depth> · <style> · <conf>% — <note>            (a UI component or concept)
-- <start>→<end> [<Op>] [ui:<Id>] · <depth> · <style> · <conf>% — <note>     (more than one marker is fine)
+- <start>→<end> [<Op>] · <depth> · <style> · <purpose> · <conf>% — <user-facing note>
+- <start>→<end> [ui:<Id>] · <depth> · <style> · <purpose> · <conf>% — <note>          (a UI component or concept)
+- <start>→<end> [<Op>] [ui:<Id>] · <depth> · <style> · <purpose> · <conf>% — <note>   (more than one marker is fine)
 …
 ```
 
 Rules:
 - **`<start>→<end>`** is the segment span (the index stores it as `startSecond` + `duration`). Use the
   arrow `→` (a plain hyphen also parses); a single timestamp with no `→<end>` is a zero-length point.
-- **`· <depth> · <style> · <conf>%`** are `·`-separated tokens between the markers and the note dash —
-  one depth (`passing`/`explained`/`in-depth`), one style (`scripted`/`answer`/`discussion`/`experiment`),
-  and a confidence percentage.
+- **`· <depth> · <style> · <purpose> · <conf>%`** are `·`-separated tokens between the markers and the note
+  dash — one depth (`passing`/`explained`/`in-depth`), one style (`scripted`/`answer`/`discussion`/
+  `experiment`), one purpose (`Example`/`Concept`/`Parameters`/`Performance`/`Comparison`/`Gotcha`/`Tip`),
+  and a confidence percentage. The parser scans for each by name (order is forgiving), so a legacy line
+  missing the purpose token still parses — it just gets no purpose.
 - **Markers before the dash are indexed; the note is display-only.** `[OpName]` / `[ui:Id]` in the
   marker position resolve into the index (case-insensitively — a stray `IKChain` finds `IkChain`, a
   bare `[Timeline]` resolves to `ui:Timeline`). `[Op]` links *inside the note* feed the help UI's

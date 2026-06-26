@@ -1,114 +1,65 @@
 ---
 video: VNC-zr-JOjQ
 type: meetup
-date: 2026-03-23
-title: MeshVolumeForce, DrawMovingPoints, SDF reflection/colorization, raymarch fields, quaternion blending & camera paths
-duration: 4:06:20
+date: 2026-03-25
+title: TiXL Meetup 2026-03-23 — Mesh-Volume Collision, Moving Points & SDF Lighting
+duration: 4:06:22
 ---
 
-A TiXL community meet-up where the host demos a new MeshVolumeForce particle operator (cloned from the field volume force) and a new DrawMovingPoints operator that stretches particles by velocity, then fields audience questions on glow/transparency, faking TV-screen lighting, GPU resource caching, SDF reflection and colorization, and raymarch "iteration glow." It closes with discussion of quaternion (slerp) flipping in blended camera paths, point-resampling for motion paths, and members sharing their own scenes.
+A long, hands-on meet-up built around the new MeshVolumeForce particle collider and the DrawMovingPoints stretch-render, followed by Q&A on faking screen lighting, an SDF laser-reflection toy, an audio-reactive SDF cityscape walkthrough, and a closing dive into quaternion blending pitfalls and procedural camera paths.
 
 ## Mentions
-- 0:50 [TextPoints] · passing — line/text points spelling out the meet-up date in the background
-- 1:07 [ListBuffer] · passing — points pushed onto a buffer for ordering
-- 1:18 [OrderAsLines] · passing — ordering the date points as lines for legibility
-- 1:41 [AdvancedFeedback] · explained — feedback layer added to the date intro scene
-- 2:00 [RenderTarget] · passing — render into a target before feedback
-- 2:05 [Layer2D] · passing — used between render target and advanced feedback
-- 5:56 [MeshVolumeForce] · in-depth — main new operator; particle collision/attraction against a mesh's faces
-- 6:00 [ParticleSystem] · explained — host emits particles to drive the mesh force demo
-- 13:00 [DrawPoints] · explained — drawing the emitted particle points
-- 6:40 [CubeMesh] · explained — first mesh fed into MeshVolumeForce (quad cube, works oddly)
-- 9:30 [SphereMesh] · passing — manifold mesh alternative tried later for poly-count test
-- 10:58 [FieldVolumeForce] · in-depth — the operator MeshVolumeForce was cloned from; parallel demo
-- 12:00 [BoxSDF] · explained — SDF box used as the field for FieldVolumeForce
-- 12:57 [Translate] · explained — inserted to offset the box; pasted values across nodes
-- 13:04 [TransformPoints] · passing — referenced re: translate/rotate naming (point-space rotation later at 2:02)
-- 21:50 [PointerNoise] · in-depth — added to rotation; gain/bias and amplitude/frequency explored
-- 28:50 [TurbulenceForce] · explained — combined with mesh force; noise-level/frequency adjustments
-- 30:30 [DrawMovingPoints] · in-depth — new operator; stretches points by velocity like motion blur
-- 34:30 [PreviousPointBuffer] · explained — internal double-buffer that finds each point's prior position
-- 35:33 [GridPoints] · passing — used to show DrawMovingPoints works on non-particle points too
-- 41:04 [LinePoints] · explained — vertical emit points for the wet/surface particle demo
-- 48:00 [Drag] · explained — recommended to bleed energy out of a runaway particle system
-- 44:30 [PerlinDistributionForce] · passing — hypothetical force he wishes existed (local densities)
-- 44:48 [CustomSDF] · in-depth — recurring custom SDF/field node (sphere, fractals, reflection scenes)
-- 45:00 [VolumeFieldForce] · explained — attraction-only force used to cluster particles into densities
-- 49:20 [DeformMesh] · explained — twist deform applied to the mesh (twist pivot/axis explored)
-- 52:00 [TextureAtlas] · passing — weekend experiment to pre-blur particles photorealistically
-- 53:00 [RadialPoints] · explained — test scene points for the moving-points texture test
-- 53:00 [OrbitCamera] · explained — z-up orbit camera in the pill-shape test
-- 54:17 [UseFallbackTexture] · explained — fallback white-dot texture input for DrawMovingPoints
-- 55:54 [UseFirstTexture] · explained — preferred multi-input variant of the fallback operator
-- 54:47 [RenderTarget] · explained — frozen via disable update to inspect particle artifacts
-- 56:00 [WhiteDotTexture] · passing — original particle sprite; mipmap artifacts discussed
-- 59:36 [SampleTextureLevel] · explained — used instead of normal sampling to disable mipmaps
-- 1:00:00 [LinearGradient] · explained — answer to "can we gradient the particle?" — gradient as texture
-- 1:01:00 [BlendImages] · explained — blend for rounded ribbon shape (wrong blend first, then correct)
-- 1:01:14 [Blend] · passing — generic blend tried while searching for the right one
-- 1:02:54 [CacheResources] [LoadImage] · in-depth — new "cache resources" flag on image loading; resource sharing/disposal
-- 1:04:56 [StringFromList] · explained — image-sequence string list driving the file path
-- 1:06:01 [Counter] · explained — "count in" to rapidly cycle textures and stress resource usage
-- 1:10:51 [Glow] · explained — glow clamping on transparent-image edges (audience problem)
-- 1:11:47 [Crop] · explained — crop/expand to add empty edge pixels; "Expand" tag suggested
-- 1:15:15 [ImageLevels] · explained — used to inspect whiteness/premultiply of a transparent logo
-- 1:16:24 [CustomPixelShader] · in-depth — recurring; here to force RGB=1 on a sampled image
-- 1:17:25 [Bloom] · explained — blooming both logo variants to show premultiply difference
-- 1:17:58 [CompareImage] · explained — side-by-side compare of the two bloom results
-- 1:19:21 [ShadowMap] · explained — the "soft shadow" directional-light workflow audience found
-- 1:19:41 [PointLight] · explained — point light has no direction; brightness/color controls discussed
-- 1:20:54 [DrawMeshAtPoints] · passing — suggestion to scatter many TVs onto points
-- 1:21:31 [LoadObj] · explained — loads the studio backdrop OBJ scene
-- 1:21:09 [DrawMesh] · explained — drawing scene mesh; has field inputs for fragment fields
-- 1:22:47 [PlaneSDF] · explained — horizon plane SDF whose distance is converted to color
-- 1:22:56 [SDFToColor] · in-depth — converts field distance to color for scene colorization (recurring topic)
-- 1:24:34 [TransformField] · explained — rotate/transform the field like a projector
-- 1:24:48 [RepeatAxis] · passing — field repetition tried during colorization demo
-- 1:26:26 [Image2DSDF] · explained — SDF from a texture's greyscale; near miss for the TV-lighting idea
-- 1:30:57 [PickColorFromImage] · explained — sample average color from a texture (read last mip level)
-- 1:33:06 [ProjectLight] · in-depth — projector/light operator with spotlight/orthographic types; multi-TV lighting
-- 1:43:35 [MeshProjectUVs] · explained — overrides UVs with planar projection (reproject-UV tangent)
-- 1:46:51 [Fresnel] · explained — fresnel edge pass for fake rim-lighting from screens (custom pixel shader)
-- 2:33:33 [Spectrogram] · explained — audio spectrogram displacing the post-render (Nick's scene)
-- 2:34:48 [TemporalAccumulation] · in-depth — CCTV-style smearing/noise reduction; naming story; grain must come after
-- 1:52:40 [MovePointsToSDF] · explained — moves grid points onto an SDF for the electric tunnel effect
-- 1:53:09 [DrawLine] · explained — lines + subdivide + noise for electric sheath
-- 1:53:09 [SubdivideLines] · passing — subdivide added to the electric line sheath
-- 1:54:33 [DrawBillboards] · passing — "plop and billboard" blobs on the line points
-- 2:11:15 [CamPosition] · explained — keeps grid points just in front of the camera
-- 2:14:00 [StarGlow] · passing — streaky glow in the VHS post chain
-- 2:30:00 [PointsOnImage] · explained — places tracker sprites on screen-space shooting-star positions
-- 2:21:00 [TerrainSDF] · explained — a terrain fractal intersected with a translated copy to crop it
-- 2:25:00 [SubtractSDF] · explained — combine fractals (subtraction) for the city
-- 2:25:00 [IntersectSDF] · explained — combine fractals (intersection) for the city
-- 1:56:00 [CombineSDF] · in-depth — base of the laser reflection scene; group second volume
-- 1:57:46 [IntersectRound] · explained — round-clamp the SDF sides
-- 1:58:05 [SpecularAA] · passing — tried to reduce SDF edge artifacts (and later raymarch jitter)
-- 1:58:14 [SDFReflectionLinePoints] · in-depth — new node; reflects line points off an SDF, ray-marched
-- 1:59:27 [DrawRayLines] · in-depth — ray lines render more consistently than draw lines for lasers
-- 2:01:35 [BoxSDF] · explained — box-minus-box tunnel built for the reflection-points demo
-- 2:02:40 [DrawLines] · explained — drawing the reflected ray lines (additive, no depth write)
-- 2:03:30 [InitializeDepth] · explained — set up depth for the tunnel laser scene
-- 2:03:30 [DepthTest] · explained — depth test set up for the tunnel laser scene
-- 2:04:08 [Bloom] · passing — HDR bloom on the bright reflected lines
-- 2:06:33 [RandomizePoints] · explained — slightly randomize reflection point positions/rotation
-- 2:19:18 [SymbolDefinition] · explained — "set as symbol definition" + Symbol Library thumbnail workflow
-- 2:42:00 [Environment] · explained — animated sky/environment technique (from Martin) in the alien scene
-- 2:50:00 [RepeatPolar] · explained — polar-repeat boxes for the iteration-glow raymarch demo
-- 2:50:35 [RaymarchField] · in-depth — counts ray-march steps near a surface to produce edge/distance glow
-- 2:51:00 [TriPlanarNormalMapping] · passing — noted as the most expensive part of the shader graph
-- 2:57:00 [PlaneSDF] · explained — combined into the raymarch scene to test the new glow output
-- 3:04:00 [TorusSDF] · explained — base of Nikita's SDF-to-color tunnel (inverted)
-- 3:28:00 [VisualizeFieldDistance] · passing — tried during the AMD raymarch-failure debugging
-- 3:32:00 [FieldDistanceForce] · explained — proves PBR/particle path works while raymarch fails on AMD
-- 3:48:43 [BlendPoints] · in-depth — powerful for camera animations; "blend with range" wrap/cross-fade
-- 3:05:02 [ReorientPoints] · explained — makes points look toward the next one (slerp flip issue)
-- 3:51:55 [ResampleLinePoints] · in-depth — interpolates one point along a line for smooth camera/motion paths; loop option requested
-- 3:52:46 [PointsToCPU] · explained — read sampled point back to CPU for camera/geometry placement
-- 3:42:13 [PointsAtCPU] · explained — reads torus-mesh point positions for the number-pad camera-path rig
-- 3:43:36 [FilterPoints] · in-depth — recommended before PointsToCPU; pick one point by start index (wraps around)
-- 3:53:14 [DrawSphere] · passing — sphere drawn at the resampled motion-path point
-- 3:53:26 [DrawLines] · passing — line drawn along the resampled path
-- 3:50:33 [ApplyCameraTransform] · explained — debug rig to visualize/blend multiple cameras in space
-- 2:07:30 [SlidingHistory] · passing — used by Nick to build the audio displacement texture
-- 4:02:55 [GainAndBias] · passing — tweaks the camera-path animation curve (a.k.a. renamed pointer-noise params)
+- 0:42→1:24 [LineTextPoints] · passing · experiment · Example · 70% — Turn a date or title string into points you can then route through a list buffer and DrawLines, so a background caption is built from the same point pipeline as everything else.
+- 1:35→2:28 [AdvancedFeedback] · passing · experiment · Gotcha · 68% — To get visible trails you must first render the source into a RenderTarget and feed that back through Layer2d, lowering the feedback alpha — a raw connection alone shows almost nothing.
+- 2:38→10:50 [MeshVolumeForce] · in-depth · scripted · Concept · 92% — Pipe any point set into a [ParticleSystem], add this as a force and give it a mesh to collide against; mark its mesh input as required so a missing-input warning shows. Draw the particles before the solid mesh (set draw order so particles write depth first) or they vanish inside it.
+- 6:42→7:18 [ui:OperatorSettings] · passing · scripted · Tip · 70% — Mark an operator's primary input as "required" and move it to the top in the settings page so the graph shows a red warning triangle when it's left unconnected.
+- 8:34→9:03 [QuadMesh] · passing · experiment · Gotcha · 60% — A non-manifold flat mesh still works as a collider, but only its front side repels cleanly; the back side falls away, so prefer a closed manifold shape for predictable collisions.
+- 11:43→14:01 [FieldVolumeForce] · explained · scripted · Comparison · 88% — The SDF-based sibling of the mesh collider: same parameters minus normal-sampling distance, and because a box SDF's distance is far more consistent than a mesh's per-face distance it gives smoother, more reliable repulsion.
+- 12:21→12:30 [BoxSDF] · passing · experiment · Example · 72% — Drop one in as the missing field input of a volume force to get a clean box-shaped collision region; pair it with a [Translate] to offset the bounds off-center.
+- 12:59→13:25 [Translate] · passing · experiment · Tip · 70% — Insert it above a field's source to shift the collision volume; copy its values and paste straight onto a matching-name input, which transfers the whole transform at once.
+- 14:11→18:11 [MeshVolumeForce] · in-depth · scripted · Parameters · 90% — Attraction pulls outside particles toward the nearest forward-facing face; repulsion only acts once a particle is detected inside the volume; zero attraction leaves particles untouched. Reflection bounces them off the surface before they enter.
+- 18:11→20:10 [MeshVolumeForce] · in-depth · scripted · Parameters · 88% — Bounciness below 1 drains energy each bounce, above 1 injects it (things go wild); randomized bounciness and orientation-angle fake a rough surface; moving the collider mesh shoves particles inside and pumps energy into the system.
+- 20:10→22:00 [MeshVolumeForce] · explained · scripted · Tip · 82% — Inverting the volume flips repulsion so particles are driven to stay *inside* the shape, filling and bouncing within it — handy for trapping a swarm in a box.
+- 21:48→24:00 [PerlinNoise] · explained · experiment · Parameters · 78% — Feeding it into a rotation and pushing the gain (gain/bias rename) makes the curve sit at one extreme then snap to the other, producing organic, sudden jerks rather than a smooth wobble.
+- 26:10→30:00 [MeshVolumeForce] · in-depth · discussion · Performance · 88% — Cost scales with face count, not particle count, because it brute-forces the nearest triangle with no acceleration structure — a few hundred faces is the practical ceiling; use invisible low-poly proxy meshes for heavy geometry.
+- 28:30→30:18 [TurbulenceForce] · explained · experiment · Example · 80% — Stack it with a collider so both shape the same swarm; SDF/field forces are cheap here (the field is sampled only twice per particle) so combining several colliders to herd particles costs far less than ray-marching them.
+- 30:39→32:30 [DrawMovingPoints] · in-depth · scripted · Concept · 90% — Stretches each point along its motion into a pill, giving a cheap motion-blur look; the stretch responds to camera rotation too, so even static [GridPoints] streak when you orbit. Only marginally slower than plain point drawing.
+- 32:30→37:00 [DrawMovingPoints] · explained · discussion · Gotcha · 85% — Because it reads last-frame position from a double buffer (not particle age), a freshly emitted point can inherit a stale slot and shoot a wrong streak; clamp this with the velocity-jump threshold so jumps beyond ~1 unit/frame aren't stretched.
+- 34:23→35:00 [KeepPreviousPointBuffer] · explained · scripted · Concept · 80% — The double-buffer operator behind frame-to-frame velocity: it ping-pongs two buffers so each point's previous position is looked up by ID, which is what any per-point motion effect needs.
+- 41:04→42:24 [LinePoints] · passing · experiment · Tip · 70% — A quick emitter for shooting particles at a surface: rotate its direction to vertical and flip the initial velocity so points stream onto the collider face you want.
+- 42:24→51:00 [DeformMesh] · explained · experiment · Example · 78% — Animate a twist on the collider mesh (it even exposes a twist pivot and gizmo) so particles crawling its surface get shaken around — a way to drive motion from collider deformation rather than real mesh velocity.
+- 48:00→50:00 [MeshVolumeForce] · explained · scripted · Tip · 80% — When a force-heavy swarm keeps gaining speed, raise the drag (or drop bounciness) to bleed off the energy that additive forces keep injecting — the go-to fix for an uncontrollable particle system.
+- 53:56→1:00:09 [DrawMovingPoints] · in-depth · explained · Gotcha · 82% — Stretching a point's UVs compresses texels toward the edges, which trips the sampler into a blurry mipmap and leaves grey-pixel artifacts; it works around this by sampling a fixed mip level (slower) and shipping a low-res fallback texture instead of mipmaps.
+- 55:42→56:10 [UseFallbackTexture] · passing · scripted · Comparison · 70% — Supplies a default texture when none is wired; prefer the multi-input "use first valid" variant over this two-input one when you need to chain several optional sources.
+- 1:00:09→1:01:30 [LinearGradient] · passing · experiment · Example · 70% — Stuff one into a point's texture input to shade the sprite from bright front to soft tail; combine via a blend's alpha channel to carve a rounded-capsule particle shape.
+- 1:01:32→1:07:00 [FilesInFolder] · explained · scripted · Performance · 80% — Procedurally driving a texture path (e.g. picking a string from its list) disposes and reloads the texture every change, spiking GPU memory; enable "cache resources" so repeatedly visited textures stay resident — the right call for VJ-style scrubbing, overkill otherwise.
+- 1:09:50→1:14:30 [Glow] · explained · discussion · Gotcha · 80% — Glow on a transparent image clamps and smears at the frame edge when artwork runs to the border; fix it upstream by giving the image empty margin (Crop with negative/expand values) before glowing.
+- 1:11:55→1:15:06 [Crop] · explained · experiment · Tip · 78% — Beyond trimming, negative values pad an image with empty pixels — the trick for adding a transparent border so an edge-to-edge logo has room for a clean glow.
+- 1:15:33→1:19:00 [ImageLevels] · explained · scripted · Tip · 78% — Inspect an image's brightness histogram to tell whether transparent regions sit on black or white; that hidden base color decides how bloom/glow spreads and why two visually identical logos bloom differently.
+- 1:16:51→1:19:00 [CustomPixelShader] · passing · experiment · Example · 65% — A two-line shader that forces RGB to white while keeping alpha re-bakes a non-premultiplied logo so its glow behaves — a fast way to fix the transparent-edge base color.
+- 1:17:42→1:19:00 [CompareImages] · passing · scripted · Tip · 72% — Wire two variants in for a split-screen A/B so you can see side-by-side how a change (e.g. base-color tweak) alters the bloom result.
+- 1:19:19→1:30:00 [SetShadow] · explained · discussion · Comparison · 75% — The only thing approaching a directional/spotlight in TiXL, but it gives no brightness or color control; for fake screen-lighting you're better off placing plain point lights, since the PBR lights lack a true directional option.
+- 1:20:30→1:25:30 [SDFToColor] · explained · experiment · Example · 80% — Convert a field's signed distance into a color ramp and feed it to a mesh's fragment-field input, turning a moving [PlaneSDF] into a procedural light/gradient that washes across the scene — rotate or repeat the field for projector-like sweeps.
+- 1:22:50→1:25:30 [TransformField] · passing · experiment · Tip · 70% — Rotating/translating the field that drives a color ramp aims the gradient like a projector, so the "light" can come from any direction.
+- 1:26:30→1:27:00 [Image2dSDF] · passing · answer · Concept · 68% — Builds a signed-distance field from a texture's grayscale, the entry point when you want an image (e.g. a screen's content) to define a shape or mask in field space.
+- 1:31:07→1:31:30 [PickColorFromImage] · passing · answer · Tip · 72% — Sample an average screen color by enabling mipmaps and reading the smallest level — a cheap way to drive a fake light's tint from whatever a texture is showing.
+- 1:25:30→1:36:00 [ProjectLight] · explained · discussion · Example · 78% — A projector that casts a texture (orthographic or spotlight); disable its volumetric iterations and additively stack several copies to fake multiple colored screen-lights, each driven by its own texture.
+- 1:44:34→1:48:00 [NormalMap] · explained · discussion · Example · 72% — Multiply a blurred render of bright screens against a Fresnel/rim pass built from the render target's normal buffer to fake screen-space ambient rim lighting on all geometry edges — no shader rewrite needed.
+- 1:52:20→1:55:00 [MoveToSDF] · explained · experiment · Example · 80% — Move grid points onto an SDF surface, then subdivide and displace them again with noise to wrap an electric, crawling sheath over any field; keep them in view with [CamPosition] so the grid follows the camera.
+- 1:54:46→1:55:00 [Blob] · passing · experiment · Tip · 65% — Drop blob billboards at the line points sitting on an SDF surface to add glowing nodes along the crawling-electricity effect.
+- 1:56:20→1:59:00 [CombineSDF] · explained · experiment · Tip · 75% — An infinite field is hard to preview, so union it with a finite box and grab the second (box-bounded) output to clamp it into something you can actually see and control.
+- 1:58:07→2:09:05 [SdfReflectionLinePoints] · in-depth · scripted · Concept · 86% — Ray-marches lines through an SDF and reflects them off the surface; raise max-reflections for repeated bounces, and beware it's literal ray-marching — a low step count degenerates, and normal-sampling distance must be tuned to avoid jitter on rough fields.
+- 1:59:27→2:00:00 [DrawRayLines] · explained · scripted · Comparison · 82% — Prefer this over [DrawLines] for lines that run to infinity or past the camera: regular lines use screen space to size themselves and look wrong at extreme depths, whereas ray-lines stay consistent.
+- 2:01:36→2:09:05 [SdfReflectionLinePoints] · in-depth · scripted · Example · 84% — Build a box-minus-box tunnel, rotate the seed lines into it and the bounced rays glow brighter toward the back with additive, depth-off drawing; its output points are pre-separated so you can directly draw lines or place glowing [Blob] sprites at every hit.
+- 2:18:24→2:20:36 [ui:SymbolLibrary] · explained · scripted · Tip · 78% — Pin an operator, right-click and "set thumbnail" to capture a representative frame; after pressing Update the library shows that preview on hover and while dragging — invaluable when scanning many operators for a VJ set.
+- 2:33:52→2:35:00 [TemporalAccumulation] · explained · discussion · Tip · 85% — Smears frames over time to mimic CCTV/old-camera trailing and to denoise; always apply grain *after* it, or the accumulation averages the grain away.
+- 2:31:00→2:33:00 [SlidingHistory] · passing · experiment · Example · 68% — Build a scrolling spectrogram waterfall from audio, then crop/amplify/stretch it to drive an audio-reactive displacement of the image.
+- 2:30:00→2:31:00 [PointsOnImage] · explained · discussion · Example · 80% — Reuse the scene camera to render just the moving elements to a separate target, then scatter points where those bright pixels are to pin HUD tracker sprites that follow objects across the screen.
+- 2:49:00→3:00:55 [RaymarchField] · in-depth · discussion · Example · 80% — Counting ray-march steps gives a free edge/distance glow: where the march takes many steps it grazed close to the surface, so use that step count as a glow term added before the specular-AA stage in the field template.
+- 3:00:55→3:01:30 [CustomSDF] · passing · discussion · Concept · 70% — Its generated code wraps the distance function and branches on render path, so the same node can be extended to return a color path as well as distance — the basis for distance-driven fractal coloring.
+- 3:11:55→3:14:00 [CustomSDF] · explained · experiment · Gotcha · 80% — Feeding a custom field into both the shape and its own [SDFToColor] crashes because the node references its own ID before it's defined; duplicate the node (a separate ID) for the color path to break the self-reference.
+- 3:18:11→3:24:00 [SDFToColor] · explained · discussion · Example · 80% — Color a fractal by its *internal iteration count* rather than surface distance: copy the fractal's [CustomSDF], modify it to output an iteration-based gradient, and feed that to the color so different fractal layers read as different colors.
+- 3:02:00→3:11:00 [BlendPoints] · in-depth · discussion · Gotcha · 82% — Its blend-with-range mode crossfades whole point paths (great for camera animations), but blending orientations runs slerp, which can suddenly flip an axis at the quaternion hemisphere boundary — and you can't fix it per-point in a compute shader since neighbors aren't accessible.
+- 3:04:00→3:05:30 [ReorientLinePoints] · passing · discussion · Concept · 70% — Reorients points to face the next one along a chain, the building block for turning a line of points into an oriented camera/spline path before blending.
+- 3:41:00→3:46:00 [DampVec3] · explained · experiment · Example · 78% — Bind several [LinePoints] camera paths to number-pad keys and damp the switch, so hitting a key smoothly eases the camera between dynamic procedural paths during a live set.
+- 3:42:00→3:45:50 [PointsToCPU] · explained · discussion · Performance · 82% — Reading a whole mesh's points back to the CPU just to follow one index is wasteful; put a [FilterPoints] (length 1, wrapping start index) before it so only the single needed point crosses to the CPU.

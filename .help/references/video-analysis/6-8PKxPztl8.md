@@ -2,37 +2,35 @@
 video: 6-8PKxPztl8
 type: tutorial
 date: 2025-10-13
-title: Using the new Shader Graph (Deep Dive) — SDFs, ray marching, and field-driven particles
-duration: 20:13
+title: Using the new Shader Graph (Deep Dive)
+duration: 0:20:13
+focusesOn: [ui:ShaderGraph], [RaymarchField]
 ---
 
-A scripted single-narrator walkthrough of TiXL's new shader-graph (SDF / field) system: how pink field operators replace stacks of fixed shaders, the four operator categories (generators, space, adjust, combine), and how ray marching renders volumes without polygons. The second half shows fields driving particle forces and point selection, plus the live-coding CustomSDF playground for fractals.
+A guided tour of TiXL's new SDF/field shader-graph system: the four operator categories (generators, space, adjust, combine), how ray-marching renders fields, performance and aliasing trade-offs, and using fields to drive particle forces and point selection.
 
 ## Mentions
-- 0:18→1:21 [ui:ShaderGraph] · explained · scripted · 95% — why the shader graph replaces one-shader-per-operator with on-the-fly compiled field functions, and the duplication it removes
-- 1:21→1:42 [ui:ShaderGraph][ui:Field][SphereSDF] · explained · scripted · 80% — collapsing three nodes (volume force, point selection, mesh sphere) into a single sphere field
-- 1:42→2:30 [RaymarchField][ui:Field][SetFog][SetMaterial] · explained · scripted · 88% — first look at ray marching a volume, and using [SetFog]/[SetMaterial] to control its look (no UVs, partial PBR)
-- 2:30→2:55 [ui:ShaderGraph] · passing · scripted · 70% — how the new field ops are aligned with classic mesh-rendering ops rather than replacing them
-- 2:55→3:14 [AddNoise][RaymarchField] · explained · scripted · 75% — cranking the noise offset to spawn isolated SDF blobs impossible with mesh displacement
-- 3:14→3:44 [PushPullSDF][ui:Field] · explained · scripted · 80% — aligning the three field effects and inserting a push-pull field to offset the boundary layer; material opacity for particle visibility
-- 3:44→4:18 [RepeatPolar] · explained · scripted · 82% — adding a polar repeat and why space repetition is essentially free with ray marching
-- 4:25→4:45 [ui:SymbolLibrary][ui:ShaderGraph] · passing · scripted · 80% — finding all the pink shader-graph ops and the four operator categories overview
-- 4:45→5:17 [ui:Field] · explained · scripted · 78% — the four field categories: generators, space, adjust, and combine operators
-- 5:17→6:03 [SphereSDF][BoxSDF][TorusSDF][ui:Field] · explained · scripted · 80% — SDF generators as fast math functions returning signed distance; shader-variation params that force recompile and the project-settings optimization toggle
-- 6:03→6:13 [ui:ProjectSettings] · passing · scripted · 70% — disabling shader optimization in project settings to speed up recompiles
-- 6:13→7:13 [CustomSDF][ui:Field] · explained · scripted · 72% — why generators return four values (object-space coords for texturing plus optional RGB to colorize meshes), and the unified field/SDF concept
-- 7:13→9:09 [RepeatPolar][ui:Field] · in-depth · scripted · 78% — the mental model of space manipulation: fields shift space first, the "rooms/teleport" analogy, and why objects crossing boundaries cause artifacts
-- 9:09→9:53 [RepeatPolar] · explained · scripted · 80% — the polar-repeat mirror option to fix artifacts, and nesting repeats to build complex geometry for free
-- 9:53→10:43 [BendField][TwistField][ui:Field] · explained · scripted · 75% — bend/twist warp space (vs folding) and why they break ray marching; Lipschitz continuity and even contour spacing
-- 10:43→11:08 [VisualizeFieldDistance] · explained · scripted · 85% — using the field-distance visualizer to inspect contour lines and spot distortion artifacts
-- 11:08→11:26 [RaymarchField] · explained · scripted · 78% — reducing the step-size factor to tame noise/twist artifacts and its performance cost
-- 11:26→12:00 [PushPullSDF][AddNoise] · explained · scripted · 82% — adjust operators: push-pull shrinks/grows an SDF, add-noise adds animated 3D noise to the distance
-- 12:00→12:37 [CombineSDF] · in-depth · scripted · 85% — combine operators: ctrl+mousewheel through union/intersect/blend methods and the K smoothness parameter
-- 12:37→12:54 [StairCombineSDF] · explained · scripted · 85% — the stair-combine grooves/stairs parameter for retro-architecture structures
-- 12:54→14:45 [RaymarchField] · in-depth · scripted · 88% — the ray-marching algorithm itself (~200M calls/frame), min-distance and max-step-count parameters, and psychedelic under-stepping
-- 14:45→15:09 [RaymarchField] · explained · scripted · 75% — computing surface normals via the normal-sampling parameter for sharp vs organic shading
-- 15:09→16:22 [CustomSDF][FractalSDF] · in-depth · scripted · 88% — the CustomSDF live-coding playground: porting GLSL fractals to HLSL, A/B/C/D variables, presets, and preset blending
-- 16:22→17:43 [FieldVolumeForce][ParticleSystem][TorusSDF][TransformField][PerlinNoise3] · in-depth · scripted · 82% — driving particles with a field volume force from a torus field, animating it via transform-field + Perlin noise, combining with a directional force
-- 17:43→19:02 [SelectPointsWithSDF][SphereSDF][AddNoise] · in-depth · scripted · 80% — selecting points by SDF into fx1/fx2 attributes to mask a noise displacement on instanced cubes; mapping/repeat options
-- 19:02→19:21 [MoveToSDF][TorusSDF] · explained · scripted · 82% — moving points onto an SDF surface (e.g. a torus)
-- 19:21→20:13 [ui:ShaderGraph] · passing · scripted · 65% — roadmap: extending the SDF system into a full node-based shader/material graph
+- 0:08→0:45 [ui:ShaderGraph] · explained · scripted · Concept · 90% — Combines small per-operator shader building blocks into one shader function compiled on the fly, replacing the old fixed one-shader-per-operator pipeline.
+- 1:42→2:30 [RaymarchField] · explained · scripted · Concept · 88% — Renders a volume by stepping a distance function instead of polygons, so there are no UV coordinates and texturing/PBR material support is limited.
+- 2:14→2:20 [SetFog] [SetMaterial] · passing · scripted · Example · 80% — Both still drive the look of a ray-marched field exactly as they do for mesh rendering, keeping the two pipelines aligned.
+- 2:58→3:14 [AddNoise] · explained · scripted · Example · 78% — Cranking the noise offset on a field breaks a surface into isolated floating blobs — a shape impossible with traditional mesh displacement.
+- 3:36→3:48 [PushPullSDF] · explained · scripted · Example · 82% — Inserting it offsets a field's boundary layer, growing or shrinking the surface to reveal particles underneath.
+- 3:48→4:08 [RepeatPolar] · explained · scripted · Gotcha · 82% — Replicates space around the local Y axis on the Z axis, so an object centred at the origin vanishes — offset it along Z to bring it back into the repeated cell. In ray-marching the repetition is free regardless of count.
+- 4:39→5:09 [ui:Field] · explained · scripted · Concept · 85% — The four shader-graph categories: generators emit a distance or color per position, space ops fold/replicate space, adjust ops modify the returned value, and combine ops merge or blend fields.
+- 5:39→6:00 [ui:ShaderGraph] · explained · scripted · Performance · 78% — Some generator knobs are "shader variation" parameters: changing them forces a graph recompile, so they can't be animated or driven by another operator.
+- 5:55→6:03 [ui:ProjectSettings] · passing · scripted · Tip · 72% — Disabling shader optimization here makes recompiles after parameter changes noticeably faster while authoring.
+- 6:35→7:05 [ui:Field] · explained · scripted · Concept · 80% — Generators return four values, not one: a signed distance plus the object-space coordinates needed for texturing, and fields can additionally return an RGB color for procedurally coloring meshes.
+- 9:09→9:53 [RepeatPolar] · explained · scripted · Gotcha · 80% — Objects straddling a fold boundary tear; enabling the mirror option hides the seam, and nesting several repeats builds complex geometry at no extra render cost.
+- 10:00→11:08 [TwistField] [BendField] · explained · scripted · Gotcha · 80% — Unlike clean space-folding, twisting and bending warp the distance field so ray-marching mis-estimates step lengths and produces artifacts as contour lines bunch up.
+- 10:43→11:08 [VisualizeFieldDistance] · explained · scripted · Tip · 82% — Draws a field's contour lines so you can see where the distance estimate degrades; evenly spaced lines mean a well-behaved field, squished ones predict ray-march artifacts.
+- 11:08→11:57 [AddNoise] · explained · scripted · Gotcha · 80% — Adding 3D noise to a distance looks great animated, but large offsets break the field's distance estimate and force a smaller ray-march step to render cleanly.
+- 11:57→12:10 [RaymarchField] · explained · scripted · Performance · 82% — Lowering the step-size factor recovers detail in a distorted field, at the cost of more steps and slower rendering.
+- 12:10→12:50 [CombineSDF] · in-depth · scripted · Parameters · 85% — Ctrl+mouse-wheel cycles the union/intersect/blend modes live; the K parameter sets blend smoothness, e.g. intersecting a fractal with a box to expose its interior.
+- 12:37→12:50 [StairCombineSDF] · explained · scripted · Parameters · 78% — A stepped variant of the smooth combine whose extra parameter sets the number of grooves/stairs in the blend seam.
+- 12:50→15:15 [RaymarchField] · in-depth · scripted · Performance · 85% — The algorithm marches each view ray forward by the field's safe distance until within the min-distance threshold or the max step count; smaller min-distance sharpens edges but needs more steps, and the normal-sampling distance trades crisp versus organic shading.
+- 15:09→16:22 [CustomSDF] · explained · scripted · Tip · 80% — A live shader-code playground for distance functions; GLSL fractals port to HLSL easily, and swapping magic numbers for the A/B/C/D offset variables makes them animatable, preset-able, and blendable.
+- 16:30→17:43 [FieldVolumeForce] · in-depth · scripted · Example · 85% — Feed it a field (e.g. a torus) to attract or repel particles toward that surface; transform the field via [TransformField] driven by [PerlinNoise3] for turbulence, and combine with a directional force to trap particles inside an inverted volume.
+- 16:38→16:46 [LinePoints] [ParticleSystem] · passing · scripted · Example · 72% — Emitting line points into a particle system and drawing them as points is the quick starting setup before adding a field force.
+- 17:16→17:43 [TransformField] · explained · scripted · Example · 80% — Wrapping a field in it lets you rotate/offset the whole space; wiring its rotation to noise animates the force region without per-step cost.
+- 17:43→19:02 [SelectPointsWithSDF] · in-depth · scripted · Example · 84% — Uses an SDF to write each point's fx1/fx2 attribute, which you then feed as the strength factor of another effect (e.g. an [AddNoise] displacement) to mask it by region; the mapping parameter can repeat or animate the selection.
+- 19:02→19:12 [MoveToSDF] · explained · scripted · Example · 80% — Snaps a point cloud onto a target SDF surface, e.g. pulling a grid of points onto a torus.

@@ -1,88 +1,70 @@
 ---
 video: GF0wWpNWkVs
 type: meetup
-date: 2026-02-09
-title: Part 2 — Building a ProjectLight post-effect operator (projector/shadow ray-marching, camera reference, PickObject, custom shader extraction)
+date: 2026-02-24
+title: TiXL Meetup 2026-02-09 / Part 2 (Building a complex shader op)
 duration: 3:14:54
 ---
 
-In Part 2 of a TiXL community meet-up, the host wraps a complex projected-light / volumetric ray-marching effect into a reusable ProjectLight post-effect operator, wiring up scene/image inputs, a cached camera reference, and a new PickObject operator to switch between projector camera types. He then extracts the inlined CustomPixelShader into a proper shader file, sets up constant-buffer parameters (intensities, colors, shadow bias/scale, ray decay, step count, time), and groups them under Light / Surface / Shadow headings. The session closes with debugging a one-frame camera-update lag, building an aspect-ratio-driven shadow resolution, adding a Bloom-lit example scene, and generating operator thumbnails.
+A long live coding session that wraps a prototype "projected volumetric light" graph into the new [ProjectLight] post-effect operator: wiring camera references, a switchable projector, a shadow render pass, packing parameters into a constant buffer, moving inline shader code into an `.hlsl` asset file, and finishing with grouping, a sample scene, and thumbnails.
 
 ## Mentions
-- 0:34 [CustomPixelShader] · passing — the original inlined-shader "guy" being converted into a reusable post-effect operator
-- 1:23 [RenderPostEffects] · passing — debating whether the new op should be classified as a post-effect under the Lib/render/post-effects namespace
-- 9:23 [GetFirstValidTexture] · explained — "first valid texture" fallback so the scene image is used when present, otherwise a blob/default
-- 10:40 [CameraReference] · explained — adds a required camera reference OBJ input ("view cam reference") feeding the effect
-- 11:49 [GetMainCamera] · passing — the default "main camera" source being pinned so it doesn't keep switching
-- 12:42 [ReuseCamera] · explained — reusing the outer/main camera inside the sub-graph; "this is the view, this was the main, here we use reuse camera"
-- 13:29 [SetCamera] · explained — discovers the camera-definition node is a Set, needed so the camera definition actually updates downstream
-- 16:30 [Time] · explained — discussing per-frame caching so both branches update once; touches local reference time and motion-blur concerns
-- 18:49 [HoldFloat] · passing — sketching a one-frame hold/delay on the camera value as a possible workaround
-- 21:18 [OrbitCamera] · explained — switches the main camera to an orbit camera to rotate the projector view
-- 22:48 [OffsetValue] · passing — mentions adding an offset/animation control to the camera motion
-- 23:15 [LoadImage] · explained — plugging the existing image (vs. an OBJ) into the projector input; later loads a frog image
-- 25:03 [Perspective] · explained — current projector uses a perspective projection; later weighed against orthographic
-- 26:24 [PickObject] · in-depth — creates a new "pick" operator via Duplicate-as-new-type to switch between connected objects (camera/projector types); long discussion of the generic-object cast hack, renaming, and unique-id change in code
-- 30:29 [Time] · in-depth — deep dive into Time's modes: local idle-motion time, local time, set-time remapping, playback time, and app-start time, and when each is useful
-- 31:41 [SetTime] · explained — remapping local time via SetTime to drive the graph
-- 31:55 [FloatToString] · passing — float-to-string text used to visualize/evaluate the local time value
-- 32:26 [Modulo] · passing — modulo/loop on time so the value keeps running and wraps
-- 33:34 [TimeConstBuffer] · in-depth — critiques the legacy time constant-buffer as an early hack that may break motion-blur multi-pass rendering; argues for using the elaborate Time path instead
-- 34:28 [RenderWithMotionBlur] · explained — example of rendering a texture then applying motion blur, motivating frame-back-time correctness
-- 36:32 [PickTexture] · passing — recalls intending PickTexture as the duplicate template (used PickObject instead)
-- 37:18 [PickObject] · explained — wiring the finished PickObject: connections, index, multi-input; just assigns the selected object
-- 38:32 [IntValue] · explained — int value acting as the camera/projector type selector feeding PickObject's index
-- 41:08 [Remap] · passing — suggests a Remap for scaling rather than hard-coding scale
-- 41:56 [PositionAndTarget] · explained — adds position and target inputs (vs. direction) for the projector
-- 42:40 [QualityCenter] · passing — half-heard mention while adding a quality/step-count parameter
-- 43:00 [StepCount] · explained — adds an integer step-count parameter for the ray march
-- 45:30 [SetEnvironment] · explained — debates the SetEnvironment node; decides to use it with a black environment for the projector pass
-- 49:36 [GetTextureSize] · in-depth — "texture properties / get texture size" to derive aspect ratio for the orthographic projection
-- 50:51 [GetRequestedResolution] · explained — alternative "requested resolution" source; later tied to SetRequestResolution discussion
-- 51:14 [Divide] · explained — divides texture width/height (a "vec2" split) to compute the aspect ratio
-- 52:43 [OrthographicProjection] · explained — feeds aspect ratio into the orthographic projection mode
-- 52:57 [CheckerPattern] · passing — "real chip pattern"/checker texture used to verify resolution adjustment
-- 56:33 [Multiply] · explained — plan for two artistic colors: one multiplied onto the projected image, one for the scene color
-- 57:55 [ProjectLight] · in-depth — opens the ProjectLight operator code; defines the private ProjectorTypes enum (orthographic, spotlight, directional)
-- 1:05:08 [CustomPixelShader] · in-depth — long examination of the inlined CustomPixelShader: float buffer for colors, padding, vector2/vector4 layout, output params; argues it should become a real shader file
-- 1:09:08 [Quaternion] · explained — tangent on how Quaternion vs Color differ only by UI; quaternions shown as a color picker
-- 1:13:58 [GodRays] · explained — looks for a good example op (god-rays / RDS) to copy parameter wiring from
-- 1:16:09 [LoadShader] · in-depth — creates a new default shader file, saves it under Lib assets/shaders/post-fx as ProjectLight.hlsl (PascalCase convention)
-- 1:18:21 [RenderTarget] · explained — routes the shader output into render targets, rewiring the whole effect
-- 1:19:59 [FloatsConstBuffer] · in-depth — reuses an existing floats constant buffer for the four packed parameters
-- 1:20:45 [SamplerState] · explained — two samplers and two transform-cameras feeding the shader; later notices sampler state wasn't connected and plugs it in
-- 1:20:53 [TransformCamera] · explained — view camera and projector camera transforms fed as constant buffers
-- 1:22:13 [Vector4] · explained — vector4 params for ambient/scene color and light color
-- 1:23:35 [FloatsToBuffer] · in-depth — assembling surface intensity, ray intensity, shadow bias, shadow scale, ray decay into the float buffer with correct slot order and renaming a→surface intensity, etc.
-- 1:24:12 [RaysDecay] · explained — adds a "rays decay" float parameter controlling ray falloff
-- 1:32:00 [Time] · in-depth — strongly argues for using Time (not CountInt) so frames are reproducible for video render and unit tests
-- 1:33:43 [CountInt] · explained — proposed but rejected as time source because it breaks render reproducibility
-- 1:35:08 [StepCount] · in-depth — feeds step count into shader; discusses shader-compiler loop-unrolling, static vs dynamic, and clamping step count to avoid GPU freeze
-- 1:39:33 [ValuesToBuffer] · explained — float padding to align vector4s on constant-buffer rows
-- 1:40:40 [AmbientColor] · in-depth — debugging why the ambient color isn't multiplied correctly; finds it's an in-out and multiplies it with the color parameter
-- 1:44:08 [SetPixelShaderStage] · in-depth — sets the pixel-shader stage and its three constant buffers (params, resolution, view+projector cameras); checks buffer order
-- 1:50:11 [OrthographicCamera] · explained — switches projection to orthographic and adjusts scale
-- 1:51:24 [CheckerPattern] · passing — toggles back to the checker pattern picture vs. frog image to test
-- 1:54:46 [WaveMarching] · in-depth — compares the old test vs new ray-marching path; notes it's slower because it may ray-march twice (shadow + main)
-- 2:05:42 [ShadowResolution] · explained — adds an int "shadow resolution" parameter for the shadow pass
-- 2:07:53 [FloatToInt] · explained — converts shadow resolution by aspect ratio then back to int to build a resolution
-- 2:08:29 [IntToInt2] · explained — combines x and y ints into an int2 resolution for the shadow pass
-- 2:11:30 [Bloom] · passing — "set fork"/glow shown working on the post-effect; later replaced with a proper Bloom
-- 2:16:15 [SetRequestResolution] · in-depth — explains SetRequestResolution writes requested resolution into the eval context; a 0,0 texture then uses it, and the factor enables oversampling
-- 2:17:16 [GetRequestedResolution] · explained — paired with SetRequestResolution; reads the requested resolution from context
-- 2:27:16 [OrbitCamera] · explained — inspects OrbitCamera to see if it avoids the double camera-update problem (it doesn't)
-- 2:30:00 [SmoothStep] · explained — adds a soft-edge / fade-out at the shadow-map sampling boundary ("soft edge")
-- 2:33:22 [Button] · passing — "make a button" / PV trigger mentioned while experimenting
-- 2:42:54 [ProjectorType] · explained — groups projector-type and camera reference params; sets up parameter groups
-- 2:44:32 [ShowParametersWithGroup] · in-depth — organizes inputs into Light / Light Appearance / Surface / Shadow groups via "show parameter with group"
-- 2:50:14 [WaveMarching] · explained — removes the slow ray-marching test path from the example, noting it's very slow
-- 2:51:37 [Text] · explained — building a promo/example: Text → RenderTarget for the projected image
-- 2:51:48 [RenderTarget] · explained — render target in the example promo chain
-- 2:51:51 [SubdivisionStretch] · passing — "subdivision stretch or so" applied in the example scene
-- 2:56:31 [Bloom] · in-depth — adds Bloom to the example; "with this new nice kernel we can physically control the falloff... looks much better with the bloom"
-- 2:57:59 [Include] · explained — needs an include line in the shader; pastes the GPU-hash include and confirms it compiles
-- 3:00:18 [ToneMapping] · explained — building the sample scene without tone mapping for now, wiring the example inputs
-- 3:00:34 [Noise] · explained — notes the noise texture isn't strictly needed in the example but doesn't hurt
-- 3:02:22 [Combine] · explained — wraps the sample-scene content into a Combine super-definition under the Examples namespace
-- 3:04:27 [SetThumbnail] · in-depth — right-click "set thumbnail" on the symbol definition and example to generate operator thumbnails
-- 3:08:33 [MotionBlur] · passing — checks MotionBlur examples while debugging why thumbnails/descriptions aren't showing
+- 0:27→1:35 [ui:Symbol] · explained · experiment · Concept · 70% — How to turn a finished prototype graph into a reusable operator: select the whole patch, "combine" it into a new symbol, and place it in a sensible namespace (here a render/post-fx folder).
+- 9:58→10:24 [FirstValidTexture] · explained · discussion · Tip · 80% — Wire it ahead of a fallback so an optional texture input degrades gracefully — it forwards the first connected/valid texture and lets a later operator substitute a default when nothing is plugged in.
+- 10:24→10:37 [Blob] · passing · experiment · Example · 55% — Reached for as a cheap stand-in scene to feed the projector when no real geometry is connected.
+- 10:37→12:24 [ReuseCamera] · in-depth · discussion · Concept · 78% — How to share one camera definition between two places in a graph: capture the main camera once and reference it downstream so the projector and the view stay locked to the same viewpoint.
+- 11:08→12:24 [ui:EvaluationContext] · explained · discussion · Concept · 72% — A camera reference passed by id through the evaluation context lets distant operators read the same camera without a direct wire — the basis for keeping a projector and the main view in sync.
+- 16:23→20:18 [ui:EvaluationContext] · in-depth · discussion · Gotcha · 80% — When two consumers both pull the same sub-scene, it can be evaluated twice per frame; operators update in the order their inputs are declared, so declaration order decides whether one path sees last frame's result and lags by a frame.
+- 17:29→18:13 [ui:LocalTime] · explained · discussion · Gotcha · 65% — Using local reference time to dedupe a double evaluation is tricky because motion-blur passes also key off time — a workaround here, not a clean fix.
+- 19:15→20:18 [ui:Graph] · explained · discussion · Concept · 75% — In a code operator you can override how inputs update; otherwise inputs evaluate strictly top-to-bottom in declaration order, which is what introduces a one-frame delay between dependent branches.
+- 21:11→22:50 [OrbitCamera] · explained · experiment · Example · 78% — Drop it in to drive the projector or view interactively — orbit the captured camera around the scene to preview the effect from changing angles.
+- 30:29→33:07 [Time] · in-depth · scripted · Parameters · 88% — Walks the time-source modes: idle/FX time keeps animating while paused, local time follows a [SetTime] remap, playback time ignores remaps, and "last started" time suits damping — pick per situation because each behaves differently when paused or looped.
+- 31:15→32:01 [SetTime] · explained · scripted · Concept · 80% — How remapping local time upstream changes what an operator reads as "now": feed it a looped/offset value and downstream time-driven nodes follow that remapped clock.
+- 26:19→29:53 [PickObject] · in-depth · experiment · Concept · 82% — How a generic object-switch is built by duplicating a pick template as a new type: it casts the connected object to an expected interface and the consumer complains if the cast fails — flexible but unchecked, so mind the type you feed it.
+- 28:53→29:30 [ui:OperatorSettings] · explained · experiment · Gotcha · 65% — Changing a duplicated operator's type requires assigning a new unique id, or the editor treats it as the original symbol.
+- 33:26→35:36 [ui:EvaluationContext] · in-depth · discussion · Gotcha · 78% — Why a per-shader time constant buffer breaks multi-pass effects: a node like [RenderWithMotionBlur] renders several sub-frames that each need their own time, so reading time from the shared evaluation context rather than a baked constant is the robust choice.
+- 34:26→34:53 [RenderWithMotionBlur] · explained · discussion · Concept · 72% — It re-renders its subtree across several time offsets to accumulate blur, so anything it drives must source time per-pass rather than from a single frozen value.
+- 38:22→41:01 [Switch] · explained · experiment · Example · 70% — Drive its index with an int parameter to flip between connected camera/projector definitions; aligning the inputs in declaration order keeps the selected branch predictable.
+- 40:22→41:01 [ui:Graph] · explained · discussion · Tip · 80% — The magnetic graph lets you grab and reorder aligned nodes without a hotkey — snap connections by lining nodes up, a workflow worth a dedicated tutorial.
+- 41:39→42:53 [Remap] · explained · experiment · Tip · 75% — Put it between a raw UI value and a target so one slider can feed two places with a meaningful range — e.g. mapping a 0..1 scale into the units the projector actually wants.
+- 41:59→47:00 [ProjectLight] · in-depth · experiment · Parameters · 82% — Building out its inputs: position and target define the light cone, roll rotates it (in degrees), a projector-type enum switches orthographic vs. perspective, and step count controls ray-march sample quality.
+- 42:48→45:09 [ui:PerformanceMonitor] · passing · experiment · Performance · 55% — Used to confirm the recording overhead stays low (single-digit CPU) while iterating on the heavy effect.
+- 44:42→46:54 [SetEnvironment] · explained · experiment · Tip · 70% — Force a black environment before the projection pass so the projected light reads against an unlit background instead of the scene's ambient lighting.
+- 49:09→52:59 [ui:EvaluationContext] · in-depth · experiment · Concept · 75% — How requested resolution flows: a node writes the target size into the evaluation context, and any image op asking for 0×0 resolution falls back to that requested value — the hook for overriding output size downstream.
+- 49:52→53:21 [TransformImage] · passing · experiment · Parameters · 50% — Mentioned while hunting for the texture's aspect ratio so the orthographic projection matches the light image's proportions.
+- 51:54→53:07 [Vector2Components] · explained · experiment · Example · 68% — Split a texture-size vector and divide width by height to derive an aspect ratio, then feed that into the projection so a non-square light image isn't stretched.
+- 52:04→52:19 [RequestedResolution] · explained · experiment · Tip · 72% — How to read the resolution the context is asking for, to size a derived render target instead of hard-coding a number.
+- 56:37→57:01 [ui:ParameterWindow] · explained · discussion · Tip · 60% — Expose two artist-facing color knobs — one multiplying the projected image, one tinting the original scene — so the look can be balanced without touching the graph.
+- 1:06:23→1:10:09 [CustomPixelShader] · in-depth · discussion · Concept · 80% — When inline custom-shader code outgrows its usefulness: it lacks helpers like hash functions and external file references don't survive copy-paste, so promote the body to a real `.hlsl` asset for maintainability and syntax highlighting.
+- 1:13:15→1:13:49 [ui:Graph] · explained · scripted · Tip · 70% — A non-obvious copy shortcut in the graph: single-click to grab a node's value/expression, then Ctrl+N to spin it into a new node — handy when refactoring inline code.
+- 1:16:36→1:20:00 [RenderTarget] · in-depth · experiment · Example · 78% — How the post-effect routes through a render target: the projection pass writes into it and the result feeds the final composite, replacing the prototype's inline render-to-texture wiring.
+- 1:19:32→1:20:16 [FloatsToList] · explained · experiment · Example · 70% — Collect four scalar parameters into a list to hand them to a shader constant buffer in one connection instead of four separate floats.
+- 1:20:00→1:21:18 [ui:ShaderGraph] · explained · experiment · Concept · 60% — Mapping shader constant buffers to inputs: separate buffers carry parameters, resolution, and the two camera matrices — knowing which slot is which is what makes the bound values land correctly.
+- 1:22:13→1:25:50 [ProjectLight] · in-depth · experiment · Parameters · 80% — Naming and ordering its shader knobs: surface intensity, ray intensity, shadow bias, shadow scale/falloff and ray decay each map to a slot in the packed buffer — keep the parameter order matching the buffer layout.
+- 1:25:50→1:30:00 [ui:ParameterWindow] · explained · experiment · Gotcha · 65% — Renaming generic a/b/c/d shader params to meaningful names: align each to its buffer slot and delete a parameter to confirm via the warning which downstream use it fed.
+- 1:32:00→1:35:04 [CountInt] · in-depth · discussion · Gotcha · 85% — Why not to drive an animated shader from a frame counter: counting frames makes renders non-reproducible, so multi-pass video exports and unit-test comparisons break — use [Time] so frames are deterministic.
+- 1:32:53→1:35:04 [Time] · explained · discussion · Tip · 80% — Prefer time over a frame counter for animation so pausing yields an analyzable still frame and re-renders match exactly — important for testability.
+- 1:35:35→1:38:55 [ui:ShaderNode] · in-depth · discussion · Performance · 78% — Passing a loop count as a compile-time constant lets the shader compiler unroll the loop: faster execution but longer compile, and clamp the value so a runaway sample count can't freeze the GPU.
+- 1:38:35→1:39:04 [IntsToBuffer] · explained · answer · Tip · 72% — When you need an exact integer in a shader (not inferred from a float), pack it through an int buffer so the value arrives precisely.
+- 1:37:05→1:38:00 [Clamp] · explained · experiment · Gotcha · 70% — Clamp a user-exposed sample/step count to a safe ceiling so an accidental huge value doesn't hang the graphics card.
+- 1:39:25→1:41:30 [ui:ShaderNode] · explained · experiment · Gotcha · 65% — Constant-buffer packing detail: vector4 fields must align to 16-byte boundaries, so insert float padding to keep colors from straddling register lines.
+- 1:40:33→1:41:30 [ui:ShaderNode] · passing · experiment · Gotcha · 55% — An `inout`/output variable reused as input should be lowercased to a local to avoid confusing it with a shader output binding.
+- 1:53:35→1:54:34 [TemporalAccumulation] · explained · discussion · Concept · 70% — Floated as the cure for ray-march sampling noise: blue-noise sampling plus temporal anti-aliasing accumulates jittered samples across frames so the flicker resolves into smooth volumetric light.
+- 1:53:35→1:55:00 [ui:Field] · passing · discussion · Concept · 50% — Adding a noise texture into the volumetric sampling to fake smoke/dust inside the light cone.
+- 2:05:43→2:09:22 [Int2Components] · explained · experiment · Example · 72% — Build an int2 render-target size from a base resolution times an aspect ratio: float→multiply→int back, then compose x and y for a separate (lower-res) shadow pass.
+- 2:08:04→2:10:11 [ProjectLight] · in-depth · experiment · Parameters · 80% — A dedicated shadow-resolution input lets the shadow render pass run at lower resolution than the main image, trading shadow sharpness for speed on the expensive ray-march.
+- 2:09:22→2:09:50 [ScaleResolution] · passing · discussion · Comparison · 60% — Considered for sizing the shadow pass but skipped — too many edge cases; a plain manual int2 was preferred for predictability.
+- 2:16:21→2:17:42 [SetRequestedResolution] · in-depth · explained · discussion · Concept · 80% — It writes a resolution factor into the evaluation context so downstream image ops that ask for 0×0 inherit it — an easy way to oversample or render a subtree at lower res.
+- 2:11:08→2:13:05 [ui:PerformanceMonitor] · explained · experiment · Performance · 65% — Reading per-frame milliseconds to judge the cost of the ray-march shadow pass while dialing shadow resolution up and down.
+- 2:12:30→2:13:05 [SetFog] · passing · experiment · Example · 55% — Stacked after the projection to confirm the post-effect still composites correctly with other scene effects.
+- 2:14:24→2:18:19 [ui:EvaluationContext] · in-depth · discussion · Gotcha · 75% — The recurring camera-sync bug: when the projector camera and the view camera update at different times, the shadow map ends up rendered with last frame's camera and misaligns with the texture — the core hazard of cross-referencing cameras.
+- 2:27:18→2:28:01 [OrbitCamera] · explained · experiment · Comparison · 60% — Checked as a reference for how a camera op handles being read from two places — it updates the same way, confirming the frame-delay is structural rather than op-specific.
+- 2:30:00→2:32:46 [SphereSDF] · passing · experiment · Gotcha · 55% — A hard projected-shadow edge looks wrong; the fix is to soften the shadow-map sampling so edges fade rather than cut sharply.
+- 2:41:33→2:43:05 [CustomPixelShader] · explained · discussion · Gotcha · 72% — Origin/attribution caveat for borrowed shader snippets: a GPU hash function lifted from public shader-hashing lore (IQ-style) carries no clear license, worth crediting in a comment.
+- 2:43:05→2:47:03 [ui:ParameterWindow] · in-depth · experiment · Tip · 80% — Organizing an operator's UI: use "show with group" to bucket parameters into Light / Light appearance / Surface / Shadow sections and order them position-first so the panel reads logically.
+- 2:51:35→2:52:11 [SubdivisionStretch] · passing · experiment · Example · 55% — Used to build the documentation/sample scene's text-on-render-target promo graphic.
+- 2:56:26→2:59:25 [Bloom] · explained · discussion · Tip · 75% — Adding it after the projected light dramatically improves the look — the glowing rays read far better with a bloom pass than the raw shader output.
+- 3:02:20→3:08:00 [ui:Symbol] · in-depth · scripted · Concept · 80% — How example/sample scenes attach to an operator: a symbol named "<OpName>Example(s)" in an Examples namespace is matched by name only (namespace ignored) and surfaces as the operator's how-to.
+- 3:04:30→3:08:00 [ui:SymbolLibrary] · explained · scripted · Tip · 72% — Right-click "set thumbnail" on a symbol to capture the current output as its library preview — works for both the operator and its example scene.
+- 3:09:42→3:10:05 [ui:OperatorSettings] · explained · experiment · Gotcha · 70% — A thumbnail/tooltip won't appear for an operator that has no description text — fill in the description or the preview stays hidden.
+- 3:13:15→3:14:02 [ui:ParameterWindow] · passing · scripted · Parameters · 55% — Side note: a string input field's max buffer length was raised to 32K to allow longer text in parameters.

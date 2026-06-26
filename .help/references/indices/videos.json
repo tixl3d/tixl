@@ -1,68 +1,467 @@
 {
   "videos": [
     {
+      "id": "-cHz2vL5ETA",
+      "type": "tutorial",
+      "date": "2024-09-30",
+      "title": "Copy Cat Tutorials — Rebuilding Glowing Ribbons with 2D Effects",
+      "duration": "0:58:24",
+      "focusesOn": [],
+      "url": "https://www.youtube.com/watch?v=-cHz2vL5ETA"
+    },
+    {
+      "id": "2cdxnKMDKU4",
+      "type": "tutorial",
+      "date": "2022-07-14",
+      "title": "Tooll 3 Tip#011 - Combining Point Buffers",
+      "duration": "0:02:31",
+      "focusesOn": [],
+      "url": "https://www.youtube.com/watch?v=2cdxnKMDKU4"
+    },
+    {
+      "id": "2Tu0p9Eh6Bw",
+      "type": "meetup",
+      "date": "2025-09-09",
+      "title": "TiXL Meetup 2025-09-08 — Roadmap features, operator style guide, creating a new op",
+      "duration": "4:27:58",
+      "focusesOn": [],
+      "url": "https://www.youtube.com/watch?v=2Tu0p9Eh6Bw"
+    },
+    {
       "id": "5KX92VWEAG8",
       "type": "meetup",
       "date": "2025-11-10",
-      "title": "Beginners UI tour, real-time performance, and building a \"donut\" with SDFs, materials, lights, fog and sprinkles",
-      "duration": "2:28:27",
+      "title": "TiXL for Beginners Meetup #1 — Real-Time Fundamentals & Building a Blender Donut",
+      "duration": "2:28:28",
+      "focusesOn": [],
       "url": "https://www.youtube.com/watch?v=5KX92VWEAG8"
     },
     {
       "id": "6-8PKxPztl8",
       "type": "tutorial",
       "date": "2025-10-13",
-      "title": "Using the new Shader Graph (Deep Dive) — SDFs, ray marching, and field-driven particles",
-      "duration": "20:13",
+      "title": "Using the new Shader Graph (Deep Dive)",
+      "duration": "0:20:13",
+      "focusesOn": [
+        "ui:ShaderGraph",
+        "op:Lib.field.render.RaymarchField"
+      ],
       "url": "https://www.youtube.com/watch?v=6-8PKxPztl8"
+    },
+    {
+      "id": "854OSxXzMDM",
+      "type": "tutorial",
+      "date": "2022-07-12",
+      "title": "Tooll 3 Tip#009 - Animating String Parts",
+      "duration": "0:03:03",
+      "focusesOn": [
+        "op:Lib.string.logic.PickStringPart"
+      ],
+      "url": "https://www.youtube.com/watch?v=854OSxXzMDM"
+    },
+    {
+      "id": "9qHY6pMnEcA",
+      "type": "tutorial",
+      "date": "2025-08-25",
+      "title": "Using Shader Graph and Particles in the Making of \"Ashborn\"",
+      "duration": "0:32:10",
+      "focusesOn": [],
+      "url": "https://www.youtube.com/watch?v=9qHY6pMnEcA"
+    },
+    {
+      "id": "_P4-VKhJXhE",
+      "type": "tutorial",
+      "date": "2022-09-08",
+      "title": "Tooll 3 Tip#019 - Color Grading",
+      "duration": "0:11:54",
+      "focusesOn": [
+        "op:Lib.image.color.ColorGrade"
+      ],
+      "url": "https://www.youtube.com/watch?v=_P4-VKhJXhE"
+    },
+    {
+      "id": "_pEhs2jQ3Gg",
+      "type": "meetup",
+      "date": "2025-12-16",
+      "title": "TiXL for Beginners Meetup #2 — Evaluation Context, Resolution & Blending",
+      "duration": "3:29:09",
+      "focusesOn": [],
+      "url": "https://www.youtube.com/watch?v=_pEhs2jQ3Gg"
     },
     {
       "id": "a5_xCfC_3m4",
       "type": "meetup",
       "date": "2026-02-03",
-      "title": "Performance monitor & fill-rate testing, the new asset browser, MediaPipe hand-tracking experiments, and Skill Quest authoring",
-      "duration": "4:10:44",
+      "title": "TiXL Meetup 2026-01-26 / Assets, Mediapipe and SkillQuest",
+      "duration": "4:10:47",
+      "focusesOn": [],
       "url": "https://www.youtube.com/watch?v=a5_xCfC_3m4"
+    },
+    {
+      "id": "AMHE-paaFWE",
+      "type": "tutorial",
+      "date": "2022-07-20",
+      "title": "Tooll 3 Tip#016 - Adjusting Soundtrack and BPM-Rate",
+      "duration": "0:06:42",
+      "focusesOn": [
+        "ui:ProjectSettings"
+      ],
+      "url": "https://www.youtube.com/watch?v=AMHE-paaFWE"
     },
     {
       "id": "asiY0Jo1oJw",
       "type": "update",
       "date": "2024-03-17",
-      "title": "Tooll V3.9 — release overview: docs & help mode, faster export, glTF scenes, Ableton Link, colored points, bias-and-gain",
-      "duration": "15:05",
+      "title": "Tooll V3.9 / New Features",
+      "duration": "0:15:05",
+      "focusesOn": [],
       "url": "https://www.youtube.com/watch?v=asiY0Jo1oJw"
+    },
+    {
+      "id": "cfUWSPJDRi4",
+      "type": "meetup",
+      "date": "2025-11-04",
+      "title": "TiXL Meetup 2025-11-03 / Asset Lib and SDF fun",
+      "duration": "3:12:14",
+      "focusesOn": [],
+      "url": "https://www.youtube.com/watch?v=cfUWSPJDRi4"
+    },
+    {
+      "id": "cGyCEkCJQUk",
+      "type": "tutorial",
+      "date": "2022-09-09",
+      "title": "Tooll 3 Tip#020 - Time Clips",
+      "duration": "0:04:11",
+      "focusesOn": [
+        "op:Lib.flow.TimeClip",
+        "ui:TimeOverrides"
+      ],
+      "url": "https://www.youtube.com/watch?v=cGyCEkCJQUk"
+    },
+    {
+      "id": "COd7gkJB0KQ",
+      "type": "tutorial",
+      "date": "2022-09-10",
+      "title": "Tooll 3 Tip#021 - Hacking the render Time",
+      "duration": "0:04:14",
+      "focusesOn": [
+        "ui:TimeOverrides"
+      ],
+      "url": "https://www.youtube.com/watch?v=COd7gkJB0KQ"
+    },
+    {
+      "id": "dCX7CcL0ZJs",
+      "type": "meetup",
+      "date": "2026-04-21",
+      "title": "Meet-up — Demo Timing, Sine Waves from Line Points, the Custom Point Shader & Rebuilding a Helix",
+      "duration": "3:41:08",
+      "focusesOn": [],
+      "url": "https://www.youtube.com/watch?v=dCX7CcL0ZJs"
+    },
+    {
+      "id": "DJKb0wDr0Zs",
+      "type": "tutorial",
+      "date": "2022-07-11",
+      "title": "\"Tooll 3 Tip#008 - Procedural Camera Animations\"",
+      "duration": "0:03:59",
+      "focusesOn": [],
+      "url": "https://www.youtube.com/watch?v=DJKb0wDr0Zs"
+    },
+    {
+      "id": "DTIl2QmkumE",
+      "type": "tutorial",
+      "date": "2022-07-04",
+      "title": "Tooll 3 Tip#007 - Animating the Steps effect",
+      "duration": "0:03:23",
+      "focusesOn": [
+        "op:Lib.image.fx.stylize.Steps"
+      ],
+      "url": "https://www.youtube.com/watch?v=DTIl2QmkumE"
+    },
+    {
+      "id": "ElW_0uaeiNA",
+      "type": "tutorial",
+      "date": "2022-07-15",
+      "title": "Tooll 3 Tip#012 - Noisy Point Trails",
+      "duration": "0:02:19",
+      "focusesOn": [
+        "op:Lib.point.generate.PointTrail"
+      ],
+      "url": "https://www.youtube.com/watch?v=ElW_0uaeiNA"
     },
     {
       "id": "f9E7lwUXfBM",
       "type": "tutorial",
       "date": "2022-06-30",
-      "title": "Resolution Magic — how output size, image inputs, and the magic resolution parameter interact",
-      "duration": "6:37",
+      "title": "Tooll 3 Tip#003 - Resolution Magic",
+      "duration": "0:06:37",
+      "focusesOn": [
+        "ui:RenderSettings"
+      ],
       "url": "https://www.youtube.com/watch?v=f9E7lwUXfBM"
     },
     {
       "id": "fCz6SbxFPPA",
       "type": "tutorial",
       "date": "2025-05-06",
-      "title": "Get Positions in Screen Space — the GetScreenPos operator for screen-space labels",
-      "duration": "13:48",
+      "title": "TiXL Tip#23 - Get Positions in Screen Space",
+      "duration": "0:13:48",
+      "focusesOn": [
+        "op:Lib.render.analyze.GetScreenPos"
+      ],
       "url": "https://www.youtube.com/watch?v=fCz6SbxFPPA"
+    },
+    {
+      "id": "GF0wWpNWkVs",
+      "type": "meetup",
+      "date": "2026-02-24",
+      "title": "TiXL Meetup 2026-02-09 / Part 2 (Building a complex shader op)",
+      "duration": "3:14:54",
+      "focusesOn": [],
+      "url": "https://www.youtube.com/watch?v=GF0wWpNWkVs"
+    },
+    {
+      "id": "hh1tcg4A8bU",
+      "type": "tutorial",
+      "date": "2022-07-02",
+      "title": "Tooll 3 Tip#005 - Snapping Keyframes",
+      "duration": "0:01:56",
+      "focusesOn": [
+        "ui:Timeline",
+        "ui:DopeSheet"
+      ],
+      "url": "https://www.youtube.com/watch?v=hh1tcg4A8bU"
+    },
+    {
+      "id": "IJLvPtz0qTg",
+      "type": "tutorial",
+      "date": "2022-09-07",
+      "title": "Tooll 3 Tip#018 - Saving Screenshots",
+      "duration": "0:01:38",
+      "focusesOn": [
+        "ui:OutputWindow"
+      ],
+      "url": "https://www.youtube.com/watch?v=IJLvPtz0qTg"
+    },
+    {
+      "id": "J2Rqx3szSus",
+      "type": "tutorial",
+      "date": "2022-07-19",
+      "title": "Tooll 3 Tip#015 - Draw Quads with Variations",
+      "duration": "0:04:22",
+      "focusesOn": [],
+      "url": "https://www.youtube.com/watch?v=J2Rqx3szSus"
+    },
+    {
+      "id": "Jpvyg-LR3f0",
+      "type": "tutorial",
+      "date": "2022-06-29",
+      "title": "Tooll 3 Tip#002 - Raster Effects",
+      "duration": "0:05:58",
+      "focusesOn": [
+        "op:Lib.image.generate.pattern.Raster"
+      ],
+      "url": "https://www.youtube.com/watch?v=Jpvyg-LR3f0"
+    },
+    {
+      "id": "Kg5UcJJWt80",
+      "type": "meetup",
+      "date": "2026-06-15",
+      "title": "TiXL Meetup — Per-Parameter Snapshots, FFmpeg Video/Audio/Data Clips, and DMX Lighting",
+      "duration": "4:45:28",
+      "focusesOn": [],
+      "url": "https://www.youtube.com/watch?v=Kg5UcJJWt80"
+    },
+    {
+      "id": "LjmnVL7azYw",
+      "type": "tutorial",
+      "date": "2022-07-22",
+      "title": "Tooll 3 Tip#017 - Cloning vs. Instancing Meshes",
+      "duration": "0:04:31",
+      "focusesOn": [
+        "op:Lib.mesh.draw.DrawMeshAtPoints",
+        "op:Lib.mesh.generate.RepeatMeshAtPoints"
+      ],
+      "url": "https://www.youtube.com/watch?v=LjmnVL7azYw"
+    },
+    {
+      "id": "LLpl6QEL7bo",
+      "type": "meetup",
+      "date": "2025-08-26",
+      "title": "TiXL Meetup 2025-08-25 — Timeline, PBR-rendering, particles, fields and the future of outputs",
+      "duration": "5:15:59",
+      "focusesOn": [],
+      "url": "https://www.youtube.com/watch?v=LLpl6QEL7bo"
+    },
+    {
+      "id": "M67r-D4R5WM",
+      "type": "tutorial",
+      "date": "2022-07-17",
+      "title": "Tooll 3 Tip#013 - Drive Animations with Audio Reactions",
+      "duration": "0:04:31",
+      "focusesOn": [
+        "op:Lib.io.audio.AudioReaction"
+      ],
+      "url": "https://www.youtube.com/watch?v=M67r-D4R5WM"
+    },
+    {
+      "id": "M7eOmqiUOZM",
+      "type": "tutorial",
+      "date": "2022-09-11",
+      "title": "Tooll 3 Tip#22 - Lost in Feedback",
+      "duration": "0:16:59",
+      "focusesOn": [
+        "op:Lib.image.fx.feedback.AdvancedFeedback"
+      ],
+      "url": "https://www.youtube.com/watch?v=M7eOmqiUOZM"
+    },
+    {
+      "id": "MAyETISMFi0",
+      "type": "meetup",
+      "date": "2026-02-03",
+      "title": "\"TiXL Meetup 2026-01-26 / Part 2: SkillQuest\"",
+      "duration": "0:34:37",
+      "focusesOn": [],
+      "url": "https://www.youtube.com/watch?v=MAyETISMFi0"
+    },
+    {
+      "id": "Mqi2mEyd4jQ",
+      "type": "meetup",
+      "date": "2025-09-23",
+      "title": "TiXL Meetup 2025-09-22 / Particle Effects, Groups operators, TimeClips, Time Scaling, Audio Sync",
+      "duration": "4:49:00",
+      "focusesOn": [],
+      "url": "https://www.youtube.com/watch?v=Mqi2mEyd4jQ"
+    },
+    {
+      "id": "o-Ojg_LOi4k",
+      "type": "tutorial",
+      "date": "2022-07-18",
+      "title": "Tooll 3 Tip#014 - Complexity with the Invert Blend Mode",
+      "duration": "0:01:48",
+      "focusesOn": [],
+      "url": "https://www.youtube.com/watch?v=o-Ojg_LOi4k"
     },
     {
       "id": "PJ9QwFt1r5k",
       "type": "update",
       "date": "2025-09-14",
-      "title": "TiXL v4.0 — release overview: graph & timeline UI, SDF/field & color ops, particles, animation, I/O",
-      "duration": "16:43",
+      "title": "TiXL v4.0 — All New Features and Updates",
+      "duration": "16:46",
+      "focusesOn": [],
       "url": "https://www.youtube.com/watch?v=PJ9QwFt1r5k"
+    },
+    {
+      "id": "pvvPsp03Hik",
+      "type": "meetup",
+      "date": "2026-01-12",
+      "title": "TiXL Meetup 2026-01-12 / Fun with F1 & F2",
+      "duration": "4:38:27",
+      "focusesOn": [],
+      "url": "https://www.youtube.com/watch?v=pvvPsp03Hik"
+    },
+    {
+      "id": "PWCfyUnFGdg",
+      "type": "meetup",
+      "date": "2026-02-24",
+      "title": "TiXL Meetup 2026-02-23 / Building complex scenes",
+      "duration": "4:34:56",
+      "focusesOn": [],
+      "url": "https://www.youtube.com/watch?v=PWCfyUnFGdg"
+    },
+    {
+      "id": "Q2nHQ-5msGQ",
+      "type": "meetup",
+      "date": "2025-12-15",
+      "title": "TiXL Meetup 2025-12-01 / Fun with F1 & F2",
+      "duration": "3:31:24",
+      "focusesOn": [],
+      "url": "https://www.youtube.com/watch?v=Q2nHQ-5msGQ"
+    },
+    {
+      "id": "qavgcL72F1Y",
+      "type": "meetup",
+      "date": "2026-06-15",
+      "title": "TiXL Meetup 2026-06-01 / New Timeline, Spline Editor, Audio Clips & AI Coding",
+      "duration": "3:48:58",
+      "focusesOn": [],
+      "url": "https://www.youtube.com/watch?v=qavgcL72F1Y"
+    },
+    {
+      "id": "rEod2FltaPA",
+      "type": "meetup",
+      "date": "2025-10-06",
+      "title": "TiXL Meetup 2025-10-06 — Particle System Deep Dive",
+      "duration": "5:18:40",
+      "focusesOn": [],
+      "url": "https://www.youtube.com/watch?v=rEod2FltaPA"
+    },
+    {
+      "id": "S8chZaAS3uQ",
+      "type": "meetup",
+      "date": "2026-02-24",
+      "title": "TiXL Meetup 2026-02-09 / Part 1 (Patching)",
+      "duration": "0:31:27",
+      "focusesOn": [],
+      "url": "https://www.youtube.com/watch?v=S8chZaAS3uQ"
+    },
+    {
+      "id": "tZ1Uz6DmL_c",
+      "type": "tutorial",
+      "date": "2022-07-13",
+      "title": "\"Tooll 3 Tip#010 - Using points to draw Meshes\"",
+      "duration": "0:03:18",
+      "focusesOn": [
+        "op:Lib.mesh.draw.DrawMeshAtPoints"
+      ],
+      "url": "https://www.youtube.com/watch?v=tZ1Uz6DmL_c"
+    },
+    {
+      "id": "VNC-zr-JOjQ",
+      "type": "meetup",
+      "date": "2026-03-25",
+      "title": "TiXL Meetup 2026-03-23 — Mesh-Volume Collision, Moving Points & SDF Lighting",
+      "duration": "4:06:22",
+      "focusesOn": [],
+      "url": "https://www.youtube.com/watch?v=VNC-zr-JOjQ"
     },
     {
       "id": "WK4j0H-oM3g",
       "type": "update",
       "date": "2023-06-18",
-      "title": "Tooll V3.6 — release overview: color/gradient workflow, Symbol Browser, in-editor shaders, per-project playback, new ops",
-      "duration": "13:56",
+      "title": "Tooll V3.6 / Overview and New Features",
+      "duration": "0:14:22",
+      "focusesOn": [],
       "url": "https://www.youtube.com/watch?v=WK4j0H-oM3g"
+    },
+    {
+      "id": "wTLW7PXj2Co",
+      "type": "meetup",
+      "date": "2025-12-15",
+      "title": "TiXL Meetup 2025-12-15 / BubbleZoom and other experiments",
+      "duration": "3:45:35",
+      "focusesOn": [],
+      "url": "https://www.youtube.com/watch?v=wTLW7PXj2Co"
+    },
+    {
+      "id": "yy1kKa-wucA",
+      "type": "meetup",
+      "date": "2026-03-10",
+      "title": "TiXL Meetup 2026-03-09 — Single-Line Number Fonts, Beat-Sync Tapping and a Keyframe-Constant Regression Hunt",
+      "duration": "4:26:22",
+      "focusesOn": [],
+      "url": "https://www.youtube.com/watch?v=yy1kKa-wucA"
+    },
+    {
+      "id": "Zp0kDW1vikQ",
+      "type": "tutorial",
+      "date": "2022-07-01",
+      "title": "Tooll 3 Tip#004 - The Rings Effect",
+      "duration": "0:02:01",
+      "focusesOn": [
+        "op:Lib.image.generate.pattern.Rings"
+      ],
+      "url": "https://www.youtube.com/watch?v=Zp0kDW1vikQ"
     }
   ]
 }

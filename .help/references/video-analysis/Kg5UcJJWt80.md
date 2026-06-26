@@ -2,75 +2,52 @@
 video: Kg5UcJJWt80
 type: meetup
 date: 2026-06-15
-title: Snapshots & presets, FFmpeg video/audio/data clips, 360 optimization, ArtNet, Skill-Quest
-duration: 4:45:18
+title: TiXL Meetup — Per-Parameter Snapshots, FFmpeg Video/Audio/Data Clips, and DMX Lighting
+duration: 4:45:28
 ---
 
-A long TiXL community meet-up centered on a reworked snapshot/preset system that exposes individual parameters (rather than whole operators) to blendable snapshots, demonstrated by building VJ-style scenes live. Also covers the new FFmpeg-based video, audio, and MIDI/OSC "data clip" recording pipeline, the guided-feature-test window, an equirectangular 360-projection performance optimization, ArtNet/DMX light control, and authoring skill-quest tutorial levels.
+A long developer meet-up walking through the new per-parameter snapshot control, the FFmpeg-based video/audio/MIDI-recording clip system, guided feature tests, and a deep dive into driving DMX/Artnet moving-head lights from points.
 
 ## Mentions
-- 0:55 [DrawLineText] [DrawPoints] · in-depth — opening live doodle: line-text points converted to a point buffer
-- 1:20 [PointsToGpuBuffer] · passing — converting line-text points to a GPU buffer
-- 1:30 [SubdividePoints] · explained — subdividing the line points before adding noise
-- 1:43 [AddNoise] · explained — animating noise on the points with a phase input
-- 6:03 [DrawPoints] · in-depth — picking size/color params to expose to per-parameter snapshots
-- 13:30 [SnapshotIndex] · explained — driving snapshot cycling via an int animation into the index
-- 15:25 [ChromaticDistortion] · explained — chromatic-distortion post effect toggled per snapshot index
-- 15:35 [Glow] · passing — switching style effects between snapshot variations
-- 16:00 [PickTexture] · explained — index-based selection of which post effect applies
-- 20:55 [FastBlur] · passing — example output op for live render previews in the snapshot view
-- 25:35 [PointsOnMesh] · in-depth — building a real demo: emit points on a posed mesh
-- 25:40 [TransformPoints] · explained — translating selected points away from the center
-- 31:40 [TSNE] · explained — t-SNE dimensionality reduction idea for laying out presets in 2D
-- 40:55 [BlendSnapshots] · explained — existing blend-snapshots op and its awkward index API
-- 50:00 [PointsOnMesh] · in-depth — emitting points on the posed mesh
-- 50:15 [DrawLines] · explained — combining two line sets to draw an eagle-like shape
-- 50:40 [OrbitCamera] · explained — orbit camera added to the demo scene
-- 50:53 [Bloom] · explained — "we always want bloom" added to the scene
-- 51:30 [SelectField] · explained — selecting points by SDF distance
-- 51:50 [PlaneSDF] · explained — plane SDF used as the selection field
-- 52:00 [RemapValue] · explained — ping-pong mapping on the selection range
-- 52:55 [OscillateValue] · explained — oscillate value driving sphere movement
-- 53:20 [SphereSDF] · explained — moving sphere SDF to drive a point selection
-- 56:10 [PerlinNoise] · explained — Perlin noise added to camera rotation offset for shake
-- 57:00 [OrbitCamera] · in-depth — camera-shake snapshots built on orbit camera
-- 1:06:45 [Gradient] · explained — blendable gradients must share the same number of steps
-- 1:08:32 [DepthOfField] · explained — DoF distance made snapshot-controllable
-- 1:08:40 [OrbitCamera] · in-depth — orbit-camera target distance exposed to snapshots
-- 1:22:30 [OrbitCamera] · explained — preset vs. snapshot distinction explained via orbit camera "close-up"
-- 1:50:00 [VideoClip] · in-depth — new FFmpeg-based video editing intro
-- 1:53:00 [PlayVideo] · explained — old Media-Foundation play-video and its one-frame seek delay
-- 1:55:40 [VideoClip] · in-depth — new VideoClip player op, auto-freeing of unused players
-- 1:57:50 [VideoClip] · explained — cross-fading/blending two video clips by timeline order
-- 2:00:25 [AutoCollectTimeClips] · explained — auto-collect feature gathering all clips on a layer
-- 2:23:55 [AudioClip] · in-depth — dragging MP3 to create an audio clip with auto-generated spectrum
-- 2:26:40 [MidiInput] · in-depth — recording MIDI/OSC and audio simultaneously (data clips)
-- 2:27:40 [Layer2D] · explained — media input into a Layer2D scale demo
-- 2:28:20 [RemapValue] · explained — remapping rotation output range to -180..180
-- 2:30:00 [SimulateIoData] · in-depth — recorded clip played back via SimulateIoData into a group
-- 2:32:20 [TeachTrigger] · explained — teach-trigger picking up simulated MIDI events
-- 2:41:00 [MediaInput] · in-depth — MediaInput range output as a float list to texture
-- 2:41:20 [ConvertToTexture] · explained — visualizing the float list as a texture
-- 2:42:00 [AnalyzePianoMidi] · in-depth — new analyze-piano-MIDI op outputting pulse/last-normalized-note
-- 3:08:20 [CustomSDF] · in-depth — custom SDF raymarch field for the 360 demo
-- 3:08:55 [OrbitCamera] · explained — orbit camera flying through the SDF field
-- 3:13:40 [SliceViewport] · in-depth — slice-viewport op to limit rendered area for performance
-- 3:13:50 [EquirectangularCamera] · explained — equirectangular/cube-map camera for 360 projection
-- 3:14:00 [CubeMap] · explained — scene drawn six times into a cube map
-- 3:18:35 [CubeMap] · explained — disabling/enabling top & bottom cube faces to save renders
-- 3:19:45 [LoadImage] · explained — feeding a black texture in place of unused cube faces
-- 3:20:20 [Black] · explained — built-in Black texture op (cache-resource) instead of disconnecting
-- 3:21:35 [Crop] · explained — cropping the equirect output to drop unused ceiling/floor pixels
-- 3:26:16 [DrawBillboards] · in-depth — switching to DrawBillboards with point orientation
-- 3:27:05 [OrientPoints] · explained — orient-points op to face camera / look-at-target
-- 3:30:08 [DrawRailLines] · in-depth — DrawRailLines used for seamless 360 line rendering
-- 3:37:55 [Duplicate] · explained — Ctrl+Shift+D duplicate-with-connections (smart reconnect)
-- 3:55:40 [Instancing] · in-depth — building the "Instancing" skill-quest level with two transforms
-- 3:58:50 [Transform] · in-depth — two transform ops (left/right eyes) connected to a group for instancing
-- 4:04:30 [Transform] · explained — "Transform Order" level: order of move/rotate/draw matters
-- 4:16:50 [PointsToArtnetLights] · in-depth — points-to-ArtNet-lights op for DMX control
-- 4:24:45 [VisualizePoints] · explained — visualize-points showing position/orientation/color
-- 4:28:00 [PointsToFloatList] · explained — grid-layout float list mapping color to DMX channels
-- 4:29:00 [Merge] · explained — merge op assigning position/color into the universe
-- 4:30:10 [LinearGradient] · passing — gradient defining a section of the DMX universe
-- 4:31:20 [OrientPoints] · explained — orienting light points to "point down"/aim precisely
+- 1:02→2:20 [LineTextPoints] [ui:Timeline] · passing · experiment · Example · 60% — Quick improvised intro graph: text points feed line drawing, then subdivide and noise-displace the lines, with the noise animation driven off the current time.
+- 4:33→9:00 [ui:ParameterWindow] [ui:VariationWindow] · in-depth · scripted · Concept · 88% — How per-parameter snapshots work: instead of flagging a whole operator, right-click individual parameters to expose only those to a snapshot, then capture/recall named states from the empty-input background view.
+- 8:11→10:20 [ui:VariationWindow] · explained · experiment · Tip · 80% — Recalled snapshot values can be dragged past the original to amplify or overshoot a change, and reverting restores the snapshot's stored value rather than the parameter default.
+- 10:40→13:55 [ui:VariationWindow] · explained · scripted · Tip · 84% — Step or blend between saved states with cursor keys or an index input, so a cycling integer animation walks through presets live.
+- 14:50→17:20 [ChromaticDistortion] · explained · experiment · Example · 72% — Used as one selectable post effect keyed off a snapshot index — picking the index decides whether the distortion pass is applied to a shared texture.
+- 22:13→24:09 [ui:VariationWindow] · explained · discussion · Gotcha · 78% — Grouping snapshot-controlled operators into a new symbol breaks the mapping, because snapshot entries are keyed by the child operator's id, which changes once it moves inside the new symbol.
+- 31:40→35:00 [ui:VariationWindow] · explained · discussion · Concept · 60% — Idea for laying presets out in a fixed 2D coordinate landscape (via dimensionality reduction) so nearby points differ only slightly and you sample a blend by mouse position.
+- 39:46→42:10 [ui:VariationWindow] · explained · answer · Concept · 72% — Why the per-parameter capture stays flat by default: an earlier prototype prompted for a snapshot group every time, but 99% of uses needed only one group, so grouping was dropped for speed.
+- 1:02:50→1:05:02 [ui:VariationWindow] · in-depth · answer · Comparison · 82% — Snapshot vs. preset: a snapshot is stored on the operator's own symbol and saved into it, while a preset stores the instance parameters into the composition that uses the operator — same blending mechanism, different owner.
+- 1:06:30→1:09:00 [ui:GradientEditor] · explained · experiment · Gotcha · 74% — Gradients can be snapshot-blended only when they share the same number of color stops; mismatched step counts can't be interpolated.
+- 1:14:00→1:18:10 [ui:VariationWindow] · explained · discussion · Tip · 66% — Plan to bind number keys to jump to snapshots (and control+number to reset), giving muscle-memory recall similar to bookmarks for graph views and output pins.
+- 1:32:50→1:41:00 [ui:SkillQuest] · in-depth · scripted · Concept · 80% — How the guided feature-test window turns each new feature into a step-by-step manual test with pass/skip/fail and Markdown links, doubling as a discoverability tour and a release-acceptance checklist.
+- 1:33:50→1:36:30 [ui:Asset] · explained · scripted · Concept · 70% — Markdown is used throughout the help text, where square-bracket links open assets or operators directly in the library when clicked.
+- 1:35:00→1:36:00 [ui:UserProject] · explained · scripted · Gotcha · 76% — The alpha build now creates its own versioned settings and project folder so a preview version can't silently corrupt the projects of your stable install.
+- 1:51:00→1:57:00 [VideoClip] · in-depth · discussion · Concept · 82% — Why playback moved off Media Foundation to FFmpeg's demuxer: frame-accurate seeking and instant play without the start-of-playback frame delay that made scrubbing and tracking work unreliable.
+- 1:55:50→2:01:00 [VideoClip] · in-depth · experiment · Performance · 80% — A pooled player frees the underlying decoder once a clip scrolls far out of view, so many timeline clips don't each hold a live video player and texture.
+- 1:56:30→1:59:00 [VideoClip] · explained · experiment · Tip · 74% — Auto-collect gathers every clip on a timeline level without manual wiring and orders them by timeline position (bottom to top), the first place TiXL connects operators implicitly.
+- 1:57:40→1:58:50 [VideoClip] [ui:Timeline] · explained · answer · Example · 70% — Two clips that overlap in time are rendered in order and crossfaded, giving a proper blend between adjacent shots.
+- 2:03:00→2:08:00 [VideoClip] · in-depth · answer · Performance · 82% — Fast-seeking decodes on the CPU into a ~1 GB frame cache so scrubbing forward and back is smooth, while playback-performance mode uses GPU decode plus a compute-shader conversion to play many heavy 4K streams at once.
+- 2:08:30→2:21:00 [VideoClip] · explained · discussion · Gotcha · 70% — Why slow seeking is usually the encoding, not the tool: a large group-of-pictures size (default ~250 frames) forces decoding from the previous keyframe, so re-encoding with a smaller GOP makes seeking effectively free.
+- 2:22:40→2:24:30 [VideoClip] · explained · answer · Concept · 70% — After the Media-Foundation removal, [PlayVideo] also runs on FFmpeg and exposes an override-time-in-seconds input so you can seek the playhead from the graph.
+- 2:23:40→2:27:00 [LoadSoundtrack] · explained · experiment · Example · 60% — Dropping an MP3 onto the timeline makes an audio clip and auto-generates its spectrum image; an auto-playback toggle lets it sound without being wired into the graph.
+- 2:27:00→2:34:00 [MidiInput] · in-depth · scripted · Example · 82% — Live MIDI/OSC input can be recorded into clips and later replayed to emulate the same named device, so a teach-enabled input downstream re-learns from the recorded events exactly as if the controller were live.
+- 2:34:00→2:48:00 [MidiInput] · in-depth · discussion · Parameters · 80% — Its range output is a float list across all keys; switching the input from a single event type to a controller range (e.g. all 108 keys) lets one node expose the whole keyboard as a list you can texture and visualize.
+- 2:41:00→2:48:00 [MidiInput] · explained · experiment · Tip · 72% — Recording a real performance once lets you loop it as test data and tune audio-reactive parameters offline, then swap the recording back for the live device with a single toggle.
+- 2:48:00→2:52:00 [DataPointImportExport] · explained · discussion · Tip · 58% — Recorded input streams are plain data channels you can export as CSV, prune noisy sub-threshold samples, and quantize — cutting roughly 90% of OSC/tracking data with no visible quality loss.
+- 2:54:00→2:58:00 [ui:VariationWindow] · explained · scripted · Gotcha · 76% — As of 4.2 snapshots and variations live in a per-project meta folder (thumbnails plus data) instead of the global roaming settings, so that folder must be kept and backed up.
+- 3:06:00→3:09:00 [ConvertEquirectangle] · explained · discussion · Example · 70% — Drives a 360° projection-dome setup: render an equirectangular feed, send it over Spout/NDI, and the dome's playback system maps it to the curved surface.
+- 3:08:00→3:13:00 [SliceViewPort] · in-depth · discussion · Performance · 80% — How to skip computing unused regions of the output (e.g. a letterbox or an unused dome ceiling) so the renderer never shades those pixels, instead of drawing black bars at full cost.
+- 3:09:40→3:13:30 [CustomSDF] [OrbitCamera] · explained · experiment · Example · 66% — A heavy raymarched scene driven by an orbit camera with fog, set to a fixed full-HD output, as the test case for viewport-slicing optimization.
+- 3:10:13→3:18:00 [Equirectangle] · in-depth · discussion · Concept · 74% — The cube-map path renders the scene six times then reprojects, which is why for pure raymarching it is far cheaper to change the projection matrix directly and march only the visible band.
+- 3:18:00→3:22:50 [ConvertEquirectangle] · explained · experiment · Tip · 70% — Disabling (not disconnecting) an unused face camera and feeding a black texture in its place, plus passing a lower resolution into the projection op, avoids an extra copy and shrinks the output feed.
+- 3:23:20→3:24:40 [UseTextureReference] · passing · answer · Concept · 55% — Briefly explains a shader-resource view as telling the driver to treat a block of GPU memory as a read-only texture (versus a writable UAV).
+- 3:25:00→3:31:00 [DrawBillboards] · in-depth · experiment · Gotcha · 80% — Points stretch in equirectangular projection because billboards stay camera-parallel; switching draw-billboard orientation to point-rotation (look-at target with translation reset) fixes the distortion at the seams.
+- 3:25:50→3:27:30 [OrientPoints] · explained · experiment · Tip · 68% — Inserting a point-orientation step before drawing makes sprites face a target so they survive a non-planar projection instead of relying on the draw operator's default billboard mode.
+- 3:29:00→3:30:30 [DrawRayLines] · explained · answer · Comparison · 80% — Reach for it over [DrawLines] when a line can cross the camera plane (front to back): screen-space line drawing fails at that edge, so this skips corner mitering and stays seamless.
+- 3:37:40→3:39:30 [Group] [ui:Graph] · in-depth · scripted · Tip · 80% — Control+Shift+D duplicates with connections, correctly handling multi-inputs, and shaking an operator out now reconnects all compatible inputs rather than just the first.
+- 4:09:00→4:14:00 [ArtnetOutput] · explained · discussion · Concept · 72% — How DMX/Artnet works for stage lights: each fixture is dumb and only knows its start address, so you push channel values to a box's IP over UDP and it converts to the daisy-chained DMX wiring.
+- 4:23:00→4:30:00 [PointsToDmxLights] · in-depth · discussion · Example · 84% — Treats each point as one fixture, mapping its position/orientation/color onto channel slots per the fixture's spec; set the fixture's channel count so a color lands on the right three channels.
+- 4:24:40→4:27:00 [LinePoints] [RandomizePoints] · explained · experiment · Example · 68% — A line of points, randomized and colored from a gradient, stands in for a row of lights to preview Artnet output before any hardware is connected.
+- 4:30:00→4:36:00 [OrientPoints] · explained · discussion · Gotcha · 70% — Aiming moving-head lights is the hard part: two tilt angles with order-dependent rotation, so orient each point's gimbal at a target rather than setting angles by hand.
+- 4:27:00→4:30:00 [SamplePointAttributes_v1] [SampleGradient] · passing · experiment · Example · 55% — Named while wiring per-fixture colors so each light samples its hue from a gradient along the point set.

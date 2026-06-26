@@ -1,164 +1,49 @@
 ---
 video: dCX7CcL0ZJs
 type: meetup
-date: 2026-04-20
-title: Time control, deterministic vs procedural animation, custom point shaders, SDF fields, sine waves, mesh/spiral recreation, SSAO & project lights
-duration: 3:41:03
+date: 2026-04-21
+title: Meet-up — Demo Timing, Sine Waves from Line Points, the Custom Point Shader & Rebuilding a Helix
+duration: 3:41:08
 ---
 
-A TiXL community meet-up where the host fields member questions while live-building, covering how to control time deterministically (time clips, switches, accumulators) versus frame-dependent procedural timing, demo preloading via SetTime, and shader precompilation. A long stretch demonstrates five ways to make a sine wave from line points, custom point shaders (including SDF fields), and then an extended attempt to recreate a complex helix/spiral reference scene with repeated meshes, noise, SSAO, project lights and presets.
+A ~3.7h Q&A meet-up covering deterministic demo construction (time clips, preloading via set-time, smooth procedural timing), several ways to turn a line of points into a sine wave, the custom point shader and its SDF field input, point alpha/Z-sorting trade-offs, and a long live rebuild of a twisted-helix reference scene.
 
 ## Mentions
-- 0:50 [Text] · passing — starts the demo with a text operator showing the date
-- 1:27 [Camera] · passing — switches to fixed resolution for more demo control
-- 1:35 [PlayAudio] · passing — adds a soundtrack/audio track to the demo
-- 2:25 [RenderTarget] · passing — renders content into a texture
-- 2:30 [PointsOnImage] · explained — converts the rendered texture into points
-- 2:35 [DrawPoints] · passing — draws the generated points
-- 2:43 [ClampPoints] · passing — referenced as the "clamp" used to constrain points
-- 2:48 [FastBlur] · passing — adds a fast blur to the point render
-- 3:07 [Noise] · passing — adds noise-driven animation
-- 5:21 [SetAudioVolume] · passing — global audio settings / volume adjustment
-- 6:11 [PickTexture] · explained — using Pick to choose between scene textures
-- 6:23 [Fork] · passing — animating a value to switch/fork between scenes
-- 6:48 [PickTexture] · explained — fades one scene out while keeping things real-time
-- 7:05 [SwitchTexture] · explained — command-style node to switch textures
-- 7:11 [SwitchLayer] · explained — Switch for layers; -1 disables all, -2 enables all
-- 8:38 [TimeClip] · in-depth — insert/name time clips to enable & disable things on the timeline
-- 9:13 [Group] · explained — collects clips; render order matters (later = on top)
-- 9:16 [RenderTarget] · passing — final output target of the composition
-- 9:40 [Text] · passing — duplicated clip becomes a titled text element
-- 10:23 [Text] · passing — "meetup" title text element
-- 10:28 [ZTest] · explained — disabling/enabling Z test to control front/back ordering
-- 10:54 [ParticleSystem] · in-depth — non-deterministic particle effect; needs reset control
-- 11:17 [EmitPoints] · explained — emits points into the particle system
-- 11:22 [TurbulenceForce] · passing — adds turbulence to the particle simulation
-- 11:22 [MovePoints] · passing — moving-points force on particles
-- 11:58 [ResetParticleSystem] · explained — reset input keyframed so Home reproduces particles
-- 13:43 [Transform] · passing — scale particles to zero to run-but-not-draw
-- 14:00 [FilterPoints] · explained — filter points to draw only one while system runs hidden
-- 16:18 [CustomPixelShader] · passing — member's question about precompiling custom HLSL shaders
-- 16:47 [ExportToImage] · explained — referencing the test export app / image output for executable export
-- 21:00 [CustomPixelShader] · explained — concatenating text into shader; shader caching makes recompiles fast
-- 22:23 [Execute] · explained — used (vs Group) to force evaluation of an offscreen branch
-- 22:46 [SetTime] · in-depth — drive a separate time range to precompile/preload the whole demo
-- 23:15 [TimeClip] · explained — preloaded screen sized to a time clip
-- 24:21 [Switch] · explained — alternative to Execute for switching at start (0 then 1)
-- 31:10 [Time] · explained — debugging/breaking out time to measure frame durations
-- 31:13 [KeepFloat] · explained — keep/store float values across frames (one-time keep)
-- 31:36 [Time] · explained — has OneTime and last-frame-duration outputs for timing
-- 29:50 [OrbitCamera] · explained — orbit camera with idle motion to replicate the flicker issue
-- 30:34 [Random] · explained — random value op; switch from Ramps to Atlas mode causing jumps
-- 31:36 [ValueInputsMoving] · in-depth — "secret weapon": smooths parameter input changes (default ~6 frames)
-- 33:16 [Accumulator] · in-depth — buffer that accumulates a value for procedural/frame-dependent timing
-- 33:40 [MouseInput] · explained — signed mouse position drives the accumulator
-- 33:51 [Vector2Components] · explained — breaks mouse position into X/Y to drive the BPM/value
-- 34:36 [Reset] · passing — accumulator reset trigger to avoid float precision drift
-- 40:00 [Image] · passing — the posted reference image used for the sine-wave question
-- 45:13 [LinePoints] · explained — line of points as the base for the sine wave
-- 45:20 [TransformPoints] · in-depth — offsets all points; core of the wave-mapping discussion
-- 46:14 [DrawPoints] · passing — draws the line points, pinned with P
-- 46:24 [Vector3] · explained — break out translation into a vec3 for the sine
-- 46:38 [Sine] · explained — "ToSine"/"ByTime" sine value feeding translation
-- 47:07 [AnimVec3] · explained — preferred operator that animates into translation (amplitude/shape sine)
-- 49:29 [LinearGradient] · explained — artist-friendly approach: gradient texture with presets
-- 50:10 [SampleLinearPointsAttribute] · in-depth — samples a texture/buffer along the point line (by normalized index)
-- 53:01 [CustomPointShader] · in-depth — line points → custom point shader → draw points to make a wave
-- 53:01 [DrawPoints] · passing — draws the custom-shader points
-- 55:01 [ImageLevels] · explained — analyze and adjust brightness levels of an image
-- 55:14 [RadialGradient] · passing — referenced as a gradient to compare against
-- 1:00:00 [CustomPointShader] · in-depth — using F (0-1), SampleGradient, point color, custom attributes
-- 1:02:20 [Bias] · in-depth — gain/bias remap of a 0-1 value; called very powerful
-- 1:02:58 [CustomPointShader] · explained — writing FX1/FX2 custom output attributes
-- 1:03:33 [Noise] · passing — add-noise modifier driven by FX strength factor
-- 1:04:19 [CustomPixelShader] · passing — listed among custom force/face/pixel shaders
-- 1:04:19 [CustomForce] · passing — mentioned alongside custom shaders
-- 1:04:19 [CustomFaceShader] · passing — mentioned alongside custom shaders
-- 1:10:40 [BoxSDF] · in-depth — custom point shader Field input; build and modify a box SDF
-- 1:11:43 [RepeatSDF] · explained — repeat the SDF in X (remerge as a field)
-- 1:12:52 [GetDistance] · explained — call GetField/GetDistance on a position in the shader
-- 1:13:27 [TransformField] · explained — transform the SDF field for powerful effects
-- 1:14:06 [SphereSDF] · explained — sphere field, transform + repeat; "dancing fish/jellyfish" preset
-- 1:23:53 [SortPoints] · in-depth — sort point buffer by camera distance (vs Z-buffer sorting)
-- 1:24:59 [DrawPoints] · in-depth — Z buffer, MSAA, AlphaCutoff slider explained for soft point edges
-- 1:29:00 [SortPoints] · explained — order-independent depth alternative discussed (not implemented)
-- 1:29:33 [Camera] · passing — camera used by sort-points; updated by frame
-- 1:30:00 [GetCameraReference] · explained — discussion of get/set camera reference and object vars
-- 1:30:00 [SetCameraVar] · explained — set object/camera var into the execution stack
-- 1:36:49 [ImageLevels] · explained — analyze whether the point texture is white/transparent
-- 1:37:41 [RadialGradient] · explained — compare PNG against a radial gradient for alpha behavior
-- 1:40:52 [Waveform] · explained — scope to inspect tonal content of the image
-- 1:41:29 [VectorScope] · in-depth — analyze color distribution of the reference image
-- 1:44:24 [ImageLevels] · in-depth — favorite op; slice through brightness distribution
-- 1:44:45 [CubeMesh] · explained — base cube mesh for the helix structure
-- 1:44:59 [RepeatMeshAtPoints] · in-depth — repeat the cube along points for the spiral
-- 1:45:18 [LinePoints] · explained — linear line points feeding the repeat (with twist/stretch)
-- 1:46:38 [DisplaceMeshNoise] · explained — noise distortion of the repeated mesh
-- 1:48:40 [Group] · passing — groups the spiral build; uses an output window
-- 1:48:59 [CylinderMesh] · explained — central cylinder mesh for the structure
-- 1:49:46 [SetMaterial] · explained — assign material/texture to the mesh
-- 1:49:55 [Raster] · explained — create a normal map at fixed resolution
-- 1:50:39 [TransformMeshUV] · explained — stretch/transform the mesh UVs for the normal map
-- 1:51:55 [SphereMesh] · explained — sphere mesh, wireframe to study structure
-- 1:52:37 [GetMeshVertices] · explained — extract vertices to use as repeat points
-- 1:53:31 [RepeatAtPoints] · explained — repeat geometry at the sphere vertices; draw lines/ribbons
-- 1:54:39 [Icosahedron] · explained — icosahedron mesh with subdivision as alternative base
-- 1:56:05 [ToolMesh] · explained — tool mesh with presets (e.g. Pacman) repeated at points
-- 1:56:43 [DrawMesh] · passing — draws the repeated tool mesh
-- 1:58:07 [RecomputeNormals] · explained — recompute normals to fix shading
-- 1:59:28 [CubeMesh] · passing — small cube mesh for radial repeat
-- 1:59:42 [RadialPoints] · explained — radial repeat points (count ~8)
-- 1:59:42 [RepeatMeshAtPoints] · passing — repeats cube on radial points
-- 2:00:00 [CombineMesh] · explained — combine meshes before repeating
-- 2:02:48 [DisplaceMeshNoise] · explained — distort-mesh noise to make form more organic
-- 2:04:00 [SelectInputConnections] · explained — new op selecting everything connected upstream
-- 2:04:27 [GridPoints] · explained — 2x2x2 grid points for the cube corners
-- 2:05:00 [IcosahedronMesh] · passing — icosa mesh repeated at points
-- 2:17:34 [ExtrudeCurves] · in-depth — extrude a profile along a rail to build the wireframe pipe
-- 2:18:06 [RadialPoints] · explained — radial points as the extrusion profile, rotated to align
-- 2:19:31 [CustomPointShader] · in-depth — FX1 = bias of abs(f) for even tapered thickness
-- 2:20:49 [ComputeNormals] · passing — recompute normals after the extrude
-- 2:21:20 [CommonPointSets] · passing — mentioned as useful (quad → circuit of points)
-- 2:25:53 [CubeMesh] · explained — rebuilding the cube edges from line points
-- 2:26:50 [CombineBuffers] · explained — combine point buffers for the box frame
-- 2:30:00 [TransformMesh] · explained — rotate/transform mesh for the box frame
-- 2:30:46 [OrthographicCamera] · explained — orthographic camera to match the reference framing
-- 2:32:28 [DisplaceMeshNoise] · in-depth — noise creating crazy spikes; debugging the vertex selection
-- 2:32:47 [UseVertexSelection] · explained — vertex selection wrongly bleeding into FX/noise
-- 2:35:21 [RepeatMeshAtPoints] · passing — repeating the box mesh along the spiral
-- 2:37:12 [SSAO] · in-depth — render to texture then SSAO for depth; near/far range tuning
-- 2:39:39 [Camera] · explained — normal camera moved far back with very small FOV to fake ortho
-- 2:42:43 [DrawBillboards] · passing — accidental draw-billboards example
-- 2:42:43 [Bloom] · explained — bloom added to the render
-- 2:46:03 [DrawPoints] · explained — extra shaded points ("easy" addition) on the spiral
-- 2:46:39 [SetMaterial] · explained — make points shinier/metallic
-- 2:47:32 [DrawLines] · passing — draw the same line points as lines
-- 2:48:14 [TransformPoints] · passing — squeeze a subset of points
-- 2:52:33 [SSAO] · in-depth — debugging hard edge; front clip plane / depth precision fix
-- 2:54:39 [SSAO] · explained — two ranges (clip and range); exposing as inputs
-- 2:55:26 [SphereSDF] · passing — negative-radius sphere example for SSAO range explanation
-- 3:00:48 [SampleLinearPointsAttribute] · explained — sample fractal noise along points to add motion
-- 3:01:05 [FractalNoise] · explained — fractal noise driving point stretch/scale
-- 3:02:21 [TileableNoise] · in-depth — repeatable/tileable noise; faster, smoother than make-tileable
-- 3:03:00 [SetRenderTarget] · explained — image format (16-bit vs 32-bit float, one channel) discussion
-- 3:07:29 [SelectConnected] · explained — select connected to reorganize the graph
-- 3:07:29 [Group] · in-depth — grouping nodes; wiring parameters to the outside
-- 3:09:48 [Execute] · explained — rename Execute to name a branch (faster than Group)
-- 3:13:33 [LinearGradient] · explained — separated gradient input op for the elements symbol
-- 3:14:01 [PingPong] · passing — ping-pong/offset the gradient over time
-- 3:14:60 [AddInput] · in-depth — add float "twist" input parameter to the new symbol
-- 3:15:36 [PublishedInput] · passing — note that publish-input is temporarily disabled
-- 3:16:05 [AddInput] · explained — add integer "count"/"sides" inputs; set as default
-- 3:19:05 [Preset] · in-depth — create presets and blend/mix between them live (the "coolest" feature)
-- 3:22:14 [CustomPointShader] · in-depth — recolorize by distance: SampleGradient(length(p.position))
-- 3:23:38 [Bloom] · explained — bloom after offset to bring the center glow through
-- 3:23:38 [ToneMapping] · passing — tone mapping discussed ("torn/tone mapping is nice")
-- 3:31:15 [SetEnvironment] · in-depth — blend between environments; feed tileable noise as a fake HDRI for lighting
-- 3:31:55 [TileableNoise] · explained — noise used as the environment map source
-- 3:33:04 [ProjectLight] · in-depth — projector/spot light needing a camera reference; casts shadows
-- 3:34:09 [ProjectLight] · explained — choose an image as the projection light source
-- 3:34:55 [Vector3Gizmo] · explained — 3D gizmo to drag light position/target in the viewport
-- 3:36:08 [ProjectLight] · explained — grabbing depth/normal from render target for normals on depth-of-field
-- 3:37:09 [Antialiasing] · explained — AA toggle makes a big quality difference (temporal AA wished for)
-- 3:37:42 [TileableNoise] · passing — another tileable-noise pass for the lighting effect
-- 3:38:41 [AmbientColor] · explained — ambient color strongly affects brightness/mood
+- 0:06:00→0:07:30 [PickTexture][Switch] · explained · discussion · Comparison · 82% — Both index between inputs, but [Switch] adds command/layer branching: index -1 disables all, -2 enables all, and positives wrap around — modes [PickTexture] lacks.
+- 0:07:42→0:09:50 [ui:Timeline] · explained · discussion · Tip · 78% — Insert a clip on a layer to both label a time range and gate visibility: outside the clip its layer is skipped, inside it renders — a cleaner on/off than animating a switch index.
+- 0:08:35→0:13:00 [TimeClip] · explained · discussion · Example · 85% — Drop a clip onto a layer/branch to enable it only within its span; name clips (press Return) and duplicate them to lay out demo sections without keyframing a selector.
+- 0:11:30→0:15:00 [ParticleSystem] · explained · experiment · Gotcha · 75% — To make an emitter deterministic for a demo, drive its reset trigger from a keyframed boolean so jumping home re-seeds it; run-but-hide it early by filtering to a single point, then reveal by raising the count.
+- 0:16:00→0:18:30 [ui:PlayerExporter] · explained · answer · Performance · 80% — The exporter now scans ahead and pre-compiles upcoming shaders (with shader-source caching so concatenated custom HLSL still hits the cache), removing the playback stutter older preloading missed.
+- 0:18:30→0:24:00 [SetTime] · in-depth · answer · Example · 88% — Build a manual preloading screen: wrap the whole demo in a branch, animate a sweep 0→100 so every shader/clip is touched and pre-compiled behind a cover layer, then cut to live time. (As of 4.1 the player does this automatically.)
+- 0:25:00→0:27:00 [LastFrameDuration] · passing · answer · Example · 65% — Combine with [RunTime] and a value-keeper to read a rough per-frame or precompute time as a debug readout.
+- 0:29:30→0:33:30 [ui:EvaluationContext] · in-depth · answer · Gotcha · 80% — Parameter-input smoothing (default ~6 frames) softens every knob change, so changing a time-evaluated animation's rate "jumps" to where it should be — smoothing can't fix it because the value isn't accumulated.
+- 0:30:00→0:31:30 [OrbitCamera] · explained · experiment · Tip · 72% — Connect its override-time input to bypass the internal spin rate and feed an external time/animation source to drive rotation precisely.
+- 0:33:30→0:35:30 [Accumulator] · in-depth · answer · Concept · 85% — The escape hatch from time-evaluated animation to frame-dependent timing: it integrates an increment each frame, so a live knob (e.g. mouse X) ramps speed smoothly instead of snapping.
+- 0:34:00→0:36:30 [Accumulator] · explained · answer · Gotcha · 80% — Left running for hours its value drifts into float-precision artifacts; periodically fire its reset, or keep increments small, to stay precise.
+- 0:49:00→0:56:00 [LinearSamplePointAttributes] · in-depth · experiment · Example · 85% — The artist-friendly sine wave: sample a [LinearGradient] by each point's normalized index and map brightness to Y offset; set interpolation to smooth and animate the sample offset for motion.
+- 0:51:30→0:56:00 [LinearGradient] · explained · experiment · Tip · 75% — Use it as an editable displacement curve — pick a preset, switch interpolation to smooth for a clean wave, and animate its offset since it's just a texture.
+- 0:58:00→1:00:00 [CustomPointShader] · in-depth · experiment · Parameters · 90% — Its built-ins for developers: F is the normalized 0–1 point index; sample_gradient(t) recolors by a value; bias() remaps 0–1 with a gain/bias control; FX1/FX2 are two writable attributes downstream ops can read.
+- 1:00:00→1:04:00 [CustomPointShader] · in-depth · experiment · Example · 82% — Write a height-derived value into FX1/FX2, then drive later modifiers (scale, [AddNoise] strength) by that attribute — e.g. no noise at the base, lots at the crest.
+- 1:11:00→1:13:00 [BoxSDF] · explained · experiment · Concept · 72% — A distance function over space you can feed a point shader's field slot; shape it first with [RepeatAxis] and rounding before sampling per point.
+- 1:13:00→1:15:00 [CustomPointShader] · in-depth · experiment · Example · 80% — Its field input accepts an SDF chain ([BoxSDF]/[SphereSDF]): call get_distance(p.position) inside the shader to read signed distance per point and deform/colorize by the field; combine with [TransformField] for moving effects.
+- 1:18:30→1:21:30 [ImageLevels] · explained · experiment · Tip · 80% — Slide its slice to read an image's actual brightness distribution and discover a "white" sprite is really ~75–85% gray, or that a gray image carries a slight tint.
+- 1:24:00→1:28:00 [ui:Field] · in-depth · discussion · Concept · 78% — Why soft point sprites fight the Z-buffer: a filtered edge has partial opacity, so an alpha-cutoff threshold decides which fragments write depth — too low gives noisy edges, too high makes circles hard.
+- 1:28:00→1:29:00 [DrawPointsShaded] · explained · discussion · Parameters · 80% — Its alpha-cutoff sets the opacity above which a fragment writes depth, and its depth-write toggle trades correct sorting for soft round sprites — with depth off, draw order alone decides overlap.
+- 1:29:00→1:32:00 [SortPoints] · in-depth · experiment · Gotcha · 82% — Sorts a point buffer back-to-front for correct alpha without depth-write, but measures distance to the camera origin (radial), so large camera-facing billboards can still sort wrong; reported bug when the count is a power of two.
+- 1:30:00→1:31:30 [ReuseCamera] · explained · experiment · Gotcha · 70% — When feeding [SortPoints] a camera, note it caches and must be re-evaluated (plugged into the draw path or set to auto/look-at) before the sort sees the correct camera position.
+- 1:40:30→1:42:00 [WaveForm] · explained · experiment · Tip · 75% — Its vectorscope mode reveals an image's color distribution at a glance — e.g. that most colors cluster in desaturated orange with a few solid highlights.
+- 1:44:00→1:46:30 [RepeatMeshAtPoints] · explained · experiment · Example · 82% — Stack a [CubeMesh] along [LinePoints] and use its built-in twist (orientation axis Y) plus stretch to spiral the stack — staying one ~1200-face mesh rather than many draw calls.
+- 1:46:30→1:47:30 [DisplaceMeshNoise] · explained · experiment · Tip · 70% — Raise (don't lower) its frequency to break a regular repeated mesh into organic distortion; keep the amount modest so structure stays readable.
+- 1:23:00→1:23:30 [ToneMapping] · passing · experiment · Tip · 60% — Place it after [Bloom] so highlights roll off correctly once the glow is added.
+- 2:09:00→2:15:00 [DrawMesh] · in-depth · discussion · Concept · 72% — Why a generic wireframe-thicken op is hard on the GPU: meshes are triangles and per-triangle compute can't see neighbors, so deduplicating shared edges is the blocker — cache one complex shape and repeat it instead.
+- 2:36:30→2:39:00 [SSAO] · in-depth · experiment · Gotcha · 85% — Banding/hard occlusion edges come from poor depth-buffer precision under a narrow field of view; push the camera's near clip plane up to just in front of the object (and match the SSAO range) to restore precision.
+- 2:37:00→2:40:00 [OrthographicCamera] · explained · experiment · Gotcha · 72% — Effects like [SSAO] can misbehave with it; faking ortho via a perspective camera pulled far back with a tiny field of view restores the depth effect.
+- 2:53:00→2:56:00 [SSAO] · explained · experiment · Parameters · 78% — Its depth-range parameter ignores geometry beyond a set distance, letting you keep occlusion on a foreground shape while excluding a background plane.
+- 3:01:00→3:06:00 [TileableNoise] · explained · experiment · Performance · 80% — Faster and better-looking than fading a non-tileable noise; for displacement, read it from a 32-bit single-channel (R) render format — higher precision and faster than 16-bit RGBA.
+- 3:07:30→3:13:00 [ui:Graph] · explained · discussion · Tip · 75% — Cleanup workflow: "select connected" to isolate a branch, group into a named [Group] or lighter [Execute] (used purely for labeling), or combine into a new symbol while keeping the output connection.
+- 3:14:00→3:20:00 [ui:OperatorSettings] · in-depth · experiment · Tip · 82% — Expose inner parameters as inputs on a combined symbol (Ctrl-break a param, set a default), then save named presets — TiXL auto-generates thumbnails and you can Alt-drag to blend continuously between them.
+- 3:22:00→3:24:00 [CustomPointShader] · explained · experiment · Gotcha · 76% — Recolor points by deriving a value from p.position length into sample_gradient — but a metal material can override the written point color, so the tint may not show.
+- 3:30:00→3:33:00 [SetEnvironment] · explained · experiment · Tip · 75% — Beyond an HDRI, plug a [TileableNoise] or any texture into it to light a scene with a synthetic environment, optionally with no visible background.
+- 3:30:00→3:38:00 [ProjectLight] · in-depth · experiment · Example · 80% — For volumetric/directional shadows: feed it a point light and a separate camera reference (disconnecting the point light's own camera helps the shadows), then choose a projected image.
+
+UNSURE: none
