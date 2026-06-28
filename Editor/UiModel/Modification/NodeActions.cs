@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -104,10 +104,11 @@ internal static class NodeActions
         nodeSelection.Clear();
     }
 
-    public static Annotation AddAnnotation(NodeSelection nodeSelection, ScalableCanvas canvas, Instance compositionOp)
+    /// <param name="placementScreenPos">Screen position to place the annotation at when nothing is selected.</param>
+    public static Annotation AddAnnotation(NodeSelection nodeSelection, ScalableCanvas canvas, Instance compositionOp, Vector2? placementScreenPos = null)
     {
         var size = new Vector2(100, 140);
-        var posOnCanvas = canvas.InverseTransformPositionFloat(ImGui.GetMousePos());
+        var posOnCanvas = canvas.InverseTransformPositionFloat(placementScreenPos ?? ImGui.GetMousePos());
         var area = new ImRect(posOnCanvas, posOnCanvas + size);
 
         if (nodeSelection.IsAnythingSelected())
