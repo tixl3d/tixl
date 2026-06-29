@@ -1,4 +1,4 @@
-﻿using ImGuiNET;
+using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Utils;
 using T3.Editor.Gui.Input;
@@ -9,6 +9,9 @@ namespace T3.Editor.Gui.Styling;
 internal static partial class CustomComponents
 {
     private static Action _cachedDrawMenuItems;
+
+    /// <summary>Screen position of the right-click that opened the most recent scroll-canvas context menu.</summary>
+    internal static Vector2 ScreenPosOnOpeningContextMenu { get; private set; }
 
     public static void ContextMenuForItem(Action drawMenuItems, string title = null, string id = "context_menu",
                                           ImGuiPopupFlags flags = ImGuiPopupFlags.MouseButtonRight)
@@ -255,7 +258,7 @@ internal static partial class CustomComponents
 
         if (ImGui.BeginPopupContextWindow("windows_context_menu"))
         {
-            ImGui.GetMousePosOnOpeningCurrentPopup();
+            ScreenPosOnOpeningContextMenu = ImGui.GetMousePosOnOpeningCurrentPopup();
             contextMenuIsOpen = true;
 
             // Assign to static field to avoid closure allocations

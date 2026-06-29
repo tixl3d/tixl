@@ -318,14 +318,14 @@ internal static class GraphContextMenu
         if (CustomComponents.DrawMenuItem((int)MenuItemIds.AddNode, Icon.None, "Operator",
                                           "TAB", reserveIconColumn: false, state: muted))
         {
-            var posOnCanvas = context.View.InverseTransformPositionFloat(ImGui.GetMousePos());
+            var posOnCanvas = context.View.InverseTransformPositionFloat(CustomComponents.ScreenPosOnOpeningContextMenu);
             context.Placeholder.OpenOnCanvas(context, posOnCanvas);
         }
 
         if (CustomComponents.DrawMenuItem((int)MenuItemIds.AddAnnotation, Icon.None, "Annotation",
                                           UserActions.AddAnnotation.ListShortcuts(), reserveIconColumn: false, state: muted))
         {
-            var newAnnotation = NodeActions.AddAnnotation(nodeSelection, context.View, context.CompositionInstance);
+            var newAnnotation = NodeActions.AddAnnotation(nodeSelection, context.View, context.CompositionInstance, CustomComponents.ScreenPosOnOpeningContextMenu);
             context.ActiveAnnotationId = newAnnotation.Id;
             context.StateMachine.SetState(GraphStates.RenameAnnotation, context);
         }
