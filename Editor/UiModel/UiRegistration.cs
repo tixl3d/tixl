@@ -62,20 +62,19 @@ internal static class UiRegistration
                                 typeof(SharpDX.Direct3D11.UnorderedAccessViewBufferFlags),
                                 typeof(SharpDX.DXGI.Format),
                                 typeof(SharpDX.Mathematics.Interop.RawViewportF),
-                                typeof(SharpDX.Mathematics.Interop.RawRectangle)
+                                typeof(SharpDX.Mathematics.Interop.RawRectangle),
+                                typeof(SharpDX.Direct3D11.RenderTargetBlendDescription),
+                                // sharpDX types
+                                typeof(SharpDX.Direct3D11.DepthStencilView),
+                                typeof(SharpDX.Direct3D11.RenderTargetView),
+                                typeof(SharpDX.Direct3D11.ShaderResourceView),
+                                typeof(SharpDX.Direct3D11.UnorderedAccessView)                                
                                );
 
         RegisterTypesToProperty(UiProperties.Texture, 
                                 typeof(Texture2D),
-                                typeof(RenderTargetReference),
-
-                                // sharpDX types
-                                typeof(SharpDX.Direct3D11.DepthStencilView),
-                                typeof(SharpDX.Direct3D11.RenderTargetBlendDescription),
-                                typeof(SharpDX.Direct3D11.RenderTargetView),
-                                typeof(SharpDX.Direct3D11.ShaderResourceView),
-                                typeof(SharpDX.Direct3D11.UnorderedAccessView)
-                               );
+                                typeof(RenderTargetReference)
+                              );
         
         RegisterTypesToProperty(UiProperties.GpuData,
                                 typeof(DataSet),
