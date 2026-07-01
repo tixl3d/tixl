@@ -295,16 +295,40 @@ internal static class MarkdownParser
                     }
 
                     // Operator reference: [Identifier]
-                    if (labelLen > 0 && IsIdentifier(src, labelStart, labelLen))
+                    // UI-topic reference:  [ui:Identifier]  or with an explicit label  [ui:Identifier|display text]
+                    if (labelLen > 0)
                     {
-                        FlushPlain(src, plainStart, i, doc);
-                        var refSlice = new Slice(labelStart, labelLen);
-                        var refIndex = doc.Urls.Count;
-                        doc.Urls.Add(refSlice);
-                        doc.Runs.Add(new Run(refSlice, RunStyle.OpRef, refIndex));
-                        i = close + 1;
-                        plainStart = i;
-                        continue;
+                        // A UI-topic ref may carry a "|display text" label so prose can read naturally
+                        // ("the [ui:ParameterWindow|Parameter window]") while still linking the ui: key.
+                        var pipe = IndexOf(src, labelStart, close, '|');
+                        var keyLen = (pipe >= 0 ? pipe : close) - labelStart;
+
+                        var isUiTopic = IsUiTopicRef(src, labelStart, keyLen);
+                        var isOpRef = pipe < 0 && IsIdentifier(src, labelStart, labelLen);
+
+                        if (isUiTopic || isOpRef)
+                        {
+                            FlushPlain(src, plainStart, i, doc);
+
+                            // The key the handler resolves ("ui:Graph" or the operator name).
+                            var keySlice = new Slice(labelStart, keyLen);
+                            var urlIndex = doc.Urls.Count;
+                            doc.Urls.Add(keySlice);
+
+                            // Displayed text: the explicit "|label", else the key with the "ui:" prefix dropped.
+                            Slice textSlice;
+                            if (pipe >= 0)
+                                textSlice = new Slice(pipe + 1, close - (pipe + 1));
+                            else if (isUiTopic)
+                                textSlice = new Slice(labelStart + 3, keyLen - 3); // drop the "ui:" prefix
+                            else
+                                textSlice = keySlice;
+
+                            doc.Runs.Add(new Run(textSlice, RunStyle.OpRef, urlIndex));
+                            i = close + 1;
+                            plainStart = i;
+                            continue;
+                        }
                     }
                 }
             }
@@ -357,5 +381,12 @@ internal static class MarkdownParser
         }
 
         return true;
+    }
+
+    /// <summary>A help-index UI-topic link: <c>[ui:Identifier]</c> (the <c>ui:</c> prefix then a plain identifier).</summary>
+    private static bool IsUiTopicRef(string src, int from, int length)
+    {
+        return length > 3 && src[from] == 'u' && src[from + 1] == 'i' && src[from + 2] == ':'
+               && IsIdentifier(src, from + 3, length - 3);
     }
 }

@@ -2,6 +2,7 @@
 using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
+using T3.Editor.Gui.Help;
 using T3.Editor.Gui.Windows.Layouts;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.InputsAndTypes;
@@ -23,6 +24,12 @@ internal static class MarkdownOperatorLinks
     /// </summary>
     internal static void HandleOperatorRef(string opName, bool suppressTooltip = false)
     {
+        if (opName.StartsWith("ui:", StringComparison.Ordinal))
+        {
+            HandleTopicRef(opName, suppressTooltip);
+            return;
+        }
+
         if (!ImGui.IsItemHovered())
             return;
 
@@ -66,11 +73,52 @@ internal static class MarkdownOperatorLinks
     }
 
     /// <summary>
-    /// Text color for an <c>[OpName]</c> fragment — the operator's output-type color, or the plain body
-    /// color for an unknown name so it doesn't masquerade as a live link. Pass as <c>operatorColor</c>.
+    /// Hover tooltip for a <c>[ui:Id]</c> fragment — the help index's UI topic (editor concept/component).
+    /// Shows the topic term and its doc; an unknown id gets no interaction.
+    /// </summary>
+    private static void HandleTopicRef(string topicKey, bool suppressTooltip)
+    {
+        if (!ImGui.IsItemHovered())
+            return;
+
+        if (!HelpIndex.TryGetTopic(topicKey, out var topic) || topic == null)
+            return;
+
+        if (suppressTooltip)
+            return;
+
+        var scale = T3Ui.UiScaleFactor;
+        var tooltipWidth = TooltipWidth * scale;
+        ImGui.SetNextWindowSizeConstraints(new Vector2(tooltipWidth, 0), new Vector2(tooltipWidth, float.MaxValue));
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(10, 8) * scale);
+        ImGui.BeginTooltip();
+
+        ImGui.PushFont(Fonts.FontBold);
+        ImGui.TextUnformatted(topic.Term);
+        ImGui.PopFont();
+        ImGui.TextColored(UiColors.TextMuted, "UI topic");
+
+        if (!string.IsNullOrWhiteSpace(topic.Doc))
+        {
+            ImGui.Spacing();
+            _tooltipMarkdown.Draw(topic.Doc,
+                                  onOperatorRef: op => HandleOperatorRef(op, suppressTooltip: true),
+                                  operatorColor: GetOperatorColor);
+        }
+
+        ImGui.EndTooltip();
+        ImGui.PopStyleVar();
+    }
+
+    /// <summary>
+    /// Text color for an <c>[OpName]</c> / <c>[ui:Id]</c> fragment — the operator's output-type color, a fixed
+    /// accent for UI topics, or the plain body color for an unknown name. Pass as <c>operatorColor</c>.
     /// </summary>
     internal static Color GetOperatorColor(string opName)
     {
+        if (opName.StartsWith("ui:", StringComparison.Ordinal))
+            return HelpIndex.TryGetTopic(opName, out _) ? UiColors.StatusAutomated : UiColors.Text;
+
         if (!TryResolve(opName, out var symbol))
             return UiColors.Text;
 

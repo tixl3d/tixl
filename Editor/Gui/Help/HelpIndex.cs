@@ -37,6 +37,16 @@ internal static class HelpIndex
         string Url,
         int DurationSeconds);
 
+    /// <summary>A UI topic (editor concept/component) from the help index — the target of a <c>[ui:Id]</c> link.</summary>
+    internal sealed record TopicInfo(string Id, string Term, string Doc);
+
+    /// <summary>Resolves a <c>ui:&lt;id&gt;</c> key (as written in a <c>[ui:Id]</c> link) to its topic.</summary>
+    internal static bool TryGetTopic(string topicKey, out TopicInfo? topic)
+    {
+        EnsureLoaded();
+        return _topicsByKey.TryGetValue(topicKey, out topic);
+    }
+
     /// <summary>Meet-up segments discussing the operator with the given full path (namespace + name), newest data first as authored.</summary>
     internal static IReadOnlyList<OnlineVideoSegment> GetOperatorSegments(string operatorFullPath)
     {
@@ -58,6 +68,30 @@ internal static class HelpIndex
         var directory = ShippedContent.ResolveDirectory(".help", "references", "indices");
         LoadVideos(Path.Combine(directory, "videos.json"));
         LoadMentions(Path.Combine(directory, "mentions.json"));
+        LoadTopics(Path.Combine(directory, "topics.json"));
+    }
+
+    private static void LoadTopics(string path)
+    {
+        if (!File.Exists(path))
+            return;
+
+        try
+        {
+            var file = JsonConvert.DeserializeObject<TopicsFileDto>(File.ReadAllText(path));
+            if (file?.Topics == null)
+                return;
+
+            foreach (var (key, dto) in file.Topics)   // key is already "ui:<id>", matching a [ui:Id] link
+            {
+                if (!string.IsNullOrEmpty(key))
+                    _topicsByKey[key] = new TopicInfo(key, dto.Term ?? key, dto.Doc ?? "");
+            }
+        }
+        catch (Exception e)
+        {
+            Log.Debug($"Could not read help topic index from {path}: {e.Message}");
+        }
     }
 
     private static void LoadVideos(string path)
@@ -186,7 +220,19 @@ internal static class HelpIndex
         [JsonProperty("momentCount")] public int MomentCount;
     }
 
+    private sealed class TopicsFileDto
+    {
+        [JsonProperty("topics")] public Dictionary<string, TopicDto>? Topics;
+    }
+
+    private sealed class TopicDto
+    {
+        [JsonProperty("term")] public string? Term;
+        [JsonProperty("doc")] public string? Doc;
+    }
+
     private static bool _loaded;
     private static readonly Dictionary<string, List<OnlineVideoSegment>> _segmentsByKey = new();
     private static readonly Dictionary<string, VideoInfo> _videosById = new();
+    private static readonly Dictionary<string, TopicInfo> _topicsByKey = new();
 }
