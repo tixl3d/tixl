@@ -4,7 +4,7 @@ title: Recording — IO data (MIDI / OSC) capture and replay
 added: 2026-05-29
 added-in-version: 4.2
 scope: timeline
-tags: [hardware, essential]
+tags: [user, hardware, essential]
 prerequisites:
   - A project is open with the composition's Syncing mode set to **Timeline**.
   - A MIDI input device is connected (controller, keyboard, surface, etc.).
@@ -13,11 +13,11 @@ related-help:
   - ../.help/docs/using/Recording.md
 ---
 
-End-to-end verification of the IO data half of the recording feature: MIDI and OSC events
-during the record window are captured into a `.data` file, automatically wired into a
-`LoadDataClip` op on the timeline, and replayable through `SimulateIoData` so downstream
-`MidiInput` / `OscInput` ops fire identically to the live capture — even without the
-original device connected.
+As well as audio, a recording can capture the live control data you send while it runs —
+MIDI from a controller and OSC from a phone or app. Those incoming moves are saved as a
+data clip on the [ui:Timeline|timeline]. Later you can replay that take with a [SimulateIoData] op, and
+your project reacts exactly as it did live — even if the original controller or phone
+isn't connected anymore.
 
 ## Step: Record MIDI controller activity
 
@@ -26,39 +26,39 @@ Click the record button. Wiggle a few CC knobs / play a few notes on your MIDI
 controller for ~10 seconds. Stop.
 
 **Expected:**
-- During recording: a **LoadDataClip** op appears on a fresh layer one below the audio
-  clip (data on the lower row, audio on the upper).
-- The data clip's body shows per-event **tick marks** as events arrive (sparse mode), or
-  a soft fill at very high event density.
-- After stop: the clip's label changes to the new filename (e.g. `rec-007`).
+- During recording: a **[LoadDataClip]** operator appears on a fresh row just below the
+  audio clip (data on the lower row, audio on the upper).
+- The data clip's body shows a **tick mark** for each incoming event as it arrives, or a
+  soft fill when events come in very fast.
+- After stop: the clip's label changes to the new recording's name (e.g. `rec-007`).
 
-## Step: Inspect the recorded `.data` file
+## Step: The recorded controls play back
 
 **Action:**
-Open `<project>/Assets/dataclips/rec-NNN.data` in a text editor.
+Open the [ui:OutputWindow|Output Window] and pin the recording's [LoadDataClip] `Clip` output to preview it.
+Move the playhead through the clip.
 
 **Expected:**
-- Top-level keys: `Version`, `Metadata` (with `TixlVersion` + `RecordedAtUtc`), `Channels`.
-- One `Channel` entry per (device, MIDI channel, controller / note) tuple you exercised.
-- Each channel has `Path` (array starting with `"Midi"`), `Type: "float"`,
-  `DurationType` (`"Tick"` for CCs, `"Interval"` for notes), and an `Events` array.
-- CC events: `{ "Time": <secs>, "Value": <0–127> }`.
-- Note events: `{ "Time": <secs>, "EndTime": <secs>, "Value": <velocity> }`.
+- The preview shows one row per knob, note, or message you moved during the take — every
+  control you touched is there, and nothing you didn't.
+- Knob (CC) moves show as a line of ticks following the timeline; held notes show as bars
+  spanning from when the note started to when it ended.
+- A playhead line tracks the timeline's position across the data, and the events sit where
+  they happened in the take.
 
 ## Step: Replay the recording — chain with SimulateIoData
 
 **Action:**
-With the recording's `LoadDataClip` on the timeline, drop a **SimulateIoData** op into
+With the recording's [LoadDataClip] on the timeline, drop a **[SimulateIoData]** op into
 the graph. Wire `LoadDataClip.Clip → SimulateIoData.Clips`. Connect
 `SimulateIoData.Execute` into the parent's Execute. Move the playhead before the clip
 and press play.
 
 **Expected:**
-- Existing `MidiInput` ops in the graph configured to the recorded device fire
-  identically to the live capture — same device name match, same channel, same
-  controller / note number, same value progression.
-- Toggling `SimulateIoData.Enabled` to false stops the replay events; setting it back to
-  true resumes from the current playhead position (no replay of the events you skipped).
+- Any [MidiInput] ops set to the recorded controller respond exactly as they did live —
+  same channel, same knob / note, same movement — driven by the recording.
+- Toggling `SimulateIoData.Enabled` off stops the replayed moves; turning it back on
+  resumes from where the playhead is now (it doesn't replay the part you skipped).
 
 ## Step: Replay without the original device connected
 
@@ -67,34 +67,32 @@ Disconnect the MIDI controller. Restart the editor (so the device isn't enumerat
 the project. Hit play.
 
 **Expected:**
-- The `MidiInput` ops still receive the simulated events from `SimulateIoData`. The
-  recording drives them via the **SimulatedIoBus** path, which doesn't require the
-  hardware to be present.
-- The Console shows no warnings about the missing device.
+- The [MidiInput] ops still respond, driven by the recording instead of the controller —
+  the hardware doesn't need to be connected for the replay to work.
+- No warnings appear about the missing device.
 
 ## Step: OSC capture and replay
 
 **Action:**
-With an OSC client sending to the port configured in `CoreSettings.DefaultOscPort`, click
-record, send a few messages (e.g. `/foo/bar` with float values), stop. Connect an
-`OscInput` op bound to the same port to a visible parameter. Hit play.
+With an OSC app sending to your configured OSC port, click record, send a few messages
+(e.g. `/foo/bar` with some values), stop. Connect an [OscInput] op bound to the same port
+and address to a visible parameter. Hit play.
 
 **Expected:**
-- The `.data` file contains channels with `Path[0] == "OSC:<port>"` and the address
-  segments following.
-- During playback, `OscInput` receives the simulated messages identically and drives the
-  parameter.
+- The data clip preview shows a row for each OSC address you sent to.
+- During playback, [OscInput] receives the replayed messages just as it did live and
+  drives the parameter.
 
 ## Step: Multiple LoadDataClips drive one SimulateIoData
 
 **Action:**
-Drop the same `.data` file onto the graph twice (or two different `.data` files).
-Connect both `Clip` outputs into the same `SimulateIoData.Clips` multi-input. Hit play.
+Drop the same recording onto the graph twice (or two different recordings).
+Connect both `Clip` outputs into the same `SimulateIoData.Clips` input. Hit play.
 
 **Expected:**
-- Both clips dispatch independently — each has its own source-time cursor.
-- Events from both clips fire through the bus simultaneously when their TimeRanges
-  overlap with the playhead.
+- Both clips play back independently — each follows its own position in the take.
+- Where the two clips overlap the playhead at the same time, the moves from both replay
+  together.
 
 ## Step: Backward scrub
 
@@ -102,20 +100,20 @@ Connect both `Clip` outputs into the same `SimulateIoData.Clips` multi-input. Hi
 While playback is running through the clip, drag the playhead backward over the clip.
 
 **Expected:**
-- No events fire on the backward jump (the cursor snaps without dispatching).
-- Forward playback after the scrub resumes dispatching from the new cursor position.
-- Held MIDI notes are **not** auto-released (known limitation; not a regression).
+- Nothing replays on the backward jump — the position just moves without firing events.
+- Playing forward again after the scrub resumes replaying from the new position.
+- A MIDI note that was being held is **not** automatically released (known limitation).
 
 ## Step: Cutting a clip preserves event timing on both halves
 
 **Action:**
-With the data clip selected and `SimulateIoData` still wired in, position the playhead somewhere inside the clip and pick **Cut at time** from the clip context menu (or use the shortcut). Move the playhead through both halves and watch the simulated event dispatches.
+With the data clip selected and [SimulateIoData] still wired in, position the playhead somewhere inside the clip and pick **Cut at time** from the clip context menu (or use the shortcut). Move the playhead through both halves and watch how the recording replays.
 
 **Expected:**
-- The data clip is split into two clips; their `LoadDataClip` ops both reference the same `.data` file.
-- The body of the **left** clip shows only the events whose source time is before the cut; the **right** clip shows the events after the cut. No events vanish or shift sideways inside either body.
-- Playing across the split fires the recorded events in the same order and at the same wall-clock positions as before the cut — the playhead crossing the split is seamless.
-- Events that belong to the right half do **not** fire while the playhead is still in the left half (no cross-clip leakage).
+- The data clip splits into two clips, both still playing back the same recording.
+- The **left** clip's body shows only the events before the cut; the **right** clip shows the events after the cut. No events vanish or shift sideways inside either body.
+- Playing across the split replays the recorded moves in the same order and at the same moments as before the cut — crossing the split is seamless.
+- Events that belong to the right half do **not** replay while the playhead is still in the left half.
 
 ## Step: Trimming preserves stretch
 

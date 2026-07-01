@@ -4,30 +4,31 @@ title: DataClip — inspection and editing
 added: 2026-05-31
 added-in-version: 4.2
 scope: timeline
-tags: [essential]
+tags: [user, essential]
 prerequisites:
-  - A project is open with at least one recorded `.data` file on the timeline (run `recording-io-data` first if you don't have one).
+  - A project is open with at least one recorded data clip on the timeline (run `recording-io-data` first if you don't have one).
   - The composition's Syncing mode is **Timeline**.
 related-help:
   - ../.help/docs/using/Recording.md
 ---
 
-Verification of the DataClip output preview (clip mode), the in-canvas Remove flow with
-undo / write-back, and the timeline-side visualisation of interval events. These steps
-exercise the editing surfaces around a recorded clip — not the recording itself.
+Once you've recorded a take of control data, you can look inside the data clip and tidy it
+up — preview what was captured, see notes as bars on the [ui:Timeline|timeline], and remove channels or
+stretches of events you don't want, with full undo. This set covers viewing and editing a
+recorded data clip, not the recording itself.
 
 ## Step: Output preview works standalone (no SimulateIoData)
 
 **Action:**
-Select a `LoadDataClip` op on the graph that has **nothing connected** to its `Clip`
-output. Open the Output Window and pin the `Clip` output.
+Select a [LoadDataClip] op on the graph that has **nothing connected** to its `Clip`
+output. Open the [ui:OutputWindow|Output Window] and pin the `Clip` output.
 
 **Expected:**
-- The DataSet view shows the recorded channels and events immediately, on the first
-  frame the window draws — no need to wire a `SimulateIoData` op first.
-- The horizontal time raster is visible and labelled in source seconds.
-- A vertical playhead line sits at the timeline's mapped source position; pausing the
-  timeline freezes it, scrubbing the timeline moves it along the source-time axis.
+- The preview shows the recorded channels and events right away — you don't need to wire
+  up a [SimulateIoData] op first.
+- A time scale runs across the bottom, labelled in seconds.
+- A playhead line sits where the timeline currently is; pausing the timeline freezes it,
+  and scrubbing the timeline moves it across the data.
 
 ## Step: Clip-boundary overlay matches the TimeClip's SourceRange
 
@@ -36,27 +37,24 @@ Still in the Output Window with the DataClip preview open, look at the canvas
 background. Note where the orange-tinted shading begins and ends.
 
 **Expected:**
-- The visible canvas area inside `SourceRange.Start … SourceRange.End` (in source
-  seconds) is unshaded; everything outside that interval is shaded with a faint
-  `StatusAnimated` tint.
-- Two thin vertical lines mark the start and end of the source slice — the same palette
-  the composition-level TimeClip view uses on `SourceRange` handles.
-- Trimming the clip in the timeline updates the overlay live: trim the right edge inward
-  and the right boundary line moves to the new edge, the shaded region grows to fill the
-  rest.
+- The stretch of the recording the clip actually uses is left clear; everything outside
+  it is dimmed with a faint orange tint.
+- Two thin vertical lines mark the start and end of the used slice.
+- Trimming the clip on the timeline updates this live: trim the right edge inward and the
+  right line moves to the new edge while the dimmed area grows to fill the rest.
 
 ## Step: Interval events render as bars in the clip body
 
 **Action:**
 Look at the data clip on the timeline (not the Output Window). Make sure the recording
-includes MIDI note events.
+includes some held MIDI notes.
 
 **Expected:**
-- Note events render as **horizontal bars** spanning from each note-on to its note-off,
-  inside the clip body — not as 2 px ticks at the note-on position.
-- CC / OSC channels in the same clip still render as the existing tick density visualisation.
-- A note recorded mid-clip but never released (recorder shut down mid-note) stretches to
-  the right edge of the clip body instead of disappearing.
+- Held notes show as **horizontal bars** running from where each note started to where it
+  ended, inside the clip body — not as a single thin tick at the note's start.
+- Knob (CC) and OSC channels in the same clip still show as their line of ticks.
+- A note that was still held when the recording stopped stretches all the way to the right
+  edge of the clip rather than disappearing.
 
 ## Step: Remove selected channels via the output view
 
@@ -66,10 +64,10 @@ the left column to select them. The "Remove" button at the top becomes the activ
 action. Click **Remove**.
 
 **Expected:**
-- The selected channels disappear from both the Output Window and from the clip body
-  visualisation on the timeline.
-- The `.data` file on disk is rewritten — opening it in a text editor shows the removed
-  channels are no longer present.
+- The selected channels disappear from both the Output Window preview and the clip body
+  on the timeline.
+- The change is permanent — closing and reopening the project shows the channels are still
+  gone.
 - The selection is cleared after the action.
 
 ## Step: Undo restores removed channels (memory + disk)
@@ -78,11 +76,11 @@ action. Click **Remove**.
 Press `Ctrl+Z` immediately after the previous step.
 
 **Expected:**
-- The channels reappear in the Output Window and in the clip body, in their original
-  positions in the channel list.
-- The `.data` file on disk has the channels back as well — undo wrote the restored set
-  back, not just the in-memory state.
-- `Ctrl+Y` (Redo) reapplies the deletion and rewrites the file again.
+- The channels reappear in the Output Window and in the clip body, back in their original
+  order in the list.
+- The restore is permanent too — closing and reopening the project shows the channels are
+  back, not just on screen for now.
+- `Ctrl+Y` (Redo) removes them again, and that also sticks.
 
 ## Step: Remove events inside a time range
 
@@ -92,11 +90,11 @@ selection shows as a faint shaded vertical band). Optionally also pick a channel
 clicking its label. Click **Remove**.
 
 **Expected:**
-- Only events whose source time falls inside the selected range are removed; events on
-  the same channel outside the range stay.
-- If no channel is selected, the range deletion applies to **all** channels.
-- The `.data` file on disk reflects the deletion.
-- Undo restores every removed event back to its original index; redo deletes again.
+- Only the events inside the selected stretch of time are removed; events on the same
+  channel outside that stretch stay.
+- If no channel is selected, the removal applies to **all** channels.
+- The change is permanent (it survives closing and reopening the project).
+- Undo restores every removed event; redo deletes them again.
 
 ## Step: Edits propagate to sibling clips referencing the same file
 
@@ -105,32 +103,32 @@ With at least one Remove command already applied, **Cut** the data clip on the t
 (playhead inside the clip → context menu → **Cut at time**). Look at both halves.
 
 **Expected:**
-- Neither half resurrects the channels you deleted — the cut creates a sibling
-  `LoadDataClip` op that reads the same `.data` file via the shared cache.
-- The deletion is also still reflected on disk (rewritten by the previous Remove).
+- Neither half brings back the channels you deleted — the new clip from the cut reads the
+  same recording, with your edits already applied.
+- The deletion is still permanent (it survives closing and reopening the project).
 
 ## Step: Removed events do not fire during replay
 
 **Action:**
-Wire the clip into `SimulateIoData` and play through the clip.
+Wire the clip into [SimulateIoData] and play through the clip.
 
 **Expected:**
-- The events you removed do not fire — neither the deleted channels nor the events
-  inside a deleted time range produce dispatches on the bus.
-- Remaining events fire at the same source positions as before the edit.
+- The events you removed don't replay — neither the deleted channels nor the events inside
+  a deleted stretch of time drive anything.
+- The remaining events still replay at the same moments as before the edit.
 
 ## Step: Inline DataClip edit pane — context menu reveals the pane below the timeline
 
 **Action:**
-Right-click on the empty clip area with **no** DataClip selected and inspect the context
-menu. Then select a DataClip in the clip area, right-click it, and choose
+Right-click on the empty clip area with **no** data clip selected and look at the context
+menu. Then select a data clip in the clip area, right-click it, and choose
 **Show Clip Data**.
 
 **Expected:**
-- With no DataClip in the selection, the context menu has no **Show Clip Data** entry.
-- With a DataClip selected, the entry appears; choosing it opens a bottom pane with the
-  clip's channel list and event markers. Selecting an audio clip (or any non-DataClip)
-  makes the pane disappear again.
+- With no data clip selected, the context menu has no **Show Clip Data** entry.
+- With a data clip selected, the entry appears; choosing it opens a pane below the timeline
+  with the clip's channel list and event markers. Selecting an audio clip (or anything
+  that isn't a data clip) makes the pane disappear again.
 - Re-opening the context menu while the pane is visible shows a checkmark on
   **Show Clip Data**; choosing it again hides the pane.
 
@@ -141,11 +139,11 @@ With the pane visible, look at where the event ticks sit horizontally vs the tim
 beat lines / clip body in the row above.
 
 **Expected:**
-- Event ticks line up vertically with the same events drawn inside the clip body in the
-  row above — same X, same density.
-- The channel-row order matches the channel list in the Output Window DataSet view.
-- Interval (MIDI note) channels render as horizontal bars from note-on to note-off, not
-  as single-tick markers.
+- Event ticks line up directly under the same events drawn inside the clip body in the
+  row above — same horizontal position, same density.
+- The channel rows are in the same order as the channel list in the Output Window preview.
+- Held-note channels show as horizontal bars from note start to note end, not as single
+  ticks.
 
 ## Step: Resize splitter
 
@@ -154,10 +152,9 @@ Hover the thin gap between the dope-sheet area and the inline pane. Drag down to
 the pane, drag up to grow it.
 
 **Expected:**
-- A horizontal cursor (↕) appears on hover; clicking and dragging up/down resizes the
-  pane and the dope sheet area complementarily.
-- The pane height clamps so neither the dope sheet nor the pane can be squashed below
-  ~80 px.
+- A resize cursor (↕) appears on hover; dragging up/down resizes the pane and the dope
+  sheet above it, trading height between them.
+- The drag stops before either the dope sheet or the pane gets squashed too small.
 - Closing and re-opening the pane (close button, then context menu **Show Clip Data**)
   restores the dragged height.
 
@@ -167,10 +164,9 @@ the pane, drag up to grow it.
 With the pane visible, move the mouse cursor inside the pane and scroll the mouse wheel.
 
 **Expected:**
-- The timeline ruler above and the events inside the pane zoom together — they stay in
-  sync (the pane's X is the timeline's X).
-- The zoom centres around the mouse position; events under the cursor stay roughly
-  under the cursor as the scale changes.
+- The timeline above and the events inside the pane zoom together and stay lined up.
+- The zoom centres on the mouse; events under the cursor stay roughly under the cursor as
+  the scale changes.
 
 ## Step: Right-mouse drag pans both axes
 
@@ -193,7 +189,7 @@ Re-open it with the same clip selected.
 **Expected:**
 - The pane reopens scrolled back to the top (first channel visible), not at the
   scroll position you left it.
-- The same reset happens when you switch from one DataClip to another while the pane is
+- The same reset happens when you switch from one data clip to another while the pane is
   open.
 
 ## Step: Close button hides the pane (and any curve mode)
@@ -204,13 +200,13 @@ test the case where curve editing is active on a dope-sheet row in addition to t
 pane being open.
 
 **Expected:**
-- The pane disappears regardless of which mode (clip-editing OR curve-editing) drove it
-  open, and the Show-Clip-Data flag is cleared: selecting another DataClip does **not**
-  bring the pane back until **Show Clip Data** is chosen from the context menu again.
-- If curve editing was also active, that's cleared too — the pane stays hidden until
-  the user explicitly re-enables either gate.
-- The close icon is not occluded by the vertical scrollbar (when the channel list
-  overflows and the scrollbar appears, the icon shifts left to remain clickable).
+- The pane closes whether it was opened for clip editing or for curve editing, and stays
+  closed: selecting another data clip does **not** bring it back until you choose
+  **Show Clip Data** from the context menu again.
+- If curve editing was also active, it's turned off too — the pane stays hidden until you
+  explicitly re-open it.
+- The close icon stays clickable even when the channel list is long enough to show a
+  scrollbar — it shifts left so the scrollbar doesn't cover it.
 
 ## Step: Background clicks deselect with the pane open
 
@@ -219,20 +215,18 @@ With the pane visible, click on the empty background of the clip area or the dop
 above (not on a clip or keyframe).
 
 **Expected:**
-- The DataClip selection clears; the pane disappears (same affordance as without the
-  pane).
-- Keyframe selection clears too.
-- Drag-fence selection inside the dope sheet still works — it adds clips / keyframes
-  under the fence as expected.
+- The data clip is deselected and the pane disappears (the same as it would without the
+  pane open).
+- Any selected keyframes are deselected too.
+- Drag-selecting a rectangle inside the dope sheet still works — it selects the clips and
+  keyframes under it as expected.
 
 ## Step: Cross-type click switches selection cleanly
 
 **Action:**
-Click a DataClip (op TimeClip). Then click an audio clip. Then click the DataClip
-again.
+Click a data clip. Then click an audio clip. Then click the data clip again.
 
 **Expected:**
 - Each click leaves **only** the clicked clip selected — never both types at once.
-- The Parameter window shows the inspector for the currently-selected type each step;
-  the inline pane appears / disappears in step with whether the selected clip is a
-  DataClip.
+- The Parameter window shows the inspector for whichever type is selected each step; the
+  inline pane appears or disappears depending on whether the selected clip is a data clip.

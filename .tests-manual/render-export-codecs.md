@@ -4,18 +4,19 @@ title: Render Export — Video Codecs
 added: 2026-06-19
 added-in-version: 4.2
 scope: render-export
-tags: [essential]
+tags: [user, essential]
 prerequisites:
   - A project is open with an operator that has a Texture2D output selected or pinned in the Output Window (so "Render To File" can render it).
   - For the audio step, the project has a soundtrack on the timeline.
 ---
 
-Covers the video **Codec** selector in the "Render To File" window. The editor encodes via the bundled
-LGPL FFmpeg build — **all in-process, no external ffmpeg, no GPL**: **H.264** and **HEVC** (`.mp4`,
-hardware-accelerated where available, else software OpenH264 / libkvazaar), **ProRes** (`.mov`), **VP9**
-and **AV1** (`.mp4`, software delivery codecs), **FFV1** (`.mkv`, lossless), and **HAP ×3** (`.mov`). All carry
-AAC audio. The verification for each codec is a round-trip: render a short range, then re-import the file with a
-`[PlayVideo]` operator (or an external player) and confirm it decodes.
+This checks the **Codec** picker in the [ui:RenderSettings|Render To File] window. A codec is the format your video is saved
+in, and TiXL offers several: **H.264** and **HEVC** for everyday MP4 files, **ProRes** for editing, **VP9**
+and **AV1** as modern web formats, **FFV1** for lossless (perfect-quality) masters, and the three **Hap**
+options for fast playback in VJ and media-server tools. They all save with sound. You don't need to install
+anything extra — every codec is built in. The way to check each one is a round-trip: render a few seconds,
+then play the file back (either by loading it into a **[PlayVideo]** operator or opening it in a normal media
+player) and confirm it looks right.
 
 ## Step: The Codec dropdown lists all codecs with friendly labels
 
@@ -28,15 +29,15 @@ Open the **Render To File** window and select the **Format & Quality** section i
 - Opening it lists: **H.264**, **HEVC (H.265)**, **ProRes**, **VP9**, **AV1**, **FFV1**, **Hap**, **Hap
   Alpha**, **Hap Q** — note the friendly labels (e.g. "Hap Alpha", not "HapAlpha").
 
-## Step: The filename extension tracks the codec
+## Step: The filename ending follows the codec
 
 **Action:**
 Note the **Filename** field in the **Output Target** section (e.g. `render-v01.mp4`). Change **Codec** (in
 **Format & Quality**) to **ProRes**, then to **FFV1**, then back to **H264**, watching the filename each time.
 
 **Expected:**
-- The extension follows the codec: ProRes → `.mov`, FFV1 → `.mkv`, VP9/AV1/H264 → `.mp4`.
-- The base name (e.g. `render-v01`) is unchanged — only the extension swaps.
+- The ending of the filename follows the codec: ProRes → `.mov`, FFV1 → `.mkv`, VP9/AV1/H264 → `.mp4`.
+- The name itself (e.g. `render-v01`) stays the same — only the ending changes.
 
 ## Step: Bitrate shows only for the rate-controlled codecs
 
@@ -56,77 +57,75 @@ switching the codec. Try **H264** first, then a non-H.264 codec (e.g. **ProRes**
 
 **Expected:**
 - A single muted line appears under the dropdown (it may briefly read "Checking encoder…" the first time).
-- On a machine with a working GPU encoder, **H264** shows **"Hardware encoder (NVIDIA NVENC / Intel Quick
-  Sync / AMD AMF)"** matching the GPU. (NVENC in the bundled build needs NVIDIA driver 570+; Intel Quick Sync
-  works via `nv12`.)
-- On a machine with **no** working hardware encoder, **H264** shows **"Software encoder"** — it encodes
-  in-process with **OpenH264** (no GPL, no external ffmpeg).
-- Non-H.264 codecs (ProRes/VP9/AV1/FFV1/HAP) show **"Software encoder"** too.
+- On a machine whose graphics card can speed up encoding, **H264** shows **"Hardware encoder (…)"** naming
+  the graphics card it's using.
+- On a machine that can't use the graphics card, **H264** shows **"Software encoder"** — TiXL encodes it
+  on its own, no extra software needed.
+- The non-H.264 codecs (ProRes, VP9, AV1, FFV1, Hap) show **"Software encoder"** too.
 - Switching codecs swaps the line in place without shifting the rest of the panel.
-- **No codec ever asks for an external ffmpeg or a download** — everything encodes in-process.
+- **No codec ever asks you to install anything or download a file** — they all work out of the box.
 
 ## Step: H.264 export produces a playable MP4 with audio
 
 **Action:**
 Set **Codec** to **H264**, choose a short range (a few seconds), make sure **Export Audio** is on, and press
-**Render**. When it finishes, re-import the written file with a `[PlayVideo]` operator (or open it in an
-external player).
+**Render**. When it finishes, play the file back — load it into a **[PlayVideo]** operator or open it in a
+normal media player.
 
 **Expected:**
-- A `.mp4` file is written to the chosen folder.
-- It plays back with the correct image and audible, in-sync audio.
+- A video file appears in the chosen folder.
+- It plays back with the correct image and audible, in-sync sound.
 
 ## Step: HEVC export produces a playable MP4
 
 **Action:**
-Set **Codec** to **HEVC (H.265)**, choose a short range, press **Render**, then re-import with
-`[PlayVideo]`.
+Set **Codec** to **HEVC (H.265)**, choose a short range, press **Render**, then play it back with
+**[PlayVideo]**.
 
 **Expected:**
-- A `.mp4` file is written and plays back with the correct image. The indicator reads **"Hardware encoder
-  (…)"** on a machine with HEVC hardware support, else **"Software encoder"** (libkvazaar — software HEVC is
-  slow, so expect a slower render).
-- No external ffmpeg / no popup. (Note: HEVC-in-MP4 from a software encode may not preview in Windows
-  Explorer / QuickTime without the `hvc1` tag, but plays in `[PlayVideo]` and VLC.)
+- A video file appears and plays back with the correct image. The indicator reads **"Hardware encoder
+  (…)"** on a machine whose graphics card supports HEVC, otherwise **"Software encoder"** (in that case the
+  render is noticeably slower).
+- No prompts to install anything. (Note: a software-encoded HEVC file may not show a preview thumbnail in
+  Windows Explorer or QuickTime, but it plays fine in **[PlayVideo]** and in VLC.)
 
 ## Step: ProRes export produces a playable MOV
 
 **Action:**
-Set **Codec** to **ProRes**, press **Render**, then re-import the output with `[PlayVideo]`.
+Set **Codec** to **ProRes**, press **Render**, then play the result back with **[PlayVideo]**.
 
 **Expected:**
-- A `.mov` file is written and plays back with the correct image.
+- A video file appears and plays back with the correct image.
 - The file is noticeably larger than the H.264 render of the same range.
 
 ## Step: VP9, AV1, and FFV1 each export and re-import
 
 **Action:**
 For each of **VP9**, **AV1**, and **FFV1** in turn: keep the range short, press **Render**, then
-re-import the output with `[PlayVideo]`. VP9 and AV1 are software-encoded, so expect a slower render than
-H.264 — especially at high resolution.
+play the result back with **[PlayVideo]**. VP9 and AV1 take longer to render than H.264 — especially at
+high resolution.
 
 **Expected:**
-- Each writes its file (`.mp4` for VP9/AV1, `.mkv` for FFV1) and plays back with the correct image.
-- FFV1 is visually lossless and its file is much larger than the others.
-- No red operator-error state on the `[PlayVideo]` re-import, and no editor freeze during the render.
+- Each one produces a video file that plays back with the correct image.
+- FFV1 looks identical to the original (lossless) and its file is much larger than the others.
+- The **[PlayVideo]** operator shows no red error when loading any of them, and the editor never freezes during the render.
 
-## Step: HAP exports in-process with a size estimate
+## Step: Hap exports with a size estimate
 
-HAP encodes **in-process** with the bundled FFmpeg (the build includes the `hap` encoder) — no external
-ffmpeg, no download.
+The Hap codecs are built in and need nothing extra installed.
 
 **Action:**
-Select **Hap** (also try **HapAlpha** / **HapQ**), keep the range short, **Render**, then re-import the
-output with `[PlayVideo]`.
+Select **Hap** (also try **HapAlpha** / **HapQ**), keep the range short, **Render**, then play the result
+back with **[PlayVideo]**.
 
 **Expected:**
-- The three HAP entries appear; the filename extension becomes `.mov`; the inline line reads **"Software
-  encoder"** and **Render** is enabled — no popup, no external ffmpeg.
-- A size estimate appears (e.g. **"Est. 1.9 GB (1120×932, DXT before Snappy)"**) — HAP is a fixed-ratio codec,
-  so the prediction is reliable; HapAlpha/HapQ are ~2× Hap. The dimensions shown are **rounded down to a
-  multiple of 4** (HAP's DXT block size), and the footer summary line shows the same rounded size, not the raw one.
-- A `.mov` is written and plays back with the correct image (HapAlpha preserves alpha; HapQ is higher
-  quality / larger). With **Export Audio** on, it carries an AAC track.
+- The three Hap entries appear; the filename ends in `.mov`; the inline line reads **"Software encoder"** and
+  **Render** is enabled — no prompts, nothing to install.
+- A size estimate appears (e.g. **"Est. 1.9 GB"** with the dimensions) — Hap files are a predictable size, so
+  the estimate is reliable; **HapAlpha** and **HapQ** are about twice the size of **Hap**. The estimate and the
+  footer summary line agree.
+- A video file appears and plays back with the correct image (**HapAlpha** keeps transparency; **HapQ** is
+  higher quality and larger). With **Export Audio** on, it includes sound.
 
 ## Step: Codec choice survives save and reload
 
@@ -135,7 +134,7 @@ Set **Codec** to **AV1**, save the project, then close and reopen it (or reload)
 window again.
 
 **Expected:**
-- **Codec** is still **AV1**, and the **Filename** still ends in `.mp4`.
+- **Codec** is still **AV1**, and the **Filename** still ends in `.mp4`. (The choice was remembered.)
 
 ## Step: The content header has a section-aware help button
 

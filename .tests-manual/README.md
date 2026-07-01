@@ -96,6 +96,20 @@ Tags are free-form but standardize on a short core vocabulary so the runner can 
 - `perf` — performance-sensitive observation steps
 - `flaky` — known intermittent; keep until fixed
 
+### Audience — every set carries exactly one
+
+Each set is tagged for **who** runs it, so the runner can present two clean lists:
+
+- `user` — an artist verifying something they'd actually do in TiXL: load a project, set an
+  audio source, record, export. Written in plain language — name things by what the user sees on
+  screen, not by the file, format, or class behind them.
+- `dev` — a contributor verifying editor internals or the authoring/build workflow: creating
+  operators, undo/redo of graph edits, build-failure messages, the markdown renderer. These keep
+  their technical detail — their audience wants it.
+
+When a set could read either way, pick by who is *expected to run it*: if a non-coding artist can
+follow it to completion, it's `user`.
+
 ## Authoring tips
 
 - Write for someone who has never used TiXL — name menus, buttons, and windows explicitly.

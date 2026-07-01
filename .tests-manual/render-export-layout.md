@@ -4,15 +4,15 @@ title: Render Export — Sidebar Layout & Footer
 added: 2026-06-20
 added-in-version: 4.2
 scope: render-export
-tags: [essential]
+tags: [user, essential]
 prerequisites:
   - A project is open with an operator that has a Texture2D output selected or pinned in the Output Window (so "Render To File" can render it).
 ---
 
-Covers the restructured **Render To File** window: a left sidebar splits the settings into **Source**,
-**Format & Quality**, and **Output Target**, and a sticky footer holds the one-line summary and the primary
-**Render** button. Also checks the restyled shared controls (segmented buttons, checkboxes) that this window
-now uses.
+This checks the layout of the [ui:RenderSettings|Render To File] window. A list on the left splits the settings into three
+groups — **Source**, **Format & Quality**, and **Output Target** — and a bar pinned along the bottom shows a
+one-line summary of what you're about to export plus the main **Render** button. It also looks at the styling
+of the shared controls (the pill-shaped selectors and the checkboxes) used here.
 
 ## Step: The window has a sidebar with three sections
 
@@ -98,10 +98,10 @@ Choose a short range and press **Render**. Watch the footer while it encodes.
 ## Step: A non-renderable output shows a single message
 
 **Action:**
-Deselect / unpin the texture output (or select an operator without a Texture2D output) so nothing renderable
-is available, then open **Render To File**.
+Deselect / unpin the image output (or select an operator that doesn't produce an image) so there's nothing
+to render, then open **Render To File**.
 
 **Expected:**
 - Instead of the sidebar and footer, the window shows a single explanatory line (e.g. "The output view is
-  empty" or "Select or pin a Symbol with Texture2D output…").
-- Restoring a valid texture output brings the full sidebar layout back.
+  empty" or a prompt to select or pin an operator that produces an image).
+- Restoring a valid image output brings the full sidebar layout back.

@@ -2,7 +2,7 @@
 id: help-window
 title: Help Window
 scope: help
-tags: [essential]
+tags: [user, essential]
 added: 2026-06-24
 added-in-version: 4.2
 prerequisites:
@@ -12,8 +12,10 @@ related-help:
   - ../.agentic/Plans/Plan_HelpWindow.md
 ---
 
-Covers the dockable Help window: following the hovered/selected operator, the pin + history flow, the
-ranked "Discussed in meet-ups" resource list, and the Learn tab.
+The Help window is your built-in guide while you work. It follows whatever operator you point at or
+select and shows what it does. You can pin a topic so it stays put, step back and forth through topics
+you've looked at, jump to videos where an operator is discussed, and switch to the Learn tab for the
+latest release notes.
 
 ## Step: Opening the Help window
 
@@ -21,18 +23,18 @@ ranked "Discussed in meet-ups" resource list, and the Learn tab.
 Open the `Windows` menu in the main menu bar and click `Help`.
 
 **Expected:**
-- A window titled `Help` appears (dock it next to the Parameter window if it floats).
+- A window titled `Help` appears (dock it next to the [ui:ParameterWindow|Parameter window] if it floats).
 - The header shows two tabs, `Help` and `Learn`, with `Help` active.
 - With nothing hovered or selected, the body reads "Hover or select an operator to see its description."
 
 ## Step: Following the hovered operator
 
 **Action:**
-With the Help window visible, move the mouse over different operators in the Graph window without clicking.
+With the Help window visible, move the mouse over different operators in the [ui:Graph|Graph window] without clicking.
 
 **Expected:**
 - The Help body updates instantly as the pointer crosses each operator — no hover delay.
-- It shows that operator's name, namespace, and description (the same content as the Parameter window's help view).
+- It shows that operator's name and description (the same content you'd see in the Parameter window's help view).
 
 ## Step: Following the selection
 
@@ -79,9 +81,8 @@ Hover one of the meet-up resource rows, then click it.
 - A tooltip appears immediately: a thumbnail on the left (with a play badge and a `Tutorial 5:23` type +
   full-length label), and on the right a caps header like `5MIN ON YOUTUBE / SEP 2024`, the video title in
   bold white (clamped with `...` if long), and the "what you'll learn" note.
-- (Thumbnails load from the dev checkout's `.help/.tmp/video-thumbnails/`; if absent the tooltip shows the
-  text only.)
-- Clicking the row opens the video in the default browser at the segment's start time.
+- (If a thumbnail image isn't available, the tooltip simply shows the text only.)
+- Clicking the row opens the video in your browser, jumped to the moment that operator is discussed.
 
 ## Step: Pinning a topic
 
@@ -96,14 +97,14 @@ operators and select different ones in the graph.
 ## Step: History back and forward
 
 **Action:**
-While pinned on one operator, pin a second operator (hover it is not enough — the panel is detached; instead
-click the pin again to unpin, hover/select the second operator, then pin it). Use the `‹` and `›` chevron
-buttons in the header.
+While pinned on one operator, pin a second operator (hovering isn't enough while pinned — click the pin
+again to unpin, hover or select the second operator, then pin it). Now use the `‹` and `›` arrow buttons
+in the header.
 
 **Expected:**
 - `‹` returns to the previously pinned operator; `›` steps forward again.
-- Landing on a history entry keeps the panel pinned (it does not jump back to following the selection).
-- The chevrons are dimmed and inert at the ends of the history.
+- Landing on an earlier topic keeps it pinned (it doesn't jump back to following your selection).
+- The arrows are dimmed and do nothing once you reach the start or end of your history.
 
 ## Step: Unpinning
 
@@ -120,6 +121,6 @@ Click the filled pin icon again, or the `✕` button shown while pinned.
 Click the `Learn` tab in the header.
 
 **Expected:**
-- The body shows the current version's release notes (rendered markdown with operator links), or
-  "No release notes for this version yet." if none ship with this build.
+- The body shows the current version's release notes, nicely formatted with clickable operator links, or
+  "No release notes for this version yet." if this build doesn't include any.
 - Switching back to `Help` restores the operator doc view.

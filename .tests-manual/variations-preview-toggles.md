@@ -4,7 +4,7 @@ title: Variation Window Preview Toggles
 added: 2026-06-11
 added-in-version: 4.3
 scope: variations-window
-tags: [essential]
+tags: [user, essential]
 prerequisites:
   - A writable project is open.
   - The Variations window is visible.
@@ -13,9 +13,10 @@ related-help:
   - ../.help/docs/using/PresetsAndSnapshots.md
 ---
 
-Covers the header icon toggles for "Preview on hover" and "Live render
-previews" in the Variations window, the documentation button, and that live
-previews never overwrite the default thumbnails shipped with a package.
+The [ui:VariationWindow|Variations window] can give you a quick look at a preset before you commit to
+it. This checks the two header toggles — "Preview on hover" and "Live render
+previews" — plus the help button, and confirms that the temporary live previews
+never replace the default thumbnails that came with a package.
 
 ## Step: Header icons are visible
 
@@ -24,10 +25,9 @@ Select an operator with presets (e.g. [Blob]) so the Variations window shows
 its presets. Look at the right side of the window header.
 
 **Expected:**
-- Three icons are right-aligned in the header: a hover-preview toggle, a
+- Three icons sit at the right of the header: a hover-preview toggle, a
   live-preview toggle, and a help icon.
-- Active toggles are highlighted in the attention color; inactive ones are
-  dimmed.
+- Toggles that are on are highlighted; ones that are off look dimmed.
 
 ## Step: Toggles stay in sync with the context menu
 
@@ -52,15 +52,17 @@ it and hover again.
 ## Step: Live previews don't replace default thumbnails
 
 **Action:**
-Note the current thumbnails. Enable the live-preview icon, change a parameter
-of the selected operator so the rendering looks clearly different, and wait
-until the thumbnails have re-rendered. Then disable the live-preview icon.
+Note what the current thumbnails look like. Enable the live-preview icon, change
+a parameter of the selected operator so the rendering looks clearly different,
+and wait until the thumbnails have re-rendered. Then disable the live-preview
+icon. Finally, close the project and reopen it.
 
 **Expected:**
-- While enabled, thumbnails re-render live and show the changed output.
-- After disabling, the original default thumbnails reappear.
-- The files under the package's `.meta/Thumbnails/` folder are unchanged
-  (live previews are written to the user's temp folder instead).
+- While enabled, the thumbnails re-render live and show the changed output.
+- After disabling, the original default thumbnails come back.
+- After reopening the project, the presets still show their original default
+  thumbnails — the live previews were only temporary and never replaced the
+  defaults that ship with the package.
 
 ## Step: Explicitly updating defaults still works
 

@@ -2,7 +2,7 @@
 id: snapshot-control-view
 title: Snapshot Control View
 scope: parameter-window
-tags: [essential]
+tags: [user, essential]
 added: 2026-06-13
 added-in-version: 4.3
 prerequisites:
@@ -12,13 +12,13 @@ related-help:
   - ../.help/docs/using/PresetsAndSnapshots.md
 ---
 
-Covers the snapshot control view shown in the Parameter window when nothing is selected in the graph: the snapshot selector bar, editable per-operator parameter rows, and how it stays in sync with the Variations window.
+When nothing is selected in the graph, the [ui:ParameterWindow|Parameter window] shows the [ui:ControlView|snapshot control view] — a single place to capture, name, switch, and tweak your snapshots. This walks through the selector bar at the top, the editable parameter rows for each operator below it, and how everything stays in step with the Variations window.
 
 ## Step: Enabling operators for snapshots
 
 **Action:**
-In the Graph window:
-1. Add two value-driven operators (e.g. `[Blob]` and `[RadialGradient]`).
+In the [ui:Graph|Graph] window:
+1. Add two operators with adjustable parameters (e.g. `[Blob]` and `[RadialGradient]`).
 2. Right-click each one and choose "Enable for snapshots" from the context menu.
 3. Click on the empty graph background so nothing is selected.
 
@@ -38,7 +38,7 @@ In the Graph window:
   name and pressing Enter (or clicking away) stores it.
 - The new snapshot is the active one.
 - Below the bar, both enabled operators are listed with their captured parameters in rounded panels, ordered by their vertical position in the graph.
-- The Variations window shows a new snapshot thumbnail.
+- The [ui:VariationWindow|Variations window] shows a new snapshot thumbnail.
 
 ## Step: Controller-index grid
 
@@ -352,22 +352,22 @@ With an operator that has only some parameters enabled:
 **Expected:**
 - All of its parameters become controlled (knob icons everywhere, all rows listed in the control view).
 
-## Step: Old project files keep per-op semantics
+## Step: Old projects still behave the same
 
 **Action:**
 1. Open a project saved before per-parameter control existed, with operators enabled for snapshots.
-2. Inspect them in the snapshot control view.
-3. Close TiXL *without changing anything* and check the project's `.t3ui` file modification time.
+2. Look at them in the snapshot control view.
+3. *Without changing anything*, watch the title bar / save indicator for an "unsaved changes" marker.
 
 **Expected:**
-- All blendable parameters of the enabled operators are listed and marked as controlled — identical to the old behavior.
-- The `.t3ui` files are not rewritten by merely loading and viewing.
+- Every adjustable parameter of the enabled operators is listed and marked as controlled — exactly like before.
+- Just opening and viewing the project does not mark it as changed (no "unsaved changes" appears and nothing lands on the undo history), so the old project is left untouched.
 
-## Step: No control view for read-only library compositions
+## Step: No control view for read-only library operators
 
 **Action:**
-1. Navigate into a Lib-namespace operator (e.g. enter `[Blob]` with `i`).
+1. Step inside one of TiXL's built-in library operators (e.g. enter `[Blob]` with `i`).
 2. Deselect everything.
 
 **Expected:**
-- The Parameter window does not show the snapshot control view.
+- The Parameter window does not show the snapshot control view (these built-in operators are read-only, so there's nothing to capture here).

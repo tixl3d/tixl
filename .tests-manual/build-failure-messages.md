@@ -4,7 +4,7 @@ title: Build-Failure Messages on New Project
 added: 2026-06-03
 added-in-version: 4.3
 scope: project-creation
-tags: [edge, essential]
+tags: [dev, edge, essential]
 prerequisites:
   - TiXL is closed before the first step. Several steps require modifying PATH
     or moving files before launching the editor.

@@ -2,26 +2,26 @@
 id: audio-input-device-default
 title: Portable Audio Input Device
 scope: project-settings
-tags: [essential, audio]
+tags: [user, essential, audio]
 added: 2026-06-15
 added-in-version: 4.2
 prerequisites:
   - A project is open.
-  - At least one WASAPI audio input (microphone, line-in, or loopback device) is available on this machine.
+  - At least one audio input is available on this machine (a microphone, line-in, or a "what you hear" / loopback device).
 related-help:
   - ../.help/docs/using/LivePerformances.md
 ---
 
-Verifies that the external audio input device a project uses can be left as a
-machine-independent default — so a shared project resolves to whatever device
-each machine is configured for — while still allowing a per-project override.
-The machine's default device is stored on the machine (in `projectSettings.json`),
-not inside the project file.
+A project can react to live audio. This checks that you can leave the input as a
+**default** — so the project picks up whatever microphone or line-in each machine
+is set to — and still pin it to one specific device when you want to. The default
+choice is remembered on your machine, not saved inside the project, so a project
+you share keeps working on someone else's setup.
 
 ## Step: Switch the project to an external audio device
 
 **Action:**
-Open the project play settings (gear icon in the timeline toolbar). Check
+Open the [ui:ProjectSettings|project play settings] (gear icon in the timeline toolbar). Check
 "Specify settings for <project>" if needed, then set **Audio Source** to
 **External Device**.
 
@@ -48,13 +48,16 @@ Open the **Default Device** dropdown and select a real input device that carries
 - The Input Level meter responds to the incoming signal.
 - The selection persists if you close and reopen the play settings.
 
-## Step: The default selection is not written into the project
+## Step: The default isn't baked into the project
 
 **Action:**
-Save the project. Open its `.t3` file in a text editor and find `"AudioInputDeviceName"`.
+Save and close the project. In [ui:Settings] → Audio, change **Default Input Device** to a
+different input, then reopen the project.
 
 **Expected:**
-- `"AudioInputDeviceName"` is an empty string (`""`) — the concrete device name is **not** stored in the project.
+- The project's audio now follows the new machine default — it did **not** remember the
+  specific device you had picked before. (A shared project behaves the same way on another
+  machine: it uses that machine's default, not yours.)
 
 ## Step: The same setting drives the global Settings window
 
@@ -68,10 +71,12 @@ Open **Settings → Audio** and scroll to **Default Input Device**.
 ## Step: A specific device can still override per project
 
 **Action:**
-Back in the project play settings, open **Input Device** and select a concrete device by name
-(not **Default Audio Input**).
+Back in the project play settings, open **Input Device** and pick a specific device by name
+(anything other than **Default Audio Input**).
 
 **Expected:**
-- The **Default Device** picker disappears (the project now uses an explicit override).
-- Saving and reopening the `.t3` shows that device name stored in `"AudioInputDeviceName"`.
-- Selecting **Default Audio Input** again clears it back to the machine default.
+- The **Default Device** picker disappears — the project now sticks to the device you named.
+- Save, close, and reopen: the project still uses that exact device, even if the machine's
+  default has changed. This is the project overriding the default on purpose.
+- Switching **Input Device** back to **Default Audio Input** returns it to following the
+  machine default.

@@ -2,7 +2,7 @@
 id: alpha-folder-separation
 title: Alpha & stable folder separation
 scope: settings
-tags: [essential]
+tags: [dev, essential]
 added: 2026-05-31
 added-in-version: 4.2
 prerequisites:

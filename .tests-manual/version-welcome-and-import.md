@@ -2,7 +2,7 @@
 id: version-welcome-and-import
 title: Version welcome popup & import
 scope: settings
-tags: [essential]
+tags: [user, essential]
 added: 2026-05-31
 added-in-version: 4.2
 prerequisites:
@@ -12,14 +12,14 @@ related-help:
   - ../.agentic/Plans/Plan_AlphaSeparation.md
 ---
 
-Verifies the welcome popup that appears the first time a user runs a version they haven't run in this settings folder before, and the optional import of projects/settings/layouts/themes/keymaps from a previously installed version.
+The first time you run a new version of TiXL, a [ui:WelcomeWindow|welcome popup] greets you. It can also offer to bring your projects, settings, layouts, themes, and keymaps over from a version you had installed before, so you don't start from scratch. This test walks through that welcome and import.
 
-The "first time" state is tracked by `versionMarker.json` in the settings folder. To re-test the first-run experience, close TiXL and delete that file (and, to test the fresh-folder import section, start from a settings folder with no `userSettings.json`).
+TiXL remembers that it has already greeted you for a given version. To see the first-run experience again, you'll need to start from a fresh settings folder (the prerequisites explain how) — otherwise the popup won't reappear.
 
 ## Step: First run shows the welcome popup
 
 **Action:**
-With no `versionMarker.json` in the current settings folder, start TiXL. Dismiss the user-name dialog if it appears (first-ever runs only).
+Starting from a fresh settings folder (so this version hasn't been run here before), start TiXL. Dismiss the user-name dialog if it appears (only on a brand-new install).
 
 **Expected:**
 - A modal welcome popup appears.
@@ -36,7 +36,7 @@ Look at the popup for an "Import from previous version" section.
 - On a freshly created settings folder with a previous version present on disk, the section is shown with checkboxes: Projects, Settings, Layouts, Themes, Keymaps.
 - Categories with no matching source data are disabled, with a tooltip explaining why.
 - The Projects row shows the approximate size of the previous project folder.
-- If the current folder was already used before (it has a `versionMarker.json` or `userSettings.json`), the import section is absent.
+- If this version has been run in this folder before, the import section is absent.
 
 ## Step: Import settings only
 
@@ -44,9 +44,9 @@ Look at the popup for an "Import from previous version" section.
 Tick only `Settings`, then click "Import selected".
 
 **Expected:**
-- The user name, UI scale, theme name, and keymap name from the previous version are applied (visible after the import, some after restart).
-- Layouts and themes files are not copied.
-- The previous version's folders are unchanged.
+- Your user name, UI scale, theme, and keymap from the previous version are applied (some take effect right away, some after a restart).
+- Your layouts and saved themes are not brought over — only the settings.
+- Your previous version is left untouched and still works as before.
 
 ## Step: Import projects
 
@@ -56,8 +56,8 @@ On a fresh run, tick only `Projects`, click "Import selected", and wait for comp
 **Expected:**
 - While copying, the popup shows "Importing…".
 - When done it shows an "Import complete" message.
-- The project tree appears under the current version's Documents folder.
-- The previous version's project folder is byte-for-byte unchanged (nothing moved or deleted).
+- Your projects from the previous version now show up in this version.
+- Your previous version still has all its projects — nothing was moved or deleted, only copied.
 
 ## Step: Release notes render with operator links
 
@@ -65,8 +65,8 @@ On a fresh run, tick only `Projects`, click "Import selected", and wait for comp
 On the Welcome tab, scroll to the "Release Notes" section. Hover an operator reference such as `[SwiftCamDevice]`, then click it.
 
 **Expected:**
-- The release notes from `.help/release-notes/alpha.md` (alpha) or `<major>.<minor>.md` (stable) render as formatted markdown — headings, bullets, and inline `[text](url)` links.
-- Operator references like `[SwiftCamDevice]` show a hand cursor and a tooltip with the operator's namespace and description on hover.
+- The release notes for this version render as nicely formatted text — headings, bullets, and clickable web links.
+- Operator references like `[SwiftCamDevice]` show a hand cursor and, on hover, a tooltip describing that operator.
 - Clicking an operator reference opens the Symbol Library filtered to that operator.
 - An unknown operator name renders as plain text with no tooltip or click.
 - If no release-notes file exists for the version, the section shows "No release notes for this version yet."
@@ -86,8 +86,7 @@ On the Test new Features tab, select a set and click "Start Test".
 Close the popup (Close button or click away), then restart TiXL without changing versions.
 
 **Expected:**
-- `versionMarker.json` exists in the settings folder and records the current version.
-- On restart at the same version, the welcome popup does not appear.
+- On restart at the same version, the welcome popup does not appear again — TiXL remembers it has already greeted you.
 
 ## Step: Reopen from the Help menu
 
@@ -101,8 +100,8 @@ Open `Help → Welcome`.
 ## Step: Downgrade does not reset the marker
 
 **Action:**
-With the marker recording a higher version (e.g. `4.3.1`), run an older build (e.g. `4.3.0`) against the same folder, then close it and inspect `versionMarker.json`.
+After running a newer build (e.g. `4.3.1`) in this folder, run an older build (e.g. `4.3.0`) against the same folder, then close it and start the newer build again.
 
 **Expected:**
-- No welcome popup appears for the older build (it's classified as a downgrade).
-- `versionMarker.json` still records the higher version — it is not lowered.
+- No welcome popup appears for the older build — going back to an older version is not treated as a first run.
+- When you return to the newer build, it still doesn't greet you — TiXL remembers the highest version you've run and doesn't forget it after a downgrade.

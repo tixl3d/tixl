@@ -2,7 +2,7 @@
 id: asset-library-external-changes
 title: Asset Library Sync with External File Changes
 scope: asset-library
-tags: [essential, edge]
+tags: [user, essential, edge]
 added: 2026-06-10
 added-in-version: 4.3
 prerequisites:
@@ -10,18 +10,19 @@ prerequisites:
   - A file manager (e.g. Windows Explorer) is open at the project's `Assets/` folder.
 ---
 
-Verifies that the Assets window picks up files that are added, deleted, or renamed
-outside of TiXL — e.g. by copying files in Windows Explorer or exporting directly
-from another application like Blender. No operator needs to reference any file for
-this to work.
+When you add, delete, or rename a file in your project's assets outside of TiXL —
+say you drop a new texture into the folder from Windows Explorer, or export one
+straight from another app like Blender — the [ui:AssetLibrary|Assets window] should notice and update
+on its own. This checks that it keeps in step with whatever's in the folder, without
+you having to refresh anything.
 
 ## Step: Adding a file externally
 
 **Action:**
-In Windows Explorer, copy any image file (e.g. a `.png`) into the project's `Assets/` folder while TiXL is running.
+In Windows Explorer, copy any image file (e.g. a PNG) into the project's `Assets/` folder while TiXL is running.
 
 **Expected:**
-- Within about a second, the new file appears in the Assets window without any interaction in TiXL.
+- Within about a second, the new file shows up in the Assets window on its own — you don't have to click or refresh anything in TiXL.
 
 ## Step: Adding a file to a subfolder
 

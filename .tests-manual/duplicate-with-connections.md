@@ -4,85 +4,85 @@ title: Duplicate With Connections
 added: 2026-06-12
 added-in-version: 4.3
 scope: graph-window
-tags: [essential]
+tags: [user, essential]
 prerequisites:
-  - A writable project is open in the Graph Window.
-  - A composition you can edit with a few operators wired together.
+  - A project you can edit is open in the Graph Window.
+  - A graph you can edit, with a few operators wired together.
 related-help:
   - ../.help/docs/using/KeyboardShortcuts.md
 ---
 
-Covers `Duplicate With Connections` (`Ctrl+Shift+D`), which duplicates the
-selected operators — like plain `Duplicate` (`Ctrl+D`), pasting at the mouse
-position — but also keeps the wiring that reaches into the selection from
-outside. Connections feeding the selection are recreated on the duplicates, and
-where a selected operator feeds an external **multi-input**, the duplicate's
-output is appended alongside the original. Single external inputs are
-deliberately left alone so the duplicate doesn't steal the original's connection.
+Checks `Duplicate With Connections` (`Ctrl+Shift+D`). Like plain `Duplicate`
+(`Ctrl+D`), it copies the selected operators and drops them at the mouse — but it
+also keeps the cables that fed into your selection from operators outside it. So
+the copies stay hooked up to their original sources instead of arriving bare.
+
+One nuance: some inputs accept several cables at once (a "multi-input"). When a
+copied operator feeds one of those, its output is added alongside the original's,
+so both feed the target. A plain single input is left untouched on purpose — the
+copy shouldn't hijack the cable the original is using.
 
 ## Step: Duplicate an operator that is fed from outside the selection
 
 **Action:**
-Wire a source operator into the input of a second operator. Select only the
-second operator and press `Ctrl+Shift+D`.
+Wire one operator into the input of a second operator. Select only the second
+operator and press `Ctrl+Shift+D`.
 
 **Expected:**
 - A copy of the second operator appears at the mouse position.
-- The copy is connected to the **same** source operator on the same input — the
-  original's connection is untouched.
+- The copy is wired to the **same** source operator, on the same input — the
+  original's cable is untouched.
 - The new copy is now the selected operator.
 
 ## Step: Compare against plain Duplicate
 
 **Action:**
-Undo (`Ctrl+Z`) until back to the single wired pair. Select the second operator
-and press `Ctrl+D` (plain duplicate).
+Undo (`Ctrl+Z`) until you're back to the single wired pair. Select the second
+operator and press `Ctrl+D` (plain duplicate).
 
 **Expected:**
-- A copy appears, but it has **no** connection to the source operator (plain
-  duplicate keeps only connections internal to the selection).
-- This confirms the difference: `Ctrl+Shift+D` preserves the inbound wiring,
-  `Ctrl+D` does not.
+- A copy appears, but this time it has **no** cable to the source operator (plain
+  duplicate keeps only the wiring that ran between selected operators).
+- This shows the difference: `Ctrl+Shift+D` keeps the incoming wiring, `Ctrl+D`
+  does not.
 
 ## Step: Duplicate two connected operators together
 
 **Action:**
-Select two operators that are wired to each other and also receive an input from
-a third, unselected operator. Press `Ctrl+Shift+D`.
+Select two operators that are wired to each other and also take an input from a
+third operator you leave unselected. Press `Ctrl+Shift+D`.
 
 **Expected:**
-- Both operators are duplicated and remain wired to each other.
-- The inbound connection from the third operator is recreated on the matching
-  duplicate.
+- Both operators are copied and the copies stay wired to each other.
+- The incoming cable from the third operator is rebuilt on the matching copy.
 
-## Step: Duplicate an operator feeding an external multi-input
+## Step: Duplicate an operator feeding a multi-input
 
 **Action:**
-Wire a selected operator into a multi-input target (e.g. an operator that
-collects several inputs of the same type). Select only that upstream operator
-and press `Ctrl+Shift+D`.
+Wire an operator into a target whose input accepts several cables of the same
+type at once (a multi-input). Select only that feeding operator and press
+`Ctrl+Shift+D`.
 
 **Expected:**
-- The duplicate's output is appended to the same multi-input, directly after the
-  original's connection — both the original and the duplicate now feed the
-  target.
-- A single (non-multi) external input would **not** receive the duplicate's
-  output; only multi-inputs are appended to.
+- The copy's output is added to the same multi-input, right after the original's
+  cable — both the original and the copy now feed the target.
+- An input that only takes one cable would **not** pick up the copy's output;
+  only multi-inputs gain the extra cable.
 
-## Step: Snapped siblings are pushed down by the new input line
+## Step: Snapped neighbours are pushed down by the new input row
 
 **Action:**
-Build a snapped vertical stack where a multi-input operator has further
-operators snapped directly below its input lines. Select an operator feeding
-that multi-input and press `Ctrl+Shift+D`.
+Build a tidy vertical stack where a multi-input operator has other operators
+snapped directly below its input rows. Select an operator feeding that
+multi-input and press `Ctrl+Shift+D`.
 
 **Expected:**
-- The target grows by one input line for the appended connection, and the
-  operators snapped below that line move down by one row — the same behavior as
-  interactively dropping a connection onto a connection line.
-- The stack stays snapped; nothing overlaps.
-- `Ctrl+Z` removes the duplicate and moves the pushed operators back up in the
-  same single undo step.
+- The target gains one new input row for the added cable, and the operators
+  snapped below that row slide down by one row to make space — just as they would
+  if you dragged a cable onto an existing one by hand.
+- The stack stays neatly snapped; nothing overlaps.
+- `Ctrl+Z` removes the copy and slides the pushed operators back up, all in one
+  undo step.
 
 ## Step: Undo restores the original graph
 
@@ -90,9 +90,8 @@ that multi-input and press `Ctrl+Shift+D`.
 After any of the duplications above, press `Ctrl+Z` once.
 
 **Expected:**
-- The duplicated operators and every connection added for them are removed in a
-  single step.
-- The graph matches its state before the duplication.
+- The copied operators and every cable added for them disappear in a single step.
+- The graph looks exactly as it did before you duplicated.
 
 ## Step: Duplicate With Connections from the context menu
 
@@ -101,5 +100,5 @@ Right-click a selected operator that is fed from outside the selection and choos
 **Duplicate With Connections** from the context menu.
 
 **Expected:**
-- The same result as the `Ctrl+Shift+D` shortcut: the duplicate appears with its
-  inbound connection preserved.
+- Same result as the `Ctrl+Shift+D` shortcut: the copy appears with its incoming
+  cable kept.

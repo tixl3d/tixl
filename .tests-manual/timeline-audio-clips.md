@@ -4,7 +4,7 @@ title: Timeline Audio Clips — drop, drag, trim, delete
 added: 2026-05-26
 added-in-version: 4.2
 scope: timeline
-tags: [essential, hardware]
+tags: [user, essential, hardware]
 prerequisites:
   - A project is open. The composition you'll edit has (or can have) its own Composition Settings enabled.
   - A short audio file (5–30s, .wav / .mp3 / .ogg) is available on disk for drop testing.
@@ -14,7 +14,11 @@ related-help:
   - ../.help/docs/using/LivePerformances.md
 ---
 
-End-to-end verification of the symbol-level `TimelineAudioClip` feature: file drop, rendering with waveform, playback sync, drag / trim / delete with `SourceOffsetSecs` adjustment, cross-type interaction with op-backed `TimeClip`s, and regression checks for the legacy soundtrack path.
+You can drop an audio file straight onto the [ui:Timeline|timeline] and treat it like a clip — move it,
+trim it, mute it, stack several, and have them play in sync with everything else. This set
+walks through dropping in audio, seeing its waveform, playing it back, editing it, and
+making sure it sits and snaps nicely alongside the operator-driven clips that were already
+on the timeline.
 
 ## Step: Existing soundtrack still plays (regression)
 
@@ -23,10 +27,10 @@ Open one of the bundled example projects with a project soundtrack (e.g.
 `Operators/Examples/user/still/proj-katsumaki/`). Hit play.
 
 **Expected:**
-- The soundtrack waveform shows as the background image across the timeline.
+- The soundtrack's waveform shows behind the timeline.
 - Audio plays in sync with the playhead.
-- `[AudioReaction]`-driven operators react to the audio (FFT routing works).
-- Scrubbing the playhead re-syncs the audio cleanly.
+- Operators driven by [AudioReaction] react to the music.
+- Scrubbing the playhead keeps the audio in sync.
 
 ## Step: Drop a `.wav` onto the layers area
 
@@ -37,37 +41,35 @@ With a composition open that has its own playback settings enabled, drag a
 isn't already occupied.
 
 **Expected:**
-- A new audio clip body appears at the drop X position, on a layer derived
-  from drop Y.
-- The clip body has an audio-tinted fill (different from random per-id colour
-  of op-backed clips), a file-audio icon in the top-left, and the filename
-  (without extension) as the label.
-- The file is copied into the active project's `Assets/audio/` folder if it
-  wasn't there already.
-- The clip's TimeRange width matches the file's natural duration at the
-  current BPM (option β — native rate).
+- A new audio clip appears where you dropped it, on the row matching the drop height.
+- The clip has its own audio-style fill (distinct from the per-operator colours of
+  operator-driven clips), a small audio-file icon in the top-left, and the file's name
+  (without the extension) as its label.
+- If the file wasn't already part of the project, it's copied into the project's audio
+  assets so the project stays self-contained.
+- The clip's length matches the audio file's real duration at the current BPM.
 
 ## Step: Waveform image populates
 
 **Action:**
-Wait a few seconds after the drop. (BASS analyses the file on a background thread.)
+Wait a few seconds after the drop.
 
 **Expected:**
-- The clip body fills with the waveform image of the source file.
-- The image is *not* stretched — it represents the full source content within
-  the clip's body width.
+- The clip fills with the waveform of the audio file.
+- The waveform is *not* stretched — it shows the file's full content across the clip's
+  width.
 
 ## Step: Playback and scrubbing
 
 **Action:**
-Position the playhead before the clip's TimeRange.Start, hit play, and let it
+Position the playhead before the start of the clip, hit play, and let it
 run past the clip. Then scrub manually back and forth across the clip.
 
 **Expected:**
-- Audio starts the moment the playhead enters the clip's TimeRange.
-- Audio stops when the playhead leaves the TimeRange (or runs out of source content).
-- Scrubbing re-syncs audio to the new playhead position within a frame.
-- BPM changes (if you adjust them) don't pitch-shift the audio.
+- Audio starts the moment the playhead reaches the clip.
+- Audio stops when the playhead leaves the clip (or the clip runs out of sound).
+- Scrubbing keeps the audio in sync with where you move the playhead.
+- Changing the BPM doesn't change the pitch of the audio.
 
 ## Step: Click selection and hover tooltip
 
@@ -76,9 +78,9 @@ Click the clip body once. Then hover (without clicking) over the body.
 
 **Expected:**
 - A selection border highlights the clip.
-- After a brief hover, a tooltip appears showing the filename, full asset
-  path, duration in seconds, volume, and (for main-soundtrack-flagged clips
-  only) a note about it.
+- After a brief hover, a tooltip appears showing the file name, its location, the duration
+  in seconds, the volume, and (only for a clip marked as the main soundtrack) a note saying
+  so.
 
 ## Step: Drag the clip body horizontally
 
@@ -86,13 +88,10 @@ Click the clip body once. Then hover (without clicking) over the body.
 Click and drag the clip body left and right at a slow, near-zero-velocity pace.
 
 **Expected:**
-- The clip moves smoothly with the cursor along the timeline — no per-pixel
-  jitter or "stuttering" while the cursor crawls. (The drag excludes the
-  SelectionRangeIndicator from snap targets, which would otherwise re-snap to
-  the selection's own edge frame-to-frame.)
-- Snapping still engages against beat raster lines and other clips' edges.
-- Releasing the drag pushes a single undo entry — Ctrl+Z restores the
-  original TimeRange.
+- The clip moves smoothly with the cursor along the timeline — no jitter or stuttering
+  even while the cursor barely crawls.
+- Snapping still engages against the beat lines and other clips' edges.
+- Releasing the drag is a single undo step — Ctrl+Z puts the clip back where it started.
 
 ## Step: Drag the clip body vertically (Y-drag for layer change)
 
@@ -101,11 +100,11 @@ Click and drag the clip body up or down, far enough to cross a full layer
 height. Drop both above and below existing rows.
 
 **Expected:**
-- The clip snaps cleanly between layer rows (integer LayerIndex changes).
-- The clip can extend onto a new layer above or below the existing range.
-- Sub-layer-height movements don't cause jitter — only crossing a full row
-  triggers the LayerIndex change.
-- Undo restores the original layer.
+- The clip snaps cleanly from one row to the next.
+- The clip can move onto a new row above or below the existing ones.
+- Small movements within a row don't cause jitter — the clip only jumps rows once you
+  cross a full row's height.
+- Undo restores the original row.
 
 ## Step: Mute a clip via the inspector
 
@@ -114,13 +113,12 @@ Select an audible audio clip (one that plays back). In the Parameter Window, tic
 **Muted** checkbox. Hit play and listen. Untick it.
 
 **Expected:**
-- With Muted on: the clip body renders noticeably faded compared to its siblings.
-  Playback through the clip's TimeRange produces no audio from this clip; other clips
-  continue to play normally.
-- With Muted off: opacity returns to normal and audio plays again.
-- Saving and reopening the project preserves the mute state on the clip.
-- Multi-select two clips with mixed mute state; the bulk inspector shows "Muted (mixed)"
-  and one click resolves them all to the same state.
+- With Muted on: the clip looks noticeably faded next to the others. Playing through it
+  produces no sound from this clip; other clips keep playing normally.
+- With Muted off: the clip returns to full brightness and plays again.
+- Saving and reopening the project keeps the clip's mute state.
+- Select two clips with different mute states; the shared inspector shows "Muted (mixed)",
+  and one click sets them both to the same state.
 
 ## Step: Parameter Window shows clip fields and accepts negative Layer
 
@@ -129,42 +127,39 @@ Click the clip body once to select it (no operator selected on the graph).
 Look at the Parameter Window.
 
 **Expected:**
-- The Audio Clip inspector renders — asset path, volume, source offset / duration, layer, and the main-soundtrack flag are visible.
-- Scrubbing the **Layer** field down past 0 sets the layer to a negative integer
-  (the field is no longer clamped at 0). The clip jumps to the corresponding row above the timeline grid origin.
-- Selecting multiple audio clips switches the inspector to the bulk-edit view; shifting Layer there applies the same delta to every selected clip and still accepts negative values.
+- The Audio Clip inspector appears — the file location, volume, start offset / duration, layer, and the main-soundtrack toggle are all visible.
+- Scrubbing the **Layer** field down past 0 goes into negative numbers (it's not stuck at 0). The clip jumps to the matching row above the timeline's origin.
+- Selecting several audio clips switches the inspector to the shared-edit view; changing Layer there shifts every selected clip by the same amount and still allows negative values.
 
 ## Step: Trim the start handle (DAW-style)
 
 **Action:**
-Click the left-edge resize-EW handle of the clip and drag it to the right.
-Then drag it back to the left.
+Grab the clip's left edge (the cursor changes to a horizontal resize arrow) and drag it to
+the right. Then drag it back to the left.
 
 **Expected:**
 - The clip's left edge moves with the cursor; the right edge stays put.
-- The audio content stays anchored to its original timeline position —
-  the part you trimmed off no longer plays, but the remainder still plays
-  at the same wall-clock time.
-- The waveform image inside the body shows the *later* part of the source
-  (the front section was trimmed off).
-- Dragging back to the left re-reveals the trimmed portion (audio reappears
-  at its original position).
-- Once the start-trim reaches the file's beginning, further leftward drag
-  is blocked — the clip does **not** extend into silence territory.
+- The audio stays anchored to its place on the timeline — the trimmed-off front no longer
+  plays, but the rest still plays at the same moment as before.
+- The waveform now shows the *later* part of the audio (the front was trimmed off).
+- Dragging back to the left brings the trimmed portion back (the audio returns at its
+  original position).
+- Once the trim reaches the start of the file, you can't drag further left — the clip
+  won't extend into silence.
 
 ## Step: Trim the end handle
 
 **Action:**
-Click the right-edge resize-EW handle and drag it to the left.
+Grab the clip's right edge and drag it to the left.
 
 **Expected:**
 - The clip's right edge moves with the cursor; the left edge stays put.
-- The waveform image truncates from the right (shows only the audible portion).
-- Dragging the end past the source content's natural end is blocked — the
-  clip body cannot extend past where audio runs out.
-- For an already-stretched clip (loaded from old data), the upper clamp is
-  soft: rightward drag is blocked but leftward shrinking works freely, and
-  once the clip drops below natural max the ceiling tightens.
+- The waveform shortens from the right (showing only the part that still plays).
+- You can't drag the end past where the audio runs out — the clip won't extend into
+  silence.
+- For a clip that was already stretched (from an older project), the limit is gentle:
+  you can't drag it longer, but you can freely shrink it, and once it drops below its
+  natural length the limit tightens up again.
 
 ## Step: Delete and undo
 
@@ -172,69 +167,67 @@ Click the right-edge resize-EW handle and drag it to the left.
 Select an audio clip and press the `Delete` key. Then Ctrl+Z.
 
 **Expected:**
-- The clip disappears from the clip area.
-- The corresponding `.wav` file in `Assets/audio/` is **not** deleted.
-- Ctrl+Z restores the clip at its original list position.
+- The clip disappears from the timeline.
+- The audio file itself stays in the project's assets — it is **not** deleted.
+- Ctrl+Z restores the clip in its original place.
 
 ## Step: Multi-drop creates stacked clips
 
 **Action:**
-Drag two or more `.wav` files onto the clip area in a single drop
-operation. (If your OS only allows single-file drag, do two drops in quick
-succession instead.)
+Drag two or more audio files onto the clip area in a single drop. (If your system only
+lets you drag one file at a time, do two drops in quick succession instead.)
 
 **Expected:**
 - Each file becomes its own clip.
-- Subsequent clips land on stacked layers so they don't overlap on the same row.
-- A single undo reverts all of them at once (when dropped as a batch).
+- The clips stack onto separate rows so they don't overlap.
+- A single undo removes all of them at once (when dropped together).
 
 ## Step: Single-click between clip types replaces selection
 
 **Action:**
-Click an op-backed `[TimeClip]` (no modifier). Then click an audio clip. Then click the
-op-backed clip again. Then alternate a few more times.
+Click an operator-driven clip such as a [TimeClip] (no modifier). Then click an audio clip.
+Then click the operator-driven clip again. Then alternate a few more times.
 
 **Expected:**
-- Each click leaves **only** the just-clicked clip selected; the previously-selected
-  clip of the OTHER type is cleared.
-- The Parameter window switches between op-clip details and audio-clip inspector
-  accordingly — never shows a "phantom" selection from the other side.
-- Shift-click still extends the selection across both types (standard additive
-  behavior preserved by the cross-type drag step further down).
+- Each click leaves **only** the just-clicked clip selected; whatever you had selected of
+  the OTHER type is deselected.
+- The Parameter window switches between the operator-clip details and the audio-clip
+  inspector to match — it never shows a leftover selection from the other side.
+- Shift-click still extends the selection across both types (the additive behaviour is
+  preserved, checked in the cross-type drag step further down).
 
 ## Step: Cross-type drag (mixed selection)
 
 **Action:**
-With at least one op-backed `[TimeClip]` and one audio clip in the same
-composition, multi-select both (click one, then Shift+click the other so
-both have selection borders). Then drag the body of either clip.
+With at least one operator-driven clip such as a [TimeClip] and one audio clip in the same
+composition, select both (click one, then Shift+click the other so both have selection
+borders). Then drag the body of either clip.
 
 **Expected:**
-- Both clips move together along X and Y (LayerIndex changes apply to both).
-- A single undo reverses both moves (op-side and audio-side commands push
-  as separate undo entries — pressing Ctrl+Z twice undoes both halves).
+- Both clips move together, both sideways and between rows.
+- Undo reverses the move — the operator clip and the audio clip undo as separate steps, so
+  pressing Ctrl+Z twice puts both back.
 
 ## Step: Cross-type selection rectangle
 
 **Action:**
-Drag a selection fence rectangle over an area containing both an op-backed
-clip and an audio clip.
+Drag a selection rectangle over an area containing both an operator-driven clip and an
+audio clip.
 
 **Expected:**
 - Both clip types are selected.
-- Shift+drag adds to selection; Alt+drag (or whatever the existing
-  Remove-mode modifier is) removes from selection on both sides.
+- Shift+drag adds to the selection; the remove-mode modifier (Alt) takes clips back out —
+  for both types.
 
 ## Step: Cross-type snapping
 
 **Action:**
-Drag an audio clip's body near the edge of an op-backed clip. Then drag an
-op-backed clip near the edge of an audio clip.
+Drag an audio clip near the edge of an operator-driven clip. Then drag an operator-driven
+clip near the edge of an audio clip.
 
 **Expected:**
-- The dragged clip snaps to the other type's TimeRange edges when close
-  enough (subject to the existing snap threshold).
-- Both clip types act as snap anchors for each other.
+- The dragged clip snaps to the other clip's edges when it gets close enough.
+- Both clip types snap to each other.
 
 ## Step: Render to video with audio
 
@@ -243,22 +236,20 @@ With a composition that has a main soundtrack (or any audio clip), render
 a short segment to a video file via the export window.
 
 **Expected:**
-- The rendered video contains the audio track.
-- `[AudioReaction]`-driven effects respond correctly in the rendered output.
-- Multiple audio clips overlapping in time mix together in the export.
+- The rendered video contains the audio.
+- Effects driven by [AudioReaction] respond correctly in the rendered output.
+- Where multiple audio clips overlap in time, they mix together in the export.
 
 ## Step: Legacy project migration
 
 **Action:**
-Open an example project whose `.t3` JSON still uses pre-rewrite field names
-(`IsSoundtrack`, `StartTime`, `EndTime`, `Bpm`, `DiscardAfterUse`, `FilePath`).
-Many of the bundled example projects fit this — check
-`Operators/Examples/user/still/synchotron/` or similar.
+Open an older example project that was saved before the audio-clip rework. Many of the
+bundled examples fit this — try `Operators/Examples/user/still/synchotron/` or similar.
 
 **Expected:**
-- The project loads without warnings about the audio clip data.
-- The soundtrack plays as before.
-- Saving the project rewrites the JSON with the new field names
-  (`IsMainSoundtrack`, `TimeRange`, `AssetPath`). Re-opening still works.
-- If the project had `Bpm` on the clip, the value migrated into
-  `Playback.Bpm` and the per-clip Bpm field is gone.
+- The project loads with no warnings about its audio.
+- The soundtrack plays just as it did before.
+- Saving and reopening the project works — the audio clip keeps its settings and still
+  plays.
+- If the old project set its tempo on the clip itself, that tempo now lives in the
+  project's Playback settings and the soundtrack plays at the right speed.

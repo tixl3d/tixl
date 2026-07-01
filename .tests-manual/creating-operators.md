@@ -4,7 +4,7 @@ title: Creating Operators
 added: 2026-04-19
 added-in-version: 4.2
 scope: graph-window
-tags: [smoke, essential]
+tags: [user, smoke, essential]
 prerequisites:
   - An empty project is open.
   - The Graph Window is visible.
@@ -12,17 +12,17 @@ related-help:
   - ../.help/using/graph-window.md
 ---
 
-A short tour of how to spawn an operator on the graph. This is the most common
-flow in TiXL — if any step here feels surprising, that's worth noting in the
-comment box.
+A quick walkthrough of adding an operator to the graph. This is the move you'll
+make more than any other in TiXL — if any step here feels surprising or awkward,
+that's worth noting in the comment box.
 
 ## Step: Opening the Symbol Browser
 
 **Action:**
-With the Graph Window focused, press `Tab`.
+With the [ui:Graph|Graph Window] focused, press `Tab`.
 
 **Expected:**
-- The Symbol Browser opens.
+- The [ui:SymbolBrowser|Symbol Browser] opens.
 - Its search field is focused and empty — you can start typing immediately.
 
 ## Step: Finding an operator by name

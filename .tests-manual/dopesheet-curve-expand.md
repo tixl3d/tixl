@@ -4,18 +4,17 @@ title: DopeSheet Per-Parameter Curve Expand
 added: 2026-04-19
 added-in-version: 4.2
 scope: timeline
-tags: [essential]
+tags: [user, essential]
 prerequisites:
   - A project with at least one animated float parameter and one animated Vector3 parameter is open.
   - The Timeline window is visible in DopeView mode.
 related-help: []
 ---
 
-A tour of the per-parameter inline curve editor: the expand toggle, component
-visibility, selection sync between the dope sheet and the curve view, splitter
-behavior, and a few details about how the two views talk to each other. See
-[`Plan_DopeSheetCurveExpand.md`](../.agentic/Plans/Plan_DopeSheetCurveExpand.md)
-for the feature design.
+Right in the [ui:DopeSheet|dope sheet], you can open up any animated parameter and edit its actual curve
+without leaving the [ui:Timeline|timeline]. This walks through expanding a parameter into its curve,
+showing or hiding the X / Y / Z parts of a Vector3, and how hovering and selecting stay in
+sync between the dope sheet and the curve view.
 
 ## Step: Expanding a float parameter
 
@@ -24,7 +23,7 @@ In the Timeline window (DopeView mode), find an animated float parameter row
 and click its curve-expand icon (the small chevron in the row's header).
 
 **Expected:**
-- The timeline body splits vertically: dope sheet on top, a new curve editor
+- The timeline body splits vertically: dope sheet on top, a new [ui:CurveEditor|curve editor]
   pane below.
 - The expanded parameter's curve is rendered in the new pane.
 
@@ -94,8 +93,8 @@ toggle.
 With only `.z` visible from the previous step, click the `.z` component toggle.
 
 **Expected:**
-- All three components are visible again — the mask entry has dropped back to
-  its default.
+- All three components are visible again — clicking the last remaining one resets back to
+  showing everything.
 
 ## Step: Hovering a dope-sheet row highlights its curves
 
@@ -128,8 +127,8 @@ curve pane.
 
 **Expected:**
 - The hovered keyframe's icon is outlined.
-- The matching keyframe in the dope-sheet row (at the same U) is outlined with
-  the same treatment.
+- The matching keyframe in the dope-sheet row (at the same point in time) is outlined the
+  same way.
 
 ## Step: Reverse keyframe highlight from the dope sheet
 
@@ -137,7 +136,7 @@ curve pane.
 Hover a keyframe in the dope-sheet row of an expanded parameter.
 
 **Expected:**
-- All matching per-component keyframes at that U in the curve pane show the
+- Every matching per-component keyframe at that point in time in the curve pane shows the
   same outline.
 
 ## Step: Component state resets on re-expand
@@ -182,8 +181,7 @@ With a Vector3 parameter expanded, click one `.y` keyframe in the curve pane
 to select it alone.
 
 **Expected:**
-- The corresponding dope-sheet row shows the stacked keyframe at that U as
-  selected.
+- The matching dope-sheet row shows the keyframe at that point in time as selected.
 
 ## Step: Curve area grows when few parameters are open
 
@@ -203,9 +201,9 @@ Continuing from the previous step — with the curve area clearly taller than
 half the timeline — look at how the curves fit vertically.
 
 **Expected:**
-- The curves don't stretch to fill the whole curve-area height.
-- They sit at the "reference" (50%-height) scale with padding above and below
-  — visual scale stays reasonable.
+- The curves don't stretch to fill the whole tall area.
+- They stay at a sensible size, centred with empty space above and below rather than
+  blown up.
 
 ## Step: Drag latches to U-only or V-only
 
@@ -216,10 +214,10 @@ the keyframe and slowly drag mostly horizontally. Release.
 Then press again and drag mostly vertically.
 
 **Expected:**
-- The first drag only moves the keyframe in time (U); no V change.
-- The second drag only moves the keyframe in value (V); no U change.
-- The cursor changes to a horizontal or vertical arrow once the latch engages.
-- On release the latch resets — the next drag starts undecided again.
+- The first drag only moves the keyframe in time (sideways); its value doesn't change.
+- The second drag only moves the keyframe in value (up/down); its timing doesn't change.
+- The cursor changes to a horizontal or vertical arrow once it locks to one direction.
+- On release the lock resets — the next drag starts free to go either way again.
 
 ## Step: Tangent edits are undoable
 
