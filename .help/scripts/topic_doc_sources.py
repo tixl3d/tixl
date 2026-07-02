@@ -55,7 +55,20 @@ def span_text(vid, t):
     return " ".join(picked)
 
 
+def time_label(seconds):
+    seconds = int(seconds or 0)
+    h, rem = divmod(seconds, 3600)
+    m, s = divmod(rem, 60)
+    return f"{h}:{m:02d}:{s:02d}" if h else f"{m}:{s:02d}"
+
+
 def main():
+    # Windows console defaults to cp1252, which can't encode arrows / em-dashes in notes.
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, ValueError):
+        pass
+
     topics = json.loads((IDX / "topics.json").read_text(encoding="utf-8"))["topics"]
     mentions = json.loads((IDX / "mentions.json").read_text(encoding="utf-8"))
     videos = {v["id"]: v for v in json.loads((IDX / "videos.json").read_text(encoding="utf-8"))["videos"]}
@@ -90,9 +103,10 @@ def main():
             print("video explanations: (none yet — run /analyze-videos with the topic vocabulary first)")
         for m in ms[:TOP]:
             v = videos.get(m["video"], {})
-            txt = span_text(m["video"], m["t"])
+            start = m.get("startSecond", 0)
+            txt = span_text(m["video"], start)
             print(f"\n--- [{m.get('depth')}] {v.get('date', '?')} "
-                  f"\"{(v.get('title') or m['video'])[:60]}\" @ {m['tLabel']}  {m['url']}")
+                  f"\"{(v.get('title') or m['video'])[:60]}\" @ {time_label(start)}  {m.get('url', '')}")
             if m.get("note"):
                 print(f"    note: {m['note']}")
             print("    " + (txt[:1400] if txt else "(transcript span empty)"))

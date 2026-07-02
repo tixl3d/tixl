@@ -1,0 +1,3 @@
+The per-project settings that travel with a composition, covering playback, audio, and how time is measured.
+
+Enable playback settings to pick a soundtrack, dial in the project's BPM, and set a sync offset for tracks that don't start on the downbeat; you can also choose whether the [ui:Timeline|timeline] ruler reads in bars, seconds, or frames. Because all timing in TiXL runs in musical bars rather than seconds, getting the BPM right here keeps procedural animation locked to the beat. Live-performance mode adds tap-tempo playback and external MIDI-clock sync for VJ use, and further tabs cover audio mix, video proxies, recording, and export.

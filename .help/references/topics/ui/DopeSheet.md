@@ -1,0 +1,3 @@
+The **Dope sheet** is the [ui:Timeline]'s row-based view of your keyframes, where you drag, copy, and retime them across all animated parameters.
+
+By default it shows only the keyframes of selected operators; turn on auto-pin to keep every animated parameter visible as you jump between operators, and press Shift+K to clear the pinned set. Hold Alt to drop warp points inside a selected range and stretch the interior to retime a block without moving its ends. You can copy keyframes and paste them onto another parameter (the first key lands at the current time), and right-click a row to set sequential values when you need clean whole-number index keys.

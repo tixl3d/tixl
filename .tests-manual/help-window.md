@@ -58,7 +58,7 @@ field and hover a result), without clicking.
 ## Step: Discussed in meet-ups list
 
 **Action:**
-Hover or select an operator that is covered in the videos (e.g. `[SphereSDF]` or `[RaymarchField]`).
+Hover or select an operator that is covered in the videos (e.g. `[RaymarchField]` or `[SelectPointsWidthSDF]` or ).
 
 **Expected:**
 - Below the description a video-resource section lists up to two rows, each a ▶ play icon, the video type

@@ -1,0 +1,3 @@
+A way to feed an operator or sub-graph its own time instead of the global [ui:PlaybackTime|playback time] — so you can scrub, loop, freeze, or remap a section of your project independently.
+
+Wrap a part of the graph so its time comes from a signal you supply — a sine, a remapped random, a beat — and everything inside animates against that instead of the timeline. Time clips on the [ui:Timeline] do this too: each clip gates which part of the graph evaluates and remaps the time fed into its sub-graph, with orange and red cues signaling that time is being remapped or scaled. Reach for this to run a scene backwards, hold it still, or jump non-linearly through an animation.

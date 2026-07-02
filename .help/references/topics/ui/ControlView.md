@@ -1,0 +1,3 @@
+The precise, per-parameter control surface shown in the [ui:ParameterWindow|Parameter window] when nothing is selected and the composition itself is active.
+
+It lists the operators whose parameters you've exposed to snapshots and lets you capture, name, recall and blend those states in one place — the numeric counterpart to the [ui:VariationWindow|Variation window], which stays the visual interface for the same snapshots. Right-click individual parameters to add just those to a snapshot instead of flagging the whole operator. Use it when you want exact control over which values a saved state stores.

@@ -9,7 +9,8 @@ UI-topic registry, and builds the reference indices the editor reads:
         -> references/indices/videos.json + mentions.json + topics.json
 
 videos.json   = { "videos": [ { id, type, date, title, url, duration } ] }
-topics.json   = { "topics": { "ui:<id>": { term, parent, synonyms, classes, doc } } }
+topics.json   = { "topics": { "ui:<id>": { term, parent, synonyms, classes, docFile } } }
+                  (docFile points at references/topics/ui/<id>.md — the editor loads it lazily)
 mentions.json = { "op:<fullpath>" | "ui:<id>": [ { video, startSecond, duration, url, depth, style, purpose, confidence, note } ] }
 
 Each mention line is `<start>[→<end>] [Op]/[ui:Id] · <depth> · <style> · <purpose> · <conf>% — <note>`. The start/end
@@ -28,6 +29,7 @@ HERE = Path(__file__).resolve().parent
 HELP = HERE.parent
 ANALYSES = HELP / "references" / "video-analysis"
 TOPICS_MD = HELP / "references" / "topics" / "ui-topics.md"
+TOPIC_DOCS_DIR = HELP / "references" / "topics" / "ui"
 INDICES = HELP / "references" / "indices"
 OP_INDEX = HELP / "docs" / "operators" / "index.json"
 
@@ -141,13 +143,12 @@ def parse_topics():
                 break
             meta[m.group(1).lower()] = m.group(2).strip()
             i += 1
-        doc = "\n".join(lines[i:]).strip()
-        if doc.lower().startswith("_todo"):
-            doc = ""
         tid = meta.get("id") or pascal(term)
         split = lambda key: [x.strip() for x in meta.get(key, "").split(",") if x.strip()]
+        # Doc body lives in its own file; record a pointer the editor loads lazily.
+        doc_file = f"references/topics/ui/{tid}.md" if (TOPIC_DOCS_DIR / f"{tid}.md").exists() else None
         topics[tid] = {"term": term, "parent": meta.get("parent") or None,
-                       "synonyms": split("synonyms"), "classes": split("classes"), "doc": doc}
+                       "synonyms": split("synonyms"), "classes": split("classes"), "docFile": doc_file}
     return topics
 
 

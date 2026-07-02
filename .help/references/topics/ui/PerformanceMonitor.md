@@ -1,0 +1,3 @@
+A diagnostics window showing frame time, memory allocations, and per-frame draw counts so you can find what's slowing a scene down.
+
+Read the small numbers under the frame rate — compute-shader count, triangle count and draw calls — to tell which of the three usual bottlenecks you've hit. In the histograms, the tiny buckets are scaled up so an occasional jitter can look worse than it is; a healthy allocation count stays in the small, immediately-freed range, so a spike out of that range flags a real memory leak worth hunting. Steady-slow frames point at the scene, but jittery ones on a laptop usually mean thermal throttling, not your graph.

@@ -1,0 +1,3 @@
+An interactive handle drawn in the output viewport that lets you drag a value — a position, a rotation, a selection region — directly on screen instead of typing numbers.
+
+Many operators show a gizmo when selected: the transform gizmo draws colored axes (red X, green Y, blue Z) you drag to move, rotate, or scale, and selection or region operators let you drag their volume through a point cloud live. A vector parameter marked as a position in the operator's UI layout gets its own draggable gizmo. Remember TiXL is right-handed and Y-up (X right, Y up, Z toward the camera), so the axis colors map straight to those directions.

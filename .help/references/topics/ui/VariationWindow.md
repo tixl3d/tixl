@@ -1,0 +1,3 @@
+The window for capturing, browsing and blending named snapshots of an operator's parameters — the visual way to store looks and switch between them live.
+
+Open the **Variation window** to grab the current state of the enabled operators as a snapshot, then recall it later or blend between several. Step through your saved states with the cursor keys or drive them from an index input, so a cycling number can walk through variations during a performance. A snapshot is stored on the operator's own symbol, while a preset stores instance values into the composition that uses it — same blending, different owner. As of 4.2 these live in a per-project meta folder, so keep that folder with your project.

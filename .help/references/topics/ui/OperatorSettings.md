@@ -1,0 +1,3 @@
+The panel for customizing how an operator's individual parameters are displayed, grouped, and exposed.
+
+Open it from the gear icon in the [ui:ParameterWindow|Parameter window] header: a list on the left shows every parameter, and selecting one lets you set its visual style, group related parameters, clamp a numeric value on its minimum, maximum, or both, and write the short description shown in the help panel. This is also where you enable richer controls — such as a Vec2 control that lets you drag both components of a paired parameter at once and see the resulting distribution curve live. Use it when finishing an operator so its inputs read clearly to anyone who uses it.

@@ -40,11 +40,44 @@ internal static class HelpIndex
     /// <summary>A UI topic (editor concept/component) from the help index — the target of a <c>[ui:Id]</c> link.</summary>
     internal sealed record TopicInfo(string Id, string Term, string Doc);
 
-    /// <summary>Resolves a <c>ui:&lt;id&gt;</c> key (as written in a <c>[ui:Id]</c> link) to its topic.</summary>
+    /// <summary>Topic metadata from the index; the doc body is loaded on demand from <see cref="DocFile"/>.</summary>
+    private readonly record struct TopicMeta(string Id, string Term, string? DocFile);
+
+    /// <summary>Resolves a <c>ui:&lt;id&gt;</c> key (as written in a <c>[ui:Id]</c> link) to its topic. The doc
+    /// body is read from its <c>docFile</c> on first request and cached for the session.</summary>
     internal static bool TryGetTopic(string topicKey, out TopicInfo? topic)
     {
         EnsureLoaded();
-        return _topicsByKey.TryGetValue(topicKey, out topic);
+        if (_resolvedTopics.TryGetValue(topicKey, out topic))
+            return true;
+
+        if (!_topicMetaByKey.TryGetValue(topicKey, out var meta))
+        {
+            topic = null;
+            return false;
+        }
+
+        topic = new TopicInfo(meta.Id, meta.Term, LoadTopicDoc(meta.DocFile));
+        _resolvedTopics[topicKey] = topic;
+        return true;
+    }
+
+    private static string LoadTopicDoc(string? docFile)
+    {
+        if (string.IsNullOrEmpty(docFile))
+            return "";
+
+        try
+        {
+            var path = Path.Combine(ShippedContent.ResolveDirectory(".help"),
+                                    docFile.Replace('/', Path.DirectorySeparatorChar));
+            return File.Exists(path) ? File.ReadAllText(path) : "";
+        }
+        catch (Exception e)
+        {
+            Log.Debug($"Could not read topic doc '{docFile}': {e.Message}");
+            return "";
+        }
     }
 
     /// <summary>Meet-up segments discussing the operator with the given full path (namespace + name), newest data first as authored.</summary>
@@ -85,7 +118,7 @@ internal static class HelpIndex
             foreach (var (key, dto) in file.Topics)   // key is already "ui:<id>", matching a [ui:Id] link
             {
                 if (!string.IsNullOrEmpty(key))
-                    _topicsByKey[key] = new TopicInfo(key, dto.Term ?? key, dto.Doc ?? "");
+                    _topicMetaByKey[key] = new TopicMeta(key, dto.Term ?? key, dto.DocFile);
             }
         }
         catch (Exception e)
@@ -228,11 +261,12 @@ internal static class HelpIndex
     private sealed class TopicDto
     {
         [JsonProperty("term")] public string? Term;
-        [JsonProperty("doc")] public string? Doc;
+        [JsonProperty("docFile")] public string? DocFile;
     }
 
     private static bool _loaded;
     private static readonly Dictionary<string, List<OnlineVideoSegment>> _segmentsByKey = new();
     private static readonly Dictionary<string, VideoInfo> _videosById = new();
-    private static readonly Dictionary<string, TopicInfo> _topicsByKey = new();
+    private static readonly Dictionary<string, TopicMeta> _topicMetaByKey = new();
+    private static readonly Dictionary<string, TopicInfo> _resolvedTopics = new();
 }

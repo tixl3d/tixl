@@ -1,0 +1,3 @@
+The **Symbol Library** is a browsable panel of every operator available, grouped by namespace, so you can explore what TiXL offers and drag operators into your [ui:Graph|graph].
+
+Click an operator in the graph to jump to its namespace and scan its siblings — for example "numbers/logic" gathers the value operators like compare, hold and LFO. The "lib" branch holds the built-ins sorted by category (field, image, mesh, points…), while "examples" holds walk-through scenes worth dragging out and double-clicking. Pin an operator, right-click and choose "set thumbnail" to capture a representative frame; after you update, the library shows that preview on hover and while dragging, which is a huge help when scanning many operators.

@@ -9,8 +9,11 @@ namespace T3.Editor.Gui.Help;
 
 /// <summary>
 /// Reusable help affordance for a window or panel header: a <see cref="Icon.Help"/> button that
-/// shows the embedded <c>.help/embedded/&lt;docId&gt;.md</c> as a formatted tooltip on hover and opens the
-/// canonical wiki page on click. Operator references in the doc become type-colored links.
+/// shows a doc as a formatted tooltip on hover and opens the canonical wiki page on click. Operator and
+/// <c>[ui:Topic]</c> references in the doc become links. The doc text is a bespoke
+/// <c>.help/embedded/&lt;docId&gt;.md</c> snippet when one exists, otherwise the matching <c>ui:</c> topic
+/// from the help index — so an icon can reuse a shared topic doc instead of a dedicated embedded file.
+/// Pass a plain id (e.g. <c>"RenderSettings"</c>) or a full <c>"ui:RenderSettings"</c> key for the fallback.
 /// </summary>
 internal static class DocumentationButton
 {
@@ -58,7 +61,16 @@ internal static class DocumentationButton
         if (_cache.TryGetValue(docId, out var cached))
             return cached;
 
-        var loaded = EmbeddedHelpLoader.TryLoad(docId);
+        // A bespoke embedded snippet wins; otherwise fall back to the ui: topic registry so an icon can
+        // reuse a shared topic doc. A "ui:"-prefixed docId is registry-only (':' is not a valid filename).
+        var loaded = docId.Contains(':') ? null : EmbeddedHelpLoader.TryLoad(docId);
+        if (loaded == null)
+        {
+            var topicKey = docId.StartsWith("ui:", StringComparison.Ordinal) ? docId : "ui:" + docId;
+            if (HelpIndex.TryGetTopic(topicKey, out var topic) && topic != null && !string.IsNullOrWhiteSpace(topic.Doc))
+                loaded = topic.Doc;
+        }
+
         _cache[docId] = loaded;
         return loaded;
     }

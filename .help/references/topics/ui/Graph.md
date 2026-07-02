@@ -1,0 +1,3 @@
+The **Graph window** is where you build a project by placing operators and wiring their inputs and outputs together — it's the main canvas you work in.
+
+Open an operator to dive into its graph, or double-click empty space to browse and add new ones. Operators snap together magnetically, so a chain of them reads top-to-bottom like a stack; use horizontal snapping (Alt+A) to align related operators so the connection lines stay tidy. A few habits pay off fast: Ctrl+D duplicates the selection at the mouse (Ctrl+Shift+D keeps its connections), and shaking an operator loose disconnects it while reconnecting compatible inputs. A disconnected operator costs nothing at render time, so it's safe to keep spare copies around until you wire them in.

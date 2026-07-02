@@ -1,0 +1,3 @@
+A visual way to build fields — signed-distance shapes, colors, and vectors — by wiring small nodes together instead of writing shader code.
+
+You build a shader graph by connecting [ui:Field|field] operators, grouped into four kinds: generators that create shapes, space operators that bend or repeat the space around them, adjust operators that reshape values, and combine operators that merge fields. A [RaymarchField] or [Render2dField] at the end turns the assembled field into an image, and the same field can also drive particle forces or select points. Keep an eye on the performance and aliasing hints in the output — ray-marching many nested fields gets expensive fast, so simplify the graph where you can.

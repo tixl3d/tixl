@@ -1,0 +1,3 @@
+The **Color editor** is the popup for picking and editing a color, including high-dynamic-range values that glow brighter than white.
+
+Because TiXL renders into a high-precision buffer, colors can exceed 1.0: Ctrl-drag a swatch upward past white (or Ctrl-drag the brightness field) to push it into HDR, marked with a small badge, which is what gives [Bloom] and emissive materials their punch. Swatches also surface every color already used in the project, and Ctrl-clicking a swatch selects and centers all operators that use it, so you can audit and unify a palette. Keep in mind a pixel keeps its RGB even where alpha is 0, so match foreground and background colors to avoid coloured fringes on transparent edges.

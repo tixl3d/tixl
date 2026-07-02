@@ -1,0 +1,3 @@
+The **Symbol browser** is the pop-up you use to find and place an operator into the [ui:Graph|graph] at a chosen spot.
+
+Long-press (or double-click) empty canvas to open it, then type to search — it matches synonyms too, so "LFO" finds the oscillator even though that isn't its name. Live thumbnails preview what each operator produces before you place it, and if you drag a connection out first the browser lists only operators that fit that input. Press Tab over a single selected operator to insert a new one inline; suggestions are ranked by how often people actually use them, so common next steps float to the top.

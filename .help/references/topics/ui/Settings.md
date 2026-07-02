@@ -1,0 +1,3 @@
+The window for global editor preferences that apply across every project, such as UI scale, theme, and input devices.
+
+Open it from the **Settings** menu to adjust the interface (UI scale, graph style, parameter-input smoothing), edit the color **theme**, set project and backup folders, and configure audio, MIDI, and keyboard shortcuts. These are preferences for the editor itself, not content of your composition — per-project options like BPM and soundtrack live in [ui:ProjectSettings|Project Settings] instead. A beat-sync offset here can add a fixed lead time so playback runs slightly early, compensating for output latency on LED controllers and similar devices.

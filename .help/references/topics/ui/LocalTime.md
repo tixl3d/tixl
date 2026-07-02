@@ -1,0 +1,3 @@
+The time an operator currently sees — normally the timeline position, but replaced by whatever a [ui:TimeOverrides|time override] upstream has set for this part of the graph.
+
+Time in TiXL is measured in musical bars (four beats per bar), so at 120 BPM one bar is about two seconds — animation rates written in bars stay locked to the beat. Local time drives keyframes and follows the playback marker unless a time clip or override remaps it for a sub-graph. It's the value most animation reads from, so overriding it upstream is how you retime just one branch without touching the rest of the project.

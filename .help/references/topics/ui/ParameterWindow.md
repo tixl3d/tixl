@@ -1,0 +1,3 @@
+The panel that lists the parameters of the currently selected operator so you can tune, animate, and connect its values.
+
+Select an operator in the graph and the **Parameter window** fills with its editable controls; drag on a number to scrub it, right-click a value to animate or link it, and rename the operator from the title field at the top. Many controls pack extra behavior into a single drag — on a blend or layer operator, dragging left sets opacity while right-drag sets luminosity, and paired Vec2 controls like gain/bias let you reshape a remap curve live. Switch the window from Parameters to its Settings tab to change how a parameter is displayed, or to Help to read the operator's documentation.

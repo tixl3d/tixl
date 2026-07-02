@@ -1,0 +1,3 @@
+A function that answers, for every point in space, questions like "how far to the nearest surface?", "what color here?", or "which way does the flow point?" — the basis of TiXL's procedural shapes and forces.
+
+Most fields return a signed distance (an SDF) used to ray-march solid-looking shapes, but a field can also return a color or a direction vector, and vector fields combine under multiply and transform just like distance fields. You build fields in a [ui:ShaderGraph|shader graph] and render them with operators such as [RaymarchField], [Render2dField], or [SampleFieldPoints]. Beyond rendering, the same field can push particles ([FieldDistanceForce], [VectorFieldForce]), color a mesh ([ColorVerticesWithField]), or select points — one definition, many uses.
