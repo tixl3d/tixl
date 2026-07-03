@@ -395,9 +395,7 @@ internal sealed partial class MagGraphView
             var isMissing = inputLine.InputUi?.Relevancy == Relevancy.Required && inputLine.ConnectionIn == null;
             if (isMissing)
             {
-                ImGui.PushID(item.Instance.SymbolChildId.GetHashCode());
-                DrawMissingInputIndicator(drawList, pMin, inputLine);
-                ImGui.PopID();
+                DrawMissingInputIndicator(drawList, item, pMin, inputLine);
             }
         }
 
@@ -457,7 +455,7 @@ internal sealed partial class MagGraphView
                     var isMissing = inputLine.InputUi.Relevancy == Relevancy.Required && inputLine.ConnectionIn == null;
                     if (isMissing)
                     {
-                        DrawMissingInputIndicator(drawList, pMin + new Vector2(0, GridSizeOnScreen.Y * inputIndex), inputLine);
+                        DrawMissingInputIndicator(drawList, item, pMin + new Vector2(0, GridSizeOnScreen.Y * inputIndex), inputLine);
                     }
 
                     
@@ -1157,7 +1155,7 @@ internal sealed partial class MagGraphView
 
 
 
-    private void DrawMissingInputIndicator(ImDrawListPtr drawList, Vector2 pMin, MagGraphItem.InputLine inputLine)
+    private void DrawMissingInputIndicator(ImDrawListPtr drawList, MagGraphItem item, Vector2 pMin, MagGraphItem.InputLine inputLine)
     {
         var s = GridSizeOnScreen.Y;
         var c = pMin + new Vector2(-s * 0.2f, s * 0.45f);
@@ -1165,16 +1163,19 @@ internal sealed partial class MagGraphView
         drawList.AddTriangleFilled(c + new Vector2(0, -0.2f) * s2,
                                    c + new Vector2(-0.2f, 0.2f) * s2,
                                    c + new Vector2(0.2f, 0.2f) * s2,
-                                   //+ new Vector2(8, 9) * CanvasScale 
+                                   //+ new Vector2(8, 9) * CanvasScale
                                    UiColors.StatusAttention);
 
         ImGui.SetCursorScreenPos(c - Vector2.One * s2 / 2);
-        ImGui.PushID(inputLine.InputUi.InputDefinition.Id.GetHashCode());
+        ImGui.PushID(item.Id.GetHashCode());
+        // Multi-input rows share the same input definition, so the index is needed for a unique ID
+        ImGui.PushID(inputLine.InputUi.InputDefinition.Id.GetHashCode() + inputLine.MultiInputIndex);
         ImGui.InvisibleButton("##missingInput", new Vector2(s2, s2));
         if (ImGui.IsItemHovered())
         {
             CustomComponents.TooltipForLastItem("Requires " + inputLine.InputUi.InputDefinition.Name);
         }
+        ImGui.PopID();
         ImGui.PopID();
     }
 
