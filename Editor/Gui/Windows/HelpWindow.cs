@@ -55,7 +55,7 @@ internal sealed class HelpWindow : Window
         if (showWindow)
         {
             instance.Config.Visible = true;
-            instance._focusWindowNextFrame = true;
+            instance.RequestWindowFocus();
         }
     }
 
@@ -94,12 +94,6 @@ internal sealed class HelpWindow : Window
     {
         IsDrawingContent = true;
         _lastContentFrame = ImGui.GetFrameCount();
-
-        if (_focusWindowNextFrame)
-        {
-            ImGui.SetWindowFocus();
-            _focusWindowNextFrame = false;
-        }
 
         UpdateContextFromGraphSelection();
 
@@ -352,8 +346,8 @@ internal sealed class HelpWindow : Window
 
     private static HelpWindow? _instance;
 
-    private bool _focusWindowNextFrame;
-    private int _lastContentFrame = int.MinValue;
+    // Halved so the frame-diff in IsOpen can't overflow int and wrongly report the window as open
+    private int _lastContentFrame = int.MinValue / 2;
 
     private Guid _lastGraphSelectionId;
     private HelpTopic _lastShownTopic;

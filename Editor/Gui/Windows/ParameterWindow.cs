@@ -7,19 +7,21 @@ using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.SystemUi;
 using T3.Editor.App;
-using T3.Editor.Gui.Dialogs;
 using T3.Editor.Gui.Graph.Dialogs;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Interaction.Variations;
+using T3.Editor.Gui.Interaction.Variations.Model;
 using T3.Editor.Gui.Styling;
-using T3.Editor.Gui.UiHelpers;
 using T3.Editor.Skills.Training;
 using T3.Editor.Gui.Windows.Layouts;
+using T3.Editor.Gui.Windows.Output;
+using T3.Editor.Gui.Windows.RenderExport;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Graph;
 using T3.Editor.UiModel.InputsAndTypes;
-using T3.Editor.Gui.Windows.TimeLine;
+using T3.Editor.Gui.Windows.Variations;
+using T3.Editor.UiModel.Modification;
 using T3.Editor.UiModel.ProjectHandling;
 using T3.Editor.UiModel.Selection;
 using T3.SystemUi;
@@ -195,10 +197,11 @@ internal sealed class ParameterWindow : Window
 
             var namespaceForEdit = op.Symbol.Namespace ?? "";
 
-            var iconSize = ImGui.GetFrameHeight(); 
-            var totalIconSpace = (iconSize * 3) + (2 * ImGui.GetStyle().ItemSpacing.X); // 3 icons, 2 spaces between
+            var iconSize = ImGui.GetFrameHeight();
+            // 3 icons; the settings and help buttons each nudge themselves +2px right
+            var iconBlockWidth = 3 * iconSize + 2 * (ImGui.GetStyle().ItemSpacing.X + 2);
 
-            ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X - totalIconSpace);
+            ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X - iconBlockWidth - ImGui.GetStyle().ItemSpacing.X);
 
             var symbol = op.Symbol;
             var package = symbol.SymbolPackage;
@@ -233,6 +236,9 @@ internal sealed class ParameterWindow : Window
             // Tags...
             {
                 ImGui.SameLine();
+                // Hard right-align: read-only packages render the namespace as plain text,
+                // which ignores the item width set above.
+                ImGui.SetCursorPosX(ImGui.GetWindowWidth() - ImGui.GetStyle().WindowPadding.X - iconBlockWidth);
                 modified |= DrawSymbolTagsButton(symbolUi);
             }
 
@@ -436,23 +442,48 @@ internal sealed class ParameterWindow : Window
             return;
 
         var symbolChildUi = op.GetChildUi();
+        if (symbolChildUi == null)
+            return;
 
         // Add spacing before
         FormInputs.AddVerticalSpace(3);
         ImGui.Indent(5);
 
-        // SymbolChild Name
-        if (symbolChildUi != null)
+        var scale = T3Ui.UiScaleFactor;
+        var frameHeight = ImGui.GetFrameHeight();
+        var spacing = ImGui.GetStyle().ItemSpacing.X;
+        var groupGap = 6 * scale;
+
+        // Icon group: bypass + disable + pin-to-output (like the parameter popup)
+        var iconGroupWidth = 3 * frameHeight + 2 * spacing;
+
+        // Preset selector only when the preset pool tracks this instance
+        var presetPool = VariationHandling.ActivePoolForPresets;
+        var showPresets = presetPool != null
+                          && VariationHandling.ActiveInstanceForPresets is { } presetInstance
+                          && presetInstance.SymbolChildId == op.SymbolChildId
+                          && presetInstance.Symbol.Id == op.Symbol.Id;
+
+        // Reserve exact widths so the icon group ends flush right, aligned with the
+        // symbol header above (whose child has 5px window padding).
+        var availWidth = ImGui.GetContentRegionAvail().X - 5 * scale;
+        float nameWidth;
+        var dropdownWidth = 0f;
+        if (showPresets)
         {
-            // Calculate button widths using the longer text variants for consistent spacing
-            ImGui.PushFont(Fonts.FontBold);
-            var disabledWidth = ImGui.CalcTextSize("DISABLED").X + (ImGui.GetStyle().FramePadding.X * 2);
-            var bypassedWidth = ImGui.CalcTextSize("BYPASSED").X + (ImGui.GetStyle().FramePadding.X * 2);
-            ImGui.PopFont();
+            // name | dropdown | new-preset | gap | icons
+            var flexibleWidth = availWidth - (frameHeight + iconGroupWidth + 3 * spacing + groupGap);
+            nameWidth = MathF.Max(60 * scale, flexibleWidth * 0.5f);
+            dropdownWidth = MathF.Max(60 * scale, flexibleWidth - nameWidth);
+        }
+        else
+        {
+            nameWidth = MathF.Max(60 * scale, availWidth - (iconGroupWidth + spacing + groupGap));
+        }
 
-            var totalButtonSpace = disabledWidth + bypassedWidth + ImGui.GetStyle().ItemSpacing.X + 5; // +5 for some extra spacing on the right
-
-            ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X - totalButtonSpace);
+        // SymbolChild Name
+        {
+            ImGui.SetNextItemWidth(nameWidth);
 
             var nameForEdit = symbolChildUi.SymbolChild.Name;
 
@@ -484,86 +515,127 @@ internal sealed class ParameterWindow : Window
                 ImGui.GetWindowDrawList().AddText(ImGui.GetItemRectMin() + new Vector2(5, 4),
                                                   UiColors.TextMuted.Fade(0.5f),
                                                   "Untitled instance");
+        }
 
-            ImGui.PushStyleColor(ImGuiCol.Button, UiColors.BackgroundInputField.Rgba);
-            // Disabled toggle
+        // Preset dropdown + new-preset button
+        if (showPresets)
+        {
+            CollectPresets(presetPool!);
+
+            var selectedPreset = presetPool!.ActiveVariation is { IsPreset: true } activeVariation
+                                 && _presets.Contains(activeVariation)
+                ? activeVariation
+                : null;
+
+            var label = selectedPreset == null
+                ? "Presets..."
+                : string.IsNullOrEmpty(selectedPreset.Title) || selectedPreset.Title == "untitled"
+                    ? "Untitled"
+                    : selectedPreset.Title;
+
+            ImGui.SameLine();
+            var chosen = _presetPicker.Draw(_presets, presetPool, op, selectedPreset, label, dropdownWidth, out _);
+            if (chosen != null)
+                presetPool.Apply(op, chosen);
+
+            // Highlight the new-preset button while the current values drift from the selected preset
+            var presetModified = selectedPreset != null && !SymbolVariationPool.DoesInstanceMatchPreset(op, selectedPreset);
+
+            ImGui.SameLine();
+            if (CustomComponents.IconButton(Icon.Presets, Vector2.Zero,
+                                            presetModified
+                                                ? CustomComponents.ButtonStates.NeedsAttention
+                                                : CustomComponents.ButtonStates.Default))
             {
-                ImGui.SameLine();
-                ImGui.PushFont(Fonts.FontBold);
-                if (symbolChildUi.SymbolChild.IsDisabled)
-                {
-                    ImGui.PushStyleColor(ImGuiCol.Button, UiColors.StatusAttention.Rgba);
-                    ImGui.PushStyleColor(ImGuiCol.Text, UiColors.Text.Rgba);
-                    if (ImGui.Button("DISABLED", new Vector2(disabledWidth, ImGui.GetFrameHeight())))
-                    {
-                        UndoRedoStack.AddAndExecute(new ChangeInstanceIsDisabledCommand(symbolChildUi, false));
-                    }
-
-                    ImGui.PopStyleColor(2);
-                }
-                else
-                {
-                    ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-                    if (ImGui.Button("ENABLED", new Vector2(disabledWidth, ImGui.GetFrameHeight())))
-                    {
-                        UndoRedoStack.AddAndExecute(new ChangeInstanceIsDisabledCommand(symbolChildUi, true));
-                    }
-
-                    ImGui.PopStyleColor();
-                }
-
-                ImGui.PopFont();
+                var newPreset = presetPool.CreatePresetForInstanceSymbol(op);
+                presetPool.SaveVariationsToFile();
+                VariationThumbnailRenderer.RequestRender(presetPool, op, newPreset.Id, toFile: true);
             }
 
-            // Bypass
+            CustomComponents.TooltipForLastItem(presetModified
+                                                    ? "Parameters differ from the selected preset — save as new preset"
+                                                    : "Create new preset from current values");
+        }
+
+        // Bypass / disable / pin-to-output icons
+        ImGui.SameLine(0, spacing + groupGap);
+        {
+            var bypassable = symbolChildUi.SymbolChild.IsBypassable();
+            var isBypassed = symbolChildUi.SymbolChild.IsBypassed;
+            if (CustomComponents.ToggleTwoIconsButton(ref isBypassed,
+                                                      Icon.OperatorBypassOff,
+                                                      Icon.OperatorBypassOn,
+                                                      CustomComponents.ButtonStates.NeedsAttention,
+                                                      CustomComponents.ButtonStates.Default,
+                                                      isEnabled: bypassable)
+                && bypassable)
             {
-                ImGui.SameLine();
-                ImGui.PushFont(Fonts.FontBold);
-                if (symbolChildUi.SymbolChild.IsBypassed)
-                {
-                    ImGui.PushStyleColor(ImGuiCol.Button, UiColors.StatusAttention.Rgba);
-                    ImGui.PushStyleColor(ImGuiCol.Text, UiColors.Text.Rgba);
-
-                    // TODO: check if bypassable
-                    if (ImGui.Button("BYPASSED", new Vector2(bypassedWidth, ImGui.GetFrameHeight())))
-                    {
-                        UndoRedoStack.AddAndExecute(new ChangeInstanceBypassedCommand(symbolChildUi.SymbolChild, false));
-                    }
-
-                    ImGui.PopStyleColor(2);
-                }
-                else
-                {
-                    var bypassable = symbolChildUi.SymbolChild.IsBypassable();
-
-                    ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
-
-                    if (!bypassable)
-                    {
-                        ImGui.BeginDisabled();
-                    }
-
-                    if (ImGui.Button("BYPASS", new Vector2(bypassedWidth, ImGui.GetFrameHeight())))
-                    {
-                        UndoRedoStack.AddAndExecute(new ChangeInstanceBypassedCommand(symbolChildUi.SymbolChild, true));
-                    }
-
-                    if (!bypassable)
-                    {
-                        CustomComponents.TooltipForLastItem("This operator cannot be bypassed");
-                        ImGui.EndDisabled();
-                    }
-
-                    ImGui.PopStyleColor();
-                }
-
-                ImGui.PopFont();
+                UndoRedoStack.AddAndExecute(new ChangeInstanceBypassedCommand(symbolChildUi.SymbolChild, isBypassed));
             }
-            ImGui.PopStyleColor();
+
+            CustomComponents.TooltipForLastItem(!bypassable
+                                                    ? "This operator cannot be bypassed"
+                                                    : isBypassed
+                                                        ? "Bypassed — click to enable"
+                                                        : "Bypass this operator");
+
+            ImGui.SameLine();
+            var isDisabled = symbolChildUi.SymbolChild.IsDisabled;
+            if (CustomComponents.ToggleIconButton(ref isDisabled,
+                                                  Icon.OperatorDisabled,
+                                                  Vector2.Zero,
+                                                  CustomComponents.ButtonStates.NeedsAttention))
+            {
+                UndoRedoStack.AddAndExecute(new ChangeInstanceIsDisabledCommand(symbolChildUi, isDisabled));
+            }
+
+            CustomComponents.TooltipForLastItem(isDisabled ? "Disabled — click to enable" : "Disable this operator");
+
+            ImGui.SameLine();
+            var projectView = ProjectView.Focused;
+            if (projectView != null && RenderProcess.OutputWindow != null && projectView.CompositionInstance != null)
+            {
+                var isPinned = RenderProcess.OutputWindow.Pinning.TryGetPinnedEvaluationInstance(projectView.Structure,
+                                   out var pinnedInstance) 
+                               && pinnedInstance == op;
+                
+                if (CustomComponents.ToggleIconButton(ref isPinned, Icon.PlayOutput, Vector2.Zero))
+                {
+                    if (LayoutHandling.FocusMode)
+                    {
+                        var selectedImage = projectView.NodeSelection.GetFirstSelectedInstance();
+                        if (selectedImage != null && ProjectView.Focused != null)
+                        {
+                            ProjectView.Focused.SetBackgroundOutput(selectedImage);
+                        }
+                    }
+                    else
+                    {
+                        if (ProjectView.Focused != null)
+                            NodeActions.PinSelectedToOutputWindow(ProjectView.Focused, 
+                                projectView.NodeSelection, 
+                                projectView.CompositionInstance, 
+                                true);
+                    }                    
+                }
+
+                CustomComponents.TooltipForLastItem(isPinned
+                                                        ? "Shown as graph background — click to clear"
+                                                        : "Show output as graph background");
+            }
         }
 
         ImGui.Unindent(5);
-      
+    }
+
+    private void CollectPresets(SymbolVariationPool pool)
+    {
+        _presets.Clear();
+        foreach (var variation in pool.AllVariations)
+        {
+            if (variation.IsPreset)
+                _presets.Add(variation);
+        }
     }
 
     /// <summary>
@@ -804,5 +876,7 @@ internal sealed class ParameterWindow : Window
 
     private readonly ParameterSettings _parameterSettings = new();
     private readonly SnapshotControlView _snapshotControlView = new();
+    private readonly VariationPicker _presetPicker = new();
+    private readonly List<Variation> _presets = new();
     public static readonly RenameInputDialog RenameInputDialog = new();
 }

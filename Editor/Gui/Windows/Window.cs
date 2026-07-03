@@ -44,6 +44,18 @@ internal abstract class Window
         ImGui.PopStyleColor();
     }
 
+    /// <summary>
+    /// Focuses the window on its next Begin. Unlike calling <c>ImGui.SetWindowFocus()</c> inside
+    /// <see cref="DrawContent"/>, this also surfaces a window that is currently an unselected dock
+    /// tab — there Begin returns false and the content never draws. The request repeats for a few
+    /// frames because on a window's creation frame the focus can be consumed before its docking
+    /// is resolved.
+    /// </summary>
+    internal void RequestWindowFocus()
+    {
+        _focusRequestFramesLeft = 20;
+    }
+
     private void DrawOneInstance()
     {
         UpdateBeforeDraw();
@@ -57,6 +69,11 @@ internal abstract class Window
             _wasVisible = true;
         }
 
+        if (_focusRequestFramesLeft > 0)
+        {
+            ImGui.SetNextWindowFocus();
+        }
+
         var borderWidthForFloatingWindows = _wasDockedLastFrame ? 0 : 2;
 
         ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, borderWidthForFloatingWindows);
@@ -67,6 +84,15 @@ internal abstract class Window
         var isVisible = mayNotClose
             ? ImGui.Begin(WindowDisplayTitle, WindowFlags)
             : ImGui.Begin(WindowDisplayTitle, ref Config.Visible, WindowFlags);
+
+        if (isVisible)
+        {
+            _focusRequestFramesLeft = 0;
+        }
+        else if (_focusRequestFramesLeft > 0)
+        {
+            _focusRequestFramesLeft--;
+        }
 
         if (isVisible)
         {
@@ -145,6 +171,7 @@ internal abstract class Window
     }
 
     private bool _wasVisible;
+    private int _focusRequestFramesLeft;
 
     internal void DrawMenuItemToggle()
     {

@@ -421,6 +421,16 @@ internal sealed class SymbolVariationPool
 
         if (sumStartOthers <= 0.0001f)
         {
+            if (_dragStartWeights.GetValueOrDefault(variationId, 0f) < 0.999f)
+            {
+                // Nothing else in the mix and this fader wasn't full at drag start — the remainder
+                // is the current (unsaved) parameter state, so the weight scales freely from it.
+                _blendWeights.Clear();
+                if (newWeight > 0.0001f)
+                    _blendWeights[variationId] = newWeight;
+                return;
+            }
+
             // No source to fade back to — keep the lone fader full.
             _blendWeights.Clear();
             _blendWeights[variationId] = 1f;
@@ -488,7 +498,28 @@ internal sealed class SymbolVariationPool
         }
 
         if (_weightedBlendVariations.Count == 0)
+        {
+            // Dragged back to zero while blending from the current state — restore it.
+            StopHover();
             return;
+        }
+
+        // A single partial weight means the remainder of the mix is the current (unsaved)
+        // parameter state: blend from it toward the variation instead of applying it fully.
+        if (_weightedBlendVariations.Count == 1 && _weightedBlendWeights[0] < 0.999f)
+        {
+            var variation = _weightedBlendVariations[0];
+            if (variation.IsPreset)
+            {
+                BeginBlendToPresent(instance, variation, _weightedBlendWeights[0]);
+            }
+            else
+            {
+                BeginBlendTowardsSnapshot(instance, variation, _weightedBlendWeights[0]);
+            }
+
+            return;
+        }
 
         BeginWeightedBlend(instance, _weightedBlendVariations, _weightedBlendWeights);
     }
@@ -1172,6 +1203,10 @@ internal sealed class SymbolVariationPool
         newMacroCommand = new MacroCommand("Set Blended Preset Values", commands);
         return true;
     }
+
+    /// <summary>True when the instance's current parameter values still match the preset's stored values.</summary>
+    public static bool DoesInstanceMatchPreset(Instance instance, Variation preset)
+        => DoesPresetVariationMatch(preset, instance) != MatchTypes.NoMatch;
 
     private static MatchTypes DoesPresetVariationMatch(Variation variation, Instance instance)
     {

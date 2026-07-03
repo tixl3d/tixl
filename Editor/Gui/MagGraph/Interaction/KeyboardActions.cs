@@ -24,10 +24,11 @@ internal static class KeyboardActions
             context.ProjectView.FocusViewToSelection();
         }
 
+        var nodeSelection = context.Selector;
         if (!T3Ui.IsCurrentlySaving && UserActions.Duplicate.Triggered())
         {
-            NodeActions.CopySelectedNodesToClipboard(context.Selector, compositionOp);
-            NodeActions.PasteClipboard(context.Selector, context.View, compositionOp);
+            NodeActions.CopySelectedNodesToClipboard(nodeSelection, compositionOp);
+            NodeActions.PasteClipboard(nodeSelection, context.View, compositionOp);
             context.Layout.FlagStructureAsChanged();
 
             result |= ChangeSymbol.SymbolModificationResults.StructureChanged;
@@ -42,7 +43,7 @@ internal static class KeyboardActions
         }
 
         if (!T3Ui.IsCurrentlySaving && UserActions.DeleteSelection.Triggered()
-                                    && context.Selector.Selection.Count > 0
+                                    && nodeSelection.Selection.Count > 0
                                     && context.StateMachine.CurrentState == GraphStates.Default)
         {
             result |= Modifications.DeleteSelection(context);
@@ -50,7 +51,7 @@ internal static class KeyboardActions
 
         if (!T3Ui.IsCurrentlySaving
             && UserActions.AlignSelectionLeft.Triggered()
-            && context.Selector.Selection.Count > 1
+            && nodeSelection.Selection.Count > 1
             && context.StateMachine.CurrentState == GraphStates.Default)
         {
             result |= Modifications.AlignSelectionToLeft(context);
@@ -58,12 +59,12 @@ internal static class KeyboardActions
 
         if (UserActions.ToggleDisabled.Triggered())
         {
-            NodeActions.ToggleDisabledForSelectedElements(context.Selector);
+            NodeActions.ToggleDisabledForSelectedElements(nodeSelection);
         }
 
         if (UserActions.ToggleBypassed.Triggered())
         {
-            NodeActions.ToggleBypassedForSelectedElements(context.Selector);
+            NodeActions.ToggleBypassedForSelectedElements(nodeSelection);
         }
 
         // Navigation backwards / forward
@@ -71,10 +72,10 @@ internal static class KeyboardActions
             IReadOnlyList<Guid>? navigationPath = null;
 
             if (UserActions.NavigateBackwards.Triggered())
-                navigationPath = context.Selector.NavigationHistory.NavigateBackwards();
+                navigationPath = nodeSelection.NavigationHistory.NavigateBackwards();
 
             if (UserActions.NavigateForward.Triggered())
-                navigationPath = context.Selector.NavigationHistory.NavigateForward();
+                navigationPath = nodeSelection.NavigationHistory.NavigateForward();
 
             if (navigationPath != null && context.View is IGraphView view)
                 view.OpenAndFocusInstance(navigationPath);
@@ -84,7 +85,7 @@ internal static class KeyboardActions
         {
             if (LayoutHandling.FocusMode)
             {
-                var selectedImage = context.Selector.GetFirstSelectedInstance();
+                var selectedImage = nodeSelection.GetFirstSelectedInstance();
                 if (selectedImage != null && ProjectView.Focused != null)
                 {
                     ProjectView.Focused.SetBackgroundOutput(selectedImage);
@@ -94,7 +95,7 @@ internal static class KeyboardActions
             {
                 if (ProjectView.Focused != null)
                     NodeActions.PinSelectedToOutputWindow(ProjectView.Focused, 
-                                                          context.Selector, 
+                                                          nodeSelection, 
                                                           compositionOp, 
                                                           true);
             }
@@ -102,7 +103,7 @@ internal static class KeyboardActions
 
         if (UserActions.DisplayImageAsBackground.Triggered())
         {
-            var selectedImage = context.Selector.GetFirstSelectedInstance();
+            var selectedImage = nodeSelection.GetFirstSelectedInstance();
             if (selectedImage != null && ProjectView.Focused != null)
             {
                 ProjectView.Focused.SetBackgroundOutput(selectedImage);
@@ -114,7 +115,7 @@ internal static class KeyboardActions
             // Prevent node graph copy if a text input is active (e.g., annotation description)
             if (!ImGuiNET.ImGui.IsAnyItemActive())
             {
-                NodeActions.CopySelectedNodesToClipboard(context.Selector, compositionOp);
+                NodeActions.CopySelectedNodesToClipboard(nodeSelection, compositionOp);
             }
         }
 
@@ -123,14 +124,14 @@ internal static class KeyboardActions
             // Prevent node graph paste if a text input is active (e.g., annotation description)
             if (!ImGuiNET.ImGui.IsAnyItemActive())
             {
-                NodeActions.PasteClipboard(context.Selector, context.View, compositionOp);
+                NodeActions.PasteClipboard(nodeSelection, context.View, compositionOp);
                 context.Layout.FlagStructureAsChanged();
             }
         }
 
         if (!T3Ui.IsCurrentlySaving && UserActions.PasteValues.Triggered())
         {
-            NodeActions.PasteValues(context.Selector, context.View, context.CompositionInstance);
+            NodeActions.PasteValues(nodeSelection, context.View, context.CompositionInstance);
             context.Layout.FlagStructureAsChanged();
         }
 
@@ -141,7 +142,7 @@ internal static class KeyboardActions
 
         if (!T3Ui.IsCurrentlySaving && UserActions.AddAnnotation.Triggered())
         {
-            var newAnnotation = NodeActions.AddAnnotation(context.Selector, context.View, compositionOp);
+            var newAnnotation = NodeActions.AddAnnotation(nodeSelection, context.View, compositionOp);
             context.ActiveAnnotationId = newAnnotation.Id;
             context.StateMachine.SetState(GraphStates.RenameAnnotation, context);
             context.Layout.FlagStructureAsChanged();
@@ -191,10 +192,10 @@ internal static class KeyboardActions
 
         if (context.StateMachine.CurrentState == GraphStates.Default)
         {
-            var oneSelected = context.Selector.Selection.Count == 1;
+            var oneSelected = nodeSelection.Selection.Count == 1;
             if (oneSelected && UserActions.RenameChild.Triggered())
             {
-                if (context.Layout.Items.TryGetValue(context.Selector.Selection[0].Id, out var item)
+                if (context.Layout.Items.TryGetValue(nodeSelection.Selection[0].Id, out var item)
                     && item.Variant == MagGraphItem.Variants.Operator)
                 {
                     RenamingOperator.OpenForChildUi(item.ChildUi!);
