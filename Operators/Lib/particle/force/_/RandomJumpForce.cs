@@ -1,4 +1,4 @@
-namespace Lib.particle.force;
+namespace Lib.particle.force._;
 
 [Guid("8342d554-6e83-49b1-91b5-2d4b5b63e726")]
 internal sealed class RandomJumpForce : Instance<RandomJumpForce>
