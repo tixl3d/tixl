@@ -102,7 +102,7 @@
       "Title": "Coffeine Spiders ",
       "PosOnCanvas": {
         "X": -0.58584595,
-        "Y": 469.35413
+        "Y": 498.9047
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -118,8 +118,8 @@
       "ActivationIndex": 8,
       "Title": "Cyberia!",
       "PosOnCanvas": {
-        "X": -0.58584595,
-        "Y": 190.35413
+        "X": 325.41415,
+        "Y": 498.9047
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -135,7 +135,7 @@
       "Title": "AI is difficult",
       "PosOnCanvas": {
         "X": 162.41415,
-        "Y": 469.35413
+        "Y": 498.9047
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {

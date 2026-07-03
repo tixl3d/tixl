@@ -8,7 +8,7 @@
       "Title": "Default",
       "PosOnCanvas": {
         "X": 0.0,
-        "Y": 0.0
+        "Y": -29.55056
       },
       "ParameterSetsForChildIds": {}
     },
@@ -19,7 +19,7 @@
       "Title": "Subtle",
       "PosOnCanvas": {
         "X": 163.00002,
-        "Y": 0.0
+        "Y": -29.55056
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -34,7 +34,7 @@
       "Title": "HorizontalTwist",
       "PosOnCanvas": {
         "X": 326.0,
-        "Y": 0.0
+        "Y": -29.55056
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
@@ -100,7 +100,7 @@
       "Title": "Magnetism",
       "PosOnCanvas": {
         "X": 0.0,
-        "Y": 186.0
+        "Y": 215.55057
       },
       "ParameterSetsForChildIds": {
         "00000000-0000-0000-0000-000000000000": {
