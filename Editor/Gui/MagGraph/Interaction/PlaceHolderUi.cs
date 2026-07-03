@@ -7,6 +7,7 @@ using T3.Core.DataTypes.Vector;
 using T3.Core.Model;
 using T3.Core.Utils;
 using T3.Editor.App;
+using T3.Editor.Gui.Help;
 using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.Styling;
@@ -447,10 +448,16 @@ internal static class PlaceHolderUi
         var isHovered = ImGui.IsItemHovered();
         if (isHovered)
         {
-            ImGui.SetNextWindowSize(new Vector2(300, 0));
-            ImGui.BeginTooltip();
-            OperatorHelp.DrawHelpSummary(symbolUi, false);
-            ImGui.EndTooltip();
+            // Let the Help window follow the hovered symbol; its preview replaces the summary tooltip.
+            HoveredHelpTarget.SetOperator(symbolUi.Symbol.Id);
+
+            if (!HelpWindow.HoverPreviewActive)
+            {
+                ImGui.SetNextWindowSize(new Vector2(300, 0));
+                ImGui.BeginTooltip();
+                OperatorHelp.DrawHelpSummary(symbolUi, false);
+                ImGui.EndTooltip();
+            }
         }
 
         ImGui.SameLine(ImGui.GetItemRectMin().X - ImGui.GetWindowPos().X);

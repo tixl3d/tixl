@@ -248,7 +248,10 @@ internal sealed class GuidedFeatureTestsWindow : Window
         {
             // Lazy-create so hot-reload that adds new fields doesn't NRE until the next editor restart.
             _introMarkdown ??= new MarkdownView(new MarkdownView.Options());
-            _introMarkdown.Draw(set.Intro);
+            // Op/topic refs suppress their own tooltip — the intro already renders inside one.
+            _introMarkdown.Draw(set.Intro,
+                                onOperatorRef: static op => MarkdownOperatorLinks.HandleOperatorRef(op, suppressTooltip: true),
+                                operatorColor: MarkdownOperatorLinks.GetOperatorColor);
         }
 
         if (set.ParseWarnings.Count > 0)
@@ -416,13 +419,17 @@ internal sealed class GuidedFeatureTestsWindow : Window
         if (_cachedAction != null)
         {
             DrawSectionLabel("Please do the following");
-            _actionMarkdown.Draw(_cachedAction);
+            _actionMarkdown.Draw(_cachedAction,
+                                 onOperatorRef: static op => MarkdownOperatorLinks.HandleOperatorRef(op),
+                                 operatorColor: MarkdownOperatorLinks.GetOperatorColor);
         }
 
         if (_cachedExpected != null)
         {
             DrawSectionLabel("Expected Results");
-            _expectedMarkdown.Draw(_cachedExpected);
+            _expectedMarkdown.Draw(_cachedExpected,
+                                   onOperatorRef: static op => MarkdownOperatorLinks.HandleOperatorRef(op),
+                                   operatorColor: MarkdownOperatorLinks.GetOperatorColor);
         }
     }
 

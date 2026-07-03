@@ -80,11 +80,11 @@ internal static class HelpIndex
         }
     }
 
-    /// <summary>Meet-up segments discussing the operator with the given full path (namespace + name), newest data first as authored.</summary>
-    internal static IReadOnlyList<OnlineVideoSegment> GetOperatorSegments(string operatorFullPath)
+    /// <summary>Meet-up segments discussing a mention key (<c>op:&lt;fullpath&gt;</c> or <c>ui:&lt;id&gt;</c>), newest data first as authored.</summary>
+    internal static IReadOnlyList<OnlineVideoSegment> GetSegments(string mentionKey)
     {
         EnsureLoaded();
-        return _segmentsByKey.TryGetValue("op:" + operatorFullPath, out var segments)
+        return _segmentsByKey.TryGetValue(mentionKey, out var segments)
                    ? segments
                    : Array.Empty<OnlineVideoSegment>();
     }

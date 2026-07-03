@@ -5,8 +5,8 @@ namespace T3.Editor.Gui.Help;
 
 /// <summary>
 /// A tiny per-frame broker that decouples "what is currently hovered" from the <see cref="Windows.HelpWindow"/>.
-/// The graph (and later the symbol library, browser, and <c>[HelpUiID]</c> elements) records the topic the
-/// mouse is over; the Help window reads it while in its follow-selection state.
+/// The graph, the symbol library/browser, and documentation affordances record the topic the mouse is over;
+/// the Help window previews it while its hover mode is enabled.
 /// </summary>
 /// <remarks>
 /// The recorded value carries the frame it was set on so the read tolerates either draw order between the
@@ -18,23 +18,30 @@ internal static class HoveredHelpTarget
     /// <summary>Records the operator the mouse is hovering as the help topic for this frame.</summary>
     internal static void SetOperator(Guid symbolId)
     {
-        _operatorSymbolId = symbolId;
+        _hoveredTopic = HelpTopic.ForOperator(symbolId);
         _frameSet = ImGui.GetFrameCount();
     }
 
-    /// <summary>The operator symbol hovered this frame or the previous one, or false if the hover is stale.</summary>
-    internal static bool TryGetOperator(out Guid symbolId)
+    /// <summary>Records the <c>ui:</c> topic the mouse is hovering (a markdown link or documentation icon).</summary>
+    internal static void SetTopic(string keyOrId)
     {
-        if (_operatorSymbolId != Guid.Empty && ImGui.GetFrameCount() - _frameSet <= 1)
+        _hoveredTopic = HelpTopic.ForUiTopic(keyOrId);
+        _frameSet = ImGui.GetFrameCount();
+    }
+
+    /// <summary>The topic hovered this frame or the previous one, or false if the hover is stale.</summary>
+    internal static bool TryGetHovered(out HelpTopic topic)
+    {
+        if (!_hoveredTopic.IsEmpty && ImGui.GetFrameCount() - _frameSet <= 1)
         {
-            symbolId = _operatorSymbolId;
+            topic = _hoveredTopic;
             return true;
         }
 
-        symbolId = Guid.Empty;
+        topic = default;
         return false;
     }
 
-    private static Guid _operatorSymbolId;
+    private static HelpTopic _hoveredTopic;
     private static int _frameSet = int.MinValue;
 }

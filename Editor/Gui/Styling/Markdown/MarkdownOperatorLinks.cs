@@ -3,6 +3,7 @@ using ImGuiNET;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
 using T3.Editor.Gui.Help;
+using T3.Editor.Gui.Windows;
 using T3.Editor.Gui.Windows.Layouts;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.InputsAndTypes;
@@ -36,6 +37,20 @@ internal static class MarkdownOperatorLinks
         if (!TryResolve(opName, out var symbol))
             return;
 
+        if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+        {
+            HelpWindow.ShowTopic(HelpTopic.ForOperator(symbol.Id));
+            WindowManager.SymbolLibrary.Reveal(symbol.Id);
+        }
+
+        // While the Help window previews hovered topics, a tooltip would double the content. Links inside
+        // the Help window itself keep their tooltip — previewing would swap the body under the cursor.
+        if (HelpWindow.HoverPreviewActive && !HelpWindow.IsDrawingContent)
+        {
+            HoveredHelpTarget.SetOperator(symbol.Id);
+            return;
+        }
+
         // suppressTooltip avoids nesting when the markdown is already inside a tooltip (e.g. the
         // operator's own description, which can itself contain [OpName] references).
         if (!suppressTooltip)
@@ -67,14 +82,12 @@ internal static class MarkdownOperatorLinks
             ImGui.EndTooltip();
             ImGui.PopStyleVar();
         }
-
-        if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
-            WindowManager.SymbolLibrary.Reveal(symbol.Id);
     }
 
     /// <summary>
-    /// Hover tooltip for a <c>[ui:Id]</c> fragment — the help index's UI topic (editor concept/component).
-    /// Shows the topic term and its doc; an unknown id gets no interaction.
+    /// Hover/click handler for a <c>[ui:Id]</c> fragment — the help index's UI topic (editor concept/component).
+    /// Clicking shows the topic in the Help window; hovering previews it there (or falls back to a tooltip
+    /// when the window's hover mode is off). An unknown id gets no interaction.
     /// </summary>
     private static void HandleTopicRef(string topicKey, bool suppressTooltip)
     {
@@ -83,6 +96,18 @@ internal static class MarkdownOperatorLinks
 
         if (!HelpIndex.TryGetTopic(topicKey, out var topic) || topic == null)
             return;
+
+        ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+        if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+            HelpWindow.ShowTopic(HelpTopic.ForUiTopic(topicKey), showWindow: true);
+
+        // While the Help window previews hovered topics, a tooltip would double the content. Links inside
+        // the Help window itself keep their tooltip — previewing would swap the body under the cursor.
+        if (HelpWindow.HoverPreviewActive && !HelpWindow.IsDrawingContent)
+        {
+            HoveredHelpTarget.SetTopic(topicKey);
+            return;
+        }
 
         if (suppressTooltip)
             return;

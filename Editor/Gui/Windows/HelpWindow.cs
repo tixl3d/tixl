@@ -7,20 +7,23 @@ using T3.Editor.Gui.Help;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.Styling.Markdown;
+using T3.Editor.Gui.UiHelpers;
+using T3.Editor.Gui.UiHelpers.Thumbnails;
 using T3.Editor.UiModel;
 using T3.Editor.UiModel.Selection;
 
 namespace T3.Editor.Gui.Windows;
 
 /// <summary>
-/// A dockable context-doc panel: it instantly mirrors the operator the user hovers or selects (no dwell
-/// delay), rendering its description, parameters, links, and the ranked "Discussed in meet-ups" resources.
-/// Pinning detaches the panel from the live selection and pushes the topic onto a back/forward history so
-/// the user can keep working in the graph while reading.
+/// A dockable context-doc panel: it shows the documentation of the current help context — the last
+/// explicitly selected operator or <c>ui:</c> topic — rendering its description, parameters, links, and
+/// the ranked "Discussed in meet-ups" resources. While the hover toggle is on, hovering an operator or a
+/// documentation link previews its doc instantly (no dwell delay) and reverts to the context afterwards.
+/// Every context change is pushed onto a deduplicated back/forward history.
 /// </summary>
 /// <remarks>
-/// The doc body reuses <see cref="OperatorHelp.DrawHelp"/>; this window adds the shell (modes, follow/pin
-/// state machine) and the meet-up resource list. See issue #102.
+/// The operator doc body reuses <see cref="OperatorHelp.DrawHelp"/>; this window adds the shell (modes,
+/// context/history state) and the meet-up resource list. See issue #102.
 /// </remarks>
 [HelpUiID("HelpWindow")]
 internal sealed class HelpWindow : Window
@@ -31,15 +34,69 @@ internal sealed class HelpWindow : Window
         MenuTitle = "Help";
         WindowFlags = ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse;
         WindowSizeOverride = new Vector2(420, 600);
+        _instance = this;
     }
 
     internal override List<Window> GetInstances() => [];
 
+    /// <summary>
+    /// Makes <paramref name="topic"/> the current help context (pushed onto the history). Called by
+    /// documentation links, doc icons, and the symbol library; pass <paramref name="showWindow"/> for
+    /// clicks that should surface the window even when it is closed.
+    /// </summary>
+    internal static void ShowTopic(in HelpTopic topic, bool showWindow = false)
+    {
+        var instance = _instance;
+        if (instance == null || topic.IsEmpty)
+            return;
+
+        instance.PushTopic(topic);
+
+        if (showWindow)
+        {
+            instance.Config.Visible = true;
+            instance._mode = Modes.Help;
+            instance._focusWindowNextFrame = true;
+        }
+    }
+
+    /// <summary>
+    /// True while the Help window is on screen in Help mode with the hover toggle enabled. Views that
+    /// show their own doc tooltips (symbol library/browser, topic links) omit them while this is set,
+    /// since the window already previews the hovered topic.
+    /// </summary>
+    internal static bool HoverPreviewActive
+    {
+        get
+        {
+            var instance = _instance;
+            return instance != null
+                   && instance._mode == Modes.Help
+                   && UserSettings.Config.HelpHoverPreview
+                   // Frame-stamped instead of Config.Visible so a hidden dock tab doesn't suppress tooltips.
+                   && ImGui.GetFrameCount() - instance._lastContentFrame <= 1;
+        }
+    }
+
+    /// <summary>
+    /// True while this window draws its own content. Doc links check it so hovering a link *inside* the
+    /// Help window keeps its tooltip instead of hover-previewing — swapping the body under the cursor
+    /// would remove the hovered link and flicker between the two topics. Clicking still navigates.
+    /// </summary>
+    internal static bool IsDrawingContent { get; private set; }
+
     protected override void DrawContent()
     {
-        // Resolve the follow target before the header so the pin button reflects whether there's anything to pin.
-        if (_mode == Modes.Help && !_isPinned)
-            _followingSymbolId = ResolveFollowTarget();
+        IsDrawingContent = true;
+        _lastContentFrame = ImGui.GetFrameCount();
+
+        if (_focusWindowNextFrame)
+        {
+            ImGui.SetWindowFocus();
+            _focusWindowNextFrame = false;
+        }
+
+        UpdateContextFromGraphSelection();
 
         DrawHeader();
         CustomComponents.SeparatorLine();
@@ -48,6 +105,8 @@ internal sealed class HelpWindow : Window
             DrawHelpBody();
         else
             DrawLearnBody();
+
+        IsDrawingContent = false;
     }
 
     #region header
@@ -59,63 +118,46 @@ internal sealed class HelpWindow : Window
         ImGui.SameLine();
         DrawModeTab("Learn", Modes.Learn);
 
-        // Pin + history controls only make sense in Help mode.
+        // History + hover controls only make sense in Help mode.
         if (_mode != Modes.Help)
             return;
 
         var buttonSize = new Vector2(ImGui.GetFrameHeight());
         var spacing = ImGui.GetStyle().ItemSpacing.X;
-        var buttonCount = _isPinned ? 4 : 3;
-        var clusterWidth = buttonCount * buttonSize.X + (buttonCount - 1) * spacing;
-        CustomComponents.RightAlign(clusterWidth);
+        CustomComponents.RightAlign(3 * buttonSize.X + 2 * spacing);
 
-        var canGoBack = _historyIndex > 0;
+        // Index 0 is the newest entry, so "back" moves towards higher indices (see PushTopic).
+        var canGoBack = _historyIndex >= 0 && _historyIndex < _history.Count - 1;
         if (CustomComponents.IconButton(Icon.ChevronLeft, buttonSize,
                                         canGoBack ? CustomComponents.ButtonStates.Default : CustomComponents.ButtonStates.Disabled)
             && canGoBack)
         {
-            StepHistory(-1);
+            _historyIndex++;
         }
 
         CustomComponents.TooltipForLastItem("Previous topic");
 
         ImGui.SameLine();
-        var canGoForward = _historyIndex >= 0 && _historyIndex < _history.Count - 1;
+        var canGoForward = _historyIndex > 0;
         if (CustomComponents.IconButton(Icon.ChevronRight, buttonSize,
                                         canGoForward ? CustomComponents.ButtonStates.Default : CustomComponents.ButtonStates.Disabled)
             && canGoForward)
         {
-            StepHistory(1);
+            _historyIndex--;
         }
 
         CustomComponents.TooltipForLastItem("Next topic");
 
         ImGui.SameLine();
-        var hasTarget = _followingSymbolId != Guid.Empty || _isPinned;
-        var pinState = _isPinned
-                           ? CustomComponents.ButtonStates.Activated
-                           : !hasTarget
-                               ? CustomComponents.ButtonStates.Disabled
-                               // Brighten the pin until the user discovers it; retire the hint after the first pin.
-                               : _pinHintRetired
-                                   ? CustomComponents.ButtonStates.Default
-                                   : CustomComponents.ButtonStates.Emphasized;
+        CustomComponents.ToggleTwoIconsButton(ref UserSettings.Config.HelpHoverPreview,
+                                              iconOff: Icon.HoverScrub,
+                                              iconOn: Icon.HoverScrub,
+                                              CustomComponents.ButtonStates.Activated,
+                                              CustomComponents.ButtonStates.Default,
+                                              noBackground: true);
 
-        if (CustomComponents.IconButton(_isPinned ? Icon.Pin : Icon.PinOutline, buttonSize, pinState) && hasTarget)
-            TogglePin();
-
-        CustomComponents.TooltipForLastItem(_isPinned
-                                                ? "Unpin — follow the selection again"
-                                                : "Pin this topic so it stays while you keep exploring the graph");
-
-        if (_isPinned)
-        {
-            ImGui.SameLine();
-            if (CustomComponents.IconButton(Icon.Close, buttonSize))
-                Unpin();
-
-            CustomComponents.TooltipForLastItem("Unpin");
-        }
+        CustomComponents.TooltipForLastItem("Preview on hover",
+                                            "Hovering an operator or a documentation link shows its doc here instantly.");
     }
 
     private void DrawModeTab(string label, Modes mode)
@@ -133,33 +175,99 @@ internal sealed class HelpWindow : Window
     }
     #endregion
 
+    #region context & history
+    /// <summary>A changed graph selection is an explicit context change; clearing the selection keeps the topic.</summary>
+    private void UpdateContextFromGraphSelection()
+    {
+        if (NodeSelection.TryGetSelectedInstanceOrInput(out var instance, out _, out _))
+        {
+            var symbolId = instance.GetSymbolUi().Symbol.Id;
+            if (symbolId != _lastGraphSelectionId)
+            {
+                _lastGraphSelectionId = symbolId;
+                PushTopic(HelpTopic.ForOperator(symbolId));
+            }
+        }
+        else
+        {
+            _lastGraphSelectionId = Guid.Empty;
+        }
+    }
+
+    /// <summary>
+    /// Deduplicating history update mirroring <see cref="UiModel.ProjectHandling.NavigationHistory"/>:
+    /// newest at index 0; re-selecting a neighbor of the current entry keeps the list order, anything
+    /// further away is moved to the front. Stepping back through the history and then selecting something
+    /// new jumps back to the front.
+    /// </summary>
+    private void PushTopic(in HelpTopic topic)
+    {
+        var index = _history.IndexOf(topic);
+        if (index == -1)
+        {
+            _history.Insert(0, topic);
+            _historyIndex = 0;
+            return;
+        }
+
+        if (Math.Abs(index - _historyIndex) <= 1)
+        {
+            _historyIndex = index;
+            return;
+        }
+
+        _history.RemoveAt(index);
+        _history.Insert(0, topic);
+        _historyIndex = 0;
+    }
+
+    /// <summary>The hovered topic previews over the current context; it never enters the history.</summary>
+    private HelpTopic GetTopicToShow()
+    {
+        if (UserSettings.Config.HelpHoverPreview && HoveredHelpTarget.TryGetHovered(out var hovered))
+            return hovered;
+
+        return _historyIndex >= 0 && _historyIndex < _history.Count
+                   ? _history[_historyIndex]
+                   : default;
+    }
+    #endregion
+
     #region help mode
     private void DrawHelpBody()
     {
-        var showId = _isPinned && _historyIndex >= 0 && _historyIndex < _history.Count
-                         ? _history[_historyIndex]
-                         : _followingSymbolId;
-
-        var topicChanged = showId != _lastShownSymbolId;
+        var topic = GetTopicToShow();
+        var topicChanged = topic != _lastShownTopic;
         if (topicChanged)
         {
             _resourceList.Reset();
-            _lastShownSymbolId = showId;
+            _lastShownTopic = topic;
         }
 
         SymbolUi? symbolUi = null;
-        string? operatorFullPath = null;
-        if (showId != Guid.Empty && SymbolUiRegistry.TryGetSymbolUi(showId, out symbolUi))
-            operatorFullPath = symbolUi.Symbol.Namespace + "." + symbolUi.Symbol.Name;
+        string? topicTitle = null;
+        string? topicDoc = null;
+        string? mentionKey = null;
+        var resourceLinks = (IReadOnlyList<VideoResourceList.LinkRow>)Array.Empty<VideoResourceList.LinkRow>();
 
-        // The hand-authored symbol links rank into the same footer list as the extracted video references.
-        var resourceLinks = symbolUi != null
-                                ? OperatorHelp.DocumentationRenderer.GetLinkRows(symbolUi)
-                                : (IReadOnlyList<VideoResourceList.LinkRow>)Array.Empty<VideoResourceList.LinkRow>();
+        if (topic.UiTopicKey != null)
+        {
+            if (UiTopicDocs.TryGet(topic.UiTopicKey, out var title, out topicDoc))
+            {
+                topicTitle = title;
+                mentionKey = topic.UiTopicKey;
+            }
+        }
+        else if (topic.SymbolId != Guid.Empty && SymbolUiRegistry.TryGetSymbolUi(topic.SymbolId, out symbolUi))
+        {
+            mentionKey = "op:" + symbolUi.Symbol.Namespace + "." + symbolUi.Symbol.Name;
+            // The hand-authored symbol links rank into the same footer list as the extracted video references.
+            resourceLinks = OperatorHelp.DocumentationRenderer.GetLinkRows(symbolUi);
+        }
 
         // Reserve space at the bottom so the resources stay docked while the doc scrolls above them.
         var bodyHeight = ImGui.GetContentRegionAvail().Y;
-        var footerHeight = symbolUi != null ? _resourceList.MeasureHeight(operatorFullPath, resourceLinks, bodyHeight) : 0f;
+        var footerHeight = mentionKey != null ? _resourceList.MeasureHeight(mentionKey, resourceLinks, bodyHeight) : 0f;
 
         // The doc always lives in a child: the empty-state message draws straight to the draw list and
         // submits no item, so without the child's own item the dangling cursor from the header separator
@@ -170,23 +278,68 @@ internal sealed class HelpWindow : Window
 
         if (symbolUi != null)
         {
+            DrawSymbolThumbnail(symbolUi);
             OperatorHelp.DrawHelp(symbolUi);
+        }
+        else if (topicTitle != null)
+        {
+            DrawUiTopicDoc(topicTitle, topicDoc);
+        }
+        else if (!topic.IsEmpty)
+        {
+            CustomComponents.EmptyWindowMessage("This topic is no longer available.");
         }
         else
         {
-            CustomComponents.EmptyWindowMessage(_isPinned
-                                                    ? "This pinned topic is no longer available."
-                                                    : "Hover or select an operator to see its description.");
+            CustomComponents.EmptyWindowMessage(UserSettings.Config.HelpHoverPreview
+                                                    ? "Hover or select an operator to see its description."
+                                                    : "Select an operator to see its description.");
         }
 
         CustomComponents.HandleDragScrolling(this);
         ImGui.EndChild();
 
         if (footerHeight > 0)
-            DrawResourceFooter(operatorFullPath, resourceLinks);
+            DrawResourceFooter(mentionKey, resourceLinks);
     }
 
-    private void DrawResourceFooter(string? operatorFullPath, IReadOnlyList<VideoResourceList.LinkRow> links)
+    private static void DrawSymbolThumbnail(SymbolUi symbolUi)
+    {
+        var symbol = symbolUi.Symbol;
+        var thumbnail = ThumbnailManager.GetThumbnail(symbol.Id, symbol.SymbolPackage, ThumbnailManager.Categories.PackageMeta);
+        if (!thumbnail.IsReady)
+            return;
+
+        ImGui.Indent(10); // Match the inset OperatorHelp.DrawHelp uses for the doc body.
+        thumbnail.AsImguiImage(100 * T3Ui.UiScaleFactor);
+        ImGui.Unindent(10);
+        FormInputs.AddVerticalSpace(4);
+    }
+
+    private void DrawUiTopicDoc(string title, string? doc)
+    {
+        ImGui.Indent(10); // Match the inset OperatorHelp.DrawHelp uses for the doc body.
+        FormInputs.AddVerticalSpace(10);
+        CustomComponents.StylizedText(title, Fonts.FontLarge, UiColors.Text);
+        CustomComponents.StylizedText("UI topic", Fonts.FontSmall, UiColors.TextMuted);
+        FormInputs.AddVerticalSpace(10);
+
+        if (!string.IsNullOrWhiteSpace(doc))
+        {
+            _topicView.Draw(doc,
+                            onUrl: static url => CoreUi.Instance.OpenWithDefaultApplication(url),
+                            onOperatorRef: static op => MarkdownOperatorLinks.HandleOperatorRef(op),
+                            operatorColor: MarkdownOperatorLinks.GetOperatorColor);
+        }
+        else
+        {
+            CustomComponents.StylizedText("No documentation for this topic yet.", Fonts.FontNormal, UiColors.TextMuted);
+        }
+
+        ImGui.Unindent(10);
+    }
+
+    private void DrawResourceFooter(string? mentionKey, IReadOnlyList<VideoResourceList.LinkRow> links)
     {
         // Subtle divider at the docked footer's top edge.
         var top = ImGui.GetCursorScreenPos();
@@ -195,62 +348,9 @@ internal sealed class HelpWindow : Window
 
         ImGui.BeginChild("resources", Vector2.Zero, ImGuiChildFlags.None, ImGuiWindowFlags.NoBackground);
         ImGui.Indent(10); // Match the inset OperatorHelp.DrawHelp uses for the doc body.
-        _resourceList.Draw(operatorFullPath, links);
+        _resourceList.Draw(mentionKey, links);
         ImGui.Unindent(10);
         ImGui.EndChild();
-    }
-
-    private static Guid ResolveFollowTarget()
-    {
-        // Hovering a node beats the current selection so scrubbing the graph updates the panel instantly.
-        if (HoveredHelpTarget.TryGetOperator(out var hoveredSymbolId))
-            return hoveredSymbolId;
-
-        if (NodeSelection.TryGetSelectedInstanceOrInput(out var instance, out _, out _))
-            return instance.GetSymbolUi().Symbol.Id;
-
-        return Guid.Empty;
-    }
-
-    private void TogglePin()
-    {
-        if (_isPinned)
-        {
-            Unpin();
-            return;
-        }
-
-        if (_followingSymbolId == Guid.Empty)
-            return;
-
-        PushHistory(_followingSymbolId);
-        _isPinned = true;
-        _pinHintRetired = true;
-    }
-
-    private void Unpin()
-    {
-        _isPinned = false;
-    }
-
-    private void PushHistory(Guid symbolId)
-    {
-        // Already on this topic at the head: just re-pin it without duplicating the entry.
-        if (_historyIndex >= 0 && _historyIndex < _history.Count && _history[_historyIndex] == symbolId)
-            return;
-
-        // Drop any forward entries — pinning a new topic starts a fresh forward trail.
-        if (_historyIndex < _history.Count - 1)
-            _history.RemoveRange(_historyIndex + 1, _history.Count - _historyIndex - 1);
-
-        _history.Add(symbolId);
-        _historyIndex = _history.Count - 1;
-    }
-
-    private void StepHistory(int direction)
-    {
-        _historyIndex = Math.Clamp(_historyIndex + direction, 0, _history.Count - 1);
-        _isPinned = true; // Landing on a history entry pins it.
     }
     #endregion
 
@@ -283,16 +383,19 @@ internal sealed class HelpWindow : Window
         Learn,
     }
 
+    private static HelpWindow? _instance;
+
     private Modes _mode = Modes.Help;
+    private bool _focusWindowNextFrame;
+    private int _lastContentFrame = int.MinValue;
 
-    private bool _isPinned;
-    private bool _pinHintRetired;
-    private Guid _followingSymbolId;
-    private Guid _lastShownSymbolId;
+    private Guid _lastGraphSelectionId;
+    private HelpTopic _lastShownTopic;
 
-    private readonly List<Guid> _history = new();
+    private readonly List<HelpTopic> _history = new();
     private int _historyIndex = -1;
 
     private readonly VideoResourceList _resourceList = new();
+    private readonly MarkdownView _topicView = new(new MarkdownView.Options());
     private readonly MarkdownView _releaseNotesView = new(new MarkdownView.Options());
 }

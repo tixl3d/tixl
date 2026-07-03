@@ -31,10 +31,23 @@ inside a `BeginChild`/`EndChild`. `SeparatorLine` ends on a bare `SetCursorPosX`
 draws via the draw list (submits no item), so the dangling cursor otherwise trips ImGui's "validate
 extent" assert at the window's `EndChild`. The child item validates the extent.
 
-Decisions taken while building (settle/adjust before Phase 2 ships):
-- **Pin = icon click, not bare `Shift`.** The §9 conflict risk (Shift is a heavily-used graph modifier)
-  made a reliable bare-Shift *tap* detector not worth it for Phase 1. The pin icon brightens
-  (`ButtonStates.Emphasized`) until the first pin to stay discoverable. Revisit the Shift bind in §9.
+**Phase 2 — implemented (2026-07).** The pin/Shift model from §3–§4 was **dropped after review** in favor of
+a context + hover-preview model:
+- **Context = last explicit change wins.** Graph selection changes, Symbol-Library item clicks, `[ui:Id]`
+  link clicks, and documentation-icon clicks each set the current help topic (`HelpWindow.ShowTopic`).
+  Clicks on topic links/doc icons also open+focus the window if closed.
+- **Hover preview toggle** (header icon, `UserSettings.Config.HelpHoverPreview`, default on): hovering an
+  operator (graph, Symbol Library, Symbol Browser) or a `ui:` topic (markdown links, doc icons) previews
+  its doc instantly and reverts to the context when the hover ends. While active, the Symbol Library /
+  Symbol Browser description tooltips and `ui:`-link tooltips are omitted (no doubled content).
+- **History**: every explicit context change is pushed with `NavigationHistory`-style dedup (newest at
+  index 0, neighbor-selection keeps order); `‹`/`›` step through it, a new context jumps back out.
+- **`ui:` topics render in the window** (`UiTopicDocs`: embedded snippet wins over `topics.json` doc) with
+  their `ui:` mention segments in the resource footer; `HelpTopic` (op-Guid or ui-key) replaced the
+  Guid-only follow target.
+- **Symbol thumbnails** (`ThumbnailManager`, PackageMeta) show above the operator doc when available.
+
+Decisions taken while building Phase 1 (still relevant):
 - **No thumbnail image yet.** The `.jpg`s live in git-ignored `.help/.tmp/video-thumbnails/` (no release
   shipping story) and need string-keyed GPU-texture plumbing (`ThumbnailManager` is Guid/atlas-only). The
   hover tooltip carries the metadata header, title, date, and note instead. Top follow-up — see §7.
@@ -175,8 +188,7 @@ Below the doc body, list the topic's segments from `mentions.json`, **ranked**, 
 
 ## 9. Open / deferred
 
-- Exact `Shift` pin keybind — confirm no conflict in the graph; whether pin also grabs keyboard focus
-  for scroll/links; `Esc` as an unpin alias.
+- ~~Exact `Shift` pin keybind~~ — obsolete; the pin model was replaced by context + hover preview (see Status).
 - Where the editor reads the indices at runtime (install-relative `.help/` vs a bundled editor asset).
 - The relevancy ranking weights (tune the age-by-type curve; the usage-stats source).
 - The Learn/release-notes content source (a notes file vs the `update`-type videos).

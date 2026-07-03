@@ -772,6 +772,8 @@ internal sealed class SymbolLibrary : Window
             ImGui.PushStyleColor(ImGuiCol.Text, ColorVariations.OperatorLabel.Apply(color).Rgba);
 
             bool buttonPressed = ImGui.Button(symbol.Name.AddSpacesForImGuiOutput());
+            if (buttonPressed)
+                HelpWindow.ShowTopic(HelpTopic.ForOperator(symbol.Id));
 
             // Get button rect for icon and highlight
             var buttonMin = ImGui.GetItemRectMin();
@@ -796,7 +798,9 @@ internal sealed class SymbolLibrary : Window
                 var thumbnailRect = ThumbnailManager.GetThumbnail(symbol.Id, symbol.SymbolPackage, ThumbnailManager.Categories.PackageMeta);
                 ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeAll);
 
-                if (!string.IsNullOrEmpty(symbolUi.Description) || thumbnailRect.IsReady)
+                // The Help window already previews the hovered symbol — the tooltip would double it.
+                if (!HelpWindow.HoverPreviewActive
+                    && (!string.IsNullOrEmpty(symbolUi.Description) || thumbnailRect.IsReady))
                 {
                     CustomComponents.BeginTooltip(600);
                     {

@@ -22,13 +22,13 @@ internal sealed class VideoResourceList
     /// <summary>A hand-authored symbol link (the old "Links:" section), now ranked into the same list.</summary>
     internal readonly record struct LinkRow(string Title, string Url, string Description, Icon? Icon);
 
-    /// <param name="operatorFullPath">The operator's namespace-qualified name (the <c>op:</c> mention key without the prefix), or null.</param>
+    /// <param name="mentionKey">The full mention key (<c>op:&lt;fullpath&gt;</c> or <c>ui:&lt;id&gt;</c>), or null.</param>
     /// <param name="links">Hand-authored symbol links to merge in, ranked above the videos.</param>
-    internal void Draw(string? operatorFullPath, IReadOnlyList<LinkRow> links)
+    internal void Draw(string? mentionKey, IReadOnlyList<LinkRow> links)
     {
         _tooltipDrawn = false;
 
-        var rows = BuildRows(operatorFullPath, links);
+        var rows = BuildRows(mentionKey, links);
         if (rows.Count == 0)
             return;
 
@@ -73,9 +73,9 @@ internal sealed class VideoResourceList
     /// Pixel height the list will occupy for the operator (0 if it has no rows), so the Help window can
     /// dock it as a fixed footer. Capped at half <paramref name="maxHeight"/> — beyond that the footer scrolls.
     /// </summary>
-    internal float MeasureHeight(string? operatorFullPath, IReadOnlyList<LinkRow> links, float maxHeight)
+    internal float MeasureHeight(string? mentionKey, IReadOnlyList<LinkRow> links, float maxHeight)
     {
-        var rows = BuildRows(operatorFullPath, links);
+        var rows = BuildRows(mentionKey, links);
         if (rows.Count == 0)
             return 0;
 
@@ -98,14 +98,14 @@ internal sealed class VideoResourceList
     }
 
     /// <summary>Merges hand-authored links and scored video segments into one list, ranked best-first.</summary>
-    private List<Row> BuildRows(string? operatorFullPath, IReadOnlyList<LinkRow> links)
+    private List<Row> BuildRows(string? mentionKey, IReadOnlyList<LinkRow> links)
     {
         var rows = new List<Row>(links.Count + 4);
 
         var referencedVideoIds = new HashSet<string>();
-        if (!string.IsNullOrEmpty(operatorFullPath))
+        if (!string.IsNullOrEmpty(mentionKey))
         {
-            foreach (var scored in GetRanked(operatorFullPath))
+            foreach (var scored in GetRanked(mentionKey))
             {
                 rows.Add(Row.ForVideo(scored));
                 referencedVideoIds.Add(scored.Segment.VideoId);
@@ -389,12 +389,12 @@ internal sealed class VideoResourceList
         ImGui.PopFont();
     }
 
-    private IReadOnlyList<ScoredSegment> GetRanked(string operatorFullPath)
+    private IReadOnlyList<ScoredSegment> GetRanked(string mentionKey)
     {
-        if (_rankedCache.TryGetValue(operatorFullPath, out var cached))
+        if (_rankedCache.TryGetValue(mentionKey, out var cached))
             return cached;
 
-        var segments = HelpIndex.GetOperatorSegments(operatorFullPath);
+        var segments = HelpIndex.GetSegments(mentionKey);
         var scored = new List<ScoredSegment>(segments.Count);
         var now = DateTime.UtcNow;
         foreach (var segment in segments)
@@ -404,7 +404,7 @@ internal sealed class VideoResourceList
         }
 
         scored.Sort(static (a, b) => b.Score.CompareTo(a.Score));
-        _rankedCache[operatorFullPath] = scored;
+        _rankedCache[mentionKey] = scored;
         return scored;
     }
 
