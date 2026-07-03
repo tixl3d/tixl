@@ -14,7 +14,7 @@ internal sealed class DuplicateSymbolDialog : ModalDialog
     internal DuplicateSymbolDialog()
     {
         Flags = ImGuiWindowFlags.NoScrollWithMouse;
-        DialogSize = new Vector2(500, 450) * T3Ui.UiScaleFactor;
+        DialogSize = new Vector2(500, 450);
     }    
     
     public event Action? Closed;
@@ -88,7 +88,7 @@ internal sealed class DuplicateSymbolDialog : ModalDialog
 
                 FormInputs.AddHint("Duplicating creates a new operator and can't be undone — this clears the undo history.");
 
-                if (CustomComponents.DisablableButton("Duplicate", symbolNamesValid, enableTriggerWithReturn: false))
+                if (CustomComponents.DrawCtaButton("Duplicate", symbolNamesValid))
                 {
                     if(!SymbolUiRegistry.TryGetSymbolUi(symbolGuid, out var compositionSymbolUi))
                         throw new InvalidOperationException($"Failed to find symbol ui for {symbolGuid}");
@@ -109,7 +109,7 @@ internal sealed class DuplicateSymbolDialog : ModalDialog
                 ImGui.SameLine();
             }
 
-            if (ImGui.Button("Cancel"))
+            if (CustomComponents.DrawCtaButton("Cancel", Icon.None, CustomComponents.ButtonStates.Emphasized))
             {
                 ImGui.CloseCurrentPopup();
                 _completedReloadPrompt = false;

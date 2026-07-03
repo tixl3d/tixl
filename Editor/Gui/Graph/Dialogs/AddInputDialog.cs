@@ -37,14 +37,14 @@ internal sealed class AddInputDialog : ModalDialog
             FormInputs.AddVerticalSpace(5);
             FormInputs.ApplyIndent();
             
-            if (CustomComponents.DisablableButton("Add", isValid))
+            if (CustomComponents.DrawCtaButton("Add", isValid))
             {
                 UndoRedoStack.AddAndExecute(new AddInputCommand(symbol.Id, _parameterName, _selectedType!, _multiInput));
                 _parameterName = string.Empty;
             }
 
             ImGui.SameLine();
-            if (ImGui.Button("Cancel"))
+            if (CustomComponents.DrawCtaButton("Cancel", Icon.None, CustomComponents.ButtonStates.Emphasized))
             {
                 ImGui.CloseCurrentPopup();
             }

@@ -33,14 +33,14 @@ internal sealed class AddOutputDialog : ModalDialog
             FormInputs.AddCheckBox("Is time clip", ref _isTimeClip);
                 
             FormInputs.ApplyIndent();
-            if (CustomComponents.DisablableButton("Add", isValid))
+            if (CustomComponents.DrawCtaButton("Add", isValid))
             {
                 UndoRedoStack.AddAndExecute(new AddOutputCommand(symbol.Id, _parameterName, _selectedType, _isTimeClip));
                 _parameterName = string.Empty;
             }
 
             ImGui.SameLine();
-            if (ImGui.Button("Cancel"))
+            if (CustomComponents.DrawCtaButton("Cancel", Icon.None, CustomComponents.ButtonStates.Emphasized))
             {
                 ImGui.CloseCurrentPopup();
             }

@@ -61,7 +61,7 @@ internal sealed class RenameOutputDialog : ModalDialog
 
         FormInputs.ApplyIndent();
 
-        if (CustomComponents.DisablableButton("Rename output", isValid))
+        if (CustomComponents.DrawCtaButton("Rename output", isValid))
         {
             // Validate with a dry run before committing the recompile to the undo stack.
             if (InputsAndOutputs.RenameOutput(symbol, _outputId, _newOutputName, dryRun: true, out _))
@@ -72,7 +72,7 @@ internal sealed class RenameOutputDialog : ModalDialog
         }
 
         ImGui.SameLine();
-        if (ImGui.Button("Cancel"))
+        if (CustomComponents.DrawCtaButton("Cancel", Icon.None, CustomComponents.ButtonStates.Emphasized))
         {
             ImGui.CloseCurrentPopup();
         }

@@ -49,14 +49,14 @@ internal sealed class RenameSymbolDialog : ModalDialog
 
             ImGui.Spacing();
                 
-            if (CustomComponents.DisablableButton("Rename", isNameValid))
+            if (CustomComponents.DrawCtaButton("Rename", isNameValid))
             {
                 SymbolNaming.RenameSymbol(symbol, name);
                 ImGui.CloseCurrentPopup();
             }
 
             ImGui.SameLine();
-            if (ImGui.Button("Cancel"))
+            if (CustomComponents.DrawCtaButton("Cancel", Icon.None, CustomComponents.ButtonStates.Emphasized))
             {
                 ImGui.CloseCurrentPopup();
             }

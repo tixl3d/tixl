@@ -33,14 +33,14 @@ internal sealed class EditResolutionDialog : ModalDialog
                 
             ImGui.Checkbox("Use as aspect ratio", ref resolution.UseAsAspectRatio);
 
-            if (CustomComponents.DisablableButton("Add", resolution.IsValid))
+            if (CustomComponents.DrawCtaButton("Add", resolution.IsValid))
             {
                 ImGui.CloseCurrentPopup();
                 success = true;
             }
 
             ImGui.SameLine();
-            if (ImGui.Button("Cancel"))
+            if (CustomComponents.DrawCtaButton("Cancel", Icon.None, CustomComponents.ButtonStates.Emphasized))
             {
                 if (!resolution.IsValid)
                 {

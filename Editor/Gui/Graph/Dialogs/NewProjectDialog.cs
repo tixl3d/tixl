@@ -105,9 +105,7 @@ internal sealed class NewProjectDialog : ModalDialog
                 ImGui.TextColored(UiColors.StatusWarning, "Warning: there is no way to change this without editing the project code at this time.");
             }
                 
-            if (CustomComponents.DisablableButton(label: "Create",
-                                                  isEnabled: allValid,
-                                                  enableTriggerWithReturn: false))
+            if (CustomComponents.DrawCtaButton("Create", isEnabled: allValid))
             {
                 if (ProjectSetup.TryCreateProject(fullName, _shareResources, out var project, out var failureLog))
                 {
@@ -166,7 +164,7 @@ internal sealed class NewProjectDialog : ModalDialog
             }
 
             ImGui.SameLine();
-            if (ImGui.Button("Cancel"))
+            if (CustomComponents.DrawCtaButton("Cancel", Icon.None, CustomComponents.ButtonStates.Emphasized))
             {
                 ImGui.CloseCurrentPopup();
             }

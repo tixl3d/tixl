@@ -46,7 +46,7 @@ internal sealed class CombineToSymbolDialog : ModalDialog
 
                 FormInputs.AddHint("Combining creates a new operator and can't be undone — this clears the undo history.");
 
-                if (CustomComponents.DisablableButton("Combine", symbolNamesValid, enableTriggerWithReturn: false))
+                if (CustomComponents.DrawCtaButton("Combine", symbolNamesValid))
                 {
                     if(!SymbolUiRegistry.TryGetSymbolUi(symbolGuid, out var compositionSymbolUi))
                         throw new Exception($"Can't find symbol ui for symbol {symbolGuid}");
@@ -61,7 +61,7 @@ internal sealed class CombineToSymbolDialog : ModalDialog
                 ImGui.SameLine();
             }
 
-            if (ImGui.Button("Cancel"))
+            if (CustomComponents.DrawCtaButton("Cancel", Icon.None, CustomComponents.ButtonStates.Emphasized))
             {
                 ImGui.CloseCurrentPopup();
             }

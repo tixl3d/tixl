@@ -132,9 +132,7 @@ internal sealed class CreateFromTemplateDialog : ModalDialog
 
                     ImGui.Dummy(new Vector2(10, 10));
 
-                    if (CustomComponents.DisablableButton("Create",
-                                                          isNewSymbolNameValid,
-                                                          enableTriggerWithReturn: false))
+                    if (CustomComponents.DrawCtaButton("Create", isNewSymbolNameValid))
                     {
                         TemplateUse.TryToApplyTemplate(_selectedTemplate, _newSymbolName, _newNameSpace, _newDescription, _projectToCopyTo);
                         ImGui.CloseCurrentPopup();
@@ -143,7 +141,7 @@ internal sealed class CreateFromTemplateDialog : ModalDialog
                     ImGui.SameLine();
                 }
 
-                if (ImGui.Button("Cancel"))
+                if (CustomComponents.DrawCtaButton("Cancel", Icon.None, CustomComponents.ButtonStates.Emphasized))
                 {
                     ImGui.CloseCurrentPopup();
                 }

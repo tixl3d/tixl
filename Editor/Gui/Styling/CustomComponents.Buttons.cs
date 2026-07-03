@@ -409,9 +409,26 @@ internal static partial class CustomComponents
                 bgColor = Color.Transparent;
                 borderColor = UiColors.ForegroundFull.Fade(0.3f);
                 break;
+            case ButtonStates.Disabled:
+                textColor = UiColors.Text.Fade(0.15f);
+                bgColor = UiColors.BackgroundButton.Fade(0.2f);
+                borderColor = Color.Transparent;
+                break;
         }
 
         return DrawCtaButton(label, icon, textColor, bgColor, borderColor);
+    }
+
+    /// <summary>
+    /// Primary action button for dialogs — CTA styling with a gated disabled state.
+    /// </summary>
+    internal static bool DrawCtaButton(string label, bool isEnabled, bool enableTriggerWithReturn = false, Icon icon = Icon.None)
+    {
+        var clicked = DrawCtaButton(label, icon, isEnabled ? ButtonStates.Activated : ButtonStates.Disabled);
+        if (!isEnabled)
+            return false;
+
+        return clicked || (enableTriggerWithReturn && ImGui.IsKeyPressed(Key.Return.ToImGuiKey()));
     }
 
 

@@ -53,12 +53,16 @@ public abstract class ModalDialog
         }
 
 
-        ImGui.SetNextWindowSize(DialogSize * T3Ui.UiScaleFactor, ImGuiCond.Appearing);
+        // DialogSize is a minimum: the dialog grows with its content so primary actions at the
+        // bottom are never cut off, and falls back to a scrollbar once it hits the screen limit.
+        var minSize = DialogSize * T3Ui.UiScaleFactor;
+        var maxHeight = MathF.Max(minSize.Y, ImGui.GetMainViewport().WorkSize.Y * 0.9f);
+        ImGui.SetNextWindowSizeConstraints(minSize, new Vector2(minSize.X, maxHeight));
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(Padding, Padding));
 
         bool isOpen = true;
         // ImGuiWindowFlags.Popup is an internal-only flag in ImGui 1.90; passing it crashes the native call.
-        if (!ImGui.BeginPopupModal(title, ref isOpen, Flags))
+        if (!ImGui.BeginPopupModal(title, ref isOpen, Flags | ImGuiWindowFlags.AlwaysAutoResize))
             return false;
             
         ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, ItemSpacing);
@@ -85,7 +89,7 @@ public abstract class ModalDialog
     }
 
     private bool _shouldShowNextFrame;
-    protected Vector2 DialogSize = new Vector2(500, 350) * T3Ui.UiScaleFactor;
+    protected Vector2 DialogSize = new(500, 350);
     protected Vector2 ItemSpacing = new(4, 10);
     protected float Padding = 20;
     protected ImGuiWindowFlags Flags = ImGuiWindowFlags.None;

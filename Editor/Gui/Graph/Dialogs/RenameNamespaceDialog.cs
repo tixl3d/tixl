@@ -39,7 +39,7 @@ internal sealed class RenameNamespaceDialog : ModalDialog
                 ImGui.TextColored(UiColors.StatusError.Rgba, $"No source project found for namespace {_nameSpace}");
             }
                 
-            if (ImGui.Button("Cancel"))
+            if (CustomComponents.DrawCtaButton("Cancel", Icon.None, CustomComponents.ButtonStates.Emphasized))
             {
                 Close();
             }
@@ -65,7 +65,7 @@ internal sealed class RenameNamespaceDialog : ModalDialog
 
         CustomComponents.HelpText("Careful now. This operator might affect a lot of operator definitions");
 
-        if (CustomComponents.DisablableButton("Rename", namespaceValid))
+        if (CustomComponents.DrawCtaButton("Rename", namespaceValid))
         {
             if (EditableSymbolProject.RenameNameSpaces(_node, _projectToCopyFrom, _projectToCopyTo, _nameSpace, out var reason))
             {
