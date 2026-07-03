@@ -24,7 +24,7 @@ internal static class UiConfig
         }
         else
         {
-            SwitchBackFromFocusMode(projectView);
+            SwitchBackFromFocusMode();
         }
     }
 
@@ -47,23 +47,37 @@ internal static class UiConfig
         return true;
     }
 
-    private static void SwitchBackFromFocusMode(ProjectView projectView)
+    /// <summary>
+    /// Applying a non-focus layout triggers <see cref="RestoreBackgroundAfterFocusMode"/>, so the
+    /// background cleanup is shared with direct layout switches (F1..F10) while in focus mode.
+    /// </summary>
+    private static void SwitchBackFromFocusMode()
     {
         var layoutIndex = _uiStateBeforeFocusMode?.WindowLayoutIndex ?? UserSettings.Config.WindowLayoutIndex;
         LayoutHandling.LoadAndApplyLayoutOrFocusMode((LayoutHandling.Layouts)layoutIndex);
-        
-        //RestoreUiVisibilityAfterFocusMode();
-        
-        // Update pinning
-        if (!OutputWindow.TryGetPrimaryOutputWindow(out var newOutputWindow))
+    }
+
+    /// <summary>
+    /// Restores output pinning and clears the graph background when leaving focus mode.
+    /// Called by <see cref="LayoutHandling"/> after the new layout has been applied,
+    /// so the primary output window of that layout exists again.
+    /// </summary>
+    internal static void RestoreBackgroundAfterFocusMode()
+    {
+        LayoutHandling.FocusMode = false;
+
+        var projectView = ProjectView.Focused;
+        if (projectView == null)
             return;
 
-        newOutputWindow.Pinning.PinInstance(projectView.GraphImageBackground.OutputInstance, projectView);
+        if (OutputWindow.TryGetPrimaryOutputWindow(out var newOutputWindow))
+        {
+            newOutputWindow.Pinning.PinInstance(projectView.GraphImageBackground.OutputInstance, projectView);
+        }
+
         projectView.GraphImageBackground.ClearBackground();
-        
-        LayoutHandling.FocusMode = false;
     }
-    
+
 
     internal static void ToggleAllUiElements()
     {

@@ -152,8 +152,10 @@ internal static class LayoutHandling
             graphWindow.SetWindowToNormal();
         }
 
-        // var isFocusMode = layoutId == Layouts.FocusMode;
-        // UserSettings.Config.FocusMode = isFocusMode;
+        if (switchingBackFromFocusMode)
+        {
+            UiConfig.RestoreBackgroundAfterFocusMode();
+        }
     }
 
     public static string GraphPrefix => "Graph View##";
