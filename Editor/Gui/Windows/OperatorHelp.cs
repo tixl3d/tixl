@@ -5,6 +5,7 @@ using T3.Core.DataTypes.Vector;
 using T3.Core.SystemUi;
 using T3.Core.Utils;
 using T3.Editor.Gui.Dialogs;
+using T3.Editor.Gui.Help;
 using T3.Editor.Gui.Interaction;
 using T3.Editor.Gui.Input;
 using T3.Editor.Gui.Styling;
@@ -17,38 +18,41 @@ namespace T3.Editor.Gui.Windows;
 
 internal sealed class OperatorHelp
 {
-    public static bool DrawHelpIcon(SymbolUi symbolUi, ref bool isEnabled)
+    /// <summary>
+    /// The help icon in the Parameter window header: clicking toggles the Help window (opening it on the
+    /// operator's doc); Ctrl-click edits the description. Hovering shows the doc as a tooltip while the
+    /// Help window is closed.
+    /// </summary>
+    public static void DrawHelpIcon(SymbolUi symbolUi)
     {
-        var changed = false;
-
         ImGui.SameLine();
         var w = ImGui.GetFrameHeight();
         ImGui.SetCursorPosX(ImGui.GetCursorPosX() + 2);
         var toggledToEdit = ImGui.GetIO().KeyCtrl;
         var icon = toggledToEdit ? Icon.PopUp : Icon.Help;
+        var helpWindowIsOpen = HelpWindow.IsOpen;
         ImGui.PushStyleColor(ImGuiCol.Button, Color.Transparent.Rgba);
-        if (CustomComponents.IconButton(
-                                        icon,
-                                        new Vector2(w, w),
-                                        isEnabled
+        if (CustomComponents.IconButton(icon, new Vector2(w, w),
+                                        helpWindowIsOpen
                                             ? CustomComponents.ButtonStates.Activated
-                                            : CustomComponents.ButtonStates.Default
-                                       ))
+                                            : CustomComponents.ButtonStates.Default))
         {
-            changed = true;
             if (toggledToEdit)
-            {
                 EditDescriptionDialog.ShowNextFrame();
-            }
+            else if (helpWindowIsOpen)
+                HelpWindow.CloseWindow();
             else
-            {
-                isEnabled = !isEnabled;
-            }
+                HelpWindow.ShowTopic(HelpTopic.ForOperator(symbolUi.Symbol.Id), showWindow: true);
         }
 
         ImGui.PopStyleColor();
 
-        if (ImGui.IsItemHovered() && !isEnabled)
+        // While closed, the doc tooltip below carries the affordance; a second tooltip would overlap it.
+        if (helpWindowIsOpen)
+            CustomComponents.TooltipForLastItem("Toggle help window");
+
+        // With the Help window open it already shows the selected op's doc — a tooltip would double it.
+        if (ImGui.IsItemHovered() && !HelpWindow.IsOpen)
         {
             _timeSinceTooltipHovered += ImGui.GetIO().DeltaTime;
 
@@ -58,6 +62,11 @@ internal sealed class OperatorHelp
             ImGui.Dummy(new Vector2(500 * T3Ui.UiScaleFactor, 1));
 
             DrawHelp(symbolUi, isInTooltip: true);
+
+            ImGui.PushStyleColor(ImGuiCol.Text, UiColors.TextMuted.Rgba);
+            ImGui.TextUnformatted("Click to open the Help window");
+            ImGui.PopStyleColor();
+
             ImGui.EndTooltip();
             ImGui.PopStyleVar();
         }
@@ -65,8 +74,6 @@ internal sealed class OperatorHelp
         {
             _timeSinceTooltipHovered = 0;
         }
-
-        return changed;
     }
 
     public static bool DrawHelpSummary(SymbolUi symbolUi, bool showMoreIndicator = true)
@@ -122,12 +129,9 @@ internal sealed class OperatorHelp
         return helpRequested;
     }
 
-    public static void DrawHelp(SymbolUi symbolUi, bool isInTooltip = false)
+    /// <summary>Title + namespace block, exposed so the Help window can lay a thumbnail beside it.</summary>
+    public static void DrawHeader(SymbolUi symbolUi)
     {
-        // Inside a tooltip the op-ref hover must not open its own (nested) tooltip.
-        var opRefHandler = isInTooltip ? _operatorRefHandlerInTooltip : _operatorRefHandler;
-
-        // Title and namespace
         ImGui.Indent(10);
         FormInputs.AddSectionHeader(symbolUi.Symbol.Name);
         ImGui.PushFont(Fonts.FontSmall);
@@ -136,6 +140,16 @@ internal sealed class OperatorHelp
         ImGui.TextUnformatted(symbolUi.Symbol.Namespace);
         ImGui.PopFont();
         ImGui.Unindent(10);
+    }
+
+    public static void DrawHelp(SymbolUi symbolUi, bool isInTooltip = false, bool omitHeader = false)
+    {
+        // Inside a tooltip the op-ref hover must not open its own (nested) tooltip.
+        var opRefHandler = isInTooltip ? _operatorRefHandlerInTooltip : _operatorRefHandler;
+
+        if (!omitHeader)
+            DrawHeader(symbolUi);
+
         FormInputs.SetIndentToLeft();
         FormInputs.AddVerticalSpace();
 

@@ -168,7 +168,10 @@ internal static partial class CustomComponents
         ImGui.PushID((int)icon);
         var clicked = ImGui.Button("##iconBtn", size);
         ImGui.PopID();
-        Icons.DrawIconOnLastItem(icon, GetStateColor(state).Rgba);
+
+        var isHovered = ImGui.IsItemHovered() && state == ButtonStates.Default;
+        
+        Icons.DrawIconOnLastItem(icon, isHovered? UiColors.ForegroundFull: GetStateColor(state).Rgba);
 
         PopToolIconStyle();
         return clicked;
@@ -284,7 +287,7 @@ internal static partial class CustomComponents
             ImGui.PopStyleColor(2);
 
         ImGui.PopStyleColor(1);
-        return clicked;
+        return clicked; 
     }
 
     private static Color GetStateColor(ButtonStates state)

@@ -35,7 +35,7 @@ With the Help window visible, move the mouse over different operators in the [ui
 
 **Expected:**
 - The Help body updates instantly as the pointer crosses each operator — no hover delay.
-- It shows that operator's name and description (the same content you'd see in the Parameter window's help view).
+- It shows that operator's name, description, and parameter details.
 - When the pointer leaves all operators, the body falls back to the last selected topic (or the empty message).
 
 ## Step: Hover toggle off

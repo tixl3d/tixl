@@ -55,7 +55,6 @@ internal sealed class HelpWindow : Window
         if (showWindow)
         {
             instance.Config.Visible = true;
-            instance._mode = Modes.Help;
             instance._focusWindowNextFrame = true;
         }
     }
@@ -65,17 +64,23 @@ internal sealed class HelpWindow : Window
     /// show their own doc tooltips (symbol library/browser, topic links) omit them while this is set,
     /// since the window already previews the hovered topic.
     /// </summary>
-    internal static bool HoverPreviewActive
+    internal static bool HoverPreviewActive => IsOpen && UserSettings.Config.HelpHoverPreview;
+
+    /// <summary>True while the window is actually on screen — frame-stamped instead of Config.Visible so a
+    /// hidden dock tab doesn't count as open.</summary>
+    internal static bool IsOpen
     {
         get
         {
             var instance = _instance;
-            return instance != null
-                   && instance._mode == Modes.Help
-                   && UserSettings.Config.HelpHoverPreview
-                   // Frame-stamped instead of Config.Visible so a hidden dock tab doesn't suppress tooltips.
-                   && ImGui.GetFrameCount() - instance._lastContentFrame <= 1;
+            return instance != null && ImGui.GetFrameCount() - instance._lastContentFrame <= 1;
         }
+    }
+
+    internal static void CloseWindow()
+    {
+        if (_instance != null)
+            _instance.Config.Visible = false;
     }
 
     /// <summary>
@@ -98,37 +103,44 @@ internal sealed class HelpWindow : Window
 
         UpdateContextFromGraphSelection();
 
-        DrawHeader();
-        CustomComponents.SeparatorLine();
+        var topCursorPos = ImGui.GetCursorPos();
+        DrawHelpBody();
 
-        if (_mode == Modes.Help)
-            DrawHelpBody();
-        else
-            DrawLearnBody();
+        // The floating icons overlap the doc child, and between overlapping sibling children the one
+        // submitted later is on top and receives the mouse — so they must be drawn after the body.
+        ImGui.SetCursorPos(topCursorPos);
+        DrawHeaderIcons();
 
         IsDrawingContent = false;
     }
 
     #region header
-    private void DrawHeader()
+    private void DrawHeaderIcons()
     {
-        ImGui.AlignTextToFramePadding();
-
-        DrawModeTab("Help", Modes.Help);
-        ImGui.SameLine();
-        DrawModeTab("Learn", Modes.Learn);
-
-        // History + hover controls only make sense in Help mode.
-        if (_mode != Modes.Help)
-            return;
-
         var buttonSize = new Vector2(ImGui.GetFrameHeight());
         var spacing = ImGui.GetStyle().ItemSpacing.X;
-        CustomComponents.RightAlign(3 * buttonSize.X + 2 * spacing);
+        var buttonCount = _shownSymbolUi != null ? 4 : 3;
+        var iconAreaWidth = buttonCount * buttonSize.X + (buttonCount - 1) * spacing;
+
+        // sameLine: false — the cursor was already placed at the window top; the default SameLine would
+        // snap it back onto the previously drawn item's line (the resource footer at the bottom).
+        CustomComponents.RightAlign(iconAreaWidth, sameLine: false);
+        ImGui.BeginChild("toolIcons", new Vector2(iconAreaWidth, buttonSize.Y), ImGuiChildFlags.None, ImGuiWindowFlags.NoScrollbar);
+
+        if (_shownSymbolUi != null)
+        {
+            // Shared dialog instance drawn by the Parameter window (for its selected symbol) — so the
+            // dialog only appears while that window is open. Not ideal, but avoids two popup instances.
+            if (CustomComponents.IconButton(Icon.PopUp, buttonSize))
+                OperatorHelp.EditDescriptionDialog.ShowNextFrame();
+
+            CustomComponents.TooltipForLastItem("Edit description and links");
+            ImGui.SameLine();
+        }
 
         // Index 0 is the newest entry, so "back" moves towards higher indices (see PushTopic).
         var canGoBack = _historyIndex >= 0 && _historyIndex < _history.Count - 1;
-        if (CustomComponents.IconButton(Icon.ChevronLeft, buttonSize,
+        if (CustomComponents.IconButton(Icon.ArrowLeft, buttonSize,
                                         canGoBack ? CustomComponents.ButtonStates.Default : CustomComponents.ButtonStates.Disabled)
             && canGoBack)
         {
@@ -139,7 +151,7 @@ internal sealed class HelpWindow : Window
 
         ImGui.SameLine();
         var canGoForward = _historyIndex > 0;
-        if (CustomComponents.IconButton(Icon.ChevronRight, buttonSize,
+        if (CustomComponents.IconButton(Icon.ArrowRight, buttonSize,
                                         canGoForward ? CustomComponents.ButtonStates.Default : CustomComponents.ButtonStates.Disabled)
             && canGoForward)
         {
@@ -158,21 +170,12 @@ internal sealed class HelpWindow : Window
 
         CustomComponents.TooltipForLastItem("Preview on hover",
                                             "Hovering an operator or a documentation link shows its doc here instantly.");
+        
+        ImGui.EndChild();
+        
+        //ImGui.SetCursorPos(keepCursorPos);
     }
-
-    private void DrawModeTab(string label, Modes mode)
-    {
-        var isActive = _mode == mode;
-        ImGui.PushStyleColor(ImGuiCol.Text, (isActive ? UiColors.Text : UiColors.TextMuted).Rgba);
-        ImGui.PushFont(isActive ? Fonts.FontBold : Fonts.FontNormal);
-
-        var size = new Vector2(ImGui.CalcTextSize(label).X, ImGui.GetFrameHeight());
-        if (ImGui.Selectable(label, isActive, ImGuiSelectableFlags.None, size))
-            _mode = mode;
-
-        ImGui.PopFont();
-        ImGui.PopStyleColor();
-    }
+    
     #endregion
 
     #region context & history
@@ -265,6 +268,8 @@ internal sealed class HelpWindow : Window
             resourceLinks = OperatorHelp.DocumentationRenderer.GetLinkRows(symbolUi);
         }
 
+        _shownSymbolUi = symbolUi; // The header's edit icon targets the shown symbol.
+
         // Reserve space at the bottom so the resources stay docked while the doc scrolls above them.
         var bodyHeight = ImGui.GetContentRegionAvail().Y;
         var footerHeight = mentionKey != null ? _resourceList.MeasureHeight(mentionKey, resourceLinks, bodyHeight) : 0f;
@@ -275,10 +280,11 @@ internal sealed class HelpWindow : Window
         ImGui.BeginChild("doc", new Vector2(0, -footerHeight), ImGuiChildFlags.None, ImGuiWindowFlags.NoBackground);
         if (topicChanged)
             ImGui.SetScrollY(0);
+        
+        FormInputs.AddVerticalSpace();
 
         if (symbolUi != null)
         {
-            DrawSymbolThumbnail(symbolUi);
             OperatorHelp.DrawHelp(symbolUi);
         }
         else if (topicTitle != null)
@@ -303,18 +309,7 @@ internal sealed class HelpWindow : Window
             DrawResourceFooter(mentionKey, resourceLinks);
     }
 
-    private static void DrawSymbolThumbnail(SymbolUi symbolUi)
-    {
-        var symbol = symbolUi.Symbol;
-        var thumbnail = ThumbnailManager.GetThumbnail(symbol.Id, symbol.SymbolPackage, ThumbnailManager.Categories.PackageMeta);
-        if (!thumbnail.IsReady)
-            return;
 
-        ImGui.Indent(10); // Match the inset OperatorHelp.DrawHelp uses for the doc body.
-        thumbnail.AsImguiImage(100 * T3Ui.UiScaleFactor);
-        ImGui.Unindent(10);
-        FormInputs.AddVerticalSpace(4);
-    }
 
     private void DrawUiTopicDoc(string title, string? doc)
     {
@@ -354,43 +349,15 @@ internal sealed class HelpWindow : Window
     }
     #endregion
 
-    #region learn mode
-    private void DrawLearnBody()
-    {
-        var notes = ReleaseNotesLoader.TryLoadForCurrentVersion();
-
-        ImGui.BeginChild("learnBody", Vector2.Zero, ImGuiChildFlags.None, ImGuiWindowFlags.NoBackground);
-        if (string.IsNullOrEmpty(notes))
-        {
-            CustomComponents.EmptyWindowMessage("No release notes for this version yet.");
-        }
-        else
-        {
-            _releaseNotesView.Draw(notes,
-                                   onUrl: static url => CoreUi.Instance.OpenWithDefaultApplication(url),
-                                   onOperatorRef: static op => MarkdownOperatorLinks.HandleOperatorRef(op),
-                                   operatorColor: MarkdownOperatorLinks.GetOperatorColor);
-        }
-
-        CustomComponents.HandleDragScrolling(this);
-        ImGui.EndChild();
-    }
-    #endregion
-
-    private enum Modes
-    {
-        Help,
-        Learn,
-    }
 
     private static HelpWindow? _instance;
 
-    private Modes _mode = Modes.Help;
     private bool _focusWindowNextFrame;
     private int _lastContentFrame = int.MinValue;
 
     private Guid _lastGraphSelectionId;
     private HelpTopic _lastShownTopic;
+    private SymbolUi? _shownSymbolUi;
 
     private readonly List<HelpTopic> _history = new();
     private int _historyIndex = -1;

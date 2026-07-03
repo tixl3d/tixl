@@ -1,6 +1,7 @@
 #nullable enable
 using ImGuiNET;
 using System.Diagnostics.CodeAnalysis;
+using T3.Editor.Gui.Help;
 using T3.Core.DataTypes.Vector;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
@@ -159,13 +160,6 @@ internal sealed class ParameterWindow : Window
             case ViewModes.Settings:
                 modified |= _parameterSettings.DrawContent(symbolUi, ProjectView.Focused!.NodeSelection);
                 break;
-            case ViewModes.Help:
-                using (new ChildWindowScope("help", Vector2.Zero, ImGuiWindowFlags.None, Color.Transparent))
-                {
-                    OperatorHelp.DrawHelp(symbolUi);
-                }
-
-                break;
         }
 
         if (modified)
@@ -253,14 +247,8 @@ internal sealed class ParameterWindow : Window
                 CustomComponents.TooltipForLastItem("Click to toggle parameter settings.");
             }
 
-            // Help-Mode
-            {
-                var isHelpMode = _viewMode == ViewModes.Help;
-                if (OperatorHelp.DrawHelpIcon(symbolUi, ref isHelpMode))
-                {
-                    _viewMode = isHelpMode ? ViewModes.Help : ViewModes.Parameters;
-                }
-            }
+            // Help icon — shows the doc in the Help window (tooltip while that window is closed).
+            OperatorHelp.DrawHelpIcon(symbolUi);
         }
 
         ImGui.EndChild();
@@ -430,8 +418,9 @@ internal sealed class ParameterWindow : Window
         FormInputs.AddVerticalSpace(15);
 
         
-        if (OperatorHelp.DrawHelpSummary(symbolUi))
-            _viewMode = ViewModes.Help;
+        // With the Help window open the summary would only duplicate the doc shown there.
+        if (!HelpWindow.IsOpen && OperatorHelp.DrawHelpSummary(symbolUi))
+            HelpWindow.ShowTopic(HelpTopic.ForOperator(symbolUi.Symbol.Id), showWindow: true);
 
         OperatorHelp.DocumentationRenderer.DrawLinksAndExamples(symbolUi);
 
@@ -442,7 +431,7 @@ internal sealed class ParameterWindow : Window
 
     private void DrawChildNameAndFlags(Instance op)
     {
-        var hideParameters = _viewMode == ViewModes.Help || _parameterSettings.IsActive;
+        var hideParameters = _parameterSettings.IsActive;
         if (hideParameters)
             return;
 
@@ -796,7 +785,6 @@ internal sealed class ParameterWindow : Window
     {
         Parameters,
         Settings,
-        Help,
     }
 
     private ViewModes _viewMode = ViewModes.Parameters;
