@@ -3,7 +3,7 @@ using T3.Core.Operator.Slots;
 
 namespace T3.Editor.Gui.OutputUi;
 
-internal sealed class DataSetOutputUi : OutputUi<float>
+internal sealed class DataSetOutputUi : OutputUi<DataSet>
 {
     public override IOutputUi Clone()
     {

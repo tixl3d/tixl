@@ -664,12 +664,16 @@ internal sealed class TimeLineCanvas : AnimationCanvas
             return;
         }
 
-        // Save to previous composition
+        // Save to previous composition. Read-only symbols keep the state in memory but must not be
+        // flagged as modified — merely viewing them would prompt to save them as a copy.
         if (_lastSyncedSymbolUi != null)
         {
             _lastSyncedSymbolUi.TimelineState ??= new TimelineState();
             SaveStateTo(_lastSyncedSymbolUi.TimelineState);
-            _lastSyncedSymbolUi.FlagAsModified();
+            if (!_lastSyncedSymbolUi.ReadOnly)
+            {
+                _lastSyncedSymbolUi.FlagAsModified();
+            }
         }
 
         _lastSyncedSymbolId = symbolId;

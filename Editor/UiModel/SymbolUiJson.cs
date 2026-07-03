@@ -685,15 +685,16 @@ internal static class SymbolUiJson
 
     private static void WriteSettings(SymbolUi symbolUi, JsonTextWriter writer)
     {
-        var hasRenderSettings = symbolUi.RenderSettings != null;
+        // RenderSettings, OutputWindowStates and TimelineState are only meaningful for symbols
+        // the user marked as a playback root via "Specify settings for ..." in the Composition
+        // Settings window. On every other symbol the editor still keeps in-memory state while
+        // the user navigates or renders, but writing it would pollute the .t3ui of sub-ops the
+        // user never intentionally configured.
+        var isComposition = symbolUi.Symbol.CompositionSettings.Enabled;
+        var hasRenderSettings = symbolUi.RenderSettings != null && isComposition;
         var hasRecordingSettings = symbolUi.RecordingSettings is { } rec && !rec.IsAtDefault();
-        var hasOutputWindowStates = symbolUi.OutputWindowStates is { Count: > 0 };
-        // TimelineState (scroll/zoom/mode of the timeline view) is only meaningful for
-        // symbols the user marked as a playback root via "Specify settings for ..." in
-        // the Composition Settings window. On every other symbol the editor still keeps
-        // an in-memory TimelineState while the user navigates the timeline, but writing
-        // it would pollute the .t3ui of sub-ops the user never intentionally configured.
-        var hasTimelineState = symbolUi.TimelineState != null && symbolUi.Symbol.CompositionSettings.Enabled;
+        var hasOutputWindowStates = symbolUi.OutputWindowStates is { Count: > 0 } && isComposition;
+        var hasTimelineState = symbolUi.TimelineState != null && isComposition;
         var hasWindowLayout = !string.IsNullOrEmpty(symbolUi.WindowLayout);
 
         if (!hasRenderSettings && !hasRecordingSettings && !hasOutputWindowStates && !hasTimelineState && !hasWindowLayout)
@@ -702,10 +703,12 @@ internal static class SymbolUiJson
         writer.WritePropertyName("Settings");
         writer.WriteStartObject();
         {
-            symbolUi.RenderSettings?.WriteToJson(writer);
+            if (hasRenderSettings)
+                symbolUi.RenderSettings!.WriteToJson(writer);
             if (hasRecordingSettings)
                 symbolUi.RecordingSettings!.WriteToJson(writer);
-            OutputWindowState.WriteAllToJson(writer, symbolUi.OutputWindowStates);
+            if (hasOutputWindowStates)
+                OutputWindowState.WriteAllToJson(writer, symbolUi.OutputWindowStates);
             if (hasTimelineState)
                 symbolUi.TimelineState!.WriteToJson(writer);
 

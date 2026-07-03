@@ -51,7 +51,10 @@ internal sealed class MagGraphLayout
 
         if (StructureFlaggedAsChanged)
         {
-            context.CompositionInstance.GetSymbolUi().FlagAsModified();
+            // Only bump the display-cache version here: this also runs when merely checking out a
+            // composition, which must not mark it as modified (read-only symbols would prompt to
+            // save as copy). Actual edits flag the symbol through their commands.
+            parentSymbolUi.BumpVersionCounter();
         }
 
         if (forceUpdate || FrameStats.Last.UndoRedoTriggered || StructureFlaggedAsChanged ||

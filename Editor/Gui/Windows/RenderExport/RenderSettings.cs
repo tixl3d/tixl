@@ -43,8 +43,10 @@ internal sealed class RenderSettings
                 settings.SequencePrefix = legacy.RenderSequencePrefix;
             #pragma warning restore CS0612, CS0618
 
+            // Don't flag as modified here: this getter runs from mere UI reads (e.g. the output window's
+            // render tooltip), which must not dirty the composition. Actual changes to the settings are
+            // flagged by the render window and render process.
             symbolUi.RenderSettings = settings;
-            symbolUi.FlagAsModified();
             return settings;
         }
     }

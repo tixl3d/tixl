@@ -65,7 +65,23 @@ public sealed partial class SymbolUi
 
     internal void FlagAsModified()
     {
+        // TODO: Temporary probe - remove once the read-only save-as-copy popup issue is settled
+        if (ReadOnly && !_hasBeenModified)
+        {
+            Log.Debug($"Flagging read-only symbol '{Symbol.Name}' as modified:\n{Environment.StackTrace}");
+        }
+
         _hasBeenModified = true;
+        BumpVersionCounter();
+    }
+
+    /// <summary>
+    /// Invalidates display caches without marking the symbol as modified. Use for view-only refreshes
+    /// (e.g. recomputing the graph layout after checking out a composition); actual edits go through
+    /// <see cref="FlagAsModified"/>.
+    /// </summary>
+    internal void BumpVersionCounter()
+    {
         VersionCounter++;
         // Forward to the Core Symbol so operators can cache per-frame child scans and rebuild only when
         // the symbol changes (the Player has no SymbolUi, but its graph is static so the mirror stays 0).

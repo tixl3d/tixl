@@ -108,7 +108,7 @@ internal static class VariationThumbnail
         ImGui.PushID(variation.Id.GetHashCode());
 
         ImGui.InvisibleButton("##thumbnail", pMax-pMin);
-        var isHovered = ImGui.IsItemVisible() && ImGui.IsItemHovered();
+        var isHovered = ImGui.IsItemVisible() && ImGui.IsItemHovered() && !ImGui.IsAnyItemActive();
         if (isHovered)
         {
             //Log.Debug("here");

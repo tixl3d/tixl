@@ -599,7 +599,7 @@ internal sealed class OutputWindow : Window
 
         var state = symbolUi.OutputWindowStates[instanceIndex];
         SaveStateTo(state);
-        symbolUi.FlagAsModified();
+        FlagSymbolUiAsModified();
     }
 
     /// <summary>
@@ -628,9 +628,16 @@ internal sealed class OutputWindow : Window
 
     private readonly OutputWindowState _fallbackState = new();
 
+    /// <summary>
+    /// Read-only symbols keep view-state changes in memory but must not be flagged as modified —
+    /// merely viewing them would prompt to save them as a copy.
+    /// </summary>
     private void FlagSymbolUiAsModified()
     {
-        _lastSyncedSymbolUi?.FlagAsModified();
+        if (_lastSyncedSymbolUi is { ReadOnly: false })
+        {
+            _lastSyncedSymbolUi.FlagAsModified();
+        }
     }
 
     /// <summary>

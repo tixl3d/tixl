@@ -576,6 +576,7 @@ internal sealed class SymbolVariationPool
                 return;
         }
 
+        RememberModificationFlagForPreview(instance, variation.IsPreset);
         _activeBlendCommand = newCommand;
         newCommand.Do();
     }
@@ -587,6 +588,7 @@ internal sealed class SymbolVariationPool
         if (!TryCreateBlendToPresetCommand(instance, variation, blend, out var macroCommand))
             return;
 
+        RememberModificationFlagForPreview(instance, isPreset: true);
         _activeBlendCommand = macroCommand;
         _activeBlendCommand.Do();
     }
@@ -597,6 +599,7 @@ internal sealed class SymbolVariationPool
 
         if (TryCreateBlendTowardsVariationCommand(instance, variation, blend, out var newMacroCommand))
         {
+            RememberModificationFlagForPreview(instance, isPreset: false);
             _activeBlendCommand = newMacroCommand;
             _activeBlendCommand.Do();
         }
@@ -628,6 +631,7 @@ internal sealed class SymbolVariationPool
 
         if (countSnapshots == variations.Count && countPresets == 0)
         {
+            RememberModificationFlagForPreview(instance, isPreset: false);
             _activeBlendCommand = CreateWeightedBlendSnapshotCommand(instance, variations, weights);
             _activeBlendCommand?.Do();
         }
@@ -635,6 +639,7 @@ internal sealed class SymbolVariationPool
         {
             if (CreateWeightedBlendPresetCommand(instance, variations, weights, out var newMacroCommand))
             {
+                RememberModificationFlagForPreview(instance, isPreset: true);
                 _activeBlendCommand = newMacroCommand;
                 newMacroCommand.Do();
             }
@@ -655,6 +660,7 @@ internal sealed class SymbolVariationPool
             UndoRedoStack.Add(_activeBlendCommand);
 
         _activeBlendCommand = null;
+        _cleanSymbolIdBeforePreview = Guid.Empty;
     }
 
     public void StopHover()
@@ -666,6 +672,7 @@ internal sealed class SymbolVariationPool
 
         _activeBlendCommand.Undo();
         _activeBlendCommand = null;
+        RestoreModificationFlagAfterPreview();
     }
 
     /// <summary>
@@ -1300,5 +1307,40 @@ internal sealed class SymbolVariationPool
         DropBlendWeight(newVariation.Id);
     }
 
+    /// <summary>
+    /// Preview commands (hover, thumbnail rendering, live blends) flag the composition's SymbolUi as
+    /// modified on both Do and Undo. Since <see cref="StopHover"/> fully reverts the values, restore a
+    /// previously clean flag — otherwise merely previewing marks read-only symbols as modified and
+    /// triggers the save-as-copy dialog when leaving them.
+    /// </summary>
+    private void RememberModificationFlagForPreview(Instance instance, bool isPreset)
+    {
+        _cleanSymbolIdBeforePreview = Guid.Empty;
+
+        var compositionSymbol = isPreset ? instance.Parent?.Symbol : instance.Symbol;
+        if (compositionSymbol == null)
+            return;
+
+        if (!SymbolUiRegistry.TryGetSymbolUi(compositionSymbol.Id, out var symbolUi))
+            return;
+
+        if (!symbolUi.HasBeenModified)
+            _cleanSymbolIdBeforePreview = compositionSymbol.Id;
+    }
+
+    private void RestoreModificationFlagAfterPreview()
+    {
+        if (_cleanSymbolIdBeforePreview == Guid.Empty)
+            return;
+
+        if (SymbolUiRegistry.TryGetSymbolUi(_cleanSymbolIdBeforePreview, out var symbolUi))
+            symbolUi.ClearModifiedFlag();
+
+        _cleanSymbolIdBeforePreview = Guid.Empty;
+    }
+
     private MacroCommand? _activeBlendCommand;
+
+    /// <summary>Id of the composition symbol that was unmodified when the current preview began.</summary>
+    private Guid _cleanSymbolIdBeforePreview;
 }

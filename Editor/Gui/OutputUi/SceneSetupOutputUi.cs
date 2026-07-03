@@ -5,7 +5,7 @@ using T3.Editor.Gui.Input;
 
 namespace T3.Editor.Gui.OutputUi;
 
-internal sealed class SceneSetupOutputUi : OutputUi<float>
+internal sealed class SceneSetupOutputUi : OutputUi<SceneSetup>
 {
     public override IOutputUi Clone()
     {
