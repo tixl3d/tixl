@@ -64,6 +64,19 @@ until the insert highlight appears, and drop it.
   make room.
 - `Ctrl+Z` restores the previous layout and cable.
 
+## Step: Drag-split must not create a cycle
+
+**Action:**
+Snap two operators **A** → **B** together. Add a third operator **C** (with
+matching types) and wire a long cable from **B**'s output into one of **C**'s
+inputs. Now drag **C** onto the snapped cable between **A** and **B** and try
+to drop it there.
+
+**Expected:**
+- The insert is refused (the console logs that the connection would create a
+  cycle) — **C** is not spliced in.
+- The graph stays intact and responsive; no crash or freeze.
+
 ## Step: Drag-split a snapped connection from an Input or to the Output node
 
 **Action:**

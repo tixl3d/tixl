@@ -477,13 +477,14 @@ internal sealed partial class MagItemMovement
             return false;
 
         var pair = list[0];
-        if (pair.Ca.SourceItem.Instance != null)
+        var bridgeConnection = new Symbol.Connection(pair.Ca.SourceParentOrChildId,
+                                                     pair.Ca.SourceOutput.Id,
+                                                     pair.Cb.TargetParentOrChildId,
+                                                     pair.Cb.TargetInput.Id);
+        if (Structure.CheckForCycle(context.CompositionInstance.Symbol, bridgeConnection))
         {
-            if (Structure.CheckForCycle(pair.Ca.SourceItem.Instance, pair.Cb.TargetItem.Id))
-            {
-                Log.Debug("Sorry, this connection would create a cycle. (1)");
-                return false;
-            }
+            Log.Debug("Sorry, this connection would create a cycle. (1)");
+            return false;
         }
 
         var potentialMovers = CollectSnappedItems(pair.Cb.TargetItem);
@@ -503,10 +504,7 @@ internal sealed partial class MagItemMovement
         newMoveCommand.StoreCurrentValues();
 
         context.MacroCommand.AddAndExecCommand(new AddConnectionCommand(context.CompositionInstance.Symbol,
-                                                                        new Symbol.Connection(pair.Ca.SourceParentOrChildId,
-                                                                                              pair.Ca.SourceOutput.Id,
-                                                                                              pair.Cb.TargetParentOrChildId,
-                                                                                              pair.Cb.TargetInput.Id),
+                                                                        bridgeConnection,
                                                                         pair.Cb.MultiInputIndex));
         return true;
     }
@@ -531,13 +529,14 @@ internal sealed partial class MagItemMovement
 
         var pair = list[0];
 
-        if (pair.Ca.SourceItem.Instance != null)
+        var bridgeConnection = new Symbol.Connection(pair.Ca.SourceParentOrChildId,
+                                                     pair.Ca.SourceOutput.Id,
+                                                     pair.Cb.TargetParentOrChildId,
+                                                     pair.Cb.TargetInput.Id);
+        if (Structure.CheckForCycle(context.CompositionInstance.Symbol, bridgeConnection))
         {
-            if (Structure.CheckForCycle(pair.Ca.SourceItem.Instance, pair.Cb.TargetItem.Id))
-            {
-                Log.Debug("Sorry, this connection would create a cycle. (1)");
-                return false;
-            }
+            Log.Debug("Sorry, this connection would create a cycle. (1)");
+            return false;
         }
 
         var potentialMovers = CollectSnappedItems(pair.Cb.TargetItem);
@@ -555,10 +554,7 @@ internal sealed partial class MagItemMovement
         newMoveCommand.StoreCurrentValues();
 
         context.MacroCommand.AddAndExecCommand(new AddConnectionCommand(context.CompositionInstance.Symbol,
-                                                                        new Symbol.Connection(pair.Ca.SourceParentOrChildId,
-                                                                                              pair.Ca.SourceOutput.Id,
-                                                                                              pair.Cb.TargetParentOrChildId,
-                                                                                              pair.Cb.TargetInput.Id),
+                                                                        bridgeConnection,
                                                                         pair.Cb.MultiInputIndex));
         return true;
     }
@@ -1168,40 +1164,36 @@ internal sealed partial class MagItemMovement
             return false;
         }
 
-        if (connection.SourceItem.Instance != null)
+        var connectionIntoSplice = new Symbol.Connection(connection.SourceParentOrChildId,
+                                                         connection.SourceOutput.Id,
+                                                         spliceLink.InputItemId,
+                                                         spliceLink.InputId);
+
+        var connectionOutOfSplice = new Symbol.Connection(spliceLink.OutputItemId,
+                                                          spliceLink.OutputId,
+                                                          connection.TargetParentOrChildId,
+                                                          connection.TargetInput.Id);
+
+        if (Structure.CheckForCycle(context.CompositionInstance.Symbol, connectionIntoSplice))
         {
-            if (Structure.CheckForCycle(connection.SourceItem.Instance, spliceLink.InputItemId))
-            {
-                Log.Debug("Sorry, this connection would create a cycle. (2)");
-                return false;
-            }
+            Log.Debug("Sorry, this connection would create a cycle. (2)");
+            return false;
         }
 
-        if (connection.TargetItem.Instance != null)
+        if (Structure.CheckForCycle(context.CompositionInstance.Symbol, connectionOutOfSplice))
         {
-            if (Structure.CheckForCycle(connection.TargetItem.Instance, spliceLink.OutputItemId))
-            {
-                Log.Debug("Sorry, this connection would create a cycle. (3)");
-                return false;
-            }
+            Log.Debug("Sorry, this connection would create a cycle. (3)");
+            return false;
         }
 
         context.MacroCommand.AddAndExecCommand(new DeleteConnectionCommand(context.CompositionInstance.Symbol,
                                                                            connection.AsSymbolConnection(),
                                                                            connection.MultiInputIndex));
         context.MacroCommand.AddAndExecCommand(new AddConnectionCommand(context.CompositionInstance.Symbol,
-                                                                        new Symbol.Connection(connection.SourceParentOrChildId,
-                                                                                              connection.SourceOutput.Id,
-                                                                                              spliceLink.InputItemId,
-                                                                                              spliceLink.InputId
-                                                                                             ), 0));
+                                                                        connectionIntoSplice, 0));
 
         context.MacroCommand.AddAndExecCommand(new AddConnectionCommand(context.CompositionInstance.Symbol,
-                                                                        new Symbol.Connection(spliceLink.OutputItemId,
-                                                                                              spliceLink.OutputId,
-                                                                                              connection.TargetParentOrChildId,
-                                                                                              connection.TargetInput.Id
-                                                                                             ), connection.MultiInputIndex));
+                                                                        connectionOutOfSplice, connection.MultiInputIndex));
 
         // Move items
         if (spliceLink.Direction == MagGraphItem.Directions.Vertical)
