@@ -527,14 +527,35 @@ internal sealed class ParameterWindow : Window
                 ? activeVariation
                 : null;
 
-            var label = selectedPreset == null
-                ? "Presets..."
-                : string.IsNullOrEmpty(selectedPreset.Title) || selectedPreset.Title == "untitled"
+            string label;
+            Color labelColor;
+            if (selectedPreset != null)
+            {
+                label = string.IsNullOrEmpty(selectedPreset.Title) || selectedPreset.Title == "untitled"
                     ? "Untitled"
                     : selectedPreset.Title;
+                labelColor = UiColors.ForegroundFull;
+            }
+            else if (_presets.Count == 0)
+            {
+                label = "No Presets";
+                labelColor = UiColors.TextMuted;
+            }
+            else
+            {
+                if (_presets.Count != _lastPresetCountForLabel)
+                {
+                    _lastPresetCountForLabel = _presets.Count;
+                    _presetCountLabel = _presets.Count == 1 ? "1 Preset" : $"{_presets.Count} Presets";
+                }
+
+                label = _presetCountLabel;
+                labelColor = UiColors.Text;
+            }
 
             ImGui.SameLine();
-            var chosen = _presetPicker.Draw(_presets, presetPool, op, selectedPreset, label, dropdownWidth, out _);
+            var chosen = _presetPicker.Draw(_presets, presetPool, op, selectedPreset, label, dropdownWidth, out _,
+                                            labelColor: labelColor);
             if (chosen != null)
                 presetPool.Apply(op, chosen);
 
@@ -885,5 +906,7 @@ internal sealed class ParameterWindow : Window
     private readonly SnapshotControlView _snapshotControlView = new();
     private readonly VariationPicker _presetPicker = new();
     private readonly List<Variation> _presets = new();
+    private int _lastPresetCountForLabel = -1;
+    private string _presetCountLabel = "";
     public static readonly RenameInputDialog RenameInputDialog = new();
 }

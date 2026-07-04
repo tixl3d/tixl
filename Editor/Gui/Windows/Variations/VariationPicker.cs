@@ -26,14 +26,15 @@ internal sealed class VariationPicker
     /// <paramref name="variations"/> in canvas order. Returns the chosen variation, or null.
     /// </summary>
     public Variation? Draw(IReadOnlyList<Variation> variations, SymbolVariationPool pool, Instance composition,
-                           Variation? selected, string label, float width, out bool renameRequested, VariationBaseCanvas? canvas = null)
+                           Variation? selected, string label, float width, out bool renameRequested, VariationBaseCanvas? canvas = null,
+                           Color? labelColor = null)
     {
         Variation? chosen = null;
         renameRequested = false;
         var scale = T3Ui.UiScaleFactor;
         var frameHeight = ImGui.GetFrameHeight();
 
-        var triggerClicked = DrawTriggerButton(label, width, frameHeight);
+        var triggerClicked = DrawTriggerButton(label, labelColor ?? UiColors.Text, width, frameHeight);
         // Double-clicking the trigger renames rather than opening the picker (caller's concern).
         renameRequested = ImGui.IsItemHovered() && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left);
         var triggerMin = ImGui.GetItemRectMin();
@@ -351,7 +352,7 @@ internal sealed class VariationPicker
         (a.ActivationIndex, b.ActivationIndex) = (b.ActivationIndex, a.ActivationIndex);
     }
 
-    private static bool DrawTriggerButton(string label, float width, float frameHeight)
+    private static bool DrawTriggerButton(string label, Color labelColor, float width, float frameHeight)
     {
         var scale = T3Ui.UiScaleFactor;
         if (width <= 0)
@@ -367,7 +368,7 @@ internal sealed class VariationPicker
 
         var textPos = new Vector2(min.X + 6 * scale, (min.Y + max.Y) / 2 - ImGui.GetFontSize() / 2);
         drawList.PushClipRect(min, new Vector2(max.X - frameHeight, max.Y), true);
-        drawList.AddText(textPos, UiColors.Text, label);
+        drawList.AddText(textPos, labelColor, label);
         drawList.PopClipRect();
 
         Icons.DrawIconAtScreenPosition(Icon.ChevronDown,
@@ -426,7 +427,7 @@ internal sealed class VariationPicker
             if (dx != 0)
             {
                 var span = MathF.Max(1, cellMax.X - cellMin.X);
-                var delta = dx / span * (io.KeyShift ? 1f / 3f : 1f);
+                var delta = dx / span * (io.KeyShift ? 0.03f : 0.3f);
                 pool.SetBlendWeight(variation.Id, pool.GetBlendWeight(variation.Id) + delta, freeMode);
                 _weightsChangedThisFrame = true;
             }
