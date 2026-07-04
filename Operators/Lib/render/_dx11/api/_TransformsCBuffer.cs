@@ -1,3 +1,4 @@
+#nullable enable
 using T3.Core.Rendering;
 
 namespace Lib.render._dx11.api;
