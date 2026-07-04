@@ -108,6 +108,9 @@ frame, press `Shift+S`). Drag the outer section by its header.
 **Expected:**
 - The inner section and all operators move together with the outer frame.
 - Dragging only the inner section leaves the outer frame in place.
+- Collapsing the outer section hides the inner frame and its operators too;
+  expanding brings both back. The inner frame's own collapse state is
+  preserved through the round-trip.
 
 ## Step: Old project loads correctly
 

@@ -74,7 +74,7 @@ internal static class SectionDragging
             _visibleSectionsForSnapping.Clear();
             foreach (var snapTo in context.Layout.Sections.Values)
             {
-                if (context.View.IsItemVisible(snapTo))
+                if (context.View.IsItemVisible(snapTo) && !snapTo.Section.IsHiddenInCollapsedSection)
                     _visibleSectionsForSnapping.Add(snapTo);
             }
 

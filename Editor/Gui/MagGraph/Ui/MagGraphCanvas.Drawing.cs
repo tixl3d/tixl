@@ -119,6 +119,9 @@ internal sealed partial class MagGraphView
             // Draw sections
             foreach (var a in _context.Layout.Sections.Values)
             {
+                if (a.Section.IsHiddenInCollapsedSection)
+                    continue;
+
                 DrawSection(a, drawList, _context);
             }
 

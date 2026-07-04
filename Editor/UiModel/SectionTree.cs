@@ -193,6 +193,14 @@ internal static class SectionTree
         }
     }
 
+    private static bool IsSelfOrAncestorCollapsed(SymbolUi symbolUi, Section section)
+    {
+        if (section.Collapsed)
+            return true;
+
+        return FindOutermostCollapsedSection(symbolUi, section.ParentSectionId) != Guid.Empty;
+    }
+
     private static Guid FindOutermostCollapsedSection(SymbolUi symbolUi, Guid sectionId)
     {
         var result = Guid.Empty;
