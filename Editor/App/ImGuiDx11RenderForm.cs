@@ -214,6 +214,7 @@ internal class ImGuiDx11RenderForm : RenderForm
                     return;
                 case WM_SETFOCUS:
                     io.AddFocusEvent(true);
+                    SyncModifiersFromSystemState(io);
                     break;
 
                 case WM_ACTIVATEAPP:
@@ -223,7 +224,11 @@ internal class ImGuiDx11RenderForm : RenderForm
                         // (especially Alt, which can desync via Alt+Tab).
                         io.AddFocusEvent(false);
                         io.ClearInputKeys();
-                        KeyHandler.SetKeyUp(Key.Alt);
+                        KeyHandler.ReleaseAllKeys();
+                    }
+                    else
+                    {
+                        SyncModifiersFromSystemState(io);
                     }
 
                     break;
@@ -269,6 +274,46 @@ internal class ImGuiDx11RenderForm : RenderForm
         if (imguiKey != ImGuiKey.None)
             io.AddKeyEvent(imguiKey, down);
     }
+
+    /// <summary>
+    /// Re-reads the physical modifier state from Windows and applies it to ImGui and
+    /// <see cref="KeyHandler"/>. Key-up events are lost while the app is unfocused or
+    /// halted at a debugger breakpoint, so modifiers must be re-synced on refocus.
+    /// </summary>
+    private static void SyncModifiersFromSystemState(ImGuiIOPtr io)
+    {
+        var shiftDown = IsVkDown(VK_SHIFT);
+        io.KeyShift = shiftDown;
+        io.AddKeyEvent(ImGuiKey.ModShift, shiftDown);
+        SyncKeyHandlerKey(Key.ShiftKey, shiftDown);
+
+        var ctrlDown = IsVkDown(VK_CONTROL);
+        io.KeyCtrl = ctrlDown;
+        io.AddKeyEvent(ImGuiKey.ModCtrl, ctrlDown);
+        SyncKeyHandlerKey(Key.CtrlKey, ctrlDown);
+
+        var altDown = IsVkDown(VK_ALT);
+        io.KeyAlt = altDown;
+        io.AddKeyEvent(ImGuiKey.ModAlt, altDown);
+        SyncKeyHandlerKey(Key.Alt, altDown);
+    }
+
+    private static void SyncKeyHandlerKey(Key key, bool isDown)
+    {
+        if (isDown)
+        {
+            KeyHandler.SetKeyDown(key);
+        }
+        else
+        {
+            KeyHandler.SetKeyUp(key);
+        }
+    }
+
+    private static bool IsVkDown(int vkCode) => (GetKeyState(vkCode) & 0x8000) != 0;
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern short GetKeyState(int nVirtKey);
 
     private bool UpdateMouseCursor()
     {

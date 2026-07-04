@@ -19,6 +19,12 @@ public static class KeyHandler
     public static void SetKeyUp(Key keyCode) => SetKeyPressed((int)keyCode, false);
     public static void SetKeyUp(int keyCode) => SetKeyPressed(keyCode, false);
 
+    /// <summary>
+    /// Releases all keys. Key-up events are lost while the app is unfocused
+    /// (Alt+Tab, debugger breakpoints), so the tracked state must be reset then.
+    /// </summary>
+    public static void ReleaseAllKeys() => Array.Clear(PressedKeysPrivate, 0, PressedKeysPrivate.Length);
+
     public static Key GetPressedKey()
     {
         for (var index = 0; index < PressedKeysPrivate.Length; index++)
