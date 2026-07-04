@@ -19,29 +19,7 @@ public sealed class DeleteSectionCommand : ICommand
             return;
         }
 
-        // Members and nested sections inherit the deleted section's parent
-        _reassignedChildIds.Clear();
-        _reparentedSectionIds.Clear();
-        var parentId = _originalSection.ParentSectionId;
-
-        foreach (var childUi in symbolUi.ChildUis.Values)
-        {
-            if (childUi.SectionId != _originalSection.Id)
-                continue;
-
-            _reassignedChildIds.Add(childUi.Id);
-            childUi.SectionId = parentId;
-        }
-
-        foreach (var section in symbolUi.Sections.Values)
-        {
-            if (section.ParentSectionId != _originalSection.Id)
-                continue;
-
-            _reparentedSectionIds.Add(section.Id);
-            section.ParentSectionId = parentId;
-        }
-
+        // Member ownership is derived from geometry and follows on the next layout refresh
         symbolUi.Sections.Remove(_originalSection.Id);
         symbolUi.FlagAsModified();
     }
@@ -55,24 +33,9 @@ public sealed class DeleteSectionCommand : ICommand
         }
 
         symbolUi.Sections[_originalSection.Id] = _originalSection;
-
-        foreach (var childId in _reassignedChildIds)
-        {
-            if (symbolUi.ChildUis.TryGetValue(childId, out var childUi))
-                childUi.SectionId = _originalSection.Id;
-        }
-
-        foreach (var sectionId in _reparentedSectionIds)
-        {
-            if (symbolUi.Sections.TryGetValue(sectionId, out var section))
-                section.ParentSectionId = _originalSection.Id;
-        }
-
         symbolUi.FlagAsModified();
     }
 
     private readonly Guid _symbolId;
     private readonly Section _originalSection;
-    private readonly List<Guid> _reassignedChildIds = [];
-    private readonly List<Guid> _reparentedSectionIds = [];
 }

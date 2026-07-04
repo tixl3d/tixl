@@ -80,6 +80,7 @@ internal sealed class MagGraphLayout
         _structureUpdateCycle++;
         CollectItemReferences(composition, parentSymbolUi);
         CollectedSections(parentSymbolUi);
+        SectionTree.UpdateOwnershipFromGeometry(parentSymbolUi);
         SectionTree.UpdateCollapsedVisibility(parentSymbolUi);
         UpdateConnectionSources(composition);
         UpdateVisibleItemLines(context);

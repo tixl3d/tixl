@@ -14,10 +14,10 @@ Sections become a first-class structural element: membership is an explicit, ser
 ## Architectural decisions (locked in)
 
 - **Rename "Annotation" → "Section"** in UI, code, and serialization. Reading old `.t3ui` files gracefully maps `Annotation` → `Section`. Hotkey: introduce the new binding; keep the old one as a hidden alias for at least one release (muscle memory).
-- **Explicit membership.** Ops (and where relevant inputs/outputs) carry an optional serialized `SectionId`. Sections carry an optional `ParentSectionId`, forming a tree per symbol graph.
-- **Membership changes only through discrete user actions** (drop into / drag out of a section, paste, section delete), each folded into the relevant `MacroCommand` so undo/redo restores membership together with positions. No frame-by-frame recomputation from rect intersection.
-  - Assignment rule on drop: the op joins the **innermost** section whose bounds contain the drop position. Dragging fully out clears (or reassigns to the section under the drop point).
-  - Overlapping non-nested sections at a drop point: innermost-by-area wins; the auto overlap-avoidance below should make this state rare.
+- **Ownership is derived state.** (Revised 2026-07-04, supersedes "explicit undoable membership".) Ops carry a serialized `SectionId`, sections a `ParentSectionId` — but both are a *cache of geometry*, re-derived by `SectionTree.UpdateOwnershipFromGeometry` on load and on every structural layout refresh (moves, resizes, paste, delete, undo/redo). No membership commands on the undo stack: undoing a move restores positions, and derivation restores ownership implicitly. Commands stay reserved for actual user gestures.
+  - Assignment rule: an op belongs to the **innermost** section fully containing its rect; a section nests into the innermost *strictly larger* one containing it. Overlapping non-nested sections: innermost-by-area wins.
+  - **Collapsed sections neither adopt nor release.** Only their header renders, so geometry against the invisible stored rect would silently hide loose ops dropped there. Membership in a collapsed section is kept while the op stays inside the stored rect.
+  - Legacy-graph edits reconcile automatically on the next MagGraph layout refresh — no manual cleanup action needed.
 - **Collapse state is stored on the section** (today: `Child.CollapsedIntoAnnotationFrameId` per op). The per-op flag is refactored into a fast runtime lookup `GraphItem.IsHiddenInCollapsedSection` (not serialized) for MagGraph layout and connection routing.
 - **Member order lives on the section** (serialized list of child ids), defaulting to canvas position order when absent. Wanted identically by the dope sheet and the snapshot control view; introduced when the first consumer needs manual ordering — derived order until then.
 - **One shared tree helper.** A single builder (e.g. `SectionTree.Build(SymbolUi)`) producing sections → nesting → member items in display order. Graph, dope sheet, and snapshot control view all consume this; none re-derives structure.
@@ -45,7 +45,7 @@ Sections become a first-class structural element: membership is an explicit, ser
 
 1. Rename `Annotation` → `Section` (class, fields, UI strings, serialization key with back-compat reader mapping `"Annotations"` → sections on load; write new key only).
 2. Add `SectionId` to `SymbolUi.Child` (serialized, optional) and `ParentSectionId` to `Section` (serialized, optional). Resolve both into fast references in MagGraph layout.
-3. Membership assignment/clearing wired into move/paste/duplicate/delete commands (MacroCommand composition; undoable). Initial migration: on first load of a file without `SectionId`s, derive membership once from geometry (innermost containing section) — same rule users see today — and mark the symbol UI modified only when the user saves.
+3. Ownership derivation wired into load and the structural layout refresh (covers move/resize/paste/delete/undo/redo and legacy-graph edits); interactions just flag the structure as changed. No migration step needed — derivation applies to old files the same way.
 4. `SectionTree.Build(SymbolUi)` helper + collapse state moved onto the section; `IsHiddenInCollapsedSection` runtime flag replaces per-op serialized field (reader still accepts the old field).
 5. Hotkey + menu: rename to "Add Section", keep old shortcut as alias; expose add/hide in a Graph/Edit main menu (issue point 3).
 

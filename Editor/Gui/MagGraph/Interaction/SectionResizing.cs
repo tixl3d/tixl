@@ -4,6 +4,7 @@ using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.UiModel;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Graph;
 
@@ -108,6 +109,9 @@ internal static class SectionResizing
             {
                 _moveCommand.StoreCurrentValues();
                 UndoRedoStack.Add(_moveCommand);
+
+                // Section ownership is re-derived from geometry on the layout refresh
+                context.Layout.FlagStructureAsChanged();
             }
             else
             {

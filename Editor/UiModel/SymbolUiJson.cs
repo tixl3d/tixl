@@ -392,45 +392,13 @@ internal static class SymbolUiJson
         if (tagsEntry?.Value<int>() != null)
             symbolUi.Tags = (SymbolUi.SymbolTags)tagsEntry.Value<int>();
 
-        if (formatVersion < SymbolFormatVersion.SectionMembership)
-            DeriveSectionMembershipFromGeometry(symbolUi);
+        // Ownership is derived state - the serialized ids only preserve membership in
+        // collapsed sections, whose invisible bounds are excluded from derivation
+        SectionTree.UpdateOwnershipFromGeometry(symbolUi);
 
         ReadSettings(mainObject, symbolUi);
 
         return true;
-    }
-
-    /// <summary>
-    /// Files from before explicit section membership derive it once from geometry —
-    /// the same innermost-containment rule the graph applied at runtime back then.
-    /// The result is only persisted when the user saves the symbol.
-    /// </summary>
-    private static void DeriveSectionMembershipFromGeometry(SymbolUi symbolUi)
-    {
-        if (symbolUi.Sections.Count == 0)
-            return;
-
-        foreach (var childUi in symbolUi.ChildUis.Values)
-        {
-            // Ops collapsed into a frame already got their membership from the legacy AnnotationId field
-            if (childUi.SectionId != Guid.Empty)
-                continue;
-
-            var childRect = new Gui.UiHelpers.ImRect(childUi.PosOnCanvas, childUi.PosOnCanvas + childUi.Size);
-            var section = SectionTree.FindSectionContainingRect(symbolUi, childRect, Guid.Empty);
-            if (section != null)
-                childUi.SectionId = section.Id;
-        }
-
-        foreach (var section in symbolUi.Sections.Values)
-        {
-            var sectionRect = new Gui.UiHelpers.ImRect(section.PosOnCanvas, section.PosOnCanvas + section.Size);
-            var parent = SectionTree.FindSectionContainingRect(symbolUi, sectionRect, section.Id);
-
-            // Strictly-larger check prevents identically-sized sections from parenting each other
-            if (parent != null && parent.Size.X * parent.Size.Y > section.Size.X * section.Size.Y)
-                section.ParentSectionId = parent.Id;
-        }
     }
 
     private static bool TryGetJArray(string key, JToken token, Symbol symbol, [NotNullWhen(true)] out JArray? array)

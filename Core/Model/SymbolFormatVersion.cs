@@ -13,13 +13,6 @@ public static class SymbolFormatVersion
     /// <summary>Current format version written by this editor.</summary>
     public const int Current = 3;
 
-    /// <summary>
-    /// Since this version, section (formerly annotation) membership is explicit: ops carry a
-    /// SectionId and sections a ParentSectionId. Older files derive membership from geometry
-    /// once on load.
-    /// </summary>
-    public const int SectionMembership = 3;
-
     /// <summary>The TiXL editor version string, written alongside the format version.</summary>
     public static string TixlVersion => RuntimeAssemblies.Version.ToString();
 

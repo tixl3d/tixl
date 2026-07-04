@@ -142,22 +142,10 @@ internal static class NodeActions
                                  Size = area.GetSize()
                              };
 
-        var symbolUi = compositionOp.GetSymbolUi();
-
-        // Nest into the innermost section fully containing the new frame
-        var parentSection = SectionTree.FindSectionContainingRect(symbolUi, area, Guid.Empty);
-        if (parentSection != null)
-            section.ParentSectionId = parentSection.Id;
-
-        var commands = new List<ICommand> { new AddSectionCommand(symbolUi, section) };
-
-        // Selected ops become members of the new section
-        foreach (var childUi in nodeSelection.GetSelectedChildUis())
-        {
-            commands.Add(new AssignSectionMembershipCommand(symbolUi, childUi, section.Id));
-        }
-
-        UndoRedoStack.AddAndExecute(new MacroCommand("Add Section", commands));
+        // Ownership of enclosed ops and the new frame's own nesting derive from
+        // geometry on the next layout refresh
+        var command = new AddSectionCommand(compositionOp.GetSymbolUi(), section);
+        UndoRedoStack.AddAndExecute(command);
         return section;
     }
 

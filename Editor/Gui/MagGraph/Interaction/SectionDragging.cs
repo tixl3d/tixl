@@ -161,6 +161,9 @@ internal static class SectionDragging
             {
                 _moveCommand.StoreCurrentValues();
                 UndoRedoStack.Add(_moveCommand);
+
+                // Section ownership is re-derived from geometry on the layout refresh
+                context.Layout.FlagStructureAsChanged();
             }
             else
             {
