@@ -230,15 +230,21 @@ internal static class NodeActions
             }
 
             var compositionSymbolUi = compositionOp.GetSymbolUi();
+            var targetPosition = canvas.InverseTransformPositionFloat(ImGui.GetMousePos());
             var cmd = new CopySymbolChildrenCommand(containerSymbolUi,
                                                     null,
                                                     containerSymbolUi.Sections.Values.ToList(),
                                                     compositionSymbolUi,
-                                                    canvas.InverseTransformPositionFloat(ImGui.GetMousePos()),
+                                                    targetPosition,
                                                     copyMode: CopySymbolChildrenCommand.CopyMode.ClipboardSource,
                                                     sourceSymbol: containerSymbol);
 
-            UndoRedoStack.AddAndExecute(cmd);
+            var macro = new MacroCommand("Paste");
+            macro.AddAndExecCommand(cmd);
+
+            // Pasting into a section near its bottom/right border grows the frame to fit
+            SectionTree.GrowSectionToFitPlacedItems(compositionSymbolUi, targetPosition, cmd.NewSymbolChildIds, macro, nodeSelection);
+            UndoRedoStack.Add(macro);
 
             // Select new operators
             nodeSelection.Clear();

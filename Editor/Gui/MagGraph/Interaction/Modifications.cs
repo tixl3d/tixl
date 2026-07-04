@@ -131,6 +131,9 @@ internal static class Modifications
                                                        MagGraphItem.GridSize.Y);
         }
 
+        // Duplicating into a section near its bottom/right border grows the frame to fit
+        SectionTree.GrowSectionToFitPlacedItems(compositionSymbolUi, targetPosition, copyCommand.NewSymbolChildIds, context.MacroCommand!, context.Selector);
+
         context.CompleteMacroCommand();
 
         // Select the duplicated nodes

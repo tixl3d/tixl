@@ -139,6 +139,51 @@ section, then expand it again.
 - Dropping a loose operator onto the area below a collapsed header does
   *not* make it vanish — collapsed sections don't adopt.
 
+## Step: Expanding pushes neighbors aside
+
+**Action:**
+Collapse a section that has content, then move another section (or a few loose
+operators) into the space right below its header. Expand the collapsed section
+again via its chevron.
+
+**Expected:**
+- Expanding pushes the frames and loose operators below downward so nothing
+  overlaps the revealed area; their relative arrangement is preserved.
+- A single `Ctrl+Z` collapses the section again *and* returns the pushed
+  neighbors to their previous places.
+- Collapsing never pulls neighbors back in on its own.
+- If a *collapsed* frame gets pushed down across an open section, its hidden
+  operators stay hidden and stay owned by it — they don't pop up inside the
+  open section. Expanding the pushed frame later reveals them where expected.
+
+## Step: Inserting into a stack grows the section
+
+**Action:**
+Inside a section, build a vertical stack of snapped operators that ends close
+to the frame's bottom border. Drag another operator into the middle of the
+stack so the lower part gets pushed down past the border.
+
+**Expected:**
+- The section grows so the pushed-down operators stay inside it.
+- If another frame sits right below, it gets pushed down as well.
+- One `Ctrl+Z` reverts insertion, growth, and pushes together.
+- Dragging an operator *out* of the section does not grow the frame.
+
+## Step: Pasting near the border grows the section
+
+**Action:**
+Copy a couple of operators (`Ctrl+C`). Place the mouse inside a section close
+to its bottom-right corner and paste (`Ctrl+V`). Repeat with `Ctrl+D`
+duplicate of ops inside the section near its border.
+
+**Expected:**
+- If the pasted/duplicated operators would stick out past the bottom or right
+  border, the section grows to include them (with a small margin).
+- Frames below/right of the grown section get pushed away instead of being
+  overlapped.
+- One `Ctrl+Z` reverts paste, growth, and pushes together.
+- Pasting with the mouse *outside* any section never resizes one.
+
 ## Step: Nested sections
 
 **Action:**

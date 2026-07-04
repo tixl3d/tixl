@@ -62,6 +62,7 @@ internal sealed partial class MagItemMovement
         if (context.MacroCommand != null)
         {
             context.MoveElementsCommand?.StoreCurrentValues();
+            GrowSectionsToFitDisplacedMembers(context);
             context.CompleteMacroCommand();
 
             // Section ownership is re-derived from geometry on the layout refresh
@@ -71,6 +72,68 @@ internal sealed partial class MagItemMovement
         if (!InputPicking.TryInitializeInputSelectionPickerForDraggedItem(context))
             Reset();
     }
+
+    /// <summary>
+    /// Splice-inserting into a stack pushes the ops below/right of the insertion — when such
+    /// displaced members cross their section's bottom or right border, the section grows to
+    /// keep them and neighboring frames get pushed out of the claimed area, all folded into
+    /// the drag's MacroCommand. Dragged items themselves are ignored, so deliberately
+    /// dragging an op out of a frame never grows it.
+    /// </summary>
+    private void GrowSectionsToFitDisplacedMembers(GraphUiContext context)
+    {
+        Debug.Assert(context.MacroCommand != null);
+        var symbolUi = context.CompositionInstance.GetSymbolUi();
+        if (symbolUi.Sections.Count == 0)
+            return;
+
+        _draggedChildIds.Clear();
+        foreach (var item in DraggedItems)
+        {
+            if (item.ChildUi != null)
+                _draggedChildIds.Add(item.ChildUi.Id);
+        }
+
+        foreach (var section in symbolUi.Sections.Values)
+        {
+            if (section.Collapsed || section.IsHiddenInCollapsedSection)
+                continue;
+
+            var membersMax = new Vector2(float.NegativeInfinity, float.NegativeInfinity);
+            var hasStayingMembers = false;
+            foreach (var childUi in symbolUi.ChildUis.Values)
+            {
+                if (childUi.SectionId != section.Id || _draggedChildIds.Contains(childUi.Id))
+                    continue;
+
+                membersMax = Vector2.Max(membersMax, childUi.PosOnCanvas + childUi.Size);
+                hasStayingMembers = true;
+            }
+
+            if (!hasStayingMembers)
+                continue;
+
+            var boundsMax = section.PosOnCanvas + section.Size;
+            var requiredMax = Vector2.Max(boundsMax, membersMax + SectionTree.ContentPadding);
+            var grewX = requiredMax.X > boundsMax.X + 0.5f;
+            var grewY = requiredMax.Y > boundsMax.Y + 0.5f;
+            if (!grewX && !grewY)
+                continue;
+
+            var resizeCommand = new ModifyCanvasElementsCommand(symbolUi, [section], context.Selector);
+            section.Size = requiredMax - section.PosOnCanvas;
+            resizeCommand.StoreCurrentValues();
+            context.MacroCommand!.AddExecutedCommandForUndo(resizeCommand);
+
+            var newBounds = ImRect.RectWithSize(section.PosOnCanvas, section.Size);
+            if (grewY)
+                SectionTree.ResolveBoundsExpansion(symbolUi, section, newBounds, Vector2.UnitY, context.MacroCommand, context.Selector);
+            if (grewX)
+                SectionTree.ResolveBoundsExpansion(symbolUi, section, newBounds, Vector2.UnitX, context.MacroCommand, context.Selector);
+        }
+    }
+
+    private static readonly HashSet<Guid> _draggedChildIds = [];
 
     /// <summary>
     /// Reset to avoid accidental dragging of previous elements 

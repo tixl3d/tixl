@@ -5,6 +5,11 @@ using T3.Editor.Gui.MagGraph.Model;
 using T3.Editor.Gui.MagGraph.States;
 using T3.Editor.Gui.Styling;
 using T3.Editor.Gui.UiHelpers;
+using T3.Editor.UiModel;
+using T3.Editor.UiModel.Commands;
+using T3.Editor.UiModel.Commands.Graph;
+using T3.Editor.UiModel.Commands.Sections;
+using T3.Editor.UiModel.Selection;
 
 namespace T3.Editor.Gui.MagGraph.Ui;
 
@@ -80,9 +85,7 @@ internal sealed partial class MagGraphView
             ImGui.SetCursorScreenPos(togglePos);
             if (ImGui.InvisibleButton("##collapse", new Vector2(toggleSize, toggleSize)))
             {
-                // Member visibility is derived from ownership on the layout refresh
-                section.Collapsed = !section.Collapsed;
-                context.Layout.FlagStructureAsChanged();
+                ToggleSectionCollapse(section, context);
             }
 
             var toggleColor = ColorVariations.OperatorLabel.Apply(section.Color)
@@ -118,7 +121,7 @@ internal sealed partial class MagGraphView
             {
                 EmitSectionResizeHandle(context, magSection, "##resizeL", new ImRect(new Vector2(pMin.X, pMin.Y + corner), new Vector2(pMin.X + edge, pMax.Y - corner)), SectionResizing.Handles.Left);
                 EmitSectionResizeHandle(context, magSection, "##resizeR", new ImRect(new Vector2(pMax.X - edge, pMin.Y + corner), new Vector2(pMax.X, pMax.Y - corner)), SectionResizing.Handles.Right);
-                EmitSectionResizeHandle(context, magSection, "##resizeT", new ImRect(new Vector2(pMin.X + corner, pMin.Y), new Vector2(pMax.X - corner, pMin.Y + edge)), SectionResizing.Handles.Top);
+                EmitSectionResizeHandle(context, magSection, "##resizeT", new ImRect(new Vector2(pMin.X + corner, pMin.Y), new Vector2(pMax.X - corner, pMin.Y - edge)), SectionResizing.Handles.Top);
                 EmitSectionResizeHandle(context, magSection, "##resizeB", new ImRect(new Vector2(pMin.X + corner, pMax.Y - edge), new Vector2(pMax.X - corner, pMax.Y)), SectionResizing.Handles.Bottom);
             }
 
@@ -219,6 +222,33 @@ internal sealed partial class MagGraphView
         ImGui.PopID(); // outer per-section PushID
     }
 
+    /// <summary>
+    /// Collapsing just folds the frame. Expanding reveals the stored bounds again and
+    /// pushes neighboring frames and loose ops below out of the way — flag flip and
+    /// pushes form one undoable unit.
+    /// </summary>
+    private static void ToggleSectionCollapse(Section section, GraphUiContext context)
+    {
+        var symbolUi = context.CompositionInstance.GetSymbolUi();
+        if (!section.Collapsed)
+        {
+            UndoRedoStack.AddAndExecute(new ChangeSectionCollapseCommand(symbolUi, section, collapsed: true));
+        }
+        else
+        {
+            var macro = new MacroCommand("Expand Section");
+            macro.AddAndExecCommand(new ChangeSectionCollapseCommand(symbolUi, section, collapsed: false));
+
+            var expandedBounds = ImRect.RectWithSize(section.PosOnCanvas, section.Size);
+            Log.Debug($"Expand '{section.Title}': pos={section.PosOnCanvas} size={section.Size} -> bounds {expandedBounds.Min}..{expandedBounds.Max}");
+            SectionTree.ResolveBoundsExpansion(symbolUi, section, expandedBounds, Vector2.UnitY, macro, context.Selector);
+
+            UndoRedoStack.Add(macro);
+        }
+
+        context.Layout.FlagStructureAsChanged();
+    }
+
     private static void EmitSectionResizeHandle(GraphUiContext context, MagGraphSection magSection, string id, ImRect rect,
                                                 SectionResizing.Handles handles)
     {
@@ -230,6 +260,7 @@ internal sealed partial class MagGraphView
         if (ImGui.IsItemHovered())
         {
             ImGui.SetMouseCursor(SectionResizing.GetCursorForHandles(handles));
+            ImGui.GetWindowDrawList().AddRectFilled(rect.Min, rect.Max, UiColors.ForegroundFull.Fade(0.1f));
         }
 
         if (!ImGui.IsItemClicked(ImGuiMouseButton.Left))
