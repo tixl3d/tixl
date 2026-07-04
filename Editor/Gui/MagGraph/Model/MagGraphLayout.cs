@@ -423,7 +423,7 @@ internal sealed class MagGraphLayout
                 var tempConnectionCount = 0; // count additional to connectionsToInput.count
                 for (var virtualSubIndex = 0; virtualSubIndex < connectionsToInput.Count + tempConnectionCount + 1; virtualSubIndex++)
                 {
-                    if (IsDisconnectedVisibleMultiInputLine(context, item.Id, input.Id, visibleIndex))
+                    if (IsDisconnectedVisibleMultiInputLine(context, item.Id, input.Id, virtualConnectionCount))
                     {
                         inputLines.Add(new MagGraphItem.InputLine
                                            {
@@ -561,9 +561,9 @@ internal sealed class MagGraphLayout
     }
 
     private static bool IsDisconnectedVisibleMultiInputLine(GraphUiContext context, Guid itemId, Guid inputId,
-                                                            int visibleInputIndex)
+                                                            int multiInputIndex)
     {
-        var itemInputHash = MagGraphConnection.GetItemInputHash(itemId, inputId, visibleInputIndex);
+        var itemInputHash = MagGraphConnection.GetItemInputHash(itemId, inputId, multiInputIndex);
         var isDisconnectedVisibleMultiInputLine =
             context.DisconnectedInputHashes.Count > 0
             && context.DisconnectedInputHashes.Contains(itemInputHash);
